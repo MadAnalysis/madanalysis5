@@ -1,0 +1,37 @@
+#
+# Copyright (c) 2010 The MadGraph Development team and Contributors
+#
+# This file is a part of the MadGraph 5 project, an application which 
+# automatically generates Feynman diagrams and matrix elements for arbitrary
+# high-energy processes in the Standard Model and beyond.
+#
+# It is subject to the MadGraph license which should accompany this 
+# distribution.
+#
+# For more information, please visit: http://madgraph.phys.ucl.ac.be
+#
+################################################################################
+# Syntax: label = particles (separated by spaces)
+p = g u c d s u~ c~ d~ s~
+l+ = e+ mu+
+l- = e- mu-
+vl = ve vm vt
+vl~ = ve~ vm~ vt~
+
+# Technicolor particles
+tc = rho_tc0 rho_tc+ omega_tc V8_tc pi_22_1_tc pi_22_8_tc rho_11_tc rho_12_tc rho_21_tc rho_22_tc pi_tc0 pi_tc+ pi_prime_tc0 pi_tc- rho_tc- eta_tc0
+
+# Light hadrons
+hadrons_light = pi0 rho0 a_20 K_L0 pi+ rho+ a_2+ eta omega f_2 Delta- ud_0 ud_1 n0 Delta0 uu_1 p+ Delta+ Delta++ dd_1 a_00 b_10 a_0+ b_1+ f_0 h_1 a_10 a_1+ f_1 pi- rho- a_2- dd_1bar Deltabar+ ud_0bar ud_1bar nbar0 Deltabar0 uu_1bar pbar- Deltabar- Deltabar-- a_0- b_1- a_1-
+
+# s hadrons
+hadrons_s = K_S0 K0 K_star0 K_star_20 K+ K_star+ K_star_2+ eta_prime phi f_prime_2 sd_0 sd_1 Sigma- Sigma_star- Lambda0 su_0 su_1 Sigma0 Sigma_star0 Sigma+ Sigma_star+ ss_1 Xi- Xi_star- Xi0 Xi_star0 Omega- K_star_00 K_10 K_star_0+ K_1+ f_prime_0 h_prime_1 K_star_10 K_star_1+ f_prime_1 K_star_1bar0 K_star_1- K_star_0bar0 K_1bar0 K_star_0- K_1- sd_0bar sd_1bar Sigmabar+ Sigma_starbar+ Lambdabar0 su_0bar su_1bar Sigmabar0 Sigma_starbar0 Sigmabar- Sigma_starbar- ss_1bar Xibar+ Xi_starbar+ Xibar0 Xi_starbar0 Omegabar+ Kbar0 K_starbar0 K_star_2bar0 K- K_star- K_star_2-        
+
+# c hadrons
+hadrons_c = D+ D_star+ D_star_2+ D0 D_star0 D_star_20 D_s+ D_star_s+ D_star_2s+ eta_c Jpsi chi_2c cd_0 cd_1 Sigma_c0 Sigma_star_c0 Lambda_c+ Xi_c0 cu_0 cu_1 Sigma_c+ Sigma_star_c+ Sigma_c++ Sigma_star_c++ Xi_c+ cs_0 cs_1 Xi_prime_c0 Xi_star_c0 Xi_prime_c+ Xi_star_c+ Omega_c0 Omega_star_c0 cc_1 Xi_cc+ Xi_star_cc+ Xi_cc++ Xi_star_cc++ Omega_cc+ Omega_star_cc+ Omega_star_ccc++ D_star_0+ D_1+ D_star_00 D_10 D_star_0s+ D_1s+ chi_0c h_1c D_star_1+ D_star_10 D_star_1s+ chi_1c psi_prime cc~3S18 cc~1S08 cc~3P08 Jpsi_di D_star_1- D_star_1bar0 D_star_1s- D_star_0- D_1- D_star_0bar0 D_1bar0 D_star_0s- D_1s- cd_0bar cd_1bar Sigma_cbar0 Sigma_star_cbar0 Lambda_cbar- Xi_cbar0 cu_0bar cu_1bar Sigma_cbar- Sigma_star_cbar- Sigma_cbar-- Sigma_star_cbar-- Xi_cbar- cs_0bar cs_1bar Xi_prime_cbar0 Xi_star_cbar0 Xi_prime_cbar- Xi_star_cbar- Omega_cbar0 Omega_star_cbar0 cc_1bar Xi_ccbar- Xi_star_ccbar- Xi_ccbar-- Xi_star_ccbar-- Omega_ccbar- Omega_star_ccbar- Omega_star_cccbar- D- D_star- D_star_2- Dbar0 D_starbar0 D_star_2bar0 D_s- D_star_s- D_star_2s-
+
+# b hadrons
+hadrons_b = B0 B_star0 B_star_20 B+ B_star+ B_star_2+ B_s0 B_star_s0 B_star_2s0 B_c+ B_star_c+ B_star_2c+ eta_b Upsilon chi_2b bd_0 bd_1 Sigma_b- Sigma_star_b- Lambda_b0 Xi_b- Xi_bc0 bu_0 bu_1 Sigma_b0 Sigma_star_b0 Sigma_b+ Sigma_star_b+ Xi_b0 Xi_bc+ bs_0 bs_1 Xi_prime_b- Xi_star_b- Xi_prime_b0 Xi_star_b0 Omega_b- Omega_star_b- Omega_bc0 bc_0 bc_1 Xi_prime_bc0 Xi_star_bc0 Xi_prime_bc+ Xi_star_bc+ Omega_prime_bc0 Omega_star_bc0 Omega_bcc+ Omega_star_bcc+ bb_1 Xi_bb- Xi_star_bb- Xi_bb0 Xi_star_bb0 Omega_bb- Omega_star_bb- Omega_bbc0 Omega_star_bbc0 Omega_star_bbb- B_star_10 B_star_1+ B_star_1s0 B_star_1c+ chi_1b B_star_0+ B_1+ B_star_0s0 B_1s0 B_star_0c+ B_1c+ chi_0b h_1b B_star_00 B_10 Upsilon_prime bb~3S18 bb~1S08 bb~3P08 B_star_1bar0 B_star_1- B_star_1sbar0 B_star_1c- B_star_0bar0 B_1bar0 B_star_0- B_1- B_star_0sbar0 B_1sbar0 B_star_0c- B_1c- bd_0bar bd_1bar Sigma_bbar+ Sigma_star_bbar+ Lambda_bbar0 Xi_bbar+ Xi_bcbar0 bu_0bar bu_1bar Sigma_bbar0 Sigma_star_bbar0 Sigma_bbar- Sigma_star_bbar- Xi_bbar0 Xi_bcbar- bs_0bar bs_1bar Xi_prime_bbar+ Xi_star_bbar+ Xi_prime_bbar0 Xi_star_bbar0 Omega_bbar+ Omega_star_bbar+ Omega_bcbar0 bc_0bar bc_1bar Xi_prime_bcbar0 Xi_star_bcbar0 Xi_prime_bcbar- Xi_star_bcbar- Omega_prime_bcba Omega_star_bcbar0 Omega_bccbar- Omega_star_bccbar- bb_1bar Xi_bbbar+ Xi_star_bbbar+ Xi_bbbar0 Xi_star_bbbar0 Omega_bbbar+ Omega_star_bbbar+ Omega_bbcbar0 Omega_star_bbcbar0 Omega_star_bbbbar+ Bbar0 B_starbar0  B_star_2bar0 B- B_star- B_star_2- B_sbar0 B_star_sbar0 B_star_2sbar0 B_c- B_star_c- B_star_2c-        
+
+# hadronic
+hadronic = hadrons_light hadrons_s hadrons_c hadrons_b

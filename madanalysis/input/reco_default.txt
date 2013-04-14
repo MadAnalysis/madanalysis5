@@ -1,0 +1,13 @@
+ 11 e-
+-11 e+
+ 13 mu-
+-13 mu+
+130 mu-_isol
+-130 mu+_isol
+ 15 ta-
+-15 ta+
+ 21 j
+  5 b
+  1 nb
+100 met
+101 mht

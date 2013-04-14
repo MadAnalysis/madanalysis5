@@ -1,0 +1,9 @@
+e = e+ e-
+mu = mu+ mu-
+mu_isol = mu+_isol mu-_isol
+ta = ta+ ta- 
+l+ = mu+ e+ ta+
+l- = mu- e- ta-
+l = mu e ta
+
+
