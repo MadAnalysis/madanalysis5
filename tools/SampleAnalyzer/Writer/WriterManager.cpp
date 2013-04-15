@@ -26,6 +26,7 @@
 #include "SampleAnalyzer/Service/LogService.h"
 #include "SampleAnalyzer/Writer/WriterManager.h"
 #include "SampleAnalyzer/Writer/LHEWriter.h"
+#include "SampleAnalyzer/Writer/LHCOWriter.h"
 
 using namespace MA5;
 
@@ -40,6 +41,14 @@ void WriterManager::BuildTable()
 #ifdef ZIP_USE
   Add("lhe.gz",lhe);
 #endif
+
+  // Adding LHE reader
+  LHCOWriter* lhco = new LHCOWriter();
+  Add("lhco",lhco);
+#ifdef ZIP_USE
+  Add("lhco.gz",lhco);
+#endif
+
 }
 
 
