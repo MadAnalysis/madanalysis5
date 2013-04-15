@@ -20,7 +20,7 @@
 #  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
 #  
 ################################################################################
- 
+
 
 from madanalysis.enumeration.uncertainty_type      import UncertaintyType
 from madanalysis.enumeration.normalize_type        import NormalizeType

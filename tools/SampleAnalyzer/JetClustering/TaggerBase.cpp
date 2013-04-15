@@ -23,7 +23,6 @@
 
 
 #include "SampleAnalyzer/JetClustering/TaggerBase.h"
-
 using namespace MA5;
 
 Bool_t TaggerBase::IsLast(MCParticleFormat* part, EventFormat& myEvent)

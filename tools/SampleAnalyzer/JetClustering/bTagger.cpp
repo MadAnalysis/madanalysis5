@@ -23,7 +23,6 @@
 
 
 #include "SampleAnalyzer/JetClustering/bTagger.h"
-
 using namespace MA5;
 
 void bTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)

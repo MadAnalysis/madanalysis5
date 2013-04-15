@@ -23,7 +23,6 @@
 
 
 #include "SampleAnalyzer/JetClustering/cTagger.h"
-
 using namespace MA5;
 
 // Matching using dr

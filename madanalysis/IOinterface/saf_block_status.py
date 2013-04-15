@@ -23,7 +23,6 @@
 
 
 class SafBlockStatus():
-
     def __init__(self):
         self.activated  = False
         self.Nactivated = 0

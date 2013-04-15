@@ -23,7 +23,6 @@
 
 
 #include "SampleAnalyzer/Service/PDGService.h"
-
 using namespace MA5;
 
 PDGService* PDGService::service_ = 0;

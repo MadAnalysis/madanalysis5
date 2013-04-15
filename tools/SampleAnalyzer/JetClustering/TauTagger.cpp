@@ -23,7 +23,6 @@
 
 
 #include "SampleAnalyzer/JetClustering/TauTagger.h"
-
 using namespace MA5;
 
 void TauTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)

@@ -23,8 +23,6 @@
 
 
 from math import sqrt
-
-
 class Measure:
 
     def __init__(self):

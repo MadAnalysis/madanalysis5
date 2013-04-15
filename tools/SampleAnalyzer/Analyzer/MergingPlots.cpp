@@ -23,8 +23,6 @@
 
 
 #ifdef FASTJET_USE
-
-
 //SampleAnalyzer headers
 #include "SampleAnalyzer/Analyzer/MergingPlots.h"
 #include "SampleAnalyzer/Core/Configuration.h"
