@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+3    dev.88  (2013/04/15) econte:  adding text file COPYING & README 
+
 2    dev.87  (2013/04/15) econte:  adding StringTool class + adding missing file header 
 
 785  dev.86  (2013/04/12) econte:  modifying makefile for SampleAnalyzer + fixing minor bugs 
