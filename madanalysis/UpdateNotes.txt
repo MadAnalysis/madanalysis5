@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+6    dev.91  (2013/04/17) econte:  fixing problem ocurring in case of dummy sample file 
+
 5    dev.90  (2013/04/15) econte:  adding LHCOWriter ; need to validate 
 
 4    dev.89  (2013/04/15) econte:  moving COPYING.ma5 to COPYING 
