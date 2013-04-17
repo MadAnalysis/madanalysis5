@@ -863,7 +863,7 @@ class JobWriter():
         if self.resubmit:
             res=commands.getstatusoutput("cd "\
                                          +self.path+"/Build/;"\
-                                         +" make clean")
+                                         +" make mrproper")
             
         res=commands.getstatusoutput("cd "\
                                      +self.path+"/Build/;"\

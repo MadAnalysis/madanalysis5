@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+7    dev.92  (2013/04/17) econte:  fixing redundant function + problem with 'make clean' 
+
 6    dev.91  (2013/04/17) econte:  fixing problem ocurring in case of dummy sample file 
 
 5    dev.90  (2013/04/15) econte:  adding LHCOWriter ; need to validate 

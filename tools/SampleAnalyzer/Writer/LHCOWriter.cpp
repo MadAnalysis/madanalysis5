@@ -134,15 +134,6 @@ bool LHCOWriter::WriteHeader(const SampleFormat& mySample)
   return true;
 }
 
-
-Int_t GetMotherIndex(Int_t index)
-{
-  if (index==0) return 0;
-  if (index==1 || index==3 || index==5) return 1;
-  else if (index==2 || index==4 || index==6) return 2;
-  else return index-4;
-}
-
 /// Read the event
 bool LHCOWriter::WriteEvent(const EventFormat& myEvent, 
                            const SampleFormat& mySample)

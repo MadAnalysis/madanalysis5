@@ -464,7 +464,7 @@ class Main():
             logging.error("library building aborted.")
             sys.exit()
 
-        if not compiler.Clean():
+        if not compiler.MrProper():
             logging.error("impossible to remove temporary files created during the building.")
             sys.exit()
 

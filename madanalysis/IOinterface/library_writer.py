@@ -270,3 +270,9 @@ class LibraryWriter():
                                      +self.path+"/SampleAnalyzer/;"\
                                      +" make clean > cleanup.log 2>&1")
         return True
+
+    def MrProper(self):
+        res=commands.getstatusoutput("cd "\
+                                     +self.path+"/SampleAnalyzer/;"\
+                                     +" make mrproper > cleanup.log 2>&1")
+        return True
