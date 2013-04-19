@@ -101,13 +101,13 @@ StatusCode::Type STDHEPreader::ReadEvent(EventFormat& myEvent, SampleFormat& myS
              blockid==MCFIO_STDHEPEND)   {DecodeSTDCM1 (version,mySample); }
     else if (blockid==MCFIO_STDHEP)
     {
-      eventskip = DecodeEventData(version, myEvent);
-      eventRead=true;
+      eventskip = !DecodeEventData(version, myEvent);
+      eventRead = true;
     }
     else if (blockid==MCFIO_STDHEP4)
     {
-      eventskip=DecodeSTDHEP4 (version, myEvent);
-      eventRead=true;
+      eventskip = !DecodeSTDHEP4 (version, myEvent);
+      eventRead = true;
     }
     else
     {
@@ -154,8 +154,8 @@ bool STDHEPreader::DecodeFileHeader(SampleFormat& mySample)
   }
 
   // Title
+  tmps="";
   *xdrinput_ >> tmps;
-  //std::cout << "title=" << tmps << endmsg;
 
   // Comment
   *xdrinput_ >> tmps;

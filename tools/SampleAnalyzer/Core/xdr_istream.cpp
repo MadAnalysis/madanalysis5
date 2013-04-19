@@ -23,6 +23,7 @@
 
 
 #include "SampleAnalyzer/Core/xdr_istream.h"
+#include <iostream>
 using namespace MA5;
 
 // -----------------------------------------------------------------------------
@@ -40,8 +41,7 @@ xdr_istream& xdr_istream::operator>>(std::string &s)
 	sb_->sgetn(line, len);
 	s=std::string(line,line+len);
 	
-	size_t pad = 4-(len&3); //change
-
+	size_t pad = (4-len)&3; //change 4-len&3
 	char dummy[pad];
 	sb_->sgetn(dummy,pad);
 	return *this;
