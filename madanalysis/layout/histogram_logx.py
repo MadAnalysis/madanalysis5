@@ -24,7 +24,6 @@
 
 from madanalysis.layout.histogram_core import HistogramCore
 import logging
-import numpy
 from math import sqrt, log10, pow
 import array
 
@@ -70,6 +69,8 @@ class HistogramLogX:
 
         
     def FinalizeReading(self,main,dataset):
+
+        import numpy
 
         # Statistics
         self.summary.nevents   = self.positive.nevents   + self.negative.nevents

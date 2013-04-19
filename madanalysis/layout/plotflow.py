@@ -34,7 +34,6 @@ from madanalysis.enumeration.stacking_method_type import StackingMethodType
 from madanalysis.layout.plotflow_for_dataset      import PlotFlowForDataset
 from math  import sqrt
 import time
-import numpy    
 import copy
 
 
@@ -65,6 +64,8 @@ class PlotFlow:
 
     def InitializeHistoFrequency(self,ihisto):
 
+        import numpy
+        
         # New collection of labels
         newlabels=[]
 

@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+9    dev.94  (2013/04/19) econte:  fixing bug with numpy library 
+
 8    dev.93  (2013/04/19) econte:  fixing bug with STDHEP reader 
 
 7    dev.92  (2013/04/17) econte:  fixing redundant function + problem with 'make clean' 

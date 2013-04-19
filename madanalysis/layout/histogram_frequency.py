@@ -24,7 +24,6 @@
 
 from madanalysis.layout.histogram_frequency_core import HistogramFrequencyCore
 import logging
-import numpy
 
 class HistogramFrequency:
 
@@ -44,6 +43,8 @@ class HistogramFrequency:
 
     def FinalizeReading(self,main,dataset):
 
+        import numpy
+        
         # Statistics
         self.summary.nevents = self.positive.nevents + self.negative.nevents
         self.summary.entries = self.positive.entries + self.negative.entries
@@ -99,6 +100,8 @@ class HistogramFrequency:
 
 
     def Reset(self):
+
+        import numpy
 
         # General info
         self.name     = ""

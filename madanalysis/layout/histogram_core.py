@@ -23,13 +23,13 @@
 
 
 import logging
-import numpy
 from math import sqrt
 
 
 class HistogramCore:
 
     def __init__(self):
+        import numpy
         self.integral  = 0
         self.nevents   = 0
         self.nentries  = 0

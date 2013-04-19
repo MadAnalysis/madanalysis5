@@ -34,7 +34,6 @@ import shutil
 import os
 import commands
 import copy
-import numpy
 
 
 class JobReader():
@@ -227,6 +226,8 @@ class JobReader():
     # merging plots      -> merging
     # selection plots    -> plot
     def Extract(self,dataset,cut,merging,plot):
+
+        import numpy
 
         # Getting the output file name
         name=InstanceName.Get(dataset.name)
