@@ -117,6 +117,7 @@ std::string JetClusteringStandard::GetName()
   else if (JetAlgorithm_==1) return "Cambridge/Aachen";
   else if (JetAlgorithm_==2) return "anti kt";
   else if (JetAlgorithm_==3) return "generalized kt";
+  return "unknown";
 }
 
 std::string JetClusteringStandard::GetParameters()

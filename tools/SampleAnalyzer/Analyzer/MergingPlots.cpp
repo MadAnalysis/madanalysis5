@@ -49,7 +49,7 @@ bool MergingPlots::Initialize(const Configuration& cfg)
   if (merging_njets_==0) 
   {
     ERROR << "number of jets requested for DJR plots is zero" << endmsg;
-    return;
+    return false;
   }
   DJR_.resize(merging_njets_);
   for (unsigned int i=0;i<DJR_.size();i++)
@@ -63,7 +63,9 @@ bool MergingPlots::Initialize(const Configuration& cfg)
 
   // Initializing clustering algorithm
   JetDefinition_ = fastjet::JetDefinition(fastjet::kt_algorithm,1.0);
+  return true;
 }
+
 
 void MergingPlots::Execute(SampleFormat& mySample, const EventFormat& myEvent)
 {
@@ -180,10 +182,10 @@ void MergingPlots::ExtractDJRwithFortran(const std::vector<fastjet::PseudoJet>& 
     PP[i][2]=inputs[i].pz();
     PP[i][3]=inputs[i].e();
   }
-  int IMODE = 4313;
-  int NN = inputs.size();
-  if (NN>512) NN=512;
-  double ECUT=1.;
+  //  int IMODE = 4313;
+  //  int NN = inputs.size();
+  //  if (NN>512) NN=512;
+  //  double ECUT=1.;
   double Y[512];
   for (unsigned int i=0;i<512;i++) Y[i]=0;
   //if (NN!=0) ktclus_(&IMODE,PP,&NN,&ECUT,Y);

@@ -69,7 +69,7 @@ class JetClusteringFastJet: public JetClustererBase
     { }
 
     /// Jet clustering
-    void Execute(SampleFormat& mySample, EventFormat& myEvent);
+    bool Execute(SampleFormat& mySample, EventFormat& myEvent);
 
     /// Initialization
     virtual bool Initialize(const std::map<std::string,std::string>& options)=0;

@@ -84,7 +84,7 @@ namespace MA5
     { }
 
     /// Jet clustering
-    virtual void Execute(SampleFormat& mySample, EventFormat& myEvent)=0;
+    virtual bool Execute(SampleFormat& mySample, EventFormat& myEvent)=0;
 
     /// Initialization
     virtual bool Initialize(const std::map<std::string,std::string>& options)=0;

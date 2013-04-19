@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+11   dev.96  (2013/04/19) econte:  fixing all compilation issues with FastJet 
+
 10   dev.95  (2013/04/19) econte:  fixing url of FastJet 
 
 9    dev.94  (2013/04/19) econte:  fixing bug with numpy library 

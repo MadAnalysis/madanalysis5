@@ -29,9 +29,9 @@ using namespace MA5;
 
 bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
 {
-  if (mySample.mc()==0 ||  myEvent.mc()==0) return;
+  if (mySample.mc()==0 ||  myEvent.mc()==0) return false;
   if (mySample.rec()==0)   mySample.InitializeRec();
-  if (myEvent.rec()!=0) return;
+  if (myEvent.rec()!=0) return false;
 
   // Preparing inputs
   std::vector<fastjet::PseudoJet> inputs;
