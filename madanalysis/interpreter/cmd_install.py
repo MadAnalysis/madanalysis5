@@ -399,7 +399,7 @@ class CmdInstall(CmdBase):
             return False
 
         # List of files
-        files = { "fastjet.tar.gz" : "http://fastjet.fr/repo/fastjet-3.0.3.tar.gz" }
+        files = { "fastjet.tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.0.3.tar.gz" }
 
         # Launching wget
         if not self.wget(files,'fastjet',installdir):
