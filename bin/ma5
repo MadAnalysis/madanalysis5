@@ -113,8 +113,8 @@ main.ma5dir = ma5dir
 
 # Release version
 # Do not touch it !!!!!  
-main.version = "dev.96"
-main.date = "2013/04/19"
+main.version = "dev.97"
+main.date = "2013/04/22"
 
 # Checking arguments
 import getopt

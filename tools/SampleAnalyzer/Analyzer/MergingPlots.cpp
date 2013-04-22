@@ -23,10 +23,15 @@
 
 
 #ifdef FASTJET_USE
+
 //SampleAnalyzer headers
 #include "SampleAnalyzer/Analyzer/MergingPlots.h"
 #include "SampleAnalyzer/Core/Configuration.h"
 #include "SampleAnalyzer/Service/Physics.h"
+
+//STL headers
+#include <sstream>
+
 
 using namespace MA5;
 
@@ -38,12 +43,30 @@ extern"C"
 */
 
 
-bool MergingPlots::Initialize(const Configuration& cfg)
+bool MergingPlots::Initialize(const Configuration& cfg,
+             const std::map<std::string,std::string>& parameters)
 {
   // Options
   merging_njets_=0;
   merging_nqmatch_=4;
   merging_nosingrad_=false;
+
+  // Reading options
+  for (std::map<std::string,std::string>::const_iterator it=parameters.begin();
+       it!=parameters.end();it++)
+  {
+    if (it->first=="njets")
+    {
+      std::stringstream str;
+      str << it->second;
+      str >> merging_njets_;
+    }
+    else
+    {
+      WARNING << "parameter '" << it->first 
+              << "' is unknown and will be ignored." << endmsg;
+    }
+  }
 
   // Initializing DJR plots
   if (merging_njets_==0) 
@@ -154,6 +177,9 @@ void MergingPlots::Execute(SampleFormat& mySample, const EventFormat& myEvent)
 
 void MergingPlots::Finalize(const SampleFormat& summary, const std::vector<SampleFormat>& files)
 {
+  // Saving plots into file
+  Write_TextFormat(out());
+
   // Deleting plots
   for (unsigned int i=0;i<DJR_.size();i++)
   {

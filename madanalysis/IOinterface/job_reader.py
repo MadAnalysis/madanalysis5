@@ -225,13 +225,16 @@ class JobReader():
     # cut counters       -> initial & cut
     # merging plots      -> merging
     # selection plots    -> plot
-    def Extract(self,dataset,cut,merging,plot):
+    def Extract(self,dataset,cut,merging,plot,domerging):
 
         import numpy
 
         # Getting the output file name
         name=InstanceName.Get(dataset.name)
-        filename = self.safdir+"/"+name+"/MadAnalysis5job.saf"
+        if not domerging:
+            filename = self.safdir+"/"+name+"/MadAnalysis5job.saf"
+        else:
+            filename = self.safdir+"/"+name+"/MergingPlots.saf"
 
         # Opening the file
         try:
@@ -336,11 +339,11 @@ class JobReader():
                     histoTag.activate()
                 elif words[0].lower()=='</histo>':
                     histoTag.desactivate()
-                    if selectionTag.activated:
+                    if selectionTag.activated and not domerging:
                         plot.histos.append(copy.copy(histoinfo))
                         plot.histos[-1].positive.array = numpy.array(data_positive)
                         plot.histos[-1].negative.array = numpy.array(data_negative)
-                    elif mergingTag.activated:
+                    elif mergingTag.activated and domerging:
                         merging.histos.append(copy.copy(histoinfo))
                         merging.histos[-1].positive.array = numpy.array(data_positive)
                         merging.histos[-1].negative.array = numpy.array(data_negative)
@@ -351,7 +354,7 @@ class JobReader():
                     histoFreqTag.activate()
                 elif words[0].lower()=='</histofrequency>':
                     histoFreqTag.desactivate()
-                    if selectionTag.activated:
+                    if selectionTag.activated and not domerging:
                         plot.histos.append(copy.copy(histofreqinfo))
                         plot.histos[-1].labels = numpy.array(labels)
                         plot.histos[-1].positive.array = numpy.array(data_positive)
@@ -364,7 +367,7 @@ class JobReader():
                     histoLogXTag.activate()
                 elif words[0].lower()=='</histologx>':
                     histoLogXTag.desactivate()
-                    if selectionTag.activated:
+                    if selectionTag.activated and not domerging:
                         plot.histos.append(copy.copy(histologxinfo))
                         plot.histos[-1].positive.array = numpy.array(data_positive)
                         plot.histos[-1].negative.array = numpy.array(data_negative)
@@ -373,11 +376,11 @@ class JobReader():
                     data_negative = []
 
             # Looking for summary sample info
-            elif globalTag.activated and len(words)==5:
+            elif globalTag.activated and not domerging and len(words)==5:
                 dataset.measured_global = self.ExtractSampleInfo(words,numline,filename)
 
             # Looking for detail sample info (one line for each file)
-            elif detailTag.activated and len(words)==5:
+            elif detailTag.activated and not domerging and len(words)==5:
                 dataset.measured_detail.append(self.ExtractSampleInfo(words,numline,filename))
 
             # Looking for initial counter

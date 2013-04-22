@@ -33,11 +33,13 @@
 #include "SampleAnalyzer/Writer/SAFWriter.h"
 #include "SampleAnalyzer/Service/Physics.h"
 #include "SampleAnalyzer/Service/LogService.h"
+#include "SampleAnalyzer/Core/Configuration.h"
 
 // STL headers
 #include <set>
 #include <string>
 #include <cmath>
+#include <map>
 
 // ROOT headers
 #include <TTree.h>
@@ -99,7 +101,8 @@ class FilterBase
   }
 
   /// Initialize (specific to the analysis)
-  virtual bool Initialize()=0;
+  virtual bool Initialize(const Configuration& cfg,
+             const std::map<std::string,std::string>& parameters)=0;
 
   /// PreFinalize
   void PreFinalize(const SampleFormat& summary, 

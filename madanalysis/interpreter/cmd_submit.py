@@ -397,8 +397,15 @@ class CmdSubmit(CmdBase):
         for i in range(0,len(self.main.datasets)):
             jobber.Extract(self.main.datasets[i],\
                            layout.cutflow.detail[i],\
-                           layout.merging.detail[i],\
-                           layout.plotflow.detail[i])
+                           0,\
+                           layout.plotflow.detail[i],\
+                           domerging=False)
+            if self.main.merging.enable:
+                jobber.Extract(self.main.datasets[i],\
+                               0,\
+                               layout.merging.detail[i],\
+                               0,\
+                               domerging=True)
         return True    
            
 

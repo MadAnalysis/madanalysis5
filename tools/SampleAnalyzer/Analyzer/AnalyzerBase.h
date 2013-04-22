@@ -39,6 +39,7 @@
 #include <set>
 #include <string>
 #include <cmath>
+#include <map>
 
 // ROOT headers
 #include <TTree.h>
@@ -101,7 +102,8 @@ class AnalyzerBase
   }
 
   /// Initialize (specific to the analysis)
-  virtual bool Initialize(const Configuration& cfg)=0;
+  virtual bool Initialize(const Configuration& cfg,                  
+             const std::map<std::string,std::string>& parameters)=0;
 
   /// PreFinalize
   void PreFinalize(const SampleFormat& summary, 

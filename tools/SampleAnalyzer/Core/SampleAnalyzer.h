@@ -95,11 +95,13 @@ class SampleAnalyzer
 
   /// Getting pointer to an analyzer
   AnalyzerBase* InitializeAnalyzer(const std::string& name, 
-                                   const std::string& outputname);
+                                   const std::string& outputname,
+                        const std::map<std::string,std::string>& parameters);
 
   /// Getting pointer to a filter
   FilterBase* InitializeFilter(const std::string& name, 
-                               const std::string& outputname);
+                               const std::string& outputname,
+                        const std::map<std::string,std::string>& parameters);
 
   /// Getting pointer to a writer
   WriterBase* InitializeWriter(const std::string& name, 

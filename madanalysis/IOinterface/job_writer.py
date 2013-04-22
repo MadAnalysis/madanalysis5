@@ -221,13 +221,16 @@ class JobWriter():
         file.write('  EventFormat myEvent;\n')
         file.write('  std::vector<SampleFormat> mySamples;\n\n')
         file.write('  // Getting pointer to the analyzer\n')
+        file.write('  std::map<std::string, std::string> parameters1;\n')
         file.write('  AnalyzerBase* analyzer1 = \n')
-        file.write('      manager.InitializeAnalyzer("MadAnalysis5job","MadAnalysis5job.saf");\n')
+        file.write('      manager.InitializeAnalyzer("MadAnalysis5job","MadAnalysis5job.saf",parameters1);\n')
         file.write('  if (analyzer1==0) return 1;\n\n')
         if self.merging.enable:
             file.write('  // Getting pointer to the analyzer devoted to merging plots\n')
+            file.write('  std::map<std::string, std::string> parameters2;\n')
+            file.write('  parameters2["njets"]="'+str(self.main.merging.njets)+'";\n')
             file.write('  AnalyzerBase* analyzer2 = \n')
-            file.write('      manager.InitializeAnalyzer("merging plots","MergingPlots.saf");\n')
+            file.write('      manager.InitializeAnalyzer("MergingPlots","MergingPlots.saf",parameters2);\n')
             file.write('  if (analyzer2==0) return 1;\n\n')
         if self.output!="":
             file.write('  //Getting pointer to the writer\n')
@@ -335,10 +338,10 @@ class JobWriter():
         file.write('#include <stdlib.h>\n\n')
         file.write('// ------------------------------------------' +\
                    '-----------------------------------\n')
-        file.write('// BuildTable\n')
+        file.write('// BuildUserTable\n')
         file.write('// ------------------------------------------' +\
                    '-----------------------------------\n')
-        file.write('void AnalyzerManager::BuildTable()\n')
+        file.write('void AnalyzerManager::BuildUserTable()\n')
         file.write('{\n')
         file.write('  Add("MadAnalysis5job", new user);\n')
         file.write('}\n')
@@ -350,10 +353,10 @@ class JobWriter():
         file.write('#include <stdlib.h>\n\n')
         file.write('// ------------------------------------------' +\
                    '-----------------------------------\n')
-        file.write('// BuildTable\n')
+        file.write('// BuildUserTable\n')
         file.write('// ------------------------------------------' +\
                    '-----------------------------------\n')
-        file.write('void FilterManager::BuildTable()\n')
+        file.write('void FilterManager::BuildUserTable()\n')
         file.write('{\n')
         file.write('}\n')
         file.close()

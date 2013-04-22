@@ -26,6 +26,7 @@
 #include <stdlib.h>
 
 // SampleAnalyzer headers
+#include "SampleAnalyzer/Analyzer/MergingPlots.h"
 #include "SampleAnalyzer/Analyzer/AnalyzerManager.h"
 #include "SampleAnalyzer/Service/LogService.h"
 
@@ -61,3 +62,10 @@ AnalyzerBase* AnalyzerManager::ChoiceAnalyzer()
 }
 
 
+// -----------------------------------------------------------------------------
+// BuildPredefinedTable
+// -----------------------------------------------------------------------------
+void AnalyzerManager::BuildPredefinedTable()
+{
+  Add("MergingPlots", new MergingPlots);
+}

@@ -40,3 +40,10 @@ FilterBase* FilterManager::ChoiceFilter()
 }
 
 
+// -----------------------------------------------------------------------------
+// BuildPredefinedTable
+// -----------------------------------------------------------------------------
+void FilterManager::BuildPredefinedTable()
+{
+}
+

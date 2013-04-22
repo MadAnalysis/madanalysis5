@@ -43,9 +43,8 @@ class MergingPlots:
         self.detail       = []
         for i in range(0,len(main.datasets)):
             self.detail.append(MergingPlotsForDataset(main,main.datasets[i]))
-            
-        self.datasetnames = []
-        self.filenames    = []
+        #self.datasetnames = []
+        #self.filenames    = []
 
 
     def Initialize(self):
@@ -60,48 +59,55 @@ class MergingPlots:
 
         # Reset Configuration
         RootConfig.Init()
+
+        # Loop on each dataset
         for i in range(0,len(self.main.datasets)):
-            self.DrawDatasetPlots(self.files[i],self.main.datasets[i].name,self.main.datasets[i],mode,output_path)
+            self.DrawDatasetPlots(self.detail[i],\
+                                  self.main.datasets[i],\
+                                  mode,output_path)
 
 
-    def DrawDatasetPlots(self,file,datasetname,dataset,mode,output_path):
+    def DrawDatasetPlots(self,histos,dataset,mode,output_path):
 
-        test = False
-        outputs = []
-        
-        # Loop over DJR plot
+        # Loop over DJR
         for i in range(0,100):
+            
+            DJRplots = []
 
-            # Getting 'total' plot
-            total = file.Get("merging/DJR"+str(i+1)+"_total_pos","TH1F",False)
-            if total is None:
+            # Looking for global plot
+            name = "DJR"+str(i+1)+"_total"
+            test=False
+            for h in range(len(histos)):
+                if histos[h].name == name:
+                    DJRplots.append(histos[h])
+                    test=True
+                    break
+                
+            # Global plot not found ?
+            if not test:
                 break
 
-            # Getting list of 'jet contribution' plot
-            jetplots = []
+            # Loop over njets
             for j in range(0,100):
 
-                # Getting j-th plot
-                jetplot = file.Get("merging/DJR"+str(i+1)+"_"+str(j)+"jet_pos","TH1F",False)
-                if jetplot is None:
-                    break
-                else:
-                    test=True
-                    jetplots.append(jetplot)
+               # Looking for njet plot
+                name = "DJR"+str(i+1)+"_"+str(j)+"jet"
+                test=False
+                for h in range(len(histos)):
+                    if histos[h].name == name:
+                        DJRplots.append(histos[h])
+                        test=True
+                        break
                 
-            # Drawing plots
-            self.DrawPlot(datasetname,i+1,total,jetplots,dataset,mode,output_path)
-
-            outputs.append(self.output_path+"/merging_"+datasetname+"_"+str(i+1))            
-
-        # Adding file
-        if test:
-            self.datasetnames.append(datasetname)
-            self.filenames.append(outputs)
-
-
+                # njet plot not found ?
+                if not test:
+                    break
+                
+            # Drawing
+            self.DrawPlot(DJRplots,dataset,mode,output_path)
             
-    def DrawPlot(self,datasetname,index,total,jetplots,dataset,mode,output_path):
+            
+    def DrawPlot(self,DJRplots,dataset,mode,output_path):
 
         from ROOT import TH1
         from ROOT import TH1F

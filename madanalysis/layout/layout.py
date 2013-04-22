@@ -143,8 +143,8 @@ class Layout:
 
     def DoPlots(self,mode,output_path):
 
-        #if self.main.merging.enable:
-        #    self.merging.DrawAll()
+#        if self.main.merging.enable:
+#            self.merging.DrawAll(mode,output_path)
 
         if self.main.selection.Nhistos==0:
             return True
@@ -846,24 +846,24 @@ class Layout:
                                    self.main.datasets[ind])
 
         # Merging plots
-        if len(self.merging.datasetnames)!=0:
-            report.WriteSubTitle('Merging plots')
-        for i in range(0,len(self.merging.datasetnames)):
-            report.WriteSubSubTitle(self.merging.datasetnames[i])
-            for j in range(0,len(self.merging.filenames[i])):
-                text.Reset()
-                title = "DJR"+str(j+1)+" : "+str(j)
-                if j>1:
-                    title +=" jets -> "
-                else:
-                    title +=" jet -> "
-                title += str(j+1)
-                if j>0:
-                    title += " jets"
-                else:
-                    title += " jet"
-                text.Add(title)
-                report.WriteFigure(text,self.merging.filenames[i][j])
+#        if len(self.merging.datasetnames)!=0:
+#            report.WriteSubTitle('Merging plots')
+#        for i in range(0,len(self.merging.datasetnames)):
+#            report.WriteSubSubTitle(self.merging.datasetnames[i])
+#            for j in range(0,len(self.merging.filenames[i])):
+#                text.Reset()
+#                title = "DJR"+str(j+1)+" : "+str(j)
+#                if j>1:
+#                    title +=" jets -> "
+#                else:
+#                    title +=" jet -> "
+#                title += str(j+1)
+#                if j>0:
+#                    title += " jets"
+#                else:
+#                    title += " jet"
+#                text.Add(title)
+#                report.WriteFigure(text,self.merging.filenames[i][j])
                 
 
         # Plots display

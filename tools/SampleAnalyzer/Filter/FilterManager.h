@@ -50,8 +50,12 @@ class FilterManager : public ManagerBase<FilterBase>
   /// Let the user selectes an analysis 
   FilterBase* ChoiceFilter();
 
-  /// Build the table
-  void BuildTable();
+  /// Build the user table
+  void BuildUserTable();
+
+  /// Build the predefined table
+  void BuildPredefinedTable();
+
 };
 
 }

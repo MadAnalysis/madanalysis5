@@ -110,8 +110,10 @@ bool SampleAnalyzer::Initialize(int argc, char **argv,
   // Build tables
   fullWriters_.BuildTable();
   fullReaders_.BuildTable();
-  fullAnalyses_.BuildTable();
-  fullFilters_.BuildTable();
+  fullAnalyses_.BuildPredefinedTable();
+  fullAnalyses_.BuildUserTable();
+  fullFilters_.BuildPredefinedTable();
+  fullFilters_.BuildUserTable();
   fullJetClusterers_.BuildTable();
 
   // Reset counter
@@ -123,7 +125,8 @@ bool SampleAnalyzer::Initialize(int argc, char **argv,
 
 
 AnalyzerBase* SampleAnalyzer::InitializeAnalyzer(const std::string& name, 
-                                   const std::string& outputname)
+                                                 const std::string& outputname,
+                           const std::map<std::string,std::string>& parameters)
 {
   // Display 
   INFO << "      - analyzer '"
@@ -153,7 +156,7 @@ AnalyzerBase* SampleAnalyzer::InitializeAnalyzer(const std::string& name,
   }
 
   // Initialize (specific to the analysis)
-  if (!myAnalysis->Initialize(cfg_))
+  if (!myAnalysis->Initialize(cfg_,parameters))
   {
     ERROR << "problem during the initialization of the analysis called '" 
           << name << "'" << endmsg;
@@ -162,6 +165,50 @@ AnalyzerBase* SampleAnalyzer::InitializeAnalyzer(const std::string& name,
 
   // Returning the analysis
   return myAnalysis;
+}
+
+
+FilterBase* SampleAnalyzer::InitializeFilter(const std::string& name, 
+                                             const std::string& outputname,
+                           const std::map<std::string,std::string>& parameters)
+{
+  // Display 
+  INFO << "      - filter '"
+       << name << "'" << endmsg;
+
+  // Getting the analysis
+  FilterBase* myFilter = fullFilters_.Get(name);
+
+  // Filter found ?
+  if (myFilter==0)
+  {
+    ERROR << "filter called '" << name << "' is not found" 
+          << endmsg;
+    return 0;
+  }
+
+  // Putting the analysis in container
+  filters_.push_back(myFilter);
+
+  // Initialize (common part to all filters)
+  if (!myFilter->PreInitialize(outputname,
+                               cfg_.IsNoEventWeight()))
+  {
+    ERROR << "problem during the pre-initialization of the filter called '" 
+          << name << "'" << endmsg;
+    return 0;
+  }
+
+  // Initialize (specific to the filter)
+  if (!myFilter->Initialize(cfg_,parameters))
+  {
+    ERROR << "problem during the initialization of the filter called '" 
+          << name << "'" << endmsg;
+    return 0;
+  }
+
+  // Returning the filter
+  return myFilter;
 }
 
 

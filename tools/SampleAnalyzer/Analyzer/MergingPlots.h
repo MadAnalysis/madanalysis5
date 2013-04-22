@@ -29,6 +29,8 @@
 
 //STL headers
 #include <vector>
+#include <map>
+#include <string>
 
 //SampleAnalyser headers
 #include "SampleAnalyzer/Core/Configuration.h"
@@ -73,7 +75,8 @@ class MergingPlots : public AnalyzerBase
  public : 
 
   /// Initialization
-  virtual bool Initialize(const Configuration& cfg);
+  virtual bool Initialize(const Configuration& cfg,
+             const std::map<std::string,std::string>& parameters);
 
   /// Finalization
   virtual void Finalize(const SampleFormat& summary, const std::vector<SampleFormat>& files);
