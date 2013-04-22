@@ -730,9 +730,9 @@ class JobWriter():
         # Closing the file
         file.close()
 
-        if not self.WriteSetupFile(bash=True):
+        if not JobWriter.WriteSetupFile(True,self.path+'/Build/',self.ma5dir):
             return False
-        if not self.WriteSetupFile(bash=False):
+        if not JobWriter.WriteSetupFile(False,self.path+'/Build/',self.ma5dir):
             return False
         
         return True
@@ -765,15 +765,16 @@ class JobWriter():
 
         # Return the string
         return ':'.join(newpaths)
-        
 
-    def WriteSetupFile(self,bash=True):
+        
+    @staticmethod
+    def WriteSetupFile(bash,path,ma5dir,MA5BASE=True):
 
         # Opening file in write-only mode
         if bash:
-            filename = self.path+"/Build/setup.sh"
+            filename = path+"/setup.sh"
         else:
-            filename = self.path+"/Build/setup.csh"
+            filename = path+"/setup.csh"
         try:
             file = open(filename,"w")
         except:
@@ -811,12 +812,13 @@ class JobWriter():
         file.write('\n')
 
         # Configuring PATH environment variable
-        file.write('# Configuring MA5 environment variable\n')
-        if bash:
-            file.write('export MA5_BASE=' + JobWriter.CleanPath(self.ma5dir)+'\n')
-        else:
-            file.write('setenv MA5_BASE=' + JobWriter.CleanPath(self.ma5dir)+'\n')
-        file.write('\n')
+        if MA5BASE:
+            file.write('# Configuring MA5 environment variable\n')
+            if bash:
+                file.write('export MA5_BASE=' + JobWriter.CleanPath(ma5dir)+'\n')
+            else:
+                file.write('setenv MA5_BASE=' + JobWriter.CleanPath(ma5dir)+'\n')
+            file.write('\n')
 
         # Configuring PATH environment variable
         file.write('# Configuring PATH environment variable\n')

@@ -186,11 +186,11 @@ class CmdSubmit(CmdBase):
             return
 
         # Checking if a selection item has been defined
-        if len(self.main.selection)==0 and self.main.merging.enable==False and \
-               self.main.output == "":
-            logging.error("no analysis found. Please define an analysis (via the command plot).")
-            logging.error("job submission aborted.")
-            return
+#        if len(self.main.selection)==0 and self.main.merging.enable==False and \
+#               self.main.output == "":
+#            logging.error("no analysis found. Please define an analysis (via the command plot).")
+#            logging.error("job submission aborted.")
+#            return
 
         # Treat the filename
         filename = os.path.expanduser(args[0])

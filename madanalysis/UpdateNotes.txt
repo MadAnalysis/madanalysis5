@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+16   dev.101 (2013/04/23) econte:  adding a setup script for SampleAnalyzer library + possibility to 
+                                   launch a job without analysis 
+
 15   dev.100 (2013/04/23) econte:  fixing problem related to open a new session in expert mode 
 
 14   dev.99  (2013/04/22) econte:  fixing minor bug with merging plots 

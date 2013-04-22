@@ -24,6 +24,7 @@
 
 from madanalysis.selection.instance_name   import InstanceName
 from madanalysis.IOinterface.folder_writer import FolderWriter
+from madanalysis.IOinterface.job_writer    import JobWriter
 from madanalysis.core.string_tools         import StringTools
 import logging
 import shutil
@@ -234,6 +235,9 @@ class LibraryWriter():
 
         # Closing the file
         file.close()
+
+        JobWriter.WriteSetupFile(True,self.path+'/SampleAnalyzer',self.ma5dir,False)
+        JobWriter.WriteSetupFile(False,self.path+'/SampleAnalyzer',self.ma5dir,False)
 
         return True
 
