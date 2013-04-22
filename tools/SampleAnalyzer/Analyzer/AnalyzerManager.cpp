@@ -67,5 +67,7 @@ AnalyzerBase* AnalyzerManager::ChoiceAnalyzer()
 // -----------------------------------------------------------------------------
 void AnalyzerManager::BuildPredefinedTable()
 {
-  Add("MergingPlots", new MA5::MergingPlots());
+#ifdef FASTJET_USE
+  Add("MergingPlots", new MergingPlots);
+#endif
 }
