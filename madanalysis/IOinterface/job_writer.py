@@ -173,12 +173,30 @@ class JobWriter():
         try:
             shutil.copyfile\
                       (\
-                      self.ma5dir+"/tools/SampleAnalyzer/newAnalysis.py",\
-                      self.path+"/Build/SampleAnalyzer/newAnalysis.py"\
+                      self.ma5dir+"/tools/SampleAnalyzer/newAnalyzer.py",\
+                      self.path+"/Build/SampleAnalyzer/newAnalyzer.py"\
                       )
         except:
-            logging.error("An error occured during copying 'SampleAnalyzer'" +\
-            "source files.")
+            logging.error('Impossible to copy the file "newAnalyzer"')
+            return False
+        try:    
+            os.chmod(self.path+"/Build/SampleAnalyzer/newAnalyzer.py",0755)
+        except:
+            logging.error('Impossible to make executable the file "newAnalyzer"')
+            return False
+        try:
+            shutil.copyfile\
+                      (\
+                      self.ma5dir+"/tools/SampleAnalyzer/newFilter.py",\
+                      self.path+"/Build/SampleAnalyzer/newFilter.py"\
+                      )
+        except:
+            logging.error('Impossible to copy the file "newFilter"')
+            return False
+        try:
+            os.chmod(self.path+"/Build/SampleAnalyzer/newFilter.py",0755)
+        except:
+            logging.error('Impossible to make executable the file "newFilter.py"')
             return False
 
         return True
@@ -200,7 +218,7 @@ class JobWriter():
         file.write('using namespace MA5;\n\n')
         return
 
-    def CreateMainFct(self,file):
+    def CreateMainFct(self,file,analysisName,outputName):
         file.write('// -----------------------------------------------------------------------\n')
         file.write('// main program\n')
         file.write('// -----------------------------------------------------------------------\n')
@@ -223,14 +241,14 @@ class JobWriter():
         file.write('  // Getting pointer to the analyzer\n')
         file.write('  std::map<std::string, std::string> parameters1;\n')
         file.write('  AnalyzerBase* analyzer1 = \n')
-        file.write('      manager.InitializeAnalyzer("MadAnalysis5job","MadAnalysis5job.saf",parameters1);\n')
+        file.write('      manager.InitializeAnalyzer("'+analysisName+'","'+outputName+'",parameters1);\n')
         file.write('  if (analyzer1==0) return 1;\n\n')
         if self.merging.enable:
             file.write('  // Getting pointer to the analyzer devoted to merging plots\n')
             file.write('  std::map<std::string, std::string> parameters2;\n')
             file.write('  parameters2["njets"]="'+str(self.main.merging.njets)+'";\n')
             file.write('  AnalyzerBase* analyzer2 = \n')
-            file.write('      manager.InitializeAnalyzer("MergingPlots","MergingPlots.saf",parameters2);\n')
+            file.write('      manager.InitializeAnalyzer("'+analysisName+'","'+outputName+'",parameters2);\n')
             file.write('  if (analyzer2==0) return 1;\n\n')
         if self.output!="":
             file.write('  //Getting pointer to the writer\n')
@@ -304,11 +322,11 @@ class JobWriter():
         file.write('}\n')
         return
 
-    def CreateBldDir(self):
+    def CreateBldDir(self,analysisName="MadAnalysis5job",outputName="MadAnalysis5job.saf"):
         file = open(self.path+'/Build/Main/main.cpp','w')
         self.CreateHeader(file)
         self.PrintIncludes(file)
-        self.CreateMainFct(file)
+        self.CreateMainFct(file,analysisName,outputName)
         file.close()
         return True
 
@@ -320,6 +338,23 @@ class JobWriter():
         job = JobMain.JobMain(file,main)
         job.WriteHeader()
         file.close()
+        return True
+
+    def WriteEmptyFilterSource(self,main):
+        file = open(self.path+"/Build/SampleAnalyzer/Filter/filterList.cpp","w")
+        file.write('#include "SampleAnalyzer/Filter/FilterManager.h"\n')
+        file.write('using namespace MA5;\n')
+        file.write('#include <stdlib.h>\n\n')
+        file.write('// ------------------------------------------' +\
+                   '-----------------------------------\n')
+        file.write('// BuildUserTable\n')
+        file.write('// ------------------------------------------' +\
+                   '-----------------------------------\n')
+        file.write('void FilterManager::BuildUserTable()\n')
+        file.write('{\n')
+        file.write('}\n')
+        file.close()
+
         return True
 
     def WriteSelectionSource(self,main):
@@ -346,21 +381,7 @@ class JobWriter():
         file.write('  Add("MadAnalysis5job", new user);\n')
         file.write('}\n')
         file.close()
-
-        file = open(self.path+"/Build/SampleAnalyzer/Filter/filterList.cpp","w")
-        file.write('#include "SampleAnalyzer/Filter/FilterManager.h"\n')
-        file.write('using namespace MA5;\n')
-        file.write('#include <stdlib.h>\n\n')
-        file.write('// ------------------------------------------' +\
-                   '-----------------------------------\n')
-        file.write('// BuildUserTable\n')
-        file.write('// ------------------------------------------' +\
-                   '-----------------------------------\n')
-        file.write('void FilterManager::BuildUserTable()\n')
-        file.write('{\n')
-        file.write('}\n')
-        file.close()
-
+        self.WriteEmptyFilterSource(main)
         return True
 
     def CreateShowerDir(self,mode):

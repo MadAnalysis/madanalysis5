@@ -90,13 +90,44 @@ class ExpertMode:
 
         # Writing an empty analysis
         logging.info("   Writing an empty analysis...")
-        os.system("cd "+self.path+"/SampleAnalyzer; python newAnalysis.py user")
-        
+        jobber.WriteEmptyFilterSource(self.main)
+        os.system("cd "+self.path+"/Build/SampleAnalyzer; python newAnalyzer.py user")
+
+        # Extracting analysis name
+        file = open(self.path+"/Build/SampleAnalyzer/Analyzer/analysisList.cpp")
+        title=""
+        for line in file:
+            if "Add" not in line:
+                continue
+            words = line.split('"')
+            if len(words)>=3:
+                title=words[1]
+                break
+        file.close()
+        if title=="":
+            title="user"
+            
         # Writing a Makefile
         logging.info("   Writing a 'Makefile'...")
-        if not jobber.WriteMakefile():
+        if not jobber.WriteMakefiles():
             logging.error("job submission aborted.")
             return False
+
+        # Writing Main
+        if not jobber.CreateBldDir(analysisName=title,outputName="user.saf"):
+            logging.error("   job submission aborted.")
+            return False
+        if self.main.shower.enable:
+             mode=self.main.shower.type
+             if self.main.shower.type=='auto':
+                 mode = commands.getstatusoutput('less ' + self.main.datasets[0].filenames[0] + ' | grep parton_shower ')
+                 if mode[0]!=0:
+                     logging.error('Cannot retrieve the showering information from the LHE files')
+                     return False
+                 mode = (mode[1].split())[0]
+             if not jobber.CreateShowerDir(mode):
+                 logging.error("   job submission aborted.")
+                 return False
 
         return True    
 
@@ -104,11 +135,11 @@ class ExpertMode:
             
     def GiveAdvice(self):
         logging.info("\nGuidelines for writing an analysis in expert mode\n")
-        logging.info(" 1. Entering the directory '"+self.path+"/SampleAnalyzer'\n")
+        logging.info(" 1. Entering the directory '"+self.path+"/Build'\n")
         logging.info(" 2. Setting the environment variables by loading setup.sh or setup.csh according to your SHELL\n")
-        logging.info(" 3. Entering the directory '"+self.path+"/SampleAnalyzer/Analysis'\n")
+        logging.info(" 3. Entering the directory '"+self.path+"/Build/SampleAnalyzer/Analyzer'\n")
         logging.info(" 4. Editing Analysis 'user.h' and 'user.cpp' files\n")
-        logging.info(" 5. Entering the directory '"+self.path+"/SampleAnalyzer'\n")
+        logging.info(" 5. Entering the directory '"+self.path+"/Build'\n")
         logging.info(" 6. Compiling with the command 'make'\n")
         logging.info(" 7. Writing a list of datasets\n")
         logging.info(" 8. Launching SampleAnalyzer with the list of datasets\n")
