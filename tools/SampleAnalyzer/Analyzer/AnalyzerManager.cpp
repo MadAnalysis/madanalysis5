@@ -67,5 +67,5 @@ AnalyzerBase* AnalyzerManager::ChoiceAnalyzer()
 // -----------------------------------------------------------------------------
 void AnalyzerManager::BuildPredefinedTable()
 {
-  Add("MergingPlots", new MergingPlots);
+  Add("MergingPlots", new MA5::MergingPlots());
 }

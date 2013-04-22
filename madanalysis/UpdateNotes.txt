@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+13   dev.98  (2013/04/22) econte:  fixing minor bug with MergingPlots analysis 
+
 12   dev.97  (2013/04/22) econte:  Merging plots fixing bug : 1/2 
 
 11   dev.96  (2013/04/19) econte:  fixing all compilation issues with FastJet 
