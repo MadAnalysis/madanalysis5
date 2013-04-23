@@ -488,7 +488,7 @@ class Layout:
             report.NewCell()
             text.Reset()
             if self.cutflow.isSignal and self.cutflow.isBackground:
-                value = self.cutflow.detail[0].calculateBSratio(\
+                value = self.cutflow.calculateBSratio(\
                     self.cutflow.background.Nselected[ind].mean,\
                     self.cutflow.background.Nselected[ind].error,\
                     self.cutflow.signal.Nselected[ind].mean,\

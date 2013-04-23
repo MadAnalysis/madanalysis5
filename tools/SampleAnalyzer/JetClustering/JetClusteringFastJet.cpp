@@ -31,7 +31,8 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
 {
   if (mySample.mc()==0 ||  myEvent.mc()==0) return false;
   if (mySample.rec()==0)   mySample.InitializeRec();
-  if (myEvent.rec()!=0) return false;
+  if (myEvent.rec()!=0) myEvent.InitializeRec();
+  myEvent.rec()->Reset();
 
   // Preparing inputs
   std::vector<fastjet::PseudoJet> inputs;
@@ -53,7 +54,6 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
   else jets = clust_seq.inclusive_jets(Ptmin_);
 
   // Filling the dataformat with jets
-  myEvent.InitializeRec();
   for (unsigned int i=0;i<jets.size();i++)
   {
     RecJetFormat * jet = myEvent.rec()->GetNewJet();

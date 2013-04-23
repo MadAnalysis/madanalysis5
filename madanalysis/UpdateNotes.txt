@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+18   dev.103 (2013/04/23) econte:  fixing Adam bug (FASTJET called only on the first event) + Jose bug 
+                                   (problem with cutflow) 
+
 17   dev.102 (2013/04/23) econte:  fixing bug with redudancy of parameter1 in main.cpp 
 
 16   dev.101 (2013/04/23) econte:  adding a setup script for SampleAnalyzer library + possibility to 
