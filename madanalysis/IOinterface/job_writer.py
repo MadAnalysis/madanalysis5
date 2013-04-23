@@ -257,12 +257,12 @@ class JobWriter():
             file.write('  if (writer1==0) return 1;\n\n')
         if self.clustering.algorithm!="none":
             file.write('  //Getting pointer to the clusterer\n')
-            file.write('  std::map<std::string, std::string> parameters1;\n')
+            file.write('  std::map<std::string, std::string> parametersC1;\n')
             parameters = self.clustering.SampleAnalyzerConfigString()
             for k,v in parameters.iteritems():
                 file.write('  parameters1["'+k+'"]="'+v+'";\n')
             file.write('  JetClustererBase* cluster1 = \n')
-            file.write('      manager.InitializeJetClusterer("'+self.clustering.algorithm+'",parameters1);\n')
+            file.write('      manager.InitializeJetClusterer("'+self.clustering.algorithm+'",parametersC1);\n')
             file.write('  if (cluster1==0) return 1;\n\n')
             
         # Loop
