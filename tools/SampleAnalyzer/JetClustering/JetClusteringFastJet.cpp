@@ -104,10 +104,14 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
     (*MET) -= myEvent.rec()->muons()[i].momentum();
   }
 
+  /*
   for (unsigned int i=0;i<myEvent.rec()->taus().size();i++)
   {
     (*MET) -= myEvent.rec()->taus()[i].momentum();
   }
+  */
+  MET->momentum().SetPz(0.);
+  MET->momentum().SetE(MET->momentum().Pt());
 
   myBtagger_->Execute(mySample,myEvent);
   myCtagger_->Execute(mySample,myEvent);

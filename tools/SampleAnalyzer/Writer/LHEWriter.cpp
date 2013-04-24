@@ -472,7 +472,7 @@ void LHEWriter::WriteMET(const ParticleBaseFormat& met)
   *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(met.px()) << " ";
   *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(met.py()) << " ";
   *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(0.) << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(met.e())  << " ";
+  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(met.pt())  << " ";
   *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(0.)  << " "; 
   *output_ << std::setw(2)  << std::right << std::showpoint << 0. << " ";
   *output_ << std::setw(3)  << std::right << std::showpoint << 0.;

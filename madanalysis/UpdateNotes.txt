@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+19   dev.104 (2013/04/24) econte:  Fixing a MAJOR bug related to MET calculation in RECO mode [thanks 
+                                   to Adam] 
+
 18   dev.103 (2013/04/23) econte:  fixing Adam bug (FASTJET called only on the first event) + Jose bug 
                                    (problem with cutflow) 
 

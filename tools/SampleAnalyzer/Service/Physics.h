@@ -592,7 +592,7 @@ class PhysicsService
   /// Compute the missing transverse energy
   inline double EventMET(const RecEventFormat* event) const
   {
-    return event->MET().e();
+    return event->MET().pt();
   }
 
   /// Compute the total hadronic transverse energy
