@@ -30,8 +30,8 @@ using namespace MA5;
 bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
 {
   if (mySample.mc()==0 ||  myEvent.mc()==0) return false;
-  if (mySample.rec()==0)   mySample.InitializeRec();
-  if (myEvent.rec()!=0) myEvent.InitializeRec();
+  if (mySample.rec()==0) mySample.InitializeRec();
+  if (myEvent.rec() ==0) myEvent.InitializeRec();
   myEvent.rec()->Reset();
 
   // Preparing inputs
