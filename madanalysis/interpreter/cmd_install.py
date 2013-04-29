@@ -28,6 +28,7 @@ import os
 import sys
 import shutil
 import urllib
+import pwd
 
 class CmdInstall(CmdBase):
     """Command INSTALL"""
@@ -314,7 +315,10 @@ class CmdInstall(CmdBase):
     def get_tmp(self):
 
         # Getting temporary folder path
-        user = os.getlogin()
+        try:
+            user = pwd.getpwuid(os.getuid())[0]
+        except:
+            user = 'unknown' 
         try:
             tmpdir = os.environ['TMPDIR']
         except:

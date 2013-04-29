@@ -33,9 +33,8 @@ void TauTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
   for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
   {
     if (PHYSICS->IsInitialState(myEvent.mc()->particles()[i])) continue;
-    if (fabs(myEvent.mc()->particles()[i].pdgid())!=15) continue;
-
-    if (!IsLast(&myEvent.mc()->particles()[i], myEvent)) continue;
+    if (fabs(myEvent.mc()->particles()[i].pdgid())!=15)        continue;
+    if (!IsLast(&myEvent.mc()->particles()[i], myEvent))       continue;
 
     Bool_t tag = false;
     Double_t DeltaRmax = DeltaRmax_;
@@ -43,10 +42,12 @@ void TauTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
     // loop on the jets
     for (unsigned int j=0;j<myEvent.rec()->jets().size();j++)
     {
-      if (myEvent.rec()->jets()[j].ntracks()!=1 && myEvent.rec()->jets()[j].ntracks()!=3) continue;
+      if (myEvent.rec()->jets()[j].ntracks()!=1 && 
+          myEvent.rec()->jets()[j].ntracks()!=3) continue;
 
       // Calculating Delta R
-      Float_t DeltaR = myEvent.mc()->particles()[i].dr(myEvent.rec()->jets()[j]);
+      Float_t DeltaR = 
+         myEvent.mc()->particles()[i].dr(myEvent.rec()->jets()[j]);
 
       if (DeltaR <= DeltaRmax)
       {

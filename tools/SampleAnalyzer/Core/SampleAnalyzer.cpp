@@ -263,8 +263,7 @@ JetClustererBase* SampleAnalyzer::InitializeJetClusterer(
 
   // Display
   INFO << "      - jet clusterer '"
-       << myClusterer->GetName() << "' : " 
-       << myClusterer->GetParameters() << endmsg;
+       << myClusterer->GetName() << endmsg;
 
   // Putting the analysis in container
   clusters_.push_back(myClusterer);
@@ -277,7 +276,10 @@ JetClustererBase* SampleAnalyzer::InitializeJetClusterer(
     return 0;
   }
 
-  // Returning the analysis
+  // Display
+  INFO << "        with: " << myClusterer->GetParameters() << endmsg;
+
+  // Returning the clusterer
   return myClusterer;
 }
 

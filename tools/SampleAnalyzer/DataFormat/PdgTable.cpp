@@ -67,15 +67,14 @@ void PdgTable::Print() const
   }
 }
 
-PdgDataFormat PdgTable::operator[](const Int_t Pdgid) const 
+const PdgDataFormat& PdgTable::operator[](const Int_t Pdgid) const 
 {
-  std::map<Int_t, PdgDataFormat>::const_iterator i;
-  i =Table_.find(Pdgid);
-  if(i==Table_.end()) 
+  std::map<Int_t, PdgDataFormat>::const_iterator it = Table_.find(Pdgid);
+  if(it==Table_.end()) 
   {
     WARNING <<"PDG ID not found (" << Pdgid << "), use default values" << endmsg;
-    return PdgDataFormat();
+    return empty_;
   }
    
-  return i->second;
+  return it->second;
 }

@@ -26,9 +26,11 @@
 #define PDGSERVICE_h
 
 // STL headers
+#include <set>
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/DataFormat/PdgTable.h"
@@ -48,6 +50,7 @@ class PDGService
  protected:
 
   PdgTable* Table_;  
+  std::set<Int_t> NeutralTable_;  
   static PDGService* service_;
 
   // -------------------------------------------------------------
@@ -69,10 +72,18 @@ class PDGService
     service_=0;
   }
 
+  /// Is charged ?
+  Bool_t IsCharged (Int_t pdgid)
+  {
+    std::set<Int_t>::const_iterator it = NeutralTable_.find(pdgid);
+    if(it==NeutralTable_.end()) return true;
+    else return false; 
+  }
+
   /// Get charge
   Int_t GetCharge (Int_t pdgid)
   {
-    return Table_->Table()[pdgid].Charge();
+    return (*Table_)[pdgid].Charge();
   }
 
   /// Get charge
@@ -94,11 +105,14 @@ class PDGService
   PDGService()  
   {
     Table_ = new PdgTable;
+    NeutralTable_.clear();
+
 
     std::string temp_string;
     std::istringstream curstring;
 
-    std::ifstream table ("/home/mkraft/new_MA/trunk/madanalysis-development/tools/SampleAnalyzer/particle.tbl");
+    std::string ma5dir = std::getenv("MA5_BASE");
+    std::ifstream table ((ma5dir+"/tools/SampleAnalyzer/particle.tbl").c_str());
 
     if(!table.good()) 
     {
@@ -134,6 +148,7 @@ class PDGService
       PdgDataFormat particle(ID,name,mass,charge,width,lifetime/1000.);
 
       Table_->Insert(ID,particle);
+      if (charge==0) NeutralTable_.insert(ID);
     }
   }
 

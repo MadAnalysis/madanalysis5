@@ -38,18 +38,40 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
   std::vector<fastjet::PseudoJet> inputs;
   for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
   {
-    if (myEvent.mc()->particles()[i].statuscode()!=1) continue;
+    // Selecting input for jet clustering
+    if (myEvent.mc()->particles()[i].statuscode()!=1)       continue;
     if (PHYSICS->IsInvisible(myEvent.mc()->particles()[i])) continue;
-    if (fabs(myEvent.mc()->particles()[i].pdgid())==13) continue;
-    inputs.push_back (fastjet::PseudoJet ( myEvent.mc()->particles()[i].px(), myEvent.mc()->particles()[i].py(), myEvent.mc()->particles()[i].pz(), myEvent.mc()->particles()[i].e() ));
+    if (fabs(myEvent.mc()->particles()[i].pdgid())==13)     continue;
+
+    // Filling good particle for clustering
+    inputs.push_back(
+          fastjet::PseudoJet ( myEvent.mc()->particles()[i].px(), 
+                               myEvent.mc()->particles()[i].py(),
+                               myEvent.mc()->particles()[i].pz(),
+                               myEvent.mc()->particles()[i].e()   ));
     inputs.back().set_user_index(i);
   }
 
   // Clustering
   fastjet::ClusterSequence clust_seq(inputs, JetDefinition_);
 
-  // Getting jets
+  // Getting jets with PTmin = 0
   std::vector<fastjet::PseudoJet> jets; 
+  if (Exclusive_) jets = clust_seq.exclusive_jets(0.);
+  else jets = clust_seq.inclusive_jets(0.);
+
+  // Calculating the MET  
+  ParticleBaseFormat* MET = myEvent.rec()->GetNewMet();
+  ParticleBaseFormat* MHT = myEvent.rec()->GetNewMht();
+
+  for (unsigned int i=0;i<jets.size();i++)
+  {
+    MET->momentum().SetPx(MET->momentum().Px() - jets[i].px());
+    MET->momentum().SetPy(MET->momentum().Py() - jets[i].py());
+  }
+  (*MHT)=(*MET);
+
+  // Getting jets with PTmin
   if (Exclusive_) jets = clust_seq.exclusive_jets(Ptmin_);
   else jets = clust_seq.inclusive_jets(Ptmin_);
 
@@ -63,8 +85,8 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
     for (unsigned int j=0;j<constituents.size();j++)
     {
       jet->AddConstituent(constituents[j].user_index());
-      if (fabs(myEvent.mc()->particles()[constituents[j].user_index()].pdgid())==11) continue;
-      //if (PDG->GetCharge(myEvent.mc()->particles()[constituents[j].user_index()].pdgid())!=0) tracks++;
+      //      if (fabs(myEvent.mc()->particles()[constituents[j].user_index()].pdgid())==11) continue;
+      if (PDG->IsCharged(myEvent.mc()->particles()[constituents[j].user_index()].pdgid())) tracks++;
     }
     jet->ntracks_ = tracks;
   }
@@ -89,29 +111,16 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
     }
   }
 
-  // Calculating the MET  
-  ParticleBaseFormat* MET = myEvent.rec()->GetNewMet();
-  ParticleBaseFormat* MHT = myEvent.rec()->GetNewMht();
-
-  for (unsigned int i=0;i<myEvent.rec()->jets().size();i++)
-  {
-    (*MET) -= myEvent.rec()->jets()[i].momentum();
-    (*MHT) -= myEvent.rec()->jets()[i].momentum();
-  }
 
   for (unsigned int i=0;i<myEvent.rec()->muons().size();i++)
   {
     (*MET) -= myEvent.rec()->muons()[i].momentum();
   }
 
-  /*
-  for (unsigned int i=0;i<myEvent.rec()->taus().size();i++)
-  {
-    (*MET) -= myEvent.rec()->taus()[i].momentum();
-  }
-  */
   MET->momentum().SetPz(0.);
   MET->momentum().SetE(MET->momentum().Pt());
+  MHT->momentum().SetPz(0.);
+  MHT->momentum().SetE(MHT->momentum().Pt());
 
   myBtagger_->Execute(mySample,myEvent);
   myCtagger_->Execute(mySample,myEvent);

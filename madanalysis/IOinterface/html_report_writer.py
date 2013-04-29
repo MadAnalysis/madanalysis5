@@ -28,9 +28,11 @@ from madanalysis.enumeration.color_type import ColorType
 from madanalysis.enumeration.font_type import FontType
 from madanalysis.enumeration.script_type import ScriptType
 from madanalysis.IOinterface.text_report import TextReport
+
 import os
 import logging
 import time
+import pwd
 
 class HTMLReportWriter(TextFileWriter.TextFileWriter):
     """Generate HTML report"""
@@ -95,9 +97,17 @@ class HTMLReportWriter(TextFileWriter.TextFileWriter):
           'Please visit us.</a>\n')
         self.page.append('      </td>\n      <td width=\'65%\'>\n')
         self.page.append('        <h1>' + title +'</h1><br />\n')
+        try:
+            mydate = str(time.strftime("%d %B %Y, %H:%M:%S"))
+        except:
+            mydate = 'date/hour not accessible'
+        try:
+            mylogin = pwd.getpwuid(os.getuid())[0]
+        except:
+            mylogin = 'unknown' 
         self.page.append('        <i>Created by <font color=\'#0000CC\'>' + \
-          str(os.getlogin()) + '</font> on  <font color=\'#0000CC\'>' + \
-          str(time.strftime("%d %B %Y, %H:%M:%S")) + '</font></i>\n')
+          mylogin + '</font> on  <font color=\'#0000CC\'>' + \
+          mydate + '</font></i>\n')
         self.page.append('      </td>\n    </tr>\n  </table>\n</div>\n\n')
  
     def TableOfContents(self):

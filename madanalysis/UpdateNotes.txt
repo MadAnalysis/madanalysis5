@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+21   dev.106 (2013/04/29) econte:  Fixing bugs : 1) bugs due to screen 2) bugs in tau reconstruction 3) 
+                                   improving speed of PdgService 4) MET before/after clustering 
+
 20   dev.105 (2013/04/25) econte:  Fixing bug with jetclustering initialization [Thanks to Jose] 
 
 19   dev.104 (2013/04/24) econte:  Fixing a MAJOR bug related to MET calculation in RECO mode [thanks 
