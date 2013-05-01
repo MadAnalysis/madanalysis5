@@ -120,6 +120,9 @@ class ReaderBase
     return name;
   }
 
+  /// Get the file size
+  virtual Long64_t GetFileSize()=0;
+
 };
 
 }

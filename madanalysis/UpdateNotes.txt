@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+22   dev.107 (2013/05/01) econte:  fixing problem with long-term job + adding sample size 
+
 21   dev.106 (2013/04/29) econte:  Fixing bugs : 1) bugs due to screen 2) bugs in tau reconstruction 3) 
                                    improving speed of PdgService 4) MET before/after clustering 
 

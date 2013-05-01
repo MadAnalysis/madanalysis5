@@ -54,6 +54,18 @@ class LHEReader : public ReaderTextBase
   virtual ~LHEReader()
   { }
 
+  /// Initialize
+  virtual bool Initialize(const std::string& rawfilename,
+                          const Configuration& cfg)
+  { 
+    firstevent_=false;
+    return ReaderTextBase::Initialize(rawfilename,cfg);
+  }
+
+  /// Finalize
+  virtual bool Finalize()
+  { return ReaderTextBase::Finalize(); }
+
   //! Read the header
   virtual bool ReadHeader(SampleFormat& mySample);
 

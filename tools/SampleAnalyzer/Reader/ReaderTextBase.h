@@ -52,6 +52,9 @@ class ReaderTextBase : public ReaderBase
   /// Streaming for reading input
   std::istream*  input_;
 
+  /// Name of the file (without prefix such as file: or rfio:)
+  std::string filename_;
+
 
   // -------------------------------------------------------------
   //                       method members
@@ -91,6 +94,9 @@ class ReaderTextBase : public ReaderBase
 
   /// Read line text
   bool ReadLine(std::string& line, bool removeComment=true);
+
+  /// Get the file size
+  virtual Long64_t GetFileSize();
 
 };
 

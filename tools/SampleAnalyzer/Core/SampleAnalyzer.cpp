@@ -287,6 +287,12 @@ JetClustererBase* SampleAnalyzer::InitializeJetClusterer(
 /// Reading the next event
 StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
 {
+  // Finalize previous file
+  if (myReader_!=0)
+  {
+    myReader_->Finalize();
+  }  
+
   // Next file
   file_index_++;
 
@@ -313,6 +319,52 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
 
   // Initialize the reader
   myReader_->Initialize(inputs_[file_index_-1], cfg_);
+
+  // Displaying the size of the file
+  Long64_t length = myReader_->GetFileSize();
+  if (length<0) INFO << "        => file size : unknown" << endmsg;
+  else
+  {
+    UInt_t unit = 0;
+    Double_t value=0;
+    if (length>1e12)
+    {
+      value = static_cast<Double_t>(length)/(1024.*1024.*1024.*1024.);
+      unit=5;
+    }
+    if (length>1e9) 
+    {
+      value = static_cast<Double_t>(length)/(1024.*1024.*1024.);
+      unit=4;
+    }
+    else if (length>1e6)
+    {
+      value = static_cast<Double_t>(length)/(1024.*1024.);
+      unit=3;
+    }
+    else if (length>1e3)
+    {
+      value = static_cast<Double_t>(length)/1024.;
+      unit=2;
+    }
+    else
+    {
+      value = length;
+      unit=1;
+    }
+    std::stringstream str;
+    if (unit==1) str << static_cast<UInt_t>(value);
+    else str << std::fixed << std::setprecision(2) << value;
+    str << " ";
+    if (unit==1) str << "octets";
+    else if (unit==2) str << "ko";
+    else if (unit==3) str << "Mo";
+    else if (unit==4) str << "Go";
+    else if (unit==5) str << "To";
+    else str << "muf";
+
+    INFO << "        => file size : " << str.str() << endmsg;
+  }
 
   // Read the header block
   if (!myReader_->ReadHeader(mySample))

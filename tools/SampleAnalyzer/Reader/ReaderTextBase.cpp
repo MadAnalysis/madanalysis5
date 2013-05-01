@@ -23,7 +23,7 @@
 
 
 // STL headers
-#include "SampleAnalyzer/Reader/ReaderTextBase.h"
+#include <fstream>
 
 // ZIP headers
 #ifdef ZIP_USE
@@ -31,6 +31,7 @@
 #endif
 
 // SampleHeader headers
+#include "SampleAnalyzer/Reader/ReaderTextBase.h"
 #include "SampleAnalyzer/Service/LogService.h"
 
 using namespace MA5;
@@ -59,11 +60,11 @@ bool ReaderTextBase::Initialize(const std::string& rawfilename,
   }
 
   // Cleaning the file (remove rfio or local location)
-  std::string filename = rawfilename;
-  CleanFilename(filename);
+  filename_ = rawfilename;
+  CleanFilename(filename_);
 
   // Is compressed file ?
-  compress_ = IsCompressedMode(filename);
+  compress_ = IsCompressedMode(filename_);
 
   // Checking consistency with compilation option
   if (compress_)
@@ -93,7 +94,7 @@ bool ReaderTextBase::Initialize(const std::string& rawfilename,
   {
 #ifdef RFIO_USE
     input_=new icastorstream();
-    input_->open(const_cast<char*>(filename.c_str()));
+    input_->open(const_cast<char*>(filename_.c_str()));
     test=input_->good();
 #endif
   }
@@ -104,7 +105,7 @@ bool ReaderTextBase::Initialize(const std::string& rawfilename,
 #ifdef ZIP_USE
     input_=new gz_istream();
     gz_istream * myinput = dynamic_cast<gz_istream*>(input_);
-    myinput->open(const_cast<char*>(filename.c_str()));
+    myinput->open(const_cast<char*>(filename_.c_str()));
     test=myinput->good();
 #endif
   }
@@ -114,15 +115,15 @@ bool ReaderTextBase::Initialize(const std::string& rawfilename,
   {
     input_=new std::ifstream();
     std::ifstream * myinput = dynamic_cast<std::ifstream*>(input_);
-    myinput->open(filename.c_str());
+    myinput->open(filename_.c_str());
     test=myinput->good();
   }
 
   // Check if the input is properly opened
   if (!test)
   {
-    ERROR << "Opening file " << filename << " failed" << endmsg;
-    exit(1);
+    ERROR << "Opening file " << filename_ << " failed" << endmsg;
+    return false;
   }
 
   return test;
@@ -162,7 +163,7 @@ bool ReaderTextBase::Finalize()
   }
 
   // Free allocated memory for the file streamer
-  if (input_!=0) { delete input_;input_=0; }
+  if (input_!=0) { delete input_; input_=0; }
 
   // OK!
   return true;
@@ -196,4 +197,32 @@ bool ReaderTextBase::ReadLine(std::string& line, bool removeComment)
 
   // Not the end of the file
   return true;
+}
+
+
+// -----------------------------------------------------------------------------
+// GetFileSize
+// -----------------------------------------------------------------------------
+Long64_t ReaderTextBase::GetFileSize()
+{
+  if (input_==0) return 0;
+
+  Long64_t length = 0;
+  if (compress_)
+  {
+    std::ifstream myinput(filename_.c_str());
+    myinput.seekg(0,std::ios::beg);
+    myinput.seekg(0,std::ios::end);
+    length = myinput.tellg();
+    myinput.seekg(0,std::ios::beg);
+    myinput.close();
+  }
+  else
+  {
+    input_->seekg(0,std::ios::beg);
+    input_->seekg(0,std::ios::end);
+    length = input_->tellg();
+    input_->seekg(0,std::ios::beg);
+  }
+  return length;  
 }
