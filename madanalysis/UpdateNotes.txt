@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+25   dev.110 (2013/05/03) econte:  fixing minor bugs related to the progressbar display 
+
 24   dev.109 (2013/05/02) econte:  Implementing a smart progress bar 
 
 23   dev.108 (2013/05/02) econte:  Adding BUT not using a progress bar class 

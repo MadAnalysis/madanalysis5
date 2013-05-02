@@ -89,7 +89,7 @@ void ProgressBar::Update(Long64_t value)
   if (value<Thresholds_[Indicator_]) return;
 
   // Check if the progress bar reach the end
-  if (Indicator_>=Nstep_ || value>MaxValue_ || value<MinValue_)
+  if (Indicator_>Nstep_ || value<MinValue_)
   { MuteEnd_=true; return; }
 
   // Calculate how many steps to add
@@ -126,7 +126,9 @@ void ProgressBar::Display(UInt_t ind)
   {
     std::vector<char> last_chars = newstreambuf_->get_last_chars();
     if (last_chars[0] != '\n') std::cout << std::endl;
-    else if (last_chars[5] == 93 && last_chars[4] == 27 && last_chars[3] == 91 && last_chars[2] == 48 && last_chars[1] == 109) std::cout << "\b\r";
+    else if (last_chars[5] == 93 && last_chars[4] == 27 && 
+             last_chars[3] == 91 && last_chars[2] == 48 && 
+             last_chars[1] == 109) std::cout << "\b\r";
   }
   FirstTime_=false;
 
