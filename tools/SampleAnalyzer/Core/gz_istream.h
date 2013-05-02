@@ -55,7 +55,11 @@ class gz_istream : public gz_streambase, public std::istream
   gz_istream( const char* name, int open_mode = std::ios::in)
       : gz_streambase( name, open_mode), std::istream( &buf) 
   {}
-  
+
+  /// Destructor
+  virtual ~gz_istream()
+  {}
+
   /// Read buffer
   gz_streambuf* rdbuf()
   { return gz_streambase::rdbuf(); }
@@ -63,6 +67,10 @@ class gz_istream : public gz_streambase, public std::istream
   /// open a gzip file
   void open( const char* name, int open_mode = std::ios::in)
   { gz_streambase::open( name, open_mode); }
+
+  /// get position of the cursor in the file
+  virtual std::streampos tellg()
+  { return buf.tellg(); }
 
 };
 

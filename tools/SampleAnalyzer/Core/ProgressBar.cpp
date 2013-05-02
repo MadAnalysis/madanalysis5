@@ -26,8 +26,12 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Core/ProgressBar.h"
+#include "SampleAnalyzer/Service/LogStream.h"
 
 using namespace MA5;
+
+
+const std::string ProgressBar::header("        => progress ");
 
 
 // -----------------------------------------------------------------------------
@@ -37,16 +41,27 @@ void ProgressBar::Initialize(UInt_t Nstep,
                              Long64_t MinValue, Long64_t MaxValue)
 {
   /// Initializing internal variables
-  MinValue_=MinValue; MaxValue_=MaxValue; Nstep_=Nstep;
-  Indicator_=0; MuteEnd_=false;
-  if (Nstep==0 || MaxValue_<0 || MinValue_<0) {MuteInit_=true;return;}
+  MinValue_   = MinValue; 
+  MaxValue_   = MaxValue;
+  Nstep_      = Nstep;
+  Indicator_  = 0;
+  MuteEnd_    = false;
+  FirstTime_  = true;
+  //  std::cout << "Indicator_=" << Indicator_ << std::endl;
+
+  /// Problem with arguments
+  if (Nstep_==0 || MaxValue_<0 || MinValue_<0) {MuteInit_=true;return;}
   else MuteInit_=false; 
 
   /// Calcultating the threshold to reach
   Thresholds_.resize(Nstep_+1);
   for (UInt_t i=0;i<=Nstep_;i++) 
-    Thresholds_[i] =   static_cast<Double_t>(MaxValue_-MinValue_) 
-                     / static_cast<Double_t>(Nstep_)*i + MinValue_;
+  {
+    Thresholds_[i] = static_cast<Long64_t>(
+                           static_cast<Double_t>(MaxValue_-MinValue_) / 
+                           static_cast<Double_t>(Nstep_)*i + MinValue_ );
+  }
+  //  std::cout << "eric Indicator_=" << Indicator_ << std::endl;
 
   /// Saving previous stream buffer related to std::cout
   oldstreambuf_ = std::cout.rdbuf();
@@ -55,6 +70,9 @@ void ProgressBar::Initialize(UInt_t Nstep,
   /// Assigning a new stream buffer with spy
   newstreambuf_ = new SpyStreamBuffer(oldstreambuf_);
   std::cout.rdbuf(newstreambuf_);
+
+  //  std::cout << "muf Indicator_=" << Indicator_ << std::endl;
+
 }
 
 
@@ -65,20 +83,21 @@ void ProgressBar::Update(Long64_t value)
 {
   // Veto ?
   if (MuteInit_ || MuteEnd_) return;
-
+  //  std::cout << "Indicator_=" << Indicator_ << std::endl;
+  //  std::cout << "eric value = " << value << " / " << Thresholds_[0] << std::endl;
   // Check if we must increase the progress bar
   if (value<Thresholds_[Indicator_]) return;
 
   // Check if the progress bar reach the end
   if (Indicator_>=Nstep_ || value>MaxValue_ || value<MinValue_)
-  { MuteEnd_=true; return;}
+  { MuteEnd_=true; return; }
 
   // Calculate how many steps to add
   UInt_t startpoint=Indicator_+1;
 
   for (UInt_t nextIndicator=startpoint;nextIndicator<Thresholds_.size();nextIndicator++)
   {
-    if (value<Thresholds_[nextIndicator]) Indicator_++;
+    if (value>Thresholds_[nextIndicator]) Indicator_++;
     else break;
   }
 
@@ -93,7 +112,7 @@ void ProgressBar::Update(Long64_t value)
 // -----------------------------------------------------------------------------
 // Display
 // -----------------------------------------------------------------------------
-void ProgressBar::Display(UInt_t ind) const
+void ProgressBar::Display(UInt_t ind)
 {
   // Preparing string to display
   std::string todisplay(Nstep_+2,' ');
@@ -103,13 +122,18 @@ void ProgressBar::Display(UInt_t ind) const
   todisplay[Nstep_+1]=']'; // overwrite the character '>' if ind=Nstep_
 
   // Go back to the line ? 
-  if (ind!=0)
+  if (ind!=0 && !FirstTime_)
   {
     std::vector<char> last_chars = newstreambuf_->get_last_chars();
     if (last_chars[0] != '\n') std::cout << std::endl;
-    else if (last_chars[1] == ']') std::cout << "\b\r";
+    else if (last_chars[5] == 93 && last_chars[4] == 27 && last_chars[3] == 91 && last_chars[2] == 48 && last_chars[1] == 109) std::cout << "\b\r";
   }
+  FirstTime_=false;
 
+  // Adding header
+  todisplay = header + "\x1b[34m"+ todisplay + "\x1b[0m";
+
+  // Displaying
   std::cout << todisplay << std::endl;
 }
 

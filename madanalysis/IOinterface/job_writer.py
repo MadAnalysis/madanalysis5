@@ -292,6 +292,7 @@ class JobWriter():
         file.write('        if (result2==StatusCode::SKIP) continue;\n')
         file.write('        else if (result2==StatusCode::FAILURE) break;\n')
         file.write('      }\n')
+        file.write('          manager.UpdateProgressBar();\n')
         if self.merging.enable:
             file.write('      analyzer2->Execute(mySample,myEvent);\n')
         if self.clustering.algorithm!="none":

@@ -35,6 +35,11 @@
    #include "SampleAnalyzer/Core/castorstream.h"
 #endif
 
+// ZIP headers
+#ifdef ZIP_USE
+   #include "SampleAnalyzer/Core/gz_istream.h"
+#endif
+
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Reader/ReaderBase.h"
 
@@ -48,6 +53,11 @@ class ReaderTextBase : public ReaderBase
   //                        data members
   // -------------------------------------------------------------
  protected:
+
+#ifdef ZIP_USE
+  /// Streaming in GZ format
+  gz_istream * gzinput_;
+#endif
 
   /// Streaming for reading input
   std::istream*  input_;
@@ -95,8 +105,11 @@ class ReaderTextBase : public ReaderBase
   /// Read line text
   bool ReadLine(std::string& line, bool removeComment=true);
 
-  /// Get the file size
+  /// Get the file size (in octet)
   virtual Long64_t GetFileSize();
+
+  /// Get the position in file (in octet)
+  virtual Long64_t GetPosition();
 
 };
 

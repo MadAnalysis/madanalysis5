@@ -45,6 +45,9 @@ SampleAnalyzer::SampleAnalyzer()
   MA5::TimeService::GetInstance();
   MA5::PDGService::GetInstance();
 
+  // Initializing pointer to 0
+  progressBar_=0;
+
   // Header
   INFO << "    * SampleAnalyzer 2.0 for MadAnalysis 5 - Welcome.";
   INFO << endmsg;
@@ -293,6 +296,12 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
     myReader_->Finalize();
   }  
 
+  // Finalize previous progress bar
+  if (progressBar_!=0)
+  {
+    progressBar_->Finalize();
+  }
+
   // Next file
   file_index_++;
 
@@ -380,6 +389,10 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
 
   // Dump the header block
   if(mySample.mc()!=0) mySample.mc()->printSubtitle();
+
+  // Initialize the progress bar
+  if (progressBar_==0) progressBar_ = new ProgressBar();
+  progressBar_->Initialize(35,0,length);
 
   // Ok !
   return StatusCode::KEEP;
@@ -530,4 +543,12 @@ void SampleAnalyzer::FillSummary(SampleFormat& summary,
     summary.mc()->xsection_error_  = sqrt(summary.mc()->xsection_error_)
                                    / summary.nevents_;
   }
+}
+
+
+
+/// Updating the progress bar
+void SampleAnalyzer::UpdateProgressBar()
+{
+  progressBar_->Update(myReader_->GetPosition());
 }

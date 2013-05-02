@@ -104,9 +104,9 @@ bool ReaderTextBase::Initialize(const std::string& rawfilename,
   {
 #ifdef ZIP_USE
     input_=new gz_istream();
-    gz_istream * myinput = dynamic_cast<gz_istream*>(input_);
-    myinput->open(const_cast<char*>(filename_.c_str()));
-    test=myinput->good();
+    gzinput_ = dynamic_cast<gz_istream*>(input_);
+    gzinput_->open(const_cast<char*>(filename_.c_str()));
+    test=gzinput_->good();
 #endif
   }
 
@@ -150,9 +150,8 @@ bool ReaderTextBase::Finalize()
   else if (compress_)
   {
 #ifdef ZIP_USE
-    gz_istream * myinput = dynamic_cast<gz_istream*>(input_);
-    myinput->close();
-    myinput->clear();
+    gzinput_->close();
+    gzinput_->clear();
 #endif
   }
   else 
@@ -225,4 +224,15 @@ Long64_t ReaderTextBase::GetFileSize()
     input_->seekg(0,std::ios::beg);
   }
   return length;  
+}
+
+
+// -----------------------------------------------------------------------------
+// GetPosition
+// -----------------------------------------------------------------------------
+Long64_t ReaderTextBase::GetPosition()
+{
+  if (input_==0) return 0;
+  if (compress_) return gzinput_->tellg();
+  else  return input_->tellg();
 }

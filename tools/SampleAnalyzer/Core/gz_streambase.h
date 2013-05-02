@@ -92,6 +92,11 @@ class gz_streambuf : public std::streambuf
 
   /// Synchronize input buffer
   virtual int sync();
+
+  /// get position of the cursor in the file
+  virtual std::streampos tellg()
+  { return gzseek(file, 0L, SEEK_CUR);  }
+
 };
 
 

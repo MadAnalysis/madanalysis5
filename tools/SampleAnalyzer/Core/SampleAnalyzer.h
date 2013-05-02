@@ -33,6 +33,7 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Core/StatusCode.h"
+#include "SampleAnalyzer/Core/ProgressBar.h"
 #include "SampleAnalyzer/Core/Configuration.h"
 #include "SampleAnalyzer/Service/LogService.h"
 #include "SampleAnalyzer/DataFormat/EventFormat.h"
@@ -84,6 +85,10 @@ class SampleAnalyzer
 
   /// The only one pointer to the reader
   ReaderBase* myReader_;
+
+  /// Progress bar for event reading
+  ProgressBar* progressBar_;
+
   
  public:
 
@@ -120,12 +125,14 @@ class SampleAnalyzer
   /// Finalization of the SampleAnalyzer
   bool Finalize(std::vector<SampleFormat>& mysamples, EventFormat& myevent);
 
+  /// Updating the progress bar
+  void UpdateProgressBar();
+
  private:
 
   /// Filling the summary format
   void FillSummary(SampleFormat& summary,
                    const std::vector<SampleFormat>& mysamples);
-
 };
 
 }

@@ -58,7 +58,7 @@ namespace MA5
       /// Constructor
       SpyStreamBuffer(std::streambuf* buf) : buf(buf)
       {
-        last_chars.resize(5,traits_type::eof());
+        last_chars.resize(7,traits_type::eof());
         // no buffering, overflow on every char
         setp(0, 0);
       }
@@ -105,8 +105,11 @@ namespace MA5
     /// Mute if the progress bar reachs the end bound
     Bool_t MuteEnd_;
 
+    /// First time
+    Bool_t FirstTime_;
+
     /// Thresholds
-    std::vector<double> Thresholds_;
+    std::vector<Long64_t> Thresholds_;
 
     /// Pointer to the new stream buffer
     SpyStreamBuffer* newstreambuf_;
@@ -114,6 +117,7 @@ namespace MA5
     /// Pointer to the old stream buffer
     std::streambuf* oldstreambuf_;
 
+    static const std::string header;
 
   // -------------------------------------------------------------
   //                       method members
@@ -136,7 +140,7 @@ namespace MA5
     void Reset()
     {
       MinValue_=0; MaxValue_=0; Nstep_=0; Indicator_=0; 
-      MuteInit_=false; MuteEnd_=false;
+      MuteInit_=false; MuteEnd_=false; FirstTime_=true;
       Thresholds_.clear();
     }
 
@@ -151,7 +155,7 @@ namespace MA5
     void Finalize();
 
     /// Displaying the progress bar
-    void Display(UInt_t ind) const;
+    void Display(UInt_t ind);
   };
 }
 
