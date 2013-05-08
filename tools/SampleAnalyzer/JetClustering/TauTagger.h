@@ -28,6 +28,7 @@
 //SampleAnalyser headers
 #include "SampleAnalyzer/JetClustering/TaggerBase.h"
 
+
 namespace MA5
 {
 
@@ -40,16 +41,16 @@ class TauTagger: public TaggerBase
 //---------------------------------------------------------------------------------
 //                                method members
 //---------------------------------------------------------------------------------
-  public :
+ public :
 
     /// Constructor without argument
-    TauTagger () {}
+    TauTagger () { }
 
-    /// Constructor
-    TauTagger (Int_t Method, Double_t DeltaRmax, Bool_t Exclusive):TaggerBase(Method, DeltaRmax, Exclusive) {}
+     /// Constructor
+    TauTagger (Int_t Method, Double_t DeltaRmax, Bool_t Exclusive):TaggerBase(Method, DeltaRmax, Exclusive) { }
 
     /// Destructor
-    ~TauTagger () {}
+    ~TauTagger () { }
 
     /// Matching using dr
     virtual void Method1 (SampleFormat& mySample, EventFormat& myEvent);

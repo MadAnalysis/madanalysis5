@@ -36,6 +36,7 @@
 #include "SampleAnalyzer/DataFormat/RecTauFormat.h"
 #include "SampleAnalyzer/DataFormat/RecJetFormat.h"
 #include "SampleAnalyzer/DataFormat/RecMETFormat.h"
+#include "SampleAnalyzer/DataFormat/RecPhotonFormat.h"
 #include "SampleAnalyzer/Service/LogService.h"
 
 
@@ -45,17 +46,22 @@ namespace MA5
 class LHEReader;
 class LHCOReader;
 class ROOTReader;
+class TauTagger;
 
 class RecEventFormat
 {
   friend class LHEReader;
   friend class LHCOReader;
   friend class ROOTReader;
+  friend class TauTagger;
 
   // -------------------------------------------------------------
   //                        data members
   // -------------------------------------------------------------
  private : 
+
+  /// Collection of reconstructed photons
+  std::vector<RecPhotonFormat> photons_;
 
   /// Collection of reconstructed electrons
   std::vector<RecLeptonFormat> electrons_;
@@ -81,6 +87,14 @@ class RecEventFormat
   /// Reconstructed Scalar sum of hadronic transverse energy
   Float_t THT_;
 
+  /// Monte Carlo taus decaying hadronically
+  std::vector<MCParticleFormat*> MCHadronicTaus_;
+
+  /// Monte Carlo taus decaying into muon
+  std::vector<MCParticleFormat*> MCMuonicTaus_;
+
+  /// Monte Carlo taus decaying into electron
+  std::vector<MCParticleFormat*> MCElectronicTaus_;
 
   // -------------------------------------------------------------
   //                      method members
@@ -94,6 +108,9 @@ class RecEventFormat
   /// Destructor
   ~RecEventFormat()
   { }
+
+  /// Accessor to the photon collection (read-only)
+  const std::vector<RecPhotonFormat>& photons() const {return photons_;}
 
   /// Accessor to the electron collection (read-only)
   const std::vector<RecLeptonFormat>& electrons() const {return electrons_;}
@@ -113,6 +130,21 @@ class RecEventFormat
   /// Accessor to the Missing Hadronic Transverse Energy (read-only)
   const RecParticleFormat& MHT() const {return MHT_;}
 
+  /// Accessor to the Monte Carlo taus decaying hadronically
+  const std::vector<MCParticleFormat*>& MCHadronicTaus() const
+  {return MCHadronicTaus_;}
+
+  /// Accessor to Monte Carlo taus decaying into muon
+  const std::vector<MCParticleFormat*>& MCMuonicTaus() const
+  {return MCMuonicTaus_;}
+
+  /// Accessor to Monte Carlo taus decaying into electron
+  const std::vector<MCParticleFormat*>& MCElectronicTaus() const
+  {return MCElectronicTaus_;}
+
+  /// Accessor to the electron collection
+  std::vector<RecPhotonFormat>& photons() {return photons_;}
+
   /// Accessor to the electron collection
   std::vector<RecLeptonFormat>& electrons() {return electrons_;}
 
@@ -131,9 +163,22 @@ class RecEventFormat
   /// Accessor to the Missing Hadronic Transverse Energy
   RecParticleFormat& MHT() {return MHT_;}
 
+  /// Accessor to the Monte Carlo taus decaying hadronically
+  std::vector<MCParticleFormat*>& MCHadronicTaus()
+  {return MCHadronicTaus_;}
+
+  /// Accessor to Monte Carlo taus decaying into muon
+  std::vector<MCParticleFormat*>& MCMuonicTaus()
+  {return MCMuonicTaus_;}
+
+  /// Accessor to Monte Carlo taus decaying into electron
+  std::vector<MCParticleFormat*>& MCElectronicTaus()
+  {return MCElectronicTaus_;}
+
   /// Clearing all information
   void Reset()
   { 
+    photons_.clear(); 
     electrons_.clear(); 
     muons_.clear(); 
     taus_.clear();
@@ -142,11 +187,21 @@ class RecEventFormat
     MHT_.Reset();
     TET_=0.;
     THT_=0.; 
+    MCHadronicTaus_.clear();
+    MCMuonicTaus_.clear();
+    MCElectronicTaus_.clear();
   }
 
   /// Displaying data member values
   void Print() const
   {
+  }
+
+  /// Giving a new photon entry
+  RecPhotonFormat* GetNewPhoton()
+  {
+    photons_.push_back(RecPhotonFormat());
+    return &photons_.back();
   }
 
   /// Giving a new electron entry

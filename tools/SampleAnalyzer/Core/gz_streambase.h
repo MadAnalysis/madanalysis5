@@ -32,6 +32,10 @@
 // ZLib header
 #include <zlib.h>
 
+// ROOT headers
+#include <Rtypes.h> 
+
+
 namespace MA5
 {
 
@@ -94,8 +98,9 @@ class gz_streambuf : public std::streambuf
   virtual int sync();
 
   /// get position of the cursor in the file
-  virtual std::streampos tellg()
-  { return gzseek(file, 0L, SEEK_CUR);  }
+  virtual Long64_t tellg();
+
+
 
 };
 

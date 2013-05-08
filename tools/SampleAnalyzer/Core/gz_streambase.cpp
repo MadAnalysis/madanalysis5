@@ -29,6 +29,23 @@
 
 using namespace MA5;
 
+
+
+// -----------------------------------------------------------------------------
+// Getting cursor position in file
+// -----------------------------------------------------------------------------
+Long64_t gz_streambuf::tellg()
+{ 
+#if ZLIB_VERNUM >= 0x1240
+  // gzoffset is only available in zlib 1.2.4 or later
+  return pos_type(gzoffset(file));
+#else
+  // return an approximation of file size (only used in progress dialog)
+  return pos_type(gztell(file) / 4);
+#endif
+}
+
+
 // -----------------------------------------------------------------------------
 // Opening a gzip file
 // -----------------------------------------------------------------------------
@@ -50,7 +67,7 @@ gz_streambuf* gz_streambuf::open( const char* name, int open_mode)
 
   *fmodeptr++ = 'b';
   *fmodeptr = '\0';
-
+  
   file = gzopen( name, fmode);
   if (file == 0) return (gz_streambuf*)0;
   opened = 1;

@@ -29,25 +29,86 @@ void TauTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
 {
   std::vector<RecJetFormat*> Candidates;
 
+  std::vector<MCParticleFormat*> MCtaus;
+
   // loop on the particles searching for tau
   for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
   {
+    // Removing initial states
     if (PHYSICS->IsInitialState(myEvent.mc()->particles()[i])) continue;
-    if (fabs(myEvent.mc()->particles()[i].pdgid())!=15)        continue;
-    if (!IsLast(&myEvent.mc()->particles()[i], myEvent))       continue;
 
+    // Removing final states
+    if (PHYSICS->IsFinalState(myEvent.mc()->particles()[i])) continue;
+
+    // Keeping only taus
+    if (fabs(myEvent.mc()->particles()[i].pdgid())!=15) continue;
+
+    // Keeping the last taus in the decay chain
+    if (!IsLast(&myEvent.mc()->particles()[i], myEvent)) continue;
+
+    // Removing taus decaying to leptons
+    bool leptonic=true;
+    bool muonic=false;
+    bool electronic=false;
+    for (unsigned int j=0;j<myEvent.mc()->particles()[i].Daughters().size();j++)
+    {
+      unsigned int pdgid = 
+        std::abs(myEvent.mc()->particles()[i].Daughters()[j]->pdgid());
+      if (pdgid==13) muonic=true;
+      else if (pdgid==11) electronic=true;
+      if (pdgid!=22 && !(pdgid>=11 && pdgid<=18)) {leptonic=false;}
+    }
+    if (leptonic && muonic)
+    {
+      bool found=false;
+      for (unsigned int j=0;j<myEvent.rec()->MCMuonicTaus_.size();j++)
+      {
+        if (myEvent.rec()->MCMuonicTaus_[j]==&(myEvent.mc()->particles()[i])) 
+        {found=true; break;}
+      }
+      if (!found) 
+        myEvent.rec()->MCMuonicTaus_.push_back(&(myEvent.mc()->particles()[i]));
+    }
+    else if (leptonic && electronic)
+    {
+      bool found=false;
+      for (unsigned int j=0;j<myEvent.rec()->MCElectronicTaus_.size();j++)
+      {
+        if (myEvent.rec()->MCElectronicTaus_[j]==&(myEvent.mc()->particles()[i])) 
+        {found=true; break;}
+      }
+      if (!found) 
+        myEvent.rec()->MCElectronicTaus_.push_back(&(myEvent.mc()->particles()[i]));
+    }
+    else if (!leptonic)
+    {
+      bool found=false;
+      for (unsigned int j=0;j<myEvent.rec()->MCHadronicTaus_.size();j++)
+      {
+        if (myEvent.rec()->MCHadronicTaus_[j]==&(myEvent.mc()->particles()[i])) 
+        {found=true; break;}
+      }
+      if (!found) 
+        myEvent.rec()->MCHadronicTaus_.push_back(&(myEvent.mc()->particles()[i]));
+
+    }
+  }
+
+  // Matching MCtaus and RECtaus
+  for (unsigned int i=0;i<myEvent.rec()->MCHadronicTaus_.size();i++)
+  {
     Bool_t tag = false;
     Double_t DeltaRmax = DeltaRmax_;
 
     // loop on the jets
     for (unsigned int j=0;j<myEvent.rec()->jets().size();j++)
     {
-      if (myEvent.rec()->jets()[j].ntracks()!=1 && 
-          myEvent.rec()->jets()[j].ntracks()!=3) continue;
+      //      if (myEvent.rec()->jets()[j].ntracks()!=1 && 
+      //    myEvent.rec()->jets()[j].ntracks()!=3) continue;
 
       // Calculating Delta R
       Float_t DeltaR = 
-         myEvent.mc()->particles()[i].dr(myEvent.rec()->jets()[j]);
+         myEvent.rec()->MCHadronicTaus_[i]->dr(myEvent.rec()->jets()[j]);
 
       if (DeltaR <= DeltaRmax)
       {
@@ -65,7 +126,7 @@ void TauTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
 
     for (unsigned int j=Candidates.size();j>0;j--)
     {
-      Candidates[j-1]->mc_ = &myEvent.mc()->particles()[i];
+      Candidates[j-1]->mc_ = myEvent.rec()->MCHadronicTaus_[i];
       RecTauFormat* myTau = myEvent.rec()->GetNewTau();
       Jet2Tau(Candidates[j-1], myTau, myEvent);
       myEvent.rec()->jets().erase((std::vector<RecJetFormat>::iterator) Candidates[j-1]);

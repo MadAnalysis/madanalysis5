@@ -141,47 +141,113 @@ void LHCOReader::FillEventInitLine(const std::string& line, EventFormat& myEvent
 void LHCOReader::FillEventParticleLine(const std::string& line, EventFormat& myEvent)
 {
   std::stringstream str;
+
+  // 1rst column : line number
   std::string firstchar;
-  std::string muf;
   str << line;
   str >> firstchar;
 
-  Double_t                tmp;      // temporary variable to fill in LorentzVector
-  Double_t                eta;
-  Double_t                phi;      // to define the MET
-  Double_t                pt;
-  Double_t                mass;
+  Double_t  tmp;  // temporary variable to fill in LorentzVector
+  Double_t  eta;
+  Double_t  phi;  // to define the MET
+  Double_t  pt;
+  Double_t  mass;
 
+  // 2nd column : object type
+  std::string muf;
   str >> muf;
+
+  // -------------------------------------------
+  //                  PHOTON
+  // -------------------------------------------
   if (muf=="0")
   {
+    RecPhotonFormat * photon = myEvent.rec()->GetNewPhoton();
 
+    // 3rd column
+    str >> eta; 
+
+    // 4th column
+    str >> phi; 
+
+    // 5th column
+    str >> pt; 
+
+    // 6th column
+    str >> mass;
+    photon->momentum_.SetPtEtaPhiM(pt,eta,phi,mass);
+
+    // 7th column 
+    str >> tmp; 
+
+    // 8th column
+    str >> tmp;
+
+    // 9th column
+    str >> photon->HEoverEE_;
   }
+
+  // -------------------------------------------
+  //                  ELECTRON
+  // -------------------------------------------
   else if (muf=="1")
   {
     RecLeptonFormat * elec = myEvent.rec()->GetNewElectron();
+
+    // 3rd column
     str >> eta; 
+
+    // 4th column
     str >> phi; 
+
+    // 5th column
     str >> pt; 
-    str >> mass; elec->momentum_.SetPtEtaPhiM(pt,eta,phi,mass);
+
+    // 6th column
+    str >> mass; 
+    elec->momentum_.SetPtEtaPhiM(pt,eta,phi,mass);
+
+    // 7th column 
     str >> tmp; 
     if(tmp<0) elec->charge_ = false;
     else elec->charge_= true ;
-    str << tmp;
+
+    // 8th column
+    str >> tmp;
+
+    // 9th column
     str >> elec->HEoverEE_;
-      
   }
+
+  // -------------------------------------------
+  //                   MUON
+  // -------------------------------------------
   else if (muf=="2")
   {
     RecLeptonFormat * muon = myEvent.rec()->GetNewMuon();
+
+    // 3rd column
     str >> eta; 
+
+    // 4th column
     str >> phi; 
+
+    // 5th column
     str >> pt; 
-    str >> mass; muon->momentum_.SetPtEtaPhiM(pt,eta,phi,mass);
+
+    // 6th column
+    str >> mass; 
+    muon->momentum_.SetPtEtaPhiM(pt,eta,phi,mass);
+
+    // 7th column : electric charge
     str >> tmp; 
     if(tmp<0) muon->charge_ = false;
     else muon->charge_= true ;
+
+    // 8th column
     str >> tmp;
+
+    // 9th column : isolation
     str >> tmp;
     muon->sumPT_isol_=std::floor(tmp);
     Float_t ET_PT=tmp-muon->sumPT_isol_;
@@ -198,42 +264,93 @@ void LHCOReader::FillEventParticleLine(const std::string& line, EventFormat& myE
     if (test) muon->sumET_isol_=std::floor(ET_PT)*muon->sumPT_isol_;
     else muon->sumET_isol_=0;
   }
+
+  // -------------------------------------------
+  //                   TAU
+  // -------------------------------------------
   else if (muf=="3")
   {
     RecTauFormat * tau = myEvent.rec()->GetNewTau();
+
+    // 3rd column
     str >> eta; 
+
+    // 4th column
     str >> phi; 
+
+    // 5th column
     str >> pt; 
-    str >> mass; tau->momentum_.SetPtEtaPhiM(pt,eta,phi,mass);
+
+    // 6th column
+    str >> mass; 
+    tau->momentum_.SetPtEtaPhiM(pt,eta,phi,mass);
+
+    // 7th column 
     str >> tmp; 
     if(tmp<0) tau->charge_ = false;
     else tau->charge_= true ;
+
+    // 8th column
     str >> tmp;
-    str >> tmp; tau->HEoverEE_=tmp;
+
+    // 9th column
+    str >> tmp; 
+    tau->HEoverEE_=tmp;
   }
+
+  // -------------------------------------------
+  //                    JET
+  // -------------------------------------------
   else if (muf=="4")
   {
     RecJetFormat * jet = myEvent.rec()->GetNewJet(); 
+
+    // 3rd column : eta
     str >> eta; 
+
+    // 4th column
     str >> phi; 
+
+    // 5th column
     str >> pt; 
-    str >> mass; jet->momentum_.SetPtEtaPhiM(pt,eta,phi,mass);
-    str >> tmp; jet->ntracks_=static_cast<unsigned short>(tmp); 
+
+    // 6th column
+    str >> mass; 
+    jet->momentum_.SetPtEtaPhiM(pt,eta,phi,mass);
+
+    // 7th column : ntracks
+    str >> tmp; 
+    jet->ntracks_=static_cast<unsigned short>(tmp); 
+
+    // 8th column : btag
     str >> tmp;
     if ( tmp == 1. || tmp ==2.) jet->btag_=true;
     else jet->btag_ =false;
     str >> jet->HEoverEE_;
   }
+
+  // -------------------------------------------
+  //                    MET
+  // -------------------------------------------
   else if (muf=="6")
   {
+    // 3rd column : eta
     str >> tmp; 
+
+    // 4th column : phi
     str >> phi; 
+
+    // 5th column : pt
     str >> tmp;
     myEvent.rec()->MET_.momentum_.SetPxPyPzE(tmp*cos(phi),
                                              tmp*sin(phi),
                                              0.,
                                              tmp);
   }
+
+  // -------------------------------------------
+  //                  other ...
+  // -------------------------------------------
   else if (firstchar!="0")
   {
     WARNING << "Unknown type of object : " << muf << endmsg;
