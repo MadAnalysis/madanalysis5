@@ -55,6 +55,9 @@ namespace MA5
     /// Is the jet clustering exclusive ?
     Bool_t Exclusive_;
 
+    /// Exclusive id for tau-elec-jet
+    Bool_t ExclusiveId_;
+
     /// Tagger
     bTagger*    myBtagger_;
     cTagger*    myCtagger_;
@@ -70,8 +73,9 @@ namespace MA5
     JetClustererBase () 
     {
       // Initializing common parameters
-      Ptmin_     = 0.;
-      Exclusive_ = false;
+      Ptmin_       = 0.;
+      Exclusive_   = false;
+      ExclusiveId_ = false;
 
       // Initializing tagger
       myBtagger_   = 0;
@@ -134,22 +138,33 @@ namespace MA5
     /// 
     void SettingsCommonPart(const std::string& key, const std::string& value)
     {
-      // b-tagging
-      if (key.find("btagger:")==0)
+      // exclusive_id
+      if (key=="exclusive_id")
       {
-        myBtagger_->SetParameter(key.substr(8),value);
+        int tmp=0;
+        std::stringstream str;
+        str << value;
+        str >> tmp;
+        if (tmp==1) ExclusiveId_=true;
+        else if (tmp==0) ExclusiveId_=false;
+        else
+        {
+          WARNING << "'exclusive_id' must be equal to 0 or 1. "
+                  << "Using default value 'exclusive_id' = " 
+                  << ExclusiveId_ << endmsg;
+        }
       }
 
-      // c-tagging
-      else if (key.find("ctagger:")==0)
+      // b-tagging
+      else if (key.find("bjet_id.")==0)
       {
-        myCtagger_->SetParameter(key.substr(8),value);
+        myBtagger_->SetParameter(key.substr(8),value,"bjet_id.");
       }
 
       // tau-tagging
-      else if (key.find("tautagger:")==0)
+      else if (key.find("tau_id.")==0)
       {
-        myTAUtagger_->SetParameter(key.substr(10),value);
+        myTAUtagger_->SetParameter(key.substr(7),value,"tau_id.");
       }
 
       // Other

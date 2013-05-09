@@ -32,6 +32,9 @@
 #include "SampleAnalyzer/Service/Physics.h"
 #include "SampleAnalyzer/Service/PDGService.h"
 
+// ROOT headers
+#include <TRandom.h>
+
 // STL headers
 #include <algorithm>
 
@@ -54,6 +57,12 @@ class TaggerBase
     /// Is the tagging exclusive ?
     Bool_t Exclusive_;
 
+    /// Efficiency
+    Float_t Efficiency_;
+
+    /// Applying efficiency
+    Bool_t doEfficiency_;
+
 //---------------------------------------------------------------------------------
 //                                method members
 //---------------------------------------------------------------------------------
@@ -61,11 +70,13 @@ class TaggerBase
 
     /// Constructor without argument
     TaggerBase() 
-    {Method_=1; DeltaRmax_=0.5; Exclusive_=false;}
-
-    /// Constructor
-    TaggerBase(Int_t Method, Double_t DeltaRmax, Bool_t Exclusive) 
-    {Method_=Method; DeltaRmax_=DeltaRmax; Exclusive_=Exclusive;}
+    {
+      Method_=1; 
+      DeltaRmax_=0.5; 
+      Exclusive_=false;
+      Efficiency_=1.;
+      doEfficiency_=false;
+    }
 
     /// Destructor
     ~TaggerBase()
@@ -91,7 +102,19 @@ class TaggerBase
     Bool_t IsLast(MCParticleFormat* part, EventFormat& myEvent);
 
     /// Set a parameter
-    virtual void SetParameter(const std::string& key, const std::string& value);
+    virtual void SetParameter(const std::string& key, const std::string& value, std::string header="");
+
+   /// Function for identification
+   Bool_t IsIdentified() const
+   {
+     // no efficiency = default
+     if (!doEfficiency_) return true;
+
+     // applying efficiency
+     if (gRandom->Rndm() < Efficiency_) return true;
+     else return false;
+   }
+
 };
 
 }

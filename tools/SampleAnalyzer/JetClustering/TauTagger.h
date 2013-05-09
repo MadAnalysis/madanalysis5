@@ -39,11 +39,12 @@ class TauTagger: public TaggerBase
 //---------------------------------------------------------------------------------
  protected :
 
-  /// Tau-Identification efficiency 
-  Float_t Efficiency_;
+  /// Mis-identification efficiency
+  Float_t misid_ljet_;
 
-  /// Apply efficiency to tau ?
-  Bool_t doEfficiency_;
+  /// Apply misefficiency
+  Bool_t doMisefficiency_;
+
 
 //---------------------------------------------------------------------------------
 //                                method members
@@ -53,14 +54,9 @@ class TauTagger: public TaggerBase
     /// Constructor without argument
     TauTagger () 
     {
-      doEfficiency_=false;
-      Efficiency_=1.; 
+      misid_ljet_=0.0;
+      doMisefficiency_=false;
     }
-
-     /// Constructor
-    TauTagger (Int_t Method, Double_t DeltaRmax, Bool_t Exclusive) : 
-              TaggerBase(Method, DeltaRmax, Exclusive) 
-    { Efficiency_=0.; doEfficiency_=false; }
 
     /// Destructor
     ~TauTagger () { }
@@ -85,11 +81,8 @@ class TauTagger: public TaggerBase
     /// Fill the Tau format with the information from the jet format
     void Jet2Tau (RecJetFormat* myJet, RecTauFormat* myTau, EventFormat& myEvent);
 
-    /// Apply identification efficiency to tau
-    Bool_t IsTauIdentified() const;
-
     /// Set a parameter
-    virtual void SetParameter(const std::string& key, const std::string& value);
+    virtual void SetParameter(const std::string& key, const std::string& value,std::string header);
 
 };
 

@@ -44,9 +44,6 @@ class cTagger:public TaggerBase
     /// Constructor without argument
     cTagger() {}
 
-    /// Constructor
-    cTagger(Int_t Method, Double_t DeltaRmax, Bool_t Exclusive): TaggerBase(Method, DeltaRmax, Exclusive) {}
-
     /// Destructor
     ~cTagger () {}
 

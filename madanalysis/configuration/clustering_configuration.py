@@ -85,7 +85,10 @@ class ClusteringConfiguration:
     def SampleAnalyzerConfigString(self):
         if self.algorithm!="none":
             mydict = {}
-            mydict['exclusive_id'] = str(self.exclusive_id)
+            if self.exclusive_id:
+                mydict['exclusive_id'] = '1'
+            else:
+                mydict['exclusive_id'] = '0'
             mydict.update(self.clustering.SampleAnalyzerConfigString())
             mydict.update(self.beauty.SampleAnalyzerConfigString())
             mydict.update(self.tau.SampleAnalyzerConfigString())

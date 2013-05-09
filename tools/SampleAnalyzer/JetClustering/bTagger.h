@@ -36,19 +36,33 @@ class bTagger:public TaggerBase
 //                                 data members
 //---------------------------------------------------------------------------------
 
+ protected :
+
+  /// Mis-identification efficiency
+  Float_t misid_ljet_;
+
+  /// Mis-identification efficiency
+  Float_t misid_cjet_;
+
+  /// Apply misefficiency
+  Bool_t doMisefficiency_;
+
+
 //---------------------------------------------------------------------------------
 //                                method members
 //---------------------------------------------------------------------------------
   public :
 
     /// Constructor without argument
-    bTagger () {}
-
-    /// Constructor
-    bTagger (Int_t Method, Double_t DeltaRmax, Bool_t Exclusive): TaggerBase(Method, DeltaRmax, Exclusive) {}
+    bTagger() 
+    {
+      misid_cjet_=0.0;
+      misid_ljet_=0.0;
+      doMisefficiency_=false;
+    }
 
     /// Destructor
-    ~bTagger () {}
+    ~bTagger() {}
 
     /// Matching using dr
     virtual void Method1 (SampleFormat& mySample, EventFormat& myEvent);
@@ -69,6 +83,9 @@ class bTagger:public TaggerBase
 
     /// Is this B hadron the last in the decay chain ?
     Bool_t IsLastBHadron(MCParticleFormat* part, EventFormat& myEvent);
+
+    /// Set a parameter
+    virtual void SetParameter(const std::string& key, const std::string& value,std::string header);
 
 };
 

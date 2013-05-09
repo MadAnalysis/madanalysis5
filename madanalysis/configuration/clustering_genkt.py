@@ -81,7 +81,7 @@ class ClusteringGenKt():
         if self.exclusive:
             mydict['exclusive'] = '1'
         else:
-            mydict['inclusive'] = '0'
+            mydict['exclusive'] = '0'
         return mydict
 
         

@@ -234,3 +234,57 @@ Bool_t bTagger::IsLastBHadron(MCParticleFormat* part, EventFormat& myEvent)
   return true;
 }
 
+
+void bTagger::SetParameter(const std::string& key, 
+                           const std::string& value, 
+                           std::string header)
+{
+  // miss-id efficiency
+  if (key=="misid_ljet")
+  {
+    Float_t tmp=0;
+    std::stringstream str;
+    str << value;
+    str >> tmp;
+    if (tmp<0) 
+    {
+      WARNING << "'misid_ljet' efficiency must be a positive value. "
+              << "Using the default value = " 
+              << misid_ljet_ << endmsg;
+    }
+    else if (tmp>1)
+    {
+      WARNING << "'misid_ljet' efficiency cannot be greater than 1. "
+              << "Using the default value = " 
+              << misid_ljet_ << endmsg;
+    }
+    else misid_ljet_=tmp;
+    if (misid_ljet_!=0.0) doMisefficiency_=true;
+  }
+
+  // miss-id efficiency
+  else if (key=="misid_cjet")
+  {
+    Float_t tmp=0;
+    std::stringstream str;
+    str << value;
+    str >> tmp;
+    if (tmp<0) 
+    {
+      WARNING << "'misid_cjet' efficiency must be a positive value. "
+              << "Using the default value = " 
+              << misid_cjet_ << endmsg;
+    }
+    else if (tmp>1)
+    {
+      WARNING << "'misid_cjet' efficiency cannot be greater than 1. "
+              << "Using the default value = " 
+              << misid_cjet_ << endmsg;
+    }
+    else misid_cjet_=tmp;
+    if (misid_cjet_!=0.0) doMisefficiency_=true;
+  }
+
+  // Other
+  else TaggerBase::SetParameter(key,value,header);
+}

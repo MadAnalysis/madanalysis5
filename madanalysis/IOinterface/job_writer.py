@@ -259,7 +259,8 @@ class JobWriter():
             file.write('  //Getting pointer to the clusterer\n')
             file.write('  std::map<std::string, std::string> parametersC1;\n')
             parameters = self.clustering.SampleAnalyzerConfigString()
-            for k,v in parameters.iteritems():
+            for k,v in sorted(parameters.iteritems(),\
+                              key=lambda (k,v): (k,v)):
                 file.write('  parametersC1["'+k+'"]="'+v+'";\n')
             file.write('  JetClustererBase* cluster1 = \n')
             file.write('      manager.InitializeJetClusterer("'+self.clustering.algorithm+'",parametersC1);\n')

@@ -35,7 +35,9 @@ Bool_t TaggerBase::IsLast(MCParticleFormat* part, EventFormat& myEvent)
 }
 
 
-void TaggerBase::SetParameter(const std::string& key, const std::string& value)
+void TaggerBase::SetParameter(const std::string& key, 
+                              const std::string& value,
+                              std::string header)
 {
   // Method
   if (key=="method")
@@ -50,7 +52,7 @@ void TaggerBase::SetParameter(const std::string& key, const std::string& value)
   }
 
   // deltaR
-  else if (key=="deltar")
+  else if (key=="matching_dr")
   {
     Float_t tmp=0;
     std::stringstream str;
@@ -73,7 +75,30 @@ void TaggerBase::SetParameter(const std::string& key, const std::string& value)
     else Exclusive_=(tmp==1);
   }
 
+  // efficiency
+  else if (key=="efficiency")
+  {
+    Float_t tmp=0;
+    std::stringstream str;
+    str << value;
+    str >> tmp;
+    if (tmp<0)
+    {
+      WARNING << "Efficiency must be a positive value. "
+              << "Using the default value = " 
+              << Efficiency_ << endmsg;
+    }
+    else if (tmp>1) 
+    {
+      WARNING << "Efficiency cannot be greater than 1. "
+              << "Using the default value = " 
+              << Efficiency_ << endmsg;
+    }
+    else Efficiency_=tmp;
+    if (Efficiency_!=1) doEfficiency_=true; else doEfficiency_=false;
+  }
+
   // Other
-  else WARNING << "Parameter " << key	<< " unknown." << endmsg;
+  else WARNING << "Parameter " << header << key	<< " unknown." << endmsg;
 
 }

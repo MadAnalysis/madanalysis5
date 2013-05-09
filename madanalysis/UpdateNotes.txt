@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+28   dev.113 (2013/05/09) econte:  implementing new clustering parameters into C++ code + tau 
+                                   efficiency 
+
 27   dev.112 (2013/05/09) econte:  adding new parameters for clustering in the Python interface 
 
 26   dev.111 (2013/05/08) econte:  fixing all problems with taus + adding photons to LHCO 
