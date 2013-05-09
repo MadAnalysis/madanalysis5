@@ -37,6 +37,13 @@ class TauTagger: public TaggerBase
 //---------------------------------------------------------------------------------
 //                                 data members
 //---------------------------------------------------------------------------------
+ protected :
+
+  /// Tau-Identification efficiency 
+  Float_t Efficiency_;
+
+  /// Apply efficiency to tau ?
+  Bool_t doEfficiency_;
 
 //---------------------------------------------------------------------------------
 //                                method members
@@ -44,10 +51,16 @@ class TauTagger: public TaggerBase
  public :
 
     /// Constructor without argument
-    TauTagger () { }
+    TauTagger () 
+    {
+      doEfficiency_=false;
+      Efficiency_=1.; 
+    }
 
      /// Constructor
-    TauTagger (Int_t Method, Double_t DeltaRmax, Bool_t Exclusive):TaggerBase(Method, DeltaRmax, Exclusive) { }
+    TauTagger (Int_t Method, Double_t DeltaRmax, Bool_t Exclusive) : 
+              TaggerBase(Method, DeltaRmax, Exclusive) 
+    { Efficiency_=0.; doEfficiency_=false; }
 
     /// Destructor
     ~TauTagger () { }
@@ -71,6 +84,12 @@ class TauTagger: public TaggerBase
 
     /// Fill the Tau format with the information from the jet format
     void Jet2Tau (RecJetFormat* myJet, RecTauFormat* myTau, EventFormat& myEvent);
+
+    /// Apply identification efficiency to tau
+    Bool_t IsTauIdentified() const;
+
+    /// Set a parameter
+    virtual void SetParameter(const std::string& key, const std::string& value);
 
 };
 

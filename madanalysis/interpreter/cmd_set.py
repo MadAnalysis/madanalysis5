@@ -87,7 +87,14 @@ class CmdSet(CmdBase.CmdBase):
             return
 
         # Looking for one dot in the name
-        objs = args[0].split('.')
+        object = args[0]
+        object = object.lower()
+        object = object.replace('clustering.bjet_id.','clustering.bjet_idX')
+        object = object.replace('clustering.tau_id.','clustering.tau_idX')
+        objs = object.split('.')
+        for i in range(len(objs)):
+            objs[i] = objs[i].replace('X','.')
+
         if len(objs)==2 and objs[0].lower()=='main':
             self.main.user_SetParameter(objs[1],args[2])
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='isolation':
@@ -301,20 +308,26 @@ class CmdSet(CmdBase.CmdBase):
             return []
 
         # Splitting
-        object = args[1].split('.')
+        object = args[1]
+        object = object.lower()
+        object = object.replace('clustering.bjet_id.','clustering.bjet_idX')
+        object = object.replace('clustering.tau_id.','clustering.tau_idX')
+        objs = object.split('.')
+        for i in range(len(objs)):
+            objs[i] = objs[i].replace('X','.')
         
-        if len(object)==1:
-            return self.complete_name(text,object[0],None,False)
-        elif len(object)==2:
+        if len(objs)==1:
+            return self.complete_name(text,objs[0],None,False)
+        elif len(objs)==2:
             withValue = False
             if nargs==4:
                 withValue=True
-            return self.complete_name(text,object[0],object[1],withValue)
-        elif len(object)==3:
+            return self.complete_name(text,objs[0],objs[1],withValue)
+        elif len(objs)==3:
             withValue = False
             if nargs==4:
                 withValue=True
-            return self.complete_name2(text,object[0],object[1],object[2],withValue) 
+            return self.complete_name2(text,objs[0],objs[1],objs[2],withValue) 
         else:
             return []
         

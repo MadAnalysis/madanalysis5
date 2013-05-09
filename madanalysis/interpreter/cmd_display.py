@@ -34,7 +34,12 @@ class CmdDisplay(CmdBase.CmdBase):
     def do_other(self,object):
 
         # Looking for one dot in the name
+        object = object.lower()
+        object = object.replace('clustering.bjet_id.','clustering.bjet_idX')
+        object = object.replace('clustering.tau_id.','clustering.tau_idX')
         objs = object.split('.')
+        for i in range(len(objs)):
+            objs[i] = objs[i].replace('X','.')
         if len(objs)>3 or len(objs)==0:
             logging.error("syntax error with the command 'display'.")
             self.help()
@@ -161,14 +166,20 @@ class CmdDisplay(CmdBase.CmdBase):
             return self.complete_name(text,None,None)
 
         # Splitting
-        object = args[1].split('.')
+        object = args[1]
+        object = object.lower()
+        object = object.replace('clustering.bjet_id.','clustering.bjet_idX')
+        object = object.replace('clustering.tau_id.','clustering.tau_idX')
+        objs = object.split('.')
+        for i in range(len(objs)):
+            objs[i] = objs[i].replace('X','.')
 
-        if len(object)==1:
-            return self.complete_name(text,object[0],None)
-        elif len(object)==2:
-            return self.complete_name(text,object[0],object[1])
-        elif len(object)==3:
-            return self.complete_name(text,object[0],object[1])
+        if len(objs)==1:
+            return self.complete_name(text,objs[0],None)
+        elif len(objs)==2:
+            return self.complete_name(text,objs[0],objs[1])
+        elif len(objs)==3:
+            return self.complete_name(text,objs[0],objs[1])
         else:
             return []
         

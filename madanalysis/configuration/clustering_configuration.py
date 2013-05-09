@@ -30,7 +30,9 @@ from madanalysis.configuration.clustering_gridjet     import ClusteringGridJet
 from madanalysis.configuration.clustering_cdfmidpoint import ClusteringCDFMidPoint
 from madanalysis.configuration.clustering_cdfjetclu   import ClusteringCDFJetClu
 from madanalysis.configuration.clustering_siscone     import ClusteringSisCone
-from madanalysis.enumeration.ma5_running_type           import MA5RunningType
+from madanalysis.configuration.beauty_identification  import BeautyIdentification
+from madanalysis.configuration.tau_identification     import TauIdentification
+from madanalysis.enumeration.ma5_running_type         import MA5RunningType
 import logging
 
 class ClusteringConfiguration:
@@ -39,30 +41,55 @@ class ClusteringConfiguration:
                                      "cambridge","gridjet",\
                                      "siscone",\
                                      "cdfjetclu", "cdfmidpoint",\
-                                     "none"] }
+                                     "none"],
+                      "exclusive_id" : ["true","false"]
+                    }
 
     def __init__(self):
-        self.clustering = 0
-        self.algorithm="none"
+        self.clustering   = 0
+        self.algorithm    = "none"
+        self.beauty       = BeautyIdentification()
+        self.tau          = TauIdentification()
+        self.exclusive_id = False
 
         
     def Display(self):
         self.user_DisplayParameter("algorithm")
         if self.algorithm!="none":
             self.clustering.Display()
+            self.user_DisplayParameter("exclusive_id")
+            self.beauty.Display()
+            self.tau.Display()
 
-        
+
     def user_DisplayParameter(self,parameter):
         if parameter=="algorithm":
             logging.info(" clustering algorithm : "+self.algorithm)
-        else:
-            if self.algorithm!="none":
+            return
+        if self.algorithm!="none":
+            if parameter=="exclusive_id":
+                word=""
+                if self.exclusive_id:
+                    word="true"
+                else:
+                    word="false"
+                logging.info("  + exclusive identification = "+word)
+            elif parameter.startswith('bjet_id.'):
+                self.beauty.user_DisplayParameter(parameter)
+            elif parameter.startswith('tau_id.'):
+                self.tau.user_DisplayParameter(parameter)
+            else:
                 self.clustering.user_DisplayParameter(parameter)
 
 
     def SampleAnalyzerConfigString(self):
         if self.algorithm!="none":
-            return self.clustering.SampleAnalyzerConfigString()
+            mydict = {}
+            mydict['exclusive_id'] = str(self.exclusive_id)
+            mydict.update(self.clustering.SampleAnalyzerConfigString())
+            mydict.update(self.beauty.SampleAnalyzerConfigString())
+            mydict.update(self.tau.SampleAnalyzerConfigString())
+            return mydict
         else:
             return {}
 
@@ -150,28 +177,63 @@ class ClusteringConfiguration:
                 logging.error("algorithm called '"+value+"' is not found.")
             return    
 
+        # other rejection if no algo specified
+        if self.algorithm=="none":
+            logging.error("'clustering' has no parameter called '"+parameter+"'")
+            return
+
+        # exclusive_id
+        if parameter=="exclusive_id":
+            if value=="true":
+                self.exclusive_id=True
+            elif value=="false":
+                self.exclusive_id=False
+            else:
+                logging.error("The allowed values for 'exclusive_id' " +\
+                              "parameter are 'true' or 'false'.")
+            return    
+
         # other
-        if self.algorithm!="none":
+        elif parameter.startswith('bjet_id.'):
+            return self.beauty.user_SetParameter(parameter,value)
+        elif parameter.startswith('tau_id.'):
+            return self.tau.user_SetParameter(parameter,value)
+        else:
             return self.clustering.user_SetParameter(parameter,value)
 
         
     def user_GetParameters(self):
-        table = ClusteringConfiguration.userVariables.keys()
         if self.algorithm!="none":
+            table = ClusteringConfiguration.userVariables.keys()
             table.extend(self.clustering.user_GetParameters())
+            table.extend(self.beauty.user_GetParameters())
+            table.extend(self.tau.user_GetParameters())
+        else:
+            table = ["algorithm"]
         return table
 
 
     def user_GetValues(self,variable):
         table = []
-        try:
-            table.extend(ClusteringConfiguration.userVariables[variable])
-        except:
-            pass
         if self.algorithm!="none":
+            try:
+                table.extend(ClusteringConfiguration.userVariables[variable])
+            except:
+                pass
             try:
                 table.extend(self.clustering.user_GetValues(variable))
             except:
                 pass
+            try:
+                table.extend(self.beauty.user_GetValues(variable))
+            except:
+                pass
+            try:
+                table.extend(self.tau.user_GetValues(variable))
+            except:
+                pass
+        else:
+            if variable=="algorithm":
+                table.extend(ClusteringConfiguration.userVariables["algorithm"])
         return table
         

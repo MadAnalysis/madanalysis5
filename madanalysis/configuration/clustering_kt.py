@@ -52,7 +52,7 @@ class ClusteringKt():
             msg="false"
             if self.exclusive:
                 msg="true"
-            logging.info("  + exclusive algo = "+str(self.exclusive))
+            logging.info("  + exclusive algo = "+msg)
         elif parameter=="ptmin":
             logging.info("  + PT min (GeV) for produced jets = "+str(self.ptmin))
         else:

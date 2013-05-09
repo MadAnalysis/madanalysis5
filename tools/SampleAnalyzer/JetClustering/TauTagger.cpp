@@ -23,7 +23,19 @@
 
 
 #include "SampleAnalyzer/JetClustering/TauTagger.h"
+#include <TRandom.h>
 using namespace MA5;
+
+
+Bool_t TauTagger::IsTauIdentified() const
+{
+  // no efficiency = default
+  if (!doEfficiency_) return true;
+
+  // applying efficiency
+  if (gRandom->Rndm() < Efficiency_) return true;
+  else return false;
+}
 
 void TauTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
 {
@@ -126,6 +138,7 @@ void TauTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
 
     for (unsigned int j=Candidates.size();j>0;j--)
     {
+      if (!IsTauIdentified()) continue;
       Candidates[j-1]->mc_ = myEvent.rec()->MCHadronicTaus_[i];
       RecTauFormat* myTau = myEvent.rec()->GetNewTau();
       Jet2Tau(Candidates[j-1], myTau, myEvent);
@@ -304,6 +317,7 @@ void TauTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
   Candidates.clear();
 }
 
+
 void TauTagger::Jet2Tau (RecJetFormat* myJet, RecTauFormat* myTau, EventFormat& myEvent)
 {
   myTau->setMomentum(myJet->momentum());
@@ -320,4 +334,31 @@ void TauTagger::Jet2Tau (RecJetFormat* myJet, RecTauFormat* myTau, EventFormat& 
 
   if (charge == 3) myTau->charge_ = true;
   else if (charge == -3) myTau->charge_ = false;
+}
+
+
+void TauTagger::SetParameter(const std::string& key, const std::string& value)
+{
+  // efficiency
+  if (key=="efficiency")
+  {
+    Float_t tmp=0;
+    std::stringstream str;
+    str << value;
+    str >> tmp;
+    if (tmp<0) 
+    {
+      WARNING << "Efficiency must be a positive value. Using the default value = " 
+              << Efficiency_ << endmsg;
+    }
+    else if (tmp>1)
+    {
+      WARNING << "Efficiency cannot be greater than 1. Using the default value = " 
+              << Efficiency_ << endmsg;
+    }
+    else DeltaRmax_=tmp;
+  }
+
+  // Other
+  else TaggerBase::SetParameter(key,value);
 }
