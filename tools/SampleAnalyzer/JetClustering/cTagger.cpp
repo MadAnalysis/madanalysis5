@@ -64,7 +64,7 @@ void cTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
     // Tagging the candidates
     for (unsigned int i=0;i<Candidates.size();i++)
     {
-      Candidates[i]->ctag_ = true;
+      Candidates[i]->true_ctag_ = true;
     }
     
     Candidates.clear();
@@ -145,7 +145,7 @@ void cTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
 
   for (unsigned int i=0;i<Candidates.size();i++)
   {
-    Candidates[i]->ctag_ = true;
+    Candidates[i]->true_ctag_ = true;
   }
 
   Candidates.clear();
@@ -226,7 +226,7 @@ void cTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
 
     for (unsigned int j=0;j<k;j++)
     {
-      Candidates[Candidates.size()-1]->ctag_=true;
+      Candidates[Candidates.size()-1]->true_ctag_=true;
       Candidates.pop_back();
     }
   }
@@ -244,4 +244,11 @@ Bool_t cTagger::IsLastCHadron(MCParticleFormat* part, EventFormat& myEvent)
     }
   }
   return true;
+}
+
+std::string cTagger::GetParameters()
+{
+  std::stringstream str;
+  //  str << "R=" << R_ << " ; p=" << p_ << " ; PTmin=" << Ptmin_;
+  return str.str();
 }

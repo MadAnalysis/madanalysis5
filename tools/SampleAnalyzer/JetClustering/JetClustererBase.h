@@ -106,6 +106,13 @@ namespace MA5
     /// Accessor to the jet clusterer parameters
     virtual std::string GetParameters()=0;
 
+    std::string bParameters()
+    { return myBtagger_->GetParameters(); }
+
+    std::string tauParameters()
+    { return myTAUtagger_->GetParameters(); }
+
+
   protected:
 
 
@@ -170,6 +177,7 @@ namespace MA5
       // Other
       else WARNING << "Parameter " << key	<< " unknown." << endmsg;
     }
+
 
   };
 

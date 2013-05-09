@@ -47,6 +47,7 @@ class LHEReader;
 class LHCOReader;
 class ROOTReader;
 class TauTagger;
+class bTagger;
 
 class RecEventFormat
 {
@@ -54,6 +55,7 @@ class RecEventFormat
   friend class LHCOReader;
   friend class ROOTReader;
   friend class TauTagger;
+  friend class bTagger;
 
   // -------------------------------------------------------------
   //                        data members
@@ -95,6 +97,13 @@ class RecEventFormat
 
   /// Monte Carlo taus decaying into electron
   std::vector<MCParticleFormat*> MCElectronicTaus_;
+
+  /// Monte Carlo b-quarks
+  std::vector<MCParticleFormat*> MCBquarks_;
+
+  /// Monte Carlo c-quarks
+  std::vector<MCParticleFormat*> MCCquarks_;
+
 
   // -------------------------------------------------------------
   //                      method members
@@ -142,6 +151,14 @@ class RecEventFormat
   const std::vector<MCParticleFormat*>& MCElectronicTaus() const
   {return MCElectronicTaus_;}
 
+  /// Accessor to Monte Carlo b-quarks
+  const std::vector<MCParticleFormat*>& MCBquarks() const
+  {return MCBquarks_;}
+
+  /// Accessor to Monte Carlo c-quarks
+  const std::vector<MCParticleFormat*>& MCCquarks() const
+  {return MCCquarks_;}
+
   /// Accessor to the electron collection
   std::vector<RecPhotonFormat>& photons() {return photons_;}
 
@@ -175,6 +192,14 @@ class RecEventFormat
   std::vector<MCParticleFormat*>& MCElectronicTaus()
   {return MCElectronicTaus_;}
 
+  /// Accessor to Monte Carlo b-quarks
+  std::vector<MCParticleFormat*>& MCBquarks()
+  {return MCBquarks_;}
+
+  /// Accessor to Monte Carlo c-quarks
+  std::vector<MCParticleFormat*>& MCCquarks()
+  {return MCCquarks_;}
+
   /// Clearing all information
   void Reset()
   { 
@@ -190,6 +215,8 @@ class RecEventFormat
     MCHadronicTaus_.clear();
     MCMuonicTaus_.clear();
     MCElectronicTaus_.clear();
+    MCBquarks_.clear();
+    MCCquarks_.clear();
   }
 
   /// Displaying data member values

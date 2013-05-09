@@ -67,6 +67,8 @@ class cTagger:public TaggerBase
     /// Is this C hadron the last in the decay chain ?
     Bool_t IsLastCHadron(MCParticleFormat* part, EventFormat& myEvent);
 
+    virtual std::string GetParameters();
+
 };
 
 }

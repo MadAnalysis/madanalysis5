@@ -32,18 +32,56 @@ void bTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
   // loop on the particles searching for b
   for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
   {
+    // Keeping only b-quark
+    if (std::abs(myEvent.mc()->particles()[i].pdgid())!=5 &&
+        std::abs(myEvent.mc()->particles()[i].pdgid())!=4) continue;
+
+    // Removing initial states
     if (PHYSICS->IsInitialState(myEvent.mc()->particles()[i])) continue;
-    if (fabs(myEvent.mc()->particles()[i].pdgid())!=5) continue;
-    
+
+    // Removing final states
+    if (PHYSICS->IsFinalState(myEvent.mc()->particles()[i])) continue;
+
+    // Keeping the last taus in the decay chain
     if (!IsLast(&myEvent.mc()->particles()[i], myEvent)) continue;
 
+    // b-quark already defined ?
+    if (std::abs(myEvent.mc()->particles()[i].pdgid())==5)
+    {
+      bool found=false;
+      for (unsigned int j=0;j<myEvent.rec()->MCBquarks_.size();j++)
+      {
+        if (myEvent.rec()->MCBquarks_[j]==&(myEvent.mc()->particles()[i])) 
+        {found=true; break;}
+      }
+      if (!found) 
+        myEvent.rec()->MCBquarks_.push_back(&(myEvent.mc()->particles()[i]));
+    }
+
+    // c-quark already defined ?
+    else if (std::abs(myEvent.mc()->particles()[i].pdgid())==4)
+    {
+      bool found=false;
+      for (unsigned int j=0;j<myEvent.rec()->MCCquarks_.size();j++)
+      {
+        if (myEvent.rec()->MCCquarks_[j]==&(myEvent.mc()->particles()[i])) 
+        {found=true; break;}
+      }
+      if (!found) 
+        myEvent.rec()->MCCquarks_.push_back(&(myEvent.mc()->particles()[i]));
+    }
+  }
+
+  // Matching b-quarks to jets
+  for (unsigned int i=0;i<myEvent.rec()->MCBquarks_.size();i++)
+  {
     Bool_t tag = false;
     Double_t DeltaRmax = DeltaRmax_;
 
     // loop on the jets
     for (unsigned int j=0;j<myEvent.rec()->jets().size();j++)
     {
-      Float_t DeltaR = myEvent.mc()->particles()[i].dr(myEvent.rec()->jets()[j]);
+      Float_t DeltaR = myEvent.rec()->MCBquarks_[i]->dr(myEvent.rec()->jets()[j]);
 
       if (DeltaR <= DeltaRmax) 
       {
@@ -56,14 +94,75 @@ void bTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
         Candidates.push_back(& myEvent.rec()->jets()[j]);
       }
     }
-
-    for (unsigned int i=0;i<Candidates.size();i++)
-    {
-      Candidates[i]->btag_ = true;
-    }
-    
-    Candidates.clear();
   }
+
+  // Tagging the b-jet 
+  for (unsigned int i=0;i<Candidates.size();i++)
+  {
+    Candidates[i]->true_btag_ = true;
+  }
+  Candidates.clear();
+
+  // Matching c-quarks to jets
+  for (unsigned int i=0;i<myEvent.rec()->MCCquarks_.size();i++)
+  {
+    Bool_t tag = false;
+    Double_t DeltaRmax = DeltaRmax_;
+
+    // loop on the jets
+    for (unsigned int j=0;j<myEvent.rec()->jets().size();j++)
+    {
+      Float_t DeltaR = 
+          myEvent.rec()->MCCquarks_[i]->dr(myEvent.rec()->jets()[j]);
+
+      if (DeltaR <= DeltaRmax) 
+      {
+        if (Exclusive_)
+        {
+          if (tag) Candidates.pop_back();
+          tag = true;
+          DeltaRmax = DeltaR;
+        }
+        Candidates.push_back(& myEvent.rec()->jets()[j]);
+      }
+    }
+  }
+
+  // Tagging the c-jet 
+  for (unsigned int i=0;i<Candidates.size();i++)
+  {
+    if (Candidates[i]->true_btag_) continue;
+    Candidates[i]->true_ctag_ = true;
+  }
+
+  // Identification and misidentification
+  for (unsigned int i=0;i<myEvent.rec()->jets().size();i++)
+  {
+    RecJetFormat* jet = &(myEvent.rec()->jets()[i]);
+
+    // 100% identification
+    if (jet->true_btag_) jet->btag_=true;
+    if (!doEfficiency_ && !doMisefficiency_) continue;
+
+    // identification efficiency
+    if (doEfficiency_ && jet->true_btag_)
+    {
+      if (gRandom->Rndm() < Efficiency_) jet->btag_=true;
+    }
+
+    // mis-identification (c-quark)
+    if (doMisefficiency_ && !jet->true_btag_ && jet->true_ctag_)
+    {
+      if (gRandom->Rndm() < misid_cjet_) jet->btag_=true;
+    }
+
+    // mis-identification (light quarks)
+    else if (doMisefficiency_ && !jet->true_btag_ && !jet->true_ctag_)
+    {
+      if (gRandom->Rndm() < misid_ljet_) jet->btag_=true;
+    }
+  }
+
 }
 
 void bTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
@@ -287,4 +386,15 @@ void bTagger::SetParameter(const std::string& key,
 
   // Other
   else TaggerBase::SetParameter(key,value,header);
+}
+
+std::string bTagger::GetParameters()
+{
+  std::stringstream str;
+  str << "dR=" << DeltaRmax_ << " ; ";
+  if (Exclusive_) str << "Exclusive ; "; else str << "Inclusive ; ";
+  str << "IDeff=" << Efficiency_;
+  str << " ; MisID(c)=" << misid_cjet_;
+  str << " ; MisID(q)=" << misid_ljet_;
+  return str.str();
 }

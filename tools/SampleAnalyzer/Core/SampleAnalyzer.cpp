@@ -266,7 +266,7 @@ JetClustererBase* SampleAnalyzer::InitializeJetClusterer(
 
   // Display
   INFO << "      - jet clusterer '"
-       << myClusterer->GetName() << endmsg;
+       << myClusterer->GetName() << "'" << endmsg;
 
   // Putting the analysis in container
   clusters_.push_back(myClusterer);
@@ -280,7 +280,9 @@ JetClustererBase* SampleAnalyzer::InitializeJetClusterer(
   }
 
   // Display
-  INFO << "        with: " << myClusterer->GetParameters() << endmsg;
+  INFO << "        with algo: " << myClusterer->GetParameters() << endmsg;
+  INFO << "        with bjet: " << myClusterer->bParameters() << endmsg;
+  INFO << "        with tau:  " << myClusterer->tauParameters() << endmsg;
 
   // Returning the clusterer
   return myClusterer;

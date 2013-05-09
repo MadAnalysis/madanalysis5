@@ -123,7 +123,6 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
   MHT->momentum().SetE(MHT->momentum().Pt());
 
   myBtagger_->Execute(mySample,myEvent);
-  myCtagger_->Execute(mySample,myEvent);
   myTAUtagger_->Execute(mySample,myEvent);
 
   return true;

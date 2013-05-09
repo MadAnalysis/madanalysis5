@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+29   dev.114 (2013/05/10) econte:  improving b/c/tau id + adding id/misid + title for jetclusterer 
+                                   initialization 
+
 28   dev.113 (2013/05/09) econte:  implementing new clustering parameters into C++ code + tau 
                                    efficiency 
 

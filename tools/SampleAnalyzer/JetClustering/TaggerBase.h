@@ -115,6 +115,8 @@ class TaggerBase
      else return false;
    }
 
+   virtual std::string GetParameters()=0;
+
 };
 
 }

@@ -189,6 +189,7 @@ class ClusteringConfiguration:
         if parameter=="exclusive_id":
             if value=="true":
                 self.exclusive_id=True
+                logging.warning("This functionnality is not available yet.")
             elif value=="false":
                 self.exclusive_id=False
             else:

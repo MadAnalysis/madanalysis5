@@ -58,7 +58,8 @@ class RecJetFormat : public RecParticleFormat
 
   UShort_t ntracks_;   /// number of tracks
   Bool_t btag_;        /// b-tag
-  Bool_t ctag_;        /// c-tag
+  Bool_t true_ctag_;   /// c-tag (before id or misid)
+  Bool_t true_btag_;   /// b-tag (before id or misid)
   std::vector<Int_t> Constituents_;  /// indices of the MC particles
 
   // -------------------------------------------------------------
@@ -85,8 +86,10 @@ class RecJetFormat : public RecParticleFormat
   /// Clear all information
   virtual void Reset()
   {
-    ntracks_ = 0; 
-    btag_    = false;
+    ntracks_   = 0; 
+    btag_      = false;
+    true_btag_ = false;
+    true_ctag_ = false;
   }
 
   /// Accessor to the number of tracks
@@ -97,9 +100,13 @@ class RecJetFormat : public RecParticleFormat
   const Bool_t& btag() const
   {return btag_;}
 
-  /// Accessor to the c-tag
-  const Bool_t& ctag() const
-  {return ctag_;}
+  /// Accessor to the true c-tag
+  const Bool_t& true_ctag() const
+  {return true_ctag_;}
+
+  /// Accessor to the true b-tag
+  const Bool_t& true_btag() const
+  {return true_btag_;}
 
   /// Add one constituent
   void AddConstituent (const int& index)

@@ -28,21 +28,19 @@ using namespace MA5;
 
 void TauTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
 {
-  std::vector<RecJetFormat*> Candidates;
-
-  std::vector<MCParticleFormat*> MCtaus;
+  std::vector<std::pair<RecJetFormat*,MCParticleFormat*> > Candidates;
 
   // loop on the particles searching for tau
   for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
   {
+    // Keeping only taus
+    if (fabs(myEvent.mc()->particles()[i].pdgid())!=15) continue;
+
     // Removing initial states
     if (PHYSICS->IsInitialState(myEvent.mc()->particles()[i])) continue;
 
     // Removing final states
     if (PHYSICS->IsFinalState(myEvent.mc()->particles()[i])) continue;
-
-    // Keeping only taus
-    if (fabs(myEvent.mc()->particles()[i].pdgid())!=15) continue;
 
     // Keeping the last taus in the decay chain
     if (!IsLast(&myEvent.mc()->particles()[i], myEvent)) continue;
@@ -119,23 +117,41 @@ void TauTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
           tag = true;
           DeltaRmax = DeltaR;
         }
-        Candidates.push_back(& myEvent.rec()->jets()[j]);
+        Candidates.push_back( 
+             std::make_pair(& myEvent.rec()->jets()[j],
+                            myEvent.rec()->MCHadronicTaus_[i]) );
       }
     }
-
-    sort(Candidates.begin(),Candidates.end());
-
-    for (unsigned int j=Candidates.size();j>0;j--)
-    {
-      if (!IsIdentified()) continue;
-      Candidates[j-1]->mc_ = myEvent.rec()->MCHadronicTaus_[i];
-      RecTauFormat* myTau = myEvent.rec()->GetNewTau();
-      Jet2Tau(Candidates[j-1], myTau, myEvent);
-      myEvent.rec()->jets().erase((std::vector<RecJetFormat>::iterator) Candidates[j-1]);
-    }
-
-    Candidates.clear();
   }
+
+  // Performing efficiency
+  for (unsigned int i=0;i<Candidates.size();i++)
+  {
+    if (!IsIdentified()) continue;
+    Candidates[i].first->mc_ = Candidates[i].second;
+    RecTauFormat* myTau = myEvent.rec()->GetNewTau();
+    Jet2Tau(Candidates[i].first, myTau, myEvent);
+    //      myEvent.rec()->jets().erase((std::vector<RecJetFormat>::iterator) Candidates[j-1]);
+  }
+
+  // Performing mis-id
+  if (doMisefficiency_)
+  {
+    for (unsigned int i=0;i<myEvent.rec()->jets().size();i++)
+    {
+      // keeping only light jets
+      if (myEvent.rec()->jets()[i].true_ctag_ || 
+          myEvent.rec()->jets()[i].true_btag_) continue;
+
+      // simulating mis-id
+      if (gRandom->Rndm() < misid_ljet_)
+      {
+        RecTauFormat* myTau = myEvent.rec()->GetNewTau();
+        Jet2Tau(&myEvent.rec()->jets()[i], myTau, myEvent);
+      }
+    }
+  }
+
 }
 
 void TauTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
@@ -310,8 +326,8 @@ void TauTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
 void TauTagger::Jet2Tau (RecJetFormat* myJet, RecTauFormat* myTau, EventFormat& myEvent)
 {
   myTau->setMomentum(myJet->momentum());
-  myTau->ntracks_ = myJet->ntracks();
-  myTau->mc_ = myJet->mc_;
+  myTau->ntracks_   = myJet->ntracks();
+  myTau->mc_        = myJet->mc_;
   myTau->DecayMode_ = PHYSICS->GetTauDecayMode(myTau->mc_);
 
   Int_t charge = 0;
@@ -355,4 +371,15 @@ void TauTagger::SetParameter(const std::string& key,
 
   // Other
   else TaggerBase::SetParameter(key,value,header);
+}
+
+
+std::string TauTagger::GetParameters()
+{
+  std::stringstream str;
+  str << "cR=" << DeltaRmax_ << " ; ";
+  if (Exclusive_) str << "Exclusive ; "; else str << "Inclusive ; ";
+  str << "IDeff=" << Efficiency_;
+  str << " ; MisID(q)=" << misid_ljet_;
+  return str.str();
 }
