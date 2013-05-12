@@ -248,7 +248,7 @@ class JobWriter():
             file.write('  std::map<std::string, std::string> parametersA2;\n')
             file.write('  parametersA2["njets"]="'+str(self.main.merging.njets)+'";\n')
             file.write('  AnalyzerBase* analyzer2 = \n')
-            file.write('      manager.InitializeAnalyzer("'+analysisName+'","'+outputName+'",parametersA2);\n')
+            file.write('      manager.InitializeAnalyzer("MergingPlots","MergingPlots.saf",parametersA2);\n')
             file.write('  if (analyzer2==0) return 1;\n\n')
         if self.output!="":
             file.write('  //Getting pointer to the writer\n')

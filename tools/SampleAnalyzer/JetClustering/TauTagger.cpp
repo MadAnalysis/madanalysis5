@@ -377,7 +377,7 @@ void TauTagger::SetParameter(const std::string& key,
 std::string TauTagger::GetParameters()
 {
   std::stringstream str;
-  str << "cR=" << DeltaRmax_ << " ; ";
+  str << "dR=" << DeltaRmax_ << " ; ";
   if (Exclusive_) str << "Exclusive ; "; else str << "Inclusive ; ";
   str << "IDeff=" << Efficiency_;
   str << " ; MisID(q)=" << misid_ljet_;

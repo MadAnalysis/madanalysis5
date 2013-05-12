@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from madanalysis.selection.instance_name           import InstanceName
 from madanalysis.enumeration.uncertainty_type      import UncertaintyType
 from madanalysis.enumeration.normalize_type        import NormalizeType
 from madanalysis.layout.root_config                import RootConfig
@@ -104,10 +105,10 @@ class MergingPlots:
                     break
                 
             # Drawing
-            self.DrawPlot(DJRplots,dataset,mode,output_path)
+            self.DrawPlot(DJRplots,dataset,mode,output_path,i+1)
             
             
-    def DrawPlot(self,DJRplots,dataset,mode,output_path):
+    def DrawPlot(self,DJRplots,dataset,mode,output_path,index):
 
         from ROOT import TH1
         from ROOT import TH1F
@@ -123,99 +124,105 @@ class MergingPlots:
         if dataset.xsection!=0.:
             xsection=dataset.xsection
 
-        # Setting color and other settings to total
-        total.SetLineColor(1)
-        total.SetLineStyle(1)
-        if total.GetEntries()!=0:
-            total.Scale( float(xsection) / float(total.GetEntries()) )
-            
-        for ind in range(0,len(jetplots)):
-            jetplots[ind].SetLineStyle(2)
-            if jetplots[ind].GetEntries()!=0:
-                jetplots[ind].Scale( float(xsection) / float(total.GetEntries()) )
+        # Setting color to the total plot
+        DJRplots[0].myhisto.SetLineColor(1)
+        DJRplots[0].myhisto.SetLineStyle(1)
+
+        # Scaling the total plot
+        if DJRplots[0].myhisto.GetEntries()!=0:
+            DJRplots[0].myhisto.Scale( float(xsection) / \
+                                       float(DJRplots[0].myhisto.GetEntries()) )
+
+        # Loop over other DJR plots    
+        for ind in range(1,len(DJRplots)):
+            DJRplots[ind].myhisto.SetLineStyle(2)
+            if DJRplots[ind].myhisto.GetEntries()!=0:
+                DJRplots[ind].myhisto.Scale( float(xsection) / \
+                                             float(DJRplots[0].myhisto.GetEntries()) )
 
         # Setting color an other settings to jet plots    
-        color=1
-        if len(jetplots)==1:
-            jetplots[0].SetLineColor(9)
-        elif len(jetplots)==2:
-            jetplots[0].SetLineColor(9)
-            jetplots[1].SetLineColor(46)
-        elif len(jetplots)==3:
-            jetplots[0].SetLineColor(9)
-            jetplots[1].SetLineColor(46)
-            jetplots[2].SetLineColor(8)
-        elif len(jetplots)==4:
-            jetplots[0].SetLineColor(9)
-            jetplots[1].SetLineColor(46)
-            jetplots[2].SetLineColor(8)
-            jetplots[3].SetLineColor(4)
-        elif len(jetplots)==5:
-            jetplots[0].SetLineColor(9)
-            jetplots[1].SetLineColor(46)
-            jetplots[2].SetLineColor(8)
-            jetplots[3].SetLineColor(4)
-            jetplots[4].SetLineColor(6)
-        elif len(jetplots)==6:
-            jetplots[0].SetLineColor(9)
-            jetplots[1].SetLineColor(46)
-            jetplots[2].SetLineColor(8)
-            jetplots[3].SetLineColor(4)
-            jetplots[4].SetLineColor(6)
-            jetplots[5].SetLineColor(2)
-        elif len(jetplots)==7:
-            jetplots[0].SetLineColor(9)
-            jetplots[1].SetLineColor(46)
-            jetplots[2].SetLineColor(8)
-            jetplots[3].SetLineColor(4)
-            jetplots[4].SetLineColor(6)
-            jetplots[5].SetLineColor(2)
-            jetplots[6].SetLineColor(7)
-        elif len(jetplots)==8:
-            jetplots[0].SetLineColor(9)
-            jetplots[1].SetLineColor(46)
-            jetplots[2].SetLineColor(8)
-            jetplots[3].SetLineColor(4)
-            jetplots[4].SetLineColor(6)
-            jetplots[5].SetLineColor(2)
-            jetplots[6].SetLineColor(7)
-            jetplots[7].SetLineColor(3)
-        elif len(jetplots)==9:
-            jetplots[0].SetLineColor(9)
-            jetplots[1].SetLineColor(46)
-            jetplots[2].SetLineColor(8)
-            jetplots[3].SetLineColor(4)
-            jetplots[4].SetLineColor(6)
-            jetplots[5].SetLineColor(2)
-            jetplots[6].SetLineColor(7)
-            jetplots[7].SetLineColor(3)
-            jetplots[8].SetLineColor(42)
-        elif len(jetplots)==10:
-            jetplots[0].SetLineColor(9)
-            jetplots[1].SetLineColor(46)
-            jetplots[2].SetLineColor(8)
-            jetplots[3].SetLineColor(4)
-            jetplots[4].SetLineColor(6)
-            jetplots[5].SetLineColor(2)
-            jetplots[6].SetLineColor(7)
-            jetplots[7].SetLineColor(3)
-            jetplots[8].SetLineColor(42)
-            jetplots[9].SetLineColor(48)
+        if len(DJRplots)==2:
+            DJRplots[1].myhisto.SetLineColor(9)
+        elif len(DJRplots)==3:
+            DJRplots[1].myhisto.SetLineColor(9)
+            DJRplots[2].myhisto.SetLineColor(46)
+        elif len(DJRplots)==4:
+            DJRplots[1].myhisto.SetLineColor(9)
+            DJRplots[2].myhisto.SetLineColor(46)
+            DJRplots[3].myhisto.SetLineColor(8)
+        elif len(DJRplots)==5:
+            DJRplots[1].myhisto.SetLineColor(9)
+            DJRplots[2].myhisto.SetLineColor(46)
+            DJRplots[3].myhisto.SetLineColor(8)
+            DJRplots[4].myhisto.SetLineColor(4)
+        elif len(DJRplots)==6:
+            DJRplots[1].myhisto.SetLineColor(9)
+            DJRplots[2].myhisto.SetLineColor(46)
+            DJRplots[3].myhisto.SetLineColor(8)
+            DJRplots[4].myhisto.SetLineColor(4)
+            DJRplots[5].myhisto.SetLineColor(6)
+        elif len(DJRplots)==7:
+            DJRplots[1].myhisto.SetLineColor(9)
+            DJRplots[2].myhisto.SetLineColor(46)
+            DJRplots[3].myhisto.SetLineColor(8)
+            DJRplots[4].myhisto.SetLineColor(4)
+            DJRplots[5].myhisto.SetLineColor(6)
+            DJRplots[6].myhisto.SetLineColor(2)
+        elif len(DJRplots)==8:
+            DJRplots[1].myhisto.SetLineColor(9)
+            DJRplots[2].myhisto.SetLineColor(46)
+            DJRplots[3].myhisto.SetLineColor(8)
+            DJRplots[4].myhisto.SetLineColor(4)
+            DJRplots[5].myhisto.SetLineColor(6)
+            DJRplots[6].myhisto.SetLineColor(2)
+            DJRplots[7].myhisto.SetLineColor(7)
+        elif len(DJRplots)==9:
+            DJRplots[1].myhisto.SetLineColor(9)
+            DJRplots[2].myhisto.SetLineColor(46)
+            DJRplots[3].myhisto.SetLineColor(8)
+            DJRplots[4].myhisto.SetLineColor(4)
+            DJRplots[5].myhisto.SetLineColor(6)
+            DJRplots[6].myhisto.SetLineColor(2)
+            DJRplots[7].myhisto.SetLineColor(7)
+            DJRplots[8].myhisto.SetLineColor(3)
+        elif len(DJRplots)==10:
+            DJRplots[1].myhisto.SetLineColor(9)
+            DJRplots[2].myhisto.SetLineColor(46)
+            DJRplots[3].myhisto.SetLineColor(8)
+            DJRplots[4].myhisto.SetLineColor(4)
+            DJRplots[5].myhisto.SetLineColor(6)
+            DJRplots[6].myhisto.SetLineColor(2)
+            DJRplots[7].myhisto.SetLineColor(7)
+            DJRplots[8].myhisto.SetLineColor(3)
+            DJRplots[9].myhisto.SetLineColor(42)
+        elif len(DJRplots)==11:
+            DJRplots[1].myhisto.SetLineColor(9)
+            DJRplots[2].myhisto.SetLineColor(46)
+            DJRplots[3].myhisto.SetLineColor(8)
+            DJRplots[4].myhisto.SetLineColor(4)
+            DJRplots[5].myhisto.SetLineColor(6)
+            DJRplots[6].myhisto.SetLineColor(2)
+            DJRplots[7].myhisto.SetLineColor(7)
+            DJRplots[8].myhisto.SetLineColor(3)
+            DJRplots[9].myhisto.SetLineColor(42)
+            DJRplots[10].myhisto.SetLineColor(48)
         else:
-            jetplots[ind].SetLineColor(color)
-            color += 1
+            color=1
+            for ind in range(1,len(DJRplots)):
+                DJRplots[ind].myhisto.SetLineColor(color)
+                color += 1
 
         # Creating and filling the stack; computing the total number of events
         stack = THStack("mystack","")
-        ntot = total.GetEntries()
-        stack.Add(total)
-        for item in jetplots:
-            ntot+=item.GetEntries()
-            stack.Add(item)
+        ntot = DJRplots[0].myhisto.GetEntries()
+        stack.Add(DJRplots[0].myhisto)
+        for ind in range(1,len(DJRplots)):
+            ntot+=DJRplots[ind].myhisto.GetEntries()
+            stack.Add(DJRplots[ind].myhisto)
 
         # Drawing plots
         stack.Draw("nostack")
-
+        
         # Setting Y axis label
         axis_titleY = "Cross section (pb/bin)"
         stack.GetYaxis().SetTitle(axis_titleY)
@@ -237,24 +244,56 @@ class MergingPlots:
             canvas.SetLogy()
         
         # Displaying a legend
-        ymin_legend = .9-.055*len(jetplots)
+        ymin_legend = .9-.055*(len(DJRplots)-1)
         if ymin_legend<0.1:
             ymin_legend = 0.1
         legend = TLegend(.65,ymin_legend,.9,.9)
         legend.SetTextSize(0.04); 
         legend.SetTextFont(22);
-        legend.AddEntry(total,"Sum")
-        for ind in range(0,len(jetplots)):
-            legend.AddEntry(jetplots[ind],str(ind)+"-jet sample")
+        legend.AddEntry(DJRplots[0].myhisto,"Sum")
+        for ind in range(1,len(DJRplots)):
+            legend.AddEntry(DJRplots[ind].myhisto,str(ind)+"-jet sample")
         legend.SetFillColor(0)    
         legend.Draw()
 
         # Save the canvas in the report format
-        canvas.SaveAs(output_path+"/merging_"+datasetname+"_"+str(index)+"."+\
+        datasetname = InstanceName.Get(dataset.name)
+
+        canvas.SaveAs(output_path+"/merging_" +\
+                      datasetname+"_"+str(index)+"." +\
                       ReportFormatType.convert2filetype(mode))
 
         # Save the canvas in the C format
-        canvas.SaveAs(output_path+"/merging_"+datasetname+"_"+str(index)+".C")
+        canvas.SaveAs(output_path+"/merging_" +\
+                      datasetname+"_"+str(index)+".C")
 
             
-                   
+    def GetPlotNames(self,mode,output_path):
+
+        allnames = []
+        
+        # Loop on each dataset
+        for mydataset in range(0,len(self.main.datasets)):
+
+            datasetname = InstanceName.Get(self.main.datasets[mydataset].name)
+            names = []
+
+            # Loop over DJR
+            for i in range(0,100):
+            
+                name = "DJR"+str(i+1)+"_total"
+                test=False
+                for h in range(len(self.detail[mydataset])):
+                    if self.detail[mydataset][h].name == name:
+                        test=True
+                        break
+
+                if test:
+                    names.append(output_path+"/merging_" +\
+                      datasetname+"_"+str(i+1))#+"." +\
+#                      ReportFormatType.convert2filetype(mode))
+
+        allnames.append(names)
+        return allnames
+    
+        

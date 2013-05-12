@@ -45,7 +45,7 @@ class TauIdentification():
 
         
     def Display(self):
-        logging.info("  + b-jet identification:")
+        logging.info("  + hadronic-tau identification:")
         self.user_DisplayParameter("tau_id.matching_dr")
         self.user_DisplayParameter("tau_id.exclusive")
         self.user_DisplayParameter("tau_id.efficiency")

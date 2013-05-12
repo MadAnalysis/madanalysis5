@@ -168,7 +168,8 @@ void MergingPlots::Execute(SampleFormat& mySample, const EventFormat& myEvent)
       }
       }
     */
-    double djr = std::log10(sqrt(DJRvalues[i]));
+    double djr = 0;
+    if (DJRvalues[i]>0) djr = std::log10(sqrt(DJRvalues[i]));
     DJR_[i].total->Fill(djr);
     DJR_[i].contribution[njets]->Fill(djr);
   }

@@ -143,8 +143,8 @@ class Layout:
 
     def DoPlots(self,mode,output_path):
 
-#        if self.main.merging.enable:
-#            self.merging.DrawAll(mode,output_path)
+        if self.main.merging.enable:
+            self.merging.DrawAll(mode,output_path)
 
         if self.main.selection.Nhistos==0:
             return True
@@ -846,25 +846,36 @@ class Layout:
                                    self.main.datasets[ind])
 
         # Merging plots
-#        if len(self.merging.datasetnames)!=0:
-#            report.WriteSubTitle('Merging plots')
-#        for i in range(0,len(self.merging.datasetnames)):
-#            report.WriteSubSubTitle(self.merging.datasetnames[i])
-#            for j in range(0,len(self.merging.filenames[i])):
-#                text.Reset()
-#                title = "DJR"+str(j+1)+" : "+str(j)
-#                if j>1:
-#                    title +=" jets -> "
-#                else:
-#                    title +=" jet -> "
-#                title += str(j+1)
-#                if j>0:
-#                    title += " jets"
-#                else:
-#                    title += " jet"
-#                text.Add(title)
-#                report.WriteFigure(text,self.merging.filenames[i][j])
-                
+        if self.main.merging.enable:
+
+            # Title : merging plots
+            report.WriteSubTitle('Merging plots')
+
+            # Getting all plot names
+            allnames = self.merging.GetPlotNames(mode,\
+                                                 output_path)
+
+            # Loop over datasets
+            for i in range(0,len(allnames)):
+
+                # Subtitle : dataset names
+                report.WriteSubSubTitle(self.main.datasets[i].name)
+
+                # Loop over DJR plots
+                for j in range(0,len(allnames[i])):
+                    text.Reset()
+                    title = "DJR"+str(j+1)+" : "+str(j)
+                    if j>1:
+                        title +=" jets -> "
+                    else:
+                        title +=" jet -> "
+                    title += str(j+1)
+                    if j>0:
+                        title += " jets"
+                    else:
+                        title += " jet"
+                    text.Add(title)
+                    report.WriteFigure(text,allnames[i][j])
 
         # Plots display
         if len(self.main.selection)!=0:
