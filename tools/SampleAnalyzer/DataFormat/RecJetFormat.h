@@ -111,6 +111,11 @@ class RecJetFormat : public RecParticleFormat
   /// Add one constituent
   void AddConstituent (const int& index)
   {Constituents_.push_back(index);}
+
+  /// get constituent collections
+  const std::vector<Int_t>& constituents() const
+  { return Constituents_; }
+
 };
 
 }

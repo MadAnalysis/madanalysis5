@@ -97,7 +97,81 @@ bool LHEWriter::WriteHeader(const SampleFormat& mySample)
   *output_ << "#                                                                    *" << std::endl;
   *output_ << "#....................................................................*" << std::endl;
   *output_ << "" << std::endl;
+  *output_ << "<MA5Format> SimplifiedLHE </MA5Format>" << std::endl;
+  *output_ << "<FormatDescription>" << std::endl;
+  *output_ << "Les Houches Event (LHE) format is defined in hep-ph/0609017" << std::endl;
+  *output_ << "" << std::endl;
+  *output_ << "The <init> ... </init> contains global information about the samples in one line:" << std::endl;
+  *output_ << " IDBMUP1 IDBMUP2 EBMUP1 EBMUP2 PDFGUP1 PDFGUP2 PDFSUP1 PDFSUP1 PDFSUP2 IDWTUP NPRUP" << std::endl;
+  *output_ << "with:" << std::endl;
+  *output_ << " - IDBMUP1: PDG id of the first beam" << std::endl;
+  *output_ << " - IDBMUP2: PDG id of the second beam" << std::endl;
+  *output_ << " - EBMUP1:  energy of the first beam" << std::endl;
+  *output_ << " - EBMUP2:  energy of the second beam" << std::endl;
+  *output_ << " - PDFGUP1: author group of the PDF related to the first beam" << std::endl;
+  *output_ << " - PDFGUP2: author group of the PDF related to the second beam" << std::endl;
+  *output_ << " - PDFSUP1: set id of the PDF related to the first beam" << std::endl;
+  *output_ << " - PDFSUP2: set id of the PDF related to the second beam" << std::endl;
+  *output_ << " - IDWTUP:  weighting strategy" << std::endl;
+  *output_ << " - NPRUP:   number of physics processes involved during the generation" << std::endl;
+  *output_ << "; the following lines give process information (one line per process):" << std::endl;
+  *output_ << " XSECUP XERRUP XMAXUP LPRUP" << std::endl;
+  *output_<<  "with:" << std::endl;
+  *output_ << " -  XSECUP: cross section value" << std::endl;
+  *output_ << " -  XERRUP: cross section error" << std::endl;
+  *output_ << " -  XMAXUP: maximum event-weight" << std::endl;
+  *output_ << " -  LPRUP:  process id" << std::endl;
+  *output_ << "" << std::endl;
+  *output_ << "Each event is described by a <event> ... </event> block. This block type contains always a line with general information:" << std::endl;
+  *output_ << " NUP IDPRUP XWGTUP SCALUP AQEDUP AQCDUP" << std::endl;
+  *output_ << "with:" << std::endl;
+  *output_ << " - NUP:    number of particles" << std::endl;
+  *output_ << " - IDPRUP: process id" << std::endl;
+  *output_ << " - XWGTUP: event-weight" << std::endl;
+  *output_ << " - SCALUP: scale" << std::endl;
+  *output_ << " - AQEDUP: alpha QED" << std::endl;
+  *output_ << " - AQCDUP: alpha QCD" << std::endl;
+  *output_ << " following by a line per particle:" << std::endl;
+  *output_ << " IDUP ISTUP MOTHUP1 MOTHUP2 ICOLUP1 ICOLUP2 PUP1 PUP2 PUP3 PUP4 PUP5 VTIMUP SPINUP" << std::endl;
+  *output_ << " - IDUP:    PDG id" << std::endl;
+  *output_ << " - ISTUP:   status code" << std::endl;
+  *output_ << " - MOTHUP1: index of the first mother particle" << std::endl;
+  *output_ << " - MOTHUP2: index of the second mother particle" << std::endl;
+  *output_ << " - ICOLUP1: first color tag" << std::endl;
+  *output_ << " - ICOLUP2: second color tag" << std::endl;
+  *output_ << " - PUP1:    PX [GeV/c]" << std::endl;
+  *output_ << " - PUP2:    PY [GeV/c]" << std::endl;
+  *output_ << " - PUP3:    PZ [GeV/c]" << std::endl;
+  *output_ << " - PUP4:    E  [GeV]" << std::endl;
+  *output_ << " - PUP5:    M  [GeV/c^2] (a space-like virtuality is denoted by a negative sign on the mass)" << std::endl;
+  *output_ << " - VTIMUP:  ctau" << std::endl;
+  *output_ << " - SPINUP:  cosine of the angle between the spin vector of a particle and its three-momentum" << std::endl;
 
+  // Explanation about Simplified LHE
+  if (mySample.rec()!=0)
+  {
+    *output_ << "" << std::endl;
+    *output_ << "In the 'simplified LHE' format, three collections of objects are stored for each object:" << std::endl;
+    *output_ << " - Objects with StatusCode=-1 : initial partons iteracting" << std::endl;
+    *output_ << " - Objects with StatusCode=+3 : particles produced during the hard process" << std::endl;
+    *output_ << " - Objects with StatusCode=+1 : reconstructed objects (after applying a fast-simulation detector a after applying a jet-clustering algorithm" << std::endl;  
+    *output_ << "In the case where reconstructed objects have been produced by MadAnalysis (e.g. applying a jet-clustering algorithm), the following conventions are adopted:" << std::endl;
+    *output_ << " - particle with PDG id = +/-11 : electrons" << std::endl;
+    *output_ << "   electrons: all electrons in the final state (including isolated electrons or electrons coming from jets" << std::endl;
+    *output_ << " - particle with PDG id = +/-13 : muons." << std::endl;
+    *output_ << "   all muons in the final state (including isolated muons or muons coming from jets" << std::endl;
+    *output_ << " - particle with PDG id = +/-15: taus decaying hadronically." << std::endl;
+    *output_ << "   jets matching with a tau decaying into hadrons in the Monte Carlo histo" << std::endl;
+    *output_ << "   identification and misidentification efficiency could be applied." << std::endl;
+    *output_ << " - particle with PDG id = 5: b-jets." << std::endl;
+    *output_ << "   jets matching a b-quark in the Monte-Carlo history" << std::endl;
+    *output_ << "   identification and misidentification efficiency could be applied." << std::endl;
+    *output_ << " - particle with PDG id = 21: jets not b-tagged." << std::endl;
+    *output_ << "   the jet collection includes also electrons collection and hadronic taus collection" << std::endl;
+    *output_ << " - particle with PDG id = 12: MET." << std::endl;
+    *output_ << "   the missing transverse energy has been computed as the opposite to the 4-momentum vector sum of jets (including electrons and hadronic taus) and muons." << std::endl; 
+  }
+  *output_ << "</FormatDescription>" << std::endl;
   if (mySample.mc()!=0)
   {
     *output_ << "Original header:" << std::endl;
