@@ -32,7 +32,7 @@ class ClusteringGenKt():
 
     userVariables = { "radius" : [str(default_radius)],\
                       "exclusive" : [str(default_exclusive)],\
-                      "P" : [str(default_P)],\
+                      "p" : [str(default_P)],\
                       "ptmin" : [str(default_ptmin)] }
 
 
@@ -46,7 +46,7 @@ class ClusteringGenKt():
     def Display(self):
         self.user_DisplayParameter("radius")
         self.user_DisplayParameter("exclusive")
-        self.user_DisplayParameter("P")
+        self.user_DisplayParameter("p")
         self.user_DisplayParameter("ptmin")
 
 
@@ -60,7 +60,7 @@ class ClusteringGenKt():
             logging.info("  + exclusive algo = "+msg)
         elif parameter=="ptmin":
             logging.info("  + PT min (GeV) for produced jets = "+str(self.ptmin))
-        elif parameter=="P":
+        elif parameter=="p":
             word=""
             if self.P==1:
                 word="[Kt algorithm behaviour]"
@@ -132,7 +132,7 @@ class ClusteringGenKt():
             self.ptmin=number
  
         # p
-        elif parameter=="P":
+        elif parameter=="p":
             try:
                 number = float(value)
             except:
