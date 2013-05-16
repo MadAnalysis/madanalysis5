@@ -28,8 +28,6 @@ using namespace MA5;
 
 void TauTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
 {
-  std::vector<std::pair<RecJetFormat*,MCParticleFormat*> > Candidates;
-
   // loop on the particles searching for tau
   for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
   {
@@ -94,9 +92,10 @@ void TauTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
   }
 
   // Matching MCtaus and RECtaus
+  std::vector<std::pair<RecJetFormat*,MCParticleFormat*> > Candidates;
   for (unsigned int i=0;i<myEvent.rec()->MCHadronicTaus_.size();i++)
   {
-    Bool_t tag = false;
+    RecJetFormat* tag = 0;
     Double_t DeltaRmax = DeltaRmax_;
 
     // loop on the jets
@@ -113,15 +112,17 @@ void TauTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
       {
         if(Exclusive_)
         {
-          if (tag) Candidates.pop_back();
-          tag = true;
+          tag = &(myEvent.rec()->jets()[j]);
           DeltaRmax = DeltaR;
         }
-        Candidates.push_back( 
+        else Candidates.push_back( 
              std::make_pair(& myEvent.rec()->jets()[j],
                             myEvent.rec()->MCHadronicTaus_[i]) );
       }
     }
+    if (Exclusive_ && tag!=0) 
+         Candidates.push_back(std::make_pair(tag,
+                                             myEvent.rec()->MCHadronicTaus_[i]));
   }
 
   // Performing efficiency

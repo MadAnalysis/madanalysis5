@@ -75,7 +75,7 @@ void bTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
   // Matching b-quarks to jets
   for (unsigned int i=0;i<myEvent.rec()->MCBquarks_.size();i++)
   {
-    Bool_t tag = false;
+    RecJetFormat* tag = 0;
     Double_t DeltaRmax = DeltaRmax_;
 
     // loop on the jets
@@ -87,13 +87,13 @@ void bTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
       {
         if (Exclusive_)
         {
-          if (tag) Candidates.pop_back();
-          tag = true;
+          tag = &(myEvent.rec()->jets()[j]);
           DeltaRmax = DeltaR;
         }
-        Candidates.push_back(& myEvent.rec()->jets()[j]);
+        else Candidates.push_back(& myEvent.rec()->jets()[j]);
       }
     }
+    if (Exclusive_ && tag!=0) Candidates.push_back(tag);
   }
 
   // Tagging the b-jet 
@@ -106,7 +106,7 @@ void bTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
   // Matching c-quarks to jets
   for (unsigned int i=0;i<myEvent.rec()->MCCquarks_.size();i++)
   {
-    Bool_t tag = false;
+    RecJetFormat* tag = 0;
     Double_t DeltaRmax = DeltaRmax_;
 
     // loop on the jets
@@ -119,13 +119,13 @@ void bTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
       {
         if (Exclusive_)
         {
-          if (tag) Candidates.pop_back();
-          tag = true;
+          tag = &(myEvent.rec()->jets()[j]);
           DeltaRmax = DeltaR;
         }
-        Candidates.push_back(& myEvent.rec()->jets()[j]);
+        else Candidates.push_back(& myEvent.rec()->jets()[j]);
       }
     }
+    if (Exclusive_ && tag!=0) Candidates.push_back(tag);
   }
 
   // Tagging the c-jet 

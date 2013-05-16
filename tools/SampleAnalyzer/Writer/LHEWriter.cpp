@@ -101,7 +101,7 @@ bool LHEWriter::WriteHeader(const SampleFormat& mySample)
   *output_ << "<FormatDescription>" << std::endl;
   *output_ << "The original Les Houches Event (LHE) format is defined in hep-ph/0609017" << std::endl;
   *output_ << "" << std::endl;
-  *output_ << "The <init> ... </init> contains global information about the samples given as a single line:" << std::endl;
+  *output_ << "The <init> ... </init> block contains global information about the samples given as a single line:" << std::endl;
   *output_ << " IDBMUP1 IDBMUP2 EBMUP1 EBMUP2 PDFGUP1 PDFGUP2 PDFSUP1 PDFSUP1 PDFSUP2 IDWTUP NPRUP" << std::endl;
   *output_ << "with:" << std::endl;
   *output_ << " - IDBMUP1: PDG code of the first beam" << std::endl;
@@ -131,8 +131,9 @@ bool LHEWriter::WriteHeader(const SampleFormat& mySample)
   *output_ << " - SCALUP: scale" << std::endl;
   *output_ << " - AQEDUP: alpha QED" << std::endl;
   *output_ << " - AQCDUP: alpha QCD" << std::endl;
-  *output_ << " This line is then followed by one line for each particle in the event:" << std::endl;
+  *output_ << "This line is then followed by one line for each particle in the event:" << std::endl;
   *output_ << " IDUP ISTUP MOTHUP1 MOTHUP2 ICOLUP1 ICOLUP2 PUP1 PUP2 PUP3 PUP4 PUP5 VTIMUP SPINUP" << std::endl;
+  *output_ << "with:" << std::endl;
   *output_ << " - IDUP:    PDG code" << std::endl;
   *output_ << " - ISTUP:   status code" << std::endl;
   *output_ << " - MOTHUP1: index of the first mother particle" << std::endl;
@@ -147,7 +148,7 @@ bool LHEWriter::WriteHeader(const SampleFormat& mySample)
   *output_ << " - VTIMUP:  c tau" << std::endl;
   *output_ << " - SPINUP:  cosine of the angle between the spin vector of the particle and its three-momentum" << std::endl;
 
-  // Explanation about Simplified LHE
+  // Explanation about the Simplified LHE
   if (mySample.rec()!=0)
   {
     *output_ << "" << std::endl;
@@ -161,10 +162,10 @@ bool LHEWriter::WriteHeader(const SampleFormat& mySample)
     *output_ << " - particle with a PDG code = +13 or -13: muons and antimuons." << std::endl;
     *output_ << "   They can be isolated or not as well aspossibly issued from the hadronization process." << std::endl;
     *output_ << " - particle with a PDG code = +15 or -15: hadronically decaying (anti)taus." << std::endl;
-    *output_ << "   These consist of jets matching a hadronically decaying tau when inspoecting the Monte Carlo history." << std::endl;
+    *output_ << "   These consist of jets matching a hadronically decaying tau when inspecting the Monte Carlo history." << std::endl;
     *output_ << "   (Mis)Identification efficiency can be possibly included." << std::endl;
     *output_ << " - particle with a PDG code = 5: b-jets." << std::endl;
-    *output_ << "   These consist of jets matching a b-quark when inspecting the Monte Carlo history" << std::endl;
+    *output_ << "   These consist of jets matching a b-quark when inspecting the Monte Carlo history." << std::endl;
     *output_ << "   (Mis)Identification efficiency can be possibly included." << std::endl;
     *output_ << " - particle with a PDG code = 21: jets which are not b-tagged and taus which are not tau-tagged." << std::endl;
     *output_ << "   the jet collection includes also electrons collection and hadronic taus collection" << std::endl;
