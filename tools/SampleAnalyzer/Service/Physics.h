@@ -308,6 +308,8 @@ class PhysicsService
   ///                    -1 = error
   Int_t GetTauDecayMode (const MCParticleFormat* part)
   {
+    if (part==0) return -1;
+
     if (fabs(part->pdgid())!=15) 
     {
       WARNING << "Particle is not a Tau" << endmsg;
