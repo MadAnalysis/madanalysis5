@@ -173,8 +173,7 @@ class CmdInstall(CmdBase):
             return False
 
         # List of files
-        files = { "zlib.tar.gz" : "http://zlib.net/zlib-1.2.7.tar.gz" }
-
+        files = { "zlib.tar.gz" : "http://zlib.net/zlib-1.2.8.tar.gz" }
         # Launching wget
         if not self.wget(files,'zlib',installdir):
             return False

@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+33   dev.118 (2013/05/16) econte:  updating release of zlib 
+
 32   dev.117 (2013/05/16) econte:  adding example in expert mode + fix bugs related to Filters 
 
 31   dev.116 (2013/05/13) econte:  adding LHE header 
