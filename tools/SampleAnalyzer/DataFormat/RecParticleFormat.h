@@ -91,7 +91,10 @@ class RecParticleFormat : public ParticleBaseFormat
   }
 
   /// Accessor to matched Monte Carlo particle 
-  const MCParticleFormat* mc() {return mc_;}
+  const MCParticleFormat* mc() const {return mc_;}
+
+  /// Mutator relatied to matched Monte Carlo particle
+  void setMc(MCParticleFormat* mc) {mc_=mc;}
 
   /// Accessor to hadronic energy / electromagnetic energy ratio
   const Float_t& HEoverEE() const {return HEoverEE_;}

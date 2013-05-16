@@ -124,7 +124,7 @@ class FilterBase
   }
 
   /// Execute
-  virtual void Execute(SampleFormat& mySample,
+  virtual bool Execute(SampleFormat& mySample,
                        const EventFormat& myEvent)=0;
 
   /// Accessor to analysis name

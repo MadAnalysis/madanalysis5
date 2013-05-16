@@ -99,13 +99,15 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
     {
       RecLeptonFormat * muon = myEvent.rec()->GetNewMuon();
       muon->setMomentum(myEvent.mc()->particles()[i].momentum());
+      muon->setMc(&(myEvent.mc()->particles()[i]));
       if (myEvent.mc()->particles()[i].pdgid()==13) muon->SetCharge(-1);
       else muon->SetCharge(+1);
     }
-    if (fabs(myEvent.mc()->particles()[i].pdgid())==11)
+    else if (fabs(myEvent.mc()->particles()[i].pdgid())==11)
     {
       RecLeptonFormat * elec = myEvent.rec()->GetNewElectron();
       elec->setMomentum(myEvent.mc()->particles()[i].momentum());
+      elec->setMc(&(myEvent.mc()->particles()[i]));
       if (myEvent.mc()->particles()[i].pdgid()==11) elec->SetCharge(-1);
       else elec->SetCharge(+1);
     }

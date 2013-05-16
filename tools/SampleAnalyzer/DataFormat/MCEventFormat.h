@@ -73,6 +73,20 @@ class MCEventFormat
   /// List of generated particles
   std::vector<MCParticleFormat> particles_;
 
+  /// Computed Missing Transverse Energy
+  MCParticleFormat MET_;
+  
+  /// Computed Missing Hadronic Transverse Energy
+  MCParticleFormat MHT_;
+
+  /// Computed Scalar sum of transverse energy
+  Float_t TET_;
+
+  /// Computed Scalar sum of hadronic transverse energy
+  Float_t THT_;
+
+
+
   // -------------------------------------------------------------
   //                      method members
   // -------------------------------------------------------------
@@ -85,6 +99,30 @@ class MCEventFormat
   /// Destructor
   ~MCEventFormat()
   { }
+
+  /// Accessor to the Missing Transverse Energy (read-only)
+  const MCParticleFormat& MET() const {return MET_;}
+
+  /// Accessor to the Missing Hadronic Transverse Energy (read-only)
+  const MCParticleFormat& MHT() const {return MHT_;}
+
+  /// Accessor to the Total Transverse Energy (read-only)
+  const Float_t& TET() const {return TET_;}
+
+  /// Accessor to the Total Hadronic Transverse Energy (read-only)
+  const Float_t& THT() const {return THT_;}
+
+  /// Accessor to the Missing Transverse Energy
+  MCParticleFormat& MET() {return MET_;}
+
+  /// Accessor to the Missing Hadronic Transverse Energy
+  MCParticleFormat& MHT() {return MHT_;}
+
+  /// Accessor to the Total Transverse Energy
+  Float_t& TET() {return TET_;}
+
+  /// Accessor to the Total Hadronic Transverse Energy
+  Float_t& THT() {return THT_;}
 
   /// Accessor to the process identity
   const UInt_t& processId()  const {return processId_;}

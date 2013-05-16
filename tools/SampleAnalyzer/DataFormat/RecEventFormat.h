@@ -139,6 +139,12 @@ class RecEventFormat
   /// Accessor to the Missing Hadronic Transverse Energy (read-only)
   const RecParticleFormat& MHT() const {return MHT_;}
 
+  /// Accessor to the Total Transverse Energy (read-only)
+  const Float_t& TET() const {return TET_;}
+
+  /// Accessor to the Total Hadronic Transverse Energy (read-only)
+  const Float_t& THT() const {return THT_;}
+
   /// Accessor to the Monte Carlo taus decaying hadronically
   const std::vector<MCParticleFormat*>& MCHadronicTaus() const
   {return MCHadronicTaus_;}
@@ -179,6 +185,12 @@ class RecEventFormat
 
   /// Accessor to the Missing Hadronic Transverse Energy
   RecParticleFormat& MHT() {return MHT_;}
+
+  /// Accessor to the Total Transverse Energy
+  Float_t& TET() {return TET_;}
+
+  /// Accessor to the Total Hadronic Transverse Energy
+  Float_t& THT() {return THT_;}
 
   /// Accessor to the Monte Carlo taus decaying hadronically
   std::vector<MCParticleFormat*>& MCHadronicTaus()
