@@ -1,296 +1,37 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
-55   1.1.7   (2013/05/17) bfuks:   testing 
-
-54   1.1.6   (2013/05/17) bfuks:   Typo in the README sdfsdf
-
-49   dev.130 (2013/05/17) econte:  fixing bug with LHCO reader 
-
-48   dev.129 (2013/05/17) econte:  changing header 2 
-
-47   dev.128 (2013/05/17) econte:  fixing minor bug with merging plots 
-
-45   dev.127 (2013/05/17) econte:  changing the header 
-
-43   dev.126 (2013/05/17) LeMouth: test 
-
-40   dev.125 (2013/05/17) econte:  adding tag to LHE produced by MA5 + calculating properly the MET in 
-                                   case of LHE simplified 
-
-39   dev.124 (2013/05/17) econte:  fixing major bug related to MET in clustering mode 
-
-38   dev.123 (2013/05/17) econte:  calculating MET, TET, MHT, THT when reading event 
-
-37   dev.122 (2013/05/16) econte:  fix bug related to MAnu's tau 
-
-36   dev.121 (2013/05/16) econte:  Fixing bugs with b/tau exclusive option 
-
-35   dev.120 (2013/05/16) LeMouth: Modification of the text in LHE writer 
-
-34   dev.119 (2013/05/16) econte:  fix problem of access to P variable in genkt clustering algo 
-
-33   dev.118 (2013/05/16) econte:  updating release of zlib 
-
-32   dev.117 (2013/05/16) econte:  adding example in expert mode + fix bugs related to Filters 
-
-31   dev.116 (2013/05/13) econte:  adding LHE header 
-
-30   dev.115 (2013/05/12) econte:  Fixing problem related to merging plots 
-
-29   dev.114 (2013/05/10) econte:  improving b/c/tau id + adding id/misid + title for jetclusterer 
-                                   initialization 
-
-28   dev.113 (2013/05/09) econte:  implementing new clustering parameters into C++ code + tau 
-                                   efficiency 
-
-27   dev.112 (2013/05/09) econte:  adding new parameters for clustering in the Python interface 
-
-26   dev.111 (2013/05/08) econte:  fixing all problems with taus + adding photons to LHCO 
-
-25   dev.110 (2013/05/03) econte:  fixing minor bugs related to the progressbar display 
-
-24   dev.109 (2013/05/02) econte:  Implementing a smart progress bar 
-
-23   dev.108 (2013/05/02) econte:  Adding BUT not using a progress bar class 
-
-22   dev.107 (2013/05/01) econte:  fixing problem with long-term job + adding sample size 
-
-21   dev.106 (2013/04/29) econte:  Fixing bugs : 1) bugs due to screen 2) bugs in tau reconstruction 3) 
-                                   improving speed of PdgService 4) MET before/after clustering 
-
-20   dev.105 (2013/04/25) econte:  Fixing bug with jetclustering initialization [Thanks to Jose] 
-
-19   dev.104 (2013/04/24) econte:  Fixing a MAJOR bug related to MET calculation in RECO mode [thanks 
-                                   to Adam] 
-
-18   dev.103 (2013/04/23) econte:  fixing Adam bug (FASTJET called only on the first event) + Jose bug 
-                                   (problem with cutflow) 
-
-17   dev.102 (2013/04/23) econte:  fixing bug with redudancy of parameter1 in main.cpp 
-
-16   dev.101 (2013/04/23) econte:  adding a setup script for SampleAnalyzer library + possibility to 
-                                   launch a job without analysis 
-
-15   dev.100 (2013/04/23) econte:  fixing problem related to open a new session in expert mode 
-
-14   dev.99  (2013/04/22) econte:  fixing minor bug with merging plots 
-
-13   dev.98  (2013/04/22) econte:  fixing minor bug with MergingPlots analysis 
-
-12   dev.97  (2013/04/22) econte:  Merging plots fixing bug : 1/2 
-
-11   dev.96  (2013/04/19) econte:  fixing all compilation issues with FastJet 
-
-10   dev.95  (2013/04/19) econte:  fixing url of FastJet 
-
-9    dev.94  (2013/04/19) econte:  fixing bug with numpy library 
-
-8    dev.93  (2013/04/19) econte:  fixing bug with STDHEP reader 
-
-7    dev.92  (2013/04/17) econte:  fixing redundant function + problem with 'make clean' 
-
-6    dev.91  (2013/04/17) econte:  fixing problem ocurring in case of dummy sample file 
-
-5    dev.90  (2013/04/15) econte:  adding LHCOWriter ; need to validate 
-
-4    dev.89  (2013/04/15) econte:  moving COPYING.ma5 to COPYING 
-
-3    dev.88  (2013/04/15) econte:  adding text file COPYING & README 
-
-2    dev.87  (2013/04/15) econte:  adding StringTool class + adding missing file header 
-
-785  dev.86  (2013/04/12) econte:  modifying makefile for SampleAnalyzer + fixing minor bugs 
-
-784  dev.85  (2013/04/08) econte:  New Makefiles solving all problems of depencies 
-
-783  dev.84  (2013/04/08) econte:  new environment variable 'MA5_BASE' -> all Makefiles used relative 
-                                   paths 
-
-782  dev.83  (2013/04/03) econte:  Fixing minor bugs + possibility to return a boolean value for all 
-                                   functions 'Initialize' 
-
-781  dev.82  (2013/04/03) econte:  Hmmm a lot of things have changed since the last commit. 1) Fixing 
-                                   bugs with Adam 2) New structure for Initialize function 3) Cleaning 
-                                   and simplifying setup scripts 
-
-780  dev.81  (2013/02/19) LeMouth: bug with the stdhep reader 
-
-779  dev.80  (2013/01/25) LeMouth: alphaT fixed for ever 
-
-775  dev.79  (2013/01/25) LeMouth: Fixing alphaT 
-
-774  dev.78  (2013/01/24) econte:  AlphaT adding + LHEWriter + HEPMCReader update 
-
-773  dev.77  (2013/01/14) econte:  Fix bug found by Adam related to rescaling 
-
-772  dev.76  (2013/01/10) econte:  Fixing Adam's bugs related to HEPMC clustering 
-
-771  dev.75  (2013/01/09) econte:  Fixing bugs with FAC mode 
-
-768  dev.74  (2013/01/03) econte:  Improving display of Main and SampleAnalyzer ... Pas encore top top 
-                                   : il faudra y revenir 
-
-767  dev.73  (2013/01/03) econte:  New structure for JetClusterer 
-
-766  dev.72  (2013/01/02) econte:  New structure development 
-
-765  dev.71  (2012/12/15) econte:  fix bugs with global cross-section computation 
-
-763  dev.70  (2012/12/15) econte:  New structure + matching -> merging 
-
-762  dev.69  (2012/12/13) econte:  functions for the new structure of SampleAnalyzer 
-
-761  dev.68  (2012/12/13) bfuks:   mcatnlo-utitliies 
-
-760  dev.67  (2012/12/12) gserret: Bug fix with NiceTitle() 
-
-759  dev.66  (2012/12/11) econte:  Validation of the release : fix bugs 
-
-758  dev.65  (2012/12/11) econte:  new structure for MadAnalysis layout (ROOT output is given up) - 
-                                   removing preview and generate commands 
-
-757  dev.64  (2012/12/08) bfuks:   Latex report bug fix 
-
-754  dev.63  (2012/12/07) econte:  Skeleton for Glue + test program to Benj 
-
-753  dev.62  (2012/12/07) econte:  Fix Adam's bug related to import 
-
-752  dev.61  (2012/12/02) econte:  Adding MET and MHT as particles in RECO mode [Ben's request] 
-
-751  dev.60  (2012/12/01) econte:  Improving HEPMC reader : taking into account the event-weight 
-
-747  dev.59  (2012/11/29) econte:  adding namespace + updating header script + fix Adam bugs related to 
-                                   LHE file 
-
-746  dev.58  (2012/11/29) bfuks:   Bug fixes 
-
-744  dev.57  (2012/11/28) econte:  remove validation scripts 
-
-744  dev.56  (2012/11/28) econte:  remove validation scripts 
-
-737  dev.55  (2012/11/28) bfuks:   Compilation bug fixes 
-
-729  dev.54  (2012/11/28) bfuks:   Preparing 1.1.4 
-
-726  dev.53  (2012/11/28) econte:  adding new validation scripts + splitting validation in 3 steps 
-
-725  dev.52  (2012/11/27) econte:  updating validation scripts 
-
-724  dev.51  (2012/11/27) econte:  fixing bugs + updating validation scripts 
-
-723  dev.50  (2012/11/27) econte:  Fixing Adam's bug 
-
-720  dev.49  (2012/11/27) econte:  Adam bug fixing in progress (40%) + updating some validation script 
-
-719  dev.48  (2012/11/27) bfuks:   New routines to check the structure of the HEP event files; bug 
-                                   fixes; layout improvements 
-
-718  dev.47  (2012/11/26) econte:  Fix bug related to cuts + bug related to resubmit + update some 
-                                   validation scripts 
-
-717  dev.46  (2012/11/26) econte:  Dataset names are not sorted according to alphabetical order 
-
-716  dev.45  (2012/11/26) econte:  fix bugs related to config display 
-
-715  dev.44  (2012/11/26) econte:  Merging plots are available now + new display for configuration 
-                                   checking 
-
-714  dev.43  (2012/11/26) bfuks:   Display selection improved; The history can now be written to a file 
-
-713  dev.42  (2012/11/25) econte:  fix problem of compilation with merging plots 
-
-712  dev.41  (2012/11/23) econte:  Fix bugs with HEPMC reader 
-
-711  dev.40  (2012/11/23) bfuks:   new XDR routines for long64 
-
-710  dev.39  (2012/11/23) econte:  Updating the code devoted to cutflow + some bug fixes 
-
-709  dev.38  (2012/11/23) bfuks:   Bug fix with the new histogram manager 
-
-708  dev.37  (2012/11/22) econte:  general info supplied in SAF format (and not in ROOT format) 
-
-707  dev.36  (2012/11/22) bfuks:   New structure for the generated code; showering step 1 
-
-706  dev.35  (2012/11/20) econte:  Fix layout of SAF file 
-
-705  dev.34  (2012/11/20) econte:  new histograms and cuts manager 
-
-701  dev.33  (2012/11/17) bfuks:   Bug fix in the tex report 
-
-680  dev.32  (2012/11/13) bfuks:   Bug fix with the new layout 
-
-679  dev.31  (2012/11/12) bfuks:   Layout when starting the program 
-
-678  dev.30  (2012/11/12) bfuks:   New layout for the TeX report; new layout when starting the program; 
-
-677  dev.29  (2012/11/12) bfuks:   new versioning for the developement version 
-
-676  1.1.28  (2012/11/12) bfuks:   Bug fix in the plotflow (thanks to Rik); bug fix in the dataset 
-                                   management (thanks to Adam) 
-
-665  1.1.27  (2012/11/08) econte:  Bug fix related to unicity of the histogram name and to the bugged 
-                                   events 
-
-664  1.1.26  (2012/11/08) bfuks:   MA5 can now use fastjet if installed on the system (usr/lib et al.) 
-
-654  1.1.25  (2012/11/07) bfuks:   Default behavior of the datasets with respect to the weights 
-                                   modified. 
-
-653  1.1.24  (2012/11/07) econte:  fix bug related to ALL observable 
-
-652  1.1.23  (2012/11/07) econte:  fix bugs related to normalization 
-
-651  1.1.22  (2012/11/07) econte:  bug fix with TH1F duplica 
-
-650  1.1.21  (2012/11/07) econte:  Adding STDHEP4 block in STDHEP format reader 
-
-646  1.1.20  (2012/11/05) econte:  fix for absolute/relative path 
-
-645  1.1.19  (2012/11/05) econte:  Bug fix with negative weights 
-
-644  1.1.18  (2012/11/04) econte:  event-weight 
-
-644  1.1.17  (2012/11/04) econte:  event-weights 
-
-643  1.1.16  (2012/11/02) bfuks:   Update of the layout for the negative weights + readability 
-                                   improvements 
-
-642  1.1.15  (2012/11/01) bfuks:   Implementing minor modifications for the HTML layout 
-
-641  1.1.14  (2012/11/01) bfuks:   New HTML report 
-
-640  1.1.13  (2012/10/31) bfuks:   Simplified submission/resubmission; simplification of the usage of 
-                                   the command 'open'; link to the pdf report included in HTML report; 
-
-639  1.1.12  (2012/10/31) bfuks:   No more 'generate' commands; everything is performed via 'submit' 
-                                   and 'resubmit'; check if pdflatex, latex and dvipdf are installed; 
-
-638  1.1.11  (2012/10/26) econte:  Fix the issue with index mother in LHE output 
-
-637  1.1.10  (2012/10/12) bfuks:   LHE reader modified for MC@NLO 
-
-635  1.1.9   (2012/10/11) bfuks:   Strange issue with the is and == in python cleared 
-
-634  1.1.8   (2012/10/11) bfuks:   FAC Format syntax corrected 
-
-632  1.1.7   (2012/10/08) econte:  Fix bugs related to FAC format 
-
-632  1.1.6   (2012/10/08) econte:  Fix bug with FAC dataformat 
-
-631  1.1.5   (2012/10/08) bfuks:   expert mode printings modified (when typing bin.ma5 -e) 
-
-630  1.1.4   (2012/10/08) bfuks:   Issues with the FAC format 
-
-629  1.1.3   (2012/10/04) bfuks:   Updating LHE Reader with respect to aMC@NLO 
-
-622  1.1.2   (2012/10/01) gserret: expert mode fix 
-
-608  1.1.1   (2012/09/30) bfuks:   bug fix in the LHE reader (thanks M. Rothering) 
-
-591  1.1.0   (2012/09/29) bfuks:   Official release of version 1.1.0 
+54   1.1.6   (2013/05/17) ma5team:  - Many bug fixes (special thanks to Adam Alloul and Jose Ruiz).
+                                    - Simplified LHE output added, LHCO writer at the beta level.
+                                    - Clustering and b, c and tau (mis)ident. improved.
+                                    - zlib updated to the most recent version.
+                                    - New version of the expert mode.
+                                    - Adding the photons in the reco mode.
+                                    - New structure for the working directory.
+                                    - Adding alpha_T in the observable lists.
+                                    - Screen output improved.
+                                    - Event weights included in the HEPmc reader.
+
+737  1.1.5   (2012/11/28) ma5team: Compilation bug fixes.
+
+729  1.1.4   (2012/11/28) ma5team: New treatment of the plots.
+                                   New structure for the generated directory.
+                                   New routines to check the integrity of StdHep files.
+                                   Layout improvements (screen output, HTML, TeX).
+                                   Possiblity to write the history in a file.
+                                   Several bug fixes
+
+666  1.1.3   (2012/11/10) ma5team: MA5 can now use fastjet if installed on the system (usr/lib, ...) 
+                                   Positive and negative weighted events supported.
+                                   New layout for the HTML report. 
+                                   Simplified submission/resubmission procedure (submit and resumbmit). 
+                                   Simplification of the usage of the command 'open'.
+                                   No more 'generate_xxx' commands (included now in 'submit'/'resubmit'). 
+                                   Checks at startup if pdflatex, latex and dvipdf are installed. 
+
+591  1.1.0   (2012/09/29) ma5team: Official release of version 1.1.0 
                                      - Interface with FastJet
                                      - Jet clustering from HAD-level events
                                      - Merging check plots
 
-471  1.0.0   (2012/06/08) bfuks:   Official release of version 1.0.0 
+471  1.0.0   (2012/06/08) ma5team: Official release of version 1.0.0 
 
