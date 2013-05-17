@@ -148,7 +148,7 @@ bool LHCOReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 
   // Finalize MHT
   myEvent.rec()->MHT_.momentum().SetPz(0.);
-  myEvent.rec()->MHT_.momentum().SetE(myEvent.mc()->MHT_.momentum().Pt());
+  myEvent.rec()->MHT_.momentum().SetE(myEvent.rec()->MHT_.momentum().Pt());
 
   // Normal end
   return true; 

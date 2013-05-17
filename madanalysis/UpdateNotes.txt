@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+49   dev.130 (2013/05/17) econte:  fixing bug with LHCO reader 
+
 48   dev.129 (2013/05/17) econte:  changing header 2 
 
 47   dev.128 (2013/05/17) econte:  fixing minor bug with merging plots 
