@@ -69,7 +69,7 @@ reached, the latter being only limited by the programming skills and the
 originality of the user.
 
 More details can be found on the MadAnalysis 5 website:
-  http://madanalysis.irmp.ucl.ac.be/ 
+  https://launchpad.net/madanalysis5
 
 
 ################################################################################
@@ -106,6 +106,12 @@ To benefit from all options coming with the MadAnalysis 5 program, the following
 (optional) libraries have to be installed on the system:
  - Zlib headers and libraries that can be downloaded from the website
      http://zlib.net/
+ - The FastJet package version 3.0, or a more recent version, that can be
+   downloaded from
+     http://fastjet.fr/
+   This package can also be installed by typing 'install fastjet' in MadAnalysis
+   5.
+ - latex and pdflatex compilers
 
 
 ################################################################################
@@ -114,15 +120,14 @@ To benefit from all options coming with the MadAnalysis 5 program, the following
 
 The latest stable version of the MadAnalysis 5 package can be downloaded as a
 tarball from the website
-  http://madanalysis.irmp.ucl.ac.be 
+  https://launchpad.net/madanalysis5
 The tarball can subsequently be unpacked by issuing in a shell
   tar -xvf ma5_xxxx.tgz
 where 'xxxx' stands for a version number.
 
-Alternatively, MadAnalysis 5 can also be obtained by SVN (SubVersion) by issuing
-in a shell
-  svn checkout https://cp3.irmp.ucl.ac.be/sources/madanalysis/branches/madanalysis-current
-
+Alternatively, MadAnalysis 5 can also be obtained via the Bazaar versioning
+system by issuing in a shell
+  bzr branch lp:madanalysis5
 
 ################################################################################
                          4. DESCRIPTION OF THE PACKAGE        
@@ -134,6 +139,8 @@ follows:
    +  bin                | This directory contains the executable file 'ma5'.
    +  madanalysis        | This directory contains all the source files of
                          |   MadAnalysis 5.
+      +   configuration  | This directory contains functions related to the
+                         |   configuration of the dependencie such as FastJet.
       +   core           | This directory contains the core of the Python
                          |   interface.
       +   dataset        | This directory contains the functions related to the
@@ -156,44 +163,62 @@ follows:
                          |   handling of multiparticle and particle collections.
       +   observable     | This directory contains the list of observables
                          |   supported within MadAnalysis 5.
-      +   SampleAnalyzer | This directory contains the C++ kernel of
-                         |   MadAnalysis, dubbed SampleAnalyzer (see below).
       +   selection      | This directory contains the routines necessary for
                          |   producing histograms and applying event selection
                          |   cuts.
+   +  tools              | This directory contains the packages that are used
+                         |   by MadAnalysis 5.
+      +   SampleAnalyzer | This directory contains the C++ kernel of
+                         |   MadAnalysis, dubbed SampleAnalyzer (see below).
+      +   Glue           | This directory contains the glues allowing to use
+                         |   showering programs (not supported yet).
   (+) samples            | This optional directory is dedicated to event sample
                          |   storage. 
-  (+) lib                | If not present, this directory is created by
-                         |   MadAnalysis to store the SampleAnalyzer library. 
 
 The main file of the package is also the only one which is supposed to be run on
 a system: 
   bin/ma5
 In addition, several text files are dedicated to specific information:
   - README: this file,
-  - COPYING.ma5: the description of the software license,
+  - COPYING: the description of the software license,
   - version.txt: general information about the installed release,
   - madanalysis/UpdateNotes.txt: the update notes.
 
 The C++ kernel of MadAnalysis is stored in the directory
-  madanalysis/SampleAnalyzer
+  tools/SampleAnalyzer
 This directory has the following structure: 
-   + madanalysis         
+   + tools
      + SampleAnalyzer
-       + Analysis         | This directory contains examples of predefined
-                          |   analyses.
+       + Analyzer         | This directory contains the skeleton for the
+                          |   analysis class as well as for the merging plots.
        + Core             | This directory contains the main routines.
+       + Counter          | This directory contains routines related to
+                          |   histogram and cut referencing.
        + DataFormat       | This directory contains the implementation of the
                           |   employed data format for handling event samples
                           |   and the related information.
+       + Filter           | This directory contains routines for applying event
+                          |   filtering (to be developped in the future).
+       + JetClustering    | This directory contains routines dedicated to jet
+                          |   clustering algorithms.
+       + Lib              | This directory store the SampleAnalyzer library,
+                          |   once compiled.
+       + Plot             | This directory contains all the methods related to
+                          |   histogram generation.
        + Reader           | This directory contains the definition of classes
                           |   dedicated to the reading of the event files. 
-       + Services         | This directory contains services (logger, physics
+       + Service          | This directory contains services (logger, physics
                           |   tools, ...)
-     + newAnalysis.py     | This Python script allows to create a blank analysis
-                          |   (see the manual).
+       + Writer           | This directory contains the definition of classes
+                          |   dedicated to the writing of event files and
+                          | result files.
+     + newAnalyzer.py     | This script allows to create a blank analysis.
+     + newFilter.py       | This script allows to create a blank filter.
 
-The associated Doxygen documentation can be found on the MadAnalysis 5 website
+The Glue directory contains routines dedicated to future developments and are
+thus neither supporter, nor documented.
+
+The associated Doxygen documentation can be found on the MadAnalysis 5 wiki:
   http://madanalysis.irmp.ucl.ac.be/wiki/doxygen  
 
 
@@ -225,12 +250,12 @@ Any public release of MadAnalysis 5 has been automatically and intensely
 validated. However, especially due to the variety of possible system
 configurations and the large number of functionalities included in the program,
 it is not impossible that some bugs are found. In this case, is is strongly
-suggested to create a ticket on our website
-  http://madanalysis.irmp.ucl.ac.be/newticket
+suggested to create a report on our website
+  https://launchpad.net/madanalysis5
 
 In this way, you also participate to the improvement of MadAnalysis 5 and the
 authors thank you for this.
- 
+
 
 ################################################################################
                          7. OUR FAMOUS LAST WORDS
@@ -244,6 +269,3 @@ Feedback, comments and advises are welcome and can be sent by e-mail:
   ma5team@iphc.cnrs.fr
 
 That's all folks!
-
-
-
