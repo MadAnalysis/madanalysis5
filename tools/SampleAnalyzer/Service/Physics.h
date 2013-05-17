@@ -359,19 +359,20 @@ class PhysicsService
   /// Compute the total transverse energy
   inline double EventTET(const MCEventFormat* event) const
   { 
-    double energy=0;
+    /*    double energy=0;
     for (unsigned int i=0;i<event->particles().size();i++)
     {
       if (event->particles()[i].statuscode()==finalstate_)
           energy+=event->particles()[i].pt();
     }
-    return energy;
+    return energy;*/
+    return event->TET();
   }
 
   /// Compute the missing transverse energy
   inline double EventMET(const MCEventFormat* event) const
   {
-    TLorentzVector q(0.,0.,0.,0.);
+    /*    TLorentzVector q(0.,0.,0.,0.);
     for (unsigned int i=0;i<event->particles().size();i++)
     {
       if (event->particles()[i].statuscode()==finalstate_)
@@ -379,6 +380,8 @@ class PhysicsService
           q+=event->particles()[i].momentum();
     }
     return q.Perp();
+    */
+    return event->MET().pt();
   }
 
   /// Compute the Alpha_T
@@ -548,20 +551,21 @@ class PhysicsService
   /// Compute the total hadronic transverse energy
   inline double EventTHT(const MCEventFormat* event) const
   {
-    double energy=0;
+    /*    double energy=0;
     for (unsigned int i=0;i<event->particles().size();i++)
     {
       if (event->particles()[i].statuscode()==finalstate_)
         if (IsHadronic(event->particles()[i]))
           energy+=event->particles()[i].pt();
     }
-    return energy;
+    return energy;*/
+    return event->THT();
   }
 
   /// Compute the missing hadronic transverse energy
   inline double EventMHT(const MCEventFormat* event) const
   {
-    TLorentzVector q(0.,0.,0.,0.);
+    /*    TLorentzVector q(0.,0.,0.,0.);
     for (unsigned int i=0;i<event->particles().size();i++)
     {
       // rejecting non finalstate particle
@@ -571,13 +575,14 @@ class PhysicsService
           IsHadronic(event->particles()[i]))
         q+=event->particles()[i].momentum();
     }
-    return q.Perp();
+    return q.Perp();*/
+    return event->MHT().pt();
   }
 
   /// Compute the total transverse energy
   inline double EventTET(const RecEventFormat* event) const
   { 
-    double energy=0;
+    /*    double energy=0;
 
     for (unsigned int i=0;i<event->jets().size();i++)
       energy+=event->jets()[i].et();
@@ -588,7 +593,8 @@ class PhysicsService
     for (unsigned int i=0;i<event->taus().size();i++)
       energy+=event->taus()[i].et();
   
-    return energy;
+      return energy;*/
+    return event->TET();
   }
 
   /// Compute the missing transverse energy
@@ -600,23 +606,26 @@ class PhysicsService
   /// Compute the total hadronic transverse energy
   inline double EventTHT(const RecEventFormat* event) const
   {
-    double energy=0;
+    /*    double energy=0;
     for (unsigned int i=0;i<event->jets().size();i++)
     {
       energy+=event->jets()[i].et();
     }
-    return energy;
+    return energy;*/
+    return event->THT();
   }
 
   /// Compute the missing hadronic transverse energy
   inline double EventMHT(const RecEventFormat* event) const
   {
-    TLorentzVector q(0.,0.,0.,0.);
+    /*    TLorentzVector q(0.,0.,0.,0.);
     for (unsigned int i=0;i<event->jets().size();i++)
     {
       q+=event->jets()[i].momentum();
     }
     return q.Et(); 
+    */
+    return event->MHT().pt();
   }
 
   /// rank filter

@@ -34,6 +34,9 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
   if (myEvent.rec() ==0) myEvent.InitializeRec();
   myEvent.rec()->Reset();
 
+  double & TET = myEvent.rec()->TET();
+  double & THT = myEvent.rec()->THT();
+
   // Preparing inputs
   std::vector<fastjet::PseudoJet> inputs;
   for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
@@ -66,10 +69,12 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
 
   for (unsigned int i=0;i<jets.size();i++)
   {
-    MET->momentum().SetPx(MET->momentum().Px() - jets[i].px());
-    MET->momentum().SetPy(MET->momentum().Py() - jets[i].py());
+    TLorentzVector q(jets[i].px(),jets[i].py(),jets[i].pz(),jets[i].e());
+    (*MET) -= q;
+    (*MHT) -= q;
+    THT += jets[i].pt();
+    TET += jets[i].pt();
   }
-  (*MHT)=(*MET);
 
   // Getting jets with PTmin
   if (Exclusive_) jets = clust_seq.exclusive_jets(Ptmin_);
@@ -117,6 +122,9 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
   for (unsigned int i=0;i<myEvent.rec()->muons().size();i++)
   {
     (*MET) -= myEvent.rec()->muons()[i].momentum();
+    //    MET->momentum().SetPx(MET->momentum().Px() - myEvent.rec()->muons()[i].px());
+    //    MET->momentum().SetPy(MET->momentum().Py() - myEvent.rec()->muons()[i].py());
+    TET += myEvent.rec()->muons()[i].pt();
   }
 
   MET->momentum().SetPz(0.);

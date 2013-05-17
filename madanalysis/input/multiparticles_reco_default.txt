@@ -5,5 +5,8 @@ ta = ta+ ta-
 l+ = mu+ e+ ta+
 l- = mu- e- ta-
 l = mu e ta
+invisible = -16 -14 -12 12 14 16 1000022
+hadronic = j
+
 
 

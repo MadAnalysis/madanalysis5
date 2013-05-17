@@ -45,13 +45,13 @@ def WriteJobInitialize(file,main):
     file.write('{\n')
 
     # mcConfig initialization
-    if main.mode!=MA5RunningType.RECO:
-        file.write('  // Initializing PhysicsService for MC\n') 
-        file.write('  PHYSICS->mcConfig().Reset();\n\n')
-        WriteHadronicList(file,main)
-        file.write('\n')
-        WriteInvisibleList(file,main)
-        file.write('\n')
+    #if main.mode!=MA5RunningType.RECO: FOR ALL MODES !!!!
+    file.write('  // Initializing PhysicsService for MC\n') 
+    file.write('  PHYSICS->mcConfig().Reset();\n\n')
+    WriteHadronicList(file,main)
+    file.write('\n')
+    WriteInvisibleList(file,main)
+    file.write('\n')
 
     # recConfig initialization
     if main.mode==MA5RunningType.RECO:
