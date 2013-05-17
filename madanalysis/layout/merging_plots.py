@@ -252,7 +252,7 @@ class MergingPlots:
         legend.SetTextFont(22);
         legend.AddEntry(DJRplots[0].myhisto,"Sum")
         for ind in range(1,len(DJRplots)):
-            legend.AddEntry(DJRplots[ind].myhisto,str(ind)+"-jet sample")
+            legend.AddEntry(DJRplots[ind].myhisto,str(ind-1)+"-jet sample")
         legend.SetFillColor(0)    
         legend.Draw()
 

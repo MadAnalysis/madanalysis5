@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+47   dev.128 (2013/05/17) econte:  fixing minor bug with merging plots 
+
 45   dev.127 (2013/05/17) econte:  changing the header 
 
 43   dev.126 (2013/05/17) LeMouth: test 
