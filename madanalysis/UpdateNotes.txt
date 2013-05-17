@@ -1,6 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
-54   1.1.6   (2013/05/17) bfuks:   Typo in the README 
+55   1.1.7   (2013/05/17) bfuks:   testing 
+
+54   1.1.6   (2013/05/17) bfuks:   Typo in the README sdfsdf
 
 49   dev.130 (2013/05/17) econte:  fixing bug with LHCO reader 
 
