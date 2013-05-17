@@ -120,6 +120,36 @@ StatusCode::Type LHCOReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySam
 // -----------------------------------------------------------------------------
 bool LHCOReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 {
+  // MHT & THT
+  for (unsigned int i=0; i<myEvent.rec()->jets_.size();i++)
+  {
+    myEvent.rec()->MHT_ -= myEvent.rec()->jets_[i].momentum();
+    myEvent.rec()->THT_ += myEvent.rec()->jets_[i].pt();
+    myEvent.rec()->TET_ += myEvent.rec()->jets_[i].pt();
+  }
+
+  // TET
+  for (unsigned int i=0; i<myEvent.rec()->muons_.size();i++)
+  {
+    myEvent.rec()->TET_ += myEvent.rec()->muons_[i].pt();
+  }
+  for (unsigned int i=0; i<myEvent.rec()->electrons_.size();i++)
+  {
+    myEvent.rec()->TET_ += myEvent.rec()->electrons_[i].pt();
+  }
+  for (unsigned int i=0; i<myEvent.rec()->taus_.size();i++)
+  {
+    myEvent.rec()->TET_ += myEvent.rec()->taus_[i].pt();
+  }
+  for (unsigned int i=0; i<myEvent.rec()->photons_.size();i++)
+  {
+    myEvent.rec()->TET_ += myEvent.rec()->photons_[i].pt();
+  }
+
+  // Finalize MHT
+  myEvent.rec()->MHT_.momentum().SetPz(0.);
+  myEvent.rec()->MHT_.momentum().SetE(myEvent.mc()->MHT_.momentum().Pt());
+
   // Normal end
   return true; 
 }

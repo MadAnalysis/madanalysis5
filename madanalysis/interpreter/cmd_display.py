@@ -34,12 +34,12 @@ class CmdDisplay(CmdBase.CmdBase):
     def do_other(self,object):
 
         # Looking for one dot in the name
-        object = object.lower()
-        object = object.replace('clustering.bjet_id.','clustering.bjet_idX')
-        object = object.replace('clustering.tau_id.','clustering.tau_idX')
+#        object = object.lower()
+        object = object.replace('clustering.bjet_id.','clustering.bjet_idXXX')
+        object = object.replace('clustering.tau_id.','clustering.tau_idXXX')
         objs = object.split('.')
         for i in range(len(objs)):
-            objs[i] = objs[i].replace('X','.')
+            objs[i] = objs[i].replace('XXX','.')
         if len(objs)>3 or len(objs)==0:
             logging.error("syntax error with the command 'display'.")
             self.help()
@@ -167,12 +167,12 @@ class CmdDisplay(CmdBase.CmdBase):
 
         # Splitting
         object = args[1]
-        object = object.lower()
-        object = object.replace('clustering.bjet_id.','clustering.bjet_idX')
-        object = object.replace('clustering.tau_id.','clustering.tau_idX')
+#        object = object.lower()
+        object = object.replace('clustering.bjet_id.','clustering.bjet_idXXX')
+        object = object.replace('clustering.tau_id.','clustering.tau_idXXX')
         objs = object.split('.')
         for i in range(len(objs)):
-            objs[i] = objs[i].replace('X','.')
+            objs[i] = objs[i].replace('XXX','.')
 
         if len(objs)==1:
             return self.complete_name(text,objs[0],None)

@@ -88,12 +88,12 @@ class CmdSet(CmdBase.CmdBase):
 
         # Looking for one dot in the name
         object = args[0]
-        object = object.lower()
-        object = object.replace('clustering.bjet_id.','clustering.bjet_idX')
-        object = object.replace('clustering.tau_id.','clustering.tau_idX')
+#        object = object.lower()
+        object = object.replace('clustering.bjet_id.','clustering.bjet_idXXX')
+        object = object.replace('clustering.tau_id.','clustering.tau_idXXX')
         objs = object.split('.')
         for i in range(len(objs)):
-            objs[i] = objs[i].replace('X','.')
+            objs[i] = objs[i].replace('XXX','.')
 
         if len(objs)==2 and objs[0].lower()=='main':
             self.main.user_SetParameter(objs[1],args[2])
@@ -309,12 +309,12 @@ class CmdSet(CmdBase.CmdBase):
 
         # Splitting
         object = args[1]
-        object = object.lower()
-        object = object.replace('clustering.bjet_id.','clustering.bjet_idX')
-        object = object.replace('clustering.tau_id.','clustering.tau_idX')
+#        object = object.lower()
+        object = object.replace('clustering.bjet_id.','clustering.bjet_idXXX')
+        object = object.replace('clustering.tau_id.','clustering.tau_idXXX')
         objs = object.split('.')
         for i in range(len(objs)):
-            objs[i] = objs[i].replace('X','.')
+            objs[i] = objs[i].replace('XXX','.')
         
         if len(objs)==1:
             return self.complete_name(text,objs[0],None,False)

@@ -150,6 +150,30 @@ bool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
   mySample.mc()->set_xsection(value);
   mySample.mc()->set_xsection_error(err_value);
 
+  // Mother pointer assignment
+  for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
+  {
+    MCParticleFormat& part = myEvent.mc()->particles_[i];
+
+    // MET, MHT, TET, THT
+    if (part.statuscode()==1 && !PHYSICS->IsInvisible(part))
+    {
+      myEvent.mc()->MET_ -= part.momentum();
+      myEvent.mc()->TET_ += part.pt();
+      if (PHYSICS->IsHadronic(part))
+      {
+        myEvent.mc()->MHT_ -= part.momentum();
+        myEvent.mc()->THT_ += part.pt(); 
+      }
+    }
+  }
+
+  // Finalize event
+  myEvent.mc()->MET_.momentum().SetPz(0.);
+  myEvent.mc()->MET_.momentum().SetE(myEvent.mc()->MET_.momentum().Pt());
+  myEvent.mc()->MHT_.momentum().SetPz(0.);
+  myEvent.mc()->MHT_.momentum().SetE(myEvent.mc()->MHT_.momentum().Pt());
+
   // Normal end 
   return true; 
 }

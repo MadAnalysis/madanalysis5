@@ -605,6 +605,20 @@ bool STDHEPreader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
   // Mother pointer assignment
   for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
   {
+    MCParticleFormat& part = myEvent.mc()->particles_[i];
+
+    // MET, MHT, TET, THT
+    if (part.statuscode()==1 && !PHYSICS->IsInvisible(part))
+    {
+      myEvent.mc()->MET_ -= part.momentum();
+      myEvent.mc()->TET_ += part.pt();
+      if (PHYSICS->IsHadronic(part))
+      {
+        myEvent.mc()->MHT_ -= part.momentum();
+        myEvent.mc()->THT_ += part.pt(); 
+      }
+    }
+
     unsigned int index1=myEvent.mc()->particles_[i].mothup1_;
     unsigned int index2=myEvent.mc()->particles_[i].mothup2_;
     if (index1!=0)
@@ -642,6 +656,12 @@ bool STDHEPreader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
       }
     }
   }
+
+  // Finalize event
+  myEvent.mc()->MET_.momentum().SetPz(0.);
+  myEvent.mc()->MET_.momentum().SetE(myEvent.mc()->MET_.momentum().Pt());
+  myEvent.mc()->MHT_.momentum().SetPz(0.);
+  myEvent.mc()->MHT_.momentum().SetE(myEvent.mc()->MHT_.momentum().Pt());
 
   // Normal end
   return true;

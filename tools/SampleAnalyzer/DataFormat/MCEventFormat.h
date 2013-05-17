@@ -164,7 +164,12 @@ class MCEventFormat
   void Reset()
   { nparts_=0; processId_=0; weight_=1.;
     scale_=0.; alphaQED_=0.; alphaQCD_=0.;
-    particles_.clear(); }
+    particles_.clear(); 
+    MET_.Reset();
+    MHT_.Reset();
+    TET_=0.;
+    THT_=0.; 
+  }
 
   /// Displaying data member values
   void Print() const
