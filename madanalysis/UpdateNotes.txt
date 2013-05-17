@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+58   1.1.7   (2013/05/17) bfuks:   initializating 1.1.7 
+
 54   1.1.6   (2013/05/17) ma5team:  - Many bug fixes (special thanks to Adam Alloul and Jose Ruiz).
                                     - Simplified LHE output added, LHCO writer at the beta level.
                                     - Clustering and b, c and tau (mis)ident. improved.
