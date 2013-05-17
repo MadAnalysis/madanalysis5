@@ -71,6 +71,8 @@ class MCSampleFormat
   std::vector<std::string> header_; // file header
   Bool_t      MadgraphTag_;         // Is the file produced by Madgraph
   Bool_t      MadgraphPythiaTag_;   // Is the file produced by MadgraphPythia
+  Bool_t      MadanalysisSimplifiedLheTag_;      // Is a simplified LHE produced by MadAnalysis
+  Bool_t      MadanalysisLheTag_;      // Is a LHE produced by MadAnalysis
   Float_t     xsection_;            // cross-section (fb^{-1})
   Float_t     xsection_error_;      // cross-section error (fb^{-1})
   Float_t     sumweight_positive_;  // all events with positive weights
@@ -100,6 +102,8 @@ class MCSampleFormat
     weightMode_         = 0; 
     MadgraphPythiaTag_  = false; 
     MadgraphTag_        = false;
+    MadanalysisSimplifiedLheTag_  = false; 
+    MadanalysisLheTag_        = false;
     xsection_           = 0.; 
     xsection_error_     = 0.;
     sumweight_positive_ = 0.;
@@ -149,6 +153,12 @@ class MCSampleFormat
   /// Accessor to the MadGraphPythia tag
   const Bool_t&       MadgraphPythiaTag()const {return MadgraphPythiaTag_;}
 
+  /// Accessor to the MadGraphPythia tag
+  const Bool_t&       MadanalysisSimplifiedLheTag()const {return MadanalysisSimplifiedLheTag_;}
+
+  /// Accessor to the MadGraphPythia tag
+  const Bool_t&       MadanalysisLheTag()const {return MadanalysisLheTag_;}
+
   /// Accessor to the sample cross section mean value
   const Float_t&      xsection()         const {return xsection_; }
 
@@ -184,6 +194,22 @@ class MCSampleFormat
   {weightMode_=v;}
 
   /// Enable MadgraphTag
+  void enableMadanalysisSimplifiedLheTag()        
+  {MadanalysisSimplifiedLheTag_=true;}
+
+  /// Disable MadgraphTag
+  void disableMadanalysisSimplifiedLheTag()       
+  {MadanalysisSimplifiedLheTag_=false;}
+
+  /// Enable MadgraphTag
+  void enableMadanalysisLheTag()        
+  {MadanalysisLheTag_=true;}
+
+  /// Disable MadgraphTag
+  void disableMadanalysisLheTag()       
+  {MadanalysisLheTag_=false;}
+
+  /// Enable MadgraphTag
   void enableMadgraphTag()        
   {MadgraphTag_=true;}
 
@@ -215,6 +241,8 @@ class MCSampleFormat
     INFO << "        => sample produced by ";
     if (MadgraphPythiaTag_) INFO << "MadGraph + Pythia.";
     else if (MadgraphTag_) INFO << "MadGraph.";
+    else if (MadanalysisSimplifiedLheTag_) INFO << "MadAnalysis (simplified LHE format).";
+    else if (MadanalysisLheTag_) INFO << "MadAnalysis (LHE format).";
     else INFO << "an unknown generator (xsection assumed in pb).";
     INFO<<endmsg;
   }

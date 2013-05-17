@@ -97,7 +97,15 @@ bool LHEWriter::WriteHeader(const SampleFormat& mySample)
   *output_ << "#                                                                    *" << std::endl;
   *output_ << "#....................................................................*" << std::endl;
   *output_ << "" << std::endl;
-  *output_ << "<MA5Format> Simplified LHE format </MA5Format>" << std::endl;
+  // Explanation about the Simplified LHE
+  if (mySample.rec()!=0)
+  {
+    *output_ << "<MA5Format> Simplified LHE format </MA5Format>" << std::endl;
+  }
+  else
+  {
+    *output_ << "<MA5Format> LHE format </MA5Format>" << std::endl;
+  }
   *output_ << "<FormatDescription>" << std::endl;
   *output_ << "The original Les Houches Event (LHE) format is defined in hep-ph/0609017" << std::endl;
   *output_ << "" << std::endl;

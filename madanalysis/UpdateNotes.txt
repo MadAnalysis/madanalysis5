@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+40   dev.125 (2013/05/17) econte:  adding tag to LHE produced by MA5 + calculating properly the MET in 
+                                   case of LHE simplified 
+
 39   dev.124 (2013/05/17) econte:  fixing major bug related to MET in clustering mode 
 
 38   dev.123 (2013/05/17) econte:  calculating MET, TET, MHT, THT when reading event 

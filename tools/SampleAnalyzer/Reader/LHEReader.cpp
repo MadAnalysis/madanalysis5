@@ -74,6 +74,10 @@ bool LHEReader::ReadHeader(SampleFormat& mySample)
         if ( (line.find("<MGPythiaCard>")!=std::string::npos) ||
              (line.find("<mgpythiacard>")!=std::string::npos) ) 
           mySample.mc()->enableMadgraphPythiaTag();
+        if ( (line.find("<MA5Format> Simplified LHE format </MA5Format>")!=std::string::npos) )
+          mySample.mc()->enableMadanalysisSimplifiedLheTag();
+        if ( (line.find("<MA5Format> LHE format </MA5Format>")!=std::string::npos) )
+          mySample.mc()->enableMadanalysisLheTag();
       }
       while(!EndOfLoop);
       GoodHeader = true;
@@ -212,10 +216,19 @@ bool LHEReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
   {
     MCParticleFormat& part = myEvent.mc()->particles_[i];
 
+    // MET in case of simplified LHE
+    if (part.pdgid()==12 && (mySample.mc()->MadanalysisSimplifiedLheTag() || mySample.mc()->MadgraphPythiaTag()))
+    {
+      myEvent.mc()->MET_ -= part.momentum();
+    }
+
     // MET, MHT, TET, THT
     if (part.statuscode()==1 && !PHYSICS->IsInvisible(part))
     {
-      myEvent.mc()->MET_ -= part.momentum();
+      if (!mySample.mc()->MadanalysisSimplifiedLheTag() && !mySample.mc()->MadgraphPythiaTag())
+      {
+        myEvent.mc()->MET_ -= part.momentum();
+      }
       myEvent.mc()->TET_ += part.pt();
       if (PHYSICS->IsHadronic(part))
       {
