@@ -113,7 +113,7 @@ main.ma5dir = ma5dir
 
 # Release version
 # Do not touch it !!!!!  
-main.version = "dev.128"
+main.version = "dev.129"
 main.date = "2013/05/17"
 
 # Checking arguments
@@ -228,8 +228,10 @@ logging.info(\
 "*   MA5 release : " + \
          "%-24s" % main.version + "%+15s" % main.date  + "   *\n" + \
 "*                                                           *\n" + \
+"*         Comput. Phys. Commun. 184 (2013) 222-256          *\n" + \
+"*                                                           *\n" + \
 "*   The MadAnalysis Development Team - Please visit us at   *\n" + \
-"*   http://madanalysis.irmp.ucl.ac.be                       *\n" + \
+"*            https://launchpad.net/madanalysis5             *\n" + \
 "*                                                           *\n" + \
 "*              Type 'help' for in-line help.                *\n" + \
 "*                                                           *\n" + \

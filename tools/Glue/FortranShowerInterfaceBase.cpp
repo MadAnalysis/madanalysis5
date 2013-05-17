@@ -1,10 +1,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012 Eric Conte, Benjamin Fuks, Guillaume Serret
+//  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
-//  Official website: <http://madanalysis.irmp.ucl.ac.be>
+//  Official website: <https://launchpad.net/madanalysis5>
 //  
 //  MadAnalysis 5 is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@
 
 
 #include "FortranShowerInterfaceBase.h"
-
 using namespace MA5;
 
 // -----------------------------------------------------------------------------
