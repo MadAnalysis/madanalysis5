@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+60   1.1.9   (2013/05/18) econte:  test 
+
 59   1.1.8   (2013/05/17) bfuks:   test 
 
 58   1.1.7   (2013/05/17) bfuks:   initializating 1.1.7 

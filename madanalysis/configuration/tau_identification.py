@@ -29,13 +29,13 @@ class TauIdentification():
     default_exclusive   = False
     default_efficiency  = 1.
     default_misid_ljet  = 0.
-    
 
     userVariables = { "tau_id.matching_dr" : [str(default_matching_dr)],\
                       "tau_id.exclusive"   : [str(default_exclusive)],\
                       "tau_id.efficiency"  : [str(default_efficiency)],\
                       "tau_id.misid_ljet"  : [str(default_misid_ljet)]\
                     }
+
 
     def __init__(self):
         self.matching_dr = TauIdentification.default_matching_dr
