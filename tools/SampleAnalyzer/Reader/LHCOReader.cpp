@@ -65,49 +65,49 @@ StatusCode::Type LHCOReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySam
 
   bool EndOfLoop = false;
   
-// Declarging a new string for line
+  // Declarging a new string for line
   std::string line;
   std::string tmp;
      
   do
+  {
+    std::stringstream str;
+    str.str("");
+      
+    if (!ReadLine(line))
     {
-      std::stringstream str;
-      str.str("");
-      
-      
-      if (!ReadLine(line))
-	{
-	  EndOfFile_=true;
-	  return StatusCode::KEEP;
-	}
-      str << line;
-      str >> tmp;
+      EndOfFile_=true;
+      return StatusCode::KEEP;
+    }
+    str << line;
+    str >> tmp;
 
-      if (saved_)
-	{
-	  FillEventInitLine(savedline_,myEvent);
-	  saved_=false;
-	}
+    if (saved_)
+    {
+      FillEventInitLine(savedline_,myEvent);
+      saved_=false;
+    }
 
-      if(tmp=="0")
-	{
-	  if(firstevent_ )
+    if(tmp=="0")
+    {
+      if(firstevent_ )
 	    {
 	      FillEventInitLine(line,myEvent);
+        firstevent_=false;
+        continue;
 	    }
-	  else 
+      else 
 	    {
 	      EndOfLoop = true;
 	      savedline_=line;
 	      saved_=true;
 	      continue;
 	    }
-	}
-
-      FillEventParticleLine(line,myEvent);
-      
-      firstevent_=false;
     }
+
+    FillEventParticleLine(line,myEvent);
+      
+  }
   while(!EndOfLoop);
   
   // Normal end

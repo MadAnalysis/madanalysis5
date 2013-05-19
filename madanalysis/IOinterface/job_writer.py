@@ -253,7 +253,10 @@ class JobWriter():
         if self.output!="":
             file.write('  //Getting pointer to the writer\n')
             file.write('  WriterBase* writer1 = \n')
-            file.write('      manager.InitializeWriter("lhe","'+self.output+'");\n')
+            if self.output.lower().endswith('lhe') or self.output.lower().endswith('lhe.gz'):
+                file.write('      manager.InitializeWriter("lhe","'+self.output+'");\n')
+            elif self.output.lower().endswith('lhco') or self.output.lower().endswith('lhco.gz'):
+                file.write('      manager.InitializeWriter("lhco","'+self.output+'");\n')
             file.write('  if (writer1==0) return 1;\n\n')
         if self.clustering.algorithm!="none":
             file.write('  //Getting pointer to the clusterer\n')

@@ -22,74 +22,41 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef WRITER_TEXT_BASE_h
-#define WRITER_TEXT_BASE_h
+#ifndef LHCO_PARTICLE_FORMAT_h
+#define LHCO_PARTICLE_FORMAT_h
 
 // STL headers
-#include <fstream>
 #include <iostream>
-#include <sstream>
+#include <string>
 
-// RFIO headers
-#ifdef RFIO_USE
-   #include "SampleAnalyzer/Core/castorstream.h"
-#endif
-
-// SampleAnalyzer headers
-#include "SampleAnalyzer/Writer/WriterBase.h"
+// ROOT headers
+#include <Rtypes.h>
 
 namespace MA5
 {
 
-class WriterTextBase : public WriterBase
+class LHCOParticleFormat
 {
 
   // -------------------------------------------------------------
   //                        data members
   // -------------------------------------------------------------
- protected:
-
-  /// Streaming for reading input
-  std::ostream* output_;
-
-
-  // -------------------------------------------------------------
-  //                       method members
-  // -------------------------------------------------------------
  public:
 
-  /// Constructor without argument
-  WriterTextBase()
-  {
-    output_=0;
-  }
+  UInt_t id;
+  Float_t eta;
+  Float_t phi;
+  Float_t pt;
+  Float_t jmass;
+  Float_t ntrk;
+  Float_t btag;
+  Float_t hadem;
 
-	/// Destructor
-  virtual ~WriterTextBase()
-  {
-    if (output_ !=0) delete output_;
-  }
+  static const std::string header;
 
-  /// Initialize
-  virtual bool Initialize(const std::string& filename);
-
-  /// Read the sample (virtual pure)
-  virtual bool WriteHeader(const SampleFormat& mySample) = 0;
-
-  /// Read the event (virtual pure)
-  virtual bool WriteEvent(const EventFormat& myEvent,
-                          const SampleFormat& mySample) = 0;
-
-  /// Finalize the event (virtual pure)
-  virtual bool WriteFoot(const SampleFormat& mySample) = 0;
-
-  /// Finalize
-  virtual bool Finalize();
-
-  /// MA5 logo
-  void WriteMA5header();
- 
+  void Print(UInt_t num, std::ostream* out);
 };
+
 
 }
 

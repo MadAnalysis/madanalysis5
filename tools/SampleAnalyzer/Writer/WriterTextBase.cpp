@@ -147,3 +147,26 @@ bool WriterTextBase::Finalize()
   return true;
 }
 
+
+// -----------------------------------------------------------------------------
+// Header
+// -----------------------------------------------------------------------------
+void WriterTextBase::WriteMA5header()
+{
+  *output_ << "#################################################################################" << std::endl;
+  *output_ << "#                 THIS FILE HAS BEEN PRODUCED BY MADANALYSIS 5                  #" << std::endl;
+  *output_ << "#                                   ______  ______                              #" << std::endl;
+  *output_ << "#                           /'\\_/`\\/\\  __ \\/\\  ___\\                             #" << std::endl;
+  *output_ << "#                          /\\      \\ \\ \\_\\ \\ \\ \\__/                             #" << std::endl;
+  *output_ << "#                          \\ \\ \\__\\ \\ \\  __ \\ \\___``\\                           #" << std::endl;
+  *output_ << "#                           \\ \\ \\_/\\ \\ \\ \\/\\ \\/\\ \\_\\ \\                          #" << std::endl;
+  *output_ << "#                            \\ \\_\\\\ \\_\\ \\_\\ \\_\\ \\____/                          #" << std::endl;
+  *output_ << "#                             \\/_/ \\/_/\\/_/\\/_/\\/___/                           #" << std::endl;
+  *output_ << "#                                                                               #" << std::endl;
+  //  *output_ << "#   MA5 release : " + "%-24s" % main.version + "%+15s" % main.date  + "         #" << std::endl;
+  //  *output_ << "#                                                                               #" << std::endl;
+  *output_ << "#                    Comput. Phys. Commun. 184 (2013) 222-256                   #" << std::endl;
+  *output_ << "#             The MadAnalysis Development Team - Please visit us at             #" << std::endl;
+  *output_ << "#                      https://launchpad.net/madanalysis5                       #" << std::endl;
+  *output_ << "#################################################################################" << std::endl;
+}

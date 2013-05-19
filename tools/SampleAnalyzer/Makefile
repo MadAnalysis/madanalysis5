@@ -6,8 +6,7 @@
 GCC = g++
 
 # Options for compilation
-CXXFASTJET = $(shell fastjet-config --cxxflags --plugins)
-CXXFLAGS = -Wall -O3 $(shell root-config --cflags) -I./../ -DZIP_USE -DFASTJET_USE $(CXXFASTJET)
+CXXFLAGS = -Wall -O3 $(shell root-config --cflags) -I./../ -DZIP_USE
 
 # Files
 SRCS = $(wildcard */*.cpp)

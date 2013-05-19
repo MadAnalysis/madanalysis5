@@ -32,6 +32,7 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Writer/WriterTextBase.h"
+#include "SampleAnalyzer/Writer/LHCOParticleFormat.h"
 
 namespace MA5
 {
@@ -44,7 +45,7 @@ class LHCOWriter : public WriterTextBase
   // -------------------------------------------------------------
  protected:
 
-
+  UInt_t counter_;
 
   // -------------------------------------------------------------
   //                       method members
@@ -53,7 +54,7 @@ class LHCOWriter : public WriterTextBase
 
   /// Constructor without argument
   LHCOWriter() : WriterTextBase()
-  {}
+  { counter_=0; }
 
 	/// Destructor
   virtual ~LHCOWriter()
@@ -77,11 +78,12 @@ class LHCOWriter : public WriterTextBase
   // Writing a reconstructed jet
 
   bool WriteEventHeader(const SampleFormat& mySample,unsigned int);
-  void WriteJet(const RecJetFormat& jet,unsigned int);
-  void WriteMuon(const RecLeptonFormat& muon,unsigned int);
-  void WriteElectron(const RecLeptonFormat& electron,unsigned int);
-  void WriteTau(const RecTauFormat& tau,unsigned int);
-  void WriteMET(const ParticleBaseFormat& met,unsigned int);
+  void WriteJet(const RecJetFormat& jet, LHCOParticleFormat* lhco);
+  void WriteMuon(const RecLeptonFormat& muon, LHCOParticleFormat* lhco);
+  void WriteElectron(const RecLeptonFormat& electron, LHCOParticleFormat* lhco);
+  void WritePhoton(const RecPhotonFormat& photon, LHCOParticleFormat* lhco);
+  void WriteTau(const RecTauFormat& tau, LHCOParticleFormat* lhco);
+  void WriteMET(const ParticleBaseFormat& met, LHCOParticleFormat* lhco);
 
 
 };
