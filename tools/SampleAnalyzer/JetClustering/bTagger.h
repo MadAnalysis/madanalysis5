@@ -62,7 +62,7 @@ class bTagger:public TaggerBase
     }
 
     /// Destructor
-    ~bTagger() {}
+    virtual ~bTagger() {}
 
     /// Matching using dr
     virtual void Method1 (SampleFormat& mySample, EventFormat& myEvent);

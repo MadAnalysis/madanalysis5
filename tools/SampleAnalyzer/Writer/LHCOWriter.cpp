@@ -205,7 +205,7 @@ bool LHCOWriter::WriteEvent(const EventFormat& myEvent,
   for (unsigned int i=0;i<myEvent.rec()->muons().size();i++)
   {
     PartTable.push_back(LHCOParticleFormat());
-    WriteMuon(myEvent.rec()->muons()[i],&PartTable.back());
+    WriteMuon(myEvent.rec()->muons()[i],&PartTable.back(),myEvent.rec());
   }
 
   // Writing taus (=3)
@@ -277,7 +277,8 @@ void LHCOWriter::WriteJet(const RecJetFormat& jet,
 }
 
 void LHCOWriter::WriteMuon(const RecLeptonFormat& muon,
-                           LHCOParticleFormat* lhco)
+                           LHCOParticleFormat* lhco, 
+                           const RecEventFormat* myEvent)
 {
   lhco->id    = 2;
   lhco->eta   = muon.momentum().Eta();
@@ -285,7 +286,23 @@ void LHCOWriter::WriteMuon(const RecLeptonFormat& muon,
   lhco->pt    = muon.momentum().Pt();
   lhco->jmass = muon.momentum().M();
   if (muon.charge()>0) lhco->ntrk=+1.; else lhco->ntrk=-1.;
-  lhco->btag = 0.;
+
+  //------------- the closest jet ---------------
+  unsigned int theClosestJet=0;
+  Double_t minDeltaR=-1;
+  for (unsigned int i=0;i<myEvent->jets().size();i++)
+  {
+    Double_t DeltaR=muon.dr(myEvent->jets()[i]);
+    if (theClosestJet==0 || DeltaR<minDeltaR)
+    {
+      theClosestJet=i;
+      minDeltaR=DeltaR;
+    }
+  }  
+  if (minDeltaR<0) lhco->btag = 0.;
+  else lhco->btag = theClosestJet+1;
+
+  //---------------- isolation ------------------
 
   // isolation : sumPT_isol
   double isolation = 0;

@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+62   1.1.11  (2013/05/21) econte:  adding changes to LHCOWriter + fixing warning appearing in Adam's 
+                                   computer 
+
 61   1.1.10  (2013/05/19) econte:  fixing bug with LHCO reader + implementing LHCO output (only 
                                    kinematics part is validated) + beautiful headers for LHCO + LHE 
 

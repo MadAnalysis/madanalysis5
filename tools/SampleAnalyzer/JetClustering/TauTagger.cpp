@@ -115,9 +115,20 @@ void TauTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
           tag = &(myEvent.rec()->jets()[j]);
           DeltaRmax = DeltaR;
         }
-        else Candidates.push_back( 
-             std::make_pair(& myEvent.rec()->jets()[j],
-                            myEvent.rec()->MCHadronicTaus_[i]) );
+        else { 
+          //          htest->Fill(myEvent.rec()->jets()[j].ntracks());
+          if (myEvent.rec()->jets()[j].ntracks()==2)
+          {
+            /*         std::cout << "----------------------" << std::endl;
+            for (unsigned int h=0;h<myEvent.rec()->jets()[j].constituents().size();h++)
+              std::cout << myEvent.mc()->particles()[ myEvent.rec()->jets()[j].constituents()[h] ].pdgid() << std::endl;
+              std::cout << "----------------------" << std::endl;*/
+
+          }
+          Candidates.push_back( 
+                               std::make_pair(& myEvent.rec()->jets()[j],
+                                              myEvent.rec()->MCHadronicTaus_[i]) );
+        }
       }
     }
     if (Exclusive_ && tag!=0) 
