@@ -55,7 +55,7 @@ namespace MA5
     /// Is the jet clustering exclusive ?
     Bool_t Exclusive_;
 
-    /// Exclusive id for tau-elec-jet
+    /// Exclusive id for tau-elec-photon-jet
     Bool_t ExclusiveId_;
 
     /// Tagger

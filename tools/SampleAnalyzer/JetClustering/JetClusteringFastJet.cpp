@@ -32,7 +32,61 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
   if (mySample.mc()==0 ||  myEvent.mc()==0) return false;
   if (mySample.rec()==0) mySample.InitializeRec();
   if (myEvent.rec() ==0) myEvent.InitializeRec();
+
+  // Reseting the reconstructed event
   myEvent.rec()->Reset();
+
+  // Veto
+  std::vector<bool> vetos(myEvent.mc()->particles().size(),false);
+
+  // Filling the dataformat with electron/muon
+  for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
+  {
+    // Keeping only final states
+    if (myEvent.mc()->particles()[i].statuscode()!=1) continue;
+
+    // Be more constraining in ExclusiveId
+    if (ExclusiveId_) 
+    {
+      // Need a mother particle
+      if (myEvent.mc()->particles()[i].mother1()==0) continue;
+
+      // HEP2LHE trick
+      if (myEvent.mc()->particles()[i].pdgid() != 
+          myEvent.mc()->particles()[i].mother1()->pdgid()) continue;
+    }
+
+    // Muons
+    if (std::abs(myEvent.mc()->particles()[i].pdgid())==13)
+    {
+      vetos[i]=true;
+      RecLeptonFormat * muon = myEvent.rec()->GetNewMuon();
+      muon->setMomentum(myEvent.mc()->particles()[i].momentum());
+      muon->setMc(&(myEvent.mc()->particles()[i]));
+      if (myEvent.mc()->particles()[i].pdgid()==13) muon->SetCharge(-1);
+      else muon->SetCharge(+1);
+    }
+
+    // Electrons
+    else if (std::abs(myEvent.mc()->particles()[i].pdgid())==11)
+    {
+      vetos[i]=true;
+      RecLeptonFormat * elec = myEvent.rec()->GetNewElectron();
+      elec->setMomentum(myEvent.mc()->particles()[i].momentum());
+      elec->setMc(&(myEvent.mc()->particles()[i]));
+      if (myEvent.mc()->particles()[i].pdgid()==11) elec->SetCharge(-1);
+      else elec->SetCharge(+1);
+    }
+
+    // Photons
+    else if (std::abs(myEvent.mc()->particles()[i].pdgid())==22)
+    {
+      vetos[i]=true;
+      RecPhotonFormat * photon = myEvent.rec()->GetNewPhoton();
+      photon->setMomentum(myEvent.mc()->particles()[i].momentum());
+      photon->setMc(&(myEvent.mc()->particles()[i]));
+    }
+  }
 
   double & TET = myEvent.rec()->TET();
   double & THT = myEvent.rec()->THT();
@@ -44,7 +98,12 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
     // Selecting input for jet clustering
     if (myEvent.mc()->particles()[i].statuscode()!=1)       continue;
     if (PHYSICS->IsInvisible(myEvent.mc()->particles()[i])) continue;
-    if (fabs(myEvent.mc()->particles()[i].pdgid())==13)     continue;
+
+    // ExclusiveId mode
+    if (ExclusiveId_ && vetos[i]) continue;
+
+    // NonExclusive Id mode
+    else if (std::abs(myEvent.mc()->particles()[i].pdgid())==13) continue;
 
     // Filling good particle for clustering
     inputs.push_back(
@@ -90,40 +149,30 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
     for (unsigned int j=0;j<constituents.size();j++)
     {
       jet->AddConstituent(constituents[j].user_index());
-      //      if (fabs(myEvent.mc()->particles()[constituents[j].user_index()].pdgid())==11) continue;
+      //      if (std::abs(myEvent.mc()->particles()[constituents[j].user_index()].pdgid())==11) continue;
       if (PDG->IsCharged(myEvent.mc()->particles()[constituents[j].user_index()].pdgid())) tracks++;
     }
     jet->ntracks_ = tracks;
   }
 
-  // Filling the dataformat with electron/muon
-  for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
+
+  if (ExclusiveId_)
   {
-    if (myEvent.mc()->particles()[i].statuscode()!=1) continue;
-    if (fabs(myEvent.mc()->particles()[i].pdgid())==13)
+    for (unsigned int i=0;i<myEvent.rec()->electrons().size();i++)
     {
-      RecLeptonFormat * muon = myEvent.rec()->GetNewMuon();
-      muon->setMomentum(myEvent.mc()->particles()[i].momentum());
-      muon->setMc(&(myEvent.mc()->particles()[i]));
-      if (myEvent.mc()->particles()[i].pdgid()==13) muon->SetCharge(-1);
-      else muon->SetCharge(+1);
+      (*MET) -= myEvent.rec()->electrons()[i].momentum();
+      TET += myEvent.rec()->electrons()[i].pt();
     }
-    else if (fabs(myEvent.mc()->particles()[i].pdgid())==11)
+    for (unsigned int i=0;i<myEvent.rec()->photons().size();i++)
     {
-      RecLeptonFormat * elec = myEvent.rec()->GetNewElectron();
-      elec->setMomentum(myEvent.mc()->particles()[i].momentum());
-      elec->setMc(&(myEvent.mc()->particles()[i]));
-      if (myEvent.mc()->particles()[i].pdgid()==11) elec->SetCharge(-1);
-      else elec->SetCharge(+1);
+      (*MET) -= myEvent.rec()->photons()[i].momentum();
+      TET += myEvent.rec()->photons()[i].pt();
     }
   }
-
 
   for (unsigned int i=0;i<myEvent.rec()->muons().size();i++)
   {
     (*MET) -= myEvent.rec()->muons()[i].momentum();
-    //    MET->momentum().SetPx(MET->momentum().Px() - myEvent.rec()->muons()[i].px());
-    //    MET->momentum().SetPy(MET->momentum().Py() - myEvent.rec()->muons()[i].py());
     TET += myEvent.rec()->muons()[i].pt();
   }
 
