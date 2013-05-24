@@ -302,6 +302,10 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
   if (progressBar_!=0)
   {
     progressBar_->Finalize();
+    INFO << "        => total number of events: " << counter_read_[file_index_-1] 
+         << " ( analyzed: " << counter_passed_[file_index_-1] 
+         << " ; skipped: " << counter_read_[file_index_-1] - counter_passed_[file_index_-1]
+         << " ) " << endmsg;
   }
 
   // Next file

@@ -88,6 +88,12 @@ def WriteJobNPID(file,main,iabs,ihisto):
     # RECO mode
     else:
 
+        # photons
+        file.write('  for (unsigned int i=0;i<event.rec()->photons().size();i++)\n')
+        file.write('  {\n')
+        file.write('    H'+str(ihisto)+'_->Fill(22,__event_weight__);\n')
+        file.write('  }\n')
+
         # electrons
         file.write('  for (unsigned int i=0;i<event.rec()->electrons().size();i++)\n')
         file.write('  {\n')

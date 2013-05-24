@@ -474,5 +474,5 @@ class Interpreter(InterpreterBase):
         if line[-1] in [' ','\t']:
             return '', line, len(line),len(enidx)
         return text, line, begidx, endidx
-        
+
         

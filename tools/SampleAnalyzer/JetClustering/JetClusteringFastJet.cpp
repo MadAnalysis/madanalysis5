@@ -45,6 +45,9 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
     // Keeping only final states
     if (myEvent.mc()->particles()[i].statuscode()!=1) continue;
 
+    if (std::abs(myEvent.mc()->particles()[i].pdgid())==11 && myEvent.mc()->particles()[i].mother1()!=0 && 15==std::abs(myEvent.mc()->particles()[i].mother1()->pdgid())) std::cout << "mumu from tautau" << std::endl;
+
+
     // Be more constraining in ExclusiveId
     if (ExclusiveId_) 
     {
