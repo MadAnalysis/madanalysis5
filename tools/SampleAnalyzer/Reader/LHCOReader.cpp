@@ -280,6 +280,7 @@ void LHCOReader::FillEventParticleLine(const std::string& line, EventFormat& myE
     // 9th column : isolation
     str >> tmp;
     muon->sumPT_isol_=std::floor(tmp);
+
     Float_t ET_PT=tmp-muon->sumPT_isol_;
     Bool_t test=false;
     for (unsigned int j=0;j<5;j++)
@@ -291,7 +292,7 @@ void LHCOReader::FillEventParticleLine(const std::string& line, EventFormat& myE
         break;
       }
     }
-    if (test) muon->sumET_isol_=std::floor(ET_PT)*muon->sumPT_isol_;
+    if (test) muon->sumET_isol_=std::floor(ET_PT)*muon->pt();
     else muon->sumET_isol_=0;
   }
 

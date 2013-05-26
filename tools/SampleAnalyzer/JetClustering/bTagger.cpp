@@ -45,6 +45,10 @@ void bTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
     // Keeping the last taus in the decay chain
     if (!IsLast(&myEvent.mc()->particles()[i], myEvent)) continue;
 
+    // Rejecting b with a null pt (initial state ?)
+    if (myEvent.mc()->particles()[i].pt()==0) continue;
+
+
     // b-quark already defined ?
     if (std::abs(myEvent.mc()->particles()[i].pdgid())==5)
     {
@@ -81,6 +85,7 @@ void bTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
     // loop on the jets
     for (unsigned int j=0;j<myEvent.rec()->jets().size();j++)
     {
+      if (myEvent.rec()->jets()[j].pt()==0) continue;
       Float_t DeltaR = myEvent.rec()->MCBquarks_[i]->dr(myEvent.rec()->jets()[j]);
 
       if (DeltaR <= DeltaRmax) 
@@ -112,6 +117,7 @@ void bTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
     // loop on the jets
     for (unsigned int j=0;j<myEvent.rec()->jets().size();j++)
     {
+      if (myEvent.rec()->jets()[j].pt()==0) continue;
       Float_t DeltaR = 
           myEvent.rec()->MCCquarks_[i]->dr(myEvent.rec()->jets()[j]);
 

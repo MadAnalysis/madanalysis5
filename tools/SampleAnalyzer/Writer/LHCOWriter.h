@@ -79,7 +79,7 @@ class LHCOWriter : public WriterTextBase
 
   bool WriteEventHeader(const SampleFormat& mySample,unsigned int);
   void WriteJet(const RecJetFormat& jet, LHCOParticleFormat* lhco);
-  void WriteMuon(const RecLeptonFormat& muon, LHCOParticleFormat* lhco, const RecEventFormat* myEvent);
+  void WriteMuon(const RecLeptonFormat& muon, LHCOParticleFormat* lhco, const RecEventFormat* myEvent, unsigned int npart);
   void WriteElectron(const RecLeptonFormat& electron, LHCOParticleFormat* lhco);
   void WritePhoton(const RecPhotonFormat& photon, LHCOParticleFormat* lhco);
   void WriteTau(const RecTauFormat& tau, LHCOParticleFormat* lhco);

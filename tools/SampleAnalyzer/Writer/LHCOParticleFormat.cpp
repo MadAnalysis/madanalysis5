@@ -31,7 +31,7 @@
 
 using namespace MA5;
 
-const std::string LHCOParticleFormat::header = "  #  typ    eta     phi        pt    jmas    ntrk    btag  had/em    dum1    dum2";
+const std::string LHCOParticleFormat::header = "  #  typ    eta     phi        pt    jmas    ntrk    btag  had/em   dum1   dum2";
 
 void LHCOParticleFormat::Print(UInt_t num, std::ostream* out)
 {
@@ -53,15 +53,19 @@ void LHCOParticleFormat::Print(UInt_t num, std::ostream* out)
   *out << "  ";
   *out << std::setw(6) << std::right << jmass;  // -X.YYY
   *out << "  ";
-  *out << std::setw(6) << std::right << ntrk;   // -X.YYY
+  double myntrk = ntrk;
+  if (myntrk>9) myntrk=9.999;
+  else if (myntrk<-9) myntrk=-9.999;
+  *out << std::setw(6) << std::right << myntrk;   // -X.YYY
   *out << "   ";
   *out << std::setw(5) << std::right << btag;   // X.YYY
   *out << "   ";
-  *out << std::setw(5) << std::right << hadem;  // X.YYY
+  out->precision(2);
+  *out << std::setw(5) << std::right << hadem;  // XX.YY
   *out << "  ";
-  *out << std::setw(6) << std::right << 0.;     // -X.YYY
+  *out << std::setw(5) << std::right << 0.;     // -X.YY
   *out << "  ";
-  *out << std::setw(6) << std::right << 0.;     // -X.YYY
+  *out << std::setw(5) << std::right << 0.;     // -X.YY
   out->precision(pres);
   *out << std::endl;
 }

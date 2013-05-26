@@ -43,6 +43,9 @@ void TauTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
     // Keeping the last taus in the decay chain
     if (!IsLast(&myEvent.mc()->particles()[i], myEvent)) continue;
 
+    // Rejecting tau with a null pt (initial state ?)
+    if (myEvent.mc()->particles()[i].pt()==0) continue;
+
     // Removing taus decaying to leptons
     bool leptonic=true;
     bool muonic=false;
@@ -105,6 +108,7 @@ void TauTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
       //    myEvent.rec()->jets()[j].ntracks()!=3) continue;
 
       // Calculating Delta R
+      if (myEvent.rec()->jets()[j].pt()==0) continue;
       Float_t DeltaR = 
          myEvent.rec()->MCHadronicTaus_[i]->dr(myEvent.rec()->jets()[j]);
 

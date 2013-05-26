@@ -90,7 +90,7 @@ bool LHCOWriter::WriteHeader(const SampleFormat& mySample)
   WriteMA5header();
 
   // LHCO format tag
-  *output_ << "#<MA5Format> LHE format </MA5Format>" << std::endl;
+  *output_ << "#<MA5Format> LHCO format </MA5Format>" << std::endl;
 
   // Explanation about the LHCO
   *output_ << "#<FormatDescription>" << std::endl;
@@ -181,10 +181,10 @@ bool LHCOWriter::WriteEvent(const EventFormat& myEvent,
 
   // Particle container in LHCO format
   std::vector<LHCOParticleFormat> PartTable;
-  PartTable.reserve( myEvent.rec()->electrons().size() +
+  PartTable.reserve( myEvent.rec()->photons().size() +
+                     myEvent.rec()->electrons().size() +
                      myEvent.rec()->muons().size() + 
                      myEvent.rec()->taus().size() + 
-                     myEvent.rec()->photons().size() +
                      myEvent.rec()->jets().size() + 1 /*MET*/);
 
   // Writing photons (=0)
@@ -205,7 +205,10 @@ bool LHCOWriter::WriteEvent(const EventFormat& myEvent,
   for (unsigned int i=0;i<myEvent.rec()->muons().size();i++)
   {
     PartTable.push_back(LHCOParticleFormat());
-    WriteMuon(myEvent.rec()->muons()[i],&PartTable.back(),myEvent.rec());
+    WriteMuon(myEvent.rec()->muons()[i],&PartTable.back(),myEvent.rec(),
+              myEvent.rec()->photons().size()+
+              myEvent.rec()->electrons().size()+
+              myEvent.rec()->muons().size());
   }
 
   // Writing taus (=3)
@@ -245,7 +248,7 @@ bool LHCOWriter::WriteEventHeader(const SampleFormat& mySample,
   *output_ << "  ";
 
   // Event number
-  *output_ << std::setw(10) << std::right << numEvent;
+  *output_ << std::setw(10) << std::right << numEvent+1;
   *output_ << "  ";
 
   // Trigger word
@@ -278,7 +281,8 @@ void LHCOWriter::WriteJet(const RecJetFormat& jet,
 
 void LHCOWriter::WriteMuon(const RecLeptonFormat& muon,
                            LHCOParticleFormat* lhco, 
-                           const RecEventFormat* myEvent)
+                           const RecEventFormat* myEvent,
+                           unsigned int npart)
 {
   lhco->id    = 2;
   lhco->eta   = muon.momentum().Eta();
@@ -292,15 +296,16 @@ void LHCOWriter::WriteMuon(const RecLeptonFormat& muon,
   Double_t minDeltaR=-1;
   for (unsigned int i=0;i<myEvent->jets().size();i++)
   {
+    if (myEvent->jets()[i].pt()==0) continue;
     Double_t DeltaR=muon.dr(myEvent->jets()[i]);
-    if (theClosestJet==0 || DeltaR<minDeltaR)
+    if (i==0 || DeltaR<minDeltaR)
     {
       theClosestJet=i;
       minDeltaR=DeltaR;
     }
   }  
   if (minDeltaR<0) lhco->btag = 0.;
-  else lhco->btag = theClosestJet+1;
+  else lhco->btag = theClosestJet+npart+1;
 
   //---------------- isolation ------------------
 
@@ -310,21 +315,12 @@ void LHCOWriter::WriteMuon(const RecLeptonFormat& muon,
 
   // isolation : sumET_isol
   double ET_PT = 0;
-  if (muon.sumPT_isol()!=0) ET_PT=muon.sumET_isol()/muon.sumPT_isol();
-  ET_PT=std::floor(ET_PT);
+  if (muon.pt()!=0) ET_PT=muon.sumET_isol()/muon.pt();
 
   // gathering isolation variables
   bool test=false;
-  for (unsigned int j=0;j<5;j++)
-  {
-    ET_PT/=10;
-    if (ET_PT<1.)
-    {
-      test=true;
-      break;
-    }
-  }
-  if (!test) ET_PT=0;
+  if (ET_PT>100) ET_PT=0.99; else ET_PT=ET_PT/100.;
+
   isolation+=ET_PT;
   lhco->hadem = isolation;
 }
@@ -363,7 +359,7 @@ void LHCOWriter::WriteTau(const RecTauFormat& tau,
   lhco->phi   = tau.momentum().Phi();
   lhco->pt    = tau.momentum().Pt();
   lhco->jmass = tau.momentum().M();
-  if (tau.charge()>0) lhco->ntrk=+1.; else lhco->ntrk=-1.;
+  if (tau.charge()>0) lhco->ntrk=tau.ntracks(); else lhco->ntrk=-tau.ntracks();
   lhco->btag = 0.;
   lhco->hadem = tau.HEoverEE();
 }

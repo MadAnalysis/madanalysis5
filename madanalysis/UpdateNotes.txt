@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+65   1.1.14  (2013/05/26) econte:  validation LHCO format 
+
 64   1.1.13  (2013/05/24) econte:  improving jetclustering + adding photons in NPID plot + nb of read 
                                    events + surprise 
 
