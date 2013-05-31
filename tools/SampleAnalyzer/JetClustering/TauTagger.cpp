@@ -28,131 +28,10 @@ using namespace MA5;
 
 void TauTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
 {
-  // loop on the particles searching for tau
-  for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
-  {
-    // Keeping only taus
-    if (fabs(myEvent.mc()->particles()[i].pdgid())!=15) continue;
-
-    // Removing initial states
-    if (PHYSICS->IsInitialState(myEvent.mc()->particles()[i])) continue;
-
-    // Removing final states
-    if (PHYSICS->IsFinalState(myEvent.mc()->particles()[i])) continue;
-
-    // Keeping the last taus in the decay chain
-    if (!IsLast(&myEvent.mc()->particles()[i], myEvent)) continue;
-
-    // Rejecting tau with a null pt (initial state ?)
-    if (myEvent.mc()->particles()[i].pt()==0) continue;
-
-    // Removing taus decaying to leptons
-    bool leptonic=true;
-    bool muonic=false;
-    bool electronic=false;
-    for (unsigned int j=0;j<myEvent.mc()->particles()[i].Daughters().size();j++)
-    {
-      unsigned int pdgid = 
-        std::abs(myEvent.mc()->particles()[i].Daughters()[j]->pdgid());
-      if (pdgid==13) muonic=true;
-      else if (pdgid==11) electronic=true;
-      if (pdgid!=22 && !(pdgid>=11 && pdgid<=18)) {leptonic=false;}
-    }
-    if (leptonic && muonic)
-    {
-      bool found=false;
-      for (unsigned int j=0;j<myEvent.rec()->MCMuonicTaus_.size();j++)
-      {
-        if (myEvent.rec()->MCMuonicTaus_[j]==&(myEvent.mc()->particles()[i])) 
-        {found=true; break;}
-      }
-      if (!found) 
-        myEvent.rec()->MCMuonicTaus_.push_back(&(myEvent.mc()->particles()[i]));
-    }
-    else if (leptonic && electronic)
-    {
-      bool found=false;
-      for (unsigned int j=0;j<myEvent.rec()->MCElectronicTaus_.size();j++)
-      {
-        if (myEvent.rec()->MCElectronicTaus_[j]==&(myEvent.mc()->particles()[i])) 
-        {found=true; break;}
-      }
-      if (!found) 
-        myEvent.rec()->MCElectronicTaus_.push_back(&(myEvent.mc()->particles()[i]));
-    }
-    else if (!leptonic)
-    {
-      bool found=false;
-      for (unsigned int j=0;j<myEvent.rec()->MCHadronicTaus_.size();j++)
-      {
-        if (myEvent.rec()->MCHadronicTaus_[j]==&(myEvent.mc()->particles()[i])) 
-        {found=true; break;}
-      }
-      if (!found) 
-        myEvent.rec()->MCHadronicTaus_.push_back(&(myEvent.mc()->particles()[i]));
-
-    }
-  }
-
-  // Matching MCtaus and RECtaus
-  std::vector<std::pair<RecJetFormat*,MCParticleFormat*> > Candidates;
-  for (unsigned int i=0;i<myEvent.rec()->MCHadronicTaus_.size();i++)
-  {
-    RecJetFormat* tag = 0;
-    Double_t DeltaRmax = DeltaRmax_;
-
-    // loop on the jets
-    for (unsigned int j=0;j<myEvent.rec()->jets().size();j++)
-    {
-      //      if (myEvent.rec()->jets()[j].ntracks()!=1 && 
-      //    myEvent.rec()->jets()[j].ntracks()!=3) continue;
-
-      // Calculating Delta R
-      if (myEvent.rec()->jets()[j].pt()==0) continue;
-      Float_t DeltaR = 
-         myEvent.rec()->MCHadronicTaus_[i]->dr(myEvent.rec()->jets()[j]);
-
-      if (DeltaR <= DeltaRmax)
-      {
-        if(Exclusive_)
-        {
-          tag = &(myEvent.rec()->jets()[j]);
-          DeltaRmax = DeltaR;
-        }
-        else { 
-          //          htest->Fill(myEvent.rec()->jets()[j].ntracks());
-          if (myEvent.rec()->jets()[j].ntracks()==2)
-          {
-            /*         std::cout << "----------------------" << std::endl;
-            for (unsigned int h=0;h<myEvent.rec()->jets()[j].constituents().size();h++)
-              std::cout << myEvent.mc()->particles()[ myEvent.rec()->jets()[j].constituents()[h] ].pdgid() << std::endl;
-              std::cout << "----------------------" << std::endl;*/
-
-          }
-          Candidates.push_back( 
-                               std::make_pair(& myEvent.rec()->jets()[j],
-                                              myEvent.rec()->MCHadronicTaus_[i]) );
-        }
-      }
-    }
-    if (Exclusive_ && tag!=0) 
-         Candidates.push_back(std::make_pair(tag,
-                                             myEvent.rec()->MCHadronicTaus_[i]));
-  }
-
-  // Performing efficiency
-  for (unsigned int i=0;i<Candidates.size();i++)
-  {
-    if (!IsIdentified()) continue;
-    Candidates[i].first->mc_ = Candidates[i].second;
-    RecTauFormat* myTau = myEvent.rec()->GetNewTau();
-    Jet2Tau(Candidates[i].first, myTau, myEvent);
-    //      myEvent.rec()->jets().erase((std::vector<RecJetFormat>::iterator) Candidates[j-1]);
-  }
-
   // Performing mis-id
   if (doMisefficiency_)
   {
+    std::vector<unsigned int> toRemove;
     for (unsigned int i=0;i<myEvent.rec()->jets().size();i++)
     {
       // keeping only light jets
@@ -164,7 +43,13 @@ void TauTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
       {
         RecTauFormat* myTau = myEvent.rec()->GetNewTau();
         Jet2Tau(&myEvent.rec()->jets()[i], myTau, myEvent);
+        toRemove.push_back(i);
       }
+    }
+    for (unsigned int i =0;i<toRemove.size();i++)
+    {
+      myEvent.rec()->jets().erase(myEvent.rec()->jets().begin()
+                                  + toRemove[i]);
     }
   }
 
@@ -353,8 +238,8 @@ void TauTagger::Jet2Tau (RecJetFormat* myJet, RecTauFormat* myTau, EventFormat& 
     charge += PDG->GetCharge(myEvent.mc()->particles()[myJet->Constituents_[i]].pdgid());
   }
 
-  if (charge == 3) myTau->charge_ = true;
-  else if (charge == -3) myTau->charge_ = false;
+  if (charge>0) myTau->charge_ = true;
+  else if (charge<=0) myTau->charge_ = false;
 }
 
 
@@ -393,8 +278,6 @@ void TauTagger::SetParameter(const std::string& key,
 std::string TauTagger::GetParameters()
 {
   std::stringstream str;
-  str << "dR=" << DeltaRmax_ << " ; ";
-  if (Exclusive_) str << "Exclusive ; "; else str << "Inclusive ; ";
   str << "IDeff=" << Efficiency_;
   str << " ; MisID(q)=" << misid_ljet_;
   return str.str();

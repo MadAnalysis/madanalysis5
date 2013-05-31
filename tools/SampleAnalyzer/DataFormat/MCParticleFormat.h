@@ -70,7 +70,8 @@ class MCParticleFormat : public ParticleBaseFormat
                               /// 2 intermediate state, 1 final state)
   UInt_t 	        mothup1_;   /// first mother index
   UInt_t 	        mothup2_;   /// second mother index
-  Int_t           extra_;
+  Int_t           extra1_;
+  Int_t           extra2_;
 
   std::vector<MCParticleFormat*> Daughters_;
 
@@ -96,7 +97,8 @@ class MCParticleFormat : public ParticleBaseFormat
   {
     momentum_.SetPxPyPzE(0.,0.,0.,0.);
     ctau_=0.; spin_=0.; pdgid_=0; 
-    statuscode_=0; mothup1_=0; mothup2_=0; mother1_=0; mother2_=0; extra_=0;
+    statuscode_=0; mothup1_=0; mothup2_=0; mother1_=0; mother2_=0; 
+    extra1_=0; extra2_=0;
   }
 
   /// Print particle informations

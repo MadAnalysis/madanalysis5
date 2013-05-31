@@ -72,12 +72,9 @@ class LHCOWriter : public WriterTextBase
  
  private:
 
-  static std::string FortranFormat_SimplePrecision(Float_t value,UInt_t precision=7); 
-  static std::string FortranFormat_DoublePrecision(Double_t value,UInt_t precision=11); 
 
   // Writing a reconstructed jet
 
-  bool WriteEventHeader(const SampleFormat& mySample,unsigned int);
   void WriteJet(const RecJetFormat& jet, LHCOParticleFormat* lhco);
   void WriteMuon(const RecLeptonFormat& muon, LHCOParticleFormat* lhco, const RecEventFormat* myEvent, unsigned int npart);
   void WriteElectron(const RecLeptonFormat& electron, LHCOParticleFormat* lhco);

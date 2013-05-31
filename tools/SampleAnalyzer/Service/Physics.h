@@ -132,7 +132,8 @@ class PhysicsService
   /// Is Initial State
   Bool_t IsInitialState(const MCParticleFormat& part) const
   {
-    return (part.statuscode()==initialstate_);
+    //    return (part.statuscode()==initialstate_);
+    return (part.statuscode()==-1 || (part.statuscode()>=11 && part.statuscode()<=19));
   }
 
   /// Is Final State
@@ -144,7 +145,7 @@ class PhysicsService
   /// Is Inter State
   Bool_t IsInterState(const MCParticleFormat& part) const
   {
-    return (part.statuscode()!=finalstate_ && part.statuscode()!=initialstate_);
+    return (!IsInitialState(part) && !IsFinalState(part));
   }
 
   /// Is Initial State
@@ -222,6 +223,13 @@ class PhysicsService
   inline bool IsHadronic(const MCParticleFormat& part) const
   {
     std::set<Int_t>::iterator found = mcConfig_.hadronic_ids_.find(part.pdgid());
+    if (found==mcConfig_.hadronic_ids_.end()) return false; else return true;
+  }
+
+  /// Is hadronic ?
+  inline bool IsHadronic(Int_t pdgid) const
+  {
+    std::set<Int_t>::iterator found = mcConfig_.hadronic_ids_.find(pdgid);
     if (found==mcConfig_.hadronic_ids_.end()) return false; else return true;
   }
 

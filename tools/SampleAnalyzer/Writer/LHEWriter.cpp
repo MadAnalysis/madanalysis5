@@ -294,59 +294,43 @@ bool LHEWriter::WriteEvent(const EventFormat& myEvent,
   // Event header
   *output_ << "<event>" << std::endl;
 
-  unsigned int counter = 0;
+  // Container for particles
+  std::vector<LHEParticleFormat> particles;
+  UInt_t counter=0;
 
   // Writing MC particles : only MC info case
   // -> hypothesis : input = LHE
   if (myEvent.mc()!=0 && myEvent.rec()==0)
   {
-    for (unsigned int i=0;i<myEvent.mc()->particles().size();i++) counter ++;
+    counter += myEvent.mc()->particles().size();
   }
 
   // Writing MC particles : MC+REC info case
   // -> hypothesis : input = HEP
-  if (myEvent.mc()!=0 && myEvent.rec()!=0)
+  else if (myEvent.mc()!=0 && myEvent.rec()!=0)
   {
-    for (unsigned int i=4;i<myEvent.mc()->particles().size();i++)
+    for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
+    {
       if (myEvent.mc()->particles()[i].statuscode()==3 || 
           ( myEvent.mc()->particles()[i].statuscode()>=21 &&
             myEvent.mc()->particles()[i].statuscode()<=29)
           ) counter++;
+    }
+
   }
 
   // Writing REC particles
   if (myEvent.rec()!=0)
   {
-    if (myEvent.mc()==0)
-    {
-      for (unsigned int i=0;i<myEvent.rec()->muons().size();i++)
-        counter++;
-      for (unsigned int i=0;i<myEvent.rec()->electrons().size();i++)
-        counter++;
-      for (unsigned int i=0;i<myEvent.rec()->taus().size();i++)
-        counter++;
-    }
-    else
-    {
-      for (unsigned int i=6;i<myEvent.mc()->particles().size();i++)
-      {
-        if ( (myEvent.mc()->particles()[i].statuscode()==3 || 
-              ( myEvent.mc()->particles()[i].statuscode()>=21 &&
-                myEvent.mc()->particles()[i].statuscode()<=29))&& (
-            fabs(myEvent.mc()->particles()[i].pdgid())==11 ||
-            fabs(myEvent.mc()->particles()[i].pdgid())==13 ||
-            fabs(myEvent.mc()->particles()[i].pdgid())==15 ))
-          {
-            counter++;
-          }
-      }
-    }
-    for (unsigned int i=0;i<myEvent.rec()->jets().size();i++)
-      counter++;
-    counter++;
+    counter += myEvent.rec()->muons().size() + 
+               myEvent.rec()->electrons().size() +
+               myEvent.rec()->taus().size() + 
+               myEvent.rec()->photons().size() +
+               myEvent.rec()->jets().size() + 1 /*MET*/;
   }
 
   // Writing event global information
+  particles.reserve(counter);
   WriteEventHeader(myEvent,counter);
 
   // Writing MC particles : only MC info case
@@ -354,9 +338,14 @@ bool LHEWriter::WriteEvent(const EventFormat& myEvent,
   if (myEvent.mc()!=0 && myEvent.rec()==0)
   {
     for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
+    {
+      particles.push_back(LHEParticleFormat());
       WriteParticle(myEvent.mc()->particles()[i],
                     myEvent.mc()->particles()[i].mothup1_,
-                    myEvent.mc()->particles()[i].mothup2_);
+                    myEvent.mc()->particles()[i].mothup2_,
+                    0,
+                    particles.back());
+    }
   }
 
   // Writing MC particles : MC+REC info case
@@ -365,20 +354,22 @@ bool LHEWriter::WriteEvent(const EventFormat& myEvent,
   {
     for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
     {
-      if ( myEvent.mc()->particles()[i].statuscode()>=11 &&
-           myEvent.mc()->particles()[i].statuscode()<=19 )
-         WriteParticle(myEvent.mc()->particles()[i],0,0,-1);
-
-      else if (i>3 && i<6 && myEvent.mc()->particles()[i].statuscode()==3)
-        WriteParticle(myEvent.mc()->particles()[i],0,0,-1);
+      if ( myEvent.mc()->particles()[i].statuscode()==-1 ||
+           ( myEvent.mc()->particles()[i].statuscode()>=11 &&
+             myEvent.mc()->particles()[i].statuscode()<=19 ))
+      {
+        particles.push_back(LHEParticleFormat());
+        WriteParticle(myEvent.mc()->particles()[i],0,0,-1, particles.back());
+      }
 
       else if (myEvent.mc()->particles()[i].statuscode()==3 || 
            ( myEvent.mc()->particles()[i].statuscode()>=21 &&
              myEvent.mc()->particles()[i].statuscode()<=29))
       {
+          particles.push_back(LHEParticleFormat());
           Int_t moth1 = GetMotherIndex(myEvent.mc()->particles()[i].mothup1_);
           Int_t moth2 = GetMotherIndex(myEvent.mc()->particles()[i].mothup2_);
-          WriteParticle(myEvent.mc()->particles()[i],moth1,moth2,3);
+          WriteParticle(myEvent.mc()->particles()[i],moth1,moth2,3, particles.back());
       }
     } 
   }
@@ -386,40 +377,39 @@ bool LHEWriter::WriteEvent(const EventFormat& myEvent,
   // Writing REC particles
   if (myEvent.rec()!=0)
   {
-    //    if (myEvent.mc()==0)
+    for (unsigned int i=0;i<myEvent.rec()->muons().size();i++)
     {
-      for (unsigned int i=0;i<myEvent.rec()->muons().size();i++)
-        WriteMuon(myEvent.rec()->muons()[i]);
-      for (unsigned int i=0;i<myEvent.rec()->electrons().size();i++)
-        WriteElectron(myEvent.rec()->electrons()[i]);
-      for (unsigned int i=0;i<myEvent.rec()->taus().size();i++)
-        WriteTau(myEvent.rec()->taus()[i]);
+      particles.push_back(LHEParticleFormat());
+      WriteMuon(myEvent.rec()->muons()[i],particles.back());
     }
-    /*
-    else
+    for (unsigned int i=0;i<myEvent.rec()->electrons().size();i++)
     {
-      for (unsigned int i=6;i<myEvent.mc()->particles().size();i++)
-      {
-        if ((myEvent.mc()->particles()[i].statuscode()==3 || 
-            ( myEvent.mc()->particles()[i].statuscode()>=21 &&
-              myEvent.mc()->particles()[i].statuscode()<=29)) && (
-            fabs(myEvent.mc()->particles()[i].pdgid())==11 ||
-            fabs(myEvent.mc()->particles()[i].pdgid())==13 ||
-            fabs(myEvent.mc()->particles()[i].pdgid())==15 ))
-          {
-            WriteParticle(myEvent.mc()->particles()[i],0,0,1);
-          }
-      }
-    }*/
-
+      particles.push_back(LHEParticleFormat());
+      WriteElectron(myEvent.rec()->electrons()[i],particles.back());
+    }
+    for (unsigned int i=0;i<myEvent.rec()->taus().size();i++)
+    {
+      particles.push_back(LHEParticleFormat());
+      WriteTau(myEvent.rec()->taus()[i],particles.back());
+    }
     for (unsigned int i=0;i<myEvent.rec()->jets().size();i++)
-      WriteJet(myEvent.rec()->jets()[i]);
-    WriteMET(myEvent.rec()->MET());
+    {
+      particles.push_back(LHEParticleFormat());
+      WriteJet(myEvent.rec()->jets()[i],particles.back());
+    }
+    for (unsigned int i=0;i<myEvent.rec()->photons().size();i++)
+    {
+      particles.push_back(LHEParticleFormat());
+      WritePhoton(myEvent.rec()->photons()[i],particles.back());
+    }
+    particles.push_back(LHEParticleFormat());
+    WriteMET(myEvent.rec()->MET(),particles.back());
   }
 
   // Event foot
+  for (unsigned int i=0;i<particles.size();i++) particles[i].Print(i+1, output_);
   *output_ << "</event>" << std::endl;
-  return true;
+  return true; 
 }
 
 
@@ -462,117 +452,129 @@ bool LHEWriter::WriteEventHeader(const EventFormat& myEvent,
 
 
 /// Writing a particle
-bool LHEWriter::WriteParticle(const MCParticleFormat& myPart, Int_t mother1, Int_t mother2, Int_t statuscode )
+void LHEWriter::WriteParticle(const MCParticleFormat& myPart, 
+                              Int_t mother1, Int_t mother2, 
+                              Int_t statuscode, LHEParticleFormat& lhe)
 {
-  *output_ << std::setw(9)  << std::right << myPart.pdgid_ << " ";
-  if (statuscode!=0)   *output_ << std::setw(4)  << std::right << statuscode << " ";
-  else *output_ << std::setw(4)  << std::right << myPart.statuscode_ << " ";
-  *output_ << std::setw(4)  << std::right << mother1 /*myPart.mothup1_*/ << " ";
-  *output_ << std::setw(4)  << std::right << mother2 /*myPart.mothup2_*/ << " ";
-  *output_ << std::setw(4)  << std::right << 0 << " ";
-  *output_ << std::setw(4)  << std::right << 0 << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(myPart.momentum_.Px()) << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(myPart.momentum_.Py()) << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(myPart.momentum_.Pz()) << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(myPart.momentum_.E())  << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(myPart.momentum_.M())  << " "; 
-  *output_ << std::setw(2)  << std::right << std::showpoint << myPart.ctau_ << " ";
-  *output_ << std::setw(3)  << std::right << std::showpoint << myPart.spin_;
-  *output_ << std::endl;
-  return true;
+  if (statuscode!=0) lhe.status = statuscode;
+  else lhe.status = myPart.statuscode_;
+  lhe.id      = myPart.pdgid_;
+  lhe.mother1 = mother1;
+  lhe.mother2 = mother2;
+  lhe.color1  = 0;
+  lhe.color2  = 0;
+  lhe.px      = myPart.momentum().Px();
+  lhe.py      = myPart.momentum().Py();
+  lhe.pz      = myPart.momentum().Pz();
+  lhe.e       = myPart.momentum().E();
+  lhe.m       = myPart.momentum().M();
+  lhe.ctau    = myPart.ctau_;
+  lhe.spin    = myPart.spin_;
 }
 
 
-void LHEWriter::WriteJet(const RecJetFormat& jet)
+void LHEWriter::WriteJet(const RecJetFormat& jet, LHEParticleFormat& lhe)
 {
-  if (jet.btag()) *output_ << std::setw(9)  << std::right << 5 << " ";
-  else *output_ << std::setw(9)  << std::right << 21 << " ";
-  *output_ << std::setw(4)  << std::right << 1  << " ";
-  *output_ << std::setw(4)  << std::right << 0  << " ";
-  *output_ << std::setw(4)  << std::right << 0  << " ";
-  *output_ << std::setw(4)  << std::right << 0  << " ";
-  *output_ << std::setw(4)  << std::right << 0  << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(jet.momentum().Px()) << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(jet.momentum().Py()) << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(jet.momentum().Pz()) << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(jet.momentum().E())  << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(jet.momentum().M())  << " "; 
-  *output_ << std::setw(2)  << std::right << std::showpoint << 0. << " ";
-  *output_ << std::setw(3)  << std::right << std::showpoint << 0.;
-  *output_ << std::endl;
+  if (jet.btag()) lhe.id = 5; else lhe.id = 21;
+  lhe.status  = 1;
+  lhe.mother1 = 0;
+  lhe.mother2 = 0;
+  lhe.color1  = 0;
+  lhe.color2  = 0;
+  lhe.px      = jet.momentum().Px();
+  lhe.py      = jet.momentum().Py();
+  lhe.pz      = jet.momentum().Pz();
+  lhe.e       = jet.momentum().E();
+  lhe.m       = jet.momentum().M();
+  lhe.ctau    = 0.;
+  lhe.spin    = 0.;
 }
 
-void LHEWriter::WriteMuon(const RecLeptonFormat& muon)
+
+void LHEWriter::WriteMuon(const RecLeptonFormat& muon, LHEParticleFormat& lhe)
 {
-  if (muon.charge()>0) *output_ << std::setw(9)  << std::right << -13 << " ";
-  else *output_ << std::setw(9)  << std::right << +13 << " ";
-  *output_ << std::setw(4)  << std::right << 1  << " ";
-  *output_ << std::setw(4)  << std::right << 0  << " ";
-  *output_ << std::setw(4)  << std::right << 0  << " ";
-  *output_ << std::setw(4)  << std::right << 0  << " ";
-  *output_ << std::setw(4)  << std::right << 0  << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(muon.momentum().Px()) << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(muon.momentum().Py()) << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(muon.momentum().Pz()) << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(muon.momentum().E())  << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(muon.momentum().M())  << " "; 
-  *output_ << std::setw(2)  << std::right << std::showpoint << 0. << " ";
-  *output_ << std::setw(3)  << std::right << std::showpoint << 0.;
-  *output_ << std::endl;
+  if (muon.charge()>0) lhe.id = -13; else lhe.id = +13;
+  lhe.status  = 1;
+  lhe.mother1 = 0;
+  lhe.mother2 = 0;
+  lhe.color1  = 0;
+  lhe.color2  = 0;
+  lhe.px      = muon.momentum().Px();
+  lhe.py      = muon.momentum().Py();
+  lhe.pz      = muon.momentum().Pz();
+  lhe.e       = muon.momentum().E();
+  lhe.m       = muon.momentum().M();
+  lhe.ctau    = 0.;
+  lhe.spin    = 0.;
 }
 
-void LHEWriter::WriteElectron(const RecLeptonFormat& electron)
+void LHEWriter::WriteElectron(const RecLeptonFormat& electron, LHEParticleFormat& lhe)
 {
-  if (electron.charge()>0) *output_ << std::setw(9)  << std::right << -11 << " ";
-  else *output_ << std::setw(9)  << std::right << +11 << " ";
-  *output_ << std::setw(4)  << std::right << 1  << " ";
-  *output_ << std::setw(4)  << std::right << 0  << " ";
-  *output_ << std::setw(4)  << std::right << 0  << " ";
-  *output_ << std::setw(4)  << std::right << 0  << " ";
-  *output_ << std::setw(4)  << std::right << 0  << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(electron.momentum().Px()) << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(electron.momentum().Py()) << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(electron.momentum().Pz()) << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(electron.momentum().E())  << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(electron.momentum().M())  << " "; 
-  *output_ << std::setw(2)  << std::right << std::showpoint << 0. << " ";
-  *output_ << std::setw(3)  << std::right << std::showpoint << 0.;
-  *output_ << std::endl;
+  if (electron.charge()>0) lhe.id = -11; else lhe.id = +11;
+  lhe.status  = 1;
+  lhe.mother1 = 0;
+  lhe.mother2 = 0;
+  lhe.color1  = 0;
+  lhe.color2  = 0;
+  lhe.px      = electron.momentum().Px();
+  lhe.py      = electron.momentum().Py();
+  lhe.pz      = electron.momentum().Pz();
+  lhe.e       = electron.momentum().E();
+  lhe.m       = electron.momentum().M();
+  lhe.ctau    = 0.;
+  lhe.spin    = 0.;
 }
 
-void LHEWriter::WriteTau(const RecTauFormat& tau)
+
+void LHEWriter::WritePhoton(const RecPhotonFormat& photon, LHEParticleFormat& lhe)
 {
-  if (tau.charge()>0) *output_ << std::setw(9)  << std::right << -15 << " ";
-  else *output_ << std::setw(9)  << std::right << +15 << " ";
-  *output_ << std::setw(4)  << std::right << 1  << " ";
-  *output_ << std::setw(4)  << std::right << 0  << " ";
-  *output_ << std::setw(4)  << std::right << 0  << " ";
-  *output_ << std::setw(4)  << std::right << 0  << " ";
-  *output_ << std::setw(4)  << std::right << 0  << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(tau.momentum().Px()) << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(tau.momentum().Py()) << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(tau.momentum().Pz()) << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(tau.momentum().E())  << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(tau.momentum().M())  << " "; 
-  *output_ << std::setw(2)  << std::right << std::showpoint << 0. << " ";
-  *output_ << std::setw(3)  << std::right << std::showpoint << 0.;
-  *output_ << std::endl;
+  lhe.id      = 22;
+  lhe.status  = 1;
+  lhe.mother1 = 0;
+  lhe.mother2 = 0;
+  lhe.color1  = 0;
+  lhe.color2  = 0;
+  lhe.px      = photon.momentum().Px();
+  lhe.py      = photon.momentum().Py();
+  lhe.pz      = photon.momentum().Pz();
+  lhe.e       = photon.momentum().E();
+  lhe.m       = photon.momentum().M();
+  lhe.ctau    = 0.;
+  lhe.spin    = 0.;
 }
 
-void LHEWriter::WriteMET(const ParticleBaseFormat& met)
+
+void LHEWriter::WriteTau(const RecTauFormat& tau, LHEParticleFormat& lhe)
 {
-  *output_ << std::setw(9)  << std::right << 12 << " ";
-  *output_ << std::setw(4)  << std::right << 1  << " ";
-  *output_ << std::setw(4)  << std::right << 0  << " ";
-  *output_ << std::setw(4)  << std::right << 0  << " ";
-  *output_ << std::setw(4)  << std::right << 0  << " ";
-  *output_ << std::setw(4)  << std::right << 0  << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(met.px()) << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(met.py()) << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(0.) << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(met.pt())  << " ";
-  *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(0.)  << " "; 
-  *output_ << std::setw(2)  << std::right << std::showpoint << 0. << " ";
-  *output_ << std::setw(3)  << std::right << std::showpoint << 0.;
-  *output_ << std::endl;
+  if (tau.charge()>0) lhe.id = -15; else lhe.id = +15;
+  lhe.status  = 1;
+  lhe.mother1 = 0;
+  lhe.mother2 = 0;
+  lhe.color1  = 0;
+  lhe.color2  = 0;
+  lhe.px      = tau.momentum().Px();
+  lhe.py      = tau.momentum().Py();
+  lhe.pz      = tau.momentum().Pz();
+  lhe.e       = tau.momentum().E();
+  lhe.m       = tau.momentum().M();
+  lhe.ctau    = 0.;
+  lhe.spin    = 0.;
+}
+
+
+void LHEWriter::WriteMET(const ParticleBaseFormat& met, LHEParticleFormat& lhe)
+{
+  lhe.id      = 12;
+  lhe.status  = 1;
+  lhe.mother1 = 0;
+  lhe.mother2 = 0;
+  lhe.color1  = 0;
+  lhe.color2  = 0;
+  lhe.px      = met.px();
+  lhe.py      = met.py();
+  lhe.pz      = 0.;
+  lhe.e       = met.pt();
+  lhe.m       = 0.;
+  lhe.ctau    = 0.;
+  lhe.spin    = 0.;
 }

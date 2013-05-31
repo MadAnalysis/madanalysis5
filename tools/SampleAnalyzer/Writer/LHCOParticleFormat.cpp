@@ -31,8 +31,15 @@
 
 using namespace MA5;
 
+// -----------------------------------------------------------------------------
+// Header
+// -----------------------------------------------------------------------------
 const std::string LHCOParticleFormat::header = "  #  typ    eta     phi        pt    jmas    ntrk    btag  had/em   dum1   dum2";
 
+
+// -----------------------------------------------------------------------------
+// Print a particle line
+// -----------------------------------------------------------------------------
 void LHCOParticleFormat::Print(UInt_t num, std::ostream* out)
 {
   *out << std::setw(3) << std::right << num;
@@ -67,5 +74,25 @@ void LHCOParticleFormat::Print(UInt_t num, std::ostream* out)
   *out << "  ";
   *out << std::setw(5) << std::right << 0.;     // -X.YY
   out->precision(pres);
+  *out << std::endl;
+}
+
+
+// -----------------------------------------------------------------------------
+// Print the event header
+// -----------------------------------------------------------------------------
+void LHCOParticleFormat::WriteEventHeader(unsigned int numEvent,
+                                          std::ostream* out)
+{
+  // Particle number
+  *out << std::setw(3) << std::right << 0;
+  *out << "  ";
+
+  // Event number
+  *out << std::setw(10) << std::right << numEvent+1;
+  *out << "  ";
+
+  // Trigger word
+  *out << std::setw(6) << std::right << 0;
   *out << std::endl;
 }

@@ -35,6 +35,8 @@ Bool_t TaggerBase::IsLast(MCParticleFormat* part, EventFormat& myEvent)
 }
 
 
+
+
 void TaggerBase::SetParameter(const std::string& key, 
                               const std::string& value,
                               std::string header)

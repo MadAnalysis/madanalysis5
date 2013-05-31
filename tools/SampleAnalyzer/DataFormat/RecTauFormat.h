@@ -98,13 +98,25 @@ class RecTauFormat : public RecParticleFormat
   const Float_t  charge() const  
   { if (charge_) return +1.; else return -1.; }
 
+  /// Mutator to the electric charge
+  void setCharge(Float_t charge )
+  { if (charge>0) charge_=true; else charge_=false; }
+
   /// Accessor to the number of tracks
   const UShort_t ntracks() const 
   { return ntracks_; }
 
+  /// Mutator to the number of tracks
+  void setNtracks(UShort_t ntracks)
+  { ntracks_=ntracks; }
+
   /// Accessor to the decay mode
   const Int_t DecayMode() const
   { return DecayMode_; }
+
+  /// Mutator to the decay mode
+  void setDecayMode(Int_t mode)
+  { DecayMode_=mode; }
 };
 
 }

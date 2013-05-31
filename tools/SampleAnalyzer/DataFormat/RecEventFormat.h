@@ -48,6 +48,7 @@ class LHCOReader;
 class ROOTReader;
 class TauTagger;
 class bTagger;
+class JetClusteringFastJet;
 
 class RecEventFormat
 {
@@ -56,6 +57,7 @@ class RecEventFormat
   friend class ROOTReader;
   friend class TauTagger;
   friend class bTagger;
+  friend class JetClusteringFastJet;
 
   // -------------------------------------------------------------
   //                        data members
@@ -90,19 +92,19 @@ class RecEventFormat
   Double_t THT_;
 
   /// Monte Carlo taus decaying hadronically
-  std::vector<MCParticleFormat*> MCHadronicTaus_;
+  std::vector<const MCParticleFormat*> MCHadronicTaus_;
 
   /// Monte Carlo taus decaying into muon
-  std::vector<MCParticleFormat*> MCMuonicTaus_;
+  std::vector<const MCParticleFormat*> MCMuonicTaus_;
 
   /// Monte Carlo taus decaying into electron
-  std::vector<MCParticleFormat*> MCElectronicTaus_;
+  std::vector<const MCParticleFormat*> MCElectronicTaus_;
 
   /// Monte Carlo b-quarks
-  std::vector<MCParticleFormat*> MCBquarks_;
+  std::vector<const MCParticleFormat*> MCBquarks_;
 
   /// Monte Carlo c-quarks
-  std::vector<MCParticleFormat*> MCCquarks_;
+  std::vector<const MCParticleFormat*> MCCquarks_;
 
 
   // -------------------------------------------------------------
@@ -146,23 +148,23 @@ class RecEventFormat
   const Double_t& THT() const {return THT_;}
 
   /// Accessor to the Monte Carlo taus decaying hadronically
-  const std::vector<MCParticleFormat*>& MCHadronicTaus() const
+  const std::vector<const MCParticleFormat*>& MCHadronicTaus() const
   {return MCHadronicTaus_;}
 
   /// Accessor to Monte Carlo taus decaying into muon
-  const std::vector<MCParticleFormat*>& MCMuonicTaus() const
+  const std::vector<const MCParticleFormat*>& MCMuonicTaus() const
   {return MCMuonicTaus_;}
 
   /// Accessor to Monte Carlo taus decaying into electron
-  const std::vector<MCParticleFormat*>& MCElectronicTaus() const
+  const std::vector<const MCParticleFormat*>& MCElectronicTaus() const
   {return MCElectronicTaus_;}
 
   /// Accessor to Monte Carlo b-quarks
-  const std::vector<MCParticleFormat*>& MCBquarks() const
+  const std::vector<const MCParticleFormat*>& MCBquarks() const
   {return MCBquarks_;}
 
   /// Accessor to Monte Carlo c-quarks
-  const std::vector<MCParticleFormat*>& MCCquarks() const
+  const std::vector<const MCParticleFormat*>& MCCquarks() const
   {return MCCquarks_;}
 
   /// Accessor to the electron collection
@@ -193,23 +195,23 @@ class RecEventFormat
   Double_t& THT() {return THT_;}
 
   /// Accessor to the Monte Carlo taus decaying hadronically
-  std::vector<MCParticleFormat*>& MCHadronicTaus()
+  std::vector<const MCParticleFormat*>& MCHadronicTaus()
   {return MCHadronicTaus_;}
 
   /// Accessor to Monte Carlo taus decaying into muon
-  std::vector<MCParticleFormat*>& MCMuonicTaus()
+  std::vector<const MCParticleFormat*>& MCMuonicTaus()
   {return MCMuonicTaus_;}
 
   /// Accessor to Monte Carlo taus decaying into electron
-  std::vector<MCParticleFormat*>& MCElectronicTaus()
+  std::vector<const MCParticleFormat*>& MCElectronicTaus()
   {return MCElectronicTaus_;}
 
   /// Accessor to Monte Carlo b-quarks
-  std::vector<MCParticleFormat*>& MCBquarks()
+  std::vector<const MCParticleFormat*>& MCBquarks()
   {return MCBquarks_;}
 
   /// Accessor to Monte Carlo c-quarks
-  std::vector<MCParticleFormat*>& MCCquarks()
+  std::vector<const MCParticleFormat*>& MCCquarks()
   {return MCCquarks_;}
 
   /// Clearing all information

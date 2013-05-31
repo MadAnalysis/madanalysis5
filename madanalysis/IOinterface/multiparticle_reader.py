@@ -29,12 +29,13 @@ import os
 
 class MultiparticleReader():
 
-    def __init__(self,path,cmd_define,level=MA5RunningType.PARTON):
+    def __init__(self,path,cmd_define,level=MA5RunningType.PARTON,forced=False):
         self.cmd_define = cmd_define
         self.npart      = 0
         self.path       = path
         self.isopen     = False
         self.level      = level
+        self.forced     = forced
 
     def Load(self):
         if self.level==MA5RunningType.PARTON:
@@ -53,6 +54,11 @@ class MultiparticleReader():
             if not self.OpenRecoLevel():
                 return False
             self.Read()
+            self.Close()
+            if not self.OpenHadronLevel():
+                return False
+            self.Read()
+            self.AddSpecialMultiparticles()
             self.Close()
          
     def OpenPartonLevel(self):        
@@ -160,7 +166,7 @@ class MultiparticleReader():
             logging.debug("Extracting a multiparticle labelled by ["+split[0]+"] with a PDG-id : "+str(split[2:]))
             
             #feed multiparticle
-            self.cmd_define.fill(split[0],split[2:])
+            self.cmd_define.fill(split[0],split[2:],self.forced)
             self.npart += 1
 
 

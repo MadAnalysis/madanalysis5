@@ -27,9 +27,53 @@
 
 using namespace MA5;
 
+
+void JetClusteringFastJet::GetFinalState(const MCParticleFormat* part, std::set<const MCParticleFormat*>& finalstates)
+{
+  for (unsigned int i=0; i<part->Daughters().size(); i++)
+  {
+    if (PHYSICS->IsFinalState(part->Daughters()[i])) finalstates.insert(part->Daughters()[i]);
+    else return GetFinalState(part->Daughters()[i],finalstates);
+  }
+}
+
+Bool_t JetClusteringFastJet::IsLast(const MCParticleFormat* part, EventFormat& myEvent)
+{
+  for (unsigned int i=0; i<part->Daughters().size(); i++)
+  {
+    if (part->Daughters()[i]->pdgid()==part->pdgid()) return false;
+  }
+  return true;
+}
+
+
+Bool_t JetClusteringFastJet::IrrelevantPhoton(const MCParticleFormat* part)
+{
+  if (part->mother1()==0) return false;
+
+  // Checking mother
+  UInt_t absid = std::abs(part->mother1()->pdgid());
+
+  if (absid==15) return true;
+  else return IrrelevantPhoton(part->mother1());
+}
+
+Bool_t JetClusteringFastJet::ComingFromHadronDecay(const MCParticleFormat* part)
+{
+  // Weird case ? Safety: removing this case
+  if (part->mother1()==0) return true;
+  //  std::cout << "part " << part->pdgid() << " <- " << part->mother1()->pdgid() << std::endl;
+  // Checking mother
+  Bool_t had = PHYSICS->IsHadronic(part->mother1()->pdgid()) && part->mother1()->pdgid()!=21;
+  if (had && part->mother1()->mother1()==0) return false;
+  else if (had) return true;
+  else return ComingFromHadronDecay(part->mother1());
+}
+
+
 bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
 {
-  if (mySample.mc()==0 ||  myEvent.mc()==0) return false;
+  if (mySample.mc()==0 || myEvent.mc()==0) return false;
   if (mySample.rec()==0) mySample.InitializeRec();
   if (myEvent.rec() ==0) myEvent.InitializeRec();
 
@@ -38,57 +82,173 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
 
   // Veto
   std::vector<bool> vetos(myEvent.mc()->particles().size(),false);
+  std::set<const MCParticleFormat*> vetos2;
 
   // Filling the dataformat with electron/muon
   for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
   {
+    const MCParticleFormat& part = myEvent.mc()->particles()[i];
+    UInt_t absid = std::abs(part.pdgid());
+
+    // Rejecting particle with a null pt (initial state ?)
+    if (part.pt()<1e-10) continue;
+
+    // Treating intermediate particles
+    if (PHYSICS->IsInterState(part))
+    {
+      // rejecting not interesting particles
+      if (absid!=5 && absid!=4 && absid!=15) continue;
+
+      // keeping the last particle with the same id in the decay chain
+      if (!IsLast(&part, myEvent)) continue;
+
+      // looking for b quarks
+      if (absid==5)
+      {
+        bool found=false;
+        for (unsigned int j=0;j<myEvent.rec()->MCBquarks_.size();j++)
+        {
+          if (myEvent.rec()->MCBquarks_[j]==&(part)) 
+          {found=true; break;}
+        }
+        if (!found) myEvent.rec()->MCBquarks_.push_back(&(part));
+      }
+
+      // looking for c quarks
+      else if (absid==4)
+      {
+        bool found=false;
+        for (unsigned int j=0;j<myEvent.rec()->MCCquarks_.size();j++)
+        {
+          if (myEvent.rec()->MCCquarks_[j]==&(part)) 
+          {found=true; break;}
+        }
+        if (!found) myEvent.rec()->MCCquarks_.push_back(&(part));
+      }
+
+      // looking for taus
+      else if (absid==15)
+      {
+        // rejecting particle if coming from hadronization
+        if (ComingFromHadronDecay(&part)) continue;
+
+        // Looking taus daughters id
+        bool leptonic   = true;
+        bool muonic     = false;
+        bool electronic = false;
+        for (unsigned int j=0;j<part.Daughters().size();j++)
+        {
+          UInt_t pdgid = std::abs(part.Daughters()[j]->pdgid());
+          if      (pdgid==13) muonic=true;
+          else if (pdgid==11) electronic=true;
+          else if (pdgid!=22 /*photons*/ &&
+                   !(pdgid>=11 && pdgid<=16) /*neutrinos*/) 
+                  leptonic=false;
+        }
+        if (!leptonic) {muonic=false; electronic=false;}
+
+        // Saving taus decaying into muons (only one copy)
+        if (muonic)
+        {
+          bool found=false;
+          for (unsigned int j=0;j<myEvent.rec()->MCMuonicTaus_.size();j++)
+          {
+            if (myEvent.rec()->MCMuonicTaus_[j]==&(part)) 
+            {found=true; break;}
+          }
+          if (!found) myEvent.rec()->MCMuonicTaus_.push_back(&(part));
+        }
+
+        // Saving taus decaying into electrons (only one copy)
+        else if (electronic)
+        {
+          bool found=false;
+          for (unsigned int j=0;j<myEvent.rec()->MCElectronicTaus_.size();j++)
+          {
+            if (myEvent.rec()->MCElectronicTaus_[j]==&(part)) 
+            {found=true; break;}
+          }
+          if (!found) myEvent.rec()->MCElectronicTaus_.push_back(&(part));
+        }
+
+        // Saving taus decaying into hadrons (only copy)
+        else
+        {
+          bool found=false;
+          for (unsigned int j=0;j<myEvent.rec()->MCHadronicTaus_.size();j++)
+          {
+            if (myEvent.rec()->MCHadronicTaus_[j]==&(part)) 
+            {found=true; break;}
+          }
+          if (!found) 
+          {
+            // Saving the hadrons in MC container
+            myEvent.rec()->MCHadronicTaus_.push_back(&(part));
+
+            // Applying efficiency
+            if (!myTAUtagger_->IsIdentified()) continue;
+
+            // Creating reco hadronic taus
+            RecTauFormat* myTau = myEvent.rec()->GetNewTau();
+            if (part.pdgid()>0) myTau->setCharge(-1.);
+            else myTau->setCharge(+1.);
+            myTau->setMomentum(part.momentum());
+            myTau->setMc(&part);
+            myTau->setDecayMode(PHYSICS->GetTauDecayMode(myTau->mc()));
+            if (myTau->DecayMode()<=0) myTau->setNtracks(0); // ERROR case
+            else if (myTau->DecayMode()==7 || 
+                     myTau->DecayMode()==9) myTau->setNtracks(3); // 3-Prong
+            else myTau->setNtracks(1); // 1-Prong
+
+            // Searching final state
+            GetFinalState(&part,vetos2);
+          }
+        }
+      }
+    }
+
     // Keeping only final states
-    if (myEvent.mc()->particles()[i].statuscode()!=1) continue;
-
-    if (std::abs(myEvent.mc()->particles()[i].pdgid())==11 && myEvent.mc()->particles()[i].mother1()!=0 && 15==std::abs(myEvent.mc()->particles()[i].mother1()->pdgid())) std::cout << "mumu from tautau" << std::endl;
-
-
-    // Be more constraining in ExclusiveId
-    if (ExclusiveId_) 
+    else if (PHYSICS->IsFinalState(part))
     {
-      // Need a mother particle
-      if (myEvent.mc()->particles()[i].mother1()==0) continue;
+      // rejecting not interesting particles
+      if (absid!=22 && absid!=11 && absid!=13) continue;
 
-      // HEP2LHE trick
-      if (myEvent.mc()->particles()[i].pdgid() != 
-          myEvent.mc()->particles()[i].mother1()->pdgid()) continue;
+      // rejecting particle if coming from hadronization
+      if (ExclusiveId_ && ComingFromHadronDecay(&part)) continue;
+
+      // Muons
+      if (absid==13)
+      {
+        vetos[i]=true;
+        RecLeptonFormat * muon = myEvent.rec()->GetNewMuon();
+        muon->setMomentum(part.momentum());
+        muon->setMc(&(part));
+        if (part.pdgid()==13) muon->SetCharge(-1);
+        else muon->SetCharge(+1);
+      }
+
+      // Electrons
+      else if (absid==11)
+      {
+        vetos[i]=true;
+        RecLeptonFormat * elec = myEvent.rec()->GetNewElectron();
+        elec->setMomentum(part.momentum());
+        elec->setMc(&(part));
+        if (part.pdgid()==11) elec->SetCharge(-1);
+        else elec->SetCharge(+1);
+      }
+
+      // Photons
+      else if (absid==22)
+      {
+        if (IrrelevantPhoton(&part)) continue;
+        vetos[i]=true;
+        RecPhotonFormat * photon = myEvent.rec()->GetNewPhoton();
+        photon->setMomentum(part.momentum());
+        photon->setMc(&(part));
+      }
     }
 
-    // Muons
-    if (std::abs(myEvent.mc()->particles()[i].pdgid())==13)
-    {
-      vetos[i]=true;
-      RecLeptonFormat * muon = myEvent.rec()->GetNewMuon();
-      muon->setMomentum(myEvent.mc()->particles()[i].momentum());
-      muon->setMc(&(myEvent.mc()->particles()[i]));
-      if (myEvent.mc()->particles()[i].pdgid()==13) muon->SetCharge(-1);
-      else muon->SetCharge(+1);
-    }
-
-    // Electrons
-    else if (std::abs(myEvent.mc()->particles()[i].pdgid())==11)
-    {
-      vetos[i]=true;
-      RecLeptonFormat * elec = myEvent.rec()->GetNewElectron();
-      elec->setMomentum(myEvent.mc()->particles()[i].momentum());
-      elec->setMc(&(myEvent.mc()->particles()[i]));
-      if (myEvent.mc()->particles()[i].pdgid()==11) elec->SetCharge(-1);
-      else elec->SetCharge(+1);
-    }
-
-    // Photons
-    else if (std::abs(myEvent.mc()->particles()[i].pdgid())==22)
-    {
-      vetos[i]=true;
-      RecPhotonFormat * photon = myEvent.rec()->GetNewPhoton();
-      photon->setMomentum(myEvent.mc()->particles()[i].momentum());
-      photon->setMc(&(myEvent.mc()->particles()[i]));
-    }
   }
 
   double & TET = myEvent.rec()->TET();
@@ -98,12 +258,18 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
   std::vector<fastjet::PseudoJet> inputs;
   for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
   {
+    const MCParticleFormat& part = myEvent.mc()->particles()[i];
+
     // Selecting input for jet clustering
     if (myEvent.mc()->particles()[i].statuscode()!=1)       continue;
     if (PHYSICS->IsInvisible(myEvent.mc()->particles()[i])) continue;
 
     // ExclusiveId mode
-    if (ExclusiveId_ && vetos[i]) continue;
+    if (ExclusiveId_)
+    {
+      if (vetos[i]) continue;
+      if (vetos2.find(&part)!=vetos2.end()) continue;
+    }
 
     // NonExclusive Id mode
     else if (std::abs(myEvent.mc()->particles()[i].pdgid())==13) continue;
@@ -170,6 +336,11 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
     {
       (*MET) -= myEvent.rec()->photons()[i].momentum();
       TET += myEvent.rec()->photons()[i].pt();
+    }
+    for (unsigned int i=0;i<myEvent.rec()->taus().size();i++)
+    {
+      (*MET) -= myEvent.rec()->taus()[i].momentum();
+      TET += myEvent.rec()->taus()[i].pt();
     }
   }
 

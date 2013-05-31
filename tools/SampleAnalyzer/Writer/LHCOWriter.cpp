@@ -31,57 +31,6 @@
 
 using namespace MA5;
 
-std::string LHCOWriter::FortranFormat_SimplePrecision(Float_t value,UInt_t precision)
-{
-  std::stringstream str;
-  str.precision(precision);
-  std::string word;
-
-  Bool_t negative=false;
-  if (value<0) {negative=true; value*=-1;}
-
-  Int_t exponent = 0;
-  if (value!=0)
-  {
-    for (; value > 1.0; exponent++) value/=10.;
-    for (; value < 0.0; exponent--) value*=10.;
-  }
-
-  str << std::uppercase << std::fixed << value << "E";
-  if (exponent>=0) str << "+"; else str << "-";
-  if (abs(exponent)<10) str << "0";
-  str << abs(exponent);
-  str >> word;
-  if (!negative) return word;
-  else return "-"+word;
-}
-
-
-std::string LHCOWriter::FortranFormat_DoublePrecision(Double_t value,UInt_t precision)
-{
-  std::stringstream str;
-  str.precision(precision);
-  std::string word;
-
-  Bool_t negative=false;
-  if (value<0) {negative=true; value*=-1;}
-
-  Int_t exponent = 0;
-  if (value!=0)
-  {
-    for (; value > 1.0; exponent++) value/=10.;
-    for (; value < 0.0; exponent--) value*=10.;
-  }
-
-  str << std::uppercase << std::fixed << value << "E";
-  if (exponent>=0) str << "+"; else str << "-";
-  if (abs(exponent)<10) str << "0";
-  str << abs(exponent);
-  str >> word;
-  if (!negative) return word;
-  else return "-"+word;
-}
-
 
 /// Read the sample
 bool LHCOWriter::WriteHeader(const SampleFormat& mySample)
@@ -177,7 +126,7 @@ bool LHCOWriter::WriteEvent(const EventFormat& myEvent,
   if (myEvent.rec()==0) return true;
 
   // Event header
-  WriteEventHeader(mySample,counter_);
+  LHCOParticleFormat::WriteEventHeader(counter_,output_);
 
   // Particle container in LHCO format
   std::vector<LHCOParticleFormat> PartTable;
@@ -239,24 +188,6 @@ bool LHCOWriter::WriteEvent(const EventFormat& myEvent,
 }
 
 
-/// Finalize the event
-bool LHCOWriter::WriteEventHeader(const SampleFormat& mySample,
-                                  unsigned int numEvent)
-{
-  // Particle number
-  *output_ << std::setw(3) << std::right << 0;
-  *output_ << "  ";
-
-  // Event number
-  *output_ << std::setw(10) << std::right << numEvent+1;
-  *output_ << "  ";
-
-  // Trigger word
-  *output_ << std::setw(6) << std::right << 0;
-  *output_ << std::endl;
-
-  return true;
-}
 
 
 /// Finalize the event
@@ -318,7 +249,6 @@ void LHCOWriter::WriteMuon(const RecLeptonFormat& muon,
   if (muon.pt()!=0) ET_PT=muon.sumET_isol()/muon.pt();
 
   // gathering isolation variables
-  bool test=false;
   if (ET_PT>100) ET_PT=0.99; else ET_PT=ET_PT/100.;
 
   isolation+=ET_PT;

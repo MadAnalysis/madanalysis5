@@ -35,7 +35,6 @@ class ExpertMode:
     def __init__(self,main):
         self.main=main
         self.path=""
-        self.dir=""
         self.forbiddenpaths=[]
         self.forbiddenpaths.append(os.path.normpath(self.main.ma5dir+'/lib'))
         self.forbiddenpaths.append(os.path.normpath(self.main.ma5dir+'/bin'))
@@ -45,8 +44,10 @@ class ExpertMode:
         logging.info("\nWelcome to the expert mode of MadAnalysis")
         logging.info("Please enter a folder for creating an empty SampleAnalyzer job")
         answer=raw_input("Answer: ")
-        self.dir = answer
-        self.path = os.path.normpath(self.main.currentdir+'/'+answer)
+        self.path = os.path.expanduser(answer)
+        if not self.path.startswith('/'):
+            self.path = self.main.currentdir+'/'+self.path
+        self.path = os.path.normpath(self.path)
 
         # Checking folder
         if self.path in self.forbiddenpaths:
