@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+68   1.1.17  (2013/06/10) bfuks:   Bug fixes: progress bar on macosx + empty histogram display 
+
 67   1.1.16  (2013/06/01) econte:  2 files missed in the previous commit 
 
 66   1.1.15  (2013/05/31) econte:  finalizing jet-clustering with exclusiveId option and full 

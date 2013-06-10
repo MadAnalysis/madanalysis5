@@ -164,7 +164,6 @@ class PlotFlow:
 
         # Loop over datasets and histos
         for ind in range(0,len(histos)):
-
             # Scaling 
             histos[ind].Scale(scales[ind])
             
@@ -396,7 +395,7 @@ class PlotFlow:
         stack = THStack("mystack","")
         ntot = 0
         for item in histos:
-            ntot+=item.GetEntries()
+            ntot+=item.Integral()
             stack.Add(item)
 
         # Drawing

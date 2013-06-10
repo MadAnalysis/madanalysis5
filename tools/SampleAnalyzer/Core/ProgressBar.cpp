@@ -30,7 +30,7 @@
 using namespace MA5;
 
 
-const std::string ProgressBar::header("        => progress ");
+const std::string ProgressBar::header("        => progress: ");
 
 
 // -----------------------------------------------------------------------------
@@ -121,21 +121,27 @@ void ProgressBar::Display(UInt_t ind)
   todisplay[Nstep_+1]=']'; // overwrite the character '>' if ind=Nstep_
 
   // Go back to the line ? 
-  if (ind!=0 && !FirstTime_)
-  {
-    std::vector<char> last_chars = newstreambuf_->get_last_chars();
-    if (last_chars[0] != '\n') std::cout << std::endl;
-    else if (last_chars[5] == 93 && last_chars[4] == 27 && 
-             last_chars[3] == 91 && last_chars[2] == 48 && 
-             last_chars[1] == 109) std::cout << "\b\r";
-  }
-  FirstTime_=false;
+//  if (ind!=0 && !FirstTime_)
+//  {
+//    std::vector<char> last_chars = newstreambuf_->get_last_chars();
+// Progressbar printing fixed (BENJ -> to be further validated)
+//    if (last_chars[0] != '\n') std::cout << std::endl;
+//    else if (last_chars[5] == 93 && last_chars[4] == 27 && 
+//             last_chars[3] == 91 && last_chars[2] == 48 && 
+//             last_chars[1] == 109) std::cout << "\b\r";
+//    if (last_chars[5] == 93 && last_chars[4] == 27 && 
+//        last_chars[3] == 91 && last_chars[2] == 48 && 
+//        last_chars[1] == 109) std::cout << "\b\r";
+//  }
+//  FirstTime_=false;
 
   // Adding header
   todisplay = header + "\x1b[34m"+ todisplay + "\x1b[0m";
 
   // Displaying
-  std::cout << todisplay << std::endl;
+// Progressbar printing fixed (BENJ -> to be further validated)
+//  std::cout << todisplay << std::endl;
+  std::cout << std::string(todisplay.length(),'\b') << todisplay;
 }
 
 
@@ -148,7 +154,9 @@ void ProgressBar::Finalize()
   if (MuteInit_) return;
 
   // Display the indicator with a status of 100% ?
-  if (!MuteEnd_) Display(Nstep_);
+// Progressbar printing fixed (BENJ -> to be further validated)
+//  if (!MuteEnd_) Display(Nstep_);
+  if(!MuteEnd_) std::cout <<std::endl;
 
   // Restoring the initial stream buffer
   std::cout.rdbuf(oldstreambuf_);
