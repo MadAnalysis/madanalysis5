@@ -233,6 +233,8 @@ Long64_t ReaderTextBase::GetFileSize()
 Long64_t ReaderTextBase::GetPosition()
 {
   if (input_==0) return 0;
+#ifdef ZIP_USE
   if (compress_) return gzinput_->tellg();
+#endif
   else  return input_->tellg();
 }

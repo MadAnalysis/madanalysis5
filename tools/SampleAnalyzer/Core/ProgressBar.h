@@ -56,30 +56,36 @@ namespace MA5
     public:
 
       /// Constructor
-      SpyStreamBuffer(std::streambuf* buf) : buf(buf)
+    SpyStreamBuffer(std::streambuf* buf) : buf_(buf)
       {
-        last_chars.resize(7,traits_type::eof());
+        add_endl_=false;
         // no buffering, overflow on every char
         setp(0, 0);
       }
 
-      /// Getting last character
-      const std::vector<char>& get_last_chars() const 
-      { return last_chars; }
+      /// Set ProgressBar mode
+      void SetProgressBarMode(bool status=true)
+      { add_endl_=status; }
+
+      /// Accessor to ProgressBar mode status
+      bool GetProgressBarMode() const
+      { return add_endl_; }
 
       /// Overflow method
       virtual int_type overflow(int_type c)
       {
-        buf->sputc(c);
-        for (unsigned int i=(last_chars.size()-1);i>0;i--) 
-           last_chars[i]=last_chars[i-1];
-        last_chars[0] = c;
+        if (add_endl_) 
+        {
+          buf_->sputc('\n');
+          add_endl_=false;
+        }
+        buf_->sputc(c);
         return c;
       }
     private:
 
-      std::streambuf* buf;
-      std::vector<char> last_chars;
+      std::streambuf* buf_;
+      bool add_endl_;
     };
 
   // -------------------------------------------------------------
