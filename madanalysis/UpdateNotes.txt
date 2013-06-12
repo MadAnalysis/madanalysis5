@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+73   1.1.22  (2013/06/12) econte:  change operation order in ma5commit 
+
 72   1.1.21  (2013/06/12) econte:  fixing bugs with label definition in RECO mode + adding version 
                                    number to SampleAnalyzer 
 
