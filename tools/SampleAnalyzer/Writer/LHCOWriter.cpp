@@ -41,6 +41,16 @@ bool LHCOWriter::WriteHeader(const SampleFormat& mySample)
   // LHCO format tag
   *output_ << "#<MA5Format> LHCO format </MA5Format>" << std::endl;
 
+  // Python interface version
+  *output_ << "#<MadAnalysis5Version> " << cfg_->GetPythonInterfaceVersion() 
+           << " " << cfg_->GetPythonInterfaceDate() 
+           << "</MadAnalysis5Version>" << std::endl;
+
+  // SampleAnalyzer version
+  *output_ << "#<SampleAnalyzerVersion> "<< cfg_->GetSampleAnalyzerVersion()
+           << " " << cfg_->GetSampleAnalyzerVersion()
+           << " </SampleAnalyzerVersion>" << std::endl;
+
   // Explanation about the LHCO
   *output_ << "#<FormatDescription>" << std::endl;
   *output_ << "#################################################################################" << std::endl;

@@ -150,7 +150,7 @@ AnalyzerBase* SampleAnalyzer::InitializeAnalyzer(const std::string& name,
 
   // Initialize (common part to all analyses)
   if (!myAnalysis->PreInitialize(outputname,
-                                 cfg_.IsNoEventWeight()))
+                                 &cfg_))
   {
     ERROR << "problem during the pre-initialization of the analysis called '" 
           << name << "'" << endmsg;
@@ -194,7 +194,7 @@ FilterBase* SampleAnalyzer::InitializeFilter(const std::string& name,
 
   // Initialize (common part to all filters)
   if (!myFilter->PreInitialize(outputname,
-                               cfg_.IsNoEventWeight()))
+                               &cfg_))
   {
     ERROR << "problem during the pre-initialization of the filter called '" 
           << name << "'" << endmsg;
@@ -236,7 +236,7 @@ WriterBase* SampleAnalyzer::InitializeWriter(const std::string& name,
   writers_.push_back(myWriter);
 
   // Initializing
-  if (!myWriter->Initialize(outputname))
+  if (!myWriter->Initialize(&cfg_,outputname))
   {
     ERROR << "problem during the initialization of the writer called '" 
           << name << "'" << endmsg;

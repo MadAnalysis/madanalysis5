@@ -105,6 +105,16 @@ bool LHEWriter::WriteHeader(const SampleFormat& mySample)
     *output_ << "<MA5Format> LHE format </MA5Format>" << std::endl;
   }
 
+  // Python interface version
+  *output_ << "<MadAnalysis5Version> " << cfg_->GetPythonInterfaceVersion() 
+           << " " << cfg_->GetPythonInterfaceDate() 
+           << "</MadAnalysis5Version>" << std::endl;
+
+  // SampleAnalyzer version
+  *output_ << "<SampleAnalyzerVersion> "<< cfg_->GetSampleAnalyzerVersion()
+           << " " << cfg_->GetSampleAnalyzerVersion()
+           << " </SampleAnalyzerVersion>" << std::endl;
+
   // Explanation about the LHE
   *output_ << "<FormatDescription>" << std::endl;
   *output_ << "#################################################################################" << std::endl;

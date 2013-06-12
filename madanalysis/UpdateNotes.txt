@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+74   1.1.23  (2013/06/12) econte:  adding MA5/SampleAnalyzer version and date to LHE and LHCO output 
+
 73   1.1.22  (2013/06/12) econte:  change operation order in ma5commit 
 
 72   1.1.21  (2013/06/12) econte:  fixing bugs with label definition in RECO mode + adding version 

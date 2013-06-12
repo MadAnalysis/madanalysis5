@@ -37,8 +37,12 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 // Initialize
 // -----------------------------------------------------------------------------
-bool WriterTextBase::Initialize(const std::string& rawfilename)
+bool WriterTextBase::Initialize(const Configuration* cfg,
+                                const std::string& rawfilename)
 {
+  // Saving configuration file
+  cfg_ = cfg;
+
   // Is the file stored in Rfio
   rfio_ = ReaderBase::IsRfioMode(rawfilename);
 
