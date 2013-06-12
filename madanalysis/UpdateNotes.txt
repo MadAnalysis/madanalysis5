@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+71   1.1.20  (2013/06/12) econte:  fix bug with usage of zlib from tools folder + release/date stamp 
+                                   inside SampleAnalyzer 
+
 70   1.1.19  (2013/06/12) econte:  small fix related to the progress bar display 
 
 69   1.1.18  (2013/06/12) econte:  fixing bugs (zlib + numpy) + display progress bar 

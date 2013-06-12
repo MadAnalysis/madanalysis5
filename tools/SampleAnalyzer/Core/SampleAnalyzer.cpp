@@ -34,8 +34,7 @@
 
 using namespace MA5;
 
-
-/// Constructor withtout arguments
+/// Constructor without arguments
 SampleAnalyzer::SampleAnalyzer() 
 {
   // Initializing service
