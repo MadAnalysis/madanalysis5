@@ -961,11 +961,15 @@ class JobWriter():
         if not dataset.weighted_events:
             weighted_events=" --no_event_weight"
 
+        # Release
+        release = ' --ma5_version="' + self.main.version + ';' + self.main.date + '"'
+
         # Running SampleAnalyzer 
         res=os.system('cd '\
                       +self.path+'/Output/'+name+';'\
                       +' ../../Build/'\
                       +'MadAnalysis5Job '+weighted_events +\
+                      release +\
                       ' ../../Input/'+name+'.list')
 
         return True

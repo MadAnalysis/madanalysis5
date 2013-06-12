@@ -48,7 +48,7 @@ SampleAnalyzer::SampleAnalyzer()
   progressBar_=0;
 
   // Header
-  INFO << "    * SampleAnalyzer 2.0 for MadAnalysis 5 - Welcome.";
+  INFO << "    * SampleAnalyzer for MadAnalysis 5 - Welcome.";
   INFO << endmsg;
  
 }
@@ -73,7 +73,7 @@ bool SampleAnalyzer::Initialize(int argc, char **argv,
   std::string filename = cfg_.GetInputListName();
 
   // Checks if a file has been provided
-  INFO << "      - extracting event samples..." << endmsg;
+  INFO << "      - extracting the list of event samples..." << endmsg;
   std::ifstream input(filename.c_str());
   if (!input)
   {

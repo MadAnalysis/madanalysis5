@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+72   1.1.21  (2013/06/12) econte:  fixing bugs with label definition in RECO mode + adding version 
+                                   number to SampleAnalyzer 
+
 71   1.1.20  (2013/06/12) econte:  fix bug with usage of zlib from tools folder + release/date stamp 
                                    inside SampleAnalyzer 
 

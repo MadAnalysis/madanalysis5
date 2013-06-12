@@ -52,9 +52,6 @@ class ParticleReader():
             self.Read()
             self.Close()
         elif self.level==MA5RunningType.RECO:
-            self.OpenHadronLevel()
-            self.Read()
-            self.Close()
             if not self.OpenRecoLevel():
                 return False
             self.Read()

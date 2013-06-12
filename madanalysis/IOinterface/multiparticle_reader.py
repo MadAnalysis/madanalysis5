@@ -55,9 +55,6 @@ class MultiparticleReader():
                 return False
             self.Read()
             self.Close()
-            if not self.OpenHadronLevel():
-                return False
-            self.Read()
             self.AddSpecialMultiparticles()
             self.Close()
          
@@ -177,6 +174,7 @@ class MultiparticleReader():
             for item in arg:
                 text += item + " "
             logging.error(text)    
+
 
     def AddSpecialMultiparticles(self):
         # Creating invisible and hadronic multiparticles (mandatory in parton and hadron level)
