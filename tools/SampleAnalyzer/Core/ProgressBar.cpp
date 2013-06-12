@@ -120,10 +120,11 @@ void ProgressBar::Display(UInt_t ind)
   todisplay[ind+1]='>';
   todisplay[Nstep_+1]=']'; // overwrite the character '>' if ind=Nstep_
 
+  bool newline=false;
   // Go back to the line ? 
   if (ind!=0 && !FirstTime_)
   {
-    if (!newstreambuf_->GetProgressBarMode()) std::cout << std::endl;
+    if (!newstreambuf_->GetProgressBarMode()) newline=true;
   }
   FirstTime_=false;
 
@@ -132,7 +133,9 @@ void ProgressBar::Display(UInt_t ind)
 
   // Displaying
   newstreambuf_->SetProgressBarMode(false);
-  std::cout << std::string(todisplay.length(),'\b') << todisplay;
+  if (newline) std::cout << std::endl;
+  else std::cout << std::string(todisplay.length(),'\b');
+  std::cout << todisplay;
   newstreambuf_->SetProgressBarMode(true);
 }
 

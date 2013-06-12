@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+70   1.1.19  (2013/06/12) econte:  small fix related to the progress bar display 
+
 69   1.1.18  (2013/06/12) econte:  fixing bugs (zlib + numpy) + display progress bar 
 
 70   1.1.19  (2013/06/12) econte:  fixing bugs (numpy, zlib) + progress bar display 
