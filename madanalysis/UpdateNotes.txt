@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+75   1.1.24  (2013/06/12) econte:  adding compilation service + remove warnings 
+
 74   1.1.23  (2013/06/12) econte:  adding MA5/SampleAnalyzer version and date to LHE and LHCO output 
 
 73   1.1.22  (2013/06/12) econte:  change operation order in ma5commit 

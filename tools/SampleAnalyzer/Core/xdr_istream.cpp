@@ -115,7 +115,7 @@ xdr_istream& xdr_istream::operator>>(Float_t &v)
 {
   if (eof()) return (*this);
 
-	UInt_t n;
+	UInt_t n=0;
 	(*this)>>n;
 	Float_t* vp = reinterpret_cast<Float_t*>(&n);
 	v=*vp;
@@ -130,7 +130,7 @@ xdr_istream& xdr_istream::operator>>(Double_t &v)
 {
   if (eof()) return (*this);
 
-	ULong64_t n;
+	ULong64_t n=0;
 	(*this)>>n;
 	Double_t* vp = reinterpret_cast<Double_t*>(&n);
 	v=*vp;

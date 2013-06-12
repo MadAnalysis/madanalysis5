@@ -27,9 +27,9 @@
 #include "SampleAnalyzer/Writer/SAFWriter.h"
 #include "SampleAnalyzer/Service/ExceptionService.h"
 #include "SampleAnalyzer/Service/TimeService.h"
-#include "SampleAnalyzer/Service/Terminate.h"
 #include "SampleAnalyzer/Service/PDGService.h"
 #include "SampleAnalyzer/Service/Terminate.h"
+#include "SampleAnalyzer/Service/CompilationService.h"
 
 
 using namespace MA5;
