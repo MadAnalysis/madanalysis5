@@ -1,59 +1,12 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
-60   1.1.28  (2013/06/13) bfuks:   Releasing v1.1.7 
+61   1.1.8   (2013/06/13) bfuks:   1.1.7 
 
-59   1.1.27  (2013/06/13) bfuks:   preparing v1.1.7 
-
-58   1.1.26  (2013/06/13) bfuks:   preparing version 1.1.7 
-
-76   1.1.25  (2013/06/13) econte:  fixing one bug related to progress bar occuring on some plateforms 
-
-75   1.1.24  (2013/06/12) econte:  adding compilation service + remove warnings 
-
-74   1.1.23  (2013/06/12) econte:  adding MA5/SampleAnalyzer version and date to LHE and LHCO output 
-
-73   1.1.22  (2013/06/12) econte:  change operation order in ma5commit 
-
-72   1.1.21  (2013/06/12) econte:  fixing bugs with label definition in RECO mode + adding version 
-                                   number to SampleAnalyzer 
-
-71   1.1.20  (2013/06/12) econte:  fix bug with usage of zlib from tools folder + release/date stamp 
-                                   inside SampleAnalyzer 
-
-70   1.1.19  (2013/06/12) econte:  small fix related to the progress bar display 
-
-69   1.1.18  (2013/06/12) econte:  fixing bugs (zlib + numpy) + display progress bar 
-
-70   1.1.19  (2013/06/12) econte:  fixing bugs (numpy, zlib) + progress bar display 
-
-69   1.1.18  (2013/06/12) econte:  fixing bugs with numpy + fixing bugs with gzip + fixing bugs with 
-                                   Progress bar [to validate] 
-
-68   1.1.17  (2013/06/10) bfuks:   Bug fixes: progress bar on macosx + empty histogram display 
-
-67   1.1.16  (2013/06/01) econte:  2 files missed in the previous commit 
-
-66   1.1.15  (2013/05/31) econte:  finalizing jet-clustering with exclusiveId option and full 
-                                   compatibility with Pythia8 
-
-65   1.1.14  (2013/05/26) econte:  validation LHCO format 
-
-64   1.1.13  (2013/05/24) econte:  improving jetclustering + adding photons in NPID plot + nb of read 
-                                   events + surprise 
-
-63   1.1.12  (2013/05/21) econte:  first implementation of the exclusive id 
-
-62   1.1.11  (2013/05/21) econte:  adding changes to LHCOWriter + fixing warning appearing in Adam's 
-                                   computer 
-
-61   1.1.10  (2013/05/19) econte:  fixing bug with LHCO reader + implementing LHCO output (only 
-                                   kinematics part is validated) + beautiful headers for LHCO + LHE 
-
-60   1.1.9   (2013/05/18) econte:  test 
-
-59   1.1.8   (2013/05/17) bfuks:   test 
-
-58   1.1.7   (2013/05/17) bfuks:   initializating 1.1.7 
+60   1.1.7   (2013/06/13) ma5team:  - LHCO output
+                                    - Compatibility with pythia-8 output
+                                    - Improvement of the jet clustering / object identification
+                                    - Few bug fixes
+                                    - Photons added in the reco modeReleasing v1.1.7 
 
 54   1.1.6   (2013/05/17) ma5team:  - Many bug fixes (special thanks to Adam Alloul and Jose Ruiz).
                                     - Simplified LHE output added, LHCO writer at the beta level.
