@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+62   1.1.8   (2013/06/13) bfuks:   1.1.7 again 
+
 61   1.1.8   (2013/06/13) bfuks:   1.1.7 
 
 60   1.1.7   (2013/06/13) ma5team:  - LHCO output
