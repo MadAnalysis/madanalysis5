@@ -96,7 +96,7 @@ class HEPMCReader : public ReaderTextBase
   void FillEventPDFInfo(const std::string& line, SampleFormat& mySample, EventFormat& myEvent);
   void FillEventParticleLine(const std::string& line, EventFormat& myEvent);
   void FillEventVertexLine(const std::string& line, EventFormat& myEvent);
-  void SetMother(MCParticleFormat* part, EventFormat& myEvent);
+  void SetMother(MCParticleFormat* const part, EventFormat& myEvent);
   Bool_t FillWeightNames(const std::string& line);
   Bool_t FillHeavyIons(const std::string& line);
 

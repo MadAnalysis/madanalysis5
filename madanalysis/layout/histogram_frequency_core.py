@@ -23,11 +23,11 @@
 
 
 import logging
-import numpy
 
 class HistogramFrequencyCore:
 
     def __init__(self):
+        import numpy
         self.integral  = 0
         self.nevents   = 0
         self.entries   = 0

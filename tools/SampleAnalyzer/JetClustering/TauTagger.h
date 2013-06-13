@@ -27,7 +27,7 @@
 
 //SampleAnalyser headers
 #include "SampleAnalyzer/JetClustering/TaggerBase.h"
-
+#include <TH1F.h>
 
 namespace MA5
 {
@@ -44,7 +44,7 @@ class TauTagger: public TaggerBase
 
   /// Apply misefficiency
   Bool_t doMisefficiency_;
-
+  //  TH1F* htest;
 
 //---------------------------------------------------------------------------------
 //                                method members
@@ -56,10 +56,12 @@ class TauTagger: public TaggerBase
     {
       misid_ljet_=0.0;
       doMisefficiency_=false;
+      //      htest = new TH1F("eric","eric",10,0,10);
     }
 
     /// Destructor
-    ~TauTagger () { }
+    virtual ~TauTagger () 
+    { /*htest->SaveAs("Alloul.root");*/ }
 
     /// Matching using dr
     virtual void Method1 (SampleFormat& mySample, EventFormat& myEvent);

@@ -36,6 +36,7 @@
 #include "SampleAnalyzer/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/DataFormat/SampleFormat.h"
 #include "SampleAnalyzer/Service/Physics.h"
+#include "SampleAnalyzer/Core/Configuration.h"
 
 // ROOT headers
 #include <TVector.h>
@@ -77,7 +78,8 @@ class WriterBase
   }
 
   /// Initialize (virtual pure)
-  virtual bool Initialize(const std::string& filename) = 0;
+  virtual bool Initialize(const Configuration* cfg,
+                          const std::string& filename) = 0;
 
   /// Read the sample (virtual pure)
   virtual bool WriteHeader(const SampleFormat& mySample) = 0;

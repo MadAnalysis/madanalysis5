@@ -55,7 +55,7 @@ namespace MA5
     /// Is the jet clustering exclusive ?
     Bool_t Exclusive_;
 
-    /// Exclusive id for tau-elec-jet
+    /// Exclusive id for tau-elec-photon-jet
     Bool_t ExclusiveId_;
 
     /// Tagger
@@ -63,6 +63,12 @@ namespace MA5
     cTagger*    myCtagger_;
     TauTagger*  myTAUtagger_;
 
+    UInt_t muon;
+    UInt_t electron;
+    UInt_t tauH;
+    UInt_t tauM;
+    UInt_t tauE;
+    UInt_t photon;
 
     //--------------------------------------------------------------------------
     //                              method members
@@ -81,6 +87,12 @@ namespace MA5
       myBtagger_   = 0;
       myCtagger_   = 0;
       myTAUtagger_ = 0;
+     muon=0;
+     electron=0;
+     tauH=0;
+     tauM=0;
+     tauE=0;
+     photon=0;
     }
 
     /// Destructor

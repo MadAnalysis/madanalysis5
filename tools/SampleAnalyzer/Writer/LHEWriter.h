@@ -32,6 +32,7 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Writer/WriterTextBase.h"
+#include "SampleAnalyzer/Writer/LHEParticleFormat.h"
 
 namespace MA5
 {
@@ -76,17 +77,19 @@ class LHEWriter : public WriterTextBase
                         unsigned int nevents);
 
   /// Writing a particle
-  bool WriteParticle(const MCParticleFormat& myPart, Int_t mother1, Int_t mother2, Int_t statuscode=0);
+  void WriteParticle(const MCParticleFormat& myPart, Int_t mother1, Int_t mother2, 
+                     Int_t statuscode, LHEParticleFormat& lhe);
 
   static std::string FortranFormat_SimplePrecision(Float_t value,UInt_t precision=7); 
   static std::string FortranFormat_DoublePrecision(Double_t value,UInt_t precision=11); 
 
   // Writing a reconstructed jet
-  void WriteJet(const RecJetFormat& jet);
-  void WriteMuon(const RecLeptonFormat& muon);
-  void WriteElectron(const RecLeptonFormat& electron);
-  void WriteTau(const RecTauFormat& tau);
-  void WriteMET(const ParticleBaseFormat& met);
+  void WriteJet(const RecJetFormat& jet, LHEParticleFormat& lhe);
+  void WriteMuon(const RecLeptonFormat& muon, LHEParticleFormat& lhe);
+  void WriteElectron(const RecLeptonFormat& electron, LHEParticleFormat& lhe);
+  void WritePhoton(const RecPhotonFormat& photon, LHEParticleFormat& lhe);
+  void WriteTau(const RecTauFormat& tau, LHEParticleFormat& lhe);
+  void WriteMET(const ParticleBaseFormat& met, LHEParticleFormat& lhe);
 
 
 };

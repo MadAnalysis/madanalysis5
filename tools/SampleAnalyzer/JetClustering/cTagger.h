@@ -45,7 +45,7 @@ class cTagger:public TaggerBase
     cTagger() {}
 
     /// Destructor
-    ~cTagger () {}
+    virtual ~cTagger () {}
 
     /// Matching using dr
     virtual void Method1 (SampleFormat& mySample, EventFormat& myEvent);

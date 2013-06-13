@@ -282,7 +282,7 @@ class Interpreter(InterpreterBase):
         input.Load()
 
     def InitializeMultiparticle(self):
-        input = MultiparticleReader(self.main.ma5dir,self.cmd_define,self.main.mode)
+        input = MultiparticleReader(self.main.ma5dir,self.cmd_define,self.main.mode,self.main.forced)
         input.Load()
 
     # PreLoop
@@ -474,5 +474,5 @@ class Interpreter(InterpreterBase):
         if line[-1] in [' ','\t']:
             return '', line, len(line),len(enidx)
         return text, line, begidx, endidx
-        
+
         

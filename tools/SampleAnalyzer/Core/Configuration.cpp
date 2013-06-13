@@ -36,6 +36,14 @@ using namespace MA5;
 
 
 // -----------------------------------------------------------------------------
+// Initializing static data members
+// -----------------------------------------------------------------------------
+// DO NOT TOUCH THESE LINES
+const std::string Configuration::sampleanalyzer_version_ = "1.1.25";
+const std::string Configuration::sampleanalyzer_date_    = "2013/06/13";
+// DO NOT TOUCH THESE LINES
+
+// -----------------------------------------------------------------------------
 // PrintSyntax
 // -----------------------------------------------------------------------------
 void Configuration::PrintSyntax()
@@ -94,6 +102,22 @@ bool Configuration::Initialize(int &argc, char *argv[])
     // weighted event
     else if (option=="--no_event_weight") no_event_weight_ = true;
 
+    // version
+    else if (option.find("--ma5_version=")==0)
+    {
+      std::string stamp = option.substr(14,std::string::npos);
+      std::size_t result = stamp.find(";");
+      if (result==std::string::npos)
+      {
+        WARNING << "MA5 version '" << stamp << "' is not valid." << std::endl;
+      }
+      else
+      {
+        pythoninterface_version_ = stamp.substr(0,result);
+        pythoninterface_date_ = stamp.substr(result+1,std::string::npos);
+      }
+    }
+
     // unknown option
     else
     {
@@ -116,6 +140,13 @@ bool Configuration::Initialize(int &argc, char *argv[])
 // -----------------------------------------------------------------------------
 void Configuration::Display()
 {
+  INFO << "      - version: " << sampleanalyzer_version_ << " (" << sampleanalyzer_date_ << ") ";
+  if ((sampleanalyzer_version_!=pythoninterface_version_ && pythoninterface_version_!="") || 
+      (sampleanalyzer_date_!=pythoninterface_date_ && pythoninterface_version_!=""))
+    INFO << "[ python interface version: " << pythoninterface_version_ 
+         << " (" << pythoninterface_date_ << ") ]";
+  INFO << endmsg;
+ 
   INFO << "      - general: ";
 
   // Is there option ?

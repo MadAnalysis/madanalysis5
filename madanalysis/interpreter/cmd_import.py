@@ -163,7 +163,7 @@ class CmdImport(CmdBase.CmdBase):
         # Loading particles
         input = ParticleReader(self.main.ma5dir,cmd_define,self.main.mode)
         input.Load()
-        input = MultiparticleReader(self.main.ma5dir,cmd_define,self.main.mode)
+        input = MultiparticleReader(self.main.ma5dir,cmd_define,self.main.mode,self.main.forced)
         input.Load()
 
         # Reset history

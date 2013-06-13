@@ -133,6 +133,7 @@ StatusCode::Type HEPMCReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySa
 }
 
 
+
 // -----------------------------------------------------------------------------
 // FinalizeEvent
 // -----------------------------------------------------------------------------
@@ -150,10 +151,38 @@ bool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
   mySample.mc()->set_xsection(value);
   mySample.mc()->set_xsection_error(err_value);
 
-  // Mother pointer assignment
+  // Computing met, mht, ...
   for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
   {
     MCParticleFormat& part = myEvent.mc()->particles_[i];
+
+    // Setting mother
+    if (part.extra1_!=part.extra2_)
+    {
+      unsigned int nmother=0;
+      for (unsigned int j=0; j < myEvent.mc()->particles_.size();j++)
+      {
+        if (i==j) continue;
+        if (part.extra1_ == myEvent.mc()->particles_[j].extra2_)
+        {
+          // set daughter
+          myEvent.mc()->particles_[j].Daughters_.push_back(&part);
+
+          // set mother
+          nmother++;
+          if      (nmother==1) part.mother1_=&(myEvent.mc()->particles()[j]);
+          else if (nmother==2) part.mother2_=&(myEvent.mc()->particles()[j]);
+          else 
+          { 
+            if (warnmother_) 
+            {
+              WARNING << "Number of mothers greather than 2 : " << nmother << endmsg; 
+              warnmother_=false; 
+            }
+          }
+        }
+      }
+    }
 
     // MET, MHT, TET, THT
     if (part.statuscode()==1 && !PHYSICS->IsInvisible(part))
@@ -410,12 +439,12 @@ void HEPMCReader::FillEventPDFInfo(const std::string& line,
 // FillEventParticleLine
 // -----------------------------------------------------------------------------
 void HEPMCReader::FillEventParticleLine(const std::string& line,
-                                      EventFormat& myEvent)
+                                        EventFormat& myEvent)
 {
   std::stringstream str;
   str << line;
 
-  double   	tmp;    // temporary variable to fill in LorentzVector
+  double tmp;    // temporary variable to fill in LorentzVector
 
   // Get a new particle
   MCParticleFormat * part = myEvent.mc()->GetNewParticle();
@@ -432,9 +461,8 @@ void HEPMCReader::FillEventParticleLine(const std::string& line,
   str >> part->statuscode_;
   str >> tmp; 
   str >> tmp; 
-  str >> part->extra_;
-
-  SetMother(part, myEvent);
+  str >> part->extra2_;
+  part->extra1_=current_vertex_.barcode_;
 }
 
 // -----------------------------------------------------------------------------
@@ -460,19 +488,45 @@ void HEPMCReader::FillEventVertexLine(const std::string& line, EventFormat& myEv
 //--------------------------------------------------------------------------
 // SetMother
 //--------------------------------------------------------------------------
-void HEPMCReader::SetMother(MCParticleFormat* part, EventFormat& myEvent)
+void HEPMCReader::SetMother(MCParticleFormat* const part, EventFormat& myEvent)
 {
+  /*  std::cout << current_vertex_.barcode_ << std::endl;
+
+  // No history
   if (myEvent.mc()->particles().size()==0) return;
-  
+
+  //ERIC orphan special treatment 
+  if (part->extra_==current_vertex_.barcode_) return;
+
+  std::cout << "---------------------------------------------" << std::endl;
+  for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
+  {
+    std::cout << "i=" << i << "\t" << myEvent.mc()->particles()[i].pdgid() << " from ";
+    if (myEvent.mc()->particles()[i].mother1()!=0) std::cout <<  myEvent.mc()->particles()[i].mother1()->pdgid();
+    std::cout << " extra=" << myEvent.mc()->particles()[i].extra_ << " current=" << current_vertex_.barcode_ << std::endl;
+    std::cout << std::endl;
+  }
+
+
   unsigned int nmother=0;
-  for (unsigned int i =0; i<(myEvent.mc()->particles().size()-1);i++)
+  for (unsigned int i=0;i<(myEvent.mc()->particles().size()-1);i++)
   {
     if(myEvent.mc()->particles()[i].extra_==current_vertex_.barcode_)
     {
       nmother++;
-      if(nmother==1)      part->mother1_=&(myEvent.mc()->particles()[i]);
-      else if(nmother==2) part->mother2_=&(myEvent.mc()->particles()[i]);
-      else { if (warnmother_) {WARNING << "Number of mothers greather than 2 : " << nmother << endmsg; warnmother_=false;} }
+      if      (nmother==1) part->mother1_=&(myEvent.mc()->particles()[i]);
+      else if (nmother==2) part->mother2_=&(myEvent.mc()->particles()[i]);
+      else 
+      { 
+        if (warnmother_) 
+        {
+          WARNING << "Number of mothers greather than 2 : " << nmother << endmsg; 
+          warnmother_=false; 
+        }
+      }
     }
   }
+
+    if (part->pdgid()==-24) {std::cout << "MMMMHHH" << std::endl; ComingFromHadronDecay(part); }
+  */
 }

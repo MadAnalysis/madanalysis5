@@ -50,10 +50,13 @@ class Main():
     userVariables = { "currentdir"      : [], \
                       "normalize"       : ["none","lumi","lumi_weight"], \
                       "lumi"            : [], \
-                      "SBratio"         : ['"S/B"','"B/S"','"S/(S+B)"','"B/(B+S)"','"S/sqrt(S+B)"','"B/sqrt(B+S)"'], \
+                      "SBratio"         : ['"S/B"','"B/S"',\
+                                           '"S/(S+B)"','"B/(B+S)"',\
+                                           '"S/sqrt(S+B)"','"B/sqrt(B+S)"'], \
                       "SBerror"         : [], \
                       "stacking_method" : ["stack","superimpose","normalize2one"], \
-                      "outputfile"      : ['"output.lhe.gz"'] }
+                      "outputfile"      : ['"output.lhe.gz"','"output.lhco.gz"'] \
+                      }
 
     SBformula = { 'S/B'         : '1./(B**2)*sqrt(B**2*ES**2+S**2*EB**2)', \
                   'S/(S+B)'     : '1./(S+B)**2*sqrt(B**2*ES**2+S**2*EB**2)', \
@@ -291,11 +294,41 @@ class Main():
                 quoteTag=True
             if quoteTag:
                 value=value[1:-1]
-            if not value.lower().endswith(".lhe") and not value.lower().endswith(".lhe.gz"):
-                logging.error("LHE format (*.lhe) and compressed LHE format (*.lhe.gz) are the only possible formats for output.")
+            valuemin = value.lower()
+
+            # Compressed file
+            if valuemin.endswith(".gz") and not self.libZIP:
+                logging.error("Compressed formats (*.gz) are not available. "\
+                              + "Please install zlib with the command line:")
+                logging.error(" install zlib")
                 return False
-            self.output = value
-            return
+
+            # LHE
+            if valuemin.endswith(".lhe") or valuemin.endswith(".lhe.gz"):
+                self.output = value
+                return
+
+            # LHCO
+            elif valuemin.endswith(".lhco") or valuemin.endswith(".lhco.gz"):
+                if self.mode == MA5RunningType.RECO:
+                    self.output = value
+                    return
+                elif self.mode == MA5RunningType.PARTON:
+                    logging.error("LHCO format is not available in PARTON mode.")
+                    return False
+                elif self.mode == MA5RunningType.HADRON:
+                    if self.clustering.algorithm == "none":
+                        logging.error("Please select a jet-clustering algorithm before requesting a LHCO file output.")
+                        logging.error("Command: set main.merging.algorithm = ")
+                        return False
+                    else:
+                        self.output = value
+                        return
+
+            else:
+                logging.error("Output format is not available. Extension allowed: " +\
+                              ".lhe .lhe.gz .lhco .lhco.gz")
+                return False
 
         # other    
         else:

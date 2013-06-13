@@ -52,6 +52,8 @@ class WriterTextBase : public WriterBase
   /// Streaming for reading input
   std::ostream* output_;
 
+  /// Configuration
+  const Configuration* cfg_;
 
   // -------------------------------------------------------------
   //                       method members
@@ -71,7 +73,8 @@ class WriterTextBase : public WriterBase
   }
 
   /// Initialize
-  virtual bool Initialize(const std::string& filename);
+  virtual bool Initialize(const Configuration* cfg,
+                          const std::string& filename);
 
   /// Read the sample (virtual pure)
   virtual bool WriteHeader(const SampleFormat& mySample) = 0;
@@ -85,6 +88,9 @@ class WriterTextBase : public WriterBase
 
   /// Finalize
   virtual bool Finalize();
+
+  /// MA5 logo
+  void WriteMA5header();
  
 };
 

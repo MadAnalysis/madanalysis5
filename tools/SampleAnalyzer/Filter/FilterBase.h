@@ -93,10 +93,10 @@ class FilterBase
 
   /// Initialize (common part to all analyses)
   bool PreInitialize(const std::string& outputName, 
-                     bool weighted_events=false)
+                     const Configuration* cfg)
   { 
     outputName_ = outputName;
-    weighted_events_ = weighted_events;
+    weighted_events_ = cfg->IsNoEventWeight();
     return true;
   }
 

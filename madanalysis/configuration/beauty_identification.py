@@ -26,7 +26,7 @@ import logging
 class BeautyIdentification():
 
     default_matching_dr = 0.5
-    default_exclusive   = False
+    default_exclusive   = True
     default_efficiency  = 1.
     default_misid_cjet  = 0.
     default_misid_ljet  = 0.

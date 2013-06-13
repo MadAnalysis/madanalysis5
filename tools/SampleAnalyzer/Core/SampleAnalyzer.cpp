@@ -27,15 +27,14 @@
 #include "SampleAnalyzer/Writer/SAFWriter.h"
 #include "SampleAnalyzer/Service/ExceptionService.h"
 #include "SampleAnalyzer/Service/TimeService.h"
-#include "SampleAnalyzer/Service/Terminate.h"
 #include "SampleAnalyzer/Service/PDGService.h"
 #include "SampleAnalyzer/Service/Terminate.h"
+#include "SampleAnalyzer/Service/CompilationService.h"
 
 
 using namespace MA5;
 
-
-/// Constructor withtout arguments
+/// Constructor without arguments
 SampleAnalyzer::SampleAnalyzer() 
 {
   // Initializing service
@@ -49,7 +48,7 @@ SampleAnalyzer::SampleAnalyzer()
   progressBar_=0;
 
   // Header
-  INFO << "    * SampleAnalyzer 2.0 for MadAnalysis 5 - Welcome.";
+  INFO << "    * SampleAnalyzer for MadAnalysis 5 - Welcome.";
   INFO << endmsg;
  
 }
@@ -74,7 +73,7 @@ bool SampleAnalyzer::Initialize(int argc, char **argv,
   std::string filename = cfg_.GetInputListName();
 
   // Checks if a file has been provided
-  INFO << "      - extracting event samples..." << endmsg;
+  INFO << "      - extracting the list of event samples..." << endmsg;
   std::ifstream input(filename.c_str());
   if (!input)
   {
@@ -151,7 +150,7 @@ AnalyzerBase* SampleAnalyzer::InitializeAnalyzer(const std::string& name,
 
   // Initialize (common part to all analyses)
   if (!myAnalysis->PreInitialize(outputname,
-                                 cfg_.IsNoEventWeight()))
+                                 &cfg_))
   {
     ERROR << "problem during the pre-initialization of the analysis called '" 
           << name << "'" << endmsg;
@@ -195,7 +194,7 @@ FilterBase* SampleAnalyzer::InitializeFilter(const std::string& name,
 
   // Initialize (common part to all filters)
   if (!myFilter->PreInitialize(outputname,
-                               cfg_.IsNoEventWeight()))
+                               &cfg_))
   {
     ERROR << "problem during the pre-initialization of the filter called '" 
           << name << "'" << endmsg;
@@ -237,7 +236,7 @@ WriterBase* SampleAnalyzer::InitializeWriter(const std::string& name,
   writers_.push_back(myWriter);
 
   // Initializing
-  if (!myWriter->Initialize(outputname))
+  if (!myWriter->Initialize(&cfg_,outputname))
   {
     ERROR << "problem during the initialization of the writer called '" 
           << name << "'" << endmsg;
@@ -302,6 +301,10 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
   if (progressBar_!=0)
   {
     progressBar_->Finalize();
+    INFO << "        => total number of events: " << counter_read_[file_index_-1] 
+         << " ( analyzed: " << counter_passed_[file_index_-1] 
+         << " ; skipped: " << counter_read_[file_index_-1] - counter_passed_[file_index_-1]
+         << " ) " << endmsg;
   }
 
   // Next file

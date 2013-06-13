@@ -162,6 +162,24 @@ def WriteFillWithElectronContainer(part,file,rank,status):
                    container+'.push_back(&(event.rec()->electrons()[i]));\n')
 
 
+def WriteFillWithPhotonContainer(part,file,rank,status):
+    
+    # If PTrank, no fill
+    if part.PTrank!=0:
+        return
+
+    # Skipping if already defined
+    if InstanceName.Find('P_'+part.name+rank+status):
+        return
+
+    # Getting container name
+    container=InstanceName.Get('P_'+part.name+rank+status)
+
+    # Put photon
+    if part.particle.Find(22):
+        file.write('      '+container+'.push_back(&(event.rec()->photons()[i]));\n')
+
+
 def WriteFillWithMuonContainer(part,file,rank,status):
     
     # If PTrank, no fill
@@ -296,6 +314,14 @@ def WriteContainer(file,main,part_list):
         file.write('    {\n')
         for item in part_list:
             WriteFillWithJetContainer(item[0],file,item[1],item[2])
+        file.write('    }\n')
+        InstanceName.Clear()
+
+        # Filling with photons
+        file.write('    for (UInt_t i=0;i<event.rec()->photons().size();i++)\n')
+        file.write('    {\n')
+        for item in part_list:
+            WriteFillWithPhotonContainer(item[0],file,item[1],item[2])
         file.write('    }\n')
         InstanceName.Clear()
 

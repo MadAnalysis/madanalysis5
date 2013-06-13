@@ -56,30 +56,36 @@ namespace MA5
     public:
 
       /// Constructor
-      SpyStreamBuffer(std::streambuf* buf) : buf(buf)
+    SpyStreamBuffer(std::streambuf* buf) : buf_(buf)
       {
-        last_chars.resize(7,traits_type::eof());
+        add_endl_=false;
         // no buffering, overflow on every char
         setp(0, 0);
       }
 
-      /// Getting last character
-      const std::vector<char>& get_last_chars() const 
-      { return last_chars; }
+      /// Set ProgressBar mode
+      void SetProgressBarMode(bool status=true)
+      { add_endl_=status; }
+
+      /// Accessor to ProgressBar mode status
+      bool GetProgressBarMode() const
+      { return add_endl_; }
 
       /// Overflow method
       virtual int_type overflow(int_type c)
       {
-        buf->sputc(c);
-        for (unsigned int i=(last_chars.size()-1);i>0;i--) 
-           last_chars[i]=last_chars[i-1];
-        last_chars[0] = c;
+        if (add_endl_) 
+        {
+          buf_->sputc('\n');
+          add_endl_=false;
+        }
+        buf_->sputc(c);
         return c;
       }
     private:
 
-      std::streambuf* buf;
-      std::vector<char> last_chars;
+      std::streambuf* buf_;
+      bool add_endl_;
     };
 
   // -------------------------------------------------------------
@@ -112,10 +118,14 @@ namespace MA5
     std::vector<Long64_t> Thresholds_;
 
     /// Pointer to the new stream buffer
-    SpyStreamBuffer* newstreambuf_;
+    SpyStreamBuffer* newstreambuf_cout_;
+    SpyStreamBuffer* newstreambuf_cerr_;
+    SpyStreamBuffer* newstreambuf_clog_;
 
     /// Pointer to the old stream buffer
-    std::streambuf* oldstreambuf_;
+    std::streambuf* oldstreambuf_cout_;
+    std::streambuf* oldstreambuf_cerr_;
+    std::streambuf* oldstreambuf_clog_;
 
     static const std::string header;
 
@@ -127,14 +137,22 @@ namespace MA5
     /// Constructor without argument
     ProgressBar()
     {
-      newstreambuf_=0;
-      oldstreambuf_=0;
+      newstreambuf_cout_=0;
+      newstreambuf_cerr_=0;
+      newstreambuf_clog_=0;
+      oldstreambuf_cout_=0;
+      oldstreambuf_cerr_=0;
+      oldstreambuf_clog_=0;
       Reset(); 
     }
 
     /// Destructor 
     ~ProgressBar() 
-    { if (newstreambuf_!=0) delete newstreambuf_; }
+    { 
+      if (newstreambuf_cout_!=0) delete newstreambuf_cout_;  
+      if (newstreambuf_cerr_!=0) delete newstreambuf_cerr_; 
+      if (newstreambuf_clog_!=0) delete newstreambuf_clog_; 
+   }
 
     /// Reset
     void Reset()

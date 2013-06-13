@@ -314,6 +314,23 @@ class ConfigChecker:
                 os.environ['LIBRARY_PATH'] = os.environ['LIBRARY_PATH'] + \
                     		        ":" + item
 	        break
+
+        # If not, test if it is there locally 
+        if not find: 
+            item = self.ma5dir+'/tools/zlib/lib/'
+            files=glob.glob(item+"/libz.so")
+            files.extend(glob.glob(item+"/libz.a"))
+            files.extend(glob.glob(item+"/libz.dylib"))
+            if len(files)!=0:
+	        self.configLinux.libraries['ZLib']=files[0]+":"+str(os.stat(files[0]).st_mtime)
+   	        find=True
+                os.environ['LD_LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH'] + \
+                    		        ":" + item
+                os.environ['DYLD_LIBRARY_PATH'] = os.environ['DYLD_LIBRARY_PATH'] + \
+                    		        ":" + item
+                os.environ['LIBRARY_PATH'] = os.environ['LIBRARY_PATH'] + \
+                    		        ":" + item
+        # Not fail -> Warning
         if not find:
             self.PrintFAIL(warning=True)
 	    logging.warning("Library called 'libz' not found. Gzip format will be disabled.")
@@ -327,9 +344,16 @@ class ConfigChecker:
             if len(files)!=0:
   	        self.configLinux.headers['ZLib']=files[0]+":"+str(os.stat(files[0]).st_mtime)
 	        find=True
-                os.environ['CPLUS_INCLUDE_PATH'] = os.environ['CPLUS_INCLUDE_PATH'] + \
-                    		        ":" + item
+                os.environ['CPLUS_INCLUDE_PATH'] = os.environ['CPLUS_INCLUDE_PATH'] + ":" + item
    	        break
+
+        # If not, test if it is there locally 
+        if not find: 
+            find=os.path.isfile(self.ma5dir+'/tools/zlib/include/zlib.h')
+            if find:
+                os.environ['CPLUS_INCLUDE_PATH'] = os.environ['CPLUS_INCLUDE_PATH'] + ":" + \
+                                                   self.ma5dir+'/tools/zlib/include/'
+
         if not find:
             self.PrintFAIL(warning=True)
 	    logging.warning("Header file called 'zlib.h' not found. Gzip format will be disabled.")
@@ -369,6 +393,7 @@ class ConfigChecker:
             if(len(files))!=0:
                find = True
                self.configLinux.fastjet_version = commands.getstatusoutput('fastjet-config --version')[1]
+
         # If not, test if it is there locally 
         if not find: 
             find=os.path.isfile(self.ma5dir+'/tools/fastjet/bin/fastjet-config')

@@ -29,12 +29,13 @@ import os
 
 class ParticleReader():
 
-    def __init__(self,path,cmd_define,level=MA5RunningType.PARTON):
+    def __init__(self,path,cmd_define,level=MA5RunningType.PARTON,forced=False):
         self.cmd_define = cmd_define
-        self.npart  = 0
-        self.path   = path
-        self.level  = level
-        self.isopen = False
+        self.npart      = 0
+        self.path       = path
+        self.level      = level
+        self.isopen     = False
+        self.forced     = forced
 
     def Load(self):
         if self.level==MA5RunningType.PARTON:
@@ -162,7 +163,7 @@ class ParticleReader():
             logging.debug("Extracting a particle labelled by ["+split[1]+"] with a PDG-id : "+split[0])
             
             #feed particle
-            self.cmd_define.fill(split[1],[split[0]])
+            self.cmd_define.fill(split[1],[split[0]],self.forced)
             self.npart += 1
 
     @staticmethod        

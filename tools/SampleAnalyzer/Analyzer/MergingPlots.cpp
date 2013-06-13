@@ -27,6 +27,7 @@
 #include "SampleAnalyzer/Analyzer/MergingPlots.h"
 #include "SampleAnalyzer/Core/Configuration.h"
 #include "SampleAnalyzer/Service/Physics.h"
+#include "SampleAnalyzer/Service/CompilationService.h"
 
 //STL headers
 #include <sstream>
@@ -201,6 +202,7 @@ Double_t MergingPlots::rapidity(Double_t px, Double_t py, Double_t pz)
 void MergingPlots::ExtractDJRwithFortran(const std::vector<fastjet::PseudoJet>& inputs,std::vector<Double_t>& DJRvalues)
 {
   double PP[512][4];
+  UNUSED(PP);
   for (unsigned int i=0;i<inputs.size();i++)
   {
     PP[i][0]=inputs[i].px();

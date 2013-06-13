@@ -55,6 +55,7 @@ class JetClusteringFastJet: public JetClustererBase
     /// Jet definition
     fastjet::JetDefinition JetDefinition_;
 
+
 //---------------------------------------------------------------------------------
 //                                method members
 //---------------------------------------------------------------------------------
@@ -73,6 +74,13 @@ class JetClusteringFastJet: public JetClustererBase
 
     /// Initialization
     virtual bool Initialize(const std::map<std::string,std::string>& options)=0;
+
+ private:
+    Bool_t IsLast(const MCParticleFormat* part, EventFormat& myEvent);
+    Bool_t ComingFromHadronDecay(const MCParticleFormat* part);
+    Bool_t IrrelevantPhoton(const MCParticleFormat* part);
+    void GetFinalState(const MCParticleFormat* part, std::set<const MCParticleFormat*>& finalstates);
+ 
 
 };
 

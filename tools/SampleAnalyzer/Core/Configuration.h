@@ -44,6 +44,14 @@ class Configuration
   // -------------------------------------------------------------
   private:
 
+    /// SampleAnalyzer version
+    static const std::string sampleanalyzer_version_;
+    static const std::string sampleanalyzer_date_;  
+
+    /// Python interface version
+    std::string pythoninterface_version_;
+    std::string pythoninterface_date_;
+
     /// option : check event mode
     Bool_t check_event_;
 
@@ -75,6 +83,22 @@ class Configuration
 
     /// Help message
     void PrintSyntax();
+
+    /// Accessor to the sampleanalyzer date
+    const std::string& GetSampleAnalyzerDate() const
+    {return sampleanalyzer_date_;}
+
+    /// Accessor to the sampleanalyzer version
+    const std::string& GetSampleAnalyzerVersion() const
+    {return sampleanalyzer_version_;}
+
+    /// Accessor to the python interface date
+    const std::string& GetPythonInterfaceDate() const
+    {return sampleanalyzer_date_;}
+
+    /// Accessor to the python interface version
+    const std::string& GetPythonInterfaceVersion() const
+    {return sampleanalyzer_version_;}
 
     /// Accessor to the input name
     const std::string& GetInputFileName() const

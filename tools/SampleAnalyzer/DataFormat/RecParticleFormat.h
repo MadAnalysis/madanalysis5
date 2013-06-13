@@ -53,7 +53,7 @@ class RecParticleFormat : public ParticleBaseFormat
  protected:
    
   Float_t 	        HEoverEE_; /// hadronic energy over electromagnetic energy
-  MCParticleFormat* mc_ ;      /// mother generated particle
+  const MCParticleFormat* mc_ ;      /// mother generated particle
 
   // -------------------------------------------------------------
   //                      method members
@@ -94,7 +94,7 @@ class RecParticleFormat : public ParticleBaseFormat
   const MCParticleFormat* mc() const {return mc_;}
 
   /// Mutator relatied to matched Monte Carlo particle
-  void setMc(MCParticleFormat* mc) {mc_=mc;}
+  void setMc(const MCParticleFormat* mc) {mc_=mc;}
 
   /// Accessor to hadronic energy / electromagnetic energy ratio
   const Float_t& HEoverEE() const {return HEoverEE_;}

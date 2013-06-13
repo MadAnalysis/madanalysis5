@@ -79,7 +79,7 @@ class TaggerBase
     }
 
     /// Destructor
-    ~TaggerBase()
+    virtual ~TaggerBase()
     {}
 
     /// Matching using dr

@@ -29,49 +29,6 @@ void bTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
 {
   std::vector<RecJetFormat*> Candidates;
 
-  // loop on the particles searching for b
-  for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
-  {
-    // Keeping only b-quark
-    if (std::abs(myEvent.mc()->particles()[i].pdgid())!=5 &&
-        std::abs(myEvent.mc()->particles()[i].pdgid())!=4) continue;
-
-    // Removing initial states
-    if (PHYSICS->IsInitialState(myEvent.mc()->particles()[i])) continue;
-
-    // Removing final states
-    if (PHYSICS->IsFinalState(myEvent.mc()->particles()[i])) continue;
-
-    // Keeping the last taus in the decay chain
-    if (!IsLast(&myEvent.mc()->particles()[i], myEvent)) continue;
-
-    // b-quark already defined ?
-    if (std::abs(myEvent.mc()->particles()[i].pdgid())==5)
-    {
-      bool found=false;
-      for (unsigned int j=0;j<myEvent.rec()->MCBquarks_.size();j++)
-      {
-        if (myEvent.rec()->MCBquarks_[j]==&(myEvent.mc()->particles()[i])) 
-        {found=true; break;}
-      }
-      if (!found) 
-        myEvent.rec()->MCBquarks_.push_back(&(myEvent.mc()->particles()[i]));
-    }
-
-    // c-quark already defined ?
-    else if (std::abs(myEvent.mc()->particles()[i].pdgid())==4)
-    {
-      bool found=false;
-      for (unsigned int j=0;j<myEvent.rec()->MCCquarks_.size();j++)
-      {
-        if (myEvent.rec()->MCCquarks_[j]==&(myEvent.mc()->particles()[i])) 
-        {found=true; break;}
-      }
-      if (!found) 
-        myEvent.rec()->MCCquarks_.push_back(&(myEvent.mc()->particles()[i]));
-    }
-  }
-
   // Matching b-quarks to jets
   for (unsigned int i=0;i<myEvent.rec()->MCBquarks_.size();i++)
   {
@@ -81,6 +38,7 @@ void bTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
     // loop on the jets
     for (unsigned int j=0;j<myEvent.rec()->jets().size();j++)
     {
+      if (myEvent.rec()->jets()[j].pt()<1e-10) continue;
       Float_t DeltaR = myEvent.rec()->MCBquarks_[i]->dr(myEvent.rec()->jets()[j]);
 
       if (DeltaR <= DeltaRmax) 
@@ -112,6 +70,8 @@ void bTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
     // loop on the jets
     for (unsigned int j=0;j<myEvent.rec()->jets().size();j++)
     {
+      if (myEvent.rec()->jets()[j].pt()<1e-10) continue;
+
       Float_t DeltaR = 
           myEvent.rec()->MCCquarks_[i]->dr(myEvent.rec()->jets()[j]);
 
