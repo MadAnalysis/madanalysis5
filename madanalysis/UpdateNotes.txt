@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+59   1.1.27  (2013/06/13) bfuks:   preparing v1.1.7 
+
 58   1.1.26  (2013/06/13) bfuks:   preparing version 1.1.7 
 
 76   1.1.25  (2013/06/13) econte:  fixing one bug related to progress bar occuring on some plateforms 
