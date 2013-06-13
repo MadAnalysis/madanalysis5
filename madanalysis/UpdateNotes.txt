@@ -1,14 +1,10 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
-62   1.1.8   (2013/06/13) bfuks:   1.1.7 again 
-
-61   1.1.8   (2013/06/13) bfuks:   1.1.7 
-
-60   1.1.7   (2013/06/13) ma5team:  - LHCO output
+62   1.1.7   (2013/06/13) ma5team:  - LHCO output
                                     - Compatibility with pythia-8 output
                                     - Improvement of the jet clustering / object identification
                                     - Few bug fixes
-                                    - Photons added in the reco modeReleasing v1.1.7 
+                                    - Photons added in the reco mode
 
 54   1.1.6   (2013/05/17) ma5team:  - Many bug fixes (special thanks to Adam Alloul and Jose Ruiz).
                                     - Simplified LHE output added, LHCO writer at the beta level.
