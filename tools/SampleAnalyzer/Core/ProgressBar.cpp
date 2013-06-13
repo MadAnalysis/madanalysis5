@@ -23,6 +23,8 @@
 
 
 // STL headers
+#include <cstdlib>
+
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Core/ProgressBar.h"
 #include "SampleAnalyzer/Service/LogStream.h"
@@ -63,14 +65,22 @@ void ProgressBar::Initialize(UInt_t Nstep,
   //  std::cout << "eric Indicator_=" << Indicator_ << std::endl;
 
   /// Saving previous stream buffer related to std::cout
-  oldstreambuf_ = std::cout.rdbuf();
+  oldstreambuf_cout_ = std::cout.rdbuf();
   std::cout.flush();
+  oldstreambuf_cerr_ = std::cerr.rdbuf();
+  std::cerr.flush();
+  oldstreambuf_clog_ = std::clog.rdbuf();
+  std::clog.flush();
 
   /// Assigning a new stream buffer with spy
-  newstreambuf_ = new SpyStreamBuffer(oldstreambuf_);
-  std::cout.rdbuf(newstreambuf_);
+  newstreambuf_cout_ = new SpyStreamBuffer(oldstreambuf_cout_);
+  std::cout.rdbuf(newstreambuf_cout_);
 
-  //  std::cout << "muf Indicator_=" << Indicator_ << std::endl;
+  newstreambuf_cerr_ = new SpyStreamBuffer(oldstreambuf_cerr_);
+  std::cout.rdbuf(newstreambuf_cerr_);
+
+  newstreambuf_clog_ = new SpyStreamBuffer(oldstreambuf_clog_);
+  std::cout.rdbuf(newstreambuf_clog_);
 
 }
 
@@ -124,19 +134,26 @@ void ProgressBar::Display(UInt_t ind)
   // Go back to the line ? 
   if (ind!=0 && !FirstTime_)
   {
-    if (!newstreambuf_->GetProgressBarMode()) newline=true;
+    if (!newstreambuf_cout_->GetProgressBarMode()) newline=true;
+    if (!newstreambuf_cerr_->GetProgressBarMode()) newline=true;
+    if (!newstreambuf_clog_->GetProgressBarMode()) newline=true;
   }
-  FirstTime_=false;
 
   // Adding header
+  unsigned int toremove = (header+todisplay).size();
   todisplay = header + "\x1b[34m"+ todisplay + "\x1b[0m";
 
   // Displaying
-  newstreambuf_->SetProgressBarMode(false);
+  newstreambuf_cout_->SetProgressBarMode(false);
+  newstreambuf_cerr_->SetProgressBarMode(false);
+  newstreambuf_clog_->SetProgressBarMode(false);
   if (newline) std::cout << std::endl;
-  else std::cout << std::string(todisplay.length(),'\b');
+  else if (!FirstTime_) std::cout << std::string(toremove,'\b');
   std::cout << todisplay;
-  newstreambuf_->SetProgressBarMode(true);
+  newstreambuf_cout_->SetProgressBarMode(true);
+  newstreambuf_cerr_->SetProgressBarMode(true);
+  newstreambuf_clog_->SetProgressBarMode(true);
+  FirstTime_=false;
 }
 
 
@@ -150,13 +167,21 @@ void ProgressBar::Finalize()
 
   // Display the indicator with a status of 100% ?
   if (!MuteEnd_) Display(Nstep_);
-  newstreambuf_->SetProgressBarMode(false);
+  newstreambuf_cout_->SetProgressBarMode(false);
+  newstreambuf_cerr_->SetProgressBarMode(false);
+  newstreambuf_clog_->SetProgressBarMode(false);
   std::cout << std::endl;
 
   // Restoring the initial stream buffer
-  std::cout.rdbuf(oldstreambuf_);
-  oldstreambuf_=0;
-  if (newstreambuf_!=0) delete newstreambuf_;
+  std::cout.rdbuf(oldstreambuf_cout_);
+  std::cerr.rdbuf(oldstreambuf_cerr_);
+  std::clog.rdbuf(oldstreambuf_clog_);
+  oldstreambuf_cout_=0;
+  oldstreambuf_cerr_=0;
+  oldstreambuf_clog_=0;
+  if (newstreambuf_cout_!=0) delete newstreambuf_cout_;
+  if (newstreambuf_cerr_!=0) delete newstreambuf_cerr_;
+  if (newstreambuf_clog_!=0) delete newstreambuf_clog_;
 
   // Reset the progress bar
   Reset();

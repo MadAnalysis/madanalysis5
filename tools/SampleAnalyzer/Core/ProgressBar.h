@@ -118,10 +118,14 @@ namespace MA5
     std::vector<Long64_t> Thresholds_;
 
     /// Pointer to the new stream buffer
-    SpyStreamBuffer* newstreambuf_;
+    SpyStreamBuffer* newstreambuf_cout_;
+    SpyStreamBuffer* newstreambuf_cerr_;
+    SpyStreamBuffer* newstreambuf_clog_;
 
     /// Pointer to the old stream buffer
-    std::streambuf* oldstreambuf_;
+    std::streambuf* oldstreambuf_cout_;
+    std::streambuf* oldstreambuf_cerr_;
+    std::streambuf* oldstreambuf_clog_;
 
     static const std::string header;
 
@@ -133,14 +137,22 @@ namespace MA5
     /// Constructor without argument
     ProgressBar()
     {
-      newstreambuf_=0;
-      oldstreambuf_=0;
+      newstreambuf_cout_=0;
+      newstreambuf_cerr_=0;
+      newstreambuf_clog_=0;
+      oldstreambuf_cout_=0;
+      oldstreambuf_cerr_=0;
+      oldstreambuf_clog_=0;
       Reset(); 
     }
 
     /// Destructor 
     ~ProgressBar() 
-    { if (newstreambuf_!=0) delete newstreambuf_; }
+    { 
+      if (newstreambuf_cout_!=0) delete newstreambuf_cout_;  
+      if (newstreambuf_cerr_!=0) delete newstreambuf_cerr_; 
+      if (newstreambuf_clog_!=0) delete newstreambuf_clog_; 
+   }
 
     /// Reset
     void Reset()
