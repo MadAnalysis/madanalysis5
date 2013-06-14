@@ -113,7 +113,7 @@ StatusCode::Type STDHEPreader::ReadEvent(EventFormat& myEvent, SampleFormat& myS
     {
       ERROR << "Block with the ID=" << blockid 
             << " is not managed by SampleAnalyzer" << endmsg;
-      exit(1);
+      return StatusCode::SKIP;
     }
   }
 

@@ -386,6 +386,7 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
 
     INFO << "        => file size: " << str.str() << endmsg;
   }
+  length = myReader_->GetFinalPosition();
 
   // Read the header block
   if (!myReader_->ReadHeader(mySample))
@@ -404,7 +405,6 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
 
   // Initialize the progress bar
   if (progressBar_==0) progressBar_ = new ProgressBar();
-  length = myReader_->GetFinalPosition();
   progressBar_->Initialize(35,0,length);
 
   // Ok !
