@@ -1,5 +1,11 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+63   1.1.11  (2013/06/14) econte:  adding "install delphes" 
+
+63   1.1.10  (2013/06/14) econte:  adding "install delphes" 
+
+63   1.1.9   (2013/06/14) econte:  Adding "install delphes" 
+
 62   1.1.8   (2013/06/13) bfuks:   1.1.7 again 
 
 61   1.1.8   (2013/06/13) bfuks:   1.1.7 
