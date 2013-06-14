@@ -33,16 +33,15 @@ import commands
 
 class LibraryWriter():
 
-    def __init__(self,ma5dir,jobdir,libZIP,FAC,libFASTJET,forced,fortran,delphes):
+    def __init__(self,ma5dir,jobdir,libZIP,libFASTJET,forced,fortran,delphes):
         self.ma5dir     = ma5dir
         self.jobdir     = jobdir
         self.path       = os.path.normpath(ma5dir+"/tools/")
         self.libZIP     = libZIP
-        self.FAC        = FAC
         self.libFASTJET = libFASTJET
         self.forced     = forced
         self.fortran    = fortran
-        self.delphes    = delphes
+        self.libDelphes = delphes
 
     def get_ncores(self):
         # Number of cores
@@ -101,8 +100,8 @@ class LibraryWriter():
         file.write('CXXFLAGS = -Wall -O3 $(shell root-config --cflags) -I./../')
         if self.libZIP:
             file.write(' -DZIP_USE')
-        if self.FAC:
-            file.write(' -DFAC_USE')
+        if self.libDelphes:
+            file.write(' -DDELPHES_USE')
         if self.libFASTJET:
             file.write(' -DFASTJET_USE')
             file.write(' $(CXXFASTJET)')
@@ -186,9 +185,6 @@ class LibraryWriter():
         # Precompile
         file.write('# Precompile target\n')
         file.write('precompile:\n')
-        if self.FAC:
-            file.write('\tcd ..; rootcint -f "SampleAnalyzer/Reader/FACdict.cpp" ' +\
-                       '-c -p SampleAnalyzer/Reader/FACdataformat.h SampleAnalyzer/Reader/FACLinkDef.h\n')
         file.write('\n')
 
         # Precompile

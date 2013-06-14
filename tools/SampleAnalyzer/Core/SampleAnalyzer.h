@@ -54,6 +54,7 @@ class SampleAnalyzer
  
   std::string analysisName_; 
   std::string datasetName_;
+  bool LastFileFail_;
 
   /// Configuration of SampleAnalyzer
   Configuration cfg_;

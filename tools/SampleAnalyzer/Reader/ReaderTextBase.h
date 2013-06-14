@@ -108,7 +108,10 @@ class ReaderTextBase : public ReaderBase
   /// Get the file size (in octet)
   virtual Long64_t GetFileSize();
 
-  /// Get the position in file (in octet)
+  /// Get the final position in file
+  virtual Long64_t GetFinalPosition();
+
+  /// Get the position in file
   virtual Long64_t GetPosition();
 
 };

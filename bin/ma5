@@ -113,7 +113,7 @@ main.ma5dir = ma5dir
 
 # Release version
 # Do not touch it !!!!!  
-main.version = "1.1.12"
+main.version = "1.1.13"
 main.date = "2013/06/14"
 
 # Checking arguments
@@ -123,7 +123,7 @@ try:
                                      "PHReEvhfmsb", \
                                      ["partonlevel","hadronlevel","recolevel",\
                                       "expert","version","release","help",\
-                                      "forced","script","mg5","FAC","autocheck","build"])
+                                      "forced","script","mg5","autocheck","build"])
 except getopt.GetoptError, err:
     logging.error(str(err))
     usage()
@@ -137,7 +137,6 @@ expertmode  = False
 forcedmode  = False
 mg5mode     = False
 scriptmode  = False
-FAC         = False
 autocheck   = False
 build       = False
 for o,a in optlist:
@@ -155,8 +154,6 @@ for o,a in optlist:
         mg5mode=True
     elif o in ("-s","--script"):
         scriptmode=True
-    elif o in ("--FAC"):
-        FAC=True
     elif o in ("-v","--version","--release"):
         logging.info("MA5 release : " + main.version + " " + main.date  + "\n")
         sys.exit()
@@ -205,8 +202,6 @@ main.forced = forcedmode
 Main.forced = forcedmode
 main.script = scriptmode
 main.mg5    = mg5mode
-main.FAC    = FAC
-main.configLinux.FAC = str(FAC)
 
 # Setting batch mode for ROOT
 #sys.argv.append('-b-')

@@ -83,7 +83,6 @@ class Main():
         self.latex          = False
         self.dvipdf         = False
         self.libFastJet     = False
-        self.FAC            = False
         self.fortran        = False
         self.observables    = ObservableManager(self.mode)
         self.mcatnloutils   = False
@@ -129,7 +128,7 @@ class Main():
         else:
             if self.clustering.algorithm=="none":
                 samples.append('.lhco')
-                if self.FAC:
+                if self.libDelphes:
                     samples.append('.root')
             else:
                 samples.append('.lhe')
@@ -488,7 +487,7 @@ class Main():
             logging.info("  => The user forces to rebuild the library.")
 
         # Initializing the JobWriter
-        compiler = LibraryWriter(self.ma5dir,'lib',self.libZIP,self.FAC,self.libFastJet,self.forced,self.fortran,self.libDelphes)
+        compiler = LibraryWriter(self.ma5dir,'lib',self.libZIP,self.libFastJet,self.forced,self.fortran,self.libDelphes)
     
         # Dumping architecture
         if not self.configLinux.Export(self.ma5dir+'/tools/architecture.ma5'):

@@ -46,6 +46,7 @@ SampleAnalyzer::SampleAnalyzer()
 
   // Initializing pointer to 0
   progressBar_=0;
+  LastFileFail_=false;
 
   // Header
   INFO << "    * SampleAnalyzer for MadAnalysis 5 - Welcome.";
@@ -298,7 +299,7 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
   }  
 
   // Finalize previous progress bar
-  if (progressBar_!=0)
+  if (!LastFileFail_ && progressBar_!=0)
   {
     progressBar_->Finalize();
     INFO << "        => total number of events: " << counter_read_[file_index_-1] 
@@ -306,6 +307,7 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
          << " ; skipped: " << counter_read_[file_index_-1] - counter_passed_[file_index_-1]
          << " ) " << endmsg;
   }
+  LastFileFail_=false;
 
   // Next file
   file_index_++;
@@ -328,11 +330,16 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
     ERROR << "the format of the input file is not supported. "
           << "The file is skipped."
           << endmsg;
+    LastFileFail_=true;
     return StatusCode::SKIP;
   }
 
   // Initialize the reader
-  myReader_->Initialize(inputs_[file_index_-1], cfg_);
+  if (!myReader_->Initialize(inputs_[file_index_-1], cfg_))
+  {
+    LastFileFail_=true;
+    return StatusCode::SKIP;
+  }
 
   // Displaying the size of the file
   Long64_t length = myReader_->GetFileSize();
@@ -385,7 +392,7 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
   {
     ERROR << "No header has been found. " 
           << "The file is skipped." << endmsg;
-    myReader_->Finalize();
+    LastFileFail_=true;
     return StatusCode::SKIP;
   }
 
@@ -397,6 +404,7 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
 
   // Initialize the progress bar
   if (progressBar_==0) progressBar_ = new ProgressBar();
+  length = myReader_->GetFinalPosition();
   progressBar_->Initialize(35,0,length);
 
   // Ok !
@@ -542,7 +550,7 @@ void SampleAnalyzer::FillSummary(SampleFormat& summary,
     summary.mc()->sumweight_positive_ += samples[i].mc()->sumweight_positive_;
     summary.mc()->sumweight_negative_ += samples[i].mc()->sumweight_negative_;
   }
-  if (samples.size()!=0)
+  if (samples.size()!=0 && summary.nevents_!=0)
   {
     summary.mc()->xsection_       /= summary.nevents_;
     summary.mc()->xsection_error_  = sqrt(summary.mc()->xsection_error_)
