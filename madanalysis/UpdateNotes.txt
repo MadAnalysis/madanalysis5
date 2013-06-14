@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+64   1.1.12  (2013/06/14) bfuks:   Bug fix with the resubmit commands + typos in the screen output 
+                                   corrected 
+
 63   1.1.11  (2013/06/14) econte:  adding "install delphes" 
 
 63   1.1.10  (2013/06/14) econte:  adding "install delphes" 

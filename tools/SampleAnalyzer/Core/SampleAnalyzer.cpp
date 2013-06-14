@@ -336,7 +336,7 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
 
   // Displaying the size of the file
   Long64_t length = myReader_->GetFileSize();
-  if (length<0) INFO << "        => file size : unknown" << endmsg;
+  if (length<0) INFO << "        => file size: unknown" << endmsg;
   else
   {
     UInt_t unit = 0;
@@ -377,7 +377,7 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
     else if (unit==5) str << "To";
     else str << "muf";
 
-    INFO << "        => file size : " << str.str() << endmsg;
+    INFO << "        => file size: " << str.str() << endmsg;
   }
 
   // Read the header block

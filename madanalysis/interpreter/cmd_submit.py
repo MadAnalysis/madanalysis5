@@ -125,22 +125,20 @@ class CmdSubmit(CmdBase):
             # Submission
             if not self.submit(self.main.lastjob_name,history):
                 return
-
-            # Reading info from job output
-            layout = Layout(self.main)
-            if not self.extract(self.main.lastjob_name,layout):
-                return
-            
             logging.info("   Updating the reports...")
         else:
             logging.info("   No new histogram / cut to account for. Updating the reports...")
 
+        # Reading info from job output
+        layout = Layout(self.main)
+        if not self.extract(self.main.lastjob_name,layout):
+            return
+
         # Status = GOOD
         self.main.lastjob_status = True
-
         # Computing
         layout.Initialize()
-        
+
         # Cleaning the directories
         if not FolderWriter.RemoveDirectory(self.main.lastjob_name+'/HTML',False):
             return
@@ -157,7 +155,7 @@ class CmdSubmit(CmdBase):
         # End time 
         end_time=time.time()
            
-        logging.info("   Well done ! Elapsed time = " + CmdSubmit.chronometer_display(end_time-start_time) )
+        logging.info("   Well done! Elapsed time = " + CmdSubmit.chronometer_display(end_time-start_time) )
 
         
     def do_submit(self,args,history):
@@ -230,7 +228,7 @@ class CmdSubmit(CmdBase):
         # End time 
         end_time=time.time()
            
-        logging.info("   Well done ! Elapsed time = " + CmdSubmit.chronometer_display(end_time-start_time) )
+        logging.info("   Well done! Elapsed time = " + CmdSubmit.chronometer_display(end_time-start_time) )
 
 
     # Generating the reports
