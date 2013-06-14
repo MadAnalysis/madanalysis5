@@ -34,6 +34,9 @@
 // ROOT headers
 #include <TROOT.h>
 
+// Delphes headers
+#include "classes/DelphesClasses.h"
+
 
 using namespace MA5;
 
@@ -93,30 +96,40 @@ bool DelphesReader::Initialize(const std::string& rawfilename,
   read_nevents_  = 0;
 
   // Get pointers to branches used in this analysis
-  branchJet       = treeReader_->UseBranch("Jet");
-  if (branchJet==0)
+  branchJet_       = treeReader_->UseBranch("Jet");
+  if (branchJet_==0)
   {
-    WARNING << "Jet collection is not found" << endmsg;
+    WARNING << "Jet collection branch is not found" << endmsg;
   }
-  branchElectron  = treeReader_->UseBranch("Electron");
-  if (branchElectron==0)
+  branchElectron_  = treeReader_->UseBranch("Electron");
+  if (branchElectron_==0)
   {
-    WARNING << "Electron collection is not found" << endmsg;
+    WARNING << "Electron collection branch is not found" << endmsg;
   }
-  branchPhoton    = treeReader_->UseBranch("Photon");
-  if (branchPhoton==0)
+  branchPhoton_    = treeReader_->UseBranch("Photon");
+  if (branchPhoton_==0)
   {
-    WARNING << "Photon collection is not found" << endmsg;
+    WARNING << "Photon collection branch is not found" << endmsg;
   }
-  branchMuon      = treeReader_->UseBranch("Muon");
-  if (branchMuon==0)
+  branchMuon_      = treeReader_->UseBranch("Muon");
+  if (branchMuon_==0)
   {
-    WARNING << "Muon collection is not found" << endmsg;
+    WARNING << "Muon collection branch is not found" << endmsg;
   }
-  branchMissingET = treeReader_->UseBranch("MissingET");
-  if (branchMissingET==0)
+  branchMissingET_ = treeReader_->UseBranch("MissingET");
+  if (branchMissingET_==0)
   {
-    WARNING << "MissingEt is not found" << endmsg;
+    WARNING << "MissingEt branch is not found" << endmsg;
+  }
+  branchScalarHT_ = treeReader_->UseBranch("ScalarHT");
+  if (branchScalarHT_==0)
+  {
+    WARNING << "ScalarHT branch is not found" << endmsg;
+  }
+  branchGenParticle_ = treeReader_->UseBranch("Particle");
+  if (branchGenParticle_==0)
+  {
+    WARNING << "GenParticle branch is not found" << endmsg;
   }
 
   return test;
@@ -186,23 +199,67 @@ StatusCode::Type DelphesReader::ReadEvent(EventFormat& myEvent, SampleFormat& my
 // -----------------------------------------------------------------------------
 bool DelphesReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 {
-  /*  // Mother pointer assignment
+  // MHT & THT
+  for (unsigned int i=0; i<myEvent.rec()->jets_.size();i++)
+  {
+    myEvent.rec()->MHT_ -= myEvent.rec()->jets_[i].momentum();
+    if (branchScalarHT_==0) myEvent.rec()->THT_ += myEvent.rec()->jets_[i].pt();
+    myEvent.rec()->TET_ += myEvent.rec()->jets_[i].pt();
+  }
+
+  // TET
+  for (unsigned int i=0; i<myEvent.rec()->muons_.size();i++)
+  {
+    myEvent.rec()->TET_ += myEvent.rec()->muons_[i].pt();
+  }
+  for (unsigned int i=0; i<myEvent.rec()->electrons_.size();i++)
+  {
+    myEvent.rec()->TET_ += myEvent.rec()->electrons_[i].pt();
+  }
+  for (unsigned int i=0; i<myEvent.rec()->taus_.size();i++)
+  {
+    myEvent.rec()->TET_ += myEvent.rec()->taus_[i].pt();
+  }
+  for (unsigned int i=0; i<myEvent.rec()->photons_.size();i++)
+  {
+    myEvent.rec()->TET_ += myEvent.rec()->photons_[i].pt();
+  }
+
+  // Finalize MHT
+  myEvent.rec()->MHT_.momentum().SetPz(0.);
+  myEvent.rec()->MHT_.momentum().SetE(myEvent.rec()->MHT_.momentum().Pt());
+
+
+  // Mother pointer assignment
   for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
   {
-    unsigned int index1=myEvent.mc()->particles_[i].mothup1_;
+    MCParticleFormat& part = myEvent.mc()->particles_[i];
+
+    // MET, MHT, TET, THT
+    if (part.statuscode()==1 && !PHYSICS->IsInvisible(part))
+    {
+      myEvent.mc()->MET_ -= part.momentum();
+      myEvent.mc()->TET_ += part.pt();
+      if (PHYSICS->IsHadronic(part))
+      {
+        myEvent.mc()->MHT_ -= part.momentum();
+        myEvent.mc()->THT_ += part.pt(); 
+      }
+    }
+    
+    /*    unsigned int index1=myEvent.mc()->particles_[i].mothup1_;
     unsigned int index2=myEvent.mc()->particles_[i].mothup2_;
     if (index1!=0 && index2!=0)
     {
       if (index1>=myEvent.mc()->particles_.size() ||
           index2>=myEvent.mc()->particles_.size())
       {
-        ERROR << "mother index is greater to nb of particles";
-        ERROR << endmsg;
-        ERROR << " - index1 = " << index1 << endmsg;
-        ERROR << " - index2 = " << index2 << endmsg;
-        ERROR << " - particles.size() " << myEvent.mc()->particles_.size();
-        ERROR << endmsg;
-        exit(1);
+        WARNING << "mother index is greater to nb of particles" << endmsg;
+        WARNING << " - index1 = " << index1 << endmsg;
+        WARNING << " - index2 = " << index2 << endmsg;
+        WARNING << " - particles.size() " << myEvent.mc()->particles_.size() << endmsg;
+        WARNING << "This event is skipped." << endmsg;
+        return false;
       }
 
       myEvent.mc()->particles_[i].mother1_ = &myEvent.mc()->particles_[index1-1];
@@ -210,7 +267,14 @@ bool DelphesReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
       myEvent.mc()->particles_[i].mother2_ = &myEvent.mc()->particles_[index2-1];
       myEvent.mc()->particles_[index2-1].Daughters_.push_back(&myEvent.mc()->particles_[i]);
     }
-    }*/
+    */
+  }
+
+  // Finalize event
+  myEvent.mc()->MET_.momentum().SetPz(0.);
+  myEvent.mc()->MET_.momentum().SetE(myEvent.mc()->MET_.momentum().Pt());
+  myEvent.mc()->MHT_.momentum().SetPz(0.);
+  myEvent.mc()->MHT_.momentum().SetE(myEvent.mc()->MHT_.momentum().Pt());
 
   // Normal end
   return true; 
@@ -224,49 +288,91 @@ bool DelphesReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 // -----------------------------------------------------------------------------
 void DelphesReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
 {
-  /*  // Fill MC particles
-  for (unsigned int i=0;i<evt_->mcparticles.size();i++)
+  // Fill electrons
+  if (branchElectron_!=0)
+  for (unsigned int i=0;i<static_cast<UInt_t>(branchElectron_->GetEntries());i++)
   {
-    MCParticleFormat * part = myEvent.mc()->GetNewParticle();
-    part->momentum_ = evt_->mcparticles[i].momentum();
-    part->pdgid_    = evt_->mcparticles[i].pid();
+    Electron* part = dynamic_cast<Electron*>(branchElectron_->At(i));
+    RecLeptonFormat * electron = myEvent.rec()->GetNewElectron();
+    electron->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
+    if (part->Charge>0) electron->charge_=true; else electron->charge_=false;
+    electron->HEoverEE_ = part->EhadOverEem;
   }
 
-  // Fill electrons
-  for (unsigned int i=0;i<evt_->electrons.size();i++)
+  // Fill photons
+  if (branchPhoton_!=0)
+  for (unsigned int i=0;i<static_cast<UInt_t>(branchPhoton_->GetEntries());i++)
   {
-    RecLeptonFormat * electron = myEvent.rec()->GetNewElectron();
-    electron->momentum_ = evt_->electrons[i].momentum();
-    if (evt_->electrons[i].charge()>0) electron->charge_=true; else electron->charge_=false;
-    //electron->isoflag_  = evt_->electrons[i].isolated();
-    electron->HEoverEE_ = evt_->electrons[i].ehoveree();
+    Photon* part = dynamic_cast<Photon*>(branchPhoton_->At(i));
+    RecPhotonFormat * photon = myEvent.rec()->GetNewPhoton();
+    photon->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
+    photon->HEoverEE_ = part->EhadOverEem;
   }
 
   // Fill muons
-  for (unsigned int i=0;i<evt_->muons.size();i++)
+  if (branchMuon_!=0)
+  for (unsigned int i=0;i<static_cast<UInt_t>(branchMuon_->GetEntries());i++)
   {
+    Muon* part = dynamic_cast<Muon*>(branchMuon_->At(i));
     RecLeptonFormat * muon = myEvent.rec()->GetNewMuon();
-    muon->momentum_ = evt_->muons[i].momentum();
-    if (evt_->muons[i].charge()>0) muon->charge_=true; else muon->charge_=false;
-    //muon->isoflag_  = evt_->muons[i].isolated();
-    //    muon->HEoverEE_ = evt_->muons[i].ehoveree();
+    muon->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
+    if (part->Charge>0) muon->charge_=true; else muon->charge_=false;
   }
 
-  // Fill jets
-  for (unsigned int i=0;i<evt_->jets.size();i++)
+  // Fill jets and taus
+  if (branchJet_!=0)
+  for (unsigned int i=0;i<static_cast<UInt_t>(branchJet_->GetEntries());i++)
   {
-    RecJetFormat * jet = myEvent.rec()->GetNewJet();
-    jet->momentum_ = evt_->jets[i].momentum();
-    jet->ntracks_  = evt_->jets[i].ntracks();
-    jet->btag_     = evt_->jets[i].btag();
-    jet->HEoverEE_ = evt_->jets[i].ehoveree();
+    Jet* part = dynamic_cast<Jet*>(branchJet_->At(i));
+    if(part->TauTag==1)
+    {
+      RecTauFormat * tau = myEvent.rec()->GetNewTau();
+      tau->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
+      tau->ntracks_  = 0; // To fix later
+      if (part->Charge>0) tau->charge_=true; else tau->charge_=false;
+      tau->HEoverEE_ = part->EhadOverEem;
+    }
+    else
+    {
+      RecJetFormat * jet = myEvent.rec()->GetNewJet();
+      jet->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
+      jet->ntracks_  = 0; // To fix later
+      jet->btag_     = part->BTag;
+      jet->HEoverEE_ = part->EhadOverEem;
+    }
   }
 
   // MET
-  myEvent.rec()->MET_.momentum_.SetPx(evt_->met.px());
-  myEvent.rec()->MET_.momentum_.SetPy(evt_->met.py());
-  myEvent.rec()->MET_.momentum_.SetE(sqrt(evt_->met.px()*evt_->met.px()+evt_->met.py()*evt_->met.py()));
-  */
+  if (branchMissingET_!=0)
+  if (branchMissingET_->GetEntries()>0)
+  {
+    MissingET* part = dynamic_cast<MissingET*>(branchMissingET_->At(0));
+    myEvent.rec()->MET_.momentum_.SetPx(part->MET*cos(part->Phi));
+    myEvent.rec()->MET_.momentum_.SetPy(part->MET*sin(part->Phi));
+    myEvent.rec()->MET_.momentum_.SetE(part->MET);
+  }
+
+  // THT
+  if (branchScalarHT_!=0)
+  if (branchScalarHT_->GetEntries()>0)
+  {
+    ScalarHT* part = dynamic_cast<ScalarHT*>(branchScalarHT_->At(0));
+    myEvent.rec()->THT_=part->HT;
+  }
+
+  // GenParticle collection
+  if (branchGenParticle_!=0)
+  if (branchGenParticle_->GetEntries()>0)
+  {
+    GenParticle* part = dynamic_cast<GenParticle*>(branchGenParticle_->At(0));
+    MCParticleFormat * gen = myEvent.mc()->GetNewParticle();
+    gen->pdgid_      = part->PID;
+    gen->statuscode_ = part->Status;
+    gen->mothup1_    = part->M1;
+    gen->mothup2_    = part->M2;
+    gen->momentum_.SetPxPyPzE(part->Px,part->Py, part->Pz, part->E);
+  }
+
 }
 
 

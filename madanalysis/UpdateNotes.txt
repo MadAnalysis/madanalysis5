@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+68   1.1.15  (2013/06/14) econte:  Finalizing Delphes reader 
+
 67   1.1.14  (2013/06/14) econte:  fixing bug with GetFileSize 
 
 66   1.1.13  (2013/06/14) econte:  adding Delphes reader (event not filled yet) 

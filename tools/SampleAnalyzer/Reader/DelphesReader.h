@@ -73,11 +73,13 @@ class DelphesReader : public ReaderBase
   Long64_t read_nevents_;
 
   /// Pointers to the different branches
-  TClonesArray *branchJet;
-  TClonesArray *branchElectron;
-  TClonesArray *branchPhoton;
-  TClonesArray *branchMuon;
-  TClonesArray *branchMissingET;
+  TClonesArray *branchJet_;
+  TClonesArray *branchElectron_;
+  TClonesArray *branchPhoton_;
+  TClonesArray *branchMuon_;
+  TClonesArray *branchMissingET_;
+  TClonesArray *branchScalarHT_;
+  TClonesArray *branchGenParticle_;
 
   // -------------------------------------------------------------
   //                       method members
@@ -123,11 +125,13 @@ class DelphesReader : public ReaderBase
     tree_=0;
     total_nevents_=0;
     read_nevents_=0;
-    branchJet=0;
-    branchElectron=0;
-    branchPhoton=0;
-    branchMuon=0;
-    branchMissingET=0;
+    branchJet_=0;
+    branchElectron_=0;
+    branchPhoton_=0;
+    branchMuon_=0;
+    branchMissingET_=0;
+    branchScalarHT_=0;
+    branchGenParticle_=0;
   }
 
   /// Get the file size

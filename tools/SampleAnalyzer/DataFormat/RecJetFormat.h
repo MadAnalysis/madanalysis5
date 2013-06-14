@@ -50,6 +50,7 @@ class RecJetFormat : public RecParticleFormat
   friend class bTagger;
   friend class TauTagger;
   friend class cTagger;
+  friend class DelphesReader;
 
   // -------------------------------------------------------------
   //                        data members
