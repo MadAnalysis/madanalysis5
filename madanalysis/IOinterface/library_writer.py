@@ -33,7 +33,7 @@ import commands
 
 class LibraryWriter():
 
-    def __init__(self,ma5dir,jobdir,libZIP,FAC,libFASTJET,forced,fortran):
+    def __init__(self,ma5dir,jobdir,libZIP,FAC,libFASTJET,forced,fortran,delphes):
         self.ma5dir     = ma5dir
         self.jobdir     = jobdir
         self.path       = os.path.normpath(ma5dir+"/tools/")
@@ -42,7 +42,7 @@ class LibraryWriter():
         self.libFASTJET = libFASTJET
         self.forced     = forced
         self.fortran    = fortran
-
+        self.delphes    = delphes
 
     def get_ncores(self):
         # Number of cores

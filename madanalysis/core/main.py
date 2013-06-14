@@ -78,6 +78,7 @@ class Main():
         self.script         = False
         self.mg5            = False
         self.libZIP         = False
+        self.libDelphes     = False
         self.pdflatex       = False
         self.latex          = False
         self.dvipdf         = False
@@ -445,6 +446,7 @@ class Main():
         if not checker.checkGF():
             return False
         self.libZIP = checker.checkZLIB()
+        self.libDelphes = checker.checkDelphes()
         self.libFastJet = checker.checkFastJet()
         self.pdflatex = checker.checkPdfLatex()
         self.latex = checker.checkLatex()
@@ -486,7 +488,7 @@ class Main():
             logging.info("  => The user forces to rebuild the library.")
 
         # Initializing the JobWriter
-        compiler = LibraryWriter(self.ma5dir,'lib',self.libZIP,self.FAC,self.libFastJet,self.forced,self.fortran)
+        compiler = LibraryWriter(self.ma5dir,'lib',self.libZIP,self.FAC,self.libFastJet,self.forced,self.fortran,self.libDelphes)
     
         # Dumping architecture
         if not self.configLinux.Export(self.ma5dir+'/tools/architecture.ma5'):
