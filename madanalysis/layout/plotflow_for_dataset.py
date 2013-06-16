@@ -60,8 +60,11 @@ class PlotFlowForDataset:
 
         for histo in self.histos:
             histo.FinalizeReading(self.main,self.dataset)
+        # Updating the value of the cross section (BENJ)
+        self.xsection = self.dataset.measured_global.xsection
+        if self.dataset.xsection!=0.:
+            self.xsection = self.dataset.xsection
 
-            
     # Computing integral
     def CreateHistogram(self):
 

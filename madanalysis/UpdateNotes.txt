@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+69   1.1.16  (2013/06/16) bfuks:   bug in the treatment of the weighted events 
+
 68   1.1.15  (2013/06/14) econte:  Finalizing Delphes reader 
 
 67   1.1.14  (2013/06/14) econte:  fixing bug with GetFileSize 

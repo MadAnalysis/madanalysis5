@@ -96,7 +96,7 @@ class AnalyzerBase
   bool PreInitialize(const std::string& outputName, 
                      const Configuration* cfg)
   {
-    weighted_events_ = cfg->IsNoEventWeight();
+    weighted_events_ = !cfg->IsNoEventWeight();
     out_.Initialize(cfg,outputName.c_str());
     return true;
   }
