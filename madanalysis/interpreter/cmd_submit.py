@@ -114,10 +114,30 @@ class CmdSubmit(CmdBase):
                     Inside = False
                 newhistory.append(cmd)
         ToReAnalyze = False
+        ReAnalyzeCmdList = ['plot','select','reject','set main.clustering',
+                            'set main.merging', 'set main.shower', 'define',
+                            'import', 'set main.isolation']
+
+        # Determining if we have to resubmit the job
         for cmd in newhistory:
-            if 'plot' in cmd or 'select' in cmd or 'reject' in cmd or\
-                'merging' in cmd or 'weighted_events' in cmd:
-                ToReAnalyze = True
+            
+            # Split cmd line into words
+            words = cmd.split()
+           
+            # Creating a line with one whitespace between each word
+            cmd2 = ''
+            for word in words:
+                if word!='':
+                    cmd2+=word+' '
+ 
+            # Looping over patterns
+            for pattern in ReAnalyzeCmdList:
+                if cmd2.startswith(pattern): 
+                    ToReAnalyze = True
+                    break
+
+            # Found?
+            if ToReAnalyze:
                 break
 
         if ToReAnalyze:
