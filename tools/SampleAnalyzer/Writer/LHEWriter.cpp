@@ -86,7 +86,7 @@ std::string LHEWriter::FortranFormat_DoublePrecision(Double_t value,UInt_t preci
 bool LHEWriter::WriteHeader(const SampleFormat& mySample)
 {
   // Opening tag
-  *output_ << "<LesHouchesEvents version=""1.0"">" << std::endl;
+  *output_ << "<LesHouchesEvents version=\"1.0\">" << std::endl;
 
   // Header tag
   *output_ << "<header>" << std::endl;
