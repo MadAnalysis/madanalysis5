@@ -107,7 +107,7 @@ void bTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
     // identification efficiency
     if (doEfficiency_ && jet->true_btag_)
     {
-      if (gRandom->Rndm() < Efficiency_) jet->btag_=true;
+      if (gRandom->Rndm()  >= Efficiency_) jet->btag_=false;
     }
 
     // mis-identification (c-quark)
