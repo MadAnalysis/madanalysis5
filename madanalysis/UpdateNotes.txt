@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+75   1.1.20  (2013/07/10) bfuks:   Fixing the normalization 
+
 74   1.1.19  (2013/07/09) bfuks:   Bug fixed with the normalizations 
 
 73   1.1.18  (2013/07/09) bfuks:   layout + normalization + clustering bug 

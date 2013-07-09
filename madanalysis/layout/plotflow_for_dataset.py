@@ -122,14 +122,30 @@ class PlotFlowForDataset:
             # Case 3: Normalization formula depends on LUMI
             elif self.main.normalize == NormalizeType.LUMI:
                 ## BENJ: much simpler way to normalize to the lumi. Works both for weighted and unweighted events
-                old_integral = self.histos[iplot].positive.integral - self.histos[iplot].negative.integral
+                npos=0
+                if(self.histos[iplot].positive.nentries !=0):
+                  npos =  self.histos[iplot].positive.integral*self.histos[iplot].positive.nevents / \
+                     self.histos[iplot].positive.nentries
+                nneg=0
+                if(self.histos[iplot].negative.nentries !=0):
+                  nneg =  self.histos[iplot].negative.integral*self.histos[iplot].negative.nevents / \
+                     self.histos[iplot].negative.nentries
+                old_integral = npos-nneg
                 scale = self.xsection / old_integral * \
                         self.main.lumi * 1000
 
             # Case 4: Normalization formula depends on WEIGHT + LUMI
             elif self.main.normalize == NormalizeType.LUMI_WEIGHT:
                 ## BENJ: much simpler way to normalize to the lumi. Works both for weighted and unweighted events
-                old_integral = self.histos[iplot].positive.integral - self.histos[iplot].negative.integral
+                npos=0
+                if(self.histos[iplot].positive.nentries !=0):
+                  npos =  self.histos[iplot].positive.integral*self.histos[iplot].positive.nevents / \
+                     self.histos[iplot].positive.nentries
+                nneg=0
+                if(self.histos[iplot].negative.nentries !=0):
+                  nneg =  self.histos[iplot].negative.integral*self.histos[iplot].negative.nevents / \
+                     self.histos[iplot].negative.nentries
+                old_integral = npos-nneg
                 scale = self.xsection / old_integral * \
                         self.dataset.weight * \
                         self.main.lumi * 1000
