@@ -121,25 +121,18 @@ class PlotFlowForDataset:
 
             # Case 3: Normalization formula depends on LUMI
             elif self.main.normalize == NormalizeType.LUMI:
-                if not self.dataset.weighted_events:
-                    scale = self.xsection * self.main.lumi * 1000 / \
-                            float(self.dataset.measured_global.nevents)
-                else:
-                    scale = self.main.lumi * 1000 / \
-                            len(self.dataset.filenames)
+                ## BENJ: much simpler way to normalize to the lumi. Works both for weighted and unweighted events
+                old_integral = self.histos[iplot].positive.integral - self.histos[iplot].negative.integral
+                scale = self.xsection / old_integral * \
+                        self.main.lumi * 1000
 
             # Case 4: Normalization formula depends on WEIGHT + LUMI
             elif self.main.normalize == NormalizeType.LUMI_WEIGHT:
-                if not self.dataset.weighted_events:
-                    scale = self.xsection * self.main.lumi * 1000 * \
-                            self.dataset.weight / \
-                            float(self.dataset.measured_global.nevents)
-                ## BENJ: added the ratio of xsections when xsection entered by the user
-                else:
-                    scale = self.main.lumi * 1000 * \
-                            self.xsection / self.dataset.measured_global.xsection * \
-                            self.dataset.weight / \
-                            len(self.dataset.filenames)
+                ## BENJ: much simpler way to normalize to the lumi. Works both for weighted and unweighted events
+                old_integral = self.histos[iplot].positive.integral - self.histos[iplot].negative.integral
+                scale = self.xsection / old_integral * \
+                        self.dataset.weight * \
+                        self.main.lumi * 1000
 
             # Setting the computing scale
             self.histos[iplot].scale=copy.copy(scale)
