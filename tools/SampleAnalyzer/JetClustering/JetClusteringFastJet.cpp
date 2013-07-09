@@ -55,6 +55,15 @@ Bool_t JetClusteringFastJet::IrrelevantPhoton(const MCParticleFormat* part)
   UInt_t absid = std::abs(part->mother1()->pdgid());
 
   if (absid==15) return true;
+
+  // BENJ: this is special for HERWIG
+  else if(part->mother1()->mother1()!=0)
+  {
+    if (part->mother1()->mother1()->pdgid()==82) return false;
+    else if (part==part->mother1()->mother1())   return false;
+  }
+  // BENJ: end of herwig fix
+
   else return IrrelevantPhoton(part->mother1());
 }
 
@@ -62,11 +71,20 @@ Bool_t JetClusteringFastJet::ComingFromHadronDecay(const MCParticleFormat* part)
 {
   // Weird case ? Safety: removing this case
   if (part->mother1()==0) return true;
-  //  std::cout << "part " << part->pdgid() << " <- " << part->mother1()->pdgid() << std::endl;
+
   // Checking mother
   Bool_t had = PHYSICS->IsHadronic(part->mother1()->pdgid()) && part->mother1()->pdgid()!=21;
   if (had && part->mother1()->mother1()==0) return false;
   else if (had) return true;
+
+  // BENJ: this is special for HERWIG
+  else if(part->mother1()->mother1()!=0)
+  {
+    if (part->mother1()->mother1()->pdgid()==82) return false;
+    else if (part==part->mother1()->mother1())   return false;
+  }
+  // BENJ: end of herwig fix
+
   else return ComingFromHadronDecay(part->mother1());
 }
 
@@ -248,7 +266,6 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
         photon->setMc(&(part));
       }
     }
-
   }
 
   double & TET = myEvent.rec()->TET();

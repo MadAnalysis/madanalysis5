@@ -134,8 +134,10 @@ class PlotFlowForDataset:
                     scale = self.xsection * self.main.lumi * 1000 * \
                             self.dataset.weight / \
                             float(self.dataset.measured_global.nevents)
+                ## BENJ: added the ratio of xsections when xsection entered by the user
                 else:
                     scale = self.main.lumi * 1000 * \
+                            self.xsection / self.dataset.measured_global.xsection * \
                             self.dataset.weight / \
                             len(self.dataset.filenames)
 

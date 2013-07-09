@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+73   1.1.18  (2013/07/09) bfuks:   layout + normalization + clustering bug 
+
 72   1.1.17  (2013/07/09) bfuks:   Bug fix in the b-tagging efficiency 
 
 69   1.1.16  (2013/06/16) bfuks:   bug in the treatment of the weighted events 

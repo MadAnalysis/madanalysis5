@@ -316,8 +316,6 @@ class Layout:
         # information
         for ind in range(0,len(dataset.filenames)):
             color = ColorType.BLACK
-            if ind == len(dataset.filenames)-1:
-                color = ColorType.BLUE
 
             # path to the file
             report.NewCell()
@@ -367,10 +365,59 @@ class Layout:
             text.Reset()
 
             # end of the line
-            if ind==(len(dataset.filenames)-1):
-                report.EndLine()
+            if len(dataset.filenames)==1:
+               report.EndLine()
             else:
-                report.NewLine()
+               report.NewLine()
+
+        # sum if many datasets
+        if len(dataset.filenames)!=1:
+          color = ColorType.BLUE
+          report.NewCell()
+          text.Add('        ')
+          text.SetColor(color)
+          text.Add("Sum")
+          report.WriteText(text)
+          text.Reset()
+
+          # number of events
+          report.NewCell()
+          text.Add('        ')
+          text.SetColor(color)
+          text.Add(str(int(dataset.measured_global.nevents)))
+          report.WriteText(text)
+          text.Reset()
+
+          # cross section
+          report.NewCell()
+          text.Add('        ')
+          text.SetColor(color)
+          if dataset.xsection != 0.0:
+              text.Add(str(dataset.xsection))
+          else:
+              value = dataset.measured_global.xsection * dataset.weight
+              error = dataset.measured_global.xerror * dataset.weight
+              text.Add(Layout.DisplayXsection(value,error))
+          report.WriteText(text)
+          text.Reset()
+
+          # Negative weigths
+          report.NewCell()
+          text.Add('        ')
+          text.SetColor(color)
+          if (dataset.measured_detail[ind].sumw_positive +\
+              dataset.measured_detail[ind].sumw_negative)==0:
+              text.Add(str(0.0))
+          else:
+              text.Add(Layout.Round_to_Ndigits( 100 * \
+                        dataset.measured_global.sumw_negative / \
+                        (dataset.measured_global.sumw_positive + \
+                         dataset.measured_global.sumw_negative),2 ))
+          report.WriteText(text)
+          text.Reset()
+
+          ## The end of line
+          report.EndLine()
 
         report.EndTable()    
         text.Reset()
