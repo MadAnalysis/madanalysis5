@@ -279,6 +279,27 @@ class PhysicsService
   }
 
 
+  /// MT 
+  Float_t MT(const MCParticleFormat& part, const MCEventFormat* event)
+  {
+    // Computing ET sum
+    double ETsum = part.et() + event->MET().et();
+
+    // Computing PT sum
+    TLorentzVector pt = part.momentum() + event->MET().momentum();
+
+    double value = ETsum*ETsum - pt.Pt()*pt.Pt();
+    if (value<0) return 0;
+    else return sqrt(value);
+  }
+
+  ///Is B Hadron ?
+  Float_t MT(const MCParticleFormat* part, const MCEventFormat* event)
+  {
+    if (part==0) return false;
+    return MT(*part,event);
+  }
+
   ///Is C Hadron ?
   Bool_t IsCHadron(Int_t pdg)
   {

@@ -273,9 +273,47 @@ def WriteFillWithMHTContainer(part,file,rank,status):
     container=InstanceName.Get('P_'+part.name+rank+status)
 
     # Put MHT
-    if part.particle.Find(101):
+    if part.particle.Find(99):
         file.write('       '+container+\
                    '.push_back(&(event.rec()->MHT()));\n')
+
+
+def WriteFillWithMETContainerMC(part,file,rank,status):
+    
+    # If PTrank, no fill
+    if part.PTrank!=0:
+        return
+
+    # Skipping if already defined
+    if InstanceName.Find('P_'+part.name+rank+status):
+        return
+
+    # Getting container name
+    container=InstanceName.Get('P_'+part.name+rank+status)
+
+    # Put MET
+    if part.particle.Find(100):
+        file.write('       '+container+\
+                   '.push_back(&(event.mc()->MET()));\n')
+
+
+def WriteFillWithMHTContainerMC(part,file,rank,status):
+    
+    # If PTrank, no fill
+    if part.PTrank!=0:
+        return
+
+    # Skipping if already defined
+    if InstanceName.Find('P_'+part.name+rank+status):
+        return
+
+    # Getting container name
+    container=InstanceName.Get('P_'+part.name+rank+status)
+
+    # Put MHT
+    if part.particle.Find(99):
+        file.write('       '+container+\
+                   '.push_back(&(event.mc()->MHT()));\n')
 
 
 def WriteContainer(file,main,part_list):
@@ -299,10 +337,21 @@ def WriteContainer(file,main,part_list):
 
     # Filling particle containers in PARTON and HADRON mode
     if main.mode in [MA5RunningType.PARTON, MA5RunningType.HADRON]:
+
+        # Special particles : MET or MHT
+        for item in part_list:
+            if item[0].particle.Find(99) or item[0].particle.Find(100):
+                WriteFillWithMETContainerMC(item[0],file,item[1],item[2]) 
+                WriteFillWithMHTContainerMC(item[0],file,item[1],item[2])
+
+        # Ordinary particles
         file.write('    for (UInt_t i=0;i<event.mc()->particles().size();i++)\n')
         file.write('    {\n')
         for item in part_list:
-            WriteFillContainer(item[0],file,item[1],item[2])
+            if item[0].particle.Find(99) or item[0].particle.Find(100):
+                pass
+            else:
+                WriteFillContainer(item[0],file,item[1],item[2])
         file.write('    }\n')
         InstanceName.Clear()
 

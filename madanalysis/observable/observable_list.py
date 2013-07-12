@@ -272,6 +272,29 @@ sdMT = dsMT = ObservableBase.Clone(MT, name='sdMT', combination=CombinationType.
 dMT  = dvMT = vdMT = ObservableBase.Clone(MT, name='dMT', combination=CombinationType.DIFFVECTOR, tex='dM_{T}')
 rMT  = ObservableBase.Clone(MT, name='rMT', combination=CombinationType.RATIO, tex='rM_{T}')
 
+
+MT_MET = ObservableBase( name        = 'MT_MET',
+                     args        = [ArgumentType.COMBINATION],
+                     combination = CombinationType.SUMVECTOR,
+                     plot_auto   = False,
+                     plot_nbins  = 100,
+                     plot_xmin   = 0.,
+                     plot_xmax   = 1000.,
+                     plot_unitX  = 'GeV/c^{2}',
+                     code_parton = 'mt_met(event.mc()->MET().momentum())',
+                     code_hadron = 'mt_met(event.mc()->MET().momentum())',
+                     code_reco   = 'mt_met(event.mc()->MET().momentum())',
+                     cut_event     = True,
+                     cut_candidate = True,
+                     tex           = 'M_{T}'
+                  )
+
+vMT_MET  = MT_MET
+sMT_MET  = ObservableBase.Clone(MT_MET, name='sMT_MET', combination=CombinationType.SUMSCALAR, tex='sM_{T}') 
+sdMT_MET = dsMT_MET = ObservableBase.Clone(MT_MET, name='sdMT_MET', combination=CombinationType.DIFFSCALAR, tex='sdM_{T}') 
+dMT_MET  = dvMT_MET = vdMT_MET = ObservableBase.Clone(MT_MET, name='dMT_MET', combination=CombinationType.DIFFVECTOR, tex='dM_{T}')
+rMT_MET  = ObservableBase.Clone(MT_MET, name='rMT_MET', combination=CombinationType.RATIO, tex='rM_{T}')
+
 PT = ObservableBase( name        = 'PT',
                      args        = [ArgumentType.COMBINATION],
                      combination = CombinationType.SUMVECTOR,

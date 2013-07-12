@@ -37,6 +37,7 @@
 // SampleAnalyzer
 #include "SampleAnalyzer/Service/LogService.h"
 
+
 namespace MA5
 {
 
@@ -120,7 +121,26 @@ class ParticleBaseFormat
   const Float_t p()       const {return momentum_.P();       }
 
   /// Accessor to the particle transverse mass
-  const Float_t mt()      const {return momentum_.Mt();      }
+  // WARNING: ROOT native formula is not the good one
+  const Float_t mt()      const 
+  { 
+    //    return momentum_.Mt();
+    Float_t tmp = momentum_.Et2() - momentum_.Pt()*momentum_.Pt();
+    if (tmp<0) return 0.; else return sqrt(tmp);
+  }
+
+  const Float_t mt_met(const TLorentzVector& MET) const 
+  { 
+    // Computing ET sum
+    double ETsum = momentum_.Et() + MET.Et();
+
+    // Computing PT sum
+    TLorentzVector pt = momentum_ + MET;
+
+    double value = ETsum*ETsum - pt.Pt()*pt.Pt();
+    if (value<0) return 0;
+    else return sqrt(value);
+  }
 
   /// Accessor to the particle transverse energy
   const Float_t et()      const {return momentum_.Et();      }

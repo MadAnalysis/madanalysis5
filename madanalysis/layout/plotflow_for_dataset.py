@@ -97,12 +97,15 @@ class PlotFlowForDataset:
         # Loop over plot
         for iabshisto in range(0,len(self.main.selection)):
 
+
             # Keep only histogram
             if self.main.selection[iabshisto].__class__.__name__!="Histogram":
                 continue
 
+
             # Reset scale
             scale=0.
+
 
             # Case 1: Normalization to ONE
             if self.main.selection[iabshisto].stack==StackingMethodType.NORMALIZE2ONE or \
@@ -115,44 +118,47 @@ class PlotFlowForDataset:
                 else:
                     scale = 0.
 
+
             # Case 2: No normalization
             elif self.main.normalize == NormalizeType.NONE:
                 scale = 1.
 
-            # Case 3: Normalization formula depends on LUMI
-            elif self.main.normalize == NormalizeType.LUMI:
-                ## BENJ: much simpler way to normalize to the lumi. Works both for weighted and unweighted events
-                npos=0
-                if(self.histos[iplot].positive.nentries !=0):
-                  npos =  self.histos[iplot].positive.integral*self.histos[iplot].positive.nevents / \
-                     self.histos[iplot].positive.nentries
-                nneg=0
-                if(self.histos[iplot].negative.nentries !=0):
-                  nneg =  self.histos[iplot].negative.integral*self.histos[iplot].negative.nevents / \
-                     self.histos[iplot].negative.nentries
-                old_integral = npos-nneg
-                scale = self.xsection / old_integral * \
-                        self.main.lumi * 1000
 
-            # Case 4: Normalization formula depends on WEIGHT + LUMI
-            elif self.main.normalize == NormalizeType.LUMI_WEIGHT:
-                ## BENJ: much simpler way to normalize to the lumi. Works both for weighted and unweighted events
+            # Case 3 and 4 : Normalization formula depends on LUMI
+            #                or depends on WEIGHT+LUMI 
+            elif self.main.normalize in [NormalizeType.LUMI, \
+                                         NormalizeType.LUMI_WEIGHT]:
+
+                # compute the good xsection value
+                thexsection = self.xsection
+                if self.main.normalize==NormalizeType.LUMI_WEIGHT:
+                    thexsection = thexsection * self.dataset.weight
+                    
+                # positive event-weight part
                 npos=0
-                if(self.histos[iplot].positive.nentries !=0):
-                  npos =  self.histos[iplot].positive.integral*self.histos[iplot].positive.nevents / \
-                     self.histos[iplot].positive.nentries
+                if self.histos[iplot].positive.nentries!=0:
+                  npos = self.histos[iplot].positive.integral  \
+                         * self.histos[iplot].positive.nevents \
+                         / self.histos[iplot].positive.nentries
+
+                # negative event-weight part
                 nneg=0
-                if(self.histos[iplot].negative.nentries !=0):
-                  nneg =  self.histos[iplot].negative.integral*self.histos[iplot].negative.nevents / \
-                     self.histos[iplot].negative.nentries
+                if self.histos[iplot].negative.nentries!=0: 
+                  nneg = self.histos[iplot].negative.integral  \
+                         * self.histos[iplot].negative.nevents \
+                         / self.histos[iplot].negative.nentries
+
+                # compute histogram integral
                 old_integral = npos-nneg
-                scale = self.xsection / old_integral * \
-                        self.dataset.weight * \
-                        self.main.lumi * 1000
+
+                # compute the scale
+                if old_integral!=0:
+                    scale = thexsection * self.main.lumi * 1000 / old_integral
+                else:
+                    scale = 1 # no scale for empty plot
 
             # Setting the computing scale
             self.histos[iplot].scale=copy.copy(scale)
-
 
             # Incrementing counter
             iplot+=1

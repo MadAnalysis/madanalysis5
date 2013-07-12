@@ -416,7 +416,6 @@ class Main():
             logging.info("Python      Python release : " + str(self.configLinux.python_version))
             import commands
             pythondir = commands.getstatusoutput('which python')
-            print pythondir
             if pythondir[0]==0:
                 logging.info("            Path get by 'which' : "+pythondir[1])
             else:
