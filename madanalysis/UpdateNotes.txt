@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+77   1.1.22  (2013/07/12) econte:  fixing a minor bug related to MT_MET in RECO mode 
+
 76   1.1.21  (2013/07/12) econte:  adding MHT & MET in PARTON & HADRON mode + adding MT_MET observable 
                                    + changing the definition of MT observable 
 

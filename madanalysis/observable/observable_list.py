@@ -283,7 +283,7 @@ MT_MET = ObservableBase( name        = 'MT_MET',
                      plot_unitX  = 'GeV/c^{2}',
                      code_parton = 'mt_met(event.mc()->MET().momentum())',
                      code_hadron = 'mt_met(event.mc()->MET().momentum())',
-                     code_reco   = 'mt_met(event.mc()->MET().momentum())',
+                     code_reco   = 'mt_met(event.rec()->MET().momentum())',
                      cut_event     = True,
                      cut_candidate = True,
                      tex           = 'M_{T}'
