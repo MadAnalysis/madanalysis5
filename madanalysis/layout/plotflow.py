@@ -143,7 +143,10 @@ class PlotFlow:
 
                 # Appending histo
                 histos.append(self.detail[iset][irelhisto].myhisto)
-                scales.append(self.detail[iset][irelhisto].scale)
+                if mode==2:
+                 scales.append(self.detail[iset][irelhisto].scale)
+                else:
+                 scales.append(1)
 
             # Draw
             self.Draw(histos,scales,self.main.selection[iabshisto],irelhisto,mode,output_path,preview=False)

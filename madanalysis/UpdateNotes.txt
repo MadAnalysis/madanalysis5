@@ -1,5 +1,9 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+78   1.1.24  (2013/07/25) bfuks:   Normalization bug fix (see bug report 1204088) 
+
+78   1.1.23  (2013/07/25) bfuks:   Normalization bug fix (see bug report 1204088) 
+
 77   1.1.22  (2013/07/12) econte:  fixing a minor bug related to MT_MET in RECO mode 
 
 76   1.1.21  (2013/07/12) econte:  adding MHT & MET in PARTON & HADRON mode + adding MT_MET observable 
