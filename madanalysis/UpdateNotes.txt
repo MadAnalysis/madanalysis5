@@ -1,5 +1,9 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+81   1.1.27  (2013/07/29) econte:  improving "Simplified LHE" format : 1) More robust code for 
+                                   mother-daughter relation 2) link between RECO and MC objects when it 
+                                   is possible 3) adding statuscode -1 for initial states 
+
 80   1.1.26  (2013/07/28) econte:  fixing warning and comment (again) patch to Herwig 
 
 79   1.1.25  (2013/07/28) econte:  fixing Adam's bug related to MET + fixing and validating the histo 

@@ -35,8 +35,7 @@ from madanalysis.layout.plotflow_for_dataset      import PlotFlowForDataset
 from math  import sqrt
 import time
 import copy
-
-
+import logging
 class PlotFlow:
 
     diconicetitle = {' ^ {':'^{', ' _ {':'_{', '\\\\':'#'}
@@ -161,6 +160,9 @@ class PlotFlow:
         from ROOT import THStack
         from ROOT import TLegend
         from ROOT import TCanvas
+        from ROOT import TASImage
+        from ROOT import TAttImage
+        from ROOT import TPad
 
         # Creating a canvas
         canvas = TCanvas("tempo","")
@@ -468,7 +470,26 @@ class PlotFlow:
             legend.Draw()
 
         if not preview:
-            
+
+            # Put the MA5 logo
+            logo = TASImage.Open(self.main.ma5dir+\
+                              "/madanalysis/input/logo.png")
+            if not logo.IsValid():
+                logging.warning("file called '"+self.main.ma5dir+\
+                                "/madanalysis/input/logo.png' " +\
+                                "is not found")
+            else:
+                logo.SetConstRatio(0)
+                logo.SetImageQuality(TAttImage.kImgBest)
+                logo.Vectorize(256)
+                w = logo.GetWidth()
+                h = logo.GetHeight()
+                logo.Scale(int(w*0.2),int(h*0.2))
+                mypad = TPad("i1", "i1", 0.05, 0.55, 0.50, 0.95)
+                mypad.Draw()
+                mypad.cd()
+                logo.Draw()
+                
             # Save the canvas in the report format
             canvas.SaveAs(output_path+"/selection_"+str(irelhisto)+"."+\
                           ReportFormatType.convert2filetype(mode))

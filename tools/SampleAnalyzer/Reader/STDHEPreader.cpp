@@ -159,7 +159,7 @@ bool STDHEPreader::DecodeFileHeader(SampleFormat& mySample)
 
   // Comment
   *xdrinput_ >> tmps;
-  //std::cout << "comment=" << tmps << endmsg; 
+  //  std::cout << "comment=" << tmps << endmsg; 
 
   // Creation date
   *xdrinput_ >> tmps;

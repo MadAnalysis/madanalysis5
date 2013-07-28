@@ -84,11 +84,11 @@ class LHEWriter : public WriterTextBase
   static std::string FortranFormat_DoublePrecision(Double_t value,UInt_t precision=11); 
 
   // Writing a reconstructed jet
-  void WriteJet(const RecJetFormat& jet, LHEParticleFormat& lhe);
-  void WriteMuon(const RecLeptonFormat& muon, LHEParticleFormat& lhe);
-  void WriteElectron(const RecLeptonFormat& electron, LHEParticleFormat& lhe);
-  void WritePhoton(const RecPhotonFormat& photon, LHEParticleFormat& lhe);
-  void WriteTau(const RecTauFormat& tau, LHEParticleFormat& lhe);
+  void WriteJet(const RecJetFormat& jet, LHEParticleFormat& lhe, Int_t& mother);
+  void WriteMuon(const RecLeptonFormat& muon, LHEParticleFormat& lhe, Int_t& mother);
+  void WriteElectron(const RecLeptonFormat& electron, LHEParticleFormat& lhe, Int_t& mother);
+  void WritePhoton(const RecPhotonFormat& photon, LHEParticleFormat& lhe, Int_t& mother);
+  void WriteTau(const RecTauFormat& tau, LHEParticleFormat& lhe, Int_t& mother);
   void WriteMET(const ParticleBaseFormat& met, LHEParticleFormat& lhe);
 
 

@@ -30,6 +30,47 @@
 
 using namespace MA5;
 
+UInt_t Find(const MCParticleFormat* part, 
+            const std::vector<const MCParticleFormat*>& collection)
+{
+  if (part==0) return 0;
+  for (unsigned int i=0;i<collection.size();i++)
+    if (collection[i]==part) return i+1;
+  return 0;
+}
+
+UInt_t FindDeeply(const MCParticleFormat* part, 
+            const std::vector<const MCParticleFormat*>& collection)
+{
+  if (part==0) return 0;
+  bool test=false;
+  const MCParticleFormat* thepart = part;
+  while(!test)
+  {
+    if (thepart->mother1()==0) 
+    {
+      test=true;
+      thepart=0;
+    }
+    else if (thepart->mother1()->statuscode()==3 || 
+            (  thepart->mother1()->statuscode()>=11 &&
+               thepart->mother1()->statuscode()<=29)  )
+    {
+      test=true;
+      thepart=thepart->mother1();
+    }
+    else
+    {
+      thepart=thepart->mother1();
+    }
+  }
+  if (thepart==0) return 0;
+  for (unsigned int i=0;i<collection.size();i++)
+    if (collection[i]==thepart) return i+1;
+  return 0;
+}
+
+
 std::string LHEWriter::FortranFormat_SimplePrecision(Float_t value,UInt_t precision)
 {
   std::stringstream str;
@@ -306,6 +347,7 @@ bool LHEWriter::WriteEvent(const EventFormat& myEvent,
 
   // Container for particles
   std::vector<LHEParticleFormat> particles;
+  std::vector<const MCParticleFormat*> pointers;
   UInt_t counter=0;
 
   // Writing MC particles : only MC info case
@@ -326,7 +368,6 @@ bool LHEWriter::WriteEvent(const EventFormat& myEvent,
             myEvent.mc()->particles()[i].statuscode()<=29)
           ) counter++;
     }
-
   }
 
   // Writing REC particles
@@ -341,6 +382,7 @@ bool LHEWriter::WriteEvent(const EventFormat& myEvent,
 
   // Writing event global information
   particles.reserve(counter);
+  pointers.reserve(counter);
   WriteEventHeader(myEvent,counter);
 
   // Writing MC particles : only MC info case
@@ -362,13 +404,17 @@ bool LHEWriter::WriteEvent(const EventFormat& myEvent,
   // -> hypothesis : input = HEP
   if (myEvent.mc()!=0 && myEvent.rec()!=0)
   {
+    bool firstpart=true;
     for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
     {
-      if ( myEvent.mc()->particles()[i].statuscode()==-1 ||
-           ( myEvent.mc()->particles()[i].statuscode()>=11 &&
-             myEvent.mc()->particles()[i].statuscode()<=19 ))
+      const MCParticleFormat* part = &(myEvent.mc()->particles()[i]);
+      if ( firstpart && 
+           ( (part->statuscode()==3 && part->pt()==0) ||
+             (part->statuscode()>=11 && part->statuscode()<=19)
+           ) )
       {
         particles.push_back(LHEParticleFormat());
+        pointers.push_back(part);
         WriteParticle(myEvent.mc()->particles()[i],0,0,-1, particles.back());
       }
 
@@ -376,10 +422,16 @@ bool LHEWriter::WriteEvent(const EventFormat& myEvent,
            ( myEvent.mc()->particles()[i].statuscode()>=21 &&
              myEvent.mc()->particles()[i].statuscode()<=29))
       {
-          particles.push_back(LHEParticleFormat());
-          Int_t moth1 = GetMotherIndex(myEvent.mc()->particles()[i].mothup1_);
-          Int_t moth2 = GetMotherIndex(myEvent.mc()->particles()[i].mothup2_);
-          WriteParticle(myEvent.mc()->particles()[i],moth1,moth2,3, particles.back());
+        firstpart=false;
+        particles.push_back(LHEParticleFormat());
+        pointers.push_back(part);
+        Int_t moth1 = Find(part->mother1(),pointers);
+        Int_t moth2 = Find(part->mother2(),pointers);
+        WriteParticle(myEvent.mc()->particles()[i],moth1,moth2,3, particles.back());
+      }
+      else 
+      {
+        firstpart=false;
       }
     } 
   }
@@ -390,27 +442,32 @@ bool LHEWriter::WriteEvent(const EventFormat& myEvent,
     for (unsigned int i=0;i<myEvent.rec()->muons().size();i++)
     {
       particles.push_back(LHEParticleFormat());
-      WriteMuon(myEvent.rec()->muons()[i],particles.back());
+      Int_t mother = FindDeeply(myEvent.rec()->muons()[i].mc(),pointers);
+      WriteMuon(myEvent.rec()->muons()[i],particles.back(),mother);
     }
     for (unsigned int i=0;i<myEvent.rec()->electrons().size();i++)
     {
       particles.push_back(LHEParticleFormat());
-      WriteElectron(myEvent.rec()->electrons()[i],particles.back());
+      Int_t mother = FindDeeply(myEvent.rec()->electrons()[i].mc(),pointers);
+      WriteElectron(myEvent.rec()->electrons()[i],particles.back(),mother);
     }
     for (unsigned int i=0;i<myEvent.rec()->taus().size();i++)
     {
       particles.push_back(LHEParticleFormat());
-      WriteTau(myEvent.rec()->taus()[i],particles.back());
+      Int_t mother = FindDeeply(myEvent.rec()->taus()[i].mc(),pointers);
+      WriteTau(myEvent.rec()->taus()[i],particles.back(),mother);
     }
     for (unsigned int i=0;i<myEvent.rec()->jets().size();i++)
     {
-      particles.push_back(LHEParticleFormat());
-      WriteJet(myEvent.rec()->jets()[i],particles.back());
+      particles.push_back(LHEParticleFormat()); 
+      Int_t mother = FindDeeply(myEvent.rec()->jets()[i].mc(),pointers);
+      WriteJet(myEvent.rec()->jets()[i],particles.back(),mother);
     }
     for (unsigned int i=0;i<myEvent.rec()->photons().size();i++)
     {
       particles.push_back(LHEParticleFormat());
-      WritePhoton(myEvent.rec()->photons()[i],particles.back());
+      Int_t mother = FindDeeply(myEvent.rec()->photons()[i].mc(),pointers);
+      WritePhoton(myEvent.rec()->photons()[i],particles.back(),mother);
     }
     particles.push_back(LHEParticleFormat());
     WriteMET(myEvent.rec()->MET(),particles.back());
@@ -483,11 +540,11 @@ void LHEWriter::WriteParticle(const MCParticleFormat& myPart,
 }
 
 
-void LHEWriter::WriteJet(const RecJetFormat& jet, LHEParticleFormat& lhe)
+void LHEWriter::WriteJet(const RecJetFormat& jet, LHEParticleFormat& lhe, Int_t& mother)
 {
   if (jet.btag()) lhe.id = 5; else lhe.id = 21;
   lhe.status  = 1;
-  lhe.mother1 = 0;
+  lhe.mother1 = mother;
   lhe.mother2 = 0;
   lhe.color1  = 0;
   lhe.color2  = 0;
@@ -501,11 +558,11 @@ void LHEWriter::WriteJet(const RecJetFormat& jet, LHEParticleFormat& lhe)
 }
 
 
-void LHEWriter::WriteMuon(const RecLeptonFormat& muon, LHEParticleFormat& lhe)
+void LHEWriter::WriteMuon(const RecLeptonFormat& muon, LHEParticleFormat& lhe, Int_t& mother)
 {
   if (muon.charge()>0) lhe.id = -13; else lhe.id = +13;
   lhe.status  = 1;
-  lhe.mother1 = 0;
+  lhe.mother1 = mother;
   lhe.mother2 = 0;
   lhe.color1  = 0;
   lhe.color2  = 0;
@@ -518,11 +575,11 @@ void LHEWriter::WriteMuon(const RecLeptonFormat& muon, LHEParticleFormat& lhe)
   lhe.spin    = 0.;
 }
 
-void LHEWriter::WriteElectron(const RecLeptonFormat& electron, LHEParticleFormat& lhe)
+void LHEWriter::WriteElectron(const RecLeptonFormat& electron, LHEParticleFormat& lhe, Int_t& mother)
 {
   if (electron.charge()>0) lhe.id = -11; else lhe.id = +11;
   lhe.status  = 1;
-  lhe.mother1 = 0;
+  lhe.mother1 = mother;
   lhe.mother2 = 0;
   lhe.color1  = 0;
   lhe.color2  = 0;
@@ -536,11 +593,11 @@ void LHEWriter::WriteElectron(const RecLeptonFormat& electron, LHEParticleFormat
 }
 
 
-void LHEWriter::WritePhoton(const RecPhotonFormat& photon, LHEParticleFormat& lhe)
+void LHEWriter::WritePhoton(const RecPhotonFormat& photon, LHEParticleFormat& lhe, Int_t& mother)
 {
   lhe.id      = 22;
   lhe.status  = 1;
-  lhe.mother1 = 0;
+  lhe.mother1 = mother;
   lhe.mother2 = 0;
   lhe.color1  = 0;
   lhe.color2  = 0;
@@ -554,11 +611,11 @@ void LHEWriter::WritePhoton(const RecPhotonFormat& photon, LHEParticleFormat& lh
 }
 
 
-void LHEWriter::WriteTau(const RecTauFormat& tau, LHEParticleFormat& lhe)
+void LHEWriter::WriteTau(const RecTauFormat& tau, LHEParticleFormat& lhe, Int_t& mother)
 {
   if (tau.charge()>0) lhe.id = -15; else lhe.id = +15;
   lhe.status  = 1;
-  lhe.mother1 = 0;
+  lhe.mother1 = mother;
   lhe.mother2 = 0;
   lhe.color1  = 0;
   lhe.color2  = 0;
