@@ -78,11 +78,11 @@ Bool_t JetClusteringFastJet::ComingFromHadronDecay(const MCParticleFormat* part)
   else if (had) return true;
 
   // BENJ: this is special for HERWIG
-  else if(part->mother1()->mother1()!=0)
+  /*  else if(part->mother1()->mother1()!=0)
   {
     if (part->mother1()->mother1()->pdgid()==82) return false;
     else if (part==part->mother1()->mother1())   return false;
-  }
+    }*/
   // BENJ: end of herwig fix
 
   else return ComingFromHadronDecay(part->mother1());

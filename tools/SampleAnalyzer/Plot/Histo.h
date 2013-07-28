@@ -47,30 +47,27 @@ class Histo : public PlotBase
  protected :
 
   /// Histogram arrays
-  std::vector< std::pair<Float_t,Float_t> > histo_;
-  std::pair<Float_t, Float_t> underflow_;
-  std::pair<Float_t, Float_t> overflow_;
+  std::vector< std::pair<Double_t,Double_t> > histo_;
+  std::pair<Double_t, Double_t> underflow_;
+  std::pair<Double_t, Double_t> overflow_;
 
   /// Histogram description
-  UInt_t nbins_;
-  Float_t xmin_;
-  Float_t xmax_;
-  Float_t step_;
+  UInt_t   nbins_;
+  Double_t xmin_;
+  Double_t xmax_;
+  Double_t step_;
 
-  /// Number of entries
-  std::pair<Long64_t,Long64_t> nentries_;
-
-  /// Sum of weights
-  std::pair<Float_t,Float_t> sum_w_;
+  /// Sum of event-weights over entries
+  std::pair<Double_t,Double_t> sum_w_;
 
   /// Sum of squared weights
-  std::pair<Float_t,Float_t> sum_ww_;
+  std::pair<Double_t,Double_t> sum_ww_;
 
   /// Sum of value * weight
-  std::pair<Float_t,Float_t> sum_xw_;
+  std::pair<Double_t,Double_t> sum_xw_;
 
   /// Sum of value * value * weight
-  std::pair<Float_t,Float_t> sum_xxw_;
+  std::pair<Double_t,Double_t> sum_xxw_;
 
   // -------------------------------------------------------------
   //                       method members
@@ -81,7 +78,7 @@ class Histo : public PlotBase
   Histo() : PlotBase()
   {
     nbins_=100; xmin_=0; xmax_=100;
-    step_ = (xmax_ - xmin_)/static_cast<Float_t>(nbins_);
+    step_ = (xmax_ - xmin_)/static_cast<Double_t>(nbins_);
   }
 
   /// Constructor with argument 
@@ -89,7 +86,7 @@ class Histo : public PlotBase
   { }
 
   /// Constructor with argument 
-  Histo(const std::string& name, UInt_t nbins, Float_t xmin, Float_t xmax) :
+  Histo(const std::string& name, UInt_t nbins, Double_t xmin, Double_t xmax) :
 		PlotBase(name)
   { 
     // Setting the description
@@ -110,7 +107,7 @@ class Histo : public PlotBase
       xmax_=100.;
     }
 
-    step_ = (xmax_ - xmin_)/static_cast<Float_t>(nbins_);
+    step_ = (xmax_ - xmin_)/static_cast<Double_t>(nbins_);
 
     // Reseting the histogram array
     histo_.resize(nbins_,std::make_pair(0.,0.));
@@ -118,7 +115,6 @@ class Histo : public PlotBase
     overflow_  = std::make_pair(0.,0.);
 	
     // Reseting statistical counters
-    nentries_ = std::make_pair(0,0);
     sum_w_    = std::make_pair(0.,0.);
     sum_ww_   = std::make_pair(0.,0.);
     sum_xw_   = std::make_pair(0.,0.);
@@ -130,7 +126,7 @@ class Histo : public PlotBase
   { }
 
   /// Filling histogram
-  void Fill(Float_t value, Float_t weight=1.0)
+  void Fill(Double_t value, Double_t weight=1.0)
   {
     if (std::isnan(value))
     {

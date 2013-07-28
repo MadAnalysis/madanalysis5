@@ -284,7 +284,7 @@ class JobWriter():
         file.write('    if (result1!=StatusCode::KEEP)\n')
         file.write('    {\n')
         file.write('      if (result1==StatusCode::SKIP) continue;\n')
-        file.write('      else if (result1==StatusCode::FAILURE) break;\n')
+        file.write('      else if (result1==StatusCode::FAILURE) {mySamples.pop_back(); break;}\n')
         file.write('    }\n')
         file.write('    \n')
         file.write('    // Loop over events\n')

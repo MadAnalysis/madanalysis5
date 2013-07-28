@@ -78,7 +78,7 @@ class PlotManager
 
   /// Adding a 1D histogram with fixed bins
   Histo* Add_Histo(const std::string& name, UInt_t bins, 
-                   Float_t xmin, Float_t xmax)
+                   Double_t xmin, Double_t xmax)
   {
     Histo* myhisto = new Histo(name, bins,  xmin, xmax);
     plots_.push_back(myhisto);
@@ -87,7 +87,7 @@ class PlotManager
 
   /// Adding a 1D histogram with a log binning
   HistoLogX* Add_HistoLogX(const std::string& name, UInt_t bins, 
-                           Float_t xmin, Float_t xmax)
+                           Double_t xmin, Double_t xmax)
   {
     HistoLogX* myhisto = new HistoLogX(name, bins,  xmin, xmax);
     plots_.push_back(myhisto);

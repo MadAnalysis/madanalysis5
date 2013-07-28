@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+79   1.1.25  (2013/07/28) econte:  fixing Adam's bug related to MET + fixing and validating the histo 
+                                   normalisation 
+
 78   1.1.24  (2013/07/25) bfuks:   Normalization bug fix (see bug report 1204088) 
 
 78   1.1.23  (2013/07/25) bfuks:   Normalization bug fix (see bug report 1204088) 

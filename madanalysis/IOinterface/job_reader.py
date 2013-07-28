@@ -147,7 +147,7 @@ class JobReader():
         return [a,b,c]
 
         
-    def ExtractStatistics1(self,words,numline,filename):
+    def ExtractStatisticsInt(self,words,numline,filename):
 
         # Extracting positive
         try:
@@ -173,7 +173,7 @@ class JobReader():
         return [a,b]
 
 
-    def ExtractStatistics2(self,words,numline,filename):
+    def ExtractStatisticsFloat(self,words,numline,filename):
 
         # Extracting positive
         try:
@@ -452,7 +452,7 @@ class JobReader():
                  (selectionTag.activated or mergingTag.activated) and \
                  len(words)==2:
                 if statisticsTag.Nlines==0:
-                    results = self.ExtractStatistics1(words,numline,filename)
+                    results = self.ExtractStatisticsInt(words,numline,filename)
                     if histoTag.activated:
                         histoinfo.positive.nevents=results[0]
                         histoinfo.negative.nevents=results[1]
@@ -463,26 +463,44 @@ class JobReader():
                         histofreqinfo.positive.nevents=results[0]
                         histofreqinfo.negative.nevents=results[1]
 
-                elif statisticsTag.Nlines==1 and not histoFreqTag.activated:
-                    results = self.ExtractStatistics1(words,numline,filename)
+                elif statisticsTag.Nlines==1:
+                    results = self.ExtractStatisticsFloat(words,numline,filename)
+                    if histoTag.activated:
+                        histoinfo.positive.sumwentries=results[0]
+                        histoinfo.negative.sumwentries=results[1]
+                    elif histoLogXTag.activated:
+                        histologxinfo.positive.sumwentries=results[0]
+                        histologxinfo.negative.sumwentries=results[1]
+                    elif histoFreqTag.activated:
+                        histofreqinfo.positive.sumwentries=results[0]
+                        histofreqinfo.negative.sumwentries=results[1]
+
+                elif statisticsTag.Nlines==2:
+                    results = self.ExtractStatisticsInt(words,numline,filename)
                     if histoTag.activated:
                         histoinfo.positive.nentries=results[0]
                         histoinfo.negative.nentries=results[1]
                     elif histoLogXTag.activated:
                         histologxinfo.positive.nentries=results[0]
                         histologxinfo.negative.nentries=results[1]
+                    elif histoFreqTag.activated:
+                        histofreqinfo.positive.nentries=results[0]
+                        histofreqinfo.negative.nentries=results[1]
 
-                elif statisticsTag.Nlines==2 and not histoFreqTag.activated:
-                    results = self.ExtractStatistics2(words,numline,filename)
+                elif statisticsTag.Nlines==3:
+                    results = self.ExtractStatisticsFloat(words,numline,filename)
                     if histoTag.activated:
                         histoinfo.positive.sumw=results[0]
                         histoinfo.negative.sumw=results[1]
                     elif histoLogXTag.activated:
                         histologxinfo.positive.sumw=results[0]
                         histologxinfo.negative.sumw=results[1]
+                    elif histoFreqTag.activated:
+                        histofreqinfo.positive.sumw=results[0]
+                        histofreqinfo.negative.sumw=results[1]
 
-                elif statisticsTag.Nlines==3 and not histoFreqTag.activated:
-                    results = self.ExtractStatistics2(words,numline,filename)
+                elif statisticsTag.Nlines==4 and not histoFreqTag.activated:
+                    results = self.ExtractStatisticsFloat(words,numline,filename)
                     if histoTag.activated:
                         histoinfo.positive.sumw2=results[0]
                         histoinfo.negative.sumw2=results[1]
@@ -490,8 +508,8 @@ class JobReader():
                         histologxinfo.positive.sumw2=results[0]
                         histologxinfo.negative.sumw2=results[1]
 
-                elif statisticsTag.Nlines==4 and not histoFreqTag.activated:
-                    results = self.ExtractStatistics2(words,numline,filename)
+                elif statisticsTag.Nlines==5 and not histoFreqTag.activated:
+                    results = self.ExtractStatisticsFloat(words,numline,filename)
                     if histoTag.activated:
                         histoinfo.positive.sumwx=results[0]
                         histoinfo.negative.sumwx=results[1]
@@ -499,8 +517,8 @@ class JobReader():
                         histologxinfo.positive.sumwx=results[0]
                         histologxinfo.negative.sumwx=results[1]
 
-                elif statisticsTag.Nlines==5 and not histoFreqTag.activated:
-                    results = self.ExtractStatistics2(words,numline,filename)
+                elif statisticsTag.Nlines==6 and not histoFreqTag.activated:
+                    results = self.ExtractStatisticsFloat(words,numline,filename)
                     if histoTag.activated:
                         histoinfo.positive.sumw2x=results[0]
                         histoinfo.negative.sumw2x=results[1]
@@ -516,7 +534,7 @@ class JobReader():
             elif dataTag.activated and \
                  (selectionTag.activated or mergingTag.activated) and \
                  len(words)==2 and (histoTag.activated or histoLogXTag.activated):
-                results = self.ExtractStatistics2(words,numline,filename)
+                results = self.ExtractStatisticsFloat(words,numline,filename)
                 if dataTag.Nlines==0:
                     if histoTag.activated:
                         histoinfo.positive.underflow=results[0]

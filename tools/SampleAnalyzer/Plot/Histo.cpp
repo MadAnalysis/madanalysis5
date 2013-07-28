@@ -74,10 +74,14 @@ void Histo::Write_TextFormatBody(std::ostream* output)
 
   *output << nevents_.first << " " 
           << nevents_.second << " # nevents" << std::endl;
+  *output << nevents_w_.first << " " 
+          << nevents_w_.second 
+          << " # sum of event-weights over events" << std::endl;
   *output << nentries_.first << " " 
           << nentries_.second << " # nentries" << std::endl;
   *output << sum_w_.first << " " 
-          << sum_w_.second << " # sum weights" << std::endl;
+          << sum_w_.second 
+          << " # sum of event-weights over entries" << std::endl;
   *output << sum_ww_.first << " " 
           << sum_ww_.second << " # sum weights^2"<<std::endl;
   *output << sum_xw_.first << " " 

@@ -45,9 +45,9 @@ class MergingPlotType
   std::vector<Histo*> contribution;
   Histo* total;
 
-  static const UInt_t  nbins;
-  static const Float_t xmin;
-  static const Float_t xmax;
+  static const UInt_t   nbins;
+  static const Double_t xmin;
+  static const Double_t xmax;
 
 
 //---------------------------------------------------------------------------------

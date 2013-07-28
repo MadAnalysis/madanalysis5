@@ -129,31 +129,39 @@ class PlotFlowForDataset:
             elif self.main.normalize in [NormalizeType.LUMI, \
                                          NormalizeType.LUMI_WEIGHT]:
 
+                # integral
+                integral=self.histos[iplot].positive.integral -\
+                         self.histos[iplot].negative.integral
+
+                # compute efficiency : Nevent / Ntotal
+                if self.dataset.measured_global.nevents==0:
+                    eff = 0
+                else:
+                    eff = (self.histos[iplot].positive.nevents  + \
+                          self.histos[iplot].negative.nevents) / \
+                          float(self.dataset.measured_global.nevents)
+
                 # compute the good xsection value
                 thexsection = self.xsection
                 if self.main.normalize==NormalizeType.LUMI_WEIGHT:
                     thexsection = thexsection * self.dataset.weight
-                    
-                # positive event-weight part
-                npos=0
-                if self.histos[iplot].positive.nentries!=0:
-                  npos = self.histos[iplot].positive.integral  \
-                         * self.histos[iplot].positive.nevents \
-                         / self.histos[iplot].positive.nentries
-
-                # negative event-weight part
-                nneg=0
-                if self.histos[iplot].negative.nentries!=0: 
-                  nneg = self.histos[iplot].negative.integral  \
-                         * self.histos[iplot].negative.nevents \
-                         / self.histos[iplot].negative.nentries
-
-                # compute histogram integral
-                old_integral = npos-nneg
+                
+                # compute final entries/event ratio
+                entries_per_events = 0
+                sumw = self.histos[iplot].positive.sumw - \
+                       self.histos[iplot].negative.sumw
+                Nentries = self.histos[iplot].positive.sumwentries - \
+                           self.histos[iplot].negative.sumwentries
+                if sumw!=0 and Nentries!=0:
+                    entries_per_events = sumw / Nentries
 
                 # compute the scale
-                if old_integral!=0:
-                    scale = thexsection * self.main.lumi * 1000 / old_integral
+                if integral!=0:
+                    scale = thexsection * \
+                            self.main.lumi * 1000 * \
+                            eff * \
+                            entries_per_events / \
+                            integral
                 else:
                     scale = 1 # no scale for empty plot
 

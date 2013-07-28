@@ -38,7 +38,7 @@ def WritePlot(file,main,iabs,ihisto):
     file.write('  {\n')
 
     # Counting number of times this block is read
-    file.write('  H'+str(ihisto)+'_->IncrementNEvents();\n')
+    file.write('  H'+str(ihisto)+'_->IncrementNEvents(__event_weight__);\n')
     if len(main.selection[iabs].arguments)==0:
         WritePlotWith0Arg(file,main,iabs,ihisto)
     elif len(main.selection[iabs].arguments)==1:

@@ -30,7 +30,9 @@ class HistogramFrequencyCore:
         import numpy
         self.integral  = 0
         self.nevents   = 0
+        self.sumwentries = 0
         self.entries   = 0
+        self.nentries  = 0
         self.array     = numpy.array([])
 
     def ComputeIntegral(self):

@@ -46,31 +46,36 @@ class HistoFrequency : public PlotBase
  protected :
 
   /// Collection of observables
-  std::map<T, std::pair<Float_t,Float_t> > stack_;
+  std::map<T, std::pair<Double_t,Double_t> > stack_;
 
+  /// Sum of event-weights over entries
+  std::pair<Double_t,Double_t> sum_w_;
 
   // -------------------------------------------------------------
   //                       method members
   // -------------------------------------------------------------
  public :
 
-  typedef typename std::map<T,std::pair<Float_t,Float_t> >::iterator
+  typedef typename std::map<T,std::pair<Double_t,Double_t> >::iterator
        iterator; 
-  typedef typename std::map<T,std::pair<Float_t,Float_t> >::const_iterator
+  typedef typename std::map<T,std::pair<Double_t,Double_t> >::const_iterator
        const_iterator; 
-  typedef typename std::map<T,std::pair<Float_t,Float_t> >::size_type
+  typedef typename std::map<T,std::pair<Double_t,Double_t> >::size_type
        size_type;
 
   /// Constructor with argument 
   HistoFrequency(const std::string& name) : PlotBase(name)
-  { }
+  {     
+    // Reseting statistical counters
+    sum_w_ = std::make_pair(0.,0.);
+  }
 
   /// Destructor
   virtual ~HistoFrequency()
   { }
 
   /// Adding an entry for a given observable
-  void Fill(const T& obs, Float_t weight=1.0)
+  void Fill(const T& obs, Double_t weight=1.0)
   {
     // Looking for the value
     iterator it = stack_.find(obs);
@@ -84,8 +89,19 @@ class HistoFrequency : public PlotBase
     // Value found
     else
     {
-      if (weight>=0) stack_[obs].first+=weight;
-      else stack_[obs].second+=std::fabs(weight);
+      if (weight>=0)
+      {
+        nentries_.first++;
+        sum_w_.first+=weight;
+        stack_[obs].first+=weight;
+      }
+      else 
+      {
+        nentries_.second++; 
+        weight=std::abs(weight);
+        sum_w_.second+=weight;
+        stack_[obs].second+=weight;
+      }
     }
   }
 
@@ -104,6 +120,14 @@ class HistoFrequency : public PlotBase
   *output << "<Statistics>" << std::endl;
   *output << nevents_.first << " " 
           << nevents_.second << " # nevents" << std::endl;
+  *output << nevents_w_.first << " " 
+          << nevents_w_.second 
+          << " # sum of event-weights over events" << std::endl;
+  *output << nentries_.first << " " 
+          << nentries_.second << " # nentries" << std::endl;
+  *output << sum_w_.first << " " 
+          << sum_w_.second 
+          << " # sum of event-weights over events" << std::endl;
   *output << "</Statistics>" << std::endl;
 
   // Data
@@ -147,9 +171,9 @@ class HistoFrequency : public PlotBase
 
     // Creating ROOT histograms
     histo.first  -> SetBins(stack_.size(),0.,
-                            static_cast<Float_t>(stack_.size()));
+                            static_cast<Double_t>(stack_.size()));
     histo.second -> SetBins(stack_.size(),0.,
-                            static_cast<Float_t>(stack_.size()));
+                            static_cast<Double_t>(stack_.size()));
  
     // Layouting the histogram
     unsigned int i=0;

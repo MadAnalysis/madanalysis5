@@ -33,6 +33,7 @@ class HistogramCore:
         self.integral  = 0
         self.nevents   = 0
         self.nentries  = 0
+        self.sumwentries = 0
         self.sumw      = 0
         self.sumw2     = 0
         self.sumwx     = 0

@@ -24,6 +24,7 @@
 
 // STL headers
 #include <sstream>
+#include <cmath>
 
 // SampleHeader headers
 #include "SampleAnalyzer/Reader/LHEReader.h"
@@ -137,12 +138,13 @@ bool LHEReader::FinalizeHeader(SampleFormat& mySample)
   for (unsigned int i=0;i<mySample.mc()->processes().size();i++)
   {
     xsection += mySample.mc()->processes()[i].xsectionMean();
-    xerror   += mySample.mc()->processes()[i].xsectionError();
+    xerror   += mySample.mc()->processes()[i].xsectionError() *
+                mySample.mc()->processes()[i].xsectionError();
   }
 
   // Filling xsection and its error
   mySample.mc()->set_xsection( xsection );
-  mySample.mc()->set_xsection_error( xerror );
+  mySample.mc()->set_xsection_error( std::sqrt(xerror) );
 
   // Normal end 
   return true;
@@ -219,7 +221,7 @@ bool LHEReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
     // MET in case of simplified LHE
     if (part.pdgid()==12 && (mySample.mc()->MadanalysisSimplifiedLheTag() || mySample.mc()->MadgraphPythiaTag()))
     {
-      myEvent.mc()->MET_ -= part.momentum();
+      myEvent.mc()->MET_ += part.momentum();
     }
 
     // MET, MHT, TET, THT
