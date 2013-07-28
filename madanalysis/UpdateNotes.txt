@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+80   1.1.26  (2013/07/28) econte:  fixing warning and comment (again) patch to Herwig 
+
 79   1.1.25  (2013/07/28) econte:  fixing Adam's bug related to MET + fixing and validating the histo 
                                    normalisation 
 

@@ -57,14 +57,17 @@ Bool_t JetClusteringFastJet::IrrelevantPhoton(const MCParticleFormat* part)
   if (absid==15) return true;
 
   // BENJ: this is special for HERWIG
-  else if(part->mother1()->mother1()!=0)
+  /*  else if(part->mother1()->mother1()!=0)
   {
     if (part->mother1()->mother1()->pdgid()==82) return false;
     else if (part==part->mother1()->mother1())   return false;
-  }
+    }*/
   // BENJ: end of herwig fix
 
   else return IrrelevantPhoton(part->mother1());
+
+  // Default
+  return false;
 }
 
 Bool_t JetClusteringFastJet::ComingFromHadronDecay(const MCParticleFormat* part)
