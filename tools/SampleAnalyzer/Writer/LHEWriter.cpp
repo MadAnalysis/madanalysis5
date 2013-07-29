@@ -547,7 +547,7 @@ void LHEWriter::WriteJet(const RecJetFormat& jet, LHEParticleFormat& lhe, Int_t&
   if (jet.btag()) lhe.id = 5; else lhe.id = 21;
   lhe.status  = 1;
   lhe.mother1 = mother;
-  lhe.mother2 = 0;
+  lhe.mother2 = mother;
   lhe.color1  = 0;
   lhe.color2  = 0;
   lhe.px      = jet.momentum().Px();
@@ -565,7 +565,7 @@ void LHEWriter::WriteMuon(const RecLeptonFormat& muon, LHEParticleFormat& lhe, I
   if (muon.charge()>0) lhe.id = -13; else lhe.id = +13;
   lhe.status  = 1;
   lhe.mother1 = mother;
-  lhe.mother2 = 0;
+  lhe.mother2 = mother;
   lhe.color1  = 0;
   lhe.color2  = 0;
   lhe.px      = muon.momentum().Px();
@@ -582,7 +582,7 @@ void LHEWriter::WriteElectron(const RecLeptonFormat& electron, LHEParticleFormat
   if (electron.charge()>0) lhe.id = -11; else lhe.id = +11;
   lhe.status  = 1;
   lhe.mother1 = mother;
-  lhe.mother2 = 0;
+  lhe.mother2 = mother;
   lhe.color1  = 0;
   lhe.color2  = 0;
   lhe.px      = electron.momentum().Px();
@@ -600,7 +600,7 @@ void LHEWriter::WritePhoton(const RecPhotonFormat& photon, LHEParticleFormat& lh
   lhe.id      = 22;
   lhe.status  = 1;
   lhe.mother1 = mother;
-  lhe.mother2 = 0;
+  lhe.mother2 = mother;
   lhe.color1  = 0;
   lhe.color2  = 0;
   lhe.px      = photon.momentum().Px();
@@ -618,7 +618,7 @@ void LHEWriter::WriteTau(const RecTauFormat& tau, LHEParticleFormat& lhe, Int_t&
   if (tau.charge()>0) lhe.id = -15; else lhe.id = +15;
   lhe.status  = 1;
   lhe.mother1 = mother;
-  lhe.mother2 = 0;
+  lhe.mother2 = mother;
   lhe.color1  = 0;
   lhe.color2  = 0;
   lhe.px      = tau.momentum().Px();

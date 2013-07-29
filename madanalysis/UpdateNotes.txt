@@ -1,5 +1,10 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+83   1.1.30  (2013/07/29) econte:  fixing bug related to daughter-mother relation in simplified LHE 
+                                   files 
+
+83   1.1.29  (2013/07/29) econte:  fixing bug with daughter-mother relation in "simplified LHE" 
+
 82   1.1.28  (2013/07/29) econte:  commenting the MA5logo in plot [unsolved problem of resolution] + 
                                    fixing a bug with event-weight in simplified LHE output 
 
