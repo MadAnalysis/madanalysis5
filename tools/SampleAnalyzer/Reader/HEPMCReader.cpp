@@ -148,9 +148,6 @@ bool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
     err_value=(event_xsection_err_/static_cast<double>(nevents_));
   }
 
-  mySample.mc()->set_xsection(value);
-  mySample.mc()->set_xsection_error(err_value);
-
   // Computing met, mht, ...
   for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
   {
@@ -282,10 +279,10 @@ Bool_t HEPMCReader::FillEvent(const std::string& line,
   else if (firstWord=="N") FillWeightNames(line);
 
   // Event units
-  else if (firstWord=="U") FillEventUnits(line);
+  else if (firstWord=="U") FillUnits(line);
 
   // Cross section
-  else if (firstWord=="C") FillEventXS(line);
+  else if (firstWord=="C") FillCrossSection(line,mySample);
 
   // HeavyIon line
   else if (firstWord=="H") FillHeavyIons(line);
@@ -360,9 +357,9 @@ void HEPMCReader::FillEventInformations(const std::string& line,
 }
 
 // -----------------------------------------------------------------------------
-// FillEventUnits
+// FillUnits
 // -----------------------------------------------------------------------------
-void HEPMCReader::FillEventUnits(const std::string& line)
+void HEPMCReader::FillUnits(const std::string& line)
 {
   std::stringstream str;
   str << line;
@@ -394,9 +391,10 @@ void HEPMCReader::FillEventUnits(const std::string& line)
 
 
 // -----------------------------------------------------------------------------
-// FillEventXS
+// FillCrossSection
 // -----------------------------------------------------------------------------
-void HEPMCReader::FillEventXS(const std::string& line)
+void HEPMCReader::FillCrossSection(const std::string& line, 
+                                   SampleFormat& mySample)
 {
   std::stringstream str;
   str << line;
@@ -411,6 +409,15 @@ void HEPMCReader::FillEventXS(const std::string& line)
   event_xsection_+=xsectmp;
   str >> event_xsection_err_;
   event_xsection_err_+=xsectmp_err;
+
+  if (mySample.mc()!=0)
+  {
+    ProcessFormat * proc = mySample.mc()->GetNewProcess();
+    proc->xsectionMean_  = xsectmp;
+    proc->xsectionError_ = xsectmp_err;
+    proc->weightMax_     = 0;
+    proc->processId_     = 0;
+  }
 }
 
 // -----------------------------------------------------------------------------

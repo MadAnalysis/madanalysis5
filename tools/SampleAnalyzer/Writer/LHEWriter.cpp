@@ -307,9 +307,9 @@ bool LHEWriter::WriteHeader(const SampleFormat& mySample)
 
     if (mySample.mc()->processes_.size()==0)
     {
-      *output_ << std::setw(19) << std::right << LHEWriter::FortranFormat_DoublePrecision(0)  << " ";
-      *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(0) << " ";
-      *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(1.0)     << " "; 
+      *output_ << std::setw(19) << std::right << LHEWriter::FortranFormat_DoublePrecision(0)   << " ";
+      *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(0)   << " ";
+      *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(1.0) << " "; 
       *output_ << std::setw(3)  << std::right << 1;
       *output_ << std::endl;
     }
@@ -500,7 +500,9 @@ bool LHEWriter::WriteEventHeader(const EventFormat& myEvent,
   {
     *output_ << std::setw(2)  << std::right << nevents << " ";
     *output_ << std::setw(3)  << std::right << myEvent.mc()->processId_ << " ";
-    *output_ << std::setw(14) << std::right << LHEWriter::FortranFormat_SimplePrecision(myEvent.mc()->weight_)   << " ";
+    double myweight = myEvent.mc()->weight_;
+    if (myweight==0) myweight=1; 
+    *output_ << std::setw(14) << std::right << LHEWriter::FortranFormat_SimplePrecision(myweight)                << " ";
     *output_ << std::setw(14) << std::right << LHEWriter::FortranFormat_SimplePrecision(myEvent.mc()->scale_)    << " ";
     *output_ << std::setw(14) << std::right << LHEWriter::FortranFormat_SimplePrecision(myEvent.mc()->alphaQED_) << " ";
     *output_ << std::setw(14) << std::right << LHEWriter::FortranFormat_SimplePrecision(myEvent.mc()->alphaQCD_) << std::endl;

@@ -380,7 +380,15 @@ bool STDHEPreader::DecodeSTDCM1(const std::string& version, SampleFormat& mySamp
 
   Float_t stdxsec;
   *xdrinput_ >> stdxsec;
-  if (stdxsec!=0) mySample.mc()->set_xsection(stdxsec/* *1e9*/);
+  if (stdxsec!=0)
+  {
+    mySample.mc()->set_xsection(stdxsec/* *1e9*/);
+    ProcessFormat * proc = mySample.mc()->GetNewProcess();
+    proc->xsectionMean_  = mySample.mc()->xsection_;
+    proc->xsectionError_ = 0;
+    proc->weightMax_     = 0;
+    proc->processId_     = 0;
+  }
 
   Double_t stdseed1; 
   *xdrinput_ >> stdseed1;

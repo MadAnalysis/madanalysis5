@@ -38,6 +38,8 @@ namespace MA5
 class LHEReader;
 class LHCOReader;
 class HEPMCReader;
+class STDHEPReader;
+class STDHEPreader;
 class ROOTReader;
 class LHEWriter;
 
@@ -48,6 +50,8 @@ class ProcessFormat
   friend class HEPMCReader;
   friend class ROOTReader;
   friend class LHEWriter;
+  friend class STDHEPReader;
+  friend class STDHEPreader;
 
   // -------------------------------------------------------------
   //                        data members

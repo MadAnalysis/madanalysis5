@@ -91,8 +91,8 @@ class HEPMCReader : public ReaderTextBase
   
   Bool_t FillEvent(const std::string& line, EventFormat& myEvent, SampleFormat& mySample);
   void FillEventInformations(const std::string& line, EventFormat& myEvent);
-  void FillEventXS(const std::string& line);
-  void FillEventUnits(const std::string& line);
+  void FillCrossSection(const std::string& line, SampleFormat& mySample);
+  void FillUnits(const std::string& line);
   void FillEventPDFInfo(const std::string& line, SampleFormat& mySample, EventFormat& myEvent);
   void FillEventParticleLine(const std::string& line, EventFormat& myEvent);
   void FillEventVertexLine(const std::string& line, EventFormat& myEvent);

@@ -40,6 +40,8 @@ namespace MA5
 class LHEReader;
 class LHCOReader;
 class HEPMCReader;
+class STDHEPReader;
+class STDHEPreader;
 class ROOTReader;
 class LHEWriter;
 class SampleAnalyzer;
@@ -52,6 +54,8 @@ class MCSampleFormat
   friend class ROOTReader;
   friend class SampleAnalyzer;
   friend class LHEWriter;
+  friend class STDHEPReader;
+  friend class STDHEPreader;
 
   // -------------------------------------------------------------
   //                        data members
