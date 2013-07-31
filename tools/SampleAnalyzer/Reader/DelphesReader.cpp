@@ -143,6 +143,8 @@ bool DelphesReader::ReadHeader(SampleFormat& mySample)
 {
   // Initiliaze REC
   mySample.InitializeRec();
+  mySample.SetSampleFormat(MA5FORMAT::DELPHES);
+  mySample.SetSampleGenerator(MA5GEN::DELPHES);
 
   // Checking ROOT version
   Int_t file_version = source_->GetVersion();

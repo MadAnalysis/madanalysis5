@@ -401,7 +401,7 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
   myReader_->FinalizeHeader(mySample);
 
   // Dump the header block
-  if(mySample.mc()!=0) mySample.mc()->printSubtitle();
+  mySample.printSubtitle();
 
   // Initialize the progress bar
   if (progressBar_==0) progressBar_ = new ProgressBar();
@@ -533,16 +533,16 @@ void SampleAnalyzer::FillSummary(SampleFormat& summary,
   for (unsigned int i=0;i<samples.size();i++)
   {
     // Total number of events
-    summary.nevents_              += samples[i].nevents_;
+    summary.nevents_ += samples[i].nevents_;
 
     // Requiring MC info
-    if(samples[i].mc()==0) {continue ;}
+    if(samples[i].mc()==0) continue ;
 
     // Mean cross-section
-    summary.mc()->xsection_       += samples[i].mc()->xsection_ * 
+    summary.mc()->xsection_       += samples[i].mc()->xsection() * 
                                      samples[i].nevents_;
-    summary.mc()->xsection_error_ += samples[i].mc()->xsection_error_ * 
-                                     samples[i].mc()->xsection_error_ *
+    summary.mc()->xsection_error_ += samples[i].mc()->xsection_error() * 
+                                     samples[i].mc()->xsection_error() *
                                      samples[i].nevents_ *
                                      samples[i].nevents_;
 
@@ -550,11 +550,18 @@ void SampleAnalyzer::FillSummary(SampleFormat& summary,
     summary.mc()->sumweight_positive_ += samples[i].mc()->sumweight_positive_;
     summary.mc()->sumweight_negative_ += samples[i].mc()->sumweight_negative_;
   }
-  if (samples.size()!=0 && summary.nevents_!=0)
+
+  // Finalizing xsection
+  if (summary.nevents_!=0)
   {
     summary.mc()->xsection_       /= summary.nevents_;
-    summary.mc()->xsection_error_  = sqrt(summary.mc()->xsection_error_)
-                                   / summary.nevents_;
+    summary.mc()->xsection_error_  = sqrt(summary.mc()->xsection_error_) / 
+                                     summary.nevents_;
+  }
+  else
+  {
+    summary.mc()->xsection_       = 0;
+    summary.mc()->xsection_error_ = 0;
   }
 }
 

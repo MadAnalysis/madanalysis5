@@ -252,8 +252,8 @@ bool LHEWriter::WriteHeader(const SampleFormat& mySample)
     *output_ << "Original header:" << std::endl;
     *output_ << "" << std::endl;
 
-    for (unsigned int i=0;i<mySample.mc()->header().size();i++)
-      *output_ << mySample.mc()->header()[i] << std::endl;
+    for (unsigned int i=0;i<mySample.header().size();i++)
+      *output_ << mySample.header()[i] << std::endl;
   }
   *output_ << "-->" << std::endl;
   *output_ << "</header>" << std::endl;
@@ -294,9 +294,16 @@ bool LHEWriter::WriteHeader(const SampleFormat& mySample)
     *output_ << std::setw(5)  << std::right << mySample.mc()->beamPDFID_.first << " ";
     *output_ << std::setw(5)  << std::right << mySample.mc()->beamPDFID_.second << " ";
     *output_ << std::setw(1)  << std::right << mySample.mc()->weightMode_ << " ";
-    if (mySample.mc()->nProcesses_==0) *output_ << std::setw(2)  << std::right << 1; else *output_ << std::setw(2)  << std::right << mySample.mc()->nProcesses_;
+    if (mySample.mc()->processes().size()==0) 
+    {
+      *output_ << std::setw(2)  << std::right << 1; 
+    }
+    else
+    {
+      *output_ << std::setw(2)  << std::right << mySample.mc()->processes().size();
+    }
     *output_ << std::endl;
-    for (unsigned int i=0;i<mySample.mc()->processes_.size();i++)
+    for (unsigned int i=0;i<mySample.mc()->processes().size();i++)
     {
       *output_ << std::setw(19) << std::right << LHEWriter::FortranFormat_DoublePrecision(mySample.mc()->processes_[i].xsectionMean_)  << " ";
       *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(mySample.mc()->processes_[i].xsectionError_) << " ";
@@ -305,7 +312,7 @@ bool LHEWriter::WriteHeader(const SampleFormat& mySample)
       *output_ << std::endl;
     }
 
-    if (mySample.mc()->processes_.size()==0)
+    if (mySample.mc()->processes().size()==0)
     {
       *output_ << std::setw(19) << std::right << LHEWriter::FortranFormat_DoublePrecision(0)   << " ";
       *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(0)   << " ";

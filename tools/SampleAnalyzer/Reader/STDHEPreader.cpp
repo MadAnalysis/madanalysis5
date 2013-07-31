@@ -24,6 +24,7 @@
 
 #include "SampleAnalyzer/Reader/STDHEPreader.h"
 #include "SampleAnalyzer/Service/LogService.h"
+#include "SampleAnalyzer/Service/ConvertService.h"
 
 using namespace MA5;
 
@@ -65,6 +66,7 @@ bool STDHEPreader::ReadHeader(SampleFormat& mySample)
 {
   // Initiliaze MC
   mySample.InitializeMC();
+  mySample.SetSampleFormat(MA5FORMAT::STDHEP);
 
   if (!DecodeFileHeader(mySample)) return false;
 
@@ -157,9 +159,26 @@ bool STDHEPreader::DecodeFileHeader(SampleFormat& mySample)
   tmps="";
   *xdrinput_ >> tmps;
 
+  // Set the title in lower case
+  tmps = CONVERT->ToLower(tmps);
+  if (tmps.find("pythia")!=std::string::npos)
+  {
+    mySample.SetSampleGenerator(MA5GEN::PYTHIA6);
+  }
+  else if (tmps.find("herwig")!=std::string::npos)
+  {
+    mySample.SetSampleGenerator(MA5GEN::HERWIG6);
+  }
+  else
+  {
+    mySample.SetSampleGenerator(MA5GEN::UNKNOWN);
+  }
+
+  //std::cout << "title=" << tmps << std::endl;
+
   // Comment
   *xdrinput_ >> tmps;
-  //  std::cout << "comment=" << tmps << endmsg; 
+  //std::cout << "comment=" << tmps << std::endl; 
 
   // Creation date
   *xdrinput_ >> tmps;
@@ -380,14 +399,10 @@ bool STDHEPreader::DecodeSTDCM1(const std::string& version, SampleFormat& mySamp
 
   Float_t stdxsec;
   *xdrinput_ >> stdxsec;
-  if (stdxsec!=0)
+  if (mySample.mc()!=0)
   {
-    mySample.mc()->set_xsection(stdxsec/* *1e9*/);
-    ProcessFormat * proc = mySample.mc()->GetNewProcess();
-    proc->xsectionMean_  = mySample.mc()->xsection_;
-    proc->xsectionError_ = 0;
-    proc->weightMax_     = 0;
-    proc->processId_     = 0;
+    mySample.mc()->setXsectionMean(stdxsec);
+    mySample.mc()->setXsectionError(0);
   }
 
   Double_t stdseed1; 
@@ -629,6 +644,7 @@ bool STDHEPreader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 
     unsigned int index1=myEvent.mc()->particles_[i].mothup1_;
     unsigned int index2=myEvent.mc()->particles_[i].mothup2_;
+    if (index1!=0 && index2==0) index2=index1;
     if (index1!=0)
     {
       if (index1>=myEvent.mc()->particles_.size())

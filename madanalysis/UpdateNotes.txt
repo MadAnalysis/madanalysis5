@@ -1,5 +1,9 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+84   1.1.31  (2013/07/31) econte:  1. fixing pb with mother-daughter relation in simplified LHE (again) 
+                                   2. new code structure for generator info and event format 3. ability 
+                                   to distinguish Pythia and Herwig samples 
+
 83   1.1.30  (2013/07/29) econte:  fixing bug related to daughter-mother relation in simplified LHE 
                                    files 
 

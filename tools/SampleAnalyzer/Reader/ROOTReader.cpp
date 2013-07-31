@@ -46,6 +46,7 @@ bool ROOTReader::ReadHeader(SampleFormat& mySample)
 {
   // Initiliaze REC
   mySample.InitializeRec();
+  mySample.SetSampleFormat(MA5FORMAT::DELPHES);
 
   // Opening file
   source_ = new TFile(mySample.name().c_str());

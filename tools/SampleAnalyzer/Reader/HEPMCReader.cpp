@@ -41,6 +41,8 @@ bool HEPMCReader::ReadHeader(SampleFormat& mySample)
   
   // Initialize MC
   mySample.InitializeMC();
+  mySample.SetSampleFormat(MA5FORMAT::HEPMC);
+  mySample.SetSampleGenerator(MA5GEN::UNKNOWN);
   warnmother_=true;
 
   // Skipping header line until first event line
@@ -139,15 +141,6 @@ StatusCode::Type HEPMCReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySa
 // -----------------------------------------------------------------------------
 bool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 {
-
-  double value=0;
-  double err_value=0;
-  if(nevents_!=0) 
-  {
-    value=(event_xsection_/static_cast<double>(nevents_));
-    err_value=(event_xsection_err_/static_cast<double>(nevents_));
-  }
-
   // Computing met, mht, ...
   for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
   {
@@ -396,27 +389,27 @@ void HEPMCReader::FillUnits(const std::string& line)
 void HEPMCReader::FillCrossSection(const std::string& line, 
                                    SampleFormat& mySample)
 {
+  // Splitting the line in words
   std::stringstream str;
   str << line;
-  double xsectmp=0;
-  double xsectmp_err=0;
+  
+  // First character
   std::string firstc;
-  
-  nevents_++;
-  
   str >> firstc;
-  str >> xsectmp;
-  event_xsection_+=xsectmp;
-  str >> event_xsection_err_;
-  event_xsection_err_+=xsectmp_err;
 
+  // xsection mean
+  Double_t xsectmp=0;
+  str >> xsectmp;
+
+  // xsection error
+  Double_t xsectmp_err=0;
+  str >> xsectmp_err;
+
+  // saving xsection mean & error
   if (mySample.mc()!=0)
   {
-    ProcessFormat * proc = mySample.mc()->GetNewProcess();
-    proc->xsectionMean_  = xsectmp;
-    proc->xsectionError_ = xsectmp_err;
-    proc->weightMax_     = 0;
-    proc->processId_     = 0;
+    mySample.mc()->setXsectionMean(xsectmp);
+    mySample.mc()->setXsectionError(xsectmp_err);
   }
 }
 

@@ -29,6 +29,9 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <algorithm>
+#include <cctype> // std::tolower
+
 
 // ROOT headers
 #include <Rtypes.h> 
@@ -134,6 +137,24 @@ class ConvertService
     Float_t convert=0;
     Converter_ >> convert;
     return convert;
+  }
+
+  /// Conversion function to lower case
+  const std::string ToLower(const std::string& value) const
+  {
+    std::string result=value;
+    std::transform(value.begin(), value.end(), result.begin(),
+                   (int(*)(int)) std::tolower);
+    return result;
+  }
+
+  /// Conversion function to upper case
+  const std::string ToUpper(const std::string& value) const
+  {
+    std::string result=value;
+    std::transform(value.begin(), value.end(), result.begin(),
+                   (int(*)(int)) std::toupper);
+    return result;
   }
 
   /// Test the success of the last conversion
