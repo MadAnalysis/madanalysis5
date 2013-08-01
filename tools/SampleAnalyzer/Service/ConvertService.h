@@ -57,7 +57,7 @@ class ConvertService
   // -------------------------------------------------------------
  private :
 
-  /// Pointer to the unique instance of ExceptionService
+  /// Pointer to the unique instance of ConvertService
   static ConvertService* Service_;
 
   /// Streamer used for the conversion

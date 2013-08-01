@@ -30,6 +30,45 @@
 
 using namespace MA5;
 
+
+Bool_t MCParticleToSave(const MCParticleFormat& part, const SampleFormat& sample)
+{
+  // Special Herwig6
+  if (sample.sampleGenerator()==MA5GEN::HERWIG6)
+  {
+    return part.statuscode()>=110 && 
+           part.statuscode()<=125;
+  }
+
+  // Else Herwig6
+  else
+  {
+    return part.statuscode()==3 || 
+           ( part.statuscode()>=21 &&
+             part.statuscode()<=29);
+  }
+}
+
+
+Bool_t InitialMCParticleToSave(const MCParticleFormat& part, const SampleFormat& sample)
+{
+  // Special Herwig6
+  if (sample.sampleGenerator()==MA5GEN::HERWIG6)
+  {
+    return part.statuscode()>=101 && 
+           part.statuscode()<=102;
+  }
+
+  // Else Herwig6
+  else
+  {
+    return (part.statuscode()==3  && part.pt()==0) ||
+           (part.statuscode()>=11 && part.statuscode()<=19);
+  }
+}
+
+
+
 UInt_t Find(const MCParticleFormat* part, 
             const std::vector<const MCParticleFormat*>& collection)
 {
@@ -45,8 +84,16 @@ UInt_t FindDeeply(const MCParticleFormat* part,
   if (part==0) return 0;
   bool test=false;
   const MCParticleFormat* thepart = part;
+  unsigned int counter=0;
+
   while(!test)
   {
+    counter++;
+    if (counter>=100000)
+    {
+      WARNING << "Number of calls exceed: infinite loop is detected" << endmsg;
+      break;
+    }
     if (thepart->mother1()==0) 
     {
       test=true;
@@ -370,10 +417,8 @@ bool LHEWriter::WriteEvent(const EventFormat& myEvent,
   {
     for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
     {
-      if (myEvent.mc()->particles()[i].statuscode()==3 || 
-          ( myEvent.mc()->particles()[i].statuscode()>=21 &&
-            myEvent.mc()->particles()[i].statuscode()<=29)
-          ) counter++;
+      if ( InitialMCParticleToSave(myEvent.mc()->particles()[i],mySample) ||
+           MCParticleToSave(myEvent.mc()->particles()[i],mySample) ) counter++;
     }
   }
 
@@ -415,19 +460,15 @@ bool LHEWriter::WriteEvent(const EventFormat& myEvent,
     for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
     {
       const MCParticleFormat* part = &(myEvent.mc()->particles()[i]);
-      if ( firstpart && 
-           ( (part->statuscode()==3 && part->pt()==0) ||
-             (part->statuscode()>=11 && part->statuscode()<=19)
-           ) )
+ 
+     if ( firstpart && InitialMCParticleToSave(*part,mySample) )
       {
         particles.push_back(LHEParticleFormat());
         pointers.push_back(part);
         WriteParticle(myEvent.mc()->particles()[i],0,0,-1, particles.back());
       }
 
-      else if (myEvent.mc()->particles()[i].statuscode()==3 || 
-           ( myEvent.mc()->particles()[i].statuscode()>=21 &&
-             myEvent.mc()->particles()[i].statuscode()<=29))
+      else if (MCParticleToSave(*part,mySample))
       {
         firstpart=false;
         particles.push_back(LHEParticleFormat());
@@ -449,31 +490,36 @@ bool LHEWriter::WriteEvent(const EventFormat& myEvent,
     for (unsigned int i=0;i<myEvent.rec()->muons().size();i++)
     {
       particles.push_back(LHEParticleFormat());
-      Int_t mother = FindDeeply(myEvent.rec()->muons()[i].mc(),pointers);
+      Int_t mother = 0; 
+      if (mySample.sampleGenerator()!=MA5GEN::HERWIG6) mother=FindDeeply(myEvent.rec()->muons()[i].mc(),pointers);
       WriteMuon(myEvent.rec()->muons()[i],particles.back(),mother);
     }
     for (unsigned int i=0;i<myEvent.rec()->electrons().size();i++)
     {
       particles.push_back(LHEParticleFormat());
-      Int_t mother = FindDeeply(myEvent.rec()->electrons()[i].mc(),pointers);
+      Int_t mother = 0; 
+      if (mySample.sampleGenerator()!=MA5GEN::HERWIG6) mother=FindDeeply(myEvent.rec()->electrons()[i].mc(),pointers);
       WriteElectron(myEvent.rec()->electrons()[i],particles.back(),mother);
     }
     for (unsigned int i=0;i<myEvent.rec()->taus().size();i++)
     {
       particles.push_back(LHEParticleFormat());
-      Int_t mother = FindDeeply(myEvent.rec()->taus()[i].mc(),pointers);
+      Int_t mother = 0; 
+      if (mySample.sampleGenerator()!=MA5GEN::HERWIG6) mother=FindDeeply(myEvent.rec()->taus()[i].mc(),pointers);
       WriteTau(myEvent.rec()->taus()[i],particles.back(),mother);
     }
     for (unsigned int i=0;i<myEvent.rec()->jets().size();i++)
     {
       particles.push_back(LHEParticleFormat()); 
-      Int_t mother = FindDeeply(myEvent.rec()->jets()[i].mc(),pointers);
+      Int_t mother = 0; 
+      if (mySample.sampleGenerator()!=MA5GEN::HERWIG6) mother=FindDeeply(myEvent.rec()->jets()[i].mc(),pointers);
       WriteJet(myEvent.rec()->jets()[i],particles.back(),mother);
     }
     for (unsigned int i=0;i<myEvent.rec()->photons().size();i++)
     {
       particles.push_back(LHEParticleFormat());
-      Int_t mother = FindDeeply(myEvent.rec()->photons()[i].mc(),pointers);
+      Int_t mother = 0; 
+      if (mySample.sampleGenerator()!=MA5GEN::HERWIG6) mother=FindDeeply(myEvent.rec()->photons()[i].mc(),pointers);
       WritePhoton(myEvent.rec()->photons()[i],particles.back(),mother);
     }
     particles.push_back(LHEParticleFormat());

@@ -23,6 +23,7 @@
 
 
 #include "SampleAnalyzer/JetClustering/JetClusteringFastJet.h"
+#include "SampleAnalyzer/Service/LoopService.h"
 #ifdef FASTJET_USE
 
 using namespace MA5;
@@ -44,51 +45,6 @@ Bool_t JetClusteringFastJet::IsLast(const MCParticleFormat* part, EventFormat& m
     if (part->Daughters()[i]->pdgid()==part->pdgid()) return false;
   }
   return true;
-}
-
-
-Bool_t JetClusteringFastJet::IrrelevantPhoton(const MCParticleFormat* part)
-{
-  if (part->mother1()==0) return false;
-
-  // Checking mother
-  UInt_t absid = std::abs(part->mother1()->pdgid());
-
-  if (absid==15) return true;
-
-  // BENJ: this is special for HERWIG
-  /*  else if(part->mother1()->mother1()!=0)
-  {
-    if (part->mother1()->mother1()->pdgid()==82) return false;
-    else if (part==part->mother1()->mother1())   return false;
-    }*/
-  // BENJ: end of herwig fix
-
-  else return IrrelevantPhoton(part->mother1());
-
-  // Default
-  return false;
-}
-
-Bool_t JetClusteringFastJet::ComingFromHadronDecay(const MCParticleFormat* part)
-{
-  // Weird case ? Safety: removing this case
-  if (part->mother1()==0) return true;
-
-  // Checking mother
-  Bool_t had = PHYSICS->IsHadronic(part->mother1()->pdgid()) && part->mother1()->pdgid()!=21;
-  if (had && part->mother1()->mother1()==0) return false;
-  else if (had) return true;
-
-  // BENJ: this is special for HERWIG
-  /*  else if(part->mother1()->mother1()!=0)
-  {
-    if (part->mother1()->mother1()->pdgid()==82) return false;
-    else if (part==part->mother1()->mother1())   return false;
-    }*/
-  // BENJ: end of herwig fix
-
-  else return ComingFromHadronDecay(part->mother1());
 }
 
 
@@ -151,7 +107,7 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
       else if (absid==15)
       {
         // rejecting particle if coming from hadronization
-        if (ComingFromHadronDecay(&part)) continue;
+        if (LOOP->ComingFromHadronDecay(&part,mySample)) continue;
 
         // Looking taus daughters id
         bool leptonic   = true;
@@ -231,11 +187,11 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
     // Keeping only final states
     else if (PHYSICS->IsFinalState(part))
     {
-      // rejecting not interesting particles
+      // keeping only electron, muon and photon
       if (absid!=22 && absid!=11 && absid!=13) continue;
 
       // rejecting particle if coming from hadronization
-      if (ExclusiveId_ && ComingFromHadronDecay(&part)) continue;
+      if (ExclusiveId_ && LOOP->ComingFromHadronDecay(&part,mySample)) continue;
 
       // Muons
       if (absid==13)
@@ -262,7 +218,7 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
       // Photons
       else if (absid==22)
       {
-        if (IrrelevantPhoton(&part)) continue;
+        if (LOOP->IrrelevantPhoton(&part,mySample)) continue;
         vetos[i]=true;
         RecPhotonFormat * photon = myEvent.rec()->GetNewPhoton();
         photon->setMomentum(part.momentum());

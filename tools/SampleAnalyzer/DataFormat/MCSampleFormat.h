@@ -29,6 +29,7 @@
 #include <map>
 #include <iostream>
 #include <vector>
+#include <cmath>
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/DataFormat/GeneratorInfo.h"
@@ -200,8 +201,8 @@ class MCSampleFormat
 
   /// Adding a weight
   void addWeightedEvents(Double_t weight)
-  { if (weight>=0) sumweight_positive_ += fabs(weight);
-    else sumweight_negative_ += fabs(weight); }
+  { if (weight>=0) sumweight_positive_ += std::abs(weight);
+    else sumweight_negative_ += std::abs(weight); }
 
   /// Accessor to the number of events with positive weight
   void setSumweight_positive(Double_t sum)
