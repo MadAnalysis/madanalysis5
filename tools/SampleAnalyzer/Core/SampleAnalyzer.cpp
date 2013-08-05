@@ -563,6 +563,7 @@ void SampleAnalyzer::FillSummary(SampleFormat& summary,
     summary.mc()->xsection_       = 0;
     summary.mc()->xsection_error_ = 0;
   }
+
 }
 
 

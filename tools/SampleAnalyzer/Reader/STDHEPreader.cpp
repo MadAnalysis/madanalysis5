@@ -158,6 +158,7 @@ bool STDHEPreader::DecodeFileHeader(SampleFormat& mySample)
   // Title
   tmps="";
   *xdrinput_ >> tmps;
+  //  std::cout << "title=" << tmps << std::cout;
 
   // Set the title in lower case
   tmps = CONVERT->ToLower(tmps);

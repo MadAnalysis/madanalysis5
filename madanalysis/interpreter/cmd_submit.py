@@ -24,6 +24,7 @@
 
 from madanalysis.interpreter.cmd_base           import CmdBase
 from madanalysis.IOinterface.job_writer         import JobWriter
+from madanalysis.IOinterface.layout_writer      import LayoutWriter
 from madanalysis.IOinterface.job_reader         import JobReader
 from madanalysis.IOinterface.folder_writer      import FolderWriter
 from madanalysis.enumeration.report_format_type import ReportFormatType
@@ -371,6 +372,8 @@ class CmdSubmit(CmdBase):
 
         logging.info("   Writing the command line history...")
         jobber.WriteHistory(history,self.main.firstdir)
+        layouter = LayoutWriter(self.main, dirname)
+        layouter.WriteLayoutConfig()
 
         if not self.resubmit:
             logging.info("   Creating Makefiles...")

@@ -56,7 +56,7 @@ class LayoutWriter():
 
         # Writing file block
         file.write('<File>\n')
-        file.write('jodir = \n')
+        file.write('jodir = '+self.jobdir+'\n')
         file.write('html = 1\n')
         file.write('latex = 1\n')
         file.write('pdflatex = 1\n')
@@ -74,19 +74,19 @@ class LayoutWriter():
         for dataset in self.main.datasets:
             file.write('<Dataset name="'+dataset.name+'">\n')
             file.write('<Physics>\n')
-            file.write('background = '+str(main.background)+'\n')
-            file.write('weight = '+str(main.weight)+'\n')
-            file.write('xsection = '+str(main.xsection)+'\n')
+            file.write('background = '+str(dataset.background)+'\n')
+            file.write('weight = '+str(dataset.weight)+'\n')
+            file.write('xsection = '+str(dataset.xsection)+'\n')
             file.write('</Physics>\n')
             file.write('<Layout>\n')
-            file.write('title = '+str(title)+'\n')
-            file.write('linecolor = '+str(main.linecolor)+'\n')
-            file.write('linestyle = '+str(main.linestyle)+'\n')
-            file.write('lineshade = '+str(main.lineshade)+'\n')
-            file.write('linewidth = '+str(main.linewidth)+'\n')
-            file.write('backcolor = '+str(main.backcolor)+'\n')
-            file.write('backstyle = '+str(main.backstyle)+'\n')
-            file.write('backshade = '+str(main.backshade)+'\n')
+            file.write('title = '+str(dataset.title)+'\n')
+            file.write('linecolor = '+str(dataset.linecolor)+'\n')
+            file.write('linestyle = '+str(dataset.linestyle)+'\n')
+            file.write('lineshade = '+str(dataset.lineshade)+'\n')
+            file.write('linewidth = '+str(dataset.linewidth)+'\n')
+            file.write('backcolor = '+str(dataset.backcolor)+'\n')
+            file.write('backstyle = '+str(dataset.backstyle)+'\n')
+            file.write('backshade = '+str(dataset.backshade)+'\n')
             file.write('</Layout>\n')
             file.write('</Dataset>\n')
 
@@ -95,9 +95,9 @@ class LayoutWriter():
         for item in self.main.selection:
             if item.__class__.__name__=="Histogram":
                file.write('<Histogram name="selection'+str(counter)+'"\n')
-               file.write('stack = '+str(stack)+'\n')
-               file.write('titleX = '+str(titleX)+'\n')
-               file.write('titleY = '+str(titleY)+'\n')
+               file.write('stack = '+str(item.stack)+'\n')
+               file.write('titleX = '+str(item.titleX)+'\n')
+               file.write('titleY = '+str(item.titleY)+'\n')
                file.write('</Histogram>\n')
 
             elif item.__class__.__name__=="Cut":
