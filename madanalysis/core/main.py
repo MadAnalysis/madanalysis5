@@ -90,7 +90,7 @@ class Main():
 
 
     def ResetParameters(self):
-        self.merging       = MergingConfiguration()
+        self.merging        = MergingConfiguration()
         self.clustering     = ClusteringConfiguration()
         self.SBratio        = 'S/B'
         self.SBerror        = Main.SBformula['S/B']
