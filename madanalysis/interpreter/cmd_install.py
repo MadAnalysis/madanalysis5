@@ -593,7 +593,7 @@ class CmdInstall(CmdBase):
         if nargs>2:
             return []
         else:
-            output = ["samples","zlib","fastjet", "MCatNLO-for-ma5", "Delphes" ]
+            output = ["samples","zlib","fastjet", "MCatNLO-for-ma5", "delphes" ]
             return self.finalize_complete(text,output)
     
 
