@@ -60,8 +60,11 @@ class PlotFlowForDataset:
 
         for histo in self.histos:
             histo.FinalizeReading(self.main,self.dataset)
+        # Updating the value of the cross section (BENJ)
+        self.xsection = self.dataset.measured_global.xsection
+        if self.dataset.xsection!=0.:
+            self.xsection = self.dataset.xsection
 
-            
     # Computing integral
     def CreateHistogram(self):
 
@@ -94,12 +97,15 @@ class PlotFlowForDataset:
         # Loop over plot
         for iabshisto in range(0,len(self.main.selection)):
 
+
             # Keep only histogram
             if self.main.selection[iabshisto].__class__.__name__!="Histogram":
                 continue
 
+
             # Reset scale
             scale=0.
+
 
             # Case 1: Normalization to ONE
             if self.main.selection[iabshisto].stack==StackingMethodType.NORMALIZE2ONE or \
@@ -112,29 +118,52 @@ class PlotFlowForDataset:
                 else:
                     scale = 0.
 
+
             # Case 2: No normalization
             elif self.main.normalize == NormalizeType.NONE:
                 scale = 1.
 
-            # Case 3: Normalization formula depends on LUMI
-            elif self.main.normalize == NormalizeType.LUMI:
-                if not self.dataset.weighted_events:
-                    scale = self.xsection * self.main.lumi * 1000 / \
-                            float(self.dataset.measured_global.nevents)
-                else:
-                    scale = self.main.lumi * 1000 / \
-                            len(self.dataset.filenames)
 
-            # Case 4: Normalization formula depends on WEIGHT + LUMI
-            elif self.main.normalize == NormalizeType.LUMI_WEIGHT:
-                if not self.dataset.weighted_events:
-                    scale = self.xsection * self.main.lumi * 1000 * \
-                            self.dataset.weight / \
-                            float(self.dataset.measured_global.nevents)
+            # Case 3 and 4 : Normalization formula depends on LUMI
+            #                or depends on WEIGHT+LUMI 
+            elif self.main.normalize in [NormalizeType.LUMI, \
+                                         NormalizeType.LUMI_WEIGHT]:
+
+                # integral
+                integral=self.histos[iplot].positive.integral -\
+                         self.histos[iplot].negative.integral
+
+                # compute efficiency : Nevent / Ntotal
+                if self.dataset.measured_global.nevents==0:
+                    eff = 0
                 else:
-                    scale = self.main.lumi * 1000 * \
-                            self.dataset.weight / \
-                            len(self.dataset.filenames)
+                    eff = (self.histos[iplot].positive.nevents  + \
+                          self.histos[iplot].negative.nevents) / \
+                          float(self.dataset.measured_global.nevents)
+
+                # compute the good xsection value
+                thexsection = self.xsection
+                if self.main.normalize==NormalizeType.LUMI_WEIGHT:
+                    thexsection = thexsection * self.dataset.weight
+                
+                # compute final entries/event ratio
+                entries_per_events = 0
+                sumw = self.histos[iplot].positive.sumw - \
+                       self.histos[iplot].negative.sumw
+                Nentries = self.histos[iplot].positive.sumwentries - \
+                           self.histos[iplot].negative.sumwentries
+                if sumw!=0 and Nentries!=0:
+                    entries_per_events = sumw / Nentries
+
+                # compute the scale
+                if integral!=0:
+                    scale = thexsection * \
+                            self.main.lumi * 1000 * \
+                            eff * \
+                            entries_per_events / \
+                            integral
+                else:
+                    scale = 1 # no scale for empty plot
 
             # Setting the computing scale
             self.histos[iplot].scale=copy.copy(scale)

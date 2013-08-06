@@ -46,6 +46,7 @@ SampleAnalyzer::SampleAnalyzer()
 
   // Initializing pointer to 0
   progressBar_=0;
+  LastFileFail_=false;
 
   // Header
   INFO << "    * SampleAnalyzer for MadAnalysis 5 - Welcome.";
@@ -298,7 +299,7 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
   }  
 
   // Finalize previous progress bar
-  if (progressBar_!=0)
+  if (!LastFileFail_ && progressBar_!=0)
   {
     progressBar_->Finalize();
     INFO << "        => total number of events: " << counter_read_[file_index_-1] 
@@ -306,6 +307,7 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
          << " ; skipped: " << counter_read_[file_index_-1] - counter_passed_[file_index_-1]
          << " ) " << endmsg;
   }
+  LastFileFail_=false;
 
   // Next file
   file_index_++;
@@ -328,15 +330,20 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
     ERROR << "the format of the input file is not supported. "
           << "The file is skipped."
           << endmsg;
+    LastFileFail_=true;
     return StatusCode::SKIP;
   }
 
   // Initialize the reader
-  myReader_->Initialize(inputs_[file_index_-1], cfg_);
+  if (!myReader_->Initialize(inputs_[file_index_-1], cfg_))
+  {
+    LastFileFail_=true;
+    return StatusCode::SKIP;
+  }
 
   // Displaying the size of the file
   Long64_t length = myReader_->GetFileSize();
-  if (length<0) INFO << "        => file size : unknown" << endmsg;
+  if (length<0) INFO << "        => file size: unknown" << endmsg;
   else
   {
     UInt_t unit = 0;
@@ -377,15 +384,16 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
     else if (unit==5) str << "To";
     else str << "muf";
 
-    INFO << "        => file size : " << str.str() << endmsg;
+    INFO << "        => file size: " << str.str() << endmsg;
   }
+  length = myReader_->GetFinalPosition();
 
   // Read the header block
   if (!myReader_->ReadHeader(mySample))
   {
     ERROR << "No header has been found. " 
           << "The file is skipped." << endmsg;
-    myReader_->Finalize();
+    LastFileFail_=true;
     return StatusCode::SKIP;
   }
 
@@ -393,7 +401,7 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
   myReader_->FinalizeHeader(mySample);
 
   // Dump the header block
-  if(mySample.mc()!=0) mySample.mc()->printSubtitle();
+  mySample.printSubtitle();
 
   // Initialize the progress bar
   if (progressBar_==0) progressBar_ = new ProgressBar();
@@ -525,16 +533,16 @@ void SampleAnalyzer::FillSummary(SampleFormat& summary,
   for (unsigned int i=0;i<samples.size();i++)
   {
     // Total number of events
-    summary.nevents_              += samples[i].nevents_;
+    summary.nevents_ += samples[i].nevents_;
 
     // Requiring MC info
-    if(samples[i].mc()==0) {continue ;}
+    if(samples[i].mc()==0) continue ;
 
     // Mean cross-section
-    summary.mc()->xsection_       += samples[i].mc()->xsection_ * 
+    summary.mc()->xsection_       += samples[i].mc()->xsection() * 
                                      samples[i].nevents_;
-    summary.mc()->xsection_error_ += samples[i].mc()->xsection_error_ * 
-                                     samples[i].mc()->xsection_error_ *
+    summary.mc()->xsection_error_ += samples[i].mc()->xsection_error() * 
+                                     samples[i].mc()->xsection_error() *
                                      samples[i].nevents_ *
                                      samples[i].nevents_;
 
@@ -542,12 +550,20 @@ void SampleAnalyzer::FillSummary(SampleFormat& summary,
     summary.mc()->sumweight_positive_ += samples[i].mc()->sumweight_positive_;
     summary.mc()->sumweight_negative_ += samples[i].mc()->sumweight_negative_;
   }
-  if (samples.size()!=0)
+
+  // Finalizing xsection
+  if (summary.nevents_!=0)
   {
     summary.mc()->xsection_       /= summary.nevents_;
-    summary.mc()->xsection_error_  = sqrt(summary.mc()->xsection_error_)
-                                   / summary.nevents_;
+    summary.mc()->xsection_error_  = sqrt(summary.mc()->xsection_error_) / 
+                                     summary.nevents_;
   }
+  else
+  {
+    summary.mc()->xsection_       = 0;
+    summary.mc()->xsection_error_ = 0;
+  }
+
 }
 
 

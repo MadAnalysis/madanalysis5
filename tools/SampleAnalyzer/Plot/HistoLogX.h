@@ -46,8 +46,8 @@ class HistoLogX : public Histo
  protected :
 
   // Histogram boundaries in Log scale
-  Float_t log_xmin_;
-  Float_t log_xmax_;
+  Double_t log_xmin_;
+  Double_t log_xmax_;
 
   // -------------------------------------------------------------
   //                       method members
@@ -60,7 +60,7 @@ class HistoLogX : public Histo
 
   /// Constructor with argument 
   HistoLogX(const std::string& name, UInt_t nbins, 
-            Float_t xmin, Float_t xmax) : Histo(name)
+            Double_t xmin, Double_t xmax) : Histo(name)
   { 
     // Setting the description
     nbins_ = nbins;
@@ -88,7 +88,7 @@ class HistoLogX : public Histo
     log_xmin_=std::log10(xmin);
     log_xmax_=std::log10(xmax);
 
-    step_ = (log_xmax_ - log_xmin_)/static_cast<Float_t>(nbins_);
+    step_ = (log_xmax_ - log_xmin_)/static_cast<Double_t>(nbins_);
 
     // Reseting the histogram array
     histo_.resize(nbins_,std::make_pair(0.,0.));
@@ -96,8 +96,6 @@ class HistoLogX : public Histo
     overflow_  = std::make_pair(0.,0.);
 	
     // Reseting statistical counters
-    nevents_  = std::make_pair(0,0);
-    nentries_ = std::make_pair(0,0);
     sum_w_    = std::make_pair(0.,0.);
     sum_ww_   = std::make_pair(0.,0.);
     sum_xw_   = std::make_pair(0.,0.);
@@ -108,7 +106,7 @@ class HistoLogX : public Histo
   { }
 
   /// Filling histogram
-  void Fill(Float_t value, Float_t weight=1.0)
+  void Fill(Double_t value, Double_t weight=1.0)
   {
     if (std::isnan(value))
     {

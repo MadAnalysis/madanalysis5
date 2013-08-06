@@ -22,49 +22,29 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef MERGING_PLOT_TYPE_H
-#define MERGING_PLOT_TYPE_H
+#ifndef GENERATOR_INFO_H
+#define GENERATOR_INFO_H
 
-//STL headers
-#include <vector>
-#include <string>
-
-//SampleAnalyzer headers
-#include "SampleAnalyzer/Plot/Histo.h"
 
 namespace MA5
 {
 
-class MergingPlotType
+namespace MA5GEN
 {
-//---------------------------------------------------------------------------------
-//                                 data members
-//---------------------------------------------------------------------------------
- public:
+  enum GeneratorType { UNKNOWN=0,
+                       MG5=1, MA5=2,
+                       PYTHIA6=3, PYTHIA8=4, 
+                       HERWIG6=5, HERWIGPP=6,
+                       DELPHES=7 };
+}
 
-  std::vector<Histo*> contribution;
-  Histo* total;
-
-  static const UInt_t   nbins;
-  static const Double_t xmin;
-  static const Double_t xmax;
-
-
-//---------------------------------------------------------------------------------
-//                                method members
-//---------------------------------------------------------------------------------
- public:
-  MergingPlotType()
-  {}
-
-  ~MergingPlotType()
-  {}
-
-  void Initialize(unsigned int ncontrib,const std::string& name);
-
-  void Finalize();
-
-};
+namespace MA5FORMAT
+{
+  enum SampleFormatType { UNKNOWN=0, 
+                          LHE=1, SIMPLIFIED_LHE=2, 
+                          STDHEP=3, HEPMC=4, LHCO=5,
+                          DELPHES=6 };
+}
 
 }
 

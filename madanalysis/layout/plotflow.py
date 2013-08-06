@@ -35,11 +35,12 @@ from madanalysis.layout.plotflow_for_dataset      import PlotFlowForDataset
 from math  import sqrt
 import time
 import copy
-
-
+import logging
 class PlotFlow:
 
     diconicetitle = {' ^ {':'^{', ' _ {':'_{', '\\\\':'#'}
+
+    counter=0
 
     def __init__(self,main):
         self.main               = main
@@ -143,7 +144,10 @@ class PlotFlow:
 
                 # Appending histo
                 histos.append(self.detail[iset][irelhisto].myhisto)
-                scales.append(self.detail[iset][irelhisto].scale)
+                if mode==2:
+                 scales.append(self.detail[iset][irelhisto].scale)
+                else:
+                 scales.append(1)
 
             # Draw
             self.Draw(histos,scales,self.main.selection[iabshisto],irelhisto,mode,output_path,preview=False)
@@ -158,9 +162,13 @@ class PlotFlow:
         from ROOT import THStack
         from ROOT import TLegend
         from ROOT import TCanvas
+        from ROOT import TASImage
+        from ROOT import TAttImage
+        from ROOT import TPad
 
         # Creating a canvas
-        canvas = TCanvas("tempo","")
+        PlotFlow.counter=PlotFlow.counter+1
+        canvas = TCanvas("tempo"+str(PlotFlow.counter),"")
 
         # Loop over datasets and histos
         for ind in range(0,len(histos)):
@@ -465,10 +473,37 @@ class PlotFlow:
             legend.Draw()
 
         if not preview:
-            
-            # Save the canvas in the report format
-            canvas.SaveAs(output_path+"/selection_"+str(irelhisto)+"."+\
-                          ReportFormatType.convert2filetype(mode))
+
+            # Put the MA5 logo
+#            logo = TASImage.Open(self.main.ma5dir+\
+#                              "/madanalysis/input/logo.eps")
+#            if not logo.IsValid():
+#                logging.warning("file called '"+self.main.ma5dir+\
+#                                "/madanalysis/input/logo.eps' " +\
+#                                "is not found")
+#            else:
+#                logo.SetConstRatio(0)
+#                logo.SetImageQuality(TAttImage.kImgBest)
+#                logo.Vectorize(256)
+#                w = logo.GetWidth()
+#                h = logo.GetHeight()
+#                logo.Scale(int(w*0.2),int(h*0.2))
+#                mypad = TPad("i1", "i1", 0.75, 0.9, 0.85, 1)
+#                mypad.Draw()
+#                mypad.cd()
+#                logo.Draw()
+               
+#            # Save the canvas in the report format
+#            canvas.Update()
+#            
+#            thepicture = TASImage.Create()
+#            thepicture.FromPad(canvas)
+#            thepicture.SetConstRatio(0)
+#            thepicture.SetImageQuality(TAttImage.kImgBest)
+#            thepicture.WriteImage(output_path+"/selection_"+str(irelhisto)+\
+#                                  "."+ReportFormatType.convert2filetype(mode))
+            canvas.SaveAs(output_path+"/selection_"+str(irelhisto)+\
+                          "."+ReportFormatType.convert2filetype(mode))
 
             # Save the canvas in the C format
             canvas.SaveAs(output_path+"/selection_"+str(irelhisto)+".C")

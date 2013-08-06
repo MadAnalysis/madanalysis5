@@ -427,6 +427,7 @@ def WriteJobInitialize(file,main):
         file.write('  PHYSICS->mcConfig().AddInvisibleId(14);\n')
         file.write('  PHYSICS->mcConfig().AddInvisibleId(16);\n')
         file.write('  PHYSICS->mcConfig().AddInvisibleId(1000022);\n')
+        file.write('  PHYSICS->mcConfig().AddInvisibleId(1000039);\n')
         file.write('\n')
 
 

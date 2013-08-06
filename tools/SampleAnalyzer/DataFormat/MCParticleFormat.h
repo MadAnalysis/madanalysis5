@@ -46,6 +46,7 @@ class HEPMCReader;
 class ROOTReader;
 class LHEWriter;
 class MergingPlots;
+class DelphesReader;
 
 class MCParticleFormat : public ParticleBaseFormat
 {
@@ -56,6 +57,7 @@ class MCParticleFormat : public ParticleBaseFormat
   friend class ROOTReader;
   friend class LHEWriter;
   friend class MergingPlots;
+  friend class DelphesReader;
 
   // -------------------------------------------------------------
   //                        data members
@@ -68,8 +70,6 @@ class MCParticleFormat : public ParticleBaseFormat
   Int_t	          pdgid_;		  /// PDG numbering of the particle
   Short_t	        statuscode_;/// status code (-1 for initial state, 
                               /// 2 intermediate state, 1 final state)
-  UInt_t 	        mothup1_;   /// first mother index
-  UInt_t 	        mothup2_;   /// second mother index
   Int_t           extra1_;
   Int_t           extra2_;
 
@@ -77,6 +77,10 @@ class MCParticleFormat : public ParticleBaseFormat
 
   MCParticleFormat *mother1_ ;  // mother particle
   MCParticleFormat *mother2_ ;  // mother particle
+
+ public:
+  UInt_t 	        mothup1_;   /// first mother index
+  UInt_t 	        mothup2_;   /// second mother index
 
 
   // -------------------------------------------------------------

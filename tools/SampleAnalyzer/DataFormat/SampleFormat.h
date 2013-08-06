@@ -31,6 +31,7 @@
 #include <vector>
 
 // SampleAnalyzer headers
+#include "SampleAnalyzer/DataFormat/GeneratorInfo.h"
 #include "SampleAnalyzer/DataFormat/MCSampleFormat.h"
 #include "SampleAnalyzer/DataFormat/RecSampleFormat.h"
 #include "SampleAnalyzer/Service/LogService.h"
@@ -43,6 +44,7 @@ class LHCOReader;
 class HEPMCReader;
 class SampleAnalyzer;
 
+
 class SampleFormat
 {
   friend class LHEReader;
@@ -54,10 +56,13 @@ class SampleFormat
   // -------------------------------------------------------------
  private:
 
-  std::string       name_;      /// file name
-  ULong64_t           nevents_;   /// Number of events in the file
-  MCSampleFormat  * mc_;
-  RecSampleFormat * rec_;
+  std::string                 name_;      /// file name
+  ULong64_t                   nevents_;   /// number of events in the file
+  MCSampleFormat  *           mc_;
+  RecSampleFormat *           rec_;
+  MA5GEN::GeneratorType       sample_generator_;
+  MA5FORMAT::SampleFormatType sample_format_;
+  std::vector<std::string>    header_;    /// file header
 
 
   // -------------------------------------------------------------
@@ -71,6 +76,9 @@ class SampleFormat
     rec_=0;
     mc_=0; 
     nevents_=0;
+    sample_generator_  = MA5GEN::UNKNOWN;
+    sample_format_     = MA5FORMAT::UNKNOWN;
+    header_.clear();
   }
 
   /// Destructor
@@ -117,7 +125,7 @@ class SampleFormat
     {
       WARNING << "MC part of the SampleFormat is already initialized" << endmsg;
     }
-    else mc_=new MCSampleFormat();
+    else mc_=new MCSampleFormat(&sample_generator_);
   }
 
   /// Initialize Rec part
@@ -136,6 +144,59 @@ class SampleFormat
     if (rec_!=0) delete rec_;
     if (mc_!=0)  delete mc_;
   }
+
+  /// Set the Generator Format
+  void SetSampleGenerator(MA5GEN::GeneratorType value)
+  { sample_generator_ = value; }
+
+  /// Set the Sample Format
+  void SetSampleFormat(MA5FORMAT::SampleFormatType value)
+  { sample_format_ = value; }
+
+  /// Accessor to the Generator Format
+  const MA5GEN::GeneratorType& sampleGenerator() const
+  { return sample_generator_; }
+
+  /// Accessor to the Sample Format
+  const MA5FORMAT::SampleFormatType& sampleFormat() const
+  { return sample_format_; }
+
+  /// Displaying subtitle for file
+  void printSubtitle() const
+  {
+    // Sample format
+    INFO << "        => sample format: ";
+    if (sample_format_==MA5FORMAT::UNKNOWN) INFO << "unknown-format";
+    else if (sample_format_==MA5FORMAT::LHE) INFO << "LHE";
+    else if (sample_format_==MA5FORMAT::SIMPLIFIED_LHE) INFO << "simplified LHE";
+    else if (sample_format_==MA5FORMAT::STDHEP) INFO << "STDHEP";
+    else if (sample_format_==MA5FORMAT::HEPMC) INFO << "HEPMC";
+    else if (sample_format_==MA5FORMAT::LHCO) INFO << "LHCO";
+    else if (sample_format_==MA5FORMAT::DELPHES) INFO << "ROOT";
+    INFO << " file produced by ";
+
+    // Generator
+    if (sample_generator_==MA5GEN::UNKNOWN) 
+              INFO << "an unknown generator " 
+                   << "(cross section assumed in pb)";
+    else if (sample_generator_==MA5GEN::MG5) INFO << "MadGraph5";
+    else if (sample_generator_==MA5GEN::MA5) INFO << "MadAnalysi5";
+    else if (sample_generator_==MA5GEN::PYTHIA6) INFO << "Pythia6";
+    else if (sample_generator_==MA5GEN::PYTHIA8) INFO << "Pythia8";
+    else if (sample_generator_==MA5GEN::HERWIG6) INFO << "Herwig6";
+    else if (sample_generator_==MA5GEN::HERWIGPP) INFO << "Herwig++";
+    else if (sample_generator_==MA5GEN::DELPHES) INFO << "Delphes";
+    INFO << "." << endmsg;
+  }
+
+  /// Accessor to the header
+  const std::vector<std::string>& header() const
+  { return header_; }
+
+  /// Mutator relative to the header
+  void AddHeader(const std::string& line)
+  { header_.push_back(line); }
+
 
 };
 

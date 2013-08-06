@@ -111,8 +111,8 @@ bool LHCOWriter::WriteHeader(const SampleFormat& mySample)
     *output_ << "#Original header:" << std::endl;
     *output_ << "" << std::endl;
 
-    for (unsigned int i=0;i<mySample.mc()->header().size();i++)
-      *output_ << "#" << mySample.mc()->header()[i] << std::endl;
+    for (unsigned int i=0;i<mySample.header().size();i++)
+      *output_ << "#" << mySample.header()[i] << std::endl;
   }
 
   // One line to remind the meaning of each line

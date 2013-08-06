@@ -24,6 +24,7 @@
 
 from madanalysis.interpreter.cmd_base           import CmdBase
 from madanalysis.IOinterface.job_writer         import JobWriter
+from madanalysis.IOinterface.layout_writer      import LayoutWriter
 from madanalysis.IOinterface.job_reader         import JobReader
 from madanalysis.IOinterface.folder_writer      import FolderWriter
 from madanalysis.enumeration.report_format_type import ReportFormatType
@@ -114,10 +115,30 @@ class CmdSubmit(CmdBase):
                     Inside = False
                 newhistory.append(cmd)
         ToReAnalyze = False
+        ReAnalyzeCmdList = ['plot','select','reject','set main.clustering',
+                            'set main.merging', 'set main.shower', 'define',
+                            'import', 'set main.isolation']
+
+        # Determining if we have to resubmit the job
         for cmd in newhistory:
-            if 'plot' in cmd or 'select' in cmd or 'reject' in cmd or\
-                'merging' in cmd or 'weighted_events' in cmd:
-                ToReAnalyze = True
+            
+            # Split cmd line into words
+            words = cmd.split()
+           
+            # Creating a line with one whitespace between each word
+            cmd2 = ''
+            for word in words:
+                if word!='':
+                    cmd2+=word+' '
+ 
+            # Looping over patterns
+            for pattern in ReAnalyzeCmdList:
+                if cmd2.startswith(pattern): 
+                    ToReAnalyze = True
+                    break
+
+            # Found?
+            if ToReAnalyze:
                 break
 
         if ToReAnalyze:
@@ -125,22 +146,20 @@ class CmdSubmit(CmdBase):
             # Submission
             if not self.submit(self.main.lastjob_name,history):
                 return
-
-            # Reading info from job output
-            layout = Layout(self.main)
-            if not self.extract(self.main.lastjob_name,layout):
-                return
-            
             logging.info("   Updating the reports...")
         else:
             logging.info("   No new histogram / cut to account for. Updating the reports...")
 
+        # Reading info from job output
+        layout = Layout(self.main)
+        if not self.extract(self.main.lastjob_name,layout):
+            return
+
         # Status = GOOD
         self.main.lastjob_status = True
-
         # Computing
         layout.Initialize()
-        
+
         # Cleaning the directories
         if not FolderWriter.RemoveDirectory(self.main.lastjob_name+'/HTML',False):
             return
@@ -157,7 +176,7 @@ class CmdSubmit(CmdBase):
         # End time 
         end_time=time.time()
            
-        logging.info("   Well done ! Elapsed time = " + CmdSubmit.chronometer_display(end_time-start_time) )
+        logging.info("   Well done! Elapsed time = " + CmdSubmit.chronometer_display(end_time-start_time) )
 
         
     def do_submit(self,args,history):
@@ -230,7 +249,7 @@ class CmdSubmit(CmdBase):
         # End time 
         end_time=time.time()
            
-        logging.info("   Well done ! Elapsed time = " + CmdSubmit.chronometer_display(end_time-start_time) )
+        logging.info("   Well done! Elapsed time = " + CmdSubmit.chronometer_display(end_time-start_time) )
 
 
     # Generating the reports
@@ -353,6 +372,8 @@ class CmdSubmit(CmdBase):
 
         logging.info("   Writing the command line history...")
         jobber.WriteHistory(history,self.main.firstdir)
+        layouter = LayoutWriter(self.main, dirname)
+        layouter.WriteLayoutConfig()
 
         if not self.resubmit:
             logging.info("   Creating Makefiles...")

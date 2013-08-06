@@ -24,6 +24,7 @@
 
 // STL headers
 #include <sstream>
+#include <cmath>
 
 // SampleHeader headers
 #include "SampleAnalyzer/Reader/LHEReader.h"
@@ -41,6 +42,12 @@ bool LHEReader::ReadHeader(SampleFormat& mySample)
 
   // Declaring a new string for line
   std::string line;
+
+  // Generator tags
+  Bool_t tag_mg5 = false;
+  Bool_t tag_ma5 = false;
+  Bool_t tag_simplified_pythia = false;
+  Bool_t tag_simplified_ma5    = false;
 
   // Read line by line the file until tag <header>
   bool EndOfLoop=false, GoodInit = false, GoodHeader=false;
@@ -66,18 +73,18 @@ bool LHEReader::ReadHeader(SampleFormat& mySample)
         if (!ReadLine(line,false)) return false;
         EndOfLoop = (line.find("</header>")!=std::string::npos);
         if (EndOfLoop) continue;
-        else mySample.mc()->AddHeader(line);
-        if ((line.find("<MGGenerationInfo>")!=std::string::npos) ||
-             (line.find("<mgversion>")!=std::string::npos) ||
-         (line.find("<MG5ProcCard>")!=std::string::npos))
-          mySample.mc()->enableMadgraphTag();
+        else mySample.AddHeader(line);
+        if ( (line.find("<MGGenerationInfo>")!=std::string::npos) ||
+             (line.find("<mgversion>")!=std::string::npos)        ||
+             (line.find("<MG5ProcCard>")!=std::string::npos)         )
+          tag_mg5=true;
+        if ( (line.find("<MA5Format> LHE format </MA5Format>")!=std::string::npos) )
+          tag_ma5=true;
         if ( (line.find("<MGPythiaCard>")!=std::string::npos) ||
              (line.find("<mgpythiacard>")!=std::string::npos) ) 
-          mySample.mc()->enableMadgraphPythiaTag();
+          tag_simplified_pythia=true;
         if ( (line.find("<MA5Format> Simplified LHE format </MA5Format>")!=std::string::npos) )
-          mySample.mc()->enableMadanalysisSimplifiedLheTag();
-        if ( (line.find("<MA5Format> LHE format </MA5Format>")!=std::string::npos) )
-          mySample.mc()->enableMadanalysisLheTag();
+          tag_simplified_ma5=true;
       }
       while(!EndOfLoop);
       GoodHeader = true;
@@ -109,16 +116,51 @@ bool LHEReader::ReadHeader(SampleFormat& mySample)
   do 
   { 
     if (!ReadLine(line)) return false;
-    if ((line.find("<MGGenerationInfo>")!=std::string::npos)||
-         (line.find("<mgversion>")!=std::string::npos)||
-         (line.find("<MG5ProcCard>")!=std::string::npos) )
-      mySample.mc()->enableMadgraphTag();
-    if ((line.find("<MGPythiaCard>")!=std::string::npos) ||
-         (line.find("<mgpythiacard>")!=std::string::npos) )
-      mySample.mc()->enableMadgraphPythiaTag();
+    if ( (line.find("<MGGenerationInfo>")!=std::string::npos) ||
+         (line.find("<mgversion>")!=std::string::npos)        ||
+         (line.find("<MG5ProcCard>")!=std::string::npos)         )
+      tag_mg5=true;
+    if ( (line.find("<MA5Format> LHE format </MA5Format>")!=std::string::npos) )
+      tag_ma5=true;
+    if ( (line.find("<MGPythiaCard>")!=std::string::npos) ||
+         (line.find("<mgpythiacard>")!=std::string::npos) ) 
+      tag_simplified_pythia=true;
+    if ( (line.find("<MA5Format> Simplified LHE format </MA5Format>")!=std::string::npos) )
+      tag_simplified_ma5=true;
     EndOfLoop = (line.find("<event>")!=std::string::npos);
   }
   while(!EndOfLoop);
+
+
+  // Determining sample format 
+  if (tag_simplified_pythia || tag_simplified_ma5) 
+  {
+    mySample.SetSampleFormat(MA5FORMAT::SIMPLIFIED_LHE);
+  }
+  else 
+  {
+    mySample.SetSampleFormat(MA5FORMAT::LHE);
+  }
+
+
+  // Determining generator format 
+  if (tag_ma5 || tag_simplified_ma5) // must be treated before mg5 
+  {
+    mySample.SetSampleGenerator(MA5GEN::MA5);
+  }
+  else if (tag_simplified_pythia)
+  {
+    mySample.SetSampleGenerator(MA5GEN::PYTHIA6);
+  }
+  else if (tag_mg5)
+  {
+    mySample.SetSampleGenerator(MA5GEN::MG5);
+  }
+  else 
+  {
+    mySample.SetSampleGenerator(MA5GEN::UNKNOWN);
+  }
+
 
   // Normal end
   firstevent_=true;
@@ -132,17 +174,18 @@ bool LHEReader::ReadHeader(SampleFormat& mySample)
 bool LHEReader::FinalizeHeader(SampleFormat& mySample)
 {
   // Computing xsection an its error for the sample
-  float xsection = 0;
-  float xerror = 0;
+  Double_t xsection = 0.;
+  Double_t xerror   = 0.;
   for (unsigned int i=0;i<mySample.mc()->processes().size();i++)
   {
     xsection += mySample.mc()->processes()[i].xsectionMean();
-    xerror   += mySample.mc()->processes()[i].xsectionError();
+    xerror   += mySample.mc()->processes()[i].xsectionError() *
+                mySample.mc()->processes()[i].xsectionError();
   }
 
   // Filling xsection and its error
-  mySample.mc()->set_xsection( xsection );
-  mySample.mc()->set_xsection_error( xerror );
+  mySample.mc()->setXsection(xsection);
+  mySample.mc()->setXsectionError(std::sqrt(xerror));
 
   // Normal end 
   return true;
@@ -211,21 +254,24 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySamp
 // -----------------------------------------------------------------------------
 bool LHEReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 {
+  // Traditional LHE or simplified LHE ?
+  Bool_t simplified = (mySample.sampleFormat()==MA5FORMAT::SIMPLIFIED_LHE);
+
   // Mother pointer assignment
   for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
   {
     MCParticleFormat& part = myEvent.mc()->particles_[i];
 
     // MET in case of simplified LHE
-    if (part.pdgid()==12 && (mySample.mc()->MadanalysisSimplifiedLheTag() || mySample.mc()->MadgraphPythiaTag()))
+    if (part.pdgid()==12 && simplified)
     {
-      myEvent.mc()->MET_ -= part.momentum();
+      myEvent.mc()->MET_ += part.momentum();
     }
 
     // MET, MHT, TET, THT
     if (part.statuscode()==1 && !PHYSICS->IsInvisible(part))
     {
-      if (!mySample.mc()->MadanalysisSimplifiedLheTag() && !mySample.mc()->MadgraphPythiaTag())
+      if (!simplified)
       {
         myEvent.mc()->MET_ -= part.momentum();
       }
@@ -296,7 +342,7 @@ void LHEReader::FillHeaderInitLine(const std::string& line,
   str >> mySample.mc()->beamPDFID_.first;
   str >> mySample.mc()->beamPDFID_.second;
   str >> mySample.mc()->weightMode_;
-  str >> mySample.mc()->nProcesses_;
+  // str >> mySample.mc()->nProcesses_; UNUSED
 }
 
 

@@ -40,13 +40,14 @@ namespace MA5
 
 class LHCOReader;
 class ROOTReader;
-
+class DelphesReader;
 class RecMETFormat
 {
 
   friend class LHCOReader;
   friend class ROOTReader;
   friend class JetClusteringFastJet;
+  friend class DelphesReader;
 
   // -------------------------------------------------------------
   //                        data members

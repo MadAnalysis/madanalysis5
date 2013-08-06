@@ -293,7 +293,7 @@ class Dataset:
         msg += " pb"
         logging.info(msg)
         logging.info("   Total number of events = " + str(self.measured_global.nevents))
-        if (self.measured_global.sumw_positive + self.measured_global.sumw_positive)==0:
+        if (self.measured_global.sumw_positive + self.measured_global.sumw_negative)==0:
             msg='0.0'
         else:
             msg=str(Layout.Round_to_Ndigits(100.*self.measured_global.sumw_negative / \

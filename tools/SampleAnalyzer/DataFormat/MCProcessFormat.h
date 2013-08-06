@@ -38,6 +38,8 @@ namespace MA5
 class LHEReader;
 class LHCOReader;
 class HEPMCReader;
+class STDHEPReader;
+class STDHEPreader;
 class ROOTReader;
 class LHEWriter;
 
@@ -48,6 +50,8 @@ class ProcessFormat
   friend class HEPMCReader;
   friend class ROOTReader;
   friend class LHEWriter;
+  friend class STDHEPReader;
+  friend class STDHEPreader;
 
   // -------------------------------------------------------------
   //                        data members
@@ -57,7 +61,7 @@ class ProcessFormat
   Double_t xsectionMean_;    /// cross-section (pb)
   Double_t xsectionError_;   /// statistical error on the cross-section
   Double_t weightMax_;       /// maximum weight encountered in the events
-  UInt_t  processId_;       /// number identifying the process
+  UInt_t   processId_;       /// number identifying the process
 
 
   // -------------------------------------------------------------
@@ -84,7 +88,7 @@ class ProcessFormat
   const Double_t&  weightMax()     const {return weightMax_;     }
 
   /// Accessor to the process identity
-  const UInt_t&   processId()     const {return processId_;     }
+  const UInt_t&   processId()      const {return processId_;     }
 
   /// Clearing all information
   void Reset()

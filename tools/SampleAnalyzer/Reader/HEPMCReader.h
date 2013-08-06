@@ -46,11 +46,8 @@ class HEPMCReader : public ReaderTextBase
   bool warnmother_;
   int partcode_;
   int vertcode_;
-  int nevents_ ;              // number of events
   float energy_unit_;
   float length_unit_;
-  double event_xsection_;     // event cross section
-  double event_xsection_err_; // event cross section error
   std::string savedline_;     // last saved line
   std::vector<std::string> weightnames_;
   bool firstHeavyIons_;
@@ -67,32 +64,36 @@ class HEPMCReader : public ReaderTextBase
   //                       method members
   // -------------------------------------------------------------
  public:
-  //! Constructor without argument
-  HEPMCReader()
-  { firstevent_=false; event_xsection_=0; event_xsection_err_=0; firstHeavyIons_=true;}
 
-  //! Destructor
+  /// Constructor without argument
+  HEPMCReader()
+  { 
+    firstevent_=false; 
+    firstHeavyIons_=true;
+  }
+
+  /// Destructor
   virtual ~HEPMCReader()
-    { }
+  { }
   
-  //! Read the header
+  /// Read the header
   virtual bool ReadHeader(SampleFormat& mySample);
   
-  //! Finalize the header
+  /// Finalize the header
   virtual bool FinalizeHeader(SampleFormat& mySample);
   
-  //! Read the event
+  /// Read the event
   virtual StatusCode::Type ReadEvent(EventFormat& myEvent, SampleFormat& mySample);
   
-  //! Finalize the event
+  /// Finalize the event
   virtual bool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent);
   
  private:
   
   Bool_t FillEvent(const std::string& line, EventFormat& myEvent, SampleFormat& mySample);
   void FillEventInformations(const std::string& line, EventFormat& myEvent);
-  void FillEventXS(const std::string& line);
-  void FillEventUnits(const std::string& line);
+  void FillCrossSection(const std::string& line, SampleFormat& mySample);
+  void FillUnits(const std::string& line);
   void FillEventPDFInfo(const std::string& line, SampleFormat& mySample, EventFormat& myEvent);
   void FillEventParticleLine(const std::string& line, EventFormat& myEvent);
   void FillEventVertexLine(const std::string& line, EventFormat& myEvent);

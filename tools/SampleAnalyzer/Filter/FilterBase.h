@@ -96,7 +96,7 @@ class FilterBase
                      const Configuration* cfg)
   { 
     outputName_ = outputName;
-    weighted_events_ = cfg->IsNoEventWeight();
+    weighted_events_ = !cfg->IsNoEventWeight();
     return true;
   }
 

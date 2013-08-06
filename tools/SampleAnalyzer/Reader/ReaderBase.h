@@ -123,8 +123,12 @@ class ReaderBase
   /// Get the file size
   virtual Long64_t GetFileSize()=0;
 
-  /// Get the position in file (in octet)
+  /// Get the position in file
   virtual Long64_t GetPosition()=0;
+
+  /// Get the final position in file
+  virtual Long64_t GetFinalPosition()=0;
+
 
 };
 

@@ -41,11 +41,13 @@ namespace MA5
 class MCParticleFormat;
 class LHEReader;
 class LHCOReader;
+class DelphesReader;
 
 class RecParticleFormat : public ParticleBaseFormat
 {
   friend class LHEReader;
   friend class LHCOReader;
+  friend class DelphesReader;
 
   // -------------------------------------------------------------
   //                        data members

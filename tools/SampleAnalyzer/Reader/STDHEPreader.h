@@ -110,8 +110,8 @@ class STDHEPreader : public ReaderTextBase
   bool DecodeEventHeader(const std::string& evt_version);
   bool DecodeEventTable (const std::string& evt_version);
   bool DecodeSTDCM1     (const std::string& evt_version, SampleFormat& mySample);
-  bool DecodeEventData(const std::string& evt_version,EventFormat& myEvent);
-  bool DecodeSTDHEP4(const std::string& version,EventFormat& myEvent);
+  bool DecodeEventData  (const std::string& evt_version,EventFormat& myEvent);
+  bool DecodeSTDHEP4    (const std::string& version,EventFormat& myEvent);
 
   /// Finalize the event (virtual pure)
   virtual bool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent);

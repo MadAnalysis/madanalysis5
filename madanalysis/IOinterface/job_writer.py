@@ -39,13 +39,13 @@ class JobWriter():
         self.path       = jobdir
         self.resubmit   = resubmit
         self.libZIP     = self.main.libZIP
+        self.libDelphes = self.main.libDelphes
         self.output     = self.main.output
         self.libFastjet = self.main.libFastJet
         self.clustering = self.main.clustering
         self.merging    = self.main.merging
         self.fortran    = self.main.fortran
         self.shower     = self.main.shower
-        self.fac        = self.main.FAC
         self.shwrmode   = ''
 
     @staticmethod     
@@ -278,14 +278,14 @@ class JobWriter():
         file.write('  while(1)\n')
         file.write('  {\n')
         file.write('    // Opening input file\n')
-        file.write('    SampleFormat mySample;\n')
+        file.write('    mySamples.push_back(SampleFormat());\n')
+        file.write('    SampleFormat& mySample=mySamples.back();\n')
         file.write('    StatusCode::Type result1 = manager.NextFile(mySample);\n')
         file.write('    if (result1!=StatusCode::KEEP)\n')
         file.write('    {\n')
         file.write('      if (result1==StatusCode::SKIP) continue;\n')
-        file.write('      else if (result1==StatusCode::FAILURE) break;\n')
+        file.write('      else if (result1==StatusCode::FAILURE) {mySamples.pop_back(); break;}\n')
         file.write('    }\n')
-        file.write('    mySamples.push_back(mySample);\n')
         file.write('    \n')
         file.write('    // Loop over events\n')
         file.write('    while(1)\n')
@@ -435,8 +435,8 @@ class JobWriter():
         file.write('CXXFLAGS = -Wall -O3 -I./ -I./../ -I' + '$(MA5_BASE)/tools/')
         if self.libZIP:
             file.write(' -DZIP_USE')
-        if self.fac:
-            file.write(' -DFAC_USE')
+        if self.libDelphes:
+            file.write(' -DDELPHES_USE')
         if self.libFastjet:
             file.write(' -DFASTJET_USE')
             file.write(' $(CXXFASTJET)')
@@ -565,8 +565,8 @@ class JobWriter():
                 '/tools/MCatNLO-utilities/MCatNLO/include')
         if self.libZIP:
             file.write(' -DZIP_USE')
-        if self.fac:
-            file.write(' -DFAC_USE')
+        if self.libDelphes:
+            file.write(' -DDELPHES_USE')
         if self.libFastjet:
             file.write(' -DFASTJET_USE')
             file.write(' $(CXXFASTJET)')
@@ -578,6 +578,8 @@ class JobWriter():
                    '-rdynamic')
         if self.libZIP:
             file.write(' -lz')
+        if self.libDelphes:
+            file.write(' -lDelphes')
         if self.fortran:
             file.write(' -lgfortran')
         if self.libFastjet:

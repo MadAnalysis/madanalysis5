@@ -29,8 +29,10 @@
 #include <map>
 #include <iostream>
 #include <vector>
+#include <cmath>
 
 // SampleAnalyzer headers
+#include "SampleAnalyzer/DataFormat/GeneratorInfo.h"
 #include "SampleAnalyzer/DataFormat/MCProcessFormat.h"
 #include "SampleAnalyzer/Service/LogService.h" 
 
@@ -40,9 +42,12 @@ namespace MA5
 class LHEReader;
 class LHCOReader;
 class HEPMCReader;
+class STDHEPReader;
+class STDHEPreader;
 class ROOTReader;
 class LHEWriter;
 class SampleAnalyzer;
+
 
 class MCSampleFormat
 {
@@ -52,6 +57,9 @@ class MCSampleFormat
   friend class ROOTReader;
   friend class SampleAnalyzer;
   friend class LHEWriter;
+  friend class STDHEPReader;
+  friend class STDHEPreader;
+
 
   // -------------------------------------------------------------
   //                        data members
@@ -64,19 +72,15 @@ class MCSampleFormat
   std::pair<UInt_t,UInt_t>      beamPDFauthor_;
   std::pair<UInt_t,UInt_t>      beamPDFID_;
   Int_t                         weightMode_;
-  UInt_t                        nProcesses_;
   std::vector<ProcessFormat>    processes_;
+  const MA5GEN::GeneratorType*  sample_generator_;
+
 
   // ----------------------- file info ---------------------------
-  std::vector<std::string> header_; // file header
-  Bool_t      MadgraphTag_;         // Is the file produced by Madgraph
-  Bool_t      MadgraphPythiaTag_;   // Is the file produced by MadgraphPythia
-  Bool_t      MadanalysisSimplifiedLheTag_;      // Is a simplified LHE produced by MadAnalysis
-  Bool_t      MadanalysisLheTag_;      // Is a LHE produced by MadAnalysis
-  Float_t     xsection_;            // cross-section (fb^{-1})
-  Float_t     xsection_error_;      // cross-section error (fb^{-1})
-  Float_t     sumweight_positive_;  // all events with positive weights
-  Float_t     sumweight_negative_;  // all events with negative weights
+  Double_t xsection_;
+  Double_t xsection_error_;
+  Double_t sumweight_positive_;  // all events with positive weights
+  Double_t sumweight_negative_;  // all events with negative weights
 
 
   // -------------------------------------------------------------
@@ -85,8 +89,11 @@ class MCSampleFormat
  public :
 
   /// Constructor withtout arguments
-  MCSampleFormat()
-  { Reset(); }
+  MCSampleFormat(const MA5GEN::GeneratorType* gen)
+  { 
+    sample_generator_=gen;
+    Reset();
+  }
 
   /// Destructor
   ~MCSampleFormat()
@@ -95,20 +102,21 @@ class MCSampleFormat
   /// Clear all the content
   void Reset()
   {
+    // Physics info
     beamPDGID_          = std::make_pair(0,0); 
     beamE_              = std::make_pair(0,0); 
     beamPDFauthor_      = std::make_pair(0,0); 
     beamPDFID_          = std::make_pair(0,0);
     weightMode_         = 0; 
-    MadgraphPythiaTag_  = false; 
-    MadgraphTag_        = false;
-    MadanalysisSimplifiedLheTag_  = false; 
-    MadanalysisLheTag_        = false;
-    xsection_           = 0.; 
-    xsection_error_     = 0.;
     sumweight_positive_ = 0.;
     sumweight_negative_ = 0.;
     processes_.clear();
+
+    // File info
+    xsection_           = 0.;
+    xsection_error_     = 0.;
+    sumweight_positive_ = 0.;
+    sumweight_negative_ = 0.;
   }
   
   /// Accessor to PDG ID of the intial partons
@@ -131,39 +139,25 @@ class MCSampleFormat
   const Int_t& weightMode() const
   { return weightMode_; }
 
+  /// Accessor to the xsection mean
+  const Double_t& xsection() const
+  { return xsection_; }
+
+  /// Accessor to the xsection mean
+  const Double_t& xsection_mean() const
+  { return xsection_; }
+
+  /// Accessor to the xsection error
+  const Double_t& xsection_error() const
+  { return xsection_error_; }
+
   /// Accessor to the number of events with positive weight
-  const Float_t& sumweight_positive() const
+  const Double_t& sumweight_positive() const
   { return sumweight_positive_; }
 
   /// Accessor to the number of events with negative weight
-  const Float_t& sumweight_negative() const
+  const Double_t& sumweight_negative() const
   { return sumweight_negative_; }
-
-  /// Accessor to the header
-  const std::vector<std::string>& header() const
-  { return header_; }
-
-  /// Mutator relative to the header
-  void AddHeader(const std::string& line)
-  { header_.push_back(line); }
-
-  /// Accessor to the MadGraph tag
-  const Bool_t&       MadgraphTag()      const {return MadgraphTag_; }
-
-  /// Accessor to the MadGraphPythia tag
-  const Bool_t&       MadgraphPythiaTag()const {return MadgraphPythiaTag_;}
-
-  /// Accessor to the MadGraphPythia tag
-  const Bool_t&       MadanalysisSimplifiedLheTag()const {return MadanalysisSimplifiedLheTag_;}
-
-  /// Accessor to the MadGraphPythia tag
-  const Bool_t&       MadanalysisLheTag()const {return MadanalysisLheTag_;}
-
-  /// Accessor to the sample cross section mean value
-  const Float_t&      xsection()         const {return xsection_; }
-
-  /// Accessor to the sample cross section error
-  const Float_t&      xsection_error()   const {return xsection_error_; }
 
   /// Accessor to the process collection (read-only)
   const std::vector<ProcessFormat>& processes() const
@@ -193,71 +187,29 @@ class MCSampleFormat
   void setWeightMode(Int_t v) 
   {weightMode_=v;}
 
-  /// Enable MadgraphTag
-  void enableMadanalysisSimplifiedLheTag()        
-  {MadanalysisSimplifiedLheTag_=true;}
+  /// Set the cross section mean
+  void setXsection(Double_t value) 
+  { xsection_=value*getXsectionUnitFactor();}
 
-  /// Disable MadgraphTag
-  void disableMadanalysisSimplifiedLheTag()       
-  {MadanalysisSimplifiedLheTag_=false;}
+  /// Set the cross section mean
+  void setXsectionMean(Double_t value) 
+  { xsection_=value;}
 
-  /// Enable MadgraphTag
-  void enableMadanalysisLheTag()        
-  {MadanalysisLheTag_=true;}
-
-  /// Disable MadgraphTag
-  void disableMadanalysisLheTag()       
-  {MadanalysisLheTag_=false;}
-
-  /// Enable MadgraphTag
-  void enableMadgraphTag()        
-  {MadgraphTag_=true;}
-
-  /// Disable MadgraphTag
-  void disableMadgraphTag()       
-  {MadgraphTag_=false;}
-
-  /// Enable MadgraphTag
-  void enableMadgraphPythiaTag()
-  {MadgraphPythiaTag_=true;}
-
-  /// Disable MadgraphTag
-  void disableMadgraphPythiaTag()
-  {MadgraphPythiaTag_=false;}
-
-  /// Set event cross section mean value
-  void set_xsection(float value)
-  { xsection_=value;
-    if (MadgraphPythiaTag_) xsection_*=1e9;}
-
-  /// Set event cross section error
-  void set_xsection_error(float value)
-  { xsection_error_=value;
-    if (MadgraphPythiaTag_) xsection_error_*=1e9;}
-
-  /// Displaying subtitle for file
-  void printSubtitle() const
-  {
-    INFO << "        => sample produced by ";
-    if (MadgraphPythiaTag_) INFO << "MadGraph + Pythia.";
-    else if (MadgraphTag_) INFO << "MadGraph.";
-    else if (MadanalysisSimplifiedLheTag_) INFO << "MadAnalysis (simplified LHE format).";
-    else if (MadanalysisLheTag_) INFO << "MadAnalysis (LHE format).";
-    else INFO << "an unknown generator (xsection assumed in pb).";
-    INFO<<endmsg;
-  }
+  /// Set the cross section mean
+  void setXsectionError(Double_t value) 
+  { xsection_error_=value;}
 
   /// Adding a weight
-  void addWeightedEvents(Float_t weight)
-  { if (weight>=0) sumweight_positive_ += fabs(weight);
-    else sumweight_negative_ += fabs(weight); }
+  void addWeightedEvents(Double_t weight)
+  { if (weight>=0) sumweight_positive_ += std::abs(weight);
+    else sumweight_negative_ += std::abs(weight); }
 
   /// Accessor to the number of events with positive weight
-  void setSumweight_positive(Float_t sum)
+  void setSumweight_positive(Double_t sum)
   { sumweight_positive_ += sum; }
 
   /// Accessor to the number of events with negative weight
-  void setSumweight_negative(Float_t sum)
+  void setSumweight_negative(Double_t sum)
   { sumweight_negative_ += sum; }
 
   /// Giving a new process entry
@@ -265,6 +217,13 @@ class MCSampleFormat
   {
     processes_.push_back(ProcessFormat());
     return &processes_.back();
+  }
+
+  /// Get scale factor required to set the cross section in pb unit
+  Double_t getXsectionUnitFactor()
+  { 
+    if (*sample_generator_==MA5GEN::PYTHIA6) return 1e9;
+    else return 1.;
   }
 
 };

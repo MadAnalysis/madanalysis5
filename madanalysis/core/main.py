@@ -78,11 +78,11 @@ class Main():
         self.script         = False
         self.mg5            = False
         self.libZIP         = False
+        self.libDelphes     = False
         self.pdflatex       = False
         self.latex          = False
         self.dvipdf         = False
         self.libFastJet     = False
-        self.FAC            = False
         self.fortran        = False
         self.observables    = ObservableManager(self.mode)
         self.mcatnloutils   = False
@@ -90,7 +90,7 @@ class Main():
 
 
     def ResetParameters(self):
-        self.merging       = MergingConfiguration()
+        self.merging        = MergingConfiguration()
         self.clustering     = ClusteringConfiguration()
         self.SBratio        = 'S/B'
         self.SBerror        = Main.SBformula['S/B']
@@ -128,7 +128,7 @@ class Main():
         else:
             if self.clustering.algorithm=="none":
                 samples.append('.lhco')
-                if self.FAC:
+                if self.libDelphes:
                     samples.append('.root')
             else:
                 samples.append('.lhe')
@@ -416,7 +416,6 @@ class Main():
             logging.info("Python      Python release : " + str(self.configLinux.python_version))
             import commands
             pythondir = commands.getstatusoutput('which python')
-            print pythondir
             if pythondir[0]==0:
                 logging.info("            Path get by 'which' : "+pythondir[1])
             else:
@@ -445,6 +444,7 @@ class Main():
         if not checker.checkGF():
             return False
         self.libZIP = checker.checkZLIB()
+        self.libDelphes = checker.checkDelphes()
         self.libFastJet = checker.checkFastJet()
         self.pdflatex = checker.checkPdfLatex()
         self.latex = checker.checkLatex()
@@ -486,7 +486,7 @@ class Main():
             logging.info("  => The user forces to rebuild the library.")
 
         # Initializing the JobWriter
-        compiler = LibraryWriter(self.ma5dir,'lib',self.libZIP,self.FAC,self.libFastJet,self.forced,self.fortran)
+        compiler = LibraryWriter(self.ma5dir,'lib',self.libZIP,self.libFastJet,self.forced,self.fortran,self.libDelphes)
     
         # Dumping architecture
         if not self.configLinux.Export(self.ma5dir+'/tools/architecture.ma5'):

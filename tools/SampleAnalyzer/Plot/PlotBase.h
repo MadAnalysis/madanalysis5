@@ -29,6 +29,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <cmath>
 
 // ROOT headers
 #include <TH1F.h>
@@ -53,6 +54,12 @@ class PlotBase
   /// Number of events
   std::pair<Long64_t,Long64_t> nevents_;
 
+  /// Number of entries
+  std::pair<Long64_t,Long64_t> nentries_;
+
+  /// Sum of event-weight over events
+  std::pair<Double_t,Double_t> nevents_w_;
+
 
   // -------------------------------------------------------------
   //                       method members
@@ -62,14 +69,19 @@ class PlotBase
   /// Constructor without argument 
   PlotBase()
   { 
-    nevents_  = std::make_pair(0,0);
+    // Reseting statistical counters
+    nevents_   = std::make_pair(0,0);
+    nentries_  = std::make_pair(0,0);
+    nevents_w_ = std::make_pair(0,0);
   }
 
   /// Constructor with argument 
   PlotBase(const std::string& name)
   { 
-    name_     = name;
-    nevents_  = std::make_pair(0,0);
+    name_      = name;
+    nevents_   = std::make_pair(0,0);
+    nevents_w_ = std::make_pair(0,0);
+    nentries_  = std::make_pair(0,0);
   }
 
   /// Destructor
@@ -83,15 +95,24 @@ class PlotBase
   virtual void Write_RootFormat(std::pair<TH1F*,TH1F*>& histos) = 0;
 
   /// Increment number of events
-  void IncrementNEvents(Float_t weight=1.0)
+  void IncrementNEvents(Double_t weight=1.0)
   {
-	  if (weight>=0) nevents_.first++;
-	  else nevents_.second++;
+	  if (weight>=0) 
+    {
+      nevents_.first++; 
+      nevents_w_.first+=weight;
+    }
+	  else 
+    {
+      weight = std::abs(weight);
+      nevents_.second++;
+      nevents_w_.second+=weight;
+    }
   }
 
   /// Return Number of events
   const std::pair<Long64_t,Long64_t>& GetNEvents()
- { return nevents_; }
+  { return nevents_; }
 
 };
 

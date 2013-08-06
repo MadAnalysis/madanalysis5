@@ -32,8 +32,8 @@ using namespace MA5;
 
 
 const UInt_t  MergingPlotType::nbins = 100;
-const Float_t MergingPlotType::xmin  = 0.;
-const Float_t MergingPlotType::xmax  = 3.;
+const Double_t MergingPlotType::xmin  = 0.;
+const Double_t MergingPlotType::xmax  = 3.;
 
 
 void MergingPlotType::Initialize(unsigned int ncontrib, const std::string& name)

@@ -77,8 +77,8 @@ class JetClusteringFastJet: public JetClustererBase
 
  private:
     Bool_t IsLast(const MCParticleFormat* part, EventFormat& myEvent);
-    Bool_t ComingFromHadronDecay(const MCParticleFormat* part);
-    Bool_t IrrelevantPhoton(const MCParticleFormat* part);
+    Bool_t ComingFromHadronDecay(const MCParticleFormat* part, const SampleFormat& mySample);
+    Bool_t IrrelevantPhoton(const MCParticleFormat* part, const SampleFormat& mySample);
     void GetFinalState(const MCParticleFormat* part, std::set<const MCParticleFormat*>& finalstates);
  
 

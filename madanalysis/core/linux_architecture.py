@@ -36,7 +36,6 @@ class LinuxArchitecture:
         self.fastjet_version  = ""
         self.libraries        = {}
         self.headers          = {}
-        self.FAC              = ""
 
 
     def Dump(self):
@@ -48,7 +47,6 @@ class LinuxArchitecture:
         logging.info(" gfortran version = " + self.gfortran_version)
         logging.info(" ROOT version     = " + self.root_version)
         logging.info(" FastJet version  = " + self.fastjet_version)
-        logging.info(" FAC mode         = " + self.FAC)
         if len(self.libraries)!=0:
             for key, value in self.libraries.items():
                 logging.info( " Library '" + key + "' = " + \
@@ -74,7 +72,6 @@ class LinuxArchitecture:
         file.write(self.gfortran_version+"\n")
         file.write(self.root_version+"\n")
         file.write(self.fastjet_version+"\n")
-        file.write(self.FAC+"\n")
         file.write(str(len(self.libraries.keys()))+"\n")
         for key, value in self.libraries.items():
             file.write(key+"\n")
@@ -103,7 +100,6 @@ class LinuxArchitecture:
             self.gfortran_version = file.readline().replace('\n','')
             self.root_version     = file.readline().replace('\n','')
             self.fastjet_version  = file.readline().replace('\n','')
-            self.FAC              = file.readline().replace('\n','')
             Nlibraries = int(file.readline().replace('\n',''))
         except:
             logging.error("missing lines in the configuration file '" + \
@@ -153,8 +149,6 @@ class LinuxArchitecture:
         if self.root_version != other.root_version:
             return False
         if self.fastjet_version != other.fastjet_version:
-            return False
-        if self.FAC != other.FAC:
             return False
         if self.libraries != other.libraries:
             return False

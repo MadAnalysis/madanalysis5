@@ -36,6 +36,7 @@ bool LHCOReader::ReadHeader(SampleFormat& mySample)
   EndOfFile_=false;
 
   mySample.InitializeRec();
+  mySample.SetSampleFormat(MA5FORMAT::LHCO);
 
   firstevent_=true;
   saved_=false;

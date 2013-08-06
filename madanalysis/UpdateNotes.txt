@@ -1,6 +1,17 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
-62   1.1.7   (2013/06/13) ma5team:  - LHCO output
+84   1.1.31  (2013/08/06) ma5team:  - installing Delphes3 from MadAnalysis5 console : install delphes
+                                    - reading default Delphes3 ROOT file
+                                    - identifying generator or shower program used when reading a sample
+                                    - improving the compatibility with samples produced by HERWIG
+                                    - improving the simplified LHE output (mother-daughter relations 
+                                      between reco objects and MC particles)
+                                    - adding MT_MET observable required for computing the W transverse mass
+                                    - fixing a bug related to the reading of the MET in simplified LHE file
+                                    - fixing a bug related to histogram normalization
+                                    - fixing minor other bugs
+
+60   1.1.7   (2013/06/13) ma5team:  - LHCO output
                                     - Compatibility with pythia-8 output
                                     - Improvement of the jet clustering / object identification
                                     - Few bug fixes
