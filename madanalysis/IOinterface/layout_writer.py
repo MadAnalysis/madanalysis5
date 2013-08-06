@@ -53,62 +53,106 @@ class LayoutWriter():
         file.write('#'+StringTools.Center('produced by MadAnalysis5 version '+self.main.version,78)+'#\n')
         file.write('#'+StringTools.Center(self.main.date,78)+'#\n')
         file.write(StringTools.Fill('#',80)+'\n')
+        file.write('\n')
 
         # Writing file block
-        file.write('<File>\n')
-        file.write('jodir = '+self.jobdir+'\n')
-        file.write('html = 1\n')
-        file.write('latex = 1\n')
-        file.write('pdflatex = 1\n')
-        file.write('</File>\n')
+        file.write(StringTools.Fill('#',80)+'\n')
+        file.write('#'+StringTools.Center('Files and Paths',78)+'#\n')
+        file.write(StringTools.Fill('#',80)+'\n')
+        file.write('<Files>\n')
+        file.write('  jodir = '+self.jobdir+'\n')
+        file.write('  html = 1\n')
+        file.write('  latex = 1\n')
+        file.write('  pdflatex = 1\n')
+        file.write('</Files>\n')
+        file.write('\n')
 
         # Writing main block
+        file.write(StringTools.Fill('#',80)+'\n')
+        file.write('#'+StringTools.Center('Global information related to the layout',78)+'#\n')
+        file.write(StringTools.Fill('#',80)+'\n')
         file.write('<Main>\n')
-        file.write('lumi = 10 # fb^{-1}\n')
-        file.write('S_over_B = "S/B"\n')
-        file.write('S_over_B_error = "S/B"\n')
-        file.write('stack = stack\n')
+        file.write('  lumi = '+str(self.main.lumi)+' # fb^{-1}\n')
+        file.write('  S_over_B = "'+ str(self.main.SBratio)+'"\n')
+        file.write('  S_over_B_error = "'+str(self.main.SBerror)+ '"\n')
+        file.write('  stack = '+str(self.main.stack)+'\n')
         file.write('</Main>\n')
+        file.write('\n')
 
         # Writing dataset
+        file.write(StringTools.Fill('#',80)+'\n')
+        file.write('#'+StringTools.Center('Definition of datasets',78)+'#\n')
+        file.write(StringTools.Fill('#',80)+'\n')
         for dataset in self.main.datasets:
             file.write('<Dataset name="'+dataset.name+'">\n')
-            file.write('<Physics>\n')
-            file.write('background = '+str(dataset.background)+'\n')
-            file.write('weight = '+str(dataset.weight)+'\n')
-            file.write('xsection = '+str(dataset.xsection)+'\n')
-            file.write('</Physics>\n')
-            file.write('<Layout>\n')
-            file.write('title = '+str(dataset.title)+'\n')
-            file.write('linecolor = '+str(dataset.linecolor)+'\n')
-            file.write('linestyle = '+str(dataset.linestyle)+'\n')
-            file.write('lineshade = '+str(dataset.lineshade)+'\n')
-            file.write('linewidth = '+str(dataset.linewidth)+'\n')
-            file.write('backcolor = '+str(dataset.backcolor)+'\n')
-            file.write('backstyle = '+str(dataset.backstyle)+'\n')
-            file.write('backshade = '+str(dataset.backshade)+'\n')
-            file.write('</Layout>\n')
+            file.write('  <Physics>\n')
+            file.write('    background = '+str(dataset.background)+'\n')
+            file.write('    weight = '+str(dataset.weight)+'\n')
+            file.write('    xsection = '+str(dataset.xsection)+'\n')
+            file.write('  </Physics>\n')
+            file.write('  <Layout>\n')
+            file.write('    title = '+str(dataset.title)+'\n')
+            file.write('    linecolor = '+str(dataset.linecolor)+'\n')
+            file.write('    linestyle = '+str(dataset.linestyle)+'\n')
+            file.write('    lineshade = '+str(dataset.lineshade)+'\n')
+            file.write('    linewidth = '+str(dataset.linewidth)+'\n')
+            file.write('    backcolor = '+str(dataset.backcolor)+'\n')
+            file.write('    backstyle = '+str(dataset.backstyle)+'\n')
+            file.write('    backshade = '+str(dataset.backshade)+'\n')
+            file.write('  </Layout>\n')
             file.write('</Dataset>\n')
+            file.write('\n')
 
         # Writing selection
+        file.write(StringTools.Fill('#',80)+'\n')
+        file.write('#'+StringTools.Center('Definition of the selection : histograms and cuts',78)+'#\n')
+        file.write(StringTools.Fill('#',80)+'\n')
         counter=0
         for item in self.main.selection:
             if item.__class__.__name__=="Histogram":
-               file.write('<Histogram name="selection'+str(counter)+'"\n')
-               file.write('stack = '+str(item.stack)+'\n')
-               file.write('titleX = '+str(item.titleX)+'\n')
-               file.write('titleY = '+str(item.titleY)+'\n')
-               file.write('</Histogram>\n')
+                file.write('<Histogram name="selection'+str(counter)+'">\n')
+                file.write('  stack = '+str(item.stack)+'\n')
+                file.write('  titleX = "'+str(item.GetXaxis())+'"\n')
+                file.write('  titleY = "'+str(item.GetYaxis())+'"\n')
+                file.write('  xmin = '+str(item.xmin)+'\n')
+                file.write('  xmax = '+str(item.xmax)+'\n')
+                file.write('</Histogram>\n')
+                file.write('\n')
+
+            if item.__class__.__name__=="HistogramFrequency":
+                pass
 
             elif item.__class__.__name__=="Cut":
-               file.write('<Cut name="selection'+str(counter)+'"\n')
-               file.write('</Cut>\n')
+                file.write('<Cut name="selection'+str(counter)+'"/>\n')
+                file.write('\n')
 
             counter+=1
 
+        # Must we definite multiparticles ?
+        MustBeDefined = False
+        for item in self.main.selection:
+            if item.__class__.__name__=="Histogram" and \
+               item.observable.name in ["NPID","NAPID"]:
+                MustBeDefined=True
+                break
+
+        # Definition of multiparticles
+        if MustBeDefined:
+            file.write(StringTools.Fill('#',80)+'\n')
+            file.write('#'+StringTools.Center('Definition of the multiparticles used',78)+'#\n')
+            file.write(StringTools.Fill('#',80)+'\n')
+            sorted_keys = sorted(self.main.multiparticles.table.keys())
+            for key in sorted_keys:
+                file.write('<Multiparticle name="'+str(key)+'">\n')
+                file.write('  ')
+                for id in self.main.multiparticles.table[key]:
+                    file.write(str(id)+'  ')
+                file.write('\n')
+                file.write('</Multiparticle>\n')
+            
+        
         # close the file
         try:
             file.close()
         except:
             logging.error("impossible to close the file '"+filename+"'")
-
