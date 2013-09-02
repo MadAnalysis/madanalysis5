@@ -287,3 +287,11 @@ class CutFlowForDataset:
                 self.Nrejected[icut].error = sqrt(\
                     self.Nrejected[icut].error**2 + errXsec**2)
 
+        # recompute error to efficiency
+        for icut in range(0,len(self.Nselected)):
+            
+            if icut==0:
+                self.eff[icut].error = Measure.binomialError(self.Nselected[icut].mean,self.Ntotal.mean)
+            else:
+                self.eff[icut].error = Measure.binomialError(self.Nselected[icut].mean,self.Nselected[icut-1].mean)
+            self.effcumu[icut].error = Measure.binomialError(self.Nselected[icut].mean,self.Ntotal.mean)

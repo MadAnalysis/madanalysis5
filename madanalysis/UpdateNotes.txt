@@ -1,6 +1,6 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
-84   1.1.31  (2013/08/06) ma5team:  - installing Delphes3 from MadAnalysis5 console : install delphes
+84   1.1.8  (2013/08/06) ma5team:   - installing Delphes3 from MadAnalysis5 console : install delphes
                                     - reading default Delphes3 ROOT file
                                     - identifying generator or shower program used when reading a sample
                                     - improving the compatibility with samples produced by HERWIG
