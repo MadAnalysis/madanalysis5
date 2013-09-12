@@ -267,7 +267,10 @@ def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
                 # Second part
                 file.write('    ParticleBaseFormat q2;\n')
                 for ind in range(0,len(combi2)):
-                    file.write('    q2'+oper_string+'='+\
+                    TheOper='+'
+                    if ind!=0:
+                      TheOper=oper_string
+                    file.write('    q2'+TheOper+'='+\
                                containers2[ind]+'['+iterator2+'['+str(ind)+']]->'+\
                                'momentum();\n')
 
@@ -336,7 +339,10 @@ def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
                 # Second part
                 file.write('    ParticleBaseFormat q1;\n')
                 for ind in range(0,len(combi1)):
-                    file.write('    q1'+oper_string+'='+\
+                    TheOper='+'
+                    if ind!=0:
+                      TheOper=oper_string
+                    file.write('    q1'+TheOper+'='+\
                                containers1[ind]+'['+iterator1+'['+str(ind)+']]->'+\
                                'momentum();\n')
 
@@ -488,9 +494,11 @@ def WriteBody(file,iabs,ihisto,combination,main,iterator='ind',value='value',q='
 
         if not allmode:
             file.write('    Double_t '+value+'=0;\n')
-            
         for ind in range(len(combination)):
-            file.write('    '+value+oper_string+'='+\
+            TheOper='+'
+            if ind!=0:
+              TheOper=oper_string
+            file.write('    '+value+TheOper+'='+\
                        containers[ind]+'['+iterator+'['+str(ind)+']]->'+\
                        obs.code(main.mode)+';\n')
 
@@ -506,7 +514,10 @@ def WriteBody(file,iabs,ihisto,combination,main,iterator='ind',value='value',q='
             file.write('    ParticleBaseFormat '+q+';\n')
             
         for ind in range(len(combination)):
-            file.write('    '+q+oper_string+'='+\
+            TheOper='+'
+            if ind!=0:
+              TheOper=oper_string
+            file.write('    '+q+TheOper+'='+\
                        containers[ind]+'['+iterator+'['+str(ind)+']]->'+\
                        'momentum();\n')
         if not allmode:
@@ -577,14 +588,20 @@ def WriteBody2(file,iabs,ihisto,combi1,combi2,main,iterator1,iterator2):
         # First part
         file.write('    ParticleBaseFormat q1;\n')
         for ind in range(0,len(combi1)):
-            file.write('    q1'+oper_string+'='+\
+            TheOper='+'
+            if ind!=0:
+              TheOper=oper_string
+            file.write('    q1'+TheOper+'='+\
                        containers1[ind]+'[+'+iterator1+'['+str(ind)+']]->'+\
                        'momentum();\n')
 
         # Second part
         file.write('    ParticleBaseFormat q2;\n')
         for ind in range(0,len(combi2)):
-            file.write('    q2'+oper_string+'='+\
+            TheOper='+'
+            if ind!=0:
+              TheOper=oper_string
+            file.write('    q2'+TheOper+'='+\
                        containers2[ind]+'['+iterator2+'['+str(ind)+']]->'+\
                        'momentum();\n')
 

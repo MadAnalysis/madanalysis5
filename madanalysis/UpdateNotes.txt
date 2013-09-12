@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+68   1.1.9   (2013/09/12) bfuks:   Fixing the releasing routine 
+
 84   1.1.8  (2013/08/06) ma5team:   - installing Delphes3 from MadAnalysis5 console : install delphes
                                     - reading default Delphes3 ROOT file
                                     - identifying generator or shower program used when reading a sample
