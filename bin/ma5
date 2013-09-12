@@ -113,7 +113,7 @@ main.ma5dir = ma5dir
 
 # Release version
 # Do not touch it !!!!!  
-main.version = "1.1.9"
+main.version = "1.1.10"
 main.date = "2013/09/12"
 
 # Checking arguments
