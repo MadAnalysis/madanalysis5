@@ -89,8 +89,8 @@ class CmdSet(CmdBase.CmdBase):
         # Looking for one dot in the name
         object = args[0]
 #        object = object.lower()
-        object = object.replace('clustering.bjet_id.','clustering.bjet_idXXX')
-        object = object.replace('clustering.tau_id.','clustering.tau_idXXX')
+        object = object.replace('fastsim.bjet_id.','fastsim.bjet_idXXX')
+        object = object.replace('fastsim.tau_id.','fastsim.tau_idXXX')
         objs = object.split('.')
         for i in range(len(objs)):
             objs[i] = objs[i].replace('XXX','.')
@@ -101,8 +101,8 @@ class CmdSet(CmdBase.CmdBase):
             self.main.isolation.user_SetParameter(objs[2],args[2])
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='merging':
             self.main.merging.user_SetParameter(objs[2],args[2],self.main.mode,self.main.libFastJet)
-        elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='clustering':
-            self.main.clustering.user_SetParameter(objs[2],args[2],self.main.datasets,self.main.mode,self.main.libFastJet) 
+        elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='fastsim':
+            self.main.fastsim.user_SetParameter(objs[2],args[2],self.main.datasets,self.main.mode,self.main.libFastJet,self.main.libDelphes) 
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='shower':
             self.main.shower.user_SetParameter(objs[2],args[2],self.main.mode,self.main.mcatnloutils)
         else:
@@ -208,8 +208,8 @@ class CmdSet(CmdBase.CmdBase):
             if not withValue:
                 output=[ object+".isolation."+ item \
                          for item in self.main.isolation.user_GetParameters() ]
-                output.extend([ object+".clustering."+ item \
-                         for item in self.main.clustering.user_GetParameters() ])
+                output.extend([ object+".fastsim."+ item \
+                         for item in self.main.fastsim.user_GetParameters() ])
                 output.extend([ object+".merging."+ item \
                          for item in self.main.merging.user_GetParameters() ])
                 output.extend([ object+".shower."+ item \
@@ -218,8 +218,8 @@ class CmdSet(CmdBase.CmdBase):
             else:
                 if subobject=="isolation":
                     output = self.main.isolation.user_GetValues(variable)
-                elif subobject=="clustering":
-                    output = self.main.clustering.user_GetValues(variable)
+                elif subobject=="fastsim":
+                    output = self.main.fastsim.user_GetValues(variable)
                 elif subobject=="merging":
                     output = self.main.merging.user_GetValues(variable)
                 elif subobject=="shower":
@@ -266,8 +266,8 @@ class CmdSet(CmdBase.CmdBase):
                          for item in self.main.user_GetParameters() ]
                 output.extend([ object+".isolation."+ item \
                                for item in self.main.isolation.user_GetParameters() ])
-                output.extend([ object+".clustering."+ item \
-                               for item in self.main.clustering.user_GetParameters() ])
+                output.extend([ object+".fastsim."+ item \
+                               for item in self.main.fastsim.user_GetParameters() ])
                 output.extend([ object+".merging."+ item \
                                for item in self.main.merging.user_GetParameters() ])
                 output.extend([ object+".shower."+ item \
@@ -310,8 +310,8 @@ class CmdSet(CmdBase.CmdBase):
         # Splitting
         object = args[1]
 #        object = object.lower()
-        object = object.replace('clustering.bjet_id.','clustering.bjet_idXXX')
-        object = object.replace('clustering.tau_id.','clustering.tau_idXXX')
+        object = object.replace('fastsim.bjet_id.','fastsim.bjet_idXXX')
+        object = object.replace('fastsim.tau_id.','fastsim.tau_idXXX')
         objs = object.split('.')
         for i in range(len(objs)):
             objs[i] = objs[i].replace('XXX','.')

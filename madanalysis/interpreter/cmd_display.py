@@ -35,8 +35,8 @@ class CmdDisplay(CmdBase.CmdBase):
 
         # Looking for one dot in the name
 #        object = object.lower()
-        object = object.replace('clustering.bjet_id.','clustering.bjet_idXXX')
-        object = object.replace('clustering.tau_id.','clustering.tau_idXXX')
+        object = object.replace('fastsim.bjet_id.','fastsim.bjet_idXXX')
+        object = object.replace('fastsim.tau_id.','fastsim.tau_idXXX')
         objs = object.split('.')
         for i in range(len(objs)):
             objs[i] = objs[i].replace('XXX','.')
@@ -51,8 +51,8 @@ class CmdDisplay(CmdBase.CmdBase):
                 self.main.Display()
                 return
             elif len(objs)==2:
-                if objs[1].lower()=="clustering":
-                    self.main.clustering.Display()
+                if objs[1].lower()=="fastsim":
+                    self.main.fastsim.Display()
                 elif objs[1].lower()=="isolation":
                     self.main.isolation.Display()
                 elif objs[1].lower()=="merging":
@@ -61,11 +61,11 @@ class CmdDisplay(CmdBase.CmdBase):
                     self.main.user_DisplayParameter(objs[1])
                 return
             else:
-                if objs[1].lower()!='isolation' and objs[1].lower()!='clustering' and objs[1].lower()!='merging':
+                if objs[1].lower()!='isolation' and objs[1].lower()!='fastsim' and objs[1].lower()!='merging':
                     logging.error("'main' has no variable set called '"+objs[1]+"'")
                     return
-                elif objs[1].lower()=='clustering':
-                    self.main.clustering.user_DisplayParameter(objs[2])
+                elif objs[1].lower()=='fastsim':
+                    self.main.fastsim.user_DisplayParameter(objs[2])
                 elif objs[1].lower()=='isolation':
                     self.main.isolation.user_DisplayParameter(objs[2])
                 elif objs[1].lower()=='merging':
@@ -168,8 +168,8 @@ class CmdDisplay(CmdBase.CmdBase):
         # Splitting
         object = args[1]
 #        object = object.lower()
-        object = object.replace('clustering.bjet_id.','clustering.bjet_idXXX')
-        object = object.replace('clustering.tau_id.','clustering.tau_idXXX')
+        object = object.replace('fastsim.bjet_id.','fastsim.bjet_idXXX')
+        object = object.replace('fastsim.tau_id.','fastsim.tau_idXXX')
         objs = object.split('.')
         for i in range(len(objs)):
             objs[i] = objs[i].replace('XXX','.')
@@ -217,8 +217,8 @@ class CmdDisplay(CmdBase.CmdBase):
                      for item in self.main.user_GetParameters() ]
             output.extend([ object+".isolation."+ item \
                      for item in self.main.isolation.user_GetParameters() ])
-            output.extend([ object+".clustering."+ item \
-                     for item in self.main.clustering.user_GetParameters() ])
+            output.extend([ object+".fastsim."+ item \
+                     for item in self.main.fastsim.user_GetParameters() ])
             output.extend([ object+".merging."+ item \
                      for item in self.main.merging.user_GetParameters() ])
             return self.finalize_complete(text,output)

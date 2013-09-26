@@ -87,12 +87,12 @@ namespace MA5
       myBtagger_   = 0;
       myCtagger_   = 0;
       myTAUtagger_ = 0;
-     muon=0;
-     electron=0;
-     tauH=0;
-     tauM=0;
-     tauE=0;
-     photon=0;
+      muon=0;
+      electron=0;
+      tauH=0;
+      tauM=0;
+      tauE=0;
+      photon=0;
     }
 
     /// Destructor

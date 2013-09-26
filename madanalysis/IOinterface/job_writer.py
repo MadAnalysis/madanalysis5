@@ -42,7 +42,7 @@ class JobWriter():
         self.libDelphes = self.main.libDelphes
         self.output     = self.main.output
         self.libFastjet = self.main.libFastJet
-        self.clustering = self.main.clustering
+        self.fastsim    = self.main.fastsim
         self.merging    = self.main.merging
         self.fortran    = self.main.fortran
         self.shower     = self.main.shower
@@ -258,17 +258,32 @@ class JobWriter():
             elif self.output.lower().endswith('lhco') or self.output.lower().endswith('lhco.gz'):
                 file.write('      manager.InitializeWriter("lhco","'+self.output+'");\n')
             file.write('  if (writer1==0) return 1;\n\n')
-        if self.clustering.algorithm!="none":
+
+        # Fast-Simulation detector
+        # + Case Fastsim
+        if self.fastsim.package=="fastjet":
             file.write('  //Getting pointer to the clusterer\n')
             file.write('  std::map<std::string, std::string> parametersC1;\n')
-            parameters = self.clustering.SampleAnalyzerConfigString()
+            parameters = self.fastsim.SampleAnalyzerConfigString()
             for k,v in sorted(parameters.iteritems(),\
                               key=lambda (k,v): (k,v)):
                 file.write('  parametersC1["'+k+'"]="'+v+'";\n')
             file.write('  JetClustererBase* cluster1 = \n')
-            file.write('      manager.InitializeJetClusterer("'+self.clustering.algorithm+'",parametersC1);\n')
+            file.write('      manager.InitializeJetClusterer("'+self.fastsim.clustering.algorithm+'",parametersC1);\n')
             file.write('  if (cluster1==0) return 1;\n\n')
             
+        # + Case Delphes
+        if self.fastsim.package=="delphes":
+            file.write('  //Getting pointer to fast-simulation package\n')
+            file.write('  std::map<std::string, std::string> parametersD1;\n')
+            parameters = self.fastsim.SampleAnalyzerConfigString()
+            for k,v in sorted(parameters.iteritems(),\
+                              key=lambda (k,v): (k,v)):
+                file.write('  parametersD1["'+k+'"]="'+v+'";\n')
+            file.write('  DetectorBase* fastsim1 = \n')
+            file.write('      manager.InitializeDetector("delphes","input/CMS_card.dat",parametersD1);\n')
+            file.write('  if (fastsim1==0) return 1;\n\n')
+
         # Loop
         file.write('  // ---------------------------------------------------\n')
         file.write('  //                      EXECUTION\n')
@@ -299,8 +314,10 @@ class JobWriter():
         file.write('          manager.UpdateProgressBar();\n')
         if self.merging.enable:
             file.write('      analyzer2->Execute(mySample,myEvent);\n')
-        if self.clustering.algorithm!="none":
+        if self.fastsim.package=="fastjet":
             file.write('      cluster1->Execute(mySample,myEvent);\n')
+        elif self.fastsim.package=="delphes":
+            file.write('      fastsim1->Execute(mySample,myEvent);\n')
         file.write('      analyzer1->Execute(mySample,myEvent);\n')
         if self.output!="":
             file.write('      writer1->WriteEvent(myEvent,mySample);\n')

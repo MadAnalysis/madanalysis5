@@ -118,6 +118,7 @@ bool SampleAnalyzer::Initialize(int argc, char **argv,
   fullFilters_.BuildPredefinedTable();
   fullFilters_.BuildUserTable();
   fullJetClusterers_.BuildTable();
+  fullDetectors_.BuildTable();
 
   // Reset counter
   file_index_=0;
@@ -288,6 +289,43 @@ JetClustererBase* SampleAnalyzer::InitializeJetClusterer(
   return myClusterer;
 }
 
+
+DetectorBase* SampleAnalyzer::InitializeDetector(
+                  const std::string& name, const std::string& configFile, 
+                  const std::map<std::string,std::string>& parameters)
+{
+  // Getting the detector
+  DetectorBase* myDetector = fullDetectors_.Get(name);
+
+  // Detector found ?
+  if (myDetector==0)
+  {
+    ERROR << "detector algorithm called '" << name << "' is not found" 
+          << endmsg;
+    return 0;
+  }
+
+  // Display
+  INFO << "      - very-fast-simulation package '"
+       << myDetector->GetName() << "'" << endmsg;
+
+  // Putting the detector in container
+  detectors_.push_back(myDetector);
+
+  // Initialize (specific to the detector)
+  if (!myDetector->Initialize(configFile, parameters))
+  {
+    ERROR << "problem during the initialization of the very-fast-simulation package called '" 
+          << name << "'" << endmsg;
+    return 0;
+  }
+
+  // Display
+  INFO << "        with config file: " << myDetector->GetConfigFile() << endmsg;
+
+  // Returning the clusterer
+  return myDetector;
+}
 
 /// Reading the next event
 StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
@@ -499,6 +537,12 @@ bool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
   for (unsigned int i=0;i<clusters_.size();i++)
   {
     clusters_[i]->Finalize();
+  }
+
+  // Finalize detectors
+  for (unsigned int i=0;i<detectors_.size();i++)
+  {
+    detectors_[i]->Finalize();
   }
 
   // Display reports
