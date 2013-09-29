@@ -24,6 +24,7 @@
 
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
 from madanalysis.configuration.clustering_configuration import ClusteringConfiguration
+from madanalysis.configuration.delphes_configuration import DelphesConfiguration
 import logging
 
 class FastsimConfiguration:
@@ -32,6 +33,7 @@ class FastsimConfiguration:
 
     def __init__(self):
         self.clustering = 0
+        self.delphes = 0
         self.package    = "none"
 
         
@@ -39,6 +41,8 @@ class FastsimConfiguration:
         self.user_DisplayParameter("package")
         if self.package=="fastjet":
             self.clustering.Display()
+        elif self.package=="delphes":
+            self.delphes.Display()
 
 
     def user_DisplayParameter(self,parameter):
@@ -47,12 +51,18 @@ class FastsimConfiguration:
             return
         if self.package=="fastjet":
             self.clustering.user_DisplayParameter(parameter)
+        elif self.package=="delphes":
+            self.delphes.user_DisplayParameter(parameter)
 
 
     def SampleAnalyzerConfigString(self):
         if self.package=="fastjet":
             mydict = {}
             mydict.update(self.clustering.SampleAnalyzerConfigString())
+            return mydict
+        elif self.package=="delphes":
+            mydict = {}
+            mydict.update(self.delphes.SampleAnalyzerConfigString())
             return mydict
         else:
             return {}
@@ -117,12 +127,15 @@ class FastsimConfiguration:
             if value=="fastjet":
                 self.package="fastjet"
                 self.clustering = ClusteringConfiguration()
+                self.delphes = 0
             elif value=="delphes":
                 self.package="delphes"
                 self.clustering = 0
+                self.delphes = DelphesConfiguration()
             elif value=="none":
                 self.package="none"
                 self.clustering = 0
+                self.delphes = 0
             else:
                 logging.error("parameter called '"+value+"' is not found.")
             return    
@@ -135,12 +148,17 @@ class FastsimConfiguration:
         # other
         if self.package=="fastjet":
             return self.clustering.user_SetParameter(parameter,value,datasets,level)
+        elif self.package=="delphes":
+            return self.delphes.user_SetParameter(parameter,value,datasets,level)
 
         
     def user_GetParameters(self):
         if self.package=="fastjet":
             table = FastsimConfiguration.userVariables.keys()
             table.extend(self.clustering.user_GetParameters())
+        elif self.package=="delphes":
+            table = FastsimConfiguration.userVariables.keys()
+            table.extend(self.delphes.user_GetParameters())
         else:
             table = ["package"]
         return table
@@ -155,6 +173,15 @@ class FastsimConfiguration:
                 pass
             try:
                 table.extend(self.clustering.user_GetValues(variable))
+            except:
+                pass
+        elif self.package=="delphes":
+            try:
+                table.extend(FastsimConfiguration.userVariables[variable])
+            except:
+                pass
+            try:
+                table.extend(self.delphes.user_GetValues(variable))
             except:
                 pass
         else:

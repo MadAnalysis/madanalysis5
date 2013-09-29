@@ -184,20 +184,49 @@ void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat&
 
 void DetectorDelphes::TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat& myEvent)
 {
-  met_                       = modularDelphes_->ExportArray("MissingET");
+  if (myEvent.rec()==0) myEvent.InitializeRec();
+  if (mySample.rec()==0) mySample.InitializeRec();
+  myEvent.rec()->Reset();
+
+  // https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/Arrays
+
+  met_ = modularDelphes_->ExportArray("MissingET/momentum");
   //  TClonesArray *branchJet = treeWriter_->UseBranch("Jet");
   //  TClonesArray *branchElectron = treeWriter_->UseBranch("Electron");
   //  TClonesArray *branchMissingET = treeReader->UseBranch("MissingET");
 
-  std::cout << "njets   = " << jets_->GetEntries() << std::endl;
-  //  std::cout << "nelecss = " << branchElectron->GetEntries() << std::endl;
-  std::cout << "nMET    = " << met_->GetEntries() << std::endl;
-  std::cout << "eric" << std::endl;
   TFolder* folder = modularDelphes_->GetFolder();
-  folder->ls();
-  TObjArray* mymet = dynamic_cast<TObjArray*>(folder->FindObject("MissingET"));
-  if (mymet==0) std::cout << "empty" << std::endl;
-  else   std::cout << "myMET = " << mymet->GetEntries() << std::endl;
+  TObject* jetsObj = folder->FindObjectAny("FastJetFinder/jets");
+  TObject* metObj  = folder->FindObjectAny("MissingET/momentum");
+  TObject* thtObj = folder->FindObjectAny("ScalarHT/energy");
+  TObjArray* jetsArray = (TObjArray*) jetsObj;
+  TObjArray* metArray  = (TObjArray*) metObj;
+  Candidate* metCand = (Candidate*) metArray->At(0);
+
+  if (jetsArray==0) WARNING << "no jets collection found" << endmsg;
+  else
+  {
+  for (unsigned int i=0;i<jetsArray->GetEntries();i++)
+  {
+    Candidate* cand = (Candidate*) jetsArray->At(i);
+    if (cand==0) continue;
+    RecJetFormat* jet = myEvent.rec()->GetNewJet();
+    jet->momentum_ = cand->Momentum;
+    jet->btag_ = cand->BTag;
+  }
+
+  }
+
+  if (metCand==0) WARNING << "no met found" << endmsg;
+  else
+  {
+    double pt = metCand->Momentum.Pt();
+    double px = metCand->Momentum.Px();
+    double py = metCand->Momentum.Px();
+    //std::cout << "px=" << px << "; py=" << py << "; pt=" << pt << std::endl;
+    myEvent.rec()->MET().momentum_.SetPxPyPzE(px,py,0,pt);
+  }
+
 
 
 }

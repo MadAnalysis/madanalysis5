@@ -281,7 +281,10 @@ class JobWriter():
                               key=lambda (k,v): (k,v)):
                 file.write('  parametersD1["'+k+'"]="'+v+'";\n')
             file.write('  DetectorBase* fastsim1 = \n')
-            file.write('      manager.InitializeDetector("delphes","CMS_card.tcl",parametersD1);\n')
+            inputcard ='CMS_card.tcl'
+            if self.fastsim.delphes.detector=='atlas':
+                inputcard = 'ATLAS_card.tcl'
+            file.write('      manager.InitializeDetector("delphes","'+inputcard+'",parametersD1);\n')
             file.write('  if (fastsim1==0) return 1;\n\n')
 
         # Loop
@@ -590,7 +593,7 @@ class JobWriter():
         file.write('\n')
         file.write('LIBFLAGS = -LLib -lSampleAnalyzerBld -lGpad -lHist ' + 
                    '-lGraf -lGraf3d ' +\
-                   '-lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore ' +\
+                   '-lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lEG ' +\
                    '-lRIO -lNet -lThread -lCore -lCint -pthread -lm -ldl '+\
                    '-rdynamic')
         if self.libZIP:
