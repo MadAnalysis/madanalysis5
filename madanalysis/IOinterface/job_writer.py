@@ -281,7 +281,7 @@ class JobWriter():
                               key=lambda (k,v): (k,v)):
                 file.write('  parametersD1["'+k+'"]="'+v+'";\n')
             file.write('  DetectorBase* fastsim1 = \n')
-            file.write('      manager.InitializeDetector("delphes","input/CMS_card.dat",parametersD1);\n')
+            file.write('      manager.InitializeDetector("delphes","CMS_card.tcl",parametersD1);\n')
             file.write('  if (fastsim1==0) return 1;\n\n')
 
         # Loop

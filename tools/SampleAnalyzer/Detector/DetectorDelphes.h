@@ -30,6 +30,26 @@
 //SampleAnalyser headers
 #include "SampleAnalyzer/Detector/DetectorBase.h"
 
+//ROOT header
+#include <TObjArray.h>
+#include <TFile.h>
+#include <TDatabasePDG.h>
+#include <TParticlePDG.h>
+#include <TFolder.h>
+
+#include "external/ExRootAnalysis/ExRootConfReader.h"
+#include "external/ExRootAnalysis/ExRootTreeWriter.h"
+#include "external/ExRootAnalysis/ExRootTreeBranch.h"
+#include "classes/DelphesClasses.h"
+#include "classes/DelphesFactory.h"
+#include "modules/Delphes.h"
+
+/*
+class ExRootConfReader;
+class Delphes;
+class DelphesFactory;
+class TObjArray;
+*/
 
 namespace MA5
 {
@@ -41,6 +61,19 @@ class DetectorDelphes: public DetectorBase
 //                                 data members
 //---------------------------------------------------------------------------------
   private :
+
+  ExRootConfReader* confReader_;
+  ExRootTreeWriter* treeWriter_;
+  ExRootTreeBranch* branchEvent_;
+  Delphes*          modularDelphes_;
+  DelphesFactory*   factory_;
+  TObjArray*        allParticleOutputArray_;
+  TObjArray*        stableParticleOutputArray_;
+  TObjArray*        partonOutputArray_;
+  TObjArray*        jets_;
+  TObjArray* met_;
+  TFile*            outputFile_;
+  TDatabasePDG*     PDG_;
 
 
 //---------------------------------------------------------------------------------
@@ -59,6 +92,9 @@ class DetectorDelphes: public DetectorBase
     /// Initialization
     virtual bool Initialize(const std::string& configFile, const std::map<std::string,std::string>& options);
 
+    /// Finalization
+    virtual void Finalize();
+
     /// Print parameters
     virtual void PrintParam();
 
@@ -71,6 +107,10 @@ class DetectorDelphes: public DetectorBase
 
     /// Jet clustering
     virtual bool Execute(SampleFormat& mySample, EventFormat& myEvent);
+
+    /// Translation functions
+    void TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat& myEvent);
+    void TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat& myEvent);
 
 };
 

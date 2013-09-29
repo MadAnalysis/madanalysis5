@@ -424,6 +424,8 @@ class ConfigChecker:
             if find:
                 os.environ['CPLUS_INCLUDE_PATH'] = os.environ['CPLUS_INCLUDE_PATH'] + ":" + \
                                                    self.ma5dir+'/tools/delphes/'
+                os.environ['CPLUS_INCLUDE_PATH'] = os.environ['CPLUS_INCLUDE_PATH'] + ":" + \
+                                                   self.ma5dir+'/tools/delphes/external/'
 
         if not find:
             self.PrintFAIL(warning=True)

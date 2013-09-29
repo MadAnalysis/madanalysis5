@@ -68,8 +68,7 @@ namespace MA5
     virtual bool Initialize(const std::string& configFile, const std::map<std::string,std::string>& options)=0;
 
     /// Finalization
-    virtual void Finalize()
-    {}
+    virtual void Finalize()=0;
 
     /// Print parameters
     virtual void PrintParam()=0;

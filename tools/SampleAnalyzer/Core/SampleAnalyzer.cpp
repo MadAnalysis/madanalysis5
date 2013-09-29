@@ -306,16 +306,18 @@ DetectorBase* SampleAnalyzer::InitializeDetector(
   }
 
   // Display
-  INFO << "      - very-fast-simulation package '"
+  INFO << "      - fast-simulation package '"
        << myDetector->GetName() << "'" << endmsg;
 
   // Putting the detector in container
   detectors_.push_back(myDetector);
 
   // Initialize (specific to the detector)
-  if (!myDetector->Initialize(configFile, parameters))
+  std::string ma5dir = std::getenv("MA5_BASE");
+  std::string config = ma5dir+"/tools/SampleAnalyzer/"+configFile;
+  if (!myDetector->Initialize(config, parameters))
   {
-    ERROR << "problem during the initialization of the very-fast-simulation package called '" 
+    ERROR << "problem during the initialization of the fast-simulation package called '" 
           << name << "'" << endmsg;
     return 0;
   }
