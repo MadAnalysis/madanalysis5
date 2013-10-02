@@ -30,6 +30,8 @@
 #include "SampleAnalyzer/Service/PDGService.h"
 #include "SampleAnalyzer/Service/Terminate.h"
 #include "SampleAnalyzer/Service/CompilationService.h"
+#include "SampleAnalyzer/Core/ProgressBar.h"
+#include "SampleAnalyzer/Core/Configuration.h"
 
 
 using namespace MA5;

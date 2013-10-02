@@ -1,0 +1,121 @@
+////////////////////////////////////////////////////////////////////////////////
+//  
+//  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
+//  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
+//  
+//  This file is part of MadAnalysis 5.
+//  Official website: <https://launchpad.net/madanalysis5>
+//  
+//  MadAnalysis 5 is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//  
+//  MadAnalysis 5 is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//  GNU General Public License for more details.
+//  
+//  You should have received a copy of the GNU General Public License
+//  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
+//  
+////////////////////////////////////////////////////////////////////////////////
+
+
+#ifndef RecTrackFormat_h
+#define RecTrackFormat_h
+
+// STL headers
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <iomanip>
+
+// SampleAnalyzer headers
+#include "SampleAnalyzer/DataFormat/ParticleBaseFormat.h"
+#include "SampleAnalyzer/Service/LogService.h"
+
+namespace MA5
+{
+
+class LHCOReader;
+class ROOTReader;
+class DetectorDelphes;
+
+class RecTrackFormat : public ParticleBaseFormat
+{
+
+  friend class LHCOReader;
+  friend class ROOTReader;
+  friend class JetClusteringFastJet;
+  friend class bTagger;
+  friend class TauTagger;
+  friend class cTagger;
+  friend class DelphesReader;
+  friend class DetectorDelphes;
+
+  // -------------------------------------------------------------
+  //                        data members
+  // -------------------------------------------------------------
+ protected:
+
+  signed int pdgid_;   /// PDG identity code
+  Bool_t charge_;      /// electric charge
+  Double_t etaOuter_;  /// eta @ first layer of calo
+  Double_t phiOuter_;  /// phi @ first layer of calo
+
+  // -------------------------------------------------------------
+  //                        method members
+  // -------------------------------------------------------------
+ public:
+
+  /// Constructor without arguments
+  RecTrackFormat()
+  { Reset(); }
+
+  /// Destructor
+  virtual ~RecTrackFormat()
+  {}
+
+  /// Dump information
+  virtual void Print() const
+  {
+    INFO << "pdgid = " << pdgid_ << ", "  
+         << "charge = " << charge_ << ", "
+         << "etaOuter = " << etaOuter_ << ", "
+         << "phiOuter = " << phiOuter_ << endmsg;
+    ParticleBaseFormat::Print();
+  }
+
+  /// Clear all information
+  virtual void Reset()
+  {
+    pdgid_    = 0;
+    charge_   = false;
+    etaOuter_ = 0.;
+    phiOuter_ = 0.;
+    ParticleBaseFormat::Reset();
+  }
+
+  /// Accessor to the pdgid
+  const signed int pdgid() const
+  {return pdgid_;}
+
+  /// Accessor to etaCalo
+  const Double_t& etaCalo() const
+  {return etaOuter_;}
+
+  /// Accessor to etaCalo
+  const Double_t& phiCalo() const
+  {return phiOuter_;}
+
+  /// Accessor to charge
+  const Float_t charge() const
+  {if (charge_) return +1.; else return -1.;}
+
+
+};
+
+}
+
+#endif

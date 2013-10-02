@@ -25,13 +25,21 @@
 #include "SampleAnalyzer/Detector/DetectorDelphes.h"
 
 #include <fstream>
+#include <TROOT.h>
 
 #ifdef DELPHES_USE
-/*
+
+//Delphes header
+#include "external/ExRootAnalysis/ExRootConfReader.h"
+#include "external/ExRootAnalysis/ExRootTreeWriter.h"
+#include "external/ExRootAnalysis/ExRootTreeBranch.h"
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "modules/Delphes.h"
-*/
+
+//SampleAnalyzer header
+#include "SampleAnalyzer/Service/DisplayService.h"
+
 
 using namespace MA5;
 
@@ -74,7 +82,7 @@ bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<s
   confReader_->ReadFile(configFile_.c_str());
 
   // Configure outputs
-  outputFile_ = TFile::Open("tmp.root", "CREATE");
+  outputFile_ = TFile::Open("tmp.root", "RECREATE");
   treeWriter_ = new ExRootTreeWriter(outputFile_, "Delphes");
   //  branchEvent_ = treeWriter_->NewBranch("Event", LHEFEvent::Class());
 
@@ -82,11 +90,11 @@ bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<s
   modularDelphes_ = new Delphes("Delphes");
   modularDelphes_->SetConfReader(confReader_);
   modularDelphes_->SetTreeWriter(treeWriter_);
+
   factory_ = modularDelphes_->GetFactory();
   allParticleOutputArray_    = modularDelphes_->ExportArray("allParticles");
   stableParticleOutputArray_ = modularDelphes_->ExportArray("stableParticles");
   partonOutputArray_         = modularDelphes_->ExportArray("partons");
-  jets_                      = modularDelphes_->ExportArray("JetTamer");
   modularDelphes_->InitTask();
 
   // Delphes PDG service
@@ -135,6 +143,7 @@ bool DetectorDelphes::Execute(SampleFormat& mySample, EventFormat& myEvent)
 void DetectorDelphes::Finalize()
 {
   modularDelphes_->FinishTask();
+
   delete confReader_; confReader_=0;
   delete treeWriter_; treeWriter_=0;
   delete modularDelphes_; modularDelphes_=0;
@@ -162,7 +171,7 @@ void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat&
     TParticlePDG* pdgParticle = PDG_->GetParticle(part.pdgid());
     if (pdgParticle==0) 
     { 
-      WARNING << "Particle not found in PDG" << endmsg;
+      //FIX ERIC: WARNING << "Particle not found in PDG" << endmsg;
       allParticleOutputArray_->Add(candidate);
       continue;
     }
@@ -184,50 +193,112 @@ void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat&
 
 void DetectorDelphes::TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat& myEvent)
 {
-  if (myEvent.rec()==0) myEvent.InitializeRec();
+  if (myEvent.rec()==0)  myEvent.InitializeRec();
   if (mySample.rec()==0) mySample.InitializeRec();
   myEvent.rec()->Reset();
 
   // https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/Arrays
-
-  met_ = modularDelphes_->ExportArray("MissingET/momentum");
-  //  TClonesArray *branchJet = treeWriter_->UseBranch("Jet");
-  //  TClonesArray *branchElectron = treeWriter_->UseBranch("Electron");
-  //  TClonesArray *branchMissingET = treeReader->UseBranch("MissingET");
-
   TFolder* folder = modularDelphes_->GetFolder();
-  TObject* jetsObj = folder->FindObjectAny("FastJetFinder/jets");
-  TObject* metObj  = folder->FindObjectAny("MissingET/momentum");
-  TObject* thtObj = folder->FindObjectAny("ScalarHT/energy");
-  TObjArray* jetsArray = (TObjArray*) jetsObj;
-  TObjArray* metArray  = (TObjArray*) metObj;
-  Candidate* metCand = (Candidate*) metArray->At(0);
 
+  // Jet collection
+  TObjArray* jetsArray = dynamic_cast<TObjArray*>(folder->FindObject("Export/FastJetFinder/jets"));
   if (jetsArray==0) WARNING << "no jets collection found" << endmsg;
   else
   {
-  for (unsigned int i=0;i<jetsArray->GetEntries();i++)
-  {
-    Candidate* cand = (Candidate*) jetsArray->At(i);
-    if (cand==0) continue;
-    RecJetFormat* jet = myEvent.rec()->GetNewJet();
-    jet->momentum_ = cand->Momentum;
-    jet->btag_ = cand->BTag;
+    for (unsigned int i=0;i<static_cast<UInt_t>(jetsArray->GetEntries());i++)
+    {
+      Candidate* cand = dynamic_cast<Candidate*>(jetsArray->At(i));
+      if (cand==0) 
+      {
+        ERROR << "impossible to access the " << i+1 << "th jet" << endmsg;
+        continue;
+      }
+      RecJetFormat* jet = myEvent.rec()->GetNewJet();
+      jet->momentum_ = cand->Momentum;
+      jet->btag_ = cand->BTag;
+    }
   }
 
-  }
-
-  if (metCand==0) WARNING << "no met found" << endmsg;
+  // Muon collection
+  TObjArray* muonArray = dynamic_cast<TObjArray*>(
+         folder->FindObject("Export/MuonIsolation/muons"));
+  if (muonArray==0) WARNING << "no muons collection found" << endmsg;
   else
   {
-    double pt = metCand->Momentum.Pt();
-    double px = metCand->Momentum.Px();
-    double py = metCand->Momentum.Px();
-    //std::cout << "px=" << px << "; py=" << py << "; pt=" << pt << std::endl;
-    myEvent.rec()->MET().momentum_.SetPxPyPzE(px,py,0,pt);
+    for (unsigned int i=0;i<static_cast<UInt_t>(muonArray->GetEntries());i++)
+    {
+      Candidate* cand = dynamic_cast<Candidate*>(muonArray->At(i));
+      if (cand==0) 
+      {
+        ERROR << "impossible to access the " << i+1 << "th muon" << endmsg;
+        continue;
+      }
+      RecLeptonFormat* muon = myEvent.rec()->GetNewMuon();
+      muon->momentum_ = cand->Momentum;
+    }
   }
 
+  // Electron collection
+  TObjArray* elecArray = dynamic_cast<TObjArray*>(
+     folder->FindObject("Export/UniqueObjectFinder/electrons"));
+  if (elecArray==0) WARNING << "no elecs collection found" << endmsg;
+  else
+  {
+    for (unsigned int i=0;i<static_cast<UInt_t>(elecArray->GetEntries());i++)
+    {
+      Candidate* cand = dynamic_cast<Candidate*>(elecArray->At(i));
+      if (cand==0) 
+      {
+        ERROR << "impossible to access the " << i+1 << "th electron" << endmsg;
+        continue;
+      }
+      RecLeptonFormat* elec = myEvent.rec()->GetNewElectron();
+      elec->momentum_ = cand->Momentum;
+    }
+  }
 
+  // Track collection
+  TObjArray* trackArray = dynamic_cast<TObjArray*>(
+    folder->FindObject("Export/TrackMerger/tracks"));
+  if (trackArray==0) WARNING << "no tracks collection found" << endmsg;
+  else
+  {
+    for (unsigned int i=0;i<static_cast<UInt_t>(trackArray->GetEntries());i++)
+    {
+      Candidate* cand = dynamic_cast<Candidate*>(trackArray->At(i));
+      if (cand==0) 
+      {
+        ERROR << "impossible to access the " << i+1 << "th track" << endmsg;
+        continue;
+      }
+      RecTrackFormat* track = myEvent.rec()->GetNewTrack();
+      track->pdgid_ = cand->PID;
+      if (cand->Charge>0) track->charge_=true; else track->charge_=false;
+      track->momentum_=cand->Momentum;
+      track->etaOuter_=cand->Position.Eta();
+      track->phiOuter_=cand->Position.Phi();
+    }
+  }
+
+  // MET
+  TObjArray* metArray  = dynamic_cast<TObjArray*>(
+    folder->FindObject("Export/MissingET/momentum"));
+  if (metArray==0) WARNING << "MET collection is not found" << endmsg;
+  else
+  {
+    Candidate* metCand = dynamic_cast<Candidate*>(metArray->At(0));
+    if (metCand==0) 
+    {
+      ERROR << "impossible to access the MET" << endmsg;
+    }
+    else
+    {
+      double pt = metCand->Momentum.Pt();
+      double px = metCand->Momentum.Px();
+      double py = metCand->Momentum.Py();
+      myEvent.rec()->MET().momentum_.SetPxPyPzE(px,py,0,pt);
+    }
+  }
 
 }
 

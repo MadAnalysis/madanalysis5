@@ -29,12 +29,10 @@
 #include <iostream>
 #include <fstream>
 
-// ZLib header
-#include <zlib.h>
-
 // ROOT headers
 #include <Rtypes.h> 
 
+struct gzFile_s;
 
 namespace MA5
 {
@@ -53,7 +51,7 @@ class gz_streambuf : public std::streambuf
   /// size of the data buffer
   static const int bufferSize = 47+256;    
 
-  gzFile file;               // file handle for compressed file
+  gzFile_s* file;               // file handle for compressed file
   char   buffer[bufferSize]; // data buffer
   char   opened;             // open/close state of stream
   int    mode;               // I/O mode
@@ -80,7 +78,7 @@ class gz_streambuf : public std::streambuf
   int is_open() { return opened; }
 
   /// Opening the gzip file
-  gz_streambuf* open( const char* name, int open_mode);
+  gz_streambuf* open(const char* name, int open_mode);
 
   /// Closing the file
   gz_streambuf* close();
@@ -89,7 +87,7 @@ class gz_streambuf : public std::streambuf
   ~gz_streambuf() { close(); }
     
   /// Overflow
-  virtual int overflow( int c = EOF);
+  virtual int overflow(int c = EOF);
 
   /// Underflow
   virtual int underflow();

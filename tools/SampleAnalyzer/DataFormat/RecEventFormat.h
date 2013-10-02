@@ -37,6 +37,7 @@
 #include "SampleAnalyzer/DataFormat/RecJetFormat.h"
 #include "SampleAnalyzer/DataFormat/RecMETFormat.h"
 #include "SampleAnalyzer/DataFormat/RecPhotonFormat.h"
+#include "SampleAnalyzer/DataFormat/RecTrackFormat.h"
 #include "SampleAnalyzer/Service/LogService.h"
 
 
@@ -80,6 +81,9 @@ class RecEventFormat
 
   /// Collection of reconstructed jets
   std::vector<RecJetFormat>    jets_;
+
+  /// Collection of reconstructed tracks
+  std::vector<RecTrackFormat>  tracks_;
 
   /// Reconstructed Missing Transverse Energy
   RecParticleFormat MET_;
@@ -137,6 +141,9 @@ class RecEventFormat
   /// Accessor to the jet collection (read-only)
   const std::vector<RecJetFormat>& jets() const {return jets_;}
 
+  /// Accessor to the track collection (read-only)
+  const std::vector<RecTrackFormat>& tracks() const {return tracks_;}
+
   /// Accessor to the Missing Transverse Energy (read-only)
   const RecParticleFormat& MET() const {return MET_;}
 
@@ -184,6 +191,9 @@ class RecEventFormat
   /// Accessor to the jet collection
   std::vector<RecJetFormat>& jets() {return jets_;}
 
+  /// Accessor to the track collection
+  std::vector<RecTrackFormat>& tracks() {return tracks_;}
+
   /// Accessor to the Missing Transverse Energy
   RecParticleFormat& MET() {return MET_;}
 
@@ -224,6 +234,7 @@ class RecEventFormat
     muons_.clear(); 
     taus_.clear();
     jets_.clear();
+    tracks_.clear();
     MET_.Reset();
     MHT_.Reset();
     TET_=0.;
@@ -273,6 +284,13 @@ class RecEventFormat
   {
     jets_.push_back(RecJetFormat());
     return &jets_.back();
+  }
+
+  /// Giving a new track entry
+  RecTrackFormat* GetNewTrack()
+  {
+    tracks_.push_back(RecTrackFormat());
+    return &tracks_.back();
   }
 
   /// Giving a pointer to the Missing Transverse Energy

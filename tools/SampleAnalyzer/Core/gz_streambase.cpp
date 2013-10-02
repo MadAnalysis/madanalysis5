@@ -22,10 +22,16 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Core/gz_streambase.h"
+
+// STL headers
 #include <iostream>
 #include <string.h>
 #include <memory.h>
+
+// ZLib headers
+#include <zlib.h>
 
 using namespace MA5;
 

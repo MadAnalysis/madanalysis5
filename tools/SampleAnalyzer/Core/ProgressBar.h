@@ -56,7 +56,7 @@ namespace MA5
     public:
 
       /// Constructor
-    SpyStreamBuffer(std::streambuf* buf) : buf_(buf)
+      SpyStreamBuffer(std::streambuf* buf) : buf_(buf)
       {
         add_endl_=false;
         // no buffering, overflow on every char

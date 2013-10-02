@@ -27,7 +27,6 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Reader/ReaderTextBase.h"
-#include "SampleAnalyzer/Reader/FACdataformat.h"
 
 // ROOT header
 #include <TChain.h>
@@ -41,7 +40,7 @@
 #ifdef DELPHES_USE
 
 // Delphes header
-#include "external/ExRootAnalysis/ExRootTreeReader.h"
+class ExRootTreeReader;
 
 namespace MA5
 {
@@ -80,6 +79,7 @@ class DelphesReader : public ReaderBase
   TClonesArray *branchMissingET_;
   TClonesArray *branchScalarHT_;
   TClonesArray *branchGenParticle_;
+  TClonesArray *branchTrack_;
 
   // -------------------------------------------------------------
   //                       method members
@@ -132,6 +132,7 @@ class DelphesReader : public ReaderBase
     branchMissingET_=0;
     branchScalarHT_=0;
     branchGenParticle_=0;
+    branchTrack_=0;
   }
 
   /// Get the file size

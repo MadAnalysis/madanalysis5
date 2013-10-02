@@ -544,24 +544,25 @@ module UniqueObjectFinder UniqueObjectFinder {
   add InputArray FastJetFinder/jets jets
 }
 
+
 ##################
 # ROOT tree writer
 ##################
 
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
-  add Branch Delphes/allParticles Particle GenParticle
-  add Branch TrackMerger/tracks Track Track
-  add Branch Calorimeter/towers Tower Tower
-  add Branch ConstituentFilter/eflowTracks EFlowTrack Track
-  add Branch ConstituentFilter/eflowTowers EFlowTower Tower
-  add Branch ConstituentFilter/muons EFlowMuon Muon
-  add Branch GenJetFinder/jets GenJet Jet
-  add Branch UniqueObjectFinder/jets Jet Jet
-  add Branch UniqueObjectFinder/electrons Electron Electron
-  add Branch UniqueObjectFinder/photons Photon Photon
-  add Branch MuonIsolation/muons Muon Muon
-  add Branch MissingET/momentum MissingET MissingET
-  add Branch ScalarHT/energy ScalarHT ScalarHT
+#  add Branch Delphes/allParticles Particle GenParticle
+#  add Branch TrackMerger/tracks Track Track
+#  add Branch Calorimeter/towers Tower Tower
+#  add Branch ConstituentFilter/eflowTracks EFlowTrack Track
+#  add Branch ConstituentFilter/eflowTowers EFlowTower Tower
+#  add Branch ConstituentFilter/muons EFlowMuon Muon
+#  add Branch GenJetFinder/jets GenJet Jet
+#  add Branch UniqueObjectFinder/jets Jet Jet
+#  add Branch UniqueObjectFinder/electrons Electron Electron
+#  add Branch UniqueObjectFinder/photons Photon Photon
+#  add Branch MuonIsolation/muons Muon Muon
+#  add Branch MissingET/momentum MissingET MissingET
+#  add Branch ScalarHT/energy ScalarHT ScalarHT
 }
 

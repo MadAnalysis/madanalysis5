@@ -37,19 +37,12 @@
 #include <TParticlePDG.h>
 #include <TFolder.h>
 
-#include "external/ExRootAnalysis/ExRootConfReader.h"
-#include "external/ExRootAnalysis/ExRootTreeWriter.h"
-#include "external/ExRootAnalysis/ExRootTreeBranch.h"
-#include "classes/DelphesClasses.h"
-#include "classes/DelphesFactory.h"
-#include "modules/Delphes.h"
-
-/*
 class ExRootConfReader;
+class ExRootTreeWriter;
+class ExRootTreeBranch;
 class Delphes;
 class DelphesFactory;
 class TObjArray;
-*/
 
 namespace MA5
 {
@@ -62,16 +55,18 @@ class DetectorDelphes: public DetectorBase
 //---------------------------------------------------------------------------------
   private :
 
+  // Delphes objects
   ExRootConfReader* confReader_;
   ExRootTreeWriter* treeWriter_;
   ExRootTreeBranch* branchEvent_;
   Delphes*          modularDelphes_;
   DelphesFactory*   factory_;
+
+  // ROOT objects
   TObjArray*        allParticleOutputArray_;
   TObjArray*        stableParticleOutputArray_;
   TObjArray*        partonOutputArray_;
   TObjArray*        jets_;
-  TObjArray* met_;
   TFile*            outputFile_;
   TDatabasePDG*     PDG_;
 

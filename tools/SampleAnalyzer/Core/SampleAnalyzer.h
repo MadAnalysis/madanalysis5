@@ -32,12 +32,13 @@
 
 
 // SampleAnalyzer headers
+// |- core functions
 #include "SampleAnalyzer/Core/StatusCode.h"
-#include "SampleAnalyzer/Core/ProgressBar.h"
-#include "SampleAnalyzer/Core/Configuration.h"
 #include "SampleAnalyzer/Service/LogService.h"
+// |- data format
 #include "SampleAnalyzer/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/DataFormat/SampleFormat.h"
+// |è-manager headers
 #include "SampleAnalyzer/Reader/ReaderManager.h"
 #include "SampleAnalyzer/Analyzer/AnalyzerManager.h"
 #include "SampleAnalyzer/Filter/FilterManager.h"
@@ -48,6 +49,9 @@
 
 namespace MA5
 {
+
+class ProgressBar;
+class Configuration;
 
 class SampleAnalyzer
 {
