@@ -69,7 +69,7 @@ class DetectorDelphes: public DetectorBase
   TObjArray*        jets_;
   TFile*            outputFile_;
   TDatabasePDG*     PDG_;
-
+  TFolder*          delphesFolder_;
 
 //---------------------------------------------------------------------------------
 //                                method members

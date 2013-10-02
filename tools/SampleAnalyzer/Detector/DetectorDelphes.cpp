@@ -88,6 +88,13 @@ bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<s
 
   // Initializing delphes
   modularDelphes_ = new Delphes("Delphes");
+  delphesFolder_ = dynamic_cast<TFolder*>(
+       gROOT->GetListOfBrowsables()->FindObject("Delphes"));
+  if (delphesFolder_==0)
+  {
+    ERROR << "Problem during initialization of Delphes" << endmsg;
+    return false;
+  }
   modularDelphes_->SetConfReader(confReader_);
   modularDelphes_->SetTreeWriter(treeWriter_);
 
@@ -198,10 +205,9 @@ void DetectorDelphes::TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat&
   myEvent.rec()->Reset();
 
   // https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/Arrays
-  TFolder* folder = modularDelphes_->GetFolder();
 
   // Jet collection
-  TObjArray* jetsArray = dynamic_cast<TObjArray*>(folder->FindObject("Export/FastJetFinder/jets"));
+  TObjArray* jetsArray = dynamic_cast<TObjArray*>(delphesFolder_->FindObject("Export/FastJetFinder/jets"));
   if (jetsArray==0) WARNING << "no jets collection found" << endmsg;
   else
   {
@@ -213,15 +219,48 @@ void DetectorDelphes::TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat&
         ERROR << "impossible to access the " << i+1 << "th jet" << endmsg;
         continue;
       }
-      RecJetFormat* jet = myEvent.rec()->GetNewJet();
-      jet->momentum_ = cand->Momentum;
-      jet->btag_ = cand->BTag;
+      if (cand->TauTag==1)
+      {
+        RecTauFormat* tau = myEvent.rec()->GetNewTau();
+        tau->momentum_ = cand->Momentum;
+        if (cand->Charge>0) tau->charge_=true; else tau->charge_=false;
+
+        if (cand->Eem!=0) tau->HEoverEE_ = cand->Ehad/cand->Eem; else tau->HEoverEE_ = 999.;
+        tau->ntracks_ = 0; // To fix later
+      }
+      else
+      {
+        RecJetFormat* jet = myEvent.rec()->GetNewJet();
+        jet->momentum_ = cand->Momentum;
+        jet->btag_ = cand->BTag;
+        if (cand->Eem!=0) jet->HEoverEE_ = cand->Ehad/cand->Eem; else jet->HEoverEE_ = 999.;
+        jet->ntracks_ = 0; // To fix later
+      }
+    }
+  }
+
+  // GenJet collection
+  TObjArray* genjetsArray = dynamic_cast<TObjArray*>(delphesFolder_->FindObject("Export/GenJetFinder/jets"));
+  if (genjetsArray==0) WARNING << "no genjets collection found" << endmsg;
+  else
+  {
+    for (unsigned int i=0;i<static_cast<UInt_t>(genjetsArray->GetEntries());i++)
+    {
+      Candidate* cand = dynamic_cast<Candidate*>(genjetsArray->At(i));
+      if (cand==0) 
+      {
+        ERROR << "impossible to access the " << i+1 << "th genjet" << endmsg;
+        continue;
+      }
+      RecJetFormat* genjet = myEvent.rec()->GetNewGenJet();
+      genjet->momentum_ = cand->Momentum;
+      genjet->btag_ = cand->BTag;
     }
   }
 
   // Muon collection
   TObjArray* muonArray = dynamic_cast<TObjArray*>(
-         folder->FindObject("Export/MuonIsolation/muons"));
+         delphesFolder_->FindObject("Export/MuonIsolation/muons"));
   if (muonArray==0) WARNING << "no muons collection found" << endmsg;
   else
   {
@@ -240,7 +279,7 @@ void DetectorDelphes::TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat&
 
   // Electron collection
   TObjArray* elecArray = dynamic_cast<TObjArray*>(
-     folder->FindObject("Export/UniqueObjectFinder/electrons"));
+     delphesFolder_->FindObject("Export/UniqueObjectFinder/electrons"));
   if (elecArray==0) WARNING << "no elecs collection found" << endmsg;
   else
   {
@@ -259,7 +298,7 @@ void DetectorDelphes::TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat&
 
   // Track collection
   TObjArray* trackArray = dynamic_cast<TObjArray*>(
-    folder->FindObject("Export/TrackMerger/tracks"));
+    delphesFolder_->FindObject("Export/TrackMerger/tracks"));
   if (trackArray==0) WARNING << "no tracks collection found" << endmsg;
   else
   {
@@ -282,7 +321,7 @@ void DetectorDelphes::TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat&
 
   // MET
   TObjArray* metArray  = dynamic_cast<TObjArray*>(
-    folder->FindObject("Export/MissingET/momentum"));
+    delphesFolder_->FindObject("Export/MissingET/momentum"));
   if (metArray==0) WARNING << "MET collection is not found" << endmsg;
   else
   {
