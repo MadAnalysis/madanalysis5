@@ -54,22 +54,25 @@ class DetectorDelphes: public DetectorBase
 //                                 data members
 //---------------------------------------------------------------------------------
   private :
+ 
+    // Delphes objects
+    ExRootConfReader* confReader_;
+    ExRootTreeWriter* treeWriter_;
+    ExRootTreeBranch* branchEvent_;
+    Delphes*          modularDelphes_;
+    DelphesFactory*   factory_;
 
-  // Delphes objects
-  ExRootConfReader* confReader_;
-  ExRootTreeWriter* treeWriter_;
-  ExRootTreeBranch* branchEvent_;
-  Delphes*          modularDelphes_;
-  DelphesFactory*   factory_;
+    // ROOT objects
+    TObjArray*        allParticleOutputArray_;
+    TObjArray*        stableParticleOutputArray_;
+    TObjArray*        partonOutputArray_;
+    TObjArray*        jets_;
+    TFile*            outputFile_;
+    TDatabasePDG*     PDG_;
+    TFolder*          delphesFolder_;
 
-  // ROOT objects
-  TObjArray*        allParticleOutputArray_;
-  TObjArray*        stableParticleOutputArray_;
-  TObjArray*        partonOutputArray_;
-  TObjArray*        jets_;
-  TFile*            outputFile_;
-  TDatabasePDG*     PDG_;
-  TFolder*          delphesFolder_;
+    // parameters
+    bool output_;
 
 //---------------------------------------------------------------------------------
 //                                method members
@@ -78,7 +81,7 @@ class DetectorDelphes: public DetectorBase
 
     /// Constructor without argument
     DetectorDelphes() 
-    {}
+    { output_=false; }
 
     /// Destructor
     virtual ~DetectorDelphes()

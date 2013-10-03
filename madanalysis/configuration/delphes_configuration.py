@@ -27,23 +27,34 @@ import logging
 
 class DelphesConfiguration:
 
-    userVariables = { "detector" : ["cms","atlas"] }
+    userVariables = { "detector" : ["cms","atlas"],
+                      "output": ["true","false"] }
 
     def __init__(self):
         self.detector  = "cms"
+        self.output = True
 
         
     def Display(self):
         self.user_DisplayParameter("detector")
+        self.user_DisplayParameter("output")
 
 
     def user_DisplayParameter(self,parameter):
         if parameter=="detector":
             logging.info(" detector : "+self.detector)
             return
+        if parameter=="output":
+            logging.info(" ROOT output : "+self.output)
+            return
 
     def SampleAnalyzerConfigString(self):
-            return {}
+            mydict = {}
+            if self.output:
+                mydict['output'] = '1'
+            else:
+                mydict['output'] = '0'
+            return mydict
 
 
     def user_SetParameter(self,parameter,value,datasets,level):
@@ -51,18 +62,29 @@ class DelphesConfiguration:
         # algorithm
         if parameter=="detector":
 
-            if value=="cms":
+            if value.lower()=="cms":
                 self.detector=value
-            elif value=="atlas":
+            elif value.lower()=="atlas":
                 self.detector=value
             else:
                 logging.error("algorithm called '"+value+"' is not found.")
-            return    
+            return
+
+        # output
+        elif parameter=="output":
+
+            if value.lower()=="true":
+                self.output = True
+            elif value.lower()=="false":
+                self.output = False
+            else:
+                logging.error("allowed values for output are: true false")
+            return
 
         else:
             logging.error("parameter called '"+parameter+"' does not exist")
             return
-
+        
         
     def user_GetParameters(self):
         return DelphesConfiguration.userVariables.keys()

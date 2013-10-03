@@ -63,18 +63,21 @@ bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<s
   {
     std::string key = DetectorBase::Lower(it->first);
 
-    /*
-    // radius
-    if (key=="r")
+    // output
+    if (key=="output")
     {
-      float tmp=0;
+      unsigned int tmp=0;
       std::stringstream str;
       str << it->second;
       str >> tmp;
-      if (tmp<0) WARNING << "R must be positive. Using default value R = " 
-                         << R_ << endmsg;
-      else R_=tmp;
-      }*/
+      if (tmp!=0 && tmp!=1) WARNING << "allowed values for output are: 0, 1. Current value = " 
+                                    << tmp << endmsg;
+      else
+      {
+        if (tmp==0) output_=false;
+        else output_=true;
+      }
+      }
   }
 
   // Configure inputs
@@ -82,7 +85,9 @@ bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<s
   confReader_->ReadFile(configFile_.c_str());
 
   // Configure outputs
-  outputFile_ = TFile::Open("tmp.root", "RECREATE");
+  if (output_) outputFile_ = TFile::Open("TheMouth.root", "RECREATE");
+  else outputFile_ = TFile::Open("tmp.root", "RECREATE");
+
   treeWriter_ = new ExRootTreeWriter(outputFile_, "Delphes");
   //  branchEvent_ = treeWriter_->NewBranch("Event", LHEFEvent::Class());
 
@@ -140,6 +145,9 @@ bool DetectorDelphes::Execute(SampleFormat& mySample, EventFormat& myEvent)
   // Export particles from Delphes
   TranslateDELPHEStoMA5(mySample, myEvent);
 
+  // Saving ROOT
+  if (output_) treeWriter_->Fill();
+
   // Reset
   treeWriter_->Clear();
   modularDelphes_->Clear();
@@ -150,6 +158,7 @@ bool DetectorDelphes::Execute(SampleFormat& mySample, EventFormat& myEvent)
 void DetectorDelphes::Finalize()
 {
   modularDelphes_->FinishTask();
+  if (output_) treeWriter_->Write();
 
   delete confReader_; confReader_=0;
   delete treeWriter_; treeWriter_=0;
