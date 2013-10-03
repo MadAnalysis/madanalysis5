@@ -32,7 +32,8 @@
 // ROOT headers
 #include <Rtypes.h> 
 
-struct gzFile_s;
+// ZLib headers
+#include <zlib.h>
 
 namespace MA5
 {
@@ -51,7 +52,7 @@ class gz_streambuf : public std::streambuf
   /// size of the data buffer
   static const int bufferSize = 47+256;    
 
-  gzFile_s* file;               // file handle for compressed file
+  gzFile file;               // file handle for compressed file
   char   buffer[bufferSize]; // data buffer
   char   opened;             // open/close state of stream
   int    mode;               // I/O mode

@@ -30,8 +30,6 @@
 #include <string.h>
 #include <memory.h>
 
-// ZLib headers
-#include <zlib.h>
 
 using namespace MA5;
 
