@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+77   1.1.11  (2013/10/06) bfuks:   compatibility with mac improved 
+
 69   1.1.10  (2013/09/12) bfuks:   Fixing the computation of observables with differences 
 
 68   1.1.9   (2013/09/12) bfuks:   Fixing the computation of observables with differences
