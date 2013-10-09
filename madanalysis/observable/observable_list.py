@@ -475,8 +475,8 @@ PHI = ObservableBase( name      = 'PHI',
                     combination = CombinationType.SUMVECTOR,
                     plot_auto   = False,
                     plot_nbins  = 100,
-                    plot_xmin   = 0.,
-                    plot_xmax   = 2*math.pi+0.01,
+                    plot_xmin   = -math.pi-0.01,
+                    plot_xmax   = math.pi+0.01,
                     plot_unitX  = '',
                     code_parton = 'phi()',
                     code_hadron = 'phi()',
@@ -487,8 +487,10 @@ PHI = ObservableBase( name      = 'PHI',
                   )
 
 vPHI  = PHI
-sPHI  = ObservableBase.Clone(PHI, name='sPHI', combination=CombinationType.SUMSCALAR, tex='s#phi') 
-sdPHI = dsPHI = ObservableBase.Clone(PHI, name='sdPHI', combination=CombinationType.DIFFSCALAR, tex='sd#phi') 
+sPHI  = ObservableBase.Clone(PHI, name='sPHI', combination=CombinationType.SUMSCALAR, tex='s#phi',
+  plot_xmin=-2.*math.pi-0.01, plot_xmax=2.*math.pi+0.01)
+sdPHI = dsPHI = ObservableBase.Clone(PHI, name='sdPHI', combination=CombinationType.DIFFSCALAR, tex='sd#phi',
+  plot_xmin=-2.*math.pi-0.01, plot_xmax=2.*math.pi+0.01)
 dPHI  = dvPHI = vdPHI = ObservableBase.Clone(PHI, name='dPHI', combination=CombinationType.DIFFVECTOR, tex='d#phi')
 rPHI  = ObservableBase.Clone(PHI, name='rPHI', combination=CombinationType.RATIO, tex='r#phi')
 

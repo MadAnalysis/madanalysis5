@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+79   1.1.13  (2013/10/09) bfuks:   Modifying the default range for the sdphi and dphi observables 
+
 78   1.1.12  (2013/10/09) bfuks:   Wrong normalization of the LHE file constructed by madgraph5 once 
                                    pythia6 has been run (bug 1183739) 
 
