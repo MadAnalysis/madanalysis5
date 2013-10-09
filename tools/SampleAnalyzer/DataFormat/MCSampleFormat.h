@@ -188,8 +188,11 @@ class MCSampleFormat
   {weightMode_=v;}
 
   /// Set the cross section mean
+  // BENJ: the normalization in the pythia lhe output by madgraph has been changed
+  //       the 1e9 factor is not needed anymore
   void setXsection(Double_t value) 
-  { xsection_=value*getXsectionUnitFactor();}
+//  { xsection_=value*getXsectionUnitFactor();}
+  { xsection_=value;}
 
   /// Set the cross section mean
   void setXsectionMean(Double_t value) 

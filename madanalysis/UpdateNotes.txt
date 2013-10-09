@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+78   1.1.12  (2013/10/09) bfuks:   Wrong normalization of the LHE file constructed by madgraph5 once 
+                                   pythia6 has been run (bug 1183739) 
+
 77   1.1.11  (2013/10/06) bfuks:   compatibility with mac improved 
 
 69   1.1.10  (2013/09/12) bfuks:   Fixing the computation of observables with differences 
