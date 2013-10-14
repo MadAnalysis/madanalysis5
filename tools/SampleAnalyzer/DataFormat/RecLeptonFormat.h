@@ -90,8 +90,8 @@ class RecLeptonFormat : public RecParticleFormat
   }
 
   /// Accessor to the electric charge 
-  virtual const Float_t charge() const
-  { if (charge_) return +1.; else return -1; }
+  virtual const int charge() const
+  { if (charge_) return +1; else return -1; }
 
   /// Mutator related to the electric charge 
   virtual void SetCharge(Int_t charge)

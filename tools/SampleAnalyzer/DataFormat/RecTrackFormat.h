@@ -110,8 +110,8 @@ class RecTrackFormat : public ParticleBaseFormat
   {return phiOuter_;}
 
   /// Accessor to charge
-  const Float_t charge() const
-  {if (charge_) return +1.; else return -1.;}
+  const int charge() const
+  {if (charge_) return +1; else return -1;}
 
 
 };

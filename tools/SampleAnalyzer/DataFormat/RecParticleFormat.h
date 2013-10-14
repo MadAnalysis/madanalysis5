@@ -119,8 +119,8 @@ class RecParticleFormat : public ParticleBaseFormat
   { return false; }
 
   /// Accessor to the electric charge
-  virtual const Float_t charge() const
-  { return 0.; }
+  virtual const int charge() const
+  { return 0; }
 
 };
 

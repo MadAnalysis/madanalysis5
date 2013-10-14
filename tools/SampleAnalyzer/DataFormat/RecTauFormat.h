@@ -99,8 +99,8 @@ class RecTauFormat : public RecParticleFormat
   }
 
   /// Accessor to the electric charge
-  const Float_t  charge() const  
-  { if (charge_) return +1.; else return -1.; }
+  const int  charge() const  
+  { if (charge_) return +1; else return -1; }
 
   /// Mutator to the electric charge
   void setCharge(Float_t charge )
