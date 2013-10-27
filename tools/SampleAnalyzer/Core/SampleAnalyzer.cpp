@@ -316,7 +316,8 @@ DetectorBase* SampleAnalyzer::InitializeDetector(
 
   // Initialize (specific to the detector)
   std::string ma5dir = std::getenv("MA5_BASE");
-  std::string config = ma5dir+"/tools/SampleAnalyzer/"+configFile;
+  //  std::string config = ma5dir+"/tools/SampleAnalyzer/"+configFile;
+  std::string config = configFile;
   if (!myDetector->Initialize(config, parameters))
   {
     ERROR << "problem during the initialization of the fast-simulation package called '" 

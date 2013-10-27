@@ -23,30 +23,44 @@
 
 
 from madanalysis.enumeration.ma5_running_type         import MA5RunningType
+import os
 import logging
 
 class DelphesConfiguration:
 
-    userVariables = { "detector" : ["cms","atlas"],
-                      "output": ["true","false"] }
+    userVariables = { "detector" : ["cms","atlas"],\
+                      "output": ["true","false"],\
+                      "pileup": ["none"] }
 
     def __init__(self):
         self.detector  = "cms"
-        self.output = True
+        self.output    = True
+        self.pileup    = ""
 
         
     def Display(self):
         self.user_DisplayParameter("detector")
         self.user_DisplayParameter("output")
+        self.user_DisplayParameter("pileup")
 
 
     def user_DisplayParameter(self,parameter):
         if parameter=="detector":
             logging.info(" detector : "+self.detector)
             return
-        if parameter=="output":
-            logging.info(" ROOT output : "+self.output)
+        elif parameter=="output":
+            if self.output:
+                msg="true"
+            else:
+                msg="false"
+            logging.info(" ROOT output : "+msg)
             return
+        elif parameter=="pileup":
+            if self.pileup=="":
+                msg="none"
+            else:
+                msg='"'+self.pileup+'"'
+            logging.info(" pile-up source = "+msg)
 
     def SampleAnalyzerConfigString(self):
             mydict = {}
@@ -55,7 +69,6 @@ class DelphesConfiguration:
             else:
                 mydict['output'] = '0'
             return mydict
-
 
     def user_SetParameter(self,parameter,value,datasets,level):
         
@@ -80,11 +93,39 @@ class DelphesConfiguration:
             else:
                 logging.error("allowed values for output are: true false")
             return
+        
+        # pileup
+        elif parameter=="pileup":
+            quoteTag=False
+            if value.startswith("'") and value.endswith("'"):
+                quoteTag=True
+            if value.startswith('"') and value.endswith('"'):
+                quoteTag=True
+            if quoteTag:
+                value=value[1:-1]
+            valuemin = value.lower()
+
+            # none
+            if valuemin=="none":
+                self.pileup = ""
+                
+            # .pileup
+            elif valuemin.endswith(".pileup"):
+                if not os.path.isfile(value):
+                    logging.error('File called "'+value+'" is not found')
+                    return
+                self.pileup = value
+                return
+
+            # other case: error
+            else:
+                logging.error("The file format for the pile-up source is not known. Only files with .pileup extension can be used.")
+                return False
 
         else:
             logging.error("parameter called '"+parameter+"' does not exist")
             return
-        
+
         
     def user_GetParameters(self):
         return DelphesConfiguration.userVariables.keys()

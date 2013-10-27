@@ -123,6 +123,7 @@ class JobWriter():
         except:
             logging.error("Impossible to create the folder 'Input'")
             return False
+
         return True
 
 
@@ -167,6 +168,45 @@ class JobWriter():
         else:
             return self.CheckJobStructure()
 
+    def CreateDelphesCard(self):
+
+        if self.fastsim.delphes.pileup=="":
+            if self.fastsim.delphes.detector=='cms':
+                cardname = 'delphes_card_CMS.tcl'
+            elif self.fastsim.delphes.detector=='atlas':
+                cardname ='delphes_card_ATLAS.tcl'
+        else:
+            if self.fastsim.delphes.detector=='cms':
+                cardname = 'delphes_card_CMS_PileUp.tcl'
+            elif self.fastsim.delphes.detector=='atlas':
+                cardname ='delphes_card_ATLAS_PileUp.tcl'
+
+        try:
+            input = open(self.ma5dir+"/tools/SampleAnalyzer/"+cardname,'r')
+        except:
+            pass
+
+        try:
+            output = open(self.path+"/Input/"+cardname,'w')
+        except:
+            pass
+
+        for line in input:
+            if self.main.fastsim.delphes.pileup!="":
+                line=line.replace('MinBias.pileup',self.main.fastsim.delphes.pileup)
+            output.write(line)
+
+        try:
+            input.close()
+        except:
+            pass
+
+        try:
+            output.close()
+        except:
+            pass
+
+
     def CopyLHEAnalysis(self):
         if not JobWriter.CreateJobStructure(self.path):
             return False
@@ -198,6 +238,9 @@ class JobWriter():
         except:
             logging.error('Impossible to make executable the file "newFilter.py"')
             return False
+
+        if self.main.fastsim.package=="delphes":
+            self.CreateDelphesCard()
 
         return True
 
@@ -281,10 +324,17 @@ class JobWriter():
                               key=lambda (k,v): (k,v)):
                 file.write('  parametersD1["'+k+'"]="'+v+'";\n')
             file.write('  DetectorBase* fastsim1 = \n')
-            inputcard ='CMS_card.tcl'
-            if self.fastsim.delphes.detector=='atlas':
-                inputcard = 'ATLAS_card.tcl'
-            file.write('      manager.InitializeDetector("delphes","'+inputcard+'",parametersD1);\n')
+            if self.fastsim.delphes.pileup=="":
+                if self.fastsim.delphes.detector=='cms':
+                    cardname = 'delphes_card_CMS.tcl'
+                elif self.fastsim.delphes.detector=='atlas':
+                    cardname ='delphes_card_ATLAS.tcl'
+            else:
+                if self.fastsim.delphes.detector=='cms':
+                    cardname = 'delphes_card_CMS_PileUp.tcl'
+                elif self.fastsim.delphes.detector=='atlas':
+                    cardname ='delphes_card_ATLAS_PileUp.tcl'
+            file.write('      manager.InitializeDetector("delphes","../../Input/'+cardname+'",parametersD1);\n')
             file.write('  if (fastsim1==0) return 1;\n\n')
 
         # Loop
