@@ -134,7 +134,13 @@ class ConfigChecker:
         ConfigChecker.AddIfValid('/usr/local/lib*',self.libs)
         ConfigChecker.AddIfValid('/local/lib*',self.libs)
         ConfigChecker.AddIfValid('/opt/local/lib*',self.libs)
-        
+
+
+    def checkTextEditor(self):
+        try:
+            self.configLinux.editor = os.environ['EDITOR']
+        except KeyError:
+            self.configLinux.editor = 'vi'
 
     def checkROOT(self):
         # Checking if ROOT is present

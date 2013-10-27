@@ -427,6 +427,7 @@ class Main():
 
         # Initializing the config checker    
         checker = ConfigChecker(self.configLinux,self.ma5dir,self.script)
+        checker.checkTextEditor()
 
         # Mandatory packages
         logging.info("Checking mandatory packages:")
