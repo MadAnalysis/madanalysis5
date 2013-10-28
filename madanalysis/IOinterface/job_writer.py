@@ -191,9 +191,19 @@ class JobWriter():
         except:
             pass
 
+        if self.main.fastsim.delphes.pileup!="":
+            # Getting current dir
+            theDir = os.getcwd()
+
+            # Adding file
+            if self.main.fastsim.delphes.pileup.startswith('/'):
+                theFile = self.main.fastsim.delphes.pileup
+            else:    
+                theFile = os.path.normpath(theDir+"/"+self.main.fastsim.delphes.pileup)
+
         for line in input:
             if self.main.fastsim.delphes.pileup!="":
-                line=line.replace('MinBias.pileup',self.main.fastsim.delphes.pileup)
+                line=line.replace('MinBias.pileup',thefile)
             output.write(line)
 
         try:
