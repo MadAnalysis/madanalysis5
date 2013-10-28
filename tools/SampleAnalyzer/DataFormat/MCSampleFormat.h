@@ -118,7 +118,7 @@ class MCSampleFormat
     sumweight_positive_ = 0.;
     sumweight_negative_ = 0.;
   }
-  
+
   /// Accessor to PDG ID of the intial partons
   const std::pair<Int_t,Int_t>& beamPDGID() const
   { return beamPDGID_; }
