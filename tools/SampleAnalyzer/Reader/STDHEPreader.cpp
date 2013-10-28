@@ -477,6 +477,8 @@ bool STDHEPreader::DecodeEventData(const std::string& version,
     part->statuscode_=isthept_[i];
     part->mothup1_=jmohept_[2*i];
     part->mothup2_=jmohept_[2*i+1];
+    part->daughter1_=jdahept_[2*i];
+    part->daughter2_=jdahept_[2*i+1];
     part->momentum_.SetPx(phept_[5*i]);
     part->momentum_.SetPy(phept_[5*i+1]);
     part->momentum_.SetPz(phept_[5*i+2]);
@@ -606,6 +608,8 @@ bool STDHEPreader::DecodeSTDHEP4(const std::string& version,
     part->statuscode_=isthept_[i];
     part->mothup1_=jmohept_[2*i];
     part->mothup2_=jmohept_[2*i+1];
+    part->daughter1_=jdahept_[2*i];
+    part->daughter2_=jdahept_[2*i+1];
     part->momentum_.SetPx(phept_[5*i]);
     part->momentum_.SetPy(phept_[5*i+1]);
     part->momentum_.SetPz(phept_[5*i+2]);

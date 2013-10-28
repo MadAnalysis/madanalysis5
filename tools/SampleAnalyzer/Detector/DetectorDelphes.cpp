@@ -181,8 +181,8 @@ void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat&
 
     candidate->M1 = part.mothup1_ - 1;
     candidate->M2 = part.mothup2_ - 1;
-    candidate->D1 = 0;//d1 - 1;
-    candidate->D2 = 0;//d2 - 1;
+    candidate->D1 = part.daughter1_ -1;
+    candidate->D2 = part.daughter2_ -1;
 
     TParticlePDG* pdgParticle = PDG_->GetParticle(part.pdgid());
     if (pdgParticle==0) 
@@ -216,7 +216,7 @@ void DetectorDelphes::TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat&
   // https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/Arrays
 
   // Jet collection
-  TObjArray* jetsArray = dynamic_cast<TObjArray*>(delphesFolder_->FindObject("Export/FastJetFinder/jets"));
+  TObjArray* jetsArray = dynamic_cast<TObjArray*>(delphesFolder_->FindObject("Export/UniqueObjectFinder/jets"/* FastJetFinder/jets"*/));
   if (jetsArray==0) WARNING << "no jets collection found" << endmsg;
   else
   {
@@ -283,6 +283,7 @@ void DetectorDelphes::TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat&
       }
       RecLeptonFormat* muon = myEvent.rec()->GetNewMuon();
       muon->momentum_ = cand->Momentum;
+      muon->SetCharge(cand->Charge);
     }
   }
 
@@ -302,6 +303,7 @@ void DetectorDelphes::TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat&
       }
       RecLeptonFormat* elec = myEvent.rec()->GetNewElectron();
       elec->momentum_ = cand->Momentum;
+      elec->SetCharge(cand->Charge);
     }
   }
 
