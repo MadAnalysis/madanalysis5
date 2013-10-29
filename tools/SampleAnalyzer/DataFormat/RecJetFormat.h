@@ -40,6 +40,7 @@ namespace MA5
 
 class LHCOReader;
 class ROOTReader;
+class DetectorDelphes;
 
 class RecJetFormat : public RecParticleFormat
 {
@@ -51,6 +52,7 @@ class RecJetFormat : public RecParticleFormat
   friend class TauTagger;
   friend class cTagger;
   friend class DelphesReader;
+  friend class DetectorDelphes;
 
   // -------------------------------------------------------------
   //                        data members

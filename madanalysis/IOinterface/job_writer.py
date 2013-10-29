@@ -42,7 +42,7 @@ class JobWriter():
         self.libDelphes = self.main.libDelphes
         self.output     = self.main.output
         self.libFastjet = self.main.libFastJet
-        self.clustering = self.main.clustering
+        self.fastsim    = self.main.fastsim
         self.merging    = self.main.merging
         self.fortran    = self.main.fortran
         self.shower     = self.main.shower
@@ -123,6 +123,7 @@ class JobWriter():
         except:
             logging.error("Impossible to create the folder 'Input'")
             return False
+
         return True
 
 
@@ -167,6 +168,55 @@ class JobWriter():
         else:
             return self.CheckJobStructure()
 
+    def CreateDelphesCard(self):
+
+        if self.fastsim.delphes.pileup=="":
+            if self.fastsim.delphes.detector=='cms':
+                cardname = 'delphes_card_CMS.tcl'
+            elif self.fastsim.delphes.detector=='atlas':
+                cardname ='delphes_card_ATLAS.tcl'
+        else:
+            if self.fastsim.delphes.detector=='cms':
+                cardname = 'delphes_card_CMS_PileUp.tcl'
+            elif self.fastsim.delphes.detector=='atlas':
+                cardname ='delphes_card_ATLAS_PileUp.tcl'
+
+        try:
+            input = open(self.ma5dir+"/tools/SampleAnalyzer/"+cardname,'r')
+        except:
+            pass
+
+        try:
+            output = open(self.path+"/Input/"+cardname,'w')
+        except:
+            pass
+
+        if self.main.fastsim.delphes.pileup!="":
+            # Getting current dir
+            theDir = os.getcwd()
+
+            # Adding file
+            if self.main.fastsim.delphes.pileup.startswith('/'):
+                theFile = self.main.fastsim.delphes.pileup
+            else:    
+                theFile = os.path.normpath(theDir+"/"+self.main.fastsim.delphes.pileup)
+
+        for line in input:
+            if self.main.fastsim.delphes.pileup!="":
+                line=line.replace('MinBias.pileup',thefile)
+            output.write(line)
+
+        try:
+            input.close()
+        except:
+            pass
+
+        try:
+            output.close()
+        except:
+            pass
+
+
     def CopyLHEAnalysis(self):
         if not JobWriter.CreateJobStructure(self.path):
             return False
@@ -198,6 +248,9 @@ class JobWriter():
         except:
             logging.error('Impossible to make executable the file "newFilter.py"')
             return False
+
+        if self.main.fastsim.package=="delphes":
+            self.CreateDelphesCard()
 
         return True
 
@@ -258,17 +311,42 @@ class JobWriter():
             elif self.output.lower().endswith('lhco') or self.output.lower().endswith('lhco.gz'):
                 file.write('      manager.InitializeWriter("lhco","'+self.output+'");\n')
             file.write('  if (writer1==0) return 1;\n\n')
-        if self.clustering.algorithm!="none":
+
+        # Fast-Simulation detector
+        # + Case Fastsim
+        if self.fastsim.package=="fastjet":
             file.write('  //Getting pointer to the clusterer\n')
             file.write('  std::map<std::string, std::string> parametersC1;\n')
-            parameters = self.clustering.SampleAnalyzerConfigString()
+            parameters = self.fastsim.SampleAnalyzerConfigString()
             for k,v in sorted(parameters.iteritems(),\
                               key=lambda (k,v): (k,v)):
                 file.write('  parametersC1["'+k+'"]="'+v+'";\n')
             file.write('  JetClustererBase* cluster1 = \n')
-            file.write('      manager.InitializeJetClusterer("'+self.clustering.algorithm+'",parametersC1);\n')
+            file.write('      manager.InitializeJetClusterer("'+self.fastsim.clustering.algorithm+'",parametersC1);\n')
             file.write('  if (cluster1==0) return 1;\n\n')
             
+        # + Case Delphes
+        if self.fastsim.package=="delphes":
+            file.write('  //Getting pointer to fast-simulation package\n')
+            file.write('  std::map<std::string, std::string> parametersD1;\n')
+            parameters = self.fastsim.SampleAnalyzerConfigString()
+            for k,v in sorted(parameters.iteritems(),\
+                              key=lambda (k,v): (k,v)):
+                file.write('  parametersD1["'+k+'"]="'+v+'";\n')
+            file.write('  DetectorBase* fastsim1 = \n')
+            if self.fastsim.delphes.pileup=="":
+                if self.fastsim.delphes.detector=='cms':
+                    cardname = 'delphes_card_CMS.tcl'
+                elif self.fastsim.delphes.detector=='atlas':
+                    cardname ='delphes_card_ATLAS.tcl'
+            else:
+                if self.fastsim.delphes.detector=='cms':
+                    cardname = 'delphes_card_CMS_PileUp.tcl'
+                elif self.fastsim.delphes.detector=='atlas':
+                    cardname ='delphes_card_ATLAS_PileUp.tcl'
+            file.write('      manager.InitializeDetector("delphes","../../Input/'+cardname+'",parametersD1);\n')
+            file.write('  if (fastsim1==0) return 1;\n\n')
+
         # Loop
         file.write('  // ---------------------------------------------------\n')
         file.write('  //                      EXECUTION\n')
@@ -299,8 +377,10 @@ class JobWriter():
         file.write('          manager.UpdateProgressBar();\n')
         if self.merging.enable:
             file.write('      analyzer2->Execute(mySample,myEvent);\n')
-        if self.clustering.algorithm!="none":
+        if self.fastsim.package=="fastjet":
             file.write('      cluster1->Execute(mySample,myEvent);\n')
+        elif self.fastsim.package=="delphes":
+            file.write('      fastsim1->Execute(mySample,myEvent);\n')
         file.write('      analyzer1->Execute(mySample,myEvent);\n')
         if self.output!="":
             file.write('      writer1->WriteEvent(myEvent,mySample);\n')
@@ -573,7 +653,7 @@ class JobWriter():
         file.write('\n')
         file.write('LIBFLAGS = -LLib -lSampleAnalyzerBld -lGpad -lHist ' + 
                    '-lGraf -lGraf3d ' +\
-                   '-lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore ' +\
+                   '-lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lEG ' +\
                    '-lRIO -lNet -lThread -lCore -lCint -pthread -lm -ldl '+\
                    '-rdynamic')
         if self.libZIP:

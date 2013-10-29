@@ -29,6 +29,7 @@
 #include <set>
 #include <string>
 #include <algorithm>
+#include <cmath>
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Service/MCconfig.h"

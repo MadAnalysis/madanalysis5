@@ -41,6 +41,7 @@ namespace MA5
 class LHCOReader;
 class ROOTReader;
 class DelphesReader;
+class DetectorDelphes;
 
 class RecTauFormat : public RecParticleFormat
 {
@@ -49,6 +50,7 @@ class RecTauFormat : public RecParticleFormat
   friend class ROOTReader;
   friend class TauTagger;
   friend class DelphesReader;
+  friend class DetectorDelphes;
 
   // -------------------------------------------------------------
   //                        data members
@@ -97,8 +99,8 @@ class RecTauFormat : public RecParticleFormat
   }
 
   /// Accessor to the electric charge
-  const Float_t  charge() const  
-  { if (charge_) return +1.; else return -1.; }
+  const int  charge() const  
+  { if (charge_) return +1; else return -1; }
 
   /// Mutator to the electric charge
   void setCharge(Float_t charge )

@@ -35,6 +35,7 @@
 #include <TROOT.h>
 
 // Delphes headers
+#include "external/ExRootAnalysis/ExRootTreeReader.h"
 #include "classes/DelphesClasses.h"
 
 
@@ -130,6 +131,11 @@ bool DelphesReader::Initialize(const std::string& rawfilename,
   if (branchGenParticle_==0)
   {
     WARNING << "GenParticle branch is not found" << endmsg;
+  }
+  branchTrack_ = treeReader_->UseBranch("Track");
+  if (branchTrack_==0)
+  {
+    WARNING << "Track branch is not found" << endmsg;
   }
 
   return test;
@@ -364,15 +370,28 @@ void DelphesReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
 
   // GenParticle collection
   if (branchGenParticle_!=0)
-  if (branchGenParticle_->GetEntries()>0)
+  for (unsigned int i=0;i<static_cast<UInt_t>(branchGenParticle_->GetEntries());i++)
   {
-    GenParticle* part = dynamic_cast<GenParticle*>(branchGenParticle_->At(0));
+    GenParticle* part = dynamic_cast<GenParticle*>(branchGenParticle_->At(i));
     MCParticleFormat * gen = myEvent.mc()->GetNewParticle();
     gen->pdgid_      = part->PID;
     gen->statuscode_ = part->Status;
     gen->mothup1_    = part->M1;
     gen->mothup2_    = part->M2;
     gen->momentum_.SetPxPyPzE(part->Px,part->Py, part->Pz, part->E);
+  }
+
+  // Track collection
+  if (branchTrack_!=0)
+  for (unsigned int i=0;i<static_cast<UInt_t>(branchTrack_->GetEntries());i++)
+  {
+    Track* ref = dynamic_cast<Track*>(branchTrack_->At(i));
+    RecTrackFormat * track = myEvent.rec()->GetNewTrack();
+    track->pdgid_ = ref->PID;
+    if (ref->Charge>0) track->charge_=true; else track->charge_=false;
+    track->momentum_.SetPtEtaPhiE(ref->PT,ref->Eta,ref->Phi,ref->PT);
+    track->etaOuter_ = ref->EtaOuter;
+    track->phiOuter_ = ref->PhiOuter;
   }
 
 }

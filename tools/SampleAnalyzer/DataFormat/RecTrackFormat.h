@@ -22,8 +22,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef RecLeptonFormat_h
-#define RecLeptonFormat_h
+#ifndef RecTrackFormat_h
+#define RecTrackFormat_h
 
 // STL headers
 #include <iostream>
@@ -31,8 +31,8 @@
 #include <sstream>
 #include <iomanip>
 
-// RecParticleFormat
-#include "SampleAnalyzer/DataFormat/RecParticleFormat.h"
+// SampleAnalyzer headers
+#include "SampleAnalyzer/DataFormat/ParticleBaseFormat.h"
 #include "SampleAnalyzer/Service/LogService.h"
 
 namespace MA5
@@ -40,75 +40,79 @@ namespace MA5
 
 class LHCOReader;
 class ROOTReader;
-class DelphesReader;
+class DetectorDelphes;
 
-class RecLeptonFormat : public RecParticleFormat
+class RecTrackFormat : public ParticleBaseFormat
 {
 
   friend class LHCOReader;
   friend class ROOTReader;
+  friend class JetClusteringFastJet;
+  friend class bTagger;
+  friend class TauTagger;
+  friend class cTagger;
   friend class DelphesReader;
+  friend class DetectorDelphes;
 
   // -------------------------------------------------------------
   //                        data members
-  // -------------------------------------------------------------             
+  // -------------------------------------------------------------
  protected:
 
-  Bool_t charge_;       /// charge of the particle 0 = -1, 1 = +1
-  Float_t sumET_isol_;  /// sumET in an isolation cone
-  Float_t sumPT_isol_;  /// sumPT in an isolation cone
+  signed int pdgid_;   /// PDG identity code
+  Bool_t charge_;      /// electric charge
+  Double_t etaOuter_;  /// eta @ first layer of calo
+  Double_t phiOuter_;  /// phi @ first layer of calo
 
   // -------------------------------------------------------------
   //                        method members
-  // -------------------------------------------------------------             
+  // -------------------------------------------------------------
  public:
 
   /// Constructor without arguments
-  RecLeptonFormat()
+  RecTrackFormat()
   { Reset(); }
 
   /// Destructor
-  virtual ~RecLeptonFormat()
+  virtual ~RecTrackFormat()
   {}
 
   /// Dump information
   virtual void Print() const
   {
-    INFO << "charge ="   << /*set::setw(8)*/"" << std::left << charge_  << ", "  
-         << "sumET_isol_ = " << /*set::setw(8)*/"" << std::left << sumET_isol_ << ", "
-         << "sumPT_isol_ = " << /*set::setw(8)*/"" << std::left << sumPT_isol_;
-
-    RecParticleFormat::Print();
+    INFO << "pdgid = " << pdgid_ << ", "  
+         << "charge = " << charge_ << ", "
+         << "etaOuter = " << etaOuter_ << ", "
+         << "phiOuter = " << phiOuter_ << endmsg;
+    ParticleBaseFormat::Print();
   }
 
   /// Clear all information
   virtual void Reset()
   {
-    charge_=false;
-    sumET_isol_=0.;
-    sumPT_isol_=0.;
+    pdgid_    = 0;
+    charge_   = false;
+    etaOuter_ = 0.;
+    phiOuter_ = 0.;
+    ParticleBaseFormat::Reset();
   }
 
-  /// Accessor to the electric charge 
-  virtual const int charge() const
-  { if (charge_) return +1; else return -1; }
+  /// Accessor to the pdgid
+  const signed int pdgid() const
+  {return pdgid_;}
 
-  /// Mutator related to the electric charge 
-  virtual void SetCharge(Int_t charge)
-  { if (charge>0) charge_=true; else charge_=false; }
+  /// Accessor to etaCalo
+  const Double_t& etaCalo() const
+  {return etaOuter_;}
 
-  /// Accessor to sumET_isol
-  virtual const Float_t sumET_isol() const
-  { return sumET_isol_; }
+  /// Accessor to etaCalo
+  const Double_t& phiCalo() const
+  {return phiOuter_;}
 
-  /// Accessor to sumPT_isol
-  virtual const Float_t sumPT_isol() const
-  { return sumPT_isol_; }
+  /// Accessor to charge
+  const int charge() const
+  {if (charge_) return +1; else return -1;}
 
-  /// Accessor to ET_PT
-  virtual const Float_t ET_PT_isol() const
-  { if (sumPT_isol_!=0) return sumET_isol_/sumPT_isol_;
-    else return 0; }
 
 };
 

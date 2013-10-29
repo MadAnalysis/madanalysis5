@@ -322,6 +322,32 @@ class CmdSubmit(CmdBase):
 
 
 
+    def editDelphesCard(self,dirname):
+        if self.main.forced or self.main.script:
+            return
+
+        logging.info("Would you like to edit the Delphes Card ? (Y/N)")
+        allowed_answers=['n','no','y','yes']
+        answer=""
+        while answer not in  allowed_answers:
+            answer=raw_input("Answer: ")
+            answer=answer.lower()
+        if answer=="no" or answer=="n":
+            return
+        else:
+            if self.main.fastsim.delphes.pileup=="":
+                if self.main.fastsim.delphes.detector=='cms':
+                    cardname = 'delphes_card_CMS.tcl'
+                elif self.main.fastsim.delphes.detector=='atlas':
+                    cardname ='delphes_card_ATLAS.tcl'
+            else:
+                if self.main.fastsim.delphes.detector=='cms':
+                    cardname = 'delphes_card_CMS_PileUp.tcl'
+                elif self.main.fastsim.delphes.detector=='atlas':
+                    cardname ='delphes_card_ATLAS_PileUp.tcl'
+            os.system(self.main.configLinux.editor+" "+dirname+"/Input/"+cardname)
+
+
     def submit(self,dirname,history):
 
         # Initializing the JobWriter
@@ -380,6 +406,10 @@ class CmdSubmit(CmdBase):
             if not jobber.WriteMakefiles():
                 logging.error("job submission aborted.")
                 return False
+
+        #edit the delphes cards
+        if self.main.fastsim.package=="delphes":
+            self.editDelphesCard(dirname)
 
         logging.info("   Compiling 'SampleAnalyzer'...")
         if not jobber.CompileJob():

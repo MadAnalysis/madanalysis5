@@ -36,6 +36,7 @@ class LinuxArchitecture:
         self.fastjet_version  = ""
         self.libraries        = {}
         self.headers          = {}
+        self.editor           = ""
 
 
     def Dump(self):

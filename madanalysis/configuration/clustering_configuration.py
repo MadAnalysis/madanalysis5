@@ -46,8 +46,8 @@ class ClusteringConfiguration:
                     }
 
     def __init__(self):
-        self.clustering   = 0
-        self.algorithm    = "none"
+        self.algorithm    = "antikt"
+        self.clustering   = ClusteringAntiKt()
         self.beauty       = BeautyIdentification()
         self.tau          = TauIdentification()
         self.exclusive_id = True
@@ -97,7 +97,8 @@ class ClusteringConfiguration:
             return {}
 
 
-    def user_SetParameter(self,parameter,value,datasets,level,fastjet):
+    def user_SetParameter(self,parameter,value,datasets,level):
+        
         # algorithm
         if parameter=="algorithm":
 
@@ -130,11 +131,6 @@ class ClusteringConfiguration:
                     logging.error("clustering algorithm is only available in RECO mode")
                     return
                 
-                # Fastjet ?
-                if not fastjet:
-                    logging.error("fastjet library is not installed. Clustering algorithms are not available.")
-                    return
-
                 test=True
                 for dataset in datasets:
                     if not test:

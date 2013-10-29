@@ -29,12 +29,11 @@
 #include <iostream>
 #include <fstream>
 
-// ZLib header
-#include <zlib.h>
-
 // ROOT headers
 #include <Rtypes.h> 
 
+// ZLib headers
+#include <zlib.h>
 
 namespace MA5
 {
@@ -80,7 +79,7 @@ class gz_streambuf : public std::streambuf
   int is_open() { return opened; }
 
   /// Opening the gzip file
-  gz_streambuf* open( const char* name, int open_mode);
+  gz_streambuf* open(const char* name, int open_mode);
 
   /// Closing the file
   gz_streambuf* close();
@@ -89,7 +88,7 @@ class gz_streambuf : public std::streambuf
   ~gz_streambuf() { close(); }
     
   /// Overflow
-  virtual int overflow( int c = EOF);
+  virtual int overflow(int c = EOF);
 
   /// Underflow
   virtual int underflow();

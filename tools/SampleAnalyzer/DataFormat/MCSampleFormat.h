@@ -118,7 +118,7 @@ class MCSampleFormat
     sumweight_positive_ = 0.;
     sumweight_negative_ = 0.;
   }
-  
+
   /// Accessor to PDG ID of the intial partons
   const std::pair<Int_t,Int_t>& beamPDGID() const
   { return beamPDGID_; }
@@ -188,8 +188,11 @@ class MCSampleFormat
   {weightMode_=v;}
 
   /// Set the cross section mean
+  // BENJ: the normalization in the pythia lhe output by madgraph has been changed
+  //       the 1e9 factor is not needed anymore
   void setXsection(Double_t value) 
-  { xsection_=value*getXsectionUnitFactor();}
+//  { xsection_=value*getXsectionUnitFactor();}
+  { xsection_=value;}
 
   /// Set the cross section mean
   void setXsectionMean(Double_t value) 

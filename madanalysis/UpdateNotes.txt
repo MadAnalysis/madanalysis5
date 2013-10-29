@@ -1,8 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
-68   1.1.9   (2013/09/12) bfuks:   Fixing the computation of observables with differences (bug 1221914) 
+86   1.1.9  (2013/10/29) ma5team:   - various bug fixes and improvement of the delphes interface
 
-84   1.1.8  (2013/08/06) ma5team:   - installing Delphes3 from MadAnalysis5 console : install delphes
+69   1.1.8  (2013/08/06) ma5team:   - installing Delphes3 from MadAnalysis5 console : install delphes
                                     - reading default Delphes3 ROOT file
                                     - identifying generator or shower program used when reading a sample
                                     - improving the compatibility with samples produced by HERWIG

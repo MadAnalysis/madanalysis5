@@ -150,12 +150,8 @@ class CutFlowForDataset:
  
         # Calculating errors on Naccepted and Nrejected
         for icut in range(0,len(self.Nselected)):
-            if icut==0:
-                self.Nselected[icut].error = Measure.binomialNEventError(self.Nselected[icut].mean,self.Ntotal.mean)
-                self.Nrejected[icut].error = Measure.binomialNEventError(self.Nrejected[icut].mean,self.Ntotal.mean)
-            else:
-                self.Nselected[icut].error = Measure.binomialNEventError(self.Nselected[icut].mean,self.Ntotal.mean)
-                self.Nrejected[icut].error = Measure.binomialNEventError(self.Nrejected[icut].mean,self.Ntotal.mean)
+            self.Nselected[icut].error = Measure.binomialNEventError(self.Nselected[icut].mean,self.Ntotal.mean)
+            self.Nrejected[icut].error = Measure.binomialNEventError(self.Nrejected[icut].mean,self.Ntotal.mean)
 
         # efficiency calculation and its error
         for icut in range(0,len(self.Nselected)):

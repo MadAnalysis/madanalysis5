@@ -32,21 +32,26 @@
 
 
 // SampleAnalyzer headers
+// |- core functions
 #include "SampleAnalyzer/Core/StatusCode.h"
-#include "SampleAnalyzer/Core/ProgressBar.h"
-#include "SampleAnalyzer/Core/Configuration.h"
 #include "SampleAnalyzer/Service/LogService.h"
+// |- data format
 #include "SampleAnalyzer/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/DataFormat/SampleFormat.h"
+// |è-manager headers
 #include "SampleAnalyzer/Reader/ReaderManager.h"
 #include "SampleAnalyzer/Analyzer/AnalyzerManager.h"
 #include "SampleAnalyzer/Filter/FilterManager.h"
 #include "SampleAnalyzer/Writer/WriterManager.h"
 #include "SampleAnalyzer/JetClustering/JetClustererManager.h"
+#include "SampleAnalyzer/Detector/DetectorManager.h"
 
 
 namespace MA5
 {
+
+class ProgressBar;
+class Configuration;
 
 class SampleAnalyzer
 {
@@ -68,6 +73,7 @@ class SampleAnalyzer
   AnalyzerManager     fullAnalyses_;
   FilterManager       fullFilters_;
   JetClustererManager fullJetClusterers_;
+  DetectorManager     fullDetectors_;
 
   /// List of managers
   std::vector<WriterBase*>       writers_;
@@ -75,6 +81,7 @@ class SampleAnalyzer
   std::vector<AnalyzerBase*>     analyzers_;
   std::vector<FilterBase*>       filters_;
   std::vector<JetClustererBase*> clusters_;
+  std::vector<DetectorBase*>     detectors_;
 
   /// Reading status
   unsigned int file_index_;
@@ -115,6 +122,11 @@ class SampleAnalyzer
 
   /// Getting pointer to a jet clusterer
   JetClustererBase* InitializeJetClusterer(const std::string& name, 
+                  const std::map<std::string,std::string>& parameters);
+
+  /// Getting pointer to a detector
+  DetectorBase* InitializeDetector(const std::string& name,
+                                  const std::string& configFile,
                   const std::map<std::string,std::string>& parameters);
 
   /// Reading the next event

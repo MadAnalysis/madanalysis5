@@ -134,7 +134,13 @@ class ConfigChecker:
         ConfigChecker.AddIfValid('/usr/local/lib*',self.libs)
         ConfigChecker.AddIfValid('/local/lib*',self.libs)
         ConfigChecker.AddIfValid('/opt/local/lib*',self.libs)
-        
+
+
+    def checkTextEditor(self):
+        try:
+            self.configLinux.editor = os.environ['EDITOR']
+        except KeyError:
+            self.configLinux.editor = 'vi'
 
     def checkROOT(self):
         # Checking if ROOT is present
@@ -424,6 +430,8 @@ class ConfigChecker:
             if find:
                 os.environ['CPLUS_INCLUDE_PATH'] = os.environ['CPLUS_INCLUDE_PATH'] + ":" + \
                                                    self.ma5dir+'/tools/delphes/'
+                os.environ['CPLUS_INCLUDE_PATH'] = os.environ['CPLUS_INCLUDE_PATH'] + ":" + \
+                                                   self.ma5dir+'/tools/delphes/external/'
 
         if not find:
             self.PrintFAIL(warning=True)

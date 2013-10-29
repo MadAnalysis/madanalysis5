@@ -81,6 +81,8 @@ class MCParticleFormat : public ParticleBaseFormat
  public:
   UInt_t 	        mothup1_;   /// first mother index
   UInt_t 	        mothup2_;   /// second mother index
+  UInt_t 	        daughter1_;   /// first mother index
+  UInt_t 	        daughter2_;   /// second mother index
 
 
   // -------------------------------------------------------------
@@ -102,6 +104,7 @@ class MCParticleFormat : public ParticleBaseFormat
     momentum_.SetPxPyPzE(0.,0.,0.,0.);
     ctau_=0.; spin_=0.; pdgid_=0; 
     statuscode_=0; mothup1_=0; mothup2_=0; mother1_=0; mother2_=0; 
+    daughter1_=0; daughter2_=0;
     extra1_=0; extra2_=0;
   }
 

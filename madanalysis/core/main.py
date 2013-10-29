@@ -36,7 +36,7 @@ from madanalysis.IOinterface.library_writer             import LibraryWriter
 from madanalysis.enumeration.ma5_running_type           import MA5RunningType
 from madanalysis.enumeration.stacking_method_type       import StackingMethodType
 from madanalysis.observable.observable_manager          import ObservableManager
-from madanalysis.configuration.clustering_configuration import ClusteringConfiguration
+from madanalysis.configuration.fastsim_configuration    import FastsimConfiguration
 from madanalysis.configuration.isolation_configuration  import IsolationConfiguration
 from madanalysis.configuration.merging_configuration    import MergingConfiguration
 from madanalysis.configuration.shower_configuration     import ShowerConfiguration
@@ -91,7 +91,7 @@ class Main():
 
     def ResetParameters(self):
         self.merging        = MergingConfiguration()
-        self.clustering     = ClusteringConfiguration()
+        self.fastsim        = FastsimConfiguration()
         self.SBratio        = 'S/B'
         self.SBerror        = Main.SBformula['S/B']
         self.lumi           = 10
@@ -126,7 +126,7 @@ class Main():
             samples.append('.hep')
             samples.append('.hepmc')
         else:
-            if self.clustering.algorithm=="none":
+            if self.fastsim.package=="none":
                 samples.append('.lhco')
                 if self.libDelphes:
                     samples.append('.root')
@@ -157,7 +157,7 @@ class Main():
         self.user_DisplayParameter("SBerror")
         if self.libFastJet:
             self.merging.Display()
-            self.clustering.Display()    
+        self.fastsim.Display()    
         self.isolation.Display()
         self.shower.Display()
         logging.info(" *********************************" )
@@ -317,9 +317,9 @@ class Main():
                     logging.error("LHCO format is not available in PARTON mode.")
                     return False
                 elif self.mode == MA5RunningType.HADRON:
-                    if self.clustering.algorithm == "none":
-                        logging.error("Please select a jet-clustering algorithm before requesting a LHCO file output.")
-                        logging.error("Command: set main.merging.algorithm = ")
+                    if self.fastsim.package == "none":
+                        logging.error("Please select a fast-simulation package before requesting a LHCO file output.")
+                        logging.error("Command: set main.fastsim.package = ")
                         return False
                     else:
                         self.output = value
@@ -427,6 +427,7 @@ class Main():
 
         # Initializing the config checker    
         checker = ConfigChecker(self.configLinux,self.ma5dir,self.script)
+        checker.checkTextEditor()
 
         # Mandatory packages
         logging.info("Checking mandatory packages:")

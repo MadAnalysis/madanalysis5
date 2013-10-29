@@ -65,7 +65,7 @@ def WriteJobRank(part,file,rank,status):
     container=InstanceName.Get('P_'+part.name+rank+status)
     refpart = copy.copy(part)
     refpart.PTrank=0
-    newcontainer=InstanceName.Get('P_'+refpart.name+'PTordering'+status);
+    newcontainer=InstanceName.Get('P_'+refpart.name+rank+status);
 
     file.write('  // Sorting particle collection according to '+rank+'\n')
     file.write('  // for getting '+str(part.PTrank)+'th particle\n')
