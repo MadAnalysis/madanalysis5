@@ -203,7 +203,7 @@ class JobWriter():
 
         for line in input:
             if self.main.fastsim.delphes.pileup!="":
-                line=line.replace('MinBias.pileup',thefile)
+                line=line.replace('MinBias.pileup',theFile)
             output.write(line)
 
         try:

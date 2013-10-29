@@ -1,8 +1,15 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
-86   1.1.9  (2013/10/29) ma5team:   - various bug fixes and improvement of the delphes interface
+80   1.1.9  (2013/10/28) ma5team:   - adding Delphes interface + CMS/ATLAS cards
+                                    - adding Delphes cards including pile-up
+                                    - the electric charge is now an integer at the reco level 
+                                    - modifying the default range for the sdphi and dphi observables 
+                                    - wrong normalization of the LHE file constructed by madgraph5 once 
+                                      pythia6 has been run (bug 1183739) 
+                                    - compatibility with mac improved 
+                                    - Fixing the computation of observables with differences 
 
-69   1.1.8  (2013/08/06) ma5team:   - installing Delphes3 from MadAnalysis5 console : install delphes
+84   1.1.8  (2013/08/06) ma5team:   - installing Delphes3 from MadAnalysis5 console : install delphes
                                     - reading default Delphes3 ROOT file
                                     - identifying generator or shower program used when reading a sample
                                     - improving the compatibility with samples produced by HERWIG
