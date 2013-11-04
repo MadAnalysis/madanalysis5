@@ -456,7 +456,12 @@ def WriteJobInitialize(file,main):
     # Initializing array of cuts     
     if Ncuts!=0:
         file.write('  // Initializing cut array\n')
-        file.write('  cuts_.Initialize('+str(Ncuts)+');\n')
+    icut=1
+    for item in main.selection.table:
+      if item.__class__.__name__=="Cut":
+        file.write("  cuts_.InitCut(\""+item.conditions.GetStringDisplay()+"\");\n")
+    if Ncuts!=0:
+        file.write('\n')
 
     # Initializing each item
     ihisto  = 0

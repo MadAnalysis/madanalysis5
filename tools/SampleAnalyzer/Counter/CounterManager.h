@@ -71,6 +71,14 @@ class CounterManager
   void Initialize(const unsigned int& n)
   { counters_.resize(n); }
 
+
+  // Specifying a cut name
+  void InitCut(const std::string myname)
+  {
+    Counter tmpcnt(myname);
+    counters_.push_back(tmpcnt);
+  }
+
   /// Reset
   void Reset()
   { counters_.clear(); }

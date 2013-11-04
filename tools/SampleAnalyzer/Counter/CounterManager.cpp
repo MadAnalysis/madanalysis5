@@ -82,7 +82,7 @@ void CounterManager::Write_TextFormat(SAFWriter& output) const
   *output.GetStream() << "<InitialCounter>" << std::endl;
 
   // name
-  *output.GetStream() << "\"" << initial_.name_ << "\" #name" << std::endl;
+  *output.GetStream() << "\"" << initial_.name_ << "\" # initial number of events" << std::endl;
 
   // nentries
   output.GetStream()->width(15);
@@ -121,7 +121,7 @@ void CounterManager::Write_TextFormat(SAFWriter& output) const
     *output.GetStream() << "<Counter>" << std::endl;
 
     // name
-    *output.GetStream() << "\"" << counters_[i].name_ << "\" #name" << std::endl;
+    *output.GetStream() << "\"" << counters_[i].name_ << "\" # " << i+1 <<"st cut" << std::endl;
 
     // nentries
     output.GetStream()->width(15);

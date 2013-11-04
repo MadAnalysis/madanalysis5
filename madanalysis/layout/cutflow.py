@@ -126,21 +126,3 @@ class CutFlow:
                 if summary.Nselected[i-1].mean!=0:
                     summary.eff[i].mean=float(summary.Nselected[i].mean)/float(summary.Nselected[i-1].mean)
                     summary.eff[i].error=Measure.binomialError(summary.Nselected[i].mean,summary.Nselected[i-1].mean)
-        
-
-
-
-
-
-                    
-            
-                                            
-
-        
-        
-            
-                
-        
-        
-
-        

@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+71   1.1.10  (2013/11/04) bfuks:   use of names with the counters 
+
 80   1.1.9  (2013/10/28) ma5team:   - adding Delphes interface + CMS/ATLAS cards
                                     - adding Delphes cards including pile-up
                                     - the electric charge is now an integer at the reco level 
