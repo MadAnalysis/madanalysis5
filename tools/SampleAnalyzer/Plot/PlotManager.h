@@ -49,7 +49,7 @@ class PlotManager
   // -------------------------------------------------------------
   //                        data members
   // -------------------------------------------------------------
- private :
+ protected :
 
   /// Collection of plots
   std::vector<PlotBase*> plots_;
