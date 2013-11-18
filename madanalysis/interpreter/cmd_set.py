@@ -102,7 +102,7 @@ class CmdSet(CmdBase.CmdBase):
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='merging':
             self.main.merging.user_SetParameter(objs[2],args[2],self.main.mode,self.main.libFastJet)
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='fastsim':
-            self.main.fastsim.user_SetParameter(objs[2],args[2],self.main.datasets,self.main.mode,self.main.libFastJet,self.main.libDelphes) 
+            self.main.fastsim.user_SetParameter(objs[2],args[2],self.main.datasets,self.main.mode,self.main.libFastJet,self.main.libDelphes,self.main.libDelfes) 
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='shower':
             self.main.shower.user_SetParameter(objs[2],args[2],self.main.mode,self.main.mcatnloutils)
         else:

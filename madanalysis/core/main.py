@@ -79,6 +79,7 @@ class Main():
         self.mg5            = False
         self.libZIP         = False
         self.libDelphes     = False
+        self.libDelfes      = False
         self.pdflatex       = False
         self.latex          = False
         self.dvipdf         = False
@@ -128,7 +129,7 @@ class Main():
         else:
             if self.fastsim.package=="none":
                 samples.append('.lhco')
-                if self.libDelphes:
+                if self.libDelphes or self.libdelphes:
                     samples.append('.root')
             else:
                 samples.append('.lhe')
@@ -446,6 +447,7 @@ class Main():
             return False
         self.libZIP = checker.checkZLIB()
         self.libDelphes = checker.checkDelphes()
+        self.libDelfes  = checker.checkDelfes()
         self.libFastJet = checker.checkFastJet()
         self.pdflatex = checker.checkPdfLatex()
         self.latex = checker.checkLatex()
@@ -487,7 +489,7 @@ class Main():
             logging.info("  => The user forces to rebuild the library.")
 
         # Initializing the JobWriter
-        compiler = LibraryWriter(self.ma5dir,'lib',self.libZIP,self.libFastJet,self.forced,self.fortran,self.libDelphes)
+        compiler = LibraryWriter(self.ma5dir,'lib',self.libZIP,self.libFastJet,self.forced,self.fortran,self.libDelphes,self.libDelfes)
     
         # Dumping architecture
         if not self.configLinux.Export(self.ma5dir+'/tools/architecture.ma5'):

@@ -46,7 +46,8 @@ class HEPMCReader;
 class ROOTReader;
 class LHEWriter;
 class MergingPlots;
-class DelphesReader;
+class DelphesTreeReader;
+class DelfesTreeReader;
 
 class MCParticleFormat : public ParticleBaseFormat
 {
@@ -57,7 +58,8 @@ class MCParticleFormat : public ParticleBaseFormat
   friend class ROOTReader;
   friend class LHEWriter;
   friend class MergingPlots;
-  friend class DelphesReader;
+  friend class DelphesTreeReader;
+  friend class DelfesTreeReader;
 
   // -------------------------------------------------------------
   //                        data members

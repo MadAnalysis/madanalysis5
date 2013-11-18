@@ -28,11 +28,12 @@
 #include <sstream>
 
 // SampleHeader headers
-#include "SampleAnalyzer/Reader/DelphesReader.h"
+#include "SampleAnalyzer/Reader/DelphesTreeReader.h"
 #include "SampleAnalyzer/Service/LogService.h"
 
 // ROOT headers
 #include <TROOT.h>
+#include <TClonesArray.h>
 
 // Delphes headers
 #include "external/ExRootAnalysis/ExRootTreeReader.h"
@@ -44,53 +45,8 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 // Initialize
 // -----------------------------------------------------------------------------
-bool DelphesReader::Initialize(const std::string& rawfilename,
-                               const Configuration& cfg)
+bool DelphesTreeReader::Initialize()
 {
-  // Set configuration
-  cfg_=cfg;
-
-  // Is the file stored in Rfio
-  rfio_ = IsRfioMode(rawfilename);
-
-  // Check consistency with compilation option
-  if (rfio_)
-  {
-#ifndef RFIO_USE
-    ERROR << "'-rfio' is not allowed. Please set the RFIO_USE"
-          << " variable in the Makefile to 1 and recompile the program if"
-          << " you would like to use this option." << endmsg;
-    exit(1);
-#endif
-  }
-
-  // Cleaning the file (remove rfio or local location)
-  filename_ = rawfilename;
-  CleanFilename(filename_);
-
-  // Opening the file
-  source_ = new TFile(filename_.c_str());
-  
-  // Check if the input is properly opened
-  bool test=true;
-  if (source_==0) test=false;
-  else if (!source_->IsOpen() || source_->IsZombie()) test=false;
-  if (!test)
-  {
-    ERROR << "Opening file " << filename_ << " failed" << endmsg;
-    source_=0;
-    return false;
-  }
-  
-  // Initializing tree
-  // Create chain of root trees
-  tree_ = dynamic_cast<TTree*>(source_->Get("Delphes"));
-  if (tree_==0)
-  {
-    ERROR << "Impossible to access the tree "
-          << "called 'Delphes' in the input file" << endmsg;
-    return false;
-  }  
   // Create object of class ExRootTreeReader
   treeReader_    = new ExRootTreeReader(tree_);
   total_nevents_ = treeReader_->GetEntries();
@@ -138,39 +94,18 @@ bool DelphesReader::Initialize(const std::string& rawfilename,
     WARNING << "Track branch is not found" << endmsg;
   }
 
-  return test;
+  return true;
 }
 
 
 // -----------------------------------------------------------------------------
 // ReadHeader
 // -----------------------------------------------------------------------------
-bool DelphesReader::ReadHeader(SampleFormat& mySample)
+bool DelphesTreeReader::ReadHeader(SampleFormat& mySample)
 {
-  // Initiliaze REC
   mySample.InitializeRec();
   mySample.SetSampleFormat(MA5FORMAT::DELPHES);
   mySample.SetSampleGenerator(MA5GEN::DELPHES);
-
-  // Checking ROOT version
-  Int_t file_version = source_->GetVersion();
-  Int_t lib_version = gROOT->GetVersionInt();
-  if (file_version!=lib_version)
-  {
-    WARNING << "the input file has been produced with ROOT version " << file_version
-            << " whereas the loaded ROOT libs are related to the version " << lib_version << endmsg;
-  }
-
-  return true;
-}
-
-
-// -----------------------------------------------------------------------------
-// FinalizeHeader
-// -----------------------------------------------------------------------------
-bool DelphesReader::FinalizeHeader(SampleFormat& mySample)
-{
-  // Normal end 
   return true;
 }
 
@@ -178,7 +113,7 @@ bool DelphesReader::FinalizeHeader(SampleFormat& mySample)
 // -----------------------------------------------------------------------------
 // ReadEvent
 // -----------------------------------------------------------------------------
-StatusCode::Type DelphesReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySample)
+StatusCode::Type DelphesTreeReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySample)
 {
   // Initiliaze MC
   myEvent.InitializeRec();
@@ -205,7 +140,7 @@ StatusCode::Type DelphesReader::ReadEvent(EventFormat& myEvent, SampleFormat& my
 // -----------------------------------------------------------------------------
 // FinalizeEvent
 // -----------------------------------------------------------------------------
-bool DelphesReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
+bool DelphesTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 {
   // MHT & THT
   for (unsigned int i=0; i<myEvent.rec()->jets_.size();i++)
@@ -294,7 +229,7 @@ bool DelphesReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 // -----------------------------------------------------------------------------
 // FillEventParticleLine
 // -----------------------------------------------------------------------------
-void DelphesReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
+void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
 {
   // Fill electrons
   if (branchElectron_!=0)
@@ -396,15 +331,5 @@ void DelphesReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
 
 }
 
-
-// -----------------------------------------------------------------------------
-// Finalize
-// -----------------------------------------------------------------------------
-bool DelphesReader::Finalize()
-{
-  // OK!
-  if (source_!=0) source_->Close();
-  return true;
-}
 
 #endif

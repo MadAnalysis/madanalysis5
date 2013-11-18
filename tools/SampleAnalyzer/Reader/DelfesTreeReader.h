@@ -22,11 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef DELPHES_READER_h
-#define DELPHES_READER_h
+#ifndef DELFES_TREE_READER_h
+#define DELFES_TREE_READER_h
 
 // SampleAnalyzer headers
-#include "SampleAnalyzer/Reader/ReaderTextBase.h"
+#include "SampleAnalyzer/Reader/TreeReaderBase.h"
 
 // ROOT header
 #include <TChain.h>
@@ -37,7 +37,7 @@
 // STL header
 #include <iostream>
 
-#ifdef DELPHES_USE
+#ifdef DELFES_USE
 
 // Delphes header
 class ExRootTreeReader;
@@ -45,7 +45,7 @@ class ExRootTreeReader;
 namespace MA5
 {
 
-class DelphesReader : public ReaderBase
+class DelfesTreeReader : public TreeReaderBase
 {
 
   // -------------------------------------------------------------
@@ -53,17 +53,8 @@ class DelphesReader : public ReaderBase
   // -------------------------------------------------------------
  protected:
 
-  /// Input file stream
-  TFile * source_;
-
-  /// Name of the input file (without prefix such as file: or rfio:)
-  std::string filename_;
-
   /// Tree reader
   ExRootTreeReader *treeReader_;
-
-  /// Tree
-  TTree* tree_;
 
   /// Number of total entries in the file
   Long64_t total_nevents_;
@@ -87,22 +78,22 @@ class DelphesReader : public ReaderBase
  public:
 
   /// Constructor without argument
-  DelphesReader()
+  DelfesTreeReader()
   { InitializeVariables(); } 
 
+  /// Constructor with arguments
+  DelfesTreeReader(TFile* source, TTree* tree): TreeReaderBase(source,tree)
+  { }
+
 	/// Destructor
-  virtual ~DelphesReader()
+  virtual ~DelfesTreeReader()
   { }
 
   /// Initialize
-  virtual bool Initialize(const std::string& rawfilename,
-                          const Configuration& cfg);
+  virtual bool Initialize();
 
   /// Read the header
   virtual bool ReadHeader(SampleFormat& mySample);
-
-  /// Finalize the header
-  virtual bool FinalizeHeader(SampleFormat& mySample);
 
   /// Read the event
   virtual StatusCode::Type ReadEvent(EventFormat& myEvent, SampleFormat& mySample);
@@ -110,8 +101,6 @@ class DelphesReader : public ReaderBase
   /// Finalize the event
   virtual bool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent);
 
-  /// Finalize
-  virtual bool Finalize();
 
  private:
 
@@ -119,10 +108,7 @@ class DelphesReader : public ReaderBase
 
   void InitializeVariables()
   {
-    source_=0;
-    filename_="";
     treeReader_=0;
-    tree_=0;
     total_nevents_=0;
     read_nevents_=0;
     branchJet_=0;
@@ -139,25 +125,14 @@ class DelphesReader : public ReaderBase
   virtual Long64_t GetFinalPosition()
   { return total_nevents_; }
 
-  /// Get the file size
-  virtual Long64_t GetFileSize()
-  {
-    Long64_t length = 0;
-    std::ifstream myinput(filename_.c_str());
-    myinput.seekg(0,std::ios::beg);
-    myinput.seekg(0,std::ios::end);
-    length = myinput.tellg();
-    myinput.close();
-    return length;
-  }
-
   /// Get the position in file (in octet)
   virtual Long64_t GetPosition()
   { return read_nevents_; }
 
-};
 
 };
+
+}
 
 #endif
 #endif

@@ -172,7 +172,8 @@ class SampleFormat
     else if (sample_format_==MA5FORMAT::STDHEP) INFO << "STDHEP";
     else if (sample_format_==MA5FORMAT::HEPMC) INFO << "HEPMC";
     else if (sample_format_==MA5FORMAT::LHCO) INFO << "LHCO";
-    else if (sample_format_==MA5FORMAT::DELPHES) INFO << "ROOT";
+    else if (sample_format_==MA5FORMAT::DELPHES) INFO << "Delphes-ROOT";
+    else if (sample_format_==MA5FORMAT::DELFES) INFO << "Delfes-ROOT";
     INFO << " file produced by ";
 
     // Generator
@@ -186,6 +187,7 @@ class SampleFormat
     else if (sample_generator_==MA5GEN::HERWIG6) INFO << "Herwig6";
     else if (sample_generator_==MA5GEN::HERWIGPP) INFO << "Herwig++";
     else if (sample_generator_==MA5GEN::DELPHES) INFO << "Delphes";
+    else if (sample_generator_==MA5GEN::DELFES) INFO << "Delfes";
     INFO << "." << endmsg;
   }
 

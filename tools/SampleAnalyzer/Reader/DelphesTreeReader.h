@@ -22,11 +22,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef ROOT_READER_h
-#define ROOT_READER_h
+#ifndef DELPHES_TREE_READER_h
+#define DELPHES_TREE_READER_h
 
 // SampleAnalyzer headers
-#include "SampleAnalyzer/Reader/ReaderBase.h"
 #include "SampleAnalyzer/Reader/TreeReaderBase.h"
 
 // ROOT header
@@ -34,17 +33,19 @@
 #include <TLorentzVector.h>
 #include <TObject.h>
 #include <TFile.h>
-#include <TROOT.h>
 
 // STL header
 #include <iostream>
 
-#ifdef ROOT_USE
+#ifdef DELPHES_USE
+
+// Delphes header
+class ExRootTreeReader;
 
 namespace MA5
 {
 
-class ROOTReader : public ReaderBase
+class DelphesTreeReader : public TreeReaderBase
 {
 
   // -------------------------------------------------------------
@@ -52,9 +53,24 @@ class ROOTReader : public ReaderBase
   // -------------------------------------------------------------
  protected:
 
-  TFile *         source_;
-  TreeReaderBase* treeReader_;
-  std::string     filename_;
+  /// Tree reader
+  ExRootTreeReader *treeReader_;
+
+  /// Number of total entries in the file
+  Long64_t total_nevents_;
+
+  /// Number of entries read by MA5
+  Long64_t read_nevents_;
+
+  /// Pointers to the different branches
+  TClonesArray *branchJet_;
+  TClonesArray *branchElectron_;
+  TClonesArray *branchPhoton_;
+  TClonesArray *branchMuon_;
+  TClonesArray *branchMissingET_;
+  TClonesArray *branchScalarHT_;
+  TClonesArray *branchGenParticle_;
+  TClonesArray *branchTrack_;
 
   // -------------------------------------------------------------
   //                       method members
@@ -62,78 +78,61 @@ class ROOTReader : public ReaderBase
  public:
 
   /// Constructor without argument
-  ROOTReader()
-  { 
-    source_=0;
-    treeReader_=0;
-  } 
+  DelphesTreeReader()
+  { InitializeVariables(); } 
+
+  /// Constructor with arguments
+  DelphesTreeReader(TFile* source, TTree* tree): TreeReaderBase(source,tree)
+  { }
 
 	/// Destructor
-  virtual ~ROOTReader()
+  virtual ~DelphesTreeReader()
   { }
 
   /// Initialize
-  virtual bool Initialize(const std::string& rawfilename,
-                          const Configuration& cfg);
-
-  /// Finalize
-  virtual bool Finalize();
+  virtual bool Initialize();
 
   /// Read the header
-  virtual bool ReadHeader(SampleFormat& mySample)
-  {
-    // Checking ROOT version
-    Int_t file_version = source_->GetVersion();
-    Int_t lib_version = gROOT->GetVersionInt();
-    if (file_version!=lib_version)
-    {
-      WARNING << "the input file has been produced with ROOT version " << file_version
-              << " whereas the loaded ROOT libs are related to the version " << lib_version << endmsg;
-    }
-    return treeReader_->ReadHeader(mySample);
-  }
-
-  /// Finalize the header
-  virtual bool FinalizeHeader(SampleFormat& mySample)
-  { return true; }
+  virtual bool ReadHeader(SampleFormat& mySample);
 
   /// Read the event
-  virtual StatusCode::Type ReadEvent(EventFormat& myEvent, SampleFormat& mySample)
-  { return treeReader_->ReadEvent(myEvent,mySample); }
+  virtual StatusCode::Type ReadEvent(EventFormat& myEvent, SampleFormat& mySample);
 
   /// Finalize the event
-  virtual bool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
-  { return treeReader_->FinalizeEvent(mySample,myEvent); }
-
-
-  /// Get the file size
-  virtual Long64_t GetFinalPosition()
-  { return treeReader_->GetFinalPosition(); }
-
-  /// Get the file size
-  virtual Long64_t GetFileSize()
-  {
-    Long64_t length = 0;
-    std::ifstream myinput(filename_.c_str());
-    myinput.seekg(0,std::ios::beg);
-    myinput.seekg(0,std::ios::end);
-    length = myinput.tellg();
-    myinput.close();
-    return length;
-  }
-
-  /// Get the position in file (in octet)
-  virtual Long64_t GetPosition()
-  { return treeReader_->GetPosition(); }
+  virtual bool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent);
 
 
  private:
-  bool SelectTreeReader();
+
+  void FillEvent(EventFormat& myEvent, SampleFormat& mySample);
+
+  void InitializeVariables()
+  {
+    treeReader_=0;
+    total_nevents_=0;
+    read_nevents_=0;
+    branchJet_=0;
+    branchElectron_=0;
+    branchPhoton_=0;
+    branchMuon_=0;
+    branchMissingET_=0;
+    branchScalarHT_=0;
+    branchGenParticle_=0;
+    branchTrack_=0;
+  }
+
+  /// Get the file size
+  virtual Long64_t GetFinalPosition()
+  { return total_nevents_; }
+
+  /// Get the position in file (in octet)
+  virtual Long64_t GetPosition()
+  { return read_nevents_; }
 
 
 };
 
-};
+}
 
 #endif
 #endif

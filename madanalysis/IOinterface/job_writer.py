@@ -40,6 +40,7 @@ class JobWriter():
         self.resubmit   = resubmit
         self.libZIP     = self.main.libZIP
         self.libDelphes = self.main.libDelphes
+        self.libDelfes  = self.main.libDelfes
         self.output     = self.main.output
         self.libFastjet = self.main.libFastJet
         self.fastsim    = self.main.fastsim
@@ -170,15 +171,20 @@ class JobWriter():
 
     def CreateDelphesCard(self):
 
-        if self.fastsim.delphes.pileup=="":
-            if self.fastsim.delphes.detector=='cms':
+        if self.main.fastsim.package=="delfes":
+            cfg=self.main.fastsim.delfes
+        else:
+            cfg=self.main.fastsim.delphes
+
+        if cfg.pileup=="":
+            if cfg.detector=='cms':
                 cardname = 'delphes_card_CMS.tcl'
-            elif self.fastsim.delphes.detector=='atlas':
+            elif cfg.detector=='atlas':
                 cardname ='delphes_card_ATLAS.tcl'
         else:
-            if self.fastsim.delphes.detector=='cms':
+            if cfg.detector=='cms':
                 cardname = 'delphes_card_CMS_PileUp.tcl'
-            elif self.fastsim.delphes.detector=='atlas':
+            elif cfg.detector=='atlas':
                 cardname ='delphes_card_ATLAS_PileUp.tcl'
 
         try:
@@ -191,18 +197,18 @@ class JobWriter():
         except:
             pass
 
-        if self.main.fastsim.delphes.pileup!="":
+        if cfg.pileup!="":
             # Getting current dir
             theDir = os.getcwd()
 
             # Adding file
-            if self.main.fastsim.delphes.pileup.startswith('/'):
-                theFile = self.main.fastsim.delphes.pileup
+            if cfg.pileup.startswith('/'):
+                theFile = cfg.pileup
             else:    
-                theFile = os.path.normpath(theDir+"/"+self.main.fastsim.delphes.pileup)
+                theFile = os.path.normpath(theDir+"/"+cfg.pileup)
 
         for line in input:
-            if self.main.fastsim.delphes.pileup!="":
+            if cfg.pileup!="":
                 line=line.replace('MinBias.pileup',theFile)
             output.write(line)
 
@@ -249,7 +255,7 @@ class JobWriter():
             logging.error('Impossible to make executable the file "newFilter.py"')
             return False
 
-        if self.main.fastsim.package=="delphes":
+        if self.main.fastsim.package in ["delphes","delfes"]:
             self.CreateDelphesCard()
 
         return True
@@ -314,37 +320,46 @@ class JobWriter():
 
         # Fast-Simulation detector
         # + Case Fastsim
-        if self.fastsim.package=="fastjet":
+        if self.main.fastsim.package=="fastjet":
             file.write('  //Getting pointer to the clusterer\n')
             file.write('  std::map<std::string, std::string> parametersC1;\n')
-            parameters = self.fastsim.SampleAnalyzerConfigString()
+            parameters = self.main.fastsim.SampleAnalyzerConfigString()
             for k,v in sorted(parameters.iteritems(),\
                               key=lambda (k,v): (k,v)):
                 file.write('  parametersC1["'+k+'"]="'+v+'";\n')
             file.write('  JetClustererBase* cluster1 = \n')
-            file.write('      manager.InitializeJetClusterer("'+self.fastsim.clustering.algorithm+'",parametersC1);\n')
+            file.write('      manager.InitializeJetClusterer("'+self.main.fastsim.clustering.algorithm+'",parametersC1);\n')
             file.write('  if (cluster1==0) return 1;\n\n')
             
         # + Case Delphes
-        if self.fastsim.package=="delphes":
+        if self.main.fastsim.package in ["delphes","delfes"]:
             file.write('  //Getting pointer to fast-simulation package\n')
             file.write('  std::map<std::string, std::string> parametersD1;\n')
-            parameters = self.fastsim.SampleAnalyzerConfigString()
+            if self.fastsim.package=="delfes":
+                cfg=self.main.fastsim.delfes
+            else:
+                cfg=self.main.fastsim.delphes
+            parameters = self.main.fastsim.SampleAnalyzerConfigString()
             for k,v in sorted(parameters.iteritems(),\
                               key=lambda (k,v): (k,v)):
                 file.write('  parametersD1["'+k+'"]="'+v+'";\n')
             file.write('  DetectorBase* fastsim1 = \n')
-            if self.fastsim.delphes.pileup=="":
-                if self.fastsim.delphes.detector=='cms':
+            if cfg.pileup=="":
+                if cfg.detector=='cms':
                     cardname = 'delphes_card_CMS.tcl'
-                elif self.fastsim.delphes.detector=='atlas':
+                elif cfg.detector=='atlas':
                     cardname ='delphes_card_ATLAS.tcl'
             else:
-                if self.fastsim.delphes.detector=='cms':
+                if cfg.detector=='cms':
                     cardname = 'delphes_card_CMS_PileUp.tcl'
-                elif self.fastsim.delphes.detector=='atlas':
+                elif cfg.detector=='atlas':
                     cardname ='delphes_card_ATLAS_PileUp.tcl'
-            file.write('      manager.InitializeDetector("delphes","../../Input/'+cardname+'",parametersD1);\n')
+
+            if self.main.fastsim.package=="delphes":
+                file.write('      manager.InitializeDetector("delphes","../../Input/'+cardname+'",parametersD1);\n')
+            else:
+                file.write('      manager.InitializeDetector("delfes","../../Input/'+cardname+'",parametersD1);\n')
+
             file.write('  if (fastsim1==0) return 1;\n\n')
 
         # Loop
@@ -377,9 +392,11 @@ class JobWriter():
         file.write('          manager.UpdateProgressBar();\n')
         if self.merging.enable:
             file.write('      analyzer2->Execute(mySample,myEvent);\n')
-        if self.fastsim.package=="fastjet":
+        if self.main.fastsim.package=="fastjet":
             file.write('      cluster1->Execute(mySample,myEvent);\n')
-        elif self.fastsim.package=="delphes":
+        elif self.main.fastsim.package=="delphes":
+            file.write('      fastsim1->Execute(mySample,myEvent);\n')
+        elif self.main.fastsim.package=="delfes":
             file.write('      fastsim1->Execute(mySample,myEvent);\n')
         file.write('      analyzer1->Execute(mySample,myEvent);\n')
         if self.output!="":
@@ -516,7 +533,9 @@ class JobWriter():
         if self.libZIP:
             file.write(' -DZIP_USE')
         if self.libDelphes:
-            file.write(' -DDELPHES_USE')
+            file.write(' -DROOT_USE -DDELPHES_USE')
+        if self.libDelfes:
+            file.write(' -DROOT_USE -DDELFES_USE')
         if self.libFastjet:
             file.write(' -DFASTJET_USE')
             file.write(' $(CXXFASTJET)')
@@ -646,7 +665,9 @@ class JobWriter():
         if self.libZIP:
             file.write(' -DZIP_USE')
         if self.libDelphes:
-            file.write(' -DDELPHES_USE')
+            file.write(' -DROOT_USE -DDELPHES_USE')
+        if self.libDelfes:
+            file.write(' -DROOT_USE -DDELFES_USE')
         if self.libFastjet:
             file.write(' -DFASTJET_USE')
             file.write(' $(CXXFASTJET)')
@@ -659,6 +680,8 @@ class JobWriter():
         if self.libZIP:
             file.write(' -lz')
         if self.libDelphes:
+            file.write(' -lDelphes')
+        if self.libDelfes:
             file.write(' -lDelphes')
         if self.fortran:
             file.write(' -lgfortran')

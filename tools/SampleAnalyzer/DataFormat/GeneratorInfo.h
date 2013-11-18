@@ -35,7 +35,7 @@ namespace MA5GEN
                        MG5=1, MA5=2,
                        PYTHIA6=3, PYTHIA8=4, 
                        HERWIG6=5, HERWIGPP=6,
-                       DELPHES=7 };
+                       DELPHES=7, DELFES=8 };
 }
 
 namespace MA5FORMAT
@@ -43,7 +43,7 @@ namespace MA5FORMAT
   enum SampleFormatType { UNKNOWN=0, 
                           LHE=1, SIMPLIFIED_LHE=2, 
                           STDHEP=3, HEPMC=4, LHCO=5,
-                          DELPHES=6 };
+                          DELPHES=6, DELFES=7 };
 }
 
 }

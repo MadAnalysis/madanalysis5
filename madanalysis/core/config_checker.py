@@ -444,6 +444,78 @@ class ConfigChecker:
         return True
 
 
+    def checkDelfes(self):
+
+        # Checking library libDelphes.so
+        find=False
+        for item in self.libs:
+            files=glob.glob(item+"/libDelphes.so")
+            files.extend(glob.glob(item+"/libDelphes.a"))
+            files.extend(glob.glob(item+"/libDelphes.dylib"))
+            if len(files)!=0:
+	        self.configLinux.libraries['Delfes']=files[0]+":"+str(os.stat(files[0]).st_mtime)
+   	        find=True
+                os.environ['LD_LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH'] + \
+                    		        ":" + item
+                os.environ['DYLD_LIBRARY_PATH'] = os.environ['DYLD_LIBRARY_PATH'] + \
+                    		        ":" + item
+                os.environ['LIBRARY_PATH'] = os.environ['LIBRARY_PATH'] + \
+                    		        ":" + item
+	        break
+
+        # If not, test if it is there locally 
+        if not find: 
+            item = self.ma5dir+'/tools/delfes/'
+            files=glob.glob(item+"/libDelphes.so")
+            files.extend(glob.glob(item+"/libDelphes.a"))
+            files.extend(glob.glob(item+"/libDelphes.dylib"))
+            if len(files)!=0:
+	        self.configLinux.libraries['Delfes']=files[0]+":"+str(os.stat(files[0]).st_mtime)
+   	        find=True
+                os.environ['LD_LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH'] + \
+                    		        ":" + item
+                os.environ['DYLD_LIBRARY_PATH'] = os.environ['DYLD_LIBRARY_PATH'] + \
+                    		        ":" + item
+                os.environ['LIBRARY_PATH'] = os.environ['LIBRARY_PATH'] + \
+                    		        ":" + item
+        # Not fail -> Warning
+        if not find:
+#            self.PrintFAIL(warning=True)
+#            logging.warning("Library called 'delfes' not found. Delphes ROOT format will be disabled.")
+#            logging.warning("To enable this format, please type 'install delphes'.")
+            return False
+
+	# Checking header file 
+        find=False
+        for item in self.includes:
+            files=glob.glob(item+"/modules/ParticlePropagator.h")
+            if len(files)!=0:
+  	        self.configLinux.headers['Delfes']=files[0]+":"+str(os.stat(files[0]).st_mtime)
+	        find=True
+                os.environ['CPLUS_INCLUDE_PATH'] = os.environ['CPLUS_INCLUDE_PATH'] + ":" + item
+   	        break
+
+        # If not, test if it is there locally 
+        if not find: 
+            find=os.path.isfile(self.ma5dir+'/tools/delfes/modules/ParticlePropagator.h')
+            if find:
+                os.environ['CPLUS_INCLUDE_PATH'] = os.environ['CPLUS_INCLUDE_PATH'] + ":" + \
+                                                   self.ma5dir+'/tools/delfes/'
+                os.environ['CPLUS_INCLUDE_PATH'] = os.environ['CPLUS_INCLUDE_PATH'] + ":" + \
+                                                   self.ma5dir+'/tools/delfes/external/'
+
+        if not find:
+#            self.PrintFAIL(warning=True)
+#            logging.warning("Header file called 'modules/ParticlePropagator.h' not found. Delfes ROOT format will be disabled.")
+#            logging.warning("To enable this format, please type 'install delphes' package.")
+            return False
+        else:
+#           self.PrintOK()
+            pass
+ 
+        return True
+
+
     def checkMCatNLOUtils(self):
 
         self.PrintLibrary("MCatNLO-utilities")

@@ -26,190 +26,107 @@
 #include <sstream>
 
 // SampleHeader headers
-#ifdef FAC_USE
 #include "SampleAnalyzer/Reader/ROOTReader.h"
-#endif
 #include "SampleAnalyzer/Service/LogService.h"
+#include "SampleAnalyzer/Reader/DelphesTreeReader.h"
+#include "SampleAnalyzer/Reader/DelfesTreeReader.h"
 
 // ROOT headers
 #include <TROOT.h>
 
-
-#ifdef FAC_USE
+#ifdef ROOT_USE
 
 using namespace MA5;
 
 // -----------------------------------------------------------------------------
-// ReadHeader
+// Initialize
 // -----------------------------------------------------------------------------
-bool ROOTReader::ReadHeader(SampleFormat& mySample)
+bool ROOTReader::Initialize(const std::string& rawfilename,
+                            const Configuration& cfg)
 {
-  // Initiliaze REC
-  mySample.InitializeRec();
-  mySample.SetSampleFormat(MA5FORMAT::DELPHES);
+  // Set configuration
+  cfg_=cfg;
 
-  // Opening file
-  source_ = new TFile(mySample.name().c_str());
+  // Is the file stored in Rfio
+  rfio_ = IsRfioMode(rawfilename);
 
-  // Checking file
-  if (!source_->IsOpen()) 
+  // Check consistency with compilation option
+  if (rfio_)
   {
-    ERROR << "ROOT file called '" << mySample.name() << "' is not found" << endmsg;
+#ifndef RFIO_USE
+    ERROR << "'-rfio' is not allowed. Please set the RFIO_USE"
+          << " variable in the Makefile to 1 and recompile the program if"
+          << " you would like to use this option." << endmsg;
+    exit(1);
+#endif
+  }
+
+  // Cleaning the file (remove rfio or local location)
+  filename_ = rawfilename;
+  CleanFilename(filename_);
+
+  // Opening the file
+  source_ = new TFile(filename_.c_str());
+  
+  // Check if the input is properly opened
+  bool test=true;
+  if (source_==0) test=false;
+  else if (!source_->IsOpen() || source_->IsZombie()) test=false;
+  if (!test)
+  {
+    ERROR << "Opening file " << filename_ << " failed" << endmsg;
+    source_=0;
     return false;
   }
 
-  // Checking ROOT version
-  Int_t file_version = source_->GetVersion();
-  Int_t lib_version = gROOT->GetVersionInt();
-  if (file_version!=lib_version)
+  // SelectTreeReader
+  return SelectTreeReader(); 
+}
+ 
+
+// -----------------------------------------------------------------------------
+// SelectTreeReader
+// -----------------------------------------------------------------------------
+bool ROOTReader::SelectTreeReader()
+{
+  TTree* mytree = 0;
+
+  // First case: Delphes
+#ifdef DELPHES_USE
+  mytree = dynamic_cast<TTree*>(source_->Get("Delphes"));
+  if (mytree!=0)
   {
-    WARNING << "the input file has been produced with ROOT version " << file_version
-            << " whereas the loaded ROOT libs are related to the version " << lib_version << endmsg;
+     treeReader_ = new DelphesTreeReader(source_, mytree);
+     treeReader_->Initialize();
+     return true;
   }
+#endif
 
-  // Getting TTree
-  tree_ = dynamic_cast<TTree*>(source_->Get("tree"));
-
-  // Checking TTree
-  if (tree_==0)
+  // Second case: Delfes
+#ifdef DELFES_USE
+  mytree = dynamic_cast<TTree*>(source_->Get("Delfes"));
+  if (mytree!=0)
   {
-    ERROR << "the ROOT TTree 'tree' is not found in the file" << endmsg;
-    return false;
+      treeReader_ = new DelfesTreeReader(source_, mytree);
+      treeReader_->Initialize();
+      return true;
   }
+#endif
+
+  // Other case: error
+  ERROR << "Impossible to access a known tree in the input file" << endmsg;
+  return false;
+}
 
 
-  // Getting number of entries
-  nevents_ = tree_->GetEntries();
-
-  // Getting event object
-  tree_->SetMakeClass(1);
-  evt_=0;
-  tree_->SetBranchAddress("event", &evt_);
-
-  INFO << "ROOTdebug nevents in ttree : " << nevents_ << endmsg;
-  ncurr_=0;
+// -----------------------------------------------------------------------------
+// Finalize
+// -----------------------------------------------------------------------------
+bool ROOTReader::Finalize()
+{
+  // OK!
+  if (source_!=0) source_->Close();
   return true;
-}
-
-
-// -----------------------------------------------------------------------------
-// FinalizeHeader
-// -----------------------------------------------------------------------------
-bool ROOTReader::FinalizeHeader(SampleFormat& mySample)
-{
-  // Normal end 
-  return true;
-}
-
-
-// -----------------------------------------------------------------------------
-// ReadEvent
-// -----------------------------------------------------------------------------
-StatusCode::Type ROOTReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySample)
-{
-  // Initiliaze MC
-  myEvent.InitializeRec();
-  myEvent.InitializeMC();
-  myEvent.fac_=evt_;
-
-  if (ncurr_ >= nevents_) return StatusCode::FAILURE;
-
-  Long64_t centry = tree_->LoadTree(ncurr_);
-  tree_->GetEntry(ncurr_);
-
-  ncurr_++;
-
-  FillEvent(myEvent,mySample);
-  return StatusCode::KEEP;
-
-}
-
-
-// -----------------------------------------------------------------------------
-// FinalizeEvent
-// -----------------------------------------------------------------------------
-bool ROOTReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
-{
-  // Mother pointer assignment
-  for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
-  {
-    unsigned int index1=myEvent.mc()->particles_[i].mothup1_;
-    unsigned int index2=myEvent.mc()->particles_[i].mothup2_;
-    if (index1!=0 && index2!=0)
-    {
-      if (index1>=myEvent.mc()->particles_.size() ||
-          index2>=myEvent.mc()->particles_.size())
-      {
-        ERROR << "mother index is greater to nb of particles";
-        ERROR << endmsg;
-        ERROR << " - index1 = " << index1 << endmsg;
-        ERROR << " - index2 = " << index2 << endmsg;
-        ERROR << " - particles.size() " << myEvent.mc()->particles_.size();
-        ERROR << endmsg;
-        exit(1);
-      }
-
-      myEvent.mc()->particles_[i].mother1_ = &myEvent.mc()->particles_[index1-1];
-      myEvent.mc()->particles_[index1-1].Daughters_.push_back(&myEvent.mc()->particles_[i]);
-      myEvent.mc()->particles_[i].mother2_ = &myEvent.mc()->particles_[index2-1];
-      myEvent.mc()->particles_[index2-1].Daughters_.push_back(&myEvent.mc()->particles_[i]);
-    }
-  }
-
-  // Normal end
-  return true; 
-}
-
-
-
-
-// -----------------------------------------------------------------------------
-// FillEventParticleLine
-// -----------------------------------------------------------------------------
-void ROOTReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
-{
-  // Fill MC particles
-  for (unsigned int i=0;i<evt_->mcparticles.size();i++)
-  {
-    MCParticleFormat * part = myEvent.mc()->GetNewParticle();
-    part->momentum_ = evt_->mcparticles[i].momentum();
-    part->pdgid_    = evt_->mcparticles[i].pid();
-  }
-
-  // Fill electrons
-  for (unsigned int i=0;i<evt_->electrons.size();i++)
-  {
-    RecLeptonFormat * electron = myEvent.rec()->GetNewElectron();
-    electron->momentum_ = evt_->electrons[i].momentum();
-    if (evt_->electrons[i].charge()>0) electron->charge_=true; else electron->charge_=false;
-    //electron->isoflag_  = evt_->electrons[i].isolated();
-    electron->HEoverEE_ = evt_->electrons[i].ehoveree();
-  }
-
-  // Fill muons
-  for (unsigned int i=0;i<evt_->muons.size();i++)
-  {
-    RecLeptonFormat * muon = myEvent.rec()->GetNewMuon();
-    muon->momentum_ = evt_->muons[i].momentum();
-    if (evt_->muons[i].charge()>0) muon->charge_=true; else muon->charge_=false;
-    //muon->isoflag_  = evt_->muons[i].isolated();
-    //    muon->HEoverEE_ = evt_->muons[i].ehoveree();
-  }
-
-  // Fill jets
-  for (unsigned int i=0;i<evt_->jets.size();i++)
-  {
-    RecJetFormat * jet = myEvent.rec()->GetNewJet();
-    jet->momentum_ = evt_->jets[i].momentum();
-    jet->ntracks_  = evt_->jets[i].ntracks();
-    jet->btag_     = evt_->jets[i].btag();
-    jet->HEoverEE_ = evt_->jets[i].ehoveree();
-  }
-
-  // MET
-  myEvent.rec()->MET_.momentum_.SetPx(evt_->met.px());
-  myEvent.rec()->MET_.momentum_.SetPy(evt_->met.py());
-  myEvent.rec()->MET_.momentum_.SetE(sqrt(evt_->met.px()*evt_->met.px()+evt_->met.py()*evt_->met.py()));
 }
 
 #endif

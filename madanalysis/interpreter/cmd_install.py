@@ -23,6 +23,7 @@
 
 
 from madanalysis.interpreter.cmd_base import CmdBase
+from madanalysis.IOinterface.delphes_migration import DelphesMigration
 import logging
 import os
 import sys
@@ -86,6 +87,8 @@ class CmdInstall(CmdBase):
             return self.install_zlib()
         elif args[0]=='delphes':
             return self.install_delphes()
+        elif args[0]=='delfes':
+            return self.install_delfes()
         elif args[0]=='fastjet':
             return self.install_fastjet()
         elif args[0]=='MCatNLO-for-ma5':
@@ -99,7 +102,7 @@ class CmdInstall(CmdBase):
     def help(self):
         logging.info("   Syntax: install <component>")
         logging.info("   Download and install a MadAnalysis component from the official site.")
-        logging.info("   List of available components : samples zlib fastjet MCatNLO-for-ma5 delphes")
+        logging.info("   List of available components : samples zlib fastjet MCatNLO-for-ma5 delphes delfes")
 
 
     def get_ncores(self):
@@ -282,6 +285,79 @@ class CmdInstall(CmdBase):
         if not os.path.isfile(self.main.ma5dir+'/tools/delphes/libDelphes.so'):
             logging.error("library labeled 'libdelphes.so' is missing.")
             self.display_log('delphes')
+            return False
+        
+        # End
+        logging.info("Installation complete.")
+
+
+        return True
+
+
+    def install_delfes(self):
+
+        # Asking for number of cores
+        ncores = self.get_ncores()
+        
+        # Checking connection with MA5 web site
+        if not self.check_ma5site():
+            return False
+    
+        # Creating tools folder
+        if not self.create_tools_folder():
+            return False
+
+        # Creating package folder
+        if not self.create_package_folder('delfes'):
+            return False
+
+        # Directory to install
+        installdir = self.main.ma5dir + '/tools/delfes/'
+
+        # List of files
+        files = { "delfes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.0.10.tar.gz" }
+        
+        # Launching wget
+        if not self.wget(files,'delfes',installdir):
+            return False
+
+        # Detarring package
+        packagedir = self.untar(installdir,'delfes.tar.gz','delfes')
+        if packagedir == "":
+            return False
+
+        # Changing the name of the directory
+        os.system("mv "+packagedir+"/* "+self.main.ma5dir+"/tools/delfes/")
+        packagedir = self.main.ma5dir+"/tools/delfes/"
+       
+        # Configuring
+        logging.info("Configuring the package ...")
+        os.system("cd "+packagedir+" ; ./configure > "+self.main.ma5dir+"/tools/delfes/"+"configuration.log 2>&1")
+        
+        # Migration
+        logging.info("Applying the MadAnalysis 5 patch to the package ...")
+        migrator = DelphesMigration(self.main)
+        migrator.Migrate()
+
+        # Compiling
+        logging.info("Compiling the package ...")
+        os.system("cd "+packagedir+" ; make -j"+str(ncores)+" > "+self.main.ma5dir+"/tools/delfes/"+"compilation.log 2>&1")
+
+        # Final check
+        logging.info("Checking installation ...")
+        if (not os.path.isdir(self.main.ma5dir+"/tools/delfes/modules")):
+            logging.error('package modules are missing.')
+            self.display_log('delfes')
+            return False
+
+        if not os.path.isfile(self.main.ma5dir+'/tools/delfes/modules/ParticlePropagator.h'):
+            logging.error("header labeled 'modules/ParticlePropagator.h' is missing.")
+            self.display_log('delfes')
+            return False
+
+        if not os.path.isfile(self.main.ma5dir+'/tools/delfes/libDelphes.so'):
+            logging.error("library labeled 'libdelphes.so' is missing.")
+            self.display_log('delfes')
             return False
         
         # End
@@ -593,7 +669,7 @@ class CmdInstall(CmdBase):
         if nargs>2:
             return []
         else:
-            output = ["samples","zlib","fastjet", "MCatNLO-for-ma5", "delphes" ]
+            output = ["samples","zlib","fastjet", "MCatNLO-for-ma5", "delphes", "delfes" ]
             return self.finalize_complete(text,output)
     
 

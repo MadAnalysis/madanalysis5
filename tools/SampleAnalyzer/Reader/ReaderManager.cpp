@@ -29,11 +29,8 @@
 #include "SampleAnalyzer/Reader/LHCOReader.h"
 #include "SampleAnalyzer/Reader/STDHEPreader.h"
 #include "SampleAnalyzer/Reader/HEPMCReader.h"
-#ifdef FAC_USE
+#ifdef ROOT_USE
   #include "SampleAnalyzer/Reader/ROOTReader.h"
-#endif
-#ifdef DELPHES_USE
-  #include "SampleAnalyzer/Reader/DelphesReader.h"
 #endif
 using namespace MA5;
 
@@ -67,18 +64,11 @@ void ReaderManager::BuildTable()
   Add("hepmc.gz",hepmc);
 #endif
 
-  /*#ifdef FAC_USE
+#ifdef ROOT_USE
   ROOTReader* root = new ROOTReader();
   Add("root",root);
-#ifdef ZIP_USE
-  Add("root.gz",root);
 #endif
-#endif*/
 
-#ifdef DELPHES_USE
-  DelphesReader* root = new DelphesReader();
-  Add("root",root);
-#endif
 
 }
 

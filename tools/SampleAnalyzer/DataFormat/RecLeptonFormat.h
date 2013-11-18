@@ -40,14 +40,16 @@ namespace MA5
 
 class LHCOReader;
 class ROOTReader;
-class DelphesReader;
+class DelphesTreeReader;
+class DelfesTreeReader;
 
 class RecLeptonFormat : public RecParticleFormat
 {
 
   friend class LHCOReader;
   friend class ROOTReader;
-  friend class DelphesReader;
+  friend class DelphesTreeReader;
+  friend class DelfesTreeReader;
 
   // -------------------------------------------------------------
   //                        data members

@@ -27,6 +27,9 @@
 #ifdef DELPHES_USE
   #include "SampleAnalyzer/Detector/DetectorDelphes.h"
 #endif
+#ifdef DELFES_USE
+  #include "SampleAnalyzer/Detector/DetectorDelfes.h"
+#endif
 
 using namespace MA5;
 
@@ -37,6 +40,9 @@ void DetectorManager::BuildTable()
 {
   #ifdef DELPHES_USE
   Add("delphes",new DetectorDelphes());
+  #endif
+  #ifdef DELFES_USE
+  Add("delfes",new DetectorDelfes());
   #endif
 }
 

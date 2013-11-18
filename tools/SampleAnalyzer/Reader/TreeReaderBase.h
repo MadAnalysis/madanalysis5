@@ -22,82 +22,82 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef RecMETFormat_h
-#define RecMETFormat_h
+#ifndef TREE_READER_BASE_h
+#define TREE_READER_BASE_h
 
-// STL headers
+#ifdef ROOT_USE
+
+// SampleAnalyzer headers
+#include "SampleAnalyzer/Core/Configuration.h"
+#include "SampleAnalyzer/DataFormat/EventFormat.h"
+#include "SampleAnalyzer/DataFormat/SampleFormat.h"
+#include "SampleAnalyzer/Service/Physics.h"
+#include "SampleAnalyzer/Core/StatusCode.h"
+
+// ROOT header
+#include <TChain.h>
+#include <TLorentzVector.h>
+#include <TObject.h>
+#include <TFile.h>
+
+// STL header
 #include <iostream>
-#include <string>
-#include <sstream>
-#include <iomanip>
-
-// RecParticleFormat
-#include "SampleAnalyzer/DataFormat/RecParticleFormat.h"
-#include "SampleAnalyzer/Service/LogService.h"
 
 namespace MA5
 {
 
-class LHCOReader;
-class ROOTReader;
-class DelphesTreeReader;
-class DelfesTreeReader;
-class RecMETFormat
+class TreeReaderBase
 {
-
-  friend class LHCOReader;
-  friend class ROOTReader;
-  friend class JetClusteringFastJet;
-  friend class DelphesTreeReader;
-  friend class DelfesTreeReader;
 
   // -------------------------------------------------------------
   //                        data members
   // -------------------------------------------------------------
-
  protected:
-  TVector2 met_;     /// transverse missing energy
+
+  /// Input file stream
+  TFile* source_;
+
+  /// Tree
+  TTree* tree_;
 
   // -------------------------------------------------------------
-  //                        method members
+  //                       method members
   // -------------------------------------------------------------
-
  public:
 
-  /// Constructor without arguments
-  RecMETFormat()
-  { Reset(); }
+  /// Constructor without argument
+  TreeReaderBase()
+  { source_=0; tree_=0; } 
 
-  /// Destructor                                                      
-  ~RecMETFormat()
-  {}
+  /// Constructor with arguments
+  TreeReaderBase(TFile* source, TTree* tree)
+  { source_=source; tree_=tree; }
 
-  /// Display information
-  void Print() const
-  {
-    INFO << "MET = (" << met_.X() << " , " << met_.Y() << " )" ;
-  }
+	/// Destructor
+  virtual ~TreeReaderBase()
+  { }
 
-  /// Clear all information
-  void Reset()
-  {
-    met_.Set(0.,0.); 
-  }
+  /// Read the header
+  virtual bool Initialize()=0;
 
-  /// Accessor to the MET vector
-  const TVector2& vector()  const {return met_;}
+  /// Read the header
+  virtual bool ReadHeader(SampleFormat& mySample)=0;
 
-  /// Accessor to the MET magnitude
-  const Float_t magnitude() const {return met_.Mod(); }
+  /// Read the event
+  virtual StatusCode::Type ReadEvent(EventFormat& myEvent, SampleFormat& mySample)=0;
 
-  /// Accessor to the x-component MET
-  const Float_t x()      const {return met_.X();}
+  /// Finalize the event
+  virtual bool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)=0;
 
-  /// Accessor to the y-component MET
-  const Float_t y()      const {return met_.Y();}
+  /// Get the file size
+  virtual Long64_t GetFinalPosition()=0;
+
+  /// Get the position in file (in octet)
+  virtual Long64_t GetPosition()=0;
 
 };
 
-}
+};
 
+#endif
 #endif
