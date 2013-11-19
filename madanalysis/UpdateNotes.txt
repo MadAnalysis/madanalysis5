@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+74   1.1.12  (2013/11/19) bfuks:   MultiAnalyses are now possible in the expert mode; output still to 
+                                   be implemented 
+
 72   1.1.11  (2013/11/14) bfuks:   small modifications in the view of including the signal region 
                                    object 
 
