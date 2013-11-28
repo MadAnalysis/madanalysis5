@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+75   1.1.13  (2013/11/28) bfuks:   MT2 variable + macos change of stdc++ library (bug #1250337) + 
+                                   cleaning of the welcome message 
+
 74   1.1.12  (2013/11/19) bfuks:   MultiAnalyses are now possible in the expert mode; output still to 
                                    be implemented 
 

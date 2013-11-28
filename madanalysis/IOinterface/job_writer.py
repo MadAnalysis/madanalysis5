@@ -529,7 +529,7 @@ class JobWriter():
         file.write('# Options for compilation\n')
         if self.libFastjet:
             file.write('CXXFASTJET = $(shell fastjet-config --cxxflags --plugins)\n')
-        file.write('CXXFLAGS = -Wall -O3 -I./ -I./../ -I' + '$(MA5_BASE)/tools/')
+        file.write('CXXFLAGS = -libstd=libstdc++ -Wall -O3 -I./ -I./../ -I' + '$(MA5_BASE)/tools/')
         if self.libZIP:
             file.write(' -DZIP_USE')
         if self.libDelphes:
@@ -658,7 +658,7 @@ class JobWriter():
             file.write('CXXFASTJET = $(shell fastjet-config --cxxflags --plugins)\n')
             
             file.write('FASTJETLIB = $(shell fastjet-config --libs --plugins)\n')
-        file.write('CXXFLAGS = -Wall -O3 -I./ -I$(MA5_BASE)/tools/')
+        file.write('CXXFLAGS = -libstd=libstdc++ -Wall -O3 -I./ -I$(MA5_BASE)/tools/')
         if self.shwrmode!='':
             file.write(' -I$(MA5_BASE)' + \
                 '/tools/MCatNLO-utilities/MCatNLO/include')

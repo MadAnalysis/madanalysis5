@@ -291,8 +291,7 @@ class ConfigChecker:
         ver = gfortran_version.split('.')
         if (int(ver[0])<4) or (int(ver[0])==4 and int(ver[1])<4):
             self.PrintFAIL(warning=True)
-            logging.warning('gfortran ' + gfortran_version + ' not recent enough (< 4.4.0).' +\
-                ' aMCatNLO cannot be used.')
+            logging.warning('gfortran ' + gfortran_version + ' older than 4.4.0.')
             return True
             
         self.configLinux.gfortran_version = gfortran_version

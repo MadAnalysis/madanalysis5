@@ -37,7 +37,7 @@
 #include "SampleAnalyzer/Service/LogService.h"
 #include "SampleAnalyzer/DataFormat/MCEventFormat.h"
 #include "SampleAnalyzer/DataFormat/RecEventFormat.h"
-
+#include "SampleAnalyzer/Service/TransverseVariables.h"
 
 #define PHYSICS MA5::PhysicsService::getInstance()
 
@@ -114,6 +114,9 @@ class PhysicsService
   //                       method members
   // -------------------------------------------------------------
  public:
+
+  /// Transverse variable toolbox
+  TransverseVariables *Transverse;
 
   /// GetInstance
   static PhysicsService* getInstance()
@@ -294,12 +297,12 @@ class PhysicsService
     else return sqrt(value);
   }
 
-  ///Is B Hadron ?
   Float_t MT(const MCParticleFormat* part, const MCEventFormat* event)
   {
     if (part==0) return false;
     return MT(*part,event);
   }
+
 
   ///Is C Hadron ?
   Bool_t IsCHadron(Int_t pdg)
@@ -837,7 +840,7 @@ class PhysicsService
 
   /// Constructor
   PhysicsService()  
-  { initialstate_=-1; finalstate_=1; }
+  { initialstate_=-1; finalstate_=1; Transverse = new TransverseVariables(); }
 
   /// Destructor
   ~PhysicsService()

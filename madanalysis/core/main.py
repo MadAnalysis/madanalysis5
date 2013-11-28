@@ -453,7 +453,8 @@ class Main():
         self.latex = checker.checkLatex()
         if self.latex:
             self.dvipdf = checker.checkdvipdf()
-        self.mcatnloutils = checker.checkMCatNLOUtils()
+#       COMMENTED BY BENJ: not used for the moment
+#        self.mcatnloutils = checker.checkMCatNLOUtils()
 
         os.environ['LD_LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH'] + \
                                         ":" + self.ma5dir+'/tools/SampleAnalyzer/Lib/'
