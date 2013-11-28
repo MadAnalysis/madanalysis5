@@ -134,12 +134,12 @@ class LoopService
     if (Ncalls_ > NcallThreshold_)
     {
       WARNING << "Number of calls exceed: infinite loops detected" << endmsg;
-      return false;
+      return true;
     }
     else
     {
       Ncalls_++;
-      return true;
+      return false;
     }
   }
 

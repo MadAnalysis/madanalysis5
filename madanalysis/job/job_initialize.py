@@ -428,6 +428,9 @@ def WriteJobInitialize(file,main):
         file.write('  PHYSICS->mcConfig().AddInvisibleId(16);\n')
         file.write('  PHYSICS->mcConfig().AddInvisibleId(1000022);\n')
         file.write('  PHYSICS->mcConfig().AddInvisibleId(1000039);\n')
+        for item in main.multiparticles.Get("invisible"):
+          if item not in [-16,-14,-12,12,14,16,1000022,1000039]:
+            file.write('  PHYSICS->mcConfig().AddInvisibleId('+str(item)+');\n')
         file.write('\n')
 
 

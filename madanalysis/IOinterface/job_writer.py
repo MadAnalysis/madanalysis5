@@ -411,15 +411,6 @@ class JobWriter():
         file.write('  INFO << "    * Finalizing all components ..." << endmsg;\n\n')
         file.write('  // Finalizing all components\n')
         file.write('  manager.Finalize(mySamples,myEvent);\n')
-        
-#        file.write('  PHYSICS->mcConfig().AddInvisibleId(12);\n')
-#        file.write('  PHYSICS->mcConfig().AddInvisibleId(-12);\n')
-#        file.write('  PHYSICS->mcConfig().AddInvisibleId(14);\n')
-#        file.write('  PHYSICS->mcConfig().AddInvisibleId(-14);\n')
-#        file.write('  PHYSICS->mcConfig().AddInvisibleId(16);\n')
-#        file.write('  PHYSICS->mcConfig().AddInvisibleId(-16);\n')
-#        file.write('  PHYSICS->mcConfig().AddInvisibleId(1000022);\n\n')
-        
         file.write('  return 0;\n')
         file.write('}\n')
         return
