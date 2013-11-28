@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+79   1.1.10.6 (2013/11/28) bfuks:   Problem with the MET in the simplified LHE format used by madgraph 
+                                   (question #239543) 
+
 78   1.1.10.5 (2013/11/28) bfuks:   Fixing clang issue (bug #1250337) 
 
 76   1.1.10.4 (2013/11/28) bfuks:   updating the versioning for the development version 

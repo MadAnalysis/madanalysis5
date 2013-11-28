@@ -263,7 +263,7 @@ bool LHEReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
     MCParticleFormat& part = myEvent.mc()->particles_[i];
 
     // MET in case of simplified LHE
-    if (part.pdgid()==12 && simplified)
+    if ( ( part.pdgid()==12 || (part.statuscode()==1 && PHYSICS->IsInvisible(part)) ) && simplified)
     {
       myEvent.mc()->MET_ += part.momentum();
     }
