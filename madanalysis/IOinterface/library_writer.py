@@ -89,7 +89,7 @@ class LibraryWriter():
 
         # Compilators
         file.write('# Compilators\n')
-        file.write('GCC = g++\n')
+        file.write('CXX = g++\n')
         if self.fortran:
             file.write('FC = gfortran\n')
         file.write('\n')
@@ -98,7 +98,7 @@ class LibraryWriter():
         file.write('# Options for compilation\n')
         if self.libFASTJET:
             file.write('CXXFASTJET = $(shell fastjet-config --cxxflags --plugins)\n')
-        file.write('CXXFLAGS = -libstd=libstdc++ -Wall -O3 $(shell root-config --cflags) -I./../')
+        file.write('CXXFLAGS = -Wall -O3 $(shell root-config --cflags) -I./../')
         if self.libZIP:
             file.write(' -DZIP_USE')
         if self.libDelphes:

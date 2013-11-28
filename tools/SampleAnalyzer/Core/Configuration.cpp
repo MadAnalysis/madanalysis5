@@ -39,7 +39,7 @@ using namespace MA5;
 // Initializing static data members
 // -----------------------------------------------------------------------------
 // DO NOT TOUCH THESE LINES
-const std::string Configuration::sampleanalyzer_version_ = "1.1.10.4";
+const std::string Configuration::sampleanalyzer_version_ = "1.1.10.5";
 const std::string Configuration::sampleanalyzer_date_    = "2013/11/28";
 // DO NOT TOUCH THESE LINES
 
