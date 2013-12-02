@@ -104,7 +104,7 @@ class SampleAnalyzer
   SampleAnalyzer();
 
   /// Initialization of the SampleAnalyzer
-  bool Initialize(int argc, char **argv, const std::string& filename);
+  bool Initialize(int argc, char **argv, const std::string& filename,bool=false);
 
   /// Getting pointer to an analyzer
   AnalyzerBase* InitializeAnalyzer(const std::string& name, 
@@ -141,11 +141,20 @@ class SampleAnalyzer
   /// Updating the progress bar
   void UpdateProgressBar();
 
+  /// Creating the directory structure associated with the SRM
+  bool PostInitialize();
+
  private:
 
   /// Filling the summary format
   void FillSummary(SampleFormat& summary,
                    const std::vector<SampleFormat>& mysamples);
+
+
+  /// Creating the directory structure associated with the SRM
+  bool CreateDirectoryStructure();
+
+
 };
 
 }

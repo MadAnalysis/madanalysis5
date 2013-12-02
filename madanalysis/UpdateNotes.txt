@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+81   1.1.10.8 (2013/12/02) bfuks:   New output structure dedicated to multianalyses; few bug fixes 
+
 80   1.1.10.7 (2013/11/29) bfuks:   Bug in jetclustering + allowing for defining invisible particles via 
                                    the invisible multiparticle in the reco mode 
 

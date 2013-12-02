@@ -99,7 +99,7 @@ class CounterManager
   const Counter& GetInitial() const
   { return initial_; }
 
-  /// Write the counters in a ROOT file
+  /// Write the counters in a Text file
   void Write_TextFormat(SAFWriter& output) const;
 
   /// Write the counters in a ROOT file

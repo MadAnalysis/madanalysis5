@@ -33,6 +33,7 @@
 // SampleAnalyzer
 #include "SampleAnalyzer/Plot/Histo.h"
 #include "SampleAnalyzer/Counter/CounterManager.h"
+#include "SampleAnalyzer/Writer/SAFWriter.h"
 
 namespace MA5
 {
@@ -73,6 +74,13 @@ class RegionSelection
   unsigned int GetNumberOfCutsAppliedSoFar()
     { return NumberOfCutsAppliedSoFar_; }
 
+  /// Printing the list of histograms
+  void WriteHistoDefinition(SAFWriter &output);
+
+  /// Printing the cutflow
+  void WriteCutflow(SAFWriter& output)
+    { cutflow_.Write_TextFormat(output); }
+
   /// Set methods
   void SetName(std::string name)
     { name_ = name; }
@@ -99,10 +107,11 @@ class RegionSelection
     { plots_.push_back(histo); }
 
   /// Getting ready for a new event
-  void InitializeForNewEvent()
+  void InitializeForNewEvent(const double &weight)
   {
     SetSurvivingTest(true);
     SetNumberOfCutsAppliedSoFar(0);
+    cutflow_.IncrementNInitial(weight);
   }
 
 };

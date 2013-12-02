@@ -39,8 +39,8 @@ using namespace MA5;
 // Initializing static data members
 // -----------------------------------------------------------------------------
 // DO NOT TOUCH THESE LINES
-const std::string Configuration::sampleanalyzer_version_ = "1.1.10.7";
-const std::string Configuration::sampleanalyzer_date_    = "2013/11/29";
+const std::string Configuration::sampleanalyzer_version_ = "1.1.10.8";
+const std::string Configuration::sampleanalyzer_date_    = "2013/12/02";
 // DO NOT TOUCH THESE LINES
 
 // -----------------------------------------------------------------------------
@@ -75,8 +75,11 @@ void Configuration::Lower(std::string& word)
 // -----------------------------------------------------------------------------
 // Initialize
 // -----------------------------------------------------------------------------
-bool Configuration::Initialize(int &argc, char *argv[])
+bool Configuration::Initialize(int &argc, char *argv[], const bool &useRSM)
 {
+  // Using a Region Selection Manager or not
+  useRSM_=useRSM;
+
   // Checking number of arguments
   // <filelist> is compulsory
   if (argc<2)

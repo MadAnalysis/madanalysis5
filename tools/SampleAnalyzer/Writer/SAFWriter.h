@@ -65,6 +65,7 @@ class SAFWriter : public WriterTextBase
 
   /// Read the sample (virtual pure)
   virtual bool WriteHeader(const SampleFormat& mySample);
+  virtual bool WriteHeader();
 
   /// Read the sample (virtual pure)
   bool WriteFiles(const std::vector<SampleFormat>& mySample);
@@ -75,6 +76,7 @@ class SAFWriter : public WriterTextBase
 
   /// Finalize the event (virtual pure)
   virtual bool WriteFoot(const SampleFormat& mySample);
+  virtual bool WriteFoot();
 
   /// Getting stream
   std::ostream* GetStream()

@@ -48,7 +48,6 @@ class WriterTextBase : public WriterBase
   //                        data members
   // -------------------------------------------------------------
  protected:
-
   /// Streaming for reading input
   std::ostream* output_;
 

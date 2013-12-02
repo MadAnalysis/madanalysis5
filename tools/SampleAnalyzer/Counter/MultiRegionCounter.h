@@ -63,7 +63,7 @@ class MultiRegionCounter
   std::string GetName()
     { return name_; }
 
-  std::vector<RegionSelection *> GetRegions()
+  std::vector<RegionSelection *> Regions()
     { return regions_; }
 
   /// Set methods

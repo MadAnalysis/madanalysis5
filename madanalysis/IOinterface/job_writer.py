@@ -362,6 +362,11 @@ class JobWriter():
 
             file.write('  if (fastsim1==0) return 1;\n\n')
 
+        # Post intialization (crating the output directory structure)
+        file.write('  // Post initialization (creates the new output directory structure)\n')
+        file.write('  if(!manager.PostInitialize()) return 1;\n\n')
+
+
         # Loop
         file.write('  // ---------------------------------------------------\n')
         file.write('  //                      EXECUTION\n')

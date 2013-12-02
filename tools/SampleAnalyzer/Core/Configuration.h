@@ -60,6 +60,9 @@ class Configuration
 
     /// input list name
     std::string input_list_name_;
+
+    /// Use the RegionSelectionManager structure and its output
+    bool useRSM_;
   
 
   // -------------------------------------------------------------
@@ -76,7 +79,7 @@ class Configuration
     { }
 
     /// Initialization
-    bool Initialize(int&argc, char *argv[]); 
+    bool Initialize(int&argc, char *argv[], const bool&);
  
     /// Printing the configuration status
     void Display();
@@ -99,6 +102,10 @@ class Configuration
     /// Accessor to the python interface version
     const std::string& GetPythonInterfaceVersion() const
     {return sampleanalyzer_version_;}
+
+    /// Accessor to the  useRSM flag
+    const bool& useRSM() const
+    { return useRSM_; }
 
     /// Accessor to the input name
     const std::string& GetInputFileName() const
@@ -142,7 +149,6 @@ class Configuration
     /// Accessor to CheckEvent
     Bool_t IsCheckEvent() const
     { return check_event_; }
-
 
 };
 

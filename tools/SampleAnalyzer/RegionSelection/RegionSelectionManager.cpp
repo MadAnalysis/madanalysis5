@@ -55,7 +55,7 @@ bool RegionSelectionManager::ApplyCut(bool condition, std::string const &cut)
   }
 
   // Looping over all regions the cut needs to be applied
-  std::vector<RegionSelection*> RegionsForThisCut = mycut->GetRegions();
+  std::vector<RegionSelection*> RegionsForThisCut = mycut->Regions();
   for (unsigned int i=0; i<RegionsForThisCut.size(); i++)
   {
     RegionSelection* ThisRegion = RegionsForThisCut[i];
@@ -104,13 +104,14 @@ void RegionSelectionManager::FillHisto(std::string const&histname, double val)
   myhisto->Fill(val,weight_);
 }
 
-
-
-/// Writing the analysis output in a text file
-void RegionSelectionManager::Write_TextFormat()
+void RegionSelectionManager::WriteHistoDefinition(SAFWriter& output)
 {
-  // TODO ...
+  for(unsigned int i=0; i<regions_.size();i++)
+  {
+    *output.GetStream() << "<RegionSelection>" << std::endl;
+    regions_[i]->WriteHistoDefinition(output);
+    *output.GetStream() << "</RegionSelection>" << std::endl << std::endl;
+  }
 }
-
 
 

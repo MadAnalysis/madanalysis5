@@ -22,6 +22,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// STL headers
+#include <string>
+
 // ZIP headers
 #ifdef ZIP_USE
    #include "SampleAnalyzer/Core/gz_ostream.h"
@@ -37,6 +40,8 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 // Initialize
 // -----------------------------------------------------------------------------
+
+/// Initialization of the writer
 bool WriterTextBase::Initialize(const Configuration* cfg,
                                 const std::string& rawfilename)
 {
@@ -98,8 +103,8 @@ bool WriterTextBase::Initialize(const Configuration* cfg,
 #endif
   }
 
-  // Output coming from local disk
-  else 
+  // Output coming from local disk (older structure)
+  else
   {
     output_=new std::ofstream();
     std::ofstream * myoutput = dynamic_cast<std::ofstream*>(output_);

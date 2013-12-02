@@ -36,6 +36,7 @@
 #include "SampleAnalyzer/Plot/PlotManager.h"
 #include "SampleAnalyzer/RegionSelection/RegionSelection.h"
 #include "SampleAnalyzer/Service/LogService.h"
+#include "SampleAnalyzer/Writer/SAFWriter.h"
 
 namespace MA5
 {
@@ -86,7 +87,7 @@ class RegionSelectionManager
   void Finalize() { Reset(); }
 
   /// Get methods
-  std::vector<RegionSelection*> GetRegions()
+  std::vector<RegionSelection*> Regions()
     { return regions_; }
 
   MultiRegionCounterManager* GetCutManager()
@@ -122,7 +123,7 @@ class RegionSelectionManager
     weight_ = EventWeight;
     NumberOfSurvivingRegions_ = regions_.size();
     for (unsigned int i=0; i<regions_.size(); i++ )
-      regions_[i]->InitializeForNewEvent();
+      regions_[i]->InitializeForNewEvent(EventWeight);
   }
 
   /// This method associates all sign region with a cut
@@ -235,8 +236,8 @@ class RegionSelectionManager
   /// Filling an histo with a value val
   void FillHisto(std::string const&, double val);
 
-  /// Writing the analysis output in a text file
-  void Write_TextFormat();
+  /// Writing the definition saf file
+  void WriteHistoDefinition(SAFWriter& output);
 
 };
 

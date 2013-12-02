@@ -30,6 +30,14 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 // WriteHeader
 // -----------------------------------------------------------------------------
+bool SAFWriter::WriteHeader()
+{
+  // Header
+  *output_ << "<SAFheader>" << std::endl;
+  *output_ << "</SAFheader>" << std::endl;
+  *output_ << std::endl;
+}
+
 bool SAFWriter::WriteHeader(const SampleFormat& mySample)
 {
   // Header
@@ -200,6 +208,13 @@ bool SAFWriter::WriteEvent(const EventFormat& myEvent,
 // WriteFoot
 // -----------------------------------------------------------------------------
 bool SAFWriter::WriteFoot(const SampleFormat& mySample)
+{
+  *output_ << "<SAFfoot>" << std::endl;
+  *output_ << "</SAFfoot>" << std::endl;
+  return true;
+}
+
+bool SAFWriter::WriteFoot()
 {
   *output_ << "<SAFfoot>" << std::endl;
   *output_ << "</SAFfoot>" << std::endl;
