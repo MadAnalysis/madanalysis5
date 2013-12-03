@@ -139,7 +139,7 @@ bool TransverseVariables::FindHigh(double &dsqH)
 {
    double x0 = (C1_[2]*C1_[3]-C1_[1]*C1_[4])/(C1_[1]*C1_[1]-C1_[0]*C1_[2]);
    double y0 = (C1_[0]*C1_[4]-C1_[1]*C1_[3])/(C1_[1]*C1_[1]-C1_[0]*C1_[2]);
-   double dsqL = m_*(m_+2.*p2_.M());
+   double dsqL = p2_.M()*(2.*m_+p2_.M());
    do
    {
       double dsqM = (dsqH + dsqL)/2.;
