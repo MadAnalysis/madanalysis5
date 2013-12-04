@@ -129,7 +129,7 @@ class Main():
         else:
             if self.fastsim.package=="none":
                 samples.append('.lhco')
-                if self.libDelphes or self.libdelphes:
+                if self.libDelphes or self.libdelfes:
                     samples.append('.root')
             else:
                 samples.append('.lhe')

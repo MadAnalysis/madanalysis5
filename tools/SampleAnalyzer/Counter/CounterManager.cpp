@@ -122,6 +122,7 @@ void CounterManager::Write_TextFormat(SAFWriter& output) const
 
     // name
     int nsp = 30-counters_[i].name_.size();
+    if(nsp<0) nsp=0;
     *output.GetStream() << "\"" << counters_[i].name_  << "\"";
     for (unsigned int jj=0; jj<nsp;jj++) *output.GetStream() << " ";
     *output.GetStream() << "# " << i+1 <<"st cut" << std::endl;

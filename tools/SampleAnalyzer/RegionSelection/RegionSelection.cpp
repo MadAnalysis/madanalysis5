@@ -38,6 +38,7 @@ void RegionSelection::WriteHistoDefinition(SAFWriter &output)
   for (unsigned int i=0;i<plots_.size();i++)
   {
     int nsp = 50-plots_[i]->GetName().size();
+    if(nsp<0) nsp=0;
     *output.GetStream() << "    " << plots_[i]->GetName();
     for (unsigned int jj=0; jj<nsp;jj++) *output.GetStream() << " ";
     *output.GetStream() <<  "  #  histo nr. " << i+1 << "\n";
