@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+85   1.1.10.11 (2013/12/05) bfuks:   Second Bug fix related to question #233529 
+
 84   1.1.10.10 (2013/12/04) bfuks:   Bug fix related to question #233529 
 
 83   1.1.10.9 (2013/12/03) bfuks:   Small bug in the MT2 routine (thanks to J. Bernon) 
