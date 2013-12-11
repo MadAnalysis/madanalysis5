@@ -31,7 +31,7 @@
 #include <vector>
 
 // SampleAnalyzer
-#include "SampleAnalyzer/Plot/Histo.h"
+#include "SampleAnalyzer/Plot/PlotBase.h"
 #include "SampleAnalyzer/Counter/CounterManager.h"
 #include "SampleAnalyzer/Writer/SAFWriter.h"
 

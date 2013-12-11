@@ -39,6 +39,7 @@
 #include "SampleAnalyzer/Plot/HistoLogX.h"
 #include "SampleAnalyzer/Plot/HistoFrequency.h"
 #include "SampleAnalyzer/Writer/SAFWriter.h"
+#include "SampleAnalyzer/RegionSelection/RegionSelection.h"
 
 namespace MA5
 {
@@ -89,6 +90,15 @@ class PlotManager
                    Double_t xmin, Double_t xmax)
   {
     Histo* myhisto = new Histo(name, bins,  xmin, xmax);
+    plots_.push_back(myhisto);
+    return myhisto;
+  }
+
+  Histo* Add_Histo(const std::string& name, UInt_t bins, 
+                   Double_t xmin, Double_t xmax, std::vector<RegionSelection*> regions)
+  {
+    Histo* myhisto = new Histo(name, bins,  xmin, xmax);
+    myhisto->SetSelectionRegions(regions);
     plots_.push_back(myhisto);
     return myhisto;
   }

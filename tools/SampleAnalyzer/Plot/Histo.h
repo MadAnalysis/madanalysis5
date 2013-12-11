@@ -27,6 +27,7 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Plot/PlotBase.h"
+#include "SampleAnalyzer/RegionSelection/RegionSelection.h"
 
 // ROOT headers
 #include <TH1F.h>
@@ -34,6 +35,7 @@
 // STL headers
 #include <map>
 #include <cmath>
+#include <vector>
 
 namespace MA5
 {
@@ -68,6 +70,9 @@ class Histo : public PlotBase
 
   /// Sum of value * value * weight
   std::pair<Double_t,Double_t> sum_xxw_;
+
+  /// RegionSelections attached to the histo
+  std::vector<RegionSelection*> regions_;
 
   // -------------------------------------------------------------
   //                       method members
@@ -124,6 +129,10 @@ class Histo : public PlotBase
   /// Destructor
   virtual ~Histo()
   { }
+
+  /// Setting the linked regions
+  void SetSelectionRegions(std::vector<RegionSelection*> myregions)
+    { regions_.insert(regions_.end(), myregions.begin(), myregions.end()); }
 
   /// Filling histogram
   void Fill(Double_t value, Double_t weight=1.0)

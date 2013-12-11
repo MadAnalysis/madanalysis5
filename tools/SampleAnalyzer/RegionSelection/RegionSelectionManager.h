@@ -190,7 +190,8 @@ class RegionSelectionManager
       myname = "Histo" + numstream.str();
     }
     // Adding the histo and linking all regions to the histo
-    plotmanager_.Add_Histo(myname,nb,xmin,xmax);
+    plotmanager_.Add_Histo(myname,nb,xmin,xmax,regions_);
+    
     unsigned int histonum = plotmanager_.GetNplots()-1;
     for (unsigned int i=0; i<regions_.size(); i++)
       regions_[i]->AssociateHisto(plotmanager_.GetHistos()[histonum]);

@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+86   1.1.10.12 (2013/12/11) bfuks:   Updating output format for the histo headers (extended expert mode) 
+
 85   1.1.10.11 (2013/12/05) bfuks:   Second Bug fix related to question #233529 
 
 84   1.1.10.10 (2013/12/04) bfuks:   Bug fix related to question #233529 
