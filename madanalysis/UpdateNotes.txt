@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+88   1.1.10.14 (2013/12/12) bfuks:   Check added in the case one wants to fill a histo for which some 
+                                   (but not all) SRs fails the cuts applied so far (thanks to Beranger) 
+
 87   1.1.10.13 (2013/12/12) bfuks:   Extended expert mode output: cleaning (cf. discussions with Chris) 
 
 86   1.1.10.12 (2013/12/11) bfuks:   Updating output format for the histo headers (extended expert mode) 

@@ -99,6 +99,17 @@ void RegionSelectionManager::FillHisto(std::string const&histname, double val)
     return;
   }
 
+  // Checking if each region is surviving
+  if(!myhisto->AllSurviving())
+  {
+    ERROR << "Trying to fill an histogram for which at least one (but"
+     << " not all) SRs is not surviving the cuts applied so far."
+     << endmsg;
+    ERROR << "Please modify the analysis and declare different histograms"
+      << endmsg;
+    exit(1);
+  }
+
   // Filling the histo
   myhisto->IncrementNEvents();
   myhisto->Fill(val,weight_);

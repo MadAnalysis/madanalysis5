@@ -134,6 +134,14 @@ class Histo : public PlotBase
   void SetSelectionRegions(std::vector<RegionSelection*> myregions)
     { regions_.insert(regions_.end(), myregions.begin(), myregions.end()); }
 
+  /// Checking that all regions of the histo are surviving
+  bool AllSurviving()
+  {
+    for(unsigned int ii=0; ii < regions_.size(); ii++)
+      if(!regions_[ii]->IsSurviving()) return false;
+    return true;
+  }
+
   /// Filling histogram
   void Fill(Double_t value, Double_t weight=1.0)
   {
