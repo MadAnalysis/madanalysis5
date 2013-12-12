@@ -77,7 +77,7 @@ void Histo::Write_TextFormatBody(std::ostream* output)
       int nsp = 50-regions_[i]->GetName().size();
       if(nsp<0) nsp=0;
       *output << " " << regions_[i]->GetName();
-      for (unsigned int jj=0; jj<nsp;jj++) *output << " ";
+      for (int jj=0; jj<nsp;jj++) *output << " ";
       *output << "# Region nr. " << i+1 << std::endl;
     }
  }

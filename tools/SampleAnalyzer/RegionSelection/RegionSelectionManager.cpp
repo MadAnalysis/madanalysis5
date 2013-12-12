@@ -106,12 +106,10 @@ void RegionSelectionManager::FillHisto(std::string const&histname, double val)
 
 void RegionSelectionManager::WriteHistoDefinition(SAFWriter& output)
 {
+  *output.GetStream() << "<RegionSelection>" << std::endl;
   for(unsigned int i=0; i<regions_.size();i++)
-  {
-    *output.GetStream() << "<RegionSelection>" << std::endl;
-    regions_[i]->WriteHistoDefinition(output);
-    *output.GetStream() << "</RegionSelection>" << std::endl << std::endl;
-  }
+    regions_[i]->WriteDefinition(output);
+  *output.GetStream() << "</RegionSelection>" << std::endl << std::endl;
 }
 
 

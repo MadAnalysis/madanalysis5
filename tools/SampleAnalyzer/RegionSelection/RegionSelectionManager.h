@@ -178,7 +178,7 @@ class RegionSelectionManager
   /// Apply a cut
   bool ApplyCut(bool, std::string const&);
 
-  /// This method associates all sign region with an histo
+  /// This method associates all signal region with an histo
   void AddHisto(const std::string&name,unsigned int nb,double xmin,double xmax)
   {
     // The name of the histo
@@ -191,10 +191,6 @@ class RegionSelectionManager
     }
     // Adding the histo and linking all regions to the histo
     plotmanager_.Add_Histo(myname,nb,xmin,xmax,regions_);
-    
-    unsigned int histonum = plotmanager_.GetNplots()-1;
-    for (unsigned int i=0; i<regions_.size(); i++)
-      regions_[i]->AssociateHisto(plotmanager_.GetHistos()[histonum]);
   }
 
   /// this method associates an arbitrary number of RS with an histo
@@ -228,10 +224,7 @@ class RegionSelectionManager
     }
 
     // Creating the histo
-    plotmanager_.Add_Histo(myname, nb, xmin, xmax);
-    unsigned int histonum = plotmanager_.GetNplots()-1;
-    for (unsigned int i=0; i<myregions.size(); i++)
-      myregions[i]->AssociateHisto(plotmanager_.GetHistos()[histonum]);
+    plotmanager_.Add_Histo(myname, nb, xmin, xmax,myregions);
   }
 
   /// Filling an histo with a value val

@@ -31,7 +31,6 @@
 #include <vector>
 
 // SampleAnalyzer
-#include "SampleAnalyzer/Plot/PlotBase.h"
 #include "SampleAnalyzer/Counter/CounterManager.h"
 #include "SampleAnalyzer/Writer/SAFWriter.h"
 
@@ -48,7 +47,6 @@ class RegionSelection
   bool surviving_;
   unsigned int NumberOfCutsAppliedSoFar_;
 
-  std::vector<PlotBase*> plots_;
   CounterManager cutflow_;
 
   // -------------------------------------------------------------
@@ -75,7 +73,7 @@ class RegionSelection
     { return NumberOfCutsAppliedSoFar_; }
 
   /// Printing the list of histograms
-  void WriteHistoDefinition(SAFWriter &output);
+  void WriteDefinition(SAFWriter &output);
 
   /// Printing the cutflow
   void WriteCutflow(SAFWriter& output)
@@ -101,10 +99,6 @@ class RegionSelection
   // Add a cut to the CutFlow
   void AddCut(std::string const &CutName)
     { cutflow_.InitCut(CutName); }
-
-  // Add a cut to the CutFlow
-  void AssociateHisto(PlotBase* histo)
-    { plots_.push_back(histo); }
 
   /// Getting ready for a new event
   void InitializeForNewEvent(const double &weight)
