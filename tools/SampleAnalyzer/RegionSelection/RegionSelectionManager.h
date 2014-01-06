@@ -161,7 +161,7 @@ class RegionSelectionManager
       {
         if(regions_[j]->GetName().compare(RSnames[i])==0)
         {
-          myregions.push_back(regions_[i]);
+          myregions.push_back(regions_[j]);
           break;
         }
       }
@@ -213,7 +213,7 @@ class RegionSelectionManager
       {
         if(regions_[j]->GetName().compare(RSnames[i])==0)
         {
-          myregions.push_back(regions_[i]);
+          myregions.push_back(regions_[j]);
           break;
         }
       }
