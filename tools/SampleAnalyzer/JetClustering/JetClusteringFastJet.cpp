@@ -167,8 +167,8 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
 
             // Creating reco hadronic taus
             RecTauFormat* myTau = myEvent.rec()->GetNewTau();
-            if (part.pdgid()>0) myTau->setCharge(-1.);
-            else myTau->setCharge(+1.);
+            if (part.pdgid()>0) myTau->setCharge(-1);
+            else myTau->setCharge(+1);
             myTau->setMomentum(part.momentum());
             myTau->setMc(&part);
             myTau->setDecayMode(PHYSICS->GetTauDecayMode(myTau->mc()));
