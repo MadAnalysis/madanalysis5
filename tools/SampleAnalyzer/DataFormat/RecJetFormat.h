@@ -32,6 +32,7 @@
 #include <iomanip>
 
 // RecParticleFormat
+#include "SampleAnalyzer/DataFormat/IsolationConeType.h"
 #include "SampleAnalyzer/DataFormat/RecParticleFormat.h"
 #include "SampleAnalyzer/Service/LogService.h"
 
@@ -69,6 +70,7 @@ class RecJetFormat : public RecParticleFormat
   Bool_t true_ctag_;   /// c-tag (before id or misid)
   Bool_t true_btag_;   /// b-tag (before id or misid)
   std::vector<Int_t> Constituents_;  /// indices of the MC particles
+  std::vector<IsolationConeType> isolCones_; // isolation cones
 
   // -------------------------------------------------------------
   //                        method members
@@ -98,6 +100,7 @@ class RecJetFormat : public RecParticleFormat
     btag_      = false;
     true_btag_ = false;
     true_ctag_ = false;
+    isolCones_.clear();
   }
 
   /// Accessor to the number of tracks
@@ -123,6 +126,14 @@ class RecJetFormat : public RecParticleFormat
   /// get constituent collections
   const std::vector<Int_t>& constituents() const
   { return Constituents_; }
+
+  /// Add one isolation cone
+  void AddIsolCone (const IsolationConeType& cone)
+  {isolCones_.push_back(cone);}
+
+  /// get the collection of isolation cones
+  const std::vector<IsolationConeType>& isolCones() const
+  { return isolCones_; }
 
 };
 

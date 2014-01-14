@@ -32,6 +32,7 @@
 #include <iomanip>
 
 // RecParticleFormat
+#include "SampleAnalyzer/DataFormat/IsolationConeType.h"
 #include "SampleAnalyzer/DataFormat/RecParticleFormat.h"
 #include "SampleAnalyzer/Service/LogService.h"
 
@@ -59,6 +60,7 @@ class RecLeptonFormat : public RecParticleFormat
   Bool_t charge_;       /// charge of the particle 0 = -1, 1 = +1
   Float_t sumET_isol_;  /// sumET in an isolation cone
   Float_t sumPT_isol_;  /// sumPT in an isolation cone
+  std::vector<IsolationConeType> isolCones_; // isolation cones
 
   // -------------------------------------------------------------
   //                        method members
@@ -89,6 +91,7 @@ class RecLeptonFormat : public RecParticleFormat
     charge_=false;
     sumET_isol_=0.;
     sumPT_isol_=0.;
+    isolCones_.clear();
   }
 
   /// Accessor to the electric charge 
@@ -111,6 +114,14 @@ class RecLeptonFormat : public RecParticleFormat
   virtual const Float_t ET_PT_isol() const
   { if (sumPT_isol_!=0) return sumET_isol_/sumPT_isol_;
     else return 0; }
+
+  /// Add one isolation cone
+  void AddIsolCone (const IsolationConeType& cone)
+  {isolCones_.push_back(cone);}
+
+  /// get the collection of isolation cones
+  const std::vector<IsolationConeType>& isolCones() const
+  { return isolCones_; }
 
 };
 

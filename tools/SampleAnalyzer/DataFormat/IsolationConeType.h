@@ -22,8 +22,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef RecPhotonFormat_h
-#define RecPhotonFormat_h
+#ifndef IsolationConeType_h
+#define IsolationConeType_h
 
 // STL headers
 #include <iostream>
@@ -32,8 +32,6 @@
 #include <iomanip>
 
 // RecParticleFormat
-#include "SampleAnalyzer/DataFormat/IsolationConeType.h"
-#include "SampleAnalyzer/DataFormat/RecParticleFormat.h"
 #include "SampleAnalyzer/Service/LogService.h"
 
 namespace MA5
@@ -41,53 +39,77 @@ namespace MA5
 
 class LHCOReader;
 class ROOTReader;
+class DelphesTreeReader;
+class DelfesTreeReader;
+class DetectorDelphes;
+class DetectorDelfes;
 
-class RecPhotonFormat : public RecParticleFormat
+class IsolationConeType
 {
 
   friend class LHCOReader;
   friend class ROOTReader;
+  friend class JetClusteringFastJet;
+  friend class bTagger;
+  friend class TauTagger;
+  friend class cTagger;
+  friend class DetectorDelphes;
+  friend class DetectorDelfes;
+  friend class DelphesTreeReader;
+  friend class DelfesTreeReader;
 
   // -------------------------------------------------------------
   //                        data members
-  // -------------------------------------------------------------             
+  // -------------------------------------------------------------
  protected:
-  std::vector<IsolationConeType> isolCones_; // isolation cones
 
+  UShort_t ntracks_;   /// number of tracks
+  Float_t sumPT_;      /// sum PT
+  Float_t sumET_;      /// sum ET
+  Float_t deltaR_;     /// deltaR of the cone
 
   // -------------------------------------------------------------
   //                        method members
-  // -------------------------------------------------------------             
+  // -------------------------------------------------------------
  public:
 
   /// Constructor without arguments
-  RecPhotonFormat()
+  IsolationConeType()
   { Reset(); }
 
   /// Destructor
-  virtual ~RecPhotonFormat()
+  virtual ~IsolationConeType()
   {}
 
   /// Dump information
   virtual void Print() const
   {
-
-    RecParticleFormat::Print();
   }
 
   /// Clear all information
   virtual void Reset()
   {
-    isolCones_.clear(); 
+    ntracks_ = 0; 
+    sumPT_   = 0.;
+    sumET_   = 0.;
+    deltaR_  = 0.;
   }
 
-  /// Add one isolation cone
-  void AddIsolCone (const IsolationConeType& cone)
-  {isolCones_.push_back(cone);}
+  /// Accessor to the number of tracks
+  virtual const UShort_t ntracks() const
+  {return ntracks_;}
 
-  /// get the collection of isolation cones
-  const std::vector<IsolationConeType>& isolCones() const
-  { return isolCones_; }
+  /// Accessor to sumPT
+  const Float_t& sumPT() const
+  {return sumPT_;}
+
+  /// Accessor to sumET
+  const Float_t& sumET() const
+  {return sumET_;}
+
+  /// Accessor to deltaR
+  const Float_t& deltaR() const
+  {return deltaR_;}
 
 };
 
