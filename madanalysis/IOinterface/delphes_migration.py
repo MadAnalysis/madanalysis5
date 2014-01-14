@@ -39,6 +39,13 @@ class DelphesMigration():
 
     def Migrate(self):
         self.ChangeTreeNames()
+        self.ApplyPatch()
+
+    def ApplyPatch(self):
+        os.system('cp '+self.main.ma5dir+'/tools/SampleAnalyzer/Detector/patch_delfes.tgz '+\
+                  self.main.ma5dir+'/tools/delfes/')
+        os.system('cd '+ self.main.ma5dir + '/tools/delfes/; tar xzf patch_delfes.tgz')
+
 
     def ChangeTreeNames(self):
         myfiles = glob.glob(self.main.ma5dir+'/tools/delfes/readers/Delphes*.cpp')

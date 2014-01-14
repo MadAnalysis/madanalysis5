@@ -171,24 +171,18 @@ class JobWriter():
 
     def CreateDelphesCard(self):
 
+        if self.main.fastsim.package=="delphes":
+            cardname = self.main.fastsim.delphes.card
+        elif self.main.fastsim.package=="delfes":
+            cardname = self.main.fastsim.delfes.card
+
         if self.main.fastsim.package=="delfes":
             cfg=self.main.fastsim.delfes
         else:
             cfg=self.main.fastsim.delphes
 
-        if cfg.pileup=="":
-            if cfg.detector=='cms':
-                cardname = 'delphes_card_CMS.tcl'
-            elif cfg.detector=='atlas':
-                cardname ='delphes_card_ATLAS.tcl'
-        else:
-            if cfg.detector=='cms':
-                cardname = 'delphes_card_CMS_PileUp.tcl'
-            elif cfg.detector=='atlas':
-                cardname ='delphes_card_ATLAS_PileUp.tcl'
-
         try:
-            input = open(self.ma5dir+"/tools/SampleAnalyzer/"+cardname,'r')
+            input = open(self.ma5dir+"/tools/SampleAnalyzer/Detector/"+cardname,'r')
         except:
             pass
 
@@ -344,16 +338,11 @@ class JobWriter():
                               key=lambda (k,v): (k,v)):
                 file.write('  parametersD1["'+k+'"]="'+v+'";\n')
             file.write('  DetectorBase* fastsim1 = \n')
-            if cfg.pileup=="":
-                if cfg.detector=='cms':
-                    cardname = 'delphes_card_CMS.tcl'
-                elif cfg.detector=='atlas':
-                    cardname ='delphes_card_ATLAS.tcl'
-            else:
-                if cfg.detector=='cms':
-                    cardname = 'delphes_card_CMS_PileUp.tcl'
-                elif cfg.detector=='atlas':
-                    cardname ='delphes_card_ATLAS_PileUp.tcl'
+
+            if self.main.fastsim.package=="delphes":
+                cardname = self.main.fastsim.delphes.card
+            elif self.main.fastsim.package=="delfes":
+                cardname = self.main.fastsim.delfes.card
 
             if self.main.fastsim.package=="delphes":
                 file.write('      manager.InitializeDetector("delphes","../../Input/'+cardname+'",parametersD1);\n')

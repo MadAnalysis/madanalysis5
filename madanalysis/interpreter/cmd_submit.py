@@ -335,16 +335,10 @@ class CmdSubmit(CmdBase):
         if answer=="no" or answer=="n":
             return
         else:
-            if self.main.fastsim.delphes.pileup=="":
-                if self.main.fastsim.delphes.detector=='cms':
-                    cardname = 'delphes_card_CMS.tcl'
-                elif self.main.fastsim.delphes.detector=='atlas':
-                    cardname ='delphes_card_ATLAS.tcl'
-            else:
-                if self.main.fastsim.delphes.detector=='cms':
-                    cardname = 'delphes_card_CMS_PileUp.tcl'
-                elif self.main.fastsim.delphes.detector=='atlas':
-                    cardname ='delphes_card_ATLAS_PileUp.tcl'
+            if self.main.fastsim.package=="delphes":
+                cardname = self.main.fastsim.delphes.card
+            elif self.main.fastsim.package=="delfes":
+                cardname = self.main.fastsim.delfes.card
             os.system(self.main.configLinux.editor+" "+dirname+"/Input/"+cardname)
 
 
@@ -408,7 +402,7 @@ class CmdSubmit(CmdBase):
                 return False
 
         #edit the delphes cards
-        if self.main.fastsim.package=="delphes":
+        if self.main.fastsim.package in ["delphes","delfes"]:
             self.editDelphesCard(dirname)
 
         logging.info("   Compiling 'SampleAnalyzer'...")

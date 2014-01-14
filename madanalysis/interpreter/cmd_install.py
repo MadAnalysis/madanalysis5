@@ -247,7 +247,7 @@ class CmdInstall(CmdBase):
         installdir = self.main.ma5dir + '/tools/delphes/'
 
         # List of files
-        files = { "delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.0.10.tar.gz" }
+        files = { "delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.0.11.tar.gz" }
         
         # Launching wget
         if not self.wget(files,'delphes',installdir):
@@ -330,14 +330,14 @@ class CmdInstall(CmdBase):
         os.system("mv "+packagedir+"/* "+self.main.ma5dir+"/tools/delfes/")
         packagedir = self.main.ma5dir+"/tools/delfes/"
        
-        # Configuring
-        logging.info("Configuring the package ...")
-        os.system("cd "+packagedir+" ; ./configure > "+self.main.ma5dir+"/tools/delfes/"+"configuration.log 2>&1")
-        
         # Migration
         logging.info("Applying the MadAnalysis 5 patch to the package ...")
         migrator = DelphesMigration(self.main)
         migrator.Migrate()
+
+        # Configuring
+        logging.info("Configuring the package ...")
+        os.system("cd "+packagedir+" ; ./configure > "+self.main.ma5dir+"/tools/delfes/"+"configuration.log 2>&1")
 
         # Compiling
         logging.info("Compiling the package ...")
@@ -357,6 +357,11 @@ class CmdInstall(CmdBase):
 
         if not os.path.isfile(self.main.ma5dir+'/tools/delfes/libDelphes.so'):
             logging.error("library labeled 'libdelphes.so' is missing.")
+            self.display_log('delfes')
+            return False
+
+        if not os.path.isfile(self.main.ma5dir+'/tools/delfes/DelphesSTDHEP'):
+            logging.error("library labeled 'DelphesSTDHEP' is missing.")
             self.display_log('delfes')
             return False
         
