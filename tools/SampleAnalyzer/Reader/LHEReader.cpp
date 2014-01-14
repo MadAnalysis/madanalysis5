@@ -44,6 +44,7 @@ bool LHEReader::ReadHeader(SampleFormat& mySample)
   std::string line;
 
   // Generator tags
+  Bool_t tag_calchep = false;
   Bool_t tag_mg5 = false;
   Bool_t tag_ma5 = false;
   Bool_t tag_simplified_pythia = false;
@@ -80,6 +81,7 @@ bool LHEReader::ReadHeader(SampleFormat& mySample)
           tag_mg5=true;
         if ( (line.find("<MA5Format> LHE format </MA5Format>")!=std::string::npos) )
           tag_ma5=true;
+        if ( (line.find("<name>CalcHEP</name>")!=std::string::npos) ) tag_calchep=true;
         if ( (line.find("<MGPythiaCard>")!=std::string::npos) ||
              (line.find("<mgpythiacard>")!=std::string::npos) ) 
           tag_simplified_pythia=true;
@@ -155,6 +157,10 @@ bool LHEReader::ReadHeader(SampleFormat& mySample)
   else if (tag_mg5)
   {
     mySample.SetSampleGenerator(MA5GEN::MG5);
+  }
+  else if (tag_calchep)
+  {
+    mySample.SetSampleGenerator(MA5GEN::CALCHEP);
   }
   else 
   {

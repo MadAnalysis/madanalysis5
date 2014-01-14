@@ -35,7 +35,8 @@ namespace MA5GEN
                        MG5=1, MA5=2,
                        PYTHIA6=3, PYTHIA8=4, 
                        HERWIG6=5, HERWIGPP=6,
-                       DELPHES=7, DELFES=8 };
+                       DELPHES=7, DELFES=8,
+                       CALCHEP=9 };
 }
 
 namespace MA5FORMAT

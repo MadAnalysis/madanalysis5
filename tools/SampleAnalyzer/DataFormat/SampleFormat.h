@@ -188,6 +188,7 @@ class SampleFormat
     else if (sample_generator_==MA5GEN::HERWIGPP) INFO << "Herwig++";
     else if (sample_generator_==MA5GEN::DELPHES) INFO << "Delphes";
     else if (sample_generator_==MA5GEN::DELFES) INFO << "Delfes";
+    else if (sample_generator_==MA5GEN::CALCHEP) INFO << "CalcHEP";
     INFO << "." << endmsg;
   }
 
