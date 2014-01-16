@@ -135,11 +135,17 @@ class Histo : public PlotBase
     { regions_.insert(regions_.end(), myregions.begin(), myregions.end()); }
 
   /// Checking that all regions of the histo are surviving
-  bool AllSurviving()
+  /// Returns 0 if all regions are failing (includes te case with 0 SR)
+  /// Returns 1 if all regions are passing 
+  // returns -1 otherwise
+  int AllSurviving()
   {
-    for(unsigned int ii=0; ii < regions_.size(); ii++)
-      if(!regions_[ii]->IsSurviving()) return false;
-    return true;
+    if (regions_.size() == 0) return 0;
+    bool FirstRegionSurvival = regions_[0]->IsSurviving();
+    for(unsigned int ii=1; ii < regions_.size(); ii++)
+      if(regions_[ii]->IsSurviving() != FirstRegionSurvival) return -1;
+    if(FirstRegionSurvival) return 1;
+    else                    return 0;
   }
 
   /// Filling histogram
