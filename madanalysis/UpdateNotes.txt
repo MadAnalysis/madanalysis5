@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+97   1.1.10.19 (2014/01/17) bfuks:   Beranger's suggestion for a IsSurviving function to be called from 
+                                   the manager 
+
 96   1.1.10.18 (2014/01/17) bfuks:   Beranger's suggestion for adding cuts/histos with one single RS: 
                                    added 
 

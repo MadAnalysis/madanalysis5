@@ -251,6 +251,22 @@ class RegionSelectionManager
   /// Writing the definition saf file
   void WriteHistoDefinition(SAFWriter& output);
 
+  /// Checking if a given RS is surviging
+  bool IsSurviving(const std::string &RSname)
+  {
+    // Looking for the region and checking its status
+    for(unsigned int i=0; i<regions_.size(); i++)
+    {
+      if(regions_[i]->GetName().compare(RSname) == 0)
+        return regions_[i]->IsSurviving();
+    }
+
+    // The region has not been found
+    WARNING << "Checking whether the non-declared region \""
+            << RSname << "\" is surviving the applied cuts." << endmsg;
+    return false;
+  }
+
 };
 
 }
