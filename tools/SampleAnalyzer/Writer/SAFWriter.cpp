@@ -36,6 +36,7 @@ bool SAFWriter::WriteHeader()
   *output_ << "<SAFheader>" << std::endl;
   *output_ << "</SAFheader>" << std::endl;
   *output_ << std::endl;
+  return true;
 }
 
 bool SAFWriter::WriteHeader(const SampleFormat& mySample)
