@@ -126,7 +126,7 @@ class RegionSelectionManager
       regions_[i]->InitializeForNewEvent(EventWeight);
   }
 
-  /// This method associates all sign region with a cut
+  /// This method associates all regions with a cut
   void AddCut(const std::string&name)
   {
     // The name of the cut
@@ -140,6 +140,16 @@ class RegionSelectionManager
     // Adding the cut to all the regions
     cutmanager_.AddCut(myname,regions_);
   }
+
+
+  /// This method associates one single region with a cut
+  void AddCut(const std::string&name, const std::string &RSname)
+  {
+    std::string RSnameA[] = {RSname};
+    AddCut(name, RSnameA);
+  }
+
+
 
   /// this method associates an arbitrary number of RS with a cut
   template <int NRS> void AddCut(const std::string&name, std::string const(&RSnames)[NRS])
@@ -178,7 +188,7 @@ class RegionSelectionManager
   /// Apply a cut
   bool ApplyCut(bool, std::string const&);
 
-  /// This method associates all signal region with an histo
+  /// This method associates all signal regions with an histo
   void AddHisto(const std::string&name,unsigned int nb,double xmin,double xmax)
   {
     // The name of the histo
@@ -191,6 +201,14 @@ class RegionSelectionManager
     }
     // Adding the histo and linking all regions to the histo
     plotmanager_.Add_Histo(myname,nb,xmin,xmax,regions_);
+  }
+
+  /// This method associates one single signal region with an histo
+  void AddHisto(const std::string&name,unsigned int nb,double xmin,double xmax,
+    const std::string &RSname)
+  {
+    std::string RSnameA[] = {RSname};
+    AddHisto(name, nb, xmin, xmax, RSnameA);
   }
 
   /// this method associates an arbitrary number of RS with an histo

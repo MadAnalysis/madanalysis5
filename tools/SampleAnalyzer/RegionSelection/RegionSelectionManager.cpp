@@ -100,7 +100,7 @@ void RegionSelectionManager::FillHisto(std::string const&histname, double val)
   }
 
   // Checking if each region is surviving
-  if(myhisto->AllSurviving()==1) return;
+  if(myhisto->AllSurviving()==0) return;
   if(myhisto->AllSurviving()==-1)
   {
     ERROR << "Trying to fill an histogram for which at least one (but"
