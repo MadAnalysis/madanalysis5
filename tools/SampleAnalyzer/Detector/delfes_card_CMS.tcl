@@ -571,20 +571,20 @@ module IsolationCalculation TrackIsolationCalculation {
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
   add Branch Delphes/allParticles Particle GenParticle
-  add Branch TrackMerger/tracks Track Track
-  add Branch Calorimeter/towers Tower Tower
-  add Branch Calorimeter/eflowTracks EFlowTrack Track
-  add Branch Calorimeter/eflowTowers EFlowTower Tower
-  add Branch MuonMomentumSmearing/muons EFlowMuon Muon
+#  add Branch TrackMerger/tracks Track Track
+#  add Branch Calorimeter/towers Tower Tower
+#  add Branch Calorimeter/eflowTracks EFlowTrack Track
+#  add Branch Calorimeter/eflowTowers EFlowTower Tower
+#  add Branch MuonMomentumSmearing/muons EFlowMuon Muon
   add Branch GenJetFinder/jets GenJet Jet
   add Branch UniqueObjectFinder/jets Jet Jet
-  add Branch UniqueObjectFinder/electrons Electron Electron
-  add Branch UniqueObjectFinder/photons Photon Photon
-  add Branch UniqueObjectFinder/muons Muon Muon
+#  add Branch UniqueObjectFinder/electrons Electron Electron
+#  add Branch UniqueObjectFinder/photons Photon Photon
+#  add Branch UniqueObjectFinder/muons Muon Muon
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
-  add Branch ElectronIsolation/electrons DelphesElectron Electron
-  add Branch MuonIsolation/muons DelphesMuon Muon
+#  add Branch ElectronIsolation/electrons DelphesElectron Electron
+#  add Branch MuonIsolation/muons DelphesMuon Muon
   add Branch ElectronIsolationCalculation/DelfesElectrons DelfesElectron Electron
   add Branch MuonIsolationCalculation/DelfesMuons DelfesMuon Muon
   add Branch PhotonIsolationCalculation/DelfesPhotons DelfesPhoton Photon
