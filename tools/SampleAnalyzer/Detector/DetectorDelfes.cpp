@@ -269,7 +269,7 @@ void DetectorDelfes::TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat& 
 
   // Muon collection
   TObjArray* muonArray = dynamic_cast<TObjArray*>(
-         delphesFolder_->FindObject("Export/MuonIsolation/muons"));
+         delphesFolder_->FindObject("Export/MuonIsolationCalculation/DelfesMuons"));
   if (muonArray==0) WARNING << "no muons collection found" << endmsg;
   else
   {
@@ -289,7 +289,7 @@ void DetectorDelfes::TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat& 
 
   // Electron collection
   TObjArray* elecArray = dynamic_cast<TObjArray*>(
-     delphesFolder_->FindObject("Export/UniqueObjectFinder/electrons"));
+     delphesFolder_->FindObject("Export/ElectronIsolationCalculation/DelfesElectrons"));
   if (elecArray==0) WARNING << "no elecs collection found" << endmsg;
   else
   {
@@ -309,7 +309,7 @@ void DetectorDelfes::TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat& 
 
   // Track collection
   TObjArray* trackArray = dynamic_cast<TObjArray*>(
-    delphesFolder_->FindObject("Export/TrackMerger/tracks"));
+    delphesFolder_->FindObject("Export/TrackIsolationCalculation/DelfesTracks"));
   if (trackArray==0) WARNING << "no tracks collection found" << endmsg;
   else
   {

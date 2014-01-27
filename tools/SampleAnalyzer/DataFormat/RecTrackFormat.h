@@ -121,9 +121,12 @@ class RecTrackFormat : public ParticleBaseFormat
   const int charge() const
   {if (charge_) return +1; else return -1;}
 
-  /// Add one isolation cone
-  void AddIsolCone (const IsolationConeType& cone)
-  {isolCones_.push_back(cone);}
+  /// giving a new isolation cone entry
+  IsolationConeType* GetNewIsolCone()
+  {
+    isolCones_.push_back(IsolationConeType());
+    return &isolCones_.back();
+  }
 
   /// get the collection of isolation cones
   const std::vector<IsolationConeType>& isolCones() const

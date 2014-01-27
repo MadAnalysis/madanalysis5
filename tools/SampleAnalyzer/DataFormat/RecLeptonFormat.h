@@ -115,13 +115,16 @@ class RecLeptonFormat : public RecParticleFormat
   { if (sumPT_isol_!=0) return sumET_isol_/sumPT_isol_;
     else return 0; }
 
-  /// Add one isolation cone
-  void AddIsolCone (const IsolationConeType& cone)
-  {isolCones_.push_back(cone);}
-
   /// get the collection of isolation cones
   const std::vector<IsolationConeType>& isolCones() const
   { return isolCones_; }
+
+  /// giving a new isolation cone entry
+  IsolationConeType* GetNewIsolCone()
+  {
+    isolCones_.push_back(IsolationConeType());
+    return &isolCones_.back();
+  }
 
 };
 
