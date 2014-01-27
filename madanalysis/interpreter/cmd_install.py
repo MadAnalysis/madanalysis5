@@ -247,7 +247,7 @@ class CmdInstall(CmdBase):
         installdir = self.main.ma5dir + '/tools/delphes/'
 
         # List of files
-        files = { "delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.0.11.tar.gz" }
+        files = { "delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.0.12.tar.gz" }
         
         # Launching wget
         if not self.wget(files,'delphes',installdir):
@@ -315,7 +315,7 @@ class CmdInstall(CmdBase):
         installdir = self.main.ma5dir + '/tools/delfes/'
 
         # List of files
-        files = { "delfes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.0.10.tar.gz" }
+        files = { "delfes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.0.12.tar.gz" }
         
         # Launching wget
         if not self.wget(files,'delfes',installdir):

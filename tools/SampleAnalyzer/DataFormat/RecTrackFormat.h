@@ -32,6 +32,7 @@
 #include <iomanip>
 
 // SampleAnalyzer headers
+#include "SampleAnalyzer/DataFormat/IsolationConeType.h"
 #include "SampleAnalyzer/DataFormat/ParticleBaseFormat.h"
 #include "SampleAnalyzer/Service/LogService.h"
 
@@ -68,6 +69,7 @@ class RecTrackFormat : public ParticleBaseFormat
   Bool_t charge_;      /// electric charge
   Double_t etaOuter_;  /// eta @ first layer of calo
   Double_t phiOuter_;  /// phi @ first layer of calo
+  std::vector<IsolationConeType> isolCones_; // isolation cones
 
   // -------------------------------------------------------------
   //                        method members
@@ -100,6 +102,7 @@ class RecTrackFormat : public ParticleBaseFormat
     etaOuter_ = 0.;
     phiOuter_ = 0.;
     ParticleBaseFormat::Reset();
+    isolCones_.clear();
   }
 
   /// Accessor to the pdgid
@@ -118,6 +121,13 @@ class RecTrackFormat : public ParticleBaseFormat
   const int charge() const
   {if (charge_) return +1; else return -1;}
 
+  /// Add one isolation cone
+  void AddIsolCone (const IsolationConeType& cone)
+  {isolCones_.push_back(cone);}
+
+  /// get the collection of isolation cones
+  const std::vector<IsolationConeType>& isolCones() const
+  { return isolCones_; }
 
 };
 
