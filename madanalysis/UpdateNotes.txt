@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+102  1.1.10.20 (2014/01/28) fuks:    Cleaning conflicts between delfes and delphes 
+
 97   1.1.10.19 (2014/01/17) bfuks:   Beranger's suggestion for a IsSurviving function to be called from 
                                    the manager 
 
