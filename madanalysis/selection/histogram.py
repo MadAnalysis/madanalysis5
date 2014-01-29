@@ -326,7 +326,7 @@ class Histogram():
         if self.observable.name in ['NPID', 'NAPID']:
             word = 'N. of particles';
 
-        if self.observable.name=='DELTAR':
+        if self.observable.name in ['DELTAR', 'DPHI_0_PI', 'DPHI_0_2PI']:
             if self.GetStringArguments().count('[')!=2 and self.GetStringArguments().count(']')!=2:
                 word='N. of (' + self.ReplaceAll(self.GetStringArguments(),self.dicoargs) + ') pairs'; 
 

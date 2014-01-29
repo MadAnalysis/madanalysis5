@@ -305,8 +305,14 @@ def WriteJobExecuteNbody(file,iabs,icut,combi1,main,container,tagName,tagIndex,c
     # Case of one particle/multiparticle
     if len(combi1)==1:
         file.write('    if (')
+        if main.mode == MA5RunningType.PARTON:
+          TheObs=obs.code_parton[:-2]
+        elif main.mode == MA5RunningType.HADRON:
+          TheObs=obs.code_hadron[:-2]
+        else:
+          TheObs=obs.code_reco[:-2]
         file.write(containers1[0]+'[a]->' +\
-                   'dr('+container+'[muf])' +\
+                   TheObs+'('+container+'[muf])' +\
                    OperatorType.convert2cpp(condition.operator) +\
                    str(condition.threshold) +\
                    ') {'+tagName+'['+str(tagIndex)+']=true; break;}\n')
@@ -338,8 +344,14 @@ def WriteJobExecuteNbody(file,iabs,icut,combi1,main,container,tagName,tagIndex,c
 
         # Result    
         file.write('    if (q1.')
-        if obs.name in ['DELTAR','vDELTAR']:
-            file.write('dr('+container+'[muf])'+ OperatorType.convert2cpp(condition.operator) + \
+        if obs.name in ['DELTAR','vDELTAR','DPHI_0_PI','DPHI_0_2PI']:
+            if main.mode == MA5RunningType.PARTON:
+              TheObs=obs.code_parton[:-2]
+            elif main.mode == MA5RunningType.HADRON:
+              TheObs=obs.code_hadron[:-2]
+            else:
+              TheObs=obs.code_reco[:-2]
+            file.write(TheObs+'('+container+'[muf])'+ OperatorType.convert2cpp(condition.operator) + \
                    str(condition.threshold) +   \
                    ') {'+tagName+'['+str(tagIndex)+']=true; break;}\n')
         else:

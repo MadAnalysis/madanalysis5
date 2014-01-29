@@ -426,6 +426,39 @@ DELTAR = ObservableBase( name        = 'DELTAR',
 vDELTAR  = DELTAR
 dDELTAR  = dvDELTAR = vdDELTAR = ObservableBase.Clone(DELTAR, name='dDELTAR', combination=CombinationType.DIFFVECTOR, tex='d#DeltaR')
 
+DPHI_0_PI = ObservableBase( name        = 'DPHI_0_PI',
+                            args        = [ArgumentType.COMBINATION,\
+                                           ArgumentType.COMBINATION],
+                            combination = CombinationType.SUMVECTOR,
+                            plot_auto   = False,
+                           plot_nbins  = 100,
+                           plot_xmin   = 0.,
+                           plot_xmax   = 3.15,
+                           plot_unitX  = '',
+                           code_parton = 'dphi_0_pi()',
+                           code_hadron = 'dphi_0_pi()',
+                           code_reco   = 'dphi_0_pi()',
+                         cut_event     = True,
+                         cut_candidate = True,
+                         tex           = '#Delta#Phi_{0,#pi}'
+                       )
+DPHI_0_2PI = ObservableBase( name        = 'DPHI_0_2PI',
+                            args        = [ArgumentType.COMBINATION,\
+                                           ArgumentType.COMBINATION],
+                            combination = CombinationType.SUMVECTOR,
+                            plot_auto   = False,
+                           plot_nbins  = 100,
+                           plot_xmin   = 0.,
+                           plot_xmax   = 6.29,
+                           plot_unitX  = '',
+                           code_parton = 'dphi_0_2pi()',
+                           code_hadron = 'dphi_0_2pi()',
+                           code_reco   = 'dphi_0_2pi()',
+                         cut_event     = True,
+                         cut_candidate = True,
+                         tex           = '#Delta#Phi_{0,2#pi}'
+                       )
+
 ETA = ObservableBase( name        = 'ETA',
                       args        = [ArgumentType.COMBINATION],
                       combination = CombinationType.SUMVECTOR,
