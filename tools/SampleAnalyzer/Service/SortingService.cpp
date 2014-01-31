@@ -1,5 +1,3 @@
-////////////////////////////////////////////////////////////////////////////////
-//
 //  Copyright (C) 2012-2014 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //
@@ -22,7 +20,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#include "SampleAnalyzer/Service/Physics.h"
+#include "SampleAnalyzer/Service/SortingService.h"
 using namespace MA5;
 
-PhysicsService* PhysicsService::service_ = 0;
+SortingService* SortingService::service_ = 0;
+

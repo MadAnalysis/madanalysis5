@@ -43,16 +43,21 @@ class TransverseVariables
   //                       data members
   // -------------------------------------------------------------
   private:
-    /// Transverse variables require 2 momenta + the missing energy + one test mass
-    TLorentzVector p1_, p2_;
+    /// The MT2 variable requires 2 momenta + the missing energy + one test mass
+    /// The MT2W variable requires a 3rd momentum
+    TLorentzVector p1_, p2_, p3_;
     double pmx_, pmy_;
     double m_;
+    double E2sq_;
+
+    /// The w mass (useful for mt2w)
+    double mw_, mw2_;
 
     /// Other usefull kinematical variables
-    double msq_, pmtsq_, pmtm_, p1met_;
+    double msq_, pmtsq_, pmtm_, p1met_, plpb1_;
 
     /// Initialization with two momenta + met
-    void Initialize(const TLorentzVector&p1, const TLorentzVector&p2, const TLorentzVector&met,
+    void InitializeMT2(const TLorentzVector&p1, const TLorentzVector&p2, const TLorentzVector&met,
       const double mass)
     {
       // Coefficients
@@ -102,12 +107,34 @@ class TransverseVariables
     void InitCoefs()   { InitC(p2_,C1_); InitC(p1_,C2_); }
 
     /// Bissection method to extract MT2
-    int Nsolutions();
+    int Nsolutions(const double&);
     int Nsolutions_massless(const double&);
     bool FindHigh(double &dsqH);
 
     /// Special case: both particles are nearly massless
     double GetMT2_massless();
+
+    /// Initialization with three momenta + met
+    void InitializeMT2W(const TLorentzVector&p1, const TLorentzVector&p2, const TLorentzVector&p3,
+      const TLorentzVector &met)
+    {
+      p1_=p1; p2_=p2; p3_=p3;
+      E2sq_ = pow(p2_.E(),2.);
+      // MET
+      pmx_ = met.Px();
+      pmy_ = met.Py();
+      pmtsq_ = pow(met.Pt(),2.);
+      // The w mass
+      mw_ = 80.4;
+      mw2_=pow(mw_,2.);
+      // dot products
+      plpb1_ = p1_.E()*p2_.E() - p1_.Px()*p2_.Px() - p1.Py()*p2_.Py() - p1.Pz()*p2_.Pz();
+    }
+
+    /// Core function for mt2w
+    bool TestComp(const double&);
+    double GetMT2W(const ParticleBaseFormat*,const ParticleBaseFormat*,const ParticleBaseFormat*,
+       const ParticleBaseFormat&);
 
   public:
     /// Constructor
@@ -120,13 +147,14 @@ class TransverseVariables
     double MT2(const ParticleBaseFormat* p1, const ParticleBaseFormat* p2,
       const ParticleBaseFormat& met, const double &mass)
     {
-      Initialize(p1->momentum(), p2->momentum(), met.momentum(),mass);
+      InitializeMT2(p1->momentum(), p2->momentum(), met.momentum(),mass);
       return GetMT2();
     }
 
     double GetMT2();
 
-
+    /// MT2W method
+    double MT2W(std::vector<const RecJetFormat*>,const RecLeptonFormat*,const ParticleBaseFormat&);
 };
 
 }

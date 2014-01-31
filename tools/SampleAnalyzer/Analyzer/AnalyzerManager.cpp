@@ -51,7 +51,7 @@ AnalyzerBase* AnalyzerManager::ChoiceAnalyzer()
   std::cin >> n;
 
   // Check the choice
-  if (n<0 || n>=Objects_.size())
+  if (n>=Objects_.size())
     {
       ERROR << "wrong analysis" << endmsg;
       exit(1);

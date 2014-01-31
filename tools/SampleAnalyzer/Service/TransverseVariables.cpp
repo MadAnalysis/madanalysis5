@@ -26,10 +26,13 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Service/TransverseVariables.h"
 #include "SampleAnalyzer/Service/LogService.h"
-
+#include "SampleAnalyzer/Service/SortingService.h"
 
 using namespace MA5;
 
+/// -----------------------------------------------
+/// Funcions related to the computation of the mt2
+/// -----------------------------------------------
 
 inline int signchange_n(long double t1,long double t2,long double t3,long double t4,long double t5)
 {
@@ -51,7 +54,7 @@ inline int signchange_p(long double t1,long double t2,long double t3,long double
    return nsc;
 }
 
-int TransverseVariables::Nsolutions()
+int TransverseVariables::Nsolutions(const double &E)
 {
   //obtain the coefficients for the 4th order equation
   //divided by Ea^n to make the variable dimensionless
@@ -64,7 +67,7 @@ int TransverseVariables::Nsolutions()
     8.*C2_[0]*C1_[1]*C2_[1]*C1_[4] + 8.*C1_[0]*C2_[1]*C2_[1]*C1_[4] +
     4.*C2_[0]*C2_[0]*C1_[2]*C1_[4] - 4.*C1_[0]*C2_[0]*C2_[2]*C1_[4] +
     8.*C2_[0]*C1_[1]*C1_[1]*C2_[4] - 8.*C1_[0]*C1_[1]*C2_[1]*C2_[4] -
-    4.*C1_[0]*C2_[0]*C1_[2]*C2_[4] + 4.*C1_[0]*C1_[0]*C2_[2]*C2_[4])/p2_.Mt();
+    4.*C1_[0]*C2_[0]*C1_[2]*C2_[4] + 4.*C1_[0]*C1_[0]*C2_[2]*C2_[4])/E;
   long double A2 = (4.*C2_[0]*C2_[2]*C1_[3]*C1_[3] - 4.*C2_[0]*C1_[2]*C1_[3]*C2_[3] -
     4.*C1_[0]*C2_[2]*C1_[3]*C2_[3] + 4.*C1_[0]*C1_[2]*C2_[3]*C2_[3] -
     8.*C2_[0]*C2_[1]*C1_[3]*C1_[4] - 8.*C2_[0]*C1_[1]*C2_[3]*C1_[4] +
@@ -75,18 +78,18 @@ int TransverseVariables::Nsolutions()
     4.*C1_[0]*C2_[1]*C2_[1]*C1_[5] + 2.*C2_[0]*C2_[0]*C1_[2]*C1_[5] -
     2.*C1_[0]*C2_[0]*C2_[2]*C1_[5] + 4.*C2_[0]*C1_[1]*C1_[1]*C2_[5] -
     4.*C1_[0]*C1_[1]*C2_[1]*C2_[5] - 2.*C1_[0]*C2_[0]*C1_[2]*C2_[5] +
-    2.*C1_[0]*C1_[0]*C2_[2]*C2_[5])/p2_.Mt2();
+    2.*C1_[0]*C1_[0]*C2_[2]*C2_[5])/pow(E,2.);
   long double A1 = (-8.*C2_[0]*C1_[3]*C2_[3]*C1_[4] + 8.*C1_[0]*C2_[3]*C2_[3]*C1_[4] +
     8.*C2_[0]*C1_[3]*C1_[3]*C2_[4] - 8.*C1_[0]*C1_[3]*C2_[3]*C2_[4] -
     4.*C2_[0]*C2_[1]*C1_[3]*C1_[5] - 4.*C2_[0]*C1_[1]*C2_[3]*C1_[5] +
     8.*C1_[0]*C2_[1]*C2_[3]*C1_[5] + 4.*C2_[0]*C2_[0]*C1_[4]*C1_[5] -
     4.*C1_[0]*C2_[0]*C2_[4]*C1_[5] + 8.*C2_[0]*C1_[1]*C1_[3]*C2_[5] -
     4.*C1_[0]*C2_[1]*C1_[3]*C2_[5] - 4.*C1_[0]*C1_[1]*C2_[3]*C2_[5] -
-    4.*C1_[0]*C2_[0]*C1_[4]*C2_[5] + 4.*C1_[0]*C1_[0]*C2_[4]*C2_[5])/pow(p2_.Mt(),3);
+    4.*C1_[0]*C2_[0]*C1_[4]*C2_[5] + 4.*C1_[0]*C1_[0]*C2_[4]*C2_[5])/pow(E,3);
   long double A0 = (-4.*C2_[0]*C1_[3]*C2_[3]*C1_[5] + 4.*C1_[0]*C2_[3]*C2_[3]*C1_[5] +
     C2_[0]*C2_[0]*C1_[5]*C1_[5] + 4.*C2_[0]*C1_[3]*C1_[3]*C2_[5] -
     4.*C1_[0]*C1_[3]*C2_[3]*C2_[5] - 2.*C1_[0]*C2_[0]*C1_[5]*C2_[5] +
-    C1_[0]*C1_[0]*C2_[5]*C2_[5])/pow(p2_.Mt2(),2);
+    C1_[0]*C1_[0]*C2_[5]*C2_[5])/pow(E,4);
 
   long double C2 = -(A2/2. - 3.*pow(A3,2)/(16.*A4));
   long double C1 = -(3.*A1/4. -A2*A3/(8.*A4));
@@ -145,7 +148,7 @@ bool TransverseVariables::FindHigh(double &dsqH)
       double dsqM = (dsqH + dsqL)/2.;
       UpdateC1((dsqM-p2_.M2())/(2.*p2_.Mt2()));
       UpdateC2(((dsqM-p1_.M2())/2.+p1met_)/p1_.Mt2());
-      int nsolM = Nsolutions();
+      int nsolM = Nsolutions(p2_.Mt());
       if     (nsolM==2) { dsqH = dsqM; return true; }
       else if(nsolM==4) { dsqH = dsqM; continue; }
       else if(nsolM==0)
@@ -191,12 +194,12 @@ double TransverseVariables::GetMT2()
 
   // Calculating the number of solutions: coefficients for the two quadratic equations
   // bissection method
-  int nsolL = Nsolutions();
+  int nsolL = Nsolutions(p2_.Mt());
   if(nsolL>0) { return sqrt(msq_+dsq0); }
 
   UpdateC1( (dsqH-p2_.M2())/(2.*p2_.Mt2()) );
   UpdateC2( ((dsqH-p1_.M2())/2.+p1met_)/p1_.Mt2() );
-  int nsolH = Nsolutions();
+  int nsolH = Nsolutions(p2_.Mt());
   if(nsolH==nsolL || nsolH==4) { if(!FindHigh(dsqH)) { return sqrt(dsq0+msq_); } }
 
   while(sqrt(dsqH+msq_) - sqrt(dsq0+msq_) > 0.001)
@@ -204,7 +207,7 @@ double TransverseVariables::GetMT2()
     double dsqM = (dsqH+dsq0)/2.;
     UpdateC1( (dsqM-p2_.M2())/(2.*p2_.Mt2()) );
     UpdateC2( ((dsqM-p1_.M2())/2.+p1met_)/p1_.Mt2() );
-    int nsolM = Nsolutions();
+    int nsolM = Nsolutions(p2_.Mt());
     if(nsolM==4) { dsqH=dsqM; FindHigh(dsqH); continue; }
     if(nsolM!=nsolL) dsqH=dsqM;
     if(nsolM==nsolL) dsq0=dsqM;
@@ -268,3 +271,159 @@ double TransverseVariables::GetMT2_massless()
   }
   return sqrt(dsqH+msq_);
 }
+
+/// -----------------------------------------------
+/// Funcions related to the computation of the mt2w
+/// -----------------------------------------------
+/// Core function for the computation of mt2w
+double TransverseVariables::GetMT2W(const ParticleBaseFormat* lep,const ParticleBaseFormat* j1,
+  const ParticleBaseFormat*j2,const ParticleBaseFormat&met)
+{
+  /// We define a mt2w region in which we will search for the bissection
+  /// (default: from mw+mb to 500 GeV)
+  InitializeMT2W(lep->momentum(), j1->momentum(), j2->momentum(), met.momentum());
+  double mt_high = 500., upper=500.;
+  double mt_low  = mw_ + std::max(p2_.M(), p3_.M());
+
+  /// First, we need to check the 500 GeV hypothesis -> otherwise, we start at threshold
+  if(!TestComp(mt_high)) mt_high = mt_low;
+
+  // Scan to find the upper bound
+  double step=0.5;
+  while(!TestComp(mt_high) && mt_high < upper+2.*step)
+  {
+    mt_low = mt_high;
+    mt_high += step;
+  }
+
+  // No compatible region found under the upper bound -> return upper bound - 1 GeV
+  if (mt_high > upper) { return upper-2.*step; }
+
+  // mt_high is compatible -> bissection method
+  while(mt_high-mt_low>0.001)
+  {
+    double mt_mid = (mt_high+mt_low)/2.; 
+    if(!TestComp(mt_mid)) mt_low  = mt_mid;
+    else                  mt_high = mt_mid;
+  }
+  return mt_high;
+}
+
+/// Test if for a given event, the trial top mass is compatible with the real top mass
+bool TransverseVariables::TestComp(const double &mt)
+{
+  // Quick check if the trial top mass is larger than the two possible thresholds
+  if(mt<(p2_.M()+mw_) || mt<(p3_.M()+mw_)) { return false;}
+
+  // Calculate the delta,  delta1 and delta2 quantities
+  double delta = (pow(mt,2.) - mw2_ - p3_.M2())/(2.*p3_.Mt2());
+  double del1 = mw2_ - p1_.M2();
+  double del2 = pow(mt,2.) - mw2_ - p3_.M2() - 2.*plpb1_;
+
+  // Removing pbz
+  double aa = (p1_.E()*p2_.Px()-p2_.E()*p1_.Px())/ (p2_.E()*p1_.Pz()-p1_.E()*p2_.Pz());
+  double bb = (p1_.E()*p2_.Py()-p2_.E()*p1_.Py())/ (p2_.E()*p1_.Pz()-p1_.E()*p2_.Pz());
+  double cc = (p1_.E()*del2-p2_.E()*del1)/(2.*(p2_.E()*p1_.Pz()-p1_.E()*p2_.Pz()));
+
+  // Computing the coefficients of the two quadratic equations
+  C1_.resize(0);
+  C1_.push_back(E2sq_*(1.+pow(aa,2.))-pow(p2_.Px()+p2_.Pz()*aa,2.));
+  C1_.push_back(E2sq_*aa*bb-(p2_.Px()+p2_.Pz()*aa)*(p2_.Py()+p2_.Pz()*bb));
+  C1_.push_back(E2sq_*(1.+pow(bb,2.))-pow(p2_.Py()+p2_.Pz()*bb,2.));
+  C1_.push_back(E2sq_*aa*cc-(p2_.Px()+p2_.Pz()*aa)*(del2/2.+p2_.Pz()*cc));
+  C1_.push_back(E2sq_*bb*cc-(p2_.Py()+p2_.Pz()*bb)*(del2/2.+p2_.Pz()*cc));
+  C1_.push_back(E2sq_*pow(cc,2.)-pow(del2/2.+p2_.Pz()*cc,2.));
+
+  // Checking if the first equation admits real solutions
+  if( ((C1_[0]*(C1_[2]*C1_[5]-pow(C1_[4],2.))-C1_[1]*(C1_[1]*C1_[5]-C1_[3]*C1_[4])+
+    C1_[3]*(C1_[1]*C1_[4]-C1_[2]*C1_[3]))/(C1_[0]+C1_[2]))>0.) { return false; }
+
+  // Defining the coefficients for the second ellipse
+  C2_.resize(0);
+  C2_.push_back(1.-pow(p3_.Px(),2.)/p3_.Mt2());
+  C2_.push_back(-p3_.Px()*p3_.Py()/p3_.Mt2());
+  C2_.push_back(1.-pow(p3_.Py(),2.)/p3_.Mt2());
+  C2_.push_back(delta*p3_.Px());
+  C2_.push_back(delta*p3_.Py());
+  C2_.push_back(C2_[0]*pow(pmx_,2.)+2.*C2_[1]*pmx_*pmy_+C2_[2]*pow(pmy_,2.)-2.*C2_[3]*pmx_
+    -2.*C2_[4]*pmy_+mw2_-pow(delta,2.)*p3_.Et2());
+  C2_[3] += -C2_[0]*pmx_-C2_[1]*pmy_;
+  C2_[4] += -C2_[2]*pmy_-C2_[1]*pmx_;
+
+  // Get a point on the 1st ellipse and checks if it lies within the 2nd ellipse
+  // It is always possible to define (x0,y0) has ellipse 1 admits real solutions
+  // if True, then mt is compatible
+  double x0 = (C1_[2]*C1_[3]-C1_[1]*C1_[4])/(C1_[1]*C1_[1]-C1_[0]*C1_[2]);
+  double x0sq = pow(x0,2.);
+  double y0 = (-C1_[1]*x0-C1_[4]+
+    sqrt(pow(C1_[1]*x0+C1_[4],2.)-C1_[2]*(C1_[0]*x0sq+2.*C1_[3]*x0+C1_[5])))/C1_[2];
+  double y0sq = pow(y0,2.);
+  if((C2_[0]*x0sq+2.*C2_[1]*x0*y0+C2_[2]*y0sq+2.*C2_[3]*x0+2.*C2_[4]*y0+C2_[5])<0.)
+    return true;
+
+  // Computing the number of intersections between the two ellipses and returning the
+  // result as a function of the number of intersections
+  if (Nsolutions(p2_.E())==0) { return false;}
+  return true;
+}
+
+
+/// Wrapper fuction for the computation of mt2w
+double TransverseVariables::MT2W(std::vector<const RecJetFormat*> jets, const RecLeptonFormat* lep, const ParticleBaseFormat& met)
+{
+  /// We need at least 2 jets
+  if(jets.size()<2) return 0.;
+
+  /// Split the jet collection according to b-tags
+  std::vector<const RecParticleFormat*> bjets, nbjets;
+  for(unsigned int ii=0 ;ii<jets.size(); ii++)
+  {
+    if(jets[ii]->btag())  bjets.push_back(jets[ii]);
+    else                  nbjets.push_back(jets[ii]);
+  }
+  /// pt-ordering
+  SORTER->sort(nbjets,PTordering);
+  SORTER->sort(bjets,PTordering);
+
+  /// We neglect the fourth jets and all the others. If less than 3 jets in total
+  /// only light jets are considered.
+  unsigned int N=3;
+  if(jets.size()<=3) N = nbjets.size();
+
+  /// no b-jets
+  /// We select the minimum mt2w obtained from all possible jet combinations
+  if(bjets.size()==0)
+  {
+    double min_mt2w=1e9;
+    for (unsigned int ii=0; ii<N; ii++)
+      for (unsigned int jj=0; jj<N; jj++)
+      {
+        if (ii==jj) continue;
+        double tmp_mt2w = GetMT2W(lep, nbjets[ii], nbjets[jj],met);
+        if(tmp_mt2w < min_mt2w) min_mt2w = tmp_mt2w;
+      }
+      return min_mt2w;
+  }
+
+  /// 1 b-jet
+  else if (bjets.size()==1)
+  {
+    double min_mt2w=1e9;
+    for (unsigned int ii=0; ii<N; ii++)
+    {
+      double tmp_mt2w = GetMT2W(lep,bjets[0],nbjets[ii],met);
+      if (tmp_mt2w < min_mt2w) min_mt2w = tmp_mt2w;
+      tmp_mt2w = GetMT2W(lep,nbjets[ii],bjets[0],met);
+      if (tmp_mt2w < min_mt2w) min_mt2w = tmp_mt2w;
+    }
+    return min_mt2w;
+  }
+
+  /// More than 1 b-tag
+  else
+  {
+    ERROR << "MMUUFF!\\"<<endmsg;
+    return -10.;
+  }
+}
+

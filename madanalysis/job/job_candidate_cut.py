@@ -212,7 +212,7 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
             # Bracket for begin 
             file.write('    {\n')
 
-            file.write('      '+container2+'=PHYSICS->rankFilter('+\
+            file.write('      '+container2+'=SORTER->rankFilter('+\
                         newcontainer2+','+str(other_part[0].PTrank)+','+\
                         'PTordering'+');\n\n')
             

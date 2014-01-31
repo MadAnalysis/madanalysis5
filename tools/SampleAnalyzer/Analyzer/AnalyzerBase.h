@@ -32,6 +32,7 @@
 #include "SampleAnalyzer/Counter/CounterManager.h"
 #include "SampleAnalyzer/Writer/SAFWriter.h"
 #include "SampleAnalyzer/Service/Physics.h"
+#include "SampleAnalyzer/Service/SortingService.h"
 #include "SampleAnalyzer/Service/LogService.h"
 #include "SampleAnalyzer/Core/Configuration.h"
 #include "SampleAnalyzer/RegionSelection/RegionSelectionManager.h"

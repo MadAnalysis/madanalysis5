@@ -69,7 +69,7 @@ def WriteJobRank(part,file,rank,status):
 
     file.write('  // Sorting particle collection according to '+rank+'\n')
     file.write('  // for getting '+str(part.PTrank)+'th particle\n')
-    file.write('  '+container+'=PHYSICS->rankFilter('+\
+    file.write('  '+container+'=SORTER->rankFilter('+\
                newcontainer+','+str(part.PTrank)+','+rank+');\n\n')
 
 

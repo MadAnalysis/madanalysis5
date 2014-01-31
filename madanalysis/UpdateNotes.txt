@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+104  1.1.10.22 (2014/01/31) fuks:    Implementation of the MT2W variable + sorting functions 
+
 103  1.1.10.21 (2014/01/29) fuks:    new methods :dphi_0_pi and sphi_0_2pi (both at the python and c++ 
                                    levels) 
 
