@@ -177,7 +177,7 @@ public:
       parts.push_back((const RecLeptonFormat*)(ConvertedLeptons[ii]));
   }
 
-   /// Sorting jets
+  /// Sorting jets
   static void sort(std::vector<const RecJetFormat*>& parts,
             OrderingObservable obs=PTordering)
   {
@@ -193,6 +193,24 @@ public:
     parts.resize(0);
     for(unsigned int ii=0; ii<ConvertedJets.size(); ii++)
       parts.push_back((const RecJetFormat*)(ConvertedJets[ii]));
+  }
+
+   /// Sorting taus
+  static void sort(std::vector<const RecTauFormat*>& parts,
+            OrderingObservable obs=PTordering)
+  {
+    // Converting to RecParticleFormat
+    std::vector<const RecParticleFormat*> ConvertedTaus;
+    for(unsigned int ii=0; ii<parts.size(); ii++)
+      ConvertedTaus.push_back(parts[ii]);
+
+    // Sorting the converted particles
+    sort(ConvertedTaus,obs);
+
+    // Converting the sorted vector
+    parts.resize(0);
+    for(unsigned int ii=0; ii<ConvertedTaus.size(); ii++)
+      parts.push_back((const RecTauFormat*)(ConvertedTaus[ii]));
   }
 
   /// rank filter

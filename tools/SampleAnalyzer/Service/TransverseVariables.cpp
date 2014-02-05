@@ -318,7 +318,7 @@ bool TransverseVariables::TestComp(const double &mt)
   // Calculate the delta,  delta1 and delta2 quantities
   double delta = (pow(mt,2.) - mw2_ - p3_.M2())/(2.*p3_.Mt2());
   double del1 = mw2_ - p1_.M2();
-  double del2 = pow(mt,2.) - mw2_ - p3_.M2() - 2.*plpb1_;
+  double del2 = pow(mt,2.) - mw2_ - p2_.M2() - 2.*plpb1_;
 
   // Removing pbz
   double aa = (p1_.E()*p2_.Px()-p2_.E()*p1_.Px())/ (p2_.E()*p1_.Pz()-p1_.E()*p2_.Pz());
@@ -422,8 +422,15 @@ double TransverseVariables::MT2W(std::vector<const RecJetFormat*> jets, const Re
   /// More than 1 b-tag
   else
   {
-    ERROR << "MMUUFF!\\"<<endmsg;
-    return -10.;
+    double min_mt2w=1e9;
+    for (unsigned int ii=0; ii<bjets.size(); ii++)
+      for (unsigned int jj=0; jj<bjets.size(); jj++)
+      {
+        if (ii==jj) continue;
+        double tmp_mt2w = GetMT2W(lep, bjets[ii], bjets[jj],met);
+        if (tmp_mt2w < min_mt2w) min_mt2w = tmp_mt2w;
+      }
+      return min_mt2w;
   }
 }
 
