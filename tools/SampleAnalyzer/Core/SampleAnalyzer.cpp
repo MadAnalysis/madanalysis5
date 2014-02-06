@@ -134,6 +134,14 @@ bool SampleAnalyzer::Initialize(int argc, char **argv,
 
 
 AnalyzerBase* SampleAnalyzer::InitializeAnalyzer(const std::string& name, 
+                                                 const std::string& outputname)
+{
+  std::map<std::string,std::string> parametersA1;
+  InitializeAnalyzer(name,outputname,parametersA1);
+}
+
+
+AnalyzerBase* SampleAnalyzer::InitializeAnalyzer(const std::string& name, 
                                                  const std::string& outputname,
                            const std::map<std::string,std::string>& parameters)
 {

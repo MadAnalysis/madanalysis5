@@ -111,6 +111,9 @@ class SampleAnalyzer
                                    const std::string& outputname,
                         const std::map<std::string,std::string>& parameters);
 
+  AnalyzerBase* InitializeAnalyzer(const std::string& name, 
+                                   const std::string& outputname);
+
   /// Getting pointer to a filter
   FilterBase* InitializeFilter(const std::string& name, 
                                const std::string& outputname,
