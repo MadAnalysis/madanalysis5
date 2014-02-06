@@ -364,7 +364,10 @@ class AnalyzerManager:
         file.close()
 
 # Reading arguments
-if len(sys.argv)!=2:
+mute=False
+if len(sys.argv)==3:
+    mute=True
+elif len(sys.argv)!=2:
     print "Error: number of argument incorrect"
     print "Syntax: ./newAnalyzer.py name"
     print "with name the name of the analyzer"
@@ -372,8 +375,11 @@ if len(sys.argv)!=2:
 
 
 print "A new class called '" + sys.argv[1] + "' will be created."
-print "Please enter a title for your analyzer : "
-title=raw_input("Title : ")
+if not mute:
+  print "Please enter a title for your analyzer : "
+  title=raw_input("Title : ")
+else:
+  title=sys.argv[1]
 
 analyzer = AnalyzerManager(sys.argv[1],title)
 

@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+107  1.1.10.25 (2014/02/06) fuks:    Creation of an analysis template - changes in the file naming 
+
 106  1.1.10.24 (2014/02/06) fuks:    problems with wgetting fastjet on some machines 
 
 105  1.1.10.23 (2014/02/05) fuks:    Few bugs corrected in the mt2w implementation (thanks to Jeremy 

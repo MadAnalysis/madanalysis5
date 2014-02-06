@@ -42,7 +42,7 @@ class ExpertMode:
         
     def CreateDirectory(self):
         logging.info("\nWelcome to the expert mode of MadAnalysis")
-        logging.info("Please enter a folder for creating an empty SampleAnalyzer job")
+        logging.info("Please enter a folder name for creating an empty SampleAnalyzer job")
         answer=raw_input("Answer: ")
         self.path = os.path.expanduser(answer)
         if not self.path.startswith('/'):
@@ -90,9 +90,13 @@ class ExpertMode:
             return False
 
         # Writing an empty analysis
+        logging.info("Please enter a name for your analysis")
+        title=raw_input("Answer: ")
+        if title=="":
+            title="user"
         logging.info("   Writing an empty analysis...")
         jobber.WriteEmptyFilterSource(self.main)
-        os.system("cd "+self.path+"/Build/SampleAnalyzer; python newAnalyzer.py user")
+        os.system("cd "+self.path+"/Build/SampleAnalyzer; python newAnalyzer.py " + title + " 1")
 
         # Extracting analysis name
         file = open(self.path+"/Build/SampleAnalyzer/Analyzer/analysisList.cpp")
@@ -105,9 +109,7 @@ class ExpertMode:
                 title=words[1]
                 break
         file.close()
-        if title=="":
-            title="user"
-            
+
         # Writing a Makefile
         logging.info("   Writing a 'Makefile'...")
         if not jobber.WriteMakefiles():
