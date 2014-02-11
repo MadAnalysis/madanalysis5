@@ -34,7 +34,7 @@ class AnalyzerManager:
         self.name       = name
         self.title      = title
         self.currentdir = os.getcwd()
-        
+
     def CheckFilePresence(self):
         if not os.path.isdir(self.currentdir + "/Analyzer"):
             print "Error: the directory called 'Analyzer' is not found."
@@ -69,7 +69,6 @@ class AnalyzerManager:
             output.write('  Add("'+self.title+'",new '+self.name+");\n")
             output.write('}\n')
             output.close()
-            
 
         # updating the file 
         else:
@@ -85,6 +84,7 @@ class AnalyzerManager:
 
                 theline = line.lstrip()
                 theline = theline.split()
+                tit = self.title.replace(' ','_')
                 for word in theline:
                     if word=="}":
                         output.write('  Add("'+self.title+'",new '+self.name+');\n')
@@ -363,6 +363,32 @@ class AnalyzerManager:
         file.write('\n')
         file.close()
 
+    def UpdateMain(self,title):
+        if not os.path.isfile(self.currentdir + "/../Main/main.cpp"):
+          return;
+        else:
+          shutil.copy(self.currentdir + "/../Main/main.cpp",
+             self.currentdir + "/../Main/main.bak")
+          output = open(self.currentdir + "/../Main/main.cpp","w")
+          input  = open(self.currentdir + "/../Main/main.bak")
+          IsExecuted=False
+          for line in input:
+            if "Getting pointer to the analyzer" in line:
+              output.write(line)
+              output.write("  std::map<std::string, std::string> prm" + title + ";\n")
+              output.write("  AnalyzerBase* analyzer" + title + "=\n")
+              output.write("    manager.InitializeAnalyzer(\"" + title + "\",\"" +\
+                 title + ".saf\",prm" + title + ");\n")
+              output.write("  if (analyzer" + title + "==0) return 1;\n\n")
+            elif "Execute" in line and not IsExecuted:
+              IsExecuted = True
+              output.write("      analyzer" + title + "->Execute(mySample,myEvent);\n")
+              output.write(line)
+            else:
+              output.write(line)
+
+
+
 # Reading arguments
 mute=False
 if len(sys.argv)==3:
@@ -387,6 +413,7 @@ analyzer = AnalyzerManager(sys.argv[1],title)
 if not analyzer.CheckFilePresence():
     sys.exit()
 
+analyzer.UpdateMain(title)
 analyzer.WriteHeader()
 analyzer.WriteSource()
 

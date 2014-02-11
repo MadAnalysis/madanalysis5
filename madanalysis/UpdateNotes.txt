@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+108  1.1.10.26 (2014/02/11) fuks:    Updating the expert mode: adding new analyses to an existing 
+                                   template directory 
+
 107  1.1.10.25 (2014/02/06) fuks:    Creation of an analysis template - changes in the file naming 
 
 106  1.1.10.24 (2014/02/06) fuks:    problems with wgetting fastjet on some machines 
