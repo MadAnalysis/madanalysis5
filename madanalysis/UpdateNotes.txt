@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+110  1.1.10.28 (2014/02/11) fuks:    Fixing minor bug when providing the wrong number of arguments to an 
+                                   observable (thanks to B.Dumont) 
+
 109  1.1.10.27 (2014/02/11) fuks:    Removing the old filter infrastructure 
 
 108  1.1.10.26 (2014/02/11) fuks:    Updating the expert mode: adding new analyses to an existing 
