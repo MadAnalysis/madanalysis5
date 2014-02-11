@@ -41,7 +41,6 @@
 // |è-manager headers
 #include "SampleAnalyzer/Reader/ReaderManager.h"
 #include "SampleAnalyzer/Analyzer/AnalyzerManager.h"
-#include "SampleAnalyzer/Filter/FilterManager.h"
 #include "SampleAnalyzer/Writer/WriterManager.h"
 #include "SampleAnalyzer/JetClustering/JetClustererManager.h"
 #include "SampleAnalyzer/Detector/DetectorManager.h"
@@ -71,7 +70,6 @@ class SampleAnalyzer
   WriterManager       fullWriters_;
   ReaderManager       fullReaders_;
   AnalyzerManager     fullAnalyses_;
-  FilterManager       fullFilters_;
   JetClustererManager fullJetClusterers_;
   DetectorManager     fullDetectors_;
 
@@ -79,7 +77,6 @@ class SampleAnalyzer
   std::vector<WriterBase*>       writers_;
   std::vector<ReaderBase*>       readers_;
   std::vector<AnalyzerBase*>     analyzers_;
-  std::vector<FilterBase*>       filters_;
   std::vector<JetClustererBase*> clusters_;
   std::vector<DetectorBase*>     detectors_;
 
@@ -113,11 +110,6 @@ class SampleAnalyzer
 
   AnalyzerBase* InitializeAnalyzer(const std::string& name, 
                                    const std::string& outputname);
-
-  /// Getting pointer to a filter
-  FilterBase* InitializeFilter(const std::string& name, 
-                               const std::string& outputname,
-                        const std::map<std::string,std::string>& parameters);
 
   /// Getting pointer to a writer
   WriterBase* InitializeWriter(const std::string& name, 

@@ -95,7 +95,6 @@ class ExpertMode:
         if title=="":
             title="user"
         logging.info("   Writing an empty analysis...")
-        jobber.WriteEmptyFilterSource(self.main)
         os.system("cd "+self.path+"/Build/SampleAnalyzer; python newAnalyzer.py " + title + " 1")
 
         # Extracting analysis name

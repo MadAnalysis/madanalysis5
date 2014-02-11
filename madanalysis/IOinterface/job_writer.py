@@ -61,8 +61,6 @@ class JobWriter():
             return False
         elif not os.path.isdir(path+"/Build/SampleAnalyzer/Analyzer"):
             return False
-        elif not os.path.isdir(path+"/Build/SampleAnalyzer/Filter"):
-            return False
         elif not os.path.isdir(path+"/Build/Main"):
             return False
         elif not os.path.isdir(path+"/Output"):
@@ -98,11 +96,6 @@ class JobWriter():
             os.mkdir(path+"/Build/SampleAnalyzer/Analyzer")
         except:
             logging.error("Impossible to create the folder 'Build/SampleAnalyzer/Analyzer'")
-            return False
-        try:
-            os.mkdir(path+"/Build/SampleAnalyzer/Filter")
-        except:
-            logging.error("Impossible to create the folder 'Build/SampleAnalyzer/Filter'")
             return False
         try:
             os.mkdir(path+"/Build/Log")
@@ -143,9 +136,6 @@ class JobWriter():
             return False
         elif not os.path.isdir(self.path+"/Build/SampleAnalyzer/Analyzer"):
             logging.error("folder '"+self.path+"/Build/SampleAnalyzer/Analyzer' is not found")
-            return False
-        elif not os.path.isdir(self.path+"/Build/SampleAnalyzer/Filter"):
-            logging.error("folder '"+self.path+"/Build/SampleAnalyzer/Filter' is not found")
             return False
         elif not os.path.isdir(self.path+"/Build/Main"):
             logging.error("folder '"+self.path+"/Build/Main' is not found")
@@ -233,20 +223,6 @@ class JobWriter():
             os.chmod(self.path+"/Build/SampleAnalyzer/newAnalyzer.py",0755)
         except:
             logging.error('Impossible to make executable the file "newAnalyzer"')
-            return False
-        try:
-            shutil.copyfile\
-                      (\
-                      self.ma5dir+"/tools/SampleAnalyzer/newFilter.py",\
-                      self.path+"/Build/SampleAnalyzer/newFilter.py"\
-                      )
-        except:
-            logging.error('Impossible to copy the file "newFilter"')
-            return False
-        try:
-            os.chmod(self.path+"/Build/SampleAnalyzer/newFilter.py",0755)
-        except:
-            logging.error('Impossible to make executable the file "newFilter.py"')
             return False
 
         if self.main.fastsim.package in ["delphes","delfes"]:
@@ -427,23 +403,6 @@ class JobWriter():
         file.close()
         return True
 
-    def WriteEmptyFilterSource(self,main):
-        file = open(self.path+"/Build/SampleAnalyzer/Filter/filterList.cpp","w")
-        file.write('#include "SampleAnalyzer/Filter/FilterManager.h"\n')
-        file.write('using namespace MA5;\n')
-        file.write('#include <stdlib.h>\n\n')
-        file.write('// ------------------------------------------' +\
-                   '-----------------------------------\n')
-        file.write('// BuildUserTable\n')
-        file.write('// ------------------------------------------' +\
-                   '-----------------------------------\n')
-        file.write('void FilterManager::BuildUserTable()\n')
-        file.write('{\n')
-        file.write('}\n')
-        file.close()
-
-        return True
-
     def WriteSelectionSource(self,main):
         main.selection.RefreshStat();
         file = open(self.path+"/Build/SampleAnalyzer/Analyzer/user.cpp","w")
@@ -468,7 +427,6 @@ class JobWriter():
         file.write('  Add("MadAnalysis5job", new user);\n')
         file.write('}\n')
         file.close()
-        self.WriteEmptyFilterSource(main)
         return True
 
     def CreateShowerDir(self,mode):
@@ -534,13 +492,6 @@ class JobWriter():
         file.write('OBJS = $(SRCS:.cpp=.o)\n')
         file.write('\n')
 
-        # Files for filters
-        file.write('# Files for filters\n')
-        file.write('SRCS2 = $(wildcard Filter/*.cpp)\n')
-        file.write('HDRS2 = $(wildcard Filter/*.h)\n')
-        file.write('OBJS2 = $(SRCS2:.cpp=.o)\n')
-        file.write('\n')
-
         # Name of the library
         file.write('# Name of the library\n')
         file.write('PROGRAM = SampleAnalyzerBld\n')
@@ -553,20 +504,19 @@ class JobWriter():
 
         # Compilation
         file.write('# Compile target\n')
-        file.write('compile: $(OBJS) $(OBJS2)\n')
+        file.write('compile: $(OBJS)\n')
         file.write('\n')
         file.write('# Object file target\n')
         file.write('$(OBJS): $(HDRS)\n')
-        file.write('$(OBJS2): $(HDRS2)\n')
         file.write('\n')
 
         # Linking
         file.write('# Link target\n')
-        file.write('link: $(OBJS) $(OBJS2)\n')
+        file.write('link: $(OBJS)\n')
         file.write('\tcp ' +\
             '$(MA5_BASE)/tools/SampleAnalyzer/Lib/libSampleAnalyzer.a ' +\
             '../../Build/Lib/lib$(PROGRAM).a\n')
-        file.write('\tar -ruc ../../Build/Lib/lib$(PROGRAM).a $(OBJS) $(OBJS2)\n')
+        file.write('\tar -ruc ../../Build/Lib/lib$(PROGRAM).a $(OBJS)\n')
         file.write('\tranlib ../../Build/Lib/lib$(PROGRAM).a\n')
         file.write('\n')
 
@@ -581,7 +531,7 @@ class JobWriter():
         file.write('\n')
         file.write('# Do clean target\n')
         file.write('do_clean:\n')
-        file.write('\t@rm -f $(OBJS) $(OBJS2)\n')
+        file.write('\t@rm -f $(OBJS)\n')
         file.write('\n')
 
         # Mr Proper
