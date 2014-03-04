@@ -132,7 +132,8 @@ class ParticleBaseFormat
   const Float_t mt_met(const TLorentzVector& MET) const 
   { 
     // Computing ET sum
-    double ETsum = momentum_.Et() + MET.Et();
+    double ETsum = sqrt( momentum_.M()*momentum_.M() +
+                         momentum_.Pt()*momentum_.Pt() )  + MET.Pt();
 
     // Computing PT sum
     TLorentzVector pt = momentum_ + MET;
@@ -235,8 +236,8 @@ class ParticleBaseFormat
   { return ParticleBaseFormat(a*momentum_); }
 
   /// operator * (momentum)
-  ParticleBaseFormat operator * (const ParticleBaseFormat& p) const
-  { return ParticleBaseFormat(momentum_.Dot(p.momentum_)); }
+  Double_t operator * (const ParticleBaseFormat& p) const
+  { return momentum_.Dot(p.momentum_); }
 
   /// operator + (momentum)
   ParticleBaseFormat operator + (const ParticleBaseFormat& p) const 
