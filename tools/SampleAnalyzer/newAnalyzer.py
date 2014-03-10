@@ -381,10 +381,10 @@ class AnalyzerManager:
               output.write("  AnalyzerBase* analyzer_" + TheName + "=\n")
               output.write("    manager.InitializeAnalyzer(\"" + TheName + "\",\"" +\
                  title + ".saf\",prm" + TheName + ");\n")
-              output.write("  if (analyzer" + TheName + "==0) return 1;\n\n")
+              output.write("  if (analyzer_" + TheName + "==0) return 1;\n\n")
             elif "Execute" in line and not IsExecuted:
               IsExecuted = True
-              output.write("      analyzer" + TheName + "->Execute(mySample,myEvent);\n")
+              output.write("      analyzer_" + TheName + "->Execute(mySample,myEvent);\n")
               output.write(line)
             else:
               output.write(line)
