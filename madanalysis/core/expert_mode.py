@@ -44,6 +44,8 @@ class ExpertMode:
         logging.info("\nWelcome to the expert mode of MadAnalysis")
         logging.info("Please enter a folder name for creating an empty SampleAnalyzer job")
         answer=raw_input("Answer: ")
+        answer=answer.replace(' ','_');
+        answer=answer.replace('-','_');
         self.path = os.path.expanduser(answer)
         if not self.path.startswith('/'):
             self.path = self.main.currentdir+'/'+self.path
@@ -94,6 +96,8 @@ class ExpertMode:
         title=raw_input("Answer: ")
         if title=="":
             title="user"
+        title=title.replace(' ', '_');
+        title=title.replace('-', '_');
         logging.info("   Writing an empty analysis...")
         os.system("cd "+self.path+"/Build/SampleAnalyzer; python newAnalyzer.py " + title + " 1")
 

@@ -375,14 +375,16 @@ class AnalyzerManager:
           for line in input:
             if "Getting pointer to the analyzer" in line:
               output.write(line)
-              output.write("  std::map<std::string, std::string> prm" + title + ";\n")
-              output.write("  AnalyzerBase* analyzer" + title + "=\n")
-              output.write("    manager.InitializeAnalyzer(\"" + title + "\",\"" +\
-                 title + ".saf\",prm" + title + ");\n")
-              output.write("  if (analyzer" + title + "==0) return 1;\n\n")
+              TheName = title.replace(' ','_');
+              TheName = title.replace('-','_');
+              output.write("  std::map<std::string, std::string> prm" + TheName + ";\n")
+              output.write("  AnalyzerBase* analyzer_" + TheName + "=\n")
+              output.write("    manager.InitializeAnalyzer(\"" + TheName + "\",\"" +\
+                 title + ".saf\",prm" + TheName + ");\n")
+              output.write("  if (analyzer" + TheName + "==0) return 1;\n\n")
             elif "Execute" in line and not IsExecuted:
               IsExecuted = True
-              output.write("      analyzer" + title + "->Execute(mySample,myEvent);\n")
+              output.write("      analyzer" + TheName + "->Execute(mySample,myEvent);\n")
               output.write(line)
             else:
               output.write(line)
