@@ -206,9 +206,9 @@ bool DelfesTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEven
       }
 
       myEvent.mc()->particles_[i].mother1_ = &myEvent.mc()->particles_[index1-1];
-      myEvent.mc()->particles_[index1-1].Daughters_.push_back(&myEvent.mc()->particles_[i]);
+      myEvent.mc()->particles_[index1-1].daughters_.push_back(&myEvent.mc()->particles_[i]);
       myEvent.mc()->particles_[i].mother2_ = &myEvent.mc()->particles_[index2-1];
-      myEvent.mc()->particles_[index2-1].Daughters_.push_back(&myEvent.mc()->particles_[i]);
+      myEvent.mc()->particles_[index2-1].daughters_.push_back(&myEvent.mc()->particles_[i]);
     }
     */
   }

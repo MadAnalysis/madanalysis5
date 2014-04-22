@@ -31,18 +31,18 @@ using namespace MA5;
 
 void JetClusteringFastJet::GetFinalState(const MCParticleFormat* part, std::set<const MCParticleFormat*>& finalstates)
 {
-  for (unsigned int i=0; i<part->Daughters().size(); i++)
+  for (unsigned int i=0; i<part->daughters().size(); i++)
   {
-    if (PHYSICS->IsFinalState(part->Daughters()[i])) finalstates.insert(part->Daughters()[i]);
-    else return GetFinalState(part->Daughters()[i],finalstates);
+    if (PHYSICS->IsFinalState(part->daughters()[i])) finalstates.insert(part->daughters()[i]);
+    else return GetFinalState(part->daughters()[i],finalstates);
   }
 }
 
 Bool_t JetClusteringFastJet::IsLast(const MCParticleFormat* part, EventFormat& myEvent)
 {
-  for (unsigned int i=0; i<part->Daughters().size(); i++)
+  for (unsigned int i=0; i<part->daughters().size(); i++)
   {
-    if (part->Daughters()[i]->pdgid()==part->pdgid()) return false;
+    if (part->daughters()[i]->pdgid()==part->pdgid()) return false;
   }
   return true;
 }
@@ -113,9 +113,9 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
         bool leptonic   = true;
         bool muonic     = false;
         bool electronic = false;
-        for (unsigned int j=0;j<part.Daughters().size();j++)
+        for (unsigned int j=0;j<part.daughters().size();j++)
         {
-          UInt_t pdgid = std::abs(part.Daughters()[j]->pdgid());
+          UInt_t pdgid = std::abs(part.daughters()[j]->pdgid());
           if      (pdgid==13) muonic=true;
           else if (pdgid==11) electronic=true;
           else if (pdgid!=22 /*photons*/ &&

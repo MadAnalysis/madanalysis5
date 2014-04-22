@@ -300,9 +300,9 @@ class PhysicsService
 
     Int_t npi = 0;
 
-    for (unsigned int i=0;i<part->Daughters().size();i++)
+    for (unsigned int i=0;i<part->daughters().size();i++)
     {
-      Int_t pdgid = part->Daughters()[i]->pdgid();
+      Int_t pdgid = part->daughters()[i]->pdgid();
       if (fabs(pdgid) == 11) return 1;
       else if (fabs(pdgid) == 13) return 2;
       else if (fabs(pdgid) == 321) return 3;
@@ -311,9 +311,9 @@ class PhysicsService
       else if (fabs(pdgid) == 20213)
       {
        	Int_t pi = 0;
-        for (unsigned int j=0;j<part->Daughters()[i]->Daughters().size();j++)
+        for (unsigned int j=0;j<part->daughters()[i]->daughters().size();j++)
         {
-          if (fabs(part->Daughters()[i]->Daughters()[j]->pdgid()) == 211) pi++;
+          if (fabs(part->daughters()[i]->daughters()[j]->pdgid()) == 211) pi++;
         }
         if (pi == 1) return 6;
         else if (pi == 3) return 7;
@@ -321,9 +321,9 @@ class PhysicsService
       else if (fabs(pdgid) == 211) npi++;
       else if (fabs(pdgid) == 24)
       {
-       	for (unsigned int j=0;j<part->Daughters()[i]->Daughters().size();j++)
+       	for (unsigned int j=0;j<part->daughters()[i]->daughters().size();j++)
         {
-          if (fabs(part->Daughters()[i]->Daughters()[j]->pdgid()) == 211) npi++;
+          if (fabs(part->daughters()[i]->daughters()[j]->pdgid()) == 211) npi++;
         }
       }
     }

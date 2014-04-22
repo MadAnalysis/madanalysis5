@@ -156,7 +156,7 @@ bool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
         if (part.extra1_ == myEvent.mc()->particles_[j].extra2_)
         {
           // set daughter
-          myEvent.mc()->particles_[j].Daughters_.push_back(&part);
+          myEvent.mc()->particles_[j].daughters_.push_back(&part);
 
           // set mother
           nmother++;
