@@ -269,20 +269,20 @@ bool LHEReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
     MCParticleFormat& part = myEvent.mc()->particles_[i];
 
     // MET in case of simplified LHE
-    if ( ( part.pdgid()==12 || (part.statuscode()==1 && PHYSICS->IsInvisible(part)) ) && simplified)
+    if ( ( part.pdgid()==12 || (part.statuscode()==1 && PHYSICS->Id->IsInvisible(part)) ) && simplified)
     {
       myEvent.mc()->MET_ += part.momentum();
     }
 
     // MET, MHT, TET, THT
-    if (part.statuscode()==1 && !PHYSICS->IsInvisible(part))
+    if (part.statuscode()==1 && !PHYSICS->Id->IsInvisible(part))
     {
       if (!simplified)
       {
         myEvent.mc()->MET_ -= part.momentum();
       }
       myEvent.mc()->TET_ += part.pt();
-      if (PHYSICS->IsHadronic(part))
+      if (PHYSICS->Id->IsHadronic(part))
       {
         myEvent.mc()->MHT_ -= part.momentum();
         myEvent.mc()->THT_ += part.pt(); 

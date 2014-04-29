@@ -206,13 +206,13 @@ def WriteFillWithMuonContainer(part,file,rank,status):
     # Put isolated negative muon
     if part.particle.Find(130):
         file.write('      if ( (event.rec()->muons()[i].charge()<0) &&'+\
-               ' PHYSICS->IsIsolatedMuon(event.rec()->muons()[i],event.rec()) ) '+\
+               ' PHYSICS->Id->IsIsolatedMuon(event.rec()->muons()[i],event.rec()) ) '+\
                container+'.push_back(&(event.rec()->muons()[i]));\n')
 
     # Put isolated positive muon
     if part.particle.Find(-130):
         file.write('      if ( (event.rec()->muons()[i].charge()>0) &&'+\
-               ' PHYSICS->IsIsolatedMuon(event.rec()->muons()[i],event.rec()) ) '+\
+               ' PHYSICS->Id->IsIsolatedMuon(event.rec()->muons()[i],event.rec()) ) '+\
                container+'.push_back(&(event.rec()->muons()[i]));\n')
 
 

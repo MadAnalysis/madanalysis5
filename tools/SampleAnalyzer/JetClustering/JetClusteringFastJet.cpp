@@ -33,7 +33,7 @@ void JetClusteringFastJet::GetFinalState(const MCParticleFormat* part, std::set<
 {
   for (unsigned int i=0; i<part->daughters().size(); i++)
   {
-    if (PHYSICS->IsFinalState(part->daughters()[i])) finalstates.insert(part->daughters()[i]);
+    if (PHYSICS->Id->IsFinalState(part->daughters()[i])) finalstates.insert(part->daughters()[i]);
     else return GetFinalState(part->daughters()[i],finalstates);
   }
 }
@@ -71,7 +71,7 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
     if (part.pt()<1e-10) continue;
 
     // Treating intermediate particles
-    if (PHYSICS->IsInterState(part))
+    if (PHYSICS->Id->IsInterState(part))
     {
       // rejecting not interesting particles
       if (absid!=5 && absid!=4 && absid!=15) continue;
@@ -185,7 +185,7 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
     }
 
     // Keeping only final states
-    else if (PHYSICS->IsFinalState(part))
+    else if (PHYSICS->Id->IsFinalState(part))
     {
       // keeping only electron, muon and photon
       if (absid!=22 && absid!=11 && absid!=13) continue;
@@ -238,7 +238,7 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
 
     // Selecting input for jet clustering
     if (myEvent.mc()->particles()[i].statuscode()!=1)       continue;
-    if (PHYSICS->IsInvisible(myEvent.mc()->particles()[i])) continue;
+    if (PHYSICS->Id->IsInvisible(myEvent.mc()->particles()[i])) continue;
 
     // ExclusiveId mode
     if (ExclusiveId_)

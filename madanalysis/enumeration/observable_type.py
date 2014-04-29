@@ -30,10 +30,10 @@ class ObservableType(object):
 	# name : accept_particles 
 	values = { 'UNKNOWN' : [False,'','','','',0,0,0,False,False],\
 		   'SQRTS' :   [False,'PHYSICS->SqrtS(event.mc())','PHYSICS->SqrtS(event.mc())','','GeV',100,0.,1000., True, False],\
-		   'TET' :     [False,'PHYSICS->EventTET(event.mc())','PHYSICS->EventTET(event.mc())','PHYSICS->EventTET(event.rec())','GeV',100,0.,1000., True,False],\
-		   'MET' :     [False,'PHYSICS->EventMET(event.mc())','PHYSICS->EventMET(event.mc())','PHYSICS->EventMET(event.rec())','GeV',100,0.,1000., True,False],\
-		   'THT' :     [False,'PHYSICS->EventTHT(event.mc())','PHYSICS->EventTHT(event.mc())','PHYSICS->EventTHT(event.rec())','GeV',100,0.,1000., True,False],\
-		   'MHT' :     [False,'PHYSICS->EventMHT(event.mc())','PHYSICS->EventMHT(event.mc())','PHYSICS->EventMHT(event.rec())','GeV',100,0.,1000.,True,False],\
+		   'TET' :     [False,'PHYSICS->Transverse->EventTET(event.mc())','PHYSICS->Transverse->EventTET(event.mc())','PHYSICS->Transverse->EventTET(event.rec())','GeV',100,0.,1000., True,False],\
+		   'MET' :     [False,'PHYSICS->Transverse->EventMET(event.mc())','PHYSICS->Transverse->EventMET(event.mc())','PHYSICS->Transverse->EventMET(event.rec())','GeV',100,0.,1000., True,False],\
+		   'THT' :     [False,'PHYSICS->Transverse->EventTHT(event.mc())','PHYSICS->Transverse->EventTHT(event.mc())','PHYSICS->Transverse->EventTHT(event.rec())','GeV',100,0.,1000., True,False],\
+		   'MHT' :     [False,'PHYSICS->Transverse->EventMHT(event.mc())','PHYSICS->Transverse->EventMHT(event.mc())','PHYSICS->Transverse->EventMHT(event.rec())','GeV',100,0.,1000.,True,False],\
 		   'NPID':     [False,'NPID','NPID','NPID','',100,0.,100.,False,False],\
 		   'NAPID':    [False,'NAPID','NAPID','NAPID','',100,0.,100.,False,False],\
 	           'E'   :     [True,'e()','e()','e()','GeV',100,0.,1000.,True,True],\

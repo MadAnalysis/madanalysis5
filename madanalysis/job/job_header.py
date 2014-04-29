@@ -139,11 +139,11 @@ def WriteParticle2(file,part,rank,status):
 
     # FinalSate
     if status=="finalstate":
-        file.write("     if ( !PHYSICS->IsFinalState(part) ) return false;\n")
+        file.write("     if ( !PHYSICS->Id->IsFinalState(part) ) return false;\n")
     elif status=="initialstate":
-        file.write("     if ( !PHYSICS->IsInitialState(part) ) return false;\n")
+        file.write("     if ( !PHYSICS->Id->IsInitialState(part) ) return false;\n")
     elif status=="interstate":
-        file.write("     if ( !PHYSICS->IsInterState(part) ) return false;\n")
+        file.write("     if ( !PHYSICS->Id->IsInterState(part) ) return false;\n")
 
     # Id
     file.write('     if ( ')

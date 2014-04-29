@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+115  1.1.10.32 (2014/04/29) fuks:    Splitting the physics services in subcategories 
+
 114  1.1.10.31 (2014/04/22) fuks:    Renaming Daughter into daughter in sampleanalyzer 
 
 113  1.1.10.30 (2014/03/10) fuks:    Fixing bug in the mewanalyzer script 

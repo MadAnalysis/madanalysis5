@@ -40,7 +40,7 @@ class Tools;
 struct RECconfig
 {
   friend class PhysicsService;
- 
+  friend class Identification;
   // -------------------------------------------------------------
   //                       data members
   // -------------------------------------------------------------

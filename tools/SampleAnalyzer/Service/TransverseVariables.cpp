@@ -434,3 +434,168 @@ double TransverseVariables::MT2W(std::vector<const RecJetFormat*> jets, const Re
   }
 }
 
+
+/// The alphaT variable
+void LoopForAlphaT(const unsigned int n1, const std::vector<const MCParticleFormat*> jets,
+  double &MinDHT, const int last, std::vector<unsigned int> Ids)
+{
+   // We have enough information to form the pseudo jets
+   if(Ids.size()==n1)
+   {
+     // Forming the two pseudo jets
+     std::vector<const MCParticleFormat*> jets1;
+     std::vector<const MCParticleFormat*> jets2=jets;
+     for (int j=n1-1; j>=0; j--)
+     { 
+        jets1.push_back(jets[Ids[j]]);
+        jets2.erase(jets2.begin()+Ids[j]);
+     }
+
+     // Computing the DeltaHT of the pseudo jets and checking if minimum
+     double THT1 = 0; double THT2 = 0;
+     for (unsigned int i=0;i<jets1.size();i++) THT1+=jets1[i]->et();
+     for (unsigned int i=0;i<jets2.size();i++) THT2+=jets2[i]->et();
+     double DeltaHT = fabs(THT1-THT2);
+     if (DeltaHT<MinDHT) MinDHT=DeltaHT;
+
+    // Exit
+    return;
+   }
+
+   // The first pseudo jet is incomplete -> adding one element
+   std::vector<unsigned int> Save=Ids;
+   for(unsigned int i=last+1; i<=jets.size()-n1+Save.size(); i++)
+   {
+     Ids = Save;   
+     Ids.push_back(i);   
+     LoopForAlphaT(n1, jets, MinDHT, i, Ids); 
+   }
+}
+
+void LoopForAlphaT(const unsigned int n1, std::vector<RecJetFormat> jets,
+  double &MinDHT, const int last, std::vector<unsigned int> Ids)
+{
+   // We have enough information to form the pseudo jets
+   if(Ids.size()==n1)
+   {
+     // Forming the two pseudo jets
+     std::vector<RecJetFormat> jets1;
+     std::vector<RecJetFormat> jets2=jets;
+     for (int j=n1-1; j>=0; j--)
+     { 
+        jets1.push_back(jets[Ids[j]]);
+        jets2.erase(jets2.begin()+Ids[j]);
+     }
+
+     // Computing the DeltaHT of the pseudo jets and checking if minimum
+     double THT1 = 0; double THT2 = 0;
+     for (unsigned int i=0;i<jets1.size();i++) THT1+=jets1[i].et();
+     for (unsigned int i=0;i<jets2.size();i++) THT2+=jets2[i].et();
+     double DeltaHT = fabs(THT1-THT2);
+     if (DeltaHT<MinDHT) MinDHT=DeltaHT;
+
+    // Exit
+    return;
+   }
+
+   // The first pseudo jet is incomplete -> adding one element
+   std::vector<unsigned int> Save=Ids;
+   for(unsigned int i=last+1; i<=jets.size()-n1+Save.size(); i++)
+   {
+     Ids = Save;   
+     Ids.push_back(i);   
+     LoopForAlphaT(n1, jets, MinDHT, i, Ids); 
+   }
+}
+
+double TransverseVariables::AlphaT(const MCEventFormat* event)
+{
+  std::vector<const MCParticleFormat*> jets;
+
+  // Creating jet collection
+  for (unsigned int i=0;i<event->particles().size();i++)
+  {
+    if (event->particles()[i].statuscode()!=event->particles()[event->particles().size()-1].statuscode()) continue;
+    if (event->particles()[i].pdgid()!=21 && (abs(event->particles()[i].pdgid())<1 || 
+        abs(event->particles()[i].pdgid())>5)) continue;
+    jets.push_back(&event->particles()[i]);
+  }
+
+  // safety
+  if (jets.size()<2) return 0;
+
+  // dijet event
+  if (jets.size()==2) return std::min(jets[0]->et(),jets[1]->et()) / 
+    (*(jets[0])+*(jets[1])).mt();
+
+  double MinDeltaHT = 1e6;
+
+  // compute vectum sum of jet momenta
+  TLorentzVector q(0.,0.,0.,0.);
+  for (unsigned int i=0;i<jets.size();i++) q+=jets[i]->momentum();
+  double MHT = q.Pt();
+
+  // compute HT
+  double THT = 0;
+  for (unsigned int i=0;i<jets.size();i++) THT+=jets[i]->et();
+
+  // Safety
+  if (THT==0) return -1.;
+  else if (MHT/THT>=1) return -1.;
+
+  // more than 3 jets : split into 2 sets
+  // n1 = number of jets in the first set
+  // n2 = number of jets in the second set
+  for (unsigned int n1=1; n1<=(jets.size()/2); n1++)
+  {
+    std::vector<unsigned int> DummyJet;
+    LoopForAlphaT(n1,jets,MinDeltaHT,-1,DummyJet);
+  }
+
+  // Final
+  return 0.5*(1.-MinDeltaHT/THT)/sqrt(1.-MHT/THT*MHT/THT);
+}
+
+double TransverseVariables::AlphaT(const RecEventFormat* event)
+{
+  // jets
+  std::vector<RecJetFormat> jets = event->jets();
+
+  // safety
+  if (jets.size()<2) return 0;
+
+  // dijet event
+  if (jets.size()==2) return std::min(jets[0].et(),jets[1].et()) / 
+    ((jets[0])+(jets[1])).mt();
+
+  double MinDeltaHT = 1e6;
+
+  // compute vectum sum of jet momenta
+  TLorentzVector q(0.,0.,0.,0.);
+  for (unsigned int i=0;i<jets.size();i++) q+=jets[i].momentum();
+  double MHT = q.Pt();
+
+  // compute HT
+  double THT = 0;
+  for (unsigned int i=0;i<jets.size();i++) THT+=jets[i].et();
+
+  // Safety
+  if (THT==0) return -1.;
+  else if (MHT/THT>=1) return -1.;
+
+  // more than 3 jets : split into 2 sets
+  // n1 = number of jets in the first set
+  // n2 = number of jets in the second set
+  for (unsigned int n1=1; n1<=(jets.size()/2); n1++)
+          {
+            std::vector<unsigned int> DummyJet;
+    LoopForAlphaT(n1,jets,MinDeltaHT,-1,DummyJet);
+  }
+
+  // Final
+  return 0.5*(1.-MinDeltaHT/THT)/sqrt(1.-MHT/THT*MHT/THT);
+}
+
+
+
+

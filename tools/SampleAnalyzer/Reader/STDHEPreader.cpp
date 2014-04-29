@@ -636,11 +636,11 @@ bool STDHEPreader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
     MCParticleFormat& part = myEvent.mc()->particles_[i];
 
     // MET, MHT, TET, THT
-    if (part.statuscode()==1 && !PHYSICS->IsInvisible(part))
+    if (part.statuscode()==1 && !PHYSICS->Id->IsInvisible(part))
     {
       myEvent.mc()->MET_ -= part.momentum();
       myEvent.mc()->TET_ += part.pt();
-      if (PHYSICS->IsHadronic(part))
+      if (PHYSICS->Id->IsHadronic(part))
       {
         myEvent.mc()->MHT_ -= part.momentum();
         myEvent.mc()->THT_ += part.pt(); 

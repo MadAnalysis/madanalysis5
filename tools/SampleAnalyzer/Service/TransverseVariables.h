@@ -143,6 +143,54 @@ class TransverseVariables
     /// Destructor
     ~TransverseVariables() { }
 
+    /// Compute the total transverse energy
+    inline double EventTET(const MCEventFormat* event) const
+    {
+      return event->TET();
+    }
+
+    /// Compute the missing transverse energy
+    inline double EventMET(const MCEventFormat* event) const
+    {
+      return event->MET().pt();
+    }
+
+    /// Compute the total hadronic transverse energy
+    inline double EventTHT(const MCEventFormat* event) const
+    {
+      return event->THT();
+    }
+
+    /// Compute the missing hadronic transverse energy
+    inline double EventMHT(const MCEventFormat* event) const
+    {
+      return event->MHT().pt();
+    }
+
+    /// Compute the total transverse energy
+    inline double EventTET(const RecEventFormat* event) const
+    {
+      return event->TET();
+    }
+
+    /// Compute the missing transverse energy
+    inline double EventMET(const RecEventFormat* event) const
+    {
+      return event->MET().pt();
+    }
+
+    /// Compute the total hadronic transverse energy
+    inline double EventTHT(const RecEventFormat* event) const
+    {
+      return event->THT();
+    }
+
+    /// Compute the missing hadronic transverse energy
+    inline double EventMHT(const RecEventFormat* event) const
+    {
+      return event->MHT().pt();
+    }
+
     /// MT2 methods
     double MT2(const ParticleBaseFormat* p1, const ParticleBaseFormat* p2,
       const ParticleBaseFormat& met, const double &mass)
@@ -155,6 +203,12 @@ class TransverseVariables
 
     /// MT2W method
     double MT2W(std::vector<const RecJetFormat*>,const RecLeptonFormat*,const ParticleBaseFormat&);
+
+  /// The Alpha_T variable
+  double AlphaT(const MCEventFormat*);
+  double AlphaT(const RecEventFormat*);
+
+
 };
 
 }

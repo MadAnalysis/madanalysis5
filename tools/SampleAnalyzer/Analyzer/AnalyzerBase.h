@@ -137,8 +137,8 @@ class AnalyzerBase
   void PreExecute(const SampleFormat& mySample,
                   const EventFormat& myEvent)
   { 
-    PHYSICS->SetFinalState(myEvent.mc());
-    PHYSICS->SetInitialState(myEvent.mc());
+    PHYSICS->Id->SetFinalState(myEvent.mc());
+    PHYSICS->Id->SetInitialState(myEvent.mc());
   }
 
   virtual void Execute(SampleFormat& mySample,

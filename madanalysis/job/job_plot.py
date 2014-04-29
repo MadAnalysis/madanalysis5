@@ -72,11 +72,11 @@ def WriteJobNPID(file,main,iabs,ihisto):
         file.write('  for (unsigned int i=0;i<event.mc()->particles().size();i++)\n')
         file.write('  {\n')
         if main.selection[iabs].statuscode=="finalstate":
-            file.write('    if (!PHYSICS->IsFinalState(event.mc()->particles()[i])) continue;\n')
+            file.write('    if (!PHYSICS->Id->IsFinalState(event.mc()->particles()[i])) continue;\n')
         elif main.selection[iabs].statuscode=="initialstate":
-            file.write('    if (!PHYSICS->IsInitialState(event.mc()->particles()[i])) continue;\n')
+            file.write('    if (!PHYSICS->Id->IsInitialState(event.mc()->particles()[i])) continue;\n')
         elif main.selection[iabs].statuscode=="interstate":
-            file.write('    if (!PHYSICS->IsInterState(event.mc()->particles()[i])) continue;\n')
+            file.write('    if (!PHYSICS->Id->IsInterState(event.mc()->particles()[i])) continue;\n')
         if npid:
             file.write('    H'+str(ihisto)+'_' +\
                    '->Fill(event.mc()->particles()[i].pdgid(),__event_weight__);\n')
