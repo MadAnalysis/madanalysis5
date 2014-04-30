@@ -87,6 +87,7 @@ class Main():
         self.fortran        = False
         self.observables    = ObservableManager(self.mode)
         self.mcatnloutils   = False
+        self.expertmode     = False
         self.ResetParameters()
 
 

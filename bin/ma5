@@ -113,8 +113,8 @@ main.ma5dir = ma5dir
 
 # Release version
 # Do not touch it !!!!!  
-main.version = "1.1.10.32"
-main.date = "2014/04/29"
+main.version = "1.1.10.33"
+main.date = "2014/04/30"
 
 # Checking arguments
 import getopt
@@ -257,6 +257,7 @@ if autocheck:
 # Expert mode
 elif expertmode:
     from madanalysis.core.expert_mode import ExpertMode
+    main.expertmode = True
     expert = ExpertMode(main)
     if not expert.CreateDirectory():
         sys.exit()

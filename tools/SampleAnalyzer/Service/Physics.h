@@ -173,18 +173,6 @@ class PhysicsService
     return GetTauDecayMode(&part);
   }
 
-  void ToRestFrame(MCParticleFormat& part, const MCParticleFormat* boost) const
-  {
-    if (boost==0) return;
-    ToRestFrame(part,*boost);
-  }
-
-  void ToRestFrame(MCParticleFormat& part, const MCParticleFormat& boost) const
-  {
-    TVector3 b = -1. * boost.momentum().BoostVector();
-    part.momentum().Boost(b);
-  }
-
   /// Compute srqt(S)
   inline double SqrtS(const MCEventFormat* event) const
   {

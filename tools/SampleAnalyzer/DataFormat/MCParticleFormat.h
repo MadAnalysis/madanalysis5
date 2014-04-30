@@ -156,6 +156,22 @@ class MCParticleFormat : public ParticleBaseFormat
   void setMothUp1(UInt_t v) {mothup1_=v;}
   void setMothUp2(UInt_t v) {mothup2_=v;}
 
+  /// Boosting the four momentum to the restframe of another particle
+  void ToRestFrame(const MCParticleFormat* boost)
+  {
+    if (boost==0) return;
+    ToRestFrame(*boost);
+  }
+
+  void ToRestFrame(const MCParticleFormat& boost)
+  {
+    TVector3 b = -1. * boost.momentum().BoostVector();
+    momentum().Boost(b);
+  }
+
+
+
+
 };
 
 }

@@ -262,7 +262,11 @@ class JobWriter():
         file.write('  // ---------------------------------------------------\n')
         file.write('  INFO << "    * Initializing all components" << endmsg;\n\n')
         file.write('  // Initializing the manager\n')
-        file.write('  if (!manager.Initialize(argc,argv,"pdg.ma5")) '+\
+        if self.main.expertmode:
+          file.write('  if (!manager.Initialize(argc,argv,"pdg.ma5",true)) '+\
+                   'return 1;\n\n')
+        else:
+          file.write('  if (!manager.Initialize(argc,argv,"pdg.ma5")) '+\
                    'return 1;\n\n')
         file.write('  // Creating data format for storing data\n')
         file.write('  EventFormat myEvent;\n')
