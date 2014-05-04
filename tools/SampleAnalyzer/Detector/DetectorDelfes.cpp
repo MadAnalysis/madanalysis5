@@ -40,6 +40,9 @@
 //SampleAnalyzer header
 #include "SampleAnalyzer/Service/DisplayService.h"
 
+//ROOT header
+#include <TError.h>
+
 
 using namespace MA5;
 
@@ -140,7 +143,9 @@ bool DetectorDelfes::Execute(SampleFormat& mySample, EventFormat& myEvent)
   TranslateMA5toDELPHES(mySample, myEvent);
 
   // Applying fast-simulation
+  gErrorIgnoreLevel=kError;
   modularDelphes_->ProcessTask();
+  gErrorIgnoreLevel=kWarning;
 
   // Export particles from Delphes
   TranslateDELPHEStoMA5(mySample, myEvent);

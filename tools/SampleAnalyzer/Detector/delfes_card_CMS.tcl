@@ -14,28 +14,20 @@ set ExecutionPath {
   MuonMomentumSmearing
 
   TrackMerger
-#MA5 BEGIN
   TrackIsolationCalculation
-#MA5 END
   Calorimeter
   EFlowMerger
 
   PhotonEfficiency
-#MA5 BEGIN
   PhotonIsolationCalculation
-#MA5 END
   PhotonIsolation
 
   ElectronEfficiency
-#MA5 BEGIN
   ElectronIsolationCalculation
-#MA5 END
   ElectronIsolation
 
   MuonEfficiency
-#MA5 BEGIN
   MuonIsolationCalculation
-#MA5 END
   MuonIsolation
 
   MissingET
