@@ -247,9 +247,11 @@ class CmdInstall(CmdBase):
         installdir = self.main.ma5dir + '/tools/delphes/'
 
         # List of files
-        files = { "delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.0.12.tar.gz" }
+        #files = { "delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.0.12.tar.gz" }
+        files = { "delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
         
         # Launching wget
+        logging.info("Configuring the package ...")
         if not self.wget(files,'delphes',installdir):
             return False
 
@@ -504,7 +506,7 @@ class CmdInstall(CmdBase):
         for file,url in files.items():
             ind+=1
             result="OK"
-            logging.info(' * ' + str(ind)+"/"+str(len(files.keys()))+" Downloading the file '"+file+"' ...")
+            logging.info(' * ' + str(ind)+"/"+str(len(files.keys()))+" Downloading the file '"+file+"' from "+url+" ...")
 
             try:
                 urllib.urlretrieve(url,installdir+'/'+file,CmdInstall.reporthook)
