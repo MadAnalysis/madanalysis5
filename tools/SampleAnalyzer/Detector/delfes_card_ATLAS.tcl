@@ -14,20 +14,28 @@ set ExecutionPath {
   MuonMomentumSmearing
 
   TrackMerger
+#MA5 BEGIN
   TrackIsolationCalculation
+#MA5 END
   Calorimeter
   EFlowMerger
 
   PhotonEfficiency
+#MA5 BEGIN
   PhotonIsolationCalculation
+#MA5 END
   PhotonIsolation
 
   ElectronEfficiency
+#MA5 BEGIN
   ElectronIsolationCalculation
+#MA5 END
   ElectronIsolation
 
   MuonEfficiency
+#MA5 BEGIN
   MuonIsolationCalculation
+#MA5 END
   MuonIsolation
 
   MissingET
@@ -46,6 +54,42 @@ set ExecutionPath {
 
   TreeWriter
 }
+
+#MA5 BEGIN
+#################################
+# Isolation Calculation
+#################################
+module IsolationCalculation PhotonIsolationCalculation {
+  set CandidateInputArray PhotonEfficiency/photons
+  set IsolationInputArray EFlowMerger/eflow
+
+  set OutputArray DelfesPhotons
+  set PTMin 0.5
+}
+
+module IsolationCalculation ElectronIsolationCalculation {
+  set CandidateInputArray ElectronEfficiency/electrons
+  set IsolationInputArray TrackMerger/tracks 
+
+  set OutputArray DelfesElectrons
+  set PTMin 0.5
+}
+
+module IsolationCalculation MuonIsolationCalculation {
+  set CandidateInputArray MuonEfficiency/muons
+  set IsolationInputArray TrackMerger/tracks 
+
+  set OutputArray DelfesMuons
+  set PTMin 0.5
+}
+module IsolationCalculation TrackIsolationCalculation {
+  set CandidateInputArray TrackMerger/tracks
+  set IsolationInputArray TrackMerger/tracks
+
+  set OutputArray DelfesTracks
+  set PTMin 0.5
+}
+#MA5 END
 
 #################################
 # Propagate particles in cylinder
@@ -138,12 +182,14 @@ module MomentumSmearing ChargedHadronMomentumSmearing {
   # set ResolutionFormula {resolution formula as a function of eta and pt}
 
   # resolution formula for charged hadrons
-  set ResolutionFormula {                  (abs(eta) <= 1.5) * (pt > 0.1   && pt <= 1.0e1) * (0.20) + \
-                                           (abs(eta) <= 1.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.20) + \
-                                           (abs(eta) <= 1.5) * (pt > 2.0e2)                * (0.20) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0   && pt <= 1.0e1) * (0.20) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.20) + \
-                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 2.0e2)                * (0.20)}
+  set ResolutionFormula {                  (abs(eta) <= 1.5) * (pt > 0.1   && pt <= 1.0)   * (0.02) + \
+                                           (abs(eta) <= 1.5) * (pt > 1.0   && pt <= 1.0e1) * (0.01) + \
+                                           (abs(eta) <= 1.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.03) + \
+                                           (abs(eta) <= 1.5) * (pt > 2.0e2)                * (0.05) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1   && pt <= 1.0)   * (0.03) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0   && pt <= 1.0e1) * (0.02) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.04) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 2.0e2)                * (0.05)}
 }
 
 #################################
@@ -192,6 +238,7 @@ module Merger TrackMerger {
 # add InputArray InputArray
   add InputArray ChargedHadronMomentumSmearing/chargedHadrons
   add InputArray ElectronEnergySmearing/electrons
+  add InputArray MuonMomentumSmearing/muons
   set OutputArray tracks
 }
 
@@ -207,7 +254,8 @@ module Calorimeter Calorimeter {
   set PhotonOutputArray photons
 
   set EFlowTrackOutputArray eflowTracks
-  set EFlowTowerOutputArray eflowTowers
+  set EFlowPhotonOutputArray eflowPhotons
+  set EFlowNeutralHadronOutputArray eflowNeutralHadrons
 
   set pi [expr {acos(-1)}]
 
@@ -275,8 +323,8 @@ module Calorimeter Calorimeter {
 module Merger EFlowMerger {
 # add InputArray InputArray
   add InputArray Calorimeter/eflowTracks
-  add InputArray Calorimeter/eflowTowers
-  add InputArray MuonMomentumSmearing/muons
+  add InputArray Calorimeter/eflowPhotons
+  add InputArray Calorimeter/eflowNeutralHadrons
   set OutputArray eflow
 }
 
@@ -314,14 +362,6 @@ module Isolation PhotonIsolation {
   set PTRatioMax 0.1
 }
 
-module IsolationCalculation PhotonIsolationCalculation {
-  set CandidateInputArray PhotonEfficiency/photons
-  set IsolationInputArray EFlowMerger/eflow
-
-  set OutputArray DelfesPhotons
-  set PTMin 0.5
-}
-
 #####################
 # Electron efficiency
 #####################
@@ -356,15 +396,6 @@ module Isolation ElectronIsolation {
   set PTRatioMax 0.1
 }
 
-module IsolationCalculation ElectronIsolationCalculation {
-  set CandidateInputArray ElectronEfficiency/electrons
-  set IsolationInputArray TrackMerger/tracks 
-
-  set OutputArray DelfesElectrons
-  set PTMin 0.5
-}
-
-
 #################
 # Muon efficiency
 #################
@@ -398,15 +429,6 @@ module Isolation MuonIsolation {
 
   set PTRatioMax 0.1
 }
-
-module IsolationCalculation MuonIsolationCalculation {
-  set CandidateInputArray MuonEfficiency/muons
-  set IsolationInputArray TrackMerger/tracks 
-
-  set OutputArray DelfesMuons
-  set PTMin 0.5
-}
-
 
 ###################
 # Missing ET merger
@@ -472,7 +494,7 @@ module EnergyScale JetEnergyScale {
   set OutputArray jets
 
  # scale formula for jets
-  set ScaleFormula {1.08}
+  set ScaleFormula {1.00}
 }
 
 ###########
@@ -547,32 +569,36 @@ module UniqueObjectFinder UniqueObjectFinder {
 # ROOT tree writer
 ##################
 
-module IsolationCalculation TrackIsolationCalculation {
-  set CandidateInputArray TrackMerger/tracks
-  set IsolationInputArray TrackMerger/tracks
+# tracks, towers and eflow objects are not stored by default in the output.
+# if needed (for jet constituent or other studies), uncomment the relevant
+# "add Branch ..." lines.
 
-  set OutputArray DelfesTracks
-  set PTMin 0.5
-}
+# MA5 BEGIN (TO TUNE)
 
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
   add Branch Delphes/allParticles Particle GenParticle
-  add Branch TrackMerger/tracks Track Track
-  add Branch Calorimeter/towers Tower Tower
+
+#  add Branch TrackMerger/tracks Track Track
+#  add Branch Calorimeter/towers Tower Tower
+
 #  add Branch Calorimeter/eflowTracks EFlowTrack Track
-#  add Branch Calorimeter/eflowTowers EFlowTower Tower
-#  add Branch MuonMomentumSmearing/muons EFlowMuon Muon
+#  add Branch Calorimeter/eflowPhotons EFlowPhoton Tower
+#  add Branch Calorimeter/eflowNeutralHadrons EFlowNeutralHadron Tower
+
   add Branch GenJetFinder/jets GenJet Jet
   add Branch UniqueObjectFinder/jets Jet Jet
-  add Branch UniqueObjectFinder/electrons Electron Electron
-  add Branch UniqueObjectFinder/photons Photon Photon
-  add Branch UniqueObjectFinder/muons Muon Muon
+#  add Branch UniqueObjectFinder/electrons Electron Electron
+#  add Branch UniqueObjectFinder/photons Photon Photon
+#  add Branch UniqueObjectFinder/muons Muon Muon
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
+
   add Branch ElectronIsolationCalculation/DelfesElectrons DelfesElectron Electron
   add Branch MuonIsolationCalculation/DelfesMuons DelfesMuon Muon
   add Branch PhotonIsolationCalculation/DelfesPhotons DelfesPhoton Photon
   add Branch TrackIsolationCalculation/DelfesTracks DelfesTrack Track
+
 }
 
+# MA5 END (TO TUNE)
