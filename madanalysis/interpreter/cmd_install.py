@@ -506,7 +506,7 @@ class CmdInstall(CmdBase):
         for file,url in files.items():
             ind+=1
             result="OK"
-            logging.info(' * ' + str(ind)+"/"+str(len(files.keys()))+" Downloading the file '"+file+"' from "+url+" ...")
+            logging.info(' * ' + str(ind)+"/"+str(len(files.keys()))+" Downloading the file "+url+" ...")
 
             try:
                 urllib.urlretrieve(url,installdir+'/'+file,CmdInstall.reporthook)
