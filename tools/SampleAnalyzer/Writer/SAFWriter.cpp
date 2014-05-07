@@ -210,14 +210,14 @@ bool SAFWriter::WriteEvent(const EventFormat& myEvent,
 // -----------------------------------------------------------------------------
 bool SAFWriter::WriteFoot(const SampleFormat& mySample)
 {
-  *output_ << "<SAFfoot>" << std::endl;
-  *output_ << "</SAFfoot>" << std::endl;
+  *output_ << "<SAFfooter>" << std::endl;
+  *output_ << "</SAFfooter>" << std::endl;
   return true;
 }
 
 bool SAFWriter::WriteFoot()
 {
-  *output_ << "<SAFfoot>" << std::endl;
-  *output_ << "</SAFfoot>" << std::endl;
+  *output_ << "<SAFfooter>" << std::endl;
+  *output_ << "</SAFfooter>" << std::endl;
   return true;
 }
