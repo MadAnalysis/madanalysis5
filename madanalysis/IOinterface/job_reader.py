@@ -293,9 +293,9 @@ class JobReader():
                     beginTag.activate()
                 elif words[0].lower()=='</safheader>':
                     beginTag.desactivate()
-                if words[0].lower()=='<saffoot>':
+                if words[0].lower()=='<saffooter>':
                     endTag.activate()
-                elif words[0].lower()=='</saffoot>':
+                elif words[0].lower()=='</saffooter>':
                     endTag.desactivate()
                 if words[0].lower()=='<sampleglobalinfo>':
                     globalTag.activate()
@@ -573,7 +573,7 @@ class JobReader():
             logging.error("SAF header <SAFheader> and </SAFheader> is not "+\
                           "found.")
         if endTag.Nactivated==0 or endTag.activated:
-            logging.error("SAF foot <SAFfoot> and </SAFfoot> is not "+\
+            logging.error("SAF footer <SAFfooter> and </SAFfooter> is not "+\
                           "found.")
         if globalTag.Nactivated==0 or globalTag.activated:
             logging.error("Information corresponding to the block "+\
