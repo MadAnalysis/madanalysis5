@@ -26,7 +26,7 @@
 #define GZ_ISTREAM_H
 
 // SampleAnalyzer headers
-#include "SampleAnalyzer/Core/gz_streambase.h"
+#include "SampleAnalyzer/Interfaces/zlib/gz_streambase.h"
 
 namespace MA5
 {

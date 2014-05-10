@@ -32,14 +32,15 @@
 // ROOT headers
 #include <Rtypes.h> 
 
-// ZLib headers
-#include <zlib.h>
 
 namespace MA5
 {
 
+// Implicit class
+class gz_file;
+
 // -------------------------------------------------------------
-//                   CLASS IGZ_STREAMBUF
+//                   CLASS GZ_STREAMBUF
 // -------------------------------------------------------------
 class gz_streambuf : public std::streambuf
 {
@@ -52,10 +53,10 @@ class gz_streambuf : public std::streambuf
   /// size of the data buffer
   static const int bufferSize = 47+256;    
 
-  gzFile file;               // file handle for compressed file
-  char   buffer[bufferSize]; // data buffer
-  char   opened;             // open/close state of stream
-  int    mode;               // I/O mode
+  gz_file* file;               // file handle for compressed file
+  char     buffer[bufferSize]; // data buffer
+  char     opened;             // open/close state of stream
+  int      mode;               // I/O mode
 
 
   // -------------------------------------------------------------
@@ -69,11 +70,10 @@ class gz_streambuf : public std::streambuf
  public:
 
   /// Constructor withtout arguments
-  gz_streambuf() : opened(0)
-  {
-    setp( buffer, buffer + (bufferSize-1));
-    setg( buffer + 4, buffer + 4, buffer + 4); 
-  }
+  gz_streambuf();
+
+  /// Destructor
+  ~gz_streambuf();
 
   /// Is opened
   int is_open() { return opened; }
@@ -84,8 +84,6 @@ class gz_streambuf : public std::streambuf
   /// Closing the file
   gz_streambuf* close();
 
-  /// Destructor
-  ~gz_streambuf() { close(); }
     
   /// Overflow
   virtual int overflow(int c = EOF);

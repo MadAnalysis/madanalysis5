@@ -23,7 +23,8 @@
 
 
 // SampleAnalyzer headers
-#include "SampleAnalyzer/Core/gz_streambase.h"
+#include "SampleAnalyzer/Interfaces/gz_streambase.h"
+#include "SampleAnalyzer/Interfaces/gz_file.h"
 
 // STL headers
 #include <iostream>
@@ -36,16 +37,39 @@ using namespace MA5;
 
 
 // -----------------------------------------------------------------------------
+// Constructor
+// -----------------------------------------------------------------------------
+gz_streambuf::gz_streambuf()
+{
+  opened=0;
+  setp( buffer, buffer + (bufferSize-1));
+  setg( buffer + 4, buffer + 4, buffer + 4); 
+  file = new gz_file;
+}
+
+
+// -----------------------------------------------------------------------------
+// Destructor
+// -----------------------------------------------------------------------------
+gz_streambuf::~gz_streambuf()
+{
+  close();
+  if (file!=0) delete file;
+  file=0;
+}
+
+
+// -----------------------------------------------------------------------------
 // Getting cursor position in file
 // -----------------------------------------------------------------------------
 Long64_t gz_streambuf::tellg()
 { 
 #if ZLIB_VERNUM >= 0x1240
   // gzoffset is only available in zlib 1.2.4 or later
-  return pos_type(gzoffset(file));
+  return pos_type(gzoffset(file->get()));
 #else
   // return an approximation of file size (only used in progress dialog)
-  return pos_type(gztell(file) / 4);
+  return pos_type(gztell(file->get()) / 4);
 #endif
 }
 
@@ -72,8 +96,8 @@ gz_streambuf* gz_streambuf::open( const char* name, int open_mode)
   *fmodeptr++ = 'b';
   *fmodeptr = '\0';
   
-  file = gzopen( name, fmode);
-  if (file == 0) return (gz_streambuf*)0;
+  file->get() = gzopen( name, fmode);
+  if (file->get() == 0) return (gz_streambuf*)0;
   opened = 1;
 
   return this;
@@ -89,7 +113,7 @@ gz_streambuf * gz_streambuf::close()
   {
     sync();
     opened = 0;
-    if ( gzclose( file) == Z_OK)
+    if ( gzclose( file->get() ) == Z_OK)
       return this;
   }
   return (gz_streambuf*)0;
@@ -112,7 +136,7 @@ int gz_streambuf::underflow()
     n_putback = 4;
   memcpy( buffer + (4 - n_putback), gptr() - n_putback, n_putback);
 
-  signed int num = gzread( file, buffer+4, bufferSize-4);
+  signed int num = gzread( file->get(), buffer+4, bufferSize-4);
   if (num <= 0) return EOF;
 
   // reset buffer pointers
@@ -131,7 +155,7 @@ int gz_streambuf::underflow()
 int gz_streambuf::flush_buffer()
 {
     int w = pptr() - pbase();
-    if ( gzwrite( file, pbase(), w) != w) return EOF;
+    if ( gzwrite( file->get(), pbase(), w) != w) return EOF;
     pbump( -w);
     return w;
 }
