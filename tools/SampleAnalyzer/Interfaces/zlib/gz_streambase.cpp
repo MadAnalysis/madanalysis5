@@ -23,8 +23,8 @@
 
 
 // SampleAnalyzer headers
-#include "SampleAnalyzer/Interfaces/gz_streambase.h"
-#include "SampleAnalyzer/Interfaces/gz_file.h"
+#include "SampleAnalyzer/Interfaces/zlib/gz_streambase.h"
+#include "SampleAnalyzer/Interfaces/zlib/gz_file.h"
 
 // STL headers
 #include <iostream>

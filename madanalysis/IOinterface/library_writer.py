@@ -117,6 +117,7 @@ class LibraryWriter():
         # Files for analyzers
         file.write('# Files\n')
         file.write('SRCS = $(wildcard */*.cpp)\n')
+        file.write('SRCS += $(wildcard */*/*.cpp)\n')
         file.write('HDRS = $(wildcard */*.h)\n')
         file.write('OBJS = $(SRCS:.cpp=.o)\n')
         if self.fortran:
