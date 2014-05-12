@@ -25,11 +25,11 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/JetClustering/JetClustererManager.h"
 #ifdef FASTJET_USE
-  #include "SampleAnalyzer/JetClustering/JetClusteringStandard.h"
-  #include "SampleAnalyzer/JetClustering/JetClusteringSISCone.h"
-  #include "SampleAnalyzer/JetClustering/JetClusteringCDFMidpoint.h"
-  #include "SampleAnalyzer/JetClustering/JetClusteringCDFJetClu.h"
-  #include "SampleAnalyzer/JetClustering/JetClusteringGridJet.h"
+  #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringStandard.h"
+  #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringSISCone.h"
+  #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringCDFMidpoint.h"
+  #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringCDFJetClu.h"
+  #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringGridJet.h"
 #endif
 
 using namespace MA5;

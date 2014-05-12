@@ -22,12 +22,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#include "SampleAnalyzer/JetClustering/JetClusteringCDFMidpoint.h"
+#include "SampleAnalyzer/Interfaces/fastjet/JetClusteringSISCone.h"
 #ifdef FASTJET_USE
 
 using namespace MA5;
 
-bool JetClusteringCDFMidpoint::Initialize(const std::map<std::string,std::string>& options)
+bool JetClusteringSISCone::Initialize(const std::map<std::string,std::string>& options)
 { 
 
   TaggerInitialize();
@@ -68,34 +68,34 @@ bool JetClusteringCDFMidpoint::Initialize(const std::map<std::string,std::string
       std::stringstream str;
       str << it->second;
       str >> tmp;
-      if (tmp<0) WARNING << "Overlap Threshold must be positive. "
-                         << "Using default value Overlap Threshold = " 
+      if (tmp<0) WARNING << "Overlap Threshold must be positive. Using default value Overlap Threshold = " 
                          << OverlapThreshold_ << endmsg;
       else OverlapThreshold_=tmp;
     }
 
-    // SeedThreshold
-    else if (key=="seedthreshold")
+
+    // NPassMax
+    else if (key=="npassmax")
     {
-      float tmp=0;
+      Int_t tmp=0;
       std::stringstream str;
       str << it->second;
       str >> tmp;
-      if (tmp<0) WARNING << "Seed Threshold must be positive. Using default value Seed Threshold = " 
-                         << SeedThreshold_ << endmsg;
-      else SeedThreshold_=tmp;
+      if (tmp<0) WARNING << "NPassMax must be positive. Using default value NPassMax = " 
+                         << NPassMax_ << endmsg;
+      else NPassMax_=tmp;
     }
 
-    // ConeArea
-    else if (key=="conearea")
+    // Protojet_ptmin
+    else if (key=="protojet_ptmin")
     {
       float tmp=0;
       std::stringstream str;
       str << it->second;
       str >> tmp;
-      if (tmp<0) WARNING << "Cone Area Fraction must be positive. Using default value ConeAreaFraction = " 
-                         << ConeAreaFraction_ << endmsg;
-      else ConeAreaFraction_=tmp;
+      if (tmp<0) WARNING << "Protojet Ptmin must be positive. Using default value Protojet_ptmin = " 
+                         << Protojet_ptmin_ << endmsg;
+      else Protojet_ptmin_=tmp;
     }
 
     // other
@@ -103,35 +103,35 @@ bool JetClusteringCDFMidpoint::Initialize(const std::map<std::string,std::string
   }
 
   // Creating plugin
-  Plugin_ = new fastjet::CDFMidPointPlugin(R_, OverlapThreshold_, 
-                                           SeedThreshold_, ConeAreaFraction_);
+  Plugin_ = new fastjet::SISConePlugin(R_, OverlapThreshold_, NPassMax_, Protojet_ptmin_);
 
   // Creating jet definition
-  JetDefinition_ = fastjet::JetDefinition(Plugin_);
+  JetDefinition_ = fastjet::JetDefinition(Plugin_);  
 
   return true;
 }
 
-
-void JetClusteringCDFMidpoint::PrintParam()
+    /// Print parameters
+void JetClusteringSISCone::PrintParam()
 {
-  INFO << "Algorithm : CDF Midpoint" << endmsg; 
-  INFO << "Parameters used :" << endmsg; INFO << "R = " << R_ 
-       << "; Overlap Threshold = " << OverlapThreshold_ << "; Seed Threshold = " 
-       << SeedThreshold_ << "; Cone Area Fraction = " << ConeAreaFraction_ << endmsg;
+  INFO << "Algorithm : SIS Cone" << endmsg; 
+  INFO << "Parameters used :" << endmsg; 
+  INFO << "R = " << R_ << "; Overlap Threshold = " << OverlapThreshold_ 
+       << "; N Pass Max = " << NPassMax_ << "; Minimal Pt for protojet = "
+       << Protojet_ptmin_ << "; Ptmin = " << Ptmin_ << endmsg;
 }
 
-std::string JetClusteringCDFMidpoint::GetName()
+std::string JetClusteringSISCone::GetName()
 {
-  return "CDF Midpoint";
+  return "SIS Cone";
 }
 
-std::string JetClusteringCDFMidpoint::GetParameters()
+std::string JetClusteringSISCone::GetParameters()
 {
   std::stringstream str;
-  str << "R=" << R_  << " ; OverlapThreshold=" 
-      << OverlapThreshold_ << " ; SeedThreshold=" 
-      << SeedThreshold_ << " ; ConeAreaFraction=" << ConeAreaFraction_;
+  str << "R=" << R_ << " ; OverlapThreshold=" << OverlapThreshold_ 
+      << " ; NPassMax=" << NPassMax_ << " ; PTmin_AlgoInputs="
+      << Protojet_ptmin_ << " ; PTmin_AlgoOutputs=" << Ptmin_;
   return str.str();
 }
 

@@ -22,7 +22,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#include "SampleAnalyzer/JetClustering/JetClusteringGridJet.h"
+#include "SampleAnalyzer/Interfaces/fastjet/JetClusteringGridJet.h"
 #ifdef FASTJET_USE
 
 using namespace MA5;

@@ -25,10 +25,10 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Detector/DetectorManager.h"
 #ifdef DELPHES_USE
-  #include "SampleAnalyzer/Detector/DetectorDelphes.h"
+  #include "SampleAnalyzer/Interfaces/delphes/DetectorDelphes.h"
 #endif
 #ifdef DELFES_USE
-  #include "SampleAnalyzer/Detector/DetectorDelfes.h"
+  #include "SampleAnalyzer/Interfaces/delfes/DetectorDelfes.h"
 #endif
 
 using namespace MA5;

@@ -22,7 +22,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#include "SampleAnalyzer/Detector/DetectorDelphes.h"
+#include "SampleAnalyzer/Interfaces/delphes/DetectorDelphes.h"
 
 #include <fstream>
 #include <TROOT.h>

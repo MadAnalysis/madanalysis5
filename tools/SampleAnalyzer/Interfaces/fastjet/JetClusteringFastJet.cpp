@@ -22,7 +22,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#include "SampleAnalyzer/JetClustering/JetClusteringFastJet.h"
+#include "SampleAnalyzer/Interfaces/fastjet/JetClusteringFastJet.h"
 #include "SampleAnalyzer/Service/LoopService.h"
 #ifdef FASTJET_USE
 

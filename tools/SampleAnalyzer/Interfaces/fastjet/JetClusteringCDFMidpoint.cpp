@@ -22,12 +22,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#include "SampleAnalyzer/JetClustering/JetClusteringCDFJetClu.h"
+#include "SampleAnalyzer/Interfaces/fastjet/JetClusteringCDFMidpoint.h"
 #ifdef FASTJET_USE
 
 using namespace MA5;
 
-bool JetClusteringCDFJetClu::Initialize(const std::map<std::string,std::string>& options)
+bool JetClusteringCDFMidpoint::Initialize(const std::map<std::string,std::string>& options)
 { 
 
   TaggerInitialize();
@@ -86,16 +86,16 @@ bool JetClusteringCDFJetClu::Initialize(const std::map<std::string,std::string>&
       else SeedThreshold_=tmp;
     }
 
-    // Iratch
-    else if (key=="iratch")
+    // ConeArea
+    else if (key=="conearea")
     {
-      Int_t tmp=0;
+      float tmp=0;
       std::stringstream str;
       str << it->second;
       str >> tmp;
-      if (tmp<0) WARNING << "Iratch must be positive. Using default value Iratch = " 
-                         << Iratch_ << endmsg;
-      else Iratch_=tmp;
+      if (tmp<0) WARNING << "Cone Area Fraction must be positive. Using default value ConeAreaFraction = " 
+                         << ConeAreaFraction_ << endmsg;
+      else ConeAreaFraction_=tmp;
     }
 
     // other
@@ -103,37 +103,35 @@ bool JetClusteringCDFJetClu::Initialize(const std::map<std::string,std::string>&
   }
 
   // Creating plugin
-  Plugin_ = new fastjet::CDFJetCluPlugin(R_, OverlapThreshold_, SeedThreshold_, Iratch_);
+  Plugin_ = new fastjet::CDFMidPointPlugin(R_, OverlapThreshold_, 
+                                           SeedThreshold_, ConeAreaFraction_);
 
   // Creating jet definition
-  JetDefinition_ = fastjet::JetDefinition(Plugin_);  
+  JetDefinition_ = fastjet::JetDefinition(Plugin_);
 
   return true;
 }
 
 
-/// Print Parameters
-void JetClusteringCDFJetClu::PrintParam() 
+void JetClusteringCDFMidpoint::PrintParam()
 {
-  INFO << "Algorithm : CDF JetClu" << endmsg; 
-  INFO << "Parameters used :" << endmsg; 
-  INFO << "R = " << R_ 
+  INFO << "Algorithm : CDF Midpoint" << endmsg; 
+  INFO << "Parameters used :" << endmsg; INFO << "R = " << R_ 
        << "; Overlap Threshold = " << OverlapThreshold_ << "; Seed Threshold = " 
-       << SeedThreshold_ << "; iratch = " << Iratch_ << endmsg;
+       << SeedThreshold_ << "; Cone Area Fraction = " << ConeAreaFraction_ << endmsg;
 }
 
-
-std::string JetClusteringCDFJetClu::GetName()
+std::string JetClusteringCDFMidpoint::GetName()
 {
-  return "CDF JetClu";
+  return "CDF Midpoint";
 }
 
-std::string JetClusteringCDFJetClu::GetParameters()
+std::string JetClusteringCDFMidpoint::GetParameters()
 {
   std::stringstream str;
   str << "R=" << R_  << " ; OverlapThreshold=" 
-      << OverlapThreshold_ << " ; SeedThreshold.=" 
-      << SeedThreshold_ << " ; iratch=" << Iratch_;
+      << OverlapThreshold_ << " ; SeedThreshold=" 
+      << SeedThreshold_ << " ; ConeAreaFraction=" << ConeAreaFraction_;
   return str.str();
 }
 

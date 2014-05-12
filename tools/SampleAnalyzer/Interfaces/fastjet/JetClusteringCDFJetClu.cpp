@@ -22,12 +22,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#include "SampleAnalyzer/JetClustering/JetClusteringSISCone.h"
+#include "SampleAnalyzer/Interfaces/fastjet/JetClusteringCDFJetClu.h"
 #ifdef FASTJET_USE
 
 using namespace MA5;
 
-bool JetClusteringSISCone::Initialize(const std::map<std::string,std::string>& options)
+bool JetClusteringCDFJetClu::Initialize(const std::map<std::string,std::string>& options)
 { 
 
   TaggerInitialize();
@@ -68,34 +68,34 @@ bool JetClusteringSISCone::Initialize(const std::map<std::string,std::string>& o
       std::stringstream str;
       str << it->second;
       str >> tmp;
-      if (tmp<0) WARNING << "Overlap Threshold must be positive. Using default value Overlap Threshold = " 
+      if (tmp<0) WARNING << "Overlap Threshold must be positive. "
+                         << "Using default value Overlap Threshold = " 
                          << OverlapThreshold_ << endmsg;
       else OverlapThreshold_=tmp;
     }
 
-
-    // NPassMax
-    else if (key=="npassmax")
-    {
-      Int_t tmp=0;
-      std::stringstream str;
-      str << it->second;
-      str >> tmp;
-      if (tmp<0) WARNING << "NPassMax must be positive. Using default value NPassMax = " 
-                         << NPassMax_ << endmsg;
-      else NPassMax_=tmp;
-    }
-
-    // Protojet_ptmin
-    else if (key=="protojet_ptmin")
+    // SeedThreshold
+    else if (key=="seedthreshold")
     {
       float tmp=0;
       std::stringstream str;
       str << it->second;
       str >> tmp;
-      if (tmp<0) WARNING << "Protojet Ptmin must be positive. Using default value Protojet_ptmin = " 
-                         << Protojet_ptmin_ << endmsg;
-      else Protojet_ptmin_=tmp;
+      if (tmp<0) WARNING << "Seed Threshold must be positive. Using default value Seed Threshold = " 
+                         << SeedThreshold_ << endmsg;
+      else SeedThreshold_=tmp;
+    }
+
+    // Iratch
+    else if (key=="iratch")
+    {
+      Int_t tmp=0;
+      std::stringstream str;
+      str << it->second;
+      str >> tmp;
+      if (tmp<0) WARNING << "Iratch must be positive. Using default value Iratch = " 
+                         << Iratch_ << endmsg;
+      else Iratch_=tmp;
     }
 
     // other
@@ -103,7 +103,7 @@ bool JetClusteringSISCone::Initialize(const std::map<std::string,std::string>& o
   }
 
   // Creating plugin
-  Plugin_ = new fastjet::SISConePlugin(R_, OverlapThreshold_, NPassMax_, Protojet_ptmin_);
+  Plugin_ = new fastjet::CDFJetCluPlugin(R_, OverlapThreshold_, SeedThreshold_, Iratch_);
 
   // Creating jet definition
   JetDefinition_ = fastjet::JetDefinition(Plugin_);  
@@ -111,27 +111,29 @@ bool JetClusteringSISCone::Initialize(const std::map<std::string,std::string>& o
   return true;
 }
 
-    /// Print parameters
-void JetClusteringSISCone::PrintParam()
+
+/// Print Parameters
+void JetClusteringCDFJetClu::PrintParam() 
 {
-  INFO << "Algorithm : SIS Cone" << endmsg; 
+  INFO << "Algorithm : CDF JetClu" << endmsg; 
   INFO << "Parameters used :" << endmsg; 
-  INFO << "R = " << R_ << "; Overlap Threshold = " << OverlapThreshold_ 
-       << "; N Pass Max = " << NPassMax_ << "; Minimal Pt for protojet = "
-       << Protojet_ptmin_ << "; Ptmin = " << Ptmin_ << endmsg;
+  INFO << "R = " << R_ 
+       << "; Overlap Threshold = " << OverlapThreshold_ << "; Seed Threshold = " 
+       << SeedThreshold_ << "; iratch = " << Iratch_ << endmsg;
 }
 
-std::string JetClusteringSISCone::GetName()
+
+std::string JetClusteringCDFJetClu::GetName()
 {
-  return "SIS Cone";
+  return "CDF JetClu";
 }
 
-std::string JetClusteringSISCone::GetParameters()
+std::string JetClusteringCDFJetClu::GetParameters()
 {
   std::stringstream str;
-  str << "R=" << R_ << " ; OverlapThreshold=" << OverlapThreshold_ 
-      << " ; NPassMax=" << NPassMax_ << " ; PTmin_AlgoInputs="
-      << Protojet_ptmin_ << " ; PTmin_AlgoOutputs=" << Ptmin_;
+  str << "R=" << R_  << " ; OverlapThreshold=" 
+      << OverlapThreshold_ << " ; SeedThreshold.=" 
+      << SeedThreshold_ << " ; iratch=" << Iratch_;
   return str.str();
 }
 
