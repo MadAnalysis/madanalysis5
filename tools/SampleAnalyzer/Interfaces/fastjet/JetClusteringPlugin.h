@@ -28,7 +28,7 @@
 #ifdef FASTJET_USE
 
 //SampleAnalyser headers
-#include "SampleAnalyzer/JetClustering/JetClusteringFastJet.h"
+#include "SampleAnalyzer/Interfaces/fastjet/JetClusteringFastJet.h"
 
 namespace MA5
 {

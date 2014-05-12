@@ -22,7 +22,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#include "SampleAnalyzer/JetClustering/JetClusteringStandard.h"
+#include "SampleAnalyzer/Interfaces/fastjet/JetClusteringStandard.h"
 #ifdef FASTJET_USE
 
 using namespace MA5;

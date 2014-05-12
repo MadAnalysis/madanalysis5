@@ -28,7 +28,7 @@
 #ifdef FASTJET_USE
 
 //SampleAnalyser headers
-#include "SampleAnalyzer/JetClustering/JetClusteringPlugin.h"
+#include "SampleAnalyzer/Interfaces/fastjet/JetClusteringPlugin.h"
 
 //FastJet headers
 #include <fastjet/CDFMidPointPlugin.hh>
