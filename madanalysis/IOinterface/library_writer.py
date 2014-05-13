@@ -76,6 +76,171 @@ class LibraryWriter():
     def Open(self):
         return FolderWriter.CreateDirectory(self.path,overwrite=True)
 
+    def WriteMakefileForInterfaces(self,package):
+
+        # Open the file
+        try:
+            file = open(self.path + "/SampleAnalyzer/Makefile_" + package,"w")
+        except:
+            logging.error('impossible to write the file '+ self.path + "/SampleAnalyzer/Makefile_" + package)
+            return False
+
+        # Header
+        file.write(StringTools.Fill('#',80)+'\n')
+        file.write('#'+StringTools.Center('MAKEFILE DEVOTED TO THE INTERFACE TO '+package.upper(),78)+'#\n')
+        file.write(StringTools.Fill('#',80)+'\n')
+        file.write('\n')
+
+        # Options for C++ compilation
+        file.write('# Options for C++ compilation\n')
+        file.write('CXX = g++\n')
+        if package=='fastjet':
+            file.write('CXXFASTJET = $(shell fastjet-config --cxxflags --plugins)\n')
+        file.write('CXXFLAGS = -Wall -O3 -fPIC $(shell root-config --cflags) -I./../../')
+        if package=='zlib':
+            file.write(' -DZIP_USE')
+        elif package=='delphes':
+            file.write(' -DROOT_USE -DDELPHES_USE')
+        elif package=='delfes':
+            file.write(' -DROOT_USE -DDELFES_USE')
+        elif package=='fastjet':
+            file.write(' -DFASTJET_USE')
+            file.write(' $(CXXFASTJET)')
+        file.write('\n')
+
+        # Options for C++ compilation
+        if self.fortran:
+            file.write('# Options for Fortran compilation\n')
+            file.write('FC = gfortran\n')
+            file.write('FCFLAGS = -Wall -O3 -fPIC\n')
+            file.write('\n')
+
+        # Files for analyzers
+        file.write('# Files\n')
+        file.write('SRCS = $(wildcard '+package+'/*.cpp)\n')
+        file.write('HDRS = $(wildcard '+package+'/*.h)\n')
+        file.write('OBJS = $(SRCS:.cpp=.o)\n')
+        if self.fortran:
+            file.write('FORTRAN_SRCS = $(wildcard '+package+'/*.f)\n')
+            file.write('FORTRAN_OBJS = $(FORTRAN_SRCS:.f=.o)\n')
+        file.write('\n')
+
+        # Name of the library
+        file.write('# Name of the library\n')
+        file.write('PROGRAM = '+package+'\n')
+        file.write('\n')
+
+        # Defining colours for shell
+        file.write('# Defining colours\n')
+        file.write('GREEN  = "\\\\033[1;32m"\n')
+        file.write('RED    = "\\\\033[1;31m"\n')
+        file.write('PINK   = "\\\\033[1;35m"\n')
+        file.write('BLUE   = "\\\\033[1;34m"\n')
+        file.write('YELLOW = "\\\\033[1;33m"\n')
+        file.write('CYAN   = "\\\\033[1;36m"\n')
+        file.write('NORMAL = "\\\\033[0;39m"\n')
+        file.write('\n')
+
+        # All
+        file.write('# All target\n')
+        file.write('all: header compile_header compile link_header link\n')
+        file.write('\n')
+
+        # Header target
+        file.write('# Header target\n')
+        file.write('header:\n')
+        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Center('Building SampleAnalyzer library',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
+        file.write('\n')
+
+        # Compile_header target
+        file.write('# Compile_header target\n')
+        file.write('compile_header:\n')
+        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Center('Compilation',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
+        file.write('\n')
+
+        # Linking_header target
+        file.write('# Link_header target\n')
+        file.write('link_header:\n')
+        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Center('Final linking',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
+        file.write('\n')
+
+        # Clean_header target
+        file.write('# clean_header target\n')
+        file.write('clean_header:\n')
+        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Center('Removing intermediate files from building',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
+        file.write('\n')
+
+        # Mrproper_header target
+        file.write('# mrproper_header target\n')
+        file.write('mrproper_header:\n')
+        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Center('Cleaning all the project',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
+        file.write('\n')
+
+        # Precompile
+        file.write('# Precompile target\n')
+        file.write('precompile:\n')
+        file.write('\n')
+
+        # Precompile
+        file.write('# Compile target\n')
+        if self.fortran:
+            file.write('compile: precompile $(OBJS) $(FORTRAN_OBJS)\n')
+        else:
+            file.write('compile: precompile $(OBJS)\n')
+        file.write('\n')
+
+        # Precompile
+        file.write('# Link target\n')
+        if self.fortran:
+            file.write('link: $(OBJS) $(FORTRAN_OBJS)\n')
+            file.write('\t$(CXX) -shared -o ../Lib/lib$(PROGRAM).so $(OBJS) $(FORTRAN_OBJS)\n')
+        else:
+            file.write('link: $(OBJS)\n')
+            file.write('\t$(CXX) -shared -o ../Lib/lib$(PROGRAM).so $(OBJS)\n')
+        file.write('\n')
+
+        # Phony target
+        file.write('# Phony target\n')
+        file.write('.PHONY: do_clean header compile_header link_header\n')
+        file.write('\n')
+
+        # Cleaning
+        file.write('# Clean target\n')
+        file.write('clean: clean_header do_clean\n')
+        file.write('\n')
+        file.write('# Do clean target\n')
+        file.write('do_clean: \n')
+        file.write('\t@rm -f $(OBJS)\n')
+        if self.fortran:
+            file.write('\t@rm -f $(FORTRAN_OBJS)\n')
+        file.write('\n')
+
+        # Mr Proper
+        file.write('# Mr Proper target \n')
+        file.write('mrproper: mrproper_header do_mrproper\n')
+        file.write('\n')
+        file.write('# Do Mr Proper target \n')
+        file.write('do_mrproper: do_clean\n')
+        file.write('\t@rm -f ../Lib/lib$(PROGRAM).so\n')
+        file.write('\t@rm -f compilation.log linking.log cleanup.log *~ */*~\n')
+        file.write('\n')
+
+        # Closing the file
+        file.close()
+
+        return True
+
+
     def WriteMakefile(self,option=""):
 
         # Open the file
@@ -257,6 +422,23 @@ class LibraryWriter():
             logging.error(" "+self.path+"/SampleAnalyzer/compilation.log")
             return False
 
+
+    def CompileForInterfaces(self,package):
+        strcores=''
+        ncores = self.get_ncores()
+        if ncores>1:
+            strcores='-j'+str(ncores)
+        res=commands.getstatusoutput("cd "\
+                                     +self.path+"/SampleAnalyzer/"+package+";"\
+                                     +" make compile "+strcores+" > compilation_"+package+".log 2>&1")
+        if res[0]==0:
+            return True
+        else:
+            logging.error("errors occured during compilation. For more details, see the file :")
+            logging.error(" "+self.path+"/SampleAnalyzer/compilation_"+package+".log")
+            return False
+
+
     def Link(self):
         res=commands.getstatusoutput("cd "\
                                      +self.path+"/SampleAnalyzer/;"\
@@ -269,14 +451,41 @@ class LibraryWriter():
             return False
 
 
+    def LinkForInterfaces(self,package):
+        res=commands.getstatusoutput("cd "\
+                                     +self.path+"/SampleAnalyzer/"+package+";"\
+                                     +" make link > linking_"+package+".log 2>&1")
+        if res[0]==0:
+            return True
+        else:
+            logging.error("errors occured during compilation. For more details, see the file :")
+            logging.error(" "+self.path+"/SampleAnalyzer/linking_"+package+".log")
+            return False
+
+
     def Clean(self):
         res=commands.getstatusoutput("cd "\
                                      +self.path+"/SampleAnalyzer/;"\
                                      +" make clean > cleanup.log 2>&1")
         return True
 
+
+    def CleanForInterfaces(self,package):
+        res=commands.getstatusoutput("cd "\
+                                     +self.path+"/SampleAnalyzer/"+package+";"\
+                                     +" make clean > cleanup_"+package+".log 2>&1")
+        return True
+
+
     def MrProper(self):
         res=commands.getstatusoutput("cd "\
                                      +self.path+"/SampleAnalyzer/;"\
                                      +" make mrproper > cleanup.log 2>&1")
+        return True
+
+
+    def MrProperForInterfaces(self,package):
+        res=commands.getstatusoutput("cd "\
+                                     +self.path+"/SampleAnalyzer/"+package+";"\
+                                     +" make mrproper > cleanup_"+package+".log 2>&1")
         return True

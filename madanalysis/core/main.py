@@ -497,34 +497,177 @@ class Main():
         if not self.configLinux.Export(self.ma5dir+'/tools/architecture.ma5'):
             sys.exit()
 
-        logging.info("   Creating a 'Makefile'...")
+        # Writing the Makefiles
+        logging.info("   Creating the general 'Makefile'...")
         if not compiler.WriteMakefile('shared'):
             logging.error("library building aborted.")
             sys.exit()
 
+        if self.libFastJet:
+            logging.info("   Creating the 'Makefile' devoted to the FastJet interface ...")
+            if not compiler.WriteMakefileForInterfaces(self,'fastjet'):
+                logging.error("library building aborted.")
+                sys.exit()
+        
+        if self.libZIP:
+            logging.info("   Creating the 'Makefile' devoted to the zlib interface ...")
+            if not compiler.WriteMakefileForInterfaces(self,'zlib'):
+                logging.error("library building aborted.")
+                sys.exit()
+
+        if self.libDelphes:
+            logging.info("   Creating the 'Makefile' devoted to the Delphes interface ...")
+            if not compiler.WriteMakefileForInterfaces(self,'delphes'):
+                logging.error("library building aborted.")
+                sys.exit()
+
+        if self.libDelfes:
+            logging.info("   Creating the 'Makefile' devoted to the Delfes interface ...")
+            if not compiler.WriteMakefileForInterfaces(self,'delfes'):
+                logging.error("library building aborted.")
+                sys.exit()
+
+        # Cleaning the project
+        logging.info("   Cleaning the project before building the library ...")
         if not compiler.MrProper():
-            logging.error("impossible to remove temporary files created during the building.")
+            logging.error("impossible to clean the general folder.")
             sys.exit()
 
-        logging.info("   Compiling the MadAnalysis library...")
+        if self.libFastJet:
+            if not compiler.MrProperForInterfaces(self,'fastjet'):
+                logging.error("impossible to clean the folder devoted to the FastJet interface.")
+                sys.exit()
+
+        if self.libZIP:
+            if not compiler.MrProperForInterfaces(self,'zlib'):
+                logging.error("impossible to clean the folder devoted to the zlib interface.")
+                sys.exit()
+
+        if self.libDelphes:
+            if not compiler.MrProperForInterfaces(self,'delphes'):
+                logging.error("impossible to clean the folder devoted to the Delphes interface.")
+                sys.exit()
+
+        if self.libDelfes:
+            if not compiler.MrProperForInterfaces(self,'delfes'):
+                logging.error("impossible to clean the folder devoted to the Delfes interface.")
+                sys.exit()
+
+        # Building the interface to FastJet
+        if self.libFastJet:
+            logging.info("   Compiling the interface to FastJet library ...")
+            if not compiler.CompileForInterfaces('fastjet'):
+                logging.error("library building aborted.")
+                sys.exit()
+
+            logging.info("   Linking the interface to FastJet library ...")
+            if not compiler.LinkForInterfaces('fastjet'):
+                logging.error("library building aborted.")
+                sys.exit()
+
+            logging.info("   Checking that the interface to FastJet library is properly built ...")
+  
+            if not os.path.isfile(self.ma5dir+'/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so'):
+                logging.error("the library 'libfastjet_for_ma5.so' is not produced.")
+                sys.exit()
+        
+        # Building the interface to zlib
+        if self.libZIP:
+            logging.info("   Compiling the interface to zlib library ...")
+            if not compiler.CompileForInterfaces('zlib'):
+                logging.error("library building aborted.")
+                sys.exit()
+
+            logging.info("   Linking the interface to zlib library ...")
+            if not compiler.LinkForInterfaces('zlib'):
+                logging.error("library building aborted.")
+                sys.exit()
+
+            logging.info("   Checking that the interface to zlib library is properly built ...")
+  
+            if not os.path.isfile(self.ma5dir+'/tools/SampleAnalyzer/Lib/libzlib_for_ma5.so'):
+                logging.error("the library 'libzlib_for_ma5.so' is not produced.")
+                sys.exit()
+
+        # Building the interface to delphes
+        if self.libDelphes:
+            logging.info("   Compiling the interface to Delphes library ...")
+            if not compiler.CompileForInterfaces('delphes'):
+                logging.error("library building aborted.")
+                sys.exit()
+
+            logging.info("   Linking the interface to Delphes library ...")
+            if not compiler.LinkForInterfaces('delphes'):
+                logging.error("library building aborted.")
+                sys.exit()
+
+            logging.info("   Checking that the interface to Delphes library is properly built ...")
+  
+            if not os.path.isfile(self.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so'):
+                logging.error("the library 'libdelphes_for_ma5.so' is not produced.")
+                sys.exit()
+
+        # Building the interface to delfes
+        if self.libDelfes:
+            logging.info("   Compiling the interface to Delfes library ...")
+            if not compiler.CompileForInterfaces('delfes'):
+                logging.error("library building aborted.")
+                sys.exit()
+
+            logging.info("   Linking the interface to Delfes library ...")
+            if not compiler.LinkForInterfaces('delphes'):
+                logging.error("library building aborted.")
+                sys.exit()
+
+            logging.info("   Checking that the interface to Delfes library is properly built ...")
+  
+            if not os.path.isfile(self.ma5dir+'/tools/SampleAnalyzer/Lib/libdelfes_for_ma5.so'):
+                logging.error("the library 'libdelfes_for_ma5.so' is not produced.")
+                sys.exit()
+
+        # Building the SampleAnalyzer
+        logging.info("   Compiling the SampleAnalyzer library ...")
         if not compiler.Compile():
             logging.error("library building aborted.")
             sys.exit()
 
-        logging.info("   Linking the MadAnalysis library...")
+        logging.info("   Linking the SampleAnalyzer library ...")
         if not compiler.Link():
             logging.error("library building aborted.")
             sys.exit()
 
-        logging.info("   Checking the MadAnalysis library...")
+        logging.info("   Checking that the SampleAnalyzer library is properly built ...")
 
         if not os.path.isfile(self.ma5dir+'/tools/SampleAnalyzer/Lib/libSampleAnalyzer.a'):
             logging.error("the library 'libSampleAnalyzer.a' is not produced.")
             sys.exit()
     
+        # Cleaning the project
+        logging.info("   Cleaning the project after building the library ...")
+
         if not compiler.Clean():
             logging.error("impossible to remove temporary files created during the building.")
             sys.exit()
+
+        if self.libFastJet:
+            if not compiler.CleanForInterfaces(self,'fastjet'):
+                logging.error("impossible to clean the folder devoted to the FastJet interface.")
+                sys.exit()
+
+        if self.libZIP:
+            if not compiler.CleanForInterfaces(self,'zlib'):
+                logging.error("impossible to clean the folder devoted to the zlib interface.")
+                sys.exit()
+
+        if self.libDelphes:
+            if not compiler.CleanForInterfaces(self,'delphes'):
+                logging.error("impossible to clean the folder devoted to the Delphes interface.")
+                sys.exit()
+
+        if self.libDelfes:
+            if not compiler.CleanForInterfaces(self,'delfes'):
+                logging.error("impossible to clean the folder devoted to the Delfes interface.")
+                sys.exit()
 
         return True    
         
