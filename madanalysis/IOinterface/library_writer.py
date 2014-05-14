@@ -429,7 +429,7 @@ class LibraryWriter():
         file.write('# Do Mr Proper target \n')
         file.write('do_mrproper: do_clean\n')
         file.write('\t@rm -f Lib/lib$(PROGRAM).so\n')
-        file.write('\t@rm -f compilation.log linking.log cleanup.log *~ */*~\n')
+        file.write('\t@rm -f compilation.log linking.log cleanup.log mrproper.log *~ */*~\n')
         file.write('\n')
 
         # Closing the file
