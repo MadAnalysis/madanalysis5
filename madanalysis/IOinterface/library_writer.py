@@ -80,7 +80,7 @@ class LibraryWriter():
 
         # Open the file
         try:
-            file = open(self.path + "/SampleAnalyzer/Makefile_" + package,"w")
+            file = open(self.path + "/SampleAnalyzer/Interfaces/Makefile_" + package,"w")
         except:
             logging.error('impossible to write the file '+ self.path + "/SampleAnalyzer/Makefile_" + package)
             return False
@@ -127,7 +127,7 @@ class LibraryWriter():
 
         # Name of the library
         file.write('# Name of the library\n')
-        file.write('PROGRAM = '+package+'\n')
+        file.write('PROGRAM = '+package+'_for_ma5\n')
         file.write('\n')
 
         # Defining colours for shell
@@ -263,7 +263,8 @@ class LibraryWriter():
         file.write('# Options for compilation\n')
         if self.libFASTJET:
             file.write('CXXFASTJET = $(shell fastjet-config --cxxflags --plugins)\n')
-        file.write('CXXFLAGS = -Wall -O3 $(shell root-config --cflags) -I./../')
+        # BENJ FIX file.write('CXXFLAGS = -Wall -O3 -fPIC $(shell root-config --cflags) -I./../')
+        file.write('CXXFLAGS = -Wall -O3 -fPIC $(shell root-config --cflags) -I./../')
         if self.libZIP:
             file.write(' -DZIP_USE')
         if self.libDelphes:
@@ -368,10 +369,11 @@ class LibraryWriter():
         file.write('# Link target\n')
         if self.fortran:
             file.write('link: $(OBJS) $(FORTRAN_OBJS)\n')
-            file.write('\tar -ruc Lib/lib$(PROGRAM).a $(OBJS) $(FORTRAN_OBJS)\n')
+            file.write('\t$(CXX) -shared -o Lib/lib$(PROGRAM).so $(OBJS) $(FORTRAN_OBJS)\n')
         else:
             file.write('link: $(OBJS)\n')
-            file.write('\tar -ruc Lib/lib$(PROGRAM).a $(OBJS)\n')
+#B FIX            file.write('\t$(CXX) -shared -o Lib/lib$(PROGRAM).so $(OBJS)\n')
+            file.write('\t$(CXX) -o Lib/lib$(PROGRAM).a $(OBJS)\n')
         file.write('\n')
 
         # Phony target
@@ -385,7 +387,7 @@ class LibraryWriter():
         file.write('\n')
         file.write('# Do clean target\n')
         file.write('do_clean: \n')
-        file.write('\t@rm -f $(OBJS) Reader/FACdict.*\n')
+        file.write('\t@rm -f $(OBJS)\n')
         file.write('\n')
 
         # Mr Proper
@@ -429,13 +431,13 @@ class LibraryWriter():
         if ncores>1:
             strcores='-j'+str(ncores)
         res=commands.getstatusoutput("cd "\
-                                     +self.path+"/SampleAnalyzer/"+package+";"\
-                                     +" make compile "+strcores+" > compilation_"+package+".log 2>&1")
+                                     +self.path+"/SampleAnalyzer/Interfaces/;"\
+                                     +" make --file=Makefile_"+package+" compile "+strcores+" > compilation_"+package+".log 2>&1")
         if res[0]==0:
             return True
         else:
             logging.error("errors occured during compilation. For more details, see the file :")
-            logging.error(" "+self.path+"/SampleAnalyzer/compilation_"+package+".log")
+            logging.error(" "+self.path+"/SampleAnalyzer/Interfaces/compilation_"+package+".log")
             return False
 
 
@@ -453,13 +455,13 @@ class LibraryWriter():
 
     def LinkForInterfaces(self,package):
         res=commands.getstatusoutput("cd "\
-                                     +self.path+"/SampleAnalyzer/"+package+";"\
-                                     +" make link > linking_"+package+".log 2>&1")
+                                     +self.path+"/SampleAnalyzer/Interfaces/;"\
+                                     +" make --file=Makefile_"+package+" link > linking_"+package+".log 2>&1")
         if res[0]==0:
             return True
         else:
             logging.error("errors occured during compilation. For more details, see the file :")
-            logging.error(" "+self.path+"/SampleAnalyzer/linking_"+package+".log")
+            logging.error(" "+self.path+"/SampleAnalyzer/Interfaces/linking_"+package+".log")
             return False
 
 
@@ -472,8 +474,8 @@ class LibraryWriter():
 
     def CleanForInterfaces(self,package):
         res=commands.getstatusoutput("cd "\
-                                     +self.path+"/SampleAnalyzer/"+package+";"\
-                                     +" make clean > cleanup_"+package+".log 2>&1")
+                                     +self.path+"/SampleAnalyzer/Interfaces/;"\
+                                     +" make --file=Makefile_"+package+" clean > cleanup_"+package+".log 2>&1")
         return True
 
 
@@ -486,6 +488,6 @@ class LibraryWriter():
 
     def MrProperForInterfaces(self,package):
         res=commands.getstatusoutput("cd "\
-                                     +self.path+"/SampleAnalyzer/"+package+";"\
-                                     +" make mrproper > cleanup_"+package+".log 2>&1")
+                                     +self.path+"/SampleAnalyzer/Interfaces/;"\
+                                     +" make --file=Makefile_"+package+" mrproper > cleanup_"+package+".log 2>&1")
         return True

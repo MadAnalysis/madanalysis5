@@ -505,25 +505,25 @@ class Main():
 
         if self.libFastJet:
             logging.info("   Creating the 'Makefile' devoted to the FastJet interface ...")
-            if not compiler.WriteMakefileForInterfaces(self,'fastjet'):
+            if not compiler.WriteMakefileForInterfaces('fastjet'):
                 logging.error("library building aborted.")
                 sys.exit()
         
         if self.libZIP:
             logging.info("   Creating the 'Makefile' devoted to the zlib interface ...")
-            if not compiler.WriteMakefileForInterfaces(self,'zlib'):
+            if not compiler.WriteMakefileForInterfaces('zlib'):
                 logging.error("library building aborted.")
                 sys.exit()
 
         if self.libDelphes:
             logging.info("   Creating the 'Makefile' devoted to the Delphes interface ...")
-            if not compiler.WriteMakefileForInterfaces(self,'delphes'):
+            if not compiler.WriteMakefileForInterfaces('delphes'):
                 logging.error("library building aborted.")
                 sys.exit()
 
         if self.libDelfes:
             logging.info("   Creating the 'Makefile' devoted to the Delfes interface ...")
-            if not compiler.WriteMakefileForInterfaces(self,'delfes'):
+            if not compiler.WriteMakefileForInterfaces('delfes'):
                 logging.error("library building aborted.")
                 sys.exit()
 
@@ -534,22 +534,22 @@ class Main():
             sys.exit()
 
         if self.libFastJet:
-            if not compiler.MrProperForInterfaces(self,'fastjet'):
+            if not compiler.MrProperForInterfaces('fastjet'):
                 logging.error("impossible to clean the folder devoted to the FastJet interface.")
                 sys.exit()
 
         if self.libZIP:
-            if not compiler.MrProperForInterfaces(self,'zlib'):
+            if not compiler.MrProperForInterfaces('zlib'):
                 logging.error("impossible to clean the folder devoted to the zlib interface.")
                 sys.exit()
 
         if self.libDelphes:
-            if not compiler.MrProperForInterfaces(self,'delphes'):
+            if not compiler.MrProperForInterfaces('delphes'):
                 logging.error("impossible to clean the folder devoted to the Delphes interface.")
                 sys.exit()
 
         if self.libDelfes:
-            if not compiler.MrProperForInterfaces(self,'delfes'):
+            if not compiler.MrProperForInterfaces('delfes'):
                 logging.error("impossible to clean the folder devoted to the Delfes interface.")
                 sys.exit()
 
@@ -615,7 +615,7 @@ class Main():
                 sys.exit()
 
             logging.info("   Linking the interface to Delfes library ...")
-            if not compiler.LinkForInterfaces('delphes'):
+            if not compiler.LinkForInterfaces('delfes'):
                 logging.error("library building aborted.")
                 sys.exit()
 
@@ -650,22 +650,22 @@ class Main():
             sys.exit()
 
         if self.libFastJet:
-            if not compiler.CleanForInterfaces(self,'fastjet'):
+            if not compiler.CleanForInterfaces('fastjet'):
                 logging.error("impossible to clean the folder devoted to the FastJet interface.")
                 sys.exit()
 
         if self.libZIP:
-            if not compiler.CleanForInterfaces(self,'zlib'):
+            if not compiler.CleanForInterfaces('zlib'):
                 logging.error("impossible to clean the folder devoted to the zlib interface.")
                 sys.exit()
 
         if self.libDelphes:
-            if not compiler.CleanForInterfaces(self,'delphes'):
+            if not compiler.CleanForInterfaces('delphes'):
                 logging.error("impossible to clean the folder devoted to the Delphes interface.")
                 sys.exit()
 
         if self.libDelfes:
-            if not compiler.CleanForInterfaces(self,'delfes'):
+            if not compiler.CleanForInterfaces('delfes'):
                 logging.error("impossible to clean the folder devoted to the Delfes interface.")
                 sys.exit()
 
