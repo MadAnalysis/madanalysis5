@@ -23,7 +23,7 @@
 
 
 #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringCDFMidpoint.h"
-#ifdef FASTJET_USE
+
 
 using namespace MA5;
 
@@ -135,5 +135,3 @@ std::string JetClusteringCDFMidpoint::GetParameters()
   return str.str();
 }
 
-
-#endif

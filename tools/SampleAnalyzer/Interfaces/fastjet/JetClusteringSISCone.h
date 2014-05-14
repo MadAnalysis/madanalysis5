@@ -25,7 +25,6 @@
 #ifndef JETCLUSTERINGSISCONE_H
 #define JETCLUSTERINGSISCONE_H
 
-#ifdef FASTJET_USE
 
 //SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringPlugin.h"
@@ -82,5 +81,4 @@ class JetClusteringSISCone: public JetClusteringPlugin
 
 }
 
-#endif
 #endif

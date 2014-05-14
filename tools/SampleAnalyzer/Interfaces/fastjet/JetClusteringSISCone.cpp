@@ -23,7 +23,7 @@
 
 
 #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringSISCone.h"
-#ifdef FASTJET_USE
+
 
 using namespace MA5;
 
@@ -136,4 +136,3 @@ std::string JetClusteringSISCone::GetParameters()
 }
 
 
-#endif

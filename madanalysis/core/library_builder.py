@@ -31,11 +31,15 @@ import sys
 
 class LibraryBuilder:
 
-    def __init__(self,configLinux,ma5dir):
+    def __init__(self,configLinux,ma5dir,libZIP,libDelphes,libDelfes,libFastJet):
 
         self.configLinux=configLinux
         self.ma5dir=ma5dir
         self.configStore = LinuxArchitecture()
+        self.libZIP=libZIP
+        self.libDelphes=libDelphes
+        self.libDelfes=libDelfes
+        self.libFastJet=libFastJet
 
         
     def checkMA5(self):
@@ -53,19 +57,33 @@ class LibraryBuilder:
                 logging.error(" "+name)
                 return False
 
-        # Look for shared library 'MadAnalysis' and 'config' file
-        if not os.path.isfile(self.ma5dir+'/tools/SampleAnalyzer/Lib/libSampleAnalyzer.a') \
+        # Look for the shared library 'MadAnalysis' and 'config' file
+        if not os.path.isfile(self.ma5dir+'/tools/SampleAnalyzer/Lib/libSampleAnalyzer.so') \
            or not os.path.isfile(self.ma5dir+'/tools/architecture.ma5'):
             FirstUse=True
+            return True, False
+
+        # Look for optional library
+        libraries = []
+        if self.libFastJet:
+            libraries.append(self.ma5dir+'/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so')
+        if self.libZIP:
+            libraries.append(self.ma5dir+'/tools/SampleAnalyzer/Lib/libzlib_for_ma5.so')
+        if self.libDelphes:
+            libraries.append(self.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so')
+        if self.libDelfes:
+            libraries.append(self.ma5dir+'/tools/SampleAnalyzer/Lib/libdelfes_for_ma5.so')
+        for library in libraries:
+            if not os.path.isfile(library):
+                return False, True
 
         # Importing the configuration stored with the library
         if not FirstUse:
             if not self.configStore.Import(self.ma5dir+'/tools/architecture.ma5'):
                 FirstUse=True
+                return True, False
 
-        if not FirstUse:
-             logging.info('  => MadAnalysis library found.')
-        return FirstUse
+        return FirstUse, False
     
         
     def compare(self):

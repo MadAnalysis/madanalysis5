@@ -475,20 +475,23 @@ class Main():
         sys.stdout.flush()
 
     def BuildLibrary(self,forced=False):
-        builder = LibraryBuilder(self.configLinux,self.ma5dir)
+        builder = LibraryBuilder(self.configLinux,self.ma5dir,self.libZIP,self.libDelphes,self.libDelfes,self.libFastJet)
+
         UpdateNeed=False
-        
-        FirstUse = builder.checkMA5()
-        if not FirstUse:
+        FirstUse, Missing = builder.checkMA5()
+        if not FirstUse and not Missing:
             UpdateNeed = not builder.compare()
 
-        rebuild = forced or FirstUse or UpdateNeed
+        rebuild = forced or FirstUse or UpdateNeed or Missing
         if not rebuild:
+            logging.info('  => MadAnalysis libraries found.')
             return True
 
         # Compile library
         if FirstUse:
             logging.info("  => First use of MadAnalysis (or the library is missing).")
+        elif Missing:
+            logging.info("  => Libraries are missing or system configuration has changed. Need to rebuild the library.")
         elif UpdateNeed:
             logging.info("  => System configuration has changed since the last use. Need to rebuild the library.")
         elif forced:
@@ -504,14 +507,14 @@ class Main():
         # Library to compiles
         libraries = []
         if self.libFastJet:
-            libraries.append(['FastJet', 'interface to FastJet', 'fastjet', self.ma5dir+'/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so'])
+            libraries.append(['FastJet', 'interface to FastJet', 'fastjet', self.ma5dir+'/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so',self.ma5dir+'/tools/SampleAnalyzer/Interfaces'])
         if self.libZIP:
-            libraries.append(['zlib', 'interface to zlib', 'zlib', self.ma5dir+'/tools/SampleAnalyzer/Lib/libzlib_for_ma5.so'])
+            libraries.append(['zlib', 'interface to zlib', 'zlib', self.ma5dir+'/tools/SampleAnalyzer/Lib/libzlib_for_ma5.so',self.ma5dir+'/tools/SampleAnalyzer/Interfaces'])
         if self.libDelphes:
-            libraries.append(['Delphes', 'interface to Delphes', 'delphes', self.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so'])
+            libraries.append(['Delphes', 'interface to Delphes', 'delphes', self.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so',self.ma5dir+'/tools/SampleAnalyzer/Interfaces'])
         if self.libDelfes:
-            libraries.append(['Delfes', 'interface to Delfes', 'delfes', self.ma5dir+'/tools/SampleAnalyzer/Lib/libdelfes_for_ma5.so'])
-        libraries.append(['SampleAnalyzer', 'general SampleAnalyzer component', '', self.ma5dir+'/tools/SampleAnalyzer/Lib/libSampleAnalyzer.so'])
+            libraries.append(['Delfes', 'interface to Delfes', 'delfes', self.ma5dir+'/tools/SampleAnalyzer/Lib/libdelfes_for_ma5.so',self.ma5dir+'/tools/SampleAnalyzer/Interfaces'])
+        libraries.append(['SampleAnalyzer', 'general SampleAnalyzer component', 'SampleAnalyzer', self.ma5dir+'/tools/SampleAnalyzer/Lib/libSampleAnalyzer.so',self.ma5dir+'/tools/SampleAnalyzer'])
 
         # Writing the Makefiles
         logging.info("")
@@ -541,36 +544,21 @@ class Main():
 
              # Cleaning the project
             logging.info("     - Cleaning the project before building the library ...")
-            if libraries[ind][0]=='SampleAnalyzer':
-                if not compiler.MrProper():
-                    logging.error("library building aborted.")
-                    sys.exit()
-            else:
-                if not compiler.MrProperForInterfaces(libraries[ind][2]):
-                    logging.error("library building aborted.")
-                    sys.exit()
+            if not compiler.MrProper(libraries[ind][2],libraries[ind][4]):
+                logging.error("library building aborted.")
+                sys.exit()
 
             # Compiling
             logging.info("     - Compiling the source files ...")
-            if libraries[ind][0]=='SampleAnalyzer':
-                if not compiler.Compile(ncores):
-                    logging.error("library building aborted.")
-                    sys.exit()
-            else:
-                if not compiler.CompileForInterfaces(libraries[ind][2],ncores):
-                    logging.error("library building aborted.")
-                    sys.exit()
+            if not compiler.Compile(ncores,libraries[ind][2],libraries[ind][4]):
+                logging.error("library building aborted.")
+                sys.exit()
 
             # Linking
             logging.info("     - Linking the library ...")
-            if libraries[ind][0]=='SampleAnalyzer':
-                if not compiler.Link():
-                    logging.error("library building aborted.")
-                    sys.exit()
-            else:
-                if not compiler.LinkForInterfaces(libraries[ind][2]):
-                    logging.error("library building aborted.")
-                    sys.exit()
+            if not compiler.Link(libraries[ind][2],libraries[ind][4]):
+                logging.error("library building aborted.")
+                sys.exit()
 
             # Checking
             logging.info("     - Checking that library is properly built ...")
@@ -580,14 +568,9 @@ class Main():
 
              # Cleaning the project
             logging.info("     - Cleaning the project after building the library ...")
-            if libraries[ind][0]=='SampleAnalyzer':
-                if not compiler.Clean():
-                    logging.error("library building aborted.")
-                    sys.exit()
-            else:
-                if not compiler.CleanForInterfaces(libraries[ind][2]):
-                    logging.error("library building aborted.")
-                    sys.exit()
+            if not compiler.Clean(libraries[ind][2],libraries[ind][4]):
+                logging.error("library building aborted.")
+                sys.exit()
 
             # Print Ok
             sys.stdout.write("     => Status: ")

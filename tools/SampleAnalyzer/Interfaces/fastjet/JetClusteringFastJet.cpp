@@ -24,7 +24,7 @@
 
 #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringFastJet.h"
 #include "SampleAnalyzer/Service/LoopService.h"
-#ifdef FASTJET_USE
+
 
 using namespace MA5;
 
@@ -337,4 +337,4 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
   return true;
 }
 
-#endif
+

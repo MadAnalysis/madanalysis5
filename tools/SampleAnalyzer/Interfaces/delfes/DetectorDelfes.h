@@ -25,7 +25,6 @@
 #ifndef DETECTOR_DELFES_H
 #define DETECTOR_DELFES_H
 
-#ifdef DELFES_USE
 
 //SampleAnalyser headers
 #include "SampleAnalyzer/Detector/DetectorBase.h"
@@ -114,5 +113,4 @@ class DetectorDelfes: public DetectorBase
 
 }
 
-#endif
 #endif

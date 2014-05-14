@@ -25,7 +25,6 @@
 #ifndef JETCLUSTERINGCDFMIDPOINT_H
 #define JETCLUSTERINGCDFMIDPOINT_H
 
-#ifdef FASTJET_USE
 
 //SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringPlugin.h"
@@ -81,5 +80,4 @@ class JetClusteringCDFMidpoint: public JetClusteringPlugin
 
 }
 
-#endif
 #endif

@@ -27,8 +27,6 @@
 #include <fstream>
 #include <TROOT.h>
 
-#ifdef DELFES_USE
-
 //Delphes header
 #include "external/ExRootAnalysis/ExRootConfReader.h"
 #include "external/ExRootAnalysis/ExRootTreeWriter.h"
@@ -357,5 +355,3 @@ void DetectorDelfes::TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat& 
 
 }
 
-
-#endif

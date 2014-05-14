@@ -27,7 +27,7 @@
 
 // ZIP headers
 #ifdef ZIP_USE
-   #include "SampleAnalyzer/Core/gz_ostream.h"
+   #include "SampleAnalyzer/Interfaces/zlib/gz_ostream.h"
 #endif
 
 // SampleHeader headers

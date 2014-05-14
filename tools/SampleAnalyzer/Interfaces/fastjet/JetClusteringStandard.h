@@ -25,7 +25,6 @@
 #ifndef JETCLUSTERING_H
 #define JETCLUSTERING_H
 
-#ifdef FASTJET_USE
 
 //SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringFastJet.h"
@@ -77,4 +76,4 @@ class JetClusteringStandard: public JetClusteringFastJet
 }
 
 #endif
-#endif
+

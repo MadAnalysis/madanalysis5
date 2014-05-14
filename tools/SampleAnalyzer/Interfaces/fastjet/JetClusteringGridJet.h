@@ -25,7 +25,6 @@
 #ifndef JETCLUSTERINGGRIDJET_H
 #define JETCLUSTERINGGRIDJET_H
 
-#ifdef FASTJET_USE
 
 //SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringPlugin.h"
@@ -77,4 +76,4 @@ class JetClusteringGridJet: public JetClusteringPlugin
 }
 
 #endif
-#endif
+

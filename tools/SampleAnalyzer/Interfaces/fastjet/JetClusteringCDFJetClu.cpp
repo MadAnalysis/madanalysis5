@@ -23,7 +23,7 @@
 
 
 #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringCDFJetClu.h"
-#ifdef FASTJET_USE
+
 
 using namespace MA5;
 
@@ -138,4 +138,3 @@ std::string JetClusteringCDFJetClu::GetParameters()
 }
 
 
-#endif

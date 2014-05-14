@@ -30,6 +30,8 @@ import logging
 import shutil
 import os
 import commands
+import subprocess
+
 
 class LibraryWriter():
 
@@ -127,14 +129,14 @@ class LibraryWriter():
         if package=='fastjet':
             file.write('CXXFASTJET = $(shell fastjet-config --cxxflags --plugins)\n')
         file.write('CXXFLAGS = -Wall -O3 -DROOT_USE -fPIC $(shell root-config --cflags) -I./../../')
-        if package=='zlib':
-            file.write(' -DZIP_USE')
-        elif package=='delphes':
-            file.write(' -DDELPHES_USE')
-        elif package=='delfes':
-            file.write(' -DDELFES_USE')
+       # if package=='zlib':
+       #     file.write(' -DZIP_USE')
+       # elif package=='delphes':
+       #     file.write(' -DDELPHES_USE')
+       # elif package=='delfes':
+       #     file.write(' -DDELFES_USE')
         elif package=='fastjet':
-            file.write(' -DFASTJET_USE')
+       #     file.write(' -DFASTJET_USE')
             file.write(' $(CXXFASTJET)')
         file.write('\n')
 
@@ -262,7 +264,7 @@ class LibraryWriter():
         file.write('# Do Mr Proper target \n')
         file.write('do_mrproper: do_clean\n')
         file.write('\t@rm -f ../Lib/lib$(PROGRAM).so\n')
-        file.write('\t@rm -f compilation.log linking.log cleanup.log *~ */*~\n')
+        file.write('\t@rm -f compilation.log linking.log cleanup.log mrproper.log *~ */*~\n')
         file.write('\n')
 
         # Closing the file
@@ -402,8 +404,8 @@ class LibraryWriter():
             file.write('\t$(CXX) -shared -o Lib/lib$(PROGRAM).so $(OBJS) $(FORTRAN_OBJS)\n')
         else:
             file.write('link: $(OBJS)\n')
-#BEN FIX            file.write('\t$(CXX) -shared -o Lib/lib$(PROGRAM).so $(OBJS)\n')
-            file.write('\tar -ruc Lib/lib$(PROGRAM).a $(OBJS)\n')
+            file.write('\t$(CXX) -shared -o Lib/lib$(PROGRAM).so $(OBJS)\n')
+#            file.write('\tar -ruc Lib/lib$(PROGRAM).a $(OBJS)\n')
         file.write('\n')
 
         # Phony target
@@ -426,7 +428,7 @@ class LibraryWriter():
         file.write('\n')
         file.write('# Do Mr Proper target \n')
         file.write('do_mrproper: do_clean\n')
-        file.write('\t@rm -f Lib/lib$(PROGRAM).a\n')
+        file.write('\t@rm -f Lib/lib$(PROGRAM).so\n')
         file.write('\t@rm -f compilation.log linking.log cleanup.log *~ */*~\n')
         file.write('\n')
 
@@ -439,83 +441,162 @@ class LibraryWriter():
         return True
 
 
-    def Compile(self,ncores):
+    def Compile(self,ncores,package,folder):
+
+        # number of cores
         strcores=''
         if ncores>1:
             strcores='-j'+str(ncores)
-        res=commands.getstatusoutput("cd "\
-                                     +self.path+"/SampleAnalyzer/;"\
-                                     +" make compile "+strcores+" > compilation.log 2>&1")
-        if res[0]==0:
-            return True
+
+        # log file name
+        if package == 'SampleAnalyzer':
+            logfile = folder+'/compilation.log'
         else:
-            logging.error("errors occured during compilation. For more details, see the file :")
-            logging.error(" "+self.path+"/SampleAnalyzer/compilation.log")
-            return False
+            logfile = folder+'/compilation_'+package+'.log'
 
-
-    def CompileForInterfaces(self,package,ncores):
-        strcores=''
-        if ncores>1:
-            strcores='-j'+str(ncores)
-        res=commands.getstatusoutput("cd "\
-                                     +self.path+"/SampleAnalyzer/Interfaces/;"\
-                                     +" make --file=Makefile_"+package+" compile "+strcores+" > compilation_"+package+".log 2>&1")
-        if res[0]==0:
-            return True
+        # makefile
+        if package == 'SampleAnalyzer':
+            makefile = 'Makefile'
         else:
-            logging.error("errors occured during compilation. For more details, see the file :")
-            logging.error(" "+self.path+"/SampleAnalyzer/Interfaces/compilation_"+package+".log")
-            return False
+            makefile = 'Makefile_'+package
+
+        # shell command
+        commands = ['make','compile',strcores,'--file='+makefile]
+
+        # call
+        result, out, err = LibraryWriter.Launch(commands,logfile,folder)
+
+        # return result
+        if not result:
+            logging.error('impossible to compile the project. For more details, see the log file:')
+            logging.error(logfile)
+            
+        return result
 
 
-    def Link(self):
-        res=commands.getstatusoutput("cd "\
-                                     +self.path+"/SampleAnalyzer/;"\
-                                     +" make link > linking.log 2>&1")
-        if res[0]==0:
-            return True
+    def Link(self,package,folder):
+
+        # log file name
+        if package == 'SampleAnalyzer':
+            logfile = folder+'/linking.log'
         else:
-            logging.error("errors occured during compilation. For more details, see the file :")
-            logging.error(" "+self.path+"/SampleAnalyzer/linking.log")
-            return False
+            logfile = folder+'/linking_'+package+'.log'
 
-
-    def LinkForInterfaces(self,package):
-        res=commands.getstatusoutput("cd "\
-                                     +self.path+"/SampleAnalyzer/Interfaces/;"\
-                                     +" make --file=Makefile_"+package+" link > linking_"+package+".log 2>&1")
-        if res[0]==0:
-            return True
+        # makefile
+        if package == 'SampleAnalyzer':
+            makefile = 'Makefile'
         else:
-            logging.error("errors occured during compilation. For more details, see the file :")
-            logging.error(" "+self.path+"/SampleAnalyzer/Interfaces/linking_"+package+".log")
-            return False
+            makefile = 'Makefile_'+package
+
+        # shell command
+        commands = ['make','link','--file='+makefile]
+
+        # call
+        result, out, err = LibraryWriter.Launch(commands,logfile,folder)
+
+        # return result
+        if not result:
+            logging.error('impossible to link the project. For more details, see the log file:')
+            logging.error(logfile)
+            
+        return result
 
 
-    def Clean(self):
-        res=commands.getstatusoutput("cd "\
-                                     +self.path+"/SampleAnalyzer/;"\
-                                     +" make clean > cleanup.log 2>&1")
-        return True
+    @staticmethod
+    def Launch(theCommands,logfile,path):
+
+        # Launching the commands
+        try:
+            result=subprocess.Popen(theCommands, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=path)
+        except:
+            logging.error('impossible to execute the commands: '+' '.join(theCommands))
+            return False, None, None
+
+        # Testing if errors
+        out, err = result.communicate()
+
+        # Open the log file
+        opened=True
+        try:
+            output = open(logfile,'w')
+        except:
+            logging.error('impossible to write the file '+logfile)
+            opened=False
+
+        if opened:
+
+            output.write('MadAnalysis redirection of stdout:\n')
+            output.write('----------------------------------\n')
+            output.write('\n')
+            if out!=None:
+                for line in out:
+                    output.write(line)
+            output.write('\n')
+            output.write('MadAnalysis redirection of stderr:\n')
+            output.write('----------------------------------\n')
+            output.write('\n')
+            if err!=None:
+                for line in err:
+                    output.write(line)
+            output.write('\n')
+
+            output.close()
+            
+        # Return results
+        return (result.returncode==0), out, err
+    
+
+    def Clean(self,package,folder):
+
+        # log file name
+        if package == 'SampleAnalyzer':
+            logfile = folder+'/cleanup.log'
+        else:
+            logfile = folder+'/cleanup_'+package+'.log'
+
+        # makefile
+        if package == 'SampleAnalyzer':
+            makefile = 'Makefile'
+        else:
+            makefile = 'Makefile_'+package
+
+        # shell command
+        commands = ['make','clean','--file='+makefile]
+
+        # call
+        result, out, err = LibraryWriter.Launch(commands,logfile,folder)
+
+        # return result
+        if not result:
+            logging.error('impossible to clean the project. For more details, see the log file:')
+            logging.error(logfile)
+            
+        return result
 
 
-    def CleanForInterfaces(self,package):
-        res=commands.getstatusoutput("cd "\
-                                     +self.path+"/SampleAnalyzer/Interfaces/;"\
-                                     +" make --file=Makefile_"+package+" clean > cleanup_"+package+".log 2>&1")
-        return True
+    def MrProper(self,package,folder):
 
+        # log file name
+        if package == 'SampleAnalyzer':
+            logfile = folder+'/mrproper.log'
+        else:
+            logfile = folder+'/mrproper_'+package+'.log'
 
-    def MrProper(self):
-        res=commands.getstatusoutput("cd "\
-                                     +self.path+"/SampleAnalyzer/;"\
-                                     +" make mrproper > cleanup.log 2>&1")
-        return True
+        # makefile
+        if package == 'SampleAnalyzer':
+            makefile = 'Makefile'
+        else:
+            makefile = 'Makefile_'+package
 
+        # shell command
+        commands = ['make','mrproper','--file='+makefile]
 
-    def MrProperForInterfaces(self,package):
-        res=commands.getstatusoutput("cd "\
-                                     +self.path+"/SampleAnalyzer/Interfaces/;"\
-                                     +" make --file=Makefile_"+package+" mrproper > cleanup_"+package+".log 2>&1")
-        return True
+        # call
+        result, out, err = LibraryWriter.Launch(commands,logfile,folder)
+
+        # return result
+        if not result:
+            logging.error('impossible to clean the project. For more details, see the log file:')
+            logging.error(logfile)
+            
+        return result

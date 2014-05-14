@@ -23,7 +23,7 @@
 
 
 #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringGridJet.h"
-#ifdef FASTJET_USE
+
 
 using namespace MA5;
 
@@ -112,4 +112,4 @@ std::string JetClusteringGridJet::GetParameters()
   return str.str();
 }
 
-#endif
+

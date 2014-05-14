@@ -25,7 +25,6 @@
 #ifndef JET_CLUSTERING_FASTJET_H
 #define JET_CLUSTERING_FASTJET_H
 
-#ifdef FASTJET_USE
 
 //SampleAnalyser headers
 #include "SampleAnalyzer/DataFormat/EventFormat.h"
@@ -86,5 +85,4 @@ class JetClusteringFastJet: public JetClustererBase
 
 }
 
-#endif
 #endif
