@@ -266,12 +266,14 @@ class LibraryWriter():
         # BENJ FIX file.write('CXXFLAGS = -Wall -O3 -fPIC $(shell root-config --cflags) -I./../')
         file.write('CXXFLAGS = -Wall -O3 -fPIC $(shell root-config --cflags) -I./../')
         if self.libZIP:
+            file.write(' -DROOT_USE')
             file.write(' -DZIP_USE')
         if self.libDelphes:
             file.write(' -DROOT_USE -DDELPHES_USE')
         if self.libDelfes:
             file.write(' -DROOT_USE -DDELFES_USE')
         if self.libFASTJET:
+            file.write(' -DROOT_USE')
             file.write(' -DFASTJET_USE')
             file.write(' $(CXXFASTJET)')
         file.write('\n')
