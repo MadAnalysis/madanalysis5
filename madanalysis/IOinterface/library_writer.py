@@ -135,7 +135,7 @@ class LibraryWriter():
        #     file.write(' -DDELPHES_USE')
        # elif package=='delfes':
        #     file.write(' -DDELFES_USE')
-        elif package=='fastjet':
+        if package=='fastjet':
        #     file.write(' -DFASTJET_USE')
             file.write(' $(CXXFASTJET)')
         file.write('\n')
@@ -315,7 +315,7 @@ class LibraryWriter():
         # Files for analyzers
         file.write('# Files\n')
         file.write('SRCS = $(wildcard */*.cpp)\n')
-        file.write('SRCS += $(wildcard */*/*.cpp)\n')
+#        file.write('SRCS += $(wildcard */*/*.cpp)\n')
         file.write('HDRS = $(wildcard */*.h)\n')
         file.write('OBJS = $(SRCS:.cpp=.o)\n')
         if self.fortran:
