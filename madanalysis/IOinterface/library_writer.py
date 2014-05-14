@@ -96,13 +96,13 @@ class LibraryWriter():
         file.write('CXX = g++\n')
         if package=='fastjet':
             file.write('CXXFASTJET = $(shell fastjet-config --cxxflags --plugins)\n')
-        file.write('CXXFLAGS = -Wall -O3 -fPIC $(shell root-config --cflags) -I./../../')
+        file.write('CXXFLAGS = -Wall -O3 -DROOT_USE -fPIC $(shell root-config --cflags) -I./../../')
         if package=='zlib':
             file.write(' -DZIP_USE')
         elif package=='delphes':
-            file.write(' -DROOT_USE -DDELPHES_USE')
+            file.write(' -DDELPHES_USE')
         elif package=='delfes':
-            file.write(' -DROOT_USE -DDELFES_USE')
+            file.write(' -DDELFES_USE')
         elif package=='fastjet':
             file.write(' -DFASTJET_USE')
             file.write(' $(CXXFASTJET)')
@@ -264,16 +264,14 @@ class LibraryWriter():
         if self.libFASTJET:
             file.write('CXXFASTJET = $(shell fastjet-config --cxxflags --plugins)\n')
         # BENJ FIX file.write('CXXFLAGS = -Wall -O3 -fPIC $(shell root-config --cflags) -I./../')
-        file.write('CXXFLAGS = -Wall -O3 -fPIC $(shell root-config --cflags) -I./../')
+        file.write('CXXFLAGS = -Wall -O3 -DROOT_USE -fPIC $(shell root-config --cflags) -I./../')
         if self.libZIP:
-            file.write(' -DROOT_USE')
             file.write(' -DZIP_USE')
         if self.libDelphes:
-            file.write(' -DROOT_USE -DDELPHES_USE')
+            file.write(' -DDELPHES_USE')
         if self.libDelfes:
-            file.write(' -DROOT_USE -DDELFES_USE')
+            file.write(' -DDELFES_USE')
         if self.libFASTJET:
-            file.write(' -DROOT_USE')
             file.write(' -DFASTJET_USE')
             file.write(' $(CXXFASTJET)')
         file.write('\n')
