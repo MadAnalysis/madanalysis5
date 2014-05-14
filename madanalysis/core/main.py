@@ -470,6 +470,10 @@ class Main():
             
         return True 
    
+    def PrintOK(self):
+        sys.stdout.write('\x1b[32m'+'[OK]'+'\x1b[0m'+'\n')
+        sys.stdout.flush()
+
     def BuildLibrary(self,forced=False):
         builder = LibraryBuilder(self.configLinux,self.ma5dir)
         UpdateNeed=False
@@ -497,177 +501,100 @@ class Main():
         if not self.configLinux.Export(self.ma5dir+'/tools/architecture.ma5'):
             sys.exit()
 
+        # Library to compiles
+        libraries = []
+        if self.libFastJet:
+            libraries.append(['FastJet', 'interface to FastJet', 'fastjet', self.ma5dir+'/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so'])
+        if self.libZIP:
+            libraries.append(['zlib', 'interface to zlib', 'zlib', self.ma5dir+'/tools/SampleAnalyzer/Lib/libzlib_for_ma5.so'])
+        if self.libDelphes:
+            libraries.append(['Delphes', 'interface to Delphes', 'delphes', self.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so'])
+        if self.libDelfes:
+            libraries.append(['Delfes', 'interface to Delfes', 'delfes', self.ma5dir+'/tools/SampleAnalyzer/Lib/libdelfes_for_ma5.so'])
+        libraries.append(['SampleAnalyzer', 'general SampleAnalyzer component', '', self.ma5dir+'/tools/SampleAnalyzer/Lib/libSampleAnalyzer.so'])
+
         # Writing the Makefiles
-        logging.info("   Creating the general 'Makefile'...")
-        if not compiler.WriteMakefile('shared'):
-            logging.error("library building aborted.")
-            sys.exit()
+        logging.info("")
+        logging.info("   **********************************************************")
+        logging.info("                Building SampleAnalyzer libraries     ")
+        logging.info("   **********************************************************")
 
-        if self.libFastJet:
-            logging.info("   Creating the 'Makefile' devoted to the FastJet interface ...")
-            if not compiler.WriteMakefileForInterfaces('fastjet'):
-                logging.error("library building aborted.")
-                sys.exit()
-        
-        if self.libZIP:
-            logging.info("   Creating the 'Makefile' devoted to the zlib interface ...")
-            if not compiler.WriteMakefileForInterfaces('zlib'):
-                logging.error("library building aborted.")
-                sys.exit()
 
-        if self.libDelphes:
-            logging.info("   Creating the 'Makefile' devoted to the Delphes interface ...")
-            if not compiler.WriteMakefileForInterfaces('delphes'):
-                logging.error("library building aborted.")
-                sys.exit()
+        # Getting number of cores
+        ncores = compiler.get_ncores2()
 
-        if self.libDelfes:
-            logging.info("   Creating the 'Makefile' devoted to the Delfes interface ...")
-            if not compiler.WriteMakefileForInterfaces('delfes'):
-                logging.error("library building aborted.")
-                sys.exit()
+        for ind in range(0,len(libraries)):
+            
+            logging.info("   **********************************************************")
+            logging.info("   Library "+str(ind+1)+"/"+str(len(libraries))+" - "+libraries[ind][1])
 
-        # Cleaning the project
-        logging.info("   Cleaning the project before building the library ...")
-        if not compiler.MrProper():
-            logging.error("impossible to clean the general folder.")
-            sys.exit()
+            # Writing a Makefile
+            logging.info("     - Writing a Makefile ...")
+            if libraries[ind][0]=='SampleAnalyzer':
+                if not compiler.WriteMakefile():
+                    logging.error("library building aborted.")
+                    sys.exit()
+            else:
+                if not compiler.WriteMakefileForInterfaces(libraries[ind][2]):
+                    logging.error("library building aborted.")
+                    sys.exit()
 
-        if self.libFastJet:
-            if not compiler.MrProperForInterfaces('fastjet'):
-                logging.error("impossible to clean the folder devoted to the FastJet interface.")
-                sys.exit()
+             # Cleaning the project
+            logging.info("     - Cleaning the project before building the library ...")
+            if libraries[ind][0]=='SampleAnalyzer':
+                if not compiler.MrProper():
+                    logging.error("library building aborted.")
+                    sys.exit()
+            else:
+                if not compiler.MrProperForInterfaces(libraries[ind][2]):
+                    logging.error("library building aborted.")
+                    sys.exit()
 
-        if self.libZIP:
-            if not compiler.MrProperForInterfaces('zlib'):
-                logging.error("impossible to clean the folder devoted to the zlib interface.")
-                sys.exit()
+            # Compiling
+            logging.info("     - Compiling the source files ...")
+            if libraries[ind][0]=='SampleAnalyzer':
+                if not compiler.Compile(ncores):
+                    logging.error("library building aborted.")
+                    sys.exit()
+            else:
+                if not compiler.CompileForInterfaces(libraries[ind][2],ncores):
+                    logging.error("library building aborted.")
+                    sys.exit()
 
-        if self.libDelphes:
-            if not compiler.MrProperForInterfaces('delphes'):
-                logging.error("impossible to clean the folder devoted to the Delphes interface.")
-                sys.exit()
+            # Linking
+            logging.info("     - Linking the library ...")
+            if libraries[ind][0]=='SampleAnalyzer':
+                if not compiler.Link():
+                    logging.error("library building aborted.")
+                    sys.exit()
+            else:
+                if not compiler.LinkForInterfaces(libraries[ind][2]):
+                    logging.error("library building aborted.")
+                    sys.exit()
 
-        if self.libDelfes:
-            if not compiler.MrProperForInterfaces('delfes'):
-                logging.error("impossible to clean the folder devoted to the Delfes interface.")
-                sys.exit()
-
-        # Building the interface to FastJet
-        if self.libFastJet:
-            logging.info("   Compiling the interface to FastJet library ...")
-            if not compiler.CompileForInterfaces('fastjet'):
-                logging.error("library building aborted.")
-                sys.exit()
-
-            logging.info("   Linking the interface to FastJet library ...")
-            if not compiler.LinkForInterfaces('fastjet'):
-                logging.error("library building aborted.")
+            # Checking
+            logging.info("     - Checking that library is properly built ...")
+            if not os.path.isfile(libraries[ind][3]):
+                logging.error("the library '"+libraries[ind][3]+"' is not produced.")
                 sys.exit()
 
-            logging.info("   Checking that the interface to FastJet library is properly built ...")
-  
-            if not os.path.isfile(self.ma5dir+'/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so'):
-                logging.error("the library 'libfastjet_for_ma5.so' is not produced.")
-                sys.exit()
-        
-        # Building the interface to zlib
-        if self.libZIP:
-            logging.info("   Compiling the interface to zlib library ...")
-            if not compiler.CompileForInterfaces('zlib'):
-                logging.error("library building aborted.")
-                sys.exit()
+             # Cleaning the project
+            logging.info("     - Cleaning the project after building the library ...")
+            if libraries[ind][0]=='SampleAnalyzer':
+                if not compiler.Clean():
+                    logging.error("library building aborted.")
+                    sys.exit()
+            else:
+                if not compiler.CleanForInterfaces(libraries[ind][2]):
+                    logging.error("library building aborted.")
+                    sys.exit()
 
-            logging.info("   Linking the interface to zlib library ...")
-            if not compiler.LinkForInterfaces('zlib'):
-                logging.error("library building aborted.")
-                sys.exit()
+            # Print Ok
+            sys.stdout.write("     => Status: ")
+            self.PrintOK()
 
-            logging.info("   Checking that the interface to zlib library is properly built ...")
-  
-            if not os.path.isfile(self.ma5dir+'/tools/SampleAnalyzer/Lib/libzlib_for_ma5.so'):
-                logging.error("the library 'libzlib_for_ma5.so' is not produced.")
-                sys.exit()
-
-        # Building the interface to delphes
-        if self.libDelphes:
-            logging.info("   Compiling the interface to Delphes library ...")
-            if not compiler.CompileForInterfaces('delphes'):
-                logging.error("library building aborted.")
-                sys.exit()
-
-            logging.info("   Linking the interface to Delphes library ...")
-            if not compiler.LinkForInterfaces('delphes'):
-                logging.error("library building aborted.")
-                sys.exit()
-
-            logging.info("   Checking that the interface to Delphes library is properly built ...")
-  
-            if not os.path.isfile(self.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so'):
-                logging.error("the library 'libdelphes_for_ma5.so' is not produced.")
-                sys.exit()
-
-        # Building the interface to delfes
-        if self.libDelfes:
-            logging.info("   Compiling the interface to Delfes library ...")
-            if not compiler.CompileForInterfaces('delfes'):
-                logging.error("library building aborted.")
-                sys.exit()
-
-            logging.info("   Linking the interface to Delfes library ...")
-            if not compiler.LinkForInterfaces('delfes'):
-                logging.error("library building aborted.")
-                sys.exit()
-
-            logging.info("   Checking that the interface to Delfes library is properly built ...")
-  
-            if not os.path.isfile(self.ma5dir+'/tools/SampleAnalyzer/Lib/libdelfes_for_ma5.so'):
-                logging.error("the library 'libdelfes_for_ma5.so' is not produced.")
-                sys.exit()
-
-        # Building the SampleAnalyzer
-        logging.info("   Compiling the SampleAnalyzer library ...")
-        if not compiler.Compile():
-            logging.error("library building aborted.")
-            sys.exit()
-
-        logging.info("   Linking the SampleAnalyzer library ...")
-        if not compiler.Link():
-            logging.error("library building aborted.")
-            sys.exit()
-
-        logging.info("   Checking that the SampleAnalyzer library is properly built ...")
-
-        if not os.path.isfile(self.ma5dir+'/tools/SampleAnalyzer/Lib/libSampleAnalyzer.a'):
-            logging.error("the library 'libSampleAnalyzer.a' is not produced.")
-            sys.exit()
-    
-        # Cleaning the project
-        logging.info("   Cleaning the project after building the library ...")
-
-        if not compiler.Clean():
-            logging.error("impossible to remove temporary files created during the building.")
-            sys.exit()
-
-        if self.libFastJet:
-            if not compiler.CleanForInterfaces('fastjet'):
-                logging.error("impossible to clean the folder devoted to the FastJet interface.")
-                sys.exit()
-
-        if self.libZIP:
-            if not compiler.CleanForInterfaces('zlib'):
-                logging.error("impossible to clean the folder devoted to the zlib interface.")
-                sys.exit()
-
-        if self.libDelphes:
-            if not compiler.CleanForInterfaces('delphes'):
-                logging.error("impossible to clean the folder devoted to the Delphes interface.")
-                sys.exit()
-
-        if self.libDelfes:
-            if not compiler.CleanForInterfaces('delfes'):
-                logging.error("impossible to clean the folder devoted to the Delfes interface.")
-                sys.exit()
+        logging.info("   **********************************************************")
+        logging.info("")
 
         return True    
         

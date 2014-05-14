@@ -73,6 +73,36 @@ class LibraryWriter():
                      str(ncores))
         return ncores
 
+    def get_ncores2(self):
+        # Number of cores
+        import multiprocessing
+        nmaxcores=multiprocessing.cpu_count()
+        logging.info("   How many cores for the compiling? default = max = " +\
+                     str(nmaxcores)+"")
+        
+        if not self.forced:
+            test=False
+            while(not test):
+                answer=raw_input("   Answer: ")
+                if answer=="":
+                    test=True
+                    ncores=nmaxcores
+                    break
+                try:
+                    ncores=int(answer)
+                except:    
+                    test=False
+                    continue
+                if ncores<=nmaxcores and ncores>0:
+                    test=True
+                    
+        else:
+            ncores=nmaxcores
+        logging.info("   => Number of cores used for the compilation = " +\
+                     str(ncores))
+        return ncores
+
+
     def Open(self):
         return FolderWriter.CreateDirectory(self.path,overwrite=True)
 
@@ -409,9 +439,8 @@ class LibraryWriter():
         return True
 
 
-    def Compile(self):
+    def Compile(self,ncores):
         strcores=''
-        ncores = self.get_ncores()
         if ncores>1:
             strcores='-j'+str(ncores)
         res=commands.getstatusoutput("cd "\
@@ -425,9 +454,8 @@ class LibraryWriter():
             return False
 
 
-    def CompileForInterfaces(self,package):
+    def CompileForInterfaces(self,package,ncores):
         strcores=''
-        ncores = self.get_ncores()
         if ncores>1:
             strcores='-j'+str(ncores)
         res=commands.getstatusoutput("cd "\
