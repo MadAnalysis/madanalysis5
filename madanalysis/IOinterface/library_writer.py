@@ -372,8 +372,8 @@ class LibraryWriter():
             file.write('\t$(CXX) -shared -o Lib/lib$(PROGRAM).so $(OBJS) $(FORTRAN_OBJS)\n')
         else:
             file.write('link: $(OBJS)\n')
-#B FIX            file.write('\t$(CXX) -shared -o Lib/lib$(PROGRAM).so $(OBJS)\n')
-            file.write('\t$(CXX) -o Lib/lib$(PROGRAM).a $(OBJS)\n')
+#BEN FIX            file.write('\t$(CXX) -shared -o Lib/lib$(PROGRAM).so $(OBJS)\n')
+            file.write('\tar -ruc Lib/lib$(PROGRAM).a $(OBJS)\n')
         file.write('\n')
 
         # Phony target
