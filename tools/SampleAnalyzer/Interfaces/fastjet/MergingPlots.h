@@ -25,7 +25,6 @@
 #ifndef MERGING_PLOTS_H
 #define MERGING_PLOTS_H
 
-#ifdef FASTJET_USE
 
 //STL headers
 #include <vector>
@@ -106,6 +105,5 @@ class MergingPlots : public AnalyzerBase
 };
 }
 
-#endif
 #endif
 

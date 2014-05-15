@@ -22,8 +22,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#ifdef DELFES_USE
-
 // STL headers
 #include <sstream>
 
@@ -429,4 +427,3 @@ void DelfesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
 }
 
 
-#endif
