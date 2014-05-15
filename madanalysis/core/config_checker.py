@@ -394,6 +394,12 @@ class ConfigChecker:
 
         self.PrintLibrary("zlib library")
         
+        # User veto
+        if self.configLinux.useroptions.zlib_veto=='1':
+            self.PrintFAIL(warning=True)
+	    logging.warning("Library called 'zlib' disabled. Gzip format will be disabled.")
+            return False
+
         # Checking library libz.so
         find=False
         for item in self.libs:
@@ -429,7 +435,7 @@ class ConfigChecker:
         # Not fail -> Warning
         if not find:
             self.PrintFAIL(warning=True)
-	    logging.warning("Library called 'libz' not found. Gzip format will be disabled.")
+	    logging.warning("Library called 'zlib' not found. Gzip format will be disabled.")
             logging.warning("To enable this format, please type 'install zlib' package.")
             return False
 
@@ -465,6 +471,12 @@ class ConfigChecker:
 
         self.PrintLibrary("delphes library")
         
+        # User veto
+        if self.configLinux.useroptions.delphes_veto=='1':
+            self.PrintFAIL(warning=True)
+	    logging.warning("Library called 'delphes' disabled. Delphes ROOT format will be disabled.")
+            return False
+
         # Checking library libDelphes.so
         find=False
         for item in self.libs:
@@ -538,6 +550,12 @@ class ConfigChecker:
 
     def checkDelfes(self):
 
+        # User veto
+        if self.configLinux.useroptions.delfes_veto=='1':
+#            self.PrintFAIL(warning=True)
+#	    logging.warning("Library called 'delphes' disabled. Delphes ROOT format will be disabled.")
+            return False
+
         # Checking library libDelphes.so but lcoally only
         find=False
         item = self.ma5dir+'/tools/delfes'
@@ -596,6 +614,12 @@ class ConfigChecker:
 
         self.configLinux.fastjet_version = "none"
 
+        # User veto
+        if self.configLinux.useroptions.fastjet_veto=='1':
+            self.PrintFAIL(warning=True)
+	    logging.warning("The FastJet package is disabled. JetClustering algorithms are disabled.")
+            return False
+
         # Checking if fastjet is installed on the system
         find = False
         for item in self.paths:
@@ -612,7 +636,7 @@ class ConfigChecker:
         # If not there, print warning message; if there -> test it
         if not find:
             self.PrintFAIL(warning=True)
-	    logging.warning("The fastJet package not found. JetClustering algorithms are disabled.")
+	    logging.warning("The FastJet package not found. JetClustering algorithms are disabled.")
             logging.warning("To enable this functionnality, please type 'install fastjet'.")
             return False
         else:
@@ -643,6 +667,11 @@ class ConfigChecker:
     def checkPdfLatex(self):
         self.PrintLibrary('pdflatex')
 
+        if self.configLinux.useroptions.pdflatex_veto=='1':
+            self.PrintFAIL(warning=True)
+	    logging.warning("pdflatex disabled. Reports under the pdf format will not be compiled.")
+            return False
+
         pdflatex_version = commands.getstatusoutput('pdflatex -version')
         if 'not found' in str(pdflatex_version) or 'no such file' in str(pdflatex_version):
             self.PrintFAIL(warning=True)
@@ -655,6 +684,11 @@ class ConfigChecker:
     def checkLatex(self):
         self.PrintLibrary('latex')
 
+        if self.configLinux.useroptions.latex_veto=='1':
+            self.PrintFAIL(warning=True)
+	    logging.warning("latex disabled. Reports under the dvi format will not be compiled.")
+            return False
+
         latex_version = commands.getstatusoutput('latex -version')
         if 'not found' in str(latex_version) or 'no such file' in str(latex_version):
             self.PrintFAIL(warning=True)
@@ -666,6 +700,11 @@ class ConfigChecker:
          
     def checkdvipdf(self):
         self.PrintLibrary('dvipdf')
+
+        if self.configLinux.useroptions.dvipdf_veto=='1':
+            self.PrintFAIL(warning=True)
+	    logging.warning("dvipdf disabled. DVI reports will not be converted to pdf files.")
+            return False
 
         dvipdf_version = commands.getstatusoutput('dvipdf')
         if 'not found' in str(dvipdf_version) or 'no such file' in str(dvipdf_version):
