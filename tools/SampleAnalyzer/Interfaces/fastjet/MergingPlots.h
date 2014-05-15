@@ -40,9 +40,11 @@
 #include "SampleAnalyzer/Analyzer/AnalyzerBase.h"
 
 
-
-class fastjet::ClusterSequence;
-class fastjet::PseudoJet;
+namespace fastjet
+{
+  class JetDefinition;
+  class PseudoJet;
+}
 
 namespace MA5
 {

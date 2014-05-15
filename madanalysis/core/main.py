@@ -431,6 +431,10 @@ class Main():
         checker = ConfigChecker(self.configLinux,self.ma5dir,self.script)
         checker.checkTextEditor()
 
+        # Reading user options
+        if not checker.ReadUserOptions():
+            return False
+
         # Mandatory packages
         logging.info("Checking mandatory packages:")
         checker.PrintLibrary("python")
@@ -438,6 +442,8 @@ class Main():
         if not checker.checkNumPy():
             return False
         if not checker.checkGPP():
+            return False
+        if not checker.checkMake():
             return False
         if not checker.checkROOT():
             return False

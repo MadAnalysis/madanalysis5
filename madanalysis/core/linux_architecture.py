@@ -23,14 +23,126 @@
 
 
 import logging
+
+class UserOptions:
+
+    def __init__(self):
+        self.root_includes    = '0'
+        self.root_libs        = '0'
+        self.delphes_veto     = '0'
+        self.delphes_includes = '0'
+        self.delphes_libs     = '0'
+        self.delfes_veto      = '0'
+        self.delfes_includes  = '0'
+        self.delfes_libs      = '0'
+        self.zlib_veto        = '0'
+        self.zlib_includes    = '0'
+        self.zlib_libs        = '0'
+        self.fastjet_veto     = '0'
+        self.fastjet_includes = '0'
+        self.fastjet_libs     = '0'
+        self.pdflatex_veto    = '0'
+        self.latex_veto       = '0'
+        self.dvipdf_veto      = '0'
+        
+    def Dump(self):
+        logging.info(" ROOT header path     = " + str(self.root_includes))
+        logging.info(" ROOT library path    = " + str(self.root_libs))
+        logging.info(" DELPHES veto         = " + str(self.delphes_veto))
+        logging.info(" DELPHES header path  = " + str(self.delphes_includes))
+        logging.info(" DELPHES library path = " + str(self.delphes_libs))
+        logging.info(" DELFES veto          = " + str(self.delfes_veto))
+        logging.info(" DELFES header path   = " + str(self.delfes_includes))
+        logging.info(" DELFES library path  = " + str(self.delfes_libs))
+        logging.info(" ZLIB veto            = " + str(self.zlib_veto))
+        logging.info(" ZLIB header path     = " + str(self.zlib_includes))
+        logging.info(" ZLIB library path    = " + str(self.zlib_libs))
+        logging.info(" FASTJET veto         = " + str(self.fastjet_veto))
+        logging.info(" FASTJET header path  = " + str(self.fastjet_includes))
+        logging.info(" FASTJET library path = " + str(self.fastjet_libs))
+        logging.info(" PDFLATEX veto        = " + str(self.pdflatex_veto))
+        logging.info(" LATEX veto           = " + str(self.latex_veto))
+        logging.info(" DVIPDF veto          = " + str(self.dvipdf_veto))
+
+    def Export(self,file):
+        file.write(self.root_includes+"\n")
+        file.write(self.root_libs+"\n")
+        file.write(self.delphes_veto+"\n")
+        file.write(self.delphes_includes+"\n")
+        file.write(self.delphes_libs+"\n")
+        file.write(self.delfes_veto+"\n")
+        file.write(self.delfes_includes+"\n")
+        file.write(self.delfes_libs+"\n")
+        file.write(self.zlib_veto+"\n")
+        file.write(self.zlib_includes+"\n")
+        file.write(self.zlib_libs+"\n")
+        file.write(self.fastjet_veto+"\n")
+        file.write(self.fastjet_includes+"\n")
+        file.write(self.fastjet_libs+"\n")
+        file.write(self.pdflatex_veto+"\n")
+        file.write(self.latex_veto+"\n")
+        file.write(self.dvipdf_veto+"\n")
+
+    def Import(self,file):
+        self.root_includes    = file.readline().replace('\n','')
+        self.root_libs        = file.readline().replace('\n','')
+        self.delphes_veto     = file.readline().replace('\n','')
+        self.delphes_includes = file.readline().replace('\n','')
+        self.delphes_libs     = file.readline().replace('\n','')
+        self.delfes_veto      = file.readline().replace('\n','')
+        self.delfes_includes  = file.readline().replace('\n','')
+        self.delfes_libs      = file.readline().replace('\n','')
+        self.zlib_veto        = file.readline().replace('\n','')
+        self.zlib_includes    = file.readline().replace('\n','')
+        self.zlib_libs        = file.readline().replace('\n','')
+        self.fastjet_veto     = file.readline().replace('\n','')
+        self.fastjet_includes = file.readline().replace('\n','')
+        self.fastjet_libs     = file.readline().replace('\n','')
+        self.pdflatex_veto    = file.readline().replace('\n','')
+        self.latex_veto       = file.readline().replace('\n','')
+        self.dvipdf_veto      = file.readline().replace('\n','')
+
+    def Compare(self,other):
+        if self.root_includes != other.root_includes:
+            return False
+        if self.root_libs != other.root_libs:
+            return False
+        if self.delphes_veto != other.delphes_veto:
+            return False
+        if self.delphes_includes != other.delphes_includes:
+            return False
+        if self.delphes_libs != other.delphes_libs:
+            return False
+        if self.delfes_veto != other.delfes_veto:
+            return False
+        if self.delfes_includes != other.delfes_includes:
+            return False
+        if self.delfes_libs != other.delfes_libs:
+            return False
+        if self.zlib_veto != other.zlib_veto:
+            return False
+        if self.zlib_includes != other.zlib_includes:
+            return False
+        if self.zlib_libs != other.zlib_libs:
+            return False
+        if self.fastjet_veto != other.fastjet_veto:
+            return False
+        if self.fastjet_includes != other.fastjet_includes:
+            return False
+        if self.fastjet_libs != other.fastjet_libs:
+            return False
+        return True
+
 class LinuxArchitecture:
 
     def __init__(self):
+        self.useroptions      = UserOptions()
         self.platform         = ""
         self.ma5_version      = ""
         self.ma5_date         = ""
         self.python_version   = ""
         self.gcc_version      = ""
+        self.make_version     = ""
         self.gfortran_version = ""
         self.root_version     = ""
         self.fastjet_version  = ""
@@ -38,13 +150,20 @@ class LinuxArchitecture:
         self.headers          = {}
         self.editor           = ""
 
-
     def Dump(self):
+        logging.info(" User options")
+        logging.info(" ------------")
+        self.useroptions.Dump()
+        logging.info("")
+
+        logging.info(" Architecture")
+        logging.info(" ------------")
         logging.info(" Linux distrib    = " + self.platform)
         logging.info(" MA5 version      = " + self.ma5_version)
         logging.info(" MA5 date         = " + self.ma5_date)
         logging.info(" Python version   = " + self.python_version)
         logging.info(" gcc version      = " + self.gcc_version)
+        logging.info(" GNU Make version = " + self.make_version)
         logging.info(" gfortran version = " + self.gfortran_version)
         logging.info(" ROOT version     = " + self.root_version)
         logging.info(" FastJet version  = " + self.fastjet_version)
@@ -57,7 +176,6 @@ class LinuxArchitecture:
                 logging.info( " Header  '" + key + "' = " + \
                               value )
 
-
     def Export(self,filename):
         try:
             file = open(filename,"w")
@@ -65,11 +183,14 @@ class LinuxArchitecture:
             logging.error("impossible to write the configuration file '" + \
                           filename + "'")
             return False
+
+        self.useroptions.Export(file)
         file.write(self.platform+"\n")
         file.write(self.ma5_version+"\n")
         file.write(self.ma5_date+"\n")
         file.write(self.python_version+"\n")
         file.write(self.gcc_version+"\n")
+        file.write(self.make_version+"\n")
         file.write(self.gfortran_version+"\n")
         file.write(self.root_version+"\n")
         file.write(self.fastjet_version+"\n")
@@ -92,12 +213,15 @@ class LinuxArchitecture:
             logging.error("impossible to read the configuration file '" + \
                           filename + "'")
             return False
+
         try:
+            self.useroptions.Import(file)
             self.platform         = file.readline().replace('\n','')
             self.ma5_version      = file.readline().replace('\n','')
             self.ma5_date         = file.readline().replace('\n','')
             self.python_version   = file.readline().replace('\n','')
             self.gcc_version      = file.readline().replace('\n','')
+            self.make_version     = file.readline().replace('\n','')
             self.gfortran_version = file.readline().replace('\n','')
             self.root_version     = file.readline().replace('\n','')
             self.fastjet_version  = file.readline().replace('\n','')
@@ -135,6 +259,9 @@ class LinuxArchitecture:
 
 
     def Compare(self, other):
+        if not self.useroptions.Compare(other.useroptions):
+            return False
+        
         if self.platform != other.platform:
             return False
         if self.ma5_version != other.ma5_version:
@@ -144,6 +271,8 @@ class LinuxArchitecture:
         if self.python_version != other.python_version:
             return False
         if self.gcc_version != other.gcc_version:
+            return False
+        if self.make_version != other.make_version:
             return False
         if self.gfortran_version != other.gfortran_version:
             return False

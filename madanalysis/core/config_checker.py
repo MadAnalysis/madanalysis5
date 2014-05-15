@@ -56,6 +56,76 @@ class ConfigChecker:
         self.fillHeaders()
 
 
+    def ReadUserOptions(self):
+
+        # Open the user options
+        filename = self.ma5dir+'/madanalysis/input/installation_options.dat'
+        try:
+            input = open(filename)
+        except:
+            logging.error('impossible to open the file: '+filename)
+            return False
+
+        # Loop over the file
+        for rawline in input:
+
+            if '#' in rawline:
+                line = rawline.split('#')[0]
+            if line=='':
+                continue
+            words=line.split('=')
+            if len(words)!=2:
+                logging.warning(filename+': the following line is incorrect and is skipped:')
+                logging.warning(line)
+            words[0]=words[0].lstrip()
+            words[0]=words[0].rstrip()
+            words[1]=words[1].lstrip()
+            words[1]=words[1].rstrip()
+
+            if words[0]=='root_includes':
+                self.configLinux.useroptions.root_includes==words[1]
+            elif words[0]=='root_libs':
+                self.configLinux.useroptions.root_libs=words[1]
+            elif words[0]=='delphes_veto':
+                self.configLinux.useroptions.delphes_veto=words[1]
+            elif words[0]=='delphes_includes':
+                self.configLinux.useroptions.delphes_includes=words[1]
+            elif words[0]=='delphes_libs':
+                self.configLinux.useroptions.delphes_libs=words[1]
+            elif words[0]=='delfes_veto':
+                self.configLinux.useroptions.delfes_veto=words[1]
+            elif words[0]=='delfes_includes':
+                self.configLinux.useroptions.delfes_includes=words[1]
+            elif words[0]=='delfes_libs':
+                self.configLinux.useroptions.delfes_libs=words[1]
+            elif words[0]=='zlib_veto':
+                self.configLinux.useroptions.zlib_veto=words[1]
+            elif words[0]=='zlib_includes':
+                self.configLinux.useroptions.zlib_includes=words[1]
+            elif words[0]=='zlib_libs':
+                self.configLinux.useroptions.zlib_libs=words[1]
+            elif words[0]=='fastjet_veto':
+                self.configLinux.useroptions.fastjet_veto=words[1]
+            elif words[0]=='fastjet_includes':
+                self.configLinux.useroptions.fastjet_includes=words[1]
+            elif words[0]=='fastjet_libs':
+                self.configLinux.useroptions.fastjet_libs=words[1]
+            elif words[0]=='pdflatex_veto':
+                self.configLinux.useroptions.pdflatex_veto=words[1]
+            elif words[0]=='latex_veto':
+                self.configLinux.useroptions.latex_veto=words[1]
+            elif words[0]=='dvipdf_veto':
+                self.configLinux.useroptions.dvipdf_veto=words[1]
+            else:
+                logging.warning(filename+': the options called "'+words[0]+'" is not found')
+
+        # Close the file
+        input.close()
+        
+        # Ok
+        return True
+    
+
     def FillMA5Path(self):
         os.environ['MA5_BASE']=self.ma5dir
 
@@ -271,6 +341,27 @@ class ConfigChecker:
             self.configLinux.gcc_version = gcc_version[1]
             return True
 
+    def checkMake(self):
+        # Checking GNU Make
+        self.PrintLibrary('GNU Make')
+        make_version = commands.getstatusoutput('make --version')
+        if make_version[0]>0:
+            self.PrintFAIL(warning=False)
+            logging.error('GNU Make not found. Please install it before ' + \
+	             'using MadAnalysis 5')
+            return False
+        else:
+            self.PrintOK()
+            lines=make_version[1].split('\n')
+            if len(lines)==0:
+                logging.error('command "make --version" seems to not give the GNU Make version')
+                return False
+            line=lines[0]
+            line=line.replace(' ','')
+            line=line.lstrip()
+            line=line.rstrip()
+            self.configLinux.make_version = line
+            return True
 
     def checkGF(self):
         self.PrintLibrary("gfortran")
