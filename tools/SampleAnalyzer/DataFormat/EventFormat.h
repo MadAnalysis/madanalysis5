@@ -35,9 +35,6 @@
 #include "SampleAnalyzer/DataFormat/MCEventFormat.h"
 #include "SampleAnalyzer/DataFormat/RecEventFormat.h"
 #include "SampleAnalyzer/Service/LogService.h"
-#ifdef FAC_USE
-  #include "SampleAnalyzer/Reader/FACdataformat.h"
-#endif
 
 
 namespace MA5
@@ -66,11 +63,6 @@ class EventFormat
   /// pointer to generated particles
   MCEventFormat  * mc_;
 
-#ifdef FAC_USE
-  /// pointer to FAC format
-  FAC::EventFormat* fac_;
-#endif
-
   // -------------------------------------------------------------
   //                      method members
   // -------------------------------------------------------------
@@ -81,10 +73,6 @@ class EventFormat
   { 
     rec_=0;
     mc_=0; 
-#ifdef FAC_USE
-    fac_=0;
-#endif
-
   }
 
   /// Destructor
@@ -98,21 +86,11 @@ class EventFormat
   /// Accessor to reconstructed objects (read-only mode)
   const RecEventFormat * rec()  const {return rec_;}
 
-#ifdef FAC_USE
-  /// Accessor FAC objects (read-only mode)
-  const FAC::EventFormat* fac() const {return fac_;}
-#endif
-
   /// Accessor to generated particles
   MCEventFormat  * mc()   {return mc_; }
 
   /// Accessor to reconstructed objects
   RecEventFormat * rec()  {return rec_;}
-
-#ifdef FAC_USE
-  /// Accessor to FAC objects
-  FAC::EventFormat* fac() {return fac_;}
-#endif
 
   /// Initializing the pointer to generated particles
   void InitializeMC()
@@ -133,19 +111,6 @@ class EventFormat
     }
     else rec_=new RecEventFormat();
   }
-
-
-#ifdef FAC_USE
-  void InitializeFac()
-  {
-    if (fac_!=0) 
-    {
-      WARNING << "FAC part of the SampleFormat is already initialized" 
-              << endmsg;
-    }
-    else fac_=new FAC::EventFormat();
-  }
-#endif
 
   /// Free allocated memory
   void Delete()

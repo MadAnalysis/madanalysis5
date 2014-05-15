@@ -26,6 +26,7 @@ from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.IOinterface.folder_writer    import FolderWriter
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
 from madanalysis.core.string_tools            import StringTools
+from madanalysis.IOinterface.shell_command    import ShellCommand
 import logging
 import shutil
 import os
@@ -640,7 +641,7 @@ class JobWriter():
         # Files to generate
         file.write('# Files to generate\n')
         file.write('OBJS    = $(SRCS:.cpp=.o)\n')
-        file.write('PROGRAM = MadAnalysis5Job\n')
+        file.write('PROGRAM = MadAnalysis5job\n')
         file.write('\n')
 
         # Lib to check
@@ -929,33 +930,94 @@ class JobWriter():
 
         return True
 
+
     def CompileJob(self):
-        if self.resubmit:
-            res=commands.getstatusoutput("cd "\
-                                         +self.path+"/Build/;"\
-                                         +" make mrproper")
+
+        # folder
+        folder = self.path+'/Build'
+
+        # log file name
+        logfile = folder+'/Log/compilation.log'
+        
+        # shell command
+        commands = ['make','compile']
+
+        # call
+        result, out = ShellCommand.ExecuteWithLog(commands,logfile,folder)
+
+        # return result
+        if not result:
+            logging.error('impossible to compile the project. For more details, see the log file:')
+            logging.error(logfile)
             
-        res=commands.getstatusoutput("cd "\
-                                     +self.path+"/Build/;"\
-                                     +" make compile > Log/compilation.log 2>&1")
-        if res[0]==0:
-            return True
-        else:
-            logging.error("errors occured during compilation. " +\
-                          "For more details, see the file :")
-            logging.error(" "+self.path+"/Build/Log/compilation.log")
-            return False
+        return result
+
+
+    def MrproperJob(self):
+
+        # folder
+        folder = self.path+'/Build'
+
+        # log file name
+        logfile = folder+'/Log/mrproper.log'
+        
+        # shell command
+        commands = ['make','mrproper']
+
+        # call
+        result, out = ShellCommand.ExecuteWithLog(commands,logfile,folder)
+
+        # return result
+        if not result:
+            logging.error('impossible to clean the project. For more details, see the log file:')
+            logging.error(logfile)
+            
+        return result
+
+
+    def MrproperJob(self):
+
+        # folder
+        folder = self.path+'/Build'
+
+        # log file name
+        logfile = folder+'/Log/mrproper.log'
+        
+        # shell command
+        commands = ['make','mrproper']
+
+        # call
+        result, out = ShellCommand.ExecuteWithLog(commands,logfile,folder)
+
+        # return result
+        if not result:
+            logging.error('impossible to clean the project. For more details, see the log file:')
+            logging.error(logfile)
+            
+        return result
+
 
     def LinkJob(self):
-        res=commands.getstatusoutput("cd "\
-                                     +self.path+"/Build/;"\
-                                     +" make link > Log/linking.log 2>&1")
-        if res[0]==0:
-            return True
-        else:
-            logging.error("errors occured during compilation. For more details, see the file :")
-            logging.error(" "+self.path+"/Build/Log/linking.log")
-            return False
+
+        # folder
+        folder = self.path+'/Build'
+
+        # log file name
+        logfile = folder+'/Log/linking.log'
+        
+        # shell command
+        commands = ['make','link']
+
+        # call
+        result, out = ShellCommand.ExecuteWithLog(commands,logfile,folder)
+
+        # return result
+        if not result:
+            logging.error('impossible to link the project. For more details, see the log file:')
+            logging.error(logfile)
+            
+        return result
+
 
     def WriteHistory(self,history,firstdir):
         file = open(self.path+"/history.ma5","w")
@@ -986,6 +1048,7 @@ class JobWriter():
             file.write("\n")
         file.close()    
 
+
     def RunJob(self,dataset):
 
         # Getting the dataset name    
@@ -995,23 +1058,26 @@ class JobWriter():
         if not os.path.isdir(self.path+"/Output/"+name):
             os.mkdir(self.path+"/Output/"+name)
             
+        # folder where the program is launched
+        folder = self.path+'/Output/'+name
+
+        # shell command
+        commands = ['../../Build/MadAnalysis5job']
+
         # Weighted events
-        weighted_events=""
         if not dataset.weighted_events:
-            weighted_events=" --no_event_weight"
+            commands.append('--no_event_weight')
 
         # Release
-        release = ' --ma5_version="' + self.main.version + ';' + self.main.date + '"'
+        commands.append('--ma5_version="'+self.main.version+';'+self.main.date+'"')
 
-        # Running SampleAnalyzer 
-        res=os.system('cd '\
-                      +self.path+'/Output/'+name+';'\
-                      +' ../../Build/'\
-                      +'MadAnalysis5Job '+weighted_events +\
-                      release +\
-                      ' ../../Input/'+name+'.list')
+        # Inputs
+        commands.append('../../Input/'+name+'.list')
 
-        return True
+        # Running SampleAnalyzer
+        result = ShellCommand.Execute(commands,folder)
+
+        return result
 
         
         

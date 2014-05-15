@@ -405,6 +405,12 @@ class CmdSubmit(CmdBase):
         if self.main.fastsim.package in ["delphes","delfes"]:
             self.editDelphesCard(dirname)
 
+        if self.resubmit:
+            logging.info("   Cleaning 'SampleAnalyzer'...")
+            if not jobber.MrproperJob():
+                logging.error("job submission aborted.")
+                return False
+
         logging.info("   Compiling 'SampleAnalyzer'...")
         if not jobber.CompileJob():
             logging.error("job submission aborted.")

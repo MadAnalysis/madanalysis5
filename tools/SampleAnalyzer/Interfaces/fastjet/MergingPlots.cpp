@@ -22,12 +22,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#ifdef FASTJET_USE
 //SampleAnalyzer headers
-#include "SampleAnalyzer/Analyzer/MergingPlots.h"
+#include "SampleAnalyzer/Interfaces/fastjet/MergingPlots.h"
 #include "SampleAnalyzer/Core/Configuration.h"
 #include "SampleAnalyzer/Service/Physics.h"
 #include "SampleAnalyzer/Service/CompilationService.h"
+
+//FastJet headers
+#include <fastjet/ClusterSequence.hh>
+#include <fastjet/PseudoJet.hh>
 
 //STL headers
 #include <sstream>
@@ -85,7 +88,7 @@ bool MergingPlots::Initialize(const Configuration& cfg,
   }
 
   // Initializing clustering algorithm
-  JetDefinition_ = fastjet::JetDefinition(fastjet::kt_algorithm,1.0);
+  JetDefinition_ = new fastjet::JetDefinition(fastjet::kt_algorithm,1.0);
   return true;
 }
 
@@ -187,6 +190,9 @@ void MergingPlots::Finalize(const SampleFormat& summary, const std::vector<Sampl
     DJR_[i].Finalize();
   }
   DJR_.clear();
+
+  // Free memory allocation
+  if (JetDefinition_==0) delete JetDefinition_;
 }
 
 
@@ -225,7 +231,7 @@ void MergingPlots::ExtractDJRwithFortran(const std::vector<fastjet::PseudoJet>& 
 void MergingPlots::ExtractDJR(const std::vector<fastjet::PseudoJet>& inputs,std::vector<Double_t>& DJRvalues)
 {
   // JetDefinition_
-  fastjet::ClusterSequence sequence(inputs, JetDefinition_);
+  fastjet::ClusterSequence sequence(inputs, *JetDefinition_);
   for (unsigned int i=0;i<DJRvalues.size();i++)
   DJRvalues[i]=sequence.exclusive_dmerge(i);
 }
@@ -479,4 +485,3 @@ UInt_t MergingPlots::ExtractJetNumber( const MCEventFormat* myEvent,
   return njets;  
 }
 
-#endif

@@ -26,7 +26,7 @@
 #include <stdlib.h>
 
 // SampleAnalyzer headers
-#include "SampleAnalyzer/Analyzer/MergingPlots.h"
+#include "SampleAnalyzer/Interfaces/fastjet/MergingPlots.h"
 #include "SampleAnalyzer/Analyzer/AnalyzerManager.h"
 #include "SampleAnalyzer/Service/LogService.h"
 

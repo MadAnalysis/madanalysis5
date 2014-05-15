@@ -40,11 +40,10 @@
 #include "SampleAnalyzer/Writer/SAFWriter.h"
 #include "SampleAnalyzer/Analyzer/AnalyzerBase.h"
 
-//FastJet headers
-#include <fastjet/ClusterSequence.hh>
-#include <fastjet/PseudoJet.hh>
 
 
+class fastjet::ClusterSequence;
+class fastjet::PseudoJet;
 
 namespace MA5
 {
@@ -61,7 +60,7 @@ class MergingPlots : public AnalyzerBase
   std::vector<MergingPlotType> DJR_;
 
   /// clustering algorithm [FastJet]
-  fastjet::JetDefinition JetDefinition_;
+  fastjet::JetDefinition* JetDefinition_;
 
   /// User configuration
   UInt_t  merging_njets_;

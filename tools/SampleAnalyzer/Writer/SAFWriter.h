@@ -30,11 +30,6 @@
 #include <iostream>
 #include <sstream>
 
-// RFIO headers
-#ifdef RFIO_USE
-   #include "SampleAnalyzer/Core/castorstream.h"
-#endif
-
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Writer/WriterTextBase.h"
 

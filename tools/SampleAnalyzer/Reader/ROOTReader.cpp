@@ -28,13 +28,12 @@
 // SampleHeader headers
 #include "SampleAnalyzer/Reader/ROOTReader.h"
 #include "SampleAnalyzer/Service/LogService.h"
-#include "SampleAnalyzer/Reader/DelphesTreeReader.h"
-#include "SampleAnalyzer/Reader/DelfesTreeReader.h"
+#include "SampleAnalyzer/Interfaces/Delphes/DelphesTreeReader.h"
+#include "SampleAnalyzer/Interfaces/Delfes/DelfesTreeReader.h"
 
 // ROOT headers
 #include <TROOT.h>
 
-#ifdef ROOT_USE
 
 using namespace MA5;
 
@@ -129,4 +128,3 @@ bool ROOTReader::Finalize()
   return true;
 }
 
-#endif

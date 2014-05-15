@@ -26,6 +26,7 @@ from madanalysis.selection.instance_name   import InstanceName
 from madanalysis.IOinterface.folder_writer import FolderWriter
 from madanalysis.IOinterface.job_writer    import JobWriter
 from madanalysis.core.string_tools         import StringTools
+from madanalysis.IOinterface.shell_command import ShellCommand
 import logging
 import shutil
 import os
@@ -464,7 +465,7 @@ class LibraryWriter():
         commands = ['make','compile',strcores,'--file='+makefile]
 
         # call
-        result, out, err = LibraryWriter.Launch(commands,logfile,folder)
+        result, out = ShellCommand.ExecuteWithLog(commands,logfile,folder)
 
         # return result
         if not result:
@@ -492,7 +493,7 @@ class LibraryWriter():
         commands = ['make','link','--file='+makefile]
 
         # call
-        result, out, err = LibraryWriter.Launch(commands,logfile,folder)
+        result, out = ShellCommand.ExecuteWithLog(commands,logfile,folder)
 
         # return result
         if not result:
@@ -501,50 +502,6 @@ class LibraryWriter():
             
         return result
 
-
-    @staticmethod
-    def Launch(theCommands,logfile,path):
-
-        # Launching the commands
-        try:
-            result=subprocess.Popen(theCommands, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=path)
-        except:
-            logging.error('impossible to execute the commands: '+' '.join(theCommands))
-            return False, None, None
-
-        # Testing if errors
-        out, err = result.communicate()
-
-        # Open the log file
-        opened=True
-        try:
-            output = open(logfile,'w')
-        except:
-            logging.error('impossible to write the file '+logfile)
-            opened=False
-
-        if opened:
-
-            output.write('MadAnalysis redirection of stdout:\n')
-            output.write('----------------------------------\n')
-            output.write('\n')
-            if out!=None:
-                for line in out:
-                    output.write(line)
-            output.write('\n')
-            output.write('MadAnalysis redirection of stderr:\n')
-            output.write('----------------------------------\n')
-            output.write('\n')
-            if err!=None:
-                for line in err:
-                    output.write(line)
-            output.write('\n')
-
-            output.close()
-            
-        # Return results
-        return (result.returncode==0), out, err
-    
 
     def Clean(self,package,folder):
 
@@ -564,7 +521,7 @@ class LibraryWriter():
         commands = ['make','clean','--file='+makefile]
 
         # call
-        result, out, err = LibraryWriter.Launch(commands,logfile,folder)
+        result, out = ShellCommand.ExecuteWithLog(commands,logfile,folder)
 
         # return result
         if not result:
@@ -592,7 +549,7 @@ class LibraryWriter():
         commands = ['make','mrproper','--file='+makefile]
 
         # call
-        result, out, err = LibraryWriter.Launch(commands,logfile,folder)
+        result, out = ShellCommand.ExecuteWithLog(commands,logfile,folder)
 
         # return result
         if not result:

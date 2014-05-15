@@ -30,15 +30,7 @@
 #include <iostream>
 #include <sstream>
 
-// RFIO headers
-#ifdef RFIO_USE
-   #include "SampleAnalyzer/Core/castorstream.h"
-#endif
-
-// ZIP headers
-#ifdef ZIP_USE
-   #include "SampleAnalyzer/Interfaces/zlib/gz_istream.h"
-#endif
+class gz_istream;
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Reader/ReaderBase.h"
@@ -54,10 +46,8 @@ class ReaderTextBase : public ReaderBase
   // -------------------------------------------------------------
  protected:
 
-#ifdef ZIP_USE
   /// Streaming in GZ format
   gz_istream * gzinput_;
-#endif
 
   /// Streaming for reading input
   std::istream*  input_;

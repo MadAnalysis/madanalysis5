@@ -25,8 +25,6 @@
 #ifndef TREE_READER_BASE_h
 #define TREE_READER_BASE_h
 
-#ifdef ROOT_USE
-
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Core/Configuration.h"
 #include "SampleAnalyzer/DataFormat/EventFormat.h"
@@ -99,5 +97,4 @@ class TreeReaderBase
 
 };
 
-#endif
 #endif

@@ -22,13 +22,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#ifdef DELFES_USE
+#ifdef DELPHES_USE
 
 // STL headers
 #include <sstream>
 
 // SampleHeader headers
-#include "SampleAnalyzer/Reader/DelfesTreeReader.h"
+#include "SampleAnalyzer/Interfaces/delphes/DelphesTreeReader.h"
 #include "SampleAnalyzer/Service/LogService.h"
 
 // ROOT headers
@@ -45,7 +45,7 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 // Initialize
 // -----------------------------------------------------------------------------
-bool DelfesTreeReader::Initialize()
+bool DelphesTreeReader::Initialize()
 {
   // Create object of class ExRootTreeReader
   treeReader_    = new ExRootTreeReader(tree_);
@@ -58,17 +58,17 @@ bool DelfesTreeReader::Initialize()
   {
     WARNING << "Jet collection branch is not found" << endmsg;
   }
-  branchElectron_  = treeReader_->UseBranch("DelfesElectron");
+  branchElectron_  = treeReader_->UseBranch("Electron");
   if (branchElectron_==0)
   {
     WARNING << "Electron collection branch is not found" << endmsg;
   }
-  branchPhoton_    = treeReader_->UseBranch("DelfesPhoton");
+  branchPhoton_    = treeReader_->UseBranch("Photon");
   if (branchPhoton_==0)
   {
     WARNING << "Photon collection branch is not found" << endmsg;
   }
-  branchMuon_      = treeReader_->UseBranch("DelfesMuon");
+  branchMuon_      = treeReader_->UseBranch("Muon");
   if (branchMuon_==0)
   {
     WARNING << "Muon collection branch is not found" << endmsg;
@@ -88,7 +88,7 @@ bool DelfesTreeReader::Initialize()
   {
     WARNING << "GenParticle branch is not found" << endmsg;
   }
-  branchTrack_ = treeReader_->UseBranch("DelfesTrack");
+  branchTrack_ = treeReader_->UseBranch("Track");
   if (branchTrack_==0)
   {
     WARNING << "Track branch is not found" << endmsg;
@@ -101,11 +101,11 @@ bool DelfesTreeReader::Initialize()
 // -----------------------------------------------------------------------------
 // ReadHeader
 // -----------------------------------------------------------------------------
-bool DelfesTreeReader::ReadHeader(SampleFormat& mySample)
+bool DelphesTreeReader::ReadHeader(SampleFormat& mySample)
 {
   mySample.InitializeRec();
-  mySample.SetSampleFormat(MA5FORMAT::DELFES);
-  mySample.SetSampleGenerator(MA5GEN::DELFES);
+  mySample.SetSampleFormat(MA5FORMAT::DELPHES);
+  mySample.SetSampleGenerator(MA5GEN::DELPHES);
   return true;
 }
 
@@ -113,7 +113,7 @@ bool DelfesTreeReader::ReadHeader(SampleFormat& mySample)
 // -----------------------------------------------------------------------------
 // ReadEvent
 // -----------------------------------------------------------------------------
-StatusCode::Type DelfesTreeReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySample)
+StatusCode::Type DelphesTreeReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySample)
 {
   // Initiliaze MC
   myEvent.InitializeRec();
@@ -140,7 +140,7 @@ StatusCode::Type DelfesTreeReader::ReadEvent(EventFormat& myEvent, SampleFormat&
 // -----------------------------------------------------------------------------
 // FinalizeEvent
 // -----------------------------------------------------------------------------
-bool DelfesTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
+bool DelphesTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 {
   // MHT & THT
   for (unsigned int i=0; i<myEvent.rec()->jets_.size();i++)
@@ -229,7 +229,7 @@ bool DelfesTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEven
 // -----------------------------------------------------------------------------
 // FillEventParticleLine
 // -----------------------------------------------------------------------------
-void DelfesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
+void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
 {
   // Fill electrons
   if (branchElectron_!=0)
@@ -240,31 +240,6 @@ void DelfesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
     electron->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
     if (part->Charge>0) electron->charge_=true; else electron->charge_=false;
     electron->HEoverEE_ = part->EhadOverEem;
-
-    IsolationConeType* isolcone05 = electron->GetNewIsolCone();
-    isolcone05->sumPT_   = part->sumPT05;
-    isolcone05->sumET_   = part->sumET05;
-    isolcone05->ntracks_ = part->nTrack05;
-    isolcone05->deltaR_  = 0.5;
-
-    IsolationConeType* isolcone04 = electron->GetNewIsolCone();
-    isolcone04->sumPT_   = part->sumPT04;
-    isolcone04->sumET_   = part->sumET04;
-    isolcone04->ntracks_ = part->nTrack04;
-    isolcone04->deltaR_  = 0.4;
-
-    IsolationConeType* isolcone03 = electron->GetNewIsolCone();
-    isolcone03->sumPT_   = part->sumPT03;
-    isolcone03->sumET_   = part->sumET03;
-    isolcone03->ntracks_ = part->nTrack03;
-    isolcone03->deltaR_  = 0.3;
-
-    IsolationConeType* isolcone02 = electron->GetNewIsolCone();
-    isolcone02->sumPT_   = part->sumPT02;
-    isolcone02->sumET_   = part->sumET02;
-    isolcone02->ntracks_ = part->nTrack02;
-    isolcone02->deltaR_  = 0.2;
-
   }
 
   // Fill photons
@@ -275,31 +250,6 @@ void DelfesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
     RecPhotonFormat * photon = myEvent.rec()->GetNewPhoton();
     photon->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
     photon->HEoverEE_ = part->EhadOverEem;
-
-    IsolationConeType* isolcone05 = photon->GetNewIsolCone();
-    isolcone05->sumPT_   = part->sumPT05;
-    isolcone05->sumET_   = part->sumET05;
-    isolcone05->ntracks_ = part->nTrack05;
-    isolcone05->deltaR_  = 0.5;
-
-    IsolationConeType* isolcone04 = photon->GetNewIsolCone();
-    isolcone04->sumPT_   = part->sumPT04;
-    isolcone04->sumET_   = part->sumET04;
-    isolcone04->ntracks_ = part->nTrack04;
-    isolcone04->deltaR_  = 0.4;
-
-    IsolationConeType* isolcone03 = photon->GetNewIsolCone();
-    isolcone03->sumPT_   = part->sumPT03;
-    isolcone03->sumET_   = part->sumET03;
-    isolcone03->ntracks_ = part->nTrack03;
-    isolcone03->deltaR_  = 0.3;
-
-    IsolationConeType* isolcone02 = photon->GetNewIsolCone();
-    isolcone02->sumPT_   = part->sumPT02;
-    isolcone02->sumET_   = part->sumET02;
-    isolcone02->ntracks_ = part->nTrack02;
-    isolcone02->deltaR_  = 0.2;
-
   }
 
   // Fill muons
@@ -310,30 +260,6 @@ void DelfesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
     RecLeptonFormat * muon = myEvent.rec()->GetNewMuon();
     muon->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
     if (part->Charge>0) muon->charge_=true; else muon->charge_=false;
-
-    IsolationConeType* isolcone05 = muon->GetNewIsolCone();
-    isolcone05->sumPT_   = part->sumPT05;
-    isolcone05->sumET_   = part->sumET05;
-    isolcone05->ntracks_ = part->nTrack05;
-    isolcone05->deltaR_  = 0.5;
-
-    IsolationConeType* isolcone04 = muon->GetNewIsolCone();
-    isolcone04->sumPT_   = part->sumPT04;
-    isolcone04->sumET_   = part->sumET04;
-    isolcone04->ntracks_ = part->nTrack04;
-    isolcone04->deltaR_  = 0.4;
-
-    IsolationConeType* isolcone03 = muon->GetNewIsolCone();
-    isolcone03->sumPT_   = part->sumPT03;
-    isolcone03->sumET_   = part->sumET03;
-    isolcone03->ntracks_ = part->nTrack03;
-    isolcone03->deltaR_  = 0.3;
-
-    IsolationConeType* isolcone02 = muon->GetNewIsolCone();
-    isolcone02->sumPT_   = part->sumPT02;
-    isolcone02->sumET_   = part->sumET02;
-    isolcone02->ntracks_ = part->nTrack02;
-    isolcone02->deltaR_  = 0.2;
   }
 
   // Fill jets and taus
@@ -401,31 +327,8 @@ void DelfesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
     track->momentum_.SetPtEtaPhiE(ref->PT,ref->Eta,ref->Phi,ref->PT);
     track->etaOuter_ = ref->EtaOuter;
     track->phiOuter_ = ref->PhiOuter;
-
-    IsolationConeType* isolcone05 = track->GetNewIsolCone();
-    isolcone05->sumPT_   = ref->sumPT05;
-    isolcone05->sumET_   = ref->sumET05;
-    isolcone05->ntracks_ = ref->nTrack05;
-    isolcone05->deltaR_  = 0.5;
-
-    IsolationConeType* isolcone04 = track->GetNewIsolCone();
-    isolcone04->sumPT_   = ref->sumPT04;
-    isolcone04->sumET_   = ref->sumET04;
-    isolcone04->ntracks_ = ref->nTrack04;
-    isolcone04->deltaR_  = 0.4;
-
-    IsolationConeType* isolcone03 = track->GetNewIsolCone();
-    isolcone03->sumPT_   = ref->sumPT03;
-    isolcone03->sumET_   = ref->sumET03;
-    isolcone03->ntracks_ = ref->nTrack03;
-    isolcone03->deltaR_  = 0.3;
-
-    IsolationConeType* isolcone02 = track->GetNewIsolCone();
-    isolcone02->sumPT_   = ref->sumPT02;
-    isolcone02->sumET_   = ref->sumET02;
-    isolcone02->ntracks_ = ref->nTrack02;
-    isolcone02->deltaR_  = 0.2;
   }
+
 }
 
 

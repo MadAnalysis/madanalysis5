@@ -22,8 +22,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef DELPHES_TREE_READER_h
-#define DELPHES_TREE_READER_h
+#ifndef DELFES_TREE_READER_h
+#define DELFES_TREE_READER_h
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Reader/TreeReaderBase.h"
@@ -37,7 +37,6 @@
 // STL header
 #include <iostream>
 
-#ifdef DELPHES_USE
 
 // Delphes header
 class ExRootTreeReader;
@@ -45,7 +44,7 @@ class ExRootTreeReader;
 namespace MA5
 {
 
-class DelphesTreeReader : public TreeReaderBase
+class DelfesTreeReader : public TreeReaderBase
 {
 
   // -------------------------------------------------------------
@@ -78,15 +77,15 @@ class DelphesTreeReader : public TreeReaderBase
  public:
 
   /// Constructor without argument
-  DelphesTreeReader()
+  DelfesTreeReader()
   { InitializeVariables(); } 
 
   /// Constructor with arguments
-  DelphesTreeReader(TFile* source, TTree* tree): TreeReaderBase(source,tree)
+  DelfesTreeReader(TFile* source, TTree* tree): TreeReaderBase(source,tree)
   { }
 
 	/// Destructor
-  virtual ~DelphesTreeReader()
+  virtual ~DelfesTreeReader()
   { }
 
   /// Initialize
@@ -134,5 +133,4 @@ class DelphesTreeReader : public TreeReaderBase
 
 }
 
-#endif
 #endif

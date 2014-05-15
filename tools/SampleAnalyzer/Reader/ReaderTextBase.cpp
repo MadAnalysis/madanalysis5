@@ -51,12 +51,10 @@ bool ReaderTextBase::Initialize(const std::string& rawfilename,
   // Check consistency with compilation option
   if (rfio_)
   {
-#ifndef RFIO_USE
     ERROR << "'-rfio' is not allowed. Please set the RFIO_USE"
           << " variable in the Makefile to 1 and recompile the program if"
           << " you would like to use this option." << endmsg;
     exit(1);
-#endif
   }
 
   // Cleaning the file (remove rfio or local location)
@@ -92,11 +90,6 @@ bool ReaderTextBase::Initialize(const std::string& rawfilename,
   // Input coming from RFIO 
   else if (rfio_)
   {
-#ifdef RFIO_USE
-    input_=new icastorstream();
-    input_->open(const_cast<char*>(filename_.c_str()));
-    test=input_->good();
-#endif
   }
  
   // Input coming from zip archive
@@ -141,11 +134,6 @@ bool ReaderTextBase::Finalize()
   } 
   else if (rfio_)
   {
-#ifdef RFIO_USE
-    irfiostream * myinput = dynamic_cast<icastorstream*>(input_);
-    myinput->close();
-    myinput->clear();
-#endif
   }
   else if (compress_)
   {

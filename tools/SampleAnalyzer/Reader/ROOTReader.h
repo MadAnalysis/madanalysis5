@@ -39,7 +39,6 @@
 // STL header
 #include <iostream>
 
-#ifdef ROOT_USE
 
 namespace MA5
 {
@@ -135,5 +134,4 @@ class ROOTReader : public ReaderBase
 
 };
 
-#endif
 #endif

@@ -29,9 +29,7 @@
 #include "SampleAnalyzer/Reader/LHCOReader.h"
 #include "SampleAnalyzer/Reader/STDHEPreader.h"
 #include "SampleAnalyzer/Reader/HEPMCReader.h"
-#ifdef ROOT_USE
-  #include "SampleAnalyzer/Reader/ROOTReader.h"
-#endif
+#include "SampleAnalyzer/Reader/ROOTReader.h"
 using namespace MA5;
 
 // -----------------------------------------------------------------------------
@@ -64,10 +62,9 @@ void ReaderManager::BuildTable()
   Add("hepmc.gz",hepmc);
 #endif
 
-#ifdef ROOT_USE
+
   ROOTReader* root = new ROOTReader();
   Add("root",root);
-#endif
 
 
 }
