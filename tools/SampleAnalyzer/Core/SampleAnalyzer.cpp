@@ -119,7 +119,6 @@ bool SampleAnalyzer::Initialize(int argc, char **argv,
   fullWriters_.BuildTable();
   fullReaders_.BuildTable();
   fullAnalyses_.BuildPredefinedTable();
-  fullAnalyses_.BuildUserTable();
   fullJetClusterers_.BuildTable();
   fullDetectors_.BuildTable();
 

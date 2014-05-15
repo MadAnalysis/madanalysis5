@@ -100,6 +100,10 @@ class SampleAnalyzer
   /// Constructor withtout arguments
   SampleAnalyzer();
 
+  /// Adding Analyzer
+  AnalyzerManager& AnalyzerList()
+  { return fullAnalyses_; }
+
   /// Initialization of the SampleAnalyzer
   bool Initialize(int argc, char **argv, const std::string& filename,bool=false);
 

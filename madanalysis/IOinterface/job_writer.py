@@ -243,7 +243,8 @@ class JobWriter():
 
     def PrintIncludes(self,file):
         file.write('// SampleHeader header\n')
-        file.write('#include \"SampleAnalyzer/Core/SampleAnalyzer.h\"\n')
+        file.write('#include "SampleAnalyzer/Core/SampleAnalyzer.h"\n')
+        file.write('#include "SampleAnalyzer/Analyzer/analysisList.h"\n') 
         file.write('using namespace MA5;\n\n')
         return
 
@@ -254,7 +255,9 @@ class JobWriter():
         file.write('int main(int argc, char *argv[])\n')
         file.write('{\n')
         file.write('  // Creating a manager\n')
-        file.write('  SampleAnalyzer manager;\n\n')
+        file.write('  SampleAnalyzer manager;\n')
+        file.write('  BuildUserTable(manager.AnalyzerList());\n')
+        file.write('\n')
 
         # Initializing
         file.write('  // ---------------------------------------------------\n')
@@ -415,20 +418,20 @@ class JobWriter():
         job.WriteSource()
         file.close()
 
-        file = open(self.path+"/Build/SampleAnalyzer/Analyzer/analysisList.cpp","w")
+        file = open(self.path+"/Build/SampleAnalyzer/Analyzer/analysisList.h","w")
         file.write('#include "SampleAnalyzer/Analyzer/AnalyzerManager.h"\n')
         file.write('#include "SampleAnalyzer/Analyzer/user.h"\n')
         file.write('#include "SampleAnalyzer/Service/LogStream.h"\n')
-        file.write('using namespace MA5;\n')
-        file.write('#include <stdlib.h>\n\n')
+        file.write('\n')
         file.write('// ------------------------------------------' +\
                    '-----------------------------------\n')
         file.write('// BuildUserTable\n')
         file.write('// ------------------------------------------' +\
                    '-----------------------------------\n')
-        file.write('void AnalyzerManager::BuildUserTable()\n')
+        file.write('void BuildUserTable(MA5::AnalyzerManager& manager)\n')
         file.write('{\n')
-        file.write('  Add("MadAnalysis5job", new user);\n')
+        file.write('  using namespace MA5;\n')
+        file.write('  manager.Add("MadAnalysis5job", new user);\n')
         file.write('}\n')
         file.close()
         return True
@@ -476,7 +479,7 @@ class JobWriter():
         file.write('# Options for compilation\n')
         if self.libFastjet:
             file.write('CXXFASTJET = $(shell fastjet-config --cxxflags --plugins)\n')
-        file.write('CXXFLAGS = -Wall -O3 -I./ -I./../ -I' + '$(MA5_BASE)/tools/')
+        file.write('CXXFLAGS = -Wall -O3 -fPIC -I./ -I./../ -I' + '$(MA5_BASE)/tools/')
         if self.libZIP:
             file.write(' -DZIP_USE')
         if self.libDelphes:
@@ -498,7 +501,7 @@ class JobWriter():
 
         # Name of the library
         file.write('# Name of the library\n')
-        file.write('PROGRAM = SampleAnalyzerBld\n')
+        file.write('PROGRAM = UserPackage_for_ma5\n')
         file.write('\n')
 
         # All
@@ -517,11 +520,7 @@ class JobWriter():
         # Linking
         file.write('# Link target\n')
         file.write('link: $(OBJS)\n')
-        file.write('\tcp ' +\
-            '$(MA5_BASE)/tools/SampleAnalyzer/Lib/libSampleAnalyzer.a ' +\
-            '../../Build/Lib/lib$(PROGRAM).a\n')
-        file.write('\tar -ruc ../../Build/Lib/lib$(PROGRAM).a $(OBJS)\n')
-        file.write('\tranlib ../../Build/Lib/lib$(PROGRAM).a\n')
+        file.write('\t$(CXX) -shared -o ../../Build/Lib/lib$(PROGRAM).so $(OBJS)\n')
         file.write('\n')
 
         # Phony target
@@ -544,7 +543,7 @@ class JobWriter():
         file.write('\n')
         file.write('# Do clean target\n')
         file.write('do_mrproper: do_clean\n')
-        file.write('\t@rm -f ../../Build/Lib/lib$(PROGRAM).a\n')
+        file.write('\t@rm -f ../../Build/Lib/lib$(PROGRAM).so\n')
         file.write('\t@rm -f *~ */*~ \n')
         file.write('\n')
         
@@ -573,9 +572,9 @@ class JobWriter():
     def WriteMakefiles(self,option=""):
 
         # Writing sub-Makefiles
-        self.WriteSampleAnalyzerMakefile(option)
-        if self.shwrmode!='':
-            self.WriteShoweringMakefile(option)
+        #self.WriteSampleAnalyzerMakefile(option)
+        #if self.shwrmode!='':
+        #    self.WriteShoweringMakefile(option)
 
         # Opening the main Makefile    
         file = open(self.path+"/Build/Makefile","w")
@@ -591,62 +590,75 @@ class JobWriter():
         file.write('CXX = g++\n')
         file.write('\n')
 
-        # Options for compilation
+        # Options for compilation : CXXFLAGS
         file.write('# Options for compilation\n')
-        if self.libFastjet:
-            file.write('CXXFASTJET = $(shell fastjet-config --cxxflags --plugins)\n')
-            
-            file.write('FASTJETLIB = $(shell fastjet-config --libs --plugins)\n')
-        file.write('CXXFLAGS = -Wall -O3 -I./ -I$(MA5_BASE)/tools/')
-        if self.shwrmode!='':
-            file.write(' -I$(MA5_BASE)' + \
-                '/tools/MCatNLO-utilities/MCatNLO/include')
+        options = []
+        options.extend(['-Wall','-O3','-I./','-I./SampleAnalyzer/','-I$(MA5_BASE)/tools/'])
         if self.libZIP:
-            file.write(' -DZIP_USE')
+            options.extend(['-DZIP_USE'])
         if self.libDelphes:
-            file.write(' -DROOT_USE -DDELPHES_USE')
+            options.extend(['-DROOT_USE','-DDELPHES_USE'])
         if self.libDelfes:
-            file.write(' -DROOT_USE -DDELFES_USE')
+            options.extend(['-DROOT_USE','-DDELFES_USE'])
         if self.libFastjet:
-            file.write(' -DFASTJET_USE')
-            file.write(' $(CXXFASTJET)')
+            options.extend(['-DROOT_USE','-DFASTJET_USE','$(shell fastjet-config --cxxflags --plugins)'])
+        file.write('CXXFLAGS = '+' '.join(options))
         file.write('\n')
-        file.write('LIBFLAGS = -LLib -lSampleAnalyzerBld -lGpad -lHist ' + 
-                   '-lGraf -lGraf3d ' +\
-                   '-lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lEG ' +\
-                   '-lRIO -lNet -lThread -lCore -lCint -pthread -lm -ldl '+\
-                   '-rdynamic')
+
+        # Options for compilation : LIBFLAGS
+
+        # - Root
+        libs=[]
+        libs.extend(['-lGpad','-lHist','-lGraf','-lGraf3d','-lTree', \
+                     '-lRint','-lPostscript','-lMatrix','-lPhysics', \
+                     '-lMathCore','-lEG', '-lRIO','-lNet','-lThread', \
+                     '-lCore','-lCint','-pthread','-lm','-ldl','-rdynamic'])
+
+        # - SampleAnalyzer
+        libs.extend(['-L$(MA5_BASE)/tools/SampleAnalyzer/Lib/','-lSampleAnalyzer'])
         if self.libZIP:
-            file.write(' -lz')
+            libs.extend(['-lz','-lzlib_for_ma5'])
         if self.libDelphes:
-            file.write(' -lDelphes')
+            libs.extend(['-lDelphes','-ldelphes_for_ma5'])
         if self.libDelfes:
-            file.write(' -lDelphes')
+            libs.extend(['-lDelphes','-ldelfes_for_ma5'])
         if self.fortran:
-            file.write(' -lgfortran')
+            libs.extend(['-lgfortran'])
         if self.libFastjet:
-            file.write(' $(FASTJETLIB)')
-        if self.shwrmode!='':
-            file.write(' -lShowering -lstdhep -lFmcfio')
-        file.write('\n\n')
-
-        # Files
-        file.write('# Files\n')
-        file.write('SRCS = $(wildcard Main/*.cpp)\n')
-        file.write('HDRS = $(wildcard Main/*.h)\n')
-        file.write('OBJS = $(SRCS:.cpp=.o)\n')
-        file.write('LIBS = Lib/libSampleAnalyzerBld.a')
-        if self.shwrmode!='':
-            file.write(' Lib/libShowering.a')
-        file.write('\n')
-        file.write('PRES = $(MA5_BASE)/tools/' +\
-                   'SampleAnalyzer/Lib/libSampleAnalyzer.a')
+            libs.extend(['$(shell fastjet-config --libs --plugins)','-lfastjet_for_ma5'])
+        file.write('LIBFLAGS = '+' '.join(libs)+'\n')
         file.write('\n')
 
-        # Name of the executable
-        file.write('#Name of the executable\n')
+        # Files to process
+        file.write('# Files to process\n')
+        file.write('SRCS  = $(wildcard Main/*.cpp)\n')
+        file.write('SRCS += $(wildcard SampleAnalyzer/Analyzer/*.cpp)\n')
+        file.write('HDRS  = $(wildcard Main/*.h)\n')
+        file.write('HDRS += $(wildcard SampleAnalyzer/Analyzer/*.h)\n')
+        file.write('\n')
+
+        # Files to generate
+        file.write('# Files to generate\n')
+        file.write('OBJS    = $(SRCS:.cpp=.o)\n')
         file.write('PROGRAM = MadAnalysis5Job\n')
         file.write('\n')
+
+        # Lib to check
+        file.write('# Requirements to check before building\n')
+        libs=[]
+        libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libSampleAnalyzer.so')
+        if self.libZIP:
+            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libzlib_for_ma5.so')
+        if self.libDelphes:
+            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so')
+        if self.libDelfes:
+            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libdelfes_for_ma5.so')
+        if self.libFastjet:
+            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so')
+        for ind in range(0,len(libs)):
+            file.write('REQUIRED'+str(ind+1)+' = '+libs[ind]+'\n')
+        file.write('\n')
+
 
         # Defining colours for shell
         file.write('# Defining colours\n')
@@ -665,16 +677,18 @@ class JobWriter():
         file.write('\n')
 
         # Check library
-        file.write('# Check library\n')
-        file.write('library_check:\n')
-        file.write('ifeq ($(wildcard $(PRES)),)\n')
-        file.write('\t@echo -e $(RED)"The static library "$(PRES)" is not found"\n')
-	file.write('\t@echo -e $(RED)" 1) Please check that MadAnalysis 5 is installed in the folder : "$(MA5_BASE)\n')
-        file.write('\t@echo -e $(RED)" 2) Launch MadAnalysis 5 in normal mode in order to build this library."\n')
-	file.write('\t@echo -e $(NORMAL)\n')
-	file.write('\t@false\n')
-        file.write('endif\n')
-        file.write('\n')
+        if len(libs)!=0:
+            file.write('# Check library\n')
+            file.write('library_check:\n')
+            for ind in range(0,len(libs)):
+                file.write('ifeq ($(wildcard $(REQUIRED'+str(ind+1)+')),)\n')
+                file.write('\t@echo -e $(RED)"The shared library "$(REQUIRED'+str(ind+1)+')" is not found"\n')
+	        file.write('\t@echo -e $(RED)" 1) Please check that MadAnalysis 5 is installed in the folder : "$(MA5_BASE)\n')
+                file.write('\t@echo -e $(RED)" 2) Launch MadAnalysis 5 in normal mode in order to build this library."\n')
+	        file.write('\t@echo -e $(NORMAL)\n')
+	        file.write('\t@false\n')
+                file.write('endif\n')
+            file.write('\n')
 
         # Header target
         file.write('# Header target\n')
@@ -718,7 +732,7 @@ class JobWriter():
 
         # Compile target
         file.write('# Compile target\n')
-        file.write('compile: $(LIBS) $(OBJS)\n')
+        file.write('compile: $(OBJS)\n')
         file.write('\n')
 
         # Object file target
@@ -728,23 +742,10 @@ class JobWriter():
 
         # Link target
         file.write('# Link target\n')
-        file.write('link: $(OBJS) $(LIBS)\n')
+        file.write('link: $(OBJS)\n')
         file.write('\t$(CXX) $(CXXFLAGS) $(OBJS) ')
         file.write('$(LIBFLAGS) -o $(PROGRAM)\n')
         file.write('\n')
-
-        # Library to build
-        file.write('# SampleAnalyzer library target\n')
-        file.write('$(LIBS):\n')
-        file.write('\t@(cd SampleAnalyzer/ && $(MAKE))\n')
-        file.write('\n')
-
-        # Library to build
-        if self.shwrmode!='':
-            file.write('# Showering library target\n')
-            file.write('Lib/libShowering.a:\n')
-            file.write('\t@(cd Showering/ && $(MAKE))\n')
-            file.write('\n')
 
         # Clean target
         file.write('# Clean target\n')
@@ -752,10 +753,7 @@ class JobWriter():
         file.write('\n')
         file.write('# Do clean target\n')
         file.write('do_clean: \n')
-        file.write('\t@(cd SampleAnalyzer/ && $(MAKE) $@)\n')
-        if self.shwrmode!='':
-            file.write('\t@(cd Showering/ && $(MAKE) $@)\n')
-        file.write('\t@rm -f $(OBJS) $(LIBS)\n')
+        file.write('\t@rm -f $(OBJS)\n')
         file.write('\n')
 
         # Mr Proper target
@@ -764,16 +762,13 @@ class JobWriter():
         file.write('\n')
         file.write('# Do Mr Proper target \n')
         file.write('do_mrproper: do_clean\n')
-        file.write('\t@(cd SampleAnalyzer/ && $(MAKE) $@)\n')
-        if self.shwrmode!='':
-            file.write('\t@(cd Showering/ && $(MAKE) $@)\n')
         file.write('\t@rm -f $(PROGRAM) Log/compilation.log' + \
-                   ' linking.log *~ */*~ \n')
+                   ' Log/linking.log Log/cleanup.log Log/mrproper.log *~ */*~ */*~ \n')
         file.write('\n')
 
         # Phony target
         file.write('# Phony target\n')
-        file.write('.PHONY: do_clean header link_header compile_header $(LIBS)\n')
+        file.write('.PHONY: do_clean header link_header compile_header\n')
         file.write('\n')
 
         # Closing the file
