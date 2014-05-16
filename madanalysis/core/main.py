@@ -43,7 +43,7 @@ from madanalysis.configuration.shower_configuration     import ShowerConfigurati
 import logging
 import os
 import sys
-
+import platform
         
 class Main():
 
@@ -88,6 +88,7 @@ class Main():
         self.observables    = ObservableManager(self.mode)
         self.mcatnloutils   = False
         self.expertmode     = False
+        self.isMAC          = False
         self.ResetParameters()
 
 
@@ -407,8 +408,15 @@ class Main():
         self.configLinux.ma5_version    = self.version
         self.configLinux.ma5_date       = self.date
         self.configLinux.python_version = sys.version.replace('\n','')
-        self.configLinux.platform       = sys.platform
+        self.configLinux.platform       = platform.system()
+        self.configLinux.release        = platform.release()
 
+        # Is Mac
+        if self.configLinux.platform.lower() in ['darwin','mac','macosx']:
+            self.isMAC = True
+        else:
+            self.isMAC = False
+        
         if detail:
             logging.info("General     Platform identifier : " + str(self.configLinux.platform))
             import multiprocessing

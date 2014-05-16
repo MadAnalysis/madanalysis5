@@ -138,6 +138,7 @@ class LinuxArchitecture:
     def __init__(self):
         self.useroptions      = UserOptions()
         self.platform         = ""
+        self.release          = ""
         self.ma5_version      = ""
         self.ma5_date         = ""
         self.python_version   = ""
@@ -158,7 +159,8 @@ class LinuxArchitecture:
 
         logging.info(" Architecture")
         logging.info(" ------------")
-        logging.info(" Linux distrib    = " + self.platform)
+        logging.info(" Platform         = " + self.platform)
+        logging.info(" Release platform = " + self.release)
         logging.info(" MA5 version      = " + self.ma5_version)
         logging.info(" MA5 date         = " + self.ma5_date)
         logging.info(" Python version   = " + self.python_version)
@@ -186,6 +188,7 @@ class LinuxArchitecture:
 
         self.useroptions.Export(file)
         file.write(self.platform+"\n")
+        file.write(self.release+"\n")
         file.write(self.ma5_version+"\n")
         file.write(self.ma5_date+"\n")
         file.write(self.python_version+"\n")
@@ -217,6 +220,7 @@ class LinuxArchitecture:
         try:
             self.useroptions.Import(file)
             self.platform         = file.readline().replace('\n','')
+            self.release          = file.readline().replace('\n','')
             self.ma5_version      = file.readline().replace('\n','')
             self.ma5_date         = file.readline().replace('\n','')
             self.python_version   = file.readline().replace('\n','')
@@ -263,6 +267,8 @@ class LinuxArchitecture:
             return False
         
         if self.platform != other.platform:
+            return False
+        if self.release != other.release:
             return False
         if self.ma5_version != other.ma5_version:
             return False
