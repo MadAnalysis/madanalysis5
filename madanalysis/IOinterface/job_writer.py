@@ -521,7 +521,10 @@ class JobWriter():
         # Linking
         file.write('# Link target\n')
         file.write('link: $(OBJS)\n')
-        file.write('\t$(CXX) -shared -o ../../Build/Lib/lib$(PROGRAM).so $(OBJS)\n')
+        if self.main.isMAC:
+            file.write('\t$(CXX) -shared -flat_namespace -dynamiclib -undefined suppress -o ../../Build/Lib/lib$(PROGRAM).so $(OBJS)\n')
+        else:
+            file.write('\t$(CXX) -shared -o ../../Build/Lib/lib$(PROGRAM).so $(OBJS)\n')
         file.write('\n')
 
         # Phony target

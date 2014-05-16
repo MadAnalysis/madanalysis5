@@ -412,10 +412,17 @@ class Main():
         self.configLinux.release        = platform.release()
 
         # Is Mac
+        sys.stdout.write("Platform: "+self.configLinux.platform+" "+self.configLinux.release+" ")
+        sys.stdout.flush()
         if self.configLinux.platform.lower() in ['darwin','mac','macosx']:
             self.isMAC = True
+            sys.stdout.write('\x1b[32m'+'[MAC/OSX mode]'+'\x1b[0m'+'\n')
+            sys.stdout.flush()
         else:
             self.isMAC = False
+            sys.stdout.write('\x1b[32m'+'[Linux mode]'+'\x1b[0m'+'\n')
+            sys.stdout.flush()
+
         
         if detail:
             logging.info("General     Platform identifier : " + str(self.configLinux.platform))
@@ -473,14 +480,10 @@ class Main():
 
         os.environ['LD_LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH'] + \
                                         ":" + self.ma5dir+'/tools/SampleAnalyzer/Lib/'
+        os.environ['DYLD_LIBRARY_PATH'] = os.environ['DYLD_LIBRARY_PATH'] + \
+                                        ":" + self.ma5dir+'/tools/SampleAnalyzer/Lib/'
         os.environ['LIBRARY_PATH'] = os.environ['LIBRARY_PATH'] + \
                                         ":" + self.ma5dir+'/tools/SampleAnalyzer/Lib/'
-
-        if self.mcatnloutils:
-            os.environ['LD_LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH'] + \
-                      ":" + self.ma5dir+'/tools/MCatNLO-utilities/MCatNLO/lib/'
-            os.environ['LIBRARY_PATH'] = os.environ['LIBRARY_PATH'] + \
-                      ":" + self.ma5dir+'/tools/MCatNLO-utilities/MCatNLO/lib/'
             
         return True 
    
@@ -512,7 +515,7 @@ class Main():
             logging.info("  => The user forces to rebuild the library.")
 
         # Initializing the JobWriter
-        compiler = LibraryWriter(self.ma5dir,'lib',self.libZIP,self.libFastJet,self.forced,self.fortran,self.libDelphes,self.libDelfes)
+        compiler = LibraryWriter(self.ma5dir,'lib',self.libZIP,self.libFastJet,self.forced,self.fortran,self.libDelphes,self.libDelfes,self)
     
         # Dumping architecture
         if not self.configLinux.Export(self.ma5dir+'/tools/architecture.ma5'):

@@ -36,7 +36,7 @@ import subprocess
 
 class LibraryWriter():
 
-    def __init__(self,ma5dir,jobdir,libZIP,libFASTJET,forced,fortran,delphes,delfes):
+    def __init__(self,ma5dir,jobdir,libZIP,libFASTJET,forced,fortran,delphes,delfes,main):
         self.ma5dir     = ma5dir
         self.jobdir     = jobdir
         self.path       = os.path.normpath(ma5dir+"/tools/")
@@ -46,6 +46,7 @@ class LibraryWriter():
         self.fortran    = fortran
         self.libDelphes = delphes
         self.libDelfes  = delfes
+        self.main       = main
 
     def get_ncores(self):
         # Number of cores
@@ -236,10 +237,16 @@ class LibraryWriter():
         file.write('# Link target\n')
         if self.fortran:
             file.write('link: $(OBJS) $(FORTRAN_OBJS)\n')
-            file.write('\t$(CXX) -shared -o ../Lib/lib$(PROGRAM).so $(OBJS) $(FORTRAN_OBJS)\n')
+            if self.main.isMAC:
+                file.write('\t$(CXX) -shared -flat_namespace -dynamiclib -undefined suppress -o ../Lib/lib$(PROGRAM).so $(OBJS) $(FORTRAN_OBJS)\n')
+            else:
+                file.write('\t$(CXX) -shared -o ../Lib/lib$(PROGRAM).so $(OBJS) $(FORTRAN_OBJS)\n')
         else:
             file.write('link: $(OBJS)\n')
-            file.write('\t$(CXX) -shared -o ../Lib/lib$(PROGRAM).so $(OBJS)\n')
+            if self.main.isMAC:
+                file.write('\t$(CXX) -shared -flat_namespace -dynamiclib -undefined suppress -o ../Lib/lib$(PROGRAM).so $(OBJS)\n')
+            else:
+                file.write('\t$(CXX) -shared -o ../Lib/lib$(PROGRAM).so $(OBJS)\n')
         file.write('\n')
 
         # Phony target
@@ -402,10 +409,17 @@ class LibraryWriter():
         file.write('# Link target\n')
         if self.fortran:
             file.write('link: $(OBJS) $(FORTRAN_OBJS)\n')
-            file.write('\t$(CXX) -shared -o Lib/lib$(PROGRAM).so $(OBJS) $(FORTRAN_OBJS)\n')
+            if self.main.isMAC:
+                file.write('\t$(CXX) -shared -flat_namespace -dynamiclib -undefined suppress -o Lib/lib$(PROGRAM).so $(OBJS) $(FORTRAN_OBJS)\n')
+            else:
+                file.write('\t$(CXX) -shared -o Lib/lib$(PROGRAM).so $(OBJS) $(FORTRAN_OBJS)\n')
         else:
             file.write('link: $(OBJS)\n')
-            file.write('\t$(CXX) -shared -o Lib/lib$(PROGRAM).so $(OBJS)\n')
+            if self.main.isMAC:
+                file.write('\t$(CXX) -shared -flat_namespace -dynamiclib -undefined suppress -o Lib/lib$(PROGRAM).so $(OBJS)\n')
+            else:
+                file.write('\t$(CXX) -shared -o Lib/lib$(PROGRAM).so $(OBJS)\n')
+                
 #            file.write('\tar -ruc Lib/lib$(PROGRAM).a $(OBJS)\n')
         file.write('\n')
 
