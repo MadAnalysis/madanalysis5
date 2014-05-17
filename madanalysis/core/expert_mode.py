@@ -102,7 +102,7 @@ class ExpertMode:
         os.system("cd "+self.path+"/Build/SampleAnalyzer; python newAnalyzer.py " + title + " 1")
 
         # Extracting analysis name
-        file = open(self.path+"/Build/SampleAnalyzer/Analyzer/analysisList.cpp")
+        file = open(self.path+"/Build/SampleAnalyzer/Analyzer/analysisList.h")
         title=""
         for line in file:
             if "Add" not in line:

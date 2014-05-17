@@ -53,28 +53,28 @@ class AnalyzerManager:
 
     def AddAnalyzer(self):
         # creating the file from scratch
-        if not os.path.isfile(self.currentdir + "/Analyzer/analysisList.cpp"):
-            output = open(self.currentdir + "/Analyzer/analysisList.cpp","w")
+        if not os.path.isfile(self.currentdir + "/Analyzer/analysisList.h"):
+            output = open(self.currentdir + "/Analyzer/analysisList.h","w")
             path = os.path.normpath(self.name+".h")
             output.write('#include "SampleAnalyzer/Analyzer/'+path+'"\n')
             output.write('#include "SampleAnalyzer/Analyzer/AnalyzerManager.h"\n')
             output.write('#include "SampleAnalyzer/Service/LogStream.h"\n')
-            output.write('using namespace MA5;\n')
-            output.write('#include <stdlib.h>\n\n')
+            output.write('\n')
             output.write('// -----------------------------------------------------------------------------\n')
             output.write('// BuildTable\n')
             output.write('// -----------------------------------------------------------------------------\n')
-            output.write('void AnalyzerManager::BuildUserTable()\n')
+            output.write('void BuildUserTable(MA5::AnalyzerManager& manager)\n')
             output.write('{\n')
-            output.write('  Add("'+self.title+'",new '+self.name+");\n")
+            output.write('  using namespace MA5;\n')
+            output.write('  manager.Add("'+self.title+'",new '+self.name+");\n")
             output.write('}\n')
             output.close()
 
         # updating the file 
         else:
-            shutil.copy(self.currentdir + "/Analyzer/analysisList.cpp",
+            shutil.copy(self.currentdir + "/Analyzer/analysisList.h",
                         self.currentdir + "/Analyzer/analysisList.bak")
-            output = open(self.currentdir + "/Analyzer/analysisList.cpp","w")
+            output = open(self.currentdir + "/Analyzer/analysisList.h","w")
             input  = open(self.currentdir + "/Analyzer/analysisList.bak")
 
             path = os.path.normpath(self.name+".h")
@@ -87,7 +87,7 @@ class AnalyzerManager:
                 tit = self.title.replace(' ','_')
                 for word in theline:
                     if word=="}":
-                        output.write('  Add("'+self.title+'",new '+self.name+');\n')
+                        output.write('  manager.Add("'+self.title+'",new '+self.name+');\n')
                         continue
                 
                 output.write(line)
@@ -419,7 +419,7 @@ analyzer.UpdateMain(title)
 analyzer.WriteHeader()
 analyzer.WriteSource()
 
-# Adding analysis in analysisList.cpp
+# Adding analysis in analysisList.h
 analyzer.AddAnalyzer()
 
 print "Done !"
