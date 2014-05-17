@@ -411,7 +411,7 @@ class ConfigChecker:
         # Name of the dynamic lib
         libnames=['libz.so','libz.a']
         if self.isMAC:
-            libnames.append(['libz.dylib'])
+            libnames.append('libz.dylib')
         
         # User veto
         if self.configLinux.useroptions.zlib_veto=='1':
@@ -492,7 +492,7 @@ class ConfigChecker:
         # Name of the dynamic lib
         libnames=['libDelphes.so','libDelphes.a']
         if self.isMAC:
-            libnames.append(['libDelphes.dylib'])
+            libnames.append('libDelphes.dylib')
 
         # User veto
         if self.configLinux.useroptions.delphes_veto=='1':
@@ -577,7 +577,7 @@ class ConfigChecker:
         # Name of the dynamic lib
         libnames=['libDelphes.so','libDelphes.a']
         if self.isMAC:
-            libnames.append(['libDelphes.dylib'])
+            libnames.append('libDelphes.dylib')
 
         # User veto
         if self.configLinux.useroptions.delfes_veto=='1':
