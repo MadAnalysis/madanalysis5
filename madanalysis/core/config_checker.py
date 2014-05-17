@@ -252,7 +252,6 @@ class ConfigChecker:
 
         # Check: looking for files
         FilesToFind=[self.configLinux.root_lib_path+'/libPyROOT.so', \
-                     self.configLinux.root_lib_path+'/ROOT.py', \
                      self.configLinux.root_inc_path+'/TH1F.h']
         for file in FilesToFind:
             if os.path.isfile(file):
