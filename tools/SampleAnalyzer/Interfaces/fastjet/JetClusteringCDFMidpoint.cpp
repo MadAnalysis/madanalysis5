@@ -22,7 +22,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+//SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringCDFMidpoint.h"
+
+//FastJet headers
+#include <fastjet/ClusterSequence.hh>
+#include <fastjet/PseudoJet.hh>
+#include <fastjet/CDFMidPointPlugin.hh>
+typedef fastjet::JetDefinition::Plugin FastJetPlugin;
 
 
 using namespace MA5;
@@ -107,7 +114,7 @@ bool JetClusteringCDFMidpoint::Initialize(const std::map<std::string,std::string
                                            SeedThreshold_, ConeAreaFraction_);
 
   // Creating jet definition
-  JetDefinition_ = fastjet::JetDefinition(Plugin_);
+  JetDefinition_ = new fastjet::JetDefinition(Plugin_);
 
   return true;
 }

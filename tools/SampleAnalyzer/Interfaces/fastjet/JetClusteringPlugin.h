@@ -29,6 +29,8 @@
 //SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringFastJet.h"
 
+class FastJetPlugin;
+
 namespace MA5
 {
 
@@ -40,7 +42,7 @@ class JetClusteringPlugin: public JetClusteringFastJet
   protected :
 
     /// fastjet plugin
-    fastjet::JetDefinition::Plugin * Plugin_;
+    FastJetPlugin * Plugin_;
 
 //---------------------------------------------------------------------------------
 //                                method members
@@ -48,12 +50,12 @@ class JetClusteringPlugin: public JetClusteringFastJet
   public :
 
     /// Constructor without argument
-    JetClusteringPlugin() : JetClusteringFastJet(fastjet::plugin_algorithm)
+    JetClusteringPlugin() : JetClusteringFastJet("fastjet_plugin")
     {}
 
     /// Destructor
-    virtual ~JetClusteringPlugin() 
-    { delete Plugin_; }
+    virtual ~JetClusteringPlugin()
+    {}
 };
 
 }

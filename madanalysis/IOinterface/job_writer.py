@@ -597,7 +597,7 @@ class JobWriter():
         # Options for compilation : CXXFLAGS
         file.write('# Options for compilation\n')
         options = []
-        options.extend(['-Wall','-O3','-I./','-I./SampleAnalyzer/','-I$(MA5_BASE)/tools/'])
+        options.extend(['-Wall','-O3','-I./','-I./SampleAnalyzer/','-I$(MA5_BASE)/tools/','-I'+self.main.configLinux.root_inc_path])
         if self.libZIP:
             options.extend(['-DZIP_USE'])
         if self.libDelphes:
@@ -605,7 +605,7 @@ class JobWriter():
         if self.libDelfes:
             options.extend(['-DROOT_USE','-DDELFES_USE'])
         if self.libFastjet:
-            options.extend(['-DROOT_USE','-DFASTJET_USE','$(shell fastjet-config --cxxflags --plugins)'])
+            options.extend(['-DROOT_USE','-DFASTJET_USE'])#,'$(shell fastjet-config --cxxflags --plugins)'])
         file.write('CXXFLAGS = '+' '.join(options))
         file.write('\n')
 
@@ -613,7 +613,8 @@ class JobWriter():
 
         # - Root
         libs=[]
-        libs.extend(['-lGpad','-lHist','-lGraf','-lGraf3d','-lTree', \
+        libs.extend(['-L'+self.main.configLinux.root_lib_path, \
+                     '-lGpad','-lHist','-lGraf','-lGraf3d','-lTree', \
                      '-lRint','-lPostscript','-lMatrix','-lPhysics', \
                      '-lMathCore','-lEG', '-lRIO','-lNet','-lThread', \
                      '-lCore','-lCint','-pthread','-lm','-ldl','-rdynamic'])
@@ -623,9 +624,9 @@ class JobWriter():
         if self.libZIP:
             libs.extend(['-lz','-lzlib_for_ma5'])
         if self.libDelphes:
-            libs.extend(['-lDelphes','-ldelphes_for_ma5'])
+            libs.extend(['-L'+self.main.configLinux.delphes_lib_paths[0],'-lDelphes','-ldelphes_for_ma5'])
         if self.libDelfes:
-            libs.extend(['-lDelphes','-ldelfes_for_ma5'])
+            libs.extend(['-L'+self.main.configLinux.delfes_lib_paths[0],'-lDelphes','-ldelfes_for_ma5'])
         if self.fortran:
             libs.extend(['-lgfortran'])
         if self.libFastjet:
@@ -778,9 +779,9 @@ class JobWriter():
         # Closing the file
         file.close()
 
-        if not JobWriter.WriteSetupFile(True,self.path+'/Build/',self.ma5dir):
+        if not JobWriter.WriteSetupFile(True,self.path+'/Build/',self.ma5dir,True,self.main.configLinux,self.main.isMAC):
             return False
-        if not JobWriter.WriteSetupFile(False,self.path+'/Build/',self.ma5dir):
+        if not JobWriter.WriteSetupFile(False,self.path+'/Build/',self.ma5dir,True,self.main.configLinux,self.main.isMAC):
             return False
         
         return True
@@ -816,7 +817,7 @@ class JobWriter():
 
         
     @staticmethod
-    def WriteSetupFile(bash,path,ma5dir,MA5BASE=True):
+    def WriteSetupFile(bash,path,ma5dir,MA5BASE,configLinux,isMAC):
 
         # Opening file in write-only mode
         if bash:
@@ -871,53 +872,54 @@ class JobWriter():
         # Configuring PATH environment variable
         file.write('# Configuring PATH environment variable\n')
         if bash:
-            file.write('export PATH=' + JobWriter.CleanPath(os.environ['PATH'])+'\n')
+            file.write('export PATH=$PATH:' + JobWriter.CleanPath(':'.join(configLinux.toPATH))+'\n')
         else:
-            file.write('setenv PATH ' + JobWriter.CleanPath(os.environ['PATH'])+'\n')
+            file.write('setenv PATH $PATH:' + JobWriter.CleanPath(':'.join(configLinux.toPATH))+'\n')
         file.write('\n')
 
         # Configuring LD_LIBRARY_PATH environment variable
         file.write('# Configuring LD_LIBRARY_PATH environment variable\n')
         if bash:
-            file.write('export LD_LIBRARY_PATH=' + JobWriter.CleanPath(os.environ['LD_LIBRARY_PATH'])+'\n')
+            file.write('export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
         else:
-            file.write('setenv LD_LIBRARY_PATH ' + JobWriter.CleanPath(os.environ['LD_LIBRARY_PATH'])+'\n')
+            file.write('setenv LD_LIBRARY_PATH $LD_LIBRARY_PATH:' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
         file.write('\n')
 
         # Configuring LIBRARY_PATH environment variable
-        file.write('# Configuring LIBRARY_PATH environment variable\n')
-        if bash:
-            file.write('export LIBRARY_PATH=' + JobWriter.CleanPath(os.environ['LD_LIBRARY_PATH'])+'\n')
-        else:
-            file.write('setenv LIBRARY_PATH ' + JobWriter.CleanPath(os.environ['LD_LIBRARY_PATH'])+'\n')
-        file.write('\n')
+        #file.write('# Configuring LIBRARY_PATH environment variable\n')
+        #if bash:
+        #    file.write('export LIBRARY_PATH=' + JobWriter.CleanPath(os.environ['LD_LIBRARY_PATH'])+'\n')
+        #else:
+        #    file.write('setenv LIBRARY_PATH ' + JobWriter.CleanPath(os.environ['LD_LIBRARY_PATH'])+'\n')
+        #file.write('\n')
 
         # Configuring DYLD_LIBRARY_PATH environment variable
-        file.write('# Configuring DYLD_LIBRARY_PATH environment variable\n')
-        if bash:
-            file.write('export DYLD_LIBRARY_PATH='  + JobWriter.CleanPath(os.environ['DYLD_LIBRARY_PATH'])+'\n')
-        else:
-            file.write('setenv DYLD_LIBRARY_PATH '  + JobWriter.CleanPath(os.environ['DYLD_LIBRARY_PATH'])+'\n')
-        file.write('\n')
+        if isMAC:
+            file.write('# Configuring DYLD_LIBRARY_PATH environment variable\n')
+            if bash:
+                file.write('export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+            else:
+                file.write('setenv DYLD_LIBRARY_PATH $DYLD_LIBRARY_PATH:' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+            file.write('\n')
 
         # Configuring CPLUS_INCLUDE_PATH environment variable
-        file.write('# Configuring CPLUS_INCLUDE_PATH environment variable\n')
-        if bash:
-            file.write('export CPLUS_INCLUDE_PATH=' + JobWriter.CleanPath(os.environ['CPLUS_INCLUDE_PATH'])+'\n')
-        else:
-            file.write('setenv CPLUS_INCLUDE_PATH ' + JobWriter.CleanPath(os.environ['CPLUS_INCLUDE_PATH'])+'\n')
-        file.write('\n')
+        #file.write('# Configuring CPLUS_INCLUDE_PATH environment variable\n')
+        #if bash:
+        #    file.write('export CPLUS_INCLUDE_PATH=' + JobWriter.CleanPath(os.environ['CPLUS_INCLUDE_PATH'])+'\n')
+        #else:
+        #    file.write('setenv CPLUS_INCLUDE_PATH ' + JobWriter.CleanPath(os.environ['CPLUS_INCLUDE_PATH'])+'\n')
+        #file.write('\n')
 
         # Checking that all environment variables are defined
         file.write('# Checking that all environment variables are defined\n')
         if bash:
-            file.write('if [[ $PATH && $LD_LIBRARY_PATH && $LIBRARY_PATH && $DYLD_LIBRARY_PATH && $CPLUS_INCLUDE_PATH ]]; then\n')
+            file.write('if [[ $PATH && $LD_LIBRARY_PATH ]]; then\n')
             file.write('echo -e $YELLOW"'+StringTools.Fill('-',56)+'"\n')
 	    file.write('echo -e "'+StringTools.Center('Your environment is properly configured for MA5',56)+'"\n')
 	    file.write('echo -e "'+StringTools.Fill('-',56)+'"$NORMAL\n')
             file.write('fi\n')
         else:
-            file.write('if ( $?PATH && $?LD_LIBRARY_PATH && $?LIBRARY_PATH && $?DYLD_LIBRARY_PATH && $?CPLUS_INCLUDE_PATH) then\n')
+            file.write('if ( $?PATH && $?LD_LIBRARY_PATH ) then\n')
             file.write('echo $YELLOW"'+StringTools.Fill('-',56)+'"\n')
 	    file.write('echo "'+StringTools.Center('Your environment is properly configured for MA5',56)+'"\n')
 	    file.write('echo "'+StringTools.Fill('-',56)+'"$NORMAL\n')

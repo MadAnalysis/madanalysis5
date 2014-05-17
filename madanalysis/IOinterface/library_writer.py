@@ -130,15 +130,16 @@ class LibraryWriter():
         file.write('CXX = g++\n')
         if package=='fastjet':
             file.write('CXXFASTJET = $(shell fastjet-config --cxxflags --plugins)\n')
-        file.write('CXXFLAGS = -Wall -O3 -DROOT_USE -fPIC $(shell root-config --cflags) -I./../../')
-       # if package=='zlib':
-       #     file.write(' -DZIP_USE')
-       # elif package=='delphes':
-       #     file.write(' -DDELPHES_USE')
-       # elif package=='delfes':
-       #     file.write(' -DDELFES_USE')
+        file.write('CXXFLAGS = -Wall -O3 -DROOT_USE -fPIC -I'+self.main.configLinux.root_inc_path+' -I./../../')
+        if package=='zlib':
+            file.write(' -I'+self.main.configLinux.zlib_inc_path)
+        if package=='delphes':
+            for header in self.main.configLinux.delphes_inc_paths:
+                file.write(' -I'+header)
+        if package=='delfes':
+            for header in self.main.configLinux.delfes_inc_paths:
+                file.write(' -I'+header)
         if package=='fastjet':
-       #     file.write(' -DFASTJET_USE')
             file.write(' $(CXXFASTJET)')
         file.write('\n')
 
@@ -301,10 +302,10 @@ class LibraryWriter():
 
         # Options for compilation
         file.write('# Options for compilation\n')
-        if self.libFASTJET:
-            file.write('CXXFASTJET = $(shell fastjet-config --cxxflags --plugins)\n')
+#        if self.libFASTJET:
+#            file.write('CXXFASTJET = $(shell fastjet-config --cxxflags --plugins)\n')
         # BENJ FIX file.write('CXXFLAGS = -Wall -O3 -fPIC $(shell root-config --cflags) -I./../')
-        file.write('CXXFLAGS = -Wall -O3 -DROOT_USE -fPIC $(shell root-config --cflags) -I./../')
+        file.write('CXXFLAGS = -Wall -O3 -DROOT_USE -fPIC -I'+self.main.configLinux.root_inc_path+' -I./../')
         if self.libZIP:
             file.write(' -DZIP_USE')
         if self.libDelphes:
@@ -313,7 +314,7 @@ class LibraryWriter():
             file.write(' -DDELFES_USE')
         if self.libFASTJET:
             file.write(' -DFASTJET_USE')
-            file.write(' $(CXXFASTJET)')
+ #           file.write(' $(CXXFASTJET)')
         file.write('\n')
         if self.fortran:
             file.write('FC = gfortran\n')
@@ -450,8 +451,8 @@ class LibraryWriter():
         # Closing the file
         file.close()
 
-        JobWriter.WriteSetupFile(True,self.path+'/SampleAnalyzer',self.ma5dir,False)
-        JobWriter.WriteSetupFile(False,self.path+'/SampleAnalyzer',self.ma5dir,False)
+        JobWriter.WriteSetupFile(True,self.path+'/SampleAnalyzer',self.ma5dir,False,self.main.configLinux,self.main.isMAC)
+        JobWriter.WriteSetupFile(False,self.path+'/SampleAnalyzer',self.ma5dir,False,self.main.configLinux,self.main.isMAC)
 
         return True
 

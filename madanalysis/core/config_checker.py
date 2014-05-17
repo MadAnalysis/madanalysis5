@@ -39,9 +39,10 @@ class ConfigChecker:
                 container.append(item)
         
 
-    def __init__(self,configLinux,ma5dir,script=False):
+    def __init__(self,configLinux,ma5dir,script=False,isMAC=False):
 
         # Getting parameter from the main program
+        self.isMAC=isMAC
         self.configLinux=configLinux
         self.ma5dir=ma5dir
         self.script=script
@@ -106,10 +107,8 @@ class ConfigChecker:
                 self.configLinux.useroptions.zlib_libs=words[1]
             elif words[0]=='fastjet_veto':
                 self.configLinux.useroptions.fastjet_veto=words[1]
-            elif words[0]=='fastjet_includes':
-                self.configLinux.useroptions.fastjet_includes=words[1]
-            elif words[0]=='fastjet_libs':
-                self.configLinux.useroptions.fastjet_libs=words[1]
+            elif words[0]=='fastjet_bin_path':
+                self.configLinux.useroptions.fastjet_bin_path=words[1]
             elif words[0]=='pdflatex_veto':
                 self.configLinux.useroptions.pdflatex_veto=words[1]
             elif words[0]=='latex_veto':
@@ -159,6 +158,7 @@ class ConfigChecker:
                 
         
     def fillHeaders(self):
+
         # Filling container with paths included in CPLUS_INCLUDE_PATH
         try:
             cplus_include_path = os.environ['CPLUS_INCLUDE_PATH'].split(':')
@@ -216,76 +216,60 @@ class ConfigChecker:
         # Checking if ROOT is present
         self.PrintLibrary('Root')
 
-        # Trying to call root-config
-        rootdirs = commands.getstatusoutput('root-config --libdir --incdir')
-        if rootdirs[0]>0:
-            self.PrintFAIL(warning=False)
-            logging.error('ROOT module called "root-config" is not detected.\n'\
-		          +'Two explanations :n'\
-		          +' - ROOT is not installed. You can download it '\
-		          +'from http://root.cern.ch\n'\
-		          +' - ROOT binary folder must be placed in the '\
-                          +'global environment variable $PATH')
-            return False
+        # Does the user force the ROOT path
+        force1=False
+        force2=False
+        if self.configLinux.useroptions.root_includes!='0':
+            self.configLinux.root_inc_path=self.configLinux.useroptions.root_includes
+            force1=True
+        if self.configLinux.useroptions.root_libs!='0':
+            self.configLinux.root_lib_path=self.configLinux.useroptions.root_libs
+            force2=True
+        force=force1 and force2
 
-        # Extracting ROOT library and header path
-        root_tmp = rootdirs[1].split() 
-        self.includes.append(root_tmp[1])
-        self.libs.append(root_tmp[0])
-        os.environ['LD_LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH'] + \
-                    		        ":" + root_tmp[0]
-        os.environ['DYLD_LIBRARY_PATH'] = os.environ['DYLD_LIBRARY_PATH'] + \
-                    		        ":" + root_tmp[0]
-        os.environ['LIBRARY_PATH'] = os.environ['LIBRARY_PATH'] + \
-                    		        ":" + root_tmp[0]
-        os.environ['CPLUS_INCLUDE_PATH'] = os.environ['CPLUS_INCLUDE_PATH'] + \
-                    		        ":" + root_tmp[1]
+        # Trying to call root-config
+        if not force:
+
+            # Using root-config
+            rootdirs = commands.getstatusoutput('root-config --libdir --incdir')
+            if rootdirs[0]>0:
+                self.PrintFAIL(warning=False)
+                logging.error('ROOT module called "root-config" is not detected.\n'\
+		              +'Two explanations :n'\
+		              +' - ROOT is not installed. You can download it '\
+		              +'from http://root.cern.ch\n'\
+		              +' - ROOT binary folder must be placed in the '\
+                              +'global environment variable $PATH')
+                return False
+
+            # Extracting ROOT library and header path
+            root_tmp = rootdirs[1].split()
+            self.configLinux.root_inc_path = root_tmp[1]
+            self.configLinux.root_lib_path = root_tmp[0]
 
         # Adding ROOT library path to Python path
-        sys.path.append(root_tmp[0])
+        sys.path.append(self.configLinux.root_inc_path)
 
-        # Looking for libPyROOT.so
-        find=False
-        for item in self.libs:
-            files=glob.glob(item+"/libPyROOT.so")
-            if len(files)!=0:
-	        self.configLinux.libraries['PyROOT']=files[0]+":"+str(os.stat(files[0]).st_mtime)
-    	        find=True
-   	        break
-        if not find:
-            self.PrintFAIL(warning=False)
-	    logging.error("ROOT library called 'libPyROOT.so' not found. Please check that ROOT is properly installed.")
-            return False
-
-        # Looking for ROOT.py
-        find=False
-        for item in self.libs:
-            files=glob.glob(item+"/ROOT.py")
-            if len(files)!=0:
-	        self.configLinux.libraries['ROOT']=files[0]+":"+str(os.stat(files[0]).st_mtime)
-	        find=True
-	        break
-        if not find:
-            self.PrintFAIL(warning=False)
-	    logging.error("ROOT file called 'ROOT.py' not found. Please check that ROOT is properly installed.")
-            return False
-
-        # Looking for TH1F.h
-        find=False
-        for item in self.includes:
-            files=glob.glob(item+"/TH1F.h")
-            if len(files)!=0:
-	        self.configLinux.headers['ROOT']=files[0]+":"+str(os.stat(files[0]).st_mtime)
-	        find=True
-	        break
-        if not find:
-            self.PrintFAIL(warning=False)
-	    logging.error("ROOT headers are not found. " +\
-		 "Please check that ROOT is properly installed.")
-            return False
+        # Check: looking for files
+        FilesToFind=[self.configLinux.root_lib_path+'/libPyROOT.so', \
+                     self.configLinux.root_lib_path+'/ROOT.py', \
+                     self.configLinux.root_inc_path+'/TH1F.h']
+        for file in FilesToFind:
+            if os.path.isfile(file):
+                self.configLinux.libraries[file.split('/')[-1]]=file+":"+str(os.stat(file).st_mtime)
+            else:
+                self.PrintFAIL(warning=False)
+	        logging.error("ROOT library called '"+file+"' is not found")
+                logging.error("Please check that ROOT is properly installed.")
+                return False
+            
+        # Root Install
         self.PrintOK()
+        return True
 
 
+    def checkPyROOT(self):
+    
         # Loading ROOT library
         self.PrintLibrary("PyRoot libraries")
         try :
@@ -341,6 +325,7 @@ class ConfigChecker:
             self.configLinux.gcc_version = gcc_version[1]
             return True
 
+
     def checkMake(self):
         # Checking GNU Make
         self.PrintLibrary('GNU Make')
@@ -363,6 +348,7 @@ class ConfigChecker:
             self.configLinux.make_version = line
             return True
 
+
     def checkGF(self):
         self.PrintLibrary("gfortran")
         gfortran_version = commands.getstatusoutput('gfortran -dumpversion')
@@ -376,8 +362,7 @@ class ConfigChecker:
                  gfortran_version = gfor.group(1)
              else:
                  self.PrintFAIL(warning=True)
-                 logging.warning('gfortran compiler not found.' + \
-                   ' aMCatNLO cannot be used.')
+                 logging.warning('gfortran compiler not found.')
                  return True
         ver = gfortran_version.split('.')
         if (int(ver[0])<4) or (int(ver[0])==4 and int(ver[1])<4):
@@ -390,9 +375,43 @@ class ConfigChecker:
         return True
 
 
+    def FindLibraryWithPattern(self,pattern,files):
+        return self.FindFilesWithPattern(self.libs,pattern,files)
+
+    def FindHeader(self,file):
+        return self.FindFilesWithPattern(self.includes,file,[file])
+
+    def FindFilesWithPattern(self,paths,pattern,targets):
+        result_files=[]
+        result_paths=[]
+        for path in paths:
+            rawfiles=glob.glob(path+"/"+pattern)
+
+            filtered_files=[]
+            for file in rawfiles:
+                for target in targets:
+                    if file.endswith('/'+target):
+                        filtered_files.append(file)
+
+            if len(filtered_files)!=0:
+                result_files.extend(filtered_files)
+            for item in filtered_files:
+                result_paths.append(path)
+
+        if len(result_files)==0:
+            return "", ""
+        else:
+            return os.path.normpath(result_paths[0]), os.path.normpath(result_files[0])
+    
+
     def checkZLIB(self):
 
         self.PrintLibrary("zlib library")
+
+        # Name of the dynamic lib
+        libnames=['libz.so','libz.a']
+        if self.isMAC:
+            libnames.append['libz.dylib']
         
         # User veto
         if self.configLinux.useroptions.zlib_veto=='1':
@@ -400,69 +419,68 @@ class ConfigChecker:
 	    logging.warning("Library called 'zlib' disabled. Gzip format will be disabled.")
             return False
 
-        # Checking library libz.so
-        find=False
-        for item in self.libs:
-            files=glob.glob(item+"/libz.so")
-            files.extend(glob.glob(item+"/libz.a"))
-            files.extend(glob.glob(item+"/libz.dylib"))
-            if len(files)!=0:
-	        self.configLinux.libraries['ZLib']=files[0]+":"+str(os.stat(files[0]).st_mtime)
-   	        find=True
-                os.environ['LD_LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH'] + \
-                    		        ":" + item
-                os.environ['DYLD_LIBRARY_PATH'] = os.environ['DYLD_LIBRARY_PATH'] + \
-                    		        ":" + item
-                os.environ['LIBRARY_PATH'] = os.environ['LIBRARY_PATH'] + \
-                    		        ":" + item
-	        break
+        # Does the user force the paths?
+        force1=False
+        force2=False
+        if self.configLinux.useroptions.zlib_includes!="0":
+            self.configLinux.zlib_inc_path=self.configLinux.useroptions.zlib_includes
+            force1=True
+        if self.configLinux.useroptions.zlib_libs!="0":
+            self.configLinux.zlib_lib_path=self.configLinux.useroptions.zlib_libraries
+            force2=True
+        force=force1 and force2
+        
+        # Checking if zlib has been installed by MA5
+        ma5installation = False
+        if not force:
+            if os.path.isdir(self.ma5dir+'/tools/zlib'):
+                self.configLinux.zlib_inc_path=self.ma5dir+'/tools/zlib/'
+                self.configLinux.zlib_lib_path=self.ma5dir+'/tools/zlib/'
+                ma5installation = True
 
-        # If not, test if it is there locally 
-        if not find: 
-            item = self.ma5dir+'/tools/zlib/lib/'
-            files=glob.glob(item+"/libz.so")
-            files.extend(glob.glob(item+"/libz.a"))
-            files.extend(glob.glob(item+"/libz.dylib"))
-            if len(files)!=0:
-	        self.configLinux.libraries['ZLib']=files[0]+":"+str(os.stat(files[0]).st_mtime)
-   	        find=True
-                os.environ['LD_LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH'] + \
-                    		        ":" + item
-                os.environ['DYLD_LIBRARY_PATH'] = os.environ['DYLD_LIBRARY_PATH'] + \
-                    		        ":" + item
-                os.environ['LIBRARY_PATH'] = os.environ['LIBRARY_PATH'] + \
-                    		        ":" + item
-        # Not fail -> Warning
-        if not find:
-            self.PrintFAIL(warning=True)
-	    logging.warning("Library called 'zlib' not found. Gzip format will be disabled.")
-            logging.warning("To enable this format, please type 'install zlib' package.")
-            return False
+        # Check if the libraries and headers are available
+        if force or ma5installation:
 
-	# Checking header file zlib.h
-        find=False
-        for item in self.includes:
-            files=glob.glob(item+"/zlib.h")
-            if len(files)!=0:
-  	        self.configLinux.headers['ZLib']=files[0]+":"+str(os.stat(files[0]).st_mtime)
-	        find=True
-                os.environ['CPLUS_INCLUDE_PATH'] = os.environ['CPLUS_INCLUDE_PATH'] + ":" + item
-   	        break
+            # header
+            if not os.path.isfile(self.configLinux.zlib_inc_path+'/zlib.h'):
+                self.PrintFAIL(warning=True)
+	        logging.warning("Header file called '"+self.configLinux.zlib_inc_path+"'/zlib.h not found. Gzip format will be disabled.")
+                logging.warning("To enable this format, please type 'install zlib' package.")
+                return False
 
-        # If not, test if it is there locally 
-        if not find: 
-            find=os.path.isfile(self.ma5dir+'/tools/zlib/include/zlib.h')
-            if find:
-                os.environ['CPLUS_INCLUDE_PATH'] = os.environ['CPLUS_INCLUDE_PATH'] + ":" + \
-                                                   self.ma5dir+'/tools/zlib/include/'
+            # lib
+            mypath, myfile = self.FindFilesWithPattern([self.configLinux.zlib_lib_path],"libz.*",libnames)
+            self.configLinux.zlib_lib=myfile
+            if self.configLinux.zlib_lib=="":
+                self.PrintFAIL(warning=True)
+	        logging.warning("Zlib library not found in "+self.configLinux.zlib_lib_path+" folder. Gzip format will be disabled.")
+                logging.warning("To enable this format, please type 'install zlib' package.")
+                return False
 
-        if not find:
-            self.PrintFAIL(warning=True)
-	    logging.warning("Header file called 'zlib.h' not found. Gzip format will be disabled.")
-            logging.warning("To enable this format, please type 'install zlib' package.")
-            return False
-        else:
-            self.PrintOK()
+        # Checking zlib can be found in other folders
+        if not force and not ma5installation:
+
+            # header
+            mypath, myfile = self.FindHeader('zlib.h')
+            self.configLinux.zlib_inc_path = mypath
+            if self.configLinux.zlib_inc_path=="":
+                self.PrintFAIL(warning=True)
+  	        logging.warning("Header file called 'zlib.h' not found. Gzip format will be disabled.")
+                logging.warning("To enable this format, please type 'install zlib' package.")
+                return False
+            
+            # lib
+            mypath, myfile = self.FindLibraryWithPattern('libz.*',libnames)
+            self.configLinux.zlib_lib_path = mypath
+            self.configLinux.zlib_lib      = myfile
+            if self.configLinux.zlib_lib_path=="":
+                self.PrintFAIL(warning=True)
+                logging.warning("Library called 'zlib' not found. Gzip format will be disabled.")
+                logging.warning("To enable this format, please type 'install zlib' package.")
+                return False
+
+        self.configLinux.libraries['ZLib']=self.configLinux.zlib_lib+":"+str(os.stat(self.configLinux.zlib_lib).st_mtime)
+        self.PrintOK()
  
         return True
 
@@ -470,126 +488,170 @@ class ConfigChecker:
     def checkDelphes(self):
 
         self.PrintLibrary("delphes library")
-        
+
+        # Name of the dynamic lib
+        libnames=['libDelphes.so','libDelphes.a']
+        if self.isMAC:
+            libnames.append['libDelphes.dylib']
+
         # User veto
         if self.configLinux.useroptions.delphes_veto=='1':
             self.PrintFAIL(warning=True)
 	    logging.warning("Library called 'delphes' disabled. Delphes ROOT format will be disabled.")
             return False
 
-        # Checking library libDelphes.so
-        find=False
-        for item in self.libs:
-            files=glob.glob(item+"/libDelphes.so")
-            files.extend(glob.glob(item+"/libDelphes.a"))
-            files.extend(glob.glob(item+"/libDelphes.dylib"))
-            files = [ x for x in files if "delfes" not in x ]
-            if len(files)!=0:
-	        self.configLinux.libraries['Delphes']=files[0]+":"+str(os.stat(files[0]).st_mtime)
-   	        find=True
-                os.environ['LD_LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH'] + \
-                    		        ":" + item
-                os.environ['DYLD_LIBRARY_PATH'] = os.environ['DYLD_LIBRARY_PATH'] + \
-                    		        ":" + item
-                os.environ['LIBRARY_PATH'] = os.environ['LIBRARY_PATH'] + \
-                    		        ":" + item
-	        break
+        # Does the user force the paths?
+        force1=False
+        force2=False
+        if self.configLinux.useroptions.delphes_includes!="0":
+            self.configLinux.delphes_inc_paths.append(self.configLinux.useroptions.delphes_includes)
+            self.configLinux.delphes_inc_paths.append(self.configLinux.useroptions.delphes_includes+'/external/')
+            force1=True
+        if self.configLinux.useroptions.delphes_libs!="0":
+            self.configLinux.delphes_lib_paths.append(self.configLinux.useroptions.delphes_libraries)
+            force2=True
+        force=force1 and force2
 
-        # If not, test if it is there locally 
-        if not find: 
-            item = self.ma5dir+'/tools/delphes'
-            files=glob.glob(item+"/libDelphes.so")
-            files.extend(glob.glob(item+"/libDelphes.a"))
-            files.extend(glob.glob(item+"/libDelphes.dylib"))
-            if len(files)!=0:
-	        self.configLinux.libraries['Delphes']=files[0]+":"+str(os.stat(files[0]).st_mtime)
-   	        find=True
-                os.environ['LD_LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH'] + \
-                    		        ":" + item
-                os.environ['DYLD_LIBRARY_PATH'] = os.environ['DYLD_LIBRARY_PATH'] + \
-                    		        ":" + item
-                os.environ['LIBRARY_PATH'] = os.environ['LIBRARY_PATH'] + \
-                    		        ":" + item
-        # Not fail -> Warning
-        if not find:
-            self.PrintFAIL(warning=True)
-	    logging.warning("Library called 'delphes' not found. Delphes ROOT format will be disabled.")
-            logging.warning("To enable this format, please type 'install delphes'.")
-            return False
+        # Checking if Delphes has been installed by MA5
+        ma5installation = False
+        if not force:
+            if os.path.isdir(self.ma5dir+'/tools/delphes') and \
+               os.path.isdir(self.ma5dir+'/tools/delphes/external'):
+                self.configLinux.delphes_inc_paths.append(self.ma5dir+'/tools/delphes/')
+                self.configLinux.delphes_inc_paths.append(self.ma5dir+'/tools/delphes/external/')
+                self.configLinux.delphes_lib_paths.append(self.ma5dir+'/tools/delphes/')
+                ma5installation = True
 
-	# Checking header file 
-        find=False
-        for item in self.includes:
-            files=glob.glob(item+"/modules/ParticlePropagator.h")
-            files = [ x for x in files if "delfes" not in x ]
-            if len(files)!=0:
-  	        self.configLinux.headers['Delphes']=files[0]+":"+str(os.stat(files[0]).st_mtime)
-	        find=True
-                os.environ['CPLUS_INCLUDE_PATH'] = os.environ['CPLUS_INCLUDE_PATH'] + ":" + item
-   	        break
+        # Check if the libraries and headers are available
+        if force or ma5installation:
 
-        # If not, test if it is there locally 
-        if not find: 
-            find=os.path.isfile(self.ma5dir+'/tools/delphes/modules/ParticlePropagator.h')
-            if find:
-                os.environ['CPLUS_INCLUDE_PATH'] = os.environ['CPLUS_INCLUDE_PATH'] + ":" + \
-                                                   self.ma5dir+'/tools/delphes/'
-                os.environ['CPLUS_INCLUDE_PATH'] = os.environ['CPLUS_INCLUDE_PATH'] + ":" + \
-                                                   self.ma5dir+'/tools/delphes/external/'
+            # header
+            if not os.path.isfile(self.configLinux.delphes_inc_paths[0]+'/modules/ParticlePropagator.h'):
+                self.PrintFAIL(warning=True)
+	        logging.warning("Header file called '"+self.configLinux.delphes_inc_paths[0]+"/modules/ParticlePropagator.h' not found." +\
+                                "Delphes ROOT format will be disabled.")
+                logging.warning("To enable this format, please type 'install delphes' package.")
+                return False
 
-        if not find:
-            self.PrintFAIL(warning=True)
-	    logging.warning("Header file called 'modules/ParticlePropagator.h' not found. Delphes ROOT format will be disabled.")
-            logging.warning("To enable this format, please type 'install delphes' package.")
-            return False
-        else:
-            self.PrintOK()
+            # lib
+            mypath, myfile = self.FindFilesWithPattern(self.configLinux.delphes_lib_paths,"libDelphes.*",libnames)
+            self.configLinux.delphes_lib=myfile
+            if self.configLinux.delphes_lib=="":
+                self.PrintFAIL(warning=True)
+	        logging.warning("Delphes library not found in "+self.configLinux.delphes_lib_paths[0]+" folder. Delphes ROOT format will be disabled.")
+                logging.warning("To enable this format, please type 'install delphes' package.")
+                return False
+
+        # Checking Delphes can be found in other folders
+        if not force and not ma5installation:
+
+            # header
+            mypath, myfile = self.FindHeader('/modules/ParticlePropagator.h')
+            self.delphes_inc_path = mypath
+            if self.delphes_inc_path=="":
+                self.PrintFAIL(warning=True)
+  	        logging.warning("Header file called '/modules/ParticlePropagator.h' not found. Delphes ROOT format will be disabled.")
+                logging.warning("To enable this format, please type 'install delphes' package.")
+                return False
+            
+            # lib
+            mypath, myfile = self.FindLibraryWithPattern('libDelphes.*',libnames)
+            self.configLinux.delphes_lib_path = mypath
+            self.configLinux.delphes_lib      = myfile
+            if self.configLinux.delphes_lib_path=="":
+                self.PrintFAIL(warning=True)
+                logging.warning("Delphes library not found. Delphes format will be disabled.")
+                logging.warning("To enable this format, please type 'install delphes' package.")
+                return False
+
+        self.configLinux.libraries['Delphes']=self.configLinux.delphes_lib+":"+str(os.stat(self.configLinux.delphes_lib).st_mtime)
+        self.PrintOK()
  
         return True
 
 
     def checkDelfes(self):
 
+#        self.PrintLibrary("delfes library")
+
+        # Name of the dynamic lib
+        libnames=['libDelphes.so','libDelphes.a']
+        if self.isMAC:
+            libnames.append['libDelphes.dylib']
+
         # User veto
         if self.configLinux.useroptions.delfes_veto=='1':
 #            self.PrintFAIL(warning=True)
-#	    logging.warning("Library called 'delphes' disabled. Delphes ROOT format will be disabled.")
+#	    logging.warning("Library called 'delfes' disabled. Delfes ROOT format will be disabled.")
             return False
 
-        # Checking library libDelphes.so but lcoally only
-        find=False
-        item = self.ma5dir+'/tools/delfes'
-        files=glob.glob(item+"/libDelphes.so")
-        files.extend(glob.glob(item+"/libDelphes.a"))
-        files.extend(glob.glob(item+"/libDelphes.dylib"))
-        if len(files)!=0:
-	    self.configLinux.libraries['Delfes']=files[0]+":"+str(os.stat(files[0]).st_mtime)
-   	    find=True
-            os.environ['LD_LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH'] + \
-                		        ":" + item
-            os.environ['DYLD_LIBRARY_PATH'] = os.environ['DYLD_LIBRARY_PATH'] + \
-                		        ":" + item
-            os.environ['LIBRARY_PATH'] = os.environ['LIBRARY_PATH'] + \
-                		        ":" + item
+        # Does the user force the paths?
+        force1=False
+        force2=False
+        if self.configLinux.useroptions.delfes_includes!="0":
+            self.configLinux.delfes_inc_paths.append(self.configLinux.useroptions.delfes_includes)
+            self.configLinux.delfes_inc_paths.append(self.configLinux.useroptions.delfes_includes+'/external/')
+            force1=True
+        if self.configLinux.useroptions.delfes_libs!="0":
+            self.configLinux.delfes_lib_paths.append(self.configLinux.useroptions.delfes_libraries)
+            force2=True
+        force=force1 and force2
 
-        # Not fail -> not telling anything
-        if not find:
-            return False
+        # Checking if delfes has been installed by MA5
+        ma5installation = False
+        if not force:
+            if os.path.isdir(self.ma5dir+'/tools/delfes') and \
+               os.path.isdir(self.ma5dir+'/tools/delfes/external'):
+                self.configLinux.delfes_inc_paths.append(self.ma5dir+'/tools/delfes/')
+                self.configLinux.delfes_inc_paths.append(self.ma5dir+'/tools/delfes/external/')
+                self.configLinux.delfes_lib_paths.append(self.ma5dir+'/tools/delfes/')
+                ma5installation = True
 
-	# Checking header file 
-        find=False
-        find=os.path.isfile(self.ma5dir+'/tools/delfes/modules/ParticlePropagator.h')
-        if find:
-            os.environ['CPLUS_INCLUDE_PATH'] = os.environ['CPLUS_INCLUDE_PATH'] + ":" + \
-                                               self.ma5dir+'/tools/delfes/'
-            os.environ['CPLUS_INCLUDE_PATH'] = os.environ['CPLUS_INCLUDE_PATH'] + ":" + \
-                                                   self.ma5dir+'/tools/delfes/external/'
+        # Check if the libraries and headers are available
+        if force or ma5installation:
 
-        if not find:
-            return False
-        else:
-            pass
+            # header
+            if not os.path.isfile(self.configLinux.delfes_inc_paths[0]+'/modules/ParticlePropagator.h'):
+#                self.PrintFAIL(warning=True)
+#	        logging.warning("Header file called '"+self.configLinux.delfes_inc_paths[0]+"/modules/ParticlePropagator.h' not found." +\
+#                                "Delfes ROOT format will be disabled.")
+#                logging.warning("To enable this format, please type 'install delfes' package.")
+                return False
 
+            # lib
+            mypath, myfile = self.FindFilesWithPattern(self.configLinux.delfes_lib_paths,"libDelphes.*",libnames)
+            self.configLinux.delfes_lib=myfile
+            if self.configLinux.delfes_lib=="":
+#                self.PrintFAIL(warning=True)
+#	         logging.warning("Delfes library not found in "+self.configLinux.delfes_lib_paths[0]+" folder. Delfes ROOT format will be disabled.")
+#                logging.warning("To enable this format, please type 'install delfes' package.")
+                return False
+
+        # Checking Delfes can be found in other folders
+        if not force and not ma5installation:
+
+            # header
+            mypath, myfile = self.FindHeader('/modules/ParticlePropagator.h')
+            self.delfes_inc_path = mypath
+            if self.delfes_inc_path=="":
+#                self.PrintFAIL(warning=True)
+#                logging.warning("Header file called '/modules/ParticlePropagator.h' not found. Delfes ROOT format will be disabled.")
+#                logging.warning("To enable this format, please type 'install delfes' package.")
+                return False
+            
+            # lib
+            mypath, myfile = self.FindLibraryWithPattern('libDelphes.*',libnames)
+            self.configLinux.delfes_lib_path = mypath
+            self.configLinux.delfes_lib      = myfile
+            if self.configLinux.delfes_lib_path=="":
+#                self.PrintFAIL(warning=True)
+#                logging.warning("Delfes library not found. Delfes format will be disabled.")
+#                logging.warning("To enable this format, please type 'install delfes' package.")
+                return False
+
+        self.configLinux.libraries['Delfes']=self.configLinux.delfes_lib+":"+str(os.stat(self.configLinux.delfes_lib).st_mtime)
+#        self.PrintOK()
+ 
         return True
 
 
@@ -611,7 +673,6 @@ class ConfigChecker:
     def checkFastJet(self):
 
         self.PrintLibrary("FastJet")
-
         self.configLinux.fastjet_version = "none"
 
         # User veto
@@ -620,29 +681,45 @@ class ConfigChecker:
 	    logging.warning("The FastJet package is disabled. JetClustering algorithms are disabled.")
             return False
 
-        # Checking if fastjet is installed on the system
-        find = False
-        for item in self.paths:
-            files=glob.glob(item+"/fastjet-config")
-            files.extend(glob.glob(item+"/fastjet-config"))
-            if(len(files))!=0:
-               find = True
-               self.configLinux.fastjet_version = commands.getstatusoutput('fastjet-config --version')[1]
+        # Does the user force the paths?
+        force=False
+        if self.configLinux.useroptions.fastjet_bin_path!="0":
+            self.configLinux.fastjet_bin_path.append(self.configLinux.useroptions.fastjet_bin_path)
+            force=True
 
-        # If not, test if it is there locally 
-        if not find: 
-            find=os.path.isfile(self.ma5dir+'/tools/fastjet/bin/fastjet-config')
+        # Checking if FastJet has been installed by MA5
+        ma5installation = False
+        if not force:
+            if os.path.isdir(self.ma5dir+'/tools/fastjet/bin'):
+                self.configLinux.fastjet_bin_path=self.ma5dir+'/tools/fastjet/bin/'
+                ma5installation = True
 
-        # If not there, print warning message; if there -> test it
-        if not find:
-            self.PrintFAIL(warning=True)
-	    logging.warning("The FastJet package not found. JetClustering algorithms are disabled.")
-            logging.warning("To enable this functionnality, please type 'install fastjet'.")
-            return False
-        else:
-            self.configLinux.fastjet_version = commands.getstatusoutput(self.ma5dir+'/tools/fastjet/bin/fastjet-config --version')[1]
-            os.environ['PATH'] = self.ma5dir+'/tools/fastjet/bin/:'+os.environ['PATH']
-            self.PrintOK()
+        # Check if the libraries and headers are available
+        if force or ma5installation:
+
+            if not os.path.isfile(self.configLinux.fastjet_bin_path+'/fastjet-config'):
+                self.PrintFAIL(warning=True)
+	        logging.warning("The FastJet package not found. JetClustering algorithms are disabled.")
+                logging.warning("To enable this functionnality, please type 'install fastjet'.")
+                return False
+                
+        # Checking FastJet can be found in other folders
+        if not force and not ma5installation:
+
+            for item in self.paths:
+                files=glob.glob(item+"/fastjet-config")
+                files.extend(glob.glob(item+"/fastjet-config"))
+                if(len(files))!=0:
+                    self.configLinux.fastjet_bin_path=item
+                    break
+            if self.configLinux.fastjet_bin_path=='':
+                self.PrintFAIL(warning=True)
+	        logging.warning("The FastJet package not found. JetClustering algorithms are disabled.")
+                logging.warning("To enable this functionnality, please type 'install fastjet'.")
+                return False
+
+        self.configLinux.fastjet_version = commands.getstatusoutput(self.ma5dir+'/tools/fastjet/bin/fastjet-config --version')[1]
+        self.PrintOK()
 
         return True
 

@@ -29,9 +29,6 @@
 //SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringPlugin.h"
 
-//FastJet headers
-#include <fastjet/CDFMidPointPlugin.hh>
-
 namespace MA5
 {
 

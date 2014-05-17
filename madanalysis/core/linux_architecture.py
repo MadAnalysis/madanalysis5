@@ -39,8 +39,7 @@ class UserOptions:
         self.zlib_includes    = '0'
         self.zlib_libs        = '0'
         self.fastjet_veto     = '0'
-        self.fastjet_includes = '0'
-        self.fastjet_libs     = '0'
+        self.fastjet_bin_path = '0'
         self.pdflatex_veto    = '0'
         self.latex_veto       = '0'
         self.dvipdf_veto      = '0'
@@ -58,8 +57,7 @@ class UserOptions:
         logging.info(" ZLIB header path     = " + str(self.zlib_includes))
         logging.info(" ZLIB library path    = " + str(self.zlib_libs))
         logging.info(" FASTJET veto         = " + str(self.fastjet_veto))
-        logging.info(" FASTJET header path  = " + str(self.fastjet_includes))
-        logging.info(" FASTJET library path = " + str(self.fastjet_libs))
+        logging.info(" FASTJET bin path     = " + str(self.fastjet_bin_path))
         logging.info(" PDFLATEX veto        = " + str(self.pdflatex_veto))
         logging.info(" LATEX veto           = " + str(self.latex_veto))
         logging.info(" DVIPDF veto          = " + str(self.dvipdf_veto))
@@ -77,8 +75,7 @@ class UserOptions:
         file.write(self.zlib_includes+"\n")
         file.write(self.zlib_libs+"\n")
         file.write(self.fastjet_veto+"\n")
-        file.write(self.fastjet_includes+"\n")
-        file.write(self.fastjet_libs+"\n")
+        file.write(self.fastjet_bin_path+"\n")
         file.write(self.pdflatex_veto+"\n")
         file.write(self.latex_veto+"\n")
         file.write(self.dvipdf_veto+"\n")
@@ -96,8 +93,7 @@ class UserOptions:
         self.zlib_includes    = file.readline().replace('\n','')
         self.zlib_libs        = file.readline().replace('\n','')
         self.fastjet_veto     = file.readline().replace('\n','')
-        self.fastjet_includes = file.readline().replace('\n','')
-        self.fastjet_libs     = file.readline().replace('\n','')
+        self.fastjet_bin_path = file.readline().replace('\n','')
         self.pdflatex_veto    = file.readline().replace('\n','')
         self.latex_veto       = file.readline().replace('\n','')
         self.dvipdf_veto      = file.readline().replace('\n','')
@@ -127,9 +123,7 @@ class UserOptions:
             return False
         if self.fastjet_veto != other.fastjet_veto:
             return False
-        if self.fastjet_includes != other.fastjet_includes:
-            return False
-        if self.fastjet_libs != other.fastjet_libs:
+        if self.fastjet_bin_path != other.fastjet_bin_path:
             return False
         return True
 
@@ -150,6 +144,19 @@ class LinuxArchitecture:
         self.libraries        = {}
         self.headers          = {}
         self.editor           = ""
+
+        self.root_inc_path=""
+        self.root_lib_path=""
+        self.zlib_inc_path=""
+        self.zlib_lib_path=""
+        self.zlib_lib=""
+        self.delphes_inc_paths=[]
+        self.delphes_lib_paths=[]
+        self.delphes_lib=""
+        self.delfes_inc_paths=[]
+        self.delfes_lib_paths=[]
+        self.delfes_lib=""
+        self.fastjet_bin_path=""
 
     def Dump(self):
         logging.info(" User options")

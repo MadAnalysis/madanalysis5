@@ -443,7 +443,7 @@ class Main():
             logging.info("")
 
         # Initializing the config checker    
-        checker = ConfigChecker(self.configLinux,self.ma5dir,self.script)
+        checker = ConfigChecker(self.configLinux,self.ma5dir,self.script,self.isMAC)
         checker.checkTextEditor()
 
         # Reading user options
@@ -462,29 +462,45 @@ class Main():
             return False
         if not checker.checkROOT():
             return False
+        if not checker.checkPyROOT():
+            return False
 
         # Optional packages
         logging.info("Checking optional packages:")
-        if not checker.checkGF():
-            return False
-        self.libZIP = checker.checkZLIB()
+        self.libGF      = checker.checkGF()
+        self.libZIP     = checker.checkZLIB()
         self.libDelphes = checker.checkDelphes()
         self.libDelfes  = checker.checkDelfes()
         self.libFastJet = checker.checkFastJet()
-        self.pdflatex = checker.checkPdfLatex()
-        self.latex = checker.checkLatex()
+        self.pdflatex   = checker.checkPdfLatex()
+        self.latex      = checker.checkLatex()
         if self.latex:
             self.dvipdf = checker.checkdvipdf()
-#       COMMENTED BY BENJ: not used for the moment
-#        self.mcatnloutils = checker.checkMCatNLOUtils()
 
+        # Set PATH variable
+        self.configLinux.toPATH=[]
+        self.configLinux.toLDPATH=[]
+        self.configLinux.toLDPATH.append(self.ma5dir+'/tools/SampleAnalyzer/Lib/')
+        self.configLinux.toLDPATH.append(self.configLinux.root_lib_path)
+        if self.libFastJet:
+            self.configLinux.toPATH.append(self.configLinux.fastjet_bin_path)
+        if self.libZIP:
+            self.configLinux.toLDPATH.append(self.configLinux.zlib_lib_path)        
+        if self.libDelphes:
+            for path in self.configLinux.delphes_lib_paths:
+                self.configLinux.toLDPATH.append(path)        
+        if self.libDelfes:
+            for path in self.configLinux.delfes_lib_paths:
+                self.configLinux.toLDPATH.append(path)        
+
+        os.environ['PATH'] = os.environ['PATH'] + \
+                             ":" + ':'.join(self.configLinux.toPATH)
         os.environ['LD_LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH'] + \
-                                        ":" + self.ma5dir+'/tools/SampleAnalyzer/Lib/'
-        os.environ['DYLD_LIBRARY_PATH'] = os.environ['DYLD_LIBRARY_PATH'] + \
-                                        ":" + self.ma5dir+'/tools/SampleAnalyzer/Lib/'
-        os.environ['LIBRARY_PATH'] = os.environ['LIBRARY_PATH'] + \
-                                        ":" + self.ma5dir+'/tools/SampleAnalyzer/Lib/'
-            
+                                        ":" + ':'.join(self.configLinux.toLDPATH)
+        if self.isMAC:        
+            os.environ['DYLD_LIBRARY_PATH'] = os.environ['DYLD_LIBRARY_PATH'] + \
+                                        ":" + ':'.join(self.configLinux.toLDPATH)
+
         return True 
    
     def PrintOK(self):

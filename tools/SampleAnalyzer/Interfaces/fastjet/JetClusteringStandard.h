@@ -51,8 +51,7 @@ class JetClusteringStandard: public JetClusteringFastJet
   public :
 
     /// Constructor with algorithm
-    JetClusteringStandard(const fastjet::JetAlgorithm& Algo):
-                                                      JetClusteringFastJet(Algo) 
+    JetClusteringStandard(std::string Algo): JetClusteringFastJet(Algo) 
     {R_=0.5; p_=-1.;}
 
     /// Destructor

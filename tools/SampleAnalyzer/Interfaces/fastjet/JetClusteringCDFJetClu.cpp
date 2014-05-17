@@ -22,7 +22,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+//SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringCDFJetClu.h"
+
+//FastJet headers
+#include <fastjet/ClusterSequence.hh>
+#include <fastjet/PseudoJet.hh>
+#include <fastjet/CDFJetCluPlugin.hh>
+typedef fastjet::JetDefinition::Plugin FastJetPlugin;
 
 
 using namespace MA5;
@@ -106,7 +113,7 @@ bool JetClusteringCDFJetClu::Initialize(const std::map<std::string,std::string>&
   Plugin_ = new fastjet::CDFJetCluPlugin(R_, OverlapThreshold_, SeedThreshold_, Iratch_);
 
   // Creating jet definition
-  JetDefinition_ = fastjet::JetDefinition(Plugin_);  
+  JetDefinition_ = new fastjet::JetDefinition(Plugin_);  
 
   return true;
 }

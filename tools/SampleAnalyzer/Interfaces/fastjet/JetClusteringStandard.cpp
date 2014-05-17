@@ -22,7 +22,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+//SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringStandard.h"
+
+//FastJet headers
+#include <fastjet/ClusterSequence.hh>
+#include <fastjet/PseudoJet.hh>
 
 
 using namespace MA5;
@@ -93,9 +98,28 @@ bool JetClusteringStandard::Initialize(const std::map<std::string,std::string>& 
   }
 
   // Creating Jet Definition
-  if (JetAlgorithm_==fastjet::genkt_algorithm) 
-      JetDefinition_ = fastjet::JetDefinition(JetAlgorithm_, R_, p_);
-  else JetDefinition_ = fastjet::JetDefinition(JetAlgorithm_, R_);
+  if (JetAlgorithm_=="kt")
+  {
+      JetDefinition_ = new fastjet::JetDefinition(fastjet::kt_algorithm, R_);
+  }
+  else if (JetAlgorithm_=="antikt")
+  {
+      JetDefinition_ = new fastjet::JetDefinition(fastjet::antikt_algorithm, R_);
+  }
+  else if (JetAlgorithm_=="cambridge")
+  {
+      JetDefinition_ = new fastjet::JetDefinition(fastjet::cambridge_algorithm, R_);
+  }
+  else if (JetAlgorithm_== "genkt") 
+  {
+      JetDefinition_ = new fastjet::JetDefinition(fastjet::genkt_algorithm, R_, p_);
+  }
+  else
+  {
+    JetDefinition_ = 0;
+    ERROR << "No FastJet algorithm found with the name " << JetAlgorithm_ << endmsg;
+    return false;
+  }
 
   return true;
 }
@@ -103,20 +127,20 @@ bool JetClusteringStandard::Initialize(const std::map<std::string,std::string>& 
 
 void JetClusteringStandard::PrintParam()
 {
-  if (JetAlgorithm_==0) INFO << "Algorithm : kt" << endmsg;
-  else if (JetAlgorithm_==1) INFO << "Algorithm : Cambridge/Aachen" << endmsg;
-  else if (JetAlgorithm_==2) INFO << "Algorithm : anti kt" << endmsg;
-  else if (JetAlgorithm_==3) INFO << "Algorithm : generalized kt" << endmsg;
+  if (JetAlgorithm_=="kt") INFO << "Algorithm : kt" << endmsg;
+  else if (JetAlgorithm_=="cambridge") INFO << "Algorithm : Cambridge/Aachen" << endmsg;
+  else if (JetAlgorithm_=="antikt") INFO << "Algorithm : anti kt" << endmsg;
+  else if (JetAlgorithm_=="genkt") INFO << "Algorithm : generalized kt" << endmsg;
   INFO << "Parameters used :" << endmsg; 
   INFO << "R = " << R_ << "; p = " << p_ << "; Ptmin = " << Ptmin_ << endmsg;
 }
 
 std::string JetClusteringStandard::GetName()
 {
-  if (JetAlgorithm_==0) return "kt";
-  else if (JetAlgorithm_==1) return "Cambridge/Aachen";
-  else if (JetAlgorithm_==2) return "anti kt";
-  else if (JetAlgorithm_==3) return "generalized kt";
+  if (JetAlgorithm_=="kt") return "kt";
+  else if (JetAlgorithm_=="cambridge") return "Cambridge/Aachen";
+  else if (JetAlgorithm_=="antikt") return "anti kt";
+  else if (JetAlgorithm_=="genkt") return "generalized kt";
   return "unknown";
 }
 

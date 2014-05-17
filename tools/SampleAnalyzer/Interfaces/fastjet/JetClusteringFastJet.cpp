@@ -22,11 +22,22 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+//SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringFastJet.h"
 #include "SampleAnalyzer/Service/LoopService.h"
 
+//FastJet headers
+#include <fastjet/ClusterSequence.hh>
+#include <fastjet/PseudoJet.hh>
 
 using namespace MA5;
+
+
+JetClusteringFastJet::JetClusteringFastJet(std::string Algo)
+{ JetAlgorithm_=Algo; JetDefinition_=0}
+
+JetClusteringFastJet::~JetClusteringFastJet(); 
+{ if (JetDefinition_!=0) delete JetDefinition_; }
 
 
 void JetClusteringFastJet::GetFinalState(const MCParticleFormat* part, std::set<const MCParticleFormat*>& finalstates)

@@ -22,7 +22,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+//SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringSISCone.h"
+
+//FastJet headers
+#include <fastjet/ClusterSequence.hh>
+#include <fastjet/PseudoJet.hh>
+#include <fastjet/SISConePlugin.hh>
+typedef fastjet::JetDefinition::Plugin FastJetPlugin;
+
 
 
 using namespace MA5;
@@ -106,7 +114,7 @@ bool JetClusteringSISCone::Initialize(const std::map<std::string,std::string>& o
   Plugin_ = new fastjet::SISConePlugin(R_, OverlapThreshold_, NPassMax_, Protojet_ptmin_);
 
   // Creating jet definition
-  JetDefinition_ = fastjet::JetDefinition(Plugin_);  
+  JetDefinition_ = new fastjet::JetDefinition(Plugin_);  
 
   return true;
 }

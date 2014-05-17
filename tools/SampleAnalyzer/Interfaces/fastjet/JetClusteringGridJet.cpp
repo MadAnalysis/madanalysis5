@@ -22,7 +22,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+//SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringGridJet.h"
+
+//FastJet headers
+#include <fastjet/ClusterSequence.hh>
+#include <fastjet/PseudoJet.hh>
+#include <fastjet/GridJetPlugin.hh>
+typedef fastjet::JetDefinition::Plugin FastJetPlugin;
 
 
 using namespace MA5;
@@ -82,7 +89,7 @@ bool JetClusteringGridJet::Initialize(const std::map<std::string,std::string>& o
   Plugin_ = new fastjet::GridJetPlugin(Ymax_, RequestedGridSpacing_);
 
   // Creating jet definition
-  JetDefinition_ = fastjet::JetDefinition(Plugin_);  
+  JetDefinition_ = new fastjet::JetDefinition(Plugin_);  
 
   return true;
 }

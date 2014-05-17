@@ -29,9 +29,6 @@
 //SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringPlugin.h"
 
-//FastJet headers
-#include <fastjet/SISConePlugin.hh>
-
 namespace MA5
 {
 

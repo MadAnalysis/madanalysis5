@@ -33,9 +33,10 @@
 #include "SampleAnalyzer/Service/PDGService.h"
 #include "SampleAnalyzer/JetClustering/JetClustererBase.h"
 
-//FastJet headers
-#include <fastjet/ClusterSequence.hh>
-#include <fastjet/PseudoJet.hh>
+namespace fastjet
+{
+  class JetDefinition;
+}
 
 
 namespace MA5
@@ -49,10 +50,10 @@ class JetClusteringFastJet: public JetClustererBase
   protected :
 
     /// Jet clustering algorithm
-    fastjet::JetAlgorithm JetAlgorithm_;
+    std::string JetAlgorithm_;
 
     /// Jet definition
-    fastjet::JetDefinition JetDefinition_;
+    fastjet::JetDefinition* JetDefinition_;
 
 
 //---------------------------------------------------------------------------------
@@ -61,12 +62,10 @@ class JetClusteringFastJet: public JetClustererBase
   public :
 
     /// Constructor with algorithm
-    JetClusteringFastJet(const fastjet::JetAlgorithm& Algo)
-    { JetAlgorithm_=Algo; }
+    JetClusteringFastJet(std::string Algo);
 
     /// Destructor
-    virtual ~JetClusteringFastJet() 
-    { }
+    virtual ~JetClusteringFastJet(); 
 
     /// Jet clustering
     bool Execute(SampleFormat& mySample, EventFormat& myEvent);
