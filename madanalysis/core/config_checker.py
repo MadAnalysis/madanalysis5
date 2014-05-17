@@ -259,10 +259,25 @@ class ConfigChecker:
                 self.configLinux.libraries[file.split('/')[-1]]=file+":"+str(os.stat(file).st_mtime)
             else:
                 self.PrintFAIL(warning=False)
-	        logging.error("ROOT library called '"+file+"' is not found")
+	        logging.error("ROOT file called '"+file+"' is not found")
                 logging.error("Please check that ROOT is properly installed.")
                 return False
             
+        # Check: looking for files
+        FilesToFind=[self.configLinux.root_lib_path+'/ROOT.py', \
+                     self.configLinux.root_inc_path+'/ROOT.pyc']
+        found=False
+        for file in FilesToFind:
+            if os.path.isfile(file):
+                self.configLinux.libraries[file.split('/')[-1]]=file+":"+str(os.stat(file).st_mtime)
+                found=True
+                break
+        if not found:
+            self.PrintFAIL(warning=False)
+            logging.error("ROOT file called 'ROOT.py' or 'ROOT.pyc' is not found")
+            logging.error("Please check that ROOT is properly installed.")
+            return False
+
         # Root Install
         self.PrintOK()
         return True
