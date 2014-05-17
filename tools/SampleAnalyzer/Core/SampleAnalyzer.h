@@ -103,6 +103,14 @@ class SampleAnalyzer
   /// Adding Analyzer
   AnalyzerManager& AnalyzerList()
   { return fullAnalyses_; }
+  ReaderManager& ReaderList()
+  { return fullReaders_; }
+  WriterManager& WriterList()
+  { return fullWriters_; }
+  JetClustererManager& JetClustererList()
+  { return fullJetClusterers_; }
+  DetectorManager& DetectorSimList()
+  { return fullDetectors_; }
 
   /// Initialization of the SampleAnalyzer
   bool Initialize(int argc, char **argv, const std::string& filename,bool=false);

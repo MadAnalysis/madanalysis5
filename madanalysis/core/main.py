@@ -561,6 +561,7 @@ class Main():
         # Getting number of cores
         ncores = compiler.get_ncores2()
 
+        # Compiling the libraries
         for ind in range(0,len(libraries)):
             
             logging.info("   **********************************************************")
@@ -596,7 +597,7 @@ class Main():
                 sys.exit()
 
             # Checking
-            logging.info("     - Checking that library is properly built ...")
+            logging.info("     - Checking that the library is properly built ...")
             if not os.path.isfile(libraries[ind][3]):
                 logging.error("the library '"+libraries[ind][3]+"' is not produced.")
                 sys.exit()
@@ -612,6 +613,62 @@ class Main():
             self.PrintOK()
 
         logging.info("   **********************************************************")
+        logging.info("   Test program ")
+
+        # Writing a Makefile
+        logging.info("     - Writing a Makefile ...")
+        if not compiler.WriteMakefileForTest():
+            logging.error("test program building aborted.")
+            sys.exit()
+
+        # Cleaning the project
+        logging.info("     - Cleaning the project before building the program ...")
+        if not compiler.MrProper('test',self.ma5dir+'/tools/SampleAnalyzer/Test'):
+            logging.error("test program building aborted.")
+            sys.exit()
+
+        # Compiling
+        logging.info("     - Compiling the source files ...")
+        if not compiler.Compile(ncores,'test',self.ma5dir+'/tools/SampleAnalyzer/Test'):
+            logging.error("test program building aborted.")
+            sys.exit()
+
+        # Linking
+        logging.info("     - Linking the program ...")
+        if not compiler.Link('test',self.ma5dir+'/tools/SampleAnalyzer/Test'):
+            logging.error("test program building aborted.")
+            sys.exit()
+
+        # Checking
+        logging.info("     - Checking that the program is properly built ...")
+        filename=self.ma5dir+'/tools/SampleAnalyzer/Test/SampleAnalyzerTest'
+        if not os.path.isfile(filename):
+            logging.error("the test program '"+filename+"' is not produced.")
+            sys.exit()
+
+        # Cleaning the project
+        logging.info("     - Cleaning the project after building the program ...")
+        if not compiler.Clean('test',self.ma5dir+'/tools/SampleAnalyzer/Test'):
+            logging.error("test program building aborted.")
+            sys.exit()
+
+        # Running the program test
+        logging.info("     - Running the test program ...")
+        if not compiler.Run('SampleAnalyzerTest',[],self.ma5dir+'/tools/SampleAnalyzer/Test'):
+            logging.error("the test is failed.")
+            sys.exit()
+
+        # Checking the program output
+        logging.info("     - Checking the program output...")
+        if not compiler.CheckRun(self.ma5dir+'/tools/SampleAnalyzer/Test/SampleAnalyzerTest.log'):
+            logging.error("the test is failed.")
+            sys.exit()
+
+        # Print Ok
+        sys.stdout.write("     => Status: ")
+        self.PrintOK()
+
+
         logging.info("")
 
         return True    

@@ -36,12 +36,12 @@ import subprocess
 
 class LibraryWriter():
 
-    def __init__(self,ma5dir,jobdir,libZIP,libFASTJET,forced,fortran,delphes,delfes,main):
+    def __init__(self,ma5dir,jobdir,libZIP,libFastJet,forced,fortran,delphes,delfes,main):
         self.ma5dir     = ma5dir
         self.jobdir     = jobdir
         self.path       = os.path.normpath(ma5dir+"/tools/")
         self.libZIP     = libZIP
-        self.libFASTJET = libFASTJET
+        self.libFastJet = libFastJet
         self.forced     = forced
         self.fortran    = fortran
         self.libDelphes = delphes
@@ -302,7 +302,7 @@ class LibraryWriter():
 
         # Options for compilation
         file.write('# Options for compilation\n')
-#        if self.libFASTJET:
+#        if self.libFastJet:
 #            file.write('CXXFASTJET = $(shell fastjet-config --cxxflags --plugins)\n')
         # BENJ FIX file.write('CXXFLAGS = -Wall -O3 -fPIC $(shell root-config --cflags) -I./../')
         file.write('CXXFLAGS = -Wall -O3 -DROOT_USE -fPIC -I'+self.main.configLinux.root_inc_path+' -I./../')
@@ -312,7 +312,7 @@ class LibraryWriter():
             file.write(' -DDELPHES_USE')
         if self.libDelfes:
             file.write(' -DDELFES_USE')
-        if self.libFASTJET:
+        if self.libFastJet:
             file.write(' -DFASTJET_USE')
  #           file.write(' $(CXXFASTJET)')
         file.write('\n')
@@ -572,3 +572,266 @@ class LibraryWriter():
             logging.error(logfile)
             
         return result
+
+
+    def Run(self,program,args,folder):
+
+        # shell command
+        commands = ['./'+program]
+        commands.extend(args)
+
+        # logfile
+        logfile = folder+'/'+program+'.log'
+
+        # call
+        result, out = ShellCommand.ExecuteWithLog(commands,logfile,folder)
+
+        # return result
+        if not result:
+            logging.error('impossible to run the project. For more details, see the log file:')
+            logging.error(logfile)
+            
+        return result
+
+
+    def CheckRun(self,logfile):
+
+        # Open
+        try:
+            input = open(logfile)
+        except:
+            logging.error('impossible to open the file:'+logfile)
+            return False
+
+        end=False
+        begin=False
+        
+        # Loop over the logfile
+        for line in input:
+            line=line.lstrip()
+            line=line.rstrip()
+            if line=='BEGIN-SAMPLEANALYZER-TEST':
+                begin=True
+            elif line=='END-SAMPLEANALYZER-TEST':
+                end=True
+
+        # Close
+        try:
+            input.close()
+        except:
+            logging.error('impossible to close the file:'+logfile)
+            return False
+
+        # CrossCheck
+        if not (begin and end):
+            logging.error('expected program output is not found. More details, see the log file:')
+            logging.error(logfile)
+            return False
+
+        return True
+
+
+    def WriteMakefileForTest(self):
+
+        # Open the file
+        filename = self.path + "/SampleAnalyzer/Test/Makefile_test"
+        try:
+            file = open(filename,"w")
+        except:
+            logging.error('impossible to write the file '+filenameself.path)
+            return False
+
+        # Writing header
+        file.write(StringTools.Fill('#',80)+'\n')
+        file.write('#'+StringTools.Center('MAKEFILE FOR SAMPLEANALYZER TEST',78)+'#\n')
+        file.write(StringTools.Fill('#',80)+'\n')
+        file.write('\n')
+
+        # Compilators
+        file.write('# Compilators\n')
+        file.write('CXX = g++\n')
+        file.write('\n')
+
+        # Options for compilation : CXXFLAGS
+        file.write('# Options for compilation\n')
+        options = []
+        options.extend(['-Wall','-O3','-I$(MA5_BASE)/tools/','-I'+self.main.configLinux.root_inc_path])
+        if self.libZIP:
+            options.extend(['-DZIP_USE'])
+        if self.libDelphes:
+            options.extend(['-DROOT_USE','-DDELPHES_USE'])
+        if self.libDelfes:
+            options.extend(['-DROOT_USE','-DDELFES_USE'])
+        if self.libFastJet:
+            options.extend(['-DROOT_USE','-DFASTJET_USE'])
+        file.write('CXXFLAGS = '+' '.join(options))
+        file.write('\n')
+
+        # Options for compilation : LIBFLAGS
+
+        # - Root
+        libs=[]
+        libs.extend(['-L'+self.main.configLinux.root_lib_path, \
+                     '-lGpad','-lHist','-lGraf','-lGraf3d','-lTree', \
+                     '-lRint','-lPostscript','-lMatrix','-lPhysics', \
+                     '-lMathCore','-lEG', '-lRIO','-lNet','-lThread', \
+                     '-lCore','-lCint','-pthread','-lm','-ldl','-rdynamic'])
+
+        # - SampleAnalyzer
+        libs.extend(['-L$(MA5_BASE)/tools/SampleAnalyzer/Lib/','-lSampleAnalyzer'])
+        if self.libZIP:
+            libs.extend(['-lz','-lzlib_for_ma5'])
+        if self.libDelphes:
+            libs.extend(['-L'+self.main.configLinux.delphes_lib_paths[0],'-lDelphes','-ldelphes_for_ma5'])
+        if self.libDelfes:
+            libs.extend(['-L'+self.main.configLinux.delfes_lib_paths[0],'-lDelphes','-ldelfes_for_ma5'])
+        if self.fortran:
+            libs.extend(['-lgfortran'])
+        if self.libFastJet:
+            libs.extend(['$(shell fastjet-config --libs --plugins --rpath=no)','-lfastjet_for_ma5'])
+        file.write('LIBFLAGS = '+' '.join(libs)+'\n')
+        file.write('\n')
+
+        # Files to process
+        file.write('# Files to process\n')
+        file.write('SRCS  = $(wildcard Test.cpp)\n')
+        file.write('\n')
+
+        # Files to generate
+        file.write('# Files to generate\n')
+        file.write('OBJS    = $(SRCS:.cpp=.o)\n')
+        file.write('PROGRAM = SampleAnalyzerTest\n')
+        file.write('\n')
+
+        # Lib to check
+        file.write('# Requirements to check before building\n')
+        libs=[]
+        libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libSampleAnalyzer.so')
+        if self.libZIP:
+            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libzlib_for_ma5.so')
+        if self.libDelphes:
+            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so')
+        if self.libDelfes:
+            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libdelfes_for_ma5.so')
+        if self.libFastJet:
+            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so')
+        for ind in range(0,len(libs)):
+            file.write('REQUIRED'+str(ind+1)+' = '+libs[ind]+'\n')
+        file.write('\n')
+
+
+        # Defining colours for shell
+        file.write('# Defining colours\n')
+        file.write('GREEN  = "\\\\033[1;32m"\n')
+        file.write('RED    = "\\\\033[1;31m"\n')
+        file.write('PINK   = "\\\\033[1;35m"\n')
+        file.write('BLUE   = "\\\\033[1;34m"\n')
+        file.write('YELLOW = "\\\\033[1;33m"\n')
+        file.write('CYAN   = "\\\\033[1;36m"\n')
+        file.write('NORMAL = "\\\\033[0;39m"\n')
+        file.write('\n')
+
+        # All target
+        file.write('# All target\n')
+        file.write('all: header library_check compile_header compile link_header link\n')
+        file.write('\n')
+
+        # Check library
+        if len(libs)!=0:
+            file.write('# Check library\n')
+            file.write('library_check:\n')
+            for ind in range(0,len(libs)):
+                file.write('ifeq ($(wildcard $(REQUIRED'+str(ind+1)+')),)\n')
+                file.write('\t@echo -e $(RED)"The shared library "$(REQUIRED'+str(ind+1)+')" is not found"\n')
+	        file.write('\t@echo -e $(RED)" 1) Please check that MadAnalysis 5 is installed in the folder : "$(MA5_BASE)\n')
+                file.write('\t@echo -e $(RED)" 2) Launch MadAnalysis 5 in normal mode in order to build this library."\n')
+	        file.write('\t@echo -e $(NORMAL)\n')
+	        file.write('\t@false\n')
+                file.write('endif\n')
+            file.write('\n')
+
+        # Header target
+        file.write('# Header target\n')
+        file.write('header:\n')
+        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Center('Building MA5 job',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
+        file.write('\n')
+
+        # Compile_header target
+        file.write('# Compile_header target\n')
+        file.write('compile_header:\n')
+        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Center('Compilation',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
+        file.write('\n')
+
+        # Linking_header target
+        file.write('# Link_header target\n')
+        file.write('link_header:\n')
+        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Center('Final linking',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
+        file.write('\n')
+
+        # Clean_header target
+        file.write('# clean_header target\n')
+        file.write('clean_header:\n')
+        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Center('Removing intermediate files from building',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
+        file.write('\n')
+
+        # Mrproper_header target
+        file.write('# mrproper_header target\n')
+        file.write('mrproper_header:\n')
+        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Center('Cleaning all the project',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
+        file.write('\n')
+
+        # Compile target
+        file.write('# Compile target\n')
+        file.write('compile: $(OBJS)\n')
+        file.write('\n')
+
+        # Object file target
+        file.write('# Object file target\n')
+        file.write('$(OBJS): \n')
+        file.write('\n')
+
+        # Link target
+        file.write('# Link target\n')
+        file.write('link: $(OBJS)\n')
+        file.write('\t$(CXX) $(CXXFLAGS) $(OBJS) $(LIBFLAGS) -o $(PROGRAM)\n')
+        file.write('\n')
+
+        # Clean target
+        file.write('# Clean target\n')
+        file.write('clean: clean_header do_clean\n')
+        file.write('\n')
+        file.write('# Do clean target\n')
+        file.write('do_clean: \n')
+        file.write('\t@rm -f $(OBJS)\n')
+        file.write('\n')
+
+        # Mr Proper target
+        file.write('# Mr Proper target \n')
+        file.write('mrproper: mrproper_header do_mrproper\n')
+        file.write('\n')
+        file.write('# Do Mr Proper target \n')
+        file.write('do_mrproper: do_clean\n')
+        file.write('\t@rm -f $(PROGRAM) compilation_test.log' + \
+                   ' linking_test.log cleanup_test.log mrproper_test.log *~ */*~ */*~ \n')
+        file.write('\n')
+
+        # Phony target
+        file.write('# Phony target\n')
+        file.write('.PHONY: do_clean header link_header compile_header\n')
+        file.write('\n')
+
+        # Closing the file
+        file.close()
+
+        return True
+    
