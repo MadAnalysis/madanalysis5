@@ -243,9 +243,15 @@ def WriteJobSum2N(file,iabs,icut,combi1,combi2,main,tagName,tagIndex,condition,i
 
     # Case of one particle/multiparticle
     if len(combi1)==1 and len(combi2)==1:
+        if main.mode == MA5RunningType.PARTON:
+          TheObs=obs.code_parton[:-2]
+        elif main.mode == MA5RunningType.HADRON:
+          TheObs=obs.code_hadron[:-2]
+        else:
+          TheObs=obs.code_reco[:-2]
         file.write('    if (')
         file.write(containers1[0]+'['+iterator1+'[0]]->' +\
-                   'dr('+containers2[0]+'['+iterator2+'[0]])' +\
+                   TheObs+'('+containers2[0]+'['+iterator2+'[0]])' +\
                    OperatorType.convert2cpp(condition.operator) +\
                    str(condition.threshold) +\
                    ') {'+tagName+'['+str(tagIndex)+']=true; break;}\n')
@@ -279,7 +285,13 @@ def WriteJobSum2N(file,iabs,icut,combi1,combi2,main,tagName,tagIndex,condition,i
                        'momentum();\n')
 
         # Result    
-        file.write('    if (q1.dr(q2)'+\
+        if main.mode == MA5RunningType.PARTON:
+          TheObs=obs.code_parton[:-2]
+        elif main.mode == MA5RunningType.HADRON:
+          TheObs=obs.code_hadron[:-2]
+        else:
+          TheObs=obs.code_reco[:-2]
+        file.write('    if (q1.'+TheObs+'(q2)'+\
                    ''+ OperatorType.convert2cpp(condition.operator) + \
                    str(condition.threshold) +   \
                    ') {'+tagName+'['+str(tagIndex)+']=true; break;}\n')

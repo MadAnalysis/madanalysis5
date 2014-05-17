@@ -40,7 +40,8 @@ class Tools;
 struct MCconfig
 {
   friend class PhysicsService;
- 
+  friend class Identification;
+
   // -------------------------------------------------------------
   //                       data members
   // -------------------------------------------------------------

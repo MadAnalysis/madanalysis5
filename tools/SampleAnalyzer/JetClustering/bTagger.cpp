@@ -147,7 +147,7 @@ void bTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
 
 	if (particle->statuscode()==3) break;
 
-        if (PHYSICS->IsBHadron(particle->pdgid()) && IsLastBHadron(particle, myEvent))
+        if (PHYSICS->Id->IsBHadron(particle->pdgid()) && IsLastBHadron(particle, myEvent))
         {
           b = true;
           myEvent.rec()->jets()[i].mc_ = particle;
@@ -223,7 +223,7 @@ void bTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
 
 	if (particle->statuscode()==3) break;
 
-        if (PHYSICS->IsBHadron(particle->pdgid()) && IsLastBHadron(particle, myEvent))
+        if (PHYSICS->Id->IsBHadron(particle->pdgid()) && IsLastBHadron(particle, myEvent))
         {
           b = true;
           myEvent.rec()->jets()[i].mc_ = particle;
@@ -287,7 +287,7 @@ Bool_t bTagger::IsLastBHadron(MCParticleFormat* part, EventFormat& myEvent)
   {
     if (myEvent.mc()->particles()[i].mother1()== part)
     {
-      if (PHYSICS->IsBHadron(myEvent.mc()->particles()[i].pdgid())) return false;
+      if (PHYSICS->Id->IsBHadron(myEvent.mc()->particles()[i].pdgid())) return false;
     }
   }
   return true;

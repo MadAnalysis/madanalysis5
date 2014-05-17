@@ -190,7 +190,7 @@ class InterpreterBase(cmd.Cmd):
         """ exit the mainloop() """
         logging.info("")
         return True
- 
+
     # Aliases
     do_EOF = do_quit
     do_exit = do_quit

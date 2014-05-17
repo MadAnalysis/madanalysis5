@@ -72,11 +72,11 @@ def WriteJobNPID(file,main,iabs,ihisto):
         file.write('  for (unsigned int i=0;i<event.mc()->particles().size();i++)\n')
         file.write('  {\n')
         if main.selection[iabs].statuscode=="finalstate":
-            file.write('    if (!PHYSICS->IsFinalState(event.mc()->particles()[i])) continue;\n')
+            file.write('    if (!PHYSICS->Id->IsFinalState(event.mc()->particles()[i])) continue;\n')
         elif main.selection[iabs].statuscode=="initialstate":
-            file.write('    if (!PHYSICS->IsInitialState(event.mc()->particles()[i])) continue;\n')
+            file.write('    if (!PHYSICS->Id->IsInitialState(event.mc()->particles()[i])) continue;\n')
         elif main.selection[iabs].statuscode=="interstate":
-            file.write('    if (!PHYSICS->IsInterState(event.mc()->particles()[i])) continue;\n')
+            file.write('    if (!PHYSICS->Id->IsInterState(event.mc()->particles()[i])) continue;\n')
         if npid:
             file.write('    H'+str(ihisto)+'_' +\
                    '->Fill(event.mc()->particles()[i].pdgid(),__event_weight__);\n')
@@ -245,8 +245,14 @@ def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
 
         # Case of one particle/multiparticle
         if len(combi2)==1:
+            if main.mode == MA5RunningType.PARTON:
+              TheObs=obs.code_parton[:-2]
+            elif main.mode == MA5RunningType.HADRON:
+              TheObs=obs.code_hadron[:-2]
+            else:
+              TheObs=obs.code_reco[:-2]
             file.write('      H'+str(ihisto)+'_->Fill('\
-                       'q1.dr('+containers2[0]+\
+                       'q1.'+TheObs+'('+containers2[0]+\
                        '[b[0]]),__event_weight__);\n')
 
         # Operation : sum or diff
@@ -275,8 +281,14 @@ def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
                                'momentum();\n')
 
                 # Result    
+                if main.mode == MA5RunningType.PARTON:
+                  TheObs=obs.code_parton[:-2]
+                elif main.mode == MA5RunningType.HADRON:
+                  TheObs=obs.code_hadron[:-2]
+                else:
+                  TheObs=obs.code_reco[:-2]
                 file.write('    H'+str(ihisto)+'_->Fill('+\
-                               'q1.dr(q2),__event_weight__);\n')
+                               'q1.'+TheObs+'(q2),__event_weight__);\n')
 
         # End Loop
         WriteEndLoop(file,iabs,ihisto,combi2,main)
@@ -317,8 +329,14 @@ def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
 
         # Case of one particle/multiparticle
         if len(combi1)==1:
+            if main.mode == MA5RunningType.PARTON:
+              TheObs=obs.code_parton[:-2]
+            elif main.mode == MA5RunningType.HADRON:
+              TheObs=obs.code_hadron[:-2]
+            else:
+              TheObs=obs.code_reco[:-2]
             file.write('      H'+str(ihisto)+'_->Fill('\
-                       'q2.dr('+containers1[0]+\
+                       'q2.'+TheObs+'('+containers1[0]+\
                        '[a[0]]),__event_weight__);\n')
 
         # Operation : sum or diff
@@ -347,8 +365,14 @@ def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
                                'momentum();\n')
 
                 # Result    
+                if main.mode == MA5RunningType.PARTON:
+                  TheObs=obs.code_parton[:-2]
+                elif main.mode == MA5RunningType.HADRON:
+                  TheObs=obs.code_hadron[:-2]
+                else:
+                  TheObs=obs.code_reco[:-2]
                 file.write('    H'+str(ihisto)+'_->Fill('+\
-                               'q1.dr(q2),__event_weight__);\n')
+                               'q1.'+TheObs+'(q2),__event_weight__);\n')
 
         # End Loop
         WriteEndLoop(file,iabs,ihisto,combi1,main)
@@ -389,7 +413,13 @@ def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
         WriteEndLoop(file,ihisto,iabs,combi2,main)
 
         # After the two loops 
-        file.write('    H'+str(ihisto)+'_->Fill(q1.dr(q2),__event_weight__);\n')
+        if main.mode == MA5RunningType.PARTON:
+          TheObs=obs.code_parton[:-2]
+        elif main.mode == MA5RunningType.HADRON:
+          TheObs=obs.code_hadron[:-2]
+        else:
+          TheObs=obs.code_reco[:-2]
+        file.write('    H'+str(ihisto)+'_->Fill(q1.'+TheObs+'(q2),__event_weight__);\n')
         
 
 def WriteBeforeLoop(file,iabs,ihisto,combination,main,value='value',q='q'):
@@ -567,9 +597,15 @@ def WriteBody2(file,iabs,ihisto,combi1,combi2,main,iterator1,iterator2):
 
     # Case of one particle/multiparticle
     if len(combi1)==1 and len(combi2)==1:
+        if main.mode == MA5RunningType.PARTON:
+          TheObs=obs.code_parton[:-2]
+        elif main.mode == MA5RunningType.HADRON:
+          TheObs=obs.code_hadron[:-2]
+        else:
+          TheObs=obs.code_reco[:-2]
         file.write('      H'+str(ihisto)+'_->Fill('+\
                    containers1[0]+'['+iterator1+'[0]]->'+\
-                   'dr('+containers2[0]+'['+iterator2+'[0]]),__event_weight__);\n')
+                   TheObs+'('+containers2[0]+'['+iterator2+'[0]]),__event_weight__);\n')
         return
 
     # Operation : sum or diff
@@ -606,8 +642,14 @@ def WriteBody2(file,iabs,ihisto,combi1,combi2,main,iterator1,iterator2):
                        'momentum();\n')
 
         # Result    
+        if main.mode == MA5RunningType.PARTON:
+          TheObs=obs.code_parton[:-2]
+        elif main.mode == MA5RunningType.HADRON:
+          TheObs=obs.code_hadron[:-2]
+        else:
+          TheObs=obs.code_reco[:-2]
         file.write('    H'+str(ihisto)+'_->Fill('+\
-                       'q1.dr(q2),__event_weight__);\n')
+                       'q1.'+TheObs+'(q2),__event_weight__);\n')
 
 
 def HasDoubleCounting(combination):

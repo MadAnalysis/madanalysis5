@@ -54,7 +54,6 @@ class CmdPlot(CmdBase,CmdSelectionBase):
 
         # Getting reference to observable
         obsRef=self.main.observables.get(obsName)
-
         foundArguments = False
         foundOptions   = False
         foundBinning   = False 
@@ -80,7 +79,7 @@ class CmdPlot(CmdBase,CmdSelectionBase):
                 Nbracket2-=1
                 if i==(len(args)-1):
                     foundOptions=True
-                
+
         if Nbracket1!=0:
             logging.error("number of opening-bracket '(' and number of " +\
                           "closing-braket ')' does not match.")
@@ -168,6 +167,11 @@ class CmdPlot(CmdBase,CmdSelectionBase):
             arguments=self.extract_arguments(args[2:endArguments],obsName,obsRef)
             if arguments==None:
                 return
+        elif len(obsRef.args) !=0: # checks whether arguments should have been provided
+          logging.error("the observable '"+obsName+"' requires "+
+                str(len(obsRef.args))+" arguments whereas no arguments have been specified.")
+          return
+        
 
         # Creating histo
         histo = Histogram(obsRef,arguments,nbins,xmin,xmax)

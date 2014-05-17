@@ -60,13 +60,30 @@ void Histo::Write_TextFormatBody(std::ostream* output)
   output->width(15);
   *output << std::left << "xmax" << std::endl;
 
-  // Data
+ // Data
   output->width(15);
 	*output << std::left << nbins_;
   output->width(15);
   *output << std::left << xmin_; 
   output->width(15);
   *output << std::left << xmax_ << std::endl;
+
+  // SelectionRegions
+  if(regions_.size()!=0)
+  {
+    *output << std::left << "# associated RegionSelections" << std::endl;
+    for(unsigned int i=0; i < regions_.size(); i++)
+    {
+      int nsp = 50-regions_[i]->GetName().size();
+      if(nsp<0) nsp=0;
+      *output << " " << regions_[i]->GetName();
+      for (int jj=0; jj<nsp;jj++) *output << " ";
+      *output << "# Region nr. " << i+1 << std::endl;
+    }
+ }
+
+ 
+
 	*output << "</Description>" << std::endl;
 
   // Statistics

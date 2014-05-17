@@ -26,7 +26,9 @@
 #include <stdlib.h>
 
 // SampleAnalyzer headers
-#include "SampleAnalyzer/Analyzer/MergingPlots.h"
+#ifdef FASTJET_USE
+  #include "SampleAnalyzer/Interfaces/fastjet/MergingPlots.h"
+#endif
 #include "SampleAnalyzer/Analyzer/AnalyzerManager.h"
 #include "SampleAnalyzer/Service/LogService.h"
 
@@ -51,7 +53,7 @@ AnalyzerBase* AnalyzerManager::ChoiceAnalyzer()
   std::cin >> n;
 
   // Check the choice
-  if (n<0 || n>=Objects_.size())
+  if (n>=Objects_.size())
     {
       ERROR << "wrong analysis" << endmsg;
       exit(1);
@@ -68,6 +70,6 @@ AnalyzerBase* AnalyzerManager::ChoiceAnalyzer()
 void AnalyzerManager::BuildPredefinedTable()
 {
 #ifdef FASTJET_USE
-  Add("MergingPlots", new MergingPlots);
+    Add("MergingPlots", new MergingPlots);
 #endif
 }

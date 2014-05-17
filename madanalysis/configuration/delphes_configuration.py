@@ -36,7 +36,18 @@ class DelphesConfiguration:
         self.detector  = "cms"
         self.output    = True
         self.pileup    = ""
+        self.card      = ""
+        self.SetCard()
 
+    def SetCard(self):
+        if self.detector=='cms' and self.pileup=="":
+            self.card = "delphes_card_CMS.tcl"
+        elif self.detector=='cms' and self.pileup!="":
+            self.card = "delphes_card_CMS_PileUp.tcl"
+        elif self.detector=='atlas' and self.pileup=="":
+            self.card = "delphes_card_ATLAS.tcl"
+        elif self.detector=='atlas' and self.pileup!="":
+            self.card = "delphes_card_ATLAS_PileUp.tcl"
         
     def Display(self):
         self.user_DisplayParameter("detector")
@@ -77,8 +88,10 @@ class DelphesConfiguration:
 
             if value.lower()=="cms":
                 self.detector=value
+                self.SetCard()
             elif value.lower()=="atlas":
                 self.detector=value
+                self.SetCard()
             else:
                 logging.error("algorithm called '"+value+"' is not found.")
             return
@@ -108,6 +121,7 @@ class DelphesConfiguration:
             # none
             if valuemin=="none":
                 self.pileup = ""
+                self.SetCard()
                 
             # .pileup
             elif valuemin.endswith(".pileup"):
@@ -115,6 +129,7 @@ class DelphesConfiguration:
                     logging.error('File called "'+value+'" is not found')
                     return
                 self.pileup = value
+                self.SetCard()
                 return
 
             # other case: error

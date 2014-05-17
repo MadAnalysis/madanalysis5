@@ -94,7 +94,7 @@ Bool_t LoopService::ComingFromHadronDecay_core(const MCParticleFormat* part,
   //  if (part->mother1()==part) { std::cout << "exit" << std::endl; exit(0); }
 
   // Checking if mother is hadron
-  Bool_t had = PHYSICS->IsHadronic(part->mother1()->pdgid()) && part->mother1()->pdgid()!=21;
+  Bool_t had = PHYSICS->Id->IsHadronic(part->mother1()->pdgid()) && part->mother1()->pdgid()!=21;
 
   // First case : initial parton
   if (had && part->mother1()->mother1()==0) return false;

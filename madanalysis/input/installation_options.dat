@@ -1,0 +1,35 @@
+# WARNING MA5 SHOULD DETECT AUTOMATICALLY YOUR CONFIGURATION
+# IF THIS AUTOMATED MODE FAILS, YOU CAN FORCE SOME 
+# OPTIONS THROUGH THIS FILE
+
+# -----ROOT-----
+# root_includes = /home/toto/root/include
+# root_libs     = /home/toto/root/lib
+
+# -----DELPHES----- 
+# delphes_veto     = 0 # 0=No, 1=Yes
+# delphes_includes = /home/toto/delphes/include
+# delphes_libs     = /home/toto/delphes/lib
+
+# -----DELFES----- 
+# delfes_veto     = 0 # 0=No, 1=Yes
+# delfes_includes = /home/toto/delfes/include
+# delfes_libs     = /home/toto/delfes/lib
+
+# -----ZLIB-----
+# zlib_veto     = 0 # 0=No, 1=Yes
+# zlib_includes = /home/toto/zlib/include
+# zlib_libs     = /home/toto/zlib/lib
+
+# -----FASTJET-----
+# fastjet_veto     = 0 # 0=No, 1=Yes
+# fastjet_bin_path = /home/toto/fastjet/include
+
+# -----PDFLATEX-----
+# pdflatex_veto = 0 # 0=No, 1=Yes
+
+# -----LATEX-----
+# latex_veto = 0 # 0=No, 1=Yes
+
+# -----DVIPDF-----
+# dvipdf_veto = 0 # 0=No, 1=Yes

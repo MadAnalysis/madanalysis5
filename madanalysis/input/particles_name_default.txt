@@ -50,9 +50,8 @@
      23     z
      24     w+
     -24     w-
-# Note that we can't give a name to 25 here,
-# since it is different in SM and MSSM.
-# MSSM Higgs
+# The Higgs boson is called h1
+     25     h1
      35     h2
      36     h3
      37     h+

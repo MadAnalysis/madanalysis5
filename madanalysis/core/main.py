@@ -43,7 +43,7 @@ from madanalysis.configuration.shower_configuration     import ShowerConfigurati
 import logging
 import os
 import sys
-
+import platform
         
 class Main():
 
@@ -79,6 +79,7 @@ class Main():
         self.mg5            = False
         self.libZIP         = False
         self.libDelphes     = False
+        self.libDelfes      = False
         self.pdflatex       = False
         self.latex          = False
         self.dvipdf         = False
@@ -86,8 +87,10 @@ class Main():
         self.fortran        = False
         self.observables    = ObservableManager(self.mode)
         self.mcatnloutils   = False
+        self.expertmode     = False
+        self.isMAC          = False
+        self.repeatSession  = False 
         self.ResetParameters()
-
 
     def ResetParameters(self):
         self.merging        = MergingConfiguration()
@@ -128,7 +131,7 @@ class Main():
         else:
             if self.fastsim.package=="none":
                 samples.append('.lhco')
-                if self.libDelphes:
+                if self.libDelphes or self.libDelfes:
                     samples.append('.root')
             else:
                 samples.append('.lhe')
@@ -405,8 +408,22 @@ class Main():
         self.configLinux.ma5_version    = self.version
         self.configLinux.ma5_date       = self.date
         self.configLinux.python_version = sys.version.replace('\n','')
-        self.configLinux.platform       = sys.platform
+        self.configLinux.platform       = platform.system()
+        self.configLinux.release        = platform.release()
 
+        # Is Mac
+        sys.stdout.write("Platform: "+self.configLinux.platform+" "+self.configLinux.release+" ")
+        sys.stdout.flush()
+        if self.configLinux.platform.lower() in ['darwin','mac','macosx']:
+            self.isMAC = True
+            sys.stdout.write('\x1b[32m'+'[MAC/OSX mode]'+'\x1b[0m'+'\n')
+            sys.stdout.flush()
+        else:
+            self.isMAC = False
+            sys.stdout.write('\x1b[32m'+'[Linux mode]'+'\x1b[0m'+'\n')
+            sys.stdout.flush()
+
+        
         if detail:
             logging.info("General     Platform identifier : " + str(self.configLinux.platform))
             import multiprocessing
@@ -426,8 +443,12 @@ class Main():
             logging.info("")
 
         # Initializing the config checker    
-        checker = ConfigChecker(self.configLinux,self.ma5dir,self.script)
+        checker = ConfigChecker(self.configLinux,self.ma5dir,self.script,self.isMAC)
         checker.checkTextEditor()
+
+        # Reading user options
+        if not checker.ReadUserOptions():
+            return False
 
         # Mandatory packages
         logging.info("Checking mandatory packages:")
@@ -437,90 +458,239 @@ class Main():
             return False
         if not checker.checkGPP():
             return False
+        if not checker.checkMake():
+            return False
         if not checker.checkROOT():
+            return False
+        if not checker.checkPyROOT():
             return False
 
         # Optional packages
         logging.info("Checking optional packages:")
-        if not checker.checkGF():
-            return False
-        self.libZIP = checker.checkZLIB()
+        self.libGF      = checker.checkGF()
+        self.libZIP     = checker.checkZLIB()
         self.libDelphes = checker.checkDelphes()
+        self.libDelfes  = checker.checkDelfes()
         self.libFastJet = checker.checkFastJet()
-        self.pdflatex = checker.checkPdfLatex()
-        self.latex = checker.checkLatex()
+        self.pdflatex   = checker.checkPdfLatex()
+        self.latex      = checker.checkLatex()
         if self.latex:
             self.dvipdf = checker.checkdvipdf()
-        self.mcatnloutils = checker.checkMCatNLOUtils()
 
+        # Set PATH variable
+        self.configLinux.toPATH=[]
+        self.configLinux.toLDPATH=[]
+        self.configLinux.toLDPATH.append(self.ma5dir+'/tools/SampleAnalyzer/Lib/')
+        self.configLinux.toLDPATH.append(self.configLinux.root_lib_path)
+        if self.libFastJet:
+            self.configLinux.toPATH.append(self.configLinux.fastjet_bin_path)
+            for path in self.configLinux.fastjet_lib_paths:
+                self.configLinux.toLDPATH.append(path)
+        if self.libZIP:
+            self.configLinux.toLDPATH.append(self.configLinux.zlib_lib_path)        
+        if self.libDelphes:
+            for path in self.configLinux.delphes_lib_paths:
+                self.configLinux.toLDPATH.append(path)        
+        if self.libDelfes:
+            for path in self.configLinux.delfes_lib_paths:
+                self.configLinux.toLDPATH.append(path)        
+
+        os.environ['PATH'] = os.environ['PATH'] + \
+                             ":" + ':'.join(self.configLinux.toPATH)
         os.environ['LD_LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH'] + \
-                                        ":" + self.ma5dir+'/tools/SampleAnalyzer/Lib/'
-        os.environ['LIBRARY_PATH'] = os.environ['LIBRARY_PATH'] + \
-                                        ":" + self.ma5dir+'/tools/SampleAnalyzer/Lib/'
+                                        ":" + ':'.join(self.configLinux.toLDPATH)
+        if self.isMAC:        
+            os.environ['DYLD_LIBRARY_PATH'] = os.environ['DYLD_LIBRARY_PATH'] + \
+                                        ":" + ':'.join(self.configLinux.toLDPATH)
 
-        if self.mcatnloutils:
-            os.environ['LD_LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH'] + \
-                      ":" + self.ma5dir+'/tools/MCatNLO-utilities/MCatNLO/lib/'
-            os.environ['LIBRARY_PATH'] = os.environ['LIBRARY_PATH'] + \
-                      ":" + self.ma5dir+'/tools/MCatNLO-utilities/MCatNLO/lib/'
-            
         return True 
    
+    def PrintOK(self):
+        sys.stdout.write('\x1b[32m'+'[OK]'+'\x1b[0m'+'\n')
+        sys.stdout.flush()
+
     def BuildLibrary(self,forced=False):
-        builder = LibraryBuilder(self.configLinux,self.ma5dir)
+        builder = LibraryBuilder(self.configLinux,self.ma5dir,self.libZIP,self.libDelphes,self.libDelfes,self.libFastJet)
+
         UpdateNeed=False
-        
-        FirstUse = builder.checkMA5()
-        if not FirstUse:
+        FirstUse, Missing = builder.checkMA5()
+        if not FirstUse and not Missing:
             UpdateNeed = not builder.compare()
 
-        rebuild = forced or FirstUse or UpdateNeed
+        rebuild = forced or FirstUse or UpdateNeed or Missing
+
         if not rebuild:
+            if not os.path.isfile(self.ma5dir+'/tools/SampleAnalyzer/Lib/libSampleAnalyzer.so'):
+                FirstUse=True
+            rebuild = forced or FirstUse or UpdateNeed or Missing
+
+        if not rebuild:
+            logging.info('  => MadAnalysis libraries found.')
+
+            # Test the program
+            if not os.path.isfile(self.ma5dir+'/tools/SampleAnalyzer/Test/SampleAnalyzerTest'):
+                FirstUse=True
+
+            precompiler = LibraryWriter(self.ma5dir,'lib',self.libZIP,self.libFastJet,self.forced,self.fortran,self.libDelphes,self.libDelfes,self)
+            if not precompiler.Run('SampleAnalyzerTest',[],self.ma5dir+'/tools/SampleAnalyzer/Test',silent=True):
+                UpdateNeed=True
+
+            if not precompiler.CheckRun(self.ma5dir+'/tools/SampleAnalyzer/Test/SampleAnalyzerTest.log',silent=True):
+                UpdateNeed=True
+            rebuild = forced or FirstUse or UpdateNeed or Missing
+            
+        if not rebuild:
+            logging.info('  => MadAnalysis test program works.')
             return True
 
         # Compile library
         if FirstUse:
             logging.info("  => First use of MadAnalysis (or the library is missing).")
+        elif Missing:
+            logging.info("  => Libraries are missing or system configuration has changed. Need to rebuild the library.")
         elif UpdateNeed:
             logging.info("  => System configuration has changed since the last use. Need to rebuild the library.")
         elif forced:
             logging.info("  => The user forces to rebuild the library.")
 
         # Initializing the JobWriter
-        compiler = LibraryWriter(self.ma5dir,'lib',self.libZIP,self.libFastJet,self.forced,self.fortran,self.libDelphes)
+        compiler = LibraryWriter(self.ma5dir,'lib',self.libZIP,self.libFastJet,self.forced,self.fortran,self.libDelphes,self.libDelfes,self)
     
         # Dumping architecture
         if not self.configLinux.Export(self.ma5dir+'/tools/architecture.ma5'):
             sys.exit()
 
-        logging.info("   Creating a 'Makefile'...")
-        if not compiler.WriteMakefile('shared'):
-            logging.error("library building aborted.")
+        # Library to compiles
+        libraries = []
+        if self.libFastJet:
+            libraries.append(['FastJet', 'interface to FastJet', 'fastjet', self.ma5dir+'/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so',self.ma5dir+'/tools/SampleAnalyzer/Interfaces'])
+        if self.libZIP:
+            libraries.append(['zlib', 'interface to zlib', 'zlib', self.ma5dir+'/tools/SampleAnalyzer/Lib/libzlib_for_ma5.so',self.ma5dir+'/tools/SampleAnalyzer/Interfaces'])
+        if self.libDelphes:
+            libraries.append(['Delphes', 'interface to Delphes', 'delphes', self.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so',self.ma5dir+'/tools/SampleAnalyzer/Interfaces'])
+        if self.libDelfes:
+            libraries.append(['Delfes', 'interface to Delfes', 'delfes', self.ma5dir+'/tools/SampleAnalyzer/Lib/libdelfes_for_ma5.so',self.ma5dir+'/tools/SampleAnalyzer/Interfaces'])
+        libraries.append(['SampleAnalyzer', 'general SampleAnalyzer component', 'SampleAnalyzer', self.ma5dir+'/tools/SampleAnalyzer/Lib/libSampleAnalyzer.so',self.ma5dir+'/tools/SampleAnalyzer'])
+
+        # Writing the Makefiles
+        logging.info("")
+        logging.info("   **********************************************************")
+        logging.info("                Building SampleAnalyzer libraries     ")
+        logging.info("   **********************************************************")
+
+
+        # Getting number of cores
+        ncores = compiler.get_ncores2()
+
+        # Compiling the libraries
+        for ind in range(0,len(libraries)):
+            
+            logging.info("   **********************************************************")
+            logging.info("   Library "+str(ind+1)+"/"+str(len(libraries))+" - "+libraries[ind][1])
+
+            # Writing a Makefile
+            logging.info("     - Writing a Makefile ...")
+            if libraries[ind][0]=='SampleAnalyzer':
+                if not compiler.WriteMakefile():
+                    logging.error("library building aborted.")
+                    sys.exit()
+            else:
+                if not compiler.WriteMakefileForInterfaces(libraries[ind][2]):
+                    logging.error("library building aborted.")
+                    sys.exit()
+
+             # Cleaning the project
+            logging.info("     - Cleaning the project before building the library ...")
+            if not compiler.MrProper(libraries[ind][2],libraries[ind][4]):
+                logging.error("library building aborted.")
+                sys.exit()
+
+            # Compiling
+            logging.info("     - Compiling the source files ...")
+            if not compiler.Compile(ncores,libraries[ind][2],libraries[ind][4]):
+                logging.error("library building aborted.")
+                sys.exit()
+
+            # Linking
+            logging.info("     - Linking the library ...")
+            if not compiler.Link(libraries[ind][2],libraries[ind][4]):
+                logging.error("library building aborted.")
+                sys.exit()
+
+            # Checking
+            logging.info("     - Checking that the library is properly built ...")
+            if not os.path.isfile(libraries[ind][3]):
+                logging.error("the library '"+libraries[ind][3]+"' is not produced.")
+                sys.exit()
+
+             # Cleaning the project
+            logging.info("     - Cleaning the project after building the library ...")
+            if not compiler.Clean(libraries[ind][2],libraries[ind][4]):
+                logging.error("library building aborted.")
+                sys.exit()
+
+            # Print Ok
+            sys.stdout.write("     => Status: ")
+            self.PrintOK()
+
+        logging.info("   **********************************************************")
+        logging.info("   Test program ")
+
+        # Writing a Makefile
+        logging.info("     - Writing a Makefile ...")
+        if not compiler.WriteMakefileForTest():
+            logging.error("test program building aborted.")
             sys.exit()
 
-        if not compiler.MrProper():
-            logging.error("impossible to remove temporary files created during the building.")
+        # Cleaning the project
+        logging.info("     - Cleaning the project before building the program ...")
+        if not compiler.MrProper('test',self.ma5dir+'/tools/SampleAnalyzer/Test'):
+            logging.error("test program building aborted.")
             sys.exit()
 
-        logging.info("   Compiling the MadAnalysis library...")
-        if not compiler.Compile():
-            logging.error("library building aborted.")
+        # Compiling
+        logging.info("     - Compiling the source files ...")
+        if not compiler.Compile(ncores,'test',self.ma5dir+'/tools/SampleAnalyzer/Test'):
+            logging.error("test program building aborted.")
             sys.exit()
 
-        logging.info("   Linking the MadAnalysis library...")
-        if not compiler.Link():
-            logging.error("library building aborted.")
+        # Linking
+        logging.info("     - Linking the program ...")
+        if not compiler.Link('test',self.ma5dir+'/tools/SampleAnalyzer/Test'):
+            logging.error("test program building aborted.")
             sys.exit()
 
-        logging.info("   Checking the MadAnalysis library...")
+        # Checking
+        logging.info("     - Checking that the program is properly built ...")
+        filename=self.ma5dir+'/tools/SampleAnalyzer/Test/SampleAnalyzerTest'
+        if not os.path.isfile(filename):
+            logging.error("the test program '"+filename+"' is not produced.")
+            sys.exit()
 
-        if not os.path.isfile(self.ma5dir+'/tools/SampleAnalyzer/Lib/libSampleAnalyzer.a'):
-            logging.error("the library 'libSampleAnalyzer.a' is not produced.")
+        # Cleaning the project
+        logging.info("     - Cleaning the project after building the program ...")
+        if not compiler.Clean('test',self.ma5dir+'/tools/SampleAnalyzer/Test'):
+            logging.error("test program building aborted.")
             sys.exit()
-    
-        if not compiler.Clean():
-            logging.error("impossible to remove temporary files created during the building.")
+
+        # Running the program test
+        logging.info("     - Running the test program ...")
+        if not compiler.Run('SampleAnalyzerTest',[],self.ma5dir+'/tools/SampleAnalyzer/Test'):
+            logging.error("the test is failed.")
             sys.exit()
+
+        # Checking the program output
+        logging.info("     - Checking the program output...")
+        if not compiler.CheckRun(self.ma5dir+'/tools/SampleAnalyzer/Test/SampleAnalyzerTest.log'):
+            logging.error("the test is failed.")
+            sys.exit()
+
+        # Print Ok
+        sys.stdout.write("     => Status: ")
+        self.PrintOK()
+
+
+        logging.info("")
 
         return True    
         

@@ -32,8 +32,10 @@
 #include "SampleAnalyzer/Counter/CounterManager.h"
 #include "SampleAnalyzer/Writer/SAFWriter.h"
 #include "SampleAnalyzer/Service/Physics.h"
+#include "SampleAnalyzer/Service/SortingService.h"
 #include "SampleAnalyzer/Service/LogService.h"
 #include "SampleAnalyzer/Core/Configuration.h"
+#include "SampleAnalyzer/RegionSelection/RegionSelectionManager.h"
 
 // STL headers
 #include <set>
@@ -75,6 +77,10 @@ class AnalyzerBase
   /// Weighted events mode
   bool weighted_events_;
 
+  /// A RS manager is associated with each analysis
+  RegionSelectionManager manager_;
+  std::string outputdir_;
+
   /// Writer SAF
   SAFWriter out_;
 
@@ -86,7 +92,7 @@ class AnalyzerBase
 
   /// Constructor without argument 
   AnalyzerBase()
-  { name_="unknown"; }
+  { name_="unknown"; outputdir_=""; }
 
   /// Destructor
   virtual ~AnalyzerBase()
@@ -97,7 +103,8 @@ class AnalyzerBase
                      const Configuration* cfg)
   {
     weighted_events_ = !cfg->IsNoEventWeight();
-    out_.Initialize(cfg,outputName.c_str());
+    if(!cfg->useRSM())
+      out_.Initialize(cfg,outputName.c_str());
     return true;
   }
 
@@ -108,7 +115,7 @@ class AnalyzerBase
   /// PreFinalize
   void PreFinalize(const SampleFormat& summary, 
                    const std::vector<SampleFormat>& samples)
-  { 
+  {
     out_.WriteHeader(summary); 
     out_.WriteFiles(samples);
   }
@@ -130,8 +137,8 @@ class AnalyzerBase
   void PreExecute(const SampleFormat& mySample,
                   const EventFormat& myEvent)
   { 
-    PHYSICS->SetFinalState(myEvent.mc());
-    PHYSICS->SetInitialState(myEvent.mc());
+    PHYSICS->Id->SetFinalState(myEvent.mc());
+    PHYSICS->Id->SetInitialState(myEvent.mc());
   }
 
   virtual void Execute(SampleFormat& mySample,
@@ -140,8 +147,18 @@ class AnalyzerBase
   /// Accessor to analysis name
   const std::string name() const {return name_;}
 
+  /// Accessor to the manager
+  RegionSelectionManager *Manager() { return &manager_; }
+
   /// Mutator to analysis name
   void setName(const std::string& Name) {name_=Name;}
+
+  /// Accessor to the output directory name
+  const std::string Output() const {return outputdir_;}
+
+  /// Mutator to the output directory name
+  void SetOutputDir(const std::string &name) {outputdir_=name;}
+
 
   SAFWriter& out()
   { return out_; }

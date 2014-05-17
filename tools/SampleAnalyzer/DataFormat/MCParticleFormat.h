@@ -46,7 +46,8 @@ class HEPMCReader;
 class ROOTReader;
 class LHEWriter;
 class MergingPlots;
-class DelphesReader;
+class DelphesTreeReader;
+class DelfesTreeReader;
 
 class MCParticleFormat : public ParticleBaseFormat
 {
@@ -57,7 +58,8 @@ class MCParticleFormat : public ParticleBaseFormat
   friend class ROOTReader;
   friend class LHEWriter;
   friend class MergingPlots;
-  friend class DelphesReader;
+  friend class DelphesTreeReader;
+  friend class DelfesTreeReader;
 
   // -------------------------------------------------------------
   //                        data members
@@ -73,7 +75,7 @@ class MCParticleFormat : public ParticleBaseFormat
   Int_t           extra1_;
   Int_t           extra2_;
 
-  std::vector<MCParticleFormat*> Daughters_;
+  std::vector<MCParticleFormat*> daughters_;
 
   MCParticleFormat *mother1_ ;  // mother particle
   MCParticleFormat *mother2_ ;  // mother particle
@@ -136,11 +138,11 @@ class MCParticleFormat : public ParticleBaseFormat
   const MCParticleFormat* mother1() const {return mother1_;}
   const MCParticleFormat* mother2() const {return mother2_;}
 
-  /// Accessor to the daugthers (read-only)
-  const std::vector<MCParticleFormat*>& Daughters() const {return Daughters_;}
+  /// Accessor to the daughters (read-only)
+  const std::vector<MCParticleFormat*>& daughters() const {return daughters_;}
 
   /// Accessor to the daughters
-  std::vector<MCParticleFormat*>& Daughters() {return Daughters_;}
+  std::vector<MCParticleFormat*>& daughters() {return daughters_;}
 
   MCParticleFormat* mother1() {return mother1_;}
   MCParticleFormat* mother2() {return mother2_;}
@@ -153,6 +155,22 @@ class MCParticleFormat : public ParticleBaseFormat
   void setMomentum(const TLorentzVector& v)  {momentum_=v;}
   void setMothUp1(UInt_t v) {mothup1_=v;}
   void setMothUp2(UInt_t v) {mothup2_=v;}
+
+  /// Boosting the four momentum to the restframe of another particle
+  void ToRestFrame(const MCParticleFormat* boost)
+  {
+    if (boost==0) return;
+    ToRestFrame(*boost);
+  }
+
+  void ToRestFrame(const MCParticleFormat& boost)
+  {
+    TVector3 b = -1. * boost.momentum().BoostVector();
+    momentum().Boost(b);
+  }
+
+
+
 
 };
 

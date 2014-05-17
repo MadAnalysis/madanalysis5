@@ -50,9 +50,6 @@ class AnalyzerManager : public ManagerBase<AnalyzerBase>
   /// Let the user selectes an analysis 
   AnalyzerBase* ChoiceAnalyzer();
 
-  /// Build the user table
-  void BuildUserTable();
-
   /// Build the predefined table
   void BuildPredefinedTable();
 

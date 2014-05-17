@@ -32,6 +32,7 @@
 #include <iomanip>
 
 // SampleAnalyzer headers
+#include "SampleAnalyzer/DataFormat/IsolationConeType.h"
 #include "SampleAnalyzer/DataFormat/ParticleBaseFormat.h"
 #include "SampleAnalyzer/Service/LogService.h"
 
@@ -40,7 +41,10 @@ namespace MA5
 
 class LHCOReader;
 class ROOTReader;
+class DelphesTreeReader;
+class DelfesTreeReader;
 class DetectorDelphes;
+class DetectorDelfes;
 
 class RecTrackFormat : public ParticleBaseFormat
 {
@@ -51,8 +55,10 @@ class RecTrackFormat : public ParticleBaseFormat
   friend class bTagger;
   friend class TauTagger;
   friend class cTagger;
-  friend class DelphesReader;
+  friend class DelphesTreeReader;
+  friend class DelfesTreeReader;
   friend class DetectorDelphes;
+  friend class DetectorDelfes;
 
   // -------------------------------------------------------------
   //                        data members
@@ -63,6 +69,7 @@ class RecTrackFormat : public ParticleBaseFormat
   Bool_t charge_;      /// electric charge
   Double_t etaOuter_;  /// eta @ first layer of calo
   Double_t phiOuter_;  /// phi @ first layer of calo
+  std::vector<IsolationConeType> isolCones_; // isolation cones
 
   // -------------------------------------------------------------
   //                        method members
@@ -95,6 +102,7 @@ class RecTrackFormat : public ParticleBaseFormat
     etaOuter_ = 0.;
     phiOuter_ = 0.;
     ParticleBaseFormat::Reset();
+    isolCones_.clear();
   }
 
   /// Accessor to the pdgid
@@ -113,6 +121,16 @@ class RecTrackFormat : public ParticleBaseFormat
   const int charge() const
   {if (charge_) return +1; else return -1;}
 
+  /// giving a new isolation cone entry
+  IsolationConeType* GetNewIsolCone()
+  {
+    isolCones_.push_back(IsolationConeType());
+    return &isolCones_.back();
+  }
+
+  /// get the collection of isolation cones
+  const std::vector<IsolationConeType>& isolCones() const
+  { return isolCones_; }
 
 };
 

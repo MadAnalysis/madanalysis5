@@ -133,7 +133,16 @@ void TauTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
   {
     RecTauFormat* myTau = myEvent.rec()->GetNewTau();
     Jet2Tau(Candidates[i-1], myTau, myEvent);
-    myEvent.rec()->jets().erase((std::vector<RecJetFormat>::iterator) Candidates[i-1]);
+    // BENJ PB COMPIL:   myEvent.rec()->jets().erase((std::vector<RecJetFormat>::iterator) Candidates[i-1]);
+    
+    // Remove the tau-identified jet from the list
+    unsigned int pos=myEvent.rec()->jets().size();
+    for (unsigned int ind=0;ind<myEvent.rec()->jets().size();ind++)
+    {
+      if (&(myEvent.rec()->jets()[ind])==Candidates[i-1]) {pos=ind;break;}
+    }
+    if (pos!=myEvent.rec()->jets().size()) // must never happen
+        myEvent.rec()->jets().erase(myEvent.rec()->jets().begin()+pos);
   }
   Candidates.clear();
 }
@@ -216,7 +225,18 @@ void TauTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
   {
     RecTauFormat* myTau = myEvent.rec()->GetNewTau();
     Jet2Tau(Taus[j-1], myTau, myEvent);
-    myEvent.rec()->jets().erase((std::vector<RecJetFormat>::iterator) Taus[j-1]);
+    // PB Benj compil:  myEvent.rec()->jets().erase((std::vector<RecJetFormat>::iterator) Taus[j-1]);
+
+    // Remove the tau-identified jet from the list
+    unsigned int pos=myEvent.rec()->jets().size();
+    for (unsigned int ind=0;ind<myEvent.rec()->jets().size();ind++)
+    {
+      if (&(myEvent.rec()->jets()[ind])==Taus[j-1]) {pos=ind;break;}
+    }
+    if (pos!=myEvent.rec()->jets().size()) // must never happen
+        myEvent.rec()->jets().erase(myEvent.rec()->jets().begin()+pos);
+
+
   }
 
   Taus.clear();

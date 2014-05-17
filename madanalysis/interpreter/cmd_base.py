@@ -29,7 +29,7 @@ import os
 class CmdBase():
     """Command CMDBase"""
 
-    reserved_words=["exit","quit","eof","history","shell","from","as","all","or","and"]
+    reserved_words=["exit","quit","eof","history","shell","from","as","all","or","and","main"]
 
     def __init__(self,main,cmd_name):
         self.reserved_words.append(cmd_name)

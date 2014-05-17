@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+72           (2014/05/17) econte:  1.1.10 
+
 157  1.1.10 (2014/05/17) ma5team:   - new compilation procedure for library and job
                                     - adding job test to check the compilation procedure
                                     - adding restart command and possibility to restart MA5 after 

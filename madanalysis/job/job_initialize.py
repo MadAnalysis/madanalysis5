@@ -428,6 +428,9 @@ def WriteJobInitialize(file,main):
         file.write('  PHYSICS->mcConfig().AddInvisibleId(16);\n')
         file.write('  PHYSICS->mcConfig().AddInvisibleId(1000022);\n')
         file.write('  PHYSICS->mcConfig().AddInvisibleId(1000039);\n')
+        for item in main.multiparticles.Get("invisible"):
+          if item not in [-16,-14,-12,12,14,16,1000022,1000039]:
+            file.write('  PHYSICS->mcConfig().AddInvisibleId('+str(item)+');\n')
         file.write('\n')
 
 
@@ -456,7 +459,12 @@ def WriteJobInitialize(file,main):
     # Initializing array of cuts     
     if Ncuts!=0:
         file.write('  // Initializing cut array\n')
-        file.write('  cuts_.Initialize('+str(Ncuts)+');\n')
+    icut=1
+    for item in main.selection.table:
+      if item.__class__.__name__=="Cut":
+        file.write("  cuts_.InitCut(\""+item.conditions.GetStringDisplay()+"\");\n")
+    if Ncuts!=0:
+        file.write('\n')
 
     # Initializing each item
     ihisto  = 0

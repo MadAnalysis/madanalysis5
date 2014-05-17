@@ -33,7 +33,7 @@ void cTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
   // loop on the particles searching for last c
   for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
   {
-    if (PHYSICS->IsInitialState(myEvent.mc()->particles()[i])) continue;
+    if (PHYSICS->Id->IsInitialState(myEvent.mc()->particles()[i])) continue;
     if (fabs(myEvent.mc()->particles()[i].pdgid())!=4) continue;
     if (!IsLast(&myEvent.mc()->particles()[i], myEvent)) continue;
 
@@ -96,7 +96,7 @@ void cTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
 
         if (particle->statuscode()==3) break;
 
-        if (PHYSICS->IsCHadron(particle->pdgid()) && IsLastCHadron(particle, myEvent))
+        if (PHYSICS->Id->IsCHadron(particle->pdgid()) && IsLastCHadron(particle, myEvent))
         {
           c = true;
           myEvent.rec()->jets()[i].mc_ = particle;
@@ -176,7 +176,7 @@ void cTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
 
         if (particle->statuscode()==3) break;
 
-        if (PHYSICS->IsCHadron(particle->pdgid()) && IsLastCHadron(particle, myEvent))
+        if (PHYSICS->Id->IsCHadron(particle->pdgid()) && IsLastCHadron(particle, myEvent))
         {
           c = true;
           myEvent.rec()->jets()[i].mc_ = particle;
@@ -240,7 +240,7 @@ Bool_t cTagger::IsLastCHadron(MCParticleFormat* part, EventFormat& myEvent)
   {
     if (myEvent.mc()->particles()[i].mother1()== part)
     {
-      if (PHYSICS->IsCHadron(myEvent.mc()->particles()[i].pdgid())) return false;
+      if (PHYSICS->Id->IsCHadron(myEvent.mc()->particles()[i].pdgid())) return false;
     }
   }
   return true;

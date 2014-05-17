@@ -30,11 +30,6 @@
 #include <iostream>
 #include <sstream>
 
-// RFIO headers
-#ifdef RFIO_USE
-   #include "SampleAnalyzer/Core/castorstream.h"
-#endif
-
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Writer/WriterBase.h"
 
@@ -48,7 +43,6 @@ class WriterTextBase : public WriterBase
   //                        data members
   // -------------------------------------------------------------
  protected:
-
   /// Streaming for reading input
   std::ostream* output_;
 

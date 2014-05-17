@@ -25,11 +25,11 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/JetClustering/JetClustererManager.h"
 #ifdef FASTJET_USE
-  #include "SampleAnalyzer/JetClustering/JetClusteringStandard.h"
-  #include "SampleAnalyzer/JetClustering/JetClusteringSISCone.h"
-  #include "SampleAnalyzer/JetClustering/JetClusteringCDFMidpoint.h"
-  #include "SampleAnalyzer/JetClustering/JetClusteringCDFJetClu.h"
-  #include "SampleAnalyzer/JetClustering/JetClusteringGridJet.h"
+  #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringStandard.h"
+  #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringSISCone.h"
+  #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringCDFMidpoint.h"
+  #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringCDFJetClu.h"
+  #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringGridJet.h"
 #endif
 
 using namespace MA5;
@@ -39,15 +39,15 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 void JetClustererManager::BuildTable()
 {
-    #ifdef FASTJET_USE
-    Add("kt",          new JetClusteringStandard(fastjet::kt_algorithm));
-    Add("antikt",      new JetClusteringStandard(fastjet::antikt_algorithm));
-    Add("genkt",       new JetClusteringStandard(fastjet::genkt_algorithm));
-    Add("cambridge",   new JetClusteringStandard(fastjet::cambridge_algorithm));
+  #ifdef FASTJET_USE
+    Add("kt",          new JetClusteringStandard("kt"));
+    Add("antikt",      new JetClusteringStandard("antikt"));
+    Add("genkt",       new JetClusteringStandard("genkt"));
+    Add("cambridge",   new JetClusteringStandard("cambridge"));
     Add("SISCone",     new JetClusteringSISCone());
     Add("CDFMidpoint", new JetClusteringCDFMidpoint());
     Add("CDFJetClu",   new JetClusteringCDFJetClu());
     Add("GridJet",     new JetClusteringGridJet());
-    #endif
+  #endif
 }
 

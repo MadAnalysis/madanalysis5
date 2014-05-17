@@ -290,31 +290,72 @@ bool STDHEPreader::FinalizeHeader(SampleFormat& mySample)
 bool STDHEPreader::DecodeEventTable(const std::string& evt_version)
 {
   // Decoding the event
-  Int_t idat=0;
-  *xdrinput_ >> idat;
+  // Case: classical 
+  if (evt_version=="1.00")
+  {
+    Int_t idat=0;
+    *xdrinput_ >> idat;
 
-  UInt_t uidat=0;
-  *xdrinput_ >> uidat; 
+    UInt_t uidat=0;
+    *xdrinput_ >> uidat; 
 
-  // Extracting evtnums
-  std::vector<Int_t> evtnums;
-  *xdrinput_ >> evtnums;
+    // Extracting evtnums
+    std::vector<Int_t> evtnums;
+    *xdrinput_ >> evtnums;
 
-  // Extracting storenums
-  std::vector<Int_t> storenums;
-  *xdrinput_ >> storenums;
+    // Extracting storenums
+    std::vector<Int_t> storenums;
+    *xdrinput_ >> storenums;
 
-  // Extracting runnums
-  std::vector<Int_t> runnums;
-  *xdrinput_ >> runnums;
+    // Extracting runnums
+    std::vector<Int_t> runnums;
+    *xdrinput_ >> runnums;
 
-  // Extracting trigMasks
-  std::vector<UInt_t> NtrigMasks;
-  *xdrinput_ >> NtrigMasks;
+    // Extracting trigMasks
+    std::vector<UInt_t> NtrigMasks;
+    *xdrinput_ >> NtrigMasks;
 
-  // Extracting prtEvents
-  std::vector<UInt_t> NptrEvents;
-  *xdrinput_ >> NptrEvents;
+    // Extracting prtEvents
+    std::vector<UInt_t> NptrEvents;
+    *xdrinput_ >> NptrEvents;
+  }
+
+  // Pavel's adding: 64-bit adress
+  else if (evt_version=="2.00")
+  {
+    Int_t idat=0;
+    *xdrinput_ >> idat;
+
+    ULong64_t uidat=0;
+    *xdrinput_ >> uidat; 
+
+    // Extracting evtnums
+    std::vector<Int_t> evtnums;
+    *xdrinput_ >> evtnums;
+
+    // Extracting storenums
+    std::vector<Int_t> storenums;
+    *xdrinput_ >> storenums;
+
+    // Extracting runnums
+    std::vector<Int_t> runnums;
+    *xdrinput_ >> runnums;
+
+    // Extracting trigMasks
+    std::vector<UInt_t> NtrigMasks;
+    *xdrinput_ >> NtrigMasks;
+
+    // Extracting prtEvents
+    std::vector<ULong64_t> NptrEvents;
+    *xdrinput_ >> NptrEvents;
+  }
+
+  // Case: other version?
+  else 
+  {
+    ERROR << "version '" << evt_version << "' is not supported" << endmsg;
+    return false;
+  }
 
   return true;
 }
@@ -346,7 +387,14 @@ bool STDHEPreader::DecodeEventHeader(const std::string& evt_version)
   UInt_t nNTuples=0;
   UInt_t dimNTuples=0;
 
-  if (evt_version=="2.00")
+  // Is there NTuple
+  bool skipNTuples = false;
+  bool add64bit=false;
+  if (evt_version=="2.00" || evt_version=="3.00") skipNTuples=true;
+  if (evt_version=="3.00") add64bit=true;
+
+  // NTuple
+  if (skipNTuples)
   {
     *xdrinput_ >> nNTuples;
     *xdrinput_ >> dimNTuples;
@@ -360,20 +408,36 @@ bool STDHEPreader::DecodeEventHeader(const std::string& evt_version)
     *xdrinput_ >> blocks;
 
     // Extracting blocks
-    std::vector<UInt_t> ptrBlocks;
-    *xdrinput_ >> ptrBlocks;
+    if (!add64bit)
+    {
+      std::vector<UInt_t> ptrBlocks;
+      *xdrinput_ >> ptrBlocks;
+    }
+    else
+    {
+      std::vector<ULong64_t> ptrBlocks;
+      *xdrinput_ >> ptrBlocks;
+    }
   }
 
   // Processing blocks extraction 
-  if (dimNTuples>0 && evt_version=="2.00")
+  if (skipNTuples && dimNTuples>0)
   {
     // Extracting blocks
     std::vector<Int_t> nTupleIds;
     *xdrinput_ >> nTupleIds;
 
     // Extracting blocks
-    std::vector<UInt_t> ptrNTuples;
-    *xdrinput_ >> ptrNTuples;
+    if (!add64bit)
+    {
+      std::vector<UInt_t> ptrNTuples;
+      *xdrinput_ >> ptrNTuples;
+    }
+    else
+    {
+      std::vector<ULong64_t> ptrNTuples;
+      *xdrinput_ >> ptrNTuples;
+    }
   }
 
   return true;
@@ -636,11 +700,11 @@ bool STDHEPreader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
     MCParticleFormat& part = myEvent.mc()->particles_[i];
 
     // MET, MHT, TET, THT
-    if (part.statuscode()==1 && !PHYSICS->IsInvisible(part))
+    if (part.statuscode()==1 && !PHYSICS->Id->IsInvisible(part))
     {
       myEvent.mc()->MET_ -= part.momentum();
       myEvent.mc()->TET_ += part.pt();
-      if (PHYSICS->IsHadronic(part))
+      if (PHYSICS->Id->IsHadronic(part))
       {
         myEvent.mc()->MHT_ -= part.momentum();
         myEvent.mc()->THT_ += part.pt(); 
@@ -664,7 +728,7 @@ bool STDHEPreader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
       else
       {
         myEvent.mc()->particles_[i].mother1_ = &myEvent.mc()->particles_[index1-1];
-        myEvent.mc()->particles_[index1-1].Daughters_.push_back(&myEvent.mc()->particles_[i]);
+        myEvent.mc()->particles_[index1-1].daughters_.push_back(&myEvent.mc()->particles_[i]);
       }
     }
     if (index2!=0)
@@ -681,7 +745,7 @@ bool STDHEPreader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
       else
       {
         myEvent.mc()->particles_[i].mother2_ = &myEvent.mc()->particles_[index2-1];
-        myEvent.mc()->particles_[index2-1].Daughters_.push_back(&myEvent.mc()->particles_[i]);
+        myEvent.mc()->particles_[index2-1].daughters_.push_back(&myEvent.mc()->particles_[i]);
       }
     }
   }

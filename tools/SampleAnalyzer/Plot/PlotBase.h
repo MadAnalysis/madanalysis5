@@ -114,6 +114,10 @@ class PlotBase
   const std::pair<Long64_t,Long64_t>& GetNEvents()
   { return nevents_; }
 
+  // Return the name
+  std::string GetName()
+    { return name_; }
+
 };
 
 }

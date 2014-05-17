@@ -32,6 +32,7 @@
 #include <iomanip>
 
 // RecParticleFormat
+#include "SampleAnalyzer/DataFormat/IsolationConeType.h"
 #include "SampleAnalyzer/DataFormat/RecParticleFormat.h"
 #include "SampleAnalyzer/Service/LogService.h"
 
@@ -51,7 +52,7 @@ class RecPhotonFormat : public RecParticleFormat
   //                        data members
   // -------------------------------------------------------------             
  protected:
-
+  std::vector<IsolationConeType> isolCones_; // isolation cones
 
 
   // -------------------------------------------------------------
@@ -76,7 +77,20 @@ class RecPhotonFormat : public RecParticleFormat
 
   /// Clear all information
   virtual void Reset()
-  { }
+  {
+    isolCones_.clear(); 
+  }
+
+  /// get the collection of isolation cones
+  const std::vector<IsolationConeType>& isolCones() const
+  { return isolCones_; }
+
+  /// giving a new isolation cone entry
+  IsolationConeType* GetNewIsolCone()
+  {
+    isolCones_.push_back(IsolationConeType());
+    return &isolCones_.back();
+  }
 
 };
 

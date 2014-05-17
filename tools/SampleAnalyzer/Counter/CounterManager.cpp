@@ -82,7 +82,7 @@ void CounterManager::Write_TextFormat(SAFWriter& output) const
   *output.GetStream() << "<InitialCounter>" << std::endl;
 
   // name
-  *output.GetStream() << "\"" << initial_.name_ << "\" #name" << std::endl;
+  *output.GetStream() << "\"Initial number of events\"      #" << std::endl;
 
   // nentries
   output.GetStream()->width(15);
@@ -121,7 +121,11 @@ void CounterManager::Write_TextFormat(SAFWriter& output) const
     *output.GetStream() << "<Counter>" << std::endl;
 
     // name
-    *output.GetStream() << "\"" << counters_[i].name_ << "\" #name" << std::endl;
+    int nsp = 30-counters_[i].name_.size();
+    if(nsp<0) nsp=0;
+    *output.GetStream() << "\"" << counters_[i].name_  << "\"";
+    for (unsigned int jj=0; jj<static_cast<unsigned int>(nsp);jj++) *output.GetStream() << " ";
+    *output.GetStream() << "# " << i+1 <<"st cut" << std::endl;
 
     // nentries
     output.GetStream()->width(15);
@@ -141,10 +145,10 @@ void CounterManager::Write_TextFormat(SAFWriter& output) const
 
     // sum of weights^2
     output.GetStream()->width(15);
-    *output.GetStream() << std::left << std::scientific << counters_[i].sumweight_.first;
+    *output.GetStream() << std::left << std::scientific << counters_[i].sumweight2_.first;
     *output.GetStream() << " ";
     output.GetStream()->width(15);
-    *output.GetStream() << std::left << std::scientific << counters_[i].sumweight_.second;
+    *output.GetStream() << std::left << std::scientific << counters_[i].sumweight2_.second;
     *output.GetStream() << " # sum of weights^2" << std::endl;
 
     // foot

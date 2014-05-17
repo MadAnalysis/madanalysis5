@@ -23,6 +23,7 @@
 
 
 from madanalysis.interpreter.cmd_base import CmdBase
+from madanalysis.IOinterface.delphes_migration import DelphesMigration
 import logging
 import os
 import sys
@@ -86,6 +87,8 @@ class CmdInstall(CmdBase):
             return self.install_zlib()
         elif args[0]=='delphes':
             return self.install_delphes()
+        elif args[0]=='delfes':
+            return self.install_delfes()
         elif args[0]=='fastjet':
             return self.install_fastjet()
         elif args[0]=='MCatNLO-for-ma5':
@@ -99,7 +102,7 @@ class CmdInstall(CmdBase):
     def help(self):
         logging.info("   Syntax: install <component>")
         logging.info("   Download and install a MadAnalysis component from the official site.")
-        logging.info("   List of available components : samples zlib fastjet MCatNLO-for-ma5 delphes")
+        logging.info("   List of available components : samples zlib fastjet MCatNLO-for-ma5 delphes delfes")
 
 
     def get_ncores(self):
@@ -219,8 +222,7 @@ class CmdInstall(CmdBase):
         # End
         logging.info("Installation complete.")
 
-
-        return True
+        return 'restart'
 
 
     def install_delphes(self):
@@ -244,9 +246,11 @@ class CmdInstall(CmdBase):
         installdir = self.main.ma5dir + '/tools/delphes/'
 
         # List of files
-        files = { "delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.0.10.tar.gz" }
+        #files = { "delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.0.12.tar.gz" }
+        files = { "delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
         
         # Launching wget
+        logging.info("Configuring the package ...")
         if not self.wget(files,'delphes',installdir):
             return False
 
@@ -287,8 +291,85 @@ class CmdInstall(CmdBase):
         # End
         logging.info("Installation complete.")
 
+        return 'restart'
 
-        return True
+
+    def install_delfes(self):
+
+        # Asking for number of cores
+        ncores = self.get_ncores()
+        
+        # Checking connection with MA5 web site
+        if not self.check_ma5site():
+            return False
+    
+        # Creating tools folder
+        if not self.create_tools_folder():
+            return False
+
+        # Creating package folder
+        if not self.create_package_folder('delfes'):
+            return False
+
+        # Directory to install
+        installdir = self.main.ma5dir + '/tools/delfes/'
+
+        # List of files
+#       files = { "delfes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.0.12.tar.gz" }
+        files = { "delfes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
+        
+        # Launching wget
+        if not self.wget(files,'delfes',installdir):
+            return False
+
+        # Detarring package
+        packagedir = self.untar(installdir,'delfes.tar.gz','delfes')
+        if packagedir == "":
+            return False
+
+        # Changing the name of the directory
+        os.system("mv "+packagedir+"/* "+self.main.ma5dir+"/tools/delfes/")
+        packagedir = self.main.ma5dir+"/tools/delfes/"
+       
+        # Migration
+        logging.info("Applying the MadAnalysis 5 patch to the package ...")
+        migrator = DelphesMigration(self.main)
+        migrator.Migrate()
+
+        # Configuring
+        logging.info("Configuring the package ...")
+        os.system("cd "+packagedir+" ; ./configure > "+self.main.ma5dir+"/tools/delfes/"+"configuration.log 2>&1")
+
+        # Compiling
+        logging.info("Compiling the package ...")
+        os.system("cd "+packagedir+" ; make -j"+str(ncores)+" > "+self.main.ma5dir+"/tools/delfes/"+"compilation.log 2>&1")
+
+        # Final check
+        logging.info("Checking installation ...")
+        if (not os.path.isdir(self.main.ma5dir+"/tools/delfes/modules")):
+            logging.error('package modules are missing.')
+            self.display_log('delfes')
+            return False
+
+        if not os.path.isfile(self.main.ma5dir+'/tools/delfes/modules/ParticlePropagator.h'):
+            logging.error("header labeled 'modules/ParticlePropagator.h' is missing.")
+            self.display_log('delfes')
+            return False
+
+        if not os.path.isfile(self.main.ma5dir+'/tools/delfes/libDelphes.so'):
+            logging.error("library labeled 'libdelphes.so' is missing.")
+            self.display_log('delfes')
+            return False
+
+        if not os.path.isfile(self.main.ma5dir+'/tools/delfes/DelphesSTDHEP'):
+            logging.error("library labeled 'DelphesSTDHEP' is missing.")
+            self.display_log('delfes')
+            return False
+        
+        # End
+        logging.info("Installation complete.")
+
+        return 'restart'
 
 
     def install_mcatnlo(self):
@@ -423,7 +504,7 @@ class CmdInstall(CmdBase):
         for file,url in files.items():
             ind+=1
             result="OK"
-            logging.info(' * ' + str(ind)+"/"+str(len(files.keys()))+" Downloading the file '"+file+"' ...")
+            logging.info(' * ' + str(ind)+"/"+str(len(files.keys()))+" Downloading the file "+url+" ...")
 
             try:
                 urllib.urlretrieve(url,installdir+'/'+file,CmdInstall.reporthook)
@@ -473,7 +554,7 @@ class CmdInstall(CmdBase):
             return False
 
         # List of files
-        files = { "fastjet.tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.0.3.tar.gz" }
+        files = { "fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.0.6.tar.gz" }
 
         # Launching wget
         if not self.wget(files,'fastjet',installdir):
@@ -521,11 +602,10 @@ class CmdInstall(CmdBase):
             self.display_log('fastjet')
             return False
         
-        
         # End
         logging.info("Installation complete.")
 
-        return True
+        return 'restart'
 
 
     def install_samples(self):
@@ -593,7 +673,7 @@ class CmdInstall(CmdBase):
         if nargs>2:
             return []
         else:
-            output = ["samples","zlib","fastjet", "MCatNLO-for-ma5", "delphes" ]
+            output = ["samples","zlib","fastjet", "MCatNLO-for-ma5", "delphes", "delfes" ]
             return self.finalize_complete(text,output)
     
 

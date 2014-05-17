@@ -156,7 +156,7 @@ bool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
         if (part.extra1_ == myEvent.mc()->particles_[j].extra2_)
         {
           // set daughter
-          myEvent.mc()->particles_[j].Daughters_.push_back(&part);
+          myEvent.mc()->particles_[j].daughters_.push_back(&part);
 
           // set mother
           nmother++;
@@ -175,11 +175,11 @@ bool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
     }
 
     // MET, MHT, TET, THT
-    if (part.statuscode()==1 && !PHYSICS->IsInvisible(part))
+    if (part.statuscode()==1 && !PHYSICS->Id->IsInvisible(part))
     {
       myEvent.mc()->MET_ -= part.momentum();
       myEvent.mc()->TET_ += part.pt();
-      if (PHYSICS->IsHadronic(part))
+      if (PHYSICS->Id->IsHadronic(part))
       {
         myEvent.mc()->MHT_ -= part.momentum();
         myEvent.mc()->THT_ += part.pt(); 

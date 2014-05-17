@@ -27,9 +27,9 @@ using namespace MA5;
 
 Bool_t TaggerBase::IsLast(MCParticleFormat* part, EventFormat& myEvent)
 {
-  for (unsigned int i=0; i<part->Daughters().size(); i++)
+  for (unsigned int i=0; i<part->daughters().size(); i++)
   {
-    if (part->Daughters()[i]->pdgid()==part->pdgid()) return false;
+    if (part->daughters()[i]->pdgid()==part->pdgid()) return false;
   }
   return true;
 }

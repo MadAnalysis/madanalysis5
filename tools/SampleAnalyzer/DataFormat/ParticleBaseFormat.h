@@ -132,7 +132,8 @@ class ParticleBaseFormat
   const Float_t mt_met(const TLorentzVector& MET) const 
   { 
     // Computing ET sum
-    double ETsum = momentum_.Et() + MET.Et();
+    double ETsum = sqrt( momentum_.M()*momentum_.M() +
+                         momentum_.Pt()*momentum_.Pt() )  + MET.Pt();
 
     // Computing PT sum
     TLorentzVector pt = momentum_ + MET;
@@ -165,6 +166,38 @@ class ParticleBaseFormat
 
   /// Accessor to the particle azimuthal angle
   const Float_t phi()     const {return momentum_.Phi();     }
+
+  /// Accessor to the delta Phi (given in [0, pi] with another particle direction
+  const Float_t dphi_0_pi(const ParticleBaseFormat* p) const 
+  {
+    double dphi = fabs(momentum_.Phi() - p->momentum().Phi());
+    if(dphi>3.14159265) dphi=2.*3.14159265-dphi;
+    return dphi;
+  }
+
+  /// Accessor to the delta Phi (given in [0, pi] with another particle direction
+  const Float_t dphi_0_pi(const ParticleBaseFormat& p) const 
+  {
+    double dphi = fabs(momentum_.Phi() - p.momentum().Phi());
+    if(dphi>3.14159265) dphi=2.*3.14159265-dphi;
+    return dphi;
+  }
+
+  /// Accessor to the delta Phi (given in [0, 2pi] with another particle direction
+  const Float_t dphi_0_2pi(const ParticleBaseFormat* p) const 
+  {
+    double dphi =momentum_.Phi() - p->momentum().Phi();
+    if(dphi<0.) dphi+=2.*3.14159265;
+    return dphi;
+  }
+
+  /// Accessor to the delta Phi (given in [0, 2pi] with another particle direction
+  const Float_t dphi_0_2pi(const ParticleBaseFormat& p) const 
+  {
+    double dphi = momentum_.Phi() - p.momentum().Phi();
+    if(dphi<0.) dphi+=2.*3.14159265;
+    return dphi;
+  }
 
   /// Accessor to the particle rapidity
   const Float_t y()       const {return momentum_.Rapidity();}
@@ -203,8 +236,8 @@ class ParticleBaseFormat
   { return ParticleBaseFormat(a*momentum_); }
 
   /// operator * (momentum)
-  ParticleBaseFormat operator * (const ParticleBaseFormat& p) const
-  { return ParticleBaseFormat(momentum_.Dot(p.momentum_)); }
+  Double_t operator * (const ParticleBaseFormat& p) const
+  { return momentum_.Dot(p.momentum_); }
 
   /// operator + (momentum)
   ParticleBaseFormat operator + (const ParticleBaseFormat& p) const 

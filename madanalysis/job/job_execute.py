@@ -69,7 +69,7 @@ def WriteJobRank(part,file,rank,status):
 
     file.write('  // Sorting particle collection according to '+rank+'\n')
     file.write('  // for getting '+str(part.PTrank)+'th particle\n')
-    file.write('  '+container+'=PHYSICS->rankFilter('+\
+    file.write('  '+container+'=SORTER->rankFilter('+\
                newcontainer+','+str(part.PTrank)+','+rank+');\n\n')
 
 
@@ -206,13 +206,13 @@ def WriteFillWithMuonContainer(part,file,rank,status):
     # Put isolated negative muon
     if part.particle.Find(130):
         file.write('      if ( (event.rec()->muons()[i].charge()<0) &&'+\
-               ' PHYSICS->IsIsolatedMuon(event.rec()->muons()[i],event.rec()) ) '+\
+               ' PHYSICS->Id->IsIsolatedMuon(event.rec()->muons()[i],event.rec()) ) '+\
                container+'.push_back(&(event.rec()->muons()[i]));\n')
 
     # Put isolated positive muon
     if part.particle.Find(-130):
         file.write('      if ( (event.rec()->muons()[i].charge()>0) &&'+\
-               ' PHYSICS->IsIsolatedMuon(event.rec()->muons()[i],event.rec()) ) '+\
+               ' PHYSICS->Id->IsIsolatedMuon(event.rec()->muons()[i],event.rec()) ) '+\
                container+'.push_back(&(event.rec()->muons()[i]));\n')
 
 

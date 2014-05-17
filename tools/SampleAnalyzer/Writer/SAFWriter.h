@@ -30,11 +30,6 @@
 #include <iostream>
 #include <sstream>
 
-// RFIO headers
-#ifdef RFIO_USE
-   #include "SampleAnalyzer/Core/castorstream.h"
-#endif
-
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Writer/WriterTextBase.h"
 
@@ -65,6 +60,7 @@ class SAFWriter : public WriterTextBase
 
   /// Read the sample (virtual pure)
   virtual bool WriteHeader(const SampleFormat& mySample);
+  virtual bool WriteHeader();
 
   /// Read the sample (virtual pure)
   bool WriteFiles(const std::vector<SampleFormat>& mySample);
@@ -75,6 +71,7 @@ class SAFWriter : public WriterTextBase
 
   /// Finalize the event (virtual pure)
   virtual bool WriteFoot(const SampleFormat& mySample);
+  virtual bool WriteFoot();
 
   /// Getting stream
   std::ostream* GetStream()

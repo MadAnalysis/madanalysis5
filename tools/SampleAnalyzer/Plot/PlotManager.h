@@ -39,6 +39,7 @@
 #include "SampleAnalyzer/Plot/HistoLogX.h"
 #include "SampleAnalyzer/Plot/HistoFrequency.h"
 #include "SampleAnalyzer/Writer/SAFWriter.h"
+#include "SampleAnalyzer/RegionSelection/RegionSelection.h"
 
 namespace MA5
 {
@@ -49,7 +50,7 @@ class PlotManager
   // -------------------------------------------------------------
   //                        data members
   // -------------------------------------------------------------
- private :
+ protected :
 
   /// Collection of plots
   std::vector<PlotBase*> plots_;
@@ -70,17 +71,34 @@ class PlotManager
 
   /// Reset
   void Reset()
-  { 
+  {
     for (unsigned int i=0;i<plots_.size();i++) 
-    { if (plots_[i]==0) delete plots_[i]; }
-    plots_.clear(); 
+    { if (plots_[i]!=0) delete plots_[i]; }
+    plots_.clear();
   }
+
+  /// Get method
+  std::vector<PlotBase*> GetHistos()
+    { return plots_; }
+
+  /// Getting thenumber of plots
+  unsigned int GetNplots()
+    { return plots_.size(); }
 
   /// Adding a 1D histogram with fixed bins
   Histo* Add_Histo(const std::string& name, UInt_t bins, 
                    Double_t xmin, Double_t xmax)
   {
     Histo* myhisto = new Histo(name, bins,  xmin, xmax);
+    plots_.push_back(myhisto);
+    return myhisto;
+  }
+
+  Histo* Add_Histo(const std::string& name, UInt_t bins, 
+                   Double_t xmin, Double_t xmax, std::vector<RegionSelection*> regions)
+  {
+    Histo* myhisto = new Histo(name, bins,  xmin, xmax);
+    myhisto->SetSelectionRegions(regions);
     plots_.push_back(myhisto);
     return myhisto;
   }

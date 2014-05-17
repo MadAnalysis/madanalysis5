@@ -21,6 +21,9 @@
 //  
 ////////////////////////////////////////////////////////////////////////////////
 
+//STL headers
+#include <sys/stat.h>
+#include <string>
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Core/SampleAnalyzer.h"
@@ -58,13 +61,13 @@ SampleAnalyzer::SampleAnalyzer()
 
 /// Initialization of the SampleAnalyzer
 bool SampleAnalyzer::Initialize(int argc, char **argv, 
-                                const std::string& pdgFileName)
+                                const std::string& pdgFileName, bool useRSM)
 {
   // Initializing general pointers
   myReader_ = 0;
 
   // Configuration
-  if (!cfg_.Initialize(argc,argv)) return false;
+  if (!cfg_.Initialize(argc,argv,useRSM)) return false;
 
   // Displaying configuration
   cfg_.Display();
@@ -116,9 +119,6 @@ bool SampleAnalyzer::Initialize(int argc, char **argv,
   fullWriters_.BuildTable();
   fullReaders_.BuildTable();
   fullAnalyses_.BuildPredefinedTable();
-  fullAnalyses_.BuildUserTable();
-  fullFilters_.BuildPredefinedTable();
-  fullFilters_.BuildUserTable();
   fullJetClusterers_.BuildTable();
   fullDetectors_.BuildTable();
 
@@ -127,6 +127,14 @@ bool SampleAnalyzer::Initialize(int argc, char **argv,
   next_file_=true;
 
   return true;
+}
+
+
+AnalyzerBase* SampleAnalyzer::InitializeAnalyzer(const std::string& name, 
+                                                 const std::string& outputname)
+{
+  std::map<std::string,std::string> parametersA1;
+  InitializeAnalyzer(name,outputname,parametersA1);
 }
 
 
@@ -173,48 +181,65 @@ AnalyzerBase* SampleAnalyzer::InitializeAnalyzer(const std::string& name,
   return myAnalysis;
 }
 
-
-FilterBase* SampleAnalyzer::InitializeFilter(const std::string& name, 
-                                             const std::string& outputname,
-                           const std::map<std::string,std::string>& parameters)
+/// Post initialization: creation of the output directory structure
+inline int CreateDir(std::string dirname)
 {
-  // Display 
-  INFO << "      - filter '"
-       << name << "'" << endmsg;
+  struct stat myStat;
+  if (!((stat(dirname.c_str(), &myStat) == 0) && (((myStat.st_mode) & S_IFMT) == S_IFDIR)))
+    { if(mkdir(dirname.c_str(),0755) != 0) { return -1; } }
+  else { return 1; }
+  return 0;
+}
 
-  // Getting the analysis
-  FilterBase* myFilter = fullFilters_.Get(name);
+bool SampleAnalyzer::CreateDirectoryStructure()
+{
+  // Check if the output directory exists -> if not: create it
+  std::string dirname="./Output";
+  if(CreateDir(dirname)==-1) { return false; }
 
-  // Filter found ?
-  if (myFilter==0)
+  // Check whether a directory for the investigated dataset exists -> if not create it
+  dirname = cfg_.GetInputFileName();
+  size_t pos = dirname.find_last_of('/');
+  if(pos!=std::string::npos) dirname = "./Output/" + dirname.substr(pos+1);
+  else                       dirname = "../Output/" + dirname;
+  if(CreateDir(dirname)==-1) { return false; }
+
+  // Creating one subdirectory for each analysis
+  for(unsigned int i=0;i<analyzers_.size(); i++)
   {
-    ERROR << "filter called '" << name << "' is not found" 
-          << endmsg;
-    return 0;
+    std::string newdirname = dirname + "/" + analyzers_[i]->name();
+    int check = -1;
+    for(unsigned int ii=0; check!=0 ; ii++)
+    {
+      std::stringstream ss; ss << ii;
+      check = CreateDir(newdirname + "_" + ss.str());
+      if(check==-1) { return false; }
+      else          { analyzers_[i]->SetOutputDir( newdirname + "_" + ss.str()); }
+    }
+
+    // Creating one suybdirectory for the histograms and another one for the cutflow
+    if(CreateDir(analyzers_[i]->Output() + "/Histograms")==-1) {  return false; }
+    if(CreateDir(analyzers_[i]->Output() + "/Cutflows")==-1) {  return false; }
   }
 
-  // Putting the analysis in container
-  filters_.push_back(myFilter);
+  // Everything is fine
+  return true;
+}
 
-  // Initialize (common part to all filters)
-  if (!myFilter->PreInitialize(outputname,
-                               &cfg_))
+bool SampleAnalyzer::PostInitialize()
+{
+  if(cfg_.useRSM())
   {
-    ERROR << "problem during the pre-initialization of the filter called '" 
-          << name << "'" << endmsg;
-    return 0;
+    // Creating the directory structure
+    if(!CreateDirectoryStructure())
+    {
+      ERROR << "The output directory structure cannot be created properly" << endmsg;
+      return false;
+    }
   }
 
-  // Initialize (specific to the filter)
-  if (!myFilter->Initialize(cfg_,parameters))
-  {
-    ERROR << "problem during the initialization of the filter called '" 
-          << name << "'" << endmsg;
-    return 0;
-  }
-
-  // Returning the filter
-  return myFilter;
+  // Everything was fine
+  return true;
 }
 
 
@@ -491,6 +516,34 @@ StatusCode::Type SampleAnalyzer::NextEvent(SampleFormat& mySample, EventFormat& 
 }
 
 
+/// Home made functions to make reasonnable filenames
+inline void ReplaceAll(std::string &name, const std::string &In, const std::string &Out)
+{
+  size_t pos = name.find(In);
+  while(pos!=std::string::npos)
+  {
+    name.replace(pos,In.size(),Out);
+    pos = name.find(In);
+  }
+}
+
+inline std::string CleanName(const std::string &name)
+{
+  std::string tmp=name;
+  ReplaceAll(tmp, "/", "_");
+  ReplaceAll(tmp, "->", "_");
+  ReplaceAll(tmp, ">", "_");
+  ReplaceAll(tmp, " ", "_");
+  ReplaceAll(tmp, "<", "_");
+  ReplaceAll(tmp, ",", "_");
+  ReplaceAll(tmp, "+", "_");
+  ReplaceAll(tmp, "-", "_");
+  ReplaceAll(tmp, "(", "_");
+  ReplaceAll(tmp, ")", "_");
+  return tmp;
+}
+
+/// Finalize fuction
 bool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples, 
                               EventFormat& myEvent)
 {
@@ -524,30 +577,90 @@ bool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
   FillSummary(summary,mySamples);
 
   // Finalize analysis
-  for (unsigned int i=0;i<analyzers_.size();i++)
+  if(cfg_.useRSM())
   {
-    analyzers_[i]->PreFinalize(summary,mySamples);
-    analyzers_[i]->Finalize(summary,mySamples);
-    analyzers_[i]->PostFinalize(summary,mySamples);
-  }
+    // Creating the general SAF file (sample info)
+    std::string datasetname = cfg_.GetInputFileName();
+    size_t pos = datasetname.find_last_of('/');
+    if(pos!=std::string::npos) datasetname = datasetname.substr(pos+1);
+    std::string general = "./Output/" + datasetname + "/" + datasetname + ".saf";
+    SAFWriter out;
+    out.Initialize(&cfg_, general.c_str());
+    out.WriteHeader(summary);
+    out.WriteFoot(summary);
+    out.Finalize();
 
-  // Finalize writers
-  for (unsigned int i=0;i<writers_.size();i++)
-  {
-    writers_[i]->WriteFoot(summary);
-    writers_[i]->Finalize();
-  }
+    // Creating the histo SAF file
+    for(unsigned int i=0; i<analyzers_.size(); i++)
+    {
+      std::string safname = analyzers_[i]->Output() + "/Histograms/histos.saf";
+      out.Initialize(&cfg_, safname.c_str());
+      out.WriteHeader();
+      analyzers_[i]->Manager()->GetPlotManager()->Write_TextFormat(out);
+      out.WriteFoot();
+      out.Finalize();
+    }
 
-  // Finalize clusters
-  for (unsigned int i=0;i<clusters_.size();i++)
-  {
-    clusters_[i]->Finalize();
-  }
+    // Linking the histos to the SRs
+    for(unsigned int i=0; i<analyzers_.size(); i++)
+    {
+      std::string safname = analyzers_[i]->Output() + "/" + analyzers_[i]->name() + ".saf";
+      out.Initialize(&cfg_, safname.c_str());
+      out.WriteHeader();
+      analyzers_[i]->Manager()->WriteHistoDefinition(out);
+      out.WriteFoot();
+      out.Finalize();
+    }
 
-  // Finalize detectors
-  for (unsigned int i=0;i<detectors_.size();i++)
+
+    // Saving the cut flows
+    for(unsigned int i=0; i<analyzers_.size(); i++)
+    {
+     AnalyzerBase* myanalysis = analyzers_[i];
+      for(unsigned int j=0; j<myanalysis->Manager()->Regions().size(); j++)
+      {
+        RegionSelection *myRS = myanalysis->Manager()->Regions()[j];
+        std::string safname = myanalysis->Output() + "/Cutflows/" + 
+           CleanName(myRS->GetName()) + ".saf";
+        out.Initialize(&cfg_, safname.c_str());
+        out.WriteHeader();
+        myRS->WriteCutflow(out);
+        out.WriteFoot();
+        out.Finalize();
+      }
+    }
+
+    // The user-defined stuff
+    for(unsigned int i=0; i<analyzers_.size(); i++)
+      analyzers_[i]->Finalize(summary,mySamples);
+  }
+  else
   {
-    detectors_[i]->Finalize();
+    for (unsigned int i=0;i<analyzers_.size();i++)
+    {
+      analyzers_[i]->PreFinalize(summary,mySamples);
+      analyzers_[i]->Finalize(summary,mySamples);
+      analyzers_[i]->PostFinalize(summary,mySamples);
+    }
+
+    // Finalize writers
+    for (unsigned int i=0;i<writers_.size();i++)
+    {
+      writers_[i]->WriteFoot(summary);
+      writers_[i]->Finalize();
+    }
+
+    // Finalize clusters
+    for (unsigned int i=0;i<clusters_.size();i++)
+    {
+      clusters_[i]->Finalize();
+    }
+
+    // Finalize detectors
+    for (unsigned int i=0;i<detectors_.size();i++)
+    {
+      detectors_[i]->Finalize();
+    }
   }
 
   // Display reports
