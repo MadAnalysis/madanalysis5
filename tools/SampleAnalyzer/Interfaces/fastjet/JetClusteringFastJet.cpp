@@ -34,9 +34,9 @@ using namespace MA5;
 
 
 JetClusteringFastJet::JetClusteringFastJet(std::string Algo)
-{ JetAlgorithm_=Algo; JetDefinition_=0}
+{ JetAlgorithm_=Algo; JetDefinition_=0; }
 
-JetClusteringFastJet::~JetClusteringFastJet(); 
+JetClusteringFastJet::~JetClusteringFastJet() 
 { if (JetDefinition_!=0) delete JetDefinition_; }
 
 
@@ -271,7 +271,7 @@ bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
   }
 
   // Clustering
-  fastjet::ClusterSequence clust_seq(inputs, JetDefinition_);
+  fastjet::ClusterSequence clust_seq(inputs, *JetDefinition_);
 
   // Getting jets with PTmin = 0
   std::vector<fastjet::PseudoJet> jets; 

@@ -26,7 +26,9 @@
 #include <stdlib.h>
 
 // SampleAnalyzer headers
-#include "SampleAnalyzer/Interfaces/fastjet/MergingPlots.h"
+#ifdef FASTJET_USE
+  #include "SampleAnalyzer/Interfaces/fastjet/MergingPlots.h"
+#endif
 #include "SampleAnalyzer/Analyzer/AnalyzerManager.h"
 #include "SampleAnalyzer/Service/LogService.h"
 
@@ -68,6 +70,6 @@ AnalyzerBase* AnalyzerManager::ChoiceAnalyzer()
 void AnalyzerManager::BuildPredefinedTable()
 {
 #ifdef FASTJET_USE
-  Add("MergingPlots", new MergingPlots);
+    Add("MergingPlots", new MergingPlots);
 #endif
 }

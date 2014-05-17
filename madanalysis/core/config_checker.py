@@ -719,6 +719,11 @@ class ConfigChecker:
                 return False
 
         self.configLinux.fastjet_version = commands.getstatusoutput(self.ma5dir+'/tools/fastjet/bin/fastjet-config --version')[1]
+        tmp = commands.getstatusoutput(self.ma5dir+'/tools/fastjet/bin/fastjet-config --libs --plugins')[1]
+        words = tmp.split()
+        for word in words:
+            if word.startswith('-L'):
+                self.configLinux.fastjet_lib_paths.append(word[2:])
         self.PrintOK()
 
         return True

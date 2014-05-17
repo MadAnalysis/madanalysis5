@@ -630,7 +630,7 @@ class JobWriter():
         if self.fortran:
             libs.extend(['-lgfortran'])
         if self.libFastjet:
-            libs.extend(['$(shell fastjet-config --libs --plugins)','-lfastjet_for_ma5'])
+            libs.extend(['$(shell fastjet-config --libs --plugins --rpath=no)','-lfastjet_for_ma5'])
         file.write('LIBFLAGS = '+' '.join(libs)+'\n')
         file.write('\n')
 

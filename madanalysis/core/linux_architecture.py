@@ -157,6 +157,7 @@ class LinuxArchitecture:
         self.delfes_lib_paths=[]
         self.delfes_lib=""
         self.fastjet_bin_path=""
+        self.fastjet_lib_paths=[]
 
     def Dump(self):
         logging.info(" User options")

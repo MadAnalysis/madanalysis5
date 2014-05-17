@@ -39,15 +39,15 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 void JetClustererManager::BuildTable()
 {
-    #ifdef FASTJET_USE
-    Add("kt",          new JetClusteringStandard("kt_algorithm");
-    Add("antikt",      new JetClusteringStandard("antikt_algorithm");
-    Add("genkt",       new JetClusteringStandard("genkt_algorithm");
-    Add("cambridge",   new JetClusteringStandard("cambridge_algorithm");
+  #ifdef FASTJET_USE
+    Add("kt",          new JetClusteringStandard("kt"));
+    Add("antikt",      new JetClusteringStandard("antikt"));
+    Add("genkt",       new JetClusteringStandard("genkt"));
+    Add("cambridge",   new JetClusteringStandard("cambridge"));
     Add("SISCone",     new JetClusteringSISCone());
     Add("CDFMidpoint", new JetClusteringCDFMidpoint());
     Add("CDFJetClu",   new JetClusteringCDFJetClu());
     Add("GridJet",     new JetClusteringGridJet());
-    #endif
+  #endif
 }
 

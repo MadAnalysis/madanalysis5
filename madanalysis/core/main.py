@@ -484,6 +484,8 @@ class Main():
         self.configLinux.toLDPATH.append(self.configLinux.root_lib_path)
         if self.libFastJet:
             self.configLinux.toPATH.append(self.configLinux.fastjet_bin_path)
+            for path in self.configLinux.fastjet_lib_paths:
+                self.configLinux.toLDPATH.append(path)
         if self.libZIP:
             self.configLinux.toLDPATH.append(self.configLinux.zlib_lib_path)        
         if self.libDelphes:

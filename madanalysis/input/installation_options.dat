@@ -22,7 +22,7 @@
 # zlib_libs     = /home/toto/zlib/lib
 
 # -----FASTJET-----
-fastjet_veto     = 1 # 0=No, 1=Yes
+# fastjet_veto     = 0 # 0=No, 1=Yes
 # fastjet_bin_path = /home/toto/fastjet/include
 
 # -----PDFLATEX-----
