@@ -819,6 +819,9 @@ class JobWriter():
     @staticmethod
     def WriteSetupFile(bash,path,ma5dir,MA5BASE,configLinux,isMAC):
 
+        # Variable to check at the end
+        toCheck=[]
+
         # Opening file in write-only mode
         if bash:
             filename = path+"/setup.sh"
@@ -866,60 +869,101 @@ class JobWriter():
             if bash:
                 file.write('export MA5_BASE=' + JobWriter.CleanPath(ma5dir)+'\n')
             else:
-                file.write('setenv MA5_BASE=' + JobWriter.CleanPath(ma5dir)+'\n')
+                file.write('setenv MA5_BASE ' + JobWriter.CleanPath(ma5dir)+'\n')
+            toCheck.append('MA5_BASE')
             file.write('\n')
 
         # Configuring PATH environment variable
-        file.write('# Configuring PATH environment variable\n')
-        if bash:
-            file.write('export PATH=$PATH:' + JobWriter.CleanPath(':'.join(configLinux.toPATH))+'\n')
-        else:
-            file.write('setenv PATH $PATH:' + JobWriter.CleanPath(':'.join(configLinux.toPATH))+'\n')
-        file.write('\n')
-
-        # Configuring LD_LIBRARY_PATH environment variable
-        file.write('# Configuring LD_LIBRARY_PATH environment variable\n')
-        if bash:
-            file.write('export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
-        else:
-            file.write('setenv LD_LIBRARY_PATH $LD_LIBRARY_PATH:' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
-        file.write('\n')
-
-        # Configuring LIBRARY_PATH environment variable
-        #file.write('# Configuring LIBRARY_PATH environment variable\n')
-        #if bash:
-        #    file.write('export LIBRARY_PATH=' + JobWriter.CleanPath(os.environ['LD_LIBRARY_PATH'])+'\n')
-        #else:
-        #    file.write('setenv LIBRARY_PATH ' + JobWriter.CleanPath(os.environ['LD_LIBRARY_PATH'])+'\n')
-        #file.write('\n')
-
-        # Configuring DYLD_LIBRARY_PATH environment variable
-        if isMAC:
-            file.write('# Configuring DYLD_LIBRARY_PATH environment variable\n')
+        if len(configLinux.toPATH)!=0:
+            file.write('# Configuring PATH environment variable\n')
             if bash:
-                file.write('export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                file.write('if [ $PATH ]; then\n')
+                file.write('export PATH=$PATH:' + JobWriter.CleanPath(':'.join(configLinux.toPATH))+'\n')
+                file.write('else\n')
+                file.write('export PATH=' + JobWriter.CleanPath(':'.join(configLinux.toPATH))+'\n')
+                file.write('fi\n')
             else:
-                file.write('setenv DYLD_LIBRARY_PATH $DYLD_LIBRARY_PATH:' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                file.write('if ( $?PATH ) then\n')
+                file.write('setenv PATH "$PATH":' + JobWriter.CleanPath(':'.join(configLinux.toPATH))+'\n')
+                file.write('else\n')
+                file.write('setenv PATH ' + JobWriter.CleanPath(':'.join(configLinux.toPATH))+'\n')
+                file.write('endif\n')
+            toCheck.append('PATH')
             file.write('\n')
 
-        # Configuring CPLUS_INCLUDE_PATH environment variable
-        #file.write('# Configuring CPLUS_INCLUDE_PATH environment variable\n')
-        #if bash:
-        #    file.write('export CPLUS_INCLUDE_PATH=' + JobWriter.CleanPath(os.environ['CPLUS_INCLUDE_PATH'])+'\n')
-        #else:
-        #    file.write('setenv CPLUS_INCLUDE_PATH ' + JobWriter.CleanPath(os.environ['CPLUS_INCLUDE_PATH'])+'\n')
-        #file.write('\n')
+        if len(configLinux.toLDPATH)!=0:
+            
+            # Configuring LD_LIBRARY_PATH environment variable
+            file.write('# Configuring LD_LIBRARY_PATH environment variable\n')
+            if bash:
+                file.write('if [ $LD_LIBRARY_PATH ]; then\n')
+                file.write('export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                file.write('else\n')
+                file.write('export LD_LIBRARY_PATH=' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                file.write('fi\n')
+            else:
+                file.write('if ( $?LD_LIBRARY_PATH ) then\n')
+                file.write('setenv LD_LIBRARY_PATH "$LD_LIBRARY_PATH":' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                file.write('else\n')
+                file.write('setenv LD_LIBRARY_PATH ' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                file.write('endif\n')
+            toCheck.append('LD_LIBRARY_PATH')
+            file.write('\n')
+
+            # Configuring LIBRARY_PATH environment variable
+            #file.write('# Configuring LIBRARY_PATH environment variable\n')
+            #if bash:
+            #    file.write('export LIBRARY_PATH=' + JobWriter.CleanPath(os.environ['LD_LIBRARY_PATH'])+'\n')
+            #else:
+            #    file.write('setenv LIBRARY_PATH ' + JobWriter.CleanPath(os.environ['LD_LIBRARY_PATH'])+'\n')
+            #file.write('\n')
+
+            # Configuring DYLD_LIBRARY_PATH environment variable
+            if isMAC:
+                file.write('# Configuring DYLD_LIBRARY_PATH environment variable\n')
+                if bash:
+                    file.write('if [ $DYLD_LIBRARY_PATH ]; then\n')
+                    file.write('export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                    file.write('else\n')
+                    file.write('export DYLD_LIBRARY_PATH=' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                    file.write('fi\n')
+                else:
+                    file.write('if ( $?DYLD_LIBRARY_PATH ) then\n')
+                    file.write('setenv DYLD_LIBRARY_PATH "$DYLD_LIBRARY_PATH":' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                    file.write('else\n')
+                    file.write('setenv DYLD_LIBRARY_PATH ' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                    file.write('endif\n')
+                toCheck.append('DYLD_LIBRARY_PATH')
+                file.write('\n')
+
+            # Configuring CPLUS_INCLUDE_PATH environment variable
+            #file.write('# Configuring CPLUS_INCLUDE_PATH environment variable\n')
+            #if bash:
+            #    file.write('export CPLUS_INCLUDE_PATH=' + JobWriter.CleanPath(os.environ['CPLUS_INCLUDE_PATH'])+'\n')
+            #else:
+            #    file.write('setenv CPLUS_INCLUDE_PATH ' + JobWriter.CleanPath(os.environ['CPLUS_INCLUDE_PATH'])+'\n')
+            #file.write('\n')
 
         # Checking that all environment variables are defined
         file.write('# Checking that all environment variables are defined\n')
         if bash:
-            file.write('if [[ $PATH && $LD_LIBRARY_PATH ]]; then\n')
+            file.write('if [[ ')
+            for ind in range(0,len(toCheck)):
+                if ind!=0:
+                    file.write(' && ')
+                file.write('$'+toCheck[ind])
+            file.write(' ]]; then\n')
             file.write('echo -e $YELLOW"'+StringTools.Fill('-',56)+'"\n')
 	    file.write('echo -e "'+StringTools.Center('Your environment is properly configured for MA5',56)+'"\n')
 	    file.write('echo -e "'+StringTools.Fill('-',56)+'"$NORMAL\n')
             file.write('fi\n')
         else:
-            file.write('if ( $?PATH && $?LD_LIBRARY_PATH ) then\n')
+            file.write('if ( \n')
+            for ind in range(0,len(toCheck)):
+                if ind!=0:
+                    file.write(' && ')
+                file.write('$?'+toCheck[ind])
+            file.write(' ) then\n')
             file.write('echo $YELLOW"'+StringTools.Fill('-',56)+'"\n')
 	    file.write('echo "'+StringTools.Center('Your environment is properly configured for MA5',56)+'"\n')
 	    file.write('echo "'+StringTools.Fill('-',56)+'"$NORMAL\n')
