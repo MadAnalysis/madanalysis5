@@ -29,7 +29,7 @@
 #include <fastjet/ClusterSequence.hh>
 #include <fastjet/PseudoJet.hh>
 #include <fastjet/CDFJetCluPlugin.hh>
-typedef fastjet::JetDefinition::Plugin FastJetPlugin;
+
 
 
 using namespace MA5;
@@ -110,7 +110,7 @@ bool JetClusteringCDFJetClu::Initialize(const std::map<std::string,std::string>&
   }
 
   // Creating plugin
-  Plugin_ = new fastjet::CDFJetCluPlugin(R_, OverlapThreshold_, SeedThreshold_, Iratch_);
+  fastjet::JetDefinition::Plugin* Plugin_ = new fastjet::CDFJetCluPlugin(R_, OverlapThreshold_, SeedThreshold_, Iratch_);
 
   // Creating jet definition
   JetDefinition_ = new fastjet::JetDefinition(Plugin_);  

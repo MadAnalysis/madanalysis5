@@ -248,7 +248,7 @@ class ConfigChecker:
             self.configLinux.root_lib_path = root_tmp[0]
 
         # Adding ROOT library path to Python path
-        sys.path.append(self.configLinux.root_inc_path)
+        sys.path.append(self.configLinux.root_lib_path)
 
         # Check: looking for files
         FilesToFind=[self.configLinux.root_lib_path+'/libPyROOT.so', \

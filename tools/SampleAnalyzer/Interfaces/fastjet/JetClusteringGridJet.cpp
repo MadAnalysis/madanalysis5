@@ -86,7 +86,7 @@ bool JetClusteringGridJet::Initialize(const std::map<std::string,std::string>& o
   }
 
   // Creating Plugin
-  Plugin_ = new fastjet::GridJetPlugin(Ymax_, RequestedGridSpacing_);
+    fastjet::JetDefinition::Plugin* Plugin__ = new fastjet::GridJetPlugin(Ymax_, RequestedGridSpacing_);
 
   // Creating jet definition
   JetDefinition_ = new fastjet::JetDefinition(Plugin_);  

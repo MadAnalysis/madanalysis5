@@ -110,7 +110,7 @@ bool JetClusteringCDFMidpoint::Initialize(const std::map<std::string,std::string
   }
 
   // Creating plugin
-  Plugin_ = new fastjet::CDFMidPointPlugin(R_, OverlapThreshold_, 
+  fastjet::JetDefinition::Plugin* Plugin_ = new fastjet::CDFMidPointPlugin(R_, OverlapThreshold_, 
                                            SeedThreshold_, ConeAreaFraction_);
 
   // Creating jet definition

@@ -29,7 +29,6 @@
 //SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/fastjet/JetClusteringFastJet.h"
 
-class FastJetPlugin;
 
 namespace MA5
 {
@@ -41,8 +40,6 @@ class JetClusteringPlugin: public JetClusteringFastJet
 //---------------------------------------------------------------------------------
   protected :
 
-    /// fastjet plugin
-    FastJetPlugin * Plugin_;
 
 //---------------------------------------------------------------------------------
 //                                method members

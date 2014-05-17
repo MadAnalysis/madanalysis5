@@ -111,7 +111,7 @@ bool JetClusteringSISCone::Initialize(const std::map<std::string,std::string>& o
   }
 
   // Creating plugin
-  Plugin_ = new fastjet::SISConePlugin(R_, OverlapThreshold_, NPassMax_, Protojet_ptmin_);
+    fastjet::JetDefinition::Plugin* Plugin_ = new fastjet::SISConePlugin(R_, OverlapThreshold_, NPassMax_, Protojet_ptmin_);
 
   // Creating jet definition
   JetDefinition_ = new fastjet::JetDefinition(Plugin_);  
