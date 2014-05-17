@@ -264,7 +264,7 @@ class ConfigChecker:
             
         # Check: looking for files
         FilesToFind=[self.configLinux.root_lib_path+'/ROOT.py', \
-                     self.configLinux.root_inc_path+'/ROOT.pyc']
+                     self.configLinux.root_lib_path+'/ROOT.pyc']
         found=False
         for file in FilesToFind:
             if os.path.isfile(file):
