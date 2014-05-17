@@ -1,5 +1,16 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+157  1.1.10 (2014/05/17) ma5team:   - new compilation procedure for library and job
+                                    - adding job test to check the compilation procedure
+                                    - adding restart command and possibility to restart MA5 after 
+                                      the installation of a package
+                                    - adding new simulation detector package = tuned release of Delphes
+                                    - compatible with the "new" STDHEP format
+                                    - new structure for plots/cuts in the expert mode for 
+                                      recasting analysis
+                                    - revisiting physics services
+                                    - adding Transverse Observable services with MT2, MTW variables 
+
 80   1.1.9  (2013/10/28) ma5team:   - adding Delphes interface + CMS/ATLAS cards
                                     - adding Delphes cards including pile-up
                                     - the electric charge is now an integer at the reco level 
