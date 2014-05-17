@@ -448,8 +448,8 @@ class ConfigChecker:
         ma5installation = False
         if not force:
             if os.path.isdir(self.ma5dir+'/tools/zlib'):
-                self.configLinux.zlib_inc_path=self.ma5dir+'/tools/zlib/'
-                self.configLinux.zlib_lib_path=self.ma5dir+'/tools/zlib/'
+                self.configLinux.zlib_inc_path=self.ma5dir+'/tools/zlib/include/'
+                self.configLinux.zlib_lib_path=self.ma5dir+'/tools/zlib/lib/'
                 ma5installation = True
 
         # Check if the libraries and headers are available

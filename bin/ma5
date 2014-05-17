@@ -24,6 +24,194 @@
 ################################################################################
 
 
+def MainSession():
+    
+    # Importing  MadAnalysis main class
+    from madanalysis.core.main import Main
+    main = Main()
+    main.ma5dir = ma5dir
+
+    # Release version
+    # Do not touch it !!!!!  
+    main.version = "1.1.10.35"
+    main.date = "2014/05/09"
+
+    # Checking arguments
+    import getopt
+    try:
+        optlist, arglist = getopt.getopt(sys.argv[1:], \
+                                     "PHReEvhfmsb", \
+                                     ["partonlevel","hadronlevel","recolevel",\
+                                      "expert","version","release","help",\
+                                      "forced","script","mg5","autocheck","build"])
+    except getopt.GetoptError, err:
+        logging.error(str(err))
+        usage()
+        sys.exit()
+
+    # Reading aguments
+    partonlevel = False
+    hadronlevel = False
+    recolevel   = False
+    expertmode  = False
+    forcedmode  = False
+    mg5mode     = False
+    scriptmode  = False
+    autocheck   = False
+    build       = False
+    for o,a in optlist:
+        if o in ("-P","--partonlevel"):
+            partonlevel=True
+        elif o in ("-H","--hadronlevel"):
+            hadronlevel=True
+        elif o in ("-R","--recolevel"):
+            recolevel=True
+        elif o in ("-E","-e","--expert"):
+            expertmode=True
+        elif o in ("-f","--forced"):
+            forcedmode=True
+        elif o in ("-m","--mg5"):
+            mg5mode=True
+        elif o in ("-s","--script"):
+            scriptmode=True
+        elif o in ("-v","--version","--release"):
+            logging.info("MA5 release : " + main.version + " " + main.date  + "\n")
+            sys.exit()
+        elif o in ("--autocheck"):
+            autocheck = True
+        elif o in ("-b","--build"):
+            build = True
+        elif o in ("-h","--help"):
+            usage()
+            sys.exit()
+
+    # Checking compatibility between arguments
+    if partonlevel and hadronlevel:
+       logging.error("Parton mode and hadron mode cannot be set in a same time.\n"
+                     "Please choose only one of these modes.")
+       sys.exit()
+    elif partonlevel and recolevel:
+       logging.error("Parton mode and reco mode cannot be set in a same time.\n"
+                     "Please choose only one of these modes.")
+       sys.exit()
+    
+    elif hadronlevel and recolevel:
+       logging.error("Hadron mode and reco mode cannot be set in a same time.\n"
+                     "Please choose only one of these modes.")
+       sys.exit()
+    if scriptmode:
+       forcedmode=True
+
+    # Setting argument in the main program 
+    from madanalysis.enumeration.ma5_running_type import MA5RunningType
+    if partonlevel:
+        main.mode=MA5RunningType.PARTON
+    elif hadronlevel:
+        main.mode=MA5RunningType.HADRON
+    elif recolevel:
+        main.mode=MA5RunningType.RECO
+        from madanalysis.enumeration.normalize_type import NormalizeType
+        main.normalize=NormalizeType.NONE
+
+    # Re-initializing the list of observables (hadron-level or reco-level)
+    if hadronlevel or recolevel:
+        main.InitObservables(main.mode)
+
+    main.forced = forcedmode
+    Main.forced = forcedmode
+    main.script = scriptmode
+    main.mg5    = mg5mode
+
+    # Setting batch mode for ROOT
+    #sys.argv.append('-b-')
+
+    # Displaying header
+    logging.info("")
+    logging.info(\
+    "*************************************************************\n" + \
+    "*                                                           *\n" + \
+    "*        W E L C O M E  to  M A D A N A L Y S I S  5        *\n" + \
+    "*                         ______  ______                    *\n" + \
+    "*                 /'\_/`\/\  __ \/\  ___\                   *\n" + \
+    "*                /\      \ \ \_\ \ \ \__/                   *\n" + \
+    "*                \ \ \__\ \ \  __ \ \___``\                 *\n" + \
+    "*                 \ \ \_/\ \ \ \/\ \/\ \_\ \                *\n" + \
+    "*                  \ \_\\\ \_\ \_\ \_\ \____/                *\n" + \
+    "*                   \/_/ \/_/\/_/\/_/\/___/                 *\n" + \
+    "*                                                           *\n" + \
+    "*   MA5 release : " + \
+             "%-24s" % main.version + "%+15s" % main.date  + "   *\n" + \
+    "*                                                           *\n" + \
+    "*         Comput. Phys. Commun. 184 (2013) 222-256          *\n" + \
+    "*                                                           *\n" + \
+    "*   The MadAnalysis Development Team - Please visit us at   *\n" + \
+    "*            https://launchpad.net/madanalysis5             *\n" + \
+    "*                                                           *\n" + \
+    "*              Type 'help' for in-line help.                *\n" + \
+    "*                                                           *\n" + \
+    "*************************************************************")
+
+    # Displaying special banner if auto-check mode is activated 
+    if autocheck:
+        logging.info("")
+        logging.info("                        AUTO-CHECK MODE")
+        logging.info("")
+
+    # Checking the present linux configuration
+    if not main.CheckLinuxConfig(detail=autocheck):
+        sys.exit()
+
+    # Building (if necesserary) the SampleAnalyzer library
+    if not main.BuildLibrary(forced=build):
+        sys.exit()	
+
+    logging.info("*************************************************************")
+
+
+    # Auto-check mode
+    if autocheck:
+        pass
+
+    # Expert mode
+    elif expertmode:
+        from madanalysis.core.expert_mode import ExpertMode
+        main.expertmode = True
+        expert = ExpertMode(main)
+        if not expert.CreateDirectory():
+            sys.exit()
+        if not expert.Copy():
+            sys.exit()
+        expert.GiveAdvice()
+        return False
+
+    # Normal mode
+    else:
+    
+        # Launching the interpreter
+        from madanalysis.interpreter.interpreter import Interpreter
+        interpreter = Interpreter(main)
+
+        # Looking for script
+        for arg in arglist:
+            filename=os.path.expanduser(arg)
+            filename=os.path.abspath(filename)
+            interpreter.load(filename)
+    
+        # Exit if script mode activated
+        if len(arglist)!=0 and main.script:
+            interpreter.run_cmd("quit")
+            return False
+    
+        # Interpreter loop
+        else:
+            interpreter.cmdloop()
+            if main.repeatSession==True:
+                return True
+            else:
+                return False
+        
+       
+
 def usage():
     logging.info("\nUsage of MadAnalysis 5")
     logging.info("------------------------")
@@ -50,6 +238,9 @@ def usage():
     logging.info("This optional argument is a list of filenames containing a "+\
                  "set of MadAnalysis 5 commands. The file name are handled as "+\
                  "concatenated, and the commands are applied sequentially.\n")
+
+
+
     
 """This is the main executable, a simple frontend to set up the PYTHONPATH
 and call immediately the command line interface scripts"""
@@ -105,183 +296,16 @@ else:
         readline.__doc__ = 'GNU'
         readline.parse_and_bind("tab: complete")
 
-
-# Importing  MadAnalysis main class
-from madanalysis.core.main import Main
-main = Main()
-main.ma5dir = ma5dir
-
-# Release version
-# Do not touch it !!!!!  
-main.version = "1.1.10.35"
-main.date = "2014/05/09"
-
-# Checking arguments
-import getopt
-try:
-    optlist, arglist = getopt.getopt(sys.argv[1:], \
-                                     "PHReEvhfmsb", \
-                                     ["partonlevel","hadronlevel","recolevel",\
-                                      "expert","version","release","help",\
-                                      "forced","script","mg5","autocheck","build"])
-except getopt.GetoptError, err:
-    logging.error(str(err))
-    usage()
-    sys.exit()
-
-# Reading aguments
-partonlevel = False
-hadronlevel = False
-recolevel   = False
-expertmode  = False
-forcedmode  = False
-mg5mode     = False
-scriptmode  = False
-autocheck   = False
-build       = False
-for o,a in optlist:
-    if o in ("-P","--partonlevel"):
-        partonlevel=True
-    elif o in ("-H","--hadronlevel"):
-        hadronlevel=True
-    elif o in ("-R","--recolevel"):
-        recolevel=True
-    elif o in ("-E","-e","--expert"):
-        expertmode=True
-    elif o in ("-f","--forced"):
-        forcedmode=True
-    elif o in ("-m","--mg5"):
-        mg5mode=True
-    elif o in ("-s","--script"):
-        scriptmode=True
-    elif o in ("-v","--version","--release"):
-        logging.info("MA5 release : " + main.version + " " + main.date  + "\n")
-        sys.exit()
-    elif o in ("--autocheck"):
-        autocheck = True
-    elif o in ("-b","--build"):
-        build = True
-    elif o in ("-h","--help"):
-        usage()
-        sys.exit()
-
-# Checking compatibility between arguments
-if partonlevel and hadronlevel:
-    logging.error("Parton mode and hadron mode cannot be set in a same time.\n"
-                  "Please choose only one of these modes.")
-    sys.exit()
-elif partonlevel and recolevel:
-    logging.error("Parton mode and reco mode cannot be set in a same time.\n"
-                  "Please choose only one of these modes.")
-    sys.exit()
-    
-elif hadronlevel and recolevel:
-    logging.error("Hadron mode and reco mode cannot be set in a same time.\n"
-                  "Please choose only one of these modes.")
-    sys.exit()
-if scriptmode:
-    forcedmode=True
-
-# Setting argument in the main program 
-from madanalysis.enumeration.ma5_running_type import MA5RunningType
-if partonlevel:
-    main.mode=MA5RunningType.PARTON
-elif hadronlevel:
-    main.mode=MA5RunningType.HADRON
-elif recolevel:
-    main.mode=MA5RunningType.RECO
-    from madanalysis.enumeration.normalize_type import NormalizeType
-    main.normalize=NormalizeType.NONE
-
-# Re-initializing the list of observables (hadron-level or reco-level)
-if hadronlevel or recolevel:
-    main.InitObservables(main.mode)
-
-
-main.forced = forcedmode
-Main.forced = forcedmode
-main.script = scriptmode
-main.mg5    = mg5mode
-
-# Setting batch mode for ROOT
-#sys.argv.append('-b-')
-
-# Displaying header
-logging.info("")
-logging.info(\
-"*************************************************************\n" + \
-"*                                                           *\n" + \
-"*        W E L C O M E  to  M A D A N A L Y S I S  5        *\n" + \
-"*                         ______  ______                    *\n" + \
-"*                 /'\_/`\/\  __ \/\  ___\                   *\n" + \
-"*                /\      \ \ \_\ \ \ \__/                   *\n" + \
-"*                \ \ \__\ \ \  __ \ \___``\                 *\n" + \
-"*                 \ \ \_/\ \ \ \/\ \/\ \_\ \                *\n" + \
-"*                  \ \_\\\ \_\ \_\ \_\ \____/                *\n" + \
-"*                   \/_/ \/_/\/_/\/_/\/___/                 *\n" + \
-"*                                                           *\n" + \
-"*   MA5 release : " + \
-         "%-24s" % main.version + "%+15s" % main.date  + "   *\n" + \
-"*                                                           *\n" + \
-"*         Comput. Phys. Commun. 184 (2013) 222-256          *\n" + \
-"*                                                           *\n" + \
-"*   The MadAnalysis Development Team - Please visit us at   *\n" + \
-"*            https://launchpad.net/madanalysis5             *\n" + \
-"*                                                           *\n" + \
-"*              Type 'help' for in-line help.                *\n" + \
-"*                                                           *\n" + \
-"*************************************************************")
-
-# Displaying special banner if auto-check mode is activated 
-if autocheck:
+# Loop over MA5 sessions
+# Goal: allowing to restart
+while True:
+    repeat = MainSession()
+    if not repeat:
+        # Normal end
+        break
+    from madanalysis.core.string_tools import StringTools
     logging.info("")
-    logging.info("                        AUTO-CHECK MODE")
+    logging.info(StringTools.Fill('-',40))
+    logging.info(StringTools.Center('RESTART THE MADANALYSIS 5 SESSION',40))
+    logging.info(StringTools.Fill('-',40))
     logging.info("")
-    
-
-# Checking the present linux configuration
-if not main.CheckLinuxConfig(detail=autocheck):
-    sys.exit()
-
-# Building (if necesserary) the SampleAnalyzer library
-if not main.BuildLibrary(forced=build):
-    sys.exit()	
-
-logging.info("*************************************************************")
-
-
-# Auto-check mode
-if autocheck:
-    pass
-
-# Expert mode
-elif expertmode:
-    from madanalysis.core.expert_mode import ExpertMode
-    main.expertmode = True
-    expert = ExpertMode(main)
-    if not expert.CreateDirectory():
-        sys.exit()
-    if not expert.Copy():
-        sys.exit()
-    expert.GiveAdvice()
-
-# Normal mode
-else:
-    
-    # Launching the interpreter
-    from madanalysis.interpreter.interpreter import Interpreter
-    interpreter = Interpreter(main)
-
-    # Looking for script
-    for arg in arglist:
-        filename=os.path.expanduser(arg)
-        filename=os.path.abspath(filename)
-        interpreter.load(filename)
-    
-    # Exit if script mode activated
-    if len(arglist)!=0 and main.script:
-        interpreter.run_cmd("quit")
-    
-    # Interpreter loop
-    else:
-        interpreter.cmdloop()

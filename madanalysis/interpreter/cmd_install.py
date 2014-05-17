@@ -222,8 +222,7 @@ class CmdInstall(CmdBase):
         # End
         logging.info("Installation complete.")
 
-
-        return True
+        return 'restart'
 
 
     def install_delphes(self):
@@ -292,8 +291,7 @@ class CmdInstall(CmdBase):
         # End
         logging.info("Installation complete.")
 
-
-        return True
+        return 'restart'
 
 
     def install_delfes(self):
@@ -371,8 +369,7 @@ class CmdInstall(CmdBase):
         # End
         logging.info("Installation complete.")
 
-
-        return True
+        return 'restart'
 
 
     def install_mcatnlo(self):
@@ -605,11 +602,10 @@ class CmdInstall(CmdBase):
             self.display_log('fastjet')
             return False
         
-        
         # End
         logging.info("Installation complete.")
 
-        return True
+        return 'restart'
 
 
     def install_samples(self):

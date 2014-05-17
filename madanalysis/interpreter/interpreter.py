@@ -26,6 +26,7 @@
    Uses the cmd package for command interpretation and tab completion.
 """
 
+import logging
 import readline
 import os
 
@@ -174,6 +175,38 @@ class Interpreter(InterpreterBase):
     def complete_import(self,text,line,begidx,endidx):
         return self.cmd_import.complete(text,line,begidx,endidx)
 
+     # Restart
+    def do_restart(self, line):
+        """ sending a signal allowing to restart the interpreter """
+        if self.main.script:
+            logging.warning("'restart' command is not allowed in script mode.")
+        else:
+            YES=False
+            # Asking the safety question
+            if not Main.forced:
+                logging.warning("Are you sure to restart the MadAnalysis 5 session? (Y/N)")
+                allowed_answers=['n','no','y','yes']
+                answer=""
+                while answer not in  allowed_answers:
+                   answer=raw_input("Answer: ")
+                   answer=answer.lower()
+                   if answer=="no" or answer=="n":
+                       YES=False
+                       break
+                   elif answer=='yes' or answer=='y':
+                       YES=True
+                       break
+            if YES:
+                self.main.repeatSession=True
+                return True
+            else:
+                pass
+
+    def help_restart(self):
+        logging.info("   Syntax: restart ")
+        logging.info("   Quit the current MadAnalysis sessiona and open a new one.")
+        logging.info("   All the information will be discarded.")
+
     def do_remove(self,line):
         self.cmd_remove.do(self.split_arg(line))
 
@@ -193,7 +226,11 @@ class Interpreter(InterpreterBase):
         return self.cmd_swap.complete(text,line,begidx,endidx)
 
     def do_install(self,line):
-        self.cmd_install.do(self.split_arg(line))
+        result = self.cmd_install.do(self.split_arg(line))
+        if result=='restart':
+            logging.info(" ")
+            logging.info("MadAnalysis 5 must be restarted for taking into account the present installation.")
+            return self.do_restart('restart')
 
     def help_install(self):
         self.cmd_install.help()

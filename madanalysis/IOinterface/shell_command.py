@@ -32,20 +32,22 @@ import subprocess
 class ShellCommand():
 
     @staticmethod
-    def ExecuteWithLog(theCommands,logfile,path):
+    def ExecuteWithLog(theCommands,logfile,path,silent=False):
 
         # Open the log file
         try:
             output = open(logfile,'w')
         except:
-            logging.error('impossible to write the file '+logfile)
+            if not silent:
+                logging.error('impossible to write the file '+logfile)
             return False, None
 
         # Launching the commands
         try:
             result=subprocess.Popen(theCommands, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=path)
         except:
-            logging.error('impossible to execute the commands: '+' '.join(theCommands))
+            if not silent:
+                logging.error('impossible to execute the commands: '+' '.join(theCommands))
             return False, None
 
         # Getting stdout

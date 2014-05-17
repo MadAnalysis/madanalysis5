@@ -622,7 +622,7 @@ class JobWriter():
         # - SampleAnalyzer
         libs.extend(['-L$(MA5_BASE)/tools/SampleAnalyzer/Lib/','-lSampleAnalyzer'])
         if self.libZIP:
-            libs.extend(['-lz','-lzlib_for_ma5'])
+            libs.extend(['-L'+self.main.configLinux.zlib_lib_path,'-lz','-lzlib_for_ma5'])
         if self.libDelphes:
             libs.extend(['-L'+self.main.configLinux.delphes_lib_paths[0],'-lDelphes','-ldelphes_for_ma5'])
         if self.libDelfes:

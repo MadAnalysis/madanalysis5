@@ -574,7 +574,7 @@ class LibraryWriter():
         return result
 
 
-    def Run(self,program,args,folder):
+    def Run(self,program,args,folder,silent=False):
 
         # shell command
         commands = ['./'+program]
@@ -584,17 +584,17 @@ class LibraryWriter():
         logfile = folder+'/'+program+'.log'
 
         # call
-        result, out = ShellCommand.ExecuteWithLog(commands,logfile,folder)
+        result, out = ShellCommand.ExecuteWithLog(commands,logfile,folder,silent)
 
         # return result
-        if not result:
+        if not result and not silent:
             logging.error('impossible to run the project. For more details, see the log file:')
             logging.error(logfile)
             
         return result
 
 
-    def CheckRun(self,logfile):
+    def CheckRun(self,logfile,silent=False):
 
         # Open
         try:
@@ -623,7 +623,7 @@ class LibraryWriter():
             return False
 
         # CrossCheck
-        if not (begin and end):
+        if not (begin and end) and not silent:
             logging.error('expected program output is not found. More details, see the log file:')
             logging.error(logfile)
             return False
@@ -680,7 +680,7 @@ class LibraryWriter():
         # - SampleAnalyzer
         libs.extend(['-L$(MA5_BASE)/tools/SampleAnalyzer/Lib/','-lSampleAnalyzer'])
         if self.libZIP:
-            libs.extend(['-lz','-lzlib_for_ma5'])
+            libs.extend(['-L'+self.main.configLinux.zlib_lib_path,'-lz','-lzlib_for_ma5'])
         if self.libDelphes:
             libs.extend(['-L'+self.main.configLinux.delphes_lib_paths[0],'-lDelphes','-ldelphes_for_ma5'])
         if self.libDelfes:

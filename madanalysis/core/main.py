@@ -89,8 +89,8 @@ class Main():
         self.mcatnloutils   = False
         self.expertmode     = False
         self.isMAC          = False
+        self.repeatSession  = False 
         self.ResetParameters()
-
 
     def ResetParameters(self):
         self.merging        = MergingConfiguration()
@@ -518,8 +518,29 @@ class Main():
             UpdateNeed = not builder.compare()
 
         rebuild = forced or FirstUse or UpdateNeed or Missing
+
+        if not rebuild:
+            if not os.path.isfile(self.ma5dir+'/tools/SampleAnalyzer/Lib/libSampleAnalyzer.so'):
+                FirstUse=True
+            rebuild = forced or FirstUse or UpdateNeed or Missing
+
         if not rebuild:
             logging.info('  => MadAnalysis libraries found.')
+
+            # Test the program
+            if not os.path.isfile(self.ma5dir+'/tools/SampleAnalyzer/Test/SampleAnalyzerTest'):
+                FirstUse=True
+
+            precompiler = LibraryWriter(self.ma5dir,'lib',self.libZIP,self.libFastJet,self.forced,self.fortran,self.libDelphes,self.libDelfes,self)
+            if not precompiler.Run('SampleAnalyzerTest',[],self.ma5dir+'/tools/SampleAnalyzer/Test',silent=True):
+                UpdateNeed=True
+
+            if not precompiler.CheckRun(self.ma5dir+'/tools/SampleAnalyzer/Test/SampleAnalyzerTest.log',silent=True):
+                UpdateNeed=True
+            rebuild = forced or FirstUse or UpdateNeed or Missing
+            
+        if not rebuild:
+            logging.info('  => MadAnalysis test program works.')
             return True
 
         # Compile library
