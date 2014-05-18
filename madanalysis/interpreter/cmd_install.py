@@ -91,8 +91,6 @@ class CmdInstall(CmdBase):
             return self.install_delfes()
         elif args[0]=='fastjet':
             return self.install_fastjet()
-        elif args[0]=='MCatNLO-for-ma5':
-            return self.install_mcatnlo()
         else:
             logging.error("the syntax is not correct.")
             self.help()
@@ -102,7 +100,7 @@ class CmdInstall(CmdBase):
     def help(self):
         logging.info("   Syntax: install <component>")
         logging.info("   Download and install a MadAnalysis component from the official site.")
-        logging.info("   List of available components : samples zlib fastjet MCatNLO-for-ma5 delphes delfes")
+        logging.info("   List of available components : samples zlib fastjet delphes delfes")
 
 
     def get_ncores(self):
@@ -372,54 +370,6 @@ class CmdInstall(CmdBase):
         return 'restart'
 
 
-    def install_mcatnlo(self):
-
-##        # Checking connection with MA5 web site
-##        if not self.check_ma5site():
-##            return False
-        logging.warning("clear comments in install.py")
-
-        # Creating tools folder
-        if not self.create_tools_folder():
-            return False
-
-        # Creating package folder
-        if not self.create_package_folder('MCatNLO-utilities'):
-            return False
-
-        # Launching wget
-        name = 'mcatnlo-utilities.tar.gz' 
-##         files = { name : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/utils/mcatnlo.tar.gz" }
-##         if not self.wget(files,'MCatNLO-utilities', self.main.ma5dir + '/tools'):
-##             return False
-        shutil.copy(self.main.ma5dir+'/../mcatnlo.tar.gz', self.main.ma5dir + '/tools/mcatnlo-utilities.tar.gz')
-        logging.warning("clear comments  + shutil copy in install.py")
-
-        # Unpacking package
-        packagedir = self.untar(self.main.ma5dir + '/tools/MCatNLO-utilities','../'+name, 'MCatNLO-utilities')
-        if packagedir == "":
-            return False
-        os.system('rm -f ' + self.main.ma5dir + '/tools/' + name)
-
-        # Configuring the Makefile
-        logging.info(" * Configuring the package ...")
-        path = self.main.ma5dir + '/tools/MCatNLO-utilities/StdHEP/src/make_opts'
-        text = open(path).read()
-        if sys.maxsize > 2**32:
-            text = text.replace('MBITS=32','MBITS=64')
-        text = text.replace('FC=g77','FC=gfortran')
-        open(path, 'w').writelines(text)    
-
-        # Compiling
-        logging.info(" * Compiling the package ...")
-        os.system('cd ' +self.main.ma5dir+'/tools/MCatNLO-utilities; make > '\
-           + self.main.ma5dir + '/tools/MCatNLO-utilities/compilation.log 2>&1')
-
-        self.main.mcatnloutils = True
-
-        return True
-
- 
     def check_ma5site(self):
         logging.info(" * Testing the access to MadAnalysis 5 website ...")
         import urllib
@@ -673,7 +623,7 @@ class CmdInstall(CmdBase):
         if nargs>2:
             return []
         else:
-            output = ["samples","zlib","fastjet", "MCatNLO-for-ma5", "delphes", "delfes" ]
+            output = ["samples","zlib","fastjet", "delphes", "delfes" ]
             return self.finalize_complete(text,output)
     
 
