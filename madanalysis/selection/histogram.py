@@ -271,7 +271,7 @@ class Histogram():
     def GetStringDisplayMore(self):
         words=''
         if self.logX or self.logY: 
-            words += ' * Log scale: '
+            words += '  * Log scale: '
             if self.logX:
                 words+= 'logX '
             if self.logY:
@@ -287,7 +287,7 @@ class Histogram():
         if self.titleX !='':
             words += '  * X-axis title: ' +  self.titleX + '\n'
         if self.titleX !='':
-            words += '  * Y-axis title: ' +  self.titleX + '\n'
+            words += '  * Y-axis title: ' +  self.titleY + '\n'
         words += '  * Particles under consideration: ' +  self.statuscode + '\n'
         words += '  * Particle ordering: ' +  self.rank
         return words
