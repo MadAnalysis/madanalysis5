@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+73   1.1.11.2 (2014/05/19) fuks:    Updated layout for the display command (histograms) 
+
 72           (2014/05/17) econte:  1.1.10 
 
 157  1.1.10 (2014/05/17) ma5team:   - new compilation procedure for library and job
