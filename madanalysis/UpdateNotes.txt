@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+75   1.1.11.4 (2014/05/20) fuks:    Bug with the makefiles and the linking 
+
 74   1.1.11.3 (2014/05/20) fuks:    Bug in the LHE reader with the mother particles that were ignored 
                                    most of the time (thanks to Alexis Kalogeropoulos) 
 
