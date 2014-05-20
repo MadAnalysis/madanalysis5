@@ -669,15 +669,9 @@ class LibraryWriter():
 
         # Options for compilation : LIBFLAGS
 
-        # - Root
-        libs=[]
-        libs.extend(['-L'+self.main.configLinux.root_lib_path, \
-                     '-lGpad','-lHist','-lGraf','-lGraf3d','-lTree', \
-                     '-lRint','-lPostscript','-lMatrix','-lPhysics', \
-                     '-lMathCore','-lEG', '-lRIO','-lNet','-lThread', \
-                     '-lCore','-lCint','-pthread','-lm','-ldl','-rdynamic'])
 
         # - SampleAnalyzer
+        libs=[]
         libs.extend(['-L$(MA5_BASE)/tools/SampleAnalyzer/Lib/','-lSampleAnalyzer'])
         if self.libZIP:
             libs.extend(['-L'+self.main.configLinux.zlib_lib_path,'-lz','-lzlib_for_ma5'])
@@ -689,6 +683,15 @@ class LibraryWriter():
             libs.extend(['-lgfortran'])
         if self.libFastJet:
             libs.extend(['$(shell fastjet-config --libs --plugins --rpath=no)','-lfastjet_for_ma5'])
+
+        # - Root
+        libs.extend(['-L'+self.main.configLinux.root_lib_path, \
+                     '-lHist','-lRIO', '-lGpad','-lGraf','-lGraf3d','-lTree', \
+                     '-lRint','-lPostscript','-lMatrix','-lPhysics', \
+                     '-lMathCore','-lEG', '-lNet','-lThread', \
+                     '-lCore','-lCint','-pthread','-lm','-ldl','-rdynamic'])
+
+        # -everything together
         file.write('LIBFLAGS = '+' '.join(libs)+'\n')
         file.write('\n')
 
@@ -803,7 +806,7 @@ class LibraryWriter():
         # Link target
         file.write('# Link target\n')
         file.write('link: $(OBJS)\n')
-        file.write('\t$(CXX) $(CXXFLAGS) $(OBJS) $(LIBFLAGS) -o $(PROGRAM)\n')
+        file.write('\t$(CXX) $(OBJS) $(LIBFLAGS) -o $(PROGRAM)\n')
         file.write('\n')
 
         # Clean target
