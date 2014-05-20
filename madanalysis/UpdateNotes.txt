@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+74   1.1.11.3 (2014/05/20) fuks:    Bug in the LHE reader with the mother particles that were ignored 
+                                   most of the time (thanks to Alexis Kalogeropoulos) 
+
 73   1.1.11.2 (2014/05/19) fuks:    Updated layout for the display command (histograms) 
 
 72           (2014/05/17) econte:  1.1.10 
