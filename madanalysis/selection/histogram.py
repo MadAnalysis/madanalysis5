@@ -286,7 +286,7 @@ class Histogram():
             words+='  * Stacking method: superimposition + normalization to one\n'
         if self.titleX !='':
             words += '  * X-axis title: ' +  self.titleX + '\n'
-        if self.titleX !='':
+        if self.titleY !='':
             words += '  * Y-axis title: ' +  self.titleY + '\n'
         words += '  * Particles under consideration: ' +  self.statuscode + '\n'
         words += '  * Particle ordering: ' +  self.rank
