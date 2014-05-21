@@ -288,34 +288,36 @@ bool LHEReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
         myEvent.mc()->THT_ += part.pt(); 
       }
     }
-    
+
+    // assigning the correct address for the mother particles
     unsigned int index1=myEvent.mc()->particles_[i].mothup1_;
     unsigned int index2=myEvent.mc()->particles_[i].mothup2_;
-    if (index1!=0 && index2!=0)
+    if (index1!=0) // at least one mother
     {
-      if (index1>=myEvent.mc()->particles_.size() ||
-          index2>=myEvent.mc()->particles_.size())
+      if (index1>=myEvent.mc()->particles_.size() )
       {
-        /*        for (unsigned int num=0;num<myEvent.mc()->particles_.size();num++)
-        {
-          std::cout << "num=" << num+1 << " | id=" << 
-                       myEvent.mc()->particles_[num].pdgid_ 
-                    << " ; mothup1_=" << myEvent.mc()->particles_[num].mothup1_ 
-                    << " ; mothup2_=" << myEvent.mc()->particles_[num].mothup2_ << endmsg;
-                    }*/
-        
         WARNING << "mother index is greater to nb of particles" << endmsg;
         WARNING << " - index1 = " << index1 << endmsg;
-        WARNING << " - index2 = " << index2 << endmsg;
         WARNING << " - particles.size() " << myEvent.mc()->particles_.size() << endmsg;
         WARNING << "This event is skipped." << endmsg;
         return false;
       }
-
       myEvent.mc()->particles_[i].mother1_ = &myEvent.mc()->particles_[index1-1];
       myEvent.mc()->particles_[index1-1].daughters_.push_back(&myEvent.mc()->particles_[i]);
-      myEvent.mc()->particles_[i].mother2_ = &myEvent.mc()->particles_[index2-1];
-      myEvent.mc()->particles_[index2-1].daughters_.push_back(&myEvent.mc()->particles_[i]);
+
+      if (index2!=0)
+      {
+        if (index2>=myEvent.mc()->particles_.size())
+        {
+          WARNING << "mother index is greater to nb of particles" << endmsg;
+          WARNING << " - index2 = " << index2 << endmsg;
+          WARNING << " - particles.size() " << myEvent.mc()->particles_.size() << endmsg;
+          WARNING << "This event is skipped." << endmsg;
+          return false;
+        }
+        myEvent.mc()->particles_[i].mother2_ = &myEvent.mc()->particles_[index2-1];
+        myEvent.mc()->particles_[index2-1].daughters_.push_back(&myEvent.mc()->particles_[i]);
+      }
     }
   }
 
