@@ -51,8 +51,8 @@ bool LHEReader::ReadHeader(SampleFormat& mySample)
   Bool_t tag_simplified_ma5    = false;
 
   // Read line by line the file until tag <header>
-  bool EndOfLoop=false, GoodInit = false, GoodHeader=false;
-  while(!GoodInit || !GoodHeader)
+  bool EndOfLoop=false, GoodInit = false;
+  while(!GoodInit)
   {
     bool HeaderFound = false, InitFound = false;
     do 
@@ -89,7 +89,6 @@ bool LHEReader::ReadHeader(SampleFormat& mySample)
           tag_simplified_ma5=true;
       }
       while(!EndOfLoop);
-      GoodHeader = true;
     }
 
     if(InitFound)
