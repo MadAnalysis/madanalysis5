@@ -51,12 +51,15 @@ bool LHEReader::ReadHeader(SampleFormat& mySample)
   Bool_t tag_simplified_ma5    = false;
 
   // Read line by line the file until tag <header>
-  bool EndOfLoop=false, GoodInit = false, GoodHeader=false;
-  while(!GoodInit || !GoodHeader)
+  // Note from Benj: the header tags are optional according to LHE standards
+  //                 the init tags are alsways the last ones before the events
+  bool EndOfLoop=false, GoodInit = false;
+
+  while(!GoodInit)
   {
     bool HeaderFound = false, InitFound = false;
-    do 
-    { 
+    do
+    {
       if (!ReadLine(line)) return false;
       HeaderFound = (line.find("<header>")!=std::string::npos);
       InitFound = (line.find("<init>")!=std::string::npos);
@@ -89,7 +92,6 @@ bool LHEReader::ReadHeader(SampleFormat& mySample)
           tag_simplified_ma5=true;
       }
       while(!EndOfLoop);
-      GoodHeader = true;
     }
 
     if(InitFound)
@@ -97,8 +99,8 @@ bool LHEReader::ReadHeader(SampleFormat& mySample)
       // Read line by line the file until tag </init>
       EndOfLoop=false;
       bool first=true;
-      do 
-      { 
+      do
+      {
         if (!ReadLine(line)) return false;
         EndOfLoop = (line.find("</init>")!=std::string::npos);
         if (!EndOfLoop)
@@ -115,8 +117,8 @@ bool LHEReader::ReadHeader(SampleFormat& mySample)
 
   // Read line by line the file until tag <event>
   EndOfLoop=false;
-  do 
-  { 
+  do
+  {
     if (!ReadLine(line)) return false;
     if ( (line.find("<MGGenerationInfo>")!=std::string::npos) ||
          (line.find("<mgversion>")!=std::string::npos)        ||
@@ -139,7 +141,7 @@ bool LHEReader::ReadHeader(SampleFormat& mySample)
   {
     mySample.SetSampleFormat(MA5FORMAT::SIMPLIFIED_LHE);
   }
-  else 
+  else
   {
     mySample.SetSampleFormat(MA5FORMAT::LHE);
   }

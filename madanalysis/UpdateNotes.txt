@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+77   1.1.11.6 (2014/05/22) fuks:    Bug in the LHE reader (headers are optional) 
+
 76   1.1.11.5 (2014/05/22) fuks:    display of histograms 
 
 75   1.1.11.4 (2014/05/20) fuks:    Bug with the makefiles and the linking 
