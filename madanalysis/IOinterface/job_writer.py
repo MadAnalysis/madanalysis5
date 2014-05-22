@@ -615,6 +615,8 @@ class JobWriter():
         # - SampleAnalyzer
         libs=[]
         libs.extend(['-L$(MA5_BASE)/tools/SampleAnalyzer/Lib/','-lSampleAnalyzer'])
+        if self.libFastjet:
+            libs.extend(['-lfastjet_for_ma5'])
         if self.libZIP:
             libs.extend(['-L'+self.main.configLinux.zlib_lib_path,'-lz','-lzlib_for_ma5'])
         if self.libDelphes:
@@ -623,8 +625,6 @@ class JobWriter():
             libs.extend(['-L'+self.main.configLinux.delfes_lib_paths[0],'-lDelphes','-ldelfes_for_ma5'])
         if self.fortran:
             libs.extend(['-lgfortran'])
-        if self.libFastjet:
-            libs.extend(['$(shell fastjet-config --libs --plugins --rpath=no)','-lfastjet_for_ma5'])
 
         # - Root
         libs.extend(['-L'+self.main.configLinux.root_lib_path, \
@@ -632,6 +632,10 @@ class JobWriter():
                      '-lRint','-lPostscript','-lMatrix','-lPhysics', \
                      '-lMathCore','-lEG', '-lNet','-lThread', \
                      '-lCore','-lCint','-pthread','-lm','-ldl','-rdynamic'])
+
+        # Fatjet
+        if self.libFastjet:
+            libs.extend(['$(shell fastjet-config --libs --plugins --rpath=no)'])
 
         #everything together
         file.write('LIBFLAGS = '+' '.join(libs)+'\n')
