@@ -668,11 +668,11 @@ class LibraryWriter():
         file.write('\n')
 
         # Options for compilation : LIBFLAGS
-
-
         # - SampleAnalyzer
         libs=[]
         libs.extend(['-L$(MA5_BASE)/tools/SampleAnalyzer/Lib/','-lSampleAnalyzer'])
+        if self.libFastJet:
+            libs.extend(['-lfastjet_for_ma5'])
         if self.libZIP:
             libs.extend(['-L'+self.main.configLinux.zlib_lib_path,'-lz','-lzlib_for_ma5'])
         if self.libDelphes:
@@ -681,8 +681,6 @@ class LibraryWriter():
             libs.extend(['-L'+self.main.configLinux.delfes_lib_paths[0],'-lDelphes','-ldelfes_for_ma5'])
         if self.fortran:
             libs.extend(['-lgfortran'])
-        if self.libFastJet:
-            libs.extend(['$(shell fastjet-config --libs --plugins --rpath=no)','-lfastjet_for_ma5'])
 
         # - Root
         libs.extend(['-L'+self.main.configLinux.root_lib_path, \
@@ -690,6 +688,10 @@ class LibraryWriter():
                      '-lRint','-lPostscript','-lMatrix','-lPhysics', \
                      '-lMathCore','-lEG', '-lNet','-lThread', \
                      '-lCore','-lCint','-pthread','-lm','-ldl','-rdynamic'])
+
+        # fastjet
+        if self.libFastJet:
+            libs.extend(['$(shell fastjet-config --libs --plugins --rpath=no)'])
 
         # -everything together
         file.write('LIBFLAGS = '+' '.join(libs)+'\n')
