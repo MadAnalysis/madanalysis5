@@ -48,10 +48,11 @@ class LayoutWriter():
             logging.error("impossible to create the file '"+filename+"'")
 
         # Writing header
+        from madanalysis.core.main import Main
         file.write(StringTools.Fill('#',80)+'\n')
         file.write('#'+StringTools.Center('MADANALYSIS5 CONFIGURATION FILE FOR PLOTS',78)+'#\n')
-        file.write('#'+StringTools.Center('produced by MadAnalysis5 version '+self.main.version,78)+'#\n')
-        file.write('#'+StringTools.Center(self.main.date,78)+'#\n')
+        file.write('#'+StringTools.Center('produced by MadAnalysis5 version '+Main.version,78)+'#\n')
+        file.write('#'+StringTools.Center(Main.date,78)+'#\n')
         file.write(StringTools.Fill('#',80)+'\n')
         file.write('\n')
 

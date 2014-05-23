@@ -451,8 +451,8 @@ class LibraryWriter():
         # Closing the file
         file.close()
 
-        JobWriter.WriteSetupFile(True,self.path+'/SampleAnalyzer',self.ma5dir,False,self.main.configLinux,self.main.isMAC)
-        JobWriter.WriteSetupFile(False,self.path+'/SampleAnalyzer',self.ma5dir,False,self.main.configLinux,self.main.isMAC)
+        JobWriter.WriteSetupFile(True,self.path+'/SampleAnalyzer',self.ma5dir,True,self.main.configLinux,self.main.isMAC)
+        JobWriter.WriteSetupFile(False,self.path+'/SampleAnalyzer',self.ma5dir,True,self.main.configLinux,self.main.isMAC)
 
         return True
 

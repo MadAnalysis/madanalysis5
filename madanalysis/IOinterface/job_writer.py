@@ -755,8 +755,7 @@ class JobWriter():
         # Link target
         file.write('# Link target\n')
         file.write('link: $(OBJS)\n')
-        file.write('\t$(CXX) $(OBJS) ')
-        file.write('$(LIBFLAGS) -o $(PROGRAM)\n')
+        file.write('\t$(CXX) $(OBJS) $(LIBFLAGS) -o $(PROGRAM)\n')
         file.write('\n')
 
         # Clean target
@@ -1125,7 +1124,8 @@ class JobWriter():
             commands.append('--no_event_weight')
 
         # Release
-        commands.append('--ma5_version="'+self.main.version+';'+self.main.date+'"')
+        from madanalysis.core.main import Main
+        commands.append('--ma5_version="'+Main.version+';'+Main.date+'"')
 
         # Inputs
         commands.append('../../Input/'+name+'.list')

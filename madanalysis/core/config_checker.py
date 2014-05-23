@@ -28,6 +28,9 @@ import os
 import commands
 import sys
 import re
+import platform
+
+from madanalysis.IOinterface.shell_command    import ShellCommand
 
 class ConfigChecker:
 
@@ -39,7 +42,7 @@ class ConfigChecker:
                 container.append(item)
         
 
-    def __init__(self,configLinux,ma5dir,script=False,isMAC=False):
+    def __init__(self,configLinux,ma5dir,script=False,isMAC=False,debug=False):
 
         # Getting parameter from the main program
         self.isMAC=isMAC
@@ -55,6 +58,7 @@ class ConfigChecker:
 
         self.includes = []
         self.fillHeaders()
+        self.debug=debug
 
 
     def ReadUserOptions(self):
@@ -212,6 +216,65 @@ class ConfigChecker:
         except KeyError:
             self.configLinux.editor = 'vi'
 
+    def checkPython(self):
+        # Checking if ROOT is present
+        self.PrintLibrary('python')
+
+        # Debug general
+        if self.debug:
+            logging.debug("Python")
+            logging.debug("  Python release:         " + str(platform.python_version()))
+            logging.debug("  Python build:           " + str(platform.python_build()))
+            logging.debug("  Python compiler:        " + str(platform.python_compiler()))
+            logging.debug("  Python prefix:          " + str(sys.prefix))
+            logging.debug("  Python executable used: " + str(sys.executable))
+
+        # Which python
+        if self.debug:
+            result = ShellCommand.Which('python')
+            if len(result)==0:
+                self.PrintFAIL(warning=False)
+                logging.error('python compiler not found. Please install it before ' + \
+	             'using MadAnalysis 5')
+                return False
+            logging.debug("  which:                  " + str(result[0]))
+
+        # Which all
+        if self.debug:
+            result = ShellCommand.Which('python',all=True)
+            if len(result)==0:
+                self.PrintFAIL(warning=False)
+                logging.error('g++ compiler not found. Please install it before ' + \
+	                 'using MadAnalysis 5')
+                return False
+            logging.debug("  which-all:              ")
+            for file in result:
+                logging.debug("    - "+str(file))
+            
+        # Python paths
+        if self.debug:
+            logging.debug("  Python internal paths: ")
+            tmp = sys.path
+            for path in tmp:
+                logging.debug("    - "+path)
+            logging.debug("  $PYTHONPATH: ")
+            try:
+                tmp = os.environ['PYTHONPATH']
+            except:
+                tmp = []
+            if len(tmp)==0:
+                logging.debug("    EMPTY OR NOT FOUND")
+            else:
+                tmp = tmp.split(':')
+                for path in tmp:
+                    logging.debug("    - "+path)
+            logging.debug("")
+
+        # Ok
+        self.PrintOK()
+        return True
+
+
     def checkROOT(self):
         # Checking if ROOT is present
         self.PrintLibrary('Root')
@@ -328,16 +391,45 @@ class ConfigChecker:
     def checkGPP(self):
         # Checking g++ release
         self.PrintLibrary('g++')
-        gcc_version = commands.getstatusoutput('g++ -dumpversion')
-        if gcc_version[0]>0:
+
+        # Which
+        result = ShellCommand.Which('g++')
+        if len(result)==0:
             self.PrintFAIL(warning=False)
             logging.error('g++ compiler not found. Please install it before ' + \
 	             'using MadAnalysis 5')
             return False
-        else:
-            self.PrintOK()
-            self.configLinux.gcc_version = gcc_version[1]
-            return True
+        if self.debug:
+            logging.debug("g++")
+            logging.debug("  which:         " + str(result[0]))
+
+        # Which all
+        if self.debug:
+            result = ShellCommand.Which('g++',all=True)
+            if len(result)==0:
+                self.PrintFAIL(warning=False)
+                logging.error('g++ compiler not found. Please install it before ' + \
+	                 'using MadAnalysis 5')
+                return False
+            logging.debug("  which-all:     ")
+            for file in result:
+                logging.debug("    - "+str(file))
+
+        # Getting the version
+        ok, out, err = ShellCommand.ExecuteWithCapture(['g++','-dumpversion'],'./')
+        if not ok:
+            self.PrintFAIL(warning=False)
+            logging.error('g++ compiler not found. Please install it before ' + \
+	             'using MadAnalysis 5')
+            return False
+        out=out.lstrip()
+        out=out.rstrip()
+        self.configLinux.gcc_version = str(out)
+        if self.debug:
+            logging.debug("  version:       " + self.configLinux.gcc_version)
+
+        self.PrintOK()
+        return True
 
 
     def checkMake(self):

@@ -38,7 +38,7 @@ class ColoredFormatter(logging.Formatter):
         elif ( record.levelno >= 20 ): #INFO
             color = '\x1b[0m'
         elif ( record.levelno >= 10 ): #DEBUG
-            color = '\x1b[33m ** DEBUG: '
+            color = '\x1b[36m ** DEBUG: '
         else:                          #ANYTHING ELSE
             color = '\x1b[0m'
         record.msg = color + str( record.msg ) + '\x1b[0m'

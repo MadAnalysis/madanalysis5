@@ -63,7 +63,6 @@ class ShellCommand():
         return (result.returncode==0), out
     
 
-
     @staticmethod
     def Execute(theCommands,path):
 
@@ -72,11 +71,55 @@ class ShellCommand():
             result=subprocess.Popen(theCommands, cwd=path)
         except:
             logging.error('impossible to execute the commands: '+' '.join(theCommands))
-            return False, None
+            return False
 
         # Getting stdout
         out, err = result.communicate()
             
         # Return results
         return (result.returncode==0)
+
+    @staticmethod
+    def ExecuteWithCapture(theCommands,path):
+
+        # Launching the commands
+        try:
+            result=subprocess.Popen(theCommands, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=path)
+        except:
+            logging.error('impossible to execute the commands: '+' '.join(theCommands))
+            return False, '', ''
+
+        # Getting stdout
+        out, err = result.communicate()
+            
+        # Return results
+        return (result.returncode==0), out, err
+    
+
+    @staticmethod
+    def Which(theCommand,all=False):
+
+        # theCommands
+        if all:
+            theCommands = ['which',theCommand,'--all']
+        else:
+            theCommands = ['which',theCommand]
+
+        # Launching the commands
+        try:
+            result=subprocess.Popen(theCommands,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        except:
+            logging.error('impossible to execute the commands: '+' '.join(theCommands))
+            return []
+
+        # Getting stdout
+        out, err = result.communicate()
+        if out==None:
+            return []
+
+        # Splitting the lines
+        msg = out.split('\n')
+            
+        # Return results
+        return msg
     

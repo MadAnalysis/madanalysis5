@@ -404,12 +404,46 @@ class Main():
         
     currentdir = property(get_currentdir, set_currentdir)
 
-    def CheckLinuxConfig(self,detail=False):
+    def CheckLinuxConfig(self,debug=False):
         self.configLinux.ma5_version    = self.version
         self.configLinux.ma5_date       = self.date
         self.configLinux.python_version = sys.version.replace('\n','')
         self.configLinux.platform       = platform.system()
         self.configLinux.release        = platform.release()
+
+        if debug:
+            logging.debug("Machine - Cross platform information")
+            logging.debug("  Machine type:     " + str(platform.machine()))
+            logging.debug("  Processor name:   " + str(platform.processor()))
+            logging.debug("  Platform:         " + str(platform.platform()))
+            logging.debug("  Platform release: " + str(platform.release()))
+            import multiprocessing
+            logging.debug("  Number of cores : " + str(multiprocessing.cpu_count()))
+            logging.debug("")
+            
+            logging.debug("Machine - OS-specific information")
+            try:
+                tmp=platform.java_ver()
+            except:
+                tmp=''
+            logging.debug("  Java version:     " + str(tmp))
+            try:
+                tmp=platform.win32_ver()
+            except:
+                tmp=''
+            logging.debug("  Windows version:  " + str(tmp))
+            try:
+                tmp=platform.mac_ver()
+            except:
+                tmp=''
+            logging.debug("  Mac Os version:   " + str(tmp))
+            try:
+                tmp=platform.dist()
+            except:
+                tmp=''
+            logging.debug("  Unix distribution:" + str(platform.platform()))
+            logging.debug("")
+
 
         # Is Mac
         sys.stdout.write("Platform: "+self.configLinux.platform+" "+self.configLinux.release+" ")
@@ -423,27 +457,8 @@ class Main():
             sys.stdout.write('\x1b[32m'+'[Linux mode]'+'\x1b[0m'+'\n')
             sys.stdout.flush()
 
-        
-        if detail:
-            logging.info("General     Platform identifier : " + str(self.configLinux.platform))
-            import multiprocessing
-            logging.info("            Number of cores : " + str(multiprocessing.cpu_count()))
-            logging.info("")
-
-            logging.info("Python      Python release : " + str(self.configLinux.python_version))
-            import commands
-            pythondir = commands.getstatusoutput('which python')
-            if pythondir[0]==0:
-                logging.info("            Path get by 'which' : "+pythondir[1])
-            else:
-                logging.info("            Path get by 'which' : ERROR")
-            logging.info("            Search path for modules : ")
-            for path in sys.path:
-                logging.info("               "+path)
-            logging.info("")
-
         # Initializing the config checker    
-        checker = ConfigChecker(self.configLinux,self.ma5dir,self.script,self.isMAC)
+        checker = ConfigChecker(self.configLinux,self.ma5dir,self.script,self.isMAC,debug)
         checker.checkTextEditor()
 
         # Reading user options
@@ -452,8 +467,8 @@ class Main():
 
         # Mandatory packages
         logging.info("Checking mandatory packages:")
-        checker.PrintLibrary("python")
-        checker.PrintOK()
+        if not checker.checkPython():
+            return False
         if not checker.checkNumPy():
             return False
         if not checker.checkGPP():

@@ -862,8 +862,9 @@ class Layout:
         # Integrated luminosity 
         report.OpenBullet()
         text.Reset()
-        text.Add('MadAnalysis version ' + self.main.version + \
-                 ' (' + self.main.date + ').\n')
+        from madanalysis.core.main import Main
+        text.Add('MadAnalysis version ' + Main.version + \
+                 ' (' + Main.date + ').\n')
         report.WriteText(text)
 
         # Integrated luminosity 
