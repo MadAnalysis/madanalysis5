@@ -588,7 +588,8 @@ class JobWriter():
         # Options for compilation : CXXFLAGS
         file.write('# Options for compilation\n')
         options = []
-        options.extend(['-Wall','-O3','-I./','-I./SampleAnalyzer/','-I$(MA5_BASE)/tools/','-I'+self.main.archi_info.root_inc_path])
+        options.extend(['-Wall','-O3','-I./','-I./SampleAnalyzer/','-I$(MA5_BASE)/tools/'])
+        options.extend(['-pthread','-m64','-I'+self.main.archi_info.root_inc_path])
         if self.main.archi_info.has_zlib:
             options.extend(['-DZIP_USE'])
         if self.main.archi_info.has_delphes:

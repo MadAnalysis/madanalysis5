@@ -298,7 +298,7 @@ class LibraryWriter():
 #        if self.main.archi_info.has_fastjet:
 #            file.write('CXXFASTJET = $(shell fastjet-config --cxxflags --plugins)\n')
         # BENJ FIX file.write('CXXFLAGS = -Wall -O3 -fPIC $(shell root-config --cflags) -I./../')
-        file.write('CXXFLAGS = -Wall -O3 -DROOT_USE -fPIC -I'+self.main.archi_info.root_inc_path+' -I./../')
+        file.write('CXXFLAGS = -Wall -O3 -DROOT_USE -fPIC -pthread -m64 -I'+self.main.archi_info.root_inc_path+' -I./../')
         if self.main.archi_info.has_zlib:
             file.write(' -DZIP_USE')
         if self.main.archi_info.has_delphes:
@@ -648,7 +648,8 @@ class LibraryWriter():
         # Options for compilation : CXXFLAGS
         file.write('# Options for compilation\n')
         options = []
-        options.extend(['-Wall','-O3','-I$(MA5_BASE)/tools/','-I'+self.main.archi_info.root_inc_path])
+        options.extend(['-Wall','-O3','-I$(MA5_BASE)/tools/'])
+        options.extend(['-pthread','-m64','-I'+self.main.archi_info.root_inc_path])
         if self.main.archi_info.has_zlib:
             options.extend(['-DZIP_USE'])
         if self.main.archi_info.has_delphes:
