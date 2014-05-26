@@ -154,7 +154,7 @@ class ConfigChecker:
 
         # Which python
         if self.debug:
-            result = ShellCommand.Which('python')
+            result = ShellCommand.Which('python',all=False,mute=True)
             if len(result)==0:
                 self.PrintFAIL(warning=False)
                 logging.error('python compiler not found. Please install it before ' + \
@@ -164,7 +164,7 @@ class ConfigChecker:
 
         # Which all
         if self.debug:
-            result = ShellCommand.Which('python',all=True)
+            result = ShellCommand.Which('python',all=True,mute=True)
             if len(result)==0:
                 self.PrintFAIL(warning=False)
                 logging.error('g++ compiler not found. Please install it before ' + \
@@ -342,7 +342,7 @@ class ConfigChecker:
 
         # Which all
         if self.debug:
-            result = ShellCommand.Which('g++',all=True)
+            result = ShellCommand.Which('g++',all=True,mute=True)
             if len(result)==0:
                 self.PrintFAIL(warning=False)
                 logging.error('g++ compiler not found. Please install it before ' + \
@@ -386,7 +386,7 @@ class ConfigChecker:
 
         # Which all
         if self.debug:
-            result = ShellCommand.Which('make',all=True)
+            result = ShellCommand.Which('make',all=True,mute=True)
             if len(result)==0:
                 self.PrintFAIL(warning=False)
                 logging.error('GNU Make not found. Please install it before ' + \
@@ -426,7 +426,7 @@ class ConfigChecker:
 
         # Which gfortran
         if self.debug:
-            result = ShellCommand.Which('gfortran')
+            result = ShellCommand.Which('gfortran',all=False,mute=True)
             if len(result)==0:
                 self.PrintFAIL(warning=False)
                 logging.warning('gfortran compiler not found.')
@@ -435,7 +435,7 @@ class ConfigChecker:
 
         # Which all
         if self.debug:
-            result = ShellCommand.Which('gfortran',all=True)
+            result = ShellCommand.Which('gfortran',all=True,mute=True)
             if len(result)==0:
                 self.PrintFAIL(warning=False)
                 logging.warning('gfortran compiler not found.')
@@ -861,7 +861,7 @@ class ConfigChecker:
         if not force and not ma5installation:
             
             logging.debug("Try to locate fastjet-config program with the 'which' command ...") 
-            result = ShellCommand.Which('fastjet-config')
+            result = ShellCommand.Which('fastjet-config',all=False,mute=True)
             if len(result)==0:
                 logging.debug('-> not found')
             else:
@@ -954,7 +954,7 @@ class ConfigChecker:
             return False
 
         # Which
-        result = ShellCommand.Which('pdflatex')
+        result = ShellCommand.Which('pdflatex',all=False,mute=True)
         if len(result)==0:
             self.PrintFAIL(warning=False)
 	    logging.warning("pdflatex disabled. Reports under the pdf format will not be compiled.")
@@ -964,7 +964,7 @@ class ConfigChecker:
 
         # Which all
         if self.debug:
-            result = ShellCommand.Which('pdflatex',all=True)
+            result = ShellCommand.Which('pdflatex',all=True,mute=True)
             if len(result)==0:
                 self.PrintFAIL(warning=False)
                 logging.warning("pdflatex disabled. Reports under the pdf format will not be compiled.")
@@ -991,7 +991,7 @@ class ConfigChecker:
             return False
 
         # Which
-        result = ShellCommand.Which('latex')
+        result = ShellCommand.Which('latex',all=False,mute=True)
         if len(result)==0:
             self.PrintFAIL(warning=False)
 	    logging.warning("latex disabled. Reports under the dvi format will not be compiled.")
@@ -1001,7 +1001,7 @@ class ConfigChecker:
 
         # Which all
         if self.debug:
-            result = ShellCommand.Which('latex',all=True)
+            result = ShellCommand.Which('latex',all=True,mute=True)
             if len(result)==0:
                 self.PrintFAIL(warning=False)
                 logging.warning("latex disabled. Reports under the dvi format will not be compiled.")
@@ -1028,7 +1028,7 @@ class ConfigChecker:
             return False
 
         # Which
-        result = ShellCommand.Which('dvipdf')
+        result = ShellCommand.Which('dvipdf',all=False,mute=True)
         if len(result)==0:
             self.PrintFAIL(warning=False)
 	    logging.warning("dvipdf not found. DVI reports will not be converted to pdf files.")
@@ -1038,7 +1038,7 @@ class ConfigChecker:
 
         # Which all
         if self.debug:
-            result = ShellCommand.Which('dvipdf',all=True)
+            result = ShellCommand.Which('dvipdf',all=True,mute=True)
             if len(result)==0:
                 self.PrintFAIL(warning=False)
                 logging.warning("dvipdf not found. DVI reports will not be converted to pdf files.")

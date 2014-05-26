@@ -98,7 +98,7 @@ class ShellCommand():
     
 
     @staticmethod
-    def Which(theCommand,all=False):
+    def Which(theCommand,all=False,mute=False):
 
         # theCommands
         if all:
@@ -110,7 +110,8 @@ class ShellCommand():
         try:
             result=subprocess.Popen(theCommands,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         except:
-            logging.error('impossible to execute the commands: '+' '.join(theCommands))
+            if not mute:
+                logging.error('impossible to execute the commands: '+' '.join(theCommands))
             return []
 
         # Getting stdout
