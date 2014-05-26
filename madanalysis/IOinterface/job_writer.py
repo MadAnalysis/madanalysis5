@@ -1116,8 +1116,9 @@ class JobWriter():
             commands.append('--no_event_weight')
 
         # Release
-        from madanalysis.core.main import Main
-        commands.append('--ma5_version="'+Main.version+';'+Main.date+'"')
+        commands.append('--ma5_version="'+\
+                        self.main.archi_info.ma5_version+';'+\
+                        self.main.archi_info.ma5_date+'"')
 
         # Inputs
         commands.append('../../Input/'+name+'.list')
