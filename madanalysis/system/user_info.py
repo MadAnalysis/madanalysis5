@@ -147,42 +147,39 @@ class UserInfo:
             
 
             if words[0]=='root_includes':
-                self.useroptions.root_includes==words[1]
+                self.root_includes==words[1]
             elif words[0]=='root_libs':
-                self.useroptions.root_libs=words[1]
+                self.root_libs=words[1]
             elif words[0]=='delphes_veto':
-                self.useroptions.delphes_veto=words[1]
+                self.delphes_veto=words[1]
             elif words[0]=='delphes_includes':
-                self.useroptions.delphes_includes=words[1]
+                self.delphes_includes=words[1]
             elif words[0]=='delphes_libs':
-                self.useroptions.delphes_libs=words[1]
+                self.delphes_libs=words[1]
             elif words[0]=='delphesMA5tune_veto':
-                self.useroptions.delphesMA5tune_veto=words[1]
+                self.delphesMA5tune_veto=words[1]
             elif words[0]=='delphesMA5tune_includes':
-                self.useroptions.delphesMA5tune_includes=words[1]
+                self.delphesMA5tune_includes=words[1]
             elif words[0]=='delphesMA5tune_libs':
-                self.useroptions.delphesMA5tune_libs=words[1]
+                self.delphesMA5tune_libs=words[1]
             elif words[0]=='zlib_veto':
-                self.useroptions.zlib_veto=words[1]
+                self.zlib_veto=words[1]
             elif words[0]=='zlib_includes':
-                self.useroptions.zlib_includes=words[1]
+                self.zlib_includes=words[1]
             elif words[0]=='zlib_libs':
-                self.useroptions.zlib_libs=words[1]
+                self.zlib_libs=words[1]
             elif words[0]=='fastjet_veto':
-                self.useroptions.fastjet_veto=words[1]
+                self.fastjet_veto=words[1]
             elif words[0]=='fastjet_bin_path':
-                self.useroptions.fastjet_bin_path=words[1]
+                self.fastjet_bin_path=words[1]
             elif words[0]=='pdflatex_veto':
-                self.useroptions.pdflatex_veto=words[1]
+                self.pdflatex_veto=words[1]
             elif words[0]=='latex_veto':
-                self.useroptions.latex_veto=words[1]
+                self.latex_veto=words[1]
             elif words[0]=='dvipdf_veto':
-                self.useroptions.dvipdf_veto=words[1]
+                self.dvipdf_veto=words[1]
             else:
                 logging.warning(filename+': the options called "'+words[0]+'" is not found')
-
-            if debug:
-                logging.debug(self.useroptions)
 
         # Close the file
         logging.debug("Closing the file: "+filename)
