@@ -676,8 +676,8 @@ class LibraryWriter():
             libs.extend(['-lgfortran'])
 
         # - Root
-        libs.extend['-L'+self.main.archi_info.root_lib_path, \
-                    '-lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic']
+        libs.extend(['-L'+self.main.archi_info.root_lib_path, \
+                    '-lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic'])
 
 # ERIC pour l'instant
 #        libs.extend(['-L'+self.main.archi_info.root_lib_path, \
