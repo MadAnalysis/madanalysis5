@@ -119,6 +119,12 @@ class ShellCommand():
         if out==None:
             return []
 
+        # Getting results
+        if result.returncode!=0:
+            if not mute:
+                logging.error('command '+str(theCommand)+' is not found')
+            return []
+            
         # Splitting the lines
         msg = out.split('\n')
 
