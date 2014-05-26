@@ -22,7 +22,7 @@
 ################################################################################
 
 
-from madanalysis.core.linux_architecture import LinuxArchitecture
+from madanalysis.system.architecture_info import ArchitectureInfo
 import logging
 import glob
 import os
@@ -31,55 +31,49 @@ import sys
 
 class LibraryBuilder:
 
-    def __init__(self,configLinux,ma5dir,libZIP,libDelphes,libDelfes,libFastJet):
+    def __init__(self,archi_info):
 
-        self.configLinux=configLinux
-        self.ma5dir=ma5dir
-        self.configStore = LinuxArchitecture()
-        self.libZIP=libZIP
-        self.libDelphes=libDelphes
-        self.libDelfes=libDelfes
-        self.libFastJet=libFastJet
+        self.archi_info        = archi_info
+        self.archi_info_stored = ArchitectureInfo()
 
-        
     def checkMA5(self):
         logging.info("Checking the MadAnalysis library:")
         FirstUse=False
 
         # Look for 'lib' directory
         name='/tools/SampleAnalyzer/Lib'
-        if not os.path.isdir(self.ma5dir+name):
+        if not os.path.isdir(self.archi_info.ma5dir+name):
             try:
        	        FirstUse=True
-                os.mkdir(self.ma5dir+name)
+                os.mkdir(self.archi_info.ma5dir+name)
             except:
                 logging.error("Impossible to create the directory :")
                 logging.error(" "+name)
                 return False
 
         # Look for the shared library 'MadAnalysis' and 'config' file
-        if not os.path.isfile(self.ma5dir+'/tools/SampleAnalyzer/Lib/libSampleAnalyzer.so') \
-           or not os.path.isfile(self.ma5dir+'/tools/architecture.ma5'):
+        if not os.path.isfile(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libSampleAnalyzer.so') \
+           or not os.path.isfile(self.archi_info.ma5dir+'/tools/architecture.ma5'):
             FirstUse=True
             return True, False
 
         # Look for optional library
         libraries = []
-        if self.libFastJet:
-            libraries.append(self.ma5dir+'/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so')
-        if self.libZIP:
-            libraries.append(self.ma5dir+'/tools/SampleAnalyzer/Lib/libzlib_for_ma5.so')
-        if self.libDelphes:
-            libraries.append(self.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so')
-        if self.libDelfes:
-            libraries.append(self.ma5dir+'/tools/SampleAnalyzer/Lib/libdelfes_for_ma5.so')
+        if self.archi_info.has_fastjet:
+            libraries.append(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so')
+        if self.archi_info.has_zlib:
+            libraries.append(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libzlib_for_ma5.so')
+        if self.archi_info.has_delphes:
+            libraries.append(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so')
+        if self.archi_info.has_delphesMA5tune:
+            libraries.append(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphesMA5tune_for_ma5.so')
         for library in libraries:
             if not os.path.isfile(library):
                 return False, True
 
         # Importing the configuration stored with the library
         if not FirstUse:
-            if not self.configStore.Import(self.ma5dir+'/tools/architecture.ma5'):
+            if not self.archi_info_stored.load(self.archi_info.ma5dir+'/tools/architecture.ma5'):
                 FirstUse=True
                 return True, False
 
@@ -87,5 +81,5 @@ class LibraryBuilder:
     
         
     def compare(self):
-        return self.configLinux.Compare(self.configStore)
+        return self.archi_info.Compare(self.archi_info_stored)
         

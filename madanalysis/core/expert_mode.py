@@ -36,9 +36,9 @@ class ExpertMode:
         self.main=main
         self.path=""
         self.forbiddenpaths=[]
-        self.forbiddenpaths.append(os.path.normpath(self.main.ma5dir+'/lib'))
-        self.forbiddenpaths.append(os.path.normpath(self.main.ma5dir+'/bin'))
-        self.forbiddenpaths.append(os.path.normpath(self.main.ma5dir+'/madanalysis'))
+        self.forbiddenpaths.append(os.path.normpath(self.main.archi_info.ma5dir+'/lib'))
+        self.forbiddenpaths.append(os.path.normpath(self.main.archi_info.ma5dir+'/bin'))
+        self.forbiddenpaths.append(os.path.normpath(self.main.archi_info.ma5dir+'/madanalysis'))
         
     def CreateDirectory(self):
         logging.info("\nWelcome to the expert mode of MadAnalysis")

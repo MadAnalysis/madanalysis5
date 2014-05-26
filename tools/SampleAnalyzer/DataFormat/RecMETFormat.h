@@ -41,7 +41,7 @@ namespace MA5
 class LHCOReader;
 class ROOTReader;
 class DelphesTreeReader;
-class DelfesTreeReader;
+class DelphesMA5tuneTreeReader;
 class RecMETFormat
 {
 
@@ -49,7 +49,7 @@ class RecMETFormat
   friend class ROOTReader;
   friend class JetClusteringFastJet;
   friend class DelphesTreeReader;
-  friend class DelfesTreeReader;
+  friend class DelphesMA5tuneTreeReader;
 
   // -------------------------------------------------------------
   //                        data members

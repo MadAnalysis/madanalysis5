@@ -25,8 +25,8 @@
 from madanalysis.selection.instance_name   import InstanceName
 from madanalysis.IOinterface.folder_writer import FolderWriter
 from madanalysis.IOinterface.job_writer    import JobWriter
-from madanalysis.core.string_tools         import StringTools
-from madanalysis.IOinterface.shell_command import ShellCommand
+from string_tools                          import StringTools
+from shell_command                         import ShellCommand
 import logging
 import shutil
 import os
@@ -36,17 +36,10 @@ import subprocess
 
 class LibraryWriter():
 
-    def __init__(self,ma5dir,jobdir,libZIP,libFastJet,forced,fortran,delphes,delfes,main):
-        self.ma5dir     = ma5dir
+    def __init__(self,jobdir,main):
         self.jobdir     = jobdir
-        self.path       = os.path.normpath(ma5dir+"/tools/")
-        self.libZIP     = libZIP
-        self.libFastJet = libFastJet
-        self.forced     = forced
-        self.fortran    = fortran
-        self.libDelphes = delphes
-        self.libDelfes  = delfes
         self.main       = main
+        self.path       = os.path.normpath(self.main.archi_info.ma5dir+"/tools/")
 
     def get_ncores(self):
         # Number of cores
@@ -55,7 +48,7 @@ class LibraryWriter():
         logging.info("     => How many cores for the compiling? default = max = " +\
                      str(nmaxcores)+"")
         
-        if not self.forced:
+        if not self.main.forced:
             test=False
             while(not test):
                 answer=raw_input("     Answer: ")
@@ -84,7 +77,7 @@ class LibraryWriter():
         logging.info("   How many cores for the compiling? default = max = " +\
                      str(nmaxcores)+"")
         
-        if not self.forced:
+        if not self.main.forced:
             test=False
             while(not test):
                 answer=raw_input("   Answer: ")
@@ -130,21 +123,21 @@ class LibraryWriter():
         file.write('CXX = g++\n')
         if package=='fastjet':
             file.write('CXXFASTJET = $(shell fastjet-config --cxxflags --plugins)\n')
-        file.write('CXXFLAGS = -Wall -O3 -DROOT_USE -fPIC -I'+self.main.configLinux.root_inc_path+' -I./../../')
+        file.write('CXXFLAGS = -Wall -O3 -DROOT_USE -fPIC -I'+self.main.archi_info.root_inc_path+' -I./../../')
         if package=='zlib':
-            file.write(' -I'+self.main.configLinux.zlib_inc_path)
+            file.write(' -I'+self.main.archi_info.zlib_inc_path)
         if package=='delphes':
-            for header in self.main.configLinux.delphes_inc_paths:
+            for header in self.main.archi_info.delphes_inc_paths:
                 file.write(' -I'+header)
-        if package=='delfes':
-            for header in self.main.configLinux.delfes_inc_paths:
+        if package=='delphesMA5tune':
+            for header in self.main.archi_info.delphesMA5tune_inc_paths:
                 file.write(' -I'+header)
         if package=='fastjet':
             file.write(' $(CXXFASTJET)')
         file.write('\n')
 
         # Options for C++ compilation
-        if self.fortran:
+        if self.main.archi_info.has_fortran:
             file.write('# Options for Fortran compilation\n')
             file.write('FC = gfortran\n')
             file.write('FCFLAGS = -Wall -O3 -fPIC\n')
@@ -155,7 +148,7 @@ class LibraryWriter():
         file.write('SRCS = $(wildcard '+package+'/*.cpp)\n')
         file.write('HDRS = $(wildcard '+package+'/*.h)\n')
         file.write('OBJS = $(SRCS:.cpp=.o)\n')
-        if self.fortran:
+        if self.main.archi_info.has_fortran:
             file.write('FORTRAN_SRCS = $(wildcard '+package+'/*.f)\n')
             file.write('FORTRAN_OBJS = $(FORTRAN_SRCS:.f=.o)\n')
         file.write('\n')
@@ -228,7 +221,7 @@ class LibraryWriter():
 
         # Precompile
         file.write('# Compile target\n')
-        if self.fortran:
+        if self.main.archi_info.has_fortran:
             file.write('compile: precompile $(OBJS) $(FORTRAN_OBJS)\n')
         else:
             file.write('compile: precompile $(OBJS)\n')
@@ -236,15 +229,15 @@ class LibraryWriter():
 
         # Precompile
         file.write('# Link target\n')
-        if self.fortran:
+        if self.main.archi_info.has_fortran:
             file.write('link: $(OBJS) $(FORTRAN_OBJS)\n')
-            if self.main.isMAC:
+            if self.main.archi_info.isMac:
                 file.write('\t$(CXX) -shared -flat_namespace -dynamiclib -undefined suppress -o ../Lib/lib$(PROGRAM).so $(OBJS) $(FORTRAN_OBJS)\n')
             else:
                 file.write('\t$(CXX) -shared -o ../Lib/lib$(PROGRAM).so $(OBJS) $(FORTRAN_OBJS)\n')
         else:
             file.write('link: $(OBJS)\n')
-            if self.main.isMAC:
+            if self.main.archi_info.isMac:
                 file.write('\t$(CXX) -shared -flat_namespace -dynamiclib -undefined suppress -o ../Lib/lib$(PROGRAM).so $(OBJS)\n')
             else:
                 file.write('\t$(CXX) -shared -o ../Lib/lib$(PROGRAM).so $(OBJS)\n')
@@ -262,7 +255,7 @@ class LibraryWriter():
         file.write('# Do clean target\n')
         file.write('do_clean: \n')
         file.write('\t@rm -f $(OBJS)\n')
-        if self.fortran:
+        if self.main.archi_info.has_fortran:
             file.write('\t@rm -f $(FORTRAN_OBJS)\n')
         file.write('\n')
 
@@ -296,27 +289,27 @@ class LibraryWriter():
         # Compilators
         file.write('# Compilators\n')
         file.write('CXX = g++\n')
-        if self.fortran:
+        if self.main.archi_info.has_fortran:
             file.write('FC = gfortran\n')
         file.write('\n')
 
         # Options for compilation
         file.write('# Options for compilation\n')
-#        if self.libFastJet:
+#        if self.main.archi_info.has_fastjet:
 #            file.write('CXXFASTJET = $(shell fastjet-config --cxxflags --plugins)\n')
         # BENJ FIX file.write('CXXFLAGS = -Wall -O3 -fPIC $(shell root-config --cflags) -I./../')
-        file.write('CXXFLAGS = -Wall -O3 -DROOT_USE -fPIC -I'+self.main.configLinux.root_inc_path+' -I./../')
-        if self.libZIP:
+        file.write('CXXFLAGS = -Wall -O3 -DROOT_USE -fPIC -I'+self.main.archi_info.root_inc_path+' -I./../')
+        if self.main.archi_info.has_zlib:
             file.write(' -DZIP_USE')
-        if self.libDelphes:
+        if self.main.archi_info.has_delphes:
             file.write(' -DDELPHES_USE')
-        if self.libDelfes:
-            file.write(' -DDELFES_USE')
-        if self.libFastJet:
+        if self.main.archi_info.has_delphesMA5tune:
+            file.write(' -DDELPHESMA5TUNE_USE')
+        if self.main.archi_info.has_fastjet:
             file.write(' -DFASTJET_USE')
  #           file.write(' $(CXXFASTJET)')
         file.write('\n')
-        if self.fortran:
+        if self.main.archi_info.has_fortran:
             file.write('FC = gfortran\n')
             file.write('FCFLAGS = -O2\n')
         file.write('\n')
@@ -327,7 +320,7 @@ class LibraryWriter():
 #        file.write('SRCS += $(wildcard */*/*.cpp)\n')
         file.write('HDRS = $(wildcard */*.h)\n')
         file.write('OBJS = $(SRCS:.cpp=.o)\n')
-        if self.fortran:
+        if self.main.archi_info.has_fortran:
             file.write('FORTRAN_SRCS = $(wildcard */*.f)\n')
             file.write('FORTRAN_OBJS = $(FORTRAN_SRCS:.f=.o)\n')
         file.write('\n')
@@ -400,7 +393,7 @@ class LibraryWriter():
 
         # Precompile
         file.write('# Compile target\n')
-        if self.fortran:
+        if self.main.archi_info.has_fortran:
             file.write('compile: precompile $(OBJS) $(FORTRAN_OBJS)\n')
         else:
             file.write('compile: precompile $(OBJS)\n')
@@ -408,15 +401,15 @@ class LibraryWriter():
 
         # Precompile
         file.write('# Link target\n')
-        if self.fortran:
+        if self.main.archi_info.has_fortran:
             file.write('link: $(OBJS) $(FORTRAN_OBJS)\n')
-            if self.main.isMAC:
+            if self.main.archi_info.isMac:
                 file.write('\t$(CXX) -shared -flat_namespace -dynamiclib -undefined suppress -o Lib/lib$(PROGRAM).so $(OBJS) $(FORTRAN_OBJS)\n')
             else:
                 file.write('\t$(CXX) -shared -o Lib/lib$(PROGRAM).so $(OBJS) $(FORTRAN_OBJS)\n')
         else:
             file.write('link: $(OBJS)\n')
-            if self.main.isMAC:
+            if self.main.archi_info.isMac:
                 file.write('\t$(CXX) -shared -flat_namespace -dynamiclib -undefined suppress -o Lib/lib$(PROGRAM).so $(OBJS)\n')
             else:
                 file.write('\t$(CXX) -shared -o Lib/lib$(PROGRAM).so $(OBJS)\n')
@@ -451,8 +444,8 @@ class LibraryWriter():
         # Closing the file
         file.close()
 
-        JobWriter.WriteSetupFile(True,self.path+'/SampleAnalyzer',self.ma5dir,True,self.main.configLinux,self.main.isMAC)
-        JobWriter.WriteSetupFile(False,self.path+'/SampleAnalyzer',self.ma5dir,True,self.main.configLinux,self.main.isMAC)
+        JobWriter.WriteSetupFile(True,self.path+'/SampleAnalyzer',True,self.main.archi_info)
+        JobWriter.WriteSetupFile(False,self.path+'/SampleAnalyzer',True,self.main.archi_info)
 
         return True
 
@@ -655,14 +648,14 @@ class LibraryWriter():
         # Options for compilation : CXXFLAGS
         file.write('# Options for compilation\n')
         options = []
-        options.extend(['-Wall','-O3','-I$(MA5_BASE)/tools/','-I'+self.main.configLinux.root_inc_path])
-        if self.libZIP:
+        options.extend(['-Wall','-O3','-I$(MA5_BASE)/tools/','-I'+self.main.archi_info.root_inc_path])
+        if self.main.archi_info.has_zlib:
             options.extend(['-DZIP_USE'])
-        if self.libDelphes:
+        if self.main.archi_info.has_delphes:
             options.extend(['-DROOT_USE','-DDELPHES_USE'])
-        if self.libDelfes:
-            options.extend(['-DROOT_USE','-DDELFES_USE'])
-        if self.libFastJet:
+        if self.main.archi_info.has_delphesMA5tune:
+            options.extend(['-DROOT_USE','-DDELPHESMA5TUNE_USE'])
+        if self.main.archi_info.has_fastjet:
             options.extend(['-DROOT_USE','-DFASTJET_USE'])
         file.write('CXXFLAGS = '+' '.join(options))
         file.write('\n')
@@ -671,26 +664,26 @@ class LibraryWriter():
         # - SampleAnalyzer
         libs=[]
         libs.extend(['-L$(MA5_BASE)/tools/SampleAnalyzer/Lib/','-lSampleAnalyzer'])
-        if self.libFastJet:
+        if self.main.archi_info.has_fastjet:
             libs.extend(['-lfastjet_for_ma5'])
-        if self.libZIP:
-            libs.extend(['-L'+self.main.configLinux.zlib_lib_path,'-lz','-lzlib_for_ma5'])
-        if self.libDelphes:
-            libs.extend(['-L'+self.main.configLinux.delphes_lib_paths[0],'-lDelphes','-ldelphes_for_ma5'])
-        if self.libDelfes:
-            libs.extend(['-L'+self.main.configLinux.delfes_lib_paths[0],'-lDelphes','-ldelfes_for_ma5'])
-        if self.fortran:
+        if self.main.archi_info.has_zlib:
+            libs.extend(['-L'+self.main.archi_info.zlib_lib_path,'-lz','-lzlib_for_ma5'])
+        if self.main.archi_info.has_delphes:
+            libs.extend(['-L'+self.main.archi_info.delphes_lib_paths[0],'-lDelphes','-ldelphes_for_ma5'])
+        if self.main.archi_info.has_delphesMA5tune:
+            libs.extend(['-L'+self.main.archi_info.delphesMA5tune_lib_paths[0],'-lDelphesMA5tune','-ldelphesMA5tune_for_ma5'])
+        if self.main.archi_info.has_fortran:
             libs.extend(['-lgfortran'])
 
         # - Root
-        libs.extend(['-L'+self.main.configLinux.root_lib_path, \
+        libs.extend(['-L'+self.main.archi_info.root_lib_path, \
                      '-lHist','-lRIO', '-lGpad','-lGraf','-lGraf3d','-lTree', \
                      '-lRint','-lPostscript','-lMatrix','-lPhysics', \
                      '-lMathCore','-lEG', '-lNet','-lThread', \
                      '-lCore','-lCint','-pthread','-lm','-ldl','-rdynamic'])
 
         # fastjet
-        if self.libFastJet:
+        if self.main.archi_info.has_fastjet:
             libs.extend(['$(shell fastjet-config --libs --plugins --rpath=no)'])
 
         # -everything together
@@ -712,13 +705,13 @@ class LibraryWriter():
         file.write('# Requirements to check before building\n')
         libs=[]
         libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libSampleAnalyzer.so')
-        if self.libZIP:
+        if self.main.archi_info.has_zlib:
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libzlib_for_ma5.so')
-        if self.libDelphes:
+        if self.main.archi_info.has_delphes:
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so')
-        if self.libDelfes:
-            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libdelfes_for_ma5.so')
-        if self.libFastJet:
+        if self.main.archi_info.has_delphesMA5tune:
+            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libdelphesMA5tune_for_ma5.so')
+        if self.main.archi_info.has_fastjet:
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so')
         for ind in range(0,len(libs)):
             file.write('REQUIRED'+str(ind+1)+' = '+libs[ind]+'\n')

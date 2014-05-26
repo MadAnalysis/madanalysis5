@@ -25,17 +25,17 @@
 from madanalysis.enumeration.ma5_running_type           import MA5RunningType
 from madanalysis.configuration.clustering_configuration import ClusteringConfiguration
 from madanalysis.configuration.delphes_configuration    import DelphesConfiguration
-from madanalysis.configuration.delfes_configuration     import DelfesConfiguration
+from madanalysis.configuration.delphesMA5tune_configuration     import DelphesMA5tuneConfiguration
 import logging
 
 class FastsimConfiguration:
 
-    userVariables = { "package" : ["fastjet","delphes","delfes","none"] }
+    userVariables = { "package" : ["fastjet","delphes","delphesMA5tune","none"] }
 
     def __init__(self):
         self.clustering = 0
         self.delphes = 0
-        self.delfes = 0
+        self.delphesMA5tune = 0
         self.package    = "none"
 
         
@@ -45,8 +45,8 @@ class FastsimConfiguration:
             self.clustering.Display()
         elif self.package=="delphes":
             self.delphes.Display()
-        elif self.package=="delfes":
-            self.delfes.Display()
+        elif self.package=="delphesMA5tune":
+            self.delphesMA5tune.Display()
 
 
     def user_DisplayParameter(self,parameter):
@@ -57,8 +57,8 @@ class FastsimConfiguration:
             self.clustering.user_DisplayParameter(parameter)
         elif self.package=="delphes":
             self.delphes.user_DisplayParameter(parameter)
-        elif self.package=="delfes":
-            self.delfes.user_DisplayParameter(parameter)
+        elif self.package=="delphesMA5tune":
+            self.delphesMA5tune.user_DisplayParameter(parameter)
 
 
     def SampleAnalyzerConfigString(self):
@@ -70,15 +70,15 @@ class FastsimConfiguration:
             mydict = {}
             mydict.update(self.delphes.SampleAnalyzerConfigString())
             return mydict
-        elif self.package=="delfes":
+        elif self.package=="delphesMA5tune":
             mydict = {}
-            mydict.update(self.delfes.SampleAnalyzerConfigString())
+            mydict.update(self.delphesMA5tune.SampleAnalyzerConfigString())
             return mydict
         else:
             return {}
 
 
-    def user_SetParameter(self,parameter,value,datasets,level,fastjet,delphes,delfes):
+    def user_SetParameter(self,parameter,value,datasets,level,fastjet,delphes,delphesMA5tune):
 
         # algorithm
         if parameter=="package":
@@ -104,7 +104,7 @@ class FastsimConfiguration:
                     return
 
             # Switch on the clustering
-            elif value in ["fastjet","delphes","delfes"]:
+            elif value in ["fastjet","delphes","delphesMA5tune"]:
 
                 # Only in reco mode
                 if level!=MA5RunningType.RECO:
@@ -121,9 +121,9 @@ class FastsimConfiguration:
                     logging.error("delphes library is not installed. This fast-simulation package is not available.")
                     return
 
-                # Delfes ?
-                if value=='delfes' and not delfes:
-                    logging.error("delfes library is not installed. This fast-simulation package is not available.")
+                # DelphesMA5tune ?
+                if value=='delphesMA5tune' and not delphesMA5tune:
+                    logging.error("delphesMA5tune library is not installed. This fast-simulation package is not available.")
                     return
 
                 test=True
@@ -144,22 +144,22 @@ class FastsimConfiguration:
                 self.package="fastjet"
                 self.clustering = ClusteringConfiguration()
                 self.delphes = 0
-                self.delfes = 0
+                self.delphesMA5tune = 0
             elif value=="delphes":
                 self.package="delphes"
                 self.clustering = 0
                 self.delphes = DelphesConfiguration()
-                self.delfes = 0
-            elif value=="delfes":
-                self.package="delfes"
+                self.delphesMA5tune = 0
+            elif value=="delphesMA5tune":
+                self.package="delphesMA5tune"
                 self.clustering = 0
                 self.delphes = 0
-                self.delfes = DelfesConfiguration()
+                self.delphesMA5tune = DelphesMA5tuneConfiguration()
             elif value=="none":
                 self.package="none"
                 self.clustering = 0
                 self.delphes = 0
-                self.delfes = 0
+                self.delphesMA5tune = 0
             else:
                 logging.error("parameter called '"+value+"' is not found.")
             return    
@@ -174,8 +174,8 @@ class FastsimConfiguration:
             return self.clustering.user_SetParameter(parameter,value,datasets,level)
         elif self.package=="delphes":
             return self.delphes.user_SetParameter(parameter,value,datasets,level)
-        elif self.package=="delfes":
-            return self.delfes.user_SetParameter(parameter,value,datasets,level)
+        elif self.package=="delphesMA5tune":
+            return self.delphesMA5tune.user_SetParameter(parameter,value,datasets,level)
 
         
     def user_GetParameters(self):
@@ -185,9 +185,9 @@ class FastsimConfiguration:
         elif self.package=="delphes":
             table = FastsimConfiguration.userVariables.keys()
             table.extend(self.delphes.user_GetParameters())
-        elif self.package=="delfes":
+        elif self.package=="delphesMA5tune":
             table = FastsimConfiguration.userVariables.keys()
-            table.extend(self.delfes.user_GetParameters())
+            table.extend(self.delphesMA5tune.user_GetParameters())
         else:
             table = ["package"]
         return table
@@ -213,13 +213,13 @@ class FastsimConfiguration:
                 table.extend(self.delphes.user_GetValues(variable))
             except:
                 pass
-        elif self.package=="delfes":
+        elif self.package=="delphesMA5tune":
             try:
                 table.extend(FastsimConfiguration.userVariables[variable])
             except:
                 pass
             try:
-                table.extend(self.delfes.user_GetValues(variable))
+                table.extend(self.delphesMA5tune.user_GetValues(variable))
             except:
                 pass
         else:

@@ -22,7 +22,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#include "SampleAnalyzer/Interfaces/delfes/DetectorDelfes.h"
+#include "SampleAnalyzer/Interfaces/delphesMA5tune/DetectorDelphesMA5tune.h"
 
 #include <fstream>
 #include <TROOT.h>
@@ -44,7 +44,7 @@
 
 using namespace MA5;
 
-bool DetectorDelfes::Initialize(const std::string& configFile, const std::map<std::string,std::string>& options)
+bool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const std::map<std::string,std::string>& options)
 { 
   // Save the name of the configuration file
   configFile_ = configFile;
@@ -89,7 +89,7 @@ bool DetectorDelfes::Initialize(const std::string& configFile, const std::map<st
   if (output_) outputFile_ = TFile::Open("TheMouth.root", "RECREATE");
   else outputFile_ = TFile::Open("tmp.root", "RECREATE");
 
-  treeWriter_ = new ExRootTreeWriter(outputFile_, "Delfes");
+  treeWriter_ = new ExRootTreeWriter(outputFile_, "DelphesMA5tune");
   //  branchEvent_ = treeWriter_->NewBranch("Event", LHEFEvent::Class());
 
   // Initializing delphes
@@ -121,13 +121,13 @@ bool DetectorDelfes::Initialize(const std::string& configFile, const std::map<st
 }
 
 
-void DetectorDelfes::PrintParam()
+void DetectorDelphesMA5tune::PrintParam()
 {
   INFO << "" << endmsg; 
 }
 
 
-std::string DetectorDelfes::GetParameters()
+std::string DetectorDelphesMA5tune::GetParameters()
 {
   std::stringstream str;
   return str.str();
@@ -135,7 +135,7 @@ std::string DetectorDelfes::GetParameters()
 
 
 /// Jet clustering
-bool DetectorDelfes::Execute(SampleFormat& mySample, EventFormat& myEvent)
+bool DetectorDelphesMA5tune::Execute(SampleFormat& mySample, EventFormat& myEvent)
 {
   // Import particles to Delphes
   TranslateMA5toDELPHES(mySample, myEvent);
@@ -158,7 +158,7 @@ bool DetectorDelfes::Execute(SampleFormat& mySample, EventFormat& myEvent)
   return true;
 }
 
-void DetectorDelfes::Finalize()
+void DetectorDelphesMA5tune::Finalize()
 {
   modularDelphes_->FinishTask();
   if (output_) treeWriter_->Write();
@@ -168,7 +168,7 @@ void DetectorDelfes::Finalize()
   delete modularDelphes_; modularDelphes_=0;
 }
 
-void DetectorDelfes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat& myEvent)
+void DetectorDelphesMA5tune::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat& myEvent)
 {
   for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
   {
@@ -210,7 +210,7 @@ void DetectorDelfes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat& 
   }
 }
 
-void DetectorDelfes::TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat& myEvent)
+void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat& myEvent)
 {
   if (myEvent.rec()==0)  myEvent.InitializeRec();
   if (mySample.rec()==0) mySample.InitializeRec();
@@ -272,7 +272,7 @@ void DetectorDelfes::TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat& 
 
   // Muon collection
   TObjArray* muonArray = dynamic_cast<TObjArray*>(
-         delphesFolder_->FindObject("Export/MuonIsolationCalculation/DelfesMuons"));
+         delphesFolder_->FindObject("Export/MuonIsolationCalculation/DelphesMA5tuneMuons"));
   if (muonArray==0) WARNING << "no muons collection found" << endmsg;
   else
   {
@@ -292,7 +292,7 @@ void DetectorDelfes::TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat& 
 
   // Electron collection
   TObjArray* elecArray = dynamic_cast<TObjArray*>(
-     delphesFolder_->FindObject("Export/ElectronIsolationCalculation/DelfesElectrons"));
+     delphesFolder_->FindObject("Export/ElectronIsolationCalculation/DelphesMA5tuneElectrons"));
   if (elecArray==0) WARNING << "no elecs collection found" << endmsg;
   else
   {
@@ -312,7 +312,7 @@ void DetectorDelfes::TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat& 
 
   // Track collection
   TObjArray* trackArray = dynamic_cast<TObjArray*>(
-    delphesFolder_->FindObject("Export/TrackIsolationCalculation/DelfesTracks"));
+    delphesFolder_->FindObject("Export/TrackIsolationCalculation/DelphesMA5tuneTracks"));
   if (trackArray==0) WARNING << "no tracks collection found" << endmsg;
   else
   {

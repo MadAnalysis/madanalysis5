@@ -61,28 +61,28 @@ def DecodeArguments():
 
     # Reading aguments
     for o,a in optlist:
-        if o in ("-P","--partonlevel"):
+        if o in ["-P","--partonlevel"]:
             mode.partonlevel=True
-        elif o in ("-H","--hadronlevel"):
+        elif o in ["-H","--hadronlevel"]:
             mode.hadronlevel=True
-        elif o in ("-R","--recolevel"):
+        elif o in ["-R","--recolevel"]:
             mode.recolevel=True
-        elif o in ("-E","-e","--expert"):
+        elif o in ["-E","-e","--expert"]:
             mode.expertmode=True
-        elif o in ("-f","--forced"):
+        elif o in ["-f","--forced"]:
             mode.forcedmode=True
-        elif o in ("-m","--mg5"):
+        elif o in ["-m","--mg5"]:
             mode.mg5mode=True
-        elif o in ("-s","--script"):
+        elif o in ["-s","--script"]:
             mode.scriptmode=True
-        elif o in ("-v","--version","--release"):
-            logging.info("MA5 release : " + Main.version + " " + Main.date  + "\n")
+        elif o in ["-v","--version","--release"]:
+            logging.info("MA5 release : " + self.main.archi_info.version + " " + self.main.archi_info.date  + "\n")
             sys.exit()
-        elif o in ("--debug"):
+        elif o in ["--debug"]:
             mode.debug = True
-        elif o in ("-b","--build"):
+        elif o in ["-b","--build"]:
             mode.build = True
-        elif o in ("-h","--help"):
+        elif o in ["-h","--help"]:
             usage()
             sys.exit()
 
@@ -110,10 +110,13 @@ def DecodeArguments():
 ################################################################################
 # Function MainSession
 ################################################################################
-def MainSession(mode,arglist):
+def MainSession(mode,arglist,ma5dir,version,date):
     
     # Instantiating  MadAnalysis main class
     main = Main()
+    main.archi_info.ma5dir      = ma5dir
+    main.archi_info.ma5_version = version
+    main.archi_info.ma5_date    = date
 
     # Setting argument in the main program 
     from madanalysis.enumeration.ma5_running_type import MA5RunningType
@@ -153,7 +156,7 @@ def MainSession(mode,arglist):
     "*                   \/_/ \/_/\/_/\/_/\/___/                 *\n" + \
     "*                                                           *\n" + \
     "*   MA5 release : " + \
-             "%-24s" % Main.version + "%+15s" % Main.date  + "   *\n" + \
+             "%-24s" % main.archi_info.ma5_version + "%+15s" % main.archi_info.ma5_date  + "   *\n" + \
     "*                                                           *\n" + \
     "*         Comput. Phys. Commun. 184 (2013) 222-256          *\n" + \
     "*                                                           *\n" + \
@@ -276,28 +279,37 @@ import os
 import commands
 import optparse
 ma5dir = os.path.split(os.path.dirname(os.path.realpath( __file__ )))[0]
+if not os.path.isdir(ma5dir):
+    sys.exit('Detected MadAnalysis 5 general folder is not correct:\n' +\
+             ma5dir)
 os.environ['MA5_BASE']=ma5dir
 
-# Adding the directory to the current PYTHONPATH
+# Adding the MadAnalysis 5 folder to the current PYTHONPATH
 # -> allowing to use MadAnalysis 5 python files
 sys.path.insert(0, ma5dir)
 
+# Adding the python service folder to the current PYTHONPATH
+servicedir = ma5dir+'/tools/ReportGenerator/Services/'
+servicedir = os.path.normpath(servicedir)
+if not os.path.isdir(servicedir):
+    sys.exit('Detected MadAnalysis 5 service folder is not correct:\n' +\
+             ma5dir)
+sys.path.insert(0, servicedir)
+
 # Configuring the logger
 import logging
-import madanalysis.interpreter.colored_log
-
-madanalysis.interpreter.colored_log.init()
+import colored_log
+colored_log.init()
 log = logging.getLogger()
 log.setLevel(logging.INFO)
 
 # Setting global variables of MadAnalysis main
 from madanalysis.core.main import Main
-Main.ma5dir = ma5dir
 
 # Release version
 # Do not touch it !!!!!  
-Main.version = "1.1.11.6"
-Main.date = "2014/05/22"
+version = "1.1.11.6"
+date = "2014/05/22"
 
 # Configurating tab completion
 try: 
@@ -331,14 +343,14 @@ mode,arglist = DecodeArguments()
 while True:
 
     # Launch the interpreter
-    repeat = MainSession(mode,arglist)
+    repeat = MainSession(mode,arglist,ma5dir,version,date)
 
     # Normal end
     if not repeat:
         break
 
     # Restart
-    from madanalysis.core.string_tools import StringTools
+    from string_tools import StringTools
     logging.info("")
     logging.info(StringTools.Fill('-',40))
     logging.info(StringTools.Center('RESTART THE MADANALYSIS 5 SESSION',40))

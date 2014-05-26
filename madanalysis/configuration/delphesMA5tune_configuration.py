@@ -26,7 +26,7 @@ from madanalysis.enumeration.ma5_running_type         import MA5RunningType
 import os
 import logging
 
-class DelfesConfiguration:
+class DelphesMA5tuneConfiguration:
 
     userVariables = { "detector" : ["cms","atlas"],\
                       "output": ["true","false"],\
@@ -41,13 +41,13 @@ class DelfesConfiguration:
 
     def SetCard(self):
         if self.detector=='cms' and self.pileup=="":
-            self.card = "delfes_card_CMS.tcl"
+            self.card = "delphesMA5tune_card_CMS.tcl"
         elif self.detector=='cms' and self.pileup!="":
-            self.card = "delfes_card_CMS_PileUp.tcl"
+            self.card = "delphesMA5tune_card_CMS_PileUp.tcl"
         elif self.detector=='atlas' and self.pileup=="":
-            self.card = "delfes_card_ATLAS.tcl"
+            self.card = "delphesMA5tune_card_ATLAS.tcl"
         elif self.detector=='atlas' and self.pileup!="":
-            self.card = "delfes_card_ATLAS_PileUp.tcl"
+            self.card = "delphesMA5tune_card_ATLAS_PileUp.tcl"
         
     def Display(self):
         self.user_DisplayParameter("detector")
@@ -143,13 +143,13 @@ class DelfesConfiguration:
 
         
     def user_GetParameters(self):
-        return DelfesConfiguration.userVariables.keys()
+        return DelphesMA5tuneConfiguration.userVariables.keys()
 
 
     def user_GetValues(self,variable):
         table = []
         try:
-            table.extend(DelfesConfiguration.userVariables[variable])
+            table.extend(DelphesMA5tuneConfiguration.userVariables[variable])
         except:
             pass
         return table

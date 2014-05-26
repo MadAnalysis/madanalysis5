@@ -25,7 +25,7 @@
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.IOinterface.folder_writer    import FolderWriter
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
-from madanalysis.core.string_tools            import StringTools
+from string_tools                             import StringTools
 import logging
 import shutil
 import os
@@ -42,13 +42,13 @@ class DelphesMigration():
         self.ApplyPatch()
 
     def ApplyPatch(self):
-        os.system('cp '+self.main.ma5dir+'/tools/SampleAnalyzer/Detector/patch_delfes.tgz '+\
-                  self.main.ma5dir+'/tools/delfes/')
-        os.system('cd '+ self.main.ma5dir + '/tools/delfes/; tar xzf patch_delfes.tgz')
+        os.system('cp '+self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Detector/patch_delphesMA5tune.tgz '+\
+                  self.main.archi_info.ma5dir+'/tools/delphesMA5tune/')
+        os.system('cd '+ self.main.archi_info.ma5dir + '/tools/delphesMA5tune/; tar xzf patch_delphesMA5tune.tgz')
 
 
     def ChangeTreeNames(self):
-        myfiles = glob.glob(self.main.ma5dir+'/tools/delfes/readers/Delphes*.cpp')
+        myfiles = glob.glob(self.main.archi_info.ma5dir+'/tools/delphesMA5tune/readers/Delphes*.cpp')
         for myfile in myfiles:
             self.ChangeTreeName(myfile)
 
@@ -66,7 +66,7 @@ class DelphesMigration():
 
         for line in input:
             if line.find("treeWriter")!=-1 and line.find("ExRootTreeWriter")!=1:
-                line = line.replace('"Delphes"','"Delfes"')
+                line = line.replace('"Delphes"','"DelphesMA5tune"')
             output.write(line)
                 
         output.close()

@@ -475,10 +475,10 @@ class PlotFlow:
         if not preview:
 
             # Put the MA5 logo
-#            logo = TASImage.Open(self.main.ma5dir+\
+#            logo = TASImage.Open(self.main.archi_info.ma5dir+\
 #                              "/madanalysis/input/logo.eps")
 #            if not logo.IsValid():
-#                logging.warning("file called '"+self.main.ma5dir+\
+#                logging.warning("file called '"+self.main.archi_info.ma5dir+\
 #                                "/madanalysis/input/logo.eps' " +\
 #                                "is not found")
 #            else:

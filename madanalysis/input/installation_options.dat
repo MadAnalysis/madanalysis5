@@ -11,10 +11,10 @@
 # delphes_includes = /home/toto/delphes/include
 # delphes_libs     = /home/toto/delphes/lib
 
-# -----DELFES----- 
-# delfes_veto     = 0 # 0=No, 1=Yes
-# delfes_includes = /home/toto/delfes/include
-# delfes_libs     = /home/toto/delfes/lib
+# -----DELPHESMA5TUNE----- 
+# delphesMA5tune_veto     = 0 # 0=No, 1=Yes
+# delphesMA5tune_includes = /home/toto/delphesMA5tune/include
+# delphesMA5tune_libs     = /home/toto/delphesMA5tune/lib
 
 # -----ZLIB-----
 # zlib_veto     = 0 # 0=No, 1=Yes

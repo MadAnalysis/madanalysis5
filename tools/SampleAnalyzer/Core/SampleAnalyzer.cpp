@@ -130,13 +130,15 @@ bool SampleAnalyzer::Initialize(int argc, char **argv,
 }
 
 
+/*
 AnalyzerBase* SampleAnalyzer::InitializeAnalyzer(const std::string& name, 
                                                  const std::string& outputname)
 {
   std::map<std::string,std::string> parametersA1;
   InitializeAnalyzer(name,outputname,parametersA1);
 }
-
+//BENJ ?????? WHAT IS THIS PIECE OF CODE
+*/
 
 AnalyzerBase* SampleAnalyzer::InitializeAnalyzer(const std::string& name, 
                                                  const std::string& outputname,

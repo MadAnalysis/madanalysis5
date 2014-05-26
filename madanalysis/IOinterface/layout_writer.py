@@ -25,7 +25,7 @@
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.IOinterface.folder_writer    import FolderWriter
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
-from madanalysis.core.string_tools            import StringTools
+from string_tools                             import StringTools
 import logging
 import shutil
 import os

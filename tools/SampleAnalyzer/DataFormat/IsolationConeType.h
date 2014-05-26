@@ -40,9 +40,9 @@ namespace MA5
 class LHCOReader;
 class ROOTReader;
 class DelphesTreeReader;
-class DelfesTreeReader;
+class DelphesMA5tuneTreeReader;
 class DetectorDelphes;
-class DetectorDelfes;
+class DetectorDelphesMA5tune;
 
 class IsolationConeType
 {
@@ -54,9 +54,9 @@ class IsolationConeType
   friend class TauTagger;
   friend class cTagger;
   friend class DetectorDelphes;
-  friend class DetectorDelfes;
+  friend class DetectorDelphesMA5tune;
   friend class DelphesTreeReader;
-  friend class DelfesTreeReader;
+  friend class DelphesMA5tuneTreeReader;
 
   // -------------------------------------------------------------
   //                        data members

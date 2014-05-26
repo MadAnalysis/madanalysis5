@@ -42,18 +42,18 @@ class MCParticleFormat;
 class LHEReader;
 class LHCOReader;
 class DelphesTreeReader;
-class DelfesTreeReader;
+class DelphesMA5tuneTreeReader;
 class DetectorDelphes;
-class DetectorDelfes;
+class DetectorDelphesMA5tune;
 
 class RecParticleFormat : public ParticleBaseFormat
 {
   friend class LHEReader;
   friend class LHCOReader;
   friend class DelphesTreeReader;
-  friend class DelfesTreeReader;
+  friend class DelphesMA5tuneTreeReader;
   friend class DetectorDelphes;
-  friend class DetectorDelfes;
+  friend class DetectorDelphesMA5tune;
 
   // -------------------------------------------------------------
   //                        data members

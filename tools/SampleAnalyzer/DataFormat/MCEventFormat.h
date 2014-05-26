@@ -46,7 +46,7 @@ class HEPMCReader;
 class LHEWriter;
 class ROOTReader;
 class DelphesTreeReader;
-class DelfesTreeReader;
+class DelphesMA5tuneTreeReader;
 
 class MCEventFormat
 {
@@ -57,7 +57,7 @@ class MCEventFormat
   friend class ROOTReader;
   friend class LHEWriter;
   friend class DelphesTreeReader;
-  friend class DelfesTreeReader;
+  friend class DelphesMA5tuneTreeReader;
 
   // -------------------------------------------------------------
   //                        data members

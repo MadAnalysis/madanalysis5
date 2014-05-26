@@ -83,9 +83,9 @@ class CmdReset(CmdBase):
         cmd_define = CmdDefine(self.main)
 
         # Loading particles
-        input = ParticleReader(self.main.ma5dir,cmd_define,self.main.mode)
+        input = ParticleReader(self.main.archi_info.ma5dir,cmd_define,self.main.mode)
         input.Load()
-        input = MultiparticleReader(self.main.ma5dir,cmd_define,self.main.mode,self.main.forced)
+        input = MultiparticleReader(self.main.archi_info.ma5dir,cmd_define,self.main.mode,self.main.forced)
         input.Load()
         
 

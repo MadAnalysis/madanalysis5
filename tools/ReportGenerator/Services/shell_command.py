@@ -22,6 +22,7 @@
 ################################################################################
 
 
+# Standard modules
 import logging
 import shutil
 import os
@@ -119,7 +120,17 @@ class ShellCommand():
 
         # Splitting the lines
         msg = out.split('\n')
+
+        # Removing irrelevant component
+        msg2 = []
+        for item in msg:
+            if item=='':
+                continue
+            if len(msg2)!=0:
+                if msg2[-1]==item:
+                    continue
+            msg2.append(item)
             
         # Return results
-        return msg
+        return msg2
     

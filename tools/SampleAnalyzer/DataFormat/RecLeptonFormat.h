@@ -42,7 +42,7 @@ namespace MA5
 class LHCOReader;
 class ROOTReader;
 class DelphesTreeReader;
-class DelfesTreeReader;
+class DelphesMA5tuneTreeReader;
 
 class RecLeptonFormat : public RecParticleFormat
 {
@@ -50,7 +50,7 @@ class RecLeptonFormat : public RecParticleFormat
   friend class LHCOReader;
   friend class ROOTReader;
   friend class DelphesTreeReader;
-  friend class DelfesTreeReader;
+  friend class DelphesMA5tuneTreeReader;
 
   // -------------------------------------------------------------
   //                        data members

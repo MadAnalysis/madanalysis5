@@ -26,7 +26,7 @@
 #include <sstream>
 
 // SampleHeader headers
-#include "SampleAnalyzer/Interfaces/delfes/DelfesTreeReader.h"
+#include "SampleAnalyzer/Interfaces/delphesMA5tune/DelphesMA5tuneTreeReader.h"
 #include "SampleAnalyzer/Service/LogService.h"
 
 // ROOT headers
@@ -43,7 +43,7 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 // Initialize
 // -----------------------------------------------------------------------------
-bool DelfesTreeReader::Initialize()
+bool DelphesMA5tuneTreeReader::Initialize()
 {
   // Create object of class ExRootTreeReader
   treeReader_    = new ExRootTreeReader(tree_);
@@ -56,17 +56,17 @@ bool DelfesTreeReader::Initialize()
   {
     WARNING << "Jet collection branch is not found" << endmsg;
   }
-  branchElectron_  = treeReader_->UseBranch("DelfesElectron");
+  branchElectron_  = treeReader_->UseBranch("DelphesMA5tuneElectron");
   if (branchElectron_==0)
   {
     WARNING << "Electron collection branch is not found" << endmsg;
   }
-  branchPhoton_    = treeReader_->UseBranch("DelfesPhoton");
+  branchPhoton_    = treeReader_->UseBranch("DelphesMA5tunePhoton");
   if (branchPhoton_==0)
   {
     WARNING << "Photon collection branch is not found" << endmsg;
   }
-  branchMuon_      = treeReader_->UseBranch("DelfesMuon");
+  branchMuon_      = treeReader_->UseBranch("DelphesMA5tuneMuon");
   if (branchMuon_==0)
   {
     WARNING << "Muon collection branch is not found" << endmsg;
@@ -86,7 +86,7 @@ bool DelfesTreeReader::Initialize()
   {
     WARNING << "GenParticle branch is not found" << endmsg;
   }
-  branchTrack_ = treeReader_->UseBranch("DelfesTrack");
+  branchTrack_ = treeReader_->UseBranch("DelphesMA5tuneTrack");
   if (branchTrack_==0)
   {
     WARNING << "Track branch is not found" << endmsg;
@@ -99,11 +99,11 @@ bool DelfesTreeReader::Initialize()
 // -----------------------------------------------------------------------------
 // ReadHeader
 // -----------------------------------------------------------------------------
-bool DelfesTreeReader::ReadHeader(SampleFormat& mySample)
+bool DelphesMA5tuneTreeReader::ReadHeader(SampleFormat& mySample)
 {
   mySample.InitializeRec();
-  mySample.SetSampleFormat(MA5FORMAT::DELFES);
-  mySample.SetSampleGenerator(MA5GEN::DELFES);
+  mySample.SetSampleFormat(MA5FORMAT::DELPHESMA5TUNE);
+  mySample.SetSampleGenerator(MA5GEN::DELPHESMA5TUNE);
   return true;
 }
 
@@ -111,7 +111,7 @@ bool DelfesTreeReader::ReadHeader(SampleFormat& mySample)
 // -----------------------------------------------------------------------------
 // ReadEvent
 // -----------------------------------------------------------------------------
-StatusCode::Type DelfesTreeReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySample)
+StatusCode::Type DelphesMA5tuneTreeReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySample)
 {
   // Initiliaze MC
   myEvent.InitializeRec();
@@ -138,7 +138,7 @@ StatusCode::Type DelfesTreeReader::ReadEvent(EventFormat& myEvent, SampleFormat&
 // -----------------------------------------------------------------------------
 // FinalizeEvent
 // -----------------------------------------------------------------------------
-bool DelfesTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
+bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 {
   // MHT & THT
   for (unsigned int i=0; i<myEvent.rec()->jets_.size();i++)
@@ -227,7 +227,7 @@ bool DelfesTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEven
 // -----------------------------------------------------------------------------
 // FillEventParticleLine
 // -----------------------------------------------------------------------------
-void DelfesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
+void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
 {
   // Fill electrons
   if (branchElectron_!=0)

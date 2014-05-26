@@ -27,8 +27,8 @@
 #ifdef DELPHES_USE
   #include "SampleAnalyzer/Interfaces/delphes/DetectorDelphes.h"
 #endif
-#ifdef DELFES_USE
-  #include "SampleAnalyzer/Interfaces/delfes/DetectorDelfes.h"
+#ifdef DELPHESMA5TUNE_USE
+  #include "SampleAnalyzer/Interfaces/delphesMA5tune/DetectorDelphesMA5tune.h"
 #endif
 
 using namespace MA5;
@@ -41,8 +41,8 @@ void DetectorManager::BuildTable()
   #ifdef DELPHES_USE
   Add("delphes",new DetectorDelphes());
   #endif
-  #ifdef DELFES_USE
-  Add("delfes",new DetectorDelfes());
+  #ifdef DELPHESMA5TUNE_USE
+  Add("delphesMA5tune",new DetectorDelphesMA5tune());
   #endif
 }
 

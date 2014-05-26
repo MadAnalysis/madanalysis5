@@ -98,7 +98,7 @@ class Interpreter(InterpreterBase):
         self.InitializeMultiparticle()
 
         # Importing history
-        self.history_file = os.path.normpath(self.main.ma5dir + '/.ma5history')
+        self.history_file = os.path.normpath(self.main.archi_info.ma5dir + '/.ma5history')
         try:
             readline.read_history_file(self.history_file)
         except:
@@ -315,11 +315,11 @@ class Interpreter(InterpreterBase):
         return self.cmd_select.complete(text,self.split_arg(tmp),begidx,endidx)
 
     def InitializeParticle(self):
-        input = ParticleReader(self.main.ma5dir,self.cmd_define,self.main.mode)
+        input = ParticleReader(self.main.archi_info.ma5dir,self.cmd_define,self.main.mode)
         input.Load()
 
     def InitializeMultiparticle(self):
-        input = MultiparticleReader(self.main.ma5dir,self.cmd_define,self.main.mode,self.main.forced)
+        input = MultiparticleReader(self.main.archi_info.ma5dir,self.cmd_define,self.main.mode,self.main.forced)
         input.Load()
 
     # PreLoop

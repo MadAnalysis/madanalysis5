@@ -45,9 +45,9 @@ class CmdSubmit(CmdBase):
         else:
             CmdBase.__init__(self,main,"resubmit")
         self.forbiddenpaths=[]
-        self.forbiddenpaths.append(os.path.normpath(self.main.ma5dir+'/lib'))
-        self.forbiddenpaths.append(os.path.normpath(self.main.ma5dir+'/bin'))
-        self.forbiddenpaths.append(os.path.normpath(self.main.ma5dir+'/madanalysis'))
+        self.forbiddenpaths.append(os.path.normpath(self.main.archi_info.ma5dir+'/lib'))
+        self.forbiddenpaths.append(os.path.normpath(self.main.archi_info.ma5dir+'/bin'))
+        self.forbiddenpaths.append(os.path.normpath(self.main.archi_info.ma5dir+'/madanalysis'))
 
     @staticmethod
     def chronometer_display(diff):
@@ -163,10 +163,10 @@ class CmdSubmit(CmdBase):
         # Cleaning the directories
         if not FolderWriter.RemoveDirectory(self.main.lastjob_name+'/HTML',False):
             return
-        if self.main.pdflatex:
+        if self.main.archi_info.has_pdflatex:
             if not FolderWriter.RemoveDirectory(self.main.lastjob_name+'/PDF',False):
                 return
-        if self.main.latex:
+        if self.main.archi_info.has_latex:
             if not FolderWriter.RemoveDirectory(self.main.lastjob_name+'/DVI',False):
                 return 
 
@@ -267,7 +267,7 @@ class CmdSubmit(CmdBase):
         logging.info("     -> To open this HTML report, please type 'open'.")
 
         # PDF report
-        if self.main.pdflatex:
+        if self.main.archi_info.has_pdflatex:
 
             # Getting output filename for PDF report
             logging.info("   Generating the PDF report ...")
@@ -291,7 +291,7 @@ class CmdSubmit(CmdBase):
             logging.warning("pdflatex not installed -> no PDF report.")
 
         # DVI/PDF report
-        if self.main.latex:
+        if self.main.archi_info.has_latex:
 
             # Getting output filename for DVI report
             logging.info("   Generating the DVI report ...")
@@ -301,7 +301,7 @@ class CmdSubmit(CmdBase):
             dvipath = os.path.normpath(dvipath)
 
             # Warning message for DVI -> PDF
-            if not self.main.dvipdf:
+            if not self.main.archi_info.has_dvipdf:
                logging.warning("dvipdf not installed -> the DVI report will not be converted to a PDF file.")
 
             # Generating the DVI report
@@ -309,7 +309,7 @@ class CmdSubmit(CmdBase):
             layout.CompileReport(ReportFormatType.LATEX,dvipath)
 
             # Displaying message for opening DVI
-            if self.main.dvipdf:
+            if self.main.archi_info.has_dvipdf:
                 pdfpath = os.path.expanduser(args[0]+'/DVI')
                 if self.main.currentdir in pdfpath:
                     pdfpath = pdfpath[len(self.main.currentdir):]
@@ -337,9 +337,9 @@ class CmdSubmit(CmdBase):
         else:
             if self.main.fastsim.package=="delphes":
                 cardname = self.main.fastsim.delphes.card
-            elif self.main.fastsim.package=="delfes":
-                cardname = self.main.fastsim.delfes.card
-            os.system(self.main.configLinux.editor+" "+dirname+"/Input/"+cardname)
+            elif self.main.fastsim.package=="delphesMA5tune":
+                cardname = self.main.fastsim.delphesMA5tune.card
+            os.system(self.main.session_info.editor+" "+dirname+"/Input/"+cardname)
 
 
     def submit(self,dirname,history):
@@ -402,7 +402,7 @@ class CmdSubmit(CmdBase):
                 return False
 
         #edit the delphes cards
-        if self.main.fastsim.package in ["delphes","delfes"]:
+        if self.main.fastsim.package in ["delphes","delphesMA5tune"]:
             self.editDelphesCard(dirname)
 
         if self.resubmit:

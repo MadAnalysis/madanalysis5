@@ -25,8 +25,8 @@
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.IOinterface.folder_writer    import FolderWriter
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
-from madanalysis.core.string_tools            import StringTools
-from madanalysis.IOinterface.shell_command    import ShellCommand
+from string_tools                             import StringTools
+from shell_command                            import ShellCommand
 import logging
 import shutil
 import os
@@ -36,17 +36,11 @@ class JobWriter():
 
     def __init__(self,main,jobdir,resubmit=False):
         self.main       = main
-        self.ma5dir     = self.main.ma5dir
         self.path       = jobdir
         self.resubmit   = resubmit
-        self.libZIP     = self.main.libZIP
-        self.libDelphes = self.main.libDelphes
-        self.libDelfes  = self.main.libDelfes
         self.output     = self.main.output
-        self.libFastjet = self.main.libFastJet
         self.fastsim    = self.main.fastsim
         self.merging    = self.main.merging
-        self.fortran    = self.main.fortran
         self.shower     = self.main.shower
         self.shwrmode   = ''
 
@@ -164,16 +158,16 @@ class JobWriter():
 
         if self.main.fastsim.package=="delphes":
             cardname = self.main.fastsim.delphes.card
-        elif self.main.fastsim.package=="delfes":
-            cardname = self.main.fastsim.delfes.card
+        elif self.main.fastsim.package=="delphesMA5tune":
+            cardname = self.main.fastsim.delphesMA5tune.card
 
-        if self.main.fastsim.package=="delfes":
-            cfg=self.main.fastsim.delfes
+        if self.main.fastsim.package=="delphesMA5tune":
+            cfg=self.main.fastsim.delphesMA5tune
         else:
             cfg=self.main.fastsim.delphes
 
         try:
-            input = open(self.ma5dir+"/tools/SampleAnalyzer/Detector/"+cardname,'r')
+            input = open(self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Detector/"+cardname,'r')
         except:
             pass
 
@@ -214,7 +208,7 @@ class JobWriter():
         try:
             shutil.copyfile\
                       (\
-                      self.ma5dir+"/tools/SampleAnalyzer/newAnalyzer.py",\
+                      self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/newAnalyzer.py",\
                       self.path+"/Build/SampleAnalyzer/newAnalyzer.py"\
                       )
         except:
@@ -226,7 +220,7 @@ class JobWriter():
             logging.error('Impossible to make executable the file "newAnalyzer"')
             return False
 
-        if self.main.fastsim.package in ["delphes","delfes"]:
+        if self.main.fastsim.package in ["delphes","delphesMA5tune"]:
             self.CreateDelphesCard()
 
         return True
@@ -310,11 +304,11 @@ class JobWriter():
             file.write('  if (cluster1==0) return 1;\n\n')
             
         # + Case Delphes
-        if self.main.fastsim.package in ["delphes","delfes"]:
+        if self.main.fastsim.package in ["delphes","delphesMA5tune"]:
             file.write('  //Getting pointer to fast-simulation package\n')
             file.write('  std::map<std::string, std::string> parametersD1;\n')
-            if self.fastsim.package=="delfes":
-                cfg=self.main.fastsim.delfes
+            if self.fastsim.package=="delphesMA5tune":
+                cfg=self.main.fastsim.delphesMA5tune
             else:
                 cfg=self.main.fastsim.delphes
             parameters = self.main.fastsim.SampleAnalyzerConfigString()
@@ -325,13 +319,13 @@ class JobWriter():
 
             if self.main.fastsim.package=="delphes":
                 cardname = self.main.fastsim.delphes.card
-            elif self.main.fastsim.package=="delfes":
-                cardname = self.main.fastsim.delfes.card
+            elif self.main.fastsim.package=="delphesMA5tune":
+                cardname = self.main.fastsim.delphesMA5tune.card
 
             if self.main.fastsim.package=="delphes":
                 file.write('      manager.InitializeDetector("delphes","../../Input/'+cardname+'",parametersD1);\n')
             else:
-                file.write('      manager.InitializeDetector("delfes","../../Input/'+cardname+'",parametersD1);\n')
+                file.write('      manager.InitializeDetector("delphesMA5tune","../../Input/'+cardname+'",parametersD1);\n')
 
             file.write('  if (fastsim1==0) return 1;\n\n')
 
@@ -374,7 +368,7 @@ class JobWriter():
             file.write('      cluster1->Execute(mySample,myEvent);\n')
         elif self.main.fastsim.package=="delphes":
             file.write('      fastsim1->Execute(mySample,myEvent);\n')
-        elif self.main.fastsim.package=="delfes":
+        elif self.main.fastsim.package=="delphesMA5tune":
             file.write('      fastsim1->Execute(mySample,myEvent);\n')
         file.write('      analyzer1->Execute(mySample,myEvent);\n')
         if self.output!="":
@@ -443,11 +437,11 @@ class JobWriter():
             self.fortran = True
             try:
                 os.mkdir(self.path+'/Build/Showering')
-                shutil.copy(self.ma5dir+'/../madfks_hwdriver.f',\
+                shutil.copy(self.main.archi_info.ma5dir+'/../madfks_hwdriver.f',\
                     self.path+'/Build/Showering/shower.f')
-                shutil.copy(self.ma5dir+'/../shower_card.dat', \
+                shutil.copy(self.main.archi_info.ma5dir+'/../shower_card.dat', \
                     self.path+'/Build/shower_card.dat')
-                shutil.copy(self.ma5dir+'/../MCATNLO_HERWIG6_input', \
+                shutil.copy(self.main.archi_info.ma5dir+'/../MCATNLO_HERWIG6_input', \
                     self.path+'/Build/MCATNLO_HERWIG6_input')
                 logging.warning('THE SHOWER CARD THING MUST BE IMPROVED')
                 logging.warning('THE INPUT CARD THING MUST BE IMPROVED')
@@ -478,16 +472,16 @@ class JobWriter():
 
         # Options for compilation
         file.write('# Options for compilation\n')
-        if self.libFastjet:
+        if self.main.archi_info.has_fastjet:
             file.write('CXXFASTJET = $(shell fastjet-config --cxxflags --plugins)\n')
         file.write('CXXFLAGS = -Wall -O3 -fPIC -I./ -I./../ -I' + '$(MA5_BASE)/tools/')
-        if self.libZIP:
+        if self.main.archi_info.has_zlib:
             file.write(' -DZIP_USE')
-        if self.libDelphes:
+        if self.main.archi_info.has_delphes:
             file.write(' -DROOT_USE -DDELPHES_USE')
-        if self.libDelfes:
-            file.write(' -DROOT_USE -DDELFES_USE')
-        if self.libFastjet:
+        if self.main.archi_info.has_delphesMA5tune:
+            file.write(' -DROOT_USE -DDELPHESMA5TUNE_USE')
+        if self.main.archi_info.has_fastjet:
             file.write(' -DFASTJET_USE')
             file.write(' $(CXXFASTJET)')
         file.write('\n')
@@ -521,7 +515,7 @@ class JobWriter():
         # Linking
         file.write('# Link target\n')
         file.write('link: $(OBJS)\n')
-        if self.main.isMAC:
+        if self.main.archi_info.isMac:
             file.write('\t$(CXX) -shared -flat_namespace -dynamiclib -undefined suppress -o ../../Build/Lib/lib$(PROGRAM).so $(OBJS)\n')
         else:
             file.write('\t$(CXX) -shared -o ../../Build/Lib/lib$(PROGRAM).so $(OBJS)\n')
@@ -597,14 +591,14 @@ class JobWriter():
         # Options for compilation : CXXFLAGS
         file.write('# Options for compilation\n')
         options = []
-        options.extend(['-Wall','-O3','-I./','-I./SampleAnalyzer/','-I$(MA5_BASE)/tools/','-I'+self.main.configLinux.root_inc_path])
-        if self.libZIP:
+        options.extend(['-Wall','-O3','-I./','-I./SampleAnalyzer/','-I$(MA5_BASE)/tools/','-I'+self.main.archi_info.root_inc_path])
+        if self.main.archi_info.has_zlib:
             options.extend(['-DZIP_USE'])
-        if self.libDelphes:
+        if self.main.archi_info.has_delphes:
             options.extend(['-DROOT_USE','-DDELPHES_USE'])
-        if self.libDelfes:
-            options.extend(['-DROOT_USE','-DDELFES_USE'])
-        if self.libFastjet:
+        if self.main.archi_info.has_delphesMA5tune:
+            options.extend(['-DROOT_USE','-DDELPHESMA5TUNE_USE'])
+        if self.main.archi_info.has_fastjet:
             options.extend(['-DROOT_USE','-DFASTJET_USE'])#,'$(shell fastjet-config --cxxflags --plugins)'])
         file.write('CXXFLAGS = '+' '.join(options))
         file.write('\n')
@@ -615,26 +609,26 @@ class JobWriter():
         # - SampleAnalyzer
         libs=[]
         libs.extend(['-L$(MA5_BASE)/tools/SampleAnalyzer/Lib/','-lSampleAnalyzer'])
-        if self.libFastjet:
+        if self.main.archi_info.has_fastjet:
             libs.extend(['-lfastjet_for_ma5'])
-        if self.libZIP:
-            libs.extend(['-L'+self.main.configLinux.zlib_lib_path,'-lz','-lzlib_for_ma5'])
-        if self.libDelphes:
-            libs.extend(['-L'+self.main.configLinux.delphes_lib_paths[0],'-lDelphes','-ldelphes_for_ma5'])
-        if self.libDelfes:
-            libs.extend(['-L'+self.main.configLinux.delfes_lib_paths[0],'-lDelphes','-ldelfes_for_ma5'])
-        if self.fortran:
+        if self.main.archi_info.has_zlib:
+            libs.extend(['-L'+self.main.archi_info.zlib_lib_path,'-lz','-lzlib_for_ma5'])
+        if self.main.archi_info.has_delphes:
+            libs.extend(['-L'+self.main.archi_info.delphes_lib_paths[0],'-lDelphes','-ldelphes_for_ma5'])
+        if self.main.archi_info.has_delphesMA5tune:
+            libs.extend(['-L'+self.main.archi_info.delphesMA5tune_lib_paths[0],'-lDelphesMA5tune','-ldelphesMA5tune_for_ma5'])
+        if self.main.archi_info.has_fortran:
             libs.extend(['-lgfortran'])
 
         # - Root
-        libs.extend(['-L'+self.main.configLinux.root_lib_path, \
+        libs.extend(['-L'+self.main.archi_info.root_lib_path, \
                      '-lRIO','-lHist','-lGpad','-lGraf','-lGraf3d','-lTree', \
                      '-lRint','-lPostscript','-lMatrix','-lPhysics', \
                      '-lMathCore','-lEG', '-lNet','-lThread', \
                      '-lCore','-lCint','-pthread','-lm','-ldl','-rdynamic'])
 
         # Fatjet
-        if self.libFastjet:
+        if self.main.archi_info.has_fastjet:
             libs.extend(['$(shell fastjet-config --libs --plugins --rpath=no)'])
 
         #everything together
@@ -659,13 +653,13 @@ class JobWriter():
         file.write('# Requirements to check before building\n')
         libs=[]
         libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libSampleAnalyzer.so')
-        if self.libZIP:
+        if self.main.archi_info.has_zlib:
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libzlib_for_ma5.so')
-        if self.libDelphes:
+        if self.main.archi_info.has_delphes:
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so')
-        if self.libDelfes:
-            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libdelfes_for_ma5.so')
-        if self.libFastjet:
+        if self.main.archi_info.has_delphesMA5tune:
+            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libdelphesMA5tune_for_ma5.so')
+        if self.main.archi_info.has_fastjet:
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so')
         for ind in range(0,len(libs)):
             file.write('REQUIRED'+str(ind+1)+' = '+libs[ind]+'\n')
@@ -785,9 +779,9 @@ class JobWriter():
         # Closing the file
         file.close()
 
-        if not JobWriter.WriteSetupFile(True,self.path+'/Build/',self.ma5dir,True,self.main.configLinux,self.main.isMAC):
+        if not JobWriter.WriteSetupFile(True,self.path+'/Build/',True,self.main.archi_info):
             return False
-        if not JobWriter.WriteSetupFile(False,self.path+'/Build/',self.ma5dir,True,self.main.configLinux,self.main.isMAC):
+        if not JobWriter.WriteSetupFile(False,self.path+'/Build/',True,self.main.archi_info):
             return False
         
         return True
@@ -823,7 +817,7 @@ class JobWriter():
 
         
     @staticmethod
-    def WriteSetupFile(bash,path,ma5dir,MA5BASE,configLinux,isMAC):
+    def WriteSetupFile(bash,path,MA5BASE,archi_info):
 
         # Variable to check at the end
         toCheck=[]
@@ -873,45 +867,45 @@ class JobWriter():
         if MA5BASE:
             file.write('# Configuring MA5 environment variable\n')
             if bash:
-                file.write('export MA5_BASE=' + JobWriter.CleanPath(ma5dir)+'\n')
+                file.write('export MA5_BASE=' + JobWriter.CleanPath(archi_info.ma5dir)+'\n')
             else:
-                file.write('setenv MA5_BASE ' + JobWriter.CleanPath(ma5dir)+'\n')
+                file.write('setenv MA5_BASE ' + JobWriter.CleanPath(archi_info.ma5dir)+'\n')
             toCheck.append('MA5_BASE')
             file.write('\n')
 
         # Configuring PATH environment variable
-        if len(configLinux.toPATH)!=0:
+        if len(archi_info.toPATH)!=0:
             file.write('# Configuring PATH environment variable\n')
             if bash:
                 file.write('if [ $PATH ]; then\n')
-                file.write('export PATH=$PATH:' + JobWriter.CleanPath(':'.join(configLinux.toPATH))+'\n')
+                file.write('export PATH=$PATH:' + JobWriter.CleanPath(':'.join(archi_info.toPATH))+'\n')
                 file.write('else\n')
-                file.write('export PATH=' + JobWriter.CleanPath(':'.join(configLinux.toPATH))+'\n')
+                file.write('export PATH=' + JobWriter.CleanPath(':'.join(archi_info.toPATH))+'\n')
                 file.write('fi\n')
             else:
                 file.write('if ( $?PATH ) then\n')
-                file.write('setenv PATH "$PATH":' + JobWriter.CleanPath(':'.join(configLinux.toPATH))+'\n')
+                file.write('setenv PATH "$PATH":' + JobWriter.CleanPath(':'.join(archi_info.toPATH))+'\n')
                 file.write('else\n')
-                file.write('setenv PATH ' + JobWriter.CleanPath(':'.join(configLinux.toPATH))+'\n')
+                file.write('setenv PATH ' + JobWriter.CleanPath(':'.join(archi_info.toPATH))+'\n')
                 file.write('endif\n')
             toCheck.append('PATH')
             file.write('\n')
 
-        if len(configLinux.toLDPATH)!=0:
+        if len(archi_info.toLDPATH)!=0:
             
             # Configuring LD_LIBRARY_PATH environment variable
             file.write('# Configuring LD_LIBRARY_PATH environment variable\n')
             if bash:
                 file.write('if [ $LD_LIBRARY_PATH ]; then\n')
-                file.write('export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                file.write('export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+'\n')
                 file.write('else\n')
-                file.write('export LD_LIBRARY_PATH=' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                file.write('export LD_LIBRARY_PATH=' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+'\n')
                 file.write('fi\n')
             else:
                 file.write('if ( $?LD_LIBRARY_PATH ) then\n')
-                file.write('setenv LD_LIBRARY_PATH "$LD_LIBRARY_PATH":' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                file.write('setenv LD_LIBRARY_PATH "$LD_LIBRARY_PATH":' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+'\n')
                 file.write('else\n')
-                file.write('setenv LD_LIBRARY_PATH ' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                file.write('setenv LD_LIBRARY_PATH ' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+'\n')
                 file.write('endif\n')
             toCheck.append('LD_LIBRARY_PATH')
             file.write('\n')
@@ -925,19 +919,19 @@ class JobWriter():
             #file.write('\n')
 
             # Configuring DYLD_LIBRARY_PATH environment variable
-            if isMAC:
+            if archi_info.isMac:
                 file.write('# Configuring DYLD_LIBRARY_PATH environment variable\n')
                 if bash:
                     file.write('if [ $DYLD_LIBRARY_PATH ]; then\n')
-                    file.write('export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                    file.write('export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+'\n')
                     file.write('else\n')
-                    file.write('export DYLD_LIBRARY_PATH=' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                    file.write('export DYLD_LIBRARY_PATH=' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+'\n')
                     file.write('fi\n')
                 else:
                     file.write('if ( $?DYLD_LIBRARY_PATH ) then\n')
-                    file.write('setenv DYLD_LIBRARY_PATH "$DYLD_LIBRARY_PATH":' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                    file.write('setenv DYLD_LIBRARY_PATH "$DYLD_LIBRARY_PATH":' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+'\n')
                     file.write('else\n')
-                    file.write('setenv DYLD_LIBRARY_PATH ' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                    file.write('setenv DYLD_LIBRARY_PATH ' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+'\n')
                     file.write('endif\n')
                 toCheck.append('DYLD_LIBRARY_PATH')
                 file.write('\n')

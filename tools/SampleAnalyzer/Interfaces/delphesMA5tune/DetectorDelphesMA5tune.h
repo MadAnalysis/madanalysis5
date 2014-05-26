@@ -22,8 +22,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef DETECTOR_DELFES_H
-#define DETECTOR_DELFES_H
+#ifndef DETECTOR_DELPHESMA5TUNE_H
+#define DETECTOR_DELPHESMA5TUNE_H
 
 
 //SampleAnalyser headers
@@ -46,7 +46,7 @@ class TObjArray;
 namespace MA5
 {
 
-class DetectorDelfes: public DetectorBase
+class DetectorDelphesMA5tune: public DetectorBase
 {
 
 //---------------------------------------------------------------------------------
@@ -79,11 +79,11 @@ class DetectorDelfes: public DetectorBase
   public :
 
     /// Constructor without argument
-    DetectorDelfes() 
+    DetectorDelphesMA5tune() 
     { output_=false; }
 
     /// Destructor
-    virtual ~DetectorDelfes()
+    virtual ~DetectorDelphesMA5tune()
     {}
 
     /// Initialization

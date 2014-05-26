@@ -51,7 +51,7 @@ class TauTagger;
 class bTagger;
 class JetClusteringFastJet;
 class DelphesTreeReader;
-class DelfesTreeReader;
+class DelphesMA5tuneTreeReader;
 
 class RecEventFormat
 {
@@ -62,7 +62,7 @@ class RecEventFormat
   friend class bTagger;
   friend class JetClusteringFastJet;
   friend class DelphesTreeReader;
-  friend class DelfesTreeReader;
+  friend class DelphesMA5tuneTreeReader;
 
   // -------------------------------------------------------------
   //                        data members

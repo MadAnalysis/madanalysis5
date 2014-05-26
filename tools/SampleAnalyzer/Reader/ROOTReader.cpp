@@ -29,7 +29,7 @@
 #include "SampleAnalyzer/Reader/ROOTReader.h"
 #include "SampleAnalyzer/Service/LogService.h"
 #include "SampleAnalyzer/Interfaces/delphes/DelphesTreeReader.h"
-#include "SampleAnalyzer/Interfaces/delfes/DelfesTreeReader.h"
+#include "SampleAnalyzer/Interfaces/delphesMA5tune/DelphesMA5tuneTreeReader.h"
 
 // ROOT headers
 #include <TROOT.h>
@@ -101,12 +101,12 @@ bool ROOTReader::SelectTreeReader()
   }
 #endif
 
-  // Second case: Delfes
-#ifdef DELFES_USE
-  mytree = dynamic_cast<TTree*>(source_->Get("Delfes"));
+  // Second case: DelphesMA5tune
+#ifdef DELPHESMA5TUNE_USE
+  mytree = dynamic_cast<TTree*>(source_->Get("DelphesMA5tune"));
   if (mytree!=0)
   {
-      treeReader_ = new DelfesTreeReader(source_, mytree);
+      treeReader_ = new DelphesMA5tuneTreeReader(source_, mytree);
       treeReader_->Initialize();
       return true;
   }

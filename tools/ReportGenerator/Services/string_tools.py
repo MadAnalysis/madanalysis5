@@ -22,6 +22,7 @@
 ################################################################################
 
 
+# Standard modules
 import logging
 import os
 import sys
@@ -63,4 +64,41 @@ class StringTools():
                 return StringTools.Fill(' ',space1) +\
                        pattern +\
                        StringTools.Fill(' ',space2)
+
             
+        @staticmethod
+        def Left(pattern,width):
+
+            # Check width
+            if width<=0:
+                return ''
+
+            # Size difference between pattern and line
+            space = width - len(pattern)
+
+            # Trivial case
+            if space<=0:
+                return pattern
+
+            # Normal case
+            else:
+                return pattern+StringTools.Fill(' ',space)
+
+
+        @staticmethod
+        def Right(pattern,width):
+
+            # Check width
+            if width<=0:
+                return ''
+
+            # Size difference between pattern and line
+            space = width - len(pattern)
+
+            # Trivial case
+            if space<=0:
+                return pattern
+
+            # Normal case
+            else:
+                return StringTools.Fill(' ',space)+pattern
