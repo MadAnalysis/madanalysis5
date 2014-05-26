@@ -508,9 +508,6 @@ class JobWriter():
         file.write('# Compile target\n')
         file.write('compile: $(OBJS)\n')
         file.write('\n')
-        file.write('# Object file target\n')
-        file.write('$(OBJS): $(HDRS)\n')
-        file.write('\n')
 
         # Linking
         file.write('# Link target\n')
