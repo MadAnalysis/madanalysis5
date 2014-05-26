@@ -55,7 +55,7 @@ module IsolationCalculation PhotonIsolationCalculation {
   set CandidateInputArray PhotonEfficiency/photons
   set IsolationInputArray EFlowMerger/eflow
 
-  set OutputArray DelfesPhotons
+  set OutputArray DelphesMA5tunePhotons
   set PTMin 0.5
 }
 
@@ -63,7 +63,7 @@ module IsolationCalculation ElectronIsolationCalculation {
   set CandidateInputArray ElectronEfficiency/electrons
   set IsolationInputArray TrackMerger/tracks 
 
-  set OutputArray DelfesElectrons
+  set OutputArray DelphesMA5tuneElectrons
   set PTMin 0.5
 }
 
@@ -71,14 +71,14 @@ module IsolationCalculation MuonIsolationCalculation {
   set CandidateInputArray MuonEfficiency/muons
   set IsolationInputArray TrackMerger/tracks 
 
-  set OutputArray DelfesMuons
+  set OutputArray DelphesMA5tuneMuons
   set PTMin 0.5
 }
 module IsolationCalculation TrackIsolationCalculation {
   set CandidateInputArray TrackMerger/tracks
   set IsolationInputArray TrackMerger/tracks
 
-  set OutputArray DelfesTracks
+  set OutputArray DelphesMA5tuneTracks
   set PTMin 0.5
 }
 #MA5 END
@@ -599,10 +599,10 @@ module TreeWriter TreeWriter {
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
 
-  add Branch ElectronIsolationCalculation/DelfesElectrons DelfesElectron Electron
-  add Branch MuonIsolationCalculation/DelfesMuons DelfesMuon Muon
-  add Branch PhotonIsolationCalculation/DelfesPhotons DelfesPhoton Photon
-  add Branch TrackIsolationCalculation/DelfesTracks DelfesTrack Track
+  add Branch ElectronIsolationCalculation/DelphesMA5tuneElectrons DelphesMA5tuneElectron Electron
+  add Branch MuonIsolationCalculation/DelphesMA5tuneMuons DelphesMA5tuneMuon Muon
+  add Branch PhotonIsolationCalculation/DelphesMA5tunePhotons DelphesMA5tunePhoton Photon
+  add Branch TrackIsolationCalculation/DelphesMA5tuneTracks DelphesMA5tuneTrack Track
 
 }
 
