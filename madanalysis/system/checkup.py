@@ -111,8 +111,11 @@ class CheckUp():
     def CheckSessionInfo(self):
 
         # Fill with user name
-        import getpass
-        self.session_info.username = getpass.getuser()
+        try:
+            import getpass
+            self.session_info.username = getpass.getuser()
+        except:
+            self.session_info.username = 'anonymous'
 
         # Display user info
         if self.debug:
