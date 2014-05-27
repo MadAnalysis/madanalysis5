@@ -619,11 +619,13 @@ class JobWriter():
             libs.extend(['-lgfortran'])
 
         # - Root
-        libs.extend(['-L'+self.main.archi_info.root_lib_path, \
-                     '-lRIO','-lHist','-lGpad','-lGraf','-lGraf3d','-lTree', \
-                     '-lRint','-lPostscript','-lMatrix','-lPhysics', \
-                     '-lMathCore','-lEG', '-lNet','-lThread', \
-                     '-lCore','-lCint','-pthread','-lm','-ldl','-rdynamic'])
+        libs.extend(['$(shell root-config --glibs)'])
+
+##        libs.extend(['-L'+self.main.archi_info.root_lib_path, \
+##                     '-lRIO','-lHist','-lGpad','-lGraf','-lGraf3d','-lTree', \
+##                     '-lRint','-lPostscript','-lMatrix','-lPhysics', \
+##                     '-lMathCore','-lEG', '-lNet','-lThread', \
+##                     '-lCore','-lCint','-pthread','-lm','-ldl','-rdynamic'])
 
         # Fatjet
         if self.main.archi_info.has_fastjet:

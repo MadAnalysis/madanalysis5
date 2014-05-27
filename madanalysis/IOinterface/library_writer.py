@@ -147,8 +147,9 @@ class LibraryWriter():
             libs.extend(['-L'+self.main.archi_info.delphesMA5tune_lib_paths[0],'-lDelphesMA5tune'])
 
         # - Root
-        libs.extend(['-L'+self.main.archi_info.root_lib_path, \
-                    '-lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic'])
+#        libs.extend(['-L'+self.main.archi_info.root_lib_path, \
+#                    '-lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic'])
+        libs.extend(['$(shell root-config --glibs)'])
 
         # fastjet
         if package=='fastjet':
@@ -699,8 +700,9 @@ class LibraryWriter():
             libs.extend(['-lgfortran'])
 
         # - Root
-        libs.extend(['-L'+self.main.archi_info.root_lib_path, \
-                    '-lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic'])
+        libs.extend(['$(shell root-config --glibs)'])
+#        libs.extend(['-L'+self.main.archi_info.root_lib_path, \
+#                    '-lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic'])
 
 # ERIC pour l'instant
 #        libs.extend(['-L'+self.main.archi_info.root_lib_path, \
