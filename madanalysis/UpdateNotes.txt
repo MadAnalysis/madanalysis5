@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+93            (2014/05/27) fuks:    mac compatiblity 
+
 78   1.1.11.7 (2014/05/22) fuks:    linking issues with the dynamic libraries 
 
 77   1.1.11.6 (2014/05/22) fuks:    Bug in the LHE reader (headers are optional) 

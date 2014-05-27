@@ -102,7 +102,7 @@ class ShellCommand():
 
         # theCommands
         if all:
-            theCommands = ['which',theCommand,'--all']
+            theCommands = ['which','-a',theCommand]
         else:
             theCommands = ['which',theCommand]
 
