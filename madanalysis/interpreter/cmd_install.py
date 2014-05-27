@@ -22,8 +22,9 @@
 ################################################################################
 
 
-from madanalysis.interpreter.cmd_base import CmdBase
+from madanalysis.interpreter.cmd_base          import CmdBase
 from madanalysis.IOinterface.delphes_migration import DelphesMigration
+from madanalysis.install.install_delphes       import InstallDelphes
 import logging
 import os
 import sys
@@ -86,6 +87,8 @@ class CmdInstall(CmdBase):
         elif args[0]=='zlib':
             return self.install_zlib()
         elif args[0]=='delphes':
+            installer=InstallManager(self.main)
+            #return installer.Execute('delphes') COMMENT FOR THE MOMENT
             return self.install_delphes()
         elif args[0]=='delphesMA5tune':
             return self.install_delphesMA5tune()
@@ -356,13 +359,6 @@ class CmdInstall(CmdBase):
             self.display_log('delphesMA5tune')
             return False
 
-        try:
-            os.system('mv '+self.main.archi_info.ma5dir+'/tools/delphesMA5tune/libDelphes.so '+\
-                      self.main.archi_info.ma5dir+'/tools/delphesMA5tune/libDelphesMA5tune.so')
-        except:
-            logging.error("impossible to create the library libDelphesMA5tune.so")
-            return False
-        
         if not os.path.isfile(self.main.archi_info.ma5dir+'/tools/delphesMA5tune/libDelphesMA5tune.so'):
             logging.error("library labeled 'libDelphesMA5tune.so' is missing.")
             self.display_log('delphesMA5tune')

@@ -177,7 +177,7 @@ class InstallBase():
         else:
             return True
 
-    def display_log(self,self.installdir):
+    def display_log(self,installdir):
         logging.error("More details can be found into the log files:")
         logging.error(" - "+installdir+"/url.log")
         logging.error(" - "+installdir+"/unpack.log")

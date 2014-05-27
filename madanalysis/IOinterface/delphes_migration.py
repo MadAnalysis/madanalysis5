@@ -42,9 +42,37 @@ class DelphesMigration():
         self.ApplyPatch()
 
     def ApplyPatch(self):
+        import os
         os.system('cp '+self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Detector/patch_delphesMA5tune.tgz '+\
                   self.main.archi_info.ma5dir+'/tools/delphesMA5tune/')
         os.system('cd '+ self.main.archi_info.ma5dir + '/tools/delphesMA5tune/; tar xzf patch_delphesMA5tune.tgz')
+        installdir = self.main.archi_info.ma5dir + '/tools/delphesMA5tune/'
+        filename_input  = installdir+'/doc/genMakefile.bak'
+        filename_output = installdir+'/doc/genMakefile.tcl'
+         
+        import os
+        try:
+           os.rename(filename_output,filename_input)
+        except:
+            logging.error('impossible to rename the file '+filename_output)
+            return False
+        
+        try:
+            input = open(filename_input)
+        except:
+            logging.error('impossible to open the file '+filename_input)
+            return False
+        try:
+            output = open(filename_output,'w')
+        except:
+            logging.error('impossible to open the file '+filename_output+'MA5')
+            return False
+        for line in input:
+            line=line.replace('libDelphes.','libDelphesMA5tune.')
+            output.write(line)
+        input.close()
+        output.close()
+        
 
 
     def ChangeTreeNames(self):

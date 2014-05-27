@@ -22,7 +22,7 @@
 ################################################################################
 
 
-from madanalysis.install.install_base.py import InstallBase
+from madanalysis.install.install_base import InstallBase
 import logging
 
 class InstallDelphes(InstallBase):
@@ -50,7 +50,7 @@ class InstallDelphes(InstallBase):
 
         # Unpacking
         logging.info("Unpacking the package ...")
-        ok, tmpdir = self.Unpack(tmpdir):
+        ok, tmpdir = self.Unpack(tmpdir)
         if not ok:
             return False
 

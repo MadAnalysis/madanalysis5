@@ -22,7 +22,6 @@
 ################################################################################
 
 
-from madanalysis.install.install_base.py import InstallBase
 import logging
 
 class InstallManager():
@@ -39,6 +38,7 @@ class InstallManager():
         elif package=='fastjet':
             installer=InstallFastjet(self.main)
         elif package=='delphes':
+            from madanalysis.install.install_delphes.py import InstallDelphes
             installer=InstallDelphes(self.main)
         elif package=='delphesma5tune':
             installer=InstallDelphesMA5tune(self.main)
