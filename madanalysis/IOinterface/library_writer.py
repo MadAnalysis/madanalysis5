@@ -703,7 +703,7 @@ class LibraryWriter():
             libs.extend(['$(shell fastjet-config --libs --plugins --rpath=no)'])
 
         # - Root
-        libs.extend(['$(shell root-config --glibs)'])
+        libs.extend(['$(shell root-config --libs)'])
 #        libs.extend(['-L'+self.main.archi_info.root_lib_path, \
 #                    '-lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic'])
 

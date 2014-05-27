@@ -624,7 +624,7 @@ class JobWriter():
 
 
         # - Root
-        libs.extend(['$(shell root-config --glibs)'])
+        libs.extend(['$(shell root-config --libs)'])
 
 ##        libs.extend(['-L'+self.main.archi_info.root_lib_path, \
 ##                     '-lRIO','-lHist','-lGpad','-lGraf','-lGraf3d','-lTree', \

@@ -264,12 +264,10 @@ class CheckUp():
             for path in self.archi_info.delphesMA5tune_lib_paths:
                 self.archi_info.toLDPATH.append(path)        
 
-        os.environ['PATH'] = os.environ['PATH'] + \
-                             ":" + ':'.join(self.archi_info.toPATH)
-        os.environ['LD_LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH'] + \
-                                        ":" + ':'.join(self.archi_info.toLDPATH)
+        os.environ['PATH'] = ':'.join(self.archi_info.toPATH) + ":" + os.environ['PATH'] 
+                              
+        os.environ['LD_LIBRARY_PATH'] = ':'.join(self.archi_info.toLDPATH) + ":" + os.environ['LD_LIBRARY_PATH'] 
         if self.archi_info.isMac:        
-            os.environ['DYLD_LIBRARY_PATH'] = os.environ['DYLD_LIBRARY_PATH'] + \
-                                        ":" + ':'.join(self.archi_info.toLDPATH)
+            os.environ['DYLD_LIBRARY_PATH'] = ':'.join(self.archi_info.toLDPATH) + ":" + os.environ['DYLD_LIBRARY_PATH'] 
 
         return True 
