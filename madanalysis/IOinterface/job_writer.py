@@ -895,13 +895,13 @@ class JobWriter():
             file.write('# Configuring LD_LIBRARY_PATH environment variable\n')
             if bash:
                 file.write('if [ $LD_LIBRARY_PATH ]; then\n')
-                file.write('export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+'\n')
+                file.write('export LD_LIBRARY_PATH=' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+':$LD_LIBRARY_PATH\n')
                 file.write('else\n')
                 file.write('export LD_LIBRARY_PATH=' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+'\n')
                 file.write('fi\n')
             else:
                 file.write('if ( $?LD_LIBRARY_PATH ) then\n')
-                file.write('setenv LD_LIBRARY_PATH "$LD_LIBRARY_PATH":' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+'\n')
+                file.write('setenv LD_LIBRARY_PATH ' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+':"$LD_LIBRARY_PATH"\n')
                 file.write('else\n')
                 file.write('setenv LD_LIBRARY_PATH ' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+'\n')
                 file.write('endif\n')
@@ -921,13 +921,13 @@ class JobWriter():
                 file.write('# Configuring DYLD_LIBRARY_PATH environment variable\n')
                 if bash:
                     file.write('if [ $DYLD_LIBRARY_PATH ]; then\n')
-                    file.write('export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+'\n')
+                    file.write('export DYLD_LIBRARY_PATH=' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+':$DYLD_LIBRARY_PATH\n')
                     file.write('else\n')
                     file.write('export DYLD_LIBRARY_PATH=' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+'\n')
                     file.write('fi\n')
                 else:
                     file.write('if ( $?DYLD_LIBRARY_PATH ) then\n')
-                    file.write('setenv DYLD_LIBRARY_PATH "$DYLD_LIBRARY_PATH":' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+'\n')
+                    file.write('setenv DYLD_LIBRARY_PATH ' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+':"$DYLD_LIBRARY_PATH"\n')
                     file.write('else\n')
                     file.write('setenv DYLD_LIBRARY_PATH ' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+'\n')
                     file.write('endif\n')

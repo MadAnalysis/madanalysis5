@@ -136,6 +136,28 @@ class LibraryWriter():
             file.write(' $(CXXFASTJET)')
         file.write('\n')
 
+        # Options for compilation : LIBFLAGS
+        # - SampleAnalyzer
+        libs=[]
+        if package=='zlib':
+            libs.extend(['-L'+self.main.archi_info.zlib_lib_path,'-lz'])
+        if package=='delphes':
+            libs.extend(['-L'+self.main.archi_info.delphes_lib_paths[0],'-lDelphes'])
+        if package=='delphesMA5tune':
+            libs.extend(['-L'+self.main.archi_info.delphesMA5tune_lib_paths[0],'-lDelphesMA5tune'])
+
+        # - Root
+        libs.extend(['-L'+self.main.archi_info.root_lib_path, \
+                    '-lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic'])
+
+        # fastjet
+        if package=='fastjet':
+            libs.extend(['$(shell fastjet-config --libs --plugins --rpath=no)'])
+
+        # -everything together
+        file.write('LIBFLAGS = '+' '.join(libs)+'\n')
+        file.write('\n')
+
         # Options for C++ compilation
         if self.main.archi_info.has_fortran:
             file.write('# Options for Fortran compilation\n')
@@ -232,15 +254,15 @@ class LibraryWriter():
         if self.main.archi_info.has_fortran:
             file.write('link: $(OBJS) $(FORTRAN_OBJS)\n')
             if self.main.archi_info.isMac:
-                file.write('\t$(CXX) -shared -flat_namespace -dynamiclib -undefined suppress -o ../Lib/lib$(PROGRAM).so $(OBJS) $(FORTRAN_OBJS)\n')
+                file.write('\t$(CXX) -shared -flat_namespace -dynamiclib -undefined suppress -o ../Lib/lib$(PROGRAM).so $(OBJS) $(FORTRAN_OBJS) $(LIBFLAGS)\n')
             else:
-                file.write('\t$(CXX) -shared -o ../Lib/lib$(PROGRAM).so $(OBJS) $(FORTRAN_OBJS)\n')
+                file.write('\t$(CXX) -shared -o ../Lib/lib$(PROGRAM).so $(OBJS) $(FORTRAN_OBJS) $(LIBFLAGS)\n')
         else:
             file.write('link: $(OBJS)\n')
             if self.main.archi_info.isMac:
-                file.write('\t$(CXX) -shared -flat_namespace -dynamiclib -undefined suppress -o ../Lib/lib$(PROGRAM).so $(OBJS)\n')
+                file.write('\t$(CXX) -shared -flat_namespace -dynamiclib -undefined suppress -o ../Lib/lib$(PROGRAM).so $(OBJS) $(LIBFLAGS)\n')
             else:
-                file.write('\t$(CXX) -shared -o ../Lib/lib$(PROGRAM).so $(OBJS)\n')
+                file.write('\t$(CXX) -shared -o ../Lib/lib$(PROGRAM).so $(OBJS) $(LIBFLAGS)\n')
         file.write('\n')
 
         # Phony target

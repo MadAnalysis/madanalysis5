@@ -83,7 +83,7 @@ def DecodeArguments():
         elif o in ["-b","--build"]:
             mode.build = True
         elif o in ["-h","--help"]:
-            usage()
+            Usage()
             sys.exit()
 
     # Checking consistency between arguments
@@ -248,7 +248,8 @@ def Usage():
     logging.info(" -f or --forced      : do not ask for confirmation when MA5 removes a directory or overwrites an object") 
     logging.info(" -s or --script      : quit automatically MA5 when the script is loaded")
     logging.info(" -m or --mg5         : run MadAnalysis with options related to MadGraph")
-    logging.info(" -h or --help        : dump this help\n")
+    logging.info(" -h or --help        : dump this help")
+    logging.info(" -d or --debug       : debug mode\n")
     logging.info("[scripts]")
     logging.info("This optional argument is a list of filenames containing a "+\
                  "set of MadAnalysis 5 commands. The file name are handled as "+\
