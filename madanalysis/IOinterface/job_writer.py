@@ -618,6 +618,11 @@ class JobWriter():
         if self.main.archi_info.has_fortran:
             libs.extend(['-lgfortran'])
 
+        # Fatjet
+        if self.main.archi_info.has_fastjet:
+            libs.extend(['$(shell fastjet-config --libs --plugins --rpath=no)'])
+
+
         # - Root
         libs.extend(['$(shell root-config --glibs)'])
 
@@ -626,10 +631,6 @@ class JobWriter():
 ##                     '-lRint','-lPostscript','-lMatrix','-lPhysics', \
 ##                     '-lMathCore','-lEG', '-lNet','-lThread', \
 ##                     '-lCore','-lCint','-pthread','-lm','-ldl','-rdynamic'])
-
-        # Fatjet
-        if self.main.archi_info.has_fastjet:
-            libs.extend(['$(shell fastjet-config --libs --plugins --rpath=no)'])
 
         #everything together
         file.write('LIBFLAGS = '+' '.join(libs)+'\n')

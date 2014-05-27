@@ -145,15 +145,15 @@ class LibraryWriter():
             libs.extend(['-L'+self.main.archi_info.delphes_lib_paths[0],'-lDelphes'])
         if package=='delphesMA5tune':
             libs.extend(['-L'+self.main.archi_info.delphesMA5tune_lib_paths[0],'-lDelphesMA5tune'])
+        # fastjet
+        if package=='fastjet':
+            libs.extend(['$(shell fastjet-config --libs --plugins --rpath=no)'])
 
         # - Root
 #        libs.extend(['-L'+self.main.archi_info.root_lib_path, \
 #                    '-lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic'])
-        libs.extend(['$(shell root-config --glibs)'])
+        libs.extend(['$(shell root-config --libs)'])
 
-        # fastjet
-        if package=='fastjet':
-            libs.extend(['$(shell fastjet-config --libs --plugins --rpath=no)'])
 
         # -everything together
         file.write('LIBFLAGS = '+' '.join(libs)+'\n')
@@ -698,6 +698,9 @@ class LibraryWriter():
             libs.extend(['-L'+self.main.archi_info.delphesMA5tune_lib_paths[0],'-lDelphesMA5tune','-ldelphesMA5tune_for_ma5'])
         if self.main.archi_info.has_fortran:
             libs.extend(['-lgfortran'])
+        # fastjet
+        if self.main.archi_info.has_fastjet:
+            libs.extend(['$(shell fastjet-config --libs --plugins --rpath=no)'])
 
         # - Root
         libs.extend(['$(shell root-config --glibs)'])
@@ -711,9 +714,6 @@ class LibraryWriter():
 #                     '-lMathCore','-lEG', '-lNet','-lThread', \
 #                     '-lCore','-lCint','-pthread','-lm','-ldl','-rdynamic'])
 
-        # fastjet
-        if self.main.archi_info.has_fastjet:
-            libs.extend(['$(shell fastjet-config --libs --plugins --rpath=no)'])
 
         # -everything together
         file.write('LIBFLAGS = '+' '.join(libs)+'\n')
