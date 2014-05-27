@@ -38,7 +38,7 @@ class InstallManager():
         elif package=='fastjet':
             installer=InstallFastjet(self.main)
         elif package=='delphes':
-            from madanalysis.install.install_delphes.py import InstallDelphes
+            from madanalysis.install.install_delphes import InstallDelphes
             installer=InstallDelphes(self.main)
         elif package=='delphesma5tune':
             installer=InstallDelphesMA5tune(self.main)
@@ -60,7 +60,7 @@ class InstallManager():
         installdir=''
         if 'CreatePackageFolder' in methods:
             logging.info("Creating a devoted folder ...")
-            ok, installdir = installer.CreatePackageFolder():
+            ok, installdir = installer.CreatePackageFolder()
             if not ok:
                 return False
             logging.debug('install folder: '+installdir)
@@ -91,7 +91,7 @@ class InstallManager():
         # /tmp/econte/ -> /tmp/econte/fastjet3.4/
         if 'Unpack' in methods:
             logging.info("Unpacking the package ...")
-            ok, workdir = installer.Unpack(workdir):
+            ok, workdir = installer.Unpack(workdir)
             if not ok:
                 return False
 

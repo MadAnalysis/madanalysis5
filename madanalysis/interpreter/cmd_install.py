@@ -24,7 +24,7 @@
 
 from madanalysis.interpreter.cmd_base          import CmdBase
 from madanalysis.IOinterface.delphes_migration import DelphesMigration
-from madanalysis.install.install_delphes       import InstallDelphes
+from madanalysis.install.install_manager       import InstallManager
 import logging
 import os
 import sys
