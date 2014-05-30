@@ -35,6 +35,11 @@ bool JetClusterer::Initialize(const std::map<std::string,std::string>& options)
   // algo defined ?
   if (algo_==0) return false;
 
+  // configure tagger
+  myBtagger_   = new bTagger();
+  myCtagger_   = new cTagger();
+  myTautagger_ = new TauTagger();
+
   // Loop over options
   for (std::map<std::string,std::string>::const_iterator
        it=options.begin();it!=options.end();it++)
@@ -92,10 +97,6 @@ bool JetClusterer::Initialize(const std::map<std::string,std::string>& options)
   // configure algo
   algo_->Initialize();
 
-  // configure tagger
-  myBtagger_   = new bTagger();
-  myCtagger_   = new cTagger();
-  myTautagger_ = new TauTagger();
 
   return true;
 }
@@ -110,4 +111,13 @@ void JetClusterer::Finalize()
   if (myBtagger_!=0)   delete myBtagger_;
   if (myCtagger_!=0)   delete myCtagger_;
   if (myTautagger_!=0) delete myTautagger_;
+}
+
+
+// -----------------------------------------------------------------------------
+// Execute
+// -----------------------------------------------------------------------------
+bool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
+{
+  std::cout << "muf" << std::endl;
 }

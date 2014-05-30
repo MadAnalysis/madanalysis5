@@ -309,7 +309,7 @@ class JobWriter():
             for k,v in sorted(parameters.iteritems(),\
                               key=lambda (k,v): (k,v)):
                 file.write('  parametersC1["'+k+'"]="'+v+'";\n')
-            file.write('  JetClustererBase* cluster1 = \n')
+            file.write('  JetClusterer* cluster1 = \n')
             file.write('      manager.InitializeJetClusterer("'+self.main.fastsim.clustering.algorithm+'",parametersC1);\n')
             file.write('  if (cluster1==0) return 1;\n\n')
             
