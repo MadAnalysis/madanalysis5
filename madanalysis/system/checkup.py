@@ -247,27 +247,59 @@ class CheckUp():
 
     def SetFolder(self):
         # Set PATH variable
-        self.archi_info.toPATH=[]
-        self.archi_info.toLDPATH=[]
-        self.archi_info.toLDPATH.append(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/')
-        self.archi_info.toLDPATH.append(self.archi_info.root_lib_path)
-        if self.archi_info.has_fastjet:
-            self.archi_info.toPATH.append(self.archi_info.fastjet_bin_path)
-            for path in self.archi_info.fastjet_lib_paths:
-                self.archi_info.toLDPATH.append(path)
-        if self.archi_info.has_zlib:
-            self.archi_info.toLDPATH.append(self.archi_info.zlib_lib_path)        
-        if self.archi_info.has_delphes:
-            for path in self.archi_info.delphes_lib_paths:
-                self.archi_info.toLDPATH.append(path)        
-        if self.archi_info.has_delphesMA5tune:
-            for path in self.archi_info.delphesMA5tune_lib_paths:
-                self.archi_info.toLDPATH.append(path)        
+        self.archi_info.toPATH1=[]
+        self.archi_info.toPATH2=[]
+        self.archi_info.toLDPATH1=[]
+        self.archi_info.toLDPATH2=[]
 
-        os.environ['PATH'] = ':'.join(self.archi_info.toPATH) + ":" + os.environ['PATH'] 
+        self.archi_info.toLDPATH1.append('$MA5_BASE/tools/SampleAnalyzer/Lib/')
+        if self.archi_info.root_priority:
+            self.archi_info.toLDPATH1.append(self.archi_info.root_lib_path)
+            self.archi_info.toPATH1.append(self.archi_info.root_bin_path)
+        else:
+            self.archi_info.toLDPATH2.append(self.archi_info.root_lib_path)
+            self.archi_info.toPATH2.append(self.archi_info.root_bin_path)
+        
+        if self.archi_info.has_fastjet:
+            if self.archi_info.fastjet_priority:
+                self.archi_info.toPATH1.append(self.archi_info.fastjet_bin_path)
+                for path in self.archi_info.fastjet_lib_paths:
+                    self.archi_info.toLDPATH1.append(path)
+            else:
+                self.archi_info.toPATH2.append(self.archi_info.fastjet_bin_path)
+                for path in self.archi_info.fastjet_lib_paths:
+                    self.archi_info.toLDPATH2.append(path)
+        if self.archi_info.has_zlib:
+            if self.archi_info.zlib_priority:
+                self.archi_info.toLDPATH1.append(self.archi_info.zlib_lib_path)
+            else:
+                self.archi_info.toLDPATH2.append(self.archi_info.zlib_lib_path)
+        if self.archi_info.has_delphes:
+            if self.archi_info.delphes_priority:
+                for path in self.archi_info.delphes_lib_paths:
+                    self.archi_info.toLDPATH1.append(path)
+            else:
+                for path in self.archi_info.delphes_lib_paths:
+                    self.archi_info.toLDPATH2.append(path)
+        if self.archi_info.has_delphesMA5tune:
+            if self.archi_info.delphesMA5tune_priority:
+                for path in self.archi_info.delphesMA5tune_lib_paths:
+                    self.archi_info.toLDPATH1.append(path)
+            else:
+                for path in self.archi_info.delphesMA5tune_lib_paths:
+                    self.archi_info.toLDPATH2.append(path)
+                
+        os.environ['PATH'] = ':'.join(self.archi_info.toPATH1) + ":" + \
+                             os.environ['PATH'] + ":" + \
+                             ':'.join(self.archi_info.toPATH2)
                               
-        os.environ['LD_LIBRARY_PATH'] = ':'.join(self.archi_info.toLDPATH) + ":" + os.environ['LD_LIBRARY_PATH'] 
+        os.environ['LD_LIBRARY_PATH'] = ':'.join(self.archi_info.toLDPATH1) + ":" + \
+                                        os.environ['LD_LIBRARY_PATH'] + ":" + \
+                                        ':'.join(self.archi_info.toLDPATH2)
+        
         if self.archi_info.isMac:        
-            os.environ['DYLD_LIBRARY_PATH'] = ':'.join(self.archi_info.toLDPATH) + ":" + os.environ['DYLD_LIBRARY_PATH'] 
+            os.environ['DYLD_LIBRARY_PATH'] = ':'.join(self.archi_info.toLDPATH1) + ":" + \
+                                              os.environ['DYLD_LIBRARY_PATH'] + ":" + \
+                                              ':'.join(self.archi_info.toLDPATH2)
 
         return True 

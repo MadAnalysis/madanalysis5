@@ -3,8 +3,7 @@
 # OPTIONS THROUGH THIS FILE
 
 # -----ROOT-----
-# root_includes = /home/toto/root/include
-# root_libs     = /home/toto/root/lib
+# root_bin_path = /home/toto/root/bin
 
 # -----DELPHES----- 
 # delphes_veto     = 0 # 0=No, 1=Yes

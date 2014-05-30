@@ -32,13 +32,18 @@ class ArchitectureInfo:
         self.ma5_date    = ""
         self.ma5dir      = ""
 
+        self.root_priority      = False
         self.has_zlib           = False
+        self.zlib_priority      = False
         self.has_delphes        = False
+        self.delphes_priority   = False
         self.has_delphesMA5tune = False
+        self.delphesMA5tune_priority = False
+        self.has_fastjet        = False
+        self.fastjet_priority   = False
         self.has_pdflatex       = False
         self.has_latex          = False
         self.has_dvipdf         = False
-        self.has_fastjet        = False
         self.has_fortran        = False
         self.isMac              = False
         
@@ -54,9 +59,12 @@ class ArchitectureInfo:
         self.headers          = {}
         self.ncores           = 0
 
-        self.toPATH = []
-        self.toLDPATH = []
+        self.toPATH1   = []
+        self.toLDPATH1 = []
+        self.toPATH2   = []
+        self.toLDPATH2 = []
     
+        self.root_bin_path=""
         self.root_inc_path=""
         self.root_lib_path=""
         self.zlib_inc_path=""

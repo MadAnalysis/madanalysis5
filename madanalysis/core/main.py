@@ -428,7 +428,7 @@ class Main():
         rebuild = forced or FirstUse or UpdateNeed or Missing
 
         if not rebuild:
-            if not os.path.isfile(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libSampleAnalyzer.so'):
+            if not os.path.isfile(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libprocess_for_ma5.so'):
                 FirstUse=True
             rebuild = forced or FirstUse or UpdateNeed or Missing
 
@@ -436,14 +436,14 @@ class Main():
             logging.info('  => MadAnalysis libraries found.')
 
             # Test the program
-            if not os.path.isfile(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/SampleAnalyzerTest'):
+            if not os.path.isfile(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestSampleAnalyzer'):
                 FirstUse=True
 
             precompiler = LibraryWriter('lib',self)
-            if not precompiler.Run('SampleAnalyzerTest',[],self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test',silent=True):
+            if not precompiler.Run('TestSampleAnalyzer',[],self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/',silent=True):
                 UpdateNeed=True
 
-            if not precompiler.CheckRun(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/SampleAnalyzerTest.log',silent=True):
+            if not precompiler.CheckRun('TestSampleAnalyzer',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/',silent=True):
                 UpdateNeed=True
             rebuild = forced or FirstUse or UpdateNeed or Missing
             
@@ -470,15 +470,22 @@ class Main():
 
         # Library to compiles
         libraries = []
-        if self.archi_info.has_fastjet:
-            libraries.append(['FastJet', 'interface to FastJet', 'fastjet', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces'])
+        libraries.append(['commons','SampleAnalyzer commons', 'commons', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libcommons_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Commons',False])
+        libraries.append(['test_commons','SampleAnalyzer commons', 'test_commons', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestCommons',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
         if self.archi_info.has_zlib:
-            libraries.append(['zlib', 'interface to zlib', 'zlib', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libzlib_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces'])
+            libraries.append(['zlib', 'interface to zlib', 'zlib', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libzlib_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces',False])
+            libraries.append(['test_zlib','interface to zlib', 'test_zlib', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestZlib',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
+        if self.archi_info.has_fastjet:
+            libraries.append(['FastJet', 'interface to FastJet', 'fastjet', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces',False])
+            libraries.append(['test_fastjet','interface to Fastjet', 'test_fastjet', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestFastjet',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
         if self.archi_info.has_delphes:
-            libraries.append(['Delphes', 'interface to Delphes', 'delphes', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces'])
+            libraries.append(['Delphes', 'interface to Delphes', 'delphes', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces',False])
+            libraries.append(['test_delphes','interface to Delphes', 'test_delphes', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestDelphes',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
         if self.archi_info.has_delphesMA5tune:
-            libraries.append(['Delphes-MA5tune', 'interface to Delphes-MA5tune', 'delphesMA5tune', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphesMA5tune_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces'])
-        libraries.append(['SampleAnalyzer', 'general SampleAnalyzer component', 'SampleAnalyzer', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libSampleAnalyzer.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer'])
+            libraries.append(['Delphes-MA5tune', 'interface to Delphes-MA5tune', 'delphesMA5tune', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphesMA5tune_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces',False])
+            libraries.append(['test_delphesMA5tune','interface to DelphesMA5tune', 'test_delphesMA5tune', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestDelphesMA5tune',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
+        libraries.append(['process', 'SampleAnalyzer core', 'process', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libprocess_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Process',False])
+        libraries.append(['test_process','SampleAnalyzer core', 'test_process', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestSampleAnalyzer',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
 
         # Writing the Makefiles
         logging.info("")
@@ -490,114 +497,96 @@ class Main():
         # Getting number of cores
         ncores = compiler.get_ncores2()
 
+        # Writing the main Makefile
+        from madanalysis.build.makefile_writer import MakefileWriter
+        options=MakefileWriter.UserfriendlyMakefileOptions()
+        options.has_commons        = True
+        options.has_process        = True
+        options.has_test           = True
+        options.has_zlib           = self.archi_info.has_zlib
+        options.has_fastjet        = self.archi_info.has_fastjet
+        options.has_delphes        = self.archi_info.has_delphes
+        options.has_delphesMA5tune = self.archi_info.has_delphesMA5tune
+        MakefileWriter.UserfriendlyMakefileForSampleAnalyzer(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Makefile',options)
+
+        # Writing the setup
+        logging.info("   Writing the setup files ...")
+        from madanalysis.build.setup_writer import SetupWriter
+        SetupWriter.WriteSetupFile(True,self.archi_info.ma5dir+'/tools/SampleAnalyzer/',self.archi_info)
+        SetupWriter.WriteSetupFile(False,self.archi_info.ma5dir+'/tools/SampleAnalyzer/',self.archi_info)
+
+        # Writing the makefile
+        logging.info("   Writing all the Makefiles ...")
+        for ind in range(0,len(libraries)):
+            if not compiler.WriteMakefileForInterfaces(libraries[ind][2]):
+                logging.error("library building aborted.")
+                sys.exit()
+        if not compiler.WriteMakefileForInterfaces('test'):
+            logging.error("test program building aborted.")
+            sys.exit()
+
         # Compiling the libraries
         for ind in range(0,len(libraries)):
-            
-            logging.info("   **********************************************************")
-            logging.info("   Library "+str(ind+1)+"/"+str(len(libraries))+" - "+libraries[ind][1])
 
-            # Writing a Makefile
-            logging.info("     - Writing a Makefile ...")
-            if libraries[ind][0]=='SampleAnalyzer':
-                if not compiler.WriteMakefile():
-                    logging.error("library building aborted.")
-                    sys.exit()
+            isLibrary=not libraries[ind][5]
+            if isLibrary:
+                product='library'
             else:
-                if not compiler.WriteMakefileForInterfaces(libraries[ind][2]):
-                    logging.error("library building aborted.")
-                    sys.exit()
+                product='test program'
+                
+            logging.info("   **********************************************************")
+            logging.info("   Component "+str(ind+1)+"/"+str(len(libraries))+" - "+product+": "+libraries[ind][1])
 
              # Cleaning the project
-            logging.info("     - Cleaning the project before building the library ...")
+            logging.info("     - Cleaning the project before building the "+product+" ...")
             if not compiler.MrProper(libraries[ind][2],libraries[ind][4]):
-                logging.error("library building aborted.")
+                logging.error("The "+product+" building aborted.")
                 sys.exit()
 
             # Compiling
             logging.info("     - Compiling the source files ...")
             if not compiler.Compile(ncores,libraries[ind][2],libraries[ind][4]):
-                logging.error("library building aborted.")
+                logging.error("The "+product+" building aborted.")
                 sys.exit()
 
             # Linking
-            logging.info("     - Linking the library ...")
+            logging.info("     - Linking the "+product+" ...")
             if not compiler.Link(libraries[ind][2],libraries[ind][4]):
-                logging.error("library building aborted.")
+                logging.error("The "+product+" building aborted.")
                 sys.exit()
 
             # Checking
-            logging.info("     - Checking that the library is properly built ...")
+            logging.info("     - Checking that the "+product+" is properly built ...")
             if not os.path.isfile(libraries[ind][3]):
-                logging.error("the library '"+libraries[ind][3]+"' is not produced.")
+                logging.error("The "+product+" '"+libraries[ind][3]+"' is not produced.")
                 sys.exit()
 
              # Cleaning the project
-            logging.info("     - Cleaning the project after building the library ...")
+            logging.info("     - Cleaning the project after building the "+product+" ...")
             if not compiler.Clean(libraries[ind][2],libraries[ind][4]):
                 logging.error("library building aborted.")
                 sys.exit()
+
+            if not isLibrary:
+
+                # Running the program test
+                logging.info("     - Running the test program ...")
+                program=libraries[ind][3].split('/')[-1]
+                if not compiler.Run(program,[],self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/'):
+                    logging.error("the test failed.")
+                    sys.exit()
+
+                # Checking the program output
+                logging.info("     - Checking the program output...")
+                if not compiler.CheckRun(program,self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/'):
+                    logging.error("the test failed.")
+                    sys.exit()
 
             # Print Ok
             sys.stdout.write("     => Status: ")
             self.PrintOK()
 
         logging.info("   **********************************************************")
-        logging.info("   Test program ")
-
-        # Writing a Makefile
-        logging.info("     - Writing a Makefile ...")
-        if not compiler.WriteMakefileForTest():
-            logging.error("test program building aborted.")
-            sys.exit()
-
-        # Cleaning the project
-        logging.info("     - Cleaning the project before building the program ...")
-        if not compiler.MrProper('test',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test'):
-            logging.error("test program building aborted.")
-            sys.exit()
-
-        # Compiling
-        logging.info("     - Compiling the source files ...")
-        if not compiler.Compile(ncores,'test',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test'):
-            logging.error("test program building aborted.")
-            sys.exit()
-
-        # Linking
-        logging.info("     - Linking the program ...")
-        if not compiler.Link('test',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test'):
-            logging.error("test program building aborted.")
-            sys.exit()
-
-        # Checking
-        logging.info("     - Checking that the program is properly built ...")
-        filename=self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/SampleAnalyzerTest'
-        if not os.path.isfile(filename):
-            logging.error("the test program '"+filename+"' is not produced.")
-            sys.exit()
-
-        # Cleaning the project
-        logging.info("     - Cleaning the project after building the program ...")
-        if not compiler.Clean('test',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test'):
-            logging.error("test program building aborted.")
-            sys.exit()
-
-        # Running the program test
-        logging.info("     - Running the test program ...")
-        if not compiler.Run('SampleAnalyzerTest',[],self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test'):
-            logging.error("the test is failed.")
-            sys.exit()
-
-        # Checking the program output
-        logging.info("     - Checking the program output...")
-        if not compiler.CheckRun(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/SampleAnalyzerTest.log'):
-            logging.error("the test is failed.")
-            sys.exit()
-
-        # Print Ok
-        sys.stdout.write("     => Status: ")
-        self.PrintOK()
-
-
         logging.info("")
 
         return True    

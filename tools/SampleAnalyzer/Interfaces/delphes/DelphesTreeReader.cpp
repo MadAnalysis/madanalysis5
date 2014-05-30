@@ -27,7 +27,7 @@
 
 // SampleHeader headers
 #include "SampleAnalyzer/Interfaces/delphes/DelphesTreeReader.h"
-#include "SampleAnalyzer/Service/LogService.h"
+#include "SampleAnalyzer/Commons/Service/LogService.h"
 
 // ROOT headers
 #include <TROOT.h>

@@ -52,8 +52,9 @@ class LibraryBuilder:
                 return False
 
         # Look for the shared library 'MadAnalysis' and 'config' file
-        if not os.path.isfile(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libSampleAnalyzer.so') \
-           or not os.path.isfile(self.archi_info.ma5dir+'/tools/architecture.ma5'):
+        if not os.path.isfile(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libprocess_for_ma5.so') \
+           or not os.path.isfile(self.archi_info.ma5dir+'/tools/architecture.ma5') \
+           or not os.path.isfile(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libcommons_for_ma5.so'):
             FirstUse=True
             return True, False
 

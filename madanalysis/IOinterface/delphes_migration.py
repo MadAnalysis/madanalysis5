@@ -43,7 +43,7 @@ class DelphesMigration():
 
     def ApplyPatch(self):
         import os
-        os.system('cp '+self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Detector/patch_delphesMA5tune.tgz '+\
+        os.system('cp '+self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Process/Detector/patch_delphesMA5tune.tgz '+\
                   self.main.archi_info.ma5dir+'/tools/delphesMA5tune/')
         os.system('cd '+ self.main.archi_info.ma5dir + '/tools/delphesMA5tune/; tar xzf patch_delphesMA5tune.tgz')
         installdir = self.main.archi_info.ma5dir + '/tools/delphesMA5tune/'

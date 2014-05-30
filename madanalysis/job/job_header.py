@@ -31,7 +31,7 @@ import sys
 
 def WriteHeader(file,main):
     file.write('#ifndef analysis_user_h\n#define analysis_user_h\n\n')
-    file.write('#include "SampleAnalyzer/Analyzer/AnalyzerBase.h"\n\n')
+    file.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerBase.h"\n\n')
     file.write('namespace MA5\n')
     file.write('{\n')
     file.write('class user : public AnalyzerBase\n{\n')

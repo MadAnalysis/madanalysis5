@@ -204,21 +204,80 @@ class ConfigChecker:
         logging.debug("")
 
         # Does the user force the ROOT path
-        force1=False
-        force2=False
-        if self.user_info.root_includes!='0':
-            logging.debug("User setting: root include path is specified.")
-            self.archi_info.root_inc_path=self.user_info.root_includes
-            force1=True
-        if self.user_info.root_libs!='0':
-            logging.debug("User setting: root lib path is specified.")
-            self.archi_info.root_lib_path=self.user_info.root_libs
-            force2=True
-        force=force1 and force2
+        force=False
+        if self.user_info.root_bin!='0':
+            logging.debug("User setting: root bin path is specified.")
+            self.archi_info.root_bin_path=os.path.normpath(self.user_info.root_bin)
+            force=True
 
+        # Detection of root-config
+        if force:
+            if not os.path.isfile(self.archi_info.root_bin_path+'/root-config'):
+                self.PrintFAIL(warning=False)
+	        logging.error("root-config program is not found in folder: "+self.archi_info.root_bin_path)
+                logging.error("Please check that ROOT is properly installed.")
+                return False
+
+            # Using root-config
+            logging.debug("root-config program found in: "+self.archi_info.root_bin_path)
+            logging.debug("Launch root-config ...") 
+            rootdirs = commands.getstatusoutput(self.archi_info.root_bin_path+'/root-config --libdir --incdir')
+            if rootdirs[0]>0:
+                self.PrintFAIL(warning=False)
+                logging.error('ROOT module called "root-config" is not detected.\n'\
+		              +'Two explanations :n'\
+		              +' - ROOT is not installed. You can download it '\
+		              +'from http://root.cern.ch\n'\
+		              +' - ROOT binary folder must be placed in the '\
+                              +'global environment variable $PATH')
+                return False
+
+            # Extracting ROOT library and header path
+            root_tmp = rootdirs[1].split()
+            self.archi_info.root_inc_path = os.path.normpath(root_tmp[1])
+            self.archi_info.root_lib_path = os.path.normpath(root_tmp[0])
+            logging.debug("-> root-config found") 
+            logging.debug("-> root header  folder: "+self.archi_info.root_inc_path) 
+            logging.debug("-> root library folder: "+self.archi_info.root_lib_path) 
+                
         # Trying to call root-config
         if not force:
 
+            self.archi_info.root_bin_path=os.path.normpath(self.user_info.root_bin)
+
+            # Which
+            result = ShellCommand.Which('root-config')
+            if len(result)==0:
+                self.PrintFAIL(warning=False)
+                logging.error('ROOT module called "root-config" is not detected.\n'\
+		              +'Two explanations :n'\
+		              +' - ROOT is not installed. You can download it '\
+		              +'from http://root.cern.ch\n'\
+		              +' - ROOT binary folder must be placed in the '\
+                              +'global environment variable $PATH')
+                return False
+            self.archi_info.root_bin_path=os.path.normpath(result[0][:-11])
+            if self.debug:
+                logging.debug("")
+                logging.debug("  which:         " + str(self.archi_info.root_bin_path))
+
+            # Which all
+            if self.debug:
+                result = ShellCommand.Which('root-config',all=True,mute=True)
+                if len(result)==0:
+                    self.PrintFAIL(warning=False)
+                    logging.error('ROOT module called "root-config" is not detected.\n'\
+		              +'Two explanations :n'\
+		              +' - ROOT is not installed. You can download it '\
+		              +'from http://root.cern.ch\n'\
+		              +' - ROOT binary folder must be placed in the '\
+                              +'global environment variable $PATH')
+                    return False
+                logging.debug("  which-all:     ")
+                for file in result:
+                    logging.debug("    - "+str(file))
+
+   
             # Using root-config
             logging.debug("Try to detect root-config ...") 
             rootdirs = commands.getstatusoutput('root-config --libdir --incdir')
@@ -273,6 +332,7 @@ class ConfigChecker:
             return False
 
         # Root Install
+        self.archi_info.root_priority=force
         self.PrintOK()
         return True
 
@@ -579,6 +639,7 @@ class ConfigChecker:
                 logging.warning("To enable this format, please type 'install zlib' package.")
                 return False
 
+
         # Checking zlib can be found in other folders
         if not force and not ma5installation:
 
@@ -608,6 +669,7 @@ class ConfigChecker:
                 return False
 
         self.archi_info.libraries['ZLib']=self.archi_info.zlib_lib+":"+str(os.stat(self.archi_info.zlib_lib).st_mtime)
+        self.archi_info.zlib_priority=(force or ma5installation)
 
         # Ok
         self.PrintOK()
@@ -718,6 +780,7 @@ class ConfigChecker:
                 return False
 
         self.archi_info.libraries['Delphes']=self.archi_info.delphes_lib+":"+str(os.stat(self.archi_info.delphes_lib).st_mtime)
+        self.archi_info.delphes_priority=(force or ma5installation)
 
         # Ok
         self.PrintOK()
@@ -803,6 +866,7 @@ class ConfigChecker:
                 return False
 
         self.archi_info.libraries['DelphesMA5tune']=self.archi_info.delphesMA5tune_lib+":"+str(os.stat(self.archi_info.delphesMA5tune_lib).st_mtime)
+        self.archi_info.delphesMA5tune_priority=(force or ma5installation)
 
         # Ok
         self.PrintOK()
@@ -884,6 +948,9 @@ class ConfigChecker:
 	        logging.warning("The FastJet package not found. JetClustering algorithms are disabled.")
                 logging.warning("To enable this functionnality, please type 'install fastjet'.")
                 return False
+
+
+        self.archi_info.fastjet_priority=(force or ma5installation)
 
         # Treating FastJet bin path
         self.archi_info.fastjet_bin_path=os.path.normpath(self.archi_info.fastjet_bin_path)

@@ -36,7 +36,7 @@
 #include "modules/Delphes.h"
 
 //SampleAnalyzer header
-#include "SampleAnalyzer/Service/DisplayService.h"
+#include "SampleAnalyzer/Commons/Service/DisplayService.h"
 
 //ROOT header
 #include <TError.h>

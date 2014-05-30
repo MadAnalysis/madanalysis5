@@ -26,7 +26,7 @@
 #define DELPHESMA5TUNE_TREE_READER_h
 
 // SampleAnalyzer headers
-#include "SampleAnalyzer/Reader/TreeReaderBase.h"
+#include "SampleAnalyzer/Commons/Base/TreeReaderBase.h"
 
 // ROOT header
 #include <TChain.h>

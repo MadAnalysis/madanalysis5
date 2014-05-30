@@ -56,9 +56,9 @@ class AnalyzerManager:
         if not os.path.isfile(self.currentdir + "/Analyzer/analysisList.h"):
             output = open(self.currentdir + "/Analyzer/analysisList.h","w")
             path = os.path.normpath(self.name+".h")
-            output.write('#include "SampleAnalyzer/Analyzer/'+path+'"\n')
-            output.write('#include "SampleAnalyzer/Analyzer/AnalyzerManager.h"\n')
-            output.write('#include "SampleAnalyzer/Service/LogStream.h"\n')
+            output.write('#include "SampleAnalyzer/User/Analyzer/'+path+'"\n')
+            output.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"\n')
+            output.write('#include "SampleAnalyzer/Commons/Service/LogStream.h"\n')
             output.write('\n')
             output.write('// -----------------------------------------------------------------------------\n')
             output.write('// BuildTable\n')
@@ -78,7 +78,7 @@ class AnalyzerManager:
             input  = open(self.currentdir + "/Analyzer/analysisList.bak")
 
             path = os.path.normpath(self.name+".h")
-            output.write('#include "SampleAnalyzer/Analyzer/'+path+'"\n')
+            output.write('#include "SampleAnalyzer/User/Analyzer/'+path+'"\n')
 
             for line in input:
 
@@ -100,7 +100,7 @@ class AnalyzerManager:
         file = open(self.currentdir + "/Analyzer/" + self.name + ".h","w")
         file.write('#ifndef analysis_'+self.name+'_h\n')
         file.write('#define analysis_'+self.name+'_h\n\n')
-        file.write('#include "SampleAnalyzer/Analyzer/AnalyzerBase.h"\n\n')
+        file.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerBase.h"\n\n')
         file.write('namespace MA5\n')
         file.write('{\n')
         file.write('class '+self.name+' : public AnalyzerBase\n')

@@ -27,7 +27,7 @@
 
 
 //SampleAnalyser headers
-#include "SampleAnalyzer/Detector/DetectorBase.h"
+#include "SampleAnalyzer/Commons/Base/DetectorBase.h"
 
 //ROOT header
 #include <TObjArray.h>

@@ -102,7 +102,7 @@ class ExpertMode:
         os.system("cd "+self.path+"/Build/SampleAnalyzer; python newAnalyzer.py " + title + " 1")
 
         # Extracting analysis name
-        file = open(self.path+"/Build/SampleAnalyzer/Analyzer/analysisList.h")
+        file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/analysisList.h")
         title=""
         for line in file:
             if "Add" not in line:
@@ -143,7 +143,7 @@ class ExpertMode:
         logging.info("\nGuidelines for writing an analysis in expert mode\n")
         logging.info(" 1. Entering the directory '"+self.path+"/Build'\n")
         logging.info(" 2. Setting the environment variables by loading setup.sh or setup.csh according to your SHELL\n")
-        logging.info(" 3. Entering the directory '"+self.path+"/Build/SampleAnalyzer/Analyzer'\n")
+        logging.info(" 3. Entering the directory '"+self.path+"/Build/SampleAnalyzer/User/Analyzer'\n")
         logging.info(" 4. Editing Analysis 'user.h' and 'user.cpp' files\n")
         logging.info(" 5. Entering the directory '"+self.path+"/Build'\n")
         logging.info(" 6. Compiling with the command 'make'\n")

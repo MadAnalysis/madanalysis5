@@ -37,7 +37,7 @@
 #include "modules/Delphes.h"
 
 //SampleAnalyzer header
-#include "SampleAnalyzer/Service/DisplayService.h"
+#include "SampleAnalyzer/Commons/Service/DisplayService.h"
 
 
 using namespace MA5;

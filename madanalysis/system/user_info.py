@@ -27,8 +27,7 @@ import logging
 class UserInfo:
 
     def __init__(self):
-        self.root_includes    = '0'
-        self.root_libs        = '0'
+        self.root_bin         = '0'
         self.delphes_veto     = '0'
         self.delphes_includes = '0'
         self.delphes_libs     = '0'
@@ -129,10 +128,12 @@ class UserInfo:
         # Loop over the file
         logging.debug("Lines to interpret: ")
 
-        for rawline in input:
+        for line in input:
 
-            if '#' in rawline:
-                line = rawline.split('#')[0]
+            if '#' in line:
+                line = line.split('#')[0]
+            line=line.lstrip()
+            line=line.rstrip()
             if line=='':
                 continue
             logging.debug("  - "+line)
@@ -144,12 +145,9 @@ class UserInfo:
             words[0]=words[0].rstrip()
             words[1]=words[1].lstrip()
             words[1]=words[1].rstrip()
-            
-
-            if words[0]=='root_includes':
-                self.root_includes==words[1]
-            elif words[0]=='root_libs':
-                self.root_libs=words[1]
+ 
+            if words[0]=='root_bin_path':
+                self.root_bin=words[1]
             elif words[0]=='delphes_veto':
                 self.delphes_veto=words[1]
             elif words[0]=='delphes_includes':
