@@ -28,6 +28,27 @@ from string_tools import StringTools
 
 class SetupWriter():
 
+
+    @staticmethod
+    def OrderPath(paths1,middle,paths2,ma5dir):
+        all=[]
+        allsh=[]
+        allcsh=[]
+        for item in paths1:
+            path=item.replace(ma5dir,'$MA5_BASE')
+            all.append(path)
+            allsh.append(path)
+            allcsh.append(path)
+        allsh.append('$MA5_BASE')
+        allcsh.append('"$MA5_BASE"')
+        for item in paths2:
+            path=item.replace(ma5dir,'$MA5_BASE')
+            all.append(path)
+            allsh.append(path)
+            allcsh.append(path)
+        return all, allsh, allcsh
+
+        
     @staticmethod
     def WriteSetupFile(bash,path,archi_info):
 
@@ -76,78 +97,58 @@ class SetupWriter():
             file.write('set NORMAL = "\\033[0;39m"\n')
         file.write('\n')
 
+        # Treating ma5dir
+        ma5dir=archi_info.ma5dir
+        if ma5dir.endswith('/'):
+            ma5dir=ma5dir[:-1]
+
         # Configuring PATH environment variable
         file.write('# Configuring MA5 environment variable\n')
         if bash:
-            file.write('export MA5_BASE=' + SetupWriter.CleanPath(archi_info.ma5dir)+'\n')
+            file.write('export MA5_BASE=' + (ma5dir)+'\n')
         else:
-            file.write('setenv MA5_BASE ' + SetupWriter.CleanPath(archi_info.ma5dir)+'\n')
+            file.write('setenv MA5_BASE ' + (ma5dir)+'\n')
         toCheck.append('MA5_BASE')
         file.write('\n')
 
+        # Treating PATH
+        toPATH, toPATHsh, toPATHcsh = SetupWriter.OrderPath(archi_info.toPATH1,'$PATH',archi_info.toPATH2,ma5dir)
+        toLDPATH, toLDPATHsh, toLDPATHcsh = SetupWriter.OrderPath(archi_info.toLDPATH1,'$LD_LIBRARY_PATH',archi_info.toLDPATH2,ma5dir)
+        toDYLDPATH, toDYLDPATHsh, toDYLDPATHcsh = SetupWriter.OrderPath(archi_info.toLDPATH1,'$DYLD_LIBRARY_PATH',archi_info.toLDPATH2,ma5dir)
+                
         # Configuring PATH environment variable
-        toPATH=[]
-        toPATH.extend(archi_info.toPATH1)
-        toPATH.extend(archi_info.toPATH2)
-        toPATHsh=[]
-        toPATHsh.extend(archi_info.toPATH1)
-        toPATHsh.append('$PATH')
-        toPATHsh.extend(archi_info.toPATH2)
-        toPATHcsh=[]
-        toPATHcsh.extend(archi_info.toPATH1)
-        toPATHcsh.append('"$PATH"')
-        toPATHcsh.extend(archi_info.toPATH2)
         if len(toPATH)!=0:
             file.write('# Configuring PATH environment variable\n')
             if bash:
                 file.write('if [ $PATH ]; then\n')
-                file.write('export PATH='+SetupWriter.CleanPath(':'.join(toPATHsh))+'\n')
+                file.write('export PATH='+(':'.join(toPATHsh))+'\n')
                 file.write('else\n')
-                file.write('export PATH='+SetupWriter.CleanPath(':'.join(toPATH))+'\n')
+                file.write('export PATH='+(':'.join(toPATH))+'\n')
                 file.write('fi\n')
             else:
                 file.write('if ( $?PATH ) then\n')
-                file.write('setenv PATH '+SetupWriter.CleanPath(':'.join(toPATHcsh))+'\n')
+                file.write('setenv PATH '+(':'.join(toPATHcsh))+'\n')
                 file.write('else\n')
-                file.write('setenv PATH '+SetupWriter.CleanPath(':'.join(toPATH))+'\n')
+                file.write('setenv PATH '+(':'.join(toPATH))+'\n')
                 file.write('endif\n')
             toCheck.append('PATH')
             file.write('\n')
 
-        toLDPATH=[]
-        toLDPATH.extend(archi_info.toLDPATH1)
-        toLDPATH.extend(archi_info.toLDPATH2)
-        toLDPATHsh=[]
-        toLDPATHsh.extend(archi_info.toLDPATH1)
-        toLDPATHsh.append('$LD_LIBRARY_PATH')
-        toLDPATHsh.extend(archi_info.toLDPATH2)
-        toLDPATHcsh=[]
-        toLDPATHcsh.extend(archi_info.toLDPATH1)
-        toLDPATHcsh.append('"$LD_LIBRARY_PATH"')
-        toLDPATHcsh.extend(archi_info.toLDPATH2)
-        toDYLDPATHsh=[]
-        toDYLDPATHsh.extend(archi_info.toLDPATH1)
-        toDYLDPATHsh.append('$DYLD_LIBRARY_PATH')
-        toDYLDPATHsh.extend(archi_info.toLDPATH2)
-        toDYLDPATHcsh=[]
-        toDYLDPATHcsh.extend(archi_info.toLDPATH1)
-        toDYLDPATHcsh.append('"$DYLD_LIBRARY_PATH"')
-        toDYLDPATHcsh.extend(archi_info.toLDPATH2)
         if len(toLDPATH)!=0:
             
             # Configuring LD_LIBRARY_PATH environment variable
             file.write('# Configuring LD_LIBRARY_PATH environment variable\n')
             if bash:
                 file.write('if [ $LD_LIBRARY_PATH ]; then\n')
-                file.write('export LD_LIBRARY_PATH='+SetupWriter.CleanPath(':'.join(toLDPATHsh))+'\n')
+                file.write('export LD_LIBRARY_PATH='+(':'.join(toLDPATHsh))+'\n')
                 file.write('else\n')
-                file.write('export LD_LIBRARY_PATH='+SetupWriter.CleanPath(':'.join(toLDPATH))+'\n')
+                file.write('export LD_LIBRARY_PATH='+(':'.join(toLDPATH))+'\n')
                 file.write('fi\n')
             else:
                 file.write('if ( $?LD_LIBRARY_PATH ) then\n')
-                file.write('setenv LD_LIBRARY_PATH '+SetupWriter.CleanPath(':'.join(toLDPATHcsh))+'\n')
+                file.write('setenv LD_LIBRARY_PATH '+(':'.join(toLDPATHcsh))+'\n')
                 file.write('else\n')
-                file.write('setenv LD_LIBRARY_PATH '+SetupWriter.CleanPath(':'.join(toLDPATH))+'\n')
+                file.write('setenv LD_LIBRARY_PATH '+(':'.join(toLDPATH))+'\n')
                 file.write('endif\n')
             toCheck.append('LD_LIBRARY_PATH')
             file.write('\n')
@@ -155,9 +156,9 @@ class SetupWriter():
             # Configuring LIBRARY_PATH environment variable
             #file.write('# Configuring LIBRARY_PATH environment variable\n')
             #if bash:
-            #    file.write('export LIBRARY_PATH=' + SetupWriter.CleanPath(os.environ['LD_LIBRARY_PATH'])+'\n')
+            #    file.write('export LIBRARY_PATH=' + (os.environ['LD_LIBRARY_PATH'])+'\n')
             #else:
-            #    file.write('setenv LIBRARY_PATH ' + SetupWriter.CleanPath(os.environ['LD_LIBRARY_PATH'])+'\n')
+            #    file.write('setenv LIBRARY_PATH ' + (os.environ['LD_LIBRARY_PATH'])+'\n')
             #file.write('\n')
 
             # Configuring DYLD_LIBRARY_PATH environment variable
@@ -165,15 +166,15 @@ class SetupWriter():
                 file.write('# Configuring DYLD_LIBRARY_PATH environment variable\n')
                 if bash:
                     file.write('if [ $DYLD_LIBRARY_PATH ]; then\n')
-                    file.write('export DYLD_LIBRARY_PATH='+ SetupWriter.CleanPath(':'.join(toDYLDPATHsh))+'\n')
+                    file.write('export DYLD_LIBRARY_PATH='+ (':'.join(toDYLDPATHsh))+'\n')
                     file.write('else\n')
-                    file.write('export DYLD_LIBRARY_PATH='+ SetupWriter.CleanPath(':'.join(toLDPATH))+'\n')
+                    file.write('export DYLD_LIBRARY_PATH='+ (':'.join(toLDPATH))+'\n')
                     file.write('fi\n')
                 else:
                     file.write('if ( $?DYLD_LIBRARY_PATH ) then\n')
-                    file.write('setenv DYLD_LIBRARY_PATH '+SetupWriter.CleanPath(':'.join(toDYLDPATHcsh))+'\n')
+                    file.write('setenv DYLD_LIBRARY_PATH '+(':'.join(toDYLDPATHcsh))+'\n')
                     file.write('else\n')
-                    file.write('setenv DYLD_LIBRARY_PATH '+SetupWriter.CleanPath(':'.join(toLDPATH))+'\n')
+                    file.write('setenv DYLD_LIBRARY_PATH '+(':'.join(toLDPATH))+'\n')
                     file.write('endif\n')
                 toCheck.append('DYLD_LIBRARY_PATH')
                 file.write('\n')
@@ -181,9 +182,9 @@ class SetupWriter():
             # Configuring CPLUS_INCLUDE_PATH environment variable
             #file.write('# Configuring CPLUS_INCLUDE_PATH environment variable\n')
             #if bash:
-            #    file.write('export CPLUS_INCLUDE_PATH=' + SetupWriter.CleanPath(os.environ['CPLUS_INCLUDE_PATH'])+'\n')
+            #    file.write('export CPLUS_INCLUDE_PATH=' + (os.environ['CPLUS_INCLUDE_PATH'])+'\n')
             #else:
-            #    file.write('setenv CPLUS_INCLUDE_PATH ' + SetupWriter.CleanPath(os.environ['CPLUS_INCLUDE_PATH'])+'\n')
+            #    file.write('setenv CPLUS_INCLUDE_PATH ' + (os.environ['CPLUS_INCLUDE_PATH'])+'\n')
             #file.write('\n')
 
         # Checking that all environment variables are defined
@@ -221,33 +222,3 @@ class SetupWriter():
         return True
 
 
-    @staticmethod
-    def CleanPath(thestring):
-
-        import os
-        
-        # Cleaning the string
-        thestring = thestring.lstrip()
-        thestring = thestring.rstrip()
-
-        # Splitting the string into paths
-        paths = thestring.split(':')
-
-        # Declaring new container
-        newpaths = []
-
-        for path in paths:
-
-            if path=="":
-                continue
-
-            # Normalizing the path
-            # -> Settling A//B, A/B/, A/./B and A/foo/../B 
-            path = os.path.normpath(path)
-
-            # Adding the path if it is not already present
-            if path not in newpaths:
-                newpaths.append(path)
-
-        # Return the string
-        return ':'.join(newpaths)

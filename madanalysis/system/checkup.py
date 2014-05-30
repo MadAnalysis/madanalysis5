@@ -252,7 +252,7 @@ class CheckUp():
         self.archi_info.toLDPATH1=[]
         self.archi_info.toLDPATH2=[]
 
-        self.archi_info.toLDPATH1.append('$MA5_BASE/tools/SampleAnalyzer/Lib/')
+        self.archi_info.toLDPATH1.append(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/')
         if self.archi_info.root_priority:
             self.archi_info.toLDPATH1.append(self.archi_info.root_lib_path)
             self.archi_info.toPATH1.append(self.archi_info.root_bin_path)
