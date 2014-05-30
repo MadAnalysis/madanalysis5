@@ -294,7 +294,7 @@ Bool_t bTagger::IsLastBHadron(MCParticleFormat* part, EventFormat& myEvent)
 }
 
 
-void bTagger::SetParameter(const std::string& key, 
+bool bTagger::SetParameter(const std::string& key, 
                            const std::string& value, 
                            std::string header)
 {
@@ -345,7 +345,8 @@ void bTagger::SetParameter(const std::string& key,
   }
 
   // Other
-  else TaggerBase::SetParameter(key,value,header);
+  else return TaggerBase::SetParameter(key,value,header);
+  return true;
 }
 
 std::string bTagger::GetParameters()

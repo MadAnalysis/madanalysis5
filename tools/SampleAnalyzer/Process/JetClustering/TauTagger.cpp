@@ -263,7 +263,7 @@ void TauTagger::Jet2Tau (RecJetFormat* myJet, RecTauFormat* myTau, EventFormat& 
 }
 
 
-void TauTagger::SetParameter(const std::string& key, 
+bool TauTagger::SetParameter(const std::string& key, 
                              const std::string& value, 
                              std::string header)
 {
@@ -291,7 +291,10 @@ void TauTagger::SetParameter(const std::string& key,
   }
 
   // Other
-  else TaggerBase::SetParameter(key,value,header);
+  else return TaggerBase::SetParameter(key,value,header);
+
+  return true;
+
 }
 
 

@@ -32,68 +32,67 @@
 
 using namespace MA5;
 
-bool ClusterAlgoStandard::Initialize(const std::map<std::string,std::string>& options)
-{ 
-  for (std::map<std::string,std::string>::const_iterator
-       it=options.begin();it!=options.end();it++)
+bool ClusterAlgoStandard::SetParameter(const std::string& key, const std::string& value)
+{
+  // radius
+  if (key=="r")
   {
-    std::string key = ClusterAlgoBase::Lower(it->first);
-
-    // radius
-    if (key=="r")
-    {
-      float tmp=0;
-      std::stringstream str;
-      str << it->second;
-      str >> tmp;
-      if (tmp<0) WARNING << "R must be positive. Using default value R = " 
-                         << R_ << endmsg;
-      else R_=tmp;
-    }
-
-    // ptmin
-    else if (key=="ptmin")
-    {
-      float tmp=0;
-      std::stringstream str;
-      str << it->second;
-      str >> tmp;
-      if (tmp<0) WARNING << "Ptmin must be positive. Using default value Ptmin = " 
-                         << Ptmin_ << endmsg;
-      else Ptmin_=tmp;
-    }
-
-    // p
-    else if (key=="p")
-    {
-      float tmp=0;
-      std::stringstream str;
-      str << it->second;
-      str >> tmp;
-      p_=tmp;
-    }
-
-    // exclusive
-    else if (key=="exclusive")
-    {
-      int tmp=0;
-      std::stringstream str;
-      str << it->second;
-      str >> tmp;
-      if (tmp==1) Exclusive_=true;
-      else if (tmp==0) Exclusive_=false;
-      else
-      {
-        WARNING << "Exclusive must be equal to 0 or 1. Using default value Exclusive = " 
-                << Exclusive_ << endmsg;
-      }
-    }
-
-    // other
-    else SettingsCommonPart(key,it->second);
-
+    float tmp=0;
+    std::stringstream str;
+    str << value;
+    str >> tmp;
+    if (tmp<0) WARNING << "R must be positive. Using default value R = " 
+                       << R_ << endmsg;
+    else R_=tmp;
   }
 
+  // ptmin
+  else if (key=="ptmin")
+  {
+    float tmp=0;
+    std::stringstream str;
+    str << value;
+    str >> tmp;
+    if (tmp<0) WARNING << "Ptmin must be positive. Using default value Ptmin = " 
+                       << Ptmin_ << endmsg;
+    else Ptmin_=tmp;
+  }
+
+  // p
+  else if (key=="p")
+  {
+    float tmp=0;
+    std::stringstream str;
+    str << value;
+    str >> tmp;
+    p_=tmp;
+  }
+
+  // exclusive
+  else if (key=="exclusive")
+  {
+    int tmp=0;
+    std::stringstream str;
+    str << value;
+    str >> tmp;
+    if (tmp==1) Exclusive_=true;
+    else if (tmp==0) Exclusive_=false;
+    else
+    {
+      WARNING << "Exclusive must be equal to 0 or 1. Using default value Exclusive = " 
+              << Exclusive_ << endmsg;
+    }
+  }
+
+  // other
+  else return false;
+
+  return true;
+}
+
+
+bool ClusterAlgoStandard::Initialize()
+{ 
   // Creating Jet Definition
   if (JetAlgorithm_=="kt")
   {

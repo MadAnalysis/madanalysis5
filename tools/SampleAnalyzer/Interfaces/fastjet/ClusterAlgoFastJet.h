@@ -73,7 +73,7 @@ class ClusterAlgoFastJet: public ClusterAlgoBase
     virtual bool Execute(SampleFormat& mySample, EventFormat& myEvent);
 
     /// Initialization
-    virtual bool Initialize(const std::map<std::string,std::string>& options)=0;
+    virtual bool Initialize()=0;
 
  private:
     Bool_t IsLast(const MCParticleFormat* part, EventFormat& myEvent);

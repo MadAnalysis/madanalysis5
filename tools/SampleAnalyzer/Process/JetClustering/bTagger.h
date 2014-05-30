@@ -85,7 +85,7 @@ class bTagger:public TaggerBase
     Bool_t IsLastBHadron(MCParticleFormat* part, EventFormat& myEvent);
 
     /// Set a parameter
-    virtual void SetParameter(const std::string& key, const std::string& value,std::string header);
+    virtual bool SetParameter(const std::string& key, const std::string& value,std::string header);
 
     virtual std::string GetParameters();
 

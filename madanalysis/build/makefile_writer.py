@@ -366,7 +366,10 @@ class MakefileWriter():
 
         # All
         file.write('# All target\n')
-        file.write('all: header compile_header compile link_header link\n')
+        if len(libs)==0:
+            file.write('all: header compile_header compile link_header link\n')
+        else:
+            file.write('all: header library_check compile_header compile link_header link\n')
         file.write('\n')
 
         # Check library

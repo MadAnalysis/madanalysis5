@@ -84,7 +84,7 @@ class TauTagger: public TaggerBase
     void Jet2Tau (RecJetFormat* myJet, RecTauFormat* myTau, EventFormat& myEvent);
 
     /// Set a parameter
-    virtual void SetParameter(const std::string& key, const std::string& value,std::string header);
+    virtual bool SetParameter(const std::string& key, const std::string& value,std::string header);
 
     virtual std::string GetParameters();
 

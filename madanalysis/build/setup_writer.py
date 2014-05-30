@@ -39,8 +39,8 @@ class SetupWriter():
             all.append(path)
             allsh.append(path)
             allcsh.append(path)
-        allsh.append('$MA5_BASE')
-        allcsh.append('"$MA5_BASE"')
+        allsh.append(middle)
+        allcsh.append('"'+middle+'"')
         for item in paths2:
             path=item.replace(ma5dir,'$MA5_BASE')
             all.append(path)

@@ -54,6 +54,8 @@ namespace MA5
     bTagger*    myBtagger_;
     cTagger*    myCtagger_;
     TauTagger*  myTautagger_;
+    /// Exclusive id for tau-elec-photon-jet
+    Bool_t ExclusiveId_;
 
     UInt_t muon;
     UInt_t electron;
@@ -75,6 +77,7 @@ namespace MA5
       myBtagger_   = 0;
       myCtagger_   = 0;
       myTautagger_ = 0;
+      ExclusiveId_ = false;
       muon=0;
       electron=0;
       tauH=0;
@@ -84,44 +87,40 @@ namespace MA5
     }
 
     /// Destructor
-    virtual ~JetClusterer()
+    ~JetClusterer()
     { }
+
+    /// Initialization
+    bool Initialize(const std::map<std::string,std::string>& options);
 
     /// Jet clustering
     bool Execute(SampleFormat& mySample, EventFormat& myEvent);
 
-    /// Initialization
-    bool Initialize(const std::map<std::string,std::string>& options)
-    {
-      if (algo_==0) return false;
-      myBtagger_   = new bTagger();
-      myCtagger_   = new cTagger();
-      myTautagger_ = new TauTagger();
-    }
-
     /// Finalization
-    void Finalize()
-    {
-      if (algo_!=0)        delete algo_;
-      if (myBtagger_!=0)   delete myBtagger_;
-      if (myCtagger_!=0)   delete myCtagger_;
-      if (myTautagger_!=0) delete myTautagger_;
-    }
-
-    /// Print parameters
-    void PrintParam();
+    void Finalize();
 
     /// Accessor to the jet clusterer name
-    std::string GetName() { return "name";}
+    std::string GetName() 
+    { 
+      if (algo_==0) return "NotDefined";
+      else return algo_->GetName();
+    }
 
-    /// Accessor to the jet clusterer parameters
-    std::string GetParameters();
-
+    /// Accessor to the b tagger parameters
     std::string bParameters()
     { return myBtagger_->GetParameters(); }
 
+    /// Accessor to the tau tagger parameters
     std::string tauParameters()
     { return myTautagger_->GetParameters(); }
+
+    /// Print parameters
+    void PrintParam()
+    { algo_->PrintParam(); }
+
+    /// Accessor to the jet clusterer parameters
+    std::string GetParameters()
+    { return algo_->GetParameters(); }
 
 
   };

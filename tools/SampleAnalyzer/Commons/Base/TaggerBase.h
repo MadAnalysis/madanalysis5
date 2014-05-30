@@ -102,20 +102,20 @@ class TaggerBase
     Bool_t IsLast(MCParticleFormat* part, EventFormat& myEvent);
 
     /// Set a parameter
-    virtual void SetParameter(const std::string& key, const std::string& value, std::string header="");
+    virtual bool SetParameter(const std::string& key, const std::string& value, std::string header="");
 
-   /// Function for identification
-   Bool_t IsIdentified() const
-   {
-     // no efficiency = default
-     if (!doEfficiency_) return true;
+    /// Function for identification
+    Bool_t IsIdentified() const
+    {
+      // no efficiency = default
+      if (!doEfficiency_) return true;
 
-     // applying efficiency
-     if (gRandom->Rndm() < Efficiency_) return true;
-     else return false;
-   }
+      // applying efficiency
+      if (gRandom->Rndm() < Efficiency_) return true;
+      else return false;
+    }
 
-   virtual std::string GetParameters()=0;
+    virtual std::string GetParameters()=0;
 
 };
 

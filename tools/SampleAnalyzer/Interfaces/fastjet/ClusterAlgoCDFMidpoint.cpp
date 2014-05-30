@@ -34,78 +34,78 @@ typedef fastjet::JetDefinition::Plugin FastJetPlugin;
 
 using namespace MA5;
 
-bool ClusterAlgoCDFMidpoint::Initialize(const std::map<std::string,std::string>& options)
+bool ClusterAlgoCDFMidpoint::SetParameter(const std::string& key, const std::string& value)
 { 
-  for (std::map<std::string,std::string>::const_iterator
-       it=options.begin();it!=options.end();it++)
+  // radius
+  if (key=="r")
   {
-    std::string key = ClusterAlgoBase::Lower(it->first);
-
-    // radius
-    if (key=="r")
-    {
-      float tmp=0;
-      std::stringstream str;
-      str << it->second;
-      str >> tmp;
-      if (tmp<0) WARNING << "R must be positive. Using default value R = " 
-                         << R_ << endmsg;
-      else R_=tmp;
-    }
-
-    // ptmin
-    else if (key=="ptmin")
-    {
-      float tmp=0;
-      std::stringstream str;
-      str << it->second;
-      str >> tmp;
-      if (tmp<0) WARNING << "Ptmin must be positive. Using default value Ptmin = " 
-                         << Ptmin_ << endmsg;
-      else Ptmin_=tmp;
-    }
-
-    // OverlapThreshold
-    else if (key=="overlapthreshold")
-    {
-      float tmp=0;
-      std::stringstream str;
-      str << it->second;
-      str >> tmp;
-      if (tmp<0) WARNING << "Overlap Threshold must be positive. "
-                         << "Using default value Overlap Threshold = " 
-                         << OverlapThreshold_ << endmsg;
-      else OverlapThreshold_=tmp;
-    }
-
-    // SeedThreshold
-    else if (key=="seedthreshold")
-    {
-      float tmp=0;
-      std::stringstream str;
-      str << it->second;
-      str >> tmp;
-      if (tmp<0) WARNING << "Seed Threshold must be positive. Using default value Seed Threshold = " 
-                         << SeedThreshold_ << endmsg;
-      else SeedThreshold_=tmp;
-    }
-
-    // ConeArea
-    else if (key=="conearea")
-    {
-      float tmp=0;
-      std::stringstream str;
-      str << it->second;
-      str >> tmp;
-      if (tmp<0) WARNING << "Cone Area Fraction must be positive. Using default value ConeAreaFraction = " 
-                         << ConeAreaFraction_ << endmsg;
-      else ConeAreaFraction_=tmp;
-    }
-
-    // other
-    else SettingsCommonPart(key,it->second);
+    float tmp=0;
+    std::stringstream str;
+    str << value;
+    str >> tmp;
+    if (tmp<0) WARNING << "R must be positive. Using default value R = " 
+                       << R_ << endmsg;
+    else R_=tmp;
   }
 
+  // ptmin
+  else if (key=="ptmin")
+  {
+    float tmp=0;
+    std::stringstream str;
+    str << value;
+    str >> tmp;
+    if (tmp<0) WARNING << "Ptmin must be positive. Using default value Ptmin = " 
+                       << Ptmin_ << endmsg;
+    else Ptmin_=tmp;
+  }
+
+  // OverlapThreshold
+  else if (key=="overlapthreshold")
+  {
+    float tmp=0;
+    std::stringstream str;
+    str << value;
+    str >> tmp;
+    if (tmp<0) WARNING << "Overlap Threshold must be positive. "
+                       << "Using default value Overlap Threshold = " 
+                       << OverlapThreshold_ << endmsg;
+    else OverlapThreshold_=tmp;
+  }
+
+  // SeedThreshold
+  else if (key=="seedthreshold")
+  {
+    float tmp=0;
+    std::stringstream str;
+    str << value;
+    str >> tmp;
+    if (tmp<0) WARNING << "Seed Threshold must be positive. Using default value Seed Threshold = " 
+                       << SeedThreshold_ << endmsg;
+    else SeedThreshold_=tmp;
+  }
+
+  // ConeArea
+  else if (key=="conearea")
+  {
+    float tmp=0;
+    std::stringstream str;
+    str << value;
+    str >> tmp;
+    if (tmp<0) WARNING << "Cone Area Fraction must be positive. Using default value ConeAreaFraction = " 
+                       << ConeAreaFraction_ << endmsg;
+    else ConeAreaFraction_=tmp;
+  }
+
+  // other
+  else return false;
+
+  return true;
+}
+
+
+bool ClusterAlgoCDFMidpoint::Initialize()
+{
   // Creating plugin
   fastjet::JetDefinition::Plugin* Plugin_ = new fastjet::CDFMidPointPlugin(R_, OverlapThreshold_, 
                                            SeedThreshold_, ConeAreaFraction_);

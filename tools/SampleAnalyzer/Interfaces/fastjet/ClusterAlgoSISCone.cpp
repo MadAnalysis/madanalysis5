@@ -35,80 +35,78 @@ typedef fastjet::JetDefinition::Plugin FastJetPlugin;
 
 using namespace MA5;
 
-bool ClusterAlgoSISCone::Initialize(const std::map<std::string,std::string>& options)
+bool ClusterAlgoSISCone::SetParameter(const std::string& key, const std::string& value)
 { 
-  for (std::map<std::string,std::string>::const_iterator
-       it=options.begin();it!=options.end();it++)
+  // radius
+  if (key=="r")
   {
-    std::string key = ClusterAlgoBase::Lower(it->first);
-
-    // radius
-    if (key=="r")
-    {
-      float tmp=0;
-      std::stringstream str;
-      str << it->second;
-      str >> tmp;
-      if (tmp<0) WARNING << "R must be positive. Using default value R = " 
-                         << R_ << endmsg;
-      else R_=tmp;
-    }
-
-    // ptmin
-    else if (key=="ptmin")
-    {
-      float tmp=0;
-      std::stringstream str;
-      str << it->second;
-      str >> tmp;
-      if (tmp<0) WARNING << "Ptmin must be positive. Using default value Ptmin = " 
-                         << Ptmin_ << endmsg;
-      else Ptmin_=tmp;
-    }
-
-    // OverlapThreshold
-    else if (key=="overlapthreshold")
-    {
-      float tmp=0;
-      std::stringstream str;
-      str << it->second;
-      str >> tmp;
-      if (tmp<0) WARNING << "Overlap Threshold must be positive. Using default value Overlap Threshold = " 
-                         << OverlapThreshold_ << endmsg;
-      else OverlapThreshold_=tmp;
-    }
-
-
-    // NPassMax
-    else if (key=="npassmax")
-    {
-      Int_t tmp=0;
-      std::stringstream str;
-      str << it->second;
-      str >> tmp;
-      if (tmp<0) WARNING << "NPassMax must be positive. Using default value NPassMax = " 
-                         << NPassMax_ << endmsg;
-      else NPassMax_=tmp;
-    }
-
-    // Protojet_ptmin
-    else if (key=="protojet_ptmin")
-    {
-      float tmp=0;
-      std::stringstream str;
-      str << it->second;
-      str >> tmp;
-      if (tmp<0) WARNING << "Protojet Ptmin must be positive. Using default value Protojet_ptmin = " 
-                         << Protojet_ptmin_ << endmsg;
-      else Protojet_ptmin_=tmp;
-    }
-
-    // other
-    else SettingsCommonPart(key,it->second);
+    float tmp=0;
+    std::stringstream str;
+    str << value;
+    str >> tmp;
+    if (tmp<0) WARNING << "R must be positive. Using default value R = " 
+                       << R_ << endmsg;
+    else R_=tmp;
   }
 
+  // ptmin
+  else if (key=="ptmin")
+  {
+    float tmp=0;
+    std::stringstream str;
+    str << value;
+    str >> tmp;
+    if (tmp<0) WARNING << "Ptmin must be positive. Using default value Ptmin = " 
+                       << Ptmin_ << endmsg;
+    else Ptmin_=tmp;
+  }
+
+  // OverlapThreshold
+  else if (key=="overlapthreshold")
+  {
+    float tmp=0;
+    std::stringstream str;
+    str << value;
+    str >> tmp;
+    if (tmp<0) WARNING << "Overlap Threshold must be positive. Using default value Overlap Threshold = " 
+                       << OverlapThreshold_ << endmsg;
+    else OverlapThreshold_=tmp;
+  }
+
+  // NPassMax
+  else if (key=="npassmax")
+  {
+    Int_t tmp=0;
+    std::stringstream str;
+    str << value;
+    str >> tmp;
+    if (tmp<0) WARNING << "NPassMax must be positive. Using default value NPassMax = " 
+                       << NPassMax_ << endmsg;
+    else NPassMax_=tmp;
+  }
+
+  // Protojet_ptmin
+  else if (key=="protojet_ptmin")
+  {
+    float tmp=0;
+    std::stringstream str;
+    str << value;
+    str >> tmp;
+    if (tmp<0) WARNING << "Protojet Ptmin must be positive. Using default value Protojet_ptmin = " 
+                       << Protojet_ptmin_ << endmsg;
+    else Protojet_ptmin_=tmp;
+  }
+
+  // other
+  else return false;
+  return true;
+}
+
+
+bool ClusterAlgoSISCone::Initialize()
+{
   // Creating plugin
-    fastjet::JetDefinition::Plugin* Plugin_ = new fastjet::SISConePlugin(R_, OverlapThreshold_, NPassMax_, Protojet_ptmin_);
+  fastjet::JetDefinition::Plugin* Plugin_ = new fastjet::SISConePlugin(R_, OverlapThreshold_, NPassMax_, Protojet_ptmin_);
 
   // Creating jet definition
   JetDefinition_ = new fastjet::JetDefinition(Plugin_);  

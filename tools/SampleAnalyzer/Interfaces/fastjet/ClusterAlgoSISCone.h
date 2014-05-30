@@ -63,7 +63,10 @@ class ClusterAlgoSISCone: public ClusterAlgoPlugin
     virtual ~ClusterAlgoSISCone () {}
 
     /// Initialization
-    virtual bool Initialize(const std::map<std::string,std::string>& options);
+    virtual bool Initialize();
+
+    /// Set parameter
+    virtual bool SetParameter(const std::string& key, const std::string& value);
 
     /// Print parameters
     virtual void PrintParam();

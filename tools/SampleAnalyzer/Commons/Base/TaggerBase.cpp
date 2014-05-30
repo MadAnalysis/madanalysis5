@@ -37,7 +37,7 @@ Bool_t TaggerBase::IsLast(MCParticleFormat* part, EventFormat& myEvent)
 
 
 
-void TaggerBase::SetParameter(const std::string& key, 
+bool TaggerBase::SetParameter(const std::string& key, 
                               const std::string& value,
                               std::string header)
 {
@@ -101,6 +101,8 @@ void TaggerBase::SetParameter(const std::string& key,
   }
 
   // Other
-  else WARNING << "Parameter " << header << key	<< " unknown." << endmsg;
+  else return false;
+
+  return true;
 
 }

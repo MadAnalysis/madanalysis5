@@ -82,8 +82,11 @@ class ClusterAlgoBase
     /// Jet clustering
     virtual bool Execute(SampleFormat& mySample, EventFormat& myEvent)=0;
 
+    /// Set parameter
+    virtual bool SetParameter(const std::string& key, const std::string& value)=0;
+
     /// Initialization
-    virtual bool Initialize(const std::map<std::string,std::string>& options)=0;
+    virtual bool Initialize()=0;
 
     /// Putting the string in lower case
     static std::string Lower(const std::string& word)
@@ -95,29 +98,15 @@ class ClusterAlgoBase
       return result;
     }
 
-    /// 
-    void SettingsCommonPart(const std::string& key, const std::string& value)
-    {
-      // exclusive_id
-      if (key=="exclusive_id")
-      {
-        int tmp=0;
-        std::stringstream str;
-        str << value;
-        str >> tmp;
-        if (tmp==1) ExclusiveId_=true;
-        else if (tmp==0) ExclusiveId_=false;
-        else
-        {
-          WARNING << "'exclusive_id' must be equal to 0 or 1. "
-                  << "Using default value 'exclusive_id' = " 
-                  << ExclusiveId_ << endmsg;
-        }
-      }
+    /// GetName
+    virtual std::string GetName()=0;
 
-      // Other
-      else WARNING << "Parameter " << key	<< " unknown." << endmsg;
-    }
+    /// Print parameters
+    virtual void PrintParam()=0;
+
+    /// Accessor to the jet clusterer parameters
+    virtual std::string GetParameters()=0;
+
 
 };
 

@@ -34,54 +34,53 @@ typedef fastjet::JetDefinition::Plugin FastJetPlugin;
 
 using namespace MA5;
 
-bool ClusterAlgoGridJet::Initialize(const std::map<std::string,std::string>& options)
+bool ClusterAlgoGridJet::SetParameter(const std::string& key, const std::string& value)
 { 
-  for (std::map<std::string,std::string>::const_iterator
-       it=options.begin();it!=options.end();it++)
+  // radius
+  if (key=="ymax")
   {
-    std::string key = ClusterAlgoBase::Lower(it->first);
-
-    // radius
-    if (key=="ymax")
-    {
-      float tmp=0;
-      std::stringstream str;
-      str << it->second;
-      str >> tmp;
-      if (tmp<0) WARNING << "Ymax must be positive. Using default value Ymax = " 
-                         << Ymax_ << endmsg;
-      else Ymax_=tmp;
-    }
-
-    // ptmin
-    else if (key=="ptmin")
-    {
-      float tmp=0;
-      std::stringstream str;
-      str << it->second;
-      str >> tmp;
-      if (tmp<0) WARNING << "Ptmin must be positive. Using default value Ptmin = " 
-                         << Ptmin_ << endmsg;
-      else Ptmin_=tmp;
-    }
-
-    // Requested Grid Spacing
-    else if (key=="requestedgridspacing")
-    {
-      float tmp=0;
-      std::stringstream str;
-      str << it->second;
-      str >> tmp;
-      if (tmp<0) WARNING << "RequestedGridSpacing must be positive. "
-                         << "Using default value RequestedGridSpacing = " 
-                         << RequestedGridSpacing_ << endmsg;
-      else RequestedGridSpacing_=tmp;
-    }
-
-    // other
-    else SettingsCommonPart(key,it->second);
+    float tmp=0;
+    std::stringstream str;
+    str << value;
+    str >> tmp;
+    if (tmp<0) WARNING << "Ymax must be positive. Using default value Ymax = " 
+                       << Ymax_ << endmsg;
+    else Ymax_=tmp;
   }
 
+  // ptmin
+  else if (key=="ptmin")
+  {
+    float tmp=0;
+    std::stringstream str;
+    str << value;
+    str >> tmp;
+    if (tmp<0) WARNING << "Ptmin must be positive. Using default value Ptmin = " 
+                       << Ptmin_ << endmsg;
+    else Ptmin_=tmp;
+  }
+
+  // Requested Grid Spacing
+  else if (key=="requestedgridspacing")
+  {
+    float tmp=0;
+    std::stringstream str;
+    str << value;
+    str >> tmp;
+    if (tmp<0) WARNING << "RequestedGridSpacing must be positive. "
+                       << "Using default value RequestedGridSpacing = " 
+                       << RequestedGridSpacing_ << endmsg;
+    else RequestedGridSpacing_=tmp;
+  }
+
+  // other
+  else return false;
+  return true;
+}
+
+
+bool ClusterAlgoGridJet::Initialize()
+{ 
   // Creating Plugin
   fastjet::JetDefinition::Plugin* Plugin_ = new fastjet::GridJetPlugin(Ymax_, RequestedGridSpacing_);
 
