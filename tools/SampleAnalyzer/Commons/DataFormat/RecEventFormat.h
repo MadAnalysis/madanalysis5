@@ -49,7 +49,7 @@ class LHCOReader;
 class ROOTReader;
 class TauTagger;
 class bTagger;
-class JetClusteringFastJet;
+class JetClusterer;
 class DelphesTreeReader;
 class DelphesMA5tuneTreeReader;
 
@@ -60,7 +60,7 @@ class RecEventFormat
   friend class ROOTReader;
   friend class TauTagger;
   friend class bTagger;
-  friend class JetClusteringFastJet;
+  friend class JetClusterer;
   friend class DelphesTreeReader;
   friend class DelphesMA5tuneTreeReader;
 

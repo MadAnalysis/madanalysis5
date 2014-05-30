@@ -117,7 +117,18 @@ bool Configuration::Initialize(int &argc, char *argv[], const bool &useRSM)
       else
       {
         pythoninterface_version_ = stamp.substr(0,result);
+        if (pythoninterface_version_.find("\"")==0)
+          pythoninterface_version_ = pythoninterface_version_.substr(1,std::string::npos);
+        if (pythoninterface_version_.size()>=2) 
+          if (pythoninterface_version_.find("\"")==(pythoninterface_version_.size()-1))
+            pythoninterface_version_ = pythoninterface_version_.substr(0,(pythoninterface_version_.size()-1));
+
         pythoninterface_date_ = stamp.substr(result+1,std::string::npos);
+        if (pythoninterface_date_.find("\"")==0)
+          pythoninterface_date_ = pythoninterface_date_.substr(1,std::string::npos);
+        if (pythoninterface_date_.size()>=2) 
+          if (pythoninterface_date_.find("\"")==(pythoninterface_date_.size()-1))
+            pythoninterface_date_ = pythoninterface_date_.substr(0,(pythoninterface_date_.size()-1));
       }
     }
 

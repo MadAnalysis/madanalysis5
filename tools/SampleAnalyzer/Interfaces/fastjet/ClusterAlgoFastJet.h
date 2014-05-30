@@ -70,16 +70,12 @@ class ClusterAlgoFastJet: public ClusterAlgoBase
     virtual ~ClusterAlgoFastJet(); 
 
     /// Jet clustering
-    virtual bool Execute(SampleFormat& mySample, EventFormat& myEvent);
+    virtual bool Execute(SampleFormat& mySample, EventFormat& myEvent, bool ExclusiveId,   
+                         const std::vector<bool>& vetos,
+                         const std::set<const MCParticleFormat*> vetos2);
 
     /// Initialization
     virtual bool Initialize()=0;
-
- private:
-    Bool_t IsLast(const MCParticleFormat* part, EventFormat& myEvent);
-    Bool_t ComingFromHadronDecay(const MCParticleFormat* part, const SampleFormat& mySample);
-    Bool_t IrrelevantPhoton(const MCParticleFormat* part, const SampleFormat& mySample);
-    void GetFinalState(const MCParticleFormat* part, std::set<const MCParticleFormat*>& finalstates);
  
 };
 

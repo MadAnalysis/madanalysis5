@@ -25,6 +25,8 @@
 //SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoFastJet.h"
 #include "SampleAnalyzer/Commons/Service/LoopService.h"
+#include "SampleAnalyzer/Commons/Service/Physics.h"
+#include "SampleAnalyzer/Commons/Service/PDGService.h"
 
 //FastJet headers
 #include <fastjet/ClusterSequence.hh>
@@ -39,29 +41,90 @@ ClusterAlgoFastJet::ClusterAlgoFastJet(std::string Algo):ClusterAlgoBase(Algo)
 ClusterAlgoFastJet::~ClusterAlgoFastJet() 
 { if (JetDefinition_!=0) delete JetDefinition_; }
 
-
-void ClusterAlgoFastJet::GetFinalState(const MCParticleFormat* part, std::set<const MCParticleFormat*>& finalstates)
+bool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent, bool ExclusiveId,   
+                                 const std::vector<bool>& vetos,
+                                 const std::set<const MCParticleFormat*> vetos2)
 {
-  for (unsigned int i=0; i<part->daughters().size(); i++)
+  // Creating a container for inputs
+  std::vector<fastjet::PseudoJet> inputs;
+
+  // Putting the good inputs into the containter
+  // Good inputs = - final state
+  //               - visible
+  //               - if exclusiveID=1: particles not vetoed
+  //               - if exclusiveID=0: all particles except muons 
+  for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
   {
-    if (PHYSICS->Id->IsFinalState(part->daughters()[i])) finalstates.insert(part->daughters()[i]);
-    else return GetFinalState(part->daughters()[i],finalstates);
-  }
-}
+    const MCParticleFormat& part = myEvent.mc()->particles()[i];
 
-Bool_t ClusterAlgoFastJet::IsLast(const MCParticleFormat* part, EventFormat& myEvent)
-{
-  for (unsigned int i=0; i<part->daughters().size(); i++)
+    // Selecting input for jet clustering
+    if (myEvent.mc()->particles()[i].statuscode()!=1)       continue;
+    if (PHYSICS->Id->IsInvisible(myEvent.mc()->particles()[i])) continue;
+
+    // ExclusiveId mode
+    if (ExclusiveId)
+    {
+      if (vetos[i]) continue;
+      if (vetos2.find(&part)!=vetos2.end()) continue;
+    }
+
+    // NonExclusive Id mode
+    else if (std::abs(myEvent.mc()->particles()[i].pdgid())==13) continue;
+
+    // Filling good particle for clustering
+    inputs.push_back(
+          fastjet::PseudoJet ( myEvent.mc()->particles()[i].px(), 
+                               myEvent.mc()->particles()[i].py(),
+                               myEvent.mc()->particles()[i].pz(),
+                               myEvent.mc()->particles()[i].e()   ));
+    inputs.back().set_user_index(i);
+  }
+
+
+  // Clustering
+  fastjet::ClusterSequence clust_seq(inputs, *JetDefinition_);
+
+  // Getting jets with PTmin = 0
+  std::vector<fastjet::PseudoJet> jets; 
+  if (Exclusive_) jets = clust_seq.exclusive_jets(0.);
+  else jets = clust_seq.inclusive_jets(0.);
+
+  // Calculating the MET  
+  ParticleBaseFormat* MET = myEvent.rec()->GetNewMet();
+  ParticleBaseFormat* MHT = myEvent.rec()->GetNewMht();
+
+  // shortcut for TET & THT
+  double & TET = myEvent.rec()->TET();
+  double & THT = myEvent.rec()->THT();
+
+  for (unsigned int i=0;i<jets.size();i++)
   {
-    if (part->daughters()[i]->pdgid()==part->pdgid()) return false;
+    TLorentzVector q(jets[i].px(),jets[i].py(),jets[i].pz(),jets[i].e());
+    (*MET) -= q;
+    (*MHT) -= q;
+    THT += jets[i].pt();
+    TET += jets[i].pt();
   }
-  return true;
-}
 
+  // Getting jets with PTmin
+  if (Exclusive_) jets = clust_seq.exclusive_jets(Ptmin_);
+  else jets = clust_seq.inclusive_jets(Ptmin_);
 
-bool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
-{
-
+  // Filling the dataformat with jets
+  for (unsigned int i=0;i<jets.size();i++)
+  {
+    RecJetFormat * jet = myEvent.rec()->GetNewJet();
+    jet->setMomentum(TLorentzVector(jets[i].px(),jets[i].py(),jets[i].pz(),jets[i].e()));
+    std::vector<fastjet::PseudoJet> constituents = clust_seq.constituents(jets[i]);
+    UInt_t tracks = 0;
+    for (unsigned int j=0;j<constituents.size();j++)
+    {
+      jet->AddConstituent(constituents[j].user_index());
+      //      if (std::abs(myEvent.mc()->particles()[constituents[j].user_index()].pdgid())==11) continue;
+      if (PDG->IsCharged(myEvent.mc()->particles()[constituents[j].user_index()].pdgid())) tracks++;
+    }
+    jet->ntracks_ = tracks;
+  }
 
   return true;
 }

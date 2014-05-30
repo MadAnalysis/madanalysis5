@@ -61,14 +61,6 @@ Bool_t JetClusteringFastJet::IsLast(const MCParticleFormat* part, EventFormat& m
 
 bool JetClusteringFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent)
 {
-  if (mySample.mc()==0 || myEvent.mc()==0) return false;
-  if (mySample.rec()==0) mySample.InitializeRec();
-  if (myEvent.rec() ==0) myEvent.InitializeRec();
-
-
-  // Reseting the reconstructed event
-  myEvent.rec()->Reset();
-
   // Veto
   std::vector<bool> vetos(myEvent.mc()->particles().size(),false);
   std::set<const MCParticleFormat*> vetos2;

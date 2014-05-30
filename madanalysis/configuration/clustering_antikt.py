@@ -53,8 +53,8 @@ class ClusteringAntiKt():
 
     def SampleAnalyzerConfigString(self):
         mydict = {}
-        mydict['R']     = str(self.radius)
-        mydict['PTmin'] = str(self.ptmin)
+        mydict['cluster.R']     = str(self.radius)
+        mydict['cluster.PTmin'] = str(self.ptmin)
         return mydict
 
         

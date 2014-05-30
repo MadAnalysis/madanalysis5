@@ -34,7 +34,7 @@
 #include <vector>
 #include <map>
 #include <string>
-
+#include <set>
 
 namespace MA5
 {
@@ -80,7 +80,9 @@ class ClusterAlgoBase
     virtual ~ClusterAlgoBase() {}
 
     /// Jet clustering
-    virtual bool Execute(SampleFormat& mySample, EventFormat& myEvent)=0;
+    virtual bool Execute(SampleFormat& mySample, EventFormat& myEvent, 
+                         bool ExclusiveId, const std::vector<bool>& vetos,
+                         const std::set<const MCParticleFormat*> vetos2)=0;
 
     /// Set parameter
     virtual bool SetParameter(const std::string& key, const std::string& value)=0;

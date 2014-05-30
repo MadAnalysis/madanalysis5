@@ -122,6 +122,9 @@ namespace MA5
     std::string GetParameters()
     { return algo_->GetParameters(); }
 
+ private:
+    Bool_t IsLast(const MCParticleFormat* part, EventFormat& myEvent);
+    void GetFinalState(const MCParticleFormat* part, std::set<const MCParticleFormat*>& finalstates);
 
   };
 

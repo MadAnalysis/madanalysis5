@@ -51,7 +51,7 @@ class RecJetFormat : public RecParticleFormat
 
   friend class LHCOReader;
   friend class ROOTReader;
-  friend class JetClusteringFastJet;
+  friend class ClusterAlgoFastJet;
   friend class bTagger;
   friend class TauTagger;
   friend class cTagger;

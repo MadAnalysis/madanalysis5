@@ -58,9 +58,9 @@ class ClusteringGridJet():
 
     def SampleAnalyzerConfigString(self):
         mydict = {}
-        mydict['Ymax']                 = str(self.ymax)
-        mydict['RequestedGridSpacing'] = str(self.spacing)
-        mydict['Ptmin']                = str(self.ptmin)
+        mydict['cluster.Ymax']                 = str(self.ymax)
+        mydict['cluster.RequestedGridSpacing'] = str(self.spacing)
+        mydict['cluster.Ptmin']                = str(self.ptmin)
         return mydict
 
         
