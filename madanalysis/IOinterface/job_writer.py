@@ -373,14 +373,14 @@ class JobWriter():
         file.write('      }\n')
         file.write('          manager.UpdateProgressBar();\n')
         if self.merging.enable:
-            file.write('      analyzer2->Execute(mySample,myEvent);\n')
+            file.write('      if (!analyzer2->Execute(mySample,myEvent)) continue;\n')
         if self.main.fastsim.package=="fastjet":
             file.write('      cluster1->Execute(mySample,myEvent);\n')
         elif self.main.fastsim.package=="delphes":
             file.write('      fastsim1->Execute(mySample,myEvent);\n')
         elif self.main.fastsim.package=="delphesMA5tune":
             file.write('      fastsim1->Execute(mySample,myEvent);\n')
-        file.write('      analyzer1->Execute(mySample,myEvent);\n')
+        file.write('      if (!analyzer1->Execute(mySample,myEvent)) continue;\n')
         if self.output!="":
             file.write('      writer1->WriteEvent(myEvent,mySample);\n')
         file.write('    }\n')

@@ -33,7 +33,7 @@ import copy
 def WriteExecute(file,main,part_list):
 
     # Function header
-    file.write('void user::Execute(SampleFormat& sample, ' +\
+    file.write('bool user::Execute(SampleFormat& sample, ' +\
                'const EventFormat& event)\n{\n')
 
     # Getting the event weight
@@ -52,6 +52,7 @@ def WriteExecute(file,main,part_list):
     WriteSelection(file,main,part_list)
 
     # End
+    file.write('  return true;\n')
     file.write('}\n\n')
 
 def WriteJobRank(part,file,rank,status):

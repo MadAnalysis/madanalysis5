@@ -50,9 +50,10 @@ bool MergingPlots::Initialize(const Configuration& cfg,
 }
 
 
-void MergingPlots::Execute(SampleFormat& mySample, const EventFormat& myEvent)
+bool MergingPlots::Execute(SampleFormat& mySample, const EventFormat& myEvent)
 {
 
+  return true;
 }
 
 void MergingPlots::Finalize(const SampleFormat& summary, const std::vector<SampleFormat>& files)

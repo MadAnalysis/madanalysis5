@@ -75,7 +75,7 @@ class MergingPlots : public AnalyzerBase
   virtual void Finalize(const SampleFormat& summary, const std::vector<SampleFormat>& files);
 
   /// Execution
-  virtual void Execute(SampleFormat& sample, const EventFormat& event);
+  virtual bool Execute(SampleFormat& sample, const EventFormat& event);
 
   /// Saving merging plots in the output file
   void Write_TextFormat(SAFWriter& output);

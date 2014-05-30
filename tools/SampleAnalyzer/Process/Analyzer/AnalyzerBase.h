@@ -135,14 +135,15 @@ class AnalyzerBase
   }
 
   /// Execute
-  void PreExecute(const SampleFormat& mySample,
+  bool PreExecute(const SampleFormat& mySample,
                   const EventFormat& myEvent)
   { 
     PHYSICS->Id->SetFinalState(myEvent.mc());
     PHYSICS->Id->SetInitialState(myEvent.mc());
+    return true;
   }
 
-  virtual void Execute(SampleFormat& mySample,
+  virtual bool Execute(SampleFormat& mySample,
                        const EventFormat& myEvent)=0;
 
   /// Accessor to analysis name
