@@ -93,9 +93,12 @@ bool ROOTReader::Initialize(const std::string& rawfilename,
 bool ROOTReader::SelectTreeReader()
 {
   TTree* mytree = 0;
+  bool DelphesMA5tune_Tag=false;
+  bool Delphes_Tag=false;
 
   // First case: Delphes
 #ifdef DELPHES_USE
+  Delphes_Tag=true;
   mytree = dynamic_cast<TTree*>(source_->Get("Delphes"));
   if (mytree!=0)
   {
@@ -107,6 +110,7 @@ bool ROOTReader::SelectTreeReader()
 
   // Second case: DelphesMA5tune
 #ifdef DELPHESMA5TUNE_USE
+  DelphesMA5tune_Tag=true;
   mytree = dynamic_cast<TTree*>(source_->Get("DelphesMA5tune"));
   if (mytree!=0)
   {
@@ -117,7 +121,32 @@ bool ROOTReader::SelectTreeReader()
 #endif
 
   // Other case: error
-  ERROR << "Impossible to access a known tree in the input file" << endmsg;
+  if (DelphesMA5tune_Tag && Delphes_Tag)
+  {
+    ERROR << "The input file seems to have not the Delphes or the DelphesMA5tune ROOT format" << endmsg;
+  }
+  else if (DelphesMA5tune_Tag)
+  {
+    ERROR << "The input file seems to have not the DelphesMA5tune ROOT format" << endmsg;
+    mytree = dynamic_cast<TTree*>(source_->Get("Delphes"));
+    if (mytree!=0)
+    {
+      ERROR << "In fact, Delphes ROOT format is detected." << endmsg;
+      ERROR << "Please uninstall DelphesMA5tune and install Delphes if you would like to read this file." << endmsg;    
+    }
+  }
+  else if (Delphes_Tag)
+  {
+    ERROR << "The input file seems to have not the Delphes ROOT format" << endmsg;
+    mytree = dynamic_cast<TTree*>(source_->Get("DelphesMA5tune"));
+    if (mytree!=0)
+    {
+      ERROR << "In fact, DelphesMA5tune ROOT format is detected." << endmsg;
+      ERROR << "Please uninstall Delphes and install DelphesMA5tune if you would like to read this file." << endmsg;    
+    }
+  }
+
+
   return false;
 }
 
