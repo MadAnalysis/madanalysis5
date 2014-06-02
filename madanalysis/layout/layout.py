@@ -821,7 +821,7 @@ class Layout:
         # Find a name for PDF file
         if self.main.archi_info.has_pdflatex:
            self.pdffile=self.main.lastjob_name+'/PDF/main.pdf'
-        elif self.main.archi_info.latex and self.main.archi_info.has_dvipdf:
+        elif self.main.archi_info.has_latex and self.main.archi_info.has_dvipdf:
            self.pdffile=self.main.lastjob_name+'/DVI/main.pdf'
         else:
            self.pdffile=''
