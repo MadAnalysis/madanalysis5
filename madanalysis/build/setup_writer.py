@@ -201,7 +201,7 @@ class SetupWriter():
 	    file.write('echo -e "'+StringTools.Fill('-',56)+'"$NORMAL\n')
             file.write('fi\n')
         else:
-            file.write('if ( \n')
+            file.write('if ( ')
             for ind in range(0,len(toCheck)):
                 if ind!=0:
                     file.write(' && ')
