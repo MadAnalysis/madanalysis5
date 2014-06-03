@@ -90,7 +90,7 @@ def WriteEventCut(file,main,iabs,icut):
         file.write('  if (')
         if main.selection[iabs].cut_type==CutType.SELECT:
             file.write('!')
-        file.write(tagName+'_global) return;\n')
+        file.write(tagName+'_global) return true;\n')
 
     # Counter
     file.write('  cuts_['+str(icut)+'].Increment(__event_weight__);\n')
