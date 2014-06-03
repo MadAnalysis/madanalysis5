@@ -833,7 +833,7 @@ class ConfigChecker:
                 logging.debug("-> not found")
                 self.PrintFAIL(warning=True)
                 logging.warning("DelphesMA5tune folder not found. Delphes-MA5tune ROOT format will be disabled.")
-                logging.warning("To enable this format, please type 'install delphes-MA5tune' package.")
+                logging.warning("To enable this format, please type 'install delphesMA5tune' package.")
                 return False
 
         # Check if the libraries and headers are available
@@ -847,7 +847,7 @@ class ConfigChecker:
                 self.PrintFAIL(warning=True)
 	        logging.warning("Header file called '"+filename+"' not found." +\
                                 "Delphes-MA5tune ROOT format will be disabled.")
-                logging.warning("To enable this format, please type 'install delphes-MA5tune' package.")
+                logging.warning("To enable this format, please type 'install delphesMA5tune' package.")
                 return False
             else:
                 logging.debug("-> found")
@@ -862,7 +862,7 @@ class ConfigChecker:
             if self.archi_info.delphesMA5tune_lib=="":
                 self.PrintFAIL(warning=True)
 	        logging.warning("Delphes-MA5tune library not found in "+self.archi_info.delphesMA5tune_lib_paths[0]+" folder. Delphes-MA5tune ROOT format will be disabled.")
-                logging.warning("To enable this format, please type 'install delphes-MA5tune' package.")
+                logging.warning("To enable this format, please type 'install delphesMA5tune' package.")
                 return False
 
         self.archi_info.libraries['DelphesMA5tune']=self.archi_info.delphesMA5tune_lib+":"+str(os.stat(self.archi_info.delphesMA5tune_lib).st_mtime)

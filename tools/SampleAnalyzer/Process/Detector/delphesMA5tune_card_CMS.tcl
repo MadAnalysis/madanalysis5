@@ -523,19 +523,13 @@ module BTagging BTagging {
 
   # https://twiki.cern.ch/twiki/bin/view/CMSPublic/PhysicsResultsBTV
   # default efficiency formula (misidentification rate)
-  add EfficiencyFormula {0} {0.001}
+  add EfficiencyFormula {0} { 0.0036*pt*exp(-78.22*pt*pt*pt*pt*pt*pt+129.81*pt*pt*pt*pt*pt-44.16*pt*pt*pt*pt-4.13*pt*pt*pt+0.49*pt*pt+1.25*pt+0.59) }
 
   # efficiency formula for c-jets (misidentification rate)
-  add EfficiencyFormula {4} {                                      (pt <= 15.0) * (0.000) + \
-                                                (abs(eta) <= 1.2) * (pt > 15.0) * (0.2*tanh(pt*0.03 - 0.4)) + \
-                              (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 15.0) * (0.1*tanh(pt*0.03 - 0.4)) + \
-                              (abs(eta) > 2.5)                                  * (0.000)}
+  add EfficiencyFormula {4} { 0.40*pt*exp(-2.19*pt*pt*pt*pt+2.79*pt*pt+3.01*pt-2.70) }
 
   # efficiency formula for b-jets
-  add EfficiencyFormula {5} {                                      (pt <= 15.0) * (0.000) + \
-                                                (abs(eta) <= 1.2) * (pt > 15.0) * (0.5*tanh(pt*0.03 - 0.4)) + \
-                              (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 15.0) * (0.4*tanh(pt*0.03 - 0.4)) + \
-                              (abs(eta) > 2.5)                                  * (0.000)}
+  add EfficiencyFormula {5} {  0.828*pow(0.048*pt,2.386)/(1+pow(0.048*pt,2.386))  }
 }
 
 module TauTagging TauTagging {
