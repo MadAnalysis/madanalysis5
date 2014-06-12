@@ -532,18 +532,18 @@ inline void ReplaceAll(std::string &name, const std::string &In, const std::stri
 inline std::string CleanName(const std::string &name)
 {
   std::string tmp=name;
-  ReplaceAll(tmp, "/", "_slash_");
+  ReplaceAll(tmp, "/",  "_slash_");
   ReplaceAll(tmp, "->", "_to_");
   ReplaceAll(tmp, ">=", "_greater_than_or_equal_to_");
-  ReplaceAll(tmp, ">", "_greater_than_");
+  ReplaceAll(tmp, ">",  "_greater_than_");
   ReplaceAll(tmp, "<=", "_smaller_than_or_equal_to_");
-  ReplaceAll(tmp, "<", "_smaller_than_");
-  ReplaceAll(tmp, " ", "_");
-  ReplaceAll(tmp, ",", "_");
-  ReplaceAll(tmp, "+", "_");
-  ReplaceAll(tmp, "-", "_");
-  ReplaceAll(tmp, "(", "_lp_");
-  ReplaceAll(tmp, ")", "_rp_");
+  ReplaceAll(tmp, "<",  "_smaller_than_");
+  ReplaceAll(tmp, " ",  "_");
+  ReplaceAll(tmp, ",",  "_");
+  ReplaceAll(tmp, "+",  "_");
+  ReplaceAll(tmp, "-",  "_");
+  ReplaceAll(tmp, "(",  "_lp_");
+  ReplaceAll(tmp, ")",  "_rp_");
   return tmp;
 }
 

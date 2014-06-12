@@ -309,8 +309,8 @@ from madanalysis.core.main import Main
 
 # Release version
 # Do not touch it !!!!!  
-version = "1.1.11.6"
-date = "2014/05/22"
+version = "1.1.11.10"
+date = "2014/06/13"
 
 # Configurating tab completion
 try: 
