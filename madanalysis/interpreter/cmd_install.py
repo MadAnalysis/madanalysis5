@@ -105,7 +105,7 @@ class CmdInstall(CmdBase):
     def help(self):
         logging.info("   Syntax: install <component>")
         logging.info("   Download and install a MadAnalysis component from the official site.")
-        logging.info("   List of available components : samples zlib fastjet MCatNLO-for-ma5 delphes delphesMA5tune")
+        logging.info("   List of available components : samples zlib fastjet delphes delphesMA5tune")
 
 
     def get_ncores(self):
@@ -676,7 +676,7 @@ class CmdInstall(CmdBase):
         if nargs>2:
             return []
         else:
-            output = ["samples","zlib","fastjet", "MCatNLO-for-ma5", "delphes", "delphesMA5tune" ]
+            output = ["samples","zlib","fastjet", "delphes", "delphesMA5tune" ]
             return self.finalize_complete(text,output)
     
 

@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+116  1.1.11.11 (2014/06/13) fuks:    hiding aMC@NLO utilities 
+
 115  1.1.11.10 (2014/06/13) fuks:    Fixing the version number 
 
 114  1.1.11.9 (2014/06/13) fuks:    Modification of the filename cleaning method used for the output 
