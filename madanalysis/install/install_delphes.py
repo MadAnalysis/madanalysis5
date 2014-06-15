@@ -33,6 +33,7 @@ class InstallDelphes(InstallBase):
         self.installdir = os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphes/')
 
     def Main(self):
+        print "ERIC"
         # Asking for number of cores
         ncores = self.get_ncores()
 

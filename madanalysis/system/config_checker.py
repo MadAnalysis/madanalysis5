@@ -363,16 +363,8 @@ class ConfigChecker:
         
         # Checking ROOT release
         logging.debug("Extract the ROOT version ...")
-        RootVersion = str(gROOT.GetVersionInt())
-        if len(RootVersion)<3:
-            self.PrintFAIL(warning=False)
-	    logging.error('Bad release of ROOT : '+gROOT.GetVersion()+\
-                          '. MadAnalysis5 needs ROOT 5.27 or higher.\n Please upgrade your version of ROOT.')
-            return False
-
-        RootVersionA = int(RootVersion[0])
-        RootVersionB = int(RootVersion[1]+RootVersion[2])
-        if RootVersionA!=5 or RootVersionB<27:
+        RootVersion = gROOT.GetVersionInt()
+        if RootVersion<52700:
             self.PrintFAIL(warning=False)
 	    logging.error('Bad release of ROOT : '+gROOT.GetVersion()+\
                           '. MadAnalysis5 needs ROOT 5.27 or higher.\n Please upgrade your version of ROOT.')

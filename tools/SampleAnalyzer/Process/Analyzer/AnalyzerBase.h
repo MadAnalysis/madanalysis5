@@ -54,6 +54,9 @@
 #include <Rtypes.h>
 #include <TCanvas.h>
 #include <TH1F.h>
+#include <TH2F.h>
+#include <TH1D.h>
+#include <TH2D.h>
 #include <TVector.h>
 #include <TClonesArray.h>
 

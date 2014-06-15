@@ -196,7 +196,7 @@ class CmdImport(CmdBase.CmdBase):
         if self.main.archi_info.has_pdflatex:
             if not FolderWriter.RemoveDirectory(self.main.lastjob_name+'/PDF',False):
                 return
-        if self.main.latex:
+        if self.main.archi_info.has_latex:
             if not FolderWriter.RemoveDirectory(self.main.lastjob_name+'/DVI',False):
                 return 
 
@@ -243,7 +243,7 @@ class CmdImport(CmdBase.CmdBase):
             logging.warning("pdflatex not installed -> no PDF report.")
 
         # DVI/PDF report
-        if self.main.latex:
+        if self.main.archi_info.has_latex:
 
             # Getting output filename for DVI report
             logging.info("   Generating the DVI report ...")
@@ -293,7 +293,8 @@ class CmdImport(CmdBase.CmdBase):
             jobber.Extract(self.main.datasets[i],\
                            layout.cutflow.detail[i],\
                            layout.merging.detail[i],\
-                           layout.plotflow.detail[i])
+                           layout.plotflow.detail[i],\
+                           False) #to Fix: False means 'no merging plots'
         return True    
            
 
