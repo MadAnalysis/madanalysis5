@@ -36,6 +36,8 @@
 
 // STL header
 #include <iostream>
+#include <vector>
+#include <map>
 
 
 // Delphes header
@@ -100,6 +102,8 @@ class DelphesMA5tuneTreeReader : public TreeReaderBase
   /// Finalize the event
   virtual bool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent);
 
+  std::vector<Int_t> MuonIndex_;
+  std::vector<Int_t> ElectronIndex_;
 
  private:
 

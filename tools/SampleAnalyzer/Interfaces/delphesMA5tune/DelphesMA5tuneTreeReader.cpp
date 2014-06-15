@@ -140,6 +140,8 @@ StatusCode::Type DelphesMA5tuneTreeReader::ReadEvent(EventFormat& myEvent, Sampl
 // -----------------------------------------------------------------------------
 bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 {
+  std::map<Int_t,unsigned int> MA5index;
+
   // MHT & THT
   for (unsigned int i=0; i<myEvent.rec()->jets_.size();i++)
   {
@@ -171,6 +173,13 @@ bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat
   myEvent.rec()->MHT_.momentum().SetE(myEvent.rec()->MHT_.momentum().Pt());
 
 
+  // Keep the MA5index
+  for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
+  {
+    MCParticleFormat& part = myEvent.mc()->particles_[i];
+    MA5index[part.extra1_] = i;
+  }
+
   // Mother pointer assignment
   for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
   {
@@ -188,25 +197,28 @@ bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat
       }
     }
     
-    unsigned int index1=myEvent.mc()->particles_[i].mothup1_;
-    unsigned int index2=myEvent.mc()->particles_[i].mothup2_;
-    if (index1!=0 && index2!=0)
+    
+    //    bool debug=false;;
+    //    if (myEvent.mc()->particles_[i].pdgid()==13) debug=true;
+    int index1=myEvent.mc()->particles_[i].mothup1_;
+    int index2=myEvent.mc()->particles_[i].mothup2_;
+    //    if (debug)  std::cout << "index1=" << index1 << "\tindex2=" << index2 << std::endl;
+    if (index1!=0)
     {
-      if (index1>=myEvent.mc()->particles_.size() ||
-          index2>=myEvent.mc()->particles_.size())
-      {
-        WARNING << "mother index is greater to nb of particles" << endmsg;
-        WARNING << " - index1 = " << index1 << endmsg;
-        WARNING << " - index2 = " << index2 << endmsg;
-        WARNING << " - particles.size() " << myEvent.mc()->particles_.size() << endmsg;
-        WARNING << "This event is skipped." << endmsg;
-        return false;
-      }
 
-      myEvent.mc()->particles_[i].mother1_ = &myEvent.mc()->particles_[index1-1];
-      myEvent.mc()->particles_[index1-1].daughters_.push_back(&myEvent.mc()->particles_[i]);
-      myEvent.mc()->particles_[i].mother2_ = &myEvent.mc()->particles_[index2-1];
-      myEvent.mc()->particles_[index2-1].daughters_.push_back(&myEvent.mc()->particles_[i]);
+      if (MA5index.find(index1)!=MA5index.end())
+      {
+        myEvent.mc()->particles_[i].mother1_ = &myEvent.mc()->particles_[MA5index[index1-1]];
+        myEvent.mc()->particles_[MA5index[index1-1]].daughters_.push_back(&myEvent.mc()->particles_[i]);
+      }
+    }
+    if (index2!=0)
+    {
+      if (MA5index.find(index2)!=MA5index.end())
+      {
+        myEvent.mc()->particles_[i].mother2_ = &myEvent.mc()->particles_[MA5index[index2-1]];
+        myEvent.mc()->particles_[MA5index[index2-1]].daughters_.push_back(&myEvent.mc()->particles_[i]);
+      }
     }
   }
 
@@ -215,6 +227,22 @@ bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat
   myEvent.mc()->MET_.momentum().SetE(myEvent.mc()->MET_.momentum().Pt());
   myEvent.mc()->MHT_.momentum().SetPz(0.);
   myEvent.mc()->MHT_.momentum().SetE(myEvent.mc()->MHT_.momentum().Pt());
+
+  // Link muons with MC particles
+  for (unsigned int i=0;i<myEvent.rec()->muons().size();i++)
+  {
+    RecLeptonFormat& part =myEvent.rec()->muons()[i];
+    if (MuonIndex_[i]<0) continue;
+    part.setMc(&myEvent.mc()->particles_[MA5index[MuonIndex_[i]]]);
+  }
+
+  // Link electrons with MC particles
+  for (unsigned int i=0;i<myEvent.rec()->electrons().size();i++)
+  {
+    RecLeptonFormat& part = myEvent.rec()->electrons()[i];
+    if (ElectronIndex_[i]<0) continue;
+    part.setMc(&myEvent.mc()->particles_[MA5index[ElectronIndex_[i]]]);
+  }
 
   // Normal end
   return true; 
@@ -228,6 +256,9 @@ bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat
 // -----------------------------------------------------------------------------
 void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
 {
+  MuonIndex_.clear();
+  ElectronIndex_.clear();
+
   // Fill electrons
   if (branchElectron_!=0)
   for (unsigned int i=0;i<static_cast<UInt_t>(branchElectron_->GetEntries());i++)
@@ -262,6 +293,7 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
     isolcone02->ntracks_ = part->nTrack02;
     isolcone02->deltaR_  = 0.2;
 
+    ElectronIndex_.push_back(part->MA5index);
   }
 
   // Fill photons
@@ -299,7 +331,6 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
 
   }
 
-  // Fill muons
   if (branchMuon_!=0)
   for (unsigned int i=0;i<static_cast<UInt_t>(branchMuon_->GetEntries());i++)
   {
@@ -331,6 +362,8 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
     isolcone02->sumET_   = part->sumET02;
     isolcone02->ntracks_ = part->nTrack02;
     isolcone02->deltaR_  = 0.2;
+
+    MuonIndex_.push_back(part->MA5index);
   }
 
   // Fill jets and taus
@@ -382,9 +415,12 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
     MCParticleFormat * gen = myEvent.mc()->GetNewParticle();
     gen->pdgid_      = part->PID;
     gen->statuscode_ = part->Status;
-    gen->mothup1_    = part->M1;
-    gen->mothup2_    = part->M2;
+    if (part->M1<0) gen->mothup1_ = 0;
+    else gen->mothup1_ = static_cast<UInt_t>(part->M1)+1;
+    if (part->M2<0) gen->mothup2_ = 0;
+    else gen->mothup2_ = static_cast<UInt_t>(part->M2)+1;
     gen->momentum_.SetPxPyPzE(part->Px,part->Py, part->Pz, part->E);
+    gen->extra1_ = part->MA5index;
   }
 
   // Track collection
