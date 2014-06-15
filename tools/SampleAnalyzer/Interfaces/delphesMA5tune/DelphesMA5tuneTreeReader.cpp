@@ -188,7 +188,7 @@ bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat
       }
     }
     
-    /*    unsigned int index1=myEvent.mc()->particles_[i].mothup1_;
+    unsigned int index1=myEvent.mc()->particles_[i].mothup1_;
     unsigned int index2=myEvent.mc()->particles_[i].mothup2_;
     if (index1!=0 && index2!=0)
     {
@@ -208,7 +208,6 @@ bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat
       myEvent.mc()->particles_[i].mother2_ = &myEvent.mc()->particles_[index2-1];
       myEvent.mc()->particles_[index2-1].daughters_.push_back(&myEvent.mc()->particles_[i]);
     }
-    */
   }
 
   // Finalize event
