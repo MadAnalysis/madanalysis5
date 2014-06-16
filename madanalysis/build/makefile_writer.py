@@ -349,7 +349,7 @@ class MakefileWriter():
                file.write('HDRS  = $(wildcard '+hfiles[ind]+')\n')
             else:
                file.write('HDRS += $(wildcard '+hfiles[ind]+')\n')
-        file.write('OBJS = $(SRCS:.cpp=.o)\n')
+        file.write('OBJS  = $(SRCS:.cpp=.o)\n')
         file.write('\n')
 
         # Name of the library
@@ -431,19 +431,23 @@ class MakefileWriter():
         file.write('precompile:\n')
         file.write('\n')
 
-        # Precompile
+        # Compile
         file.write('# Compile target\n')
         file.write('compile: precompile $(OBJS)\n')
         file.write('\n')
 
-        # Precompile
-        file.write('# Link target\n')
-        file.write('link: $(OBJS)\n')
+        # Compile each file
+        # TO NOT FORGET HDRS -> handling header dependencies
+        file.write('# Compile each file\n')
+        file.write('%.o: %.cpp $(HDRS)\n')
+        file.write('\t$(CXX) $(CXXFLAGS) -o $@ -c $<\n')
+        file.write('\n')
 
         # Link
+        file.write('# Link target\n')
+        file.write('link: $(OBJS)\n')
         if not ProductPath.endswith('/'):
             ProductPath=ProductPath+'/'
-            
         if isLibrary:
             if options.isMac:
                 file.write('\t$(CXX) -shared -flat_namespace -dynamiclib -undefined suppress -o '+ProductPath+'$(LIBRARY) $(OBJS) $(LIBFLAGS)\n')
