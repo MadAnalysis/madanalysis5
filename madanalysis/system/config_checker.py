@@ -303,8 +303,49 @@ class ConfigChecker:
         sys.path.append(self.archi_info.root_lib_path)
 
         # Check: looking for files
-        FilesToFind=[os.path.normpath(self.archi_info.root_lib_path+'/libPyROOT.so'), \
+        FilesToFind=[os.path.normpath(self.archi_info.root_lib_path+'/libCore.so'), \
                      os.path.normpath(self.archi_info.root_inc_path+'/TH1F.h')]
+        for file in FilesToFind:
+            logging.debug("Try to find "+file+" ...")
+            if os.path.isfile(file):
+                self.archi_info.libraries[file.split('/')[-1]]=file+":"+str(os.stat(file).st_mtime)
+            else:
+                self.PrintFAIL(warning=False)
+	        logging.error("ROOT file called '"+file+"' is not found")
+                logging.error("Please check that ROOT is properly installed.")
+                return False
+           
+        # Getting the features
+        ok, out, err = ShellCommand.ExecuteWithCapture([self.archi_info.root_bin_path+'/root-config','--features'],'./')
+        if not ok:
+            self.PrintFAIL(warning=False)
+            logging.error('problem with root-config')
+            return False
+        out=out.lstrip()
+        out=out.rstrip()
+        features = str(out).split()
+        features.sort()
+        for feature in features:
+            self.archi_info.root_features.append(feature)
+        if self.debug:
+            logging.debug("  features:      " + str(self.archi_info.root_features))
+
+        # Root Install
+        self.archi_info.root_priority=force
+        self.PrintOK()
+        return True
+
+
+    def checkPyROOT(self):
+
+        # Check if Python is install
+        if 'python' not in self.archi_info.root_features:
+            self.PrintFAIL(warning=False)
+            logging.error("ROOT has not been built with 'python' options.")
+            return False
+        
+        # Check: looking for files
+        FilesToFind=[os.path.normpath(self.archi_info.root_lib_path+'/libPyROOT.so')]
         for file in FilesToFind:
             logging.debug("Try to find "+file+" ...")
             if os.path.isfile(file):
@@ -325,20 +366,21 @@ class ConfigChecker:
                 self.archi_info.libraries[file.split('/')[-1]]=file+":"+str(os.stat(file).st_mtime)
                 found=True
                 break
+
+        # If check failed: looking for Python path
         if not found:
-            self.PrintFAIL(warning=False)
-            logging.error("ROOT file called 'ROOT.py' or 'ROOT.pyc' is not found")
-            logging.error("Please check that ROOT is properly installed.")
-            return False
+            libnames=['ROOT.py','ROOT.py']
+            logging.debug("Look for the libraries in Python Library folder ...") 
+            mypath, myfile = self.FindFilesWithPattern(sys.path,"ROOT.py*",libnames)
+            logging.debug("-> result: "+str(myfile))
+            if myfile=='':
+                self.PrintFAIL(warning=False)
+                logging.error("ROOT file called 'ROOT.py' or 'ROOT.pyc' is not found")
+                logging.error("Please check that ROOT is properly installed.")
+                return False
+            else:
+                self.archi_info.libraries[myfile.split('/')[-1]]=myfile+":"+str(os.stat(myfile).st_mtime)
 
-        # Root Install
-        self.archi_info.root_priority=force
-        self.PrintOK()
-        return True
-
-
-    def checkPyROOT(self):
-    
         # Loading ROOT library
         self.PrintLibrary("PyRoot libraries")
         logging.debug("")

@@ -67,6 +67,7 @@ class ArchitectureInfo:
         self.root_bin_path=""
         self.root_inc_path=""
         self.root_lib_path=""
+        self.root_features=[]
         self.zlib_inc_path=""
         self.zlib_lib_path=""
         self.zlib_lib=""

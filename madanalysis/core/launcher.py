@@ -178,6 +178,7 @@ def MainSession(mode,arglist,ma5dir,version,date):
 
     # Displaying special banner if auto-check mode is activated 
     if mode.debug:
+        log = logging.getLogger()
         log.setLevel(logging.DEBUG)
         logging.debug("")
         logging.debug("DEBUG MODE ACTIVATED")

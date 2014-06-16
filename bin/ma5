@@ -57,8 +57,7 @@ sys.path.insert(0, ma5dir)
 servicedir = ma5dir+'/tools/ReportGenerator/Services/'
 servicedir = os.path.normpath(servicedir)
 if not os.path.isdir(servicedir):
-    sys.exit('Detected MadAnalysis 5 service folder is not correct:\n' +\
-             ma5dir)
+    sys.exit('Detected MadAnalysis 5 service folder is not correct:\n' + ma5dir)
 sys.path.insert(0, servicedir)
 
 # Release version
