@@ -220,9 +220,10 @@ class ConfigChecker:
 
             # Using root-config
             logging.debug("root-config program found in: "+self.archi_info.root_bin_path)
-            logging.debug("Launch root-config ...") 
-            rootdirs = commands.getstatusoutput(self.archi_info.root_bin_path+'/root-config --libdir --incdir')
-            if rootdirs[0]>0:
+            logging.debug("Launch root-config ...")
+            theCommands = [self.archi_info.root_bin_path+'/root-config','--libdir','--incdir']
+            ok, out, err = ShellCommand.ExecuteWithCapture(theCommands,'./')
+            if not ok:
                 self.PrintFAIL(warning=False)
                 logging.error('ROOT module called "root-config" is not detected.\n'\
 		              +'Two explanations :n'\
@@ -231,9 +232,15 @@ class ConfigChecker:
 		              +' - ROOT binary folder must be placed in the '\
                               +'global environment variable $PATH')
                 return False
-
+     
             # Extracting ROOT library and header path
-            root_tmp = rootdirs[1].split()
+            out=out.lstrip()
+            out=out.rstrip()
+            root_tmp = out.split()
+            if len(root_tmp)<2:
+                self.PrintFAIL(warning=False)
+                logging.error('"root-config --libdir --incdir" does not provide good information.')
+                return False
             self.archi_info.root_inc_path = os.path.normpath(root_tmp[1])
             self.archi_info.root_lib_path = os.path.normpath(root_tmp[0])
             logging.debug("-> root-config found") 
@@ -280,8 +287,9 @@ class ConfigChecker:
    
             # Using root-config
             logging.debug("Try to detect root-config ...") 
-            rootdirs = commands.getstatusoutput('root-config --libdir --incdir')
-            if rootdirs[0]>0:
+            theCommands = ['root-config','--libdir','--incdir']
+            ok, out, err = ShellCommand.ExecuteWithCapture(theCommands,'./')
+            if not ok:
                 self.PrintFAIL(warning=False)
                 logging.error('ROOT module called "root-config" is not detected.\n'\
 		              +'Two explanations :n'\
@@ -292,7 +300,9 @@ class ConfigChecker:
                 return False
 
             # Extracting ROOT library and header path
-            root_tmp = rootdirs[1].split()
+            out=out.lstrip()
+            out=out.rstrip()
+            root_tmp = out.split()
             self.archi_info.root_inc_path = os.path.normpath(root_tmp[1])
             self.archi_info.root_lib_path = os.path.normpath(root_tmp[0])
             logging.debug("-> root-config found") 
@@ -338,6 +348,10 @@ class ConfigChecker:
 
     def checkPyROOT(self):
 
+        # Loading ROOT library
+        self.PrintLibrary("PyRoot libraries")
+        logging.debug("")
+
         # Check if Python is install
         if 'python' not in self.archi_info.root_features:
             self.PrintFAIL(warning=False)
@@ -381,9 +395,7 @@ class ConfigChecker:
             else:
                 self.archi_info.libraries[myfile.split('/')[-1]]=myfile+":"+str(os.stat(myfile).st_mtime)
 
-        # Loading ROOT library
-        self.PrintLibrary("PyRoot libraries")
-        logging.debug("")
+        # Import gROOT
         logging.debug("Try to import the gROOT module ...")
         try:
 	    from ROOT import gROOT
