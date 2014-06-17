@@ -668,8 +668,9 @@ class ConfigChecker:
             if not os.path.isfile(filename):
                 logging.debug('-> not found')
                 self.PrintFAIL(warning=True)
-	        logging.warning("Header file called '"+filename+"' not found. Gzip format will be disabled.")
-                logging.warning("To enable this format, please type 'install zlib' package.")
+                logging.warning("Header file called '"+filename+"' not found.")
+                logging.warning("Gzip format will be disabled.")
+                logging.warning("To enable this format, please type 'install zlib'.")
                 return False
             else:
                 logging.debug('-> found')
@@ -681,8 +682,9 @@ class ConfigChecker:
             logging.debug("-> result: "+str(self.archi_info.zlib_lib))
             if self.archi_info.zlib_lib=="":
                 self.PrintFAIL(warning=True)
-	        logging.warning("Zlib library not found in "+self.archi_info.zlib_lib_path+" folder. Gzip format will be disabled.")
-                logging.warning("To enable this format, please type 'install zlib' package.")
+                logging.warning("Zlib library not found in "+self.archi_info.zlib_lib_path+" folder.")
+                logging.warning("Gzip format will be disabled.")
+                logging.warning("To enable this format, please type 'install zlib'.")
                 return False
 
 
@@ -697,8 +699,9 @@ class ConfigChecker:
             logging.debug("-> result for the file: "+str(os.path.normpath(myfile)))
             if self.archi_info.zlib_inc_path=="":
                 self.PrintFAIL(warning=True)
-  	        logging.warning("Header file called 'zlib.h' not found. Gzip format will be disabled.")
-                logging.warning("To enable this format, please type 'install zlib' package.")
+                logging.warning("Header file called 'zlib.h' not found.")
+                logging.warning("Gzip format will be disabled.")
+                logging.warning("To enable this format, please type 'install zlib'.")
                 return False
             
             # lib
@@ -710,8 +713,9 @@ class ConfigChecker:
             logging.debug("-> result for lib files: "+str(self.archi_info.zlib_lib))
             if self.archi_info.zlib_lib_path=="":
                 self.PrintFAIL(warning=True)
-                logging.warning("Library called 'zlib' not found. Gzip format will be disabled.")
-                logging.warning("To enable this format, please type 'install zlib' package.")
+                logging.warning("Library called 'zlib' not found.")
+                logging.warning("Gzip format will be disabled.")
+                logging.warning("To enable this format, please type 'install zlib'.")
                 return False
 
         self.archi_info.libraries['ZLib']=self.archi_info.zlib_lib+":"+str(os.stat(self.archi_info.zlib_lib).st_mtime)
@@ -736,7 +740,8 @@ class ConfigChecker:
         if self.user_info.delphes_veto=='1':
             logging.debug("User setting: veto on Delphes")
             self.PrintFAIL(warning=True)
-	    logging.warning("Library called 'delphes' disabled. Delphes ROOT format will be disabled.")
+            logging.warning("Library called 'delphes' disabled.")
+            logging.warning("Delphes ROOT format will be disabled.")
             return False
 
         # Does the user force the paths?
@@ -776,9 +781,9 @@ class ConfigChecker:
             if not os.path.isfile(filename):
                 logging.debug("-> not found")
                 self.PrintFAIL(warning=True)
-	        logging.warning("Header file called '"+filename+"' not found." +\
-                                "Delphes ROOT format will be disabled.")
-                logging.warning("To enable this format, please type 'install delphes' package.")
+                logging.warning("Header file called '"+filename+"' not found.")
+                logging.warning("Delphes ROOT format will be disabled.")
+                logging.warning("To enable this format, please type 'install delphes'.")
                 return False
             else:
                 logging.debug("-> found")
@@ -790,8 +795,9 @@ class ConfigChecker:
             logging.debug("-> result: "+str(self.archi_info.delphes_lib))
             if self.archi_info.delphes_lib=="":
                 self.PrintFAIL(warning=True)
-	        logging.warning("Delphes library not found in "+self.archi_info.delphes_lib_paths[0]+" folder. Delphes ROOT format will be disabled.")
-                logging.warning("To enable this format, please type 'install delphes' package.")
+                logging.warning("Delphes library not found in "+self.archi_info.delphes_lib_paths[0]+" folder.")
+                logging.warning("Delphes ROOT format will be disabled.")
+                logging.warning("To enable this format, please type 'install delphes'.")
                 return False
 
         # Checking Delphes can be found in other folders
@@ -807,10 +813,11 @@ class ConfigChecker:
                 logging.debug("-> result for the file: "+str(os.path.normpath(myfile)))
             if len(self.archi_info.delphes_inc_paths)==0:
                 self.PrintFAIL(warning=True)
-  	        logging.warning("Header file called '/modules/ParticlePropagator.h' not found. Delphes ROOT format will be disabled.")
-                logging.warning("To enable this format, please type 'install delphes' package.")
+                logging.warning("Header file called '/modules/ParticlePropagator.h' not found.")
+                logging.warning("Delphes ROOT format will be disabled.")
+                logging.warning("To enable this format, please type 'install delphes'.")
                 return False
-            
+
             # lib
             logging.debug("Look for the Delphes libraries ...") 
             mypath, myfile = self.FindLibraryWithPattern('libDelphes.*',libnames)
@@ -821,8 +828,9 @@ class ConfigChecker:
                 logging.debug("-> result for lib files: "+str(self.archi_info.delphes_lib))
             if len(self.archi_info.delphes_lib_paths)==0:
                 self.PrintFAIL(warning=True)
-                logging.warning("Delphes library not found. Delphes format will be disabled.")
-                logging.warning("To enable this format, please type 'install delphes' package.")
+                logging.warning("Delphes library not found.")
+                logging.warning("Delphes format will be disabled.")
+                logging.warning("To enable this format, please type 'install delphes'.")
                 return False
 
         self.archi_info.libraries['Delphes']=self.archi_info.delphes_lib+":"+str(os.stat(self.archi_info.delphes_lib).st_mtime)
@@ -878,8 +886,9 @@ class ConfigChecker:
             else:
                 logging.debug("-> not found")
                 self.PrintFAIL(warning=True)
-                logging.warning("DelphesMA5tune folder not found. Delphes-MA5tune ROOT format will be disabled.")
-                logging.warning("To enable this format, please type 'install delphesMA5tune' package.")
+                logging.warning("DelphesMA5tune folder not found.")
+                logging.warning("Delphes-MA5tune ROOT format will be disabled.")
+                logging.warning("To enable this format, please type 'install delphesMA5tune'.")
                 return False
 
         # Check if the libraries and headers are available
@@ -891,9 +900,9 @@ class ConfigChecker:
             if not os.path.isfile(filename):
                 logging.debug("-> not found")
                 self.PrintFAIL(warning=True)
-	        logging.warning("Header file called '"+filename+"' not found." +\
-                                "Delphes-MA5tune ROOT format will be disabled.")
-                logging.warning("To enable this format, please type 'install delphesMA5tune' package.")
+                logging.warning("Header file called '"+filename+"' not found.")
+                logging.warning("Delphes-MA5tune ROOT format will be disabled.")
+                logging.warning("To enable this format, please type 'install delphesMA5tune'.")
                 return False
             else:
                 logging.debug("-> found")
@@ -907,8 +916,10 @@ class ConfigChecker:
             logging.debug("-> result for lib files: "+str(self.archi_info.delphesMA5tune_lib))
             if self.archi_info.delphesMA5tune_lib=="":
                 self.PrintFAIL(warning=True)
-	        logging.warning("Delphes-MA5tune library not found in "+self.archi_info.delphesMA5tune_lib_paths[0]+" folder. Delphes-MA5tune ROOT format will be disabled.")
-                logging.warning("To enable this format, please type 'install delphesMA5tune' package.")
+                logging.warning("Delphes-MA5tune library not found in "+\
+                  self.archi_info.delphesMA5tune_lib_paths[0]+" folder.")
+                logging.warning("Delphes-MA5tune ROOT format will be disabled.")
+                logging.warning("To enable this format, please type 'install delphesMA5tune'.")
                 return False
 
         self.archi_info.libraries['DelphesMA5tune']=self.archi_info.delphesMA5tune_lib+":"+str(os.stat(self.archi_info.delphesMA5tune_lib).st_mtime)
@@ -960,7 +971,8 @@ class ConfigChecker:
             if not os.path.isfile(filename):
                 logging.debug("-> not found")
                 self.PrintFAIL(warning=True)
-	        logging.warning("The FastJet package not found. JetClustering algorithms are disabled.")
+                logging.warning("The FastJet package is not found.")
+                logging.warning("JetClustering algorithms will be disabled.")
                 logging.warning("To enable this functionnality, please type 'install fastjet'.")
                 return False
             else:
@@ -991,7 +1003,8 @@ class ConfigChecker:
                     break
             if self.archi_info.fastjet_bin_path=='':
                 self.PrintFAIL(warning=True)
-	        logging.warning("The FastJet package not found. JetClustering algorithms are disabled.")
+                logging.warning("The FastJet is package not found.")
+                logging.warning("JetClustering algorithms will be disabled.")
                 logging.warning("To enable this functionnality, please type 'install fastjet'.")
                 return False
 
