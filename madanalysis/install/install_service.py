@@ -24,12 +24,11 @@
 
 from shell_command import ShellCommand
 import logging
+import os
+import sys
+import shutil
 
-class InstallBase():
-
-    def __init__(self,main):
-        self.main = main
-
+class InstallService():
 
     @staticmethod
     def convert_bytes(bytes):
@@ -65,17 +64,15 @@ class InstallBase():
         except:
             percent = 100
         theString="% 3.1f%%" % percent
-        logging.info( theString + " of " + InstallBase.convert_bytes(filesize) )
+        logging.info( "      "+theString + " of " + InstallService.convert_bytes(filesize) )
 
-
-    def get_ncores(self):
-        # Getting number max of cores
-        nmaxcores=self.main.archi_info.ncores
-        logging.info(" * How many cores would you like " +\
-                     "to use for the compilation ? default = max=" +\
+    @staticmethod
+    def get_ncores(nmaxcores,forced):
+        logging.info("   How many cores would you like " +\
+                     "to use for the compilation ? default = max = " +\
                      str(nmaxcores)+"")
         
-        if not self.main.forced:
+        if not forced:
             test=False
             while(not test):
                 answer=raw_input("   => Answer: ")
@@ -97,25 +94,30 @@ class InstallBase():
         return ncores
 
 
-    def untar(self,logdir,installdir,tarball,package):
+    @staticmethod
+    def untar(logname,installdir,tarball):
         # Unpacking the folder
         theCommands=['tar','xzf',tarball]
+        logging.debug('shell command: '+' '.join(theCommands))
         ok, out= ShellCommand.ExecuteWithLog(theCommands,\
-                                             logdir+'/unpack.log',\
+                                             logname,\
                                              installdir,\
                                              silent=False)
         if not ok:
             return False, ''
 
         # Removing the tarball
+        toRemove=installdir+'/'+tarball
+        logging.debug('removing the file: '+toRemove)
         try:
-            os.remove(installdir+'/'+tarball)
+            os.remove(toRemove)
         except:
             logging.debug('impossible to remove the tarball: '+tarball)
 
         # Getting the good folder
         import glob
         folder_content = glob.glob(installdir+'/*')
+        logging.debug('content of '+installdir+': '+str(folder_content))
         if len(folder_content)==0:
             logging.error('The content of the tarball is empty')
             return False, ''
@@ -125,50 +127,67 @@ class InstallBase():
             return True, installdir
 
 
-    def get_tmp(self):
-        # Getting temporary folder path
-        installdir=self.main.archi_info.tmpdir+'/ma5install'
-        logging.info(" * Creating a temporary folder '"+installdir+"' ...")
+    @staticmethod
+    def prepare_tmp(tmpdir):
+        # Debug message
+        logging.debug("Creating a temporary folder '"+tmpdir+"' ...")
 
         # Removing previous temporary folder path
-        if os.path.isdir(installdir):
+        if os.path.isdir(tmpdir):
+            logging.debug("This temporary folder '"+tmpdir+"' is found. Try to remove it ...")
             try:
-                shutil.rmtree(installdir)
+                shutil.rmtree(tmpdir)
             except:
-                logging.error("impossible to remove the folder '"+installdir+"'")
+                logging.error("impossible to remove the folder '"+tmpdir+"'")
                 return False, ""
 
         # Creating the temporary folder
+        logging.debug("Creating (again) a temporary folder '"+tmpdir+"' ...")
         try:
-            os.mkdir(installdir)
+            os.mkdir(tmpdir)
         except:
-            logging.error("impossible to create the folder '"+installdir+"'")
+            logging.error("impossible to create the folder '"+tmpdir+"'")
             return False, ""
 
         # Ok
-        logging.debug('Name of the temporary folder: '+installdir)
-        return True, installdir
+        logging.debug('Name of the temporary folder: '+tmpdir)
+        return True, tmpdir
 
-        
-    def wget(self,files,package,installdir):
+
+    @staticmethod        
+    def wget(filesToDownload,logFileName,installdir):
         
         import urllib
         ind=0
         error=False
-        log=open(self.main.archi_info.ma5dir+'/tools/'+package+'/url.log','w')
-        for file,url in files.items():
+
+        # Opening log file
+        try:
+            log=open(logFileName,'w')
+        except:
+            logging.error('impossible to create the file '+logFileName)
+            return False
+
+        # Loop over files to download
+        for file,url in filesToDownload.items():
             ind+=1
             result="OK"
-            logging.info(' * ' + str(ind)+"/"+str(len(files.keys()))+" Downloading the file "+url+" ...")
-
+            logging.info('    - ' + str(ind)+"/"+str(len(filesToDownload.keys()))+" "+url+" ...")
+            output = installdir+'/'+file
             try:
-                urllib.urlretrieve(url,installdir+'/'+file,InstallBase.reporthook)
+                urllib.urlretrieve(url,output,InstallService.reporthook)
             except:
-                logging.warning("Impossible to download.")
+                logging.warning("Impossible to download the package from "+\
+                                url + " to "+output)
                 result="ERROR"
                 error=True
             log.write(url+' : '+result+'\n')
-        log.close()    
+
+        # Close the file
+        try:
+            log.close()
+        except:
+            logging.error('impossible to close the file '+logFileName)
 
         # Result
         if error:
@@ -177,17 +196,10 @@ class InstallBase():
         else:
             return True
 
-    def display_log(self,installdir):
-        logging.error("More details can be found into the log files:")
-        logging.error(" - "+installdir+"/url.log")
-        logging.error(" - "+installdir+"/unpack.log")
-        logging.error(" - "+installdir+"/configuration.log")
-        logging.error(" - "+installdir+"/compilation.log")
-        logging.error(" - "+installdir+"/installation.log")
 
-
-    def check_ma5site(self):
-        logging.info(" * Testing the access to MadAnalysis 5 website ...")
+    @staticmethod
+    def check_ma5site():
+        logging.debug("Testing the access to MadAnalysis 5 website ...")
         import urllib
         try:
             urllib.urlopen('http://madanalysis.irmp.ucl.ac.be')
@@ -197,36 +209,34 @@ class InstallBase():
         return True        
 
 
-    def create_tools_folder(self):
-        if os.path.isdir(self.main.archi_info.ma5dir + '/tools'):
-            logging.info(" * The installation folder 'tools' is already created")
+    @staticmethod
+    def create_tools_folder(path):
+        if os.path.isdir(path):
+            logging.debug("   The installation folder 'tools' is already created.")
         else:
-            logging.info(" * Creating the 'tools' folder ...")
+            logging.debug("   Creating the 'tools' folder ...")
             try:
-                os.mkdir(self.main.archi_info.ma5dir + '/tools')
+                os.mkdir(path)
             except:
-                logging.error("impossible to create the folder 'tools'")
+                logging.error("impossible to create the folder 'tools'.")
                 return False
         return True    
 
         
-    def create_package_folder(self,package):
+    @staticmethod
+    def create_package_folder(toolsdir,package):
         
         # Removing the folder package
-        if os.path.isdir(self.main.archi_info.ma5dir + '/tools/'+package):
-            logging.info(" * Removing the current folder 'tools/"+package+"' ...")
-            try:
-                shutil.rmtree(self.main.archi_info.ma5dir + '/tools/'+package)
-            except:
-                logging.error("impossible to remove the folder 'tools/"+package+"'")
-                return False
+        if os.path.isdir(toolsdir+'/'+package):
+            logging.error("impossible to remove the folder 'tools/"+package+"'")
+            return False
 
         # Creating the folder package
         try:
-            os.mkdir(self.main.archi_info.ma5dir + "/tools/" + package)
+            os.mkdir(toolsdir+'/'+package)
         except:
             logging.error("impossible to create the folder 'tools/" +\
                           package+"'")
             return False
-        logging.info(" * Creation of the directory 'tools/" + package + "'") 
+        logging.debug("   Creation of the directory 'tools/" + package + "'") 
         return True

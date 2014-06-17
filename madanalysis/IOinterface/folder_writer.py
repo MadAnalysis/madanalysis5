@@ -35,7 +35,7 @@ class FolderWriter:
 
         # Checking if the directory is already defined
         if not os.path.isdir(path):
-            return True
+            return True, True
             
         # Asking the safety question
         if question and not Main.forced:
@@ -46,16 +46,16 @@ class FolderWriter:
                answer=raw_input("Answer: ")
                answer=answer.lower()
             if answer=="no" or answer=="n":
-                return False
+                return False, True
 
         # Removing the directory
         try:
             shutil.rmtree(path)
-            return True
+            return True, True
         except:
             logging.error("Impossible to remove the directory :")
             logging.error(" "+path)
-            return False
+            return False, False
         
         
     @staticmethod

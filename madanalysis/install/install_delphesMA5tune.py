@@ -30,12 +30,12 @@ import logging
 import glob
 import shutil
 
-class InstallDelphes:
+class InstallDelphesMA5tune:
 
     def __init__(self,main):
         self.main       = main
         self.toolsdir   = os.path.normpath(self.main.archi_info.ma5dir+'/tools')
-        self.installdir = os.path.normpath(self.toolsdir+'/delphes')
+        self.installdir = os.path.normpath(self.toolsdir+'/delphesMA5tune')
         self.tmpdir     = self.main.session_info.tmpdir
         self.ncores     = 1
         self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
@@ -64,13 +64,13 @@ class InstallDelphes:
     def CreatePackageFolder(self):
         if not InstallService.create_tools_folder(self.toolsdir):
             return False
-        if not InstallService.create_package_folder(self.toolsdir,'delphes'):
+        if not InstallService.create_package_folder(self.toolsdir,'delphesMA5tune'):
             return False
         return True
 
 
     def CreateTmpFolder(self):
-        ok, tmpdir = InstallService.prepare_tmp(self.main.session_info.tmpdir+'/MA5_delphes')
+        ok, tmpdir = InstallService.prepare_tmp(self.main.session_info.tmpdir+'/MA5_delphesMA5tune')
         if ok:
             self.tmpdir=tmpdir
         return ok
@@ -94,6 +94,37 @@ class InstallDelphes:
         # Unpacking the tarball
         ok, packagedir = InstallService.untar(logname, self.tmpdir,'delphes.tar.gz')
         if not ok:
+            return False
+        # Copying the patch
+        logging.debug('Copying the patch ...')
+        input=self.toolsdir+'/SampleAnalyzer/Interfaces/delphesMA5tune/patch_delphesMA5tune.tgz'
+        output=packagedir+'/patch_delphesMA5tune.tgz'
+        try:
+            shutil.copy(input,output)
+        except:
+            logging.error('impossible to copy the patch '+input+' to '+output)
+            return False
+        # Unpacking the folder
+        logname = os.path.normpath(self.installdir+'/unpack_patch.log')
+        theCommands=['tar','xzf','patch_delphesMA5tune.tgz']
+        logging.debug('shell command: '+' '.join(theCommands))
+        ok, out= ShellCommand.ExecuteWithLog(theCommands,\
+                                             logname,\
+                                             packagedir,\
+                                             silent=False)
+        if not ok:
+            logging.error('impossible to untar the patch '+output)
+            return False
+        # Applying the patch
+        logname = os.path.normpath(self.installdir+'/patch.log')
+        theCommands=['python','patch.py']
+        logging.debug('shell command: '+' '.join(theCommands))
+        ok, out= ShellCommand.ExecuteWithLog(theCommands,\
+                                             logname,\
+                                             packagedir,\
+                                             silent=False)
+        if not ok:
+            logging.error('impossible to apply the patch '+output)
             return False
         # Getting the list of files
         logging.debug('Getting the list of files ...')
@@ -187,8 +218,8 @@ class InstallDelphes:
             self.display_log()
             return False
 
-        if not os.path.isfile(self.installdir+'/libDelphes.so'):
-            logging.error("library labeled 'libDelphes.so' is missing.")
+        if not os.path.isfile(self.installdir+'/libDelphesMA5tune.so'):
+            logging.error("library labeled 'libDelphesMA5tune.so' is missing.")
             self.display_log()
             return False
         

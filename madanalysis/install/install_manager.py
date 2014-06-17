@@ -23,7 +23,9 @@
 
 
 import logging
+import sys
 
+from string_tools                                       import StringTools
 class InstallManager():
 
     def __init__(self,main):
@@ -34,103 +36,156 @@ class InstallManager():
         # Selection of the package
         package=rawpackage.lower()
         if package=='zlib':
+            from madanalysis.install.install_zlib import InstallZlib
             installer=InstallZlib(self.main)
         elif package=='fastjet':
+            from madanalysis.install.install_fastjet import InstallFastjet
             installer=InstallFastjet(self.main)
+        elif package=='fastjet-contrib':
+            from madanalysis.install.install_fastjetcontrib import InstallFastjetContrib
+            installer=InstallFastjetContrib(self.main)
         elif package=='delphes':
             from madanalysis.install.install_delphes import InstallDelphes
             installer=InstallDelphes(self.main)
         elif package=='delphesma5tune':
+            from madanalysis.install.install_delphesMA5tune import InstallDelphesMA5tune
             installer=InstallDelphesMA5tune(self.main)
         elif package=='samples':
+            from madanalysis.install.install_samples import InstallSamples
             installer=InstallSamples(self.main)
         else:
             logging.error('the package "'+rawpackage+'" is unknown')
             return False
 
+        # Writing the Makefiles
+        logging.info("")
+        logging.info("   **********************************************************")
+        logging.info("   "+StringTools.Center('Installing '+rawpackage,57))
+        logging.info("   **********************************************************")
+
         # Get list of the methods of the installer class
         # If the method does not exist, the method is not called
         methods = dir(installer)
 
+        # 0. Detecting previous installation
+        if 'Detect' in methods:
+            logging.info("   Detecting a previous installation ...")
+            if installer.Detect():
+                logging.info("   => found")
+                logging.info("   Removing the previous installation ...")
+                ok1, ok2 = installer.Remove(question=True)
+                if not ok1 and not ok2:
+                    self.PrintBad()
+                    return False
+                elif not ok1 and ok2:
+                    self.PrintSkip()
+                    return True
+            else:
+                logging.info("   => not found. OK")
+
         # 1. Asking for number of cores
         if 'GetNcores' in methods:
-            ncores = installer.GetNcores()
+            installer.GetNcores()
+            logging.info("   **********************************************************")
 
         # 2. Creating a folder
-        installdir=''
         if 'CreatePackageFolder' in methods:
-            logging.info("Creating a devoted folder ...")
-            ok, installdir = installer.CreatePackageFolder()
-            if not ok:
+            logging.info("   Creating a devoted folder ...")
+            if not installer.CreatePackageFolder():
+                self.PrintBad()
                 return False
-            logging.debug('install folder: '+installdir)
-
+    
         # 3. Creating a temporary folder
-        tmpdir=''
         if 'CreateTmpFolder' in methods:
-            logging.info("Creating a temporary folder ...")
-            ok, tmpdir = installer.get_tmp()
-            if not ok:
+            logging.info("   Creating a temporary folder ...")
+            if not installer.CreateTmpFolder():
+                self.PrintBad()
                 return False
-            logging.debug('temporary folder: '+tmpdir)
-
-        # Choose the working path
-        if tmpdir!='':
-            workdir=tmpdir
-        else:
-            workdir=installdir
 
         # 4. Downloading
         if 'Download' in methods:
-            logging.info("Downloading the package ...")
-            if not installer.Download(workdir):
+            logging.info("   Downloading the package ...")
+            if not installer.Download():
+                self.PrintBad()
                 return False
 
         # 5. Unpacking
-        # workdir could be modified. Example:
-        # /tmp/econte/ -> /tmp/econte/fastjet3.4/
         if 'Unpack' in methods:
-            logging.info("Unpacking the package ...")
-            ok, workdir = installer.Unpack(workdir)
-            if not ok:
+            logging.info("   Unpacking the package ...")
+            if not installer.Unpack():
+                self.PrintBad()
                 return False
 
         # 6. Configuring
         if 'Configure' in methods:
-            logging.info("Configuring the package ...")
-            if not installer.Configure(workdir):
+            logging.info("   Configuring the package ...")
+            if not installer.Configure():
+                self.PrintBad()
                 return False
 
         # 7. Compiling
         if 'Build' in methods:
-            logging.info("Building the package ...")
-            if not installer.Build(workdir):
+            logging.info("   Building the package ...")
+            if not installer.Build():
+                self.PrintBad()
                 return False
 
         # 8. Checking
-        if 'Check' in methods:
-            logging.info("Checking the compilation ...")
-            if not installer.Check(workdir):
+        if 'PreCheck' in methods:
+            logging.info("   Checking the building ...")
+            if not installer.PreCheck():
+                self.PrintBad()
                 return False
-        
-        # Transfering the data : workdir -> installdir
-        # 2 possibilities:
-        #   - tmpdir -> installdir
-        #   - installdir/package454.5 -> installdir/
+
+        # 9. Clean
+        if 'Clean' in methods:
+            logging.info("   Cleaning the building ...")
+            if not installer.Clean():
+                self.PrintBad()
+                return False
+
+        # 9. Install
         if 'Install' in methods:
-            logging.info("Transfering the data form the temporary to the definitive folder ...")
-            if not installer.Install(workdir,installdir):
+            logging.info("   Transfering the data from the temporary to the definitive folder ...")
+            if not installer.Install():
+                self.PrintBad()
                 return False
 
-        # 9. Checking (again)
-        if 'Check' in methods and installdir!=workdir:
-            logging.info("Checking the installation ...")
-            if not installer.Check(installdir):
+        # 10. Checking (again)
+        if 'Check' in methods:
+            logging.info("   Checking the installation ...")
+            if not installer.Check():
+                self.PrintBad()
                 return False
 
-        # 10. End: restart MA5 session?
-        logging.info("Installation complete.")
-        if installer.NeedRestart():
+        # 11. End: restart MA5 session?
+        self.PrintGood()
+
+        if installer.NeedToRestart():
             return 'restart'
         else:
             return True
+
+    def PrintGood(self):
+        logging.info("   Installation complete.")
+        sys.stdout.write("   => Status:")
+        sys.stdout.write('\x1b[32m'+'[OK]'+'\x1b[0m'+'\n')
+        sys.stdout.flush()
+        logging.info("   **********************************************************")
+        logging.info("")
+
+    def PrintSkip(self):
+        logging.info("   Installation skipped.")
+        sys.stdout.write("   => Status:")
+        sys.stdout.write('\x1b[35m'+'[SKIPPED]'+'\x1b[0m'+'\n')
+        sys.stdout.flush()
+        logging.info("   **********************************************************")
+        logging.info("")
+
+    def PrintBad(self):
+        logging.info("   Installation NOT complete.")
+        sys.stdout.write("   => Status:")
+        sys.stdout.write('\x1b[31m'+'[FAILURE]'+'\x1b[0m'+'\n')
+        sys.stdout.flush()
+        logging.info("   **********************************************************")
+        logging.info("")

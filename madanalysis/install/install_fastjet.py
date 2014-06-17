@@ -27,18 +27,16 @@ from shell_command import ShellCommand
 import os
 import sys
 import logging
-import glob
-import shutil
 
-class InstallDelphes:
+class InstallFastjet:
 
     def __init__(self,main):
         self.main       = main
+        self.installdir = os.path.normpath(self.main.archi_info.ma5dir+'/tools/fastjet/')
         self.toolsdir   = os.path.normpath(self.main.archi_info.ma5dir+'/tools')
-        self.installdir = os.path.normpath(self.toolsdir+'/delphes')
         self.tmpdir     = self.main.session_info.tmpdir
         self.ncores     = 1
-        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
+        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.0.6.tar.gz"}
 
 
     def Detect(self):
@@ -64,18 +62,17 @@ class InstallDelphes:
     def CreatePackageFolder(self):
         if not InstallService.create_tools_folder(self.toolsdir):
             return False
-        if not InstallService.create_package_folder(self.toolsdir,'delphes'):
+        if not InstallService.create_package_folder(self.toolsdir,'fastjet'):
             return False
         return True
 
 
     def CreateTmpFolder(self):
-        ok, tmpdir = InstallService.prepare_tmp(self.main.session_info.tmpdir+'/MA5_delphes')
+        ok, tmpdir = InstallService.prepare_tmp(self.main.session_info.tmpdir+'/MA5_fastjet')
         if ok:
             self.tmpdir=tmpdir
         return ok
-
-
+        
     def Download(self):
         # Checking connection with MA5 web site
         if not InstallService.check_ma5site():
@@ -92,42 +89,23 @@ class InstallDelphes:
         # Logname
         logname = os.path.normpath(self.installdir+'/unpack.log')
         # Unpacking the tarball
-        ok, packagedir = InstallService.untar(logname, self.tmpdir,'delphes.tar.gz')
+        ok, packagedir = InstallService.untar(logname, self.tmpdir,'fastjet.tar.gz')
         if not ok:
             return False
-        # Getting the list of files
-        logging.debug('Getting the list of files ...')
-        myfiles=glob.glob(packagedir+'/*')
-        logging.debug('=> '+str(myfiles))
-        # Moving files from packagedir to installdir
-        logging.debug('Moving files from '+packagedir+' to '+self.installdir+' ...')
-        for myfile in myfiles:
-            myfile2=myfile.split('/')[-1]
-            if os.path.isdir(myfile):
-                try:
-                    shutil.copytree(myfile,self.installdir+'/'+myfile2)
-                except:
-                    logging.error('impossible to move the file/folder '+myfile+' from '+packagedir+' to '+self.installdir)
-                    return False
-            else:
-                try:
-                    shutil.copy(myfile,self.installdir+'/'+myfile2)
-                except:
-                    logging.error('impossible to move the file/folder '+myfile+' from '+packagedir+' to '+self.installdir)
-                    return False
-        # Ok
+        # Ok: returning the good folder
+        self.tmpdir=packagedir
         return True
 
 
     def Configure(self):
         # Input
-        theCommands=['./configure']
+        theCommands=['./configure','--prefix='+self.installdir]
         logname=os.path.normpath(self.installdir+'/configuration.log')
         # Execute
         logging.debug('shell command: '+' '.join(theCommands))
         ok, out= ShellCommand.ExecuteWithLog(theCommands,\
                                              logname,\
-                                             self.installdir,\
+                                             self.tmpdir,\
                                              silent=False)
         # return result
         if not ok:
@@ -144,7 +122,7 @@ class InstallDelphes:
         logging.debug('shell command: '+' '.join(theCommands))
         ok, out= ShellCommand.ExecuteWithLog(theCommands,\
                                              logname,\
-                                             self.installdir,\
+                                             self.tmpdir,\
                                              silent=False)
         # return result
         if not ok:
@@ -153,42 +131,49 @@ class InstallDelphes:
         return ok
 
 
-    def Clean(self):
+    def Install(self):
         # Input
-        theCommands=['make','clean']
-        logname=os.path.normpath(self.installdir+'/clean.log')
+        theCommands=['make','install']
+        logname=os.path.normpath(self.installdir+'/installation.log')
         # Execute
         logging.debug('shell command: '+' '.join(theCommands))
         ok, out= ShellCommand.ExecuteWithLog(theCommands,\
                                              logname,\
-                                             self.installdir,\
+                                             self.tmpdir,\
                                              silent=False)
         # return result
         if not ok:
-            logging.error('impossible to clean the project. For more details, see the log file:')
+            logging.error('impossible to build the project. For more details, see the log file:')
             logging.error(logname)
         return ok
 
 
-
     def Check(self):
         # Check folders
-        dirs = [self.installdir+"/modules",\
-                self.installdir+"/classes"]
+        dirs = [self.installdir+"/include",\
+                self.installdir+"/lib",\
+                self.installdir+"/bin"]
         for dir in dirs:
             if not os.path.isdir(dir):
                 logging.error('folder '+dir+' is missing.')
                 self.display_log()
                 return False
 
-        # Check one header file
-        if not os.path.isfile(self.installdir+'/modules/ParticlePropagator.h'):
-            logging.error("header labeled 'modules/ParticlePropagator.h' is missing.")
+        # Check fastjet executable
+        if not os.path.isfile(self.installdir+'/bin/fastjet-config'):
+            logging.error("binary labeled 'fastjet-config' is missing.")
             self.display_log()
             return False
 
-        if not os.path.isfile(self.installdir+'/libDelphes.so'):
-            logging.error("library labeled 'libDelphes.so' is missing.")
+        # Check one header file
+        if not os.path.isfile(self.installdir+'/include/fastjet/PseudoJet.hh'):
+            logging.error("header labeled 'include/fastjet/PseudoJet.hh' is missing.")
+            self.display_log()
+            return False
+
+        if (not os.path.isfile(self.installdir+'/lib/libfastjet.so')) and \
+           (not os.path.isfile(self.installdir+'/lib/libfastjet.a')):
+            logging.error("library labeled 'libfastjet.so' or 'libfastjet.a' is missing.")
             self.display_log()
             return False
         
@@ -200,7 +185,7 @@ class InstallDelphes:
         logging.error(" - "+os.path.normpath(self.installdir+"/unpack.log"))
         logging.error(" - "+os.path.normpath(self.installdir+"/configuration.log"))
         logging.error(" - "+os.path.normpath(self.installdir+"/compilation.log"))
-        logging.error(" - "+os.path.normpath(self.installdir+"/clean.log"))
+        logging.error(" - "+os.path.normpath(self.installdir+"/installation.log"))
 
     def NeedToRestart(self):
         return True
