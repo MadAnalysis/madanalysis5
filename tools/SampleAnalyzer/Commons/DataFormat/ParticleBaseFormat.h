@@ -30,6 +30,7 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <cmath>
 
 // ROOT headers
 #include <TLorentzVector.h>
