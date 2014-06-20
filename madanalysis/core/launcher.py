@@ -47,7 +47,7 @@ class MA5mode():
 ################################################################################
 # Function DecodeArguments
 ################################################################################
-def DecodeArguments():
+def DecodeArguments(version, date):
     
     import sys
     import os
@@ -85,7 +85,7 @@ def DecodeArguments():
         elif o in ["-s","--script"]:
             mode.scriptmode=True
         elif o in ["-v","--version","--release"]:
-            logging.info("MA5 release : " + self.main.archi_info.version + " " + self.main.archi_info.date  + "\n")
+            logging.info("MA5 release : " + version + " [ " + date  + " ]")
             sys.exit()
         elif o in ["--debug"]:
             mode.debug = True
@@ -309,7 +309,8 @@ def LaunchMA5(version, date, ma5dir):
             readline.parse_and_bind("tab: complete")
 
     # Read arguments
-    mode,arglist = DecodeArguments()
+    mode,arglist = DecodeArguments(version, date)
+
 
     # Loop over MA5 sessions
     # Goal: allowing to restart

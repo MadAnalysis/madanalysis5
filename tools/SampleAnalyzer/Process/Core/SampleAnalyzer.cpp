@@ -196,13 +196,13 @@ inline int CreateDir(std::string dirname)
 bool SampleAnalyzer::CreateDirectoryStructure()
 {
   // Check if the output directory exists -> if not: create it
-  std::string dirname="./Output";
+  std::string dirname="../Output";
   if(CreateDir(dirname)==-1) { return false; }
 
   // Check whether a directory for the investigated dataset exists -> if not create it
   dirname = cfg_.GetInputFileName();
   size_t pos = dirname.find_last_of('/');
-  if(pos!=std::string::npos) dirname = "./Output/" + dirname.substr(pos+1);
+  if(pos!=std::string::npos) dirname = "../Output/" + dirname.substr(pos+1);
   else                       dirname = "../Output/" + dirname;
   if(CreateDir(dirname)==-1) { return false; }
 
@@ -587,7 +587,7 @@ bool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
     std::string datasetname = cfg_.GetInputFileName();
     size_t pos = datasetname.find_last_of('/');
     if(pos!=std::string::npos) datasetname = datasetname.substr(pos+1);
-    std::string general = "./Output/" + datasetname + "/" + datasetname + ".saf";
+    std::string general = "../Output/" + datasetname + "/" + datasetname + ".saf";
     SAFWriter out;
     out.Initialize(&cfg_, general.c_str());
     out.WriteHeader(summary);

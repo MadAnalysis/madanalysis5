@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+127  1.1.11.14 (2014/06/20) fuks:    bug fixes: version number printout; writing of the output saf files 
+                                   bugged in specific cases 
+
 126  1.1.11.13 (2014/06/18) fuks:    Big fix in the ma5commons 
 
 124  1.1.11.12 (2014/06/17) fuks:    Formatting of the printed messages updated 
