@@ -69,7 +69,7 @@ bool ROOTReader::Initialize(const std::string& rawfilename,
   CleanFilename(filename_);
 
   // Opening the file
-  source_ = new TFile(filename_.c_str());
+  source_ = TFile::Open(filename_.c_str());
   
   // Check if the input is properly opened
   bool test=true;
