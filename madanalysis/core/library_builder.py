@@ -42,21 +42,32 @@ class LibraryBuilder:
 
         # Look for 'lib' directory
         name='/tools/SampleAnalyzer/Lib'
+        logging.debug('-> looking for folder: '+name)
         if not os.path.isdir(self.archi_info.ma5dir+name):
             try:
-       	        FirstUse=True
+                FirstUse=True
                 os.mkdir(self.archi_info.ma5dir+name)
             except:
                 logging.error("Impossible to create the directory :")
                 logging.error(" "+name)
-                return False
+                return False, False
 
         # Look for the shared library 'MadAnalysis' and 'config' file
-        if not os.path.isfile(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libprocess_for_ma5.so') \
-           or not os.path.isfile(self.archi_info.ma5dir+'/tools/architecture.ma5') \
-           or not os.path.isfile(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libcommons_for_ma5.so'):
-            FirstUse=True
-            return True, False
+        librairies = [self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libprocess_for_ma5.so',\
+                        self.archi_info.ma5dir+'/tools/architecture.ma5',\
+                        self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libcommons_for_ma5.so']
+        for lib in librairies:
+            logging.debug('-> looking for file: '+lib)
+            if not os.path.isfile(lib):
+                logging.debug('\t-> file '+ lib + " not found.")
+                FirstUse = True
+                return True, False
+
+#        if not os.path.isfile(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libprocess_for_ma5.so'): \
+#           or not os.path.isfile(self.archi_info.ma5dir+'/tools/architecture.ma5') \
+#           or not os.path.isfile(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libcommons_for_ma5.so'):
+#            FirstUse=True
+#            return True, False
 
         # Look for optional library
         libraries = []
@@ -70,11 +81,14 @@ class LibraryBuilder:
             libraries.append(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphesMA5tune_for_ma5.so')
         for library in libraries:
             if not os.path.isfile(library):
+                logging.debug('\t-> library '+ library + " not found.")
                 return False, True
 
         # Importing the configuration stored with the library
         if not FirstUse:
+            logging.debug('-> loading the architecture file.')
             if not self.archi_info_stored.load(self.archi_info.ma5dir+'/tools/architecture.ma5'):
+                logging.debug('\t-> failed to load the architecture file.')
                 FirstUse=True
                 return True, False
 

@@ -250,8 +250,8 @@ class CheckUp():
         # Optional packages
         logging.info("Checking graphical packages:")
         checker = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
-        self.archi_info.has_gnuplot       = checker.checkGnuplot()
-        self.archi_info.has_matplotlib    = checker.checkMatplotlib()
+        self.session_info.has_gnuplot       = checker.checkGnuplot()
+        self.session_info.has_matplotlib    = checker.checkMatplotlib()
         self.archi_info.has_root          = checker.checkRoot()
         return True
 

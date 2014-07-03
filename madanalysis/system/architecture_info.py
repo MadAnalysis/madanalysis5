@@ -45,6 +45,7 @@ class ArchitectureInfo:
         self.has_latex          = False
         self.has_dvipdf         = False
         self.has_fortran        = False
+        self.has_root           = False
         self.isMac              = False
         
         self.platform         = ""

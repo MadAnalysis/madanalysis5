@@ -409,8 +409,8 @@ class Main():
             return False
         if not checkup.CheckOptionalPackages():
             return False
-        if not checkup.CheckGraphicalPackages():
-            return False
+#        if not checkup.CheckGraphicalPackages():
+#            return False
         if not checkup.SetFolder():
             return False
         return True

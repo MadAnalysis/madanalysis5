@@ -30,6 +30,8 @@ class SessionInfo():
         self.editor   = ""
         self.username = ""
         self.tmpdir   = ""
+        self.has_matplotlib     = False
+        self.has_gnuplot        = False
 
     def dump(self):
         for item in self.__dict__:
