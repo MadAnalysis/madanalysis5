@@ -35,6 +35,8 @@ class InstallFastjet:
         self.installdir = os.path.normpath(self.main.archi_info.ma5dir+'/tools/fastjet/')
         self.toolsdir   = os.path.normpath(self.main.archi_info.ma5dir+'/tools')
         self.tmpdir     = self.main.session_info.tmpdir
+        self.downloaddir= os.path.normpath(self.tmpdir + '/MA5_downloads/')
+        self.untardir = os.path.normpath(self.tmpdir + '/MA5_fastjet/')
         self.ncores     = 1
         self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.0.6.tar.gz"}
 
@@ -68,9 +70,9 @@ class InstallFastjet:
 
 
     def CreateTmpFolder(self):
-        ok, tmpdir = InstallService.prepare_tmp(self.main.session_info.tmpdir+'/MA5_fastjet')
+        ok = InstallService.prepare_tmp(self.untardir, self.downloaddir)
         if ok:
-            self.tmpdir=tmpdir
+            self.tmpdir=self.untardir
         return ok
         
     def Download(self):
@@ -79,7 +81,7 @@ class InstallFastjet:
             return False
         # Launching wget
         logname = os.path.normpath(self.installdir+'/wget.log')
-        if not InstallService.wget(self.files,logname,self.tmpdir):
+        if not InstallService.wget(self.files,logname,self.downloaddir):
             return False
         # Ok
         return True

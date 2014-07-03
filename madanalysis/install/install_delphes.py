@@ -37,6 +37,8 @@ class InstallDelphes:
         self.toolsdir   = os.path.normpath(self.main.archi_info.ma5dir+'/tools')
         self.installdir = os.path.normpath(self.toolsdir+'/delphes')
         self.tmpdir     = self.main.session_info.tmpdir
+        self.downloaddir= os.path.normpath(self.tmpdir + '/MA5_downloads/')
+        self.untardir = os.path.normpath(self.tmpdir + '/MA5_delphes/')
         self.ncores     = 1
         self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
 
@@ -70,9 +72,9 @@ class InstallDelphes:
 
 
     def CreateTmpFolder(self):
-        ok, tmpdir = InstallService.prepare_tmp(self.main.session_info.tmpdir+'/MA5_delphes')
+        ok = InstallService.prepare_tmp(self.untardir, self.downloaddir)
         if ok:
-            self.tmpdir=tmpdir
+            self.tmpdir=self.untardir
         return ok
 
 
@@ -82,7 +84,7 @@ class InstallDelphes:
             return False
         # Launching wget
         logname = os.path.normpath(self.installdir+'/wget.log')
-        if not InstallService.wget(self.files,logname,self.tmpdir):
+        if not InstallService.wget(self.files,logname,self.downloaddir):
             return False
         # Ok
         return True

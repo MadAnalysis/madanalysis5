@@ -35,6 +35,8 @@ class InstallZlib:
         self.installdir = os.path.normpath(self.main.archi_info.ma5dir+'/tools/zlib/')
         self.toolsdir   = os.path.normpath(self.main.archi_info.ma5dir+'/tools')
         self.tmpdir     = self.main.session_info.tmpdir
+        self.downloaddir= os.path.normpath(self.tmpdir + '/MA5_downloads/')
+        self.untardir = os.path.normpath(self.tmpdir + '/MA5_zlib/')
         self.ncores     = 1
         self.files = {"zlib.tar.gz" : "http://zlib.net/zlib-1.2.8.tar.gz"}
 
@@ -68,9 +70,9 @@ class InstallZlib:
 
 
     def CreateTmpFolder(self):
-        ok, tmpdir = InstallService.prepare_tmp(self.main.session_info.tmpdir+'/MA5_zlib')
+        ok = InstallService.prepare_tmp(self.untardir, self.downloaddir)
         if ok:
-            self.tmpdir=tmpdir
+            self.tmpdir=self.untardir
         return ok
         
     def Download(self):
@@ -79,7 +81,7 @@ class InstallZlib:
             return False
         # Launching wget
         logname = os.path.normpath(self.installdir+'/wget.log')
-        if not InstallService.wget(self.files,logname,self.tmpdir):
+        if not InstallService.wget(self.files,logname,self.downloaddir):
             return False
         # Ok
         return True

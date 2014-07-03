@@ -129,31 +129,39 @@ class InstallService():
 
 
     @staticmethod
-    def prepare_tmp(tmpdir):
-        # Debug message
-        logging.debug("Creating a temporary folder '"+tmpdir+"' ...")
+    def prepare_tmp(untardir, downloaddir):
         # Removing previous temporary folder path
-        if "downloads" not in tmpdir :
-            if os.path.isdir(tmpdir):
-                logging.debug("This temporary folder '"+tmpdir+"' is found. Try to remove it ...")
-                try:
-                    shutil.rmtree(tmpdir)
-                except:
-                    logging.error("impossible to remove the folder '"+tmpdir+"'")
-                    return False, ""
+        if os.path.isdir(untardir):
+            logging.debug("This temporary folder '"+untardir+"' is found. Try to remove it ...")
+            try:
+                shutil.rmtree(untardir)
+            except:
+                logging.error("impossible to remove the folder '"+untardir+"'")
+                return False
 
         # Creating the temporary folder
-        logging.debug("Creating (again) a temporary folder '"+tmpdir+"' ...")
+        logging.debug("Creating a temporary folder '"+untardir+"' ...")
         try:
-            if os.path.isdir(tmpdir) is False:
-                os.mkdir(tmpdir)
+            os.mkdir(untardir)
         except:
-            logging.error("impossible to create the folder '"+tmpdir+"'")
-            return False, ""
+            logging.error("impossible to create the folder '"+untardir+"'")
+            return False
 
+
+        # Creating the downloaddir folder
+        logging.debug("Creating a temporary download folder '"+downloaddir+"' ...")
+        if not os.path.isdir(downloaddir) :
+            try:
+                os.mkdir(downloaddir)
+            except:
+                logging.error("impossible to create the folder '"+downloaddir+"'")
+                return False
+        else:
+            logging.debug("folder '"+downloaddir+"'" + " exists.")
         # Ok
-        logging.debug('Name of the temporary folder: '+tmpdir)
-        return True, tmpdir
+        logging.debug('Name of the temporary untar    folder: '+untardir)
+        logging.debug('Name of the temporary download folder: '+downloaddir)
+        return True
 
 
     @staticmethod        
@@ -177,6 +185,7 @@ class InstallService():
             logging.info('    - ' + str(ind)+"/"+str(len(filesToDownload.keys()))+" "+url+" ...")
             output = installdir+'/'+file
             if os.path.isfile(output) is True:
+                logging.debug(output + " has been found.")
                 try:
                     info = urllib.urlopen(url)
                     sizeURLFile = int(info.info().getheaders("Content-Length")[0])

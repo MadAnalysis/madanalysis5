@@ -36,6 +36,8 @@ class InstallFastjetContrib:
         self.bindir     = os.path.normpath(self.installdir+'/bin/fastjet-config')
         self.toolsdir   = os.path.normpath(self.main.archi_info.ma5dir+'/tools')
         self.tmpdir     = self.main.session_info.tmpdir
+        self.downloaddir= os.path.normpath(self.tmpdir + '/MA5_downloads/')
+        self.untardir = os.path.normpath(self.tmpdir + '/MA5_fastjetcontrib/')
         self.ncores     = 1
         self.files = {"fastjetcontrib.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fjcontrib-1.012.tar.gz"}
 
@@ -46,9 +48,9 @@ class InstallFastjetContrib:
 
 
     def CreateTmpFolder(self):
-        ok, tmpdir = InstallService.prepare_tmp(self.main.session_info.tmpdir+'/MA5_fastjetcontrib')
+        ok = InstallService.prepare_tmp(self.untardir, self.downloaddir)
         if ok:
-            self.tmpdir=tmpdir
+            self.tmpdir=self.untardir
         return ok
         
     def Download(self):
@@ -57,7 +59,7 @@ class InstallFastjetContrib:
             return False
         # Launching wget
         logname = os.path.normpath(self.installdir+'/wget_contrib.log')
-        if not InstallService.wget(self.files,logname,self.tmpdir):
+        if not InstallService.wget(self.files,logname,self.downloaddir):
             return False
         # Ok
         return True
