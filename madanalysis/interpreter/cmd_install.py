@@ -1,24 +1,24 @@
 ################################################################################
-#  
+#
 #  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
-#  
+#
 #  This file is part of MadAnalysis 5.
 #  Official website: <https://launchpad.net/madanalysis5>
-#  
+#
 #  MadAnalysis 5 is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
-#  
+#
 #  MadAnalysis 5 is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #  GNU General Public License for more details.
-#  
+#
 #  You should have received a copy of the GNU General Public License
 #  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
-#  
+#
 ################################################################################
 
 
@@ -45,7 +45,7 @@ class CmdInstall(CmdBase):
             logging.error("wrong number of arguments for the command 'install'.")
             self.help()
             return
-        
+
         # Calling selection method
         if args[0]=='samples':
             installer=InstallManager(self.main)
@@ -64,6 +64,18 @@ class CmdInstall(CmdBase):
             if installer.Execute('fastjet')==False:
                 return False
             return installer.Execute('fastjet-contrib')
+        elif args[0]=='gnuplot':
+            installer=InstallManager(self.main)
+            return installer.Execute('gnuplot')
+        elif args[0]=='matplotlib':
+            installer=InstallManager(self.main)
+            return installer.Execute('matplotlib')
+        elif args[0]=='root':
+            installer=InstallManager(self.main)
+            return installer.Execute('root')
+        elif args[0]=='numpy':
+            installer=InstallManager(self.main)
+            return installer.Execute('numpy')
         else:
             logging.error("the syntax is not correct.")
             self.help()
@@ -85,8 +97,8 @@ class CmdInstall(CmdBase):
         if nargs>2:
             return []
         else:
-            output = ["samples","zlib","fastjet", "delphes", "delphesMA5tune" ]
+            output = ["samples","zlib","fastjet", "delphes", "delphesMA5tune", "gnuplot", "matplotlib", "root" , "numpy"]
             return self.finalize_complete(text,output)
-    
+
 
 

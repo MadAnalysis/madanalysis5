@@ -1,24 +1,24 @@
 ################################################################################
-#  
+#
 #  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
-#  
+#
 #  This file is part of MadAnalysis 5.
 #  Official website: <https://launchpad.net/madanalysis5>
-#  
+#
 #  MadAnalysis 5 is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
-#  
+#
 #  MadAnalysis 5 is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #  GNU General Public License for more details.
-#  
+#
 #  You should have received a copy of the GNU General Public License
 #  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
-#  
+#
 ################################################################################
 
 
@@ -37,7 +37,7 @@ class CheckUp():
         self.debug        = debug
         self.script       = script
 
-       
+
     def CheckArchitecture(self):
 
         # Fill with Python info
@@ -67,7 +67,7 @@ class CheckUp():
 
         # Info for debug mode
         if self.debug:
-            
+
             # Machine general
             import platform
             logging.debug("")
@@ -106,7 +106,7 @@ class CheckUp():
             logging.debug("")
 
         return True
-            
+
 
     def CheckSessionInfo(self):
 
@@ -132,7 +132,7 @@ class CheckUp():
                     tmp=''
                 logging.debug(StringTools.Left("  Variable $"+name+":",28)+ str(tmp))
             logging.debug('')
-    
+
         # Fill with tmp folder
         import os
         logging.debug("Temporary folder")
@@ -181,7 +181,7 @@ class CheckUp():
             logging.error('Impossible to create a tmp folder')
             return False
         logging.debug('')
-                
+
 
         # Fill with editor program
         logging.debug("Text editor")
@@ -245,6 +245,16 @@ class CheckUp():
 
         return True
 
+
+    def CheckGraphicalPackages(self):
+        # Optional packages
+        logging.info("Checking graphical packages:")
+        checker = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
+        self.archi_info.has_gnuplot       = checker.checkGnuplot()
+        self.archi_info.has_matplotlib    = checker.checkMatplotlib()
+        self.archi_info.has_root          = checker.checkRoot()
+        return True
+
     def SetFolder(self):
         # Set PATH variable
         self.archi_info.toPATH1=[]
@@ -259,7 +269,7 @@ class CheckUp():
         else:
             self.archi_info.toLDPATH2.append(self.archi_info.root_lib_path)
             self.archi_info.toPATH2.append(self.archi_info.root_bin_path)
-        
+
         if self.archi_info.has_fastjet:
             if self.archi_info.fastjet_priority:
                 self.archi_info.toPATH1.append(self.archi_info.fastjet_bin_path)
@@ -288,18 +298,18 @@ class CheckUp():
             else:
                 for path in self.archi_info.delphesMA5tune_lib_paths:
                     self.archi_info.toLDPATH2.append(path)
-                
+
         os.environ['PATH'] = ':'.join(self.archi_info.toPATH1) + ":" + \
                              os.environ['PATH'] + ":" + \
                              ':'.join(self.archi_info.toPATH2)
-                              
+
         os.environ['LD_LIBRARY_PATH'] = ':'.join(self.archi_info.toLDPATH1) + ":" + \
                                         os.environ['LD_LIBRARY_PATH'] + ":" + \
                                         ':'.join(self.archi_info.toLDPATH2)
-        
-        if self.archi_info.isMac:        
+
+        if self.archi_info.isMac:
             os.environ['DYLD_LIBRARY_PATH'] = ':'.join(self.archi_info.toLDPATH1) + ":" + \
                                               os.environ['DYLD_LIBRARY_PATH'] + ":" + \
                                               ':'.join(self.archi_info.toLDPATH2)
 
-        return True 
+        return True

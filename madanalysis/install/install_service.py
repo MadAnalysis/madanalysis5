@@ -97,22 +97,23 @@ class InstallService():
     @staticmethod
     def untar(logname,installdir,tarball):
         # Unpacking the folder
-        theCommands=['tar','xzf',tarball]
+        downloaddir = os.path.join(os.path.join('/tmp', os.environ['USER']), 'MA5_downloads')
+        theCommands=['tar','xzf',tarball, '-C', installdir]
         logging.debug('shell command: '+' '.join(theCommands))
         ok, out= ShellCommand.ExecuteWithLog(theCommands,\
                                              logname,\
-                                             installdir,\
+                                             downloaddir,\
                                              silent=False)
         if not ok:
             return False, ''
 
-        # Removing the tarball
-        toRemove=installdir+'/'+tarball
-        logging.debug('removing the file: '+toRemove)
-        try:
-            os.remove(toRemove)
-        except:
-            logging.debug('impossible to remove the tarball: '+tarball)
+#        # Removing the tarball
+#        toRemove=installdir+'/'+tarball
+#        logging.debug('removing the file: '+toRemove)
+#        try:
+#            os.remove(toRemove)
+#        except:
+#            logging.debug('impossible to remove the tarball: '+tarball)
 
         # Getting the good folder
         import glob
@@ -131,20 +132,21 @@ class InstallService():
     def prepare_tmp(tmpdir):
         # Debug message
         logging.debug("Creating a temporary folder '"+tmpdir+"' ...")
-
         # Removing previous temporary folder path
-        if os.path.isdir(tmpdir):
-            logging.debug("This temporary folder '"+tmpdir+"' is found. Try to remove it ...")
-            try:
-                shutil.rmtree(tmpdir)
-            except:
-                logging.error("impossible to remove the folder '"+tmpdir+"'")
-                return False, ""
+        if "downloads" not in tmpdir :
+            if os.path.isdir(tmpdir):
+                logging.debug("This temporary folder '"+tmpdir+"' is found. Try to remove it ...")
+                try:
+                    shutil.rmtree(tmpdir)
+                except:
+                    logging.error("impossible to remove the folder '"+tmpdir+"'")
+                    return False, ""
 
         # Creating the temporary folder
         logging.debug("Creating (again) a temporary folder '"+tmpdir+"' ...")
         try:
-            os.mkdir(tmpdir)
+            if os.path.isdir(tmpdir) is False:
+                os.mkdir(tmpdir)
         except:
             logging.error("impossible to create the folder '"+tmpdir+"'")
             return False, ""
@@ -174,13 +176,34 @@ class InstallService():
             result="OK"
             logging.info('    - ' + str(ind)+"/"+str(len(filesToDownload.keys()))+" "+url+" ...")
             output = installdir+'/'+file
-            try:
-                urllib.urlretrieve(url,output,InstallService.reporthook)
-            except:
-                logging.warning("Impossible to download the package from "+\
-                                url + " to "+output)
-                result="ERROR"
-                error=True
+            if os.path.isfile(output) is True:
+                try:
+                    info = urllib.urlopen(url)
+                    sizeURLFile = int(info.info().getheaders("Content-Length")[0])
+                    sizeSYSFile = os.path.getsize(output)
+                    if sizeURLFile != sizeSYSFile :
+                        logging.info("   '" + file + "' is corrupted or is an old version." + os.linesep +\
+                            "   Downloading a new package ...")
+                        raise Exception(file + " is corrupted or is an old version.")
+                    else:
+                        logging.info("   '" + file + "' already exists. Package not downloaded.")
+                    info.close()
+                except:
+                    try:
+                        urllib.urlretrieve(url,output,InstallService.reporthook)
+                    except:
+                        logging.warning("Impossible to download the package from "+\
+                                        url + " to "+output)
+                        result="ERROR"
+                        error=True
+            else:
+                try:
+                    urllib.urlretrieve(url,output,InstallService.reporthook)
+                except:
+                    logging.warning("Impossible to download the package from "+\
+                                    url + " to "+output)
+                    result="ERROR"
+                    error=True
             log.write(url+' : '+result+'\n')
 
         # Close the file
@@ -227,13 +250,13 @@ class InstallService():
     def create_package_folder(toolsdir,package):
         
         # Removing the folder package
-        if os.path.isdir(toolsdir+'/'+package):
+        if os.path.isdir(os.path.join(toolsdir, package)):
             logging.error("impossible to remove the folder 'tools/"+package+"'")
             return False
 
         # Creating the folder package
         try:
-            os.mkdir(toolsdir+'/'+package)
+            os.mkdir(os.path.join(toolsdir, package))
         except:
             logging.error("impossible to create the folder 'tools/" +\
                           package+"'")

@@ -1,24 +1,24 @@
 ################################################################################
-#  
+#
 #  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
-#  
+#
 #  This file is part of MadAnalysis 5.
 #  Official website: <https://launchpad.net/madanalysis5>
-#  
+#
 #  MadAnalysis 5 is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
-#  
+#
 #  MadAnalysis 5 is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #  GNU General Public License for more details.
-#  
+#
 #  You should have received a copy of the GNU General Public License
 #  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
-#  
+#
 ################################################################################
 
 
@@ -39,7 +39,7 @@ class ConfigChecker:
         for item in dirs:
             if not (item in container):
                 container.append(item)
-        
+
 
     def __init__(self, archi_info, user_info, session_info, script=False, debug=False):
 
@@ -58,7 +58,7 @@ class ConfigChecker:
         self.includes = []
         self.fillHeaders()
         self.debug=debug
-  
+
 
     def FillMA5Path(self):
         os.environ['MA5_BASE']=self.archi_info.ma5dir
@@ -80,7 +80,7 @@ class ConfigChecker:
             sys.stdout.write('\x1b[35m'+'[DISABLED]'+'\x1b[0m'+'\n')
         else:
             sys.stdout.write('\x1b[31m'+'[FAILURE]'+'\x1b[0m'+'\n')
-        sys.stdout.flush()    
+        sys.stdout.flush()
 
     def PrintLibrary(self,text,tab=5,width=25):
         mytab = '%'+str(tab)+'s'
@@ -90,8 +90,8 @@ class ConfigChecker:
         mywidth = mywidth % text
         sys.stdout.write(mytab+mywidth)
         sys.stdout.flush()
-                
-        
+
+
     def fillHeaders(self):
         # Filling container with paths included in CPLUS_INCLUDE_PATH
         try:
@@ -124,7 +124,7 @@ class ConfigChecker:
                 ConfigChecker.AddIfValid(item,self.libs)
         except:
             os.environ['DYLD_LIBRARY_PATH']=''
-                
+
         # Filling container with paths included in LIBRARY_PATH
         try:
             library_path = os.environ['LIBRARY_PATH'].split(':')
@@ -173,7 +173,7 @@ class ConfigChecker:
             logging.debug("  which-all:              ")
             for file in result:
                 logging.debug("    - "+str(file))
-            
+
         # Python paths
         if self.debug:
             logging.debug("  Python internal paths: ")
@@ -232,7 +232,7 @@ class ConfigChecker:
 		              +' - ROOT binary folder must be placed in the '\
                               +'global environment variable $PATH')
                 return False
-     
+
             # Extracting ROOT library and header path
             out=out.lstrip()
             out=out.rstrip()
@@ -243,10 +243,10 @@ class ConfigChecker:
                 return False
             self.archi_info.root_inc_path = os.path.normpath(root_tmp[1])
             self.archi_info.root_lib_path = os.path.normpath(root_tmp[0])
-            logging.debug("-> root-config found") 
-            logging.debug("-> root header  folder: "+self.archi_info.root_inc_path) 
-            logging.debug("-> root library folder: "+self.archi_info.root_lib_path) 
-                
+            logging.debug("-> root-config found")
+            logging.debug("-> root header  folder: "+self.archi_info.root_inc_path)
+            logging.debug("-> root library folder: "+self.archi_info.root_lib_path)
+
         # Trying to call root-config
         if not force:
 
@@ -284,9 +284,9 @@ class ConfigChecker:
                 for file in result:
                     logging.debug("    - "+str(file))
 
-   
+
             # Using root-config
-            logging.debug("Try to detect root-config ...") 
+            logging.debug("Try to detect root-config ...")
             theCommands = ['root-config','--libdir','--incdir']
             ok, out, err = ShellCommand.ExecuteWithCapture(theCommands,'./')
             if not ok:
@@ -305,9 +305,9 @@ class ConfigChecker:
             root_tmp = out.split()
             self.archi_info.root_inc_path = os.path.normpath(root_tmp[1])
             self.archi_info.root_lib_path = os.path.normpath(root_tmp[0])
-            logging.debug("-> root-config found") 
-            logging.debug("-> root header  folder: "+self.archi_info.root_inc_path) 
-            logging.debug("-> root library folder: "+self.archi_info.root_lib_path) 
+            logging.debug("-> root-config found")
+            logging.debug("-> root header  folder: "+self.archi_info.root_inc_path)
+            logging.debug("-> root library folder: "+self.archi_info.root_lib_path)
 
         # Adding ROOT library path to Python path
         sys.path.append(self.archi_info.root_lib_path)
@@ -324,7 +324,7 @@ class ConfigChecker:
 	        logging.error("ROOT file called '"+file+"' is not found")
                 logging.error("Please check that ROOT is properly installed.")
                 return False
-           
+
         # Getting the features
         ok, out, err = ShellCommand.ExecuteWithCapture([self.archi_info.root_bin_path+'/root-config','--features'],'./')
         if not ok:
@@ -357,7 +357,7 @@ class ConfigChecker:
             self.PrintFAIL(warning=False)
             logging.error("ROOT has not been built with 'python' options.")
             return False
-        
+
         # Check: looking for files
         FilesToFind=[os.path.normpath(self.archi_info.root_lib_path+'/libPyROOT.so')]
         for file in FilesToFind:
@@ -369,7 +369,7 @@ class ConfigChecker:
 	        logging.error("ROOT file called '"+file+"' is not found")
                 logging.error("Please check that ROOT is properly installed.")
                 return False
-            
+
         # Check: looking for files
         FilesToFind=[os.path.normpath(self.archi_info.root_lib_path+'/ROOT.py'), \
                      os.path.normpath(self.archi_info.root_lib_path+'/ROOT.pyc')]
@@ -384,7 +384,7 @@ class ConfigChecker:
         # If check failed: looking for Python path
         if not found:
             libnames=['ROOT.py','ROOT.py']
-            logging.debug("Look for the libraries in Python Library folder ...") 
+            logging.debug("Look for the libraries in Python Library folder ...")
             mypath, myfile = self.FindFilesWithPattern(sys.path,"ROOT.py*",libnames)
             logging.debug("-> result: "+str(myfile))
             if myfile=='':
@@ -414,7 +414,7 @@ class ConfigChecker:
             TApplication.NeedGraphicsLibs()
             gApplication.InitializeGraphics()
         gROOT.SetBatch(True)
-        
+
         # Checking ROOT release
         logging.debug("Extract the ROOT version ...")
         RootVersion = gROOT.GetVersionInt()
@@ -575,7 +575,7 @@ class ConfigChecker:
             self.PrintFAIL(warning=True)
             logging.warning('gfortran ' + gfortran_version + ' older than 4.4.0.')
             return True
-            
+
         self.archi_info.gfortran_version = gfortran_version
         if self.debug:
             logging.debug("  version:       " + self.archi_info.gfortran_version)
@@ -612,7 +612,7 @@ class ConfigChecker:
             return "", ""
         else:
             return os.path.normpath(result_paths[0]), os.path.normpath(result_files[0])
-    
+
 
     def checkZLIB(self):
 
@@ -625,7 +625,7 @@ class ConfigChecker:
         libnames=['libz.so','libz.a']
         if self.archi_info.isMac:
             libnames.append('libz.dylib')
-        
+
         # User veto
         if self.user_info.zlib_veto=='1':
             logging.debug("User setting: veto on zlib module")
@@ -645,12 +645,12 @@ class ConfigChecker:
             self.archi_info.zlib_lib_path=os.path.normpath(self.user_info.zlib_libraries)
             force2=True
         force=force1 and force2
-        
+
         # Checking if zlib has been installed by MA5
         ma5installation = False
         if not force:
             pathname = os.path.normpath(self.archi_info.ma5dir+'/tools/zlib')
-            logging.debug("Look for zlib in the folder "+pathname+" ...") 
+            logging.debug("Look for zlib in the folder "+pathname+" ...")
             if os.path.isdir(pathname):
                 self.archi_info.zlib_inc_path=os.path.normpath(pathname+'/include/')
                 self.archi_info.zlib_lib_path=os.path.normpath(pathname+'/lib/')
@@ -664,7 +664,7 @@ class ConfigChecker:
 
             # header
             filename=os.path.normpath(self.archi_info.zlib_inc_path+'/zlib.h')
-            logging.debug("Look for the file "+filename+" ...") 
+            logging.debug("Look for the file "+filename+" ...")
             if not os.path.isfile(filename):
                 logging.debug('-> not found')
                 self.PrintFAIL(warning=True)
@@ -676,7 +676,7 @@ class ConfigChecker:
                 logging.debug('-> found')
 
             # lib
-            logging.debug("Look for the libraries in folder "+self.archi_info.zlib_lib_path+" ...") 
+            logging.debug("Look for the libraries in folder "+self.archi_info.zlib_lib_path+" ...")
             mypath, myfile = self.FindFilesWithPattern([self.archi_info.zlib_lib_path],"libz.*",libnames)
             self.archi_info.zlib_lib=os.path.normpath(myfile)
             logging.debug("-> result: "+str(self.archi_info.zlib_lib))
@@ -692,7 +692,7 @@ class ConfigChecker:
         if not force and not ma5installation:
 
             # header
-            logging.debug("Look for the header file zlib.h ...") 
+            logging.debug("Look for the header file zlib.h ...")
             mypath, myfile = self.FindHeader('zlib.h')
             self.archi_info.zlib_inc_path = os.path.normpath(mypath)
             logging.debug("-> result for the path: "+str(self.archi_info.zlib_inc_path))
@@ -703,9 +703,9 @@ class ConfigChecker:
                 logging.warning("Gzip format will be disabled.")
                 logging.warning("To enable this format, please type 'install zlib'.")
                 return False
-            
+
             # lib
-            logging.debug("Look for the zlib libraries ...") 
+            logging.debug("Look for the zlib libraries ...")
             mypath, myfile = self.FindLibraryWithPattern('libz.*',libnames)
             self.archi_info.zlib_lib_path = os.path.normpath(mypath)
             self.archi_info.zlib_lib      = os.path.normpath(myfile)
@@ -761,7 +761,7 @@ class ConfigChecker:
         # Checking if Delphes has been installed by MA5
         ma5installation = False
         if not force:
-            logging.debug("Look for Delphes in the folder "+self.archi_info.ma5dir+"/tools ...") 
+            logging.debug("Look for Delphes in the folder "+self.archi_info.ma5dir+"/tools ...")
             if os.path.isdir(self.archi_info.ma5dir+'/tools/delphes') and \
                os.path.isdir(self.archi_info.ma5dir+'/tools/delphes/external'):
                 self.archi_info.delphes_inc_paths.append(self.archi_info.ma5dir+'/tools/delphes/')
@@ -777,7 +777,7 @@ class ConfigChecker:
 
             # header
             filename = os.path.normpath(self.archi_info.delphes_inc_paths[0]+'/modules/ParticlePropagator.h')
-            logging.debug("Look for the file "+filename+" ...") 
+            logging.debug("Look for the file "+filename+" ...")
             if not os.path.isfile(filename):
                 logging.debug("-> not found")
                 self.PrintFAIL(warning=True)
@@ -789,7 +789,7 @@ class ConfigChecker:
                 logging.debug("-> found")
 
             # lib
-            logging.debug("Look for the libraries in folder "+str(self.archi_info.delphes_lib_paths)+" ...") 
+            logging.debug("Look for the libraries in folder "+str(self.archi_info.delphes_lib_paths)+" ...")
             mypath, myfile = self.FindFilesWithPattern(self.archi_info.delphes_lib_paths,"libDelphes.*",libnames)
             self.archi_info.delphes_lib=os.path.normpath(myfile)
             logging.debug("-> result: "+str(self.archi_info.delphes_lib))
@@ -804,7 +804,7 @@ class ConfigChecker:
         if not force and not ma5installation:
 
             # header
-            logging.debug("Look for the header file /modules/ParticlePropagator.h ...") 
+            logging.debug("Look for the header file /modules/ParticlePropagator.h ...")
             mypath, myfile = self.FindHeader('/modules/ParticlePropagator.h')
             if mypath!='' and myfile!='':
                 self.archi_info.delphes_inc_paths.append(os.path.normpath(mypath))
@@ -819,7 +819,7 @@ class ConfigChecker:
                 return False
 
             # lib
-            logging.debug("Look for the Delphes libraries ...") 
+            logging.debug("Look for the Delphes libraries ...")
             mypath, myfile = self.FindLibraryWithPattern('libDelphes.*',libnames)
             if mypath!='' and myfile!='':
                 self.archi_info.delphes_lib_paths.append(os.path.normpath(mypath))
@@ -875,7 +875,7 @@ class ConfigChecker:
         # Checking if Delphes-MA5tune has been installed by MA5
         ma5installation = False
         if not force:
-            logging.debug("Look for Delphes-MA5tune in the folder "+self.archi_info.ma5dir+"/tools ...") 
+            logging.debug("Look for Delphes-MA5tune in the folder "+self.archi_info.ma5dir+"/tools ...")
             if os.path.isdir(self.archi_info.ma5dir+'/tools/delphesMA5tune') and \
                os.path.isdir(self.archi_info.ma5dir+'/tools/delphesMA5tune/external'):
                 self.archi_info.delphesMA5tune_inc_paths.append(self.archi_info.ma5dir+'/tools/delphesMA5tune/')
@@ -895,8 +895,8 @@ class ConfigChecker:
         if force or ma5installation:
 
             # header
-            filename = os.path.normpath(self.archi_info.delphesMA5tune_inc_paths[0]+'/modules/ParticlePropagator.h') 
-            logging.debug("Look for the file "+filename+" ...") 
+            filename = os.path.normpath(self.archi_info.delphesMA5tune_inc_paths[0]+'/modules/ParticlePropagator.h')
+            logging.debug("Look for the file "+filename+" ...")
             if not os.path.isfile(filename):
                 logging.debug("-> not found")
                 self.PrintFAIL(warning=True)
@@ -908,7 +908,7 @@ class ConfigChecker:
                 logging.debug("-> found")
 
             # lib
-            logging.debug("Look for the libraries in folder "+str(self.archi_info.delphesMA5tune_lib_paths)+" ...") 
+            logging.debug("Look for the libraries in folder "+str(self.archi_info.delphesMA5tune_lib_paths)+" ...")
             mypath, myfile = self.FindFilesWithPattern(self.archi_info.delphesMA5tune_lib_paths,"libDelphesMA5tune.*",libnames)
             self.archi_info.delphesMA5tune_lib_paths.append(os.path.normpath(mypath))
             self.archi_info.delphesMA5tune_lib      = os.path.normpath(myfile)
@@ -955,19 +955,19 @@ class ConfigChecker:
         ma5installation = False
         if not force:
             pathname = os.path.normpath(self.archi_info.ma5dir+'/tools/fastjet/bin')
-            logging.debug("Look for FastJet in the folder "+pathname+" ...") 
+            logging.debug("Look for FastJet in the folder "+pathname+" ...")
             if os.path.isdir(pathname):
                 self.archi_info.fastjet_bin_path=pathname
                 logging.debug("-> found")
                 ma5installation = True
             else:
                 logging.debug("-> not found")
- 
+
         # Check if the libraries and headers are available
         if force or ma5installation:
 
             filename = os.path.normpath(self.archi_info.fastjet_bin_path+'/fastjet-config')
-            logging.debug("Look for the file "+filename+" ...") 
+            logging.debug("Look for the file "+filename+" ...")
             if not os.path.isfile(filename):
                 logging.debug("-> not found")
                 self.PrintFAIL(warning=True)
@@ -981,8 +981,8 @@ class ConfigChecker:
         # Checking if FastJet is set into the PATH
         whichdetected=False
         if not force and not ma5installation:
-            
-            logging.debug("Try to locate fastjet-config program with the 'which' command ...") 
+
+            logging.debug("Try to locate fastjet-config program with the 'which' command ...")
             result = ShellCommand.Which('fastjet-config',all=False,mute=True)
             if len(result)==0:
                 logging.debug('-> not found')
@@ -995,7 +995,7 @@ class ConfigChecker:
         if not force and not ma5installation and not whichdetected:
 
             for item in self.paths:
-                logging.debug("Look for the fastjet-config in the path "+item+" ...") 
+                logging.debug("Look for the fastjet-config in the path "+item+" ...")
                 files=glob.glob(os.path.normpath(item+"/fastjet-config"))
                 logging.debug("-> result: "+str(files))
                 if(len(files))!=0:
@@ -1062,7 +1062,82 @@ class ConfigChecker:
             logging.error("The python library 'numpy' is not found. Please install it with the following command line:")
             logging.error("apt-get install python-numpy")
             return False
-        
+
+        self.PrintOK()
+        return True
+
+
+    def checkGnuplot(self):
+
+        self.PrintLibrary("Gnuplot")
+
+        # Checking if gnuplot is installed on the system
+        # Which
+        result = ShellCommand.Which('gnuplot',all=False,mute=True)
+        if len(result)==0:
+            self.PrintFAIL(warning=False)
+            logging.warning("gnuplot disabled. Plots using gnuplot library will not be done.")
+            return False
+        if self.debug:
+            logging.debug("  which:         " + str(result[0]))
+
+        # Which all
+        if self.debug:
+            result = ShellCommand.Which('gnuplot',all=True,mute=True)
+            if len(result)==0:
+                self.PrintFAIL(warning=False)
+                logging.warning("gnuplot disabled. Plots using gnuplot library will not be done.")
+                return False
+            logging.debug("  which-all:     ")
+            for file in result:
+                logging.debug("    - "+str(file))
+
+        # Ok
+        self.PrintOK()
+        return True
+
+    def checkMatplotlib(self):
+
+        self.PrintLibrary("Matplotlib")
+
+        # Checking if matplotlib is installed on the system
+        try:
+            import matplotlib
+        except:
+            self.PrintFAIL(warning=False)
+            logging.error("The python library 'matplotlib' is not found. Please install it with the following command line:")
+            logging.error("sudo apt-get install python-matplotlib")
+            return False
+
+        self.PrintOK()
+        return True
+
+    def checkRoot(self):
+
+        self.PrintLibrary("Root")
+
+        # Checking if gnuplot is installed on the system
+        # Which
+        result = ShellCommand.Which('root',all=False,mute=True)
+        if len(result)==0:
+            self.PrintFAIL(warning=False)
+            logging.warning("Root disabled. Plots using ROOT library will not be done.")
+            return False
+        if self.debug:
+            logging.debug("  which:         " + str(result[0]))
+
+        # Which all
+        if self.debug:
+            result = ShellCommand.Which('root',all=True,mute=True)
+            if len(result)==0:
+                self.PrintFAIL(warning=False)
+                logging.warning("Root disabled. Plots using ROOT library will not be done.")
+                return False
+            logging.debug("  which-all:     ")
+            for file in result:
+                logging.debug("    - "+str(file))
+
+        # Ok
         self.PrintOK()
         return True
 
@@ -1103,7 +1178,7 @@ class ConfigChecker:
         self.PrintOK()
         return True
 
-         
+
     def checkLatex(self):
         # Checking if latex is present
         self.PrintLibrary('latex')
@@ -1140,7 +1215,7 @@ class ConfigChecker:
         self.PrintOK()
         return True
 
-         
+
     def checkdvipdf(self):
         # Checking if dvipdf is present
         self.PrintLibrary('dvipdf')

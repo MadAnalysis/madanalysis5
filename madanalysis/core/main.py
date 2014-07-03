@@ -1,24 +1,24 @@
 ################################################################################
-#  
+#
 #  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
-#  
+#
 #  This file is part of MadAnalysis 5.
 #  Official website: <https://launchpad.net/madanalysis5>
-#  
+#
 #  MadAnalysis 5 is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
-#  
+#
 #  MadAnalysis 5 is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #  GNU General Public License for more details.
-#  
+#
 #  You should have received a copy of the GNU General Public License
 #  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
-#  
+#
 ################################################################################
 
 
@@ -46,7 +46,7 @@ import logging
 import os
 import sys
 import platform
-        
+
 class Main():
 
     userVariables = { "currentdir"      : [], \
@@ -82,7 +82,7 @@ class Main():
         self.mg5            = False
         self.observables    = ObservableManager(self.mode)
         self.expertmode     = False
-        self.repeatSession  = False 
+        self.repeatSession  = False
         self.ResetParameters()
 
     def ResetParameters(self):
@@ -105,14 +105,14 @@ class Main():
 
     def InitObservables(self,mode):
         self.observables = ObservableManager(mode)
-        
+
 
     def IsGoodFormat(self,file):
         for item in self.GetSampleFormat():
             if file.endswith(item):
                 return True
-        return False 
-        
+        return False
+
 
     def GetSampleFormat(self):
         samples = []
@@ -138,7 +138,7 @@ class Main():
                 zipsamples.append(item+'.gz')
             samples.extend(zipsamples)
 
-        return samples     
+        return samples
 
 
     def Display(self):
@@ -153,7 +153,7 @@ class Main():
         self.user_DisplayParameter("SBerror")
         if self.archi_info.has_fastjet:
             self.merging.Display()
-        self.fastsim.Display()    
+        self.fastsim.Display()
         self.isolation.Display()
         self.shower.Display()
         logging.info(" *********************************" )
@@ -237,7 +237,7 @@ class Main():
                 logging.error("'normalize' possible values are : 'none', 'lumi', 'lumi_weight'")
                 return False
 
-        # lumi    
+        # lumi
         elif (parameter=="lumi"):
             try:
                 tmp = float(value)
@@ -250,7 +250,7 @@ class Main():
                 logging.error("'lumi' is a positive float value")
                 return
 
-        # sbratio    
+        # sbratio
         elif (parameter=="SBratio"):
             quoteTag=False
             if value.startswith("'") and value.endswith("'"):
@@ -280,7 +280,7 @@ class Main():
             else:
                 logging.error("Specified formula is not correct.")
                 return False
-            
+
         # output
         elif (parameter=="outputfile"):
             quoteTag=False
@@ -326,7 +326,7 @@ class Main():
                               ".lhe .lhe.gz .lhco .lhco.gz")
                 return False
 
-        # other    
+        # other
         else:
             logging.error("'main' has no parameter called '"+parameter+"'")
 
@@ -392,9 +392,9 @@ class Main():
         try:
             os.chdir(theDir)
         except:
-            logging.error("Impossible to access the directory : "+theDir) 
+            logging.error("Impossible to access the directory : "+theDir)
         self.user_DisplayParameter("currentdir")
-        
+
     currentdir = property(get_currentdir, set_currentdir)
 
     def CheckLinuxConfig(self,debug=False):
@@ -409,17 +409,18 @@ class Main():
             return False
         if not checkup.CheckOptionalPackages():
             return False
+        if not checkup.CheckGraphicalPackages():
+            return False
         if not checkup.SetFolder():
             return False
         return True
-  
+
     def PrintOK(self):
         sys.stdout.write('\x1b[32m'+'[OK]'+'\x1b[0m'+'\n')
         sys.stdout.flush()
 
     def BuildLibrary(self,forced=False):
         builder = LibraryBuilder(self.archi_info)
-
         UpdateNeed=False
         FirstUse, Missing = builder.checkMA5()
         if not FirstUse and not Missing:
@@ -446,7 +447,7 @@ class Main():
             if not precompiler.CheckRun('TestSampleAnalyzer',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/',silent=True):
                 UpdateNeed=True
             rebuild = forced or FirstUse or UpdateNeed or Missing
-            
+
         if not rebuild:
             logging.info('  => MadAnalysis test program works.')
             return True
@@ -460,10 +461,9 @@ class Main():
             logging.info("  => System configuration has changed since the last use. Need to rebuild the library.")
         elif forced:
             logging.info("  => The user forces to rebuild the library.")
-
         # Initializing the JobWriter
         compiler = LibraryWriter('lib',self)
-    
+
         # Dumping architecture
         if not self.archi_info.save(self.archi_info.ma5dir+'/tools/architecture.ma5'):
             sys.exit()
@@ -507,14 +507,13 @@ class Main():
         options.has_fastjet        = self.archi_info.has_fastjet
         options.has_delphes        = self.archi_info.has_delphes
         options.has_delphesMA5tune = self.archi_info.has_delphesMA5tune
-        MakefileWriter.UserfriendlyMakefileForSampleAnalyzer(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Makefile',options)
+        #MakefileWriter.UserfriendlyMakefileForSampleAnalyzer(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Makefile',options)
 
         # Writing the setup
         logging.info("   Writing the setup files ...")
         from madanalysis.build.setup_writer import SetupWriter
         SetupWriter.WriteSetupFile(True,self.archi_info.ma5dir+'/tools/SampleAnalyzer/',self.archi_info)
         SetupWriter.WriteSetupFile(False,self.archi_info.ma5dir+'/tools/SampleAnalyzer/',self.archi_info)
-
         # Writing the makefile
         logging.info("   Writing all the Makefiles ...")
         for ind in range(0,len(libraries)):
@@ -533,7 +532,7 @@ class Main():
                 product='library'
             else:
                 product='test program'
-                
+
             logging.info("   **********************************************************")
             logging.info("   Component "+str(ind+1)+"/"+str(len(libraries))+" - "+product+": "+libraries[ind][1])
 
@@ -589,5 +588,5 @@ class Main():
         logging.info("   **********************************************************")
         logging.info("")
 
-        return True    
-        
+        return True
+
