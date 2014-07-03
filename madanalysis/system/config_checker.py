@@ -791,7 +791,7 @@ class ConfigChecker:
             # lib
             logging.debug("Look for the libraries in folder "+str(self.archi_info.delphes_lib_paths)+" ...")
             mypath, myfile = self.FindFilesWithPattern(self.archi_info.delphes_lib_paths,"libDelphes.*",libnames)
-            self.archi_info.delphes_lib=os.path.normpath(myfile)
+            self.archi_info.delphes_lib=myfile
             logging.debug("-> result: "+str(self.archi_info.delphes_lib))
             if self.archi_info.delphes_lib=="":
                 self.PrintFAIL(warning=True)
@@ -799,7 +799,8 @@ class ConfigChecker:
                 logging.warning("Delphes ROOT format will be disabled.")
                 logging.warning("To enable this format, please type 'install delphes'.")
                 return False
-
+            self.archi_info.delphes_lib=os.path.normpath(myfile)
+            
         # Checking Delphes can be found in other folders
         if not force and not ma5installation:
 
@@ -911,7 +912,7 @@ class ConfigChecker:
             logging.debug("Look for the libraries in folder "+str(self.archi_info.delphesMA5tune_lib_paths)+" ...")
             mypath, myfile = self.FindFilesWithPattern(self.archi_info.delphesMA5tune_lib_paths,"libDelphesMA5tune.*",libnames)
             self.archi_info.delphesMA5tune_lib_paths.append(os.path.normpath(mypath))
-            self.archi_info.delphesMA5tune_lib      = os.path.normpath(myfile)
+            self.archi_info.delphesMA5tune_lib      = myfile
             logging.debug("-> result for lib paths: "+str(self.archi_info.delphesMA5tune_lib_paths))
             logging.debug("-> result for lib files: "+str(self.archi_info.delphesMA5tune_lib))
             if self.archi_info.delphesMA5tune_lib=="":
@@ -921,7 +922,8 @@ class ConfigChecker:
                 logging.warning("Delphes-MA5tune ROOT format will be disabled.")
                 logging.warning("To enable this format, please type 'install delphesMA5tune'.")
                 return False
-
+            self.archi_info.delphesMA5tune_lib      = os.path.normpath(myfile)
+            
         self.archi_info.libraries['DelphesMA5tune']=self.archi_info.delphesMA5tune_lib+":"+str(os.stat(self.archi_info.delphesMA5tune_lib).st_mtime)
         self.archi_info.delphesMA5tune_priority=(force or ma5installation)
 
@@ -1105,8 +1107,8 @@ class ConfigChecker:
             import matplotlib
         except:
             self.PrintFAIL(warning=False)
-            logging.error("The python library 'matplotlib' is not found. Please install it with the following command line:")
-            logging.error("sudo apt-get install python-matplotlib")
+            logging.warning("The python library 'matplotlib' is not found. Please install it with the following command line:")
+            logging.warning("install matplotlib")
             return False
 
         self.PrintOK()
