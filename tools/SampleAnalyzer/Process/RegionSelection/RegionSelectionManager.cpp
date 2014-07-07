@@ -103,12 +103,11 @@ void RegionSelectionManager::FillHisto(std::string const&histname, double val)
   if(myhisto->AllSurviving()==0) return;
   if(myhisto->AllSurviving()==-1)
   {
-    ERROR << "Trying to fill an histogram for which at least one (but"
+    WARNING << "Trying to fill an histogram for which at least one (but"
      << " not all) SRs is not surviving the cuts applied so far."
      << endmsg;
-    ERROR << "Please modify the analysis and declare different histograms"
+    WARNING << "Please modify the analysis and declare different histograms"
       << endmsg;
-    exit(1);
   }
 
   // Filling the histo

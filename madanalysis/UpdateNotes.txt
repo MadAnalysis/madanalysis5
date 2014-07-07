@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+135  1.1.11.15 (2014/07/08) fuks:    Error message replaced by a warning message for histogram filling 
+
 127  1.1.11.14 (2014/06/20) fuks:    bug fixes: version number printout; writing of the output saf files 
                                    bugged in specific cases 
 
