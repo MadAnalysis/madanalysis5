@@ -34,21 +34,20 @@ class HistogramFrequency:
 
 
     def Print(self):
-
-        # Data
-        self.positive.Print()
-        self.negative.Print()
-        self.summary.Print()
+       # Data
+       self.positive.Print()
+       self.negative.Print()
+       self.summary.Print()
 
 
     def FinalizeReading(self,main,dataset):
 
         import numpy
-        
+
         # Statistics
         self.summary.nevents = self.positive.nevents + self.negative.nevents
         self.summary.entries = self.positive.entries + self.negative.entries
-            
+
         # Data
         data = []
         for i in range(0,len(self.positive.array)):
@@ -66,7 +65,7 @@ class HistogramFrequency:
         self.positive.ComputeIntegral()
         self.negative.ComputeIntegral()
         self.summary.ComputeIntegral()
-        
+
 
     def CreateHistogram(self,NPID,main):
 
@@ -91,6 +90,8 @@ class HistogramFrequency:
                 spid = main.multiparticles.GetName(pid)
             else:
                 spid = main.multiparticles.GetAName(-pid,pid)
+            if spid=='':
+                spid=str(pid)
 
             # Set labels
             self.myhisto.GetXaxis().SetBinLabel(bin+1,spid)
@@ -115,10 +116,10 @@ class HistogramFrequency:
 
         # Histogram
         self.myhisto = 0
-        
+
         # warnings
         self.warnings = []
 
 
 
-        
+
