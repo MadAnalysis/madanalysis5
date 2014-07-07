@@ -466,7 +466,6 @@ class JobWriter():
 
     def WriteSampleAnalyzerMakefile(self,option=""):
 
-        print "ERIC"
         from madanalysis.build.makefile_writer import MakefileWriter
         options=MakefileWriter.MakefileOptions()
         
