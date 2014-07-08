@@ -57,6 +57,10 @@ class InstallService():
         except:
             step = 1
 
+        # Benj fix for small files
+        if step ==0:
+          step = 1
+
         if (numblocks+1)%step!=0:
             return
         try:
@@ -97,7 +101,10 @@ class InstallService():
     @staticmethod
     def untar(logname,installdir,tarball):
         # Unpacking the folder
-        downloaddir = os.path.join(os.path.join('/tmp', os.environ['USER']), 'MA5_downloads')
+        # Modified by Benj
+#        downloaddir = os.path.join(os.path.join('/tmp', os.environ['USER']), 'MA5_downloads')
+        downloaddir = os.path.join(installdir, '../MA5_downloads')
+        # end of Benj fix
         theCommands=['tar','xzf',tarball, '-C', installdir]
         logging.debug('shell command: '+' '.join(theCommands))
         ok, out= ShellCommand.ExecuteWithLog(theCommands,\

@@ -32,3 +32,7 @@
 
 # -----DVIPDF-----
 # dvipdf_veto = 0 # 0=No, 1=Yes
+
+# -----RECASTING TOOLS-----
+# recasttools_veto= 1 # 0=No, 1=Yes
+# recasttools_path= /home/toto/RecastingTools

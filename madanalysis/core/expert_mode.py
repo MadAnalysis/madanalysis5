@@ -29,6 +29,7 @@ import glob
 import os
 import commands
 import sys
+import shutil
 
 class ExpertMode:
 
@@ -91,6 +92,20 @@ class ExpertMode:
             logging.error("   job submission aborted.")
             return False
 
+        # Recasting tools
+        if self.main.archi_info.has_recasttools:
+          try:
+            shutil.copyfile(self.main.archi_info.ma5dir+"/tools/RecastingTools/exclusion_CLs.py",self.path+'/exclusion_CLs.py')
+          except:
+            logging.error('Impossible to copy the recasting tools')
+            return False
+        try:
+            os.chmod(self.path+"/exclusion_CLs.py",0755)
+        except:
+            logging.error('Impossible to render the recasting tools executable')
+            return False
+
+
         # Writing an empty analysis
         logging.info("Please enter a name for your analysis")
         title=raw_input("Answer: ")
@@ -134,6 +149,9 @@ class ExpertMode:
              if not jobber.CreateShowerDir(mode):
                  logging.error("   job submission aborted.")
                  return False
+
+        # adding the CLs script if available
+        
 
         return True    
 

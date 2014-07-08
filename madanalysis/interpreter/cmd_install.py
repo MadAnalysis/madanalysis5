@@ -76,6 +76,9 @@ class CmdInstall(CmdBase):
         elif args[0]=='numpy':
             installer=InstallManager(self.main)
             return installer.Execute('numpy')
+        elif args[0]=='RecastingTools':
+            installer=InstallManager(self.main)
+            return installer.Execute('RecastingTools')
         else:
             logging.error("the syntax is not correct.")
             self.help()
@@ -97,7 +100,7 @@ class CmdInstall(CmdBase):
         if nargs>2:
             return []
         else:
-            output = ["samples","zlib","fastjet", "delphes", "delphesMA5tune", "gnuplot", "matplotlib", "root" , "numpy"]
+            output = ["samples","zlib","fastjet", "delphes", "delphesMA5tune", "gnuplot", "matplotlib", "root" , "numpy", "RecastingTools"]
             return self.finalize_complete(text,output)
 
 

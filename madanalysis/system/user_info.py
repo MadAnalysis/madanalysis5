@@ -42,7 +42,9 @@ class UserInfo:
         self.pdflatex_veto    = '0'
         self.latex_veto       = '0'
         self.dvipdf_veto      = '0'
-        
+        self.recasttools_veto = '0'
+        self.recasttools_path = '0'
+
     def dump(self):
         for item in self.__dict__:
             logging.debug(item+'\t'+str(self.__dict__[item]))
@@ -176,6 +178,10 @@ class UserInfo:
                 self.latex_veto=words[1]
             elif words[0]=='dvipdf_veto':
                 self.dvipdf_veto=words[1]
+            elif words[0]=='recasttools_veto':
+                self.recasttools_veto=words[1]
+            elif words[0]=='recasttools_path':
+                self.recasttools_path=words[1]
             else:
                 logging.warning(filename+': the options called "'+words[0]+'" is not found')
 

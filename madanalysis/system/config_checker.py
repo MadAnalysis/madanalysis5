@@ -1253,3 +1253,53 @@ class ConfigChecker:
         # Ok
         self.PrintOK()
         return True
+
+    def checkRecastTools(self):
+     # Checking whether the recasttools module is present
+     self.PrintLibrary("Recasting tools")
+     logging.debug("")
+
+     # User veto
+     if self.user_info.recasttools_veto=='1':
+       logging.debug("User setting: veto on the recasting tools")
+       self.PrintFAIL(warning=True)
+       logging.warning("Recasting tools are disabled (vetoed by the user)")
+       return False
+
+     # Does the user force the paths?
+     force = False
+     if self.user_info.recasttools_path!="0":
+       logging.debug("User setting: the path for the recasting tools has been specified")
+       self.archi_info.recasttools_path = self.user_info.recasttools_path
+       force = True
+
+     # In the case the user provides the path to a CLs code
+     if force:
+       filename = os.path.normpath(self.archi_info.recasttools_path+'/exclusion_CLs.py')
+       logging.debug("Looking for the file "+filename+" ...")
+       if not os.path.isfile(filename):
+         logging.debug("-> not found")
+         self.PrintFAIL(warning=True)
+         logging.warning("Recasting tools are not found and will be disabled.")
+         logging.warning("To enable this functionnality, please type 'install RecastingTools'.")
+         return False
+       else:
+         logging.debug("-> found")
+
+     # if not: default installation
+     else:
+       logging.debug("Looking for the recasting tools in the folder "+self.archi_info.ma5dir+"/tools ...")
+       filename = os.path.normpath(self.archi_info.ma5dir+'/tools/RecastingTools/exclusion_CLs.py')
+       logging.debug("Looking for the file "+filename+" ...")
+       if not os.path.isfile(filename):
+         logging.debug("-> not found")
+         self.PrintFAIL(warning=True)
+         logging.warning("Recasting tools are not found and will be disabled.")
+         logging.warning("To enable this functionnality, please type 'install RecastingTools'.")
+         return False
+       else:
+         logging.debug("-> found")
+
+     # Ok
+     self.PrintOK()
+     return True

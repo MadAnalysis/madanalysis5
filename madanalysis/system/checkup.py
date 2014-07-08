@@ -239,6 +239,7 @@ class CheckUp():
         self.archi_info.has_fastjet         = checker.checkFastJet()
         self.archi_info.has_delphes         = checker.checkDelphes()
         self.archi_info.has_delphesMA5tune  = checker.checkDelphesMA5tune()
+        self.archi_info.has_recasttools     = checker.checkRecastTools()
 
         if not self.archi_info.has_latex:
             self.archi_info.has_dvipdf = False

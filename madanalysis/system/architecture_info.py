@@ -46,6 +46,7 @@ class ArchitectureInfo:
         self.has_dvipdf         = False
         self.has_fortran        = False
         self.has_root           = False
+        self.has_recasttools    = False
         self.isMac              = False
         
         self.platform         = ""
@@ -80,6 +81,7 @@ class ArchitectureInfo:
         self.delphesMA5tune_lib=""
         self.fastjet_bin_path=""
         self.fastjet_lib_paths=[]
+        self.recasttools_path=""
 
 
     def dump(self):
@@ -161,4 +163,4 @@ class ArchitectureInfo:
 
     def Compare(self, other):
         return self==other
-    
+

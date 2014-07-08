@@ -65,6 +65,9 @@ class InstallManager():
         elif package=='numpy':
             from madanalysis.install.install_numpy import InstallNumpy
             installer=InstallNumpy(self.main)
+        elif package=='recastingtools':
+            from madanalysis.install.install_recastingtools import InstallRecastingTools
+            installer=InstallRecastingTools(self.main)
         else:
             logging.error('the package "'+rawpackage+'" is unknown')
             return False

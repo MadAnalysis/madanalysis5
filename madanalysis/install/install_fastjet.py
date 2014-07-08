@@ -74,7 +74,7 @@ class InstallFastjet:
         if ok:
             self.tmpdir=self.untardir
         return ok
-        
+
     def Download(self):
         # Checking connection with MA5 web site
         if not InstallService.check_ma5site():

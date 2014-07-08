@@ -56,7 +56,7 @@ def DecodeArguments(version, date):
     import getopt
     try:
         optlist, arglist = getopt.getopt(sys.argv[1:], \
-                                     "PHReEvhfmsb", \
+                                     "PHReEvhfmsbd", \
                                      ["partonlevel","hadronlevel","recolevel",\
                                       "expert","version","release","help",\
                                       "forced","script","mg5","debug","build"])
@@ -87,7 +87,7 @@ def DecodeArguments(version, date):
         elif o in ["-v","--version","--release"]:
             logging.info("MA5 release : " + version + " [ " + date  + " ]")
             sys.exit()
-        elif o in ["--debug"]:
+        elif o in ["-d", "--debug"]:
             mode.debug = True
         elif o in ["-b","--build"]:
             mode.build = True
