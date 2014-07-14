@@ -819,9 +819,9 @@ class Layout:
         #    return
 
         # Find a name for PDF file
-        if self.main.archi_info.has_pdflatex:
+        if self.main.session_info.has_pdflatex:
            self.pdffile=self.main.lastjob_name+'/PDF/main.pdf'
-        elif self.main.archi_info.has_latex and self.main.archi_info.has_dvipdf:
+        elif self.main.session_info.has_latex and self.main.session_info.has_dvipdf:
            self.pdffile=self.main.lastjob_name+'/DVI/main.pdf'
         else:
            self.pdffile=''
@@ -1006,7 +1006,7 @@ class Layout:
                 return False
                 
             # Converting DVI file to PDF file
-            if self.main.archi_info.has_dvipdf:
+            if self.main.session_info.has_dvipdf:
                 logging.info("     -> Converting the DVI report to a PDF report.")
                 os.system('cd '+output_path+'; dvipdf main.dvi > dvipdf.log 2>&1')
                 name=os.path.normpath(output_path+'/main.pdf')

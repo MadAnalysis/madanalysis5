@@ -193,10 +193,10 @@ class CmdImport(CmdBase.CmdBase):
         # Cleaning the directories
         if not FolderWriter.RemoveDirectory(self.main.lastjob_name+'/HTML',False):
             return
-        if self.main.archi_info.has_pdflatex:
+        if self.main.session_info.has_pdflatex:
             if not FolderWriter.RemoveDirectory(self.main.lastjob_name+'/PDF',False):
                 return
-        if self.main.archi_info.has_latex:
+        if self.main.session_info.has_latex:
             if not FolderWriter.RemoveDirectory(self.main.lastjob_name+'/DVI',False):
                 return 
 
@@ -219,7 +219,7 @@ class CmdImport(CmdBase.CmdBase):
         logging.info("     -> To open this HTML report, please type 'open'.")
 
         # PDF report
-        if self.main.archi_info.has_pdflatex:
+        if self.main.session_info.has_pdflatex:
 
             # Getting output filename for PDF report
             logging.info("   Generating the PDF report ...")
@@ -243,7 +243,7 @@ class CmdImport(CmdBase.CmdBase):
             logging.warning("pdflatex not installed -> no PDF report.")
 
         # DVI/PDF report
-        if self.main.archi_info.has_latex:
+        if self.main.session_info.has_latex:
 
             # Getting output filename for DVI report
             logging.info("   Generating the DVI report ...")
@@ -253,7 +253,7 @@ class CmdImport(CmdBase.CmdBase):
             dvipath = os.path.normpath(dvipath)
 
             # Warning message for DVI -> PDF
-            if not self.main.archi_info.has_dvipdf:
+            if not self.main.session_info.has_dvipdf:
                logging.warning("dvipdf not installed -> the DVI report will not be converted to a PDF file.")
 
             # Generating the DVI report
@@ -261,7 +261,7 @@ class CmdImport(CmdBase.CmdBase):
             layout.CompileReport(ReportFormatType.LATEX,dvipath)
 
             # Displaying message for opening DVI
-            if self.main.archi_info.has_dvipdf:
+            if self.main.session_info.has_dvipdf:
                 pdfpath = os.path.expanduser(args[0]+'/DVI')
                 if self.main.currentdir in pdfpath:
                     pdfpath = pdfpath[len(self.main.currentdir):]

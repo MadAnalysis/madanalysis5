@@ -1,4 +1,4 @@
-# WARNING MA5 SHOULD DETECT AUTOMATICALLY YOUR CONFIGURATION
+# WARNING! MA5 SHOULD DETECT AUTOMATICALLY YOUR CONFIGURATION
 # IF THIS AUTOMATED MODE FAILS, YOU CAN FORCE SOME 
 # OPTIONS THROUGH THIS FILE
 
@@ -31,7 +31,7 @@
 # latex_veto = 0 # 0=No, 1=Yes
 
 # -----DVIPDF-----
-# dvipdf_veto = 0 # 0=No, 1=Yes
+# dvipdf_veto = 1 # 0=No, 1=Yes
 
 # -----RECASTING TOOLS-----
 # recasttools_veto= 1 # 0=No, 1=Yes

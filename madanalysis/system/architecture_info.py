@@ -41,12 +41,8 @@ class ArchitectureInfo:
         self.delphesMA5tune_priority = False
         self.has_fastjet        = False
         self.fastjet_priority   = False
-        self.has_pdflatex       = False
-        self.has_latex          = False
-        self.has_dvipdf         = False
         self.has_fortran        = False
         self.has_root           = False
-        self.has_recasttools    = False
         self.isMac              = False
         
         self.platform         = ""
@@ -81,7 +77,6 @@ class ArchitectureInfo:
         self.delphesMA5tune_lib=""
         self.fastjet_bin_path=""
         self.fastjet_lib_paths=[]
-        self.recasttools_path=""
 
 
     def dump(self):

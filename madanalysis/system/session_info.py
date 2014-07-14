@@ -30,8 +30,13 @@ class SessionInfo():
         self.editor   = ""
         self.username = ""
         self.tmpdir   = ""
+        self.recasttools_path   = ""
         self.has_matplotlib     = False
         self.has_gnuplot        = False
+        self.has_pdflatex       = False
+        self.has_latex          = False
+        self.has_recasttools    = False
+        self.has_dvipdf         = False
 
     def dump(self):
         for item in self.__dict__:

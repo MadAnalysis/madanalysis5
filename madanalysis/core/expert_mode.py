@@ -93,7 +93,7 @@ class ExpertMode:
             return False
 
         # Recasting tools
-        if self.main.archi_info.has_recasttools:
+        if self.main.session_info.has_recasttools:
           try:
             shutil.copyfile(self.main.archi_info.ma5dir+"/tools/RecastingTools/exclusion_CLs.py",self.path+'/exclusion_CLs.py')
           except:

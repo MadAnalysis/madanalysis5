@@ -31,13 +31,13 @@ import logging
 class InstallRecastingTools:
 
     def __init__(self,main):
-        self.main       = main
-        self.installdir = os.path.normpath(self.main.archi_info.ma5dir+'/tools/RecastingTools/')
-        self.toolsdir   = os.path.normpath(self.main.archi_info.ma5dir+'/tools')
-        self.tmpdir     = self.main.session_info.tmpdir
-        self.downloaddir= os.path.normpath(self.tmpdir + '/MA5_downloads/')
-        self.untardir = os.path.normpath(self.tmpdir + '/MA5_RecastingTools/')
-        self.ncores     = 1
+        self.main        = main
+        self.installdir  = os.path.normpath(self.main.archi_info.ma5dir+'/tools/RecastingTools/')
+        self.toolsdir    = os.path.normpath(self.main.archi_info.ma5dir+'/tools')
+        self.tmpdir      = self.main.session_info.tmpdir
+        self.downloaddir = os.path.normpath(self.tmpdir + '/MA5_downloads/')
+        self.untardir    = os.path.normpath(self.tmpdir + '/MA5_RecastingTools/')
+        self.ncores      = 1
         self.files = {"exclusion_CLs.py" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PhysicsAnalysisDatabase/exclusion_CLs.py"}
 
 
@@ -120,4 +120,4 @@ class InstallRecastingTools:
         logging.error(" - "+os.path.normpath(self.installdir+"/copy.log"))
 
     def NeedToRestart(self):
-        return False
+        return True  # if not, the script will be not copied in the working folder

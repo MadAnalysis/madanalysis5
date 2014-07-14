@@ -24,6 +24,7 @@
 
 from madanalysis.system.user_info          import UserInfo
 from madanalysis.system.config_checker     import ConfigChecker
+from madanalysis.system.detect_manager     import DetectManager
 from string_tools                          import StringTools
 import logging
 import os
@@ -232,17 +233,20 @@ class CheckUp():
         # Optional packages
         logging.info("Checking optional packages:")
         checker = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
-        self.archi_info.has_pdflatex        = checker.checkPdfLatex()
-        self.archi_info.has_latex           = checker.checkLatex()
-        self.archi_info.has_dvipdf          = checker.checkdvipdf()
-        self.archi_info.has_zlib            = checker.checkZLIB()
-        self.archi_info.has_fastjet         = checker.checkFastJet()
-        self.archi_info.has_delphes         = checker.checkDelphes()
-        self.archi_info.has_delphesMA5tune  = checker.checkDelphesMA5tune()
-        self.archi_info.has_recasttools     = checker.checkRecastTools()
+        checker2 = DetectManager(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
 
-        if not self.archi_info.has_latex:
-            self.archi_info.has_dvipdf = False
+        if not checker2.Execute('pdflatex'):
+            return False
+        if not checker2.Execute('latex'):
+            return False
+        if not checker2.Execute('dvipdf'):
+            return False
+        self.archi_info.has_zlib              = checker.checkZLIB()
+        self.archi_info.has_fastjet           = checker.checkFastJet()
+        self.archi_info.has_delphes           = checker.checkDelphes()
+        self.archi_info.has_delphesMA5tune    = checker.checkDelphesMA5tune()
+        if not checker2.Execute('recasttools'):
+            return False
 
         return True
 
@@ -253,7 +257,7 @@ class CheckUp():
         checker = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
         self.session_info.has_gnuplot       = checker.checkGnuplot()
         self.session_info.has_matplotlib    = checker.checkMatplotlib()
-        self.archi_info.has_root          = checker.checkRoot()
+        self.archi_info.has_root            = checker.checkRoot()
         return True
 
     def SetFolder(self):

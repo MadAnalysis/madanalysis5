@@ -33,13 +33,13 @@ import shutil
 class InstallDelphes:
 
     def __init__(self,main):
-        self.main       = main
-        self.toolsdir   = os.path.normpath(self.main.archi_info.ma5dir+'/tools')
-        self.installdir = os.path.normpath(self.toolsdir+'/delphes')
-        self.tmpdir     = self.main.session_info.tmpdir
-        self.downloaddir= os.path.normpath(self.tmpdir + '/MA5_downloads/')
-        self.untardir = os.path.normpath(self.tmpdir + '/MA5_delphes/')
-        self.ncores     = 1
+        self.main        = main
+        self.toolsdir    = os.path.normpath(self.main.archi_info.ma5dir+'/tools')
+        self.installdir  = os.path.normpath(self.toolsdir+'/delphes')
+        self.tmpdir      = self.main.session_info.tmpdir
+        self.downloaddir = os.path.normpath(self.tmpdir + '/MA5_downloads/')
+        self.untardir    = os.path.normpath(self.tmpdir + '/MA5_delphes/')
+        self.ncores      = 1
         self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
 
 
