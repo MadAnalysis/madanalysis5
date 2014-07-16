@@ -100,21 +100,21 @@ class CmdSubmit(CmdBase):
         self.main.lastjob_status = False
 
         # Checking if new plots or cuts have been performed
-        newhistory = []
-        ToAdd = False
-        Inside = False
-        for cmd in history:
-            if 'submit' in cmd and 'resubmit' not in cmd:
-                ToAdd = True
-                Inside = True
-            elif ToAdd:
-                if not Inside:
-                    newhistory=[]
-                    Inside = True
-                if 'resubmit' in cmd:
-                    Inside = False
-                newhistory.append(cmd)
         ToReAnalyze = False
+        
+        # Look for the last submit and resubmit
+        last_submit_cmd = -1
+        for i in range(len(history)-1): # Last history entry should be resubmit
+            if history[i].startswith('submit') or history[i].startswith('resubmit'):
+                last_submit_cmd = i
+
+        newhistory = []
+        if last_submit_cmd==-1:
+            ToReAnalyze = True
+        else:
+            for i in range(last_submit_cmd+1,len(history)):
+                newhistory.append(history[i])
+
         ReAnalyzeCmdList = ['plot','select','reject','set main.clustering',
                             'set main.merging', 'set main.shower', 'define',
                             'import', 'set main.isolation']
