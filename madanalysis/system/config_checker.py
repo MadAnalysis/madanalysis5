@@ -205,7 +205,7 @@ class ConfigChecker:
 
         # Does the user force the ROOT path
         force=False
-        if self.user_info.root_bin!='0':
+        if self.user_info.root_bin!=None:
             logging.debug("User setting: root bin path is specified.")
             self.archi_info.root_bin_path=os.path.normpath(self.user_info.root_bin)
             force=True
@@ -249,8 +249,6 @@ class ConfigChecker:
 
         # Trying to call root-config
         if not force:
-
-            self.archi_info.root_bin_path=os.path.normpath(self.user_info.root_bin)
 
             # Which
             result = ShellCommand.Which('root-config')
@@ -627,7 +625,7 @@ class ConfigChecker:
             libnames.append('libz.dylib')
 
         # User veto
-        if self.user_info.zlib_veto=='1':
+        if self.user_info.zlib_veto:
             logging.debug("User setting: veto on zlib module")
             self.PrintFAIL(warning=True)
 	    logging.warning("Library called 'zlib' disabled. Gzip format will be disabled.")
@@ -636,11 +634,11 @@ class ConfigChecker:
         # Does the user force the paths?
         force1=False
         force2=False
-        if self.user_info.zlib_includes!="0":
+        if self.user_info.zlib_includes!=None:
             logging.debug("User setting: zlib include path is specified")
             self.archi_info.zlib_inc_path=os.path.normpath(self.user_info.zlib_includes)
             force1=True
-        if self.user_info.zlib_libs!="0":
+        if self.user_info.zlib_libs!=None:
             logging.debug("User setting: zlib lib path is specified")
             self.archi_info.zlib_lib_path=os.path.normpath(self.user_info.zlib_libraries)
             force2=True
@@ -737,7 +735,7 @@ class ConfigChecker:
             libnames.append('libDelphes.dylib')
 
         # User veto
-        if self.user_info.delphes_veto=='1':
+        if self.user_info.delphes_veto:
             logging.debug("User setting: veto on Delphes")
             self.PrintFAIL(warning=True)
             logging.warning("Library called 'delphes' disabled.")
@@ -747,12 +745,12 @@ class ConfigChecker:
         # Does the user force the paths?
         force1=False
         force2=False
-        if self.user_info.delphes_includes!="0":
+        if self.user_info.delphes_includes!=None:
             logging.debug("User setting: Delphes include path is specified.")
             self.archi_info.delphes_inc_paths.append(self.user_info.delphes_includes)
             self.archi_info.delphes_inc_paths.append(self.user_info.delphes_includes+'/external/')
             force1=True
-        if self.user_info.delphes_libs!="0":
+        if self.user_info.delphes_libs!=None:
             logging.debug("User setting: Delphes lib path is specified.")
             self.archi_info.delphes_lib_paths.append(self.user_info.delphes_libraries)
             force2=True
@@ -853,7 +851,7 @@ class ConfigChecker:
             libnames.append('libDelphesMA5tune.dylib')
 
         # User veto
-        if self.user_info.delphesMA5tune_veto=='1':
+        if self.user_info.delphesMA5tune_veto:
             logging.debug("User setting: veto on Delphes-MA5tune")
             self.PrintFAIL(warning=True)
             logging.warning("Delphes-MA5tune is disabled. Delphes-MA5tune ROOT format will be disabled.")
@@ -862,12 +860,12 @@ class ConfigChecker:
         # Does the user force the paths?
         force1=False
         force2=False
-        if self.user_info.delphesMA5tune_includes!="0":
+        if self.user_info.delphesMA5tune_includes!=None:
             logging.debug("User setting: Delphes-MA5tune include path is specified.")
             self.archi_info.delphesMA5tune_inc_paths.append(self.user_info.delphesMA5tune_includes)
             self.archi_info.delphesMA5tune_inc_paths.append(self.user_info.delphesMA5tune_includes+'/external/')
             force1=True
-        if self.user_info.delphesMA5tune_libs!="0":
+        if self.user_info.delphesMA5tune_libs!=None:
             logging.debug("User setting: Delphes-MA5tune lib path is specified.")
             self.archi_info.delphesMA5tune_lib_paths.append(self.user_info.delphesMA5tune_libraries)
             force2=True
@@ -940,7 +938,7 @@ class ConfigChecker:
         logging.debug("")
 
         # User veto
-        if self.user_info.fastjet_veto=='1':
+        if self.user_info.fastjet_veto:
             logging.debug("User setting: veto on fastjet module")
             self.PrintFAIL(warning=True)
 	    logging.warning("The FastJet package is disabled. JetClustering algorithms are disabled.")
@@ -948,7 +946,7 @@ class ConfigChecker:
 
         # Does the user force the paths?
         force=False
-        if self.user_info.fastjet_bin_path!="0":
+        if self.user_info.fastjet_bin_path!=None:
             logging.debug("User setting: fastjet bin path is specified")
             self.archi_info.fastjet_bin_path.append(self.user_info.fastjet_bin_path)
             force=True

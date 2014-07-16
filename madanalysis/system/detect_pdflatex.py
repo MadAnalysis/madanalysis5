@@ -53,7 +53,7 @@ class DetectPdflatex:
         
 
     def IsItVetoed(self):
-        if self.user_info.pdflatex_veto=='1':
+        if self.user_info.pdflatex_veto:
             logging.debug("user setting: veto on pdflatex")
             return True
         else:

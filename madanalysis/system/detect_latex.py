@@ -53,7 +53,7 @@ class DetectLatex:
         
 
     def IsItVetoed(self):
-        if self.user_info.latex_veto=='1':
+        if self.user_info.latex_veto:
             logging.debug("user setting: veto on LaTex")
             return True
         else:

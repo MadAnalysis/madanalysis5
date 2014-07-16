@@ -27,23 +27,46 @@ import logging
 class UserInfo:
 
     def __init__(self):
-        self.root_bin         = '0'
-        self.delphes_veto     = '0'
-        self.delphes_includes = '0'
-        self.delphes_libs     = '0'
-        self.delphesMA5tune_veto      = '0'
-        self.delphesMA5tune_includes  = '0'
-        self.delphesMA5tune_libs      = '0'
-        self.zlib_veto        = '0'
-        self.zlib_includes    = '0'
-        self.zlib_libs        = '0'
-        self.fastjet_veto     = '0'
-        self.fastjet_bin_path = '0'
-        self.pdflatex_veto    = '0'
-        self.latex_veto       = '0'
-        self.dvipdf_veto      = '0'
-        self.recasttools_veto = '0'
-        self.recasttools_path = '0'
+        # General
+        self.tmp_dir        = None
+        self.download_dir   = None
+        self.webaccess_veto = None
+
+        # Root
+        self.root_bin = None
+
+        # Delphes
+        self.delphes_veto     = None
+        self.delphes_includes = None
+        self.delphes_libs     = None
+
+        # DelphesMA5tune
+        self.delphesMA5tune_veto     = None
+        self.delphesMA5tune_includes = None
+        self.delphesMA5tune_libs     = None
+
+        # Zlib
+        self.zlib_veto     = None
+        self.zlib_includes = None
+        self.zlib_libs     = None
+
+        # Fastjet
+        self.fastjet_veto     = None
+        self.fastjet_bin_path = None
+
+        # Recast tools
+        self.recasttools_veto = None
+        self.recasttools_path = None
+
+        # Pdflatex
+        self.pdflatex_veto = None
+
+        # latex
+        self.latex_veto = None
+
+        # dvipdf
+        self.dvipdf_veto = None
+
 
     def dump(self):
         for item in self.__dict__:
@@ -117,6 +140,84 @@ class UserInfo:
         # Return the operation status
         return test
 
+
+    def ConvertToBool(self,option,value,filename):
+        if value=='0':
+            return False
+        elif value=='1':
+            return True
+        else:
+            logging.warning(filename+': the option called "'+option+'" allows only the values "1" or "0"')
+            return None
+        
+
+    def SetValue(self,option,value,filename):
+
+        # General
+        if   option=='tmp_dir':
+            self.tmp_dir=value
+        elif option=='download_dir':
+            self.download_dir=value
+        elif option=='webaccess_veto':
+            self.webaccess_veto=self.ConvertToBool(option,value,filename)
+            
+        # Root
+        elif   option=='root_bin_path':
+            self.root_bin=value
+
+        # Delphes
+        elif option=='delphes_veto':
+            self.delphes_veto=self.ConvertToBool(option,value,filename)
+        elif option=='delphes_includes':
+            self.delphes_includes=value
+        elif option=='delphes_libs':
+            self.delphes_libs=value
+
+        # DelphesMA5tune
+        elif option=='delphesMA5tune_veto':
+            self.delphesMA5tune_veto=self.ConvertToBool(option,value,filename)
+        elif option=='delphesMA5tune_includes':
+            self.delphesMA5tune_includes=value
+        elif option=='delphesMA5tune_libs':
+            self.delphesMA5tune_libs=value
+
+        # Zlib
+        elif option=='zlib_veto':
+            self.zlib_veto=self.ConvertToBool(option,value,filename)
+        elif option=='zlib_includes':
+            self.zlib_includes=value
+        elif option=='zlib_libs':
+            self.zlib_libs=value
+
+        # Fastjet
+        elif option=='fastjet_veto':
+            self.fastjet_veto=self.ConvertToBool(option,value,filename)
+        elif option=='fastjet_bin_path':
+            self.fastjet_bin_path=value
+
+        # Recast tools
+        elif option=='recasttools_veto':
+            self.recasttools_veto=self.ConvertToBool(option,value,filename)
+        elif option=='recasttools_path':
+            self.recasttools_path=value
+
+        # Pdflatex
+        elif option=='pdflatex_veto':
+            self.pdflatex_veto=self.ConvertToBool(option,value,filename)
+
+        # latex
+        elif option=='latex_veto':
+            self.latex_veto=self.ConvertToBool(option,value,filename)
+            
+        # dvipdf
+        elif option=='dvipdf_veto':
+            self.dvipdf_veto=self.ConvertToBool(option,value,filename)
+
+        # other
+        else:
+            logging.warning(filename+': the option called "'+option+'" is not found')
+        
+
     def ReadUserOptions(self,filename):
 
         # Open the user options
@@ -147,44 +248,9 @@ class UserInfo:
             words[0]=words[0].rstrip()
             words[1]=words[1].lstrip()
             words[1]=words[1].rstrip()
- 
-            if words[0]=='root_bin_path':
-                self.root_bin=words[1]
-            elif words[0]=='delphes_veto':
-                self.delphes_veto=words[1]
-            elif words[0]=='delphes_includes':
-                self.delphes_includes=words[1]
-            elif words[0]=='delphes_libs':
-                self.delphes_libs=words[1]
-            elif words[0]=='delphesMA5tune_veto':
-                self.delphesMA5tune_veto=words[1]
-            elif words[0]=='delphesMA5tune_includes':
-                self.delphesMA5tune_includes=words[1]
-            elif words[0]=='delphesMA5tune_libs':
-                self.delphesMA5tune_libs=words[1]
-            elif words[0]=='zlib_veto':
-                self.zlib_veto=words[1]
-            elif words[0]=='zlib_includes':
-                self.zlib_includes=words[1]
-            elif words[0]=='zlib_libs':
-                self.zlib_libs=words[1]
-            elif words[0]=='fastjet_veto':
-                self.fastjet_veto=words[1]
-            elif words[0]=='fastjet_bin_path':
-                self.fastjet_bin_path=words[1]
-            elif words[0]=='pdflatex_veto':
-                self.pdflatex_veto=words[1]
-            elif words[0]=='latex_veto':
-                self.latex_veto=words[1]
-            elif words[0]=='dvipdf_veto':
-                self.dvipdf_veto=words[1]
-            elif words[0]=='recasttools_veto':
-                self.recasttools_veto=words[1]
-            elif words[0]=='recasttools_path':
-                self.recasttools_path=words[1]
-            else:
-                logging.warning(filename+': the options called "'+words[0]+'" is not found')
 
+            self.SetValue(words[0], words[1], filename)
+    
         # Close the file
         logging.debug("Closing the file: "+filename)
         input.close()

@@ -58,7 +58,7 @@ class DetectRecastTools:
 
 
     def IsItVetoed(self):
-        if self.user_info.recasttools_veto=='1':
+        if self.user_info.recasttools_veto:
             logging.debug("user setting: veto on the Recasting Tools package")
             return True
         else:
@@ -78,7 +78,7 @@ class DetectRecastTools:
 
 
     def ManualDetection(self):
-        if self.user_info.recasttools_path=="0":
+        if self.user_info.recasttools_path==None:
             return DetectStatusType.UNFOUND
 
         # Folder

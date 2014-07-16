@@ -53,7 +53,7 @@ class DetectDvipdf:
         
 
     def IsItVetoed(self):
-        if self.user_info.dvipdf_veto=='1':
+        if self.user_info.dvipdf_veto:
             logging.debug("user setting: veto on dvipdf")
             return True
         else:

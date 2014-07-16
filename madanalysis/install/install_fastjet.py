@@ -35,7 +35,7 @@ class InstallFastjet:
         self.installdir = os.path.normpath(self.main.archi_info.ma5dir+'/tools/fastjet/')
         self.toolsdir   = os.path.normpath(self.main.archi_info.ma5dir+'/tools')
         self.tmpdir     = self.main.session_info.tmpdir
-        self.downloaddir= os.path.normpath(self.tmpdir + '/MA5_downloads/')
+        self.downloaddir = self.main.session_info.downloaddir
         self.untardir = os.path.normpath(self.tmpdir + '/MA5_fastjet/')
         self.ncores     = 1
         self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.0.6.tar.gz"}

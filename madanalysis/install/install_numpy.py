@@ -35,7 +35,7 @@ class InstallNumpy:
         self.installdir = os.path.normpath(self.main.archi_info.ma5dir+'/tools/numpy/')
         self.toolsdir   = os.path.normpath(self.main.archi_info.ma5dir+'/tools')
         self.tmpdir     = self.main.session_info.tmpdir
-        self.downloaddir= os.path.normpath(self.tmpdir + '/MA5_downloads/')
+        self.downloaddir = self.main.session_info.downloaddir
         self.untardir = os.path.normpath(self.tmpdir + '/MA5_numpy/')
         self.ncores     = 1
         self.files = {"numpy.tar.gz" : "http://sourceforge.net/projects/numpy/files/NumPy/1.8.1/numpy-1.8.1.tar.gz"}

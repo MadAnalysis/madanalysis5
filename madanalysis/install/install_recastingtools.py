@@ -35,7 +35,7 @@ class InstallRecastingTools:
         self.installdir  = os.path.normpath(self.main.archi_info.ma5dir+'/tools/RecastingTools/')
         self.toolsdir    = os.path.normpath(self.main.archi_info.ma5dir+'/tools')
         self.tmpdir      = self.main.session_info.tmpdir
-        self.downloaddir = os.path.normpath(self.tmpdir + '/MA5_downloads/')
+        self.downloaddir = self.main.session_info.downloaddir
         self.untardir    = os.path.normpath(self.tmpdir + '/MA5_RecastingTools/')
         self.ncores      = 1
         self.files = {"exclusion_CLs.py" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PhysicsAnalysisDatabase/exclusion_CLs.py"}
@@ -88,13 +88,21 @@ class InstallRecastingTools:
 
     def Unpack(self):
         # copying the file (no unpacking necessary here) + chmod
-        logname = os.path.normpath(self.installdir+'/copy.log')
-        theCommands=['cp','exclusion_CLs.py',self.installdir]
-        logging.debug('shell command: '+' '.join(theCommands))
-        ok, out= ShellCommand.ExecuteWithLog(theCommands, logname, self.downloaddir, silent=False)
-        if not ok:
-         return False, ''
-
+        import shutil
+        source      = os.path.normpath(self.downloaddir+'/exclusion_CLs.py')
+        destination = os.path.normpath(self.installdir +'/exclusion_CLs.py')
+        try:
+            shutil.copy(source,destination)
+        except:
+            logging.error('impossible to copy "'+source+'" to "'+destination+'"')
+            return False, ''
+        import stat
+        try:
+            st = os.stat(destination)
+            os.chmod(destination, st.st_mode | stat.S_IEXEC)
+        except:
+            logging.error('impossible to make executable the file "'+destination+'"')
+            return False, ''
         return True
 
 

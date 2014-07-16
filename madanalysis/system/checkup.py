@@ -134,32 +134,61 @@ class CheckUp():
                 logging.debug(StringTools.Left("  Variable $"+name+":",28)+ str(tmp))
             logging.debug('')
 
+        # Web access
+        logging.debug("Web access")
+        if self.user_info.webaccess_veto:
+            self.session_info.has_web=False
+            logging.debug('  disable')
+        else:
+            self.session_info.has_web=True
+            logging.debug('  enable')
+        logging.debug('')
+ 
         # Fill with tmp folder
         import os
         logging.debug("Temporary folder")
         tmpdir=''
-        for name in ["TMPDIR","TMP","TEMP"]:
-            if name in os.environ:
-                tmp=os.environ[name]
-            else:
-                tmp=''
-            logging.debug(StringTools.Left("  Variable $"+name+":",28)+ str(tmp))
-            if tmp!='' and tmpdir=='':
-                tmp=os.path.normpath(tmp)
-                logging.debug('Check if the folder '+tmp+' exists ...')
-                if os.path.isdir(tmp):
-                    logging.debug('-> found')
-                    tmpdir=tmp
-                else:
-                    logging.debug('-> not found')
-                    logging.debug('Try to create this folder ...')
-                    try:
-                        os.mkdir(tmp)
-                        logging.debug('-> ok')
-                        tmpdir=tmp
-                    except:
-                        logging.debug('-> impossible to create it')
 
+        # force by the user?
+        if self.user_info.tmp_dir!=None:
+            logging.debug('  Folder forced by the user: '+str(self.user_info.tmp_dir))
+            tmpdir=os.path.normpath(self.user_info.tmp_dir)
+            if os.path.isdir(tmpdir):
+                logging.debug('-> found')
+            else:
+                logging.debug('-> not found')
+                logging.debug('Try to create the folder '+tmpdir+' ...')
+                try:
+                    os.mkdir(tmpdir)
+                except:
+                    logging.debug('-> impossible to create it')
+                    tmpdir=''
+
+        # environment variable
+        if tmpdir=='':
+            for name in ["TMPDIR","TMP","TEMP"]:
+                if name in os.environ:
+                    tmp=os.environ[name]
+                else:
+                    tmp=''
+                logging.debug(StringTools.Left("  Variable $"+name+":",28)+ str(tmp))
+                if tmp!='' and tmpdir=='':
+                    tmp=os.path.normpath(tmp)
+                    logging.debug('Check if the folder '+tmp+' exists ...')
+                    if os.path.isdir(tmp):
+                        logging.debug('-> found')
+                        tmpdir=tmp
+                    else:
+                        logging.debug('-> not found')
+                        logging.debug('Try to create this folder ...')
+                        try:
+                            os.mkdir(tmp)
+                            logging.debug('-> ok')
+                            tmpdir=tmp
+                        except:
+                            logging.debug('-> impossible to create it')
+        
+        # /tmp/ + username
         if tmpdir=='':
             pathname = os.path.normpath('/tmp/'+self.session_info.username)
             logging.debug('Check if the folder '+pathname+' exists ...')
@@ -180,6 +209,49 @@ class CheckUp():
             logging.debug('temporary folder will be used for MA5: '+tmpdir)
         else:
             logging.error('Impossible to create a tmp folder')
+            return False
+        logging.debug('')
+
+        # Download dir
+        logging.debug("Download dir")
+        tmpdir=''
+
+        # -> forced by the user?
+        if self.user_info.download_dir!=None:
+            logging.debug('  Folder forced by the user: '+str(self.user_info.download_dir))
+            tmpdir=os.path.normpath(self.user_info.download_dir)
+            if os.path.isdir(tmpdir):
+                logging.debug('-> found')
+            else:
+                logging.debug('-> not found')
+                logging.debug('Try to create the folder '+tmpdir+' ...')
+                try:
+                    os.mkdir(tmpdir)
+                except:
+                    logging.debug('-> impossible to create it')
+                    tmpdir=''
+        
+        # -> temporary folder + 'MA5_download'
+        if tmpdir=='':
+            pathname = os.path.normpath(self.session_info.tmpdir+'/MA5_downloads/')
+            logging.debug('Check if the folder '+pathname+' exists ...')
+            if os.path.isdir(pathname):
+                logging.debug('-> found')
+                tmpdir=pathname
+            else:
+                logging.debug('-> not found')
+                logging.debug('Try to create the folder '+pathname+' ...')
+                try:
+                    os.mkdir(pathname)
+                    tmpdir=pathname
+                except:
+                    logging.debug('-> impossible to create it')
+
+        if tmpdir!='':
+            self.session_info.downloaddir = tmpdir
+            logging.debug('download folder will be used for MA5: '+tmpdir)
+        else:
+            logging.error('Impossible to create a download folder')
             return False
         logging.debug('')
 

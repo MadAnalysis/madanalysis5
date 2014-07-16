@@ -35,7 +35,7 @@ class InstallZlib:
         self.installdir = os.path.normpath(self.main.archi_info.ma5dir+'/tools/zlib/')
         self.toolsdir   = os.path.normpath(self.main.archi_info.ma5dir+'/tools')
         self.tmpdir     = self.main.session_info.tmpdir
-        self.downloaddir= os.path.normpath(self.tmpdir + '/MA5_downloads/')
+        self.downloaddir = self.main.session_info.downloaddir
         self.untardir = os.path.normpath(self.tmpdir + '/MA5_zlib/')
         self.ncores     = 1
         self.files = {"zlib.tar.gz" : "http://zlib.net/zlib-1.2.8.tar.gz"}

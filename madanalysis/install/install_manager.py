@@ -119,10 +119,13 @@ class InstallManager():
 
         # 4. Downloading
         if 'Download' in methods:
-            logging.info("   Downloading the package ...")
-            if not installer.Download():
-                self.PrintBad()
-                return False
+            if self.main.session_info.has_web:
+                logging.info("   Downloading the package ...")
+                if not installer.Download():
+                    self.PrintBad()
+                    return False
+            else:
+                logging.warning("   Download is not allowed because the internet access is disabled.")
 
         # 5. Unpacking
         if 'Unpack' in methods:

@@ -36,7 +36,7 @@ class InstallFastjetContrib:
         self.bindir     = os.path.normpath(self.installdir+'/bin/fastjet-config')
         self.toolsdir   = os.path.normpath(self.main.archi_info.ma5dir+'/tools')
         self.tmpdir     = self.main.session_info.tmpdir
-        self.downloaddir= os.path.normpath(self.tmpdir + '/MA5_downloads/')
+        self.downloaddir = self.main.session_info.downloaddir
         self.untardir = os.path.normpath(self.tmpdir + '/MA5_fastjetcontrib/')
         self.ncores     = 1
         self.files = {"fastjetcontrib.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fjcontrib-1.012.tar.gz"}

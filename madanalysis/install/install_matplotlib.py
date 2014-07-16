@@ -35,7 +35,7 @@ class InstallMatplotlib:
         self.installdir = os.path.normpath(self.main.archi_info.ma5dir+'/tools/matplotlib/')
         self.toolsdir   = os.path.normpath(self.main.archi_info.ma5dir+'/tools')
         self.tmpdir     = self.main.session_info.tmpdir
-        self.downloaddir= os.path.normpath(self.tmpdir + '/MA5_downloads/')
+        self.downloaddir = self.main.session_info.downloaddir
         self.untardir = os.path.normpath(self.tmpdir + '/MA5_matplotlib/')
         self.ncores     = 1
         self.files = {"matplotlib.tar.gz" : "http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.3.1/matplotlib-1.3.1.tar.gz"}

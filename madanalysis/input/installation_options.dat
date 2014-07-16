@@ -2,6 +2,11 @@
 # IF THIS AUTOMATED MODE FAILS, YOU CAN FORCE SOME 
 # OPTIONS THROUGH THIS FILE
 
+# ----GENERAL----
+# tmp_dir = /tmp/toto/
+# download_dir = /home/toto/download_dir
+# webaccess_veto = 0 # 0=No, 1=Yes
+
 # -----ROOT-----
 # root_bin_path = /home/toto/root/bin
 
@@ -24,6 +29,10 @@
 # fastjet_veto     = 0 # 0=No, 1=Yes
 # fastjet_bin_path = /home/toto/fastjet/include
 
+# -----RECASTING TOOLS-----
+# recasttools_veto= 0 # 0=No, 1=Yes
+# recasttools_path= /home/toto/RecastingTools
+
 # -----PDFLATEX-----
 # pdflatex_veto = 0 # 0=No, 1=Yes
 
@@ -31,8 +40,6 @@
 # latex_veto = 0 # 0=No, 1=Yes
 
 # -----DVIPDF-----
-# dvipdf_veto = 1 # 0=No, 1=Yes
+# dvipdf_veto = 0 # 0=No, 1=Yes
 
-# -----RECASTING TOOLS-----
-# recasttools_veto= 1 # 0=No, 1=Yes
-# recasttools_path= /home/toto/RecastingTools
+
