@@ -1,20 +1,24 @@
-# WARNING MA5 SHOULD DETECT AUTOMATICALLY YOUR CONFIGURATION
+# WARNING! MA5 SHOULD DETECT AUTOMATICALLY YOUR CONFIGURATION
 # IF THIS AUTOMATED MODE FAILS, YOU CAN FORCE SOME 
 # OPTIONS THROUGH THIS FILE
 
+# ----GENERAL----
+# tmp_dir = /tmp/toto/
+# download_dir = /home/toto/download_dir
+# webaccess_veto = 0 # 0=No, 1=Yes
+
 # -----ROOT-----
-# root_includes = /home/toto/root/include
-# root_libs     = /home/toto/root/lib
+# root_bin_path = /home/toto/root/bin
 
 # -----DELPHES----- 
 # delphes_veto     = 0 # 0=No, 1=Yes
 # delphes_includes = /home/toto/delphes/include
 # delphes_libs     = /home/toto/delphes/lib
 
-# -----DELFES----- 
-# delfes_veto     = 0 # 0=No, 1=Yes
-# delfes_includes = /home/toto/delfes/include
-# delfes_libs     = /home/toto/delfes/lib
+# -----DELPHESMA5TUNE----- 
+# delphesMA5tune_veto     = 0 # 0=No, 1=Yes
+# delphesMA5tune_includes = /home/toto/delphesMA5tune/include
+# delphesMA5tune_libs     = /home/toto/delphesMA5tune/lib
 
 # -----ZLIB-----
 # zlib_veto     = 0 # 0=No, 1=Yes
@@ -25,6 +29,10 @@
 # fastjet_veto     = 0 # 0=No, 1=Yes
 # fastjet_bin_path = /home/toto/fastjet/include
 
+# -----RECASTING TOOLS-----
+# recasttools_veto= 0 # 0=No, 1=Yes
+# recasttools_path= /home/toto/RecastingTools
+
 # -----PDFLATEX-----
 # pdflatex_veto = 0 # 0=No, 1=Yes
 
@@ -33,3 +41,5 @@
 
 # -----DVIPDF-----
 # dvipdf_veto = 0 # 0=No, 1=Yes
+
+

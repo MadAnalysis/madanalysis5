@@ -100,9 +100,9 @@ class CmdSet(CmdBase.CmdBase):
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='isolation':
             self.main.isolation.user_SetParameter(objs[2],args[2])
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='merging':
-            self.main.merging.user_SetParameter(objs[2],args[2],self.main.mode,self.main.libFastJet)
+            self.main.merging.user_SetParameter(objs[2],args[2],self.main.mode,self.main.archi_info.has_fastjet)
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='fastsim':
-            self.main.fastsim.user_SetParameter(objs[2],args[2],self.main.datasets,self.main.mode,self.main.libFastJet,self.main.libDelphes,self.main.libDelfes) 
+            self.main.fastsim.user_SetParameter(objs[2],args[2],self.main.datasets,self.main.mode,self.main.archi_info.has_fastjet,self.main.archi_info.has_delphes,self.main.archi_info.has_delphesMA5tune) 
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='shower':
             self.main.shower.user_SetParameter(objs[2],args[2],self.main.mode,self.main.mcatnloutils)
         else:

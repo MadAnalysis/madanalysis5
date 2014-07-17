@@ -29,6 +29,7 @@ import glob
 import os
 import commands
 import sys
+import shutil
 
 class ExpertMode:
 
@@ -36,9 +37,9 @@ class ExpertMode:
         self.main=main
         self.path=""
         self.forbiddenpaths=[]
-        self.forbiddenpaths.append(os.path.normpath(self.main.ma5dir+'/lib'))
-        self.forbiddenpaths.append(os.path.normpath(self.main.ma5dir+'/bin'))
-        self.forbiddenpaths.append(os.path.normpath(self.main.ma5dir+'/madanalysis'))
+        self.forbiddenpaths.append(os.path.normpath(self.main.archi_info.ma5dir+'/lib'))
+        self.forbiddenpaths.append(os.path.normpath(self.main.archi_info.ma5dir+'/bin'))
+        self.forbiddenpaths.append(os.path.normpath(self.main.archi_info.ma5dir+'/madanalysis'))
         
     def CreateDirectory(self):
         logging.info("\nWelcome to the expert mode of MadAnalysis")
@@ -91,6 +92,20 @@ class ExpertMode:
             logging.error("   job submission aborted.")
             return False
 
+        # Recasting tools
+        if self.main.session_info.has_recasttools:
+          try:
+            shutil.copyfile(self.main.archi_info.ma5dir+"/tools/RecastingTools/exclusion_CLs.py",self.path+'/exclusion_CLs.py')
+          except:
+            logging.error('Impossible to copy the recasting tools')
+            return False
+        try:
+            os.chmod(self.path+"/exclusion_CLs.py",0755)
+        except:
+            logging.error('Impossible to render the recasting tools executable')
+            return False
+
+
         # Writing an empty analysis
         logging.info("Please enter a name for your analysis")
         title=raw_input("Answer: ")
@@ -102,7 +117,7 @@ class ExpertMode:
         os.system("cd "+self.path+"/Build/SampleAnalyzer; python newAnalyzer.py " + title + " 1")
 
         # Extracting analysis name
-        file = open(self.path+"/Build/SampleAnalyzer/Analyzer/analysisList.h")
+        file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/analysisList.h")
         title=""
         for line in file:
             if "Add" not in line:
@@ -135,6 +150,9 @@ class ExpertMode:
                  logging.error("   job submission aborted.")
                  return False
 
+        # adding the CLs script if available
+        
+
         return True    
 
 
@@ -143,7 +161,7 @@ class ExpertMode:
         logging.info("\nGuidelines for writing an analysis in expert mode\n")
         logging.info(" 1. Entering the directory '"+self.path+"/Build'\n")
         logging.info(" 2. Setting the environment variables by loading setup.sh or setup.csh according to your SHELL\n")
-        logging.info(" 3. Entering the directory '"+self.path+"/Build/SampleAnalyzer/Analyzer'\n")
+        logging.info(" 3. Entering the directory '"+self.path+"/Build/SampleAnalyzer/User/Analyzer'\n")
         logging.info(" 4. Editing Analysis 'user.h' and 'user.cpp' files\n")
         logging.info(" 5. Entering the directory '"+self.path+"/Build'\n")
         logging.info(" 6. Compiling with the command 'make'\n")

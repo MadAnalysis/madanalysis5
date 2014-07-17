@@ -70,11 +70,11 @@ class ClusteringCDFJetClu():
 
     def SampleAnalyzerConfigString(self):
         mydict = {}
-        mydict['R']                = str(self.radius)
-        mydict['PTmin']            = str(self.ptmin)
-        mydict['OverlapThreshold'] = str(self.overlap)
-        mydict['SeedThreshol']     = str(self.seed)
-        mydict['Iratch']           = str(self.iratch)
+        mydict['cluster.R']                = str(self.radius)
+        mydict['cluster.PTmin']            = str(self.ptmin)
+        mydict['cluster.OverlapThreshold'] = str(self.overlap)
+        mydict['cluster.SeedThreshol']     = str(self.seed)
+        mydict['cluster.Iratch']           = str(self.iratch)
         return mydict
 
         

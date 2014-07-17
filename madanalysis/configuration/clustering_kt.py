@@ -61,12 +61,12 @@ class ClusteringKt():
 
     def SampleAnalyzerConfigString(self):
         mydict = {}
-        mydict['R']     = str(self.radius)
-        mydict['PTmin'] = str(self.ptmin)
+        mydict['cluster.R']     = str(self.radius)
+        mydict['cluster.PTmin'] = str(self.ptmin)
         if self.exclusive:
-            mydict['exclusive'] = '1'
+            mydict['cluster.exclusive'] = '1'
         else:
-            mydict['exclusive'] = '0'
+            mydict['cluster.exclusive'] = '0'
         return mydict
 
         

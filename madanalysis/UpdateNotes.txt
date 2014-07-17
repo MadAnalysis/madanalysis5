@@ -1,5 +1,16 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+
+ 82  1.1.11 (2014/07/17) ma5team:   - new structure for the detection of the user system
+                                    - new structure for installing the external packages
+                                    - the user can choose which package to use via the user_isntall.dat file
+                                    - first steps for the externalization of extra modules such as root, numpy, etc...
+                                    - first steps for a dedicated interface to root, gnuplot and matplotlib
+                                    - official release of the MA5Tune for Delphes
+                                    - interface to the recasting package
+                                    - many bug fixes
+                                    - improved portability with mac OS
+
 157  1.1.10 (2014/05/17) ma5team:   - new compilation procedure for library and job
                                     - adding job test to check the compilation procedure
                                     - adding restart command and possibility to restart MA5 after 

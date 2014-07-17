@@ -70,11 +70,11 @@ class ClusteringSisCone():
 
     def SampleAnalyzerConfigString(self):
         mydict = {}
-        mydict['R']                = str(self.radius)
-        mydict['PTmin']            = str(self.ptmin)
-        mydict['OverlapThreshold'] = str(self.overlap)
-        mydict['NPassMax']         = str(self.npassmax)
-        mydict['Protojet_ptmin']   = str(self.input_ptmin)
+        mydict['cluster.R']                = str(self.radius)
+        mydict['cluster.PTmin']            = str(self.ptmin)
+        mydict['cluster.OverlapThreshold'] = str(self.overlap)
+        mydict['cluster.NPassMax']         = str(self.npassmax)
+        mydict['cluster.Protojet_ptmin']   = str(self.input_ptmin)
         return mydict
 
         

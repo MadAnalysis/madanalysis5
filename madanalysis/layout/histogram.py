@@ -52,22 +52,32 @@ class Histogram:
 
         # Statistics
         self.summary.nevents   = self.positive.nevents   + self.negative.nevents
-        self.summary.nentries   = self.positive.nentries   + self.negative.nentries
+        self.summary.nentries  = self.positive.nentries  + self.negative.nentries
+
+        # sumw
         self.summary.sumw      = self.positive.sumw      - self.negative.sumw
         if self.summary.sumw<0:
             self.summary.sumw=0
+
+        # sumw2
         self.summary.sumw2     = self.positive.sumw2     - self.negative.sumw2
         if self.summary.sumw2<0:
             self.summary.sumw2=0
+
+        # sumwx
         self.summary.sumwx     = self.positive.sumwx     - self.negative.sumwx
-        if self.summary.sumwx<0:
-            self.summary.sumwx=0
+        # no correction on it
+
+        # sumw2x
         self.summary.sumw2x    = self.positive.sumw2x    - self.negative.sumw2x
-        if self.summary.sumw2x<0:
-            self.summary.sumw2x=0
+        # no correction on it
+
+        # underflow
         self.summary.underflow = self.positive.underflow - self.negative.underflow
         if self.summary.underflow<0:
             self.summary.underflow=0
+
+        # overflow
         self.summary.overflow  = self.positive.overflow  - self.negative.overflow
         if self.summary.overflow<0:
             self.summary.overflow=0

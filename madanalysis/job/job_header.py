@@ -31,7 +31,7 @@ import sys
 
 def WriteHeader(file,main):
     file.write('#ifndef analysis_user_h\n#define analysis_user_h\n\n')
-    file.write('#include "SampleAnalyzer/Analyzer/AnalyzerBase.h"\n\n')
+    file.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerBase.h"\n\n')
     file.write('namespace MA5\n')
     file.write('{\n')
     file.write('class user : public AnalyzerBase\n{\n')
@@ -40,7 +40,7 @@ def WriteHeader(file,main):
     file.write('  virtual bool Initialize(const MA5::Configuration& cfg,\n')
     file.write('                          const std::map<std::string,std::string>& parameters);\n')
     file.write('  virtual void Finalize(const SampleFormat& summary, const std::vector<SampleFormat>& files);\n')
-    file.write('  virtual void Execute(SampleFormat& sample, const EventFormat& event);\n\n')
+    file.write('  virtual bool Execute(SampleFormat& sample, const EventFormat& event);\n\n')
     file.write(' private : \n')
 
 

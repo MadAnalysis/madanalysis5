@@ -46,7 +46,7 @@ class JobMain:
 
     
     def WriteSource(self):
-        self.file.write('#include "Analyzer/user.h"\n')
+        self.file.write('#include "SampleAnalyzer/User/Analyzer/user.h"\n')
         self.file.write('using namespace MA5;\n')
         self.file.write('\n')
         import madanalysis.job.job_initialize as JobInitialize

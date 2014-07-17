@@ -25,8 +25,8 @@
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.IOinterface.folder_writer    import FolderWriter
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
-from madanalysis.core.string_tools            import StringTools
-from madanalysis.IOinterface.shell_command    import ShellCommand
+from string_tools                             import StringTools
+from shell_command                            import ShellCommand
 import logging
 import shutil
 import os
@@ -36,17 +36,11 @@ class JobWriter():
 
     def __init__(self,main,jobdir,resubmit=False):
         self.main       = main
-        self.ma5dir     = self.main.ma5dir
         self.path       = jobdir
         self.resubmit   = resubmit
-        self.libZIP     = self.main.libZIP
-        self.libDelphes = self.main.libDelphes
-        self.libDelfes  = self.main.libDelfes
         self.output     = self.main.output
-        self.libFastjet = self.main.libFastJet
         self.fastsim    = self.main.fastsim
         self.merging    = self.main.merging
-        self.fortran    = self.main.fortran
         self.shower     = self.main.shower
         self.shwrmode   = ''
 
@@ -60,7 +54,9 @@ class JobWriter():
             return False
         elif not os.path.isdir(path+"/Build/SampleAnalyzer"):
             return False
-        elif not os.path.isdir(path+"/Build/SampleAnalyzer/Analyzer"):
+        elif not os.path.isdir(path+"/Build/SampleAnalyzer/User"):
+            return False
+        elif not os.path.isdir(path+"/Build/SampleAnalyzer/User/Analyzer"):
             return False
         elif not os.path.isdir(path+"/Build/Main"):
             return False
@@ -94,9 +90,14 @@ class JobWriter():
             logging.error("Impossible to create the folder 'Build/SampleAnalyzer'")
             return False
         try:
-            os.mkdir(path+"/Build/SampleAnalyzer/Analyzer")
+            os.mkdir(path+"/Build/SampleAnalyzer/User")
         except:
-            logging.error("Impossible to create the folder 'Build/SampleAnalyzer/Analyzer'")
+            logging.error("Impossible to create the folder 'Build/SampleAnalyzer/User'")
+            return False
+        try:
+            os.mkdir(path+"/Build/SampleAnalyzer/User/Analyzer")
+        except:
+            logging.error("Impossible to create the folder 'Build/SampleAnalyzer/User/Analyzer'")
             return False
         try:
             os.mkdir(path+"/Build/Log")
@@ -135,8 +136,11 @@ class JobWriter():
         elif not os.path.isdir(self.path+"/Build/SampleAnalyzer"):
             logging.error("folder '"+self.path+"/Build/SampleAnalyzer' is not found")
             return False
-        elif not os.path.isdir(self.path+"/Build/SampleAnalyzer/Analyzer"):
-            logging.error("folder '"+self.path+"/Build/SampleAnalyzer/Analyzer' is not found")
+        elif not os.path.isdir(self.path+"/Build/SampleAnalyzer/User"):
+            logging.error("folder '"+self.path+"/Build/SampleAnalyzer/User' is not found")
+            return False
+        elif not os.path.isdir(self.path+"/Build/SampleAnalyzer/User/Analyzer"):
+            logging.error("folder '"+self.path+"/Build/SampleAnalyzer/User/Analyzer' is not found")
             return False
         elif not os.path.isdir(self.path+"/Build/Main"):
             logging.error("folder '"+self.path+"/Build/Main' is not found")
@@ -164,16 +168,16 @@ class JobWriter():
 
         if self.main.fastsim.package=="delphes":
             cardname = self.main.fastsim.delphes.card
-        elif self.main.fastsim.package=="delfes":
-            cardname = self.main.fastsim.delfes.card
+        elif self.main.fastsim.package=="delphesMA5tune":
+            cardname = self.main.fastsim.delphesMA5tune.card
 
-        if self.main.fastsim.package=="delfes":
-            cfg=self.main.fastsim.delfes
+        if self.main.fastsim.package=="delphesMA5tune":
+            cfg=self.main.fastsim.delphesMA5tune
         else:
             cfg=self.main.fastsim.delphes
 
         try:
-            input = open(self.ma5dir+"/tools/SampleAnalyzer/Detector/"+cardname,'r')
+            input = open(self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Process/Detector/"+cardname,'r')
         except:
             pass
 
@@ -214,7 +218,7 @@ class JobWriter():
         try:
             shutil.copyfile\
                       (\
-                      self.ma5dir+"/tools/SampleAnalyzer/newAnalyzer.py",\
+                      self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/newAnalyzer.py",\
                       self.path+"/Build/SampleAnalyzer/newAnalyzer.py"\
                       )
         except:
@@ -226,7 +230,7 @@ class JobWriter():
             logging.error('Impossible to make executable the file "newAnalyzer"')
             return False
 
-        if self.main.fastsim.package in ["delphes","delfes"]:
+        if self.main.fastsim.package in ["delphes","delphesMA5tune"]:
             self.CreateDelphesCard()
 
         return True
@@ -244,8 +248,8 @@ class JobWriter():
 
     def PrintIncludes(self,file):
         file.write('// SampleHeader header\n')
-        file.write('#include "SampleAnalyzer/Core/SampleAnalyzer.h"\n')
-        file.write('#include "SampleAnalyzer/Analyzer/analysisList.h"\n') 
+        file.write('#include "SampleAnalyzer/Process/Core/SampleAnalyzer.h"\n')
+        file.write('#include "SampleAnalyzer/User/Analyzer/analysisList.h"\n') 
         file.write('using namespace MA5;\n\n')
         return
 
@@ -305,16 +309,16 @@ class JobWriter():
             for k,v in sorted(parameters.iteritems(),\
                               key=lambda (k,v): (k,v)):
                 file.write('  parametersC1["'+k+'"]="'+v+'";\n')
-            file.write('  JetClustererBase* cluster1 = \n')
+            file.write('  JetClusterer* cluster1 = \n')
             file.write('      manager.InitializeJetClusterer("'+self.main.fastsim.clustering.algorithm+'",parametersC1);\n')
             file.write('  if (cluster1==0) return 1;\n\n')
             
         # + Case Delphes
-        if self.main.fastsim.package in ["delphes","delfes"]:
+        if self.main.fastsim.package in ["delphes","delphesMA5tune"]:
             file.write('  //Getting pointer to fast-simulation package\n')
             file.write('  std::map<std::string, std::string> parametersD1;\n')
-            if self.fastsim.package=="delfes":
-                cfg=self.main.fastsim.delfes
+            if self.fastsim.package=="delphesMA5tune":
+                cfg=self.main.fastsim.delphesMA5tune
             else:
                 cfg=self.main.fastsim.delphes
             parameters = self.main.fastsim.SampleAnalyzerConfigString()
@@ -325,13 +329,13 @@ class JobWriter():
 
             if self.main.fastsim.package=="delphes":
                 cardname = self.main.fastsim.delphes.card
-            elif self.main.fastsim.package=="delfes":
-                cardname = self.main.fastsim.delfes.card
+            elif self.main.fastsim.package=="delphesMA5tune":
+                cardname = self.main.fastsim.delphesMA5tune.card
 
             if self.main.fastsim.package=="delphes":
                 file.write('      manager.InitializeDetector("delphes","../../Input/'+cardname+'",parametersD1);\n')
             else:
-                file.write('      manager.InitializeDetector("delfes","../../Input/'+cardname+'",parametersD1);\n')
+                file.write('      manager.InitializeDetector("delphesMA5tune","../../Input/'+cardname+'",parametersD1);\n')
 
             file.write('  if (fastsim1==0) return 1;\n\n')
 
@@ -369,14 +373,14 @@ class JobWriter():
         file.write('      }\n')
         file.write('          manager.UpdateProgressBar();\n')
         if self.merging.enable:
-            file.write('      analyzer2->Execute(mySample,myEvent);\n')
+            file.write('      if (!analyzer2->Execute(mySample,myEvent)) continue;\n')
         if self.main.fastsim.package=="fastjet":
             file.write('      cluster1->Execute(mySample,myEvent);\n')
         elif self.main.fastsim.package=="delphes":
             file.write('      fastsim1->Execute(mySample,myEvent);\n')
-        elif self.main.fastsim.package=="delfes":
+        elif self.main.fastsim.package=="delphesMA5tune":
             file.write('      fastsim1->Execute(mySample,myEvent);\n')
-        file.write('      analyzer1->Execute(mySample,myEvent);\n')
+        file.write('      if (!analyzer1->Execute(mySample,myEvent)) continue;\n')
         if self.output!="":
             file.write('      writer1->WriteEvent(myEvent,mySample);\n')
         file.write('    }\n')
@@ -404,7 +408,7 @@ class JobWriter():
 
     def WriteSelectionHeader(self,main):
         main.selection.RefreshStat();
-        file = open(self.path+"/Build/SampleAnalyzer/Analyzer/user.h","w")
+        file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/user.h","w")
         import madanalysis.job.job_main as JobMain
         job = JobMain.JobMain(file,main)
         job.WriteHeader()
@@ -413,16 +417,16 @@ class JobWriter():
 
     def WriteSelectionSource(self,main):
         main.selection.RefreshStat();
-        file = open(self.path+"/Build/SampleAnalyzer/Analyzer/user.cpp","w")
+        file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/user.cpp","w")
         import madanalysis.job.job_main as JobMain
         job = JobMain.JobMain(file,main)
         job.WriteSource()
         file.close()
 
-        file = open(self.path+"/Build/SampleAnalyzer/Analyzer/analysisList.h","w")
-        file.write('#include "SampleAnalyzer/Analyzer/AnalyzerManager.h"\n')
-        file.write('#include "SampleAnalyzer/Analyzer/user.h"\n')
-        file.write('#include "SampleAnalyzer/Service/LogStream.h"\n')
+        file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/analysisList.h","w")
+        file.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"\n')
+        file.write('#include "SampleAnalyzer/User/Analyzer/user.h"\n')
+        file.write('#include "SampleAnalyzer/Commons/Service/LogStream.h"\n')
         file.write('\n')
         file.write('// ------------------------------------------' +\
                    '-----------------------------------\n')
@@ -443,11 +447,11 @@ class JobWriter():
             self.fortran = True
             try:
                 os.mkdir(self.path+'/Build/Showering')
-                shutil.copy(self.ma5dir+'/../madfks_hwdriver.f',\
+                shutil.copy(self.main.archi_info.ma5dir+'/../madfks_hwdriver.f',\
                     self.path+'/Build/Showering/shower.f')
-                shutil.copy(self.ma5dir+'/../shower_card.dat', \
+                shutil.copy(self.main.archi_info.ma5dir+'/../shower_card.dat', \
                     self.path+'/Build/shower_card.dat')
-                shutil.copy(self.ma5dir+'/../MCATNLO_HERWIG6_input', \
+                shutil.copy(self.main.archi_info.ma5dir+'/../MCATNLO_HERWIG6_input', \
                     self.path+'/Build/MCATNLO_HERWIG6_input')
                 logging.warning('THE SHOWER CARD THING MUST BE IMPROVED')
                 logging.warning('THE INPUT CARD THING MUST BE IMPROVED')
@@ -462,335 +466,71 @@ class JobWriter():
 
     def WriteSampleAnalyzerMakefile(self,option=""):
 
-        # Open the file
-        file = open(self.path+"/Build/SampleAnalyzer/Makefile","w")
+        from madanalysis.build.makefile_writer import MakefileWriter
+        options=MakefileWriter.MakefileOptions()
+        
+        # Name of the Makefile
+        filename = self.path+"/Build/SampleAnalyzer/Makefile"
 
         # Header
-        file.write(StringTools.Fill('#',80)+'\n')
-        file.write('#'+StringTools.Center('SUB MAKEFILE DEVOTED TO SAMPLE ANALYZER',78)+'#\n')
-        file.write(StringTools.Fill('#',80)+'\n')
-        file.write('\n')
+        title='User package'
 
-        # Compilators
-        file.write('# Compilators\n')
-        file.write('CXX = g++\n')
-        file.write('\n')
+        # Options
+        option.has_commons  = True
+        options.has_process = True
+        toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
 
-        # Options for compilation
-        file.write('# Options for compilation\n')
-        if self.libFastjet:
-            file.write('CXXFASTJET = $(shell fastjet-config --cxxflags --plugins)\n')
-        file.write('CXXFLAGS = -Wall -O3 -fPIC -I./ -I./../ -I' + '$(MA5_BASE)/tools/')
-        if self.libZIP:
-            file.write(' -DZIP_USE')
-        if self.libDelphes:
-            file.write(' -DROOT_USE -DDELPHES_USE')
-        if self.libDelfes:
-            file.write(' -DROOT_USE -DDELFES_USE')
-        if self.libFastjet:
-            file.write(' -DFASTJET_USE')
-            file.write(' $(CXXFASTJET)')
-        file.write('\n')
-        file.write('\n')
+        # File to compile
+        cppfiles = package+'/*.cpp'
+        hfiles   = package+'/*.h'
 
-        # Files for analyzers
-        file.write('# Files for analyzers\n')
-        file.write('SRCS = $(wildcard Analyzer/*.cpp)\n')
-        file.write('HDRS = $(wildcard Analyzer/*.h)\n')
-        file.write('OBJS = $(SRCS:.cpp=.o)\n')
-        file.write('\n')
+        # Files to produce
+        isLibrary=True
+        ProductName='libUserPackage_for_ma5.so'
+        ProductPath='../../Build/Lib/'
 
-        # Name of the library
-        file.write('# Name of the library\n')
-        file.write('PROGRAM = UserPackage_for_ma5\n')
-        file.write('\n')
+        # write makefile
+        MakefileWriter.Makefile(filename,title,ProductName,ProductPath,isLibrary,cppfiles,hfiles,options,self.main.archi_info,toRemove)
 
-        # All
-        file.write('# All target\n')
-        file.write('all: compile link\n')
-        file.write('\n')
-
-        # Compilation
-        file.write('# Compile target\n')
-        file.write('compile: $(OBJS)\n')
-        file.write('\n')
-        file.write('# Object file target\n')
-        file.write('$(OBJS): $(HDRS)\n')
-        file.write('\n')
-
-        # Linking
-        file.write('# Link target\n')
-        file.write('link: $(OBJS)\n')
-        if self.main.isMAC:
-            file.write('\t$(CXX) -shared -flat_namespace -dynamiclib -undefined suppress -o ../../Build/Lib/lib$(PROGRAM).so $(OBJS)\n')
-        else:
-            file.write('\t$(CXX) -shared -o ../../Build/Lib/lib$(PROGRAM).so $(OBJS)\n')
-        file.write('\n')
-
-        # Phony target
-        file.write('# Phony target\n')
-        file.write('.PHONY: do_clean\n')
-        file.write('\n')
-
-        # Cleaning
-        file.write('# Clean target\n')
-        file.write('clean: do_clean\n')
-        file.write('\n')
-        file.write('# Do clean target\n')
-        file.write('do_clean:\n')
-        file.write('\t@rm -f $(OBJS)\n')
-        file.write('\n')
-
-        # Mr Proper
-        file.write('# Mr Proper target\n')
-        file.write('mrproper: do_mrproper\n')
-        file.write('\n')
-        file.write('# Do clean target\n')
-        file.write('do_mrproper: do_clean\n')
-        file.write('\t@rm -f ../../Build/Lib/lib$(PROGRAM).so\n')
-        file.write('\t@rm -f *~ */*~ \n')
-        file.write('\n')
-        
-        # Closing the file
-        file.close()
-
-    def WriteShoweringMakefile(self,option=""):
-        file = open(self.path+"/Build/Showering/Makefile","w")
-        file.write('FC  = gfortran\n')
-        file.write('FFLAGS = -I' + \
-            '$(MA5_BASE)/tools/MCatNLO-utilities/MCatNLO/include\n\n')
-        file.write('SRCS = $(wildcard ' + self.path + '/Build/Showering/*.f)\n')
-        file.write('OBJS = $(SRCS:.f=.o)\n')
-        file.write('PROGRAM = Showering\n\n')
-        file.write('all:\t precompile compile link\n\n')
-        file.write('precompile:\t\n\n')
-        file.write('compile:\tprecompile $(OBJS)\n\n')
-        file.write('link:\t$(OBJS)\n')
-        file.write('\tar -ruc ../../Build/Lib/lib$(PROGRAM).a $(OBJS)\n')
-        file.write('\tranlib ../../Build/Lib/lib$(PROGRAM).a\n')
-        file.write('\t@rm -f $(OBJS)\n\n')
-        file.write('clean:;\t@rm -f $(OBJS) ../../Build/Lib/lib$(PROGRAM).a' + \
-            ' Log/compilation.log Log/linking.log *~ */*~ \n')
-        file.close()
+        # Ok
+        return True
+    
 
     def WriteMakefiles(self,option=""):
 
-        # Writing sub-Makefiles
-        #self.WriteSampleAnalyzerMakefile(option)
-        #if self.shwrmode!='':
-        #    self.WriteShoweringMakefile(option)
+        from madanalysis.build.makefile_writer import MakefileWriter
+        options=MakefileWriter.MakefileOptions()
 
-        # Opening the main Makefile    
-        file = open(self.path+"/Build/Makefile","w")
+        # Name of the Makefile
+        filename = self.path+"/Build/Makefile"
 
-        # Writing header
-        file.write(StringTools.Fill('#',80)+'\n')
-        file.write('#'+StringTools.Center('GENERAL MAKEFILE FOR MAD ANALYSIS 5 JOB',78)+'#\n')
-        file.write(StringTools.Fill('#',80)+'\n')
-        file.write('\n')
+        # Header
+        title='MadAnalysis Job'
 
-        # Compilators
-        file.write('# Compilators\n')
-        file.write('CXX = g++\n')
-        file.write('\n')
+        # Options
+        options.has_commons  = True
+        options.has_process = True
+        #options.has_userpackage = True
+        toRemove=['Log/compilation.log','Log/linking.log','Log/cleanup.log','Log/mrproper.log']
 
-        # Options for compilation : CXXFLAGS
-        file.write('# Options for compilation\n')
-        options = []
-        options.extend(['-Wall','-O3','-I./','-I./SampleAnalyzer/','-I$(MA5_BASE)/tools/','-I'+self.main.configLinux.root_inc_path])
-        if self.libZIP:
-            options.extend(['-DZIP_USE'])
-        if self.libDelphes:
-            options.extend(['-DROOT_USE','-DDELPHES_USE'])
-        if self.libDelfes:
-            options.extend(['-DROOT_USE','-DDELFES_USE'])
-        if self.libFastjet:
-            options.extend(['-DROOT_USE','-DFASTJET_USE'])#,'$(shell fastjet-config --cxxflags --plugins)'])
-        file.write('CXXFLAGS = '+' '.join(options))
-        file.write('\n')
+        # File to compile
+        cppfiles = ['Main/*.cpp','SampleAnalyzer/User/*/*.cpp']
+        hfiles   = ['Main/*.h','SampleAnalyzer/User/*/*.h']
 
-        # Options for compilation : LIBFLAGS
+        # Files to produce
+        isLibrary=False
+        ProductName='MadAnalysis5job'
+        ProductPath='./'
 
+        # Write makefile
+        MakefileWriter.Makefile(filename,title,ProductName,ProductPath,isLibrary,cppfiles,hfiles,options,self.main.archi_info,toRemove,moreIncludes=['./'])
 
-        # - SampleAnalyzer
-        libs=[]
-        libs.extend(['-L$(MA5_BASE)/tools/SampleAnalyzer/Lib/','-lSampleAnalyzer'])
-        if self.libFastjet:
-            libs.extend(['-lfastjet_for_ma5'])
-        if self.libZIP:
-            libs.extend(['-L'+self.main.configLinux.zlib_lib_path,'-lz','-lzlib_for_ma5'])
-        if self.libDelphes:
-            libs.extend(['-L'+self.main.configLinux.delphes_lib_paths[0],'-lDelphes','-ldelphes_for_ma5'])
-        if self.libDelfes:
-            libs.extend(['-L'+self.main.configLinux.delfes_lib_paths[0],'-lDelphes','-ldelfes_for_ma5'])
-        if self.fortran:
-            libs.extend(['-lgfortran'])
-
-        # - Root
-        libs.extend(['-L'+self.main.configLinux.root_lib_path, \
-                     '-lRIO','-lHist','-lGpad','-lGraf','-lGraf3d','-lTree', \
-                     '-lRint','-lPostscript','-lMatrix','-lPhysics', \
-                     '-lMathCore','-lEG', '-lNet','-lThread', \
-                     '-lCore','-lCint','-pthread','-lm','-ldl','-rdynamic'])
-
-        # Fatjet
-        if self.libFastjet:
-            libs.extend(['$(shell fastjet-config --libs --plugins --rpath=no)'])
-
-        #everything together
-        file.write('LIBFLAGS = '+' '.join(libs)+'\n')
-        file.write('\n')
-
-        # Files to process
-        file.write('# Files to process\n')
-        file.write('SRCS  = $(wildcard Main/*.cpp)\n')
-        file.write('SRCS += $(wildcard SampleAnalyzer/Analyzer/*.cpp)\n')
-        file.write('HDRS  = $(wildcard Main/*.h)\n')
-        file.write('HDRS += $(wildcard SampleAnalyzer/Analyzer/*.h)\n')
-        file.write('\n')
-
-        # Files to generate
-        file.write('# Files to generate\n')
-        file.write('OBJS    = $(SRCS:.cpp=.o)\n')
-        file.write('PROGRAM = MadAnalysis5job\n')
-        file.write('\n')
-
-        # Lib to check
-        file.write('# Requirements to check before building\n')
-        libs=[]
-        libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libSampleAnalyzer.so')
-        if self.libZIP:
-            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libzlib_for_ma5.so')
-        if self.libDelphes:
-            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so')
-        if self.libDelfes:
-            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libdelfes_for_ma5.so')
-        if self.libFastjet:
-            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so')
-        for ind in range(0,len(libs)):
-            file.write('REQUIRED'+str(ind+1)+' = '+libs[ind]+'\n')
-        file.write('\n')
-
-
-        # Defining colours for shell
-        file.write('# Defining colours\n')
-        file.write('GREEN  = "\\\\033[1;32m"\n')
-        file.write('RED    = "\\\\033[1;31m"\n')
-        file.write('PINK   = "\\\\033[1;35m"\n')
-        file.write('BLUE   = "\\\\033[1;34m"\n')
-        file.write('YELLOW = "\\\\033[1;33m"\n')
-        file.write('CYAN   = "\\\\033[1;36m"\n')
-        file.write('NORMAL = "\\\\033[0;39m"\n')
-        file.write('\n')
-
-        # All target
-        file.write('# All target\n')
-        file.write('all: header library_check compile_header compile link_header link\n')
-        file.write('\n')
-
-        # Check library
-        if len(libs)!=0:
-            file.write('# Check library\n')
-            file.write('library_check:\n')
-            for ind in range(0,len(libs)):
-                file.write('ifeq ($(wildcard $(REQUIRED'+str(ind+1)+')),)\n')
-                file.write('\t@echo -e $(RED)"The shared library "$(REQUIRED'+str(ind+1)+')" is not found"\n')
-	        file.write('\t@echo -e $(RED)" 1) Please check that MadAnalysis 5 is installed in the folder : "$(MA5_BASE)\n')
-                file.write('\t@echo -e $(RED)" 2) Launch MadAnalysis 5 in normal mode in order to build this library."\n')
-	        file.write('\t@echo -e $(NORMAL)\n')
-	        file.write('\t@false\n')
-                file.write('endif\n')
-            file.write('\n')
-
-        # Header target
-        file.write('# Header target\n')
-        file.write('header:\n')
-        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
-	file.write('\t@echo -e "'+StringTools.Center('Building MA5 job',50)+'"\n')
-	file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
-        file.write('\n')
-
-        # Compile_header target
-        file.write('# Compile_header target\n')
-        file.write('compile_header:\n')
-        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
-	file.write('\t@echo -e "'+StringTools.Center('Compilation',50)+'"\n')
-	file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
-        file.write('\n')
-
-        # Linking_header target
-        file.write('# Link_header target\n')
-        file.write('link_header:\n')
-        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
-	file.write('\t@echo -e "'+StringTools.Center('Final linking',50)+'"\n')
-	file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
-        file.write('\n')
-
-        # Clean_header target
-        file.write('# clean_header target\n')
-        file.write('clean_header:\n')
-        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
-	file.write('\t@echo -e "'+StringTools.Center('Removing intermediate files from building',50)+'"\n')
-	file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
-        file.write('\n')
-
-        # Mrproper_header target
-        file.write('# mrproper_header target\n')
-        file.write('mrproper_header:\n')
-        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
-	file.write('\t@echo -e "'+StringTools.Center('Cleaning all the project',50)+'"\n')
-	file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
-        file.write('\n')
-
-        # Compile target
-        file.write('# Compile target\n')
-        file.write('compile: $(OBJS)\n')
-        file.write('\n')
-
-        # Object file target
-        file.write('# Object file target\n')
-        file.write('$(OBJS): $(HDRS)\n')
-        file.write('\n')
-
-        # Link target
-        file.write('# Link target\n')
-        file.write('link: $(OBJS)\n')
-        file.write('\t$(CXX) $(OBJS) ')
-        file.write('$(LIBFLAGS) -o $(PROGRAM)\n')
-        file.write('\n')
-
-        # Clean target
-        file.write('# Clean target\n')
-        file.write('clean: clean_header do_clean\n')
-        file.write('\n')
-        file.write('# Do clean target\n')
-        file.write('do_clean: \n')
-        file.write('\t@rm -f $(OBJS)\n')
-        file.write('\n')
-
-        # Mr Proper target
-        file.write('# Mr Proper target \n')
-        file.write('mrproper: mrproper_header do_mrproper\n')
-        file.write('\n')
-        file.write('# Do Mr Proper target \n')
-        file.write('do_mrproper: do_clean\n')
-        file.write('\t@rm -f $(PROGRAM) Log/compilation.log' + \
-                   ' Log/linking.log Log/cleanup.log Log/mrproper.log *~ */*~ */*~ \n')
-        file.write('\n')
-
-        # Phony target
-        file.write('# Phony target\n')
-        file.write('.PHONY: do_clean header link_header compile_header\n')
-        file.write('\n')
-
-        # Closing the file
-        file.close()
-
-        if not JobWriter.WriteSetupFile(True,self.path+'/Build/',self.ma5dir,True,self.main.configLinux,self.main.isMAC):
-            return False
-        if not JobWriter.WriteSetupFile(False,self.path+'/Build/',self.ma5dir,True,self.main.configLinux,self.main.isMAC):
-            return False
+        # Setup
+        from madanalysis.build.setup_writer import SetupWriter
+        SetupWriter.WriteSetupFile(True, self.path+'/Build/',self.main.archi_info)
+        SetupWriter.WriteSetupFile(False,self.path+'/Build/',self.main.archi_info)
         
+        # Ok
         return True
 
     @staticmethod
@@ -824,7 +564,7 @@ class JobWriter():
 
         
     @staticmethod
-    def WriteSetupFile(bash,path,ma5dir,MA5BASE,configLinux,isMAC):
+    def WriteSetupFile(bash,path,MA5BASE,archi_info):
 
         # Variable to check at the end
         toCheck=[]
@@ -874,45 +614,47 @@ class JobWriter():
         if MA5BASE:
             file.write('# Configuring MA5 environment variable\n')
             if bash:
-                file.write('export MA5_BASE=' + JobWriter.CleanPath(ma5dir)+'\n')
+                file.write('export MA5_BASE=' + JobWriter.CleanPath(archi_info.ma5dir)+'\n')
             else:
-                file.write('setenv MA5_BASE ' + JobWriter.CleanPath(ma5dir)+'\n')
+                file.write('setenv MA5_BASE ' + JobWriter.CleanPath(archi_info.ma5dir)+'\n')
             toCheck.append('MA5_BASE')
             file.write('\n')
 
         # Configuring PATH environment variable
-        if len(configLinux.toPATH)!=0:
+        print "BILOUTE"
+        print archi_info.toPATH
+        if len(archi_info.toPATH)!=0:
             file.write('# Configuring PATH environment variable\n')
             if bash:
                 file.write('if [ $PATH ]; then\n')
-                file.write('export PATH=$PATH:' + JobWriter.CleanPath(':'.join(configLinux.toPATH))+'\n')
+                file.write('export PATH=$PATH:' + JobWriter.CleanPath(':'.join(archi_info.toPATH))+'\n')
                 file.write('else\n')
-                file.write('export PATH=' + JobWriter.CleanPath(':'.join(configLinux.toPATH))+'\n')
+                file.write('export PATH=' + JobWriter.CleanPath(':'.join(archi_info.toPATH))+'\n')
                 file.write('fi\n')
             else:
                 file.write('if ( $?PATH ) then\n')
-                file.write('setenv PATH "$PATH":' + JobWriter.CleanPath(':'.join(configLinux.toPATH))+'\n')
+                file.write('setenv PATH "$PATH":' + JobWriter.CleanPath(':'.join(archi_info.toPATH))+'\n')
                 file.write('else\n')
-                file.write('setenv PATH ' + JobWriter.CleanPath(':'.join(configLinux.toPATH))+'\n')
+                file.write('setenv PATH ' + JobWriter.CleanPath(':'.join(archi_info.toPATH))+'\n')
                 file.write('endif\n')
             toCheck.append('PATH')
             file.write('\n')
 
-        if len(configLinux.toLDPATH)!=0:
+        if len(archi_info.toLDPATH)!=0:
             
             # Configuring LD_LIBRARY_PATH environment variable
             file.write('# Configuring LD_LIBRARY_PATH environment variable\n')
             if bash:
                 file.write('if [ $LD_LIBRARY_PATH ]; then\n')
-                file.write('export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                file.write('export LD_LIBRARY_PATH=' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+':$LD_LIBRARY_PATH\n')
                 file.write('else\n')
-                file.write('export LD_LIBRARY_PATH=' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                file.write('export LD_LIBRARY_PATH=' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+'\n')
                 file.write('fi\n')
             else:
                 file.write('if ( $?LD_LIBRARY_PATH ) then\n')
-                file.write('setenv LD_LIBRARY_PATH "$LD_LIBRARY_PATH":' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                file.write('setenv LD_LIBRARY_PATH ' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+':"$LD_LIBRARY_PATH"\n')
                 file.write('else\n')
-                file.write('setenv LD_LIBRARY_PATH ' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                file.write('setenv LD_LIBRARY_PATH ' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+'\n')
                 file.write('endif\n')
             toCheck.append('LD_LIBRARY_PATH')
             file.write('\n')
@@ -926,19 +668,19 @@ class JobWriter():
             #file.write('\n')
 
             # Configuring DYLD_LIBRARY_PATH environment variable
-            if isMAC:
+            if archi_info.isMac:
                 file.write('# Configuring DYLD_LIBRARY_PATH environment variable\n')
                 if bash:
                     file.write('if [ $DYLD_LIBRARY_PATH ]; then\n')
-                    file.write('export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                    file.write('export DYLD_LIBRARY_PATH=' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+':$DYLD_LIBRARY_PATH\n')
                     file.write('else\n')
-                    file.write('export DYLD_LIBRARY_PATH=' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                    file.write('export DYLD_LIBRARY_PATH=' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+'\n')
                     file.write('fi\n')
                 else:
                     file.write('if ( $?DYLD_LIBRARY_PATH ) then\n')
-                    file.write('setenv DYLD_LIBRARY_PATH "$DYLD_LIBRARY_PATH":' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                    file.write('setenv DYLD_LIBRARY_PATH ' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+':"$DYLD_LIBRARY_PATH"\n')
                     file.write('else\n')
-                    file.write('setenv DYLD_LIBRARY_PATH ' + JobWriter.CleanPath(':'.join(configLinux.toLDPATH))+'\n')
+                    file.write('setenv DYLD_LIBRARY_PATH ' + JobWriter.CleanPath(':'.join(archi_info.toLDPATH))+'\n')
                     file.write('endif\n')
                 toCheck.append('DYLD_LIBRARY_PATH')
                 file.write('\n')
@@ -1125,7 +867,9 @@ class JobWriter():
             commands.append('--no_event_weight')
 
         # Release
-        commands.append('--ma5_version="'+self.main.version+';'+self.main.date+'"')
+        commands.append('--ma5_version="'+\
+                        self.main.archi_info.ma5_version+';'+\
+                        self.main.archi_info.ma5_date+'"')
 
         # Inputs
         commands.append('../../Input/'+name+'.list')

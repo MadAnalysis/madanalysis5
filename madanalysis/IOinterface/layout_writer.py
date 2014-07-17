@@ -25,7 +25,7 @@
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.IOinterface.folder_writer    import FolderWriter
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
-from madanalysis.core.string_tools            import StringTools
+from string_tools                             import StringTools
 import logging
 import shutil
 import os
@@ -48,10 +48,11 @@ class LayoutWriter():
             logging.error("impossible to create the file '"+filename+"'")
 
         # Writing header
+        from madanalysis.core.main import Main
         file.write(StringTools.Fill('#',80)+'\n')
         file.write('#'+StringTools.Center('MADANALYSIS5 CONFIGURATION FILE FOR PLOTS',78)+'#\n')
-        file.write('#'+StringTools.Center('produced by MadAnalysis5 version '+self.main.version,78)+'#\n')
-        file.write('#'+StringTools.Center(self.main.date,78)+'#\n')
+        file.write('#'+StringTools.Center('produced by MadAnalysis5 version '+Main.version,78)+'#\n')
+        file.write('#'+StringTools.Center(Main.date,78)+'#\n')
         file.write(StringTools.Fill('#',80)+'\n')
         file.write('\n')
 

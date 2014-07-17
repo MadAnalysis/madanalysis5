@@ -36,16 +36,16 @@ class AnalyzerManager:
         self.currentdir = os.getcwd()
 
     def CheckFilePresence(self):
-        if not os.path.isdir(self.currentdir + "/Analyzer"):
-            print "Error: the directory called 'Analyzer' is not found."
+        if not os.path.isdir(self.currentdir + "/User/Analyzer"):
+            print "Error: the directory called 'User/Analyzer' is not found."
             return False
-        if os.path.isfile(self.currentdir + "/Analyzer/" + self.name + ".cpp"):
-            print "Error: a file called 'Analyzer/"+self.name+\
+        if os.path.isfile(self.currentdir + "/User/Analyzer/" + self.name + ".cpp"):
+            print "Error: a file called 'User/Analyzer/"+self.name+\
                      ".cpp' is already defined."
             print "Please remove this file before."
             return False
-        if os.path.isfile(self.currentdir + "/Analyzer/" + self.name + ".h"):
-            print "Error: a file called 'Analyzer/"+self.name+\
+        if os.path.isfile(self.currentdir + "/User/Analyzer/" + self.name + ".h"):
+            print "Error: a file called 'User/Analyzer/"+self.name+\
                      ".h' is already defined."
             print "Please remove this file before."
             return False
@@ -53,12 +53,12 @@ class AnalyzerManager:
 
     def AddAnalyzer(self):
         # creating the file from scratch
-        if not os.path.isfile(self.currentdir + "/Analyzer/analysisList.h"):
-            output = open(self.currentdir + "/Analyzer/analysisList.h","w")
+        if not os.path.isfile(self.currentdir + "/User/Analyzer/analysisList.h"):
+            output = open(self.currentdir + "/User/Analyzer/analysisList.h","w")
             path = os.path.normpath(self.name+".h")
-            output.write('#include "SampleAnalyzer/Analyzer/'+path+'"\n')
-            output.write('#include "SampleAnalyzer/Analyzer/AnalyzerManager.h"\n')
-            output.write('#include "SampleAnalyzer/Service/LogStream.h"\n')
+            output.write('#include "SampleAnalyzer/User/Analyzer/'+path+'"\n')
+            output.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"\n')
+            output.write('#include "SampleAnalyzer/Commons/Service/LogStream.h"\n')
             output.write('\n')
             output.write('// -----------------------------------------------------------------------------\n')
             output.write('// BuildTable\n')
@@ -72,13 +72,13 @@ class AnalyzerManager:
 
         # updating the file 
         else:
-            shutil.copy(self.currentdir + "/Analyzer/analysisList.h",
-                        self.currentdir + "/Analyzer/analysisList.bak")
-            output = open(self.currentdir + "/Analyzer/analysisList.h","w")
-            input  = open(self.currentdir + "/Analyzer/analysisList.bak")
+            shutil.copy(self.currentdir + "/User/Analyzer/analysisList.h",
+                        self.currentdir + "/User/Analyzer/analysisList.bak")
+            output = open(self.currentdir + "/User/Analyzer/analysisList.h","w")
+            input  = open(self.currentdir + "/User/Analyzer/analysisList.bak")
 
             path = os.path.normpath(self.name+".h")
-            output.write('#include "SampleAnalyzer/Analyzer/'+path+'"\n')
+            output.write('#include "SampleAnalyzer/User/Analyzer/'+path+'"\n')
 
             for line in input:
 
@@ -97,10 +97,10 @@ class AnalyzerManager:
 
     def WriteHeader(self):
         
-        file = open(self.currentdir + "/Analyzer/" + self.name + ".h","w")
+        file = open(self.currentdir + "/User/Analyzer/" + self.name + ".h","w")
         file.write('#ifndef analysis_'+self.name+'_h\n')
         file.write('#define analysis_'+self.name+'_h\n\n')
-        file.write('#include "SampleAnalyzer/Analyzer/AnalyzerBase.h"\n\n')
+        file.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerBase.h"\n\n')
         file.write('namespace MA5\n')
         file.write('{\n')
         file.write('class '+self.name+' : public AnalyzerBase\n')
@@ -109,7 +109,7 @@ class AnalyzerManager:
         file.write(' public:\n')
         file.write('  virtual bool Initialize(const MA5::Configuration& cfg, const std::map<std::string,std::string>& parameters);\n')
         file.write('  virtual void Finalize(const SampleFormat& summary, const std::vector<SampleFormat>& files);\n')
-        file.write('  virtual void Execute(SampleFormat& sample, const EventFormat& event);\n\n')
+        file.write('  virtual bool Execute(SampleFormat& sample, const EventFormat& event);\n\n')
         file.write(' private:\n')
         file.write('};\n')
         file.write('}\n\n')
@@ -117,8 +117,8 @@ class AnalyzerManager:
         file.close()
     def WriteSource(self):
         
-        file = open(self.currentdir + "/Analyzer/" + self.name + ".cpp","w")
-        file.write('#include "Analyzer/'+self.name+'.h"\n')
+        file = open(self.currentdir + "/User/Analyzer/" + self.name + ".cpp","w")
+        file.write('#include "SampleAnalyzer/User/Analyzer/'+self.name+'.h"\n')
         file.write('using namespace MA5;\n')
         file.write('using namespace std;\n')
         file.write('\n')
@@ -149,7 +149,7 @@ class AnalyzerManager:
         file.write('// Execute\n')
         file.write('// function called each time one event is read\n')
         file.write('// -----------------------------------------------------------------------------\n')
-        file.write('void '+self.name+'::Execute(SampleFormat& sample, const EventFormat& event)\n')
+        file.write('bool '+self.name+'::Execute(SampleFormat& sample, const EventFormat& event)\n')
         file.write('{\n')
         file.write('  // ***************************************************************************\n')
         file.write('  // Example of analysis with generated particles\n')
@@ -234,6 +234,7 @@ class AnalyzerManager:
         file.write('    cout << "THT=" << event.mc()->THT() << endl; \n')
         file.write('   cout << endl;\n')
         file.write('\n')
+        file.write('  return true;\n')
         file.write('  }\n')
         file.write('  */\n')
         file.write('\n\n')
@@ -359,6 +360,7 @@ class AnalyzerManager:
         file.write('    cout << endl;\n')
         file.write('  }\n')
         file.write('  */\n')
+        file.write('  return true;\n')
         file.write('}\n')
         file.write('\n')
         file.close()
