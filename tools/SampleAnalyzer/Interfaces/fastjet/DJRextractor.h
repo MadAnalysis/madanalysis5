@@ -73,7 +73,6 @@ class DJRextractor
     // Jet algo
     JetDefinition_=0;
     // Options
-    merging_njets_=0;
     merging_nqmatch_=4;
     merging_nosingrad_=false;
   }
@@ -82,7 +81,7 @@ class DJRextractor
   ~DJRextractor() {}
 
   /// Initialization
-  bool Initialize(const std::map<std::string,std::string>& parameters);
+  bool Initialize();
 
   /// Finalization
   void Finalize();
@@ -91,8 +90,7 @@ class DJRextractor
   bool Execute(SampleFormat& sample, const EventFormat& event, std::vector<Double_t>& DJR);
 
   /// Extracting the number of additionnal jets contained in the event 
-  UInt_t ExtractJetNumber(const MCEventFormat* myEvent, 
-                          MCSampleFormat* mySample);
+  UInt_t ExtractJetNumber(const MCEventFormat* myEvent, MCSampleFormat* mySample);
 
   /// Selecting particles
   void SelectParticles_NonHadronization(std::vector<fastjet::PseudoJet>& inputs, const MCEventFormat* myEvent);

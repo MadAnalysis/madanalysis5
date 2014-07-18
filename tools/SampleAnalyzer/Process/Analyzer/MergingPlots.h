@@ -25,24 +25,17 @@
 #ifndef MERGING_PLOTS_H
 #define MERGING_PLOTS_H
 
+#ifdef FASTJET_USE
 
-//STL headers
-#include <vector>
-#include <map>
-#include <string>
-
-//SampleAnalyser headers
-#include "SampleAnalyzer/Commons/Base/Configuration.h"
-#include "SampleAnalyzer/Commons/DataFormat/MCEventFormat.h"
-#include "SampleAnalyzer/Commons/DataFormat/MCSampleFormat.h"
 #include "SampleAnalyzer/Process/Plot/MergingPlotType.h"
-#include "SampleAnalyzer/Process/Writer/SAFWriter.h"
 #include "SampleAnalyzer/Process/Analyzer/AnalyzerBase.h"
-
 
 
 namespace MA5
 {
+
+class DJRextractor;
+
 class MergingPlots : public AnalyzerBase
 {
   INIT_ANALYSIS(MergingPlots,"MergingPlots")
@@ -52,14 +45,22 @@ class MergingPlots : public AnalyzerBase
 //---------------------------------------------------------------------------------
   private :
 
+  /// Algo based on FastJet
+  DJRextractor* algo_;
+
   /// DJR plots
   std::vector<MergingPlotType> DJR_;
-
 
   /// User configuration
   UInt_t  merging_njets_;
   UChar_t merging_nqmatch_;
   Bool_t  merging_nosingrad_;
+
+  /// Saving merging plots in the output file
+  void Write_TextFormat(SAFWriter& output);
+
+  /// Extracting the number of additionnal jets contained in the event 
+  UInt_t ExtractJetNumber(const MCEventFormat* myEvent, MCSampleFormat* mySample);
 
 
 //---------------------------------------------------------------------------------
@@ -77,19 +78,9 @@ class MergingPlots : public AnalyzerBase
   /// Execution
   virtual bool Execute(SampleFormat& sample, const EventFormat& event);
 
-  /// Saving merging plots in the output file
-  void Write_TextFormat(SAFWriter& output);
-  void Write_RootFormat(TFile* output);
-  Bool_t SavePlots(const std::string& name);
-
-  /// Extracting the number of additionnal jets contained in the event 
-  UInt_t ExtractJetNumber(const MCEventFormat* myEvent, 
-                          MCSampleFormat* mySample);
-
-
-
 };
 }
 
+#endif
 #endif
 

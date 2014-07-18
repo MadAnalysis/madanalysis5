@@ -46,32 +46,8 @@ extern"C"
 */
 
 
-bool DJRextractor::Initialize(const std::map<std::string,std::string>& parameters)
+bool DJRextractor::Initialize()
 {
-  // Reading options
-  for (std::map<std::string,std::string>::const_iterator it=parameters.begin();
-       it!=parameters.end();it++)
-  {
-    if (it->first=="njets")
-    {
-      std::stringstream str;
-      str << it->second;
-      str >> merging_njets_;
-    }
-    else
-    {
-      WARNING << "parameter '" << it->first 
-              << "' is unknown and will be ignored." << endmsg;
-    }
-  }
-
-  // Initializing DJR plots
-  if (merging_njets_==0) 
-  {
-    ERROR << "number of jets requested for DJR plots is zero" << endmsg;
-    return false;
-  }
-
   // Initializing clustering algorithm
   JetDefinition_ = new fastjet::JetDefinition(fastjet::kt_algorithm,1.0);
   return true;
@@ -81,13 +57,8 @@ bool DJRextractor::Initialize(const std::map<std::string,std::string>& parameter
 bool DJRextractor::Execute(SampleFormat& mySample, const EventFormat& myEvent, std::vector<Double_t>& DJRvalues)
 {
   // Safety
-  DJRvalues.resize(merging_njets_,0);
   if (mySample.mc()==0) return false;
   if (myEvent.mc()==0) return false;
-
-  // Getting number of additional jets in the event
-  UInt_t njets = ExtractJetNumber(myEvent.mc(),mySample.mc());
-  if (njets>merging_njets_) return false;
 
   // Preparing inputs
   std::vector<fastjet::PseudoJet> inputs;
@@ -142,8 +113,10 @@ void DJRextractor::ExtractDJR(const std::vector<fastjet::PseudoJet>& inputs,std:
 {
   // JetDefinition_
   fastjet::ClusterSequence sequence(inputs, *JetDefinition_);
-  for (unsigned int i=0;i<DJRvalues.size();i++)
-  DJRvalues[i]=sequence.exclusive_dmerge(i);
+  for (unsigned int i=0;i<DJRvalues.size();i++) 
+  {
+    DJRvalues[i]=sequence.exclusive_dmerge(i);
+  }
 }
 
 
@@ -254,72 +227,4 @@ void DJRextractor::SelectParticles(std::vector<fastjet::PseudoJet>& inputs,
 }
 
 
-
-/// Number of jets
-UInt_t DJRextractor::ExtractJetNumber( const MCEventFormat* myEvent, 
-                                      MCSampleFormat* mySample)
-{
-  UInt_t njets=0;
-  for (unsigned int i=6;i<myEvent->particles().size();i++)
-  {
-    const MCParticleFormat* myPart = &myEvent->particles()[i];
-
-    // keep particles generated during the matrix element calculation
-    if (myPart->statuscode()!=3) continue;
-
-    // keep only partons
-    if (abs(myPart->pdgid())>merging_nqmatch_ && myPart->pdgid()!=21) continue;
-
-    // keep only jets whose mother is one of the initial parton
-    if (myPart->mother1()==0) continue;
-
-    // coming from initial state ?
-    if (myPart->mothup1_>6 && (myPart->mothup1_==0 || myPart->mothup2_==0)) continue;
-
-    // removing color singlet
-    /*
-    if (merging_nosingrad_)
-    {
-      for (unsigned int j=0;j<myEvent->particles().size();j++)
-      {
-        if (i!=j) continue;
-
-        const MCParticleFormat* myPart2 = &myEvent->particles()[j];
-        
-        // keep particles generated during the matrix element calculation
-        if (myPart2->statuscode()!=3) continue;
-
-        // keep only partons 
-        if ( myPart2->pdgid()!=-myPart->pdgid() && 
-             (myPart2->pdgid()!=21 && myPart->pdgid()!=21)) continue;
-
-        // only final states
-
-      }
-    }
-    */
-
-    // count particle
-    njets++;    
-  }
-  /*
-  if (njets==3)  
-  {
-    for (unsigned int i=0;i<myEvent->particles().size();i++)
-    {
-      if (fabs(myEvent->particles()[i].pdgid())>5 && 
-          myEvent->particles()[i].pdgid()!=21) continue;
-      if (myEvent->particles()[i].statuscode()==1) continue;
-
-      std::cout << "i=" << i+1 
-                << " ; id=" << myEvent->particles()[i].pdgid()
-                << " ; s="  << myEvent->particles()[i].statuscode()
-                << " ; m1=" << myEvent->particles()[i].mothup1_ 
-                << " ; m2=" << myEvent->particles()[i].mothup2_ << std::endl;
-    }
-    exit(1);
-    }
-  */
-  return njets;  
-}
 
