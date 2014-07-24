@@ -14,8 +14,8 @@ set ExecutionPath {
   MuonMomentumSmearing
 
   TrackMerger
-  TrackIsolationCalculation
   Calorimeter
+  TrackIsolationCalculation
   EFlowMerger
 
   PhotonEfficiency
@@ -52,34 +52,63 @@ set ExecutionPath {
 # Isolation Calculation
 #################################
 module IsolationCalculation PhotonIsolationCalculation {
-  set CandidateInputArray PhotonEfficiency/photons
-  set IsolationInputArray EFlowMerger/eflow
-
+  set CandidateInputArray   PhotonEfficiency/photons
+  set TrackInputArray       TrackMerger/tracks 
+  set CaloTowerInputArray   Calorimeter/towers
+  set EflowTrackInputArray  Calorimeter/eflowTracks 
+  set EflowPhotonInputArray Calorimeter/eflowPhotons 
+  set EflowHadronInputArray Calorimeter/eflowNeutralHadrons
   set OutputArray DelphesMA5tunePhotons
-  set PTMin 0.5
+  set Track_PTMin        0.5
+  set EflowTrack_PTMin   0.5
+  set EflowPhoton_PTMin  0.5
+  set EflowNeutral_PTMin 0.5
+  set CaloTower_PTMin    0.5
 }
 
 module IsolationCalculation ElectronIsolationCalculation {
-  set CandidateInputArray ElectronEfficiency/electrons
-  set IsolationInputArray TrackMerger/tracks 
-
+  set CandidateInputArray   ElectronEfficiency/electrons
+  set TrackInputArray       TrackMerger/tracks 
+  set CaloTowerInputArray   Calorimeter/towers
+  set EflowTrackInputArray  Calorimeter/eflowTracks 
+  set EflowPhotonInputArray Calorimeter/eflowPhotons 
+  set EflowHadronInputArray Calorimeter/eflowNeutralHadrons
   set OutputArray DelphesMA5tuneElectrons
-  set PTMin 0.5
+  set Track_PTMin        0.5
+  set EflowTrack_PTMin   0.5
+  set EflowPhoton_PTMin  0.5
+  set EflowNeutral_PTMin 0.5
+  set CaloTower_PTMin    0.5
 }
 
 module IsolationCalculation MuonIsolationCalculation {
-  set CandidateInputArray MuonEfficiency/muons
-  set IsolationInputArray TrackMerger/tracks 
-
+  set CandidateInputArray   MuonEfficiency/muons
+  set TrackInputArray       TrackMerger/tracks 
+  set CaloTowerInputArray   Calorimeter/towers
+  set EflowTrackInputArray  Calorimeter/eflowTracks 
+  set EflowPhotonInputArray Calorimeter/eflowPhotons 
+  set EflowHadronInputArray Calorimeter/eflowNeutralHadrons
   set OutputArray DelphesMA5tuneMuons
-  set PTMin 0.5
+  set Track_PTMin        0.5
+  set EflowTrack_PTMin   0.5
+  set EflowPhoton_PTMin  0.5
+  set EflowNeutral_PTMin 0.5
+  set CaloTower_PTMin    0.5
 }
-module IsolationCalculation TrackIsolationCalculation {
-  set CandidateInputArray TrackMerger/tracks
-  set IsolationInputArray TrackMerger/tracks
 
+module IsolationCalculation TrackIsolationCalculation {
+  set CandidateInputArray   TrackMerger/tracks
+  set TrackInputArray       TrackMerger/tracks 
+  set CaloTowerInputArray   Calorimeter/towers
+  set EflowTrackInputArray  Calorimeter/eflowTracks 
+  set EflowPhotonInputArray Calorimeter/eflowPhotons 
+  set EflowHadronInputArray Calorimeter/eflowNeutralHadrons
   set OutputArray DelphesMA5tuneTracks
-  set PTMin 0.5
+  set Track_PTMin        0.5
+  set EflowTrack_PTMin   0.5
+  set EflowPhoton_PTMin  0.5
+  set EflowNeutral_PTMin 0.5
+  set CaloTower_PTMin    0.5
 }
 #MA5 END
 
@@ -352,7 +381,7 @@ module Efficiency PhotonEfficiency {
 
 module Isolation PhotonIsolation {
   set CandidateInputArray PhotonEfficiency/photons
-  set IsolationInputArray EFlowMerger/eflow
+  set TrackInputArray EFlowMerger/eflow
 
   set OutputArray photons
 
@@ -386,7 +415,7 @@ module Efficiency ElectronEfficiency {
 
 module Isolation ElectronIsolation {
   set CandidateInputArray ElectronEfficiency/electrons
-  set IsolationInputArray EFlowMerger/eflow
+  set TrackInputArray EFlowMerger/eflow
 
   set OutputArray electrons
 
@@ -422,7 +451,7 @@ module Efficiency MuonEfficiency {
 
 module Isolation MuonIsolation {
   set CandidateInputArray MuonEfficiency/muons
-  set IsolationInputArray EFlowMerger/eflow
+  set TrackInputArray EFlowMerger/eflow
 
   set OutputArray muons
 

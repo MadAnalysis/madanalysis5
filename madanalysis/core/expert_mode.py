@@ -94,17 +94,16 @@ class ExpertMode:
 
         # Recasting tools
         if self.main.session_info.has_recasttools:
-          try:
-            shutil.copyfile(self.main.archi_info.ma5dir+"/tools/RecastingTools/exclusion_CLs.py",self.path+'/exclusion_CLs.py')
-          except:
-            logging.error('Impossible to copy the recasting tools')
-            return False
-        try:
-            os.chmod(self.path+"/exclusion_CLs.py",0755)
-        except:
-            logging.error('Impossible to render the recasting tools executable')
-            return False
-
+            try:
+                shutil.copyfile(self.main.archi_info.ma5dir+"/tools/RecastingTools/exclusion_CLs.py",self.path+'/exclusion_CLs.py')
+            except:
+                logging.error('Impossible to copy the recasting tools')
+                return False
+            try:
+                os.chmod(self.path+"/exclusion_CLs.py",0755)
+            except:
+                logging.error('Impossible to render the recasting tools executable')
+                return False
 
         # Writing an empty analysis
         logging.info("Please enter a name for your analysis")

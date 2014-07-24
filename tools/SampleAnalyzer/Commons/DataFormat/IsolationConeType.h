@@ -63,10 +63,11 @@ class IsolationConeType
   // -------------------------------------------------------------
  protected:
 
-  UShort_t ntracks_;   /// number of tracks
-  Float_t sumPT_;      /// sum PT
-  Float_t sumET_;      /// sum ET
-  Float_t deltaR_;     /// deltaR of the cone
+  UShort_t ntracks_;    /// number of tracks
+  Float_t sumPT_;       /// sum PT
+  Float_t eflow_sumPT_; /// sum PT eflow
+  Float_t sumET_;       /// sum ET
+  Float_t deltaR_;      /// deltaR of the cone
 
   // -------------------------------------------------------------
   //                        method members
@@ -89,10 +90,11 @@ class IsolationConeType
   /// Clear all information
   virtual void Reset()
   {
-    ntracks_ = 0; 
-    sumPT_   = 0.;
-    sumET_   = 0.;
-    deltaR_  = 0.;
+    ntracks_     = 0; 
+    sumPT_       = 0.;
+    sumET_       = 0.;
+    eflow_sumPT_ = 0.;
+    deltaR_      = 0.;
   }
 
   /// Accessor to the number of tracks
@@ -110,6 +112,10 @@ class IsolationConeType
   /// Accessor to deltaR
   const Float_t& deltaR() const
   {return deltaR_;}
+
+  /// Accessor to sumPTeflow
+  const Float_t& sumPTeflow() const
+  {return eflow_sumPT_;}
 
 };
 
