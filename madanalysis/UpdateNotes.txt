@@ -11,7 +11,7 @@ Update notes for MadAnalysis 5 (in reverse time order)
                                     - many bug fixes
                                     - improved portability with mac OS
 
-157  1.1.10 (2014/05/17) ma5team:   - new compilation procedure for library and job
+ 81  1.1.10 (2014/05/17) ma5team:   - new compilation procedure for library and job
                                     - adding job test to check the compilation procedure
                                     - adding restart command and possibility to restart MA5 after 
                                       the installation of a package

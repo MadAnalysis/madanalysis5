@@ -99,9 +99,9 @@ class ExpertMode:
           except:
             logging.error('Impossible to copy the recasting tools')
             return False
-        try:
+          try:
             os.chmod(self.path+"/exclusion_CLs.py",0755)
-        except:
+          except:
             logging.error('Impossible to render the recasting tools executable')
             return False
 
