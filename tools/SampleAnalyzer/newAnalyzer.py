@@ -386,7 +386,7 @@ class AnalyzerManager:
               output.write("  if (analyzer_" + TheName + "==0) return 1;\n\n")
             elif "Execute" in line and not IsExecuted:
               IsExecuted = True
-              output.write("      analyzer_" + TheName + "->Execute(mySample,myEvent);\n")
+              output.write("      if (!analyzer_" + TheName + "->Execute(mySample,myEvent)) continue;\n")
               output.write(line)
             else:
               output.write(line)
