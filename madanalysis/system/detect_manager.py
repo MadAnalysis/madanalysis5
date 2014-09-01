@@ -89,6 +89,9 @@ class DetectManager():
         elif package=='recasttools':
             from madanalysis.system.detect_recasttools import DetectRecastTools
             checker=DetectRecastTools(self.archi_info, self.user_info, self.session_info, self.debug)
+        elif package=='madgraph':
+            from madanalysis.system.detect_madgraph import DetectMadgraph
+            checker=DetectMadgraph(self.archi_info, self.user_info, self.session_info, self.debug)
         else:
             logging.error('the package "'+rawpackage+'" is unknown')
             return False

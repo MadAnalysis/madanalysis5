@@ -36,6 +36,9 @@ class UserInfo:
         self.root_bin = None
 
         # Delphes
+        self.madgraph_veto    = None
+
+        # Delphes
         self.delphes_veto     = None
         self.delphes_includes = None
         self.delphes_libs     = None
@@ -164,6 +167,10 @@ class UserInfo:
         # Root
         elif   option=='root_bin_path':
             self.root_bin=value
+
+        # Madgraph
+        elif option=='madgraph_veto':
+            self.madgraph_veto=self.ConvertToBool(option,value,filename)
 
         # Delphes
         elif option=='delphes_veto':

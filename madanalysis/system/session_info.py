@@ -32,12 +32,14 @@ class SessionInfo():
         self.tmpdir             = ""
         self.downloaddir        = ""
         self.recasttools_path   = ""
+        self.madgraph_path      = ""
         self.has_matplotlib     = False
         self.has_gnuplot        = False
         self.has_pdflatex       = False
         self.has_latex          = False
         self.has_recasttools    = False
         self.has_dvipdf         = False
+        self.has_madgraph       = False
         self.has_web            = True
 
     def dump(self):

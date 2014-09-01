@@ -67,18 +67,24 @@ class MultiparticleReader():
             logging.error("cannot open the file called '" + filename + "' : it is already opened")
             return False
 
+        # Files
         name = os.path.normpath(self.path+"/"+filename)
+        relname = os.path.normpath(self.path+"/"+filename)
+        if not os.path.isfile(name):
+            name = os.path.normpath(self.path+"/madanalysis/"+filename)
+            relname = os.path.normpath("madanalysis/"+filename)
+
+        # Display file location
+        logging.info("Multiparticle labels exported from " + relname)
+
+        # Open
         if os.path.isfile(name):
-            logging.info("  => Multiparticle labels exported from " + filename)
             self.file = open (name, "r")
         else:
-            name = os.path.normpath(self.path+"/madanalysis/"+filename)
-            logging.info("  => Multiparticle labels from madanalysis/" + filename)
-            if os.path.isfile(name):
-                self.file = open (name, "r")
-            else:
-                logging.error("File not found")
-                return False
+            logging.error("File not found")
+            return False
+
+        # Ok
         return True    
 
 
@@ -92,7 +98,8 @@ class MultiparticleReader():
             return False
 
         name = os.path.normpath(self.path+"/madanalysis/"+filename)
-        logging.info('Multiparticle labels from '+filename)
+        relname = os.path.normpath("madanalysis/"+filename)
+        logging.info('Multiparticle labels from '+relname)
         if os.path.isfile(name):
             self.file = open (name, "r")
         else:
@@ -112,7 +119,8 @@ class MultiparticleReader():
             return False
 
         name = os.path.normpath(self.path+"/madanalysis/"+filename)
-        logging.info('Multiparticle labels from '+filename)
+        relname = os.path.normpath("madanalysis/"+filename)
+        logging.info('Multiparticle labels from '+relname)
         if os.path.isfile(name):
             self.file = open (name, "r")
         else:
