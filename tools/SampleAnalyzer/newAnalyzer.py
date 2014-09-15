@@ -174,14 +174,14 @@ class AnalyzerManager:
         file.write('\n')
         file.write('      // display the status code\n')
         file.write('      cout << "Status Code=" << part.statuscode() << endl;\n')
-        file.write('      if (PHYSICS->IsInitialState(part)) cout << " (Initial state) ";\n')
-        file.write('      else if (PHYSICS->IsFinalState(part)) cout << " (Intermediate state) ";\n')
-        file.write('      else cout << " (Final state) ";\n')
+        file.write('      if (PHYSICS->Id->IsInitialState(part)) cout << " (Initial state) ";\n')
+        file.write('      else if (PHYSICS->Id->IsFinalState(part)) cout << " (Final state) ";\n')
+        file.write('      else cout << " (Intermediate state) ";\n')
         file.write('      cout << endl;\n')
         file.write('\n')
         file.write('      // pdgid\n')
         file.write('      cout << "pdg id=" << part.pdgid() << endl;\n')
-        file.write('      if (PHYSICS->IsInvisible(part)) cout << " (invisible particle) ";\n')
+        file.write('      if (PHYSICS->Id->IsInvisible(part)) cout << " (invisible particle) ";\n')
         file.write('      else cout << " (visible particle) ";\n')
         file.write('      cout << endl;\n')
         file.write('\n')
@@ -386,7 +386,7 @@ class AnalyzerManager:
               output.write("  if (analyzer_" + TheName + "==0) return 1;\n\n")
             elif "Execute" in line and not IsExecuted:
               IsExecuted = True
-              output.write("      analyzer_" + TheName + "->Execute(mySample,myEvent);\n")
+              output.write("      if (!analyzer_" + TheName + "->Execute(mySample,myEvent)) continue;\n")
               output.write(line)
             else:
               output.write(line)
