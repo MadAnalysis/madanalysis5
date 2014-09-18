@@ -17,10 +17,10 @@ set ExecutionPath {
 
   TrackMerger
   Calorimeter
-  TrackIsolationCalculation
   TrackPileUpSubtractor
   NeutralTowerMerger
   EFlowMerger
+  TrackIsolationCalculation
 
   GenJetFinder
 
