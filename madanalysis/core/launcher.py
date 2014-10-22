@@ -202,9 +202,15 @@ def MainSession(mode,arglist,ma5dir,version,date):
         from madanalysis.core.expert_mode import ExpertMode
         main.expertmode = True
         expert = ExpertMode(main)
-        if not expert.CreateDirectory():
+        dirname=""
+        if len(arglist)>0:
+          dirname=arglist[0]
+        if not expert.CreateDirectory(dirname):
             sys.exit()
-        if not expert.Copy():
+        dirname=""
+        if len(arglist)>1:
+          dirname=arglist[1]
+        if not expert.Copy(dirname):
             sys.exit()
         expert.GiveAdvice()
         return False

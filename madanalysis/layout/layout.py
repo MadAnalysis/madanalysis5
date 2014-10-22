@@ -102,7 +102,10 @@ class Layout:
         # error greater than xsection ? 
         else:
             string1 = Layout.Round_to_Ndigits(xsection,3)
-            string2 = Layout.Round_to_Ndigits(100.*xerror/xsection,2)
+            if xsection ==0.:
+              string2="0.0"
+            else:
+              string2 = Layout.Round_to_Ndigits(100.*xerror/xsection,2)
             return string1 + " @ " + string2 + '%'
 
     @staticmethod
