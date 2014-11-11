@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+93   1.1.12.4 (2014/11/11) fuks:    Bug with the linestyle when drawing histograms in the normal mode 
+                                   (see question 257315 on launchpad) 
+
 92   1.1.12.3 (2014/10/23) fuks:    Arguments allowed for the expert mode, a few bug corrected 
 
 88   1.1.12.2 (2014/08/21) fuks:    Small issue with the newanalyzer script for multianalyses 
