@@ -174,15 +174,15 @@ class Dataset:
         #backstyle
         elif variable == "backstyle":
             if value=="solid":
-                self.linestyle=BackStyleType.SOLID
+                self.backstyle=BackStyleType.SOLID
             elif value=="dotted":
-                self.linestyle=BackStyleType.DOTTED
+                self.backstyle=BackStyleType.DOTTED
             elif value=="hline":
-                self.linestyle=BackStyleType.HLINE
+                self.backstyle=BackStyleType.HLINE
             elif value=="dline":
-                self.linestyle=BackStyleType.DLINE
+                self.backstyle=BackStyleType.DLINE
             elif value=="vline":
-                self.linestyle=BackStyleType.VLINE
+                self.backstyle=BackStyleType.VLINE
             else:
                 logging.error("the possible values for the attribute 'backstyle' are 'solid', 'dotted', 'hline', 'dline', 'vline'.")
 
