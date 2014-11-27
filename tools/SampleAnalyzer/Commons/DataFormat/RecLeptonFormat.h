@@ -71,6 +71,24 @@ class RecLeptonFormat : public RecParticleFormat
   RecLeptonFormat()
   { Reset(); }
 
+  /// Constructor with one argument
+  RecLeptonFormat(const RecParticleFormat& part)
+  { 
+    Reset();
+    mc_       = part.mc_;
+    HEoverEE_ = part.HEoverEE_;
+    momentum_ = part.momentum_;
+  }
+
+  /// Constructor with one argument
+  RecLeptonFormat(const RecParticleFormat* part)
+  { 
+    Reset();
+    mc_       = part->mc_;
+    HEoverEE_ = part->HEoverEE_;
+    momentum_ = part->momentum_;
+  }
+
   /// Destructor
   virtual ~RecLeptonFormat()
   {}
@@ -125,6 +143,10 @@ class RecLeptonFormat : public RecParticleFormat
     isolCones_.push_back(IsolationConeType());
     return &isolCones_.back();
   }
+
+  /// giving a new isolation cone entry
+  void setIsolCones(const std::vector<IsolationConeType>& cones)
+  { isolCones_ = cones; }
 
 };
 

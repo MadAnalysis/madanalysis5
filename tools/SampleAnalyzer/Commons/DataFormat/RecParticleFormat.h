@@ -45,6 +45,7 @@ class DelphesTreeReader;
 class DelphesMA5tuneTreeReader;
 class DetectorDelphes;
 class DetectorDelphesMA5tune;
+class RecLeptonFormat;
 
 class RecParticleFormat : public ParticleBaseFormat
 {
@@ -54,6 +55,7 @@ class RecParticleFormat : public ParticleBaseFormat
   friend class DelphesMA5tuneTreeReader;
   friend class DetectorDelphes;
   friend class DetectorDelphesMA5tune;
+  friend class RecLeptonFormat;
 
   // -------------------------------------------------------------
   //                        data members
@@ -125,6 +127,7 @@ class RecParticleFormat : public ParticleBaseFormat
   /// Accessor to the electric charge
   virtual const int charge() const
   { return 0; }
+
 
 };
 

@@ -98,7 +98,7 @@ class IsolationConeType
   }
 
   /// Accessor to the number of tracks
-  virtual const UShort_t ntracks() const
+  const UShort_t ntracks() const
   {return ntracks_;}
 
   /// Accessor to sumPT
@@ -116,6 +116,26 @@ class IsolationConeType
   /// Accessor to sumPTeflow
   const Float_t& sumPTeflow() const
   {return eflow_sumPT_;}
+
+  /// Mutator to the number of tracks
+  void setNtracks(UShort_t tracks)
+  {ntracks_=tracks;}
+
+  /// Mutator to sumPT
+  void setsumPT(Float_t sumPT)
+  {sumPT_=sumPT;}
+
+  /// Mutator to sumET
+  void setSumET(Float_t sumET)
+  {sumET_=sumET;}
+
+  /// Mutator to deltaR
+  void setDeltaR(Float_t deltaR)
+  {deltaR_=deltaR;}
+
+  /// Mutator to sumPTeflow
+  void setSumPTeflow(Float_t eflow_sumPT)
+  {eflow_sumPT_=eflow_sumPT;}
 
 };
 

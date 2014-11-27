@@ -178,7 +178,7 @@ void DJRextractor::SelectParticles(std::vector<fastjet::PseudoJet>& inputs,
     if (fabs(myEvent->particles()[i].pdgid())>5 && 
         myEvent->particles()[i].pdgid()!=21) continue;
 
-    // Selecting final states
+    // Selecting radiative states
     if (myEvent->particles()[i].statuscode()!=2) continue;
 
     // Selecting states not coming from initial proton (beam remnant) 

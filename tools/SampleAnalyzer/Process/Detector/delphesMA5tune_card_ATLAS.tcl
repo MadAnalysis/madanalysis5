@@ -16,7 +16,6 @@ set ExecutionPath {
   TrackMerger
   Calorimeter
   EFlowMerger
-  TrackIsolationCalculation
 
   PhotonEfficiency
   PhotonIsolationCalculation
@@ -78,16 +77,6 @@ module IsolationCalculation MuonIsolationCalculation {
   set CaloTower_PTMin    0.5
 }
 
-module IsolationCalculation TrackIsolationCalculation {
-  set CandidateInputArray   TrackMerger/tracks
-  set TrackInputArray       TrackMerger/tracks 
-  set CaloTowerInputArray   Calorimeter/towers
-  set EflowInputArray       EFlowMerger/eflow
-  set OutputArray DelphesMA5tuneTracks
-  set Track_PTMin        0.5
-  set Eflow_PTMin        0.5
-  set CaloTower_PTMin    0.5
-}
 #MA5 END
 
 #################################
@@ -520,7 +509,7 @@ module TreeWriter TreeWriter {
   add Branch ElectronIsolationCalculation/DelphesMA5tuneElectrons DelphesMA5tuneElectron Electron
   add Branch MuonIsolationCalculation/DelphesMA5tuneMuons DelphesMA5tuneMuon Muon
   add Branch PhotonIsolationCalculation/DelphesMA5tunePhotons DelphesMA5tunePhoton Photon
-  add Branch TrackIsolationCalculation/DelphesMA5tuneTracks DelphesMA5tuneTrack Track
+#  add Branch TrackIsolationCalculation/DelphesMA5tuneTracks DelphesMA5tuneTrack Track
 
 }
 
