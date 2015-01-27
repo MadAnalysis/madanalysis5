@@ -314,7 +314,10 @@ class LibraryWriter():
             makefile = 'Makefile_'+package
 
         # shell command
-        commands = ['make','compile',strcores,'--file='+makefile]
+        if strcores=='':
+          commands = ['make','compile','--file='+makefile]
+        else:
+          commands = ['make','compile',strcores,'--file='+makefile]
 
         # call
         result, out = ShellCommand.ExecuteWithLog(commands,logfile,folder)
