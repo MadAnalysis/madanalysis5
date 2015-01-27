@@ -40,7 +40,7 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 // DO NOT TOUCH THESE LINES
 const std::string Configuration::sampleanalyzer_version_ = "1.1.11";
-const std::string Configuration::sampleanalyzer_date_    = "2014/09/15";
+const std::string Configuration::sampleanalyzer_date_    = "2015/01/26";
 // DO NOT TOUCH THESE LINES
 
 // -----------------------------------------------------------------------------
