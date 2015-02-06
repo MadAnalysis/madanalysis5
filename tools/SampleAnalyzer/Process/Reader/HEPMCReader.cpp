@@ -172,7 +172,19 @@ bool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
           }
         }
       }
+      if(nmother>0) part.mothup1_ = part.mother1_-&myEvent.mc()->particles_[0]+1;
+      if(nmother>1) part.mothup2_ = part.mother2_-&myEvent.mc()->particles_[0]+1;
     }
+
+  for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
+  {
+    MCParticleFormat& part = myEvent.mc()->particles_[i];
+    if(part.daughters_.size()>0)
+    {
+       part.daughter1_ = part.daughters()[0]-&myEvent.mc()->particles_[0] + 1;
+       part.daughter2_ = part.daughters()[part.daughters().size()-1]-&myEvent.mc()->particles_[0] + 1;
+    }
+  }
 
     // MET, MHT, TET, THT
     if (part.statuscode()==1 && !PHYSICS->Id->IsInvisible(part))
@@ -473,7 +485,7 @@ void HEPMCReader::FillEventVertexLine(const std::string& line, EventFormat& myEv
   std::stringstream str;
   str << line;
 
-  int tmp=0;
+  double tmp=0;
   char linecode;
   str >> linecode;                  // character 'V'
   str >> current_vertex_.barcode_;  // barcode
