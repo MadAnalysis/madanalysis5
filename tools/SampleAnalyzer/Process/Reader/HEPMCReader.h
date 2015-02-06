@@ -25,9 +25,6 @@
 #ifndef HEPMC_READER_h
 #define HEPMC_READER_h
 
-// STL headers
-#include <map>
-
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Reader/ReaderTextBase.h"
 

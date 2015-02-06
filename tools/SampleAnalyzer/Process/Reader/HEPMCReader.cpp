@@ -183,7 +183,7 @@ bool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
     {
        part.daughter1_ = part.daughters()[0]-&myEvent.mc()->particles_[0] + 1;
        part.daughter2_ = part.daughters()[part.daughters().size()-1]-&myEvent.mc()->particles_[0] + 1;
-   }
+    }
   }
 
 
