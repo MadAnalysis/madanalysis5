@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+96   1.1.12.6 (2015/02/06) fuks:    Bug in the HepMC reader fixed 
+
 95   1.1.12.5 (2015/01/26) fuks:    Compilation errors when one core was selected fixed 
 
 93   1.1.12.4 (2014/11/11) fuks:    Bug with the linestyle when drawing histograms in the normal mode 

@@ -25,6 +25,9 @@
 #ifndef HEPMC_READER_h
 #define HEPMC_READER_h
 
+// STL headers
+#include <map>
+
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Reader/ReaderTextBase.h"
 
@@ -57,7 +60,7 @@ class HEPMCReader : public ReaderTextBase
     Int_t barcode_;
     Double_t ctau_;
   };
-  
+
   HEPVertex current_vertex_;
 
   // -------------------------------------------------------------
