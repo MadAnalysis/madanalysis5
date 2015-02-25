@@ -229,42 +229,126 @@ bool DelphesTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEve
 // -----------------------------------------------------------------------------
 void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
 {
+  // ---------------------------------------------------------------------------
+  // GenParticle collection
+  // ---------------------------------------------------------------------------
+  std::map<const GenParticle*,unsigned int> gentable;
+  std::map<const GenParticle*,unsigned int>::const_iterator genit;
+  if (branchGenParticle_!=0)
+  for (unsigned int i=0;i<static_cast<UInt_t>(branchGenParticle_->GetEntries());i++)
+  {
+    // getting the i-th particle
+    GenParticle* part = dynamic_cast<GenParticle*>(branchGenParticle_->At(i));
+    if (part==0) continue;
+
+    // filling the mapping table: pointer address <-> i-th
+    gentable[part]=i;
+
+    // creating new particle and filling particle info
+    MCParticleFormat * gen = myEvent.mc()->GetNewParticle();
+    gen->pdgid_      = part->PID;
+    gen->statuscode_ = part->Status;
+    gen->mothup1_    = part->M1;
+    gen->mothup2_    = part->M2;
+    gen->isPU_      = part->IsPU;
+    gen->momentum_.SetPxPyPzE(part->Px,part->Py, part->Pz, part->E);
+  }
+
+
+  // ---------------------------------------------------------------------------
   // Fill electrons
+  // ---------------------------------------------------------------------------
   if (branchElectron_!=0)
   for (unsigned int i=0;i<static_cast<UInt_t>(branchElectron_->GetEntries());i++)
   {
+    // getting the i-th particle
     Electron* part = dynamic_cast<Electron*>(branchElectron_->At(i));
+    if (part==0) continue;
+
+    // creating new particle and filling particle info
     RecLeptonFormat * electron = myEvent.rec()->GetNewElectron();
     electron->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
     if (part->Charge>0) electron->charge_=true; else electron->charge_=false;
     electron->HEoverEE_ = part->EhadOverEem;
+
+    // setting corresponding gen particle
+    const GenParticle* mc = dynamic_cast<const GenParticle*>(part->Particle.GetObject());
+    if (mc!=0)
+    {
+      genit = gentable.find(mc);
+      if (genit!=gentable.end()) electron->mc_=&(myEvent.mc()->particles()[genit->second]);
+      else WARNING << "GenParticle corresponding to an electron is not found in the gen table" << endmsg;
+    }
   }
 
+  // ---------------------------------------------------------------------------
   // Fill photons
+  // ---------------------------------------------------------------------------
   if (branchPhoton_!=0)
   for (unsigned int i=0;i<static_cast<UInt_t>(branchPhoton_->GetEntries());i++)
   {
+    // getting the i-th particle
     Photon* part = dynamic_cast<Photon*>(branchPhoton_->At(i));
+    if (part==0) continue;
+
+    // creating new particle and filling particle info
     RecPhotonFormat * photon = myEvent.rec()->GetNewPhoton();
     photon->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
     photon->HEoverEE_ = part->EhadOverEem;
+
+    // setting corresponding gen particle
+    GenParticle* mc=0;
+    for (unsigned int j=0;j<static_cast<UInt_t>(part->Particles.GetEntries());j++)
+    {
+      GenParticle* ref = dynamic_cast<GenParticle*>(part->Particles.At(j));
+      if (ref==0) continue;
+      if (mc==0) mc=ref;
+      else if (mc->PT<ref->PT) mc=ref;
+    }
+    if (mc!=0)
+    {
+      genit = gentable.find(mc);
+      if (genit!=gentable.end()) photon->mc_=&(myEvent.mc()->particles()[genit->second]);
+      else WARNING << "GenParticle corresponding to a photon is not found in the gen table" << endmsg;
+    }
   }
 
+  // ---------------------------------------------------------------------------
   // Fill muons
+  // ---------------------------------------------------------------------------
   if (branchMuon_!=0)
   for (unsigned int i=0;i<static_cast<UInt_t>(branchMuon_->GetEntries());i++)
   {
+    // getting the i-th particle
     Muon* part = dynamic_cast<Muon*>(branchMuon_->At(i));
+    if (part==0) continue;
+
+    // creating new particle and filling particle info
     RecLeptonFormat * muon = myEvent.rec()->GetNewMuon();
     muon->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
     if (part->Charge>0) muon->charge_=true; else muon->charge_=false;
+
+    // setting corresponding gen particle
+    const GenParticle* mc = dynamic_cast<const GenParticle*>(part->Particle.GetObject());
+    if (mc!=0)
+    {
+      genit = gentable.find(mc);
+      if (genit!=gentable.end()) muon->mc_=&(myEvent.mc()->particles()[genit->second]);
+      else WARNING << "GenParticle corresponding to a muon is not found in the gen table" << endmsg;
+    }
   }
 
+  // ---------------------------------------------------------------------------
   // Fill jets and taus
+  // ---------------------------------------------------------------------------
   if (branchJet_!=0)
   for (unsigned int i=0;i<static_cast<UInt_t>(branchJet_->GetEntries());i++)
   {
+    // getting the i-th particle
     Jet* part = dynamic_cast<Jet*>(branchJet_->At(i));
+    if (part==0) continue;
+
+    // creating new tau
     if(part->TauTag==1)
     {
       RecTauFormat * tau = myEvent.rec()->GetNewTau();
@@ -273,58 +357,95 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
       if (part->Charge>0) tau->charge_=true; else tau->charge_=false;
       tau->HEoverEE_ = part->EhadOverEem;
     }
+
+    // creating new jet
     else
     {
+      // Creating new jet
       RecJetFormat * jet = myEvent.rec()->GetNewJet();
+
+      // Setting jet info
       jet->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
       jet->ntracks_  = 0; // To fix later
       jet->btag_     = part->BTag;
       jet->HEoverEE_ = part->EhadOverEem;
+
+      // Setting corresponding gen particle
+      /*      for (unsigned int j=0;j<static_cast<UInt_t>(part->Particles.GetEntries());j++)
+      {
+        GenParticle* ref = dynamic_cast<GenParticle*>(part->Particles.At(j));
+        if (ref!=0)
+        {
+          genit = gentable.find(ref);
+          if (genit!=gentable.end()) jet->Constituents_.push_back(genit->second);
+          else WARNING << "GenParticle corresponding to a jet constituent is not found in the gen table" << endmsg;
+        }
+        }*/
     }
   }
 
+  // ---------------------------------------------------------------------------
   // MET
+  // ---------------------------------------------------------------------------
   if (branchMissingET_!=0)
   if (branchMissingET_->GetEntries()>0)
   {
+    // getting the first particle
     MissingET* part = dynamic_cast<MissingET*>(branchMissingET_->At(0));
-    myEvent.rec()->MET_.momentum_.SetPx(part->MET*cos(part->Phi));
-    myEvent.rec()->MET_.momentum_.SetPy(part->MET*sin(part->Phi));
-    myEvent.rec()->MET_.momentum_.SetE(part->MET);
+
+    // filling MET info
+    if (part!=0)
+    {
+      myEvent.rec()->MET_.momentum_.SetPx(part->MET*cos(part->Phi));
+      myEvent.rec()->MET_.momentum_.SetPy(part->MET*sin(part->Phi));
+      myEvent.rec()->MET_.momentum_.SetE (part->MET);
+    }
   }
 
+  // ---------------------------------------------------------------------------
   // THT
+  // ---------------------------------------------------------------------------
   if (branchScalarHT_!=0)
   if (branchScalarHT_->GetEntries()>0)
   {
+    // getting the first particle
     ScalarHT* part = dynamic_cast<ScalarHT*>(branchScalarHT_->At(0));
-    myEvent.rec()->THT_=part->HT;
+
+    // filling THT info
+    if (part!=0)
+    {
+      myEvent.rec()->THT_=part->HT;
+    }
   }
 
-  // GenParticle collection
-  if (branchGenParticle_!=0)
-  for (unsigned int i=0;i<static_cast<UInt_t>(branchGenParticle_->GetEntries());i++)
-  {
-    GenParticle* part = dynamic_cast<GenParticle*>(branchGenParticle_->At(i));
-    MCParticleFormat * gen = myEvent.mc()->GetNewParticle();
-    gen->pdgid_      = part->PID;
-    gen->statuscode_ = part->Status;
-    gen->mothup1_    = part->M1;
-    gen->mothup2_    = part->M2;
-    gen->momentum_.SetPxPyPzE(part->Px,part->Py, part->Pz, part->E);
-  }
-
+  // ---------------------------------------------------------------------------
   // Track collection
+  // ---------------------------------------------------------------------------
   if (branchTrack_!=0)
   for (unsigned int i=0;i<static_cast<UInt_t>(branchTrack_->GetEntries());i++)
   {
+    // getting the i-th track
     Track* ref = dynamic_cast<Track*>(branchTrack_->At(i));
+    if (ref==0) continue;
+
+    // creating new track
     RecTrackFormat * track = myEvent.rec()->GetNewTrack();
+
+    // filling track info
     track->pdgid_ = ref->PID;
     if (ref->Charge>0) track->charge_=true; else track->charge_=false;
     track->momentum_.SetPtEtaPhiE(ref->PT,ref->Eta,ref->Phi,ref->PT);
     track->etaOuter_ = ref->EtaOuter;
     track->phiOuter_ = ref->PhiOuter;
+
+    // setting corresponding gen particle
+    const GenParticle* mc = dynamic_cast<const GenParticle*>(ref->Particle.GetObject());
+    if (mc!=0)
+    {
+      genit = gentable.find(mc);
+      if (genit!=gentable.end()) track->mc_=&(myEvent.mc()->particles()[genit->second]);
+      else WARNING << "GenParticle corresponding to a track is not found in the gen table" << endmsg;
+    }
   }
 
 }
