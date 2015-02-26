@@ -33,17 +33,11 @@
 #include <fastjet/PseudoJet.hh>
 
 //STL headers
+#include <map>
 #include <sstream>
 
 
 using namespace MA5;
-
-/*
-extern"C"
-{
-  void ktclus_(int *imode, double PP[512][4], int* NN, double* ECUT, double Y[512]);
-}
-*/
 
 
 bool DJRextractor::Initialize()
@@ -64,7 +58,7 @@ bool DJRextractor::Execute(SampleFormat& mySample, const EventFormat& myEvent, s
   std::vector<fastjet::PseudoJet> inputs;
   SelectParticles(inputs,myEvent.mc());
 
-  // Getting DJR observables
+  // Extract the DJR values
   ExtractDJR(inputs,DJRvalues);
 
   return true;
@@ -77,8 +71,6 @@ void DJRextractor::Finalize()
 }
 
 
-
-
 Double_t DJRextractor::rapidity(Double_t px, Double_t py, Double_t pz)
 {
   double PTJET = sqrt( px*px + py*py);
@@ -86,96 +78,69 @@ Double_t DJRextractor::rapidity(Double_t px, Double_t py, Double_t pz)
 }
 
 
-void DJRextractor::ExtractDJRwithFortran(const std::vector<fastjet::PseudoJet>& inputs,std::vector<Double_t>& DJRvalues)
-{
-  double PP[512][4];
-  UNUSED(PP);
-  for (unsigned int i=0;i<inputs.size();i++)
-  {
-    PP[i][0]=inputs[i].px();
-    PP[i][1]=inputs[i].py();
-    PP[i][2]=inputs[i].pz();
-    PP[i][3]=inputs[i].e();
-  }
-  //  int IMODE = 4313;
-  //  int NN = inputs.size();
-  //  if (NN>512) NN=512;
-  //  double ECUT=1.;
-  double Y[512];
-  for (unsigned int i=0;i<512;i++) Y[i]=0;
-  //if (NN!=0) ktclus_(&IMODE,PP,&NN,&ECUT,Y);
-
-  for (unsigned int i=0;i<DJRvalues.size();i++)
-  DJRvalues[i]=Y[i];
-}
-
 void DJRextractor::ExtractDJR(const std::vector<fastjet::PseudoJet>& inputs,std::vector<Double_t>& DJRvalues)
 {
   // JetDefinition_
   fastjet::ClusterSequence sequence(inputs, *JetDefinition_);
-  for (unsigned int i=0;i<DJRvalues.size();i++) 
+  for (unsigned int i=0;i<DJRvalues.size();i++)
   {
     DJRvalues[i]=sequence.exclusive_dmerge(i);
   }
 }
 
-
-
-/// Selecting particles for non-hadronized events
-void DJRextractor::SelectParticles_NonHadronization(std::vector<fastjet::PseudoJet>& inputs, const MCEventFormat* myEvent)
-{
-  for (unsigned int i=6;i<myEvent->particles().size();i++)
-  {
-    // Selecting partons (but not top quark)
-    if (fabs(myEvent->particles()[i].pdgid())>5 && 
-        myEvent->particles()[i].pdgid()!=21) continue;
-
-    // Selecting final states
-    if (myEvent->particles()[i].statuscode()==3) continue;
-
-    // Selecting states not coming from initial proton (beam remnant) 
-    // or hadronization
-    const MCParticleFormat* myPart = &(myEvent->particles()[i]);
-    bool test=true;
-    while (myPart->mother1()!=0)
-    {
-      if (myPart->mothup1_==1 || myPart->mothup1_==2)
-      { test=false; break;}
-      else if (myPart->mothup1_<=6)
-      { test=true; break;}
-      else if (myPart->mother1()->pdgid()==91 || 
-               myPart->mother1()->pdgid()==92)
-      {test=false; break;}
-      myPart = myPart->mother1();
-    }
-    if (!test) continue;
-
-    // Cut on the rapidity
-    double ETAJET = rapidity(myEvent->particles()[i].momentum().Px(),
-                             myEvent->particles()[i].momentum().Py(),
-                             myEvent->particles()[i].momentum().Pz());
-    if (fabs(ETAJET)>5) continue;
-    
-    // add the particle
-    inputs.push_back(fastjet::PseudoJet ( myEvent->particles()[i].px(), 
-                                          myEvent->particles()[i].py(), 
-                                          myEvent->particles()[i].pz(), 
-                                          myEvent->particles()[i].e() ) );
-
-    // labeling the particle
-    inputs.back().set_user_index(i);
-  }
-}
-
-
 /// Selecting particles for non-hadronized events
 void DJRextractor::SelectParticles(std::vector<fastjet::PseudoJet>& inputs,
                                     const MCEventFormat* myEvent)
 {
+  // Indexing
+  std::map<const MCParticleFormat*,int> indices;
+  for (unsigned int i=0;i<myEvent->particles().size();i++)
+    indices[&(myEvent->particles()[i])]=i;
+
+  // The main routine
+  std::map<const MCParticleFormat*,bool> filters;
   for (unsigned int i=6;i<myEvent->particles().size();i++)
   {
+    std::vector<MCParticleFormat*> family=myEvent->particles()[i].mother1()->daughters();
+    // Filters
+    if(myEvent->particles()[i].mothup2_!=0) filters[&(myEvent->particles()[i])] = false;
+    else if(filters.find(myEvent->particles()[i].mother1())!=filters.end())
+    {
+      const MCParticleFormat* part=&(myEvent->particles()[i]);
+      // The mother is already filtered (easy)
+      if(filters[part->mother1()]) filters[part]=true;
+      // This is not a radiation or decay pattern -> let's keep it
+      else if(part->mother1()->daughters().size()<2) filters[part]=false;
+      // The mother is not filtered -> testing if we have a radiation pattern
+      else
+      {
+        // Get all brothers and sisters and kill doubles
+        for(int j=family.size()-1;j>0;j--)
+        {
+          if (indices[family[j]] ==indices[part]) { family.erase(family.begin()+j); continue; }
+          for(int k=j+1;k<family.size();k++)
+            if (indices[family[j]]==indices[family[k]]) { family.erase(family.begin()+k); break; }
+        }
+        // Checking whether we have partons in the family
+        unsigned int ng=0, ninit=0, nq=0,nqb=0;
+        if(part->pdgid()==part->mother1()->pdgid()) ninit++;
+        for(unsigned int i=0; i< family.size();i++)
+        {
+          if(family[i]->pdgid()<=4 && family[i]->pdgid()>0) nq++;
+          if(family[i]->pdgid()>=-4 && family[i]->pdgid()<0) nqb++;
+          if(family[i]->pdgid()==21) ng++;
+          if(family[i]->pdgid()==part->mother1()->pdgid()) ninit++;
+        }
+        bool condition1 = part->mother1()->pdgid()!=21 && ninit>0;
+        bool condition2 = part->mother1()->pdgid()==21 && (ng>=2 || (nqb>0 && nq>0));
+        if(!condition1 && !condition2) filters[part]=true;
+        else                           filters[part]=false;
+      }
+    }
+    else filters[&(myEvent->particles()[i])]=false;
+
     // Selecting partons (but not top quark)
-    if (fabs(myEvent->particles()[i].pdgid())>5 && 
+    if (fabs(myEvent->particles()[i].pdgid())>6 && 
         myEvent->particles()[i].pdgid()!=21) continue;
 
     // Selecting radiative states
@@ -205,7 +170,7 @@ void DJRextractor::SelectParticles(std::vector<fastjet::PseudoJet>& inputs,
     if (fabs(ETAJET)>5) continue;
 
     // Remove double counting
-    if (myEvent->particles()[i].mother1()!=0 && myPart->mother2()==0)
+    if (myEvent->particles()[i].mother1()!=0 && myEvent->particles()[i].mothup2_==0)
     {
       if (myEvent->particles()[i].pdgid()==myEvent->particles()[i].mother1()->pdgid() &&
           myEvent->particles()[i].statuscode()==myEvent->particles()[i].mother1()->statuscode() &&
@@ -214,17 +179,18 @@ void DJRextractor::SelectParticles(std::vector<fastjet::PseudoJet>& inputs,
           fabs(myEvent->particles()[i].pz()-myEvent->particles()[i].mother1()->pz())<1e-04 )
         continue;
     }
-    
-    // add the particle
-    inputs.push_back(fastjet::PseudoJet ( myEvent->particles()[i].px(), 
-                                          myEvent->particles()[i].py(), 
-                                          myEvent->particles()[i].pz(), 
-                                          myEvent->particles()[i].e() ) );
 
-    // labeling the particle
-    inputs.back().set_user_index(i);
+    if(!filters[&(myEvent->particles()[i])])
+    {
+      // add the particle
+      inputs.push_back(fastjet::PseudoJet ( myEvent->particles()[i].px(), 
+                                            myEvent->particles()[i].py(), 
+                                            myEvent->particles()[i].pz(), 
+                                            myEvent->particles()[i].e() ) );
+
+      // labeling the particle
+      inputs.back().set_user_index(i);
+    }
   }
 }
-
-
 

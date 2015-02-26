@@ -60,7 +60,7 @@ class MergingPlots : public AnalyzerBase
   void Write_TextFormat(SAFWriter& output);
 
   /// Extracting the number of additionnal jets contained in the event 
-  UInt_t ExtractJetNumber(const MCEventFormat* myEvent, MCSampleFormat* mySample);
+  UInt_t ExtractHardJetNumber(const MCEventFormat* myEvent, MCSampleFormat* mySample);
 
 
 //---------------------------------------------------------------------------------
