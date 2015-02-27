@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+101  1.1.12.8 (2015/02/27) fuks:    Automated PAD installation added 
+
 100  1.1.12.7 (2015/02/26) fuks:    Fixing the merging plot bug 
 
 96   1.1.12.6 (2015/02/06) fuks:    Bug in the HepMC reader fixed 

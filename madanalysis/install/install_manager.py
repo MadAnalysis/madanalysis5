@@ -68,6 +68,9 @@ class InstallManager():
         elif package=='recastingtools':
             from madanalysis.install.install_recastingtools import InstallRecastingTools
             installer=InstallRecastingTools(self.main)
+        elif package=='pad':
+            from madanalysis.install.install_pad import InstallPad
+            installer=InstallPad(self.main)
         else:
             logging.error('the package "'+rawpackage+'" is unknown')
             return False
