@@ -39,8 +39,8 @@ class InstallPad:
         self.downloaddir = self.installdir + "/Build/SampleAnalyzer/User/Analyzer"
         self.untardir    = ""
         self.ncores      = 1
-        self.analyses    = {"cms_sus_13_012", "cms_sus_13_016", "atlas_sus_13_05", "atlas_susy_2013_11"}
-        self.files = { 
+        self.analyses    = ["cms_sus_13_012", "cms_sus_13_016", "atlas_sus_13_05", "atlas_susy_2013_11"]
+        self.files = {
     "cms_sus_13_011.cpp" : "http://inspirehep.net/record/1301484/files/cms_sus_13_011.cpp",
     "cms_sus_13_011.h"   : "http://inspirehep.net/record/1301484/files/cms_sus_13_011.h",
     "cms_sus_13_011.info": "http://inspirehep.net/record/1301484/files/cms_sus_13_011.info",
@@ -131,6 +131,10 @@ class InstallPad:
             out.write("LIBFLAGS += -lMinuit\n")
         inp.close()
         out.close()
+        TheCommand = ['rm', '-f', self.installdir+'/Build/Makefile.save']
+        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+        if not ok:
+            return False
         return ok
 
 
