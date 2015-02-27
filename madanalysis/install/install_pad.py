@@ -49,7 +49,7 @@ class InstallPad:
     "cms_sus_13_016.info": "http://inspirehep.net/record/1305194/files/cms_sus_13_016.info",
     "cms_sus_13_012.cpp" : "http://inspirehep.net/record/1305458/files/cms_sus_13_012.cpp",
     "cms_sus_13_012.h"   : "http://inspirehep.net/record/1305458/files/cms_sus_13_012.h",
-#    "cms_sus_13_012.info": "http://inspirehep.net/record/1305458/files/cms_sus_13_012.info",
+    "cms_sus_13_012.info": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PhysicsAnalysisDatabase/cms_sus_13_012.info",
     "atlas_sus_13_05.cpp"    : "http://inspirehep.net/record/1325001/files/atlas_sus_13_05.cpp",
     "atlas_sus_13_05.h"      : "http://inspirehep.net/record/1325001/files/atlas_sus_13_05.h",
     "atlas_sus_13_05.info"   : "http://inspirehep.net/record/1325001/files/atlas_sus_13_05.info",

@@ -38,7 +38,8 @@ class InstallRecastingTools:
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir    = os.path.normpath(self.tmpdir + '/MA5_RecastingTools/')
         self.ncores      = 1
-        self.files = {"exclusion_CLs.py" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PhysicsAnalysisDatabase/exclusion_CLs.py"}
+        self.files = {"exclusion_CLs.py" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PhysicsAnalysisDatabase/exclusion_CLs.py",
+                      "getmaps.py" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PhysicsAnalysisDatabase/getmaps.py"}
 
 
     def Detect(self):
@@ -89,20 +90,21 @@ class InstallRecastingTools:
     def Unpack(self):
         # copying the file (no unpacking necessary here) + chmod
         import shutil
-        source      = os.path.normpath(self.downloaddir+'/exclusion_CLs.py')
-        destination = os.path.normpath(self.installdir +'/exclusion_CLs.py')
-        try:
-            shutil.copy(source,destination)
-        except:
-            logging.error('impossible to copy "'+source+'" to "'+destination+'"')
-            return False, ''
-        import stat
-        try:
-            st = os.stat(destination)
-            os.chmod(destination, st.st_mode | stat.S_IEXEC)
-        except:
-            logging.error('impossible to make executable the file "'+destination+'"')
-            return False, ''
+        for f in ['exclusion_CLs.py','getmaps.py']:
+          source      = os.path.normpath(self.downloaddir+'/' + f)
+          destination = os.path.normpath(self.installdir +'/' + f)
+          try:
+              shutil.copy(source,destination)
+          except:
+              logging.error('impossible to copy "'+source+'" to "'+destination+'"')
+              return False, ''
+          import stat
+          try:
+              st = os.stat(destination)
+              os.chmod(destination, st.st_mode | stat.S_IEXEC)
+          except:
+              logging.error('impossible to make executable the file "'+destination+'"')
+              return False, ''
         return True
 
 

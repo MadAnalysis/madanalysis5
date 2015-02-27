@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+105  1.1.12.12 (2015/02/27) fuks:    Efficiency maps and automated pad installation 
+
 104  1.1.12.11 (2015/02/27) fuks:    Automated PAD installation: final bug fixes 
 
 103  1.1.12.10 (2015/02/27) fuks:    Automated PAD installation (missing files) 
