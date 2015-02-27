@@ -128,4 +128,4 @@ class InstallRecastingTools:
         logging.error(" - "+os.path.normpath(self.installdir+"/copy.log"))
 
     def NeedToRestart(self):
-        return True  # if not, the script will be not copied in the working folder
+        return False  # if not, the script will be not copied in the working folder
