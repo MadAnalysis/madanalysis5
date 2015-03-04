@@ -37,6 +37,7 @@ class InstallPad:
         self.installdir  = os.path.normpath(self.main.archi_info.ma5dir+'/PAD')
         self.tmpdir      = self.main.session_info.tmpdir
         self.downloaddir = self.installdir + "/Build/SampleAnalyzer/User/Analyzer"
+        self.delphesdir  = self.installdir + "/Input/Cards"
         self.untardir    = ""
         self.ncores      = 1
         self.analyses    = ["cms_sus_13_012", "cms_sus_13_016", "atlas_sus_13_05", "atlas_susy_2013_11"]
@@ -55,8 +56,112 @@ class InstallPad:
     "atlas_sus_13_05.info"   : "http://inspirehep.net/record/1325001/files/atlas_sus_13_05.info",
     "atlas_susy_2013_11.cpp" : "http://inspirehep.net/record/1326686/files/atlas_susy_2013_11.cpp",
     "atlas_susy_2013_11.h"   : "http://inspirehep.net/record/1326686/files/atlas_susy_2013_11.h",
-    "atlas_susy_2013_11.info": "http://inspirehep.net/record/1326686/files/atlas_susy_2013_11.info"}
+    "atlas_susy_2013_11.info": "http://inspirehep.net/record/1326686/files/atlas_susy_2013_11.info",
+    "atlas_higg_2013_03.cpp" : "http://inspirehep.net/record/1347081/files/atlas_higg_2013_03.cpp",
+    "atlas_higg_2013_03.h"   : "http://inspirehep.net/record/1347081/files/atlas_higg_2013_03.h",
+    "atlas_higg_2013_03.info": "http://inspirehep.net/record/1347081/files/atlas_higg_2013_03.info"
+}
 
+        self.delphescards = {
+    "delphes_card_cms_standard.tcl"   : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PhysicsAnalysisDatabase/delphesMA5tune_card_CMS_SUSY.tcl",
+    "delphes_card_atlas_standard.tcl" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PhysicsAnalysisDatabase/delphesMA5tune_card_ATLAS.tcl",
+    "delphes_card_atlas_sus_2013_05.tcl" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PhysicsAnalysisDatabase/delphesMA5tune_card_ATLAS_05.tcl",
+    "delphes_card_atlas_sus_2013_11.tcl" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PhysicsAnalysisDatabase/delphesMA5tune_card_ATLAS_dileptonSUSY.tcl"
+    }
+
+    def CreateBibtex(self):
+      try:
+        file = open(self.installdir+"/bibliography.bib",'w')
+      except:
+        logging.error('impossible to write the file '+file)
+        return False
+
+      # MA5
+      file.write('@article{Dumont:2014tja,\n')
+      file.write('      author         = \"Dumont, B. and Fuks, B. and Kraml, S. and Bein, S. and\n')
+      file.write('                        Chalons, G. and others\",\n')
+      file.write('      title          = \"{Toward a public analysis database for LHC new physics\n')
+      file.write('                        searches using MADANALYSIS 5}\",\n')
+      file.write('      journal        = \"Eur.Phys.J.\",\n')
+      file.write('      number         = \"2\",\n')
+      file.write('      volume         = \"C75\",\n')
+      file.write('      pages          = \"56\",\n')
+      file.write('      doi            = \"10.1140/epjc/s10052-014-3242-3\",\n')
+      file.write('      year           = \"2015\",\n')
+      file.write('      eprint         = \"1407.3278\",\n')
+      file.write('      archivePrefix  = \"arXiv\",\n')
+      file.write('      primaryClass   = \"hep-ph\",\n')
+      file.write('      reportNumber   = \"CERN-PH-TH-2014-109, LAPTH-048-14, LPSC14143\",\n')
+      file.write('      SLACcitation   = \"%%CITATION = ARXIV:1407.3278;%%\",\n')
+      file.write('}\n')
+
+      file.write('@article{Conte:2012fm,\n')
+      file.write('      author         = \"Conte, Eric and Fuks, Benjamin and Serret, Guillaume\",\n')
+      file.write('      title          = \"{MadAnalysis 5, A User-Friendly Framework for Collider\n')
+      file.write('                        Phenomenology}\",\n')
+      file.write('      journal        = \"Comput.Phys.Commun.\",\n')
+      file.write('      volume         = \"184\",\n')
+      file.write('      pages          = \"222-256\",\n')
+      file.write('      doi            = \"10.1016/j.cpc.2012.09.009\",\n')
+      file.write('      year           = \"2013\",\n')
+      file.write('      eprint         = \"1206.1599\",\n')
+      file.write('      archivePrefix  = \"arXiv\",\n')
+      file.write('      primaryClass   = \"hep-ph\",\n')
+      file.write('      reportNumber   = \"IPHC-PHENO-06\",\n')
+      file.write('      SLACcitation   = \"%%CITATION = ARXIV:1206.1599;%%\",\n')
+      file.write('}\n')
+
+      # CMS-13-011
+      file.write('@article{,\n')
+      file.write('      author         = \"Dumont, Beranger and Fuks, Benjamin and Wymant, Chris\",\n')
+      file.write('      title          = \"{MadAnalysis 5 implementation of CMS-SUS-13-011: search\n')
+      file.write('                        for stops in the single lepton final state at 8 TeV}\",\n')
+      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.LR5T.2RR3\",\n')
+      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1301484;%%\",\n')
+      file.write('}\n')
+
+      #CMS-13-012
+      file.write('@article{,\n')
+      file.write('      author         = \"Bein, Samuel and Sengupta, Dipan\",\n')
+      file.write('      title          = \"{MadAnalysis 5 implementation of CMS-SUS-13-012}\",\n')
+      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.83GG.U5BW\",\n')
+      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1305458;%%\",\n')
+      file.write('}\n')
+
+      # CMS-13-016
+      file.write('@article{,\n')
+      file.write('      author         = \"Sengupta, Dipan and Kulkarni, Suchita\",\n')
+      file.write('      title          = \"{MadAnalysis 5 implementation of CMS-SUS-13-016}\",\n')
+      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.ZC3J.646F\",\n')
+      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1305194;%%\",\n')
+      file.write('}\n')
+
+      #ATLAS-HIGG-2013-03
+      file.write('@article{,\n')
+      file.write('      author         = \"Dumont, Beranger\",\n')
+      file.write('      title          = \"{MadAnalysis 5 implementation of ATLAS-HIGG-2013-03}\",\n')
+      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.RT3V.9PJK\",\n')
+      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1347081;%%\",\n')
+      file.write('}\n')
+
+      #ATLAS-SUS-2013-11
+      file.write('@article{,\n')
+      file.write('      author         = \"Dumont, Beranger\",\n')
+      file.write('      title          = \"{MadAnalysis 5 implementation of ATLAS-SUSY-2013-11:\n')
+      file.write('                        di-leptons plus MET}\",\n')
+      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.HLMR.T56W.2\",\n')
+      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1326686;%%\",\n')
+      file.write('}\n')
+
+      #ATLAS-SUS-2013-05
+      file.write('@article{,\n')
+      file.write('      author         = \"Chalons, Guillaume\",\n')
+      file.write('      title          = \"{MadAnalysis 5 implementation of ATLAS-SUSY-2013-05}\",\n')
+      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.Z4ML.3W67.2\",\n')
+      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1325001;%%\",\n')
+      file.write('}\n')
+
+      file.close()
 
     def Detect(self):
         if not os.path.isdir(self.installdir):
@@ -86,7 +191,7 @@ class InstallPad:
 
 
     def CreatePackageFolder(self):
-        TheCommand = ['bin/ma5', '-E', '-f', 'PAD', 'cms_sus_13_011']
+        TheCommand = ['bin/ma5', '-R', '-E', '-f', 'PAD', 'cms_sus_13_011']
         logname = os.path.normpath(self.main.archi_info.ma5dir+'/PAD-workingdir.log')
         ok, out= ShellCommand.ExecuteWithLog(TheCommand,logname,self.main.archi_info.ma5dir,silent=False)
         if not ok:
@@ -98,20 +203,39 @@ class InstallPad:
             self.installdir+'/Build/SampleAnalyzer',silent=False)
           if not ok:
               return False
+        # Logs
+        TheCommand = ['mkdir', self.installdir+'/Logs']
+        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+        if not ok:
+            return False
         TheCommand = ['mv',logname,self.installdir]
         ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
         if not ok:
             return False
+        #bibtex
+        self.CreateBibtex()
+        # delphes card directory
+        TheCommand = ['mkdir', self.installdir+'/Input/Cards']
+        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+        if not ok:
+            return False
+        self.CreateBibtex()
         return True
 
 
     def Download(self):
-        # Checking connection with InSpire
+        # Checking connection with InSpire and the ma5 website
         if not InstallService.check_inspire():
             return False
+        if not InstallService.check_ma5site():
+            return False
         # Launching wget
-        logname = os.path.normpath(self.installdir+'/wget.log')
+        logname = os.path.normpath(self.installdir+'/wget_analyses.log')
         if not InstallService.wget(self.files,logname,self.downloaddir):
+            return False
+        # delphes cards
+        logname = os.path.normpath(self.installdir+'/wget_delphescards.log')
+        if not InstallService.wget(self.delphescards,logname,self.delphesdir):
             return False
         # Ok
         return True
@@ -150,6 +274,11 @@ class InstallPad:
             logging.error('impossible to build the project. For more details, see the log file:')
             logging.error(logname)
         return ok
+
+    def Check(self):
+        for path in glob.glob(self.installdir+"/*.log"):
+          shutil.move(path, self.installdir+'/Logs')
+        return True
 
     def NeedToRestart(self):
         return False
