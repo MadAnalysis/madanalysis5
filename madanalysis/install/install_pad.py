@@ -40,7 +40,8 @@ class InstallPad:
         self.delphesdir  = self.installdir + "/Input/Cards"
         self.untardir    = ""
         self.ncores      = 1
-        self.analyses    = ["cms_sus_13_012", "cms_sus_13_016", "atlas_sus_13_05", "atlas_susy_2013_11"]
+        self.analyses    = ["cms_sus_13_011", "cms_sus_13_012", "cms_sus_13_016", "atlas_sus_13_05", "atlas_susy_2013_11",
+            "atlas_higg_2013_03"]
         self.files = {
     "cms_sus_13_011.cpp" : "http://inspirehep.net/record/1301484/files/cms_sus_13_011.cpp",
     "cms_sus_13_011.h"   : "http://inspirehep.net/record/1301484/files/cms_sus_13_011.h",
@@ -197,12 +198,18 @@ class InstallPad:
         if not ok:
             return False
         for analysis in self.analyses:
-          TheCommand = ['./newAnalyzer.py', analysis, analysis]
-          lname = os.path.normpath(self.installdir+'/PAD-'+analysis+'.log')
-          ok, out= ShellCommand.ExecuteWithLog(TheCommand,lname,\
-            self.installdir+'/Build/SampleAnalyzer',silent=False)
+          if "cms_sus_13_011" not in analysis:
+            TheCommand = ['./newAnalyzer.py', analysis, analysis]
+            lname = os.path.normpath(self.installdir+'/PAD-'+analysis+'.log')
+            ok, out= ShellCommand.ExecuteWithLog(TheCommand,lname,\
+              self.installdir+'/Build/SampleAnalyzer',silent=False)
+            if not ok:
+                return False
+          TheCommand = ['rm', '-f', self.installdir+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.cpp',\
+                self.installdir+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.h']
+          ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
           if not ok:
-              return False
+            return False
         # Logs
         TheCommand = ['mkdir', self.installdir+'/Logs']
         ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
@@ -259,8 +266,26 @@ class InstallPad:
         ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
         if not ok:
             return False
-        return ok
 
+        # Updating the main in order to get a correct file name for the template analysis
+        TheCommand = ['mv',self.installdir+'/Build/Main/main.cpp', self.installdir+'/Build/Main/main.cpp.save']
+        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+        if not ok:
+            return False
+        inp = open(self.installdir+'/Build/Main/main.cpp.save', 'r')
+        out = open(self.installdir+'/Build/Main/main.cpp', 'w')
+        for line in inp:
+          if 'user.saf' in line:
+            out.write("      manager.InitializeAnalyzer(\"cms_sus_13_011\",\"cms_sus_13_011.saf\",parametersA1);\n")
+          else:
+            out.write(line)
+        inp.close()
+        out.close()
+        TheCommand = ['rm', '-f', self.installdir+'/Build/Main/main.cpp.save']
+        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+        if not ok:
+            return False
+        return ok
 
     def Build(self):
         # Input
