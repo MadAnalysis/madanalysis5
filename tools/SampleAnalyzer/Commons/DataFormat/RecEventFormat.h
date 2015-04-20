@@ -88,8 +88,25 @@ class RecEventFormat
   std::vector<RecJetFormat>    genjets_;
 
   /// Collection of reconstructed tracks
+  bool tracks_ok_;
   std::vector<RecTrackFormat>  tracks_;
 
+  /// Reconstructed towers
+  bool towers_ok_;
+  std::vector<RecParticleFormat> towers_;
+
+  /// Collection of reconstructed EFlow tracks
+  bool EFlowTracks_ok_;
+  std::vector<RecTrackFormat> EFlowTracks_;
+
+  /// Collection of reconstructed EFlow tracks
+  bool EFlowPhotons_ok_;
+  std::vector<RecParticleFormat> EFlowPhotons_;
+
+  /// Collection of reconstructed EFlow tracks
+  bool EFlowNeutralHadrons_ok_;
+  std::vector<RecParticleFormat> EFlowNeutralHadrons_;
+ 
   /// Reconstructed Missing Transverse Energy
   RecParticleFormat MET_;
   
@@ -152,6 +169,12 @@ class RecEventFormat
   /// Accessor to the track collection (read-only)
   const std::vector<RecTrackFormat>& tracks() const {return tracks_;}
 
+  /// Accessor to the tower collection (read-only)
+  const std::vector<RecParticleFormat>& towers() const {return towers_;}
+  const std::vector<RecTrackFormat>& EFlowTracks() const {return EFlowTracks_;}
+  const std::vector<RecParticleFormat>& EFlowPhotons() const {return EFlowPhotons_;}
+  const std::vector<RecParticleFormat>& EFlowNeutralHadrons() const {return EFlowNeutralHadrons_;}
+
   /// Accessor to the Missing Transverse Energy (read-only)
   const RecParticleFormat& MET() const {return MET_;}
 
@@ -199,6 +222,12 @@ class RecEventFormat
   /// Accessor to the jet collection
   std::vector<RecJetFormat>& jets() {return jets_;}
 
+  /// Accessor to the towers collection
+  std::vector<RecParticleFormat>& towers() {return towers_;}
+  std::vector<RecTrackFormat>& EFlowTracks() {return EFlowTracks_;}
+  std::vector<RecParticleFormat>& EFlowPhotons() {return EFlowPhotons_;}
+  std::vector<RecParticleFormat>& EFlowNeutralHadrons() {return EFlowNeutralHadrons_;}
+
   /// Accessor to the jet collection
   std::vector<RecJetFormat>& genjets() {return genjets_;}
 
@@ -245,8 +274,17 @@ class RecEventFormat
     muons_.clear(); 
     taus_.clear();
     jets_.clear();
-    genjets_.clear();
+    towers_ok_=false;
+    towers_.clear();
+    tracks_ok_=false;
     tracks_.clear();
+    EFlowTracks_ok_=false;
+    EFlowTracks_.clear();
+    EFlowPhotons_ok_=false;
+    EFlowPhotons_.clear();
+    EFlowNeutralHadrons_ok_=false;
+    EFlowNeutralHadrons_.clear();
+    genjets_.clear();
     MET_.Reset();
     MHT_.Reset();
     TET_=0.;
@@ -282,6 +320,34 @@ class RecEventFormat
   {
     muons_.push_back(RecLeptonFormat());
     return &muons_.back();
+  }
+
+  /// Giving a new tower entry
+  RecParticleFormat* GetNewTower()
+  {
+    towers_.push_back(RecParticleFormat());
+    return &towers_.back();
+  }
+
+  /// Giving a new EFlowTrack entry
+  RecTrackFormat* GetNewEFlowTrack()
+  {
+    EFlowTracks_.push_back(RecTrackFormat());
+    return &EFlowTracks_.back();
+  }
+
+  /// Giving a new EFlowTrack entry
+  RecParticleFormat* GetNewEFlowPhoton()
+  {
+    EFlowPhotons_.push_back(RecParticleFormat());
+    return &EFlowPhotons_.back();
+  }
+
+  /// Giving a new EFlowNeutralHadron entry
+  RecParticleFormat* GetNewEFlowNeutralHadron()
+  {
+    EFlowNeutralHadrons_.push_back(RecParticleFormat());
+    return &EFlowNeutralHadrons_.back();
   }
 
   /// Giving a new tau entry

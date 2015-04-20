@@ -63,12 +63,18 @@ class DelphesTreeReader : public TreeReaderBase
   /// Pointers to the different branches
   TClonesArray *branchJet_;
   TClonesArray *branchElectron_;
+  TClonesArray *branchElectronMA5_;
   TClonesArray *branchPhoton_;
   TClonesArray *branchMuon_;
+  TClonesArray *branchMuonMA5_;
   TClonesArray *branchMissingET_;
   TClonesArray *branchScalarHT_;
   TClonesArray *branchGenParticle_;
   TClonesArray *branchTrack_;
+  TClonesArray *branchTower_;
+  TClonesArray *branchEFlowTracks_;
+  TClonesArray *branchEFlowPhotons_;
+  TClonesArray *branchEFlowNeutralHadrons_;
 
   // -------------------------------------------------------------
   //                       method members
@@ -111,12 +117,18 @@ class DelphesTreeReader : public TreeReaderBase
     read_nevents_=0;
     branchJet_=0;
     branchElectron_=0;
+    branchElectronMA5_=0;
     branchPhoton_=0;
     branchMuon_=0;
+    branchMuonMA5_=0;
     branchMissingET_=0;
     branchScalarHT_=0;
     branchGenParticle_=0;
     branchTrack_=0;
+    branchTower_=0;
+    branchEFlowTracks_=0;
+    branchEFlowPhotons_=0;
+    branchEFlowNeutralHadrons_=0;
   }
 
   /// Get the file size

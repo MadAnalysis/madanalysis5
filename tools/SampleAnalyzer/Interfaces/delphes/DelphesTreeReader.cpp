@@ -61,6 +61,11 @@ bool DelphesTreeReader::Initialize()
   {
     WARNING << "Electron collection branch is not found" << endmsg;
   }
+  branchElectronMA5_  = treeReader_->UseBranch("ElectronMA5");
+  if (branchElectronMA5_==0)
+  {
+    WARNING << "ElectronMA5 collection branch is not found" << endmsg;
+  }
   branchPhoton_    = treeReader_->UseBranch("Photon");
   if (branchPhoton_==0)
   {
@@ -70,6 +75,11 @@ bool DelphesTreeReader::Initialize()
   if (branchMuon_==0)
   {
     WARNING << "Muon collection branch is not found" << endmsg;
+  }
+  branchMuonMA5_      = treeReader_->UseBranch("MuonMA5");
+  if (branchMuonMA5_==0)
+  {
+    WARNING << "MuonMA5 collection branch is not found" << endmsg;
   }
   branchMissingET_ = treeReader_->UseBranch("MissingET");
   if (branchMissingET_==0)
@@ -81,6 +91,28 @@ bool DelphesTreeReader::Initialize()
   {
     WARNING << "ScalarHT branch is not found" << endmsg;
   }
+  branchTower_ = treeReader_->UseBranch("Tower");
+  if (branchTower_==0)
+  {
+    WARNING << "Tower branch is not found" << endmsg;
+  }
+  branchEFlowTracks_ = treeReader_->UseBranch("EFlowTrack");
+  if (branchEFlowTracks_==0)
+  {
+    WARNING << "EFlowTracks branch is not found" << endmsg;
+  }
+  branchEFlowPhotons_ = treeReader_->UseBranch("EFlowPhoton");
+  if (branchEFlowPhotons_==0)
+  {
+    WARNING << "EFlowPhotons branch is not found" << endmsg;
+  }
+  branchEFlowNeutralHadrons_ = treeReader_->UseBranch("EFlowNeutralHadron");
+  if (branchEFlowNeutralHadrons_==0)
+  {
+    WARNING << "EFlowNeutralHadrons branch is not found" << endmsg;
+  }
+
+
   branchGenParticle_ = treeReader_->UseBranch("Particle");
   if (branchGenParticle_==0)
   {
@@ -90,6 +122,16 @@ bool DelphesTreeReader::Initialize()
   if (branchTrack_==0)
   {
     WARNING << "Track branch is not found" << endmsg;
+  }
+
+  // DelphesMA5 tune mode
+  if (branchMuonMA5_!=0 && branchMuonMA5_!=0)
+  {
+    INFO << "MA5-Tune root file found" << endmsg;
+  }
+  else
+  {
+    INFO << "Traditionnal Delphes root file found" << endmsg;
   }
 
   return true;
@@ -258,7 +300,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
   // ---------------------------------------------------------------------------
   // Fill electrons
   // ---------------------------------------------------------------------------
-  if (branchElectron_!=0)
+  if (branchElectron_!=0 && branchElectronMA5_==0)
   for (unsigned int i=0;i<static_cast<UInt_t>(branchElectron_->GetEntries());i++)
   {
     // getting the i-th particle
@@ -279,6 +321,33 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
       if (genit!=gentable.end()) electron->mc_=&(myEvent.mc()->particles()[genit->second]);
       else WARNING << "GenParticle corresponding to an electron is not found in the gen table" << endmsg;
     }
+    electron->refmc_=reinterpret_cast<ULong64_t>(mc);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Fill muons MA5
+  // ---------------------------------------------------------------------------
+  if (branchElectronMA5_!=0)
+  for (unsigned int i=0;i<static_cast<UInt_t>(branchElectronMA5_->GetEntries());i++)
+  {
+    // getting the i-th particle
+    Electron* part = dynamic_cast<Electron*>(branchElectron_->At(i));
+    if (part==0) continue;
+
+    // creating new particle and filling particle info
+    RecLeptonFormat * electron = myEvent.rec()->GetNewElectron();
+    electron->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
+    if (part->Charge>0) electron->charge_=true; else electron->charge_=false;
+
+    // setting corresponding gen particle
+    const GenParticle* mc = dynamic_cast<const GenParticle*>(part->Particle.GetObject());
+    if (mc!=0)
+    {
+      genit = gentable.find(mc);
+      if (genit!=gentable.end()) electron->mc_=&(myEvent.mc()->particles()[genit->second]);
+      else WARNING << "GenParticle corresponding to a electron is not found in the gen table" << endmsg;
+    }
+    electron->refmc_=reinterpret_cast<ULong64_t>(mc);
   }
 
   // ---------------------------------------------------------------------------
@@ -316,7 +385,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
   // ---------------------------------------------------------------------------
   // Fill muons
   // ---------------------------------------------------------------------------
-  if (branchMuon_!=0)
+  if (branchMuon_!=0 && branchMuonMA5_==0)
   for (unsigned int i=0;i<static_cast<UInt_t>(branchMuon_->GetEntries());i++)
   {
     // getting the i-th particle
@@ -336,7 +405,125 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
       if (genit!=gentable.end()) muon->mc_=&(myEvent.mc()->particles()[genit->second]);
       else WARNING << "GenParticle corresponding to a muon is not found in the gen table" << endmsg;
     }
+    muon->refmc_=reinterpret_cast<ULong64_t>(mc);
   }
+
+  // ---------------------------------------------------------------------------
+  // Fill muons MA5
+  // ---------------------------------------------------------------------------
+  if (branchMuonMA5_!=0)
+  for (unsigned int i=0;i<static_cast<UInt_t>(branchMuonMA5_->GetEntries());i++)
+  {
+    // getting the i-th particle
+    Muon* part = dynamic_cast<Muon*>(branchMuon_->At(i));
+    if (part==0) continue;
+
+    // creating new particle and filling particle info
+    RecLeptonFormat * muon = myEvent.rec()->GetNewMuon();
+    muon->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
+    if (part->Charge>0) muon->charge_=true; else muon->charge_=false;
+
+    // setting corresponding gen particle
+    const GenParticle* mc = dynamic_cast<const GenParticle*>(part->Particle.GetObject());
+    if (mc!=0)
+    {
+      genit = gentable.find(mc);
+      if (genit!=gentable.end()) muon->mc_=&(myEvent.mc()->particles()[genit->second]);
+      else WARNING << "GenParticle corresponding to a muon is not found in the gen table" << endmsg;
+    }
+    muon->refmc_=reinterpret_cast<ULong64_t>(mc);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Fill Tower
+  // ---------------------------------------------------------------------------
+  if (branchTower_!=0)
+  for (unsigned int i=0;i<static_cast<UInt_t>(branchTower_->GetEntries());i++)
+  {
+    // getting the i-th particle
+    Tower* tower = dynamic_cast<Tower*>(branchTower_->At(i));
+    if (tower==0) continue;
+
+    // creating new tower and filling particle info
+    RecParticleFormat * part = myEvent.rec()->GetNewTower();
+    part->momentum_.SetPtEtaPhiM(tower->ET,tower->Eta,tower->Phi,0.0);
+
+    // setting corresponding gen particle
+    /*    std::cout << "number of igen : " << tower->Particles.GetEntries() << std::endl;
+    for (unsigned igen=0;igen<tower->Particles.GetEntries();igen++)
+    {
+      std::cout << tower->Particles.At(igen) << std::endl;
+    }
+    */
+  }
+
+  // ---------------------------------------------------------------------------
+  // Fill EFlowTrack
+  // ---------------------------------------------------------------------------
+  if (branchEFlowTracks_!=0)
+  for (unsigned int i=0;i<static_cast<UInt_t>(branchEFlowTracks_->GetEntries());i++)
+  {
+    // getting the i-th particle
+    Track* track = dynamic_cast<Track*>(branchEFlowTracks_->At(i));
+    if (track==0) continue;
+
+    // creating new track and filling particle info
+    RecTrackFormat * part = myEvent.rec()->GetNewEFlowTrack();
+    part->momentum_.SetPtEtaPhiM(track->PT,track->Eta,track->Phi,0.0);
+
+    // setting corresponding gen particle
+    const GenParticle* mc = dynamic_cast<const GenParticle*>(track->Particle.GetObject());
+    part->refmc_=reinterpret_cast<ULong64_t>(mc);
+
+  }
+
+  // ---------------------------------------------------------------------------
+  // Fill EFlowPhotons
+  // ---------------------------------------------------------------------------
+  if (branchEFlowPhotons_!=0)
+  for (unsigned int i=0;i<static_cast<UInt_t>(branchEFlowPhotons_->GetEntries());i++)
+  {
+    // getting the i-th particle
+    Tower* tower = dynamic_cast<Tower*>(branchEFlowPhotons_->At(i));
+    if (tower==0) continue;
+
+    // creating new tower and filling particle info
+    RecParticleFormat * part = myEvent.rec()->GetNewEFlowPhoton();
+    part->momentum_.SetPtEtaPhiM(tower->ET,tower->Eta,tower->Phi,0.0);
+
+    // setting corresponding gen particle
+    /*    std::cout << "number of igen : " << tower->Particles.GetEntries() << std::endl;
+    for (unsigned igen=0;igen<tower->Particles.GetEntries();igen++)
+    {
+      std::cout << tower->Particles.At(igen) << std::endl;
+    }
+    */
+  }
+
+
+  // ---------------------------------------------------------------------------
+  // Fill EFlowNeutralHadrons
+  // ---------------------------------------------------------------------------
+  if (branchEFlowNeutralHadrons_!=0)
+  for (unsigned int i=0;i<static_cast<UInt_t>(branchEFlowNeutralHadrons_->GetEntries());i++)
+  {
+    // getting the i-th particle
+    Tower* tower = dynamic_cast<Tower*>(branchEFlowNeutralHadrons_->At(i));
+    if (tower==0) continue;
+
+    // creating new tower and filling particle info
+    RecParticleFormat * part = myEvent.rec()->GetNewEFlowNeutralHadron();
+    part->momentum_.SetPtEtaPhiM(tower->ET,tower->Eta,tower->Phi,0.0);
+
+    // setting corresponding gen particle
+    /*    std::cout << "number of igen : " << tower->Particles.GetEntries() << std::endl;
+    for (unsigned igen=0;igen<tower->Particles.GetEntries();igen++)
+    {
+      std::cout << tower->Particles.At(igen) << std::endl;
+    }
+    */
+  }
+
 
   // ---------------------------------------------------------------------------
   // Fill jets and taus
@@ -446,6 +633,9 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
       if (genit!=gentable.end()) track->mc_=&(myEvent.mc()->particles()[genit->second]);
       else WARNING << "GenParticle corresponding to a track is not found in the gen table" << endmsg;
     }
+
+    // setting 
+    track->refmc_=reinterpret_cast<ULong64_t>(mc);
   }
 
 }

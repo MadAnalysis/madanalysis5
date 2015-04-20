@@ -61,6 +61,7 @@ class RecLeptonFormat : public RecParticleFormat
   Float_t sumET_isol_;  /// sumET in an isolation cone
   Float_t sumPT_isol_;  /// sumPT in an isolation cone
   std::vector<IsolationConeType> isolCones_; // isolation cones
+  ULong64_t refmc_;
 
   // -------------------------------------------------------------
   //                        method members
@@ -87,6 +88,7 @@ class RecLeptonFormat : public RecParticleFormat
     mc_       = part->mc_;
     HEoverEE_ = part->HEoverEE_;
     momentum_ = part->momentum_;
+    refmc_    = 0;
   }
 
   /// Destructor
@@ -147,6 +149,8 @@ class RecLeptonFormat : public RecParticleFormat
   /// giving a new isolation cone entry
   void setIsolCones(const std::vector<IsolationConeType>& cones)
   { isolCones_ = cones; }
+
+  const ULong64_t& refmc() const {return refmc_;}
 
 };
 

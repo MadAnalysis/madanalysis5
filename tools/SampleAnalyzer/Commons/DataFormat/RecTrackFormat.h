@@ -71,6 +71,7 @@ class RecTrackFormat : public ParticleBaseFormat
   Double_t phiOuter_;  /// phi @ first layer of calo
   std::vector<IsolationConeType> isolCones_; // isolation cones
   MCParticleFormat* mc_;
+  ULong64_t refmc_;
 
   // -------------------------------------------------------------
   //                        method members
@@ -105,6 +106,7 @@ class RecTrackFormat : public ParticleBaseFormat
     phiOuter_ = 0.;
     ParticleBaseFormat::Reset();
     isolCones_.clear();
+    refmc_    = 0;
   }
 
   /// Accessor to the pdgid
@@ -137,6 +139,8 @@ class RecTrackFormat : public ParticleBaseFormat
   /// get the collection of isolation cones
   const std::vector<IsolationConeType>& isolCones() const
   { return isolCones_; }
+
+  const ULong64_t& refmc() const {return refmc_;}
 
 };
 
