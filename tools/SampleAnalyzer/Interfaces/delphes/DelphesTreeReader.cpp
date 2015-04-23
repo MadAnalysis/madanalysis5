@@ -125,7 +125,7 @@ bool DelphesTreeReader::Initialize()
   }
 
   // DelphesMA5 tune mode
-  if (branchMuonMA5_!=0 && branchMuonMA5_!=0)
+  if (branchMuonMA5_!=0 && branchElectronMA5_!=0)
   {
     INFO << "MA5-Tune root file found" << endmsg;
   }
@@ -324,14 +324,15 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
     electron->refmc_=reinterpret_cast<ULong64_t>(mc);
   }
 
+
   // ---------------------------------------------------------------------------
-  // Fill muons MA5
+  // Fill electrons MA5
   // ---------------------------------------------------------------------------
   if (branchElectronMA5_!=0)
   for (unsigned int i=0;i<static_cast<UInt_t>(branchElectronMA5_->GetEntries());i++)
   {
     // getting the i-th particle
-    Electron* part = dynamic_cast<Electron*>(branchElectron_->At(i));
+    Electron* part = dynamic_cast<Electron*>(branchElectronMA5_->At(i));
     if (part==0) continue;
 
     // creating new particle and filling particle info
@@ -349,6 +350,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
     }
     electron->refmc_=reinterpret_cast<ULong64_t>(mc);
   }
+
 
   // ---------------------------------------------------------------------------
   // Fill photons
@@ -382,6 +384,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
     }
   }
 
+
   // ---------------------------------------------------------------------------
   // Fill muons
   // ---------------------------------------------------------------------------
@@ -408,6 +411,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
     muon->refmc_=reinterpret_cast<ULong64_t>(mc);
   }
 
+
   // ---------------------------------------------------------------------------
   // Fill muons MA5
   // ---------------------------------------------------------------------------
@@ -415,7 +419,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
   for (unsigned int i=0;i<static_cast<UInt_t>(branchMuonMA5_->GetEntries());i++)
   {
     // getting the i-th particle
-    Muon* part = dynamic_cast<Muon*>(branchMuon_->At(i));
+    Muon* part = dynamic_cast<Muon*>(branchMuonMA5_->At(i));
     if (part==0) continue;
 
     // creating new particle and filling particle info
@@ -433,6 +437,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
     }
     muon->refmc_=reinterpret_cast<ULong64_t>(mc);
   }
+
 
   // ---------------------------------------------------------------------------
   // Fill Tower
@@ -457,6 +462,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
     */
   }
 
+
   // ---------------------------------------------------------------------------
   // Fill EFlowTrack
   // ---------------------------------------------------------------------------
@@ -476,6 +482,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
     part->refmc_=reinterpret_cast<ULong64_t>(mc);
 
   }
+
 
   // ---------------------------------------------------------------------------
   // Fill EFlowPhotons
@@ -571,6 +578,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
     }
   }
 
+
   // ---------------------------------------------------------------------------
   // MET
   // ---------------------------------------------------------------------------
@@ -589,6 +597,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
     }
   }
 
+
   // ---------------------------------------------------------------------------
   // THT
   // ---------------------------------------------------------------------------
@@ -604,6 +613,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
       myEvent.rec()->THT_=part->HT;
     }
   }
+
 
   // ---------------------------------------------------------------------------
   // Track collection
