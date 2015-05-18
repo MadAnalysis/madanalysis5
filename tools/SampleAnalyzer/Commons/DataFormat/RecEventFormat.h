@@ -33,6 +33,7 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/DataFormat/RecLeptonFormat.h"
+#include "SampleAnalyzer/Commons/DataFormat/RecTowerFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecTauFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecJetFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecMETFormat.h"
@@ -93,7 +94,7 @@ class RecEventFormat
 
   /// Reconstructed towers
   bool towers_ok_;
-  std::vector<RecParticleFormat> towers_;
+  std::vector<RecTowerFormat> towers_;
 
   /// Collection of reconstructed EFlow tracks
   bool EFlowTracks_ok_;
@@ -170,7 +171,7 @@ class RecEventFormat
   const std::vector<RecTrackFormat>& tracks() const {return tracks_;}
 
   /// Accessor to the tower collection (read-only)
-  const std::vector<RecParticleFormat>& towers() const {return towers_;}
+  const std::vector<RecTowerFormat>& towers() const {return towers_;}
   const std::vector<RecTrackFormat>& EFlowTracks() const {return EFlowTracks_;}
   const std::vector<RecParticleFormat>& EFlowPhotons() const {return EFlowPhotons_;}
   const std::vector<RecParticleFormat>& EFlowNeutralHadrons() const {return EFlowNeutralHadrons_;}
@@ -223,7 +224,7 @@ class RecEventFormat
   std::vector<RecJetFormat>& jets() {return jets_;}
 
   /// Accessor to the towers collection
-  std::vector<RecParticleFormat>& towers() {return towers_;}
+  std::vector<RecTowerFormat>& towers() {return towers_;}
   std::vector<RecTrackFormat>& EFlowTracks() {return EFlowTracks_;}
   std::vector<RecParticleFormat>& EFlowPhotons() {return EFlowPhotons_;}
   std::vector<RecParticleFormat>& EFlowNeutralHadrons() {return EFlowNeutralHadrons_;}
@@ -323,9 +324,9 @@ class RecEventFormat
   }
 
   /// Giving a new tower entry
-  RecParticleFormat* GetNewTower()
+  RecTowerFormat* GetNewTower()
   {
-    towers_.push_back(RecParticleFormat());
+    towers_.push_back(RecTowerFormat());
     return &towers_.back();
   }
 

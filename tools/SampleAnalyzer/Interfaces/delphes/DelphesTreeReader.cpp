@@ -450,16 +450,23 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
     if (tower==0) continue;
 
     // creating new tower and filling particle info
-    RecParticleFormat * part = myEvent.rec()->GetNewTower();
+    RecTowerFormat * part = myEvent.rec()->GetNewTower();
     part->momentum_.SetPtEtaPhiM(tower->ET,tower->Eta,tower->Phi,0.0);
 
     // setting corresponding gen particle
-    /*    std::cout << "number of igen : " << tower->Particles.GetEntries() << std::endl;
-    for (unsigned igen=0;igen<tower->Particles.GetEntries();igen++)
+    for (unsigned int j=0;j<static_cast<UInt_t>(tower->Particles.GetEntries());j++)
     {
-      std::cout << tower->Particles.At(igen) << std::endl;
+       const GenParticle* mc = dynamic_cast<const GenParticle*>(tower->Particles[j]);
+       //       if (mc!=0)
+       //       {
+       //         genit = gentable.find(mc);
+       //         if (genit!=gentable.end()) track->mc_=&(myEvent.mc()->particles()[genit->second]);
+       //         else WARNING << "GenParticle corresponding to a track is not found in the gen table" << endmsg;
+       //       }
+
+       // setting 
+       part->refmcs_.push_back(reinterpret_cast<ULong64_t>(mc));
     }
-    */
   }
 
 
