@@ -21,8 +21,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef ISOLATIONTRACKER_SERVICE_h
-#define ISOLATIONTRACKER_SERVICE_h
+#ifndef ISOLATIONCOMBINED_SERVICE_h
+#define ISOLATIONCOMBINED_SERVICE_h
 
 // STL headers
 
@@ -33,7 +33,7 @@
 namespace MA5
 {
 
-class IsolationTracker : public IsolationBase
+class IsolationCombined : public IsolationBase
 {
   // -------------------------------------------------------------
   //                       data members
@@ -44,10 +44,10 @@ class IsolationTracker : public IsolationBase
   public:
 
     /// Constructor
-    IsolationTracker() {}
+    IsolationCombined() {}
 
     /// Destructor
-    virtual ~IsolationTracker() {}
+    virtual ~IsolationCombined() {}
 
 
     virtual Double_t relIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
@@ -70,6 +70,7 @@ class IsolationTracker : public IsolationBase
       if (event==0) return 0;
       Double_t sum=0.;
       sum += sumPT(part,event->tracks(),DR,PTmin);
+      sum += sumPT(part,event->towers(),DR,PTmin);
       return sum;
     }
 

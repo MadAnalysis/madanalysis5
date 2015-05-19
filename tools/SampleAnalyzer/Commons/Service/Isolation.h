@@ -29,6 +29,7 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/IsolationTracker.h"
 #include "SampleAnalyzer/Commons/Service/IsolationCalorimeter.h"
+#include "SampleAnalyzer/Commons/Service/IsolationCombined.h"
 #include "SampleAnalyzer/Commons/Service/IsolationEFlow.h"
 
 
@@ -43,14 +44,14 @@ class Isolation
 
   IsolationTracker     *tracker;
   IsolationCalorimeter *calorimeter;
-  IsolationCalorimeter *combined;
+  IsolationCombined    *combined;
   IsolationEFlow       *eflow;
 
   Isolation()
   {
     tracker     = new IsolationTracker;
     calorimeter = new IsolationCalorimeter;
-    combined    = new IsolationCalorimeter;
+    combined    = new IsolationCombined;
     eflow       = new IsolationEFlow;
   }
 
