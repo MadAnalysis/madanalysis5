@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+112  1.1.12.15 (2015/05/20) fuks:    Fixing the merging plot routines so that they now work for pythia8 
+
 107  1.1.12.14 (2015/03/09) fuks:    Fixing some last bugs on the automated PAD installation 
 
 106  1.1.12.13 (2015/03/04) fuks:    Updating the automated pad installation 

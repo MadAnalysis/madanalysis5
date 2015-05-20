@@ -140,9 +140,12 @@ UInt_t MergingPlots::ExtractHardJetNumber(const MCEventFormat* myEvent,
 
   // Filters
   std::map<const MCParticleFormat*,bool> filters;
-  for (unsigned int i=6;i<myEvent->particles().size();i++)
+  for (unsigned int i=0;i<myEvent->particles().size();i++)
   {
     const MCParticleFormat* myPart = &myEvent->particles()[i];
+    if (myPart->mother1()==0) continue;
+    if (myPart->mother1()->mother1()==0) continue;
+    if (myPart->mother1()->mother1()->mother1()==0) continue;
     std::vector<MCParticleFormat*> family=myEvent->particles()[i].mother1()->daughters();
 
     // Filters
@@ -182,7 +185,7 @@ UInt_t MergingPlots::ExtractHardJetNumber(const MCEventFormat* myEvent,
     else filters[&(myEvent->particles()[i])]=false;
 
     // keep particles generated during the matrix element calculation
-    if (myPart->statuscode()!=3) continue;
+    if (myPart->statuscode()!=3 && !(myPart->statuscode()>20 && myPart->statuscode()<30) ) continue;
 
     // keep only partons
     if (abs(myPart->pdgid())>merging_nqmatch_ && myPart->pdgid()!=21) continue;
