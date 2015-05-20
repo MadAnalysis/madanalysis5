@@ -145,7 +145,6 @@ UInt_t MergingPlots::ExtractHardJetNumber(const MCEventFormat* myEvent,
     const MCParticleFormat* myPart = &myEvent->particles()[i];
     if (myPart->mother1()==0) continue;
     if (myPart->mother1()->mother1()==0) continue;
-    if (myPart->mother1()->mother1()->mother1()==0) continue;
     std::vector<MCParticleFormat*> family=myEvent->particles()[i].mother1()->daughters();
 
     // Filters

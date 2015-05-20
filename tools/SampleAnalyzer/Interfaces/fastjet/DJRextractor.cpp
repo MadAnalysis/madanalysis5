@@ -103,7 +103,6 @@ void DJRextractor::SelectParticles(std::vector<fastjet::PseudoJet>& inputs,
   {
     if (myEvent->particles()[i].mother1()==0) continue;
     if (myEvent->particles()[i].mother1()->mother1()==0) continue;
-    if (myEvent->particles()[i].mother1()->mother1()->mother1()==0) continue;
 
     std::vector<MCParticleFormat*> family=myEvent->particles()[i].mother1()->daughters();
     // Filters
@@ -151,7 +150,6 @@ void DJRextractor::SelectParticles(std::vector<fastjet::PseudoJet>& inputs,
     // Selecting radiative states
     if (myEvent->particles()[i].statuscode()!=2 &&
         myEvent->particles()[i].statuscode()!=71) continue;
-
 
     // Selecting states not coming from initial proton (beam remnant) 
     // or hadronization
