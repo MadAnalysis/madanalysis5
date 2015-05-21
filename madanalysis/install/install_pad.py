@@ -41,7 +41,7 @@ class InstallPad:
         self.untardir    = ""
         self.ncores      = 1
         self.analyses    = ["cms_sus_13_011", "cms_sus_13_012", "cms_sus_13_016", "atlas_sus_13_05", "atlas_susy_2013_11",
-            "atlas_higg_2013_03"]
+            "atlas_higg_2013_03", "ATLAS_EXOT_2014_06"]
         self.files = {
     "cms_sus_13_011.cpp" : "http://inspirehep.net/record/1301484/files/cms_sus_13_011.cpp",
     "cms_sus_13_011.h"   : "http://inspirehep.net/record/1301484/files/cms_sus_13_011.h",
@@ -60,7 +60,10 @@ class InstallPad:
     "atlas_susy_2013_11.info": "http://inspirehep.net/record/1326686/files/atlas_susy_2013_11.info",
     "atlas_higg_2013_03.cpp" : "http://inspirehep.net/record/1347081/files/atlas_higg_2013_03.cpp",
     "atlas_higg_2013_03.h"   : "http://inspirehep.net/record/1347081/files/atlas_higg_2013_03.h",
-    "atlas_higg_2013_03.info": "http://inspirehep.net/record/1347081/files/atlas_higg_2013_03.info"
+    "atlas_higg_2013_03.info": "http://inspirehep.net/record/1347081/files/atlas_higg_2013_03.info",
+    "ATLAS_EXOT_2014_06.cpp" : "http://inspirehep.net/record/1353627/files/ATLAS_EXOT_2014_06.cpp",
+    "ATLAS_EXOT_2014_06.h"   : "http://inspirehep.net/record/1353627/files/ATLAS_EXOT_2014_06.h",
+    "ATLAS_EXOT_2014_06.info": "http://inspirehep.net/record/1353627/files/ATLAS_EXOT_2014_06.info"
 }
 
         self.delphescards = {
@@ -162,6 +165,13 @@ class InstallPad:
       file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1325001;%%\",\n')
       file.write('}\n')
 
+      #ATLAS-EXOT-2014-06
+      file.write('@article{,\n')
+      file.write('      author         = \"Barducci, Daniele\",\n')
+      file.write('      title          = \"{MadAnalysis 5 implementation of ATLAS-EXOT-2014-06}\",\n')
+      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.922E.4BN6\",\n')
+      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1353627;%%\",\n')
+      file.write('}\n')
       file.close()
 
     def Detect(self):
