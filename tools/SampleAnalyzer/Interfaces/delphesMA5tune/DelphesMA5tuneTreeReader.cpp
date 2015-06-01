@@ -402,7 +402,6 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
     {
       // Set event-weight
       myEvent.mc()->setWeight(header1->Weight);
-      std::cout << "Weight=" << header1->Weight << std::endl;
     }
     else
     {
@@ -410,7 +409,6 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
       if (header2==0) continue;
       // Set event-weight
       myEvent.mc()->setWeight(header2->Weight);
-      std::cout << "Weight=" << header2->Weight << std::endl;
     }
   }
 
