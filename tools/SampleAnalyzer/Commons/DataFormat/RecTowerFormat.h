@@ -47,7 +47,7 @@ class DetectorDelphes;
 class DetectorDelphesMA5tune;
 class RecLeptonFormat;
 
-class RecTowerFormat : public ParticleBaseFormat
+class RecTowerFormat : public RecParticleFormat
 {
   friend class LHEReader;
   friend class LHCOReader;
@@ -62,7 +62,6 @@ class RecTowerFormat : public ParticleBaseFormat
   // -------------------------------------------------------------
    
  protected:
-  std::vector<ULong64_t> refmcs_;
 
   // -------------------------------------------------------------
   //                      method members
@@ -81,15 +80,12 @@ class RecTowerFormat : public ParticleBaseFormat
   virtual void Reset()
   {
     momentum_.SetPxPyPzE(0.,0.,0.,0.);
-    refmcs_.clear();
   }
 
   /// Print particle informations
   virtual void Print() const
   {
   }
-
-  const std::vector<ULong64_t>& refmcs() const {return refmcs_;}
 
 };
 

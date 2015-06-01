@@ -52,6 +52,18 @@ class IsolationBase
                    const std::vector<RecTowerFormat>& towers,
                    const double& DR,double PTmin) const;
 
+    Double_t sumPT(const RecPhotonFormat* part, 
+                   const std::vector<RecTrackFormat>& tracks,
+                   const double& DR,double PTmin) const; 
+
+    Double_t sumPT(const RecPhotonFormat* part, 
+                   const std::vector<RecParticleFormat>& towers,
+                   const double& DR,double PTmin) const;
+
+    Double_t sumPT(const RecPhotonFormat* part, 
+                   const std::vector<RecTowerFormat>& towers,
+                   const double& DR,double PTmin) const;
+
   public:
 
     /// Constructor
@@ -61,6 +73,7 @@ class IsolationBase
     virtual ~IsolationBase() {}
 
 
+    /// Methods for leptons
     virtual Double_t relIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin) const = 0;
 
     virtual Double_t relIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const double& DR, double PTmin) const = 0;
@@ -69,13 +82,27 @@ class IsolationBase
 
     virtual Double_t sumIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const double& DR, double PTmin) const = 0;
 
+    /// Methods for photons
+    virtual Double_t relIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin) const = 0;
+
+    virtual Double_t relIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin) const = 0;
+
+    virtual Double_t sumIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin) const = 0;
+
+    virtual Double_t sumIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin) const = 0;
+
+
     virtual std::vector<const RecLeptonFormat*> getRelIsolatedMuons(const RecEventFormat* event, 
                                                             const double& threshold, 
                                                             const double& DR, double PTmin) const = 0;
 
     virtual std::vector<const RecLeptonFormat*> getRelIsolatedElectrons(const RecEventFormat* event, 
-                                                                const double& threshold,
-                                                                const double& DR, double PTmin) const = 0;
+                                                                        const double& threshold,
+                                                                        const double& DR, double PTmin) const = 0;
+
+    virtual std::vector<const RecPhotonFormat*> getRelIsolatedPhotons(const RecEventFormat* event, 
+                                                                      const double& threshold, 
+                                                                      const double& DR, double PTmin) const = 0;
 
     /*
     std::vector<const RecJetFormat*> cleanJets(const RecEventFormat* event,

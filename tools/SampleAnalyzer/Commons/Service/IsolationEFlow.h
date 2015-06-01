@@ -75,6 +75,31 @@ class IsolationEFlow : public IsolationBase
       return sum;
     }
 
+    virtual Double_t relIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
+    { return relIsolation(&part, event, DR, PTmin); }
+
+    virtual Double_t relIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
+    {
+      if (part==0) return 0;
+      if (event==0) return 0;
+      if (part->pt()<1e-9) return 999.;
+      return sumIsolation(part,event,DR,PTmin)/part->pt();
+    }
+
+    virtual Double_t sumIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
+    { return sumIsolation(&part, event, DR, PTmin); }
+
+    virtual Double_t sumIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
+    {
+      if (part==0) return 0;
+      if (event==0) return 0;
+      Double_t sum=0.;
+      sum += sumPT(part,event->EFlowTracks(),DR,PTmin);
+      sum += sumPT(part,event->EFlowPhotons(),DR,PTmin);
+      sum += sumPT(part,event->EFlowNeutralHadrons(),DR,PTmin);
+      return sum;
+    }
+
     virtual std::vector<const RecLeptonFormat*> getRelIsolatedMuons(const RecEventFormat* event, 
                                                                  const double& threshold, const double& DR, double PTmin=0.5) const
     {
@@ -96,6 +121,19 @@ class IsolationEFlow : public IsolationBase
       {
         if (relIsolation(event->electrons()[i],event,DR,PTmin)>threshold) continue;
         isolated.push_back(&(event->electrons()[i]));
+      }
+      return isolated;
+    }
+
+    /// 
+    virtual std::vector<const RecPhotonFormat*> getRelIsolatedPhotons(const RecEventFormat* event, 
+                                                                      const double& threshold, const double& DR, double PTmin=0.5) const
+    { 
+      std::vector<const RecPhotonFormat*> isolated;
+      for (unsigned int i=0;i<event->photons().size();i++)
+      {
+        if (relIsolation(event->photons()[i],event,DR,PTmin)>threshold) continue;
+        isolated.push_back(&(event->photons()[i]));
       }
       return isolated;
     }

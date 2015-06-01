@@ -72,6 +72,7 @@ class DelphesTreeReader : public TreeReaderBase
   TClonesArray *branchGenParticle_;
   TClonesArray *branchTrack_;
   TClonesArray *branchTower_;
+  TClonesArray *branchEvent_;
   TClonesArray *branchEFlowTracks_;
   TClonesArray *branchEFlowPhotons_;
   TClonesArray *branchEFlowNeutralHadrons_;

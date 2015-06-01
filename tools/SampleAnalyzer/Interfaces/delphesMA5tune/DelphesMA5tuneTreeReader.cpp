@@ -91,6 +91,11 @@ bool DelphesMA5tuneTreeReader::Initialize()
   {
     WARNING << "Track branch is not found" << endmsg;
   }
+  branchEvent_ = treeReader_->UseBranch("Event");
+  if (branchEvent_==0)
+  {
+    WARNING << "Event branch is not found" << endmsg;
+  }
 
   return true;
 }
@@ -383,6 +388,30 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
     int index=0;
     if (part->MA5index>=0) index=part->MA5index+1;
     MuonIndex_.push_back(index);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Fill Event
+  // ---------------------------------------------------------------------------
+  if (branchEvent_!=0)
+  for (unsigned int i=0;i<static_cast<UInt_t>(branchEvent_->GetEntries());i++)
+  {
+    // Get the header 
+    LHEFEvent* header1 =  dynamic_cast<LHEFEvent*>(branchEvent_->At(i));
+    if (header1!=0)
+    {
+      // Set event-weight
+      myEvent.mc()->setWeight(header1->Weight);
+      std::cout << "Weight=" << header1->Weight << std::endl;
+    }
+    else
+    {
+      HepMCEvent* header2 = dynamic_cast<HepMCEvent*>(branchEvent_->At(i));
+      if (header2==0) continue;
+      // Set event-weight
+      myEvent.mc()->setWeight(header2->Weight);
+      std::cout << "Weight=" << header2->Weight << std::endl;
+    }
   }
 
   // Fill jets and taus

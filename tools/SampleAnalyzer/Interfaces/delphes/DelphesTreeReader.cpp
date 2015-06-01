@@ -111,8 +111,6 @@ bool DelphesTreeReader::Initialize()
   {
     WARNING << "EFlowNeutralHadrons branch is not found" << endmsg;
   }
-
-
   branchGenParticle_ = treeReader_->UseBranch("Particle");
   if (branchGenParticle_==0)
   {
@@ -122,6 +120,11 @@ bool DelphesTreeReader::Initialize()
   if (branchTrack_==0)
   {
     WARNING << "Track branch is not found" << endmsg;
+  }
+  branchEvent_ = treeReader_->UseBranch("Event");
+  if (branchEvent_==0)
+  {
+    WARNING << "Event branch is not found" << endmsg;
   }
 
   // DelphesMA5 tune mode
@@ -321,7 +324,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
       if (genit!=gentable.end()) electron->mc_=&(myEvent.mc()->particles()[genit->second]);
       else WARNING << "GenParticle corresponding to an electron is not found in the gen table" << endmsg;
     }
-    electron->refmc_=reinterpret_cast<ULong64_t>(mc);
+    electron->delphesTags_.push_back(reinterpret_cast<ULong64_t>(mc));
   }
 
 
@@ -348,7 +351,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
       if (genit!=gentable.end()) electron->mc_=&(myEvent.mc()->particles()[genit->second]);
       else WARNING << "GenParticle corresponding to a electron is not found in the gen table" << endmsg;
     }
-    electron->refmc_=reinterpret_cast<ULong64_t>(mc);
+    electron->delphesTags_.push_back(reinterpret_cast<ULong64_t>(mc));
   }
 
 
@@ -378,11 +381,38 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
     }
     if (mc!=0)
     {
+      photon->delphesTags_.push_back(reinterpret_cast<ULong64_t>(mc));
       genit = gentable.find(mc);
       if (genit!=gentable.end()) photon->mc_=&(myEvent.mc()->particles()[genit->second]);
       else WARNING << "GenParticle corresponding to a photon is not found in the gen table" << endmsg;
     }
   }
+
+
+  // ---------------------------------------------------------------------------
+  // Fill Event
+  // ---------------------------------------------------------------------------
+  if (branchEvent_!=0)
+  for (unsigned int i=0;i<static_cast<UInt_t>(branchEvent_->GetEntries());i++)
+  {
+    // Get the header 
+    LHEFEvent* header1 =  dynamic_cast<LHEFEvent*>(branchEvent_->At(i));
+    if (header1!=0)
+    {
+      // Set event-weight
+      myEvent.mc()->setWeight(header1->Weight);
+      std::cout << "Weight=" << header1->Weight << std::endl;
+    }
+    else
+    {
+      HepMCEvent* header2 = dynamic_cast<HepMCEvent*>(branchEvent_->At(i));
+      if (header2==0) continue;
+      // Set event-weight
+      myEvent.mc()->setWeight(header2->Weight);
+      std::cout << "Weight=" << header2->Weight << std::endl;
+    }
+  }
+
 
 
   // ---------------------------------------------------------------------------
@@ -408,7 +438,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
       if (genit!=gentable.end()) muon->mc_=&(myEvent.mc()->particles()[genit->second]);
       else WARNING << "GenParticle corresponding to a muon is not found in the gen table" << endmsg;
     }
-    muon->refmc_=reinterpret_cast<ULong64_t>(mc);
+    muon->delphesTags_.push_back(reinterpret_cast<ULong64_t>(mc));
   }
 
 
@@ -435,7 +465,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
       if (genit!=gentable.end()) muon->mc_=&(myEvent.mc()->particles()[genit->second]);
       else WARNING << "GenParticle corresponding to a muon is not found in the gen table" << endmsg;
     }
-    muon->refmc_=reinterpret_cast<ULong64_t>(mc);
+    muon->delphesTags_.push_back(reinterpret_cast<ULong64_t>(mc));
   }
 
 
@@ -465,7 +495,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
        //       }
 
        // setting 
-       part->refmcs_.push_back(reinterpret_cast<ULong64_t>(mc));
+       part->delphesTags_.push_back(reinterpret_cast<ULong64_t>(mc));
     }
   }
 
@@ -486,7 +516,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
 
     // setting corresponding gen particle
     const GenParticle* mc = dynamic_cast<const GenParticle*>(track->Particle.GetObject());
-    part->refmc_=reinterpret_cast<ULong64_t>(mc);
+    part->delphesTags_.push_back(reinterpret_cast<ULong64_t>(mc));
 
   }
 
@@ -652,7 +682,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
     }
 
     // setting 
-    track->refmc_=reinterpret_cast<ULong64_t>(mc);
+    track->delphesTags_.push_back(reinterpret_cast<ULong64_t>(mc));
   }
 
 }
