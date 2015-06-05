@@ -108,8 +108,6 @@ class MCSampleFormat
     beamPDFauthor_      = std::make_pair(0,0); 
     beamPDFID_          = std::make_pair(0,0);
     weightMode_         = 0; 
-    sumweight_positive_ = 0.;
-    sumweight_negative_ = 0.;
     processes_.clear();
 
     // File info
