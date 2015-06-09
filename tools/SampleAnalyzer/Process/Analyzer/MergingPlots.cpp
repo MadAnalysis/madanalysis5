@@ -195,8 +195,13 @@ UInt_t MergingPlots::ExtractHardJetNumber(const MCEventFormat* myEvent,
     // coming from initial state ?
     if (myPart->mothup1_>6 && (myPart->mothup1_==0 || myPart->mothup2_==0)) continue;
 
-    // count particle
-    if(!filters[myPart]) njets++;
+    // Pythia 6 formt: removing the initial guys
+    if(i<6 && *mySample->GeneratorType()==MA5GEN::PYTHIA6) continue;
+
+    //count particle
+    if(!filters[myPart])
+      njets++;
+
   }
   return njets;
 }
