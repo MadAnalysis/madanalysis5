@@ -49,6 +49,9 @@ SampleAnalyzer::SampleAnalyzer()
   MA5::TimeService::GetInstance();
   MA5::PDGService::GetInstance();
 
+  // Check datatypes
+  CheckDatatypes();
+
   // Initializing pointer to 0
   progressBar_=0;
   LastFileFail_=false;
@@ -58,6 +61,79 @@ SampleAnalyzer::SampleAnalyzer()
   INFO << endmsg;
  
 }
+
+
+/// CheckDatatypes
+void SampleAnalyzer::CheckDatatypes() const
+{
+  unsigned int value = sizeof(MAint8);
+  if (value!=1)
+  {
+    WARNING << "MAint8 type corresponds to " 
+            << value*8 << " bits" << endmsg;  
+
+  }
+  value = sizeof(MAuint8);
+  if (value!=1)
+  {
+    WARNING << "MAuint8 type corresponds to " 
+            << value*8 << " bits" << endmsg;  
+
+  }
+  value = sizeof(MAint16);
+  if (value!=2)
+  {
+    WARNING << "MAint16 type corresponds to " 
+            << value*8 << " bits" << endmsg;  
+  }
+  value = sizeof(MAuint16);
+  if (value!=2)
+  {
+    WARNING << "MAuint16 type corresponds to " 
+            << value*8 << " bits" << endmsg;  
+  }
+  value = sizeof(MAint32);
+  if (value!=4)
+  {
+    WARNING << "MAint32 type corresponds to " 
+            << value*8 << " bits" << endmsg;  
+
+  }
+  value = sizeof(MAuint32);
+  if (value!=4)
+  {
+    WARNING << "MAuint32 type corresponds to " 
+            << value*8 << " bits" << endmsg;  
+  }
+  value = sizeof(MAint64);
+  if (value!=8)
+  {
+    WARNING << "MAint64 type corresponds to " 
+            << value*8 << " bits" << endmsg;  
+
+  }
+  value = sizeof(MAuint64);
+  if (value!=8)
+  {
+    WARNING << "MAuint64 type corresponds to " 
+            << value*8 << " bits" << endmsg;  
+  }
+  value = sizeof(MAfloat32);
+  if (value!=4)
+  {
+    WARNING << "MAfloat32 type corresponds to " 
+            << value*8 << " bits" << endmsg;  
+
+  }
+  value = sizeof(MAfloat64);
+  if (value!=8)
+  {
+    WARNING << "MAfloat64 type corresponds to " 
+            << value*8 << " bits" << endmsg;  
+  }
+
+}
+
 
 /// Initialization of the SampleAnalyzer
 bool SampleAnalyzer::Initialize(int argc, char **argv, 

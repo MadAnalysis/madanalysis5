@@ -49,11 +49,69 @@ class IsolationEFlow : public IsolationBase
     /// Destructor
     virtual ~IsolationEFlow() {}
 
+    /// Isolation component
+    enum ComponentType {ALL_COMPONENTS,TRACK_COMPONENT,PHOTON_COMPONENT,NEUTRAL_COMPONENT};
 
-    virtual Double_t relIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
+    virtual Double_t relIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
+    { return relIsolation(&part, event, DR, PTmin, type); }
+
+    virtual Double_t relIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
+    {
+      if (part==0) return 0;
+      if (event==0) return 0;
+      if (part->pt()<1e-9) return 999.;
+      return sumIsolation(part,event,DR,PTmin,type)/part->pt();
+    }
+
+    virtual Double_t sumIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
+    { return sumIsolation(&part, event, DR, PTmin,type); }
+
+    virtual Double_t sumIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
+    {
+      if (part==0) return 0;
+      if (event==0) return 0;
+      Double_t sum=0.;
+      if (type==TRACK_COMPONENT || type==ALL_COMPONENTS)
+          sum += sumPT(part,event->EFlowTracks(),DR,PTmin);
+      else if (type==PHOTON_COMPONENT || type==ALL_COMPONENTS)
+          sum += sumPT(part,event->EFlowPhotons(),DR,PTmin);
+      else if (type==NEUTRAL_COMPONENT || type==ALL_COMPONENTS)
+          sum += sumPT(part,event->EFlowNeutralHadrons(),DR,PTmin);
+      return sum;
+    }
+
+    virtual Double_t relIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
+    { return relIsolation(&part, event, DR, PTmin, type); }
+
+    virtual Double_t relIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
+    {
+      if (part==0) return 0;
+      if (event==0) return 0;
+      if (part->pt()<1e-9) return 999.;
+      return sumIsolation(part,event,DR,PTmin,type)/part->pt();
+    }
+
+    virtual Double_t sumIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
+    { return sumIsolation(&part, event, DR, PTmin, type); }
+
+    virtual Double_t sumIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
+    {
+      if (part==0) return 0;
+      if (event==0) return 0;
+      Double_t sum=0.;
+      if (type==TRACK_COMPONENT || type==ALL_COMPONENTS)
+          sum += sumPT(part,event->EFlowTracks(),DR,PTmin);
+      else if (type==PHOTON_COMPONENT || type==ALL_COMPONENTS)
+          sum += sumPT(part,event->EFlowPhotons(),DR,PTmin);
+      else if (type==NEUTRAL_COMPONENT || type==ALL_COMPONENTS)
+          sum += sumPT(part,event->EFlowNeutralHadrons(),DR,PTmin);
+      return sum;
+    }
+
+    virtual Double_t relIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin) const
     { return relIsolation(&part, event, DR, PTmin); }
 
-    virtual Double_t relIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
+    virtual Double_t relIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const double& DR, double PTmin) const
     {
       if (part==0) return 0;
       if (event==0) return 0;
@@ -61,10 +119,10 @@ class IsolationEFlow : public IsolationBase
       return sumIsolation(part,event,DR,PTmin)/part->pt();
     }
 
-    virtual Double_t sumIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
+    virtual Double_t sumIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin) const
     { return sumIsolation(&part, event, DR, PTmin); }
 
-    virtual Double_t sumIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
+    virtual Double_t sumIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const double& DR, double PTmin) const
     {
       if (part==0) return 0;
       if (event==0) return 0;
@@ -75,10 +133,10 @@ class IsolationEFlow : public IsolationBase
       return sum;
     }
 
-    virtual Double_t relIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
+    virtual Double_t relIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin) const
     { return relIsolation(&part, event, DR, PTmin); }
 
-    virtual Double_t relIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
+    virtual Double_t relIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin) const
     {
       if (part==0) return 0;
       if (event==0) return 0;
@@ -86,10 +144,10 @@ class IsolationEFlow : public IsolationBase
       return sumIsolation(part,event,DR,PTmin)/part->pt();
     }
 
-    virtual Double_t sumIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
+    virtual Double_t sumIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin) const
     { return sumIsolation(&part, event, DR, PTmin); }
 
-    virtual Double_t sumIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
+    virtual Double_t sumIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin) const
     {
       if (part==0) return 0;
       if (event==0) return 0;
@@ -101,7 +159,7 @@ class IsolationEFlow : public IsolationBase
     }
 
     virtual std::vector<const RecLeptonFormat*> getRelIsolatedMuons(const RecEventFormat* event, 
-                                                                 const double& threshold, const double& DR, double PTmin=0.5) const
+                                                                 const double& threshold, const double& DR, double PTmin) const
     {
       std::vector<const RecLeptonFormat*> isolated;
       for (unsigned int i=0;i<event->muons().size();i++)
@@ -114,7 +172,7 @@ class IsolationEFlow : public IsolationBase
 
     virtual std::vector<const RecLeptonFormat*> getRelIsolatedElectrons(const RecEventFormat* event, 
                                                              const double& threshold,
-                                                             const double& DR, double PTmin=0.5) const
+                                                             const double& DR, double PTmin) const
     {
       std::vector<const RecLeptonFormat*> isolated;
       for (unsigned int i=0;i<event->electrons().size();i++)
@@ -127,7 +185,7 @@ class IsolationEFlow : public IsolationBase
 
     /// 
     virtual std::vector<const RecPhotonFormat*> getRelIsolatedPhotons(const RecEventFormat* event, 
-                                                                      const double& threshold, const double& DR, double PTmin=0.5) const
+                                                                      const double& threshold, const double& DR, double PTmin) const
     { 
       std::vector<const RecPhotonFormat*> isolated;
       for (unsigned int i=0;i<event->photons().size();i++)

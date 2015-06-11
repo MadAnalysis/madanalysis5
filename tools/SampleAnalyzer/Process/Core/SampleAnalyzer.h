@@ -33,6 +33,7 @@
 
 // SampleAnalyzer headers
 // |- core functions
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/Base/StatusCode.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 // |- data format
@@ -152,6 +153,9 @@ class SampleAnalyzer
   bool PostInitialize();
 
  private:
+
+  /// CheckDatatypes
+  void CheckDatatypes() const;
 
   /// Filling the summary format
   void FillSummary(SampleFormat& summary,

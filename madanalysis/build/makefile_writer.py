@@ -167,6 +167,7 @@ class MakefileWriter():
             self.has_delphes_ma5lib        = False
             self.has_delphesMA5tune_ma5lib = False
             self.has_zlib_ma5lib           = False
+            self.has_root                  = True
 
 
     @staticmethod
@@ -203,8 +204,9 @@ class MakefileWriter():
             
         # - root
         cxxflags=[]
-        cxxflags.extend(['$(shell root-config --cflags)'])
-#        cxxflags.extend(['-I'+archi_info.root_inc_path]) # root
+        if options.has_root:
+            cxxflags.extend(['$(shell root-config --cflags)'])
+    #        cxxflags.extend(['-I'+archi_info.root_inc_path]) # root
         file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
 
         # - fastjet
@@ -244,7 +246,8 @@ class MakefileWriter():
              cxxflags.extend(['-DDELPHES_USE'])
         if options.has_delphesMA5tune_tag:
              cxxflags.extend(['-DDELPHESMA5TUNE_USE'])
-        file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
+        if len(cxxflags)!=0:
+            file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
         file.write('\n')
 
         # Options for C++ linking
@@ -313,8 +316,10 @@ class MakefileWriter():
         #libs.extend(['-L'+archi_info.root_lib_path, \
         #            '-lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic -lEG'])
         # becareful: to not forget -lEG
-        libs.extend(['$(shell root-config --libs)','-lEG'])
-        file.write('LIBFLAGS += '+' '.join(libs)+'\n')
+        if options.has_root:
+            libs.extend(['$(shell root-config --libs)','-lEG'])
+        if len(libs)!=0:
+            file.write('LIBFLAGS += '+' '.join(libs)+'\n')
         file.write('\n')
 
         # Lib to check

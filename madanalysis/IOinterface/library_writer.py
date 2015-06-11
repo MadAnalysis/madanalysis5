@@ -112,6 +112,8 @@ class LibraryWriter():
         filename = self.path+"/SampleAnalyzer/Interfaces/Makefile_"+package
         if package=='commons':
             filename = self.path+"/SampleAnalyzer/Commons/Makefile"
+        elif package=='configuration':
+            filename = self.path+"/SampleAnalyzer/Configuration/Makefile"
         elif package=='process':
             filename = self.path+"/SampleAnalyzer/Process/Makefile"
         elif package=='test_process':
@@ -131,6 +133,8 @@ class LibraryWriter():
         title=''
         if package=='commons':
             title='SampleAnalyzer commons'
+        elif package=='configuration':
+            title='SampleAnalyzer configuration'
         elif package=='process':
             title='SmapleAnalyzer process'
         elif package=='test_commons':
@@ -160,6 +164,8 @@ class LibraryWriter():
             options.has_fastjet_ma5lib=True
           #  options.has_fastjet_lib=True
             toRemove.extend(['compilation_fastjet.log','linking_fastjet.log','cleanup_fastjet.log','mrproper_fastjet.log','../Bin/TestFastjet.log'])
+        elif package=='configuration':
+            options.has_root = False
         elif package=='commons':
             pass
             toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
@@ -229,7 +235,7 @@ class LibraryWriter():
             toRemove.extend(['compilation_process.log','linking_process.log','cleanup_process.log','mrproper_process.log','../Bin/TestSampleAnalyzer.log'])
 
         # file pattern
-        if package in ['commons','process']:
+        if package in ['commons','process','configuration']:
             cppfiles = ['*/*.cpp']
             hfiles   = ['*/*.h']
         elif package=='test_commons':
@@ -258,6 +264,10 @@ class LibraryWriter():
         if package=='test_process':
             isLibrary=False
             ProductName='TestSampleAnalyzer'
+            ProductPath='../Bin/'
+        elif package=='configuration':
+            isLibrary=False
+            ProductName='PortabilityCheckup'
             ProductPath='../Bin/'
         elif package=='test_commons':
             isLibrary=False
@@ -298,7 +308,7 @@ class LibraryWriter():
             strcores='-j'+str(ncores)
 
         # log file name
-        if package in ['process','commons','test']:
+        if package in ['process','commons','test','configuration']:
             logfile = folder+'/compilation.log'
         elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_delphes','test_delphesMA5tune']:
             logfile = folder+'/compilation_'+package[5:]+'.log'
@@ -306,7 +316,7 @@ class LibraryWriter():
             logfile = folder+'/compilation_'+package+'.log'
 
         # makefile
-        if package in ['process','commons','test']:
+        if package in ['process','commons','test','configuration']:
             makefile = 'Makefile'
         elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_delphes','test_delphesMA5tune']:
             makefile = 'Makefile_'+package[5:]
@@ -333,7 +343,7 @@ class LibraryWriter():
     def Link(self,package,folder):
 
         # log file name
-        if package in ['process','commons','test']:
+        if package in ['process','commons','test','configuration']:
             logfile = folder+'/linking.log'
         elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_delphes','test_delphesMA5tune']:
             logfile = folder+'/linking_'+package[5:]+'.log'
@@ -341,7 +351,7 @@ class LibraryWriter():
             logfile = folder+'/linking_'+package+'.log'
 
         # makefile
-        if package in ['process','commons','test']:
+        if package in ['process','commons','test','configuration']:
             makefile = 'Makefile'
         elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_delphes','test_delphesMA5tune']:
             makefile = 'Makefile_'+package[5:]
@@ -365,7 +375,7 @@ class LibraryWriter():
     def Clean(self,package,folder):
 
         # log file name
-        if package in ['process','commons','test']:
+        if package in ['process','commons','configuration','test']:
             logfile = folder+'/cleanup.log'
         elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_delphes','test_delphesMA5tune']:
             logfile = folder+'/cleanup_'+package[5:]+'.log'
@@ -373,7 +383,7 @@ class LibraryWriter():
             logfile = folder+'/cleanup_'+package+'.log'
 
         # makefile
-        if package in ['process','commons','test']:
+        if package in ['process','commons','test','configuration']:
             makefile = 'Makefile'
         elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_delphes','test_delphesMA5tune']:
             makefile = 'Makefile_'+package[5:]
@@ -397,23 +407,27 @@ class LibraryWriter():
     def MrProper(self,package,folder):
 
         # log file name
-        if package in ['process','commons']:
+        if package in ['process','commons','configuration']:
             logfile = folder+'/mrproper.log'
         elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_delphes','test_delphesMA5tune']:
             logfile = folder+'/mrproper_'+package[5:]+'.log'
         else:
             logfile = folder+'/mrproper_'+package+'.log'
+        logging.debug("LogFile: "+logfile)
+
 
         # makefile
-        if package in ['process','commons','test']:
+        if package in ['process','commons','test','configuration']:
             makefile = 'Makefile'
         elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_delphes','test_delphesMA5tune']:
             makefile = 'Makefile_'+package[5:]
         else:
             makefile = 'Makefile_'+package
+        logging.debug("Makefile: "+makefile)
 
         # shell command
         commands = ['make','mrproper','--file='+makefile]
+        logging.debug("Command: "+" ".join(commands))
 
         # call
         result, out = ShellCommand.ExecuteWithLog(commands,logfile,folder)
@@ -431,9 +445,11 @@ class LibraryWriter():
         # shell command
         commands = ['./'+program]
         commands.extend(args)
+        logging.debug("Command: "+" ".join(commands))
 
         # logfile
         logfile = os.path.normpath(folder+'/'+program+'.log')
+        logging.debug("LogFile: "+logfile)
 
         # call
         result, out = ShellCommand.ExecuteWithLog(commands,logfile,folder,silent)
@@ -450,6 +466,7 @@ class LibraryWriter():
 
         # log file name
         logfile = os.path.normpath(folder+'/'+program+'.log')
+        logging.debug("LogFile: "+logfile)
 
         # Open
         try:
@@ -467,7 +484,9 @@ class LibraryWriter():
             line=line.rstrip()
             if line=='BEGIN-SAMPLEANALYZER-TEST':
                 begin=True
+                logging.debug("Analyzing output file: OK -> Begin Stamp found")
             elif line=='END-SAMPLEANALYZER-TEST':
+                logging.debug("Analyzing output file: OK -> End Stamp")
                 end=True
 
         # Close
@@ -478,7 +497,55 @@ class LibraryWriter():
             return False
 
         # CrossCheck
-        if not (begin and end) and not silent:
+        if not (begin and end): # and not silent:
+            logging.error('expected program output is not found. More details, see the log file:')
+            logging.error(logfile)
+            return False
+
+        return True
+
+
+
+    def CheckRunConfiguration(self,program,folder,silent=False):
+
+        # log file name
+        logfile = os.path.normpath(folder+'/'+program+'.log')
+        logging.debug("LogFile: "+logfile)
+
+        # Open
+        try:
+            input = open(logfile)
+        except:
+            logging.error('impossible to open the file:'+logfile)
+            return False
+
+        end=False
+        begin=False
+        ok=False
+        
+        # Loop over the logfile
+        for line in input:
+            line=line.lstrip()
+            line=line.rstrip()
+            if line=='MA5 C++ PORTABILITY CHECK-UP - BEGIN':
+                begin=True
+                logging.debug("Analyzing output file: OK -> Begin Stamp found")
+            elif line=='MA5 C++ PORTABILITY CHECK-UP   - END':
+                end=True
+                logging.debug("Analyzing output file: OK -> Begin Stamp found")
+            elif line=='FINAL TEST = OK':
+                ok=True
+                logging.debug("Analyzing output file: OK -> Successful test found")
+
+        # Close
+        try:
+            input.close()
+        except:
+            logging.error('impossible to close the file:'+logfile)
+            return False
+
+        # CrossCheck
+        if not (begin and end and ok): # and not silent:
             logging.error('expected program output is not found. More details, see the log file:')
             logging.error(logfile)
             return False
