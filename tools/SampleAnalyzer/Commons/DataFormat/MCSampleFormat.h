@@ -117,6 +117,9 @@ class MCSampleFormat
     sumweight_negative_ = 0.;
   }
 
+  /// Accessoir to the generator type
+  const MA5GEN::GeneratorType* GeneratorType() { return sample_generator_;}
+
   /// Accessor to PDG ID of the intial partons
   const std::pair<Int_t,Int_t>& beamPDGID() const
   { return beamPDGID_; }
