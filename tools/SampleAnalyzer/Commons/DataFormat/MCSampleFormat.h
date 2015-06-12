@@ -118,7 +118,8 @@ class MCSampleFormat
   }
 
   /// Accessoir to the generator type
-  const MA5GEN::GeneratorType* GeneratorType() { return sample_generator_;}
+  const MA5GEN::GeneratorType* GeneratorType() const
+  { return sample_generator_; }
 
   /// Accessor to PDG ID of the intial partons
   const std::pair<Int_t,Int_t>& beamPDGID() const
