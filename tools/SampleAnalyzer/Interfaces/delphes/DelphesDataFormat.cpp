@@ -191,7 +191,7 @@ void DelphesDataFormat::InitializeBranch(TTree* tree)
   {
     WARNING << "Muon collection branch is not found" << endmsg;
   }
-  if (branchPhoton_)
+  if (branchPhoton_==0)
   {
     WARNING << "Photon collection branch is not found" << endmsg;
   }
