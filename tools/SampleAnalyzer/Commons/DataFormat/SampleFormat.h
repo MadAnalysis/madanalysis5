@@ -174,6 +174,7 @@ class SampleFormat
     else if (sample_format_==MA5FORMAT::LHCO) INFO << "LHCO";
     else if (sample_format_==MA5FORMAT::DELPHES) INFO << "Delphes-ROOT";
     else if (sample_format_==MA5FORMAT::DELPHESMA5TUNE) INFO << "Delphes-MA5tune ROOT";
+    else if (sample_format_==MA5FORMAT::DELPHESMA5CARD) INFO << "Delphes-ROOT";
     INFO << " file produced by ";
 
     // Generator
@@ -188,6 +189,7 @@ class SampleFormat
     else if (sample_generator_==MA5GEN::HERWIGPP) INFO << "Herwig++";
     else if (sample_generator_==MA5GEN::DELPHES) INFO << "Delphes";
     else if (sample_generator_==MA5GEN::DELPHESMA5TUNE) INFO << "Delphes-MA5tune";
+    else if (sample_generator_==MA5GEN::DELPHESMA5CARD) INFO << "Delphes + MA5tuned-cards";
     else if (sample_generator_==MA5GEN::CALCHEP) INFO << "CalcHEP";
     INFO << "." << endmsg;
   }
