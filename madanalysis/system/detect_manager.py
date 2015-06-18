@@ -36,6 +36,7 @@ class DetectManager():
         self.session_info = session_info
         self.script       = script
         self.debug        = debug
+        self.logger       = logging.getLogger('madanalysis')
 
     def Execute(self, rawpackage):
 
@@ -93,7 +94,7 @@ class DetectManager():
             from madanalysis.system.detect_madgraph import DetectMadgraph
             checker=DetectMadgraph(self.archi_info, self.user_info, self.session_info, self.debug)
         else:
-            logging.error('the package "'+rawpackage+'" is unknown')
+            self.logger.error('the package "'+rawpackage+'" is unknown')
             return False
 
         # Get list of the methods of the chcker class
@@ -105,13 +106,13 @@ class DetectManager():
 
         # 2. Initialization
         if 'Initialize' in methods:
-            logging.debug('Initialization ...')
+            self.logger.debug('Initialization ...')
             if not checker.Initialize():
                 self.PrintFAILURE()
                 if checker.mandatory:
-                    logging.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
+                    self.logger.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
                     for line in checker.log:
-                        logging.error(line)
+                        self.logger.error(line)
                     return False
                 else:
                     if 'PrintDisableMessage' in methods:
@@ -122,11 +123,11 @@ class DetectManager():
                 
         # 3. Veto
         if 'IsItVetoed' in methods:
-            logging.debug('Is there a veto? ...')
+            self.logger.debug('Is there a veto? ...')
             if checker.IsItVetoed():
                 # Should not happen because veto possible only on optional packages
                 if checker.mandatory:
-                    logging.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
+                    self.logger.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
                     return False
                 # normal case
                 else:
@@ -138,7 +139,7 @@ class DetectManager():
         # 4. Does the user force something?
         search = True
         if 'ManualDetection' in methods:
-            logging.debug('Detection of the package in the location specified by the user ...')
+            self.logger.debug('Detection of the package in the location specified by the user ...')
             search = False
             status = checker.ManualDetection()
 
@@ -146,9 +147,9 @@ class DetectManager():
             if status==DetectStatusType.ISSUE:
                 self.PrintFAILURE()
                 if checker.mandatory:
-                    logging.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
+                    self.logger.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
                     for line in checker.log:
-                        logging.error(line)
+                        self.logger.error(line)
                     return False
                 else:
                     if 'PrintDisableMessage' in methods:
@@ -163,7 +164,7 @@ class DetectManager():
 
         # 5. Is it installed in the tools folder?
         if search and 'ToolsDetection' in methods:
-            logging.debug('Detection of the package in the "tools" folder ...')
+            self.logger.debug('Detection of the package in the "tools" folder ...')
             search = False
             status = checker.ToolsDetection()
 
@@ -171,9 +172,9 @@ class DetectManager():
             if status==DetectStatusType.ISSUE:
                 self.PrintFAILURE()
                 if checker.mandatory:
-                    logging.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
+                    self.logger.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
                     for line in checker.log:
-                        logging.error(line)
+                        self.logger.error(line)
                     return False
                 else:
                     if 'PrintDisableMessage' in methods:
@@ -188,16 +189,16 @@ class DetectManager():
 
         # 6. Autodetection of the package
         if search and 'AutoDetection' in methods:
-            logging.debug('Try to detect automatically the package ...')
+            self.logger.debug('Try to detect automatically the package ...')
             search = False
             status = checker.AutoDetection()
 
             if status in [DetectStatusType.UNFOUND,DetectStatusType.ISSUE]:
                 if checker.mandatory:
                     self.PrintFAILURE()
-                    logging.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
+                    self.logger.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
                     for line in checker.log:
-                        logging.error(line)
+                        self.logger.error(line)
                     return False
                 else:
                     if status==DetectStatusType.UNFOUND:
@@ -214,9 +215,9 @@ class DetectManager():
         if search:
             if checker.mandatory:
                 self.PrintFAILURE()
-                logging.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
+                self.logger.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
                 for line in checker.log:
-                    logging.error(line)
+                    self.logger.error(line)
                 return False
             else:
                 self.PrintDISABLED()
@@ -228,13 +229,13 @@ class DetectManager():
 
         # 7. Getting more details about the package
         if 'ExtractInfo' in methods:
-            logging.debug('Extract more informations related to the package ...')
+            self.logger.debug('Extract more informations related to the package ...')
             if not checker.ExtractInfo():
                 self.PrintFAILURE()
                 if checker.mandatory:
-                    logging.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
+                    self.logger.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
                     for line in checker.log:
-                        logging.error(line)
+                        self.logger.error(line)
                     return False
                 else:
                     if 'PrintDisableMessage' in methods:
@@ -246,13 +247,13 @@ class DetectManager():
 
         # 8. Saving package information
         if 'SaveInfo' in methods:
-            logging.debug('Saving informations ...')
+            self.logger.debug('Saving informations ...')
             if not checker.SaveInfo():
                 self.PrintFAILURE()
                 if checker.mandatory:
-                    logging.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
+                    self.logger.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
                     for line in checker.log:
-                        logging.error(line)
+                        self.logger.error(line)
                     return False
                 else:
                     if 'PrintDisableMessage' in methods:
@@ -263,13 +264,13 @@ class DetectManager():
 
         # 9. Finalize: displaying OK
         if 'Finalize' in methods:
-            logging.debug('Finalization ...')
+            self.logger.debug('Finalization ...')
             if not checker.Finalize():
                 self.PrintFAILURE()
                 if checker.mandatory:
-                    logging.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
+                    self.logger.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
                     for line in checker.log:
-                        logging.error(line)
+                        self.logger.error(line)
                     return False
                 else:
                     if 'PrintDisableMessage' in methods:
@@ -328,5 +329,5 @@ class DetectManager():
         sys.stdout.flush()
 
         # Adding a "\n" character in debug mode
-        logging.debug("")
+        self.logger.debug("")
         

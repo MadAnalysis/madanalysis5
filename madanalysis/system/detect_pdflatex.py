@@ -44,20 +44,21 @@ class DetectPdflatex:
         self.name      = 'pdflatex'
         self.mandatory = False
         self.log       = []
+        self.logger    = logging.getLogger('madanalysis')
 
         # adding what you want here
 
 
     def PrintDisableMessage(self):
-        logging.warning("pdflatex disabled. Reports under the pdf format will not be compiled.")
+        self.logger.warning("pdflatex disabled. Reports under the pdf format will not be compiled.")
         
 
     def IsItVetoed(self):
         if self.user_info.pdflatex_veto:
-            logging.debug("user setting: veto on pdflatex")
+            self.logger.debug("user setting: veto on pdflatex")
             return True
         else:
-            logging.debug("no user veto")
+            self.logger.debug("no user veto")
             return False
 
         
@@ -67,7 +68,7 @@ class DetectPdflatex:
         if len(result)==0:
             return DetectStatusType.UNFOUND
         if self.debug:
-            logging.debug("  which:         " + str(result[0]))
+            self.logger.debug("  which:         " + str(result[0]))
 
         # Ok
         return DetectStatusType.FOUND
@@ -79,9 +80,9 @@ class DetectPdflatex:
             result = ShellCommand.Which('pdflatex',all=True,mute=True)
             if len(result)==0:
                 return False
-            logging.debug("  which-all:     ")
+            self.logger.debug("  which-all:     ")
             for file in result:
-                logging.debug("    - "+str(file))
+                self.logger.debug("    - "+str(file))
 
         # Ok
         return True

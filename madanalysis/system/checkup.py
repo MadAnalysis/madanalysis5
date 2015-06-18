@@ -37,7 +37,7 @@ class CheckUp():
         self.session_info = session_info
         self.debug        = debug
         self.script       = script
-
+        self.logger       = logging.getLogger('madanalysis')
 
     def CheckArchitecture(self):
 
@@ -71,40 +71,40 @@ class CheckUp():
 
             # Machine general
             import platform
-            logging.debug("")
-            logging.debug("Machine - Cross platform information")
-            logging.debug(StringTools.Left("  Machine type:     ",28) + str(platform.machine()))
-            logging.debug(StringTools.Left("  Processor name:   ",28) + str(platform.processor()))
-            logging.debug(StringTools.Left("  Platform:         ",28) + str(platform.platform()))
-            logging.debug(StringTools.Left("  Platform release: ",28) + str(platform.release()))
-            logging.debug(StringTools.Left("  System:           ",28) + str(platform.system()))
-            logging.debug(StringTools.Left("  Node:             ",28) + str(platform.node()))
-            logging.debug(StringTools.Left("  Number of cores:  ",28) + str(self.archi_info.ncores))
-            logging.debug("")
+            self.logger.debug("")
+            self.logger.debug("Machine - Cross platform information")
+            self.logger.debug(StringTools.Left("  Machine type:     ",28) + str(platform.machine()))
+            self.logger.debug(StringTools.Left("  Processor name:   ",28) + str(platform.processor()))
+            self.logger.debug(StringTools.Left("  Platform:         ",28) + str(platform.platform()))
+            self.logger.debug(StringTools.Left("  Platform release: ",28) + str(platform.release()))
+            self.logger.debug(StringTools.Left("  System:           ",28) + str(platform.system()))
+            self.logger.debug(StringTools.Left("  Node:             ",28) + str(platform.node()))
+            self.logger.debug(StringTools.Left("  Number of cores:  ",28) + str(self.archi_info.ncores))
+            self.logger.debug("")
 
             # Machine OS
-            logging.debug("Machine - OS-specific information")
+            self.logger.debug("Machine - OS-specific information")
             try:
                 tmp=platform.java_ver()
             except:
                 tmp=''
-            logging.debug(StringTools.Left("  Java version:     ",28) + str(tmp))
+            self.logger.debug(StringTools.Left("  Java version:     ",28) + str(tmp))
             try:
                 tmp=platform.win32_ver()
             except:
                 tmp=''
-            logging.debug(StringTools.Left("  Windows version:  ",28) + str(tmp))
+            self.logger.debug(StringTools.Left("  Windows version:  ",28) + str(tmp))
             try:
                 tmp=platform.mac_ver()
             except:
                 tmp=''
-            logging.debug(StringTools.Left("  Mac Os version:   ",28) + str(tmp))
+            self.logger.debug(StringTools.Left("  Mac Os version:   ",28) + str(tmp))
             try:
                 tmp=platform.dist()
             except:
                 tmp=''
-            logging.debug(StringTools.Left("  Unix distribution:",28) + str(platform.platform()))
-            logging.debug("")
+            self.logger.debug(StringTools.Left("  Unix distribution:",28) + str(platform.platform()))
+            self.logger.debug("")
 
         return True
 
@@ -120,48 +120,48 @@ class CheckUp():
 
         # Display user info
         if self.debug:
-            logging.debug('')
-            logging.debug("User")
-            logging.debug(StringTools.Left("  User name:",28)+str(self.session_info.username))
+            self.logger.debug('')
+            self.logger.debug("User")
+            self.logger.debug(StringTools.Left("  User name:",28)+str(self.session_info.username))
             import os
-            logging.debug(StringTools.Left("  User ID:",28)+str(os.getuid()))
-            logging.debug(StringTools.Left("  Expanding folder ~/:",28)+str(os.path.expanduser("~/")))
+            self.logger.debug(StringTools.Left("  User ID:",28)+str(os.getuid()))
+            self.logger.debug(StringTools.Left("  Expanding folder ~/:",28)+str(os.path.expanduser("~/")))
             for name in ["USER","USERNAME","LNAME","LOGNAME","HOME","HOMEDRIVE","posix","HOMEPATH"]:
                 if name in os.environ:
                     tmp=os.environ[name]
                 else:
                     tmp=''
-                logging.debug(StringTools.Left("  Variable $"+name+":",28)+ str(tmp))
-            logging.debug('')
+                self.logger.debug(StringTools.Left("  Variable $"+name+":",28)+ str(tmp))
+            self.logger.debug('')
 
         # Web access
-        logging.debug("Web access")
+        self.logger.debug("Web access")
         if self.user_info.webaccess_veto:
             self.session_info.has_web=False
-            logging.debug('  disable')
+            self.logger.debug('  disable')
         else:
             self.session_info.has_web=True
-            logging.debug('  enable')
-        logging.debug('')
+            self.logger.debug('  enable')
+        self.logger.debug('')
  
         # Fill with tmp folder
         import os
-        logging.debug("Temporary folder")
+        self.logger.debug("Temporary folder")
         tmpdir=''
 
         # force by the user?
         if self.user_info.tmp_dir!=None:
-            logging.debug('  Folder forced by the user: '+str(self.user_info.tmp_dir))
+            self.logger.debug('  Folder forced by the user: '+str(self.user_info.tmp_dir))
             tmpdir=os.path.normpath(self.user_info.tmp_dir)
             if os.path.isdir(tmpdir):
-                logging.debug('-> found')
+                self.logger.debug('-> found')
             else:
-                logging.debug('-> not found')
-                logging.debug('Try to create the folder '+tmpdir+' ...')
+                self.logger.debug('-> not found')
+                self.logger.debug('Try to create the folder '+tmpdir+' ...')
                 try:
                     os.mkdir(tmpdir)
                 except:
-                    logging.debug('-> impossible to create it')
+                    self.logger.debug('-> impossible to create it')
                     tmpdir=''
 
         # environment variable
@@ -171,113 +171,113 @@ class CheckUp():
                     tmp=os.environ[name]
                 else:
                     tmp=''
-                logging.debug(StringTools.Left("  Variable $"+name+":",28)+ str(tmp))
+                self.logger.debug(StringTools.Left("  Variable $"+name+":",28)+ str(tmp))
                 if tmp!='' and tmpdir=='':
                     tmp=os.path.normpath(tmp)
-                    logging.debug('Check if the folder '+tmp+' exists ...')
+                    self.logger.debug('Check if the folder '+tmp+' exists ...')
                     if os.path.isdir(tmp):
-                        logging.debug('-> found')
+                        self.logger.debug('-> found')
                         tmpdir=tmp
                     else:
-                        logging.debug('-> not found')
-                        logging.debug('Try to create this folder ...')
+                        self.logger.debug('-> not found')
+                        self.logger.debug('Try to create this folder ...')
                         try:
                             os.mkdir(tmp)
-                            logging.debug('-> ok')
+                            self.logger.debug('-> ok')
                             tmpdir=tmp
                         except:
-                            logging.debug('-> impossible to create it')
+                            self.logger.debug('-> impossible to create it')
         
         # /tmp/ + username
         if tmpdir=='':
             pathname = os.path.normpath('/tmp/'+self.session_info.username)
-            logging.debug('Check if the folder '+pathname+' exists ...')
+            self.logger.debug('Check if the folder '+pathname+' exists ...')
             if os.path.isdir(pathname):
-                logging.debug('-> found')
+                self.logger.debug('-> found')
                 tmpdir=pathname
             else:
-                logging.debug('-> not found')
-                logging.debug('Try to create the folder '+pathname+' ...')
+                self.logger.debug('-> not found')
+                self.logger.debug('Try to create the folder '+pathname+' ...')
                 try:
                     os.mkdir(pathname)
                     tmpdir=pathname
                 except:
-                    logging.debug('-> impossible to create it')
+                    self.logger.debug('-> impossible to create it')
 
         if tmpdir!='':
             self.session_info.tmpdir = tmpdir
-            logging.debug('temporary folder will be used for MA5: '+tmpdir)
+            self.logger.debug('temporary folder will be used for MA5: '+tmpdir)
         else:
-            logging.error('Impossible to create a tmp folder')
+            self.logger.error('Impossible to create a tmp folder')
             return False
-        logging.debug('')
+        self.logger.debug('')
 
         # Download dir
-        logging.debug("Download dir")
+        self.logger.debug("Download dir")
         tmpdir=''
 
         # -> forced by the user?
         if self.user_info.download_dir!=None:
-            logging.debug('  Folder forced by the user: '+str(self.user_info.download_dir))
+            self.logger.debug('  Folder forced by the user: '+str(self.user_info.download_dir))
             tmpdir=os.path.normpath(self.user_info.download_dir)
             if os.path.isdir(tmpdir):
-                logging.debug('-> found')
+                self.logger.debug('-> found')
             else:
-                logging.debug('-> not found')
-                logging.debug('Try to create the folder '+tmpdir+' ...')
+                self.logger.debug('-> not found')
+                self.logger.debug('Try to create the folder '+tmpdir+' ...')
                 try:
                     os.mkdir(tmpdir)
                 except:
-                    logging.debug('-> impossible to create it')
+                    self.logger.debug('-> impossible to create it')
                     tmpdir=''
         
         # -> temporary folder + 'MA5_download'
         if tmpdir=='':
             pathname = os.path.normpath(self.session_info.tmpdir+'/MA5_downloads/')
-            logging.debug('Check if the folder '+pathname+' exists ...')
+            self.logger.debug('Check if the folder '+pathname+' exists ...')
             if os.path.isdir(pathname):
-                logging.debug('-> found')
+                self.logger.debug('-> found')
                 tmpdir=pathname
             else:
-                logging.debug('-> not found')
-                logging.debug('Try to create the folder '+pathname+' ...')
+                self.logger.debug('-> not found')
+                self.logger.debug('Try to create the folder '+pathname+' ...')
                 try:
                     os.mkdir(pathname)
                     tmpdir=pathname
                 except:
-                    logging.debug('-> impossible to create it')
+                    self.logger.debug('-> impossible to create it')
 
         if tmpdir!='':
             self.session_info.downloaddir = tmpdir
-            logging.debug('download folder will be used for MA5: '+tmpdir)
+            self.logger.debug('download folder will be used for MA5: '+tmpdir)
         else:
-            logging.error('Impossible to create a download folder')
+            self.logger.error('Impossible to create a download folder')
             return False
-        logging.debug('')
+        self.logger.debug('')
 
 
         # Fill with editor program
-        logging.debug("Text editor")
-        logging.debug("Look for the global variable $EDITOR ...")
+        self.logger.debug("Text editor")
+        self.logger.debug("Look for the global variable $EDITOR ...")
         if 'EDITOR' in os.environ:
             self.session_info.editor = os.environ['EDITOR']
             self.session_info.editor = self.session_info.editor.lstrip()
             self.session_info.editor = self.session_info.editor.rstrip()
-            logging.debug("-> variable $EDITOR found : "+self.session_info.editor)
+            self.logger.debug("-> variable $EDITOR found : "+self.session_info.editor)
         else:
             self.session_info.editor = 'vi'
-            logging.debug('-> variable not found. VI editor is set by default.')
+            self.logger.debug('-> variable not found. VI editor is set by default.')
         if self.session_info.editor=='':
             self.session_info.editor = 'vi'
-            logging.debug('-> variable empty. VI editor is set by default.')
-        logging.debug('')
+            self.logger.debug('-> variable empty. VI editor is set by default.')
+        self.logger.debug('')
 
         # Ok
         return True
 
     def ReadUserOptions(self):
         # Reading user options
-        logging.info("Reading user settings ...")
+        self.logger.info("Reading user settings ...")
         filename = self.archi_info.ma5dir+'/madanalysis/input/installation_options.dat'
         if not self.user_info.ReadUserOptions(filename):
             return False
@@ -285,7 +285,7 @@ class CheckUp():
 
     def CheckMandatoryPackages(self):
         # Mandatory packages
-        logging.info("Checking mandatory packages:")
+        self.logger.info("Checking mandatory packages:")
         checker = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
         if not checker.checkPython():
             return False
@@ -303,7 +303,7 @@ class CheckUp():
 
     def CheckOptionalPackages(self):
         # Optional packages
-        logging.info("Checking optional packages:")
+        self.logger.info("Checking optional packages:")
         checker = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
         checker2 = DetectManager(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
 
@@ -327,7 +327,7 @@ class CheckUp():
 
     def CheckGraphicalPackages(self):
         # Optional packages
-        logging.info("Checking graphical packages:")
+        self.logger.info("Checking graphical packages:")
         checker = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
         self.session_info.has_gnuplot       = checker.checkGnuplot()
         self.session_info.has_matplotlib    = checker.checkMatplotlib()

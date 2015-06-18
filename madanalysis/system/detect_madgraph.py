@@ -44,6 +44,7 @@ class DetectMadgraph:
         self.name         = 'MadGraph'
         self.mandatory    = False
         self.log          = []
+        self.logger       = logging.getLogger('madanalysis')
 
         # adding what you want here
         inputname = "/input/particles_name_default.txt"
@@ -53,27 +54,27 @@ class DetectMadgraph:
 
 
     def PrintDisableMessage(self):
-#        logging.info("Particle labels will be exported from MadAnalysis files.")
+#        self.logger.info("Particle labels will be exported from MadAnalysis files.")
         pass
         
 
     def IsItVetoed(self):
         if self.user_info.madgraph_veto:
-            logging.debug("user setting: veto on MadGraph")
+            self.logger.debug("user setting: veto on MadGraph")
             return True
         else:
-            logging.debug("no user veto")
+            self.logger.debug("no user veto")
             return False
 
         
     def AutoDetection(self):
         for filename in self.filenames:
             if os.path.isfile(filename):
-                logging.debug('file "'+filename+'" is found.')
+                self.logger.debug('file "'+filename+'" is found.')
                 self.goodfilename=filename
                 return DetectStatusType.FOUND
             else:
-                logging.debug('file "'+filename+'" is NOT found.')
+                self.logger.debug('file "'+filename+'" is NOT found.')
         return DetectStatusType.UNFOUND
 
 

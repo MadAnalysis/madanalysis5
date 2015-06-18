@@ -70,10 +70,12 @@ class UserInfo:
         # dvipdf
         self.dvipdf_veto = None
 
+        # logger
+        self.logger = logging.getLogger('madanalysis')
 
     def dump(self):
         for item in self.__dict__:
-            logging.debug(item+'\t'+str(self.__dict__[item]))
+            self.logger.debug(item+'\t'+str(self.__dict__[item]))
 
     def __eq__(self,other):
         return self.__dict__==other.__dict__
@@ -87,7 +89,7 @@ class UserInfo:
         try:
             file = open(filename,"w")
         except:
-            logging.error("impossible to write the configuration file '" + \
+            self.logger.error("impossible to write the configuration file '" + \
                           filename + "'")
             return False
 
@@ -97,7 +99,7 @@ class UserInfo:
             pickle.dump(self,file)
             test=True
         except:
-            logging.error("error occured during saving data to "+filename)
+            self.logger.error("error occured during saving data to "+filename)
             test=False
 
         # Close the file
@@ -112,7 +114,7 @@ class UserInfo:
         try:
             file = open(filename,"r")
         except:
-            logging.error("impossible to read the configuration file '" + \
+            self.logger.error("impossible to read the configuration file '" + \
                           filename + "'")
             return False
 
@@ -122,7 +124,7 @@ class UserInfo:
             newone = pickle.load(file)
             test=True
         except:
-            logging.error("error occured during reading data from "+filename)
+            self.logger.error("error occured during reading data from "+filename)
             test=False
 
         # Close the file
@@ -137,7 +139,7 @@ class UserInfo:
             for item in self.__dict__:
                 self.__dict__[item]=copy.copy(newone.__dict__[item])
         except:
-            logging.error("error occured during copying data from "+filename)
+            self.logger.error("error occured during copying data from "+filename)
             test=False
 
         # Return the operation status
@@ -150,7 +152,7 @@ class UserInfo:
         elif value=='1':
             return True
         else:
-            logging.warning(filename+': the option called "'+option+'" allows only the values "1" or "0"')
+            self.logger.warning(filename+': the option called "'+option+'" allows only the values "1" or "0"')
             return None
         
 
@@ -222,21 +224,21 @@ class UserInfo:
 
         # other
         else:
-            logging.warning(filename+': the option called "'+option+'" is not found')
+            self.logger.warning(filename+': the option called "'+option+'" is not found')
         
 
     def ReadUserOptions(self,filename):
 
         # Open the user options
-        logging.debug("Opening the file: "+filename)
+        self.logger.debug("Opening the file: "+filename)
         try:
             input = open(filename)
         except:
-            logging.error('impossible to open the file: '+filename)
+            self.logger.error('impossible to open the file: '+filename)
             return False
 
         # Loop over the file
-        logging.debug("Lines to interpret: ")
+        self.logger.debug("Lines to interpret: ")
 
         for line in input:
 
@@ -246,11 +248,11 @@ class UserInfo:
             line=line.rstrip()
             if line=='':
                 continue
-            logging.debug("  - "+line)
+            self.logger.debug("  - "+line)
             words=line.split('=')
             if len(words)!=2:
-                logging.warning(filename+': the following line is incorrect and is skipped:')
-                logging.warning(line)
+                self.logger.warning(filename+': the following line is incorrect and is skipped:')
+                self.logger.warning(line)
             words[0]=words[0].lstrip()
             words[0]=words[0].rstrip()
             words[1]=words[1].lstrip()
@@ -259,7 +261,7 @@ class UserInfo:
             self.SetValue(words[0], words[1], filename)
     
         # Close the file
-        logging.debug("Closing the file: "+filename)
+        self.logger.debug("Closing the file: "+filename)
         input.close()
         
         # Ok

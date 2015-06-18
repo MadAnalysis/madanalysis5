@@ -44,20 +44,20 @@ class DetectDvipdf:
         self.name      = 'dvipdf'
         self.mandatory = False
         self.log       = []
-
+        self.logger    = logging.getLogger('madanalysis')
         # adding what you want here
 
 
     def PrintDisableMessage(self):
-        logging.warning("dvipdf disabled. DVI reports will not be converted to pdf files.")
+        self.logger.warning("dvipdf disabled. DVI reports will not be converted to pdf files.")
         
 
     def IsItVetoed(self):
         if self.user_info.dvipdf_veto:
-            logging.debug("user setting: veto on dvipdf")
+            self.logger.debug("user setting: veto on dvipdf")
             return True
         else:
-            logging.debug("no user veto")
+            self.logger.debug("no user veto")
             return False
 
         
@@ -67,7 +67,7 @@ class DetectDvipdf:
         if len(result)==0:
             return DetectStatusType.UNFOUND
         if self.debug:
-            logging.debug("  which:         " + str(result[0]))
+            self.logger.debug("  which:         " + str(result[0]))
 
         # Ok
         return DetectStatusType.FOUND
@@ -79,9 +79,9 @@ class DetectDvipdf:
             result = ShellCommand.Which('dvipdf',all=True,mute=True)
             if len(result)==0:
                 return False
-            logging.debug("  which-all:     ")
+            self.logger.debug("  which-all:     ")
             for file in result:
-                logging.debug("    - "+str(file))
+                self.logger.debug("    - "+str(file))
 
         # Ok
         return True
