@@ -38,8 +38,8 @@ class InstallRecastingTools:
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir    = os.path.normpath(self.tmpdir + '/MA5_RecastingTools/')
         self.ncores      = 1
-        self.files = {"exclusion_CLs.py" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PhysicsAnalysisDatabase/exclusion_CLs.py",
-                      "getmaps.py" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PhysicsAnalysisDatabase/getmaps.py"}
+        self.files = {"exclusion_CLs.py" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/exclusion_CLs.py",
+                      "getmaps.py" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/getmaps.py"}
 
 
     def Detect(self):
