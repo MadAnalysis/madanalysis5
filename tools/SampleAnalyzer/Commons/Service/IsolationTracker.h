@@ -50,6 +50,10 @@ class IsolationTracker : public IsolationBase
     virtual ~IsolationTracker() {}
 
 
+    // -------------------------------------------------------------
+    //                Isolation of one particle
+    // -------------------------------------------------------------
+
     virtual Double_t relIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
     { return relIsolation(&part, event, DR, PTmin); }
 
@@ -96,44 +100,58 @@ class IsolationTracker : public IsolationBase
       return sum;
     }
 
-    /// 
-    virtual std::vector<const RecLeptonFormat*> getRelIsolatedMuons(const RecEventFormat* event, 
-                                                                    const double& threshold, const double& DR, double PTmin=0.5) const
-    { 
+
+    // -------------------------------------------------------------
+    //                Isolation of one collection
+    // -------------------------------------------------------------
+
+    virtual std::vector<const RecLeptonFormat*> getRelIsolated(const std::vector<RecLeptonFormat>& leptons, 
+                                                               const RecEventFormat* event, 
+                                                               const double& threshold, const double& DR, double PTmin=0.5) const
+    {
+      std::vector<const RecLeptonFormat*> isolated(leptons.size());
+      for (unsigned int i=0;i<leptons.size();i++) isolated[i]=&(leptons[i]);
+      return getRelIsolated(isolated, event, threshold, DR, PTmin);
+    }
+
+    virtual std::vector<const RecLeptonFormat*> getRelIsolated(const std::vector<const RecLeptonFormat*>& leptons, 
+                                                               const RecEventFormat* event, 
+                                                               const double& threshold, const double& DR, double PTmin=0.5) const
+    {
       std::vector<const RecLeptonFormat*> isolated;
-      for (unsigned int i=0;i<event->muons().size();i++)
+      for (unsigned int i=0;i<leptons.size();i++)
       {
-        if (relIsolation(event->muons()[i],event,DR,PTmin)>threshold) continue;
-        isolated.push_back(&(event->muons()[i]));
+        if (relIsolation(leptons[i],event,DR,PTmin)>threshold) continue;
+        isolated.push_back(leptons[i]);
       }
       return isolated;
     }
 
-    /// 
-    virtual std::vector<const RecLeptonFormat*> getRelIsolatedElectrons(const RecEventFormat* event, 
-                                                                        const double& threshold, const double& DR, double PTmin=0.5) const
-    { 
-      std::vector<const RecLeptonFormat*> isolated;
-      for (unsigned int i=0;i<event->electrons().size();i++)
-      {
-        if (relIsolation(event->electrons()[i],event,DR,PTmin)>threshold) continue;
-        isolated.push_back(&(event->electrons()[i]));
-      }
-      return isolated;
+
+    virtual std::vector<const RecPhotonFormat*> getRelIsolated(const std::vector<RecPhotonFormat>& photons, 
+                                                               const RecEventFormat* event, 
+                                                               const double& threshold, const double& DR, double PTmin=0.5) const
+    {
+      std::vector<const RecPhotonFormat*> isolated(photons.size());
+      for (unsigned int i=0;i<photons.size();i++) isolated[i]=&(photons[i]);
+      return getRelIsolated(isolated, event, threshold, DR, PTmin);
     }
 
-    /// 
-    virtual std::vector<const RecPhotonFormat*> getRelIsolatedPhotons(const RecEventFormat* event, 
-                                                                      const double& threshold, const double& DR, double PTmin=0.5) const
-    { 
+    virtual std::vector<const RecPhotonFormat*> getRelIsolated(const std::vector<const RecPhotonFormat*>& photons, 
+                                                               const RecEventFormat* event, 
+                                                               const double& threshold, const double& DR, double PTmin=0.5) const
+    {
       std::vector<const RecPhotonFormat*> isolated;
-      for (unsigned int i=0;i<event->photons().size();i++)
+      for (unsigned int i=0;i<photons.size();i++)
       {
-        if (relIsolation(event->photons()[i],event,DR,PTmin)>threshold) continue;
-        isolated.push_back(&(event->photons()[i]));
+        if (relIsolation(photons[i],event,DR,PTmin)>threshold) continue;
+        isolated.push_back(photons[i]);
       }
       return isolated;
     }
+
+
+
 
 };
 

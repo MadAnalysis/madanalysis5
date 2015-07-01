@@ -73,6 +73,10 @@ class IsolationBase
     virtual ~IsolationBase() {}
 
 
+    // -------------------------------------------------------------
+    //                Isolation of one particle
+    // -------------------------------------------------------------
+
     /// Methods for leptons
     virtual Double_t relIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin) const = 0;
 
@@ -92,49 +96,25 @@ class IsolationBase
     virtual Double_t sumIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin) const = 0;
 
 
-    virtual std::vector<const RecLeptonFormat*> getRelIsolatedMuons(const RecEventFormat* event, 
-                                                            const double& threshold, 
-                                                            const double& DR, double PTmin) const = 0;
+    // -------------------------------------------------------------
+    //                Isolation of one collection
+    // -------------------------------------------------------------
 
-    virtual std::vector<const RecLeptonFormat*> getRelIsolatedElectrons(const RecEventFormat* event, 
-                                                                        const double& threshold,
-                                                                        const double& DR, double PTmin) const = 0;
+    virtual std::vector<const RecLeptonFormat*> getRelIsolated(const std::vector<RecLeptonFormat>& leptons, 
+                                                               const RecEventFormat* event, 
+                                                               const double& threshold, const double& DR, double PTmin=0.5) const = 0;
 
-    virtual std::vector<const RecPhotonFormat*> getRelIsolatedPhotons(const RecEventFormat* event, 
-                                                                      const double& threshold, 
-                                                                      const double& DR, double PTmin) const = 0;
+    virtual std::vector<const RecLeptonFormat*> getRelIsolated(const std::vector<const RecLeptonFormat*>& leptons, 
+                                                               const RecEventFormat* event, 
+                                                               const double& threshold, const double& DR, double PTmin=0.5) const = 0;
 
-    /*
-    std::vector<const RecJetFormat*> cleanJets(const RecEventFormat* event,
-                                               const std::vector<const RecLeptonFormat*>& muons, 
-                                               const std::vector<const RecLeptonFormat*>& electrons,
-                                               const double& threshold) const
-    {
-      std::vector<const RecJetFormat*> cleaned;
-      for (unsigned int i=0;i<event->jets().size();i++)
-      {
-        const RecJetFormat& jet = event->jets()[i];
-        bool isolated = true;
-  
-        for (unsigned int j=0;j<muons.size();j++)
-        {
-          const RecLeptonFormat* muon = muons[j];
-          if (muon->momentum().DeltaR(jet.momentum())<threshold) isolated=false;
-        }
-        if (!isolated) continue;
+    virtual std::vector<const RecPhotonFormat*> getRelIsolated(const std::vector<RecPhotonFormat>& photons, 
+                                                               const RecEventFormat* event, 
+                                                               const double& threshold, const double& DR, double PTmin=0.5) const = 0;
 
-        for (unsigned int j=0;j<electrons.size();j++)
-        {
-          const RecLeptonFormat* elec = electrons[j];
-          if (elec->momentum().DeltaR(jet.momentum())<threshold) isolated=false;
-        }
-        if (!isolated) continue;
-        
-        cleaned.push_back(&jet);
-      }
-      return cleaned;
-    }
-    */
+    virtual std::vector<const RecPhotonFormat*> getRelIsolated(const std::vector<const RecPhotonFormat*>& photons, 
+                                                               const RecEventFormat* event, 
+                                                               const double& threshold, const double& DR, double PTmin=0.5) const = 0;
 
 };
 
