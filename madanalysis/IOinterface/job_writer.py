@@ -177,7 +177,7 @@ class JobWriter():
             cfg=self.main.fastsim.delphes
 
         try:
-            input = open(self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Process/Detector/"+cardname,'r')
+            input = open(self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Interfaces/delphes/"+cardname,'r')
         except:
             pass
 

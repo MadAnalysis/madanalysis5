@@ -28,7 +28,7 @@ import logging
 
 class DelphesConfiguration:
 
-    userVariables = { "detector" : ["cms","atlas"],\
+    userVariables = { "detector" : ["cms","atlas","cms-ma5tune","atlas-ma5tune"],\
                       "output": ["true","false"],\
                       "pileup": ["none"] }
 
@@ -41,13 +41,21 @@ class DelphesConfiguration:
 
     def SetCard(self):
         if self.detector=='cms' and self.pileup=="":
-            self.card = "delphes_card_CMS.tcl"
+            self.card = "delphes_cms.tcl"
         elif self.detector=='cms' and self.pileup!="":
-            self.card = "delphes_card_CMS_PileUp.tcl"
+            self.card = "delphes_cms_pileup.tcl"
         elif self.detector=='atlas' and self.pileup=="":
-            self.card = "delphes_card_ATLAS.tcl"
+            self.card = "delphes_atlas.tcl"
         elif self.detector=='atlas' and self.pileup!="":
-            self.card = "delphes_card_ATLAS_PileUp.tcl"
+            self.card = "delphes_atlas_pileup.tcl"
+        elif self.detector=='cms-ma5tune' and self.pileup=="":
+            self.card = "ma5_cms.tcl"
+        elif self.detector=='cms-ma5tune' and self.pileup!="":
+            self.card = "ma5_cms_pileup.tcl"
+        elif self.detector=='atlas-ma5tune' and self.pileup=="":
+            self.card = "ma5_atlas.tcl"
+        elif self.detector=='atlas-ma5tune' and self.pileup!="":
+            self.card = "ma5_atlas_pileup.tcl"
         
     def Display(self):
         self.user_DisplayParameter("detector")
@@ -90,6 +98,12 @@ class DelphesConfiguration:
                 self.detector=value
                 self.SetCard()
             elif value.lower()=="atlas":
+                self.detector=value
+                self.SetCard()
+            elif value.lower()=="cms-ma5tune":
+                self.detector=value
+                self.SetCard()
+            elif value.lower()=="atlas-ma5tune":
                 self.detector=value
                 self.SetCard()
             else:
