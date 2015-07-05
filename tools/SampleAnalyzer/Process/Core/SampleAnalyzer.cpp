@@ -429,7 +429,7 @@ DetectorBase* SampleAnalyzer::InitializeDetector(
   }
 
   // Display
-  INFO << "        with config file: " << myDetector->GetConfigFile() << endmsg;
+  INFO << myDetector->PrintConfigFile() << endmsg;
 
   // Returning the clusterer
   return myDetector;

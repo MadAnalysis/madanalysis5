@@ -53,6 +53,7 @@ class bTagger;
 class JetClusterer;
 class DelphesTreeReader;
 class DelphesMA5tuneTreeReader;
+class DelphesMemoryInterface;
 
 class RecEventFormat
 {
@@ -64,6 +65,7 @@ class RecEventFormat
   friend class JetClusterer;
   friend class DelphesTreeReader;
   friend class DelphesMA5tuneTreeReader;
+  friend class DelphesMemoryInterface;
 
   // -------------------------------------------------------------
   //                        data members

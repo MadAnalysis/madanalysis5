@@ -41,6 +41,7 @@ namespace MA5
 
 class LHCOReader;
 class ROOTReader;
+class DelphesMemoryInterface;
 
 class RecPhotonFormat : public RecParticleFormat
 {
@@ -52,6 +53,7 @@ class RecPhotonFormat : public RecParticleFormat
   friend class DetectorDelphes;
   friend class DetectorDelphesMA5tune;
   friend class RecLeptonFormat;
+  friend class DelphesMemoryInterface;
 
   // -------------------------------------------------------------
   //                        data members

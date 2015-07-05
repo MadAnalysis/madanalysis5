@@ -83,6 +83,10 @@ namespace MA5
     const std::string& GetConfigFile() const
     { return configFile_; }
 
+    /// Config File
+    virtual const std::string PrintConfigFile() const
+    { return "        with config card: "+GetConfigFile(); }
+
     /// Putting the string in lower case
     static std::string Lower(const std::string& word)
     {

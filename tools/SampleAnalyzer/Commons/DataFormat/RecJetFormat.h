@@ -45,6 +45,7 @@ class DelphesTreeReader;
 class DelphesMA5tuneTreeReader;
 class DetectorDelphes;
 class DetectorDelphesMA5tune;
+class DelphesMemoryInterface;
 
 class RecJetFormat : public RecParticleFormat
 {
@@ -59,6 +60,7 @@ class RecJetFormat : public RecParticleFormat
   friend class DetectorDelphesMA5tune;
   friend class DelphesTreeReader;
   friend class DelphesMA5tuneTreeReader;
+  friend class DelphesMemoryInterface;
 
   // -------------------------------------------------------------
   //                        data members

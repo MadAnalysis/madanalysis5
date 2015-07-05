@@ -43,6 +43,7 @@ class LHCOReader;
 class ROOTReader;
 class DelphesTreeReader;
 class DelphesMA5tuneTreeReader;
+class DelphesMemoryInterface;
 
 class RecLeptonFormat : public RecParticleFormat
 {
@@ -51,6 +52,7 @@ class RecLeptonFormat : public RecParticleFormat
   friend class ROOTReader;
   friend class DelphesTreeReader;
   friend class DelphesMA5tuneTreeReader;
+  friend class DelphesMemoryInterface;
 
   // -------------------------------------------------------------
   //                        data members

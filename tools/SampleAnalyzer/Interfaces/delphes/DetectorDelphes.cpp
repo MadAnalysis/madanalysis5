@@ -23,6 +23,7 @@
 
 
 #include "SampleAnalyzer/Interfaces/delphes/DetectorDelphes.h"
+#include "SampleAnalyzer/Interfaces/delphes/DelphesMemoryInterface.h"
 
 #include <fstream>
 #include <TROOT.h>
@@ -41,6 +42,7 @@
 
 
 using namespace MA5;
+
 
 bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<std::string,std::string>& options)
 { 
@@ -79,18 +81,49 @@ bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<s
       }
   }
 
-  // Configure inputs
+  // Decode configuration file with Delphes class 'ExRootConfReader'
   confReader_ = new ExRootConfReader;
   confReader_->ReadFile(configFile_.c_str());
 
-  // Configure outputs
+  // Studying configuration part for TreeWriter module
+  ExRootConfParam param = confReader_->GetParam("TreeWriter::Branch");
+  if (param.GetSize()==0) 
+  {
+    ERROR << "Problem with Delphes card: no 'add Branch' line in TreeWriter module" << endmsg;
+    return false;
+  }
+  if (param.GetSize()%3!=0) 
+  {
+    ERROR << "Problem with Delphes card: problem with one or several 'add Branch' lines" << endmsg;
+    return false;
+  }
+
+  bool isElectronMA5 = false;
+  bool isMuonMA5     = false;
+  bool isPhotonMA5   = false;
+  bool isJetMA5      = false;
+  for(unsigned int i=0; i<static_cast<unsigned int>(param.GetSize())/3; i++)
+  {
+    std::string branchInputArray = param[i*3+0].GetString();
+    std::string branchName       = param[i*3+1].GetString();
+    if      (branchName=="ElectronMA5") isElectronMA5 = true;
+    else if (branchName=="MuonMA5")     isMuonMA5     = true;
+    else if (branchName=="PhotonMA5")   isPhotonMA5   = true;
+    else if (branchName=="JetMA5")      isJetMA5      = true;
+    table_[branchName]=branchInputArray;
+  }
+  if (isElectronMA5 && isMuonMA5 && 
+      isPhotonMA5   && isJetMA5      ) MA5card_=true; else MA5card_=false;
+
+  // Creating output file
   if (output_) outputFile_ = TFile::Open("TheMouth.root", "RECREATE");
   else outputFile_ = TFile::Open("tmp.root", "RECREATE");
 
+  // Creating output tree
   treeWriter_ = new ExRootTreeWriter(outputFile_, "Delphes");
   //  branchEvent_ = treeWriter_->NewBranch("Event", LHEFEvent::Class());
 
-  // Initializing delphes
+  // Creating all Delphes modules
   modularDelphes_ = new Delphes("Delphes");
   delphesFolder_ = dynamic_cast<TFolder*>(
        gROOT->GetListOfBrowsables()->FindObject("Delphes"));
@@ -99,6 +132,8 @@ bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<s
     ERROR << "Problem during initialization of Delphes" << endmsg;
     return false;
   }
+
+  // Initializing Delphes modules
   modularDelphes_->SetConfReader(confReader_);
   modularDelphes_->SetTreeWriter(treeWriter_);
 
@@ -114,6 +149,9 @@ bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<s
   // Reset
   treeWriter_->Clear();
   modularDelphes_->Clear();
+
+  // Initializing interface
+  interface_.Initialize(delphesFolder_,table_,MA5card_);
 
   return true;
 }
@@ -206,149 +244,14 @@ void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat&
   }
 }
 
+
 void DetectorDelphes::TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat& myEvent)
 {
   if (myEvent.rec()==0)  myEvent.InitializeRec();
   if (mySample.rec()==0) mySample.InitializeRec();
   myEvent.rec()->Reset();
 
-  // https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/Arrays
-
-  // Jet collection
-  TObjArray* jetsArray = dynamic_cast<TObjArray*>(delphesFolder_->FindObject("Export/UniqueObjectFinder/jets"/* FastJetFinder/jets"*/));
-  if (jetsArray==0) WARNING << "no jets collection found" << endmsg;
-  else
-  {
-    for (unsigned int i=0;i<static_cast<UInt_t>(jetsArray->GetEntries());i++)
-    {
-      Candidate* cand = dynamic_cast<Candidate*>(jetsArray->At(i));
-      if (cand==0) 
-      {
-        ERROR << "impossible to access the " << i+1 << "th jet" << endmsg;
-        continue;
-      }
-      if (cand->TauTag==1)
-      {
-        RecTauFormat* tau = myEvent.rec()->GetNewTau();
-        tau->momentum_ = cand->Momentum;
-        if (cand->Charge>0) tau->charge_=true; else tau->charge_=false;
-
-        if (cand->Eem!=0) tau->HEoverEE_ = cand->Ehad/cand->Eem; else tau->HEoverEE_ = 999.;
-        tau->ntracks_ = 0; // To fix later
-      }
-      else
-      {
-        RecJetFormat* jet = myEvent.rec()->GetNewJet();
-        jet->momentum_ = cand->Momentum;
-        jet->btag_ = cand->BTag;
-        if (cand->Eem!=0) jet->HEoverEE_ = cand->Ehad/cand->Eem; else jet->HEoverEE_ = 999.;
-        jet->ntracks_ = 0; // To fix later
-      }
-    }
-  }
-
-  // GenJet collection
-  TObjArray* genjetsArray = dynamic_cast<TObjArray*>(delphesFolder_->FindObject("Export/GenJetFinder/jets"));
-  if (genjetsArray==0) WARNING << "no genjets collection found" << endmsg;
-  else
-  {
-    for (unsigned int i=0;i<static_cast<UInt_t>(genjetsArray->GetEntries());i++)
-    {
-      Candidate* cand = dynamic_cast<Candidate*>(genjetsArray->At(i));
-      if (cand==0) 
-      {
-        ERROR << "impossible to access the " << i+1 << "th genjet" << endmsg;
-        continue;
-      }
-      RecJetFormat* genjet = myEvent.rec()->GetNewGenJet();
-      genjet->momentum_ = cand->Momentum;
-      genjet->btag_ = cand->BTag;
-    }
-  }
-
-  // Muon collection
-  TObjArray* muonArray = dynamic_cast<TObjArray*>(
-         delphesFolder_->FindObject("Export/MuonIsolation/muons"));
-  if (muonArray==0) WARNING << "no muons collection found" << endmsg;
-  else
-  {
-    for (unsigned int i=0;i<static_cast<UInt_t>(muonArray->GetEntries());i++)
-    {
-      Candidate* cand = dynamic_cast<Candidate*>(muonArray->At(i));
-      if (cand==0) 
-      {
-        ERROR << "impossible to access the " << i+1 << "th muon" << endmsg;
-        continue;
-      }
-      RecLeptonFormat* muon = myEvent.rec()->GetNewMuon();
-      muon->momentum_ = cand->Momentum;
-      muon->SetCharge(cand->Charge);
-    }
-  }
-
-  // Electron collection
-  TObjArray* elecArray = dynamic_cast<TObjArray*>(
-     delphesFolder_->FindObject("Export/UniqueObjectFinder/electrons"));
-  if (elecArray==0) WARNING << "no elecs collection found" << endmsg;
-  else
-  {
-    for (unsigned int i=0;i<static_cast<UInt_t>(elecArray->GetEntries());i++)
-    {
-      Candidate* cand = dynamic_cast<Candidate*>(elecArray->At(i));
-      if (cand==0) 
-      {
-        ERROR << "impossible to access the " << i+1 << "th electron" << endmsg;
-        continue;
-      }
-      RecLeptonFormat* elec = myEvent.rec()->GetNewElectron();
-      elec->momentum_ = cand->Momentum;
-      elec->SetCharge(cand->Charge);
-    }
-  }
-
-  // Track collection
-  TObjArray* trackArray = dynamic_cast<TObjArray*>(
-    delphesFolder_->FindObject("Export/TrackMerger/tracks"));
-  if (trackArray==0) WARNING << "no tracks collection found" << endmsg;
-  else
-  {
-    for (unsigned int i=0;i<static_cast<UInt_t>(trackArray->GetEntries());i++)
-    {
-      Candidate* cand = dynamic_cast<Candidate*>(trackArray->At(i));
-      if (cand==0) 
-      {
-        ERROR << "impossible to access the " << i+1 << "th track" << endmsg;
-        continue;
-      }
-      RecTrackFormat* track = myEvent.rec()->GetNewTrack();
-      track->pdgid_ = cand->PID;
-      if (cand->Charge>0) track->charge_=true; else track->charge_=false;
-      track->momentum_=cand->Momentum;
-      track->etaOuter_=cand->Position.Eta();
-      track->phiOuter_=cand->Position.Phi();
-    }
-  }
-
-  // MET
-  TObjArray* metArray  = dynamic_cast<TObjArray*>(
-    delphesFolder_->FindObject("Export/MissingET/momentum"));
-  if (metArray==0) WARNING << "MET collection is not found" << endmsg;
-  else
-  {
-    Candidate* metCand = dynamic_cast<Candidate*>(metArray->At(0));
-    if (metCand==0) 
-    {
-      ERROR << "impossible to access the MET" << endmsg;
-    }
-    else
-    {
-      double pt = metCand->Momentum.Pt();
-      double px = metCand->Momentum.Px();
-      double py = metCand->Momentum.Py();
-      myEvent.rec()->MET().momentum_.SetPxPyPzE(px,py,0,pt);
-    }
-  }
-
+  interface_.TransfertDELPHEStoMA5(mySample,myEvent);
 }
 
 
