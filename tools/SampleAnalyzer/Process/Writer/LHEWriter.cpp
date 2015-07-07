@@ -125,13 +125,13 @@ std::string LHEWriter::FortranFormat_SimplePrecision(Float_t value,UInt_t precis
   std::string word;
 
   Bool_t negative=false;
-  if (value<0) {negative=true; value*=-1;}
+  if (value<0.) {negative=true; value*=-1.;}
 
   Int_t exponent = 0;
-  if (value!=0)
+  if (value!=0.)
   {
-    for (; value > 1.0; exponent++) value/=10.;
-    for (; value < 0.0; exponent--) value*=10.;
+    for (; value >= 10.; exponent++) value/=10.;
+    for (; value <  1. ; exponent--) value*=10.;
   }
 
   str << std::uppercase << std::fixed << value << "E";
@@ -151,13 +151,13 @@ std::string LHEWriter::FortranFormat_DoublePrecision(Double_t value,UInt_t preci
   std::string word;
 
   Bool_t negative=false;
-  if (value<0) {negative=true; value*=-1;}
+  if (value<0.) {negative=true; value*=-1.;}
 
-  Int_t exponent = 0;
-  if (value!=0)
+  Int_t exponent = 0.;
+  if (value!=0.)
   {
-    for (; value > 1.0; exponent++) value/=10.;
-    for (; value < 0.0; exponent--) value*=10.;
+    for (; value >= 10.; exponent++) value/=10.;
+    for (; value < 1.  ; exponent--) value*=10.;
   }
 
   str << std::uppercase << std::fixed << value << "E";
