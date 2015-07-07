@@ -168,8 +168,7 @@ def MainSession(mode,arglist,ma5dir,version,date):
              "%-24s" % main.archi_info.ma5_version + "%+15s" % main.archi_info.ma5_date  + "   *\n" + \
     "*                                                           *\n" + \
     "*         Comput. Phys. Commun. 184 (2013) 222-256          *\n" + \
-    "*           J. Phys. Conf. Ser. 123 (2014) 012032           *\n" + \
-    "*                  arXiv:1405.3982 [hep-ph]                 *\n" + \
+    "*             Eur. Phys. J. C74 (2014) 3103                 *\n" + \
     "*                                                           *\n" + \
     "*   The MadAnalysis Development Team - Please visit us at   *\n" + \
     "*            https://launchpad.net/madanalysis5             *\n" + \
