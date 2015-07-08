@@ -219,8 +219,8 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
   // https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/Arrays
 
   // Jet collection
-  TObjArray* jetsArray = dynamic_cast<TObjArray*>(delphesFolder_->FindObject("Export/UniqueObjectFinder/jets"/* FastJetFinder/jets"*/));
-  if (jetsArray==0) WARNING << "no jets collection found" << endmsg;
+  TObjArray* jetsArray = dynamic_cast<TObjArray*>(delphesFolder_->FindObject("Export/JetEnergyScale/jets"/* FastJetFinder/jets"*/));
+  if (jetsArray==0) {if (!first_) WARNING << "no jets collection found" << endmsg;}
   else
   {
     for (unsigned int i=0;i<static_cast<UInt_t>(jetsArray->GetEntries());i++)
@@ -253,7 +253,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
 
   // GenJet collection
   TObjArray* genjetsArray = dynamic_cast<TObjArray*>(delphesFolder_->FindObject("Export/GenJetFinder/jets"));
-  if (genjetsArray==0) WARNING << "no genjets collection found" << endmsg;
+  if (genjetsArray==0) {if (!first_) WARNING << "no genjets collection found" << endmsg;}
   else
   {
     for (unsigned int i=0;i<static_cast<UInt_t>(genjetsArray->GetEntries());i++)
@@ -273,7 +273,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
   // Muon collection
   TObjArray* muonArray = dynamic_cast<TObjArray*>(
          delphesFolder_->FindObject("Export/MuonIsolationCalculation/DelphesMA5tuneMuons"));
-  if (muonArray==0) WARNING << "no muons collection found" << endmsg;
+  if (muonArray==0) {if (!first_) WARNING << "no muons collection found" << endmsg;}
   else
   {
     for (unsigned int i=0;i<static_cast<UInt_t>(muonArray->GetEntries());i++)
@@ -293,7 +293,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
   // Electron collection
   TObjArray* elecArray = dynamic_cast<TObjArray*>(
      delphesFolder_->FindObject("Export/ElectronIsolationCalculation/DelphesMA5tuneElectrons"));
-  if (elecArray==0) WARNING << "no elecs collection found" << endmsg;
+  if (elecArray==0) {if (!first_) WARNING << "no elecs collection found" << endmsg;}
   else
   {
     for (unsigned int i=0;i<static_cast<UInt_t>(elecArray->GetEntries());i++)
@@ -313,7 +313,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
   // Track collection
   TObjArray* trackArray = dynamic_cast<TObjArray*>(
     delphesFolder_->FindObject("Export/TrackIsolationCalculation/DelphesMA5tuneTracks"));
-  if (trackArray==0) WARNING << "no tracks collection found" << endmsg;
+  if (trackArray==0) {if (!first_) WARNING << "no tracks collection found" << endmsg;}
   else
   {
     for (unsigned int i=0;i<static_cast<UInt_t>(trackArray->GetEntries());i++)
@@ -336,7 +336,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
   // MET
   TObjArray* metArray  = dynamic_cast<TObjArray*>(
     delphesFolder_->FindObject("Export/MissingET/momentum"));
-  if (metArray==0) WARNING << "MET collection is not found" << endmsg;
+  if (metArray==0) {if (!first_) WARNING << "MET collection is not found" << endmsg;}
   else
   {
     Candidate* metCand = dynamic_cast<Candidate*>(metArray->At(0));
@@ -352,6 +352,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
       myEvent.rec()->MET().momentum_.SetPxPyPzE(px,py,0,pt);
     }
   }
+  first_=true;
 
 }
 

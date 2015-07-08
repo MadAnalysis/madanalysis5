@@ -177,9 +177,12 @@ class JobWriter():
             cfg=self.main.fastsim.delphes
 
         try:
-            input = open(self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Interfaces/delphes/"+cardname,'r')
+            if self.main.fastsim.package=="delphes":
+                input = open(self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Interfaces/delphes/"+cardname,'r')
+            elif self.main.fastsim.package=="delphesMA5tune":
+                input = open(self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Interfaces/delphesMA5tune/"+cardname,'r')
         except:
-            pass
+            logging.error("impossible to find "+self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Interfaces/delphes/"+cardname)
 
         try:
             output = open(self.path+"/Input/"+cardname,'w')
