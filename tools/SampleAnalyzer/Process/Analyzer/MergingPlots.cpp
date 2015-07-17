@@ -47,6 +47,8 @@ bool MergingPlots::Initialize(const Configuration& cfg,
   // Reading options
   merging_nqmatch_   = 4;
   merging_nosingrad_ = false;
+  ma5_mode_ = false;
+
   for (std::map<std::string,std::string>::const_iterator 
        it=parameters.begin();it!=parameters.end();it++)
   {
@@ -55,6 +57,11 @@ bool MergingPlots::Initialize(const Configuration& cfg,
       std::stringstream str;
       str << it->second;
       str >> merging_njets_;
+    }
+    else if (it->first=="ma5_mode")
+    {
+      if (it->second=="1") ma5_mode_=true;
+      else if (it->second=="0") ma5_mode_=false;
     }
     else
     {
@@ -89,7 +96,16 @@ bool MergingPlots::Initialize(const Configuration& cfg,
 bool MergingPlots::Execute(SampleFormat& mySample, const EventFormat& myEvent)
 {
   // Getting number of extra jets in the event
-  UInt_t njets = ExtractHardJetNumber(myEvent.mc(),mySample.mc());
+  UInt_t njets = 0;
+
+  if (!ma5_mode_) // normal mode
+  {
+    njets = ExtractHardJetNumber(myEvent.mc(),mySample.mc());
+  }
+  else // ma5 mode
+  {
+    njets = myEvent.mc()->processId() % 10;
+  }
   if (njets>merging_njets_) return false;
 
   // Computing DJRvalues

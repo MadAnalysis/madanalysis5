@@ -35,8 +35,9 @@ import logging
 
 class MergingConfiguration:
 
-    userVariables = { "check" : ["true","false"],\
-                      "njets" : ["4"] }
+    userVariables = { "check"    : ["true","false"],\
+                      "njets"    : ["4"],\
+                      "ma5_mode" : ["true","false"]}
 
     def __init__(self):
         self.enable = False
@@ -47,6 +48,7 @@ class MergingConfiguration:
         self.user_DisplayParameter("check")
         if self.enable:
             self.user_DisplayParameter("njets")
+            self.user_DisplayParameter("ma5_mode")
 
         
     def user_DisplayParameter(self,parameter):
@@ -58,6 +60,12 @@ class MergingConfiguration:
             logging.info(" enabling merging plots : "+value)
         elif parameter=="njets":
             logging.info("  + njets = "+str(self.njets))
+        elif parameter=="ma5mode":
+            if self.ma5_mode:
+                value="true"
+            else:
+                value="false"
+            logging.info(" ma5 mode : "+value)
         else:
             logging.error("'merging' has no parameter called '"+parameter+"'")
             return
@@ -80,6 +88,16 @@ class MergingConfiguration:
                 self.enable=True
             elif value=="false":
                 self.enable=False
+            else:
+                logging.error("only possible values are 'true' and 'false'")
+                return
+
+        # enable
+        elif parameter=="ma5_mode":
+            if value=="true":
+                self.ma5_mode=True
+            elif value=="false":
+                self.ma5_mode=False
             else:
                 logging.error("only possible values are 'true' and 'false'")
                 return
