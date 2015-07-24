@@ -72,6 +72,7 @@ class DelphesMA5tuneTreeReader : public TreeReaderBase
   TClonesArray *branchScalarHT_;
   TClonesArray *branchGenParticle_;
   TClonesArray *branchTrack_;
+  TClonesArray *branchEvent_;
 
   // -------------------------------------------------------------
   //                       method members

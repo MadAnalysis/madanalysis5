@@ -44,36 +44,37 @@ class DetectRecastTools:
         self.name         = 'Recasting tools'
         self.mandatory    = False
         self.log          = []
+        self.logger       = logging.getLogger('madanalysis')
 
         # adding what you want here
         self.recasttools_path = ""
         
 
     def PrintDisableMessage(self):
-        logging.warning("Recasting tools are not found and will be disabled.")
+        self.logger.warning("Recasting tools are not found and will be disabled.")
 
 
     def PrintInstallMessage(self):
-        logging.warning("To enable this functionnality, please type 'install RecastingTools'.")
+        self.logger.warning("To enable this functionnality, please type 'install RecastingTools'.")
 
 
     def IsItVetoed(self):
         if self.user_info.recasttools_veto:
-            logging.debug("user setting: veto on the Recasting Tools package")
+            self.logger.debug("user setting: veto on the Recasting Tools package")
             return True
         else:
-            logging.debug("no user veto")
+            self.logger.debug("no user veto")
             return False
 
 
     def CommonDetection(self,folder):
         filename = os.path.normpath(folder+'/exclusion_CLs.py')
-        logging.debug("Looking for the file "+filename+" ...")
+        self.logger.debug("Looking for the file "+filename+" ...")
         if os.path.isfile(filename):
-            logging.debug("-> found")
+            self.logger.debug("-> found")
             return DetectStatusType.FOUND
         else:
-            logging.debug("-> not found")
+            self.logger.debug("-> not found")
             return DetectStatusType.UNFOUND
 
 
@@ -82,7 +83,7 @@ class DetectRecastTools:
             return DetectStatusType.UNFOUND
 
         # Folder
-        logging.debug("User setting: the path for the recasting tools has been specified")
+        self.logger.debug("User setting: the path for the recasting tools has been specified")
         self.recasttools_path = self.user_info.recasttools_path
 
         # Launch the search

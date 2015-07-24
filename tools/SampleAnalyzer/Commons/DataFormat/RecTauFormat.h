@@ -44,6 +44,7 @@ class DelphesTreeReader;
 class DelphesMA5tuneTreeReader;
 class DetectorDelphes;
 class DetectorDelphesMA5tune;
+class DelphesMemoryInterface;
 
 class RecTauFormat : public RecParticleFormat
 {
@@ -55,6 +56,7 @@ class RecTauFormat : public RecParticleFormat
   friend class DelphesMA5tuneTreeReader;
   friend class DetectorDelphes;
   friend class DetectorDelphesMA5tune;
+  friend class DelphesMemoryInterface;
 
   // -------------------------------------------------------------
   //                        data members

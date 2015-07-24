@@ -57,6 +57,15 @@ class CmdInstall(CmdBase):
             installer=InstallManager(self.main)
             return installer.Execute('delphes')
         elif args[0]=='delphesMA5tune':
+            logging.warning("The package 'delphesMA5tune' is now obsolete. It is replaced by Delphes with special MA5-tuned cards.")
+            logging.warning("Are you sure to install this package? (Y/N)")
+            allowed_answers=['n','no','y','yes']
+            answer=""
+            while answer not in  allowed_answers:
+               answer=raw_input("Answer: ")
+               answer=answer.lower()
+            if answer=="no" or answer=="n":
+                return
             installer=InstallManager(self.main)
             return installer.Execute('delphesMA5tune')
         elif args[0]=='fastjet':
@@ -79,6 +88,9 @@ class CmdInstall(CmdBase):
         elif args[0]=='RecastingTools':
             installer=InstallManager(self.main)
             return installer.Execute('RecastingTools')
+        elif args[0]=='PAD':
+            installer=InstallManager(self.main)
+            return installer.Execute('PAD')
         else:
             logging.error("the syntax is not correct.")
             self.help()
@@ -88,7 +100,7 @@ class CmdInstall(CmdBase):
     def help(self):
         logging.info("   Syntax: install <component>")
         logging.info("   Download and install a MadAnalysis component from the official site.")
-        logging.info("   List of available components : samples zlib fastjet delphes delphesMA5tune")
+        logging.info("   List of available components : samples zlib fastjet delphes delphesMA5tune RecastingTools PAD")
 
 
     def complete(self,text,args,begidx,endidx):
@@ -100,7 +112,7 @@ class CmdInstall(CmdBase):
         if nargs>2:
             return []
         else:
-            output = ["samples","zlib","fastjet", "delphes", "delphesMA5tune", "gnuplot", "matplotlib", "root" , "numpy", "RecastingTools"]
+            output = ["samples","zlib","fastjet", "delphes", "delphesMA5tune", "gnuplot", "matplotlib", "root" , "numpy", "RecastingTools", "PAD"]
             return self.finalize_complete(text,output)
 
 

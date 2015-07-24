@@ -14,21 +14,17 @@ set ExecutionPath {
   MuonMomentumSmearing
 
   TrackMerger
-  TrackIsolationCalculation
   Calorimeter
   EFlowMerger
 
   PhotonEfficiency
   PhotonIsolationCalculation
-  PhotonIsolation
 
   ElectronEfficiency
   ElectronIsolationCalculation
-  ElectronIsolation
 
   MuonEfficiency
   MuonIsolationCalculation
-  MuonIsolation
 
   MissingET
 
@@ -40,48 +36,9 @@ set ExecutionPath {
   BTagging
   TauTagging
 
-  UniqueObjectFinder
-
-  ScalarHT
 
   TreeWriter
 }
-
-#MA5 BEGIN
-#################################
-# Isolation Calculation
-#################################
-module IsolationCalculation PhotonIsolationCalculation {
-  set CandidateInputArray PhotonEfficiency/photons
-  set IsolationInputArray EFlowMerger/eflow
-
-  set OutputArray DelphesMA5tunePhotons
-  set PTMin 0.5
-}
-
-module IsolationCalculation ElectronIsolationCalculation {
-  set CandidateInputArray ElectronEfficiency/electrons
-  set IsolationInputArray TrackMerger/tracks 
-
-  set OutputArray DelphesMA5tuneElectrons
-  set PTMin 0.5
-}
-
-module IsolationCalculation MuonIsolationCalculation {
-  set CandidateInputArray MuonEfficiency/muons
-  set IsolationInputArray TrackMerger/tracks 
-
-  set OutputArray DelphesMA5tuneMuons
-  set PTMin 0.5
-}
-module IsolationCalculation TrackIsolationCalculation {
-  set CandidateInputArray TrackMerger/tracks
-  set IsolationInputArray TrackMerger/tracks
-
-  set OutputArray DelphesMA5tuneTracks
-  set PTMin 0.5
-}
-#MA5 END
 
 
 #################################
@@ -346,22 +303,6 @@ module Efficiency PhotonEfficiency {
                          (abs(eta) > 2.5)                                   * (0.00)}
 }
 
-##################
-# Photon isolation
-##################
-
-module Isolation PhotonIsolation {
-  set CandidateInputArray PhotonEfficiency/photons
-  set IsolationInputArray EFlowMerger/eflow
-
-  set OutputArray photons
-
-  set DeltaRMax 0.5
-
-  set PTMin 0.5
-
-  set PTRatioMax 0.1
-}
 
 #####################
 # Electron efficiency
@@ -380,22 +321,6 @@ module Efficiency ElectronEfficiency {
                          (abs(eta) > 2.5)                                   * (0.00)}
 }
 
-####################
-# Electron isolation
-####################
-
-module Isolation ElectronIsolation {
-  set CandidateInputArray ElectronEfficiency/electrons
-  set IsolationInputArray EFlowMerger/eflow
-
-  set OutputArray electrons
-
-  set DeltaRMax 0.5
-
-  set PTMin 0.5
-
-  set PTRatioMax 0.1
-}
 
 #################
 # Muon efficiency
@@ -416,22 +341,6 @@ module Efficiency MuonEfficiency {
                          (abs(eta) > 2.4)                                                 * (0.00)}
 }
 
-################
-# Muon isolation
-################
-
-module Isolation MuonIsolation {
-  set CandidateInputArray MuonEfficiency/muons
-  set IsolationInputArray EFlowMerger/eflow
-
-  set OutputArray muons
-
-  set DeltaRMax 0.5
-
-  set PTMin 0.5
-
-  set PTRatioMax 0.1
-}
 
 ###################
 # Missing ET merger
@@ -443,18 +352,6 @@ module Merger MissingET {
   set MomentumOutputArray momentum
 }
 
-##################
-# Scalar HT merger
-##################
-
-module Merger ScalarHT {
-# add InputArray InputArray
-  add InputArray UniqueObjectFinder/jets
-  add InputArray UniqueObjectFinder/electrons
-  add InputArray UniqueObjectFinder/photons
-  add InputArray UniqueObjectFinder/muons
-  set EnergyOutputArray energy
-}
 
 #####################
 # MC truth jet finder
@@ -551,18 +448,46 @@ module TauTagging TauTagging {
   add EfficiencyFormula {15} {0.4}
 }
 
-#####################################################
-# Find uniquely identified photons/electrons/tau/jets
-#####################################################
-
-module UniqueObjectFinder UniqueObjectFinder {
-# earlier arrays take precedence over later ones
-# add InputArray InputArray OutputArray
-  add InputArray PhotonIsolation/photons photons
-  add InputArray ElectronIsolation/electrons electrons
-  add InputArray MuonIsolation/muons muons
-  add InputArray JetEnergyScale/jets jets
+#MA5 BEGIN
+#################################
+# Isolation Calculation
+#################################
+module IsolationCalculation PhotonIsolationCalculation {
+  set CandidateInputArray   PhotonEfficiency/photons
+  set TrackInputArray       TrackMerger/tracks 
+  set CaloTowerInputArray   Calorimeter/towers
+  set EflowInputArray       EFlowMerger/eflow
+  set OutputArray DelphesMA5tunePhotons
+  set Track_PTMin        0.5
+  set Eflow_PTMin        0.5
+  set CaloTower_PTMin    0.5
 }
+
+module IsolationCalculation ElectronIsolationCalculation {
+  set CandidateInputArray   ElectronEfficiency/electrons
+  set TrackInputArray       TrackMerger/tracks 
+  set CaloTowerInputArray   Calorimeter/towers
+  set EflowInputArray       EFlowMerger/eflow
+  set OutputArray DelphesMA5tuneElectrons
+  set Track_PTMin        0.5
+  set Eflow_PTMin        0.5
+  set CaloTower_PTMin    0.5
+}
+
+module IsolationCalculation MuonIsolationCalculation {
+  set CandidateInputArray   MuonEfficiency/muons
+  set TrackInputArray       TrackMerger/tracks 
+  set CaloTowerInputArray   Calorimeter/towers
+  set EflowInputArray       EFlowMerger/eflow
+  set OutputArray DelphesMA5tuneMuons
+  set Track_PTMin        0.5
+  set Eflow_PTMin        0.5
+  set CaloTower_PTMin    0.5
+}
+
+#MA5 END
+
+
 
 ##################
 # ROOT tree writer
@@ -586,17 +511,18 @@ module TreeWriter TreeWriter {
 #  add Branch Calorimeter/eflowNeutralHadrons EFlowNeutralHadron Tower
 
   add Branch GenJetFinder/jets GenJet Jet
-  add Branch UniqueObjectFinder/jets Jet Jet
+  add Branch JetEnergyScale/jets Jet Jet
 #  add Branch UniqueObjectFinder/electrons Electron Electron
 #  add Branch UniqueObjectFinder/photons Photon Photon
 #  add Branch UniqueObjectFinder/muons Muon Muon
   add Branch MissingET/momentum MissingET MissingET
-  add Branch ScalarHT/energy ScalarHT ScalarHT
+#  add Branch ScalarHT/energy ScalarHT ScalarHT
+
 
   add Branch ElectronIsolationCalculation/DelphesMA5tuneElectrons DelphesMA5tuneElectron Electron
   add Branch MuonIsolationCalculation/DelphesMA5tuneMuons DelphesMA5tuneMuon Muon
   add Branch PhotonIsolationCalculation/DelphesMA5tunePhotons DelphesMA5tunePhoton Photon
-  add Branch TrackIsolationCalculation/DelphesMA5tuneTracks DelphesMA5tuneTrack Track
+#  add Branch TrackIsolationCalculation/DelphesMA5tuneTracks DelphesMA5tuneTrack Track
 
 }
 

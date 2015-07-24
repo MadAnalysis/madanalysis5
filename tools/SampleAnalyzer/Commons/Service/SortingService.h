@@ -106,111 +106,30 @@ public:
   }
 
   /// sort particle
-  static void sort(std::vector<const RecParticleFormat*>& parts,
+  template<typename T> static void sort(std::vector<T*>& parts,
             OrderingObservable obs=PTordering)
   {
     if (obs==PTordering) 
         std::sort(parts.begin(),parts.end(),
-                  PointerComparison::PTSortPredicate<const RecParticleFormat>);
+                  PointerComparison::PTSortPredicate<T>);
     else if (obs==ETordering)
         std::sort(parts.begin(),parts.end(),
-                  PointerComparison::ETSortPredicate<const RecParticleFormat>);
+                  PointerComparison::ETSortPredicate<T>);
     else if (obs==Eordering)
         std::sort(parts.begin(),parts.end(),
-                  PointerComparison::ESortPredicate<const RecParticleFormat>);
+                  PointerComparison::ESortPredicate<T>);
     else if (obs==ETAordering)
         std::sort(parts.begin(),parts.end(),
-                  PointerComparison::ETASortPredicate<const RecParticleFormat>);
+                  PointerComparison::ETASortPredicate<T>);
     else if (obs==PXordering)
         std::sort(parts.begin(),parts.end(),
-                  PointerComparison::PXSortPredicate<const RecParticleFormat>);
+                  PointerComparison::PXSortPredicate<T>);
     else if (obs==PYordering)
         std::sort(parts.begin(),parts.end(),
-                  PointerComparison::PYSortPredicate<const RecParticleFormat>);
+                  PointerComparison::PYSortPredicate<T>);
     else if (obs==PZordering)
         std::sort(parts.begin(),parts.end(),
-                  PointerComparison::PZSortPredicate<const RecParticleFormat>);
-  }
-
-  /// sort particle
-  static void sort(std::vector<const MCParticleFormat*>& parts,
-            OrderingObservable obs=PTordering)
-  {
-    if (obs==PTordering) 
-        std::sort(parts.begin(),parts.end(),
-                  PointerComparison::PTSortPredicate<const MCParticleFormat>);
-    else if (obs==ETordering)
-        std::sort(parts.begin(),parts.end(),
-                  PointerComparison::ETSortPredicate<const MCParticleFormat>);
-    else if (obs==Eordering)
-        std::sort(parts.begin(),parts.end(),
-                  PointerComparison::ESortPredicate<const MCParticleFormat>);
-    else if (obs==ETAordering)
-        std::sort(parts.begin(),parts.end(),
-                  PointerComparison::ETASortPredicate<const MCParticleFormat>);
-    else if (obs==PXordering)
-        std::sort(parts.begin(),parts.end(),
-                  PointerComparison::PXSortPredicate<const MCParticleFormat>);
-    else if (obs==PYordering)
-        std::sort(parts.begin(),parts.end(),
-                  PointerComparison::PYSortPredicate<const MCParticleFormat>);
-    else if (obs==PZordering)
-        std::sort(parts.begin(),parts.end(),
-                  PointerComparison::PZSortPredicate<const MCParticleFormat>);
-  }
-
-  /// Sorting electrons
-  static void sort(std::vector<const RecLeptonFormat*>& parts,
-            OrderingObservable obs=PTordering)
-  {
-    // Converting to RecParticleFormat
-    std::vector<const RecParticleFormat*> ConvertedLeptons;
-    for(unsigned int ii=0; ii<parts.size(); ii++)
-      ConvertedLeptons.push_back(parts[ii]);
-
-    // Sorting the converted particles
-    sort(ConvertedLeptons,obs);
-
-    // Converting the sorted vector
-    parts.resize(0);
-    for(unsigned int ii=0; ii<ConvertedLeptons.size(); ii++)
-      parts.push_back((const RecLeptonFormat*)(ConvertedLeptons[ii]));
-  }
-
-  /// Sorting jets
-  static void sort(std::vector<const RecJetFormat*>& parts,
-            OrderingObservable obs=PTordering)
-  {
-    // Converting to RecParticleFormat
-    std::vector<const RecParticleFormat*> ConvertedJets;
-    for(unsigned int ii=0; ii<parts.size(); ii++)
-      ConvertedJets.push_back(parts[ii]);
-
-    // Sorting the converted particles
-    sort(ConvertedJets,obs);
-
-    // Converting the sorted vector
-    parts.resize(0);
-    for(unsigned int ii=0; ii<ConvertedJets.size(); ii++)
-      parts.push_back((const RecJetFormat*)(ConvertedJets[ii]));
-  }
-
-   /// Sorting taus
-  static void sort(std::vector<const RecTauFormat*>& parts,
-            OrderingObservable obs=PTordering)
-  {
-    // Converting to RecParticleFormat
-    std::vector<const RecParticleFormat*> ConvertedTaus;
-    for(unsigned int ii=0; ii<parts.size(); ii++)
-      ConvertedTaus.push_back(parts[ii]);
-
-    // Sorting the converted particles
-    sort(ConvertedTaus,obs);
-
-    // Converting the sorted vector
-    parts.resize(0);
-    for(unsigned int ii=0; ii<ConvertedTaus.size(); ii++)
-      parts.push_back((const RecTauFormat*)(ConvertedTaus[ii]));
+                  PointerComparison::PZSortPredicate<T>);
   }
 
   /// rank filter

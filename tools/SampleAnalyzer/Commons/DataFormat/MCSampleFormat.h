@@ -108,8 +108,6 @@ class MCSampleFormat
     beamPDFauthor_      = std::make_pair(0,0); 
     beamPDFID_          = std::make_pair(0,0);
     weightMode_         = 0; 
-    sumweight_positive_ = 0.;
-    sumweight_negative_ = 0.;
     processes_.clear();
 
     // File info
@@ -118,6 +116,10 @@ class MCSampleFormat
     sumweight_positive_ = 0.;
     sumweight_negative_ = 0.;
   }
+
+  /// Accessoir to the generator type
+  const MA5GEN::GeneratorType* GeneratorType() const
+  { return sample_generator_; }
 
   /// Accessor to PDG ID of the intial partons
   const std::pair<Int_t,Int_t>& beamPDGID() const

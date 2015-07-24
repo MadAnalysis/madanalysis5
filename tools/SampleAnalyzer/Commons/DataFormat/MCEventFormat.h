@@ -66,7 +66,7 @@ class MCEventFormat
 
   UInt_t nparts_;       /// number of particles in the event
   UInt_t processId_;    /// identity of the current process
-  Double_t weight_;      /// event weight
+  mutable Double_t weight_;      /// event weight
   Double_t scale_;       /// scale Q of the event
   Double_t alphaQED_;    /// ALPHA_em value used
   Double_t alphaQCD_;    /// ALPHA_s value used
@@ -153,7 +153,7 @@ class MCEventFormat
   void setProcessId(UInt_t v)  {processId_=v;}
 
   /// Setting the event weight
-  void setWeight   (Double_t v) {weight_=v;   }
+  void setWeight   (Double_t v) const {weight_=v;   }
 
   /// Setting the scale
   void setScale    (Double_t v) {scale_=v;    }

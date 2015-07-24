@@ -28,6 +28,7 @@
 
 //SampleAnalyser headers
 #include "SampleAnalyzer/Commons/Base/DetectorBase.h"
+#include "SampleAnalyzer/Interfaces/delphes/DelphesMemoryInterface.h"
 
 //ROOT header
 #include <TObjArray.h>
@@ -72,6 +73,9 @@ class DetectorDelphes: public DetectorBase
 
     // parameters
     bool output_;
+    bool MA5card_;
+    std::map<std::string,std::string> table_;
+    DelphesMemoryInterface interface_;
 
 //---------------------------------------------------------------------------------
 //                                method members
@@ -80,7 +84,7 @@ class DetectorDelphes: public DetectorBase
 
     /// Constructor without argument
     DetectorDelphes() 
-    { output_=false; }
+    { output_=false; MA5card_=false;}
 
     /// Destructor
     virtual ~DetectorDelphes()
@@ -109,6 +113,18 @@ class DetectorDelphes: public DetectorBase
     void TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat& myEvent);
     void TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat& myEvent);
 
+    /// Config File
+    virtual const std::string PrintConfigFile() const
+    {
+      if (MA5card_)
+      {
+        return "        with the MA5-tuned card: "+GetConfigFile();
+      }
+      else
+      {
+        return "        with the Delphes card: "+GetConfigFile();
+      }
+    }
 };
 
 }

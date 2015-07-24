@@ -91,6 +91,11 @@ bool DelphesMA5tuneTreeReader::Initialize()
   {
     WARNING << "Track branch is not found" << endmsg;
   }
+  branchEvent_ = treeReader_->UseBranch("Event");
+  if (branchEvent_==0)
+  {
+    WARNING << "Event branch is not found" << endmsg;
+  }
 
   return true;
 }
@@ -276,24 +281,28 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
     isolcone05->sumPT_   = part->sumPT05;
     isolcone05->sumET_   = part->sumET05;
     isolcone05->ntracks_ = part->nTrack05;
+    isolcone05->eflow_sumPT_ = part->sumPTeflow05;
     isolcone05->deltaR_  = 0.5;
 
     IsolationConeType* isolcone04 = electron->GetNewIsolCone();
     isolcone04->sumPT_   = part->sumPT04;
     isolcone04->sumET_   = part->sumET04;
     isolcone04->ntracks_ = part->nTrack04;
+    isolcone04->eflow_sumPT_ = part->sumPTeflow04;
     isolcone04->deltaR_  = 0.4;
 
     IsolationConeType* isolcone03 = electron->GetNewIsolCone();
     isolcone03->sumPT_   = part->sumPT03;
     isolcone03->sumET_   = part->sumET03;
     isolcone03->ntracks_ = part->nTrack03;
+    isolcone03->eflow_sumPT_ = part->sumPTeflow03;
     isolcone03->deltaR_  = 0.3;
 
     IsolationConeType* isolcone02 = electron->GetNewIsolCone();
     isolcone02->sumPT_   = part->sumPT02;
     isolcone02->sumET_   = part->sumET02;
     isolcone02->ntracks_ = part->nTrack02;
+    isolcone02->eflow_sumPT_ = part->sumPTeflow02;
     isolcone02->deltaR_  = 0.2;
 
     int index=0;
@@ -314,24 +323,28 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
     isolcone05->sumPT_   = part->sumPT05;
     isolcone05->sumET_   = part->sumET05;
     isolcone05->ntracks_ = part->nTrack05;
+    isolcone05->eflow_sumPT_ = part->sumPTeflow05;
     isolcone05->deltaR_  = 0.5;
 
     IsolationConeType* isolcone04 = photon->GetNewIsolCone();
     isolcone04->sumPT_   = part->sumPT04;
     isolcone04->sumET_   = part->sumET04;
     isolcone04->ntracks_ = part->nTrack04;
+    isolcone04->eflow_sumPT_ = part->sumPTeflow04;
     isolcone04->deltaR_  = 0.4;
 
     IsolationConeType* isolcone03 = photon->GetNewIsolCone();
     isolcone03->sumPT_   = part->sumPT03;
     isolcone03->sumET_   = part->sumET03;
     isolcone03->ntracks_ = part->nTrack03;
+    isolcone03->eflow_sumPT_ = part->sumPTeflow03;
     isolcone03->deltaR_  = 0.3;
 
     IsolationConeType* isolcone02 = photon->GetNewIsolCone();
     isolcone02->sumPT_   = part->sumPT02;
     isolcone02->sumET_   = part->sumET02;
     isolcone02->ntracks_ = part->nTrack02;
+    isolcone02->eflow_sumPT_ = part->sumPTeflow02;
     isolcone02->deltaR_  = 0.2;
 
   }
@@ -348,29 +361,55 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
     isolcone05->sumPT_   = part->sumPT05;
     isolcone05->sumET_   = part->sumET05;
     isolcone05->ntracks_ = part->nTrack05;
+    isolcone05->eflow_sumPT_ = part->sumPTeflow05;
     isolcone05->deltaR_  = 0.5;
 
     IsolationConeType* isolcone04 = muon->GetNewIsolCone();
     isolcone04->sumPT_   = part->sumPT04;
     isolcone04->sumET_   = part->sumET04;
     isolcone04->ntracks_ = part->nTrack04;
+    isolcone04->eflow_sumPT_ = part->sumPTeflow04;
     isolcone04->deltaR_  = 0.4;
 
     IsolationConeType* isolcone03 = muon->GetNewIsolCone();
     isolcone03->sumPT_   = part->sumPT03;
     isolcone03->sumET_   = part->sumET03;
     isolcone03->ntracks_ = part->nTrack03;
+    isolcone03->eflow_sumPT_ = part->sumPTeflow03;
     isolcone03->deltaR_  = 0.3;
 
     IsolationConeType* isolcone02 = muon->GetNewIsolCone();
     isolcone02->sumPT_   = part->sumPT02;
     isolcone02->sumET_   = part->sumET02;
     isolcone02->ntracks_ = part->nTrack02;
+    isolcone02->eflow_sumPT_ = part->sumPTeflow02;
     isolcone02->deltaR_  = 0.2;
 
     int index=0;
     if (part->MA5index>=0) index=part->MA5index+1;
     MuonIndex_.push_back(index);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Fill Event
+  // ---------------------------------------------------------------------------
+  if (branchEvent_!=0)
+  for (unsigned int i=0;i<static_cast<UInt_t>(branchEvent_->GetEntries());i++)
+  {
+    // Get the header 
+    LHEFEvent* header1 =  dynamic_cast<LHEFEvent*>(branchEvent_->At(i));
+    if (header1!=0)
+    {
+      // Set event-weight
+      myEvent.mc()->setWeight(header1->Weight);
+    }
+    else
+    {
+      HepMCEvent* header2 = dynamic_cast<HepMCEvent*>(branchEvent_->At(i));
+      if (header2==0) continue;
+      // Set event-weight
+      myEvent.mc()->setWeight(header2->Weight);
+    }
   }
 
   // Fill jets and taus
@@ -459,24 +498,28 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
     isolcone05->sumPT_   = ref->sumPT05;
     isolcone05->sumET_   = ref->sumET05;
     isolcone05->ntracks_ = ref->nTrack05;
+    isolcone05->eflow_sumPT_ = ref->sumPTeflow05;
     isolcone05->deltaR_  = 0.5;
 
     IsolationConeType* isolcone04 = track->GetNewIsolCone();
     isolcone04->sumPT_   = ref->sumPT04;
     isolcone04->sumET_   = ref->sumET04;
     isolcone04->ntracks_ = ref->nTrack04;
+    isolcone04->eflow_sumPT_ = ref->sumPTeflow04;
     isolcone04->deltaR_  = 0.4;
 
     IsolationConeType* isolcone03 = track->GetNewIsolCone();
     isolcone03->sumPT_   = ref->sumPT03;
     isolcone03->sumET_   = ref->sumET03;
     isolcone03->ntracks_ = ref->nTrack03;
+    isolcone03->eflow_sumPT_ = ref->sumPTeflow03;
     isolcone03->deltaR_  = 0.3;
 
     IsolationConeType* isolcone02 = track->GetNewIsolCone();
     isolcone02->sumPT_   = ref->sumPT02;
     isolcone02->sumET_   = ref->sumET02;
     isolcone02->ntracks_ = ref->nTrack02;
+    isolcone02->eflow_sumPT_ = ref->sumPTeflow02;
     isolcone02->deltaR_  = 0.2;
   }
 }

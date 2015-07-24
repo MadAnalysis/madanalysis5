@@ -32,17 +32,20 @@ class SessionInfo():
         self.tmpdir             = ""
         self.downloaddir        = ""
         self.recasttools_path   = ""
+        self.madgraph_path      = ""
         self.has_matplotlib     = False
         self.has_gnuplot        = False
         self.has_pdflatex       = False
         self.has_latex          = False
         self.has_recasttools    = False
         self.has_dvipdf         = False
+        self.has_madgraph       = False
         self.has_web            = True
+        self.logger             = logging.getLogger('madanalysis')
 
     def dump(self):
         for item in self.__dict__:
-            logging.debug(item+'\t'+str(self.__dict__[item]))
+            self.logger.debug(item+'\t'+str(self.__dict__[item]))
 
     def __eq__(self,other):
         return self.__dict__==other.__dict__
@@ -56,7 +59,7 @@ class SessionInfo():
         try:
             file = open(filename,"w")
         except:
-            logging.error("impossible to write the configuration file '" + \
+            self.logger.error("impossible to write the configuration file '" + \
                           filename + "'")
             return False
 
@@ -66,7 +69,7 @@ class SessionInfo():
             pickle.dump(self,file)
             test=True
         except:
-            logging.error("error occured during saving data to "+filename)
+            self.logger.error("error occured during saving data to "+filename)
             test=False
 
         # Close the file
@@ -81,7 +84,7 @@ class SessionInfo():
         try:
             file = open(filename,"r")
         except:
-            logging.error("impossible to read the configuration file '" + \
+            self.logger.error("impossible to read the configuration file '" + \
                           filename + "'")
             return False
 
@@ -91,7 +94,7 @@ class SessionInfo():
             newone = pickle.load(file)
             test=True
         except:
-            logging.error("error occured during reading data from "+filename)
+            self.logger.error("error occured during reading data from "+filename)
             test=False
 
         # Close the file
@@ -106,7 +109,7 @@ class SessionInfo():
             for item in self.__dict__:
                 self.__dict__[item]=copy.copy(newone.__dict__[item])
         except:
-            logging.error("error occured during copying data from "+filename)
+            self.logger.error("error occured during copying data from "+filename)
             test=False
 
         # Return the operation status

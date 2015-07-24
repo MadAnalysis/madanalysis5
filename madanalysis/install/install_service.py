@@ -247,6 +247,17 @@ class InstallService():
             return False
         return True        
 
+    @staticmethod
+    def check_inspire():
+        logging.debug("Testing the access to InSpire...")
+        import urllib
+        try:
+            urllib.urlopen('http://inspirehep.net/')
+        except:
+            logging.error("impossible to access the InSpire website.")
+            return False
+        return True
+
 
     @staticmethod
     def create_tools_folder(path):

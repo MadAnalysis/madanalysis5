@@ -481,6 +481,28 @@ sdETA = dsETA = ObservableBase.Clone(ETA, name='sdETA', combination=CombinationT
 dETA  = dvETA = vdETA = ObservableBase.Clone(ETA, name='dETA', combination=CombinationType.DIFFVECTOR, tex='d#eta')
 rETA  = ObservableBase.Clone(ETA, name='rETA', combination=CombinationType.RATIO, tex='r#eta')
 
+ABSETA = ObservableBase( name        = 'ABSETA',
+                      args        = [ArgumentType.COMBINATION],
+                      combination = CombinationType.SUMVECTOR,
+                      plot_auto   = False,
+                      plot_nbins  =  50,
+                      plot_xmin   =  0.0,
+                      plot_xmax   = +8.0,
+                      plot_unitX  = '',
+                      code_parton = 'abseta()',
+                      code_hadron = 'abseta()',
+                      code_reco   = 'abseta()',
+                      cut_event     = True,
+                      cut_candidate = True,
+                      tex           = '|#eta|'
+                    )
+vABSETA  = ABSETA
+sABSETA  = ObservableBase.Clone(ABSETA, name='sABSETA', combination=CombinationType.SUMSCALAR, tex='sabs#eta') 
+sdABSETA = dsABSETA = ObservableBase.Clone(ABSETA, name='sdABSETA', combination=CombinationType.DIFFSCALAR, tex='sdabs#eta') 
+dABSETA  = dvABSETA = vdABSETA = ObservableBase.Clone(ABSETA, name='dABSETA', combination=CombinationType.DIFFVECTOR, tex='dabs#eta')
+rABSETA  = ObservableBase.Clone(ABSETA, name='rABSETA', combination=CombinationType.RATIO, tex='rabs#eta')
+
+
 THETA = ObservableBase( name    = 'THETA',
                         args        = [ArgumentType.COMBINATION],
                     combination = CombinationType.SUMVECTOR,

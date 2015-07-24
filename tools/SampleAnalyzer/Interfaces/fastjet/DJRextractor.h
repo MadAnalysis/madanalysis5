@@ -93,12 +93,10 @@ class DJRextractor
   UInt_t ExtractJetNumber(const MCEventFormat* myEvent, MCSampleFormat* mySample);
 
   /// Selecting particles
-  void SelectParticles_NonHadronization(std::vector<fastjet::PseudoJet>& inputs, const MCEventFormat* myEvent);
   void SelectParticles(std::vector<fastjet::PseudoJet>& inputs, const MCEventFormat* myEvent);
 
-
+  /// Extracting the DJR information
   void ExtractDJR(const std::vector<fastjet::PseudoJet>& inputs,std::vector<Double_t>& DJRvalues);
-  void ExtractDJRwithFortran(const std::vector<fastjet::PseudoJet>& inputs,std::vector<Double_t>& DJRvalues);
 
   Double_t rapidity(Double_t px, Double_t py, Double_t pz);
 

@@ -50,7 +50,11 @@ def init():
     fmt = ColoredFormatter('%(message)s')
     hdlr.setFormatter(fmt)
     rootLogger.addHandler(hdlr)
-    
-    
 
-        
+    # we need to replace all root loggers by ma5 loggers for a proper interface with madgraph5
+    ma5Logger = logging.getLogger('madanalysis')
+    hdlr = logging.StreamHandler()
+    fmt = ColoredFormatter('%(message)s')
+    hdlr.setFormatter(fmt)
+    ma5Logger.addHandler(hdlr)
+    ma5Logger.propagate=False

@@ -33,7 +33,7 @@
 
 //STL headers
 #include <sstream>
-
+#include <map>
 
 using namespace MA5;
 
@@ -47,6 +47,8 @@ bool MergingPlots::Initialize(const Configuration& cfg,
   // Reading options
   merging_nqmatch_   = 4;
   merging_nosingrad_ = false;
+  ma5_mode_ = false;
+
   for (std::map<std::string,std::string>::const_iterator 
        it=parameters.begin();it!=parameters.end();it++)
   {
@@ -55,6 +57,11 @@ bool MergingPlots::Initialize(const Configuration& cfg,
       std::stringstream str;
       str << it->second;
       str >> merging_njets_;
+    }
+    else if (it->first=="ma5_mode")
+    {
+      if (it->second=="1") ma5_mode_=true;
+      else if (it->second=="0") ma5_mode_=false;
     }
     else
     {
@@ -89,7 +96,16 @@ bool MergingPlots::Initialize(const Configuration& cfg,
 bool MergingPlots::Execute(SampleFormat& mySample, const EventFormat& myEvent)
 {
   // Getting number of extra jets in the event
-  UInt_t njets = ExtractJetNumber(myEvent.mc(),mySample.mc());
+  UInt_t njets = 0;
+
+  if (!ma5_mode_) // normal mode
+  {
+    njets = ExtractHardJetNumber(myEvent.mc(),mySample.mc());
+  }
+  else // ma5 mode
+  {
+    njets = myEvent.mc()->processId() % 10;
+  }
   if (njets>merging_njets_) return false;
 
   // Computing DJRvalues
@@ -128,16 +144,63 @@ void MergingPlots::Finalize(const SampleFormat& summary,
 
 
 /// Number of jets
-UInt_t MergingPlots::ExtractJetNumber(const MCEventFormat* myEvent, 
+UInt_t MergingPlots::ExtractHardJetNumber(const MCEventFormat* myEvent, 
                                       MCSampleFormat* mySample)
 {
   UInt_t njets=0;
-  for (unsigned int i=6;i<myEvent->particles().size();i++)
+
+  // Indexing
+  std::map<const MCParticleFormat*,int> indices;
+  for (unsigned int i=0;i<myEvent->particles().size();i++)
+    indices[&(myEvent->particles()[i])]=i;
+
+  // Filters
+  std::map<const MCParticleFormat*,bool> filters;
+  for (unsigned int i=0;i<myEvent->particles().size();i++)
   {
     const MCParticleFormat* myPart = &myEvent->particles()[i];
+    if (myPart->mother1()==0) continue;
+    if (myPart->mother1()->mother1()==0) continue;
+    std::vector<MCParticleFormat*> family=myEvent->particles()[i].mother1()->daughters();
+
+    // Filters
+    if(myEvent->particles()[i].mothup2_!=0) filters[&(myEvent->particles()[i])] = false;
+    else if(filters.find(myEvent->particles()[i].mother1())!=filters.end())
+    {
+      // The mother is already filtered (easy)
+      if(filters[myPart->mother1()]) filters[myPart]=true;
+      // This is not a radiation or decay pattern -> let's keep it
+      else if(myPart->mother1()->daughters().size()<2) filters[myPart]=false;
+      // The mother is not filtered -> testing if we have a radiation pattern
+      else
+      {
+        // Get all brothers and sisters and kill doubles
+        for(int j=family.size()-1;j>0;j--)
+        {
+          if (indices[family[j]] ==indices[myPart]) { family.erase(family.begin()+j); continue; }
+          for(int k=j+1;k<family.size();k++)
+            if (indices[family[j]]==indices[family[k]]) { family.erase(family.begin()+k); break; }
+        }
+        // Checking whether we have partons in the family
+        unsigned int ng=0, ninit=0, nq=0,nqb=0;
+        if(myPart->pdgid()==myPart->mother1()->pdgid()) ninit++;
+        for(unsigned int i=0; i< family.size();i++)
+        {
+          if(family[i]->pdgid()<=4 && family[i]->pdgid()>0) nq++;
+          if(family[i]->pdgid()>=-4 && family[i]->pdgid()<0) nqb++;
+          if(family[i]->pdgid()==21) ng++;
+          if(family[i]->pdgid()==myPart->mother1()->pdgid()) ninit++;
+        }
+        bool condition1 = myPart->mother1()->pdgid()!=21 && ninit>0;
+        bool condition2 = myPart->mother1()->pdgid()==21 && (ng>=2 || (nqb>0 && nq>0));
+        if(!condition1 && !condition2) filters[myPart]=true;
+        else                           filters[myPart]=false;
+      }
+    }
+    else filters[&(myEvent->particles()[i])]=false;
 
     // keep particles generated during the matrix element calculation
-    if (myPart->statuscode()!=3) continue;
+    if (myPart->statuscode()!=3 && !(myPart->statuscode()>20 && myPart->statuscode()<30) ) continue;
 
     // keep only partons
     if (abs(myPart->pdgid())>merging_nqmatch_ && myPart->pdgid()!=21) continue;
@@ -148,51 +211,15 @@ UInt_t MergingPlots::ExtractJetNumber(const MCEventFormat* myEvent,
     // coming from initial state ?
     if (myPart->mothup1_>6 && (myPart->mothup1_==0 || myPart->mothup2_==0)) continue;
 
-    // removing color singlet
-    /*
-    if (merging_nosingrad_)
-    {
-      for (unsigned int j=0;j<myEvent->particles().size();j++)
-      {
-        if (i!=j) continue;
+    // Pythia 6 formt: removing the initial guys
+    if(i<6 && *mySample->GeneratorType()==MA5GEN::PYTHIA6) continue;
 
-        const MCParticleFormat* myPart2 = &myEvent->particles()[j];
-        
-        // keep particles generated during the matrix element calculation
-        if (myPart2->statuscode()!=3) continue;
+    //count particle
+    if(!filters[myPart])
+      njets++;
 
-        // keep only partons 
-        if ( myPart2->pdgid()!=-myPart->pdgid() && 
-             (myPart2->pdgid()!=21 && myPart->pdgid()!=21)) continue;
-
-        // only final states
-
-      }
-    }
-    */
-
-    // count particle
-    njets++;    
   }
-  /*
-  if (njets==3)  
-  {
-    for (unsigned int i=0;i<myEvent->particles().size();i++)
-    {
-      if (fabs(myEvent->particles()[i].pdgid())>5 && 
-          myEvent->particles()[i].pdgid()!=21) continue;
-      if (myEvent->particles()[i].statuscode()==1) continue;
-
-      std::cout << "i=" << i+1 
-                << " ; id=" << myEvent->particles()[i].pdgid()
-                << " ; s="  << myEvent->particles()[i].statuscode()
-                << " ; m1=" << myEvent->particles()[i].mothup1_ 
-                << " ; m2=" << myEvent->particles()[i].mothup2_ << std::endl;
-    }
-    exit(1);
-    }
-  */
-  return njets;  
+  return njets;
 }
 
 

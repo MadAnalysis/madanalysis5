@@ -72,6 +72,7 @@ class DetectorDelphesMA5tune: public DetectorBase
 
     // parameters
     bool output_;
+    bool first_;
 
 //---------------------------------------------------------------------------------
 //                                method members
@@ -80,7 +81,7 @@ class DetectorDelphesMA5tune: public DetectorBase
 
     /// Constructor without argument
     DetectorDelphesMA5tune() 
-    { output_=false; }
+    { output_=false; first_=false; }
 
     /// Destructor
     virtual ~DetectorDelphesMA5tune()

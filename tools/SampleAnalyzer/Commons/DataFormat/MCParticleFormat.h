@@ -70,6 +70,7 @@ class MCParticleFormat : public ParticleBaseFormat
   Float_t 		    spin_;	    /// cosine of the angle btwn the spin vector and
                               /// its 3-momentum, in the lab frame
   Int_t	          pdgid_;		  /// PDG numbering of the particle
+  Bool_t          isPU_;      /// is PileUp particle or not
   Short_t	        statuscode_;/// status code (-1 for initial state, 
                               /// 2 intermediate state, 1 final state)
   Int_t           extra1_;
@@ -108,6 +109,7 @@ class MCParticleFormat : public ParticleBaseFormat
     statuscode_=0; mothup1_=0; mothup2_=0; mother1_=0; mother2_=0; 
     daughter1_=0; daughter2_=0;
     extra1_=0; extra2_=0;
+    isPU_=false;
   }
 
   /// Print particle informations
@@ -130,10 +132,10 @@ class MCParticleFormat : public ParticleBaseFormat
     else ERROR << "Mum2  " << endmsg;
   }
 
-
+  const Bool_t& isPU()  const {return isPU_;}
   const Float_t& ctau() const {return ctau_;}
   const Float_t& spin() const {return spin_;}
-  const Int_t& pdgid() const {return pdgid_;}
+  const Int_t& pdgid()  const {return pdgid_;}
   const Short_t& statuscode() const {return statuscode_;}
   const MCParticleFormat* mother1() const {return mother1_;}
   const MCParticleFormat* mother2() const {return mother2_;}
@@ -148,6 +150,7 @@ class MCParticleFormat : public ParticleBaseFormat
   MCParticleFormat* mother2() {return mother2_;}
 
   // mutators
+  void setIsPU(Bool_t v)   {isPU_=v;}
   void setCtau(Float_t v)  {ctau_=v;}
   void setSpin(Float_t v)  {spin_=v;}
   void setPdgid(Int_t v)   {pdgid_=v;}
@@ -168,8 +171,6 @@ class MCParticleFormat : public ParticleBaseFormat
     TVector3 b = -1. * boost.momentum().BoostVector();
     momentum().Boost(b);
   }
-
-
 
 
 };

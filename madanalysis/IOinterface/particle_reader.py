@@ -68,26 +68,28 @@ class ParticleReader():
             logging.error("cannot open the file called '" + filename + "' : it is already opened")
             return False
 
+        # Name of the filename
         name = os.path.normpath(self.path+"/"+filename)
+        relname = os.path.normpath(self.path+"/"+filename)
+
+        if not os.path.isfile(name):
+            name = os.path.normpath(self.path+"/madanalysis/"+filename)
+            relname = os.path.normpath("madanalysis/"+filename)
+
+        # Display labels
+        if self.level!=MA5RunningType.HADRON:
+            logging.info('Particle labels exported from ' + relname)
+        else: 
+            logging.info('Parton labels exported from ' + relname)
+
+        # Open the file 
         if os.path.isfile(name):
-            logging.info("MadGraph 5 found:")
-            if self.level!=MA5RunningType.HADRON:
-                logging.info('  => Particle labels exported from ' + name)
-            else: 
-                logging.info('  => Parton labels exported from ' + name)
             self.file = open (name, "r")
         else:
-            name = os.path.normpath(self.path+"/madanalysis/"+filename)
-            logging.info("MadGraph 5 NOT found:")
-            if self.level!=MA5RunningType.HADRON:
-                logging.info('  => Particle labels from ' + filename)
-            else: 
-                logging.info('  => Parton labels from ' + filename)
-            if os.path.isfile(name):
-                self.file = open (name, "r")
-            else:
-                logging.error("File not found")
-                return False
+            logging.error("File not found")
+            return False
+
+        # Ok
         return True    
 
     def OpenHadronLevel(self):
@@ -101,7 +103,8 @@ class ParticleReader():
             return False
 
         name = os.path.normpath(self.path+"/madanalysis/"+filename)
-        logging.info('  => Hadron labels from ' + filename)
+        relname = os.path.normpath("madanalysis/"+filename)
+        logging.info('  => Hadron labels from ' + relname)
         if os.path.isfile(name):
             self.file = open (name, "r")
         else:

@@ -168,8 +168,7 @@ def MainSession(mode,arglist,ma5dir,version,date):
              "%-24s" % main.archi_info.ma5_version + "%+15s" % main.archi_info.ma5_date  + "   *\n" + \
     "*                                                           *\n" + \
     "*         Comput. Phys. Commun. 184 (2013) 222-256          *\n" + \
-    "*           J. Phys. Conf. Ser. 123 (2014) 012032           *\n" + \
-    "*                  arXiv:1405.3982 [hep-ph]                 *\n" + \
+    "*             Eur. Phys. J. C74 (2014) 3103                 *\n" + \
     "*                                                           *\n" + \
     "*   The MadAnalysis Development Team - Please visit us at   *\n" + \
     "*            https://launchpad.net/madanalysis5             *\n" + \
@@ -202,9 +201,15 @@ def MainSession(mode,arglist,ma5dir,version,date):
         from madanalysis.core.expert_mode import ExpertMode
         main.expertmode = True
         expert = ExpertMode(main)
-        if not expert.CreateDirectory():
+        dirname=""
+        if len(arglist)>0:
+          dirname=arglist[0]
+        if not expert.CreateDirectory(dirname):
             sys.exit()
-        if not expert.Copy():
+        dirname=""
+        if len(arglist)>1:
+          dirname=arglist[1]
+        if not expert.Copy(dirname):
             sys.exit()
         expert.GiveAdvice()
         return False

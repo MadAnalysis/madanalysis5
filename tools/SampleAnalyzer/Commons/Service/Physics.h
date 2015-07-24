@@ -39,6 +39,7 @@
 #include "SampleAnalyzer/Commons/DataFormat/RecEventFormat.h"
 #include "SampleAnalyzer/Commons/Service/TransverseVariables.h"
 #include "SampleAnalyzer/Commons/Service/Identification.h"
+#include "SampleAnalyzer/Commons/Service/Isolation.h"
 
 #define PHYSICS MA5::PhysicsService::getInstance()
 
@@ -65,6 +66,9 @@ class PhysicsService
 
   /// Identification method toolbox
   Identification *Id;
+
+  // Isolation
+  Isolation* Isol;
 
   /// GetInstance
   static PhysicsService* getInstance()
@@ -105,6 +109,7 @@ class PhysicsService
     if (value<0) return 0;
     else return sqrt(value);
   }
+
 
   Float_t MT(const MCParticleFormat* part, const MCEventFormat* event)
   {
@@ -192,11 +197,17 @@ class PhysicsService
   {
     Transverse = new TransverseVariables();
     Id = new Identification();
+    Isol = new Isolation();
   }
 
   /// Destructor
   ~PhysicsService()
-  {}
+  {
+    delete Transverse;
+    delete Id;
+    delete Isol;
+  }
+
 };
 
 }

@@ -43,6 +43,7 @@ class LHCOReader;
 class ROOTReader;
 class DelphesTreeReader;
 class DelphesMA5tuneTreeReader;
+class DelphesMemoryInterface;
 
 class RecLeptonFormat : public RecParticleFormat
 {
@@ -51,6 +52,7 @@ class RecLeptonFormat : public RecParticleFormat
   friend class ROOTReader;
   friend class DelphesTreeReader;
   friend class DelphesMA5tuneTreeReader;
+  friend class DelphesMemoryInterface;
 
   // -------------------------------------------------------------
   //                        data members
@@ -61,6 +63,7 @@ class RecLeptonFormat : public RecParticleFormat
   Float_t sumET_isol_;  /// sumET in an isolation cone
   Float_t sumPT_isol_;  /// sumPT in an isolation cone
   std::vector<IsolationConeType> isolCones_; // isolation cones
+  ULong64_t refmc_;
 
   // -------------------------------------------------------------
   //                        method members
@@ -70,6 +73,25 @@ class RecLeptonFormat : public RecParticleFormat
   /// Constructor without arguments
   RecLeptonFormat()
   { Reset(); }
+
+  /// Constructor with one argument
+  RecLeptonFormat(const RecParticleFormat& part)
+  { 
+    Reset();
+    mc_       = part.mc_;
+    HEoverEE_ = part.HEoverEE_;
+    momentum_ = part.momentum_;
+  }
+
+  /// Constructor with one argument
+  RecLeptonFormat(const RecParticleFormat* part)
+  { 
+    Reset();
+    mc_       = part->mc_;
+    HEoverEE_ = part->HEoverEE_;
+    momentum_ = part->momentum_;
+    refmc_    = 0;
+  }
 
   /// Destructor
   virtual ~RecLeptonFormat()
@@ -125,6 +147,12 @@ class RecLeptonFormat : public RecParticleFormat
     isolCones_.push_back(IsolationConeType());
     return &isolCones_.back();
   }
+
+  /// giving a new isolation cone entry
+  void setIsolCones(const std::vector<IsolationConeType>& cones)
+  { isolCones_ = cones; }
+
+  const ULong64_t& refmc() const {return refmc_;}
 
 };
 

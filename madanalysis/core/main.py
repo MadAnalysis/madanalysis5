@@ -469,7 +469,14 @@ class Main():
             sys.exit()
 
         # Library to compiles
+        # |- [0] = unique name
+        # |- [1] = title of the library to display
+        # |- [2] = 
+        # |- [3] = output file to cross-check
+        # |- [4] = folder
+        # |- [5] = False=Library, True=Executable
         libraries = []
+        libraries.append(['configuration','SampleAnalyzer configuration', 'configuration', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/PortabilityCheckup',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Configuration',True])
         libraries.append(['commons','SampleAnalyzer commons', 'commons', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libcommons_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Commons',False])
         libraries.append(['test_commons','SampleAnalyzer commons', 'test_commons', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestCommons',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
         if self.archi_info.has_zlib:
@@ -577,9 +584,14 @@ class Main():
 
                 # Checking the program output
                 logging.info("     - Checking the program output...")
-                if not compiler.CheckRun(program,self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/'):
-                    logging.error("the test failed.")
-                    sys.exit()
+                if libraries[ind][0]=="configuration":
+                    if not compiler.CheckRunConfiguration(program,self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/'):
+                        logging.error("the test failed.")
+                        sys.exit()
+                else:    
+                    if not compiler.CheckRun(program,self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/'):
+                        logging.error("the test failed.")
+                        sys.exit()
 
             # Print Ok
             sys.stdout.write("     => Status: ")

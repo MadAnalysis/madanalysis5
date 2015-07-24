@@ -40,8 +40,8 @@ class InstallDelphes:
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir    = os.path.normpath(self.tmpdir + '/MA5_delphes/')
         self.ncores      = 1
-        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
-
+#        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
+        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.2.0.tar.gz"}
 
     def Detect(self):
         if not os.path.isdir(self.toolsdir):
@@ -117,6 +117,17 @@ class InstallDelphes:
                 except:
                     logging.error('impossible to move the file/folder '+myfile+' from '+packagedir+' to '+self.installdir)
                     return False
+
+        # Updating ExRootTask
+        filename = self.installdir+'/external/ExRootAnalysis/ExRootTask.cc'
+        logging.debug('Updating files: commenting out lines in: '+filename+' ...')
+        self.CommentLines(filename,[64,65,66],'//')
+        
+        # Updating ExRootTask
+        filename = self.installdir+'/external/ExRootAnalysis/ExRootConfReader.cc'
+        logging.debug('Updating files: commenting out lines in: '+filename+' ...')
+        self.CommentLines(filename,[180,181,182],'//')
+        
         # Ok
         return True
 
@@ -131,6 +142,7 @@ class InstallDelphes:
                                              logname,\
                                              self.installdir,\
                                              silent=False)
+
         # return result
         if not ok:
             logging.error('impossible to configure the project. For more details, see the log file:')
@@ -208,3 +220,39 @@ class InstallDelphes:
         return True
     
         
+    def CommentLines(self,filename,thelines,charac='//'):
+        # open input file
+        try:
+            input = open(filename)
+        except:
+            logging.error("impossible to read the file:" + filename)
+            return False
+
+        # open output file
+        try:
+            output = open(filename+'.savema5','w')
+        except:
+            logging.error("impossible to read the file:" + filename+'.savema5')
+            return False
+
+        # lines
+        ind = 0
+        for line in input:
+            ind+=1
+            if ind in thelines:
+                output.write(charac+' '+line)
+            else:
+                output.write(line)
+
+        #close
+        input.close()
+        output.close()
+
+        try:
+            shutil.copy(filename+'.savema5',filename)
+        except:
+            logging.error("impossible to copy "+filename+'.savema5 in '+filename)
+            return False
+
+        return True
+            

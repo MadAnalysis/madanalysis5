@@ -41,13 +41,14 @@ class ExpertMode:
         self.forbiddenpaths.append(os.path.normpath(self.main.archi_info.ma5dir+'/bin'))
         self.forbiddenpaths.append(os.path.normpath(self.main.archi_info.ma5dir+'/madanalysis'))
         
-    def CreateDirectory(self):
-        logging.info("\nWelcome to the expert mode of MadAnalysis")
-        logging.info("Please enter a folder name for creating an empty SampleAnalyzer job")
-        answer=raw_input("Answer: ")
-        answer=answer.replace(' ','_');
-        answer=answer.replace('-','_');
-        self.path = os.path.expanduser(answer)
+    def CreateDirectory(self,name):
+        if name=="":
+          logging.info("\nWelcome to the expert mode of MadAnalysis")
+          logging.info("Please enter a folder name for creating an empty SampleAnalyzer job")
+          answer=raw_input("Answer: ")
+          answer=answer.replace(' ','_');
+          name  =answer.replace('-','_');
+        self.path = os.path.expanduser(name)
         if not self.path.startswith('/'):
             self.path = self.main.currentdir+'/'+self.path
         self.path = os.path.normpath(self.path)
@@ -75,7 +76,7 @@ class ExpertMode:
         return True
 
 
-    def Copy(self):
+    def Copy(self,name):
         
         # Initializing the JobWriter
         jobber = JobWriter(self.main,self.path,False)
@@ -94,27 +95,29 @@ class ExpertMode:
 
         # Recasting tools
         if self.main.session_info.has_recasttools:
-          try:
-            shutil.copyfile(self.main.archi_info.ma5dir+"/tools/RecastingTools/exclusion_CLs.py",self.path+'/exclusion_CLs.py')
-          except:
-            logging.error('Impossible to copy the recasting tools')
-            return False
-          try:
-            os.chmod(self.path+"/exclusion_CLs.py",0755)
-          except:
-            logging.error('Impossible to render the recasting tools executable')
-            return False
-
+            try:
+                shutil.copyfile(self.main.archi_info.ma5dir+"/tools/RecastingTools/exclusion_CLs.py",self.path+'/exclusion_CLs.py')
+                shutil.copyfile(self.main.archi_info.ma5dir+"/tools/RecastingTools/getmaps.py",self.path+'/getmaps.py')
+            except:
+                logging.error('Impossible to copy the recasting tools')
+                return False
+            try:
+                os.chmod(self.path+"/exclusion_CLs.py",0755)
+                os.chmod(self.path+"/getmaps.py",0755)
+            except:
+                logging.error('Impossible to render the recasting tools executable')
+                return False
 
         # Writing an empty analysis
-        logging.info("Please enter a name for your analysis")
-        title=raw_input("Answer: ")
-        if title=="":
-            title="user"
-        title=title.replace(' ', '_');
-        title=title.replace('-', '_');
+        if name=="":
+          logging.info("Please enter a name for your analysis")
+          title=raw_input("Answer: ")
+          if title=="":
+              title="user"
+          title=title.replace(' ', '_');
+          name=title.replace('-', '_');
         logging.info("   Writing an empty analysis...")
-        os.system("cd "+self.path+"/Build/SampleAnalyzer; python newAnalyzer.py " + title + " 1")
+        os.system("cd "+self.path+"/Build/SampleAnalyzer; python newAnalyzer.py " + name + " 1")
 
         # Extracting analysis name
         file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/analysisList.h")

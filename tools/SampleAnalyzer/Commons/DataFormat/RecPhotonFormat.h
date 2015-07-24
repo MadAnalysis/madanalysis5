@@ -41,12 +41,19 @@ namespace MA5
 
 class LHCOReader;
 class ROOTReader;
+class DelphesMemoryInterface;
 
 class RecPhotonFormat : public RecParticleFormat
 {
 
   friend class LHCOReader;
   friend class ROOTReader;
+  friend class DelphesTreeReader;
+  friend class DelphesMA5tuneTreeReader;
+  friend class DetectorDelphes;
+  friend class DetectorDelphesMA5tune;
+  friend class RecLeptonFormat;
+  friend class DelphesMemoryInterface;
 
   // -------------------------------------------------------------
   //                        data members
@@ -91,6 +98,7 @@ class RecPhotonFormat : public RecParticleFormat
     isolCones_.push_back(IsolationConeType());
     return &isolCones_.back();
   }
+
 
 };
 

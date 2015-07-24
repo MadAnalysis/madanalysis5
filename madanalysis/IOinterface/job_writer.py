@@ -177,9 +177,12 @@ class JobWriter():
             cfg=self.main.fastsim.delphes
 
         try:
-            input = open(self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Process/Detector/"+cardname,'r')
+            if self.main.fastsim.package=="delphes":
+                input = open(self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Interfaces/delphes/"+cardname,'r')
+            elif self.main.fastsim.package=="delphesMA5tune":
+                input = open(self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Interfaces/delphesMA5tune/"+cardname,'r')
         except:
-            pass
+            logging.error("impossible to find "+self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Interfaces/delphes/"+cardname)
 
         try:
             output = open(self.path+"/Input/"+cardname,'w')
@@ -288,6 +291,7 @@ class JobWriter():
             file.write('  // Getting pointer to the analyzer devoted to merging plots\n')
             file.write('  std::map<std::string, std::string> parametersA2;\n')
             file.write('  parametersA2["njets"]="'+str(self.main.merging.njets)+'";\n')
+            file.write('  parametersA2["ma5_mode"]="'+str(int(self.main.merging.ma5_mode))+'";\n')
             file.write('  AnalyzerBase* analyzer2 = \n')
             file.write('      manager.InitializeAnalyzer("MergingPlots","MergingPlots.saf",parametersA2);\n')
             file.write('  if (analyzer2==0) return 1;\n\n')

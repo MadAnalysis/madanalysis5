@@ -141,7 +141,7 @@ StatusCode::Type HEPMCReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySa
 // -----------------------------------------------------------------------------
 bool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 {
-  // Computing met, mht, ...
+  // Computing met, mht, ... + mother to daughter relations
   for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
   {
     MCParticleFormat& part = myEvent.mc()->particles_[i];
@@ -185,6 +185,7 @@ bool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
        part.daughter2_ = part.daughters()[part.daughters().size()-1]-&myEvent.mc()->particles_[0] + 1;
     }
   }
+
 
     // MET, MHT, TET, THT
     if (part.statuscode()==1 && !PHYSICS->Id->IsInvisible(part))

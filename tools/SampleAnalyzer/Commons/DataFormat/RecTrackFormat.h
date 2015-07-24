@@ -45,8 +45,9 @@ class DelphesTreeReader;
 class DelphesMA5tuneTreeReader;
 class DetectorDelphes;
 class DetectorDelphesMA5tune;
+class DelphesMemoryInterface;
 
-class RecTrackFormat : public ParticleBaseFormat
+class RecTrackFormat : public RecParticleFormat
 {
 
   friend class LHCOReader;
@@ -59,6 +60,7 @@ class RecTrackFormat : public ParticleBaseFormat
   friend class DelphesMA5tuneTreeReader;
   friend class DetectorDelphes;
   friend class DetectorDelphesMA5tune;
+  friend class DelphesMemoryInterface;
 
   // -------------------------------------------------------------
   //                        data members
@@ -70,6 +72,7 @@ class RecTrackFormat : public ParticleBaseFormat
   Double_t etaOuter_;  /// eta @ first layer of calo
   Double_t phiOuter_;  /// phi @ first layer of calo
   std::vector<IsolationConeType> isolCones_; // isolation cones
+  MCParticleFormat* mc_;
 
   // -------------------------------------------------------------
   //                        method members
@@ -98,6 +101,7 @@ class RecTrackFormat : public ParticleBaseFormat
   virtual void Reset()
   {
     pdgid_    = 0;
+    mc_       = 0;
     charge_   = false;
     etaOuter_ = 0.;
     phiOuter_ = 0.;
@@ -121,6 +125,10 @@ class RecTrackFormat : public ParticleBaseFormat
   const int charge() const
   {if (charge_) return +1; else return -1;}
 
+  /// Accessor to charge
+  const MCParticleFormat* mc() const
+  {return mc_;}
+
   /// giving a new isolation cone entry
   IsolationConeType* GetNewIsolCone()
   {
@@ -131,6 +139,7 @@ class RecTrackFormat : public ParticleBaseFormat
   /// get the collection of isolation cones
   const std::vector<IsolationConeType>& isolCones() const
   { return isolCones_; }
+
 
 };
 

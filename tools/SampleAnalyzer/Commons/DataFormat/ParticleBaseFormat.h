@@ -162,6 +162,9 @@ class ParticleBaseFormat
   /// Accessor to the particle pseudo-rapidity
   const Float_t eta()     const {return momentum_.Eta();     }
 
+  /// Accessor to the particle pseudo-rapidity
+  const Float_t abseta()     const {return fabs(momentum_.Eta());     }
+
   /// Accessor to the particle polar angle
   const Float_t theta()   const {return momentum_.Theta();   }
 

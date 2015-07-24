@@ -27,6 +27,7 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/TreeReaderBase.h"
+#include "SampleAnalyzer/Interfaces/delphes/DelphesDataFormat.h"
 
 // ROOT header
 #include <TChain.h>
@@ -37,8 +38,6 @@
 // STL header
 #include <iostream>
 
-// Delphes header
-class ExRootTreeReader;
 
 namespace MA5
 {
@@ -51,24 +50,15 @@ class DelphesTreeReader : public TreeReaderBase
   // -------------------------------------------------------------
  protected:
 
-  /// Tree reader
-  ExRootTreeReader *treeReader_;
-
   /// Number of total entries in the file
   Long64_t total_nevents_;
 
   /// Number of entries read by MA5
   Long64_t read_nevents_;
 
-  /// Pointers to the different branches
-  TClonesArray *branchJet_;
-  TClonesArray *branchElectron_;
-  TClonesArray *branchPhoton_;
-  TClonesArray *branchMuon_;
-  TClonesArray *branchMissingET_;
-  TClonesArray *branchScalarHT_;
-  TClonesArray *branchGenParticle_;
-  TClonesArray *branchTrack_;
+  /// Data
+  DelphesDataFormat data_;
+
 
   // -------------------------------------------------------------
   //                       method members
@@ -106,17 +96,8 @@ class DelphesTreeReader : public TreeReaderBase
 
   void InitializeVariables()
   {
-    treeReader_=0;
     total_nevents_=0;
     read_nevents_=0;
-    branchJet_=0;
-    branchElectron_=0;
-    branchPhoton_=0;
-    branchMuon_=0;
-    branchMissingET_=0;
-    branchScalarHT_=0;
-    branchGenParticle_=0;
-    branchTrack_=0;
   }
 
   /// Get the file size

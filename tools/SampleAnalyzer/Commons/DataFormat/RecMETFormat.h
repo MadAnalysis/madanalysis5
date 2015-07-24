@@ -42,6 +42,8 @@ class LHCOReader;
 class ROOTReader;
 class DelphesTreeReader;
 class DelphesMA5tuneTreeReader;
+class DelphesMemoryInterface;
+
 class RecMETFormat
 {
 
@@ -50,6 +52,7 @@ class RecMETFormat
   friend class JetClusteringFastJet;
   friend class DelphesTreeReader;
   friend class DelphesMA5tuneTreeReader;
+  friend class DelphesMemoryInterface;
 
   // -------------------------------------------------------------
   //                        data members

@@ -45,6 +45,8 @@ class DelphesTreeReader;
 class DelphesMA5tuneTreeReader;
 class DetectorDelphes;
 class DetectorDelphesMA5tune;
+class RecLeptonFormat;
+class DelphesMemoryInterface;
 
 class RecParticleFormat : public ParticleBaseFormat
 {
@@ -54,14 +56,17 @@ class RecParticleFormat : public ParticleBaseFormat
   friend class DelphesMA5tuneTreeReader;
   friend class DetectorDelphes;
   friend class DetectorDelphesMA5tune;
+  friend class RecLeptonFormat;
+  friend class DelphesMemoryInterface;
 
   // -------------------------------------------------------------
   //                        data members
   // -------------------------------------------------------------
  protected:
    
-  Float_t 	        HEoverEE_; /// hadronic energy over electromagnetic energy
-  const MCParticleFormat* mc_ ;      /// mother generated particle
+  Float_t 	              HEoverEE_;    /// hadronic energy over electromagnetic energy
+  const MCParticleFormat* mc_ ;         /// mother generated particle
+  std::vector<ULong64_t>  delphesTags_; /// tag reference for Delphes
 
   // -------------------------------------------------------------
   //                      method members
@@ -80,6 +85,7 @@ class RecParticleFormat : public ParticleBaseFormat
   virtual void Reset()
   {
     momentum_.SetPxPyPzE(0.,0.,0.,0.);
+    delphesTags_.clear();
     HEoverEE_=0.; 
     mc_=0;
   }
@@ -125,6 +131,24 @@ class RecParticleFormat : public ParticleBaseFormat
   /// Accessor to the electric charge
   virtual const int charge() const
   { return 0; }
+
+  const std::vector<ULong64_t>& delphesTags() const {return delphesTags_;}
+
+  bool isDelphesUnique(const std::vector<ULong64_t>& delphesTags) const
+  {
+    for (unsigned int i=0;i<delphesTags_.size();i++)
+      for (unsigned int j=0;j<delphesTags.size();j++)
+    {
+      if (delphesTags_[i]==delphesTags[j]) return true;
+    }
+    return false;
+  }
+
+  bool isDelphesUnique(const RecParticleFormat* part) const
+  { return isDelphesUnique(part->delphesTags()); }
+
+  bool isDelphesUnique(const RecParticleFormat& part) const
+  { return isDelphesUnique(part.delphesTags()); }
 
 };
 

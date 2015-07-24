@@ -57,7 +57,7 @@ class HEPMCReader : public ReaderTextBase
     Int_t barcode_;
     Double_t ctau_;
   };
-  
+
   HEPVertex current_vertex_;
 
   // -------------------------------------------------------------
