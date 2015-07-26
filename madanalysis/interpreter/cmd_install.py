@@ -58,14 +58,15 @@ class CmdInstall(CmdBase):
             return installer.Execute('delphes')
         elif args[0]=='delphesMA5tune':
             logging.warning("The package 'delphesMA5tune' is now obsolete. It is replaced by Delphes with special MA5-tuned cards.")
-            logging.warning("Are you sure to install this package? (Y/N)")
-            allowed_answers=['n','no','y','yes']
-            answer=""
-            while answer not in  allowed_answers:
-               answer=raw_input("Answer: ")
-               answer=answer.lower()
-            if answer=="no" or answer=="n":
-                return
+            if not self.main.forced:
+              logging.warning("Are you sure to install this package? (Y/N)")
+              allowed_answers=['n','no','y','yes']
+              answer=""
+              while answer not in  allowed_answers:
+                 answer=raw_input("Answer: ")
+                 answer=answer.lower()
+              if answer=="no" or answer=="n":
+                  return
             installer=InstallManager(self.main)
             return installer.Execute('delphesMA5tune')
         elif args[0]=='fastjet':
