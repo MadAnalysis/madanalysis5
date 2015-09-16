@@ -50,6 +50,7 @@ DelphesDataFormat::DelphesDataFormat()
   branchEFlowTrack_   = 0;
   branchEFlowPhoton_  = 0;
   branchEFlowNeutral_ = 0;
+  branchEvent_        = 0;
   Jet_          = 0;
   Electron_     = 0;
   Photon_       = 0;
@@ -62,6 +63,7 @@ DelphesDataFormat::DelphesDataFormat()
   EFlowTrack_   = 0;
   EFlowPhoton_  = 0;
   EFlowNeutral_ = 0;
+  Event_        = 0;
   delphesMA5card_ = false;
 }
 
