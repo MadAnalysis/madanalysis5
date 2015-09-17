@@ -49,6 +49,7 @@ DelphesMemoryInterface::DelphesMemoryInterface()
   EFlowTrack_   = 0;
   EFlowPhoton_  = 0;
   EFlowNeutral_ = 0;
+  Event_        = 0;
   delphesMA5card_ = false;
 }
 
