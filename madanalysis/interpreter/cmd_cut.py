@@ -157,6 +157,14 @@ class CmdCut(CmdBase,CmdSelectionBase):
         if len(sequence)<2:
             return sequence
         if sequence[0]=='(' and sequence[-1]==')':
+            nopened=0
+            for i in range(len(sequence)):
+                if sequence[i]=="(":
+                    nopened+=1
+                elif sequence[i]==")":
+                    nopened-=1
+                if nopened==0 and i!=0 and i!=len(sequence)-1:
+                    return sequence
             return self.clean_sequence(sequence[1:-1])
         else:
             return sequence
@@ -166,7 +174,6 @@ class CmdCut(CmdBase,CmdSelectionBase):
 
         # Remove extra braces
         words=self.clean_sequence(sequence)
-
         # Loop over the words
         iword=0
         while iword < len(words):
