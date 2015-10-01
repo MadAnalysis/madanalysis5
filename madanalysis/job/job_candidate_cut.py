@@ -203,7 +203,8 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
             # Is this container concerned by the cut ?
             concerned=False
             for other in other_part:
-                if other_part[0].particle.IsThereCommonPart(combination.particle):
+                if other_part[0].particle.IsThereCommonPart(combination.particle) \
+                  and other_part[2]==main.selection[iabs].rank:
                     concerned=True
                     break
             if not concerned:
@@ -211,11 +212,9 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
 
             # Bracket for begin 
             file.write('    {\n')
-
             file.write('      '+container2+'=SORTER->rankFilter('+\
                         newcontainer2+','+str(other_part[0].PTrank)+','+\
                         'PTordering'+');\n\n')
-            
 
             # Bracket for end
             file.write('    }\n')
