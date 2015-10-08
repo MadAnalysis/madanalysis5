@@ -1,42 +1,9 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
-96   1.3     (2015/10/01) fuks:    Bug fixes with cuts and plots mixing final and interstate particles 
+96   1.2     (2015/10/01) fuks:    Bug fixes with cuts and plots mixing final and interstate particles 
 
-133  1.2.RC   (2015/07/07) fuks:    Bug fix in the LHE writer (thanks to Ioannis Tsinikos) 
-
-114  1.1.12.17 (2015/05/21) fuks:    Adding the ATLAS monophoton to the PAD 
-
-113  1.1.12.16 (2015/05/20) fuks:    Fixing the merging plots for pythia 8 
-
-112  1.1.12.15 (2015/05/20) fuks:    Fixing the merging plot routines so that they now work for pythia8 
-
-107  1.1.12.14 (2015/03/09) fuks:    Fixing some last bugs on the automated PAD installation 
-
-106  1.1.12.13 (2015/03/04) fuks:    Updating the automated pad installation 
-
-105  1.1.12.12 (2015/02/27) fuks:    Efficiency maps and automated pad installation 
-
-104  1.1.12.11 (2015/02/27) fuks:    Automated PAD installation: final bug fixes 
-
-103  1.1.12.10 (2015/02/27) fuks:    Automated PAD installation (missing files) 
-
-102  1.1.12.9 (2015/02/27) fuks:    Automated PAD installation (V2) 
-
-101  1.1.12.8 (2015/02/27) fuks:    Automated PAD installation added 
-
-100  1.1.12.7 (2015/02/26) fuks:    Fixing the merging plot bug 
-
-96   1.1.12.6 (2015/02/06) fuks:    Bug in the HepMC reader fixed 
-
-95   1.1.12.5 (2015/01/26) fuks:    Compilation errors when one core was selected fixed 
-
-93   1.1.12.4 (2014/11/11) fuks:    Bug with the linestyle when drawing histograms in the normal mode 
-                                   (see question 257315 on launchpad) 
-
-92   1.1.12.3 (2014/10/23) fuks:    Arguments allowed for the expert mode, a few bug corrected 
-
-88   1.1.12.2 (2014/08/21) fuks:    Small issue with the newanalyzer script for multianalyses 
-
+133  1.2.RC (2015/07/07) ma5team:   - Bug fixes (LHE writer, HepMC reader, merging plots, etc.)
+                                    - PAD features
 
  82  1.1.11 (2014/07/17) ma5team:   - new structure for the detection of the user system
                                     - new structure for installing the external packages

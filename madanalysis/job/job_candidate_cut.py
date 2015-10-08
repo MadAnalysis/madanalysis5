@@ -56,10 +56,11 @@ def GetFinalCondition(current,index,tagName):
         elif current.sequence[i].__class__.__name__=="ConditionConnector":
             msg+=' '+current.sequence[i].GetStringCode()+' '
         elif current.sequence[i].__class__.__name__=="ConditionSequence":
-            msg+=GetFinalCondition(current.sequence[i],index,tagName)
+            msg2, index=GetFinalCondition(current.sequence[i],index,tagName)
+            msg+=msg2
         i+=1
     msg+=')'
-    return msg
+    return msg,index
     
 
 
@@ -118,7 +119,7 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
 
         # Writing final tag
         file.write('      Bool_t ' + tagName + '_global = ' +\
-                   GetFinalCondition(main.selection[iabs].conditions,0,tagName)+';\n')
+                   GetFinalCondition(main.selection[iabs].conditions,0,tagName)[0]+';\n')
         
         # Add candidate ?
         file.write('      if (')
