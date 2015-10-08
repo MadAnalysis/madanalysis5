@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+96   1.6      (2015/10/08) fuks:    Fixing a bug with the cut conditions 
+
 95   1.5      (2015/10/01) fuks:    Bug fix with the cuts (mixing statuscodes) 
 
 94   1.4      (2015/09/28) fuks:    Bug fix in the cut condition decoder 
