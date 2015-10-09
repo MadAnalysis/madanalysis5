@@ -42,7 +42,7 @@ class MergingConfiguration:
     def __init__(self):
         self.enable = False
         self.njets  = 4
-
+        self.ma5_mode = False
         
     def Display(self):
         self.user_DisplayParameter("check")
@@ -60,7 +60,7 @@ class MergingConfiguration:
             logging.info(" enabling merging plots : "+value)
         elif parameter=="njets":
             logging.info("  + njets = "+str(self.njets))
-        elif parameter=="ma5mode":
+        elif parameter=="ma5_mode":
             if self.ma5_mode:
                 value="true"
             else:
