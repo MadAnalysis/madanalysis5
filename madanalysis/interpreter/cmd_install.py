@@ -92,6 +92,12 @@ class CmdInstall(CmdBase):
         elif args[0]=='PAD':
             installer=InstallManager(self.main)
             return installer.Execute('PAD')
+        elif args[0]=='PAD2':
+            installer=InstallManager(self.main)
+            return installer.Execute('PAD2')
+        elif args[0]=='PADlocal':
+            installer=InstallManager(self.main)
+            return installer.Execute('PADlocal')
         else:
             logging.error("the syntax is not correct.")
             self.help()
@@ -113,7 +119,8 @@ class CmdInstall(CmdBase):
         if nargs>2:
             return []
         else:
-            output = ["samples","zlib","fastjet", "delphes", "delphesMA5tune", "gnuplot", "matplotlib", "root" , "numpy", "RecastingTools", "PAD"]
+            output = ["samples","zlib","fastjet", "delphes", "delphesMA5tune",\
+                "gnuplot", "matplotlib", "root" , "numpy", "RecastingTools", "PAD"]
             return self.finalize_complete(text,output)
 
 
