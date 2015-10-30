@@ -41,7 +41,7 @@ class CmdInstall(CmdBase):
     def do(self,args):
 
         # Checking argument number
-        if len(args) != 1:
+        if len(args)!=1 and args[0]!='PADForMA5Tunelocal':
             logging.error("wrong number of arguments for the command 'install'.")
             self.help()
             return
@@ -89,25 +89,51 @@ class CmdInstall(CmdBase):
         elif args[0]=='RecastingTools':
             installer=InstallManager(self.main)
             return installer.Execute('RecastingTools')
+        elif args[0]=='PADForMA5Tune':
+            installer=InstallManager(self.main)
+            if os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphes')):
+                logging.warning("   Delphes is installed: removing it...")
+                from madanalysis.IOinterface.folder_writer import FolderWriter
+                if not FolderWriter.RemoveDirectory(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphes'),True):
+                    return False
+            if not os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphesMA5tune')):
+                logging.warning("   DelphesMA5Tune not installed: installing it...")
+                if not installer.Execute('delphesMA5tune'):
+                    return False
+            return installer.Execute('PADForMA5Tune')
         elif args[0]=='PAD':
             installer=InstallManager(self.main)
+            if os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphesMA5Tune')):
+                logging.warning("   DelphesMA5Tune is installed: removing it...")
+                from madanalysis.IOinterface.folder_writer import FolderWriter
+                if not FolderWriter.RemoveDirectory(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphesMA5Tune'),True):
+                    return False
+            if not os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphes')):
+                logging.warning("   Delphes not installed...")
+                if not installer.Execute('delphes'):
+                    return False
             return installer.Execute('PAD')
-        elif args[0]=='PAD2':
+        elif args[0]=='PADForMA5Tunelocal' and len(args)==2:
             installer=InstallManager(self.main)
-            return installer.Execute('PAD2')
-        elif args[0]=='PADlocal':
-            installer=InstallManager(self.main)
-            return installer.Execute('PADlocal')
+            if os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphes')):
+                logging.warning("   Delphes is installed: removing it...")
+                from madanalysis.IOinterface.folder_writer import FolderWriter
+                if not FolderWriter.RemoveDirectory(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphes'),True):
+                    return False
+            if not os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphesMA5tune')):
+                logging.warning("   DelphesMA5Tune not installed: installing it...")
+                if not installer.Execute('delphesMA5tune'):
+                    return False
+            return installer.Execute('PADForMA5Tunelocal_xxx_'+args[1])
         else:
             logging.error("the syntax is not correct.")
             self.help()
             return
 
-
     def help(self):
         logging.info("   Syntax: install <component>")
         logging.info("   Download and install a MadAnalysis component from the official site.")
-        logging.info("   List of available components : samples zlib fastjet delphes delphesMA5tune RecastingTools PAD")
+        logging.info("   List of available components: samples zlib fastjet delphes delphesMA5tune RecastingTools PAD PADForMA5Tune")
 
 
     def complete(self,text,args,begidx,endidx):
@@ -120,7 +146,7 @@ class CmdInstall(CmdBase):
             return []
         else:
             output = ["samples","zlib","fastjet", "delphes", "delphesMA5tune",\
-                "gnuplot", "matplotlib", "root" , "numpy", "RecastingTools", "PAD"]
+                "gnuplot", "matplotlib", "root" , "numpy", "RecastingTools", "PAD", "PADForMA5Tune"]
             return self.finalize_complete(text,output)
 
 
