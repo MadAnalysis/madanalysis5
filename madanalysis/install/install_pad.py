@@ -41,7 +41,8 @@ class InstallPad:
         self.untardir    = ""
         self.ncores      = 1
         self.analyses    = ["cms_sus_13_011", "cms_sus_13_012", "cms_sus_13_016", "atlas_sus_13_05", "atlas_susy_2013_11",
-            "atlas_higg_2013_03", "ATLAS_EXOT_2014_06", "atlas_susy_2014_10", "atlas_susy_2013_21", "atlas_1405_7875" ]
+            "atlas_higg_2013_03", "ATLAS_EXOT_2014_06", "atlas_susy_2014_10", "atlas_susy_2013_21", "atlas_1405_7875" ,
+            "cms_sus_14_001_monojet" ]
         self.files = {
     "cms_sus_13_011.cpp" : "http://inspirehep.net/record/1301484/files/cms_sus_13_011.cpp",
     "cms_sus_13_011.h"   : "http://inspirehep.net/record/1301484/files/cms_sus_13_011.h",
