@@ -73,7 +73,10 @@ class InstallPad:
 #    "atlas_1405_7875.cpp" : "http://inspirehep.net/record/1388801/files/atlas_1405_7875.cpp",
     "atlas_1405_7875.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/atlas_1405_7875.cpp",
     "atlas_1405_7875.h"   : "http://inspirehep.net/record/1388801/files/atlas_1405_7875.h",
-    "atlas_1405_7875.info": "http://inspirehep.net/record/1388801/files/atlas_1405_7875.info"
+    "atlas_1405_7875.info": "http://inspirehep.net/record/1388801/files/atlas_1405_7875.info",
+    "cms_sus_14_001_monojet.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_sus_14_001_monojet.cpp",
+    "cms_sus_14_001_monojet.h"   : "http://inspirehep.net/record/1401439/files/cms_sus_14_001_monojet.h",
+    "cms_sus_14_001_monojet.info": "http://inspirehep.net/record/1401439/files/cms_sus_14_001_monojet.info"
 }
 
         self.delphescards = {
