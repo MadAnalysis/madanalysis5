@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+101  1.8      (2015/10/30) fuks:    Fxing the PAD installation... creating PadForMA5Tune 
+
 98   1.7      (2015/10/28) fuks:    Updating the PAD autoinstall 
 
 96   1.6      (2015/10/08) fuks:    Fixing a bug with the cut conditions 

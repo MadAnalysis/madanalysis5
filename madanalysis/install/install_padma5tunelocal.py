@@ -32,18 +32,18 @@ import shutil
 
 class InstallPadForMA5Tune:
 
-    def __init__(self,main):
+    def __init__(self,main,package):
         self.main        = main
         self.installdir  = os.path.normpath(self.main.archi_info.ma5dir+'/PADForMA5Tune')
         self.tmpdir      = self.main.session_info.tmpdir
+        os.system("rm -fr " + self.tmpdir+'/MA5Analyses')
+        os.system("mkdir " + self.tmpdir+'/MA5Analyses')
         self.downloaddir = self.installdir + "/Build/SampleAnalyzer/User/Analyzer"
         self.delphesdir  = self.installdir + "/Input/Cards"
+        self.package     = package
         self.untardir    = ""
         self.ncores      = 1
-        self.analyses    = ["cms_sus_13_011", "cms_sus_13_012", "cms_sus_13_016", "atlas_sus_13_05", "atlas_susy_2013_11",
-            "atlas_higg_2013_03", "ATLAS_EXOT_2014_06", "atlas_susy_2014_10", "atlas_susy_2013_21", "atlas_1405_7875",
-            "cms_sus_14_001_monojet"  ]
-        self.files = {
+        self.files2 = {
     "cms_sus_13_011.cpp" : "http://inspirehep.net/record/1301484/files/cms_sus_13_011.cpp",
     "cms_sus_13_011.h"   : "http://inspirehep.net/record/1301484/files/cms_sus_13_011.h",
     "cms_sus_13_011.info": "http://inspirehep.net/record/1301484/files/cms_sus_13_011.info",
@@ -75,12 +75,13 @@ class InstallPadForMA5Tune:
     "atlas_1405_7875.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/atlas_1405_7875.cpp",
     "atlas_1405_7875.h"   : "http://inspirehep.net/record/1388801/files/atlas_1405_7875.h",
     "atlas_1405_7875.info": "http://inspirehep.net/record/1388801/files/atlas_1405_7875.info",
-    "cms_sus_14_001_monojet.cpp" : "http://inspirehep.net/record/1401439/files/cms_sus_14_001_monojet.cpp",
+    "cms_sus_14_001_monojet.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_sus_14_001_monojet.cpp",
+#    "cms_sus_14_001_monojet.cpp" : "http://inspirehep.net/record/1401439/files/cms_sus_14_001_monojet.cpp",
     "cms_sus_14_001_monojet.h"   : "http://inspirehep.net/record/1401439/files/cms_sus_14_001_monojet.h",
     "cms_sus_14_001_monojet.info": "http://inspirehep.net/record/1401439/files/cms_sus_14_001_monojet.info"
 }
 
-        self.delphescards = {
+        self.delphescards2 = {
     "delphes_card_cms_standard.tcl"   : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/delphesMA5tune_card_CMS_SUSY.tcl",
     "delphes_card_atlas_standard.tcl" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/delphesMA5tune_card_ATLAS.tcl",
     "delphes_card_atlas_sus_2013_05.tcl" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/delphesMA5tune_card_ATLAS_05.tcl",
@@ -254,8 +255,13 @@ class InstallPadForMA5Tune:
         TheCommand = ['bin/ma5', '-R', '-E', '-f', 'PADForMA5Tune', 'cms_sus_13_011']
         logname = os.path.normpath(self.main.archi_info.ma5dir+'/PAD-workingdir.log')
         ok, out= ShellCommand.ExecuteWithLog(TheCommand,logname,self.main.archi_info.ma5dir,silent=False)
+        lognameU = os.path.normpath(self.installdir+'/unpack.log')
+        ok, packagedir = InstallService.untar(lognameU, self.tmpdir+'/MA5Analyses',self.package)
         if not ok:
             return False
+        self.analyses=glob.glob(self.tmpdir+'/MA5Analyses'+'/*.h')
+        self.analyses=[ x.split('/')[-1] for x in self.analyses]
+        self.analyses=[ x.split('.')[0] for x in self.analyses]
         for analysis in self.analyses:
           if "cms_sus_13_011" not in analysis:
             TheCommand = ['./newAnalyzer.py', analysis, analysis]
@@ -290,22 +296,22 @@ class InstallPadForMA5Tune:
 
 
     def Download(self):
-        # Checking connection with InSpire and the ma5 website
-        if not InstallService.check_inspire():
-            return False
-        if not InstallService.check_ma5site():
-            return False
-        # Launching wget
-        logname = os.path.normpath(self.installdir+'/wget_analyses.log')
-        if not InstallService.wget(self.files,logname,self.downloaddir):
-            return False
+        for analysis in self.analyses:
+            for ext in ['cpp','h','info']:
+                TheCommand= ['mv', self.tmpdir+'/MA5Analyses/'+analysis+'.'+ext, self.installdir+'/Build/SampleAnalyzer/User/Analyzer/']
+                ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+                if not ok:
+                    return False
         # delphes cards
-        logname = os.path.normpath(self.installdir+'/wget_delphescards.log')
-        if not InstallService.wget(self.delphescards,logname,self.delphesdir):
-            return False
+        self.delphescards=glob.glob(self.tmpdir+'/MA5Analyses'+'/*.tcl')
+        self.delphescards=[ x.split('/')[-1] for x in self.delphescards]
+        for card in self.delphescards:
+            TheCommand= ['mv', self.tmpdir+'/MA5Analyses/'+card, self.delphesdir]
+            ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+            if not ok:
+                return False
         # Ok
         return True
-
 
     def Configure(self):
         # Updating the makefile

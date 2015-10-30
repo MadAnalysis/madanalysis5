@@ -72,7 +72,7 @@ class InstallManager():
             from madanalysis.install.install_padma5tune import InstallPadForMA5Tune
             installer=InstallPadForMA5Tune(self.main)
         elif 'padforma5tunelocal' in package:
-            mydir=package.split('_xxx_')[-1]
+            mydir=rawpackage.split('_xxx_')[-1]
             from madanalysis.install.install_padma5tunelocal import InstallPadForMA5Tune
             installer=InstallPadForMA5Tune(self.main,mydir)
         elif package=='pad':
