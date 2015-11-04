@@ -30,13 +30,21 @@ class DelphesConfiguration:
 
     userVariables = { "detector" : ["cms","atlas","cms-ma5tune","atlas-ma5tune"],\
                       "output": ["true","false"],\
-                      "pileup": ["none"] }
+                      "pileup": ["none"],\
+                      "skim_genparticles": ["true","false"],\
+                      "skim_tracks": ["true","false"],\
+                      "skim_towers": ["true","false"],\
+                      "skim_eflow" : ["true","false"] }
 
     def __init__(self):
-        self.detector  = "cms"
-        self.output    = True
-        self.pileup    = ""
-        self.card      = ""
+        self.detector          = "cms"
+        self.output            = True
+        self.pileup            = ""
+        self.card              = ""
+        self.skim_genparticles = False
+        self.skim_tracks       = False
+        self.skim_towers       = False
+        self.skim_eflow        = False
         self.SetCard()
 
     def SetCard(self):
@@ -61,6 +69,10 @@ class DelphesConfiguration:
         self.user_DisplayParameter("detector")
         self.user_DisplayParameter("output")
         self.user_DisplayParameter("pileup")
+        self.user_DisplayParameter("skim_genparticles")
+        self.user_DisplayParameter("skim_tracks")
+        self.user_DisplayParameter("skim_towers")
+        self.user_DisplayParameter("skim_eflow")
 
 
     def user_DisplayParameter(self,parameter):
@@ -80,6 +92,38 @@ class DelphesConfiguration:
             else:
                 msg='"'+self.pileup+'"'
             logging.info(" pile-up source = "+msg)
+            return
+        elif parameter=="skim_genparticles":
+            if self.skim_genparticles:
+                msg="true"
+            else:
+                msg="false"
+            logging.info(" Skimming on GenParticles collection : "+msg)
+            return
+        elif parameter=="skim_tracks":
+            if self.skim_tracks:
+                msg="true"
+            else:
+                msg="false"
+            logging.info(" Skimming on Tracks collection : "+msg)
+            return
+        elif parameter=="skim_towers":
+            if self.skim_towers:
+                msg="true"
+            else:
+                msg="false"
+            logging.info(" Skimming on Towers collection : "+msg)
+            return
+        elif parameter=="skim_eflow":
+            if self.skim_eflow:
+                msg="true"
+            else:
+                msg="false"
+            logging.info(" Skimming on EFlow collection : "+msg)
+            return
+        else:
+            logging.error("parameter '"+parameter+"' is unknown")
+            return
 
     def SampleAnalyzerConfigString(self):
             mydict = {}
@@ -121,6 +165,50 @@ class DelphesConfiguration:
                 logging.error("allowed values for output are: true false")
             return
         
+        # skim_genparticles
+        elif parameter=="skim_genparticles":
+
+            if value.lower()=="true":
+                self.skim_genparticles = True
+            elif value.lower()=="false":
+                self.skim_genparticles = False
+            else:
+                logging.error("allowed values for skim_genparticles are: true false")
+            return
+
+        # skim_tracks
+        elif parameter=="skim_tracks":
+
+            if value.lower()=="true":
+                self.skim_tracks = True
+            elif value.lower()=="false":
+                self.skim_tracks = False
+            else:
+                logging.error("allowed values for skim_tracks are: true false")
+            return
+
+        # skim_towers
+        elif parameter=="skim_towers":
+
+            if value.lower()=="true":
+                self.skim_towers = True
+            elif value.lower()=="false":
+                self.skim_towers = False
+            else:
+                logging.error("allowed values for skim_towers are: true false")
+            return
+
+        # skim_eflow
+        elif parameter=="skim_eflow":
+
+            if value.lower()=="true":
+                self.skim_eflow = True
+            elif value.lower()=="false":
+                self.skim_eflow = False
+            else:
+                logging.error("allowed values for skim_eflow are: true false")
+            return
+
         # pileup
         elif parameter=="pileup":
             quoteTag=False

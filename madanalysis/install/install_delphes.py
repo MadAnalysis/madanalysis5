@@ -41,7 +41,7 @@ class InstallDelphes:
         self.untardir    = os.path.normpath(self.tmpdir + '/MA5_delphes/')
         self.ncores      = 1
 #        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
-        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.2.0.tar.gz"}
+        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.0.tar.gz"}
 
     def Detect(self):
         if not os.path.isdir(self.toolsdir):
@@ -127,6 +127,13 @@ class InstallDelphes:
         filename = self.installdir+'/external/ExRootAnalysis/ExRootConfReader.cc'
         logging.debug('Updating files: commenting out lines in: '+filename+' ...')
         self.CommentLines(filename,[180,181,182],'//')
+
+        # Adding files
+        filesToAdd = ["MA5GenParticleFilter"]
+        if not self.CopyFiles(filesToAdd):
+            return False
+        if not self.UpdateDictionnary(filesToAdd):
+            return False
         
         # Ok
         return True
@@ -152,8 +159,53 @@ class InstallDelphes:
         
     def Build(self):
         # Input
-        theCommands=['make','-j'+str(self.ncores)]
-        logname=os.path.normpath(self.installdir+'/compilation.log')
+        theCommands=['make','-j'+str(self.ncores),'libDelphes.so']
+        logname=os.path.normpath(self.installdir+'/compilation_libDelphes.log')
+        # Execute
+        logging.debug('shell command: '+' '.join(theCommands))
+        ok, out= ShellCommand.ExecuteWithLog(theCommands,\
+                                             logname,\
+                                             self.installdir,\
+                                             silent=False)
+        # return result
+        if not ok:
+            logging.error('impossible to build the project. For more details, see the log file:')
+            logging.error(logname)
+            return ok
+
+        # Input
+        theCommands=['make','DelphesSTDHEP']
+        logname=os.path.normpath(self.installdir+'/compilation_STDHEP.log')
+        # Execute
+        logging.debug('shell command: '+' '.join(theCommands))
+        ok, out= ShellCommand.ExecuteWithLog(theCommands,\
+                                             logname,\
+                                             self.installdir,\
+                                             silent=False)
+        # return result
+        if not ok:
+            logging.error('impossible to build the project. For more details, see the log file:')
+            logging.error(logname)
+            return ok
+
+        # Input
+        theCommands=['make','DelphesLHEF']
+        logname=os.path.normpath(self.installdir+'/compilation_LHEF.log')
+        # Execute
+        logging.debug('shell command: '+' '.join(theCommands))
+        ok, out= ShellCommand.ExecuteWithLog(theCommands,\
+                                             logname,\
+                                             self.installdir,\
+                                             silent=False)
+        # return result
+        if not ok:
+            logging.error('impossible to build the project. For more details, see the log file:')
+            logging.error(logname)
+            return ok
+
+        # Input
+        theCommands=['make','DelphesHepMC']
+        logname=os.path.normpath(self.installdir+'/compilation_HepMC.log')
         # Execute
         logging.debug('shell command: '+' '.join(theCommands))
         ok, out= ShellCommand.ExecuteWithLog(theCommands,\
@@ -212,7 +264,10 @@ class InstallDelphes:
         logging.error("More details can be found into the log files:")
         logging.error(" - "+os.path.normpath(self.installdir+"/wget.log"))
         logging.error(" - "+os.path.normpath(self.installdir+"/unpack.log"))
-        logging.error(" - "+os.path.normpath(self.installdir+"/configuration.log"))
+        logging.error(" - "+os.path.normpath(self.installdir+"/configuration_libDelphes.log"))
+        logging.error(" - "+os.path.normpath(self.installdir+"/configuration_LHEF.log"))
+        logging.error(" - "+os.path.normpath(self.installdir+"/configuration_STDHEP.log"))
+        logging.error(" - "+os.path.normpath(self.installdir+"/configuration_HepMC.log"))
         logging.error(" - "+os.path.normpath(self.installdir+"/compilation.log"))
         logging.error(" - "+os.path.normpath(self.installdir+"/clean.log"))
 
@@ -255,4 +310,79 @@ class InstallDelphes:
             return False
 
         return True
+
             
+    def CopyFiles(self,filesToAdd):
+
+        for file in filesToAdd:
+
+            inputname  = self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/delphes/'+file+'.cc.install'
+            outputname = self.installdir+'/modules/'+file+'.cc'
+            logging.debug("Copying file from '"+inputname+"' to '"+outputname+'" ...')
+
+            try:
+                shutil.copy(inputname,outputname)
+            except:
+                logging.error("impossible to copy "+inputname+' in '+outputname)
+                return False
+             
+            inputname  = self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/delphes/'+file+'.h.install'
+            outputname = self.installdir+'/modules/'+file+'.h'
+            logging.debug("Copying file from '"+inputname+"' to '"+outputname+'" ...')
+
+            try:
+                shutil.copy(inputname,outputname)
+            except:
+                logging.error("impossible to copy "+inputname+' in '+outputname)
+                return False
+
+            return True
+
+
+    def UpdateDictionnary(self,filesToAdd):
+
+        inputname = self.installdir+'/modules/ModulesLinkDef.h'
+        logging.debug("Updating the Delphes dictionnary '"+inputname+'" ...')
+        try:
+            input = open(inputname)
+        except:
+            logging.error('impossible to open '+inputname)
+            return False
+
+        outputname = self.installdir+'/modules/ModulesLinkDef.savema5'
+        try:
+            output = open(outputname,'w')
+        except:
+            logging.error('impossible to write '+outputname)
+            return False
+
+        for line in input:
+            myline = line.lstrip()
+            myline = myline.rstrip()
+            words = myline.split()
+
+            if len(words)>=2:
+                if words[0]=='#include' and words[1]=='"modules/ExampleModule.h"':
+                    for file in filesToAdd:
+                        output.write('#include "modules/'+file+'.h"\n')
+            if len(words)>=5:
+                if words[0]=='#pragma' and words[1]=='link' and \
+                   words[2]=='C++' and words[3]=='class' and \
+                   words[4]=='ExampleModule+;':
+                    for file in filesToAdd:
+                        output.write('#pragma link C++ class '+file+'+;\n')
+
+            output.write(line)
+
+        input.close()
+        output.close()
+
+        try:
+            shutil.copy(outputname,inputname)
+        except:
+            logging.error("impossible to copy "+outputname+' in '+inputname)
+            return False
+        
+        return True
+    
+        

@@ -164,6 +164,77 @@ class JobWriter():
         else:
             return self.CheckJobStructure()
 
+    def CopyDelphesCard(self,input,output,cfg):
+        TagTreeWriter=False
+        TagExecutionPath=False
+        
+        # READING THE FILE  
+        for line in input:
+
+            # Pileup
+            if cfg.pileup!="":
+                line=line.replace('MinBias.pileup',theFile)
+
+            # Treatment
+            myline = line.lstrip()
+            myline = myline.rstrip()
+            words  = myline.split()
+            if myline.startswith('#'):
+                output.write(line)
+                continue
+                
+            if len(words)>=2:
+                if words[0].lower()=='set' and \
+                   words[1].lower()=='executionpath':
+                    TagExecutionPath=True
+
+            if len(words)>=1:
+                if words[0].lower()=='treewriter' and TagExecutionPath:
+                    TagExecutionPath=False
+                    output.write('  MA5Filter\n')
+
+
+            if len(words)>=3:
+                if words[0].lower()=='module' and \
+                   words[1].lower()=='treewriter' and \
+                   words[2].lower()=='treewriter' :
+                    TagTreeWriter=True
+                    if cfg.skim_genparticles:
+                        output.write('module MA5GenParticleFilter MA5Filter {\n')
+                        output.write('\n')
+                        output.write('  set InputArray Delphes/allParticles\n')
+                        output.write('  set OutputArray filteredParticles\n')
+                        output.write('  add PdgCode {18}\n')
+                        output.write('\n')
+                        output.write('}\n\n')
+
+
+            if len(words)>=5 and TagTreeWriter:
+                if words[0].lower()=='add' and\
+                   words[1].lower()=='branch':
+                    if words[3].lower()=='particle' and cfg.skim_genparticles:
+                        output.write('  add Branch MA5Filter/filteredParticles      Particle    GenParticle\n')
+                        continue
+                    if words[3].lower()=='track' and cfg.skim_tracks:
+                        output.write('#'+line)
+                        continue
+                    if words[3].lower()=='tower' and cfg.skim_towers:
+                        output.write('#'+line)
+                        continue
+                    if words[3].lower()=='eflowtrack' and cfg.skim_eflow:
+                        output.write('#'+line)
+                        continue
+                    if words[3].lower()=='eflowphoton' and cfg.skim_eflow:
+                        output.write('#'+line)
+                        continue
+                    if words[3].lower()=='eflowneutralhadron' and cfg.skim_eflow:
+                        output.write('#'+line)
+                        continue
+            
+            # Enter TreeWriter
+            output.write(line)
+        
+
     def CreateDelphesCard(self):
 
         if self.main.fastsim.package=="delphes":
@@ -199,10 +270,8 @@ class JobWriter():
             else:    
                 theFile = os.path.normpath(theDir+"/"+cfg.pileup)
 
-        for line in input:
-            if cfg.pileup!="":
-                line=line.replace('MinBias.pileup',theFile)
-            output.write(line)
+        self.CopyDelphesCard(input,output,cfg)
+
 
         try:
             input.close()
