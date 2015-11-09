@@ -54,12 +54,12 @@ void MA5GenParticleFilter::saveDescendants(Candidate* candidate, const std::vect
                                            std::vector<bool>& good_table, unsigned int level, unsigned int loop)
 {
   //candidate->M1
+
 }
 
 //------------------------------------------------------------------------------
 
-MA5GenParticleFilter::MA5GenParticleFilter() :
-  fItInputArray(0)
+MA5GenParticleFilter::MA5GenParticleFilter() : fItInputArray(0)
 {
 }
 
@@ -73,12 +73,8 @@ MA5GenParticleFilter::~MA5GenParticleFilter()
 
 void MA5GenParticleFilter::Init()
 {
-
   ExRootConfParam param;
   Size_t i, size;
-
-  // PT threshold
-  //  fPTMin = GetDouble("PTMin", 0.0);
 
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/allParticles"));
@@ -88,7 +84,6 @@ void MA5GenParticleFilter::Init()
   size = param.GetSize();
 
   // read PdgCodes to be filtered out from the data card
-
   fPdgCodes.clear();
   for(i = 0; i < size; ++i)
   {
@@ -110,28 +105,17 @@ void MA5GenParticleFilter::Finish()
 
 void MA5GenParticleFilter::Process()
 {
-  Candidate *candidate;
+  Candidate *cand;
   Int_t pdgCode;
   Int_t status;
-
   fItInputArray->Reset();
 
-  // Convert 
-  std::vector<Candidate*> table;
-  table.reserve(fInputArray->GetEntries());
-  while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
+  unsigned int i=0;
+  while((cand = static_cast<Candidate*>(fItInputArray->Next())))
   {
-    table.push_back(candidate);
-  }
-  std::vector<bool> good_table(false,table.size());
 
-
-  for (unsigned int i=0;i<table.size();i++)
-  {
-    Candidate *candidate = table[i];
-
-    pdgCode = std::abs(candidate->PID);
-    status  = std::abs(candidate->Status);
+    pdgCode = std::abs(cand->PID);
+    status  = std::abs(cand->Status);
 
     bool keep=false;
 
@@ -143,28 +127,23 @@ void MA5GenParticleFilter::Process()
     if ((pdgCode%100)==5 || (pdgCode%1000)==5) keep=true; //b hadrons
     if ((pdgCode%100)==4 || (pdgCode%1000)==4) keep=true; //c hadrons 
     if (pdgCode==4 || pdgCode==5) keep=true; // b/c quarks
-    if( find(fPdgCodes.begin(), fPdgCodes.end(), pdgCode) == fPdgCodes.end()) keep=true;
+    if( find(fPdgCodes.begin(), fPdgCodes.end(), pdgCode) == fPdgCodes.end()) 
+        keep=true;
 
     if (pdgCode==15) //tau hadrons
     {
       keep=true;
     }
 
-
     if (status==1)
     {
       if (pdgCode==11 || pdgCode==13) keep=true; //lepton
       if (pdgCode>=1000000)           keep=true; //susy
-      saveDescendants(candidate,table,good_table,0);
+      //  saveDescendants(cand,table,good_table,0);
     }
 
-    if (keep) good_table[i]=true;
-  }
-
-  // Save the good particle
-  for (unsigned int i=0;i<table.size();i++)
-  {
-    if (good_table[i]) fOutputArray->Add(table[i]);
+    if (keep) fOutputArray->Add(cand);
+    i++;
   }
 
 }
