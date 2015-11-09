@@ -71,6 +71,8 @@ class IsolationCombined : public IsolationBase
       Double_t sum=0.;
       sum += sumPT(part,event->tracks(),DR,PTmin);
       sum += sumPT(part,event->towers(),DR,PTmin);
+      sum -= part->pt();
+      if (part->isElectron()) sum -= part->pt();
       return sum;
     }
 
