@@ -26,7 +26,7 @@ Double_t IsolationBase::sumPT(const RecLeptonFormat* part,
     if (part->momentum().DeltaR(track.momentum()) > DR) continue;
 
     // Cut on id
-    if (track.isDelphesUnique(part->delphesTags())) continue;
+    //    if (track.isDelphesUnique(part->delphesTags())) continue;
 
     // Sum
     sumPT += track.pt();
@@ -189,7 +189,7 @@ Double_t IsolationBase::sumPT(const RecPhotonFormat* part,
     if (part->momentum().DeltaR(tower.momentum()) > DR) continue;
 
     // Cut on id
-    if (tower.isDelphesUnique(part->delphesTags())) continue;
+    //    if (tower.isDelphesUnique(part->delphesTags())) continue;
 
     // Sum
     sumPT += tower.pt();

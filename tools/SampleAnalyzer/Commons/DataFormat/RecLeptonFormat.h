@@ -64,6 +64,7 @@ class RecLeptonFormat : public RecParticleFormat
   Float_t sumPT_isol_;  /// sumPT in an isolation cone
   std::vector<IsolationConeType> isolCones_; // isolation cones
   ULong64_t refmc_;
+  UInt_t   pdg_;
 
   // -------------------------------------------------------------
   //                        method members
@@ -113,6 +114,7 @@ class RecLeptonFormat : public RecParticleFormat
     charge_=false;
     sumET_isol_=0.;
     sumPT_isol_=0.;
+    pdg_=0;
     isolCones_.clear();
   }
 
@@ -153,6 +155,22 @@ class RecLeptonFormat : public RecParticleFormat
   { isolCones_ = cones; }
 
   const ULong64_t& refmc() const {return refmc_;}
+
+  /// is it an electron?
+  Bool_t isElectron() const
+  { return (pdg_==11); }
+
+  /// is it a muon?
+  Bool_t isMuon() const
+  { return (pdg_==13); }
+
+  /// is it an electron?
+  void setElectronId()
+  { pdg_==11; }
+
+  /// is it a muon?
+  void setMuonId()
+  { pdg_==13; }
 
 };
 

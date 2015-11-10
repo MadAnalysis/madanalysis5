@@ -73,6 +73,7 @@ class IsolationCalorimeter : IsolationBase
       if (event==0) return 0;
       Double_t sum=0.;
       sum += sumPT(part,event->towers(),DR,PTmin);
+      if (part->isElectron()) sum -= part->pt();
       return sum;
     }
 
@@ -84,7 +85,7 @@ class IsolationCalorimeter : IsolationBase
       if (part==0) return 0;
       if (event==0) return 0;
       if (part->pt()<1e-9) return 999.;
-      return sumIsolation(part,event,DR,PTmin)/part->pt();
+      return (sumIsolation(part,event,DR,PTmin)/part->pt());
     }
 
     virtual Double_t sumIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
@@ -96,6 +97,7 @@ class IsolationCalorimeter : IsolationBase
       if (event==0) return 0;
       Double_t sum=0.;
       sum += sumPT(part,event->towers(),DR,PTmin);
+      sum -= part->pt();
       return sum;
     }
 

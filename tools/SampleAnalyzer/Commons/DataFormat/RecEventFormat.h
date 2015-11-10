@@ -315,6 +315,7 @@ class RecEventFormat
   RecLeptonFormat* GetNewElectron()
   {
     electrons_.push_back(RecLeptonFormat());
+    (&electrons_.back())->setElectronId();
     return &electrons_.back();
   }
 
@@ -322,6 +323,7 @@ class RecEventFormat
   RecLeptonFormat* GetNewMuon()
   {
     muons_.push_back(RecLeptonFormat());
+    (&muons_.back())->setMuonId();
     return &muons_.back();
   }
 

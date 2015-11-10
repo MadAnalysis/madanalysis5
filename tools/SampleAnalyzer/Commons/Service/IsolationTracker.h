@@ -74,6 +74,7 @@ class IsolationTracker : public IsolationBase
       if (event==0) return 0;
       Double_t sum=0.;
       sum += sumPT(part,event->tracks(),DR,PTmin);
+      sum -= part->pt();
       return sum;
     }
 
