@@ -639,7 +639,7 @@ class Layout:
 
         # Displaying warnings
         if warning_test:
-            report.CreateTable([13],text)
+            report.CreateTable([12],text)
             report.NewCell()
             text.SetColor(ColorType.RED)
             text.Add("Warnings related to negative event-weights:")
@@ -661,7 +661,7 @@ class Layout:
         
         text=TextReport()
         text.Add("Statistics table")
-        report.CreateTable([2.6,4.1,3.6,2.8,2.8,2.1,2.1],text)
+        report.CreateTable([2.6,4.1,2.3,2.8,2.8,2.1,2.1],text)
         report.NewCell(ColorType.YELLOW)
         text.Reset()
         text.Add("        Dataset")
@@ -787,7 +787,7 @@ class Layout:
 
         # Displaying warnings
         if warning_test:
-            report.CreateTable([13],text)
+            report.CreateTable([12],text)
             report.NewCell()
             text.SetColor(ColorType.RED)
             text.Add("Warnings related to negative event-weights:")
@@ -804,6 +804,20 @@ class Layout:
             report.EndTable()    
                 
             
+    # Writing Statistics Table
+    def WriteStatisticsTablePID(self,index,report):
+        
+        text=TextReport()
+        text.Add("Statistics table")
+        report.CreateTable([12],text)
+        report.NewCell(ColorType.YELLOW)
+        text.Reset()
+        text.Add("  ")
+        report.WriteText(text)
+        report.NewLine()
+        report.EndTable()    
+
+
     def GenerateReport(self,history,output_path,mode):
 
         # Creating production directory
@@ -943,8 +957,11 @@ class Layout:
                 text.Add(self.main.selection[ind].GetStringDisplay()+'\n')
                 report.WriteText(text)
                 text.Reset()
+                text.Add('\\ \n')
                 if self.main.selection[ind].observable.name not in ['NPID','NAPID']:
                     self.WriteStatisticsTable(ihisto,report)
+                else:
+                    self.WriteStatisticsTablePID(ihisto,report)
                 report.WriteFigure(text,output_path +'/selection_'+str(ihisto))
                 text.Add('\n\n')
                 report.WriteText(text)
