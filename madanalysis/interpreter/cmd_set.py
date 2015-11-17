@@ -95,7 +95,19 @@ class CmdSet(CmdBase.CmdBase):
         for i in range(len(objs)):
             objs[i] = objs[i].replace('XXX','.')
 
-        if len(objs)==2 and objs[0].lower()=='main':
+        if len(objs)==2 and objs[0].lower()=='main' and objs[1].lower()=='recast':
+            import os
+            hasdelphes=os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphes'))\
+              or self.main.archi_info.has_delphes
+            hasMA5Tune=os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphesMA5Tune'))\
+              or self.main.archi_info.has_delphesMA5tune
+            hasPAD=os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/PAD'))
+            hasPADTune=os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/PADForMA5Tune'))
+            self.main.recasting.user_SetParameter("status",args[2],self.main.mode,hasdelphes,hasMA5Tune,self.main.datasets, hasPAD,hasPADTune)
+            if args[2]=='on' and self.main.fastsim.package!='none':
+                logging.warning("Fastsim package switched off and internally handled")
+                self.main.fastsim.package="none"
+        elif len(objs)==2 and objs[0].lower()=='main':
             self.main.user_SetParameter(objs[1],args[2])
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='isolation':
             self.main.isolation.user_SetParameter(objs[2],args[2])
@@ -103,6 +115,9 @@ class CmdSet(CmdBase.CmdBase):
             self.main.merging.user_SetParameter(objs[2],args[2],self.main.mode,self.main.archi_info.has_fastjet)
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='fastsim':
             self.main.fastsim.user_SetParameter(objs[2],args[2],self.main.datasets,self.main.mode,self.main.archi_info.has_fastjet,self.main.archi_info.has_delphes,self.main.archi_info.has_delphesMA5tune) 
+            if objs[2]=='package' and args[2] in ['fastjet', 'delphes', 'delphesMA5tune'] and self.main.recasting.status=='on':
+                logging.warning("Recasting mode switched off")
+                self.main.recasting.status ="off"
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='shower':
             self.main.shower.user_SetParameter(objs[2],args[2],self.main.mode,self.main.mcatnloutils)
         else:

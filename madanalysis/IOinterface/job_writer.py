@@ -45,70 +45,71 @@ class JobWriter():
         self.shwrmode   = ''
 
     @staticmethod     
-    def CheckJobStructureMute(path):
+    def CheckJobStructureMute(path,recastflag):
         if not os.path.isdir(path):
             return False
-        elif not os.path.isdir(path+"/Build"):
-            return False
-        elif not os.path.isdir(path+"/Build/Lib"):
-            return False
-        elif not os.path.isdir(path+"/Build/SampleAnalyzer"):
-            return False
-        elif not os.path.isdir(path+"/Build/SampleAnalyzer/User"):
-            return False
-        elif not os.path.isdir(path+"/Build/SampleAnalyzer/User/Analyzer"):
-            return False
-        elif not os.path.isdir(path+"/Build/Main"):
-            return False
-        elif not os.path.isdir(path+"/Output"):
+        if not recastflag:
+            if not os.path.isdir(path+"/Build"):
+                return False
+            elif not os.path.isdir(path+"/Build/Lib"):
+                return False
+            elif not os.path.isdir(path+"/Build/SampleAnalyzer"):
+                return False
+            elif not os.path.isdir(path+"/Build/SampleAnalyzer/User"):
+                return False
+            elif not os.path.isdir(path+"/Build/SampleAnalyzer/User/Analyzer"):
+                return False
+            elif not os.path.isdir(path+"/Build/Main"):
+                return False
+        if not os.path.isdir(path+"/Output"):
             return False
         elif not os.path.isdir(path+"/Input"):
             return False
         elif not os.path.isfile(path+"/history.ma5"):
             return False
-        else:
-            return True
+        return True
 
 
     @staticmethod     
-    def CreateJobStructure(path):
+    def CreateJobStructure(path,recastflag):
         if not os.path.isdir(path):
             return False
-        try:
-            os.mkdir(path+"/Build")
-        except:
-            logging.error("Impossible to create the folder 'Build'")
-            return False
-        try:
-            os.mkdir(path+"/Build/Lib")
-        except:
-            logging.error("Impossible to create the folder 'Build/Lib'")
-            return False
-        try:
-            os.mkdir(path+"/Build/SampleAnalyzer")
-        except:
-            logging.error("Impossible to create the folder 'Build/SampleAnalyzer'")
-            return False
-        try:
-            os.mkdir(path+"/Build/SampleAnalyzer/User")
-        except:
-            logging.error("Impossible to create the folder 'Build/SampleAnalyzer/User'")
-            return False
-        try:
-            os.mkdir(path+"/Build/SampleAnalyzer/User/Analyzer")
-        except:
-            logging.error("Impossible to create the folder 'Build/SampleAnalyzer/User/Analyzer'")
-            return False
-        try:
-            os.mkdir(path+"/Build/Log")
-        except:
-            logging.error("Impossible to create the folder 'Build/Log'")
-            return False
-        try:
-            os.mkdir(path+"/Build/Main")
-        except:
-            logging.error("Impossible to create the folder 'Build/Main'")
-            return False
+        elif not recastflag:
+            try:
+                os.mkdir(path+"/Build")
+            except:
+                logging.error("Impossible to create the folder 'Build'")
+                return False
+            try:
+                os.mkdir(path+"/Build/Lib")
+            except:
+                logging.error("Impossible to create the folder 'Build/Lib'")
+                return False
+            try:
+                os.mkdir(path+"/Build/SampleAnalyzer")
+            except:
+                logging.error("Impossible to create the folder 'Build/SampleAnalyzer'")
+                return False
+            try:
+                os.mkdir(path+"/Build/SampleAnalyzer/User")
+            except:
+                logging.error("Impossible to create the folder 'Build/SampleAnalyzer/User'")
+                return False
+            try:
+                os.mkdir(path+"/Build/SampleAnalyzer/User/Analyzer")
+            except:
+                logging.error("Impossible to create the folder 'Build/SampleAnalyzer/User/Analyzer'")
+                return False
+            try:
+                os.mkdir(path+"/Build/Log")
+            except:
+                logging.error("Impossible to create the folder 'Build/Log'")
+                return False
+            try:
+                os.mkdir(path+"/Build/Main")
+            except:
+                logging.error("Impossible to create the folder 'Build/Main'")
+                return False
         try:
             os.mkdir(path+"/Output")
         except:
@@ -123,29 +124,30 @@ class JobWriter():
         return True
 
 
-    def CheckJobStructure(self):
+    def CheckJobStructure(self,recastflag):
         if not os.path.isdir(self.path):
             logging.error("folder '"+self.path+"' is not found")
             return False
-        elif not os.path.isdir(self.path+"/Build"):
-            logging.error("folder '"+self.path+"/Build' is not found")
-            return False
-        elif not os.path.isdir(self.path+"/Build/Lib"):
-            logging.error("folder '"+self.path+"/Build/Lib' is not found")
-            return False
-        elif not os.path.isdir(self.path+"/Build/SampleAnalyzer"):
-            logging.error("folder '"+self.path+"/Build/SampleAnalyzer' is not found")
-            return False
-        elif not os.path.isdir(self.path+"/Build/SampleAnalyzer/User"):
-            logging.error("folder '"+self.path+"/Build/SampleAnalyzer/User' is not found")
-            return False
-        elif not os.path.isdir(self.path+"/Build/SampleAnalyzer/User/Analyzer"):
-            logging.error("folder '"+self.path+"/Build/SampleAnalyzer/User/Analyzer' is not found")
-            return False
-        elif not os.path.isdir(self.path+"/Build/Main"):
-            logging.error("folder '"+self.path+"/Build/Main' is not found")
-            return False
-        elif not os.path.isdir(self.path+"/Output"):
+        if not recastflag:
+            if not os.path.isdir(self.path+"/Build"):
+                logging.error("folder '"+self.path+"/Build' is not found")
+                return False
+            elif not os.path.isdir(self.path+"/Build/Lib"):
+                logging.error("folder '"+self.path+"/Build/Lib' is not found")
+                return False
+            elif not os.path.isdir(self.path+"/Build/SampleAnalyzer"):
+                logging.error("folder '"+self.path+"/Build/SampleAnalyzer' is not found")
+                return False
+            elif not os.path.isdir(self.path+"/Build/SampleAnalyzer/User"):
+                logging.error("folder '"+self.path+"/Build/SampleAnalyzer/User' is not found")
+                return False
+            elif not os.path.isdir(self.path+"/Build/SampleAnalyzer/User/Analyzer"):
+                logging.error("folder '"+self.path+"/Build/SampleAnalyzer/User/Analyzer' is not found")
+                return False
+            elif not os.path.isdir(self.path+"/Build/Main"):
+                logging.error("folder '"+self.path+"/Build/Main' is not found")
+                return False
+        if not os.path.isdir(self.path+"/Output"):
             logging.error("folder '"+self.path+"/Output' is not found")
             return False
         elif not os.path.isdir(self.path+"/Input"):
@@ -162,7 +164,8 @@ class JobWriter():
             InstanceName.Clear()
             return FolderWriter.CreateDirectory(self.path,question=True)
         else:
-            return self.CheckJobStructure()
+            recast = (self.main.recasting.status=="on")
+            return self.CheckJobStructure(recast)
 
     def CopyDelphesCard(self,input,output,cfg):
         TagTreeWriter=False
@@ -285,25 +288,30 @@ class JobWriter():
 
 
     def CopyLHEAnalysis(self):
-        if not JobWriter.CreateJobStructure(self.path):
+        recast = (self.main.recasting.status=="on")
+        if not JobWriter.CreateJobStructure(self.path,recast):
             return False
-        try:
-            shutil.copyfile\
-                      (\
-                      self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/newAnalyzer.py",\
-                      self.path+"/Build/SampleAnalyzer/newAnalyzer.py"\
-                      )
-        except:
-            logging.error('Impossible to copy the file "newAnalyzer"')
-            return False
-        try:    
-            os.chmod(self.path+"/Build/SampleAnalyzer/newAnalyzer.py",0755)
-        except:
-            logging.error('Impossible to make executable the file "newAnalyzer"')
-            return False
+        if not recast:
+            try:
+                shutil.copyfile\
+                          (\
+                          self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/newAnalyzer.py",\
+                          self.path+"/Build/SampleAnalyzer/newAnalyzer.py"\
+                          )
+            except:
+                logging.error('Impossible to copy the file "newAnalyzer"')
+                return False
+            try:    
+                os.chmod(self.path+"/Build/SampleAnalyzer/newAnalyzer.py",0755)
+            except:
+                logging.error('Impossible to make executable the file "newAnalyzer"')
+                return False
 
         if self.main.fastsim.package in ["delphes","delphesMA5tune"]:
             self.CreateDelphesCard()
+
+        if self.main.recasting.status=="on":
+            self.main.recasting.CreateCard(self.path)
 
         return True
 

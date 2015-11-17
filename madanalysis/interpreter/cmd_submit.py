@@ -341,9 +341,22 @@ class CmdSubmit(CmdBase):
                 cardname = self.main.fastsim.delphesMA5tune.card
             os.system(self.main.session_info.editor+" "+dirname+"/Input/"+cardname)
 
+    def editRecastingCard(self,dirname):
+        if self.main.forced or self.main.script:
+            return
+
+        logging.info("Would you like to edit the recasting Card ? (Y/N)")
+        allowed_answers=['n','no','y','yes']
+        answer=""
+        while answer not in  allowed_answers:
+            answer=raw_input("Answer: ")
+            answer=answer.lower()
+        if answer=="no" or answer=="n":
+            return
+        else:
+            os.system(self.main.session_info.editor+" "+dirname+"/Input/recasting_card.dat")
 
     def submit(self,dirname,history):
-
         # Initializing the JobWriter
         jobber = JobWriter(self.main,dirname,self.resubmit)
         
@@ -357,13 +370,13 @@ class CmdSubmit(CmdBase):
         if not jobber.Open():
             logging.error("job submission aborted.")
             return False
-        
+
         if not self.resubmit:
             logging.info("   Copying 'SampleAnalyzer' source files...")
             if not jobber.CopyLHEAnalysis():
                 logging.error("   job submission aborted.")
                 return False
-            if not jobber.CreateBldDir():
+            if self.main.recasting.status != 'on' and not jobber.CreateBldDir():
                 logging.error("   job submission aborted.")
                 return False
             if self.main.shower.enable:
@@ -378,13 +391,17 @@ class CmdSubmit(CmdBase):
                     logging.error("   job submission aborted.")
                     return False
 
-        logging.info("   Inserting your selection into 'SampleAnalyzer'...")
-        if not jobber.WriteSelectionHeader(self.main):
-            logging.error("job submission aborted.")
-            return False
-        if not jobber.WriteSelectionSource(self.main):
-            logging.error("job submission aborted.")
-            return False
+        # In the case of recasting, there is no need to create a standard Job
+        if self.main.recasting.status == "on":
+            self.editRecastingCard(dirname)
+        else:
+            logging.info("   Inserting your selection into 'SampleAnalyzer'...")
+            if not jobber.WriteSelectionHeader(self.main):
+                logging.error("job submission aborted.")
+                return False
+            if not jobber.WriteSelectionSource(self.main):
+                logging.error("job submission aborted.")
+                return False
 
         logging.info("   Writing the list of datasets...")
         for item in self.main.datasets:
@@ -392,73 +409,84 @@ class CmdSubmit(CmdBase):
 
         logging.info("   Writing the command line history...")
         jobber.WriteHistory(history,self.main.firstdir)
-        layouter = LayoutWriter(self.main, dirname)
-        layouter.WriteLayoutConfig()
+        if self.main.recasting.status == "on":
+            if not self.main.recasting.LayoutWriter():
+                return False
+        else:
+            layouter = LayoutWriter(self.main, dirname)
+            layouter.WriteLayoutConfig()
 
-        if not self.resubmit:
+        if not self.main.recasting.status=='on' and not self.resubmit:
             logging.info("   Creating Makefiles...")
             if not jobber.WriteMakefiles():
                 logging.error("job submission aborted.")
                 return False
 
-        #edit the delphes cards
+        # Edit the delphes or recasting cards
         if self.main.fastsim.package in ["delphes","delphesMA5tune"]:
             self.editDelphesCard(dirname)
 
-        if self.resubmit:
+        if self.resubmit and not self.main.recasting.status=='on':
             logging.info("   Cleaning 'SampleAnalyzer'...")
             if not jobber.MrproperJob():
                 logging.error("job submission aborted.")
                 return False
 
-        logging.info("   Compiling 'SampleAnalyzer'...")
-        if not jobber.CompileJob():
-            logging.error("job submission aborted.")
-            return False
+        if not self.main.recasting.status=='on':
+            logging.info("   Compiling 'SampleAnalyzer'...")
+            if not jobber.CompileJob():
+                logging.error("job submission aborted.")
+                return False
 
-        logging.info("   Linking 'SampleAnalyzer'...")
-        if not jobber.LinkJob():
-            logging.error("job submission aborted.")
-            return False
+            logging.info("   Linking 'SampleAnalyzer'...")
+            if not jobber.LinkJob():
+                logging.error("job submission aborted.")
+                return False
 
-        for item in self.main.datasets:
-            logging.info("   Running 'SampleAnalyzer' over dataset '"
-                         +item.name+"'...")
-            logging.info("    *******************************************************")
-            if not jobber.RunJob(item):
-                logging.error("run over '"+item.name+"' aborted.")
-            logging.info("    *******************************************************")
-    
-        return True   
+            for item in self.main.datasets:
+                logging.info("   Running 'SampleAnalyzer' over dataset '"
+                             +item.name+"'...")
+                logging.info("    *******************************************************")
+                if not jobber.RunJob(item):
+                    logging.error("run over '"+item.name+"' aborted.")
+                logging.info("    *******************************************************")
+        return True
 
 
     def extract(self,dirname,layout):
         logging.info("   Checking SampleAnalyzer output...")
         jobber = JobReader(dirname)
-        if not jobber.CheckDir():
+        if self.main.recasting.status=='on':
+            if not self.main.recasting.CheckDir():
+                return False
+        elif not jobber.CheckDir():
             logging.error("errors have occured during the analysis.")
             return False
-        
+
         for item in self.main.datasets:
-            if not jobber.CheckFile(item):
+            if self.main.recasting.status=='on':
+                if not self.main.recasting.CheckFile(item):
+                    return False
+            elif not jobber.CheckFile(item):
                 logging.error("errors have occured during the analysis.")
                 return False
 
-        logging.info("   Extracting data from the output files...")
-        for i in range(0,len(self.main.datasets)):
-            jobber.Extract(self.main.datasets[i],\
-                           layout.cutflow.detail[i],\
-                           0,\
-                           layout.plotflow.detail[i],\
-                           domerging=False)
-            if self.main.merging.enable:
+        if self.main.recasting.status!='on':
+            logging.info("   Extracting data from the output files...")
+            for i in range(0,len(self.main.datasets)):
                 jobber.Extract(self.main.datasets[i],\
+                               layout.cutflow.detail[i],\
                                0,\
-                               layout.merging.detail[i],\
-                               0,\
-                               domerging=True)
-        return True    
-           
+                               layout.plotflow.detail[i],\
+                               domerging=False)
+                if self.main.merging.enable:
+                    jobber.Extract(self.main.datasets[i],\
+                                   0,\
+                                   layout.merging.detail[i],\
+                                   0,\
+                                   domerging=True)
+        return True
+
 
     def help(self):
         if not self.resubmit:

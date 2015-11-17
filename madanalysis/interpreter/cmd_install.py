@@ -46,6 +46,40 @@ class CmdInstall(CmdBase):
             self.help()
             return
 
+        # delphes preinstallation
+        def inst_delphes(main,installer):
+            if os.path.isdir(os.path.normpath(main.archi_info.ma5dir+'/tools/delphesMA5Tune')):
+                logging.warning("   DelphesMA5Tune is installed: deactivating...")
+                if os.path.isdir(os.path.normpath(main.archi_info.ma5dir+'/tools/DEACT_delphesMA5Tune')):
+                    from madanalysis.IOinterface.folder_writer import FolderWriter
+                    if not FolderWriter.RemoveDirectory(os.path.normpath(main.archi_info.ma5dir+'/tools/DEACT_delphesMA5Tune'),True):
+                        return False
+                shutil.move(os.path.normpath(main.archi_info.ma5dir+'/tools/delphesMA5Tune'),os.path.normpath(main.archi_info.ma5dir+'/tools/DEACT_delphesMA5Tune'))
+            if os.path.isdir(os.path.normpath(main.archi_info.ma5dir+'/tools/DEACT_delphes')):
+                logging.warning("   Delphes deactivated. Activating it...")
+                shutil.move(os.path.normpath(main.archi_info.ma5dir+'/tools/DEACT_delphes'),os.path.normpath(main.archi_info.ma5dir+'/tools/delphes'))
+                return True
+            elif not os.path.isdir(os.path.normpath(main.archi_info.ma5dir+'/tools/delphes')):
+                logging.warning("   Delphes not installed...")
+                return installer.Execute('delphes')
+
+        # ma5tune preinstallation
+        def inst_ma5tune(main,installer):
+            if os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphes')):
+                logging.warning("   Delphes is installed: decativating it...")
+                if os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphesMA5')):
+                    from madanalysis.IOinterface.folder_writer import FolderWriter
+                    if not FolderWriter.RemoveDirectory(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphes'),True):
+                        return False
+                shutil.move(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphes'),os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphes'))
+            if os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphesMA5Tune')):
+                logging.warning("   DelphesMA5Tune deactivated. Activating it...")
+                shutil.move(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphesMA5Tune'),os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphesMA5Tune'))
+                return True
+            elif not os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphesMA5tune')):
+                logging.warning("   DelphesMA5Tune not installed: installing it...")
+                return installer.Execute('delphesMA5tune')
+
         # Calling selection method
         if args[0]=='samples':
             installer=InstallManager(self.main)
@@ -55,7 +89,7 @@ class CmdInstall(CmdBase):
             return installer.Execute('zlib')
         elif args[0]=='delphes':
             installer=InstallManager(self.main)
-            return installer.Execute('delphes')
+            inst_delphes(self.main,installer)
         elif args[0]=='delphesMA5tune':
             logging.warning("The package 'delphesMA5tune' is now obsolete. It is replaced by Delphes with special MA5-tuned cards.")
             if not self.main.forced:
@@ -68,7 +102,7 @@ class CmdInstall(CmdBase):
               if answer=="no" or answer=="n":
                   return
             installer=InstallManager(self.main)
-            return installer.Execute('delphesMA5tune')
+            return inst_ma5tune(self.main,installer)
         elif args[0]=='fastjet':
             installer=InstallManager(self.main)
             if installer.Execute('fastjet')==False:
@@ -91,40 +125,16 @@ class CmdInstall(CmdBase):
             return installer.Execute('RecastingTools')
         elif args[0]=='PADForMA5Tune':
             installer=InstallManager(self.main)
-            if os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphes')):
-                logging.warning("   Delphes is installed: removing it...")
-                from madanalysis.IOinterface.folder_writer import FolderWriter
-                if not FolderWriter.RemoveDirectory(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphes'),True):
-                    return False
-            if not os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphesMA5tune')):
-                logging.warning("   DelphesMA5Tune not installed: installing it...")
-                if not installer.Execute('delphesMA5tune'):
-                    return False
-            return installer.Execute('PADForMA5Tune')
+            if inst_ma5tune(self.main,installer):
+                return installer.Execute('PADForMA5Tune')
         elif args[0]=='PAD':
             installer=InstallManager(self.main)
-            if os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphesMA5Tune')):
-                logging.warning("   DelphesMA5Tune is installed: removing it...")
-                from madanalysis.IOinterface.folder_writer import FolderWriter
-                if not FolderWriter.RemoveDirectory(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphesMA5Tune'),True):
-                    return False
-            if not os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphes')):
-                logging.warning("   Delphes not installed...")
-                if not installer.Execute('delphes'):
-                    return False
-            return installer.Execute('PAD')
+            if inst_delphes(self.main,installer):
+                return installer.Execute('PAD')
         elif args[0]=='PADForMA5Tunelocal' and len(args)==2:
             installer=InstallManager(self.main)
-            if os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphes')):
-                logging.warning("   Delphes is installed: removing it...")
-                from madanalysis.IOinterface.folder_writer import FolderWriter
-                if not FolderWriter.RemoveDirectory(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphes'),True):
-                    return False
-            if not os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphesMA5tune')):
-                logging.warning("   DelphesMA5Tune not installed: installing it...")
-                if not installer.Execute('delphesMA5tune'):
-                    return False
-            return installer.Execute('PADForMA5Tunelocal_xxx_'+args[1])
+            if inst_ma5tune(self.main,installer):
+                return installer.Execute('PADForMA5Tunelocal_xxx_'+args[1])
         else:
             logging.error("the syntax is not correct.")
             self.help()

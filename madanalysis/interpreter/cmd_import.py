@@ -75,7 +75,7 @@ class CmdImport(CmdBase.CmdBase):
               
             
         elif len(args)==1 and os.path.isdir(filename):
-            if JobWriter.CheckJobStructureMute(filename):
+            if JobWriter.CheckJobStructureMute(filename,(self.main.recasting.status=='on')):
                 self.ImportJob(filename,myinterpreter,history)
                 return
             elif UFOReader.CheckStructure(filename):
@@ -361,8 +361,9 @@ class CmdImport(CmdBase.CmdBase):
         if len(files)==0:
             logging.error("The dataset '"+filename+"' has not been found or has a unsupported format.")
             if recowarning:
-                logging.error("To load LHE or HEP files, please specify a clustering algorithm by typing. For instance:")
+                logging.error("To load LHE or HEP files, please specify a clustering algorithm by typing, for instance:")
                 logging.error(" set main.clustering.algorithm = antikt")
+                logging.error("or enter the recasting mode")
             return False
             
         # Getting current dir

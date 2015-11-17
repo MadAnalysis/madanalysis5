@@ -36,6 +36,7 @@ from madanalysis.IOinterface.library_writer             import LibraryWriter
 from madanalysis.enumeration.ma5_running_type           import MA5RunningType
 from madanalysis.enumeration.stacking_method_type       import StackingMethodType
 from madanalysis.observable.observable_manager          import ObservableManager
+from madanalysis.configuration.recast_configuration     import RecastConfiguration
 from madanalysis.configuration.fastsim_configuration    import FastsimConfiguration
 from madanalysis.configuration.isolation_configuration  import IsolationConfiguration
 from madanalysis.configuration.merging_configuration    import MergingConfiguration
@@ -57,7 +58,8 @@ class Main():
                                            '"S/sqrt(S+B)"','"B/sqrt(B+S)"'], \
                       "SBerror"         : [], \
                       "stacking_method" : ["stack","superimpose","normalize2one"], \
-                      "outputfile"      : ['"output.lhe.gz"','"output.lhco.gz"'] \
+                      "outputfile"      : ['"output.lhe.gz"','"output.lhco.gz"'],\
+                      "recast"          : ["on", "off"] \
                       }
 
     SBformula = { 'S/B'         : '1./(B**2)*sqrt(B**2*ES**2+S**2*EB**2)', \
@@ -83,11 +85,13 @@ class Main():
         self.observables    = ObservableManager(self.mode)
         self.expertmode     = False
         self.repeatSession  = False
+        self.recast         = "off"
         self.ResetParameters()
 
     def ResetParameters(self):
         self.merging        = MergingConfiguration()
         self.fastsim        = FastsimConfiguration()
+        self.recasting      = RecastConfiguration()
         self.SBratio        = 'S/B'
         self.SBerror        = Main.SBformula['S/B']
         self.lumi           = 10
@@ -122,7 +126,12 @@ class Main():
             samples.append('.hep')
             samples.append('.hepmc')
         else:
-            if self.fastsim.package=="none":
+            if self.recasting.status=="on":
+                samples.append('.hep')
+                samples.append('.hepmc')
+                if self.archi_info.has_delphes or self.archi_info.has_delphesMA5tune:
+                    samples.append('.root')
+            elif self.fastsim.package=="none":
                 samples.append('.lhco')
                 if self.archi_info.has_delphes or self.archi_info.has_delphesMA5tune:
                     samples.append('.root')
@@ -155,6 +164,8 @@ class Main():
             self.merging.Display()
         self.fastsim.Display()
         self.isolation.Display()
+        logging.info(" *********************************" )
+        self.recasting.Display()
         self.shower.Display()
         logging.info(" *********************************" )
 
@@ -192,6 +203,8 @@ class Main():
             logging.info(' S/B ratio formula = "' + self.SBratio + '"')
         elif parameter=="SBerror":
             logging.info(' S/B error formula = "' + self.SBerror + '"')
+        elif parameter=="recast":
+            logging.info(' Recasting mode = "' + self.recasting.status + '"')
         else:
             logging.error("'main' has no parameter called '"+parameter+"'")
 
