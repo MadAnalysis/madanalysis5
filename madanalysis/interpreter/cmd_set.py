@@ -99,11 +99,11 @@ class CmdSet(CmdBase.CmdBase):
             import os
             hasdelphes=os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphes'))\
               or self.main.archi_info.has_delphes
-            hasMA5Tune=os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphesMA5Tune'))\
+            hasMA5tune=os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune'))\
               or self.main.archi_info.has_delphesMA5tune
             hasPAD=os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/PAD'))
-            hasPADTune=os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/PADForMA5Tune'))
-            self.main.recasting.user_SetParameter("status",args[2],self.main.mode,hasdelphes,hasMA5Tune,self.main.datasets, hasPAD,hasPADTune)
+            hasPADtune=os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/PADForMA5tune'))
+            self.main.recasting.user_SetParameter("status",args[2],self.main.mode,hasdelphes,hasMA5tune,self.main.datasets, hasPAD,hasPADtune)
             if args[2]=='on' and self.main.fastsim.package!='none':
                 logging.warning("Fastsim package switched off and internally handled")
                 self.main.fastsim.package="none"

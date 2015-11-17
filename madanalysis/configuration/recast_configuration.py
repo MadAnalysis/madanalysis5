@@ -35,6 +35,12 @@ class RecastConfiguration:
         self.ma5tune = False
         self.pad     = False
         self.padtune = False
+        self.DelphesDic = {
+          "delphes_card_cms_standard.tcl":      ["cms_sus_14_001_monojet", "cms_sus_13_016", "cms_sus_13_012", "cms_sus_13_011"],
+          "delphes_card_atlas_sus_2013_05.tcl": ["ATLAS_EXOT_2014_06", "atlas_susy_2013_21", "atlas_sus_13_05"],
+          "delphes_card_atlas_sus_2013_11.tcl": ["atlas_higg_2013_03", "atlas_susy_2013_11", "atlas_1405_7875"],
+          "delphes_card_atlas_sus_2014_10.tcl": ["atlas_susy_2014_10"] }
+        self.delphesruns = []
 
     def Display(self):
         self.user_DisplayParameter("status")
@@ -68,12 +74,12 @@ class RecastConfiguration:
             return
         elif parameter=="padtune":
             if self.padtune:
-                logging.info("   * the PADForMa5Tune is         : available")
+                logging.info("   * the PADForMa5tune is         : available")
             else:
-                logging.info("   * the PADForMa5Tune is         : not available")
+                logging.info("   * the PADForMa5tune is         : not available")
             return
 
-    def user_SetParameter(self,parameter,value,level,hasdelphes,hasMA5Tune,datasets, hasPAD, hasPADTune):
+    def user_SetParameter(self,parameter,value,level,hasdelphes,hasMA5tune,datasets, hasPAD, hasPADtune):
         # algorithm
         if parameter=="status":
             # Switch on the clustering
@@ -95,13 +101,13 @@ class RecastConfiguration:
                 else:
                     canrecast=True
 
-                # DelphesMA5Tune and the PADFor MA5TUne?
-                if hasMA5Tune:
+                # DelphesMA5tune and the PADFor MA5TUne?
+                if hasMA5tune:
                     self.ma5tune=True
-                if hasPADTune:
+                if hasPADtune:
                     self.padtune=True
-                if not hasPADTune or not hasMA5Tune:
-                    logging.warning("DelphesMA5Tune and/or the PADForMA5Tune are not installed " + \
+                if not hasPADtune or not hasMA5tune:
+                    logging.warning("DelphesMA5tune and/or the PADForMA5tune are not installed " + \
                         "(or deactivated): the corresponding analyses will be unavailable")
                 else:
                     canrecast=True
@@ -110,7 +116,7 @@ class RecastConfiguration:
                 if canrecast:
                     self.status="on"
                 else:
-                    logging.error("The recasting modules (PAD/Delphes, PADForMA5Tune/DelphesMa5Tune) " + \
+                    logging.error("The recasting modules (PAD/Delphes, PADForMA5tune/DelphesMa5tune) " + \
                        "are not available. The recasting mode cannot be activated")
                     return
 
@@ -154,7 +160,7 @@ class RecastConfiguration:
     def CreateCard(self,dirname):
         # getting the PAD analysis
         if self.padtune:
-            self.CreateMyCard(dirname,"PADForMA5Tune")
+            self.CreateMyCard(dirname,"PADForMA5tune")
         if self.pad:
             self.CreateMyCard(dirname,"PAD")
 
@@ -164,7 +170,9 @@ class RecastConfiguration:
         exist=os.path.isfile(dirname+'/Input/recasting_card.dat')
         card = open(dirname+'/Input/recasting_card.dat','a')
         if not exist:
-            card.write('# AnalysisName               PADType    Switch\n')
+            card.write('# Delphes cards must be located in the PAD(ForMA%tune) directory\n')
+            card.write('# Switches must be on or off\n')
+            card.write('# AnalysisName               PADType    Switch     DelphesCard\n')
         if padtype=="PAD":
             mytype="v1.2"
         else:
@@ -172,9 +180,23 @@ class RecastConfiguration:
         for line in mainfile:
             if "manager.InitializeAnalyzer" in line:
                 analysis = str(line.split('\"')[1])
-                card.write(analysis.ljust(30,' ') + mytype.ljust(12,' ') + 'on\n')
+                mydelphes="UNKNOWN"
+                for mycard,alist in self.DelphesDic.items():
+                      if analysis in alist:
+                          mydelphes=mycard
+                          break
+                card.write(analysis.ljust(30,' ') + mytype.ljust(12,' ') + 'on    ' + mydelphes+'\n')
         mainfile.close()
         card.close()
+
+    def GetDelphesRuns(self,recastcard):
+        self.delphesruns=[]
+        runcard = open(recastcard,'r')
+        for line in runcard:
+            myline=line.split()
+            if myline[2].lower() =='on' and myline[3] not in self.delphesruns:
+                self.delphesruns.append(myline[1]+'_'+myline[3])
+        return True
 
     def CheckDir(self):
         logging.error("checkdir to be implemented")

@@ -69,12 +69,12 @@ class InstallManager():
             from madanalysis.install.install_recastingtools import InstallRecastingTools
             installer=InstallRecastingTools(self.main)
         elif package=='padforma5tune':
-            from madanalysis.install.install_padma5tune import InstallPadForMA5Tune
-            installer=InstallPadForMA5Tune(self.main)
+            from madanalysis.install.install_padma5tune import InstallPadForMA5tune
+            installer=InstallPadForMA5tune(self.main)
         elif 'padforma5tunelocal' in package:
             mydir=rawpackage.split('_xxx_')[-1]
-            from madanalysis.install.install_padma5tunelocal import InstallPadForMA5Tune
-            installer=InstallPadForMA5Tune(self.main,mydir)
+            from madanalysis.install.install_padma5tunelocal import InstallPadForMA5tune
+            installer=InstallPadForMA5tune(self.main,mydir)
         elif package=='pad':
             from madanalysis.install.install_pad import InstallPad
             installer=InstallPad(self.main)

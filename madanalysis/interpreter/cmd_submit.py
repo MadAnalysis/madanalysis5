@@ -29,6 +29,7 @@ from madanalysis.IOinterface.job_reader         import JobReader
 from madanalysis.IOinterface.folder_writer      import FolderWriter
 from madanalysis.enumeration.report_format_type import ReportFormatType
 from madanalysis.layout.layout                  import Layout
+from madanalysis.configuration.delphesMA5tune_configuration     import DelphesMA5tuneConfiguration
 import logging
 import glob
 import os
@@ -394,6 +395,24 @@ class CmdSubmit(CmdBase):
         # In the case of recasting, there is no need to create a standard Job
         if self.main.recasting.status == "on":
             self.editRecastingCard(dirname)
+            logging.info("   Getting the list of delphes simulation to be performed...")
+            self.main.recasting.GetDelphesRuns(dirname+"/Input/recasting_card.dat")
+            for mydelphescard in self.main.recasting.delphesruns:
+                version=mydelphescard[:4]
+                card=mydelphescard[5:]
+                if version=="v1.1":
+                    self.main.recasting.status="off"
+                    self.main.fastsim.package="delphesMA5tune"
+                    self.main.fastsim.clustering=0
+                    self.main.fastsim.delphes=0
+                    self.main.fastsim.delphesMA5tune = DelphesMA5tuneConfiguration()
+                    self.submit(dirname+'_DeslphesForMa5tuneRun',self.resubmit)
+                    self.main.recasting.status="on"
+                    self.main.fastsim.package="none"
+                else:
+                    logging.error('please implement the v1.2 delphes run')
+                import sys
+                sys.exit()
         else:
             logging.info("   Inserting your selection into 'SampleAnalyzer'...")
             if not jobber.WriteSelectionHeader(self.main):

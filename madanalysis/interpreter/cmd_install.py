@@ -41,20 +41,20 @@ class CmdInstall(CmdBase):
     def do(self,args):
 
         # Checking argument number
-        if len(args)!=1 and args[0]!='PADForMA5Tunelocal':
+        if len(args)!=1 and args[0]!='PADForMA5tunelocal':
             logging.error("wrong number of arguments for the command 'install'.")
             self.help()
             return
 
         # delphes preinstallation
         def inst_delphes(main,installer):
-            if os.path.isdir(os.path.normpath(main.archi_info.ma5dir+'/tools/delphesMA5Tune')):
-                logging.warning("   DelphesMA5Tune is installed: deactivating...")
-                if os.path.isdir(os.path.normpath(main.archi_info.ma5dir+'/tools/DEACT_delphesMA5Tune')):
+            if os.path.isdir(os.path.normpath(main.archi_info.ma5dir+'/tools/delphesMA5tune')):
+                logging.warning("   DelphesMA5tune is installed: deactivating...")
+                if os.path.isdir(os.path.normpath(main.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune')):
                     from madanalysis.IOinterface.folder_writer import FolderWriter
-                    if not FolderWriter.RemoveDirectory(os.path.normpath(main.archi_info.ma5dir+'/tools/DEACT_delphesMA5Tune'),True):
+                    if not FolderWriter.RemoveDirectory(os.path.normpath(main.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune'),True):
                         return False
-                shutil.move(os.path.normpath(main.archi_info.ma5dir+'/tools/delphesMA5Tune'),os.path.normpath(main.archi_info.ma5dir+'/tools/DEACT_delphesMA5Tune'))
+                shutil.move(os.path.normpath(main.archi_info.ma5dir+'/tools/delphesMA5tune'),os.path.normpath(main.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune'))
             if os.path.isdir(os.path.normpath(main.archi_info.ma5dir+'/tools/DEACT_delphes')):
                 logging.warning("   Delphes deactivated. Activating it...")
                 shutil.move(os.path.normpath(main.archi_info.ma5dir+'/tools/DEACT_delphes'),os.path.normpath(main.archi_info.ma5dir+'/tools/delphes'))
@@ -72,12 +72,12 @@ class CmdInstall(CmdBase):
                     if not FolderWriter.RemoveDirectory(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphes'),True):
                         return False
                 shutil.move(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphes'),os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphes'))
-            if os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphesMA5Tune')):
-                logging.warning("   DelphesMA5Tune deactivated. Activating it...")
-                shutil.move(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphesMA5Tune'),os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphesMA5Tune'))
+            if os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune')):
+                logging.warning("   DelphesMA5tune deactivated. Activating it...")
+                shutil.move(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune'),os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphesMA5tune'))
                 return True
             elif not os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphesMA5tune')):
-                logging.warning("   DelphesMA5Tune not installed: installing it...")
+                logging.warning("   DelphesMA5tune not installed: installing it...")
                 return installer.Execute('delphesMA5tune')
 
         # Calling selection method
@@ -89,7 +89,7 @@ class CmdInstall(CmdBase):
             return installer.Execute('zlib')
         elif args[0]=='delphes':
             installer=InstallManager(self.main)
-            inst_delphes(self.main,installer)
+            return inst_delphes(self.main,installer)
         elif args[0]=='delphesMA5tune':
             logging.warning("The package 'delphesMA5tune' is now obsolete. It is replaced by Delphes with special MA5-tuned cards.")
             if not self.main.forced:
@@ -123,18 +123,18 @@ class CmdInstall(CmdBase):
         elif args[0]=='RecastingTools':
             installer=InstallManager(self.main)
             return installer.Execute('RecastingTools')
-        elif args[0]=='PADForMA5Tune':
+        elif args[0]=='PADForMA5tune':
             installer=InstallManager(self.main)
             if inst_ma5tune(self.main,installer):
-                return installer.Execute('PADForMA5Tune')
+                return installer.Execute('PADForMA5tune')
         elif args[0]=='PAD':
             installer=InstallManager(self.main)
             if inst_delphes(self.main,installer):
                 return installer.Execute('PAD')
-        elif args[0]=='PADForMA5Tunelocal' and len(args)==2:
+        elif args[0]=='PADForMA5tunelocal' and len(args)==2:
             installer=InstallManager(self.main)
             if inst_ma5tune(self.main,installer):
-                return installer.Execute('PADForMA5Tunelocal_xxx_'+args[1])
+                return installer.Execute('PADForMA5tunelocal_xxx_'+args[1])
         else:
             logging.error("the syntax is not correct.")
             self.help()
@@ -143,7 +143,7 @@ class CmdInstall(CmdBase):
     def help(self):
         logging.info("   Syntax: install <component>")
         logging.info("   Download and install a MadAnalysis component from the official site.")
-        logging.info("   List of available components: samples zlib fastjet delphes delphesMA5tune RecastingTools PAD PADForMA5Tune")
+        logging.info("   List of available components: samples zlib fastjet delphes delphesMA5tune RecastingTools PAD PADForMA5tune")
 
 
     def complete(self,text,args,begidx,endidx):
@@ -156,7 +156,7 @@ class CmdInstall(CmdBase):
             return []
         else:
             output = ["samples","zlib","fastjet", "delphes", "delphesMA5tune",\
-                "gnuplot", "matplotlib", "root" , "numpy", "RecastingTools", "PAD", "PADForMA5Tune"]
+                "gnuplot", "matplotlib", "root" , "numpy", "RecastingTools", "PAD", "PADForMA5tune"]
             return self.finalize_complete(text,output)
 
 

@@ -30,11 +30,11 @@ import logging
 import glob
 import shutil
 
-class InstallPadForMA5Tune:
+class InstallPadForMA5tune:
 
     def __init__(self,main,package):
         self.main        = main
-        self.installdir  = os.path.normpath(self.main.archi_info.ma5dir+'/PADForMA5Tune')
+        self.installdir  = os.path.normpath(self.main.archi_info.ma5dir+'/PADForMA5tune')
         self.tmpdir      = self.main.session_info.tmpdir
         os.system("rm -fr " + self.tmpdir+'/MA5Analyses')
         os.system("mkdir " + self.tmpdir+'/MA5Analyses')
@@ -236,7 +236,7 @@ class InstallPadForMA5Tune:
         bkpname = "pad_forma5tune-v" + time.strftime("%Y%m%d-%Hh%M") + ".tgz"
         logging.info("     => Backuping the previous installation: " + bkpname)
         logname = os.path.normpath(self.main.archi_info.ma5dir+'/pad-backup.log')
-        TheCommand = ['tar', 'czf', bkpname, 'PADForMA5Tune']
+        TheCommand = ['tar', 'czf', bkpname, 'PADForMA5tune']
         logging.debug('Shell command: '+' '.join(TheCommand))
         ok, out= ShellCommand.ExecuteWithLog(TheCommand,logname,self.main.archi_info.ma5dir,silent=False)
         if not ok:
@@ -252,7 +252,7 @@ class InstallPadForMA5Tune:
 
 
     def CreatePackageFolder(self):
-        TheCommand = ['bin/ma5', '-R', '-E', '-f', 'PADForMA5Tune', 'cms_sus_13_011']
+        TheCommand = ['bin/ma5', '-R', '-E', '-f', 'PADForMA5tune', 'cms_sus_13_011']
         logname = os.path.normpath(self.main.archi_info.ma5dir+'/PAD-workingdir.log')
         ok, out= ShellCommand.ExecuteWithLog(TheCommand,logname,self.main.archi_info.ma5dir,silent=False)
         lognameU = os.path.normpath(self.installdir+'/unpack.log')
