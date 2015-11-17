@@ -194,8 +194,8 @@ class JobWriter():
             if len(words)>=1:
                 if words[0].lower()=='treewriter' and TagExecutionPath:
                     TagExecutionPath=False
-                    output.write('  MA5Filter\n')
-
+                    if cfg.skim_genparticles:
+                        output.write('  MA5Filter\n')
 
             if len(words)>=3:
                 if words[0].lower()=='module' and \
@@ -238,6 +238,21 @@ class JobWriter():
             output.write(line)
         
 
+    def CopyDelphesMA5Card(self,input,output,cfg):
+        TagTreeWriter=False
+        TagExecutionPath=False
+        
+        # READING THE FILE  
+        for line in input:
+
+            # Pileup
+            if cfg.pileup!="":
+                line=line.replace('MinBias.pileup',theFile)
+
+            # Enter TreeWriter
+            output.write(line)
+
+
     def CreateDelphesCard(self):
 
         if self.main.fastsim.package=="delphes":
@@ -272,9 +287,11 @@ class JobWriter():
                 theFile = cfg.pileup
             else:    
                 theFile = os.path.normpath(theDir+"/"+cfg.pileup)
-
-        self.CopyDelphesCard(input,output,cfg)
-
+ 
+        if self.main.fastsim.package=="delphes":
+            self.CopyDelphesCard(input,output,cfg)
+        elif self.main.fastsim.package=="delphesMA5tune": 
+            self.CopyDelphesMA5Card(input,output,cfg)
 
         try:
             input.close()
