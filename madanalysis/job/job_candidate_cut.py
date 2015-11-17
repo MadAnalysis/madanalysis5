@@ -132,10 +132,11 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
 
         # Remove candidate from all containers    
         file.write('    // Removing rejected candidates from all containers\n')
+        logging.debug("- Removing rejecting candidates from all containers WITHOUT pt rank")
 
         # Loop over containers
         for other_part in part_list:
-
+ 
             # Skip container with particle with a PTrank
             if other_part[0].PTrank!=0:
                 continue
@@ -145,6 +146,8 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
                                           main.selection[iabs].rank+\
                                           main.selection[iabs].statuscode)
 
+            logging.debug("-- Is the following container concerned? "+other_part[0].name+" -> "+container2)
+
             # Is this container concerned by the cut ?
             concerned=False
             for other in other_part:
@@ -153,6 +156,7 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
                     break
             if not concerned:
                 continue
+            logging.debug("---> YES. Cutting on container: "+other_part[0].name+" -> "+container2)
 
             # Bracket for begin 
             file.write('    {\n')
@@ -182,10 +186,10 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
             file.write('    }\n')
 
         # Remove candidate from all containers    
-        file.write('    // Sorting particles according PTrank\n')
+        first = True
+        logging.debug("- Updating all connected containers WITH pt rank")
+        for other_part in part_list: # Loop over containers
 
-        # Loop over containers
-        for other_part in part_list:
 
             # Skip container with particle with a PTrank
             if other_part[0].PTrank==0:
@@ -201,15 +205,24 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
                                              main.selection[iabs].rank+\
                                              main.selection[iabs].statuscode)
 
+            logging.debug("-- Is the following container concerned? "+other_part[0].name+" -> "+container2+" derivated from "+newcontainer2)
+
             # Is this container concerned by the cut ?
             concerned=False
             for other in other_part:
-                if other_part[0].particle.IsThereCommonPart(combination.particle) \
-                  and other_part[2]==main.selection[iabs].rank:
+                if refpart.particle.IsThereCommonPart(combination.particle):
+#                if other_part[0].particle.IsThereCommonPart(combination.particle) \
+#                  and other_part[2]==main.selection[iabs].rank:
                     concerned=True
                     break
             if not concerned:
                 continue
+
+            if first:
+                first=False
+                file.write('    // Sorting particles according PTrank\n')
+
+            logging.debug("---> YES. Updating the container: "+other_part[0].name+" -> "+container2)
 
             # Bracket for begin 
             file.write('    {\n')
