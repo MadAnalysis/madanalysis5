@@ -42,7 +42,8 @@ class InstallDelphes:
         self.untardir    = os.path.normpath(self.tmpdir + '/MA5_delphes/')
         self.ncores      = 1
 #        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
-        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.0.tar.gz"}
+#        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.0.tar.gz"}
+        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.1.tar.gz"}
 
     def Detect(self):
         if not os.path.isdir(self.toolsdir):
@@ -141,6 +142,9 @@ class InstallDelphes:
 
 
     def Configure(self):
+
+        # KNOWn DELPHES ISsues: GENERATE ISSUES BECAuse IT USES TCSLSH COMMAND
+        
         # Input
         theCommands=['./configure']
         logname=os.path.normpath(self.installdir+'/configuration.log')

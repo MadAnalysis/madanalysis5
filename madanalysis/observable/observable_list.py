@@ -46,6 +46,53 @@ SQRTS = ObservableBase( name        = 'SQRTS',
                         tex           = '#sqrt{#hat{s}}'
                       )
 
+SCALE = ObservableBase( name        = 'SCALE',
+                        args        = [],
+                        combination = CombinationType.DEFAULT,
+                        plot_auto   = False,
+                        plot_nbins  = 100,
+                        plot_xmin   = 0.,
+                        plot_xmax   = 10000.,
+                        plot_unitX  = 'GeV',
+                        code_parton = 'event.mc()->scale()',
+                        code_hadron = 'event.mc()->scale()',
+                        code_reco   = '',
+                        cut_event     = True,
+                        cut_candidate = True,
+                        tex           = 'event scale Q'
+                      )
+
+ALPHA_QCD = ObservableBase( name        = 'ALPHA_QCD',
+                        args        = [],
+                        combination = CombinationType.DEFAULT,
+                        plot_auto   = False,
+                        plot_nbins  = 100,
+                        plot_xmin   = 0.,
+                        plot_xmax   = .2,
+                        plot_unitX  = '',
+                        code_parton = 'event.mc()->alphaQCD()',
+                        code_hadron = 'event.mc()->alphaQCD()',
+                        code_reco   = '',
+                        cut_event     = True,
+                        cut_candidate = True,
+                        tex           = '#alpha_{QCD}'
+                      )
+
+ALPHA_QED = ObservableBase( name        = 'ALPHA_QED',
+                        args        = [],
+                        combination = CombinationType.DEFAULT,
+                        plot_auto   = False,
+                        plot_nbins  = 100,
+                        plot_xmin   = 0.,
+                        plot_xmax   = .01,
+                        plot_unitX  = '',
+                        code_parton = 'event.mc()->alphaQED()',
+                        code_hadron = 'event.mc()->alphaQED()',
+                        code_reco   = '',
+                        cut_event     = True,
+                        cut_candidate = True,
+                        tex           = '#alpha_{QED}'
+                      )
 
 ALPHAT = ObservableBase( name         = 'ALPHAT',
                         args          = [],
