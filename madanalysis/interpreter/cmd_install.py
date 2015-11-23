@@ -60,18 +60,14 @@ class CmdInstall(CmdBase):
                 shutil.move(os.path.normpath(main.archi_info.ma5dir+'/tools/DEACT_delphes'),os.path.normpath(main.archi_info.ma5dir+'/tools/delphes'))
                 return True
             elif not os.path.isdir(os.path.normpath(main.archi_info.ma5dir+'/tools/delphes')):
-                logging.warning("   Delphes not installed...")
+                logging.info("   A previous installation has not been found... installing...")
                 return installer.Execute('delphes')
+            return True
 
         # ma5tune preinstallation
         def inst_ma5tune(main,installer):
-            if os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphes')):
-                logging.warning("   Delphes is installed: decativating it...")
-                if os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphesMA5')):
-                    from madanalysis.IOinterface.folder_writer import FolderWriter
-                    if not FolderWriter.RemoveDirectory(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphes'),True):
-                        return False
-                shutil.move(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphes'),os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphes'))
+            if not installer.Deactivate('delphes'):
+                return False
             if os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune')):
                 logging.warning("   DelphesMA5tune deactivated. Activating it...")
                 shutil.move(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune'),os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphesMA5tune'))
@@ -79,6 +75,7 @@ class CmdInstall(CmdBase):
             elif not os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphesMA5tune')):
                 logging.warning("   DelphesMA5tune not installed: installing it...")
                 return installer.Execute('delphesMA5tune')
+            return True
 
         # Calling selection method
         if args[0]=='samples':

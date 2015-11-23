@@ -159,9 +159,9 @@ class RecastConfiguration:
 
     def CreateCard(self,dirname):
         # getting the PAD analysis
-        if self.padtune:
+        if self.padtune and self.ma5tune:
             self.CreateMyCard(dirname,"PADForMA5tune")
-        if self.pad:
+        if self.pad and self.delphes:
             self.CreateMyCard(dirname,"PAD")
 
     def CreateMyCard(self,dirname,padtype):

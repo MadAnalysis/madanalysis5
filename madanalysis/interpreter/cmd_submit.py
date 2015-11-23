@@ -30,11 +30,16 @@ from madanalysis.IOinterface.folder_writer      import FolderWriter
 from madanalysis.enumeration.report_format_type import ReportFormatType
 from madanalysis.layout.layout                  import Layout
 from madanalysis.configuration.delphesMA5tune_configuration     import DelphesMA5tuneConfiguration
+from madanalysis.IOinterface.library_writer     import LibraryWriter
+from madanalysis.install.install_manager        import InstallManager
+from shell_command import ShellCommand
+from string_tools  import StringTools
 import logging
 import glob
 import os
 import time
 import commands
+import shutil
 
 class CmdSubmit(CmdBase):
     """Command SUBMIT"""
@@ -373,13 +378,17 @@ class CmdSubmit(CmdBase):
             return False
 
         if not self.resubmit:
-            logging.info("   Copying 'SampleAnalyzer' source files...")
+            if self.main.recasting.status != 'on':
+                logging.info("   Copying 'SampleAnalyzer' source files...")
             if not jobber.CopyLHEAnalysis():
                 logging.error("   job submission aborted.")
                 return False
             if self.main.recasting.status != 'on' and not jobber.CreateBldDir():
                 logging.error("   job submission aborted.")
                 return False
+            if self.main.recasting.status == 'on':
+                if not FolderWriter.CreateDirectory(dirname+'/Events'):
+                    return False
             if self.main.shower.enable:
                  mode=self.main.shower.type
                  if self.main.shower.type=='auto':
@@ -394,25 +403,92 @@ class CmdSubmit(CmdBase):
 
         # In the case of recasting, there is no need to create a standard Job
         if self.main.recasting.status == "on":
+
+            ### First, the analyses to take care off
             self.editRecastingCard(dirname)
             logging.info("   Getting the list of delphes simulation to be performed...")
+
+            ### Second, whichdelphes run must be performed, and running them
             self.main.recasting.GetDelphesRuns(dirname+"/Input/recasting_card.dat")
-            for mydelphescard in self.main.recasting.delphesruns:
+            firstv11 = True
+            for mydelphescard in sorted(self.main.recasting.delphesruns):
                 version=mydelphescard[:4]
                 card=mydelphescard[5:]
                 if version=="v1.1":
-                    self.main.recasting.status="off"
-                    self.main.fastsim.package="delphesMA5tune"
-                    self.main.fastsim.clustering=0
-                    self.main.fastsim.delphes=0
-                    self.main.fastsim.delphesMA5tune = DelphesMA5tuneConfiguration()
-                    self.submit(dirname+'_DeslphesForMa5tuneRun',self.resubmit)
-                    self.main.recasting.status="on"
-                    self.main.fastsim.package="none"
+                    if not self.main.recasting.ma5tune:
+                        logging.error('The DelphesMA5tune library is not present... '
+                           + 'v1.1 analyses cannot be used')
+                        return False
+                    if firstv11:
+                        logging.info("")
+                        logging.info("   **********************************************************")
+                        logging.info("   "+StringTools.Center('v1.1 detector simulations',57))
+                        logging.info("   **********************************************************")
+                        firstv11=False
+                    ## Deactivating delphes
+                    installer=InstallManager(self.main)
+                    if not installer.Deactivate('delphes'):
+                        return False
+
+                    if os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune')):
+                        logging.info('   Activating and compiling the delphesMA5tune library')
+                        shutil.move(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune'),\
+                           os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphesMA5tune'))
+                        compiler = LibraryWriter('lib',self.main)
+                        self.main.archi_info.has_delphes = False
+                        self.main.archi_info.has_delphesMA5tune = True
+                        if not compiler.WriteMakefileForInterfaces('process'):
+                            logging.error("library building aborted.")
+                            return False
+                        ncores = compiler.get_ncores2()
+                        if ncores>1:
+                            strcores='-j'+str(ncores)
+                        command = ['make','compile',strcores,'--file=Makefile']
+                        folder=self.main.archi_info.ma5dir + '/tools/SampleAnalyzer/Process'
+                        logfile = folder+'/compilation.log'
+                        result, out = ShellCommand.ExecuteWithLog(command,logfile,folder)
+                        if not result:
+                            logging.error('Impossible to compile the project.'+\
+                              ' For more details, see the log file:')
+                            logging.error(logfile)
+                            return result
+                        logfile = folder+'/linking.log'
+                        command = ['make','link',strcores,'--file=Makefile']
+                        result, out = ShellCommand.ExecuteWithLog(command,logfile,folder)
+                        if not result:
+                            logging.error('Impossible to link the project.'+\
+                              ' For more details, see the log file:')
+                            logging.error(logfile)
+                            return result
+                        logfile = folder+'/cleanup.log'
+                        command = ['make','clean',strcores,'--file=Makefile']
+                        result, out = ShellCommand.ExecuteWithLog(command,logfile,folder)
+                        if not result:
+                            logging.error('Impossible to clean the project.'+\
+                              ' For more details, see the log file:')
+                            logging.error(logfile)
+                            return result
+                    ## running delphes
+                    if not os.path.isfile(dirname+'/Events/events_'+card+'.root'):
+                        self.main.recasting.status="off"
+                        self.main.fastsim.package="delphesMA5tune"
+                        self.main.fastsim.clustering=0
+                        self.main.fastsim.delphes=0
+                        self.main.fastsim.delphesMA5tune = DelphesMA5tuneConfiguration()
+                        self.main.fastsim.delphesMA5tune.card = "../../../../PADForMA5tune/Input/Cards/"+card
+                        self.submit(dirname+'_DelphesForMa5tuneRun',[])
+                        self.main.recasting.status="on"
+                        self.main.fastsim.package="none"
+                        ## saving the output
+                        shutil.move(dirname+'_DelphesForMa5tuneRun/Output/_defaultset/TheMouth.root',\
+                          dirname+'/Events/events_'+card+'.root')
+                        if not FolderWriter.RemoveDirectory(os.path.normpath(dirname+'_DelphesForMa5tuneRun'),True):
+                            return False
                 else:
                     logging.error('please implement the v1.2 delphes run')
-                import sys
-                sys.exit()
+
+            ### Third, executing the analyses
+
         else:
             logging.info("   Inserting your selection into 'SampleAnalyzer'...")
             if not jobber.WriteSelectionHeader(self.main):

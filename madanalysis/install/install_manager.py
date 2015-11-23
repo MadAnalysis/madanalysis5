@@ -217,3 +217,17 @@ class InstallManager():
         sys.stdout.flush()
         logging.info("   **********************************************************")
         logging.info("")
+
+    def Deactivate(self, rawpackage):
+        package=rawpackage.lower()
+        if package=='delphes':
+            from madanalysis.install.install_delphes import InstallDelphes
+            installer=InstallDelphes(self.main)
+        else:
+            logging.error('the package "'+rawpackage+'" is unknown')
+            return False
+
+        if not installer.Deactivate():
+            return False
+        return True
+

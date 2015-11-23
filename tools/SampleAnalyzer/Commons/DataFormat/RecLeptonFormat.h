@@ -166,11 +166,11 @@ class RecLeptonFormat : public RecParticleFormat
 
   /// is it an electron?
   void setElectronId()
-  { pdg_==11; }
+  { pdg_=11; }
 
   /// is it a muon?
   void setMuonId()
-  { pdg_==13; }
+  { pdg_=13; }
 
 };
 

@@ -259,7 +259,6 @@ class JobWriter():
             cardname = self.main.fastsim.delphes.card
         elif self.main.fastsim.package=="delphesMA5tune":
             cardname = self.main.fastsim.delphesMA5tune.card
-
         if self.main.fastsim.package=="delphesMA5tune":
             cfg=self.main.fastsim.delphesMA5tune
         else:
@@ -272,6 +271,8 @@ class JobWriter():
                 input = open(self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Interfaces/delphesMA5tune/"+cardname,'r')
         except:
             logging.error("impossible to find "+self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Interfaces/delphes/"+cardname)
+        if "../../../.." in cardname:
+            cardname=cardname.split('/')[-1]
 
         try:
             output = open(self.path+"/Input/"+cardname,'w')
@@ -429,6 +430,8 @@ class JobWriter():
                 cardname = self.main.fastsim.delphes.card
             elif self.main.fastsim.package=="delphesMA5tune":
                 cardname = self.main.fastsim.delphesMA5tune.card
+                if "../../../.." in cardname:
+                    cardname=cardname.split('/')[-1]
 
             if self.main.fastsim.package=="delphes":
                 file.write('      manager.InitializeDetector("delphes","../../Input/'+cardname+'",parametersD1);\n')

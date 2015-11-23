@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+110  1.11     (2015/11/23) fuks:    auto-recast part III 
+
 109  1.10     (2015/11/17) fuks:    auto-recast part II 
 
 106  1.9      (2015/11/17) fuks:    Automatic recasting part 1 

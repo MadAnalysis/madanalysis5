@@ -24,6 +24,7 @@
 
 from madanalysis.install.install_service import InstallService
 from shell_command import ShellCommand
+from string_tools  import StringTools
 import os
 import sys
 import logging
@@ -382,7 +383,21 @@ class InstallDelphes:
         except:
             logging.error("impossible to copy "+outputname+' in '+inputname)
             return False
-        
+
         return True
-    
-        
+
+    def Deactivate(self):
+        if os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphes')):
+            logging.info("")
+            logging.info("   **********************************************************")
+            logging.info("   "+StringTools.Center('Deactivating Delphes',57))
+            logging.info("   **********************************************************")
+
+            if os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphes')):
+                if not FolderWriter.RemoveDirectory(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphes'),True):
+                        return False
+
+            shutil.move(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphes'),\
+                  os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphes'))
+
+        return True
