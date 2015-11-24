@@ -48,20 +48,17 @@ class CmdInstall(CmdBase):
 
         # delphes preinstallation
         def inst_delphes(main,installer):
-            if os.path.isdir(os.path.normpath(main.archi_info.ma5dir+'/tools/delphesMA5tune')):
-                logging.warning("   DelphesMA5tune is installed: deactivating...")
-                if os.path.isdir(os.path.normpath(main.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune')):
-                    from madanalysis.IOinterface.folder_writer import FolderWriter
-                    if not FolderWriter.RemoveDirectory(os.path.normpath(main.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune'),True):
-                        return False
-                shutil.move(os.path.normpath(main.archi_info.ma5dir+'/tools/delphesMA5tune'),os.path.normpath(main.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune'))
+            if not installer.Deactivate('delphesMA5tune'):
+                return False
             if os.path.isdir(os.path.normpath(main.archi_info.ma5dir+'/tools/DEACT_delphes')):
-                logging.warning("   Delphes deactivated. Activating it...")
+                logging.warning("Delphes deactivated. Activating it...")
                 shutil.move(os.path.normpath(main.archi_info.ma5dir+'/tools/DEACT_delphes'),os.path.normpath(main.archi_info.ma5dir+'/tools/delphes'))
                 return True
             elif not os.path.isdir(os.path.normpath(main.archi_info.ma5dir+'/tools/delphes')):
                 logging.info("   A previous installation has not been found... installing...")
                 return installer.Execute('delphes')
+            logging.warning("A previous installation of Delphes has been found. Skipping the installation.")
+            logging.warning("To update Delphes, please remove the tools/delphes directory")
             return True
 
         # ma5tune preinstallation
@@ -69,12 +66,14 @@ class CmdInstall(CmdBase):
             if not installer.Deactivate('delphes'):
                 return False
             if os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune')):
-                logging.warning("   DelphesMA5tune deactivated. Activating it...")
+                logging.warning("DelphesMA5tune deactivated. Activating it...")
                 shutil.move(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune'),os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphesMA5tune'))
                 return True
             elif not os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphesMA5tune')):
-                logging.warning("   DelphesMA5tune not installed: installing it...")
+                logging.warning("DelphesMA5tune not installed: installing it...")
                 return installer.Execute('delphesMA5tune')
+            logging.warning("A previous installation of DelphesMA5tune has been found. Skipping the installation.")
+            logging.warning("To update DelphesMA5tune, please remove the tools/delphesMA5tune directory")
             return True
 
         # Calling selection method

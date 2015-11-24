@@ -23,7 +23,8 @@
 
 
 import logging
-from string_tools import StringTools
+from shell_command import ShellCommand
+from string_tools  import StringTools
 
 
 class MakefileWriter():
@@ -189,7 +190,12 @@ class MakefileWriter():
 
         # Compilers
         file.write('# Compilers\n')
-        file.write('CXX = g++\n')
+        mycommand = [archi_info.root_bin_path+'/root-config','--cxx']
+        ok, out, err = ShellCommand.ExecuteWithCapture(mycommand,'./')
+        if not ok:
+            return False
+        out=out.lstrip()
+        file.write('CXX = '+out+'\n')
         file.write('\n')
 
         # Options for C++ compilation

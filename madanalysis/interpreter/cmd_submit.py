@@ -22,16 +22,15 @@
 ################################################################################
 
 
-from madanalysis.interpreter.cmd_base           import CmdBase
-from madanalysis.IOinterface.job_writer         import JobWriter
-from madanalysis.IOinterface.layout_writer      import LayoutWriter
-from madanalysis.IOinterface.job_reader         import JobReader
-from madanalysis.IOinterface.folder_writer      import FolderWriter
-from madanalysis.enumeration.report_format_type import ReportFormatType
-from madanalysis.layout.layout                  import Layout
+from madanalysis.interpreter.cmd_base                           import CmdBase
+from madanalysis.IOinterface.job_writer                         import JobWriter
+from madanalysis.IOinterface.layout_writer                      import LayoutWriter
+from madanalysis.IOinterface.job_reader                         import JobReader
+from madanalysis.IOinterface.folder_writer                      import FolderWriter
+from madanalysis.enumeration.report_format_type                 import ReportFormatType
+from madanalysis.layout.layout                                  import Layout
+from madanalysis.install.install_manager                        import InstallManager
 from madanalysis.configuration.delphesMA5tune_configuration     import DelphesMA5tuneConfiguration
-from madanalysis.IOinterface.library_writer     import LibraryWriter
-from madanalysis.install.install_manager        import InstallManager
 from shell_command import ShellCommand
 from string_tools  import StringTools
 import logging
@@ -419,56 +418,24 @@ class CmdSubmit(CmdBase):
                         logging.error('The DelphesMA5tune library is not present... '
                            + 'v1.1 analyses cannot be used')
                         return False
+
                     if firstv11:
                         logging.info("")
                         logging.info("   **********************************************************")
                         logging.info("   "+StringTools.Center('v1.1 detector simulations',57))
                         logging.info("   **********************************************************")
                         firstv11=False
+
                     ## Deactivating delphes
                     installer=InstallManager(self.main)
                     if not installer.Deactivate('delphes'):
                         return False
 
-                    if os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune')):
-                        logging.info('   Activating and compiling the delphesMA5tune library')
-                        shutil.move(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune'),\
-                           os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphesMA5tune'))
-                        compiler = LibraryWriter('lib',self.main)
-                        self.main.archi_info.has_delphes = False
-                        self.main.archi_info.has_delphesMA5tune = True
-                        if not compiler.WriteMakefileForInterfaces('process'):
-                            logging.error("library building aborted.")
-                            return False
-                        ncores = compiler.get_ncores2()
-                        if ncores>1:
-                            strcores='-j'+str(ncores)
-                        command = ['make','compile',strcores,'--file=Makefile']
-                        folder=self.main.archi_info.ma5dir + '/tools/SampleAnalyzer/Process'
-                        logfile = folder+'/compilation.log'
-                        result, out = ShellCommand.ExecuteWithLog(command,logfile,folder)
-                        if not result:
-                            logging.error('Impossible to compile the project.'+\
-                              ' For more details, see the log file:')
-                            logging.error(logfile)
-                            return result
-                        logfile = folder+'/linking.log'
-                        command = ['make','link',strcores,'--file=Makefile']
-                        result, out = ShellCommand.ExecuteWithLog(command,logfile,folder)
-                        if not result:
-                            logging.error('Impossible to link the project.'+\
-                              ' For more details, see the log file:')
-                            logging.error(logfile)
-                            return result
-                        logfile = folder+'/cleanup.log'
-                        command = ['make','clean',strcores,'--file=Makefile']
-                        result, out = ShellCommand.ExecuteWithLog(command,logfile,folder)
-                        if not result:
-                            logging.error('Impossible to clean the project.'+\
-                              ' For more details, see the log file:')
-                            logging.error(logfile)
-                            return result
-                    ## running delphes
+                    ## Activating and compile the MA5Tune
+                    if not installer.Activate('delphesma5tune'):
+                        return False
+
+                    ## running delphesMA5tune
                     if not os.path.isfile(dirname+'/Events/events_'+card+'.root'):
                         self.main.recasting.status="off"
                         self.main.fastsim.package="delphesMA5tune"

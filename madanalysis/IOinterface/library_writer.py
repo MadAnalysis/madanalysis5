@@ -136,7 +136,7 @@ class LibraryWriter():
         elif package=='configuration':
             title='SampleAnalyzer configuration'
         elif package=='process':
-            title='SmapleAnalyzer process'
+            title='SampleAnalyzer process'
         elif package=='test_commons':
             title='*commons* test'
         elif package=='test_process':
@@ -289,7 +289,7 @@ class LibraryWriter():
             isLibrary=False
             ProductName='TestDelphesMA5tune'
             ProductPath='../Bin/'
-        else:        
+        else:
             isLibrary=True
             ProductName='lib'+package+'_for_ma5.so'
             ProductPath='../Lib/'

@@ -724,10 +724,11 @@ class ConfigChecker:
         return True
 
 
-    def checkDelphes(self):
+    def checkDelphes(self, getpaths=False):
         # Checking if Delphes is present
-        self.PrintLibrary("Delphes")
-        self.logger.debug("")
+        if not getpaths:
+            self.PrintLibrary("Delphes")
+            self.logger.debug("")
 
         # Name of the dynamic lib
         libnames=['libDelphes.so','libDelphes.a']
@@ -736,114 +737,162 @@ class ConfigChecker:
 
         # User veto
         if self.user_info.delphes_veto:
-            self.logger.debug("User setting: veto on Delphes")
-            self.PrintFAIL(warning=True)
-            self.logger.warning("Library called 'delphes' disabled.")
-            self.logger.warning("Delphes ROOT format will be disabled.")
+            if not getpaths:
+                self.logger.debug("User setting: veto on Delphes")
+                self.PrintFAIL(warning=True)
+                self.logger.warning("Library called 'delphes' disabled.")
+                self.logger.warning("Delphes ROOT format will be disabled.")
             return False
 
         # Does the user force the paths?
         force1=False
         force2=False
         if self.user_info.delphes_includes!=None:
-            self.logger.debug("User setting: Delphes include path is specified.")
-            self.archi_info.delphes_inc_paths.append(self.user_info.delphes_includes)
-            self.archi_info.delphes_inc_paths.append(self.user_info.delphes_includes+'/external/')
+            if not getpaths:
+                self.logger.debug("User setting: Delphes include path is specified.")
+                self.archi_info.delphes_inc_paths.append(self.user_info.delphes_includes)
+                self.archi_info.delphes_inc_paths.append(self.user_info.delphes_includes+'/external/')
+            else:
+                delpath=os.path.normpath(self.user_info.delphes_includes)
+                deldeac = delpath.replace(delpath.split('/')[-1],"DEACT_"+delpath.split('/')[-1])
+                if os.path.isdir(deldeac):
+                    self.archi_info.delphes_inc_paths.insert(0,deldeac+'/external/')
+                    self.archi_info.delphes_inc_paths.insert(0,deldeac)
+                    self.includes.append(deldeac)
+                    self.includes.append(deldeac+'/external/')
+                else:
+                    self.archi_info.delphes_inc_paths.append(self.user_info.delphes_includes)
+                    self.archi_info.delphes_inc_paths.append(self.user_info.delphes_includes+'/external/')
             force1=True
         if self.user_info.delphes_libs!=None:
-            self.logger.debug("User setting: Delphes lib path is specified.")
-            self.archi_info.delphes_lib_paths.append(self.user_info.delphes_libraries)
+            if not getpaths:
+                self.logger.debug("User setting: Delphes lib path is specified.")
+                self.archi_info.delphes_lib_paths.append(self.user_info.delphes_libs)
+            else:
+                delpath=os.path.normpath(self.user_info.delphes_libs)
+                deldeac = delpath.replace(delpath.split('/')[-1],"DEACT_"+delpath.split('/')[-1])
+                if os.path.isdir(deldeac):
+                    self.archi_info.delphes_lib_paths.insert(0,deldeac)
+                    self.libs.append(deldeac)
+                else:
+                    self.archi_info.delphes_lib_paths.append(self.user_info.delphes_libs)
             force2=True
         force=force1 and force2
 
         # Checking if Delphes has been installed by MA5
         ma5installation = False
         if not force:
-            self.logger.debug("Look for Delphes in the folder "+self.archi_info.ma5dir+"/tools ...")
+            if not getpaths:
+                self.logger.debug("Look for Delphes in the folder "+self.archi_info.ma5dir+"/tools ...")
             if os.path.isdir(self.archi_info.ma5dir+'/tools/delphes') and \
                os.path.isdir(self.archi_info.ma5dir+'/tools/delphes/external'):
                 self.archi_info.delphes_inc_paths.append(self.archi_info.ma5dir+'/tools/delphes/')
                 self.archi_info.delphes_inc_paths.append(self.archi_info.ma5dir+'/tools/delphes/external/')
                 self.archi_info.delphes_lib_paths.append(self.archi_info.ma5dir+'/tools/delphes/')
-                self.logger.debug("-> found")
+                if not getpaths:
+                    self.logger.debug("-> found")
+                ma5installation = True
+            elif os.path.isdir(self.archi_info.ma5dir+'/tools/DEACT_delphes') and \
+               os.path.isdir(self.archi_info.ma5dir+'/tools/DEACT_delphes/external') and getpaths:
+                self.archi_info.delphes_inc_paths.append(self.archi_info.ma5dir+'/tools/DEACT_delphes/')
+                self.archi_info.delphes_inc_paths.append(self.archi_info.ma5dir+'/tools/DEACT_delphes/external/')
+                self.archi_info.delphes_lib_paths.append(self.archi_info.ma5dir+'/tools/DEACT_delphes/')
+                self.includes.append(self.archi_info.ma5dir+'/tools/DEACT_delphes/')
+                self.includes.append(self.archi_info.ma5dir+'/tools/DEACT_delphes/external/')
+                self.libs.append(self.archi_info.ma5dir+'/tools/DEACT_delphes/')
                 ma5installation = True
             else:
-                self.logger.debug("-> not found")
+                if not getpaths:
+                    self.logger.debug("-> not found")
 
         # Check if the libraries and headers are available
         if force or ma5installation:
-
             # header
             filename = os.path.normpath(self.archi_info.delphes_inc_paths[0]+'/modules/ParticlePropagator.h')
-            self.logger.debug("Look for the file "+filename+" ...")
+            if not getpaths:
+                self.logger.debug("Look for the file "+filename+" ...")
             if not os.path.isfile(filename):
-                self.logger.debug("-> not found")
-                self.PrintFAIL(warning=True)
-                self.logger.warning("Header file called '"+filename+"' not found.")
-                self.logger.warning("Delphes ROOT format will be disabled.")
-                self.logger.warning("To enable this format, please type 'install delphes'.")
+                if not getpaths:
+                    self.logger.debug("-> not found")
+                    self.PrintFAIL(warning=True)
+                    self.logger.warning("Header file called '"+filename+"' not found.")
+                    self.logger.warning("Delphes ROOT format will be disabled.")
+                    self.logger.warning("To enable this format, please type 'install delphes'.")
                 return False
             else:
-                self.logger.debug("-> found")
+                if not getpaths:
+                    self.logger.debug("-> found")
 
             # lib
-            self.logger.debug("Look for the libraries in folder "+str(self.archi_info.delphes_lib_paths)+" ...")
+            if not getpaths:
+                self.logger.debug("Look for the libraries in folder "+str(self.archi_info.delphes_lib_paths)+" ...")
             mypath, myfile = self.FindFilesWithPattern(self.archi_info.delphes_lib_paths,"libDelphes.*",libnames)
             self.archi_info.delphes_lib=myfile
-            self.logger.debug("-> result: "+str(self.archi_info.delphes_lib))
+            if not getpaths:
+                self.logger.debug("-> result: "+str(self.archi_info.delphes_lib))
             if self.archi_info.delphes_lib=="":
-                self.PrintFAIL(warning=True)
-                self.logger.warning("Delphes library not found in "+self.archi_info.delphes_lib_paths[0]+" folder.")
-                self.logger.warning("Delphes ROOT format will be disabled.")
-                self.logger.warning("To enable this format, please type 'install delphes'.")
+                if not getpaths:
+                    self.PrintFAIL(warning=True)
+                    self.logger.warning("Delphes library not found in "+self.archi_info.delphes_lib_paths[0]+" folder.")
+                    self.logger.warning("Delphes ROOT format will be disabled.")
+                    self.logger.warning("To enable this format, please type 'install delphes'.")
                 return False
             self.archi_info.delphes_lib=os.path.normpath(myfile)
-            
+
         # Checking Delphes can be found in other folders
         if not force and not ma5installation:
-
             # header
-            self.logger.debug("Look for the header file /modules/ParticlePropagator.h ...")
+            if not getpaths:
+                self.logger.debug("Look for the header file /modules/ParticlePropagator.h ...")
             mypath, myfile = self.FindHeader('/modules/ParticlePropagator.h')
             if mypath!='' and myfile!='':
                 self.archi_info.delphes_inc_paths.append(os.path.normpath(mypath))
                 self.archi_info.delphes_inc_paths.append(os.path.normpath(mypath+'/external'))
-                self.logger.debug("-> result for the path: "+str(self.archi_info.delphes_inc_paths))
-                self.logger.debug("-> result for the file: "+str(os.path.normpath(myfile)))
+                if not getpaths:
+                    self.logger.debug("-> result for the path: "+str(self.archi_info.delphes_inc_paths))
+                    self.logger.debug("-> result for the file: "+str(os.path.normpath(myfile)))
             if len(self.archi_info.delphes_inc_paths)==0:
-                self.PrintFAIL(warning=True)
-                self.logger.warning("Header file called '/modules/ParticlePropagator.h' not found.")
-                self.logger.warning("Delphes ROOT format will be disabled.")
-                self.logger.warning("To enable this format, please type 'install delphes'.")
+                if not getpaths:
+                    self.PrintFAIL(warning=True)
+                    self.logger.warning("Header file called '/modules/ParticlePropagator.h' not found.")
+                    self.logger.warning("Delphes ROOT format will be disabled.")
+                    self.logger.warning("To enable this format, please type 'install delphes'.")
                 return False
 
             # lib
-            self.logger.debug("Look for the Delphes libraries ...")
+            if not getpaths:
+                self.logger.debug("Look for the Delphes libraries ...")
             mypath, myfile = self.FindLibraryWithPattern('libDelphes.*',libnames)
             if mypath!='' and myfile!='':
                 self.archi_info.delphes_lib_paths.append(os.path.normpath(mypath))
                 self.archi_info.delphes_lib      = os.path.normpath(myfile)
-                self.logger.debug("-> result for lib paths: "+str(self.archi_info.delphes_lib_paths))
-                self.logger.debug("-> result for lib files: "+str(self.archi_info.delphes_lib))
+                if not getpaths:
+                    self.logger.debug("-> result for lib paths: "+str(self.archi_info.delphes_lib_paths))
+                    self.logger.debug("-> result for lib files: "+str(self.archi_info.delphes_lib))
             if len(self.archi_info.delphes_lib_paths)==0:
-                self.PrintFAIL(warning=True)
-                self.logger.warning("Delphes library not found.")
-                self.logger.warning("Delphes format will be disabled.")
-                self.logger.warning("To enable this format, please type 'install delphes'.")
+                if not getpaths:
+                    self.PrintFAIL(warning=True)
+                    self.logger.warning("Delphes library not found.")
+                    self.logger.warning("Delphes format will be disabled.")
+                    self.logger.warning("To enable this format, please type 'install delphes'.")
                 return False
-
+            if getpaths:
+               self.libs=self.libs[:-1]
         self.archi_info.libraries['Delphes']=self.archi_info.delphes_lib+":"+str(os.stat(self.archi_info.delphes_lib).st_mtime)
         self.archi_info.delphes_priority=(force or ma5installation)
 
         # Ok
-        self.PrintOK()
+        if not getpaths:
+            self.PrintOK()
+        self.includes=[x for x in self.includes if not x.startswith('DEACT')]
+        self.libs=[x for x in self.libs if not x.startswith('DEACT')]
         return True
 
-
-    def checkDelphesMA5tune(self):
+    def checkDelphesMA5tune(self,getpaths=False):
         # Checking if Delphes-MA5tune is present
-        self.PrintLibrary("Delphes-MA5tune")
-        self.logger.debug("")
+        if not getpaths:
+            self.PrintLibrary("Delphes-MA5tune")
+            self.logger.debug("")
 
         # Name of the dynamic lib
         libnames=['libDelphesMA5tune.so','libDelphesMA5tune.a']
@@ -852,73 +901,112 @@ class ConfigChecker:
 
         # User veto
         if self.user_info.delphesMA5tune_veto:
-            self.logger.debug("User setting: veto on Delphes-MA5tune")
-            self.PrintFAIL(warning=True)
-            self.logger.warning("Delphes-MA5tune is disabled. Delphes-MA5tune ROOT format will be disabled.")
+            if not getpaths:
+                self.logger.debug("User setting: veto on Delphes-MA5tune")
+                self.PrintFAIL(warning=True)
+                self.logger.warning("Delphes-MA5tune is disabled. Delphes-MA5tune ROOT format will be disabled.")
             return False
 
         # Does the user force the paths?
         force1=False
         force2=False
         if self.user_info.delphesMA5tune_includes!=None:
-            self.logger.debug("User setting: Delphes-MA5tune include path is specified.")
-            self.archi_info.delphesMA5tune_inc_paths.append(self.user_info.delphesMA5tune_includes)
-            self.archi_info.delphesMA5tune_inc_paths.append(self.user_info.delphesMA5tune_includes+'/external/')
+            if not getpaths:
+                self.logger.debug("User setting: Delphes-MA5tune include path is specified.")
+                self.archi_info.delphesMA5tune_inc_paths.append(self.user_info.delphesMA5tune_includes)
+                self.archi_info.delphesMA5tune_inc_paths.append(self.user_info.delphesMA5tune_includes+'/external/')
+            else:
+                delpath=os.path.normpath(self.user_info.delphesMA5tune_includes)
+                deldeac = delpath.replace(delpath.split('/')[-1],"DEACT_"+delpath.split('/')[-1])
+                if os.path.isdir(deldeac):
+                    self.archi_info.delphesMA5tune_inc_paths.insert(0,deldeac+'/external/')
+                    self.archi_info.delphesMA5tune_inc_paths.insert(0,deldeac)
+                    self.includes.append(deldeac)
+                    self.includes.append(deldeac+'/external/')
+                else:
+                    self.archi_info.delphesMA5tune_inc_paths.append(self.user_info.delphesMA5tune_includes)
+                    self.archi_info.delphesMA5tune_inc_paths.append(self.user_info.delphesMA5tune_includes+'/external/')
             force1=True
         if self.user_info.delphesMA5tune_libs!=None:
-            self.logger.debug("User setting: Delphes-MA5tune lib path is specified.")
-            self.archi_info.delphesMA5tune_lib_paths.append(self.user_info.delphesMA5tune_libraries)
+            if not getpaths:
+                self.logger.debug("User setting: Delphes-MA5tune lib path is specified.")
+                self.archi_info.delphesMA5tune_lib_paths.append(self.user_info.delphesMA5tune_libraries)
+            else:
+                delpath=os.path.normpath(self.user_info.delphesMA5tune_libs)
+                deldeac = delpath.replace(delpath.split('/')[-1],"DEACT_"+delpath.split('/')[-1])
+                if os.path.isdir(deldeac):
+                    self.archi_info.delphesMA5tune_lib_paths.insert(0,deldeac)
+                    self.libs.append(deldeac)
+                else:
+                    self.archi_info.delphesMA5tune_lib_paths.append(self.user_info.delphesMA5tune_libs)
             force2=True
         force=force1 and force2
 
         # Checking if Delphes-MA5tune has been installed by MA5
         ma5installation = False
         if not force:
-            self.logger.debug("Look for Delphes-MA5tune in the folder "+self.archi_info.ma5dir+"/tools ...")
+            if not getpaths:
+                self.logger.debug("Look for Delphes-MA5tune in the folder "+self.archi_info.ma5dir+"/tools ...")
             if os.path.isdir(self.archi_info.ma5dir+'/tools/delphesMA5tune') and \
                os.path.isdir(self.archi_info.ma5dir+'/tools/delphesMA5tune/external'):
                 self.archi_info.delphesMA5tune_inc_paths.append(self.archi_info.ma5dir+'/tools/delphesMA5tune/')
                 self.archi_info.delphesMA5tune_inc_paths.append(self.archi_info.ma5dir+'/tools/delphesMA5tune/external/')
                 self.archi_info.delphesMA5tune_lib_paths.append(self.archi_info.ma5dir+'/tools/delphesMA5tune/')
-                self.logger.debug("-> found")
+                if not getpaths:
+                    self.logger.debug("-> found")
+                ma5installation = True
+            elif os.path.isdir(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune') and \
+               os.path.isdir(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/external') and getpaths:
+                self.archi_info.delphesMA5tune_inc_paths.append(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/')
+                self.archi_info.delphesMA5tune_inc_paths.append(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/external/')
+                self.archi_info.delphesMA5tune_lib_paths.append(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/')
+                self.includes.append(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/')
+                self.includes.append(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/external/')
+                self.libs.append(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/')
                 ma5installation = True
             else:
-                self.logger.debug("-> not found")
-                self.PrintFAIL(warning=True)
-                self.logger.warning("DelphesMA5tune folder not found.")
-                self.logger.warning("Delphes-MA5tune ROOT format will be disabled.")
-                self.logger.warning("To enable this format, please type 'install delphesMA5tune'.")
+                if not getpaths:
+                    self.logger.debug("-> not found")
+                    self.PrintFAIL(warning=True)
+                    self.logger.warning("DelphesMA5tune folder not found.")
+                    self.logger.warning("Delphes-MA5tune ROOT format will be disabled.")
+                    self.logger.warning("To enable this format, please type 'install delphesMA5tune'.")
                 return False
 
         # Check if the libraries and headers are available
         if force or ma5installation:
-
             # header
             filename = os.path.normpath(self.archi_info.delphesMA5tune_inc_paths[0]+'/modules/ParticlePropagator.h')
-            self.logger.debug("Look for the file "+filename+" ...")
+            if not getpaths:
+                self.logger.debug("Look for the file "+filename+" ...")
             if not os.path.isfile(filename):
-                self.logger.debug("-> not found")
-                self.PrintFAIL(warning=True)
-                self.logger.warning("Header file called '"+filename+"' not found.")
-                self.logger.warning("Delphes-MA5tune ROOT format will be disabled.")
-                self.logger.warning("To enable this format, please type 'install delphesMA5tune'.")
+                if not getpaths:
+                    self.logger.debug("-> not found")
+                    self.PrintFAIL(warning=True)
+                    self.logger.warning("Header file called '"+filename+"' not found.")
+                    self.logger.warning("Delphes-MA5tune ROOT format will be disabled.")
+                    self.logger.warning("To enable this format, please type 'install delphesMA5tune'.")
                 return False
             else:
-                self.logger.debug("-> found")
+                if not getpaths:
+                    self.logger.debug("-> found")
 
             # lib
-            self.logger.debug("Look for the libraries in folder "+str(self.archi_info.delphesMA5tune_lib_paths)+" ...")
+            if not getpaths:
+                self.logger.debug("Look for the libraries in folder "+str(self.archi_info.delphesMA5tune_lib_paths)+" ...")
             mypath, myfile = self.FindFilesWithPattern(self.archi_info.delphesMA5tune_lib_paths,"libDelphesMA5tune.*",libnames)
             self.archi_info.delphesMA5tune_lib_paths.append(os.path.normpath(mypath))
             self.archi_info.delphesMA5tune_lib      = myfile
-            self.logger.debug("-> result for lib paths: "+str(self.archi_info.delphesMA5tune_lib_paths))
-            self.logger.debug("-> result for lib files: "+str(self.archi_info.delphesMA5tune_lib))
+            if not getpaths:
+                self.logger.debug("-> result for lib paths: "+str(self.archi_info.delphesMA5tune_lib_paths))
+                self.logger.debug("-> result for lib files: "+str(self.archi_info.delphesMA5tune_lib))
             if self.archi_info.delphesMA5tune_lib=="":
-                self.PrintFAIL(warning=True)
-                self.logger.warning("Delphes-MA5tune library not found in "+\
-                  self.archi_info.delphesMA5tune_lib_paths[0]+" folder.")
-                self.logger.warning("Delphes-MA5tune ROOT format will be disabled.")
-                self.logger.warning("To enable this format, please type 'install delphesMA5tune'.")
+                if not getpaths:
+                    self.PrintFAIL(warning=True)
+                    self.logger.warning("Delphes-MA5tune library not found in "+\
+                      self.archi_info.delphesMA5tune_lib_paths[0]+" folder.")
+                    self.logger.warning("Delphes-MA5tune ROOT format will be disabled.")
+                    self.logger.warning("To enable this format, please type 'install delphesMA5tune'.")
                 return False
             self.archi_info.delphesMA5tune_lib      = os.path.normpath(myfile)
             
@@ -926,7 +1014,10 @@ class ConfigChecker:
         self.archi_info.delphesMA5tune_priority=(force or ma5installation)
 
         # Ok
-        self.PrintOK()
+        if not getpaths:
+            self.PrintOK()
+        self.includes=[x for x in self.includes if not x.startswith('DEACT')]
+        self.libs=[x for x in self.libs if not x.startswith('DEACT')]
         return True
 
 
@@ -1140,3 +1231,12 @@ class ConfigChecker:
         # Ok
         self.PrintOK()
         return True
+
+    def checkPAD(self):
+        return os.path.isdir(os.path.normpath(self.archi_info.ma5dir+'/PAD'))
+
+    def checkPADForMA5tune(self):
+        return os.path.isdir(os.path.normpath(self.archi_info.ma5dir+'/PADForMA5tune'))
+
+
+

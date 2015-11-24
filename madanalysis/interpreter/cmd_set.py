@@ -22,6 +22,8 @@
 ################################################################################
 
 
+from madanalysis.system.config_checker     import ConfigChecker
+from madanalysis.system.user_info          import UserInfo
 import madanalysis.interpreter.cmd_base as CmdBase
 import logging
 
@@ -96,13 +98,13 @@ class CmdSet(CmdBase.CmdBase):
             objs[i] = objs[i].replace('XXX','.')
 
         if len(objs)==2 and objs[0].lower()=='main' and objs[1].lower()=='recast':
-            import os
-            hasdelphes=os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphes'))\
-              or self.main.archi_info.has_delphes
-            hasMA5tune=os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune'))\
-              or self.main.archi_info.has_delphesMA5tune
-            hasPAD=os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/PAD'))
-            hasPADtune=os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/PADForMA5tune'))
+            user_info    = UserInfo()
+            user_info.ReadUserOptions(self.main.archi_info.ma5dir+'/madanalysis/input/installation_options.dat')
+            checker = ConfigChecker(self.main.archi_info, user_info, self.main.session_info, self.main.script, False)
+            hasdelphes = checker.checkDelphes(True)
+            hasMA5tune = checker.checkDelphesMA5tune(True)
+            hasPAD     = checker.checkPAD()
+            hasPADtune = checker.checkPADForMA5tune()
             self.main.recasting.user_SetParameter("status",args[2],self.main.mode,hasdelphes,hasMA5tune,self.main.datasets, hasPAD,hasPADtune)
             if args[2]=='on' and self.main.fastsim.package!='none':
                 logging.warning("Fastsim package switched off and internally handled")
@@ -125,7 +127,6 @@ class CmdSet(CmdBase.CmdBase):
             self.help()
             return
 
-        
     def do_selection(self,args):
         # set selection [ i ] .variable = value
         #     0         1 2 3 4         5 6

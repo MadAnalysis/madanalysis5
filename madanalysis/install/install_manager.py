@@ -223,11 +223,31 @@ class InstallManager():
         if package=='delphes':
             from madanalysis.install.install_delphes import InstallDelphes
             installer=InstallDelphes(self.main)
+        elif package=='delphesma5tune':
+            from madanalysis.install.install_delphesMA5tune import InstallDelphesMA5tune
+            installer=InstallDelphesMA5tune(self.main)
         else:
             logging.error('the package "'+rawpackage+'" is unknown')
             return False
 
         if not installer.Deactivate():
+            return False
+        return True
+
+
+    def Activate(self, rawpackage):
+        package=rawpackage.lower()
+        if package=='delphes':
+            from madanalysis.install.install_delphes import InstallDelphes
+            installer=InstallDelphes(self.main)
+        elif package=='delphesma5tune':
+            from madanalysis.install.install_delphesMA5tune import InstallDelphesMA5tune
+            installer=InstallDelphesMA5tune(self.main)
+        else:
+            logging.error('the package "'+rawpackage+'" is unknown')
+            return False
+
+        if not installer.Activate():
             return False
         return True
 

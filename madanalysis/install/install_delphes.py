@@ -22,7 +22,8 @@
 ################################################################################
 
 
-from madanalysis.install.install_service import InstallService
+from madanalysis.install.install_service   import InstallService
+from madanalysis.IOinterface.folder_writer import FolderWriter
 from shell_command import ShellCommand
 from string_tools  import StringTools
 import os
@@ -391,17 +392,30 @@ class InstallDelphes:
         return True
 
     def Deactivate(self):
-        if os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphes')):
-            logging.info("")
-            logging.info("   **********************************************************")
-            logging.info("   "+StringTools.Center('Deactivating Delphes',57))
-            logging.info("   **********************************************************")
-
-            if os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphes')):
-                if not FolderWriter.RemoveDirectory(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphes'),True):
+        if self.main.archi_info.delphes_lib_paths==[]:
+            return True
+        for x in  self.main.archi_info.delphes_lib_paths:
+            if 'DEACT' in x:
+                return True
+        if os.path.isdir(self.main.archi_info.delphes_lib_paths[0]):
+            logging.warning("Delphes is installed. Deactivating it.")
+            # Paths
+            delpath=os.path.normpath(self.main.archi_info.delphes_lib_paths[0])
+            deldeac = delpath.replace(delpath.split('/')[-1],"DEACT_"+delpath.split('/')[-1])
+            # If the deactivated directory already exists -> suppression
+            if os.path.isdir(os.path.normpath(deldeac)):
+                if not FolderWriter.RemoveDirectory(os.path.normpath(deldeac),True):
                         return False
+            # cleaning delphes + the samplanalyzer interface to delphes
+            shutil.move(delpath,deldeac)
+            myexts = ['so', 'a', 'dylib']
+            for ext in myexts:
+                myfile=self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.'+ext
+                if os.path.isfile(os.path.normpath(myfile)):
+                    os.remove(os.path.normpath(myfile))
 
-            shutil.move(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphes'),\
-                  os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphes'))
-
+            ToRemove=[ 'Makefile_delphes','compilation_delphes.log','linking_delphes.log','cleanup_delphes.log']
+            for myfile in ToRemove:
+                os.remove(os.path.normpath(self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/'+myfile))
+            self.main.archi_info.has_delphes = False
         return True
