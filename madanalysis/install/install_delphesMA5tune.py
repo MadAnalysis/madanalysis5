@@ -22,10 +22,10 @@
 ################################################################################
 
 
-from madanalysis.install.install_service    import InstallService
-from madanalysis.system.user_info           import UserInfo
-from madanalysis.system.config_checker      import ConfigChecker
-from madanalysis.IOinterface.library_writer import LibraryWriter
+from madanalysis.install.install_service                        import InstallService
+from madanalysis.system.user_info                               import UserInfo
+from madanalysis.system.config_checker                          import ConfigChecker
+from madanalysis.IOinterface.library_writer                     import LibraryWriter
 from shell_command import ShellCommand
 import os
 import sys
@@ -267,9 +267,13 @@ class InstallDelphesMA5tune:
             ToRemove=[ 'Makefile_delphesMA5tune','compilation_delphesMA5tune.log','linking_delphesMA5tune.log','cleanup_delphesMA5tune.log']
             for myfile in ToRemove:
                 os.remove(os.path.normpath(self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/'+myfile))
+            self.main.archi_info.has_delphesMA5tune = False
         return True
 
     def Activate(self):
+        # output =  1: activation successfull.
+        # output =  0: nothing is done.
+        # output = -1: error
         user_info = UserInfo()
         user_info.ReadUserOptions(self.main.archi_info.ma5dir+'/madanalysis/input/installation_options.dat')
         checker = ConfigChecker(self.main.archi_info, user_info, self.main.session_info, self.main.script, False)
@@ -285,11 +289,10 @@ class InstallDelphesMA5tune:
                 [ x.replace("DEACT_","") for x in self.main.archi_info.delphesMA5tune_lib_paths ]
             # do we have to activate the tune?
             if not 'DEACT' in delpath:
-                return True
+                return 0
             logging.warning("DelphesMA5tune is deactivated. Activating it.")
             # naming
             shutil.move(delpath,deldeac)
-
             # compiling
             compiler = LibraryWriter('lib',self.main)
             ncores = compiler.get_ncores2()
@@ -299,7 +302,7 @@ class InstallDelphesMA5tune:
             for mypackage in ToBuild:
                 if not compiler.WriteMakefileForInterfaces(mypackage):
                     logging.error("library building aborted.")
-                    return False
+                    return -1
                 flag=''
                 myfolder='Process'
                 if mypackage != 'process':
@@ -313,7 +316,7 @@ class InstallDelphesMA5tune:
                     logging.error('Impossible to compile the project.'+\
                       ' For more details, see the log file:')
                     logging.error(logfile)
-                    return result
+                    return -1
                 logfile = folder+'/linking'+flag+'.log'
                 command = ['make','link',strcores,'--file=Makefile'+flag]
                 result, out = ShellCommand.ExecuteWithLog(command,logfile,folder)
@@ -321,7 +324,7 @@ class InstallDelphesMA5tune:
                     logging.error('Impossible to link the project.'+\
                       ' For more details, see the log file:')
                     logging.error(logfile)
-                    return result
+                    return -1
                 logfile = folder+'/cleanup'+flag+'.log'
                 command = ['make','clean',strcores,'--file=Makefile'+flag]
                 result, out = ShellCommand.ExecuteWithLog(command,logfile,folder)
@@ -329,5 +332,6 @@ class InstallDelphesMA5tune:
                     logging.error('Impossible to clean the project.'+\
                       ' For more details, see the log file:')
                     logging.error(logfile)
-                    return result
-        return True
+                    return -1
+                self.main.archi_info.has_delphesMA5tune=True
+        return 1

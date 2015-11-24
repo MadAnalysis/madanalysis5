@@ -41,8 +41,6 @@ class JobWriter():
         self.output     = self.main.output
         self.fastsim    = self.main.fastsim
         self.merging    = self.main.merging
-        self.shower     = self.main.shower
-        self.shwrmode   = ''
 
     @staticmethod     
     def CheckJobStructureMute(path,recastflag):
@@ -428,6 +426,8 @@ class JobWriter():
 
             if self.main.fastsim.package=="delphes":
                 cardname = self.main.fastsim.delphes.card
+                if "../../../.." in cardname:
+                    cardname=cardname.split('/')[-1]
             elif self.main.fastsim.package=="delphesMA5tune":
                 cardname = self.main.fastsim.delphesMA5tune.card
                 if "../../../.." in cardname:
@@ -540,29 +540,6 @@ class JobWriter():
         file.write('  manager.Add("MadAnalysis5job", new user);\n')
         file.write('}\n')
         file.close()
-        return True
-
-    def CreateShowerDir(self,mode):
-        if self.shower.type=='auto' and mode=='HERWIG6':
-            self.shwrmode = mode
-            self.fortran = True
-            try:
-                os.mkdir(self.path+'/Build/Showering')
-                shutil.copy(self.main.archi_info.ma5dir+'/../madfks_hwdriver.f',\
-                    self.path+'/Build/Showering/shower.f')
-                shutil.copy(self.main.archi_info.ma5dir+'/../shower_card.dat', \
-                    self.path+'/Build/shower_card.dat')
-                shutil.copy(self.main.archi_info.ma5dir+'/../MCATNLO_HERWIG6_input', \
-                    self.path+'/Build/MCATNLO_HERWIG6_input')
-                logging.warning('THE SHOWER CARD THING MUST BE IMPROVED')
-                logging.warning('THE INPUT CARD THING MUST BE IMPROVED')
-                logging.warning('THE main function must be generated')
-            except:
-                logging.error('Cannot create the directory ' + self.path + '/MCatNLO.')
-                return False              
-            logging.warning('MUFFFFF and the shower is ready')
-        else:
-            logging.error('showering not implemented')
         return True
 
     def WriteSampleAnalyzerMakefile(self,option=""):

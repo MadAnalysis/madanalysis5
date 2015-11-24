@@ -245,9 +245,6 @@ class InstallManager():
             installer=InstallDelphesMA5tune(self.main)
         else:
             logging.error('the package "'+rawpackage+'" is unknown')
-            return False
-
-        if not installer.Activate():
-            return False
-        return True
+            return -1
+        return installer.Activate()
 

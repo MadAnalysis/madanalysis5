@@ -31,6 +31,7 @@ from madanalysis.enumeration.report_format_type                 import ReportFor
 from madanalysis.layout.layout                                  import Layout
 from madanalysis.install.install_manager                        import InstallManager
 from madanalysis.configuration.delphesMA5tune_configuration     import DelphesMA5tuneConfiguration
+from madanalysis.configuration.delphes_configuration            import DelphesConfiguration
 from shell_command import ShellCommand
 from string_tools  import StringTools
 import logging
@@ -121,7 +122,7 @@ class CmdSubmit(CmdBase):
                 newhistory.append(history[i])
 
         ReAnalyzeCmdList = ['plot','select','reject','set main.clustering',
-                            'set main.merging', 'set main.shower', 'define',
+                            'set main.merging', 'define', 'set main.recast',
                             'import', 'set main.isolation']
 
         # Determining if we have to resubmit the job
@@ -362,9 +363,28 @@ class CmdSubmit(CmdBase):
             os.system(self.main.session_info.editor+" "+dirname+"/Input/recasting_card.dat")
 
     def submit(self,dirname,history):
+        # checking if the needed version of delphes is activated
+        forced_bkp = self.main.forced
+        self.main.forced=True
+        if self.main.fastsim.package == 'delphes' and not self.main.archi_info.has_delphes:
+            if self.main.archi_info.has_delphesMA5tune:
+                installer=InstallManager(self.main)
+                if not installer.Deactivate('delphesMA5tune'):
+                    return False
+            if installer.Activate('delphes')==-1:
+                return False
+        if self.main.fastsim.package == 'delphesMA5tune' and not self.main.archi_info.has_delphesMA5tune:
+            if self.main.archi_info.has_delphes:
+                installer=InstallManager(self.main)
+                if not installer.Deactivate('delphes'):
+                    return False
+            if installer.Activate('delphesMA5tune')==-1:
+                return False
+        self.main.forced=forced_bkp
+
         # Initializing the JobWriter
         jobber = JobWriter(self.main,dirname,self.resubmit)
-        
+
         # Writing process
         if not self.resubmit:
             logging.info("   Creating folder '"+dirname.split('/')[-1] \
@@ -388,17 +408,6 @@ class CmdSubmit(CmdBase):
             if self.main.recasting.status == 'on':
                 if not FolderWriter.CreateDirectory(dirname+'/Events'):
                     return False
-            if self.main.shower.enable:
-                 mode=self.main.shower.type
-                 if self.main.shower.type=='auto':
-                     mode = commands.getstatusoutput('less ' + self.main.datasets[0].filenames[0] + ' | grep parton_shower ')
-                     if mode[0]!=0:
-                         logging.error('Cannot retrieve the showering information from the LHE files')
-                         return False
-                     mode = (mode[1].split())[0]
-                 if not jobber.CreateShowerDir(mode):
-                    logging.error("   job submission aborted.")
-                    return False
 
         # In the case of recasting, there is no need to create a standard Job
         if self.main.recasting.status == "on":
@@ -407,16 +416,18 @@ class CmdSubmit(CmdBase):
             self.editRecastingCard(dirname)
             logging.info("   Getting the list of delphes simulation to be performed...")
 
-            ### Second, whichdelphes run must be performed, and running them
+            ### Second, which delphes run must be performed, and running them
             self.main.recasting.GetDelphesRuns(dirname+"/Input/recasting_card.dat")
             firstv11 = True
+            firstv13 = True
+            forced_bkp = self.main.forced
+            self.main.forced=True
             for mydelphescard in sorted(self.main.recasting.delphesruns):
                 version=mydelphescard[:4]
                 card=mydelphescard[5:]
                 if version=="v1.1":
                     if not self.main.recasting.ma5tune:
-                        logging.error('The DelphesMA5tune library is not present... '
-                           + 'v1.1 analyses cannot be used')
+                        logging.error('The DelphesMA5tune library is not present... v1.1 analyses cannot be used')
                         return False
 
                     if firstv11:
@@ -432,27 +443,66 @@ class CmdSubmit(CmdBase):
                         return False
 
                     ## Activating and compile the MA5Tune
-                    if not installer.Activate('delphesma5tune'):
+                    if installer.Activate('delphesMA5tune')==-1:
                         return False
 
                     ## running delphesMA5tune
-                    if not os.path.isfile(dirname+'/Events/events_'+card+'.root'):
+                    if not os.path.isfile(dirname+'/Events/events_v1x1_'+card+'.root'):
                         self.main.recasting.status="off"
                         self.main.fastsim.package="delphesMA5tune"
                         self.main.fastsim.clustering=0
                         self.main.fastsim.delphes=0
                         self.main.fastsim.delphesMA5tune = DelphesMA5tuneConfiguration()
-                        self.main.fastsim.delphesMA5tune.card = "../../../../PADForMA5tune/Input/Cards/"+card
+                        self.main.fastsim.delphesMA5tune.card = os.path.normpath("../../../../PADForMA5tune/Input/Cards/"+card)
                         self.submit(dirname+'_DelphesForMa5tuneRun',[])
                         self.main.recasting.status="on"
                         self.main.fastsim.package="none"
                         ## saving the output
                         shutil.move(dirname+'_DelphesForMa5tuneRun/Output/_defaultset/TheMouth.root',\
-                          dirname+'/Events/events_'+card+'.root')
-                        if not FolderWriter.RemoveDirectory(os.path.normpath(dirname+'_DelphesForMa5tuneRun'),True):
+                          dirname+'/Events/events_v1x1_'+card+'.root')
+                        if not FolderWriter.RemoveDirectory(os.path.normpath(dirname+'_DelphesForMa5tuneRun')):
+                            return False
+                elif version in ['v1.2', 'v1.3']:
+                    if not self.main.recasting.delphes:
+                        logging.error('The Delphes library is not present... v1.2+ analyses cannot be used')
+                        return False
+
+                    if firstv13:
+                        logging.info("")
+                        logging.info("   **********************************************************")
+                        logging.info("   "+StringTools.Center('v1.2+ detector simulations',57))
+                        logging.info("   **********************************************************")
+                        firstv13=False
+
+                    ## Deactivating delphesMA5tune
+                    installer=InstallManager(self.main)
+                    if not installer.Deactivate('delphesMA5tune'):
+                        return False
+
+                    ## Activating and compile Delphes
+                    if installer.Activate('delphes')==-1:
+                        return False
+
+                    ## running delphesMA5tune
+                    if not os.path.isfile(dirname+'/Events/events_v1x2_'+card+'.root'):
+                        self.main.recasting.status="off"
+                        self.main.fastsim.package="delphes"
+                        self.main.fastsim.clustering=0
+                        self.main.fastsim.delphesMA5tune=0
+                        self.main.fastsim.delphes = DelphesConfiguration()
+                        self.main.fastsim.delphes.card = os.path.normpath("../../../../PAD/Input/Cards/"+card)
+                        self.submit(dirname+'_DelphesRun',[])
+                        self.main.recasting.status="on"
+                        self.main.fastsim.package="none"
+                        ## saving the output
+                        shutil.move(dirname+'_DelphesRun/Output/_defaultset/TheMouth.root',\
+                          dirname+'/Events/events_v1x2_'+card+'.root')
+                        if not FolderWriter.RemoveDirectory(os.path.normpath(dirname+'_DelphesRun')):
                             return False
                 else:
-                    logging.error('please implement the v1.2 delphes run')
+                    logging.error('An analysis can only be compatible with ma5 v1.1, v1.2 or v1.3...')
+                    return False
+            self.main.forced=forced_bkp
 
             ### Third, executing the analyses
 

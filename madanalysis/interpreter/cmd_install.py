@@ -22,8 +22,10 @@
 ################################################################################
 
 
-from madanalysis.interpreter.cmd_base          import CmdBase
-from madanalysis.install.install_manager       import InstallManager
+from madanalysis.interpreter.cmd_base       import CmdBase
+from madanalysis.install.install_manager    import InstallManager
+from madanalysis.system.user_info           import UserInfo
+from madanalysis.system.config_checker      import ConfigChecker
 import logging
 import os
 import sys
@@ -47,33 +49,33 @@ class CmdInstall(CmdBase):
             return
 
         # delphes preinstallation
-        def inst_delphes(main,installer):
+        def inst_delphes(main,installer,pad=False):
             if not installer.Deactivate('delphesMA5tune'):
                 return False
-            if os.path.isdir(os.path.normpath(main.archi_info.ma5dir+'/tools/DEACT_delphes')):
-                logging.warning("Delphes deactivated. Activating it...")
-                shutil.move(os.path.normpath(main.archi_info.ma5dir+'/tools/DEACT_delphes'),os.path.normpath(main.archi_info.ma5dir+'/tools/delphes'))
-                return True
-            elif not os.path.isdir(os.path.normpath(main.archi_info.ma5dir+'/tools/delphes')):
-                logging.info("   A previous installation has not been found... installing...")
+            ResuActi = installer.Activate('delphes')
+            if ResuActi == -1:
+                return False
+            elif ResuActi == 0 and not self.main.archi_info.has_delphes:
+                logging.warning("Delphes not installed: installing it...")
                 return installer.Execute('delphes')
-            logging.warning("A previous installation of Delphes has been found. Skipping the installation.")
-            logging.warning("To update Delphes, please remove the tools/delphes directory")
+            elif ResuActi ==0 and self.main.archi_info.has_delphes and not pad:
+                logging.warning("A previous installation of Delphes has been found. Skipping the installation.")
+                logging.warning("To update Delphes, please remove the tools/delphes directory")
             return True
 
         # ma5tune preinstallation
-        def inst_ma5tune(main,installer):
+        def inst_ma5tune(main,installer,pad=False):
             if not installer.Deactivate('delphes'):
                 return False
-            if os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune')):
-                logging.warning("DelphesMA5tune deactivated. Activating it...")
-                shutil.move(os.path.normpath(self.main.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune'),os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphesMA5tune'))
-                return True
-            elif not os.path.isdir(os.path.normpath(self.main.archi_info.ma5dir+'/tools/delphesMA5tune')):
+            ResuActi = installer.Activate('delphesMA5tune')
+            if ResuActi == -1:
+                return False
+            elif ResuActi == 0 and not self.main.archi_info.has_delphesMA5tune:
                 logging.warning("DelphesMA5tune not installed: installing it...")
                 return installer.Execute('delphesMA5tune')
-            logging.warning("A previous installation of DelphesMA5tune has been found. Skipping the installation.")
-            logging.warning("To update DelphesMA5tune, please remove the tools/delphesMA5tune directory")
+            elif ResuActi == 0 and self.main.archi_info.has_delphesMA5tune and not pad:
+                logging.warning("A previous installation of DelphesMA5tune has been found. Skipping the installation.")
+                logging.warning("To update DelphesMA5tune, please remove the tools/delphesMA5tune directory")
             return True
 
         # Calling selection method
@@ -121,15 +123,15 @@ class CmdInstall(CmdBase):
             return installer.Execute('RecastingTools')
         elif args[0]=='PADForMA5tune':
             installer=InstallManager(self.main)
-            if inst_ma5tune(self.main,installer):
+            if inst_ma5tune(self.main,installer,True):
                 return installer.Execute('PADForMA5tune')
         elif args[0]=='PAD':
-            installer=InstallManager(self.main)
+            installer=InstallManager(self.main,True)
             if inst_delphes(self.main,installer):
                 return installer.Execute('PAD')
         elif args[0]=='PADForMA5tunelocal' and len(args)==2:
             installer=InstallManager(self.main)
-            if inst_ma5tune(self.main,installer):
+            if inst_ma5tune(self.main,installer,True):
                 return installer.Execute('PADForMA5tunelocal_xxx_'+args[1])
         else:
             logging.error("the syntax is not correct.")

@@ -22,8 +22,11 @@
 ################################################################################
 
 
-from madanalysis.install.install_service   import InstallService
-from madanalysis.IOinterface.folder_writer import FolderWriter
+from madanalysis.install.install_service    import InstallService
+from madanalysis.system.user_info           import UserInfo
+from madanalysis.system.config_checker      import ConfigChecker
+from madanalysis.IOinterface.library_writer import LibraryWriter
+from madanalysis.IOinterface.folder_writer  import FolderWriter
 from shell_command import ShellCommand
 from string_tools  import StringTools
 import os
@@ -419,3 +422,69 @@ class InstallDelphes:
                 os.remove(os.path.normpath(self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/'+myfile))
             self.main.archi_info.has_delphes = False
         return True
+
+    def Activate(self):
+        # output =  1: activation successfull.
+        # output =  0: nothing is done.
+        # output = -1: error
+        user_info = UserInfo()
+        user_info.ReadUserOptions(self.main.archi_info.ma5dir+'/madanalysis/input/installation_options.dat')
+        checker = ConfigChecker(self.main.archi_info, user_info, self.main.session_info, self.main.script, False)
+        hasdelphes = checker.checkDelphes(True)
+        if hasdelphes:
+            # Paths
+            delpath=os.path.normpath(self.main.archi_info.delphes_lib_paths[0])
+            deldeac = delpath.replace("DEACT_","")
+            self.main.archi_info.delphes_lib=self.main.archi_info.delphes_lib.replace("DEACT_","")
+            self.main.archi_info.delphes_inc_paths =\
+                [ x.replace("DEACT_","") for x in self.main.archi_info.delphes_inc_paths ]
+            self.main.archi_info.delphes_lib_paths =\
+                [ x.replace("DEACT_","") for x in self.main.archi_info.delphes_lib_paths ]
+            # do we have to activate delphes?
+            if not 'DEACT' in delpath:
+                return 0
+            logging.warning("Delphes is deactivated. Activating it.")
+            # naming
+            shutil.move(delpath,deldeac)
+            # compiling
+            compiler = LibraryWriter('lib',self.main)
+            ncores = compiler.get_ncores2()
+            if ncores>1:
+                strcores='-j'+str(ncores)
+            ToBuild =  ['delphes', 'process']
+            for mypackage in ToBuild:
+                if not compiler.WriteMakefileForInterfaces(mypackage):
+                    logging.error("library building aborted.")
+                    return -1
+                flag=''
+                myfolder='Process'
+                if mypackage != 'process':
+                    flag='_'+mypackage
+                    myfolder='Interfaces'
+                command = ['make','compile',strcores,'--file=Makefile'+flag]
+                folder=self.main.archi_info.ma5dir + '/tools/SampleAnalyzer/'+myfolder
+                logfile = folder+'/compilation'+flag+'.log'
+                result, out = ShellCommand.ExecuteWithLog(command,logfile,folder)
+                if not result:
+                    logging.error('Impossible to compile the project.'+\
+                      ' For more details, see the log file:')
+                    logging.error(logfile)
+                    return -1
+                logfile = folder+'/linking'+flag+'.log'
+                command = ['make','link',strcores,'--file=Makefile'+flag]
+                result, out = ShellCommand.ExecuteWithLog(command,logfile,folder)
+                if not result:
+                    logging.error('Impossible to link the project.'+\
+                      ' For more details, see the log file:')
+                    logging.error(logfile)
+                    return -1
+                logfile = folder+'/cleanup'+flag+'.log'
+                command = ['make','clean',strcores,'--file=Makefile'+flag]
+                result, out = ShellCommand.ExecuteWithLog(command,logfile,folder)
+                if not result:
+                    logging.error('Impossible to clean the project.'+\
+                      ' For more details, see the log file:')
+                    logging.error(logfile)
+                    return -1
+                self.main.archi_info.has_delphes=True
+        return 1

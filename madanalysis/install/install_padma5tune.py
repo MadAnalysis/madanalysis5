@@ -41,7 +41,7 @@ class InstallPadForMA5tune:
         self.untardir    = ""
         self.ncores      = 1
         self.analyses    = ["cms_sus_13_011", "cms_sus_13_012", "cms_sus_13_016", "atlas_sus_13_05", "atlas_susy_2013_11",
-            "atlas_higg_2013_03", "ATLAS_EXOT_2014_06", "atlas_susy_2014_10", "atlas_susy_2013_21", "atlas_1405_7875",
+            "atlas_higg_2013_03", "atlas_susy_2014_10", "atlas_susy_2013_21", "atlas_1405_7875",
             "cms_sus_14_001_monojet"  ]
         self.files = {
     "cms_sus_13_011.cpp" : "http://inspirehep.net/record/1301484/files/cms_sus_13_011.cpp",
@@ -62,9 +62,6 @@ class InstallPadForMA5tune:
     "atlas_higg_2013_03.cpp" : "http://inspirehep.net/record/1347081/files/atlas_higg_2013_03.cpp",
     "atlas_higg_2013_03.h"   : "http://inspirehep.net/record/1347081/files/atlas_higg_2013_03.h",
     "atlas_higg_2013_03.info": "http://inspirehep.net/record/1347081/files/atlas_higg_2013_03.info",
-    "ATLAS_EXOT_2014_06.cpp" : "http://inspirehep.net/record/1353627/files/ATLAS_EXOT_2014_06.cpp",
-    "ATLAS_EXOT_2014_06.h"   : "http://inspirehep.net/record/1353627/files/ATLAS_EXOT_2014_06.h",
-    "ATLAS_EXOT_2014_06.info": "http://inspirehep.net/record/1353627/files/ATLAS_EXOT_2014_06.info",
     "atlas_susy_2014_10.cpp" : "http://inspirehep.net/record/1387577/files/atlas_susy_2014_10.cpp",
     "atlas_susy_2014_10.h"   : "http://inspirehep.net/record/1387577/files/atlas_susy_2014_10.h",
     "atlas_susy_2014_10.info": "http://inspirehep.net/record/1387577/files/atlas_susy_2014_10.info",
@@ -130,6 +127,25 @@ class InstallPadForMA5tune:
       file.write('      SLACcitation   = \"%%CITATION = ARXIV:1206.1599;%%\",\n')
       file.write('}\n')
 
+      file.write('@article{Conte:2014zja,\n')
+      file.write('      author         = \"Conte, Eric and Dumont, B\'eranger and Fuks, Benjamin and\n')
+      file.write('                        Wymant, Chris\",\n')
+      file.write('      title          = \"{Designing and recasting LHC analyses with MadAnalysis\n')
+      file.write('                        5}\",\n')
+      file.write('      journal        = \"Eur. Phys. J.\",\n')
+      file.write('      volume         = \"C74\",\n')
+      file.write('      year           = \"2014\",\n')
+      file.write('      number         = \"10\",\n')
+      file.write('      pages          = \"3103\",\n')
+      file.write('      doi            = \"10.1140/epjc/s10052-014-3103-0\",\n')
+      file.write('      eprint         = \"1405.3982\",\n')
+      file.write('      archivePrefix  = \"arXiv\",\n')
+      file.write('      primaryClass   = \"hep-ph\",\n')
+      file.write('      reportNumber   = \"CERN-PH-TH-2014-088, LPSC-14-079, LAPTH-033-14,\n')
+      file.write('                        MCNET-14-11\",\n')
+      file.write('      SLACcitation   = \"%%CITATION = ARXIV:1405.3982;%%\"\n')
+      file.write('}\n')
+
       # CMS-13-011
       file.write('@article{,\n')
       file.write('      author         = \"Dumont, Beranger and Fuks, Benjamin and Wymant, Chris\",\n')
@@ -189,14 +205,6 @@ class InstallPadForMA5tune:
       file.write('      title          = \"{MadAnalysis 5 implementation of ATLAS-SUSY-2013-05}\",\n')
       file.write('      doi            = \"10.7484/INSPIREHEP.DATA.Z4ML.3W67.2\",\n')
       file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1325001;%%\",\n')
-      file.write('}\n')
-
-      #ATLAS-EXOT-2014-06
-      file.write('@article{,\n')
-      file.write('      author         = \"Barducci, Daniele\",\n')
-      file.write('      title          = \"{MadAnalysis 5 implementation of ATLAS-EXOT-2014-06}\",\n')
-      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.922E.4BN6\",\n')
-      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1353627;%%\",\n')
       file.write('}\n')
 
       #ATLAS-SUSY-2014-10

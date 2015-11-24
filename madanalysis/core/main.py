@@ -40,7 +40,6 @@ from madanalysis.configuration.recast_configuration     import RecastConfigurati
 from madanalysis.configuration.fastsim_configuration    import FastsimConfiguration
 from madanalysis.configuration.isolation_configuration  import IsolationConfiguration
 from madanalysis.configuration.merging_configuration    import MergingConfiguration
-from madanalysis.configuration.shower_configuration     import ShowerConfiguration
 from string_tools                                       import StringTools
 from madanalysis.system.checkup                         import CheckUp
 import logging
@@ -104,8 +103,6 @@ class Main():
             self.normalize = NormalizeType.NONE
         else:
             self.normalize = NormalizeType.LUMI_WEIGHT
-        self.shower     = ShowerConfiguration()
-
 
     def InitObservables(self,mode):
         self.observables = ObservableManager(mode)
@@ -166,7 +163,6 @@ class Main():
         self.isolation.Display()
         logging.info(" *********************************" )
         self.recasting.Display()
-        self.shower.Display()
         logging.info(" *********************************" )
 
 

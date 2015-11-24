@@ -794,9 +794,9 @@ class ConfigChecker:
                 ma5installation = True
             elif os.path.isdir(self.archi_info.ma5dir+'/tools/DEACT_delphes') and \
                os.path.isdir(self.archi_info.ma5dir+'/tools/DEACT_delphes/external') and getpaths:
-                self.archi_info.delphes_inc_paths.append(self.archi_info.ma5dir+'/tools/DEACT_delphes/')
-                self.archi_info.delphes_inc_paths.append(self.archi_info.ma5dir+'/tools/DEACT_delphes/external/')
-                self.archi_info.delphes_lib_paths.append(self.archi_info.ma5dir+'/tools/DEACT_delphes/')
+                self.archi_info.delphes_inc_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphes/external/')
+                self.archi_info.delphes_inc_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphes/')
+                self.archi_info.delphes_lib_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphes/')
                 self.includes.append(self.archi_info.ma5dir+'/tools/DEACT_delphes/')
                 self.includes.append(self.archi_info.ma5dir+'/tools/DEACT_delphes/external/')
                 self.libs.append(self.archi_info.ma5dir+'/tools/DEACT_delphes/')
@@ -957,9 +957,9 @@ class ConfigChecker:
                 ma5installation = True
             elif os.path.isdir(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune') and \
                os.path.isdir(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/external') and getpaths:
-                self.archi_info.delphesMA5tune_inc_paths.append(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/')
-                self.archi_info.delphesMA5tune_inc_paths.append(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/external/')
-                self.archi_info.delphesMA5tune_lib_paths.append(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/')
+                self.archi_info.delphesMA5tune_inc_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/external/')
+                self.archi_info.delphesMA5tune_inc_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/')
+                self.archi_info.delphesMA5tune_lib_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/')
                 self.includes.append(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/')
                 self.includes.append(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/external/')
                 self.libs.append(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/')
