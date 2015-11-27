@@ -147,7 +147,6 @@ class ExpertMode:
         return True    
 
 
-            
     def GiveAdvice(self):
         logging.info("\nGuidelines for writing an analysis in expert mode\n")
         logging.info(" 1. Entering the directory '"+self.path+"/Build'\n")

@@ -126,8 +126,8 @@ class CmdInstall(CmdBase):
             if inst_ma5tune(self.main,installer,True):
                 return installer.Execute('PADForMA5tune')
         elif args[0]=='PAD':
-            installer=InstallManager(self.main,True)
-            if inst_delphes(self.main,installer):
+            installer=InstallManager(self.main)
+            if inst_delphes(self.main,installer,True):
                 return installer.Execute('PAD')
         elif args[0]=='PADForMA5tunelocal' and len(args)==2:
             installer=InstallManager(self.main)
