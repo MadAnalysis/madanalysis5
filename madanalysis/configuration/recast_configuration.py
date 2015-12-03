@@ -110,6 +110,25 @@ class RecastConfiguration:
           "delphes_card_atlas_sus_2014_10.tcl": ["atlas_susy_2014_10"] ,
           "delphes_card_atlas_sus_2013_04.tcl": ["atlas_susy_2013_04"] ,
           "delphes_card_cms_b2g_12_012.tcl":    ["cms_B2G_12_012", "cms_exo_12_047", "cms_exo_12_048"] }
+
+        self.description = {
+          "atlas_susy_2013_04"     : "ATLAS - multijet + met", 
+          "atlas_sus_13_05"        : "ATLAS - stop/sbottom - 0 lepton + 2 bjets + met",
+          "atlas_susy_2013_11"     : "ATLAS - ewkinos - 2 leptons + met",
+          "atlas_susy_2013_21"     : "ATLAS - monojet",
+          "atlas_susy_2014_10"     : "ATLAS - squark-gluino - 2 leptons + jets + met",
+          "atlas_1405_7875"        : "ATLAS - squark-gluino - 0 leptons + 2-6 jets + met",
+          "atlas_higg_2013_03"     : "ATLAS - ZH to invisible + 2 leptons",
+          "ATLAS_EXOT_2014_06"     : "ATLAS - monophoton",
+          "cms_sus_13_012"         : "CMS   - squark-gluino - MET/MHT",
+          "cms_sus_13_016"         : "CMS   - gluinos - 2 leptons + bjets + met",
+          "cms_sus_14_001_monojet" : "CMS   - stop - the monojet channel",
+          "cms_sus_13_011"         : "CMS   - stop - 1 lepton + bjets + met",
+          "cms_exo_12_047"         : "CMS   - monophoton",
+          "cms_exo_12_048"         : "CMS   - monojet",
+          "cms_B2G_12_012"         : "CMS   - T5/3 partners in the SSDL channel"
+        }
+
         self.delphesruns  = []
         self.analysisruns = []
         self.CLs_numofexps= 100000
@@ -269,11 +288,17 @@ class RecastConfiguration:
             if "manager.InitializeAnalyzer" in line:
                 analysis = str(line.split('\"')[1])
                 mydelphes="UNKNOWN"
+                descr="UNKNOWN"
                 for mycard,alist in self.DelphesDic.items():
                       if analysis in alist:
                           mydelphes=mycard
                           break
-                card.write(analysis.ljust(30,' ') + mytype.ljust(12,' ') + 'on    ' + mydelphes+'\n')
+                for myana,mydesc in self.description.items():
+                      if analysis == myana:
+                          descr=mydesc
+                          break
+                card.write(analysis.ljust(30,' ') + mytype.ljust(12,' ') + 'on    ' + mydelphes.ljust(50, ' ')+\
+                      ' # '+descr+'\n')
         mainfile.close()
         card.close()
 
