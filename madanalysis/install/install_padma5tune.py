@@ -40,9 +40,9 @@ class InstallPadForMA5tune:
         self.delphesdir  = self.installdir + "/Input/Cards"
         self.untardir    = ""
         self.ncores      = 1
-        self.analyses    = ["cms_sus_13_011", "cms_sus_13_012", "cms_sus_13_016", "atlas_sus_13_05", "atlas_susy_2013_11",
-            "atlas_higg_2013_03", "atlas_susy_2014_10", "atlas_susy_2013_21", "atlas_1405_7875",
-            "cms_sus_14_001_monojet"  ]
+        self.analyses    = ["cms_sus_14_001_monojet", "cms_sus_13_016", "cms_sus_13_012", "cms_sus_13_011",
+            "atlas_higg_2013_03", "atlas_1405_7875", "atlas_susy_2014_10", "atlas_susy_2013_21", "atlas_susy_2013_11",
+             "atlas_sus_13_05", "atlas_susy_2013_04" ]
         self.files = {
     "cms_sus_13_011.cpp" : "http://inspirehep.net/record/1301484/files/cms_sus_13_011.cpp",
     "cms_sus_13_011.h"   : "http://inspirehep.net/record/1301484/files/cms_sus_13_011.h",
@@ -71,10 +71,14 @@ class InstallPadForMA5tune:
 #    "atlas_1405_7875.cpp" : "http://inspirehep.net/record/1388801/files/atlas_1405_7875.cpp",
     "atlas_1405_7875.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/atlas_1405_7875.cpp",
     "atlas_1405_7875.h"   : "http://inspirehep.net/record/1388801/files/atlas_1405_7875.h",
-    "atlas_1405_7875.info": "http://inspirehep.net/record/1388801/files/atlas_1405_7875.info",
+#    "atlas_1405_7875.info": "http://inspirehep.net/record/1388801/files/atlas_1405_7875.info",
+    "atlas_1405_7875.info": "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/atlas_1405_7875.info",
     "cms_sus_14_001_monojet.cpp" : "http://inspirehep.net/record/1401439/files/cms_sus_14_001_monojet.cpp",
     "cms_sus_14_001_monojet.h"   : "http://inspirehep.net/record/1401439/files/cms_sus_14_001_monojet.h",
-    "cms_sus_14_001_monojet.info": "http://inspirehep.net/record/1401439/files/cms_sus_14_001_monojet.info"
+    "cms_sus_14_001_monojet.info": "http://inspirehep.net/record/1401439/files/cms_sus_14_001_monojet.info",
+    "atlas_susy_2013_04.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/atlas_susy_2013_04.cpp",
+    "atlas_susy_2013_04.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/atlas_susy_2013_04.h",
+    "atlas_susy_2013_04.info": "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/atlas_susy_2013_04.info"
 }
 
         self.delphescards = {
@@ -82,6 +86,7 @@ class InstallPadForMA5tune:
     "delphes_card_atlas_standard.tcl" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/delphesMA5tune_card_ATLAS.tcl",
     "delphes_card_atlas_sus_2013_05.tcl" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/delphesMA5tune_card_ATLAS_05.tcl",
     "delphes_card_atlas_sus_2013_11.tcl" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/delphesMA5tune_card_ATLAS_dileptonSUSY.tcl",
+    "delphes_card_atlas_sus_2013_04.tcl" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_atlas_sus_2013_04.tcl",
     "delphes_card_atlas_sus_2014_10.tcl" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/delphesMA5tune_card_ATLAS_2014_10.tcl"
     }
 

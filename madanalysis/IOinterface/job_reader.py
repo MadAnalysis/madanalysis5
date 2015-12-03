@@ -51,7 +51,7 @@ class JobReader():
             return False
         else:
             return True
-                            
+
     def CheckFile(self,dataset):
         name=InstanceName.Get(dataset.name)
         if os.path.isfile(self.safdir+"/"+name+"/MadAnalysis5job.saf"):

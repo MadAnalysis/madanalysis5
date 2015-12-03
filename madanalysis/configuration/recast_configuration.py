@@ -29,10 +29,73 @@ from shell_command import ShellCommand
 import logging
 import shutil
 import os
+import math
+
+def CleanRegionName(mystr):
+    newstr = mystr.replace("/",  "_slash_")
+    newstr = newstr.replace("->", "_to_")
+    newstr = newstr.replace(">=", "_greater_than_or_equal_to_")
+    newstr = newstr.replace(">",  "_greater_than_")
+    newstr = newstr.replace("<=", "_smaller_than_or_equal_to_")
+    newstr = newstr.replace("<",  "_smaller_than_")
+    newstr = newstr.replace(" ",  "_")
+    newstr = newstr.replace(",",  "_")
+    newstr = newstr.replace("+",  "_")
+    newstr = newstr.replace("-",  "_")
+    newstr = newstr.replace("(",  "_lp_")
+    newstr = newstr.replace(")",  "_rp_")
+    return newstr
+
+def CLs(NumObserved, ExpectedBG, BGError, SigHypothesis, NumToyExperiments):
+    ## testing whether scipy is there
+    try:
+        import scipy.stats
+    except ImportError:
+        logging.warning('scipy is not installed... the CLs module cannot be used.')
+        logging.warning('Please install scipy.')
+        return False
+    # generate a set of expected-number-of-background-events, one for each toy
+    # experiment, distributed according to a Gaussian with the specified mean
+    # and uncertainty
+    ExpectedBGs = scipy.stats.norm.rvs(loc=ExpectedBG, scale=BGError, size=NumToyExperiments)
+
+    # Ignore values in the tail of the Gaussian extending to negative numbers
+    ExpectedBGs = [value for value in ExpectedBGs if value > 0]
+
+    # For each toy experiment, get the actual number of background events by
+    # taking one value from a Poisson distribution created using the expected
+    # number of events.
+    ToyBGs = scipy.stats.poisson.rvs(ExpectedBGs)
+    ToyBGs = map(float, ToyBGs)
+
+    # The probability for the background alone to fluctutate as LOW as
+    # observed = the fraction of the toy experiments with backgrounds as low as
+    # observed = p_b.
+    # NB (1 - this p_b) corresponds to what is usually called p_b for CLs.
+    p_b = scipy.stats.percentileofscore(ToyBGs, NumObserved, kind='weak')*.01
+
+    # Toy MC for background+signal
+    ExpectedBGandS = [expectedbg + SigHypothesis for expectedbg in ExpectedBGs]
+    ToyBplusS = scipy.stats.poisson.rvs(ExpectedBGandS)
+    ToyBplusS = map(float, ToyBplusS)
+
+    # Calculate the fraction of these that are >= the number observed,
+    # giving p_(S+B). Divide by (1 - p_b) a la the CLs prescription.
+    p_SplusB = scipy.stats.percentileofscore(ToyBplusS, NumObserved, kind='weak')*.01
+
+    if p_SplusB>p_b:
+        return 0.
+    else:
+        return 1.-(p_SplusB / p_b) # 1 - CLs
 
 class RecastConfiguration:
 
-    userVariables = { "status" : ["on","off"] }
+    default_CLs_numofexps = 100000
+
+    userVariables ={
+         "status"        : ["on","off"],\
+         "CLs_numofexps" : [str(default_CLs_numofexps)]
+    }
 
     def __init__(self):
         self.status  = "off"
@@ -45,9 +108,11 @@ class RecastConfiguration:
           "delphes_card_atlas_sus_2013_05.tcl": ["ATLAS_EXOT_2014_06", "atlas_susy_2013_21", "atlas_sus_13_05"],
           "delphes_card_atlas_sus_2013_11.tcl": ["atlas_higg_2013_03", "atlas_susy_2013_11", "atlas_1405_7875"],
           "delphes_card_atlas_sus_2014_10.tcl": ["atlas_susy_2014_10"] ,
-          "delphes_card_cms_b2g_12_012.tcl":    ["cms_B2G_12_012"] }
+          "delphes_card_atlas_sus_2013_04.tcl": ["atlas_susy_2013_04"] ,
+          "delphes_card_cms_b2g_12_012.tcl":    ["cms_B2G_12_012", "cms_exo_12_047", "cms_exo_12_048"] }
         self.delphesruns  = []
         self.analysisruns = []
+        self.CLs_numofexps= 100000
 
     def Display(self):
         self.user_DisplayParameter("status")
@@ -56,6 +121,7 @@ class RecastConfiguration:
             self.user_DisplayParameter("ma5tune")
             self.user_DisplayParameter("pad")
             self.user_DisplayParameter("padtune")
+            self.user_DisplayParameter("CLs_numofexps")
 
     def user_DisplayParameter(self,parameter):
         if parameter=="status":
@@ -85,6 +151,10 @@ class RecastConfiguration:
             else:
                 logging.info("   * the PADForMa5tune is         : not available")
             return
+        elif parameter=="CLs_numofexps":
+            logging.info("   * Number of toy experiments for the CLs calculation: "+self.CLs_numofexps)
+            return
+        return
 
     def user_SetParameter(self,parameter,value,level,hasdelphes,hasMA5tune,datasets, hasPAD, hasPADtune):
         # algorithm
@@ -147,20 +217,31 @@ class RecastConfiguration:
             else:
                 logging.error("Recasting can only be set to 'on' or 'off'.")
 
+        # CLs module
+        elif parameter=="CLs_numofexps":
+            if self.status!="on":
+                logging.error("Please first set the recasting mode to 'on'.")
+                return
+            self.CLs_numofexps = value
         # other rejection if no algo specified
         else:
             logging.error("the recast module has no parameter called '"+parameter+"'")
             return
 
     def user_GetParameters(self):
-        table = ["status"]
+        if self.status=="on":
+            table = ["CLs_numofexps"]
+        else:
+           table = []
         return table
 
 
     def user_GetValues(self,variable):
         table = []
         if variable=="status":
-                table.extend(FastsimConfiguration.userVariables["status"])
+                table.extend(RecastConfiguration.userVariables["status"])
+        elif variable =="CLs_numofexps":
+                table.extend(RecastConfiguration.userVariables["CLs_numofexps"])
         return table
 
 
@@ -274,11 +355,11 @@ class RecastConfiguration:
         os.remove(PADdir+'/Input/PADevents.list')
         return True
 
-    def SavePADOutput(self,PADdir,dirname,analysislist):
+    def SavePADOutput(self,PADdir,dirname,analysislist,setname):
         if not os.path.isfile(dirname+'/Output/PADevents.list.saf'):
-            shutil.move(PADdir+'/Output/PADevents.list/PADevents.list.saf',dirname+'/Output')
+            shutil.move(PADdir+'/Output/PADevents.list/PADevents.list.saf',dirname+'/Output/'+setname+'.saf')
         for analysis in analysislist:
-            shutil.move(PADdir+'/Output/PADevents.list/'+analysis+'_0',dirname+'/Output')
+            shutil.move(PADdir+'/Output/PADevents.list/'+analysis+'_0',dirname+'/Output/'+setname+'/'+analysis)
         return True
 
     def GetDelphesRuns(self,recastcard):
@@ -299,27 +380,260 @@ class RecastConfiguration:
                 self.analysisruns.append(myline[1]+'_'+myline[0])
         return True
 
-    def GetCLs(self,PADDir,dirname, analysislist):
+    def ReadInfoFile(self, mytree, myanalysis):
+        ## checking the header of the file
+        info_root = mytree.getroot()
+        if info_root.tag != "analysis":
+            logging.warning('Invalid info file (' + myanalysis+ '): <analysis> tag.')
+            return -1,-1,-1
+        if info_root.attrib["id"].lower() != myanalysis.lower():
+            logging.warning('Invalid info file (' + myanalysis+ '): <analysis id> tag.')
+            return -1,-1,-1
+        ## extracting the information
+        lumi    = 0
+        regions = []
+        regiondata = {}
+        for child in info_root:
+            # Luminosity
+            if child.tag == "lumi":
+                try:
+                    lumi = float(child.text)
+                except:
+                    logging.warning('Invalid info file (' + myanalysis+ '): ill-defined lumi')
+                    return -1,-1,-1
+                logging.debug('The luminosity of ' + myanalysis + ' is ' + str(lumi) + ' fb-1.')
+            # regions
+            if child.tag == "region" and ("type" not in child.attrib or child.attrib["type"] == "signal"):
+                if "id" not in child.attrib:
+                    logging.warning('Invalid info file (' + myanalysis+ '): <region id> tag.')
+                    return -1,-1,-1
+                if child.attrib["id"] in regions:
+                    logging.warning('Invalid info file (' + myanalysis+ '): doubly-defined region.')
+                    return -1,-1,-1
+                regions.append(child.attrib["id"])
+                nobs    = -1
+                nb      = -1
+                deltanb = -1
+                for rchild in child:
+                    try:
+                        myval=float(rchild.text)
+                    except:
+                        logging.warning('Invalid info file (' + myanalysis+ '): region data ill-defined.')
+                        return -1,-1,-1
+                    if rchild.tag=="nobs":
+                        nobs = myval
+                    elif rchild.tag=="nb":
+                        nb = myval
+                    elif rchild.tag=="deltanb":
+                        deltanb = myval
+                    else:
+                        logging.warning('Invalid info file (' + myanalysis+ '): unknown region subtag.')
+                        return -1,-1,-1
+                regiondata[child.attrib["id"]] = { "nobs":nobs, "nb":nb, "deltanb":deltanb }
+        return lumi, regions, regiondata
+
+    def ReadCutflow(self, dirname,regions,regiondata):
+        for reg in regions:
+            regname = CleanRegionName(reg)
+            ## getting the initial and final number of events
+            IsInitial = False
+            IsCounter = False
+            N0 = 0.
+            Nf = 0.
+            ## checking if regions must be combined
+            theregs=regname.split(';')
+            for regiontocombine in theregs:
+                if not os.path.isfile(dirname+'/'+regiontocombine+'.saf'):
+                    logging.warning('Cannot find a cutflow for the region '+regiontocombine+' in ' + dirname)
+                    logging.warning('Skipping the CLs calculation.')
+                    return -1
+                mysaffile = open(dirname+'/'+regiontocombine+'.saf')
+                myN0=-1
+                myNf=-1
+                for line in mysaffile:
+                    if "<InitialCounter>" in line:
+                        IsInitial = True
+                        continue
+                    elif "</InitialCounter>" in line:
+                        IsInitial = False
+                        continue
+                    elif "<Counter>" in line:
+                        IsCounter = True
+                        continue
+                    elif "</Counter>" in line:
+                        IsCounter = False
+                        continue
+                    if IsInitial and "sum of weights" in line and not '^2' in line:
+                        myN0 = float(line.split()[0])
+                    if IsCounter and "sum of weights" in line and not '^2' in line:
+                        myNf = float(line.split()[0])
+                mysaffile.close()
+                if myNf==-1 or myN0==-1:
+                    logging.warning('Invalid cutflow for the region ' + reg +'('+regname+') in ' + dirname)
+                    logging.warning('Skipping the CLs calculation.')
+                    return -1
+                Nf+=myNf
+                N0+=myN0
+            if Nf==0 and N0==0:
+                logging.warning('Invalid cutflow for the region ' + reg +'('+regname+') in ' + dirname)
+                logging.warning('Skipping the CLs calculation.')
+                return -1
+            regiondata[reg]["N0"]=N0
+            regiondata[reg]["Nf"]=Nf
+        return regiondata
+
+
+    def ComputesigCLs(self,regiondata,regions,lumi):
+        for reg in regions:
+            nb      = regiondata[reg]["nb"]
+            nobs    = regiondata[reg]["nobs"]
+            deltanb = regiondata[reg]["deltanb"]
+            def GetSig95(xsection):
+                nsignal=xsection * lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
+                return CLs(nobs,nb,deltanb,nsignal,self.CLs_numofexps)-0.95
+            nslow = lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
+            nshig = lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
+            if nslow == 0 and nshig == 0:
+               regiondata[reg]["sig95"]="Inf"
+               continue
+            low = 1.
+            hig = 1.
+            while CLs(nobs,nb,deltanb,nslow,self.CLs_numofexps)>0.95:
+              logging.debug('region ' + reg + ', lower bound = ' + str(low))
+              nslow=nslow*0.1
+              low  =  low*0.1
+            while CLs(nobs,nb,deltanb,nshig,self.CLs_numofexps)<0.95:
+              logging.debug('region ' + reg + ', upper bound = ' + str(hig))
+              nshig=nshig*10.
+              hig  =  hig*10.
+            ## testing whether scipy is there
+            try:
+                import scipy.stats
+            except ImportError:
+                logging.warning('scipy is not installed... the CLs module cannot be used.')
+                logging.warning('Please install scipy.')
+                return False
+            s95 = scipy.optimize.brentq(GetSig95,low,hig)
+            logging.debug('region ' + reg + ', s95 = ' + str(s95) + ' pb')
+            regiondata[reg]["s95"]=s95
+        return regiondata
+
+    def ComputeCLs(self,regiondata,regions,xsection,lumi):
+        ## computing fi a region belongs to the best expected ones, and derive the CLs in all cases
+        bestreg=[]
+        limit=-1
+        for reg in regions:
+            nsignal = xsection * lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
+            nb      = regiondata[reg]["nb"]
+            nobs    = regiondata[reg]["nobs"]
+            deltanb = regiondata[reg]["deltanb"]
+            limitSR = CLs(nb,   nb, deltanb, nsignal, self.CLs_numofexps)
+            myCLs   = CLs(nobs, nb, deltanb, nsignal, self.CLs_numofexps)
+            regiondata[reg]["limitSR"] = limitSR
+            regiondata[reg]["CLs"]     = myCLs
+            if limitSR >= limit:
+                regiondata[reg]["best"]=1
+                if limitSR > limit:
+                    for mybr in bestreg:
+                        regiondata[mybr]["best"]=0
+                    bestreg = [reg]
+                    limit = limitSR
+                else:
+                    bestreg.append(reg)
+            else:
+                regiondata[reg]["best"]=0
+        return regiondata
+
+    def WriteCLs(self, dirname, analysis, regions,regiondata, summary, xsflag):
+        for reg in regions:
+            if not xsflag:
+                eff    = (regiondata[reg]["Nf"] / regiondata[reg]["N0"])
+                stat   = (math.sqrt(eff*(1-eff)/regiondata[reg]["N0"]))
+                syst   = 0.
+                mycls  = "%.7f" % regiondata[reg]["CLs"]
+                myeff  = "%.7f" % eff
+                mystat = "%.7f" % stat
+                mysyst = "%.7f" % syst
+                mytot  = "%.7f" % (math.sqrt(stat**2+syst**2))
+                summary.write(analysis.ljust(30,' ') + reg.ljust(50,' ') +\
+                   str(regiondata[reg]["best"]).ljust(10, ' ') + mycls.ljust(10,' ') + \
+                   ' ||    ' + myeff.ljust(15,' ') + mystat.ljust(15,' ') + mysyst.ljust(15, ' ') +\
+                   mytot.ljust(15,' ') + '\n')
+
+    def GetCLs(self,PADdir, dirname, analysislist, name,  xsection, setname):
         logging.info('   Calculation of the exclusion CLs')
-        ## testing whether scipy is there
+        if xsection<=0:
+            logging.info('   Signal xsection not defined. The 95% excluded xsecton will be calculated.')
         try:
-            import scipy
-        except ImportError:
-            logging.warning('scipy is not installed... the CLs module cannot be used.')
-            logging.warning('Please install scipy.')
-            return False
-        
+            from lxml import ET
+        except:
+            try:
+                import xml.etree.ElementTree as ET
+            except:
+                logging.warning('lxml or xml not available... the CLs module cannot be used')
+                return False
+        ## preparing the output file
+        if os.path.isfile(dirname+'/Output/'+setname+'/CLs_output.saf'):
+            mysummary=open(dirname+'/Output/'+setname+'/CLs_output.saf','a')
+        else:
+            mysummary=open(dirname+'/Output/'+setname+'/CLs_output.saf','w')
+            if xsection <=0:
+                mysummary.write("# analysis name".ljust(30, ' ') + "signal region".ljust(50,' ') + \
+                 'excluded cross section\n')
+            else:
+                mysummary.write("# analysis name".ljust(30, ' ') + "signal region".ljust(50,' ') + \
+                 "best?".ljust(10,' ') + 'CLs'.ljust(10,' ') + ' ||    ' + 'efficiency'.ljust(15,' ') +\
+                 "stat. unc.".ljust(15,' ') + "syst. unc.".ljust(15," ") + "tot. unc.".ljust(15," ") + '\n')
+        ## running over all analysis
+        for analysis in analysislist:
+            ## Reading the info file
+            if not os.path.isfile(PADdir+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.info'):
+                logging.warning('Info file missing for the '+ analysis+ ' analysis. Skipping the CLs calculation')
+                return False
+            info_input = open(PADdir+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.info')
+            try:
+                info_tree = ET.parse(info_input)
+            except:
+                logging.warning('Info file for '+analysis+' corrupted. Skipping the CLs calculation.')
+                return False
+            info_input.close()
+            lumi, regions, regiondata = self.ReadInfoFile(info_tree,analysis)
+            if lumi==-1 or regions==-1 or regiondata==-1:
+                logging.warning('Info file for '+analysis+' corrupted. Skipping the CLs calculation.')
+                return False
+            ## reading the cutflow information
+            regiondata=self.ReadCutflow(dirname+'/Output/'+name+'/'+analysis+'/Cutflows',regions,regiondata)
+            if regiondata==-1:
+                logging.warning('Info file for '+analysis+' corrupted. Skipping the CLs calculation.')
+                return False
+            ## performing the alculation
+            if xsection <=0:
+                xsflag=True
+                regiondata=self.ComputesigCLs(regiondata,regions,lumi)
+            else:
+                xsflag=False
+                regiondata=self.ComputeCLs(regiondata,regions,xsection,lumi)
+            ## writing the output file
+            self.WriteCLs(dirname,analysis,regions, regiondata,mysummary,xsflag)
+            mysummary.write('\n')
+
+        ## closing the output file
+        mysummary.close()
+
         return True
 
 
-    def CheckDir(self):
-        logging.error("checkdir to be implemented")
-        return False
+    def CheckDir(self,dirname):
+        if not os.path.isdir(dirname):
+            logging.error("The directory '"+dirname+"' has not been found.")
+            return False
+        elif not os.path.isdir(dirname+'/Output'):
+            logging.error("The directory '"+dirname+"/Output' has not been found.")
+            return False
+        return True
 
-    def CheckFile(self,dataset):
-        logging.error("checkfile to be implemented")
-        return False
-
-    def LayoutWriter(self):
-        logging.error("layout writer to be implemented")
-        return False
+    def CheckFile(self,dirname,dataset):
+        if not os.path.isfile(dirname+'/Output/'+dataset.name+'/CLs_output.saf'):
+            logging.error("The file '"+dirname+'/Output/'+dataset.name+'/CLs_output.saf" has not been found.')
+            return False
+        return True

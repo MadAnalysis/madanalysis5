@@ -249,7 +249,8 @@ class CmdSubmit(CmdBase):
         layout.Initialize()
 
         # Creating the reports
-        self.CreateReports(args,history,layout)
+        if not self.main.recasting.status=="on":
+            self.CreateReports(args,history,layout)
 
         # End time 
         end_time=time.time()
@@ -447,19 +448,21 @@ class CmdSubmit(CmdBase):
                         return False
 
                     ## running delphesMA5tune
-                    if not os.path.isfile(dirname+'/Events/events_v1x1_'+card.replace('.tcl','')+'.root'):
-                        self.main.recasting.status="off"
-                        self.main.fastsim.package="delphesMA5tune"
-                        self.main.fastsim.clustering=0
-                        self.main.fastsim.delphes=0
-                        self.main.fastsim.delphesMA5tune = DelphesMA5tuneConfiguration()
-                        self.main.fastsim.delphesMA5tune.card = os.path.normpath("../../../../PADForMA5tune/Input/Cards/"+card)
-                        self.submit(dirname+'_DelphesForMa5tuneRun',[])
-                        self.main.recasting.status="on"
-                        self.main.fastsim.package="none"
-                        ## saving the output
-                        shutil.move(dirname+'_DelphesForMa5tuneRun/Output/_defaultset/TheMouth.root',\
-                          dirname+'/Events/events_v1x1_'+card.replace('.tcl','')+'.root')
+                    for item in self.main.datasets:
+                        if not os.path.isfile(dirname + '/Events/' + item.name + '_v1x1_' + \
+                             card.replace('.tcl','')+'.root'):
+                            self.main.recasting.status="off"
+                            self.main.fastsim.package="delphesMA5tune"
+                            self.main.fastsim.clustering=0
+                            self.main.fastsim.delphes=0
+                            self.main.fastsim.delphesMA5tune = DelphesMA5tuneConfiguration()
+                            self.main.fastsim.delphesMA5tune.card = os.path.normpath("../../../../PADForMA5tune/Input/Cards/"+card)
+                            self.submit(dirname+'_DelphesForMa5tuneRun',[])
+                            self.main.recasting.status="on"
+                            self.main.fastsim.package="none"
+                            ## saving the output
+                            shutil.move(dirname+'_DelphesForMa5tuneRun/Output/_'+item.name+'/TheMouth.root',\
+                              dirname+'/Events/'+item.name+'_v1x1_'+card.replace('.tcl','')+'.root')
                         if not FolderWriter.RemoveDirectory(os.path.normpath(dirname+'_DelphesForMa5tuneRun')):
                             return False
                 elif version in ['v1.2', 'v1.3']:
@@ -484,19 +487,21 @@ class CmdSubmit(CmdBase):
                         return False
 
                     ## running delphesMA5tune
-                    if not os.path.isfile(dirname+'/Events/events_v1x2_'+card.replace('.tcl','')+'.root'):
-                        self.main.recasting.status="off"
-                        self.main.fastsim.package="delphes"
-                        self.main.fastsim.clustering=0
-                        self.main.fastsim.delphesMA5tune=0
-                        self.main.fastsim.delphes = DelphesConfiguration()
-                        self.main.fastsim.delphes.card = os.path.normpath("../../../../PAD/Input/Cards/"+card)
-                        self.submit(dirname+'_DelphesRun',[])
-                        self.main.recasting.status="on"
-                        self.main.fastsim.package="none"
-                        ## saving the output
-                        shutil.move(dirname+'_DelphesRun/Output/_defaultset/TheMouth.root',\
-                          dirname+'/Events/events_v1x2_'+card.replace('.tcl','')+'.root')
+                    for item in self.main.datasets:
+                        if not os.path.isfile(dirname+'/Events/' + item.name +\
+                         '_v1x2_'+card.replace('.tcl','')+'.root'):
+                            self.main.recasting.status="off"
+                            self.main.fastsim.package="delphes"
+                            self.main.fastsim.clustering=0
+                            self.main.fastsim.delphesMA5tune=0
+                            self.main.fastsim.delphes = DelphesConfiguration()
+                            self.main.fastsim.delphes.card = os.path.normpath("../../../../PAD/Input/Cards/"+card)
+                            self.submit(dirname+'_DelphesRun',[])
+                            self.main.recasting.status="on"
+                            self.main.fastsim.package="none"
+                            ## saving the output
+                            shutil.move(dirname+'_DelphesRun/Output/_'+item.name+'/TheMouth.root',\
+                              dirname+'/Events/'+item.name+'_v1x2_'+card.replace('.tcl','')+'.root')
                         if not FolderWriter.RemoveDirectory(os.path.normpath(dirname+'_DelphesRun')):
                             return False
                 else:
@@ -518,6 +523,7 @@ class CmdSubmit(CmdBase):
                     PADdir = self.main.archi_info.ma5dir+'/PADForMA5tune'
                 else:
                     logging.error('Unknown PAD version')
+                    self.main.forced=forced_bkp
                     return False
                 ## current delphes card
                 mycard     = mydelphescard[5:]
@@ -532,13 +538,17 @@ class CmdSubmit(CmdBase):
                 installer=InstallManager(self.main)
                 if myversion=='v1.1':
                     if not installer.Deactivate('delphes'):
+                        self.main.forced=forced_bkp
                         return False
                     if installer.Activate('delphesMA5tune')==-1:
+                        self.main.forced=forced_bkp
                         return False
                 elif myversion=='v1.2':
                     if not installer.Deactivate('delphesMA5tune'):
+                        self.main.forced=forced_bkp
                         return False
                     if installer.Activate('delphes')==-1:
+                        self.main.forced=forced_bkp
                         return False
                 ## Analyses
                 myanalyses = self.main.recasting.analysisruns
@@ -550,25 +560,32 @@ class CmdSubmit(CmdBase):
                           break
                 myanalyses = [ x for x in myanalyses if x in tmpanalyses]
                 ## event file
-                myevents = os.path.normpath(dirname+'/Events/events_'+myversion.replace('.','x')+'_'+\
-                  mycard.replace('.tcl','')+'.root')
-                ## preparing and running the PAD
-                if not self.main.recasting.UpdatePADMain(myanalyses,PADdir):
-                    return False
-                if not self.main.recasting.MakePAD(PADdir,dirname,self.main):
-                    return False
-                if not self.main.recasting.RunPAD(PADdir,myevents):
-                    return False
-                ## Restoring the PAD as it was before
-                if not self.main.recasting.RestorePADMain(PADdir,dirname,self.main):
-                    return False
-                ## saving the output
-                if not self.main.recasting.SavePADOutput(PADdir,dirname,myanalyses):
-                    return False
-                ## Running the CLs exclusion script (if available)
-                if not self.main.recasting.GetCLs(PADdir,dirname,myanalyses):
-                    return False
-                ## Saving the results
+                for myset in self.main.datasets:
+                    myevents=os.path.normpath(dirname + '/Events/' + myset.name + '_' +\
+                       myversion.replace('.','x')+'_' + mycard.replace('.tcl','')+'.root')
+                    ## preparing and running the PAD
+                    if not self.main.recasting.UpdatePADMain(myanalyses,PADdir):
+                        self.main.forced=forced_bkp
+                        return False
+                    if not self.main.recasting.MakePAD(PADdir,dirname,self.main):
+                        self.main.forced=forced_bkp
+                        return False
+                    if not self.main.recasting.RunPAD(PADdir,myevents):
+                        self.main.forced=forced_bkp
+                        return False
+                    ## Restoring the PAD as it was before
+                    if not self.main.recasting.RestorePADMain(PADdir,dirname,self.main):
+                        self.main.forced=forced_bkp
+                        return False
+                    ## saving the output
+                    if not self.main.recasting.SavePADOutput(PADdir,dirname,myanalyses,myset.name):
+                        self.main.forced=forced_bkp
+                        return False
+                    ## Running the CLs exclusion script (if available)
+                    if not self.main.recasting.GetCLs(PADdir,dirname,myanalyses,myset.name,myset.xsection,myset.name):
+                        self.main.forced=forced_bkp
+                        return False
+                    ## Saving the results
             self.main.forced=forced_bkp
         else:
             logging.info("   Inserting your selection into 'SampleAnalyzer'...")
@@ -586,8 +603,9 @@ class CmdSubmit(CmdBase):
         logging.info("   Writing the command line history...")
         jobber.WriteHistory(history,self.main.firstdir)
         if self.main.recasting.status == "on":
-            if not self.main.recasting.LayoutWriter():
-                return False
+            logging.info('    -> the results can be found in:') 
+            for item in self.main.datasets:
+                logging.info('       '+ dirname + '/Output/'+ item.name + '/CLs_output.saf')
         else:
             layouter = LayoutWriter(self.main, dirname)
             layouter.WriteLayoutConfig()
@@ -633,7 +651,7 @@ class CmdSubmit(CmdBase):
         logging.info("   Checking SampleAnalyzer output...")
         jobber = JobReader(dirname)
         if self.main.recasting.status=='on':
-            if not self.main.recasting.CheckDir():
+            if not self.main.recasting.CheckDir(dirname):
                 return False
         elif not jobber.CheckDir():
             logging.error("errors have occured during the analysis.")
@@ -641,7 +659,7 @@ class CmdSubmit(CmdBase):
 
         for item in self.main.datasets:
             if self.main.recasting.status=='on':
-                if not self.main.recasting.CheckFile(item):
+                if not self.main.recasting.CheckFile(dirname,item):
                     return False
             elif not jobber.CheckFile(item):
                 logging.error("errors have occured during the analysis.")

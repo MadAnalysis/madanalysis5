@@ -125,6 +125,15 @@ class CmdSet(CmdBase.CmdBase):
             if objs[2]=='package' and args[2] in ['fastjet', 'delphes', 'delphesMA5tune'] and self.main.recasting.status=='on':
                 logging.warning("Recasting mode switched off")
                 self.main.recasting.status ="off"
+        elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='recast':
+            user_info    = UserInfo()
+            user_info.ReadUserOptions(self.main.archi_info.ma5dir+'/madanalysis/input/installation_options.dat')
+            checker = ConfigChecker(self.main.archi_info, user_info, self.main.session_info, self.main.script, False)
+            hasdelphes = checker.checkDelphes(True)
+            hasMA5tune = checker.checkDelphesMA5tune(True)
+            hasPAD     = checker.checkPAD()
+            hasPADtune = checker.checkPADForMA5tune()
+            self.main.recasting.user_SetParameter(objs[2],args[2],self.main.mode,hasdelphes,hasMA5tune,self.main.datasets, hasPAD,hasPADtune)
         else:
             logging.error("syntax error with the command 'set'.")
             self.help()
@@ -231,6 +240,8 @@ class CmdSet(CmdBase.CmdBase):
                          for item in self.main.fastsim.user_GetParameters() ])
                 output.extend([ object+".merging."+ item \
                          for item in self.main.merging.user_GetParameters() ])
+                output.extend([ object+".recast."+ item \
+                         for item in self.main.recasting.user_GetParameters() ])
                 return self.finalize_complete(text,output)
             else:
                 if subobject=="isolation":
@@ -239,6 +250,8 @@ class CmdSet(CmdBase.CmdBase):
                     output = self.main.fastsim.user_GetValues(variable)
                 elif subobject=="merging":
                     output = self.main.merging.user_GetValues(variable)
+                elif subobject=="recast":
+                    output = self.main.recasting.user_GetValues(variable)
                 return self.finalize_complete(text,output)
         # Other cases
         else:
@@ -285,6 +298,8 @@ class CmdSet(CmdBase.CmdBase):
                                for item in self.main.fastsim.user_GetParameters() ])
                 output.extend([ object+".merging."+ item \
                                for item in self.main.merging.user_GetParameters() ])
+                output.extend([ object+".recast."+ item \
+                               for item in self.main.recasting.user_GetParameters() ])
                 return self.finalize_complete(text,output)
             else:
                 return self.finalize_complete(text,self.main.user_GetValues(variable))

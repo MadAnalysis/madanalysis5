@@ -40,14 +40,20 @@ class InstallPad:
         self.delphesdir  = self.installdir + "/Input/Cards"
         self.untardir    = ""
         self.ncores      = 1
-        self.analyses    = ["cms_B2G_12_012", "ATLAS_EXOT_2014_06" ]
+        self.analyses    = ["cms_B2G_12_012", "cms_exo_12_048", "cms_exo_12_047", "ATLAS_EXOT_2014_06"]
         self.files = {
           "CMS_B2G_12_012.cpp" : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.cpp",
           "CMS_B2G_12_012.h"   : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.h",
           "CMS_B2G_12_012.info": "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.info",
           "ATLAS_EXOT_2014_06.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2014_06.cpp",
           "ATLAS_EXOT_2014_06.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2014_06.h",
-          "ATLAS_EXOT_2014_06.info": "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2014_06.info"
+          "ATLAS_EXOT_2014_06.info": "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2014_06.info",
+          "cms_exo_12_047.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_12_047.cpp",
+          "cms_exo_12_047.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_12_047.h",
+          "cms_exo_12_047.info": "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_12_047.info",
+          "cms_exo_12_048.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_12_048.cpp",
+          "cms_exo_12_048.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_12_048.h",
+          "cms_exo_12_048.info": "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_12_048.info"
         }
 
         self.delphescards = {
