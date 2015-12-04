@@ -519,7 +519,7 @@ class RecastConfiguration:
             nslow = lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
             nshig = lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
             if nslow == 0 and nshig == 0:
-               regiondata[reg]["sig95"]="Inf"
+               regiondata[reg]["s95"]="Inf"
                continue
             low = 1.
             hig = 1.
@@ -540,7 +540,7 @@ class RecastConfiguration:
                 return False
             s95 = scipy.optimize.brentq(GetSig95,low,hig)
             logging.debug('region ' + reg + ', s95 = ' + str(s95) + ' pb')
-            regiondata[reg]["s95"]=s95
+            regiondata[reg]["s95"]= ("%.7f" % s95)
         return regiondata
 
     def ComputeCLs(self,regiondata,regions,xsection,lumi):
@@ -571,17 +571,23 @@ class RecastConfiguration:
 
     def WriteCLs(self, dirname, analysis, regions,regiondata, summary, xsflag):
         for reg in regions:
+            eff    = (regiondata[reg]["Nf"] / regiondata[reg]["N0"])
+            stat   = (math.sqrt(eff*(1-eff)/regiondata[reg]["N0"]))
+            syst   = 0.
+            myeff  = "%.7f" % eff
+            mystat = "%.7f" % stat
+            mysyst = "%.7f" % syst
+            mytot  = "%.7f" % (math.sqrt(stat**2+syst**2))
             if not xsflag:
-                eff    = (regiondata[reg]["Nf"] / regiondata[reg]["N0"])
-                stat   = (math.sqrt(eff*(1-eff)/regiondata[reg]["N0"]))
-                syst   = 0.
                 mycls  = "%.7f" % regiondata[reg]["CLs"]
-                myeff  = "%.7f" % eff
-                mystat = "%.7f" % stat
-                mysyst = "%.7f" % syst
-                mytot  = "%.7f" % (math.sqrt(stat**2+syst**2))
                 summary.write(analysis.ljust(30,' ') + reg.ljust(50,' ') +\
                    str(regiondata[reg]["best"]).ljust(10, ' ') + mycls.ljust(10,' ') + \
+                   ' ||    ' + myeff.ljust(15,' ') + mystat.ljust(15,' ') + mysyst.ljust(15, ' ') +\
+                   mytot.ljust(15,' ') + '\n')
+            else:
+                myxs = regiondata[reg]["s95"]
+                summary.write(analysis.ljust(30,' ') + reg.ljust(50,' ') +\
+                   myxs.ljust(10,' ') + \
                    ' ||    ' + myeff.ljust(15,' ') + mystat.ljust(15,' ') + mysyst.ljust(15, ' ') +\
                    mytot.ljust(15,' ') + '\n')
 
@@ -604,7 +610,9 @@ class RecastConfiguration:
             mysummary=open(dirname+'/Output/'+setname+'/CLs_output.saf','w')
             if xsection <=0:
                 mysummary.write("# analysis name".ljust(30, ' ') + "signal region".ljust(50,' ') + \
-                 'excluded cross section\n')
+                 'sig95'.ljust(10, ' ') + ' ||    ' + 'efficiency'.ljust(15,' ') +\
+                 "stat. unc.".ljust(15,' ') + "syst. unc.".ljust(15," ") + "tot. unc.".ljust(15," ") + '\n')
+
             else:
                 mysummary.write("# analysis name".ljust(30, ' ') + "signal region".ljust(50,' ') + \
                  "best?".ljust(10,' ') + 'CLs'.ljust(10,' ') + ' ||    ' + 'efficiency'.ljust(15,' ') +\
