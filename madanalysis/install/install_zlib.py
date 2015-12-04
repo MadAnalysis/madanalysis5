@@ -91,7 +91,7 @@ class InstallZlib:
         # Logname
         logname = os.path.normpath(self.installdir+'/unpack.log')
         # Unpacking the tarball
-        ok, packagedir = InstallService.untar(logname, self.tmpdir,'zlib.tar.gz')
+        ok, packagedir = InstallService.untar(logname, self.downloaddir, self.tmpdir,'zlib.tar.gz')
         if not ok:
             return False
         # Ok: returning the good folder

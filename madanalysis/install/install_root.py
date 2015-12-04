@@ -86,7 +86,7 @@ class InstallRoot:
         # Logname
         logname = os.path.normpath(self.installdir+'/unpack.log')
         # Unpacking the tarball
-        ok, packagedir = InstallService.untar(logname, self.tmpdir,'root.tar.gz')
+        ok, packagedir = InstallService.untar(logname, self.downloaddir, self.tmpdir,'root.tar.gz')
         if not ok:
             return False
         # Ok: returning the good folder

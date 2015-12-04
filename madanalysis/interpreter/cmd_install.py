@@ -43,7 +43,7 @@ class CmdInstall(CmdBase):
     def do(self,args):
 
         # Checking argument number
-        if len(args)!=1 and args[0]!='PADForMA5tunelocal':
+        if len(args)!=1:
             logging.error("wrong number of arguments for the command 'install'.")
             self.help()
             return
@@ -55,10 +55,10 @@ class CmdInstall(CmdBase):
             ResuActi = installer.Activate('delphes')
             if ResuActi == -1:
                 return False
-            elif ResuActi == 0 and not self.main.archi_info.has_delphes:
+            elif ResuActi == 1 and not self.main.archi_info.has_delphes:
                 logging.warning("Delphes not installed: installing it...")
                 return installer.Execute('delphes')
-            elif ResuActi ==0 and self.main.archi_info.has_delphes and not pad:
+            elif ResuActi == 0 and self.main.archi_info.has_delphes and not pad:
                 logging.warning("A previous installation of Delphes has been found. Skipping the installation.")
                 logging.warning("To update Delphes, please remove the tools/delphes directory")
             return True
@@ -70,7 +70,7 @@ class CmdInstall(CmdBase):
             ResuActi = installer.Activate('delphesMA5tune')
             if ResuActi == -1:
                 return False
-            elif ResuActi == 0 and not self.main.archi_info.has_delphesMA5tune:
+            elif ResuActi == 1 and not self.main.archi_info.has_delphesMA5tune:
                 logging.warning("DelphesMA5tune not installed: installing it...")
                 return installer.Execute('delphesMA5tune')
             elif ResuActi == 0 and self.main.archi_info.has_delphesMA5tune and not pad:
@@ -129,10 +129,6 @@ class CmdInstall(CmdBase):
             installer=InstallManager(self.main)
             if inst_delphes(self.main,installer,True):
                 return installer.Execute('PAD')
-        elif args[0]=='PADForMA5tunelocal' and len(args)==2:
-            installer=InstallManager(self.main)
-            if inst_ma5tune(self.main,installer,True):
-                return installer.Execute('PADForMA5tunelocal_xxx_'+args[1])
         else:
             logging.error("the syntax is not correct.")
             self.help()

@@ -99,14 +99,11 @@ class InstallService():
 
 
     @staticmethod
-    def untar(logname,installdir,tarball):
+    def untar(logname,downloaddir,installdir,tarball):
         # Unpacking the folder
-        # Modified by Benj
-#        downloaddir = os.path.join(os.path.join('/tmp', os.environ['USER']), 'MA5_downloads')
-        downloaddir = os.path.join(installdir, '../MA5_downloads')
-        # end of Benj fix
         theCommands=['tar','xzf',tarball, '-C', installdir]
         logging.debug('shell command: '+' '.join(theCommands))
+        logging.debug('exected dir: '+downloaddir)
         ok, out= ShellCommand.ExecuteWithLog(theCommands,\
                                              logname,\
                                              downloaddir,\

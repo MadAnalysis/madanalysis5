@@ -100,7 +100,7 @@ class InstallDelphes:
         # Logname
         logname = os.path.normpath(self.installdir+'/unpack.log')
         # Unpacking the tarball
-        ok, packagedir = InstallService.untar(logname, self.tmpdir,'delphes.tar.gz')
+        ok, packagedir = InstallService.untar(logname, self.downloaddir,self.tmpdir,'delphes.tar.gz')
         if not ok:
             return False
         # Getting the list of files

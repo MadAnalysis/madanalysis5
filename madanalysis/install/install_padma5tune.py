@@ -36,7 +36,8 @@ class InstallPadForMA5tune:
         self.main        = main
         self.installdir  = os.path.normpath(self.main.archi_info.ma5dir+'/PADForMA5tune')
         self.tmpdir      = self.main.session_info.tmpdir
-        self.downloaddir = self.installdir + "/Build/SampleAnalyzer/User/Analyzer"
+        self.downloaddir = self.main.session_info.downloaddir
+        self.PADdir      = self.installdir + "/Build/SampleAnalyzer/User/Analyzer"
         self.delphesdir  = self.installdir + "/Input/Cards"
         self.untardir    = ""
         self.ncores      = 1
@@ -327,10 +328,20 @@ class InstallPadForMA5tune:
             return False
         # delphes cards
         logname = os.path.normpath(self.installdir+'/wget_delphescards.log')
-        if not InstallService.wget(self.delphescards,logname,self.delphesdir):
+        if not InstallService.wget(self.delphescards,logname,self.downloaddir):
             return False
         # Ok
         return True
+
+    def Unpack(self):
+        # the analyses
+        for myfile, src in self.files.items():
+          shutil.copy(self.downloaddir+'/'+myfile, self.PADdir)
+        # the delphes cards
+        for myfile, src in self.delphescards.items():
+          shutil.copy(self.downloaddir+'/'+myfile, self.delphesdir)
+        return True
+
 
 
     def Configure(self):

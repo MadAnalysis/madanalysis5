@@ -4,7 +4,7 @@
 
 # ----GENERAL----
 # tmp_dir = /tmp/toto/
-# download_dir = /home/toto/download_dir
+download_dir = /Users/fuks/Desktop/tmp
 # webaccess_veto = 0 # 0=No, 1=Yes
 
 # -----ROOT-----
