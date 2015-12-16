@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+121  1.3.9    (2015/12/16) fuks:    Fixing a few things with the recasting module 
+
 120  1.3.8    (2015/12/04) fuks:    Fixing the PAD installation 
 
 119  1.3.7    (2015/12/04) fuks:    Fixing the CLs routines 

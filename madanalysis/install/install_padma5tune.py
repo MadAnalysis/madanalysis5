@@ -41,7 +41,7 @@ class InstallPadForMA5tune:
         self.delphesdir  = self.installdir + "/Input/Cards"
         self.untardir    = ""
         self.ncores      = 1
-        self.analyses    = ["cms_sus_14_001_monojet", "cms_sus_13_016", "cms_sus_13_012", "cms_sus_13_011",
+        self.analyses    = ["cms_sus_14_001_monojet", "cms_sus_14_001_TopTag", "cms_sus_13_016", "cms_sus_13_012", "cms_sus_13_011",
             "atlas_higg_2013_03", "atlas_1405_7875", "atlas_susy_2014_10", "atlas_susy_2013_21", "atlas_susy_2013_11",
              "atlas_sus_13_05", "atlas_susy_2013_04" ]
         self.files = {
@@ -77,13 +77,19 @@ class InstallPadForMA5tune:
     "cms_sus_14_001_monojet.cpp" : "http://inspirehep.net/record/1401439/files/cms_sus_14_001_monojet.cpp",
     "cms_sus_14_001_monojet.h"   : "http://inspirehep.net/record/1401439/files/cms_sus_14_001_monojet.h",
     "cms_sus_14_001_monojet.info": "http://inspirehep.net/record/1401439/files/cms_sus_14_001_monojet.info",
-    "atlas_susy_2013_04.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/atlas_susy_2013_04.cpp",
-    "atlas_susy_2013_04.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/atlas_susy_2013_04.h",
-    "atlas_susy_2013_04.info": "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/atlas_susy_2013_04.info"
+#    "cms_sus_14_001_TopTag.cpp" : "http://inspirehep.net/record/1409185/files/cms_sus_14_001_TopTag.cpp",
+#    "cms_sus_14_001_TopTag.h"   : "http://inspirehep.net/record/1409185/files/cms_sus_14_001_TopTag.h",
+    "cms_sus_14_001_TopTag.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_sus_14_001_TopTag.cpp",
+    "cms_sus_14_001_TopTag.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_sus_14_001_TopTag.h",
+    "cms_sus_14_001_TopTag.info": "http://inspirehep.net/record/1409185/files/cms_sus_14_001_TopTag.info",
+    "atlas_susy_2013_04.cpp" : "http://inspirehep.net/record/1408964/files/atlas_susy_2013_04.cpp",
+    "atlas_susy_2013_04.h"   : "http://inspirehep.net/record/1408964/files/atlas_susy_2013_04.h",
+    "atlas_susy_2013_04.info": "http://inspirehep.net/record/1408964/files/atlas_susy_2013_04.info"
 }
 
         self.delphescards = {
     "delphes_card_cms_standard.tcl"   : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/delphesMA5tune_card_CMS_SUSY.tcl",
+    "delphes_card_cms_sus14004.tcl"   : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/delphesMA5tune_card_CMS_sus14004.tcl",
     "delphes_card_atlas_standard.tcl" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/delphesMA5tune_card_ATLAS.tcl",
     "delphes_card_atlas_sus_2013_05.tcl" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/delphesMA5tune_card_ATLAS_05.tcl",
     "delphes_card_atlas_sus_2013_11.tcl" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/delphesMA5tune_card_ATLAS_dileptonSUSY.tcl",
@@ -188,6 +194,15 @@ class InstallPadForMA5tune:
       file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1401439;%%\"\n')
       file.write('}\n')
 
+      file.write('@article{,\n')
+      file.write('      key            = \"1409185",\n')
+      file.write('      author         = \"Bein, Samuel and Atmasiddha, Prachi and Sharma, Seema\",\n')
+      file.write('      title          = \"{MadAnalysis 5 implementation of CMS-SUS-14-001-TopTag}\",\n')
+      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.AL3X.K2SD\",\n')
+      file.write('      year           = \"2015\",\n')
+      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1409185;%%\"\n')
+      file.write('}\n')
+
       #ATLAS-HIGG-2013-03
       file.write('@article{,\n')
       file.write('      author         = \"Dumont, Beranger\",\n')
@@ -223,7 +238,7 @@ class InstallPadForMA5tune:
       file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1387577;%%\"\n')
       file.write('}\n')
 
-      #ATLAS-SUSY-2014-10
+      #ATLAS-SUSY-2013-21
       file.write('@article{,\n')
       file.write('      key            = \"1388797\",\n')
       file.write('      author         = \"Sengupta, Dipan and Chalons, Guillaume\",\n')
@@ -234,7 +249,7 @@ class InstallPadForMA5tune:
       file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1388797;%%\"\n')
       file.write('}\n')
 
-      #ATLAS-SUSY-2014-10
+      #ATLAS-SUSY-2013-02
       file.write('@article{,\n')
       file.write('      key            = \"1388801\",\n')
       file.write('      author         = \"Guillaume Chalons and Dipan Sengupta\",\n')
@@ -245,7 +260,14 @@ class InstallPadForMA5tune:
       file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1388801;%%\"\n')
       file.write('}\n')
 
-
+      #ATLAS-SUSY-2013-04
+      file.write('@article{,\n')
+      file.write('      key            = \"1408964\",\n')
+      file.write('      author         = \"Fuks, Benjamin and Blanke, Monika and Galon, Iftah\",\n')
+      file.write('      title          = \"{MadAnalysis5 implementation of ATLAS-SUSY-2013-04}\",\n')
+      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.STLS.SAMT\",\n')
+      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1408964;%%\"\n')
+      file.write('}\n')
 
       # closing the file
       file.close()

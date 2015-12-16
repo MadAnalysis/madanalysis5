@@ -105,6 +105,7 @@ class RecastConfiguration:
         self.padtune = False
         self.DelphesDic = {
           "delphes_card_cms_standard.tcl":      ["cms_sus_14_001_monojet", "cms_sus_13_016", "cms_sus_13_012", "cms_sus_13_011"],
+          "delphes_card_cms_sus14004.tcl":      ["cms_sus_14_001_TopTag"],
           "delphes_card_atlas_sus_2013_05.tcl": ["ATLAS_EXOT_2014_06", "atlas_susy_2013_21", "atlas_sus_13_05"],
           "delphes_card_atlas_sus_2013_11.tcl": ["atlas_higg_2013_03", "atlas_susy_2013_11", "atlas_1405_7875"],
           "delphes_card_atlas_sus_2014_10.tcl": ["atlas_susy_2014_10"] ,
@@ -123,6 +124,7 @@ class RecastConfiguration:
           "cms_sus_13_012"         : "CMS   - squark-gluino - MET/MHT",
           "cms_sus_13_016"         : "CMS   - gluinos - 2 leptons + bjets + met",
           "cms_sus_14_001_monojet" : "CMS   - stop - the monojet channel",
+          "cms_sus_14_001_TopTag"  : "CMS   - stop - the top tagging channel",
           "cms_sus_13_011"         : "CMS   - stop - 1 lepton + bjets + met",
           "cms_exo_12_047"         : "CMS   - monophoton",
           "cms_exo_12_048"         : "CMS   - monojet",
@@ -171,7 +173,7 @@ class RecastConfiguration:
                 logging.info("   * the PADForMa5tune is         : not available")
             return
         elif parameter=="CLs_numofexps":
-            logging.info("   * Number of toy experiments for the CLs calculation: "+self.CLs_numofexps)
+            logging.info("   * Number of toy experiments for the CLs calculation: "+str(self.CLs_numofexps))
             return
         return
 
