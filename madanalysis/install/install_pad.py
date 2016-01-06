@@ -49,9 +49,9 @@ class InstallPad:
           "ATLAS_EXOT_2014_06.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2014_06.cpp",
           "ATLAS_EXOT_2014_06.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2014_06.h",
           "ATLAS_EXOT_2014_06.info": "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2014_06.info",
-          "cms_exo_12_047.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_12_047.cpp",
-          "cms_exo_12_047.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_12_047.h",
-          "cms_exo_12_047.info": "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_12_047.info",
+          "cms_exo_12_047.cpp" : "http://inspirehep.net/record/1411894/files/cms_exo_12_047.cpp",
+          "cms_exo_12_047.h"   : "http://inspirehep.net/record/1411894/files/cms_exo_12_047.h",
+          "cms_exo_12_047.info": "http://inspirehep.net/record/1411894/files/cms_exo_12_047.info",
           "cms_exo_12_048.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_12_048.cpp",
           "cms_exo_12_048.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_12_048.h",
           "cms_exo_12_048.info": "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_12_048.info"
