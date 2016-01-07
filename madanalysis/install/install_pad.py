@@ -41,7 +41,7 @@ class InstallPad:
         self.delphesdir  = self.installdir + "/Input/Cards"
         self.untardir    = ""
         self.ncores      = 1
-        self.analyses    = ["cms_B2G_12_012", "cms_exo_12_048", "cms_exo_12_047", "ATLAS_EXOT_2014_06"]
+        self.analyses    = ["cms_B2G_12_012", "cms_b2g_14_004", "cms_exo_12_048", "cms_exo_12_047", "ATLAS_EXOT_2014_06"]
         self.files = {
           "CMS_B2G_12_012.cpp" : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.cpp",
           "CMS_B2G_12_012.h"   : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.h",
@@ -52,13 +52,17 @@ class InstallPad:
           "cms_exo_12_047.cpp" : "http://inspirehep.net/record/1411894/files/cms_exo_12_047.cpp",
           "cms_exo_12_047.h"   : "http://inspirehep.net/record/1411894/files/cms_exo_12_047.h",
           "cms_exo_12_047.info": "http://inspirehep.net/record/1411894/files/cms_exo_12_047.info",
-          "cms_exo_12_048.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_12_048.cpp",
-          "cms_exo_12_048.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_12_048.h",
-          "cms_exo_12_048.info": "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_12_048.info"
+          "cms_exo_12_048.cpp" : "http://inspirehep.net/record/1413153/files/cms_exo_12_048.cpp",
+          "cms_exo_12_048.h"   : "http://inspirehep.net/record/1413153/files/cms_exo_12_048.h",
+          "cms_exo_12_048.info": "http://inspirehep.net/record/1413153/files/cms_exo_12_048.info",
+          "cms_b2g_14_004.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.cpp",
+          "cms_b2g_14_004.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.h",
+          "cms_b2g_14_004.info": "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.info"
         }
 
         self.delphescards = {
-    "delphes_card_cms_b2g_12_012.tcl"   : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/cms_b2g_12_012.tcl",
+    "delphes_card_cms_b2g_14_004.tcl"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.tcl",
+    "delphes_card_cms_b2g_12_012.tcl"    : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/cms_b2g_12_012.tcl",
     "delphes_card_atlas_sus_2013_05.tcl" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphesMA5tune_card_ATLAS_05.dat"
         }
 
@@ -124,7 +128,7 @@ class InstallPad:
       file.write('}\n')
 
       # CMS-B2G-12-012
-      file.write('@article{,\n')
+      file.write('@article{1402144,\n')
       file.write('      key            = \"1402144\",\n')
       file.write('      author         = \"Barducci, Daniele and Delaunay, C\'edric\",\n')
       file.write('      title          = \"{MadAnalysis 5 implementation of CMS-B2G-12-012}\",\n')
@@ -134,11 +138,32 @@ class InstallPad:
       file.write('}\n')
 
       #ATLAS-EXOT-2014-06
-      file.write('@article{,\n')
+      file.write('@article{1353627,\n')
+      file.write('      key            = \"1353627\",\n')
       file.write('      author         = \"Barducci, Daniele\",\n')
       file.write('      title          = \"{MadAnalysis 5 implementation of ATLAS-EXOT-2014-06}\",\n')
       file.write('      doi            = \"10.7484/INSPIREHEP.DATA.922E.4BN6\",\n')
       file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1353627;%%\",\n')
+      file.write('}\n')
+
+      # CMS-EXO-12-047
+      file.write('@article{1411894,\n')
+      file.write('      key            = \"1411894\",\n')
+      file.write('      author         = \"Guo, Jun and Conte, Eric and Fuks, Benjamin\",\n')
+      file.write('      title          = \"{MadAnalysis5 implementation of the CMS monophoton search\n')
+      file.write('                        (EXO-12-047)}\",\n')
+      file.write('      year           = \"2016\",\n')
+      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1411894;%%\"\n')
+      file.write('}\n')
+
+      # CMS-EXO-12-048
+      file.write('@article{1413153,\n')
+      file.write('      key            = \"1413153\",\n')
+      file.write('      author         = \"Guo, Jun and Conte, Eric and Fuks, Benjamin\",\n')
+      file.write('      title          = \"{MadAnalysis5 implementation of the CMS monojet search\n')
+      file.write('                        (EXO-12-048)}",\n')
+      file.write('      year           = \"2016\",\n')
+      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1413153;%%\"\n')
       file.write('}\n')
 
       # closing the file

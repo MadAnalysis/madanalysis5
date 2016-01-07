@@ -110,7 +110,8 @@ class RecastConfiguration:
           "delphes_card_atlas_sus_2013_11.tcl": ["atlas_higg_2013_03", "atlas_susy_2013_11", "atlas_1405_7875"],
           "delphes_card_atlas_sus_2014_10.tcl": ["atlas_susy_2014_10"] ,
           "delphes_card_atlas_sus_2013_04.tcl": ["atlas_susy_2013_04"] ,
-          "delphes_card_cms_b2g_12_012.tcl":    ["cms_B2G_12_012", "cms_exo_12_047", "cms_exo_12_048"] }
+          "delphes_card_cms_b2g_12_012.tcl":    ["cms_B2G_12_012", "cms_exo_12_047", "cms_exo_12_048"],
+          "delphes_card_cms_b2g_14_004.tcl":    ["cms_b2g_14_004"] }
 
         self.description = {
           "atlas_susy_2013_04"     : "ATLAS - multijet + met", 
@@ -128,7 +129,8 @@ class RecastConfiguration:
           "cms_sus_13_011"         : "CMS   - stop - 1 lepton + bjets + met",
           "cms_exo_12_047"         : "CMS   - monophoton",
           "cms_exo_12_048"         : "CMS   - monojet",
-          "cms_B2G_12_012"         : "CMS   - T5/3 partners in the SSDL channel"
+          "cms_B2G_12_012"         : "CMS   - T5/3 partners in the SSDL channel",
+          "cms_b2g_14_004"         : "CMS   - Dark matter production with a ttbar pair"
         }
 
         self.delphesruns  = []
