@@ -61,9 +61,9 @@ class InstallPad:
         }
 
         self.delphescards = {
-    "delphes_card_cms_b2g_14_004.tcl"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.tcl",
-    "delphes_card_cms_b2g_12_012.tcl"    : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/cms_b2g_12_012.tcl",
-    "delphes_card_atlas_sus_2013_05.tcl" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphesMA5tune_card_ATLAS_05.dat"
+    "delphes_card_cms_b2g_14_004.tcl"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_b2g_14_004.tcl",
+    "delphes_card_cms_b2g_12_012.tcl"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_b2g_12_012.tcl",
+    "delphes_card_atlas_sus_2013_05.tcl" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_atlas_sus_2013_05.tcl"
         }
 
     def CreateBibtex(self):

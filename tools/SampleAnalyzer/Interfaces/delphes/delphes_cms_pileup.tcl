@@ -43,6 +43,8 @@ set ExecutionPath {
 
   MissingET
 
+  JetFlavorAssociation
+
   BTagging
   TauTagging
 
@@ -506,6 +508,23 @@ module EnergyScale JetEnergyScale {
 
  # scale formula for jets
   set ScaleFormula {1.0}
+}
+
+########################
+# Jet Flavor Association
+########################
+
+module JetFlavorAssociation JetFlavorAssociation {
+
+  set PartonInputArray Delphes/partons
+  set ParticleInputArray Delphes/allParticles
+  set ParticleLHEFInputArray Delphes/allParticlesLHEF
+  set JetInputArray JetEnergyScale/jets
+
+  set DeltaR 0.5
+  set PartonPTMin 1.0
+  set PartonEtaMax 6.0
+
 }
 
 ###################
