@@ -43,7 +43,7 @@ class InstallDelphesMA5tune:
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir = os.path.normpath(self.tmpdir + '/MA5_delphesMA5tune/')
         self.ncores     = 1
-        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
+        self.files = {"delphestune.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
 
 
     def Detect(self):
@@ -97,7 +97,7 @@ class InstallDelphesMA5tune:
         # Logname
         logname = os.path.normpath(self.installdir+'/unpack.log')
         # Unpacking the tarball
-        ok, packagedir = InstallService.untar(logname, self.downloaddir,self.tmpdir,'delphes.tar.gz')
+        ok, packagedir = InstallService.untar(logname, self.downloaddir,self.tmpdir,'delphestune.tar.gz')
         if not ok:
             return False
         # Copying the patch

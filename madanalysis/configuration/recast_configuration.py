@@ -106,7 +106,8 @@ class RecastConfiguration:
         self.DelphesDic = {
           "delphes_card_cms_standard.tcl":      ["cms_sus_14_001_monojet", "cms_sus_13_016", "cms_sus_13_012", "cms_sus_13_011"],
           "delphes_card_cms_sus14004.tcl":      ["cms_sus_14_001_TopTag"],
-          "delphes_card_atlas_sus_2013_05.tcl": ["ATLAS_EXOT_2014_06", "atlas_susy_2013_21", "atlas_sus_13_05"],
+          "delphes_card_atlas_sus_2013_05.tcl": ["atlas_susy_2013_21", "atlas_sus_13_05"],
+          "delphes_card_atlas_sus_2013_05_pad.tcl": ["ATLAS_EXOT_2014_06"],
           "delphes_card_atlas_sus_2013_11.tcl": ["atlas_higg_2013_03", "atlas_susy_2013_11", "atlas_1405_7875"],
           "delphes_card_atlas_sus_2014_10.tcl": ["atlas_susy_2014_10"] ,
           "delphes_card_atlas_sus_2013_04.tcl": ["atlas_susy_2013_04"] ,

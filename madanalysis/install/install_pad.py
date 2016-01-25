@@ -63,7 +63,7 @@ class InstallPad:
         self.delphescards = {
     "delphes_card_cms_b2g_14_004.tcl"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_b2g_14_004.tcl",
     "delphes_card_cms_b2g_12_012.tcl"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_b2g_12_012.tcl",
-    "delphes_card_atlas_sus_2013_05.tcl" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_atlas_sus_2013_05.tcl"
+    "delphes_card_atlas_sus_2013_05_pad.tcl" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_atlas_sus_2013_05_pad.tcl"
         }
 
     def CreateBibtex(self):
