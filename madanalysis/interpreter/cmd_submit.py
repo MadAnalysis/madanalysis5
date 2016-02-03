@@ -423,6 +423,9 @@ class CmdSubmit(CmdBase):
             firstv13 = True
             forced_bkp = self.main.forced
             self.main.forced=True
+            if len(self.main.recasting.delphesruns)==0:
+                logging.warning('No recasting to do... Please check the recasting card')
+                return False
             for mydelphescard in sorted(self.main.recasting.delphesruns):
                 version=mydelphescard[:4]
                 card=mydelphescard[5:]

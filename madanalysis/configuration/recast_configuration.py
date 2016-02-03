@@ -94,7 +94,8 @@ class RecastConfiguration:
 
     userVariables ={
          "status"        : ["on","off"],\
-         "CLs_numofexps" : [str(default_CLs_numofexps)]
+         "CLs_numofexps" : [str(default_CLs_numofexps)],\
+         "card_path"     : ""
     }
 
     def __init__(self):
@@ -137,6 +138,7 @@ class RecastConfiguration:
         self.delphesruns  = []
         self.analysisruns = []
         self.CLs_numofexps= 100000
+        self.card_path= ""
 
     def Display(self):
         self.user_DisplayParameter("status")
@@ -146,6 +148,7 @@ class RecastConfiguration:
             self.user_DisplayParameter("pad")
             self.user_DisplayParameter("padtune")
             self.user_DisplayParameter("CLs_numofexps")
+            self.user_DisplayParameter("card_path")
 
     def user_DisplayParameter(self,parameter):
         if parameter=="status":
@@ -177,6 +180,9 @@ class RecastConfiguration:
             return
         elif parameter=="CLs_numofexps":
             logging.info("   * Number of toy experiments for the CLs calculation: "+str(self.CLs_numofexps))
+            return
+        elif parameter=="card_path":
+            logging.info("   * Path to a recasting card: "+str(self.card_path))
             return
         return
 
@@ -247,6 +253,19 @@ class RecastConfiguration:
                 logging.error("Please first set the recasting mode to 'on'.")
                 return
             self.CLs_numofexps = value
+
+        # path to a recasting card
+        elif parameter=="card_path":
+            if self.status!="on":
+                logging.error("Please first set the recasting mode to 'on'.")
+                return
+            import os
+            if os.path.isfile(value):
+                self.card_path = value
+            else:
+                logging.error("Invalid path to a recasting card.")
+                return
+
         # other rejection if no algo specified
         else:
             logging.error("the recast module has no parameter called '"+parameter+"'")
@@ -254,7 +273,7 @@ class RecastConfiguration:
 
     def user_GetParameters(self):
         if self.status=="on":
-            table = ["CLs_numofexps"]
+            table = ["CLs_numofexps", "card_path"]
         else:
            table = []
         return table
@@ -266,15 +285,90 @@ class RecastConfiguration:
                 table.extend(RecastConfiguration.userVariables["status"])
         elif variable =="CLs_numofexps":
                 table.extend(RecastConfiguration.userVariables["CLs_numofexps"])
+        elif variable =="card_path":
+                table.extend(RecastConfiguration.userVariables["card_path"])
         return table
 
 
     def CreateCard(self,dirname):
-        # getting the PAD analysis
-        if self.padtune and self.ma5tune:
-            self.CreateMyCard(dirname,"PADForMA5tune")
-        if self.pad and self.delphes:
-            self.CreateMyCard(dirname,"PAD")
+        # using an existing card
+        if self.card_path=="":
+            if self.padtune and self.ma5tune:
+                self.CreateMyCard(dirname,"PADForMA5tune")
+            if self.pad and self.delphes:
+                self.CreateMyCard(dirname,"PAD")
+            return True
+        #using and checking an existing card
+        else:
+            import os
+            if not os.path.isfile(self.card_path):
+                logging.error("Invalid path to a recasting card.")
+                return False
+            if not self.CheckCard(dirname):
+                logging.error("Invalid recasting card")
+                return False
+        return True
+
+    def CheckCard(self,dirname):
+        logging.info('   Checking the recasting card...')
+        import os
+        padfile  = open(dirname+"/../PAD/Build/Main/main.cpp", 'r')
+        padlist=[]
+        tunefile = open(dirname+"/../PADForMA5tune/Build/Main/main.cpp", 'r')
+        tunelist=[]
+        for myfile,mylist in [ [padfile, padlist], [tunefile,tunelist] ]:
+            for line in myfile:
+                if "manager.InitializeAnalyzer" in line:
+                    analysis = str(line.split('\"')[1])
+                    mydelphes="UNKNOWN"
+                    for mycard,alist in self.DelphesDic.items():
+                          if analysis in alist:
+                              mydelphes=mycard
+                              break
+                    mylist.append([analysis,mydelphes])
+        padfile.close()
+        tunefile.close()
+        usercard = open(self.card_path)
+        for line in usercard:
+            if line[0]=='#':
+                continue
+            myline=line.split()
+            myana = myline[0]
+            myver = myline[1]
+            mydelphes = myline[3]
+            # checking the presence of the analysis and the delphes card
+            if myana in  [x[0] for x in padlist]:
+                if myver!="v1.2":
+                    logging.error("Recasting card: invalid analysis (not present in the PAD): " + myana)
+                    return False
+                if not os.path.isfile(dirname+'/../PAD/Input/Cards/'+mydelphes):
+                    logging.error("Recasting card: PAD analysis linked to an invalid delphes card: " + myana + " - " + mydelphes)
+                    return False
+            elif myana in  [x[0] for x in tunelist]:
+                if myver!="v1.1":
+                    logging.error("Recasting card: invalid analysis (not present in the PADForMA5tune): " + myana)
+                    return False
+                if not os.path.isfile(dirname+'/../PADForMA5tune/Input/Cards/'+mydelphes):
+                    logging.error("Recasting card: PADForMA5tune analysis linked to an invalid delphes card: " + myana + " - " + mydelphes)
+                    return False
+            else:
+                logging.error("Recasting card: invalid analysis (not present in the PAD and in the PADForMA5tune): " + myana)
+                return False
+            # checking the matching between the delphes card and the analysis
+            for mycard,alist in self.DelphesDic.items():
+                if myana in alist:
+                    if mydelphes!=mycard:
+                        logging.error("Invalid delphes card associated with the analysis: " + myana)
+                        return False
+                    break
+        usercard.close()
+        try:
+            shutil.copy(self.card_path,dirname+'/Input/recasting_card.dat')
+        except:
+            logging.error('impossible to copy the recasting card to the working directory')
+            return False
+        return True
+
 
     def CreateMyCard(self,dirname,padtype):
         mainfile = open(dirname+"/../"+padtype+"/Build/Main/main.cpp")
@@ -513,19 +607,27 @@ class RecastConfiguration:
         return regiondata
 
 
-    def ComputesigCLs(self,regiondata,regions,lumi):
+    def ComputesigCLs(self,regiondata,regions,lumi,tag):
         for reg in regions:
             nb      = regiondata[reg]["nb"]
-            nobs    = regiondata[reg]["nobs"]
+            if tag == "obs":
+                nobs    = regiondata[reg]["nobs"]
+            elif tag == "exp":
+                nobs    = regiondata[reg]["nb"]
             deltanb = regiondata[reg]["deltanb"]
             def GetSig95(xsection):
+                if regiondata[reg]["Nf"]==0:
+                    return 0
                 nsignal=xsection * lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
                 return CLs(nobs,nb,deltanb,nsignal,self.CLs_numofexps)-0.95
             nslow = lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
             nshig = lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
             if nslow == 0 and nshig == 0:
-               regiondata[reg]["s95"]="Inf"
-               continue
+                if tag == "obs":
+                    regiondata[reg]["s95obs"]="-1"
+                elif tag == "exp":
+                    regiondata[reg]["s95exp"]="-1"
+                continue
             low = 1.
             hig = 1.
             while CLs(nobs,nb,deltanb,nslow,self.CLs_numofexps)>0.95:
@@ -545,31 +647,36 @@ class RecastConfiguration:
                 return False
             s95 = scipy.optimize.brentq(GetSig95,low,hig)
             logging.debug('region ' + reg + ', s95 = ' + str(s95) + ' pb')
-            regiondata[reg]["s95"]= ("%.7f" % s95)
+            if tag == "obs":
+                regiondata[reg]["s95obs"]= ("%.7f" % s95)
+            elif tag == "exp":
+                regiondata[reg]["s95exp"]= ("%.7f" % s95)
         return regiondata
 
     def ComputeCLs(self,regiondata,regions,xsection,lumi):
         ## computing fi a region belongs to the best expected ones, and derive the CLs in all cases
         bestreg=[]
-        limit=-1
+        rMax = -1
         for reg in regions:
             nsignal = xsection * lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
             nb      = regiondata[reg]["nb"]
             nobs    = regiondata[reg]["nobs"]
             deltanb = regiondata[reg]["deltanb"]
-            limitSR = CLs(nb,   nb, deltanb, nsignal, self.CLs_numofexps)
-            myCLs   = CLs(nobs, nb, deltanb, nsignal, self.CLs_numofexps)
-            regiondata[reg]["limitSR"] = limitSR
+            if nsignal==0:
+                rSR   = -1
+                myCLs = 0
+            else:
+                n95     = float(regiondata[reg]["s95exp"]) * lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
+                rSR     = nsignal/n95
+                myCLs   = CLs(nobs, nb, deltanb, nsignal, self.CLs_numofexps)
+            regiondata[reg]["rSR"] = rSR
             regiondata[reg]["CLs"]     = myCLs
-            if limitSR >= limit:
+            if rSR > rMax:
                 regiondata[reg]["best"]=1
-                if limitSR > limit:
-                    for mybr in bestreg:
-                        regiondata[mybr]["best"]=0
-                    bestreg = [reg]
-                    limit = limitSR
-                else:
-                    bestreg.append(reg)
+                for mybr in bestreg:
+                    regiondata[mybr]["best"]=0
+                bestreg = [reg]
+                rMax = rSR
             else:
                 regiondata[reg]["best"]=0
         return regiondata
@@ -583,23 +690,25 @@ class RecastConfiguration:
             mystat = "%.7f" % stat
             mysyst = "%.7f" % syst
             mytot  = "%.7f" % (math.sqrt(stat**2+syst**2))
+            myxsexp = regiondata[reg]["s95exp"]
+            myxsobs = regiondata[reg]["s95obs"]
             if not xsflag:
                 mycls  = "%.7f" % regiondata[reg]["CLs"]
                 summary.write(analysis.ljust(30,' ') + reg.ljust(50,' ') +\
-                   str(regiondata[reg]["best"]).ljust(10, ' ') + mycls.ljust(10,' ') + \
+                   str(regiondata[reg]["best"]).ljust(10, ' ') +\
+                   myxsexp.ljust(15,' ') + myxsobs.ljust(15,' ') + mycls.ljust(10,' ') + \
                    ' ||    ' + myeff.ljust(15,' ') + mystat.ljust(15,' ') + mysyst.ljust(15, ' ') +\
                    mytot.ljust(15,' ') + '\n')
             else:
-                myxs = regiondata[reg]["s95"]
                 summary.write(analysis.ljust(30,' ') + reg.ljust(50,' ') +\
-                   myxs.ljust(10,' ') + \
+                   myxsexp.ljust(15,' ') + myxsobs.ljust(15,' ') + \
                    ' ||    ' + myeff.ljust(15,' ') + mystat.ljust(15,' ') + mysyst.ljust(15, ' ') +\
                    mytot.ljust(15,' ') + '\n')
 
     def GetCLs(self,PADdir, dirname, analysislist, name,  xsection, setname):
         logging.info('   Calculation of the exclusion CLs')
         if xsection<=0:
-            logging.info('   Signal xsection not defined. The 95% excluded xsecton will be calculated.')
+            logging.info('   Signal xsection not defined. The 95% excluded xsection will be calculated.')
         try:
             from lxml import ET
         except:
@@ -615,12 +724,13 @@ class RecastConfiguration:
             mysummary=open(dirname+'/Output/'+setname+'/CLs_output.saf','w')
             if xsection <=0:
                 mysummary.write("# analysis name".ljust(30, ' ') + "signal region".ljust(50,' ') + \
-                 'sig95'.ljust(10, ' ') + ' ||    ' + 'efficiency'.ljust(15,' ') +\
+                 'sig95(exp)'.ljust(15, ' ') + 'sig95(obs)'.ljust(15, ' ') +' ||    ' + 'efficiency'.ljust(15,' ') +\
                  "stat. unc.".ljust(15,' ') + "syst. unc.".ljust(15," ") + "tot. unc.".ljust(15," ") + '\n')
 
             else:
                 mysummary.write("# analysis name".ljust(30, ' ') + "signal region".ljust(50,' ') + \
-                 "best?".ljust(10,' ') + 'CLs'.ljust(10,' ') + ' ||    ' + 'efficiency'.ljust(15,' ') +\
+                 "best?".ljust(10,' ') + 'sig95(exp)'.ljust(15,' ') + 'sig95(obs)'.ljust(15, ' ') +\
+                 'CLs'.ljust(10,' ') + ' ||    ' + 'efficiency'.ljust(15,' ') +\
                  "stat. unc.".ljust(15,' ') + "syst. unc.".ljust(15," ") + "tot. unc.".ljust(15," ") + '\n')
         ## running over all analysis
         for analysis in analysislist:
@@ -645,10 +755,10 @@ class RecastConfiguration:
                 logging.warning('Info file for '+analysis+' corrupted. Skipping the CLs calculation.')
                 return False
             ## performing the alculation
-            if xsection <=0:
-                xsflag=True
-                regiondata=self.ComputesigCLs(regiondata,regions,lumi)
-            else:
+            regiondata=self.ComputesigCLs(regiondata,regions,lumi,"exp")
+            regiondata=self.ComputesigCLs(regiondata,regions,lumi,"obs")
+            xsflag=True
+            if xsection >0:
                 xsflag=False
                 regiondata=self.ComputeCLs(regiondata,regions,xsection,lumi)
             ## writing the output file

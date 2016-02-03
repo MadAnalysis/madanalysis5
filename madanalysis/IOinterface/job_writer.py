@@ -327,7 +327,8 @@ class JobWriter():
             self.CreateDelphesCard()
 
         if self.main.recasting.status=="on":
-            self.main.recasting.CreateCard(self.path)
+            if not self.main.recasting.CreateCard(self.path):
+                return False
 
         return True
 
