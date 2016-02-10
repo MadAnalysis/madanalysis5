@@ -41,7 +41,7 @@ class InstallPad:
         self.delphesdir  = self.installdir + "/Input/Cards"
         self.untardir    = ""
         self.ncores      = 1
-        self.analyses    = ["cms_B2G_12_012", "cms_b2g_14_004", "cms_exo_12_048", "cms_exo_12_047", "ATLAS_EXOT_2014_06"]
+        self.analyses    = ["CMS_B2G_12_012", "cms_b2g_12_022", "cms_b2g_14_004", "cms_exo_12_048", "cms_exo_12_047", "ATLAS_EXOT_2014_06"]
         self.files = {
           "CMS_B2G_12_012.cpp" : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.cpp",
           "CMS_B2G_12_012.h"   : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.h",
@@ -57,7 +57,10 @@ class InstallPad:
           "cms_exo_12_048.info": "http://inspirehep.net/record/1413153/files/cms_exo_12_048.info",
           "cms_b2g_14_004.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.cpp",
           "cms_b2g_14_004.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.h",
-          "cms_b2g_14_004.info": "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.info"
+          "cms_b2g_14_004.info": "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.info",
+          "cms_b2g_12_022.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_12_022.cpp",
+          "cms_b2g_12_022.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_12_022.h",
+          "cms_b2g_12_022.info": "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_12_022.info"
         }
 
         self.delphescards = {
@@ -203,7 +206,7 @@ class InstallPad:
         if not ok:
             return False
         for analysis in self.analyses:
-          if "cms_B2G_12_012" not in analysis:
+          if "CMS_B2G_12_012" not in analysis:
             TheCommand = ['./newAnalyzer.py', analysis, analysis]
             lname = os.path.normpath(self.installdir+'/PAD-'+analysis+'.log')
             ok, out= ShellCommand.ExecuteWithLog(TheCommand,lname,\
@@ -290,7 +293,7 @@ class InstallPad:
         out = open(self.installdir+'/Build/Main/main.cpp', 'w')
         for line in inp:
           if 'user.saf' in line:
-            out.write("      manager.InitializeAnalyzer(\"cms_B2G_12_012\",\"cms_B2G_12_012.saf\",parametersA1);\n")
+            out.write("      manager.InitializeAnalyzer(\"CMS_B2G_12_012\",\"CMS_B2G_12_012.saf\",parametersA1);\n")
           else:
             out.write(line)
         inp.close()
