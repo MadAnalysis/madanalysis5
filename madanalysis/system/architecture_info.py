@@ -94,7 +94,7 @@ class ArchitectureInfo:
             diff = list(set(self.__dict__.keys()) - set(other.__dict__.keys()))
             logging.debug("The comparison of categories -> differences detected: "+str(diff))
             return False
-        logging.debug("The comparison of categories -> OK")
+        logging.debug("The comparison of categorie names -> OK")
         logging.debug("The comparison of categorie values:")
         diff=False
         for key in self.__dict__.keys():

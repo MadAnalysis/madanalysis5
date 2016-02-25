@@ -49,6 +49,7 @@ class InstallDelphes:
 #        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.0.tar.gz"}
         self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.1.tar.gz"}
 
+
     def Detect(self):
         if not os.path.isdir(self.toolsdir):
             logging.debug("The folder '"+self.toolsdir+"' is not found")

@@ -51,6 +51,16 @@ class InstallService():
 
 
     @staticmethod
+    def reporthook2(bytes_so_far, chunk_size, total_size):
+        percent = float(bytes_so_far) / total_size
+        percent = round(percent*100, 2)
+        sys.stdout.write("      "+"Download "+\
+                         InstallService.convert_bytes(bytes_so_far)+\
+                         " of "+\
+                         InstallService.convert_bytes(total_size)+\
+                         " (%0.1f%%)      \r"%(percent))
+        
+    @staticmethod
     def reporthook(numblocks,blocksize,filesize):
         try:
             step = int(filesize/(blocksize*10))
@@ -170,10 +180,11 @@ class InstallService():
 
     @staticmethod        
     def wget(filesToDownload,logFileName,installdir):
-        
-        import urllib
-        ind=0
-        error=False
+
+        # Importing required Python library
+        import urllib2
+        import ssl
+        import time
 
         # Opening log file
         try:
@@ -182,44 +193,155 @@ class InstallService():
             logging.error('impossible to create the file '+logFileName)
             return False
 
-        # Loop over files to download
+        # Parameters
+        nMaxAttempts = 3     # max of attempts when impossible to access a file
+        nSeconds     = 3     # nb of seconds to wait between each attempt
+        ind          = 0     # interator on files to download
+        error        = False # error flag ; True = there is at least one error
+        
+        # Loop over the files to download
         for file,url in filesToDownload.items():
             ind+=1
             result="OK"
             logging.info('    - ' + str(ind)+"/"+str(len(filesToDownload.keys()))+" "+url+" ...")
             output = installdir+'/'+file
-            if os.path.isfile(output) is True:
-                logging.debug(output + " has been found.")
+
+            # Try to connect the file
+            ok=True
+            for nAttempt in range(0,nMaxAttempts):
+                if nAttempt>0:
+                    logging.warning("New attempt to access the url: "+url)
+                    logging.debug("Waiting "+str(nSeconds)+" seconds ...")
+                    time.sleep(nSeconds)
+                logging.debug("Attempt "+str(nAttempt+1)+"/"+str(nMaxAttempts)+" to access the url")
                 try:
-                    info = urllib.urlopen(url)
-                    sizeURLFile = int(info.info().getheaders("Content-Length")[0])
-                    sizeSYSFile = os.path.getsize(output)
-                    if sizeURLFile != sizeSYSFile :
-                        logging.info("   '" + file + "' is corrupted or is an old version." + os.linesep +\
-                            "   Downloading a new package ...")
-                        raise Exception(file + " is corrupted or is an old version.")
-                    else:
-                        logging.info("   '" + file + "' already exists. Package not downloaded.")
-                    info.close()
+                    info = urllib2.urlopen(url, context=ssl._create_unverified_context())
                 except:
-                    try:
-                        urllib.urlretrieve(url,output,InstallService.reporthook)
-                    except:
-                        logging.warning("Impossible to download the package from "+\
-                                        url + " to "+output)
-                        result="ERROR"
-                        error=True
+                    logging.warning("Impossible to access the url: "+url)
+                    ok=False
+                if ok:
+                    logging.debug('Info about the file: --------------------------------------------------------')
+                    words = str(info.info()).split('\n')
+                    for word in words:
+                        word=word.lstrip()
+                        word=word.rstrip()
+                        if word!='':
+                            logging.debug('Info about the file: '+word)
+                    logging.debug('Info about the file: --------------------------------------------------------')
+                    break
+
+            # Check if the connection is OK
+            if not ok:
+                logging.warning("Impossible to download the package from "+\
+                                url + " to "+output)
+                result="ERROR"
+                error=True
+
+                # Write download status in the log file
+                log.write(url+' : '+result+'\n')
+
+                # skip the file
+                continue
+
+            
+            # Decoding the size of the remote file
+            logging.debug('Decoding the size of the remote file...')
+            sizeURLFile = 0
+            try:
+                sizeURLFile = int(info.info().getheaders("Content-Length")[0])
+            except:
+                logging.debug('-> Problem to decode it')
+                logging.warning("Bad description for "+url)
+                result="ERROR"
+                error=True
+
+                # Write download status in the log file
+                log.write(url+' : '+result+'\n')
+
+                # skip the file
+                continue
+            logging.debug('-> size='+str(sizeURLFile))
+
+            # Does the file exist locally?
+            ok=False
+            if not os.path.isfile(output):
+                logging.debug("No file with the name '"+output+"' exists locally.")
             else:
+                logging.debug("A file with the same name '"+output+"' has been found on the machine.")
+
+                ok=True
+                        
+                # Decoding the size of the local file
+                if ok:
+                    logging.debug('Decoding the size of the local file...')
+                    sizeSYSFile = 0
+                    try:
+                        sizeSYSFile = os.path.getsize(output)
+                    except:
+                        logging.debug('-> Problem to decode it')
+                        ok=False
+
+                # Comparing the sizes of two files
+                if ok:
+                    logging.debug('-> size='+str(sizeSYSFile))
+                    logging.debug('Comparing the sizes of two files...')
+                    if sizeURLFile != sizeSYSFile :
+                        logging.debug('-> Difference detected!')
+                        logging.info("   '" + file + "' is corrupted or is an old version." + os.linesep +\
+                                     "   Downloading a new package ...")
+                        ok=False
+
+                # Case where the two files are identifical -> do nothing
+                if ok:
+                    logging.debug('-> NO difference detected!')
+                    logging.info("   '" + file + "' already exists. Package not downloaded.")
+
+                # Other cases: download is necessary
+                if not ok:
+                    logging.debug('Fail to get info about the local file. It will be overwritten.')
+
+            # Download of the package
+            if not ok:
+                logging.debug('Downloading the file ...')
+
+                # Open the output file [write mode]
                 try:
-                    urllib.urlretrieve(url,output,InstallService.reporthook)
+                    outfile = open(output, 'wb')
                 except:
-                    logging.warning("Impossible to download the package from "+\
-                                    url + " to "+output)
+                    info.close()
+                    logging.warning("Impossible to write the file "+output)
                     result="ERROR"
                     error=True
+
+                # Copy the file
+                if not error:
+                    chunk_size   = 8192
+                    bytes_so_far = 0
+                    while 1:
+                        chunk = info.read(chunk_size)
+                        bytes_so_far += len(chunk)
+                        if not chunk:
+                            break
+                        outfile.write(chunk)
+                        InstallService.reporthook2(bytes_so_far, chunk_size, sizeURLFile)
+
+                    InstallService.reporthook2(sizeURLFile, chunk_size, sizeURLFile)
+                    sys.stdout.write('\n')
+
+                #Closing file
+                if not error:
+                    try:
+                        outfile.close()
+                        info.close()
+                    except:
+                        logging.warning("Impossible to close the file "+output)
+                        result="ERROR"
+                        error=True
+
+            # Write download status in the log file
             log.write(url+' : '+result+'\n')
 
-        # Close the file
+        # Close the log file
         try:
             log.close()
         except:
@@ -235,24 +357,59 @@ class InstallService():
 
     @staticmethod
     def check_ma5site():
-        logging.debug("Testing the access to MadAnalysis 5 website ...")
-        import urllib
+        url='http://madanalysis.irmp.ucl.ac.be'
+        logging.debug("Testing the access to MadAnalysis 5 website: "+url+" ...")
+        import urllib2
+        import ssl
+
+        # Open an access to the url
         try:
-            urllib.urlopen('http://madanalysis.irmp.ucl.ac.be')
+            info = urllib2.urlopen(url, context=ssl._create_unverified_context())
         except:
             logging.error("impossible to access MadAnalysis 5 website.")
             return False
+
+        # Print info [debug mode]
+        logging.debug('Info about the url: --------------------------------------------------------')
+        words = str(info.info()).split('\n')
+        for word in words:
+            word=word.lstrip()
+            word=word.rstrip()
+            if word!='':
+                logging.debug('Info about the url: '+word)
+        logging.debug('Info about the url: --------------------------------------------------------')
+
+        # Close the access
+        info.close()
         return True        
 
+    
     @staticmethod
     def check_inspire():
-        logging.debug("Testing the access to InSpire...")
-        import urllib
+        url='http://inspirehep.net/'
+        logging.debug("Testing the access to InSpire: "+url+" ...")
+        import urllib2
+        import ssl
+
+        # Open an access to the url
         try:
-            urllib.urlopen('http://inspirehep.net/')
+            info=urllib2.urlopen(url, context=ssl._create_unverified_context())
         except:
             logging.error("impossible to access the InSpire website.")
             return False
+
+        # Print info [debug mode]
+        logging.debug('Info about the url: --------------------------------------------------------')
+        words = str(info.info()).split('\n')
+        for word in words:
+            word=word.lstrip()
+            word=word.rstrip()
+            if word!='':
+                logging.debug('Info about the url: '+word)
+        logging.debug('Info about the url: --------------------------------------------------------')
+
+        # Close the access
+        info.close()
         return True
 
 

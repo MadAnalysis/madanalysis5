@@ -636,11 +636,11 @@ class ConfigChecker:
         force2=False
         if self.user_info.zlib_includes!=None:
             self.logger.debug("User setting: zlib include path is specified")
-            self.archi_info.zlib_inc_path=os.path.normpath(self.user_info.zlib_includes)
+            self.archi_info.zlib_inc_path=os.path.normpath(self.archi_info.zlib_inc_path)
             force1=True
         if self.user_info.zlib_libs!=None:
             self.logger.debug("User setting: zlib lib path is specified")
-            self.archi_info.zlib_lib_path=os.path.normpath(self.user_info.zlib_libraries)
+            self.archi_info.zlib_lib_path=os.path.normpath(self.archi_info.zlib_lib_path)
             force2=True
         force=force1 and force2
 
@@ -705,10 +705,11 @@ class ConfigChecker:
             # lib
             self.logger.debug("Look for the zlib libraries ...")
             mypath, myfile = self.FindLibraryWithPattern('libz.*',libnames)
-            self.archi_info.zlib_lib_path = os.path.normpath(mypath)
-            self.archi_info.zlib_lib      = os.path.normpath(myfile)
-            self.logger.debug("-> result for lib paths: "+str(self.archi_info.zlib_lib_path))
-            self.logger.debug("-> result for lib files: "+str(self.archi_info.zlib_lib))
+            if mypath!='' and myfile!='':
+                self.archi_info.zlib_lib_path = os.path.normpath(mypath)
+                self.archi_info.zlib_lib      = os.path.normpath(myfile)
+                self.logger.debug("-> result for lib paths: "+str(self.archi_info.zlib_lib_path))
+                self.logger.debug("-> result for lib files: "+str(self.archi_info.zlib_lib))
             if self.archi_info.zlib_lib_path=="":
                 self.PrintFAIL(warning=True)
                 self.logger.warning("Library called 'zlib' not found.")
