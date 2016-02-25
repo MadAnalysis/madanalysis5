@@ -181,11 +181,6 @@ class InstallService():
     @staticmethod        
     def wget(filesToDownload,logFileName,installdir):
 
-        # Importing required Python library
-        import urllib2
-        import ssl
-        import time
-
         # Opening log file
         try:
             log=open(logFileName,'w')
@@ -194,8 +189,6 @@ class InstallService():
             return False
 
         # Parameters
-        nMaxAttempts = 3     # max of attempts when impossible to access a file
-        nSeconds     = 3     # nb of seconds to wait between each attempt
         ind          = 0     # interator on files to download
         error        = False # error flag ; True = there is at least one error
         
@@ -207,28 +200,8 @@ class InstallService():
             output = installdir+'/'+file
 
             # Try to connect the file
-            ok=True
-            for nAttempt in range(0,nMaxAttempts):
-                if nAttempt>0:
-                    logging.warning("New attempt to access the url: "+url)
-                    logging.debug("Waiting "+str(nSeconds)+" seconds ...")
-                    time.sleep(nSeconds)
-                logging.debug("Attempt "+str(nAttempt+1)+"/"+str(nMaxAttempts)+" to access the url")
-                try:
-                    info = urllib2.urlopen(url, context=ssl._create_unverified_context())
-                except:
-                    logging.warning("Impossible to access the url: "+url)
-                    ok=False
-                if ok:
-                    logging.debug('Info about the file: --------------------------------------------------------')
-                    words = str(info.info()).split('\n')
-                    for word in words:
-                        word=word.lstrip()
-                        word=word.rstrip()
-                        if word!='':
-                            logging.debug('Info about the file: '+word)
-                    logging.debug('Info about the file: --------------------------------------------------------')
-                    break
+            info = InstallService.UrlAccess(url)
+            ok=(info!=None)
 
             # Check if the connection is OK
             if not ok:
@@ -356,20 +329,46 @@ class InstallService():
 
 
     @staticmethod
-    def check_ma5site():
-        url='http://madanalysis.irmp.ucl.ac.be'
-        logging.debug("Testing the access to MadAnalysis 5 website: "+url+" ...")
+    def UrlAccess(url):
+
         import urllib2
         import ssl
+        import time
 
-        # Open an access to the url
-        try:
-            info = urllib2.urlopen(url, context=ssl._create_unverified_context())
-        except:
-            logging.error("impossible to access MadAnalysis 5 website.")
-            return False
+        # max of attempts when impossible to access a file
+        nMaxAttempts = 3
 
-        # Print info [debug mode]
+        # nb of seconds to wait between each attempt
+        nSeconds     = 3
+        
+        # ssl method for python v>2.7.9
+        modeSSL = (sys.version_info.major>=2  and \
+                   sys.version_info.minor>=7 and \
+                   sys.version_info.micro>=9)
+
+        # Try to access
+        ok=True
+        for nAttempt in range(0,nMaxAttempts):
+            if nAttempt>0:
+                logging.warning("New attempt to access the url: "+url)
+                logging.debug("Waiting "+str(nSeconds)+" seconds ...")
+                time.sleep(nSeconds)
+            logging.debug("Attempt "+str(nAttempt+1)+"/"+str(nMaxAttempts)+" to access the url")
+            try:
+                if modeSSL:
+                    info = urllib2.urlopen(url, context=ssl._create_unverified_context())
+                else:
+                    info = urllib2.urlopen(url)
+            except:
+                logging.warning("Impossible to access the url: "+url)
+                ok=False
+            if ok:
+                break
+
+        if not ok:
+            return None
+        
+        # Display
         logging.debug('Info about the url: --------------------------------------------------------')
         words = str(info.info()).split('\n')
         for word in words:
@@ -379,37 +378,32 @@ class InstallService():
                 logging.debug('Info about the url: '+word)
         logging.debug('Info about the url: --------------------------------------------------------')
 
+        return info
+
+
+    @staticmethod
+    def check_ma5site():
+        url='http://madanalysis.irmp.ucl.ac.be'
+        logging.debug("Testing the access to MadAnalysis 5 website: "+url+" ...")
+
+        info = InstallService.UrlAccess(url)
+
         # Close the access
-        info.close()
+        if info!=None:
+            info.close()
         return True        
 
-    
+        
     @staticmethod
     def check_inspire():
         url='http://inspirehep.net/'
         logging.debug("Testing the access to InSpire: "+url+" ...")
-        import urllib2
-        import ssl
 
-        # Open an access to the url
-        try:
-            info=urllib2.urlopen(url, context=ssl._create_unverified_context())
-        except:
-            logging.error("impossible to access the InSpire website.")
-            return False
-
-        # Print info [debug mode]
-        logging.debug('Info about the url: --------------------------------------------------------')
-        words = str(info.info()).split('\n')
-        for word in words:
-            word=word.lstrip()
-            word=word.rstrip()
-            if word!='':
-                logging.debug('Info about the url: '+word)
-        logging.debug('Info about the url: --------------------------------------------------------')
+        info = InstallService.UrlAccess(url)
 
         # Close the access
-        info.close()
+        if info!=None:
+            info.close()
         return True
 
 
