@@ -342,9 +342,13 @@ class InstallService():
         nSeconds     = 3
         
         # ssl method for python v>2.7.9
-        modeSSL = (sys.version_info.major>=2  and \
-                   sys.version_info.minor>=7 and \
-                   sys.version_info.micro>=9)
+        try:
+            modeSSL = (sys.version_info[0]>=2 and \
+                       sys.version_info[1]>=7 and \
+                       sys.version_info[2]>=9 )
+        except:
+            logging.warning("Problem with Python version decoding!")
+            modeSSL = False
 
         # Try to access
         ok=True
