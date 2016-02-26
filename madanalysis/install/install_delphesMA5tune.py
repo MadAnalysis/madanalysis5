@@ -22,10 +22,11 @@
 ################################################################################
 
 
-from madanalysis.install.install_service                        import InstallService
-from madanalysis.system.user_info                               import UserInfo
-from madanalysis.system.config_checker                          import ConfigChecker
-from madanalysis.IOinterface.library_writer                     import LibraryWriter
+from madanalysis.install.install_service    import InstallService
+from madanalysis.system.user_info           import UserInfo
+from madanalysis.system.config_checker      import ConfigChecker
+from madanalysis.IOinterface.library_writer import LibraryWriter
+from madanalysis.system.checkup             import CheckUp
 from shell_command import ShellCommand
 import os
 import sys
@@ -291,47 +292,76 @@ class InstallDelphesMA5tune:
             if not 'DEACT' in delpath:
                 return 0
             logging.warning("DelphesMA5tune is deactivated. Activating it.")
+
             # naming
             shutil.move(delpath,deldeac)
-            # compiling
+
+            # Compiler setup
             compiler = LibraryWriter('lib',self.main)
             ncores = compiler.get_ncores2()
-            if ncores>1:
-                strcores='-j'+str(ncores)
+
+            from madanalysis.build.setup_writer import SetupWriter
+            SetupWriter.WriteSetupFile(True,self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/',self.main.archi_info)
+            SetupWriter.WriteSetupFile(False,self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/',self.main.archi_info)
+
             ToBuild =  ['delphesMA5tune', 'process']
+
+            # Makefile
+            self.main.archi_info.has_delphesMA5tune=True
             for mypackage in ToBuild:
                 if not compiler.WriteMakefileForInterfaces(mypackage):
                     logging.error("library building aborted.")
                     return -1
-                flag=''
+
+            # Cleaning
+            for mypackage in ToBuild:
                 myfolder='Process'
                 if mypackage != 'process':
-                    flag='_'+mypackage
                     myfolder='Interfaces'
-                command = ['make','compile',strcores,'--file=Makefile'+flag]
-                folder=self.main.archi_info.ma5dir + '/tools/SampleAnalyzer/'+myfolder
-                logfile = folder+'/compilation'+flag+'.log'
-                result, out = ShellCommand.ExecuteWithLog(command,logfile,folder)
-                if not result:
-                    logging.error('Impossible to compile the project.'+\
-                      ' For more details, see the log file:')
-                    logging.error(logfile)
+                if not compiler.MrProper(mypackage,self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/'+myfolder):
+                    logging.error("Library '" + mypackage + "' precleaning aborted.")
                     return -1
-                logfile = folder+'/linking'+flag+'.log'
-                command = ['make','link',strcores,'--file=Makefile'+flag]
-                result, out = ShellCommand.ExecuteWithLog(command,logfile,folder)
-                if not result:
-                    logging.error('Impossible to link the project.'+\
-                      ' For more details, see the log file:')
-                    logging.error(logfile)
+
+            # Compiling
+            for mypackage in ToBuild:
+                myfolder='Process'
+                if mypackage != 'process':
+                    myfolder='Interfaces'
+                if not compiler.Compile(ncores,mypackage,self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/'+myfolder):
+                    logging.error("Library '" + mypackage + "' compilation aborted.")
                     return -1
-                logfile = folder+'/cleanup'+flag+'.log'
-                command = ['make','clean',strcores,'--file=Makefile'+flag]
-                result, out = ShellCommand.ExecuteWithLog(command,logfile,folder)
-                if not result:
-                    logging.error('Impossible to clean the project.'+\
-                      ' For more details, see the log file:')
-                    logging.error(logfile)
+
+            # Linking
+            for mypackage in ToBuild:
+                myfolder='Process'
+                if mypackage != 'process':
+                    myfolder='Interfaces'
+                if not compiler.Link(mypackage,self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/'+myfolder):
+                    logging.error("Library '" + mypackage + "' linking aborted.")
                     return -1
-                self.main.archi_info.has_delphesMA5tune=True
+
+            # Checking
+            for mypackage in ToBuild:
+                myfolder='Lib/libprocess_for_ma5.so'
+                if mypackage != 'process':
+                    myfolder='Lib/libdelphesMA5tune_for_ma5.so'
+                if not os.path.isfile(self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/'+myfolder):
+                    logging.error("Library '" + mypackage + "' checking aborted.")
+                    return -1
+
+            # Cleaning
+            for mypackage in ToBuild:
+                myfolder='Process'
+                if mypackage != 'process':
+                    myfolder='Interfaces'
+                if not compiler.Clean(mypackage,self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/'+myfolder):
+                    logging.error("Library '" + mypackage + "' cleaning aborted.")
+                    return -1
+
+            # Paths
+            checkup = CheckUp(self.main.archi_info, self.main.session_info, False, self.main.script)
+            if not checkup.SetFolder():
+                logging.error("Problem with the path updates.")
+                return -1
+
         return 1
