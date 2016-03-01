@@ -1,94 +1,14 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
-131  1.3.16   (2016/02/26) fuks:    Fixing the delphes(ma5tune) activation methods 
+131  1.3.   (2016/03/01) ma5team:   - New structure for the PAD; automated recasting methods
+                                    - Compatiblity with delphes 3.3 
+                                    - Several system-dependent bug fixes
+                                    - Bug fixes: selections, report writer
+                                    - Development: new observables, better debugging mode, Delphes3 handling
+                                         pythia8 compatiblitity for the merging plots
 
-128  1.3.15   (2016/02/10) fuks:    Fixing a bug in the recasting tools (thanks to Daniele) 
-
-127  1.3.14   (2016/02/03) fuks:    Adding new recasting functionalities 
-
-125  1.3.13   (2016/01/07) fuks:    Compatiblity with delphes 3.3 
-
-124  1.3.12   (2016/01/07) fuks:    Updating the PAD installation 
-
-123  1.3.11   (2016/01/06) fuks:    Updating the PAD installation 
-
-122  1.3.10   (2015/12/21) fuks:    PADtune installation update 
-
-121  1.3.9    (2015/12/16) fuks:    Fixing a few things with the recasting module 
-
-120  1.3.8    (2015/12/04) fuks:    Fixing the PAD installation 
-
-119  1.3.7    (2015/12/04) fuks:    Fixing the CLs routines 
-
-118  1.3.6    (2015/12/03) fuks:    Automated recasting - first finetunings 
-
-117  1.3.5    (2015/12/03) fuks:    Automated recasting - beta1.0 
-
-116  1.3.4    (2015/11/27) fuks:    Recasting - executing the PAD 
-
-115  1.3.3    (2015/11/25) fuks:    Automated delphes simulation with the recasting 
-
-114  1.3.2    (2015/11/24) fuks:    Automated recasting ... next step + fixing compiler bug on macos 
-                                   10.11 
-
-114  1.4      (2015/11/24) fuks:    Automated recasting ... next step + fixing compiler bug on macos 
-                                   10.11 
-
-111  1.12     (2015/11/23) fuks:    Updating the intaller 
-
-110  1.11     (2015/11/23) fuks:    auto-recast part III 
-
-109  1.10     (2015/11/17) fuks:    auto-recast part II 
-
-106  1.9      (2015/11/17) fuks:    Automatic recasting part 1 
-
-101  1.8      (2015/10/30) fuks:    Fxing the PAD installation... creating PadForMA5Tune 
-
-98   1.7      (2015/10/28) fuks:    Updating the PAD autoinstall 
-
-96   1.6      (2015/10/08) fuks:    Fixing a bug with the cut conditions 
-
-95   1.5      (2015/10/01) fuks:    Bug fix with the cuts (mixing statuscodes) 
-
-94   1.4      (2015/09/28) fuks:    Bug fix in the cut condition decoder 
-
-92   1.3      (2015/07/26) fuks:    Small bug for running the ma5tune in script mode fixed 
-
-133  1.2.RC   (2015/07/07) fuks:    Bug fix in the LHE writer (thanks to Ioannis Tsinikos) 
-
-114  1.1.12.17 (2015/05/21) fuks:    Adding the ATLAS monophoton to the PAD 
-
-113  1.1.12.16 (2015/05/20) fuks:    Fixing the merging plots for pythia 8 
-
-112  1.1.12.15 (2015/05/20) fuks:    Fixing the merging plot routines so that they now work for pythia8 
-
-107  1.1.12.14 (2015/03/09) fuks:    Fixing some last bugs on the automated PAD installation 
-
-106  1.1.12.13 (2015/03/04) fuks:    Updating the automated pad installation 
-
-105  1.1.12.12 (2015/02/27) fuks:    Efficiency maps and automated pad installation 
-
-104  1.1.12.11 (2015/02/27) fuks:    Automated PAD installation: final bug fixes 
-
-103  1.1.12.10 (2015/02/27) fuks:    Automated PAD installation (missing files) 
-
-102  1.1.12.9 (2015/02/27) fuks:    Automated PAD installation (V2) 
-
-101  1.1.12.8 (2015/02/27) fuks:    Automated PAD installation added 
-
-100  1.1.12.7 (2015/02/26) fuks:    Fixing the merging plot bug 
-
-96   1.1.12.6 (2015/02/06) fuks:    Bug in the HepMC reader fixed 
-
-95   1.1.12.5 (2015/01/26) fuks:    Compilation errors when one core was selected fixed 
-
-93   1.1.12.4 (2014/11/11) fuks:    Bug with the linestyle when drawing histograms in the normal mode 
-                                   (see question 257315 on launchpad) 
-
-92   1.1.12.3 (2014/10/23) fuks:    Arguments allowed for the expert mode, a few bug corrected 
-
-88   1.1.12.2 (2014/08/21) fuks:    Small issue with the newanalyzer script for multianalyses 
-
+133  1.2    (2015/10/28) ma5team:   - Bug fixes (LHE writer, HepMC reader, merging plots, etc.)
+                                    - PAD features
 
  82  1.1.11 (2014/07/17) ma5team:   - new structure for the detection of the user system
                                     - new structure for installing the external packages
