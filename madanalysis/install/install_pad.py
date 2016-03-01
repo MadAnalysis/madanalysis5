@@ -155,6 +155,17 @@ class InstallPad:
       file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1305194;%%\",\n')
       file.write('}\n')
 
+      #CMS-SUS-14-011
+      file.write('@article{,\n')
+      file.write('key            = "1401439",\n')
+      file.write('      author         = \"Sharma, Seema and Pandey, Shubham\",\n')
+      file.write('      title          = \"{MadAnalysis 5 implementation of CMS-SUS-14-001 (monojet\n')
+      file.write('                        anaysis)}\",\n')
+      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.QGBP.K237\",\n')
+      file.write('      year           = \"2015\",\n')
+      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1401439;%%\"\n')
+      file.write('}\n')
+
       #ATLAS-HIGG-2013-03
       file.write('@article{,\n')
       file.write('      author         = \"Dumont, Beranger\",\n')
