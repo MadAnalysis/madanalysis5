@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -20,6 +20,7 @@
 //  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
 //  
 ////////////////////////////////////////////////////////////////////////////////
+
 
 #include "SampleAnalyzer/Commons/Base/ClusterAlgoBase.h"
 #include "SampleAnalyzer/Commons/Base/DetectorBase.h"

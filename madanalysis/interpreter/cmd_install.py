@@ -1,29 +1,31 @@
 ################################################################################
-#
-#  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
+#  
+#  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
-#
+#  
 #  This file is part of MadAnalysis 5.
 #  Official website: <https://launchpad.net/madanalysis5>
-#
+#  
 #  MadAnalysis 5 is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
-#
+#  
 #  MadAnalysis 5 is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #  GNU General Public License for more details.
-#
+#  
 #  You should have received a copy of the GNU General Public License
 #  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
-#
+#  
 ################################################################################
 
 
-from madanalysis.interpreter.cmd_base          import CmdBase
-from madanalysis.install.install_manager       import InstallManager
+from madanalysis.interpreter.cmd_base       import CmdBase
+from madanalysis.install.install_manager    import InstallManager
+from madanalysis.system.user_info           import UserInfo
+from madanalysis.system.config_checker      import ConfigChecker
 import logging
 import os
 import sys
@@ -41,10 +43,40 @@ class CmdInstall(CmdBase):
     def do(self,args):
 
         # Checking argument number
-        if len(args) != 1:
+        if len(args)!=1:
             logging.error("wrong number of arguments for the command 'install'.")
             self.help()
             return
+
+        # delphes preinstallation
+        def inst_delphes(main,installer,pad=False):
+            if not installer.Deactivate('delphesMA5tune'):
+                return False
+            ResuActi = installer.Activate('delphes')
+            if ResuActi == -1:
+                return False
+            elif ResuActi == 1 and not self.main.archi_info.has_delphes:
+                logging.warning("Delphes not installed: installing it...")
+                return installer.Execute('delphes')
+            elif ResuActi == 0 and self.main.archi_info.has_delphes and not pad:
+                logging.warning("A previous installation of Delphes has been found. Skipping the installation.")
+                logging.warning("To update Delphes, please remove the tools/delphes directory")
+            return True
+
+        # ma5tune preinstallation
+        def inst_ma5tune(main,installer,pad=False):
+            if not installer.Deactivate('delphes'):
+                return False
+            ResuActi = installer.Activate('delphesMA5tune')
+            if ResuActi == -1:
+                return False
+            elif ResuActi == 1 and not self.main.archi_info.has_delphesMA5tune:
+                logging.warning("DelphesMA5tune not installed: installing it...")
+                return installer.Execute('delphesMA5tune')
+            elif ResuActi == 0 and self.main.archi_info.has_delphesMA5tune and not pad:
+                logging.warning("A previous installation of DelphesMA5tune has been found. Skipping the installation.")
+                logging.warning("To update DelphesMA5tune, please remove the tools/delphesMA5tune directory")
+            return True
 
         # Calling selection method
         if args[0]=='samples':
@@ -55,7 +87,7 @@ class CmdInstall(CmdBase):
             return installer.Execute('zlib')
         elif args[0]=='delphes':
             installer=InstallManager(self.main)
-            return installer.Execute('delphes')
+            return inst_delphes(self.main,installer)
         elif args[0]=='delphesMA5tune':
             logging.warning("The package 'delphesMA5tune' is now obsolete. It is replaced by Delphes with special MA5-tuned cards.")
             if not self.main.forced:
@@ -68,7 +100,7 @@ class CmdInstall(CmdBase):
               if answer=="no" or answer=="n":
                   return
             installer=InstallManager(self.main)
-            return installer.Execute('delphesMA5tune')
+            return inst_ma5tune(self.main,installer)
         elif args[0]=='fastjet':
             installer=InstallManager(self.main)
             if installer.Execute('fastjet')==False:
@@ -89,19 +121,23 @@ class CmdInstall(CmdBase):
         elif args[0]=='RecastingTools':
             installer=InstallManager(self.main)
             return installer.Execute('RecastingTools')
+        elif args[0]=='PADForMA5tune':
+            installer=InstallManager(self.main)
+            if inst_ma5tune(self.main,installer,True):
+                return installer.Execute('PADForMA5tune')
         elif args[0]=='PAD':
             installer=InstallManager(self.main)
-            return installer.Execute('PAD')
+            if inst_delphes(self.main,installer,True):
+                return installer.Execute('PAD')
         else:
             logging.error("the syntax is not correct.")
             self.help()
             return
 
-
     def help(self):
         logging.info("   Syntax: install <component>")
         logging.info("   Download and install a MadAnalysis component from the official site.")
-        logging.info("   List of available components : samples zlib fastjet delphes delphesMA5tune RecastingTools PAD")
+        logging.info("   List of available components: samples zlib fastjet delphes delphesMA5tune RecastingTools PAD PADForMA5tune")
 
 
     def complete(self,text,args,begidx,endidx):
@@ -113,7 +149,8 @@ class CmdInstall(CmdBase):
         if nargs>2:
             return []
         else:
-            output = ["samples","zlib","fastjet", "delphes", "delphesMA5tune", "gnuplot", "matplotlib", "root" , "numpy", "RecastingTools", "PAD"]
+            output = ["samples","zlib","fastjet", "delphes", "delphesMA5tune",\
+                "gnuplot", "matplotlib", "root" , "numpy", "RecastingTools", "PAD", "PADForMA5tune"]
             return self.finalize_complete(text,output)
 
 

@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -51,7 +51,7 @@ class JobReader():
             return False
         else:
             return True
-                            
+
     def CheckFile(self,dataset):
         name=InstanceName.Get(dataset.name)
         if os.path.isfile(self.safdir+"/"+name+"/MadAnalysis5job.saf"):

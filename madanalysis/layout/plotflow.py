@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -150,12 +150,12 @@ class PlotFlow:
                  scales.append(1)
 
             # Draw
-            self.Draw(histos,scales,self.main.selection[iabshisto],irelhisto,mode,output_path,preview=False)
+            self.Draw(histos,scales,self.main.selection[iabshisto],irelhisto,mode,output_path)
                 
             irelhisto+=1
 
 
-    def Draw(self,histos,scales,ref,irelhisto,mode,output_path,preview=False):
+    def Draw(self,histos,scales,ref,irelhisto,mode,output_path):
 
         from ROOT import TH1
         from ROOT import TH1F
@@ -472,45 +472,8 @@ class PlotFlow:
             legend.SetFillColor(0)    
             legend.Draw()
 
-        if not preview:
+        canvas.SaveAs(output_path+"/selection_"+str(irelhisto)+\
+            "."+ReportFormatType.convert2filetype(mode))
 
-            # Put the MA5 logo
-#            logo = TASImage.Open(self.main.archi_info.ma5dir+\
-#                              "/madanalysis/input/logo.eps")
-#            if not logo.IsValid():
-#                logging.warning("file called '"+self.main.archi_info.ma5dir+\
-#                                "/madanalysis/input/logo.eps' " +\
-#                                "is not found")
-#            else:
-#                logo.SetConstRatio(0)
-#                logo.SetImageQuality(TAttImage.kImgBest)
-#                logo.Vectorize(256)
-#                w = logo.GetWidth()
-#                h = logo.GetHeight()
-#                logo.Scale(int(w*0.2),int(h*0.2))
-#                mypad = TPad("i1", "i1", 0.75, 0.9, 0.85, 1)
-#                mypad.Draw()
-#                mypad.cd()
-#                logo.Draw()
-               
-#            # Save the canvas in the report format
-#            canvas.Update()
-#            
-#            thepicture = TASImage.Create()
-#            thepicture.FromPad(canvas)
-#            thepicture.SetConstRatio(0)
-#            thepicture.SetImageQuality(TAttImage.kImgBest)
-#            thepicture.WriteImage(output_path+"/selection_"+str(irelhisto)+\
-#                                  "."+ReportFormatType.convert2filetype(mode))
-            canvas.SaveAs(output_path+"/selection_"+str(irelhisto)+\
-                          "."+ReportFormatType.convert2filetype(mode))
-
-            # Save the canvas in the C format
-            canvas.SaveAs(output_path+"/selection_"+str(irelhisto)+".C")
-            
-        else:
-            # break 
-            answer=raw_input("Press enter to continue : ")
-  
-            
-                   
+        # Save the canvas in the C format
+        canvas.SaveAs(output_path+"/selection_"+str(irelhisto)+".C")

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -166,11 +166,11 @@ class RecLeptonFormat : public RecParticleFormat
 
   /// is it an electron?
   void setElectronId()
-  { pdg_==11; }
+  { pdg_=11; }
 
   /// is it a muon?
   void setMuonId()
-  { pdg_==13; }
+  { pdg_=13; }
 
 };
 

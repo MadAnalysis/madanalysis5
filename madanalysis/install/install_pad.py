@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -36,57 +36,38 @@ class InstallPad:
         self.main        = main
         self.installdir  = os.path.normpath(self.main.archi_info.ma5dir+'/PAD')
         self.tmpdir      = self.main.session_info.tmpdir
-        self.downloaddir = self.installdir + "/Build/SampleAnalyzer/User/Analyzer"
+        self.downloaddir = self.main.session_info.downloaddir
+        self.PADdir      = self.installdir + "/Build/SampleAnalyzer/User/Analyzer"
         self.delphesdir  = self.installdir + "/Input/Cards"
         self.untardir    = ""
         self.ncores      = 1
-        self.analyses    = ["cms_sus_13_011", "cms_sus_13_012", "cms_sus_13_016", "atlas_sus_13_05", "atlas_susy_2013_11",
-            "atlas_higg_2013_03", "ATLAS_EXOT_2014_06", "atlas_susy_2014_10", "atlas_susy_2013_21", "atlas_1405_7875" ,
-            "cms_sus_14_001_monojet" ]
+        self.analyses    = ["CMS_B2G_12_012", "cms_b2g_12_022", "cms_b2g_14_004", "cms_exo_12_048", "cms_exo_12_047", "ATLAS_EXOT_2014_06"]
         self.files = {
-    "cms_sus_13_011.cpp" : "http://inspirehep.net/record/1301484/files/cms_sus_13_011.cpp",
-    "cms_sus_13_011.h"   : "http://inspirehep.net/record/1301484/files/cms_sus_13_011.h",
-    "cms_sus_13_011.info": "http://inspirehep.net/record/1301484/files/cms_sus_13_011.info",
-    "cms_sus_13_016.cpp" : "http://inspirehep.net/record/1305194/files/cms_sus_13_016.cpp",
-    "cms_sus_13_016.h"   : "http://inspirehep.net/record/1305194/files/cms_sus_13_016.h",
-    "cms_sus_13_016.info": "http://inspirehep.net/record/1305194/files/cms_sus_13_016.info",
-    "cms_sus_13_012.cpp" : "http://inspirehep.net/record/1305458/files/cms_sus_13_012.cpp",
-    "cms_sus_13_012.h"   : "http://inspirehep.net/record/1305458/files/cms_sus_13_012.h",
-    "cms_sus_13_012.info": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/cms_sus_13_012.info",
-    "atlas_sus_13_05.cpp"    : "http://inspirehep.net/record/1325001/files/atlas_sus_13_05.cpp",
-    "atlas_sus_13_05.h"      : "http://inspirehep.net/record/1325001/files/atlas_sus_13_05.h",
-    "atlas_sus_13_05.info"   : "http://inspirehep.net/record/1325001/files/atlas_sus_13_05.info",
-    "atlas_susy_2013_11.cpp" : "http://inspirehep.net/record/1326686/files/atlas_susy_2013_11.cpp",
-    "atlas_susy_2013_11.h"   : "http://inspirehep.net/record/1326686/files/atlas_susy_2013_11.h",
-    "atlas_susy_2013_11.info": "http://inspirehep.net/record/1326686/files/atlas_susy_2013_11.info",
-    "atlas_higg_2013_03.cpp" : "http://inspirehep.net/record/1347081/files/atlas_higg_2013_03.cpp",
-    "atlas_higg_2013_03.h"   : "http://inspirehep.net/record/1347081/files/atlas_higg_2013_03.h",
-    "atlas_higg_2013_03.info": "http://inspirehep.net/record/1347081/files/atlas_higg_2013_03.info",
-    "ATLAS_EXOT_2014_06.cpp" : "http://inspirehep.net/record/1353627/files/ATLAS_EXOT_2014_06.cpp",
-    "ATLAS_EXOT_2014_06.h"   : "http://inspirehep.net/record/1353627/files/ATLAS_EXOT_2014_06.h",
-    "ATLAS_EXOT_2014_06.info": "http://inspirehep.net/record/1353627/files/ATLAS_EXOT_2014_06.info",
-    "atlas_susy_2014_10.cpp" : "http://inspirehep.net/record/1387577/files/atlas_susy_2014_10.cpp",
-    "atlas_susy_2014_10.h"   : "http://inspirehep.net/record/1387577/files/atlas_susy_2014_10.h",
-    "atlas_susy_2014_10.info": "http://inspirehep.net/record/1387577/files/atlas_susy_2014_10.info",
-    "atlas_susy_2013_21.cpp" : "http://inspirehep.net/record/1388797/files/atlas_susy_2013_21.cpp",
-    "atlas_susy_2013_21.h"   : "http://inspirehep.net/record/1388797/files/atlas_susy_2013_21.h",
-    "atlas_susy_2013_21.info": "http://inspirehep.net/record/1388797/files/atlas_susy_2013_21.info",
-#    "atlas_1405_7875.cpp" : "http://inspirehep.net/record/1388801/files/atlas_1405_7875.cpp",
-    "atlas_1405_7875.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/atlas_1405_7875.cpp",
-    "atlas_1405_7875.h"   : "http://inspirehep.net/record/1388801/files/atlas_1405_7875.h",
-    "atlas_1405_7875.info": "http://inspirehep.net/record/1388801/files/atlas_1405_7875.info",
-    "cms_sus_14_001_monojet.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_sus_14_001_monojet.cpp",
-    "cms_sus_14_001_monojet.h"   : "http://inspirehep.net/record/1401439/files/cms_sus_14_001_monojet.h",
-    "cms_sus_14_001_monojet.info": "http://inspirehep.net/record/1401439/files/cms_sus_14_001_monojet.info"
-}
+          "CMS_B2G_12_012.cpp" : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.cpp",
+          "CMS_B2G_12_012.h"   : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.h",
+          "CMS_B2G_12_012.info": "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.info",
+          "ATLAS_EXOT_2014_06.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2014_06.cpp",
+          "ATLAS_EXOT_2014_06.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2014_06.h",
+          "ATLAS_EXOT_2014_06.info": "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2014_06.info",
+          "cms_exo_12_047.cpp" : "http://inspirehep.net/record/1411894/files/cms_exo_12_047.cpp",
+          "cms_exo_12_047.h"   : "http://inspirehep.net/record/1411894/files/cms_exo_12_047.h",
+          "cms_exo_12_047.info": "http://inspirehep.net/record/1411894/files/cms_exo_12_047.info",
+          "cms_exo_12_048.cpp" : "http://inspirehep.net/record/1413153/files/cms_exo_12_048.cpp",
+          "cms_exo_12_048.h"   : "http://inspirehep.net/record/1413153/files/cms_exo_12_048.h",
+          "cms_exo_12_048.info": "http://inspirehep.net/record/1413153/files/cms_exo_12_048.info",
+          "cms_b2g_14_004.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.cpp",
+          "cms_b2g_14_004.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.h",
+          "cms_b2g_14_004.info": "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.info",
+          "cms_b2g_12_022.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_12_022.cpp",
+          "cms_b2g_12_022.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_12_022.h",
+          "cms_b2g_12_022.info": "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_12_022.info"
+        }
 
         self.delphescards = {
-    "delphes_card_cms_standard.tcl"   : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/delphesMA5tune_card_CMS_SUSY.tcl",
-    "delphes_card_atlas_standard.tcl" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/delphesMA5tune_card_ATLAS.tcl",
-    "delphes_card_atlas_sus_2013_05.tcl" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/delphesMA5tune_card_ATLAS_05.tcl",
-    "delphes_card_atlas_sus_2013_11.tcl" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/delphesMA5tune_card_ATLAS_dileptonSUSY.tcl",
-    "delphes_card_atlas_sus_2014_10.tcl" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/delphesMA5tune_card_ATLAS_2014_10.tcl"
-    }
+    "delphes_card_cms_b2g_14_004.tcl"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_b2g_14_004.tcl",
+    "delphes_card_cms_b2g_12_012.tcl"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_b2g_12_012.tcl",
+    "delphes_card_atlas_sus_2013_05_pad.tcl" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_atlas_sus_2013_05_pad.tcl"
+        }
 
     def CreateBibtex(self):
       try:
@@ -130,105 +111,62 @@ class InstallPad:
       file.write('      SLACcitation   = \"%%CITATION = ARXIV:1206.1599;%%\",\n')
       file.write('}\n')
 
-      # CMS-13-011
-      file.write('@article{,\n')
-      file.write('      author         = \"Dumont, Beranger and Fuks, Benjamin and Wymant, Chris\",\n')
-      file.write('      title          = \"{MadAnalysis 5 implementation of CMS-SUS-13-011: search\n')
-      file.write('                        for stops in the single lepton final state at 8 TeV}\",\n')
-      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.LR5T.2RR3\",\n')
-      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1301484;%%\",\n')
+      file.write('@article{Conte:2014zja,\n')
+      file.write('      author         = \"Conte, Eric and Dumont, B\'eranger and Fuks, Benjamin and\n')
+      file.write('                        Wymant, Chris\",\n')
+      file.write('      title          = \"{Designing and recasting LHC analyses with MadAnalysis\n')
+      file.write('                        5}\",\n')
+      file.write('      journal        = \"Eur. Phys. J.\",\n')
+      file.write('      volume         = \"C74\",\n')
+      file.write('      year           = \"2014\",\n')
+      file.write('      number         = \"10\",\n')
+      file.write('      pages          = \"3103\",\n')
+      file.write('      doi            = \"10.1140/epjc/s10052-014-3103-0\",\n')
+      file.write('      eprint         = \"1405.3982\",\n')
+      file.write('      archivePrefix  = \"arXiv\",\n')
+      file.write('      primaryClass   = \"hep-ph\",\n')
+      file.write('      reportNumber   = \"CERN-PH-TH-2014-088, LPSC-14-079, LAPTH-033-14,\n')
+      file.write('                        MCNET-14-11\",\n')
+      file.write('      SLACcitation   = \"%%CITATION = ARXIV:1405.3982;%%\"\n')
       file.write('}\n')
 
-      #CMS-13-012
-      file.write('@article{,\n')
-      file.write('      author         = \"Bein, Samuel and Sengupta, Dipan\",\n')
-      file.write('      title          = \"{MadAnalysis 5 implementation of CMS-SUS-13-012}\",\n')
-      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.83GG.U5BW\",\n')
-      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1305458;%%\",\n')
-      file.write('}\n')
-
-      # CMS-13-016
-      file.write('@article{,\n')
-      file.write('      author         = \"Sengupta, Dipan and Kulkarni, Suchita\",\n')
-      file.write('      title          = \"{MadAnalysis 5 implementation of CMS-SUS-13-016}\",\n')
-      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.ZC3J.646F\",\n')
-      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1305194;%%\",\n')
-      file.write('}\n')
-
-      #CMS-SUS-14-011
-      file.write('@article{,\n')
-      file.write('key            = "1401439",\n')
-      file.write('      author         = \"Sharma, Seema and Pandey, Shubham\",\n')
-      file.write('      title          = \"{MadAnalysis 5 implementation of CMS-SUS-14-001 (monojet\n')
-      file.write('                        anaysis)}\",\n')
-      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.QGBP.K237\",\n')
+      # CMS-B2G-12-012
+      file.write('@article{1402144,\n')
+      file.write('      key            = \"1402144\",\n')
+      file.write('      author         = \"Barducci, Daniele and Delaunay, C\'edric\",\n')
+      file.write('      title          = \"{MadAnalysis 5 implementation of CMS-B2G-12-012}\",\n')
+      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.GRGZ.FST3\",\n')
       file.write('      year           = \"2015\",\n')
-      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1401439;%%\"\n')
-      file.write('}\n')
-
-      #ATLAS-HIGG-2013-03
-      file.write('@article{,\n')
-      file.write('      author         = \"Dumont, Beranger\",\n')
-      file.write('      title          = \"{MadAnalysis 5 implementation of ATLAS-HIGG-2013-03}\",\n')
-      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.RT3V.9PJK\",\n')
-      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1347081;%%\",\n')
-      file.write('}\n')
-
-      #ATLAS-SUS-2013-11
-      file.write('@article{,\n')
-      file.write('      author         = \"Dumont, Beranger\",\n')
-      file.write('      title          = \"{MadAnalysis 5 implementation of ATLAS-SUSY-2013-11:\n')
-      file.write('                        di-leptons plus MET}\",\n')
-      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.HLMR.T56W.2\",\n')
-      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1326686;%%\",\n')
-      file.write('}\n')
-
-      #ATLAS-SUS-2013-05
-      file.write('@article{,\n')
-      file.write('      author         = \"Chalons, Guillaume\",\n')
-      file.write('      title          = \"{MadAnalysis 5 implementation of ATLAS-SUSY-2013-05}\",\n')
-      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.Z4ML.3W67.2\",\n')
-      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1325001;%%\",\n')
+      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1402144;%%\"\n')
       file.write('}\n')
 
       #ATLAS-EXOT-2014-06
-      file.write('@article{,\n')
+      file.write('@article{1353627,\n')
+      file.write('      key            = \"1353627\",\n')
       file.write('      author         = \"Barducci, Daniele\",\n')
       file.write('      title          = \"{MadAnalysis 5 implementation of ATLAS-EXOT-2014-06}\",\n')
       file.write('      doi            = \"10.7484/INSPIREHEP.DATA.922E.4BN6\",\n')
       file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1353627;%%\",\n')
       file.write('}\n')
 
-      #ATLAS-SUSY-2014-10
-      file.write('@article{,\n')
-      file.write('      key            = \"1387577\",\n')
-      file.write('      author         = \"Dumont, Beranger\",\n')
-      file.write('      title          = \"{MadAnalysis 5 implementation of ATLAS-SUSY-2014-10:\n')
-      file.write('                        dilepton pair, jets, and MET}\",\n')
-      file.write('      doi            = \"INSPIREHEP.DATA.RSTT.7HVX\",\n')
-      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1387577;%%\"\n')
+      # CMS-EXO-12-047
+      file.write('@article{1411894,\n')
+      file.write('      key            = \"1411894\",\n')
+      file.write('      author         = \"Guo, Jun and Conte, Eric and Fuks, Benjamin\",\n')
+      file.write('      title          = \"{MadAnalysis5 implementation of the CMS monophoton search\n')
+      file.write('                        (EXO-12-047)}\",\n')
+      file.write('      year           = \"2016\",\n')
+      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1411894;%%\"\n')
       file.write('}\n')
 
-      #ATLAS-SUSY-2014-10
-      file.write('@article{,\n')
-      file.write('      key            = \"1388797\",\n')
-      file.write('      author         = \"Sengupta, Dipan and Chalons, Guillaume\",\n')
-      file.write('      title          = \"{Madanalysis 5 implementation of the ATLAS monojet\n')
-      file.write('                        analysis documented in arXiv:1407.0608, Phys. Rev. D. 90,\n')
-      file.write('                        052008}\",\n')
-      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.RB33.M3CD\",\n')
-      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1388797;%%\"\n')
-      file.write('}\n')
-
-      #ATLAS-SUSY-2014-10
-      file.write('@article{,\n')
-      file.write('      key            = \"1388801\",\n')
-      file.write('      author         = \"Guillaume Chalons and Dipan Sengupta\",\n')
-      file.write('      title          = \"{Madanalysis 5 implementation of the ATLAS multi jet\n')
-      file.write('                        analysis documented in arXiv:1405.7875, JHEP 1409 (2014)\n')
-      file.write('                        176}\",\n')
-      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.UYT6.GFD9\",\n')
-      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1388801;%%\"\n')
+      # CMS-EXO-12-048
+      file.write('@article{1413153,\n')
+      file.write('      key            = \"1413153\",\n')
+      file.write('      author         = \"Guo, Jun and Conte, Eric and Fuks, Benjamin\",\n')
+      file.write('      title          = \"{MadAnalysis5 implementation of the CMS monojet search\n')
+      file.write('                        (EXO-12-048)}",\n')
+      file.write('      year           = \"2016\",\n')
+      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1413153;%%\"\n')
       file.write('}\n')
 
       # closing the file
@@ -262,13 +200,13 @@ class InstallPad:
 
 
     def CreatePackageFolder(self):
-        TheCommand = ['bin/ma5', '-R', '-E', '-f', 'PAD', 'cms_sus_13_011']
+        TheCommand = ['bin/ma5', '-R', '-E', '-f', 'PAD', 'CMS_B2G_12_012']
         logname = os.path.normpath(self.main.archi_info.ma5dir+'/PAD-workingdir.log')
         ok, out= ShellCommand.ExecuteWithLog(TheCommand,logname,self.main.archi_info.ma5dir,silent=False)
         if not ok:
             return False
         for analysis in self.analyses:
-          if "cms_sus_13_011" not in analysis:
+          if "CMS_B2G_12_012" not in analysis:
             TheCommand = ['./newAnalyzer.py', analysis, analysis]
             lname = os.path.normpath(self.installdir+'/PAD-'+analysis+'.log')
             ok, out= ShellCommand.ExecuteWithLog(TheCommand,lname,\
@@ -312,11 +250,20 @@ class InstallPad:
             return False
         # delphes cards
         logname = os.path.normpath(self.installdir+'/wget_delphescards.log')
-        if not InstallService.wget(self.delphescards,logname,self.delphesdir):
+        if not InstallService.wget(self.delphescards,logname,self.downloaddir):
             return False
         # Ok
         return True
 
+    def Unpack(self):
+        # the analyses
+        for myfile, src in self.files.items():
+          shutil.copy(self.downloaddir+'/'+myfile, self.PADdir)
+        # the delphes cards
+        for myfile, src in self.delphescards.items():
+          shutil.copy(self.downloaddir+'/'+myfile, self.delphesdir)
+
+        return True
 
     def Configure(self):
         # Updating the makefile
@@ -346,7 +293,7 @@ class InstallPad:
         out = open(self.installdir+'/Build/Main/main.cpp', 'w')
         for line in inp:
           if 'user.saf' in line:
-            out.write("      manager.InitializeAnalyzer(\"cms_sus_13_011\",\"cms_sus_13_011.saf\",parametersA1);\n")
+            out.write("      manager.InitializeAnalyzer(\"CMS_B2G_12_012\",\"CMS_B2G_12_012.saf\",parametersA1);\n")
           else:
             out.write(line)
         inp.close()

@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -91,7 +91,7 @@ class InstallZlib:
         # Logname
         logname = os.path.normpath(self.installdir+'/unpack.log')
         # Unpacking the tarball
-        ok, packagedir = InstallService.untar(logname, self.tmpdir,'zlib.tar.gz')
+        ok, packagedir = InstallService.untar(logname, self.downloaddir, self.tmpdir,'zlib.tar.gz')
         if not ok:
             return False
         # Ok: returning the good folder

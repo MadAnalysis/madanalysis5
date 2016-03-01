@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -38,7 +38,7 @@ class InstallRecastingTools:
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir    = os.path.normpath(self.tmpdir + '/MA5_RecastingTools/')
         self.ncores      = 1
-        self.files = {"exclusion_CLs.py" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/exclusion_CLs.py",
+        self.files = {"exclusion_CLs.py" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/exclusion_CLs_v1x2.py",
                       "getmaps.py" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/PublicAnalysisDatabase/getmaps.py"}
 
 

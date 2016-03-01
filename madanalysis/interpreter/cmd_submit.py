@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,18 +22,23 @@
 ################################################################################
 
 
-from madanalysis.interpreter.cmd_base           import CmdBase
-from madanalysis.IOinterface.job_writer         import JobWriter
-from madanalysis.IOinterface.layout_writer      import LayoutWriter
-from madanalysis.IOinterface.job_reader         import JobReader
-from madanalysis.IOinterface.folder_writer      import FolderWriter
-from madanalysis.enumeration.report_format_type import ReportFormatType
-from madanalysis.layout.layout                  import Layout
+from madanalysis.interpreter.cmd_base                           import CmdBase
+from madanalysis.IOinterface.job_writer                         import JobWriter
+from madanalysis.IOinterface.layout_writer                      import LayoutWriter
+from madanalysis.IOinterface.job_reader                         import JobReader
+from madanalysis.IOinterface.folder_writer                      import FolderWriter
+from madanalysis.enumeration.report_format_type                 import ReportFormatType
+from madanalysis.layout.layout                                  import Layout
+from madanalysis.install.install_manager                        import InstallManager
+from madanalysis.configuration.delphesMA5tune_configuration     import DelphesMA5tuneConfiguration
+from madanalysis.configuration.delphes_configuration            import DelphesConfiguration
+from string_tools  import StringTools
 import logging
 import glob
 import os
 import time
 import commands
+import shutil
 
 class CmdSubmit(CmdBase):
     """Command SUBMIT"""
@@ -116,7 +121,7 @@ class CmdSubmit(CmdBase):
                 newhistory.append(history[i])
 
         ReAnalyzeCmdList = ['plot','select','reject','set main.clustering',
-                            'set main.merging', 'set main.shower', 'define',
+                            'set main.merging', 'define', 'set main.recast',
                             'import', 'set main.isolation']
 
         # Determining if we have to resubmit the job
@@ -244,7 +249,8 @@ class CmdSubmit(CmdBase):
         layout.Initialize()
 
         # Creating the reports
-        self.CreateReports(args,history,layout)
+        if not self.main.recasting.status=="on":
+            self.CreateReports(args,history,layout)
 
         # End time 
         end_time=time.time()
@@ -341,12 +347,44 @@ class CmdSubmit(CmdBase):
                 cardname = self.main.fastsim.delphesMA5tune.card
             os.system(self.main.session_info.editor+" "+dirname+"/Input/"+cardname)
 
+    def editRecastingCard(self,dirname):
+        if self.main.forced or self.main.script:
+            return
+
+        logging.info("Would you like to edit the recasting Card ? (Y/N)")
+        allowed_answers=['n','no','y','yes']
+        answer=""
+        while answer not in  allowed_answers:
+            answer=raw_input("Answer: ")
+            answer=answer.lower()
+        if answer=="no" or answer=="n":
+            return
+        else:
+            os.system(self.main.session_info.editor+" "+dirname+"/Input/recasting_card.dat")
 
     def submit(self,dirname,history):
+        # checking if the needed version of delphes is activated
+        forced_bkp = self.main.forced
+        self.main.forced=True
+        if self.main.fastsim.package == 'delphes' and not self.main.archi_info.has_delphes:
+            if self.main.archi_info.has_delphesMA5tune:
+                installer=InstallManager(self.main)
+                if not installer.Deactivate('delphesMA5tune'):
+                    return False
+            if installer.Activate('delphes')==-1:
+                return False
+        if self.main.fastsim.package == 'delphesMA5tune' and not self.main.archi_info.has_delphesMA5tune:
+            if self.main.archi_info.has_delphes:
+                installer=InstallManager(self.main)
+                if not installer.Deactivate('delphes'):
+                    return False
+            if installer.Activate('delphesMA5tune')==-1:
+                return False
+        self.main.forced=forced_bkp
 
         # Initializing the JobWriter
         jobber = JobWriter(self.main,dirname,self.resubmit)
-        
+
         # Writing process
         if not self.resubmit:
             logging.info("   Creating folder '"+dirname.split('/')[-1] \
@@ -357,34 +395,209 @@ class CmdSubmit(CmdBase):
         if not jobber.Open():
             logging.error("job submission aborted.")
             return False
-        
+
         if not self.resubmit:
-            logging.info("   Copying 'SampleAnalyzer' source files...")
+            if self.main.recasting.status != 'on':
+                logging.info("   Copying 'SampleAnalyzer' source files...")
             if not jobber.CopyLHEAnalysis():
                 logging.error("   job submission aborted.")
                 return False
-            if not jobber.CreateBldDir():
+            if self.main.recasting.status != 'on' and not jobber.CreateBldDir():
                 logging.error("   job submission aborted.")
                 return False
-            if self.main.shower.enable:
-                 mode=self.main.shower.type
-                 if self.main.shower.type=='auto':
-                     mode = commands.getstatusoutput('less ' + self.main.datasets[0].filenames[0] + ' | grep parton_shower ')
-                     if mode[0]!=0:
-                         logging.error('Cannot retrieve the showering information from the LHE files')
-                         return False
-                     mode = (mode[1].split())[0]
-                 if not jobber.CreateShowerDir(mode):
-                    logging.error("   job submission aborted.")
+            if self.main.recasting.status == 'on':
+                if not FolderWriter.CreateDirectory(dirname+'/Events'):
                     return False
 
-        logging.info("   Inserting your selection into 'SampleAnalyzer'...")
-        if not jobber.WriteSelectionHeader(self.main):
-            logging.error("job submission aborted.")
-            return False
-        if not jobber.WriteSelectionSource(self.main):
-            logging.error("job submission aborted.")
-            return False
+        # In the case of recasting, there is no need to create a standard Job
+        if self.main.recasting.status == "on":
+
+            ### First, the analyses to take care off
+            self.editRecastingCard(dirname)
+            logging.info("   Getting the list of delphes simulation to be performed...")
+
+            ### Second, which delphes run must be performed, and running them
+            if not self.main.recasting.GetDelphesRuns(dirname+"/Input/recasting_card.dat"):
+                return False
+            firstv11 = True
+            firstv13 = True
+            forced_bkp = self.main.forced
+            self.main.forced=True
+            if len(self.main.recasting.delphesruns)==0:
+                logging.warning('No recasting to do... Please check the recasting card')
+                return False
+            for mydelphescard in sorted(self.main.recasting.delphesruns):
+                version=mydelphescard[:4]
+                card=mydelphescard[5:]
+                if version=="v1.1":
+                    if not self.main.recasting.ma5tune:
+                        logging.error('The DelphesMA5tune library is not present... v1.1 analyses cannot be used')
+                        return False
+
+                    if firstv11:
+                        logging.info("")
+                        logging.info("   **********************************************************")
+                        logging.info("   "+StringTools.Center('v1.1 detector simulations',57))
+                        logging.info("   **********************************************************")
+                        firstv11=False
+
+                    ## Deactivating delphes
+                    installer=InstallManager(self.main)
+                    if not installer.Deactivate('delphes'):
+                        return False
+
+                    ## Activating and compile the MA5Tune
+                    if installer.Activate('delphesMA5tune')==-1:
+                        return False
+
+                    ## running delphesMA5tune
+                    for item in self.main.datasets:
+                        if not os.path.isfile(dirname + '/Events/' + item.name + '_v1x1_' + \
+                             card.replace('.tcl','')+'.root'):
+                            self.main.recasting.status="off"
+                            self.main.fastsim.package="delphesMA5tune"
+                            self.main.fastsim.clustering=0
+                            self.main.fastsim.delphes=0
+                            self.main.fastsim.delphesMA5tune = DelphesMA5tuneConfiguration()
+                            self.main.fastsim.delphesMA5tune.card = os.path.normpath("../../../../PADForMA5tune/Input/Cards/"+card)
+                            self.submit(dirname+'_DelphesForMa5tuneRun',[])
+                            self.main.recasting.status="on"
+                            self.main.fastsim.package="none"
+                            ## saving the output
+                            shutil.move(dirname+'_DelphesForMa5tuneRun/Output/_'+item.name+'/TheMouth.root',\
+                              dirname+'/Events/'+item.name+'_v1x1_'+card.replace('.tcl','')+'.root')
+                        if not FolderWriter.RemoveDirectory(os.path.normpath(dirname+'_DelphesForMa5tuneRun')):
+                            return False
+                elif version in ['v1.2', 'v1.3']:
+                    if not self.main.recasting.delphes:
+                        logging.error('The Delphes library is not present... v1.2+ analyses cannot be used')
+                        return False
+
+                    if firstv13:
+                        logging.info("")
+                        logging.info("   **********************************************************")
+                        logging.info("   "+StringTools.Center('v1.2+ detector simulations',57))
+                        logging.info("   **********************************************************")
+                        firstv13=False
+
+                    ## Deactivating delphesMA5tune
+                    installer=InstallManager(self.main)
+                    if not installer.Deactivate('delphesMA5tune'):
+                        return False
+
+                    ## Activating and compile Delphes
+                    if installer.Activate('delphes')==-1:
+                        return False
+
+                    ## running delphesMA5tune
+                    for item in self.main.datasets:
+                        if not os.path.isfile(dirname+'/Events/' + item.name +\
+                         '_v1x2_'+card.replace('.tcl','')+'.root'):
+                            self.main.recasting.status="off"
+                            self.main.fastsim.package="delphes"
+                            self.main.fastsim.clustering=0
+                            self.main.fastsim.delphesMA5tune=0
+                            self.main.fastsim.delphes = DelphesConfiguration()
+                            self.main.fastsim.delphes.card = os.path.normpath("../../../../PAD/Input/Cards/"+card)
+                            self.submit(dirname+'_DelphesRun',[])
+                            self.main.recasting.status="on"
+                            self.main.fastsim.package="none"
+                            ## saving the output
+                            shutil.move(dirname+'_DelphesRun/Output/_'+item.name+'/TheMouth.root',\
+                              dirname+'/Events/'+item.name+'_v1x2_'+card.replace('.tcl','')+'.root')
+                        if not FolderWriter.RemoveDirectory(os.path.normpath(dirname+'_DelphesRun')):
+                            return False
+                else:
+                    logging.error('An analysis can only be compatible with ma5 v1.1, v1.2 or v1.3...')
+                    return False
+            self.main.forced=forced_bkp
+
+            ### Third, executing the analyses
+            if not self.main.recasting.GetAnalysisRuns(dirname+"/Input/recasting_card.dat"):
+                return False
+            forced_bkp = self.main.forced
+            self.main.forced=True
+            for mydelphescard in list(set(sorted(self.main.recasting.delphesruns))):
+                ## checking the PAD Version
+                myversion  = mydelphescard[:4]
+                if myversion=='v1.2':
+                    PADdir = self.main.archi_info.ma5dir+'/PAD'
+                elif myversion=='v1.1':
+                    PADdir = self.main.archi_info.ma5dir+'/PADForMA5tune'
+                else:
+                    logging.error('Unknown PAD version')
+                    self.main.forced=forced_bkp
+                    return False
+                ## current delphes card
+                mycard     = mydelphescard[5:]
+                ## print out
+                logging.info("")
+                logging.info("   **********************************************************")
+                logging.info("   "+StringTools.Center(myversion+' running of the PAD'+\
+                       ' on events generated with',57))
+                logging.info("   "+StringTools.Center(mycard,57))
+                logging.info("   **********************************************************")
+                ## setting up Delphes
+                installer=InstallManager(self.main)
+                if myversion=='v1.1':
+                    if not installer.Deactivate('delphes'):
+                        self.main.forced=forced_bkp
+                        return False
+                    if installer.Activate('delphesMA5tune')==-1:
+                        self.main.forced=forced_bkp
+                        return False
+                elif myversion=='v1.2':
+                    if not installer.Deactivate('delphesMA5tune'):
+                        self.main.forced=forced_bkp
+                        return False
+                    if installer.Activate('delphes')==-1:
+                        self.main.forced=forced_bkp
+                        return False
+                ## Analyses
+                myanalyses = self.main.recasting.analysisruns
+                myanalyses = [ x for x in myanalyses if myversion in x ]
+                myanalyses = [ x.replace(myversion+'_','') for x in myanalyses ]
+                for card,analysislist in self.main.recasting.DelphesDic.items():
+                      if card == mycard:
+                          tmpanalyses=analysislist
+                          break
+                myanalyses = [ x for x in myanalyses if x in tmpanalyses]
+                ## event file
+                for myset in self.main.datasets:
+                    myevents=os.path.normpath(dirname + '/Events/' + myset.name + '_' +\
+                       myversion.replace('.','x')+'_' + mycard.replace('.tcl','')+'.root')
+                    ## preparing and running the PAD
+                    if not self.main.recasting.UpdatePADMain(myanalyses,PADdir):
+                        self.main.forced=forced_bkp
+                        return False
+                    if not self.main.recasting.MakePAD(PADdir,dirname,self.main):
+                        self.main.forced=forced_bkp
+                        return False
+                    if not self.main.recasting.RunPAD(PADdir,myevents):
+                        self.main.forced=forced_bkp
+                        return False
+                    ## Restoring the PAD as it was before
+                    if not self.main.recasting.RestorePADMain(PADdir,dirname,self.main):
+                        self.main.forced=forced_bkp
+                        return False
+                    ## saving the output
+                    if not self.main.recasting.SavePADOutput(PADdir,dirname,myanalyses,myset.name):
+                        self.main.forced=forced_bkp
+                        return False
+                    ## Running the CLs exclusion script (if available)
+                    if not self.main.recasting.GetCLs(PADdir,dirname,myanalyses,myset.name,myset.xsection,myset.name):
+                        self.main.forced=forced_bkp
+                        return False
+                    ## Saving the results
+            self.main.forced=forced_bkp
+        else:
+            logging.info("   Inserting your selection into 'SampleAnalyzer'...")
+            if not jobber.WriteSelectionHeader(self.main):
+                logging.error("job submission aborted.")
+                return False
+            if not jobber.WriteSelectionSource(self.main):
+                logging.error("job submission aborted.")
+                return False
 
         logging.info("   Writing the list of datasets...")
         for item in self.main.datasets:
@@ -392,73 +605,85 @@ class CmdSubmit(CmdBase):
 
         logging.info("   Writing the command line history...")
         jobber.WriteHistory(history,self.main.firstdir)
-        layouter = LayoutWriter(self.main, dirname)
-        layouter.WriteLayoutConfig()
+        if self.main.recasting.status == "on":
+            logging.info('    -> the results can be found in:') 
+            for item in self.main.datasets:
+                logging.info('       '+ dirname + '/Output/'+ item.name + '/CLs_output.saf')
+        else:
+            layouter = LayoutWriter(self.main, dirname)
+            layouter.WriteLayoutConfig()
 
-        if not self.resubmit:
+        if not self.main.recasting.status=='on' and not self.resubmit:
             logging.info("   Creating Makefiles...")
             if not jobber.WriteMakefiles():
                 logging.error("job submission aborted.")
                 return False
 
-        #edit the delphes cards
+        # Edit the delphes or recasting cards
         if self.main.fastsim.package in ["delphes","delphesMA5tune"]:
             self.editDelphesCard(dirname)
 
-        if self.resubmit:
+        if self.resubmit and not self.main.recasting.status=='on':
             logging.info("   Cleaning 'SampleAnalyzer'...")
             if not jobber.MrproperJob():
                 logging.error("job submission aborted.")
                 return False
 
-        logging.info("   Compiling 'SampleAnalyzer'...")
-        if not jobber.CompileJob():
-            logging.error("job submission aborted.")
-            return False
+        if not self.main.recasting.status=='on':
+            logging.info("   Compiling 'SampleAnalyzer'...")
+            if not jobber.CompileJob():
+                logging.error("job submission aborted.")
+                return False
 
-        logging.info("   Linking 'SampleAnalyzer'...")
-        if not jobber.LinkJob():
-            logging.error("job submission aborted.")
-            return False
+            logging.info("   Linking 'SampleAnalyzer'...")
+            if not jobber.LinkJob():
+                logging.error("job submission aborted.")
+                return False
 
-        for item in self.main.datasets:
-            logging.info("   Running 'SampleAnalyzer' over dataset '"
-                         +item.name+"'...")
-            logging.info("    *******************************************************")
-            if not jobber.RunJob(item):
-                logging.error("run over '"+item.name+"' aborted.")
-            logging.info("    *******************************************************")
-    
-        return True   
+            for item in self.main.datasets:
+                logging.info("   Running 'SampleAnalyzer' over dataset '"
+                             +item.name+"'...")
+                logging.info("    *******************************************************")
+                if not jobber.RunJob(item):
+                    logging.error("run over '"+item.name+"' aborted.")
+                logging.info("    *******************************************************")
+        return True
 
 
     def extract(self,dirname,layout):
         logging.info("   Checking SampleAnalyzer output...")
         jobber = JobReader(dirname)
-        if not jobber.CheckDir():
+        if self.main.recasting.status=='on':
+            if not self.main.recasting.CheckDir(dirname):
+                return False
+        elif not jobber.CheckDir():
             logging.error("errors have occured during the analysis.")
             return False
-        
+
         for item in self.main.datasets:
-            if not jobber.CheckFile(item):
+            if self.main.recasting.status=='on':
+                if not self.main.recasting.CheckFile(dirname,item):
+                    return False
+            elif not jobber.CheckFile(item):
                 logging.error("errors have occured during the analysis.")
                 return False
 
-        logging.info("   Extracting data from the output files...")
-        for i in range(0,len(self.main.datasets)):
-            jobber.Extract(self.main.datasets[i],\
-                           layout.cutflow.detail[i],\
-                           0,\
-                           layout.plotflow.detail[i],\
-                           domerging=False)
-            if self.main.merging.enable:
+        if self.main.recasting.status!='on':
+            logging.info("   Extracting data from the output files...")
+            for i in range(0,len(self.main.datasets)):
                 jobber.Extract(self.main.datasets[i],\
+                               layout.cutflow.detail[i],\
                                0,\
-                               layout.merging.detail[i],\
-                               0,\
-                               domerging=True)
-        return True    
-           
+                               layout.plotflow.detail[i],\
+                               domerging=False)
+                if self.main.merging.enable:
+                    jobber.Extract(self.main.datasets[i],\
+                                   0,\
+                                   layout.merging.detail[i],\
+                                   0,\
+                                   domerging=True)
+        return True
+
 
     def help(self):
         if not self.resubmit:

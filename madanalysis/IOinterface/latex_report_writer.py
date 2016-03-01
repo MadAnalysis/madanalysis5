@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -80,6 +80,7 @@ class LATEXReportWriter(TextFileWriter.TextFileWriter):
         self.file.write('\\usepackage{jheppub}\n')
         self.file.write('\\usepackage[T1]{fontenc}\n')
         self.file.write("\\usepackage{colortbl}\n")
+        self.file.write('\\usepackage{float}\n')
         self.file.write('\\definecolor{orange}{rgb}{1,0.5,0}\n')
         self.file.write('% '.ljust(79,'-')+'\n')
         self.file.write('% ' + 'COVER PAGE'.center(78)+'\n')
@@ -166,14 +167,14 @@ class LATEXReportWriter(TextFileWriter.TextFileWriter):
     def CreateTable(self,col,caption):
         self.table=self.table+1
         self.number_col=len(col)
-        self.file.write("\\begin{table}[!h]\n  \\begin{center}\n")
+        self.file.write("\\begin{table}[H]\n  \\begin{center}\n")
         if caption.table != []:
             self.file.write("    \\caption{")
             self.WriteText(caption)
             self.file.write("}\n")
         self.file.write("    \\begin{tabular}{|")
         for item in col: 
-            size = round(item/sum(col)*130,0)
+            size = round(item/sum(col)*120,0)
             self.file.write("m{"+str(size)+"mm}|")
         self.file.write("}\n      \\hline\n")
 
@@ -208,12 +209,12 @@ class LATEXReportWriter(TextFileWriter.TextFileWriter):
         thefile = os.path.normpath(filename)
         if os.path.isfile(thefile+self.ext):
             scale=0.60
-            self.file.write('\\begin{figure}[!h]\n  \\begin{center}\n')
+            self.file.write('\\begin{figure}[H]\n  \\begin{center}\n')
             self.file.write('    \\includegraphics[scale='+str(scale)+']{'+\
                   os.path.basename(filename)+self.ext+'}\\\\\n\\caption{')
             self.WriteText(caption)
             self.file.write("}\n  \\end{center}\n\\end{figure}\n")
-            self.WriteSpacor()
+#            self.WriteSpacor()
         else:
             logging.warning(thefile+self.ext+" does not exist.")
         

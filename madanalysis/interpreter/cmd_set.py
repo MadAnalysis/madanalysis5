@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,6 +22,8 @@
 ################################################################################
 
 
+from madanalysis.system.config_checker     import ConfigChecker
+from madanalysis.system.user_info          import UserInfo
 import madanalysis.interpreter.cmd_base as CmdBase
 import logging
 
@@ -95,22 +97,48 @@ class CmdSet(CmdBase.CmdBase):
         for i in range(len(objs)):
             objs[i] = objs[i].replace('XXX','.')
 
-        if len(objs)==2 and objs[0].lower()=='main':
+        if len(objs)==2 and objs[0].lower()=='main' and objs[1].lower()=='recast':
+            user_info    = UserInfo()
+            user_info.ReadUserOptions(self.main.archi_info.ma5dir+'/madanalysis/input/installation_options.dat')
+            checker = ConfigChecker(self.main.archi_info, user_info, self.main.session_info, self.main.script, False)
+            hasdelphes = checker.checkDelphes(True)
+            hasMA5tune = checker.checkDelphesMA5tune(True)
+            hasPAD     = checker.checkPAD()
+            hasPADtune = checker.checkPADForMA5tune()
+            self.main.recasting.user_SetParameter("status",args[2],self.main.mode,hasdelphes,hasMA5tune,self.main.datasets, hasPAD,hasPADtune)
+            if args[2]=='on' and self.main.fastsim.package!='none':
+                logging.warning("Fastsim package switched off and internally handled")
+                self.main.fastsim.package="none"
+        elif len(objs)==2 and objs[0].lower()=='main':
             self.main.user_SetParameter(objs[1],args[2])
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='isolation':
             self.main.isolation.user_SetParameter(objs[2],args[2])
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='merging':
             self.main.merging.user_SetParameter(objs[2],args[2],self.main.mode,self.main.archi_info.has_fastjet)
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='fastsim':
-            self.main.fastsim.user_SetParameter(objs[2],args[2],self.main.datasets,self.main.mode,self.main.archi_info.has_fastjet,self.main.archi_info.has_delphes,self.main.archi_info.has_delphesMA5tune) 
-        elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='shower':
-            self.main.shower.user_SetParameter(objs[2],args[2],self.main.mode,self.main.mcatnloutils)
+            user_info    = UserInfo()
+            user_info.ReadUserOptions(self.main.archi_info.ma5dir+'/madanalysis/input/installation_options.dat')
+            checker = ConfigChecker(self.main.archi_info, user_info, self.main.session_info, self.main.script, False)
+            hasdelphes = checker.checkDelphes(True)
+            hasMA5tune = checker.checkDelphesMA5tune(True)
+            self.main.fastsim.user_SetParameter(objs[2],args[2],self.main.datasets,self.main.mode,self.main.archi_info.has_fastjet,hasdelphes,hasMA5tune) 
+            if objs[2]=='package' and args[2] in ['fastjet', 'delphes', 'delphesMA5tune'] and self.main.recasting.status=='on':
+                logging.warning("Recasting mode switched off")
+                self.main.recasting.status ="off"
+        elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='recast':
+            user_info    = UserInfo()
+            user_info.ReadUserOptions(self.main.archi_info.ma5dir+'/madanalysis/input/installation_options.dat')
+            checker = ConfigChecker(self.main.archi_info, user_info, self.main.session_info, self.main.script, False)
+            hasdelphes = checker.checkDelphes(True)
+            hasMA5tune = checker.checkDelphesMA5tune(True)
+            hasPAD     = checker.checkPAD()
+            hasPADtune = checker.checkPADForMA5tune()
+            self.main.recasting.user_SetParameter(objs[2],args[2],self.main.mode,hasdelphes,hasMA5tune,self.main.datasets, hasPAD,hasPADtune)
         else:
             logging.error("syntax error with the command 'set'.")
             self.help()
             return
 
-        
     def do_selection(self,args):
         # set selection [ i ] .variable = value
         #     0         1 2 3 4         5 6
@@ -212,8 +240,8 @@ class CmdSet(CmdBase.CmdBase):
                          for item in self.main.fastsim.user_GetParameters() ])
                 output.extend([ object+".merging."+ item \
                          for item in self.main.merging.user_GetParameters() ])
-                output.extend([ object+".shower."+ item \
-                         for item in self.main.shower.user_GetParameters() ])
+                output.extend([ object+".recast."+ item \
+                         for item in self.main.recasting.user_GetParameters() ])
                 return self.finalize_complete(text,output)
             else:
                 if subobject=="isolation":
@@ -222,8 +250,8 @@ class CmdSet(CmdBase.CmdBase):
                     output = self.main.fastsim.user_GetValues(variable)
                 elif subobject=="merging":
                     output = self.main.merging.user_GetValues(variable)
-                elif subobject=="shower":
-                    output = self.main.shower.user_GetValues(variable)
+                elif subobject=="recast":
+                    output = self.main.recasting.user_GetValues(variable)
                 return self.finalize_complete(text,output)
         # Other cases
         else:
@@ -270,8 +298,8 @@ class CmdSet(CmdBase.CmdBase):
                                for item in self.main.fastsim.user_GetParameters() ])
                 output.extend([ object+".merging."+ item \
                                for item in self.main.merging.user_GetParameters() ])
-                output.extend([ object+".shower."+ item \
-                                for item in self.main.shower.user_GetParameters() ])
+                output.extend([ object+".recast."+ item \
+                               for item in self.main.recasting.user_GetParameters() ])
                 return self.finalize_complete(text,output)
             else:
                 return self.finalize_complete(text,self.main.user_GetValues(variable))

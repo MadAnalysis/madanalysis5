@@ -4,7 +4,7 @@
 
 # ----GENERAL----
 # tmp_dir = /tmp/toto/
-# download_dir = /home/toto/download_dir
+#download_dir = /Users/fuks/Desktop/tmp
 # webaccess_veto = 0 # 0=No, 1=Yes
 
 # -----ROOT-----
@@ -12,8 +12,8 @@
 
 # -----DELPHES----- 
 # delphes_veto     = 0 # 0=No, 1=Yes
-# delphes_includes = /home/toto/delphes/include
-# delphes_libs     = /home/toto/delphes/lib
+#delphes_includes = /Users/fuks/Work/tools/madanalysis/bzr/v1.3beta/tools/RE_delphes/
+#delphes_libs     = /Users/fuks/Work/tools/madanalysis/bzr/v1.3beta/tools/RE_delphes/
 
 # -----DELPHESMA5TUNE----- 
 # delphesMA5tune_veto     = 0 # 0=No, 1=Yes

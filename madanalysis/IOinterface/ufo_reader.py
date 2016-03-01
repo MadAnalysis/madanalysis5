@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -395,7 +395,7 @@ class UFOReader():
                 if NameTag==2:
                     NameTag=0
                     isName=True
-                    Name=word
+                    Name=word.lower()
                 if WidthTag==2:
                     WidthTag=0
                     isWidth=True
@@ -411,7 +411,7 @@ class UFOReader():
                 if AntinameTag==2:
                     AntinameTag=0
                     isAntiname=True
-                    Antiname=word
+                    Antiname=word.lower()
                 if ColorTag==2:
                     ColorTag=0
                     isColor=True

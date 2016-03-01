@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -141,25 +141,12 @@ class ExpertMode:
         if not jobber.CreateBldDir(analysisName=title,outputName="user.saf"):
             logging.error("   job submission aborted.")
             return False
-        if self.main.shower.enable:
-             mode=self.main.shower.type
-             if self.main.shower.type=='auto':
-                 mode = commands.getstatusoutput('less ' + self.main.datasets[0].filenames[0] + ' | grep parton_shower ')
-                 if mode[0]!=0:
-                     logging.error('Cannot retrieve the showering information from the LHE files')
-                     return False
-                 mode = (mode[1].split())[0]
-             if not jobber.CreateShowerDir(mode):
-                 logging.error("   job submission aborted.")
-                 return False
 
         # adding the CLs script if available
-        
 
         return True    
 
 
-            
     def GiveAdvice(self):
         logging.info("\nGuidelines for writing an analysis in expert mode\n")
         logging.info(" 1. Entering the directory '"+self.path+"/Build'\n")

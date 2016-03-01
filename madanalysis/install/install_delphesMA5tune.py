@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -22,7 +22,11 @@
 ################################################################################
 
 
-from madanalysis.install.install_service import InstallService
+from madanalysis.install.install_service    import InstallService
+from madanalysis.system.user_info           import UserInfo
+from madanalysis.system.config_checker      import ConfigChecker
+from madanalysis.IOinterface.library_writer import LibraryWriter
+from madanalysis.system.checkup             import CheckUp
 from shell_command import ShellCommand
 import os
 import sys
@@ -40,7 +44,7 @@ class InstallDelphesMA5tune:
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir = os.path.normpath(self.tmpdir + '/MA5_delphesMA5tune/')
         self.ncores     = 1
-        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
+        self.files = {"delphestune.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
 
 
     def Detect(self):
@@ -94,7 +98,7 @@ class InstallDelphesMA5tune:
         # Logname
         logname = os.path.normpath(self.installdir+'/unpack.log')
         # Unpacking the tarball
-        ok, packagedir = InstallService.untar(logname, self.tmpdir,'delphes.tar.gz')
+        ok, packagedir = InstallService.untar(logname, self.downloaddir,self.tmpdir,'delphestune.tar.gz')
         if not ok:
             return False
         # Copying the patch
@@ -237,5 +241,127 @@ class InstallDelphesMA5tune:
 
     def NeedToRestart(self):
         return True
-    
-        
+
+    def Deactivate(self):
+        if self.main.archi_info.delphesMA5tune_lib_paths==[]:
+            return True
+        for x in  self.main.archi_info.delphesMA5tune_lib_paths:
+            if 'DEACT' in x:
+                return True
+        if os.path.isdir(self.main.archi_info.delphesMA5tune_lib_paths[0]):
+            logging.warning("DelphesMA5tune is installed. Deactivating it.")
+            # Paths
+            delpath=os.path.normpath(self.main.archi_info.delphesMA5tune_lib_paths[0])
+            deldeac = delpath.replace(delpath.split('/')[-1],"DEACT_"+delpath.split('/')[-1])
+            # If the deactivated directory already exists -> suppression
+            if os.path.isdir(os.path.normpath(deldeac)):
+                if not FolderWriter.RemoveDirectory(os.path.normpath(deldeac),True):
+                        return False
+            # cleaning delphesMA5tune + the samplanalyzer interface to delphesMA5tune
+            shutil.move(delpath,deldeac)
+            myexts = ['so', 'a', 'dylib']
+            for ext in myexts:
+                myfile=self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphesMA5tune_for_ma5.'+ext
+                if os.path.isfile(os.path.normpath(myfile)):
+                    os.remove(os.path.normpath(myfile))
+
+            ToRemove=[ 'Makefile_delphesMA5tune','compilation_delphesMA5tune.log','linking_delphesMA5tune.log','cleanup_delphesMA5tune.log']
+            for myfile in ToRemove:
+                os.remove(os.path.normpath(self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/'+myfile))
+            self.main.archi_info.has_delphesMA5tune = False
+        return True
+
+    def Activate(self):
+        # output =  1: activation successfull.
+        # output =  0: nothing is done.
+        # output = -1: error
+        user_info = UserInfo()
+        user_info.ReadUserOptions(self.main.archi_info.ma5dir+'/madanalysis/input/installation_options.dat')
+        checker = ConfigChecker(self.main.archi_info, user_info, self.main.session_info, self.main.script, False)
+        hastune = checker.checkDelphesMA5tune(True)
+        if hastune:
+            # Paths
+            delpath=os.path.normpath(self.main.archi_info.delphesMA5tune_lib_paths[0])
+            deldeac = delpath.replace("DEACT_","")
+            self.main.archi_info.delphesMA5tune_lib=self.main.archi_info.delphesMA5tune_lib.replace("DEACT_","")
+            self.main.archi_info.delphesMA5tune_inc_paths =\
+                [ x.replace("DEACT_","") for x in self.main.archi_info.delphesMA5tune_inc_paths ]
+            self.main.archi_info.delphesMA5tune_lib_paths =\
+                [ x.replace("DEACT_","") for x in self.main.archi_info.delphesMA5tune_lib_paths ]
+            # do we have to activate the tune?
+            if not 'DEACT' in delpath:
+                return 0
+            logging.warning("DelphesMA5tune is deactivated. Activating it.")
+
+            # naming
+            shutil.move(delpath,deldeac)
+
+            # Compiler setup
+            compiler = LibraryWriter('lib',self.main)
+            ncores = compiler.get_ncores2()
+
+            from madanalysis.build.setup_writer import SetupWriter
+            SetupWriter.WriteSetupFile(True,self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/',self.main.archi_info)
+            SetupWriter.WriteSetupFile(False,self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/',self.main.archi_info)
+
+            ToBuild =  ['delphesMA5tune', 'process']
+
+            # Makefile
+            self.main.archi_info.has_delphesMA5tune=True
+            for mypackage in ToBuild:
+                if not compiler.WriteMakefileForInterfaces(mypackage):
+                    logging.error("library building aborted.")
+                    return -1
+
+            # Cleaning
+            for mypackage in ToBuild:
+                myfolder='Process'
+                if mypackage != 'process':
+                    myfolder='Interfaces'
+                if not compiler.MrProper(mypackage,self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/'+myfolder):
+                    logging.error("Library '" + mypackage + "' precleaning aborted.")
+                    return -1
+
+            # Compiling
+            for mypackage in ToBuild:
+                myfolder='Process'
+                if mypackage != 'process':
+                    myfolder='Interfaces'
+                if not compiler.Compile(ncores,mypackage,self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/'+myfolder):
+                    logging.error("Library '" + mypackage + "' compilation aborted.")
+                    return -1
+
+            # Linking
+            for mypackage in ToBuild:
+                myfolder='Process'
+                if mypackage != 'process':
+                    myfolder='Interfaces'
+                if not compiler.Link(mypackage,self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/'+myfolder):
+                    logging.error("Library '" + mypackage + "' linking aborted.")
+                    return -1
+
+            # Checking
+            for mypackage in ToBuild:
+                myfolder='Lib/libprocess_for_ma5.so'
+                if mypackage != 'process':
+                    myfolder='Lib/libdelphesMA5tune_for_ma5.so'
+                if not os.path.isfile(self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/'+myfolder):
+                    logging.error("Library '" + mypackage + "' checking aborted.")
+                    return -1
+
+            # Cleaning
+            for mypackage in ToBuild:
+                myfolder='Process'
+                if mypackage != 'process':
+                    myfolder='Interfaces'
+                if not compiler.Clean(mypackage,self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/'+myfolder):
+                    logging.error("Library '" + mypackage + "' cleaning aborted.")
+                    return -1
+
+            # Paths
+            checkup = CheckUp(self.main.archi_info, self.main.session_info, False, self.main.script)
+            if not checkup.SetFolder():
+                logging.error("Problem with the path updates.")
+                return -1
+
+        return 1

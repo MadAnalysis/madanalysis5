@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -20,6 +20,7 @@
 //  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
 //  
 ////////////////////////////////////////////////////////////////////////////////
+
 
 //STL headers
 #include <sys/stat.h>
@@ -204,17 +205,6 @@ bool SampleAnalyzer::Initialize(int argc, char **argv,
 
   return true;
 }
-
-
-/*
-AnalyzerBase* SampleAnalyzer::InitializeAnalyzer(const std::string& name, 
-                                                 const std::string& outputname)
-{
-  std::map<std::string,std::string> parametersA1;
-  InitializeAnalyzer(name,outputname,parametersA1);
-}
-//BENJ ?????? WHAT IS THIS PIECE OF CODE
-*/
 
 AnalyzerBase* SampleAnalyzer::InitializeAnalyzer(const std::string& name, 
                                                  const std::string& outputname,

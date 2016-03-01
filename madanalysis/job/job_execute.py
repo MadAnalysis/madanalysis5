@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -443,11 +443,14 @@ def WriteSelection(file,main,part_list):
     ihisto = 0
     icut = 0
     for iabs in range(len(main.selection.table)):
-        
+
+        logging.debug("--------------------------------------------")
+        logging.debug("SELECTION STEP "+str(iabs)+": "+main.selection[iabs].GetStringDisplay())
         file.write('  // Histogram/Cut number '+str(iabs)+'\n')
         file.write('  // '+main.selection[iabs].GetStringDisplay()+'\n')
         
         if main.selection[iabs].__class__.__name__=="Histogram":
+            logging.debug("- selection step = histogram")
             JobPlot.WritePlot(file,main,iabs,ihisto)
             ihisto+=1
             
@@ -455,15 +458,18 @@ def WriteSelection(file,main,part_list):
 
             # Event cut
             if len(main.selection[iabs].part)==0:
+                logging.debug("- selection step = cut on event")
                 JobEventCut.WriteEventCut(file,main,iabs,icut)
 
             # Candidate cut    
             else:
+                logging.debug("- selection step = cut on candidate")
                 JobCandidateCut.WriteCandidateCut(file,main,iabs,icut,part_list)
 
             icut+=1
             
         file.write('\n')
+    logging.debug("--------------------------------------------")
 
 
 

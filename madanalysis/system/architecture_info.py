@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -23,7 +23,6 @@
 
 
 import logging
-
 class ArchitectureInfo:
 
     def __init__(self):
@@ -85,10 +84,25 @@ class ArchitectureInfo:
 
     def __eq__(self,other):
         logging.debug("Compare 2 ArchitureInfo objects:")
-        logging.debug("The current one:")
+        logging.debug("The current one (number of items="+str(len(self.__dict__))+"):")
         logging.debug(str(self.__dict__))
-        logging.debug("The other one:")
+        logging.debug("The other   one (number of items="+str(len(other.__dict__))+"):")
         logging.debug(str(other.__dict__))
+        items_ok = self.__dict__.keys() == other.__dict__.keys()
+        if not items_ok:
+            diff = list(set(self.__dict__.keys()) - set(other.__dict__.keys()))
+            logging.debug("The comparison of categories -> differences detected: "+str(diff))
+            return False
+        logging.debug("The comparison of categorie names -> OK")
+        logging.debug("The comparison of categorie values:")
+        diff=False
+        for key in self.__dict__.keys():
+            if self.__dict__[key] != other.__dict__[key]:
+                logging.debug("  -> difference here: "+str(key))
+                diff=True
+        if not diff:
+            logging.debug("  -> OK")
+
         return self.__dict__==other.__dict__
 
     def __neq__(self,other):

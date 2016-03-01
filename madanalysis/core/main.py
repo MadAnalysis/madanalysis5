@@ -1,24 +1,24 @@
 ################################################################################
-#
-#  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
+#  
+#  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
-#
+#  
 #  This file is part of MadAnalysis 5.
 #  Official website: <https://launchpad.net/madanalysis5>
-#
+#  
 #  MadAnalysis 5 is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
-#
+#  
 #  MadAnalysis 5 is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #  GNU General Public License for more details.
-#
+#  
 #  You should have received a copy of the GNU General Public License
 #  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
-#
+#  
 ################################################################################
 
 
@@ -36,10 +36,10 @@ from madanalysis.IOinterface.library_writer             import LibraryWriter
 from madanalysis.enumeration.ma5_running_type           import MA5RunningType
 from madanalysis.enumeration.stacking_method_type       import StackingMethodType
 from madanalysis.observable.observable_manager          import ObservableManager
+from madanalysis.configuration.recast_configuration     import RecastConfiguration
 from madanalysis.configuration.fastsim_configuration    import FastsimConfiguration
 from madanalysis.configuration.isolation_configuration  import IsolationConfiguration
 from madanalysis.configuration.merging_configuration    import MergingConfiguration
-from madanalysis.configuration.shower_configuration     import ShowerConfiguration
 from string_tools                                       import StringTools
 from madanalysis.system.checkup                         import CheckUp
 import logging
@@ -57,7 +57,8 @@ class Main():
                                            '"S/sqrt(S+B)"','"B/sqrt(B+S)"'], \
                       "SBerror"         : [], \
                       "stacking_method" : ["stack","superimpose","normalize2one"], \
-                      "outputfile"      : ['"output.lhe.gz"','"output.lhco.gz"'] \
+                      "outputfile"      : ['"output.lhe.gz"','"output.lhco.gz"'],\
+                      "recast"          : ["on", "off"] \
                       }
 
     SBformula = { 'S/B'         : '1./(B**2)*sqrt(B**2*ES**2+S**2*EB**2)', \
@@ -83,11 +84,13 @@ class Main():
         self.observables    = ObservableManager(self.mode)
         self.expertmode     = False
         self.repeatSession  = False
+        self.recast         = "off"
         self.ResetParameters()
 
     def ResetParameters(self):
         self.merging        = MergingConfiguration()
         self.fastsim        = FastsimConfiguration()
+        self.recasting      = RecastConfiguration()
         self.SBratio        = 'S/B'
         self.SBerror        = Main.SBformula['S/B']
         self.lumi           = 10
@@ -100,8 +103,6 @@ class Main():
             self.normalize = NormalizeType.NONE
         else:
             self.normalize = NormalizeType.LUMI_WEIGHT
-        self.shower     = ShowerConfiguration()
-
 
     def InitObservables(self,mode):
         self.observables = ObservableManager(mode)
@@ -122,7 +123,12 @@ class Main():
             samples.append('.hep')
             samples.append('.hepmc')
         else:
-            if self.fastsim.package=="none":
+            if self.recasting.status=="on":
+                samples.append('.hep')
+                samples.append('.hepmc')
+                if self.archi_info.has_delphes or self.archi_info.has_delphesMA5tune:
+                    samples.append('.root')
+            elif self.fastsim.package=="none":
                 samples.append('.lhco')
                 if self.archi_info.has_delphes or self.archi_info.has_delphesMA5tune:
                     samples.append('.root')
@@ -155,7 +161,8 @@ class Main():
             self.merging.Display()
         self.fastsim.Display()
         self.isolation.Display()
-        self.shower.Display()
+        logging.info(" *********************************" )
+        self.recasting.Display()
         logging.info(" *********************************" )
 
 
@@ -192,6 +199,8 @@ class Main():
             logging.info(' S/B ratio formula = "' + self.SBratio + '"')
         elif parameter=="SBerror":
             logging.info(' S/B error formula = "' + self.SBerror + '"')
+        elif parameter=="recast":
+            logging.info(' Recasting mode = "' + self.recasting.status + '"')
         else:
             logging.error("'main' has no parameter called '"+parameter+"'")
 
