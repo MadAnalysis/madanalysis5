@@ -57,7 +57,11 @@ class CmdInstall(CmdBase):
                 return False
             elif ResuActi == 1 and not self.main.archi_info.has_delphes:
                 logging.warning("Delphes not installed: installing it...")
-                return installer.Execute('delphes')
+                if pad:
+                    installer.Execute('delphes')
+                    return False
+                else:
+                    return installer.Execute('delphes')
             elif ResuActi == 0 and self.main.archi_info.has_delphes and not pad:
                 logging.warning("A previous installation of Delphes has been found. Skipping the installation.")
                 logging.warning("To update Delphes, please remove the tools/delphes directory")
@@ -72,7 +76,11 @@ class CmdInstall(CmdBase):
                 return False
             elif ResuActi == 1 and not self.main.archi_info.has_delphesMA5tune:
                 logging.warning("DelphesMA5tune not installed: installing it...")
-                return installer.Execute('delphesMA5tune')
+                if pad:
+                    installer.Execute('delphesMA5tune')
+                    return False
+                else:
+                    return installer.Execute('delphesMA5tune')
             elif ResuActi == 0 and self.main.archi_info.has_delphesMA5tune and not pad:
                 logging.warning("A previous installation of DelphesMA5tune has been found. Skipping the installation.")
                 logging.warning("To update DelphesMA5tune, please remove the tools/delphesMA5tune directory")
@@ -125,10 +133,16 @@ class CmdInstall(CmdBase):
             installer=InstallManager(self.main)
             if inst_ma5tune(self.main,installer,True):
                 return installer.Execute('PADForMA5tune')
+            else:
+                logging.warning('DelphesMA5tune is now installed... please exit the program and install the pad')
+                return
         elif args[0]=='PAD':
             installer=InstallManager(self.main)
             if inst_delphes(self.main,installer,True):
                 return installer.Execute('PAD')
+            else:
+                logging.warning('Delphes is now installed... please exit the program and install the pad')
+                return
         else:
             logging.error("the syntax is not correct.")
             self.help()

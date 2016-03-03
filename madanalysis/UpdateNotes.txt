@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+110  1.5      (2016/03/04) fuks:    Fixing an undesired behavior with the PAD(forma5tune) installation 
+
 109  1.4     (2016/03/01) fuks:    Finalizing v1.3 
 
 131  1.3.   (2016/03/01) ma5team:   - New structure for the PAD; automated recasting methods
