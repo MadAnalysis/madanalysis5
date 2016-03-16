@@ -472,7 +472,7 @@ class RecastConfiguration:
         if not FolderWriter.RemoveDirectory(os.path.normpath(PADdir+'/Output/PADevents.list')):
             return False
         ## running
-        command = ['MadAnalysis5job', '../Input/PADevents.list']
+        command = ['./MadAnalysis5job', '../Input/PADevents.list']
         ok = ShellCommand.Execute(command,PADdir+'/Build')
         if not ok:
             logging.error('Problem with the run of the PAD on the file: '+ eventfile)
