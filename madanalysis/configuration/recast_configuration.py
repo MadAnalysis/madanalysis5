@@ -406,7 +406,7 @@ class RecastConfiguration:
         ## backuping the main file
         logging.info("   Updating the PAD main executable")
         if os.path.isfile(PADdir+'/Build/Main/main.bak'):
-            os.remove(PADdir+'/Build/Main/main.bak')
+            shutil.move(PADdir+'/Build/Main/main.bak',PADdir+'/Build/Main/main.cpp')
         shutil.move(PADdir+'/Build/Main/main.cpp',PADdir+'/Build/Main/main.bak')
         ## creating the main file with the desired analyses inside
         mainfile = open(PADdir+"/Build/Main/main.bak",'r')
