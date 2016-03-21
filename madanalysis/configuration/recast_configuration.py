@@ -313,11 +313,16 @@ class RecastConfiguration:
     def CheckCard(self,dirname):
         logging.info('   Checking the recasting card...')
         import os
-        padfile  = open(dirname+"/../PAD/Build/Main/main.cpp", 'r')
+        ToLoopOver=[]
         padlist=[]
-        tunefile = open(dirname+"/../PADForMA5tune/Build/Main/main.cpp", 'r')
         tunelist=[]
-        for myfile,mylist in [ [padfile, padlist], [tunefile,tunelist] ]:
+        if self.pad:
+            padfile  = open(dirname+"/../PAD/Build/Main/main.cpp", 'r')
+            ToLoopOver.append([padfile, padlist])
+        if self.padtune:
+            tunefile = open(dirname+"/../PADForMA5tune/Build/Main/main.cpp", 'r')
+            ToLoopOver.append([tunefile, tunelist])
+        for myfile,mylist in ToLoopOver:
             for line in myfile:
                 if "manager.InitializeAnalyzer" in line:
                     analysis = str(line.split('\"')[1])
@@ -327,8 +332,10 @@ class RecastConfiguration:
                               mydelphes=mycard
                               break
                     mylist.append([analysis,mydelphes])
-        padfile.close()
-        tunefile.close()
+        if self.pad:
+            padfile.close()
+        if self.padtune:
+            tunefile.close()
         usercard = open(self.card_path)
         for line in usercard:
             if line[0]=='#':
