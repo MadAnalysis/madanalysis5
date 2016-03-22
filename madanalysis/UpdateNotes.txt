@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+118  1.4.3    (2016/03/22) fuks:    Fixing Federico's bug part II 
+
 117  1.4.2    (2016/03/21) fuks:    Fixing Federico Ambrogi's issue with the recasting card path 
 
 110  1.5      (2016/03/04) fuks:    Fixing an undesired behavior with the PAD(forma5tune) installation 

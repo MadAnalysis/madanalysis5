@@ -570,20 +570,25 @@ class CmdSubmit(CmdBase):
                     if not self.main.recasting.UpdatePADMain(myanalyses,PADdir):
                         self.main.forced=forced_bkp
                         return False
+                    time.sleep(1.);
                     if not self.main.recasting.MakePAD(PADdir,dirname,self.main):
                         self.main.forced=forced_bkp
                         return False
+                    time.sleep(1.);
                     if not self.main.recasting.RunPAD(PADdir,myevents):
                         self.main.forced=forced_bkp
                         return False
+                    time.sleep(1.);
                     ## Restoring the PAD as it was before
                     if not self.main.recasting.RestorePADMain(PADdir,dirname,self.main):
                         self.main.forced=forced_bkp
                         return False
+                    time.sleep(1.);
                     ## saving the output
                     if not self.main.recasting.SavePADOutput(PADdir,dirname,myanalyses,myset.name):
                         self.main.forced=forced_bkp
                         return False
+                    time.sleep(1.);
                     ## Running the CLs exclusion script (if available)
                     if not self.main.recasting.GetCLs(PADdir,dirname,myanalyses,myset.name,myset.xsection,myset.name):
                         self.main.forced=forced_bkp
