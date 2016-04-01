@@ -273,14 +273,20 @@ def WriteJobSum2N(file,iabs,icut,combi1,combi2,main,tagName,tagIndex,condition,i
         # First part
         file.write('    ParticleBaseFormat q1;\n')
         for ind in range(0,len(combi1)):
-            file.write('    q1'+oper_string+'='+\
+            TheOper='+'
+            if ind!=0:
+              TheOper=oper_string
+            file.write('    q1'+TheOper+'='+\
                        containers1[ind]+'[+'+iterator1+'['+str(ind)+']]->'+\
                        'momentum();\n')
 
         # Second part
         file.write('    ParticleBaseFormat q2;\n')
         for ind in range(0,len(combi2)):
-            file.write('    q2'+oper_string+'='+\
+            TheOper='+'
+            if ind!=0:
+              TheOper=oper_string
+            file.write('    q2'+TheOper+'='+\
                        containers2[ind]+'['+iterator2+'['+str(ind)+']]->'+\
                        'momentum();\n')
 
@@ -464,7 +470,10 @@ def WriteJobSum(file,iabs,icut,combination,main,tagName,tagIndex,condition,itera
                              CombinationType.DIFFVECTOR]:
         file.write('    ParticleBaseFormat q;\n')
         for ind in range(len(combination)):
-            file.write('    q'+oper_string+'='+containers[ind]+'['+iterator+'['+str(ind)+']]->'+\
+            TheOper='+'
+            if ind!=0:
+              TheOper=oper_string
+            file.write('    q'+TheOper+'='+containers[ind]+'['+iterator+'['+str(ind)+']]->'+\
                              'momentum();\n')
         file.write('    if (q.')
         file.write(obs.code(main.mode)+\

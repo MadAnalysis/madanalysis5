@@ -353,7 +353,10 @@ def WriteJobExecuteNbody(file,iabs,icut,combi1,main,container,tagName,tagIndex,c
         # First part
         file.write('    ParticleBaseFormat q1;\n')
         for ind in range(0,len(combi1)):
-            file.write('    q1'+oper_string+'='+\
+            TheOper='+'
+            if ind!=0:
+              TheOper=oper_string
+            file.write('    q1'+TheOper+'='+\
                        containers1[ind]+'[a['+str(ind)+']]->'+\
                        'momentum();\n')
 
