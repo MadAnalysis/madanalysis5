@@ -204,6 +204,7 @@ class TransverseVariables
 
     /// MT2W method
     double MT2W(std::vector<const RecJetFormat*>,const RecLeptonFormat*,const ParticleBaseFormat&);
+    double MT2W(std::vector<const MCParticleFormat*>,const MCParticleFormat*,const ParticleBaseFormat&);
 
   /// The Alpha_T variable
   double AlphaT(const MCEventFormat*);

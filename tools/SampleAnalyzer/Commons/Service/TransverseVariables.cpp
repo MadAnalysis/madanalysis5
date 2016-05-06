@@ -434,6 +434,74 @@ double TransverseVariables::MT2W(std::vector<const RecJetFormat*> jets, const Re
   }
 }
 
+double TransverseVariables::MT2W(std::vector<const MCParticleFormat*> jets, const MCParticleFormat* lep, const ParticleBaseFormat& met)
+{
+  /// We need at least 2 jets
+  if(jets.size()<2) return 0.;
+
+  /// Split the jet collection according to b-tags
+  std::vector<const MCParticleFormat*> bjets, nbjets;
+  for(unsigned int ii=0 ;ii<jets.size(); ii++)
+  {
+    if(abs(jets[ii]->pdgid()==5))  bjets.push_back(jets[ii]);
+    else                          nbjets.push_back(jets[ii]);
+  }
+  /// pt-ordering
+  SORTER->sort(nbjets,PTordering);
+  SORTER->sort(bjets,PTordering);
+
+  /// We neglect the fourth jets and all the others. If less than 3 jets in total
+  /// only light jets are considered.
+  unsigned int N=3;
+  if(jets.size()<=3) N = nbjets.size();
+
+  /// no b-jets
+  /// We select the minimum mt2w obtained from all possible jet combinations
+  if(bjets.size()==0)
+  {
+    double min_mt2w=1e9;
+    for (unsigned int ii=0; ii<N; ii++)
+      for (unsigned int jj=0; jj<N; jj++)
+      {
+        if (ii==jj) continue;
+        double tmp_mt2w = GetMT2W(lep, nbjets[ii], nbjets[jj],met);
+        if(tmp_mt2w < min_mt2w) min_mt2w = tmp_mt2w;
+      }
+      return min_mt2w;
+  }
+
+  /// 1 b-jet
+  else if (bjets.size()==1)
+  {
+    double min_mt2w=1e9;
+    for (unsigned int ii=0; ii<N; ii++)
+    {
+      double tmp_mt2w = GetMT2W(lep,bjets[0],nbjets[ii],met);
+      if (tmp_mt2w < min_mt2w) min_mt2w = tmp_mt2w;
+      tmp_mt2w = GetMT2W(lep,nbjets[ii],bjets[0],met);
+      if (tmp_mt2w < min_mt2w) min_mt2w = tmp_mt2w;
+    }
+    return min_mt2w;
+  }
+
+  /// More than 1 b-tag
+  else
+  {
+    double min_mt2w=1e9;
+    for (unsigned int ii=0; ii<bjets.size(); ii++)
+      for (unsigned int jj=0; jj<bjets.size(); jj++)
+      {
+        if (ii==jj) continue;
+        double tmp_mt2w = GetMT2W(lep, bjets[ii], bjets[jj],met);
+        if (tmp_mt2w < min_mt2w) min_mt2w = tmp_mt2w;
+      }
+      return min_mt2w;
+  }
+}
+
+
+
+
 
 /// The alphaT variable
 void LoopForAlphaT(const unsigned int n1, const std::vector<const MCParticleFormat*> jets,
