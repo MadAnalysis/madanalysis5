@@ -185,8 +185,8 @@ def MainSession(mode,arglist,ma5dir,version,date):
         logging.debug("DEBUG MODE ACTIVATED")
         logging.debug("")
 
-    # Checking the present linux configuration
-    if not main.CheckLinuxConfig(debug=mode.debug):
+    # Checking the present configuration
+    if not main.CheckConfig(debug=mode.debug):
         sys.exit()
 
     # Building (if necesserary) the SampleAnalyzer library
@@ -264,7 +264,6 @@ def Usage():
     logging.info(" -b or --build       : rebuild the SampleAnalyzer static library")
     logging.info(" -f or --forced      : do not ask for confirmation when MA5 removes a directory or overwrites an object") 
     logging.info(" -s or --script      : quit automatically MA5 when the script is loaded")
-    logging.info(" -m or --mg5         : run MadAnalysis with options related to MadGraph")
     logging.info(" -h or --help        : dump this help")
     logging.info(" -d or --debug       : debug mode\n")
     logging.info("[scripts]")

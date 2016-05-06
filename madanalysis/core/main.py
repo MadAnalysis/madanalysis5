@@ -406,7 +406,7 @@ class Main():
 
     currentdir = property(get_currentdir, set_currentdir)
 
-    def CheckLinuxConfig(self,debug=False):
+    def CheckConfig(self,debug=False):
         checkup = CheckUp(self.archi_info, self.session_info, debug, self.script)
         if not checkup.CheckArchitecture():
             return False

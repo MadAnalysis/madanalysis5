@@ -87,12 +87,6 @@ class DetectManager():
         elif package=='latex':
             from madanalysis.system.detect_latex import DetectLatex
             checker=DetectLatex(self.archi_info, self.user_info, self.session_info, self.debug)
-        elif package=='recasttools':
-            from madanalysis.system.detect_recasttools import DetectRecastTools
-            checker=DetectRecastTools(self.archi_info, self.user_info, self.session_info, self.debug)
-        elif package=='madgraph':
-            from madanalysis.system.detect_madgraph import DetectMadgraph
-            checker=DetectMadgraph(self.archi_info, self.user_info, self.session_info, self.debug)
         else:
             self.logger.error('the package "'+rawpackage+'" is unknown')
             return False
@@ -289,10 +283,11 @@ class DetectManager():
             PrintOK()
         elif status==DetectStatusType.UNFOUND:
             PrintDISABLED()
+        elif status==DetectStatusType.DEACTIVATED:
+            PrintDEACTIVATED()
         elif status==DetectStatusType.ISSUE:
             PrintFAILURE()
 
-            
     def PrintOK(self):
         sys.stdout.write('\x1b[32m'+'[OK]'+'\x1b[0m'+'\n')
         sys.stdout.flush()
@@ -310,6 +305,10 @@ class DetectManager():
 
     def PrintUSERDISABLED(self):
         sys.stdout.write('\x1b[35m'+'[DISABLED BY THE USER]'+'\x1b[0m'+'\n')
+        sys.stdout.flush()
+
+    def PrintDEACTIVATED(self):
+        sys.stdout.write('\x1b[33m'+'[DEACTIVATED]'+'\x1b[0m'+'\n')
         sys.stdout.flush()
 
 

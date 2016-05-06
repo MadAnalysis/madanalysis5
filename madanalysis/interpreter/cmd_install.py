@@ -38,15 +38,16 @@ class CmdInstall(CmdBase):
 
     def __init__(self,main):
         CmdBase.__init__(self,main,"install")
+        self.logger = logging.getLogger('madanalysis')
 
 
     def do(self,args):
 
         # Checking argument number
         if len(args)!=1:
-            logging.error("wrong number of arguments for the command 'install'.")
+            self.logger.error("wrong number of arguments for the command 'install'.")
             self.help()
-            return
+            return True
 
         # delphes preinstallation
         def inst_delphes(main,installer,pad=False):
@@ -56,15 +57,15 @@ class CmdInstall(CmdBase):
             if ResuActi == -1:
                 return False
             elif ResuActi == 1 and not self.main.archi_info.has_delphes:
-                logging.warning("Delphes not installed: installing it...")
+                self.logger.warning("Delphes not installed: installing it...")
                 if pad:
                     installer.Execute('delphes')
                     return False
                 else:
                     return installer.Execute('delphes')
             elif ResuActi == 0 and self.main.archi_info.has_delphes and not pad:
-                logging.warning("A previous installation of Delphes has been found. Skipping the installation.")
-                logging.warning("To update Delphes, please remove the tools/delphes directory")
+                self.logger.warning("A previous installation of Delphes has been found. Skipping the installation.")
+                self.logger.warning("To update Delphes, please remove the tools/delphes directory")
             return True
 
         # ma5tune preinstallation
@@ -75,15 +76,15 @@ class CmdInstall(CmdBase):
             if ResuActi == -1:
                 return False
             elif ResuActi == 1 and not self.main.archi_info.has_delphesMA5tune:
-                logging.warning("DelphesMA5tune not installed: installing it...")
+                self.logger.warning("DelphesMA5tune not installed: installing it...")
                 if pad:
                     installer.Execute('delphesMA5tune')
                     return False
                 else:
                     return installer.Execute('delphesMA5tune')
             elif ResuActi == 0 and self.main.archi_info.has_delphesMA5tune and not pad:
-                logging.warning("A previous installation of DelphesMA5tune has been found. Skipping the installation.")
-                logging.warning("To update DelphesMA5tune, please remove the tools/delphesMA5tune directory")
+                self.logger.warning("A previous installation of DelphesMA5tune has been found. Skipping the installation.")
+                self.logger.warning("To update DelphesMA5tune, please remove the tools/delphesMA5tune directory")
             return True
 
         # Calling selection method
@@ -97,16 +98,16 @@ class CmdInstall(CmdBase):
             installer=InstallManager(self.main)
             return inst_delphes(self.main,installer)
         elif args[0]=='delphesMA5tune':
-            logging.warning("The package 'delphesMA5tune' is now obsolete. It is replaced by Delphes with special MA5-tuned cards.")
+            self.logger.warning("The package 'delphesMA5tune' is now obsolete. It is replaced by Delphes with special MA5-tuned cards.")
             if not self.main.forced:
-              logging.warning("Are you sure to install this package? (Y/N)")
+              self.logger.warning("Are you sure to install this package? (Y/N)")
               allowed_answers=['n','no','y','yes']
               answer=""
               while answer not in  allowed_answers:
                  answer=raw_input("Answer: ")
                  answer=answer.lower()
               if answer=="no" or answer=="n":
-                  return
+                  return True
             installer=InstallManager(self.main)
             return inst_ma5tune(self.main,installer)
         elif args[0]=='fastjet':
@@ -134,24 +135,24 @@ class CmdInstall(CmdBase):
             if inst_ma5tune(self.main,installer,True):
                 return installer.Execute('PADForMA5tune')
             else:
-                logging.warning('DelphesMA5tune is now installed... please exit the program and install the pad')
-                return
+                self.logger.warning('DelphesMA5tune is now installed... please exit the program and install the pad')
+                return True
         elif args[0]=='PAD':
             installer=InstallManager(self.main)
             if inst_delphes(self.main,installer,True):
                 return installer.Execute('PAD')
             else:
-                logging.warning('Delphes is now installed... please exit the program and install the pad')
-                return
+                self.logger.warning('Delphes is now installed... please exit the program and install the pad')
+                return True
         else:
-            logging.error("the syntax is not correct.")
+            self.logger.error("the syntax is not correct.")
             self.help()
-            return
+            return True
 
     def help(self):
-        logging.info("   Syntax: install <component>")
-        logging.info("   Download and install a MadAnalysis component from the official site.")
-        logging.info("   List of available components: samples zlib fastjet delphes delphesMA5tune RecastingTools PAD PADForMA5tune")
+        self.logger.info("   Syntax: install <component>")
+        self.logger.info("   Download and install a MadAnalysis component from the official site.")
+        self.logger.info("   List of available components: samples zlib fastjet delphes delphesMA5tune RecastingTools PAD PADForMA5tune")
 
 
     def complete(self,text,args,begidx,endidx):

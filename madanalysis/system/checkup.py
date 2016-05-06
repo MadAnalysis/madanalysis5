@@ -317,10 +317,6 @@ class CheckUp():
         self.archi_info.has_fastjet           = checker.checkFastJet()
         self.archi_info.has_delphes           = checker.checkDelphes()
         self.archi_info.has_delphesMA5tune    = checker.checkDelphesMA5tune()
-        if not checker2.Execute('recasttools'):
-            return False
-        if not checker2.Execute('madgraph'):
-            return False
 
         return True
 

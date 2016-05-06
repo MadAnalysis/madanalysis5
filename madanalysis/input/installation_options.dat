@@ -29,10 +29,6 @@
 #fastjet_veto     = 0 # 0=No, 1=Yes
 #fastjet_bin_path = /Users/fuks/Work/tools/madanalysis/bzr/v1.1.12beta/tools/fastjet/bin
 
-# -----RECASTING TOOLS-----
-# recasttools_veto= 0 # 0=No, 1=Yes
-# recasttools_path= /home/toto/RecastingTools
-
 # -----PDFLATEX-----
 # pdflatex_veto = 0 # 0=No, 1=Yes
 

@@ -23,7 +23,7 @@
 
 
 class DetectStatusType(object):
-        values = ['FOUND','UNFOUND','ISSUE']
+        values = ['FOUND','UNFOUND','ISSUE', 'DEACTIVATED']
 
         class __metaclass__(type):
             def __getattr__(self, name):

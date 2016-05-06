@@ -82,6 +82,10 @@ class ConfigChecker:
             sys.stdout.write('\x1b[31m'+'[FAILURE]'+'\x1b[0m'+'\n')
         sys.stdout.flush()
 
+    def PrintDEACTIVATED(self):
+        sys.stdout.write('\x1b[33m'+'[DEACTIVATED]'+'\x1b[0m'+'\n')
+        sys.stdout.flush()
+
     def PrintLibrary(self,text,tab=5,width=25):
         mytab = '%'+str(tab)+'s'
         mytab = mytab % ' '
@@ -804,7 +808,17 @@ class ConfigChecker:
                 ma5installation = True
             else:
                 if not getpaths:
-                    self.logger.debug("-> not found")
+                    if os.path.isdir(self.archi_info.ma5dir+'/tools/DEACT_delphes') and \
+                        os.path.isdir(self.archi_info.ma5dir+'/tools/DEACT_delphes/external'):
+                        self.logger.debug("-> deactivated")
+                        self.PrintDEACTIVATED()
+                    else:
+                        self.logger.debug("-> not found")
+                        self.PrintFAIL(warning=True)
+                        self.logger.warning("DelphesMA5tune folder not found.")
+                        self.logger.warning("Delphes-MA5tune ROOT format will be disabled.")
+                        self.logger.warning("To enable this format, please type 'install delphesMA5tune'.")
+                return False
 
         # Check if the libraries and headers are available
         if force or ma5installation:
@@ -967,11 +981,16 @@ class ConfigChecker:
                 ma5installation = True
             else:
                 if not getpaths:
-                    self.logger.debug("-> not found")
-                    self.PrintFAIL(warning=True)
-                    self.logger.warning("DelphesMA5tune folder not found.")
-                    self.logger.warning("Delphes-MA5tune ROOT format will be disabled.")
-                    self.logger.warning("To enable this format, please type 'install delphesMA5tune'.")
+                    if os.path.isdir(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune') and \
+                        os.path.isdir(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/external'):
+                        self.logger.debug("-> deactivated")
+                        self.PrintDEACTIVATED()
+                    else:
+                        self.logger.debug("-> not found")
+                        self.PrintFAIL(warning=True)
+                        self.logger.warning("DelphesMA5tune folder not found.")
+                        self.logger.warning("Delphes-MA5tune ROOT format will be disabled.")
+                        self.logger.warning("To enable this format, please type 'install delphesMA5tune'.")
                 return False
 
         # Check if the libraries and headers are available

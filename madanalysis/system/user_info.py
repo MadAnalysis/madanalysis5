@@ -35,9 +35,6 @@ class UserInfo:
         self.root_bin = None
 
         # Delphes
-        self.madgraph_veto    = None
-
-        # Delphes
         self.delphes_veto     = None
         self.delphes_includes = None
         self.delphes_libs     = None
@@ -55,10 +52,6 @@ class UserInfo:
         # Fastjet
         self.fastjet_veto     = None
         self.fastjet_bin_path = None
-
-        # Recast tools
-        self.recasttools_veto = None
-        self.recasttools_path = None
 
         # Pdflatex
         self.pdflatex_veto = None
@@ -169,10 +162,6 @@ class UserInfo:
         elif   option=='root_bin_path':
             self.root_bin=value
 
-        # Madgraph
-        elif option=='madgraph_veto':
-            self.madgraph_veto=self.ConvertToBool(option,value,filename)
-
         # Delphes
         elif option=='delphes_veto':
             self.delphes_veto=self.ConvertToBool(option,value,filename)
@@ -202,12 +191,6 @@ class UserInfo:
             self.fastjet_veto=self.ConvertToBool(option,value,filename)
         elif option=='fastjet_bin_path':
             self.fastjet_bin_path=value
-
-        # Recast tools
-        elif option=='recasttools_veto':
-            self.recasttools_veto=self.ConvertToBool(option,value,filename)
-        elif option=='recasttools_path':
-            self.recasttools_path=value
 
         # Pdflatex
         elif option=='pdflatex_veto':
