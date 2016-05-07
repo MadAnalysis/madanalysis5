@@ -22,8 +22,8 @@
 
 # -----ZLIB-----
 # zlib_veto     = 0 # 0=No, 1=Yes
-# zlib_includes = /home/toto/zlib/include
-# zlib_libs     = /home/toto/zlib/lib
+#zlib_includes = /usr/include
+#zlib_libs = /usr/lib
 
 # -----FASTJET-----
 #fastjet_veto     = 0 # 0=No, 1=Yes

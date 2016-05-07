@@ -29,6 +29,7 @@ from madanalysis.enumeration.uncertainty_type           import UncertaintyType
 from madanalysis.enumeration.normalize_type             import NormalizeType
 from madanalysis.enumeration.sb_ratio_type              import SBratioType
 from madanalysis.interpreter.cmd_base                   import CmdBase
+from madanalysis.region.region_collection               import RegionCollection
 from madanalysis.system.session_info                    import SessionInfo
 from madanalysis.system.architecture_info               import ArchitectureInfo
 from madanalysis.core.library_builder                   import LibraryBuilder
@@ -78,6 +79,7 @@ class Main():
         self.forced         = False
         self.multiparticles = MultiParticleCollection()
         self.datasets       = DatasetCollection()
+        self.regions        = RegionCollection()
         self.selection      = Selection()
         self.script         = False
         self.mg5            = False

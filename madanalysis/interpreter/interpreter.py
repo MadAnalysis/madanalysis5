@@ -43,21 +43,23 @@ from madanalysis.enumeration.report_format_type import ReportFormatType
 from madanalysis.enumeration.cut_type import CutType
 
 # List of command
-from madanalysis.interpreter.cmd_set     import CmdSet
-from madanalysis.interpreter.cmd_define  import CmdDefine
-from madanalysis.interpreter.cmd_import  import CmdImport
-from madanalysis.interpreter.cmd_remove  import CmdRemove
-from madanalysis.interpreter.cmd_swap    import CmdSwap
-from madanalysis.interpreter.cmd_display import CmdDisplay
+from madanalysis.interpreter.cmd_set            import CmdSet
+from madanalysis.interpreter.cmd_define         import CmdDefine
+from madanalysis.interpreter.cmd_define_region  import CmdDefineRegion
+from madanalysis.interpreter.cmd_import         import CmdImport
+from madanalysis.interpreter.cmd_remove         import CmdRemove
+from madanalysis.interpreter.cmd_swap           import CmdSwap
+from madanalysis.interpreter.cmd_display        import CmdDisplay
 from madanalysis.interpreter.cmd_display_particles      import CmdDisplayParticles
 from madanalysis.interpreter.cmd_display_multiparticles import CmdDisplayMultiparticles
 from madanalysis.interpreter.cmd_display_datasets       import CmdDisplayDatasets
-from madanalysis.interpreter.cmd_plot     import CmdPlot
-from madanalysis.interpreter.cmd_cut      import CmdCut
-from madanalysis.interpreter.cmd_submit   import CmdSubmit
-from madanalysis.interpreter.cmd_open     import CmdOpen
-from madanalysis.interpreter.cmd_reset    import CmdReset
-from madanalysis.interpreter.cmd_install  import CmdInstall
+from madanalysis.interpreter.cmd_display_regions        import CmdDisplayRegions
+from madanalysis.interpreter.cmd_plot           import CmdPlot
+from madanalysis.interpreter.cmd_cut            import CmdCut
+from madanalysis.interpreter.cmd_submit         import CmdSubmit
+from madanalysis.interpreter.cmd_open           import CmdOpen
+from madanalysis.interpreter.cmd_reset          import CmdReset
+from madanalysis.interpreter.cmd_install        import CmdInstall
 
 
 #===============================================================================
@@ -77,10 +79,12 @@ class Interpreter(InterpreterBase):
         # Getting back all commands
         self.cmd_set                    = CmdSet(main)
         self.cmd_define                 = CmdDefine(main)
+        self.cmd_define_region          = CmdDefineRegion(main)
         self.cmd_display                = CmdDisplay(main)
         self.cmd_display_datasets       = CmdDisplayDatasets(main)
-        self.cmd_display_particles      = CmdDisplayParticles(main)
         self.cmd_display_multiparticles = CmdDisplayMultiparticles(main)
+        self.cmd_display_particles      = CmdDisplayParticles(main)
+        self.cmd_display_regions        = CmdDisplayRegions(main)
         self.cmd_import                 = CmdImport(main)
         self.cmd_remove                 = CmdRemove(main)
         self.cmd_swap                   = CmdSwap(main) 
@@ -92,7 +96,7 @@ class Interpreter(InterpreterBase):
         self.cmd_submit                 = CmdSubmit(main)
         self.cmd_resubmit               = CmdSubmit(main,resubmit=True)
         self.cmd_install                = CmdInstall(main)
-        
+
         # Initializing multiparticle
         self.InitializeParticle()
         self.InitializeMultiparticle()
@@ -124,11 +128,20 @@ class Interpreter(InterpreterBase):
     def do_define(self,line):
         self.cmd_define.do(self.split_arg(line))
 
+    def do_define_region(self,line):
+        self.cmd_define_region.do(self.split_arg(line))
+
     def help_define(self):
         self.cmd_define.help()
 
+    def help_define_region(self):
+        self.cmd_define_region.help()
+
     def complete_define(self,text,line,begidx,endidx):
         return self.cmd_define.complete(text,line,begidx,endidx)
+
+    def complete_define_region(self,text,line,begidx,endidx):
+        return self.cmd_define_region.complete(text,line,begidx,endidx)
 
     def do_display(self,line):
         self.cmd_display.do(self.split_arg(line))
@@ -160,11 +173,20 @@ class Interpreter(InterpreterBase):
     def do_display_datasets(self,line):
         self.cmd_display_datasets.do(self.split_arg(line))
 
+    def do_display_regions(self,line):
+        self.cmd_display_regions.do(self.split_arg(line))
+
     def help_display_datasets(self):
         self.cmd_display_datasets.help()
 
+    def help_display_regions(self):
+        self.cmd_display_regions.help()
+
     def complete_display_datasets(self,text,line,begidx,endidx):
         return self.cmd_display_datasets.complete(text,line,begidx,endidx)
+
+    def complete_display_regionss(self,text,line,begidx,endidx):
+        return self.cmd_display_regions.complete(text,line,begidx,endidx)
 
     def do_import(self,line):
         self.cmd_import.do(self.split_arg(line),self,self.history)

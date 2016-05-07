@@ -620,7 +620,6 @@ class ConfigChecker:
 
         # Checking if zlib is present
         self.PrintLibrary("zlib")
-        self.archi_info.fastjet_version = "none"
         self.logger.debug("")
 
         # Name of the dynamic lib
@@ -639,12 +638,12 @@ class ConfigChecker:
         force1=False
         force2=False
         if self.user_info.zlib_includes!=None:
-            self.logger.debug("User setting: zlib include path is specified")
-            self.archi_info.zlib_inc_path=os.path.normpath(self.archi_info.zlib_inc_path)
+            self.logger.debug("User setting: zlib include path is specified: "+ self.user_info.zlib_includes)
+            self.archi_info.zlib_inc_path=os.path.normpath(self.user_info.zlib_includes)
             force1=True
         if self.user_info.zlib_libs!=None:
-            self.logger.debug("User setting: zlib lib path is specified")
-            self.archi_info.zlib_lib_path=os.path.normpath(self.archi_info.zlib_lib_path)
+            self.logger.debug("User setting: zlib lib path is specified: "+ self.user_info.zlib_libs)
+            self.archi_info.zlib_lib_path=os.path.normpath(self.user_info.zlib_libs)
             force2=True
         force=force1 and force2
 

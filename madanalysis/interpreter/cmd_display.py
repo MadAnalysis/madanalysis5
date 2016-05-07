@@ -92,6 +92,15 @@ class CmdDisplay(CmdBase.CmdBase):
                 self.main.datasets.Get(objs[0]).user_DisplayParameter(objs[1].lower())
                 return
 
+        # Region  display
+        elif self.main.regions.Find(objs[0]):
+            if len(objs)==1:
+                self.main.regions.Get(objs[0]).Display()
+                return
+            else:
+                self.main.regions.Get(objs[0]).user_DisplayParameter(objs[1].lower())
+                return
+
         # Multiparticle display
         elif self.main.multiparticles.Find(objs[0]):
             if len(objs)==1:
@@ -191,6 +200,7 @@ class CmdDisplay(CmdBase.CmdBase):
             output = ["main","selection"]
             output.extend(self.main.datasets.GetNames())
             output.extend(self.main.multiparticles.GetNames())
+            output.extend(self.main.regions.GetNames())
             output.extend( [ "selection["+str(ind+1)+"]" \
                              for ind in \
                              range(0,len(self.main.selection)) ] )
@@ -228,6 +238,13 @@ class CmdDisplay(CmdBase.CmdBase):
             output=[ object+"."+ item \
                      for item in \
                      self.main.datasets.Get(object).user_GetParameters() ]
+            return self.finalize_complete(text,output)
+
+        # Region  object    
+        elif self.main.regions.Find(object):
+            output=[ object+"."+ item \
+                     for item in \
+                     self.main.regions.Get(object).user_GetParameters() ]
             return self.finalize_complete(text,output)
 
         # Other cases
