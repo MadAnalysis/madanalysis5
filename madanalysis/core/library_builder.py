@@ -35,21 +35,22 @@ class LibraryBuilder:
 
         self.archi_info        = archi_info
         self.archi_info_stored = ArchitectureInfo()
+        self.logger            = logging.getLogger('MA5')
 
     def checkMA5(self):
-        logging.info("Checking the MadAnalysis library:")
+        self.logger.info("Checking the MadAnalysis 5 core library:")
         FirstUse=False
 
         # Look for 'lib' directory
         name='/tools/SampleAnalyzer/Lib'
-        logging.debug('-> looking for folder: '+name)
+        self.logger.debug('-> looking for folder: '+name)
         if not os.path.isdir(self.archi_info.ma5dir+name):
             try:
                 FirstUse=True
                 os.mkdir(self.archi_info.ma5dir+name)
             except:
-                logging.error("Impossible to create the directory :")
-                logging.error(" "+name)
+                self.logger.error("Impossible to create the directory :")
+                self.logger.error(" "+name)
                 return False, False
 
         # Look for the shared library 'MadAnalysis' and 'config' file
@@ -57,9 +58,9 @@ class LibraryBuilder:
                         self.archi_info.ma5dir+'/tools/architecture.ma5',\
                         self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libcommons_for_ma5.so']
         for lib in librairies:
-            logging.debug('-> looking for file: '+lib)
+            self.logger.debug('-> looking for file: '+lib)
             if not os.path.isfile(lib):
-                logging.debug('\t-> file '+ lib + " not found.")
+                self.logger.debug('\t-> file '+ lib + " not found.")
                 FirstUse = True
                 return True, False
 
@@ -81,14 +82,14 @@ class LibraryBuilder:
             libraries.append(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphesMA5tune_for_ma5.so')
         for library in libraries:
             if not os.path.isfile(library):
-                logging.debug('\t-> library '+ library + " not found.")
+                self.logger.debug('\t-> library '+ library + " not found.")
                 return False, True
 
         # Importing the configuration stored with the library
         if not FirstUse:
-            logging.debug('-> loading the architecture file.')
+            self.logger.debug('-> loading the architecture file.')
             if not self.archi_info_stored.load(self.archi_info.ma5dir+'/tools/architecture.ma5'):
-                logging.debug('\t-> failed to load the architecture file.')
+                self.logger.debug('\t-> failed to load the architecture file.')
                 FirstUse=True
                 return True, False
 

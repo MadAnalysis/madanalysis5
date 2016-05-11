@@ -36,7 +36,7 @@ class SessionInfo():
         self.has_latex          = False
         self.has_dvipdf         = False
         self.has_web            = True
-        self.logger             = logging.getLogger('madanalysis')
+        self.logger             = logging.getLogger('MA5')
 
     def dump(self):
         for item in self.__dict__:

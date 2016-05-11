@@ -63,7 +63,7 @@ class UserInfo:
         self.dvipdf_veto = None
 
         # logger
-        self.logger = logging.getLogger('madanalysis')
+        self.logger = logging.getLogger('MA5')
 
     def dump(self):
         for item in self.__dict__:

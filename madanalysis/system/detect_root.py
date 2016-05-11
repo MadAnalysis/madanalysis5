@@ -44,7 +44,7 @@ class DetectRoot:
         self.lib_path  = ''
         self.libraries = {}
         self.features  = []
-        self.logger    = logging.getLogger('madanalysis')
+        self.logger    = logging.getLogger('MA5')
 
 
     def Initialize(self):

@@ -36,6 +36,7 @@ class MultiparticleReader():
         self.isopen     = False
         self.level      = level
         self.forced     = forced
+        self.logger = logging.getLogger('MA5')
 
     def Load(self):
         if self.level==MA5RunningType.PARTON:
@@ -64,7 +65,7 @@ class MultiparticleReader():
 
         # Checking if the file is opened
         if self.isopen:
-            logging.error("cannot open the file called '" + filename + "' : it is already opened")
+            self.logger.error("cannot open the file called '" + filename + "' : it is already opened")
             return False
 
         # Files
@@ -75,13 +76,13 @@ class MultiparticleReader():
             relname = os.path.normpath("madanalysis/"+filename)
 
         # Display file location
-        logging.info("Multiparticle labels exported from " + relname)
+        self.logger.info("Multiparticle labels exported from " + relname)
 
         # Open
         if os.path.isfile(name):
             self.file = open (name, "r")
         else:
-            logging.error("File not found")
+            self.logger.error("File not found")
             return False
 
         # Ok
@@ -94,16 +95,16 @@ class MultiparticleReader():
 
         # Checking if the file is opened
         if self.isopen:
-            logging.error("cannot open the file called '" + filename + "' : it is already opened")
+            self.logger.error("cannot open the file called '" + filename + "' : it is already opened")
             return False
 
         name = os.path.normpath(self.path+"/madanalysis/"+filename)
         relname = os.path.normpath("madanalysis/"+filename)
-        logging.info('Multiparticle labels from '+relname)
+        self.logger.info('Multiparticle labels from '+relname)
         if os.path.isfile(name):
             self.file = open (name, "r")
         else:
-            logging.error("File '"+name+"' not found")
+            self.logger.error("File '"+name+"' not found")
             return False
 
         return True    
@@ -115,16 +116,16 @@ class MultiparticleReader():
 
         # Checking if the file is opened
         if self.isopen:
-            logging.error("cannot open the file called '" + filename + "' : it is already opened")
+            self.logger.error("cannot open the file called '" + filename + "' : it is already opened")
             return False
 
         name = os.path.normpath(self.path+"/madanalysis/"+filename)
         relname = os.path.normpath("madanalysis/"+filename)
-        logging.info('Multiparticle labels from '+relname)
+        self.logger.info('Multiparticle labels from '+relname)
         if os.path.isfile(name):
             self.file = open (name, "r")
         else:
-            logging.error("File not found")
+            self.logger.error("File not found")
             return False
 
         return True    
@@ -168,7 +169,7 @@ class MultiparticleReader():
                 continue
 
             #debug message
-            logging.debug("Extracting a multiparticle labelled by ["+split[0]+"] with a PDG-id : "+str(split[2:]))
+            self.logger.debug("Extracting a multiparticle labelled by ["+split[0]+"] with a PDG-id : "+str(split[2:]))
             
             #feed multiparticle
             self.cmd_define.fill(split[0],split[2:],self.forced)
@@ -181,7 +182,7 @@ class MultiparticleReader():
                    + str(counter) +  " : "
             for item in arg:
                 text += item + " "
-            logging.error(text)    
+            self.logger.error(text)    
 
 
     def AddSpecialMultiparticles(self):
@@ -192,11 +193,11 @@ class MultiparticleReader():
         if not self.cmd_define.main.multiparticles.Find("invisible"):
             self.cmd_define.main.multiparticles.Add("invisible",[12,-12,14,-14,16,-16,1000022])
             self.npart += 1
-            logging.info("  => Creation of the label 'invisible' (-> missing energy).")
+            self.logger.info("  => Creation of the label 'invisible' (-> missing energy).")
         if not self.cmd_define.main.multiparticles.Find("hadronic"):
             self.cmd_define.main.multiparticles.Add("hadronic",[1,2,3,4,5,-1,-2,-3,-4,-5,21])
             self.npart += 1
-            logging.info("  => Creation of the label 'hadronic' (-> jet energy).")
+            self.logger.info("  => Creation of the label 'hadronic' (-> jet energy).")
         
 
     def Close(self):
@@ -206,4 +207,4 @@ class MultiparticleReader():
 
         self.isopen = False 
 
-        logging.info("  => " + str(self.npart) + " multiparticles successfully exported.")
+        self.logger.info("  => " + str(self.npart) + " multiparticles successfully exported.")

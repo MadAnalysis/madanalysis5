@@ -38,7 +38,7 @@ class CmdInstall(CmdBase):
 
     def __init__(self,main):
         CmdBase.__init__(self,main,"install")
-        self.logger = logging.getLogger('madanalysis')
+        self.logger = logging.getLogger('MA5')
 
 
     def do(self,args):

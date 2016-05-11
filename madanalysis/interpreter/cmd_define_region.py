@@ -29,7 +29,7 @@ class CmdDefineRegion(CmdBase.CmdBase):
     """Command DEFINE_REGION"""
 
     def __init__(self,main):
-        self.logger       = logging.getLogger('madanalysis')
+        self.logger       = logging.getLogger('MA5')
         CmdBase.CmdBase.__init__(self,main,"define_region")
 
     def do(self,args):

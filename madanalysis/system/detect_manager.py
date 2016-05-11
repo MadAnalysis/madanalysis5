@@ -36,7 +36,7 @@ class DetectManager():
         self.session_info = session_info
         self.script       = script
         self.debug        = debug
-        self.logger       = logging.getLogger('madanalysis')
+        self.logger       = logging.getLogger('MA5')
 
     def Execute(self, rawpackage):
 
@@ -96,13 +96,13 @@ class DetectManager():
         methods = dir(checker)
 
         # 1. Displaying the name of the package
-        self.PrintPackageName(checker.name)
+        package_name = self.PrintPackageName(checker.name)
 
         # 2. Initialization
         if 'Initialize' in methods:
             self.logger.debug('Initialization ...')
             if not checker.Initialize():
-                self.PrintFAILURE()
+                self.PrintFAILURE(package_name)
                 if checker.mandatory:
                     self.logger.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
                     for line in checker.log:
@@ -110,9 +110,9 @@ class DetectManager():
                     return False
                 else:
                     if 'PrintDisableMessage' in methods:
-                        checker.PrintDisableMessage()
+                        checker.PrintDisableMessage(package_name)
                     if 'PrintInstallMessage' in methods:
-                        checker.PrintInstallMessage()
+                        checker.PrintInstallMessage(package_name)
                     return True
                 
         # 3. Veto
@@ -125,9 +125,9 @@ class DetectManager():
                     return False
                 # normal case
                 else:
-                    self.PrintUSERDISABLED()
+                    self.PrintUSERDISABLED(package_name)
                     if 'PrintDisableMessage' in methods:
-                        checker.PrintDisableMessage()
+                        checker.PrintDisableMessage(package_name)
                     return True
 
         # 4. Does the user force something?
@@ -139,7 +139,7 @@ class DetectManager():
 
             # If problem
             if status==DetectStatusType.ISSUE:
-                self.PrintFAILURE()
+                self.PrintFAILURE(package_name)
                 if checker.mandatory:
                     self.logger.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
                     for line in checker.log:
@@ -147,9 +147,9 @@ class DetectManager():
                     return False
                 else:
                     if 'PrintDisableMessage' in methods:
-                        checker.PrintDisableMessage()
+                        checker.PrintDisableMessage(package_name)
                     if 'PrintInstallMessage' in methods:
-                        checker.PrintInstallMessage()
+                        checker.PrintInstallMessage(package_name)
                     return True
 
             # No found -> autodetection
@@ -164,7 +164,7 @@ class DetectManager():
 
             # If problem
             if status==DetectStatusType.ISSUE:
-                self.PrintFAILURE()
+                self.PrintFAILURE(package_name)
                 if checker.mandatory:
                     self.logger.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
                     for line in checker.log:
@@ -172,9 +172,9 @@ class DetectManager():
                     return False
                 else:
                     if 'PrintDisableMessage' in methods:
-                        checker.PrintDisableMessage()
+                        checker.PrintDisableMessage(package_name)
                     if 'PrintInstallMessage' in methods:
-                        checker.PrintInstallMessage()
+                        checker.PrintInstallMessage(package_name)
                     return True
 
             # No found -> autodetection
@@ -189,43 +189,43 @@ class DetectManager():
 
             if status in [DetectStatusType.UNFOUND,DetectStatusType.ISSUE]:
                 if checker.mandatory:
-                    self.PrintFAILURE()
+                    self.PrintFAILURE(package_name)
                     self.logger.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
                     for line in checker.log:
                         self.logger.error(line)
                     return False
                 else:
                     if status==DetectStatusType.UNFOUND:
-                        self.PrintDISABLED()
+                        self.PrintDISABLED(package_name)
                     else:
-                        self.PrintFAILURE()
+                        self.PrintFAILURE(package_name)
                     if 'PrintDisableMessage' in methods:
-                        checker.PrintDisableMessage()
+                        checker.PrintDisableMessage(package_name)
                     if 'PrintInstallMessage' in methods:
-                        checker.PrintInstallMessage()
+                        checker.PrintInstallMessage(package_name)
                     return True
 
         # Case of no autodetection of the package
         if search:
             if checker.mandatory:
-                self.PrintFAILURE()
+                self.PrintFAILURE(package_name)
                 self.logger.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
                 for line in checker.log:
                     self.logger.error(line)
                 return False
             else:
-                self.PrintDISABLED()
+                self.PrintDISABLED(package_name)
                 if 'PrintDisableMessage' in methods:
-                    checker.PrintDisableMessage()
+                    checker.PrintDisableMessage(package_name)
                 if 'PrintInstallMessage' in methods:
-                    checker.PrintInstallMessage()
+                    checker.PrintInstallMessage(package_name)
                 return True
 
         # 7. Getting more details about the package
         if 'ExtractInfo' in methods:
             self.logger.debug('Extract more informations related to the package ...')
             if not checker.ExtractInfo():
-                self.PrintFAILURE()
+                self.PrintFAILURE(package_name)
                 if checker.mandatory:
                     self.logger.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
                     for line in checker.log:
@@ -233,9 +233,9 @@ class DetectManager():
                     return False
                 else:
                     if 'PrintDisableMessage' in methods:
-                        checker.PrintDisableMessage()
+                        checker.PrintDisableMessage(package_name)
                     if 'PrintInstallMessage' in methods:
-                        checker.PrintInstallMessage()
+                        checker.PrintInstallMessage(package_name)
                     return True
 
 
@@ -243,7 +243,7 @@ class DetectManager():
         if 'SaveInfo' in methods:
             self.logger.debug('Saving informations ...')
             if not checker.SaveInfo():
-                self.PrintFAILURE()
+                self.PrintFAILURE(package_name)
                 if checker.mandatory:
                     self.logger.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
                     for line in checker.log:
@@ -251,16 +251,16 @@ class DetectManager():
                     return False
                 else:
                     if 'PrintDisableMessage' in methods:
-                        checker.PrintDisableMessage()
+                        checker.PrintDisableMessage(package_name)
                     if 'PrintInstallMessage' in methods:
-                        checker.PrintInstallMessage()
+                        checker.PrintInstallMessage(package_name)
                     return True
 
         # 9. Finalize: displaying OK
         if 'Finalize' in methods:
             self.logger.debug('Finalization ...')
             if not checker.Finalize():
-                self.PrintFAILURE()
+                self.PrintFAILURE(package_name)
                 if checker.mandatory:
                     self.logger.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
                     for line in checker.log:
@@ -268,13 +268,13 @@ class DetectManager():
                     return False
                 else:
                     if 'PrintDisableMessage' in methods:
-                        checker.PrintDisableMessage()
+                        checker.PrintDisableMessage(package_name)
                     if 'PrintInstallMessage' in methods:
-                        checker.PrintInstallMessage()
+                        checker.PrintInstallMessage(package_name)
                     return True
 
         # Ok
-        self.PrintOK()
+        self.PrintOK(package_name)
         return True
 
 
@@ -288,33 +288,28 @@ class DetectManager():
         elif status==DetectStatusType.ISSUE:
             PrintFAILURE()
 
-    def PrintOK(self):
-        sys.stdout.write('\x1b[32m'+'[OK]'+'\x1b[0m'+'\n')
-        sys.stdout.flush()
+    def PrintOK(self,text):
+        self.logger.info(text+'\x1b[32m'+'[OK]'+'\x1b[0m')
 
 
-    def PrintFAILURE(self):
-        sys.stdout.write('\x1b[31m'+'[FAILURE]'+'\x1b[0m'+'\n')
-        sys.stdout.flush()
+    def PrintFAILURE(self,text):
+        self.logger.info(text + '\x1b[31m'+'[FAILURE]'+'\x1b[0m')
 
 
-    def PrintDISABLED(self):
-        sys.stdout.write('\x1b[35m'+'[DISABLED]'+'\x1b[0m'+'\n')
-        sys.stdout.flush()
+    def PrintDISABLED(self,text):
+        self.logger.info(text + '\x1b[35m'+'[DISABLED]'+'\x1b[0m')
 
 
-    def PrintUSERDISABLED(self):
-        sys.stdout.write('\x1b[35m'+'[DISABLED BY THE USER]'+'\x1b[0m'+'\n')
-        sys.stdout.flush()
-
-    def PrintDEACTIVATED(self):
-        sys.stdout.write('\x1b[33m'+'[DEACTIVATED]'+'\x1b[0m'+'\n')
-        sys.stdout.flush()
+    def PrintUSERDISABLED(self,text):
+        self.logger.info(text+'\x1b[35m'+'[DISABLED BY THE USER]'+'\x1b[0m')
 
 
-    def PrintWARNING(self):
-        sys.stdout.write('\x1b[35m'+'[WARNING]'+'\x1b[0m'+'\n')
-        sys.stdout.flush()
+    def PrintDEACTIVATED(self,text):
+        self.logger.info(text+'\x1b[33m'+'[DEACTIVATED]'+'\x1b[0m')
+
+
+    def PrintWARNING(self,text):
+        self.logger.info(text+'\x1b[35m'+'[WARNING]'+'\x1b[0m')
 
 
     def PrintPackageName(self,text,tab=5,width=25):
@@ -324,9 +319,5 @@ class DetectManager():
         mytab += '- '
         mywidth = '%-'+str(width)+'s'
         mywidth = mywidth % text
-        sys.stdout.write(mytab+mywidth)
-        sys.stdout.flush()
+        return mytab+mywidth
 
-        # Adding a "\n" character in debug mode
-        self.logger.debug("")
-        

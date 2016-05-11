@@ -28,7 +28,7 @@ import madanalysis.region.region as Region
 class RegionCollection:
 
     def __init__(self):
-        self.logger = logging.getLogger('madanalysis')
+        self.logger = logging.getLogger('MA5')
         self.table = []
 
     def __len__(self):

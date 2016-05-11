@@ -34,6 +34,7 @@ from madanalysis.system.session_info                    import SessionInfo
 from madanalysis.system.architecture_info               import ArchitectureInfo
 from madanalysis.core.library_builder                   import LibraryBuilder
 from madanalysis.IOinterface.library_writer             import LibraryWriter
+from madanalysis.IOinterface.madgraph_interface         import MadGraphInterface
 from madanalysis.enumeration.ma5_running_type           import MA5RunningType
 from madanalysis.enumeration.stacking_method_type       import StackingMethodType
 from madanalysis.observable.observable_manager          import ObservableManager
@@ -82,12 +83,14 @@ class Main():
         self.regions        = RegionCollection()
         self.selection      = Selection()
         self.script         = False
-        self.mg5            = False
         self.observables    = ObservableManager(self.mode)
         self.expertmode     = False
         self.repeatSession  = False
         self.recast         = "off"
         self.ResetParameters()
+        self.madgraph       = MadGraphInterface()
+        self.logger         = logging.getLogger('MA5')
+
 
     def ResetParameters(self):
         self.merging        = MergingConfiguration()
@@ -150,9 +153,9 @@ class Main():
 
 
     def Display(self):
-        logging.info(" *********************************" )
-        logging.info("            main program          " )
-        logging.info(" *********************************" )
+        self.logger.info(" *********************************" )
+        self.logger.info("            main program          " )
+        self.logger.info(" *********************************" )
         self.user_DisplayParameter("currentdir")
         self.user_DisplayParameter("normalize")
         self.user_DisplayParameter("lumi")
@@ -163,14 +166,14 @@ class Main():
             self.merging.Display()
         self.fastsim.Display()
         self.isolation.Display()
-        logging.info(" *********************************" )
+        self.logger.info(" *********************************" )
         self.recasting.Display()
-        logging.info(" *********************************" )
+        self.logger.info(" *********************************" )
 
 
     def user_DisplayParameter(self,parameter):
         if  parameter=="currentdir":
-            logging.info(" currentdir = "+self.get_currentdir())
+            self.logger.info(" currentdir = "+self.get_currentdir())
         elif parameter=="stacking_method":
             sentence = " stacking methode for histograms = "
             if self.stack==StackingMethodType.STACK:
@@ -179,7 +182,7 @@ class Main():
                 sentence+="superimpose"
             else:
                 sentence+="normalize2one"
-            logging.info(sentence)
+            self.logger.info(sentence)
         elif parameter=="normalize":
             word=""
             if self.normalize==NormalizeType.NONE:
@@ -188,23 +191,23 @@ class Main():
                 word="lumi"
             elif self.normalize==NormalizeType.LUMI_WEIGHT:
                 word="lumi_weight"
-            logging.info(" histogram normalization mode = " + word)
+            self.logger.info(" histogram normalization mode = " + word)
         elif parameter=="outputfile":
             if self.output=="":
                 msg="none"
             else:
                 msg='"'+self.output+'"'
-            logging.info(" output file = "+msg)
+            self.logger.info(" output file = "+msg)
         elif parameter=="lumi":
-            logging.info(" integrated luminosity = "+str(self.lumi)+" fb^{-1}" )
+            self.logger.info(" integrated luminosity = "+str(self.lumi)+" fb^{-1}" )
         elif parameter=="SBratio":
-            logging.info(' S/B ratio formula = "' + self.SBratio + '"')
+            self.logger.info(' S/B ratio formula = "' + self.SBratio + '"')
         elif parameter=="SBerror":
-            logging.info(' S/B error formula = "' + self.SBerror + '"')
+            self.logger.info(' S/B error formula = "' + self.SBerror + '"')
         elif parameter=="recast":
-            logging.info(' Recasting mode = "' + self.recasting.status + '"')
+            self.logger.info(' Recasting mode = "' + self.recasting.status + '"')
         else:
-            logging.error("'main' has no parameter called '"+parameter+"'")
+            self.logger.error("'main' has no parameter called '"+parameter+"'")
 
 
     def user_GetValues(self,variable):
@@ -233,7 +236,7 @@ class Main():
             elif value == "normalize2one":
                 self.stack=StackingMethodType.NORMALIZE2ONE
             else:
-                logging.error("'stack' possible values are : 'stack', 'superimpose', 'normalize2one'")
+                self.logger.error("'stack' possible values are : 'stack', 'superimpose', 'normalize2one'")
                 return False
 
         # normalize
@@ -245,7 +248,7 @@ class Main():
             elif value == "lumi_weight":
                 self.normalize = NormalizeType.LUMI_WEIGHT
             else:
-                logging.error("'normalize' possible values are : 'none', 'lumi', 'lumi_weight'")
+                self.logger.error("'normalize' possible values are : 'none', 'lumi', 'lumi_weight'")
                 return False
 
         # lumi
@@ -253,12 +256,12 @@ class Main():
             try:
                 tmp = float(value)
             except:
-                logging.error("'lumi' is a positive float value")
+                self.logger.error("'lumi' is a positive float value")
                 return
             if (tmp>0):
                 self.lumi=tmp
             else:
-                logging.error("'lumi' is a positive float value")
+                self.logger.error("'lumi' is a positive float value")
                 return
 
         # sbratio
@@ -274,7 +277,7 @@ class Main():
                 self.SBratio=value
                 self.suggestSBerror()
             else:
-                logging.error("Specified formula is not correct.")
+                self.logger.error("Specified formula is not correct.")
                 return False
 
         # sberror
@@ -289,7 +292,7 @@ class Main():
             if Main.checkSBratio(value):
                 self.SBerror=value
             else:
-                logging.error("Specified formula is not correct.")
+                self.logger.error("Specified formula is not correct.")
                 return False
 
         # output
@@ -305,9 +308,9 @@ class Main():
 
             # Compressed file
             if valuemin.endswith(".gz") and not self.archi_info.has_zlib:
-                logging.error("Compressed formats (*.gz) are not available. "\
+                self.logger.error("Compressed formats (*.gz) are not available. "\
                               + "Please install zlib with the command line:")
-                logging.error(" install zlib")
+                self.logger.error(" install zlib")
                 return False
 
             # LHE
@@ -321,29 +324,29 @@ class Main():
                     self.output = value
                     return
                 elif self.mode == MA5RunningType.PARTON:
-                    logging.error("LHCO format is not available in PARTON mode.")
+                    self.logger.error("LHCO format is not available in PARTON mode.")
                     return False
                 elif self.mode == MA5RunningType.HADRON:
                     if self.fastsim.package == "none":
-                        logging.error("Please select a fast-simulation package before requesting a LHCO file output.")
-                        logging.error("Command: set main.fastsim.package = ")
+                        self.logger.error("Please select a fast-simulation package before requesting a LHCO file output.")
+                        self.logger.error("Command: set main.fastsim.package = ")
                         return False
                     else:
                         self.output = value
                         return
 
             else:
-                logging.error("Output format is not available. Extension allowed: " +\
+                self.logger.error("Output format is not available. Extension allowed: " +\
                               ".lhe .lhe.gz .lhco .lhco.gz")
                 return False
 
         # other
         else:
-            logging.error("'main' has no parameter called '"+parameter+"'")
+            self.logger.error("'main' has no parameter called '"+parameter+"'")
 
     @staticmethod
     def checkSBratio(text):
-        logging.info("Checking the formula ...")
+        self.logger.info("Checking the formula ...")
         text = text.replace("ES","z")
         text = text.replace("EB","t")
         text = text.replace("S","x")
@@ -368,8 +371,8 @@ class Main():
             error = TFormula('SBerror',text)
             error.Optimize()
             if ref.GetExpFormula()==error.GetExpFormula():
-                logging.info("Formula corresponding to the uncertainty calculation has been found and set to the variable main.SBerror :")
-                logging.info('  '+v)
+                self.logger.info("Formula corresponding to the uncertainty calculation has been found and set to the variable main.SBerror :")
+                self.logger.info('  '+v)
                 self.SBerror=v
                 return True
 
@@ -381,7 +384,7 @@ class Main():
             error = TFormula('SBerror',text)
             error.Optimize()
             if ref.GetExpFormula()==error.GetExpFormula():
-                logging.info("Formula corresponding to the uncertainty calculation has been found and set to the variable main.SBerror :")
+                self.logger.info("Formula corresponding to the uncertainty calculation has been found and set to the variable main.SBerror :")
                 v=v.replace('ES','ZZ')
                 v=v.replace('EB','TT')
                 v=v.replace('S','SS')
@@ -390,7 +393,7 @@ class Main():
                 v=v.replace('BB','S')
                 v=v.replace('ZZ','EB')
                 v=v.replace('TT','ES')
-                logging.info('  '+v)
+                self.logger.info('  '+v)
                 self.SBerror=v
                 return True
 
@@ -403,7 +406,7 @@ class Main():
         try:
             os.chdir(theDir)
         except:
-            logging.error("Impossible to access the directory : "+theDir)
+            self.logger.error("Impossible to access the directory : "+theDir)
         self.user_DisplayParameter("currentdir")
 
     currentdir = property(get_currentdir, set_currentdir)
@@ -445,7 +448,7 @@ class Main():
             rebuild = forced or FirstUse or UpdateNeed or Missing
 
         if not rebuild:
-            logging.info('  => MadAnalysis libraries found.')
+            self.logger.info('  => MadAnalysis libraries found.')
 
             # Test the program
             if not os.path.isfile(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestSampleAnalyzer'):
@@ -460,18 +463,18 @@ class Main():
             rebuild = forced or FirstUse or UpdateNeed or Missing
 
         if not rebuild:
-            logging.info('  => MadAnalysis test program works.')
+            self.logger.info('  => MadAnalysis test program works.')
             return True
 
         # Compile library
         if FirstUse:
-            logging.info("  => First use of MadAnalysis (or the library is missing).")
+            self.logger.info("  => First use of MadAnalysis (or the library is missing).")
         elif Missing:
-            logging.info("  => Libraries are missing or system configuration has changed. Need to rebuild the library.")
+            self.logger.info("  => Libraries are missing or system configuration has changed. Need to rebuild the library.")
         elif UpdateNeed:
-            logging.info("  => System configuration has changed since the last use. Need to rebuild the library.")
+            self.logger.info("  => System configuration has changed since the last use. Need to rebuild the library.")
         elif forced:
-            logging.info("  => The user forces to rebuild the library.")
+            self.logger.info("  => The user forces to rebuild the library.")
         # Initializing the JobWriter
         compiler = LibraryWriter('lib',self)
 
@@ -506,10 +509,10 @@ class Main():
         libraries.append(['test_process','SampleAnalyzer core', 'test_process', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestSampleAnalyzer',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
 
         # Writing the Makefiles
-        logging.info("")
-        logging.info("   **********************************************************")
-        logging.info("                Building SampleAnalyzer libraries     ")
-        logging.info("   **********************************************************")
+        self.logger.info("")
+        self.logger.info("   **********************************************************")
+        self.logger.info("                Building SampleAnalyzer libraries     ")
+        self.logger.info("   **********************************************************")
 
 
         # Getting number of cores
@@ -528,18 +531,18 @@ class Main():
         #MakefileWriter.UserfriendlyMakefileForSampleAnalyzer(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Makefile',options)
 
         # Writing the setup
-        logging.info("   Writing the setup files ...")
+        self.logger.info("   Writing the setup files ...")
         from madanalysis.build.setup_writer import SetupWriter
         SetupWriter.WriteSetupFile(True,self.archi_info.ma5dir+'/tools/SampleAnalyzer/',self.archi_info)
         SetupWriter.WriteSetupFile(False,self.archi_info.ma5dir+'/tools/SampleAnalyzer/',self.archi_info)
         # Writing the makefile
-        logging.info("   Writing all the Makefiles ...")
+        self.logger.info("   Writing all the Makefiles ...")
         for ind in range(0,len(libraries)):
             if not compiler.WriteMakefileForInterfaces(libraries[ind][2]):
-                logging.error("library building aborted.")
+                self.logger.error("library building aborted.")
                 sys.exit()
         if not compiler.WriteMakefileForInterfaces('test'):
-            logging.error("test program building aborted.")
+            self.logger.error("test program building aborted.")
             sys.exit()
 
         # Compiling the libraries
@@ -551,65 +554,64 @@ class Main():
             else:
                 product='test program'
 
-            logging.info("   **********************************************************")
-            logging.info("   Component "+str(ind+1)+"/"+str(len(libraries))+" - "+product+": "+libraries[ind][1])
+            self.logger.info("   **********************************************************")
+            self.logger.info("   Component "+str(ind+1)+"/"+str(len(libraries))+" - "+product+": "+libraries[ind][1])
 
              # Cleaning the project
-            logging.info("     - Cleaning the project before building the "+product+" ...")
+            self.logger.info("     - Cleaning the project before building the "+product+" ...")
             if not compiler.MrProper(libraries[ind][2],libraries[ind][4]):
-                logging.error("The "+product+" building aborted.")
+                self.logger.error("The "+product+" building aborted.")
                 sys.exit()
 
             # Compiling
-            logging.info("     - Compiling the source files ...")
+            self.logger.info("     - Compiling the source files ...")
             if not compiler.Compile(ncores,libraries[ind][2],libraries[ind][4]):
-                logging.error("The "+product+" building aborted.")
+                self.logger.error("The "+product+" building aborted.")
                 sys.exit()
 
             # Linking
-            logging.info("     - Linking the "+product+" ...")
+            self.logger.info("     - Linking the "+product+" ...")
             if not compiler.Link(libraries[ind][2],libraries[ind][4]):
-                logging.error("The "+product+" building aborted.")
+                self.logger.error("The "+product+" building aborted.")
                 sys.exit()
 
             # Checking
-            logging.info("     - Checking that the "+product+" is properly built ...")
+            self.logger.info("     - Checking that the "+product+" is properly built ...")
             if not os.path.isfile(libraries[ind][3]):
-                logging.error("The "+product+" '"+libraries[ind][3]+"' is not produced.")
+                self.logger.error("The "+product+" '"+libraries[ind][3]+"' is not produced.")
                 sys.exit()
 
              # Cleaning the project
-            logging.info("     - Cleaning the project after building the "+product+" ...")
+            self.logger.info("     - Cleaning the project after building the "+product+" ...")
             if not compiler.Clean(libraries[ind][2],libraries[ind][4]):
-                logging.error("library building aborted.")
+                self.logger.error("library building aborted.")
                 sys.exit()
 
             if not isLibrary:
 
                 # Running the program test
-                logging.info("     - Running the test program ...")
+                self.logger.info("     - Running the test program ...")
                 program=libraries[ind][3].split('/')[-1]
                 if not compiler.Run(program,[],self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/'):
-                    logging.error("the test failed.")
+                    self.logger.error("the test failed.")
                     sys.exit()
 
                 # Checking the program output
-                logging.info("     - Checking the program output...")
+                self.logger.info("     - Checking the program output...")
                 if libraries[ind][0]=="configuration":
                     if not compiler.CheckRunConfiguration(program,self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/'):
-                        logging.error("the test failed.")
+                        self.logger.error("the test failed.")
                         sys.exit()
                 else:    
                     if not compiler.CheckRun(program,self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/'):
-                        logging.error("the test failed.")
+                        self.logger.error("the test failed.")
                         sys.exit()
 
             # Print Ok
-            sys.stdout.write("     => Status: ")
+            sys.stdout.write("MA5:      => Status: ")
             self.PrintOK()
 
-        logging.info("   **********************************************************")
-        logging.info("")
+        self.logger.info("   **********************************************************")
+        self.logger.info("")
 
         return True
-

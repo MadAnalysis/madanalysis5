@@ -55,21 +55,27 @@ class InterpreterBase(cmd.Cmd):
                              '^','!','=','>','<',',']
 
     def load(self,filename):
-        logging.info("Reading commands from '" + \
-                     filename + "' file ...")
-        input = TextFileReader(filename)
-        if not input.Open():
-            return False
+        if isinstance(filename,str):
+            logging.info("Reading commands from '" + \
+                         filename + "' file ...")
 
-        for line in input.file:
+            input = TextFileReader(filename)
+            if not input.Open():
+                return False
+            mycommands = input.file
+        else:
+            mycommands = filename
+
+        for line in mycommands:
             line = line.rstrip('\r\n')
             logging.info("ma5>"+line)
             line = self.precmd(line)
             stop = self.onecmd(line)
             stop = self.postcmd(stop, line)
 
-        input.Close()
-    
+        if isinstance(filename,str):
+            input.Close()
+
     def __init__(self, *arg, **opt):
         """Init history and line continuation"""
         
@@ -155,7 +161,7 @@ class InterpreterBase(cmd.Cmd):
         
         # execute the line command
         return line
-            
+
     def exec_cmd(self, line, errorhandling=False):
         """for third party call, call the line with pre and postfix treatment
         without global error handling """
@@ -167,7 +173,7 @@ class InterpreterBase(cmd.Cmd):
         else:
             stop = cmd.Cmd.onecmd(self, line)
         stop = self.postcmd(stop, line)
-        return stop      
+        return stop
 
     def run_cmd(self, line):
         """for third party call, call the line with pre and postfix treatment

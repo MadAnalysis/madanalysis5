@@ -35,8 +35,11 @@ import logging
 
 class CmdSelectionBase():
 
+    def __init__(self):
+        self.logger       = logging.getLogger('MA5')
+
     def DisplayObservableError(self,word):
-        logging.error("'"+word+\
+        self.logger.error("'"+word+\
                       "' is an unknown observable and cannot be used in a plot/cut definition.")
 
     def extract_observable(self,word,display=True):
@@ -46,7 +49,7 @@ class CmdSelectionBase():
             return word
         else:
             if display:
-                logging.error("'"+word+\
+                self.logger.error("'"+word+\
                               "' is an unwknown observable and cannot be used int a plot definition.")
             return None
 
@@ -96,7 +99,7 @@ class CmdSelectionBase():
 
         # Checking consistency between Observable and Number of arguments
         if len(arguments)!=len(obsRef.args):
-            logging.error("the observable '"+obsName+"' accepts "+
+            self.logger.error("the observable '"+obsName+"' accepts "+
                           str(len(obsRef.args))+" arguments whereas "+
                           str(len(arguments))+" arguments have been specified.")
             return None
@@ -112,7 +115,7 @@ class CmdSelectionBase():
                     return None
                 for parts in result:
                     if len(parts)!=1:
-                        logging.error("Argument "+str(iarg)+" of the observable "+\
+                        self.logger.error("Argument "+str(iarg)+" of the observable "+\
                                       obsName+" must be a particle/multiparticle "+\
                                       "and not a combination of "+\
                                       "particles/multiparticles.")
@@ -127,7 +130,7 @@ class CmdSelectionBase():
                    obsRef.combination==CombinationType.DIFFVECTOR:
                     for parts in result:
                         if len(parts)!=2:
-                            logging.error("the observable '"+obsName+ \
+                            self.logger.error("the observable '"+obsName+ \
                                           "' is a property of a "+\
                                           "(multi)particle *pair*.")
                             return None
@@ -156,7 +159,7 @@ class CmdSelectionBase():
             value=int(theString)
         except:
             value=None
-            logging.error("Argument '"+theString+"' must be an integer value.") 
+            self.logger.error("Argument '"+theString+"' must be an integer value.") 
         return value
 
 
@@ -166,7 +169,7 @@ class CmdSelectionBase():
             value=float(theString)
         except:
             value=None
-            logging.error("Argument '"+theString+"' must be an float value.") 
+            self.logger.error("Argument '"+theString+"' must be an float value.") 
         return value
 
 
@@ -174,16 +177,16 @@ class CmdSelectionBase():
 
         # Checking first and end position
         if words[0]=="and" or words[-1]=="and":
-            logging.error("the reserved word 'and' is incorrectly used.")
+            self.logger.error("the reserved word 'and' is incorrectly used.")
             return
         elif words[0]=="[" or words[-1]=="[":
-            logging.error("incorrect use of the opening bracket '['.")
+            self.logger.error("incorrect use of the opening bracket '['.")
             return
         elif words[0]=="]":
-            logging.error("incorrect use of the closing bracket ']'.")
+            self.logger.error("incorrect use of the closing bracket ']'.")
             return
         elif words[0]=="<" or words[-1]=="<":
-            logging.error("incorrect use of the '<' character.")
+            self.logger.error("incorrect use of the '<' character.")
             return
 
         # Creating ParticleObject
@@ -202,7 +205,7 @@ class CmdSelectionBase():
             elif item==")":
                 nBrackets-=1
                 if nBrackets<0:
-                    logging.error("problem with brackets () : too much " +\
+                    self.logger.error("problem with brackets () : too much " +\
                                   "more closing-brackets.")
                     return
                 
@@ -210,28 +213,28 @@ class CmdSelectionBase():
             elif PTrankMode>0:
                 if PTrankMode==1:
                     if len(parts)==0:
-                        logging.error("PT rank applied to no particle or " +\
+                        self.logger.error("PT rank applied to no particle or " +\
                                       "multiparticle.")
                         return
                     if item=="0":
-                        logging.error("PT rank cannot be equal to 0. " +\
+                        self.logger.error("PT rank cannot be equal to 0. " +\
                                       "The first PT rank is 1.")
                         return
                     try:
                         thePTrank = int(item)
                     except:
-                        logging.error("PT rank '" + item + "' is not valid")
+                        self.logger.error("PT rank '" + item + "' is not valid")
                         return
                     if len(mothers)==0:
                         if parts[-1].PTrank!=0:
-                            logging.error("You cannot specify several PT " +\
+                            self.logger.error("You cannot specify several PT " +\
                                           "ranks to '"+parts[-1].particle.name+\
                                           "'")
                             return
                         parts[-1].PTrank = thePTrank
                     else :
                         if mothers[-1].PTrank!=0:
-                            logging.error("You cannot specify several PT " +\
+                            self.logger.error("You cannot specify several PT " +\
                                           "ranks to '"+mothers[-1].particle.name+\
                                           "'")
                             return
@@ -239,7 +242,7 @@ class CmdSelectionBase():
                     PTrankMode=2
                 elif PTrankMode==2:
                     if item!="]":
-                        logging.error("closing-bracket ']' is expected "+\
+                        self.logger.error("closing-bracket ']' is expected "+\
                                       "instead of '" + item + "'")
                         return
                     PTrankMode=0
@@ -248,7 +251,7 @@ class CmdSelectionBase():
             elif motherMode>0:
                 if item=="<":
                     if motherMode!=1:
-                        logging.error("too much number of '<' character")
+                        self.logger.error("too much number of '<' character")
                         return
                     motherMode=2
                 elif self.main.multiparticles.Find(item):
@@ -270,14 +273,14 @@ class CmdSelectionBase():
                     mothers.append(theMother)
                     motherMode=0
                 else:
-                    logging.error("'"+item+"' is not a defined "+\
+                    self.logger.error("'"+item+"' is not a defined "+\
                                   "(multi)particle.")
                     return
 
             # Normal mode
             elif item=="and":
                 if ALLmode and len(parts)>1:
-                    logging.error("Reversed word 'all' must be applied in front of only (multi)particle")
+                    self.logger.error("Reversed word 'all' must be applied in front of only (multi)particle")
                     return
                 object.Add(parts,ALLmode)
                 parts=[]
@@ -285,36 +288,36 @@ class CmdSelectionBase():
                 ALLmode=False
             elif item=="all":
                 if len(parts)!=0:
-                    logging.error("Reserved word 'all' must be applied in front of a (multi)particle")
+                    self.logger.error("Reserved word 'all' must be applied in front of a (multi)particle")
                     return 
                 ALLmode=True
             elif item=="[":
                 if PTrankMode!=0:
-                    logging.error("You cannot specify several PT rank '[]'")
+                    self.logger.error("You cannot specify several PT rank '[]'")
                     return
                 PTrankMode=1
             elif item=="<":
                 # Should not occur
                 if motherMode!=0:
-                    logging.error("problem with character '<'")
+                    self.logger.error("problem with character '<'")
                     return
                 motherMode=1
             elif self.main.multiparticles.Find(item):
                 parts.append(ExtraParticle(self.main.multiparticles.Get(item)))
                 mothers=[]
             else:
-                logging.error("'"+item+"' is not a defined "+"(multi)particle.")
+                self.logger.error("'"+item+"' is not a defined "+"(multi)particle.")
                 return
 
         # End
         if nBrackets>0:
-            logging.error("problem with brackets () : too much " +\
+            self.logger.error("problem with brackets () : too much " +\
                                   "more opening-brackets")
             return
         
         if len(parts)!=0:
             if ALLmode and len(parts)>1:
-                logging.error("Reversed word 'all' must be applied in front of only (multi)particle")
+                self.logger.error("Reversed word 'all' must be applied in front of only (multi)particle")
                 return
             object.Add(parts,ALLmode)
         return object

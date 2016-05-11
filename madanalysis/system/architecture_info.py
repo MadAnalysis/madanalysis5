@@ -60,7 +60,7 @@ class ArchitectureInfo:
         self.toLDPATH1 = []
         self.toPATH2   = []
         self.toLDPATH2 = []
-    
+
         self.root_bin_path=""
         self.root_inc_path=""
         self.root_lib_path=""
@@ -77,31 +77,30 @@ class ArchitectureInfo:
         self.fastjet_bin_path=""
         self.fastjet_lib_paths=[]
 
-
     def dump(self):
         for item in self.__dict__:
-            logging.debug(item+'\t'+str(self.__dict__[item]))
+            logging.getLogger('MA5').debug(item+'\t'+str(self.__dict__[item]))
 
     def __eq__(self,other):
-        logging.debug("Compare 2 ArchitureInfo objects:")
-        logging.debug("The current one (number of items="+str(len(self.__dict__))+"):")
-        logging.debug(str(self.__dict__))
-        logging.debug("The other   one (number of items="+str(len(other.__dict__))+"):")
-        logging.debug(str(other.__dict__))
+        logging.getLogger('MA5').debug("Compare 2 ArchitureInfo objects:")
+        logging.getLogger('MA5').debug("The current one (number of items="+str(len(self.__dict__))+"):")
+        logging.getLogger('MA5').debug(str(self.__dict__))
+        logging.getLogger('MA5').debug("The other   one (number of items="+str(len(other.__dict__))+"):")
+        logging.getLogger('MA5').debug(str(other.__dict__))
         items_ok = self.__dict__.keys() == other.__dict__.keys()
         if not items_ok:
             diff = list(set(self.__dict__.keys()) - set(other.__dict__.keys()))
-            logging.debug("The comparison of categories -> differences detected: "+str(diff))
+            logging.getLogger('MA5').debug("The comparison of categories -> differences detected: "+str(diff))
             return False
-        logging.debug("The comparison of categorie names -> OK")
-        logging.debug("The comparison of categorie values:")
+        logging.getLogger('MA5').debug("The comparison of categorie names -> OK")
+        logging.getLogger('MA5').debug("The comparison of categorie values:")
         diff=False
         for key in self.__dict__.keys():
             if self.__dict__[key] != other.__dict__[key]:
-                logging.debug("  -> difference here: "+str(key))
+                logging.getLogger('MA5').debug("  -> difference here: "+str(key))
                 diff=True
         if not diff:
-            logging.debug("  -> OK")
+            logging.getLogger('MA5').debug("  -> OK")
 
         return self.__dict__==other.__dict__
 
@@ -114,7 +113,7 @@ class ArchitectureInfo:
         try:
             file = open(filename,"w")
         except:
-            logging.error("impossible to write the configuration file '" + \
+            logging.getLogger('MA5').error("impossible to write the configuration file '" + \
                           filename + "'")
             return False
 
@@ -124,7 +123,7 @@ class ArchitectureInfo:
             pickle.dump(self,file)
             test=True
         except:
-            logging.error("error occured during saving data to "+filename)
+            logging.getLogger('MA5').error("error occured during saving data to "+filename)
             test=False
 
         # Close the file
@@ -139,7 +138,7 @@ class ArchitectureInfo:
         try:
             file = open(filename,"r")
         except:
-            logging.error("impossible to read the configuration file '" + \
+            logging.getLogger('MA5').error("impossible to read the configuration file '" + \
                           filename + "'")
             return False
 
@@ -149,7 +148,7 @@ class ArchitectureInfo:
             newone = pickle.load(file)
             test=True
         except:
-            logging.error("error occured during reading data from "+filename)
+            logging.getLogger('MA5').error("error occured during reading data from "+filename)
             test=False
 
         # Close the file
@@ -164,7 +163,7 @@ class ArchitectureInfo:
             for item in self.__dict__:
                 self.__dict__[item]=copy.copy(newone.__dict__[item])
         except:
-            logging.error("error occured during copying data from "+filename)
+            logging.getLogger('MA5').error("error occured during copying data from "+filename)
             test=False
 
         # Return the operation status

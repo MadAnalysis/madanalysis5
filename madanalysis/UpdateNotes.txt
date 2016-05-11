@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+123  1.4.7    (2016/05/10) fuks:    MadGraph interface at the parton level 
+
 122  1.4.6    (2016/05/06) fuks:    regions first step + bug in zlib (merci Valentin) 
 
 121  1.4.5    (2016/05/06) fuks:    Cleaning the recasting stuff and the madgraph interface stuff 

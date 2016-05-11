@@ -37,7 +37,6 @@ class MA5mode():
       self.recolevel   = False
       self.expertmode  = False
       self.forcedmode  = False
-      self.mg5mode     = False
       self.scriptmode  = False
       self.debug       = False
       self.build       = False
@@ -59,7 +58,7 @@ def DecodeArguments(version, date):
                                      "PHReEvhfmsbd", \
                                      ["partonlevel","hadronlevel","recolevel",\
                                       "expert","version","release","help",\
-                                      "forced","script","mg5","debug","build"])
+                                      "forced","script","debug","build"])
     except getopt.GetoptError, err:
         logging.error(str(err))
         Usage()
@@ -80,8 +79,6 @@ def DecodeArguments(version, date):
             mode.expertmode=True
         elif o in ["-f","--forced"]:
             mode.forcedmode=True
-        elif o in ["-m","--mg5"]:
-            mode.mg5mode=True
         elif o in ["-s","--script"]:
             mode.scriptmode=True
         elif o in ["-v","--version","--release"]:
@@ -145,7 +142,6 @@ def MainSession(mode,arglist,ma5dir,version,date):
     main.forced = mode.forcedmode
     Main.forced = mode.forcedmode
     main.script = mode.scriptmode
-    main.mg5    = mode.mg5mode
 
     # Setting batch mode for ROOT
     #sys.argv.append('-b-')
@@ -333,4 +329,7 @@ def LaunchMA5(version, date, ma5dir):
         logging.info(StringTools.Center('RESTART THE MADANALYSIS 5 SESSION',40))
         logging.info(StringTools.Fill('-',40))
         logging.info("")
-    
+
+
+
+

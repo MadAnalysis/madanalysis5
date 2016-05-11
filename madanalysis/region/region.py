@@ -25,7 +25,7 @@ import logging
 class Region:
 
     def __init__(self,name):
-        self.logger       = logging.getLogger('madanalysis')
+        self.logger       = logging.getLogger('MA5')
         self.name              = name.lower()
         self.selections        = []
         self.histos            = []

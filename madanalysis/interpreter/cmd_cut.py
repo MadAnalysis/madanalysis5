@@ -58,15 +58,18 @@ class CmdCut(CmdBase,CmdSelectionBase):
             return
 
         foundArguments  = False
+        foundRegions    = False
         foundOptions    = False
-        foundConditions = False 
+        foundConditions = False
 
         # 1. First check : counting number of braces ( ) and [ ]
         # 2. Detecting if there is argument or option
         endArguments=-1
         beginOptions=-1
+        beginRegions=-1
         Nbracket1=0
         Nbracket2=0
+        Nbracket3=0
         for i in range(0,len(args)):
             if args[i]=='(':
                 Nbracket1+=1
@@ -78,11 +81,18 @@ class CmdCut(CmdBase,CmdSelectionBase):
             elif args[i]=='[':
                 Nbracket2+=1
                 beginOptions=i
+            elif args[i]=='{':
+                Nbracket3+=1
+                beginRegions=i
+            elif args[i]=='}':
+                Nbracket3-=1
+                if i==(len(args)-1) or '[' in args[i+1:]:
+                    foundRegions=True
             elif args[i]==']':
                 Nbracket2-=1
-                if i==(len(args)-1):
+                if i==(len(args)-1) or '{' in args[i+1:]:
                     foundOptions=True
-                
+
         if Nbracket1!=0:
             logging.error("number of opening-bracket '(' and number of " +\
                           "closing-braket ')' does not match.")
@@ -90,6 +100,11 @@ class CmdCut(CmdBase,CmdSelectionBase):
         if Nbracket2!=0:
             logging.error("number of opening-bracket '[' and number of " +\
                           "closing-braket ']' does not match.")
+            return
+
+        if Nbracket3!=0:
+            logging.error("number of opening-bracket '{' and number of " +\
+                          "closing-braket '}' does not match.")
             return
 
         if not foundOptions:
@@ -140,7 +155,7 @@ class CmdCut(CmdBase,CmdSelectionBase):
                                            partType=None)
         if result==None:
             return
-            
+
         # Creating cut
         cut = Cut(parts,condition,self.cut_type)
 

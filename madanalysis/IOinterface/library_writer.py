@@ -40,12 +40,13 @@ class LibraryWriter():
         self.jobdir     = jobdir
         self.main       = main
         self.path       = os.path.normpath(self.main.archi_info.ma5dir+"/tools/")
+        self.logger     = logging.getLogger('MA5')
 
     def get_ncores(self):
         # Number of cores
         import multiprocessing
         nmaxcores=multiprocessing.cpu_count()
-        logging.info("     => How many cores for the compiling? default = max = " +\
+        self.logger.info("     => How many cores for the compiling? default = max = " +\
                      str(nmaxcores)+"")
         
         if not self.main.forced:
@@ -66,7 +67,7 @@ class LibraryWriter():
                     
         else:
             ncores=nmaxcores
-        logging.info("     Number of cores used for the compilation = " +\
+        self.logger.info("     Number of cores used for the compilation = " +\
                      str(ncores))
         return ncores
 
@@ -74,7 +75,7 @@ class LibraryWriter():
         # Number of cores
         import multiprocessing
         nmaxcores=multiprocessing.cpu_count()
-        logging.info("   How many cores for the compiling? default = max = " +\
+        self.logger.info("   How many cores for the compiling? default = max = " +\
                      str(nmaxcores)+"")
         
         if not self.main.forced:
@@ -95,7 +96,7 @@ class LibraryWriter():
                     
         else:
             ncores=nmaxcores
-        logging.info("   => Number of cores used for the compilation = " +\
+        self.logger.info("   => Number of cores used for the compilation = " +\
                      str(ncores))
         return ncores
 
@@ -334,8 +335,8 @@ class LibraryWriter():
 
         # return result
         if not result:
-            logging.error('impossible to compile the project. For more details, see the log file:')
-            logging.error(logfile)
+            self.logger.error('impossible to compile the project. For more details, see the log file:')
+            self.logger.error(logfile)
             
         return result
 
@@ -366,8 +367,8 @@ class LibraryWriter():
 
         # return result
         if not result:
-            logging.error('impossible to link the project. For more details, see the log file:')
-            logging.error(logfile)
+            self.logger.error('impossible to link the project. For more details, see the log file:')
+            self.logger.error(logfile)
             
         return result
 
@@ -398,8 +399,8 @@ class LibraryWriter():
 
         # return result
         if not result:
-            logging.error('impossible to clean the project. For more details, see the log file:')
-            logging.error(logfile)
+            self.logger.error('impossible to clean the project. For more details, see the log file:')
+            self.logger.error(logfile)
             
         return result
 
@@ -413,7 +414,7 @@ class LibraryWriter():
             logfile = folder+'/mrproper_'+package[5:]+'.log'
         else:
             logfile = folder+'/mrproper_'+package+'.log'
-        logging.debug("LogFile: "+logfile)
+        self.logger.debug("LogFile: "+logfile)
 
 
         # makefile
@@ -423,19 +424,19 @@ class LibraryWriter():
             makefile = 'Makefile_'+package[5:]
         else:
             makefile = 'Makefile_'+package
-        logging.debug("Makefile: "+makefile)
+        self.logger.debug("Makefile: "+makefile)
 
         # shell command
         commands = ['make','mrproper','--file='+makefile]
-        logging.debug("Command: "+" ".join(commands))
+        self.logger.debug("Command: "+" ".join(commands))
 
         # call
         result, out = ShellCommand.ExecuteWithLog(commands,logfile,folder)
 
         # return result
         if not result:
-            logging.error('impossible to clean the project. For more details, see the log file:')
-            logging.error(logfile)
+            self.logger.error('impossible to clean the project. For more details, see the log file:')
+            self.logger.error(logfile)
             
         return result
 
@@ -445,19 +446,19 @@ class LibraryWriter():
         # shell command
         commands = ['./'+program]
         commands.extend(args)
-        logging.debug("Command: "+" ".join(commands))
+        self.logger.debug("Command: "+" ".join(commands))
 
         # logfile
         logfile = os.path.normpath(folder+'/'+program+'.log')
-        logging.debug("LogFile: "+logfile)
+        self.logger.debug("LogFile: "+logfile)
 
         # call
         result, out = ShellCommand.ExecuteWithLog(commands,logfile,folder,silent)
 
         # return result
         if not result and not silent:
-            logging.error('impossible to run the project. For more details, see the log file:')
-            logging.error(logfile)
+            self.logger.error('impossible to run the project. For more details, see the log file:')
+            self.logger.error(logfile)
             
         return result
 
@@ -466,13 +467,13 @@ class LibraryWriter():
 
         # log file name
         logfile = os.path.normpath(folder+'/'+program+'.log')
-        logging.debug("LogFile: "+logfile)
+        self.logger.debug("LogFile: "+logfile)
 
         # Open
         try:
             input = open(logfile)
         except:
-            logging.error('impossible to open the file:'+logfile)
+            self.logger.error('impossible to open the file:'+logfile)
             return False
 
         end=False
@@ -484,22 +485,22 @@ class LibraryWriter():
             line=line.rstrip()
             if line=='BEGIN-SAMPLEANALYZER-TEST':
                 begin=True
-                logging.debug("Analyzing output file: OK -> Begin Stamp found")
+                self.logger.debug("Analyzing output file: OK -> Begin Stamp found")
             elif line=='END-SAMPLEANALYZER-TEST':
-                logging.debug("Analyzing output file: OK -> End Stamp")
+                self.logger.debug("Analyzing output file: OK -> End Stamp")
                 end=True
 
         # Close
         try:
             input.close()
         except:
-            logging.error('impossible to close the file:'+logfile)
+            self.logger.error('impossible to close the file:'+logfile)
             return False
 
         # CrossCheck
         if not (begin and end): # and not silent:
-            logging.error('expected program output is not found. More details, see the log file:')
-            logging.error(logfile)
+            self.logger.error('expected program output is not found. More details, see the log file:')
+            self.logger.error(logfile)
             return False
 
         return True
@@ -510,13 +511,13 @@ class LibraryWriter():
 
         # log file name
         logfile = os.path.normpath(folder+'/'+program+'.log')
-        logging.debug("LogFile: "+logfile)
+        self.logger.debug("LogFile: "+logfile)
 
         # Open
         try:
             input = open(logfile)
         except:
-            logging.error('impossible to open the file:'+logfile)
+            self.logger.error('impossible to open the file:'+logfile)
             return False
 
         end=False
@@ -529,25 +530,25 @@ class LibraryWriter():
             line=line.rstrip()
             if line=='MA5 C++ PORTABILITY CHECK-UP - BEGIN':
                 begin=True
-                logging.debug("Analyzing output file: OK -> Begin Stamp found")
+                self.logger.debug("Analyzing output file: OK -> Begin Stamp found")
             elif line=='MA5 C++ PORTABILITY CHECK-UP   - END':
                 end=True
-                logging.debug("Analyzing output file: OK -> Begin Stamp found")
+                self.logger.debug("Analyzing output file: OK -> Begin Stamp found")
             elif line=='FINAL TEST = OK':
                 ok=True
-                logging.debug("Analyzing output file: OK -> Successful test found")
+                self.logger.debug("Analyzing output file: OK -> Successful test found")
 
         # Close
         try:
             input.close()
         except:
-            logging.error('impossible to close the file:'+logfile)
+            self.logger.error('impossible to close the file:'+logfile)
             return False
 
         # CrossCheck
         if not (begin and end and ok): # and not silent:
-            logging.error('expected program output is not found. More details, see the log file:')
-            logging.error(logfile)
+            self.logger.error('expected program output is not found. More details, see the log file:')
+            self.logger.error(logfile)
             return False
 
         return True

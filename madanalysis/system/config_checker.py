@@ -58,7 +58,7 @@ class ConfigChecker:
         self.includes = []
         self.fillHeaders()
         self.debug=debug
-        self.logger = logging.getLogger('madanalysis')
+        self.logger = logging.getLogger('MA5')
 
     def FillMA5Path(self):
         os.environ['MA5_BASE']=self.archi_info.ma5dir
@@ -92,7 +92,7 @@ class ConfigChecker:
         mytab += '- '
         mywidth = '%-'+str(width)+'s'
         mywidth = mywidth % text
-        sys.stdout.write(mytab+mywidth)
+        sys.stdout.write('MA5: '+mytab+mywidth)
         sys.stdout.flush()
 
 
@@ -744,8 +744,8 @@ class ConfigChecker:
             if not getpaths:
                 self.logger.debug("User setting: veto on Delphes")
                 self.PrintFAIL(warning=True)
-                self.logger.warning("Library called 'delphes' disabled.")
-                self.logger.warning("Delphes ROOT format will be disabled.")
+#                self.logger.warning("Library called 'delphes' disabled.")
+#                self.logger.warning("Delphes ROOT format will be disabled.")
             return False
 
         # Does the user force the paths?
@@ -814,9 +814,9 @@ class ConfigChecker:
                     else:
                         self.logger.debug("-> not found")
                         self.PrintFAIL(warning=True)
-                        self.logger.warning("DelphesMA5tune folder not found.")
-                        self.logger.warning("Delphes-MA5tune ROOT format will be disabled.")
-                        self.logger.warning("To enable this format, please type 'install delphesMA5tune'.")
+#                        self.logger.warning("Delphes folder not found.")
+#                        self.logger.warning("Delphes ROOT format will be disabled.")
+#                        self.logger.warning("To enable this format, please type 'install delphes'.")
                 return False
 
         # Check if the libraries and headers are available
@@ -829,9 +829,9 @@ class ConfigChecker:
                 if not getpaths:
                     self.logger.debug("-> not found")
                     self.PrintFAIL(warning=True)
-                    self.logger.warning("Header file called '"+filename+"' not found.")
-                    self.logger.warning("Delphes ROOT format will be disabled.")
-                    self.logger.warning("To enable this format, please type 'install delphes'.")
+#                    self.logger.warning("Header file called '"+filename+"' not found.")
+#                    self.logger.warning("Delphes ROOT format will be disabled.")
+#                    self.logger.warning("To enable this format, please type 'install delphes'.")
                 return False
             else:
                 if not getpaths:
@@ -847,9 +847,9 @@ class ConfigChecker:
             if self.archi_info.delphes_lib=="":
                 if not getpaths:
                     self.PrintFAIL(warning=True)
-                    self.logger.warning("Delphes library not found in "+self.archi_info.delphes_lib_paths[0]+" folder.")
-                    self.logger.warning("Delphes ROOT format will be disabled.")
-                    self.logger.warning("To enable this format, please type 'install delphes'.")
+#                    self.logger.warning("Delphes library not found in "+self.archi_info.delphes_lib_paths[0]+" folder.")
+#                    self.logger.warning("Delphes ROOT format will be disabled.")
+#                    self.logger.warning("To enable this format, please type 'install delphes'.")
                 return False
             self.archi_info.delphes_lib=os.path.normpath(myfile)
 
@@ -868,9 +868,9 @@ class ConfigChecker:
             if len(self.archi_info.delphes_inc_paths)==0:
                 if not getpaths:
                     self.PrintFAIL(warning=True)
-                    self.logger.warning("Header file called '/modules/ParticlePropagator.h' not found.")
-                    self.logger.warning("Delphes ROOT format will be disabled.")
-                    self.logger.warning("To enable this format, please type 'install delphes'.")
+#                    self.logger.warning("Header file called '/modules/ParticlePropagator.h' not found.")
+#                    self.logger.warning("Delphes ROOT format will be disabled.")
+#                    self.logger.warning("To enable this format, please type 'install delphes'.")
                 return False
 
             # lib
@@ -918,7 +918,7 @@ class ConfigChecker:
             if not getpaths:
                 self.logger.debug("User setting: veto on Delphes-MA5tune")
                 self.PrintFAIL(warning=True)
-                self.logger.warning("Delphes-MA5tune is disabled. Delphes-MA5tune ROOT format will be disabled.")
+#                self.logger.warning("Delphes-MA5tune is disabled. Delphes-MA5tune ROOT format will be disabled.")
             return False
 
         # Does the user force the paths?
@@ -987,9 +987,9 @@ class ConfigChecker:
                     else:
                         self.logger.debug("-> not found")
                         self.PrintFAIL(warning=True)
-                        self.logger.warning("DelphesMA5tune folder not found.")
-                        self.logger.warning("Delphes-MA5tune ROOT format will be disabled.")
-                        self.logger.warning("To enable this format, please type 'install delphesMA5tune'.")
+#                        self.logger.warning("DelphesMA5tune folder not found.")
+#                        self.logger.warning("Delphes-MA5tune ROOT format will be disabled.")
+#                        self.logger.warning("To enable this format, please type 'install delphesMA5tune'.")
                 return False
 
         # Check if the libraries and headers are available
@@ -1002,9 +1002,9 @@ class ConfigChecker:
                 if not getpaths:
                     self.logger.debug("-> not found")
                     self.PrintFAIL(warning=True)
-                    self.logger.warning("Header file called '"+filename+"' not found.")
-                    self.logger.warning("Delphes-MA5tune ROOT format will be disabled.")
-                    self.logger.warning("To enable this format, please type 'install delphesMA5tune'.")
+#                    self.logger.warning("Header file called '"+filename+"' not found.")
+#                    self.logger.warning("Delphes-MA5tune ROOT format will be disabled.")
+#                    self.logger.warning("To enable this format, please type 'install delphesMA5tune'.")
                 return False
             else:
                 if not getpaths:
@@ -1022,10 +1022,10 @@ class ConfigChecker:
             if self.archi_info.delphesMA5tune_lib=="":
                 if not getpaths:
                     self.PrintFAIL(warning=True)
-                    self.logger.warning("Delphes-MA5tune library not found in "+\
-                      self.archi_info.delphesMA5tune_lib_paths[0]+" folder.")
-                    self.logger.warning("Delphes-MA5tune ROOT format will be disabled.")
-                    self.logger.warning("To enable this format, please type 'install delphesMA5tune'.")
+#                    self.logger.warning("Delphes-MA5tune library not found in "+\
+#                      self.archi_info.delphesMA5tune_lib_paths[0]+" folder.")
+#                    self.logger.warning("Delphes-MA5tune ROOT format will be disabled.")
+#                    self.logger.warning("To enable this format, please type 'install delphesMA5tune'.")
                 return False
             self.archi_info.delphesMA5tune_lib      = os.path.normpath(myfile)
             

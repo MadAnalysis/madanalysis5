@@ -37,7 +37,7 @@ class CheckUp():
         self.session_info = session_info
         self.debug        = debug
         self.script       = script
-        self.logger       = logging.getLogger('madanalysis')
+        self.logger       = logging.getLogger('MA5')
 
     def CheckArchitecture(self):
 
@@ -55,16 +55,14 @@ class CheckUp():
         self.archi_info.ncores = multiprocessing.cpu_count()
 
         # Is Mac
-        sys.stdout.write("Platform: "+self.archi_info.platform+" "+self.archi_info.release+" ")
-        sys.stdout.flush()
+        platform_text= "Platform: "+self.archi_info.platform+" "+self.archi_info.release+" "
         if self.archi_info.platform.lower() in ['darwin','mac','macosx']:
             self.archi_info.isMac = True
-            sys.stdout.write('\x1b[32m'+'[MAC/OSX mode]'+'\x1b[0m'+'\n')
-            sys.stdout.flush()
+            platform_text+='\x1b[32m'+'[MAC/OSX mode]'+'\x1b[0m'
         else:
             self.archi_info.isMac = False
-            sys.stdout.write('\x1b[32m'+'[Linux mode]'+'\x1b[0m'+'\n')
-            sys.stdout.flush()
+            platform_text+='\x1b[32m'+'[Linux mode]'+'\x1b[0m'
+        self.logger.info(platform_text)
 
         # Info for debug mode
         if self.debug:
