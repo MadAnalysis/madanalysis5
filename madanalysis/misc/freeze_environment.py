@@ -25,6 +25,9 @@
 
 import os
 
+class Architecture(Exception):
+    pass
+
 def freeze_environment(func):
 
     def newf(self, *args, **opts):
@@ -38,6 +41,8 @@ def freeze_environment(func):
 
         # restoring the environement
         self.ma5_environ.update(os.environ)
+        if not self.main.archi_info.save(self.archi_info.ma5dir+'/tools/architecture.ma5'):
+            raise Architecture('Cannot save the architecture')
         os.environ.clear()
         os.environ.update(old_environ)
 

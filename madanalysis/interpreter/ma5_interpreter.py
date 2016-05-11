@@ -72,26 +72,6 @@ class MA5Interpreter(Interpreter):
         if not sys.version_info[0] == 2 or sys.version_info[1] < 6:
             raise InvalidPython('Python release '+ sys.version + ' not supported.\n' + \
             'MadAnalysis 5 works only with python 2.6 or later (but not python 3.X).')
-        try:
-            import readline
-        except ImportError:
-            try:
-                import pyreadline as readline
-            except:
-                print "For tab completion and history, install module readline."
-        else:
-            import rlcompleter
-            if 'r261:67515' in sys.version and  'GCC 4.2.1 (Apple Inc. build 5646)' in sys.version:
-                readline.parse_and_bind("bind ^I rl_complete")
-                readline.__doc__ = 'libedit'  
-            elif hasattr(readline, '__doc__'):
-                if 'libedit' not in readline.__doc__:
-                    readline.parse_and_bind("tab: complete")
-                else:
-                    readline.parse_and_bind("bind ^I rl_complete")
-            else:
-                readline.__doc__ = 'GNU'
-                readline.parse_and_bind("tab: complete")
 
         # Checking the MA5 path and adding it to sys.path
         if not os.path.isdir(ma5dir):
@@ -125,35 +105,26 @@ class MA5Interpreter(Interpreter):
             raise InvalidMA5version('Cannot find the ma5 version info file')
 
         # Loading the MadAnalysis session
-        self.main = Main()
-        self.main.archi_info.ma5dir      = ma5dir
-        self.main.archi_info.ma5_version = version
-        self.main.archi_info.ma5_date    = date
-        self.main.forced = forced
+        main = Main()
+        main.archi_info.ma5dir      = ma5dir
+        main.archi_info.ma5_version = version
+        main.archi_info.ma5_date    = date
+        main.forced = forced
         Main.forced = forced
 
         # Displaying header
-        self.logger.info('*************************************************************')
-        self.logger.info('*        W E L C O M E  to  M A D A N A L Y S I S  5        *')
-        self.logger.info('*                                                           *')
-        self.logger.info('*   MA5 release : ' + \
-                "%-24s" % self.main.archi_info.ma5_version + "%+15s" % self.main.archi_info.ma5_date  + '   *')
-        self.logger.info('*                                                           *') 
-        self.logger.info('*         Comput. Phys. Commun. 184 (2013) 222-256          *')
-        self.logger.info('*             Eur. Phys. J. C74 (2014) 3103                 *')
-        self.logger.info('*************************************************************')
+        self.logger.setLevel(LoggerLevel)
 
         # Checking the configuration
-        self.logger.setLevel(LoggerLevel)
-        if not self.main.CheckConfig(debug=(LoggerLevel<=logging.DEBUG)):
+        if not main.CheckConfig(debug=(LoggerLevel<=logging.DEBUG)):
             raise MA5Configuration('Issue with the configuration')
         self.ma5_environ = dict(os.environ)
 
+        # Initializing the interpreter and compiling if needed
+        Interpreter.__init__(self, main, *args, **opts)
+
         if not no_compilation:
             self.compile()
-
-        # Initializing the interpreter
-        Interpreter.__init__(self, self.main, *args, **opts)
 
         # Backuping the environment
         os.environ.clear()
@@ -174,4 +145,16 @@ class MA5Interpreter(Interpreter):
 
     @freeze_environment
     def load(self, *args, **opts):
+        banner_level=90
+        self.logger.log(banner_level,'*************************************************************')
+        self.logger.log(banner_level,'*        W E L C O M E  to  M A D A N A L Y S I S  5        *')
+        self.logger.log(banner_level,'*                                                           *')
+        self.logger.log(banner_level,'*   MA5 release : ' + \
+                "%-24s" % self.main.archi_info.ma5_version + "%+15s" % self.main.archi_info.ma5_date  + '   *')
+        self.logger.log(banner_level,'*                                                           *')
+        self.logger.log(banner_level,'*         Comput. Phys. Commun. 184 (2013) 222-256          *')
+        self.logger.log(banner_level,'*             Eur. Phys. J. C74 (2014) 3103                 *')
+        self.logger.log(banner_level,'*************************************************************')
+
         Interpreter.load(self,*args,**opts)
+

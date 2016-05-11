@@ -58,11 +58,20 @@ class CmdInstall(CmdBase):
                 return False
             elif ResuActi == 1 and not self.main.archi_info.has_delphes:
                 self.logger.warning("Delphes not installed: installing it...")
-                if pad:
-                    installer.Execute('delphes')
-                    return False
-                else:
-                    return installer.Execute('delphes')
+                resu = installer.Execute('delphes')
+                if resu:
+                    main.archi_info.has_delphes=True
+                    main.archi_info.delphes_priority=True
+                    dpath =  os.path.normpath(os.path.join(main.archi_info.ma5dir,'tools','delphes'))
+                    mylib = os.path.normpath(os.path.join(dpath,'libDelphes.so'))
+                    main.archi_info.libraries['Delphes']= mylib+":"+str(os.stat(mylib).st_mtime)
+                    main.archi_info.delphes_lib = mylib
+                    main.archi_info.toLDPATH1 = [x for x in main.archi_info.toLDPATH1 if not 'MA5tune' in x]
+                    main.archi_info.toLDPATH1.append(dpath)
+                    main.archi_info.delphes_lib_paths = [dpath]
+                    main.archi_info.delphes_inc_paths =\
+                     [dpath, os.path.normpath(os.path.join(dpath,'external'))]
+                    return resu
             elif ResuActi == 0 and self.main.archi_info.has_delphes and not pad:
                 self.logger.warning("A previous installation of Delphes has been found. Skipping the installation.")
                 self.logger.warning("To update Delphes, please remove the tools/delphes directory")
@@ -77,11 +86,20 @@ class CmdInstall(CmdBase):
                 return False
             elif ResuActi == 1 and not self.main.archi_info.has_delphesMA5tune:
                 self.logger.warning("DelphesMA5tune not installed: installing it...")
-                if pad:
-                    installer.Execute('delphesMA5tune')
-                    return False
-                else:
-                    return installer.Execute('delphesMA5tune')
+                resu = installer.Execute('delphesMA5tune')
+                if resu:
+                    main.archi_info.has_delphesMA5tune=True
+                    main.archi_info.delphesMA5tune_priority=True
+                    dpath =  os.path.normpath(os.path.join(main.archi_info.ma5dir,'tools','delphesMA5tune'))
+                    mylib = os.path.normpath(os.path.join(dpath,'libDelphesMA5tune.so'))
+                    main.archi_info.libraries['DelphesMA5tune']= mylib+":"+str(os.stat(mylib).st_mtime)
+                    main.archi_info.delphesMA5tune_lib=mylib
+                    main.archi_info.toLDPATH1 = [x for x in main.archi_info.toLDPATH1 if not 'delphes' in x]
+                    main.archi_info.toLDPATH1.append(dpath)
+                    main.archi_info.delphesMA5tune_lib_paths = [dpath]
+                    main.archi_info.delphesMA5tune_inc_paths =\
+                      [dpath, os.path.normpath(os.path.join(dpath,'external'))]
+                return resu
             elif ResuActi == 0 and self.main.archi_info.has_delphesMA5tune and not pad:
                 self.logger.warning("A previous installation of DelphesMA5tune has been found. Skipping the installation.")
                 self.logger.warning("To update DelphesMA5tune, please remove the tools/delphesMA5tune directory")

@@ -280,13 +280,13 @@ class DetectManager():
 
     def Print(self,status):
         if status==DetectStatusType.FOUND:
-            PrintOK()
+            PrintOK('')
         elif status==DetectStatusType.UNFOUND:
-            PrintDISABLED()
+            PrintDISABLED('')
         elif status==DetectStatusType.DEACTIVATED:
-            PrintDEACTIVATED()
+            PrintDEACTIVATED('')
         elif status==DetectStatusType.ISSUE:
-            PrintFAILURE()
+            PrintFAILURE('')
 
     def PrintOK(self,text):
         self.logger.info(text+'\x1b[32m'+'[OK]'+'\x1b[0m')

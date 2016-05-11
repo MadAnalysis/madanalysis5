@@ -193,19 +193,19 @@ class InstallManager():
 
     def PrintGood(self):
         self.logger.info("   Installation complete.")
-        self.logger.info('   => Status: \x1b[32m'+'[OK]'+'\x1b[0m'+'\n')
+        self.logger.info('   => Status: \x1b[32m'+'[OK]'+'\x1b[0m')
         self.logger.info("   **********************************************************")
         self.logger.info("")
 
     def PrintSkip(self):
         self.logger.info("   Installation skipped.")
-        self.logger.info('   => Status: \x1b[35m'+'[SKIPPED]'+'\x1b[0m'+'\n')
+        self.logger.info('   => Status: \x1b[35m'+'[SKIPPED]'+'\x1b[0m')
         self.logger.info("   **********************************************************")
         self.logger.info("")
 
     def PrintBad(self):
         self.logger.info("   Installation NOT complete.")
-        self.logger.info('   => Status: \x1b[31m'+'[FAILURE]'+'\x1b[0m'+'\n')
+        self.logger.info('   => Status: \x1b[31m'+'[FAILURE]'+'\x1b[0m')
         self.logger.info("   **********************************************************")
         self.logger.info("")
 

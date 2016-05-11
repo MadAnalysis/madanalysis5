@@ -429,9 +429,6 @@ class Main():
             return False
         return True
 
-    def PrintOK(self):
-        sys.stdout.write('\x1b[32m'+'[OK]'+'\x1b[0m'+'\n')
-        sys.stdout.flush()
 
     def BuildLibrary(self,forced=False):
         builder = LibraryBuilder(self.archi_info)
@@ -608,8 +605,7 @@ class Main():
                         sys.exit()
 
             # Print Ok
-            sys.stdout.write("MA5:      => Status: ")
-            self.PrintOK()
+            self.logger.info('      => Status: \x1b[32m'+'[OK]'+'\x1b[0m'+'\n')
 
         self.logger.info("   **********************************************************")
         self.logger.info("")
