@@ -52,9 +52,9 @@ class ColoredFormatterMA5(logging.Formatter):
         logging.Formatter.__init__(self, msg)
 
     def format(self,record):
-        if ( record.levelno >= 50 ):   #FATAL
-            color = '\x1b[31mMA5- ERROR: '
-        elif ( record.levelno >= 40 ): #ERROR
+        if ( record.levelno >= 90):    #INFO for BANNER
+            color = '\x1b[0mMA5: '
+        elif ( record.levelno >= 40 and record.levelno < 90):   #FATAL
             color = '\x1b[31mMA5-ERROR: '
         elif ( record.levelno >= 30 ): #WARNING
             color = '\x1b[35mMA5-WARNING: '

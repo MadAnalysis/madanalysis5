@@ -605,7 +605,7 @@ class Main():
                         sys.exit()
 
             # Print Ok
-            self.logger.info('      => Status: \x1b[32m'+'[OK]'+'\x1b[0m'+'\n')
+            self.logger.info('      => Status: \x1b[32m'+'[OK]'+'\x1b[0m')
 
         self.logger.info("   **********************************************************")
         self.logger.info("")

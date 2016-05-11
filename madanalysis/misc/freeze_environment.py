@@ -39,9 +39,9 @@ def freeze_environment(func):
         # the function
         out = func(self, *args, **opts)
 
-        # restoring the environement
+        # restoring the environment and sving the architecture
         self.ma5_environ.update(os.environ)
-        if not self.main.archi_info.save(self.archi_info.ma5dir+'/tools/architecture.ma5'):
+        if not self.main.archi_info.save(self.main.archi_info.ma5dir+'/tools/architecture.ma5'):
             raise Architecture('Cannot save the architecture')
         os.environ.clear()
         os.environ.update(old_environ)
