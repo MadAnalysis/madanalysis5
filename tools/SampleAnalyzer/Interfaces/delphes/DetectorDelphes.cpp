@@ -46,6 +46,8 @@ using namespace MA5;
 
 bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<std::string,std::string>& options)
 { 
+  nprocesses_=0;
+
   // Save the name of the configuration file
   configFile_ = configFile;
 
@@ -121,8 +123,9 @@ bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<s
 
   // Creating output tree
   treeWriter_ = new ExRootTreeWriter(outputFile_, "Delphes");
-  ExRootTreeBranch* branchEvent_ = treeWriter_->NewBranch("Event", LHEFEvent::Class());
-  //  branchEvent_ = treeWriter_->NewBranch("Event", LHEFEvent::Class());
+  //  ExRootTreeBrancha* branchEvent_ = treeWriter_->NewBranch("Event", LHEFEvent::Class());
+  branchEvent_  = treeWriter_->NewBranch("Event",  LHEFEvent::Class());
+  branchWeight_ = treeWriter_->NewBranch("Weight", Weight::Class());
 
   // Creating all Delphes modules
   modularDelphes_ = new Delphes("Delphes");
@@ -174,6 +177,8 @@ std::string DetectorDelphes::GetParameters()
 /// Jet clustering
 bool DetectorDelphes::Execute(SampleFormat& mySample, EventFormat& myEvent)
 {
+  nprocesses_++;
+
   // Import particles to Delphes
   TranslateMA5toDELPHES(mySample, myEvent);
 
@@ -182,6 +187,9 @@ bool DetectorDelphes::Execute(SampleFormat& mySample, EventFormat& myEvent)
 
   // Export particles from Delphes
   TranslateDELPHEStoMA5(mySample, myEvent);
+
+  // Creater Event header
+  StoreEventHeader(mySample, myEvent); 
 
   // Saving ROOT
   if (output_) treeWriter_->Fill();
@@ -195,6 +203,7 @@ bool DetectorDelphes::Execute(SampleFormat& mySample, EventFormat& myEvent)
 
 void DetectorDelphes::Finalize()
 {
+  nprocesses_=0;
   modularDelphes_->FinishTask();
   if (output_) treeWriter_->Write();
 
@@ -202,6 +211,23 @@ void DetectorDelphes::Finalize()
   delete treeWriter_; treeWriter_=0;
   delete modularDelphes_; modularDelphes_=0;
 }
+
+void DetectorDelphes::StoreEventHeader(SampleFormat& mySample, EventFormat& myEvent)
+{
+  LHEFEvent *element = dynamic_cast<LHEFEvent *>(branchEvent_->NewEntry());
+  
+  element->Number    = nprocesses_;
+  if (myEvent.mc()==0) return;
+
+  element->ProcessID = myEvent.mc()->processId();
+  element->Weight    = myEvent.mc()->weight();
+  element->ScalePDF  = myEvent.mc()->scale();
+  element->AlphaQED  = myEvent.mc()->alphaQED();
+  element->AlphaQCD  = myEvent.mc()->alphaQCD();
+  element->ReadTime  = 0; //? readStopWatch->RealTime();
+  element->ProcTime  = 0; //? procStopWatch->RealTime();
+}
+
 
 void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat& myEvent)
 {
