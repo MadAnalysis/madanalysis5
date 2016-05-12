@@ -84,11 +84,12 @@ DelphesDataFormat::~DelphesDataFormat()
   if (EFlowTrack_!=0)   delete EFlowTrack_;
   if (EFlowPhoton_!=0)  delete EFlowPhoton_;
   if (EFlowNeutral_!=0) delete EFlowNeutral_;
+  if (Event_!=0)        delete Event_;
 }
 
 
 // -----------------------------------------------------------------------------
-// GetEntry
+// Getentry
 // -----------------------------------------------------------------------------
 bool DelphesDataFormat::GetEntry(Long64_t treeEntry)
 {
@@ -105,6 +106,7 @@ bool DelphesDataFormat::GetEntry(Long64_t treeEntry)
   if (branchEFlowTrack_!=0)   test &= (branchEFlowTrack_   -> GetEntry(treeEntry) >=0);
   if (branchEFlowPhoton_!=0)  test &= (branchEFlowPhoton_  -> GetEntry(treeEntry) >=0);
   if (branchEFlowNeutral_!=0) test &= (branchEFlowNeutral_ -> GetEntry(treeEntry) >=0);
+  if (branchEvent_!=0)        test &= (branchEvent_        -> GetEntry(treeEntry) >=0);
   return test;
 }
 
