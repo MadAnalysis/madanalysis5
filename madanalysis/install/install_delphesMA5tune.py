@@ -175,8 +175,53 @@ class InstallDelphesMA5tune:
         
     def Build(self):
         # Input
-        theCommands=['make','-j'+str(self.ncores)]
+        theCommands=['make','-j'+str(self.ncores),'libDelphesMA5tune.so']
         logname=os.path.normpath(self.installdir+'/compilation.log')
+        # Execute
+        self.logger.debug('shell command: '+' '.join(theCommands))
+        ok, out= ShellCommand.ExecuteWithLog(theCommands,\
+                                             logname,\
+                                             self.installdir,\
+                                             silent=False)
+        # return result
+        if not ok:
+            self.logger.error('impossible to build the project. For more details, see the log file:')
+            self.logger.error(logname)
+            return ok
+
+        # Input
+        theCommands=['make','DelphesSTDHEP']
+        logname=os.path.normpath(self.installdir+'/compilation_STDHEP.log')
+        # Execute
+        self.logger.debug('shell command: '+' '.join(theCommands))
+        ok, out= ShellCommand.ExecuteWithLog(theCommands,\
+                                             logname,\
+                                             self.installdir,\
+                                             silent=False)
+        # return result
+        if not ok:
+            self.logger.error('impossible to build the project. For more details, see the log file:')
+            self.logger.error(logname)
+            return ok
+
+        # Input
+        theCommands=['make','DelphesLHEF']
+        logname=os.path.normpath(self.installdir+'/compilation_LHEF.log')
+        # Execute
+        self.logger.debug('shell command: '+' '.join(theCommands))
+        ok, out= ShellCommand.ExecuteWithLog(theCommands,\
+                                             logname,\
+                                             self.installdir,\
+                                             silent=False)
+        # return result
+        if not ok:
+            self.logger.error('impossible to build the project. For more details, see the log file:')
+            self.logger.error(logname)
+            return ok
+
+        # Input
+        theCommands=['make','DelphesHepMC']
+        logname=os.path.normpath(self.installdir+'/compilation_HepMC.log')
         # Execute
         self.logger.debug('shell command: '+' '.join(theCommands))
         ok, out= ShellCommand.ExecuteWithLog(theCommands,\

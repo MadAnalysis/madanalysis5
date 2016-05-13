@@ -77,7 +77,7 @@ bool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const std
         if (tmp==0) output_=false;
         else output_=true;
       }
-      }
+    }
   }
 
   // Configure inputs
@@ -115,6 +115,7 @@ bool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const std
   // Reset
   treeWriter_->Clear();
   modularDelphes_->Clear();
+
 
   return true;
 }
