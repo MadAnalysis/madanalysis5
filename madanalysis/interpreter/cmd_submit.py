@@ -95,11 +95,11 @@ class CmdSubmit(CmdBase):
 
         # Checking argument number
         if len(args)!=0:
-            logging.warning("Command 'resubmit' takes no argument. Any argument will be skipped.")
+            self.logger.warning("Command 'resubmit' takes no argument. Any argument will be skipped.")
 
         # Checking presence of a valid job
         if self.main.lastjob_name is "":
-            logging.error("an analysis must be defined and ran before using the resubmit command.") 
+            self.logger.error("an analysis must be defined and ran before using the resubmit command.") 
             return False
 
         self.main.lastjob_status = False
@@ -147,13 +147,13 @@ class CmdSubmit(CmdBase):
                 break
 
         if ToReAnalyze:
-            logging.info("   Creating the new histograms and/or applying the new cuts...")
+            self.logger.info("   Creating the new histograms and/or applying the new cuts...")
             # Submission
             if not self.submit(self.main.lastjob_name,history):
                 return
-            logging.info("   Updating the reports...")
+            self.logger.info("   Updating the reports...")
         else:
-            logging.info("   No new histogram / cut to account for. Updating the reports...")
+            self.logger.info("   No new histogram / cut to account for. Updating the reports...")
 
         # Reading info from job output
         layout = Layout(self.main)
@@ -181,7 +181,7 @@ class CmdSubmit(CmdBase):
         # End time 
         end_time=time.time()
            
-        logging.info("   Well done! Elapsed time = " + CmdSubmit.chronometer_display(end_time-start_time) )
+        self.logger.info("   Well done! Elapsed time = " + CmdSubmit.chronometer_display(end_time-start_time) )
 
         
     def do_submit(self,args,history):
@@ -199,21 +199,21 @@ class CmdSubmit(CmdBase):
 
         # Checking argument number
         if len(args)>1:
-             logging.error("wrong number of arguments for the command 'submit'.")
+             self.logger.error("wrong number of arguments for the command 'submit'.")
              self.help()
              return
 
         # Checking if a dataset has been defined
         if len(self.main.datasets)==0:
-            logging.error("no dataset found; please define a dataset (via the command import).")
-            logging.error("job submission aborted.")
+            self.logger.error("no dataset found; please define a dataset (via the command import).")
+            self.logger.error("job submission aborted.")
             return
 
         # Checking if a selection item has been defined
 #        if len(self.main.selection)==0 and self.main.merging.enable==False and \
 #               self.main.output == "":
-#            logging.error("no analysis found. Please define an analysis (via the command plot).")
-#            logging.error("job submission aborted.")
+#            self.logger.error("no analysis found. Please define an analysis (via the command plot).")
+#            self.logger.error("job submission aborted.")
 #            return
 
         # Treat the filename
@@ -224,7 +224,7 @@ class CmdSubmit(CmdBase):
 
         # Checking folder
         if filename in self.forbiddenpaths:
-            logging.error("the folder '"+filename+"' is a MadAnalysis folder. " + \
+            self.logger.error("the folder '"+filename+"' is a MadAnalysis folder. " + \
                          "You cannot overwrite it. Please choose another folder.")
             return
 
@@ -245,7 +245,7 @@ class CmdSubmit(CmdBase):
         self.main.lastjob_status = True
 
         # Computing
-        logging.info("   Preparing data for the reports ...")
+        self.logger.info("   Preparing data for the reports ...")
         layout.Initialize()
 
         # Creating the reports
@@ -255,14 +255,14 @@ class CmdSubmit(CmdBase):
         # End time 
         end_time=time.time()
            
-        logging.info("   Well done! Elapsed time = " + CmdSubmit.chronometer_display(end_time-start_time) )
+        self.logger.info("   Well done! Elapsed time = " + CmdSubmit.chronometer_display(end_time-start_time) )
 
 
     # Generating the reports
     def CreateReports(self,args,history,layout):
 
         # Getting output filename for HTML report
-        logging.info("   Generating the HMTL report ...")
+        self.logger.info("   Generating the HMTL report ...")
         htmlpath = os.path.expanduser(args[0]+'/HTML')
         if not htmlpath.startswith('/'):
             htmlpath = self.main.currentdir + "/" + htmlpath
@@ -270,13 +270,13 @@ class CmdSubmit(CmdBase):
 
         # Generating the HTML report
         layout.GenerateReport(history,htmlpath,ReportFormatType.HTML)
-        logging.info("     -> To open this HTML report, please type 'open'.")
+        self.logger.info("     -> To open this HTML report, please type 'open'.")
 
         # PDF report
         if self.main.session_info.has_pdflatex:
 
             # Getting output filename for PDF report
-            logging.info("   Generating the PDF report ...")
+            self.logger.info("   Generating the PDF report ...")
             pdfpath = os.path.expanduser(args[0]+'/PDF')
             if not pdfpath.startswith('/'):
                 pdfpath = self.main.currentdir + "/" + pdfpath
@@ -291,16 +291,16 @@ class CmdSubmit(CmdBase):
                 pdfpath = pdfpath[len(self.main.currentdir):]
             if pdfpath[0]=='/':
                 pdfpath=pdfpath[1:]
-            logging.info("     -> To open this PDF report, please type 'open " + pdfpath + "'.")
+            self.logger.info("     -> To open this PDF report, please type 'open " + pdfpath + "'.")
             
         else:
-            logging.warning("pdflatex not installed -> no PDF report.")
+            self.logger.warning("pdflatex not installed -> no PDF report.")
 
         # DVI/PDF report
         if self.main.session_info.has_latex:
 
             # Getting output filename for DVI report
-            logging.info("   Generating the DVI report ...")
+            self.logger.info("   Generating the DVI report ...")
             dvipath = os.path.expanduser(args[0]+'/DVI')
             if not dvipath.startswith('/'):
                 dvipath = self.main.currentdir + "/" + dvipath
@@ -308,7 +308,7 @@ class CmdSubmit(CmdBase):
 
             # Warning message for DVI -> PDF
             if not self.main.session_info.has_dvipdf:
-               logging.warning("dvipdf not installed -> the DVI report will not be converted to a PDF file.")
+               self.logger.warning("dvipdf not installed -> the DVI report will not be converted to a PDF file.")
 
             # Generating the DVI report
             layout.GenerateReport(history,dvipath,ReportFormatType.LATEX)
@@ -321,10 +321,10 @@ class CmdSubmit(CmdBase):
                     pdfpath = pdfpath[len(self.main.currentdir):]
                 if pdfpath[0]=='/':
                     pdfpath=pdfpath[1:]
-                logging.info("     -> To open this PDF report, please type 'open " + pdfpath + "'.")
+                self.logger.info("     -> To open this PDF report, please type 'open " + pdfpath + "'.")
                 
         else:
-            logging.warning("latex not installed -> no DVI/PDF report.")
+            self.logger.warning("latex not installed -> no DVI/PDF report.")
 
 
 
@@ -332,7 +332,7 @@ class CmdSubmit(CmdBase):
         if self.main.forced or self.main.script:
             return
 
-        logging.info("Would you like to edit the Delphes Card ? (Y/N)")
+        self.logger.info("Would you like to edit the Delphes Card ? (Y/N)")
         allowed_answers=['n','no','y','yes']
         answer=""
         while answer not in  allowed_answers:
@@ -351,7 +351,7 @@ class CmdSubmit(CmdBase):
         if self.main.forced or self.main.script:
             return
 
-        logging.info("Would you like to edit the recasting Card ? (Y/N)")
+        self.logger.info("Would you like to edit the recasting Card ? (Y/N)")
         allowed_answers=['n','no','y','yes']
         answer=""
         while answer not in  allowed_answers:
@@ -387,23 +387,23 @@ class CmdSubmit(CmdBase):
 
         # Writing process
         if not self.resubmit:
-            logging.info("   Creating folder '"+dirname.split('/')[-1] \
+            self.logger.info("   Creating folder '"+dirname.split('/')[-1] \
                 +"'...")
         else:
-            logging.info("   Checking the structure of the folder '"+\
+            self.logger.info("   Checking the structure of the folder '"+\
                dirname.split('/')[-1]+"'...")
         if not jobber.Open():
-            logging.error("job submission aborted.")
+            self.logger.error("job submission aborted.")
             return False
 
         if not self.resubmit:
             if self.main.recasting.status != 'on':
-                logging.info("   Copying 'SampleAnalyzer' source files...")
+                self.logger.info("   Copying 'SampleAnalyzer' source files...")
             if not jobber.CopyLHEAnalysis():
-                logging.error("   job submission aborted.")
+                self.logger.error("   job submission aborted.")
                 return False
             if self.main.recasting.status != 'on' and not jobber.CreateBldDir():
-                logging.error("   job submission aborted.")
+                self.logger.error("   job submission aborted.")
                 return False
             if self.main.recasting.status == 'on':
                 if not FolderWriter.CreateDirectory(dirname+'/Events'):
@@ -414,7 +414,7 @@ class CmdSubmit(CmdBase):
 
             ### First, the analyses to take care off
             self.editRecastingCard(dirname)
-            logging.info("   Getting the list of delphes simulation to be performed...")
+            self.logger.info("   Getting the list of delphes simulation to be performed...")
 
             ### Second, which delphes run must be performed, and running them
             if not self.main.recasting.GetDelphesRuns(dirname+"/Input/recasting_card.dat"):
@@ -424,21 +424,20 @@ class CmdSubmit(CmdBase):
             forced_bkp = self.main.forced
             self.main.forced=True
             if len(self.main.recasting.delphesruns)==0:
-                logging.warning('No recasting to do... Please check the recasting card')
+                self.logger.warning('No recasting to do... Please check the recasting card')
                 return False
             for mydelphescard in sorted(self.main.recasting.delphesruns):
                 version=mydelphescard[:4]
                 card=mydelphescard[5:]
                 if version=="v1.1":
                     if not self.main.recasting.ma5tune:
-                        logging.error('The DelphesMA5tune library is not present... v1.1 analyses cannot be used')
+                        self.logger.error('The DelphesMA5tune library is not present... v1.1 analyses cannot be used')
                         return False
 
                     if firstv11:
-                        logging.info("")
-                        logging.info("   **********************************************************")
-                        logging.info("   "+StringTools.Center('v1.1 detector simulations',57))
-                        logging.info("   **********************************************************")
+                        self.logger.info("   **********************************************************")
+                        self.logger.info("   "+StringTools.Center('v1.1 detector simulations',57))
+                        self.logger.info("   **********************************************************")
                         firstv11=False
 
                     ## Deactivating delphes
@@ -470,14 +469,13 @@ class CmdSubmit(CmdBase):
                             return False
                 elif version in ['v1.2', 'v1.3']:
                     if not self.main.recasting.delphes:
-                        logging.error('The Delphes library is not present... v1.2+ analyses cannot be used')
+                        self.logger.error('The Delphes library is not present... v1.2+ analyses cannot be used')
                         return False
 
                     if firstv13:
-                        logging.info("")
-                        logging.info("   **********************************************************")
-                        logging.info("   "+StringTools.Center('v1.2+ detector simulations',57))
-                        logging.info("   **********************************************************")
+                        self.logger.info("   **********************************************************")
+                        self.logger.info("   "+StringTools.Center('v1.2+ detector simulations',57))
+                        self.logger.info("   **********************************************************")
                         firstv13=False
 
                     ## Deactivating delphesMA5tune
@@ -508,7 +506,7 @@ class CmdSubmit(CmdBase):
                         if not FolderWriter.RemoveDirectory(os.path.normpath(dirname+'_DelphesRun')):
                             return False
                 else:
-                    logging.error('An analysis can only be compatible with ma5 v1.1, v1.2 or v1.3...')
+                    self.logger.error('An analysis can only be compatible with ma5 v1.1, v1.2 or v1.3...')
                     return False
             self.main.forced=forced_bkp
 
@@ -525,18 +523,17 @@ class CmdSubmit(CmdBase):
                 elif myversion=='v1.1':
                     PADdir = self.main.archi_info.ma5dir+'/PADForMA5tune'
                 else:
-                    logging.error('Unknown PAD version')
+                    self.logger.error('Unknown PAD version')
                     self.main.forced=forced_bkp
                     return False
                 ## current delphes card
                 mycard     = mydelphescard[5:]
                 ## print out
-                logging.info("")
-                logging.info("   **********************************************************")
-                logging.info("   "+StringTools.Center(myversion+' running of the PAD'+\
+                self.logger.info("   **********************************************************")
+                self.logger.info("   "+StringTools.Center(myversion+' running of the PAD'+\
                        ' on events generated with',57))
-                logging.info("   "+StringTools.Center(mycard,57))
-                logging.info("   **********************************************************")
+                self.logger.info("   "+StringTools.Center(mycard,57))
+                self.logger.info("   **********************************************************")
                 ## setting up Delphes
                 installer=InstallManager(self.main)
                 if myversion=='v1.1':
@@ -596,32 +593,32 @@ class CmdSubmit(CmdBase):
                     ## Saving the results
             self.main.forced=forced_bkp
         else:
-            logging.info("   Inserting your selection into 'SampleAnalyzer'...")
+            self.logger.info("   Inserting your selection into 'SampleAnalyzer'...")
             if not jobber.WriteSelectionHeader(self.main):
-                logging.error("job submission aborted.")
+                self.logger.error("job submission aborted.")
                 return False
             if not jobber.WriteSelectionSource(self.main):
-                logging.error("job submission aborted.")
+                self.logger.error("job submission aborted.")
                 return False
 
-        logging.info("   Writing the list of datasets...")
+        self.logger.info("   Writing the list of datasets...")
         for item in self.main.datasets:
             jobber.WriteDatasetList(item)
 
-        logging.info("   Writing the command line history...")
+        self.logger.info("   Writing the command line history...")
         jobber.WriteHistory(history,self.main.firstdir)
         if self.main.recasting.status == "on":
-            logging.info('    -> the results can be found in:') 
+            self.logger.info('    -> the results can be found in:') 
             for item in self.main.datasets:
-                logging.info('       '+ dirname + '/Output/'+ item.name + '/CLs_output.saf')
+                self.logger.info('       '+ dirname + '/Output/'+ item.name + '/CLs_output.saf')
         else:
             layouter = LayoutWriter(self.main, dirname)
             layouter.WriteLayoutConfig()
 
         if not self.main.recasting.status=='on' and not self.resubmit:
-            logging.info("   Creating Makefiles...")
+            self.logger.info("   Creating Makefiles...")
             if not jobber.WriteMakefiles():
-                logging.error("job submission aborted.")
+                self.logger.error("job submission aborted.")
                 return False
 
         # Edit the delphes or recasting cards
@@ -629,40 +626,40 @@ class CmdSubmit(CmdBase):
             self.editDelphesCard(dirname)
 
         if self.resubmit and not self.main.recasting.status=='on':
-            logging.info("   Cleaning 'SampleAnalyzer'...")
+            self.logger.info("   Cleaning 'SampleAnalyzer'...")
             if not jobber.MrproperJob():
-                logging.error("job submission aborted.")
+                self.logger.error("job submission aborted.")
                 return False
 
         if not self.main.recasting.status=='on':
-            logging.info("   Compiling 'SampleAnalyzer'...")
+            self.logger.info("   Compiling 'SampleAnalyzer'...")
             if not jobber.CompileJob():
-                logging.error("job submission aborted.")
+                self.logger.error("job submission aborted.")
                 return False
 
-            logging.info("   Linking 'SampleAnalyzer'...")
+            self.logger.info("   Linking 'SampleAnalyzer'...")
             if not jobber.LinkJob():
-                logging.error("job submission aborted.")
+                self.logger.error("job submission aborted.")
                 return False
 
             for item in self.main.datasets:
-                logging.info("   Running 'SampleAnalyzer' over dataset '"
+                self.logger.info("   Running 'SampleAnalyzer' over dataset '"
                              +item.name+"'...")
-                logging.info("    *******************************************************")
+                self.logger.info("    *******************************************************")
                 if not jobber.RunJob(item):
-                    logging.error("run over '"+item.name+"' aborted.")
-                logging.info("    *******************************************************")
+                    self.logger.error("run over '"+item.name+"' aborted.")
+                self.logger.info("    *******************************************************")
         return True
 
 
     def extract(self,dirname,layout):
-        logging.info("   Checking SampleAnalyzer output...")
+        self.logger.info("   Checking SampleAnalyzer output...")
         jobber = JobReader(dirname)
         if self.main.recasting.status=='on':
             if not self.main.recasting.CheckDir(dirname):
                 return False
         elif not jobber.CheckDir():
-            logging.error("errors have occured during the analysis.")
+            self.logger.error("errors have occured during the analysis.")
             return False
 
         for item in self.main.datasets:
@@ -670,11 +667,11 @@ class CmdSubmit(CmdBase):
                 if not self.main.recasting.CheckFile(dirname,item):
                     return False
             elif not jobber.CheckFile(item):
-                logging.error("errors have occured during the analysis.")
+                self.logger.error("errors have occured during the analysis.")
                 return False
 
         if self.main.recasting.status!='on':
-            logging.info("   Extracting data from the output files...")
+            self.logger.info("   Extracting data from the output files...")
             for i in range(0,len(self.main.datasets)):
                 jobber.Extract(self.main.datasets[i],\
                                layout.cutflow.detail[i],\
@@ -692,14 +689,14 @@ class CmdSubmit(CmdBase):
 
     def help(self):
         if not self.resubmit:
-            logging.info("   Syntax: submit <dirname>")
-            logging.info("   Performs an analysis over a list of datasets. Output is stored into the directory <dirname>.")
-            logging.info("   If the optional argument is omitted, MadAnalysis creates a fresh directory automatically.")
-            logging.info("   HTML and PDF reports are automatically created.")
+            self.logger.info("   Syntax: submit <dirname>")
+            self.logger.info("   Performs an analysis over a list of datasets. Output is stored into the directory <dirname>.")
+            self.logger.info("   If the optional argument is omitted, MadAnalysis creates a fresh directory automatically.")
+            self.logger.info("   HTML and PDF reports are automatically created.")
         else:
-            logging.info("   Syntax: resubmit")
-            logging.info("   Update of an analysis already performed, if relevant.")
-            logging.info("   In all cases, the HTML and PDF reports are regenerated.")
+            self.logger.info("   Syntax: resubmit")
+            self.logger.info("   Update of an analysis already performed, if relevant.")
+            self.logger.info("   In all cases, the HTML and PDF reports are regenerated.")
 
 
     def complete(self,text,line,begidx,endidx):

@@ -62,6 +62,12 @@ class SampleAnalyzer(Exception):
 class MA5Interpreter(Interpreter):
     """This is a class allowing to call an MA5 interpreter from an external code"""
 
+    # Make sure that this cmd.Cmd daughter class doesn't assume that its user
+    # input is raw, i.e. provided by a user via the interactive interface.
+    # In this case the input is supposed to be already processed by the
+    # external code using this intepreter.
+    use_rawinput = 0
+
     def __init__(self, ma5dir, LoggerLevel=logging.INFO, LoggerStream=sys.stdout,
        no_compilation=False, forced=True, *args, **opts):
 
@@ -91,6 +97,7 @@ class MA5Interpreter(Interpreter):
         # logger
         colored_log.init(LoggerStream=LoggerStream)
         self.logger = logging.getLogger('MA5')
+        self.logger.setLevel(LoggerLevel)
 
         # version numbers
         try:
@@ -111,9 +118,6 @@ class MA5Interpreter(Interpreter):
         main.archi_info.ma5_date    = date
         main.forced = forced
         Main.forced = forced
-
-        # Displaying header
-        self.logger.setLevel(LoggerLevel)
 
         # Checking the configuration
         if not main.CheckConfig(debug=(LoggerLevel<=logging.DEBUG)):
@@ -158,3 +162,6 @@ class MA5Interpreter(Interpreter):
 
         Interpreter.load(self,*args,**opts)
 
+    @freeze_environment
+    def setLogLevel(self,level):
+        self.logger.setLevel(level)

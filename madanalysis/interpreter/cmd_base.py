@@ -34,15 +34,16 @@ class CmdBase():
     def __init__(self,main,cmd_name):
         self.reserved_words.append(cmd_name)
         self.main=main
+        self.logger=logging.getLogger('MA5')
 
     def do(self,args):
-        logging.error("To developpers: CmdBase.do method must be overloaded!")
+        self.logger.error("To developpers: CmdBase.do method must be overloaded!")
 
     def help(self):
-        logging.error("To developpers: CmdBase.help method must be overloaded!")
+        self.logger.error("To developpers: CmdBase.help method must be overloaded!")
 
     def complete(self,text,line,begidx,endidx):
-        logging.error("To developpers: CmdBase.complete method must be overloaded!")
+        self.logger.error("To developpers: CmdBase.complete method must be overloaded!")
         return
     
     @staticmethod 

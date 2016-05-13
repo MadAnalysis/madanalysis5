@@ -51,8 +51,8 @@ def CLs(NumObserved, ExpectedBG, BGError, SigHypothesis, NumToyExperiments):
     try:
         import scipy.stats
     except ImportError:
-        logging.warning('scipy is not installed... the CLs module cannot be used.')
-        logging.warning('Please install scipy.')
+        self.logger.warning('scipy is not installed... the CLs module cannot be used.')
+        self.logger.warning('Please install scipy.')
         return False
     # generate a set of expected-number-of-background-events, one for each toy
     # experiment, distributed according to a Gaussian with the specified mean
@@ -140,6 +140,7 @@ class RecastConfiguration:
         self.analysisruns = []
         self.CLs_numofexps= 100000
         self.card_path= ""
+        self.logger = logging.getLogger('MA5')
 
     def Display(self):
         self.user_DisplayParameter("status")
@@ -153,37 +154,37 @@ class RecastConfiguration:
 
     def user_DisplayParameter(self,parameter):
         if parameter=="status":
-            logging.info(" recasting mode: "+self.status)
+            self.logger.info(" recasting mode: "+self.status)
             return
         elif parameter=="delphes":
             if self.delphes:
-                logging.info("   * analyses based on delphes    : allowed")
+                self.logger.info("   * analyses based on delphes    : allowed")
             else:
-                logging.info("   * analyses based on delphes    : not allowed")
+                self.logger.info("   * analyses based on delphes    : not allowed")
             return
         elif parameter=="ma5tune":
             if self.ma5tune:
-                logging.info("   * analyses based on the ma5tune: allowed")
+                self.logger.info("   * analyses based on the ma5tune: allowed")
             else:
-                logging.info("   * analyses based on the ma5tune: not allowed")
+                self.logger.info("   * analyses based on the ma5tune: not allowed")
             return
         elif parameter=="pad":
             if self.pad:
-                logging.info("   * the PAD is                   : available")
+                self.logger.info("   * the PAD is                   : available")
             else:
-                logging.info("   * the PAD is                   : not available")
+                self.logger.info("   * the PAD is                   : not available")
             return
         elif parameter=="padtune":
             if self.padtune:
-                logging.info("   * the PADForMa5tune is         : available")
+                self.logger.info("   * the PADForMa5tune is         : available")
             else:
-                logging.info("   * the PADForMa5tune is         : not available")
+                self.logger.info("   * the PADForMa5tune is         : not available")
             return
         elif parameter=="CLs_numofexps":
-            logging.info("   * Number of toy experiments for the CLs calculation: "+str(self.CLs_numofexps))
+            self.logger.info("   * Number of toy experiments for the CLs calculation: "+str(self.CLs_numofexps))
             return
         elif parameter=="card_path":
-            logging.info("   * Path to a recasting card: "+str(self.card_path))
+            self.logger.info("   * Path to a recasting card: "+str(self.card_path))
             return
         return
 
@@ -194,7 +195,7 @@ class RecastConfiguration:
             if value =="on":
                 # Only in reco mode
                 if level!=MA5RunningType.RECO:
-                    logging.error("recasting is only available in the RECO mode")
+                    self.logger.error("recasting is only available in the RECO mode")
                     return
 
                 canrecast=False
@@ -204,7 +205,7 @@ class RecastConfiguration:
                 if hasPAD:
                     self.pad=True
                 if not hasPAD or not hasdelphes:
-                    logging.warning("Delphes and/or the PAD are not installed (or deactivated): " + \
+                    self.logger.warning("Delphes and/or the PAD are not installed (or deactivated): " + \
                         "the corresponding analyses will be unavailable")
                 else:
                     canrecast=True
@@ -215,7 +216,7 @@ class RecastConfiguration:
                 if hasPADtune:
                     self.padtune=True
                 if not hasPADtune or not hasMA5tune:
-                    logging.warning("DelphesMA5tune and/or the PADForMA5tune are not installed " + \
+                    self.logger.warning("DelphesMA5tune and/or the PADForMA5tune are not installed " + \
                         "(or deactivated): the corresponding analyses will be unavailable")
                 else:
                     canrecast=True
@@ -224,7 +225,7 @@ class RecastConfiguration:
                 if canrecast:
                     self.status="on"
                 else:
-                    logging.error("The recasting modules (PAD/Delphes, PADForMA5tune/DelphesMa5tune) " + \
+                    self.logger.error("The recasting modules (PAD/Delphes, PADForMA5tune/DelphesMa5tune) " + \
                        "are not available. The recasting mode cannot be activated")
                     return
 
@@ -241,35 +242,35 @@ class RecastConfiguration:
                             test=False
                             break
                 if not test:
-                    logging.error("some datasets have a hadronic file format. "+\
+                    self.logger.error("some datasets have a hadronic file format. "+\
                                   "The recasting mode cannot be switched off.")
                     return
                 self.status="off"
             else:
-                logging.error("Recasting can only be set to 'on' or 'off'.")
+                self.logger.error("Recasting can only be set to 'on' or 'off'.")
 
         # CLs module
         elif parameter=="CLs_numofexps":
             if self.status!="on":
-                logging.error("Please first set the recasting mode to 'on'.")
+                self.logger.error("Please first set the recasting mode to 'on'.")
                 return
             self.CLs_numofexps = value
 
         # path to a recasting card
         elif parameter=="card_path":
             if self.status!="on":
-                logging.error("Please first set the recasting mode to 'on'.")
+                self.logger.error("Please first set the recasting mode to 'on'.")
                 return
             import os
             if os.path.isfile(value):
                 self.card_path = value
             else:
-                logging.error("Invalid path to a recasting card.")
+                self.logger.error("Invalid path to a recasting card.")
                 return
 
         # other rejection if no algo specified
         else:
-            logging.error("the recast module has no parameter called '"+parameter+"'")
+            self.logger.error("the recast module has no parameter called '"+parameter+"'")
             return
 
     def user_GetParameters(self):
@@ -303,15 +304,15 @@ class RecastConfiguration:
         else:
             import os
             if not os.path.isfile(self.card_path):
-                logging.error("Invalid path to a recasting card.")
+                self.logger.error("Invalid path to a recasting card.")
                 return False
             if not self.CheckCard(dirname):
-                logging.error("Invalid recasting card")
+                self.logger.error("Invalid recasting card")
                 return False
         return True
 
     def CheckCard(self,dirname):
-        logging.info('   Checking the recasting card...')
+        self.logger.info('   Checking the recasting card...')
         import os
         ToLoopOver=[]
         padlist=[]
@@ -347,33 +348,33 @@ class RecastConfiguration:
             # checking the presence of the analysis and the delphes card
             if myana in  [x[0] for x in padlist]:
                 if myver!="v1.2":
-                    logging.error("Recasting card: invalid analysis (not present in the PAD): " + myana)
+                    self.logger.error("Recasting card: invalid analysis (not present in the PAD): " + myana)
                     return False
                 if not os.path.isfile(dirname+'/../PAD/Input/Cards/'+mydelphes):
-                    logging.error("Recasting card: PAD analysis linked to an invalid delphes card: " + myana + " - " + mydelphes)
+                    self.logger.error("Recasting card: PAD analysis linked to an invalid delphes card: " + myana + " - " + mydelphes)
                     return False
             elif myana in  [x[0] for x in tunelist]:
                 if myver!="v1.1":
-                    logging.error("Recasting card: invalid analysis (not present in the PADForMA5tune): " + myana)
+                    self.logger.error("Recasting card: invalid analysis (not present in the PADForMA5tune): " + myana)
                     return False
                 if not os.path.isfile(dirname+'/../PADForMA5tune/Input/Cards/'+mydelphes):
-                    logging.error("Recasting card: PADForMA5tune analysis linked to an invalid delphes card: " + myana + " - " + mydelphes)
+                    self.logger.error("Recasting card: PADForMA5tune analysis linked to an invalid delphes card: " + myana + " - " + mydelphes)
                     return False
             else:
-                logging.error("Recasting card: invalid analysis (not present in the PAD and in the PADForMA5tune): " + myana)
+                self.logger.error("Recasting card: invalid analysis (not present in the PAD and in the PADForMA5tune): " + myana)
                 return False
             # checking the matching between the delphes card and the analysis
             for mycard,alist in self.DelphesDic.items():
                 if myana in alist:
                     if mydelphes!=mycard:
-                        logging.error("Invalid delphes card associated with the analysis: " + myana)
+                        self.logger.error("Invalid delphes card associated with the analysis: " + myana)
                         return False
                     break
         usercard.close()
         try:
             shutil.copy(self.card_path,dirname+'/Input/recasting_card.dat')
         except:
-            logging.error('impossible to copy the recasting card to the working directory')
+            self.logger.error('impossible to copy the recasting card to the working directory')
             return False
         return True
 
@@ -411,7 +412,7 @@ class RecastConfiguration:
 
     def UpdatePADMain(self,analysislist,PADdir):
         ## backuping the main file
-        logging.info("   Updating the PAD main executable")
+        self.logger.info("   Updating the PAD main executable")
         if os.path.isfile(PADdir+'/Build/Main/main.bak'):
             shutil.move(PADdir+'/Build/Main/main.bak',PADdir+'/Build/Main/main.cpp')
         shutil.move(PADdir+'/Build/Main/main.cpp',PADdir+'/Build/Main/main.bak')
@@ -445,7 +446,7 @@ class RecastConfiguration:
         return True
 
     def RestorePADMain(self,PADdir,dirname,main):
-        logging.info('   Restoring the PAD in '+PADdir)
+        self.logger.info('   Restoring the PAD in '+PADdir)
         ## Restoring the main file
         shutil.move(PADdir+'/Build/Main/main.bak',PADdir+'/Build/Main/main.cpp')
         self.MakePAD(PADdir,dirname,main,True)
@@ -453,7 +454,7 @@ class RecastConfiguration:
 
     def MakePAD(self,PADdir,dirname,main,silent=False):
         if not silent:
-            logging.info('   Compiling the PAD in '+PADdir)
+            self.logger.info('   Compiling the PAD in '+PADdir)
         compiler = LibraryWriter('lib',main)
         ncores = compiler.get_ncores2()
         if ncores>1:
@@ -462,9 +463,9 @@ class RecastConfiguration:
         logfile = PADdir+'/Build/PADcompilation.log'
         result, out = ShellCommand.ExecuteWithLog(command,logfile,PADdir+'/Build')
         if not result:
-            logging.error('Impossible to compile the PAD....'+\
+            self.logger.error('Impossible to compile the PAD....'+\
               ' For more details, see the log file:')
-            logging.error(logfile)
+            self.logger.error(logfile)
             return False
         return True
 
@@ -482,7 +483,7 @@ class RecastConfiguration:
         command = ['./MadAnalysis5job', '../Input/PADevents.list']
         ok = ShellCommand.Execute(command,PADdir+'/Build')
         if not ok:
-            logging.error('Problem with the run of the PAD on the file: '+ eventfile)
+            self.logger.error('Problem with the run of the PAD on the file: '+ eventfile)
             return False
         os.remove(PADdir+'/Input/PADevents.list')
         return True
@@ -516,10 +517,10 @@ class RecastConfiguration:
         ## checking the header of the file
         info_root = mytree.getroot()
         if info_root.tag != "analysis":
-            logging.warning('Invalid info file (' + myanalysis+ '): <analysis> tag.')
+            self.logger.warning('Invalid info file (' + myanalysis+ '): <analysis> tag.')
             return -1,-1,-1
         if info_root.attrib["id"].lower() != myanalysis.lower():
-            logging.warning('Invalid info file (' + myanalysis+ '): <analysis id> tag.')
+            self.logger.warning('Invalid info file (' + myanalysis+ '): <analysis id> tag.')
             return -1,-1,-1
         ## extracting the information
         lumi    = 0
@@ -531,16 +532,16 @@ class RecastConfiguration:
                 try:
                     lumi = float(child.text)
                 except:
-                    logging.warning('Invalid info file (' + myanalysis+ '): ill-defined lumi')
+                    self.logger.warning('Invalid info file (' + myanalysis+ '): ill-defined lumi')
                     return -1,-1,-1
-                logging.debug('The luminosity of ' + myanalysis + ' is ' + str(lumi) + ' fb-1.')
+                self.logger.debug('The luminosity of ' + myanalysis + ' is ' + str(lumi) + ' fb-1.')
             # regions
             if child.tag == "region" and ("type" not in child.attrib or child.attrib["type"] == "signal"):
                 if "id" not in child.attrib:
-                    logging.warning('Invalid info file (' + myanalysis+ '): <region id> tag.')
+                    self.logger.warning('Invalid info file (' + myanalysis+ '): <region id> tag.')
                     return -1,-1,-1
                 if child.attrib["id"] in regions:
-                    logging.warning('Invalid info file (' + myanalysis+ '): doubly-defined region.')
+                    self.logger.warning('Invalid info file (' + myanalysis+ '): doubly-defined region.')
                     return -1,-1,-1
                 regions.append(child.attrib["id"])
                 nobs    = -1
@@ -550,7 +551,7 @@ class RecastConfiguration:
                     try:
                         myval=float(rchild.text)
                     except:
-                        logging.warning('Invalid info file (' + myanalysis+ '): region data ill-defined.')
+                        self.logger.warning('Invalid info file (' + myanalysis+ '): region data ill-defined.')
                         return -1,-1,-1
                     if rchild.tag=="nobs":
                         nobs = myval
@@ -559,7 +560,7 @@ class RecastConfiguration:
                     elif rchild.tag=="deltanb":
                         deltanb = myval
                     else:
-                        logging.warning('Invalid info file (' + myanalysis+ '): unknown region subtag.')
+                        self.logger.warning('Invalid info file (' + myanalysis+ '): unknown region subtag.')
                         return -1,-1,-1
                 regiondata[child.attrib["id"]] = { "nobs":nobs, "nb":nb, "deltanb":deltanb }
         return lumi, regions, regiondata
@@ -576,8 +577,8 @@ class RecastConfiguration:
             theregs=regname.split(';')
             for regiontocombine in theregs:
                 if not os.path.isfile(dirname+'/'+regiontocombine+'.saf'):
-                    logging.warning('Cannot find a cutflow for the region '+regiontocombine+' in ' + dirname)
-                    logging.warning('Skipping the CLs calculation.')
+                    self.logger.warning('Cannot find a cutflow for the region '+regiontocombine+' in ' + dirname)
+                    self.logger.warning('Skipping the CLs calculation.')
                     return -1
                 mysaffile = open(dirname+'/'+regiontocombine+'.saf')
                 myN0=-1
@@ -596,19 +597,19 @@ class RecastConfiguration:
                         IsCounter = False
                         continue
                     if IsInitial and "sum of weights" in line and not '^2' in line:
-                        myN0 = float(line.split()[0])
+                        myN0 = float(line.split()[0])+float(line.split()[1])
                     if IsCounter and "sum of weights" in line and not '^2' in line:
-                        myNf = float(line.split()[0])
+                        myNf = float(line.split()[0])+float(line.split()[1])
                 mysaffile.close()
                 if myNf==-1 or myN0==-1:
-                    logging.warning('Invalid cutflow for the region ' + reg +'('+regname+') in ' + dirname)
-                    logging.warning('Skipping the CLs calculation.')
+                    self.logger.warning('Invalid cutflow for the region ' + reg +'('+regname+') in ' + dirname)
+                    self.logger.warning('Skipping the CLs calculation.')
                     return -1
                 Nf+=myNf
                 N0+=myN0
             if Nf==0 and N0==0:
-                logging.warning('Invalid cutflow for the region ' + reg +'('+regname+') in ' + dirname)
-                logging.warning('Skipping the CLs calculation.')
+                self.logger.warning('Invalid cutflow for the region ' + reg +'('+regname+') in ' + dirname)
+                self.logger.warning('Skipping the CLs calculation.')
                 return -1
             regiondata[reg]["N0"]=N0
             regiondata[reg]["Nf"]=Nf
@@ -639,22 +640,22 @@ class RecastConfiguration:
             low = 1.
             hig = 1.
             while CLs(nobs,nb,deltanb,nslow,self.CLs_numofexps)>0.95:
-              logging.debug('region ' + reg + ', lower bound = ' + str(low))
+              self.logger.debug('region ' + reg + ', lower bound = ' + str(low))
               nslow=nslow*0.1
               low  =  low*0.1
             while CLs(nobs,nb,deltanb,nshig,self.CLs_numofexps)<0.95:
-              logging.debug('region ' + reg + ', upper bound = ' + str(hig))
+              self.logger.debug('region ' + reg + ', upper bound = ' + str(hig))
               nshig=nshig*10.
               hig  =  hig*10.
             ## testing whether scipy is there
             try:
                 import scipy.stats
             except ImportError:
-                logging.warning('scipy is not installed... the CLs module cannot be used.')
-                logging.warning('Please install scipy.')
+                self.logger.warning('scipy is not installed... the CLs module cannot be used.')
+                self.logger.warning('Please install scipy.')
                 return False
             s95 = scipy.optimize.brentq(GetSig95,low,hig)
-            logging.debug('region ' + reg + ', s95 = ' + str(s95) + ' pb')
+            self.logger.debug('region ' + reg + ', s95 = ' + str(s95) + ' pb')
             if tag == "obs":
                 regiondata[reg]["s95obs"]= ("%.7f" % s95)
             elif tag == "exp":
@@ -714,16 +715,16 @@ class RecastConfiguration:
                    mytot.ljust(15,' ') + '\n')
 
     def GetCLs(self,PADdir, dirname, analysislist, name,  xsection, setname):
-        logging.info('   Calculation of the exclusion CLs')
+        self.logger.info('   Calculation of the exclusion CLs')
         if xsection<=0:
-            logging.info('   Signal xsection not defined. The 95% excluded xsection will be calculated.')
+            self.logger.info('   Signal xsection not defined. The 95% excluded xsection will be calculated.')
         try:
             from lxml import ET
         except:
             try:
                 import xml.etree.ElementTree as ET
             except:
-                logging.warning('lxml or xml not available... the CLs module cannot be used')
+                self.logger.warning('lxml or xml not available... the CLs module cannot be used')
                 return False
         ## preparing the output file
         if os.path.isfile(dirname+'/Output/'+setname+'/CLs_output.saf'):
@@ -744,23 +745,23 @@ class RecastConfiguration:
         for analysis in analysislist:
             ## Reading the info file
             if not os.path.isfile(PADdir+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.info'):
-                logging.warning('Info file missing for the '+ analysis+ ' analysis. Skipping the CLs calculation')
+                self.logger.warning('Info file missing for the '+ analysis+ ' analysis. Skipping the CLs calculation')
                 return False
             info_input = open(PADdir+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.info')
             try:
                 info_tree = ET.parse(info_input)
             except:
-                logging.warning('Info file for '+analysis+' corrupted. Skipping the CLs calculation.')
+                self.logger.warning('Info file for '+analysis+' corrupted. Skipping the CLs calculation.')
                 return False
             info_input.close()
             lumi, regions, regiondata = self.ReadInfoFile(info_tree,analysis)
             if lumi==-1 or regions==-1 or regiondata==-1:
-                logging.warning('Info file for '+analysis+' corrupted. Skipping the CLs calculation.')
+                self.logger.warning('Info file for '+analysis+' corrupted. Skipping the CLs calculation.')
                 return False
             ## reading the cutflow information
             regiondata=self.ReadCutflow(dirname+'/Output/'+name+'/'+analysis+'/Cutflows',regions,regiondata)
             if regiondata==-1:
-                logging.warning('Info file for '+analysis+' corrupted. Skipping the CLs calculation.')
+                self.logger.warning('Info file for '+analysis+' corrupted. Skipping the CLs calculation.')
                 return False
             ## performing the alculation
             regiondata=self.ComputesigCLs(regiondata,regions,lumi,"exp")
@@ -781,15 +782,15 @@ class RecastConfiguration:
 
     def CheckDir(self,dirname):
         if not os.path.isdir(dirname):
-            logging.error("The directory '"+dirname+"' has not been found.")
+            self.logger.error("The directory '"+dirname+"' has not been found.")
             return False
         elif not os.path.isdir(dirname+'/Output'):
-            logging.error("The directory '"+dirname+"/Output' has not been found.")
+            self.logger.error("The directory '"+dirname+"/Output' has not been found.")
             return False
         return True
 
     def CheckFile(self,dirname,dataset):
         if not os.path.isfile(dirname+'/Output/'+dataset.name+'/CLs_output.saf'):
-            logging.error("The file '"+dirname+'/Output/'+dataset.name+'/CLs_output.saf" has not been found.')
+            self.logger.error("The file '"+dirname+'/Output/'+dataset.name+'/CLs_output.saf" has not been found.')
             return False
         return True

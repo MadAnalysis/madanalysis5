@@ -90,13 +90,13 @@ class Counter
   /// Increment the counter
   void Increment(const Float_t& weight=1.)
   {
-    if (weight>=0)
+    if (weight>0)
     {
       nentries_.first++;
       sumweight_.first+=weight;
       sumweight2_.first+=weight*weight;
     }
-    else
+    else if (weight<0)
     {
       nentries_.second++;
       sumweight_.second+=weight;

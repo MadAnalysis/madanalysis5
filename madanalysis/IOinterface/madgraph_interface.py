@@ -33,7 +33,6 @@ class MadGraphInterface():
         self.multiparticles={}
         self.card=[]
         self.invisible_particles = []
-        self.PID=0
 
     class InvalidCard(Exception):
         pass
@@ -57,8 +56,7 @@ class MadGraphInterface():
         for line in MG5history:
             if 'define' in line:
                 myline = line.split()
-                if myline[1]=='p':
-                    continue
+                self.logger.debug('pdgs = '+str(myline[3:]))
                 mypdgs= [self.get_pdg_code(prt) for prt in myline[3:]]
                 self.multiparticles[myline[1]]=sorted(sum([e if isinstance(e,list) else [e] for e in mypdgs],[]))
         self.logger.debug('  >> ' + str(self.multiparticles))
@@ -95,34 +93,47 @@ class MadGraphInterface():
         return "Beware of the sluggy Valentin."
 
 
-    def generate_parton_card_for_procdef(self, process, interstate=[], finalstate=[], invisiblestate=[]):
+    def generate_parton_card_for_procdef(self, process, interstate=[], finalstate=[], invisstate=[]):
         """ Main routine for decoding the parton-level process"""
 
         # init
         if interstate==[] and finalstate==[]:
-            self.PID+=1
-            self.card.append('# Process # ' + str(self.PID))
             self.logger.debug('  >> new process')
 
         # getting the list of particles and creating the plots
         if interstate==[] and finalstate==[]:
-            interstate,finalstate,invisiblestate = self.particles_in_process(process)
+            dummy, interstate,finalstate,invisstate = self.particles_in_process(process)
         self.logger.debug('    >> visible inter state particles: ' + str(interstate))
         self.logger.debug('    >> visible final state particles: ' + str(finalstate))
-        self.logger.debug('    >> invisible final state particles: ' + str(invisiblestate))
-        self.generate_plots(interstate,finalstate,invisiblestate)
-##        for mydecay in process.get('decay_chains'):
-##            dec_inter,dec_final,dec_inv = self.particles_in_process(mydecay)
-##            interstate =dec_inter
-##            finalstate+=dec_final
-##            invisiblestate+=dec_inv
-##            self.logger.debug('  >> decay branch')
-##            self.generate_parton_card_for_procdef(mydecay,interstate=interstate,finalstate=finalstate,
-##               invisiblestate=invisiblestate)
+        self.logger.debug('    >> invisible final state particles: ' + str(invisstate))
+        # Hard process before decay
+        self.generate_plots(interstate,finalstate,invisstate)
+        # Hard process after decay
+        if interstate !=[]:
+            interstate, finalstate, invisstate = \
+               self.decay(process.get('decay_chains'),interstate,finalstate,invisstate)
+            self.logger.debug('    >> visible final state particles after decay: ' + str(finalstate))
+            self.logger.debug('    >> invisible final state particles after decay: ' + str(invisstate))
+            self.generate_plots(interstate,finalstate,invisstate)
+
+    def decay(self,chains,old_int,old_fin,old_inv):
+        new_int, new_fin, new_inv = old_int, old_fin, old_inv
+        for mydecay in chains:
+            dec_init,dec_inter,dec_final,dec_inv = self.particles_in_process(mydecay)
+            for x in dec_init:
+                if x in new_int:
+                    new_int.remove(x)
+                new_inv+=dec_inv
+                new_fin+=dec_final
+                new_int+=dec_inter
+            if new_int!=[]:
+                new_int, newfin, new_inv = self.decay(mydecay.get('decay_chains'),new_int,new_fin,new_inv)
+        return new_int,new_fin,new_inv
 
     def particles_in_process(self,process):
          # init
-        instate = []
+        initstate = []
+        intstate = []
         finstate = []
         decaying_particles=[]
 
@@ -131,25 +142,36 @@ class MadGraphInterface():
             decaying_particles.append(mydecay.get('legs')[0].get('ids'))
 
         for myleg in process.get('legs'):
-            if not myleg.get('state'):
-                continue
             prts = sorted(myleg.get('ids'))
-            if prts in decaying_particles:
-                instate.append(self.get_name(prts))
+            if not myleg.get('state'):
+                initstate.append(self.get_name(prts))
+            elif prts in decaying_particles:
+                intstate.append(self.get_name(prts))
             else:
                 finstate.append(self.get_name(prts))
         invstate   = [ x for x in finstate if x in self.invisible_particles ]
         finstate = [ x for x in finstate if not x in invstate ]
-        return instate,finstate,invstate
+        return initstate,intstate,finstate,invstate
+
 
 
     def generate_plots(self,interstate,finalstate,invisible):
+        # Formatting the inputs (tally)
+        new_inter = []
+        new_final = []
+        for x,num in [[x,interstate.count(x)] for x in set(interstate)]:
+            for i in range(num):
+                new_inter.append(x+'['+str(i+1)+']')
+        for x,num in [[x,finalstate.count(x)] for x in set(finalstate)]:
+            for i in range(num):
+                new_final.append(x+'['+str(i+1)+']')
+
         # properties of the final state particles
         self.card.append('# PT and ETA distributions of all particles')
-        for part in interstate:
+        for part in new_inter:
             self.card.append('plot  PT(' + part + ') 40 0 1000 [logY interstate]')
             self.card.append('plot ETA(' + part + ') 40 -10 10 [logY interstate]')
-        for part in finalstate:
+        for part in new_final:
             self.card.append('plot  PT(' + part + ') 40 0 1000 [logY]')
             self.card.append('plot ETA(' + part + ') 40 -10 10 [logY]')
 
@@ -157,25 +179,28 @@ class MadGraphInterface():
         tagstate = 'allstate'
         if len(interstate)==0:
             tagstate=''
-        allstate = interstate+finalstate
+        allstate = new_inter+new_final
         permlist = [c for i in range(1,len(allstate)) for c in itertools.combinations(allstate, i+1)]
+        permlist.sort()
+        permlist=list(permlist for permlist,_ in itertools.groupby(permlist))
         if len(permlist)>0:
             self.card.append('# Invariant-mass distributions')
         for perm in permlist:
             self.card.append('plot M('+' '.join(perm)+') 40 0 1000 [logY '+tagstate+']')
 
-        # delta R of between two final state particles
+        # delta R of between two particles
         if len(permlist)>0:
             self.card.append('# Angular distance distributions')
         for perm in permlist:
-            self.card.append('plot DELTAR('+','.join(perm)+') 40 0 10 [logY '+tagstate+']')
+            if len(perm)==2:
+                self.card.append('plot DELTAR('+','.join(perm)+') 40 0 10 [logY '+tagstate+']')
 
         # MET
         if len(invisible)>0:
             self.card.append('# Invisible')
-            for part in interstate:
+            for part in new_inter:
                 self.card.append('plot MT_MET(' + part + ') 40 0 1000 [logY interstate]')
-            for part in finalstate:
+            for part in new_final:
                 self.card.append('plot MT_MET(' + part + ') 40 0 1000 [logY]')
 
     # from pdf list to name
@@ -188,6 +213,7 @@ class MadGraphInterface():
                 return myprt['antiname']
         else:
             for key, value in self.multiparticles.iteritems():
+                self.logger.debug('new multiparticles ' + key + ' = ' + str(value))
                 if value==pdg:
                     return key
         self.logger.error('  ** Cannot find the name associated with the pdg code list' + str(pdg))
@@ -221,5 +247,7 @@ class MadGraphInterface():
 
     def write_multiparticles(self):
         for key, value in self.multiparticles.iteritems():
+            if len([ x for x in value if x in [self.get_pdg_code(y) for y in self.invisible_particles] ])==len(value):
+                self.invisible_particles.append(key)
             self.card.append('define ' + key + ' = ' + ' '.join([str(x) for x in value]))
 

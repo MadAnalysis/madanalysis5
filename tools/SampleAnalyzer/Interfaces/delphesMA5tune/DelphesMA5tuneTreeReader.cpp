@@ -394,21 +394,23 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
   // Fill Event
   // ---------------------------------------------------------------------------
   if (branchEvent_!=0)
-  for (unsigned int i=0;i<static_cast<UInt_t>(branchEvent_->GetEntries());i++)
   {
-    // Get the header 
-    LHEFEvent* header1 =  dynamic_cast<LHEFEvent*>(branchEvent_->At(i));
-    if (header1!=0)
+    for (unsigned int i=0;i<static_cast<UInt_t>(branchEvent_->GetEntries());i++)
     {
-      // Set event-weight
-      myEvent.mc()->setWeight(header1->Weight);
-    }
-    else
-    {
-      HepMCEvent* header2 = dynamic_cast<HepMCEvent*>(branchEvent_->At(i));
-      if (header2==0) continue;
-      // Set event-weight
-      myEvent.mc()->setWeight(header2->Weight);
+      // Get the header 
+      LHEFEvent* header1 =  dynamic_cast<LHEFEvent*>(branchEvent_->At(i));
+      if (header1!=0)
+      {
+        // Set event-weight
+        myEvent.mc()->setWeight(header1->Weight);
+      }
+      else
+      {
+        HepMCEvent* header2 = dynamic_cast<HepMCEvent*>(branchEvent_->At(i));
+        if (header2==0) continue;
+        // Set event-weight
+        myEvent.mc()->setWeight(header2->Weight);
+      }
     }
   }
 

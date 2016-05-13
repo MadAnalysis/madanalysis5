@@ -50,8 +50,8 @@ class Layout:
         self.input_path   = self.main.lastjob_name
         self.cutflow      = CutFlow(self.main)
         self.plotflow     = PlotFlow(self.main)
-        self.merging     = MergingPlots(self.main)
-
+        self.merging      = MergingPlots(self.main)
+        self.logger       = logging.getLogger('MA5')
 
     def Initialize(self):
 
@@ -165,7 +165,7 @@ class Layout:
 
         # Checking file presence
         if not os.path.isfile(filename):
-            logging.error("the image '" + \
+            self.logger.error("the image '" + \
                           filename + \
                           "' is not found.")
             return False
@@ -175,8 +175,8 @@ class Layout:
             shutil.copy(filename,output_path)
             return True
         except:
-            logging.error("Errors have occured during the copy of the file ")
-            logging.error(" "+filename)
+            self.logger.error("Errors have occured during the copy of the file ")
+            self.logger.error(" "+filename)
             return False
 
     def WriteDatasetTable(self,report,dataset):
@@ -831,7 +831,7 @@ class Layout:
         if not self.DoPlots(mode,output_path):
             return
         
- #       logging.info("     ** Computing cut efficiencies...")
+ #       self.logger.info("     ** Computing cut efficiencies...")
         #if not layout.DoEfficiencies():
         #    return
 
@@ -845,14 +845,14 @@ class Layout:
 
         # Defining report writing
         if mode == ReportFormatType.HTML:
-            report = HTMLReportWriter(output_path+"/index.html", self.pdffile)
+            report = HTMLReportWriter(output_path+"/index.html", os.path.relpath(self.pdffile,output_path))
         elif mode == ReportFormatType.LATEX:
             report = LATEXReportWriter(output_path+"/main.tex",\
               self.main.archi_info.ma5dir+"/madanalysis/input",False)
         else :
             report = LATEXReportWriter(output_path+"/main.tex",\
               self.main.archi_info.ma5dir+"/madanalysis/input",True)
-                
+
         # Opening
         if not report.Open():
             return False
@@ -1015,26 +1015,26 @@ class Layout:
 
             name=os.path.normpath(output_path+'/main.dvi')
             if not os.path.isfile(name):
-                logging.error('DVI file cannot be produced')
-                logging.error('Please have a look to the log file '+output_path+'/latex.log')
+                self.logger.error('DVI file cannot be produced')
+                self.logger.error('Please have a look to the log file '+output_path+'/latex.log')
                 return False
             
             # Checking latex log : are there errors
             if not Layout.CheckLatexLog(output_path+'/latex.log'):
-                logging.error('some errors occured during LATEX compilation')
-                logging.error('for more details, have a look to the log file : '+output_path+'/latex.log')
+                self.logger.error('some errors occured during LATEX compilation')
+                self.logger.error('for more details, have a look to the log file : '+output_path+'/latex.log')
                 return False
                 
             # Converting DVI file to PDF file
             if self.main.session_info.has_dvipdf:
-                logging.info("     -> Converting the DVI report to a PDF report.")
+                self.logger.info("     -> Converting the DVI report to a PDF report.")
                 os.system('cd '+output_path+'; dvipdf main.dvi > dvipdf.log 2>&1')
                 name=os.path.normpath(output_path+'/main.pdf')
 
                 # Checking PDF file presence
                 if not os.path.isfile(name):
-                    logging.error('PDF file cannot be produced')
-                    logging.error('Please have a look to the log file '+output_path+'/dvipdf.log')
+                    self.logger.error('PDF file cannot be produced')
+                    self.logger.error('Please have a look to the log file '+output_path+'/dvipdf.log')
                     return False
                 
         # ---- PDFLATEX MODE ----
@@ -1045,15 +1045,15 @@ class Layout:
 
             # Checking latex log : are there errors
             if not Layout.CheckLatexLog(output_path+'/latex.log'):
-                logging.error('some errors occured during LATEX compilation')
-                logging.error('for more details, have a look to the log file : '+output_path+'/latex.log')
+                self.logger.error('some errors occured during LATEX compilation')
+                self.logger.error('for more details, have a look to the log file : '+output_path+'/latex.log')
                 return False
             
             # Checking PDF file presence
             name=os.path.normpath(output_path+'/main.pdf')
             if not os.path.isfile(name):
-                logging.error('PDF file cannot be produced')
-                logging.error('Please have a look to the log file '+output_path+'/latex2.log')
+                self.logger.error('PDF file cannot be produced')
+                self.logger.error('Please have a look to the log file '+output_path+'/latex2.log')
                 return False
             
         

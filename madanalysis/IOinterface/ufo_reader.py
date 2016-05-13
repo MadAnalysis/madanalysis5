@@ -104,14 +104,14 @@ class UFOReader():
 
         # Checking if the file is opened
         if self.isopen:
-            logging.error("cannot open the file called '" + 'particles.py' + "' : it is already opened")
+            logging.getLogger('MA5').error("cannot open the file called '" + 'particles.py' + "' : it is already opened")
             return False
 
         name = os.path.normpath(self.path+"/"+'particles.py')
         if os.path.isfile(name):
             self.file = open (name, "r")
         else:
-            logging.info('UFO file called ' + name + ' is not found')
+            logging.getLogger('MA5').info('UFO file called ' + name + ' is not found')
         return True    
 
 
@@ -119,14 +119,14 @@ class UFOReader():
 
         # Checking if the file is opened
         if self.isopen:
-            logging.error("cannot open the file called '" + 'parameters.py' + "' : it is already opened")
+            logging.getLogger('MA5').error("cannot open the file called '" + 'parameters.py' + "' : it is already opened")
             return False
 
         name = os.path.normpath(self.path+"/"+'parameters.py')
         if os.path.isfile(name):
             self.file = open (name, "r")
         else:
-            logging.info('UFO file called ' + name + ' is not found')
+            logging.getLogger('MA5').info('UFO file called ' + name + ' is not found')
         return True    
 
 
@@ -182,7 +182,7 @@ class UFOReader():
             return True
 
         self.cmd_define.fill('invisible',tmp,forced=True)
-        logging.info("Adding "+inv+"to 'invisible' multiparticle")
+        logging.getLogger('MA5').info("Adding "+inv+"to 'invisible' multiparticle")
 
         
 
@@ -267,7 +267,7 @@ class UFOReader():
                     isValue=False
                     
                     #debug message
-                    logging.debug("Extracting a parameter labelled ["+Name+\
+                    logging.getLogger('MA5').debug("Extracting a parameter labelled ["+Name+\
                                  "] with value=" + Value)
             
                     #feed particle
@@ -427,7 +427,7 @@ class UFOReader():
                     isColor=False
                     
                     #debug message
-                    logging.debug("Extracting a particle labelled ["+Name+\
+                    logging.getLogger('MA5').debug("Extracting a particle labelled ["+Name+\
                                  "] with PDG-id=" + Pdg +\
                                  ", mass=" + Mass + ", width=" + \
                                  Width + ", charge=" + Charge + ", color=" + Color)
@@ -460,7 +460,7 @@ class UFOReader():
         try:
             thepart.pdg = int(Pdg)
         except :
-            logging.error("PDG-ID of the particle " + Name +\
+            logging.getLogger('MA5').error("PDG-ID of the particle " + Name +\
                           " is not an integer value : " + Pdg)
             return
         if antiparticle:
@@ -469,7 +469,7 @@ class UFOReader():
         try:
             thepart.color = int(Color)
         except :
-            logging.error("Color structure of the particle " + Name +\
+            logging.getLogger('MA5').error("Color structure of the particle " + Name +\
                           " is not an integer value : " + Color)
             return
         
@@ -481,7 +481,7 @@ class UFOReader():
             try:
                 tmp=int(item)
             except:
-                logging.error("Charge of the particle " + Name +\
+                logging.getLogger('MA5').error("Charge of the particle " + Name +\
                               " is not a float value : " + Charge)
                 return
 
@@ -490,7 +490,7 @@ class UFOReader():
         elif len(charges)==2:
             thepart.charge = float(charges[0])/float(charges[1])
         else:
-            logging.error("Charge of the particle " + Name +\
+            logging.getLogger('MA5').error("Charge of the particle " + Name +\
                           " is not a float value : " + Charge)
             return
 
@@ -512,5 +512,5 @@ class UFOReader():
 
         self.isopen = False 
 
-        logging.info(str(len(self.parts.parts)) + " particles have been successfully exported.")
+        logging.getLogger('MA5').info(str(len(self.parts.parts)) + " particles have been successfully exported.")
         return True

@@ -421,4 +421,7 @@ class InstallDelphesMA5tune:
                 self.logger.error("Problem with the path updates.")
                 return -1
 
+            if not self.main.archi_info.save(self.main.archi_info.ma5dir+'/tools/architecture.ma5'):
+                return -1
+
         return 1
