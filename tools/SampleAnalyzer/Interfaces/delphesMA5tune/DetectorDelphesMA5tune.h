@@ -58,6 +58,7 @@ class DetectorDelphesMA5tune: public DetectorBase
     ExRootConfReader* confReader_;
     ExRootTreeWriter* treeWriter_;
     ExRootTreeBranch* branchEvent_;
+    ExRootTreeBranch* branchWeight_;
     Delphes*          modularDelphes_;
     DelphesFactory*   factory_;
 
@@ -73,6 +74,8 @@ class DetectorDelphesMA5tune: public DetectorBase
     // parameters
     bool output_;
     bool first_;
+    unsigned long nprocesses_;
+
 
 //---------------------------------------------------------------------------------
 //                                method members
@@ -81,7 +84,7 @@ class DetectorDelphesMA5tune: public DetectorBase
 
     /// Constructor without argument
     DetectorDelphesMA5tune() 
-    { output_=false; first_=false; }
+    { output_=false; first_=false; nprocesses_=0; }
 
     /// Destructor
     virtual ~DetectorDelphesMA5tune()
@@ -105,6 +108,9 @@ class DetectorDelphesMA5tune: public DetectorBase
 
     /// Jet clustering
     virtual bool Execute(SampleFormat& mySample, EventFormat& myEvent);
+
+    /// Store Event block
+    void StoreEventHeader(SampleFormat& mySample, EventFormat& myEvent);
 
     /// Translation functions
     void TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat& myEvent);

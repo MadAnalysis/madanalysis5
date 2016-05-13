@@ -123,6 +123,7 @@ class DelphesMA5tuneTreeReader : public TreeReaderBase
     branchScalarHT_=0;
     branchGenParticle_=0;
     branchTrack_=0;
+    branchEvent_=0;
   }
 
   /// Get the file size

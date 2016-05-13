@@ -123,7 +123,6 @@ bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<s
 
   // Creating output tree
   treeWriter_ = new ExRootTreeWriter(outputFile_, "Delphes");
-  //  ExRootTreeBrancha* branchEvent_ = treeWriter_->NewBranch("Event", LHEFEvent::Class());
   branchEvent_  = treeWriter_->NewBranch("Event",  LHEFEvent::Class());
   branchWeight_ = treeWriter_->NewBranch("Weight", Weight::Class());
 

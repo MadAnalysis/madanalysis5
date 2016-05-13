@@ -89,7 +89,8 @@ bool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const std
   else outputFile_ = TFile::Open("tmp.root", "RECREATE");
 
   treeWriter_ = new ExRootTreeWriter(outputFile_, "DelphesMA5tune");
-  //  branchEvent_ = treeWriter_->NewBranch("Event", LHEFEvent::Class());
+  branchEvent_ = treeWriter_->NewBranch("Event", LHEFEvent::Class());
+  branchWeight_ = treeWriter_->NewBranch("Weight", Weight::Class());
 
   // Initializing delphes
   modularDelphes_ = new Delphes("Delphes");
@@ -115,6 +116,7 @@ bool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const std
   // Reset
   treeWriter_->Clear();
   modularDelphes_->Clear();
+  nprocesses_=0;
 
 
   return true;
@@ -137,6 +139,8 @@ std::string DetectorDelphesMA5tune::GetParameters()
 /// Jet clustering
 bool DetectorDelphesMA5tune::Execute(SampleFormat& mySample, EventFormat& myEvent)
 {
+  nprocesses_++;
+
   // Import particles to Delphes
   TranslateMA5toDELPHES(mySample, myEvent);
 
@@ -148,6 +152,9 @@ bool DetectorDelphesMA5tune::Execute(SampleFormat& mySample, EventFormat& myEven
   // Export particles from Delphes
   TranslateDELPHEStoMA5(mySample, myEvent);
 
+  // Creater Event header
+  StoreEventHeader(mySample, myEvent); 
+
   // Saving ROOT
   if (output_) treeWriter_->Fill();
 
@@ -158,8 +165,25 @@ bool DetectorDelphesMA5tune::Execute(SampleFormat& mySample, EventFormat& myEven
   return true;
 }
 
+void DetectorDelphesMA5tune::StoreEventHeader(SampleFormat& mySample, EventFormat& myEvent)
+{
+  LHEFEvent *element = dynamic_cast<LHEFEvent *>(branchEvent_->NewEntry());
+  
+  element->Number    = nprocesses_;
+  if (myEvent.mc()==0) return;
+
+  element->ProcessID = myEvent.mc()->processId();
+  element->Weight    = myEvent.mc()->weight();
+  element->ScalePDF  = myEvent.mc()->scale();
+  element->AlphaQED  = myEvent.mc()->alphaQED();
+  element->AlphaQCD  = myEvent.mc()->alphaQCD();
+  element->ReadTime  = 0; //? readStopWatch->RealTime();
+  element->ProcTime  = 0; //? procStopWatch->RealTime();
+}
+
 void DetectorDelphesMA5tune::Finalize()
 {
+  nprocesses_=0;
   modularDelphes_->FinishTask();
   if (output_) treeWriter_->Write();
 
