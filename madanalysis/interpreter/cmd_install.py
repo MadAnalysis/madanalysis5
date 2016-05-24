@@ -51,6 +51,17 @@ class CmdInstall(CmdBase):
 
         # delphes preinstallation
         def inst_delphes(main,installer,pad=False):
+            def UpdatePaths():
+                main.archi_info.has_delphes=True
+                main.archi_info.delphes_priority=True
+                dpath =  os.path.normpath(os.path.join(main.archi_info.ma5dir,'tools','delphes'))
+                mylib = os.path.normpath(os.path.join(dpath,'libDelphes.so'))
+                main.archi_info.libraries['Delphes']= mylib+":"+str(os.stat(mylib).st_mtime)
+                main.archi_info.delphes_lib = mylib
+                main.archi_info.toLDPATH1 = [x for x in main.archi_info.toLDPATH1 if not 'MA5tune' in x]
+                main.archi_info.toLDPATH1.append(dpath)
+                main.archi_info.delphes_lib_paths = [dpath]
+                main.archi_info.delphes_inc_paths =[dpath, os.path.normpath(os.path.join(dpath,'external'))]
             if not installer.Deactivate('delphesMA5tune'):
                 return False
             ResuActi = installer.Activate('delphes')
@@ -60,17 +71,9 @@ class CmdInstall(CmdBase):
                 self.logger.warning("Delphes not installed: installing it...")
                 resu = installer.Execute('delphes')
                 if resu:
-                    main.archi_info.has_delphes=True
-                    main.archi_info.delphes_priority=True
-                    dpath =  os.path.normpath(os.path.join(main.archi_info.ma5dir,'tools','delphes'))
-                    mylib = os.path.normpath(os.path.join(dpath,'libDelphes.so'))
-                    main.archi_info.libraries['Delphes']= mylib+":"+str(os.stat(mylib).st_mtime)
-                    main.archi_info.delphes_lib = mylib
-                    main.archi_info.toLDPATH1 = [x for x in main.archi_info.toLDPATH1 if not 'MA5tune' in x]
-                    main.archi_info.toLDPATH1.append(dpath)
-                    main.archi_info.delphes_lib_paths = [dpath]
-                    main.archi_info.delphes_inc_paths =\
-                     [dpath, os.path.normpath(os.path.join(dpath,'external'))]
+                    UpdatePaths()
+                    if not main.CheckConfig():
+                        return False
                     return resu
             elif ResuActi == 0 and self.main.archi_info.has_delphes and not pad:
                 self.logger.warning("A previous installation of Delphes has been found. Skipping the installation.")
@@ -79,6 +82,17 @@ class CmdInstall(CmdBase):
 
         # ma5tune preinstallation
         def inst_ma5tune(main,installer,pad=False):
+            def UpdatePaths():
+                main.archi_info.has_delphesMA5tune=True
+                main.archi_info.delphesMA5tune_priority=True
+                dpath =  os.path.normpath(os.path.join(main.archi_info.ma5dir,'tools','delphesMA5tune'))
+                mylib = os.path.normpath(os.path.join(dpath,'libDelphesMA5tune.so'))
+                main.archi_info.libraries['DelphesMA5tune']= mylib+":"+str(os.stat(mylib).st_mtime)
+                main.archi_info.delphesMA5tune_lib=mylib
+                main.archi_info.toLDPATH1 = [x for x in main.archi_info.toLDPATH1 if not 'delphes' in x]
+                main.archi_info.toLDPATH1.append(dpath)
+                main.archi_info.delphesMA5tune_lib_paths = [dpath]
+                main.archi_info.delphesMA5tune_inc_paths=[dpath,os.path.normpath(os.path.join(dpath,'external'))]
             if not installer.Deactivate('delphes'):
                 return False
             ResuActi = installer.Activate('delphesMA5tune')
@@ -88,17 +102,9 @@ class CmdInstall(CmdBase):
                 self.logger.warning("DelphesMA5tune not installed: installing it...")
                 resu = installer.Execute('delphesMA5tune')
                 if resu:
-                    main.archi_info.has_delphesMA5tune=True
-                    main.archi_info.delphesMA5tune_priority=True
-                    dpath =  os.path.normpath(os.path.join(main.archi_info.ma5dir,'tools','delphesMA5tune'))
-                    mylib = os.path.normpath(os.path.join(dpath,'libDelphesMA5tune.so'))
-                    main.archi_info.libraries['DelphesMA5tune']= mylib+":"+str(os.stat(mylib).st_mtime)
-                    main.archi_info.delphesMA5tune_lib=mylib
-                    main.archi_info.toLDPATH1 = [x for x in main.archi_info.toLDPATH1 if not 'delphes' in x]
-                    main.archi_info.toLDPATH1.append(dpath)
-                    main.archi_info.delphesMA5tune_lib_paths = [dpath]
-                    main.archi_info.delphesMA5tune_inc_paths =\
-                      [dpath, os.path.normpath(os.path.join(dpath,'external'))]
+                    UpdatePaths()
+                    if not main.CheckConfig():
+                        return False
                 return resu
             elif ResuActi == 0 and self.main.archi_info.has_delphesMA5tune and not pad:
                 self.logger.warning("A previous installation of DelphesMA5tune has been found. Skipping the installation.")

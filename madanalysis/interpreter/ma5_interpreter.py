@@ -35,11 +35,14 @@ sys.path.insert(0, os.path.abspath(os.path.join(MA5_root_path,'tools','ReportGen
 
 import colored_log
 
-from madanalysis.core.main                    import Main
-from madanalysis.enumeration.ma5_running_type import MA5RunningType
-from madanalysis.interpreter.cmd_install      import CmdInstall
-from madanalysis.interpreter.interpreter      import Interpreter
-from madanalysis.misc.freeze_environment      import freeze_environment
+from madanalysis.core.main                        import Main
+from madanalysis.enumeration.ma5_running_type     import MA5RunningType
+from madanalysis.interpreter.cmd_install          import CmdInstall
+from madanalysis.interpreter.interpreter          import Interpreter
+from madanalysis.misc.freeze_environment          import freeze_environment
+from madanalysis.enumeration.ma5_running_type     import MA5RunningType
+from madanalysis.IOinterface.particle_reader      import ParticleReader
+from madanalysis.IOinterface.multiparticle_reader import MultiparticleReader
 
 
 class InvalidPython(Exception):
@@ -165,3 +168,18 @@ class MA5Interpreter(Interpreter):
     @freeze_environment
     def setLogLevel(self,level):
         self.logger.setLevel(level)
+
+    @freeze_environment
+    def init_reco(self):
+        # chaning the running mode
+        self.main.mode=MA5RunningType.RECO
+
+        # observables
+        self.main.InitObservables(self.main.mode)
+
+        # labels
+        input = ParticleReader(self.main.archi_info.ma5dir,self.cmd_define,self.main.mode)
+        input.Load()
+        input = MultiparticleReader(self.main.archi_info.ma5dir,self.cmd_define,self.main.mode,self.main.forced)
+        input.Load()
+

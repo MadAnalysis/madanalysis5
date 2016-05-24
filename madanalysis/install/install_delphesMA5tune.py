@@ -234,7 +234,6 @@ class InstallDelphesMA5tune:
             self.logger.error(logname)
         return ok
 
-
     def Clean(self):
         # Input
         theCommands=['make','clean']
@@ -422,6 +421,8 @@ class InstallDelphesMA5tune:
                 return -1
 
             if not self.main.archi_info.save(self.main.archi_info.ma5dir+'/tools/architecture.ma5'):
+                return -1
+            if not self.main.CheckConfig():
                 return -1
 
         return 1

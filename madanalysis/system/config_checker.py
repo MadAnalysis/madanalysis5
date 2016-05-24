@@ -397,12 +397,12 @@ class ConfigChecker:
         # Import gROOT
         self.logger.debug("Try to import the gROOT module ...")
         try:
-	    from ROOT import gROOT
+            from ROOT import gROOT
         except:
             self.PrintFAIL(package_name,warning=False)
             self.logger.error("'root-config --libdir' indicates a wrong path for ROOT"\
-	                  +" libraries. Please specify the ROOT library path"\
-		          +" into the environnement variable $PYTHONPATH")
+                  +" libraries. Please specify the ROOT library path"\
+                  +" into the environnement variable $PYTHONPATH")
             return False
 
         # Setting ROOT batch mode
