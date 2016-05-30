@@ -76,9 +76,9 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
     # PATCH : TEMPORARY : TO REMOVE
     for combination in main.selection[iabs].part:
         if len(combination)>1:
-            logging.warning("sorry but the possibility to apply a cut on a combination of " +\
+            logging.getLogger('MA5').warning("sorry but the possibility to apply a cut on a combination of " +\
                             "particles is not still implemented in MadAnalysis 5.")
-            logging.warning("this cut will be disabled.")
+            logging.getLogger('MA5').warning("this cut will be disabled.")
             file.write('  cuts_['+str(icut)+'].Increment(__event_weight__);\n')
             file.write('  }\n')
             return
@@ -132,7 +132,7 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
 
         # Remove candidate from all containers    
         file.write('    // Removing rejected candidates from all containers\n')
-        logging.debug("- Removing rejecting candidates from all containers WITHOUT pt rank")
+        logging.getLogger('MA5').debug("- Removing rejecting candidates from all containers WITHOUT pt rank")
 
         # Loop over containers
         for other_part in part_list:
@@ -146,7 +146,7 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
                                           main.selection[iabs].rank+\
                                           main.selection[iabs].statuscode)
 
-            logging.debug("-- Is the following container concerned? "+other_part[0].name+" -> "+container2)
+            logging.getLogger('MA5').debug("-- Is the following container concerned? "+other_part[0].name+" -> "+container2)
 
             # Is this container concerned by the cut ?
             concerned=False
@@ -156,7 +156,7 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
                     break
             if not concerned:
                 continue
-            logging.debug("---> YES. Cutting on container: "+other_part[0].name+" -> "+container2)
+            logging.getLogger('MA5').debug("---> YES. Cutting on container: "+other_part[0].name+" -> "+container2)
 
             # Bracket for begin 
             file.write('    {\n')
@@ -187,7 +187,7 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
 
         # Remove candidate from all containers    
         first = True
-        logging.debug("- Updating all connected containers WITH pt rank")
+        logging.getLogger('MA5').debug("- Updating all connected containers WITH pt rank")
         for other_part in part_list: # Loop over containers
 
 
@@ -205,7 +205,7 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
                                              main.selection[iabs].rank+\
                                              main.selection[iabs].statuscode)
 
-            logging.debug("-- Is the following container concerned? "+other_part[0].name+" -> "+container2+" derivated from "+newcontainer2)
+            logging.getLogger('MA5').debug("-- Is the following container concerned? "+other_part[0].name+" -> "+container2+" derivated from "+newcontainer2)
 
             # Is this container concerned by the cut ?
             concerned=False
@@ -222,7 +222,7 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
                 first=False
                 file.write('    // Sorting particles according PTrank\n')
 
-            logging.debug("---> YES. Updating the container: "+other_part[0].name+" -> "+container2)
+            logging.getLogger('MA5').debug("---> YES. Updating the container: "+other_part[0].name+" -> "+container2)
 
             # Bracket for begin 
             file.write('    {\n')
@@ -259,7 +259,7 @@ def WriteFactorizedConditions(file,main,iabs,icut,container,\
         WriteFactorizedCutWith1Arg(file,main,iabs,icut,container,\
                                    tagName,tagIndex,condition)
     else:
-        logging.error("observable with more than 2 arguments are " +\
+        logging.getLogger('MA5').error("observable with more than 2 arguments are " +\
                       "not managed by MadAnalysis 5")
 
 
