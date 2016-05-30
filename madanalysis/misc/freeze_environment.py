@@ -31,7 +31,7 @@ class Architecture(Exception):
 def freeze_environment(func):
 
     def newf(self, *args, **opts):
-        # resetting the envuronement
+        # resetting the environement
         old_environ = dict(os.environ)
         os.environ.clear()
         os.environ.update(self.ma5_environ)

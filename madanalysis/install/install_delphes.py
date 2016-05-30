@@ -428,6 +428,9 @@ class InstallDelphes:
                 os.remove(os.path.normpath(self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/'+myfile))
             self.main.archi_info.has_delphes = False
             self.main.archi_info.delphes_priority = False
+            self.main.archi_info.delphes_lib_paths = []
+            self.main.archi_info.delphes_inc_paths = []
+            self.main.archi_info.delphes_lib = ""
         return True
 
     def Activate(self):
@@ -471,7 +474,8 @@ class InstallDelphes:
             self.main.archi_info.has_delphes=True
             self.main.archi_info.delphes_priority=True
             dpath =  os.path.normpath(os.path.join(self.main.archi_info.ma5dir,'tools','delphes'))
-            self.main.archi_info.libraries['Delphes'] = os.path.normpath(os.path.join(dpath,'libDelphes.so'))
+            mylib = os.path.normpath(os.path.join(dpath,'libDelphes.so'))
+            self.main.archi_info.libraries['Delphes']= mylib+":"+str(os.stat(mylib).st_mtime)
             self.main.archi_info.toLDPATH1 = [x for x in self.main.archi_info.toLDPATH1 if not 'MA5tune' in x]
             self.main.archi_info.toLDPATH1.append(dpath)
 

@@ -171,7 +171,7 @@ class MA5Interpreter(Interpreter):
 
     @freeze_environment
     def init_reco(self):
-        # chaning the running mode
+        # changing the running mode
         self.main.mode=MA5RunningType.RECO
 
         # observables
@@ -182,4 +182,19 @@ class MA5Interpreter(Interpreter):
         input.Load()
         input = MultiparticleReader(self.main.archi_info.ma5dir,self.cmd_define,self.main.mode,self.main.forced)
         input.Load()
+
+    @freeze_environment
+    def init_parton(self):
+        # changing the running mode
+        self.main.mode=MA5RunningType.PARTON
+
+        # observables
+        self.main.InitObservables(self.main.mode)
+
+        # labels
+        input = ParticleReader(self.main.archi_info.ma5dir,self.cmd_define,self.main.mode)
+        input.Load()
+        input = MultiparticleReader(self.main.archi_info.ma5dir,self.cmd_define,self.main.mode,self.main.forced)
+        input.Load()
+
 

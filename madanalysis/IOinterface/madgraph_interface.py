@@ -114,7 +114,7 @@ class MadGraphInterface():
 
         self.card.append('\n# Analysis using both reco')
         self.card.append('@MG5aMC analysis_name = analysis1')
-        self.card.append('@MG5aMC set reco = [BasicReco, CMSReco]')
+        self.card.append('@MG5aMC set_reconstructions = [\'BasicReco\', \'CMSReco\']')
         self.card.append('# object definition')
         self.card.append('select (j)  PT > 20')
         self.card.append('select (b)  PT > 20')

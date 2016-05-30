@@ -179,7 +179,8 @@ class DetectRoot:
         for k, v in self.libraries:
             self.main.archi_info.libraries[k]=v
         for feature in self.features:
-            self.main.archi_info.root_features.append(feature)
+            if not feature in self.main.archi_info.root_features:
+                self.main.archi_info.root_features.append(feature)
 
         # Adding ROOT library path to Python path
         sys.path.append(self.archi_info.root_lib_path)

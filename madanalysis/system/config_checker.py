@@ -335,7 +335,8 @@ class ConfigChecker:
         features = str(out).split()
         features.sort()
         for feature in features:
-            self.archi_info.root_features.append(feature)
+            if not feature in self.archi_info.root_features:
+                self.archi_info.root_features.append(feature)
         if self.debug:
             self.logger.debug("  features:      " + str(self.archi_info.root_features))
 
@@ -735,7 +736,7 @@ class ConfigChecker:
 
         # Name of the dynamic lib
         libnames=['libDelphes.so','libDelphes.a']
-        if self.archi_info.isMac:
+        if self.archi_info.isMac and 'libDelphes.dylib' not in libnames:
             libnames.append('libDelphes.dylib')
 
         # User veto
@@ -753,8 +754,10 @@ class ConfigChecker:
         if self.user_info.delphes_includes!=None:
             if not getpaths:
                 self.logger.debug("User setting: Delphes include path is specified.")
-                self.archi_info.delphes_inc_paths.append(self.user_info.delphes_includes)
-                self.archi_info.delphes_inc_paths.append(self.user_info.delphes_includes+'/external/')
+                if not self.user_info.delphes_includes in self.archi_info.delphes_inc_paths:
+                    self.archi_info.delphes_inc_paths.append(self.user_info.delphes_includes)
+                if not self.user_info.delphes_includes+'/external' in self.archi_info.delphes_inc_paths:
+                    self.archi_info.delphes_inc_paths.append(self.user_info.delphes_includes+'/external/')
             else:
                 delpath=os.path.normpath(self.user_info.delphes_includes)
                 deldeac = delpath.replace(delpath.split('/')[-1],"DEACT_"+delpath.split('/')[-1])
@@ -764,13 +767,16 @@ class ConfigChecker:
                     self.includes.append(deldeac)
                     self.includes.append(deldeac+'/external/')
                 else:
-                    self.archi_info.delphes_inc_paths.append(self.user_info.delphes_includes)
-                    self.archi_info.delphes_inc_paths.append(self.user_info.delphes_includes+'/external/')
+                    if not self.user_info.delphes_includes in self.archi_info.delphes_inc_paths:
+                        self.archi_info.delphes_inc_paths.append(self.user_info.delphes_includes)
+                if not self.user_info.delphes_includes+'/external' in self.archi_info.delphes_inc_paths:
+                        self.archi_info.delphes_inc_paths.append(self.user_info.delphes_includes+'/external/')
             force1=True
         if self.user_info.delphes_libs!=None:
             if not getpaths:
                 self.logger.debug("User setting: Delphes lib path is specified.")
-                self.archi_info.delphes_lib_paths.append(self.user_info.delphes_libs)
+                if not os.path.normpath(self.user_info.delphes_libs) in self.archi_info.delphes_lib_paths:
+                    self.archi_info.delphes_lib_paths.append(os.path.normpath(self.user_info.delphes_libs))
             else:
                 delpath=os.path.normpath(self.user_info.delphes_libs)
                 deldeac = delpath.replace(delpath.split('/')[-1],"DEACT_"+delpath.split('/')[-1])
@@ -778,7 +784,8 @@ class ConfigChecker:
                     self.archi_info.delphes_lib_paths.insert(0,deldeac)
                     self.libs.append(deldeac)
                 else:
-                    self.archi_info.delphes_lib_paths.append(self.user_info.delphes_libs)
+                    if not os.path.normpath(self.user_info.delphes_libs) in self.archi_info.delphes_lib_paths:
+                        self.archi_info.delphes_lib_paths.append(os.path.normpath(self.user_info.delphes_libs))
             force2=True
         force=force1 and force2
 
@@ -789,20 +796,25 @@ class ConfigChecker:
                 self.logger.debug("Look for Delphes in the folder "+self.archi_info.ma5dir+"/tools ...")
             if os.path.isdir(self.archi_info.ma5dir+'/tools/delphes') and \
                os.path.isdir(self.archi_info.ma5dir+'/tools/delphes/external'):
-                self.archi_info.delphes_inc_paths.append(self.archi_info.ma5dir+'/tools/delphes/')
-                self.archi_info.delphes_inc_paths.append(self.archi_info.ma5dir+'/tools/delphes/external/')
-                self.archi_info.delphes_lib_paths.append(self.archi_info.ma5dir+'/tools/delphes/')
+                dpath =  os.path.normpath(os.path.join(self.archi_info.ma5dir,'tools','delphes'))
+                if not dpath in self.archi_info.delphes_inc_paths:
+                    self.archi_info.delphes_inc_paths.append(dpath)
+                if not dpath in self.archi_info.delphes_lib_paths:
+                    self.archi_info.delphes_lib_paths.append(dpath)
+                dpath=os.path.normpath(os.path.join(self.archi_info.ma5dir,'tools','delphes','external'))
+                if not dpath in self.archi_info.delphes_inc_paths:
+                    self.archi_info.delphes_inc_paths.append(dpath)
                 if not getpaths:
                     self.logger.debug("-> found")
                 ma5installation = True
             elif os.path.isdir(self.archi_info.ma5dir+'/tools/DEACT_delphes') and \
                os.path.isdir(self.archi_info.ma5dir+'/tools/DEACT_delphes/external') and getpaths:
-                self.archi_info.delphes_inc_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphes/external/')
-                self.archi_info.delphes_inc_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphes/')
-                self.archi_info.delphes_lib_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphes/')
-                self.includes.append(self.archi_info.ma5dir+'/tools/DEACT_delphes/')
-                self.includes.append(self.archi_info.ma5dir+'/tools/DEACT_delphes/external/')
-                self.libs.append(self.archi_info.ma5dir+'/tools/DEACT_delphes/')
+                self.archi_info.delphes_inc_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphes/external')
+                self.archi_info.delphes_inc_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphes')
+                self.archi_info.delphes_lib_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphes')
+                self.includes.append(self.archi_info.ma5dir+'/tools/DEACT_delphes')
+                self.includes.append(self.archi_info.ma5dir+'/tools/DEACT_delphes/external')
+                self.libs.append(self.archi_info.ma5dir+'/tools/DEACT_delphes')
                 ma5installation = True
             else:
                 if not getpaths:
@@ -859,8 +871,10 @@ class ConfigChecker:
                 self.logger.debug("Look for the header file /modules/ParticlePropagator.h ...")
             mypath, myfile = self.FindHeader('/modules/ParticlePropagator.h')
             if mypath!='' and myfile!='':
-                self.archi_info.delphes_inc_paths.append(os.path.normpath(mypath))
-                self.archi_info.delphes_inc_paths.append(os.path.normpath(mypath+'/external'))
+                if not os.path.normpath(mypath) in self.archi_info.delphes_inc_paths:
+                    self.archi_info.delphes_inc_paths.append(os.path.normpath(mypath))
+                if not os.path.normpath(mypath+'/external') in self.archi_info.delphes_inc_paths:
+                    self.archi_info.delphes_inc_paths.append(os.path.normpath(mypath+'/external'))
                 if not getpaths:
                     self.logger.debug("-> result for the path: "+str(self.archi_info.delphes_inc_paths))
                     self.logger.debug("-> result for the file: "+str(os.path.normpath(myfile)))
@@ -877,7 +891,8 @@ class ConfigChecker:
                 self.logger.debug("Look for the Delphes libraries ...")
             mypath, myfile = self.FindLibraryWithPattern('libDelphes.*',libnames)
             if mypath!='' and myfile!='':
-                self.archi_info.delphes_lib_paths.append(os.path.normpath(mypath))
+                if not os.path.normpath(mypath) in self.archi_info.delphes_lib_paths:
+                    self.archi_info.delphes_lib_paths.append(os.path.normpath(mypath))
                 self.archi_info.delphes_lib      = os.path.normpath(myfile)
                 if not getpaths:
                     self.logger.debug("-> result for lib paths: "+str(self.archi_info.delphes_lib_paths))
@@ -909,7 +924,7 @@ class ConfigChecker:
 
         # Name of the dynamic lib
         libnames=['libDelphesMA5tune.so','libDelphesMA5tune.a']
-        if self.archi_info.isMac:
+        if self.archi_info.isMac and 'libDelphesMA5tune.dylib' not in libnames:
             libnames.append('libDelphesMA5tune.dylib')
 
         # User veto
@@ -926,8 +941,10 @@ class ConfigChecker:
         if self.user_info.delphesMA5tune_includes!=None:
             if not getpaths:
                 self.logger.debug("User setting: Delphes-MA5tune include path is specified.")
-                self.archi_info.delphesMA5tune_inc_paths.append(self.user_info.delphesMA5tune_includes)
-                self.archi_info.delphesMA5tune_inc_paths.append(self.user_info.delphesMA5tune_includes+'/external/')
+                if not self.user_info.delphesMA5tune_includes in self.archi_info.delphesMA5tune_inc_paths:
+                    self.archi_info.delphesMA5tune_inc_paths.append(self.user_info.delphesMA5tune_includes)
+                if not self.user_info.delphesMA5tune_includes+'/external' in self.archi_info.delphesMA5tune_inc_paths:
+                    self.archi_info.delphesMA5tune_inc_paths.append(self.user_info.delphesMA5tune_includes+'/external/')
             else:
                 delpath=os.path.normpath(self.user_info.delphesMA5tune_includes)
                 deldeac = delpath.replace(delpath.split('/')[-1],"DEACT_"+delpath.split('/')[-1])
@@ -937,13 +954,16 @@ class ConfigChecker:
                     self.includes.append(deldeac)
                     self.includes.append(deldeac+'/external/')
                 else:
-                    self.archi_info.delphesMA5tune_inc_paths.append(self.user_info.delphesMA5tune_includes)
-                    self.archi_info.delphesMA5tune_inc_paths.append(self.user_info.delphesMA5tune_includes+'/external/')
+                    if not self.user_info.delphesMA5tune_includes in self.archi_info.delphesMA5tune_inc_paths:
+                        self.archi_info.delphesMA5tune_inc_paths.append(self.user_info.delphesMA5tune_includes)
+                    if not self.user_info.delphesMA5tune_includes+'/external' in self.archi_info.delphesMA5tune_inc_paths:
+                        self.archi_info.delphesMA5tune_inc_paths.append(self.user_info.delphesMA5tune_includes+'/external/')
             force1=True
         if self.user_info.delphesMA5tune_libs!=None:
             if not getpaths:
                 self.logger.debug("User setting: Delphes-MA5tune lib path is specified.")
-                self.archi_info.delphesMA5tune_lib_paths.append(self.user_info.delphesMA5tune_libraries)
+                if not os.path.normpath(self.user_info.delphesMA5tune_libs) in self.archi_info.delphesMA5tune_lib_paths:
+                    self.archi_info.delphesMA5tune_lib_paths.append(os.path.normpath(self.user_info.delphesMA5tune_libs))
             else:
                 delpath=os.path.normpath(self.user_info.delphesMA5tune_libs)
                 deldeac = delpath.replace(delpath.split('/')[-1],"DEACT_"+delpath.split('/')[-1])
@@ -951,7 +971,8 @@ class ConfigChecker:
                     self.archi_info.delphesMA5tune_lib_paths.insert(0,deldeac)
                     self.libs.append(deldeac)
                 else:
-                    self.archi_info.delphesMA5tune_lib_paths.append(self.user_info.delphesMA5tune_libs)
+                    if not os.path.normpath(self.user_info.delphesMA5tune_libs) in self.archi_info.delphesMA5tune_lib_paths:
+                        self.archi_info.delphesMA5tune_lib_paths.append(os.path.normpath(self.user_info.delphesMA5tune_libs))
             force2=True
         force=force1 and force2
 
@@ -962,20 +983,25 @@ class ConfigChecker:
                 self.logger.debug("Look for Delphes-MA5tune in the folder "+self.archi_info.ma5dir+"/tools ...")
             if os.path.isdir(self.archi_info.ma5dir+'/tools/delphesMA5tune') and \
                os.path.isdir(self.archi_info.ma5dir+'/tools/delphesMA5tune/external'):
-                self.archi_info.delphesMA5tune_inc_paths.append(self.archi_info.ma5dir+'/tools/delphesMA5tune/')
-                self.archi_info.delphesMA5tune_inc_paths.append(self.archi_info.ma5dir+'/tools/delphesMA5tune/external/')
-                self.archi_info.delphesMA5tune_lib_paths.append(self.archi_info.ma5dir+'/tools/delphesMA5tune/')
+                dpath =  os.path.normpath(os.path.join(self.archi_info.ma5dir,'tools','delphesMA5tune'))
+                if not dpath in self.archi_info.delphesMA5tune_inc_paths:
+                    self.archi_info.delphesMA5tune_inc_paths.append(dpath)
+                if not dpath in self.archi_info.delphesMA5tune_lib_paths:
+                    self.archi_info.delphesMA5tune_lib_paths.append(dpath)
+                dpath=os.path.normpath(os.path.join(self.archi_info.ma5dir,'tools','delphesMA5tune','external'))
+                if not dpath in self.archi_info.delphesMA5tune_inc_paths:
+                    self.archi_info.delphesMA5tune_inc_paths.append(dpath)
                 if not getpaths:
                     self.logger.debug("-> found")
                 ma5installation = True
             elif os.path.isdir(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune') and \
                os.path.isdir(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/external') and getpaths:
-                self.archi_info.delphesMA5tune_inc_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/external/')
-                self.archi_info.delphesMA5tune_inc_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/')
-                self.archi_info.delphesMA5tune_lib_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/')
-                self.includes.append(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/')
-                self.includes.append(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/external/')
-                self.libs.append(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/')
+                self.archi_info.delphesMA5tune_inc_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/external')
+                self.archi_info.delphesMA5tune_inc_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune')
+                self.archi_info.delphesMA5tune_lib_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune')
+                self.includes.append(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune')
+                self.includes.append(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/external')
+                self.libs.append(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune')
                 ma5installation = True
             else:
                 if not getpaths:
@@ -1013,7 +1039,8 @@ class ConfigChecker:
             if not getpaths:
                 self.logger.debug("Look for the libraries in folder "+str(self.archi_info.delphesMA5tune_lib_paths)+" ...")
             mypath, myfile = self.FindFilesWithPattern(self.archi_info.delphesMA5tune_lib_paths,"libDelphesMA5tune.*",libnames)
-            self.archi_info.delphesMA5tune_lib_paths.append(os.path.normpath(mypath))
+            if not os.path.normpath(mypath) in self.archi_info.delphesMA5tune_lib_paths:
+                self.archi_info.delphesMA5tune_lib_paths.append(os.path.normpath(mypath))
             self.archi_info.delphesMA5tune_lib      = myfile
             if not getpaths:
                 self.logger.debug("-> result for lib paths: "+str(self.archi_info.delphesMA5tune_lib_paths))
@@ -1149,7 +1176,7 @@ class ConfigChecker:
         self.logger.debug("  Lib flags:     " + str(out))
         words = out.split()
         for word in words:
-            if word.startswith('-L'):
+            if word.startswith('-L') and not word[2:] in self.archi_info.fastjet_lib_paths:
                 self.archi_info.fastjet_lib_paths.append(word[2:])
         if self.debug:
             self.logger.debug("  Lib path:      " + str(self.archi_info.fastjet_lib_paths))

@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+133  1.4.12   (2016/05/30) fuks:    Delphes(MA5tune) activation and deactivation 
+
 132  1.4.11   (2016/05/24) fuks:    The MG5-NA5 interface (next step) 
 
 130  1.4.10   (2016/05/13) fuks:    Few recasting bugs 
