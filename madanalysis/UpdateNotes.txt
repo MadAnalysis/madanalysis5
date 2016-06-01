@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+135  1.4.14   (2016/06/01) fuks:    mg5-ma5 interface 
+
 134  1.4.13   (2016/05/31) fuks:    logging fix 
 
 133  1.4.12   (2016/05/30) fuks:    Delphes(MA5tune) activation and deactivation 

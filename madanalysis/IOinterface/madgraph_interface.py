@@ -52,7 +52,7 @@ class MadGraphInterface():
         self.logger.info('Getting the UFO model:')
         self.model = ProcessesLists[0][0].get('model')
         self.logger.debug('  >> ' + self.model.get('name'))
-        self.get_invisible(card=(card_type=='parton'))
+        self.get_invisible()
 
         self.logger.info('Getting the multiparticle definitions')
         for line in MG5history:
@@ -361,14 +361,14 @@ class MadGraphInterface():
             raise self.MultiParts("  ** Problem with the multiparticle definitions")
 
     # adding the particle definitions
-    def get_invisible(self,card=True):
+    def get_invisible(self):
         # Do we have MET?
         for key, value in self.model.get('particle_dict').iteritems():
             if value['width'] == 'ZERO' and value['color']==1 and value['charge']==0 and not value['name']=='a':
                 self.invisible_particles.append(value['name'])
                 self.invisible_particles.append(value['antiname'])
         self.invisible_particles=list(set(self.invisible_particles))
-        if len(self.invisible_particles)>0 and card:
+        if len(self.invisible_particles)>0:
             self.card.append('# Multiparticle definition')
             self.card.append('define invisible = ' + ' '.join(self.invisible_particles))
 

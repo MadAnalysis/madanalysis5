@@ -152,6 +152,15 @@ class MA5Interpreter(Interpreter):
 
     @freeze_environment
     def load(self, *args, **opts):
+        Interpreter.load(self,*args,**opts)
+
+    @freeze_environment
+    def setLogLevel(self,level):
+        self.logger.setLevel(level)
+
+    @freeze_environment
+    def init_reco(self):
+        # banner
         banner_level=90
         self.logger.log(banner_level,'*************************************************************')
         self.logger.log(banner_level,'*        W E L C O M E  to  M A D A N A L Y S I S  5        *')
@@ -163,14 +172,6 @@ class MA5Interpreter(Interpreter):
         self.logger.log(banner_level,'*             Eur. Phys. J. C74 (2014) 3103                 *')
         self.logger.log(banner_level,'*************************************************************')
 
-        Interpreter.load(self,*args,**opts)
-
-    @freeze_environment
-    def setLogLevel(self,level):
-        self.logger.setLevel(level)
-
-    @freeze_environment
-    def init_reco(self):
         # changing the running mode
         self.main.mode=MA5RunningType.RECO
 
@@ -178,13 +179,25 @@ class MA5Interpreter(Interpreter):
         self.main.InitObservables(self.main.mode)
 
         # labels
-        input = ParticleReader(self.main.archi_info.ma5dir,self.cmd_define,self.main.mode)
+        input = ParticleReader(self.main.archi_info.ma5dir,self.cmd_define,self.main.mode,self.main.forced)
         input.Load()
         input = MultiparticleReader(self.main.archi_info.ma5dir,self.cmd_define,self.main.mode,self.main.forced)
         input.Load()
 
     @freeze_environment
     def init_parton(self):
+        # banner
+        banner_level=90
+        self.logger.log(banner_level,'*************************************************************')
+        self.logger.log(banner_level,'*        W E L C O M E  to  M A D A N A L Y S I S  5        *')
+        self.logger.log(banner_level,'*                                                           *')
+        self.logger.log(banner_level,'*   MA5 release : ' + \
+                "%-24s" % self.main.archi_info.ma5_version + "%+15s" % self.main.archi_info.ma5_date  + '   *')
+        self.logger.log(banner_level,'*                                                           *')
+        self.logger.log(banner_level,'*         Comput. Phys. Commun. 184 (2013) 222-256          *')
+        self.logger.log(banner_level,'*             Eur. Phys. J. C74 (2014) 3103                 *')
+        self.logger.log(banner_level,'*************************************************************')
+
         # changing the running mode
         self.main.mode=MA5RunningType.PARTON
 
@@ -192,7 +205,7 @@ class MA5Interpreter(Interpreter):
         self.main.InitObservables(self.main.mode)
 
         # labels
-        input = ParticleReader(self.main.archi_info.ma5dir,self.cmd_define,self.main.mode)
+        input = ParticleReader(self.main.archi_info.ma5dir,self.cmd_define,self.main.mode,self.main.forced)
         input.Load()
         input = MultiparticleReader(self.main.archi_info.ma5dir,self.cmd_define,self.main.mode,self.main.forced)
         input.Load()
