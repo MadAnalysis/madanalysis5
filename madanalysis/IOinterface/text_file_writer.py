@@ -46,11 +46,3 @@ class TextFileWriter():
             self.file.close()
             self.isopen = False
 
-        
-                
-            
-                
-        
-        
-        
-        

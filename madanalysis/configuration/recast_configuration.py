@@ -95,15 +95,17 @@ class RecastConfiguration:
     userVariables ={
          "status"        : ["on","off"],\
          "CLs_numofexps" : [str(default_CLs_numofexps)],\
-         "card_path"     : ""
+         "card_path"     : "",\
+         "store_root"    : ["True", "False"]
     }
 
     def __init__(self):
-        self.status  = "off"
-        self.delphes = False
-        self.ma5tune = False
-        self.pad     = False
-        self.padtune = False
+        self.status     = "off"
+        self.delphes    = False
+        self.ma5tune    = False
+        self.pad        = False
+        self.padtune    = False
+        self.store_root = False
         self.DelphesDic = {
           "delphes_card_cms_standard.tcl":      ["cms_sus_14_001_monojet", "cms_sus_13_016", "cms_sus_13_012", "cms_sus_13_011"],
           "delphes_card_cms_sus14004.tcl":      ["cms_sus_14_001_TopTag"],
@@ -151,6 +153,7 @@ class RecastConfiguration:
             self.user_DisplayParameter("padtune")
             self.user_DisplayParameter("CLs_numofexps")
             self.user_DisplayParameter("card_path")
+            self.user_DisplayParameter("store_root")
 
     def user_DisplayParameter(self,parameter):
         if parameter=="status":
@@ -185,6 +188,9 @@ class RecastConfiguration:
             return
         elif parameter=="card_path":
             self.logger.info("   * Path to a recasting card: "+str(self.card_path))
+            return
+        elif parameter=="store_root":
+            self.logger.info("   * Keeping the root files: "+str(self.store_root))
             return
         return
 
@@ -268,6 +274,19 @@ class RecastConfiguration:
                 self.logger.error("Invalid path to a recasting card.")
                 return
 
+        # Keeping the root files
+        elif parameter=="store_root":
+            if self.status!="on":
+                self.logger.error("Please first set the recasting mode to 'on'.")
+                return
+            if value == 'True':
+                self.store_root=True
+            elif value == 'False':
+                self.store_root=False
+            else:
+                self.logger.error("Do the root files need to be stored? (True/False)")
+                return
+
         # other rejection if no algo specified
         else:
             self.logger.error("the recast module has no parameter called '"+parameter+"'")
@@ -275,7 +294,7 @@ class RecastConfiguration:
 
     def user_GetParameters(self):
         if self.status=="on":
-            table = ["CLs_numofexps", "card_path"]
+            table = ["CLs_numofexps", "card_path", "store_root"]
         else:
            table = []
         return table
@@ -289,16 +308,18 @@ class RecastConfiguration:
                 table.extend(RecastConfiguration.userVariables["CLs_numofexps"])
         elif variable =="card_path":
                 table.extend(RecastConfiguration.userVariables["card_path"])
+        elif variable =="store_root":
+                table.extend(RecastConfiguration.userVariables["store_root"])
         return table
 
 
-    def CreateCard(self,dirname):
+    def CreateCard(self,dirname,write=True):
         # using an existing card
         if self.card_path=="":
             if self.padtune and self.ma5tune:
-                self.CreateMyCard(dirname,"PADForMA5tune")
+                self.CreateMyCard(dirname,"PADForMA5tune",write)
             if self.pad and self.delphes:
-                self.CreateMyCard(dirname,"PAD")
+                self.CreateMyCard(dirname,"PAD",write)
             return True
         #using and checking an existing card
         else:
@@ -381,15 +402,15 @@ class RecastConfiguration:
         return True
 
 
-    def CreateMyCard(self,dirname,padtype):
+    def CreateMyCard(self,dirname,padtype,write=True):
         mainfile = open(dirname+"/../"+padtype+"/Build/Main/main.cpp")
-        import os
-        exist=os.path.isfile(dirname+'/Input/recasting_card.dat')
-        card = open(dirname+'/Input/recasting_card.dat','a')
-        if not exist:
-            card.write('# Delphes cards must be located in the PAD(ForMA5tune) directory\n')
-            card.write('# Switches must be on or off\n')
-            card.write('# AnalysisName               PADType    Switch     DelphesCard\n')
+        thecard=[]
+        if write:
+            exist=os.path.isfile(dirname+'/Input/recasting_card.dat')
+            if not exist and write:
+                thecard.append('# Delphes cards must be located in the PAD(ForMA5tune) directory')
+                thecard.append('# Switches must be on or off')
+                thecard.append('# AnalysisName               PADType    Switch     DelphesCard')
         if padtype=="PAD":
             mytype="v1.2"
         else:
@@ -407,10 +428,16 @@ class RecastConfiguration:
                       if analysis == myana:
                           descr=mydesc
                           break
-                card.write(analysis.ljust(30,' ') + mytype.ljust(12,' ') + 'on    ' + mydelphes.ljust(50, ' ')+\
-                      ' # '+descr+'\n')
+                thecard.append(analysis.ljust(30,' ') + mytype.ljust(12,' ') + 'on    ' + mydelphes.ljust(50, ' ')+\
+                      ' # '+descr)
         mainfile.close()
-        card.close()
+        thecard.append('')
+        if write:
+            card = open(dirname+'/Input/recasting_card.dat','a')
+            card.write('\n'.join(thecard))
+            card.close()
+        else:
+            return thecard
 
     def UpdatePADMain(self,analysislist,PADdir):
         ## backuping the main file

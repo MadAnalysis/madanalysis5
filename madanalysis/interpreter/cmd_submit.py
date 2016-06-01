@@ -585,6 +585,9 @@ class CmdSubmit(CmdBase):
                     if not self.main.recasting.SavePADOutput(PADdir,dirname,myanalyses,myset.name):
                         self.main.forced=forced_bkp
                         return False
+                    if not self.main.recasting.store_root:
+                        os.remove(os.path.normpath(dirname + '/Events/' + myset.name + '_' +\
+                       myversion.replace('.','x')+'_' + mycard.replace('.tcl','')+'.root'))
                     time.sleep(1.);
                     ## Running the CLs exclusion script (if available)
                     if not self.main.recasting.GetCLs(PADdir,dirname,myanalyses,myset.name,myset.xsection,myset.name):

@@ -21,6 +21,7 @@
 #
 ################################################################################
 
+from madanalysis.configuration.recast_configuration     import RecastConfiguration
 import itertools
 import logging
 import os
@@ -33,6 +34,7 @@ class MadGraphInterface():
         self.multiparticles={}
         self.card=[]
         self.invisible_particles = []
+        self.recastinfo = RecastConfiguration()
 
     class InvalidCard(Exception):
         pass
@@ -213,8 +215,28 @@ class MadGraphInterface():
                 if len(perm)==2:
                     self.card.append('plot DELTAR('+','.join(perm)+') 40 0 10 [logY]')
 
+        # recasting
+        self.card.append('\n# Recasting')
+        self.card.append('@MG5aMC recasting_commands')
+        self.card.append('@MG5aMC inputs = *.hep, *.hepmc, *stdhep')
+        self.card.append('set main.recast = on')
+        self.card.append('set main.recast.store_root = False')
+        self.card.append('@MG5aMC recasting_card')
+        self.card.append('# Uncomment the analyses to run')
+        self.card.append('# Delphes cards must be located in the PAD(ForMA5tune) directory')
+        self.card.append('# Switches must be on or off')
+        self.card.append('# AnalysisName               PADType    Switch     DelphesCard')
+        ma5dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),os.pardir,os.pardir))
+        tmp = self.recastinfo.CreateMyCard(os.path.normpath(os.path.join(ma5dir,'PAD')),"PAD",False)
+        tmp = ['# '+x for x in tmp]
+        self.card+= tmp
+        tmp = self.recastinfo.CreateMyCard(os.path.normpath(os.path.join(ma5dir,'PAD')),"PADForMA5tune",False)
+        tmp = ['# '+x for x in tmp]
+        self.card+= tmp
+
         # output
         return '\n'.join(self.card)
+
 
     def get_Npart(self, prt, pdglist):
         if isinstance(prt, list):
