@@ -76,6 +76,9 @@ class MadGraphInterface():
 
     def generate_parton_card(self, ProcessesDefinitions, ProcessesLists):
 
+        # event fiile
+        self.card.append('@MG5aMC inputs = *.lhe')
+
         # global observables
         self.card.append('# Global event variables')
         self.card.append('plot THT   40 0 500 [logY]')
@@ -94,6 +97,7 @@ class MadGraphInterface():
     def generate_hadron_card(self, ProcessesDefinitions, ProcessesLists):
         self.card.append('# Reconstruction using FastJet')
         self.card.append('@MG5aMC reconstruction_name = BasicReco')
+        self.card.append('@MG5aMC inputs = *.hepmc, *.hep, *.stdhep')
         self.card.append('set main.fastsim.package = fastjet')
         self.card.append('set main.fastsim.algorithm = antikt')
         self.card.append('set main.fastsim.radius = 0.4')
@@ -109,11 +113,13 @@ class MadGraphInterface():
 
         self.card.append('\n# Reconstruction using Delphes')
         self.card.append('@MG5aMC reconstruction_name = CMSReco')
+        self.card.append('@MG5aMC inputs = *.hepmc, *.hep, *.stdhep')
         self.card.append('set main.fastsim.package  = delphes')
         self.card.append('set main.fastsim.detector = cms-ma5tune')
 
         self.card.append('\n# Analysis using both reco')
         self.card.append('@MG5aMC analysis_name = analysis1')
+        self.card.append('@MG5aMC inputs = *.lhe, *.root')
         self.card.append('@MG5aMC set_reconstructions = [\'BasicReco\', \'CMSReco\']')
         self.card.append('# object definition')
         self.card.append('select (j)  PT > 20')
