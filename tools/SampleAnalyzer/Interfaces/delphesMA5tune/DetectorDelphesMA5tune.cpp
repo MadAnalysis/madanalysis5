@@ -47,6 +47,7 @@ bool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const std
 { 
   // Save the name of the configuration file
   configFile_ = configFile;
+  rootfile_="";
 
   // Test the presence of the configuration file on the hard disk
   std::ifstream configTest(configFile.c_str());
@@ -78,6 +79,12 @@ bool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const std
         else output_=true;
       }
     }
+    else if (key=="rootfile")
+    {
+      std::stringstream str;
+      str << it->second;
+      str >> rootfile_;
+    }
   }
 
   // Configure inputs
@@ -85,7 +92,13 @@ bool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const std
   confReader_->ReadFile(configFile_.c_str());
 
   // Configure outputs
-  if (output_) outputFile_ = TFile::Open("TheMouth.root", "RECREATE");
+  if (output_)
+  {
+    if (rootfile_=="")
+       outputFile_ = TFile::Open("TheMouth.root", "RECREATE");
+    else
+       outputFile_ = TFile::Open(rootfile_.c_str(), "RECREATE");
+  }
   else outputFile_ = TFile::Open("tmp.root", "RECREATE");
 
   treeWriter_ = new ExRootTreeWriter(outputFile_, "DelphesMA5tune");

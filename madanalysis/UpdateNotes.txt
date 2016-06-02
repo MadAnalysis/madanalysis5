@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+138  1.4.17   (2016/06/02) fuks:    MG5-MA5 interface: recasting 
+
 137  1.4.16   (2016/06/02) fuks:    mg5-ma5 interface: recasting 
 
 136  1.4.15   (2016/06/01) fuks:    mg5-ma5 interface 

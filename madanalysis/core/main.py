@@ -329,7 +329,7 @@ class Main():
                 elif self.mode == MA5RunningType.HADRON:
                     if self.fastsim.package == "none":
                         self.logger.error("Please select a fast-simulation package before requesting a LHCO file output.")
-                        self.logger.error("Command: set main.fastsim.package = ")
+                        self.logger.error("Command: set main.fastsim.package = ... ")
                         return False
                     else:
                         self.output = value

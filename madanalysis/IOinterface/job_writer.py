@@ -389,7 +389,7 @@ class JobWriter():
             file.write('  AnalyzerBase* analyzer2 = \n')
             file.write('      manager.InitializeAnalyzer("MergingPlots","MergingPlots.saf",parametersA2);\n')
             file.write('  if (analyzer2==0) return 1;\n\n')
-        if self.output!="":
+        if self.output!="" and not self.output.lower().endswith('root'):
             file.write('  //Getting pointer to the writer\n')
             file.write('  WriterBase* writer1 = \n')
             if self.output.lower().endswith('lhe') or self.output.lower().endswith('lhe.gz'):
@@ -483,7 +483,7 @@ class JobWriter():
         elif self.main.fastsim.package=="delphesMA5tune":
             file.write('      fastsim1->Execute(mySample,myEvent);\n')
         file.write('      if (!analyzer1->Execute(mySample,myEvent)) continue;\n')
-        if self.output!="":
+        if self.output!="" and  not self.output.lower().endswith('root'):
             file.write('      writer1->WriteEvent(myEvent,mySample);\n')
         file.write('    }\n')
         file.write('  }\n\n')

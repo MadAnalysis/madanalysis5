@@ -50,6 +50,7 @@ bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<s
 
   // Save the name of the configuration file
   configFile_ = configFile;
+  rootfile_="";
 
   // Test the presence of the configuration file on the hard disk
   std::ifstream configTest(configFile.c_str());
@@ -80,7 +81,13 @@ bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<s
         if (tmp==0) output_=false;
         else output_=true;
       }
-      }
+    }
+    else if (key=="rootfile")
+    {
+      std::stringstream str;
+      str << it->second;
+      str >> rootfile_;
+    }
   }
 
   // Decode configuration file with Delphes class 'ExRootConfReader'
@@ -118,7 +125,13 @@ bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<s
       isPhotonMA5   && isJetMA5      ) MA5card_=true; else MA5card_=false;
 
   // Creating output file
-  if (output_) outputFile_ = TFile::Open("TheMouth.root", "RECREATE");
+  if (output_)
+  {
+    if (rootfile_=="")
+       outputFile_ = TFile::Open("TheMouth.root", "RECREATE");
+    else
+       outputFile_ = TFile::Open(rootfile_.c_str(), "RECREATE");
+  }
   else outputFile_ = TFile::Open("tmp.root", "RECREATE");
 
   // Creating output tree

@@ -74,6 +74,7 @@ class DetectorDelphes: public DetectorBase
 
     // parameters
     bool output_;
+    std::string rootfile_;
     bool MA5card_;
     std::map<std::string,std::string> table_;
     DelphesMemoryInterface interface_;

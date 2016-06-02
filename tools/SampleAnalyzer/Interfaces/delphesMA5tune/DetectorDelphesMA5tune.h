@@ -73,6 +73,7 @@ class DetectorDelphesMA5tune: public DetectorBase
 
     // parameters
     bool output_;
+    std::string rootfile_;
     bool first_;
     unsigned long nprocesses_;
 

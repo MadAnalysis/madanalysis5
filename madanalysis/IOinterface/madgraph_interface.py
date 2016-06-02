@@ -51,6 +51,15 @@ class MadGraphInterface():
         self.logger.info('Creating an MA5 card for the mode: ' + card_type)
         self.card=[]
 
+        ## card header
+        self.card.append('@MG5aMC stdout_lvl=INFO')
+        if card_type=='parton':
+            self.card.append('@MG5aMC inputs = *.lhe\n')
+        elif card_type=='hadron':
+            self.card.append('@MG5aMC inputs = *.hepmc, *.hep, *.stdhep\n')
+            self.card.append('# Reconstruction using FastJet')
+            self.card.append('@MG5aMC reconstruction_name = BasicReco')
+
         self.logger.info('Getting the UFO model:')
         self.model = ProcessesLists[0][0].get('model')
         self.logger.debug('  >> ' + self.model.get('name'))
@@ -78,9 +87,6 @@ class MadGraphInterface():
 
     def generate_parton_card(self, ProcessesDefinitions, ProcessesLists):
 
-        # event fiile
-        self.card.append('@MG5aMC inputs = *.lhe')
-
         # global observables
         self.card.append('# Global event variables')
         self.card.append('plot THT   40 0 500 [logY]')
@@ -97,9 +103,6 @@ class MadGraphInterface():
 
 
     def generate_hadron_card(self, ProcessesDefinitions, ProcessesLists):
-        self.card.append('# Reconstruction using FastJet')
-        self.card.append('@MG5aMC reconstruction_name = BasicReco')
-        self.card.append('@MG5aMC inputs = *.hepmc, *.hep, *.stdhep')
         self.card.append('set main.fastsim.package = fastjet')
         self.card.append('set main.fastsim.algorithm = antikt')
         self.card.append('set main.fastsim.radius = 0.4')
@@ -115,13 +118,11 @@ class MadGraphInterface():
 
         self.card.append('\n# Reconstruction using Delphes')
         self.card.append('@MG5aMC reconstruction_name = CMSReco')
-        self.card.append('@MG5aMC inputs = *.hepmc, *.hep, *.stdhep')
         self.card.append('set main.fastsim.package  = delphes')
         self.card.append('set main.fastsim.detector = cms-ma5tune')
 
         self.card.append('\n# Analysis using both reco')
         self.card.append('@MG5aMC analysis_name = analysis1')
-        self.card.append('@MG5aMC inputs = *.lhe, *.root')
         self.card.append('@MG5aMC set_reconstructions = [\'BasicReco\', \'CMSReco\']')
         self.card.append('# object definition')
         self.card.append('select (j)  PT > 20')
@@ -218,7 +219,6 @@ class MadGraphInterface():
         # recasting
         self.card.append('\n# Recasting')
         self.card.append('@MG5aMC recasting_commands')
-        self.card.append('@MG5aMC inputs = *.hep, *.hepmc, *stdhep')
         self.card.append('set main.recast = on')
         self.card.append('set main.recast.store_root = False')
         self.card.append('@MG5aMC recasting_card')

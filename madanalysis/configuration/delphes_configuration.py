@@ -34,7 +34,8 @@ class DelphesConfiguration:
                       "skim_genparticles": ["true","false"],\
                       "skim_tracks": ["true","false"],\
                       "skim_towers": ["true","false"],\
-                      "skim_eflow" : ["true","false"] }
+                      "skim_eflow" : ["true","false"],\
+                      "rootfile" : ["none"] }
 
     def __init__(self):
         self.detector          = "cms"
@@ -45,6 +46,7 @@ class DelphesConfiguration:
         self.skim_tracks       = False
         self.skim_towers       = False
         self.skim_eflow        = False
+        self.rootfile          = ""
         self.SetCard()
 
     def SetCard(self):
@@ -68,6 +70,7 @@ class DelphesConfiguration:
     def Display(self):
         self.user_DisplayParameter("detector")
         self.user_DisplayParameter("output")
+        self.user_DisplayParameter("rootfile")
         self.user_DisplayParameter("pileup")
         self.user_DisplayParameter("skim_genparticles")
         self.user_DisplayParameter("skim_tracks")
@@ -77,52 +80,56 @@ class DelphesConfiguration:
 
     def user_DisplayParameter(self,parameter):
         if parameter=="detector":
-            logging.info(" detector : "+self.detector)
+            logging.getLogger('MA5').info(" detector : "+self.detector)
             return
         elif parameter=="output":
             if self.output:
                 msg="true"
             else:
                 msg="false"
-            logging.info(" ROOT output : "+msg)
+            logging.getLogger('MA5').info(" ROOT output: "+msg)
+            return
+        elif parameter=="rootfile":
+            if self.rootfile not in ['', "none"]:
+                logging.getLogger('MA5').info(" ROOT outputfile: "+msg)
             return
         elif parameter=="pileup":
             if self.pileup=="":
                 msg="none"
             else:
                 msg='"'+self.pileup+'"'
-            logging.info(" pile-up source = "+msg)
+            logging.getLogger('MA5').info(" pile-up source = "+msg)
             return
         elif parameter=="skim_genparticles":
             if self.skim_genparticles:
                 msg="true"
             else:
                 msg="false"
-            logging.info(" Skimming on GenParticles collection : "+msg)
+            logging.getLogger('MA5').info(" Skimming on GenParticles collection : "+msg)
             return
         elif parameter=="skim_tracks":
             if self.skim_tracks:
                 msg="true"
             else:
                 msg="false"
-            logging.info(" Skimming on Tracks collection : "+msg)
+            logging.getLogger('MA5').info(" Skimming on Tracks collection : "+msg)
             return
         elif parameter=="skim_towers":
             if self.skim_towers:
                 msg="true"
             else:
                 msg="false"
-            logging.info(" Skimming on Towers collection : "+msg)
+            logging.getLogger('MA5').info(" Skimming on Towers collection : "+msg)
             return
         elif parameter=="skim_eflow":
             if self.skim_eflow:
                 msg="true"
             else:
                 msg="false"
-            logging.info(" Skimming on EFlow collection : "+msg)
+            logging.getLogger('MA5').info(" Skimming on EFlow collection : "+msg)
             return
         else:
-            logging.error("parameter '"+parameter+"' is unknown")
+            logging.getLogger('MA5').error("parameter '"+parameter+"' is unknown")
             return
 
     def SampleAnalyzerConfigString(self):
@@ -131,6 +138,8 @@ class DelphesConfiguration:
                 mydict['output'] = '1'
             else:
                 mydict['output'] = '0'
+            if self.rootfile not in ['', 'none']:
+                mydict['rootfile'] = self.rootfile
             return mydict
 
     def user_SetParameter(self,parameter,value,datasets,level):
@@ -151,7 +160,7 @@ class DelphesConfiguration:
                 self.detector=value
                 self.SetCard()
             else:
-                logging.error("algorithm called '"+value+"' is not found.")
+                logging.getLogger('MA5').error("algorithm called '"+value+"' is not found.")
             return
 
         # output
@@ -162,9 +171,17 @@ class DelphesConfiguration:
             elif value.lower()=="false":
                 self.output = False
             else:
-                logging.error("allowed values for output are: true false")
+                logging.getLogger('MA5').error("allowed values for output are: true false")
             return
-        
+
+        elif parameter=="rootfile":
+            if value.lower().endswith('root'):
+                self.rootfile=os.path.normpath(value)
+            else:
+                logging.getLogger('MA5').error("Wrong output file format (root file necessary)")
+                return False
+            return
+
         # skim_genparticles
         elif parameter=="skim_genparticles":
 
@@ -173,7 +190,7 @@ class DelphesConfiguration:
             elif value.lower()=="false":
                 self.skim_genparticles = False
             else:
-                logging.error("allowed values for skim_genparticles are: true false")
+                logging.getLogger('MA5').error("allowed values for skim_genparticles are: true false")
             return
 
         # skim_tracks
@@ -184,7 +201,7 @@ class DelphesConfiguration:
             elif value.lower()=="false":
                 self.skim_tracks = False
             else:
-                logging.error("allowed values for skim_tracks are: true false")
+                logging.getLogger('MA5').error("allowed values for skim_tracks are: true false")
             return
 
         # skim_towers
@@ -195,7 +212,7 @@ class DelphesConfiguration:
             elif value.lower()=="false":
                 self.skim_towers = False
             else:
-                logging.error("allowed values for skim_towers are: true false")
+                logging.getLogger('MA5').error("allowed values for skim_towers are: true false")
             return
 
         # skim_eflow
@@ -206,7 +223,7 @@ class DelphesConfiguration:
             elif value.lower()=="false":
                 self.skim_eflow = False
             else:
-                logging.error("allowed values for skim_eflow are: true false")
+                logging.getLogger('MA5').error("allowed values for skim_eflow are: true false")
             return
 
         # pileup
@@ -228,7 +245,7 @@ class DelphesConfiguration:
             # .pileup
             elif valuemin.endswith(".pileup"):
                 if not os.path.isfile(value):
-                    logging.error('File called "'+value+'" is not found')
+                    logging.getLogger('MA5').error('File called "'+value+'" is not found')
                     return
                 self.pileup = value
                 self.SetCard()
@@ -236,11 +253,11 @@ class DelphesConfiguration:
 
             # other case: error
             else:
-                logging.error("The file format for the pile-up source is not known. Only files with .pileup extension can be used.")
+                logging.getLogger('MA5').error("The file format for the pile-up source is not known. Only files with .pileup extension can be used.")
                 return False
 
         else:
-            logging.error("parameter called '"+parameter+"' does not exist")
+            logging.getLogger('MA5').error("parameter called '"+parameter+"' does not exist")
             return
 
         
@@ -255,4 +272,4 @@ class DelphesConfiguration:
         except:
             pass
         return table
-        
+

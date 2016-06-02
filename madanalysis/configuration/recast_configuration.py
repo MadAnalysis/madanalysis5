@@ -339,10 +339,12 @@ class RecastConfiguration:
         padlist=[]
         tunelist=[]
         if self.pad:
-            padfile  = open(dirname+"/../PAD/Build/Main/main.cpp", 'r')
+            ma5dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),os.pardir,os.pardir))
+            padfile  = open(os.path.normpath(os.path.join(ma5dir,"PAD/Build/Main/main.cpp")), 'r')
             ToLoopOver.append([padfile, padlist])
         if self.padtune:
-            tunefile = open(dirname+"/../PADForMA5tune/Build/Main/main.cpp", 'r')
+            ma5dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),os.pardir,os.pardir))
+            tunefile = open(os.path.normpath(os.path.join(ma5dir,"PADForMA5tune/Build/Main/main.cpp")), 'r')
             ToLoopOver.append([tunefile, tunelist])
         for myfile,mylist in ToLoopOver:
             for line in myfile:
@@ -403,7 +405,8 @@ class RecastConfiguration:
 
 
     def CreateMyCard(self,dirname,padtype,write=True):
-        mainfile = open(dirname+"/../"+padtype+"/Build/Main/main.cpp")
+        ma5dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),os.pardir,os.pardir))
+        mainfile  = open(os.path.normpath(os.path.join(ma5dir,padtype,"Build/Main/main.cpp")), 'r')
         thecard=[]
         if write:
             exist=os.path.isfile(dirname+'/Input/recasting_card.dat')
