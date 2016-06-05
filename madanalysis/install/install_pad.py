@@ -217,7 +217,11 @@ class InstallPad:
                 self.installdir+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.h']
           ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
           if not ok:
-            return False
+              return False
+          TheCommand = ['rm', '-f', self.installdir+'/Build/Main/main.bak']
+          ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+          if not ok:
+              return False
         # Logs
         TheCommand = ['mkdir', self.installdir+'/Logs']
         ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)

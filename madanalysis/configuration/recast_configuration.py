@@ -323,7 +323,6 @@ class RecastConfiguration:
             return True
         #using and checking an existing card
         else:
-            import os
             if not os.path.isfile(self.card_path):
                 self.logger.error("Invalid path to a recasting card.")
                 return False
@@ -334,16 +333,14 @@ class RecastConfiguration:
 
     def CheckCard(self,dirname):
         self.logger.info('   Checking the recasting card...')
-        import os
         ToLoopOver=[]
         padlist=[]
         tunelist=[]
+        ma5dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),os.pardir,os.pardir))
         if self.pad:
-            ma5dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),os.pardir,os.pardir))
             padfile  = open(os.path.normpath(os.path.join(ma5dir,"PAD/Build/Main/main.cpp")), 'r')
             ToLoopOver.append([padfile, padlist])
         if self.padtune:
-            ma5dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),os.pardir,os.pardir))
             tunefile = open(os.path.normpath(os.path.join(ma5dir,"PADForMA5tune/Build/Main/main.cpp")), 'r')
             ToLoopOver.append([tunefile, tunelist])
         for myfile,mylist in ToLoopOver:
@@ -375,14 +372,14 @@ class RecastConfiguration:
                 if myver!="v1.2":
                     self.logger.error("Recasting card: invalid analysis (not present in the PAD): " + myana)
                     return False
-                if not os.path.isfile(dirname+'/../PAD/Input/Cards/'+mydelphes):
+                if not os.path.isfile(os.path.normpath(os.path.join(ma5dir,'PAD/Input/Cards',mydelphes))):
                     self.logger.error("Recasting card: PAD analysis linked to an invalid delphes card: " + myana + " - " + mydelphes)
                     return False
             elif myana in  [x[0] for x in tunelist]:
                 if myver!="v1.1":
                     self.logger.error("Recasting card: invalid analysis (not present in the PADForMA5tune): " + myana)
                     return False
-                if not os.path.isfile(dirname+'/../PADForMA5tune/Input/Cards/'+mydelphes):
+                if not os.path.isfile(os.path.normpath(os.path.join(ma5dir,'PADForMA5tune/Input/Cards',mydelphes))):
                     self.logger.error("Recasting card: PADForMA5tune analysis linked to an invalid delphes card: " + myana + " - " + mydelphes)
                     return False
             else:
@@ -767,10 +764,10 @@ class RecastConfiguration:
                 self.logger.warning('lxml or xml not available... the CLs module cannot be used')
                 return False
         ## preparing the output file
-        if os.path.isfile(dirname+'/Output/'+setname+'/CLs_output.saf'):
-            mysummary=open(dirname+'/Output/'+setname+'/CLs_output.saf','a')
+        if os.path.isfile(dirname+'/Output/'+setname+'/CLs_output.dat'):
+            mysummary=open(dirname+'/Output/'+setname+'/CLs_output.dat','a')
         else:
-            mysummary=open(dirname+'/Output/'+setname+'/CLs_output.saf','w')
+            mysummary=open(dirname+'/Output/'+setname+'/CLs_output.dat','w')
             if xsection <=0:
                 mysummary.write("# analysis name".ljust(30, ' ') + "signal region".ljust(50,' ') + \
                  'sig95(exp)'.ljust(15, ' ') + 'sig95(obs)'.ljust(15, ' ') +' ||    ' + 'efficiency'.ljust(15,' ') +\
@@ -830,7 +827,25 @@ class RecastConfiguration:
         return True
 
     def CheckFile(self,dirname,dataset):
-        if not os.path.isfile(dirname+'/Output/'+dataset.name+'/CLs_output.saf'):
-            self.logger.error("The file '"+dirname+'/Output/'+dataset.name+'/CLs_output.saf" has not been found.')
+        if not os.path.isfile(dirname+'/Output/'+dataset.name+'/CLs_output.dat'):
+            self.logger.error("The file '"+dirname+'/Output/'+dataset.name+'/CLs_output.dat" has not been found.')
             return False
         return True
+
+    def collect_outputs(self,dirname,datasets):
+        out = open(os.path.normpath(os.path.join(dirname,'Output/CLs_output_summary.dat')),'w')
+        counter=1
+        for item in datasets:
+            outset=open(os.path.normpath(os.path.join(dirname,'Output',item.name,'CLs_output.dat')))
+            for line in outset:
+                if counter==1 and '# analysis name' in line:
+                    out.write('# dataset name'.ljust(30) + line[2:])
+                    counter+=1
+                if len(line.lstrip())==0:
+                   continue
+                if line.lstrip()[0]=='#':
+                   continue
+                out.write(item.name.ljust(30)+line)
+            outset.close()
+            out.write('\n')
+        out.close()

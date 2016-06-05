@@ -28,7 +28,6 @@ from madanalysis.IOinterface.ufo_reader           import UFOReader
 from madanalysis.IOinterface.job_writer           import JobWriter
 from madanalysis.IOinterface.particle_reader      import ParticleReader
 from madanalysis.IOinterface.multiparticle_reader import MultiparticleReader
-from madanalysis.interpreter.cmd_define           import CmdDefine
 from madanalysis.IOinterface.job_reader           import JobReader
 from madanalysis.IOinterface.folder_writer        import FolderWriter
 from madanalysis.enumeration.report_format_type   import ReportFormatType

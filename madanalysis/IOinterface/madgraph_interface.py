@@ -34,6 +34,7 @@ class MadGraphInterface():
         self.multiparticles={}
         self.card=[]
         self.invisible_particles = []
+        self.invisible_pdgs = []
         self.recastinfo = RecastConfiguration()
 
     class InvalidCard(Exception):
@@ -56,14 +57,15 @@ class MadGraphInterface():
         if card_type=='parton':
             self.card.append('@MG5aMC inputs = *.lhe\n')
         elif card_type=='hadron':
-            self.card.append('@MG5aMC inputs = *.hepmc, *.hep, *.stdhep\n')
+            self.card.append('@MG5aMC inputs = *.hepmc, *.hep, *.stdhep, *.lhco\n')
             self.card.append('# Reconstruction using FastJet')
             self.card.append('@MG5aMC reconstruction_name = BasicReco')
+            self.card.append('@MG5aMC reco_output = lhe')
 
         self.logger.info('Getting the UFO model:')
         self.model = ProcessesLists[0][0].get('model')
         self.logger.debug('  >> ' + self.model.get('name'))
-        self.get_invisible()
+        self.get_invisible(card_type)
 
         self.logger.info('Getting the multiparticle definitions')
         for line in MG5history:
@@ -74,7 +76,8 @@ class MadGraphInterface():
                 self.multiparticles[myline[1]]=sorted(sum([e if isinstance(e,list) else [e] for e in mypdgs],[]))
         self.logger.debug('  >> ' + str(self.multiparticles))
         self.logger.debug('  >> invisible: ' + str(self.invisible_particles))
-        self.write_multiparticles(card=(card_type=='parton'))
+        if card_type=='parton':
+            self.write_multiparticles()
 
         if card_type=='hadron':
             return self.generate_hadron_card(ProcessesDefinitions, ProcessesLists)
@@ -118,6 +121,7 @@ class MadGraphInterface():
 
         self.card.append('\n# Reconstruction using Delphes')
         self.card.append('@MG5aMC reconstruction_name = CMSReco')
+        self.card.append('@MG5aMC reco_output = root')
         self.card.append('set main.fastsim.package  = delphes')
         self.card.append('set main.fastsim.detector = cms-ma5tune')
 
@@ -125,6 +129,8 @@ class MadGraphInterface():
         self.card.append('@MG5aMC analysis_name = analysis1')
         self.card.append('@MG5aMC set_reconstructions = [\'BasicReco\', \'CMSReco\']')
         self.card.append('# object definition')
+        self.card.append('define e = e+ e-')
+        self.card.append('define mu = mu+ mu-')
         self.card.append('select (j)  PT > 20')
         self.card.append('select (b)  PT > 20')
         self.card.append('select (e)  PT > 10')
@@ -389,23 +395,27 @@ class MadGraphInterface():
             raise self.MultiParts("  ** Problem with the multiparticle definitions")
 
     # adding the particle definitions
-    def get_invisible(self):
+    def get_invisible(self, card_type='parton'):
+        do_parton = card_type=='parton'
         # Do we have MET?
         for key, value in self.model.get('particle_dict').iteritems():
             if value['width'] == 'ZERO' and value['color']==1 and value['charge']==0 and not value['name']=='a':
                 self.invisible_particles.append(value['name'])
                 self.invisible_particles.append(value['antiname'])
+                self.invisible_pdgs.append(str(value['pdg_code']))
+                self.invisible_pdgs.append(str(-value['pdg_code']))
         self.invisible_particles=list(set(self.invisible_particles))
         if len(self.invisible_particles)>0:
             self.card.append('# Multiparticle definition')
-            self.card.append('define invisible = ' + ' '.join(self.invisible_particles))
+            if not do_parton:
+                self.card.append('define invisible = ' + ' '.join(list(set(self.invisible_pdgs))))
 
-    def write_multiparticles(self, card=True):
+    def write_multiparticles(self):
         for key, value in self.multiparticles.iteritems():
             if len([ x for x in value if x in [self.get_pdg_code(y) for y in self.invisible_particles] ])==len(value):
                 self.invisible_particles.append(key)
-            if card:
                 self.card.append('define ' + key + ' = ' + ' '.join([str(x) for x in value]))
+        self.card.append('define invisible = ' + ' '.join(self.invisible_particles)+'\n')
 
     def get_finalstate_particles(self, process):
         dummy, interstate,finalstate,invisstate = self.particles_in_process(process)

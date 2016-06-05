@@ -122,6 +122,10 @@ class MA5Interpreter(Interpreter):
         main.forced = forced
         Main.forced = forced
 
+        # quiet please
+        if (LoggerLevel>logging.DEBUG):
+           self.logger.setLevel(100)
+
         # Checking the configuration
         if not main.CheckConfig(debug=(LoggerLevel<=logging.DEBUG)):
             raise MA5Configuration('Issue with the configuration')
@@ -132,6 +136,10 @@ class MA5Interpreter(Interpreter):
 
         if not no_compilation:
             self.compile()
+
+        # stop being silent
+        if (LoggerLevel>logging.DEBUG):
+           self.logger.setLevel(LoggerLevel)
 
         # Backuping the environment
         os.environ.clear()
@@ -175,14 +183,24 @@ class MA5Interpreter(Interpreter):
         # changing the running mode
         self.main.mode=MA5RunningType.RECO
 
+        # resetting
+        self.main.datasets.Reset()
+        self.main.selection.Reset()
+        self.main.ResetParameters()
+        self.history=[]
+
         # observables
         self.main.InitObservables(self.main.mode)
 
-        # labels
+        # labels (but no logs!)
+        lvl = self.logger.getEffectiveLevel()
+        self.setLogLevel(100)
+        self.main.multiparticles.Reset()
         input = ParticleReader(self.main.archi_info.ma5dir,self.cmd_define,self.main.mode,self.main.forced)
         input.Load()
         input = MultiparticleReader(self.main.archi_info.ma5dir,self.cmd_define,self.main.mode,self.main.forced)
         input.Load()
+        self.setLogLevel(lvl)
 
     @freeze_environment
     def init_parton(self):
@@ -201,13 +219,23 @@ class MA5Interpreter(Interpreter):
         # changing the running mode
         self.main.mode=MA5RunningType.PARTON
 
+        # resetting
+        self.main.datasets.Reset()
+        self.main.selection.Reset()
+        self.main.ResetParameters()
+        self.history=[]
+
+
         # observables
         self.main.InitObservables(self.main.mode)
 
         # labels
+        lvl = self.logger.getEffectiveLevel()
+        self.setLogLevel(100)
+        self.main.multiparticles.Reset()
         input = ParticleReader(self.main.archi_info.ma5dir,self.cmd_define,self.main.mode,self.main.forced)
         input.Load()
         input = MultiparticleReader(self.main.archi_info.ma5dir,self.cmd_define,self.main.mode,self.main.forced)
         input.Load()
-
+        self.setLogLevel(lvl)
 

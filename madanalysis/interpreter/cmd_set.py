@@ -22,8 +22,12 @@
 ################################################################################
 
 
-from madanalysis.system.config_checker     import ConfigChecker
-from madanalysis.system.user_info          import UserInfo
+from madanalysis.system.config_checker            import ConfigChecker
+from madanalysis.system.user_info                 import UserInfo
+from madanalysis.enumeration.ma5_running_type     import MA5RunningType
+from madanalysis.IOinterface.particle_reader      import ParticleReader
+from madanalysis.IOinterface.multiparticle_reader import MultiparticleReader
+from madanalysis.interpreter.cmd_define           import CmdDefine
 import madanalysis.interpreter.cmd_base as CmdBase
 import logging
 
@@ -36,14 +40,14 @@ class CmdSet(CmdBase.CmdBase):
     def do_other(self,object,operator,value):
         # Looking for '='
         if operator!='=' :
-            logging.error("syntax error with the command 'set'.")
+            logging.getLogger('MA5').error("syntax error with the command 'set'.")
             self.help()
             return
 
         # Looking for one dot in the name
         objs = object.split('.')
         if len(objs)!=2 :
-            logging.error("syntax error with the command 'set'.")
+            logging.getLogger('MA5').error("syntax error with the command 'set'.")
             self.help()
             return
 
@@ -76,7 +80,7 @@ class CmdSet(CmdBase.CmdBase):
 
         # Anything else
         else :
-            logging.error("no object called '"+objs[0]+"' is found")
+            logging.getLogger('MA5').error("no object called '"+objs[0]+"' is found")
             return
 
 
@@ -84,7 +88,7 @@ class CmdSet(CmdBase.CmdBase):
 
         # Looking for '='
         if args[1]!='=' :
-            logging.error("syntax error with the command 'set'.")
+            logging.getLogger('MA5').error("syntax error with the command 'set'.")
             self.help()
             return
 
@@ -107,10 +111,24 @@ class CmdSet(CmdBase.CmdBase):
             hasPADtune = checker.checkPADForMA5tune()
             self.main.recasting.user_SetParameter("status",args[2],self.main.mode,hasdelphes,hasMA5tune,self.main.datasets, hasPAD,hasPADtune)
             if args[2]=='on' and self.main.fastsim.package!='none':
-                logging.warning("Fastsim package switched off and internally handled")
+                logging.getLogger('MA5').warning("Fastsim package switched off and internally handled")
                 self.main.fastsim.package="none"
         elif len(objs)==2 and objs[0].lower()=='main':
-            self.main.user_SetParameter(objs[1],args[2])
+            if objs[1]=='mode':
+                self.main.mode=MA5RunningType.PARTON
+                self.main.ResetParameters()
+                self.main.InitObservables(self.main.mode)
+                lvl = logging.getLogger('MA5').getEffectiveLevel()
+                logging.getLogger('MA5').setLevel(100)
+                self.main.multiparticles.Reset()
+                cmd_define = CmdDefine(self.main)
+                input = ParticleReader(self.main.archi_info.ma5dir,cmd_define,self.main.mode,self.main.forced)
+                input.Load()
+                input = MultiparticleReader(self.main.archi_info.ma5dir,cmd_define,self.main.mode,self.main.forced)
+                input.Load()
+                logging.getLogger('MA5').setLevel(lvl)
+            else:
+                self.main.user_SetParameter(objs[1],args[2])
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='isolation':
             self.main.isolation.user_SetParameter(objs[2],args[2])
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='merging':
@@ -123,7 +141,7 @@ class CmdSet(CmdBase.CmdBase):
             hasMA5tune = checker.checkDelphesMA5tune(True)
             self.main.fastsim.user_SetParameter(objs[2],args[2],self.main.datasets,self.main.mode,self.main.archi_info.has_fastjet,hasdelphes,hasMA5tune) 
             if objs[2]=='package' and args[2] in ['fastjet', 'delphes', 'delphesMA5tune'] and self.main.recasting.status=='on':
-                logging.warning("Recasting mode switched off")
+                logging.getLogger('MA5').warning("Recasting mode switched off")
                 self.main.recasting.status ="off"
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='recast':
             user_info    = UserInfo()
@@ -135,7 +153,7 @@ class CmdSet(CmdBase.CmdBase):
             hasPADtune = checker.checkPADForMA5tune()
             self.main.recasting.user_SetParameter(objs[2],args[2],self.main.mode,hasdelphes,hasMA5tune,self.main.datasets, hasPAD,hasPADtune)
         else:
-            logging.error("syntax error with the command 'set'.")
+            logging.getLogger('MA5').error("syntax error with the command 'set'.")
             self.help()
             return
 
@@ -145,13 +163,13 @@ class CmdSet(CmdBase.CmdBase):
 
         # Checking number of arguments
         if len(args)<7:
-            logging.error("wrong number of arguments")
+            logging.getLogger('MA5').error("wrong number of arguments")
             return
 
         # Looking for '=', '[' and ']' 
         if args[0]!='selection' or args[1]!='[' or not args[2].isdigit() or \
                args[3]!=']' or not args[4].startswith('.') or args[5]!='=' :
-            logging.error("syntax error with the command 'set'.")
+            logging.getLogger('MA5').error("syntax error with the command 'set'.")
             self.help()
             return
 
@@ -162,7 +180,7 @@ class CmdSet(CmdBase.CmdBase):
             self.main.selection[index-1].user_SetParameter(variable,args[6])
             return
         else:
-            logging.error("selection['" + str(index) + "'] does not exist")
+            logging.getLogger('MA5').error("selection['" + str(index) + "'] does not exist")
             return
 
         return
@@ -207,7 +225,7 @@ class CmdSet(CmdBase.CmdBase):
 
         # First check of argument
         if len(args2)<3:
-            logging.error("wrong number of arguments for the command 'set'.")
+            logging.getLogger('MA5').error("wrong number of arguments for the command 'set'.")
             return
 
         # Checking argument number
@@ -218,15 +236,15 @@ class CmdSet(CmdBase.CmdBase):
         elif len(args2)==3:
             self.do_other(args2[0],args2[1],args2[2])
         else:
-            logging.error("object called '" + args2[0] +\
+            logging.getLogger('MA5').error("object called '" + args2[0] +\
                           "' is unknown or has no options to set.")
             self.help()
             return
 
 
     def help(self):
-        logging.info("   Syntax: set <object>.<variable> = <value>")
-        logging.info("   Modifies or sets an attribute of an object to a specific value.")
+        logging.getLogger('MA5').info("   Syntax: set <object>.<variable> = <value>")
+        logging.getLogger('MA5').info("   Modifies or sets an attribute of an object to a specific value.")
 
 
 

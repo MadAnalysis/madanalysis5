@@ -314,6 +314,10 @@ class InstallPadForMA5tune:
           ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
           if not ok:
             return False
+          TheCommand = ['rm', '-f', self.installdir+'/Build/Main/main.bak']
+          ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+          if not ok:
+              return False
         # Logs
         TheCommand = ['mkdir', self.installdir+'/Logs']
         ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)

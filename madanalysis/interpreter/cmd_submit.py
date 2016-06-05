@@ -611,9 +611,11 @@ class CmdSubmit(CmdBase):
         self.logger.info("   Writing the command line history...")
         jobber.WriteHistory(history,self.main.firstdir)
         if self.main.recasting.status == "on":
+            self.main.recasting.collect_outputs(dirname,self.main.datasets)
             self.logger.info('    -> the results can be found in:') 
+            self.logger.info('       '+ dirname + '/Output/CLs_output_summary.dat')
             for item in self.main.datasets:
-                self.logger.info('       '+ dirname + '/Output/'+ item.name + '/CLs_output.saf')
+                self.logger.info('       '+ dirname + '/Output/'+ item.name + '/CLs_output.dat')
         else:
             layouter = LayoutWriter(self.main, dirname)
             layouter.WriteLayoutConfig()
