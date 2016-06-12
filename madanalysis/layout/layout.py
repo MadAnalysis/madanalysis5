@@ -37,7 +37,7 @@ from madanalysis.enumeration.normalize_type      import NormalizeType
 from madanalysis.enumeration.observable_type     import ObservableType
 from madanalysis.layout.cutflow                  import CutFlow
 from madanalysis.layout.plotflow                 import PlotFlow
-from madanalysis.layout.merging_plots           import MergingPlots
+from madanalysis.layout.merging_plots            import MergingPlots
 from math                                        import log10, floor, ceil
 import os
 import shutil
@@ -144,6 +144,8 @@ class Layout:
                 string2=str(int(xerror))
             return string1 + " +/- " + string2
 
+
+
     def DoPlots(self,mode,output_path):
 
         if self.main.merging.enable:
@@ -155,6 +157,7 @@ class Layout:
         self.plotflow.DrawAll(mode,output_path)
         
         return True
+
 
     def CopyLogo(self,mode,output_path):
         

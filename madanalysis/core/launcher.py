@@ -28,18 +28,19 @@ from string_tools import StringTools
 import os
 import sys
 import logging
-
+            
 class MA5mode():
     
    def __init__(self):
-      self.partonlevel = False
-      self.hadronlevel = False
-      self.recolevel   = False
-      self.expertmode  = False
-      self.forcedmode  = False
-      self.scriptmode  = False
-      self.debug       = False
-      self.build       = False
+      self.partonlevel    = False
+      self.hadronlevel    = False
+      self.recolevel      = False
+      self.expertmode     = False
+      self.forcedmode     = False
+      self.scriptmode     = False
+      self.debug          = False
+      self.build          = False
+      self.developer_mode = False
 
 
 
@@ -55,10 +56,10 @@ def DecodeArguments(version, date):
     import getopt
     try:
         optlist, arglist = getopt.getopt(sys.argv[1:], \
-                                     "PHReEvhfmsbd", \
+                                     "PHReEvhfmsbdq", \
                                      ["partonlevel","hadronlevel","recolevel",\
                                       "expert","version","release","help",\
-                                      "forced","script","debug","build"])
+                                      "forced","script","debug","build","qmode"])
     except getopt.GetoptError, err:
         logging.error(str(err))
         Usage()
@@ -88,6 +89,11 @@ def DecodeArguments(version, date):
             mode.debug = True
         elif o in ["-b","--build"]:
             mode.build = True
+        elif o in ["-q","--qmode"]:
+            mode.developer_mode = True
+            print ""
+            print " **** DEVELOPER MODE DETECTED **** "
+            print ""
         elif o in ["-h","--help"]:
             Usage()
             sys.exit()
@@ -139,9 +145,10 @@ def MainSession(mode,arglist,ma5dir,version,date):
     if mode.hadronlevel or mode.recolevel:
         main.InitObservables(main.mode)
 
-    main.forced = mode.forcedmode
-    Main.forced = mode.forcedmode
-    main.script = mode.scriptmode
+    main.forced         = mode.forcedmode
+    Main.forced         = mode.forcedmode
+    main.script         = mode.scriptmode
+    main.developer_mode = mode.developer_mode
 
     # Setting batch mode for ROOT
     #sys.argv.append('-b-')

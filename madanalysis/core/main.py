@@ -86,6 +86,7 @@ class Main():
         self.observables    = ObservableManager(self.mode)
         self.expertmode     = False
         self.repeatSession  = False
+        self.developer_mode = False
         self.recast         = "off"
         self.ResetParameters()
         self.madgraph       = MadGraphInterface()
