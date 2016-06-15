@@ -153,8 +153,10 @@ class PlotFlow:
 
             # Draw
             if self.main.developer_mode:
-                print "DEVELOPER MODE"
-                self.DrawROOT(histos,scales,self.main.selection[iabshisto],irelhisto,mode,output_path)
+                filenameC   = output_path+"/selection_"+str(irelhisto)+".C"
+                outputfiles = [output_path+"/selection_"+str(irelhisto)+\
+                               "."+ReportFormatType.convert2filetype(mode)]
+                self.DrawROOT(histos,scales,self.main.selection[iabshisto],irelhisto,filenameC,outputfiles)
             else:
                 self.Draw(histos,scales,self.main.selection[iabshisto],irelhisto,mode,output_path)
                 
@@ -498,12 +500,13 @@ class PlotFlow:
 
 
 
-    def DrawROOT(self,histos,scales,ref,irelhisto,mode,output_path):
+    def DrawROOT(self,histos,scales,ref,irelhisto,filenameC,outputnames):
 
-        filenameC   = output_path+"/selection_"+str(irelhisto)+".C"
-        filenamePNG = output_path+"/selection_"+str(irelhisto)+\
-                      "."+ReportFormatType.convert2filetype(mode)
-
+        # Is there any legend?
+        legendmode = False
+        if len(self.main.datasets)>1:
+            legendmode = True
+            
         # Stacking or superimposing histos ?
         stackmode = False
         if ref.stack==StackingMethodType.STACK or \
@@ -522,12 +525,20 @@ class PlotFlow:
         # File header
         outputC.write('void selection_'+str(irelhisto)+'()\n')
         outputC.write('{\n\n')
-        
+
+        # ROOT version
+        outputC.write('  // ROOT version\n')
+        outputC.write('  Int_t root_version = gROOT->GetVersionInt();\n')
+        outputC.write('\n')
+
         # Creating the TCanvas
         PlotFlow.counter=PlotFlow.counter+1
         canvas_name='tempo'+str(PlotFlow.counter)
         outputC.write('  // Creating a new TCanvas\n')
-        outputC.write('  TCanvas* canvas = new TCanvas("'+canvas_name+'","'+canvas_name+'",0,0,700,500);\n')
+        widthx=700
+        if legendmode:
+            widthx=1000
+        outputC.write('  TCanvas* canvas = new TCanvas("'+canvas_name+'","'+canvas_name+'",0,0,'+str(widthx)+',500);\n')
         outputC.write('  gStyle->SetOptStat(0);\n')
         outputC.write('  gStyle->SetOptTitle(0);\n')
         outputC.write('  canvas->SetHighLightColor(2);\n')
@@ -535,12 +546,17 @@ class PlotFlow:
         outputC.write('  canvas->SetFillColor(0);\n')
         outputC.write('  canvas->SetBorderMode(0);\n')
         outputC.write('  canvas->SetBorderSize(3);\n')
-        outputC.write('  canvas->SetLeftMargin(0.125);\n')
-        outputC.write('  canvas->SetBottomMargin(0.12);\n')
         outputC.write('  canvas->SetFrameBorderMode(0);\n')
         outputC.write('  canvas->SetFrameBorderSize(0);\n')
-        outputC.write('  canvas->SetFrameBorderMode(0);\n')
-        outputC.write('  canvas->SetFrameBorderSize(0);\n')
+        outputC.write('  canvas->SetTickx(1);\n')
+        outputC.write('  canvas->SetTicky(1);\n')
+        outputC.write('  canvas->SetLeftMargin(0.14);\n')
+        margin=0.05
+        if legendmode:
+            margin=0.3
+        outputC.write('  canvas->SetRightMargin('+str(margin)+');\n')
+        outputC.write('  canvas->SetBottomMargin(0.15);\n')
+        outputC.write('  canvas->SetTopMargin(0.05);\n')
         outputC.write('\n')
 
         # Loop over datasets and histos
@@ -686,6 +702,8 @@ class PlotFlow:
         else:
             outputC.write('  stack->Draw("nostack");\n')
 
+        outputC.write('\n')
+        outputC.write('  // Y axis\n')
         # Setting Y axis label
         axis_titleY = ref.GetYaxis()
 
@@ -711,10 +729,15 @@ class PlotFlow:
            titlesize=0.04
         else:
            titlesize=0.06
-        outputC.write('  stack->GetYaxis()->SetTitle("'+axis_titleY+'");\n')
+        outputC.write('  stack->GetYaxis()->SetLabelSize(0.04);\n')
+        outputC.write('  stack->GetYaxis()->SetLabelOffset(0.005);\n')
         outputC.write('  stack->GetYaxis()->SetTitleSize('+str(titlesize)+');\n')
         outputC.write('  stack->GetYaxis()->SetTitleFont(22);\n')
-        outputC.write('  stack->GetYaxis()->SetLabelSize(0.04);\n')
+        outputC.write('  stack->GetYaxis()->SetTitleOffset(1);\n')
+        outputC.write('  stack->GetYaxis()->SetTitle("'+axis_titleY+'");\n')
+
+        outputC.write('\n')
+        outputC.write('  // X axis\n')
 
         # Setting X axis label
         if ref.titleX=="": 
@@ -723,39 +746,48 @@ class PlotFlow:
             axis_titleX = PlotFlow.NiceTitle(ref.titleX)
         
         # Setting X axis label
-        outputC.write('  stack->GetXaxis()->SetTitle("'+axis_titleX+'");\n')
+        outputC.write('  stack->GetXaxis()->SetLabelSize(0.04);\n')
+        outputC.write('  stack->GetXaxis()->SetLabelOffset(0.005);\n')
         outputC.write('  stack->GetXaxis()->SetTitleSize(0.06);\n')
         outputC.write('  stack->GetXaxis()->SetTitleFont(22);\n')
-        outputC.write('  stack->GetXaxis()->SetLabelSize(0.04);\n')
+        outputC.write('  stack->GetXaxis()->SetTitleOffset(1);\n')
+        outputC.write('  stack->GetXaxis()->SetTitle("'+axis_titleX+'");\n')
         outputC.write('\n')
 
         # Setting Log scale
         outputC.write('  // Finalizing the TCanvas\n')
+        logx=0
         if ref.logX and ntot != 0:
-            outputC.write('  canvas->SetLogx();\n')
+            logx=1
+        logy=0
         if ref.logY and ntot != 0:
-            outputC.write('  canvas->SetLogy();\n')
+            logy=1
+        outputC.write('  canvas->SetLogx('+str(logx)+');\n')
+        outputC.write('  canvas->SetLogy('+str(logy)+');\n')
         outputC.write('\n')
         
         # Displaying a legend
-        if len(self.main.datasets)>1:
+        if legendmode:
             outputC.write('  // Creating a TLegend\n')
             ymin_legend = .9-.055*len(histos)
             if ymin_legend<0.1:
                 ymin_legend = 0.1
-            outputC.write('  TLegend* legend = new TLegend(.65,'+str(ymin_legend)+',.9,.9);\n')
-            outputC.write('  legend->SetTextSize(0.05);\n')
-            outputC.write('  legend->SetTextFont(22);\n')
+            outputC.write('  TLegend* legend = new TLegend(.73,.5,.97,.95);\n')
             for ind in range(0,len(histos)):
                 histoname=histos[ind].GetTitle()
                 nicetitle=PlotFlow.NiceTitle(self.main.datasets[ind].title)
-                outputC.write('  legend->AddEntry('+histoname+','+nicetitle+');\n')
+                outputC.write('  legend->AddEntry('+histoname+',"'+nicetitle+'");\n')
             outputC.write('  legend->SetFillColor(0);\n')
+            outputC.write('  legend->SetTextSize(0.05);\n')
+            outputC.write('  legend->SetTextFont(22);\n')
+            outputC.write('  legend->SetY1(TMath::Max(0.15,0.97-0.10*legend->GetListOfPrimitives()->GetSize()));\n')
             outputC.write('  legend->Draw();\n')
+            outputC.write('\n')
         
         # Producing the image
         outputC.write('  // Saving the image\n')
-        outputC.write('  canvas->SaveAs("'+filenamePNG+'");\n')
+        for outputname in outputnames:
+            outputC.write('  canvas->SaveAs("'+outputname+'");\n')
         outputC.write('\n')
 
         # File foot
