@@ -142,25 +142,44 @@ class PlotFlow:
             self.color=1
             histos=[]
             scales=[]
-            for iset in range(0,len(self.detail)):
 
-                # Appending histo
-                histos.append(self.detail[iset][irelhisto].myhisto)
-                if mode==2:
-                 scales.append(self.detail[iset][irelhisto].scale)
-                else:
-                 scales.append(1)
+            # normal mode
+            if not self.main.developer_mode:
 
-            # Draw
-            if self.main.developer_mode:
+                for iset in range(0,len(self.detail)):
+ 
+                    # Appending histo
+                    histos.append(self.detail[iset][irelhisto].myhisto)
+                    if mode==2:
+                        scales.append(self.detail[iset][irelhisto].scale)
+                    else:
+                        scales.append(1)
+
+                self.Draw(histos,scales,self.main.selection[iabshisto],irelhisto,\
+                          mode,output_path)
+                
+                irelhisto+=1
+
+            # developer mode
+            elif self.main.developer_mode:
+
+                for iset in range(0,len(self.detail)):
+ 
+                    # Appending histo
+                    histos.append(self.detail[iset][irelhisto])
+                    if mode==2:
+                        scales.append(self.detail[iset][irelhisto].scale)
+                    else:
+                        scales.append(1)
+
                 filenameC   = output_path+"/selection_"+str(irelhisto)+".C"
                 outputfiles = [output_path+"/selection_"+str(irelhisto)+\
                                "."+ReportFormatType.convert2filetype(mode)]
-                self.DrawROOT(histos,scales,self.main.selection[iabshisto],irelhisto,filenameC,outputfiles)
-            else:
-                self.Draw(histos,scales,self.main.selection[iabshisto],irelhisto,mode,output_path)
-                
-            irelhisto+=1
+                self.DrawROOT(histos,scales,self.main.selection[iabshisto],\
+                              irelhisto,filenameC,outputfiles)
+                  
+                irelhisto+=1
+
 
         # Launching ROOT
         if self.main.developer_mode:
@@ -500,12 +519,28 @@ class PlotFlow:
 
 
 
+
+
+
+
     def DrawROOT(self,histos,scales,ref,irelhisto,filenameC,outputnames):
 
         # Is there any legend?
         legendmode = False
         if len(self.main.datasets)>1:
             legendmode = True
+
+        # Type of histogram
+        frequencyhisto = True
+        for histo in histos:
+            if histo.__class__.__name__!='HistogramFrequency':
+                frequencyhisto = False
+                break
+        logxhisto = True
+        for histo in histos:
+            if histo.__class__.__name__!='HistogramLogX':
+                logxhisto = False
+                break
             
         # Stacking or superimposing histos ?
         stackmode = False
@@ -559,26 +594,42 @@ class PlotFlow:
         outputC.write('  canvas->SetTopMargin(0.05);\n')
         outputC.write('\n')
 
+        # Binning
+        xnbin=histos[0].myhisto.GetXaxis().GetNbins()
+        if logxhisto:
+            outputC.write('  // Histo binning\n')
+            outputC.write('  Double_t xBinning['+str(xnbin+1)+'] = {')
+            for bin in range(1,xnbin+2):
+                if bin!=1:
+                    outputC.write(',')
+                outputC.write(str(histos[0].myhisto.GetBinLowEdge(bin)))
+            outputC.write('};\n')
+            outputC.write('\n')
+
         # Loop over datasets and histos
         for ind in range(0,len(histos)):
             # Scaling 
-            histos[ind].Scale(scales[ind])
+            histos[ind].myhisto.Scale(scales[ind])
         
             # Creating TH1F
             outputC.write('  // Creating a new TH1F\n')
-            histoname=histos[ind].GetTitle()
-            xnbin=histos[ind].GetXaxis().GetNbins()
-            xmin=histos[ind].GetXaxis().GetXmin()
-            xmax=histos[ind].GetXaxis().GetXmax()
-            outputC.write('  TH1F* '+histoname+' = new TH1F("'+histoname+'","'+histoname+\
-                          '",'+str(xnbin)+','+str(xmin)+','+str(xmax)+');\n')
+            histoname=histos[ind].myhisto.GetTitle()
+            xmin=histos[ind].myhisto.GetXaxis().GetXmin()
+            xmax=histos[ind].myhisto.GetXaxis().GetXmax()
+            if logxhisto:
+                 outputC.write('  TH1F* '+histoname+' = new TH1F("'+histoname+'","'+\
+                               histoname+'",'+str(xnbin)+',xBinning);\n')
+            else:
+                 outputC.write('  TH1F* '+histoname+' = new TH1F("'+histoname+'","'+\
+                               histoname+'",'+str(xnbin)+','+\
+                               str(xmin)+','+str(xmax)+');\n')
 
             # TH1F content
             outputC.write('  // Content\n')
             for bin in range(1,xnbin+1):
                 outputC.write('  '+histoname+'->SetBinContent('+str(bin)+\
-                              ','+str(histos[ind].GetBinContent(bin))+');\n')
-            nentries=histos[ind].GetEntries()
+                              ','+str(histos[ind].myhisto.GetBinContent(bin))+');\n')
+            nentries=histos[ind].myhisto.GetEntries()
             outputC.write('  '+histoname+'->SetEntries('+str(nentries)+');\n')
 
             # linecolor
@@ -686,6 +737,9 @@ class PlotFlow:
             outputC.write('  '+histoname+'->SetLineWidth('+str(linewidth)+');\n')
             outputC.write('  '+histoname+'->SetFillColor('+str(backcolor)+');\n')
             outputC.write('  '+histoname+'->SetFillStyle('+str(backstyle)+');\n')
+            if frequencyhisto:
+                outputC.write('  '+histoname+'->SetBarWidth(0.8);\n')
+                outputC.write('  '+histoname+'->SetBarOffset(0.1);\n')
             outputC.write('\n')
         
         # Creating the THStack
@@ -694,13 +748,17 @@ class PlotFlow:
         # Loop over datasets and histos
         ntot = 0
         for ind in range(0,len(histos)):
-            histoname=histos[ind].GetTitle()
-            ntot+=histos[ind].Integral()
+            histoname=histos[ind].myhisto.GetTitle()
+            ntot+=histos[ind].myhisto.Integral()
             outputC.write('  stack->Add('+histoname+');\n')
-        if stackmode:
-            outputC.write('  stack->Draw();\n')
-        else:
-            outputC.write('  stack->Draw("nostack");\n')
+
+        drawoptions=[]
+        if not stackmode:
+            drawoptions.append('nostack')
+        if frequencyhisto:
+            drawoptions.append('bar1')
+        outputC.write('  stack->Draw("'+''.join(drawoptions)+'");\n')
+        
 
         outputC.write('\n')
         outputC.write('  // Y axis\n')
@@ -752,6 +810,10 @@ class PlotFlow:
         outputC.write('  stack->GetXaxis()->SetTitleFont(22);\n')
         outputC.write('  stack->GetXaxis()->SetTitleOffset(1);\n')
         outputC.write('  stack->GetXaxis()->SetTitle("'+axis_titleX+'");\n')
+        if frequencyhisto:
+            for bin in range(1,xnbin+1):
+                 outputC.write('  stack->GetXaxis()->SetBinLabel('+str(bin)+','\
+                               '"'+str(histos[ind].myhisto.GetXaxis().GetBinLabel(bin))+'");\n')
         outputC.write('\n')
 
         # Setting Log scale
@@ -774,7 +836,7 @@ class PlotFlow:
                 ymin_legend = 0.1
             outputC.write('  TLegend* legend = new TLegend(.73,.5,.97,.95);\n')
             for ind in range(0,len(histos)):
-                histoname=histos[ind].GetTitle()
+                histoname=histos[ind].myhisto.GetTitle()
                 nicetitle=PlotFlow.NiceTitle(self.main.datasets[ind].title)
                 outputC.write('  legend->AddEntry('+histoname+',"'+nicetitle+'");\n')
             outputC.write('  legend->SetFillColor(0);\n')

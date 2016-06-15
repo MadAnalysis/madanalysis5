@@ -85,8 +85,8 @@ class HistoLogX : public Histo
       xmin_=1.;
       xmax_=100.;
     }
-    log_xmin_=std::log10(xmin);
-    log_xmax_=std::log10(xmax);
+    log_xmin_=std::log10(xmin_);
+    log_xmax_=std::log10(xmax_);
 
     step_ = (log_xmax_ - log_xmin_)/static_cast<Double_t>(nbins_);
 
