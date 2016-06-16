@@ -56,7 +56,7 @@ class MergingPlots:
             self.detail[i].CreateHistogram()
 
 
-    def DrawAll(self,mode,output_path):
+    def DrawAll(self,histo_path,modes,output_paths):
 
         # Reset Configuration
         RootConfig.Init()
@@ -65,10 +65,10 @@ class MergingPlots:
         for i in range(0,len(self.main.datasets)):
             self.DrawDatasetPlots(self.detail[i],\
                                   self.main.datasets[i],\
-                                  mode,output_path)
+                                  histo_path,modes,output_paths)
 
 
-    def DrawDatasetPlots(self,histos,dataset,mode,output_path):
+    def DrawDatasetPlots(self,histos,dataset,histo_path,modes,output_paths):
 
         # Loop over DJR
         for i in range(0,100):
@@ -103,12 +103,24 @@ class MergingPlots:
                 # njet plot not found ?
                 if not test:
                     break
-                
+
+            # Save the canvas in the report format
+            datasetname = InstanceName.Get(dataset.name)
+            index=i+1
+
+            filenameC = histo_path+"/merging_" +\
+                        datasetname+"_"+str(index)+".C"
+            output_files=[]
+            for iout in range(0,len(output_paths)):
+                output_files.append(output_paths[iout]+\
+                                    "/merging_" +\
+                                    datasetname+"_"+str(index)+"." +\
+                                    ReportFormatType.convert2filetype(modes[iout]))
             # Drawing
-            self.DrawPlot(DJRplots,dataset,mode,output_path,i+1)
+            self.DrawPlot(DJRplots,dataset,filenameC,output_files,index)
             
             
-    def DrawPlot(self,DJRplots,dataset,mode,output_path,index):
+    def DrawPlot(self,DJRplots,dataset,filenameC,output_files,index):
 
         from ROOT import TH1
         from ROOT import TH1F
@@ -256,16 +268,10 @@ class MergingPlots:
         legend.SetFillColor(0)    
         legend.Draw()
 
-        # Save the canvas in the report format
-        datasetname = InstanceName.Get(dataset.name)
-
-        canvas.SaveAs(output_path+"/merging_" +\
-                      datasetname+"_"+str(index)+"." +\
-                      ReportFormatType.convert2filetype(mode))
-
-        # Save the canvas in the C format
-        canvas.SaveAs(output_path+"/merging_" +\
-                      datasetname+"_"+str(index)+".C")
+        # Save the canvas
+        canvas.SaveAs(filenameC)
+        for output_file in output_files:
+            canvas.SaveAs(output_file)
 
             
     def GetPlotNames(self,mode,output_path):

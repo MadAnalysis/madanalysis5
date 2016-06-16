@@ -261,28 +261,60 @@ class CmdSubmit(CmdBase):
     # Generating the reports
     def CreateReports(self,args,history,layout):
 
+        output_paths = []
+        modes        = []
+
+        # Getting output filename for histo folder
+        histopath = os.path.expanduser(args[0]+'/Histo')
+        if not histopath.startswith('/'):
+            histopath = self.main.currentdir + "/" + histopath
+        histopath = os.path.normpath(histopath)
+
         # Getting output filename for HTML report
-        self.logger.info("   Generating the HMTL report ...")
         htmlpath = os.path.expanduser(args[0]+'/HTML')
         if not htmlpath.startswith('/'):
             htmlpath = self.main.currentdir + "/" + htmlpath
         htmlpath = os.path.normpath(htmlpath)
+        output_paths.append(htmlpath)
+        modes.append(ReportFormatType.HTML)
 
+        # Getting output filename for PDF report
+        if self.main.session_info.has_pdflatex:
+            pdfpath = os.path.expanduser(args[0]+'/PDF')
+            if not pdfpath.startswith('/'):
+                pdfpath = self.main.currentdir + "/" + pdfpath
+            pdfpath = os.path.normpath(pdfpath)
+            output_paths.append(pdfpath)
+            modes.append(ReportFormatType.PDFLATEX)
+
+        # Getting output filename for DVI report
+        if self.main.session_info.has_latex:
+            dvipath = os.path.expanduser(args[0]+'/DVI')
+            if not dvipath.startswith('/'):
+                dvipath = self.main.currentdir + "/" + dvipath
+            dvipath = os.path.normpath(dvipath)
+            output_paths.append(dvipath)
+            modes.append(ReportFormatType.LATEX)
+
+        # Creating folders
+        if not layout.CreateFolders(histopath,output_paths,modes):
+            return
+
+        # Draw plots
+        self.logger.info("   Generating all plots ...")
+        if not layout.DoPlots(histopath,modes,output_paths):
+            return
+        
         # Generating the HTML report
+        self.logger.info("   Generating the HMTL report ...")
         layout.GenerateReport(history,htmlpath,ReportFormatType.HTML)
         self.logger.info("     -> To open this HTML report, please type 'open'.")
 
         # PDF report
         if self.main.session_info.has_pdflatex:
 
-            # Getting output filename for PDF report
-            self.logger.info("   Generating the PDF report ...")
-            pdfpath = os.path.expanduser(args[0]+'/PDF')
-            if not pdfpath.startswith('/'):
-                pdfpath = self.main.currentdir + "/" + pdfpath
-            pdfpath = os.path.normpath(pdfpath)
-
             # Generating the PDF report
+            self.logger.info("   Generating the PDF report ...")
             layout.GenerateReport(history,pdfpath,ReportFormatType.PDFLATEX)
             layout.CompileReport(ReportFormatType.PDFLATEX,pdfpath)
 
@@ -299,16 +331,10 @@ class CmdSubmit(CmdBase):
         # DVI/PDF report
         if self.main.session_info.has_latex:
 
-            # Getting output filename for DVI report
-            self.logger.info("   Generating the DVI report ...")
-            dvipath = os.path.expanduser(args[0]+'/DVI')
-            if not dvipath.startswith('/'):
-                dvipath = self.main.currentdir + "/" + dvipath
-            dvipath = os.path.normpath(dvipath)
-
             # Warning message for DVI -> PDF
-            if not self.main.session_info.has_dvipdf:
-               self.logger.warning("dvipdf not installed -> the DVI report will not be converted to a PDF file.")
+            self.logger.info("   Generating the DVI report ...")
+#            if not self.main.session_info.has_dvipdf:
+#               self.logger.warning("dvipdf not installed -> the DVI report will not be converted to a PDF file.")
 
             # Generating the DVI report
             layout.GenerateReport(history,dvipath,ReportFormatType.LATEX)
@@ -321,7 +347,7 @@ class CmdSubmit(CmdBase):
                     pdfpath = pdfpath[len(self.main.currentdir):]
                 if pdfpath[0]=='/':
                     pdfpath=pdfpath[1:]
-                self.logger.info("     -> To open this PDF report, please type 'open " + pdfpath + "'.")
+                self.logger.info("     -> To open the corresponding Latex file, please type 'open " + pdfpath + "'.")
                 
         else:
             self.logger.warning("latex not installed -> no DVI/PDF report.")

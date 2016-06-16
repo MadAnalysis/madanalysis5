@@ -75,14 +75,14 @@ class HistoLogX : public Histo
     if (xmin<=0)
     {
       std::cout << "WARNING xmin cannot be less than or equal to zero" << std::endl;
-      std::cout << "Setting xmin to 1." << std::endl;
-      xmin_=1.;
+      std::cout << "Setting xmin to 0.1" << std::endl;
+      xmin_=.1;
     }
     if (xmin_>=xmax)
     {
       std::cout << "WARNING: xmin cannot be equal to or greater than xmax" << std::endl;
-      std::cout << "Setting xmin to 1. and xmax to 100." << std::endl;
-      xmin_=1.;
+      std::cout << "Setting xmin to 0.1 and xmax to 100." << std::endl;
+      xmin_=.1;
       xmax_=100.;
     }
     log_xmin_=std::log10(xmin_);

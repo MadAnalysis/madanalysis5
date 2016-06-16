@@ -129,7 +129,7 @@ class PlotFlow:
         return newtext
 
 
-    def DrawAll(self,mode,output_path):
+    def DrawAll(self,histo_path,modes,output_paths):
 
         # Reset Configuration
         RootConfig.Init()
@@ -143,6 +143,15 @@ class PlotFlow:
             histos=[]
             scales=[]
 
+            # Name of output files
+            filenameC = histo_path+"/selection_"+str(irelhisto)+".C"
+            logging.debug('Producing file '+filenameC+' ...')
+            output_files=[]
+            for iout in range(0,len(output_paths)):
+                output_files.append(output_paths[iout]+\
+                                    "/selection_"+str(irelhisto)+"."+\
+                                    ReportFormatType.convert2filetype(modes[iout]))
+
             # normal mode
             if not self.main.developer_mode:
 
@@ -150,13 +159,13 @@ class PlotFlow:
  
                     # Appending histo
                     histos.append(self.detail[iset][irelhisto].myhisto)
-                    if mode==2:
-                        scales.append(self.detail[iset][irelhisto].scale)
-                    else:
-                        scales.append(1)
+#                    if mode==2:
+                    scales.append(self.detail[iset][irelhisto].scale)
+#                    else:
+#                        scales.append(1)
 
                 self.Draw(histos,scales,self.main.selection[iabshisto],irelhisto,\
-                          mode,output_path)
+                          filenameC,output_files)
                 
                 irelhisto+=1
 
@@ -167,16 +176,13 @@ class PlotFlow:
  
                     # Appending histo
                     histos.append(self.detail[iset][irelhisto])
-                    if mode==2:
-                        scales.append(self.detail[iset][irelhisto].scale)
-                    else:
-                        scales.append(1)
+#                    if mode==2:
+                    scales.append(self.detail[iset][irelhisto].scale)
+#                    else:
+#                        scales.append(1)
 
-                filenameC   = output_path+"/selection_"+str(irelhisto)+".C"
-                outputfiles = [output_path+"/selection_"+str(irelhisto)+\
-                               "."+ReportFormatType.convert2filetype(mode)]
                 self.DrawROOT(histos,scales,self.main.selection[iabshisto],\
-                              irelhisto,filenameC,outputfiles)
+                              irelhisto,filenameC,output_files)
                   
                 irelhisto+=1
 
@@ -186,13 +192,13 @@ class PlotFlow:
             print "LAUNCHING ROOT"
             commands=['root','-l','-q','-b']
             for ind in range(0,irelhisto):
-                commands.append(output_path+'/selection_'+str(ind)+'.C')
+                commands.append(histo_path+'/selection_'+str(ind)+'.C')
             import os
             os.system(' '.join(commands))
             
         return True
 
-    def Draw(self,histos,scales,ref,irelhisto,mode,output_path):
+    def Draw(self,histos,scales,ref,irelhisto,filenameC,output_files):
 
         from ROOT import TH1
         from ROOT import TH1F
@@ -509,17 +515,10 @@ class PlotFlow:
             legend.SetFillColor(0)    
             legend.Draw()
 
-        canvas.SaveAs(output_path+"/selection_"+str(irelhisto)+\
-            "."+ReportFormatType.convert2filetype(mode))
-
-        # Save the canvas in the C format
-        canvas.SaveAs(output_path+"/selection_"+str(irelhisto)+".C")
-
-
-
-
-
-
+        # Save the canvas
+        canvas.SaveAs(filenameC)
+        for output_file in output_files:
+            canvas.SaveAs(output_file)
 
 
 
@@ -595,14 +594,14 @@ class PlotFlow:
         outputC.write('\n')
 
         # Binning
-        xnbin=histos[0].myhisto.GetXaxis().GetNbins()
+        xnbin=histos[0].nbins
         if logxhisto:
             outputC.write('  // Histo binning\n')
             outputC.write('  Double_t xBinning['+str(xnbin+1)+'] = {')
             for bin in range(1,xnbin+2):
                 if bin!=1:
                     outputC.write(',')
-                outputC.write(str(histos[0].myhisto.GetBinLowEdge(bin)))
+                outputC.write(str(histos[0].GetBinLowEdge(bin)))
             outputC.write('};\n')
             outputC.write('\n')
 
@@ -613,9 +612,9 @@ class PlotFlow:
         
             # Creating TH1F
             outputC.write('  // Creating a new TH1F\n')
-            histoname=histos[ind].myhisto.GetTitle()
-            xmin=histos[ind].myhisto.GetXaxis().GetXmin()
-            xmax=histos[ind].myhisto.GetXaxis().GetXmax()
+            histoname=histos[ind].name+'_'+str(ind)
+            xmin=histos[ind].xmin
+            xmax=histos[ind].xmax
             if logxhisto:
                  outputC.write('  TH1F* '+histoname+' = new TH1F("'+histoname+'","'+\
                                histoname+'",'+str(xnbin)+',xBinning);\n')
@@ -629,7 +628,7 @@ class PlotFlow:
             for bin in range(1,xnbin+1):
                 outputC.write('  '+histoname+'->SetBinContent('+str(bin)+\
                               ','+str(histos[ind].myhisto.GetBinContent(bin))+');\n')
-            nentries=histos[ind].myhisto.GetEntries()
+            nentries=histos[ind].summary.nentries
             outputC.write('  '+histoname+'->SetEntries('+str(nentries)+');\n')
 
             # linecolor
@@ -748,7 +747,7 @@ class PlotFlow:
         # Loop over datasets and histos
         ntot = 0
         for ind in range(0,len(histos)):
-            histoname=histos[ind].myhisto.GetTitle()
+            histoname=histos[ind].name+'_'+str(ind)
             ntot+=histos[ind].myhisto.Integral()
             outputC.write('  stack->Add('+histoname+');\n')
 
@@ -813,7 +812,7 @@ class PlotFlow:
         if frequencyhisto:
             for bin in range(1,xnbin+1):
                  outputC.write('  stack->GetXaxis()->SetBinLabel('+str(bin)+','\
-                               '"'+str(histos[ind].myhisto.GetXaxis().GetBinLabel(bin))+'");\n')
+                               '"'+str(histos[ind].stringlabels[bin-1])+'");\n')
         outputC.write('\n')
 
         # Setting Log scale
@@ -836,7 +835,7 @@ class PlotFlow:
                 ymin_legend = 0.1
             outputC.write('  TLegend* legend = new TLegend(.73,.5,.97,.95);\n')
             for ind in range(0,len(histos)):
-                histoname=histos[ind].myhisto.GetTitle()
+                histoname=histos[ind].name+'_'+str(ind)
                 nicetitle=PlotFlow.NiceTitle(self.main.datasets[ind].title)
                 outputC.write('  legend->AddEntry('+histoname+',"'+nicetitle+'");\n')
             outputC.write('  legend->SetFillColor(0);\n')

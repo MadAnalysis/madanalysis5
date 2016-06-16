@@ -140,3 +140,21 @@ class HistogramLogX:
         for bin in range(0,self.nbins):
             self.myhisto.SetBinContent(bin+1, self.summary.array[bin])
 
+
+    def GetBinLowEdge(self,bin):
+
+        # Special case
+        if bin<=0:
+            return self.xmin
+
+        if bin>=self.nbins:
+            return self.xmax
+        
+        # Computing steps
+        step = (log10(self.xmax) - log10(self.xmin) ) / \
+               float (self.nbins)
+        
+        # value
+        return pow(10., log10(self.xmin)+bin*step)
+
+

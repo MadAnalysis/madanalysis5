@@ -139,4 +139,7 @@ class Histogram:
 
         # warnings
         self.warnings = []
+
         
+        
+    

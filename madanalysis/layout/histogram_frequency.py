@@ -82,6 +82,7 @@ class HistogramFrequency:
             len(self.summary.array))
 
         # Filling bins
+        self.stringlabels = []
         for bin in range(0,len(self.labels)):
 
             # Looking for the good label
@@ -95,9 +96,15 @@ class HistogramFrequency:
 
             # Set labels
             self.myhisto.GetXaxis().SetBinLabel(bin+1,spid)
+            self.stringlabels.append(spid)
 
             # Setting the bin content
             self.myhisto.SetBinContent(bin+1, self.summary.array[bin])
+
+            # Put final settings
+            self.nbins = len(self.labels)
+            self.xmin  = 0.
+            self.xmax  = self.nbins
 
 
     def Reset(self):
@@ -106,8 +113,14 @@ class HistogramFrequency:
 
         # General info
         self.name     = ""
-        self.labels   = numpy.array([])
         self.scale    = 0.
+        self.nbins    = 0
+        self.xmin     = 0.
+        self.xmax     = 1.
+
+        # labels
+        self.labels       = numpy.array([]) # int
+        self.stringlabels = []              # string
 
         # Data
         self.positive = HistogramFrequencyCore()

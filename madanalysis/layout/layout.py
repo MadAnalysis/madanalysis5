@@ -146,15 +146,21 @@ class Layout:
 
 
 
-    def DoPlots(self,mode,output_path):
+    def DoPlots(self,histo_path,modes,output_paths):
 
+        # Header plots
+        logging.debug('Producing header plots ...')
         if self.main.merging.enable:
-            self.merging.DrawAll(mode,output_path)
+            self.merging.DrawAll(histo_path,modes,output_paths)
 
-        if self.main.selection.Nhistos==0:
-            return True
+        # Selection plots
+        logging.debug('Producing selection plots ...')
+        if self.main.selection.Nhistos!=0:
+            self.plotflow.DrawAll(histo_path,modes,output_paths)
 
-        self.plotflow.DrawAll(mode,output_path)
+        # Foot plots
+        logging.debug('Producing foot plots ...')
+        # to do
         
         return True
 
@@ -821,19 +827,27 @@ class Layout:
         report.EndTable()    
 
 
+    def CreateFolders(self,histo_folder,output_paths,modes):
+
+        # Creating histo folder
+        if not FolderWriter.CreateDirectory(histo_folder,True):
+            return False
+
+        for ind in range(0,len(output_paths)):
+                         
+            # Creating production directory
+            if not FolderWriter.CreateDirectory(output_paths[ind],True):
+                return False
+
+            # Copying MA5 logo
+            if not self.CopyLogo(modes[ind],output_paths[ind]):
+                return False
+            
+        return True
+
+
     def GenerateReport(self,history,output_path,mode):
 
-        # Creating production directory
-        if not FolderWriter.CreateDirectory(output_path,True):
-            return False
-
-        if not self.CopyLogo(mode,output_path):
-            return False
-
-        # Draw plots
-        if not self.DoPlots(mode,output_path):
-            return
-        
  #       self.logger.info("     ** Computing cut efficiencies...")
         #if not layout.DoEfficiencies():
         #    return
@@ -1029,16 +1043,16 @@ class Layout:
                 return False
                 
             # Converting DVI file to PDF file
-            if self.main.session_info.has_dvipdf:
-                self.logger.info("     -> Converting the DVI report to a PDF report.")
-                os.system('cd '+output_path+'; dvipdf main.dvi > dvipdf.log 2>&1')
-                name=os.path.normpath(output_path+'/main.pdf')
-
-                # Checking PDF file presence
-                if not os.path.isfile(name):
-                    self.logger.error('PDF file cannot be produced')
-                    self.logger.error('Please have a look to the log file '+output_path+'/dvipdf.log')
-                    return False
+#            if self.main.session_info.has_dvipdf:
+#                self.logger.info("     -> Converting the DVI report to a PDF report.")
+#                os.system('cd '+output_path+'; dvipdf main.dvi > dvipdf.log 2>&1')
+#                name=os.path.normpath(output_path+'/main.pdf')
+#
+#                # Checking PDF file presence
+#                if not os.path.isfile(name):
+#                    self.logger.error('PDF file cannot be produced')
+#                    self.logger.error('Please have a look to the log file '+output_path+'/dvipdf.log')
+#                    return False
                 
         # ---- PDFLATEX MODE ----
         elif mode==ReportFormatType.PDFLATEX:
