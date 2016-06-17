@@ -39,6 +39,8 @@ from math import sqrt
 
 class MergingPlots:
 
+    counter = 0
+
     def __init__(self,main):
         self.main         = main
         self.detail       = []
@@ -62,13 +64,26 @@ class MergingPlots:
         RootConfig.Init()
 
         # Loop on each dataset
+        rootfiles=[]
         for i in range(0,len(self.main.datasets)):
             self.DrawDatasetPlots(self.detail[i],\
                                   self.main.datasets[i],\
-                                  histo_path,modes,output_paths)
+                                  histo_path,modes,output_paths,\
+                                  rootfiles)
+
+        # Drawing
+        if self.main.developer_mode:
+            print "LAUNCHING ROOT"
+            commands=['root','-l','-q','-b']
+            for item in rootfiles:
+                commands.append(item)
+            import os
+            os.system(' '.join(commands))
+            
 
 
-    def DrawDatasetPlots(self,histos,dataset,histo_path,modes,output_paths):
+
+    def DrawDatasetPlots(self,histos,dataset,histo_path,modes,output_paths,rootfiles):
 
         # Loop over DJR
         for i in range(0,100):
@@ -110,6 +125,7 @@ class MergingPlots:
 
             filenameC = histo_path+"/merging_" +\
                         datasetname+"_"+str(index)+".C"
+            rootfiles.append(filenameC)
             output_files=[]
             for iout in range(0,len(output_paths)):
                 output_files.append(output_paths[iout]+\
@@ -117,7 +133,11 @@ class MergingPlots:
                                     datasetname+"_"+str(index)+"." +\
                                     ReportFormatType.convert2filetype(modes[iout]))
             # Drawing
-            self.DrawPlot(DJRplots,dataset,filenameC,output_files,index)
+            if not self.main.developer_mode:
+                self.DrawPlot(DJRplots,dataset,filenameC,output_files,index)
+            else:
+                self.DrawROOT(DJRplots,dataset,filenameC,output_files,index)
+                
             
             
     def DrawPlot(self,DJRplots,dataset,filenameC,output_files,index):
@@ -302,4 +322,183 @@ class MergingPlots:
         allnames.append(names)
         return allnames
     
-        
+
+    def DrawROOT(self,DJRplots,dataset,filenameC,output_files,index):
+
+        # Open the file in write-mode
+        try:
+            outputC = file(filenameC,'w')
+        except:
+            logging.error('Impossible to write the file: '+filenameC)
+            return False
+
+        # File header
+        function_name = filenameC[:-2]
+        function_name = function_name.split('/')[-1]
+        outputC.write('void '+function_name+'()\n')
+        outputC.write('{\n\n')
+
+        # ROOT version
+        outputC.write('  // ROOT version\n')
+        outputC.write('  Int_t root_version = gROOT->GetVersionInt();\n')
+        outputC.write('\n')
+
+        # Creating the TCanvas
+        MergingPlots.counter=MergingPlots.counter+1
+        canvas_name='tempo'+str(MergingPlots.counter)
+        outputC.write('  // Creating a new TCanvas\n')
+        outputC.write('  TCanvas* canvas = new TCanvas("'+canvas_name+'","'+canvas_name+'",0,0,1000,500);\n')
+        outputC.write('  gStyle->SetOptStat(0);\n')
+        outputC.write('  gStyle->SetOptTitle(0);\n')
+        outputC.write('  canvas->SetHighLightColor(2);\n')
+        outputC.write('  canvas->SetFillColor(0);\n')
+        outputC.write('  canvas->SetBorderMode(0);\n')
+        outputC.write('  canvas->SetBorderSize(3);\n')
+        outputC.write('  canvas->SetFrameBorderMode(0);\n')
+        outputC.write('  canvas->SetFrameBorderSize(0);\n')
+        outputC.write('  canvas->SetTickx(1);\n')
+        outputC.write('  canvas->SetTicky(1);\n')
+        outputC.write('  canvas->SetLeftMargin(0.14);\n')
+        outputC.write('  canvas->SetRightMargin(0.30);\n')
+        outputC.write('  canvas->SetBottomMargin(0.15);\n')
+        outputC.write('  canvas->SetTopMargin(0.05);\n')
+        outputC.write('\n')
+
+        # Getting xsection
+        xsection=dataset.measured_global.xsection
+        if dataset.xsection!=0.:
+            xsection=dataset.xsection
+
+        # Scaling the total plot
+        scales=[]
+        if DJRplots[0].summary.nentries!=0:
+            scales.append( float(xsection) / \
+                           float(DJRplots[0].summary.nentries) )
+        else:
+            scales.append(1.)
+
+        # Loop over other DJR plots    
+        for ind in range(1,len(DJRplots)):
+            if DJRplots[ind].summary.nentries!=0:
+                scales.append( float(xsection) / \
+                               float(DJRplots[0].summary.nentries) )
+            else:
+                scales.append(1.)
+
+        # Loop over datasets and histos
+        for ind in range(0,len(DJRplots)):
+
+            # Creating TH1F
+            outputC.write('  // Creating a new TH1F\n')
+            histoname=DJRplots[ind].name
+            xmin=DJRplots[ind].xmin
+            xmax=DJRplots[ind].xmax
+            xnbin=DJRplots[ind].nbins
+            outputC.write('  TH1F* '+histoname+' = new TH1F("'+histoname+\
+                          '_'+str(MergingPlots.counter)+'","'+\
+                          histoname+'",'+str(xnbin)+','+\
+                          str(xmin)+','+str(xmax)+');\n')
+
+            # TH1F content
+            outputC.write('  // Content\n')
+            outputC.write('  '+histoname+'->SetBinContent(0'+\
+                          ','+str(DJRplots[ind].summary.underflow*scales[ind])+'); // underflow\n')
+            for bin in range(1,xnbin+1):
+                outputC.write('  '+histoname+'->SetBinContent('+str(bin)+\
+                              ','+str(DJRplots[ind].summary.array[bin-1]*scales[ind])+');\n')
+            nentries=DJRplots[ind].summary.nentries
+            outputC.write('  '+histoname+'->SetBinContent('+str(xnbin+1)+\
+                          ','+str(DJRplots[ind].summary.overflow*scales[ind])+'); // overflow\n')
+            outputC.write('  '+histoname+'->SetEntries('+str(nentries)+');\n')
+
+            # Setting color an other settings to jet plots    
+            mycolors=[1,9,46,8,4,6,2,7,3,42,48]
+            outputC.write('  '+histoname+'->SetLineColor('+str(mycolors[ind])+');\n')
+            if ind==0:
+                 outputC.write('  '+histoname+'->SetLineStyle(1);\n')
+            else:
+                 outputC.write('  '+histoname+'->SetLineStyle(2);\n')
+            outputC.write('\n')
+            
+
+        # Creating the THStack
+        outputC.write('  // Creating a new THStack\n')
+        outputC.write('  THStack* stack = new THStack("mystack_'+str(MergingPlots.counter)+'","mystack");\n')
+
+        # Loop over datasets and histos
+        ntot=DJRplots[0].summary.integral
+        for ind in range(0,len(DJRplots)):
+            histoname=DJRplots[ind].name
+            outputC.write('  stack->Add('+histoname+');\n')
+        outputC.write('  stack->Draw("nostack");\n')
+        outputC.write('\n')
+
+        # Setting Y axis label
+        outputC.write('  // Y axis\n')
+        axis_titleY = "Cross section (pb/bin)"
+        if(len(axis_titleY) > 35): 
+           titlesize=0.04
+        else:
+           titlesize=0.06
+        outputC.write('  stack->GetYaxis()->SetLabelSize(0.04);\n')
+        outputC.write('  stack->GetYaxis()->SetLabelOffset(0.005);\n')
+        outputC.write('  stack->GetYaxis()->SetTitleSize('+str(titlesize)+');\n')
+        outputC.write('  stack->GetYaxis()->SetTitleFont(22);\n')
+        outputC.write('  stack->GetYaxis()->SetTitleOffset(1);\n')
+        outputC.write('  stack->GetYaxis()->SetTitle("'+axis_titleY+'");\n')
+        outputC.write('\n')
+
+        # Setting X axis label
+        outputC.write('  // X axis\n')
+        axis_titleX = "log10(DJR"+str(index)+")"
+        outputC.write('  stack->GetXaxis()->SetLabelSize(0.04);\n')
+        outputC.write('  stack->GetXaxis()->SetLabelOffset(0.005);\n')
+        outputC.write('  stack->GetXaxis()->SetTitleSize(0.06);\n')
+        outputC.write('  stack->GetXaxis()->SetTitleFont(22);\n')
+        outputC.write('  stack->GetXaxis()->SetTitleOffset(1);\n')
+        outputC.write('  stack->GetXaxis()->SetTitle("'+axis_titleX+'");\n')
+        outputC.write('\n')
+
+        # Setting Log scale
+        outputC.write('  // Finalizing the TCanvas\n')
+        logy=0
+        if ntot!=0:
+            logy=1
+        outputC.write('  canvas->SetLogx(0);\n')
+        outputC.write('  canvas->SetLogy('+str(logy)+');\n')
+        outputC.write('\n')
+
+        # Displaying a legend
+        outputC.write('  // Creating a TLegend\n')
+        outputC.write('  TLegend* legend = new TLegend(.73,.5,.97,.95);\n')
+        outputC.write('  legend->AddEntry('+DJRplots[0].name+',"Sum");\n')
+        for ind in range(1,len(DJRplots)):
+                histoname=DJRplots[ind].name
+                nicetitle=str(ind-1)+"-jet sample"
+                outputC.write('  legend->AddEntry('+histoname+',"'+nicetitle+'");\n')
+        outputC.write('  legend->SetFillColor(0);\n')
+        outputC.write('  legend->SetTextSize(0.04);\n')
+        outputC.write('  legend->SetTextFont(22);\n')
+        outputC.write('  legend->SetY1(TMath::Max(0.15,0.97-0.10*legend->GetListOfPrimitives()->GetSize()));\n')
+        outputC.write('  legend->Draw();\n')
+        outputC.write('\n')
+
+        # Producing the image
+        outputC.write('  // Saving the image\n')
+        for outputname in output_files:
+            outputC.write('  canvas->SaveAs("'+outputname+'");\n')
+        outputC.write('\n')
+
+        # File foot
+        outputC.write('}\n')
+
+        # Close the file
+        try:
+            outputC.close()
+        except:
+            logging.error('Impossible to close the file: '+outputC)
+            return False
+
+        # Ok
+        return True
+

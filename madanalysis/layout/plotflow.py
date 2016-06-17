@@ -556,7 +556,9 @@ class PlotFlow:
             return False
 
         # File header
-        outputC.write('void selection_'+str(irelhisto)+'()\n')
+        function_name = filenameC[:-2]
+        function_name = function_name.split('/')[-1]
+        outputC.write('void '+function_name+'()\n')
         outputC.write('{\n\n')
 
         # ROOT version
@@ -606,9 +608,7 @@ class PlotFlow:
 
         # Loop over datasets and histos
         for ind in range(0,len(histos)):
-            # Scaling 
-            histos[ind].myhisto.Scale(scales[ind])
-        
+
             # Creating TH1F
             outputC.write('  // Creating a new TH1F\n')
             histoname=histos[ind].name+'_'+str(ind)
@@ -624,11 +624,15 @@ class PlotFlow:
 
             # TH1F content
             outputC.write('  // Content\n')
+            outputC.write('  '+histoname+'->SetBinContent(0'+\
+                          ','+str(histos[ind].summary.underflow*scales[ind])+');\n')
             for bin in range(1,xnbin+1):
                 outputC.write('  '+histoname+'->SetBinContent('+str(bin)+\
-                              ','+str(histos[ind].myhisto.GetBinContent(bin))+');\n')
+                              ','+str(histos[ind].summary.array[bin-1]*scales[ind])+'); // underflow\n')
             nentries=histos[ind].summary.nentries
             outputC.write('  '+histoname+'->SetEntries('+str(nentries)+');\n')
+            outputC.write('  '+histoname+'->SetBinContent('+str(xnbin+1)+\
+                          ','+str(histos[ind].summary.overflow*scales[ind])+'); // overflow\n')
 
             # linecolor
             if self.main.datasets[ind].linecolor!=ColorType.AUTO:
@@ -742,12 +746,13 @@ class PlotFlow:
         
         # Creating the THStack
         outputC.write('  // Creating a new THStack\n')
-        outputC.write('  THStack* stack = new THStack("mystack","mystack");\n')
+        PlotFlow.counter+=1
+        outputC.write('  THStack* stack = new THStack("mystack_'+str(PlotFlow.counter)+'","mystack");\n')
         # Loop over datasets and histos
         ntot = 0
         for ind in range(0,len(histos)):
             histoname=histos[ind].name+'_'+str(ind)
-            ntot+=histos[ind].myhisto.Integral()
+            ntot+=histos[ind].summary.integral
             outputC.write('  stack->Add('+histoname+');\n')
 
         drawoptions=[]
@@ -756,11 +761,10 @@ class PlotFlow:
         if frequencyhisto:
             drawoptions.append('bar1')
         outputC.write('  stack->Draw("'+''.join(drawoptions)+'");\n')
-        
-
         outputC.write('\n')
-        outputC.write('  // Y axis\n')
+        
         # Setting Y axis label
+        outputC.write('  // Y axis\n')
         axis_titleY = ref.GetYaxis()
 
         # Scale to one ?
@@ -829,9 +833,6 @@ class PlotFlow:
         # Displaying a legend
         if legendmode:
             outputC.write('  // Creating a TLegend\n')
-            ymin_legend = .9-.055*len(histos)
-            if ymin_legend<0.1:
-                ymin_legend = 0.1
             outputC.write('  TLegend* legend = new TLegend(.73,.5,.97,.95);\n')
             for ind in range(0,len(histos)):
                 histoname=histos[ind].name+'_'+str(ind)
