@@ -67,8 +67,6 @@ class PlotFlow:
 
     def InitializeHistoFrequency(self,ihisto):
 
-        import numpy
-        
         # New collection of labels
         newlabels=[]
 
@@ -116,9 +114,10 @@ class PlotFlow:
                     array_negative.append(0.)
 
             # save result
-            histo[ihisto].positive.array = numpy.array(array_positive)
-            histo[ihisto].negative.array = numpy.array(array_negative)
-            histo[ihisto].labels   = numpy.array(newlabels)
+            # PS: [:] -> clone the arrays
+            histo[ihisto].positive.array = array_positive[:]
+            histo[ihisto].negative.array = array_negative[:]
+            histo[ihisto].labels         = newlabels[:]
 
 
     @staticmethod

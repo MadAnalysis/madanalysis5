@@ -287,8 +287,8 @@ class CheckUp():
         checker = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
         if not checker.checkPython():
             return False
-        if not checker.checkNumPy():
-            return False
+#        if not checker.checkNumPy():
+#            return False
         if not checker.checkGPP():
             return False
         if not checker.checkMake():

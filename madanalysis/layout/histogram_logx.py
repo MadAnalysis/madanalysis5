@@ -70,8 +70,6 @@ class HistogramLogX:
         
     def FinalizeReading(self,main,dataset):
 
-        import numpy
-
         # Statistics
         self.summary.nevents   = self.positive.nevents   + self.negative.nevents
         self.summary.nentries   = self.positive.nentries   + self.negative.nentries
@@ -105,7 +103,7 @@ class HistogramLogX:
                     ' has a negative content : '+\
                     str(data[-1])+'. This value is set to zero')
                 data[-1]=0
-        self.summary.array = numpy.array(data)
+        self.summary.array = data[:] # [:] -> clone of data
 
         # Integral
         self.positive.ComputeIntegral()

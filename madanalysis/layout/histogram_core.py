@@ -47,8 +47,7 @@ class HistogramCore:
         self.overflow    = 0.
         self.nan         = 0.
         self.inf         = 0.
-        import numpy
-        self.array       = numpy.array([])
+        self.array       = []
 
 
     def ComputeIntegral(self):

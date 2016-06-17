@@ -42,8 +42,6 @@ class HistogramFrequency:
 
     def FinalizeReading(self,main,dataset):
 
-        import numpy
-
         # Statistics
         self.summary.nevents = self.positive.nevents + self.negative.nevents
         self.summary.entries = self.positive.entries + self.negative.entries
@@ -59,7 +57,7 @@ class HistogramFrequency:
                     ' has a negative content : '+\
                     str(data[-1])+'. This value is set to zero')
                 data[-1]=0
-        self.summary.array = numpy.array(data)
+        self.summary.array = data[:] # [:] -> clone of data
 
         # Integral
         self.positive.ComputeIntegral()
@@ -109,8 +107,6 @@ class HistogramFrequency:
 
     def Reset(self):
 
-        import numpy
-
         # General info
         self.name     = ""
         self.scale    = 0.
@@ -119,8 +115,8 @@ class HistogramFrequency:
         self.xmax     = 1.
 
         # labels
-        self.labels       = numpy.array([]) # int
-        self.stringlabels = []              # string
+        self.labels       = [] # int: PDG id 
+        self.stringlabels = [] # string: label
 
         # Data
         self.positive = HistogramFrequencyCore()

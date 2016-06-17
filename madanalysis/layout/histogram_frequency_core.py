@@ -26,13 +26,12 @@ import logging
 class HistogramFrequencyCore:
 
     def __init__(self):
-        import numpy
         self.integral  = 0
         self.nevents   = 0
         self.sumwentries = 0
         self.entries   = 0
         self.nentries  = 0
-        self.array     = numpy.array([])
+        self.array     = []
 
     def ComputeIntegral(self):
         self.integral = 0
