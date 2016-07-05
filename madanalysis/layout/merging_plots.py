@@ -114,8 +114,9 @@ class MergingPlots:
             index=i+1
 
             filenameC = histo_path+"/merging_" +\
-                        datasetname+"_"+str(index)+".C"
+                        datasetname+"_"+str(index)
             rootfiles.append(filenameC)
+            filenameC += '.C'
             output_files=[]
             for iout in range(0,len(output_paths)):
                 output_files.append(output_paths[iout]+\

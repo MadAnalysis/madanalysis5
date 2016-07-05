@@ -32,7 +32,9 @@ import commands
 class HistoRootProducer():
 
     def __init__(self,histo_path,filenames):
-        self.filenames  = filenames
+        self.filenames  = []
+        for filename in filenames:
+            self.filenames.append((filename)+'.C')
         self.histo_path = histo_path
 
 
@@ -75,7 +77,7 @@ class HistoRootProducer():
         output.write('CXX=`root-config --cxx`\n')
         output.write('CFLAGS=`root-config --cflags`\n')
         output.write('LIBS=`root-config --libs`\n')
-        output.write('SOURCE=compile.C\n')
+        output.write('SOURCE=all.C\n')
         output.write('PROGRAM=goROOT\n')
         output.write('\n')
         output.write('$(PROGRAM):\n')
@@ -145,7 +147,7 @@ class HistoRootProducer():
 
 
     def WriteMainFile(self):
-        output = open(self.histo_path+'/compile.C','w')
+        output = open(self.histo_path+'/all.C','w')
         output.write('// STL headers\n')
         output.write('#include <iostream>\n')
         output.write('\n')

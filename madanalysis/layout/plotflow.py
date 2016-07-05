@@ -160,6 +160,8 @@ class PlotFlow:
             logging.debug('Producing file '+filenameC+' ...')
             self.DrawROOT(histos,scales,self.main.selection[iabshisto],\
                           irelhisto,filenameC,output_files)
+            
+            logging.debug('Producing file '+filenamePy+' ...')
             self.DrawMATPLOTLIB\
                          (histos,scales,self.main.selection[iabshisto],\
                           irelhisto,filenamePy,output_files)
@@ -169,7 +171,7 @@ class PlotFlow:
 
         # Save ROOT files
         for ind in range(0,irelhisto):
-            ListROOTplots.append(histo_path+'/selection_'+str(ind)+'.C')
+            ListROOTplots.append(histo_path+'/selection_'+str(ind))
             
         return True
 
@@ -580,12 +582,12 @@ class PlotFlow:
         xmax =histos[0].xmax
         outputPy.write('    # Histo binning\n')
         if logxhisto:
-            outputPy.write('  xBinning = [')
+            outputPy.write('    xBinning = [')
             for bin in range(1,xnbin+2):
                 if bin!=1:
                     outputPy.write(',')
                 outputPy.write(str(histos[0].GetBinLowEdge(bin)))
-            outputPy.write('];\n')
+            outputPy.write(']\n')
             outputPy.write('\n')
         else:
             outputPy.write('    xBinning = numpy.linspace('+\
@@ -640,7 +642,7 @@ class PlotFlow:
             axis_titleX = ref.GetXaxis_Matplotlib()
         else:
             axis_titleX = PlotFlow.NiceTitle(ref.titleX)
-        outputPy.write('    plt.xlabel("'+axis_titleX+'",\\n')
+        outputPy.write('    plt.xlabel("'+axis_titleX+'",\\\n')
         outputPy.write('               fontsize=16,color="black")\n')
 
         # Y-axis
@@ -663,7 +665,7 @@ class PlotFlow:
 
         if ref.titleY!="": 
             axis_titleY = PlotFlow.NiceTitle(ref.titleY)
-        outputPy.write('    plt.ylabel("'+axis_titleY+'",\\n')
+        outputPy.write('    plt.ylabel("'+axis_titleY+'",\\\n')
         outputPy.write('               fontsize=16,color="black")\n')
 
         # Draw
@@ -677,7 +679,9 @@ class PlotFlow:
         outputPy.write('\n')
 
         # Call the function
-        outputPy.write(function_name+'()\n')
+        outputPy.write('    # Running!\n')
+        outputPy.write("    if __name__ == '__main__':\n")
+        outputPy.write('        '+function_name+'()\n')
 
         # Close the file
         try:

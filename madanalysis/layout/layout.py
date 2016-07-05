@@ -22,24 +22,25 @@
 ################################################################################
 
 
-from madanalysis.enumeration.sb_ratio_type       import SBratioType
-from madanalysis.enumeration.color_type          import ColorType
-from madanalysis.enumeration.report_format_type  import ReportFormatType
-from madanalysis.enumeration.normalize_type      import NormalizeType
-from madanalysis.enumeration.observable_type     import ObservableType
-from madanalysis.enumeration.graphic_render_type import GraphicRenderType
-from madanalysis.enumeration.font_type           import FontType
-from madanalysis.enumeration.script_type         import ScriptType
-from madanalysis.IOinterface.folder_writer       import FolderWriter
-from madanalysis.IOinterface.text_report         import TextReport
-from madanalysis.IOinterface.html_report_writer  import HTMLReportWriter
-from madanalysis.IOinterface.latex_report_writer import LATEXReportWriter
-from madanalysis.IOinterface.histo_root_producer import HistoRootProducer
-from madanalysis.layout.cutflow                  import CutFlow
-from madanalysis.layout.plotflow                 import PlotFlow
-from madanalysis.layout.merging_plots            import MergingPlots
-from madanalysis.selection.instance_name         import InstanceName
-from math                                        import log10, floor, ceil
+from madanalysis.enumeration.sb_ratio_type             import SBratioType
+from madanalysis.enumeration.color_type                import ColorType
+from madanalysis.enumeration.report_format_type        import ReportFormatType
+from madanalysis.enumeration.normalize_type            import NormalizeType
+from madanalysis.enumeration.observable_type           import ObservableType
+from madanalysis.enumeration.graphic_render_type       import GraphicRenderType
+from madanalysis.enumeration.font_type                 import FontType
+from madanalysis.enumeration.script_type               import ScriptType
+from madanalysis.IOinterface.folder_writer             import FolderWriter
+from madanalysis.IOinterface.text_report               import TextReport
+from madanalysis.IOinterface.html_report_writer        import HTMLReportWriter
+from madanalysis.IOinterface.latex_report_writer       import LATEXReportWriter
+from madanalysis.IOinterface.histo_root_producer       import HistoRootProducer
+from madanalysis.IOinterface.histo_matplotlib_producer import HistoMatplotlibProducer
+from madanalysis.layout.cutflow                        import CutFlow
+from madanalysis.layout.plotflow                       import PlotFlow
+from madanalysis.layout.merging_plots                  import MergingPlots
+from madanalysis.selection.instance_name               import InstanceName
+from math                                              import log10, floor, ceil
 import os
 import shutil
 import logging
@@ -149,17 +150,17 @@ class Layout:
 
     def DoPlots(self,histo_path,modes,output_paths):
 
-        ListROOTplots = []
+        ListPlots = []
         
         # Header plots
         logging.debug('Producing scripts for header plots ...')
         if self.main.merging.enable:
-            self.merging.DrawAll(histo_path,modes,output_paths,ListROOTplots)
+            self.merging.DrawAll(histo_path,modes,output_paths,ListPlots)
 
         # Selection plots
         logging.debug('Producing scripts for selection plots ...')
         if self.main.selection.Nhistos!=0:
-            self.plotflow.DrawAll(histo_path,modes,output_paths,ListROOTplots)
+            self.plotflow.DrawAll(histo_path,modes,output_paths,ListPlots)
 
         # Foot plots
         logging.debug('Producing scripts for foot plots ...')
@@ -167,7 +168,10 @@ class Layout:
 
         # Launching ROOT
         if self.main.graphic_render==GraphicRenderType.ROOT:
-            producer=HistoRootProducer(histo_path,ListROOTplots)
+            producer=HistoRootProducer(histo_path,ListPlots)
+            producer.Execute()
+        elif self.main.graphic_render==GraphicRenderType.MATPLOTLIB:
+            producer=HistoMatplotlibProducer(histo_path,ListPlots)
             producer.Execute()
 
         # Ok
