@@ -27,22 +27,25 @@ class ObservableBase():
     def __init__(self,
                  name,        args,       combination,
                  plot_auto,   plot_nbins, plot_xmin,
-                 plot_xmax,   plot_unitX, code_parton,
-                 code_hadron, code_reco,  cut_event, cut_candidate, tex):
-        self.name          = name
-        self.args          = args
-        self.plot_auto     = plot_auto
-        self.plot_nbins    = plot_nbins
-        self.plot_xmin     = plot_xmin
-        self.plot_xmax     = plot_xmax
-        self.plot_unitX    = plot_unitX
-        self.code_parton   = code_parton
-        self.code_hadron   = code_hadron
-        self.code_reco     = code_reco
-        self.cut_event     = cut_event
-        self.cut_candidate = cut_candidate
-        self.combination   = combination
-        self.tex          = tex
+                 plot_xmax,   plot_unitX_tlatex, plot_unitX_latex,\
+                 code_parton, code_hadron, code_reco,  cut_event, \
+                 cut_candidate, tlatex, latex):
+        self.name              = name
+        self.args              = args
+        self.plot_auto         = plot_auto
+        self.plot_nbins        = plot_nbins
+        self.plot_xmin         = plot_xmin
+        self.plot_xmax         = plot_xmax
+        self.plot_unitX_tlatex = plot_unitX_tlatex
+        self.plot_unitX_latex  = plot_unitX_latex
+        self.code_parton       = code_parton
+        self.code_hadron       = code_hadron
+        self.code_reco         = code_reco
+        self.cut_event         = cut_event
+        self.cut_candidate     = cut_candidate
+        self.combination       = combination
+        self.tlatex            = tlatex
+        self.latex             = latex
 
 
     def code(self,level):
@@ -58,16 +61,18 @@ class ObservableBase():
 
     @staticmethod
     def Clone(obs,
-              name=None,        args=None,        combination=None,
-              plot_auto=None,   plot_nbins=None, plot_xmin=None,
-              plot_xmax=None,   plot_unitX=None, code_parton=None,
-              code_hadron=None, code_reco=None,  cut_event=None,     cut_candidate=None, tex=None):
+              name=None,          args=None,        combination=None,
+              plot_auto=None,     plot_nbins=None,  plot_xmin=None,
+              plot_xmax=None,     plot_unitX_tlatex=None,  plot_unitX_latex=None, code_parton=None,
+              code_hadron=None,   code_reco=None,   cut_event=None, \
+              cut_candidate=None, tlatex=None,      latex=None):
 
         # create clone of obs
-        newobs = ObservableBase(obs.name,        obs.args,        obs.combination,
-                                obs.plot_auto,   obs.plot_nbins,  obs.plot_xmin,
-                                obs.plot_xmax,   obs.plot_unitX,  obs.code_parton,
-                                obs.code_hadron, obs.code_reco,   obs.cut_event,   obs.cut_candidate, obs.tex)
+        newobs = ObservableBase(obs.name,          obs.args,        obs.combination,
+                                obs.plot_auto,     obs.plot_nbins,  obs.plot_xmin,
+                                obs.plot_xmax,     obs.plot_unitX_tlatex, obs.plot_unitX_latex,  obs.code_parton,
+                                obs.code_hadron,   obs.code_reco,   obs.cut_event,\
+                                obs.cut_candidate, obs.tlatex,      obs.latex)
 
         # replace
         if name!=None:
@@ -84,8 +89,10 @@ class ObservableBase():
             newobs.plot_xmin=plot_xmin
         if plot_xmax!=None:
             newobs.plot_xmax=plot_xmax
-        if plot_unitX!=None:
-            newobs.plot_unitX=plot_unitX
+        if plot_unitX_tlatex!=None:
+            newobs.plot_unitX_tlatex=plot_unitX_tlatex
+        if plot_unitX_latex!=None:
+            newobs.plot_unitX_tlatex=plot_unitX_latex
         if code_parton!=None:
             newobs.code_parton=codeparton
         if code_hadron!=None:
@@ -96,8 +103,10 @@ class ObservableBase():
             newobs.cut_event=cut_event
         if cut_candidate!=None:
             newobs.cut_candidate=cut_candidate
-        if tex!=None:
-            newobs.tex=tex
+        if tlatex!=None:
+            newobs.tlatex=tlatex
+        if latex!=None:
+            newobs.latex=latex
 
         # return the clone
         return newobs

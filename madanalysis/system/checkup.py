@@ -295,8 +295,8 @@ class CheckUp():
             return False
         if not checker.checkROOT():
             return False
-        if not checker.checkPyROOT():
-            return False
+#        if not checker.checkPyROOT():
+#            return False
         return True
 
     def CheckOptionalPackages(self):

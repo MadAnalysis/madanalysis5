@@ -150,9 +150,6 @@ def MainSession(mode,arglist,ma5dir,version,date):
     main.script         = mode.scriptmode
     main.developer_mode = mode.developer_mode
 
-    # Setting batch mode for ROOT
-    #sys.argv.append('-b-')
-
     # Displaying header
     logging.info("")
     logging.info(\

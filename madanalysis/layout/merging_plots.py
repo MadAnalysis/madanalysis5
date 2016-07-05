@@ -25,14 +25,12 @@
 from madanalysis.selection.instance_name           import InstanceName
 from madanalysis.enumeration.uncertainty_type      import UncertaintyType
 from madanalysis.enumeration.normalize_type        import NormalizeType
-from madanalysis.layout.root_config                import RootConfig
 from madanalysis.enumeration.report_format_type    import ReportFormatType
 from madanalysis.enumeration.observable_type       import ObservableType
 from madanalysis.enumeration.color_type            import ColorType
 from madanalysis.enumeration.linestyle_type        import LineStyleType
 from madanalysis.enumeration.backstyle_type        import BackStyleType
 from madanalysis.enumeration.stacking_method_type  import StackingMethodType
-from madanalysis.layout.root_config                import RootConfig
 from madanalysis.layout.merging_plots_for_dataset import MergingPlotsForDataset 
 from math import sqrt
 
@@ -58,10 +56,7 @@ class MergingPlots:
             self.detail[i].CreateHistogram()
 
 
-    def DrawAll(self,histo_path,modes,output_paths):
-
-        # Reset Configuration
-        RootConfig.Init()
+    def DrawAll(self,histo_path,modes,output_paths,ListROOTplots):
 
         # Loop on each dataset
         rootfiles=[]
@@ -71,14 +66,9 @@ class MergingPlots:
                                   histo_path,modes,output_paths,\
                                   rootfiles)
 
-        # Drawing
-        if self.main.developer_mode:
-            print "LAUNCHING ROOT"
-            commands=['root','-l','-q','-b']
-            for item in rootfiles:
-                commands.append(item)
-            import os
-            os.system(' '.join(commands))
+        # Saving files
+        for item in rootfiles:
+            ListROOTplots.append(item)
             
 
 
@@ -133,165 +123,8 @@ class MergingPlots:
                                     datasetname+"_"+str(index)+"." +\
                                     ReportFormatType.convert2filetype(modes[iout]))
             # Drawing
-            if not self.main.developer_mode:
-                self.DrawPlot(DJRplots,dataset,filenameC,output_files,index)
-            else:
-                self.DrawROOT(DJRplots,dataset,filenameC,output_files,index)
+            self.DrawROOT(DJRplots,dataset,filenameC,output_files,index)
                 
-            
-            
-    def DrawPlot(self,DJRplots,dataset,filenameC,output_files,index):
-
-        from ROOT import TH1
-        from ROOT import TH1F
-        from ROOT import THStack
-        from ROOT import TLegend
-        from ROOT import TCanvas
-
-        # Creating a canvas
-        canvas = TCanvas("tempo","")
-
-        # Getting xsection
-        xsection=dataset.measured_global.xsection
-        if dataset.xsection!=0.:
-            xsection=dataset.xsection
-
-        # Setting color to the total plot
-        DJRplots[0].myhisto.SetLineColor(1)
-        DJRplots[0].myhisto.SetLineStyle(1)
-
-        # Scaling the total plot
-        if DJRplots[0].myhisto.GetEntries()!=0:
-            DJRplots[0].myhisto.Scale( float(xsection) / \
-                                       float(DJRplots[0].myhisto.GetEntries()) )
-
-        # Loop over other DJR plots    
-        for ind in range(1,len(DJRplots)):
-            DJRplots[ind].myhisto.SetLineStyle(2)
-            if DJRplots[ind].myhisto.GetEntries()!=0:
-                DJRplots[ind].myhisto.Scale( float(xsection) / \
-                                             float(DJRplots[0].myhisto.GetEntries()) )
-
-        # Setting color an other settings to jet plots    
-        if len(DJRplots)==2:
-            DJRplots[1].myhisto.SetLineColor(9)
-        elif len(DJRplots)==3:
-            DJRplots[1].myhisto.SetLineColor(9)
-            DJRplots[2].myhisto.SetLineColor(46)
-        elif len(DJRplots)==4:
-            DJRplots[1].myhisto.SetLineColor(9)
-            DJRplots[2].myhisto.SetLineColor(46)
-            DJRplots[3].myhisto.SetLineColor(8)
-        elif len(DJRplots)==5:
-            DJRplots[1].myhisto.SetLineColor(9)
-            DJRplots[2].myhisto.SetLineColor(46)
-            DJRplots[3].myhisto.SetLineColor(8)
-            DJRplots[4].myhisto.SetLineColor(4)
-        elif len(DJRplots)==6:
-            DJRplots[1].myhisto.SetLineColor(9)
-            DJRplots[2].myhisto.SetLineColor(46)
-            DJRplots[3].myhisto.SetLineColor(8)
-            DJRplots[4].myhisto.SetLineColor(4)
-            DJRplots[5].myhisto.SetLineColor(6)
-        elif len(DJRplots)==7:
-            DJRplots[1].myhisto.SetLineColor(9)
-            DJRplots[2].myhisto.SetLineColor(46)
-            DJRplots[3].myhisto.SetLineColor(8)
-            DJRplots[4].myhisto.SetLineColor(4)
-            DJRplots[5].myhisto.SetLineColor(6)
-            DJRplots[6].myhisto.SetLineColor(2)
-        elif len(DJRplots)==8:
-            DJRplots[1].myhisto.SetLineColor(9)
-            DJRplots[2].myhisto.SetLineColor(46)
-            DJRplots[3].myhisto.SetLineColor(8)
-            DJRplots[4].myhisto.SetLineColor(4)
-            DJRplots[5].myhisto.SetLineColor(6)
-            DJRplots[6].myhisto.SetLineColor(2)
-            DJRplots[7].myhisto.SetLineColor(7)
-        elif len(DJRplots)==9:
-            DJRplots[1].myhisto.SetLineColor(9)
-            DJRplots[2].myhisto.SetLineColor(46)
-            DJRplots[3].myhisto.SetLineColor(8)
-            DJRplots[4].myhisto.SetLineColor(4)
-            DJRplots[5].myhisto.SetLineColor(6)
-            DJRplots[6].myhisto.SetLineColor(2)
-            DJRplots[7].myhisto.SetLineColor(7)
-            DJRplots[8].myhisto.SetLineColor(3)
-        elif len(DJRplots)==10:
-            DJRplots[1].myhisto.SetLineColor(9)
-            DJRplots[2].myhisto.SetLineColor(46)
-            DJRplots[3].myhisto.SetLineColor(8)
-            DJRplots[4].myhisto.SetLineColor(4)
-            DJRplots[5].myhisto.SetLineColor(6)
-            DJRplots[6].myhisto.SetLineColor(2)
-            DJRplots[7].myhisto.SetLineColor(7)
-            DJRplots[8].myhisto.SetLineColor(3)
-            DJRplots[9].myhisto.SetLineColor(42)
-        elif len(DJRplots)==11:
-            DJRplots[1].myhisto.SetLineColor(9)
-            DJRplots[2].myhisto.SetLineColor(46)
-            DJRplots[3].myhisto.SetLineColor(8)
-            DJRplots[4].myhisto.SetLineColor(4)
-            DJRplots[5].myhisto.SetLineColor(6)
-            DJRplots[6].myhisto.SetLineColor(2)
-            DJRplots[7].myhisto.SetLineColor(7)
-            DJRplots[8].myhisto.SetLineColor(3)
-            DJRplots[9].myhisto.SetLineColor(42)
-            DJRplots[10].myhisto.SetLineColor(48)
-        else:
-            color=1
-            for ind in range(1,len(DJRplots)):
-                DJRplots[ind].myhisto.SetLineColor(color)
-                color += 1
-
-        # Creating and filling the stack; computing the total number of events
-        stack = THStack("mystack","")
-        ntot = DJRplots[0].myhisto.GetEntries()
-        stack.Add(DJRplots[0].myhisto)
-        for ind in range(1,len(DJRplots)):
-            ntot+=DJRplots[ind].myhisto.GetEntries()
-            stack.Add(DJRplots[ind].myhisto)
-
-        # Drawing plots
-        stack.Draw("nostack")
-        
-        # Setting Y axis label
-        axis_titleY = "Cross section (pb/bin)"
-        stack.GetYaxis().SetTitle(axis_titleY)
-        if(len(axis_titleY) > 35): 
-           stack.GetYaxis().SetTitleSize(0.04)
-        else:
-           stack.GetYaxis().SetTitleSize(0.06)
-        stack.GetYaxis().SetTitleFont(22)
-        stack.GetYaxis().SetLabelSize(0.04)
-
-        # Setting X axis label
-        stack.GetXaxis().SetTitle("log10(DJR"+str(index)+")")
-        stack.GetXaxis().SetTitleSize(0.06)
-        stack.GetXaxis().SetTitleFont(22)
-        stack.GetXaxis().SetLabelSize(0.04)
-
-        # Setting Log scale
-        if ntot != 0:
-            canvas.SetLogy()
-        
-        # Displaying a legend
-        ymin_legend = .9-.055*(len(DJRplots)-1)
-        if ymin_legend<0.1:
-            ymin_legend = 0.1
-        legend = TLegend(.65,ymin_legend,.9,.9)
-        legend.SetTextSize(0.04); 
-        legend.SetTextFont(22);
-        legend.AddEntry(DJRplots[0].myhisto,"Sum")
-        for ind in range(1,len(DJRplots)):
-            legend.AddEntry(DJRplots[ind].myhisto,str(ind-1)+"-jet sample")
-        legend.SetFillColor(0)    
-        legend.Draw()
-
-        # Save the canvas
-        canvas.SaveAs(filenameC)
-        for output_file in output_files:
-            canvas.SaveAs(output_file)
 
             
     def GetPlotNames(self,mode,output_path):
@@ -345,7 +178,7 @@ class MergingPlots:
 
         # Creating the TCanvas
         MergingPlots.counter=MergingPlots.counter+1
-        canvas_name='tempo'+str(MergingPlots.counter)
+        canvas_name='canvas_merging_tempo'+str(MergingPlots.counter)
         outputC.write('  // Creating a new TCanvas\n')
         outputC.write('  TCanvas* canvas = new TCanvas("'+canvas_name+'","'+canvas_name+'",0,0,1000,500);\n')
         outputC.write('  gStyle->SetOptStat(0);\n')

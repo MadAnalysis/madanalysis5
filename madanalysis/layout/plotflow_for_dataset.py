@@ -24,7 +24,6 @@
 
 from madanalysis.enumeration.uncertainty_type     import UncertaintyType
 from madanalysis.enumeration.normalize_type       import NormalizeType
-from madanalysis.layout.root_config               import RootConfig
 from madanalysis.enumeration.report_format_type   import ReportFormatType
 from madanalysis.enumeration.observable_type      import ObservableType
 from madanalysis.enumeration.color_type           import ColorType

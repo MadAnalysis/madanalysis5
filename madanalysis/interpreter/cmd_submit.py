@@ -233,10 +233,12 @@ class CmdSubmit(CmdBase):
         self.main.lastjob_status = False
 
         # Submission
+        logging.debug('Launching SampleAnalyzer ...')
         if not self.submit(filename,history):
             return
 
         # Reading info from job output
+        logging.debug('Go back to the Python interface ...')
         layout = Layout(self.main)
         if not self.extract(filename,layout):
             return

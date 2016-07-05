@@ -24,7 +24,6 @@
 
 from madanalysis.enumeration.uncertainty_type     import UncertaintyType
 from madanalysis.enumeration.normalize_type       import NormalizeType
-from madanalysis.layout.root_config               import RootConfig
 from madanalysis.enumeration.report_format_type   import ReportFormatType
 from madanalysis.enumeration.observable_type      import ObservableType
 from madanalysis.enumeration.color_type           import ColorType
@@ -128,10 +127,7 @@ class PlotFlow:
         return newtext
 
 
-    def DrawAll(self,histo_path,modes,output_paths):
-
-        # Reset Configuration
-        RootConfig.Init()
+    def DrawAll(self,histo_path,modes,output_paths,ListROOTplots):
 
         # Loop on each histo type
         irelhisto=0
@@ -143,382 +139,39 @@ class PlotFlow:
             scales=[]
 
             # Name of output files
-            filenameC = histo_path+"/selection_"+str(irelhisto)+".C"
-            logging.debug('Producing file '+filenameC+' ...')
+            filenameC  = histo_path+"/selection_"+str(irelhisto)+".C"
+            filenamePy = histo_path+"/selection_"+str(irelhisto)+".py"
+            
             output_files=[]
             for iout in range(0,len(output_paths)):
                 output_files.append(output_paths[iout]+\
                                     "/selection_"+str(irelhisto)+"."+\
                                     ReportFormatType.convert2filetype(modes[iout]))
 
-            # normal mode
-            if not self.main.developer_mode:
+            for iset in range(0,len(self.detail)):
 
-                for iset in range(0,len(self.detail)):
- 
-                    # Appending histo
-                    histos.append(self.detail[iset][irelhisto].myhisto)
-#                    if mode==2:
-                    scales.append(self.detail[iset][irelhisto].scale)
-#                    else:
-#                        scales.append(1)
+            # Appending histo
+                histos.append(self.detail[iset][irelhisto])
+#               if mode==2:
+                scales.append(self.detail[iset][irelhisto].scale)
+#               else:
+#                   scales.append(1)
 
-                self.Draw(histos,scales,self.main.selection[iabshisto],irelhisto,\
-                          filenameC,output_files)
-                
-                irelhisto+=1
-
-            # developer mode
-            elif self.main.developer_mode:
-
-                for iset in range(0,len(self.detail)):
- 
-                    # Appending histo
-                    histos.append(self.detail[iset][irelhisto])
-#                    if mode==2:
-                    scales.append(self.detail[iset][irelhisto].scale)
-#                    else:
-#                        scales.append(1)
-
-                self.DrawROOT(histos,scales,self.main.selection[iabshisto],\
-                              irelhisto,filenameC,output_files)
+            logging.debug('Producing file '+filenameC+' ...')
+            self.DrawROOT(histos,scales,self.main.selection[iabshisto],\
+                          irelhisto,filenameC,output_files)
+            self.DrawMATPLOTLIB\
+                         (histos,scales,self.main.selection[iabshisto],\
+                          irelhisto,filenamePy,output_files)
                   
-                irelhisto+=1
+            irelhisto+=1
 
 
-        # Launching ROOT
-        if self.main.developer_mode:
-            print "LAUNCHING ROOT"
-            commands=['root','-l','-q','-b']
-            for ind in range(0,irelhisto):
-                commands.append(histo_path+'/selection_'+str(ind)+'.C')
-            import os
-            os.system(' '.join(commands))
+        # Save ROOT files
+        for ind in range(0,irelhisto):
+            ListROOTplots.append(histo_path+'/selection_'+str(ind)+'.C')
             
         return True
-
-    def Draw(self,histos,scales,ref,irelhisto,filenameC,output_files):
-
-        from ROOT import TH1
-        from ROOT import TH1F
-        from ROOT import THStack
-        from ROOT import TLegend
-        from ROOT import TCanvas
-        from ROOT import TASImage
-        from ROOT import TAttImage
-        from ROOT import TPad
-
-        # Creating a canvas
-        PlotFlow.counter=PlotFlow.counter+1
-        canvas = TCanvas("tempo"+str(PlotFlow.counter),"")
-
-        # Loop over datasets and histos
-        for ind in range(0,len(histos)):
-            # Scaling 
-            histos[ind].Scale(scales[ind])
-            
-        # Stacking or superimposing histos ?
-        stackmode = False
-        if ref.stack==StackingMethodType.STACK or \
-           ( ref.stack==StackingMethodType.AUTO and \
-             self.main.stack==StackingMethodType.STACK ):
-            stackmode=True
-
-        # Setting AUTO settings
-        if len(histos)==1:
-            histos[0].SetLineColor(9)
-            if stackmode:
-                histos[0].SetFillColor(9)
-                histos[0].SetFillStyle(3004)
-        elif len(histos)==2:
-            histos[0].SetLineColor(9)
-            histos[1].SetLineColor(46)
-            if stackmode:
-                histos[0].SetFillColor(9)
-                histos[0].SetFillStyle(3004)
-                histos[1].SetFillColor(46)
-                histos[1].SetFillStyle(3005)
-        elif len(histos)==3:
-            histos[0].SetLineColor(9)
-            histos[1].SetLineColor(46)
-            histos[2].SetLineColor(8)
-            if stackmode:
-                histos[0].SetFillColor(9)
-                histos[0].SetFillStyle(3004)
-                histos[1].SetFillColor(46)
-                histos[1].SetFillStyle(3005)
-                histos[2].SetFillColor(8)
-                histos[2].SetFillStyle(3006)
-        elif len(histos)==4:
-            histos[0].SetLineColor(9)
-            histos[1].SetLineColor(46)
-            histos[2].SetLineColor(8)
-            histos[3].SetLineColor(4)
-            if stackmode:
-                histos[0].SetFillColor(9)
-                histos[0].SetFillStyle(3004)
-                histos[1].SetFillColor(46)
-                histos[1].SetFillStyle(3005)
-                histos[2].SetFillColor(8)
-                histos[2].SetFillStyle(3006)
-                histos[3].SetFillColor(4)
-                histos[3].SetFillStyle(3007)
-        elif len(histos)==5:
-            histos[0].SetLineColor(9)
-            histos[1].SetLineColor(46)
-            histos[2].SetLineColor(8)
-            histos[3].SetLineColor(4)
-            histos[4].SetLineColor(6)
-            if stackmode:
-                histos[0].SetFillColor(9)
-                histos[0].SetFillStyle(3004)
-                histos[1].SetFillColor(46)
-                histos[1].SetFillStyle(3005)
-                histos[2].SetFillColor(8)
-                histos[2].SetFillStyle(3006)
-                histos[3].SetFillColor(4)
-                histos[3].SetFillStyle(3007)
-                histos[4].SetFillColor(6)
-                histos[4].SetFillStyle(3013)
-        elif len(histos)==6:
-            histos[0].SetLineColor(9)
-            histos[1].SetLineColor(46)
-            histos[2].SetLineColor(8)
-            histos[3].SetLineColor(4)
-            histos[4].SetLineColor(6)
-            histos[5].SetLineColor(2)
-            if stackmode:
-                histos[0].SetFillColor(9)
-                histos[0].SetFillStyle(3004)
-                histos[1].SetFillColor(46)
-                histos[1].SetFillStyle(3005)
-                histos[2].SetFillColor(8)
-                histos[2].SetFillStyle(3006)
-                histos[3].SetFillColor(4)
-                histos[3].SetFillStyle(3007)
-                histos[4].SetFillColor(6)
-                histos[4].SetFillStyle(3013)
-                histos[5].SetFillColor(2)
-                histos[5].SetFillStyle(3017)
-        elif len(histos)==7:
-            histos[0].SetLineColor(9)
-            histos[1].SetLineColor(46)
-            histos[2].SetLineColor(8)
-            histos[3].SetLineColor(4)
-            histos[4].SetLineColor(6)
-            histos[5].SetLineColor(2)
-            histos[6].SetLineColor(7)
-            if stackmode:
-                histos[0].SetFillColor(9)
-                histos[0].SetFillStyle(3004)
-                histos[1].SetFillColor(46)
-                histos[1].SetFillStyle(3005)
-                histos[2].SetFillColor(8)
-                histos[2].SetFillStyle(3006)
-                histos[3].SetFillColor(4)
-                histos[3].SetFillStyle(3007)
-                histos[4].SetFillColor(6)
-                histos[4].SetFillStyle(3013)
-                histos[5].SetFillColor(2)
-                histos[5].SetFillStyle(3017)
-                histos[6].SetFillColor(7)
-                histos[6].SetFillStyle(3022)
-        elif len(histos)==8:
-            histos[0].SetLineColor(9)
-            histos[1].SetLineColor(46)
-            histos[2].SetLineColor(8)
-            histos[3].SetLineColor(4)
-            histos[4].SetLineColor(6)
-            histos[5].SetLineColor(2)
-            histos[6].SetLineColor(7)
-            histos[7].SetLineColor(3)
-            if stackmode:
-                histos[0].SetFillColor(9)
-                histos[0].SetFillStyle(3004)
-                histos[1].SetFillColor(46)
-                histos[1].SetFillStyle(3005)
-                histos[2].SetFillColor(8)
-                histos[2].SetFillStyle(3006)
-                histos[3].SetFillColor(4)
-                histos[3].SetFillStyle(3007)
-                histos[4].SetFillColor(6)
-                histos[4].SetFillStyle(3013)
-                histos[5].SetFillColor(2)
-                histos[5].SetFillStyle(3017)
-                histos[6].SetFillColor(7)
-                histos[6].SetFillStyle(3022)
-                histos[7].SetFillColor(3)
-                histos[7].SetFillStyle(3315)
-        elif len(histos)==9:
-            histos[0].SetLineColor(9)
-            histos[1].SetLineColor(46)
-            histos[2].SetLineColor(8)
-            histos[3].SetLineColor(4)
-            histos[4].SetLineColor(6)
-            histos[5].SetLineColor(2)
-            histos[6].SetLineColor(7)
-            histos[7].SetLineColor(3)
-            histos[8].SetLineColor(42)
-            if stackmode:
-                histos[0].SetFillColor(9)
-                histos[0].SetFillStyle(3004)
-                histos[1].SetFillColor(46)
-                histos[1].SetFillStyle(3005)
-                histos[2].SetFillColor(8)
-                histos[2].SetFillStyle(3006)
-                histos[3].SetFillColor(4)
-                histos[3].SetFillStyle(3007)
-                histos[4].SetFillColor(6)
-                histos[4].SetFillStyle(3013)
-                histos[5].SetFillColor(2)
-                histos[5].SetFillStyle(3017)
-                histos[6].SetFillColor(7)
-                histos[6].SetFillStyle(3022)
-                histos[7].SetFillColor(3)
-                histos[7].SetFillStyle(3315)
-                histos[8].SetFillColor(42)
-                histos[8].SetFillStyle(3351)
-        elif len(histos)==10:
-            histos[0].SetLineColor(9)
-            histos[1].SetLineColor(46)
-            histos[2].SetLineColor(8)
-            histos[3].SetLineColor(4)
-            histos[4].SetLineColor(6)
-            histos[5].SetLineColor(2)
-            histos[6].SetLineColor(7)
-            histos[7].SetLineColor(3)
-            histos[8].SetLineColor(42)
-            histos[9].SetLineColor(48)
-            if stackmode:
-                histos[0].SetFillColor(9)
-                histos[0].SetFillStyle(3004)
-                histos[1].SetFillColor(46)
-                histos[1].SetFillStyle(3005)
-                histos[2].SetFillColor(8)
-                histos[2].SetFillStyle(3006)
-                histos[3].SetFillColor(4)
-                histos[3].SetFillStyle(3007)
-                histos[4].SetFillColor(6)
-                histos[4].SetFillStyle(3013)
-                histos[5].SetFillColor(2)
-                histos[5].SetFillStyle(3017)
-                histos[6].SetFillColor(7)
-                histos[6].SetFillStyle(3022)
-                histos[7].SetFillColor(3)
-                histos[7].SetFillStyle(3315)
-                histos[8].SetFillColor(42)
-                histos[8].SetFillStyle(3351)
-                histos[9].SetFillColor(48)
-                histos[9].SetFillStyle(3481)
-        else:
-            histos[ind].SetLineColor(self.color)
-            self.color += 1
-
-        # Setting USER color
-        for ind in range(0,len(histos)):
-
-            # linecolor
-            if self.main.datasets[ind].linecolor!=ColorType.AUTO:
-                histos[ind].SetLineColor(ColorType.convert2root( \
-                self.main.datasets[ind].linecolor,\
-                self.main.datasets[ind].lineshade))
-
-            # lineStyle
-            histos[ind].SetLineStyle(LineStyleType.convert2code( \
-                self.main.datasets[ind].linestyle))
-
-            # linewidth
-            histos[ind].SetLineWidth(self.main.datasets[ind].linewidth)
-
-            # background color  
-            if self.main.datasets[ind].backcolor!=ColorType.AUTO:
-                histos[ind].SetFillColor(ColorType.convert2root( \
-                self.main.datasets[ind].backcolor,\
-                self.main.datasets[ind].backshade))
-
-            # background color  
-            if self.main.datasets[ind].backstyle!=BackStyleType.AUTO:
-                histos[ind].SetFillStyle(BackStyleType.convert2code( \
-                self.main.datasets[ind].backstyle))
-
-        # Creating and filling the stack; computing the total number of events
-        stack = THStack("mystack","")
-        ntot = 0
-        for item in histos:
-            ntot+=item.Integral()
-            stack.Add(item)
-
-        # Drawing
-        if stackmode:
-            stack.Draw()
-        else:
-            stack.Draw("nostack")
-
-        # Setting Y axis label
-        axis_titleY = ref.GetYaxis()
-
-        # Scale to one ?
-        scale2one = False
-        if ref.stack==StackingMethodType.NORMALIZE2ONE or \
-           (self.main.stack==StackingMethodType.NORMALIZE2ONE and \
-           ref.stack==StackingMethodType.AUTO):
-            scale2one = True
-
-        if scale2one:
-            axis_titleY += " ( scaled to one )"
-        elif self.main.normalize == NormalizeType.LUMI or \
-           self.main.normalize == NormalizeType.LUMI_WEIGHT:
-            axis_titleY += " ( L_{int} = " + str(self.main.lumi)+ " fb^{-1} )"
-        elif self.main.normalize == NormalizeType.NONE:
-            axis_titleY += " (not normalized)"
-
-        if ref.titleY!="": 
-            axis_titleY = PlotFlow.NiceTitle(ref.titleY)
-
-        stack.GetYaxis().SetTitle(axis_titleY)
-        if(len(axis_titleY) > 35): 
-           stack.GetYaxis().SetTitleSize(0.04)
-        else:
-           stack.GetYaxis().SetTitleSize(0.06)
-        stack.GetYaxis().SetTitleFont(22)
-        stack.GetYaxis().SetLabelSize(0.04)
-
-        # Setting X axis label
-        if ref.titleX=="": 
-            axis_titleX = ref.GetXaxis()
-        else:
-            axis_titleX = PlotFlow.NiceTitle(ref.titleX)
-        
-        # Setting X axis label
-        stack.GetXaxis().SetTitle(axis_titleX)
-        stack.GetXaxis().SetTitleSize(0.06)
-        stack.GetXaxis().SetTitleFont(22)
-        stack.GetXaxis().SetLabelSize(0.04)
-
-        # Setting Log scale
-        if ref.logX and ntot != 0:
-            canvas.SetLogx()
-        if ref.logY and ntot != 0:
-            canvas.SetLogy()
-        
-        # Displaying a legend
-        if len(self.main.datasets)>1:
-            ymin_legend = .9-.055*len(histos)
-            if ymin_legend<0.1:
-                ymin_legend = 0.1
-            legend = TLegend(.65,ymin_legend,.9,.9)
-            legend.SetTextSize(0.05); 
-            legend.SetTextFont(22); 
-            for ind in range(0,len(histos)):
-                legend.AddEntry(histos[ind],PlotFlow.NiceTitle(self.main.datasets[ind].title))
-            legend.SetFillColor(0)    
-            legend.Draw()
-
-        # Save the canvas
-        canvas.SaveAs(filenameC)
-        for output_file in output_files:
-            canvas.SaveAs(output_file)
-
 
 
     def DrawROOT(self,histos,scales,ref,irelhisto,filenameC,outputnames):
@@ -568,7 +221,7 @@ class PlotFlow:
 
         # Creating the TCanvas
         PlotFlow.counter=PlotFlow.counter+1
-        canvas_name='tempo'+str(PlotFlow.counter)
+        canvas_name='canvas_plotflow_tempo'+str(PlotFlow.counter)
         outputC.write('  // Creating a new TCanvas\n')
         widthx=700
         if legendmode:
@@ -625,14 +278,14 @@ class PlotFlow:
             # TH1F content
             outputC.write('  // Content\n')
             outputC.write('  '+histoname+'->SetBinContent(0'+\
-                          ','+str(histos[ind].summary.underflow*scales[ind])+');\n')
+                          ','+str(histos[ind].summary.underflow*scales[ind])+'); // underflow\n')
             for bin in range(1,xnbin+1):
                 outputC.write('  '+histoname+'->SetBinContent('+str(bin)+\
-                              ','+str(histos[ind].summary.array[bin-1]*scales[ind])+'); // underflow\n')
+                              ','+str(histos[ind].summary.array[bin-1]*scales[ind])+');\n')
             nentries=histos[ind].summary.nentries
-            outputC.write('  '+histoname+'->SetEntries('+str(nentries)+');\n')
             outputC.write('  '+histoname+'->SetBinContent('+str(xnbin+1)+\
                           ','+str(histos[ind].summary.overflow*scales[ind])+'); // overflow\n')
+            outputC.write('  '+histoname+'->SetEntries('+str(nentries)+');\n')
 
             # linecolor
             if self.main.datasets[ind].linecolor!=ColorType.AUTO:
@@ -801,7 +454,7 @@ class PlotFlow:
 
         # Setting X axis label
         if ref.titleX=="": 
-            axis_titleX = ref.GetXaxis()
+            axis_titleX = ref.GetXaxis_Root()
         else:
             axis_titleX = PlotFlow.NiceTitle(ref.titleX)
         
@@ -859,6 +512,178 @@ class PlotFlow:
             outputC.close()
         except:
             logging.error('Impossible to close the file: '+outputC)
+            return False
+
+        # Ok
+        return True
+
+
+
+    def DrawMATPLOTLIB(self,histos,scales,ref,irelhisto,filenamePy,outputnames):
+
+        # Is there any legend?
+        legendmode = False
+        if len(self.main.datasets)>1:
+            legendmode = True
+
+        # Type of histogram
+        frequencyhisto = True
+        for histo in histos:
+            if histo.__class__.__name__!='HistogramFrequency':
+                frequencyhisto = False
+                break
+        logxhisto = True
+        for histo in histos:
+            if histo.__class__.__name__!='HistogramLogX':
+                logxhisto = False
+                break
+            
+        # Stacking or superimposing histos ?
+        stackmode = False
+        if ref.stack==StackingMethodType.STACK or \
+           ( ref.stack==StackingMethodType.AUTO and \
+             self.main.stack==StackingMethodType.STACK ):
+            stackmode=True
+
+
+        # Open the file in write-mode
+        try:
+            outputPy = file(filenamePy,'w')
+        except:
+            logging.error('Impossible to write the file: '+filenamePy)
+            return False
+
+        # File header
+        function_name = filenamePy[:-3]
+        function_name = function_name.split('/')[-1]
+        outputPy.write('def '+function_name+'():\n')
+        outputPy.write('\n')
+
+        # Import Libraries
+        outputPy.write('    # Library import\n')
+        outputPy.write('    import numpy\n')
+        outputPy.write('    import matplotlib\n')
+#        outputPy.write("    matplotlib.use('Agg')\n")
+        outputPy.write('    import matplotlib.pyplot as plt\n')
+        outputPy.write('\n')
+
+        # Matplotlib & numpy version
+        outputPy.write('    # Library version\n')
+        outputPy.write('    matplotlib_version = matplotlib.__version__\n')
+        outputPy.write('    numpy_version      = numpy.__version__\n')
+        outputPy.write('\n')
+
+        # Binning
+        # Loop over datasets and histos
+        xnbin=histos[0].nbins
+        xmin =histos[0].xmin
+        xmax =histos[0].xmax
+        outputPy.write('    # Histo binning\n')
+        if logxhisto:
+            outputPy.write('  xBinning = [')
+            for bin in range(1,xnbin+2):
+                if bin!=1:
+                    outputPy.write(',')
+                outputPy.write(str(histos[0].GetBinLowEdge(bin)))
+            outputPy.write('];\n')
+            outputPy.write('\n')
+        else:
+            outputPy.write('    xBinning = numpy.linspace('+\
+                           str(xmin)+','+str(xmax)+','+str(xnbin+1)+\
+                           ',endpoint=True)\n')
+        outputPy.write('\n')
+
+        # Loop over datasets and histos
+        for ind in range(0,len(histos)):
+
+            # Creating a new histo
+            histoname=histos[ind].name+'_'+str(ind)
+            outputPy.write('    # Creating a new histo: '+histoname+'\n')
+            outputPy.write('    '+histoname+'_data    = [')
+            for bin in range(0,xnbin):
+                if bin!=0:
+                    outputPy.write(',')
+                outputPy.write(str(histos[ind].GetBinMean(bin)))
+            outputPy.write(']\n')
+            outputPy.write('    '+histoname+'_weights = [')
+            for bin in range(1,xnbin+1):
+                if bin!=1:
+                    outputPy.write(',')
+                outputPy.write(str(histos[ind].summary.array[bin-1]*scales[ind]))
+            outputPy.write(']\n\n')
+
+
+        # Canvas
+        outputPy.write('    # Creating a new Canvas\n')
+        dpi=80
+        height=500
+        widthx=700
+        if legendmode:
+            widthx=1000
+        outputPy.write('    fig = plt.figure(figsize=('+\
+                       str(widthx/dpi)+','+str(height/dpi)+\
+                       '),dpi='+str(dpi)+')\n')
+        outputPy.write('    pad = fig.add_subplot(111)\n')
+        outputPy.write('\n')
+        
+        # Stack
+        outputPy.write('    # Creating a new Stack\n')
+        outputPy.write('    pad.hist(x='+histos[0].name+'_'+str(0)+'_data,bins=xBinning,weights='+histos[0].name+'_'+str(0)+'_weights)\n')
+        outputPy.write('\n')
+
+        # Label
+        outputPy.write('    # Axis\n')
+        outputPy.write("    plt.rc('text',usetex=True)\n")
+
+        # X-axis
+        if ref.titleX=="": 
+            axis_titleX = ref.GetXaxis_Matplotlib()
+        else:
+            axis_titleX = PlotFlow.NiceTitle(ref.titleX)
+        outputPy.write('    plt.xlabel("'+axis_titleX+'",\\n')
+        outputPy.write('               fontsize=16,color="black")\n')
+
+        # Y-axis
+        axis_titleY = ref.GetYaxis()
+
+        # Scale to one ?
+        scale2one = False
+        if ref.stack==StackingMethodType.NORMALIZE2ONE or \
+           (self.main.stack==StackingMethodType.NORMALIZE2ONE and \
+           ref.stack==StackingMethodType.AUTO):
+            scale2one = True
+
+        if scale2one:
+            axis_titleY += " ( scaled to one )"
+        elif self.main.normalize == NormalizeType.LUMI or \
+           self.main.normalize == NormalizeType.LUMI_WEIGHT:
+            axis_titleY += " ( $\mathcal{L}_{\\\\textrm{int}}$ = " + str(self.main.lumi)+ " fb$^{-1}$ )"
+        elif self.main.normalize == NormalizeType.NONE:
+            axis_titleY += " (not normalized)"
+
+        if ref.titleY!="": 
+            axis_titleY = PlotFlow.NiceTitle(ref.titleY)
+        outputPy.write('    plt.ylabel("'+axis_titleY+'",\\n')
+        outputPy.write('               fontsize=16,color="black")\n')
+
+        # Draw
+        outputPy.write('    plt.show()\n')
+        outputPy.write('\n')
+                           
+        # Producing the image
+        outputPy.write('    # Saving the image\n')
+        for outputname in outputnames:
+            outputPy.write("    plt.savefig('"+outputname+"')\n")
+        outputPy.write('\n')
+
+        # Call the function
+        outputPy.write(function_name+'()\n')
+
+        # Close the file
+        try:
+            outputPy.close()
+        except:
+            logging.error('Impossible to close the file: '+outputPy)
             return False
 
         # Ok

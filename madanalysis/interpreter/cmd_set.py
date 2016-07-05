@@ -131,6 +131,8 @@ class CmdSet(CmdBase.CmdBase):
                 self.main.user_SetParameter(objs[1],args[2])
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='isolation':
             self.main.isolation.user_SetParameter(objs[2],args[2])
+        elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='fom':
+            self.main.fom.user_SetParameter(objs[2],args[2])
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='merging':
             self.main.merging.user_SetParameter(objs[2],args[2],self.main.mode,self.main.archi_info.has_fastjet)
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='fastsim':
@@ -254,6 +256,8 @@ class CmdSet(CmdBase.CmdBase):
             if not withValue:
                 output=[ object+".isolation."+ item \
                          for item in self.main.isolation.user_GetParameters() ]
+                output.extend([ object+".fom."+ item \
+                         for item in self.main.fom.user_GetParameters() ])
                 output.extend([ object+".fastsim."+ item \
                          for item in self.main.fastsim.user_GetParameters() ])
                 output.extend([ object+".merging."+ item \
@@ -264,6 +268,8 @@ class CmdSet(CmdBase.CmdBase):
             else:
                 if subobject=="isolation":
                     output = self.main.isolation.user_GetValues(variable)
+                elif subobject=="fom":
+                    output = self.main.fom.user_GetValues(variable)
                 elif subobject=="fastsim":
                     output = self.main.fastsim.user_GetValues(variable)
                 elif subobject=="merging":
@@ -312,6 +318,8 @@ class CmdSet(CmdBase.CmdBase):
                          for item in self.main.user_GetParameters() ]
                 output.extend([ object+".isolation."+ item \
                                for item in self.main.isolation.user_GetParameters() ])
+                output.extend([ object+".fom."+ item \
+                               for item in self.main.fom.user_GetParameters() ])
                 output.extend([ object+".fastsim."+ item \
                                for item in self.main.fastsim.user_GetParameters() ])
                 output.extend([ object+".merging."+ item \

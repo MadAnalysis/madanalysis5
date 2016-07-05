@@ -28,8 +28,6 @@ import logging
 
 class Histogram:
 
-    stamp = 0
-
     def __init__(self):
         self.Reset()
 
@@ -100,22 +98,8 @@ class Histogram:
             
 
     def CreateHistogram(self):
+        pass
 
-        # New stamp
-        Histogram.stamp+=1
-
-        # Creating a new histo
-        from ROOT import TH1F
-        self.myhisto = TH1F(\
-            self.name+"_"+str(Histogram.stamp),\
-            self.name+"_"+str(Histogram.stamp),\
-            self.nbins,\
-            self.xmin,\
-            self.xmax)
-
-        # Filling bins
-        for bin in range(0,self.nbins):
-            self.myhisto.SetBinContent(bin+1, self.summary.array[bin])
 
 
     def Reset(self):
@@ -138,6 +122,55 @@ class Histogram:
         # warnings
         self.warnings = []
 
+
+
+
+    def GetBinLowEdge(self,bin):
+
+        # Special case
+        if bin<=0:
+            return self.xmin
+
+        if bin>=self.nbins:
+            return self.xmax
         
+        # Computing steps
+        step = (self.xmax - self.xmin) / float (self.nbins)
         
+        # value
+        return self.xmin+bin*step
+
+
+    def GetBinUpperEdge(self,bin):
+
+        # Special case
+        if bin<=0:
+            return self.xmin
+
+        if bin>=self.nbins:
+            return self.xmax
+        
+        # Computing steps
+        step = (self.xmax - self.xmin) / float (self.nbins)
+        
+        # value
+        return self.xmin+(bin+1)*step
+
+
+    def GetBinMean(self,bin):
+
+        # Special case
+        if bin<=0:
+            return self.xmin
+
+        if bin>=self.nbins:
+            return self.xmax
+        
+        # Computing steps
+        step = (self.xmax - self.xmin) / float (self.nbins)
+        
+        # value
+        return self.xmin+(bin+0.5)*step
+    
+
     

@@ -57,11 +57,13 @@ class CmdDisplay(CmdBase.CmdBase):
                     self.main.isolation.Display()
                 elif objs[1].lower()=="merging":
                     self.main.merging.Display()
+                elif objs[1].lower()=="fom":
+                    self.main.fom.Display()
                 else:
                     self.main.user_DisplayParameter(objs[1])
                 return
             else:
-                if objs[1].lower()!='isolation' and objs[1].lower()!='fastsim' and objs[1].lower()!='merging':
+                if objs[1].lower()!='isolation' and objs[1].lower()!='fastsim' and objs[1].lower()!='merging' and objs[1].lower()!='fom':
                     logging.error("'main' has no variable set called '"+objs[1]+"'")
                     return
                 elif objs[1].lower()=='fastsim':
@@ -70,6 +72,8 @@ class CmdDisplay(CmdBase.CmdBase):
                     self.main.isolation.user_DisplayParameter(objs[2])
                 elif objs[1].lower()=='merging':
                     self.main.merging.user_DisplayParameter(objs[2])
+                elif objs[1].lower()=='fom':
+                    self.main.fom.user_DisplayParameter(objs[2])
                 else:
                     self.main.user_DisplayParameter(objs[2])
                 return
@@ -229,6 +233,8 @@ class CmdDisplay(CmdBase.CmdBase):
                      for item in self.main.isolation.user_GetParameters() ])
             output.extend([ object+".fastsim."+ item \
                      for item in self.main.fastsim.user_GetParameters() ])
+            output.extend([ object+".fom."+ item \
+                     for item in self.main.fom.user_GetParameters() ])
             output.extend([ object+".merging."+ item \
                      for item in self.main.merging.user_GetParameters() ])
             return self.finalize_complete(text,output)

@@ -25,9 +25,6 @@
 from madanalysis.multiparticle.multiparticle_collection import MultiParticleCollection
 from madanalysis.dataset.dataset_collection             import DatasetCollection
 from madanalysis.selection.selection                    import Selection
-from madanalysis.enumeration.uncertainty_type           import UncertaintyType
-from madanalysis.enumeration.normalize_type             import NormalizeType
-from madanalysis.enumeration.sb_ratio_type              import SBratioType
 from madanalysis.interpreter.cmd_base                   import CmdBase
 from madanalysis.region.region_collection               import RegionCollection
 from madanalysis.system.session_info                    import SessionInfo
@@ -37,9 +34,13 @@ from madanalysis.IOinterface.library_writer             import LibraryWriter
 from madanalysis.IOinterface.madgraph_interface         import MadGraphInterface
 from madanalysis.enumeration.ma5_running_type           import MA5RunningType
 from madanalysis.enumeration.stacking_method_type       import StackingMethodType
+from madanalysis.enumeration.uncertainty_type           import UncertaintyType
+from madanalysis.enumeration.normalize_type             import NormalizeType
+from madanalysis.enumeration.graphic_render_type        import GraphicRenderType
 from madanalysis.observable.observable_manager          import ObservableManager
 from madanalysis.configuration.recast_configuration     import RecastConfiguration
 from madanalysis.configuration.fastsim_configuration    import FastsimConfiguration
+from madanalysis.configuration.fom_configuration        import FomConfiguration
 from madanalysis.configuration.isolation_configuration  import IsolationConfiguration
 from madanalysis.configuration.merging_configuration    import MergingConfiguration
 from string_tools                                       import StringTools
@@ -53,19 +54,12 @@ class Main():
 
     userVariables = { "currentdir"      : [], \
                       "normalize"       : ["none","lumi","lumi_weight"], \
+                      "graphic_render"  : ["root","matplotlib","none"], \
                       "lumi"            : [], \
-                      "SBratio"         : ['"S/B"','"B/S"',\
-                                           '"S/(S+B)"','"B/(B+S)"',\
-                                           '"S/sqrt(S+B)"','"B/sqrt(B+S)"'], \
-                      "SBerror"         : [], \
                       "stacking_method" : ["stack","superimpose","normalize2one"], \
                       "outputfile"      : ['"output.lhe.gz"','"output.lhco.gz"'],\
                       "recast"          : ["on", "off"] \
                       }
-
-    SBformula = { 'S/B'         : '1./(B**2)*sqrt(B**2*ES**2+S**2*EB**2)', \
-                  'S/(S+B)'     : '1./(S+B)**2*sqrt(B**2*ES**2+S**2*EB**2)', \
-                  'S/sqrt(S+B)' : '1./pow(S+B,3./2.)*sqrt((S+2*B)**2*ES**2+S**2*EB**2)' }
 
     forced = False
     version = ""
@@ -97,14 +91,14 @@ class Main():
         self.merging        = MergingConfiguration()
         self.fastsim        = FastsimConfiguration()
         self.recasting      = RecastConfiguration()
-        self.SBratio        = 'S/B'
-        self.SBerror        = Main.SBformula['S/B']
+        self.fom            = FomConfiguration()
         self.lumi           = 10
         self.lastjob_name   = ''
         self.lastjob_status = False
         self.stack          = StackingMethodType.STACK
         self.isolation      = IsolationConfiguration()
         self.output         = ""
+        self.graphic_render = GraphicRenderType.ROOT
         if self.mode==MA5RunningType.RECO:
             self.normalize = NormalizeType.NONE
         else:
@@ -158,11 +152,11 @@ class Main():
         self.logger.info("            main program          " )
         self.logger.info(" *********************************" )
         self.user_DisplayParameter("currentdir")
+        self.user_DisplayParameter("graphic_render")
         self.user_DisplayParameter("normalize")
         self.user_DisplayParameter("lumi")
         self.user_DisplayParameter("outputfile")
-        self.user_DisplayParameter("SBratio")
-        self.user_DisplayParameter("SBerror")
+        self.fom.Display()
         if self.archi_info.has_fastjet:
             self.merging.Display()
         self.fastsim.Display()
@@ -193,6 +187,15 @@ class Main():
             elif self.normalize==NormalizeType.LUMI_WEIGHT:
                 word="lumi_weight"
             self.logger.info(" histogram normalization mode = " + word)
+        elif parameter=="graphic_render":
+            word=""
+            if self.graphic_render==GraphicRenderType.NONE:
+                word="none"
+            elif self.graphic_render==GraphicRenderType.ROOT:
+                word="root"
+            elif self.graphic_render==GraphicRenderType.MATPLOTLIB:
+                word="matplotlib"
+            self.logger.info(" graphic renderer = " + word)
         elif parameter=="outputfile":
             if self.output=="":
                 msg="none"
@@ -201,10 +204,6 @@ class Main():
             self.logger.info(" output file = "+msg)
         elif parameter=="lumi":
             self.logger.info(" integrated luminosity = "+str(self.lumi)+" fb^{-1}" )
-        elif parameter=="SBratio":
-            self.logger.info(' S/B ratio formula = "' + self.SBratio + '"')
-        elif parameter=="SBerror":
-            self.logger.info(' S/B error formula = "' + self.SBerror + '"')
         elif parameter=="recast":
             self.logger.info(' Recasting mode = "' + self.recasting.status + '"')
         else:
@@ -252,6 +251,18 @@ class Main():
                 self.logger.error("'normalize' possible values are : 'none', 'lumi', 'lumi_weight'")
                 return False
 
+        # graphic_render
+        elif parameter=="graphic_render":
+            if value == "none":
+                self.graphic_render = GraphicRenderType.NONE
+            elif value == "root":
+                self.graphic_render = GraphicRenderType.ROOT
+            elif value == "matplotlib":
+                self.graphic_render = GraphicRenderType.MATPLOTLIB
+            else:
+                self.logger.error("'graphic_render' possible values are : 'none', 'root', 'matplotlib'")
+                return False
+
         # lumi
         elif (parameter=="lumi"):
             try:
@@ -264,37 +275,6 @@ class Main():
             else:
                 self.logger.error("'lumi' is a positive float value")
                 return
-
-        # sbratio
-        elif (parameter=="SBratio"):
-            quoteTag=False
-            if value.startswith("'") and value.endswith("'"):
-                quoteTag=True
-            if value.startswith('"') and value.endswith('"'):
-                quoteTag=True
-            if quoteTag:
-                value=value[1:-1]
-            if Main.checkSBratio(value):
-                self.SBratio=value
-                self.suggestSBerror()
-            else:
-                self.logger.error("Specified formula is not correct.")
-                return False
-
-        # sberror
-        elif (parameter=="SBerror"):
-            quoteTag=False
-            if value.startswith("'") and value.endswith("'"):
-                quoteTag=True
-            if value.startswith('"') and value.endswith('"'):
-                quoteTag=True
-            if quoteTag:
-                value=value[1:-1]
-            if Main.checkSBratio(value):
-                self.SBerror=value
-            else:
-                self.logger.error("Specified formula is not correct.")
-                return False
 
         # output
         elif (parameter=="outputfile"):
@@ -344,59 +324,6 @@ class Main():
         # other
         else:
             self.logger.error("'main' has no parameter called '"+parameter+"'")
-
-    @staticmethod
-    def checkSBratio(text):
-        self.logger.info("Checking the formula ...")
-        text = text.replace("ES","z")
-        text = text.replace("EB","t")
-        text = text.replace("S","x")
-        text = text.replace("B","y")
-        from ROOT import TFormula
-        formula = TFormula()
-        test = formula.Compile(text)
-        return (test==0)
-
-    def suggestSBerror(self):
-        # create a TFormula with the SBratio formula
-        text = self.SBratio.replace("S","x")
-        text = text.replace("B","y")
-        from ROOT import TFormula
-        ref = TFormula('SBratio',text)
-        ref.Optimize()
-
-        # Loop over SBerror formula and comparing
-        for k, v in Main.SBformula.iteritems():
-            text = k.replace("S","x")
-            text = text.replace("B","y")
-            error = TFormula('SBerror',text)
-            error.Optimize()
-            if ref.GetExpFormula()==error.GetExpFormula():
-                self.logger.info("Formula corresponding to the uncertainty calculation has been found and set to the variable main.SBerror :")
-                self.logger.info('  '+v)
-                self.SBerror=v
-                return True
-
-        # Loop over SBerror formula and comparing
-        # reverse S and B
-        for k, v in Main.SBformula.iteritems():
-            text = k.replace("S","y")
-            text = text.replace("B","x")
-            error = TFormula('SBerror',text)
-            error.Optimize()
-            if ref.GetExpFormula()==error.GetExpFormula():
-                self.logger.info("Formula corresponding to the uncertainty calculation has been found and set to the variable main.SBerror :")
-                v=v.replace('ES','ZZ')
-                v=v.replace('EB','TT')
-                v=v.replace('S','SS')
-                v=v.replace('B','BB')
-                v=v.replace('SS','B')
-                v=v.replace('BB','S')
-                v=v.replace('ZZ','EB')
-                v=v.replace('TT','ES')
-                self.logger.info('  '+v)
-                self.SBerror=v
-                return True
 
 
     def get_currentdir(self):

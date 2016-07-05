@@ -24,20 +24,21 @@
 
 from madanalysis.enumeration.sb_ratio_type       import SBratioType
 from madanalysis.enumeration.color_type          import ColorType
-from madanalysis.IOinterface.root_file_reader    import RootFileReader
-from madanalysis.IOinterface.folder_writer       import FolderWriter
-from madanalysis.selection.instance_name         import InstanceName
-from madanalysis.enumeration.font_type           import FontType
-from madanalysis.enumeration.script_type         import ScriptType
-from madanalysis.IOinterface.text_report         import TextReport
-from madanalysis.IOinterface.html_report_writer  import HTMLReportWriter
-from madanalysis.IOinterface.latex_report_writer import LATEXReportWriter
 from madanalysis.enumeration.report_format_type  import ReportFormatType
 from madanalysis.enumeration.normalize_type      import NormalizeType
 from madanalysis.enumeration.observable_type     import ObservableType
+from madanalysis.enumeration.graphic_render_type import GraphicRenderType
+from madanalysis.enumeration.font_type           import FontType
+from madanalysis.enumeration.script_type         import ScriptType
+from madanalysis.IOinterface.folder_writer       import FolderWriter
+from madanalysis.IOinterface.text_report         import TextReport
+from madanalysis.IOinterface.html_report_writer  import HTMLReportWriter
+from madanalysis.IOinterface.latex_report_writer import LATEXReportWriter
+from madanalysis.IOinterface.histo_root_producer import HistoRootProducer
 from madanalysis.layout.cutflow                  import CutFlow
 from madanalysis.layout.plotflow                 import PlotFlow
 from madanalysis.layout.merging_plots            import MergingPlots
+from madanalysis.selection.instance_name         import InstanceName
 from math                                        import log10, floor, ceil
 import os
 import shutil
@@ -148,20 +149,28 @@ class Layout:
 
     def DoPlots(self,histo_path,modes,output_paths):
 
+        ListROOTplots = []
+        
         # Header plots
-        logging.debug('Producing header plots ...')
+        logging.debug('Producing scripts for header plots ...')
         if self.main.merging.enable:
-            self.merging.DrawAll(histo_path,modes,output_paths)
+            self.merging.DrawAll(histo_path,modes,output_paths,ListROOTplots)
 
         # Selection plots
-        logging.debug('Producing selection plots ...')
+        logging.debug('Producing scripts for selection plots ...')
         if self.main.selection.Nhistos!=0:
-            self.plotflow.DrawAll(histo_path,modes,output_paths)
+            self.plotflow.DrawAll(histo_path,modes,output_paths,ListROOTplots)
 
         # Foot plots
-        logging.debug('Producing foot plots ...')
+        logging.debug('Producing scripts for foot plots ...')
         # to do
-        
+
+        # Launching ROOT
+        if self.main.graphic_render==GraphicRenderType.ROOT:
+            producer=HistoRootProducer(histo_path,ListROOTplots)
+            producer.Execute()
+
+        # Ok
         return True
 
 
@@ -956,7 +965,8 @@ class Layout:
                     else:
                         title += " jet"
                     text.Add(title)
-                    report.WriteFigure(text,allnames[i][j])
+                    if self.main.graphic_render!=GraphicRenderType.NONE:
+                        report.WriteFigure(text,allnames[i][j])
 
         # Plots display
         if len(self.main.selection)!=0:
@@ -979,7 +989,8 @@ class Layout:
                     self.WriteStatisticsTable(ihisto,report)
                 else:
                     self.WriteStatisticsTablePID(ihisto,report)
-                report.WriteFigure(text,output_path +'/selection_'+str(ihisto))
+                if self.main.graphic_render!=GraphicRenderType.NONE:
+                    report.WriteFigure(text,output_path +'/selection_'+str(ihisto))
                 text.Add('\n\n')
                 report.WriteText(text)
                 text.Reset()

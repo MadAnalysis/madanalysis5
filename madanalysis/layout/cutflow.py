@@ -28,6 +28,7 @@ from madanalysis.IOinterface.job_reader       import JobReader
 from madanalysis.layout.cut_info              import CutInfo
 from madanalysis.layout.cutflow_for_dataset   import CutFlowForDataset
 from madanalysis.layout.measure               import Measure
+from madanalysis.layout.fom_calculation       import FomCalculation
 from math                                     import sqrt
 
                            
@@ -46,7 +47,8 @@ class CutFlow:
                 self.isSignal=True
         self.background = CutFlowForDataset(main,0)
         self.signal     = CutFlowForDataset(main,0)
-        self.formulaSBratio()
+        self.fom        = FomCalculation(self.main)
+
 
     def Initialize(self):
 
@@ -61,25 +63,9 @@ class CutFlow:
             
 
     def calculateBSratio(self,B,eB,S,eS):
-        value = Measure()
-        value.mean  = self.Mformula.Eval(S,B)
-        value.error = self.Eformula.Eval(S,B,eS,eB) 
-        return value
+        return self.fom.Compute(S,eS,B,eB)
 
 
-    def formulaSBratio(self):
-        from ROOT import TFormula
-        text = self.main.SBratio
-        text = text.replace("S","x")
-        text = text.replace("B","y")
-        self.Mformula = TFormula("SBratio",text)
-        text = self.main.SBerror
-        text = text.replace("ES","z")
-        text = text.replace("EB","t")
-        text = text.replace("S","x")
-        text = text.replace("B","y")
-        self.Eformula = TFormula("SBerror",text)
-    
     def CalculateSummary(self,summary,background=True):
 
         # Ntotal
