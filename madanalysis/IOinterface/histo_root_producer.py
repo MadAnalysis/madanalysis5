@@ -81,7 +81,7 @@ class HistoRootProducer():
         output.write('PROGRAM=goROOT\n')
         output.write('\n')
         output.write('$(PROGRAM):\n')
-        output.write('\t$(CXX) $(CFLAGS) $(LIBS) -o $(PROGRAM) $(SOURCE)\n')
+        output.write('\t$(CXX) $(CFLAGS) $(SOURCE) $(LIBS) -o $(PROGRAM)\n')
         output.close()
 
         # Commands
