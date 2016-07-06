@@ -183,9 +183,7 @@ class InstallDelphes:
                                              silent=False)
         # return result
         if not ok:
-            self.logger.error('impossible to build the project. For more details, see the log file:')
-            self.logger.error(logname)
-            return ok
+            pass # only for ROOT6
 
         # Input
         theCommands=['make','-j'+str(self.ncores),'libDelphes.so']
