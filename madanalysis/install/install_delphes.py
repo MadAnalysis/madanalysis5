@@ -48,7 +48,8 @@ class InstallDelphes:
         self.ncores      = 1
 #        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
 #        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.0.tar.gz"}
-        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.1.tar.gz"}
+#        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.1.tar.gz"}
+        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.2.tar.gz"}
         self.logger = logging.getLogger('MA5')
 
 
@@ -170,6 +171,22 @@ class InstallDelphes:
 
         
     def Build(self):
+
+        # Input
+        theCommands=['make','ClassesDict_rdict.pcm','ExRootAnalysisDict_rdict.pcm', 'ModulesDict_rdict.pcm', 'FastJetDict_rdict.pcm']
+        logname=os.path.normpath(self.installdir+'/compilation_Dict.log')
+        # Execute
+        self.logger.debug('shell command: '+' '.join(theCommands))
+        ok, out= ShellCommand.ExecuteWithLog(theCommands,\
+                                             logname,\
+                                             self.installdir,\
+                                             silent=False)
+        # return result
+        if not ok:
+            self.logger.error('impossible to build the project. For more details, see the log file:')
+            self.logger.error(logname)
+            return ok
+
         # Input
         theCommands=['make','-j'+str(self.ncores),'libDelphes.so']
         logname=os.path.normpath(self.installdir+'/compilation_libDelphes.log')
