@@ -32,6 +32,7 @@ from madanalysis.enumeration.backstyle_type       import BackStyleType
 from madanalysis.enumeration.stacking_method_type import StackingMethodType
 from madanalysis.layout.plotflow_for_dataset      import PlotFlowForDataset
 from math  import sqrt
+import madanalysis.enumeration.color_hex
 import time
 import copy
 import logging
@@ -363,7 +364,7 @@ class PlotFlow:
                 linecolor10 = [9,46,8,4,6,2,7,3,42,48]
                 linecolor   = linecolor10[ind]
                 if stackmode:
-                    backstyle10 = [3004,3005,3006,3007,3013,3017,3022,3315,3481]
+                    backstyle10 = [3004,3005,3006,3007,3013,3017,3022,3315,3351,3481]
                     backstyle   = backstyle10[ind]
                     backcolor   = linecolor10[ind]
             else:
@@ -595,24 +596,33 @@ class PlotFlow:
                            ',endpoint=True)\n')
         outputPy.write('\n')
 
+
+        # Data
+        outputPy.write('    # Creating data sequence: middle of each bin\n')
+        outputPy.write('    xData = numpy.array([')
+        for bin in range(0,xnbin):
+            if bin!=0:
+                outputPy.write(',')
+            outputPy.write(str(histos[0].GetBinMean(bin)))
+        outputPy.write('])\n\n')
+        
         # Loop over datasets and histos
+        ntot = 0
         for ind in range(0,len(histos)):
+
+            # Ntot
+            ntot+=histos[ind].summary.integral
 
             # Creating a new histo
             histoname=histos[ind].name+'_'+str(ind)
-            outputPy.write('    # Creating a new histo: '+histoname+'\n')
-            outputPy.write('    '+histoname+'_data    = [')
-            for bin in range(0,xnbin):
-                if bin!=0:
-                    outputPy.write(',')
-                outputPy.write(str(histos[ind].GetBinMean(bin)))
-            outputPy.write(']\n')
-            outputPy.write('    '+histoname+'_weights = [')
+            outputPy.write('    # Creating weights for histo: '+histoname+'\n')
+            outputPy.write('    '+histoname+'_weights = numpy.array([')
             for bin in range(1,xnbin+1):
                 if bin!=1:
                     outputPy.write(',')
                 outputPy.write(str(histos[ind].summary.array[bin-1]*scales[ind]))
-            outputPy.write(']\n\n')
+            outputPy.write('])\n\n')
+
 
 
         # Canvas
@@ -627,10 +637,125 @@ class PlotFlow:
                        '),dpi='+str(dpi)+')\n')
         outputPy.write('    pad = fig.add_subplot(111)\n')
         outputPy.write('\n')
-        
+
         # Stack
         outputPy.write('    # Creating a new Stack\n')
-        outputPy.write('    pad.hist(x='+histos[0].name+'_'+str(0)+'_data,bins=xBinning,weights='+histos[0].name+'_'+str(0)+'_weights)\n')
+        for ind in range(len(histos)-1,-1,-1):
+            myweight = histos[ind].name+'_'+str(ind)+'_weights'
+            mytitle  = '"'+PlotFlow.NiceTitle(self.main.datasets[ind].title)+'"'
+
+            if not stackmode:
+                myweights=histos[ind].name+'_'+str(ind)+'_weights'
+            else:
+                myweights=''
+                for ind2 in range(0,ind+1):
+                    if ind2>=1:
+                        myweights+='+'
+                    myweights+=histos[ind2].name+'_'+str(ind2)+'_weights'
+
+            # Setting AUTO settings
+            if len(histos)==1:
+                linecolor1 = [9]
+                linecolor  = linecolor1[ind]
+                if stackmode:
+                    backstyle1 = [3004]
+                    backstyle  = backstyle1[ind]
+                    backcolor  = linecolor1[ind]
+            elif len(histos)==2:
+                linecolor2 = [9,46]
+                linecolor  = linecolor2[ind]
+                if stackmode:
+                    backstyle2 = [3004,3005]
+                    backstyle  = backstyle2[ind]
+                    backcolor  = linecolor2[ind]
+            elif len(histos)==3:
+                linecolor3 = [9,46,8]
+                linecolor  = linecolor3[ind]
+                if stackmode:
+                    backstyle3 = [3004,3005,3006]
+                    backstyle  = backstyle3[ind]
+                    backcolor  = linecolor3[ind]                    
+            elif len(histos)==4:
+                linecolor4 = [9,46,8,4]
+                linecolor  = linecolor4[ind]
+                if stackmode:
+                    backstyle4 = [3004,3005,3006,3007]
+                    backstyle  = backstyle4[ind]
+                    backcolor  = linecolor4[ind]
+            elif len(histos)==5:
+                linecolor5 = [9,46,8,4,6]
+                linecolor  = linecolor5[ind]
+                if stackmode:
+                    backstyle5 = [3004,3005,3006,3007,3013]
+                    backstyle  = backstyle5[ind]
+                    backcolor  = linecolor5[ind]
+            elif len(histos)==6:
+                linecolor6 = [9,46,8,4,6,2]
+                linecolor  = linecolor6[ind]
+                if stackmode:
+                    backstyle6 = [3004,3005,3006,3007,3013,3017]
+                    backstyle  = backstyle6[ind]
+                    backcolor  = linecolor6[ind]
+            elif len(histos)==7:
+                linecolor7 = [9,46,8,4,6,2,7]
+                linecolor  = linecolor7[ind]
+                if stackmode:
+                    backstyle7 = [3004,3005,3006,3007,3013,3017,3022]
+                    backstyle  = backstyle7[ind]
+                    backcolor  = linecolor7[ind]
+            elif len(histos)==8:
+                linecolor8 = [9,46,8,4,6,2,7,3]
+                linecolor  = linecolor8[ind]
+                if stackmode:
+                    backstyle8 = [3004,3005,3006,3007,3013,3017,3022,3315]
+                    backstyle  = backstyle8[ind]
+                    backcolor  = linecolor8[ind]
+            elif len(histos)==9:
+                linecolor9 = [9,46,8,4,6,2,7,3,42]
+                linecolor  = linecolor9[ind]
+                if stackmode:
+                    backstyle9 = [3004,3005,3006,3007,3013,3017,3022,3315,3351]
+                    backstyle  = backstyle9[ind]
+                    backcolor  = linecolor9[ind]
+            elif len(histos)==10:
+                linecolor10 = [9,46,8,4,6,2,7,3,42,48]
+                linecolor   = linecolor10[ind]
+                if stackmode:
+                    backstyle10 = [3004,3005,3006,3007,3013,3017,3022,3315,3351,3481]
+                    backstyle   = backstyle10[ind]
+                    backcolor   = linecolor10[ind]
+            else:
+                linecolor=self.color
+                self.color += 1
+
+            # lineStyle
+            linestyle=LineStyleType.convert2code(self.main.datasets[ind].linestyle)
+
+            # linewidth
+            linewidth=self.main.datasets[ind].linewidth
+
+            # background color
+            if self.main.datasets[ind].backcolor!=ColorType.AUTO:
+                backcolor=ColorType.convert2root( \
+                          self.main.datasets[ind].backcolor,\
+                          self.main.datasets[ind].backshade)
+
+            # background color  
+            if self.main.datasets[ind].backstyle!=BackStyleType.AUTO:
+                backstyle=BackStyleType.convert2code( \
+                          self.main.datasets[ind].backstyle)
+
+            mycolor  = '"'+madanalysis.enumeration.color_hex.color_hex[linecolor]+'"'
+
+            outputPy.write('    pad.hist('+\
+                               'x=xData, '+\
+                               'bins=xBinning, '+\
+                               'weights='+myweights+', '+\
+                               'histtype="step", '+\
+                               'color='+mycolor+', '+\
+                               'label='+mytitle+', '+\
+                               'bottom=None, '+\
+                               'cumulative=False, normed=False, align="mid", orientation="vertical")\n')
         outputPy.write('\n')
 
         # Label
@@ -667,10 +792,46 @@ class PlotFlow:
             axis_titleY = PlotFlow.NiceTitle(ref.titleY)
         outputPy.write('    plt.ylabel("'+axis_titleY+'",\\\n')
         outputPy.write('               fontsize=16,color="black")\n')
+        outputPy.write('\n')
 
+        # Bound y
+        outputPy.write('    # Boundary of y-axis\n')
+        myweights=''
+        if stackmode:
+            for ind in range(0,len(histos)):
+                if ind>=1:
+                    myweights+='+'
+                myweights+=histos[ind].name+'_'+str(ind)+'_weights'
+        else:
+            myweights='['
+            for ind in range(0,len(histos)):
+                if ind>=1:
+                    myweights+=','
+                myweights+=histos[ind].name+'_'+str(ind)+'_weights.max()'
+            myweights=']'
+        outputPy.write('    plt.gca().set_ylim(0,('+myweights+').max()*1.1)\n')
+
+        # Log
+        outputPy.write('    # Log/Linear scale\n')
+        logx='linear'
+        if ref.logX and ntot != 0:
+            logx='log'
+        logy='linear'
+        if ref.logY and ntot != 0:
+            logy='log'
+        outputPy.write('    plt.gca().set_xscale("'+logx+'")\n')
+        outputPy.write('    plt.gca().set_yscale("'+logy+'")\n')
+        outputPy.write('\n')
+        
         # Draw
         outputPy.write('    plt.show()\n')
         outputPy.write('\n')
+
+        # Legend
+        if len(histos)>1:
+            outputPy.write('    # Legend\n')
+            outputPy.write('    plt.legend()\n')
+            outputPy.write('\n')
                            
         # Producing the image
         outputPy.write('    # Saving the image\n')
@@ -679,9 +840,9 @@ class PlotFlow:
         outputPy.write('\n')
 
         # Call the function
-        outputPy.write('    # Running!\n')
-        outputPy.write("    if __name__ == '__main__':\n")
-        outputPy.write('        '+function_name+'()\n')
+        outputPy.write('# Running!\n')
+        outputPy.write("if __name__ == '__main__':\n")
+        outputPy.write('    '+function_name+'()\n')
 
         # Close the file
         try:
@@ -695,4 +856,47 @@ class PlotFlow:
 
 
 
+    def save():
+        # Data list
+        histo_list  = ''
+        weight_list = ''
+        color_list  = ''
+        title_list  = ''
+        if len(histos)>1:
+            histo_list  += '['
+            weight_list += '['
+            color_list  += '['
+            title_list  += '['
+        for ind in range(0,len(histos)):
+            if ind>=1:
+                histo_list  += ','
+                weight_list += ','
+                color_list  += ','
+                title_list  += ','
+            histo_list  += histos[ind].name+'_'+str(ind)+'_data'
+            weight_list += histos[ind].name+'_'+str(ind)+'_weights'
+            if ind%2==0:
+                color_list  += '"red"'
+            else:
+                color_list  += '"blue"'
+            nicetitle=PlotFlow.NiceTitle(self.main.datasets[ind].title)
+            title_list += '"'+nicetitle+'"'
+        if len(histos)>1:
+            histo_list  += ']'
+            weight_list += ']'
+            color_list  += ']'
+            title_list  += ']'
 
+        # Stack
+        outputPy.write('    # Creating a new Stack\n')
+        outputPy.write('    pad.hist('+\
+                           'x='+histo_list+','+\
+                           'bins=xBinning,'+\
+                           'weights='+weight_list+','+\
+                           'histtype="step",'+\
+                           'color='+color_list+','+\
+#                           'stacked='+stackmode_string+','+\
+                           'label='+title_list+','+\
+                           'cumulative=False,normed=False)\n')
+        outputPy.write('\n')
+    
