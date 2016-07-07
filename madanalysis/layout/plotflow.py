@@ -574,7 +574,8 @@ class PlotFlow:
         outputPy.write('    import numpy\n')
         outputPy.write('    import matplotlib\n')
 #        outputPy.write("    matplotlib.use('Agg')\n")
-        outputPy.write('    import matplotlib.pyplot as plt\n')
+        outputPy.write('    import matplotlib.pyplot   as plt\n')
+        outputPy.write('    import matplotlib.gridspec as gridspec\n')
         outputPy.write('\n')
 
         # Matplotlib & numpy version
@@ -639,10 +640,16 @@ class PlotFlow:
         widthx=700
         if legendmode:
             widthx=1000
-        outputPy.write('    fig = plt.figure(figsize=('+\
+        outputPy.write('    fig   = plt.figure(figsize=('+\
                        str(widthx/dpi)+','+str(height/dpi)+\
                        '),dpi='+str(dpi)+')\n')
-        outputPy.write('    pad = fig.add_subplot(111)\n')
+        if not legendmode:
+            outputPy.write('    frame = gridspec.GridSpec(1,1)\n')
+        else:
+            outputPy.write('    frame = gridspec.GridSpec(1,1,right=0.7)\n')
+        # subplot argument: nrows, ncols, plot_number
+        # outputPy.write('    pad = fig.add_subplot(111)\n')
+        outputPy.write('    pad   = fig.add_subplot(frame[0])\n')
         outputPy.write('\n')
 
         # Stack
@@ -650,6 +657,7 @@ class PlotFlow:
         for ind in range(len(histos)-1,-1,-1):
             myweight = histos[ind].name+'_'+str(ind)+'_weights'
             mytitle  = '"'+PlotFlow.NiceTitle(self.main.datasets[ind].title)+'"'
+            mytitle  = mytitle.replace('_','\_')
 
             if not stackmode:
                 myweights=histos[ind].name+'_'+str(ind)+'_weights'
@@ -763,9 +771,13 @@ class PlotFlow:
             mybackcolor  = '"'+madanalysis.enumeration.color_hex.color_hex[backcolor]+'"'
 
             filledmode='"stepfilled"'
+            rWidth=1.
             if backcolor==0: #invisible
                 filledmode='"step"'
                 mybackcolor = 'None'
+#            if frequencyhisto:
+#                filledmode='"bar"'
+#                rWidth=0.8
             mylinewidth  = self.main.datasets[ind].linewidth
             mylinestyle  = LineStyleType.convert2matplotlib(self.main.datasets[ind].linestyle)
 
@@ -774,12 +786,13 @@ class PlotFlow:
                                'x=xData, '+\
                                'bins=xBinning, '+\
                                'weights='+myweights+',\\\n'+\
-                               '             histtype='+filledmode+', '+\
-                               'color='+mybackcolor+', '+\
+                               '             label='+mytitle+', '+\
+                               'histtype='+filledmode+', '+\
+                               'rwidth='+str(rWidth)+',\\\n'+\
+                               '             color='+mybackcolor+', '+\
                                'edgecolor='+mylinecolor+', '+\
                                'linewidth='+str(mylinewidth)+', '+\
                                'linestyle='+mylinestyle+',\\\n'+\
-                               '             label='+mytitle+',\\\n'+\
                                '             bottom=None, '+\
                                'cumulative=False, normed=False, align="mid", orientation="vertical")\n\n')
         outputPy.write('\n')
@@ -849,6 +862,18 @@ class PlotFlow:
         outputPy.write('    plt.gca().set_xscale("'+logx+'")\n')
         outputPy.write('    plt.gca().set_yscale("'+logy+'")\n')
         outputPy.write('\n')
+
+        # Labels
+        if frequencyhisto:
+            outputPy.write('    # Labels for x-Axis\n')
+            outputPy.write('    xLabels = numpy.array([')
+            for bin in range(0,xnbin):
+                if bin>=1:
+                    outputPy.write(',')
+                outputPy.write('"'+str(histos[0].stringlabels[bin]).replace('_','\_')+'"')
+            outputPy.write('])\n')
+            outputPy.write('    plt.xticks(xData, xLabels, rotation="vertical")\n')
+            outputPy.write('\n')
         
         # Draw
         outputPy.write('    # Draw\n')
@@ -856,9 +881,25 @@ class PlotFlow:
         outputPy.write('\n')
 
         # Legend
-        if len(histos)>1:
+        if legendmode:
+
+            # Reminder for 'loc'
+            # -'best'         : 0, (only implemented for axes legends)
+            # -'upper right'  : 1,
+            # -'upper left'   : 2,
+            # -'lower left'   : 3,
+            # -'lower right'  : 4,
+            # -'right'        : 5,
+            # -'center left'  : 6,
+            # -'center right' : 7,
+            # -'lower center' : 8,
+            # -'upper center' : 9,
+            # -'center'       : 10,
+
+            
             outputPy.write('    # Legend\n')
-            outputPy.write('    plt.legend()\n')
+            outputPy.write('    plt.legend(bbox_to_anchor=(1.05,1), loc=2,'+\
+                                ' borderaxespad=0.)\n')
             outputPy.write('\n')
                            
         # Producing the image
@@ -881,50 +922,3 @@ class PlotFlow:
 
         # Ok
         return True
-
-
-
-    def save():
-        # Data list
-        histo_list  = ''
-        weight_list = ''
-        color_list  = ''
-        title_list  = ''
-        if len(histos)>1:
-            histo_list  += '['
-            weight_list += '['
-            color_list  += '['
-            title_list  += '['
-        for ind in range(0,len(histos)):
-            if ind>=1:
-                histo_list  += ','
-                weight_list += ','
-                color_list  += ','
-                title_list  += ','
-            histo_list  += histos[ind].name+'_'+str(ind)+'_data'
-            weight_list += histos[ind].name+'_'+str(ind)+'_weights'
-            if ind%2==0:
-                color_list  += '"red"'
-            else:
-                color_list  += '"blue"'
-            nicetitle=PlotFlow.NiceTitle(self.main.datasets[ind].title)
-            title_list += '"'+nicetitle+'"'
-        if len(histos)>1:
-            histo_list  += ']'
-            weight_list += ']'
-            color_list  += ']'
-            title_list  += ']'
-
-        # Stack
-        outputPy.write('    # Creating a new Stack\n')
-        outputPy.write('    pad.hist('+\
-                           'x='+histo_list+','+\
-                           'bins=xBinning,'+\
-                           'weights='+weight_list+','+\
-                           'histtype="step",'+\
-                           'color='+color_list+','+\
-#                           'stacked='+stackmode_string+','+\
-                           'label='+title_list+','+\
-                           'cumulative=False,normed=False)\n')
-        outputPy.write('\n')
-    

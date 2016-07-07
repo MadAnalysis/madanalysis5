@@ -160,7 +160,7 @@ class Histogram:
     def GetBinMean(self,bin):
 
         # Special case
-        if bin<=0:
+        if bin<0:
             return self.xmin
 
         if bin>=self.nbins:
