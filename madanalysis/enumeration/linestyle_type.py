@@ -23,10 +23,10 @@
 
 
 class LineStyleType(object):
-	values = { 'SOLID'      : [1,'solid'],\
-		   'DASHED'     : [2,'dashed'],\
-		   'DOTTED'     : [3,'dotted'],\
-		   'DASHDOTTED' : [4,'dash-dotted'] }
+	values = { 'SOLID'      : [1,'solid','"solid"'],\
+		   'DASHED'     : [2,'dashed','"dashed"'],\
+		   'DOTTED'     : [3,'dotted','"dotted"'],\
+		   'DASHDOTTED' : [4,'dash-dotted','"dashdot"'] }
 	
         class __metaclass__(type):
 
@@ -40,3 +40,7 @@ class LineStyleType(object):
 		def convert2string(self,color):
 			name = self.values.keys()[color]
 			return self.values[name][1]
+
+		def convert2matplotlib(self,style):
+			name = self.values.keys()[style]
+			return self.values[name][2]

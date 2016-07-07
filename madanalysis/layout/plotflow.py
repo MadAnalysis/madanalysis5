@@ -296,6 +296,13 @@ class PlotFlow:
                           self.main.datasets[ind].linecolor,\
                           self.main.datasets[ind].lineshade)
 
+            # reset
+            linecolor=0
+            linestyle=0
+            backcolor=0
+            backstyle=0
+            linewidth=1
+            
             # Setting AUTO settings
             if len(histos)==1:
                 linecolor1 = [9]
@@ -653,6 +660,13 @@ class PlotFlow:
                         myweights+='+'
                     myweights+=histos[ind2].name+'_'+str(ind2)+'_weights'
 
+            # reset
+            linecolor=0
+            linestyle=0
+            backcolor=0
+            backstyle=0
+            linewidth=1
+
             # Setting AUTO settings
             if len(histos)==1:
                 linecolor1 = [9]
@@ -740,22 +754,34 @@ class PlotFlow:
                           self.main.datasets[ind].backcolor,\
                           self.main.datasets[ind].backshade)
 
-            # background color  
+            # background style
             if self.main.datasets[ind].backstyle!=BackStyleType.AUTO:
-                backstyle=BackStyleType.convert2code( \
+                backstyle=BackStyleType.convert2matplotlib( \
                           self.main.datasets[ind].backstyle)
 
-            mycolor  = '"'+madanalysis.enumeration.color_hex.color_hex[linecolor]+'"'
+            mylinecolor  = '"'+madanalysis.enumeration.color_hex.color_hex[linecolor]+'"'
+            mybackcolor  = '"'+madanalysis.enumeration.color_hex.color_hex[backcolor]+'"'
 
+            filledmode='"stepfilled"'
+            if backcolor==0: #invisible
+                filledmode='"step"'
+                mybackcolor = 'None'
+            mylinewidth  = self.main.datasets[ind].linewidth
+            mylinestyle  = LineStyleType.convert2matplotlib(self.main.datasets[ind].linestyle)
+
+                
             outputPy.write('    pad.hist('+\
                                'x=xData, '+\
                                'bins=xBinning, '+\
-                               'weights='+myweights+', '+\
-                               'histtype="step", '+\
-                               'color='+mycolor+', '+\
-                               'label='+mytitle+', '+\
-                               'bottom=None, '+\
-                               'cumulative=False, normed=False, align="mid", orientation="vertical")\n')
+                               'weights='+myweights+',\\\n'+\
+                               '             histtype='+filledmode+', '+\
+                               'color='+mybackcolor+', '+\
+                               'edgecolor='+mylinecolor+', '+\
+                               'linewidth='+str(mylinewidth)+', '+\
+                               'linestyle='+mylinestyle+',\\\n'+\
+                               '             label='+mytitle+',\\\n'+\
+                               '             bottom=None, '+\
+                               'cumulative=False, normed=False, align="mid", orientation="vertical")\n\n')
         outputPy.write('\n')
 
         # Label
@@ -803,13 +829,14 @@ class PlotFlow:
                     myweights+='+'
                 myweights+=histos[ind].name+'_'+str(ind)+'_weights'
         else:
-            myweights='['
+            myweights='numpy.array(['
             for ind in range(0,len(histos)):
                 if ind>=1:
                     myweights+=','
                 myweights+=histos[ind].name+'_'+str(ind)+'_weights.max()'
-            myweights=']'
+            myweights+='])'
         outputPy.write('    plt.gca().set_ylim(0,('+myweights+').max()*1.1)\n')
+        outputPy.write('\n')
 
         # Log
         outputPy.write('    # Log/Linear scale\n')
@@ -824,6 +851,7 @@ class PlotFlow:
         outputPy.write('\n')
         
         # Draw
+        outputPy.write('    # Draw\n')
         outputPy.write('    plt.show()\n')
         outputPy.write('\n')
 
