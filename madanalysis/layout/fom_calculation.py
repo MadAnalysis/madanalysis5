@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from madanalysis.layout.measure               import Measure
 from math import sqrt
 
 
