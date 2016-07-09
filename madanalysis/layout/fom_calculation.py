@@ -32,7 +32,7 @@ class FomCalculation:
         self.formula = main.fom.formula
         self.x       = main.fom.x
 
-    def Compute(self,S,eS,B,eB):
+    def Compute(self,S,ES,B,EB):
 
         # Initialization
         value = Measure()
