@@ -156,7 +156,7 @@ def WriteJobExecute2Nbody(file,iabs,icut,combi1,combi2,main,tagName,tagIndex,con
     if len(combi1)==1 and combi1.ALL:
         if obs.combination in [CombinationType.SUMSCALAR,\
                                CombinationType.DIFFSCALAR]:
-            file.write('    Double_t value1=0;\n')
+            file.write('    MAdouble64 value1=0;\n')
         else:
             file.write('    ParticleBaseFormat q1;\n')
     
@@ -164,7 +164,7 @@ def WriteJobExecute2Nbody(file,iabs,icut,combi1,combi2,main,tagName,tagIndex,con
     if len(combi2)==1 and combi2.ALL:
         if obs.combination in [CombinationType.SUMSCALAR,\
                                CombinationType.DIFFSCALAR]:
-            file.write('    Double_t value2=0;\n')
+            file.write('    MAdouble64 value2=0;\n')
         else:
             file.write('    ParticleBaseFormat q2;\n')
 
@@ -315,7 +315,7 @@ def WriteJobExecuteNbody(file,iabs,icut,combination,main,tagName,tagIndex,condit
     if len(combination)==1 and combination.ALL:
         if obs.combination in [CombinationType.SUMSCALAR,\
                                CombinationType.DIFFSCALAR]:
-            file.write('    Double_t value=0;\n')
+            file.write('    MAdouble64 value=0;\n')
         else:
             file.write('    ParticleBaseFormat q;\n')
 
