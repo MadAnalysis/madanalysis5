@@ -98,5 +98,5 @@ class FomConfiguration:
         return table
 
     def getFormula(self):
-        FomConfiguration.allformula[self.formula]
+        return FomConfiguration.allformula[self.formula]
 
