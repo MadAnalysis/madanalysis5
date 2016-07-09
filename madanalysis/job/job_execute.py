@@ -346,7 +346,7 @@ def WriteContainer(file,main,part_list):
                 WriteFillWithMHTContainerMC(item[0],file,item[1],item[2])
 
         # Ordinary particles
-        file.write('    for (UInt_t i=0;i<event.mc()->particles().size();i++)\n')
+        file.write('    for (MAuint32 i=0;i<event.mc()->particles().size();i++)\n')
         file.write('    {\n')
         for item in part_list:
             if item[0].particle.Find(99) or item[0].particle.Find(100):
@@ -360,7 +360,7 @@ def WriteContainer(file,main,part_list):
     else:
 
         # Filling with jets
-        file.write('    for (UInt_t i=0;i<event.rec()->jets().size();i++)\n')
+        file.write('    for (MAuint32 i=0;i<event.rec()->jets().size();i++)\n')
         file.write('    {\n')
         for item in part_list:
             WriteFillWithJetContainer(item[0],file,item[1],item[2])
@@ -368,7 +368,7 @@ def WriteContainer(file,main,part_list):
         InstanceName.Clear()
 
         # Filling with photons
-        file.write('    for (UInt_t i=0;i<event.rec()->photons().size();i++)\n')
+        file.write('    for (MAuint32 i=0;i<event.rec()->photons().size();i++)\n')
         file.write('    {\n')
         for item in part_list:
             WriteFillWithPhotonContainer(item[0],file,item[1],item[2])
@@ -376,7 +376,7 @@ def WriteContainer(file,main,part_list):
         InstanceName.Clear()
 
         # Filling with electrons
-        file.write('    for (UInt_t i=0;i<event.rec()->electrons().size();i++)\n')
+        file.write('    for (MAuint32 i=0;i<event.rec()->electrons().size();i++)\n')
         file.write('    {\n')
         for item in part_list:
             WriteFillWithElectronContainer(item[0],file,item[1],item[2])
@@ -384,7 +384,7 @@ def WriteContainer(file,main,part_list):
         InstanceName.Clear()
 
         # Filling with muons
-        file.write('    for (UInt_t i=0;i<event.rec()->muons().size();i++)\n')
+        file.write('    for (MAuint32 i=0;i<event.rec()->muons().size();i++)\n')
         file.write('    {\n')
         for item in part_list:
             WriteFillWithMuonContainer(item[0],file,item[1],item[2])
@@ -392,7 +392,7 @@ def WriteContainer(file,main,part_list):
         InstanceName.Clear()
 
         # Filling with taus
-        file.write('    for (UInt_t i=0;i<event.rec()->taus().size();i++)\n')
+        file.write('    for (MAuint32 i=0;i<event.rec()->taus().size();i++)\n')
         file.write('    {\n')
         for item in part_list:
             WriteFillWithTauContainer(item[0],file,item[1],item[2])

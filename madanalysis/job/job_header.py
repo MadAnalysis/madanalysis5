@@ -73,9 +73,9 @@ def WriteCore(file,main,part_list):
             # Histogram case
             if main.selection.table[ind].__class__.__name__=="Histogram":
                 if main.selection.table[ind].observable.name=="NPID" :
-                    file.write('  HistoFrequency<Int_t>* H'+str(Nhistos)+'_;\n')
+                    file.write('  HistoFrequency<MAint32>* H'+str(Nhistos)+'_;\n')
                 elif main.selection.table[ind].observable.name=="NAPID" :
-                    file.write('  HistoFrequency<UInt_t>* H'+str(Nhistos)+'_;\n')
+                    file.write('  HistoFrequency<MAuint32>* H'+str(Nhistos)+'_;\n')
                 elif main.selection.table[ind].logX:
                     file.write('  HistoLogX* H'+str(Nhistos)+'_;\n');
                 else:

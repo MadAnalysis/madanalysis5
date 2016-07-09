@@ -73,7 +73,7 @@ def WriteEventCut(file,main,iabs,icut):
 
     # Initializing tag
     tagName='filter'
-    file.write('  std::vector<Bool_t> '+tagName+'('+str(len(conditions))+',false);\n')
+    file.write('  std::vector<MAbool> '+tagName+'('+str(len(conditions))+',false);\n')
 
     # Loop over conditions
     for ind in range(len(conditions)):
@@ -82,7 +82,7 @@ def WriteEventCut(file,main,iabs,icut):
         file.write('  }\n')
 
     # Writing final tag
-    file.write('  Bool_t ' + tagName + '_global = ' +\
+    file.write('  MAbool ' + tagName + '_global = ' +\
                GetFinalCondition(main.selection[iabs].conditions,0,tagName)[0]+';\n')
 
     # Event Cut ?
@@ -363,7 +363,7 @@ def WriteJobLoop(file,iabs,icut,combination,redundancies,main,iterator='ind'):
                                            item.name+cut.rank+cut.statuscode))
 
     # Declaring indicator
-    file.write('    UInt_t '+iterator+'['+str(len(combination))+'];\n')
+    file.write('    MAuint32 '+iterator+'['+str(len(combination))+'];\n')
 
     # Rendundancies case
     if redundancies:
@@ -409,13 +409,13 @@ def WriteJobSameCombi(file,iabs,icut,combination,redundancies,main,iterator='ind
         file.write('    std::set<const MCParticleFormat*> mycombi;\n')
     else:
         file.write('    std::set<const RecParticleFormat*> mycombi;\n');
-    file.write('    for (UInt_t i=0;i<'+str(len(combination))+';i++)\n')
+    file.write('    for (MAuint32 i=0;i<'+str(len(combination))+';i++)\n')
     file.write('    {\n')
     for i in range(0,len(combination)):
         file.write('      mycombi.insert('+containers[i]+'['+iterator+'[i]]);\n')
     file.write('    }\n')
-    file.write('    Bool_t matched=false;\n')
-    file.write('    for (UInt_t i=0;i<combis.size();i++)\n')
+    file.write('    MAbool matched=false;\n')
+    file.write('    for (MAuint32 i=0;i<combis.size();i++)\n')
     file.write('      if (combis[i]==mycombi) {matched=true; break;}\n')
     file.write('    if (matched) continue;\n')
     file.write('    else combis.push_back(mycombi);\n\n')

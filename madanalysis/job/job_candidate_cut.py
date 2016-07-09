@@ -103,12 +103,12 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
         file.write('> toRemove;\n')    
 
         # loop over particles
-        file.write('    for (UInt_t muf=0;muf<'+container+'.size();muf++)\n')
+        file.write('    for (MAuint32 muf=0;muf<'+container+'.size();muf++)\n')
         file.write('    {\n')
 
         # Initializing tag
         tagName='filter'
-        file.write('      std::vector<Bool_t> '+tagName+'('+str(len(conditions))+',false);\n')
+        file.write('      std::vector<MAbool> '+tagName+'('+str(len(conditions))+',false);\n')
 
         # Loop over conditions
         for ind in range(len(conditions)):
@@ -118,7 +118,7 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
             file.write('      }\n')
 
         # Writing final tag
-        file.write('      Bool_t ' + tagName + '_global = ' +\
+        file.write('      MAbool ' + tagName + '_global = ' +\
                    GetFinalCondition(main.selection[iabs].conditions,0,tagName)[0]+';\n')
         
         # Add candidate ?
@@ -173,7 +173,7 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
             file.write('    for (unsigned int i=0;i<'+container2+\
                        '.size();i++)\n')
             file.write('    {\n')
-            file.write('      Bool_t reject=false;\n')
+            file.write('      MAbool reject=false;\n')
             file.write('      for (unsigned int j=0;j<toRemove.size();j++)\n')
             file.write('      {\n')
             file.write('        if (toRemove[j]=='+container2+'[i]) {reject=true;break;}\n')
@@ -393,11 +393,11 @@ def WriteJobLoop(file,iabs,icut,combination,redundancies,main,iterator='ind'):
                                            item.name+cut.rank+cut.statuscode))
 
     if len(combination)==1:
-        file.write('    for (UInt_t '+iterator+'=0;'+iterator+'<' + containers[0] + '.size();'+iterator+'++)\n')
+        file.write('    for (MAuint32 '+iterator+'=0;'+iterator+'<' + containers[0] + '.size();'+iterator+'++)\n')
         file.write('    {\n')
     else:
 
-        file.write('    UInt_t '+iterator+'['+str(len(combination))+'];\n')
+        file.write('    MAuint32 '+iterator+'['+str(len(combination))+'];\n')
         if redundancies:
             if main.mode in [MA5RunningType.PARTON,MA5RunningType.HADRON]:
                 file.write('    std::vector<std::set<const MCParticleFormat*> > combis;\n')
@@ -438,13 +438,13 @@ def WriteJobSameCombi(file,iabs,icut,combination,redundancies,main,iterator='ind
         file.write('    std::set<const MCParticleFormat*> mycombi;\n')
     else:
         file.write('    std::set<const RecParticleFormat*> mycombi;\n')
-    file.write('    for (UInt_t i=0;i<'+str(len(combination))+';i++)\n')
+    file.write('    for (MAuint32 i=0;i<'+str(len(combination))+';i++)\n')
     file.write('    {\n')
     for i in range(0,len(combination)):
         file.write('      mycombi.insert('+containers[i]+'['+iterator+'[i]]);\n')
     file.write('    }\n')
-    file.write('    Bool_t matched=false;\n')
-    file.write('    for (UInt_t i=0;i<combis.size();i++)\n')
+    file.write('    MAbool matched=false;\n')
+    file.write('    for (MAuint32 i=0;i<combis.size();i++)\n')
     file.write('      if (combis[i]==mycombi) {matched=true; break;}\n')
     file.write('    if (matched) continue;\n')
     file.write('    else combis.push_back(mycombi);\n\n')

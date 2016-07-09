@@ -479,11 +479,11 @@ def WriteJobInitialize(file,main):
 
             # NPID
             if item.observable.name=="NPID" :
-                file.write('HistoFrequency<Int_t>("selection_'+str(ihisto)+'");\n')
+                file.write('HistoFrequency<MAint32>("selection_'+str(ihisto)+'");\n')
 
             # NAPID    
             elif item.observable.name=="NAPID" :
-                file.write('HistoFrequency<UInt_t>("selection_'+str(ihisto)+'");\n')
+                file.write('HistoFrequency<MAuint32>("selection_'+str(ihisto)+'");\n')
 
             # Histo with LogX
             elif item.logX:
