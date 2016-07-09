@@ -96,3 +96,7 @@ class FomConfiguration:
         if self.IsX() and variable=='x':
             table = ['0.']
         return table
+
+    def getFormula(self):
+        FomConfiguration.allformula[self.formula]
+
