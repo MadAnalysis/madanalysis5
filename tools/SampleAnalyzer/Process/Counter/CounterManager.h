@@ -30,9 +30,6 @@
 #include <ostream>
 #include <vector>
 
-// ROOT headers
-#include <TFile.h>
-
 // SampleAnalyzer
 #include "SampleAnalyzer/Process/Counter/Counter.h"
 #include "SampleAnalyzer/Process/Writer/SAFWriter.h"
@@ -90,7 +87,7 @@ class CounterManager
   { return counters_[index];}
 
   /// Incrementing the initial number of events
-  void IncrementNInitial(Float_t weight=1.0)
+  void IncrementNInitial(MAfloat32 weight=1.0)
   { initial_.Increment(weight); }
 
   /// Incrementing the initial number of events
@@ -103,7 +100,7 @@ class CounterManager
   void Write_TextFormat(SAFWriter& output) const;
 
   /// Write the counters in a ROOT file
-  void Write_RootFormat(TFile* output) const;
+  //  void Write_RootFormat(TFile* output) const;
 
   /// Finalizing
   void Finalize()

@@ -22,14 +22,23 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// STL headers
+#include <fstream>
+
+// SampleAnalyzer headers
+#include "SampleAnalyzer/Commons/Service/DisplayService.h"
 #include "SampleAnalyzer/Interfaces/delphes/DetectorDelphes.h"
 #include "SampleAnalyzer/Interfaces/delphes/DelphesMemoryInterface.h"
 
-#include <fstream>
+// ROOT headers
 #include <TROOT.h>
+#include <TObjArray.h>
+#include <TFile.h>
+#include <TDatabasePDG.h>
+#include <TParticlePDG.h>
+#include <TFolder.h>
 
-
-//Delphes header
+// Delphes headers
 #include "external/ExRootAnalysis/ExRootConfReader.h"
 #include "external/ExRootAnalysis/ExRootTreeWriter.h"
 #include "external/ExRootAnalysis/ExRootTreeBranch.h"
@@ -37,8 +46,6 @@
 #include "classes/DelphesFactory.h"
 #include "modules/Delphes.h"
 
-//SampleAnalyzer header
-#include "SampleAnalyzer/Commons/Service/DisplayService.h"
 
 
 using namespace MA5;

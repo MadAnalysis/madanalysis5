@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -29,8 +29,8 @@
 #include <iostream>
 #include <fstream>
 
-// ROOT headers
-#include <Rtypes.h> 
+// SampleAnalyzer header
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 
 
 namespace MA5
@@ -51,12 +51,12 @@ class gz_streambuf : public std::streambuf
  private:
 
   /// size of the data buffer
-  static const int bufferSize = 47+256;    
+  static const MAint32 bufferSize = 47+256;    
 
   gz_file* file;               // file handle for compressed file
   char     buffer[bufferSize]; // data buffer
   char     opened;             // open/close state of stream
-  int      mode;               // I/O mode
+  MAint32  mode;               // I/O mode
 
 
   // -------------------------------------------------------------
@@ -65,7 +65,7 @@ class gz_streambuf : public std::streambuf
  private :
 
   /// Flush the buffer
-  int flush_buffer();
+  MAint32 flush_buffer();
 
  public:
 
@@ -76,28 +76,26 @@ class gz_streambuf : public std::streambuf
   ~gz_streambuf();
 
   /// Is opened
-  int is_open() { return opened; }
+  MAint32 is_open() { return opened; }
 
   /// Opening the gzip file
-  gz_streambuf* open(const char* name, int open_mode);
+  gz_streambuf* open(const char* name, MAint32 open_mode);
 
   /// Closing the file
   gz_streambuf* close();
 
     
   /// Overflow
-  virtual int overflow(int c = EOF);
+  virtual MAint32 overflow(MAint32 c = EOF);
 
   /// Underflow
-  virtual int underflow();
+  virtual MAint32 underflow();
 
   /// Synchronize input buffer
-  virtual int sync();
+  virtual MAint32 sync();
 
   /// get position of the cursor in the file
-  virtual Long64_t tellg();
-
-
+  virtual MAint64 tellg();
 
 };
 
@@ -125,7 +123,7 @@ class gz_streambase : virtual public std::ios
   { init(&buf); }
 
   /// Constructor with arguments
-  gz_streambase( const char* name, int open_mode)
+  gz_streambase( const char* name, MAint32 open_mode)
   {
     init( &buf);
     open( name, open_mode);
@@ -136,7 +134,7 @@ class gz_streambase : virtual public std::ios
   { buf.close(); }
 
   /// Open a gzip file
-  void open( const char* name, int open_mode)
+  void open( const char* name, MAint32 open_mode)
   {
     if (!buf.open( name, open_mode))
         clear( rdstate() | std::ios::badbit);

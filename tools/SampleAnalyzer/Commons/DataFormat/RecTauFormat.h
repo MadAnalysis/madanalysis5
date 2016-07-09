@@ -63,9 +63,9 @@ class RecTauFormat : public RecParticleFormat
   // -------------------------------------------------------------
  protected:
 
-  Bool_t charge_;    /// charge of the particle 0 = -1, 1 = +1
-  UShort_t ntracks_; /// number of tracks
-  Int_t DecayMode_; /// Decay mode :  1 = Tau --> e nu nu
+  MAbool charge_;    /// charge of the particle 0 = -1, 1 = +1
+  MAuint16 ntracks_; /// number of tracks
+  MAint32 DecayMode_; /// Decay mode :  1 = Tau --> e nu nu
                     ///               2 = Tau --> mu nu nu
                     ///               3 = Tau --> K nu
                     ///               4 = Tau --> K* nu
@@ -109,23 +109,23 @@ class RecTauFormat : public RecParticleFormat
   { if (charge_) return +1; else return -1; }
 
   /// Mutator to the electric charge
-  void setCharge(Float_t charge )
+  void setCharge(MAfloat32 charge )
   { if (charge>0) charge_=true; else charge_=false; }
 
   /// Accessor to the number of tracks
-  const UShort_t ntracks() const 
+  const MAuint16 ntracks() const 
   { return ntracks_; }
 
   /// Mutator to the number of tracks
-  void setNtracks(UShort_t ntracks)
+  void setNtracks(MAuint16 ntracks)
   { ntracks_=ntracks; }
 
   /// Accessor to the decay mode
-  const Int_t DecayMode() const
+  const MAint32 DecayMode() const
   { return DecayMode_; }
 
   /// Mutator to the decay mode
-  void setDecayMode(Int_t mode)
+  void setDecayMode(MAint32 mode)
   { DecayMode_=mode; }
 };
 

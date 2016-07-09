@@ -59,17 +59,17 @@ class STDHEPreader : public ReaderTextBase
  protected:
 
   // temporary data format
-  Int_t nevhept_;
-  Int_t nevhept_before_;
-  Int_t nhept_;
-  Bool_t firstevent;
+  MAint32 nevhept_;
+  MAint32 nevhept_before_;
+  MAint32 nhept_;
+  MAbool firstevent;
 
-  std::vector<Int_t>    isthept_;
-  std::vector<Int_t>    idhept_;
-  std::vector<Int_t>    jmohept_;
-  std::vector<Int_t>    jdahept_;
-  std::vector<Double_t> phept_;
-  std::vector<Double_t> vhept_;
+  std::vector<MAint32>    isthept_;
+  std::vector<MAint32>    idhept_;
+  std::vector<MAint32>    jmohept_;
+  std::vector<MAint32>    jdahept_;
+  std::vector<MAfloat64> phept_;
+  std::vector<MAfloat64> vhept_;
 
   // data related to the format
   STDHEPversion version_;

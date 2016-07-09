@@ -126,6 +126,7 @@ void Histo::Write_TextFormatBody(std::ostream* output)
 
 
 /// Write the plot in a ROOT file
+/*
 void Histo::Write_RootFormat(std::pair<TH1F*,TH1F*>& histo)
 {
   // Creating ROOT histograms
@@ -145,7 +146,7 @@ void Histo::Write_RootFormat(std::pair<TH1F*,TH1F*>& histo)
 
   // Filling statistics for histo with positive weight
   histo.first  -> SetEntries(nentries_.first);
-  Double_t stats[4];
+  MAfloat64 stats[4];
   stats[0]=sum_w_.first;
   stats[1]=sum_ww_.first;
   stats[2]=sum_xw_.first;
@@ -160,3 +161,4 @@ void Histo::Write_RootFormat(std::pair<TH1F*,TH1F*>& histo)
   histo.second -> PutStats(stats);
 }
 
+*/

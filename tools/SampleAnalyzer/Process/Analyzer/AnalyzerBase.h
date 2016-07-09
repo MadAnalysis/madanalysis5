@@ -44,21 +44,7 @@
 #include <vector>
 #include <map>
 
-// ROOT headers
-#include <TTree.h>
-#include <TStyle.h>
-#include <TLine.h>
-#include <TLegend.h>
-#include <TFile.h>
-#include <TROOT.h>
-#include <Rtypes.h>
-#include <TCanvas.h>
-#include <TH1F.h>
-#include <TH2F.h>
-#include <TH1D.h>
-#include <TH2D.h>
-#include <TVector.h>
-#include <TClonesArray.h>
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 
 
 // initializing MACRO 

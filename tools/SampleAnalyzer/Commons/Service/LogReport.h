@@ -38,8 +38,7 @@
 #include "SampleAnalyzer/Commons/Service/LogMsgValue.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
-// ROOT headers
-#include <Rtypes.h> 
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 
 
 namespace MA5
@@ -70,13 +69,13 @@ class LogReport
   MsgCollection MsgTable_;
 
   /// Total number of occurences
-  UInt_t GeneralCounter_;
+  MAuint32 GeneralCounter_;
 
   /// Threshold applied on the total number of occurences
-  Int_t GlobalThreshold_;
+  MAint32 GlobalThreshold_;
 
   /// Threshold applied on the number of a message occurence
-  Int_t MsgThreshold_;
+  MAint32 MsgThreshold_;
 
 
   // -------------------------------------------------------------
@@ -111,19 +110,19 @@ class LogReport
   { Name_=Name; }
 
   /// Accessor to the global threshold
-  Int_t GetGlobalThreshold() const
+  MAint32 GetGlobalThreshold() const
   { return GlobalThreshold_; }
 
   /// Mutator related to the global threshold
-  void SetGlobalThreshold(const Int_t& value)
+  void SetGlobalThreshold(const MAint32& value)
   { GlobalThreshold_=value; }
 
   /// Accessor to the message threshold
-  Int_t GetMsgThreshold() const
+  MAint32 GetMsgThreshold() const
   { return MsgThreshold_; }
 
   /// Mutator related to the message threshold 
-  void SetMsgThreshold(const Int_t& value)
+  void SetMsgThreshold(const MAint32& value)
   { MsgThreshold_=value; }
 
   /// Getting an iterator to an entry in the report table
@@ -146,8 +145,8 @@ class LogReport
   }
 
   /// Adding an occurence in the report table
-  Bool_t Add(const std::string& filename, 
-             const UInt_t& line, 
+  MAbool Add(const std::string& filename, 
+             const MAuint32& line, 
              const std::string& msg,
              const std::string& function)
   {
@@ -165,8 +164,8 @@ class LogReport
     if (iter->second.GetFunction()=="") { iter->second.SetFunction(function); }
 
     // Veto for display ?
-    if (static_cast<Int_t>(GeneralCounter_)>GlobalThreshold_ || 
-        static_cast<Int_t>(iter->second.GetCounter())>MsgThreshold_) return false;
+    if (static_cast<MAint32>(GeneralCounter_)>GlobalThreshold_ || 
+        static_cast<MAint32>(iter->second.GetCounter())>MsgThreshold_) return false;
     else return true;
   } 
 
@@ -178,7 +177,7 @@ class LogReport
   void WriteGenericReport(LogStream& os=INFO) const;
 
   /// Order relation for sorting entries in the table
-  static Bool_t OccurencyOrder(const std::pair<const LogMsgKey, LogMsgValue>* a,
+  static MAbool OccurencyOrder(const std::pair<const LogMsgKey, LogMsgValue>* a,
                                const std::pair<const LogMsgKey, LogMsgValue>* b)
   { return a->second.GetCounter() > b->second.GetCounter(); }
 

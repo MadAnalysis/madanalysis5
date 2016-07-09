@@ -25,12 +25,16 @@
 #ifndef DELPHES_DATA_FORMAT_h
 #define DELPHES_DATA_FORMAT_h
 
+// STL header
+#include <iostream>
+
+// SampleAnalyzer header
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
+
 // ROOT header
 #include <TTree.h>
 #include <TClonesArray.h>
 
-// STL header
-#include <iostream>
 
 namespace MA5
 {
@@ -77,7 +81,7 @@ struct DelphesDataFormat
   ~DelphesDataFormat();
 
   /// GetEntry
-  bool GetEntry(Long64_t treeEntry);
+  bool GetEntry(MAint64 treeEntry);
 
   /// Initialize all data
   void InitializeData();

@@ -25,14 +25,18 @@
 #ifndef XDR_ISTREAM_H
 #define XDR_ISTREAM_H
 
+
+// SampleAnalyzer headers
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
+
+
 // STL headers
 #include <vector>
 #include <string>
 #include <streambuf>
 #include <istream>
+#include <cstdio>
 
-// ROOT headers
-#include <TRint.h>
 
 namespace MA5
 {
@@ -67,12 +71,12 @@ class xdr_istream
   { return (sb_->sgetc()==EOF); }
 
   /// Overloading operator >> for simple types
-  xdr_istream& operator >> (Int_t       &v);
-  xdr_istream& operator >> (UInt_t      &v);
-  xdr_istream& operator >> (Long64_t      &v);
-  xdr_istream& operator >> (ULong64_t     &v);
-  xdr_istream& operator >> (Float_t     &v);
-  xdr_istream& operator >> (Double_t    &v);
+  xdr_istream& operator >> (MAint32       &v);
+  xdr_istream& operator >> (MAuint32      &v);
+  xdr_istream& operator >> (MAint64      &v);
+  xdr_istream& operator >> (MAuint64     &v);
+  xdr_istream& operator >> (MAfloat32     &v);
+  xdr_istream& operator >> (MAfloat64    &v);
   xdr_istream& operator >> (std::string &v);
 
   /// Overloading operator >> for std::vector
@@ -82,7 +86,7 @@ class xdr_istream
   {
     if (eof()) return (*this);
  
-    UInt_t sz;
+    MAuint32 sz;
     T val;
     (*this)>>sz;
 

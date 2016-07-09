@@ -68,37 +68,37 @@ class Identification
     { return recConfig_; }
 
   /// Is Initial State
-  Bool_t IsInitialState(const MCParticleFormat& part) const
+  MAbool IsInitialState(const MCParticleFormat& part) const
   {
     return (part.statuscode()==-1 || (part.statuscode()>=11 && part.statuscode()<=19));
   }
 
   /// Is Final State
-  Bool_t IsFinalState(const MCParticleFormat& part) const
+  MAbool IsFinalState(const MCParticleFormat& part) const
   {
     return (part.statuscode()==finalstate_);
   }
 
   /// Is Inter State
-  Bool_t IsInterState(const MCParticleFormat& part) const
+  MAbool IsInterState(const MCParticleFormat& part) const
   {
     return (!IsInitialState(part) && !IsFinalState(part));
   }
 
   /// Is Initial State
-  Bool_t IsInitialState(const MCParticleFormat* part) const
+  MAbool IsInitialState(const MCParticleFormat* part) const
   {
     return (part->statuscode()==initialstate_);
   }
 
   /// Is Final State
-  Bool_t IsFinalState(const MCParticleFormat* part) const
+  MAbool IsFinalState(const MCParticleFormat* part) const
   {
     return (part->statuscode()==finalstate_);
   }
 
   /// Is Inter State
-  Bool_t IsInterState(const MCParticleFormat* part) const
+  MAbool IsInterState(const MCParticleFormat* part) const
   {
     return (part->statuscode()!=finalstate_ && part->statuscode()!=initialstate_);
   }
@@ -147,14 +147,14 @@ class Identification
   /// Is hadronic ?
   inline bool IsHadronic(const MCParticleFormat& part) const
   {
-    std::set<Int_t>::iterator found = mcConfig_.hadronic_ids_.find(part.pdgid());
+    std::set<MAint32>::iterator found = mcConfig_.hadronic_ids_.find(part.pdgid());
     if (found==mcConfig_.hadronic_ids_.end()) return false; else return true;
   }
 
   /// Is hadronic ?
-  inline bool IsHadronic(Int_t pdgid) const
+  inline bool IsHadronic(MAint32 pdgid) const
   {
-    std::set<Int_t>::iterator found = mcConfig_.hadronic_ids_.find(pdgid);
+    std::set<MAint32>::iterator found = mcConfig_.hadronic_ids_.find(pdgid);
     if (found==mcConfig_.hadronic_ids_.end()) return false; else return true;
   }
 
@@ -168,7 +168,7 @@ class Identification
   /// Is invisible ?
   inline bool IsInvisible(const MCParticleFormat& part) const
   {
-    std::set<Int_t>::iterator found = mcConfig_.invisible_ids_.find(part.pdgid());
+    std::set<MAint32>::iterator found = mcConfig_.invisible_ids_.find(part.pdgid());
     if (found==mcConfig_.invisible_ids_.end()) return false; else return true;
   }
 
@@ -180,10 +180,10 @@ class Identification
   }
 
   ///Is B Hadron ?
-  Bool_t IsBHadron(Int_t pdg)
+  MAbool IsBHadron(MAint32 pdg)
   {
-    UInt_t apdg = std::abs(pdg);
-    Bool_t btag;
+    MAuint32 apdg = std::abs(pdg);
+    MAbool btag;
     return btag = ( (apdg >=500 && apdg <= 599) ||
                     (apdg>=5000 && apdg <= 5999) ||
                     (apdg>=10500 && apdg <= 10599 ) ||
@@ -191,23 +191,23 @@ class Identification
   }
 
   ///Is B Hadron ?
-  Bool_t IsBHadron(const MCParticleFormat& part)
+  MAbool IsBHadron(const MCParticleFormat& part)
   {
     return IsBHadron(part.pdgid());
   }
 
   ///Is B Hadron ?
-  Bool_t IsBHadron(const MCParticleFormat* part)
+  MAbool IsBHadron(const MCParticleFormat* part)
   {
     if (part==0) return false;
     return IsBHadron(part->pdgid());
   }
 
   ///Is C Hadron ?
-  Bool_t IsCHadron(Int_t pdg)
+  MAbool IsCHadron(MAint32 pdg)
   {
-    UInt_t apdg = std::abs(pdg);
-    Bool_t ctag;
+    MAuint32 apdg = std::abs(pdg);
+    MAbool ctag;
     return ctag = ( (apdg >=400 && apdg <= 499) ||
                     (apdg>=4000 && apdg <= 4999) ||
                     (apdg>=10400 && apdg <= 10499 ) ||
@@ -215,20 +215,20 @@ class Identification
   }
 
   ///Is C Hadron ?
-  Bool_t IsCHadron(const MCParticleFormat& part)
+  MAbool IsCHadron(const MCParticleFormat& part)
   {
     return IsCHadron(part.pdgid());
   }
 
   ///Is C Hadron ?
-  Bool_t IsCHadron(const MCParticleFormat* part)
+  MAbool IsCHadron(const MCParticleFormat* part)
   {
     if (part==0) return false;
     return IsCHadron(part->pdgid());
   }
 
   /// Muon isolation
-  Bool_t IsIsolatedMuon(const RecLeptonFormat* muon,
+  MAbool IsIsolatedMuon(const RecLeptonFormat* muon,
                         const RecEventFormat* event) const
   {
     // Safety
@@ -256,7 +256,7 @@ class Identification
   } 
 
   /// Muon isolation
-  Bool_t IsIsolatedMuon(const RecLeptonFormat& part,
+  MAbool IsIsolatedMuon(const RecLeptonFormat& part,
                         const RecEventFormat* event) const
   {
     return IsIsolatedMuon(&part,event);

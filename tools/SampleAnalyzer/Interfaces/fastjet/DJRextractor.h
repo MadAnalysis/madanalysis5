@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -57,9 +57,9 @@ class DJRextractor
   fastjet::JetDefinition* JetDefinition_;
 
   /// User configuration
-  UInt_t  merging_njets_;
-  UChar_t merging_nqmatch_;
-  Bool_t  merging_nosingrad_;
+  MAuint32  merging_njets_;
+  MAuint8   merging_nqmatch_;
+  MAbool    merging_nosingrad_;
 
 
 //---------------------------------------------------------------------------------
@@ -81,24 +81,24 @@ class DJRextractor
   ~DJRextractor() {}
 
   /// Initialization
-  bool Initialize();
+  MAbool Initialize();
 
   /// Finalization
   void Finalize();
 
   /// Execution
-  bool Execute(SampleFormat& sample, const EventFormat& event, std::vector<Double_t>& DJR);
+  MAbool Execute(SampleFormat& sample, const EventFormat& event, std::vector<MAdouble64>& DJR);
 
   /// Extracting the number of additionnal jets contained in the event 
-  UInt_t ExtractJetNumber(const MCEventFormat* myEvent, MCSampleFormat* mySample);
+  MAuint32 ExtractJetNumber(const MCEventFormat* myEvent, MCSampleFormat* mySample);
 
   /// Selecting particles
   void SelectParticles(std::vector<fastjet::PseudoJet>& inputs, const MCEventFormat* myEvent);
 
   /// Extracting the DJR information
-  void ExtractDJR(const std::vector<fastjet::PseudoJet>& inputs,std::vector<Double_t>& DJRvalues);
+  void ExtractDJR(const std::vector<fastjet::PseudoJet>& inputs,std::vector<MAdouble64>& DJRvalues);
 
-  Double_t rapidity(Double_t px, Double_t py, Double_t pz);
+  MAdouble64 rapidity(MAdouble64 px, MAdouble64 py, MAdouble64 pz);
 
 
 };

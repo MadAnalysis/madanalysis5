@@ -25,12 +25,14 @@
 #ifndef MCTOOLCONFIG_h
 #define MCTOOLCONFIG_h
 
+
+// SampleAnalyzer headers
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
+
 // STL headers
 #include <set>
 #include <string>
 
-// ROOT headers
-#include "TRint.h"
 
 namespace MA5
 {
@@ -48,10 +50,10 @@ struct MCconfig
   protected:
 
   /// list of PDG ids related to invisible particles
-  std::set<Int_t> invisible_ids_;
+  std::set<MAint32> invisible_ids_;
 
   /// list of PDG ids related to partons
-  std::set<Int_t> hadronic_ids_;
+  std::set<MAint32> hadronic_ids_;
 
   // -------------------------------------------------------------
   //                       method members
@@ -74,13 +76,13 @@ struct MCconfig
   } 
 
   /// Add hadronic id
-  void AddHadronicId(Int_t id)
+  void AddHadronicId(MAint32 id)
   {
     hadronic_ids_.insert(id);
   } 
 
   /// Add invisible id
-  void AddInvisibleId(Int_t id)
+  void AddInvisibleId(MAint32 id)
   {
     invisible_ids_.insert(id);
   } 

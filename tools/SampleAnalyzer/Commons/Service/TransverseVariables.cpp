@@ -1,32 +1,34 @@
 ////////////////////////////////////////////////////////////////////////////////
-//  
-//  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
+//
+//  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
-//  
+//
 //  This file is part of MadAnalysis 5.
 //  Official website: <https://launchpad.net/madanalysis5>
-//  
+//
 //  MadAnalysis 5 is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//  
+//
 //  MadAnalysis 5 is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 //  GNU General Public License for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License
 //  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
-//  
+//
 ////////////////////////////////////////////////////////////////////////////////
 
-
 // STL headers
+
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/TransverseVariables.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Commons/Service/SortingService.h"
+#include "SampleAnalyzer/Commons/Vector/MARotation3axis.h"
+
 
 using namespace MA5;
 
@@ -219,8 +221,9 @@ double TransverseVariables::GetMT2_massless()
 {
   // Rotation of all four-momenta so that p2_.Py() = 0
   double th=-atan(p2_.Py()/p2_.Px());
-  p2_.RotateZ(th);
-  p1_.RotateZ(th);
+  MARotation3axis rot(th,MARotation3axis::Zaxis);
+  rot.rotate(p2_);
+  rot.rotate(p1_);
   double pxtmp = pmx_*cos(th)-pmy_*sin(th);
   double pytmp = sin(th)*pmx_+cos(th)*pmy_;
   pmx_ = pxtmp;
@@ -276,12 +279,12 @@ double TransverseVariables::GetMT2_massless()
 /// Funcions related to the computation of the mt2w
 /// -----------------------------------------------
 /// Core function for the computation of mt2w
-double TransverseVariables::GetMT2W(const ParticleBaseFormat* lep,const ParticleBaseFormat* j1,
-  const ParticleBaseFormat*j2,const ParticleBaseFormat&met)
+double TransverseVariables::GetMT2W(const MALorentzVector* lep,const MALorentzVector* j1,
+  const MALorentzVector*j2,const MALorentzVector&met)
 {
   /// We define a mt2w region in which we will search for the bissection
   /// (default: from mw+mb to 500 GeV)
-  InitializeMT2W(lep->momentum(), j1->momentum(), j2->momentum(), met.momentum());
+  InitializeMT2W(*lep, *j1, *j2, met);
   double mt_high = 500., upper=500.;
   double mt_low  = mw_ + std::max(p2_.M(), p3_.M());
 
@@ -369,7 +372,7 @@ bool TransverseVariables::TestComp(const double &mt)
 
 
 /// Wrapper fuction for the computation of mt2w
-double TransverseVariables::MT2W(std::vector<const RecJetFormat*> jets, const RecLeptonFormat* lep, const ParticleBaseFormat& met)
+double TransverseVariables::MT2W(std::vector<const RecJetFormat*> jets, const RecLeptonFormat* lep, const MALorentzVector& met)
 {
   /// We need at least 2 jets
   if(jets.size()<2) return 0.;
@@ -399,7 +402,10 @@ double TransverseVariables::MT2W(std::vector<const RecJetFormat*> jets, const Re
       for (unsigned int jj=0; jj<N; jj++)
       {
         if (ii==jj) continue;
-        double tmp_mt2w = GetMT2W(lep, nbjets[ii], nbjets[jj],met);
+        double tmp_mt2w = GetMT2W(&lep->momentum(),
+				  &nbjets[ii]->momentum(),
+				  &nbjets[jj]->momentum(),
+				  met);
         if(tmp_mt2w < min_mt2w) min_mt2w = tmp_mt2w;
       }
       return min_mt2w;
@@ -411,9 +417,15 @@ double TransverseVariables::MT2W(std::vector<const RecJetFormat*> jets, const Re
     double min_mt2w=1e9;
     for (unsigned int ii=0; ii<N; ii++)
     {
-      double tmp_mt2w = GetMT2W(lep,bjets[0],nbjets[ii],met);
+      double tmp_mt2w = GetMT2W(&lep->momentum(),
+				&bjets[0]->momentum(),
+				&nbjets[ii]->momentum(),
+				met);
       if (tmp_mt2w < min_mt2w) min_mt2w = tmp_mt2w;
-      tmp_mt2w = GetMT2W(lep,nbjets[ii],bjets[0],met);
+      tmp_mt2w = GetMT2W(&lep->momentum(),
+			 &nbjets[ii]->momentum(),
+			 &bjets[0]->momentum(),
+			 met);
       if (tmp_mt2w < min_mt2w) min_mt2w = tmp_mt2w;
     }
     return min_mt2w;
@@ -427,80 +439,15 @@ double TransverseVariables::MT2W(std::vector<const RecJetFormat*> jets, const Re
       for (unsigned int jj=0; jj<bjets.size(); jj++)
       {
         if (ii==jj) continue;
-        double tmp_mt2w = GetMT2W(lep, bjets[ii], bjets[jj],met);
+        double tmp_mt2w = GetMT2W(&lep->momentum(),
+				  &bjets[ii]->momentum(),
+				  &bjets[jj]->momentum(),
+				  met);
         if (tmp_mt2w < min_mt2w) min_mt2w = tmp_mt2w;
       }
       return min_mt2w;
   }
 }
-
-double TransverseVariables::MT2W(std::vector<const MCParticleFormat*> jets, const MCParticleFormat* lep, const ParticleBaseFormat& met)
-{
-  /// We need at least 2 jets
-  if(jets.size()<2) return 0.;
-
-  /// Split the jet collection according to b-tags
-  std::vector<const MCParticleFormat*> bjets, nbjets;
-  for(unsigned int ii=0 ;ii<jets.size(); ii++)
-  {
-    if(abs(jets[ii]->pdgid()==5))  bjets.push_back(jets[ii]);
-    else                          nbjets.push_back(jets[ii]);
-  }
-  /// pt-ordering
-  SORTER->sort(nbjets,PTordering);
-  SORTER->sort(bjets,PTordering);
-
-  /// We neglect the fourth jets and all the others. If less than 3 jets in total
-  /// only light jets are considered.
-  unsigned int N=3;
-  if(jets.size()<=3) N = nbjets.size();
-
-  /// no b-jets
-  /// We select the minimum mt2w obtained from all possible jet combinations
-  if(bjets.size()==0)
-  {
-    double min_mt2w=1e9;
-    for (unsigned int ii=0; ii<N; ii++)
-      for (unsigned int jj=0; jj<N; jj++)
-      {
-        if (ii==jj) continue;
-        double tmp_mt2w = GetMT2W(lep, nbjets[ii], nbjets[jj],met);
-        if(tmp_mt2w < min_mt2w) min_mt2w = tmp_mt2w;
-      }
-      return min_mt2w;
-  }
-
-  /// 1 b-jet
-  else if (bjets.size()==1)
-  {
-    double min_mt2w=1e9;
-    for (unsigned int ii=0; ii<N; ii++)
-    {
-      double tmp_mt2w = GetMT2W(lep,bjets[0],nbjets[ii],met);
-      if (tmp_mt2w < min_mt2w) min_mt2w = tmp_mt2w;
-      tmp_mt2w = GetMT2W(lep,nbjets[ii],bjets[0],met);
-      if (tmp_mt2w < min_mt2w) min_mt2w = tmp_mt2w;
-    }
-    return min_mt2w;
-  }
-
-  /// More than 1 b-tag
-  else
-  {
-    double min_mt2w=1e9;
-    for (unsigned int ii=0; ii<bjets.size(); ii++)
-      for (unsigned int jj=0; jj<bjets.size(); jj++)
-      {
-        if (ii==jj) continue;
-        double tmp_mt2w = GetMT2W(lep, bjets[ii], bjets[jj],met);
-        if (tmp_mt2w < min_mt2w) min_mt2w = tmp_mt2w;
-      }
-      return min_mt2w;
-  }
-}
-
-
-
 
 
 /// The alphaT variable
@@ -593,13 +540,13 @@ double TransverseVariables::AlphaT(const MCEventFormat* event)
   if (jets.size()<2) return 0;
 
   // dijet event
-  if (jets.size()==2) return std::min(jets[0]->et(),jets[1]->et()) / 
-    (*(jets[0])+*(jets[1])).mt();
+  if (jets.size()==2) return std::min(jets[0]->et(),jets[1]->et()) /
+			    ( jets[0]->momentum()+jets[1]->momentum() ).Mt();
 
   double MinDeltaHT = 1e6;
 
   // compute vectum sum of jet momenta
-  TLorentzVector q(0.,0.,0.,0.);
+  MALorentzVector q(0.,0.,0.,0.);
   for (unsigned int i=0;i<jets.size();i++) q+=jets[i]->momentum();
   double MHT = q.Pt();
 
@@ -634,12 +581,12 @@ double TransverseVariables::AlphaT(const RecEventFormat* event)
 
   // dijet event
   if (jets.size()==2) return std::min(jets[0].et(),jets[1].et()) / 
-    ((jets[0])+(jets[1])).mt();
+  ((jets[0].momentum())+(jets[1].momentum())).Mt();
 
   double MinDeltaHT = 1e6;
 
   // compute vectum sum of jet momenta
-  TLorentzVector q(0.,0.,0.,0.);
+  MALorentzVector q(0.,0.,0.,0.);
   for (unsigned int i=0;i<jets.size();i++) q+=jets[i].momentum();
   double MHT = q.Pt();
 

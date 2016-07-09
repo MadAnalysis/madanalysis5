@@ -86,8 +86,8 @@ class SampleAnalyzer
   bool next_file_;
 
   /// Counters
-  std::vector<ULong64_t> counter_read_;
-  std::vector<ULong64_t> counter_passed_;
+  std::vector<MAuint64> counter_read_;
+  std::vector<MAuint64> counter_passed_;
 
   /// The only one pointer to the reader
   ReaderBase* myReader_;

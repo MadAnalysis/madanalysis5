@@ -145,7 +145,7 @@ StatusCode::Type DelphesMA5tuneTreeReader::ReadEvent(EventFormat& myEvent, Sampl
 // -----------------------------------------------------------------------------
 bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 {
-  std::map<Int_t,unsigned int> MA5index;
+  std::map<MAint32,unsigned int> MA5index;
 
   // MHT & THT
   for (unsigned int i=0; i<myEvent.rec()->jets_.size();i++)
@@ -269,7 +269,7 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
 
   // Fill electrons
   if (branchElectron_!=0)
-  for (unsigned int i=0;i<static_cast<UInt_t>(branchElectron_->GetEntries());i++)
+  for (unsigned int i=0;i<static_cast<MAuint32>(branchElectron_->GetEntries());i++)
   {
     Electron* part = dynamic_cast<Electron*>(branchElectron_->At(i));
     RecLeptonFormat * electron = myEvent.rec()->GetNewElectron();
@@ -312,7 +312,7 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
 
   // Fill photons
   if (branchPhoton_!=0)
-  for (unsigned int i=0;i<static_cast<UInt_t>(branchPhoton_->GetEntries());i++)
+  for (unsigned int i=0;i<static_cast<MAuint32>(branchPhoton_->GetEntries());i++)
   {
     Photon* part = dynamic_cast<Photon*>(branchPhoton_->At(i));
     RecPhotonFormat * photon = myEvent.rec()->GetNewPhoton();
@@ -350,7 +350,7 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
   }
 
   if (branchMuon_!=0)
-  for (unsigned int i=0;i<static_cast<UInt_t>(branchMuon_->GetEntries());i++)
+  for (unsigned int i=0;i<static_cast<MAuint32>(branchMuon_->GetEntries());i++)
   {
     Muon* part = dynamic_cast<Muon*>(branchMuon_->At(i));
     RecLeptonFormat * muon = myEvent.rec()->GetNewMuon();
@@ -395,7 +395,7 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
   // ---------------------------------------------------------------------------
   if (branchEvent_!=0)
   {
-    for (unsigned int i=0;i<static_cast<UInt_t>(branchEvent_->GetEntries());i++)
+    for (unsigned int i=0;i<static_cast<MAuint32>(branchEvent_->GetEntries());i++)
     {
       // Get the header 
       LHEFEvent* header1 =  dynamic_cast<LHEFEvent*>(branchEvent_->At(i));
@@ -416,7 +416,7 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
 
   // Fill jets and taus
   if (branchJet_!=0)
-  for (unsigned int i=0;i<static_cast<UInt_t>(branchJet_->GetEntries());i++)
+  for (unsigned int i=0;i<static_cast<MAuint32>(branchJet_->GetEntries());i++)
   {
     Jet* part = dynamic_cast<Jet*>(branchJet_->At(i));
     if(part->TauTag==1)
@@ -457,7 +457,7 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
 
   // GenParticle collection
   if (branchGenParticle_!=0)
-  for (unsigned int i=0;i<static_cast<UInt_t>(branchGenParticle_->GetEntries());i++)
+  for (unsigned int i=0;i<static_cast<MAuint32>(branchGenParticle_->GetEntries());i++)
   {
     GenParticle* part = dynamic_cast<GenParticle*>(branchGenParticle_->At(i));
     MCParticleFormat * gen = myEvent.mc()->GetNewParticle();
@@ -469,9 +469,9 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
     // 0 -> no mother
     // 1 -> first line
     if (part->M1<0) gen->mothup1_ = 0;
-    else gen->mothup1_ = static_cast<UInt_t>(part->M1)+1;
+    else gen->mothup1_ = static_cast<MAuint32>(part->M1)+1;
     if (part->M2<0) gen->mothup2_ = 0;
-    else gen->mothup2_ = static_cast<UInt_t>(part->M2)+1;
+    else gen->mothup2_ = static_cast<MAuint32>(part->M2)+1;
     if (part->MA5index<0) gen->extra1_ = 0;
     else gen->extra1_ = part->MA5index+1;
 
@@ -486,7 +486,7 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
 
   // Track collection
   if (branchTrack_!=0)
-  for (unsigned int i=0;i<static_cast<UInt_t>(branchTrack_->GetEntries());i++)
+  for (unsigned int i=0;i<static_cast<MAuint32>(branchTrack_->GetEntries());i++)
   {
     Track* ref = dynamic_cast<Track*>(branchTrack_->At(i));
     RecTrackFormat * track = myEvent.rec()->GetNewTrack();

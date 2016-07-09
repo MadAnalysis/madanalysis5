@@ -43,13 +43,14 @@ void HistoLogX::Write_TextFormat(std::ostream* output)
 
 
 /// Write the plot in a ROOT file
+/*
 void HistoLogX::Write_RootFormat(std::pair<TH1F*,TH1F*>& histo)
 {
   // Creating binning for histograms
-  Double_t binnings[histo_.size()+1];
+  MAfloat64 binnings[histo_.size()+1];
   for (unsigned int i=0;i<histo_.size();i++)
   {
-    binnings[i]=std::pow(static_cast<Float_t>(10.),static_cast<Float_t>(log_xmin_+i*step_));
+    binnings[i]=std::pow(static_cast<MAfloat32>(10.),static_cast<MAfloat32>(log_xmin_+i*step_));
   }
   binnings[histo_.size()]=xmax_;
 
@@ -70,7 +71,7 @@ void HistoLogX::Write_RootFormat(std::pair<TH1F*,TH1F*>& histo)
 
   // Filling statistics for histo with positive weight
   histo.first  -> SetEntries(nentries_.first);
-  Double_t stats[4];
+  MAfloat64 stats[4];
   stats[0]=sum_w_.first;
   stats[1]=sum_ww_.first;
   stats[2]=sum_xw_.first;
@@ -85,3 +86,4 @@ void HistoLogX::Write_RootFormat(std::pair<TH1F*,TH1F*>& histo)
   histo.second -> PutStats(stats);
 }
 
+*/

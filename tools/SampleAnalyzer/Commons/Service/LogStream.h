@@ -25,6 +25,9 @@
 #ifndef LOG_STREAM_H
 #define LOG_STREAM_H
 
+// SampleAnalyzer headers
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
+
 // STL headers
 #include <iostream>
 #include <iomanip>
@@ -33,8 +36,6 @@
 #include <typeinfo>
 #include <sstream>
 
-// ROOT headers
-#include <Rtypes.h> 
 
 namespace MA5
 {
@@ -65,16 +66,16 @@ class LogStream
   mutable std::stringstream Buffer_;
 
   /// Using color ?
-  Bool_t ColorMode_;
+  MAbool ColorMode_;
 
   /// Color type
   ColorType Color_;
 
   /// Mute or UnMute ?
-  Bool_t Mute_;
+  MAbool Mute_;
 
   /// Tag specifying if a new line is begun
-  Bool_t NewLine_;
+  MAbool NewLine_;
 
   /// String displayed at the beginning of a new line 
   std::string BeginLine_;
@@ -341,11 +342,11 @@ class LogStream
   { ColorMode_=false; Update(); }
 
   /// Is the stream mute ?
-  Bool_t IsMute()
+  MAbool IsMute()
   { return Mute_;}
 
   /// Is the stream unmute ?
-  Bool_t IsUnMute()
+  MAbool IsUnMute()
   { return !Mute_;}
 
   /// Mute the stream
@@ -410,7 +411,7 @@ class LogStream
   { return Buffer_.width(wide); }
 
   /// Displaying n times a character c 
-  void repeat(char c, UInt_t n)
+  void repeat(char c, MAuint32 n)
   {
     if (NewEntry())
     { 
@@ -426,7 +427,7 @@ class LogStream
  private:
 
   /// Global veto applied on the stream
-  Bool_t NewEntry()
+  MAbool NewEntry()
   {
     if (Mute_) return false;
     if (NewLine_) {Buffer_ << BeginLine_; NewLine_=false;}
@@ -444,7 +445,7 @@ class LogStream
     else
     {
       std::stringstream str;
-      str << "\x1b[" << static_cast<UInt_t>(Color_) << "m";
+      str << "\x1b[" << static_cast<MAuint32>(Color_) << "m";
       BeginLine_=str.str();
       EndLine_="\x1b[0m";
     }

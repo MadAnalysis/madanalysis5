@@ -25,19 +25,20 @@
 #ifndef DELPHESMA5TUNE_TREE_READER_h
 #define DELPHESMA5TUNE_TREE_READER_h
 
+// STL header
+#include <iostream>
+#include <vector>
+#include <map>
+
 // SampleAnalyzer headers
-#include "SampleAnalyzer/Commons/Base/TreeReaderBase.h"
+#include "SampleAnalyzer/Commons/Vector/MALorentzVector.h"
+#include "SampleAnalyzer/Interfaces/root/TreeReaderBase.h"
 
 // ROOT header
 #include <TChain.h>
 #include <TLorentzVector.h>
 #include <TObject.h>
 #include <TFile.h>
-
-// STL header
-#include <iostream>
-#include <vector>
-#include <map>
 
 
 // Delphes header
@@ -58,10 +59,10 @@ class DelphesMA5tuneTreeReader : public TreeReaderBase
   ExRootTreeReader *treeReader_;
 
   /// Number of total entries in the file
-  Long64_t total_nevents_;
+  MAint64 total_nevents_;
 
   /// Number of entries read by MA5
-  Long64_t read_nevents_;
+  MAint64 read_nevents_;
 
   /// Pointers to the different branches
   TClonesArray *branchJet_;
@@ -103,8 +104,8 @@ class DelphesMA5tuneTreeReader : public TreeReaderBase
   /// Finalize the event
   virtual bool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent);
 
-  std::vector<Int_t> MuonIndex_;
-  std::vector<Int_t> ElectronIndex_;
+  std::vector<MAint32> MuonIndex_;
+  std::vector<MAint32> ElectronIndex_;
 
  private:
 
@@ -127,11 +128,11 @@ class DelphesMA5tuneTreeReader : public TreeReaderBase
   }
 
   /// Get the file size
-  virtual Long64_t GetFinalPosition()
+  virtual MAint64 GetFinalPosition()
   { return total_nevents_; }
 
   /// Get the position in file (in octet)
-  virtual Long64_t GetPosition()
+  virtual MAint64 GetPosition()
   { return read_nevents_; }
 
 

@@ -30,12 +30,6 @@
 #include "SampleAnalyzer/Commons/Base/DetectorBase.h"
 #include "SampleAnalyzer/Interfaces/delphes/DelphesMemoryInterface.h"
 
-//ROOT header
-#include <TObjArray.h>
-#include <TFile.h>
-#include <TDatabasePDG.h>
-#include <TParticlePDG.h>
-#include <TFolder.h>
 
 class ExRootConfReader;
 class ExRootTreeWriter;
@@ -43,6 +37,10 @@ class ExRootTreeBranch;
 class Delphes;
 class DelphesFactory;
 class TObjArray;
+class TFolder;
+class TDatabasePDG;
+class TParticlePDG;
+class TFile;
 
 namespace MA5
 {

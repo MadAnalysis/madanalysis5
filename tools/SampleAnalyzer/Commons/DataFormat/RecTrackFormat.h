@@ -68,9 +68,9 @@ class RecTrackFormat : public RecParticleFormat
  protected:
 
   signed int pdgid_;   /// PDG identity code
-  Bool_t charge_;      /// electric charge
-  Double_t etaOuter_;  /// eta @ first layer of calo
-  Double_t phiOuter_;  /// phi @ first layer of calo
+  MAbool charge_;      /// electric charge
+  MAfloat64 etaOuter_;  /// eta @ first layer of calo
+  MAfloat64 phiOuter_;  /// phi @ first layer of calo
   std::vector<IsolationConeType> isolCones_; // isolation cones
   MCParticleFormat* mc_;
 
@@ -114,11 +114,11 @@ class RecTrackFormat : public RecParticleFormat
   {return pdgid_;}
 
   /// Accessor to etaCalo
-  const Double_t& etaCalo() const
+  const MAfloat64& etaCalo() const
   {return etaOuter_;}
 
   /// Accessor to etaCalo
-  const Double_t& phiCalo() const
+  const MAfloat64& phiCalo() const
   {return phiOuter_;}
 
   /// Accessor to charge

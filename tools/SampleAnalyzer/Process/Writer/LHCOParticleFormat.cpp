@@ -40,7 +40,7 @@ const std::string LHCOParticleFormat::header = "  #  typ    eta     phi        p
 // -----------------------------------------------------------------------------
 // Print a particle line
 // -----------------------------------------------------------------------------
-void LHCOParticleFormat::Print(UInt_t num, std::ostream* out)
+void LHCOParticleFormat::Print(MAuint32 num, std::ostream* out)
 {
   *out << std::setw(3) << std::right << num;
   *out << "  ";

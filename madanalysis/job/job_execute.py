@@ -37,7 +37,7 @@ def WriteExecute(file,main,part_list):
                'const EventFormat& event)\n{\n')
 
     # Getting the event weight
-    file.write('  Float_t __event_weight__ = 1.0;\n')
+    file.write('  MAfloat32 __event_weight__ = 1.0;\n')
     file.write('  if (weighted_events_ && event.mc()!=0) ' +\
                '__event_weight__ = event.mc()->weight();\n\n')  
     file.write('  if (sample.mc()!=0) sample.mc()->addWeightedEvents(__event_weight__);\n')

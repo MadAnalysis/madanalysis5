@@ -27,6 +27,7 @@
 
 // STL headers
 #include <vector>
+#include <algorithm>
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/DataFormat/MCEventFormat.h"
@@ -134,7 +135,7 @@ public:
 
   /// rank filter
   static std::vector<const MCParticleFormat*> 
-  rankFilter(std::vector<const MCParticleFormat*> ref, Short_t rank,
+  rankFilter(std::vector<const MCParticleFormat*> ref, MAint16 rank,
              OrderingObservable obs=PTordering)
   {
     // rejecting case where rank equal to zero
@@ -146,8 +147,8 @@ public:
     }
 
     // Number of particle is not correct
-    if ( (static_cast<Int_t>(ref.size()) - 
-          static_cast<Int_t>(std::abs(rank)))<0 ) 
+    if ( (static_cast<MAint32>(ref.size()) - 
+          static_cast<MAint32>(std::abs(rank)))<0 ) 
       return std::vector<const MCParticleFormat*>();
 
     // Sorting reference collection of particles
@@ -164,7 +165,7 @@ public:
 
   /// rank filter
   static std::vector<const RecParticleFormat*> 
-  rankFilter(std::vector<const RecParticleFormat*> ref, Short_t rank,
+  rankFilter(std::vector<const RecParticleFormat*> ref, MAint16 rank,
              OrderingObservable obs=PTordering)
   {
     // rejecting case where rank equal to zero
@@ -176,8 +177,8 @@ public:
     }
 
     // Number of particle is not correct
-    if ( (static_cast<Int_t>(ref.size()) - 
-          static_cast<Int_t>(std::abs(rank)))<0 ) 
+    if ( (static_cast<MAint32>(ref.size()) - 
+          static_cast<MAint32>(std::abs(rank)))<0 ) 
       return std::vector<const RecParticleFormat*>();
 
     // Sorting reference collection of particles

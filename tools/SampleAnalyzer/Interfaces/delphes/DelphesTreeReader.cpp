@@ -93,7 +93,7 @@ StatusCode::Type DelphesTreeReader::ReadEvent(EventFormat& myEvent, SampleFormat
   if (read_nevents_ >= total_nevents_) return StatusCode::FAILURE;
 
   // read the next event
-  Int_t treeEntry = tree_->LoadTree(read_nevents_);
+  MAint32 treeEntry = tree_->LoadTree(read_nevents_);
   if (treeEntry<0)
   {
     ERROR << "Unexpected end of the file !" << endmsg;
@@ -211,7 +211,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
   std::map<const GenParticle*,unsigned int> gentable;
   std::map<const GenParticle*,unsigned int>::const_iterator genit;
   if (data_.GenParticle_!=0)
-  for (unsigned int i=0;i<static_cast<UInt_t>(data_.GenParticle_->GetEntries());i++)
+  for (unsigned int i=0;i<static_cast<MAuint32>(data_.GenParticle_->GetEntries());i++)
   {
     // getting the i-th particle
     GenParticle* part = dynamic_cast<GenParticle*>(data_.GenParticle_->At(i));
@@ -235,7 +235,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
   // Fill electrons
   // ---------------------------------------------------------------------------
   if (data_.Electron_!=0)
-  for (unsigned int i=0;i<static_cast<UInt_t>(data_.Electron_->GetEntries());i++)
+  for (unsigned int i=0;i<static_cast<MAuint32>(data_.Electron_->GetEntries());i++)
   {
     // getting the i-th particle
     Electron* part = dynamic_cast<Electron*>(data_.Electron_->At(i));
@@ -255,7 +255,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
       if (genit!=gentable.end()) electron->mc_=&(myEvent.mc()->particles()[genit->second]);
       else WARNING << "GenParticle corresponding to an electron is not found in the gen table" << endmsg;
     }
-    electron->delphesTags_.push_back(reinterpret_cast<ULong64_t>(mc));
+    electron->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
   }
 
 
@@ -263,7 +263,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
   // Fill photons
   // ---------------------------------------------------------------------------
   if (data_.Photon_!=0)
-  for (unsigned int i=0;i<static_cast<UInt_t>(data_.Photon_->GetEntries());i++)
+  for (unsigned int i=0;i<static_cast<MAuint32>(data_.Photon_->GetEntries());i++)
   {
     // getting the i-th particle
     Photon* part = dynamic_cast<Photon*>(data_.Photon_->At(i));
@@ -276,7 +276,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
 
     // setting corresponding gen particle
     GenParticle* mc=0;
-    for (unsigned int j=0;j<static_cast<UInt_t>(part->Particles.GetEntries());j++)
+    for (unsigned int j=0;j<static_cast<MAuint32>(part->Particles.GetEntries());j++)
     {
       GenParticle* ref = dynamic_cast<GenParticle*>(part->Particles.At(j));
       if (ref==0) continue;
@@ -285,7 +285,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
     }
     if (mc!=0)
     {
-      photon->delphesTags_.push_back(reinterpret_cast<ULong64_t>(mc));
+      photon->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
       genit = gentable.find(mc);
       if (genit!=gentable.end()) photon->mc_=&(myEvent.mc()->particles()[genit->second]);
       else WARNING << "GenParticle corresponding to a photon is not found in the gen table" << endmsg;
@@ -298,7 +298,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
   // ---------------------------------------------------------------------------
   if (data_.Event_!=0)
   {
-    for (unsigned int i=0;i<static_cast<UInt_t>(data_.Event_->GetEntries());i++)
+    for (unsigned int i=0;i<static_cast<MAuint32>(data_.Event_->GetEntries());i++)
     {
       // Get the header  
       LHEFEvent* header1 =  dynamic_cast<LHEFEvent*>(data_.Event_->At(i));
@@ -322,7 +322,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
   // Fill muons
   // ---------------------------------------------------------------------------
   if (data_.Muon_!=0)
-  for (unsigned int i=0;i<static_cast<UInt_t>(data_.Muon_->GetEntries());i++)
+  for (unsigned int i=0;i<static_cast<MAuint32>(data_.Muon_->GetEntries());i++)
   {
     // getting the i-th particle
     Muon* part = dynamic_cast<Muon*>(data_.Muon_->At(i));
@@ -341,7 +341,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
       if (genit!=gentable.end()) muon->mc_=&(myEvent.mc()->particles()[genit->second]);
       else WARNING << "GenParticle corresponding to a muon is not found in the gen table" << endmsg;
     }
-    muon->delphesTags_.push_back(reinterpret_cast<ULong64_t>(mc));
+    muon->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
   }
 
 
@@ -349,7 +349,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
   // Fill Tower
   // ---------------------------------------------------------------------------
   if (data_.Tower_!=0)
-  for (unsigned int i=0;i<static_cast<UInt_t>(data_.Tower_->GetEntries());i++)
+  for (unsigned int i=0;i<static_cast<MAuint32>(data_.Tower_->GetEntries());i++)
   {
     // getting the i-th particle
     Tower* tower = dynamic_cast<Tower*>(data_.Tower_->At(i));
@@ -360,7 +360,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
     part->momentum_.SetPtEtaPhiM(tower->ET,tower->Eta,tower->Phi,0.0);
 
     // setting corresponding gen particle
-    for (unsigned int j=0;j<static_cast<UInt_t>(tower->Particles.GetEntries());j++)
+    for (unsigned int j=0;j<static_cast<MAuint32>(tower->Particles.GetEntries());j++)
     {
        const GenParticle* mc = dynamic_cast<const GenParticle*>(tower->Particles[j]);
        //       if (mc!=0)
@@ -371,7 +371,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
        //       }
 
        // setting 
-       part->delphesTags_.push_back(reinterpret_cast<ULong64_t>(mc));
+       part->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
     }
   }
 
@@ -380,7 +380,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
   // Fill EFlowTrack
   // ---------------------------------------------------------------------------
   if (data_.EFlowTrack_!=0)
-  for (unsigned int i=0;i<static_cast<UInt_t>(data_.EFlowTrack_->GetEntries());i++)
+  for (unsigned int i=0;i<static_cast<MAuint32>(data_.EFlowTrack_->GetEntries());i++)
   {
     // getting the i-th particle
     Track* track = dynamic_cast<Track*>(data_.EFlowTrack_->At(i));
@@ -392,7 +392,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
 
     // setting corresponding gen particle
     const GenParticle* mc = dynamic_cast<const GenParticle*>(track->Particle.GetObject());
-    part->delphesTags_.push_back(reinterpret_cast<ULong64_t>(mc));
+    part->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
 
   }
 
@@ -401,7 +401,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
   // Fill EFlowPhotons
   // ---------------------------------------------------------------------------
   if (data_.EFlowPhoton_!=0)
-  for (unsigned int i=0;i<static_cast<UInt_t>(data_.EFlowPhoton_->GetEntries());i++)
+  for (unsigned int i=0;i<static_cast<MAuint32>(data_.EFlowPhoton_->GetEntries());i++)
   {
     // getting the i-th particle
     Tower* tower = dynamic_cast<Tower*>(data_.EFlowPhoton_->At(i));
@@ -425,7 +425,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
   // Fill EFlowNeutralHadrons
   // ---------------------------------------------------------------------------
   if (data_.EFlowNeutral_!=0)
-  for (unsigned int i=0;i<static_cast<UInt_t>(data_.EFlowNeutral_->GetEntries());i++)
+  for (unsigned int i=0;i<static_cast<MAuint32>(data_.EFlowNeutral_->GetEntries());i++)
   {
     // getting the i-th particle
     Tower* tower = dynamic_cast<Tower*>(data_.EFlowNeutral_->At(i));
@@ -449,7 +449,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
   // Fill jets and taus
   // ---------------------------------------------------------------------------
   if (data_.Jet_!=0)
-  for (unsigned int i=0;i<static_cast<UInt_t>(data_.Jet_->GetEntries());i++)
+  for (unsigned int i=0;i<static_cast<MAuint32>(data_.Jet_->GetEntries());i++)
   {
     // getting the i-th particle
     Jet* part = dynamic_cast<Jet*>(data_.Jet_->At(i));
@@ -478,7 +478,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
       jet->HEoverEE_ = part->EhadOverEem;
 
       // Setting corresponding gen particle
-      /*      for (unsigned int j=0;j<static_cast<UInt_t>(part->Particles.GetEntries());j++)
+      /*      for (unsigned int j=0;j<static_cast<MAuint32>(part->Particles.GetEntries());j++)
       {
         GenParticle* ref = dynamic_cast<GenParticle*>(part->Particles.At(j));
         if (ref!=0)
@@ -532,7 +532,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
   // Track collection
   // ---------------------------------------------------------------------------
   if (data_.Track_!=0)
-  for (unsigned int i=0;i<static_cast<UInt_t>(data_.Track_->GetEntries());i++)
+  for (unsigned int i=0;i<static_cast<MAuint32>(data_.Track_->GetEntries());i++)
   {
     // getting the i-th track
     Track* ref = dynamic_cast<Track*>(data_.Track_->At(i));
@@ -558,7 +558,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
     }
 
     // setting 
-    track->delphesTags_.push_back(reinterpret_cast<ULong64_t>(mc));
+    track->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
   }
 
 }

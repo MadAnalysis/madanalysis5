@@ -28,8 +28,6 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Plot/Histo.h"
 
-// ROOT headers
-#include <TH1F.h>
 
 // STL headers
 #include <cmath>
@@ -46,8 +44,8 @@ class HistoLogX : public Histo
  protected :
 
   // Histogram boundaries in Log scale
-  Double_t log_xmin_;
-  Double_t log_xmax_;
+  MAfloat64 log_xmin_;
+  MAfloat64 log_xmax_;
 
   // -------------------------------------------------------------
   //                       method members
@@ -59,8 +57,8 @@ class HistoLogX : public Histo
   { }
 
   /// Constructor with argument 
-  HistoLogX(const std::string& name, UInt_t nbins, 
-            Double_t xmin, Double_t xmax) : Histo(name)
+  HistoLogX(const std::string& name, MAuint32 nbins, 
+            MAfloat64 xmin, MAfloat64 xmax) : Histo(name)
   { 
     // Setting the description
     nbins_ = nbins;
@@ -88,7 +86,7 @@ class HistoLogX : public Histo
     log_xmin_=std::log10(xmin_);
     log_xmax_=std::log10(xmax_);
 
-    step_ = (log_xmax_ - log_xmin_)/static_cast<Double_t>(nbins_);
+    step_ = (log_xmax_ - log_xmin_)/static_cast<MAfloat64>(nbins_);
 
     // Reseting the histogram array
     histo_.resize(nbins_,std::make_pair(0.,0.));
@@ -106,7 +104,7 @@ class HistoLogX : public Histo
   { }
 
   /// Filling histogram
-  void Fill(Double_t value, Double_t weight=1.0)
+  void Fill(MAfloat64 value, MAfloat64 weight=1.0)
   {
     if (std::isnan(value))
     {
@@ -156,7 +154,7 @@ class HistoLogX : public Histo
   virtual void Write_TextFormat(std::ostream* output);
 
   // Write the plot in a ROOT file
-  virtual void Write_RootFormat(std::pair<TH1F*,TH1F*>& histos);
+  //  virtual void Write_RootFormat(std::pair<TH1F*,TH1F*>& histos);
 
 };
 

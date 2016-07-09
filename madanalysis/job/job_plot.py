@@ -437,7 +437,7 @@ def WriteBeforeLoop(file,iabs,ihisto,combination,main,value='value',q='q'):
     if allmode:
         if obs.combination in [CombinationType.SUMSCALAR,\
                                CombinationType.DIFFSCALAR]:
-            file.write('    Double_t '+value+'=0;\n')
+            file.write('    MAdouble64 '+value+'=0;\n')
         else:
             file.write('    ParticleBaseFormat '+q+';\n')
 
@@ -523,7 +523,7 @@ def WriteBody(file,iabs,ihisto,combination,main,iterator='ind',value='value',q='
                            CombinationType.DIFFSCALAR]:
 
         if not allmode:
-            file.write('    Double_t '+value+'=0;\n')
+            file.write('    MAdouble64 '+value+'=0;\n')
         for ind in range(len(combination)):
             TheOper='+'
             if ind!=0:

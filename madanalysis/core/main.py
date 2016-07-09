@@ -424,6 +424,9 @@ class Main():
         if self.archi_info.has_fastjet:
             libraries.append(['FastJet', 'interface to FastJet', 'fastjet', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces',False])
             libraries.append(['test_fastjet','interface to Fastjet', 'test_fastjet', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestFastjet',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
+        if 1: #self.archi_info.has_root:
+            libraries.append(['Root', 'interface to Root', 'root', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libroot_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces',False])
+            libraries.append(['test_root','interface to Root', 'test_root', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestRoot',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
         if self.archi_info.has_delphes:
             libraries.append(['Delphes', 'interface to Delphes', 'delphes', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces',False])
             libraries.append(['test_delphes','interface to Delphes', 'test_delphes', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestDelphes',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])

@@ -26,7 +26,7 @@
 using namespace MA5;
 
 
-PdgDataFormat::PdgDataFormat(const Int_t Pdgid, const std::string& Name, const Float_t m, const Int_t q, const Float_t Gamma, const Float_t ctau) :
+PdgDataFormat::PdgDataFormat(const MAint32 Pdgid, const std::string& Name, const MAfloat32 m, const MAint32 q, const MAfloat32 Gamma, const MAfloat32 ctau) :
   Pdgid_(Pdgid), Mass_(m), Charge_(q), GammaTot_(Gamma), Ctau_(ctau), Name_(Name) 
 {
   if( (fabs(Pdgid) == 12)       || (fabs(Pdgid) == 14)       || (fabs(Pdgid) == 16)      || 

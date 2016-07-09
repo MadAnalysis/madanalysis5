@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -31,6 +31,7 @@ class MakefileWriter():
 
     class UserfriendlyMakefileOptions():
         def __init__(self):
+            self.has_root           = False
             self.has_commons        = False
             self.has_process        = False
             self.has_zlib           = False
@@ -51,7 +52,7 @@ class MakefileWriter():
         file.write('NORMAL = "\\\\033[0;39m"\n')
         file.write('\n')
 
-
+        
     @staticmethod
     def UserfriendlyMakefileForSampleAnalyzer(filename,options):
 
@@ -86,6 +87,9 @@ class MakefileWriter():
         if options.has_delphes:
             file.write('\tcd Interfaces && $(MAKE) -f Makefile_delphes\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_delphes\n')
+        if options.has_root:
+            file.write('\tcd Interfaces && $(MAKE) -f Makefile_root\n')
+            file.write('\tcd Test && $(MAKE) -f Makefile_root\n')
         if options.has_delphesMA5tune:
             file.write('\tcd Interfaces && $(MAKE) -f Makefile_delphesMA5tune\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_delphesMA5tune\n')
@@ -109,6 +113,9 @@ class MakefileWriter():
         if options.has_delphes:
             file.write('\tcd Interfaces && $(MAKE) -f Makefile_delphes clean\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_delphes clean\n')
+        if options.has_root:
+            file.write('\tcd Interfaces && $(MAKE) -f Makefile_root clean\n')
+            file.write('\tcd Test && $(MAKE) -f Makefile_root clean\n')
         if options.has_delphesMA5tune:
             file.write('\tcd Interfaces && $(MAKE) -f Makefile_delphesMA5tune clean\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_delphesMA5tune clean\n')
@@ -133,6 +140,9 @@ class MakefileWriter():
         if options.has_delphes:
             file.write('\tcd Interfaces && $(MAKE) -f Makefile_delphes mrproper\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_delphes mrproper\n')
+        if options.has_root:
+            file.write('\tcd Interfaces && $(MAKE) -f Makefile_root mrproper\n')
+            file.write('\tcd Test && $(MAKE) -f Makefile_root mrproper\n')
         if options.has_delphesMA5tune:
             file.write('\tcd Interfaces && $(MAKE) -f Makefile_delphesMA5tune mrproper\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_delphesMA5tune mrproper\n')
@@ -155,20 +165,25 @@ class MakefileWriter():
             self.has_fastjet_tag           = False
             self.has_delphes_tag           = False
             self.has_delphesMA5tune_tag    = False
+            self.has_root_tag              = False
             self.has_zlib_tag              = False
             self.has_fastjet_inc           = False
             self.has_delphes_inc           = False
             self.has_delphesMA5tune_inc    = False
             self.has_zlib_inc              = False
+            self.has_root_inc              = False
             self.has_fastjet_lib           = False
             self.has_delphes_lib           = False
             self.has_delphesMA5tune_lib    = False
             self.has_zlib_lib              = False
             self.has_fastjet_ma5lib        = False
             self.has_delphes_ma5lib        = False
+            self.has_root_lib              = False
             self.has_delphesMA5tune_ma5lib = False
             self.has_zlib_ma5lib           = False
-            self.has_root                  = True
+            self.has_root_tag              = False
+            self.has_root                  = False
+            self.has_root_ma5lib           = False
 
 
     @staticmethod
@@ -209,11 +224,10 @@ class MakefileWriter():
             file.write('CXXFLAGS += '+' -I'+item+'\n')
             
         # - root
-        cxxflags=[]
-        if options.has_root:
+        if options.has_root_inc:
+            cxxflags=[]
             cxxflags.extend(['$(shell root-config --cflags)'])
-    #        cxxflags.extend(['-I'+archi_info.root_inc_path]) # root
-        file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
+            file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
 
         # - fastjet
         if options.has_fastjet_inc:
@@ -243,7 +257,8 @@ class MakefileWriter():
 
         # - tags
         cxxflags=[]
-        cxxflags.extend(['-DROOT_USE'])
+        if options.has_root_tag:
+            cxxflags.extend(['-DROOT_USE'])
         if options.has_fastjet_tag:
             cxxflags.extend(['-DFASTJET_USE'])
         if options.has_zlib_tag:
@@ -284,7 +299,20 @@ class MakefileWriter():
                 libs.extend(['-L'+archi_info.zlib_lib_path,'-lz'])
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
 
-        # - fastjet
+        # - root
+        if options.has_root_ma5lib:
+            libs=[]
+            if options.has_root_ma5lib:
+                libs.extend(['-lroot_for_ma5'])
+            if options.has_root_lib:
+                libs.extend(['$(shell root-config --libs) -lEG'])
+            file.write('LIBFLAGS += '+' '.join(libs)+'\n')
+        else:
+            if options.has_root_lib:
+                libs.extend(['$(shell root-config --libs) -lEG'])
+                file.write('LIBFLAGS += '+' '.join(libs)+'\n')
+                
+            # - fastjet
         if options.has_fastjet_ma5lib or options.has_fastjet_lib:
             libs=[]
             if options.has_fastjet_ma5lib:
@@ -338,6 +366,8 @@ class MakefileWriter():
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libzlib_for_ma5.so')
         if options.has_delphes_ma5lib:
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so')
+        if options.has_root_ma5lib:
+            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libroot_for_ma5.so')
         if options.has_delphesMA5tune_ma5lib:
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libdelphesMA5tune_for_ma5.so')
         if options.has_fastjet_ma5lib:
@@ -392,8 +422,8 @@ class MakefileWriter():
                 file.write('\t@echo -e $(RED)"The shared library "$(REQUIRED'+str(ind+1)+')" is not found"\n')
                 file.write('\t@echo -e $(RED)" 1) Please check that MadAnalysis 5 is installed in the folder : "$(MA5_BASE)\n')
                 file.write('\t@echo -e $(RED)" 2) Launch MadAnalysis 5 in normal mode in order to build this library."\n')
-                file.write('\t@echo -e $(NORMAL)\n')
-                file.write('\t@false\n')
+	        file.write('\t@echo -e $(NORMAL)\n')
+	        file.write('\t@false\n')
                 file.write('endif\n')
             file.write('\n')
             
@@ -401,40 +431,40 @@ class MakefileWriter():
         file.write('# Header target\n')
         file.write('header:\n')
         file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
-        file.write('\t@echo -e "'+StringTools.Center('Building '+title,50)+'"\n')
-        file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
+	file.write('\t@echo -e "'+StringTools.Center('Building '+title,50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
         file.write('\n')
 
         # Compile_header target
         file.write('# Compile_header target\n')
         file.write('compile_header:\n')
         file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
-        file.write('\t@echo -e "'+StringTools.Center('Compilation',50)+'"\n')
-        file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
+	file.write('\t@echo -e "'+StringTools.Center('Compilation',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
         file.write('\n')
 
         # Linking_header target
         file.write('# Link_header target\n')
         file.write('link_header:\n')
         file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
-        file.write('\t@echo -e "'+StringTools.Center('Linking',50)+'"\n')
-        file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
+	file.write('\t@echo -e "'+StringTools.Center('Linking',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
         file.write('\n')
 
         # Clean_header target
         file.write('# clean_header target\n')
         file.write('clean_header:\n')
         file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
-        file.write('\t@echo -e "'+StringTools.Center('Removing intermediate files from building',50)+'"\n')
-        file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
+	file.write('\t@echo -e "'+StringTools.Center('Removing intermediate files from building',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
         file.write('\n')
 
         # Mrproper_header target
         file.write('# mrproper_header target\n')
         file.write('mrproper_header:\n')
         file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
-        file.write('\t@echo -e "'+StringTools.Center('Cleaning all the project',50)+'"\n')
-        file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
+	file.write('\t@echo -e "'+StringTools.Center('Cleaning all the project',50)+'"\n')
+	file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
         file.write('\n')
 
         # Precompile

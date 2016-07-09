@@ -52,16 +52,16 @@ class MergingPlots : public AnalyzerBase
   std::vector<MergingPlotType> DJR_;
 
   /// User configuration
-  UInt_t  merging_njets_;
-  UChar_t merging_nqmatch_;
-  Bool_t  merging_nosingrad_;
-  Bool_t  ma5_mode_;
+  MAuint32  merging_njets_;
+  MAuint8 merging_nqmatch_;
+  MAbool  merging_nosingrad_;
+  MAbool  ma5_mode_;
 
   /// Saving merging plots in the output file
   void Write_TextFormat(SAFWriter& output);
 
   /// Extracting the number of additionnal jets contained in the event 
-  UInt_t ExtractHardJetNumber(const MCEventFormat* myEvent, MCSampleFormat* mySample);
+  MAuint32 ExtractHardJetNumber(const MCEventFormat* myEvent, MCSampleFormat* mySample);
 
 
 //---------------------------------------------------------------------------------

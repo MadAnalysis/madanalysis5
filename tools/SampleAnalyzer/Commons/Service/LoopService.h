@@ -34,8 +34,7 @@
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/Service/Physics.h"
 
-// ROOT headers
-#include <Rtypes.h> 
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 
 
 // ShortCut to access to LoopService
@@ -63,10 +62,10 @@ class LoopService
   static LoopService* Service_;
 
   /// Threshold to the number of calls
-  static const UInt_t NcallThreshold_;
+  static const MAuint32 NcallThreshold_;
 
   /// Current number of calls
-  UInt_t Ncalls_;
+  MAuint32 Ncalls_;
 
   // -------------------------------------------------------------
   //                       method members
@@ -102,7 +101,7 @@ class LoopService
   }
 
   /// Determing if a photon coming from signal
-  Bool_t IrrelevantPhoton(const MCParticleFormat* part, 
+  MAbool IrrelevantPhoton(const MCParticleFormat* part, 
                           const SampleFormat& mySample)
   {
     Ncalls_=0;
@@ -110,7 +109,7 @@ class LoopService
   }
 
   /// Determing if a particle coming from hadron decay
-  Bool_t ComingFromHadronDecay(const MCParticleFormat* part, 
+  MAbool ComingFromHadronDecay(const MCParticleFormat* part, 
                                const SampleFormat& mySample)
   {
     Ncalls_=0;
@@ -121,15 +120,15 @@ class LoopService
  private:
 
   /// Determing if a photon coming from signal
-  Bool_t IrrelevantPhoton_core(const MCParticleFormat* part, 
+  MAbool IrrelevantPhoton_core(const MCParticleFormat* part, 
                                const SampleFormat& mySample);
 
   /// Determing if a particle coming from hadron decay
-  Bool_t ComingFromHadronDecay_core(const MCParticleFormat* part, 
+  MAbool ComingFromHadronDecay_core(const MCParticleFormat* part, 
                                     const SampleFormat& mySample);
 
   /// Threshold
-  Bool_t ReachThreshold()
+  MAbool ReachThreshold()
   {
     if (Ncalls_ > NcallThreshold_)
     {

@@ -30,8 +30,9 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <vector>
 
-// MCParticleDataFormat
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/DataFormat/ParticleBaseFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
@@ -64,9 +65,9 @@ class RecParticleFormat : public ParticleBaseFormat
   // -------------------------------------------------------------
  protected:
    
-  Float_t 	              HEoverEE_;    /// hadronic energy over electromagnetic energy
+  MAfloat32 	              HEoverEE_;    /// hadronic energy over electromagnetic energy
   const MCParticleFormat* mc_ ;         /// mother generated particle
-  std::vector<ULong64_t>  delphesTags_; /// tag reference for Delphes
+  std::vector<MAuint64>  delphesTags_; /// tag reference for Delphes
 
   // -------------------------------------------------------------
   //                      method members
@@ -111,30 +112,30 @@ class RecParticleFormat : public ParticleBaseFormat
   void setMc(const MCParticleFormat* mc) {mc_=mc;}
 
   /// Accessor to hadronic energy / electromagnetic energy ratio
-  const Float_t& HEoverEE() const {return HEoverEE_;}
+  const MAfloat32& HEoverEE() const {return HEoverEE_;}
 
   /// Accessor to electromagnetic energy / hadronic energy ratio
-  const Float_t EEoverHE() const 
+  const MAfloat32 EEoverHE() const 
   {
     if (HEoverEE_!=0) return 1./HEoverEE_; 
     else return 0.;
   }
 
   /// Accessor to the number of tracks
-  virtual const UShort_t ntracks() const
+  virtual const MAuint16 ntracks() const
   { return 0; }
 
   /// Accessor to the isolation tag
-  virtual const Bool_t isolated() const
+  virtual const MAbool isolated() const
   { return false; }
 
   /// Accessor to the electric charge
   virtual const int charge() const
   { return 0; }
 
-  const std::vector<ULong64_t>& delphesTags() const {return delphesTags_;}
+  const std::vector<MAuint64>& delphesTags() const {return delphesTags_;}
 
-  bool isDelphesUnique(const std::vector<ULong64_t>& delphesTags) const
+  bool isDelphesUnique(const std::vector<MAuint64>& delphesTags) const
   {
     for (unsigned int i=0;i<delphesTags_.size();i++)
       for (unsigned int j=0;j<delphesTags.size();j++)

@@ -37,8 +37,8 @@ void cTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
     if (fabs(myEvent.mc()->particles()[i].pdgid())!=4) continue;
     if (!IsLast(&myEvent.mc()->particles()[i], myEvent)) continue;
 
-    Bool_t tag = false;
-    Double_t DeltaRmax = DeltaRmax_;
+    MAbool tag = false;
+    MAfloat64 DeltaRmax = DeltaRmax_;
 
     // loop on the jets
     for (unsigned int j=0;j<myEvent.rec()->jets().size();j++)
@@ -46,7 +46,7 @@ void cTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
       if (myEvent.rec()->jets()[j].btag()) continue;
 
       // Calculating DeltaR
-      Float_t DeltaR = myEvent.mc()->particles()[i].dr(myEvent.rec()->jets()[j]);
+      MAfloat32 DeltaR = myEvent.mc()->particles()[i].dr(myEvent.rec()->jets()[j]);
 
       // Adding the jet to the candidates if DeltaR <= DeltaRmax
       if (DeltaR <= DeltaRmax) 
@@ -80,11 +80,11 @@ void cTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
   {
     if (myEvent.rec()->jets()[i].btag()) continue;
 
-    Bool_t c = false;
+    MAbool c = false;
 
     for (unsigned int j=0;j<myEvent.rec()->jets()[i].Constituents_.size();j++)
     {
-      Int_t N = myEvent.rec()->jets()[i].Constituents_[j];
+      MAint32 N = myEvent.rec()->jets()[i].Constituents_[j];
       MCParticleFormat* particle = & myEvent.mc()->particles()[N];
       while (!c)
       {
@@ -116,20 +116,20 @@ void cTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
 
   if (Exclusive_)
   {
-    UInt_t i = 0;
-    UInt_t n = Candidates.size();
+    MAuint32 i = 0;
+    MAuint32 n = Candidates.size();
 
     while (i<n)
     {
-      UInt_t j = i+1;
+      MAuint32 j = i+1;
 
-      Float_t DeltaR = Candidates[i]->mc()->dr(Candidates[i]);
+      MAfloat32 DeltaR = Candidates[i]->mc()->dr(Candidates[i]);
 
       while (j<n)
       {
         if (Candidates[i]->mc()==Candidates[j]->mc())
         {
-          Float_t DeltaR2 = Candidates[j]->mc()->dr(Candidates[j]);
+          MAfloat32 DeltaR2 = Candidates[j]->mc()->dr(Candidates[j]);
 
           if (DeltaR2<DeltaR) std::swap(Candidates[i], Candidates[j]);
 
@@ -160,11 +160,11 @@ void cTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
   {
     if (myEvent.rec()->jets()[i].btag()) continue;
 
-    Bool_t c = false;
+    MAbool c = false;
 
     for (unsigned int j=0;j<myEvent.rec()->jets()[i].Constituents_.size();j++)
     {
-      Int_t N = myEvent.rec()->jets()[i].Constituents_[j];
+      MAint32 N = myEvent.rec()->jets()[i].Constituents_[j];
       MCParticleFormat* particle = & myEvent.mc()->particles()[N];
       while (!c)
       {
@@ -201,11 +201,11 @@ void cTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
 
     if (!IsLast(&myEvent.mc()->particles()[i], myEvent)) continue;
 
-    UInt_t k = 0;
+    MAuint32 k = 0;
 
     for (unsigned int j=Candidates.size();j>0;j--)
     {
-      Float_t DeltaR = myEvent.mc()->particles()[i].dr(Candidates[j-1]);
+      MAfloat32 DeltaR = myEvent.mc()->particles()[i].dr(Candidates[j-1]);
 
       if (DeltaR <= DeltaRmax_)
       {
@@ -234,7 +234,7 @@ void cTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
   Candidates.clear();
 }
 
-Bool_t cTagger::IsLastCHadron(MCParticleFormat* part, EventFormat& myEvent)
+MAbool cTagger::IsLastCHadron(MCParticleFormat* part, EventFormat& myEvent)
 {
   for (unsigned int i=0; i<myEvent.mc()->particles().size(); i++)
   {

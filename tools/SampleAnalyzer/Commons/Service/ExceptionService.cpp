@@ -34,7 +34,7 @@ ExceptionService* ExceptionService::Service_ = 0;
 /// Displaying and storing the exception
 void ExceptionService::Display(const ExceptionType& e)
 { 
-  Bool_t display = false;
+  MAbool display = false;
 
   // Add the exception into the good report
   if (e.IsWarning()) display=WarningReport_.Add(e.GetFileName(),

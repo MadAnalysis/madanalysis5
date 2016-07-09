@@ -40,16 +40,16 @@ class ClusterAlgoSISCone: public ClusterAlgoPlugin
   private :
 
     /// Cone Radius
-    Double_t R_;
+    MAfloat64 R_;
 
     /// Overlap Threshold
-    Double_t OverlapThreshold_;
+    MAfloat64 OverlapThreshold_;
 
     /// Max number of passes
-    Int_t NPassMax_;
+    MAint32 NPassMax_;
 
     /// Minimal Pt for protojet
-    Double_t Protojet_ptmin_;
+    MAfloat64 Protojet_ptmin_;
 
 //---------------------------------------------------------------------------------
 //                                method members

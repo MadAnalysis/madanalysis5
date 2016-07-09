@@ -55,14 +55,14 @@ namespace MA5
     cTagger*    myCtagger_;
     TauTagger*  myTautagger_;
     /// Exclusive id for tau-elec-photon-jet
-    Bool_t ExclusiveId_;
+    MAbool ExclusiveId_;
 
-    UInt_t muon;
-    UInt_t electron;
-    UInt_t tauH;
-    UInt_t tauM;
-    UInt_t tauE;
-    UInt_t photon;
+    MAuint32 muon;
+    MAuint32 electron;
+    MAuint32 tauH;
+    MAuint32 tauM;
+    MAuint32 tauE;
+    MAuint32 photon;
 
     //--------------------------------------------------------------------------
     //                              method members
@@ -123,7 +123,7 @@ namespace MA5
     { return algo_->GetParameters(); }
 
  private:
-    Bool_t IsLast(const MCParticleFormat* part, EventFormat& myEvent);
+    MAbool IsLast(const MCParticleFormat* part, EventFormat& myEvent);
     void GetFinalState(const MCParticleFormat* part, std::set<const MCParticleFormat*>& finalstates);
 
   };

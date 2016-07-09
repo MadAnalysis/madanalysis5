@@ -87,7 +87,7 @@ void TimeService::WriteGenericReport(LogStream& os) const
   os << "|" << endmsg;
 
 
-  UInt_t precision = os.precision();
+  MAuint32 precision = os.precision();
   os.precision(5);
 
   for (std::vector<const std::pair<const std::string,TimeMeasureType>* >::const_iterator

@@ -25,12 +25,10 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Counter/CounterManager.h"
 
-// ROOT headers
-#include <TVector.h>
-
 
 using namespace MA5;
 
+/*
 /// Write the counters in a ROOT file
 void CounterManager::Write_RootFormat(TFile* output) const
 {
@@ -73,6 +71,7 @@ void CounterManager::Write_RootFormat(TFile* output) const
   sumweight_neg.Write("accepted_sumw_negative_weight");
   sumweight2_neg.Write("accepted_sumw2_negative_weight");
 }
+*/
 
 
 /// Write the counters in a TEXT file

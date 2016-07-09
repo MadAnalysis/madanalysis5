@@ -76,7 +76,7 @@ bool ClusterAlgoSISCone::SetParameter(const std::string& key, const std::string&
   // NPassMax
   else if (key=="npassmax")
   {
-    Int_t tmp=0;
+    MAint32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;

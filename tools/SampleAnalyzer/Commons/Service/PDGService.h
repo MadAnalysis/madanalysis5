@@ -50,7 +50,7 @@ class PDGService
  protected:
 
   PdgTable* Table_;  
-  std::set<Int_t> NeutralTable_;  
+  std::set<MAint32> NeutralTable_;  
   static PDGService* service_;
 
   // -------------------------------------------------------------
@@ -73,27 +73,27 @@ class PDGService
   }
 
   /// Is charged ?
-  Bool_t IsCharged (Int_t pdgid)
+  MAbool IsCharged (MAint32 pdgid)
   {
-    std::set<Int_t>::const_iterator it = NeutralTable_.find(pdgid);
+    std::set<MAint32>::const_iterator it = NeutralTable_.find(pdgid);
     if(it==NeutralTable_.end()) return true;
     else return false; 
   }
 
   /// Get charge
-  Int_t GetCharge (Int_t pdgid)
+  MAint32 GetCharge (MAint32 pdgid)
   {
     return (*Table_)[pdgid].Charge();
   }
 
   /// Get charge
-  Int_t GetCharge (const MCParticleFormat& part)
+  MAint32 GetCharge (const MCParticleFormat& part)
   {
     return GetCharge(part.pdgid());
   }
 
   /// Get charge
-  Int_t GetCharge (const MCParticleFormat* part)
+  MAint32 GetCharge (const MCParticleFormat* part)
   {
     if (part==0) return 0;
     return GetCharge(part->pdgid());
@@ -130,12 +130,12 @@ class PDGService
     {
       curstring.clear(); // needed when using several times istringstream::str(string)
       curstring.str(temp_string);
-      Int_t ID;
+      MAint32 ID;
       std::string name;
-      Int_t charge;
-      Float_t mass; 
-      Float_t width; 
-      Float_t lifetime;
+      MAint32 charge;
+      MAfloat32 mass; 
+      MAfloat32 width; 
+      MAfloat32 lifetime;
 
       // ID name   chg       mass    total width   lifetime
       //  1 d      -1      0.33000     0.00000   0.00000E+00

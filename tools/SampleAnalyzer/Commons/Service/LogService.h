@@ -36,8 +36,7 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/LogStream.h"
 
-// ROOT headers
-#include <Rtypes.h> 
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 
 
 // ShortCuts to the different loggers
@@ -128,7 +127,7 @@ class LogService
   {}
 
   /// Mute a given USER logger 
-  void SetGlobalMuteUser(Bool_t mute)
+  void SetGlobalMuteUser(MAbool mute)
   {
     for (std::map<std::string,LogStream>::iterator 
     it=User_.begin(); it!=User_.end(); it++)
@@ -195,7 +194,7 @@ class LogService
         it = test.first;
         it->second.SetColor(LogStream::CYAN);
         it->second.SetPrompt("USER["+name+"]: ");
-        if (static_cast<UInt_t>(Level_) < static_cast<UInt_t>(USER_LEVEL)) 
+        if (static_cast<MAuint32>(Level_) < static_cast<MAuint32>(USER_LEVEL)) 
              it->second.SetMute();
         if (ExclusiveUser_!="" && ExclusiveUser_!=name) it->second.SetMute();
       }

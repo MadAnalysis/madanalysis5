@@ -64,15 +64,15 @@ class MCEventFormat
   // -------------------------------------------------------------
  private : 
 
-  UInt_t nparts_;       /// number of particles in the event
-  UInt_t processId_;    /// identity of the current process
-  mutable Double_t weight_;      /// event weight
-  Double_t scale_;       /// scale Q of the event
-  Double_t alphaQED_;    /// ALPHA_em value used
-  Double_t alphaQCD_;    /// ALPHA_s value used
-  Double_t PDFscale_;
-  std::pair<Double_t,Double_t> x_;
-  std::pair<Double_t,Double_t> xpdf_;
+  MAuint32 nparts_;       /// number of particles in the event
+  MAuint32 processId_;    /// identity of the current process
+  mutable MAfloat64 weight_;      /// event weight
+  MAfloat64 scale_;       /// scale Q of the event
+  MAfloat64 alphaQED_;    /// ALPHA_em value used
+  MAfloat64 alphaQCD_;    /// ALPHA_s value used
+  MAfloat64 PDFscale_;
+  std::pair<MAfloat64,MAfloat64> x_;
+  std::pair<MAfloat64,MAfloat64> xpdf_;
 
   /// List of generated particles
   std::vector<MCParticleFormat> particles_;
@@ -84,10 +84,10 @@ class MCEventFormat
   MCParticleFormat MHT_;
 
   /// Computed Scalar sum of transverse energy
-  Double_t TET_;
+  MAfloat64 TET_;
 
   /// Computed Scalar sum of hadronic transverse energy
-  Double_t THT_;
+  MAfloat64 THT_;
 
 
 
@@ -111,10 +111,10 @@ class MCEventFormat
   const MCParticleFormat& MHT() const {return MHT_;}
 
   /// Accessor to the Total Transverse Energy (read-only)
-  const Double_t& TET() const {return TET_;}
+  const MAfloat64& TET() const {return TET_;}
 
   /// Accessor to the Total Hadronic Transverse Energy (read-only)
-  const Double_t& THT() const {return THT_;}
+  const MAfloat64& THT() const {return THT_;}
 
   /// Accessor to the Missing Transverse Energy
   MCParticleFormat& MET() {return MET_;}
@@ -123,25 +123,25 @@ class MCEventFormat
   MCParticleFormat& MHT() {return MHT_;}
 
   /// Accessor to the Total Transverse Energy
-  Double_t& TET() {return TET_;}
+  MAfloat64& TET() {return TET_;}
 
   /// Accessor to the Total Hadronic Transverse Energy
-  Double_t& THT() {return THT_;}
+  MAfloat64& THT() {return THT_;}
 
   /// Accessor to the process identity
-  const UInt_t& processId()  const {return processId_;}
+  const MAuint32& processId()  const {return processId_;}
 
   /// Accessor to the event weight
-  const Double_t& weight()    const {return weight_;   }
+  const MAfloat64& weight()    const {return weight_;   }
 
   /// Accessor to the scale
-  const Double_t& scale()     const {return scale_;    }
+  const MAfloat64& scale()     const {return scale_;    }
 
   /// Accessor to alpha_QED
-  const Double_t& alphaQED()  const {return alphaQED_; }
+  const MAfloat64& alphaQED()  const {return alphaQED_; }
 
   /// Accessor to alpha_QCD
-  const Double_t& alphaQCD()  const {return alphaQCD_; }
+  const MAfloat64& alphaQCD()  const {return alphaQCD_; }
 
   /// Accessor to the generated particle collection (read-only)
   const std::vector<MCParticleFormat>& particles() const {return particles_;}
@@ -150,19 +150,19 @@ class MCEventFormat
   std::vector<MCParticleFormat>& particles() {return particles_;}
 
   /// Setting the process identity
-  void setProcessId(UInt_t v)  {processId_=v;}
+  void setProcessId(MAuint32 v)  {processId_=v;}
 
   /// Setting the event weight
-  void setWeight   (Double_t v) const {weight_=v;   }
+  void setWeight   (MAfloat64 v) const {weight_=v;   }
 
   /// Setting the scale
-  void setScale    (Double_t v) {scale_=v;    }
+  void setScale    (MAfloat64 v) {scale_=v;    }
 
   /// Setting AlphaQED
-  void setAlphaQED (Double_t v) {alphaQED_=v; }
+  void setAlphaQED (MAfloat64 v) {alphaQED_=v; }
 
   /// Setting AlphaQCD
-  void setAlphaQCD (Double_t v) {alphaQCD_=v; }
+  void setAlphaQCD (MAfloat64 v) {alphaQCD_=v; }
 
   /// Clearing all information
   void Reset()

@@ -290,7 +290,7 @@ def WriteJobExecuteNbody(file,iabs,icut,combi1,main,container,tagName,tagIndex,c
     if len(combi1)==1 and combi1.ALL:
         if obs.combination in [CombinationType.SUMSCALAR,\
                                CombinationType.DIFFSCALAR]:
-            file.write('    Double_t value1=0;\n')
+            file.write('    MAdouble64 value1=0;\n')
         else:
             file.write('    ParticleBaseFormat q1;\n')
 

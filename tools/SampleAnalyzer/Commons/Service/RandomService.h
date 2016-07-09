@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,75 +22,88 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef LOG_MSG_VALUE_H
-#define LOG_MSG_VALUE_H
+#ifndef RANDOM_SERVICE_H
+#define RANDOM_SERVICE_H
 
-// STL headers
-#include<string>
+// STL headers 
+#include <iostream>
+#include <string>
+#include <ctime>
+#include <cstdlib>
 
-#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
+// SampleAnalyzer headers
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
+
+
+// ShortCut to access to RandomService
+#define RANDOM MA5::RandomService::GetInstance()   
+
 
 namespace MA5
 {
 
 //////////////////////////////////////////////////////////////////////////////
-/// The class LogMsgValue contains the occurence of an exception and extra
-/// information.
+/// The class RandomService contains static methods used for producing random
+/// numbers according to a given pdf.
+///
+/// RandomService is a singleton-pattern-based class : only one instance.
+/// Getting the only one instance : RandomService::GetInstance()
 //////////////////////////////////////////////////////////////////////////////
-class LogMsgValue
+class RandomService
 {
   // -------------------------------------------------------------
   //                        data members
   // -------------------------------------------------------------
- private:
+ private :
 
-  /// Occurence of the exception
-  MAuint32 Counter_;
+  /// Pointer to the unique instance of RandomService
+  static RandomService* Service_;
 
-  /// Name of the function from where the exception is thrown
-  std::string Function_;
-  
   // -------------------------------------------------------------
   //                       method members
   // -------------------------------------------------------------
- public:
+ private:
 
-  /// Constructor without argument 
-  LogMsgValue() : Counter_(0)
-  { }
+  /// Constructor without argument
+  RandomService() 
+  {
+    // select a random seed according to the time
+    std::srand(time(0));
+  }
 
-  /// Constructor with arguments 
-  LogMsgValue(const MAuint32& Counter, 
-              const std::string& Function) : Counter_(Counter), Function_(Function)
-  { }
-  
   /// Destructor
-  ~LogMsgValue()
+  ~RandomService()
   {}
 
-  /// Reset
-  void Reset()
-  { Counter_=0; Function_=""; } 
-  
-  /// Accessor to the occurence
-  const MAuint32& GetCounter() const
-  {return Counter_;}
+  /// (Re)initialzing the streamer
+  void Initialize()
+  { }
 
-  /// Accessor to the name of the function
-  const std::string& GetFunction() const
-  {return Function_;}
-  
-  /// Mutator related to the occurence
-  void SetCounter(const MAuint32& Counter)
-  {Counter_=Counter;}
+ public:
 
-  /// Mutator related to name of the function
-  void SetFunction(const std::string& Function)
-  {Function_=Function;}
+  /// Getting the unique instance of RandomService
+  static RandomService* GetInstance()
+  {
+    if (Service_==0) Service_ = new RandomService;
+    return Service_;
+  }
+
+  /// Deleting the unique instance of Convert Service
+  static void Kill()
+  {
+    if (Service_!=0) delete Service_;
+    Service_=0;
+  }
+
+  /// Random a number between 0 and 1 according to a flat pdf
+  MAdouble64 flat() const
+  {
+    return static_cast<MAdouble64>(std::rand()) /
+           static_cast<MAdouble64>(RAND_MAX); 
+  }
 
 };
 
 }
 
 #endif
-

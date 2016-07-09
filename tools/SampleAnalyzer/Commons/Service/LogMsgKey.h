@@ -28,8 +28,7 @@
 // STL headers
 #include<string>
 
-// ROOT headers
-#include <Rtypes.h> 
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 
 
 namespace MA5
@@ -50,7 +49,7 @@ class LogMsgKey
   std::string FileName_;
 
   /// Number of the line where the exception is thrown
-  UInt_t Line_;
+  MAuint32 Line_;
 
   /// Description of the exception
   std::string Msg_;
@@ -66,7 +65,7 @@ class LogMsgKey
 
   /// Constructor without argument 
   LogMsgKey(const std::string& FileName, 
-            const UInt_t& Line,
+            const MAuint32& Line,
             const std::string& Msg) : FileName_(FileName), 
                                       Line_(Line),
                                       Msg_(Msg)
@@ -87,7 +86,7 @@ class LogMsgKey
   {return FileName_;}
 
   /// Accessor to the line number
-  const UInt_t& GetLine() const 
+  const MAuint32& GetLine() const 
   {return Line_;}
 
   /// Accessor to the description of the exception
@@ -99,7 +98,7 @@ class LogMsgKey
   {FileName_=name;}
 
   /// Mutator related to the line number
-  void SetLine(const UInt_t& line)          
+  void SetLine(const MAuint32& line)          
   {Line_=line;}
 
   /// Mutator related to the description of the exception
@@ -107,7 +106,7 @@ class LogMsgKey
   {Msg_=msg;}
 
   /// Order relation
-  Bool_t operator < (const LogMsgKey& b) const
+  MAbool operator < (const LogMsgKey& b) const
   {
     if (Line_ < b.Line_) return true;
     else if (Line_ > b.Line_) return false;

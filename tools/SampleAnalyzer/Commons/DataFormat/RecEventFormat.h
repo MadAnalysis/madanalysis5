@@ -36,7 +36,6 @@
 #include "SampleAnalyzer/Commons/DataFormat/RecTowerFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecTauFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecJetFormat.h"
-#include "SampleAnalyzer/Commons/DataFormat/RecMETFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecPhotonFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecTrackFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
@@ -117,10 +116,10 @@ class RecEventFormat
   RecParticleFormat MHT_;
 
   /// Reconstructed Scalar sum of transverse energy
-  Double_t TET_;
+  MAfloat64 TET_;
 
   /// Reconstructed Scalar sum of hadronic transverse energy
-  Double_t THT_;
+  MAfloat64 THT_;
 
   /// Monte Carlo taus decaying hadronically
   std::vector<const MCParticleFormat*> MCHadronicTaus_;
@@ -185,10 +184,10 @@ class RecEventFormat
   const RecParticleFormat& MHT() const {return MHT_;}
 
   /// Accessor to the Total Transverse Energy (read-only)
-  const Double_t& TET() const {return TET_;}
+  const MAfloat64& TET() const {return TET_;}
 
   /// Accessor to the Total Hadronic Transverse Energy (read-only)
-  const Double_t& THT() const {return THT_;}
+  const MAfloat64& THT() const {return THT_;}
 
   /// Accessor to the Monte Carlo taus decaying hadronically
   const std::vector<const MCParticleFormat*>& MCHadronicTaus() const
@@ -244,10 +243,10 @@ class RecEventFormat
   RecParticleFormat& MHT() {return MHT_;}
 
   /// Accessor to the Total Transverse Energy
-  Double_t& TET() {return TET_;}
+  MAfloat64& TET() {return TET_;}
 
   /// Accessor to the Total Hadronic Transverse Energy
-  Double_t& THT() {return THT_;}
+  MAfloat64& THT() {return THT_;}
 
   /// Accessor to the Monte Carlo taus decaying hadronically
   std::vector<const MCParticleFormat*>& MCHadronicTaus()

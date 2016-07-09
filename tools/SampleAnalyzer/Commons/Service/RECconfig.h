@@ -29,8 +29,6 @@
 #include <set>
 #include <string>
 
-// ROOT headers
-#include "TRint.h"
 
 namespace MA5
 {
@@ -47,16 +45,16 @@ struct RECconfig
   protected:
 
   /// Muon isolation algorithm
-  Bool_t deltaRalgo_;
+  MAbool deltaRalgo_;
 
   /// Parameter : deltaR
-  Float_t deltaR_;
+  MAfloat32 deltaR_;
 
   /// Parameter : sumPT
-  Float_t sumPT_;
+  MAfloat32 sumPT_;
 
   /// Parameter : ET_PT
-  Float_t ET_PT_;
+  MAfloat32 ET_PT_;
 
   // -------------------------------------------------------------
   //                       method members
@@ -76,13 +74,13 @@ struct RECconfig
   { deltaRalgo_=true; deltaR_=0.5; sumPT_=1.; ET_PT_=1.; }
 
   /// Specify algo DeltaR
-  void UseDeltaRIsolation(Float_t deltaR=0.5)
+  void UseDeltaRIsolation(MAfloat32 deltaR=0.5)
   {
     deltaRalgo_=true; deltaR_=deltaR;
   } 
 
   /// Specify algo SumPT
-  void UseSumPTIsolation(Float_t sumPT, Float_t ET_PT)
+  void UseSumPTIsolation(MAfloat32 sumPT, MAfloat32 ET_PT)
   {
     deltaRalgo_=false; sumPT_=sumPT; ET_PT_=ET_PT;
   } 

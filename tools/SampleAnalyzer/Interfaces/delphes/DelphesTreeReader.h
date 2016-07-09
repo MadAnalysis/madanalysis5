@@ -25,8 +25,14 @@
 #ifndef DELPHES_TREE_READER_h
 #define DELPHES_TREE_READER_h
 
+// STL header
+#include <iostream>
+#include <vector>
+#include <map>
+
 // SampleAnalyzer headers
-#include "SampleAnalyzer/Commons/Base/TreeReaderBase.h"
+#include "SampleAnalyzer/Commons/Vector/MALorentzVector.h"
+#include "SampleAnalyzer/Interfaces/root/TreeReaderBase.h"
 #include "SampleAnalyzer/Interfaces/delphes/DelphesDataFormat.h"
 
 // ROOT header
@@ -34,9 +40,6 @@
 #include <TLorentzVector.h>
 #include <TObject.h>
 #include <TFile.h>
-
-// STL header
-#include <iostream>
 
 
 namespace MA5
@@ -51,10 +54,10 @@ class DelphesTreeReader : public TreeReaderBase
  protected:
 
   /// Number of total entries in the file
-  Long64_t total_nevents_;
+  MAint64 total_nevents_;
 
   /// Number of entries read by MA5
-  Long64_t read_nevents_;
+  MAint64 read_nevents_;
 
   /// Data
   DelphesDataFormat data_;
@@ -101,11 +104,11 @@ class DelphesTreeReader : public TreeReaderBase
   }
 
   /// Get the file size
-  virtual Long64_t GetFinalPosition()
+  virtual MAint64 GetFinalPosition()
   { return total_nevents_; }
 
   /// Get the position in file (in octet)
-  virtual Long64_t GetPosition()
+  virtual MAint64 GetPosition()
   { return read_nevents_; }
 
 

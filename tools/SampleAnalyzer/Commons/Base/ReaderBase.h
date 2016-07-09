@@ -25,6 +25,7 @@
 #ifndef READER_BASE_h
 #define READER_BASE_h
 
+
 // STL headers
 #include <fstream>
 #include <iostream>
@@ -32,15 +33,13 @@
 #include <cmath>
 
 // SampleAnalyzer headers
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
+#include "SampleAnalyzer/Commons/Base/StatusCode.h"
 #include "SampleAnalyzer/Commons/Base/Configuration.h"
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
 #include "SampleAnalyzer/Commons/Service/Physics.h"
-#include "SampleAnalyzer/Commons/Base/StatusCode.h"
 
-// ROOT headers
-#include <TVector.h>
-#include <TClonesArray.h>
 
 namespace MA5
 {
@@ -53,10 +52,10 @@ class ReaderBase
  protected:
 
   /// Allowing to read data from RFIO
-  bool rfio_;
+  MAbool rfio_;
 
   /// Allowing to read compressed file
-  bool compress_;
+  MAbool compress_;
 
   /// User configuration
   Configuration cfg_;
@@ -79,33 +78,33 @@ class ReaderBase
   }
 
   /// Initialize (virtual pure)
-  virtual bool Initialize(const std::string& rawfilename,
+  virtual MAbool Initialize(const std::string& rawfilename,
                           const Configuration& cfg) = 0;
 
   /// Read the sample (virtual pure)
-  virtual bool ReadHeader(SampleFormat& mySample) = 0;
+  virtual MAbool ReadHeader(SampleFormat& mySample) = 0;
 
   /// Finalize the header (virtual pure)
-  virtual bool FinalizeHeader(SampleFormat& mySample) = 0;
+  virtual MAbool FinalizeHeader(SampleFormat& mySample) = 0;
 
   /// Read the event (virtual pure)
   virtual StatusCode::Type ReadEvent(EventFormat& myEvent, SampleFormat& mySample) = 0;
 
   /// Finalize the event (virtual pure)
-  virtual bool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent) = 0;
+  virtual MAbool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent) = 0;
 
   /// Finalize
-  virtual bool Finalize()=0;
+  virtual MAbool Finalize()=0;
 
   /// Is the file stored in Rfio ?
-  static bool IsRfioMode(const std::string& name)
+  static MAbool IsRfioMode(const std::string& name)
   {  
     if (name.find("rfio:")==0) return true;
     return false;
   }
 
   /// Is compressed file ?
-  static bool IsCompressedMode(const std::string& name)
+  static MAbool IsCompressedMode(const std::string& name)
   {
     if (name.size()<4) return false;
     if (name.find(".gz")==name.size()-3) return true;
@@ -121,13 +120,13 @@ class ReaderBase
   }
 
   /// Get the file size
-  virtual Long64_t GetFileSize()=0;
+  virtual MAint64 GetFileSize()=0;
 
   /// Get the position in file
-  virtual Long64_t GetPosition()=0;
+  virtual MAint64 GetPosition()=0;
 
   /// Get the final position in file
-  virtual Long64_t GetFinalPosition()=0;
+  virtual MAint64 GetFinalPosition()=0;
 
 
 };

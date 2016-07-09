@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -48,7 +48,7 @@ bool DJRextractor::Initialize()
 }
 
 
-bool DJRextractor::Execute(SampleFormat& mySample, const EventFormat& myEvent, std::vector<Double_t>& DJRvalues)
+MAbool DJRextractor::Execute(SampleFormat& mySample, const EventFormat& myEvent, std::vector<MAdouble64>& DJRvalues)
 {
   // Safety
   if (mySample.mc()==0) return false;
@@ -71,14 +71,14 @@ void DJRextractor::Finalize()
 }
 
 
-Double_t DJRextractor::rapidity(Double_t px, Double_t py, Double_t pz)
+MAdouble64 DJRextractor::rapidity(MAdouble64 px, MAdouble64 py, MAdouble64 pz)
 {
   double PTJET = sqrt( px*px + py*py);
   return fabs(log(std::min((sqrt(PTJET*PTJET+pz*pz)+fabs(pz ))/PTJET,1e5)));
 }
 
 
-void DJRextractor::ExtractDJR(const std::vector<fastjet::PseudoJet>& inputs,std::vector<Double_t>& DJRvalues)
+void DJRextractor::ExtractDJR(const std::vector<fastjet::PseudoJet>& inputs,std::vector<MAdouble64>& DJRvalues)
 {
   // JetDefinition_
   fastjet::ClusterSequence sequence(inputs, *JetDefinition_);
@@ -98,7 +98,7 @@ void DJRextractor::SelectParticles(std::vector<fastjet::PseudoJet>& inputs,
     indices[&(myEvent->particles()[i])]=i;
 
   // The main routine
-  std::map<const MCParticleFormat*,bool> filters;
+  std::map<const MCParticleFormat*,MAbool> filters;
   for (unsigned int i=0;i<myEvent->particles().size();i++)
   {
     if (myEvent->particles()[i].mother1()==0) continue;
@@ -118,10 +118,10 @@ void DJRextractor::SelectParticles(std::vector<fastjet::PseudoJet>& inputs,
       else
       {
         // Get all brothers and sisters and kill doubles
-        for(int j=family.size()-1;j>0;j--)
+        for(MAint32 j=family.size()-1;j>0;j--)
         {
           if (indices[family[j]] ==indices[part]) { family.erase(family.begin()+j); continue; }
-          for(int k=j+1;k<family.size();k++)
+          for(MAuint32 k=j+1;k<family.size();k++)
             if (indices[family[j]]==indices[family[k]]) { family.erase(family.begin()+k); break; }
         }
         // Checking whether we have partons in the family
@@ -134,8 +134,8 @@ void DJRextractor::SelectParticles(std::vector<fastjet::PseudoJet>& inputs,
           if(family[i]->pdgid()==21) ng++;
           if(family[i]->pdgid()==part->mother1()->pdgid()) ninit++;
         }
-        bool condition1 = part->mother1()->pdgid()!=21 && ninit>0;
-        bool condition2 = part->mother1()->pdgid()==21 && (ng>=2 || (nqb>0 && nq>0));
+        MAbool condition1 = part->mother1()->pdgid()!=21 && ninit>0;
+        MAbool condition2 = part->mother1()->pdgid()==21 && (ng>=2 || (nqb>0 && nq>0));
         if(!condition1 && !condition2) filters[part]=true;
         else                           filters[part]=false;
       }
@@ -154,7 +154,7 @@ void DJRextractor::SelectParticles(std::vector<fastjet::PseudoJet>& inputs,
     // Selecting states not coming from initial proton (beam remnant) 
     // or hadronization
     const MCParticleFormat* myPart = &(myEvent->particles()[i]);
-    bool test=true;
+    MAbool test=true;
     while (myPart->mother1()!=0)
     {
       if (myPart->mothup1_==1 || myPart->mothup1_==2)

@@ -26,25 +26,20 @@
 #define DELPHES_MEMORY_INTERFACE_h
 
 
-//ROOT header
-#include <TObjArray.h>
-#include <TFile.h>
-#include <TDatabasePDG.h>
-#include <TParticlePDG.h>
-#include <TFolder.h>
-#include <TClonesArray.h>
-
 // STL header
 #include <string>
 #include <map>
 #include <iostream>
+#include <vector>
 
 // SampleAnalyzer headers
-// |- core functions
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/Base/StatusCode.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Commons/Base/DetectorBase.h"
+
+class TObjArray;
+class TFolder;
 
 namespace MA5
 {

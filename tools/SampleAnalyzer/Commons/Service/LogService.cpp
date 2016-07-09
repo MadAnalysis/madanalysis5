@@ -35,7 +35,7 @@ LogService* LogService::Service_ = 0;
 void LogService::SetVerbosityLevel(VerbosityLevel level)
 {
   // Converting to integer
-  UInt_t myLevel = static_cast<UInt_t>(level);
+  MAuint32 myLevel = static_cast<MAuint32>(level);
 
   // Setting the internal data
   if (myLevel<=1) Level_=DEBUG_LEVEL;

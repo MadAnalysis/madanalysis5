@@ -22,23 +22,29 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#include "SampleAnalyzer/Interfaces/delphesMA5tune/DetectorDelphesMA5tune.h"
+// STL headers
 #include <fstream>
-#include <TROOT.h>
 
-//Delphes header
+// SampleAnalyzer headers
+#include "SampleAnalyzer/Interfaces/delphesMA5tune/DetectorDelphesMA5tune.h"
+#include "SampleAnalyzer/Commons/Service/DisplayService.h"
+
+// ROOT header
+#include <TError.h>
+#include <TROOT.h>
+#include <TObjArray.h>
+#include <TFile.h>
+#include <TDatabasePDG.h>
+#include <TParticlePDG.h>
+#include <TFolder.h>
+
+// Delphes header
 #include "external/ExRootAnalysis/ExRootConfReader.h"
 #include "external/ExRootAnalysis/ExRootTreeWriter.h"
 #include "external/ExRootAnalysis/ExRootTreeBranch.h"
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
 #include "modules/Delphes.h"
-
-//SampleAnalyzer header
-#include "SampleAnalyzer/Commons/Service/DisplayService.h"
-
-//ROOT header
-#include <TError.h>
 
 
 using namespace MA5;
@@ -260,7 +266,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
   if (jetsArray==0) {if (!first_) WARNING << "no jets collection found" << endmsg;}
   else
   {
-    for (unsigned int i=0;i<static_cast<UInt_t>(jetsArray->GetEntries());i++)
+    for (unsigned int i=0;i<static_cast<MAuint32>(jetsArray->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(jetsArray->At(i));
       if (cand==0) 
@@ -271,7 +277,11 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
       if (cand->TauTag==1)
       {
         RecTauFormat* tau = myEvent.rec()->GetNewTau();
-        tau->momentum_ = cand->Momentum;
+        double px = cand->Momentum.Px();
+        double py = cand->Momentum.Py();
+        double pz = cand->Momentum.Pz();
+        double e  = cand->Momentum.E();
+        tau->momentum_.SetPxPyPzE(px,py,pz,e);
         if (cand->Charge>0) tau->charge_=true; else tau->charge_=false;
 
         if (cand->Eem!=0) tau->HEoverEE_ = cand->Ehad/cand->Eem; else tau->HEoverEE_ = 999.;
@@ -280,7 +290,11 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
       else
       {
         RecJetFormat* jet = myEvent.rec()->GetNewJet();
-        jet->momentum_ = cand->Momentum;
+        double px = cand->Momentum.Px();
+        double py = cand->Momentum.Py();
+        double pz = cand->Momentum.Pz();
+        double e  = cand->Momentum.E();
+        jet->momentum_.SetPxPyPzE(px,py,pz,e);
         jet->btag_ = cand->BTag;
         if (cand->Eem!=0) jet->HEoverEE_ = cand->Ehad/cand->Eem; else jet->HEoverEE_ = 999.;
         jet->ntracks_ = 0; // To fix later
@@ -293,7 +307,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
   if (genjetsArray==0) {if (!first_) WARNING << "no genjets collection found" << endmsg;}
   else
   {
-    for (unsigned int i=0;i<static_cast<UInt_t>(genjetsArray->GetEntries());i++)
+    for (unsigned int i=0;i<static_cast<MAuint32>(genjetsArray->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(genjetsArray->At(i));
       if (cand==0) 
@@ -302,7 +316,11 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
         continue;
       }
       RecJetFormat* genjet = myEvent.rec()->GetNewGenJet();
-      genjet->momentum_ = cand->Momentum;
+      double px = cand->Momentum.Px();
+      double py = cand->Momentum.Py();
+      double pz = cand->Momentum.Pz();
+      double e  = cand->Momentum.E();
+      genjet->momentum_.SetPxPyPzE(px,py,pz,e);
       genjet->btag_ = cand->BTag;
     }
   }
@@ -313,7 +331,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
   if (muonArray==0) {if (!first_) WARNING << "no muons collection found" << endmsg;}
   else
   {
-    for (unsigned int i=0;i<static_cast<UInt_t>(muonArray->GetEntries());i++)
+    for (unsigned int i=0;i<static_cast<MAuint32>(muonArray->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(muonArray->At(i));
       if (cand==0) 
@@ -322,7 +340,11 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
         continue;
       }
       RecLeptonFormat* muon = myEvent.rec()->GetNewMuon();
-      muon->momentum_ = cand->Momentum;
+      double px = cand->Momentum.Px();
+      double py = cand->Momentum.Py();
+      double pz = cand->Momentum.Pz();
+      double e  = cand->Momentum.E();
+      muon->momentum_.SetPxPyPzE(px,py,pz,e);
       muon->SetCharge(cand->Charge);
     }
   }
@@ -333,7 +355,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
   if (elecArray==0) {if (!first_) WARNING << "no elecs collection found" << endmsg;}
   else
   {
-    for (unsigned int i=0;i<static_cast<UInt_t>(elecArray->GetEntries());i++)
+    for (unsigned int i=0;i<static_cast<MAuint32>(elecArray->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(elecArray->At(i));
       if (cand==0) 
@@ -342,7 +364,11 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
         continue;
       }
       RecLeptonFormat* elec = myEvent.rec()->GetNewElectron();
-      elec->momentum_ = cand->Momentum;
+      double px = cand->Momentum.Px();
+      double py = cand->Momentum.Py();
+      double pz = cand->Momentum.Pz();
+      double e  = cand->Momentum.E();
+      elec->momentum_.SetPxPyPzE(px,py,pz,e);
       elec->SetCharge(cand->Charge);
     }
   }
@@ -353,7 +379,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
   if (trackArray==0) {if (!first_) WARNING << "no tracks collection found" << endmsg;}
   else
   {
-    for (unsigned int i=0;i<static_cast<UInt_t>(trackArray->GetEntries());i++)
+    for (unsigned int i=0;i<static_cast<MAuint32>(trackArray->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(trackArray->At(i));
       if (cand==0) 
@@ -364,7 +390,11 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
       RecTrackFormat* track = myEvent.rec()->GetNewTrack();
       track->pdgid_ = cand->PID;
       if (cand->Charge>0) track->charge_=true; else track->charge_=false;
-      track->momentum_=cand->Momentum;
+      double px = cand->Momentum.Px();
+      double py = cand->Momentum.Py();
+      double pz = cand->Momentum.Pz();
+      double e  = cand->Momentum.E();
+      track->momentum_.SetPxPyPzE(px,py,pz,e);
       track->etaOuter_=cand->Position.Eta();
       track->phiOuter_=cand->Position.Phi();
     }

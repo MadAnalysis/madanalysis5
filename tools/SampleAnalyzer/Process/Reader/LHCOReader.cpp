@@ -178,11 +178,11 @@ void LHCOReader::FillEventParticleLine(const std::string& line, EventFormat& myE
   str << line;
   str >> firstchar;
 
-  Double_t  tmp;  // temporary variable to fill in LorentzVector
-  Double_t  eta;
-  Double_t  phi;  // to define the MET
-  Double_t  pt;
-  Double_t  mass;
+  MAfloat64  tmp;  // temporary variable to fill in LorentzVector
+  MAfloat64  eta;
+  MAfloat64  phi;  // to define the MET
+  MAfloat64  pt;
+  MAfloat64  mass;
 
   // 2nd column : object type
   std::string muf;
@@ -282,8 +282,8 @@ void LHCOReader::FillEventParticleLine(const std::string& line, EventFormat& myE
     str >> tmp;
     muon->sumPT_isol_=std::floor(tmp);
 
-    Float_t ET_PT=tmp-muon->sumPT_isol_;
-    Bool_t test=false;
+    MAfloat32 ET_PT=tmp-muon->sumPT_isol_;
+    MAbool test=false;
     for (unsigned int j=0;j<5;j++)
     {
       ET_PT*=10;

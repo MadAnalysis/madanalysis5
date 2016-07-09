@@ -28,6 +28,7 @@
 // STL headers
 
 // SampleAnalyzer headers
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/Service/IsolationBase.h"
 
 
@@ -55,10 +56,10 @@ class IsolationTracker : public IsolationBase
     //                Isolation of one particle
     // -------------------------------------------------------------
 
-    virtual Double_t relIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
+    virtual MAfloat64 relIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
     { return relIsolation(&part, event, DR, PTmin); }
 
-    virtual Double_t relIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
+    virtual MAfloat64 relIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
     {
       if (part==0) return 0;
       if (event==0) return 0;
@@ -66,23 +67,23 @@ class IsolationTracker : public IsolationBase
       return sumIsolation(part,event,DR,PTmin)/part->pt();
     }
 
-    virtual Double_t sumIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
+    virtual MAfloat64 sumIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
     { return sumIsolation(&part, event, DR, PTmin); }
 
-    virtual Double_t sumIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
+    virtual MAfloat64 sumIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
     {
       if (part==0) return 0;
       if (event==0) return 0;
-      Double_t sum=0.;
+      MAfloat64 sum=0.;
       sum += sumPT(part,event->tracks(),DR,PTmin);
       sum -= part->pt();
       return sum;
     }
 
-    virtual Double_t relIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
+    virtual MAfloat64 relIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
     { return relIsolation(&part, event, DR, PTmin); }
 
-    virtual Double_t relIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
+    virtual MAfloat64 relIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
     {
       if (part==0) return 0;
       if (event==0) return 0;
@@ -90,14 +91,14 @@ class IsolationTracker : public IsolationBase
       return sumIsolation(part,event,DR,PTmin)/part->pt();
     }
 
-    virtual Double_t sumIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
+    virtual MAfloat64 sumIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
     { return sumIsolation(&part, event, DR, PTmin); }
 
-    virtual Double_t sumIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
+    virtual MAfloat64 sumIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin=0.5) const
     {
       if (part==0) return 0;
       if (event==0) return 0;
-      Double_t sum=0.;
+      MAfloat64 sum=0.;
       sum += sumPT(part,event->tracks(),DR,PTmin);
       return sum;
     }

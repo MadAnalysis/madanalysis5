@@ -37,9 +37,6 @@
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
 #include "SampleAnalyzer/Commons/Service/Physics.h"
 
-// ROOT headers
-#include <TVector.h>
-#include <TClonesArray.h>
 
 namespace MA5
 {

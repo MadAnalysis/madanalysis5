@@ -85,7 +85,7 @@ StatusCode::Type HEPMCReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySa
   // Initializing MC event
   myEvent.InitializeMC();
 
-  Bool_t eventOnGoing=false;
+  MAbool eventOnGoing=false;
 
   // Read the saved line
   if (savedline_!="") 
@@ -214,7 +214,7 @@ bool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 //------------------------------------------------------------------------------
 // FillWeightNames
 //------------------------------------------------------------------------------
-Bool_t HEPMCReader::FillWeightNames(const std::string& line)
+MAbool HEPMCReader::FillWeightNames(const std::string& line)
 {
   // Splitting line in words
   std::stringstream str;
@@ -253,7 +253,7 @@ Bool_t HEPMCReader::FillWeightNames(const std::string& line)
 //------------------------------------------------------------------------------
 // FillHeavyIons
 //------------------------------------------------------------------------------
-Bool_t HEPMCReader::FillHeavyIons(const std::string& line)
+MAbool HEPMCReader::FillHeavyIons(const std::string& line)
 {
   if (line!="") if (firstHeavyIons_) 
      WARNING << "WARNING: HeavyIons block is not "
@@ -266,7 +266,7 @@ Bool_t HEPMCReader::FillHeavyIons(const std::string& line)
 //------------------------------------------------------------------------------
 // FillEventHeader
 //------------------------------------------------------------------------------
-Bool_t HEPMCReader::FillEvent(const std::string& line,
+MAbool HEPMCReader::FillEvent(const std::string& line,
                               EventFormat& myEvent, 
                               SampleFormat& mySample)
 {
@@ -344,7 +344,7 @@ void HEPMCReader::FillEventInformations(const std::string& line,
   str >> tmp;
   if (tmp>0)
   {
-    std::vector<Long64_t> randoms(static_cast<unsigned int>(tmp));
+    std::vector<MAint64> randoms(static_cast<unsigned int>(tmp));
     for (unsigned int i=0;i<randoms.size();i++) str >> randoms[i];
   }
 
@@ -411,11 +411,11 @@ void HEPMCReader::FillCrossSection(const std::string& line,
   str >> firstc;
 
   // xsection mean
-  Double_t xsectmp=0;
+  MAfloat64 xsectmp=0;
   str >> xsectmp;
 
   // xsection error
-  Double_t xsectmp_err=0;
+  MAfloat64 xsectmp_err=0;
   str >> xsectmp_err;
 
   // saving xsection mean & error
@@ -463,7 +463,7 @@ void HEPMCReader::FillEventParticleLine(const std::string& line,
   MCParticleFormat * part = myEvent.mc()->GetNewParticle();
   char linecode;
   str >> linecode;
-  UInt_t partnum;
+  MAuint32 partnum;
   str >> partnum;
   str >> part->pdgid_;
   str >> tmp; part->momentum_.SetPx(tmp*energy_unit_);

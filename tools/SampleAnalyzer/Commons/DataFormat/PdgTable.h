@@ -48,18 +48,18 @@ class PdgTable {
 
 	PdgTable& operator=(const PdgTable& Table);
 
-  const std::map<Int_t, PdgDataFormat>& Table() 
+  const std::map<MAint32, PdgDataFormat>& Table() 
   { return Table_; }
 
-	void Insert(const Int_t Pdgid, const PdgDataFormat &p);
+	void Insert(const MAint32 Pdgid, const PdgDataFormat &p);
 
 	void Print() const;
 
-  const PdgDataFormat& operator[](const Int_t Pdgid) const;
+  const PdgDataFormat& operator[](const MAint32 Pdgid) const;
 
   private:
 
-	std::map<Int_t, PdgDataFormat> Table_;
+	std::map<MAint32, PdgDataFormat> Table_;
   PdgDataFormat empty_;
 };
 

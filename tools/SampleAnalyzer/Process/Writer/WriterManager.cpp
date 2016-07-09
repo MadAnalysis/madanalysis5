@@ -62,7 +62,7 @@ WriterBase* WriterManager::GetByFileExtension(std::string filename)
                  filename.begin(), std::ptr_fun<int, int>(std::tolower));
 
  // Loop over names
-  for (std::map<std::string, UInt_t>::const_iterator
+  for (std::map<std::string, MAuint32>::const_iterator
          it = Names_.begin(); it != Names_.end(); it++)
   {
     // easy case to reject

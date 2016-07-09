@@ -28,6 +28,13 @@
 // Delphes header
 #include "classes/DelphesClasses.h"
 
+//ROOT header
+#include <TObjArray.h>
+#include <TFile.h>
+#include <TDatabasePDG.h>
+#include <TParticlePDG.h>
+#include <TFolder.h>
+#include <TClonesArray.h>
 
 using namespace MA5;
 
@@ -161,7 +168,7 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
   // --------------Jet collection
   if (Jet_!=0)
   {
-    for (unsigned int i=0;i<static_cast<UInt_t>(Jet_->GetEntries());i++)
+    for (unsigned int i=0;i<static_cast<MAuint32>(Jet_->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(Jet_->At(i));
       if (cand==0) 
@@ -172,7 +179,7 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
       if (cand->TauTag==1)
       {
         RecTauFormat* tau = myEvent.rec()->GetNewTau();
-        tau->momentum_ = cand->Momentum;
+        tau->momentum_.SetPxPyPzE(cand->Momentum.Px(),cand->Momentum.Py(),cand->Momentum.Pz(),cand->Momentum.E());
         if (cand->Charge>0) tau->charge_=true; else tau->charge_=false;
         if (cand->Eem!=0) tau->HEoverEE_ = cand->Ehad/cand->Eem; else tau->HEoverEE_ = 999.;
         tau->ntracks_ = 0; // To fix later
@@ -180,7 +187,7 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
       else
       {
         RecJetFormat* jet = myEvent.rec()->GetNewJet();
-        jet->momentum_ = cand->Momentum;
+        jet->momentum_.SetPxPyPzE(cand->Momentum.Px(),cand->Momentum.Py(),cand->Momentum.Pz(),cand->Momentum.E());
         jet->btag_ = cand->BTag;
         if (cand->Eem!=0) jet->HEoverEE_ = cand->Ehad/cand->Eem; else jet->HEoverEE_ = 999.;
         jet->ntracks_ = 0; // To fix later
@@ -191,7 +198,7 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
   // --------------GenJet collection
   /*  if (genjetsArray!=0)
   {
-    for (unsigned int i=0;i<static_cast<UInt_t>(genjetsArray->GetEntries());i++)
+    for (unsigned int i=0;i<static_cast<MAuint32>(genjetsArray->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(genjetsArray->At(i));
       if (cand==0) 
@@ -208,7 +215,7 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
   // --------------Muon collection
   if (Muon_!=0)
   {
-    for (unsigned int i=0;i<static_cast<UInt_t>(Muon_->GetEntries());i++)
+    for (unsigned int i=0;i<static_cast<MAuint32>(Muon_->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(Muon_->At(i));
       if (cand==0) 
@@ -217,7 +224,7 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
         continue;
       }
       RecLeptonFormat* muon = myEvent.rec()->GetNewMuon();
-      muon->momentum_ = cand->Momentum;
+      muon->momentum_.SetPxPyPzE(cand->Momentum.Px(),cand->Momentum.Py(),cand->Momentum.Pz(),cand->Momentum.E());
       muon->SetCharge(cand->Charge);
     }
   }
@@ -225,7 +232,7 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
   // --------------Electron collection
   if (Electron_!=0)
   {
-    for (unsigned int i=0;i<static_cast<UInt_t>(Electron_->GetEntries());i++)
+    for (unsigned int i=0;i<static_cast<MAuint32>(Electron_->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(Electron_->At(i));
       if (cand==0) 
@@ -234,7 +241,7 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
         continue;
       }
       RecLeptonFormat* elec = myEvent.rec()->GetNewElectron();
-      elec->momentum_ = cand->Momentum;
+      elec->momentum_.SetPxPyPzE(cand->Momentum.Px(),cand->Momentum.Py(),cand->Momentum.Pz(),cand->Momentum.E());
       elec->SetCharge(cand->Charge);
     }
   }
@@ -242,7 +249,7 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
   // --------------Photon collection
   if (Photon_!=0)
   {
-    for (unsigned int i=0;i<static_cast<UInt_t>(Photon_->GetEntries());i++)
+    for (unsigned int i=0;i<static_cast<MAuint32>(Photon_->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(Photon_->At(i));
       if (cand==0) 
@@ -253,7 +260,7 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
       else
       {
         RecPhotonFormat* photon = myEvent.rec()->GetNewPhoton();
-        photon->momentum_ = cand->Momentum;
+        photon->momentum_.SetPxPyPzE(cand->Momentum.Px(),cand->Momentum.Py(),cand->Momentum.Pz(),cand->Momentum.E());
         if (cand->Eem!=0) photon->HEoverEE_ = cand->Ehad/cand->Eem; else photon->HEoverEE_ = 999.;
       }
     }
@@ -262,7 +269,7 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
   // --------------Track collection
   if (Track_!=0)
   {
-    for (unsigned int i=0;i<static_cast<UInt_t>(Track_->GetEntries());i++)
+    for (unsigned int i=0;i<static_cast<MAuint32>(Track_->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(Track_->At(i));
       if (cand==0) 
@@ -273,7 +280,7 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
       RecTrackFormat* track = myEvent.rec()->GetNewTrack();
       track->pdgid_ = cand->PID;
       if (cand->Charge>0) track->charge_=true; else track->charge_=false;
-      track->momentum_=cand->Momentum;
+      track->momentum_.SetPxPyPzE(cand->Momentum.Px(),cand->Momentum.Py(),cand->Momentum.Pz(),cand->Momentum.E());
       track->etaOuter_=cand->Position.Eta();
       track->phiOuter_=cand->Position.Phi();
     }
@@ -313,7 +320,7 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
   // --------------Tower collection
   if (Tower_!=0)
   {
-    for (unsigned int i=0;i<static_cast<UInt_t>(Tower_->GetEntries());i++)
+    for (unsigned int i=0;i<static_cast<MAuint32>(Tower_->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(Tower_->At(i));
       if (cand==0) 
@@ -322,14 +329,14 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
         continue;
       }
       RecTowerFormat* tower = myEvent.rec()->GetNewTower();
-      tower->momentum_=cand->Momentum;
+      tower->momentum_.SetPxPyPzE(cand->Momentum.Px(),cand->Momentum.Py(),cand->Momentum.Pz(),cand->Momentum.E());
     }
   }
 
   // --------------EFlowTrack collection
   if (EFlowTrack_!=0)
   {
-    for (unsigned int i=0;i<static_cast<UInt_t>(EFlowTrack_->GetEntries());i++)
+    for (unsigned int i=0;i<static_cast<MAuint32>(EFlowTrack_->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(EFlowTrack_->At(i));
       if (cand==0) 
@@ -338,14 +345,14 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
         continue;
       }
       RecTrackFormat * track = myEvent.rec()->GetNewEFlowTrack();
-      track->momentum_=cand->Momentum;
+      track->momentum_.SetPxPyPzE(cand->Momentum.Px(),cand->Momentum.Py(),cand->Momentum.Pz(),cand->Momentum.E());
     }
   }
 
   // --------------EFlowPhoton collection
   if (EFlowPhoton_!=0)
   {
-    for (unsigned int i=0;i<static_cast<UInt_t>(EFlowPhoton_->GetEntries());i++)
+    for (unsigned int i=0;i<static_cast<MAuint32>(EFlowPhoton_->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(EFlowPhoton_->At(i));
       if (cand==0) 
@@ -354,14 +361,14 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
         continue;
       }
       RecParticleFormat * tower = myEvent.rec()->GetNewEFlowPhoton();
-      tower->momentum_=cand->Momentum;
+      tower->momentum_.SetPxPyPzE(cand->Momentum.Px(),cand->Momentum.Py(),cand->Momentum.Pz(),cand->Momentum.E());
     }
   }
 
   // --------------EFlowNeutral collection
   if (EFlowNeutral_!=0)
   {
-    for (unsigned int i=0;i<static_cast<UInt_t>(EFlowNeutral_->GetEntries());i++)
+    for (unsigned int i=0;i<static_cast<MAuint32>(EFlowNeutral_->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(EFlowNeutral_->At(i));
       if (cand==0) 
@@ -370,7 +377,7 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
         continue;
       }
       RecParticleFormat * tower = myEvent.rec()->GetNewEFlowNeutralHadron();
-      tower->momentum_=cand->Momentum;
+      tower->momentum_.SetPxPyPzE(cand->Momentum.Px(),cand->Momentum.Py(),cand->Momentum.Pz(),cand->Momentum.E());
     }
   }
 

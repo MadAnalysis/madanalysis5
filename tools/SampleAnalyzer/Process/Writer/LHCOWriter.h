@@ -45,7 +45,7 @@ class LHCOWriter : public WriterTextBase
   // -------------------------------------------------------------
  protected:
 
-  UInt_t counter_;
+  MAuint32 counter_;
 
   // -------------------------------------------------------------
   //                       method members

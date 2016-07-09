@@ -25,6 +25,7 @@
 /// STL headers
 #include <iomanip>
 #include <algorithm>
+#include <vector>
 
 /// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/LogReport.h"
@@ -40,7 +41,7 @@ void LogReport::WriteGenericReport(LogStream& os) const
   // Skipping print if table empty
   if (table.empty()) return; 
 
-  UInt_t index=0;
+  MAuint32 index=0;
   for (MsgConstIterator it = MsgTable_.begin(); it!=MsgTable_.end(); it++)
   { 
     table[index]=&(*it);
@@ -81,7 +82,7 @@ void LogReport::WriteGenericReport(LogStream& os) const
   os << "|"; os.repeat('-',78); os << "|" << endmsg;
 
 
-  UInt_t precision = os.precision();
+  MAuint32 precision = os.precision();
   os.precision(5);
 
   /// Loop over the table

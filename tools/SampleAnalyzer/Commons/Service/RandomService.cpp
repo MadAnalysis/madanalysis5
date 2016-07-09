@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -23,7 +23,10 @@
 
 
 // SampleAnalyzer headers
-#include "SampleAnalyzer/Commons/Base/ClusterAlgoBase.h"
-#include "SampleAnalyzer/Commons/Base/DetectorBase.h"
-#include "SampleAnalyzer/Commons/Base/ReaderBase.h"
+#include "SampleAnalyzer/Commons/Service/RandomService.h"
+
+using namespace MA5;
+
+/// Initializing the static member 
+RandomService* RandomService::Service_ = 0;
 

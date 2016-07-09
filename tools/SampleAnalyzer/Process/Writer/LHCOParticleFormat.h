@@ -29,8 +29,7 @@
 #include <iostream>
 #include <string>
 
-// ROOT headers
-#include <Rtypes.h>
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 
 namespace MA5
 {
@@ -43,18 +42,18 @@ class LHCOParticleFormat
   // -------------------------------------------------------------
  public:
 
-  UInt_t id;
-  Float_t eta;
-  Float_t phi;
-  Float_t pt;
-  Float_t jmass;
-  Float_t ntrk;
-  Float_t btag;
-  Float_t hadem;
+  MAuint32 id;
+  MAfloat32 eta;
+  MAfloat32 phi;
+  MAfloat32 pt;
+  MAfloat32 jmass;
+  MAfloat32 ntrk;
+  MAfloat32 btag;
+  MAfloat32 hadem;
 
   static const std::string header;
 
-  void Print(UInt_t num, std::ostream* out);
+  void Print(MAuint32 num, std::ostream* out);
   static void WriteEventHeader(unsigned int numEvent,std::ostream* out);
 };
 

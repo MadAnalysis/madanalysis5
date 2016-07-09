@@ -29,9 +29,6 @@
 #include "SampleAnalyzer/Process/Plot/PlotBase.h"
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelection.h"
 
-// ROOT headers
-#include <TH1F.h>
-
 // STL headers
 #include <map>
 #include <cmath>
@@ -49,27 +46,27 @@ class Histo : public PlotBase
  protected :
 
   /// Histogram arrays
-  std::vector< std::pair<Double_t,Double_t> > histo_;
-  std::pair<Double_t, Double_t> underflow_;
-  std::pair<Double_t, Double_t> overflow_;
+  std::vector< std::pair<MAfloat64,MAfloat64> > histo_;
+  std::pair<MAfloat64, MAfloat64> underflow_;
+  std::pair<MAfloat64, MAfloat64> overflow_;
 
   /// Histogram description
-  UInt_t   nbins_;
-  Double_t xmin_;
-  Double_t xmax_;
-  Double_t step_;
+  MAuint32   nbins_;
+  MAfloat64 xmin_;
+  MAfloat64 xmax_;
+  MAfloat64 step_;
 
   /// Sum of event-weights over entries
-  std::pair<Double_t,Double_t> sum_w_;
+  std::pair<MAfloat64,MAfloat64> sum_w_;
 
   /// Sum of squared weights
-  std::pair<Double_t,Double_t> sum_ww_;
+  std::pair<MAfloat64,MAfloat64> sum_ww_;
 
   /// Sum of value * weight
-  std::pair<Double_t,Double_t> sum_xw_;
+  std::pair<MAfloat64,MAfloat64> sum_xw_;
 
   /// Sum of value * value * weight
-  std::pair<Double_t,Double_t> sum_xxw_;
+  std::pair<MAfloat64,MAfloat64> sum_xxw_;
 
   /// RegionSelections attached to the histo
   std::vector<RegionSelection*> regions_;
@@ -83,7 +80,7 @@ class Histo : public PlotBase
   Histo() : PlotBase()
   {
     nbins_=100; xmin_=0; xmax_=100;
-    step_ = (xmax_ - xmin_)/static_cast<Double_t>(nbins_);
+    step_ = (xmax_ - xmin_)/static_cast<MAfloat64>(nbins_);
   }
 
   /// Constructor with argument 
@@ -91,7 +88,7 @@ class Histo : public PlotBase
   { }
 
   /// Constructor with argument 
-  Histo(const std::string& name, UInt_t nbins, Double_t xmin, Double_t xmax) :
+  Histo(const std::string& name, MAuint32 nbins, MAfloat64 xmin, MAfloat64 xmax) :
 		PlotBase(name)
   { 
     // Setting the description
@@ -112,7 +109,7 @@ class Histo : public PlotBase
       xmax_=100.;
     }
 
-    step_ = (xmax_ - xmin_)/static_cast<Double_t>(nbins_);
+    step_ = (xmax_ - xmin_)/static_cast<MAfloat64>(nbins_);
 
     // Reseting the histogram array
     histo_.resize(nbins_,std::make_pair(0.,0.));
@@ -149,7 +146,7 @@ class Histo : public PlotBase
   }
 
   /// Filling histogram
-  void Fill(Double_t value, Double_t weight=1.0)
+  void Fill(MAfloat64 value, MAfloat64 weight=1.0)
   {
     if (std::isnan(value))
     {
@@ -200,7 +197,7 @@ class Histo : public PlotBase
   virtual void Write_TextFormat(std::ostream* output);
 
   /// Write the plot in a ROOT file
-  virtual void Write_RootFormat(std::pair<TH1F*,TH1F*>& histos);
+  //  virtual void Write_RootFormat(std::pair<TH1F*,TH1F*>& histos);
 
  protected:
 

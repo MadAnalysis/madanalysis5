@@ -44,11 +44,11 @@ bool LHEReader::ReadHeader(SampleFormat& mySample)
   std::string line;
 
   // Generator tags
-  Bool_t tag_calchep = false;
-  Bool_t tag_mg5 = false;
-  Bool_t tag_ma5 = false;
-  Bool_t tag_simplified_pythia = false;
-  Bool_t tag_simplified_ma5    = false;
+  MAbool tag_calchep = false;
+  MAbool tag_mg5 = false;
+  MAbool tag_ma5 = false;
+  MAbool tag_simplified_pythia = false;
+  MAbool tag_simplified_ma5    = false;
 
   // Read line by line the file until tag <header>
   // Note from Benj: the header tags are optional according to LHE standards
@@ -182,8 +182,8 @@ bool LHEReader::ReadHeader(SampleFormat& mySample)
 bool LHEReader::FinalizeHeader(SampleFormat& mySample)
 {
   // Computing xsection an its error for the sample
-  Double_t xsection = 0.;
-  Double_t xerror   = 0.;
+  MAfloat64 xsection = 0.;
+  MAfloat64 xerror   = 0.;
   for (unsigned int i=0;i<mySample.mc()->processes().size();i++)
   {
     xsection += mySample.mc()->processes()[i].xsectionMean();
@@ -263,7 +263,7 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySamp
 bool LHEReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 {
   // Traditional LHE or simplified LHE ?
-  Bool_t simplified = (mySample.sampleFormat()==MA5FORMAT::SIMPLIFIED_LHE);
+  MAbool simplified = (mySample.sampleFormat()==MA5FORMAT::SIMPLIFIED_LHE);
 
   // Mother pointer assignment
   for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)

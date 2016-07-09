@@ -59,12 +59,12 @@ class RecLeptonFormat : public RecParticleFormat
   // -------------------------------------------------------------             
  protected:
 
-  Bool_t charge_;       /// charge of the particle 0 = -1, 1 = +1
-  Float_t sumET_isol_;  /// sumET in an isolation cone
-  Float_t sumPT_isol_;  /// sumPT in an isolation cone
+  MAbool charge_;       /// charge of the particle 0 = -1, 1 = +1
+  MAfloat32 sumET_isol_;  /// sumET in an isolation cone
+  MAfloat32 sumPT_isol_;  /// sumPT in an isolation cone
   std::vector<IsolationConeType> isolCones_; // isolation cones
-  ULong64_t refmc_;
-  UInt_t   pdg_;
+  MAuint64 refmc_;
+  MAuint32   pdg_;
 
   // -------------------------------------------------------------
   //                        method members
@@ -123,19 +123,19 @@ class RecLeptonFormat : public RecParticleFormat
   { if (charge_) return +1; else return -1; }
 
   /// Mutator related to the electric charge 
-  virtual void SetCharge(Int_t charge)
+  virtual void SetCharge(MAint32 charge)
   { if (charge>0) charge_=true; else charge_=false; }
 
   /// Accessor to sumET_isol
-  virtual const Float_t sumET_isol() const
+  virtual const MAfloat32 sumET_isol() const
   { return sumET_isol_; }
 
   /// Accessor to sumPT_isol
-  virtual const Float_t sumPT_isol() const
+  virtual const MAfloat32 sumPT_isol() const
   { return sumPT_isol_; }
 
   /// Accessor to ET_PT
-  virtual const Float_t ET_PT_isol() const
+  virtual const MAfloat32 ET_PT_isol() const
   { if (sumPT_isol_!=0) return sumET_isol_/sumPT_isol_;
     else return 0; }
 
@@ -154,14 +154,14 @@ class RecLeptonFormat : public RecParticleFormat
   void setIsolCones(const std::vector<IsolationConeType>& cones)
   { isolCones_ = cones; }
 
-  const ULong64_t& refmc() const {return refmc_;}
+  const MAuint64& refmc() const {return refmc_;}
 
   /// is it an electron?
-  Bool_t isElectron() const
+  MAbool isElectron() const
   { return (pdg_==11); }
 
   /// is it a muon?
-  Bool_t isMuon() const
+  MAbool isMuon() const
   { return (pdg_==13); }
 
   /// is it an electron?

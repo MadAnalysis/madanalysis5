@@ -33,6 +33,7 @@
 class gz_istream;
 
 // SampleAnalyzer headers
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/Base/ReaderBase.h"
 
 namespace MA5
@@ -96,13 +97,13 @@ class ReaderTextBase : public ReaderBase
   bool ReadLine(std::string& line, bool removeComment=true);
 
   /// Get the file size (in octet)
-  virtual Long64_t GetFileSize();
+  virtual MAint64 GetFileSize();
 
   /// Get the final position in file
-  virtual Long64_t GetFinalPosition();
+  virtual MAint64 GetFinalPosition();
 
   /// Get the position in file
-  virtual Long64_t GetPosition();
+  virtual MAint64 GetPosition();
 
 };
 

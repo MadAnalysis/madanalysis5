@@ -91,7 +91,7 @@ DelphesDataFormat::~DelphesDataFormat()
 // -----------------------------------------------------------------------------
 // Getentry
 // -----------------------------------------------------------------------------
-bool DelphesDataFormat::GetEntry(Long64_t treeEntry)
+bool DelphesDataFormat::GetEntry(MAint64 treeEntry)
 {
   bool test = true;
   if (branchJet_!=0)          test &= (branchJet_          -> GetEntry(treeEntry) >=0);
@@ -217,7 +217,7 @@ bool DelphesDataFormat::InitializeData(TBranch*& branch,TClonesArray*& array)
 
   // Get ClassInformation
   const char *className = element->GetClonesName();
-  Int_t size = element->GetMaximum();
+  MAint32 size = element->GetMaximum();
   TClass *cl = gROOT->GetClass(className);
   if (cl==0) return false;
 
