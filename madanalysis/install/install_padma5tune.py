@@ -358,7 +358,25 @@ class InstallPadForMA5tune:
     def Unpack(self):
         # the analyses
         for myfile, src in self.files.items():
-          shutil.copy(self.downloaddir+'/'+myfile, self.PADdir)
+            newfile=open(self.PADdir+'/'+myfile,'w')
+            oldfile=open(self.downloaddir+'/'+myfile,'r')
+            rootheaders=False
+            for line in oldfile:
+                if 'RootMainHeaders.h' in line:
+                    rootheaders=True
+                if 'TLorentzVector' in line:
+                    newfile.write(line.replace('TLorentzVector','MA5::MALorentzVector'))
+                else:
+                    newfile.write(line)
+            newfile.close()
+            oldfile.close()
+            if myfile.endswith('.h') and not rootheaders:
+                with open(self.PADdir+'/'+myfile, 'r+') as f:
+                    content = f.read()
+                    f.seek(0, 0)
+                    f.truncate()
+                    f.write(content.replace('#include','#include \"SampleAnalyzer/Interfaces/root/RootMainHeaders.h\"\n#include'))
+
         # the delphes cards
         for myfile, src in self.delphescards.items():
           shutil.copy(self.downloaddir+'/'+myfile, self.delphesdir)

@@ -44,7 +44,7 @@ class DetectMatplotlib:
         self.name         = 'Matplotlib'
         self.mandatory    = False
         self.log          = []
-        self.logger       = logging.getLogger('madanalysis')
+        self.logger       = logging.getLogger('MA5')
         self.moreInfo     = 'For more details, type: config_info matplotlib'
         # adding what you want here
 

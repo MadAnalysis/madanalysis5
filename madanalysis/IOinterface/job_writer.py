@@ -792,7 +792,10 @@ class JobWriter():
         commands.append('../../Input/'+name+'.list')
 
         # Running SampleAnalyzer
-        result = ShellCommand.Execute(commands,folder)
+        if self.main.redirectSAlogger:
+            result = ShellCommand.ExecuteWithMA5Logging(commands,folder)
+        else:
+            result = ShellCommand.Execute(commands,folder)
 
         return result
 

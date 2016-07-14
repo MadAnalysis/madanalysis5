@@ -122,6 +122,8 @@ class MA5Interpreter(Interpreter):
         main.forced = forced
         Main.forced = forced
 
+        main.redirectSAlogger = True
+
         # quiet please
         if (LoggerLevel>logging.DEBUG):
            self.logger.setLevel(100)

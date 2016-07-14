@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+171  1.4.20   (2016/07/15) fuks:    logging + -no-root 
+
 170  1.4.19   (2016/07/14) fuks:    recasting - no root - tep1 
 
 139  1.4.18   (2016/06/06) fuks:    finalizing the ma5-mag5 interface 

@@ -158,11 +158,11 @@ class PlotFlow:
 #               else:
 #                   scales.append(1)
 
-            logging.debug('Producing file '+filenameC+' ...')
+            logging.getLogger('MA5').debug('Producing file '+filenameC+' ...')
             self.DrawROOT(histos,scales,self.main.selection[iabshisto],\
                           irelhisto,filenameC,output_files)
             
-            logging.debug('Producing file '+filenamePy+' ...')
+            logging.getLogger('MA5').debug('Producing file '+filenamePy+' ...')
             self.DrawMATPLOTLIB\
                          (histos,scales,self.main.selection[iabshisto],\
                           irelhisto,filenamePy,output_files)
@@ -208,7 +208,7 @@ class PlotFlow:
         try:
             outputC = file(filenameC,'w')
         except:
-            logging.error('Impossible to write the file: '+filenameC)
+            logging.getLogger('MA5').error('Impossible to write the file: '+filenameC)
             return False
 
         # File header
@@ -521,7 +521,7 @@ class PlotFlow:
         try:
             outputC.close()
         except:
-            logging.error('Impossible to close the file: '+outputC)
+            logging.getLogger('MA5').error('Impossible to close the file: '+outputC)
             return False
 
         # Ok
@@ -560,7 +560,7 @@ class PlotFlow:
         try:
             outputPy = file(filenamePy,'w')
         except:
-            logging.error('Impossible to write the file: '+filenamePy)
+            logging.getLogger('MA5').error('Impossible to write the file: '+filenamePy)
             return False
 
         # File header
@@ -917,7 +917,7 @@ class PlotFlow:
         try:
             outputPy.close()
         except:
-            logging.error('Impossible to close the file: '+outputPy)
+            logging.getLogger('MA5').error('Impossible to close the file: '+outputPy)
             return False
 
         # Ok

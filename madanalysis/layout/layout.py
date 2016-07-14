@@ -153,17 +153,17 @@ class Layout:
         ListPlots = []
         
         # Header plots
-        logging.debug('Producing scripts for header plots ...')
+        self.logger.debug('Producing scripts for header plots ...')
         if self.main.merging.enable:
             self.merging.DrawAll(histo_path,modes,output_paths,ListPlots)
 
         # Selection plots
-        logging.debug('Producing scripts for selection plots ...')
+        self.logger.debug('Producing scripts for selection plots ...')
         if self.main.selection.Nhistos!=0:
             self.plotflow.DrawAll(histo_path,modes,output_paths,ListPlots)
 
         # Foot plots
-        logging.debug('Producing scripts for foot plots ...')
+        self.logger.debug('Producing scripts for foot plots ...')
         # to do
 
         # Launching ROOT

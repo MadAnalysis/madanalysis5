@@ -136,8 +136,8 @@ class TransverseVariables
 
     /// Core function for mt2w
     bool TestComp(const double&);
-    double GetMT2W(const MALorentzVector*,const MALorentzVector*,const MALorentzVector*,
-       const MALorentzVector&);
+    double GetMT2W(const ParticleBaseFormat*,const ParticleBaseFormat*,const ParticleBaseFormat*,
+       const ParticleBaseFormat&);
 
   public:
     /// Constructor
@@ -202,10 +202,19 @@ class TransverseVariables
       return GetMT2();
     }
 
+    /// MT2 methods
+    double MT2(const ParticleBaseFormat* p1, const ParticleBaseFormat* p2,
+      const ParticleBaseFormat& met, const double &mass)
+    {
+      InitializeMT2(p1->momentum(), p2->momentum(), met.momentum(),mass);
+      return GetMT2();
+    }
+
     double GetMT2();
 
     /// MT2W method
-    double MT2W(std::vector<const RecJetFormat*>,const RecLeptonFormat*,const MALorentzVector&);
+    double MT2W(std::vector<const RecJetFormat*>,const RecLeptonFormat*,const ParticleBaseFormat&);
+    double MT2W(std::vector<const MCParticleFormat*>,const MCParticleFormat*,const ParticleBaseFormat&);
 
   /// The Alpha_T variable
   double AlphaT(const MCEventFormat*);

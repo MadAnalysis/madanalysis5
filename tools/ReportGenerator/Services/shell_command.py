@@ -80,6 +80,30 @@ class ShellCommand():
         # Return results
         return (result.returncode==0)
 
+
+    @staticmethod
+    def ExecuteWithMA5Logging(theCommands,path,silent=False):
+
+        # Launching the commands
+        logging.getLogger('MA5')
+        try:
+            result=subprocess.Popen(theCommands, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=path)
+        except:
+            if not silent:
+                logging.getLogger('MA5').error('impossible to execute the commands: '+' '.join(theCommands))
+            return False, None
+
+        while True:
+            my_out = result.stdout.readline()
+            if my_out == '' and result.poll() is not None:
+                break
+            if my_out and not 'progress' in my_out:
+                logging.getLogger('MA5').info('    '+my_out.strip())
+        result.poll()
+
+        # Return results
+        return (result.returncode==0)
+
     @staticmethod
     def ExecuteWithCapture(theCommands,path):
 

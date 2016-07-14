@@ -85,6 +85,7 @@ class Main():
         self.ResetParameters()
         self.madgraph       = MadGraphInterface()
         self.logger         = logging.getLogger('MA5')
+        self.redirectSAlogger = False
 
 
     def ResetParameters(self):
@@ -348,9 +349,9 @@ class Main():
     currentdir = property(get_currentdir, set_currentdir)
 
     def AutoSetGraphicalRenderer(self):
-        logging.debug('Function AutoSetGraphicalRenderer:')
-        logging.debug('   - ROOT is there:       '+str(self.session_info.has_root))
-        logging.debug('   - Matplotlib is there: '+str(self.session_info.has_matplotlib))
+        self.logger.debug('Function AutoSetGraphicalRenderer:')
+        self.logger.debug('   - ROOT is there:       '+str(self.session_info.has_root))
+        self.logger.debug('   - Matplotlib is there: '+str(self.session_info.has_matplotlib))
         if self.session_info.has_root:
             self.graphic_render = GraphicRenderType.ROOT
         elif self.session_info.has_matplotlib:
