@@ -115,27 +115,30 @@ class RecastConfiguration:
           "delphes_card_atlas_sus_2014_10.tcl": ["atlas_susy_2014_10"] ,
           "delphes_card_atlas_sus_2013_04.tcl": ["atlas_susy_2013_04"] ,
           "delphes_card_cms_b2g_12_012.tcl":    ["CMS_B2G_12_012", "cms_exo_12_047", "cms_exo_12_048"],
-          "delphes_card_cms_b2g_14_004.tcl":    ["cms_b2g_12_022", "cms_b2g_14_004"] }
+          "delphes_card_cms_b2g_14_004.tcl":    ["cms_b2g_12_022", "cms_b2g_14_004"],
+          "delphes_card_ATLAS_1604_07773.tcl": ["ATLAS_1604_07773"]
+        }
 
         self.description = {
-          "atlas_susy_2013_04"     : "ATLAS - multijet + met", 
-          "atlas_sus_13_05"        : "ATLAS - stop/sbottom - 0 lepton + 2 bjets + met",
-          "atlas_susy_2013_11"     : "ATLAS - ewkinos - 2 leptons + met",
-          "atlas_susy_2013_21"     : "ATLAS - monojet",
-          "atlas_susy_2014_10"     : "ATLAS - squark-gluino - 2 leptons + jets + met",
-          "atlas_1405_7875"        : "ATLAS - squark-gluino - 0 leptons + 2-6 jets + met",
-          "atlas_higg_2013_03"     : "ATLAS - ZH to invisible + 2 leptons",
-          "ATLAS_EXOT_2014_06"     : "ATLAS - monophoton",
-          "cms_sus_13_012"         : "CMS   - squark-gluino - MET/MHT",
-          "cms_sus_13_016"         : "CMS   - gluinos - 2 leptons + bjets + met",
-          "cms_sus_14_001_monojet" : "CMS   - stop - the monojet channel",
-          "cms_sus_14_001_TopTag"  : "CMS   - stop - the top tagging channel",
-          "cms_sus_13_011"         : "CMS   - stop - 1 lepton + bjets + met",
-          "cms_exo_12_047"         : "CMS   - monophoton",
-          "cms_exo_12_048"         : "CMS   - monojet",
-          "CMS_B2G_12_012"         : "CMS   - T5/3 partners in the SSDL channel",
-          "cms_b2g_12_022"         : "CMS   - Monotop search",
-          "cms_b2g_14_004"         : "CMS   - Dark matter production with a ttbar pair"
+          "atlas_susy_2013_04"     : "ATLAS - 8 TeV - multijet + met", 
+          "atlas_sus_13_05"        : "ATLAS - 8 TeV - stop/sbottom - 0 lepton + 2 bjets + met",
+          "atlas_susy_2013_11"     : "ATLAS - 8 TeV - ewkinos - 2 leptons + met",
+          "atlas_susy_2013_21"     : "ATLAS - 8 TeV - monojet",
+          "atlas_susy_2014_10"     : "ATLAS - 8 TeV - squark-gluino - 2 leptons + jets + met",
+          "atlas_1405_7875"        : "ATLAS - 8 TeV - squark-gluino - 0 leptons + 2-6 jets + met",
+          "atlas_higg_2013_03"     : "ATLAS - 8 TeV - ZH to invisible + 2 leptons",
+          "ATLAS_EXOT_2014_06"     : "ATLAS - 8 TeV - monophoton",
+          "ATLAS_1604_07773"       : "ATLAS - 13 TeV - monojet",
+          "cms_sus_13_012"         : "CMS   - 8 TeV - squark-gluino - MET/MHT",
+          "cms_sus_13_016"         : "CMS   - 8 TeV - gluinos - 2 leptons + bjets + met",
+          "cms_sus_14_001_monojet" : "CMS   - 8 TeV - stop - the monojet channel",
+          "cms_sus_14_001_TopTag"  : "CMS   - 8 TeV - stop - the top tagging channel",
+          "cms_sus_13_011"         : "CMS   - 8 TeV - stop - 1 lepton + bjets + met",
+          "cms_exo_12_047"         : "CMS   - 8 TeV - monophoton",
+          "cms_exo_12_048"         : "CMS   - 8 TeV - monojet",
+          "CMS_B2G_12_012"         : "CMS   - 8 TeV - T5/3 partners in the SSDL channel",
+          "cms_b2g_12_022"         : "CMS   - 8 TeV - Monotop search",
+          "cms_b2g_14_004"         : "CMS   - 8 TeV - Dark matter production with a ttbar pair"
         }
 
         self.delphesruns  = []

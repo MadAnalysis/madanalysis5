@@ -41,7 +41,7 @@ class InstallPad:
         self.delphesdir  = self.installdir + "/Input/Cards"
         self.untardir    = ""
         self.ncores      = 1
-        self.analyses    = ["CMS_B2G_12_012", "cms_b2g_12_022", "cms_b2g_14_004", "cms_exo_12_048", "cms_exo_12_047", "ATLAS_EXOT_2014_06"]
+        self.analyses    = ["CMS_B2G_12_012", "cms_b2g_12_022", "cms_b2g_14_004", "cms_exo_12_048", "cms_exo_12_047", "ATLAS_EXOT_2014_06", "ATLAS_1604_07773"]
         self.files = {
           "CMS_B2G_12_012.cpp" : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.cpp",
           "CMS_B2G_12_012.h"   : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.h",
@@ -49,24 +49,32 @@ class InstallPad:
           "ATLAS_EXOT_2014_06.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2014_06.cpp",
           "ATLAS_EXOT_2014_06.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2014_06.h",
           "ATLAS_EXOT_2014_06.info": "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2014_06.info",
-          "cms_exo_12_047.cpp" : "http://inspirehep.net/record/1411894/files/cms_exo_12_047.cpp",
-          "cms_exo_12_047.h"   : "http://inspirehep.net/record/1411894/files/cms_exo_12_047.h",
-          "cms_exo_12_047.info": "http://inspirehep.net/record/1411894/files/cms_exo_12_047.info",
-          "cms_exo_12_048.cpp" : "http://inspirehep.net/record/1413153/files/cms_exo_12_048.cpp",
-          "cms_exo_12_048.h"   : "http://inspirehep.net/record/1413153/files/cms_exo_12_048.h",
-          "cms_exo_12_048.info": "http://inspirehep.net/record/1413153/files/cms_exo_12_048.info",
-          "cms_b2g_14_004.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.cpp",
-          "cms_b2g_14_004.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.h",
-          "cms_b2g_14_004.info": "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.info",
-          "cms_b2g_12_022.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_12_022.cpp",
-          "cms_b2g_12_022.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_12_022.h",
-          "cms_b2g_12_022.info": "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_12_022.info"
+#           "cms_exo_12_047.cpp" : "http://inspirehep.net/record/1411894/files/cms_exo_12_047.cpp",
+#           "cms_exo_12_047.h"   : "http://inspirehep.net/record/1411894/files/cms_exo_12_047.h",
+#           "cms_exo_12_048.cpp" : "http://inspirehep.net/record/1413153/files/cms_exo_12_048.cpp",
+#           "cms_exo_12_048.h"   : "http://inspirehep.net/record/1413153/files/cms_exo_12_048.h",
+          "cms_exo_12_047.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_12_047.cpp",
+          "cms_exo_12_047.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_12_047.h",
+          "cms_exo_12_048.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_12_048.cpp",
+          "cms_exo_12_048.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_12_048.h",
+          "cms_exo_12_047.info"   : "http://inspirehep.net/record/1411894/files/cms_exo_12_047.info",
+          "cms_exo_12_048.info"   : "http://inspirehep.net/record/1413153/files/cms_exo_12_048.info",
+          "cms_b2g_14_004.cpp"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.cpp",
+          "cms_b2g_14_004.h"      : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.h",
+          "cms_b2g_14_004.info"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.info",
+          "cms_b2g_12_022.cpp"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_12_022.cpp",
+          "cms_b2g_12_022.h"      : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_12_022.h",
+          "cms_b2g_12_022.info"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_12_022.info",
+          "ATLAS_1604_07773.cpp"  : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_1604_07773.cpp",
+          "ATLAS_1604_07773.h"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_1604_07773.h",
+          "ATLAS_1604_07773.info" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_1604_07773.info"
         }
 
         self.delphescards = {
-    "delphes_card_cms_b2g_14_004.tcl"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_b2g_14_004.tcl",
-    "delphes_card_cms_b2g_12_012.tcl"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_b2g_12_012.tcl",
-    "delphes_card_atlas_sus_2013_05_pad.tcl" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_atlas_sus_2013_05_pad.tcl"
+    "delphes_card_cms_b2g_14_004.tcl"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_b2g_14_004.tcl",
+    "delphes_card_cms_b2g_12_012.tcl"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_b2g_12_012.tcl",
+    "delphes_card_atlas_sus_2013_05_pad.tcl" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_atlas_sus_2013_05_pad.tcl",
+    "delphes_card_ATLAS_1604_07773.tcl"      : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_ATLAS_1604_07773.tcl"
         }
 
     def CreateBibtex(self):
@@ -260,12 +268,30 @@ class InstallPad:
         return True
 
     def Unpack(self):
-        # the analyses
+        # the analyses include the compatibility with v1.4
         for myfile, src in self.files.items():
-          shutil.copy(self.downloaddir+'/'+myfile, self.PADdir)
+            newfile=open(self.PADdir+'/'+myfile,'w')
+            oldfile=open(self.downloaddir+'/'+myfile,'r')
+            rootheaders=False
+            for line in oldfile:
+                if 'RootMainHeaders.h' in line:
+                    rootheaders=True
+                if 'TLorentzVector' in line:
+                    newfile.write(line.replace('TLorentzVector','MALorentzVector'))
+                else:
+                    newfile.write(line)
+            newfile.close()
+            oldfile.close()
+            if myfile.endswith('.h') and not rootheaders:
+                with open(self.PADdir+'/'+myfile, 'r+') as f:
+                    content = f.read()
+                    f.seek(0, 0)
+                    f.truncate()
+                    f.write(content.replace('#include','#include \"SampleAnalyzer/Interfaces/root/RootMainHeaders.h\"\n#include'))
+
         # the delphes cards
         for myfile, src in self.delphescards.items():
-          shutil.copy(self.downloaddir+'/'+myfile, self.delphesdir)
+            shutil.copy(self.downloaddir+'/'+myfile, self.delphesdir)
 
         return True
 

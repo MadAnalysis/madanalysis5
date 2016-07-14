@@ -113,9 +113,9 @@ class DetectManager():
                     return False
                 else:
                     if 'PrintDisableMessage' in methods:
-                        checker.PrintDisableMessage(package_name)
+                        checker.PrintDisableMessage()
                     if 'PrintInstallMessage' in methods:
-                        checker.PrintInstallMessage(package_name)
+                        checker.PrintInstallMessage()
                     return True
                 
         # 3. Veto
@@ -130,7 +130,7 @@ class DetectManager():
                 else:
                     self.PrintUSERDISABLED(package_name)
                     if 'PrintDisableMessage' in methods:
-                        checker.PrintDisableMessage(package_name)
+                        checker.PrintDisableMessage()
                     return True
 
         # 4. Does the user force something?
@@ -150,9 +150,9 @@ class DetectManager():
                     return False
                 else:
                     if 'PrintDisableMessage' in methods:
-                        checker.PrintDisableMessage(package_name)
+                        checker.PrintDisableMessage()
                     if 'PrintInstallMessage' in methods:
-                        checker.PrintInstallMessage(package_name)
+                        checker.PrintInstallMessage()
                     return True
 
             # No found -> autodetection
@@ -175,9 +175,9 @@ class DetectManager():
                     return False
                 else:
                     if 'PrintDisableMessage' in methods:
-                        checker.PrintDisableMessage(package_name)
+                        checker.PrintDisableMessage()
                     if 'PrintInstallMessage' in methods:
-                        checker.PrintInstallMessage(package_name)
+                        checker.PrintInstallMessage()
                     return True
 
             # No found -> autodetection
@@ -203,9 +203,9 @@ class DetectManager():
                     else:
                         self.PrintFAILURE(package_name)
                     if 'PrintDisableMessage' in methods:
-                        checker.PrintDisableMessage(package_name)
+                        checker.PrintDisableMessage()
                     if 'PrintInstallMessage' in methods:
-                        checker.PrintInstallMessage(package_name)
+                        checker.PrintInstallMessage()
                     return True
 
         # Case of no autodetection of the package
@@ -219,9 +219,9 @@ class DetectManager():
             else:
                 self.PrintDISABLED(package_name)
                 if 'PrintDisableMessage' in methods:
-                    checker.PrintDisableMessage(package_name)
+                    checker.PrintDisableMessage()
                 if 'PrintInstallMessage' in methods:
-                    checker.PrintInstallMessage(package_name)
+                    checker.PrintInstallMessage()
                 return True
 
         # 7. Getting more details about the package
@@ -236,9 +236,9 @@ class DetectManager():
                     return False
                 else:
                     if 'PrintDisableMessage' in methods:
-                        checker.PrintDisableMessage(package_name)
+                        checker.PrintDisableMessage()
                     if 'PrintInstallMessage' in methods:
-                        checker.PrintInstallMessage(package_name)
+                        checker.PrintInstallMessage()
                     return True
 
 
@@ -254,9 +254,9 @@ class DetectManager():
                     return False
                 else:
                     if 'PrintDisableMessage' in methods:
-                        checker.PrintDisableMessage(package_name)
+                        checker.PrintDisableMessage()
                     if 'PrintInstallMessage' in methods:
-                        checker.PrintInstallMessage(package_name)
+                        checker.PrintInstallMessage()
                     return True
 
         # 9. Finalize: displaying OK
@@ -271,9 +271,9 @@ class DetectManager():
                     return False
                 else:
                     if 'PrintDisableMessage' in methods:
-                        checker.PrintDisableMessage(package_name)
+                        checker.PrintDisableMessage()
                     if 'PrintInstallMessage' in methods:
-                        checker.PrintInstallMessage(package_name)
+                        checker.PrintInstallMessage()
                     return True
 
         # Ok
