@@ -98,7 +98,7 @@ class Main():
         self.stack          = StackingMethodType.STACK
         self.isolation      = IsolationConfiguration()
         self.output         = ""
-        self.graphic_render = GraphicRenderType.ROOT
+        self.graphic_render = GraphicRenderType.NONE
         if self.mode==MA5RunningType.RECO:
             self.normalize = NormalizeType.NONE
         else:
@@ -256,9 +256,17 @@ class Main():
             if value == "none":
                 self.graphic_render = GraphicRenderType.NONE
             elif value == "root":
-                self.graphic_render = GraphicRenderType.ROOT
+                if self.session_info.has_root:
+                    self.graphic_render = GraphicRenderType.ROOT
+                else:
+                    self.logger.error("Sorry but the Root package is not detected by MadAnalysis")
+                    return False
             elif value == "matplotlib":
-                self.graphic_render = GraphicRenderType.MATPLOTLIB
+                if self.session_info.has_matplotlib:
+                    self.graphic_render = GraphicRenderType.MATPLOTLIB
+                else:
+                    self.logger.error("Sorry but the Matplotlib package is not detected by MadAnalysis")
+                    return False
             else:
                 self.logger.error("'graphic_render' possible values are : 'none', 'root', 'matplotlib'")
                 return False
@@ -339,6 +347,22 @@ class Main():
 
     currentdir = property(get_currentdir, set_currentdir)
 
+    def AutoSetGraphicalRenderer(self):
+        logging.debug('Function AutoSetGraphicalRenderer:')
+        logging.debug('   - ROOT is there:       '+str(self.session_info.has_root))
+        logging.debug('   - Matplotlib is there: '+str(self.session_info.has_matplotlib))
+        if self.session_info.has_root:
+            self.graphic_render = GraphicRenderType.ROOT
+        elif self.session_info.has_matplotlib:
+            self.graphic_render = GraphicRenderType.MATPLOTLIB
+        else:
+            self.graphic_render = GraphicRenderType.NONE
+        self.logger.info("Packages used for graphical rendering: "+\
+                         '\x1b[32m'+\
+                         GraphicRenderType.convert2string(self.graphic_render)+\
+                         '\x1b[0m')
+
+
     def CheckConfig(self,debug=False):
         checkup = CheckUp(self.archi_info, self.session_info, debug, self.script)
         if not checkup.CheckArchitecture():
@@ -349,8 +373,11 @@ class Main():
             return False
         if not checkup.CheckMandatoryPackages():
             return False
-        if not checkup.CheckOptionalPackages():
+        if not checkup.CheckOptionalProcessingPackages():
             return False
+        if not checkup.CheckOptionalGraphicalPackages():
+            return False
+        self.AutoSetGraphicalRenderer()
 #        if not checkup.CheckGraphicalPackages():
 #            return False
         if not checkup.SetFolder():
@@ -424,7 +451,7 @@ class Main():
         if self.archi_info.has_fastjet:
             libraries.append(['FastJet', 'interface to FastJet', 'fastjet', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces',False])
             libraries.append(['test_fastjet','interface to Fastjet', 'test_fastjet', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestFastjet',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
-        if 1: #self.archi_info.has_root:
+        if self.archi_info.has_root:
             libraries.append(['Root', 'interface to Root', 'root', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libroot_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces',False])
             libraries.append(['test_root','interface to Root', 'test_root', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestRoot',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
         if self.archi_info.has_delphes:

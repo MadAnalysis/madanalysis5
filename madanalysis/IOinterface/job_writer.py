@@ -557,8 +557,9 @@ class JobWriter():
         # Options
         option.has_commons   = True
         options.has_process  = True
-        options.has_root_inc = True
-        options.has_root_lib = True
+        if self.main.archi_info.has_root:
+            options.has_root_inc = True
+            options.has_root_lib = True
         toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
 
         # File to compile
@@ -591,8 +592,9 @@ class JobWriter():
         # Options
         options.has_commons  = True
         options.has_process  = True
-        options.has_root_inc = True
-        options.has_root_lib = True
+        if self.main.archi_info.has_root:
+            options.has_root_inc = True
+            options.has_root_lib = True
         #options.has_userpackage = True
         toRemove=['Log/compilation.log','Log/linking.log','Log/cleanup.log','Log/mrproper.log']
 

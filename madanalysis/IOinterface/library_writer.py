@@ -161,7 +161,6 @@ class LibraryWriter():
         # Mode
         if package=='fastjet':
             options.has_commons=True
-            options.has_root = False
             options.has_fastjet_inc=True
             options.has_fastjet_lib=True
             toRemove.extend(['compilation_fastjet.log','linking_fastjet.log','cleanup_fastjet.log','mrproper_fastjet.log'])
@@ -240,8 +239,9 @@ class LibraryWriter():
             options.has_delphes_tag           = self.main.archi_info.has_delphes
             options.has_delphesMA5tune_tag    = self.main.archi_info.has_delphesMA5tune
             options.has_zlib_tag              = self.main.archi_info.has_zlib
-            options.has_root_tag              = True
-            options.has_root_ma5lib           = True
+            if self.main.archi_info.has_root:
+                options.has_root_tag              = True
+                options.has_root_ma5lib           = True
             toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
         elif package=='test_process':
             options.has_commons               = True

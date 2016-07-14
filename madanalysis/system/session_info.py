@@ -30,6 +30,7 @@ class SessionInfo():
         self.username           = ""
         self.tmpdir             = ""
         self.downloaddir        = ""
+        self.has_root           = False
         self.has_matplotlib     = False
         self.has_gnuplot        = False
         self.has_pdflatex       = False

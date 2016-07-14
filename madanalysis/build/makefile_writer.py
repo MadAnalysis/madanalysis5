@@ -178,11 +178,11 @@ class MakefileWriter():
             self.has_zlib_lib              = False
             self.has_fastjet_ma5lib        = False
             self.has_delphes_ma5lib        = False
-            self.has_root_lib              = False
             self.has_delphesMA5tune_ma5lib = False
             self.has_zlib_ma5lib           = False
-            self.has_root_tag              = False
             self.has_root                  = False
+            self.has_root_tag              = False
+            self.has_root_lib              = False
             self.has_root_ma5lib           = False
 
 
@@ -205,12 +205,18 @@ class MakefileWriter():
 
         # Compilers
         file.write('# Compilers\n')
-        mycommand = [archi_info.root_bin_path+'/root-config','--cxx']
-        ok, out, err = ShellCommand.ExecuteWithCapture(mycommand,'./')
-        if not ok:
-            return False
-        out=out.lstrip()
-        file.write('CXX = '+out+'\n')
+        if archi_info.has_root:
+            if archi_info.root_bin_path=='':
+                mycommand = ['root-config','--cxx']
+            else:
+                mycommand = [archi_info.root_bin_path+'/root-config','--cxx']
+            ok, out, err = ShellCommand.ExecuteWithCapture(mycommand,'./')
+            if not ok:
+                return False
+            out=out.lstrip()
+            file.write('CXX = '+out+'\n')
+        else:
+            file.write('CXX = g++\n')
         file.write('\n')
 
         # Options for C++ compilation

@@ -32,33 +32,44 @@ class ArchitectureInfo:
         self.ma5_date    = ""
         self.ma5dir      = ""
 
-        self.root_priority      = False
-        self.has_zlib           = False
-        self.zlib_priority      = False
-        self.has_delphes        = False
-        self.delphes_priority   = False
-        self.has_delphesMA5tune = False
-        self.delphesMA5tune_priority = False
-        self.has_fastjet        = False
-        self.fastjet_priority   = False
-        self.has_fortran        = False
+        self.platform = ""
+        self.release  = ""
+
+        # Main flags
+        self.isMac = False
+
+        # Is there optional package?
         self.has_root           = False
-        self.isMac              = False
+        self.has_fastjet        = False
+        self.has_zlib           = False
+        self.has_delphes        = False
+        self.has_delphesMA5tune = False
         
-        self.platform         = ""
-        self.release          = ""
+        # Library to put before all the others?
+        self.root_priority           = False
+        self.zlib_priority           = False
+        self.delphes_priority        = False
+        self.delphesMA5tune_priority = False
+        self.fastjet_priority        = False
+
+        # Version
         self.python_version   = ""
         self.gcc_version      = ""
         self.make_version     = ""
         self.gfortran_version = ""
         self.root_version     = ""
         self.fastjet_version  = ""
+
+        # Some library information to detect any change
         self.libraries        = {}
         self.headers          = {}
         self.ncores           = 0
 
+        # Library to put before all the others
         self.toPATH1   = []
         self.toLDPATH1 = []
+
+        # Library to put after all the others
         self.toPATH2   = []
         self.toLDPATH2 = []
 

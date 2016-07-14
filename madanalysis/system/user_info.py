@@ -32,7 +32,11 @@ class UserInfo:
         self.webaccess_veto = None
 
         # Root
-        self.root_bin = None
+        self.root_veto = None
+        self.root_bin  = None
+
+        # MatPlotLib
+        self.matplotlib_veto = None
 
         # Delphes
         self.delphes_veto     = None
@@ -161,6 +165,12 @@ class UserInfo:
         # Root
         elif   option=='root_bin_path':
             self.root_bin=value
+        elif   option=='root_veto':
+            self.root_veto=self.ConvertToBool(option,value,filename)
+
+        # Matplotlib
+        elif   option=='matplotlib_veto':
+            self.matplotlib_veto=self.ConvertToBool(option,value,filename)
 
         # Delphes
         elif option=='delphes_veto':

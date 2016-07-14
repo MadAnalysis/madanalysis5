@@ -141,7 +141,7 @@ class ConfigChecker:
 
     def checkPython(self):
         # Checking if Python is present
-        package_name = self.PrintLibrary('python')
+        package_name = self.PrintLibrary('Python')
         self.logger.debug('python')
 
         # Debug general
@@ -433,7 +433,7 @@ class ConfigChecker:
 
     def checkGPP(self):
         # Checking g++ release
-        package_name = self.PrintLibrary('g++')
+        package_name = self.PrintLibrary('GNU GCC g++')
         self.logger.debug('g++')
 
         # Which
@@ -619,7 +619,7 @@ class ConfigChecker:
     def checkZLIB(self):
 
         # Checking if zlib is present
-        package_name = self.PrintLibrary("zlib")
+        package_name = self.PrintLibrary("Zlib")
         self.logger.debug("zlib")
 
         # Name of the dynamic lib
@@ -734,11 +734,6 @@ class ConfigChecker:
             package_name = self.PrintLibrary("Delphes")
             self.logger.debug("Delphes")
 
-        # Name of the dynamic lib
-        libnames=['libDelphes.so','libDelphes.a']
-        if self.archi_info.isMac and 'libDelphes.dylib' not in libnames:
-            libnames.append('libDelphes.dylib')
-
         # User veto
         if self.user_info.delphes_veto:
             if not getpaths:
@@ -747,6 +742,17 @@ class ConfigChecker:
 #                self.logger.warning("Library called 'delphes' disabled.")
 #                self.logger.warning("Delphes ROOT format will be disabled.")
             return False
+
+        if not self.archi_info.has_root:
+            if not getpaths:
+                self.logger.debug("This package needs ROOT")
+                self.PrintFAIL(package_name,warning=True)
+            return False
+
+        # Name of the dynamic lib
+        libnames=['libDelphes.so','libDelphes.a']
+        if self.archi_info.isMac and 'libDelphes.dylib' not in libnames:
+            libnames.append('libDelphes.dylib')
 
         # Does the user force the paths?
         force1=False
@@ -916,16 +922,13 @@ class ConfigChecker:
         self.libs=[x for x in self.libs if not x.startswith('DEACT')]
         return True
 
+
     def checkDelphesMA5tune(self,getpaths=False):
         # Checking if Delphes-MA5tune is present
         package_name = self.PrintLibrary("Delphes-MA5tune")
         if not getpaths:
             self.logger.debug("Delphes-MA5tune")
 
-        # Name of the dynamic lib
-        libnames=['libDelphesMA5tune.so','libDelphesMA5tune.a']
-        if self.archi_info.isMac and 'libDelphesMA5tune.dylib' not in libnames:
-            libnames.append('libDelphesMA5tune.dylib')
 
         # User veto
         if self.user_info.delphesMA5tune_veto:
@@ -934,6 +937,17 @@ class ConfigChecker:
                 self.PrintFAIL(package_name,warning=True)
 #                self.logger.warning("Delphes-MA5tune is disabled. Delphes-MA5tune ROOT format will be disabled.")
             return False
+
+        if not self.archi_info.has_root:
+            if not getpaths:
+                self.logger.debug("This package needs ROOT")
+                self.PrintFAIL(package_name,warning=True)
+            return False
+
+        # Name of the dynamic lib
+        libnames=['libDelphesMA5tune.so','libDelphesMA5tune.a']
+        if self.archi_info.isMac and 'libDelphesMA5tune.dylib' not in libnames:
+            libnames.append('libDelphesMA5tune.dylib')
 
         # Does the user force the paths?
         force1=False

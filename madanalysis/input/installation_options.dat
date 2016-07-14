@@ -8,7 +8,11 @@
 # webaccess_veto = 0 # 0=No, 1=Yes
 
 # -----ROOT-----
+root_veto     = 0 # 0=No, 1=Yes
 # root_bin_path = /home/toto/root/bin
+
+# -----MATPLOTLIB-----
+matplotlib_veto = 0 # 0=No, 1=Yes
 
 # -----DELPHES----- 
 # delphes_veto     = 0 # 0=No, 1=Yes
@@ -34,8 +38,5 @@
 
 # -----LATEX-----
 # latex_veto = 0 # 0=No, 1=Yes
-
-# -----DVIPDF-----
-# dvipdf_veto = 0 # 0=No, 1=Yes
 
 

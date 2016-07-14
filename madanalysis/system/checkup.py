@@ -285,37 +285,43 @@ class CheckUp():
         # Mandatory packages
         self.logger.info("Checking mandatory packages:")
         checker = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
+
         if not checker.checkPython():
             return False
-#        if not checker.checkNumPy():
-#            return False
         if not checker.checkGPP():
             return False
         if not checker.checkMake():
             return False
-        if not checker.checkROOT():
-            return False
-#        if not checker.checkPyROOT():
-#            return False
         return True
 
-    def CheckOptionalPackages(self):
+    def CheckOptionalGraphicalPackages(self):
         # Optional packages
-        self.logger.info("Checking optional packages:")
+        self.logger.info("Checking optional packages devoted to histogramming:")
         checker = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
         checker2 = DetectManager(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
 
+        if not checker2.Execute('root_graphical'):
+            return False
+        if not checker2.Execute('matplotlib'):
+            return False
         if not checker2.Execute('pdflatex'):
             return False
         if not checker2.Execute('latex'):
             return False
-        if not checker2.Execute('dvipdf'):
-            return False
+        return True
+
+    def CheckOptionalProcessingPackages(self):
+        # Optional packages
+        self.logger.info("Checking optional packages devoted to data processing:")
+        checker = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
+        checker2 = DetectManager(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
+        
         self.archi_info.has_zlib              = checker.checkZLIB()
         self.archi_info.has_fastjet           = checker.checkFastJet()
+        if not checker2.Execute('root'):
+            return False
         self.archi_info.has_delphes           = checker.checkDelphes()
         self.archi_info.has_delphesMA5tune    = checker.checkDelphesMA5tune()
-
         return True
 
 

@@ -23,9 +23,12 @@
 
 
 class GraphicRenderType(object):
-        values = ['NONE','ROOT','MATPLOTLIB']
+	values = {'NONE' : ['none'] ,'ROOT':['Root'],'MATPLOTLIB':['Matplotlib']}
 
         class __metaclass__(type):
             def __getattr__(self, name):
-                            return self.values.index(name)
+	        return self.values.keys().index(name)
 
+            def convert2string(self,index):
+                name = self.values.keys()[index]
+                return self.values[name][0]

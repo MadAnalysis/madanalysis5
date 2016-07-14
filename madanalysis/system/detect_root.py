@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -30,14 +30,18 @@ import sys
 import re
 import platform
 from shell_command  import ShellCommand
-from madanalysis.enumeration.detect_status_type import DetectSatusType
+from madanalysis.enumeration.detect_status_type import DetectStatusType
 
 
 class DetectRoot:
 
-    def __init__(self,main):
-        self.main      = main
+    def __init__(self,archi_info, user_info, session_info, debug):
+        self.archi_info   = archi_info
+        self.user_info    = user_info
+        self.session_info = session_info
+        self.debug        = debug
         self.name      = 'Root'
+        self.mandatory = False
         self.force     = False
         self.bin_path  = ''
         self.inc_path  = ''
@@ -47,19 +51,20 @@ class DetectRoot:
         self.logger    = logging.getLogger('MA5')
 
 
-    def Initialize(self):
-        return True
-
-
-    def Finalize(self):
-        return True
+    def IsItVetoed(self):
+        if self.user_info.root_veto:
+            self.logger.debug("user setting: veto on Root")
+            return True
+        else:
+            self.logger.debug("no user veto")
+            return False
 
 
     def ManualDetection(self):
         msg = ''
         
         # User setting
-        if self.user_info.root_bin=='0':
+        if self.user_info.root_bin==None:
             return DetectStatusType.UNFOUND, msg
         self.logger.debug("User setting: root bin path is specified.")
         self.bin_path=os.path.normpath(self.user_info.root_bin)
@@ -105,7 +110,7 @@ class DetectRoot:
 		      +' - ROOT is not installed. You can download it '\
 		      +'from http://root.cern.ch\n'\
 		      +' - ROOT binary folder must be placed in the '\
-                      +'global environment variable $PATH')
+                      +'global environment variable $PATH'
                 return False, msg
             self.logger.debug("  which-all:     ")
             for file in result:
@@ -119,14 +124,13 @@ class DetectRoot:
         theCommands = ['root-config','--libdir','--incdir']
         ok, out, err = ShellCommand.ExecuteWithCapture(theCommands,'./')
         if not ok:
-            self.PrintFAIL(warning=False)
-            self.logger.error('ROOT module called "root-config" is not detected.\n'\
-                          +'Two explanations :n'\
-		          +' - ROOT is not installed. You can download it '\
-		          +'from http://root.cern.ch\n'\
-		          +' - ROOT binary folder must be placed in the '\
-                          +'global environment variable $PATH')
-            return False
+            msg = 'ROOT module called "root-config" is not detected.\n'\
+                  +'Two explanations :n'\
+		  +' - ROOT is not installed. You can download it '\
+		  +'from http://root.cern.ch\n'\
+		  +' - ROOT binary folder must be placed in the '\
+                  +'global environment variable $PATH'
+            return False,msg
 
         # Extracting ROOT library and header path
         out=out.lstrip()
@@ -152,9 +156,12 @@ class DetectRoot:
                 return False
            
         # Getting the features
-        ok, out, err = ShellCommand.ExecuteWithCapture([self.bin_path+'/root-config','--features'],'./')
+        if self.bin_path!='':
+            theCommands = [self.bin_path+'/root-config','--features']
+        else:
+            theCommands = ['root-config','--features']
+        ok, out, err = ShellCommand.ExecuteWithCapture(theCommands,'./')
         if not ok:
-            self.PrintFAIL(warning=False)
             self.logger.error('problem with root-config')
             return False
         out=out.lstrip()
@@ -172,15 +179,15 @@ class DetectRoot:
 
     def SaveInfo(self):
         # archi_info
-        self.main.archi_info.root_priority = self.force
-        self.main.archi_info.root_bin_path = self.bin_path
-        self.main.archi_info.root_inc_path = self.inc_path
-        self.main.archi_info.root_lib_path = self.lib_path
-        for k, v in self.libraries:
-            self.main.archi_info.libraries[k]=v
+        self.archi_info.has_root = True
+        self.archi_info.root_priority = self.force
+        self.archi_info.root_bin_path = self.bin_path
+        self.archi_info.root_inc_path = self.inc_path
+        self.archi_info.root_lib_path = self.lib_path
+        for k, v in self.libraries.iteritems():
+            self.archi_info.libraries[k]=v
         for feature in self.features:
-            if not feature in self.main.archi_info.root_features:
-                self.main.archi_info.root_features.append(feature)
+            self.archi_info.root_features.append(feature)
 
         # Adding ROOT library path to Python path
         sys.path.append(self.archi_info.root_lib_path)

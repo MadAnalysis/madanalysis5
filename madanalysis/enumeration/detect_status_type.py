@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -23,7 +23,7 @@
 
 
 class DetectStatusType(object):
-        values = ['FOUND','UNFOUND','ISSUE', 'DEACTIVATED']
+        values = ['FOUND','UNFOUND','ISSUE','VETOED','TOBUILD']
 
         class __metaclass__(type):
             def __getattr__(self, name):
