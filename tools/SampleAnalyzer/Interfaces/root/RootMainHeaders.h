@@ -50,9 +50,6 @@
 
 
 // Relations between TLorentzVector & MALorentzVector
-TLorentzVector ToTLorentzVector(const MA5::MALorentzVector& a)
-{
-  return TLorentzVector(a.Px(),a.Py(),a.Pz(),a.E());
-}
+TLorentzVector ToTLorentzVector(const MA5::MALorentzVector& a);
 
 #endif
