@@ -49,7 +49,7 @@ class FomConfiguration:
 
     def user_DisplayParameter(self,parameter):
         if parameter=="formula":
-            logging.info(" figure of merit (fom) - formula num "+str(self.formula)+": "+FomConfiguration.allformula[self.formula-1][0])
+            logging.info(" figure of merit (fom) - formula num "+str(self.formula)+": "+FomConfiguration.allformula[self.formula-1])
         elif parameter=="x" and self.IsX():
             logging.info(" x parameter value: "+str(self.x))
 
@@ -80,7 +80,7 @@ class FomConfiguration:
 
             
     def IsX(self):
-        return ('x' in FomConfiguration.allformula[self.formula][0])
+        return ('x' in FomConfiguration.allformula[self.formula-1])
     
         
     def user_GetParameters(self):

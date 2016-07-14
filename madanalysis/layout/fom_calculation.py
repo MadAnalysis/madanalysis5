@@ -38,7 +38,7 @@ class FomCalculation:
         value = Measure()
 
         # Mean value
-        if self.formula==0:
+        if self.formula==1:
             value.mean = float(S)/float(B)
         elif self.formula==2:
             value.mean = float(S)/sqrt(B)
