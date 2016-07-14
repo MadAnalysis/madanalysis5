@@ -73,7 +73,7 @@ class FomConfiguration:
             if number<0:
                 logging.error("The x parameter cannont be negative.")
                 return False
-            self.x=value
+            self.x=number
         # other    
         else:
             logging.error("'formula' has no parameter called '"+parameter+"'")
