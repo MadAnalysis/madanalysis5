@@ -30,10 +30,22 @@ import logging
 import sys
 
 def WriteHeader(file,main):
-    file.write('#ifndef analysis_user_h\n#define analysis_user_h\n\n')
-    file.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerBase.h"\n\n')
+    # Preprocessor commands
+    file.write('#ifndef analysis_user_h\n')
+    file.write('#define analysis_user_h\n')
+    file.write('\n')
+
+    # Including headers files
+    file.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerBase.h"\n')
+    if main.archi_info.has_root:
+        file.write('#include "SampleAnalyzer/Interfaces/root/RootMainHeaders.h"\n')
+    file.write('\n')
+
+    # Namespace
     file.write('namespace MA5\n')
     file.write('{\n')
+
+    # Class
     file.write('class user : public AnalyzerBase\n{\n')
     file.write('  INIT_ANALYSIS(user,"MadAnalysis5job")\n\n')
     file.write(' public : \n')
