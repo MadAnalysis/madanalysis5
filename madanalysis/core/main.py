@@ -357,7 +357,7 @@ class Main():
             self.graphic_render = GraphicRenderType.MATPLOTLIB
         else:
             self.graphic_render = GraphicRenderType.NONE
-        self.logger.info("Packages used for graphical rendering: "+\
+        self.logger.info("Package used for graphical rendering: "+\
                          '\x1b[32m'+\
                          GraphicRenderType.convert2string(self.graphic_render)+\
                          '\x1b[0m')
