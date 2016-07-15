@@ -206,9 +206,17 @@ class LibraryWriter():
             options.has_root        = True
             options.has_root_inc    = True
             options.has_root_lib    = True
+            options.has_delphes_tag           = self.main.archi_info.has_delphes
+            options.has_delphesMA5tune_tag    = self.main.archi_info.has_delphesMA5tune
             toRemove.extend(['compilation_root.log','linking_root.log','cleanup_root.log','mrproper_root.log'])
         elif package=='test_root':
             options.has_commons     = True
+            if self.main.archi_info.has_delphes:
+                options.has_delphes_tag    = True
+                options.has_delphes_ma5lib = True
+            if self.main.archi_info.has_delphesMA5tune:
+                options.has_delphesMA5tune_tag    = True
+                options.has_delphesMA5tune_ma5lib = True
             options.has_root        = True
             options.has_root_ma5lib = True
             options.has_root_inc    = True
