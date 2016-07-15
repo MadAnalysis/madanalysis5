@@ -53,7 +53,12 @@ class WriterManager : public ManagerBase<WriterBase>
   /// Get the good Writer from a given file name
   WriterBase* GetByFileExtension(std::string filename);
 
+  /// Print the list of items in the collection
+  void Print(LogStream& os=INFO) const
+  { ManagerBase<WriterBase>::Print(Objects_, Names_, os); }
+
 };
+
 
 }
 

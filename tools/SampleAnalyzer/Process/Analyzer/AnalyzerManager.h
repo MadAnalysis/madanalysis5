@@ -53,6 +53,10 @@ class AnalyzerManager : public ManagerBase<AnalyzerBase>
   /// Build the predefined table
   void BuildPredefinedTable();
 
+  /// Print the list of items in the collection
+  void Print(LogStream& os=INFO) const
+  { ManagerBase<AnalyzerBase>::Print(Objects_, Names_, os); }
+
 };
 
 }

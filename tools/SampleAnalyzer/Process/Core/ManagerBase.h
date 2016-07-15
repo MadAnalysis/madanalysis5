@@ -81,7 +81,9 @@ class ManagerBase
   bool Add(std::string name, T* object);
 
   /// Display the content of the Manager
-  void Print(LogStream& os=INFO) const;
+  void Print(const std::vector<T*>& Objects, 
+             const std::map<std::string, MAuint32>& Names,
+             LogStream& os=INFO) const;
 
 };
 
@@ -143,25 +145,30 @@ bool ManagerBase<T>::Add(std::string name, T* object)
   return true;  
 }
 
+
 // -----------------------------------------------------------------------------
 // Print
 // -----------------------------------------------------------------------------
 template <typename T>
-void ManagerBase<T>::Print(LogStream& os) const
+void ManagerBase<T>::Print(const std::vector<T*>& Objects, 
+                           const std::map<std::string, MAuint32>& Names,
+                           LogStream& os) const
 {
   // Header
   INFO << "------------------------------------------" << endmsg;
+  INFO << "Number of items: " << Names.size() << endmsg;
 
   // Loop over names
   for (std::map<std::string, MAuint32>::const_iterator
-         it = Names_.begin(); it != Names_.end(); it++)
+         it = Names.begin(); it != Names.end(); it++)
   {
-    INFO.width(10); 
+    INFO << " - ";
+    INFO.width(20); 
     INFO << it->first;
     INFO << " : ";
-    INFO << typeid(Objects_[it->second]).name();
+    INFO << typeid(Objects[it->second]).name();
     INFO << " @ " ;
-    INFO << Objects_[it->second];
+    INFO << Objects[it->second];
     INFO << endmsg; 
   }
 

@@ -408,7 +408,7 @@ class Main():
                 FirstUse=True
 
             precompiler = LibraryWriter('lib',self)
-            if not precompiler.Run('TestSampleAnalyzer',[],self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/',silent=True):
+            if not precompiler.Run('TestSampleAnalyzer',[self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/Process/dummy_list.txt'],self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/',silent=True):
                 UpdateNeed=True
 
             if not precompiler.CheckRun('TestSampleAnalyzer',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/',silent=True):
@@ -548,7 +548,11 @@ class Main():
                 # Running the program test
                 self.logger.info("     - Running the test program ...")
                 program=libraries[ind][3].split('/')[-1]
-                if not compiler.Run(program,[],self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/'):
+
+                argv = []
+                if program=='TestSampleAnalyzer':
+                    argv = [self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/Process/dummy_list.txt']
+                if not compiler.Run(program,argv,self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/'):
                     self.logger.error("the test failed.")
                     sys.exit()
 

@@ -50,6 +50,11 @@ class DetectorManager : public ManagerBase<DetectorBase>
 
    /// Build the table
   void BuildTable(); 
+
+  /// Print the list of items in the collection
+  void Print(LogStream& os=INFO) const
+  { ManagerBase<DetectorBase>::Print(Objects_, Names_, os); }
+
 };
 
 }

@@ -75,11 +75,11 @@ class SampleAnalyzer
   DetectorManager     fullDetectors_;
 
   /// List of managers
-  std::vector<WriterBase*>       writers_;
-  std::vector<ReaderBase*>       readers_;
-  std::vector<AnalyzerBase*>     analyzers_;
-  std::vector<JetClusterer*> clusters_;
-  std::vector<DetectorBase*>     detectors_;
+  std::vector<WriterBase*>    writers_;
+  std::vector<ReaderBase*>    readers_;
+  std::vector<AnalyzerBase*>  analyzers_;
+  std::vector<JetClusterer*>  clusters_;
+  std::vector<DetectorBase*>  detectors_;
 
   /// Reading status
   unsigned int file_index_;
