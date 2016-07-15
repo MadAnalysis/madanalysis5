@@ -197,14 +197,20 @@ class RecastConfiguration:
             return
         return
 
-    def user_SetParameter(self,parameter,value,level,hasdelphes,hasMA5tune,datasets, hasPAD, hasPADtune):
+    def user_SetParameter(self,parameter,value,level,hasroot,hasdelphes,hasMA5tune,datasets, hasPAD, hasPADtune):
         # algorithm
         if parameter=="status":
             # Switch on the clustering
             if value =="on":
+
                 # Only in reco mode
                 if level!=MA5RunningType.RECO:
                     self.logger.error("recasting is only available in the RECO mode")
+                    return
+
+                # Only if ROOT is install
+                if not hasroot:
+                    self.logger.error("recasting is only available if ROOT is installed")
                     return
 
                 canrecast=False

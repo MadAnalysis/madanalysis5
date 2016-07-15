@@ -4,20 +4,20 @@
 
 # ----GENERAL----
 # tmp_dir = /tmp/toto/
-#download_dir = /Users/fuks/Desktop/tmp
+# download_dir = /Users/fuks/Desktop/tmp
 # webaccess_veto = 0 # 0=No, 1=Yes
 
 # -----ROOT-----
-root_veto     = 0 # 0=No, 1=Yes
+# root_veto     = 0 # 0=No, 1=Yes
 # root_bin_path = /home/toto/root/bin
 
 # -----MATPLOTLIB-----
-matplotlib_veto = 0 # 0=No, 1=Yes
+#matplotlib_veto = 0 # 0=No, 1=Yes
 
 # -----DELPHES----- 
 # delphes_veto     = 0 # 0=No, 1=Yes
-#delphes_includes = /Users/fuks/Work/tools/madanalysis/bzr/v1.3beta/tools/RE_delphes/
-#delphes_libs     = /Users/fuks/Work/tools/madanalysis/bzr/v1.3beta/tools/RE_delphes/
+# delphes_includes = /Users/fuks/Work/tools/madanalysis/bzr/v1.3beta/tools/RE_delphes/
+# delphes_libs     = /Users/fuks/Work/tools/madanalysis/bzr/v1.3beta/tools/RE_delphes/
 
 # -----DELPHESMA5TUNE----- 
 # delphesMA5tune_veto     = 0 # 0=No, 1=Yes
@@ -26,12 +26,12 @@ matplotlib_veto = 0 # 0=No, 1=Yes
 
 # -----ZLIB-----
 # zlib_veto     = 0 # 0=No, 1=Yes
-#zlib_includes = /usr/include
-#zlib_libs = /usr/lib
+# zlib_includes = /usr/include
+# zlib_libs = /usr/lib
 
 # -----FASTJET-----
-#fastjet_veto     = 0 # 0=No, 1=Yes
-#fastjet_bin_path = /Users/fuks/Work/tools/madanalysis/bzr/v1.1.12beta/tools/fastjet/bin
+# fastjet_veto     = 0 # 0=No, 1=Yes
+# fastjet_bin_path = /Users/fuks/Work/tools/madanalysis/bzr/v1.1.12beta/tools/fastjet/bin
 
 # -----PDFLATEX-----
 # pdflatex_veto = 0 # 0=No, 1=Yes
