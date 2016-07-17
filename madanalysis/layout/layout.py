@@ -875,7 +875,10 @@ class Layout:
 
         # Defining report writing
         if mode == ReportFormatType.HTML:
-            report = HTMLReportWriter(output_path+"/index.html", os.path.relpath(self.pdffile,output_path))
+            mypdf=''
+            if self.pdffile!='':
+                mypdf=os.path.relpath(self.pdffile,output_path)
+            report = HTMLReportWriter(output_path+"/index.html",mypdf)
         elif mode == ReportFormatType.LATEX:
             report = LATEXReportWriter(output_path+"/main.tex",\
               self.main.archi_info.ma5dir+"/madanalysis/input",False)
