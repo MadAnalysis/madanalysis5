@@ -395,15 +395,15 @@ class CmdSubmit(CmdBase):
         forced_bkp = self.main.forced
         self.main.forced=True
         if self.main.fastsim.package == 'delphes' and not self.main.archi_info.has_delphes:
+            installer=InstallManager(self.main)
             if self.main.archi_info.has_delphesMA5tune:
-                installer=InstallManager(self.main)
                 if not installer.Deactivate('delphesMA5tune'):
                     return False
             if installer.Activate('delphes')==-1:
                 return False
         if self.main.fastsim.package == 'delphesMA5tune' and not self.main.archi_info.has_delphesMA5tune:
+            installer=InstallManager(self.main)
             if self.main.archi_info.has_delphes:
-                installer=InstallManager(self.main)
                 if not installer.Deactivate('delphes'):
                     return False
             if installer.Activate('delphesMA5tune')==-1:

@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+180  1.4.22   (2016/07/17) fuks:    Fixing the recasting and the new root modules 
+
 178  1.4.21   (2016/07/17) fuks:    install pad fixed 
 
 171  1.4.20   (2016/07/15) fuks:    logging + -no-root 

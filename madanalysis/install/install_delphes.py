@@ -463,8 +463,11 @@ class InstallDelphes:
             self.main.archi_info.delphes_lib=self.main.archi_info.delphes_lib.replace("DEACT_","")
             self.main.archi_info.delphes_inc_paths =\
                 [ x.replace("DEACT_","") for x in self.main.archi_info.delphes_inc_paths ]
+            if len(self.main.archi_info.delphes_inc_paths)>2:
+                del self.main.archi_info.delphes_inc_paths[-1]
+                del self.main.archi_info.delphes_inc_paths[-1]
             self.main.archi_info.delphes_lib_paths =\
-                [ x.replace("DEACT_","") for x in self.main.archi_info.delphes_lib_paths ]
+                list(set([ x.replace("DEACT_","") for x in self.main.archi_info.delphes_lib_paths ]))
             # do we have to activate delphes?
             if not 'DEACT' in delpath:
                 return 0
@@ -483,7 +486,7 @@ class InstallDelphes:
 
 #             if ncores>1:
 #                 strcores='-j'+str(ncores)
-            ToBuild =  ['delphes', 'process']
+            ToBuild =  ['delphes', 'root', 'process']
 
             # Makefile
             self.main.archi_info.has_delphes=True
@@ -528,8 +531,11 @@ class InstallDelphes:
 
             # Checking
             for mypackage in ToBuild:
-                myfolder='Lib/libprocess_for_ma5.so'
-                if mypackage != 'process':
+                if mypackage == 'process':
+                    myfolder='Lib/libprocess_for_ma5.so'
+                elif mypackage == 'root':
+                    myfolder='Lib/libroot_for_ma5.so'
+                else:
                     myfolder='Lib/libdelphes_for_ma5.so'
                 if not os.path.isfile(self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/'+myfolder):
                     self.logger.error("Library '" + mypackage + "' checking aborted.")
@@ -545,6 +551,8 @@ class InstallDelphes:
                     return -1
 
             # Paths
+            lev=self.logger.getEffectiveLevel()
+            self.logger.setLevel(100)
             checkup = CheckUp(self.main.archi_info, self.main.session_info, False, self.main.script)
             if not checkup.SetFolder():
                 self.logger.error("Problem with the path updates.")
@@ -554,5 +562,6 @@ class InstallDelphes:
                 return -1
             if not self.main.CheckConfig():
                 return -1
+            self.logger.setLevel(lev)
 
         return 1

@@ -337,8 +337,11 @@ class InstallDelphesMA5tune:
             self.main.archi_info.delphesMA5tune_lib=self.main.archi_info.delphesMA5tune_lib.replace("DEACT_","")
             self.main.archi_info.delphesMA5tune_inc_paths =\
                 [ x.replace("DEACT_","") for x in self.main.archi_info.delphesMA5tune_inc_paths ]
+            if len(self.main.archi_info.delphesMA5tune_inc_paths)>2:
+                del self.main.archi_info.delphesMA5tune_inc_paths[-1]
+                del self.main.archi_info.delphesMA5tune_inc_paths[-1]
             self.main.archi_info.delphesMA5tune_lib_paths =\
-                [ x.replace("DEACT_","") for x in self.main.archi_info.delphesMA5tune_lib_paths ]
+                list(set([ x.replace("DEACT_","") for x in self.main.archi_info.delphesMA5tune_lib_paths ]))
             # do we have to activate the tune?
             if not 'DEACT' in delpath:
                 return 0
@@ -355,7 +358,7 @@ class InstallDelphesMA5tune:
             SetupWriter.WriteSetupFile(True,self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/',self.main.archi_info)
             SetupWriter.WriteSetupFile(False,self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/',self.main.archi_info)
 
-            ToBuild =  ['delphesMA5tune', 'process']
+            ToBuild =  ['delphesMA5tune', 'root', 'process']
 
             # Makefile
             self.main.archi_info.has_delphesMA5tune=True
@@ -401,8 +404,11 @@ class InstallDelphesMA5tune:
 
             # Checking
             for mypackage in ToBuild:
-                myfolder='Lib/libprocess_for_ma5.so'
-                if mypackage != 'process':
+                if mypackage == 'process':
+                    myfolder='Lib/libprocess_for_ma5.so'
+                elif mypackage == 'root':
+                    myfolder='Lib/libroot_for_ma5.so'
+                else:
                     myfolder='Lib/libdelphesMA5tune_for_ma5.so'
                 if not os.path.isfile(self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/'+myfolder):
                     self.logger.error("Library '" + mypackage + "' checking aborted.")
@@ -418,6 +424,8 @@ class InstallDelphesMA5tune:
                     return -1
 
             # Paths
+            lev=self.logger.getEffectiveLevel()
+            self.logger.setLevel(100)
             checkup = CheckUp(self.main.archi_info, self.main.session_info, False, self.main.script)
             if not checkup.SetFolder():
                 self.logger.error("Problem with the path updates.")
@@ -427,5 +435,6 @@ class InstallDelphesMA5tune:
                 return -1
             if not self.main.CheckConfig():
                 return -1
+            self.logger.setLevel(lev)
 
         return 1
