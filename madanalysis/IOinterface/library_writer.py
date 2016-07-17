@@ -242,16 +242,15 @@ class LibraryWriter():
         elif package=='process':
             options.has_commons=True
             options.has_fastjet_ma5lib        = self.main.archi_info.has_fastjet
-#            options.has_delphes_ma5lib        = self.main.archi_info.has_delphes
-#            options.has_delphesMA5tune_ma5lib = self.main.archi_info.has_delphesMA5tune
+            options.has_delphes_ma5lib        = self.main.archi_info.has_delphes
+            options.has_delphesMA5tune_ma5lib = self.main.archi_info.has_delphesMA5tune
             options.has_zlib_ma5lib           = self.main.archi_info.has_zlib
             options.has_fastjet_tag           = self.main.archi_info.has_fastjet
             options.has_delphes_tag           = self.main.archi_info.has_delphes
             options.has_delphesMA5tune_tag    = self.main.archi_info.has_delphesMA5tune
             options.has_zlib_tag              = self.main.archi_info.has_zlib
-            if self.main.archi_info.has_root:
-                options.has_root_tag              = True
-                options.has_root_ma5lib           = True
+            options.has_root_tag              = self.main.archi_info.has_root
+            options.has_root_ma5lib           = self.main.archi_info.has_root
             toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
         elif package=='test_process':
             options.has_commons               = True
