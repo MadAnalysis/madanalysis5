@@ -166,6 +166,10 @@ bool ROOTReader::SelectTreeReader()
       ERROR << "Please uninstall Delphes and install DelphesMA5tune if you would like to read this file." << endmsg;    
     }
   }
+  else
+  {
+    ERROR << "You need to install Delphes or DelphesMA5tune for reading this file." << endmsg;
+  }
 
 
   return false;
