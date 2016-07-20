@@ -67,11 +67,11 @@ class RecJetFormat : public RecParticleFormat
   // -------------------------------------------------------------
  protected:
 
-  UShort_t ntracks_;   /// number of tracks
-  Bool_t btag_;        /// b-tag
-  Bool_t true_ctag_;   /// c-tag (before id or misid)
-  Bool_t true_btag_;   /// b-tag (before id or misid)
-  std::vector<Int_t> Constituents_;  /// indices of the MC particles
+  MAuint16 ntracks_;   /// number of tracks
+  MAbool btag_;        /// b-tag
+  MAbool true_ctag_;   /// c-tag (before id or misid)
+  MAbool true_btag_;   /// b-tag (before id or misid)
+  std::vector<MAint32> Constituents_;  /// indices of the MC particles
   std::vector<IsolationConeType> isolCones_; // isolation cones
 
   // -------------------------------------------------------------
@@ -106,19 +106,19 @@ class RecJetFormat : public RecParticleFormat
   }
 
   /// Accessor to the number of tracks
-  virtual const UShort_t ntracks() const
+  virtual const MAuint16 ntracks() const
   {return ntracks_;}
 
   /// Accessor to the b-tag
-  const Bool_t& btag() const
+  const MAbool& btag() const
   {return btag_;}
 
   /// Accessor to the true c-tag
-  const Bool_t& true_ctag() const
+  const MAbool& true_ctag() const
   {return true_ctag_;}
 
   /// Accessor to the true b-tag
-  const Bool_t& true_btag() const
+  const MAbool& true_btag() const
   {return true_btag_;}
 
   /// Add one constituent
@@ -126,7 +126,7 @@ class RecJetFormat : public RecParticleFormat
   {Constituents_.push_back(index);}
 
   /// get constituent collections
-  const std::vector<Int_t>& constituents() const
+  const std::vector<MAint32>& constituents() const
   { return Constituents_; }
 
   /// Add one isolation cone

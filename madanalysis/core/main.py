@@ -25,19 +25,22 @@
 from madanalysis.multiparticle.multiparticle_collection import MultiParticleCollection
 from madanalysis.dataset.dataset_collection             import DatasetCollection
 from madanalysis.selection.selection                    import Selection
-from madanalysis.enumeration.uncertainty_type           import UncertaintyType
-from madanalysis.enumeration.normalize_type             import NormalizeType
-from madanalysis.enumeration.sb_ratio_type              import SBratioType
 from madanalysis.interpreter.cmd_base                   import CmdBase
+from madanalysis.region.region_collection               import RegionCollection
 from madanalysis.system.session_info                    import SessionInfo
 from madanalysis.system.architecture_info               import ArchitectureInfo
 from madanalysis.core.library_builder                   import LibraryBuilder
 from madanalysis.IOinterface.library_writer             import LibraryWriter
+from madanalysis.IOinterface.madgraph_interface         import MadGraphInterface
 from madanalysis.enumeration.ma5_running_type           import MA5RunningType
 from madanalysis.enumeration.stacking_method_type       import StackingMethodType
+from madanalysis.enumeration.uncertainty_type           import UncertaintyType
+from madanalysis.enumeration.normalize_type             import NormalizeType
+from madanalysis.enumeration.graphic_render_type        import GraphicRenderType
 from madanalysis.observable.observable_manager          import ObservableManager
 from madanalysis.configuration.recast_configuration     import RecastConfiguration
 from madanalysis.configuration.fastsim_configuration    import FastsimConfiguration
+from madanalysis.configuration.fom_configuration        import FomConfiguration
 from madanalysis.configuration.isolation_configuration  import IsolationConfiguration
 from madanalysis.configuration.merging_configuration    import MergingConfiguration
 from string_tools                                       import StringTools
@@ -51,19 +54,12 @@ class Main():
 
     userVariables = { "currentdir"      : [], \
                       "normalize"       : ["none","lumi","lumi_weight"], \
+                      "graphic_render"  : ["root","matplotlib","none"], \
                       "lumi"            : [], \
-                      "SBratio"         : ['"S/B"','"B/S"',\
-                                           '"S/(S+B)"','"B/(B+S)"',\
-                                           '"S/sqrt(S+B)"','"B/sqrt(B+S)"'], \
-                      "SBerror"         : [], \
                       "stacking_method" : ["stack","superimpose","normalize2one"], \
                       "outputfile"      : ['"output.lhe.gz"','"output.lhco.gz"'],\
                       "recast"          : ["on", "off"] \
                       }
-
-    SBformula = { 'S/B'         : '1./(B**2)*sqrt(B**2*ES**2+S**2*EB**2)', \
-                  'S/(S+B)'     : '1./(S+B)**2*sqrt(B**2*ES**2+S**2*EB**2)', \
-                  'S/sqrt(S+B)' : '1./pow(S+B,3./2.)*sqrt((S+2*B)**2*ES**2+S**2*EB**2)' }
 
     forced = False
     version = ""
@@ -78,27 +74,32 @@ class Main():
         self.forced         = False
         self.multiparticles = MultiParticleCollection()
         self.datasets       = DatasetCollection()
+        self.regions        = RegionCollection()
         self.selection      = Selection()
         self.script         = False
-        self.mg5            = False
         self.observables    = ObservableManager(self.mode)
         self.expertmode     = False
         self.repeatSession  = False
+        self.developer_mode = False
         self.recast         = "off"
         self.ResetParameters()
+        self.madgraph       = MadGraphInterface()
+        self.logger         = logging.getLogger('MA5')
+        self.redirectSAlogger = False
+
 
     def ResetParameters(self):
         self.merging        = MergingConfiguration()
         self.fastsim        = FastsimConfiguration()
         self.recasting      = RecastConfiguration()
-        self.SBratio        = 'S/B'
-        self.SBerror        = Main.SBformula['S/B']
+        self.fom            = FomConfiguration()
         self.lumi           = 10
         self.lastjob_name   = ''
         self.lastjob_status = False
         self.stack          = StackingMethodType.STACK
         self.isolation      = IsolationConfiguration()
         self.output         = ""
+        self.graphic_render = GraphicRenderType.NONE
         if self.mode==MA5RunningType.RECO:
             self.normalize = NormalizeType.NONE
         else:
@@ -148,27 +149,27 @@ class Main():
 
 
     def Display(self):
-        logging.info(" *********************************" )
-        logging.info("            main program          " )
-        logging.info(" *********************************" )
+        self.logger.info(" *********************************" )
+        self.logger.info("            main program          " )
+        self.logger.info(" *********************************" )
         self.user_DisplayParameter("currentdir")
+        self.user_DisplayParameter("graphic_render")
         self.user_DisplayParameter("normalize")
         self.user_DisplayParameter("lumi")
         self.user_DisplayParameter("outputfile")
-        self.user_DisplayParameter("SBratio")
-        self.user_DisplayParameter("SBerror")
+        self.fom.Display()
         if self.archi_info.has_fastjet:
             self.merging.Display()
         self.fastsim.Display()
         self.isolation.Display()
-        logging.info(" *********************************" )
+        self.logger.info(" *********************************" )
         self.recasting.Display()
-        logging.info(" *********************************" )
+        self.logger.info(" *********************************" )
 
 
     def user_DisplayParameter(self,parameter):
         if  parameter=="currentdir":
-            logging.info(" currentdir = "+self.get_currentdir())
+            self.logger.info(" currentdir = "+self.get_currentdir())
         elif parameter=="stacking_method":
             sentence = " stacking methode for histograms = "
             if self.stack==StackingMethodType.STACK:
@@ -177,7 +178,7 @@ class Main():
                 sentence+="superimpose"
             else:
                 sentence+="normalize2one"
-            logging.info(sentence)
+            self.logger.info(sentence)
         elif parameter=="normalize":
             word=""
             if self.normalize==NormalizeType.NONE:
@@ -186,23 +187,28 @@ class Main():
                 word="lumi"
             elif self.normalize==NormalizeType.LUMI_WEIGHT:
                 word="lumi_weight"
-            logging.info(" histogram normalization mode = " + word)
+            self.logger.info(" histogram normalization mode = " + word)
+        elif parameter=="graphic_render":
+            word=""
+            if self.graphic_render==GraphicRenderType.NONE:
+                word="none"
+            elif self.graphic_render==GraphicRenderType.ROOT:
+                word="root"
+            elif self.graphic_render==GraphicRenderType.MATPLOTLIB:
+                word="matplotlib"
+            self.logger.info(" graphic renderer = " + word)
         elif parameter=="outputfile":
             if self.output=="":
                 msg="none"
             else:
                 msg='"'+self.output+'"'
-            logging.info(" output file = "+msg)
+            self.logger.info(" output file = "+msg)
         elif parameter=="lumi":
-            logging.info(" integrated luminosity = "+str(self.lumi)+" fb^{-1}" )
-        elif parameter=="SBratio":
-            logging.info(' S/B ratio formula = "' + self.SBratio + '"')
-        elif parameter=="SBerror":
-            logging.info(' S/B error formula = "' + self.SBerror + '"')
+            self.logger.info(" integrated luminosity = "+str(self.lumi)+" fb^{-1}" )
         elif parameter=="recast":
-            logging.info(' Recasting mode = "' + self.recasting.status + '"')
+            self.logger.info(' Recasting mode = "' + self.recasting.status + '"')
         else:
-            logging.error("'main' has no parameter called '"+parameter+"'")
+            self.logger.error("'main' has no parameter called '"+parameter+"'")
 
 
     def user_GetValues(self,variable):
@@ -231,7 +237,7 @@ class Main():
             elif value == "normalize2one":
                 self.stack=StackingMethodType.NORMALIZE2ONE
             else:
-                logging.error("'stack' possible values are : 'stack', 'superimpose', 'normalize2one'")
+                self.logger.error("'stack' possible values are : 'stack', 'superimpose', 'normalize2one'")
                 return False
 
         # normalize
@@ -243,7 +249,27 @@ class Main():
             elif value == "lumi_weight":
                 self.normalize = NormalizeType.LUMI_WEIGHT
             else:
-                logging.error("'normalize' possible values are : 'none', 'lumi', 'lumi_weight'")
+                self.logger.error("'normalize' possible values are : 'none', 'lumi', 'lumi_weight'")
+                return False
+
+        # graphic_render
+        elif parameter=="graphic_render":
+            if value == "none":
+                self.graphic_render = GraphicRenderType.NONE
+            elif value == "root":
+                if self.session_info.has_root:
+                    self.graphic_render = GraphicRenderType.ROOT
+                else:
+                    self.logger.error("Sorry but the Root package is not detected by MadAnalysis")
+                    return False
+            elif value == "matplotlib":
+                if self.session_info.has_matplotlib:
+                    self.graphic_render = GraphicRenderType.MATPLOTLIB
+                else:
+                    self.logger.error("Sorry but the Matplotlib package is not detected by MadAnalysis")
+                    return False
+            else:
+                self.logger.error("'graphic_render' possible values are : 'none', 'root', 'matplotlib'")
                 return False
 
         # lumi
@@ -251,44 +277,13 @@ class Main():
             try:
                 tmp = float(value)
             except:
-                logging.error("'lumi' is a positive float value")
+                self.logger.error("'lumi' is a positive float value")
                 return
             if (tmp>0):
                 self.lumi=tmp
             else:
-                logging.error("'lumi' is a positive float value")
+                self.logger.error("'lumi' is a positive float value")
                 return
-
-        # sbratio
-        elif (parameter=="SBratio"):
-            quoteTag=False
-            if value.startswith("'") and value.endswith("'"):
-                quoteTag=True
-            if value.startswith('"') and value.endswith('"'):
-                quoteTag=True
-            if quoteTag:
-                value=value[1:-1]
-            if Main.checkSBratio(value):
-                self.SBratio=value
-                self.suggestSBerror()
-            else:
-                logging.error("Specified formula is not correct.")
-                return False
-
-        # sberror
-        elif (parameter=="SBerror"):
-            quoteTag=False
-            if value.startswith("'") and value.endswith("'"):
-                quoteTag=True
-            if value.startswith('"') and value.endswith('"'):
-                quoteTag=True
-            if quoteTag:
-                value=value[1:-1]
-            if Main.checkSBratio(value):
-                self.SBerror=value
-            else:
-                logging.error("Specified formula is not correct.")
-                return False
 
         # output
         elif (parameter=="outputfile"):
@@ -303,9 +298,9 @@ class Main():
 
             # Compressed file
             if valuemin.endswith(".gz") and not self.archi_info.has_zlib:
-                logging.error("Compressed formats (*.gz) are not available. "\
+                self.logger.error("Compressed formats (*.gz) are not available. "\
                               + "Please install zlib with the command line:")
-                logging.error(" install zlib")
+                self.logger.error(" install zlib")
                 return False
 
             # LHE
@@ -319,78 +314,25 @@ class Main():
                     self.output = value
                     return
                 elif self.mode == MA5RunningType.PARTON:
-                    logging.error("LHCO format is not available in PARTON mode.")
+                    self.logger.error("LHCO format is not available in PARTON mode.")
                     return False
                 elif self.mode == MA5RunningType.HADRON:
                     if self.fastsim.package == "none":
-                        logging.error("Please select a fast-simulation package before requesting a LHCO file output.")
-                        logging.error("Command: set main.fastsim.package = ")
+                        self.logger.error("Please select a fast-simulation package before requesting a LHCO file output.")
+                        self.logger.error("Command: set main.fastsim.package = ... ")
                         return False
                     else:
                         self.output = value
                         return
 
             else:
-                logging.error("Output format is not available. Extension allowed: " +\
+                self.logger.error("Output format is not available. Extension allowed: " +\
                               ".lhe .lhe.gz .lhco .lhco.gz")
                 return False
 
         # other
         else:
-            logging.error("'main' has no parameter called '"+parameter+"'")
-
-    @staticmethod
-    def checkSBratio(text):
-        logging.info("Checking the formula ...")
-        text = text.replace("ES","z")
-        text = text.replace("EB","t")
-        text = text.replace("S","x")
-        text = text.replace("B","y")
-        from ROOT import TFormula
-        formula = TFormula()
-        test = formula.Compile(text)
-        return (test==0)
-
-    def suggestSBerror(self):
-        # create a TFormula with the SBratio formula
-        text = self.SBratio.replace("S","x")
-        text = text.replace("B","y")
-        from ROOT import TFormula
-        ref = TFormula('SBratio',text)
-        ref.Optimize()
-
-        # Loop over SBerror formula and comparing
-        for k, v in Main.SBformula.iteritems():
-            text = k.replace("S","x")
-            text = text.replace("B","y")
-            error = TFormula('SBerror',text)
-            error.Optimize()
-            if ref.GetExpFormula()==error.GetExpFormula():
-                logging.info("Formula corresponding to the uncertainty calculation has been found and set to the variable main.SBerror :")
-                logging.info('  '+v)
-                self.SBerror=v
-                return True
-
-        # Loop over SBerror formula and comparing
-        # reverse S and B
-        for k, v in Main.SBformula.iteritems():
-            text = k.replace("S","y")
-            text = text.replace("B","x")
-            error = TFormula('SBerror',text)
-            error.Optimize()
-            if ref.GetExpFormula()==error.GetExpFormula():
-                logging.info("Formula corresponding to the uncertainty calculation has been found and set to the variable main.SBerror :")
-                v=v.replace('ES','ZZ')
-                v=v.replace('EB','TT')
-                v=v.replace('S','SS')
-                v=v.replace('B','BB')
-                v=v.replace('SS','B')
-                v=v.replace('BB','S')
-                v=v.replace('ZZ','EB')
-                v=v.replace('TT','ES')
-                logging.info('  '+v)
-                self.SBerror=v
-                return True
+            self.logger.error("'main' has no parameter called '"+parameter+"'")
 
 
     def get_currentdir(self):
@@ -401,12 +343,28 @@ class Main():
         try:
             os.chdir(theDir)
         except:
-            logging.error("Impossible to access the directory : "+theDir)
+            self.logger.error("Impossible to access the directory : "+theDir)
         self.user_DisplayParameter("currentdir")
 
     currentdir = property(get_currentdir, set_currentdir)
 
-    def CheckLinuxConfig(self,debug=False):
+    def AutoSetGraphicalRenderer(self):
+        self.logger.debug('Function AutoSetGraphicalRenderer:')
+        self.logger.debug('   - ROOT is there:       '+str(self.session_info.has_root))
+        self.logger.debug('   - Matplotlib is there: '+str(self.session_info.has_matplotlib))
+        if self.session_info.has_root:
+            self.graphic_render = GraphicRenderType.ROOT
+        elif self.session_info.has_matplotlib:
+            self.graphic_render = GraphicRenderType.MATPLOTLIB
+        else:
+            self.graphic_render = GraphicRenderType.NONE
+        self.logger.info("Package used for graphical rendering: "+\
+                         '\x1b[32m'+\
+                         GraphicRenderType.convert2string(self.graphic_render)+\
+                         '\x1b[0m')
+
+
+    def CheckConfig(self,debug=False):
         checkup = CheckUp(self.archi_info, self.session_info, debug, self.script)
         if not checkup.CheckArchitecture():
             return False
@@ -416,17 +374,17 @@ class Main():
             return False
         if not checkup.CheckMandatoryPackages():
             return False
-        if not checkup.CheckOptionalPackages():
+        if not checkup.CheckOptionalProcessingPackages():
             return False
+        if not checkup.CheckOptionalGraphicalPackages():
+            return False
+        self.AutoSetGraphicalRenderer()
 #        if not checkup.CheckGraphicalPackages():
 #            return False
         if not checkup.SetFolder():
             return False
         return True
 
-    def PrintOK(self):
-        sys.stdout.write('\x1b[32m'+'[OK]'+'\x1b[0m'+'\n')
-        sys.stdout.flush()
 
     def BuildLibrary(self,forced=False):
         builder = LibraryBuilder(self.archi_info)
@@ -443,14 +401,14 @@ class Main():
             rebuild = forced or FirstUse or UpdateNeed or Missing
 
         if not rebuild:
-            logging.info('  => MadAnalysis libraries found.')
+            self.logger.info('  => MadAnalysis libraries found.')
 
             # Test the program
             if not os.path.isfile(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestSampleAnalyzer'):
                 FirstUse=True
 
             precompiler = LibraryWriter('lib',self)
-            if not precompiler.Run('TestSampleAnalyzer',[],self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/',silent=True):
+            if not precompiler.Run('TestSampleAnalyzer',[self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/Process/dummy_list.txt'],self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/',silent=True):
                 UpdateNeed=True
 
             if not precompiler.CheckRun('TestSampleAnalyzer',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/',silent=True):
@@ -458,18 +416,18 @@ class Main():
             rebuild = forced or FirstUse or UpdateNeed or Missing
 
         if not rebuild:
-            logging.info('  => MadAnalysis test program works.')
+            self.logger.info('  => MadAnalysis test program works.')
             return True
 
         # Compile library
         if FirstUse:
-            logging.info("  => First use of MadAnalysis (or the library is missing).")
+            self.logger.info("  => First use of MadAnalysis (or the library is missing).")
         elif Missing:
-            logging.info("  => Libraries are missing or system configuration has changed. Need to rebuild the library.")
+            self.logger.info("  => Libraries are missing or system configuration has changed. Need to rebuild the library.")
         elif UpdateNeed:
-            logging.info("  => System configuration has changed since the last use. Need to rebuild the library.")
+            self.logger.info("  => System configuration has changed since the last use. Need to rebuild the library.")
         elif forced:
-            logging.info("  => The user forces to rebuild the library.")
+            self.logger.info("  => The user forces to rebuild the library.")
         # Initializing the JobWriter
         compiler = LibraryWriter('lib',self)
 
@@ -488,26 +446,38 @@ class Main():
         libraries.append(['configuration','SampleAnalyzer configuration', 'configuration', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/PortabilityCheckup',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Configuration',True])
         libraries.append(['commons','SampleAnalyzer commons', 'commons', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libcommons_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Commons',False])
         libraries.append(['test_commons','SampleAnalyzer commons', 'test_commons', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestCommons',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
+        # Zlib
         if self.archi_info.has_zlib:
             libraries.append(['zlib', 'interface to zlib', 'zlib', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libzlib_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces',False])
             libraries.append(['test_zlib','interface to zlib', 'test_zlib', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestZlib',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
+
+        # Fastjet
         if self.archi_info.has_fastjet:
             libraries.append(['FastJet', 'interface to FastJet', 'fastjet', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces',False])
             libraries.append(['test_fastjet','interface to Fastjet', 'test_fastjet', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestFastjet',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
+        # Delphes
         if self.archi_info.has_delphes:
             libraries.append(['Delphes', 'interface to Delphes', 'delphes', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces',False])
             libraries.append(['test_delphes','interface to Delphes', 'test_delphes', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestDelphes',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
+        # DelphesMA5tune
         if self.archi_info.has_delphesMA5tune:
             libraries.append(['Delphes-MA5tune', 'interface to Delphes-MA5tune', 'delphesMA5tune', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphesMA5tune_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces',False])
             libraries.append(['test_delphesMA5tune','interface to DelphesMA5tune', 'test_delphesMA5tune', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestDelphesMA5tune',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
+
+        # Root
+        if self.archi_info.has_root:
+            libraries.append(['Root', 'interface to Root', 'root', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libroot_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces',False])
+            libraries.append(['test_root','interface to Root', 'test_root', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestRoot',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
+
+        # Process
         libraries.append(['process', 'SampleAnalyzer core', 'process', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libprocess_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Process',False])
         libraries.append(['test_process','SampleAnalyzer core', 'test_process', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestSampleAnalyzer',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
 
         # Writing the Makefiles
-        logging.info("")
-        logging.info("   **********************************************************")
-        logging.info("                Building SampleAnalyzer libraries     ")
-        logging.info("   **********************************************************")
+        self.logger.info("")
+        self.logger.info("   **********************************************************")
+        self.logger.info("                Building SampleAnalyzer libraries     ")
+        self.logger.info("   **********************************************************")
 
 
         # Getting number of cores
@@ -526,18 +496,18 @@ class Main():
         #MakefileWriter.UserfriendlyMakefileForSampleAnalyzer(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Makefile',options)
 
         # Writing the setup
-        logging.info("   Writing the setup files ...")
+        self.logger.info("   Writing the setup files ...")
         from madanalysis.build.setup_writer import SetupWriter
         SetupWriter.WriteSetupFile(True,self.archi_info.ma5dir+'/tools/SampleAnalyzer/',self.archi_info)
         SetupWriter.WriteSetupFile(False,self.archi_info.ma5dir+'/tools/SampleAnalyzer/',self.archi_info)
         # Writing the makefile
-        logging.info("   Writing all the Makefiles ...")
+        self.logger.info("   Writing all the Makefiles ...")
         for ind in range(0,len(libraries)):
             if not compiler.WriteMakefileForInterfaces(libraries[ind][2]):
-                logging.error("library building aborted.")
+                self.logger.error("library building aborted.")
                 sys.exit()
         if not compiler.WriteMakefileForInterfaces('test'):
-            logging.error("test program building aborted.")
+            self.logger.error("test program building aborted.")
             sys.exit()
 
         # Compiling the libraries
@@ -549,65 +519,67 @@ class Main():
             else:
                 product='test program'
 
-            logging.info("   **********************************************************")
-            logging.info("   Component "+str(ind+1)+"/"+str(len(libraries))+" - "+product+": "+libraries[ind][1])
+            self.logger.info("   **********************************************************")
+            self.logger.info("   Component "+str(ind+1)+"/"+str(len(libraries))+" - "+product+": "+libraries[ind][1])
 
              # Cleaning the project
-            logging.info("     - Cleaning the project before building the "+product+" ...")
+            self.logger.info("     - Cleaning the project before building the "+product+" ...")
             if not compiler.MrProper(libraries[ind][2],libraries[ind][4]):
-                logging.error("The "+product+" building aborted.")
+                self.logger.error("The "+product+" building aborted.")
                 sys.exit()
 
             # Compiling
-            logging.info("     - Compiling the source files ...")
+            self.logger.info("     - Compiling the source files ...")
             if not compiler.Compile(ncores,libraries[ind][2],libraries[ind][4]):
-                logging.error("The "+product+" building aborted.")
+                self.logger.error("The "+product+" building aborted.")
                 sys.exit()
 
             # Linking
-            logging.info("     - Linking the "+product+" ...")
+            self.logger.info("     - Linking the "+product+" ...")
             if not compiler.Link(libraries[ind][2],libraries[ind][4]):
-                logging.error("The "+product+" building aborted.")
+                self.logger.error("The "+product+" building aborted.")
                 sys.exit()
 
             # Checking
-            logging.info("     - Checking that the "+product+" is properly built ...")
+            self.logger.info("     - Checking that the "+product+" is properly built ...")
             if not os.path.isfile(libraries[ind][3]):
-                logging.error("The "+product+" '"+libraries[ind][3]+"' is not produced.")
+                self.logger.error("The "+product+" '"+libraries[ind][3]+"' is not produced.")
                 sys.exit()
 
              # Cleaning the project
-            logging.info("     - Cleaning the project after building the "+product+" ...")
+            self.logger.info("     - Cleaning the project after building the "+product+" ...")
             if not compiler.Clean(libraries[ind][2],libraries[ind][4]):
-                logging.error("library building aborted.")
+                self.logger.error("library building aborted.")
                 sys.exit()
 
             if not isLibrary:
 
                 # Running the program test
-                logging.info("     - Running the test program ...")
+                self.logger.info("     - Running the test program ...")
                 program=libraries[ind][3].split('/')[-1]
-                if not compiler.Run(program,[],self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/'):
-                    logging.error("the test failed.")
+
+                argv = []
+                if program=='TestSampleAnalyzer':
+                    argv = [self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/Process/dummy_list.txt']
+                if not compiler.Run(program,argv,self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/'):
+                    self.logger.error("the test failed.")
                     sys.exit()
 
                 # Checking the program output
-                logging.info("     - Checking the program output...")
+                self.logger.info("     - Checking the program output...")
                 if libraries[ind][0]=="configuration":
                     if not compiler.CheckRunConfiguration(program,self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/'):
-                        logging.error("the test failed.")
+                        self.logger.error("the test failed.")
                         sys.exit()
                 else:    
                     if not compiler.CheckRun(program,self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/'):
-                        logging.error("the test failed.")
+                        self.logger.error("the test failed.")
                         sys.exit()
 
             # Print Ok
-            sys.stdout.write("     => Status: ")
-            self.PrintOK()
+            self.logger.info('      => Status: \x1b[32m'+'[OK]'+'\x1b[0m')
 
-        logging.info("   **********************************************************")
-        logging.info("")
+        self.logger.info("   **********************************************************")
+        self.logger.info("")
 
         return True
-

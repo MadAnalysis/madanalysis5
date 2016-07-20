@@ -22,14 +22,23 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// STL headers
+#include <fstream>
+
+// SampleAnalyzer headers
+#include "SampleAnalyzer/Commons/Service/DisplayService.h"
 #include "SampleAnalyzer/Interfaces/delphes/DetectorDelphes.h"
 #include "SampleAnalyzer/Interfaces/delphes/DelphesMemoryInterface.h"
 
-#include <fstream>
+// ROOT headers
 #include <TROOT.h>
+#include <TObjArray.h>
+#include <TFile.h>
+#include <TDatabasePDG.h>
+#include <TParticlePDG.h>
+#include <TFolder.h>
 
-
-//Delphes header
+// Delphes headers
 #include "external/ExRootAnalysis/ExRootConfReader.h"
 #include "external/ExRootAnalysis/ExRootTreeWriter.h"
 #include "external/ExRootAnalysis/ExRootTreeBranch.h"
@@ -37,8 +46,6 @@
 #include "classes/DelphesFactory.h"
 #include "modules/Delphes.h"
 
-//SampleAnalyzer header
-#include "SampleAnalyzer/Commons/Service/DisplayService.h"
 
 
 using namespace MA5;
@@ -46,8 +53,11 @@ using namespace MA5;
 
 bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<std::string,std::string>& options)
 { 
+  nprocesses_=0;
+
   // Save the name of the configuration file
   configFile_ = configFile;
+  rootfile_="";
 
   // Test the presence of the configuration file on the hard disk
   std::ifstream configTest(configFile.c_str());
@@ -78,7 +88,13 @@ bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<s
         if (tmp==0) output_=false;
         else output_=true;
       }
-      }
+    }
+    else if (key=="rootfile")
+    {
+      std::stringstream str;
+      str << it->second;
+      str >> rootfile_;
+    }
   }
 
   // Decode configuration file with Delphes class 'ExRootConfReader'
@@ -116,13 +132,19 @@ bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<s
       isPhotonMA5   && isJetMA5      ) MA5card_=true; else MA5card_=false;
 
   // Creating output file
-  if (output_) outputFile_ = TFile::Open("TheMouth.root", "RECREATE");
+  if (output_)
+  {
+    if (rootfile_=="")
+       outputFile_ = TFile::Open("TheMouth.root", "RECREATE");
+    else
+       outputFile_ = TFile::Open(rootfile_.c_str(), "RECREATE");
+  }
   else outputFile_ = TFile::Open("tmp.root", "RECREATE");
 
   // Creating output tree
   treeWriter_ = new ExRootTreeWriter(outputFile_, "Delphes");
-  ExRootTreeBranch* branchEvent_ = treeWriter_->NewBranch("Event", LHEFEvent::Class());
-  //  branchEvent_ = treeWriter_->NewBranch("Event", LHEFEvent::Class());
+  branchEvent_  = treeWriter_->NewBranch("Event",  LHEFEvent::Class());
+  branchWeight_ = treeWriter_->NewBranch("Weight", Weight::Class());
 
   // Creating all Delphes modules
   modularDelphes_ = new Delphes("Delphes");
@@ -174,6 +196,8 @@ std::string DetectorDelphes::GetParameters()
 /// Jet clustering
 bool DetectorDelphes::Execute(SampleFormat& mySample, EventFormat& myEvent)
 {
+  nprocesses_++;
+
   // Import particles to Delphes
   TranslateMA5toDELPHES(mySample, myEvent);
 
@@ -182,6 +206,9 @@ bool DetectorDelphes::Execute(SampleFormat& mySample, EventFormat& myEvent)
 
   // Export particles from Delphes
   TranslateDELPHEStoMA5(mySample, myEvent);
+
+  // Creater Event header
+  StoreEventHeader(mySample, myEvent); 
 
   // Saving ROOT
   if (output_) treeWriter_->Fill();
@@ -195,6 +222,7 @@ bool DetectorDelphes::Execute(SampleFormat& mySample, EventFormat& myEvent)
 
 void DetectorDelphes::Finalize()
 {
+  nprocesses_=0;
   modularDelphes_->FinishTask();
   if (output_) treeWriter_->Write();
 
@@ -202,6 +230,23 @@ void DetectorDelphes::Finalize()
   delete treeWriter_; treeWriter_=0;
   delete modularDelphes_; modularDelphes_=0;
 }
+
+void DetectorDelphes::StoreEventHeader(SampleFormat& mySample, EventFormat& myEvent)
+{
+  LHEFEvent *element = dynamic_cast<LHEFEvent *>(branchEvent_->NewEntry());
+  
+  element->Number    = nprocesses_;
+  if (myEvent.mc()==0) return;
+
+  element->ProcessID = myEvent.mc()->processId();
+  element->Weight    = myEvent.mc()->weight();
+  element->ScalePDF  = myEvent.mc()->scale();
+  element->AlphaQED  = myEvent.mc()->alphaQED();
+  element->AlphaQCD  = myEvent.mc()->alphaQCD();
+  element->ReadTime  = 0; //? readStopWatch->RealTime();
+  element->ProcTime  = 0; //? procStopWatch->RealTime();
+}
+
 
 void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat& myEvent)
 {

@@ -190,11 +190,11 @@ bool ReaderTextBase::ReadLine(std::string& line, bool removeComment)
 // -----------------------------------------------------------------------------
 // GetFileSize
 // -----------------------------------------------------------------------------
-Long64_t ReaderTextBase::GetFileSize()
+MAint64 ReaderTextBase::GetFileSize()
 {
   if (input_==0) return 0;
 
-  Long64_t length = 0;
+  MAint64 length = 0;
   if (compress_)
   {
     std::ifstream myinput(filename_.c_str());
@@ -218,7 +218,7 @@ Long64_t ReaderTextBase::GetFileSize()
 // -----------------------------------------------------------------------------
 // GetFileSize
 // -----------------------------------------------------------------------------
-Long64_t ReaderTextBase::GetFinalPosition()
+MAint64 ReaderTextBase::GetFinalPosition()
 {
   return GetFileSize();
 }
@@ -227,7 +227,7 @@ Long64_t ReaderTextBase::GetFinalPosition()
 // -----------------------------------------------------------------------------
 // GetPosition
 // -----------------------------------------------------------------------------
-Long64_t ReaderTextBase::GetPosition()
+MAint64 ReaderTextBase::GetPosition()
 {
   if (input_==0) return 0;
 #ifdef ZIP_USE

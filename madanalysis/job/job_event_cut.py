@@ -73,7 +73,7 @@ def WriteEventCut(file,main,iabs,icut):
 
     # Initializing tag
     tagName='filter'
-    file.write('  std::vector<Bool_t> '+tagName+'('+str(len(conditions))+',false);\n')
+    file.write('  std::vector<MAbool> '+tagName+'('+str(len(conditions))+',false);\n')
 
     # Loop over conditions
     for ind in range(len(conditions)):
@@ -82,7 +82,7 @@ def WriteEventCut(file,main,iabs,icut):
         file.write('  }\n')
 
     # Writing final tag
-    file.write('  Bool_t ' + tagName + '_global = ' +\
+    file.write('  MAbool ' + tagName + '_global = ' +\
                GetFinalCondition(main.selection[iabs].conditions,0,tagName)[0]+';\n')
 
     # Event Cut ?
@@ -156,7 +156,7 @@ def WriteJobExecute2Nbody(file,iabs,icut,combi1,combi2,main,tagName,tagIndex,con
     if len(combi1)==1 and combi1.ALL:
         if obs.combination in [CombinationType.SUMSCALAR,\
                                CombinationType.DIFFSCALAR]:
-            file.write('    Double_t value1=0;\n')
+            file.write('    MAdouble64 value1=0;\n')
         else:
             file.write('    ParticleBaseFormat q1;\n')
     
@@ -164,7 +164,7 @@ def WriteJobExecute2Nbody(file,iabs,icut,combi1,combi2,main,tagName,tagIndex,con
     if len(combi2)==1 and combi2.ALL:
         if obs.combination in [CombinationType.SUMSCALAR,\
                                CombinationType.DIFFSCALAR]:
-            file.write('    Double_t value2=0;\n')
+            file.write('    MAdouble64 value2=0;\n')
         else:
             file.write('    ParticleBaseFormat q2;\n')
 
@@ -273,14 +273,20 @@ def WriteJobSum2N(file,iabs,icut,combi1,combi2,main,tagName,tagIndex,condition,i
         # First part
         file.write('    ParticleBaseFormat q1;\n')
         for ind in range(0,len(combi1)):
-            file.write('    q1'+oper_string+'='+\
+            TheOper='+'
+            if ind!=0:
+              TheOper=oper_string
+            file.write('    q1'+TheOper+'='+\
                        containers1[ind]+'[+'+iterator1+'['+str(ind)+']]->'+\
                        'momentum();\n')
 
         # Second part
         file.write('    ParticleBaseFormat q2;\n')
         for ind in range(0,len(combi2)):
-            file.write('    q2'+oper_string+'='+\
+            TheOper='+'
+            if ind!=0:
+              TheOper=oper_string
+            file.write('    q2'+TheOper+'='+\
                        containers2[ind]+'['+iterator2+'['+str(ind)+']]->'+\
                        'momentum();\n')
 
@@ -309,7 +315,7 @@ def WriteJobExecuteNbody(file,iabs,icut,combination,main,tagName,tagIndex,condit
     if len(combination)==1 and combination.ALL:
         if obs.combination in [CombinationType.SUMSCALAR,\
                                CombinationType.DIFFSCALAR]:
-            file.write('    Double_t value=0;\n')
+            file.write('    MAdouble64 value=0;\n')
         else:
             file.write('    ParticleBaseFormat q;\n')
 
@@ -357,7 +363,7 @@ def WriteJobLoop(file,iabs,icut,combination,redundancies,main,iterator='ind'):
                                            item.name+cut.rank+cut.statuscode))
 
     # Declaring indicator
-    file.write('    UInt_t '+iterator+'['+str(len(combination))+'];\n')
+    file.write('    MAuint32 '+iterator+'['+str(len(combination))+'];\n')
 
     # Rendundancies case
     if redundancies:
@@ -403,13 +409,13 @@ def WriteJobSameCombi(file,iabs,icut,combination,redundancies,main,iterator='ind
         file.write('    std::set<const MCParticleFormat*> mycombi;\n')
     else:
         file.write('    std::set<const RecParticleFormat*> mycombi;\n');
-    file.write('    for (UInt_t i=0;i<'+str(len(combination))+';i++)\n')
+    file.write('    for (MAuint32 i=0;i<'+str(len(combination))+';i++)\n')
     file.write('    {\n')
     for i in range(0,len(combination)):
         file.write('      mycombi.insert('+containers[i]+'['+iterator+'[i]]);\n')
     file.write('    }\n')
-    file.write('    Bool_t matched=false;\n')
-    file.write('    for (UInt_t i=0;i<combis.size();i++)\n')
+    file.write('    MAbool matched=false;\n')
+    file.write('    for (MAuint32 i=0;i<combis.size();i++)\n')
     file.write('      if (combis[i]==mycombi) {matched=true; break;}\n')
     file.write('    if (matched) continue;\n')
     file.write('    else combis.push_back(mycombi);\n\n')
@@ -464,7 +470,10 @@ def WriteJobSum(file,iabs,icut,combination,main,tagName,tagIndex,condition,itera
                              CombinationType.DIFFVECTOR]:
         file.write('    ParticleBaseFormat q;\n')
         for ind in range(len(combination)):
-            file.write('    q'+oper_string+'='+containers[ind]+'['+iterator+'['+str(ind)+']]->'+\
+            TheOper='+'
+            if ind!=0:
+              TheOper=oper_string
+            file.write('    q'+TheOper+'='+containers[ind]+'['+iterator+'['+str(ind)+']]->'+\
                              'momentum();\n')
         file.write('    if (q.')
         file.write(obs.code(main.mode)+\

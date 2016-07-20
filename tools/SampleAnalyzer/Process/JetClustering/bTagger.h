@@ -39,13 +39,13 @@ class bTagger:public TaggerBase
  protected :
 
   /// Mis-identification efficiency
-  Float_t misid_ljet_;
+  MAfloat32 misid_ljet_;
 
   /// Mis-identification efficiency
-  Float_t misid_cjet_;
+  MAfloat32 misid_cjet_;
 
   /// Apply misefficiency
-  Bool_t doMisefficiency_;
+  MAbool doMisefficiency_;
 
 
 //---------------------------------------------------------------------------------
@@ -82,7 +82,7 @@ class bTagger:public TaggerBase
     }
 
     /// Is this B hadron the last in the decay chain ?
-    Bool_t IsLastBHadron(MCParticleFormat* part, EventFormat& myEvent);
+    MAbool IsLastBHadron(MCParticleFormat* part, EventFormat& myEvent);
 
     /// Set a parameter
     virtual bool SetParameter(const std::string& key, const std::string& value,std::string header);

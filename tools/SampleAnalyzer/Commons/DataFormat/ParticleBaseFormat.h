@@ -32,8 +32,7 @@
 #include <iomanip>
 #include <cmath>
 
-// ROOT headers
-#include <TLorentzVector.h>
+#include "SampleAnalyzer/Commons/Vector/MALorentzVector.h"
 
 // SampleAnalyzer
 #include "SampleAnalyzer/Commons/Service/LogService.h"
@@ -62,7 +61,7 @@ class ParticleBaseFormat
  protected:
    
   /// Quadrivector of particle (E, px,py,pz)
-  TLorentzVector 	momentum_;  
+  MALorentzVector 	momentum_;  
 
 
   // -------------------------------------------------------------
@@ -75,11 +74,11 @@ class ParticleBaseFormat
   { }
 
   /// Constructor without argument
-  ParticleBaseFormat(Double_t px, Double_t py, Double_t pz, Double_t e)
+  ParticleBaseFormat(MAfloat64 px, MAfloat64 py, MAfloat64 pz, MAfloat64 e)
   { momentum_.SetPxPyPzE(px,py,pz,e); }
 
   /// Constructor without argument
-  ParticleBaseFormat(const TLorentzVector& p)
+  ParticleBaseFormat(const MALorentzVector& p)
   { momentum_.SetPxPyPzE(p.Px(),p.Py(),p.Pz(),p.E()); }
 
   /// Destructor
@@ -104,40 +103,40 @@ class ParticleBaseFormat
   }
 			
   /// Accessor to 4-vector momentum (read-only)
-  const TLorentzVector& momentum() const {return momentum_;}
+  const MALorentzVector& momentum() const {return momentum_;}
 
   /// Accessor to 4-vector momentum
-  TLorentzVector& momentum() {return momentum_;}
+  MALorentzVector& momentum() {return momentum_;}
 
   /// Set the 4-vector momentum
-  void setMomentum(const TLorentzVector& v) {momentum_=v;}
+  void setMomentum(const MALorentzVector& v) {momentum_=v;}
 
   /// Accessor to the particle energy
-  const Float_t e()       const {return momentum_.E();       }
+  const MAfloat32 e()       const {return momentum_.E();       }
 
   /// Accessor to the particle mass
-  const Float_t m()       const {return momentum_.M();       }
+  const MAfloat32 m()       const {return momentum_.M();       }
 
   /// Accessor to the particle momentum magnitude
-  const Float_t p()       const {return momentum_.P();       }
+  const MAfloat32 p()       const {return momentum_.P();       }
 
   /// Accessor to the particle transverse mass
   // WARNING: ROOT native formula is not the good one
-  const Float_t mt()      const 
+  const MAfloat32 mt()      const 
   { 
     //    return momentum_.Mt();
-    Float_t tmp = momentum_.Et2() - momentum_.Pt()*momentum_.Pt();
+    MAfloat32 tmp = momentum_.Et2() - momentum_.Pt()*momentum_.Pt();
     if (tmp<0) return 0.; else return sqrt(tmp);
   }
 
-  const Float_t mt_met(const TLorentzVector& MET) const 
+  const MAfloat32 mt_met(const MALorentzVector& MET) const 
   { 
     // Computing ET sum
     double ETsum = sqrt( momentum_.M()*momentum_.M() +
                          momentum_.Pt()*momentum_.Pt() )  + MET.Pt();
 
     // Computing PT sum
-    TLorentzVector pt = momentum_ + MET;
+    MALorentzVector pt = momentum_ + MET;
 
     double value = ETsum*ETsum - pt.Pt()*pt.Pt();
     if (value<0) return 0;
@@ -145,34 +144,34 @@ class ParticleBaseFormat
   }
 
   /// Accessor to the particle transverse energy
-  const Float_t et()      const {return momentum_.Et();      }
+  const MAfloat32 et()      const {return momentum_.Et();      }
 
   /// Accessor to the particle transverse momentum magnitude
-  const Float_t pt()      const {return momentum_.Perp();    }
+  const MAfloat32 pt()      const {return momentum_.Perp();    }
 
   /// Accessor to the particle x-component momentum
-  const Float_t px()      const {return momentum_.Px();      }
+  const MAfloat32 px()      const {return momentum_.Px();      }
 
   /// Accessor to the particle y-component momentum
-  const Float_t py()      const {return momentum_.Py();      }
+  const MAfloat32 py()      const {return momentum_.Py();      }
 
   /// Accessor to the particle z-component momentum
-  const Float_t pz()      const {return momentum_.Pz();      }
+  const MAfloat32 pz()      const {return momentum_.Pz();      }
 
   /// Accessor to the particle pseudo-rapidity
-  const Float_t eta()     const {return momentum_.Eta();     }
+  const MAfloat32 eta()     const {return momentum_.Eta();     }
 
   /// Accessor to the particle pseudo-rapidity
-  const Float_t abseta()     const {return fabs(momentum_.Eta());     }
+  const MAfloat32 abseta()     const {return fabs(momentum_.Eta());     }
 
   /// Accessor to the particle polar angle
-  const Float_t theta()   const {return momentum_.Theta();   }
+  const MAfloat32 theta()   const {return momentum_.Theta();   }
 
   /// Accessor to the particle azimuthal angle
-  const Float_t phi()     const {return momentum_.Phi();     }
+  const MAfloat32 phi()     const {return momentum_.Phi();     }
 
   /// Accessor to the delta Phi (given in [0, pi] with another particle direction
-  const Float_t dphi_0_pi(const ParticleBaseFormat* p) const 
+  const MAfloat32 dphi_0_pi(const ParticleBaseFormat* p) const 
   {
     double dphi = fabs(momentum_.Phi() - p->momentum().Phi());
     if(dphi>3.14159265) dphi=2.*3.14159265-dphi;
@@ -180,7 +179,7 @@ class ParticleBaseFormat
   }
 
   /// Accessor to the delta Phi (given in [0, pi] with another particle direction
-  const Float_t dphi_0_pi(const ParticleBaseFormat& p) const 
+  const MAfloat32 dphi_0_pi(const ParticleBaseFormat& p) const 
   {
     double dphi = fabs(momentum_.Phi() - p.momentum().Phi());
     if(dphi>3.14159265) dphi=2.*3.14159265-dphi;
@@ -188,7 +187,7 @@ class ParticleBaseFormat
   }
 
   /// Accessor to the delta Phi (given in [0, 2pi] with another particle direction
-  const Float_t dphi_0_2pi(const ParticleBaseFormat* p) const 
+  const MAfloat32 dphi_0_2pi(const ParticleBaseFormat* p) const 
   {
     double dphi =momentum_.Phi() - p->momentum().Phi();
     if(dphi<0.) dphi+=2.*3.14159265;
@@ -196,7 +195,7 @@ class ParticleBaseFormat
   }
 
   /// Accessor to the delta Phi (given in [0, 2pi] with another particle direction
-  const Float_t dphi_0_2pi(const ParticleBaseFormat& p) const 
+  const MAfloat32 dphi_0_2pi(const ParticleBaseFormat& p) const 
   {
     double dphi = momentum_.Phi() - p.momentum().Phi();
     if(dphi<0.) dphi+=2.*3.14159265;
@@ -204,43 +203,43 @@ class ParticleBaseFormat
   }
 
   /// Accessor to the particle rapidity
-  const Float_t y()       const {return momentum_.Rapidity();}
+  const MAfloat32 y()       const {return momentum_.Rapidity();}
 
   /// Accessor to the relativist beta parameter
-  const Float_t beta()    const {return momentum_.Beta();    }
+  const MAfloat32 beta()    const {return momentum_.Beta();    }
 
   /// Accessor to the relativist gamma parameter
-  const Float_t gamma()   const {return momentum_.Gamma();   }
+  const MAfloat32 gamma()   const {return momentum_.Gamma();   }
 
   /// Accessor to the polar radius
-  const Float_t r()       const
+  const MAfloat32 r()       const
   { 
     return sqrt(momentum_.Eta()*momentum_.Eta() + \
                 momentum_.Phi()*momentum_.Phi() ); 
   }
 
   /// Accessor to the delta R with another particle direction
-  const Float_t dr(const ParticleBaseFormat& p) const 
+  const MAfloat32 dr(const ParticleBaseFormat& p) const 
   { return momentum_.DeltaR(p.momentum()); }
 
   /// Accessor to the delta R with another particle direction
-  const Float_t dr(const ParticleBaseFormat* p) const 
+  const MAfloat32 dr(const ParticleBaseFormat* p) const 
   { return momentum_.DeltaR(p->momentum()); }
 
   /// Accessor to the angle with another particle direction
-  const Float_t angle(const ParticleBaseFormat& p) const 
-  { return momentum_.Angle(p.momentum().Vect()); }
+  const MAfloat32 angle(const ParticleBaseFormat& p) const 
+  { return momentum_.Angle(p.momentum()); }
 
   /// Accessor to the angle with another particle direction
-  const Float_t angle(const ParticleBaseFormat* p) const 
-  { return momentum_.Angle(p->momentum().Vect()); }
+  const MAfloat32 angle(const ParticleBaseFormat* p) const 
+  { return momentum_.Angle(p->momentum()); }
 
   /// operator * (scalar)
-  ParticleBaseFormat operator * (Double_t a) const
+  ParticleBaseFormat operator * (MAfloat64 a) const
   { return ParticleBaseFormat(a*momentum_); }
 
   /// operator * (momentum)
-  Double_t operator * (const ParticleBaseFormat& p) const
+  MAfloat64 operator * (const ParticleBaseFormat& p) const
   { return momentum_.Dot(p.momentum_); }
 
   /// operator + (momentum)
@@ -252,11 +251,11 @@ class ParticleBaseFormat
   { return ParticleBaseFormat(momentum_-p.momentum_); }
 
   /// operator + (momentum)
-  ParticleBaseFormat operator + (const TLorentzVector& p) const 
+  ParticleBaseFormat operator + (const MALorentzVector& p) const 
   { return ParticleBaseFormat(momentum_+p); }
 
   /// operator - (momentum)
-  ParticleBaseFormat operator - (const TLorentzVector& p) const
+  ParticleBaseFormat operator - (const MALorentzVector& p) const
   { return ParticleBaseFormat(momentum_-p); }
 
   /// operator += (momentum)

@@ -22,8 +22,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/ClusterAlgoBase.h"
 #include "SampleAnalyzer/Commons/Base/DetectorBase.h"
 #include "SampleAnalyzer/Commons/Base/ReaderBase.h"
-#include "SampleAnalyzer/Commons/Base/TreeReaderBase.h"
 

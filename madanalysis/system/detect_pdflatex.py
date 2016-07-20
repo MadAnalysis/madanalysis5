@@ -44,7 +44,7 @@ class DetectPdflatex:
         self.name      = 'pdflatex'
         self.mandatory = False
         self.log       = []
-        self.logger    = logging.getLogger('madanalysis')
+        self.logger    = logging.getLogger('MA5')
 
         # adding what you want here
 

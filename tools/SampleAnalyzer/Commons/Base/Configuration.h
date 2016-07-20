@@ -25,12 +25,14 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
+
 // STL headers
 #include <iostream>
 #include <string>
 
-// ROOT headers
-#include <TLorentzVector.h>
+// SampleAnalyzer headers
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
+#include "SampleAnalyzer/Commons/Vector/MALorentzVector.h"
 
 
 namespace MA5
@@ -53,10 +55,10 @@ class Configuration
     std::string pythoninterface_date_;
 
     /// option : check event mode
-    Bool_t check_event_;
+    MAbool check_event_;
 
     /// option : veto to event weights
-    Bool_t no_event_weight_;
+    MAbool no_event_weight_;
 
     /// input list name
     std::string input_list_name_;
@@ -143,11 +145,11 @@ class Configuration
     { return input_list_name_; }
 
     /// Accessor to NoEventWeight
-    Bool_t IsNoEventWeight() const
+    MAbool IsNoEventWeight() const
     { return no_event_weight_; }
 
     /// Accessor to CheckEvent
-    Bool_t IsCheckEvent() const
+    MAbool IsCheckEvent() const
     { return check_event_; }
 
 };

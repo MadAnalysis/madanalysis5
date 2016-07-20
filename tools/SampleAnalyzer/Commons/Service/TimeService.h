@@ -32,8 +32,7 @@
 #include<iostream>
 #include<ctime>
 
-// ROOT headerse
-#include <Rtypes.h> 
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/TimeMeasureType.h"
@@ -156,7 +155,7 @@ class TimeService
   void StopTime(const std::string& name)
   {
     // Take time measure
-    UInt_t timing = std::clock();
+    MAuint32 timing = std::clock();
 
     // 
     TimeIterator it = GetIterator(name);

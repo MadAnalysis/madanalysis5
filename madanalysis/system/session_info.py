@@ -30,17 +30,14 @@ class SessionInfo():
         self.username           = ""
         self.tmpdir             = ""
         self.downloaddir        = ""
-        self.recasttools_path   = ""
-        self.madgraph_path      = ""
+        self.has_root           = False
         self.has_matplotlib     = False
         self.has_gnuplot        = False
         self.has_pdflatex       = False
         self.has_latex          = False
-        self.has_recasttools    = False
         self.has_dvipdf         = False
-        self.has_madgraph       = False
         self.has_web            = True
-        self.logger             = logging.getLogger('madanalysis')
+        self.logger             = logging.getLogger('MA5')
 
     def dump(self):
         for item in self.__dict__:

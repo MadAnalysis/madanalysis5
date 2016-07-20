@@ -41,16 +41,16 @@ class ClusterAlgoCDFJetClu: public ClusterAlgoPlugin
   private :
 
     /// Cone Radius
-    Double_t R_;
+    MAfloat64 R_;
 
     /// Overlap Threshold
-    Double_t OverlapThreshold_;
+    MAfloat64 OverlapThreshold_;
 
     /// Seed Threshold
-    Double_t SeedThreshold_;
+    MAfloat64 SeedThreshold_;
 
     /// iratch
-    Int_t Iratch_;
+    MAint32 Iratch_;
 
 //---------------------------------------------------------------------------------
 //                                method members

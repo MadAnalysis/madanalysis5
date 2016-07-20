@@ -389,7 +389,7 @@ class JobWriter():
             file.write('  AnalyzerBase* analyzer2 = \n')
             file.write('      manager.InitializeAnalyzer("MergingPlots","MergingPlots.saf",parametersA2);\n')
             file.write('  if (analyzer2==0) return 1;\n\n')
-        if self.output!="":
+        if self.output!="" and not self.output.lower().endswith('root'):
             file.write('  //Getting pointer to the writer\n')
             file.write('  WriterBase* writer1 = \n')
             if self.output.lower().endswith('lhe') or self.output.lower().endswith('lhe.gz'):
@@ -483,7 +483,7 @@ class JobWriter():
         elif self.main.fastsim.package=="delphesMA5tune":
             file.write('      fastsim1->Execute(mySample,myEvent);\n')
         file.write('      if (!analyzer1->Execute(mySample,myEvent)) continue;\n')
-        if self.output!="":
+        if self.output!="" and  not self.output.lower().endswith('root'):
             file.write('      writer1->WriteEvent(myEvent,mySample);\n')
         file.write('    }\n')
         file.write('  }\n\n')
@@ -555,8 +555,11 @@ class JobWriter():
         title='User package'
 
         # Options
-        option.has_commons  = True
-        options.has_process = True
+        option.has_commons   = True
+        options.has_process  = True
+        if self.main.archi_info.has_root:
+            options.has_root_inc = True
+            options.has_root_lib = True
         toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
 
         # File to compile
@@ -588,7 +591,10 @@ class JobWriter():
 
         # Options
         options.has_commons  = True
-        options.has_process = True
+        options.has_process  = True
+        if self.main.archi_info.has_root:
+            options.has_root_inc = True
+            options.has_root_lib = True
         #options.has_userpackage = True
         toRemove=['Log/compilation.log','Log/linking.log','Log/cleanup.log','Log/mrproper.log']
 
@@ -786,7 +792,10 @@ class JobWriter():
         commands.append('../../Input/'+name+'.list')
 
         # Running SampleAnalyzer
-        result = ShellCommand.Execute(commands,folder)
+        if self.main.redirectSAlogger:
+            result = ShellCommand.ExecuteWithMA5Logging(commands,folder)
+        else:
+            result = ShellCommand.Execute(commands,folder)
 
         return result
 

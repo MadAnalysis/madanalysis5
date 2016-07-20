@@ -22,10 +22,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/TaggerBase.h"
+
+
 using namespace MA5;
 
-Bool_t TaggerBase::IsLast(MCParticleFormat* part, EventFormat& myEvent)
+MAbool TaggerBase::IsLast(MCParticleFormat* part, EventFormat& myEvent)
 {
   for (unsigned int i=0; i<part->daughters().size(); i++)
   {
@@ -44,7 +47,7 @@ bool TaggerBase::SetParameter(const std::string& key,
   // Method
   if (key=="method")
   {
-    Int_t tmp=0;
+    MAint32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
@@ -56,7 +59,7 @@ bool TaggerBase::SetParameter(const std::string& key,
   // deltaR
   else if (key=="matching_dr")
   {
-    Float_t tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
@@ -68,19 +71,19 @@ bool TaggerBase::SetParameter(const std::string& key,
   // exclusive
   else if (key=="exclusive")
   {
-    Int_t tmp=0;
+    MAint32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
     if (tmp<0)  WARNING << "DeltaRmax must be equal to 0 or 1. Using the default value = " 
-                        << static_cast<Int_t>(Exclusive_) << endmsg;
+                        << static_cast<MAint32>(Exclusive_) << endmsg;
     else Exclusive_=(tmp==1);
   }
 
   // efficiency
   else if (key=="efficiency")
   {
-    Float_t tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;

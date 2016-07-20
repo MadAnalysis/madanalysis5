@@ -37,13 +37,14 @@ class CmdPlot(CmdBase,CmdSelectionBase):
     """Command PLOT"""
 
     def __init__(self,main):
+        self.logger       = logging.getLogger('MA5')
         CmdBase.__init__(self,main,"plot")
 
     def do(self,args):
 
         # Skipping the case with empty args
         if len(args)==0:
-            logging.error("wrong syntax")
+            self.logger.error("wrong syntax")
             self.help()
             return
 
@@ -81,11 +82,11 @@ class CmdPlot(CmdBase,CmdSelectionBase):
                     foundOptions=True
 
         if Nbracket1!=0:
-            logging.error("number of opening-bracket '(' and number of " +\
+            self.logger.error("number of opening-bracket '(' and number of " +\
                           "closing-braket ')' does not match.")
             return
         if Nbracket2!=0:
-            logging.error("number of opening-bracket '[' and number of " +\
+            self.logger.error("number of opening-bracket '[' and number of " +\
                           "closing-braket ']' does not match.")
             return
 
@@ -99,7 +100,7 @@ class CmdPlot(CmdBase,CmdSelectionBase):
             elif beginOptions==1:
                 foundBinning=False
             else:
-                logging.error("histogram parameters (binning and bounds) are not fully defined")
+                self.logger.error("histogram parameters (binning and bounds) are not fully defined")
                 self.help()
                 return
         else:
@@ -108,13 +109,13 @@ class CmdPlot(CmdBase,CmdSelectionBase):
             elif beginOptions-endArguments==1:
                 foundBinning=False
             else:
-                logging.error('histogram parameters (binning and bounds) are not fully defined')
+                self.logger.error('histogram parameters (binning and bounds) are not fully defined')
                 self.help()
                 return
 
         # Binning : warning for NPID and NAPID if binnings are defined
         if obsRef.plot_auto and foundBinning:
-           logging.warning("histogram parameters (binning and bounds) " +
+           self.logger.warning("histogram parameters (binning and bounds) " +
                            "are automatically determined for the observable '" +\
                            obsName+"'.")
            foundBinning=False
@@ -132,11 +133,11 @@ class CmdPlot(CmdBase,CmdSelectionBase):
             try:
                 nbins = int(args[beginOptions-3])
             except:
-                logging.error(str(beginOptions-2)+\
+                self.logger.error(str(beginOptions-2)+\
                           "th argument (nbins) must have a non-zero, positive, integer value.")
                 return
             if (nbins<=0):
-                logging.error(str(beginOptions-2)+\
+                self.logger.error(str(beginOptions-2)+\
                           "th argument (nbins) must have a non-zero, positive, integer value")
                 return
 
@@ -144,7 +145,7 @@ class CmdPlot(CmdBase,CmdSelectionBase):
             try:
                 xmin = float(args[beginOptions-2])
             except:
-                logging.error(str(beginOptions-1)+\
+                self.logger.error(str(beginOptions-1)+\
                           "th argument (xmin) must have a floating value.")
                 return
 
@@ -152,13 +153,13 @@ class CmdPlot(CmdBase,CmdSelectionBase):
             try:
                 xmax = float(args[beginOptions-1])
             except:
-                logging.error(str(beginOptions)+\
+                self.logger.error(str(beginOptions)+\
                           "th argument (xmax) have a floating value.")
                 return
             
             # Checking xmin < xmax
             if xmin>xmax:
-                logging.error("'xmin' must be less than 'xmax'.")
+                self.logger.error("'xmin' must be less than 'xmax'.")
                 return
 
         # Extracting arguments
@@ -168,7 +169,7 @@ class CmdPlot(CmdBase,CmdSelectionBase):
             if arguments==None:
                 return
         elif len(obsRef.args) !=0: # checks whether arguments should have been provided
-          logging.error("the observable '"+obsName+"' requires "+
+          self.logger.error("the observable '"+obsName+"' requires "+
                 str(len(obsRef.args))+" arguments whereas no arguments have been specified.")
           return
         
@@ -186,12 +187,12 @@ class CmdPlot(CmdBase,CmdSelectionBase):
 
 
     def help(self):
-        logging.info("   Syntax: plot observable_name ( multiparticle1 multiparticle2 ... ) nbins xmin xmax [ option1 option 2 ]")
-        logging.info("   Declares an histogram: ")
-        logging.info("    - describing the distribution of a given observable, related to one or a combination of (multi)particles,")
-        logging.info("    - with nbins being the number of bins,")
-        logging.info("    - xmin being the lower limit on the x-axis,")
-        logging.info("    - xmax bing the upper limit on the x-axis.")
+        self.logger.info("   Syntax: plot observable_name ( multiparticle1 multiparticle2 ... ) nbins xmin xmax [ option1 option 2 ]")
+        self.logger.info("   Declares an histogram: ")
+        self.logger.info("    - describing the distribution of a given observable, related to one or a combination of (multi)particles,")
+        self.logger.info("    - with nbins being the number of bins,")
+        self.logger.info("    - xmin being the lower limit on the x-axis,")
+        self.logger.info("    - xmax bing the upper limit on the x-axis.")
 
 
     def complete_arguments(self,text,args,obsRef):

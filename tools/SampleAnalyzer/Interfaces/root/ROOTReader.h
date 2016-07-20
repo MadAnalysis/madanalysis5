@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -26,19 +26,14 @@
 #define ROOT_READER_h
 
 // SampleAnalyzer headers
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/Base/ReaderBase.h"
-#include "SampleAnalyzer/Commons/Base/TreeReaderBase.h"
-
-// ROOT header
-#include <TChain.h>
-#include <TLorentzVector.h>
-#include <TObject.h>
-#include <TFile.h>
-#include <TROOT.h>
+#include "SampleAnalyzer/Interfaces/root/TreeReaderBase.h"
 
 // STL header
 #include <iostream>
 
+class TFile;
 
 namespace MA5
 {
@@ -67,33 +62,22 @@ class ROOTReader : public ReaderBase
     treeReader_=0;
   } 
 
-	/// Destructor
+  /// Destructor
   virtual ~ROOTReader()
   { }
 
   /// Initialize
-  virtual bool Initialize(const std::string& rawfilename,
+  virtual MAbool Initialize(const std::string& rawfilename,
                           const Configuration& cfg);
 
   /// Finalize
-  virtual bool Finalize();
+  virtual MAbool Finalize();
 
   /// Read the header
-  virtual bool ReadHeader(SampleFormat& mySample)
-  {
-    // Checking ROOT version
-    Int_t file_version = source_->GetVersion();
-    Int_t lib_version = gROOT->GetVersionInt();
-    if (file_version!=lib_version)
-    {
-      WARNING << "the input file has been produced with ROOT version " << file_version
-              << " whereas the loaded ROOT libs are related to the version " << lib_version << endmsg;
-    }
-    return treeReader_->ReadHeader(mySample);
-  }
+  virtual MAbool ReadHeader(SampleFormat& mySample);
 
   /// Finalize the header
-  virtual bool FinalizeHeader(SampleFormat& mySample)
+  virtual MAbool FinalizeHeader(SampleFormat& mySample)
   { return true; }
 
   /// Read the event
@@ -101,18 +85,18 @@ class ROOTReader : public ReaderBase
   { return treeReader_->ReadEvent(myEvent,mySample); }
 
   /// Finalize the event
-  virtual bool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
+  virtual MAbool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
   { return treeReader_->FinalizeEvent(mySample,myEvent); }
 
 
   /// Get the file size
-  virtual Long64_t GetFinalPosition()
+  virtual MAint64 GetFinalPosition()
   { return treeReader_->GetFinalPosition(); }
 
   /// Get the file size
-  virtual Long64_t GetFileSize()
+  virtual MAint64 GetFileSize()
   {
-    Long64_t length = 0;
+    MAint64 length = 0;
     std::ifstream myinput(filename_.c_str());
     myinput.seekg(0,std::ios::beg);
     myinput.seekg(0,std::ios::end);
@@ -122,12 +106,12 @@ class ROOTReader : public ReaderBase
   }
 
   /// Get the position in file (in octet)
-  virtual Long64_t GetPosition()
+  virtual MAint64 GetPosition()
   { return treeReader_->GetPosition(); }
 
 
  private:
-  bool SelectTreeReader();
+  MAbool SelectTreeReader();
 
 
 };

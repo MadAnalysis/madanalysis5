@@ -53,10 +53,10 @@ class IsolationEFlow : public IsolationBase
     /// Isolation component
     enum ComponentType {ALL_COMPONENTS,TRACK_COMPONENT,PHOTON_COMPONENT,NEUTRAL_COMPONENT};
 
-    virtual Double_t relIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
+    virtual MAfloat64 relIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
     { return relIsolation(&part, event, DR, PTmin, type); }
 
-    virtual Double_t relIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
+    virtual MAfloat64 relIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
     {
       if (part==0) return 0;
       if (event==0) return 0;
@@ -64,14 +64,14 @@ class IsolationEFlow : public IsolationBase
       return sumIsolation(part,event,DR,PTmin,type)/part->pt();
     }
 
-    virtual Double_t sumIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
+    virtual MAfloat64 sumIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
     { return sumIsolation(&part, event, DR, PTmin,type); }
 
-    virtual Double_t sumIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
+    virtual MAfloat64 sumIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
     {
       if (part==0) return 0;
       if (event==0) return 0;
-      Double_t sum=0.;
+      MAfloat64 sum=0.;
       if (type==TRACK_COMPONENT || type==ALL_COMPONENTS)
           sum += sumPT(part,event->EFlowTracks(),DR,PTmin);
       else if (type==PHOTON_COMPONENT || type==ALL_COMPONENTS)
@@ -82,10 +82,10 @@ class IsolationEFlow : public IsolationBase
       return sum;
     }
 
-    virtual Double_t relIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
+    virtual MAfloat64 relIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
     { return relIsolation(&part, event, DR, PTmin, type); }
 
-    virtual Double_t relIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
+    virtual MAfloat64 relIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
     {
       if (part==0) return 0;
       if (event==0) return 0;
@@ -93,14 +93,14 @@ class IsolationEFlow : public IsolationBase
       return sumIsolation(part,event,DR,PTmin,type)/part->pt();
     }
 
-    virtual Double_t sumIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
+    virtual MAfloat64 sumIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
     { return sumIsolation(&part, event, DR, PTmin, type); }
 
-    virtual Double_t sumIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
+    virtual MAfloat64 sumIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin, ComponentType type) const
     {
       if (part==0) return 0;
       if (event==0) return 0;
-      Double_t sum=0.;
+      MAfloat64 sum=0.;
       if (type==TRACK_COMPONENT || type==ALL_COMPONENTS)
           sum += sumPT(part,event->EFlowTracks(),DR,PTmin);
       else if (type==PHOTON_COMPONENT /*|| type==ALL_COMPONENTS*/)
@@ -110,10 +110,10 @@ class IsolationEFlow : public IsolationBase
       return sum;
     }
 
-    virtual Double_t relIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin) const
+    virtual MAfloat64 relIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin) const
     { return relIsolation(&part, event, DR, PTmin); }
 
-    virtual Double_t relIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const double& DR, double PTmin) const
+    virtual MAfloat64 relIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const double& DR, double PTmin) const
     {
       if (part==0) return 0;
       if (event==0) return 0;
@@ -121,24 +121,24 @@ class IsolationEFlow : public IsolationBase
       return sumIsolation(part,event,DR,PTmin)/part->pt();
     }
 
-    virtual Double_t sumIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin) const
+    virtual MAfloat64 sumIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin) const
     { return sumIsolation(&part, event, DR, PTmin); }
 
-    virtual Double_t sumIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const double& DR, double PTmin) const
+    virtual MAfloat64 sumIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const double& DR, double PTmin) const
     {
       if (part==0) return 0;
       if (event==0) return 0;
-      Double_t sum=0.;
+      MAfloat64 sum=0.;
       sum += sumPT(part,event->EFlowTracks(),DR,PTmin);
       sum += sumPT(part,event->EFlowPhotons(),DR,PTmin);
       sum += sumPT(part,event->EFlowNeutralHadrons(),DR,PTmin);
       return sum;
     }
 
-    virtual Double_t relIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin) const
+    virtual MAfloat64 relIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin) const
     { return relIsolation(&part, event, DR, PTmin); }
 
-    virtual Double_t relIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin) const
+    virtual MAfloat64 relIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin) const
     {
       if (part==0) return 0;
       if (event==0) return 0;
@@ -146,14 +146,14 @@ class IsolationEFlow : public IsolationBase
       return sumIsolation(part,event,DR,PTmin)/part->pt();
     }
 
-    virtual Double_t sumIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin) const
+    virtual MAfloat64 sumIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin) const
     { return sumIsolation(&part, event, DR, PTmin); }
 
-    virtual Double_t sumIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin) const
+    virtual MAfloat64 sumIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin) const
     {
       if (part==0) return 0;
       if (event==0) return 0;
-      Double_t sum=0.;
+      MAfloat64 sum=0.;
       sum += sumPT(part,event->EFlowTracks(),DR,PTmin);
       sum += sumPT(part,event->EFlowPhotons(),DR,PTmin);
       sum += sumPT(part,event->EFlowNeutralHadrons(),DR,PTmin);

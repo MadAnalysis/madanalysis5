@@ -38,8 +38,8 @@ const std::string ProgressBar::header("        => progress: ");
 // -----------------------------------------------------------------------------
 // Initialize
 // -----------------------------------------------------------------------------
-void ProgressBar::Initialize(UInt_t Nstep, 
-                             Long64_t MinValue, Long64_t MaxValue)
+void ProgressBar::Initialize(MAuint32 Nstep, 
+                             MAint64 MinValue, MAint64 MaxValue)
 {
   /// Initializing internal variables
   MinValue_   = MinValue; 
@@ -56,11 +56,11 @@ void ProgressBar::Initialize(UInt_t Nstep,
 
   /// Calcultating the threshold to reach
   Thresholds_.resize(Nstep_+1);
-  for (UInt_t i=0;i<=Nstep_;i++) 
+  for (MAuint32 i=0;i<=Nstep_;i++) 
   {
-    Thresholds_[i] = static_cast<Long64_t>(
-                           static_cast<Double_t>(MaxValue_-MinValue_) / 
-                           static_cast<Double_t>(Nstep_)*i + MinValue_ );
+    Thresholds_[i] = static_cast<MAint64>(
+                           static_cast<MAfloat64>(MaxValue_-MinValue_) / 
+                           static_cast<MAfloat64>(Nstep_)*i + MinValue_ );
   }
   //  std::cout << "eric Indicator_=" << Indicator_ << std::endl;
 
@@ -88,7 +88,7 @@ void ProgressBar::Initialize(UInt_t Nstep,
 // -----------------------------------------------------------------------------
 // Update
 // -----------------------------------------------------------------------------
-void ProgressBar::Update(Long64_t value)
+void ProgressBar::Update(MAint64 value)
 {
   // Veto ?
   if (MuteInit_ || MuteEnd_) return;
@@ -102,9 +102,9 @@ void ProgressBar::Update(Long64_t value)
   { MuteEnd_=true; return; }
 
   // Calculate how many steps to add
-  UInt_t startpoint=Indicator_+1;
+  MAuint32 startpoint=Indicator_+1;
 
-  for (UInt_t nextIndicator=startpoint;nextIndicator<Thresholds_.size();nextIndicator++)
+  for (MAuint32 nextIndicator=startpoint;nextIndicator<Thresholds_.size();nextIndicator++)
   {
     if (value>Thresholds_[nextIndicator]) Indicator_++;
     else break;
@@ -121,7 +121,7 @@ void ProgressBar::Update(Long64_t value)
 // -----------------------------------------------------------------------------
 // Display
 // -----------------------------------------------------------------------------
-void ProgressBar::Display(UInt_t ind)
+void ProgressBar::Display(MAuint32 ind)
 {
   // Preparing string to display
   std::string todisplay(Nstep_+2,' ');

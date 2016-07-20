@@ -88,7 +88,7 @@ bool ClusterAlgoCDFJetClu::SetParameter(const std::string& key, const std::strin
   // Iratch
   else if (key=="iratch")
   {
-    Int_t tmp=0;
+    MAint32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;

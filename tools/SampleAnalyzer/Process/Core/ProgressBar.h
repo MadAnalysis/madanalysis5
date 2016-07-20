@@ -32,8 +32,7 @@
 #include <vector>
 #include <sstream>
 
-// ROOT headers
-#include <Rtypes.h> 
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/LogService.h"
@@ -94,28 +93,28 @@ namespace MA5
   protected:
 
     /// Start point of the progress bar
-    Long64_t MinValue_;
+    MAint64 MinValue_;
 
     /// End point of the progress bar
-    Long64_t MaxValue_;
+    MAint64 MaxValue_;
 
     /// Number of steps
-    UInt_t Nstep_;
+    MAuint32 Nstep_;
 
     /// Progress indicator
-    UInt_t Indicator_;
+    MAuint32 Indicator_;
 
     /// Mute if bad initialization
-    Bool_t MuteInit_;
+    MAbool MuteInit_;
 
     /// Mute if the progress bar reachs the end bound
-    Bool_t MuteEnd_;
+    MAbool MuteEnd_;
 
     /// First time
-    Bool_t FirstTime_;
+    MAbool FirstTime_;
 
     /// Thresholds
-    std::vector<Long64_t> Thresholds_;
+    std::vector<MAint64> Thresholds_;
 
     /// Pointer to the new stream buffer
     SpyStreamBuffer* newstreambuf_cout_;
@@ -163,17 +162,17 @@ namespace MA5
     }
 
     /// Initializing the progress bar
-    void Initialize(UInt_t Nstep, 
-                    Long64_t MinValue, Long64_t MaxValue);
+    void Initialize(MAuint32 Nstep, 
+                    MAint64 MinValue, MAint64 MaxValue);
 
     /// Updating the display of the progress bar
-    void Update(Long64_t value);
+    void Update(MAint64 value);
 
     /// Finalizing the progress bar
     void Finalize();
 
     /// Displaying the progress bar
-    void Display(UInt_t ind);
+    void Display(MAuint32 ind);
   };
 }
 

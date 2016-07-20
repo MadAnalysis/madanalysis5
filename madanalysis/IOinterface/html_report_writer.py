@@ -23,11 +23,12 @@
 
 
 import madanalysis.IOinterface.text_file_writer as TextFileWriter
-from madanalysis.IOinterface.html_style_writer   import HTMLCSSWriter
-from madanalysis.enumeration.color_type import ColorType
-from madanalysis.enumeration.font_type import FontType
-from madanalysis.enumeration.script_type import ScriptType
-from madanalysis.IOinterface.text_report import TextReport
+from madanalysis.IOinterface.html_style_writer  import HTMLCSSWriter
+from madanalysis.enumeration.color_type         import ColorType
+from madanalysis.enumeration.font_type          import FontType
+from madanalysis.enumeration.script_type        import ScriptType
+from madanalysis.IOinterface.text_report        import TextReport
+from madanalysis.IOinterface.png_reader         import PngReader
 
 import os
 import logging
@@ -214,17 +215,21 @@ class HTMLReportWriter(TextFileWriter.TextFileWriter):
 
     def WriteFigure(self,caption,filename):
         thefile = os.path.normpath(filename)
-        from ROOT import TImage
-        im = TImage.Open(thefile+".png",TImage.kPng)
+        im = PngReader(thefile+'.png')
+        if not im.Open():
+            return
         if not im.IsValid():
-            logging.warning(" the picture "+ thefile+".png does not exist.")
-        if im.GetWidth()!=0:
-            scale = 620./im.GetWidth()
+            return
+        if not im.ExtractHeader():
+            return
+        im.Close()
+        if im.header.width!=0:
+            scale = 620./im.header.width
         else:
             scale = 1.
         self.page.append("  <center>\n")
         self.page.append('    <img src=\'' + os.path.basename(filename) + \
-                '.png\' ' + 'height=\''+ str(scale*im.GetHeight())+'\' alt =\'\' />\n')
+                '.png\' ' + 'height=\''+ str(scale*im.header.height)+'\' alt =\'\' />\n')
         self.page.append("  </center><br /> <br />\n")
         
     

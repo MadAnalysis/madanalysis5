@@ -23,7 +23,6 @@
 
 
 // STL headeres
-#include <stdlib.h>
 
 // SampleAnalyzer headers
 #ifdef FASTJET_USE

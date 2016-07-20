@@ -46,21 +46,21 @@ class HistoFrequency : public PlotBase
  protected :
 
   /// Collection of observables
-  std::map<T, std::pair<Double_t,Double_t> > stack_;
+  std::map<T, std::pair<MAfloat64,MAfloat64> > stack_;
 
   /// Sum of event-weights over entries
-  std::pair<Double_t,Double_t> sum_w_;
+  std::pair<MAfloat64,MAfloat64> sum_w_;
 
   // -------------------------------------------------------------
   //                       method members
   // -------------------------------------------------------------
  public :
 
-  typedef typename std::map<T,std::pair<Double_t,Double_t> >::iterator
+  typedef typename std::map<T,std::pair<MAfloat64,MAfloat64> >::iterator
        iterator; 
-  typedef typename std::map<T,std::pair<Double_t,Double_t> >::const_iterator
+  typedef typename std::map<T,std::pair<MAfloat64,MAfloat64> >::const_iterator
        const_iterator; 
-  typedef typename std::map<T,std::pair<Double_t,Double_t> >::size_type
+  typedef typename std::map<T,std::pair<MAfloat64,MAfloat64> >::size_type
        size_type;
 
   /// Constructor with argument 
@@ -75,7 +75,7 @@ class HistoFrequency : public PlotBase
   { }
 
   /// Adding an entry for a given observable
-  void Fill(const T& obs, Double_t weight=1.0)
+  void Fill(const T& obs, MAfloat64 weight=1.0)
   {
     // Looking for the value
     iterator it = stack_.find(obs);
@@ -154,6 +154,7 @@ class HistoFrequency : public PlotBase
   }
 
   /// Write the plot in a ROOT file
+  /*
   virtual void Write_RootFormat(std::pair<TH1F*,TH1F*>& histo)
   {
 
@@ -171,9 +172,9 @@ class HistoFrequency : public PlotBase
 
     // Creating ROOT histograms
     histo.first  -> SetBins(stack_.size(),0.,
-                            static_cast<Double_t>(stack_.size()));
+                            static_cast<MAfloat64>(stack_.size()));
     histo.second -> SetBins(stack_.size(),0.,
-                            static_cast<Double_t>(stack_.size()));
+                            static_cast<MAfloat64>(stack_.size()));
  
     // Layouting the histogram
     unsigned int i=0;
@@ -193,6 +194,7 @@ class HistoFrequency : public PlotBase
       i++;
     }
   }
+  */
 
 };
 

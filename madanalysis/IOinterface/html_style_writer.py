@@ -39,15 +39,15 @@ class HTMLCSSWriter(TextFileWriter.TextFileWriter):
 
 
     def WriteCSSbody(self):
-        self.page.append('body  { width: 800px; height: 600px; margin: 10px auto; ' + \
+        self.page.append('body  { width: 1024px; height: 768px; margin: 10px auto; ' + \
            'color: #000000; font-family: \'Verdana\',Serif; font-size: 12px; ' + \
-           'background-color: #C0C0C0; }\n\n')
+           'background-color: #FFFFFF; }\n\n')
 
     def WriteCSStop(self):
         self.page.append('#top { height: 83px; font-family :\'Verdana\',Serif; ' + \
            'font-size: 11px; margin: auto; ' + \
            'background-color: #FFFFFF; text-align:center;}\n')
-        self.page.append('.top table { width: 800px; height: 71px; ' + \
+        self.page.append('.top table { width: 1024px; height: 71px; ' + \
            'border: medium solid #000000; border-collapse: collapse; border-spacing: 1px}\n')
         self.page.append('.top td { font-family :\'Verdana\',Serif; font-size: 12px; ' + \
            'vertical-align: center; text-align: center; border: medium solid #000000; ' + \
@@ -57,7 +57,7 @@ class HTMLCSSWriter(TextFileWriter.TextFileWriter):
 
     def WriteCSSmenu(self):
         self.page.append('#menu { float:left; background-color : #FFFFFF; color: #000000; ' + \
-          'width: 150px; height: 600px; font-family: \'Verdana\',Serif; font-size: 12px; ' + \
+          'width: 150px; height: 697px; font-family: \'Verdana\',Serif; font-size: 12px; ' + \
           'margin: auto; padding: 0 0 0 10px ; }\n')
         self.page.append('.menu h3 {  margin-top:2px;  margin-bottom: 2px; ' + \
           'border-bottom:2px groove #263d65; border-top:2px groove #263d65; font-size: 14px; ' + \
@@ -66,7 +66,7 @@ class HTMLCSSWriter(TextFileWriter.TextFileWriter):
         self.page.append('.menu li { margin:0 0 0 -15px; padding: 0; }\n\n')
 
     def WriteCSSmain(self):
-        self.page.append('#main { float: right; margin: auto; width: 640px; height: 600px; ' + \
+        self.page.append('#main { float: right; margin: auto; width: 864px; height: 697px; ' + \
           'padding: 0; background-color: #FFFFFF; color: #000000; ' + \
           'font-family: \'Verdana\',Serif; font-size: 12px; overflow: auto; }\n')
         self.page.append('.main h2 { text-align: center; width: 250px; margin: auto; ' + \
@@ -79,7 +79,7 @@ class HTMLCSSWriter(TextFileWriter.TextFileWriter):
         self.page.append('.main ul { list-style-type: square; }\n')
         self.page.append('.main li { margin:0 0 0 -15px; padding: 0; }\n')
         self.page.append('.main img { align=\'center\'; width: 620px; }\n')
-        self.page.append('.main table { width: 620px; border: medium solid #000000; ' + \
+        self.page.append('.main table { width: 844px; border: medium solid #000000; ' + \
            'border-collapse: collapse; border-spacing: 1px}\n')
         self.page.append('.main td { font-family :\'Verdana\',Serif; font-size: 12px; ' + \
            'vertical-align: center; text-align: center; border: thin solid #000000; ' + \

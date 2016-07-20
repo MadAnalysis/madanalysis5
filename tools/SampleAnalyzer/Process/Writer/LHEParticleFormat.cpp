@@ -36,16 +36,16 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 // FortranFormat_SimplePrecision
 // -----------------------------------------------------------------------------
-std::string LHEParticleFormat::FortranFormat_SimplePrecision(Float_t value,UInt_t precision)
+std::string LHEParticleFormat::FortranFormat_SimplePrecision(MAfloat32 value,MAuint32 precision)
 {
   std::stringstream str;
   str.precision(precision);
   std::string word;
 
-  Bool_t negative=false;
+  MAbool negative=false;
   if (value<0) {negative=true; value*=-1;}
 
-  Int_t exponent = 0;
+  MAint32 exponent = 0;
   if (value!=0)
   {
     for (; value > 1.0; exponent++) value/=10.;
@@ -65,16 +65,16 @@ std::string LHEParticleFormat::FortranFormat_SimplePrecision(Float_t value,UInt_
 // -----------------------------------------------------------------------------
 // FortranFormat_DoublePrecision
 // -----------------------------------------------------------------------------
-std::string LHEParticleFormat::FortranFormat_DoublePrecision(Double_t value,UInt_t precision)
+std::string LHEParticleFormat::FortranFormat_DoublePrecision(MAfloat64 value,MAuint32 precision)
 {
   std::stringstream str;
   str.precision(precision);
   std::string word;
 
-  Bool_t negative=false;
+  MAbool negative=false;
   if (value<0) {negative=true; value*=-1;}
 
-  Int_t exponent = 0;
+  MAint32 exponent = 0;
   if (value!=0)
   {
     for (; value > 1.0; exponent++) value/=10.;
@@ -94,7 +94,7 @@ std::string LHEParticleFormat::FortranFormat_DoublePrecision(Double_t value,UInt
 // -----------------------------------------------------------------------------
 // Print a particle line
 // -----------------------------------------------------------------------------
-void LHEParticleFormat::Print(UInt_t num, std::ostream* out)
+void LHEParticleFormat::Print(MAuint32 num, std::ostream* out)
 {
   *out << std::setw(9)  << std::right << id       << " ";
   *out << std::setw(4)  << std::right << status   << " ";

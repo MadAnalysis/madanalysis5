@@ -57,11 +57,13 @@ class CmdDisplay(CmdBase.CmdBase):
                     self.main.isolation.Display()
                 elif objs[1].lower()=="merging":
                     self.main.merging.Display()
+                elif objs[1].lower()=="fom":
+                    self.main.fom.Display()
                 else:
                     self.main.user_DisplayParameter(objs[1])
                 return
             else:
-                if objs[1].lower()!='isolation' and objs[1].lower()!='fastsim' and objs[1].lower()!='merging':
+                if objs[1].lower()!='isolation' and objs[1].lower()!='fastsim' and objs[1].lower()!='merging' and objs[1].lower()!='fom':
                     logging.error("'main' has no variable set called '"+objs[1]+"'")
                     return
                 elif objs[1].lower()=='fastsim':
@@ -70,6 +72,8 @@ class CmdDisplay(CmdBase.CmdBase):
                     self.main.isolation.user_DisplayParameter(objs[2])
                 elif objs[1].lower()=='merging':
                     self.main.merging.user_DisplayParameter(objs[2])
+                elif objs[1].lower()=='fom':
+                    self.main.fom.user_DisplayParameter(objs[2])
                 else:
                     self.main.user_DisplayParameter(objs[2])
                 return
@@ -90,6 +94,15 @@ class CmdDisplay(CmdBase.CmdBase):
                 return
             else:
                 self.main.datasets.Get(objs[0]).user_DisplayParameter(objs[1].lower())
+                return
+
+        # Region  display
+        elif self.main.regions.Find(objs[0]):
+            if len(objs)==1:
+                self.main.regions.Get(objs[0]).Display()
+                return
+            else:
+                self.main.regions.Get(objs[0]).user_DisplayParameter(objs[1].lower())
                 return
 
         # Multiparticle display
@@ -191,6 +204,7 @@ class CmdDisplay(CmdBase.CmdBase):
             output = ["main","selection"]
             output.extend(self.main.datasets.GetNames())
             output.extend(self.main.multiparticles.GetNames())
+            output.extend(self.main.regions.GetNames())
             output.extend( [ "selection["+str(ind+1)+"]" \
                              for ind in \
                              range(0,len(self.main.selection)) ] )
@@ -219,6 +233,8 @@ class CmdDisplay(CmdBase.CmdBase):
                      for item in self.main.isolation.user_GetParameters() ])
             output.extend([ object+".fastsim."+ item \
                      for item in self.main.fastsim.user_GetParameters() ])
+            output.extend([ object+".fom."+ item \
+                     for item in self.main.fom.user_GetParameters() ])
             output.extend([ object+".merging."+ item \
                      for item in self.main.merging.user_GetParameters() ])
             return self.finalize_complete(text,output)
@@ -228,6 +244,13 @@ class CmdDisplay(CmdBase.CmdBase):
             output=[ object+"."+ item \
                      for item in \
                      self.main.datasets.Get(object).user_GetParameters() ]
+            return self.finalize_complete(text,output)
+
+        # Region  object    
+        elif self.main.regions.Find(object):
+            output=[ object+"."+ item \
+                     for item in \
+                     self.main.regions.Get(object).user_GetParameters() ]
             return self.finalize_complete(text,output)
 
         # Other cases

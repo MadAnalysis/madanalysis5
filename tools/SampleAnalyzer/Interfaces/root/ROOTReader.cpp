@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -25,8 +25,15 @@
 // STL headers
 #include <sstream>
 
+// ROOT header
+#include <TROOT.h>
+#include <TChain.h>
+#include "SampleAnalyzer/Commons/Vector/MALorentzVector.h"
+#include <TObject.h>
+#include <TFile.h>
+
 // SampleHeader headers
-#include "SampleAnalyzer/Process/Reader/ROOTReader.h"
+#include "SampleAnalyzer/Interfaces/root/ROOTReader.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #ifdef DELPHES_USE
   #include "SampleAnalyzer/Interfaces/delphes/DelphesTreeReader.h"
@@ -35,11 +42,25 @@
   #include "SampleAnalyzer/Interfaces/delphesMA5tune/DelphesMA5tuneTreeReader.h"
 #endif
 
-// ROOT headers
-#include <TROOT.h>
 
 
 using namespace MA5;
+
+// -----------------------------------------------------------------------------
+// ReadHeader
+// -----------------------------------------------------------------------------
+MAbool ROOTReader::ReadHeader(SampleFormat& mySample)
+{
+  // Checking ROOT version
+  MAint32 file_version = source_->GetVersion();
+  MAint32 lib_version = gROOT->GetVersionInt();
+  if (file_version!=lib_version)
+  {
+    WARNING << "the input file has been produced with ROOT version " << file_version
+            << " whereas the loaded ROOT libs are related to the version " << lib_version << endmsg;
+  }
+  return treeReader_->ReadHeader(mySample);
+}
 
 // -----------------------------------------------------------------------------
 // Initialize
@@ -144,6 +165,10 @@ bool ROOTReader::SelectTreeReader()
       ERROR << "In fact, DelphesMA5tune ROOT format is detected." << endmsg;
       ERROR << "Please uninstall Delphes and install DelphesMA5tune if you would like to read this file." << endmsg;    
     }
+  }
+  else
+  {
+    ERROR << "You need to install Delphes or DelphesMA5tune for reading this file." << endmsg;
   }
 
 

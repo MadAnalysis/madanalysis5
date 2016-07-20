@@ -36,6 +36,7 @@ class ParticleReader():
         self.level      = level
         self.isopen     = False
         self.forced     = forced
+        self.logger = logging.getLogger('MA5')
 
     def Load(self):
         if self.level==MA5RunningType.PARTON:
@@ -65,7 +66,7 @@ class ParticleReader():
 
         # Checking if the file is opened
         if self.isopen:
-            logging.error("cannot open the file called '" + filename + "' : it is already opened")
+            self.logger.error("cannot open the file called '" + filename + "' : it is already opened")
             return False
 
         # Name of the filename
@@ -78,15 +79,15 @@ class ParticleReader():
 
         # Display labels
         if self.level!=MA5RunningType.HADRON:
-            logging.info('Particle labels exported from ' + relname)
+            self.logger.info('Particle labels exported from ' + relname)
         else: 
-            logging.info('Parton labels exported from ' + relname)
+            self.logger.info('Parton labels exported from ' + relname)
 
         # Open the file 
         if os.path.isfile(name):
             self.file = open (name, "r")
         else:
-            logging.error("File not found")
+            self.logger.error("File not found")
             return False
 
         # Ok
@@ -99,16 +100,16 @@ class ParticleReader():
 
         # Checking if the file is opened
         if self.isopen:
-            logging.error("cannot open the file called '" + filename + "' : it is already opened")
+            self.logger.error("cannot open the file called '" + filename + "' : it is already opened")
             return False
 
         name = os.path.normpath(self.path+"/madanalysis/"+filename)
         relname = os.path.normpath("madanalysis/"+filename)
-        logging.info('  => Hadron labels from ' + relname)
+        self.logger.info('  => Hadron labels from ' + relname)
         if os.path.isfile(name):
             self.file = open (name, "r")
         else:
-            logging.error("File not found")
+            self.logger.error("File not found")
             return False
 
         return True    
@@ -120,15 +121,15 @@ class ParticleReader():
 
         # Checking if the file is opened
         if self.isopen:
-            logging.error("cannot open the file called '" + filename + "' : it is already opened")
+            self.logger.error("cannot open the file called '" + filename + "' : it is already opened")
             return False
 
         name = os.path.normpath(self.path+"/madanalysis/"+filename)
-        logging.info('Particle labels from ' + filename)
+        self.logger.info('Particle labels from ' + filename)
         if os.path.isfile(name):
             self.file = open (name, "r")
         else:
-            logging.error("File not found")
+            self.logger.error("File not found")
             return False
 
         return True    
@@ -163,7 +164,7 @@ class ParticleReader():
                 continue
 
             #debug message
-            logging.debug("Extracting a particle labelled by ["+split[1]+"] with a PDG-id : "+split[0])
+            self.logger.debug("Extracting a particle labelled by ["+split[1]+"] with a PDG-id : "+split[0])
             
             #feed particle
             self.cmd_define.fill(split[1],[split[0]],self.forced)
@@ -175,7 +176,7 @@ class ParticleReader():
                    + str(counter) +  " : "
             for item in arg:
                 text += item + " "
-            logging.error(text)    
+            self.logger.error(text)    
 
     def Close(self):
 
@@ -184,4 +185,4 @@ class ParticleReader():
 
         self.isopen = False 
 
-        logging.info("  => " + str(self.npart) + " particles successfully exported.")
+        self.logger.info("  => " + str(self.npart) + " particles successfully exported.")

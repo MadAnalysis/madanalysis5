@@ -53,6 +53,10 @@ class ReaderManager : public ManagerBase<ReaderBase>
   /// Get the good Reader from a given file name
   ReaderBase* GetByFileExtension(std::string filename);
 
+  /// Print the list of items in the collection
+  void Print(LogStream& os=INFO) const
+  { ManagerBase<ReaderBase>::Print(Objects_, Names_, os); }
+
 };
 
 }

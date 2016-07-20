@@ -31,7 +31,7 @@
 #include<cmath>
 #include<ctime>
 
-#include <Rtypes.h> 
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 #include "SampleAnalyzer/Commons/Service/LogStream.h"
 #include "SampleAnalyzer/Commons/Service/ConvertService.h"
@@ -43,13 +43,13 @@ class TimeMeasureType
 {
  private:
 
-  Bool_t   StartFilled_;
-  UInt_t   StartCurrent_;
-  Float_t  Min_;
-  Float_t  Max_;
-  UInt_t   NIterations_;
-  Float_t  Sum_;
-  Float_t  Sum2_; 
+  MAbool   StartFilled_;
+  MAuint32   StartCurrent_;
+  MAfloat32  Min_;
+  MAfloat32  Max_;
+  MAuint32   NIterations_;
+  MAfloat32  Sum_;
+  MAfloat32  Sum2_; 
 
  public:
 
@@ -75,15 +75,15 @@ class TimeMeasureType
   } 
   
   // Accessors
-  const Float_t& GetMin() const {return Min_;}
-  const Float_t& GetMax() const {return Max_;}
-  const UInt_t& GetNIterations() const {return NIterations_;}
-  const Float_t GetAverage() const
+  const MAfloat32& GetMin() const {return Min_;}
+  const MAfloat32& GetMax() const {return Max_;}
+  const MAuint32& GetNIterations() const {return NIterations_;}
+  const MAfloat32 GetAverage() const
   { 
     try
     {
       if (NIterations_==0) throw EXCEPTION_WARNING("Number of iterations is null","",0);
-      return Sum_/static_cast<Float_t>(NIterations_); 
+      return Sum_/static_cast<MAfloat32>(NIterations_); 
     }
     catch (const std::exception& e)
     {
@@ -91,13 +91,13 @@ class TimeMeasureType
       return 0.;
     }    
   }
-  const Float_t GetDeviation() const
+  const MAfloat32 GetDeviation() const
   { 
     try
     {
       if (NIterations_==0) throw EXCEPTION_WARNING("Number of iterations is null",
                                                    "",0);
-      Float_t value = Sum2_/static_cast<Float_t>(NIterations_) - GetAverage()*GetAverage();
+      MAfloat32 value = Sum2_/static_cast<MAfloat32>(NIterations_) - GetAverage()*GetAverage();
       if (value<0) throw EXCEPTION_ERROR("Impossible to calcultate the square root of a negative value",
                                          "negative value = "+CONVERT->ToString(value),
                                          1);
@@ -111,12 +111,12 @@ class TimeMeasureType
   }
   
   // Mutators
-  void SetStart(const UInt_t& value)
+  void SetStart(const MAuint32& value)
   { StartCurrent_=value; StartFilled_=true; }
 
-  void SetStop(const UInt_t& StopCurrent)
+  void SetStop(const MAuint32& StopCurrent)
   {
-    Float_t timing = static_cast<Float_t>(StopCurrent-StartCurrent_)/CLOCKS_PER_SEC;
+    MAfloat32 timing = static_cast<MAfloat32>(StopCurrent-StartCurrent_)/CLOCKS_PER_SEC;
     if (timing<0) return;  
     if (!StartFilled_) return;
 

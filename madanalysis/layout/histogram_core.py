@@ -29,18 +29,25 @@ from math import sqrt
 class HistogramCore:
 
     def __init__(self):
-        import numpy
-        self.integral  = 0
-        self.nevents   = 0
-        self.nentries  = 0
-        self.sumwentries = 0
-        self.sumw      = 0
-        self.sumw2     = 0
-        self.sumwx     = 0
-        self.sumw2x    = 0
-        self.underflow = 0
-        self.overflow  = 0
-        self.array     = numpy.array([])
+
+        # statistics
+        # - int
+        self.nevents     = 0
+        self.nentries    = 0
+        # - float
+        self.integral    = 0.
+        self.sumwentries = 0.
+        self.sumw        = 0.
+        self.sumw2       = 0.
+        self.sumwx       = 0.
+        self.sumw2x      = 0.
+
+        # content
+        self.underflow   = 0.
+        self.overflow    = 0.
+        self.nan         = 0.
+        self.inf         = 0.
+        self.array       = []
 
 
     def ComputeIntegral(self):

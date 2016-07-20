@@ -28,19 +28,19 @@ from string_tools import StringTools
 import os
 import sys
 import logging
-
+            
 class MA5mode():
     
    def __init__(self):
-      self.partonlevel = False
-      self.hadronlevel = False
-      self.recolevel   = False
-      self.expertmode  = False
-      self.forcedmode  = False
-      self.mg5mode     = False
-      self.scriptmode  = False
-      self.debug       = False
-      self.build       = False
+      self.partonlevel    = False
+      self.hadronlevel    = False
+      self.recolevel      = False
+      self.expertmode     = False
+      self.forcedmode     = False
+      self.scriptmode     = False
+      self.debug          = False
+      self.build          = False
+      self.developer_mode = False
 
 
 
@@ -56,10 +56,10 @@ def DecodeArguments(version, date):
     import getopt
     try:
         optlist, arglist = getopt.getopt(sys.argv[1:], \
-                                     "PHReEvhfmsbd", \
+                                     "PHReEvhfmsbdq", \
                                      ["partonlevel","hadronlevel","recolevel",\
                                       "expert","version","release","help",\
-                                      "forced","script","mg5","debug","build"])
+                                      "forced","script","debug","build","qmode"])
     except getopt.GetoptError, err:
         logging.error(str(err))
         Usage()
@@ -80,8 +80,6 @@ def DecodeArguments(version, date):
             mode.expertmode=True
         elif o in ["-f","--forced"]:
             mode.forcedmode=True
-        elif o in ["-m","--mg5"]:
-            mode.mg5mode=True
         elif o in ["-s","--script"]:
             mode.scriptmode=True
         elif o in ["-v","--version","--release"]:
@@ -91,6 +89,11 @@ def DecodeArguments(version, date):
             mode.debug = True
         elif o in ["-b","--build"]:
             mode.build = True
+        elif o in ["-q","--qmode"]:
+            mode.developer_mode = True
+            print ""
+            print " **** DEVELOPER MODE DETECTED **** "
+            print ""
         elif o in ["-h","--help"]:
             Usage()
             sys.exit()
@@ -142,13 +145,10 @@ def MainSession(mode,arglist,ma5dir,version,date):
     if mode.hadronlevel or mode.recolevel:
         main.InitObservables(main.mode)
 
-    main.forced = mode.forcedmode
-    Main.forced = mode.forcedmode
-    main.script = mode.scriptmode
-    main.mg5    = mode.mg5mode
-
-    # Setting batch mode for ROOT
-    #sys.argv.append('-b-')
+    main.forced         = mode.forcedmode
+    Main.forced         = mode.forcedmode
+    main.script         = mode.scriptmode
+    main.developer_mode = mode.developer_mode
 
     # Displaying header
     logging.info("")
@@ -185,8 +185,8 @@ def MainSession(mode,arglist,ma5dir,version,date):
         logging.debug("DEBUG MODE ACTIVATED")
         logging.debug("")
 
-    # Checking the present linux configuration
-    if not main.CheckLinuxConfig(debug=mode.debug):
+    # Checking the present configuration
+    if not main.CheckConfig(debug=mode.debug):
         sys.exit()
 
     # Building (if necesserary) the SampleAnalyzer library
@@ -264,7 +264,6 @@ def Usage():
     logging.info(" -b or --build       : rebuild the SampleAnalyzer static library")
     logging.info(" -f or --forced      : do not ask for confirmation when MA5 removes a directory or overwrites an object") 
     logging.info(" -s or --script      : quit automatically MA5 when the script is loaded")
-    logging.info(" -m or --mg5         : run MadAnalysis with options related to MadGraph")
     logging.info(" -h or --help        : dump this help")
     logging.info(" -d or --debug       : debug mode\n")
     logging.info("[scripts]")
@@ -334,4 +333,7 @@ def LaunchMA5(version, date, ma5dir):
         logging.info(StringTools.Center('RESTART THE MADANALYSIS 5 SESSION',40))
         logging.info(StringTools.Fill('-',40))
         logging.info("")
-    
+
+
+
+

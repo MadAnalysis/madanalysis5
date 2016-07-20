@@ -23,8 +23,8 @@
 
 
 //STL headers
-#include <sys/stat.h>
 #include <string>
+#include <sys/stat.h>
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Core/SampleAnalyzer.h"
@@ -478,30 +478,30 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
   }
 
   // Displaying the size of the file
-  Long64_t length = myReader_->GetFileSize();
+  MAint64 length = myReader_->GetFileSize();
   if (length<0) INFO << "        => file size: unknown" << endmsg;
   else
   {
-    UInt_t unit = 0;
-    Double_t value=0;
+    MAuint32 unit = 0;
+    MAfloat64 value=0;
     if (length>1e12)
     {
-      value = static_cast<Double_t>(length)/(1024.*1024.*1024.*1024.);
+      value = static_cast<MAfloat64>(length)/(1024.*1024.*1024.*1024.);
       unit=5;
     }
     if (length>1e9) 
     {
-      value = static_cast<Double_t>(length)/(1024.*1024.*1024.);
+      value = static_cast<MAfloat64>(length)/(1024.*1024.*1024.);
       unit=4;
     }
     else if (length>1e6)
     {
-      value = static_cast<Double_t>(length)/(1024.*1024.);
+      value = static_cast<MAfloat64>(length)/(1024.*1024.);
       unit=3;
     }
     else if (length>1e3)
     {
-      value = static_cast<Double_t>(length)/1024.;
+      value = static_cast<MAfloat64>(length)/1024.;
       unit=2;
     }
     else
@@ -510,7 +510,7 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
       unit=1;
     }
     std::stringstream str;
-    if (unit==1) str << static_cast<UInt_t>(value);
+    if (unit==1) str << static_cast<MAuint32>(value);
     else str << std::fixed << std::setprecision(2) << value;
     str << " ";
     if (unit==1) str << "octets";
@@ -621,8 +621,8 @@ bool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
   //                      DUMP NUMBER OF EVENT
   // -----------------------------------------------------------------------
   INFO << "    * Total number of processed events: ";
-  ULong64_t nInitial = 0;
-  ULong64_t nPassed  = 0;
+  MAuint64 nInitial = 0;
+  MAuint64 nPassed  = 0;
 
   for (unsigned int i=0;i<counter_read_.size();i++)   
       nInitial+=counter_read_[i];

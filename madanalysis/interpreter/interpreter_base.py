@@ -55,25 +55,32 @@ class InterpreterBase(cmd.Cmd):
                              '^','!','=','>','<',',']
 
     def load(self,filename):
-        logging.info("Reading commands from '" + \
-                     filename + "' file ...")
-        input = TextFileReader(filename)
-        if not input.Open():
-            return False
+        if isinstance(filename,str):
+            self.logger.info("Reading commands from '" + \
+                         filename + "' file ...")
 
-        for line in input.file:
+            input = TextFileReader(filename)
+            if not input.Open():
+                return False
+            mycommands = input.file
+        else:
+            mycommands = filename
+
+        for line in mycommands:
             line = line.rstrip('\r\n')
-            logging.info("ma5>"+line)
+            self.logger.info("ma5>"+line)
             line = self.precmd(line)
             stop = self.onecmd(line)
             stop = self.postcmd(stop, line)
 
-        input.Close()
-    
+        if isinstance(filename,str):
+            input.Close()
+
     def __init__(self, *arg, **opt):
         """Init history and line continuation"""
         
         self.log = True
+        self.logger=logging.getLogger('MA5')
 
         # string table for history
         self.history = []
@@ -151,23 +158,23 @@ class InterpreterBase(cmd.Cmd):
             return ''
 
         # debug
-        logging.debug(self.split_arg(line))
+        self.logger.debug(self.split_arg(line))
         
         # execute the line command
         return line
-            
+
     def exec_cmd(self, line, errorhandling=False):
         """for third party call, call the line with pre and postfix treatment
         without global error handling """
 
-        logging.info(line)
+        self.logger.info(line)
         line = self.precmd(line)
         if errorhandling:
             stop = self.onecmd(line)
         else:
             stop = cmd.Cmd.onecmd(self, line)
         stop = self.postcmd(stop, line)
-        return stop      
+        return stop
 
     def run_cmd(self, line):
         """for third party call, call the line with pre and postfix treatment
@@ -183,12 +190,12 @@ class InterpreterBase(cmd.Cmd):
         """Default action if line is not recognized"""
 
         # Faulty command
-        logging.warning("Command \"%s\" not implemented, please try again." % \
+        self.logger.warning("Command \"%s\" not implemented, please try again." % \
                                                                 line.split()[0])
     # Quit
     def do_quit(self, line):
         """ exit the mainloop() """
-        logging.info("")
+        self.logger.info("")
         return True
 
     # Aliases
@@ -257,39 +264,39 @@ class InterpreterBase(cmd.Cmd):
         args = self.split_arg(line)
 
         if len(args) == 0:
-            logging.info('\n'.join(self.history))
+            self.logger.info('\n'.join(self.history))
             return
         elif args[0] == 'clean':
             self.history = []
-            logging.info('History is cleaned')
+            self.logger.info('History is cleaned')
             return
         elif len(args)==1:
             if os.path.exists(args[0]):
-                logging.error('The file ' + args[0] + ' already exists.' + \
+                self.logger.error('The file ' + args[0] + ' already exists.' + \
                     ' Please chose another filename.')
                 return
             else:
                 file = open(args[0], 'w')
                 file.write('\n'.join(self.history))
                 file.close()
-                logging.info('Command history written to the file ' + \
+                self.logger.info('Command history written to the file ' + \
                     args[0] + '.')
                 return
         else:
-            logging.error("'history' takes either zero or one argument")
+            self.logger.error("'history' takes either zero or one argument")
             return
 
     def help_help(self):
-        logging.info("   Syntax: help [<command>]")
-        logging.info("   Display the list of all available commands.");
-        logging.info("   If a command is passed as an argument, its manual is displayed to the screen.")
+        self.logger.info("   Syntax: help [<command>]")
+        self.logger.info("   Display the list of all available commands.");
+        self.logger.info("   If a command is passed as an argument, its manual is displayed to the screen.")
         
         
     def help_history(self):
-        logging.info("   Syntax: history [clean] ")
-        logging.info("   Displays the history of the commands type-in by")
-        logging.info("   the user.")
-        logging.info("   The option \"clean\" removes all the entries from the history.")
+        self.logger.info("   Syntax: history [clean] ")
+        self.logger.info("   Displays the history of the commands type-in by")
+        self.logger.info("   the user.")
+        self.logger.info("   The option \"clean\" removes all the entries from the history.")
 
     def do_shell(self, line):
         "run a shell command"
@@ -297,12 +304,12 @@ class InterpreterBase(cmd.Cmd):
         if line.strip() is '':
             self.help_shell()
         else:
-            logging.info("   Running the shell command: " + line + ".")
+            self.logger.info("   Running the shell command: " + line + ".")
             subprocess.call(line, shell=True)
 
     def help_shell(self):
-        logging.info("   Syntax: shell <command> (or !CMD)")
-        logging.info("   Runs the command CMD on a shell and retrieves the output.")
+        self.logger.info("   Syntax: shell <command> (or !CMD)")
+        self.logger.info("   Runs the command CMD on a shell and retrieves the output.")
 
 
     def complete_history(self, text, line, begidx, endidx):
@@ -377,7 +384,7 @@ class InterpreterBase(cmd.Cmd):
             words = word.split('-')
             for i in range(len(words)):
                 msg+=chr((int(words[i])))
-            logging.info("\x1b[1m"+"\x1b[32m"+msg+"\x1b[0m")
-        logging.info("")
+            self.logger.info("\x1b[1m"+"\x1b[32m"+msg+"\x1b[0m")
+        self.logger.info("")
 
 

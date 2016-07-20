@@ -29,8 +29,6 @@ import array
 
 class HistogramLogX:
 
-    stamp=0
-
     def __init__(self):
         self.Reset()
 
@@ -61,16 +59,11 @@ class HistogramLogX:
         self.negative = HistogramCore()
         self.summary  = HistogramCore()
 
-        # Histogram
-        self.myhisto = 0
-
         # Warnings
         self.warnings = []
 
         
     def FinalizeReading(self,main,dataset):
-
-        import numpy
 
         # Statistics
         self.summary.nevents   = self.positive.nevents   + self.negative.nevents
@@ -105,7 +98,7 @@ class HistogramLogX:
                     ' has a negative content : '+\
                     str(data[-1])+'. This value is set to zero')
                 data[-1]=0
-        self.summary.array = numpy.array(data)
+        self.summary.array = data[:] # [:] -> clone of data
 
         # Integral
         self.positive.ComputeIntegral()
@@ -115,9 +108,6 @@ class HistogramLogX:
 
     def CreateHistogram(self):
 
-        # New stamp
-        HistogramLogX.stamp+=1
-
         # Logarithm binning
         step = (log10(self.xmax) - log10(self.xmin) ) / \
                float (self.nbins)
@@ -126,17 +116,54 @@ class HistogramLogX:
             binnings.append( pow(10., log10(self.xmin)+i*step) )
         binnings.append(self.xmax)
 
-        # Creating a new histo
-        from ROOT import TH1F
-        self.myhisto = TH1F(\
-            self.name+"_"+str(HistogramLogX.stamp),\
-            self.name+"_"+str(HistogramLogX.stamp),\
-            self.nbins,\
-            self.xmin,\
-            self.xmax)
 
-        # Filling bins
-        self.myhisto.SetBins(self.nbins,array.array('d',binnings))
-        for bin in range(0,self.nbins):
-            self.myhisto.SetBinContent(bin+1, self.summary.array[bin])
 
+    def GetBinLowEdge(self,bin):
+
+        # Special case
+        if bin<=0:
+            return self.xmin
+
+        if bin>=self.nbins:
+            return self.xmax
+        
+        # Computing steps
+        step = (log10(self.xmax) - log10(self.xmin) ) / \
+               float (self.nbins)
+        
+        # value
+        return pow(10., log10(self.xmin)+bin*step)
+
+
+    def GetBinUpperEdge(self,bin):
+
+        # Special case
+        if bin<=0:
+            return self.xmin
+
+        if bin>=self.nbins:
+            return self.xmax
+        
+        # Computing steps
+        step = (log10(self.xmax) - log10(self.xmin) ) / \
+               float (self.nbins)
+        
+        # value
+        return pow(10., log10(self.xmin)+(bin+1)*step)
+
+
+    def GetBinMean(self,bin):
+
+        # Special case
+        if bin<=0:
+            return self.xmin
+
+        if bin>=self.nbins:
+            return self.xmax
+        
+        # Computing steps
+        step = (log10(self.xmax) - log10(self.xmin) ) / \
+               float (self.nbins)
+        
+        # value
+        return pow(10., log10(self.xmin)+(bin+0.5)*step)

@@ -1,38 +1,37 @@
 ////////////////////////////////////////////////////////////////////////////////
-//  
-//  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
+//
+//  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
-//  
+//
 //  This file is part of MadAnalysis 5.
 //  Official website: <https://launchpad.net/madanalysis5>
-//  
+//
 //  MadAnalysis 5 is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//  
+//
 //  MadAnalysis 5 is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 //  GNU General Public License for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License
 //  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
-//  
+//
 ////////////////////////////////////////////////////////////////////////////////
-
 
 #ifndef TRANSVERSE_VARIABLE_SERVICE_h
 #define TRANSVERSE_VARIABLE_SERVICE_h
 
 // STL headers
 #include <iostream>
-#include <TLorentzVector.h>
 #include <vector>
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/DataFormat/MCEventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecEventFormat.h"
+#include "SampleAnalyzer/Commons/Vector/MALorentzVector.h"
 
 
 namespace MA5
@@ -46,7 +45,7 @@ class TransverseVariables
   private:
     /// The MT2 variable requires 2 momenta + the missing energy + one test mass
     /// The MT2W variable requires a 3rd momentum
-    TLorentzVector p1_, p2_, p3_;
+    MALorentzVector p1_, p2_, p3_;
     double pmx_, pmy_;
     double m_;
     double E2sq_;
@@ -58,7 +57,7 @@ class TransverseVariables
     double msq_, pmtsq_, pmtm_, p1met_, plpb1_;
 
     /// Initialization with two momenta + met
-    void InitializeMT2(const TLorentzVector&p1, const TLorentzVector&p2, const TLorentzVector&met,
+    void InitializeMT2(const MALorentzVector&p1, const MALorentzVector&p2, const MALorentzVector&met,
       const double mass)
     {
       // Coefficients
@@ -81,7 +80,7 @@ class TransverseVariables
     /// the MT2 method requires two series of 6 coefficients + associated fcns
     std::vector<double> C1_, C2_;
 
-    void InitC(const TLorentzVector &p, std::vector<double> &C)
+    void InitC(const MALorentzVector &p, std::vector<double> &C)
     {
       C.push_back( 1. - pow(p.Px(),2)/p.Mt2() );
       C.push_back( -p.Px()*p.Py()/p.Mt2() );
@@ -116,8 +115,8 @@ class TransverseVariables
     double GetMT2_massless();
 
     /// Initialization with three momenta + met
-    void InitializeMT2W(const TLorentzVector&p1, const TLorentzVector&p2, const TLorentzVector&p3,
-      const TLorentzVector &met)
+    void InitializeMT2W(const MALorentzVector&p1, const MALorentzVector&p2, const MALorentzVector&p3,
+      const MALorentzVector &met)
     {
       p1_=p1; p2_=p2; p3_=p3;
       E2sq_ = pow(p2_.E(),2.);
@@ -129,7 +128,10 @@ class TransverseVariables
       mw_ = 80.4;
       mw2_=pow(mw_,2.);
       // dot products
-      plpb1_ = p1_.E()*p2_.E() - p1_.Px()*p2_.Px() - p1.Py()*p2_.Py() - p1.Pz()*p2_.Pz();
+      plpb1_ = p1_.E()*p2_.E() -
+	       p1_.Px()*p2_.Px() -
+	       p1.Py()*p2_.Py() -
+	       p1.Pz()*p2_.Pz();
     }
 
     /// Core function for mt2w
@@ -193,6 +195,14 @@ class TransverseVariables
     }
 
     /// MT2 methods
+    double MT2(const MALorentzVector* p1, const MALorentzVector* p2,
+      const MALorentzVector& met, const double &mass)
+    {
+      InitializeMT2(*p1, *p2, met,mass);
+      return GetMT2();
+    }
+
+    /// MT2 methods
     double MT2(const ParticleBaseFormat* p1, const ParticleBaseFormat* p2,
       const ParticleBaseFormat& met, const double &mass)
     {
@@ -204,6 +214,7 @@ class TransverseVariables
 
     /// MT2W method
     double MT2W(std::vector<const RecJetFormat*>,const RecLeptonFormat*,const ParticleBaseFormat&);
+    double MT2W(std::vector<const MCParticleFormat*>,const MCParticleFormat*,const ParticleBaseFormat&);
 
   /// The Alpha_T variable
   double AlphaT(const MCEventFormat*);

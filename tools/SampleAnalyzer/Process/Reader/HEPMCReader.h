@@ -54,8 +54,8 @@ class HEPMCReader : public ReaderTextBase
 
   struct HEPVertex
   {
-    Int_t barcode_;
-    Double_t ctau_;
+    MAint32 barcode_;
+    MAfloat64 ctau_;
   };
 
   HEPVertex current_vertex_;
@@ -90,7 +90,7 @@ class HEPMCReader : public ReaderTextBase
   
  private:
   
-  Bool_t FillEvent(const std::string& line, EventFormat& myEvent, SampleFormat& mySample);
+  MAbool FillEvent(const std::string& line, EventFormat& myEvent, SampleFormat& mySample);
   void FillEventInformations(const std::string& line, EventFormat& myEvent);
   void FillCrossSection(const std::string& line, SampleFormat& mySample);
   void FillUnits(const std::string& line);
@@ -98,8 +98,8 @@ class HEPMCReader : public ReaderTextBase
   void FillEventParticleLine(const std::string& line, EventFormat& myEvent);
   void FillEventVertexLine(const std::string& line, EventFormat& myEvent);
   void SetMother(MCParticleFormat* const part, EventFormat& myEvent);
-  Bool_t FillWeightNames(const std::string& line);
-  Bool_t FillHeavyIons(const std::string& line);
+  MAbool FillWeightNames(const std::string& line);
+  MAbool FillHeavyIons(const std::string& line);
 
 };
 

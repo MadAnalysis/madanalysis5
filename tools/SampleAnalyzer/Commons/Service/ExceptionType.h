@@ -34,8 +34,7 @@
 #include <string>
 #include <exception>
 
-// ROOT headers
-#include <Rtypes.h> 
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 
 namespace MA5
 {
@@ -73,13 +72,13 @@ class ExceptionType : public std::exception
   std::string Details_; 
 
   /// Line number of the file where the exception has been thrown
-  UInt_t Line_;
+  MAuint32 Line_;
 
   /// Logger to be used : WARNING (=true), ERROR(=false)
-  Bool_t Warning_;
+  MAbool Warning_;
 
   /// Number ID specified by the user
-  Int_t Num_;
+  MAint32 Num_;
   
 
   // -------------------------------------------------------------
@@ -89,12 +88,12 @@ class ExceptionType : public std::exception
 
   /// Constructor with arguments
   ExceptionType(const std::string& filename, 
-                const UInt_t& line,
+                const MAuint32& line,
                 const std::string function,
-                const Bool_t& warning,
+                const MAbool& warning,
                 const std::string& msg,
                 const std::string& details="",
-                const Int_t& Num=0  ) : FileName_(filename),
+                const MAint32& Num=0  ) : FileName_(filename),
                                         Msg_(msg), 
                                         Function_(function),
                                         Details_(details),
@@ -112,15 +111,15 @@ class ExceptionType : public std::exception
   { return Msg_.c_str(); }
 
   /// Accessor to the number ID
-  const Int_t& GetID() const throw()
+  const MAint32& GetID() const throw()
   { return Num_; }
 
   /// Is WARNING logger used ? 
-  Bool_t IsWarning() const
+  MAbool IsWarning() const
   { return Warning_; }
 
   /// Is ERROR logger used ? 
-  Bool_t IsError() const
+  MAbool IsError() const
   { return !Warning_; }
 
   /// Accessor to the description of the exception
@@ -132,7 +131,7 @@ class ExceptionType : public std::exception
   { return FileName_; }
 
   /// Accessor to the line number
-  const UInt_t& GetLine() const
+  const MAuint32& GetLine() const
   { return Line_; }
 
   /// Accessor to the function name

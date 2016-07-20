@@ -437,7 +437,7 @@ def WriteBeforeLoop(file,iabs,ihisto,combination,main,value='value',q='q'):
     if allmode:
         if obs.combination in [CombinationType.SUMSCALAR,\
                                CombinationType.DIFFSCALAR]:
-            file.write('    Double_t '+value+'=0;\n')
+            file.write('    MAdouble64 '+value+'=0;\n')
         else:
             file.write('    ParticleBaseFormat '+q+';\n')
 
@@ -523,7 +523,7 @@ def WriteBody(file,iabs,ihisto,combination,main,iterator='ind',value='value',q='
                            CombinationType.DIFFSCALAR]:
 
         if not allmode:
-            file.write('    Double_t '+value+'=0;\n')
+            file.write('    MAdouble64 '+value+'=0;\n')
         for ind in range(len(combination)):
             TheOper='+'
             if ind!=0:
@@ -736,7 +736,7 @@ def WriteJobLoop(file,iabs,ihisto,combination,redundancies,main,iterator='ind'):
                                            item.name+histo.rank+histo.statuscode))
 
     # Declaring indicator
-    file.write('    UInt_t '+iterator+'['+str(len(combination))+'];\n')
+    file.write('    MAuint32 '+iterator+'['+str(len(combination))+'];\n')
 
     # Rendundancies case
     if redundancies:
@@ -781,13 +781,13 @@ def WriteJobSameCombi(file,iabs,ihisto,combination,redundancies,main,iterator='i
         file.write('    std::set<const MCParticleFormat*> mycombi;\n')
     else:
         file.write('    std::set<const RecParticleFormat*> mycombi;\n')
-    file.write('    for (UInt_t i=0;i<'+str(len(combination))+';i++)\n')
+    file.write('    for (MAuint32 i=0;i<'+str(len(combination))+';i++)\n')
     file.write('    {\n')
     for i in range(len(combination)):
         file.write('      mycombi.insert('+containers[i]+'['+iterator+'[i]]);\n')
     file.write('    }\n')
-    file.write('    Bool_t matched=false;\n')
-    file.write('    for (UInt_t i=0;i<combis.size();i++)\n')
+    file.write('    MAbool matched=false;\n')
+    file.write('    for (MAuint32 i=0;i<combis.size();i++)\n')
     file.write('      if (combis[i]==mycombi) {matched=true; break;}\n')
     file.write('    if (matched) continue;\n')
     file.write('    else combis.push_back(mycombi);\n\n')

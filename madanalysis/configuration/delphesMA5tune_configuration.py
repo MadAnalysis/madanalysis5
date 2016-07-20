@@ -30,13 +30,15 @@ class DelphesMA5tuneConfiguration:
 
     userVariables = { "detector" : ["cms","atlas"],\
                       "output": ["true","false"],\
-                      "pileup": ["none"] }
+                      "pileup": ["none"],\
+                      "rootfile" : ["none"] }
 
     def __init__(self):
         self.detector  = "cms"
         self.output    = True
         self.pileup    = ""
         self.card      = ""
+        self.rootfile  = ""
         self.SetCard()
 
     def SetCard(self):
@@ -51,27 +53,32 @@ class DelphesMA5tuneConfiguration:
         
     def Display(self):
         self.user_DisplayParameter("detector")
+        self.user_DisplayParameter("rootfile")
         self.user_DisplayParameter("output")
         self.user_DisplayParameter("pileup")
 
 
     def user_DisplayParameter(self,parameter):
         if parameter=="detector":
-            logging.info(" detector : "+self.detector)
+            logging.getLogger('MA5').info(" detector : "+self.detector)
             return
         elif parameter=="output":
             if self.output:
                 msg="true"
             else:
                 msg="false"
-            logging.info(" ROOT output : "+msg)
+            logging.getLogger('MA5').info(" ROOT output : "+msg)
+            return
+        elif parameter=="rootfile":
+            if self.rootfile not in ['', "none"]:
+                logging.getLogger('MA5').getLogger('MA5').info(" ROOT outputfile: "+msg)
             return
         elif parameter=="pileup":
             if self.pileup=="":
                 msg="none"
             else:
                 msg='"'+self.pileup+'"'
-            logging.info(" pile-up source = "+msg)
+            logging.getLogger('MA5').info(" pile-up source = "+msg)
 
     def SampleAnalyzerConfigString(self):
             mydict = {}
@@ -79,6 +86,8 @@ class DelphesMA5tuneConfiguration:
                 mydict['output'] = '1'
             else:
                 mydict['output'] = '0'
+            if self.rootfile not in ['', 'none']:
+                mydict['rootfile'] = self.rootfile
             return mydict
 
     def user_SetParameter(self,parameter,value,datasets,level):
@@ -93,7 +102,7 @@ class DelphesMA5tuneConfiguration:
                 self.detector=value
                 self.SetCard()
             else:
-                logging.error("algorithm called '"+value+"' is not found.")
+                logging.getLogger('MA5').error("algorithm called '"+value+"' is not found.")
             return
 
         # output
@@ -104,9 +113,17 @@ class DelphesMA5tuneConfiguration:
             elif value.lower()=="false":
                 self.output = False
             else:
-                logging.error("allowed values for output are: true false")
+                logging.getLogger('MA5').error("allowed values for output are: true false")
             return
-        
+
+        elif parameter=="rootfile":
+            if value.lower().endswith('root'):
+                self.rootfile=os.path.normpath(value)
+            else:
+                logging.getLogger('MA5').error("Wrong output file format (root file necessary)")
+                return False
+            return
+
         # pileup
         elif parameter=="pileup":
             quoteTag=False
@@ -126,7 +143,7 @@ class DelphesMA5tuneConfiguration:
             # .pileup
             elif valuemin.endswith(".pileup"):
                 if not os.path.isfile(value):
-                    logging.error('File called "'+value+'" is not found')
+                    logging.getLogger('MA5').error('File called "'+value+'" is not found')
                     return
                 self.pileup = value
                 self.SetCard()
@@ -134,11 +151,11 @@ class DelphesMA5tuneConfiguration:
 
             # other case: error
             else:
-                logging.error("The file format for the pile-up source is not known. Only files with .pileup extension can be used.")
+                logging.getLogger('MA5').error("The file format for the pile-up source is not known. Only files with .pileup extension can be used.")
                 return False
 
         else:
-            logging.error("parameter called '"+parameter+"' does not exist")
+            logging.getLogger('MA5').error("parameter called '"+parameter+"' does not exist")
             return
 
         

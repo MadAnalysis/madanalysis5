@@ -22,7 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// SampleAnalyzer headesr
+#include "SampleAnalyzer/Commons/Service/RandomService.h"
 #include "SampleAnalyzer/Process/JetClustering/bTagger.h"
+
+
 using namespace MA5;
 
 void bTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
@@ -33,13 +37,13 @@ void bTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
   for (unsigned int i=0;i<myEvent.rec()->MCBquarks_.size();i++)
   {
     RecJetFormat* tag = 0;
-    Double_t DeltaRmax = DeltaRmax_;
+    MAfloat64 DeltaRmax = DeltaRmax_;
 
     // loop on the jets
     for (unsigned int j=0;j<myEvent.rec()->jets().size();j++)
     {
       if (myEvent.rec()->jets()[j].pt()<1e-10) continue;
-      Float_t DeltaR = myEvent.rec()->MCBquarks_[i]->dr(myEvent.rec()->jets()[j]);
+      MAfloat32 DeltaR = myEvent.rec()->MCBquarks_[i]->dr(myEvent.rec()->jets()[j]);
 
       if (DeltaR <= DeltaRmax) 
       {
@@ -65,14 +69,14 @@ void bTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
   for (unsigned int i=0;i<myEvent.rec()->MCCquarks_.size();i++)
   {
     RecJetFormat* tag = 0;
-    Double_t DeltaRmax = DeltaRmax_;
+    MAfloat64 DeltaRmax = DeltaRmax_;
 
     // loop on the jets
     for (unsigned int j=0;j<myEvent.rec()->jets().size();j++)
     {
       if (myEvent.rec()->jets()[j].pt()<1e-10) continue;
 
-      Float_t DeltaR = 
+      MAfloat32 DeltaR = 
           myEvent.rec()->MCCquarks_[i]->dr(myEvent.rec()->jets()[j]);
 
       if (DeltaR <= DeltaRmax) 
@@ -107,19 +111,19 @@ void bTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
     // identification efficiency
     if (doEfficiency_ && jet->true_btag_)
     {
-      if (gRandom->Rndm()  >= Efficiency_) jet->btag_=false;
+      if (RANDOM->flat()  >= Efficiency_) jet->btag_=false;
     }
 
     // mis-identification (c-quark)
     if (doMisefficiency_ && !jet->true_btag_ && jet->true_ctag_)
     {
-      if (gRandom->Rndm() < misid_cjet_) jet->btag_=true;
+      if (RANDOM->flat() < misid_cjet_) jet->btag_=true;
     }
 
     // mis-identification (light quarks)
     else if (doMisefficiency_ && !jet->true_btag_ && !jet->true_ctag_)
     {
-      if (gRandom->Rndm() < misid_ljet_) jet->btag_=true;
+      if (RANDOM->flat() < misid_ljet_) jet->btag_=true;
     }
   }
 
@@ -131,11 +135,11 @@ void bTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
 
   for (unsigned int i=0;i<myEvent.rec()->jets().size();i++)
   {
-    Bool_t b = false;
+    MAbool b = false;
 
     for (unsigned int j=0;j<myEvent.rec()->jets()[i].Constituents_.size();j++)
     {
-      Int_t N = myEvent.rec()->jets()[i].Constituents_[j];
+      MAint32 N = myEvent.rec()->jets()[i].Constituents_[j];
       MCParticleFormat* particle = & myEvent.mc()->particles()[N];
       while (!b)
       {
@@ -167,20 +171,20 @@ void bTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
 
   if (Exclusive_)
   {
-    UInt_t i = 0;
-    UInt_t n = Candidates.size();
+    MAuint32 i = 0;
+    MAuint32 n = Candidates.size();
 
     while (i<n)
     {
-      UInt_t j = i+1;
+      MAuint32 j = i+1;
 
-      Float_t DeltaR = Candidates[i]->mc()->dr(Candidates[i]);
+      MAfloat32 DeltaR = Candidates[i]->mc()->dr(Candidates[i]);
 
       while (j<n)
       {
         if (Candidates[i]->mc()==Candidates[j]->mc())
         {
-          Float_t DeltaR2 = Candidates[j]->mc()->dr(Candidates[j]);
+          MAfloat32 DeltaR2 = Candidates[j]->mc()->dr(Candidates[j]);
 
           if (DeltaR2<DeltaR) std::swap(Candidates[i], Candidates[j]);
 
@@ -207,11 +211,11 @@ void bTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
   // jet preselection using method 2
   for (unsigned int i=0;i<myEvent.rec()->jets().size();i++)
   {
-    Bool_t b = false;
+    MAbool b = false;
 
     for (unsigned int j=0;j<myEvent.rec()->jets()[i].Constituents_.size();j++)
     {
-      Int_t N = myEvent.rec()->jets()[i].Constituents_[j];
+      MAint32 N = myEvent.rec()->jets()[i].Constituents_[j];
       MCParticleFormat* particle = & myEvent.mc()->particles()[N];
       while (!b)
       {
@@ -248,11 +252,11 @@ void bTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
 
     if (!IsLast(&myEvent.mc()->particles()[i], myEvent)) continue;
 
-    UInt_t k = 0;
+    MAuint32 k = 0;
 
     for (unsigned int j=Candidates.size();j>0;j--)
     {
-      Float_t DeltaR = myEvent.mc()->particles()[i].dr(Candidates[j-1]);
+      MAfloat32 DeltaR = myEvent.mc()->particles()[i].dr(Candidates[j-1]);
 
       if (DeltaR <= DeltaRmax_)
       {
@@ -281,7 +285,7 @@ void bTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
   Candidates.clear();
 }
 
-Bool_t bTagger::IsLastBHadron(MCParticleFormat* part, EventFormat& myEvent)
+MAbool bTagger::IsLastBHadron(MCParticleFormat* part, EventFormat& myEvent)
 {
   for (unsigned int i=0; i<myEvent.mc()->particles().size(); i++)
   {
@@ -301,7 +305,7 @@ bool bTagger::SetParameter(const std::string& key,
   // miss-id efficiency
   if (key=="misid_ljet")
   {
-    Float_t tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
@@ -324,7 +328,7 @@ bool bTagger::SetParameter(const std::string& key,
   // miss-id efficiency
   else if (key=="misid_cjet")
   {
-    Float_t tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;

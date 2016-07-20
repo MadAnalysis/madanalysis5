@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -31,6 +31,7 @@ class MakefileWriter():
 
     class UserfriendlyMakefileOptions():
         def __init__(self):
+            self.has_root           = False
             self.has_commons        = False
             self.has_process        = False
             self.has_zlib           = False
@@ -86,6 +87,9 @@ class MakefileWriter():
         if options.has_delphes:
             file.write('\tcd Interfaces && $(MAKE) -f Makefile_delphes\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_delphes\n')
+        if options.has_root:
+            file.write('\tcd Interfaces && $(MAKE) -f Makefile_root\n')
+            file.write('\tcd Test && $(MAKE) -f Makefile_root\n')
         if options.has_delphesMA5tune:
             file.write('\tcd Interfaces && $(MAKE) -f Makefile_delphesMA5tune\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_delphesMA5tune\n')
@@ -109,6 +113,9 @@ class MakefileWriter():
         if options.has_delphes:
             file.write('\tcd Interfaces && $(MAKE) -f Makefile_delphes clean\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_delphes clean\n')
+        if options.has_root:
+            file.write('\tcd Interfaces && $(MAKE) -f Makefile_root clean\n')
+            file.write('\tcd Test && $(MAKE) -f Makefile_root clean\n')
         if options.has_delphesMA5tune:
             file.write('\tcd Interfaces && $(MAKE) -f Makefile_delphesMA5tune clean\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_delphesMA5tune clean\n')
@@ -133,6 +140,9 @@ class MakefileWriter():
         if options.has_delphes:
             file.write('\tcd Interfaces && $(MAKE) -f Makefile_delphes mrproper\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_delphes mrproper\n')
+        if options.has_root:
+            file.write('\tcd Interfaces && $(MAKE) -f Makefile_root mrproper\n')
+            file.write('\tcd Test && $(MAKE) -f Makefile_root mrproper\n')
         if options.has_delphesMA5tune:
             file.write('\tcd Interfaces && $(MAKE) -f Makefile_delphesMA5tune mrproper\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_delphesMA5tune mrproper\n')
@@ -155,11 +165,13 @@ class MakefileWriter():
             self.has_fastjet_tag           = False
             self.has_delphes_tag           = False
             self.has_delphesMA5tune_tag    = False
+            self.has_root_tag              = False
             self.has_zlib_tag              = False
             self.has_fastjet_inc           = False
             self.has_delphes_inc           = False
             self.has_delphesMA5tune_inc    = False
             self.has_zlib_inc              = False
+            self.has_root_inc              = False
             self.has_fastjet_lib           = False
             self.has_delphes_lib           = False
             self.has_delphesMA5tune_lib    = False
@@ -168,7 +180,10 @@ class MakefileWriter():
             self.has_delphes_ma5lib        = False
             self.has_delphesMA5tune_ma5lib = False
             self.has_zlib_ma5lib           = False
-            self.has_root                  = True
+            self.has_root                  = False
+            self.has_root_tag              = False
+            self.has_root_lib              = False
+            self.has_root_ma5lib           = False
 
 
     @staticmethod
@@ -190,12 +205,18 @@ class MakefileWriter():
 
         # Compilers
         file.write('# Compilers\n')
-        mycommand = [archi_info.root_bin_path+'/root-config','--cxx']
-        ok, out, err = ShellCommand.ExecuteWithCapture(mycommand,'./')
-        if not ok:
-            return False
-        out=out.lstrip()
-        file.write('CXX = '+out+'\n')
+        if archi_info.has_root:
+            if archi_info.root_bin_path=='':
+                mycommand = ['root-config','--cxx']
+            else:
+                mycommand = [archi_info.root_bin_path+'/root-config','--cxx']
+            ok, out, err = ShellCommand.ExecuteWithCapture(mycommand,'./')
+            if not ok:
+                return False
+            out=out.lstrip()
+            file.write('CXX = '+out+'\n')
+        else:
+            file.write('CXX = g++\n')
         file.write('\n')
 
         # Options for C++ compilation
@@ -209,11 +230,10 @@ class MakefileWriter():
             file.write('CXXFLAGS += '+' -I'+item+'\n')
             
         # - root
-        cxxflags=[]
-        if options.has_root:
+        if options.has_root_inc:
+            cxxflags=[]
             cxxflags.extend(['$(shell root-config --cflags)'])
-    #        cxxflags.extend(['-I'+archi_info.root_inc_path]) # root
-        file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
+            file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
 
         # - fastjet
         if options.has_fastjet_inc:
@@ -243,7 +263,8 @@ class MakefileWriter():
 
         # - tags
         cxxflags=[]
-        cxxflags.extend(['-DROOT_USE'])
+        if options.has_root_tag:
+            cxxflags.extend(['-DROOT_USE'])
         if options.has_fastjet_tag:
             cxxflags.extend(['-DFASTJET_USE'])
         if options.has_zlib_tag:
@@ -284,7 +305,20 @@ class MakefileWriter():
                 libs.extend(['-L'+archi_info.zlib_lib_path,'-lz'])
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
 
-        # - fastjet
+        # - root
+        if options.has_root_ma5lib:
+            libs=[]
+            if options.has_root_ma5lib:
+                libs.extend(['-lroot_for_ma5'])
+            if options.has_root_lib:
+                libs.extend(['$(shell root-config --libs) -lEG'])
+            file.write('LIBFLAGS += '+' '.join(libs)+'\n')
+        else:
+            if options.has_root_lib:
+                libs.extend(['$(shell root-config --libs) -lEG'])
+                file.write('LIBFLAGS += '+' '.join(libs)+'\n')
+                
+            # - fastjet
         if options.has_fastjet_ma5lib or options.has_fastjet_lib:
             libs=[]
             if options.has_fastjet_ma5lib:
@@ -338,6 +372,8 @@ class MakefileWriter():
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libzlib_for_ma5.so')
         if options.has_delphes_ma5lib:
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so')
+        if options.has_root_ma5lib:
+            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libroot_for_ma5.so')
         if options.has_delphesMA5tune_ma5lib:
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libdelphesMA5tune_for_ma5.so')
         if options.has_fastjet_ma5lib:

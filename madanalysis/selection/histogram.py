@@ -311,13 +311,20 @@ class Histogram():
             word = word.replace(i,j)
         return word    
 
-    def GetXaxis(self):
-        word = self.observable.tex + " "
+    def GetXaxis_Root(self):
+        word = self.observable.tlatex + " "
         if len(self.arguments)!=0:
             word += "[ " + self.ReplaceAll(self.GetStringArguments(),self.dicoargs)+ " ] "
-        if self.observable.plot_unitX!="":
-            word += "("+self.observable.plot_unitX+") "
+        if self.observable.plot_unitX_tlatex!="":
+            word += "("+self.observable.plot_unitX_tlatex+") "
+        return word    
 
+    def GetXaxis_Matplotlib(self):
+        word = self.observable.latex + " "
+        if len(self.arguments)!=0:
+            word += "[ " + self.ReplaceAll(self.GetStringArguments(),self.dicoargs)+ " ] "
+        if self.observable.plot_unitX_latex!="":
+            word += "("+self.observable.plot_unitX_latex+") "
         return word    
 
     def GetYaxis(self):

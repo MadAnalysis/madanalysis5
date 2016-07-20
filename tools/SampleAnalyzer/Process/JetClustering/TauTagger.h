@@ -27,7 +27,6 @@
 
 //SampleAnalyser headers
 #include "SampleAnalyzer/Commons/Base/TaggerBase.h"
-#include <TH1F.h>
 
 namespace MA5
 {
@@ -40,10 +39,10 @@ class TauTagger: public TaggerBase
  protected :
 
   /// Mis-identification efficiency
-  Float_t misid_ljet_;
+  MAfloat32 misid_ljet_;
 
   /// Apply misefficiency
-  Bool_t doMisefficiency_;
+  MAbool doMisefficiency_;
   //  TH1F* htest;
 
 //---------------------------------------------------------------------------------

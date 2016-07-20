@@ -23,6 +23,8 @@
 
 
 import logging
+import sys
+
 class ColoredFormatter(logging.Formatter):
 
     def __init__(self, msg):
@@ -44,7 +46,29 @@ class ColoredFormatter(logging.Formatter):
         record.msg = color + str( record.msg ) + '\x1b[0m'
         return logging.Formatter.format(self, record)
 
-def init():
+class ColoredFormatterMA5(logging.Formatter):
+
+    def __init__(self, msg):
+        logging.Formatter.__init__(self, msg)
+
+    def format(self,record):
+        if ( record.levelno >= 90):    #INFO for BANNER
+            color = '\x1b[0mMA5: '
+        elif ( record.levelno >= 40 and record.levelno < 90):   #FATAL
+            color = '\x1b[31mMA5-ERROR: '
+        elif ( record.levelno >= 30 ): #WARNING
+            color = '\x1b[35mMA5-WARNING: '
+        elif ( record.levelno >= 20 ): #INFO
+            color = '\x1b[0mMA5: '
+        elif ( record.levelno >= 10 ): #DEBUG
+            color = '\x1b[36mMA5-DEBUG: '
+        else:                          #ANYTHING ELSE
+            color = '\x1b[0mMA5: '
+        record.msg = color + str( record.msg ) + '\x1b[0m'
+        return logging.Formatter.format(self, record)
+
+
+def init(LoggerStream=sys.stdout):
     rootLogger = logging.getLogger()
     hdlr = logging.StreamHandler()
     fmt = ColoredFormatter('%(message)s')
@@ -52,9 +76,11 @@ def init():
     rootLogger.addHandler(hdlr)
 
     # we need to replace all root loggers by ma5 loggers for a proper interface with madgraph5
-    ma5Logger = logging.getLogger('madanalysis')
-    hdlr = logging.StreamHandler()
-    fmt = ColoredFormatter('%(message)s')
+    ma5Logger = logging.getLogger('MA5')
+    for hdlr in ma5Logger.handlers:
+        ma5Logger.removeHandler(hdlr)
+    hdlr = logging.StreamHandler(LoggerStream)
+    fmt = ColoredFormatterMA5('%(message)s')
     hdlr.setFormatter(fmt)
     ma5Logger.addHandler(hdlr)
     ma5Logger.propagate=False

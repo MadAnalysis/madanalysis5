@@ -30,6 +30,7 @@ class InstallManager():
 
     def __init__(self,main):
         self.main=main
+        self.logger = logging.getLogger('MA5')
 
     def Execute(self, rawpackage):
 
@@ -75,14 +76,14 @@ class InstallManager():
             from madanalysis.install.install_pad import InstallPad
             installer=InstallPad(self.main)
         else:
-            logging.error('the package "'+rawpackage+'" is unknown')
+            self.logger.error('the package "'+rawpackage+'" is unknown')
             return False
 
         # Writing the Makefiles
-        logging.info("")
-        logging.info("   **********************************************************")
-        logging.info("   "+StringTools.Center('Installing '+rawpackage,57))
-        logging.info("   **********************************************************")
+        self.logger.info("")
+        self.logger.info("   **********************************************************")
+        self.logger.info("   "+StringTools.Center('Installing '+rawpackage,57))
+        self.logger.info("   **********************************************************")
 
         # Get list of the methods of the installer class
         # If the method does not exist, the method is not called
@@ -90,10 +91,10 @@ class InstallManager():
 
         # 0. Detecting previous installation
         if 'Detect' in methods:
-            logging.info("   Detecting a previous installation ...")
+            self.logger.info("   Detecting a previous installation ...")
             if installer.Detect():
-                logging.info("   => found")
-                logging.info("   Removing the previous installation ...")
+                self.logger.info("   => found")
+                self.logger.info("   Removing the previous installation ...")
                 ok1, ok2 = installer.Remove(question=True)
                 if not ok1 and not ok2:
                     self.PrintBad()
@@ -102,23 +103,23 @@ class InstallManager():
                     self.PrintSkip()
                     return True
             else:
-                logging.info("   => not found. OK")
+                self.logger.info("   => not found. OK")
 
         # 1. Asking for number of cores
         if 'GetNcores' in methods:
             installer.GetNcores()
-            logging.info("   **********************************************************")
+            self.logger.info("   **********************************************************")
 
         # 2. Creating a folder
         if 'CreatePackageFolder' in methods:
-            logging.info("   Creating a devoted folder ...")
+            self.logger.info("   Creating a devoted folder ...")
             if not installer.CreatePackageFolder():
                 self.PrintBad()
                 return False
 
         # 3. Creating a temporary folder
         if 'CreateTmpFolder' in methods:
-            logging.info("   Creating a temporary folder ...")
+            self.logger.info("   Creating a temporary folder ...")
             if not installer.CreateTmpFolder():
                 self.PrintBad()
                 return False
@@ -126,58 +127,58 @@ class InstallManager():
         # 4. Downloading
         if 'Download' in methods:
             if self.main.session_info.has_web:
-                logging.info("   Downloading the package ...")
+                self.logger.info("   Downloading the package ...")
                 if not installer.Download():
                     self.PrintBad()
                     return False
             else:
-                logging.warning("   Download is not allowed because the internet access is disabled.")
+                self.logger.warning("   Download is not allowed because the internet access is disabled.")
 
         # 5. Unpacking
         if 'Unpack' in methods:
-            logging.info("   Unpacking the package ...")
+            self.logger.info("   Unpacking the package ...")
             if not installer.Unpack():
                 self.PrintBad()
                 return False
 
         # 6. Configuring
         if 'Configure' in methods:
-            logging.info("   Configuring the package ...")
+            self.logger.info("   Configuring the package ...")
             if not installer.Configure():
                 self.PrintBad()
                 return False
 
         # 7. Compiling
         if 'Build' in methods:
-            logging.info("   Building the package ...")
+            self.logger.info("   Building the package ...")
             if not installer.Build():
                 self.PrintBad()
                 return False
 
         # 8. Checking
         if 'PreCheck' in methods:
-            logging.info("   Checking the building ...")
+            self.logger.info("   Checking the building ...")
             if not installer.PreCheck():
                 self.PrintBad()
                 return False
 
         # 9. Clean
         if 'Clean' in methods:
-            logging.info("   Cleaning the building ...")
+            self.logger.info("   Cleaning the building ...")
             if not installer.Clean():
                 self.PrintBad()
                 return False
 
         # 9. Install
         if 'Install' in methods:
-            logging.info("   Transfering the data from the temporary to the definitive folder ...")
+            self.logger.info("   Transfering the data from the temporary to the definitive folder ...")
             if not installer.Install():
                 self.PrintBad()
                 return False
 
         # 10. Checking (again)
         if 'Check' in methods:
-            logging.info("   Checking the installation ...")
+            self.logger.info("   Checking the installation ...")
             if not installer.Check():
                 self.PrintBad()
                 return False
@@ -191,28 +192,22 @@ class InstallManager():
             return True
 
     def PrintGood(self):
-        logging.info("   Installation complete.")
-        sys.stdout.write("   => Status:")
-        sys.stdout.write('\x1b[32m'+'[OK]'+'\x1b[0m'+'\n')
-        sys.stdout.flush()
-        logging.info("   **********************************************************")
-        logging.info("")
+        self.logger.info("   Installation complete.")
+        self.logger.info('   => Status: \x1b[32m'+'[OK]'+'\x1b[0m')
+        self.logger.info("   **********************************************************")
+        self.logger.info("")
 
     def PrintSkip(self):
-        logging.info("   Installation skipped.")
-        sys.stdout.write("   => Status:")
-        sys.stdout.write('\x1b[35m'+'[SKIPPED]'+'\x1b[0m'+'\n')
-        sys.stdout.flush()
-        logging.info("   **********************************************************")
-        logging.info("")
+        self.logger.info("   Installation skipped.")
+        self.logger.info('   => Status: \x1b[35m'+'[SKIPPED]'+'\x1b[0m')
+        self.logger.info("   **********************************************************")
+        self.logger.info("")
 
     def PrintBad(self):
-        logging.info("   Installation NOT complete.")
-        sys.stdout.write("   => Status:")
-        sys.stdout.write('\x1b[31m'+'[FAILURE]'+'\x1b[0m'+'\n')
-        sys.stdout.flush()
-        logging.info("   **********************************************************")
-        logging.info("")
+        self.logger.info("   Installation NOT complete.")
+        self.logger.info('   => Status: \x1b[31m'+'[FAILURE]'+'\x1b[0m')
+        self.logger.info("   **********************************************************")
+        self.logger.info("")
 
     def Deactivate(self, rawpackage):
         package=rawpackage.lower()
@@ -223,7 +218,7 @@ class InstallManager():
             from madanalysis.install.install_delphesMA5tune import InstallDelphesMA5tune
             installer=InstallDelphesMA5tune(self.main)
         else:
-            logging.error('the package "'+rawpackage+'" is unknown')
+            self.logger.error('the package "'+rawpackage+'" is unknown')
             return False
 
         if not installer.Deactivate():
@@ -240,7 +235,7 @@ class InstallManager():
             from madanalysis.install.install_delphesMA5tune import InstallDelphesMA5tune
             installer=InstallDelphesMA5tune(self.main)
         else:
-            logging.error('the package "'+rawpackage+'" is unknown')
+            self.logger.error('the package "'+rawpackage+'" is unknown')
             return -1
         return installer.Activate()
 

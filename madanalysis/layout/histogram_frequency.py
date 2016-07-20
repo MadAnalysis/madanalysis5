@@ -27,8 +27,6 @@ import logging
 
 class HistogramFrequency:
 
-    stamp = 0
-
     def __init__(self):
         self.Reset()
 
@@ -41,8 +39,6 @@ class HistogramFrequency:
 
 
     def FinalizeReading(self,main,dataset):
-
-        import numpy
 
         # Statistics
         self.summary.nevents = self.positive.nevents + self.negative.nevents
@@ -59,7 +55,7 @@ class HistogramFrequency:
                     ' has a negative content : '+\
                     str(data[-1])+'. This value is set to zero')
                 data[-1]=0
-        self.summary.array = numpy.array(data)
+        self.summary.array = data[:] # [:] -> clone of data
 
         # Integral
         self.positive.ComputeIntegral()
@@ -69,19 +65,8 @@ class HistogramFrequency:
 
     def CreateHistogram(self,NPID,main):
 
-        # New stamp
-        HistogramFrequency.stamp+=1
-
-        # Creating a new histo
-        from ROOT import TH1F
-        self.myhisto = TH1F(\
-            self.name+"_"+str(HistogramFrequency.stamp),\
-            self.name+"_"+str(HistogramFrequency.stamp),\
-            len(self.summary.array),\
-            0,\
-            len(self.summary.array))
-
         # Filling bins
+        self.stringlabels = []
         for bin in range(0,len(self.labels)):
 
             # Looking for the good label
@@ -94,32 +79,84 @@ class HistogramFrequency:
                 spid=str(pid)
 
             # Set labels
-            self.myhisto.GetXaxis().SetBinLabel(bin+1,spid)
+            self.stringlabels.append(spid)
 
-            # Setting the bin content
-            self.myhisto.SetBinContent(bin+1, self.summary.array[bin])
+            # Put final settings
+            self.nbins = len(self.labels)
+            self.xmin  = 0.
+            self.xmax  = self.nbins
 
 
     def Reset(self):
 
-        import numpy
-
         # General info
         self.name     = ""
-        self.labels   = numpy.array([])
         self.scale    = 0.
+        self.nbins    = 0
+        self.xmin     = 0.
+        self.xmax     = 1.
+
+        # labels
+        self.labels       = [] # int: PDG id 
+        self.stringlabels = [] # string: label
 
         # Data
         self.positive = HistogramFrequencyCore()
         self.negative = HistogramFrequencyCore()
         self.summary  = HistogramFrequencyCore()
 
-        # Histogram
-        self.myhisto = 0
-
         # warnings
         self.warnings = []
 
 
+    def GetBinLowEdge(self,bin):
+
+        # Special case
+        if bin<=0:
+            return self.xmin
+
+        if bin>=self.nbins:
+            return self.xmax
+        
+        # Computing steps
+        step = (self.xmax - self.xmin) / float (self.nbins)
+        
+        # value
+        return self.xmin+bin*step
+
+
+    def GetBinUpperEdge(self,bin):
+
+        # Special case
+        if bin<=0:
+            return self.xmin
+
+        if bin>=self.nbins:
+            return self.xmax
+        
+        # Computing steps
+        step = (self.xmax - self.xmin) / float (self.nbins)
+        
+        # value
+        return self.xmin+(bin+1)*step
+
+
+    def GetBinMean(self,bin):
+
+        # Special case
+        if bin<0:
+            return self.xmin
+
+        if bin>=self.nbins:
+            return self.xmax
+        
+        # Computing steps
+        step = (self.xmax - self.xmin) / float (self.nbins)
+        
+        # value
+        return self.xmin+(bin+0.5)*step
+    
+
+    
 
 

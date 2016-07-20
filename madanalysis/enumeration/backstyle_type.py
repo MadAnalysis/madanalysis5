@@ -23,12 +23,14 @@
 
 
 class BackStyleType(object):
-	values = { 'AUTO'   : [0,'auto'],\
-		   'SOLID'  : [1001,'solid'],\
-		   'DOTTED' : [3002,'dotted'],\
-		   'HLINE'  : [3007,'hline'],\
-		   'DLINE'  : [3004,'dline'],\
-		   'VLINE'  : [3006,'vline']  }
+	values = { 'AUTO'   : [0,   'auto',  'None'],\
+		   'SOLID'  : [1001,'solid', 'None'],\
+		   'DOTTED' : [3002,'dotted','"."'],\
+		   'HLINE'  : [3007,'hline', '"-"'],\
+		   'DLINE'  : [3004,'dline', '"/"'],\
+		   'VLINE'  : [3006,'vline', '"|"']  }
+
+#            matplotlib -> hatch   = ['/', '\\', '|', '-', '+', 'x', 'o', 'O', '.', '*']
 
         class __metaclass__(type):
 
@@ -42,3 +44,7 @@ class BackStyleType(object):
 		def convert2string(self,color):
 			name = self.values.keys()[color]
 			return self.values[name][1]
+
+		def convert2matplotlib(self,color):
+			name = self.values.keys()[color]
+			return self.values[name][2]

@@ -37,7 +37,7 @@ class CheckUp():
         self.session_info = session_info
         self.debug        = debug
         self.script       = script
-        self.logger       = logging.getLogger('madanalysis')
+        self.logger       = logging.getLogger('MA5')
 
     def CheckArchitecture(self):
 
@@ -55,16 +55,14 @@ class CheckUp():
         self.archi_info.ncores = multiprocessing.cpu_count()
 
         # Is Mac
-        sys.stdout.write("Platform: "+self.archi_info.platform+" "+self.archi_info.release+" ")
-        sys.stdout.flush()
+        platform_text= "Platform: "+self.archi_info.platform+" "+self.archi_info.release+" "
         if self.archi_info.platform.lower() in ['darwin','mac','macosx']:
             self.archi_info.isMac = True
-            sys.stdout.write('\x1b[32m'+'[MAC/OSX mode]'+'\x1b[0m'+'\n')
-            sys.stdout.flush()
+            platform_text+='\x1b[32m'+'[MAC/OSX mode]'+'\x1b[0m'
         else:
             self.archi_info.isMac = False
-            sys.stdout.write('\x1b[32m'+'[Linux mode]'+'\x1b[0m'+'\n')
-            sys.stdout.flush()
+            platform_text+='\x1b[32m'+'[Linux mode]'+'\x1b[0m'
+        self.logger.info(platform_text)
 
         # Info for debug mode
         if self.debug:
@@ -287,41 +285,43 @@ class CheckUp():
         # Mandatory packages
         self.logger.info("Checking mandatory packages:")
         checker = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
+
         if not checker.checkPython():
-            return False
-        if not checker.checkNumPy():
             return False
         if not checker.checkGPP():
             return False
         if not checker.checkMake():
             return False
-        if not checker.checkROOT():
-            return False
-        if not checker.checkPyROOT():
-            return False
         return True
 
-    def CheckOptionalPackages(self):
+    def CheckOptionalGraphicalPackages(self):
         # Optional packages
-        self.logger.info("Checking optional packages:")
+        self.logger.info("Checking optional packages devoted to histogramming:")
         checker = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
         checker2 = DetectManager(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
 
+        if not checker2.Execute('root_graphical'):
+            return False
+        if not checker2.Execute('matplotlib'):
+            return False
         if not checker2.Execute('pdflatex'):
             return False
         if not checker2.Execute('latex'):
             return False
-        if not checker2.Execute('dvipdf'):
-            return False
+        return True
+
+    def CheckOptionalProcessingPackages(self):
+        # Optional packages
+        self.logger.info("Checking optional packages devoted to data processing:")
+        checker = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
+        checker2 = DetectManager(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
+        
         self.archi_info.has_zlib              = checker.checkZLIB()
         self.archi_info.has_fastjet           = checker.checkFastJet()
+        if not checker2.Execute('root'):
+            return False
         self.archi_info.has_delphes           = checker.checkDelphes()
         self.archi_info.has_delphesMA5tune    = checker.checkDelphesMA5tune()
-        if not checker2.Execute('recasttools'):
-            return False
-        if not checker2.Execute('madgraph'):
-            return False
-
         return True
 
 

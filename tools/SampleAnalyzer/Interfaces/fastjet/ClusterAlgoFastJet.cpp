@@ -99,7 +99,7 @@ bool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent, b
 
   for (unsigned int i=0;i<jets.size();i++)
   {
-    TLorentzVector q(jets[i].px(),jets[i].py(),jets[i].pz(),jets[i].e());
+    MALorentzVector q(jets[i].px(),jets[i].py(),jets[i].pz(),jets[i].e());
     (*MET) -= q;
     (*MHT) -= q;
     THT += jets[i].pt();
@@ -114,9 +114,9 @@ bool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent, b
   for (unsigned int i=0;i<jets.size();i++)
   {
     RecJetFormat * jet = myEvent.rec()->GetNewJet();
-    jet->setMomentum(TLorentzVector(jets[i].px(),jets[i].py(),jets[i].pz(),jets[i].e()));
+    jet->setMomentum(MALorentzVector(jets[i].px(),jets[i].py(),jets[i].pz(),jets[i].e()));
     std::vector<fastjet::PseudoJet> constituents = clust_seq.constituents(jets[i]);
-    UInt_t tracks = 0;
+    MAuint32 tracks = 0;
     for (unsigned int j=0;j<constituents.size();j++)
     {
       jet->AddConstituent(constituents[j].user_index());

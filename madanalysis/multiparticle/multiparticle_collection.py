@@ -43,7 +43,7 @@ class MultiParticleCollection:
         for key in sorted_keys:
             if len(self.table[key])>1:
                 msg += key + " " 
-        logging.info(msg)        
+        logging.getLogger('MA5').info(msg)        
 
     def DisplayParticles(self):
         sorted_keys = sorted(self.table.keys())
@@ -51,7 +51,7 @@ class MultiParticleCollection:
         for key in sorted_keys:
             if len(self.table[key])==1:
                 msg += key + " "
-        logging.info(msg)        
+        logging.getLogger('MA5').info(msg)        
 
     def Find(self,name):
         name.lower()
@@ -62,9 +62,9 @@ class MultiParticleCollection:
     def Add(self,name,ids,forced=False):
         name.lower()
         if self.Find(name) and not forced:
-            logging.warning("Particle/Multiparticle labelled '"+name+"' is" + \
+            logging.getLogger('MA5').warning("Particle/Multiparticle labelled '"+name+"' is" + \
                             " already defined.")
-            logging.warning("Would you like to overwrite the previous " + \
+            logging.getLogger('MA5').warning("Would you like to overwrite the previous " + \
                             "definition ? (Y/N)")
             allowed_answers=['n','no','y','yes']
             answer=""
@@ -97,7 +97,7 @@ class MultiParticleCollection:
         if self.Find(name):
             if level!=MA5RunningType.RECO and \
                    ( name=="hadronic" or name=="invisible" ) :
-                logging.error("this multiparticle cannot be removed (reserved keyword).")
+                logging.getLogger('MA5').error("this multiparticle cannot be removed (reserved keyword).")
             else:    
                 del self.table[name]
 

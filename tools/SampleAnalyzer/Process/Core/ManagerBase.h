@@ -33,8 +33,7 @@
 #include <functional>
 #include <algorithm>
 
-// ROOT headers
-#include <Rtypes.h> 
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/LogService.h"
@@ -56,7 +55,7 @@ class ManagerBase
   std::vector<T*> Objects_;
 
   /// Mapping between names (lower case) and objects
-  std::map<std::string, UInt_t> Names_;
+  std::map<std::string, MAuint32> Names_;
 
 
   // -------------------------------------------------------------
@@ -82,7 +81,9 @@ class ManagerBase
   bool Add(std::string name, T* object);
 
   /// Display the content of the Manager
-  void Print(LogStream& os=INFO) const;
+  void Print(const std::vector<T*>& Objects, 
+             const std::map<std::string, MAuint32>& Names,
+             LogStream& os=INFO) const;
 
 };
 
@@ -98,7 +99,7 @@ T* ManagerBase<T>::Get(std::string name)
                  name.begin(), std::ptr_fun<int, int>(std::tolower));
 
   // Seach the name
-  std::map<std::string, UInt_t>::iterator it = Names_.find(name); 
+  std::map<std::string, MAuint32>::iterator it = Names_.find(name); 
 
   // Found
   if (it!=Names_.end())
@@ -122,14 +123,14 @@ bool ManagerBase<T>::Add(std::string name, T* object)
                  name.begin(), std::ptr_fun<int, int>(std::tolower));
 
   // Insert name in the data base
-  std::pair<std::map<std::string,UInt_t>::iterator,bool>
+  std::pair<std::map<std::string,MAuint32>::iterator,bool>
     found = Names_.insert(std::make_pair(name,0));
   
   // Check if name insertion is failed
   if (!found.second) return false;
 
   // Look for object in the data base
-  for (UInt_t i=0;i<Objects_.size();i++)
+  for (MAuint32 i=0;i<Objects_.size();i++)
   {
     if (Objects_[i]==object)
     {
@@ -144,25 +145,30 @@ bool ManagerBase<T>::Add(std::string name, T* object)
   return true;  
 }
 
+
 // -----------------------------------------------------------------------------
 // Print
 // -----------------------------------------------------------------------------
 template <typename T>
-void ManagerBase<T>::Print(LogStream& os) const
+void ManagerBase<T>::Print(const std::vector<T*>& Objects, 
+                           const std::map<std::string, MAuint32>& Names,
+                           LogStream& os) const
 {
   // Header
   INFO << "------------------------------------------" << endmsg;
+  INFO << "Number of items: " << Names.size() << endmsg;
 
   // Loop over names
-  for (std::map<std::string, UInt_t>::const_iterator
-         it = Names_.begin(); it != Names_.end(); it++)
+  for (std::map<std::string, MAuint32>::const_iterator
+         it = Names.begin(); it != Names.end(); it++)
   {
-    INFO.width(10); 
+    INFO << " - ";
+    INFO.width(20); 
     INFO << it->first;
     INFO << " : ";
-    INFO << typeid(Objects_[it->second]).name();
+    INFO << typeid(Objects[it->second]).name();
     INFO << " @ " ;
-    INFO << Objects_[it->second];
+    INFO << Objects[it->second];
     INFO << endmsg; 
   }
 

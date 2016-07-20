@@ -40,10 +40,10 @@ class ClusterAlgoStandard: public ClusterAlgoFastJet
   private :
 
     /// jet-radius parameter
-    Double_t R_;
+    MAfloat64 R_;
 
     /// generalised kt parameter
-    Double_t p_;
+    MAfloat64 p_;
 
 //---------------------------------------------------------------------------------
 //                                method members

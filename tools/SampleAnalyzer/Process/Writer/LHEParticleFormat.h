@@ -29,8 +29,7 @@
 #include <iostream>
 #include <string>
 
-// ROOT headers
-#include <Rtypes.h>
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 
 namespace MA5
 {
@@ -43,26 +42,26 @@ class LHEParticleFormat
   // -------------------------------------------------------------
  public:
 
-  Int_t   id;
-  Int_t   status;
-  UInt_t  mother1;
-  UInt_t  mother2;
-  UInt_t  color1;
-  UInt_t  color2;
-  Float_t px;
-  Float_t py;
-  Float_t pz;
-  Float_t e;
-  Float_t m;
-  Float_t ctau;
-  Float_t spin;
+  MAint32   id;
+  MAint32   status;
+  MAuint32  mother1;
+  MAuint32  mother2;
+  MAuint32  color1;
+  MAuint32  color2;
+  MAfloat32 px;
+  MAfloat32 py;
+  MAfloat32 pz;
+  MAfloat32 e;
+  MAfloat32 m;
+  MAfloat32 ctau;
+  MAfloat32 spin;
 
-  static std::string FortranFormat_SimplePrecision(Float_t value,
-                                                   UInt_t precision=7); 
-  static std::string FortranFormat_DoublePrecision(Double_t value,
-                                                   UInt_t precision=11); 
+  static std::string FortranFormat_SimplePrecision(MAfloat32 value,
+                                                   MAuint32 precision=7); 
+  static std::string FortranFormat_DoublePrecision(MAfloat64 value,
+                                                   MAuint32 precision=11); 
 
-  void Print(UInt_t num, std::ostream* out);
+  void Print(MAuint32 num, std::ostream* out);
 };
 
 

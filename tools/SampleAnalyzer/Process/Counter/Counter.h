@@ -25,6 +25,9 @@
 #ifndef COUNTER_h
 #define COUNTER_h
 
+// SampleAnalyzer headers
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
+
 // STL headers
 #include <iostream>
 #include <string>
@@ -50,15 +53,15 @@ class Counter
 
   /// number of times the function Increment is called
   /// first = positive weight ; second = negative weight
-  std::pair<Long64_t,Long64_t> nentries_;
+  std::pair<MAint64,MAint64> nentries_;
 
   /// sum of weights
   /// first = positive weight ; second = negative weight
-  std::pair<Double_t,Double_t> sumweight_;
+  std::pair<MAfloat64,MAfloat64> sumweight_;
 
   /// sum of squared weights
   /// first = positive weight ; second = negative weight
-  std::pair<Double_t,Double_t> sumweight2_;
+  std::pair<MAfloat64,MAfloat64> sumweight2_;
 
 
   // -------------------------------------------------------------
@@ -88,15 +91,15 @@ class Counter
   }
 
   /// Increment the counter
-  void Increment(const Float_t& weight=1.)
+  void Increment(const MAfloat32& weight=1.)
   {
-    if (weight>=0)
+    if (weight>0)
     {
       nentries_.first++;
       sumweight_.first+=weight;
       sumweight2_.first+=weight*weight;
     }
-    else
+    else if (weight<0)
     {
       nentries_.second++;
       sumweight_.second+=weight;

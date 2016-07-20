@@ -87,11 +87,11 @@ StatusCode::Type STDHEPreader::ReadEvent(EventFormat& myEvent, SampleFormat& myS
   while(!eventRead)
   {
     // Read blockid
-    Int_t blockid=0;
+    MAint32 blockid=0;
     *xdrinput_ >> blockid;
     if (xdrinput_->eof()) return StatusCode::FAILURE;
 
-    Int_t ntot=0;
+    MAint32 ntot=0;
     *xdrinput_ >> ntot;
 
     std::string version;
@@ -132,8 +132,8 @@ bool STDHEPreader::DecodeFileHeader(SampleFormat& mySample)
 {
   // temporary variables used for reading the xdr format file
   std::string  tmps;
-  Int_t  tmpi = 0;
-  UInt_t tmpui = 0;
+  MAint32  tmpi = 0;
+  MAuint32 tmpui = 0;
 
   // BlockID
   *xdrinput_ >> tmpi;
@@ -205,17 +205,17 @@ bool STDHEPreader::DecodeFileHeader(SampleFormat& mySample)
   //std::cout << "First table=" << tmpui << endmsg;
 
   // Dim Table
-  UInt_t dimTable;
+  MAuint32 dimTable;
   *xdrinput_ >> dimTable;
   //std::cout << "Dim table=" << dimTable << endmsg;
 
   // Number of blocks
-  UInt_t nBlocks;
+  MAuint32 nBlocks;
   *xdrinput_ >> nBlocks;
   //std::cout << "N blocks = " << nBlocks << endmsg;
 
   // Number of NTuples
-  UInt_t nNTuples = 0;
+  MAuint32 nNTuples = 0;
   if (version_!=V1)
   {
     *xdrinput_ >> nNTuples;
@@ -226,11 +226,11 @@ bool STDHEPreader::DecodeFileHeader(SampleFormat& mySample)
   if (nBlocks!=0)
   {
     // Extracting blocks
-    std::vector<Int_t> blocks;
+    std::vector<MAint32> blocks;
     *xdrinput_ >> blocks;  
  
     // Extracting block names
-    for (UInt_t i=0;i<blocks.size();i++)
+    for (MAuint32 i=0;i<blocks.size();i++)
     {
       *xdrinput_ >> tmps;
       //std::cout << "Block " << i << " = " << tmps; 
@@ -293,60 +293,60 @@ bool STDHEPreader::DecodeEventTable(const std::string& evt_version)
   // Case: classical 
   if (evt_version=="1.00")
   {
-    Int_t idat=0;
+    MAint32 idat=0;
     *xdrinput_ >> idat;
 
-    UInt_t uidat=0;
+    MAuint32 uidat=0;
     *xdrinput_ >> uidat; 
 
     // Extracting evtnums
-    std::vector<Int_t> evtnums;
+    std::vector<MAint32> evtnums;
     *xdrinput_ >> evtnums;
 
     // Extracting storenums
-    std::vector<Int_t> storenums;
+    std::vector<MAint32> storenums;
     *xdrinput_ >> storenums;
 
     // Extracting runnums
-    std::vector<Int_t> runnums;
+    std::vector<MAint32> runnums;
     *xdrinput_ >> runnums;
 
     // Extracting trigMasks
-    std::vector<UInt_t> NtrigMasks;
+    std::vector<MAuint32> NtrigMasks;
     *xdrinput_ >> NtrigMasks;
 
     // Extracting prtEvents
-    std::vector<UInt_t> NptrEvents;
+    std::vector<MAuint32> NptrEvents;
     *xdrinput_ >> NptrEvents;
   }
 
   // Pavel's adding: 64-bit adress
   else if (evt_version=="2.00")
   {
-    Int_t idat=0;
+    MAint32 idat=0;
     *xdrinput_ >> idat;
 
-    ULong64_t uidat=0;
+    MAuint64 uidat=0;
     *xdrinput_ >> uidat; 
 
     // Extracting evtnums
-    std::vector<Int_t> evtnums;
+    std::vector<MAint32> evtnums;
     *xdrinput_ >> evtnums;
 
     // Extracting storenums
-    std::vector<Int_t> storenums;
+    std::vector<MAint32> storenums;
     *xdrinput_ >> storenums;
 
     // Extracting runnums
-    std::vector<Int_t> runnums;
+    std::vector<MAint32> runnums;
     *xdrinput_ >> runnums;
 
     // Extracting trigMasks
-    std::vector<UInt_t> NtrigMasks;
+    std::vector<MAuint32> NtrigMasks;
     *xdrinput_ >> NtrigMasks;
 
     // Extracting prtEvents
-    std::vector<ULong64_t> NptrEvents;
+    std::vector<MAuint64> NptrEvents;
     *xdrinput_ >> NptrEvents;
   }
 
@@ -366,26 +366,26 @@ bool STDHEPreader::DecodeEventTable(const std::string& evt_version)
 // -----------------------------------------------------------------------------
 bool STDHEPreader::DecodeEventHeader(const std::string& evt_version)
 {
-  Int_t evtnum=0;
+  MAint32 evtnum=0;
   *xdrinput_ >> evtnum;
 
-  Int_t storenums=0;
+  MAint32 storenums=0;
   *xdrinput_ >> storenums;
 
-  Int_t runnum=0;
+  MAint32 runnum=0;
   *xdrinput_ >> runnum;
 
-  Int_t trigMask=0;
+  MAint32 trigMask=0;
   *xdrinput_ >> trigMask;
 
-  UInt_t nBlocks=0;
+  MAuint32 nBlocks=0;
   *xdrinput_ >> nBlocks;
 
-  UInt_t dimBlocks=0;
+  MAuint32 dimBlocks=0;
   *xdrinput_ >> dimBlocks;
 
-  UInt_t nNTuples=0;
-  UInt_t dimNTuples=0;
+  MAuint32 nNTuples=0;
+  MAuint32 dimNTuples=0;
 
   // Is there NTuple
   bool skipNTuples = false;
@@ -404,18 +404,18 @@ bool STDHEPreader::DecodeEventHeader(const std::string& evt_version)
   if (dimBlocks>0)
   {
     // Extracting blocks
-    std::vector<Int_t> blocks;
+    std::vector<MAint32> blocks;
     *xdrinput_ >> blocks;
 
     // Extracting blocks
     if (!add64bit)
     {
-      std::vector<UInt_t> ptrBlocks;
+      std::vector<MAuint32> ptrBlocks;
       *xdrinput_ >> ptrBlocks;
     }
     else
     {
-      std::vector<ULong64_t> ptrBlocks;
+      std::vector<MAuint64> ptrBlocks;
       *xdrinput_ >> ptrBlocks;
     }
   }
@@ -424,18 +424,18 @@ bool STDHEPreader::DecodeEventHeader(const std::string& evt_version)
   if (skipNTuples && dimNTuples>0)
   {
     // Extracting blocks
-    std::vector<Int_t> nTupleIds;
+    std::vector<MAint32> nTupleIds;
     *xdrinput_ >> nTupleIds;
 
     // Extracting blocks
     if (!add64bit)
     {
-      std::vector<UInt_t> ptrNTuples;
+      std::vector<MAuint32> ptrNTuples;
       *xdrinput_ >> ptrNTuples;
     }
     else
     {
-      std::vector<ULong64_t> ptrNTuples;
+      std::vector<MAuint64> ptrNTuples;
       *xdrinput_ >> ptrNTuples;
     }
   }
@@ -450,19 +450,19 @@ bool STDHEPreader::DecodeEventHeader(const std::string& evt_version)
 bool STDHEPreader::DecodeSTDCM1(const std::string& version, SampleFormat& mySample)
 {
 
-  Int_t nevtreq; 
+  MAint32 nevtreq; 
   *xdrinput_ >> nevtreq;
 
-  Int_t nevtgen; 
+  MAint32 nevtgen; 
   *xdrinput_ >> nevtgen;
 
-  Int_t nevtwrt;
+  MAint32 nevtwrt;
   *xdrinput_ >> nevtwrt;
 
-  Float_t stdecom;
+  MAfloat32 stdecom;
   *xdrinput_ >> stdecom; 
 
-  Float_t stdxsec;
+  MAfloat32 stdxsec;
   *xdrinput_ >> stdxsec;
   if (mySample.mc()!=0)
   {
@@ -470,10 +470,10 @@ bool STDHEPreader::DecodeSTDCM1(const std::string& version, SampleFormat& mySamp
     mySample.mc()->setXsectionError(0);
   }
 
-  Double_t stdseed1; 
+  MAfloat64 stdseed1; 
   *xdrinput_ >> stdseed1;
 
-  Double_t stdseed2;
+  MAfloat64 stdseed2;
   *xdrinput_ >> stdseed2;
 
   if (version.find("1.")==0 || version.find("2.")==0 || 
@@ -487,7 +487,7 @@ bool STDHEPreader::DecodeSTDCM1(const std::string& version, SampleFormat& mySamp
   if (version.find("5.00")==0 || version.find("5.01")==0 )
    return true;
 
-  Int_t nevtlh=0;
+  MAint32 nevtlh=0;
   *xdrinput_ >> nevtlh;
 
   return true;
@@ -561,37 +561,37 @@ bool STDHEPreader::CheckEvent(const EventFormat& myEvent,
            << " Event ignored ." << endmsg;
      return false;
   }
-  if(nhept_!=static_cast<Int_t>(isthept_.size())) 
+  if(nhept_!=static_cast<MAint32>(isthept_.size())) 
   {
      ERROR << "Corrupted " << blk << " block: missing status codes."
            << " Event ignored." << endmsg;
      return false;
   }
-  if(nhept_!=static_cast<Int_t>(idhept_.size())) 
+  if(nhept_!=static_cast<MAint32>(idhept_.size())) 
   {
      ERROR << "Corrupted " << blk << " block: missing PDG codes."
            << " Event ignored." << endmsg;
      return false;
   } 
-  if((2*nhept_)!=static_cast<Int_t>(jmohept_.size())) 
+  if((2*nhept_)!=static_cast<MAint32>(jmohept_.size())) 
   {
      ERROR << "Corrupted " << blk << " block: missing mother information."
            << " Event ignored." << endmsg;
      return false;
   } 
-  if((2*nhept_)!=static_cast<Int_t>(jdahept_.size())) 
+  if((2*nhept_)!=static_cast<MAint32>(jdahept_.size())) 
   {
      ERROR << "Corrupted " << blk << " block: missing daughter information."
            << " Event ignored." << endmsg;
      return false;
   } 
-  if((5*nhept_)!=static_cast<Int_t>(phept_.size()))
+  if((5*nhept_)!=static_cast<MAint32>(phept_.size()))
   {
      ERROR << "Corrupted " << blk << " block: missing 4-momentum " << 
                "information." << " Event ignored." << endmsg;
      return false;
   }   
-  if((4*nhept_)!=static_cast<Int_t>(vhept_.size()))
+  if((4*nhept_)!=static_cast<MAint32>(vhept_.size()))
   {
      ERROR << "Corrupted " << blk << " block: missing vertex information."
            << " Event ignored." << endmsg;
@@ -630,32 +630,32 @@ bool STDHEPreader::DecodeSTDHEP4(const std::string& version,
   *xdrinput_ >> vhept_;
 
   // Extracting the event weight
-  Double_t eventweight=1;
+  MAfloat64 eventweight=1;
   *xdrinput_ >> eventweight;
   myEvent.mc()->setWeight(eventweight);
 
   // Extracting alpha QED
-  Double_t alphaQED=0;
+  MAfloat64 alphaQED=0;
   *xdrinput_ >> alphaQED;
 
   // Extracting alpha QCD
-  Double_t alphaQCD=0;
+  MAfloat64 alphaQCD=0;
   *xdrinput_ >> alphaQCD;
 
   // Extracing dat
-  std::vector<Double_t> dat;
+  std::vector<MAfloat64> dat;
   *xdrinput_ >> dat;
 
   // Extracing dat
-  std::vector<Double_t> spint;
+  std::vector<MAfloat64> spint;
   *xdrinput_ >> spint;
 
   // Extracting idat
-  std::vector<Int_t> idat;
+  std::vector<MAint32> idat;
   *xdrinput_ >> idat;
 
   // Extracting idrupt
-  Int_t idrupt;
+  MAint32 idrupt;
   *xdrinput_ >> idrupt;
 
   // Check the consistency of the entries in the event table

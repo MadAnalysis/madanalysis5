@@ -69,8 +69,7 @@ class InstallPadForMA5tune:
     "atlas_susy_2013_21.cpp" : "http://inspirehep.net/record/1388797/files/atlas_susy_2013_21.cpp",
     "atlas_susy_2013_21.h"   : "http://inspirehep.net/record/1388797/files/atlas_susy_2013_21.h",
     "atlas_susy_2013_21.info": "http://inspirehep.net/record/1388797/files/atlas_susy_2013_21.info",
-#    "atlas_1405_7875.cpp" : "http://inspirehep.net/record/1388801/files/atlas_1405_7875.cpp",
-    "atlas_1405_7875.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/atlas_1405_7875.cpp",
+    "atlas_1405_7875.cpp" : "http://inspirehep.net/record/1388801/files/atlas_1405_7875.cpp",
     "atlas_1405_7875.h"   : "http://inspirehep.net/record/1388801/files/atlas_1405_7875.h",
     "atlas_1405_7875.info": "http://inspirehep.net/record/1388801/files/atlas_1405_7875.info",
     "cms_sus_14_001_monojet.cpp" : "http://inspirehep.net/record/1401439/files/cms_sus_14_001_monojet.cpp",
@@ -315,6 +314,10 @@ class InstallPadForMA5tune:
           ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
           if not ok:
             return False
+          TheCommand = ['rm', '-f', self.installdir+'/Build/Main/main.bak']
+          ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+          if not ok:
+              return False
         # Logs
         TheCommand = ['mkdir', self.installdir+'/Logs']
         ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
@@ -355,7 +358,25 @@ class InstallPadForMA5tune:
     def Unpack(self):
         # the analyses
         for myfile, src in self.files.items():
-          shutil.copy(self.downloaddir+'/'+myfile, self.PADdir)
+            newfile=open(self.PADdir+'/'+myfile,'w')
+            oldfile=open(self.downloaddir+'/'+myfile,'r')
+            rootheaders=False
+            for line in oldfile:
+                if 'RootMainHeaders.h' in line:
+                    rootheaders=True
+                if 'TLorentzVector' in line:
+                    newfile.write(line.replace('TLorentzVector','MA5::MALorentzVector'))
+                else:
+                    newfile.write(line)
+            newfile.close()
+            oldfile.close()
+            if myfile.endswith('.h') and not rootheaders:
+                with open(self.PADdir+'/'+myfile, 'r+') as f:
+                    content = f.read()
+                    f.seek(0, 0)
+                    f.truncate()
+                    f.write(content.replace('#include','#include \"SampleAnalyzer/Interfaces/root/RootMainHeaders.h\"\n#include'))
+
         # the delphes cards
         for myfile, src in self.delphescards.items():
           shutil.copy(self.downloaddir+'/'+myfile, self.delphesdir)

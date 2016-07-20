@@ -32,10 +32,11 @@ class UserInfo:
         self.webaccess_veto = None
 
         # Root
-        self.root_bin = None
+        self.root_veto = None
+        self.root_bin  = None
 
-        # Delphes
-        self.madgraph_veto    = None
+        # MatPlotLib
+        self.matplotlib_veto = None
 
         # Delphes
         self.delphes_veto     = None
@@ -56,10 +57,6 @@ class UserInfo:
         self.fastjet_veto     = None
         self.fastjet_bin_path = None
 
-        # Recast tools
-        self.recasttools_veto = None
-        self.recasttools_path = None
-
         # Pdflatex
         self.pdflatex_veto = None
 
@@ -70,7 +67,7 @@ class UserInfo:
         self.dvipdf_veto = None
 
         # logger
-        self.logger = logging.getLogger('madanalysis')
+        self.logger = logging.getLogger('MA5')
 
     def dump(self):
         for item in self.__dict__:
@@ -168,10 +165,12 @@ class UserInfo:
         # Root
         elif   option=='root_bin_path':
             self.root_bin=value
+        elif   option=='root_veto':
+            self.root_veto=self.ConvertToBool(option,value,filename)
 
-        # Madgraph
-        elif option=='madgraph_veto':
-            self.madgraph_veto=self.ConvertToBool(option,value,filename)
+        # Matplotlib
+        elif   option=='matplotlib_veto':
+            self.matplotlib_veto=self.ConvertToBool(option,value,filename)
 
         # Delphes
         elif option=='delphes_veto':
@@ -202,12 +201,6 @@ class UserInfo:
             self.fastjet_veto=self.ConvertToBool(option,value,filename)
         elif option=='fastjet_bin_path':
             self.fastjet_bin_path=value
-
-        # Recast tools
-        elif option=='recasttools_veto':
-            self.recasttools_veto=self.ConvertToBool(option,value,filename)
-        elif option=='recasttools_path':
-            self.recasttools_path=value
 
         # Pdflatex
         elif option=='pdflatex_veto':

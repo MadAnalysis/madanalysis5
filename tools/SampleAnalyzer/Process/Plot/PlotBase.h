@@ -31,9 +31,6 @@
 #include <string>
 #include <cmath>
 
-// ROOT headers
-#include <TH1F.h>
-
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
@@ -52,13 +49,13 @@ class PlotBase
   std::string name_;
 
   /// Number of events
-  std::pair<Long64_t,Long64_t> nevents_;
+  std::pair<MAint64,MAint64> nevents_;
 
   /// Number of entries
-  std::pair<Long64_t,Long64_t> nentries_;
+  std::pair<MAint64,MAint64> nentries_;
 
   /// Sum of event-weight over events
-  std::pair<Double_t,Double_t> nevents_w_;
+  std::pair<MAfloat64,MAfloat64> nevents_w_;
 
 
   // -------------------------------------------------------------
@@ -92,10 +89,10 @@ class PlotBase
   virtual void Write_TextFormat(std::ostream* output) = 0;
 
   /// Write the plot in a ROOT file
-  virtual void Write_RootFormat(std::pair<TH1F*,TH1F*>& histos) = 0;
+  //  virtual void Write_RootFormat(std::pair<TH1F*,TH1F*>& histos) = 0;
 
   /// Increment number of events
-  void IncrementNEvents(Double_t weight=1.0)
+  void IncrementNEvents(MAfloat64 weight=1.0)
   {
 	  if (weight>=0) 
     {
@@ -111,7 +108,7 @@ class PlotBase
   }
 
   /// Return Number of events
-  const std::pair<Long64_t,Long64_t>& GetNEvents()
+  const std::pair<MAint64,MAint64>& GetNEvents()
   { return nevents_; }
 
   // Return the name

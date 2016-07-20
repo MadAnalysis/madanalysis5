@@ -30,12 +30,6 @@
 #include "SampleAnalyzer/Commons/Base/DetectorBase.h"
 #include "SampleAnalyzer/Interfaces/delphes/DelphesMemoryInterface.h"
 
-//ROOT header
-#include <TObjArray.h>
-#include <TFile.h>
-#include <TDatabasePDG.h>
-#include <TParticlePDG.h>
-#include <TFolder.h>
 
 class ExRootConfReader;
 class ExRootTreeWriter;
@@ -43,6 +37,10 @@ class ExRootTreeBranch;
 class Delphes;
 class DelphesFactory;
 class TObjArray;
+class TFolder;
+class TDatabasePDG;
+class TParticlePDG;
+class TFile;
 
 namespace MA5
 {
@@ -59,6 +57,7 @@ class DetectorDelphes: public DetectorBase
     ExRootConfReader* confReader_;
     ExRootTreeWriter* treeWriter_;
     ExRootTreeBranch* branchEvent_;
+    ExRootTreeBranch* branchWeight_;
     Delphes*          modularDelphes_;
     DelphesFactory*   factory_;
 
@@ -73,9 +72,12 @@ class DetectorDelphes: public DetectorBase
 
     // parameters
     bool output_;
+    std::string rootfile_;
     bool MA5card_;
     std::map<std::string,std::string> table_;
     DelphesMemoryInterface interface_;
+    unsigned long nprocesses_;
+
 
 //---------------------------------------------------------------------------------
 //                                method members
@@ -84,7 +86,7 @@ class DetectorDelphes: public DetectorBase
 
     /// Constructor without argument
     DetectorDelphes() 
-    { output_=false; MA5card_=false;}
+    { output_=false; MA5card_=false; nprocesses_=0;}
 
     /// Destructor
     virtual ~DetectorDelphes()
@@ -112,6 +114,9 @@ class DetectorDelphes: public DetectorBase
     /// Translation functions
     void TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat& myEvent);
     void TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat& myEvent);
+
+    /// Create Event block for Delphes output
+    void StoreEventHeader(SampleFormat& mySample, EventFormat& myEvent);
 
     /// Config File
     virtual const std::string PrintConfigFile() const

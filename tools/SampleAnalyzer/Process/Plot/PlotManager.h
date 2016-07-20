@@ -25,13 +25,12 @@
 #ifndef PLOT_MANAGER_H
 #define PLOT_MANAGER_H
 
+
 // STL headers
 #include <iostream>
 #include <ostream>
 #include <vector>
 
-// ROOT headers
-#include <TFile.h>
 
 // SampleAnalyzer
 #include "SampleAnalyzer/Process/Plot/PlotBase.h"
@@ -40,6 +39,7 @@
 #include "SampleAnalyzer/Process/Plot/HistoFrequency.h"
 #include "SampleAnalyzer/Process/Writer/SAFWriter.h"
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelection.h"
+
 
 namespace MA5
 {
@@ -86,16 +86,16 @@ class PlotManager
     { return plots_.size(); }
 
   /// Adding a 1D histogram with fixed bins
-  Histo* Add_Histo(const std::string& name, UInt_t bins, 
-                   Double_t xmin, Double_t xmax)
+  Histo* Add_Histo(const std::string& name, MAuint32 bins, 
+                   MAfloat64 xmin, MAfloat64 xmax)
   {
     Histo* myhisto = new Histo(name, bins,  xmin, xmax);
     plots_.push_back(myhisto);
     return myhisto;
   }
 
-  Histo* Add_Histo(const std::string& name, UInt_t bins, 
-                   Double_t xmin, Double_t xmax, std::vector<RegionSelection*> regions)
+  Histo* Add_Histo(const std::string& name, MAuint32 bins, 
+                   MAfloat64 xmin, MAfloat64 xmax, std::vector<RegionSelection*> regions)
   {
     Histo* myhisto = new Histo(name, bins,  xmin, xmax);
     myhisto->SetSelectionRegions(regions);
@@ -104,8 +104,8 @@ class PlotManager
   }
 
   /// Adding a 1D histogram with a log binning
-  HistoLogX* Add_HistoLogX(const std::string& name, UInt_t bins, 
-                           Double_t xmin, Double_t xmax)
+  HistoLogX* Add_HistoLogX(const std::string& name, MAuint32 bins, 
+                           MAfloat64 xmin, MAfloat64 xmax)
   {
     HistoLogX* myhisto = new HistoLogX(name, bins,  xmin, xmax);
     plots_.push_back(myhisto);
@@ -123,9 +123,6 @@ class PlotManager
 
   /// Write the counters in a Text file
   void Write_TextFormat(SAFWriter& output);
-
-  /// Write the counters in a ROOT file
-  void Write_RootFormat(TFile* output);
 
   /// Finalizing
   void Finalize()

@@ -28,8 +28,7 @@
 // STL headers
 #include<string>
 
-// ROOT headers
-#include <Rtypes.h> 
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 
 namespace MA5
 {
@@ -46,7 +45,7 @@ class LogMsgValue
  private:
 
   /// Occurence of the exception
-  UInt_t Counter_;
+  MAuint32 Counter_;
 
   /// Name of the function from where the exception is thrown
   std::string Function_;
@@ -61,7 +60,7 @@ class LogMsgValue
   { }
 
   /// Constructor with arguments 
-  LogMsgValue(const UInt_t& Counter, 
+  LogMsgValue(const MAuint32& Counter, 
               const std::string& Function) : Counter_(Counter), Function_(Function)
   { }
   
@@ -74,7 +73,7 @@ class LogMsgValue
   { Counter_=0; Function_=""; } 
   
   /// Accessor to the occurence
-  const UInt_t& GetCounter() const
+  const MAuint32& GetCounter() const
   {return Counter_;}
 
   /// Accessor to the name of the function
@@ -82,7 +81,7 @@ class LogMsgValue
   {return Function_;}
   
   /// Mutator related to the occurence
-  void SetCounter(const UInt_t& Counter)
+  void SetCounter(const MAuint32& Counter)
   {Counter_=Counter;}
 
   /// Mutator related to name of the function

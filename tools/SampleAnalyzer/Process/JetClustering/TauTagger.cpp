@@ -23,6 +23,7 @@
 
 
 #include "SampleAnalyzer/Process/JetClustering/TauTagger.h"
+#include "SampleAnalyzer/Commons/Service/RandomService.h"
 using namespace MA5;
 
 
@@ -39,7 +40,7 @@ void TauTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
           myEvent.rec()->jets()[i].true_btag_) continue;
 
       // simulating mis-id
-      if (gRandom->Rndm() < misid_ljet_)
+      if (RANDOM->flat() < misid_ljet_)
       {
         RecTauFormat* myTau = myEvent.rec()->GetNewTau();
         Jet2Tau(&myEvent.rec()->jets()[i], myTau, myEvent);
@@ -63,12 +64,12 @@ void TauTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
   {
     if (myEvent.rec()->jets()[i].ntracks()!=1 && myEvent.rec()->jets()[i].ntracks()!=3) continue;
 
-    Bool_t tag = false;
+    MAbool tag = false;
     // Loop on the jets constituents
     for (unsigned int j=0;j<myEvent.rec()->jets()[i].Constituents_.size();j++)
     {
       // Searching for a tau in the history
-      Int_t N = myEvent.rec()->jets()[i].Constituents_[j];
+      MAint32 N = myEvent.rec()->jets()[i].Constituents_[j];
       MCParticleFormat* particle = & myEvent.mc()->particles()[N];
       while (!tag)
       {
@@ -99,21 +100,21 @@ void TauTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
 
   if (Exclusive_)
   {
-    UInt_t i = 0;
-    UInt_t n = Candidates.size();
+    MAuint32 i = 0;
+    MAuint32 n = Candidates.size();
 
     while (i<n)
     {
-      UInt_t j = i+1;
+      MAuint32 j = i+1;
 
-      Float_t DeltaR = Candidates[i]->mc()->dr(Candidates[i]);
+      MAfloat32 DeltaR = Candidates[i]->mc()->dr(Candidates[i]);
 
       while (j<n)
       {
         // If two candidates are matching with the same tau, erasing the one with the greater Delta R and reducing n (the size of the vector)
        	if (Candidates[i]->mc()==Candidates[j]->mc())
         {
-          Float_t DeltaR2 = Candidates[j]->mc()->dr(Candidates[j]);
+          MAfloat32 DeltaR2 = Candidates[j]->mc()->dr(Candidates[j]);
 
           if (DeltaR2<DeltaR) std::swap(Candidates[i], Candidates[j]);
 
@@ -156,10 +157,10 @@ void TauTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
   {
     if (myEvent.rec()->jets()[i].ntracks()!=1 && myEvent.rec()->jets()[i].ntracks()!=3) continue;
 
-    Bool_t tag = false;
+    MAbool tag = false;
     for (unsigned int j=0;j<myEvent.rec()->jets()[i].Constituents_.size();j++)
     {
-      Int_t N = myEvent.rec()->jets()[i].Constituents_[j];
+      MAint32 N = myEvent.rec()->jets()[i].Constituents_[j];
       MCParticleFormat* particle = & myEvent.mc()->particles()[N];
       while (!tag)
       {
@@ -198,12 +199,12 @@ void TauTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
 
     if (!IsLast(&myEvent.mc()->particles()[i], myEvent)) continue;
 
-    Double_t DeltaRmax = DeltaRmax_; 
-    Bool_t tag = false;
+    MAfloat64 DeltaRmax = DeltaRmax_; 
+    MAbool tag = false;
 
     for (unsigned int j=Candidates.size();j>0;j--)
     {
-      Float_t DeltaR = myEvent.mc()->particles()[i].dr(Candidates[j-1]);
+      MAfloat32 DeltaR = myEvent.mc()->particles()[i].dr(Candidates[j-1]);
 
       if (DeltaR <= DeltaRmax)
       {
@@ -251,7 +252,7 @@ void TauTagger::Jet2Tau (RecJetFormat* myJet, RecTauFormat* myTau, EventFormat& 
   myTau->mc_        = myJet->mc_;
   myTau->DecayMode_ = PHYSICS->GetTauDecayMode(myTau->mc_);
 
-  Int_t charge = 0;
+  MAint32 charge = 0;
 
   for (unsigned int i=0;i<myJet->Constituents_.size();i++)
   {
@@ -270,7 +271,7 @@ bool TauTagger::SetParameter(const std::string& key,
   // miss-id efficiency
   if (key=="misid_ljet")
   {
-    Float_t tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;

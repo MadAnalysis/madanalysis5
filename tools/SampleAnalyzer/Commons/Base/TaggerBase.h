@@ -25,18 +25,19 @@
 #ifndef TAGGERBASE_H
 #define TAGGERBASE_H
 
+
+// STL headers
+#include <algorithm>
+
 // SampleAnalyser headers
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecJetFormat.h"
 #include "SampleAnalyzer/Commons/Service/Physics.h"
 #include "SampleAnalyzer/Commons/Service/PDGService.h"
+#include "SampleAnalyzer/Commons/Service/RandomService.h"
 
-// ROOT headers
-#include <TRandom.h>
-
-// STL headers
-#include <algorithm>
 
 namespace MA5
 {
@@ -49,19 +50,19 @@ class TaggerBase
   protected :
 
     /// Method used
-    Int_t Method_;
+    MAint32 Method_;
 
     /// Delta R max
-    Float_t DeltaRmax_;
+    MAfloat32 DeltaRmax_;
 
     /// Is the tagging exclusive ?
-    Bool_t Exclusive_;
+    MAbool Exclusive_;
 
     /// Efficiency
-    Float_t Efficiency_;
+    MAfloat32 Efficiency_;
 
     /// Applying efficiency
-    Bool_t doEfficiency_;
+    MAbool doEfficiency_;
 
 //---------------------------------------------------------------------------------
 //                                method members
@@ -95,23 +96,24 @@ class TaggerBase
     virtual void Execute(SampleFormat& mySample, EventFormat& myEvent)=0;
 
     /// Accessor to the selected method
-    Int_t GetMethod() 
+    MAint32 GetMethod() 
     {return Method_;}
 
     /// 
-    Bool_t IsLast(MCParticleFormat* part, EventFormat& myEvent);
+    MAbool IsLast(MCParticleFormat* part, EventFormat& myEvent);
 
     /// Set a parameter
     virtual bool SetParameter(const std::string& key, const std::string& value, std::string header="");
 
     /// Function for identification
-    Bool_t IsIdentified() const
+    MAbool IsIdentified() const
     {
       // no efficiency = default
       if (!doEfficiency_) return true;
 
       // applying efficiency
-      if (gRandom->Rndm() < Efficiency_) return true;
+      MAdouble64 value = RANDOM->flat();
+      if (value < Efficiency_) return true;
       else return false;
     }
 

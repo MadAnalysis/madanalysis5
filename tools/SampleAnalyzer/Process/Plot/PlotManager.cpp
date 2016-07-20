@@ -30,9 +30,6 @@
 #include <sstream>
 
 // Root headers
-#include <TH1F.h>
-#include <TClonesArray.h>
-#include <TVector.h>
 
 using namespace MA5;
 
@@ -44,6 +41,7 @@ void PlotManager::Write_TextFormat(SAFWriter& output)
 }
 
 
+/*
 /// Write the counters in a ROOT file
 void PlotManager::Write_RootFormat(TFile* output)
 {
@@ -79,3 +77,4 @@ void PlotManager::Write_RootFormat(TFile* output)
   plots2save_nevents_negative_weight_.Write("nevents_negative_weight");
 
 }
+*/

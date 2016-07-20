@@ -30,32 +30,32 @@ using namespace MA5;
 
 PdgTable::PdgTable(const PdgTable& Table) 
 {
-  std::map<Int_t, PdgDataFormat>::const_iterator i;
+  std::map<MAint32, PdgDataFormat>::const_iterator i;
   for(i = Table.Table_.begin(); i != Table.Table_.end(); i++)
   {
-    Table_.insert(std::map<Int_t,PdgDataFormat>::value_type(i->first,i->second));
+    Table_.insert(std::map<MAint32,PdgDataFormat>::value_type(i->first,i->second));
   }
 }
 
 PdgTable& PdgTable::operator=(const PdgTable& Table) 
 {
   if(this == &Table) return *this;
-  std::map<Int_t, PdgDataFormat>::const_iterator i;
+  std::map<MAint32, PdgDataFormat>::const_iterator i;
   for(i = Table.Table_.begin(); i != Table.Table_.end(); i++)
   {
-    Table_.insert(std::map<Int_t,PdgDataFormat>::value_type(i->first,i->second));
+    Table_.insert(std::map<MAint32,PdgDataFormat>::value_type(i->first,i->second));
   }
   return *this;
 }
 
-void PdgTable::Insert(const Int_t Pdgid, const PdgDataFormat &p) 
+void PdgTable::Insert(const MAint32 Pdgid, const PdgDataFormat &p) 
 {
-  Table_.insert(std::map<Int_t,PdgDataFormat>::value_type(Pdgid,p));
+  Table_.insert(std::map<MAint32,PdgDataFormat>::value_type(Pdgid,p));
 }
 
 void PdgTable::Print() const 
 {
-  std::map<Int_t, PdgDataFormat>::const_iterator i;
+  std::map<MAint32, PdgDataFormat>::const_iterator i;
   for(i = Table_.begin(); i != Table_.end(); i++)
   {
     INFO << "Name = " << /*set::setw(20)*/"" << std::left << i->second.Name() << endmsg; 
@@ -67,9 +67,9 @@ void PdgTable::Print() const
   }
 }
 
-const PdgDataFormat& PdgTable::operator[](const Int_t Pdgid) const 
+const PdgDataFormat& PdgTable::operator[](const MAint32 Pdgid) const 
 {
-  std::map<Int_t, PdgDataFormat>::const_iterator it = Table_.find(Pdgid);
+  std::map<MAint32, PdgDataFormat>::const_iterator it = Table_.find(Pdgid);
   if(it==Table_.end()) 
   {
     WARNING <<"PDG ID not found (" << Pdgid << "), use default values" << endmsg;

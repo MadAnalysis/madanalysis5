@@ -76,9 +76,9 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
     # PATCH : TEMPORARY : TO REMOVE
     for combination in main.selection[iabs].part:
         if len(combination)>1:
-            logging.warning("sorry but the possibility to apply a cut on a combination of " +\
+            logging.getLogger('MA5').warning("sorry but the possibility to apply a cut on a combination of " +\
                             "particles is not still implemented in MadAnalysis 5.")
-            logging.warning("this cut will be disabled.")
+            logging.getLogger('MA5').warning("this cut will be disabled.")
             file.write('  cuts_['+str(icut)+'].Increment(__event_weight__);\n')
             file.write('  }\n')
             return
@@ -103,12 +103,12 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
         file.write('> toRemove;\n')    
 
         # loop over particles
-        file.write('    for (UInt_t muf=0;muf<'+container+'.size();muf++)\n')
+        file.write('    for (MAuint32 muf=0;muf<'+container+'.size();muf++)\n')
         file.write('    {\n')
 
         # Initializing tag
         tagName='filter'
-        file.write('      std::vector<Bool_t> '+tagName+'('+str(len(conditions))+',false);\n')
+        file.write('      std::vector<MAbool> '+tagName+'('+str(len(conditions))+',false);\n')
 
         # Loop over conditions
         for ind in range(len(conditions)):
@@ -118,7 +118,7 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
             file.write('      }\n')
 
         # Writing final tag
-        file.write('      Bool_t ' + tagName + '_global = ' +\
+        file.write('      MAbool ' + tagName + '_global = ' +\
                    GetFinalCondition(main.selection[iabs].conditions,0,tagName)[0]+';\n')
         
         # Add candidate ?
@@ -132,7 +132,7 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
 
         # Remove candidate from all containers    
         file.write('    // Removing rejected candidates from all containers\n')
-        logging.debug("- Removing rejecting candidates from all containers WITHOUT pt rank")
+        logging.getLogger('MA5').debug("- Removing rejecting candidates from all containers WITHOUT pt rank")
 
         # Loop over containers
         for other_part in part_list:
@@ -146,7 +146,7 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
                                           main.selection[iabs].rank+\
                                           main.selection[iabs].statuscode)
 
-            logging.debug("-- Is the following container concerned? "+other_part[0].name+" -> "+container2)
+            logging.getLogger('MA5').debug("-- Is the following container concerned? "+other_part[0].name+" -> "+container2)
 
             # Is this container concerned by the cut ?
             concerned=False
@@ -156,7 +156,7 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
                     break
             if not concerned:
                 continue
-            logging.debug("---> YES. Cutting on container: "+other_part[0].name+" -> "+container2)
+            logging.getLogger('MA5').debug("---> YES. Cutting on container: "+other_part[0].name+" -> "+container2)
 
             # Bracket for begin 
             file.write('    {\n')
@@ -173,7 +173,7 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
             file.write('    for (unsigned int i=0;i<'+container2+\
                        '.size();i++)\n')
             file.write('    {\n')
-            file.write('      Bool_t reject=false;\n')
+            file.write('      MAbool reject=false;\n')
             file.write('      for (unsigned int j=0;j<toRemove.size();j++)\n')
             file.write('      {\n')
             file.write('        if (toRemove[j]=='+container2+'[i]) {reject=true;break;}\n')
@@ -187,7 +187,7 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
 
         # Remove candidate from all containers    
         first = True
-        logging.debug("- Updating all connected containers WITH pt rank")
+        logging.getLogger('MA5').debug("- Updating all connected containers WITH pt rank")
         for other_part in part_list: # Loop over containers
 
 
@@ -205,7 +205,7 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
                                              main.selection[iabs].rank+\
                                              main.selection[iabs].statuscode)
 
-            logging.debug("-- Is the following container concerned? "+other_part[0].name+" -> "+container2+" derivated from "+newcontainer2)
+            logging.getLogger('MA5').debug("-- Is the following container concerned? "+other_part[0].name+" -> "+container2+" derivated from "+newcontainer2)
 
             # Is this container concerned by the cut ?
             concerned=False
@@ -222,7 +222,7 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
                 first=False
                 file.write('    // Sorting particles according PTrank\n')
 
-            logging.debug("---> YES. Updating the container: "+other_part[0].name+" -> "+container2)
+            logging.getLogger('MA5').debug("---> YES. Updating the container: "+other_part[0].name+" -> "+container2)
 
             # Bracket for begin 
             file.write('    {\n')
@@ -259,7 +259,7 @@ def WriteFactorizedConditions(file,main,iabs,icut,container,\
         WriteFactorizedCutWith1Arg(file,main,iabs,icut,container,\
                                    tagName,tagIndex,condition)
     else:
-        logging.error("observable with more than 2 arguments are " +\
+        logging.getLogger('MA5').error("observable with more than 2 arguments are " +\
                       "not managed by MadAnalysis 5")
 
 
@@ -290,7 +290,7 @@ def WriteJobExecuteNbody(file,iabs,icut,combi1,main,container,tagName,tagIndex,c
     if len(combi1)==1 and combi1.ALL:
         if obs.combination in [CombinationType.SUMSCALAR,\
                                CombinationType.DIFFSCALAR]:
-            file.write('    Double_t value1=0;\n')
+            file.write('    MAdouble64 value1=0;\n')
         else:
             file.write('    ParticleBaseFormat q1;\n')
 
@@ -353,7 +353,10 @@ def WriteJobExecuteNbody(file,iabs,icut,combi1,main,container,tagName,tagIndex,c
         # First part
         file.write('    ParticleBaseFormat q1;\n')
         for ind in range(0,len(combi1)):
-            file.write('    q1'+oper_string+'='+\
+            TheOper='+'
+            if ind!=0:
+              TheOper=oper_string
+            file.write('    q1'+TheOper+'='+\
                        containers1[ind]+'[a['+str(ind)+']]->'+\
                        'momentum();\n')
 
@@ -390,11 +393,11 @@ def WriteJobLoop(file,iabs,icut,combination,redundancies,main,iterator='ind'):
                                            item.name+cut.rank+cut.statuscode))
 
     if len(combination)==1:
-        file.write('    for (UInt_t '+iterator+'=0;'+iterator+'<' + containers[0] + '.size();'+iterator+'++)\n')
+        file.write('    for (MAuint32 '+iterator+'=0;'+iterator+'<' + containers[0] + '.size();'+iterator+'++)\n')
         file.write('    {\n')
     else:
 
-        file.write('    UInt_t '+iterator+'['+str(len(combination))+'];\n')
+        file.write('    MAuint32 '+iterator+'['+str(len(combination))+'];\n')
         if redundancies:
             if main.mode in [MA5RunningType.PARTON,MA5RunningType.HADRON]:
                 file.write('    std::vector<std::set<const MCParticleFormat*> > combis;\n')
@@ -435,13 +438,13 @@ def WriteJobSameCombi(file,iabs,icut,combination,redundancies,main,iterator='ind
         file.write('    std::set<const MCParticleFormat*> mycombi;\n')
     else:
         file.write('    std::set<const RecParticleFormat*> mycombi;\n')
-    file.write('    for (UInt_t i=0;i<'+str(len(combination))+';i++)\n')
+    file.write('    for (MAuint32 i=0;i<'+str(len(combination))+';i++)\n')
     file.write('    {\n')
     for i in range(0,len(combination)):
         file.write('      mycombi.insert('+containers[i]+'['+iterator+'[i]]);\n')
     file.write('    }\n')
-    file.write('    Bool_t matched=false;\n')
-    file.write('    for (UInt_t i=0;i<combis.size();i++)\n')
+    file.write('    MAbool matched=false;\n')
+    file.write('    for (MAuint32 i=0;i<combis.size();i++)\n')
     file.write('      if (combis[i]==mycombi) {matched=true; break;}\n')
     file.write('    if (matched) continue;\n')
     file.write('    else combis.push_back(mycombi);\n\n')

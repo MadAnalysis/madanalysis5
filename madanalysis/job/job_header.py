@@ -30,10 +30,22 @@ import logging
 import sys
 
 def WriteHeader(file,main):
-    file.write('#ifndef analysis_user_h\n#define analysis_user_h\n\n')
-    file.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerBase.h"\n\n')
+    # Preprocessor commands
+    file.write('#ifndef analysis_user_h\n')
+    file.write('#define analysis_user_h\n')
+    file.write('\n')
+
+    # Including headers files
+    file.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerBase.h"\n')
+    if main.archi_info.has_root:
+        file.write('#include "SampleAnalyzer/Interfaces/root/RootMainHeaders.h"\n')
+    file.write('\n')
+
+    # Namespace
     file.write('namespace MA5\n')
     file.write('{\n')
+
+    # Class
     file.write('class user : public AnalyzerBase\n{\n')
     file.write('  INIT_ANALYSIS(user,"MadAnalysis5job")\n\n')
     file.write(' public : \n')
@@ -73,9 +85,9 @@ def WriteCore(file,main,part_list):
             # Histogram case
             if main.selection.table[ind].__class__.__name__=="Histogram":
                 if main.selection.table[ind].observable.name=="NPID" :
-                    file.write('  HistoFrequency<Int_t>* H'+str(Nhistos)+'_;\n')
+                    file.write('  HistoFrequency<MAint32>* H'+str(Nhistos)+'_;\n')
                 elif main.selection.table[ind].observable.name=="NAPID" :
-                    file.write('  HistoFrequency<UInt_t>* H'+str(Nhistos)+'_;\n')
+                    file.write('  HistoFrequency<MAuint32>* H'+str(Nhistos)+'_;\n')
                 elif main.selection.table[ind].logX:
                     file.write('  HistoLogX* H'+str(Nhistos)+'_;\n');
                 else:

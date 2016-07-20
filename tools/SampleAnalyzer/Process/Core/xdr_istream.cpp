@@ -32,7 +32,7 @@ using namespace MA5;
 xdr_istream& xdr_istream::operator>>(std::string &s)
 {
   if (eof()) return (*this);
-	UInt_t len=0;
+	MAuint32 len=0;
 	(*this)>>len;
 
   if (eof()) return (*this);
@@ -48,9 +48,9 @@ xdr_istream& xdr_istream::operator>>(std::string &s)
 }
 
 // -----------------------------------------------------------------------------
-// overloading >> operator for UInt_t
+// overloading >> operator for MAuint32
 // -----------------------------------------------------------------------------
-xdr_istream& xdr_istream::operator>>(UInt_t &v)
+xdr_istream& xdr_istream::operator>>(MAuint32 &v)
 {
   if (eof()) return (*this);
 
@@ -58,29 +58,29 @@ xdr_istream& xdr_istream::operator>>(UInt_t &v)
 	for(int i=0;i<32; i+=8)
   {
 		v<<=8;
-		v += static_cast<UInt_t>(sb_->sbumpc());
+		v += static_cast<MAuint32>(sb_->sbumpc());
 	}
 	return *this;
 }
 
 // -----------------------------------------------------------------------------
-// overloading >> operator for Int_t
+// overloading >> operator for MAint32
 // -----------------------------------------------------------------------------
-xdr_istream& xdr_istream::operator>>(Int_t &v)
+xdr_istream& xdr_istream::operator>>(MAint32 &v)
 {
   if (eof()) return (*this);
 
-	UInt_t _v=0;
+	MAuint32 _v=0;
 	(*this)>>_v;
-	v=static_cast<Int_t>(_v);
+	v=static_cast<MAint32>(_v);
 	return (*this);
 }
 
 
 // -----------------------------------------------------------------------------
-// overloading >> operator for ULong64_t
+// overloading >> operator for MAuint64
 // -----------------------------------------------------------------------------
-xdr_istream& xdr_istream::operator>>(ULong64_t &v)
+xdr_istream& xdr_istream::operator>>(MAuint64 &v)
 {
   if (eof()) return (*this);
 
@@ -88,51 +88,51 @@ xdr_istream& xdr_istream::operator>>(ULong64_t &v)
 	for(int i=0;i<64; i+=8)
   {
 		v<<=8;
-		v += static_cast<ULong64_t>(sb_->sbumpc());
+		v += static_cast<MAuint64>(sb_->sbumpc());
 	}
 	return *this;
 }
 
 
 // -----------------------------------------------------------------------------
-// overloading >> operator for Long64_t
+// overloading >> operator for MAint64
 // -----------------------------------------------------------------------------
-xdr_istream& xdr_istream::operator>>(Long64_t &v)
+xdr_istream& xdr_istream::operator>>(MAint64 &v)
 {
   if (eof()) return (*this);
 
-	ULong64_t _v=0;
+	MAuint64 _v=0;
 	(*this)>>_v;
-	v=static_cast<Long64_t>(_v);
+	v=static_cast<MAint64>(_v);
 	return (*this);
 }
 
 
 // -----------------------------------------------------------------------------
-// overloading >> operator for Float_t
+// overloading >> operator for MAfloat32
 // -----------------------------------------------------------------------------
-xdr_istream& xdr_istream::operator>>(Float_t &v)
+xdr_istream& xdr_istream::operator>>(MAfloat32 &v)
 {
   if (eof()) return (*this);
 
-	UInt_t n=0;
+	MAuint32 n=0;
 	(*this)>>n;
-	Float_t* vp = reinterpret_cast<Float_t*>(&n);
+	MAfloat32* vp = reinterpret_cast<MAfloat32*>(&n);
 	v=*vp;
 	return *this;
 }
 
 
 // -----------------------------------------------------------------------------
-// overloading >> operator for Double_t
+// overloading >> operator for MAfloat64
 // -----------------------------------------------------------------------------
-xdr_istream& xdr_istream::operator>>(Double_t &v)
+xdr_istream& xdr_istream::operator>>(MAfloat64 &v)
 {
   if (eof()) return (*this);
 
-	ULong64_t n=0;
+	MAuint64 n=0;
 	(*this)>>n;
-	Double_t* vp = reinterpret_cast<Double_t*>(&n);
+	MAfloat64* vp = reinterpret_cast<MAfloat64*>(&n);
 	v=*vp;
 	return *this;
 }

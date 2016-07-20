@@ -197,8 +197,8 @@ class SetupWriter():
                 file.write('$'+toCheck[ind])
             file.write(' ]]; then\n')
             file.write('echo -e $YELLOW"'+StringTools.Fill('-',56)+'"\n')
-	    file.write('echo -e "'+StringTools.Center('Your environment is properly configured for MA5',56)+'"\n')
-	    file.write('echo -e "'+StringTools.Fill('-',56)+'"$NORMAL\n')
+            file.write('echo -e "'+StringTools.Center('Your environment is properly configured for MA5',56)+'"\n')
+            file.write('echo -e "'+StringTools.Fill('-',56)+'"$NORMAL\n')
             file.write('fi\n')
         else:
             file.write('if ( ')
@@ -208,8 +208,8 @@ class SetupWriter():
                 file.write('$?'+toCheck[ind])
             file.write(' ) then\n')
             file.write('echo $YELLOW"'+StringTools.Fill('-',56)+'"\n')
-	    file.write('echo "'+StringTools.Center('Your environment is properly configured for MA5',56)+'"\n')
-	    file.write('echo "'+StringTools.Fill('-',56)+'"$NORMAL\n')
+            file.write('echo "'+StringTools.Center('Your environment is properly configured for MA5',56)+'"\n')
+            file.write('echo "'+StringTools.Fill('-',56)+'"$NORMAL\n')
             file.write('endif\n')
 
         # Closing the file

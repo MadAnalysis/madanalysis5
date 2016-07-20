@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -62,7 +62,7 @@ gz_streambuf::~gz_streambuf()
 // -----------------------------------------------------------------------------
 // Getting cursor position in file
 // -----------------------------------------------------------------------------
-Long64_t gz_streambuf::tellg()
+MAint64 gz_streambuf::tellg()
 { 
 #if ZLIB_VERNUM >= 0x1240
   // gzoffset is only available in zlib 1.2.4 or later

@@ -96,7 +96,7 @@ bool MergingPlots::Initialize(const Configuration& cfg,
 bool MergingPlots::Execute(SampleFormat& mySample, const EventFormat& myEvent)
 {
   // Getting number of extra jets in the event
-  UInt_t njets = 0;
+  MAuint32 njets = 0;
 
   if (!ma5_mode_) // normal mode
   {
@@ -109,7 +109,7 @@ bool MergingPlots::Execute(SampleFormat& mySample, const EventFormat& myEvent)
   if (njets>merging_njets_) return false;
 
   // Computing DJRvalues
-  std::vector<Double_t> DJRvalues(merging_njets_,0.);
+  std::vector<MAfloat64> DJRvalues(merging_njets_,0.);
   if (!algo_->Execute(mySample,myEvent,DJRvalues)) return false;
 
   // Getting results
@@ -144,10 +144,10 @@ void MergingPlots::Finalize(const SampleFormat& summary,
 
 
 /// Number of jets
-UInt_t MergingPlots::ExtractHardJetNumber(const MCEventFormat* myEvent, 
+MAuint32 MergingPlots::ExtractHardJetNumber(const MCEventFormat* myEvent, 
                                       MCSampleFormat* mySample)
 {
-  UInt_t njets=0;
+  MAuint32 njets=0;
 
   // Indexing
   std::map<const MCParticleFormat*,int> indices;

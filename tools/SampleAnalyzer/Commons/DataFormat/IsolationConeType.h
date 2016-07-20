@@ -63,11 +63,11 @@ class IsolationConeType
   // -------------------------------------------------------------
  protected:
 
-  UShort_t ntracks_;    /// number of tracks
-  Float_t sumPT_;       /// sum PT
-  Float_t eflow_sumPT_; /// sum PT eflow
-  Float_t sumET_;       /// sum ET
-  Float_t deltaR_;      /// deltaR of the cone
+  MAuint16 ntracks_;    /// number of tracks
+  MAfloat32 sumPT_;       /// sum PT
+  MAfloat32 eflow_sumPT_; /// sum PT eflow
+  MAfloat32 sumET_;       /// sum ET
+  MAfloat32 deltaR_;      /// deltaR of the cone
 
   // -------------------------------------------------------------
   //                        method members
@@ -98,43 +98,43 @@ class IsolationConeType
   }
 
   /// Accessor to the number of tracks
-  const UShort_t ntracks() const
+  const MAuint16 ntracks() const
   {return ntracks_;}
 
   /// Accessor to sumPT
-  const Float_t& sumPT() const
+  const MAfloat32& sumPT() const
   {return sumPT_;}
 
   /// Accessor to sumET
-  const Float_t& sumET() const
+  const MAfloat32& sumET() const
   {return sumET_;}
 
   /// Accessor to deltaR
-  const Float_t& deltaR() const
+  const MAfloat32& deltaR() const
   {return deltaR_;}
 
   /// Accessor to sumPTeflow
-  const Float_t& sumPTeflow() const
+  const MAfloat32& sumPTeflow() const
   {return eflow_sumPT_;}
 
   /// Mutator to the number of tracks
-  void setNtracks(UShort_t tracks)
+  void setNtracks(MAuint16 tracks)
   {ntracks_=tracks;}
 
   /// Mutator to sumPT
-  void setsumPT(Float_t sumPT)
+  void setsumPT(MAfloat32 sumPT)
   {sumPT_=sumPT;}
 
   /// Mutator to sumET
-  void setSumET(Float_t sumET)
+  void setSumET(MAfloat32 sumET)
   {sumET_=sumET;}
 
   /// Mutator to deltaR
-  void setDeltaR(Float_t deltaR)
+  void setDeltaR(MAfloat32 deltaR)
   {deltaR_=deltaR;}
 
   /// Mutator to sumPTeflow
-  void setSumPTeflow(Float_t eflow_sumPT)
+  void setSumPTeflow(MAfloat32 eflow_sumPT)
   {eflow_sumPT_=eflow_sumPT;}
 
 };

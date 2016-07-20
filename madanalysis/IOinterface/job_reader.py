@@ -227,8 +227,6 @@ class JobReader():
     # selection plots    -> plot
     def Extract(self,dataset,cut,merging,plot,domerging):
 
-        import numpy
-
         # Getting the output file name
         name=InstanceName.Get(dataset.name)
         if not domerging:
@@ -341,12 +339,12 @@ class JobReader():
                     histoTag.desactivate()
                     if selectionTag.activated and not domerging:
                         plot.histos.append(copy.copy(histoinfo))
-                        plot.histos[-1].positive.array = numpy.array(data_positive)
-                        plot.histos[-1].negative.array = numpy.array(data_negative)
+                        plot.histos[-1].positive.array = data_positive[:]
+                        plot.histos[-1].negative.array = data_negative[:]
                     elif mergingTag.activated and domerging:
                         merging.histos.append(copy.copy(histoinfo))
-                        merging.histos[-1].positive.array = numpy.array(data_positive)
-                        merging.histos[-1].negative.array = numpy.array(data_negative)
+                        merging.histos[-1].positive.array = data_positive[:]
+                        merging.histos[-1].negative.array = data_negative[:]
                     histoinfo.Reset()
                     data_positive = []
                     data_negative = []
@@ -356,9 +354,9 @@ class JobReader():
                     histoFreqTag.desactivate()
                     if selectionTag.activated and not domerging:
                         plot.histos.append(copy.copy(histofreqinfo))
-                        plot.histos[-1].labels = numpy.array(labels)
-                        plot.histos[-1].positive.array = numpy.array(data_positive)
-                        plot.histos[-1].negative.array = numpy.array(data_negative)
+                        plot.histos[-1].labels = labels[:]
+                        plot.histos[-1].positive.array = data_positive[:]
+                        plot.histos[-1].negative.array = data_negative[:]
                     histofreqinfo.Reset()
                     data_positive = []
                     data_negative = []
@@ -369,8 +367,8 @@ class JobReader():
                     histoLogXTag.desactivate()
                     if selectionTag.activated and not domerging:
                         plot.histos.append(copy.copy(histologxinfo))
-                        plot.histos[-1].positive.array = numpy.array(data_positive)
-                        plot.histos[-1].negative.array = numpy.array(data_negative)
+                        plot.histos[-1].positive.array = data_positive[:]
+                        plot.histos[-1].negative.array = data_negative[:]
                     histologxinfo.Reset()
                     data_positive = []
                     data_negative = []

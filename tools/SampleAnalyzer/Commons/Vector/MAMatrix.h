@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -22,85 +22,74 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef RecMETFormat_h
-#define RecMETFormat_h
+#ifndef MAMatrix_h
+#define MAMatrix_h
 
 // STL headers
 #include <iostream>
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <cmath>
+#include <vector>
 
-// RecParticleFormat
-#include "SampleAnalyzer/Commons/DataFormat/RecParticleFormat.h"
+// SampleAnalyzer
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
+#include "SampleAnalyzer/Commons/Vector/MALorentzVector.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
+
 
 namespace MA5
 {
 
-class LHCOReader;
-class ROOTReader;
-class DelphesTreeReader;
-class DelphesMA5tuneTreeReader;
-class DelphesMemoryInterface;
-
-class RecMETFormat
+class MAMatrix
 {
 
-  friend class LHCOReader;
-  friend class ROOTReader;
-  friend class JetClusteringFastJet;
-  friend class DelphesTreeReader;
-  friend class DelphesMA5tuneTreeReader;
-  friend class DelphesMemoryInterface;
+ public :
 
   // -------------------------------------------------------------
   //                        data members
   // -------------------------------------------------------------
-
  protected:
-  TVector2 met_;     /// transverse missing energy
+  
+  std::vector<std::vector<MAdouble64> > m_;
+
 
   // -------------------------------------------------------------
-  //                        method members
+  //                      method members
   // -------------------------------------------------------------
+ public :
 
- public:
-
-  /// Constructor without arguments
-  RecMETFormat()
-  { Reset(); }
-
-  /// Destructor                                                      
-  ~RecMETFormat()
+  // Constructors
+  MAMatrix()
   {}
 
-  /// Display information
-  void Print() const
+  MAMatrix(MAuint16 n, MAuint16 m)
+  {setDim(n,m);}
+  
+  MAMatrix(MAuint16 n)
+  {setDim(n,n);}
+
+  // Destructor
+  ~MAMatrix()
+  {}
+
+  // Setting the rotation angle
+  void setDim(MAuint16 n, MAuint16 m)
   {
-    INFO << "MET = (" << met_.X() << " , " << met_.Y() << " )" ;
+    m_.resize(n,std::vector<MAdouble64>(m,0.));
   }
 
-  /// Clear all information
-  void Reset()
-  {
-    met_.Set(0.,0.); 
-  }
+  // Operator
+  const std::vector<MAdouble64>& operator[] (MAuint16 i) const
+  { return m_[i]; }
 
-  /// Accessor to the MET vector
-  const TVector2& vector()  const {return met_;}
-
-  /// Accessor to the MET magnitude
-  const Float_t magnitude() const {return met_.Mod(); }
-
-  /// Accessor to the x-component MET
-  const Float_t x()      const {return met_.X();}
-
-  /// Accessor to the y-component MET
-  const Float_t y()      const {return met_.Y();}
-
+  std::vector<MAdouble64>& operator[] (MAuint16 i)
+  { return m_[i]; }
+	   
+  
 };
-
+ 
 }
 
 #endif

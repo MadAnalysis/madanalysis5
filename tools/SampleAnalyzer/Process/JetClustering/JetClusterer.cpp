@@ -131,7 +131,7 @@ void JetClusterer::GetFinalState(const MCParticleFormat* part, std::set<const MC
 // -----------------------------------------------------------------------------
 // IsLast
 // -----------------------------------------------------------------------------
-Bool_t JetClusterer::IsLast(const MCParticleFormat* part, EventFormat& myEvent)
+MAbool JetClusterer::IsLast(const MCParticleFormat* part, EventFormat& myEvent)
 {
   for (unsigned int i=0; i<part->daughters().size(); i++)
   {
@@ -162,7 +162,7 @@ bool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
   for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
   {
     const MCParticleFormat& part = myEvent.mc()->particles()[i];
-    UInt_t absid = std::abs(part.pdgid());
+    MAuint32 absid = std::abs(part.pdgid());
 
     // Rejecting particle with a null pt (initial state ?)
     if (part.pt()<1e-10) continue;
@@ -212,7 +212,7 @@ bool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
         bool electronic = false;
         for (unsigned int j=0;j<part.daughters().size();j++)
         {
-          UInt_t pdgid = std::abs(part.daughters()[j]->pdgid());
+          MAuint32 pdgid = std::abs(part.daughters()[j]->pdgid());
           if      (pdgid==13) muonic=true;
           else if (pdgid==11) electronic=true;
           else if (pdgid!=22 /*photons*/ &&

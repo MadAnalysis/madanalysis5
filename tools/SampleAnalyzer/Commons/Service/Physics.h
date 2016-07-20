@@ -97,13 +97,13 @@ class PhysicsService
   { return Id->recConfig(); }
 
   /// MT 
-  Float_t MT(const MCParticleFormat& part, const MCEventFormat* event)
+  MAfloat32 MT(const MCParticleFormat& part, const MCEventFormat* event)
   {
     // Computing ET sum
     double ETsum = part.et() + event->MET().et();
 
     // Computing PT sum
-    TLorentzVector pt = part.momentum() + event->MET().momentum();
+    MALorentzVector pt = part.momentum() + event->MET().momentum();
 
     double value = ETsum*ETsum - pt.Pt()*pt.Pt();
     if (value<0) return 0;
@@ -111,7 +111,7 @@ class PhysicsService
   }
 
 
-  Float_t MT(const MCParticleFormat* part, const MCEventFormat* event)
+  MAfloat32 MT(const MCParticleFormat* part, const MCEventFormat* event)
   {
     if (part==0) return false;
     return MT(*part,event);
@@ -128,7 +128,7 @@ class PhysicsService
   ///  	       	       	  9 = Tau --> 3pi pi0 nu
   ///                     0 = other
   ///                    -1 = error
-  Int_t GetTauDecayMode (const MCParticleFormat* part)
+  MAint32 GetTauDecayMode (const MCParticleFormat* part)
   {
     if (part==0) return -1;
 
@@ -138,11 +138,11 @@ class PhysicsService
       return -1;
     }
 
-    Int_t npi = 0;
+    MAint32 npi = 0;
 
     for (unsigned int i=0;i<part->daughters().size();i++)
     {
-      Int_t pdgid = part->daughters()[i]->pdgid();
+      MAint32 pdgid = part->daughters()[i]->pdgid();
       if (fabs(pdgid) == 11) return 1;
       else if (fabs(pdgid) == 13) return 2;
       else if (fabs(pdgid) == 321) return 3;
@@ -150,7 +150,7 @@ class PhysicsService
       else if (fabs(pdgid) == 213) return 5;
       else if (fabs(pdgid) == 20213)
       {
-       	Int_t pi = 0;
+       	MAint32 pi = 0;
         for (unsigned int j=0;j<part->daughters()[i]->daughters().size();j++)
         {
           if (fabs(part->daughters()[i]->daughters()[j]->pdgid()) == 211) pi++;
@@ -173,7 +173,7 @@ class PhysicsService
     else return 0;
   }
 
-  Int_t GetTauDecayMode (const MCParticleFormat& part)
+  MAint32 GetTauDecayMode (const MCParticleFormat& part)
   {
     return GetTauDecayMode(&part);
   }
@@ -181,8 +181,8 @@ class PhysicsService
   /// Compute srqt(S)
   inline double SqrtS(const MCEventFormat* event) const
   {
-    TLorentzVector q(0.,0.,0.,0.);
-    for (UInt_t i=0;i<event->particles().size();i++)
+    MALorentzVector q(0.,0.,0.,0.);
+    for (MAuint32 i=0;i<event->particles().size();i++)
     {
       if ( Id->IsInitialState(event->particles()[i]) )
         q += event->particles()[i].momentum();

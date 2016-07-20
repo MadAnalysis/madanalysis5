@@ -41,10 +41,10 @@ class ClusterAlgoGridJet: public ClusterAlgoPlugin
   private :
 
     /// y max
-    Double_t Ymax_;
+    MAfloat64 Ymax_;
 
     /// Requested Grid Spacing in y and phi
-    Double_t RequestedGridSpacing_;
+    MAfloat64 RequestedGridSpacing_;
 
 //---------------------------------------------------------------------------------
 //                                method members

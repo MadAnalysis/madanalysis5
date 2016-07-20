@@ -30,7 +30,7 @@ using namespace MA5;
 /// -----------------------------------------------
 /// sumPT Lepton vs Tracks
 /// -----------------------------------------------
-Double_t IsolationBase::sumPT(const RecLeptonFormat* part, 
+MAfloat64 IsolationBase::sumPT(const RecLeptonFormat* part, 
                               const std::vector<RecTrackFormat>& tracks,
                               const double& DR, 
                               double PTmin) const
@@ -65,7 +65,7 @@ Double_t IsolationBase::sumPT(const RecLeptonFormat* part,
 /// -----------------------------------------------
 /// sumPT Lepton vs Towers
 /// -----------------------------------------------
-Double_t IsolationBase::sumPT(const RecLeptonFormat* part, 
+MAfloat64 IsolationBase::sumPT(const RecLeptonFormat* part, 
                               const std::vector<RecTowerFormat>& towers,
                               const double& DR, 
                               double PTmin) const
@@ -97,7 +97,7 @@ Double_t IsolationBase::sumPT(const RecLeptonFormat* part,
 /// -----------------------------------------------
 /// sumPT Lepton vs Eflow object
 /// -----------------------------------------------
-Double_t IsolationBase::sumPT(const RecLeptonFormat* part, 
+MAfloat64 IsolationBase::sumPT(const RecLeptonFormat* part, 
                               const std::vector<RecParticleFormat>& towers,
                               const double& DR, 
                               double PTmin) const
@@ -129,7 +129,7 @@ Double_t IsolationBase::sumPT(const RecLeptonFormat* part,
 /// -----------------------------------------------
 /// sumPT Photon vs Tracks
 /// -----------------------------------------------
-Double_t IsolationBase::sumPT(const RecPhotonFormat* part, 
+MAfloat64 IsolationBase::sumPT(const RecPhotonFormat* part, 
                               const std::vector<RecTrackFormat>& tracks,
                               const double& DR, 
                               double PTmin) const
@@ -161,7 +161,7 @@ Double_t IsolationBase::sumPT(const RecPhotonFormat* part,
 /// -----------------------------------------------
 /// sumPT Photon vs Towers
 /// -----------------------------------------------
-Double_t IsolationBase::sumPT(const RecPhotonFormat* part, 
+MAfloat64 IsolationBase::sumPT(const RecPhotonFormat* part, 
                          const std::vector<RecTowerFormat>& towers,
                          const double& DR, 
                          double PTmin) const
@@ -193,7 +193,7 @@ Double_t IsolationBase::sumPT(const RecPhotonFormat* part,
 /// -----------------------------------------------
 /// sumPT Photon vs Eflow object
 /// -----------------------------------------------
-Double_t IsolationBase::sumPT(const RecPhotonFormat* part, 
+MAfloat64 IsolationBase::sumPT(const RecPhotonFormat* part, 
                          const std::vector<RecParticleFormat>& towers,
                          const double& DR, 
                          double PTmin) const

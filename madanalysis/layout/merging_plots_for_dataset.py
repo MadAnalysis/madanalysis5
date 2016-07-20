@@ -24,14 +24,12 @@
 
 from madanalysis.enumeration.uncertainty_type     import UncertaintyType
 from madanalysis.enumeration.normalize_type       import NormalizeType
-from madanalysis.layout.root_config               import RootConfig
 from madanalysis.enumeration.report_format_type   import ReportFormatType
 from madanalysis.enumeration.observable_type      import ObservableType
 from madanalysis.enumeration.color_type           import ColorType
 from madanalysis.enumeration.linestyle_type       import LineStyleType
 from madanalysis.enumeration.backstyle_type       import BackStyleType
 from madanalysis.enumeration.stacking_method_type import StackingMethodType
-from madanalysis.layout.root_config               import RootConfig
 from math import sqrt
 
 

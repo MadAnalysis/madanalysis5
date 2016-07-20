@@ -37,7 +37,7 @@ def WriteExecute(file,main,part_list):
                'const EventFormat& event)\n{\n')
 
     # Getting the event weight
-    file.write('  Float_t __event_weight__ = 1.0;\n')
+    file.write('  MAfloat32 __event_weight__ = 1.0;\n')
     file.write('  if (weighted_events_ && event.mc()!=0) ' +\
                '__event_weight__ = event.mc()->weight();\n\n')  
     file.write('  if (sample.mc()!=0) sample.mc()->addWeightedEvents(__event_weight__);\n')
@@ -346,7 +346,7 @@ def WriteContainer(file,main,part_list):
                 WriteFillWithMHTContainerMC(item[0],file,item[1],item[2])
 
         # Ordinary particles
-        file.write('    for (UInt_t i=0;i<event.mc()->particles().size();i++)\n')
+        file.write('    for (MAuint32 i=0;i<event.mc()->particles().size();i++)\n')
         file.write('    {\n')
         for item in part_list:
             if item[0].particle.Find(99) or item[0].particle.Find(100):
@@ -360,7 +360,7 @@ def WriteContainer(file,main,part_list):
     else:
 
         # Filling with jets
-        file.write('    for (UInt_t i=0;i<event.rec()->jets().size();i++)\n')
+        file.write('    for (MAuint32 i=0;i<event.rec()->jets().size();i++)\n')
         file.write('    {\n')
         for item in part_list:
             WriteFillWithJetContainer(item[0],file,item[1],item[2])
@@ -368,7 +368,7 @@ def WriteContainer(file,main,part_list):
         InstanceName.Clear()
 
         # Filling with photons
-        file.write('    for (UInt_t i=0;i<event.rec()->photons().size();i++)\n')
+        file.write('    for (MAuint32 i=0;i<event.rec()->photons().size();i++)\n')
         file.write('    {\n')
         for item in part_list:
             WriteFillWithPhotonContainer(item[0],file,item[1],item[2])
@@ -376,7 +376,7 @@ def WriteContainer(file,main,part_list):
         InstanceName.Clear()
 
         # Filling with electrons
-        file.write('    for (UInt_t i=0;i<event.rec()->electrons().size();i++)\n')
+        file.write('    for (MAuint32 i=0;i<event.rec()->electrons().size();i++)\n')
         file.write('    {\n')
         for item in part_list:
             WriteFillWithElectronContainer(item[0],file,item[1],item[2])
@@ -384,7 +384,7 @@ def WriteContainer(file,main,part_list):
         InstanceName.Clear()
 
         # Filling with muons
-        file.write('    for (UInt_t i=0;i<event.rec()->muons().size();i++)\n')
+        file.write('    for (MAuint32 i=0;i<event.rec()->muons().size();i++)\n')
         file.write('    {\n')
         for item in part_list:
             WriteFillWithMuonContainer(item[0],file,item[1],item[2])
@@ -392,7 +392,7 @@ def WriteContainer(file,main,part_list):
         InstanceName.Clear()
 
         # Filling with taus
-        file.write('    for (UInt_t i=0;i<event.rec()->taus().size();i++)\n')
+        file.write('    for (MAuint32 i=0;i<event.rec()->taus().size();i++)\n')
         file.write('    {\n')
         for item in part_list:
             WriteFillWithTauContainer(item[0],file,item[1],item[2])
@@ -444,13 +444,13 @@ def WriteSelection(file,main,part_list):
     icut = 0
     for iabs in range(len(main.selection.table)):
 
-        logging.debug("--------------------------------------------")
-        logging.debug("SELECTION STEP "+str(iabs)+": "+main.selection[iabs].GetStringDisplay())
+        logging.getLogger('MA5').debug("--------------------------------------------")
+        logging.getLogger('MA5').debug("SELECTION STEP "+str(iabs)+": "+main.selection[iabs].GetStringDisplay())
         file.write('  // Histogram/Cut number '+str(iabs)+'\n')
         file.write('  // '+main.selection[iabs].GetStringDisplay()+'\n')
         
         if main.selection[iabs].__class__.__name__=="Histogram":
-            logging.debug("- selection step = histogram")
+            logging.getLogger('MA5').debug("- selection step = histogram")
             JobPlot.WritePlot(file,main,iabs,ihisto)
             ihisto+=1
             
@@ -458,18 +458,18 @@ def WriteSelection(file,main,part_list):
 
             # Event cut
             if len(main.selection[iabs].part)==0:
-                logging.debug("- selection step = cut on event")
+                logging.getLogger('MA5').debug("- selection step = cut on event")
                 JobEventCut.WriteEventCut(file,main,iabs,icut)
 
             # Candidate cut    
             else:
-                logging.debug("- selection step = cut on candidate")
+                logging.getLogger('MA5').debug("- selection step = cut on candidate")
                 JobCandidateCut.WriteCandidateCut(file,main,iabs,icut,part_list)
 
             icut+=1
             
         file.write('\n')
-    logging.debug("--------------------------------------------")
+    logging.getLogger('MA5').debug("--------------------------------------------")
 
 
 

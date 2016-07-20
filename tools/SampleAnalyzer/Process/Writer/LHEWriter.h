@@ -77,18 +77,18 @@ class LHEWriter : public WriterTextBase
                         unsigned int nevents);
 
   /// Writing a particle
-  void WriteParticle(const MCParticleFormat& myPart, Int_t mother1, Int_t mother2, 
-                     Int_t statuscode, LHEParticleFormat& lhe);
+  void WriteParticle(const MCParticleFormat& myPart, MAint32 mother1, MAint32 mother2, 
+                     MAint32 statuscode, LHEParticleFormat& lhe);
 
-  static std::string FortranFormat_SimplePrecision(Float_t value,UInt_t precision=7); 
-  static std::string FortranFormat_DoublePrecision(Double_t value,UInt_t precision=11); 
+  static std::string FortranFormat_SimplePrecision(MAfloat32 value,MAuint32 precision=7); 
+  static std::string FortranFormat_DoublePrecision(MAfloat64 value,MAuint32 precision=11); 
 
   // Writing a reconstructed jet
-  void WriteJet(const RecJetFormat& jet, LHEParticleFormat& lhe, Int_t& mother);
-  void WriteMuon(const RecLeptonFormat& muon, LHEParticleFormat& lhe, Int_t& mother);
-  void WriteElectron(const RecLeptonFormat& electron, LHEParticleFormat& lhe, Int_t& mother);
-  void WritePhoton(const RecPhotonFormat& photon, LHEParticleFormat& lhe, Int_t& mother);
-  void WriteTau(const RecTauFormat& tau, LHEParticleFormat& lhe, Int_t& mother);
+  void WriteJet(const RecJetFormat& jet, LHEParticleFormat& lhe, MAint32& mother);
+  void WriteMuon(const RecLeptonFormat& muon, LHEParticleFormat& lhe, MAint32& mother);
+  void WriteElectron(const RecLeptonFormat& electron, LHEParticleFormat& lhe, MAint32& mother);
+  void WritePhoton(const RecPhotonFormat& photon, LHEParticleFormat& lhe, MAint32& mother);
+  void WriteTau(const RecTauFormat& tau, LHEParticleFormat& lhe, MAint32& mother);
   void WriteMET(const ParticleBaseFormat& met, LHEParticleFormat& lhe);
 
 

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -26,20 +26,18 @@
 #define TREE_READER_BASE_h
 
 // SampleAnalyzer headers
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/Base/Configuration.h"
+#include "SampleAnalyzer/Commons/Base/StatusCode.h"
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
 #include "SampleAnalyzer/Commons/Service/Physics.h"
-#include "SampleAnalyzer/Commons/Base/StatusCode.h"
-
-// ROOT header
-#include <TChain.h>
-#include <TLorentzVector.h>
-#include <TObject.h>
-#include <TFile.h>
 
 // STL header
 #include <iostream>
+
+class TFile;
+class TTree;
 
 namespace MA5
 {
@@ -76,22 +74,22 @@ class TreeReaderBase
   { }
 
   /// Read the header
-  virtual bool Initialize()=0;
+  virtual MAbool Initialize()=0;
 
   /// Read the header
-  virtual bool ReadHeader(SampleFormat& mySample)=0;
+  virtual MAbool ReadHeader(SampleFormat& mySample)=0;
 
   /// Read the event
   virtual StatusCode::Type ReadEvent(EventFormat& myEvent, SampleFormat& mySample)=0;
 
   /// Finalize the event
-  virtual bool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)=0;
+  virtual MAbool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)=0;
 
   /// Get the file size
-  virtual Long64_t GetFinalPosition()=0;
+  virtual MAint64 GetFinalPosition()=0;
 
   /// Get the position in file (in octet)
-  virtual Long64_t GetPosition()=0;
+  virtual MAint64 GetPosition()=0;
 
 };
 

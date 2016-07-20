@@ -33,8 +33,7 @@
 #include <cctype> // std::tolower
 
 
-// ROOT headers
-#include <Rtypes.h> 
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 
 
 // ShortCut to access to ConvertService
@@ -106,35 +105,35 @@ class ConvertService
     return Converter_.str();
   }
 
-  /// Conversion function to Int_t
+  /// Conversion function to MAint32
   template <class T> 
-  const Int_t ToInt_t(const T& value)
+  const MAint32 ToMAint32(const T& value)
   {
     Initialize(); 
     Converter_ << value;
-    Int_t convert=0;
+    MAint32 convert=0;
     Converter_ >> convert;
     return convert;
   }
 
-  /// Conversion function to UInt_t
+  /// Conversion function to MAuint32
   template <class T> 
-  const UInt_t ToUInt_t(const T& value)
+  const MAuint32 ToMAuint32(const T& value)
   {
     Initialize(); 
     Converter_ << value;
-    UInt_t convert=0;
+    MAuint32 convert=0;
     Converter_ >> convert;
     return convert;
   }
 
-  /// Conversion function to Float_t
+  /// Conversion function to MAfloat32
   template <class T> 
-  const Float_t ToFloat(const T& value)
+  const MAfloat32 ToFloat(const T& value)
   {
     Initialize(); 
     Converter_ << value;
-    Float_t convert=0;
+    MAfloat32 convert=0;
     Converter_ >> convert;
     return convert;
   }
@@ -158,13 +157,13 @@ class ConvertService
   }
 
   /// Test the success of the last conversion
-  Bool_t Success()
+  MAbool Success()
   {
     return true;
   }
 
   /// Test the failure of the last conversion
-  Bool_t Fail()
+  MAbool Fail()
   {
     return true;
   }

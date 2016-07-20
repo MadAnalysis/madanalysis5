@@ -28,7 +28,6 @@ from madanalysis.IOinterface.ufo_reader           import UFOReader
 from madanalysis.IOinterface.job_writer           import JobWriter
 from madanalysis.IOinterface.particle_reader      import ParticleReader
 from madanalysis.IOinterface.multiparticle_reader import MultiparticleReader
-from madanalysis.interpreter.cmd_define           import CmdDefine
 from madanalysis.IOinterface.job_reader           import JobReader
 from madanalysis.IOinterface.folder_writer        import FolderWriter
 from madanalysis.enumeration.report_format_type   import ReportFormatType
@@ -49,14 +48,14 @@ class CmdImport(CmdBase.CmdBase):
 
         # Checking argument number
         if len(args)!=3 and len(args)!=1 :
-            logging.error("wrong number of arguments for the command 'import'.")
+            self.logger.error("wrong number of arguments for the command 'import'.")
             self.help()
             return
 
         # Getting dataset name
         if len(args)==3:
             if not args[1] == 'as':
-                logging.error("syntax error with the command 'import'.")
+                self.logger.error("syntax error with the command 'import'.")
                 self.help()
                 return
 
@@ -92,15 +91,15 @@ class CmdImport(CmdBase.CmdBase):
             
 
     def ImportUFO(self,filename):
-        logging.info("UFO model folder is detected")
+        self.logger.info("UFO model folder is detected")
 
         # UFO mode is forbidden in RECO level
         if self.main.mode==MA5RunningType.RECO:
-            logging.error("cannot import particles in MA5 reconstructed mode")
+            self.logger.error("cannot import particles in MA5 reconstructed mode")
             return False
         
         # Other modes : parton and hadron
-        logging.info("Import all particles defined in the model ...")
+        self.logger.info("Import all particles defined in the model ...")
         cmd_define = CmdDefine(self.main)
         
         ufo = UFOReader(filename,cmd_define)
@@ -118,7 +117,7 @@ class CmdImport(CmdBase.CmdBase):
             return False
 
         if len(ufo.parts.parts)==0:
-            logging.warning("UFO model contained no particles")
+            self.logger.warning("UFO model contained no particles")
             return
 
         # Reseting only particles, kept multiparticles
@@ -131,13 +130,13 @@ class CmdImport(CmdBase.CmdBase):
 
 
     def ImportJob(self,filename,myinterpreter,history):
-        logging.info("SampleAnalyzer job folder is detected")
-        logging.info("Restore MadAnalysis configuration used for this job ...")
+        self.logger.info("SampleAnalyzer job folder is detected")
+        self.logger.info("Restore MadAnalysis configuration used for this job ...")
 
         # Ask question
         if not self.main.forced:
-            logging.warning("You are going to reinitialize MadAnalysis 5. The current configuration will be lost.")
-            logging.warning("Are you sure to do that ? (Y/N)")
+            self.logger.warning("You are going to reinitialize MadAnalysis 5. The current configuration will be lost.")
+            self.logger.warning("Are you sure to do that ? (Y/N)")
             allowed_answers=['n','no','y','yes']
             answer=""
             while answer not in  allowed_answers:
@@ -208,7 +207,7 @@ class CmdImport(CmdBase.CmdBase):
     def CreateReports(self,args,history,layout):
 
         # Getting output filename for HTML report
-        logging.info("   Generating the HMTL report ...")
+        self.logger.info("   Generating the HMTL report ...")
         htmlpath = os.path.expanduser(args[0]+'/HTML')
         if not htmlpath.startswith('/'):
             htmlpath = self.main.currentdir + "/" + htmlpath
@@ -216,13 +215,13 @@ class CmdImport(CmdBase.CmdBase):
 
         # Generating the HTML report
         layout.GenerateReport(history,htmlpath,ReportFormatType.HTML)
-        logging.info("     -> To open this HTML report, please type 'open'.")
+        self.logger.info("     -> To open this HTML report, please type 'open'.")
 
         # PDF report
         if self.main.session_info.has_pdflatex:
 
             # Getting output filename for PDF report
-            logging.info("   Generating the PDF report ...")
+            self.logger.info("   Generating the PDF report ...")
             pdfpath = os.path.expanduser(args[0]+'/PDF')
             if not pdfpath.startswith('/'):
                 pdfpath = self.main.currentdir + "/" + pdfpath
@@ -237,16 +236,16 @@ class CmdImport(CmdBase.CmdBase):
                 pdfpath = pdfpath[len(self.main.currentdir):]
             if pdfpath[0]=='/':
                 pdfpath=pdfpath[1:]
-            logging.info("     -> To open this PDF report, please type 'open " + pdfpath + "'.")
+            self.logger.info("     -> To open this PDF report, please type 'open " + pdfpath + "'.")
             
         else:
-            logging.warning("pdflatex not installed -> no PDF report.")
+            self.logger.warning("pdflatex not installed -> no PDF report.")
 
         # DVI/PDF report
         if self.main.session_info.has_latex:
 
             # Getting output filename for DVI report
-            logging.info("   Generating the DVI report ...")
+            self.logger.info("   Generating the DVI report ...")
             dvipath = os.path.expanduser(args[0]+'/DVI')
             if not dvipath.startswith('/'):
                 dvipath = self.main.currentdir + "/" + dvipath
@@ -254,7 +253,7 @@ class CmdImport(CmdBase.CmdBase):
 
             # Warning message for DVI -> PDF
             if not self.main.session_info.has_dvipdf:
-               logging.warning("dvipdf not installed -> the DVI report will not be converted to a PDF file.")
+               self.logger.warning("dvipdf not installed -> the DVI report will not be converted to a PDF file.")
 
             # Generating the DVI report
             layout.GenerateReport(history,dvipath,ReportFormatType.LATEX)
@@ -267,28 +266,28 @@ class CmdImport(CmdBase.CmdBase):
                     pdfpath = pdfpath[len(self.main.currentdir):]
                 if pdfpath[0]=='/':
                     pdfpath=pdfpath[1:]
-                logging.info("     -> To open this PDF report, please type 'open " + pdfpath + "'.")
+                self.logger.info("     -> To open this PDF report, please type 'open " + pdfpath + "'.")
                 
         else:
-            logging.warning("latex not installed -> no DVI/PDF report.")
+            self.logger.warning("latex not installed -> no DVI/PDF report.")
 
 
 
 
 
     def extract(self,dirname,layout):
-        logging.info("   Checking SampleAnalyzer output...")
+        self.logger.info("   Checking SampleAnalyzer output...")
         jobber = JobReader(dirname)
         if not jobber.CheckDir():
-            logging.error("errors have occured during the analysis.")
+            self.logger.error("errors have occured during the analysis.")
             return False
         
         for item in self.main.datasets:
             if not jobber.CheckFile(item):
-                logging.error("errors have occured during the analysis.")
+                self.logger.error("errors have occured during the analysis.")
                 return False
 
-        logging.info("   Extracting data from the output files...")
+        self.logger.info("   Extracting data from the output files...")
         for i in range(0,len(self.main.datasets)):
             jobber.Extract(self.main.datasets[i],\
                            layout.cutflow.detail[i],\
@@ -319,19 +318,19 @@ class CmdImport(CmdBase.CmdBase):
         
         # Checking if the name is authorized
         if name in self.reserved_words:
-            logging.error("name '" +name+ "' is a reserved keyword. Please choose another name.")
+            self.logger.error("name '" +name+ "' is a reserved keyword. Please choose another name.")
             return False
 
         # Checking if the name is authorized
         if not self.IsAuthorizedLabel(name):
-            logging.error("syntax error with the name '" + name + "'.")
-            logging.error("A correct name contains only characters being letters, digits or the '+', '-', '~' and '_' symbols.")
-            logging.error("Moreover, a correct name  starts with a letter or the '_' symbol.")
+            self.logger.error("syntax error with the name '" + name + "'.")
+            self.logger.error("A correct name contains only characters being letters, digits or the '+', '-', '~' and '_' symbols.")
+            self.logger.error("Moreover, a correct name  starts with a letter or the '_' symbol.")
             return False
 
         # Checking if no multiparticle with the same name has been defined
         if self.main.multiparticles.Find(name):
-            logging.error("A (multi)particle '"+name+"' already exists. Please choose a different name.")
+            self.logger.error("A (multi)particle '"+name+"' already exists. Please choose a different name.")
             return False
 
         # Creating dataset
@@ -359,11 +358,11 @@ class CmdImport(CmdBase.CmdBase):
         
         # If no file
         if len(files)==0:
-            logging.error("The dataset '"+filename+"' has not been found or has a unsupported format.")
+            self.logger.error("The dataset '"+filename+"' has not been found or has a unsupported format.")
             if recowarning:
-                logging.error("To load LHE or HEP files, please specify a clustering algorithm by typing, for instance:")
-                logging.error(" set main.clustering.algorithm = antikt")
-                logging.error("or enter the recasting mode")
+                self.logger.error("To load LHE or HEP files, please specify a clustering algorithm by typing, for instance:")
+                self.logger.error(" set main.clustering.algorithm = antikt")
+                self.logger.error("or enter the recasting mode")
             return False
             
         # Getting current dir
@@ -375,7 +374,7 @@ class CmdImport(CmdBase.CmdBase):
                 theFile = item
             else:    
                 theFile = os.path.normpath(theDir+"/"+item)
-            logging.info("   -> Storing the file '"+item.split('/')[-1]+\
+            self.logger.info("   -> Storing the file '"+item.split('/')[-1]+\
                "' in the dataset '"+name+"'.")
             set.Add(theFile)
 
@@ -384,14 +383,14 @@ class CmdImport(CmdBase.CmdBase):
 
 
     def help(self):
-        logging.info("   Syntax: import <Sample file> as <dataset name>")
-        logging.info("   Stores one or several data file(s) in a given dataset.")
-        logging.info("   The supported event file formats are: ")
-        logging.info("     - LHE (lhe or lhe.gz),")
-        logging.info("     - HEPMC (hepmc or hepmc.gz),")
-        logging.info("     - STDHEP (hep or hep.gz),") 
-        logging.info("     - LHCO (lhco or lhco.gz).") 
-        logging.info("   If the dataset does not exist, it is created.")
+        self.logger.info("   Syntax: import <Sample file> as <dataset name>")
+        self.logger.info("   Stores one or several data file(s) in a given dataset.")
+        self.logger.info("   The supported event file formats are: ")
+        self.logger.info("     - LHE (lhe or lhe.gz),")
+        self.logger.info("     - HEPMC (hepmc or hepmc.gz),")
+        self.logger.info("     - STDHEP (hep or hep.gz),") 
+        self.logger.info("     - LHCO (lhco or lhco.gz).") 
+        self.logger.info("   If the dataset does not exist, it is created.")
 
 
 

@@ -189,7 +189,7 @@ bool LHCOWriter::WriteEvent(const EventFormat& myEvent,
   WriteMET(myEvent.rec()->MET(),&PartTable.back());
 
   // Printing the table
-  for (UInt_t i=0;i<PartTable.size();i++) PartTable[i].Print(i+1,output_);
+  for (MAuint32 i=0;i<PartTable.size();i++) PartTable[i].Print(i+1,output_);
 
   // Incremeting event counter
   counter_++;
@@ -234,11 +234,11 @@ void LHCOWriter::WriteMuon(const RecLeptonFormat& muon,
 
   //------------- the closest jet ---------------
   unsigned int theClosestJet=0;
-  Double_t minDeltaR=-1;
+  MAfloat64 minDeltaR=-1;
   for (unsigned int i=0;i<myEvent->jets().size();i++)
   {
     if (myEvent->jets()[i].pt()==0) continue;
-    Double_t DeltaR=muon.dr(myEvent->jets()[i]);
+    MAfloat64 DeltaR=muon.dr(myEvent->jets()[i]);
     if (i==0 || DeltaR<minDeltaR)
     {
       theClosestJet=i;

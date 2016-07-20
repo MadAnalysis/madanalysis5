@@ -36,6 +36,8 @@ int main(int argc, char *argv[])
 
   // Creating a manager
   SampleAnalyzer manager;
+  if (!manager.Initialize(argc,argv,"pdg.ma5")) return 1;
+  std::cout << std::endl;
 
   // List of available analyzers
   INFO << "List of available analyzers:" << endmsg;

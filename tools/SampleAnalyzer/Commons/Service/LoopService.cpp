@@ -29,13 +29,13 @@ using namespace MA5;
 
 /// Initializing the static member 
 LoopService* LoopService::Service_ = 0;
-const UInt_t LoopService::NcallThreshold_ = 100000;
+const MAuint32 LoopService::NcallThreshold_ = 100000;
 
 
 // -----------------------------------------------------------------------------
 // IrrelevantPhoton
 // -----------------------------------------------------------------------------
-Bool_t LoopService::IrrelevantPhoton_core(const MCParticleFormat* part, 
+MAbool LoopService::IrrelevantPhoton_core(const MCParticleFormat* part, 
                                           const SampleFormat& mySample)
 {
   // Safety
@@ -51,7 +51,7 @@ Bool_t LoopService::IrrelevantPhoton_core(const MCParticleFormat* part,
         part->mother1()->statuscode()==120) return false;
 
   // Checking mother
-  UInt_t absid = std::abs(part->mother1()->pdgid());
+  MAuint32 absid = std::abs(part->mother1()->pdgid());
 
   if (absid==15) return true;
 
@@ -74,7 +74,7 @@ Bool_t LoopService::IrrelevantPhoton_core(const MCParticleFormat* part,
 // -----------------------------------------------------------------------------
 // ComingFromHadronDecay
 // -----------------------------------------------------------------------------
-Bool_t LoopService::ComingFromHadronDecay_core(const MCParticleFormat* part, 
+MAbool LoopService::ComingFromHadronDecay_core(const MCParticleFormat* part, 
                                                 const SampleFormat& mySample)
 {
   // Safety
@@ -94,7 +94,7 @@ Bool_t LoopService::ComingFromHadronDecay_core(const MCParticleFormat* part,
   //  if (part->mother1()==part) { std::cout << "exit" << std::endl; exit(0); }
 
   // Checking if mother is hadron
-  Bool_t had = PHYSICS->Id->IsHadronic(part->mother1()->pdgid()) && part->mother1()->pdgid()!=21;
+  MAbool had = PHYSICS->Id->IsHadronic(part->mother1()->pdgid()) && part->mother1()->pdgid()!=21;
 
   // First case : initial parton
   if (had && part->mother1()->mother1()==0) return false;

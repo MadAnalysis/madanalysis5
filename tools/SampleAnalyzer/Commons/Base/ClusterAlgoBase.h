@@ -26,15 +26,18 @@
 #define CLUSTER_ALGO_BASE_H
 
 
-//SampleAnalyser headers
-#include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
-#include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
-
 //STL headers
 #include <vector>
 #include <map>
 #include <string>
 #include <set>
+#include <algorithm>
+
+//SampleAnalyser headers
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
+#include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
+#include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
+
 
 namespace MA5
 {
@@ -50,13 +53,13 @@ class ClusterAlgoBase
     std::string JetAlgorithm_;
 
     /// Pt min for the jets
-    Double_t Ptmin_;
+    MAfloat64 Ptmin_;
 
     /// Is the jet clustering exclusive ?
-    Bool_t Exclusive_;
+    MAbool Exclusive_;
 
     /// Exclusive id for tau-elec-photon-jet
-    Bool_t ExclusiveId_;
+    MAbool ExclusiveId_;
 
 
 

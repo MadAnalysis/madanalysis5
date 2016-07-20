@@ -31,7 +31,7 @@
 using namespace MA5;
 
 
-Bool_t MCParticleToSave(const MCParticleFormat& part, const SampleFormat& sample)
+MAbool MCParticleToSave(const MCParticleFormat& part, const SampleFormat& sample)
 {
   // Special Herwig6
   if (sample.sampleGenerator()==MA5GEN::HERWIG6)
@@ -50,7 +50,7 @@ Bool_t MCParticleToSave(const MCParticleFormat& part, const SampleFormat& sample
 }
 
 
-Bool_t InitialMCParticleToSave(const MCParticleFormat& part, const SampleFormat& sample)
+MAbool InitialMCParticleToSave(const MCParticleFormat& part, const SampleFormat& sample)
 {
   // Special Herwig6
   if (sample.sampleGenerator()==MA5GEN::HERWIG6)
@@ -69,7 +69,7 @@ Bool_t InitialMCParticleToSave(const MCParticleFormat& part, const SampleFormat&
 
 
 
-UInt_t Find(const MCParticleFormat* part, 
+MAuint32 Find(const MCParticleFormat* part, 
             const std::vector<const MCParticleFormat*>& collection)
 {
   if (part==0) return 0;
@@ -78,7 +78,7 @@ UInt_t Find(const MCParticleFormat* part,
   return 0;
 }
 
-UInt_t FindDeeply(const MCParticleFormat* part, 
+MAuint32 FindDeeply(const MCParticleFormat* part, 
             const std::vector<const MCParticleFormat*>& collection)
 {
   if (part==0) return 0;
@@ -118,16 +118,16 @@ UInt_t FindDeeply(const MCParticleFormat* part,
 }
 
 
-std::string LHEWriter::FortranFormat_SimplePrecision(Float_t value,UInt_t precision)
+std::string LHEWriter::FortranFormat_SimplePrecision(MAfloat32 value,MAuint32 precision)
 {
   std::stringstream str;
   str.precision(precision);
   std::string word;
 
-  Bool_t negative=false;
+  MAbool negative=false;
   if (value<0.) {negative=true; value*=-1.;}
 
-  Int_t exponent = 0;
+  MAint32 exponent = 0;
   if (value!=0.)
   {
     for (; value >= 10.; exponent++) value/=10.;
@@ -144,16 +144,16 @@ std::string LHEWriter::FortranFormat_SimplePrecision(Float_t value,UInt_t precis
 }
 
 
-std::string LHEWriter::FortranFormat_DoublePrecision(Double_t value,UInt_t precision)
+std::string LHEWriter::FortranFormat_DoublePrecision(MAfloat64 value,MAuint32 precision)
 {
   std::stringstream str;
   str.precision(precision);
   std::string word;
 
-  Bool_t negative=false;
+  MAbool negative=false;
   if (value<0.) {negative=true; value*=-1.;}
 
-  Int_t exponent = 0.;
+  MAint32 exponent = 0.;
   if (value!=0.)
   {
     for (; value >= 10.; exponent++) value/=10.;
@@ -377,7 +377,7 @@ bool LHEWriter::WriteHeader(const SampleFormat& mySample)
 }
 
 
-Int_t GetMotherIndex(Int_t index)
+MAint32 GetMotherIndex(MAint32 index)
 {
   if (index==0) return 0;
   if (index==1 || index==3 || index==5) return 1;
@@ -402,7 +402,7 @@ bool LHEWriter::WriteEvent(const EventFormat& myEvent,
   // Container for particles
   std::vector<LHEParticleFormat> particles;
   std::vector<const MCParticleFormat*> pointers;
-  UInt_t counter=0;
+  MAuint32 counter=0;
 
   // Writing MC particles : only MC info case
   // -> hypothesis : input = LHE
@@ -473,8 +473,8 @@ bool LHEWriter::WriteEvent(const EventFormat& myEvent,
         firstpart=false;
         particles.push_back(LHEParticleFormat());
         pointers.push_back(part);
-        Int_t moth1 = Find(part->mother1(),pointers);
-        Int_t moth2 = Find(part->mother2(),pointers);
+        MAint32 moth1 = Find(part->mother1(),pointers);
+        MAint32 moth2 = Find(part->mother2(),pointers);
         WriteParticle(myEvent.mc()->particles()[i],moth1,moth2,3, particles.back());
       }
       else 
@@ -490,35 +490,35 @@ bool LHEWriter::WriteEvent(const EventFormat& myEvent,
     for (unsigned int i=0;i<myEvent.rec()->muons().size();i++)
     {
       particles.push_back(LHEParticleFormat());
-      Int_t mother = 0; 
+      MAint32 mother = 0; 
       if (mySample.sampleGenerator()!=MA5GEN::HERWIG6) mother=FindDeeply(myEvent.rec()->muons()[i].mc(),pointers);
       WriteMuon(myEvent.rec()->muons()[i],particles.back(),mother);
     }
     for (unsigned int i=0;i<myEvent.rec()->electrons().size();i++)
     {
       particles.push_back(LHEParticleFormat());
-      Int_t mother = 0; 
+      MAint32 mother = 0; 
       if (mySample.sampleGenerator()!=MA5GEN::HERWIG6) mother=FindDeeply(myEvent.rec()->electrons()[i].mc(),pointers);
       WriteElectron(myEvent.rec()->electrons()[i],particles.back(),mother);
     }
     for (unsigned int i=0;i<myEvent.rec()->taus().size();i++)
     {
       particles.push_back(LHEParticleFormat());
-      Int_t mother = 0; 
+      MAint32 mother = 0; 
       if (mySample.sampleGenerator()!=MA5GEN::HERWIG6) mother=FindDeeply(myEvent.rec()->taus()[i].mc(),pointers);
       WriteTau(myEvent.rec()->taus()[i],particles.back(),mother);
     }
     for (unsigned int i=0;i<myEvent.rec()->jets().size();i++)
     {
       particles.push_back(LHEParticleFormat()); 
-      Int_t mother = 0; 
+      MAint32 mother = 0; 
       if (mySample.sampleGenerator()!=MA5GEN::HERWIG6) mother=FindDeeply(myEvent.rec()->jets()[i].mc(),pointers);
       WriteJet(myEvent.rec()->jets()[i],particles.back(),mother);
     }
     for (unsigned int i=0;i<myEvent.rec()->photons().size();i++)
     {
       particles.push_back(LHEParticleFormat());
-      Int_t mother = 0; 
+      MAint32 mother = 0; 
       if (mySample.sampleGenerator()!=MA5GEN::HERWIG6) mother=FindDeeply(myEvent.rec()->photons()[i].mc(),pointers);
       WritePhoton(myEvent.rec()->photons()[i],particles.back(),mother);
     }
@@ -575,8 +575,8 @@ bool LHEWriter::WriteEventHeader(const EventFormat& myEvent,
 
 /// Writing a particle
 void LHEWriter::WriteParticle(const MCParticleFormat& myPart, 
-                              Int_t mother1, Int_t mother2, 
-                              Int_t statuscode, LHEParticleFormat& lhe)
+                              MAint32 mother1, MAint32 mother2, 
+                              MAint32 statuscode, LHEParticleFormat& lhe)
 {
   if (statuscode!=0) lhe.status = statuscode;
   else lhe.status = myPart.statuscode_;
@@ -595,7 +595,7 @@ void LHEWriter::WriteParticle(const MCParticleFormat& myPart,
 }
 
 
-void LHEWriter::WriteJet(const RecJetFormat& jet, LHEParticleFormat& lhe, Int_t& mother)
+void LHEWriter::WriteJet(const RecJetFormat& jet, LHEParticleFormat& lhe, MAint32& mother)
 {
   if (jet.btag()) lhe.id = 5; else lhe.id = 21;
   lhe.status  = 1;
@@ -613,7 +613,7 @@ void LHEWriter::WriteJet(const RecJetFormat& jet, LHEParticleFormat& lhe, Int_t&
 }
 
 
-void LHEWriter::WriteMuon(const RecLeptonFormat& muon, LHEParticleFormat& lhe, Int_t& mother)
+void LHEWriter::WriteMuon(const RecLeptonFormat& muon, LHEParticleFormat& lhe, MAint32& mother)
 {
   if (muon.charge()>0) lhe.id = -13; else lhe.id = +13;
   lhe.status  = 1;
@@ -630,7 +630,7 @@ void LHEWriter::WriteMuon(const RecLeptonFormat& muon, LHEParticleFormat& lhe, I
   lhe.spin    = 0.;
 }
 
-void LHEWriter::WriteElectron(const RecLeptonFormat& electron, LHEParticleFormat& lhe, Int_t& mother)
+void LHEWriter::WriteElectron(const RecLeptonFormat& electron, LHEParticleFormat& lhe, MAint32& mother)
 {
   if (electron.charge()>0) lhe.id = -11; else lhe.id = +11;
   lhe.status  = 1;
@@ -648,7 +648,7 @@ void LHEWriter::WriteElectron(const RecLeptonFormat& electron, LHEParticleFormat
 }
 
 
-void LHEWriter::WritePhoton(const RecPhotonFormat& photon, LHEParticleFormat& lhe, Int_t& mother)
+void LHEWriter::WritePhoton(const RecPhotonFormat& photon, LHEParticleFormat& lhe, MAint32& mother)
 {
   lhe.id      = 22;
   lhe.status  = 1;
@@ -666,7 +666,7 @@ void LHEWriter::WritePhoton(const RecPhotonFormat& photon, LHEParticleFormat& lh
 }
 
 
-void LHEWriter::WriteTau(const RecTauFormat& tau, LHEParticleFormat& lhe, Int_t& mother)
+void LHEWriter::WriteTau(const RecTauFormat& tau, LHEParticleFormat& lhe, MAint32& mother)
 {
   if (tau.charge()>0) lhe.id = -15; else lhe.id = +15;
   lhe.status  = 1;

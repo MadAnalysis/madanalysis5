@@ -22,23 +22,25 @@
 ################################################################################
 
 
-from madanalysis.enumeration.sb_ratio_type       import SBratioType
-from madanalysis.enumeration.color_type          import ColorType
-from madanalysis.IOinterface.root_file_reader    import RootFileReader
-from madanalysis.IOinterface.folder_writer       import FolderWriter
-from madanalysis.selection.instance_name         import InstanceName
-from madanalysis.enumeration.font_type           import FontType
-from madanalysis.enumeration.script_type         import ScriptType
-from madanalysis.IOinterface.text_report         import TextReport
-from madanalysis.IOinterface.html_report_writer  import HTMLReportWriter
-from madanalysis.IOinterface.latex_report_writer import LATEXReportWriter
-from madanalysis.enumeration.report_format_type  import ReportFormatType
-from madanalysis.enumeration.normalize_type      import NormalizeType
-from madanalysis.enumeration.observable_type     import ObservableType
-from madanalysis.layout.cutflow                  import CutFlow
-from madanalysis.layout.plotflow                 import PlotFlow
-from madanalysis.layout.merging_plots           import MergingPlots
-from math                                        import log10, floor, ceil
+from madanalysis.enumeration.sb_ratio_type             import SBratioType
+from madanalysis.enumeration.color_type                import ColorType
+from madanalysis.enumeration.report_format_type        import ReportFormatType
+from madanalysis.enumeration.normalize_type            import NormalizeType
+from madanalysis.enumeration.observable_type           import ObservableType
+from madanalysis.enumeration.graphic_render_type       import GraphicRenderType
+from madanalysis.enumeration.font_type                 import FontType
+from madanalysis.enumeration.script_type               import ScriptType
+from madanalysis.IOinterface.folder_writer             import FolderWriter
+from madanalysis.IOinterface.text_report               import TextReport
+from madanalysis.IOinterface.html_report_writer        import HTMLReportWriter
+from madanalysis.IOinterface.latex_report_writer       import LATEXReportWriter
+from madanalysis.IOinterface.histo_root_producer       import HistoRootProducer
+from madanalysis.IOinterface.histo_matplotlib_producer import HistoMatplotlibProducer
+from madanalysis.layout.cutflow                        import CutFlow
+from madanalysis.layout.plotflow                       import PlotFlow
+from madanalysis.layout.merging_plots                  import MergingPlots
+from madanalysis.selection.instance_name               import InstanceName
+from math                                              import log10, floor, ceil
 import os
 import shutil
 import logging
@@ -50,8 +52,8 @@ class Layout:
         self.input_path   = self.main.lastjob_name
         self.cutflow      = CutFlow(self.main)
         self.plotflow     = PlotFlow(self.main)
-        self.merging     = MergingPlots(self.main)
-
+        self.merging      = MergingPlots(self.main)
+        self.logger       = logging.getLogger('MA5')
 
     def Initialize(self):
 
@@ -144,17 +146,37 @@ class Layout:
                 string2=str(int(xerror))
             return string1 + " +/- " + string2
 
-    def DoPlots(self,mode,output_path):
 
-        if self.main.merging.enable:
-            self.merging.DrawAll(mode,output_path)
 
-        if self.main.selection.Nhistos==0:
-            return True
+    def DoPlots(self,histo_path,modes,output_paths):
 
-        self.plotflow.DrawAll(mode,output_path)
+        ListPlots = []
         
+        # Header plots
+        self.logger.debug('Producing scripts for header plots ...')
+        if self.main.merging.enable:
+            self.merging.DrawAll(histo_path,modes,output_paths,ListPlots)
+
+        # Selection plots
+        self.logger.debug('Producing scripts for selection plots ...')
+        if self.main.selection.Nhistos!=0:
+            self.plotflow.DrawAll(histo_path,modes,output_paths,ListPlots)
+
+        # Foot plots
+        self.logger.debug('Producing scripts for foot plots ...')
+        # to do
+
+        # Launching ROOT
+        if self.main.graphic_render==GraphicRenderType.ROOT:
+            producer=HistoRootProducer(histo_path,ListPlots)
+            producer.Execute()
+        elif self.main.graphic_render==GraphicRenderType.MATPLOTLIB:
+            producer=HistoMatplotlibProducer(histo_path,ListPlots)
+            producer.Execute()
+
+        # Ok
         return True
+
 
     def CopyLogo(self,mode,output_path):
         
@@ -165,7 +187,7 @@ class Layout:
 
         # Checking file presence
         if not os.path.isfile(filename):
-            logging.error("the image '" + \
+            self.logger.error("the image '" + \
                           filename + \
                           "' is not found.")
             return False
@@ -175,8 +197,8 @@ class Layout:
             shutil.copy(filename,output_path)
             return True
         except:
-            logging.error("Errors have occured during the copy of the file ")
-            logging.error(" "+filename)
+            self.logger.error("Errors have occured during the copy of the file ")
+            self.logger.error(" "+filename)
             return False
 
     def WriteDatasetTable(self,report,dataset):
@@ -434,19 +456,19 @@ class Layout:
         text.Reset()
         text.Add("How to compare signal (S) and background (B): ")
         text.SetColor(ColorType.BLUE)
-        text.Add(self.main.SBratio)
+        text.Add(self.main.fom.getFormula())
         text.SetColor(ColorType.BLACK)
         text.Add('.\n')
         report.WriteText(text)
         text.Reset()
 
-        text.Add("Associated uncertainty: ")
-        text.SetColor(ColorType.BLUE)
-        text.Add(self.main.SBerror)
-        text.SetColor(ColorType.BLACK)
-        text.Add('.\n')
-        report.WriteText(text)
-        text.Reset()
+#       text.Add("Associated uncertainty: ")
+#       text.SetColor(ColorType.BLUE)
+#       text.Add(self.main.SBerror)
+#       text.SetColor(ColorType.BLACK)
+#       text.Add('.\n')
+#       report.WriteText(text)
+#       text.Reset()
         report.CloseBullet()
 
         # Caption
@@ -818,20 +840,28 @@ class Layout:
         report.EndTable()    
 
 
+    def CreateFolders(self,histo_folder,output_paths,modes):
+
+        # Creating histo folder
+        if not FolderWriter.CreateDirectory(histo_folder,True):
+            return False
+
+        for ind in range(0,len(output_paths)):
+                         
+            # Creating production directory
+            if not FolderWriter.CreateDirectory(output_paths[ind],True):
+                return False
+
+            # Copying MA5 logo
+            if not self.CopyLogo(modes[ind],output_paths[ind]):
+                return False
+            
+        return True
+
+
     def GenerateReport(self,history,output_path,mode):
 
-        # Creating production directory
-        if not FolderWriter.CreateDirectory(output_path,True):
-            return False
-
-        if not self.CopyLogo(mode,output_path):
-            return False
-
-        # Draw plots
-        if not self.DoPlots(mode,output_path):
-            return
-        
- #       logging.info("     ** Computing cut efficiencies...")
+ #       self.logger.info("     ** Computing cut efficiencies...")
         #if not layout.DoEfficiencies():
         #    return
 
@@ -845,14 +875,17 @@ class Layout:
 
         # Defining report writing
         if mode == ReportFormatType.HTML:
-            report = HTMLReportWriter(output_path+"/index.html", self.pdffile)
+            mypdf=''
+            if self.pdffile!='':
+                mypdf=os.path.relpath(self.pdffile,output_path)
+            report = HTMLReportWriter(output_path+"/index.html",mypdf)
         elif mode == ReportFormatType.LATEX:
             report = LATEXReportWriter(output_path+"/main.tex",\
               self.main.archi_info.ma5dir+"/madanalysis/input",False)
         else :
             report = LATEXReportWriter(output_path+"/main.tex",\
               self.main.archi_info.ma5dir+"/madanalysis/input",True)
-                
+
         # Opening
         if not report.Open():
             return False
@@ -939,7 +972,8 @@ class Layout:
                     else:
                         title += " jet"
                     text.Add(title)
-                    report.WriteFigure(text,allnames[i][j])
+                    if self.main.graphic_render!=GraphicRenderType.NONE:
+                        report.WriteFigure(text,allnames[i][j])
 
         # Plots display
         if len(self.main.selection)!=0:
@@ -962,7 +996,8 @@ class Layout:
                     self.WriteStatisticsTable(ihisto,report)
                 else:
                     self.WriteStatisticsTablePID(ihisto,report)
-                report.WriteFigure(text,output_path +'/selection_'+str(ihisto))
+                if self.main.graphic_render!=GraphicRenderType.NONE:
+                    report.WriteFigure(text,output_path +'/selection_'+str(ihisto))
                 text.Add('\n\n')
                 report.WriteText(text)
                 text.Reset()
@@ -1015,27 +1050,27 @@ class Layout:
 
             name=os.path.normpath(output_path+'/main.dvi')
             if not os.path.isfile(name):
-                logging.error('DVI file cannot be produced')
-                logging.error('Please have a look to the log file '+output_path+'/latex.log')
+                self.logger.error('DVI file cannot be produced')
+                self.logger.error('Please have a look to the log file '+output_path+'/latex.log')
                 return False
             
             # Checking latex log : are there errors
             if not Layout.CheckLatexLog(output_path+'/latex.log'):
-                logging.error('some errors occured during LATEX compilation')
-                logging.error('for more details, have a look to the log file : '+output_path+'/latex.log')
+                self.logger.error('some errors occured during LATEX compilation')
+                self.logger.error('for more details, have a look to the log file : '+output_path+'/latex.log')
                 return False
                 
             # Converting DVI file to PDF file
-            if self.main.session_info.has_dvipdf:
-                logging.info("     -> Converting the DVI report to a PDF report.")
-                os.system('cd '+output_path+'; dvipdf main.dvi > dvipdf.log 2>&1')
-                name=os.path.normpath(output_path+'/main.pdf')
-
-                # Checking PDF file presence
-                if not os.path.isfile(name):
-                    logging.error('PDF file cannot be produced')
-                    logging.error('Please have a look to the log file '+output_path+'/dvipdf.log')
-                    return False
+#            if self.main.session_info.has_dvipdf:
+#                self.logger.info("     -> Converting the DVI report to a PDF report.")
+#                os.system('cd '+output_path+'; dvipdf main.dvi > dvipdf.log 2>&1')
+#                name=os.path.normpath(output_path+'/main.pdf')
+#
+#                # Checking PDF file presence
+#                if not os.path.isfile(name):
+#                    self.logger.error('PDF file cannot be produced')
+#                    self.logger.error('Please have a look to the log file '+output_path+'/dvipdf.log')
+#                    return False
                 
         # ---- PDFLATEX MODE ----
         elif mode==ReportFormatType.PDFLATEX:
@@ -1045,15 +1080,15 @@ class Layout:
 
             # Checking latex log : are there errors
             if not Layout.CheckLatexLog(output_path+'/latex.log'):
-                logging.error('some errors occured during LATEX compilation')
-                logging.error('for more details, have a look to the log file : '+output_path+'/latex.log')
+                self.logger.error('some errors occured during LATEX compilation')
+                self.logger.error('for more details, have a look to the log file : '+output_path+'/latex.log')
                 return False
             
             # Checking PDF file presence
             name=os.path.normpath(output_path+'/main.pdf')
             if not os.path.isfile(name):
-                logging.error('PDF file cannot be produced')
-                logging.error('Please have a look to the log file '+output_path+'/latex2.log')
+                self.logger.error('PDF file cannot be produced')
+                self.logger.error('Please have a look to the log file '+output_path+'/latex2.log')
                 return False
             
         

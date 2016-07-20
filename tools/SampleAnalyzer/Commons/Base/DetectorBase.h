@@ -25,15 +25,17 @@
 #ifndef DETECTOR_BASE_H
 #define DETECTOR_BASE_H
 
-//SampleAnalyser headers
-#include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
-#include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
 
 //STL headers
 #include <map>
 #include <string>
 #include <algorithm>
 #include <locale>
+
+//SampleAnalyser headers
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
+#include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
+#include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
 
 
 namespace MA5

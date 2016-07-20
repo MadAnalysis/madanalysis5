@@ -57,7 +57,7 @@ class SampleFormat
  private:
 
   std::string                 name_;      /// file name
-  ULong64_t                   nevents_;   /// number of events in the file
+  MAuint64                   nevents_;   /// number of events in the file
   MCSampleFormat  *           mc_;
   RecSampleFormat *           rec_;
   MA5GEN::GeneratorType       sample_generator_;
@@ -107,7 +107,7 @@ class SampleFormat
   { return name_; }
 
   /// Accessor to the number of events
-  const ULong64_t& nevents() const
+  const MAuint64& nevents() const
   { return nevents_; }
 
   /// Set the sample name
@@ -115,7 +115,7 @@ class SampleFormat
   {name_=name;}
 
   /// Set the number of events in the sample
-  void setNEvents(ULong64_t v)
+  void setNEvents(MAuint64 v)
   {nevents_=v;}
 
   /// Initialize MonteCarlo part

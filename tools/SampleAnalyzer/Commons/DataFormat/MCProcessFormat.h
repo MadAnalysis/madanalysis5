@@ -58,10 +58,10 @@ class ProcessFormat
   // -------------------------------------------------------------
  private:
 
-  Double_t xsectionMean_;    /// cross-section (pb)
-  Double_t xsectionError_;   /// statistical error on the cross-section
-  Double_t weightMax_;       /// maximum weight encountered in the events
-  UInt_t   processId_;       /// number identifying the process
+  MAfloat64 xsectionMean_;    /// cross-section (pb)
+  MAfloat64 xsectionError_;   /// statistical error on the cross-section
+  MAfloat64 weightMax_;       /// maximum weight encountered in the events
+  MAuint32   processId_;       /// number identifying the process
 
 
   // -------------------------------------------------------------
@@ -76,19 +76,19 @@ class ProcessFormat
   ~ProcessFormat() {}
 
   /// Accessor to the mean value of the process cross section
-  const Double_t&  xsection()      const {return xsectionMean_;  }
+  const MAfloat64&  xsection()      const {return xsectionMean_;  }
 
   /// Accessor to the mean value of the process cross section
-  const Double_t&  xsectionMean()  const {return xsectionMean_;  }
+  const MAfloat64&  xsectionMean()  const {return xsectionMean_;  }
 
   /// Accessor to the error value of the process cross section
-  const Double_t&  xsectionError() const {return xsectionError_; }
+  const MAfloat64&  xsectionError() const {return xsectionError_; }
 
   /// Accessor to the highest weight
-  const Double_t&  weightMax()     const {return weightMax_;     }
+  const MAfloat64&  weightMax()     const {return weightMax_;     }
 
   /// Accessor to the process identity
-  const UInt_t&   processId()      const {return processId_;     }
+  const MAuint32&   processId()      const {return processId_;     }
 
   /// Clearing all information
   void Reset()
