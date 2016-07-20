@@ -1,13 +1,20 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
-31  1.3.   (2016/03/01) ma5team:   - New structure for the PAD; automated recasting methods
+111  1.4    (2016/07/20) ma5team:   - Root is now optional and Pyroot is not a requirement anymore
+                                    - matplotlib can be used for the histograms
+                                    - Improvement of the plot layout
+                                    - Improvement of the recasting module + PAD
+                                    - Developments for the madGraph5 interface
+                                    - A few bug fixes
+
+109  1.3.   (2016/03/01) ma5team:   - New structure for the PAD; automated recasting methods
                                     - Compatiblity with delphes 3.3
                                     - Several system-dependent bug fixes
                                     - Bug fixes: selections, report writer
                                     - Development: new observables, better debugging mode, Delphes3 handling
                                          pythia8 compatiblitity for the merging plots
 
-133  1.2    (2015/10/28) ma5team:   - Bug fixes (LHE writer, HepMC reader, merging plots, etc.)
+ 91  1.2    (2015/10/28) ma5team:   - Bug fixes (LHE writer, HepMC reader, merging plots, etc.)
                                     - PAD features
 
  82  1.1.11 (2014/07/17) ma5team:   - new structure for the detection of the user system
