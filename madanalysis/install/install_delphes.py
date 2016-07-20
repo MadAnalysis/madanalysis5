@@ -144,6 +144,15 @@ class InstallDelphes:
             return False
         if not self.UpdateDictionnary(filesToAdd):
             return False
+
+        # Updating Makefile
+        filename = self.installdir+'/Makefile'
+        self.logger.debug('Updating files '+filename+ ': no CMSSW\n')
+        self.SwitchOffCMSSW(filename)
+        
+        filename = self.installdir+'/doc/genMakefile.tcl'
+        self.logger.debug('Updating files '+filename+ ': no CMSSW\n')
+        self.SwitchOffCMSSW(filename)
         
         # Ok
         return True
@@ -170,7 +179,7 @@ class InstallDelphes:
         return ok
 
         
-    def Build(self):
+    def BuildOld(self):
 
         # Input
         theCommands=['make','ClassesDict_rdict.pcm','ExRootAnalysisDict_rdict.pcm', 'ModulesDict_rdict.pcm', 'FastJetDict_rdict.pcm']
@@ -233,6 +242,24 @@ class InstallDelphes:
         # Input
         theCommands=['make','DelphesHepMC']
         logname=os.path.normpath(self.installdir+'/compilation_HepMC.log')
+        # Execute
+        self.logger.debug('shell command: '+' '.join(theCommands))
+        ok, out= ShellCommand.ExecuteWithLog(theCommands,\
+                                             logname,\
+                                             self.installdir,\
+                                             silent=False)
+        # return result
+        if not ok:
+            self.logger.error('impossible to build the project. For more details, see the log file:')
+            self.logger.error(logname)
+        return ok
+
+
+    def Build(self):
+
+        # Input
+        theCommands=['make']
+        logname=os.path.normpath(self.installdir+'/compilation.log')
         # Execute
         self.logger.debug('shell command: '+' '.join(theCommands))
         ok, out= ShellCommand.ExecuteWithLog(theCommands,\
@@ -339,6 +366,38 @@ class InstallDelphes:
         return True
 
             
+    def SwitchOffCMSSW(self,filename):
+        # open input file
+        try:
+            input = open(filename)
+        except:
+            self.logger.error("impossible to read the file:" + filename)
+            return False
+
+        # open output file
+        try:
+            output = open(filename+'.savema5','w')
+        except:
+            self.logger.error("impossible to read the file:" + filename+'.savema5')
+            return False
+
+        # lines
+        for line in input:
+            output.write(line.replace('HAS_CMSSW = true','HAS_CMSSW = false'))
+
+        #close
+        input.close()
+        output.close()
+
+        try:
+            shutil.copy(filename+'.savema5',filename)
+        except:
+            self.logger.error("impossible to copy "+filename+'.savema5 in '+filename)
+            return False
+
+        return True
+
+
     def CopyFiles(self,filesToAdd):
 
         for file in filesToAdd:
