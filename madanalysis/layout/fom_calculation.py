@@ -32,39 +32,56 @@ class FomCalculation:
         self.formula = main.fom.formula
         self.x       = main.fom.x
 
-    def Compute(self,S,ES,B,EB):
+    def Compute(self,s,es,b,eb):
 
         # Initialization
         value = Measure()
 
+        # Converting in floating value
+        S=float(s)
+        B=float(b)
+        ES=float(es)
+        EB=float(eb)
+        
         # Mean value
-        if self.formula==1:
-            value.mean = float(S)/float(B)
-        elif self.formula==2:
-            value.mean = float(S)/sqrt(B)
-        elif self.formula==3:
-            value.mean = float(S)/float(S+B)
-        elif self.formula==4:
-            value.mean = float(S)/sqrt(S+B)
-        elif self.formula==5:
-            value.mean = float(S)/sqrt(S+B+(self.x*B)**2)
+        try:
+            if self.formula==1:
+                value.mean = S/B
+            elif self.formula==2:
+                value.mean = S/sqrt(B)
+            elif self.formula==3:
+                value.mean = S/(S+B)
+            elif self.formula==4:
+                value.mean = S/sqrt(S+B)
+            elif self.formula==5:
+                value.mean = S/sqrt(S+B+(self.x*B)**2)
+        except ZeroDivisionError:  # division by 0
+            value.mean=-1
+        except ValueError: # negative sqrt
+            value.mean=-1
 
         # Error value
-        if self.formula==1:
-            value.error = 1./(B**2)*\
-                          sqrt(B**2*ES**2+S**2*EB**2)
-        elif self.formula==2:
-            value.error = 1./(S+B)**2*\
-                          sqrt(B**2*ES**2+S**2*EB**2)
-        elif self.formula==3:
-            value.error = 1./(2*pow(B,3./2.))*\
-                          sqrt((2*B)**2*ES**2+S**2*EB**2)
-        elif self.formula==4:
-            value.error = 1./(2*pow(S+B,3./2.))*\
-                          sqrt((S+2*B)**2*ES**2+S**2*EB**2)
-        elif self.formula==5:
-            value.error = 1./(2*pow(S+B+self.x*B**2,3./2.))*\
-                          sqrt((S+2*B+2*self.x*B**2)**2*ES**2+S**2*(2*self.x*B+1)**2*EB**2)
+        try:
+            if self.formula==1:
+                value.error = 1./(B**2)*\
+                              sqrt(B**2*ES**2+S**2*EB**2)
+            elif self.formula==2:
+                value.error = 1./(S+B)**2*\
+                              sqrt(B**2*ES**2+S**2*EB**2)
+            elif self.formula==3:
+                value.error = 1./(2*pow(B,3./2.))*\
+                              sqrt((2*B)**2*ES**2+S**2*EB**2)
+            elif self.formula==4:
+                value.error = 1./(2*pow(S+B,3./2.))*\
+                              sqrt((S+2*B)**2*ES**2+S**2*EB**2)
+            elif self.formula==5:
+                value.error = 1./(2*pow(S+B+self.x*B**2,3./2.))*\
+                             sqrt((S+2*B+2*self.x*B**2)**2*ES**2+S**2*(2*self.x*B+1)**2*EB**2)
+
+        except ZeroDivisionError: # division by 0
+            value.mean=-1
+        except ValueError: # negative sqrt
+            value.mean=-1
 
         return value
 
