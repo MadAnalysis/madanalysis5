@@ -191,6 +191,9 @@ class MA5Interpreter(Interpreter):
         self.main.ResetParameters()
         self.history=[]
 
+        # Graphical mode
+        self.main.AutoSetGraphicalRenderer()
+
         # observables
         self.main.InitObservables(self.main.mode)
 
@@ -227,6 +230,8 @@ class MA5Interpreter(Interpreter):
         self.main.ResetParameters()
         self.history=[]
 
+        # Graphical mode
+        self.main.AutoSetGraphicalRenderer()
 
         # observables
         self.main.InitObservables(self.main.mode)

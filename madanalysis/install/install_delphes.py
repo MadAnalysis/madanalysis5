@@ -499,7 +499,8 @@ class InstallDelphes:
 
             ToRemove=[ 'Makefile_delphes','compilation_delphes.log','linking_delphes.log','cleanup_delphes.log']
             for myfile in ToRemove:
-                os.remove(os.path.normpath(self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/'+myfile))
+                if os.path.isfile(os.path.normpath(self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/'+myfile)):
+                    os.remove(os.path.normpath(self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/'+myfile))
             self.main.archi_info.has_delphes = False
             self.main.archi_info.delphes_priority = False
             self.main.archi_info.delphes_lib_paths = []

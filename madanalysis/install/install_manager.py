@@ -66,9 +66,6 @@ class InstallManager():
         elif package=='numpy':
             from madanalysis.install.install_numpy import InstallNumpy
             installer=InstallNumpy(self.main)
-        elif package=='recastingtools':
-            from madanalysis.install.install_recastingtools import InstallRecastingTools
-            installer=InstallRecastingTools(self.main)
         elif package=='padforma5tune':
             from madanalysis.install.install_padma5tune import InstallPadForMA5tune
             installer=InstallPadForMA5tune(self.main)

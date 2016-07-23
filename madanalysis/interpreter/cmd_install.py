@@ -151,9 +151,6 @@ class CmdInstall(CmdBase):
         elif args[0]=='numpy':
             installer=InstallManager(self.main)
             return installer.Execute('numpy')
-        elif args[0]=='RecastingTools':
-            installer=InstallManager(self.main)
-            return installer.Execute('RecastingTools')
         elif args[0]=='PADForMA5tune':
             installer=InstallManager(self.main)
             if inst_ma5tune(self.main,installer,True):
@@ -176,7 +173,7 @@ class CmdInstall(CmdBase):
     def help(self):
         self.logger.info("   Syntax: install <component>")
         self.logger.info("   Download and install a MadAnalysis component from the official site.")
-        self.logger.info("   List of available components: samples zlib fastjet delphes delphesMA5tune RecastingTools PAD PADForMA5tune")
+        self.logger.info("   List of available components: samples zlib fastjet delphes delphesMA5tune PAD PADForMA5tune")
 
 
     def complete(self,text,args,begidx,endidx):
@@ -189,7 +186,7 @@ class CmdInstall(CmdBase):
             return []
         else:
             output = ["samples","zlib","fastjet", "delphes", "delphesMA5tune",\
-                "gnuplot", "matplotlib", "root" , "numpy", "RecastingTools", "PAD", "PADForMA5tune"]
+                "gnuplot", "matplotlib", "root" , "numpy", "PAD", "PADForMA5tune"]
             return self.finalize_complete(text,output)
 
 

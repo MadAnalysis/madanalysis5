@@ -314,7 +314,8 @@ class InstallDelphesMA5tune:
 
             ToRemove=[ 'Makefile_delphesMA5tune','compilation_delphesMA5tune.log','linking_delphesMA5tune.log','cleanup_delphesMA5tune.log']
             for myfile in ToRemove:
-                os.remove(os.path.normpath(self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/'+myfile))
+                if os.path.isfile(os.path.normpath(self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/'+myfile)):
+                    os.remove(os.path.normpath(self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/'+myfile))
             self.main.archi_info.has_delphesMA5tune = False
             self.main.archi_info.delphesMA5tune_priority = False
             self.main.archi_info.delphesMA5tune_lib_paths = []
