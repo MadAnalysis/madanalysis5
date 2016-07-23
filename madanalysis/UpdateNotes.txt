@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+114  1.5      (2016/07/23) fuks:    Fixing the root detection with the delphes activation methods 
+
 111  1.4    (2016/07/20) ma5team:   - Root is now optional and Pyroot is not a requirement anymore
                                     - matplotlib can be used for the histograms
                                     - Improvement of the plot layout

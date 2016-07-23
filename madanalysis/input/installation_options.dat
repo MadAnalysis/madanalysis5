@@ -12,7 +12,7 @@
 # root_bin_path = /home/toto/root/bin
 
 # -----MATPLOTLIB-----
-#matplotlib_veto = 0 # 0=No, 1=Yes
+# matplotlib_veto = 0 # 0=No, 1=Yes
 
 # -----DELPHES----- 
 # delphes_veto     = 0 # 0=No, 1=Yes
