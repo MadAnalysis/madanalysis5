@@ -368,7 +368,7 @@ class RecastConfiguration:
             tunefile.close()
         usercard = open(self.card_path)
         for line in usercard:
-            if len(line)==0:
+            if len(line.strip())==0:
                 continue
             if line.lstrip()[0]=='#':
                 continue
@@ -537,9 +537,9 @@ class RecastConfiguration:
         self.delphesruns=[]
         runcard = open(recastcard,'r')
         for line in runcard:
-            if len(line)==0:
+            if len(line.strip())==0:
                 continue
-            if line.lstrip()[0]=='#':
+            if line.strip().startswith('#'):
                 continue
             myline=line.split()
             if myline[2].lower() =='on' and myline[3] not in self.delphesruns:
@@ -550,9 +550,9 @@ class RecastConfiguration:
         self.analysisruns=[]
         runcard = open(recastcard,'r')
         for line in runcard:
-            if len(line)==0:
+            if len(line.strip())==0:
                 continue
-            if line.lstrip()[0]=='#':
+            if line.strip().startswith('#'):
                 continue
             myline=line.split()
             if myline[2].lower() =='on':
