@@ -76,6 +76,9 @@ def CLs(NumObserved, ExpectedBG, BGError, SigHypothesis, NumToyExperiments):
 
     # Toy MC for background+signal
     ExpectedBGandS = [expectedbg + SigHypothesis for expectedbg in ExpectedBGs]
+    ExpectedBGandS = [x for x in ExpectedBGandS if x > 0]
+    if len(ExpectedBGandS)==0:
+        return 0.
     ToyBplusS = scipy.stats.poisson.rvs(ExpectedBGandS)
     ToyBplusS = map(float, ToyBplusS)
 
@@ -671,13 +674,13 @@ class RecastConfiguration:
                 nobs    = regiondata[reg]["nb"]
             deltanb = regiondata[reg]["deltanb"]
             def GetSig95(xsection):
-                if regiondata[reg]["Nf"]==0:
+                if regiondata[reg]["Nf"]<=0:
                     return 0
                 nsignal=xsection * lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
                 return CLs(nobs,nb,deltanb,nsignal,self.CLs_numofexps)-0.95
             nslow = lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
             nshig = lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
-            if nslow == 0 and nshig == 0:
+            if nslow <= 0 and nshig <= 0:
                 if tag == "obs":
                     regiondata[reg]["s95obs"]="-1"
                 elif tag == "exp":
@@ -686,13 +689,13 @@ class RecastConfiguration:
             low = 1.
             hig = 1.
             while CLs(nobs,nb,deltanb,nslow,self.CLs_numofexps)>0.95:
-              self.logger.debug('region ' + reg + ', lower bound = ' + str(low))
-              nslow=nslow*0.1
-              low  =  low*0.1
+                self.logger.debug('region ' + reg + ', lower bound = ' + str(low))
+                nslow=nslow*0.1
+                low  =  low*0.1
             while CLs(nobs,nb,deltanb,nshig,self.CLs_numofexps)<0.95:
-              self.logger.debug('region ' + reg + ', upper bound = ' + str(hig))
-              nshig=nshig*10.
-              hig  =  hig*10.
+                self.logger.debug('region ' + reg + ', upper bound = ' + str(hig))
+                nshig=nshig*10.
+                hig  =  hig*10.
             ## testing whether scipy is there
             try:
                 import scipy.stats
@@ -700,7 +703,10 @@ class RecastConfiguration:
                 self.logger.warning('scipy is not installed... the CLs module cannot be used.')
                 self.logger.warning('Please install scipy.')
                 return False
-            s95 = scipy.optimize.brentq(GetSig95,low,hig)
+            try:
+                s95 = scipy.optimize.brentq(GetSig95,low,hig,xtol=low/100.)
+            except:
+                s95=-1
             self.logger.debug('region ' + reg + ', s95 = ' + str(s95) + ' pb')
             if tag == "obs":
                 regiondata[reg]["s95obs"]= ("%.7f" % s95)
@@ -717,7 +723,7 @@ class RecastConfiguration:
             nb      = regiondata[reg]["nb"]
             nobs    = regiondata[reg]["nobs"]
             deltanb = regiondata[reg]["deltanb"]
-            if nsignal==0:
+            if nsignal<=0:
                 rSR   = -1
                 myCLs = 0
             else:
@@ -739,6 +745,8 @@ class RecastConfiguration:
     def WriteCLs(self, dirname, analysis, regions,regiondata, summary, xsflag):
         for reg in regions:
             eff    = (regiondata[reg]["Nf"] / regiondata[reg]["N0"])
+            if eff < 0:
+                eff = 0
             stat   = (math.sqrt(eff*(1-eff)/regiondata[reg]["N0"]))
             syst   = 0.
             myeff  = "%.7f" % eff
@@ -809,7 +817,7 @@ class RecastConfiguration:
             if regiondata==-1:
                 self.logger.warning('Info file for '+analysis+' corrupted. Skipping the CLs calculation.')
                 return False
-            ## performing the alculation
+            ## performing the calculation
             regiondata=self.ComputesigCLs(regiondata,regions,lumi,"exp")
             regiondata=self.ComputesigCLs(regiondata,regions,lumi,"obs")
             xsflag=True
