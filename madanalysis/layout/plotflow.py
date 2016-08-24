@@ -290,19 +290,13 @@ class PlotFlow:
                           ','+str(histos[ind].summary.overflow*scales[ind])+'); // overflow\n')
             outputC.write('  '+histoname+'->SetEntries('+str(nentries)+');\n')
 
-            # linecolor
-            if self.main.datasets[ind].linecolor!=ColorType.AUTO:
-                colorline=ColorType.convert2root( \
-                          self.main.datasets[ind].linecolor,\
-                          self.main.datasets[ind].lineshade)
-
             # reset
             linecolor=0
             linestyle=0
             backcolor=0
             backstyle=0
             linewidth=1
-            
+
             # Setting AUTO settings
             if len(histos)==1:
                 linecolor1 = [9]
@@ -377,6 +371,12 @@ class PlotFlow:
             else:
                 linecolor=self.color
                 self.color += 1
+
+            # linecolor
+            if self.main.datasets[ind].linecolor!=ColorType.AUTO:
+                linecolor=ColorType.convert2root( \
+                          self.main.datasets[ind].linecolor,\
+                          self.main.datasets[ind].lineshade)
 
             # lineStyle
             linestyle=LineStyleType.convert2code(self.main.datasets[ind].linestyle)

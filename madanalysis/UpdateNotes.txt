@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+119  1.5.5    (2016/08/24) fuks:    Small bug with the colors 
+
 118  1.5.4    (2016/07/24) fuks:    Fixing bugs in the recasting module when negative weights are around 
 
 117  1.5.3    (2016/07/24) fuks:    Fixing a few bug in the recasting module (reading of the recasting 

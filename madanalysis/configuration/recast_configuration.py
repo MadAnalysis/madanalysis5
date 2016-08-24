@@ -51,8 +51,8 @@ def CLs(NumObserved, ExpectedBG, BGError, SigHypothesis, NumToyExperiments):
     try:
         import scipy.stats
     except ImportError:
-        self.logger.warning('scipy is not installed... the CLs module cannot be used.')
-        self.logger.warning('Please install scipy.')
+        logging.getLogger('MA5').warning('scipy is not installed... the CLs module cannot be used.')
+        logging.getLogger('MA5').warning('Please install scipy.')
         return False
     # generate a set of expected-number-of-background-events, one for each toy
     # experiment, distributed according to a Gaussian with the specified mean
