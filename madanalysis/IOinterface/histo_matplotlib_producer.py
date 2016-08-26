@@ -27,6 +27,7 @@ from shell_command                            import ShellCommand
 import logging
 import shutil
 import os
+import sys
 import commands
 
 class HistoMatplotlibProducer():
