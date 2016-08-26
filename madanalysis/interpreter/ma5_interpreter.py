@@ -132,6 +132,7 @@ class MA5Interpreter(Interpreter):
         if not main.CheckConfig(debug=(LoggerLevel<=logging.DEBUG)):
             raise MA5Configuration('Issue with the configuration')
         self.ma5_environ = dict(os.environ)
+        main.madgraph.has_root = main.archi_info.has_root
 
         # Initializing the interpreter and compiling if needed
         Interpreter.__init__(self, main, *args, **opts)

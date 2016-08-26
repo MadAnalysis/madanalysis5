@@ -36,6 +36,7 @@ class MadGraphInterface():
         self.invisible_particles = []
         self.invisible_pdgs = []
         self.recastinfo = RecastConfiguration()
+        self.has_root = True
 
     class InvalidCard(Exception):
         pass
@@ -119,15 +120,22 @@ class MadGraphInterface():
         self.card.append('set main.fastsim.tau_id.efficiency = 1.0')
         self.card.append('set main.fastsim.tau_id.misid_ljet = 0.0')
 
-        self.card.append('\n# Reconstruction using Delphes')
-        self.card.append('@MG5aMC reconstruction_name = CMSReco')
-        self.card.append('@MG5aMC reco_output = root')
-        self.card.append('set main.fastsim.package  = delphes')
-        self.card.append('set main.fastsim.detector = cms-ma5tune')
+        if self.has_root:
+            self.card.append('\n# Reconstruction using Delphes')
+            self.card.append('@MG5aMC reconstruction_name = CMSReco')
+            self.card.append('@MG5aMC reco_output = root')
+            self.card.append('set main.fastsim.package  = delphes')
+            self.card.append('set main.fastsim.detector = cms-ma5tune')
 
-        self.card.append('\n# Analysis using both reco')
-        self.card.append('@MG5aMC analysis_name = analysis1')
-        self.card.append('@MG5aMC set_reconstructions = [\'BasicReco\', \'CMSReco\']')
+
+        if self.has_root:
+            self.card.append('\n# Analysis using both reco')
+            self.card.append('@MG5aMC analysis_name = analysis1')
+            self.card.append('@MG5aMC set_reconstructions = [\'BasicReco\', \'CMSReco\']')
+        else:
+            self.card.append('\n# Analysis using the fastjet reco')
+            self.card.append('@MG5aMC analysis_name = analysis1')
+            self.card.append('@MG5aMC set_reconstructions = [\'BasicReco\']')
         self.card.append('# object definition')
         self.card.append('define e = e+ e-')
         self.card.append('define mu = mu+ mu-')
@@ -223,22 +231,23 @@ class MadGraphInterface():
                     self.card.append('plot DELTAR('+','.join(perm)+') 40 0 10 [logY]')
 
         # recasting
-        self.card.append('\n# Recasting')
-        self.card.append('@MG5aMC recasting_commands')
-        self.card.append('set main.recast = on')
-        self.card.append('set main.recast.store_root = False')
-        self.card.append('@MG5aMC recasting_card')
-        self.card.append('# Uncomment the analyses to run')
-        self.card.append('# Delphes cards must be located in the PAD(ForMA5tune) directory')
-        self.card.append('# Switches must be on or off')
-        self.card.append('# AnalysisName               PADType    Switch     DelphesCard')
-        ma5dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),os.pardir,os.pardir))
-        tmp = self.recastinfo.CreateMyCard(os.path.normpath(os.path.join(ma5dir,'PAD')),"PAD",False)
-        tmp = ['# '+x for x in tmp]
-        self.card+= tmp
-        tmp = self.recastinfo.CreateMyCard(os.path.normpath(os.path.join(ma5dir,'PAD')),"PADForMA5tune",False)
-        tmp = ['# '+x for x in tmp]
-        self.card+= tmp
+        if self.has_root:
+            self.card.append('\n# Recasting')
+            self.card.append('@MG5aMC recasting_commands')
+            self.card.append('set main.recast = on')
+            self.card.append('set main.recast.store_root = False')
+            self.card.append('@MG5aMC recasting_card')
+            self.card.append('# Uncomment the analyses to run')
+            self.card.append('# Delphes cards must be located in the PAD(ForMA5tune) directory')
+            self.card.append('# Switches must be on or off')
+            self.card.append('# AnalysisName               PADType    Switch     DelphesCard')
+            ma5dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),os.pardir,os.pardir))
+            tmp = self.recastinfo.CreateMyCard(os.path.normpath(os.path.join(ma5dir,'PAD')),"PAD",False)
+            tmp = ['# '+x for x in tmp]
+            self.card+= tmp
+            tmp = self.recastinfo.CreateMyCard(os.path.normpath(os.path.join(ma5dir,'PAD')),"PADForMA5tune",False)
+            tmp = ['# '+x for x in tmp]
+            self.card+= tmp
 
         # output
         return '\n'.join(self.card)

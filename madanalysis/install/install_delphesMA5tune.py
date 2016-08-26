@@ -123,7 +123,7 @@ class InstallDelphesMA5tune:
             return False
         # Applying the patch
         logname = os.path.normpath(self.installdir+'/patch.log')
-        theCommands=['python','patch.py']
+        theCommands=[sys.executable,'patch.py']
         self.logger.debug('shell command: '+' '.join(theCommands))
         ok, out= ShellCommand.ExecuteWithLog(theCommands,\
                                              logname,\

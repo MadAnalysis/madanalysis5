@@ -46,11 +46,19 @@ class InstallManager():
             from madanalysis.install.install_fastjetcontrib import InstallFastjetContrib
             installer=InstallFastjetContrib(self.main)
         elif package=='delphes':
-            from madanalysis.install.install_delphes import InstallDelphes
-            installer=InstallDelphes(self.main)
+            if self.main.archi_info.has_root:
+                from madanalysis.install.install_delphes import InstallDelphes
+                installer=InstallDelphes(self.main)
+            else:
+                self.logger.warning('the package "'+rawpackage+'" cannot be installed without root; installation skipped')
+                return True
         elif package=='delphesma5tune':
-            from madanalysis.install.install_delphesMA5tune import InstallDelphesMA5tune
-            installer=InstallDelphesMA5tune(self.main)
+            if self.main.archi_info.has_root:
+                from madanalysis.install.install_delphesMA5tune import InstallDelphesMA5tune
+                installer=InstallDelphesMA5tune(self.main)
+            else:
+                self.logger.warning('the package "'+rawpackage+'" cannot be installed without root; installation skipped')
+                return True
         elif package=='samples':
             from madanalysis.install.install_samples import InstallSamples
             installer=InstallSamples(self.main)
@@ -67,11 +75,19 @@ class InstallManager():
             from madanalysis.install.install_numpy import InstallNumpy
             installer=InstallNumpy(self.main)
         elif package=='padforma5tune':
-            from madanalysis.install.install_padma5tune import InstallPadForMA5tune
-            installer=InstallPadForMA5tune(self.main)
+            if self.main.archi_info.has_root:
+                from madanalysis.install.install_padma5tune import InstallPadForMA5tune
+                installer=InstallPadForMA5tune(self.main)
+            else:
+                self.logger.warning('the package "'+rawpackage+'" cannot be installed without root; installation skipped')
+                return True
         elif package=='pad':
-            from madanalysis.install.install_pad import InstallPad
-            installer=InstallPad(self.main)
+            if self.main.archi_info.has_root:
+                from madanalysis.install.install_pad import InstallPad
+                installer=InstallPad(self.main)
+            else:
+                self.logger.warning('the package "'+rawpackage+'" cannot be installed without root; installation skipped')
+                return True
         else:
             self.logger.error('the package "'+rawpackage+'" is unknown')
             return False

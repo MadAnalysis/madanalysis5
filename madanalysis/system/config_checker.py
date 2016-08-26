@@ -155,6 +155,7 @@ class ConfigChecker:
 
         # Which python
         if self.debug:
+            self.logger.debug("  sys.executable:         " + str(sys.executable))
             result = ShellCommand.Which('python',all=False,mute=True)
             if len(result)==0:
                 self.PrintFAIL(package_name,warning=False)

@@ -41,7 +41,7 @@ class InstallPad:
         self.delphesdir  = self.installdir + "/Input/Cards"
         self.untardir    = ""
         self.ncores      = 1
-        self.analyses    = ["CMS_B2G_12_012", "cms_b2g_12_022", "cms_b2g_14_004", "cms_exo_12_048", "cms_exo_12_047", "ATLAS_EXOT_2014_06", "ATLAS_1604_07773"]
+        self.analyses    = ["CMS_B2G_12_012", "cms_b2g_12_022", "cms_b2g_14_004", "cms_exo_12_048", "cms_exo_12_047", "ATLAS_EXOT_2014_06", "ATLAS_1604_07773", "atlas_1605_03814"]
         self.files = {
           "CMS_B2G_12_012.cpp" : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.cpp",
           "CMS_B2G_12_012.h"   : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.h",
@@ -67,7 +67,10 @@ class InstallPad:
           "cms_b2g_12_022.info"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_12_022.info",
           "ATLAS_1604_07773.cpp"  : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_1604_07773.cpp",
           "ATLAS_1604_07773.h"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_1604_07773.h",
-          "ATLAS_1604_07773.info" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_1604_07773.info"
+          "ATLAS_1604_07773.info" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_1604_07773.info",
+          "atlas_1605_03814.cpp"  : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/atlas_1605_03814.cpp",
+          "atlas_1605_03814.h"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/atlas_1605_03814.h",
+          "atlas_1605_03814.info" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/atlas_1605_03814.info"
         }
 
         self.delphescards = {

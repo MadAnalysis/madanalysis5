@@ -263,6 +263,7 @@ class PlotFlow:
             outputC.write('\n')
 
         # Loop over datasets and histos
+        ntot = 0
         for ind in range(0,len(histos)):
 
             # Creating TH1F
@@ -283,6 +284,7 @@ class PlotFlow:
             outputC.write('  '+histoname+'->SetBinContent(0'+\
                           ','+str(histos[ind].summary.underflow*scales[ind])+'); // underflow\n')
             for bin in range(1,xnbin+1):
+                ntot+= histos[ind].summary.array[bin-1]*scales[ind]
                 outputC.write('  '+histoname+'->SetBinContent('+str(bin)+\
                               ','+str(histos[ind].summary.array[bin-1]*scales[ind])+');\n')
             nentries=histos[ind].summary.nentries
@@ -412,10 +414,8 @@ class PlotFlow:
         PlotFlow.counter+=1
         outputC.write('  THStack* stack = new THStack("mystack_'+str(PlotFlow.counter)+'","mystack");\n')
         # Loop over datasets and histos
-        ntot = 0
         for ind in range(0,len(histos)):
             histoname=histos[ind].name+'_'+str(ind)
-            ntot+=histos[ind].summary.integral
             outputC.write('  stack->Add('+histoname+');\n')
 
         drawoptions=[]
@@ -619,13 +619,13 @@ class PlotFlow:
         for ind in range(0,len(histos)):
 
             # Ntot
-            ntot+=histos[ind].summary.integral
 
             # Creating a new histo
             histoname=histos[ind].name+'_'+str(ind)
             outputPy.write('    # Creating weights for histo: '+histoname+'\n')
             outputPy.write('    '+histoname+'_weights = numpy.array([')
             for bin in range(1,xnbin+1):
+                ntot+=histos[ind].summary.array[bin-1]*scales[ind]
                 if bin!=1:
                     outputPy.write(',')
                 outputPy.write(str(histos[ind].summary.array[bin-1]*scales[ind]))
@@ -786,9 +786,10 @@ class PlotFlow:
                                'x=xData, '+\
                                'bins=xBinning, '+\
                                'weights='+myweights+',\\\n'+\
-                               '             label='+mytitle+', '+\
-                               'histtype='+filledmode+', '+\
-                               'rwidth='+str(rWidth)+',\\\n'+\
+                               '             label='+mytitle+', ')
+            if ntot!=0:
+                outputPy.write('histtype='+filledmode+', ')
+            outputPy.write(    'rwidth='+str(rWidth)+',\\\n'+\
                                '             color='+mybackcolor+', '+\
                                'edgecolor='+mylinecolor+', '+\
                                'linewidth='+str(mylinewidth)+', '+\
@@ -874,11 +875,12 @@ class PlotFlow:
             outputPy.write('])\n')
             outputPy.write('    plt.xticks(xData, xLabels, rotation="vertical")\n')
             outputPy.write('\n')
-        
+
+### BENJ: not necessary for getting the png and pdf files
         # Draw
-        outputPy.write('    # Draw\n')
-        outputPy.write('    plt.show()\n')
-        outputPy.write('\n')
+#        outputPy.write('    # Draw\n')
+#        outputPy.write('    plt.show()\n')
+#        outputPy.write('\n')
 
         # Legend
         if legendmode:

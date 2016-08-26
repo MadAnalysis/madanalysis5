@@ -119,7 +119,7 @@ class RecastConfiguration:
           "delphes_card_atlas_sus_2013_04.tcl": ["atlas_susy_2013_04"] ,
           "delphes_card_cms_b2g_12_012.tcl":    ["CMS_B2G_12_012", "cms_exo_12_047", "cms_exo_12_048"],
           "delphes_card_cms_b2g_14_004.tcl":    ["cms_b2g_12_022", "cms_b2g_14_004"],
-          "delphes_card_ATLAS_1604_07773.tcl": ["ATLAS_1604_07773"]
+          "delphes_card_ATLAS_1604_07773.tcl": ["ATLAS_1604_07773", "atlas_1605_03814"]
         }
 
         self.description = {
@@ -132,6 +132,7 @@ class RecastConfiguration:
           "atlas_higg_2013_03"     : "ATLAS - 8 TeV - ZH to invisible + 2 leptons",
           "ATLAS_EXOT_2014_06"     : "ATLAS - 8 TeV - monophoton",
           "ATLAS_1604_07773"       : "ATLAS - 13 TeV - monojet",
+          "atlas_1605_03814"       : "ATLAS - 13 TeV - multijet (2-6 jets) + met",
           "cms_sus_13_012"         : "CMS   - 8 TeV - squark-gluino - MET/MHT",
           "cms_sus_13_016"         : "CMS   - 8 TeV - gluinos - 2 leptons + bjets + met",
           "cms_sus_14_001_monojet" : "CMS   - 8 TeV - stop - the monojet channel",

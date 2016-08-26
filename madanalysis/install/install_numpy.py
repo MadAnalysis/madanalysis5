@@ -96,7 +96,7 @@ class InstallNumpy:
 
     def Build(self):
         # Input
-        theCommands=['python','setup.py','build']
+        theCommands=[sys.executable,'setup.py','build']
         logname=os.path.normpath(self.installdir+'/compilation.log')
         # Execute
         logging.debug('shell command: '+' '.join(theCommands))
