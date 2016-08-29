@@ -130,6 +130,7 @@ class PlotFlow:
     @staticmethod
     def NiceTitleMatplotlib(text):
         text=PlotFlow.NiceTitle(text)
+        text=text.replace('#DeltaR','#Delta R')
         text='$'+text.replace('#','\\\\')+'$'
         return text
 
