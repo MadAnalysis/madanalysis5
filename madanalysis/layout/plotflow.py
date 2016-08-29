@@ -131,7 +131,7 @@ class PlotFlow:
     def NiceTitleMatplotlib(text):
         text=PlotFlow.NiceTitle(text)
         text='$'+text.replace('#','\\\\')+'$'
-        return newtext
+        return text
 
 
     def DrawAll(self,histo_path,modes,output_paths,ListROOTplots):
@@ -810,7 +810,7 @@ class PlotFlow:
 
         # X-axis
         if ref.titleX=="": 
-            axis_titleX = ref.GetXaxis()
+            axis_titleX = ref.GetXaxis_Root()
         else:
             axis_titleX = ref.titleX
         axis_titleX = PlotFlow.NiceTitleMatplotlib(axis_titleX)

@@ -120,7 +120,7 @@ class UserInfo:
             newone = pickle.load(file)
             test=True
         except:
-            self.logger.error("error occured during reading data from "+filename)
+            self.logger.warning("error occured during reading data from "+filename)
             test=False
 
         # Close the file
