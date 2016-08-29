@@ -205,13 +205,8 @@ class MakefileWriter():
 
         # Compilers
         file.write('# Compilers\n')
-        if archi_info.has_root:
-            mycommand = [archi_info.ma5dir+'/tools/SampleAnalyzer/ExternalSymLink/Bin/root-config','--cxx']
-            ok, out, err = ShellCommand.ExecuteWithCapture(mycommand,'./')
-            if not ok:
-                return False
-            out=out.lstrip()
-            file.write('CXX = '+out+'\n')
+        if archi_info.has_root and archi_info.root_compiler!='':
+            file.write('CXX = '+archi_info.root_compiler+'\n')
         else:
             file.write('CXX = g++\n')
         file.write('\n')

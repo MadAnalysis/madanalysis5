@@ -49,6 +49,7 @@ class DetectRoot:
         self.lib_path  = ''
         self.libraries = {}
         self.features  = []
+        self.compiler  = ''
         self.logger    = logging.getLogger('MA5')
 
 
@@ -164,10 +165,7 @@ class DetectRoot:
                 return False
            
         # Getting the features
-        if self.bin_path!='':
-            theCommands = [self.bin_path+'/root-config','--features']
-        else:
-            theCommands = ['root-config','--features']
+        theCommands = [self.bin_path+'/root-config','--features']
         ok, out, err = ShellCommand.ExecuteWithCapture(theCommands,'./')
         if not ok:
             self.logger.error('problem with root-config')
@@ -181,6 +179,18 @@ class DetectRoot:
         if self.debug:
             self.logger.debug("  features:      " + str(self.features))
 
+        # Getting the compiler
+        theCommands = [self.bin_path+'/root-config','--cxx']
+        ok, out, err = ShellCommand.ExecuteWithCapture(theCommands,'./')
+        if not ok:
+            self.logger.error('impossible to get C++ compiler from root-config')
+            return False
+        out=out.lstrip()
+        out=out.rstrip()
+        self.compiler = out
+        if self.debug:
+            self.logger.debug("  C++ compiler:      " + str(self.compiler))
+
         # Ok
         return True
 
@@ -193,6 +203,7 @@ class DetectRoot:
         self.archi_info.root_original_bins = [self.bin_file]
         self.archi_info.root_inc_path      = self.inc_path
         self.archi_info.root_lib_path      = self.lib_path
+        self.archi_info.root_compiler      = self.compiler
         
         for k, v in self.libraries.iteritems():
             self.archi_info.libraries[k]=v

@@ -80,6 +80,7 @@ class ArchitectureInfo:
         self.toPATH2   = []
         self.toLDPATH2 = []
 
+        self.root_compiler=''
         self.root_bin_path=""
         self.root_inc_path=""
         self.root_lib_path=""

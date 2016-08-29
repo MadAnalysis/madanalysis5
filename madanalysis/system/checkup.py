@@ -37,7 +37,9 @@ class CheckUp():
         self.session_info = session_info
         self.debug        = debug
         self.script       = script
+        self.checker      = DetectManager(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
         self.logger       = logging.getLogger('MA5')
+
 
     def CheckArchitecture(self):
 
@@ -284,54 +286,42 @@ class CheckUp():
     def CheckMandatoryPackages(self):
         # Mandatory packages
         self.logger.info("Checking mandatory packages:")
-        checker = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
+        checker2 = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
 
-        if not checker.checkPython():
+        if not checker2.checkPython():
             return False
-        if not checker.checkGPP():
+        if not checker2.checkGPP():
             return False
-        if not checker.checkMake():
+        if not checker2.checkMake():
             return False
         return True
 
     def CheckOptionalGraphicalPackages(self):
         # Optional packages
         self.logger.info("Checking optional packages devoted to histogramming:")
-        checker = DetectManager(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
 
-        if not checker.Execute('root_graphical'):
+        if not self.checker.Execute('root_graphical'):
             return False
-        if not checker.Execute('matplotlib'):
+        if not self.checker.Execute('matplotlib'):
             return False
-        if not checker.Execute('pdflatex'):
+        if not self.checker.Execute('pdflatex'):
             return False
-        if not checker.Execute('latex'):
+        if not self.checker.Execute('latex'):
             return False
         return True
 
     def CheckOptionalProcessingPackages(self):
         # Optional packages
         self.logger.info("Checking optional packages devoted to data processing:")
-        checker = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
-        checker2 = DetectManager(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
+        checker2 = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
         
-        self.archi_info.has_zlib              = checker.checkZLIB()
-        if not checker2.Execute('fastjet'):
+        self.archi_info.has_zlib              = checker2.checkZLIB()
+        if not self.checker.Execute('fastjet'):
             return False
-        if not checker2.Execute('root'):
+        if not self.checker.Execute('root'):
             return False
-        self.archi_info.has_delphes           = checker.checkDelphes()
-        self.archi_info.has_delphesMA5tune    = checker.checkDelphesMA5tune()
-        return True
-
-
-    def CheckGraphicalPackages(self):
-        # Optional packages
-        self.logger.info("Checking graphical packages:")
-        checker = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
-        self.session_info.has_gnuplot       = checker.checkGnuplot()
-        self.session_info.has_matplotlib    = checker.checkMatplotlib()
-        self.archi_info.has_root            = checker.checkRoot()
+        self.archi_info.has_delphes           = checker2.checkDelphes()
+        self.archi_info.has_delphesMA5tune    = checker2.checkDelphesMA5tune()
         return True
 
 
