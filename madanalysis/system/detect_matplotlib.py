@@ -64,7 +64,7 @@ class DetectMatplotlib:
         try:
             import matplotlib
         except:
-            return DetectStatusType.UNFOUND
+            return DetectStatusType.UNFOUND,''
 
         # Checking release
         if self.debug:
@@ -80,12 +80,12 @@ class DetectMatplotlib:
         if len(numbers)>=1:
             if numbers[0]=='0':
                 self.logger.error("Release must be greater to 1.0.0. Please upgrade the Matplotlib package.")
-                return DetectStatusType.UNFOUND
+                return DetectStatusType.UNFOUND,''
         else:
             self.logger.warning("Impossible to decode the Matplotlib release")
             
         # Ok
-        return DetectStatusType.FOUND
+        return DetectStatusType.FOUND,''
 
 
     def SaveInfo(self):

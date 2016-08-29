@@ -59,9 +59,9 @@ class DetectRootGraphical:
     def AutoDetection(self):
 
         if self.archi_info.has_root:
-            return DetectStatusType.FOUND
+            return DetectStatusType.FOUND,''
         else:
-            return DetectStatusType.UNFOUND
+            return DetectStatusType.UNFOUND,''
 
 
     def SaveInfo(self):

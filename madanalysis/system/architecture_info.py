@@ -52,6 +52,13 @@ class ArchitectureInfo:
         self.delphesMA5tune_priority = False
         self.fastjet_priority        = False
 
+        # Library files
+        self.zlib_original_libs           = []
+        self.fastjet_original_bins        = []
+        self.root_original_bins           = []
+        self.delphes_original_libs        = []
+        self.delphesMA5tune_original_libs = []
+
         # Version
         self.python_version   = ""
         self.gcc_version      = ""

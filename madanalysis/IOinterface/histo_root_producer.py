@@ -74,11 +74,11 @@ class HistoRootProducer():
 
         # Commands
         output = file(self.histo_path+'/Makefile','w')
-        output.write('CXX=`root-config --cxx`\n')
-        output.write('CFLAGS=`root-config --cflags`\n')
-        output.write('LIBS=`root-config --libs`\n')
-        output.write('SOURCE=all.C\n')
-        output.write('PROGRAM=goROOT\n')
+        output.write('CXX     = `$(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/root-config --cxx`\n')
+        output.write('CFLAGS  = `$(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/root-config --cflags`\n')
+        output.write('LIBS    = `$(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/root-config --libs`\n')
+        output.write('SOURCE  = all.C\n')
+        output.write('PROGRAM = goROOT\n')
         output.write('\n')
         output.write('$(PROGRAM):\n')
         output.write('\t$(CXX) $(CFLAGS) $(SOURCE) $(LIBS) -o $(PROGRAM)\n')

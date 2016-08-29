@@ -206,10 +206,7 @@ class MakefileWriter():
         # Compilers
         file.write('# Compilers\n')
         if archi_info.has_root:
-            if archi_info.root_bin_path=='':
-                mycommand = ['root-config','--cxx']
-            else:
-                mycommand = [archi_info.root_bin_path+'/root-config','--cxx']
+            mycommand = [archi_info.ma5dir+'/tools/SampleAnalyzer/ExternalSymLink/Bin/root-config','--cxx']
             ok, out, err = ShellCommand.ExecuteWithCapture(mycommand,'./')
             if not ok:
                 return False
@@ -232,13 +229,14 @@ class MakefileWriter():
         # - root
         if options.has_root_inc:
             cxxflags=[]
-            cxxflags.extend(['$(shell root-config --cflags)'])
+            cxxflags.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/root-config --cflags)'])
             file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
 
         # - fastjet
         if options.has_fastjet_inc:
             cxxflags=[]
-            cxxflags.extend(['$(shell fastjet-config --cxxflags --plugins)'])
+            cxxflags.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config --cxxflags)'])
+#            cxxflags.extend(['$(shell fastjet-config --cxxflags)'])
             file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
 
         # - zlib
@@ -287,7 +285,8 @@ class MakefileWriter():
         # - commons
         if options.has_commons:
             libs=[]
-            libs.extend(['-L$(MA5_BASE)/tools/SampleAnalyzer/Lib'])
+            libs.append('-L$(MA5_BASE)/tools/SampleAnalyzer/Lib')
+            libs.append('-L$(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Lib')
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
         
         # - process
@@ -302,7 +301,8 @@ class MakefileWriter():
             if options.has_zlib_ma5lib:
                 libs.extend(['-lzlib_for_ma5'])
             if options.has_zlib_lib:
-                libs.extend(['-L'+archi_info.zlib_lib_path,'-lz'])
+#                libs.extend(['-L'+archi_info.zlib_lib_path,'-lz'])
+                libs.extend(['-lz'])
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
 
         # - root
@@ -311,11 +311,11 @@ class MakefileWriter():
             if options.has_root_ma5lib:
                 libs.extend(['-lroot_for_ma5'])
             if options.has_root_lib:
-                libs.extend(['$(shell root-config --libs) -lEG'])
+                libs.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/root-config --libs) -lEG'])
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
         else:
             if options.has_root_lib:
-                libs.extend(['$(shell root-config --libs) -lEG'])
+                libs.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/root-config --libs) -lEG'])
                 file.write('LIBFLAGS += '+' '.join(libs)+'\n')
                 
             # - fastjet
@@ -324,7 +324,8 @@ class MakefileWriter():
             if options.has_fastjet_ma5lib:
                 libs.extend(['-lfastjet_for_ma5'])
             if options.has_fastjet_lib:
-                libs.extend(['$(shell fastjet-config --libs --plugins)']) # --rpath=no)'])
+#                libs.extend(['$(shell fastjet-config --libs --plugins)']) # --rpath=no)'])
+                libs.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config --libs --plugins)']) # --rpath=no)'])
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
 
         # - delphes
@@ -333,7 +334,8 @@ class MakefileWriter():
             if options.has_delphes_ma5lib:
                 libs.extend(['-ldelphes_for_ma5'])
             if options.has_delphes_lib:
-                libs.extend(['-L'+archi_info.delphes_lib_paths[0],'-lDelphes'])
+#                libs.extend(['-L'+archi_info.delphes_lib_paths[0],'-lDelphes'])
+                libs.extend(['-lDelphes'])
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
 
         # - delphesMA5tune
@@ -342,7 +344,8 @@ class MakefileWriter():
             if options.has_delphesMA5tune_ma5lib:
                 libs.extend(['-ldelphesMA5tune_for_ma5'])
             if options.has_delphesMA5tune_lib:
-                libs.extend(['-L'+archi_info.delphesMA5tune_lib_paths[0],'-lDelphesMA5tune'])
+#                libs.extend(['-L'+archi_info.delphesMA5tune_lib_paths[0],'-lDelphesMA5tune'])
+                libs.extend(['-lDelphesMA5tune'])
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
 
         # - Commons
@@ -357,7 +360,7 @@ class MakefileWriter():
         #            '-lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic -lEG'])
         # becareful: to not forget -lEG
         if options.has_root:
-            libs.extend(['$(shell root-config --libs)','-lEG'])
+            libs.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/root-config --libs)','-lEG'])
         if len(libs)!=0:
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
         file.write('\n')

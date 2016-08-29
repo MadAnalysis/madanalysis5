@@ -138,7 +138,7 @@ class DetectManager():
         if 'ManualDetection' in methods:
             self.logger.debug('Detection of the package in the location specified by the user ...')
             search = False
-            status = checker.ManualDetection()
+            status, msg = checker.ManualDetection()
 
             # If problem
             if status==DetectStatusType.ISSUE:
@@ -163,7 +163,7 @@ class DetectManager():
         if search and 'ToolsDetection' in methods:
             self.logger.debug('Detection of the package in the "tools" folder ...')
             search = False
-            status = checker.ToolsDetection()
+            status, msg = checker.ToolsDetection()
 
             # If problem
             if status==DetectStatusType.ISSUE:
@@ -184,11 +184,15 @@ class DetectManager():
             elif status==DetectStatusType.UNFOUND:
                 search = True
 
+            # OK -> autodetection
+            elif status==DetectStatusType.FOUND:
+                search = False
+
         # 6. Autodetection of the package
         if search and 'AutoDetection' in methods:
             self.logger.debug('Try to detect automatically the package ...')
             search = False
-            status = checker.AutoDetection()
+            status,msg = checker.AutoDetection()
 
             if status in [DetectStatusType.UNFOUND,DetectStatusType.ISSUE]:
                 if checker.mandatory:

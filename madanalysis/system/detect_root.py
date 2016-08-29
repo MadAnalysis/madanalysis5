@@ -43,6 +43,7 @@ class DetectRoot:
         self.name      = 'Root'
         self.mandatory = False
         self.force     = False
+        self.bin_file  = ''
         self.bin_path  = ''
         self.inc_path  = ''
         self.lib_path  = ''
@@ -62,10 +63,11 @@ class DetectRoot:
 
     def ManualDetection(self):
         msg = ''
-        
+
         # User setting
         if self.user_info.root_bin==None:
             return DetectStatusType.UNFOUND, msg
+
         self.logger.debug("User setting: root bin path is specified.")
         self.bin_path=os.path.normpath(self.user_info.root_bin)
         self.logger.debug("root-config program found in: "+self.bin_path)
@@ -73,7 +75,7 @@ class DetectRoot:
         # Detection of root-config
         self.logger.debug("Detecting root-config in the path specified by the user ...")
         if not os.path.isfile(self.bin_path+'/root-config'):
-            msg  = "root-config program is not found in folder: "+self.root_bin_path+"\n"
+            msg  = "root-config program is not found in folder: "+self.bin_path+"\n"
             msg += "Please check that ROOT is properly installed."
             return DetectStatusType.UNFOUND, msg
 
@@ -94,12 +96,18 @@ class DetectRoot:
 		  +' - ROOT binary folder must be placed in the '\
                   +'global environment variable $PATH'
             return DetectStatusType.UNFOUND, msg
-        self.bin_path=os.path.normpath(result[0][:-11])
+        islink = os.path.islink(result[0])
+        if not islink:
+            self.bin_file=os.path.normpath(result[0])
+        else:
+            self.bin_file=os.path.normpath(os.path.realpath(result[0]))
+        self.bin_path=os.path.dirname(self.bin_file)
 
         # Debug mode
         if self.debug:
-            self.logger.debug("")
-            self.logger.debug("  which:         " + str(self.bin_path))
+            self.logger.debug("  which:         " + str(result[0]) + " [is it a link? "+str(islink)+"]")
+            if islink:
+                self.logger.debug("                 -> "+os.path.realpath(result[0]))
 
         # Which all
         if self.debug:
@@ -111,17 +119,17 @@ class DetectRoot:
 		      +'from http://root.cern.ch\n'\
 		      +' - ROOT binary folder must be placed in the '\
                       +'global environment variable $PATH'
-                return False, msg
+                DetectStatusType.ISSUE, msg
             self.logger.debug("  which-all:     ")
             for file in result:
                 self.logger.debug("    - "+str(file))
-        return True, msg
+        return DetectStatusType.FOUND, msg
 
 
     def ExtractInfo(self):
         # Using root-config for getting lib and header paths
         self.logger.debug("Trying to get library and header paths ...") 
-        theCommands = ['root-config','--libdir','--incdir']
+        theCommands = [self.bin_path+'/root-config','--libdir','--incdir']
         ok, out, err = ShellCommand.ExecuteWithCapture(theCommands,'./')
         if not ok:
             msg = 'ROOT module called "root-config" is not detected.\n'\
@@ -179,11 +187,13 @@ class DetectRoot:
 
     def SaveInfo(self):
         # archi_info
-        self.archi_info.has_root = True
-        self.archi_info.root_priority = self.force
-        self.archi_info.root_bin_path = self.bin_path
-        self.archi_info.root_inc_path = self.inc_path
-        self.archi_info.root_lib_path = self.lib_path
+        self.archi_info.has_root           = True
+        self.archi_info.root_priority      = self.force
+        self.archi_info.root_bin_path      = self.bin_path
+        self.archi_info.root_original_bins = [self.bin_file]
+        self.archi_info.root_inc_path      = self.inc_path
+        self.archi_info.root_lib_path      = self.lib_path
+        
         for k, v in self.libraries.iteritems():
             self.archi_info.libraries[k]=v
         for feature in self.features:
@@ -191,7 +201,7 @@ class DetectRoot:
                 self.archi_info.root_features.append(feature)
 
         # Adding ROOT library path to Python path
-        sys.path.append(self.archi_info.root_lib_path)
+#        sys.path.append(self.archi_info.root_lib_path)
 
         # Ok
         return True

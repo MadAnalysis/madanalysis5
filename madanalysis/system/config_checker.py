@@ -204,6 +204,15 @@ class ConfigChecker:
         # Checking if ROOT is present
         package_name = self.PrintLibrary('Root')
         self.logger.debug('Root')
+        if self.archi_info.has_root:
+            self.PrintOK(package_name)
+        return True
+        
+        
+    def checkROOTold(self):
+        # Checking if ROOT is present
+        package_name = self.PrintLibrary('Root')
+        self.logger.debug('Root')
 
         # Does the user force the ROOT path
         force=False
@@ -591,13 +600,22 @@ class ConfigChecker:
     def FindLibraryWithPattern(self,pattern,files):
         return self.FindFilesWithPattern(self.libs,pattern,files)
 
+    def FindLibraryWithPattern2(self,pattern,files):
+        return self.FindFilesWithPattern2(self.libs,pattern,files)
+
     def FindHeader(self,file):
         return self.FindFilesWithPattern(self.includes,file,[file])
+
+    def FindHeader2(self,file):
+        return self.FindFilesWithPattern2(self.includes,file,[file])
 
     def FindFilesWithPattern(self,paths,pattern,targets):
         result_files=[]
         result_paths=[]
         for path in paths:
+            path=os.path.normpath(path)
+            if 'tools/SampleAnalyzer/ExternalSymLink' in path:
+                continue
             rawfiles=glob.glob(path+"/"+pattern)
 
             filtered_files=[]
@@ -615,6 +633,37 @@ class ConfigChecker:
             return "", ""
         else:
             return os.path.normpath(result_paths[0]), os.path.normpath(result_files[0])
+
+    def FindFilesWithPattern2(self,paths,pattern,targets):
+        result_files=[]
+        result_paths=[]
+        for path in paths:
+            path=os.path.normpath(path)
+            if 'tools/SampleAnalyzer/ExternalSymLink' in path:
+                continue
+            rawfiles=glob.glob(path+"/"+pattern)
+
+            filtered_files=[]
+            for file in rawfiles:
+                for target in targets:
+                    if file.endswith('/'+target):
+                        filtered_files.append(file)
+
+            if len(filtered_files)!=0:
+                result_files.extend(filtered_files)
+            for item in filtered_files:
+                result_paths.append(path)
+
+        if len(result_files)==0:
+            return "", []
+        else:
+            files_to_send = []
+            folder=os.path.normpath(result_paths[0])
+            for item in result_files:
+                item=os.path.normpath(item)
+                if folder in item:
+                    files_to_send.append(item)
+            return folder, files_to_send
 
 
     def checkZLIB(self):
@@ -679,8 +728,8 @@ class ConfigChecker:
 
             # lib
             self.logger.debug("Look for the libraries in folder "+self.archi_info.zlib_lib_path+" ...")
-            mypath, myfile = self.FindFilesWithPattern([self.archi_info.zlib_lib_path],"libz.*",libnames)
-            self.archi_info.zlib_lib=os.path.normpath(myfile)
+            mypath, myfiles = self.FindFilesWithPattern2([self.archi_info.zlib_lib_path],"libz.*",libnames)
+            self.archi_info.zlib_lib=os.path.normpath(myfiles[0])
             self.logger.debug("-> result: "+str(self.archi_info.zlib_lib))
             if self.archi_info.zlib_lib=="":
                 self.PrintFAIL(package_name,warning=True)
@@ -688,6 +737,7 @@ class ConfigChecker:
                 self.logger.warning("Gzip format will be disabled.")
                 self.logger.warning("To enable this format, please type 'install zlib'.")
                 return False
+            self.archi_info.zlib_original_libs.extend(myfiles)
 
 
         # Checking zlib can be found in other folders
@@ -708,10 +758,10 @@ class ConfigChecker:
 
             # lib
             self.logger.debug("Look for the zlib libraries ...")
-            mypath, myfile = self.FindLibraryWithPattern('libz.*',libnames)
-            if mypath!='' and myfile!='':
+            mypath, myfiles = self.FindLibraryWithPattern2('libz.*',libnames)
+            if mypath!='':
                 self.archi_info.zlib_lib_path = os.path.normpath(mypath)
-                self.archi_info.zlib_lib      = os.path.normpath(myfile)
+                self.archi_info.zlib_lib      = os.path.normpath(myfiles[0])
                 self.logger.debug("-> result for lib paths: "+str(self.archi_info.zlib_lib_path))
                 self.logger.debug("-> result for lib files: "+str(self.archi_info.zlib_lib))
             if self.archi_info.zlib_lib_path=="":
@@ -720,6 +770,7 @@ class ConfigChecker:
                 self.logger.warning("Gzip format will be disabled.")
                 self.logger.warning("To enable this format, please type 'install zlib'.")
                 return False
+            self.archi_info.zlib_original_libs.extend(myfiles)
 
         self.archi_info.libraries['ZLib']=self.archi_info.zlib_lib+":"+str(os.stat(self.archi_info.zlib_lib).st_mtime)
         self.archi_info.zlib_priority=(force or ma5installation)
@@ -858,8 +909,8 @@ class ConfigChecker:
             # lib
             if not getpaths:
                 self.logger.debug("Look for the libraries in folder "+str(self.archi_info.delphes_lib_paths)+" ...")
-            mypath, myfile = self.FindFilesWithPattern(self.archi_info.delphes_lib_paths,"libDelphes.*",libnames)
-            self.archi_info.delphes_lib=myfile
+            mypath, myfiles = self.FindFilesWithPattern2(self.archi_info.delphes_lib_paths,"libDelphes.*",libnames)
+            self.archi_info.delphes_lib=os.path.normpath(myfiles[0])
             if not getpaths:
                 self.logger.debug("-> result: "+str(self.archi_info.delphes_lib))
             if self.archi_info.delphes_lib=="":
@@ -869,7 +920,7 @@ class ConfigChecker:
 #                    self.logger.warning("Delphes ROOT format will be disabled.")
 #                    self.logger.warning("To enable this format, please type 'install delphes'.")
                 return False
-            self.archi_info.delphes_lib=os.path.normpath(myfile)
+            self.archi_info.delphes_original_libs.extend(myfiles)
 
         # Checking Delphes can be found in other folders
         if not force and not ma5installation:
@@ -896,11 +947,11 @@ class ConfigChecker:
             # lib
             if not getpaths:
                 self.logger.debug("Look for the Delphes libraries ...")
-            mypath, myfile = self.FindLibraryWithPattern('libDelphes.*',libnames)
-            if mypath!='' and myfile!='':
+            mypath, myfiles = self.FindLibraryWithPattern2('libDelphes.*',libnames)
+            if mypath!='':
                 if not os.path.normpath(mypath) in self.archi_info.delphes_lib_paths:
                     self.archi_info.delphes_lib_paths.append(os.path.normpath(mypath))
-                self.archi_info.delphes_lib      = os.path.normpath(myfile)
+                self.archi_info.delphes_lib      = os.path.normpath(myfiles[0])
                 if not getpaths:
                     self.logger.debug("-> result for lib paths: "+str(self.archi_info.delphes_lib_paths))
                     self.logger.debug("-> result for lib files: "+str(self.archi_info.delphes_lib))
@@ -911,10 +962,14 @@ class ConfigChecker:
                     self.logger.warning("Delphes format will be disabled.")
                     self.logger.warning("To enable this format, please type 'install delphes'.")
                 return False
+            self.archi_info.delphes_original_libs.extend(myfiles)
             if getpaths:
                self.libs=self.libs[:-1]
+
         self.archi_info.libraries['Delphes']=self.archi_info.delphes_lib+":"+str(os.stat(self.archi_info.delphes_lib).st_mtime)
         self.archi_info.delphes_priority=(force or ma5installation)
+
+        # Lib
 
         # Ok
         if not getpaths:
@@ -1053,10 +1108,11 @@ class ConfigChecker:
             # lib
             if not getpaths:
                 self.logger.debug("Look for the libraries in folder "+str(self.archi_info.delphesMA5tune_lib_paths)+" ...")
-            mypath, myfile = self.FindFilesWithPattern(self.archi_info.delphesMA5tune_lib_paths,"libDelphesMA5tune.*",libnames)
+            mypath, myfiles = self.FindFilesWithPattern2(self.archi_info.delphesMA5tune_lib_paths,"libDelphesMA5tune.*",libnames)
             if not os.path.normpath(mypath) in self.archi_info.delphesMA5tune_lib_paths:
                 self.archi_info.delphesMA5tune_lib_paths.append(os.path.normpath(mypath))
-            self.archi_info.delphesMA5tune_lib      = myfile
+            self.archi_info.delphesMA5tune_lib      = os.path.normpath(myfiles[0])
+            self.archi_info.delphesMA5tune_original_libs.extend(myfiles)
             if not getpaths:
                 self.logger.debug("-> result for lib paths: "+str(self.archi_info.delphesMA5tune_lib_paths))
                 self.logger.debug("-> result for lib files: "+str(self.archi_info.delphesMA5tune_lib))
@@ -1068,10 +1124,11 @@ class ConfigChecker:
 #                    self.logger.warning("Delphes-MA5tune ROOT format will be disabled.")
 #                    self.logger.warning("To enable this format, please type 'install delphesMA5tune'.")
                 return False
-            self.archi_info.delphesMA5tune_lib      = os.path.normpath(myfile)
             
         self.archi_info.libraries['DelphesMA5tune']=self.archi_info.delphesMA5tune_lib+":"+str(os.stat(self.archi_info.delphesMA5tune_lib).st_mtime)
         self.archi_info.delphesMA5tune_priority=(force or ma5installation)
+
+        # Lib
 
         # Ok
         if not getpaths:
@@ -1164,6 +1221,7 @@ class ConfigChecker:
 
         # Treating FastJet bin path
         self.archi_info.fastjet_bin_path=os.path.normpath(self.archi_info.fastjet_bin_path)
+        self.archi_info.fastjet_original_bins=[self.archi_info.fastjet_bin_path+'/fastjet-config']
         self.logger.debug("fastjet bin path chosen: "+self.archi_info.fastjet_bin_path)
 
         # Getting FastJet version
