@@ -127,6 +127,12 @@ class PlotFlow:
            newtext = newtext.replace(i,j)
         return newtext
 
+    @staticmethod
+    def NiceTitleMatplotlib(text):
+        text=PlotFlow.NiceTitle(text)
+        text='$'+text.replace('#','\\\\')+'$'
+        return newtext
+
 
     def DrawAll(self,histo_path,modes,output_paths,ListROOTplots):
 
@@ -656,7 +662,7 @@ class PlotFlow:
         outputPy.write('    # Creating a new Stack\n')
         for ind in range(len(histos)-1,-1,-1):
             myweight = histos[ind].name+'_'+str(ind)+'_weights'
-            mytitle  = '"'+PlotFlow.NiceTitle(self.main.datasets[ind].title)+'"'
+            mytitle  = '"'+PlotFlow.NiceTitleMatplotlib(self.main.datasets[ind].title)+'"'
             mytitle  = mytitle.replace('_','\_')
 
             if not stackmode:
@@ -804,9 +810,10 @@ class PlotFlow:
 
         # X-axis
         if ref.titleX=="": 
-            axis_titleX = ref.GetXaxis_Matplotlib()
+            axis_titleX = ref.GetXaxis()
         else:
-            axis_titleX = PlotFlow.NiceTitle(ref.titleX)
+            axis_titleX = ref.titleX
+        axis_titleX = PlotFlow.NiceTitleMatplotlib(axis_titleX)
         outputPy.write('    plt.xlabel("'+axis_titleX+'",\\\n')
         outputPy.write('               fontsize=16,color="black")\n')
 
@@ -829,7 +836,7 @@ class PlotFlow:
             axis_titleY += " (not normalized)"
 
         if ref.titleY!="": 
-            axis_titleY = PlotFlow.NiceTitle(ref.titleY)
+            axis_titleY = PlotFlow.NiceTitleMatplotlib(ref.titleY)
         outputPy.write('    plt.ylabel("'+axis_titleY+'",\\\n')
         outputPy.write('               fontsize=16,color="black")\n')
         outputPy.write('\n')
