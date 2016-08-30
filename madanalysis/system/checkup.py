@@ -290,7 +290,7 @@ class CheckUp():
 
         if not checker2.checkPython():
             return False
-        if not checker2.checkGPP():
+        if not self.checker.Execute('gpp'):
             return False
         if not checker2.checkMake():
             return False

@@ -356,53 +356,6 @@ class ConfigChecker:
         return True
 
 
-
-
-    def checkGPP(self):
-        # Checking g++ release
-        package_name = self.PrintLibrary('GNU GCC g++')
-        self.logger.debug('g++')
-
-        # Which
-        result = ShellCommand.Which('g++')
-        if len(result)==0:
-            self.PrintFAIL(package_name,warning=False)
-            self.logger.error('g++ compiler not found. Please install it before ' + \
-	             'using MadAnalysis 5')
-            return False
-        if self.debug:
-            self.logger.debug("")
-            self.logger.debug("  which:         " + str(result[0]))
-
-        # Which all
-        if self.debug:
-            result = ShellCommand.Which('g++',all=True,mute=True)
-            if len(result)==0:
-                self.PrintFAIL(package_name,warning=False)
-                self.logger.error('g++ compiler not found. Please install it before ' + \
-	                 'using MadAnalysis 5')
-                return False
-            self.logger.debug("  which-all:     ")
-            for file in result:
-                self.logger.debug("    - "+str(file))
-
-        # Getting the version
-        ok, out, err = ShellCommand.ExecuteWithCapture(['g++','-dumpversion'],'./')
-        if not ok:
-            self.PrintFAIL(package_name,warning=False)
-            self.logger.error('g++ compiler not found. Please install it before ' + \
-	             'using MadAnalysis 5')
-            return False
-        out=out.lstrip()
-        out=out.rstrip()
-        self.archi_info.gcc_version = str(out)
-        if self.debug:
-            self.logger.debug("  version:       " + self.archi_info.gcc_version)
-
-        self.PrintOK(package_name)
-        return True
-
-
     def checkMake(self):
         # Checking GNU Make
         package_name = self.PrintLibrary('GNU Make')
