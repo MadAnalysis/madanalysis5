@@ -209,6 +209,9 @@ class ConfigChecker:
             return folder, files_to_send
 
 
+
+
+
     def checkZLIB(self):
 
         # Checking if zlib is present

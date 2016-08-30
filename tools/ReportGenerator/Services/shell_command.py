@@ -105,21 +105,33 @@ class ShellCommand():
         return (result.returncode==0)
 
     @staticmethod
-    def ExecuteWithCapture(theCommands,path):
+    def ExecuteWithCapture(theCommands,path,stdin=False):
 
+        # stdin?
+        if not stdin:
+            stdin_value=None
+        else:
+            input = file(os.devnull)
+            stdin_value= input
+        
         # Launching the commands
         try:
-            result=subprocess.Popen(theCommands, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=path)
+            result=subprocess.Popen(theCommands, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=path, stdin=stdin_value)
         except:
             logging.error('impossible to execute the commands: '+' '.join(theCommands))
+            if stdin:
+                input.close()
             return False, '', ''
 
         # Getting stdout
         out, err = result.communicate()
             
         # Return results
+        if stdin:
+            input.close()
         return (result.returncode==0), out, err
     
+
 
     @staticmethod
     def Which(theCommand,all=False,mute=False):

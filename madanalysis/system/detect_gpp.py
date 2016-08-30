@@ -47,6 +47,7 @@ class DetectGpp:
         self.logger       = logging.getLogger('madanalysis')
         self.moreInfo='For more details, type: config_info gpp'
         # adding what you want here
+        self.header_paths = []
         self.version      = ''
 
 
@@ -94,6 +95,30 @@ class DetectGpp:
         self.version = str(out)
         if self.debug:
             self.logger.debug("  version:       " + self.version)
+
+
+        # Getting include path
+        ok, out, err = ShellCommand.ExecuteWithCapture(['g++','-E','-x','c++','-','-v'],'./',stdin=True)
+        if not ok:
+            self.logger.warning('unexpected error with g++')
+            return True
+        toKeep=False
+        self.header_paths = []
+        for line in out.split('\n'):
+            line = line.lstrip()
+            line = line.rstrip()
+            if line.startswith('#include <...>'):
+                toKeep=True
+                continue
+            elif line.startswith('End of search list'):
+                toKeep=False
+                break
+            if toKeep:
+                self.header_paths.append(line)
+        if self.debug:
+            self.logger.debug("  search path for headers:")
+            for line in self.header_paths:
+                self.logger.debug('    - '+line)
 
         # Ok
         return True

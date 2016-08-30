@@ -31,7 +31,7 @@
 
 # -----FASTJET-----
 # fastjet_veto     = 0 # 0=No, 1=Yes
-# fastjet_bin_path = /Users/fuks/Work/tools/fastjet-3.0.6/build/bin
+# fastjet_bin_path = /home/econte/MA5/v1.5beta/tools/fastjet/bin
 
 # -----PDFLATEX-----
 # pdflatex_veto = 0 # 0=No, 1=Yes
