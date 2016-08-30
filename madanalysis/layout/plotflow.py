@@ -152,7 +152,7 @@ class PlotFlow:
             
             output_files=[]
             for iout in range(0,len(output_paths)):
-                output_files.append(output_paths[iout]+\
+                output_files.append('../'+output_paths[iout].split('/')[-1]+\
                                     "/selection_"+str(irelhisto)+"."+\
                                     ReportFormatType.convert2filetype(modes[iout]))
 

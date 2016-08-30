@@ -56,15 +56,15 @@ class HistoRootProducer():
         logname=os.path.normpath(self.histo_path+'/root.log')
         
         # Execute
-        logging.debug('shell command: '+' '.join(theCommands))
+        logging.getLogger('MA5').debug('shell command: '+' '.join(theCommands))
         ok, out= ShellCommand.ExecuteWithLog(theCommands,\
                                              logname,\
                                              self.histo_path,\
                                              silent=False)
         # return result
         if not ok:
-            logging.error('impossible to execute ROOT. For more details, see the log file:')
-            logging.error(logname)
+            logging.getLogger('MA5').error('impossible to execute ROOT. For more details, see the log file:')
+            logging.getLogger('MA5').error(logname)
         return ok
 
 
@@ -91,7 +91,7 @@ class HistoRootProducer():
         logname=os.path.normpath(self.histo_path+'/compile_root.log')
         
         # Execute
-        logging.debug('shell command: '+' '.join(theCommands))
+        logging.getLogger('MA5').debug('shell command: '+' '.join(theCommands))
         ok, out= ShellCommand.ExecuteWithLog(theCommands,\
                                              logname,\
                                              self.histo_path,\
@@ -99,14 +99,14 @@ class HistoRootProducer():
 
         # return result
         if not ok:
-            logging.error('impossible to execute ROOT. For more details, see the log file:')
-            logging.error(logname)
+            logging.getLogger('MA5').error('impossible to execute ROOT. For more details, see the log file:')
+            logging.getLogger('MA5').error(logname)
             return ok
 
         # check
         if not os.path.isfile(self.histo_path+'/goROOT'):
-            logging.error('the file '+self.histo_path+'/goROOT is not found')
-            logging.error(logname)
+            logging.getLogger('MA5').error('the file '+self.histo_path+'/goROOT is not found')
+            logging.getLogger('MA5').error(logname)
             return False
             
         # Commands
@@ -116,7 +116,7 @@ class HistoRootProducer():
         logname=os.path.normpath(self.histo_path+'/launch_root.log')
         
         # Execute
-        logging.debug('shell command: '+' '.join(theCommands))
+        logging.getLogger('MA5').debug('shell command: '+' '.join(theCommands))
         ok, out= ShellCommand.ExecuteWithLog(theCommands,\
                                              logname,\
                                              self.histo_path,\
@@ -124,8 +124,8 @@ class HistoRootProducer():
 
         # return result
         if not ok:
-            logging.error('impossible to execute ROOT. For more details, see the log file:')
-            logging.error(logname)
+            logging.getLogger('MA5').error('impossible to execute ROOT. For more details, see the log file:')
+            logging.getLogger('MA5').error(logname)
             return ok
 
         # Reading log file
@@ -139,8 +139,8 @@ class HistoRootProducer():
                 ok2 = True
         input.close()
         if not (ok1 and ok2):
-            logging.error('wrong behaviour of the ROOT execution. For more details, see the log file:')
-            logging.error(logname)
+            logging.getLogger('MA5').error('wrong behaviour of the ROOT execution. For more details, see the log file:')
+            logging.getLogger('MA5').error(logname)
             return ok
         
         return ok
