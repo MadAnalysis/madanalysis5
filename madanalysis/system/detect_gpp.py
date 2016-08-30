@@ -47,7 +47,8 @@ class DetectGpp:
         self.logger       = logging.getLogger('madanalysis')
         self.moreInfo='For more details, type: config_info gpp'
         # adding what you want here
-        self.header_paths = []
+        self.header_paths  = []
+        self.library_paths = []
         self.version      = ''
 
 
@@ -103,7 +104,8 @@ class DetectGpp:
             self.logger.warning('unexpected error with g++')
             return True
         toKeep=False
-        self.header_paths = []
+        self.header_paths  = []
+        self.library_paths = []
         for line in out.split('\n'):
             line = line.lstrip()
             line = line.rstrip()
@@ -112,12 +114,21 @@ class DetectGpp:
                 continue
             elif line.startswith('End of search list'):
                 toKeep=False
-                break
             if toKeep:
-                self.header_paths.append(line)
+                if os.path.isdir(line):
+                    self.header_paths.append(os.path.normpath(line))
+            if line.startswith('LIBRARY_PATH='):
+                paths=line[13:].split(':')
+                for path in paths:
+                    if os.path.isdir(path):
+                        self.library_paths.append(os.path.normpath(path))
+                    
         if self.debug:
             self.logger.debug("  search path for headers:")
             for line in self.header_paths:
+                self.logger.debug('    - '+line)
+            self.logger.debug("  search path for libraries:")
+            for line in self.library_paths:
                 self.logger.debug('    - '+line)
 
         # Ok
@@ -126,6 +137,9 @@ class DetectGpp:
 
     def SaveInfo(self):
         self.archi_info.gcc_version = self.version
+        self.session_info.gcc_header_search_path  = self.header_paths
+        self.session_info.gcc_library_search_path = self.library_paths
+
         return True
 
 

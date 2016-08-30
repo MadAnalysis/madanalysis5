@@ -37,6 +37,8 @@ class SessionInfo():
         self.has_latex          = False
         self.has_dvipdf         = False
         self.has_web            = True
+        self.gcc_header_search_path  = []
+        self.gcc_library_search_path = []
         self.logger             = logging.getLogger('MA5')
 
     def dump(self):
