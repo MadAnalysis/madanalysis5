@@ -66,16 +66,23 @@ class DetectFastjet:
         if self.user_info.fastjet_bin_path==None:
             return DetectStatusType.UNFOUND, msg
 
-        self.logger.debug("User setting: root bin path is specified.")
-        self.bin_path=os.path.normpath(self.user_info.fastjet_bin_path)
-        self.logger.debug("fastjet-config program found in: "+self.bin_path)
+        self.logger.debug("User setting: fastjet bin path is specified.")
+
+        # File & folder name
+        folder   = os.path.normpath(self.user_info.fastjet_bin_path)
+        filename = self.bin_path+'/fastjet-config'
 
         # Detection of fastjet-config
         self.logger.debug("Detecting fastjet-config in the path specified by the user ...")
-        if not os.path.isfile(self.bin_path+'/fastjet-config'):
-            msg  = "fastjet-config program is not found in folder: "+self.bin_path+"\n"
+        if not os.path.isfile(filename):
+            msg  = "fastjet-config program is not found in folder: "+folder+"\n"
             msg += "Please check that FastJet is properly installed."
             return DetectStatusType.UNFOUND, msg
+        
+        self.bin_file=filename
+        self.bin_path=folder
+        
+        self.logger.debug("fastjet-config program found in: "+self.bin_path)
 
         # Ok
         return DetectStatusType.FOUND, msg
