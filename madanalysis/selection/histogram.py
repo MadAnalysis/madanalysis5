@@ -311,6 +311,11 @@ class Histogram():
             word = word.replace(i,j)
         return word    
 
+    def ReplaceAll_Matplotlib(self,word,dico):
+        for i,j in dico.iteritems():
+            word = word.replace(i,j)
+        return word    
+
     def GetXaxis_Root(self):
         word = self.observable.tlatex + " "
         if len(self.arguments)!=0:
@@ -320,22 +325,24 @@ class Histogram():
         return word    
 
     def GetXaxis_Matplotlib(self):
-        word = self.observable.latex + " "
+        word = "$"+self.observable.tlatex + "$ "
         if len(self.arguments)!=0:
-            word += "[ " + self.ReplaceAll(self.GetStringArguments(),self.dicoargs)+ " ] "
-        if self.observable.plot_unitX_latex!="":
-            word += "("+self.observable.plot_unitX_latex+") "
+            word += "$[ " + self.ReplaceAll(self.GetStringArguments(),self.dicoargs)+ " ]$ "
+        if self.observable.plot_unitX_tlatex!="":
+            word += "$("+self.observable.plot_unitX_tlatex+")$ "
         return word    
 
     def GetYaxis(self):
         word = "Events "
 
+        part_string = self.ReplaceAll(self.GetStringArguments(),self.dicoargs)
+
         if self.observable.name in ['NPID', 'NAPID']:
             word = 'N. of particles';
 
-        if self.observable.name in ['DELTAR', 'DPHI_0_PI', 'DPHI_0_2PI']:
+        elif self.observable.name in ['DELTAR', 'DPHI_0_PI', 'DPHI_0_2PI']:
             if self.GetStringArguments().count('[')!=2 and self.GetStringArguments().count(']')!=2:
-                word='N. of (' + self.ReplaceAll(self.GetStringArguments(),self.dicoargs) + ') pairs'; 
+                word='N. of (' + part_string + ') pairs'; 
 
         elif len(self.arguments)!=0 and self.observable.name!='N':
             # Special case : display 'pair'/'combination' words
@@ -348,19 +355,58 @@ class Histogram():
                    if self.GetStringArguments().count('[')==2 and self.GetStringArguments().count(']')==2 and self.observable.name!='N':
                        word = "Events "
                    else:
-                       word = 'N. of ' + self.ReplaceAll(self.GetStringArguments(),self.dicoargs) + ' pairs '
+                       word = 'N. of ' + part_string + ' pairs '
                elif len(self.arguments[0][0])>2:
                    if self.GetStringArguments().count('[')==len(self.arguments[0][0]) and self.GetStringArguments().count(']')==len(self.arguments[0][0]) and \
                       self.observable.name!='N':
                        word = "Events "
                    else:
-                       word = 'N. of ' + self.ReplaceAll(self.GetStringArguments(),self.dicoargs) + " combinations "
+                       word = 'N. of ' + part_string + " combinations "
                elif self.GetStringArguments().count('[')==1 and self.GetStringArguments().count(']')==1 and self.observable.name!='N':
                    word = "Events "
                else:
-                   word = 'N. of ' + self.ReplaceAll(self.GetStringArguments(),self.dicoargs)
+                   word = 'N. of ' + part_string
             elif self.GetStringArguments().count('[')!=1 and self.GetStringArguments().count(']')!=1:
-               word = 'N. of ' + self.ReplaceAll(self.GetStringArguments(),self.dicoargs)
+               word = 'N. of ' + part_string
         return word
     
+
+    def GetYaxis_Matplotlib(self):
+        word = "$#mathrm{Events}$"
+
+        part_string = self.ReplaceAll_Matplotlib(self.GetStringArguments(),self.dicoargs)
+
+        if self.observable.name in ['NPID', 'NAPID']:
+            word = '$#mathrm{N.}# #mathrm{of}# #mathrm{particles}$';
+
+        elif self.observable.name in ['DELTAR', 'DPHI_0_PI', 'DPHI_0_2PI']:
+            if self.GetStringArguments().count('[')!=2 and self.GetStringArguments().count(']')!=2:
+                word='$#mathrm{N.}# #mathrm{of}# (' + part_string + ')# #mathrm{pairs}$'; 
+
+        elif len(self.arguments)!=0 and self.observable.name!='N':
+            # Special case : display 'pair'/'combination' words
+            if len(self.arguments)==1 and \
+               len(self.arguments[0])==1 and \
+               self.observable.args[0] in [ArgumentType.PARTICLE,\
+                                           ArgumentType.COMBINATION] and \
+               self.arguments[0].SameCombinationNumber():
+               if len(self.arguments[0][0])==2: 
+                   if self.GetStringArguments().count('[')==2 and self.GetStringArguments().count(']')==2 and self.observable.name!='N':
+                       word = "$#mathrm{Events}$"
+                   else:
+                       word = '$#mathrm{N.} #mathrm{of}# ' + part_string + '# #mathrm{pairs}$'
+               elif len(self.arguments[0][0])>2:
+                   if self.GetStringArguments().count('[')==len(self.arguments[0][0]) and self.GetStringArguments().count(']')==len(self.arguments[0][0]) and \
+                      self.observable.name!='N':
+                       word = "$#mathrm{Events}$"
+                   else:
+                       word = '$#mathrm{N.} #mathrm{of}# ' + part_string + "# #mathrm{combinations}$"
+               elif self.GetStringArguments().count('[')==1 and self.GetStringArguments().count(']')==1 and self.observable.name!='N':
+                   word = "$#mathrm{Events}$"
+               else:
+                   word = '$#mathrm{N.}# #mathrm{of}# ' + part_string+'$'
+            elif self.GetStringArguments().count('[')!=1 and self.GetStringArguments().count(']')!=1:
+               word = '$#mathrm{N.}# #mathrm{of}# ' + part_string+'$'
+               
+        return word
 

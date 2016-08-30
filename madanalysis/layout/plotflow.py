@@ -807,19 +807,20 @@ class PlotFlow:
 
         # Label
         outputPy.write('    # Axis\n')
-        outputPy.write("    plt.rc('text',usetex=True)\n")
+        outputPy.write("    plt.rc('text',usetex=False)\n")
 
         # X-axis
         if ref.titleX=="": 
-            axis_titleX = ref.GetXaxis_Root()
+            axis_titleX = ref.GetXaxis_Matplotlib()
         else:
             axis_titleX = ref.titleX
-        axis_titleX = PlotFlow.NiceTitleMatplotlib(axis_titleX)
-        outputPy.write('    plt.xlabel("'+axis_titleX+'",\\\n')
+        axis_titleX = axis_titleX.replace('#DeltaR','#Delta R')
+        axis_titleX = axis_titleX.replace('#','\\')
+        outputPy.write('    plt.xlabel(r"'+axis_titleX+'",\\\n')
         outputPy.write('               fontsize=16,color="black")\n')
 
         # Y-axis
-        axis_titleY = ref.GetYaxis()
+        axis_titleY = ref.GetYaxis_Matplotlib()
 
         # Scale to one ?
         scale2one = False
@@ -829,16 +830,17 @@ class PlotFlow:
             scale2one = True
 
         if scale2one:
-            axis_titleY += " ( scaled to one )"
+            axis_titleY += " $(#mathrm{scaled}\ #mathrm{to}# #mathrm{one})$"
         elif self.main.normalize == NormalizeType.LUMI or \
            self.main.normalize == NormalizeType.LUMI_WEIGHT:
-            axis_titleY += " ( $\mathcal{L}_{\\\\textrm{int}}$ = " + str(self.main.lumi)+ " fb$^{-1}$ )"
+            axis_titleY += " $(#mathcal{L}_{#mathrm{int}} = " + str(self.main.lumi)+ "# #mathrm{fb}^{-1})$ "
         elif self.main.normalize == NormalizeType.NONE:
-            axis_titleY += " (not normalized)"
+            axis_titleY += " $(#mathrm{not}# #mathrm{normalized})$"
 
         if ref.titleY!="": 
-            axis_titleY = PlotFlow.NiceTitleMatplotlib(ref.titleY)
-        outputPy.write('    plt.ylabel("'+axis_titleY+'",\\\n')
+            axis_titleY = PlotFlow.NiceTitle(ref.titleY)
+        axis_titleY = axis_titleY.replace('#','\\')
+        outputPy.write('    plt.ylabel(r"'+axis_titleY+'",\\\n')
         outputPy.write('               fontsize=16,color="black")\n')
         outputPy.write('\n')
 
