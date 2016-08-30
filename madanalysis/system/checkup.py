@@ -325,6 +325,41 @@ class CheckUp():
         return True
 
 
+    @staticmethod
+    def CreateSymbLink(source,destination):
+
+        # Is it a good source
+        if source=='':
+            self.logger.error('source empty for creating symbolic link: '+source)
+
+        # Is there a previous link?
+        if os.path.islink(destination):
+            try:
+                os.remove(destination)
+            except:
+                self.logger.error('impossible to remove the file '+destination)
+                return False
+
+        # Does the destination exist but it is a file or a folder
+        elif os.path.isfile(destination):
+            self.logger.error('creating symbolic link: destination already exist and it is file')
+            return False
+        elif os.path.isdir(destination):
+            self.logger.error('creating symbolic link: destination already exist and it is folder')
+            return False
+
+        # Creating a link
+        logging.debug('Creating symbolic link from '+source)
+        logging.debug('                       to   '+destination+' ...')
+        try:
+            os.symlink(source,destination)
+        except:
+            self.logger.error('impossible to create the link '+destination)
+            return False
+
+        return True
+
+        
     def SetFolder(self):
 
         # Reset the pieces of environment variables
@@ -376,17 +411,7 @@ class CheckUp():
         if self.archi_info.has_root:
             for source in self.archi_info.root_original_bins:
                 destination=os.path.normpath(folderSymLinkBin+'/'+source.split('/')[-1])
-                if os.path.isfile(destination):
-                    try:
-                        os.remove(destination)
-                    except:
-                        self.logger.error('impossible to remove the file '+destination)
-                logging.debug('Creating symbolic link from '+source)
-                logging.debug('                       to   '+destination+' ...')
-                try:
-                    os.symlink(source,destination)
-                except:
-                    self.logger.error('impossible to create the link '+destination)
+                CheckUp.CreateSymbLink(source,destination)
 
             if self.archi_info.root_priority:
                 self.archi_info.toLDPATH1.append(self.archi_info.root_lib_path)
@@ -399,17 +424,7 @@ class CheckUp():
         if self.archi_info.has_fastjet:
             for source in self.archi_info.fastjet_original_bins:
                 destination=os.path.normpath(folderSymLinkBin+'/'+source.split('/')[-1])
-                if os.path.isfile(destination):
-                    try:
-                        os.remove(destination)
-                    except:
-                        self.logger.error('impossible to remove the file '+destination)
-                logging.debug('Creating symbolic link from '+source)
-                logging.debug('                       to   '+destination+' ...')
-                try:
-                    os.symlink(source,destination)
-                except:
-                    self.logger.error('impossible to create the link '+destination)
+                CheckUp.CreateSymbLink(source,destination)
 
             if self.archi_info.fastjet_priority:
 #                self.archi_info.toPATH1.append(self.archi_info.fastjet_bin_path)
@@ -424,17 +439,8 @@ class CheckUp():
         if self.archi_info.has_zlib:
             for source in self.archi_info.zlib_original_libs:
                 destination=os.path.normpath(folderSymLinkLib+'/'+source.split('/')[-1])
-                if os.path.isfile(destination):
-                    try:
-                        os.remove(destination)
-                    except:
-                        self.logger.error('impossible to remove the file '+destination)
-                logging.debug('Creating symbolic link from '+source)
-                logging.debug('                       to   '+destination+' ...')
-                try:
-                    os.symlink(source,destination)
-                except:
-                    self.logger.error('impossible to create the link '+destination)
+                CheckUp.CreateSymbLink(source,destination)
+
 #            if self.archi_info.zlib_priority:
 #                self.archi_info.toLDPATH1.append(self.archi_info.zlib_lib_path)
 #            else:
@@ -444,17 +450,8 @@ class CheckUp():
         if self.archi_info.has_delphes:
             for source in self.archi_info.delphes_original_libs:
                 destination=os.path.normpath(folderSymLinkLib+'/'+source.split('/')[-1])
-                if os.path.isfile(destination):
-                    try:
-                        os.remove(destination)
-                    except:
-                        self.logger.error('impossible to remove the file '+destination)
-                logging.debug('Creating symbolic link from '+source)
-                logging.debug('                       to   '+destination+' ...')
-                try:
-                    os.symlink(source,destination)
-                except:
-                    self.logger.error('impossible to create the link '+destination)
+                CheckUp.CreateSymbLink(source,destination)
+
 #            if self.archi_info.delphes_priority:
 #                for path in self.archi_info.delphes_lib_paths:
 #                    self.archi_info.toLDPATH1.append(path)
@@ -466,17 +463,7 @@ class CheckUp():
         if self.archi_info.has_delphesMA5tune:
             for source in self.archi_info.delphesMA5tune_original_libs:
                 destination=os.path.normpath(folderSymLinkLib+'/'+source.split('/')[-1])
-                if os.path.isfile(destination):
-                    try:
-                        os.remove(destination)
-                    except:
-                        self.logger.error('impossible to remove the file '+destination)
-                logging.debug('Creating symbolic link from '+source)
-                logging.debug('                       to   '+destination+' ...')
-                try:
-                    os.symlink(source,destination)
-                except:
-                    self.logger.error('impossible to create the link '+destination)
+                CheckUp.CreateSymbLink(source,destination)
 #            if self.archi_info.delphesMA5tune_priority:
 #                for path in self.archi_info.delphesMA5tune_lib_paths:
 #                    self.archi_info.toLDPATH1.append(path)
