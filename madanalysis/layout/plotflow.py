@@ -842,6 +842,14 @@ class PlotFlow:
         outputPy.write('               fontsize=16,color="black")\n')
         outputPy.write('\n')
 
+        # Tag Log/Linear
+        is_logx=False
+        if ref.logX and ntot != 0:
+            is_logx=True
+        is_logy=False
+        if ref.logY and ntot != 0:
+            is_logy=True
+
         # Bound y
         outputPy.write('    # Boundary of y-axis\n')
         myweights=''
@@ -857,21 +865,62 @@ class PlotFlow:
                     myweights+=','
                 myweights+=histos[ind].name+'_'+str(ind)+'_weights.max()'
             myweights+='])'
-        outputPy.write('    plt.gca().set_ylim(0,('+myweights+').max()*1.1)\n')
+        outputPy.write('    ymax=('+myweights+').max()*1.1\n')
+        outputPy.write('    ')
+        if is_logy:
+            outputPy.write('#')
+        outputPy.write('ymin=0 # linear scale\n')
+
+        myweights=''
+        if stackmode:
+            for ind in range(0,len(histos)):
+                if ind>=1:
+                    myweights+='+'
+                myweights+=histos[ind].name+'_'+str(ind)+'_weights'
+        else:
+            myweights='numpy.array(['
+            for ind in range(0,len(histos)):
+                if ind>=1:
+                    myweights+=','
+                myweights+=histos[ind].name+'_'+str(ind)+'_weights.min()'
+            myweights+='])'
+        outputPy.write('    ')
+        if not is_logy:
+            outputPy.write('#')
+        outputPy.write('ymin=min(1e-2, min(x for x in ('+myweights+') if x)/100.) # log scale\n')
+        outputPy.write('    plt.gca().set_ylim(ymin,ymax)\n')
         outputPy.write('\n')
 
-        # Log
-        outputPy.write('    # Log/Linear scale\n')
-        logx='linear'
-        if ref.logX and ntot != 0:
-            logx='log'
-        logy='linear'
-        if ref.logY and ntot != 0:
-            logy='log'
-        outputPy.write('    plt.gca().set_xscale("'+logx+'")\n')
-        outputPy.write('    plt.gca().set_yscale("'+logy+'")\n')
+        # X axis
+        outputPy.write('    # Log/Linear scale for X-axis\n')
+        # - Linear
+        outputPy.write('    ')
+        if is_logx:
+            outputPy.write('#')
+        outputPy.write('plt.gca().set_xscale("linear")\n')
+        # - Log
+        outputPy.write('    ')
+        if not is_logx:
+            outputPy.write('#')
+        outputPy.write('plt.gca().set_xscale("log",nonposx="clip")\n')
         outputPy.write('\n')
 
+
+        # Y axis
+        outputPy.write('    # Log/Linear scale for Y-axis\n')
+        # - Linear
+        outputPy.write('    ')
+        if is_logy:
+            outputPy.write('#')
+        outputPy.write('plt.gca().set_yscale("linear")\n')
+        # - Log
+        outputPy.write('    ')
+        if not is_logy:
+            outputPy.write('#')
+        outputPy.write('plt.gca().set_yscale("log",nonposy="clip")\n')
+        outputPy.write('\n')
+
+ 
         # Labels
         if frequencyhisto:
             outputPy.write('    # Labels for x-Axis\n')
