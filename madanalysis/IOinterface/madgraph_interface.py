@@ -37,6 +37,8 @@ class MadGraphInterface():
         self.invisible_pdgs = []
         self.recastinfo = RecastConfiguration()
         self.has_root = True
+        self.has_matplotlib = True
+        self.has_delphes = True
 
     class InvalidCard(Exception):
         pass
@@ -90,6 +92,14 @@ class MadGraphInterface():
 
 
     def generate_parton_card(self, ProcessesDefinitions, ProcessesLists):
+        self.card.append('# Histogram drawer (options: matplotlib or root)')
+        if self.has_root:
+            self.card.append('set main.graphic_render = root\n')
+        elif self.has_matplotlib:
+            self.card.append('set main.graphic_render = matplotlib\n')
+        else:
+            self.logger.warning('plots cannot be generated (neither root nor matplotlib can be found')
+            self.card.append('set main.graphic_render = none\n')
 
         # global observables
         self.card.append('# Global event variables')
@@ -120,7 +130,7 @@ class MadGraphInterface():
         self.card.append('set main.fastsim.tau_id.efficiency = 1.0')
         self.card.append('set main.fastsim.tau_id.misid_ljet = 0.0')
 
-        if self.has_root:
+        if self.has_root and self.has_delphes:
             self.card.append('\n# Reconstruction using Delphes')
             self.card.append('@MG5aMC reconstruction_name = CMSReco')
             self.card.append('@MG5aMC reco_output = root')
@@ -128,7 +138,7 @@ class MadGraphInterface():
             self.card.append('set main.fastsim.detector = cms-ma5tune')
 
 
-        if self.has_root:
+        if self.has_root and self.has_delphes:
             self.card.append('\n# Analysis using both reco')
             self.card.append('@MG5aMC analysis_name = analysis1')
             self.card.append('@MG5aMC set_reconstructions = [\'BasicReco\', \'CMSReco\']')
@@ -231,7 +241,7 @@ class MadGraphInterface():
                     self.card.append('plot DELTAR('+','.join(perm)+') 40 0 10 [logY]')
 
         # recasting
-        if self.has_root:
+        if self.has_root and self.has_delphes:
             self.card.append('\n# Recasting')
             self.card.append('@MG5aMC recasting_commands')
             self.card.append('set main.recast = on')

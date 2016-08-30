@@ -87,7 +87,6 @@ class DetectFastjet:
         # Ok
         return DetectStatusType.FOUND, msg
 
-                
     def ToolsDetection(self):
         msg = ''
 

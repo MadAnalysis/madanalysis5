@@ -26,12 +26,12 @@
 
 # -----ZLIB-----
 # zlib_veto     = 0 # 0=No, 1=Yes
-# zlib_includes = /usr/include
-# zlib_libs = /usr/lib
+zlib_includes = /usr/include
+zlib_libs = /usr/lib
 
 # -----FASTJET-----
 # fastjet_veto     = 0 # 0=No, 1=Yes
-# fastjet_bin_path = /home/econte/MA5/v1.5beta/tools/fastjet/bin
+fastjet_bin_path = /Users/fuks/Work/tools/fastjet-3.0.6/build/bin
 
 # -----PDFLATEX-----
 # pdflatex_veto = 0 # 0=No, 1=Yes
