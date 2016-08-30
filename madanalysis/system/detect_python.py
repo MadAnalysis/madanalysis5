@@ -33,7 +33,7 @@ from shell_command  import ShellCommand
 from madanalysis.enumeration.detect_status_type import DetectStatusType
 
 
-class DetectMake:
+class DetectPython:
 
     def __init__(self, archi_info, user_info, session_info, debug):
         # mandatory options
@@ -41,70 +41,78 @@ class DetectMake:
         self.user_info    = user_info
         self.session_info = session_info
         self.debug        = debug
-        self.name      = 'GNU Make'
+        self.name      = 'Python'
         self.mandatory = True
         self.log       = []
         self.logger    = logging.getLogger('madanalysis')
-        self.moreInfo='For more details, type: config_info make'
+        self.moreInfo='For more details, type: config_info python'
         # adding what you want here
-        self.version = ""
 
 
     def PrintDisableMessage(self):
-        self.logger.warning("GNU Make not found. Please install it before using MadAnalysis 5")
+        self.logger.warning("Python not found. Please install it before using MadAnalysis 5")
         
 
     def AutoDetection(self):
-        msg = ''
-        
-        # Which
-        result = ShellCommand.Which('make',all=False,mute=True)
-        if len(result)==0:
-            msg = "GNU Make not found. Please install it before using MadAnalysis 5"
-            return DetectStatusType.UNFOUND, msg
-        if self.debug:
-            self.logger.debug("  which:         " + str(result[0]))
-
-        # Ok
-        return DetectStatusType.FOUND, msg
+        return DetectStatusType.FOUND,''
 
 
     def ExtractInfo(self):
+        
+        # Debug general
+        if self.debug:
+            self.logger.debug("")
+            self.logger.debug("  Python release:         " + str(platform.python_version()))
+            self.logger.debug("  Python build:           " + str(platform.python_build()))
+            self.logger.debug("  Python compiler:        " + str(platform.python_compiler()))
+            self.logger.debug("  Python prefix:          " + str(sys.prefix))
+            self.logger.debug("  Python executable used: " + str(sys.executable))
+
+        # Which python
+        if self.debug:
+            self.logger.debug("  sys.executable:         " + str(sys.executable))
+            result = ShellCommand.Which('python',all=False,mute=True)
+            if len(result)==0:
+                self.logger.error('python compiler not found. Please install it before ' + \
+	             'using MadAnalysis 5')
+                return False
+            self.logger.debug("  which:                  " + str(result[0]))
+
         # Which all
         if self.debug:
-            result = ShellCommand.Which('make',all=True,mute=True)
+            result = ShellCommand.Which('python',all=True,mute=True)
             if len(result)==0:
-                self.logger.error('GNU Make not found. Please install it before ' + \
+                self.logger.error('g++ compiler not found. Please install it before ' + \
 	                 'using MadAnalysis 5')
                 return False
-            self.logger.debug("  which-all:     ")
+            self.logger.debug("  which-all:              ")
             for file in result:
                 self.logger.debug("    - "+str(file))
 
-        # Getting the version
-        ok, out, err = ShellCommand.ExecuteWithCapture(['make','--version'],'./')
-        if not ok:
-            self.logger.error('GNU Make not found. Please install it before ' + \
-	             'using MadAnalysis 5')
-            return False
-        lines=out.split('\n')
-        if len(lines)==0:
-             self.logger.error('command "make --version" seems to not give the GNU Make version')
-             return False
-        firstline=lines[0]
-        firstline=firstline.lstrip()
-        firstline=firstline.rstrip()
-        self.version = str(firstline)
+        # Python paths
         if self.debug:
-            self.logger.debug("  version:       " + self.version)
-
+            self.logger.debug("  Python internal paths: ")
+            tmp = sys.path
+            for path in tmp:
+                self.logger.debug("    - "+path)
+            self.logger.debug("  $PYTHONPATH: ")
+            try:
+                tmp = os.environ['PYTHONPATH']
+            except:
+                tmp = []
+            if len(tmp)==0:
+                self.logger.debug("    EMPTY OR NOT FOUND")
+            else:
+                tmp = tmp.split(':')
+                for path in tmp:
+                    self.logger.debug("    - "+path)
+            self.logger.debug("")
 
         # Ok
         return True
 
 
     def SaveInfo(self):
-        self.archi_info.make_version = self.version
         return True
 
 

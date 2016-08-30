@@ -76,6 +76,9 @@ class DetectManager():
         elif package=='pyroot':
             from madanalysis.system.detect_pyroot import DetectPyRoot
             checker=DetectPyRoot(self.archi_info, self.user_info, self.session_info, self.debug)
+        elif package=='python':
+            from madanalysis.system.detect_python import DetectPython
+            checker=DetectPython(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='gpp':
             from madanalysis.system.detect_gpp import DetectGpp
             checker=DetectGpp(self.archi_info, self.user_info, self.session_info, self.debug)

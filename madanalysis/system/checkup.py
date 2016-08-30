@@ -286,13 +286,12 @@ class CheckUp():
     def CheckMandatoryPackages(self):
         # Mandatory packages
         self.logger.info("Checking mandatory packages:")
-        checker2 = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
 
-        if not checker2.checkPython():
+        if not self.checker.Execute('python'):
             return False
         if not self.checker.Execute('gpp'):
             return False
-        if not checker2.checkMake():
+        if not self.checker.Execute('make'):
             return False
         return True
 
