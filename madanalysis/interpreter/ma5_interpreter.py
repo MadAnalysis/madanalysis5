@@ -133,7 +133,7 @@ class MA5Interpreter(Interpreter):
             raise MA5Configuration('Issue with the configuration')
         self.ma5_environ = dict(os.environ)
         main.madgraph.has_root = main.archi_info.has_root
-        main.madgraph.has_delphes = main.archi_info.has_delphes
+        main.madgraph.has_delphes = main.archi_info.has_delphes or main.archi_info.has_delphesMA5tune
         main.madgraph.has_matplotlib = main.session_info.has_matplotlib
 
         # Initializing the interpreter and compiling if needed
