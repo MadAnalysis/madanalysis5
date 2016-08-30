@@ -349,8 +349,8 @@ class CheckUp():
             return False
 
         # Creating a link
-        logging.debug('Creating symbolic link from '+source)
-        logging.debug('                       to   '+destination+' ...')
+        logging.getLogger('MA5').debug('Creating symbolic link from '+source)
+        logging.getLogger('MA5').debug('                       to   '+destination+' ...')
         try:
             os.symlink(source,destination)
         except:

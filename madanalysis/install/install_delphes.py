@@ -506,6 +506,7 @@ class InstallDelphes:
             self.main.archi_info.delphes_lib_paths = []
             self.main.archi_info.delphes_inc_paths = []
             self.main.archi_info.delphes_lib = ""
+            self.main.archi_info.delphes_original_libs = []
         return True
 
     def Activate(self):
@@ -521,6 +522,8 @@ class InstallDelphes:
             delpath=os.path.normpath(self.main.archi_info.delphes_lib_paths[0])
             deldeac = delpath.replace("DEACT_","")
             self.main.archi_info.delphes_lib=self.main.archi_info.delphes_lib.replace("DEACT_","")
+            self.main.archi_info.delphes_original_libs =\
+               [x.replace("DEACT_","") for x in self.main.archi_info.delphes_original_libs]
             self.main.archi_info.delphes_inc_paths =\
                 [ x.replace("DEACT_","") for x in self.main.archi_info.delphes_inc_paths ]
             if len(self.main.archi_info.delphes_inc_paths)>2:

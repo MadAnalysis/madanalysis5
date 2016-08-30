@@ -321,6 +321,7 @@ class InstallDelphesMA5tune:
             self.main.archi_info.delphesMA5tune_lib_paths = []
             self.main.archi_info.delphesMA5tune_inc_paths = []
             self.main.archi_info.delphesMA5tune_lib = ""
+            self.main.archi_info.delphesMA5tune_original_libs = []
         return True
 
     def Activate(self):
@@ -336,6 +337,8 @@ class InstallDelphesMA5tune:
             delpath=os.path.normpath(self.main.archi_info.delphesMA5tune_lib_paths[0])
             deldeac = delpath.replace("DEACT_","")
             self.main.archi_info.delphesMA5tune_lib=self.main.archi_info.delphesMA5tune_lib.replace("DEACT_","")
+            self.main.archi_info.delphesMA5tune_original_libs =\
+              [x.replace("DEACT_","") for x in self.main.archi_info.delphesMA5tune_original_libs]
             self.main.archi_info.delphesMA5tune_inc_paths =\
                 [ x.replace("DEACT_","") for x in self.main.archi_info.delphesMA5tune_inc_paths ]
             if len(self.main.archi_info.delphesMA5tune_inc_paths)>2:

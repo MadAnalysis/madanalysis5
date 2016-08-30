@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+133  1.5.10   (2016/08/30) fuks:    Fixing last bugs for the ma5-mg5 interface 
+
 131  1.5.9    (2016/08/30) fuks:    Fixing ma5-mg5 interface issues 
 
 127  1.5.8    (2016/08/30) fuks:    Fixing issues related to the mg5_amc interface 
