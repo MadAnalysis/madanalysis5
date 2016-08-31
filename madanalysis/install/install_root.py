@@ -38,7 +38,8 @@ class InstallRoot:
         self.downloaddir= os.path.normpath(self.tmpdir + '/MA5_downloads/')
         self.untardir = os.path.normpath(self.tmpdir + '/MA5_root/')
         self.ncores     = 1
-        self.files = {"root.tar.gz" : "ftp://root.cern.ch/root/root_v5.34.18.source.tar.gz"}
+#        self.files = {"root.tar.gz" : "ftp://root.cern.ch/root/root_v5.34.18.source.tar.gz"}
+        self.files = {"root.tar.gz" : "https://root.cern.ch/download/root_v6.04.08.source.tar.gz"}
 
 
     def Detect(self):
@@ -93,9 +94,14 @@ class InstallRoot:
         self.tmpdir=packagedir
         return True
 
+
+    def GetNcores(self):
+        self.ncores = InstallService.get_ncores(self.main.archi_info.ncores,\
+                                                self.main.forced)
+
     def Configure(self):
         # Input
-        theCommands=['./configure','--prefix='+self.installdir]
+        theCommands=['./configure','--prefix='+self.installdir,'--disable-gfal']
         logname=os.path.normpath(self.installdir+'/configuration.log')
         # Execute
         logging.debug('shell command: '+' '.join(theCommands))
@@ -113,6 +119,23 @@ class InstallRoot:
     def Install(self):
         # Input
         theCommands=['make', 'install']
+        logname=os.path.normpath(self.installdir+'/compilation.log')
+        # Execute
+        logging.debug('shell command: '+' '.join(theCommands))
+        ok, out= ShellCommand.ExecuteWithLog(theCommands,\
+                                             logname,\
+                                             self.tmpdir,\
+                                             silent=False)
+        # return result
+        if not ok:
+            logging.error('impossible to build the project. For more details, see the log file:')
+            logging.error(logname)
+        return ok
+
+
+    def Build(self):
+        # Input
+        theCommands=['make','-j'+str(self.ncores)]
         logname=os.path.normpath(self.installdir+'/compilation.log')
         # Execute
         logging.debug('shell command: '+' '.join(theCommands))
@@ -154,9 +177,9 @@ class InstallRoot:
                 elif dir == self.installdir+"/lib":
                     path = os.path.join(os.path.join(self.installdir, "lib"), "root")
                     listdir = os.listdir(path)
-                    libs = ["libHist.so", "libCore.so", "libCint.so", "libGraf3d.so", "libMathCore.so",\
-                            "libMatrix.so", "libRIO.so", "libNet.so", "libGraf.so", "libThread.so", \
-                            "libGpad.so", "libTree.so", "libRint.so", "libPostscript.so", "libPhysics.so"]
+                    libs = ["libHist.so",   "libCore.so", "libGraf3d.so", "libMathCore.so",\
+                            "libMatrix.so", "libRIO.so",  "libNet.so",    "libGraf.so",       "libThread.so", \
+                            "libGpad.so",   "libTree.so", "libRint.so",   "libPostscript.so", "libPhysics.so"]
                     sl = set(libs)
                     sld = set(listdir)
                     samefiles = list(sl.intersection(sld))

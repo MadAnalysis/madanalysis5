@@ -326,8 +326,7 @@ class CheckUp():
         return True
 
 
-    @staticmethod
-    def CreateSymbLink(source,destination):
+    def CreateSymLink(self,source,destination):
 
         # Is it a good source
         if source=='':
@@ -412,27 +411,27 @@ class CheckUp():
         if self.archi_info.has_root:
             for source in self.archi_info.root_original_bins:
                 destination=os.path.normpath(folderSymLinkBin+'/'+source.split('/')[-1])
-                CheckUp.CreateSymbLink(source,destination)
+                self.CreateSymLink(source,destination)
 
-            if self.archi_info.root_priority:
+            if 1: #self.archi_info.root_priority:
                 self.archi_info.toLDPATH1.append(self.archi_info.root_lib_path)
-#                self.archi_info.toPATH1.append(self.archi_info.root_bin_path)
+                self.archi_info.toPATH1.append(self.archi_info.root_bin_path)
             else:
                 self.archi_info.toLDPATH2.append(self.archi_info.root_lib_path)
-#                self.archi_info.toPATH2.append(self.archi_info.root_bin_path)
+                self.archi_info.toPATH2.append(self.archi_info.root_bin_path)
 
         # FASTJET
         if self.archi_info.has_fastjet:
             for source in self.archi_info.fastjet_original_bins:
                 destination=os.path.normpath(folderSymLinkBin+'/'+source.split('/')[-1])
-                CheckUp.CreateSymbLink(source,destination)
+                self.CreateSymLink(source,destination)
 
-            if self.archi_info.fastjet_priority:
-#                self.archi_info.toPATH1.append(self.archi_info.fastjet_bin_path)
+            if 1: #self.archi_info.fastjet_priority:
+                self.archi_info.toPATH1.append(self.archi_info.fastjet_bin_path)
                 for path in self.archi_info.fastjet_lib_paths:
                     self.archi_info.toLDPATH1.append(path)
             else:
-#                self.archi_info.toPATH2.append(self.archi_info.fastjet_bin_path)
+                self.archi_info.toPATH2.append(self.archi_info.fastjet_bin_path)
                 for path in self.archi_info.fastjet_lib_paths:
                     self.archi_info.toLDPATH2.append(path)
 
@@ -440,7 +439,7 @@ class CheckUp():
         if self.archi_info.has_zlib:
             for source in self.archi_info.zlib_original_libs:
                 destination=os.path.normpath(folderSymLinkLib+'/'+source.split('/')[-1])
-                CheckUp.CreateSymbLink(source,destination)
+                self.CreateSymLink(source,destination)
 
 #            if self.archi_info.zlib_priority:
 #                self.archi_info.toLDPATH1.append(self.archi_info.zlib_lib_path)
@@ -451,7 +450,7 @@ class CheckUp():
         if self.archi_info.has_delphes:
             for source in self.archi_info.delphes_original_libs:
                 destination=os.path.normpath(folderSymLinkLib+'/'+source.split('/')[-1])
-                CheckUp.CreateSymbLink(source,destination)
+                self.CreateSymLink(source,destination)
 
 #            if self.archi_info.delphes_priority:
 #                for path in self.archi_info.delphes_lib_paths:
@@ -464,7 +463,7 @@ class CheckUp():
         if self.archi_info.has_delphesMA5tune:
             for source in self.archi_info.delphesMA5tune_original_libs:
                 destination=os.path.normpath(folderSymLinkLib+'/'+source.split('/')[-1])
-                CheckUp.CreateSymbLink(source,destination)
+                self.CreateSymLink(source,destination)
 #            if self.archi_info.delphesMA5tune_priority:
 #                for path in self.archi_info.delphesMA5tune_lib_paths:
 #                    self.archi_info.toLDPATH1.append(path)

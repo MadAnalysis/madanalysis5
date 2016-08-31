@@ -70,20 +70,39 @@ class DetectRoot:
             return DetectStatusType.UNFOUND, msg
 
         self.logger.debug("User setting: root bin path is specified.")
-        self.bin_path=os.path.normpath(self.user_info.root_bin)
-        self.logger.debug("root-config program found in: "+self.bin_path)
+        folder=os.path.normpath(self.user_info.root_bin)
+        self.logger.debug("root-config program found in: "+folder)
 
         # Detection of root-config
         self.logger.debug("Detecting root-config in the path specified by the user ...")
-        if not os.path.isfile(self.bin_path+'/root-config'):
-            msg  = "root-config program is not found in folder: "+self.bin_path+"\n"
+        if not os.path.isfile(folder+'/root-config'):
+            msg  = "root-config program is not found in folder: "+folder+"\n"
             msg += "Please check that ROOT is properly installed."
             return DetectStatusType.UNFOUND, msg
 
         # Ok
+        self.bin_path=folder
+        self.bin_file=folder+'/root-config'
         return DetectStatusType.FOUND, msg
 
                 
+    def ToolsDetection(self):
+        msg = ''
+
+        # Detection of root-config
+        self.logger.debug("Detecting root-config in the tools folder ...")
+        folder = os.path.normpath(self.archi_info.ma5dir+'/tools/root/bin')
+        if not os.path.isfile(folder+'/root-config'):
+            msg  = "root-config program is not found in folder: "+folder+"\n"
+            msg += "Please check that ROOT is properly installed."
+            return DetectStatusType.UNFOUND, msg
+
+        # Ok
+        self.bin_path=folder
+        self.bin_file=folder+'/root-config'
+        return DetectStatusType.FOUND, msg
+
+
     def AutoDetection(self):
         msg = ''
 
