@@ -52,6 +52,7 @@ class ReaderTextBase : public ReaderBase
 
   /// Streaming for reading input
   std::istream*  input_;
+  std::ifstream* input_fifo_;
 
   /// Name of the file (without prefix such as file: or rfio:)
   std::string filename_;

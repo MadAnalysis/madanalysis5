@@ -36,6 +36,7 @@ import madanalysis.interpreter.cmd_base as CmdBase
 import logging
 import glob
 import os
+import stat
 
 class CmdImport(CmdBase.CmdBase):
     """Command IMPORT"""
@@ -347,7 +348,7 @@ class CmdImport(CmdBase.CmdBase):
         files=[]
         recowarning = False
         for file in glob.glob(filename):
-            if not os.path.isfile(file):
+            if not os.path.isfile(file) and not stat.S_ISFIFO(os.stat(file).st_mode):
                 continue
             if self.main.IsGoodFormat(file):
                 files.append(file)

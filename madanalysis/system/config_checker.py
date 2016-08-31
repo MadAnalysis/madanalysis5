@@ -283,7 +283,7 @@ class ConfigChecker:
                 self.logger.warning("Gzip format will be disabled.")
                 self.logger.warning("To enable this format, please type 'install zlib'.")
                 return False
-            self.archi_info.zlib_original_libs.extend(myfiles)
+            self.archi_info.zlib_original_libs.extend([fl for fl in myfiles if not fl in self.archi_info.zlib_original_libs])
 
 
         # Checking zlib can be found in other folders
@@ -316,7 +316,7 @@ class ConfigChecker:
                 self.logger.warning("Gzip format will be disabled.")
                 self.logger.warning("To enable this format, please type 'install zlib'.")
                 return False
-            self.archi_info.zlib_original_libs.extend(myfiles)
+            self.archi_info.zlib_original_libs.extend([fl for fl in myfiles if not fl in self.archi_info.zlib_original_libs])
 
         self.archi_info.libraries['ZLib']=self.archi_info.zlib_lib+":"+str(os.stat(self.archi_info.zlib_lib).st_mtime)
         self.archi_info.zlib_priority=(force or ma5installation)
@@ -466,7 +466,7 @@ class ConfigChecker:
 #                    self.logger.warning("Delphes ROOT format will be disabled.")
 #                    self.logger.warning("To enable this format, please type 'install delphes'.")
                 return False
-            self.archi_info.delphes_original_libs.extend(myfiles)
+            self.archi_info.delphes_original_libs.extend([fl for fl in myfiles if not fl in self.archi_info.delphes_original_libs])
 
         # Checking Delphes can be found in other folders
         if not force and not ma5installation:
@@ -508,7 +508,7 @@ class ConfigChecker:
                     self.logger.warning("Delphes format will be disabled.")
                     self.logger.warning("To enable this format, please type 'install delphes'.")
                 return False
-            self.archi_info.delphes_original_libs.extend(myfiles)
+            self.archi_info.delphes_original_libs.extend([fl for fl in myfiles if not fl in self.archi_info.delphes_original_libs])
             if getpaths:
                self.libs=self.libs[:-1]
 
@@ -658,7 +658,7 @@ class ConfigChecker:
             if not os.path.normpath(mypath) in self.archi_info.delphesMA5tune_lib_paths:
                 self.archi_info.delphesMA5tune_lib_paths.append(os.path.normpath(mypath))
             self.archi_info.delphesMA5tune_lib      = os.path.normpath(myfiles[0])
-            self.archi_info.delphesMA5tune_original_libs.extend(myfiles)
+            self.archi_info.delphesMA5tune_original_libs.extend([fl for fl in myfiles if not fl in self.archi_info.delphesMA5tune_original_libs])
             if not getpaths:
                 self.logger.debug("-> result for lib paths: "+str(self.archi_info.delphesMA5tune_lib_paths))
                 self.logger.debug("-> result for lib files: "+str(self.archi_info.delphesMA5tune_lib))

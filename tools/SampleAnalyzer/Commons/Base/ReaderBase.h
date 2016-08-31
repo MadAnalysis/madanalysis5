@@ -57,6 +57,9 @@ class ReaderBase
   /// Allowing to read compressed file
   MAbool compress_;
 
+  /// Allowing to read fifo file
+  MAbool fifo_;
+
   /// User configuration
   Configuration cfg_;
 
@@ -108,6 +111,14 @@ class ReaderBase
   {
     if (name.size()<4) return false;
     if (name.find(".gz")==name.size()-3) return true;
+    return false;
+  }
+
+  /// Is FIFO file ?
+  static MAbool IsFIFOMode(const std::string& name)
+  {
+    if (name.size()<6) return false;
+    if (name.find(".fifo")==name.size()-5) return true;
     return false;
   }
 

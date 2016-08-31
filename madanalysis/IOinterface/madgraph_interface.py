@@ -60,7 +60,7 @@ class MadGraphInterface():
         if card_type=='parton':
             self.card.append('@MG5aMC inputs = *.lhe\n')
         elif card_type=='hadron':
-            self.card.append('@MG5aMC inputs = *.hepmc, *.hep, *.stdhep, *.lhco\n')
+            self.card.append('@MG5aMC inputs = *.hepmc, *.hep, *.stdhep, *.lhco, *.fifo\n')
             self.card.append('# Reconstruction using FastJet')
             self.card.append('@MG5aMC reconstruction_name = BasicReco')
             self.card.append('@MG5aMC reco_output = lhe')
@@ -73,7 +73,7 @@ class MadGraphInterface():
         self.logger.info('Getting the multiparticle definitions')
         for line in MG5history:
             if 'define' in line:
-                myline = line.split()
+                myline = line.split('#')[0].split()
                 self.logger.debug('pdgs = '+str(myline[3:]))
                 mypdgs= [self.get_pdg_code(prt) for prt in myline[3:]]
                 self.multiparticles[myline[1]]=sorted(sum([e if isinstance(e,list) else [e] for e in mypdgs],[]))
@@ -129,6 +129,7 @@ class MadGraphInterface():
         self.card.append('# tau-tagging')
         self.card.append('set main.fastsim.tau_id.efficiency = 1.0')
         self.card.append('set main.fastsim.tau_id.misid_ljet = 0.0')
+        self.card.append('set main.stacking_method = normalize2one')
 
         if self.has_root and self.has_delphes:
             self.card.append('\n# Reconstruction using Delphes')
@@ -402,16 +403,20 @@ class MadGraphInterface():
 
     # from pdg code to name
     def get_pdg_code(self,prt):
-        for key, value in self.model.get('particle_dict').iteritems():
-            if value['antiname']==prt and not value['is_part']:
-                return key
-            elif value['name']==prt and value['is_part']:
-                return key
-        if prt in self.multiparticles.keys():
-            return self.multiparticles[prt]
-        else:
-            self.logger.error("  ** Problem with the multiparticle definitions")
-            raise self.MultiParts("  ** Problem with the multiparticle definitions")
+        try:
+            if isinstance( int(prt), int ):
+               return prt
+        except:
+            for key, value in self.model.get('particle_dict').iteritems():
+                if value['antiname']==prt and not value['is_part']:
+                    return key
+                elif value['name']==prt and value['is_part']:
+                    return key
+            if prt in self.multiparticles.keys():
+                return self.multiparticles[prt]
+            else:
+                self.logger.error("  ** Problem with the multiparticle definitions")
+                raise self.MultiParts("  ** Problem with the multiparticle definitions")
 
     # adding the particle definitions
     def get_invisible(self, card_type='parton'):

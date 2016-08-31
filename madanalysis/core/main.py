@@ -145,6 +145,12 @@ class Main():
                 zipsamples.append(item+'.gz')
             samples.extend(zipsamples)
 
+        # fifo format
+        fifosamples = []
+        for item in samples:
+            fifosamples.append(item+'.fifo')
+        samples.extend(fifosamples)
+
         return samples
 
 
