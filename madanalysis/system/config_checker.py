@@ -227,7 +227,7 @@ class ConfigChecker:
         if self.user_info.zlib_veto:
             self.logger.debug("User setting: veto on zlib module")
             self.PrintFAIL(package_name,warning=True)
-	    self.logger.warning("Library called 'zlib' disabled. Gzip format will be disabled.")
+            self.logger.warning("Library called 'zlib' disabled. Gzip format will be disabled.")
             return False
 
         # Does the user force the paths?

@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+141  1.5.13   (2016/09/01) fuks:    gzip fix 
+
 140  1.5.12   (2016/09/01) fuks:    FIFO step 1 
 
 137  1.5.11   (2016/08/30) fuks:    Few bugs in the detection module 
