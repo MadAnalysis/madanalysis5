@@ -36,9 +36,10 @@ class MadGraphInterface():
         self.invisible_particles = []
         self.invisible_pdgs = []
         self.recastinfo = RecastConfiguration()
-        self.has_root = True
-        self.has_matplotlib = True
-        self.has_delphes = True
+        self.has_root           = True
+        self.has_matplotlib     = True
+        self.has_delphes        = True
+        self.has_delphesMA5tune = True
 
     class InvalidCard(Exception):
         pass
@@ -137,9 +138,15 @@ class MadGraphInterface():
             self.card.append('@MG5aMC reco_output = root')
             self.card.append('set main.fastsim.package  = delphes')
             self.card.append('set main.fastsim.detector = cms-ma5tune')
+        elif self.has_root and self.has_delphesMA5tune:
+            self.card.append('\n# Reconstruction using Delphes')
+            self.card.append('@MG5aMC reconstruction_name = CMSReco')
+            self.card.append('@MG5aMC reco_output = root')
+            self.card.append('set main.fastsim.package  = delphesMA5tune')
+            self.card.append('set main.fastsim.detector = cms')
 
 
-        if self.has_root and self.has_delphes:
+        if self.has_root and (self.has_delphes or self.has_delphesMA5tune):
             self.card.append('\n# Analysis using both reco')
             self.card.append('@MG5aMC analysis_name = analysis1')
             self.card.append('@MG5aMC set_reconstructions = [\'BasicReco\', \'CMSReco\']')
@@ -242,7 +249,7 @@ class MadGraphInterface():
                     self.card.append('plot DELTAR('+','.join(perm)+') 40 0 10 [logY]')
 
         # recasting
-        if self.has_root and self.has_delphes:
+        if self.has_root and (self.has_delphes or self.has_delphesMA5tune):
             self.card.append('\n# Recasting')
             self.card.append('@MG5aMC recasting_commands')
             self.card.append('set main.recast = on')
@@ -252,13 +259,18 @@ class MadGraphInterface():
             self.card.append('# Delphes cards must be located in the PAD(ForMA5tune) directory')
             self.card.append('# Switches must be on or off')
             self.card.append('# AnalysisName               PADType    Switch     DelphesCard')
-            ma5dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),os.pardir,os.pardir))
-            tmp = self.recastinfo.CreateMyCard(os.path.normpath(os.path.join(ma5dir,'PAD')),"PAD",False)
-            tmp = ['# '+x for x in tmp]
-            self.card+= tmp
-            tmp = self.recastinfo.CreateMyCard(os.path.normpath(os.path.join(ma5dir,'PAD')),"PADForMA5tune",False)
-            tmp = ['# '+x for x in tmp]
-            self.card+= tmp
+            ma5dir = \
+              os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),os.pardir,os.pardir))
+            if self.has_delphes:
+                cpath = os.path.normpath(os.path.join(ma5dir,'PAD'))
+                tmp = self.recastinfo.CreateMyCard(cpath,"PAD",False)
+                tmp = ['# '+x for x in tmp]
+                self.card+= tmp
+            if self.has_delphesMA5tune:
+                cpath = os.path.normpath(os.path.join(ma5dir,'PADForMA5tune'))
+                tmp = self.recastinfo.CreateMyCard(cpad,"PADForMA5tune",False)
+                tmp = ['# '+x for x in tmp]
+                self.card+= tmp
 
         # output
         return '\n'.join(self.card)

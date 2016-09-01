@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+144  1.5.15   (2016/09/01) fuks:    Fixing installation options for the mg5-ma5 interface 
+
 142  1.5.14   (2016/09/01) fuks:    Protections added for PADMA5tune and delphesMA5tune -> not 
                                    compatible with root 6 
 
