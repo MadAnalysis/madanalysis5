@@ -60,6 +60,9 @@ class MadGraphInterface():
         self.card.append('@MG5aMC stdout_lvl=INFO')
         if card_type=='parton':
             self.card.append('@MG5aMC inputs = *.lhe\n')
+            self.card.append('@MG5aMC analysis_name = analysis1')
+            self.card.append('# Uncomment the next line to bypass this analysis')
+            self.card.append('# @MG5aMC skip_analysis')
         elif card_type=='hadron':
             self.card.append('@MG5aMC inputs = *.hepmc, *.hep, *.stdhep, *.lhco, *.fifo\n')
             self.card.append('# Reconstruction using FastJet')
@@ -147,11 +150,15 @@ class MadGraphInterface():
 
         if self.has_root and (self.has_delphes or self.has_delphesMA5tune):
             self.card.append('\n# Analysis using both reco')
-            self.card.append('@MG5aMC analysis_name = analysis1')
+            self.card.append('@MG5aMC analysis_name = analysis2')
+            self.card.append('# Uncomment the next line to bypass this analysis')
+            self.card.append('# @MG5aMC skip_analysis')
             self.card.append('@MG5aMC set_reconstructions = [\'BasicReco\', \'CMSReco\']')
         else:
             self.card.append('\n# Analysis using the fastjet reco')
-            self.card.append('@MG5aMC analysis_name = analysis1')
+            self.card.append('@MG5aMC analysis_name = analysis2')
+            self.card.append('# Uncomment the next line to bypass this analysis')
+            self.card.append('# @MG5aMC skip_analysis')
             self.card.append('@MG5aMC set_reconstructions = [\'BasicReco\']')
         self.card.append('\n# plot tunning: dsigma/sigma is plotted.')
         self.card.append('set main.stacking_method = normalize2one')
@@ -293,6 +300,10 @@ class MadGraphInterface():
         # init
         if interstate==[] and finalstate==[]:
             self.logger.debug('  >> new process')
+
+        # checking if process is not a string
+        if isinstance(process,str):
+            return
 
         # getting the list of particles and creating the plots
         if interstate==[] and finalstate==[]:

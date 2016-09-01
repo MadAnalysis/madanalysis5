@@ -165,17 +165,19 @@ class MA5Interpreter(Interpreter):
         return True
 
     @freeze_environment
-    def load(self, *args, **opts):
-        self.logger.info(banner_level,'*************************************************************')
-        self.logger.info(banner_level,'*        W E L C O M E  to  M A D A N A L Y S I S  5        *')
-        self.logger.info(banner_level,'*                                                           *')
-        self.logger.info(banner_level,'*   MA5 release : ' + \
+    def print_banner(self):
+        self.logger.info('*************************************************************')
+        self.logger.info('*        W E L C O M E  to  M A D A N A L Y S I S  5        *')
+        self.logger.info('*                                                           *')
+        self.logger.info('*   MA5 release : ' + \
                 "%-24s" % self.main.archi_info.ma5_version + "%+15s" % self.main.archi_info.ma5_date  + '   *')
-        self.logger.info(banner_level,'*                                                           *')
-        self.logger.info(banner_level,'*         Comput. Phys. Commun. 184 (2013) 222-256          *')
-        self.logger.info(banner_level,'*             Eur. Phys. J. C74 (2014) 3103                 *')
-        self.logger.info(banner_level,'*************************************************************')
+        self.logger.info('*                                                           *')
+        self.logger.info('*         Comput. Phys. Commun. 184 (2013) 222-256          *')
+        self.logger.info('*             Eur. Phys. J. C74 (2014) 3103                 *')
+        self.logger.info('*************************************************************')
 
+    @freeze_environment
+    def load(self, *args, **opts):
         Interpreter.load(self,*args,**opts)
 
     @freeze_environment
@@ -184,18 +186,6 @@ class MA5Interpreter(Interpreter):
 
     @freeze_environment
     def init_reco(self):
-        # banner
-        banner_level=90
-        self.logger.log(banner_level,'*************************************************************')
-        self.logger.log(banner_level,'*        W E L C O M E  to  M A D A N A L Y S I S  5        *')
-        self.logger.log(banner_level,'*                                                           *')
-        self.logger.log(banner_level,'*   MA5 release : ' + \
-                "%-24s" % self.main.archi_info.ma5_version + "%+15s" % self.main.archi_info.ma5_date  + '   *')
-        self.logger.log(banner_level,'*                                                           *')
-        self.logger.log(banner_level,'*         Comput. Phys. Commun. 184 (2013) 222-256          *')
-        self.logger.log(banner_level,'*             Eur. Phys. J. C74 (2014) 3103                 *')
-        self.logger.log(banner_level,'*************************************************************')
-
         # changing the running mode
         self.main.mode=MA5RunningType.RECO
 
@@ -223,18 +213,6 @@ class MA5Interpreter(Interpreter):
 
     @freeze_environment
     def init_parton(self):
-        # banner
-        banner_level=90
-        self.logger.log(banner_level,'*************************************************************')
-        self.logger.log(banner_level,'*        W E L C O M E  to  M A D A N A L Y S I S  5        *')
-        self.logger.log(banner_level,'*                                                           *')
-        self.logger.log(banner_level,'*   MA5 release : ' + \
-                "%-24s" % self.main.archi_info.ma5_version + "%+15s" % self.main.archi_info.ma5_date  + '   *')
-        self.logger.log(banner_level,'*                                                           *')
-        self.logger.log(banner_level,'*         Comput. Phys. Commun. 184 (2013) 222-256          *')
-        self.logger.log(banner_level,'*             Eur. Phys. J. C74 (2014) 3103                 *')
-        self.logger.log(banner_level,'*************************************************************')
-
         # changing the running mode
         self.main.mode=MA5RunningType.PARTON
 
