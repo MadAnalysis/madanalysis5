@@ -467,6 +467,16 @@ class ConfigChecker:
 #                    self.logger.warning("To enable this format, please type 'install delphes'.")
                 return False
             self.archi_info.delphes_original_libs.extend([fl for fl in myfiles if not fl in self.archi_info.delphes_original_libs])
+            import glob
+            delphes_dict=glob.glob(os.path.dirname(self.archi_info.delphes_lib)+'/*.pcm')
+            self.archi_info.delphes_original_libs.extend([fl for fl in delphes_dict if not fl in self.archi_info.delphes_original_libs])
+            
+            
+
+
+
+
+            
 
         # Checking Delphes can be found in other folders
         if not force and not ma5installation:
@@ -509,6 +519,10 @@ class ConfigChecker:
                     self.logger.warning("To enable this format, please type 'install delphes'.")
                 return False
             self.archi_info.delphes_original_libs.extend([fl for fl in myfiles if not fl in self.archi_info.delphes_original_libs])
+            self.archi_info.delphes_original_libs.extend([fl for fl in myfiles if not fl in self.archi_info.delphes_original_libs])
+            import glob
+            delphes_dict=glob.glob(os.path.dirname(self.archi_info.delphes_lib)+'/*.pcm')
+            self.archi_info.delphes_original_libs.extend([fl for fl in delphes_dict if not fl in self.archi_info.delphes_original_libs])
             if getpaths:
                self.libs=self.libs[:-1]
 

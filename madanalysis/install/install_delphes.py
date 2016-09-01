@@ -49,7 +49,7 @@ class InstallDelphes:
 #        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
 #        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.0.tar.gz"}
 #        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.1.tar.gz"}
-        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.2.tar.gz"}
+        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.3.tar.gz"}
         self.logger = logging.getLogger('MA5')
 
 
@@ -128,23 +128,6 @@ class InstallDelphes:
                     self.logger.error('impossible to move the file/folder '+myfile+' from '+packagedir+' to '+self.installdir)
                     return False
 
-        # Updating ExRootTask
-        filename = self.installdir+'/external/ExRootAnalysis/ExRootTask.cc'
-        self.logger.debug('Updating files: commenting out lines in: '+filename+' ...')
-        self.CommentLines(filename,[64,65,66],'//')
-        
-        # Updating ExRootTask
-        filename = self.installdir+'/external/ExRootAnalysis/ExRootConfReader.cc'
-        self.logger.debug('Updating files: commenting out lines in: '+filename+' ...')
-        self.CommentLines(filename,[180,181,182],'//')
-
-        # Adding files
-        filesToAdd = ["MA5GenParticleFilter"]
-        if not self.CopyFiles(filesToAdd):
-            return False
-        if not self.UpdateDictionnary(filesToAdd):
-            return False
-
         # Updating Makefile
         filename = self.installdir+'/Makefile'
         self.logger.debug('Updating files '+filename+ ': no CMSSW\n')
@@ -153,6 +136,23 @@ class InstallDelphes:
         filename = self.installdir+'/doc/genMakefile.tcl'
         self.logger.debug('Updating files '+filename+ ': no CMSSW\n')
         self.SwitchOffCMSSW(filename)
+
+        # Updating ExRootTask
+        filename = self.installdir+'/external/ExRootAnalysis/ExRootTask.cc'
+        self.logger.debug('Updating files: commenting out lines in: '+filename+' ...')
+        self.CommentLines(filename,[64,65,66],'//')
+        
+        # Updating ExRootTask
+        filename = self.installdir+'/external/ExRootAnalysis/ExRootConfReader.cc'
+        self.logger.debug('Updating files: commenting out lines in: '+filename+' ...')
+        self.CommentLines(filename,[178,189,180],'//')
+
+        # Adding files
+        filesToAdd = ["MA5GenParticleFilter"]
+        if not self.CopyFiles(filesToAdd):
+            return False
+        if not self.UpdateDictionnary(filesToAdd):
+            return False
         
         # Ok
         return True

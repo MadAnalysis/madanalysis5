@@ -40,7 +40,8 @@ class InstallFastjet:
         self.ncores     = 1
 #        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.0.6.tar.gz"}
 #        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.1.3.tar.gz"}
-        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.2.0.tar.gz"}
+#        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.2.0.tar.gz"}
+        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.2.1.tar.gz"}
 
     def Detect(self):
         if not os.path.isdir(self.toolsdir):
