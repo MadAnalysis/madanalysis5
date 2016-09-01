@@ -130,7 +130,6 @@ class MadGraphInterface():
         self.card.append('# tau-tagging')
         self.card.append('set main.fastsim.tau_id.efficiency = 1.0')
         self.card.append('set main.fastsim.tau_id.misid_ljet = 0.0')
-        self.card.append('set main.stacking_method = normalize2one')
 
         if self.has_root and self.has_delphes:
             self.card.append('\n# Reconstruction using Delphes')
@@ -154,7 +153,9 @@ class MadGraphInterface():
             self.card.append('\n# Analysis using the fastjet reco')
             self.card.append('@MG5aMC analysis_name = analysis1')
             self.card.append('@MG5aMC set_reconstructions = [\'BasicReco\']')
-        self.card.append('# object definition')
+        self.card.append('\n# plot tunning: dsigma/sigma is plotted.')
+        self.card.append('set main.stacking_method = normalize2one')
+        self.card.append('\n# object definition')
         self.card.append('define e = e+ e-')
         self.card.append('define mu = mu+ mu-')
         self.card.append('select (j)  PT > 20')
@@ -268,7 +269,7 @@ class MadGraphInterface():
                 self.card+= tmp
             if self.has_delphesMA5tune:
                 cpath = os.path.normpath(os.path.join(ma5dir,'PADForMA5tune'))
-                tmp = self.recastinfo.CreateMyCard(cpad,"PADForMA5tune",False)
+                tmp = self.recastinfo.CreateMyCard(cpath,"PADForMA5tune",False)
                 tmp = ['# '+x for x in tmp]
                 self.card+= tmp
 
