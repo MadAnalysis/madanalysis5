@@ -50,6 +50,7 @@ class DetectRoot:
         self.libraries = {}
         self.features  = []
         self.compiler  = ''
+        self.version   = []
         self.logger    = logging.getLogger('MA5')
 
 
@@ -111,9 +112,9 @@ class DetectRoot:
         if len(result)==0:
             msg = 'ROOT module called "root-config" is not detected.\n'\
                   +'Two explanations :n'\
-		  +' - ROOT is not installed. You can download it '\
-		  +'from http://root.cern.ch\n'\
-		  +' - ROOT binary folder must be placed in the '\
+                  +' - ROOT is not installed. You can download it '\
+                  +'from http://root.cern.ch\n'\
+                  +' - ROOT binary folder must be placed in the '\
                   +'global environment variable $PATH'
             return DetectStatusType.UNFOUND, msg
         islink = os.path.islink(result[0])
@@ -134,10 +135,10 @@ class DetectRoot:
             result = ShellCommand.Which('root-config',all=True,mute=True)
             if len(result)==0:
                 msg = 'ROOT module called "root-config" is not detected.\n'\
-		      +'Two explanations :n'\
-		      +' - ROOT is not installed. You can download it '\
-		      +'from http://root.cern.ch\n'\
-		      +' - ROOT binary folder must be placed in the '\
+                      +'Two explanations :n'\
+                      +' - ROOT is not installed. You can download it '\
+                      +'from http://root.cern.ch\n'\
+                      +' - ROOT binary folder must be placed in the '\
                       +'global environment variable $PATH'
                 DetectStatusType.ISSUE, msg
             self.logger.debug("  which-all:     ")
@@ -147,16 +148,16 @@ class DetectRoot:
 
 
     def ExtractInfo(self):
-        # Using root-config for getting lib and header paths
+        # Using root-config for getting lib and header paths as well as the version number
         self.logger.debug("Trying to get library and header paths ...") 
-        theCommands = [self.bin_path+'/root-config','--libdir','--incdir']
+        theCommands = [self.bin_path+'/root-config','--libdir','--incdir', '--version']
         ok, out, err = ShellCommand.ExecuteWithCapture(theCommands,'./')
         if not ok:
             msg = 'ROOT module called "root-config" is not detected.\n'\
                   +'Two explanations :n'\
-		  +' - ROOT is not installed. You can download it '\
-		  +'from http://root.cern.ch\n'\
-		  +' - ROOT binary folder must be placed in the '\
+                  +' - ROOT is not installed. You can download it '\
+                  +'from http://root.cern.ch\n'\
+                  +' - ROOT binary folder must be placed in the '\
                   +'global environment variable $PATH'
             return False,msg
 
@@ -164,11 +165,13 @@ class DetectRoot:
         out=out.lstrip()
         out=out.rstrip()
         root_tmp = out.split()
+        self.version  = root_tmp[2].replace('/','.').split('.')
         self.inc_path = os.path.normpath(root_tmp[1])
         self.lib_path = os.path.normpath(root_tmp[0])
-        self.logger.debug("-> root-config found") 
-        self.logger.debug("-> root header  folder: "+self.inc_path) 
-        self.logger.debug("-> root library folder: "+self.lib_path) 
+        self.logger.debug("-> root-config found")
+        self.logger.debug("-> root version: "+'.'.join(self.version))
+        self.logger.debug("-> root header  folder: "+self.inc_path)
+        self.logger.debug("-> root library folder: "+self.lib_path)
 
         # Check: looking for files
         FilesToFind=[os.path.normpath(self.lib_path+'/libCore.so'), \
@@ -179,10 +182,10 @@ class DetectRoot:
                 self.libraries[file.split('/')[-1]]=file+":"+str(os.stat(file).st_mtime)
             else:
                 self.PrintFAIL(warning=False)
-	        self.logger.error("ROOT file called '"+file+"' is not found")
+                self.logger.error("ROOT file called '"+file+"' is not found")
                 self.logger.error("Please check that ROOT is properly installed.")
                 return False
-           
+
         # Getting the features
         theCommands = [self.bin_path+'/root-config','--features']
         ok, out, err = ShellCommand.ExecuteWithCapture(theCommands,'./')
@@ -218,12 +221,14 @@ class DetectRoot:
         # archi_info
         self.archi_info.has_root           = True
         self.archi_info.root_priority      = self.force
+        self.archi_info.root_version       = self.version
         self.archi_info.root_bin_path      = self.bin_path
         self.archi_info.root_original_bins = [self.bin_file]
         self.archi_info.root_inc_path      = self.inc_path
         self.archi_info.root_lib_path      = self.lib_path
         self.archi_info.root_compiler      = self.compiler
-        
+
+
         for k, v in self.libraries.iteritems():
             self.archi_info.libraries[k]=v
         for feature in self.features:

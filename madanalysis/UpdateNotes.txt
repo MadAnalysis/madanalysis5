@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+142  1.5.14   (2016/09/01) fuks:    Protections added for PADMA5tune and delphesMA5tune -> not 
+                                   compatible with root 6 
+
 141  1.5.13   (2016/09/01) fuks:    gzip fix 
 
 140  1.5.12   (2016/09/01) fuks:    FIFO step 1 

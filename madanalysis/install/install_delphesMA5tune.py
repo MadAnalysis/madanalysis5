@@ -328,10 +328,13 @@ class InstallDelphesMA5tune:
         # output =  1: activation successfull.
         # output =  0: nothing is done.
         # output = -1: error
+        self.logger.debug("Starting the activation of delphesMA5tune")
         user_info = UserInfo()
         user_info.ReadUserOptions(self.main.archi_info.ma5dir+'/madanalysis/input/installation_options.dat')
         checker = ConfigChecker(self.main.archi_info, user_info, self.main.session_info, self.main.script, False)
+        self.logger.debug("Checking if delphesMA5tune was previously installed")
         hastune = checker.checkDelphesMA5tune(True)
+        self.logger.debug("  delphesMA5tune available? -> " + str(hastune))
         if hastune:
             # Paths
             delpath=os.path.normpath(self.main.archi_info.delphesMA5tune_lib_paths[0])
@@ -355,6 +358,7 @@ class InstallDelphesMA5tune:
             shutil.move(delpath,deldeac)
 
             # Compiler setup
+            self.logger.debug("Preparing makefiles")
             compiler = LibraryWriter('lib',self.main)
             ncores = compiler.get_ncores2()
 
@@ -375,6 +379,7 @@ class InstallDelphesMA5tune:
 
 
             for mypackage in ToBuild:
+                self.logger.debug("Building " + mypackage)
                 if not compiler.WriteMakefileForInterfaces(mypackage):
                     self.logger.error("library building aborted.")
                     return -1
