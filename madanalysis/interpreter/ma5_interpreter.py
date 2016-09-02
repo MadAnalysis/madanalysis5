@@ -131,7 +131,7 @@ class MA5Interpreter(Interpreter):
 
         # quiet please
         if (LoggerLevel>logging.DEBUG):
-           self.logger.setLevel(100)
+           self.logger.setLevel(10)
 
         # Checking the configuration
         if not main.CheckConfig(debug=(LoggerLevel<=logging.DEBUG)):
@@ -278,7 +278,6 @@ class MA5Interpreter(Interpreter):
                 update_options(usrkey,value)
 
         # Configuration
-        opts['veto-root']=True
         for key in opts.keys():
             value=opts[key]
             if key=='veto-delphes':
