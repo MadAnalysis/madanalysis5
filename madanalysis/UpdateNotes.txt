@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+148  1.5.19   (2016/09/02) fuks:    ma5-mg5 interface 
+
 147  1.5.18   (2016/09/01) fuks:    small fixes for the mg5-ma5 interface 
 
 146  1.5.17   (2016/09/01) fuks:    Fixing fastjet plots for the mg5-ma5 interface 

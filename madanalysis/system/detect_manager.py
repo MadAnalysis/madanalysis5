@@ -124,7 +124,7 @@ class DetectManager():
                     if 'PrintInstallMessage' in methods:
                         checker.PrintInstallMessage()
                     return True
-                
+
         # 3. Veto
         if 'IsItVetoed' in methods:
             self.logger.debug('Is there a veto? ...')

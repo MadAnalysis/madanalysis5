@@ -57,13 +57,25 @@ class MadGraphInterface():
         self.card=[]
 
         ## card header
-        self.card.append('@MG5aMC stdout_lvl=INFO')
         if card_type=='parton':
-            self.card.append('@MG5aMC inputs = *.lhe\n')
-            self.card.append('@MG5aMC analysis_name = analysis1')
-            self.card.append('# Uncomment the next line to bypass this analysis')
-            self.card.append('# @MG5aMC skip_analysis')
+            self.card.append('# Uncomment the line below to skip this analysis altogether')
+            self.card.append('# @MG5aMC skip_analysis\n')
+            self.card.append('@MG5aMC stdout_lvl=INFO\n')
+            self.card.append('@MG5aMC inputs = *.lhe')
+            self.card.append('@MG5aMC analysis_name = analysis1\n')
         elif card_type=='hadron':
+            self.card.append('# Uncomment the line below to skip this analysis altogether')
+            self.card.append('# @MG5aMC skip_analysis\n')
+            self.card.append('@MG5aMC stdout_lvl=INFO\n')
+            if self.has_root and not self.has_delphes:
+                self.card.append('# Recasting functionalities based on Delphes turned off. Please type')
+                self.card.append('#       install madanalysis5 --update --with_delphes')
+                self.card.append('# in the MG5 interpereter to turn them on.\n')
+            if self.has_root and not self.has_delphesMA5tune:
+                self.card.append('# Recasting functionalities based on DelphesMA5tune turned off. Please type')
+                self.card.append('#       install madanalysis5 --update --with_delphesMA5tune')
+                self.card.append('# in the MG5 interpereter to turn them on.\n')
+
             self.card.append('@MG5aMC inputs = *.hepmc, *.hep, *.stdhep, *.lhco, *.fifo\n')
             self.card.append('# Reconstruction using FastJet')
             self.card.append('@MG5aMC reconstruction_name = BasicReco')

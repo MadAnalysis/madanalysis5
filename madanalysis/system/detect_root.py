@@ -84,9 +84,10 @@ class DetectRoot:
         # Ok
         self.bin_path=folder
         self.bin_file=folder+'/root-config'
+        self.logger.debug("root-config program found in: "+self.bin_path)
+
         return DetectStatusType.FOUND, msg
 
-                
     def ToolsDetection(self):
         msg = ''
 

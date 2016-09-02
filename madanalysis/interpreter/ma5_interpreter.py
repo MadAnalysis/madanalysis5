@@ -27,6 +27,7 @@
 
 import logging
 import os
+import shutil
 import sys
 
 MA5_root_path = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),os.pardir,os.pardir))
@@ -37,12 +38,14 @@ import colored_log
 
 from madanalysis.core.main                        import Main
 from madanalysis.enumeration.ma5_running_type     import MA5RunningType
-from madanalysis.interpreter.cmd_install          import CmdInstall
 from madanalysis.interpreter.interpreter          import Interpreter
 from madanalysis.misc.freeze_environment          import freeze_environment
 from madanalysis.enumeration.ma5_running_type     import MA5RunningType
 from madanalysis.IOinterface.particle_reader      import ParticleReader
 from madanalysis.IOinterface.multiparticle_reader import MultiparticleReader
+from madanalysis.system.checkup                   import CheckUp
+from madanalysis.install.install_manager          import InstallManager
+from madanalysis.system.user_info                 import UserInfo
 
 
 class InvalidPython(Exception):
@@ -58,6 +61,8 @@ class MA5Configuration(Exception):
 class MA5Dependence(Exception):
     pass
 class SampleAnalyzer(Exception):
+    pass
+class UNK_OPT(Exception):
     pass
 
 
@@ -158,13 +163,6 @@ class MA5Interpreter(Interpreter):
         return True
 
     @freeze_environment
-    def install(self, target):
-        cmd_install  = CmdInstall(self.main)
-        if not cmd_install.do([target]):
-            raise MA5Dependence('Issue with the installation of ' + target)
-        return True
-
-    @freeze_environment
     def print_banner(self):
         self.logger.info('*************************************************************')
         self.logger.info('*        W E L C O M E  to  M A D A N A L Y S I S  5        *')
@@ -238,3 +236,156 @@ class MA5Interpreter(Interpreter):
         input.Load()
         self.setLogLevel(lvl)
 
+
+    @freeze_environment
+    def further_install(self, opts):
+        # initialization
+        install_delphes         = False
+        install_delphesMA5tune  = False
+        user_info           = UserInfo()
+
+        # A few useful methods
+        def validate_bool_key(key):
+            if not isinstance(opts[key],bool):
+                self.logger.warning('Unknown value for the further_install key '+ key + '. Ignoring.')
+                return False
+            return opts[key]
+
+        def setinc(key,usrkey,value, archi_reset=''):
+            if opts[key] not in [True,None] and os.path.isdir(opts[key]):
+                user_info.SetValue(usrkey,value,'')
+                inname  = os.path.join(MA5_root_path,'madanalysis','input','installation_options.dat')
+                outname = os.path.join(MA5_root_path,'madanalysis','input','installation_options.new')
+                infile  = open(inname ,'r')
+                outfile = open(outname,'w')
+                for line in infile:
+                    if usrkey in line:
+                        outfile.write(usrkey + ' = ' + value+'\n')
+                    else:
+                        outfile.write(line)
+                infile.close()
+                outfile.close()
+                shutil.move(outname,inname)
+                if archi_reset != '':
+                    self.main.archi_info.__dict__[archi_reset.keys()[0]] = archi_reset.values()[0]
+            elif opts[key] not in [True,None]:
+                self.logger.warning('Non-existing ' + key.replace('with-','') + \
+                   ' path. Automatic detection used.')
+
+        # Configuration
+        for key in opts.keys():
+            value=opts[key]
+            print key, ' = ', value
+            if key=='veto-delphes':
+                user_info.delphes_veto = validate_bool_key(key)
+            elif key=='veto-delphesMA5tune':
+                user_info.delphesMA5tune_veto = validate_bool_key(key)
+            elif key=='veto-root':
+                validate_bool_key(key)
+            elif key=='with-zlib':
+                if not isinstance(opts[key],bool):
+                    setinc(key,'zlib_libs',opts[key]+'/lib',archi_reset={'zlib_original_libs':[]})
+                    setinc(key,'zlib_includes', opts[key]+'/include')
+            elif key=='with-fastjet':
+                setinc(key,'fastjet_bin_path',opts[key])
+            elif key=='with-root':
+                setinc(key,'root_bin_path',opts[key])
+            elif key=='with-delphes':
+                install_delphes = validate_bool_key(key)
+            elif key=='with-delphesMA5tune':
+                install_delphesMA5tune = validate_bool_key(key)
+            else:
+                raise UNK_OPT('Unknown options for further_install')
+
+        # Muting the logger
+        lvl = self.logger.getEffectiveLevel()
+        self.setLogLevel(100)
+
+        # updating the configuration internally
+        def config_update(checkup):
+            if not checkup.CheckOptionalProcessingPackages():
+                self.logger.error('Impossible to internally update the paths of the dependences.')
+                return False
+            arch_to_update = [ 'has_zlib', 'zlib_lib', 'zlib_lib_path', 'zlib_inc_path', 'zlib_original_libs',\
+              'fastjet_bin_path', 'fastjet_original_bins', 'toPATH1', 'fastjet_lib_paths', 'toLDPATH1', \
+              'has_fastjet' ]
+            for x in arch_to_update:
+                self.main.archi_info.__dict__[x] = checkup.archi_info.__dict__[x]
+
+
+        checkup = CheckUp(self.main.archi_info, self.main.session_info, True, self.main.script)
+        checkup.user_info         = user_info
+        checkup.checker.user_info = user_info
+        config_update(checkup)
+
+        # If not zlib -> install zlib
+        if not self.main.archi_info.has_zlib:
+            self.logger.info('The zlib package has not been found. Proceeding with its local installation.')
+            installer=InstallManager(self.main)
+            if not installer.Execute('zlib'):
+                self.logger.error('Impossible to install zlib.')
+                return False
+
+        # If not fastjet -> install fastjet
+        if not self.main.archi_info.has_fastjet:
+            self.logger.info('The fastjet package has not been found. Proceeding with its local installation.')
+            installer=InstallManager(self.main)
+            if not installer.Execute('fastjet'):
+                self.logger.error('Impossible to install fastjet.')
+                return False
+
+        # Delphes installation
+        if self.main.archi_info.has_root and user_info.delphes_veto and install_delphes:
+            self.logger.warning('Delphes has been both vetoed and non-vetoed. Ignoring veto.')
+            user_info.delphes_veto = False
+        elif self.main.archi_info.has_root and user_info.delphes_veto:
+            self.logger.info('Delphes installation has been vetoed. Skipping it.')
+
+        if not self.main.archi_info.has_root and install_delphes:
+            self.logger.warning('The root package has not been found. Skipping the delphes installation.')
+
+        if self.main.archi_info.has_root and install_delphes:
+            self.logger.info('Proceeding with the delphes installation.')
+            installer=InstallManager(self.main)
+            if not installer.Execute('delphes'):
+                self.logger.error('Impossible to install delphes.')
+                return False
+            self.logger.info('Proceeding with the PAD installation.')
+            if not installer.Execute('pad'):
+                self.logger.error('Impossible to install the PAD.')
+                return False
+
+        # DelphesMA5tune installation
+        root_v = (len(self.main.archi_info.root_version)==3) and (int(self.main.archi_info.root_version[0])==5)
+        if self.main.archi_info.has_root and user_info.delphesMA5tune_veto and install_delphesMA5tune:
+            self.logger.warning('DelphesMA5tune has been both vetoed and non-vetoed. Ignoring veto.')
+            user_info.delphesMA5tune_veto = False
+        elif self.main.archi_info.has_root and user_info.delphesMA5tune_veto:
+            self.logger.info('DelphesMA5tune installation has been vetoed. Skipping it.')
+
+        if not self.main.archi_info.has_root and install_delphesMA5tune:
+            self.logger.warning('The root package has not been found. Skipping the delphesMA5tune installation.')
+
+        if not self.main.archi_info.has_root and install_delphesMA5tune and not root_v:
+            self.logger.warning('DelphesMA5tune is not compatible with root 6. Skipping its installation.')
+
+        if self.main.archi_info.has_root and install_delphesMA5tune and root_v:
+            self.logger.info('Proceeding with the delphesMA5tune installation.')
+            installer=InstallManager(self.main)
+            if not installer.Execute('delphesMA5tune'):
+                self.logger.error('Impossible to install delphesMA5tune.')
+                return False
+            self.logger.info('Proceeding with the PADForMA5tune installation.')
+            if not installer.Execute('padforma5tune'):
+                self.logger.error('Impossible to install the PADForMA5tune.')
+                return False
+
+        # Compilation
+        if not self.main.CheckConfig(debug=False):
+            raise MA5Configuration('Issue with the configuration')
+        self.compile()
+
+        # restoring the log level
+        self.setLogLevel(lvl)
+
+        return True

@@ -130,11 +130,11 @@ class DetectFastjet:
             result = ShellCommand.Which('fastjet-config',all=True,mute=True)
             if len(result)==0:
                 msg = 'The FastJet package is not found.'
-                return False, msg
+                return DetectStatusType.UNFOUND, msg
             self.logger.debug("  which-all:     ")
             for file in result:
                 self.logger.debug("    - "+str(file))
-        return True, msg
+        return DetectStatusType.FOUND, msg
 
 
     def ExtractInfo(self):

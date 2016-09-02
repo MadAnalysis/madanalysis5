@@ -44,7 +44,7 @@ class ArchitectureInfo:
         self.has_zlib           = False
         self.has_delphes        = False
         self.has_delphesMA5tune = False
-        
+
         # Library to put before all the others?
         self.root_priority           = False
         self.zlib_priority           = False

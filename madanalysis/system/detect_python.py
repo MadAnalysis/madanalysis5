@@ -44,7 +44,7 @@ class DetectPython:
         self.name      = 'Python'
         self.mandatory = True
         self.log       = []
-        self.logger    = logging.getLogger('madanalysis')
+        self.logger    = logging.getLogger('MA5')
         self.moreInfo='For more details, type: config_info python'
         # adding what you want here
 

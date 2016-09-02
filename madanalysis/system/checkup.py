@@ -313,7 +313,7 @@ class CheckUp():
         # Optional packages
         self.logger.info("Checking optional packages devoted to data processing:")
         checker2 = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
-        
+
         self.archi_info.has_zlib              = checker2.checkZLIB()
 #        if not self.checker.Execute('zlib'):
 #            return False

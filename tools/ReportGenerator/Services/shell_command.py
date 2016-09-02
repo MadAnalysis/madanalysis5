@@ -1,4 +1,4 @@
-################################################################################
+###############################################################################
 #  
 #  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
@@ -40,7 +40,7 @@ class ShellCommand():
             output = open(logfile,'w')
         except:
             if not silent:
-                logging.error('impossible to write the file '+logfile)
+                logging.getLogger('MA5').error('impossible to write the file '+logfile)
             return False, None
 
         # Launching the commands
@@ -48,7 +48,7 @@ class ShellCommand():
             result=subprocess.Popen(theCommands, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=path)
         except:
             if not silent:
-                logging.error('impossible to execute the commands: '+' '.join(theCommands))
+                logging.getLogger('MA5').error('impossible to execute the commands: '+' '.join(theCommands))
             return False, None
 
         # Getting stdout
@@ -71,7 +71,7 @@ class ShellCommand():
         try:
             result=subprocess.Popen(theCommands, cwd=path)
         except:
-            logging.error('impossible to execute the commands: '+' '.join(theCommands))
+            logging.getLogger('MA5').error('impossible to execute the commands: '+' '.join(theCommands))
             return False
 
         # Getting stdout
@@ -83,9 +83,8 @@ class ShellCommand():
 
     @staticmethod
     def ExecuteWithMA5Logging(theCommands,path,silent=False):
-
-        # Launching the commands
         logging.getLogger('MA5')
+        # Launching the commands
         try:
             result=subprocess.Popen(theCommands, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=path)
         except:
@@ -118,7 +117,7 @@ class ShellCommand():
         try:
             result=subprocess.Popen(theCommands, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=path, stdin=stdin_value)
         except:
-            logging.error('impossible to execute the commands: '+' '.join(theCommands))
+            logging.getLogger('MA5').error('impossible to execute the commands: '+' '.join(theCommands))
             if stdin:
                 input.close()
             return False, '', ''
@@ -147,7 +146,7 @@ class ShellCommand():
             result=subprocess.Popen(theCommands,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         except:
             if not mute:
-                logging.error('impossible to execute the commands: '+' '.join(theCommands))
+                logging.getLogger('MA5').error('impossible to execute the commands: '+' '.join(theCommands))
             return []
 
         # Getting stdout
@@ -158,7 +157,7 @@ class ShellCommand():
         # Getting results
         if result.returncode!=0:
             if not mute:
-                logging.error('command '+str(theCommand)+' is not found')
+                logging.getLogger('MA5').error('command '+str(theCommand)+' is not found')
             return []
             
         # Splitting the lines

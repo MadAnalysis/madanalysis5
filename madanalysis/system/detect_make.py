@@ -44,7 +44,7 @@ class DetectMake:
         self.name      = 'GNU Make'
         self.mandatory = True
         self.log       = []
-        self.logger    = logging.getLogger('madanalysis')
+        self.logger    = logging.getLogger('MA5')
         self.moreInfo='For more details, type: config_info make'
         # adding what you want here
         self.version = ""
