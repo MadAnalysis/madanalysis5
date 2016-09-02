@@ -251,37 +251,55 @@ class MA5Interpreter(Interpreter):
                 return False
             return opts[key]
 
+        def update_options(usrkey,value):
+            inname  = os.path.join(MA5_root_path,'madanalysis','input','installation_options.dat')
+            outname = os.path.join(MA5_root_path,'madanalysis','input','installation_options.new')
+            infile  = open(inname ,'r')
+            outfile = open(outname,'w')
+            for line in infile:
+                if usrkey in line:
+                    outfile.write(usrkey + ' = ' + value+'\n')
+                else:
+                    outfile.write(line)
+            infile.close()
+            outfile.close()
+            shutil.move(outname,inname)
+
         def setinc(key,usrkey,value, archi_reset=''):
             if opts[key] not in [True,None] and os.path.isdir(opts[key]):
                 user_info.SetValue(usrkey,value,'')
-                inname  = os.path.join(MA5_root_path,'madanalysis','input','installation_options.dat')
-                outname = os.path.join(MA5_root_path,'madanalysis','input','installation_options.new')
-                infile  = open(inname ,'r')
-                outfile = open(outname,'w')
-                for line in infile:
-                    if usrkey in line:
-                        outfile.write(usrkey + ' = ' + value+'\n')
-                    else:
-                        outfile.write(line)
-                infile.close()
-                outfile.close()
-                shutil.move(outname,inname)
+                update_options(usrkey,value)
                 if archi_reset != '':
                     self.main.archi_info.__dict__[archi_reset.keys()[0]] = archi_reset.values()[0]
             elif opts[key] not in [True,None]:
                 self.logger.warning('Non-existing ' + key.replace('with-','') + \
                    ' path. Automatic detection used.')
+            elif usrkey=='root_veto':
+                update_options(usrkey,value)
 
         # Configuration
+        opts['veto-root']=True
         for key in opts.keys():
             value=opts[key]
-            print key, ' = ', value
             if key=='veto-delphes':
                 user_info.delphes_veto = validate_bool_key(key)
             elif key=='veto-delphesMA5tune':
                 user_info.delphesMA5tune_veto = validate_bool_key(key)
             elif key=='veto-root':
-                validate_bool_key(key)
+                user_info.root_veto = validate_bool_key(key)
+                if user_info.root_veto==True:
+                    self.main.session_info.has_root = False
+                    killroot1=[ 'root_bin_path', 'root_version', 'root_inc_path', 'root_compiler', \
+                       'root_lib_path' ]
+                    killroot2=[ 'root_original_bins', 'root_features' ]
+                    for x in killroot1:
+                        self.main.archi_info.__dict__[x] = ''
+                    for x in killroot2:
+                        self.main.archi_info.__dict__[x] = []
+                    self.main.archi_info.has_root = False
+                    setinc(key,'root_veto','1')
+                    del self.main.archi_info.libraries['TH1F.h']
+                    del self.main.archi_info.libraries['libCore.so']
             elif key=='with-zlib':
                 if not isinstance(opts[key],bool):
                     setinc(key,'zlib_libs',opts[key]+'/lib',archi_reset={'zlib_original_libs':[]})
@@ -299,7 +317,7 @@ class MA5Interpreter(Interpreter):
 
         # Muting the logger
         lvl = self.logger.getEffectiveLevel()
-        self.setLogLevel(100)
+        self.setLogLevel(10)
 
         # updating the configuration internally
         def config_update(checkup):
@@ -308,7 +326,8 @@ class MA5Interpreter(Interpreter):
                 return False
             arch_to_update = [ 'has_zlib', 'zlib_lib', 'zlib_lib_path', 'zlib_inc_path', 'zlib_original_libs',\
               'fastjet_bin_path', 'fastjet_original_bins', 'toPATH1', 'fastjet_lib_paths', 'toLDPATH1', \
-              'has_fastjet' ]
+              'has_fastjet', 'root_bin_path', 'root_original_bins', 'root_version', 'libraries', \
+              'root_inc_path', 'root_features', 'root_compiler', 'root_lib_path' ]
             for x in arch_to_update:
                 self.main.archi_info.__dict__[x] = checkup.archi_info.__dict__[x]
 
