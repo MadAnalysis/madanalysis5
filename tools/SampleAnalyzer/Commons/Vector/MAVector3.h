@@ -288,10 +288,10 @@ class MAVector3
 
   // Addition of 3-vectors.
   MAVector3 operator + (const MAVector3& a) const
-  { return MAVector3(a.X() + X(), a.Y() + Y(), a.Z() + Z()); }
+  { return MAVector3(X()+a.X(), Y()+a.Y() , Z()+a.Z() ); }
 
   MAVector3 operator - (const MAVector3& a) const
-  { return MAVector3(a.X() - X(), a.Y() - Y(), a.Z() - Z()); }
+  { return MAVector3(X()-a.X(), Y()-a.Y() , Z()-a.Z() ); }
 
   MAVector3 operator * (MAdouble64 a) const
   { return MAVector3(a*X(), a*Y(), a*Z()); }

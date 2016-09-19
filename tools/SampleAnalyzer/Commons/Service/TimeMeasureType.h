@@ -43,7 +43,7 @@ class TimeMeasureType
 {
  private:
 
-  MAbool   StartFilled_;
+  MAbool     StartFilled_;
   MAuint32   StartCurrent_;
   MAfloat32  Min_;
   MAfloat32  Max_;

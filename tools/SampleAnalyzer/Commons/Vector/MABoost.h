@@ -36,6 +36,7 @@
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/Vector/MALorentzVector.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
 
 namespace MA5
@@ -95,7 +96,18 @@ class MABoost
   
   // Setting the boost vector
   void SetBoostVector(MALorentzVector& q)
-  { setBoostVector(q.X(),q.Y(),q.Z()); }
+  { 
+    try
+    {
+      if (q.T()==0) throw EXCEPTION_WARNING("Energy equal to zero. Impossible to compute the boost.","",0);
+      setBoostVector(q.X(),q.Y(),q.Z());
+    }
+    catch(const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
+      MABoost();
+    }    
+  }
 
   // Boost a MALorentzVector
   void boost(MALorentzVector& p) const

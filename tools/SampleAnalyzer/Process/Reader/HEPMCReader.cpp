@@ -28,6 +28,7 @@
 //SampleHeader headers
 #include "SampleAnalyzer/Process/Reader/HEPMCReader.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
 using namespace MA5;
 
@@ -164,11 +165,15 @@ bool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
           else if (nmother==2) part.mother2_=&(myEvent.mc()->particles()[j]);
           else 
           { 
-            if (warnmother_) 
+            try
             {
-              WARNING << "Number of mothers greather than 2 : " << nmother << endmsg; 
-              warnmother_=false; 
+              if (warnmother_) throw EXCEPTION_WARNING("Number of mothers greather than 2","",0);
             }
+            catch (const std::exception& e)
+            {
+              MANAGE_EXCEPTION(e);
+              warnmother_=false; 
+            }    
           }
         }
       }
@@ -233,11 +238,16 @@ MAbool HEPMCReader::FillWeightNames(const std::string& line)
           << nweights << endmsg;
     return false;
   }
-  if (nweights>=2)
+
+  try
   {
-    WARNING << nweights << " event-weights are defined. "
-            << "Only the first one will be used." << endmsg;
+    if (nweights>=2) throw EXCEPTION_WARNING("Several event-weights are defined. Only the first one will be used.","",0);
   }
+  catch (const std::exception& e)
+  {
+    MANAGE_EXCEPTION(e);
+  }    
+
 
   // Storing weight names
   weightnames_.clear();

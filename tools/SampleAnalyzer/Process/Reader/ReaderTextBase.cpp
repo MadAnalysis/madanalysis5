@@ -24,8 +24,6 @@
 
 // STL headers
 #include <fstream>
-#include <fcntl.h>
-#include <unistd.h>
 
 // ZIP headers
 #ifdef ZIP_USE
@@ -66,9 +64,6 @@ bool ReaderTextBase::Initialize(const std::string& rawfilename,
   // Is compressed file ?
   compress_ = IsCompressedMode(filename_);
 
-  // Is fifo file ?
-  fifo_ = IsFIFOMode(filename_);
-
   // Checking consistency with compilation option
   if (compress_)
   {
@@ -108,19 +103,8 @@ bool ReaderTextBase::Initialize(const std::string& rawfilename,
 #endif
   }
 
-  // FIFO file
-  else if (fifo_)
-  {
-    int ififo = open(filename_.c_str(), O_RDONLY);
-    if (ififo < 0) return false;
-
-    input_fifo_ = new std::ifstream();
-    input_fifo_->open(filename_.c_str());
-    test=input_fifo_->good();
-  }
-
   // Input coming from local disk
-  else
+  else 
   {
     input_=new std::ifstream();
     std::ifstream * myinput = dynamic_cast<std::ifstream*>(input_);
@@ -158,18 +142,15 @@ bool ReaderTextBase::Finalize()
     gzinput_->clear();
 #endif
   }
-  else if (fifo_)
-    input_fifo_->clear();
   else 
   {
     std::ifstream * myinput = dynamic_cast<std::ifstream*>(input_);
     myinput->close();
-    myinput->clear();
+    myinput->clear();   
   }
 
   // Free allocated memory for the file streamer
   if (input_!=0) { delete input_; input_=0; }
-  if (input_fifo_!=0) { delete input_fifo_; input_fifo_=0; }
 
   // OK!
   return true;
@@ -185,16 +166,8 @@ bool ReaderTextBase::ReadLine(std::string& line, bool removeComment)
   while (!getnewline)
   {
     // Getting a new line from the file
-    if (!fifo_)
-    {
-      getline(*input_,line,'\n');
-      if (input_->eof() || input_->fail() ) return false;
-    }
-    else
-    {
-      std::getline(*input_fifo_, line);
-      if (input_fifo_->eof()) return false;
-    }
+    getline(*input_,line,'\n');
+    if (input_->eof() || input_->fail()) return false;
 
     // Removing possible comments
     if (removeComment)
