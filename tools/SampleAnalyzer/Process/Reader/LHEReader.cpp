@@ -29,6 +29,7 @@
 // SampleHeader headers
 #include "SampleAnalyzer/Process/Reader/LHEReader.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
 using namespace MA5;
 
@@ -296,30 +297,36 @@ bool LHEReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
     unsigned int index2=myEvent.mc()->particles_[i].mothup2_;
     if (index1!=0) // at least one mother
     {
-      if (index1>=myEvent.mc()->particles_.size() )
+      try
       {
-        WARNING << "mother index is greater to nb of particles" << endmsg;
-        WARNING << " - index1 = " << index1 << endmsg;
-        WARNING << " - particles.size() " << myEvent.mc()->particles_.size() << endmsg;
-        WARNING << "This event is skipped." << endmsg;
-        return false;
+        if (index1>=myEvent.mc()->particles_.size()) throw EXCEPTION_WARNING("mother index1 is greater to nb of particles","",0);
+        myEvent.mc()->particles_[i].mother1_ = &myEvent.mc()->particles_[index1-1];
+        myEvent.mc()->particles_[index1-1].daughters_.push_back(&myEvent.mc()->particles_[i]);
       }
-      myEvent.mc()->particles_[i].mother1_ = &myEvent.mc()->particles_[index1-1];
-      myEvent.mc()->particles_[index1-1].daughters_.push_back(&myEvent.mc()->particles_[i]);
-
-      if (index2!=0)
+      catch (const std::exception& e)
       {
-        if (index2>=myEvent.mc()->particles_.size())
-        {
-          WARNING << "mother index is greater to nb of particles" << endmsg;
-          WARNING << " - index2 = " << index2 << endmsg;
-          WARNING << " - particles.size() " << myEvent.mc()->particles_.size() << endmsg;
-          WARNING << "This event is skipped." << endmsg;
-          return false;
-        }
+        MANAGE_EXCEPTION(e);
+        //     << " - index1 = " << index1 << endmsg
+        //     << " - particles.size() " << myEvent.mc()->particles_.size()
+        return false;
+      }    
+    }
+
+    if (index2!=0)
+    {
+      try
+      {
+        if (index2>=myEvent.mc()->particles_.size()) throw EXCEPTION_WARNING("mother index2 is greater to nb of particles","",0);
         myEvent.mc()->particles_[i].mother2_ = &myEvent.mc()->particles_[index2-1];
         myEvent.mc()->particles_[index2-1].daughters_.push_back(&myEvent.mc()->particles_[i]);
       }
+      catch (const std::exception& e)
+      {
+        MANAGE_EXCEPTION(e);
+        //     << " - index1 = " << index1 << endmsg
+        //     << " - particles.size() " << myEvent.mc()->particles_.size()
+        myEvent.mc()->particles_[i].mother2_ = 0;
+      }    
     }
   }
 

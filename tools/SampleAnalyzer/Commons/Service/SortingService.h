@@ -32,6 +32,7 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/DataFormat/MCEventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecEventFormat.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
 #define SORTER MA5::SortingService::getInstance()
 
@@ -139,12 +140,15 @@ public:
              OrderingObservable obs=PTordering)
   {
     // rejecting case where rank equal to zero
-    if (rank==0)
+    try
     {
-      WARNING << "Rank equal to 0 is not possible. "
-              << "Allowed values are 1,2,3,... and -1,-2,-3,..." << endmsg;
-      return std::vector<const MCParticleFormat*>();
+      if (rank==0) throw EXCEPTION_WARNING("Rank equal to 0 is not possible. Allowed values are 1,2,3,... and -1,-2,-3,...","",0);
     }
+    catch(const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
+      return std::vector<const MCParticleFormat*>();
+    }    
 
     // Number of particle is not correct
     if ( (static_cast<MAint32>(ref.size()) - 

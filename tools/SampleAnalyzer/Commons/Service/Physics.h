@@ -40,6 +40,7 @@
 #include "SampleAnalyzer/Commons/Service/TransverseVariables.h"
 #include "SampleAnalyzer/Commons/Service/Identification.h"
 #include "SampleAnalyzer/Commons/Service/Isolation.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
 #define PHYSICS MA5::PhysicsService::getInstance()
 
@@ -132,11 +133,15 @@ class PhysicsService
   {
     if (part==0) return -1;
 
-    if (fabs(part->pdgid())!=15) 
+    try
     {
-      WARNING << "Particle is not a Tau" << endmsg;
-      return -1;
+      if (fabs(part->pdgid())!=15) throw EXCEPTION_WARNING("Particle is not a Tau.","",0);
     }
+    catch(const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
+      return -1;
+    }    
 
     MAint32 npi = 0;
 

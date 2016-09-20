@@ -35,6 +35,7 @@
 #include "SampleAnalyzer/Commons/DataFormat/MCSampleFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecSampleFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
 namespace MA5
 {
@@ -121,21 +122,29 @@ class SampleFormat
   /// Initialize MonteCarlo part
   void InitializeMC()
   {
-    if (mc_!=0) 
+    try
     {
-      WARNING << "MC part of the SampleFormat is already initialized" << endmsg;
+      if (mc_!=0) throw EXCEPTION_WARNING("MC part of the SampleFormat is already initialized.","",0);
+      mc_=new MCSampleFormat(&sample_generator_);
     }
-    else mc_=new MCSampleFormat(&sample_generator_);
+    catch(const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
+    }    
   }
 
   /// Initialize Rec part
   void InitializeRec()
   {
-    if (rec_!=0) 
+    try
     {
-      WARNING << "REC part of the SampleFormat is already initialized" << endmsg;
+      if (rec_!=0) throw EXCEPTION_WARNING("REC part of the SampleFormat is already initialized.","",0);
+      rec_=new RecSampleFormat();
     }
-    else rec_=new RecSampleFormat();
+    catch(const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
+    }    
   }
 
   /// Free allocates memory

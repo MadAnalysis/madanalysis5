@@ -100,7 +100,7 @@ class MABoost
     try
     {
       if (q.T()==0) throw EXCEPTION_WARNING("Energy equal to zero. Impossible to compute the boost.","",0);
-      setBoostVector(q.X(),q.Y(),q.Z());
+      setBoostVector(q.X()/q.T(),q.Y()/q.T(),q.Z()/q.T());
     }
     catch(const std::exception& e)
     {
