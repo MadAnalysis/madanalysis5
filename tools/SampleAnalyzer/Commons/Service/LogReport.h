@@ -84,7 +84,7 @@ class LogReport
  public:
 
   /// Constructor withtout argument
-  LogReport() : GeneralCounter_(0), GlobalThreshold_(-1), MsgThreshold_(-1)
+  LogReport() : GeneralCounter_(0), GlobalThreshold_(-1), MsgThreshold_(10)
   {}
 
   /// Destructor
@@ -95,7 +95,7 @@ class LogReport
   void Reset()
   { 
     GlobalThreshold_ = -1;
-    MsgThreshold_ = -1;
+    MsgThreshold_ = 10;
     GeneralCounter_ = 0;
     MsgTable_.clear();
     Name_="";
