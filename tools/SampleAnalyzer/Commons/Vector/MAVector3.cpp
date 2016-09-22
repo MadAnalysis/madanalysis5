@@ -124,7 +124,7 @@ MAdouble64 MAVector3::PseudoRapidity() const
    //return 0.5*log( (m+z_)/(m-z_) );
    // guard against Pt=0
    double cosTheta = CosTheta();
-   if (cosTheta*cosTheta < 1) return -0.5* std::log( (1.0-cosTheta)/(1.0+cosTheta) );
+   if (cosTheta*cosTheta< 1) return -0.5* std::log( (1.0-cosTheta)/(1.0+cosTheta) );
    if (z_ == 0) return 0;
    if (z_ > 0) return  999;
    else        return -999;

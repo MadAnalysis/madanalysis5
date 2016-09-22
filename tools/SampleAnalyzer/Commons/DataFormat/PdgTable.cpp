@@ -22,9 +22,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#include "SampleAnalyzer/Commons/DataFormat/PdgTable.h"
+// STL headers
 #include <iostream> 
 #include <iomanip>
+
+// SampleAnalyzer headers
+#include "SampleAnalyzer/Commons/DataFormat/PdgTable.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
+#include "SampleAnalyzer/Commons/Service/ConvertService.h"
+
 
 using namespace MA5;
 
@@ -70,11 +76,15 @@ void PdgTable::Print() const
 const PdgDataFormat& PdgTable::operator[](const MAint32 Pdgid) const 
 {
   std::map<MAint32, PdgDataFormat>::const_iterator it = Table_.find(Pdgid);
-  if(it==Table_.end()) 
+  try
   {
-    WARNING <<"PDG ID not found (" << Pdgid << "), use default values" << endmsg;
-    return empty_;
+    if (it==Table_.end()) throw EXCEPTION_WARNING("PDG ID not found ["+CONVERT->ToString(Pdgid)+"]","",0);
   }
+  catch(const std::exception& e)
+  {
+    MANAGE_EXCEPTION(e);
+    return empty_;
+  }    
    
   return it->second;
 }

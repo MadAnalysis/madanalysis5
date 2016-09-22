@@ -30,6 +30,7 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/Configuration.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
 
 using namespace MA5;
@@ -110,12 +111,10 @@ bool Configuration::Initialize(int &argc, char *argv[], const bool &useRSM)
     {
       std::string stamp = option.substr(14,std::string::npos);
       std::size_t result = stamp.find(";");
-      if (result==std::string::npos)
+      try
       {
-        WARNING << "MA5 version '" << stamp << "' is not valid." << std::endl;
-      }
-      else
-      {
+        if (result==std::string::npos) throw EXCEPTION_WARNING("MA5 version '"+stamp+"' is not valid.","",0);
+
         pythoninterface_version_ = stamp.substr(0,result);
         if (pythoninterface_version_.find("\"")==0)
           pythoninterface_version_ = pythoninterface_version_.substr(1,std::string::npos);
@@ -130,6 +129,10 @@ bool Configuration::Initialize(int &argc, char *argv[], const bool &useRSM)
           if (pythoninterface_date_.find("\"")==(pythoninterface_date_.size()-1))
             pythoninterface_date_ = pythoninterface_date_.substr(0,(pythoninterface_date_.size()-1));
       }
+      catch(const std::exception& e)
+      {
+        MANAGE_EXCEPTION(e);
+      }    
     }
 
     // unknown option
