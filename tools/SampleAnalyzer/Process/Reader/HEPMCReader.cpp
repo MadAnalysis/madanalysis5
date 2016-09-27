@@ -265,9 +265,14 @@ MAbool HEPMCReader::FillWeightNames(const std::string& line)
 //------------------------------------------------------------------------------
 MAbool HEPMCReader::FillHeavyIons(const std::string& line)
 {
-  if (line!="") if (firstHeavyIons_) 
-     WARNING << "WARNING: HeavyIons block is not "
-             << "read by SampleAnalyzer" << endmsg;
+  try
+  {
+    if (line!="") if (firstHeavyIons_) EXCEPTION_WARNING("HeavyIons block is not read by SampleAnalyzer","",0);
+  }
+  catch(const std::exception& e)
+  {
+    MANAGE_EXCEPTION(e);
+  }    
   firstHeavyIons_=false;
   return false;
 }
@@ -319,7 +324,14 @@ MAbool HEPMCReader::FillEvent(const std::string& line,
   else
   {
     // ignore other cases
-    WARNING << "HEPMC linecode unknown" << endmsg;
+    try
+    {
+      EXCEPTION_WARNING("HEPMC linecode unknown","",0);
+    }
+    catch(const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
+    }    
   }
 
   // Normal end
@@ -543,7 +555,7 @@ void HEPMCReader::SetMother(MCParticleFormat* const part, EventFormat& myEvent)
       { 
         if (warnmother_) 
         {
-          WARNING << "Number of mothers greather than 2 : " << nmother << endmsg; 
+          EXCEPTION_WARNING << "Number of mothers greather than 2 : " << nmother << endmsg; 
           warnmother_=false; 
         }
       }

@@ -35,6 +35,7 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/DataFormat/ParticleBaseFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
 namespace MA5
 {
@@ -101,8 +102,14 @@ class RecParticleFormat : public ParticleBaseFormat
          << "EHoverEE=" << /*set::setw(8)*/"" << std::left << HEoverEE_
 	       << " - ";
 
-    if (mc_==0) ERROR << "NoMCmum" << " - ";
-    else ERROR << "Mum1  " << " - ";
+    try
+    {
+      if (mc_==0) throw EXCEPTION_ERROR("NoMCmum","",0);
+    }
+    catch(const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
+    }    
   }
 
   /// Accessor to matched Monte Carlo particle 

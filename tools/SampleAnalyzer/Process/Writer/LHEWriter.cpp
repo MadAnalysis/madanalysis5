@@ -27,6 +27,8 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Writer/LHEWriter.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
+
 
 using namespace MA5;
 
@@ -91,8 +93,15 @@ MAuint32 FindDeeply(const MCParticleFormat* part,
     counter++;
     if (counter>=100000)
     {
-      WARNING << "Number of calls exceed: infinite loop is detected" << endmsg;
-      break;
+      try
+      {
+        throw EXCEPTION_ERROR("Number of calls exceed: infinite loop is detected","",0);
+      }
+      catch(const std::exception& e)
+      {
+        MANAGE_EXCEPTION(e);
+        break;
+      }    
     }
     if (thepart->mother1()==0) 
     {

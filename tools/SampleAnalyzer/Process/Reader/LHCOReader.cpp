@@ -22,9 +22,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-#include "SampleAnalyzer/Process/Reader/LHCOReader.h"
+// STL headers
 #include <sstream>
 #include <cmath>
+
+// SampleAnalyzer headers
+#include "SampleAnalyzer/Process/Reader/LHCOReader.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
+
 
 using namespace MA5;
 
@@ -385,6 +390,13 @@ void LHCOReader::FillEventParticleLine(const std::string& line, EventFormat& myE
   // -------------------------------------------
   else if (firstchar!="0")
   {
-    WARNING << "Unknown type of object : " << muf << endmsg;
+    try
+    {
+      EXCEPTION_WARNING("Unknown type of object : "+muf,"",0);
+    }
+    catch(const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
+    }    
   }
 }

@@ -28,11 +28,13 @@
 // ROOT header
 #include <TROOT.h>
 #include <TChain.h>
-#include "SampleAnalyzer/Commons/Vector/MALorentzVector.h"
 #include <TObject.h>
 #include <TFile.h>
 
 // SampleHeader headers
+#include "SampleAnalyzer/Commons/Vector/MALorentzVector.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
+#include "SampleAnalyzer/Commons/Service/ConvertService.h"
 #include "SampleAnalyzer/Interfaces/root/ROOTReader.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #ifdef DELPHES_USE
@@ -54,11 +56,18 @@ MAbool ROOTReader::ReadHeader(SampleFormat& mySample)
   // Checking ROOT version
   MAint32 file_version = source_->GetVersion();
   MAint32 lib_version = gROOT->GetVersionInt();
-  if (file_version!=lib_version)
+  try
   {
-    WARNING << "the input file has been produced with ROOT version " << file_version
-            << " whereas the loaded ROOT libs are related to the version " << lib_version << endmsg;
+    if (file_version!=lib_version) throw EXCEPTION_WARNING("the input file has been produced with ROOT version "+
+                                                           CONVERT->ToString(file_version)+
+                                                           " whereas the loaded ROOT libs are related to the version "+
+                                                           CONVERT->ToString(lib_version),"",0);
   }
+  catch (const std::exception& e)
+  {
+    MANAGE_EXCEPTION(e);
+  }    
+
   return treeReader_->ReadHeader(mySample);
 }
 

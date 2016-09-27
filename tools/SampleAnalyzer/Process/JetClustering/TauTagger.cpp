@@ -22,8 +22,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Process/JetClustering/TauTagger.h"
 #include "SampleAnalyzer/Commons/Service/RandomService.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 using namespace MA5;
 
 

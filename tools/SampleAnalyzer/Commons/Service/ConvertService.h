@@ -32,8 +32,9 @@
 #include <algorithm>
 #include <cctype> // std::tolower
 
-
+// SampleAnalyzer header
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
 
 // ShortCut to access to ConvertService
@@ -113,6 +114,16 @@ class ConvertService
     Converter_ << value;
     MAint32 convert=0;
     Converter_ >> convert;
+
+    try
+    {
+      if (Converter_.fail()) throw EXCEPTION_ERROR("Impossible to convert a string to a int","word="+ToString(value),0);
+    }
+    catch (const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
+    }    
+
     return convert;
   }
 
@@ -124,6 +135,16 @@ class ConvertService
     Converter_ << value;
     MAuint32 convert=0;
     Converter_ >> convert;
+
+    try
+    {
+      if (Converter_.fail()) throw EXCEPTION_ERROR("Impossible to convert a string to a int","word="+ToString(value),0);
+    }
+    catch (const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
+    }    
+
     return convert;
   }
 
@@ -135,6 +156,16 @@ class ConvertService
     Converter_ << value;
     MAfloat32 convert=0;
     Converter_ >> convert;
+
+    try
+    {
+      if (Converter_.fail()) throw EXCEPTION_ERROR("Impossible to convert a string to a float","word="+ToString(value),0);
+    }
+    catch (const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
+    }    
+
     return convert;
   }
 

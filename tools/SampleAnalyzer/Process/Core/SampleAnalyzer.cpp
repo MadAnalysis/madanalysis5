@@ -36,6 +36,7 @@
 #include "SampleAnalyzer/Commons/Service/CompilationService.h"
 #include "SampleAnalyzer/Process/Core/ProgressBar.h"
 #include "SampleAnalyzer/Commons/Base/Configuration.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
 
 using namespace MA5;
@@ -67,72 +68,118 @@ SampleAnalyzer::SampleAnalyzer()
 /// CheckDatatypes
 void SampleAnalyzer::CheckDatatypes() const
 {
-  unsigned int value = sizeof(MAint8);
-  if (value!=1)
-  {
-    WARNING << "MAint8 type corresponds to " 
-            << value*8 << " bits" << endmsg;  
+  unsigned int value = 0;
 
-  }
-  value = sizeof(MAuint8);
-  if (value!=1)
+  // MAint8
+  try
   {
-    WARNING << "MAuint8 type corresponds to " 
-            << value*8 << " bits" << endmsg;  
+    value = sizeof(MAint8);
+    if (value!=1) EXCEPTION_WARNING("MAint8 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
+  }
+  catch(const std::exception& e)
+  {
+    MANAGE_EXCEPTION(e);
+  }    
 
-  }
-  value = sizeof(MAint16);
-  if (value!=2)
+  // MAuint8
+  try
   {
-    WARNING << "MAint16 type corresponds to " 
-            << value*8 << " bits" << endmsg;  
+    value = sizeof(MAuint8);
+    if (value!=1) EXCEPTION_WARNING("MAuint8 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
   }
-  value = sizeof(MAuint16);
-  if (value!=2)
+  catch(const std::exception& e)
   {
-    WARNING << "MAuint16 type corresponds to " 
-            << value*8 << " bits" << endmsg;  
-  }
-  value = sizeof(MAint32);
-  if (value!=4)
-  {
-    WARNING << "MAint32 type corresponds to " 
-            << value*8 << " bits" << endmsg;  
+    MANAGE_EXCEPTION(e);
+  }    
 
-  }
-  value = sizeof(MAuint32);
-  if (value!=4)
-  {
-    WARNING << "MAuint32 type corresponds to " 
-            << value*8 << " bits" << endmsg;  
-  }
-  value = sizeof(MAint64);
-  if (value!=8)
-  {
-    WARNING << "MAint64 type corresponds to " 
-            << value*8 << " bits" << endmsg;  
 
-  }
-  value = sizeof(MAuint64);
-  if (value!=8)
+  // MAint16
+  try
   {
-    WARNING << "MAuint64 type corresponds to " 
-            << value*8 << " bits" << endmsg;  
+    value = sizeof(MAint16);
+    if (value!=2) EXCEPTION_WARNING("MAint16 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
   }
-  value = sizeof(MAfloat32);
-  if (value!=4)
+  catch(const std::exception& e)
   {
-    WARNING << "MAfloat32 type corresponds to " 
-            << value*8 << " bits" << endmsg;  
+    MANAGE_EXCEPTION(e);
+  }    
 
-  }
-  value = sizeof(MAfloat64);
-  if (value!=8)
+  // MAuint16
+  try
   {
-    WARNING << "MAfloat64 type corresponds to " 
-            << value*8 << " bits" << endmsg;  
+    value = sizeof(MAuint16);
+    if (value!=2) EXCEPTION_WARNING("MAuint16 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
   }
+  catch(const std::exception& e)
+  {
+    MANAGE_EXCEPTION(e);
+  }    
 
+  // MAint32
+  try
+  {
+    value = sizeof(MAint32);
+    if (value!=4) EXCEPTION_WARNING("MAint32 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
+  }
+  catch(const std::exception& e)
+  {
+    MANAGE_EXCEPTION(e);
+  }    
+
+  // MAuint32
+  try
+  {
+    value = sizeof(MAuint32);
+    if (value!=4) EXCEPTION_WARNING("MAuint32 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
+  }
+  catch(const std::exception& e)
+  {
+    MANAGE_EXCEPTION(e);
+  }    
+
+  // MAint64
+  try
+  {
+    value = sizeof(MAint64);
+    if (value!=8) EXCEPTION_WARNING("MAint64 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
+  }
+  catch(const std::exception& e)
+  {
+    MANAGE_EXCEPTION(e);
+  }    
+
+  // MAuint64
+  try
+  {
+    value = sizeof(MAuint64);
+    if (value!=8) EXCEPTION_WARNING("MAuint64 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
+  }
+  catch(const std::exception& e)
+  {
+    MANAGE_EXCEPTION(e);
+  }    
+
+  // MAfloat32
+  try
+  {
+    value = sizeof(MAfloat32);
+    if (value!=4) EXCEPTION_WARNING("MAfloat32 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
+  }
+  catch(const std::exception& e)
+  {
+    MANAGE_EXCEPTION(e);
+  }    
+
+  // MAfloat64
+  try
+  {
+    value = sizeof(MAfloat64);
+    if (value!=8) EXCEPTION_WARNING("MAfloat64 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
+  }
+  catch(const std::exception& e)
+  {
+    MANAGE_EXCEPTION(e);
+  }    
 }
 
 
