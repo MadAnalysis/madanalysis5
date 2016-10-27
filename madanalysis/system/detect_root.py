@@ -182,10 +182,9 @@ class DetectRoot:
             if os.path.isfile(file):
                 self.libraries[file.split('/')[-1]]=file+":"+str(os.stat(file).st_mtime)
             else:
-                self.PrintFAIL(warning=False)
-                self.logger.error("ROOT file called '"+file+"' is not found")
-                self.logger.error("Please check that ROOT is properly installed.")
-                return False
+                msg = "ROOT file called '"+file+"' is not found\n"\
+                 + "Please check that ROOT is properly installed."
+                return False,msg
 
         # Getting the features
         theCommands = [self.bin_path+'/root-config','--features']
