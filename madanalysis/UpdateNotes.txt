@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+158  1.5.24   (2016/10/28) fuks:    Bug in the eflow isolation 
+
 157  1.5.23   (2016/10/27) fuks:    Fixing root detection issue 
 
 153  1.5.22   (2016/09/21) fuks:    Fixing matplotlib installation 
