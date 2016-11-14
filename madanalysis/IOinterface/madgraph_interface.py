@@ -431,7 +431,7 @@ class MadGraphInterface():
         else:
             for key, value in self.multiparticles.iteritems():
                 self.logger.debug('new multiparticles ' + key + ' = ' + str(value))
-                if value==pdg:
+                if sorted(value)==sorted(pdg):
                     return key
         self.logger.error('  ** Cannot find the name associated with the pdg code list' + str(pdg))
         raise self.MultiParts("  ** Problem with the multiparticle definitions")
@@ -441,7 +441,7 @@ class MadGraphInterface():
     def get_pdg_code(self,prt):
         try:
             if isinstance( int(prt), int ):
-               return prt
+               return int(prt)
         except:
             for key, value in self.model.get('particle_dict').iteritems():
                 if value['antiname']==prt and not value['is_part']:
