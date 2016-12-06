@@ -452,7 +452,6 @@ bool STDHEPreader::DecodeEventHeader(const std::string& evt_version)
 // -----------------------------------------------------------------------------
 bool STDHEPreader::DecodeSTDCM1(const std::string& version, SampleFormat& mySample)
 {
-
   MAint32 nevtreq; 
   *xdrinput_ >> nevtreq;
 

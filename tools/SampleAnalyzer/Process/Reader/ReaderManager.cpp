@@ -76,6 +76,10 @@ void ReaderManager::BuildTable()
 // -----------------------------------------------------------------------------
 ReaderBase* ReaderManager::GetByFileExtension(std::string filename)
 {
+  // Do we have a fifo file?
+  std::string::size_type n = filename.find(".fifo");
+  if (n!=std::string::npos) filename.erase(n,5);
+
   // Set the extension in lower case
   std::transform(filename.begin(), filename.end(),
                  filename.begin(), std::ptr_fun<int, int>(std::tolower));

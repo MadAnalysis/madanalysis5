@@ -53,6 +53,9 @@ class ReaderTextBase : public ReaderBase
   /// Streaming for reading input
   std::istream*  input_;
 
+  /// Streaming for fifo
+  std::ifstream* input_fifo_;
+
   /// Name of the file (without prefix such as file: or rfio:)
   std::string filename_;
 
@@ -65,13 +68,15 @@ class ReaderTextBase : public ReaderBase
   /// Constructor without argument
   ReaderTextBase()
   {
-    input_=0;
+    input_      = 0;
+    input_fifo_ = 0;
   }
 
 	/// Destructor
   virtual ~ReaderTextBase()
   {
-    if (input_ !=0) delete input_;
+    if (input_     !=0) delete input_;
+    if (input_fifo_!=0) delete input_fifo_;
   }
 
   /// Initialize
