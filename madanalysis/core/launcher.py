@@ -45,6 +45,56 @@ class MA5mode():
 
 
 ################################################################################
+# Function DefaultInstallCard
+################################################################################
+def DefaultInstallCard():
+    logging.info("Generate a default installation_options.dat file...")
+    output = file('installation_options.dat','w')
+    output.write('# WARNING! MA5 SHOULD DETECT AUTOMATICALLY YOUR CONFIGURATION\n')
+    output.write('# IF THIS AUTOMATED MODE FAILS, YOU CAN FORCE SOME \n')
+    output.write('# OPTIONS THROUGH THIS FILE\n')
+    output.write('\n')
+    output.write('# ----GENERAL----\n')
+    output.write('# tmp_dir = /tmp/ma5/\n')
+    output.write('# download_dir = /tmp/downloadma5/\n')
+    output.write('# webaccess_veto = 0 # 0=No, 1=Yes\n')
+    output.write('\n')
+    output.write('# -----ROOT-----\n')
+    output.write('# root_veto     = 0 # 0=No, 1=Yes\n')
+    output.write('# root_bin_path = /home/root/bin\n')
+    output.write('\n')
+    output.write('# -----MATPLOTLIB-----\n')
+    output.write('# matplotlib_veto = 0 # 0=No, 1=Yes\n')
+    output.write('\n')
+    output.write('# -----DELPHES----- \n')
+    output.write('# delphes_veto     = 0 # 0=No, 1=Yes\n')
+    output.write('# delphes_includes = /home/delphes/delphes/include/\n')
+    output.write('# delphes_libs     = /home/delphes/delphes/lib/\n')
+    output.write('\n')
+    output.write('# -----DELPHESMA5TUNE-----\n')
+    output.write('# delphesMA5tune_veto     = 0 # 0=No, 1=Yes\n')
+    output.write('# delphesMA5tune_includes = /home/delphesMA5tune/include\n')
+    output.write('# delphesMA5tune_libs     = /home/delphesMA5tune/lib\n')
+    output.write('\n')
+    output.write('# -----ZLIB-----\n')
+    output.write('# zlib_veto     = 0 # 0=No, 1=Yes\n')
+    output.write('# zlib_includes = /home/zlib/include/\n')
+    output.write('# zlib_libs     = /home/zlib/lib/\n')
+    output.write('\n')
+    output.write('# -----FASTJET-----\n')
+    output.write('# fastjet_veto     = 0 # 0=No, 1=Yes\n')
+    output.write('# fastjet_bin_path = /home/fastjet/build/bin/\n')
+    output.write('\n')
+    output.write('# -----PDFLATEX-----\n')
+    output.write('# pdflatex_veto = 0 # 0=No, 1=Yes\n')
+    output.write('\n')
+    output.write('# -----LATEX-----\n')
+    output.write('# latex_veto = 0 # 0=No, 1=Yes\n')
+    output.write('\n')
+    output.close()
+
+
+################################################################################
 # Function DecodeArguments
 ################################################################################
 def DecodeArguments(version, date):
@@ -56,10 +106,10 @@ def DecodeArguments(version, date):
     import getopt
     try:
         optlist, arglist = getopt.getopt(sys.argv[1:], \
-                                     "PHReEvhfmsbdq", \
+                                     "PHReEvhfmsbdqi", \
                                      ["partonlevel","hadronlevel","recolevel",\
                                       "expert","version","release","help",\
-                                      "forced","script","debug","build","qmode"])
+                                      "forced","script","debug","build","qmode","installcard"])
     except getopt.GetoptError, err:
         logging.error(str(err))
         Usage()
@@ -97,6 +147,14 @@ def DecodeArguments(version, date):
         elif o in ["-h","--help"]:
             Usage()
             sys.exit()
+        elif o in ["-i","--installcard"]:
+            DefaultInstallCard()
+            sys.exit()
+        else:
+            logging.error("Argument '"+o+"' is not found.")
+            Usage()
+            sys.exit()
+
 
     # Checking consistency between arguments
     if mode.partonlevel and mode.hadronlevel:
@@ -216,16 +274,24 @@ def MainSession(mode,arglist,ma5dir,version,date):
 
     # Normal mode
     else:
-    
+
         # Launching the interpreter
         from madanalysis.interpreter.interpreter import Interpreter
         interpreter = Interpreter(main)
 
-        # Looking for script
+        # List of ma5script to load
+        myscripts=[]
         for arg in arglist:
             filename=os.path.expanduser(arg)
             filename=os.path.abspath(filename)
-            interpreter.load(filename)
+            if not os.path.isfile(filename):
+               logging.warning("The file called '"+filename+"' is not found and will be skipped.")
+            else:
+               myscripts.append(filename)
+    
+        # Executing the ma5 scripts
+        for myscript in myscripts:
+            interpreter.load(myscript)
     
         # Exit if script mode activated
         if len(arglist)!=0 and main.script:
@@ -248,6 +314,7 @@ def Usage():
     logging.info("\nUsage of MadAnalysis 5")
     logging.info("------------------------")
     logging.info("Syntax : ./bin/ma5 [options] [scripts]\n")
+    
     logging.info("[options]")
     logging.info("This optional argument allows to select the running mode of " +\
                  "MadAnalysis 5 appropriate to the type of event files to analyze. " +\
@@ -265,7 +332,10 @@ def Usage():
     logging.info(" -f or --forced      : do not ask for confirmation when MA5 removes a directory or overwrites an object") 
     logging.info(" -s or --script      : quit automatically MA5 when the script is loaded")
     logging.info(" -h or --help        : dump this help")
-    logging.info(" -d or --debug       : debug mode\n")
+    logging.info(" -i or --installcard : produce the default installation card in installation_card.dat")
+    logging.info(" -d or --debug       : debug mode")
+    logging.info(" -q or --qmode       : developper mode only for MA5 developpers\n")
+    
     logging.info("[scripts]")
     logging.info("This optional argument is a list of filenames containing a "+\
                  "set of MadAnalysis 5 commands. The file name are handled as "+\

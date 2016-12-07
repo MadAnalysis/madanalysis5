@@ -44,17 +44,31 @@ class DetectZlib:
         self.name         = 'Zlib'
         self.mandatory    = False
         self.force        = False
+
+        self.search_libs = []
+        self.search_incs = []
+        
         self.logger       = logging.getLogger('MA5')
 
+        # NAme of the header
+        self.headernames=['zlib.h']
+        
         # Name of the dynamic lib
+        self.libnames=['libz.so','libz.a','libz.so.*'] #taking into account: libz.so.1, ...
         if self.archi_info.isMac:
-            self.libnames=['libz.dylib','libz.so','libz.a']
-        else:
-            self.libnames=['libz.so','libz.a']
+            self.libnames.extend(['libz.dylib'])
 
         #specific options
-        self.header_file  = ''
-        self.library_file = ''
+        self.header_files  = []
+        self.library_files = []
+
+
+    @staticmethod
+    def AddIfValid(path,container):
+        dirs=glob.glob(path)
+        for item in dirs:
+            if not (item in container):
+                container.append(item)
 
 
     def IsItVetoed(self):
@@ -66,28 +80,84 @@ class DetectZlib:
             return False
 
 
+    def FillHeaders(self):
+        # Filling container with paths included in CPLUS_INCLUDE_PATH
+        try:
+            cplus_include_path = os.environ['CPLUS_INCLUDE_PATH'].split(':')
+            for item in cplus_include_path:
+                DetectZlib.AddIfValid(item,self.search_incs)
+        except:
+            os.environ['CPLUS_INCLUDE_PATH']=''
+
+        # Filling container with standard include paths
+        DetectZlib.AddIfValid('/usr/include',self.search_incs)
+        DetectZlib.AddIfValid('/usr/local/include',self.search_incs)
+        DetectZlib.AddIfValid('/local/include',self.search_incs)
+        DetectZlib.AddIfValid('/opt/local/include',self.search_incs)
+
+
+    def FillLibraries(self):
+        # Filling container with paths included in LD_LIBRARY_PATH
+        try:
+            ld_library_path = os.environ['LD_LIBRARY_PATH'].split(':')
+            for item in ld_library_path:
+                DetectZlib.AddIfValid(item,self.search_libs)
+        except:
+            os.environ['LD_LIBRARY_PATH']=''
+
+        # Filling container with paths included in DYLD_LIBRARY_PATH
+        try:
+            ld_library_path = os.environ['DYLD_LIBRARY_PATH'].split(':')
+            for item in ld_library_path:
+                DetectZlib.AddIfValid(item,self.search_libs)
+        except:
+            os.environ['DYLD_LIBRARY_PATH']=''
+
+        # Filling container with paths included in LIBRARY_PATH
+        try:
+            library_path = os.environ['LIBRARY_PATH'].split(':')
+            for item in library_path:
+                DetectZlib.AddIfValid(item,self.search_libs)
+        except:
+            os.environ['LIBRARY_PATH']=''
+
+        # Filling container with standard library paths
+        DetectZlib.AddIfValid('/usr/lib*',self.search_libs)
+        DetectZlib.AddIfValid('/usr/local/lib*',self.search_libs)
+        DetectZlib.AddIfValid('/local/lib*',self.search_libs)
+        DetectZlib.AddIfValid('/opt/local/lib*',self.search_libs)
+        
+
     def ManualDetection(self):
 
         # User setting for header
         force1=False
         test1=False
+        result1=[]
         if self.user_info.zlib_includes!=None:
 
              self.logger.debug("User setting: zlib include path is specified.")
-             force1 = True
-             test1  = self.LookForHeader(self.user_info.zlib_includes)
+             force1  = True
+             result1 = self.LookForPattern(self.user_info.zlib_includes,self.headernames)
+             test1   = (len(result1)!=0)
 
         # User setting for header
         force2=False
         test2=False
+        result2=[]
         if self.user_info.zlib_libs!=None:
 
              self.logger.debug("User setting: zlib lib path is specified.")
-             force2 = True
-             test2  = self.LookForLibrary(self.user_info.zlib_libs)
+             force2  = True
+             result2 = self.LookForPattern(self.user_info.zlib_libs,self.libnames)
+             test2   = (len(result2)!=0)
 
         # Return
         if force1 and force2 and test1 and test2:
+            self.force = True
+            self.header_files  = result1
+            self.library_files = result2
+            
             return DetectStatusType.FOUND, ''
         else:
             return DetectStatusType.UNFOUND, ''
@@ -105,90 +175,89 @@ class DetectZlib:
             self.logger.debug("-> found")
 
         # headers
-        test1 = self.LookForHeader(pathname+'/include/')
+        result1 = self.LookForPattern(pathname+'/include/',self.headernames)
+        test1   = (len(result1)!=0)
 
         # libs
-        test2 = self.LookForHeader(pathname+'/lib/')
+        result2 = self.LookForPattern(pathname+'/lib/',self.libnames)
+        test2   = (len(result2)!=0)
             
         # Return
         if test1 and test2:
+            self.header_files  = result1
+            self.library_files = result2
             return DetectStatusType.FOUND, ''
         else:
             return DetectStatusType.UNFOUND, ''
 
 
-    def LookForHeader(self,path):
-        filename=os.path.normpath(path+'/zlib.h')
-        self.logger.debug("Look for the header file "+filename+" ...")
-        if not os.path.isfile(filename):
-            self.logger.debug('-> not found')
-            logging.warning("Header file called '"+filename+"' not found.")
-            return False
-        else:
-            self.logger.debug('-> found')
-            self.header_file=filename
-            return True
+    def LookForPattern(self,path,patterns):
+        result=[]
+        for pattern in patterns:
+            filename=os.path.normpath(path+'/'+pattern)
+            self.logger.debug('look for pattern '+filename+' ...')
+            thefiles = glob.glob(filename)
+            for thefile in thefiles:
+                if thefile not in result:
+                    self.logger.debug('-> found: '+thefile)
+                    result.append(thefile)
+        if len(result)==0:
+            self.logger.debug('-> no file found')
+        return result
 
-
-    def LookForLibrary(self,path):
-        self.logger.debug("Look for the libraries in folder "+path+" ...")
-        found = False
-        for libname in self.libnames:
-            filename=os.path.normpath(path+'/'+libname)
-            self.logger.debug("Look for the library file "+filename+" ...")
-            if not os.path.isfile(filename):
-                self.logger.debug('-> not found')
-            else:
-                self.logger.debug('-> found')
-                found = True
-                self.library_file=filename
-                return True
-        return False
-
-                
+    
     def AutoDetection(self):
 
+        self.logger.debug("Search for header & libraries possible paths...")
+        self.FillHeaders()
+        self.FillLibraries()
+        self.logger.debug("->header  paths="+str(self.search_incs))
+        self.logger.debug("->library paths="+str(self.search_libs))
+         
         # header
         self.logger.debug("Look for the header file zlib.h ...")
-        mypath, myfile = self.FindHeader('zlib.h')
-        self.archi_info.zlib_inc_path = os.path.normpath(mypath)
-        self.logger.debug("-> result for the path: "+str(self.archi_info.zlib_inc_path))
-        self.logger.debug("-> result for the file: "+str(os.path.normpath(myfile)))
-        if self.archi_info.zlib_inc_path=="":
-            self.PrintFAIL(package_name,warning=True)
-            self.logger.warning("Header file called 'zlib.h' not found.")
-            self.logger.warning("Gzip format will be disabled.")
-            self.logger.warning("To enable this format, please type 'install zlib'.")
-            return False
+        result1=[]
+        for path in self.search_incs:
+            result1 = self.LookForPattern(path,self.headernames)
+            if len(result1)!=0:
+                break
+        test1   = (len(result1)!=0)
+        if not test1:
+#            self.logger.warning("Header file called 'zlib.h' not found.")
+#            self.logger.warning("Gzip format will be disabled.")
+#            self.logger.warning("To enable this format, please type 'install zlib'.")
+            return DetectStatusType.UNFOUND, ""
 
         # lib
         self.logger.debug("Look for the zlib libraries ...")
-        mypath, myfiles = self.FindLibraryWithPattern2('libz.*',libnames)
-        if mypath!='':
-            self.archi_info.zlib_lib_path = os.path.normpath(mypath)
-            self.archi_info.zlib_lib      = os.path.normpath(myfiles[0])
-            self.logger.debug("-> result for lib paths: "+str(self.archi_info.zlib_lib_path))
-            self.logger.debug("-> result for lib files: "+str(self.archi_info.zlib_lib))
-        if self.archi_info.zlib_lib_path=="":
-            self.PrintFAIL(package_name,warning=True)
-            self.logger.warning("Library called 'zlib' not found.")
-            self.logger.warning("Gzip format will be disabled.")
-            self.logger.warning("To enable this format, please type 'install zlib'.")
-            return False
-        self.archi_info.zlib_original_libs.extend(myfiles)
+        result2=[]
+        for path in self.search_libs:
+            result2 = self.LookForPattern(path,self.libnames)
+            if len(result2)!=0:
+                break
+        test2   = (len(result2)!=0)
+        if not test2:
+#            self.logger.warning("Zlib libraries are not found.")
+#            self.logger.warning("Gzip format will be disabled.")
+#            self.logger.warning("To enable this format, please type 'install zlib'.")
+            return DetectStatusType.UNFOUND, ""
 
-        return DetectStatusType.FOUND, msg
+        self.header_files  = result1
+        self.library_files = result2
+
+        return DetectStatusType.FOUND, ""
 
 
     def SaveInfo(self):
+
         # archi_info
-        self.archi_info.has_root           = True
         self.archi_info.zlib_priority      = self.force
-        self.archi_info.zlib_lib           = self.library_file
-        self.archi_info.zlib_inc_path      = os.path.dirname[self.header_file]
-        self.archi_info.zlib_lib_path      = os.path.dirname[self.library_file]
-        self.archi_info.zlib_original_libs.extend([self.library_file])
+        self.archi_info.zlib_lib           = self.library_files[0]
+        self.archi_info.zlib_inc_path      = os.path.dirname(self.header_files[0])
+        self.archi_info.zlib_lib_path      = os.path.dirname(self.library_files[0])
+        self.archi_info.zlib_original_libs.extend(self.library_files)
         self.archi_info.libraries['ZLib']=self.archi_info.zlib_lib+":"+str(os.stat(self.archi_info.zlib_lib).st_mtime)
+        
         # Ok
         return True
 

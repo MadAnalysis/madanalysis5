@@ -26,7 +26,7 @@
 #define GZ_FILE_H
 
 // ZLib headers
-#include <zlib.h>
+#include "zlib.h"
 
 
 namespace MA5

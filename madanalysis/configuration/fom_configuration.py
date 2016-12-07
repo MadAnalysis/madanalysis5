@@ -40,6 +40,7 @@ class FomConfiguration:
     def __init__(self):
         self.formula = 4
         self.x       = 0
+        self.logger  = logging.getLogger('MA5')
 
         
     def Display(self):
@@ -49,9 +50,9 @@ class FomConfiguration:
 
     def user_DisplayParameter(self,parameter):
         if parameter=="formula":
-            logging.info(" figure of merit (fom) - formula num "+str(self.formula)+": "+FomConfiguration.allformula[self.formula-1])
+            self.logger.info(" figure of merit (fom) - formula num "+str(self.formula)+": "+FomConfiguration.allformula[self.formula-1])
         elif parameter=="x" and self.IsX():
-            logging.info(" x parameter value: "+str(self.x))
+            self.logger.info(" x parameter value: "+str(self.x))
 
 
     def user_SetParameter(self,parameter,value):
@@ -62,21 +63,21 @@ class FomConfiguration:
                 self.formula=valueint
                 self.Display()
             else:
-                logging.error("The only possible values for 'formula' are : "+' '.str(FomConfiguration.userVariables["formula"]+'.'))
+                self.logger.error("The only possible values for 'formula' are : "+' '.str(FomConfiguration.userVariables["formula"]+'.'))
                 return False
         elif parameter=='x' and self.IsX():
             try:
                 number = float(value)
             except:
-                logging.error("The x parameter must be a float value.")
+                self.logger.error("The x parameter must be a float value.")
                 return False
             if number<0:
-                logging.error("The x parameter cannont be negative.")
+                self.logger.error("The x parameter cannont be negative.")
                 return False
             self.x=number
         # other    
         else:
-            logging.error("'formula' has no parameter called '"+parameter+"'")
+            self.logger.error("'formula' has no parameter called '"+parameter+"'")
 
             
     def IsX(self):

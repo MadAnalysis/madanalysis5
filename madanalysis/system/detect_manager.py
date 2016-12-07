@@ -48,6 +48,7 @@ class DetectManager():
         # Selection of the package
         if package=='zlib':
             from madanalysis.system.detect_zlib import DetectZlib
+            print "ERIC"
             checker=DetectZlib(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='fastjet':
             from madanalysis.system.detect_fastjet import DetectFastjet

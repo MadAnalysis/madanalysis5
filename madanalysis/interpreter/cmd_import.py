@@ -352,10 +352,12 @@ class CmdImport(CmdBase.CmdBase):
                 continue
             if self.main.IsGoodFormat(file):
                 files.append(file)
-            elif self.main.mode == MA5RunningType.RECO:
-                if file.endswith(".lhe") or file.endswith(".lhe.gz") or\
-                   file.endswith(".hep") or file.endswith(".hep.gz"):
-                    recowarning = True
+            else:
+                logging.warning("file "+file+" is skipped: "+self.main.PrintErrorFormat(file))
+                if self.main.mode == MA5RunningType.RECO:
+                    if file.endswith(".lhe") or file.endswith(".lhe.gz") or\
+                       file.endswith(".hep") or file.endswith(".hep.gz"):
+                         recowarning = True
         
         # If no file
         if len(files)==0:
@@ -419,6 +421,8 @@ class CmdImport(CmdBase.CmdBase):
                 if os.path.isfile(file):
                     if self.main.IsGoodFormat(file):
                         output.append(file)
+                    else:
+                        logging.warning("file "+file+" is skipped: "+self.main.PrintErrorFormat(file))
                 else:
                     output.append(file) # directory
             return self.finalize_complete(text,output)
