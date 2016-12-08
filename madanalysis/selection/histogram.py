@@ -92,7 +92,7 @@ class Histogram():
         if name in Histogram.userShortcuts.keys():
             return self.user_SetParameter(Histogram.userShortcuts[name][0],Histogram.userShortcuts[name][1])
         else:
-            logging.error("option '" + name + "' is unknown.")
+            logging.getLogger('MA5').error("option '" + name + "' is unknown.")
             return False
 
     def user_SetParameter(self,variable,value):
@@ -101,10 +101,10 @@ class Histogram():
             try:
                 tmp = int(value)
             except:
-                logging.error("variable 'nbins' must be an non-null integer positive value")
+                logging.getLogger('MA5').error("variable 'nbins' must be an non-null integer positive value")
                 return False
             if tmp <=0:
-                logging.error("variable 'nbins' must be an non-null integer positive value")
+                logging.getLogger('MA5').error("variable 'nbins' must be an non-null integer positive value")
                 return False
             else:
                 self.nbins = tmp
@@ -114,10 +114,10 @@ class Histogram():
             try:
                 tmp = float(value)
             except:
-                logging.error("variable 'xmin' must be a float value")
+                logging.getLogger('MA5').error("variable 'xmin' must be a float value")
                 return False
             if tmp > self.xmax:
-                logging.error("'xmin' value must be less than 'xmax' value")
+                logging.getLogger('MA5').error("'xmin' value must be less than 'xmax' value")
                 return False
             else:
                 self.xmin = tmp
@@ -126,10 +126,10 @@ class Histogram():
             try:
                 tmp = float(value)
             except:
-                logging.error("variable 'xmax' must be a float value")
+                logging.getLogger('MA5').error("variable 'xmax' must be a float value")
                 return False
             if tmp < self.xmin:
-                logging.error("'xmax' value must be greater than 'xmin' value")
+                logging.getLogger('MA5').error("'xmax' value must be greater than 'xmin' value")
                 return False
             else:
                 self.xmax = tmp
@@ -140,7 +140,7 @@ class Histogram():
             elif value=="false":
                 self.logX=False
             else:
-                logging.error("variable 'logX' possible values are 'true' and 'false'")
+                logging.getLogger('MA5').error("variable 'logX' possible values are 'true' and 'false'")
                 return False
         # logY
         elif variable == "logY":
@@ -149,7 +149,7 @@ class Histogram():
             elif value=="false":
                 self.logY=False
             else:
-                logging.error("variable 'logY' possible values are 'true' and 'false'")
+                logging.getLogger('MA5').error("variable 'logY' possible values are 'true' and 'false'")
                 return False
 
         # rank
@@ -157,7 +157,7 @@ class Histogram():
             if value in Histogram.userVariables["rank"]:
                 self.rank=value
             else:
-                logging.error("'"+value+"' is not a possible value for the variable 'rank'.")
+                logging.getLogger('MA5').error("'"+value+"' is not a possible value for the variable 'rank'.")
                 return False
             
         # statuscode
@@ -165,7 +165,7 @@ class Histogram():
             if value in Histogram.userVariables["statuscode"]:
                 self.statuscode=value
             else:
-                logging.error("'"+value+"' is not a possible value for the variable 'statuscode'.")
+                logging.getLogger('MA5').error("'"+value+"' is not a possible value for the variable 'statuscode'.")
                 return False
 
         # stack
@@ -179,7 +179,7 @@ class Histogram():
             elif value=="normalize2one":
                 self.stack = StackingMethodType.NORMALIZE2ONE
             else:
-                logging.error("'"+value+"' is not a possible value for the variable 'stacking_method'.")
+                logging.getLogger('MA5').error("'"+value+"' is not a possible value for the variable 'stacking_method'.")
                 return False
 
         # titleX
@@ -187,7 +187,7 @@ class Histogram():
             if value[0] in [ '"', "'" ] and value[-1] in [ '"', "'" ]:
                 self.titleX = value[1:-1]
             else:
-                logging.error("'"+value+"' is not a string, as necessary for the variable 'titleX'.")
+                logging.getLogger('MA5').error("'"+value+"' is not a string, as necessary for the variable 'titleX'.")
                 return False
 
         # titleY
@@ -195,10 +195,10 @@ class Histogram():
             if value[0] in [ '"', "'" ] and value[-1] in [ '"', "'" ]:
                 self.titleY = value[1:-1]
             else:
-                logging.error("'"+value+"' is not a string, as necessary for the variable 'titleY'.")
+                logging.getLogger('MA5').error("'"+value+"' is not a string, as necessary for the variable 'titleY'.")
                 return False        # other
         else:
-            logging.error("variable called '"+variable+"' is unknown")
+            logging.getLogger('MA5').error("variable called '"+variable+"' is unknown")
             return False
         
 
@@ -206,11 +206,11 @@ class Histogram():
 
     def user_DisplayParameter(self,variable):
         if variable=="nbins":
-            logging.info(" nbins = "+str(self.nbins))
+            logging.getLogger('MA5').info(" nbins = "+str(self.nbins))
         elif variable=="xmin":
-            logging.info(" xmin = "+str(self.xmin))
+            logging.getLogger('MA5').info(" xmin = "+str(self.xmin))
         elif variable=="xmax":
-            logging.info(" xmax = "+str(self.xmax))
+            logging.getLogger('MA5').info(" xmax = "+str(self.xmax))
         elif variable=="stacking_method":
             msg=""
             if self.stack==StackingMethodType.AUTO:
@@ -221,33 +221,33 @@ class Histogram():
                 msg="superimpose"
             elif self.stack==StackingMethodType.NORMALIZE2ONE:
                 msg="normalize2one"
-            logging.info(" stacking method = "+msg)
+            logging.getLogger('MA5').info(" stacking method = "+msg)
         elif variable=="logX":
             word="false"
             if self.logX:
                 word="true"
-            logging.info(" logX = "+word)
+            logging.getLogger('MA5').info(" logX = "+word)
         elif variable=="logY":
             word="false"
             if self.logY:
                 word="true"
-            logging.info(" logY = "+word)
+            logging.getLogger('MA5').info(" logY = "+word)
         elif variable=="rank":
-            logging.info(" rank = "+self.rank)
+            logging.getLogger('MA5').info(" rank = "+self.rank)
         elif variable=="statuscode":
-            logging.info(" statuscode = "+self.statuscode)
+            logging.getLogger('MA5').info(" statuscode = "+self.statuscode)
         elif variable=="titleX":
-            logging.info(" titleX = '"+self.titleX+"'")
+            logging.getLogger('MA5').info(" titleX = '"+self.titleX+"'")
         elif variable=="titleY":
-            logging.info(" titleY = '"+self.titleY+"'")
+            logging.getLogger('MA5').info(" titleY = '"+self.titleY+"'")
         else:
-            logging.error("no variable called '"+variable+"' is found")
+            logging.getLogger('MA5').error("no variable called '"+variable+"' is found")
                             
 
     def Display(self):
-        logging.info(self.GetStringDisplay())
-        logging.info(self.GetStringDisplay2())
-        logging.info(self.GetStringDisplayMore())
+        logging.getLogger('MA5').info(self.GetStringDisplay())
+        logging.getLogger('MA5').info(self.GetStringDisplay2())
+        logging.getLogger('MA5').info(self.GetStringDisplayMore())
 
     def GetStringDisplay(self):
         msg = "  * Plot: "+self.observable.name

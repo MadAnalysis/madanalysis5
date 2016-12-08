@@ -55,17 +55,17 @@ class ClusteringSisCone():
 
     def user_DisplayParameter(self,parameter):
         if parameter=="radius":
-            logging.info("  + cone radius = "+str(self.radius))
+            logging.getLogger('MA5').info("  + cone radius = "+str(self.radius))
         elif parameter=="overlap":
-            logging.info("  + overlap threshold = "+str(self.overlap))
+            logging.getLogger('MA5').info("  + overlap threshold = "+str(self.overlap))
         elif parameter=="npassmax":
-            logging.info("  + number max of pass = "+str(self.npassmax))
+            logging.getLogger('MA5').info("  + number max of pass = "+str(self.npassmax))
         elif parameter=="ptmin":
-            logging.info("  + PT min (GeV) for produced jets = "+str(self.ptmin))
+            logging.getLogger('MA5').info("  + PT min (GeV) for produced jets = "+str(self.ptmin))
         elif parameter=="input_ptmin":
-            logging.info("  + PT min (GeV) for input particles = "+str(self.input_ptmin))
+            logging.getLogger('MA5').info("  + PT min (GeV) for input particles = "+str(self.input_ptmin))
         else:
-            logging.error("'clustering' has no parameter called '"+parameter+"'")
+            logging.getLogger('MA5').error("'clustering' has no parameter called '"+parameter+"'")
 
 
     def SampleAnalyzerConfigString(self):
@@ -95,10 +95,10 @@ class ClusteringSisCone():
             try:
                 number = float(value)
             except:
-                logging.error("the cone radius must be a float value.")
+                logging.getLogger('MA5').error("the cone radius must be a float value.")
                 return False
             if number<=0:
-                logging.error("the cone radius cannot be negative or null.")
+                logging.getLogger('MA5').error("the cone radius cannot be negative or null.")
                 return False
             self.radius=number
 
@@ -107,10 +107,10 @@ class ClusteringSisCone():
             try:
                 number = float(value)
             except:
-                logging.error("the overlap threshold must be a float value.")
+                logging.getLogger('MA5').error("the overlap threshold must be a float value.")
                 return False
             if number<0:
-                logging.error("the overlap threshold cannot be negative.")
+                logging.getLogger('MA5').error("the overlap threshold cannot be negative.")
                 return False
             self.overlap=number
 
@@ -119,10 +119,10 @@ class ClusteringSisCone():
             try:
                 number = int(value)
             except:
-                logging.error("the n max of pass  must be an integer value.")
+                logging.getLogger('MA5').error("the n max of pass  must be an integer value.")
                 return False
             if number<0:
-                logging.error("the n max of pass cannot be negative.")
+                logging.getLogger('MA5').error("the n max of pass cannot be negative.")
                 return False
             self.npassmax=number
 
@@ -131,10 +131,10 @@ class ClusteringSisCone():
             try:
                 number = float(value)
             except:
-                logging.error("the input PT min must be a float value.")
+                logging.getLogger('MA5').error("the input PT min must be a float value.")
                 return False
             if number<0:
-                logging.error("the input PT min cannot be negative.")
+                logging.getLogger('MA5').error("the input PT min cannot be negative.")
                 return False
             self.areafraction=number
 
@@ -143,13 +143,13 @@ class ClusteringSisCone():
             try:
                 number = float(value)
             except:
-                logging.error("the ptmin must be a float value.")
+                logging.getLogger('MA5').error("the ptmin must be a float value.")
                 return False
             if number<0:
-                logging.error("the ptmin cannot be negative.")
+                logging.getLogger('MA5').error("the ptmin cannot be negative.")
                 return False
             self.ptmin=number
 
         # other    
         else:
-            logging.error("'clustering' has no parameter called '"+parameter+"'")
+            logging.getLogger('MA5').error("'clustering' has no parameter called '"+parameter+"'")

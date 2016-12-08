@@ -77,7 +77,7 @@ class Cut():
         if name in Cut.userShortcuts.keys():
             return self.user_SetParameter(Cut.userShortcuts[name][0],Cut.userShortcuts[name][1])
         else:
-            logging.error("option '" + name + "' is unknown.")
+            logging.getLogger('MA5').error("option '" + name + "' is unknown.")
             return False
 
     def user_SetParameter(self,variable,value):
@@ -86,7 +86,7 @@ class Cut():
             if value in Cut.userVariables["rank"]:
                 self.rank=value
             else:
-                logging.error("'"+value+"' is not a possible value for the variable 'rank'.")
+                logging.getLogger('MA5').error("'"+value+"' is not a possible value for the variable 'rank'.")
                 return False
             
         # statuscode
@@ -94,27 +94,27 @@ class Cut():
             if value in Cut.userVariables["statuscode"]:
                 self.statuscode=value
             else:
-                logging.error("'"+value+"' is not a possible value for the variable 'statuscode'.")
+                logging.getLogger('MA5').error("'"+value+"' is not a possible value for the variable 'statuscode'.")
                 return False
 
         else:
-            logging.error("variable called '"+variable+"' is unknown")
+            logging.getLogger('MA5').error("variable called '"+variable+"' is unknown")
             return False
 
         return True
 
     def user_DisplayParameter(self,variable):
         if variable=="rank":
-            logging.info(" rank = "+self.rank)
+            logging.getLogger('MA5').info(" rank = "+self.rank)
         elif variable=="statuscode":
-            logging.info(" statuscode = "+self.statuscode) 
+            logging.getLogger('MA5').info(" statuscode = "+self.statuscode) 
         else:
-            logging.error("no variable called '"+variable+"' is found")
+            logging.getLogger('MA5').error("no variable called '"+variable+"' is found")
                             
 
     def Display(self):
-        logging.info(self.GetStringDisplay())
-        logging.info(self.GetStringDisplay2())
+        logging.getLogger('MA5').info(self.GetStringDisplay())
+        logging.getLogger('MA5').info(self.GetStringDisplay2())
 
     def GetStringDisplay(self):
         msg = "Cut: "

@@ -51,7 +51,7 @@ class FastsimConfiguration:
 
     def user_DisplayParameter(self,parameter):
         if parameter=="package":
-            logging.info(" fast-simulation package : "+self.package)
+            logging.getLogger('MA5').info(" fast-simulation package : "+self.package)
             return
         if self.package=="fastjet":
             self.clustering.user_DisplayParameter(parameter)
@@ -99,7 +99,7 @@ class FastsimConfiguration:
                             test=False
                             break
                 if not test:
-                    logging.error("some datasets contain partonic/hadronic file format. "+\
+                    logging.getLogger('MA5').error("some datasets contain partonic/hadronic file format. "+\
                                   "Fast-simulation package cannot be switched off.")
                     return
 
@@ -108,22 +108,22 @@ class FastsimConfiguration:
 
                 # Only in reco mode
                 if level!=MA5RunningType.RECO:
-                    logging.error("fast-simulation algorithm is only available in RECO mode")
+                    logging.getLogger('MA5').error("fast-simulation algorithm is only available in RECO mode")
                     return
                 
                 # Fastjet ?
                 if value=='fastjet' and not fastjet:
-                    logging.error("fastjet library is not installed. Clustering algorithms are not available.")
+                    logging.getLogger('MA5').error("fastjet library is not installed. Clustering algorithms are not available.")
                     return
 
                 # Delphes ?
                 if value=='delphes' and not delphes:
-                    logging.error("delphes library is not installed. This fast-simulation package is not available.")
+                    logging.getLogger('MA5').error("delphes library is not installed. This fast-simulation package is not available.")
                     return
 
                 # DelphesMA5tune ?
                 if value=='delphesMA5tune' and not delphesMA5tune:
-                    logging.error("delphesMA5tune library is not installed. This fast-simulation package is not available.")
+                    logging.getLogger('MA5').error("delphesMA5tune library is not installed. This fast-simulation package is not available.")
                     return
 
                 test=True
@@ -137,7 +137,7 @@ class FastsimConfiguration:
                             test=False
                             break
                 if not test:
-                    logging.error("some datasets contain reconstructed file format. Fast-simulation cannot be switched on.")
+                    logging.getLogger('MA5').error("some datasets contain reconstructed file format. Fast-simulation cannot be switched on.")
                     return
                  
             if value=="fastjet":
@@ -161,12 +161,12 @@ class FastsimConfiguration:
                 self.delphes = 0
                 self.delphesMA5tune = 0
             else:
-                logging.error("parameter called '"+value+"' is not found.")
+                logging.getLogger('MA5').error("parameter called '"+value+"' is not found.")
             return    
 
         # other rejection if no algo specified
         if self.package=="none":
-            logging.error("'fastsim' has no parameter called '"+parameter+"'")
+            logging.getLogger('MA5').error("'fastsim' has no parameter called '"+parameter+"'")
             return
 
         # other

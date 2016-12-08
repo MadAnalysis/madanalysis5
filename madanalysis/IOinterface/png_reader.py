@@ -96,7 +96,7 @@ class PngReader():
         try:
             self.input = open(self.filename,'rb')
         except:
-            logging.error("File called '"+self.filename+"' is not found.")
+            logging.getLogger('MA5').error("File called '"+self.filename+"' is not found.")
             return False
         return True
 
@@ -105,7 +105,7 @@ class PngReader():
         try:
             self.input.close()
         except:
-            logging.error("Impossible to close the file called '"+self.filename+"'.")
+            logging.getLogger('MA5').error("Impossible to close the file called '"+self.filename+"'.")
             return False
         return True
 
@@ -115,10 +115,10 @@ class PngReader():
         try:
             head = self.input.read(8)
         except:
-            logging.error('The file "'+self.filename+'" seems to be empty.')
+            logging.getLogger('MA5').error('The file "'+self.filename+'" seems to be empty.')
             return False
         if len(head)!=8:
-            logging.error('The file "'+self.filename+'" seems to be empty.')
+            logging.getLogger('MA5').error('The file "'+self.filename+'" seems to be empty.')
             return False
 
         # Check the PNG stamp
@@ -128,7 +128,7 @@ class PngReader():
                 ok=False
                 break
         if not ok:
-            logging.error('The file "'+self.filename+'" is not a PNG file.')
+            logging.getLogger('MA5').error('The file "'+self.filename+'" is not a PNG file.')
             return False
 
         # Ok
@@ -142,12 +142,12 @@ class PngReader():
             head_length = self.input.read(4)
             head_type   = self.input.read(4)
         except:
-            logging.error('The file "'+self.filename+'" does not contain a PNG header.')
+            logging.getLogger('MA5').error('The file "'+self.filename+'" does not contain a PNG header.')
             return False
 
         # Check the header begin
         if head_type.upper()!='IHDR':
-            logging.error('The file "'+self.filename+'" does not contain a PNG header.')
+            logging.getLogger('MA5').error('The file "'+self.filename+'" does not contain a PNG header.')
             return False
 
         # Read the header
@@ -160,7 +160,7 @@ class PngReader():
             filter_type      = self.input.read(1)
             interlace_type   = self.input.read(1)
         except:
-            logging.error('Wrong PNG header for the file "'+self.filename+'".')
+            logging.getLogger('MA5').error('Wrong PNG header for the file "'+self.filename+'".')
             return False
 
         # Decode the header

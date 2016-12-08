@@ -83,15 +83,15 @@ class InstallFastjetContrib:
         theCommands=['./configure','--fastjet-config='+self.bindir]
         logname=os.path.normpath(self.installdir+'/configuration_contrib.log')
         # Execute
-        logging.debug('shell command: '+' '.join(theCommands))
+        logging.getLogger('MA5').debug('shell command: '+' '.join(theCommands))
         ok, out= ShellCommand.ExecuteWithLog(theCommands,\
                                              logname,\
                                              self.tmpdir,\
                                              silent=False)
         # return result
         if not ok:
-            logging.error('impossible to configure the project. For more details, see the log file:')
-            logging.error(logname)
+            logging.getLogger('MA5').error('impossible to configure the project. For more details, see the log file:')
+            logging.getLogger('MA5').error(logname)
         return ok
 
         
@@ -100,15 +100,15 @@ class InstallFastjetContrib:
         theCommands=['make','-j'+str(self.ncores)]
         logname=os.path.normpath(self.installdir+'/compilation_contrib.log')
         # Execute
-        logging.debug('shell command: '+' '.join(theCommands))
+        logging.getLogger('MA5').debug('shell command: '+' '.join(theCommands))
         ok, out= ShellCommand.ExecuteWithLog(theCommands,\
                                              logname,\
                                              self.tmpdir,\
                                              silent=False)
         # return result
         if not ok:
-            logging.error('impossible to build the project. For more details, see the log file:')
-            logging.error(logname)
+            logging.getLogger('MA5').error('impossible to build the project. For more details, see the log file:')
+            logging.getLogger('MA5').error(logname)
         return ok
 
 
@@ -117,15 +117,15 @@ class InstallFastjetContrib:
         theCommands=['make','install']
         logname=os.path.normpath(self.installdir+'/installation_contrib.log')
         # Execute
-        logging.debug('shell command: '+' '.join(theCommands))
+        logging.getLogger('MA5').debug('shell command: '+' '.join(theCommands))
         ok, out= ShellCommand.ExecuteWithLog(theCommands,\
                                              logname,\
                                              self.tmpdir,\
                                              silent=False)
         # return result
         if not ok:
-            logging.error('impossible to build the project. For more details, see the log file:')
-            logging.error(logname)
+            logging.getLogger('MA5').error('impossible to build the project. For more details, see the log file:')
+            logging.getLogger('MA5').error(logname)
         return ok
 
 
@@ -136,37 +136,37 @@ class InstallFastjetContrib:
                 self.installdir+"/bin"]
         for dir in dirs:
             if not os.path.isdir(dir):
-                logging.error('folder '+dir+' is missing.')
+                logging.getLogger('MA5').error('folder '+dir+' is missing.')
                 self.display_log()
                 return False
 
         # Check fastjet executable
         if not os.path.isfile(self.installdir+'/bin/fastjet-config'):
-            logging.error("binary labeled 'fastjet-config' is missing.")
+            logging.getLogger('MA5').error("binary labeled 'fastjet-config' is missing.")
             self.display_log()
             return False
 
         # Check one header file
         if not os.path.isfile(self.installdir+'/include/fastjet/contrib/Nsubjettiness.hh'):
-            logging.error("header labeled 'include/fastjet/contrib/Nsubjettiness.hh' is missing.")
+            logging.getLogger('MA5').error("header labeled 'include/fastjet/contrib/Nsubjettiness.hh' is missing.")
             self.display_log()
             return False
 
         if (not os.path.isfile(self.installdir+'/lib/libNsubjettiness.so')) and \
            (not os.path.isfile(self.installdir+'/lib/libNsubjettiness.a')):
-            logging.error("library labeled 'libNsubjettiness.so' or 'libNsubjettiness.a' is missing.")
+            logging.getLogger('MA5').error("library labeled 'libNsubjettiness.so' or 'libNsubjettiness.a' is missing.")
             self.display_log()
             return False
         
         return True
 
     def display_log(self):
-        logging.error("More details can be found into the log files:")
-        logging.error(" - "+os.path.normpath(self.installdir+"/wget_contrib.log"))
-        logging.error(" - "+os.path.normpath(self.installdir+"/unpack_contrib.log"))
-        logging.error(" - "+os.path.normpath(self.installdir+"/configuration_contrib.log"))
-        logging.error(" - "+os.path.normpath(self.installdir+"/compilation_contrib.log"))
-        logging.error(" - "+os.path.normpath(self.installdir+"/installation_contrib.log"))
+        logging.getLogger('MA5').error("More details can be found into the log files:")
+        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/wget_contrib.log"))
+        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/unpack_contrib.log"))
+        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/configuration_contrib.log"))
+        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/compilation_contrib.log"))
+        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/installation_contrib.log"))
 
     def NeedToRestart(self):
         return True

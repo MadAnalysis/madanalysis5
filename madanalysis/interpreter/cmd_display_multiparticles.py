@@ -35,8 +35,8 @@ class CmdDisplayMultiparticles(CmdBase.CmdBase):
         self.main.multiparticles.DisplayMultiparticles()
 
     def help(self):
-        logging.info("   Syntax: display_multiparticles")
-        logging.info("   Displays the list of all (pre)defined multiparticles.")
+        logging.getLogger('MA5').info("   Syntax: display_multiparticles")
+        logging.getLogger('MA5').info("   Displays the list of all (pre)defined multiparticles.")
 
     def complete(self,text,line,begidx,endidx,main):
         return

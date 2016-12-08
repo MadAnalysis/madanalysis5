@@ -41,7 +41,7 @@ class CmdDisplay(CmdBase.CmdBase):
         for i in range(len(objs)):
             objs[i] = objs[i].replace('XXX','.')
         if len(objs)>3 or len(objs)==0:
-            logging.error("syntax error with the command 'display'.")
+            logging.getLogger('MA5').error("syntax error with the command 'display'.")
             self.help()
             return
 
@@ -64,7 +64,7 @@ class CmdDisplay(CmdBase.CmdBase):
                 return
             else:
                 if objs[1].lower()!='isolation' and objs[1].lower()!='fastsim' and objs[1].lower()!='merging' and objs[1].lower()!='fom':
-                    logging.error("'main' has no variable set called '"+objs[1]+"'")
+                    logging.getLogger('MA5').error("'main' has no variable set called '"+objs[1]+"'")
                     return
                 elif objs[1].lower()=='fastsim':
                     self.main.fastsim.user_DisplayParameter(objs[2])
@@ -84,7 +84,7 @@ class CmdDisplay(CmdBase.CmdBase):
                 self.main.selection.Display()
                 return
             else:
-                logging.error("'selection' has no variable to be set.")
+                logging.getLogger('MA5').error("'selection' has no variable to be set.")
                 return
 
         # Dataset display
@@ -111,23 +111,23 @@ class CmdDisplay(CmdBase.CmdBase):
                 self.main.multiparticles.Get(objs[0]).Display()
                 return
             else:
-                logging.error("'"+objs[0]+"' has no variable to be set.")
+                logging.getLogger('MA5').error("'"+objs[0]+"' has no variable to be set.")
                 return
                 
         # Adding ids to the multiparticle
-        logging.error("no object called '"+objs[0]+"' found.")
+        logging.getLogger('MA5').error("no object called '"+objs[0]+"' found.")
 
 
     def do_selection(self,args):
         # Looking for '=', '[' and ']' 
         if args[0]!='selection' or args[1]!='[' or not args[2].isdigit() or \
                args[3]!=']' :
-            logging.error("syntax error with the command 'display'.")
+            logging.getLogger('MA5').error("syntax error with the command 'display'.")
             self.help()
             return
 
         if len(args)==5 and not args[4].startswith('.') :
-            logging.error("syntax error with the command 'display'.")
+            logging.getLogger('MA5').error("syntax error with the command 'display'.")
             self.help()
             return
 
@@ -141,7 +141,7 @@ class CmdDisplay(CmdBase.CmdBase):
             else:
                 self.main.selection[index-1].Display()
         else:
-            logging.error("selection['" + str(index) + "'] not found.")
+            logging.getLogger('MA5').error("selection['" + str(index) + "'] not found.")
             return
 
         return
@@ -154,15 +154,15 @@ class CmdDisplay(CmdBase.CmdBase):
         elif len(args)==5 or len(args)==4:
             return self.do_selection(args)
         else:
-            logging.error("wrong number of arguments for the command 'display'.")
+            logging.getLogger('MA5').error("wrong number of arguments for the command 'display'.")
             self.help()
             return
 
 
     def help(self):
-        logging.info("   Syntax: display <object name>")
-        logging.info("   Syntax 2: display <object name>.<properties>")
-        logging.info("   Displays the definition of an object, or one of its properties.")
+        logging.getLogger('MA5').info("   Syntax: display <object name>")
+        logging.getLogger('MA5').info("   Syntax 2: display <object name>.<properties>")
+        logging.getLogger('MA5').info("   Displays the definition of an object, or one of its properties.")
 
     def complete(self,text,line,begidx,endidx):
         # set  object.variable = value

@@ -41,14 +41,14 @@ class CmdReset(CmdBase):
 
         # Checking argument number
         if len(args) != 0:
-            logging.error("wrong number of arguments for the command 'reset'.")
+            logging.getLogger('MA5').error("wrong number of arguments for the command 'reset'.")
             self.help()
             return
 
         # Ask question
         if not self.main.forced:
-            logging.warning("You are going to reinitialize MadAnalysis 5. The current configuration will be lost.")
-            logging.warning("Are you sure to do that ? (Y/N)")
+            logging.getLogger('MA5').warning("You are going to reinitialize MadAnalysis 5. The current configuration will be lost.")
+            logging.getLogger('MA5').warning("Are you sure to do that ? (Y/N)")
             allowed_answers=['n','no','y','yes']
             answer=""
             while answer not in  allowed_answers:
@@ -90,8 +90,8 @@ class CmdReset(CmdBase):
         
 
     def help(self):
-        logging.info("   Syntax: reset")
-        logging.info("   Reinitializing all variables")
+        logging.getLogger('MA5').info("   Syntax: reset")
+        logging.getLogger('MA5').info("   Reinitializing all variables")
 
 
     def complete(self,text,line,begidx,endidx):

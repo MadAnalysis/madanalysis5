@@ -48,7 +48,7 @@ class MA5mode():
 # Function DefaultInstallCard
 ################################################################################
 def DefaultInstallCard():
-    logging.info("Generate a default installation_options.dat file...")
+    logging.getLogger('MA5').info("Generate a default installation_options.dat file...")
     output = file('installation_options.dat','w')
     output.write('# WARNING! MA5 SHOULD DETECT AUTOMATICALLY YOUR CONFIGURATION\n')
     output.write('# IF THIS AUTOMATED MODE FAILS, YOU CAN FORCE SOME \n')
@@ -111,7 +111,7 @@ def DecodeArguments(version, date):
                                       "expert","version","release","help",\
                                       "forced","script","debug","build","qmode","installcard"])
     except getopt.GetoptError, err:
-        logging.error(str(err))
+        logging.getLogger('MA5').error(str(err))
         Usage()
         sys.exit()
 
@@ -133,7 +133,7 @@ def DecodeArguments(version, date):
         elif o in ["-s","--script"]:
             mode.scriptmode=True
         elif o in ["-v","--version","--release"]:
-            logging.info("MA5 release : " + version + " [ " + date  + " ]")
+            logging.getLogger('MA5').info("MA5 release : " + version + " [ " + date  + " ]")
             sys.exit()
         elif o in ["-d", "--debug"]:
             mode.debug = True
@@ -151,23 +151,23 @@ def DecodeArguments(version, date):
             DefaultInstallCard()
             sys.exit()
         else:
-            logging.error("Argument '"+o+"' is not found.")
+            logging.getLogger('MA5').error("Argument '"+o+"' is not found.")
             Usage()
             sys.exit()
 
 
     # Checking consistency between arguments
     if mode.partonlevel and mode.hadronlevel:
-       logging.error("Parton mode and hadron mode cannot be set in a same time.\n"
+       logging.getLogger('MA5').error("Parton mode and hadron mode cannot be set in a same time.\n"
                      "Please choose only one of these modes.")
        sys.exit()
     elif mode.partonlevel and mode.recolevel:
-       logging.error("Parton mode and reco mode cannot be set in a same time.\n"
+       logging.getLogger('MA5').error("Parton mode and reco mode cannot be set in a same time.\n"
                      "Please choose only one of these modes.")
        sys.exit()
     
     elif mode.hadronlevel and mode.recolevel:
-       logging.error("Hadron mode and reco mode cannot be set in a same time.\n"
+       logging.getLogger('MA5').error("Hadron mode and reco mode cannot be set in a same time.\n"
                      "Please choose only one of these modes.")
        sys.exit()
 
@@ -209,8 +209,8 @@ def MainSession(mode,arglist,ma5dir,version,date):
     main.developer_mode = mode.developer_mode
 
     # Displaying header
-    logging.info("")
-    logging.info(\
+    logging.getLogger('MA5').info("")
+    logging.getLogger('MA5').info(\
     "*************************************************************\n" + \
     "*                                                           *\n" + \
     "*        W E L C O M E  to  M A D A N A L Y S I S  5        *\n" + \
@@ -239,9 +239,9 @@ def MainSession(mode,arglist,ma5dir,version,date):
     if mode.debug:
         log = logging.getLogger()
         log.setLevel(logging.DEBUG)
-        logging.debug("")
-        logging.debug("DEBUG MODE ACTIVATED")
-        logging.debug("")
+        logging.getLogger('MA5').debug("")
+        logging.getLogger('MA5').debug("DEBUG MODE ACTIVATED")
+        logging.getLogger('MA5').debug("")
 
     # Checking the present configuration
     if not main.CheckConfig(debug=mode.debug):
@@ -251,7 +251,7 @@ def MainSession(mode,arglist,ma5dir,version,date):
     if not main.BuildLibrary(forced=mode.build):
         sys.exit()	
 
-    logging.info("*************************************************************")
+    logging.getLogger('MA5').info("*************************************************************")
 
 
     # Expert mode
@@ -285,7 +285,7 @@ def MainSession(mode,arglist,ma5dir,version,date):
             filename=os.path.expanduser(arg)
             filename=os.path.abspath(filename)
             if not os.path.isfile(filename):
-               logging.warning("The file called '"+filename+"' is not found and will be skipped.")
+               logging.getLogger('MA5').warning("The file called '"+filename+"' is not found and will be skipped.")
             else:
                myscripts.append(filename)
     
@@ -311,33 +311,33 @@ def MainSession(mode,arglist,ma5dir,version,date):
 # Function usage
 ################################################################################
 def Usage():
-    logging.info("\nUsage of MadAnalysis 5")
-    logging.info("------------------------")
-    logging.info("Syntax : ./bin/ma5 [options] [scripts]\n")
+    logging.getLogger('MA5').info("\nUsage of MadAnalysis 5")
+    logging.getLogger('MA5').info("------------------------")
+    logging.getLogger('MA5').info("Syntax : ./bin/ma5 [options] [scripts]\n")
     
-    logging.info("[options]")
-    logging.info("This optional argument allows to select the running mode of " +\
+    logging.getLogger('MA5').info("[options]")
+    logging.getLogger('MA5').info("This optional argument allows to select the running mode of " +\
                  "MadAnalysis 5 appropriate to the type of event files to analyze. " +\
                  "If absent, the parton-level mode is selected. Warning: the " +\
                  "different modes are self-excluding each other and only one " +\
                  "choice has to be made.")
-    logging.info("List of available options :")
-    logging.info(" -P or --partonlevel : parton-level mode")
-    logging.info(" -H or --hadronlevel : hadron-level mode")
-    logging.info(" -R or --recolevel   : detector-level mode")
-    logging.info(" -e or -E or --expert : entering expert mode")
-    logging.info(" -v or --version")
-    logging.info("    or --release     : display the version number of MadAnalysis")
-    logging.info(" -b or --build       : rebuild the SampleAnalyzer static library")
-    logging.info(" -f or --forced      : do not ask for confirmation when MA5 removes a directory or overwrites an object") 
-    logging.info(" -s or --script      : quit automatically MA5 when the script is loaded")
-    logging.info(" -h or --help        : dump this help")
-    logging.info(" -i or --installcard : produce the default installation card in installation_card.dat")
-    logging.info(" -d or --debug       : debug mode")
-    logging.info(" -q or --qmode       : developper mode only for MA5 developpers\n")
+    logging.getLogger('MA5').info("List of available options :")
+    logging.getLogger('MA5').info(" -P or --partonlevel : parton-level mode")
+    logging.getLogger('MA5').info(" -H or --hadronlevel : hadron-level mode")
+    logging.getLogger('MA5').info(" -R or --recolevel   : detector-level mode")
+    logging.getLogger('MA5').info(" -e or -E or --expert : entering expert mode")
+    logging.getLogger('MA5').info(" -v or --version")
+    logging.getLogger('MA5').info("    or --release     : display the version number of MadAnalysis")
+    logging.getLogger('MA5').info(" -b or --build       : rebuild the SampleAnalyzer static library")
+    logging.getLogger('MA5').info(" -f or --forced      : do not ask for confirmation when MA5 removes a directory or overwrites an object") 
+    logging.getLogger('MA5').info(" -s or --script      : quit automatically MA5 when the script is loaded")
+    logging.getLogger('MA5').info(" -h or --help        : dump this help")
+    logging.getLogger('MA5').info(" -i or --installcard : produce the default installation card in installation_card.dat")
+    logging.getLogger('MA5').info(" -d or --debug       : debug mode")
+    logging.getLogger('MA5').info(" -q or --qmode       : developper mode only for MA5 developpers\n")
     
-    logging.info("[scripts]")
-    logging.info("This optional argument is a list of filenames containing a "+\
+    logging.getLogger('MA5').info("[scripts]")
+    logging.getLogger('MA5').info("This optional argument is a list of filenames containing a "+\
                  "set of MadAnalysis 5 commands. The file name are handled as "+\
                  "concatenated, and the commands are applied sequentially.\n")
 
@@ -398,11 +398,11 @@ def LaunchMA5(version, date, ma5dir):
             break
 
         # Restart
-        logging.info("")
-        logging.info(StringTools.Fill('-',40))
-        logging.info(StringTools.Center('RESTART THE MADANALYSIS 5 SESSION',40))
-        logging.info(StringTools.Fill('-',40))
-        logging.info("")
+        logging.getLogger('MA5').info("")
+        logging.getLogger('MA5').info(StringTools.Fill('-',40))
+        logging.getLogger('MA5').info(StringTools.Center('RESTART THE MADANALYSIS 5 SESSION',40))
+        logging.getLogger('MA5').info(StringTools.Fill('-',40))
+        logging.getLogger('MA5').info("")
 
 
 

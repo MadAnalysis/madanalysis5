@@ -41,19 +41,19 @@ class CmdOpen(CmdBase):
 
         # Are we in script mode ?
         if self.main.script:
-            logging.error("command 'open' is not available in script mode")
+            logging.getLogger('MA5').error("command 'open' is not available in script mode")
             return
 
         # Checking argument number
         if len(args) == 0:
             if self.main.lastjob_name=='':
-                logging.error("No analysis has been run -> no report to open.")
-                logging.error("To open an existing report, please type the relevant path.")
+                logging.getLogger('MA5').error("No analysis has been run -> no report to open.")
+                logging.getLogger('MA5').error("To open an existing report, please type the relevant path.")
                 return
             else:
                 args.append(self.main.lastjob_name+'/HTML')
         if len(args) != 1:
-            logging.error("wrong number of arguments for the command 'open'.")
+            logging.getLogger('MA5').error("wrong number of arguments for the command 'open'.")
             self.help()
             return
 
@@ -63,7 +63,7 @@ class CmdOpen(CmdBase):
         else:
            name = args[0]
         if not os.path.isdir(name):
-            logging.error("No directory called '"+args[0]+"' is not found")
+            logging.getLogger('MA5').error("No directory called '"+args[0]+"' is not found")
             return False
             
         # Detect report structure
@@ -76,7 +76,7 @@ class CmdOpen(CmdBase):
             else:
                 filename="main.tex"
         else:
-            logging.error("Directory called '"+args[0]+"' has not the structure of a MadAnalysis report")
+            logging.getLogger('MA5').error("Directory called '"+args[0]+"' has not the structure of a MadAnalysis report")
             return False
             
         
@@ -93,9 +93,9 @@ class CmdOpen(CmdBase):
 
 
     def help(self):
-        logging.info("   Syntax: open <report_directory>")
-        logging.info("   Opening a report with the default text editor or web browser")
-        logging.info("   If no argument is provided, the latest generated HTML report is open")
+        logging.getLogger('MA5').info("   Syntax: open <report_directory>")
+        logging.getLogger('MA5').info("   Opening a report with the default text editor or web browser")
+        logging.getLogger('MA5').info("   If no argument is provided, the latest generated HTML report is open")
 
 
     def complete(self,text,line,begidx,endidx):

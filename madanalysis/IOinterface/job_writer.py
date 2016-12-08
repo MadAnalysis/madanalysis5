@@ -76,47 +76,47 @@ class JobWriter():
             try:
                 os.mkdir(path+"/Build")
             except:
-                logging.error("Impossible to create the folder 'Build'")
+                logging.getLogger('MA5').error("Impossible to create the folder 'Build'")
                 return False
             try:
                 os.mkdir(path+"/Build/Lib")
             except:
-                logging.error("Impossible to create the folder 'Build/Lib'")
+                logging.getLogger('MA5').error("Impossible to create the folder 'Build/Lib'")
                 return False
             try:
                 os.mkdir(path+"/Build/SampleAnalyzer")
             except:
-                logging.error("Impossible to create the folder 'Build/SampleAnalyzer'")
+                logging.getLogger('MA5').error("Impossible to create the folder 'Build/SampleAnalyzer'")
                 return False
             try:
                 os.mkdir(path+"/Build/SampleAnalyzer/User")
             except:
-                logging.error("Impossible to create the folder 'Build/SampleAnalyzer/User'")
+                logging.getLogger('MA5').error("Impossible to create the folder 'Build/SampleAnalyzer/User'")
                 return False
             try:
                 os.mkdir(path+"/Build/SampleAnalyzer/User/Analyzer")
             except:
-                logging.error("Impossible to create the folder 'Build/SampleAnalyzer/User/Analyzer'")
+                logging.getLogger('MA5').error("Impossible to create the folder 'Build/SampleAnalyzer/User/Analyzer'")
                 return False
             try:
                 os.mkdir(path+"/Build/Log")
             except:
-                logging.error("Impossible to create the folder 'Build/Log'")
+                logging.getLogger('MA5').error("Impossible to create the folder 'Build/Log'")
                 return False
             try:
                 os.mkdir(path+"/Build/Main")
             except:
-                logging.error("Impossible to create the folder 'Build/Main'")
+                logging.getLogger('MA5').error("Impossible to create the folder 'Build/Main'")
                 return False
         try:
             os.mkdir(path+"/Output")
         except:
-            logging.error("Impossible to create the folder 'Output'")
+            logging.getLogger('MA5').error("Impossible to create the folder 'Output'")
             return False
         try:
             os.mkdir(path+"/Input")
         except:
-            logging.error("Impossible to create the folder 'Input'")
+            logging.getLogger('MA5').error("Impossible to create the folder 'Input'")
             return False
 
         return True
@@ -124,35 +124,35 @@ class JobWriter():
 
     def CheckJobStructure(self,recastflag):
         if not os.path.isdir(self.path):
-            logging.error("folder '"+self.path+"' is not found")
+            logging.getLogger('MA5').error("folder '"+self.path+"' is not found")
             return False
         if not recastflag:
             if not os.path.isdir(self.path+"/Build"):
-                logging.error("folder '"+self.path+"/Build' is not found")
+                logging.getLogger('MA5').error("folder '"+self.path+"/Build' is not found")
                 return False
             elif not os.path.isdir(self.path+"/Build/Lib"):
-                logging.error("folder '"+self.path+"/Build/Lib' is not found")
+                logging.getLogger('MA5').error("folder '"+self.path+"/Build/Lib' is not found")
                 return False
             elif not os.path.isdir(self.path+"/Build/SampleAnalyzer"):
-                logging.error("folder '"+self.path+"/Build/SampleAnalyzer' is not found")
+                logging.getLogger('MA5').error("folder '"+self.path+"/Build/SampleAnalyzer' is not found")
                 return False
             elif not os.path.isdir(self.path+"/Build/SampleAnalyzer/User"):
-                logging.error("folder '"+self.path+"/Build/SampleAnalyzer/User' is not found")
+                logging.getLogger('MA5').error("folder '"+self.path+"/Build/SampleAnalyzer/User' is not found")
                 return False
             elif not os.path.isdir(self.path+"/Build/SampleAnalyzer/User/Analyzer"):
-                logging.error("folder '"+self.path+"/Build/SampleAnalyzer/User/Analyzer' is not found")
+                logging.getLogger('MA5').error("folder '"+self.path+"/Build/SampleAnalyzer/User/Analyzer' is not found")
                 return False
             elif not os.path.isdir(self.path+"/Build/Main"):
-                logging.error("folder '"+self.path+"/Build/Main' is not found")
+                logging.getLogger('MA5').error("folder '"+self.path+"/Build/Main' is not found")
                 return False
         if not os.path.isdir(self.path+"/Output"):
-            logging.error("folder '"+self.path+"/Output' is not found")
+            logging.getLogger('MA5').error("folder '"+self.path+"/Output' is not found")
             return False
         elif not os.path.isdir(self.path+"/Input"):
-            logging.error("folder '"+self.path+"/Input' is not found")
+            logging.getLogger('MA5').error("folder '"+self.path+"/Input' is not found")
             return False
         elif not os.path.isfile(self.path+"/history.ma5"):
-            logging.error("file '"+self.path+"/history.ma5' is not found")
+            logging.getLogger('MA5').error("file '"+self.path+"/history.ma5' is not found")
             return False
         else:
             return True
@@ -268,7 +268,7 @@ class JobWriter():
             elif self.main.fastsim.package=="delphesMA5tune":
                 input = open(self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Interfaces/delphesMA5tune/"+cardname,'r')
         except:
-            logging.error("impossible to find "+self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Interfaces/delphes/"+cardname)
+            logging.getLogger('MA5').error("impossible to find "+self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Interfaces/delphes/"+cardname)
         if "../../../.." in cardname:
             cardname=cardname.split('/')[-1]
 
@@ -315,12 +315,12 @@ class JobWriter():
                           self.path+"/Build/SampleAnalyzer/newAnalyzer.py"\
                           )
             except:
-                logging.error('Impossible to copy the file "newAnalyzer"')
+                logging.getLogger('MA5').error('Impossible to copy the file "newAnalyzer"')
                 return False
             try:    
                 os.chmod(self.path+"/Build/SampleAnalyzer/newAnalyzer.py",0755)
             except:
-                logging.error('Impossible to make executable the file "newAnalyzer"')
+                logging.getLogger('MA5').error('Impossible to make executable the file "newAnalyzer"')
                 return False
 
         if self.main.fastsim.package in ["delphes","delphesMA5tune"]:
@@ -663,8 +663,8 @@ class JobWriter():
 
         # return result
         if not result:
-            logging.error('impossible to compile the project. For more details, see the log file:')
-            logging.error(logfile)
+            logging.getLogger('MA5').error('impossible to compile the project. For more details, see the log file:')
+            logging.getLogger('MA5').error(logfile)
             
         return result
 
@@ -685,8 +685,8 @@ class JobWriter():
 
         # return result
         if not result:
-            logging.error('impossible to clean the project. For more details, see the log file:')
-            logging.error(logfile)
+            logging.getLogger('MA5').error('impossible to clean the project. For more details, see the log file:')
+            logging.getLogger('MA5').error(logfile)
             
         return result
 
@@ -707,8 +707,8 @@ class JobWriter():
 
         # return result
         if not result:
-            logging.error('impossible to clean the project. For more details, see the log file:')
-            logging.error(logfile)
+            logging.getLogger('MA5').error('impossible to clean the project. For more details, see the log file:')
+            logging.getLogger('MA5').error(logfile)
             
         return result
 
@@ -729,8 +729,8 @@ class JobWriter():
 
         # return result
         if not result:
-            logging.error('impossible to link the project. For more details, see the log file:')
-            logging.error(logfile)
+            logging.getLogger('MA5').error('impossible to link the project. For more details, see the log file:')
+            logging.getLogger('MA5').error(logfile)
             
         return result
 

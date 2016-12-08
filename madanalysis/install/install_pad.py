@@ -84,7 +84,7 @@ class InstallPad:
       try:
         file = open(self.installdir+"/bibliography.bib",'w')
       except:
-        logging.error('impossible to write the file '+file)
+        logging.getLogger('MA5').error('impossible to write the file '+file)
         return False
 
       # MA5
@@ -185,7 +185,7 @@ class InstallPad:
 
     def Detect(self):
         if not os.path.isdir(self.installdir):
-            logging.debug("The folder "+self.installdir+"' is not found")
+            logging.getLogger('MA5').debug("The folder "+self.installdir+"' is not found")
             return False
         return True
 
@@ -193,14 +193,14 @@ class InstallPad:
     def Remove(self,question=True):
         import time
         bkpname = "pad-v" + time.strftime("%Y%m%d-%Hh%M") + ".tgz"
-        logging.info("     => Backuping the previous installation: " + bkpname)
+        logging.getLogger('MA5').info("     => Backuping the previous installation: " + bkpname)
         logname = os.path.normpath(self.main.archi_info.ma5dir+'/pad-backup.log')
         TheCommand = ['tar', 'czf', bkpname, 'PAD']
-        logging.debug('Shell command: '+' '.join(TheCommand))
+        logging.getLogger('MA5').debug('Shell command: '+' '.join(TheCommand))
         ok, out= ShellCommand.ExecuteWithLog(TheCommand,logname,self.main.archi_info.ma5dir,silent=False)
         if not ok:
             return False
-        logging.info("     => Backup done")
+        logging.getLogger('MA5').info("     => Backup done")
         from madanalysis.IOinterface.folder_writer import FolderWriter
         return FolderWriter.RemoveDirectory(self.installdir,question)
 
@@ -342,12 +342,12 @@ class InstallPad:
         theCommands=['make','-j'+str(self.ncores)]
         logname=os.path.normpath(self.installdir+'/Build/compilation.log')
         # Execute
-        logging.debug('shell command: '+' '.join(theCommands))
+        logging.getLogger('MA5').debug('shell command: '+' '.join(theCommands))
         ok, out= ShellCommand.ExecuteWithLog(theCommands,logname,self.installdir+'/Build',silent=False)
         # return result
         if not ok:
-            logging.error('impossible to build the project. For more details, see the log file:')
-            logging.error(logname)
+            logging.getLogger('MA5').error('impossible to build the project. For more details, see the log file:')
+            logging.getLogger('MA5').error(logname)
         return ok
 
     def Check(self):

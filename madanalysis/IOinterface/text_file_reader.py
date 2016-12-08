@@ -31,14 +31,14 @@ class TextFileReader():
 
     def Open(self):
         if self.isopen:
-            logging.error("Cannot open the file '"+self.filename+"' because it is already opened")
+            logging.getLogger('MA5').error("Cannot open the file '"+self.filename+"' because it is already opened")
             return False
         try:
             self.file = open ( self.filename, "r" )
             self.isopen = True
             return True
         except:
-            logging.error("File called '" + self.filename + "' is not found")
+            logging.getLogger('MA5').error("File called '" + self.filename + "' is not found")
             return False
 
     def Close(self):

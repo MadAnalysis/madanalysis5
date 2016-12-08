@@ -60,15 +60,15 @@ class HistogramCore:
 
     def Print(self):
 
-        logging.info('nevents='+str(self.nevents)+\
+        logging.getLogger('MA5').info('nevents='+str(self.nevents)+\
                      ' entries='+str(self.entries))
 
-        logging.info('sumw='+str(self.sumw)+\
+        logging.getLogger('MA5').info('sumw='+str(self.sumw)+\
                      ' sumw2='+str(self.sumw2)+\
                      ' sumwx='+str(self.sumwx)+\
                      ' sumw2x='+str(self.sumw2x))
 
-        logging.info('underflow='+str(self.underflow)+\
+        logging.getLogger('MA5').info('underflow='+str(self.underflow)+\
                      ' overflow='+str(self.overflow))
         
 

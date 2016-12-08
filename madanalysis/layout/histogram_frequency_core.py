@@ -42,7 +42,7 @@ class HistogramFrequencyCore:
 
     def Print(self):
 
-        logging.info('nevents='+str(self.nevents)+\
+        logging.getLogger('MA5').info('nevents='+str(self.nevents)+\
                      ' entries='+str(self.entries))
         
 

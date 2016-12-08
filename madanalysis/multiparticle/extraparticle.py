@@ -51,7 +51,7 @@ class ExtraParticle():
         return True
 
     def Display(self):
-        logging.info("   ExtraParticle '" + self.particle.name +\
+        logging.getLogger('MA5').info("   ExtraParticle '" + self.particle.name +\
                      "' is defined by : " +\
                      self.GetStringDisplay()+".")
 

@@ -55,7 +55,7 @@ class MultiParticle:
             text = "   The multiparticle '"+ self.name + "' is defined by the PDG-ids "
         text = text+self.GetStringDisplay();
         text = text[:-1]
-        logging.info(text+".")
+        logging.getLogger('MA5').info(text+".")
 
     def GetStringDisplay(self):
         text = ""
@@ -64,10 +64,10 @@ class MultiParticle:
         return text    
 
     def DisplayParameter(self,data):
-        logging.error("Particles and Multiparticles have no attributes.")
+        logging.getLogger('MA5').error("Particles and Multiparticles have no attributes.")
 
     def SetParameter(self,parameter,value):
-        logging.error("Particles and Multiparticles have no attribute denoted "+parameter+".")
+        logging.getLogger('MA5').error("Particles and Multiparticles have no attribute denoted "+parameter+".")
 
     def GetParameters(self):
         return []

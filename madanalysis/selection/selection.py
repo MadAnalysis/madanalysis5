@@ -41,10 +41,10 @@ class Selection:
         return self.table[i]
 
     def Display(self):
-        logging.info("   *********** Selection ***********" )
+        logging.getLogger('MA5').info("   *********** Selection ***********" )
         for ind in range(0,len(self.table)):
-            logging.info("   "+str(ind+1)+". "+self.table[ind].GetStringDisplay())
-        logging.info("   *********************************" )
+            logging.getLogger('MA5').info("   "+str(ind+1)+". "+self.table[ind].GetStringDisplay())
+        logging.getLogger('MA5').info("   *********************************" )
 
     def Find(self,name):
         return False
@@ -64,7 +64,7 @@ class Selection:
 
     def CheckIndex(self,index):
         if index==0 or index>len(self.table):
-            logging.error("selection["+str(index)+"] does not exist.")
+            logging.getLogger('MA5').error("selection["+str(index)+"] does not exist.")
             return False
         return True
 

@@ -57,17 +57,17 @@ class MergingConfiguration:
                 value="true"
             else:
                 value="false"
-            logging.info(" enabling merging plots : "+value)
+            logging.getLogger('MA5').info(" enabling merging plots : "+value)
         elif parameter=="njets":
-            logging.info("  + njets = "+str(self.njets))
+            logging.getLogger('MA5').info("  + njets = "+str(self.njets))
         elif parameter=="ma5_mode":
             if self.ma5_mode:
                 value="true"
             else:
                 value="false"
-            logging.info(" ma5 mode : "+value)
+            logging.getLogger('MA5').info(" ma5 mode : "+value)
         else:
-            logging.error("'merging' has no parameter called '"+parameter+"'")
+            logging.getLogger('MA5').error("'merging' has no parameter called '"+parameter+"'")
             return
 
 
@@ -77,19 +77,19 @@ class MergingConfiguration:
             if value=="true":
                 # Only in reco mode
                 if level==MA5RunningType.PARTON:
-                    logging.error("clustering algorithm is only available in HADRON or RECO mode")
+                    logging.getLogger('MA5').error("clustering algorithm is only available in HADRON or RECO mode")
                     return
                 
                 # Fastjet ?
                 if not fastjet:
-                    logging.error("fastjet library is not installed. Merging plots not available.")
+                    logging.getLogger('MA5').error("fastjet library is not installed. Merging plots not available.")
                     return
                 
                 self.enable=True
             elif value=="false":
                 self.enable=False
             else:
-                logging.error("only possible values are 'true' and 'false'")
+                logging.getLogger('MA5').error("only possible values are 'true' and 'false'")
                 return
 
         # enable
@@ -99,7 +99,7 @@ class MergingConfiguration:
             elif value=="false":
                 self.ma5_mode=False
             else:
-                logging.error("only possible values are 'true' and 'false'")
+                logging.getLogger('MA5').error("only possible values are 'true' and 'false'")
                 return
 
         # njets
@@ -107,16 +107,16 @@ class MergingConfiguration:
             try:
                 njets = int(value)
             except:
-                logging.error("the value for 'njets' must be a positive non-null integer.")
+                logging.getLogger('MA5').error("the value for 'njets' must be a positive non-null integer.")
                 return
             if njets<=0:
-                logging.error("the value for 'njets' cannot be negative or null.")
+                logging.getLogger('MA5').error("the value for 'njets' cannot be negative or null.")
                 return
             self.njets=njets
 
         # other
         else:
-            logging.error("no parameter called '"+parameter+"' is found.")
+            logging.getLogger('MA5').error("no parameter called '"+parameter+"' is found.")
             return
 
         

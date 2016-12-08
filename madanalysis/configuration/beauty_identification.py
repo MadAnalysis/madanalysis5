@@ -48,7 +48,7 @@ class BeautyIdentification():
 
         
     def Display(self):
-        logging.info("  + b-jet identification:")
+        logging.getLogger('MA5').info("  + b-jet identification:")
         self.user_DisplayParameter("bjet_id.matching_dr")
         self.user_DisplayParameter("bjet_id.exclusive")
         self.user_DisplayParameter("bjet_id.efficiency")
@@ -58,20 +58,20 @@ class BeautyIdentification():
 
     def user_DisplayParameter(self,parameter):
         if parameter=="bjet_id.matching_dr":
-            logging.info("    + DeltaR matching = "+str(self.matching_dr))
+            logging.getLogger('MA5').info("    + DeltaR matching = "+str(self.matching_dr))
         elif parameter=="bjet_id.exclusive":
             msg="false"
             if self.exclusive:
                 msg="true"
-            logging.info("    + exclusive algo = "+msg)
+            logging.getLogger('MA5').info("    + exclusive algo = "+msg)
         elif parameter=="bjet_id.efficiency":
-            logging.info("    + id efficiency = "+str(self.efficiency))
+            logging.getLogger('MA5').info("    + id efficiency = "+str(self.efficiency))
         elif parameter=="bjet_id.misid_cjet":
-            logging.info("    + mis-id efficiency (c-quark)      = "+str(self.misid_cjet))
+            logging.getLogger('MA5').info("    + mis-id efficiency (c-quark)      = "+str(self.misid_cjet))
         elif parameter=="bjet_id.misid_ljet":
-            logging.info("    + mis-id efficiency (light quarks) = "+str(self.misid_ljet))
+            logging.getLogger('MA5').info("    + mis-id efficiency (light quarks) = "+str(self.misid_ljet))
         else:
-            logging.error("'clustering' has no parameter called '"+parameter+"'")
+            logging.getLogger('MA5').error("'clustering' has no parameter called '"+parameter+"'")
 
 
     def SampleAnalyzerConfigString(self):
@@ -104,10 +104,10 @@ class BeautyIdentification():
             try:
                 number = float(value)
             except:
-                logging.error("the 'matching deltaR' must be a float value.")
+                logging.getLogger('MA5').error("the 'matching deltaR' must be a float value.")
                 return False
             if number<=0:
-                logging.error("the 'matching deltaR' cannot be negative or null.")
+                logging.getLogger('MA5').error("the 'matching deltaR' cannot be negative or null.")
                 return False
             self.matching_dr=number
 
@@ -118,7 +118,7 @@ class BeautyIdentification():
             elif value == "false":
                 self.exclusive=False
             else:
-                logging.error("'exclusive' possible values are : 'true', 'false'")
+                logging.getLogger('MA5').error("'exclusive' possible values are : 'true', 'false'")
                 return False
 
         # efficiency
@@ -126,13 +126,13 @@ class BeautyIdentification():
             try:
                 number = float(value)
             except:
-                logging.error("the efficiency must be a float value.")
+                logging.getLogger('MA5').error("the efficiency must be a float value.")
                 return False
             if number<0:
-                logging.error("the efficiency cannot be negative.")
+                logging.getLogger('MA5').error("the efficiency cannot be negative.")
                 return False
             if number>1:
-                logging.error("the efficiency cannot not greater to 1.")
+                logging.getLogger('MA5').error("the efficiency cannot not greater to 1.")
                 return False
             self.efficiency=number
 
@@ -141,13 +141,13 @@ class BeautyIdentification():
             try:
                 number = float(value)
             except:
-                logging.error("the efficiency must be a float value.")
+                logging.getLogger('MA5').error("the efficiency must be a float value.")
                 return False
             if number<0:
-                logging.error("the efficiency cannot be negative.")
+                logging.getLogger('MA5').error("the efficiency cannot be negative.")
                 return False
             if number>1:
-                logging.error("the efficiency cannot be greater to 1.")
+                logging.getLogger('MA5').error("the efficiency cannot be greater to 1.")
                 return False
             self.efficiency=number
 
@@ -156,13 +156,13 @@ class BeautyIdentification():
             try:
                 number = float(value)
             except:
-                logging.error("the mis-id efficiency must be a float value.")
+                logging.getLogger('MA5').error("the mis-id efficiency must be a float value.")
                 return False
             if number<0:
-                logging.error("the mis-id efficiency cannot be negative.")
+                logging.getLogger('MA5').error("the mis-id efficiency cannot be negative.")
                 return False
             if number>1:
-                logging.error("the mis-id efficiency cannot be greater to 1.")
+                logging.getLogger('MA5').error("the mis-id efficiency cannot be greater to 1.")
                 return False
             self.misid_cjet=number
 
@@ -171,16 +171,16 @@ class BeautyIdentification():
             try:
                 number = float(value)
             except:
-                logging.error("the mis-id efficiency must be a float value.")
+                logging.getLogger('MA5').error("the mis-id efficiency must be a float value.")
                 return False
             if number<0:
-                logging.error("the mis-id efficiency cannot be negative.")
+                logging.getLogger('MA5').error("the mis-id efficiency cannot be negative.")
                 return False
             if number>1:
-                logging.error("the mis-id efficiency cannot be greater to 1.")
+                logging.getLogger('MA5').error("the mis-id efficiency cannot be greater to 1.")
                 return False
             self.misid_ljet=number
 
         # other    
         else:
-            logging.error("'clustering' has no parameter called '"+parameter+"'")
+            logging.getLogger('MA5').error("'clustering' has no parameter called '"+parameter+"'")

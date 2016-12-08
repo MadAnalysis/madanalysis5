@@ -45,7 +45,7 @@ class LayoutWriter():
         try:
             file = open(filename,"w")
         except:
-            logging.error("impossible to create the file '"+filename+"'")
+            logging.getLogger('MA5').error("impossible to create the file '"+filename+"'")
 
         # Writing header
         from madanalysis.core.main import Main
@@ -156,4 +156,4 @@ class LayoutWriter():
         try:
             file.close()
         except:
-            logging.error("impossible to close the file '"+filename+"'")
+            logging.getLogger('MA5').error("impossible to close the file '"+filename+"'")

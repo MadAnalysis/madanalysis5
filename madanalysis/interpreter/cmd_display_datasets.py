@@ -35,8 +35,8 @@ class CmdDisplayDatasets(CmdBase.CmdBase):
         self.main.datasets.Display()
 
     def help(self):
-        logging.info("   Syntax: display_datasets")
-        logging.info("   Displays the list of all the imported datasets.")
+        logging.getLogger('MA5').info("   Syntax: display_datasets")
+        logging.getLogger('MA5').info("   Displays the list of all the imported datasets.")
 
     def complete(self,text,line,begidx,endidx,main):
         return

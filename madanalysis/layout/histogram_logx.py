@@ -36,7 +36,7 @@ class HistogramLogX:
     def Print(self):
 
         # General info
-        logging.info(self.name + ' ' + str(self.nbins) + \
+        logging.getLogger('MA5').info(self.name + ' ' + str(self.nbins) + \
                      str(self.xmin) + ' ' + str(self.xmax))
 
         # Data

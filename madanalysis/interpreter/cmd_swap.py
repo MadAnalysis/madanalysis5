@@ -35,7 +35,7 @@ class CmdSwap(CmdBase):
 
         # Checking argument number
         if len(args) != 8:
-            logging.error("wrong number of arguments for the command 'swap'.")
+            logging.getLogger('MA5').error("wrong number of arguments for the command 'swap'.")
             self.help()
             return
 
@@ -44,7 +44,7 @@ class CmdSwap(CmdBase):
            not args[2].isdigit() or args[3]!=']' or \
            args[4]!='selection' or args[5]!='[' or \
            not args[6].isdigit() or args[7]!=']' :
-            logging.error("the syntax is not correct.")
+            logging.getLogger('MA5').error("the syntax is not correct.")
             self.help()
             return
         
@@ -57,8 +57,8 @@ class CmdSwap(CmdBase):
 
 
     def help(self):
-        logging.info("   Syntax: swap selection[X] selection[Y]")
-        logging.info("   Swaping the Xth plot/cut with the Yth plot/cut.")
+        logging.getLogger('MA5').info("   Syntax: swap selection[X] selection[Y]")
+        logging.getLogger('MA5').info("   Swaping the Xth plot/cut with the Yth plot/cut.")
 
     def complete(self,text,line,begidx,endidx):
         # swap  selection[i] selection[j]

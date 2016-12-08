@@ -64,7 +64,7 @@ class ClusteringConfiguration:
 
     def user_DisplayParameter(self,parameter):
         if parameter=="algorithm":
-            logging.info(" clustering algorithm : "+self.algorithm)
+            logging.getLogger('MA5').info(" clustering algorithm : "+self.algorithm)
             return
         if self.algorithm!="none":
             if parameter=="exclusive_id":
@@ -73,7 +73,7 @@ class ClusteringConfiguration:
                     word="true"
                 else:
                     word="false"
-                logging.info("  + exclusive identification = "+word)
+                logging.getLogger('MA5').info("  + exclusive identification = "+word)
             elif parameter.startswith('bjet_id.'):
                 self.beauty.user_DisplayParameter(parameter)
             elif parameter.startswith('tau_id.'):
@@ -118,7 +118,7 @@ class ClusteringConfiguration:
                             test=False
                             break
                 if not test:
-                    logging.error("some datasets contain partonic/hadronic file format. Clustering algorithm cannot be switched off.")
+                    logging.getLogger('MA5').error("some datasets contain partonic/hadronic file format. Clustering algorithm cannot be switched off.")
                     return
 
             # Switch on the clustering
@@ -128,7 +128,7 @@ class ClusteringConfiguration:
 
                 # Only in reco mode
                 if level!=MA5RunningType.RECO:
-                    logging.error("clustering algorithm is only available in RECO mode")
+                    logging.getLogger('MA5').error("clustering algorithm is only available in RECO mode")
                     return
                 
                 test=True
@@ -142,7 +142,7 @@ class ClusteringConfiguration:
                             test=False
                             break
                 if not test:
-                    logging.error("some datasets contain reconstructed file format. Clustering algorithm cannot be switched on.")
+                    logging.getLogger('MA5').error("some datasets contain reconstructed file format. Clustering algorithm cannot be switched on.")
                     return
                  
             if value=="kt":
@@ -173,12 +173,12 @@ class ClusteringConfiguration:
                 self.algorithm="none"
                 self.clustering = 0
             else:
-                logging.error("algorithm called '"+value+"' is not found.")
+                logging.getLogger('MA5').error("algorithm called '"+value+"' is not found.")
             return    
 
         # other rejection if no algo specified
         if self.algorithm=="none":
-            logging.error("'clustering' has no parameter called '"+parameter+"'")
+            logging.getLogger('MA5').error("'clustering' has no parameter called '"+parameter+"'")
             return
 
         # exclusive_id
@@ -188,7 +188,7 @@ class ClusteringConfiguration:
             elif value=="false":
                 self.exclusive_id=False
             else:
-                logging.error("The allowed values for 'exclusive_id' " +\
+                logging.getLogger('MA5').error("The allowed values for 'exclusive_id' " +\
                               "parameter are 'true' or 'false'.")
             return    
 

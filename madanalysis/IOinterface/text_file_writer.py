@@ -31,14 +31,14 @@ class TextFileWriter():
 
     def Open(self):
         if self.isopen:
-            logging.error("the file called '"+self.filename+"' cannot be opened. It is already opened")
+            logging.getLogger('MA5').error("the file called '"+self.filename+"' cannot be opened. It is already opened")
             return False
         try:
             self.file = open ( self.filename, "w" )
             self.isopen = True
             return True
         except:
-            logging.error("Impossible to create the file called '" + self.filename + "'")
+            logging.getLogger('MA5').error("Impossible to create the file called '" + self.filename + "'")
             return False
 
     def Close(self):

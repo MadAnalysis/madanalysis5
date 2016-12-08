@@ -201,12 +201,12 @@ class Interpreter(InterpreterBase):
     def do_restart(self, line):
         """ sending a signal allowing to restart the interpreter """
         if self.main.script:
-            logging.warning("'restart' command is not allowed in script mode.")
+            logging.getLogger('MA5').warning("'restart' command is not allowed in script mode.")
         else:
             YES=False
             # Asking the safety question
             if not Main.forced:
-                logging.warning("Are you sure to restart the MadAnalysis 5 session? (Y/N)")
+                logging.getLogger('MA5').warning("Are you sure to restart the MadAnalysis 5 session? (Y/N)")
                 allowed_answers=['n','no','y','yes']
                 answer=""
                 while answer not in  allowed_answers:
@@ -225,9 +225,9 @@ class Interpreter(InterpreterBase):
                 pass
 
     def help_restart(self):
-        logging.info("   Syntax: restart ")
-        logging.info("   Quit the current MadAnalysis sessiona and open a new one.")
-        logging.info("   All the information will be discarded.")
+        logging.getLogger('MA5').info("   Syntax: restart ")
+        logging.getLogger('MA5').info("   Quit the current MadAnalysis sessiona and open a new one.")
+        logging.getLogger('MA5').info("   All the information will be discarded.")
 
     def do_remove(self,line):
         self.cmd_remove.do(self.split_arg(line))
@@ -250,8 +250,8 @@ class Interpreter(InterpreterBase):
     def do_install(self,line):
         result = self.cmd_install.do(self.split_arg(line))
         if result=='restart':
-            logging.info(" ")
-            logging.info("MadAnalysis 5 must be restarted for taking into account the present installation.")
+            logging.getLogger('MA5').info(" ")
+            logging.getLogger('MA5').info("MadAnalysis 5 must be restarted for taking into account the present installation.")
             return self.do_restart('restart')
 
     def help_install(self):

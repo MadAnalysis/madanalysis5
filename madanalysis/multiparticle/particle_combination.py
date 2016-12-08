@@ -40,7 +40,7 @@ class ParticleCombination():
         return self.extraparticles[i]
         
     def Display(self):
-        logging.info(" combination = "+self.GetStringDisplay())
+        logging.getLogger('MA5').info(" combination = "+self.GetStringDisplay())
 
     def GetStringDisplay(self):
         text=""

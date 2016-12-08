@@ -35,8 +35,8 @@ class CmdDisplayRegions(CmdBase.CmdBase):
         self.main.regions.Display()
 
     def help(self):
-        logging.info("   Syntax: display_regionss")
-        logging.info("   Displays the list of all the crated regions.")
+        logging.getLogger('MA5').info("   Syntax: display_regionss")
+        logging.getLogger('MA5').info("   Displays the list of all the crated regions.")
 
     def complete(self,text,line,begidx,endidx,main):
         return

@@ -23,7 +23,6 @@
 
 
 // STL headeres
-
 // SampleAnalyzer headers
 #ifdef FASTJET_USE
   #include "SampleAnalyzer/Process/Analyzer/MergingPlots.h"

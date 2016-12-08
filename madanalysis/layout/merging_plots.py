@@ -163,7 +163,7 @@ class MergingPlots:
         try:
             outputC = file(filenameC,'w')
         except:
-            logging.error('Impossible to write the file: '+filenameC)
+            logging.getLogger('MA5').error('Impossible to write the file: '+filenameC)
             return False
 
         # File header
@@ -330,7 +330,7 @@ class MergingPlots:
         try:
             outputC.close()
         except:
-            logging.error('Impossible to close the file: '+outputC)
+            logging.getLogger('MA5').error('Impossible to close the file: '+outputC)
             return False
 
         # Ok

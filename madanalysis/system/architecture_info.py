@@ -23,7 +23,6 @@
 
 
 import logging
-
 class ArchitectureInfo:
 
     def __init__(self):

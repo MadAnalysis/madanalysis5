@@ -20,8 +20,9 @@
 #  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
 #  
 ################################################################################
-import logging
 
+
+import logging
 class Region:
 
     def __init__(self,name):
