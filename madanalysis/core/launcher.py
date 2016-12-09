@@ -210,30 +210,28 @@ def MainSession(mode,arglist,ma5dir,version,date):
 
     # Displaying header
     logging.getLogger('MA5').info("")
-    logging.getLogger('MA5').info(\
-    "*************************************************************\n" + \
-    "*                                                           *\n" + \
-    "*        W E L C O M E  to  M A D A N A L Y S I S  5        *\n" + \
-    "*                         ______  ______                    *\n" + \
-    "*                 /'\_/`\/\  __ \/\  ___\                   *\n" + \
-    "*                /\      \ \ \_\ \ \ \__/                   *\n" + \
-    "*                \ \ \__\ \ \  __ \ \___``\                 *\n" + \
-    "*                 \ \ \_/\ \ \ \/\ \/\ \_\ \                *\n" + \
-    "*                  \ \_\\\ \_\ \_\ \_\ \____/                *\n" + \
-    "*                   \/_/ \/_/\/_/\/_/\/___/                 *\n" + \
-    "*                                                           *\n" + \
-    "*   MA5 release : " + \
-             "%-24s" % main.archi_info.ma5_version + "%+15s" % main.archi_info.ma5_date  + "   *\n" + \
-    "*                                                           *\n" + \
-    "*         Comput. Phys. Commun. 184 (2013) 222-256          *\n" + \
-    "*             Eur. Phys. J. C74 (2014) 3103                 *\n" + \
-    "*                                                           *\n" + \
-    "*   The MadAnalysis Development Team - Please visit us at   *\n" + \
-    "*            https://launchpad.net/madanalysis5             *\n" + \
-    "*                                                           *\n" + \
-    "*              Type 'help' for in-line help.                *\n" + \
-    "*                                                           *\n" + \
-    "*************************************************************")
+    logging.getLogger('MA5').info("*************************************************************")
+    logging.getLogger('MA5').info("*                                                           *")
+    logging.getLogger('MA5').info("*        W E L C O M E  to  M A D A N A L Y S I S  5        *")
+    logging.getLogger('MA5').info("*                         ______  ______                    *")
+    logging.getLogger('MA5').info("*                 /'\_/`\/\  __ \/\  ___\                   *")
+    logging.getLogger('MA5').info("*                /\      \ \ \_\ \ \ \__/                   *")
+    logging.getLogger('MA5').info("*                \ \ \__\ \ \  __ \ \___``\                 *")
+    logging.getLogger('MA5').info("*                 \ \ \_/\ \ \ \/\ \/\ \_\ \                *")
+    logging.getLogger('MA5').info("*                  \ \_\\\ \_\ \_\ \_\ \____/                *")
+    logging.getLogger('MA5').info("*                   \/_/ \/_/\/_/\/_/\/___/                 *")
+    logging.getLogger('MA5').info("*                                                           *")
+    logging.getLogger('MA5').info("*   MA5 release : " + "%-24s" % main.archi_info.ma5_version + "%+15s" % main.archi_info.ma5_date  + "   *")
+    logging.getLogger('MA5').info("*                                                           *")
+    logging.getLogger('MA5').info("*         Comput. Phys. Commun. 184 (2013) 222-256          *")
+    logging.getLogger('MA5').info("*             Eur. Phys. J. C74 (2014) 3103                 *")
+    logging.getLogger('MA5').info("*                                                           *")
+    logging.getLogger('MA5').info("*   The MadAnalysis Development Team - Please visit us at   *")
+    logging.getLogger('MA5').info("*            https://launchpad.net/madanalysis5             *")
+    logging.getLogger('MA5').info("*                                                           *")
+    logging.getLogger('MA5').info("*              Type 'help' for in-line help.                *")
+    logging.getLogger('MA5').info("*                                                           *")
+    logging.getLogger('MA5').info("*************************************************************")
 
     # Displaying special banner if auto-check mode is activated 
     if mode.debug:
