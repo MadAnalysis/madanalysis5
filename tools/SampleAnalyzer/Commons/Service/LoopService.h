@@ -33,7 +33,7 @@
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/Service/Physics.h"
-
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 
 
@@ -130,16 +130,18 @@ class LoopService
   /// Threshold
   MAbool ReachThreshold()
   {
-    if (Ncalls_ > NcallThreshold_)
+    try
     {
-      WARNING << "Number of calls exceed: infinite loops detected" << endmsg;
-      return true;
-    }
-    else
-    {
+      if (Ncalls_ > NcallThreshold_) throw EXCEPTION_WARNING("Number of calls exceed: infinite loops detected","",0);
       Ncalls_++;
-      return false;
     }
+    catch(const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
+      return true;
+    }    
+
+    return false;
   }
 
 };

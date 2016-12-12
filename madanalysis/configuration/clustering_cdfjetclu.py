@@ -55,17 +55,17 @@ class ClusteringCDFJetClu():
 
     def user_DisplayParameter(self,parameter):
         if parameter=="radius":
-            logging.info("  + cone radius = "+str(self.radius))
+            logging.getLogger('MA5').info("  + cone radius = "+str(self.radius))
         elif parameter=="overlap":
-            logging.info("  + overlap threshold = "+str(self.overlap))
+            logging.getLogger('MA5').info("  + overlap threshold = "+str(self.overlap))
         elif parameter=="seed":
-            logging.info("  + seed threshold = "+str(self.seed))
+            logging.getLogger('MA5').info("  + seed threshold = "+str(self.seed))
         elif parameter=="ptmin":
-            logging.info("  + PT min (GeV) for produced jets = "+str(self.ptmin))
+            logging.getLogger('MA5').info("  + PT min (GeV) for produced jets = "+str(self.ptmin))
         elif parameter=="iratch":
-            logging.info("  + ratcheting parameter = "+str(self.iratch))
+            logging.getLogger('MA5').info("  + ratcheting parameter = "+str(self.iratch))
         else:
-            logging.error("'clustering' has no parameter called '"+parameter+"'")
+            logging.getLogger('MA5').error("'clustering' has no parameter called '"+parameter+"'")
 
 
     def SampleAnalyzerConfigString(self):
@@ -95,10 +95,10 @@ class ClusteringCDFJetClu():
             try:
                 number = float(value)
             except:
-                logging.error("the cone radius must be a float value.")
+                logging.getLogger('MA5').error("the cone radius must be a float value.")
                 return False
             if number<=0:
-                logging.error("the cone radius cannot be negative or null.")
+                logging.getLogger('MA5').error("the cone radius cannot be negative or null.")
                 return False
             self.radius=number
 
@@ -107,10 +107,10 @@ class ClusteringCDFJetClu():
             try:
                 number = float(value)
             except:
-                logging.error("the overlap threshold must be a float value.")
+                logging.getLogger('MA5').error("the overlap threshold must be a float value.")
                 return False
             if number<0:
-                logging.error("the overlap threshold cannot be negative.")
+                logging.getLogger('MA5').error("the overlap threshold cannot be negative.")
                 return False
             self.overlap=number
 
@@ -119,10 +119,10 @@ class ClusteringCDFJetClu():
             try:
                 number = float(value)
             except:
-                logging.error("the seed threshold must be a float value.")
+                logging.getLogger('MA5').error("the seed threshold must be a float value.")
                 return False
             if number<0:
-                logging.error("the seed threshold cannot be negative.")
+                logging.getLogger('MA5').error("the seed threshold cannot be negative.")
                 return False
             self.seed=number
 
@@ -131,7 +131,7 @@ class ClusteringCDFJetClu():
             try:
                 number = int(value)
             except:
-                logging.error("the ratcheting parameter must be an integer value.")
+                logging.getLogger('MA5').error("the ratcheting parameter must be an integer value.")
                 return False
             self.iratch=number
 
@@ -140,13 +140,13 @@ class ClusteringCDFJetClu():
             try:
                 number = float(value)
             except:
-                logging.error("the ptmin must be a float value.")
+                logging.getLogger('MA5').error("the ptmin must be a float value.")
                 return False
             if number<0:
-                logging.error("the ptmin cannot be negative.")
+                logging.getLogger('MA5').error("the ptmin cannot be negative.")
                 return False
             self.ptmin=number
 
         # other    
         else:
-            logging.error("'clustering' has no parameter called '"+parameter+"'")
+            logging.getLogger('MA5').error("'clustering' has no parameter called '"+parameter+"'")

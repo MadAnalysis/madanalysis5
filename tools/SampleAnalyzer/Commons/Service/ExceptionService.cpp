@@ -45,7 +45,6 @@ void ExceptionService::Display(const ExceptionType& e)
                                 e.GetLine(),
                                 e.GetMsg(),
                                 e.GetFunction());
-
   // Veto ?
   if (!display) return;
 

@@ -110,7 +110,7 @@ def WriteConditions(file,main,iabs,icut,tagName,tagIndex,condition):
     elif len(condition.parts)==2:
         WriteCutWith2Args(file,main,iabs,icut,tagName,tagIndex,condition)
     else:
-        logging.error("observable with more than 2 arguments are " +\
+        logging.getLogger('MA5').error("observable with more than 2 arguments are " +\
                       "not managed by MadAnalysis 5")
 
 

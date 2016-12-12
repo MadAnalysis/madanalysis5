@@ -46,7 +46,7 @@ def WritePlot(file,main,iabs,ihisto):
     elif len(main.selection[iabs].arguments)==2:
         WritePlotWith2Args(file,main,iabs,ihisto)
     else:
-        logging.error("observable with more than 2 arguments are " +\
+        logging.getLogger('MA5').error("observable with more than 2 arguments are " +\
                       "not managed by MadAnalysis 5")
 
     # Closing bracket for the current histo

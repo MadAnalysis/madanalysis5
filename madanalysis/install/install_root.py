@@ -38,15 +38,16 @@ class InstallRoot:
         self.downloaddir= os.path.normpath(self.tmpdir + '/MA5_downloads/')
         self.untardir = os.path.normpath(self.tmpdir + '/MA5_root/')
         self.ncores     = 1
-        self.files = {"root.tar.gz" : "ftp://root.cern.ch/root/root_v5.34.18.source.tar.gz"}
+#        self.files = {"root.tar.gz" : "ftp://root.cern.ch/root/root_v5.34.18.source.tar.gz"}
+        self.files = {"root.tar.gz" : "https://root.cern.ch/download/root_v6.04.08.source.tar.gz"}
 
 
     def Detect(self):
         if not os.path.isdir(self.toolsdir):
-            logging.debug("The folder '"+self.toolsdir+"' is not found")
+            logging.getLogger('MA5').debug("The folder '"+self.toolsdir+"' is not found")
             return False
         if not os.path.isdir(self.installdir):
-            logging.debug("The folder "+self.installdir+"' is not found")
+            logging.getLogger('MA5').debug("The folder "+self.installdir+"' is not found")
             return False
         return True
 
@@ -93,20 +94,26 @@ class InstallRoot:
         self.tmpdir=packagedir
         return True
 
+
+    def GetNcores(self):
+        self.ncores = InstallService.get_ncores(self.main.archi_info.ncores,\
+                                                self.main.forced)
+
     def Configure(self):
         # Input
-        theCommands=['./configure','--prefix='+self.installdir]
+        theCommands=['./configure','--prefix='+self.installdir,'--disable-gfal','--disable-python']
         logname=os.path.normpath(self.installdir+'/configuration.log')
+
         # Execute
-        logging.debug('shell command: '+' '.join(theCommands))
+        logging.getLogger('MA5').debug('shell command: '+' '.join(theCommands))
         ok, out= ShellCommand.ExecuteWithLog(theCommands,\
                                              logname,\
                                              self.tmpdir,\
                                              silent=False)
         # return result
         if not ok:
-            logging.error('impossible to configure the project. For more details, see the log file:')
-            logging.error(logname)
+            logging.getLogger('MA5').error('impossible to configure the project. For more details, see the log file:')
+            logging.getLogger('MA5').error(logname)
         return ok
 
 
@@ -115,15 +122,32 @@ class InstallRoot:
         theCommands=['make', 'install']
         logname=os.path.normpath(self.installdir+'/compilation.log')
         # Execute
-        logging.debug('shell command: '+' '.join(theCommands))
+        logging.getLogger('MA5').debug('shell command: '+' '.join(theCommands))
         ok, out= ShellCommand.ExecuteWithLog(theCommands,\
                                              logname,\
                                              self.tmpdir,\
                                              silent=False)
         # return result
         if not ok:
-            logging.error('impossible to build the project. For more details, see the log file:')
-            logging.error(logname)
+            logging.getLogger('MA5').error('impossible to build the project. For more details, see the log file:')
+            logging.getLogger('MA5').error(logname)
+        return ok
+
+
+    def Build(self):
+        # Input
+        theCommands=['make','-j'+str(self.ncores)]
+        logname=os.path.normpath(self.installdir+'/compilation.log')
+        # Execute
+        logging.getLogger('MA5').debug('shell command: '+' '.join(theCommands))
+        ok, out= ShellCommand.ExecuteWithLog(theCommands,\
+                                             logname,\
+                                             self.tmpdir,\
+                                             silent=False)
+        # return result
+        if not ok:
+            logging.getLogger('MA5').error('impossible to build the project. For more details, see the log file:')
+            logging.getLogger('MA5').error(logname)
         return ok
 
 
@@ -134,34 +158,58 @@ class InstallRoot:
                 self.installdir+"/include"]
         for dir in dirs:
             if not os.path.isdir(dir):
-                logging.error('folder '+dir+' is missing.')
+                logging.getLogger('MA5').error('folder '+dir+' is missing.')
                 self.display_log()
                 return False
             else:
                 # Checking root executable
+                self.logger.debug('Checking that bin folder is there...')
                 if dir == self.installdir+"/bin":
+                    self.logger.debug('Checking that root executable is there...')
                     path = os.path.join(os.path.join(self.installdir, "bin"), "root")
                     if not os.path.isfile(path) :
-                        logging.error("Root executable doesn't exist.")
+                        logging.getLogger('MA5').error("Root executable doesn't exist.")
                         self.display_log()
                         return False
                     elif os.path.isfile(path) and not os.access(path, os.X_OK):
-                        logging.error("You don't have the permission to execute Root.")
+                        logging.getLogger('MA5').error("You don't have the permission to execute root.")
+                        self.display_log()
+                        return False
+                    self.logger.debug('Checking that root-config executable is there...')
+                    path = os.path.join(os.path.join(self.installdir, "bin"), "root-config")
+                    if not os.path.isfile(path) :
+                        logging.getLogger('MA5').error("Root-config executable doesn't exist.")
+                        self.display_log()
+                        return False
+                    elif os.path.isfile(path) and not os.access(path, os.X_OK):
+                        logging.getLogger('MA5').error("You don't have the permission to execute root-config.")
                         self.display_log()
                         return False
 
                 # Checking libraries
+                    self.logger.debug('Checking that lib folder is there...')
                 elif dir == self.installdir+"/lib":
                     path = os.path.join(os.path.join(self.installdir, "lib"), "root")
                     listdir = os.listdir(path)
-                    libs = ["libHist.so", "libCore.so", "libCint.so", "libGraf3d.so", "libMathCore.so",\
-                            "libMatrix.so", "libRIO.so", "libNet.so", "libGraf.so", "libThread.so", \
-                            "libGpad.so", "libTree.so", "libRint.so", "libPostscript.so", "libPhysics.so"]
-                    sl = set(libs)
-                    sld = set(listdir)
-                    samefiles = list(sl.intersection(sld))
-                    if len(samefiles) != len(libs):
-                        logging.error('Libraries are missing. Please reinstall root.')
+                    libs = ["libHist.",   "libCore.", "libGraf3d.", "libMathCore.",\
+                            "libMatrix.", "libRIO.",  "libNet.",    "libGraf.",       "libThread.", \
+                            "libGpad.",   "libTree.", "libRint.",   "libPostscript.", "libPhysics."]
+                    globaltest = True
+                    for ref in libs:
+                        test=False
+                        self.logger.debug('Checking if there is the lib: '+ref+'* ...')
+                        for item in listdir:
+                            if item.startswith(ref):
+                                test=True
+                                break
+                        if not test:
+                            logging.getLogger('MA5').debug('--> NOT found')
+                            globaltest=False
+                        else:
+                            logging.getLogger('MA5').debug('--> found')
+
+                    if not globaltest:
+                        logging.getLogger('MA5').error('Libraries are missing. Please reinstall root.')
                         self.display_log()
                         return False
 
@@ -175,18 +223,18 @@ class InstallRoot:
                                 "TApplication.h", "TLegend.h"]
                     samefiles = list(set(includes).intersection(set(listdir)))
                     if len(samefiles) != len(includes):
-                        logging.error('Headers are missing. Please reinstall root.')
+                        logging.getLogger('MA5').error('Headers are missing. Please reinstall root.')
                         self.display_log()
                         return False                
         return True
 
     def display_log(self):
-        logging.error("More details can be found into the log files:")
-        logging.error(" - "+os.path.normpath(self.installdir+"/wget.log"))
-        logging.error(" - "+os.path.normpath(self.installdir+"/unpack.log"))
-        logging.error(" - "+os.path.normpath(self.installdir+"/configuration.log"))
-        logging.error(" - "+os.path.normpath(self.installdir+"/compilation.log"))
-        logging.error(" - "+os.path.normpath(self.installdir+"/installation.log"))
+        logging.getLogger('MA5').error("More details can be found into the log files:")
+        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/wget.log"))
+        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/unpack.log"))
+        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/configuration.log"))
+        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/compilation.log"))
+        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/installation.log"))
 
     def NeedToRestart(self):
         return True

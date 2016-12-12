@@ -1,25 +1,26 @@
 ################################################################################
-#
+#  
 #  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
-#
+#  
 #  This file is part of MadAnalysis 5.
 #  Official website: <https://launchpad.net/madanalysis5>
-#
+#  
 #  MadAnalysis 5 is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
-#
+#  
 #  MadAnalysis 5 is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #  GNU General Public License for more details.
-#
+#  
 #  You should have received a copy of the GNU General Public License
 #  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
-#
+#  
 ################################################################################
+
 
 from madanalysis.configuration.recast_configuration     import RecastConfiguration
 import itertools
@@ -36,6 +37,10 @@ class MadGraphInterface():
         self.invisible_particles = []
         self.invisible_pdgs = []
         self.recastinfo = RecastConfiguration()
+        self.has_root           = True
+        self.has_matplotlib     = True
+        self.has_delphes        = True
+        self.has_delphesMA5tune = True
 
     class InvalidCard(Exception):
         pass
@@ -53,11 +58,26 @@ class MadGraphInterface():
         self.card=[]
 
         ## card header
-        self.card.append('@MG5aMC stdout_lvl=INFO')
         if card_type=='parton':
-            self.card.append('@MG5aMC inputs = *.lhe\n')
+            self.card.append('# Uncomment the line below to skip this analysis altogether')
+            self.card.append('# @MG5aMC skip_analysis\n')
+            self.card.append('@MG5aMC stdout_lvl=INFO\n')
+            self.card.append('@MG5aMC inputs = *.lhe')
+            self.card.append('@MG5aMC analysis_name = analysis1\n')
         elif card_type=='hadron':
-            self.card.append('@MG5aMC inputs = *.hepmc, *.hep, *.stdhep, *.lhco\n')
+            self.card.append('# Uncomment the line below to skip this analysis altogether')
+            self.card.append('# @MG5aMC skip_analysis\n')
+            self.card.append('@MG5aMC stdout_lvl=INFO\n')
+            if self.has_root and not self.has_delphes:
+                self.card.append('# Recasting functionalities based on Delphes turned off. Please type')
+                self.card.append('#       install madanalysis5 --update --with_delphes')
+                self.card.append('# in the MG5 interpereter to turn them on.\n')
+            if self.has_root and not self.has_delphesMA5tune:
+                self.card.append('# Recasting functionalities based on DelphesMA5tune turned off. Please type')
+                self.card.append('#       install madanalysis5 --update --with_delphesMA5tune')
+                self.card.append('# in the MG5 interpereter to turn them on.\n')
+
+            self.card.append('@MG5aMC inputs = *.hepmc, *.hep, *.stdhep, *.lhco, *.fifo\n')
             self.card.append('# Reconstruction using FastJet')
             self.card.append('@MG5aMC reconstruction_name = BasicReco')
             self.card.append('@MG5aMC reco_output = lhe')
@@ -70,7 +90,7 @@ class MadGraphInterface():
         self.logger.info('Getting the multiparticle definitions')
         for line in MG5history:
             if 'define' in line:
-                myline = line.split()
+                myline = line.split('#')[0].split()
                 self.logger.debug('pdgs = '+str(myline[3:]))
                 mypdgs= [self.get_pdg_code(prt) for prt in myline[3:]]
                 self.multiparticles[myline[1]]=sorted(sum([e if isinstance(e,list) else [e] for e in mypdgs],[]))
@@ -89,6 +109,14 @@ class MadGraphInterface():
 
 
     def generate_parton_card(self, ProcessesDefinitions, ProcessesLists):
+        self.card.append('# Histogram drawer (options: matplotlib or root)')
+        if self.has_root:
+            self.card.append('set main.graphic_render = root\n')
+        elif self.has_matplotlib:
+            self.card.append('set main.graphic_render = matplotlib\n')
+        else:
+            self.logger.warning('plots cannot be generated (neither root nor matplotlib can be found')
+            self.card.append('set main.graphic_render = none\n')
 
         # global observables
         self.card.append('# Global event variables')
@@ -119,16 +147,35 @@ class MadGraphInterface():
         self.card.append('set main.fastsim.tau_id.efficiency = 1.0')
         self.card.append('set main.fastsim.tau_id.misid_ljet = 0.0')
 
-        self.card.append('\n# Reconstruction using Delphes')
-        self.card.append('@MG5aMC reconstruction_name = CMSReco')
-        self.card.append('@MG5aMC reco_output = root')
-        self.card.append('set main.fastsim.package  = delphes')
-        self.card.append('set main.fastsim.detector = cms-ma5tune')
+        if self.has_root and self.has_delphes:
+            self.card.append('\n# Reconstruction using Delphes')
+            self.card.append('@MG5aMC reconstruction_name = CMSReco')
+            self.card.append('@MG5aMC reco_output = root')
+            self.card.append('set main.fastsim.package  = delphes')
+            self.card.append('set main.fastsim.detector = cms-ma5tune')
+        elif self.has_root and self.has_delphesMA5tune:
+            self.card.append('\n# Reconstruction using Delphes')
+            self.card.append('@MG5aMC reconstruction_name = CMSReco')
+            self.card.append('@MG5aMC reco_output = root')
+            self.card.append('set main.fastsim.package  = delphesMA5tune')
+            self.card.append('set main.fastsim.detector = cms')
 
-        self.card.append('\n# Analysis using both reco')
-        self.card.append('@MG5aMC analysis_name = analysis1')
-        self.card.append('@MG5aMC set_reconstructions = [\'BasicReco\', \'CMSReco\']')
-        self.card.append('# object definition')
+
+        if self.has_root and (self.has_delphes or self.has_delphesMA5tune):
+            self.card.append('\n# Analysis using both reco')
+            self.card.append('@MG5aMC analysis_name = analysis2')
+            self.card.append('# Uncomment the next line to bypass this analysis')
+            self.card.append('# @MG5aMC skip_analysis')
+            self.card.append('@MG5aMC set_reconstructions = [\'BasicReco\', \'CMSReco\']')
+        else:
+            self.card.append('\n# Analysis using the fastjet reco')
+            self.card.append('@MG5aMC analysis_name = analysis2')
+            self.card.append('# Uncomment the next line to bypass this analysis')
+            self.card.append('# @MG5aMC skip_analysis')
+            self.card.append('@MG5aMC set_reconstructions = [\'BasicReco\']')
+        self.card.append('\n# plot tunning: dsigma/sigma is plotted.')
+        self.card.append('set main.stacking_method = normalize2one')
+        self.card.append('\n# object definition')
         self.card.append('define e = e+ e-')
         self.card.append('define mu = mu+ mu-')
         self.card.append('select (j)  PT > 20')
@@ -223,22 +270,28 @@ class MadGraphInterface():
                     self.card.append('plot DELTAR('+','.join(perm)+') 40 0 10 [logY]')
 
         # recasting
-        self.card.append('\n# Recasting')
-        self.card.append('@MG5aMC recasting_commands')
-        self.card.append('set main.recast = on')
-        self.card.append('set main.recast.store_root = False')
-        self.card.append('@MG5aMC recasting_card')
-        self.card.append('# Uncomment the analyses to run')
-        self.card.append('# Delphes cards must be located in the PAD(ForMA5tune) directory')
-        self.card.append('# Switches must be on or off')
-        self.card.append('# AnalysisName               PADType    Switch     DelphesCard')
-        ma5dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),os.pardir,os.pardir))
-        tmp = self.recastinfo.CreateMyCard(os.path.normpath(os.path.join(ma5dir,'PAD')),"PAD",False)
-        tmp = ['# '+x for x in tmp]
-        self.card+= tmp
-        tmp = self.recastinfo.CreateMyCard(os.path.normpath(os.path.join(ma5dir,'PAD')),"PADForMA5tune",False)
-        tmp = ['# '+x for x in tmp]
-        self.card+= tmp
+        if self.has_root and (self.has_delphes or self.has_delphesMA5tune):
+            self.card.append('\n# Recasting')
+            self.card.append('@MG5aMC recasting_commands')
+            self.card.append('set main.recast = on')
+            self.card.append('set main.recast.store_root = False')
+            self.card.append('@MG5aMC recasting_card')
+            self.card.append('# Uncomment the analyses to run')
+            self.card.append('# Delphes cards must be located in the PAD(ForMA5tune) directory')
+            self.card.append('# Switches must be on or off')
+            self.card.append('# AnalysisName               PADType    Switch     DelphesCard')
+            ma5dir = \
+              os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),os.pardir,os.pardir))
+            if self.has_delphes:
+                cpath = os.path.normpath(os.path.join(ma5dir,'PAD'))
+                tmp = self.recastinfo.CreateMyCard(cpath,"PAD",False)
+                tmp = ['# '+x for x in tmp]
+                self.card+= tmp
+            if self.has_delphesMA5tune:
+                cpath = os.path.normpath(os.path.join(ma5dir,'PADForMA5tune'))
+                tmp = self.recastinfo.CreateMyCard(cpath,"PADForMA5tune",False)
+                tmp = ['# '+x for x in tmp]
+                self.card+= tmp
 
         # output
         return '\n'.join(self.card)
@@ -260,6 +313,10 @@ class MadGraphInterface():
         # init
         if interstate==[] and finalstate==[]:
             self.logger.debug('  >> new process')
+
+        # checking if process is not a string
+        if isinstance(process,str):
+            return
 
         # getting the list of particles and creating the plots
         if interstate==[] and finalstate==[]:
@@ -375,7 +432,7 @@ class MadGraphInterface():
         else:
             for key, value in self.multiparticles.iteritems():
                 self.logger.debug('new multiparticles ' + key + ' = ' + str(value))
-                if value==pdg:
+                if sorted(value)==sorted(pdg):
                     return key
         self.logger.error('  ** Cannot find the name associated with the pdg code list' + str(pdg))
         raise self.MultiParts("  ** Problem with the multiparticle definitions")
@@ -383,16 +440,20 @@ class MadGraphInterface():
 
     # from pdg code to name
     def get_pdg_code(self,prt):
-        for key, value in self.model.get('particle_dict').iteritems():
-            if value['antiname']==prt and not value['is_part']:
-                return key
-            elif value['name']==prt and value['is_part']:
-                return key
-        if prt in self.multiparticles.keys():
-            return self.multiparticles[prt]
-        else:
-            self.logger.error("  ** Problem with the multiparticle definitions")
-            raise self.MultiParts("  ** Problem with the multiparticle definitions")
+        try:
+            if isinstance( int(prt), int ):
+               return int(prt)
+        except:
+            for key, value in self.model.get('particle_dict').iteritems():
+                if value['antiname']==prt and not value['is_part']:
+                    return key
+                elif value['name']==prt and value['is_part']:
+                    return key
+            if prt in self.multiparticles.keys():
+                return self.multiparticles[prt]
+            else:
+                self.logger.error("  ** Problem with the multiparticle definitions")
+                raise self.MultiParts("  ** Problem with the multiparticle definitions")
 
     # adding the particle definitions
     def get_invisible(self, card_type='parton'):

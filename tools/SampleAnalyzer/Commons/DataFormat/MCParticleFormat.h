@@ -32,9 +32,10 @@
 #include <iomanip>
 #include <vector>
 
-// SampleAnalyzer
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/DataFormat/ParticleBaseFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
 
 namespace MA5
@@ -126,11 +127,15 @@ class MCParticleFormat : public ParticleBaseFormat
          << "StatusCode=" << /*set::setw(3)*/"" << std::left 
          << static_cast<signed int>(statuscode_) << " - " << endmsg;
 
-    if (mother1_==0) ERROR << "NoMum1" << " - ";
-    else ERROR << "Mum1  " << " - ";
-
-    if (mother2_==0) ERROR << "NoMum2" << endmsg;
-    else ERROR << "Mum2  " << endmsg;
+    try
+    {
+      if (mother1_==0) throw EXCEPTION_ERROR("NoMum1","",0);
+      if (mother2_==0) throw EXCEPTION_ERROR("NoMum2","",0);
+    }
+    catch(const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
+    }    
   }
 
   const MAbool& isPU()  const {return isPU_;}

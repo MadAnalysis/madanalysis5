@@ -114,9 +114,10 @@ class CmdSet(CmdBase.CmdBase):
                 logging.getLogger('MA5').warning("Fastsim package switched off and internally handled")
                 self.main.fastsim.package="none"
         elif len(objs)==2 and objs[0].lower()=='main':
-            if objs[1]=='mode':
+            if objs[1]=='mode' and args[2]=='parton':
                 self.main.mode=MA5RunningType.PARTON
                 self.main.ResetParameters()
+                self.main.AutoSetGraphicalRenderer()
                 self.main.InitObservables(self.main.mode)
                 lvl = logging.getLogger('MA5').getEffectiveLevel()
                 logging.getLogger('MA5').setLevel(100)

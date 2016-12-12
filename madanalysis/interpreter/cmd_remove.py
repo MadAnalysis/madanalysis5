@@ -45,15 +45,15 @@ class CmdRemove(CmdBase.CmdBase):
             if len(theList) is 0:
                 self.main.multiparticles.Remove(name,self.main.mode)
             else:
-                logging.error("The Particle/Multiparticle '" + name + \
+                logging.getLogger('MA5').error("The Particle/Multiparticle '" + name + \
                               "' cannot be removed, being used by: ")
                 for item in theList:
-                    logging.error(" - "+self.main.selection[item].GetStringDisplay())
-                logging.error("Please remove these plots/cuts before removing the Particle/Multiparticle "+ name +".")
+                    logging.getLogger('MA5').error(" - "+self.main.selection[item].GetStringDisplay())
+                logging.getLogger('MA5').error("Please remove these plots/cuts before removing the Particle/Multiparticle "+ name +".")
             return
                 
         # No object found 
-        logging.error("No object called '"+name+"' found.")
+        logging.getLogger('MA5').error("No object called '"+name+"' found.")
 
 
     def remove_selection(self,index):
@@ -67,18 +67,18 @@ class CmdRemove(CmdBase.CmdBase):
             self.remove_input(args[0])
         elif len(args)==4:
             if args[0]!='selection' or args[1]!='[' or not args[2].isdigit() or args[3]!="]":
-                logging.error("wrong syntax for the command 'remove'.")
+                logging.getLogger('MA5').error("wrong syntax for the command 'remove'.")
                 return
             self.remove_selection(int(args[2]))
         else:
-            logging.error("wrong number of arguments for the command 'remove'.")
+            logging.getLogger('MA5').error("wrong number of arguments for the command 'remove'.")
             self.help()
             return
 
 
     def help(self):
-        logging.info("   Syntax: remove <object name>")
-        logging.info("   Removing an existing object from the memory.")
+        logging.getLogger('MA5').info("   Syntax: remove <object name>")
+        logging.getLogger('MA5').info("   Removing an existing object from the memory.")
 
     def complete(self,text,line,begidx,endidx):
 

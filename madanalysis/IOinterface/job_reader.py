@@ -44,10 +44,10 @@ class JobReader():
 
     def CheckDir(self):
         if not os.path.isdir(self.path):
-            logging.error("Directory called '"+self.path+"' is not found.")
+            logging.getLogger('MA5').error("Directory called '"+self.path+"' is not found.")
             return False
         elif not os.path.isdir(self.safdir):
-            logging.error("Directory called '"+self.safdir+"' is not found.")
+            logging.getLogger('MA5').error("Directory called '"+self.safdir+"' is not found.")
             return False
         else:
             return True
@@ -57,7 +57,7 @@ class JobReader():
         if os.path.isfile(self.safdir+"/"+name+"/MadAnalysis5job.saf"):
             return True
         else:
-            logging.error("File called '"+self.safdir+"/"+name+".saf' is not found.")
+            logging.getLogger('MA5').error("File called '"+self.safdir+"/"+name+".saf' is not found.")
             return False
 
 
@@ -70,35 +70,35 @@ class JobReader():
         try:
             results.xsection=float(words[0])
         except:
-            logging.error("xsection is not a float value:"+\
+            logging.getLogger('MA5').error("xsection is not a float value:"+\
                           words[0])
 
         # Extracting xsection error
         try:
             results.xerror=float(words[1])
         except:
-            logging.error("xsection_error is not a float value:"+\
+            logging.getLogger('MA5').error("xsection_error is not a float value:"+\
                           words[1])
 
         # Extracting number of events
         try:
             results.nevents=int(words[2])
         except:
-            logging.error("nevents is not an integer value:"+\
+            logging.getLogger('MA5').error("nevents is not an integer value:"+\
                           words[2])
 
         # Extracting sum positive weights
         try:
             results.sumw_positive=float(words[3])
         except:
-            logging.error("sum_weight+ is not a float value:"+\
+            logging.getLogger('MA5').error("sum_weight+ is not a float value:"+\
                           words[3])
 
         # Extracting sum negative weights
         try:
             results.sumw_negative=float(words[4])
         except:
-            logging.error("sum_weight- is not a float value:"+\
+            logging.getLogger('MA5').error("sum_weight- is not a float value:"+\
                           words[4])
 
         return results
@@ -110,13 +110,13 @@ class JobReader():
         try:
             a=float(words[0])
         except:
-            logging.error("Counter is not a float value:"+words[0])
+            logging.getLogger('MA5').error("Counter is not a float value:"+words[0])
 
         # Extracting xsection error
         try:
             b=float(words[1])
         except:
-            logging.error("Counter is not a float value:"+words[1])
+            logging.getLogger('MA5').error("Counter is not a float value:"+words[1])
 
         # Returning exracting values
         return [a,b]
@@ -129,19 +129,19 @@ class JobReader():
         try:
             a=int(words[0])
         except:
-            logging.error("nbin is not a int value:"+words[0])
+            logging.getLogger('MA5').error("nbin is not a int value:"+words[0])
 
         # Extracting xmin
         try:
             b=float(words[1])
         except:
-            logging.error("xmin is not a float value:"+words[1])
+            logging.getLogger('MA5').error("xmin is not a float value:"+words[1])
 
         # Extracting xmax
         try:
             c=float(words[2])
         except:
-            logging.error("xmax is not a float value:"+words[2])
+            logging.getLogger('MA5').error("xmax is not a float value:"+words[2])
 
         # Returning exracting values
         return [a,b,c]
@@ -153,20 +153,20 @@ class JobReader():
         try:
             a=int(words[0])
         except:
-            logging.error(str(words[0])+' must be a positive integer value @ "'+filename+'" line='+str(numline))
+            logging.getLogger('MA5').error(str(words[0])+' must be a positive integer value @ "'+filename+'" line='+str(numline))
             a=0
         if a<0:
-            logging.error(str(words[0])+' must be a positive integer value @ "'+filename+'" line='+str(numline))
+            logging.getLogger('MA5').error(str(words[0])+' must be a positive integer value @ "'+filename+'" line='+str(numline))
             a=0
 
         # Extracting negative
         try:
             b=int(words[1])
         except:
-            logging.error(str(words[1])+' must be a positive integer value @ "'+filename+'" line='+str(numline))
+            logging.getLogger('MA5').error(str(words[1])+' must be a positive integer value @ "'+filename+'" line='+str(numline))
             b=0
         if b<0:
-            logging.error(str(words[1])+' must be a positive integer value @ "'+filename+'" line='+str(numline))
+            logging.getLogger('MA5').error(str(words[1])+' must be a positive integer value @ "'+filename+'" line='+str(numline))
             b=0
 
         # Returning exracting values
@@ -179,14 +179,14 @@ class JobReader():
         try:
             a=float(words[0])
         except:
-            logging.error(str(words[0])+' must be a float value @ "'+filename+'" line='+str(numline))
+            logging.getLogger('MA5').error(str(words[0])+' must be a float value @ "'+filename+'" line='+str(numline))
             a=0.
 
         # Extracting negative
         try:
             b=float(words[1])
         except:
-            logging.error(str(words[1])+' must be a float value @ "'+filename+'" line='+str(numline))
+            logging.getLogger('MA5').error(str(words[1])+' must be a float value @ "'+filename+'" line='+str(numline))
             b=0.
 
         # Returning exracting values
@@ -199,21 +199,21 @@ class JobReader():
         try:
             a=int(words[0])
         except:
-            logging.error(str(words[0])+' must be an integer value @ "'+filename+'" line='+str(numline))
+            logging.getLogger('MA5').error(str(words[0])+' must be an integer value @ "'+filename+'" line='+str(numline))
             a=0.
 
         # Extracting positive
         try:
             b=float(words[1])
         except:
-            logging.error(str(words[1])+' must be a float value @ "'+filename+'" line='+str(numline))
+            logging.getLogger('MA5').error(str(words[1])+' must be a float value @ "'+filename+'" line='+str(numline))
             b=0.
 
         # Extracting negative
         try:
             c=float(words[2])
         except:
-            logging.error(str(words[2])+' must be a float value @ "'+filename+'" line='+str(numline))
+            logging.getLogger('MA5').error(str(words[2])+' must be a float value @ "'+filename+'" line='+str(numline))
             c=0.
 
         # Returning exracting values
@@ -238,7 +238,7 @@ class JobReader():
         try:
             file = open(filename,'r')
         except:
-            logging.error("File called '"+filename+"' is not found")
+            logging.getLogger('MA5').error("File called '"+filename+"' is not found")
             return
 
         # Initializing tags
@@ -395,7 +395,7 @@ class JobReader():
                     cut.initial.sumw2_pos = results[0]
                     cut.initial.sumw2_neg = results[1]
                 else:
-                    logging.warning('Extra line is found: '+line)
+                    logging.getLogger('MA5').warning('Extra line is found: '+line)
                 initialTag.newline()
 
             # Looking for cut counter
@@ -412,7 +412,7 @@ class JobReader():
                     cutinfo.sumw2_pos = results[0]
                     cutinfo.sumw2_neg = results[1]
                 else:
-                    logging.warning('Extra line is found: '+line)
+                    logging.getLogger('MA5').warning('Extra line is found: '+line)
                 cutTag.newline()    
 
             # Looking from histogram description
@@ -428,8 +428,8 @@ class JobReader():
                         elif histoFreqTag.activated:
                             histofreqinfo.name=myname
                     else:
-                        logging.error('invalid name for histogram @ line=' + str(numline) +' : ')
-                        logging.error(str(line))
+                        logging.getLogger('MA5').error('invalid name for histogram @ line=' + str(numline) +' : ')
+                        logging.getLogger('MA5').error(str(line))
                 elif descriptionTag.Nlines==1 and not histoFreqTag.activated and \
                      len(words)==3:
                     results = self.ExtractDescription(words,numline,filename)
@@ -442,7 +442,7 @@ class JobReader():
                         histologxinfo.xmin=results[1]
                         histologxinfo.xmax=results[2]
                 else:
-                    logging.warning('Extra line is found: '+line)
+                    logging.getLogger('MA5').warning('Extra line is found: '+line)
                 descriptionTag.newline()    
 
             # Looking from histogram statistics
@@ -525,7 +525,7 @@ class JobReader():
                         histologxinfo.negative.sumw2x=results[1]
 
                 else:
-                    logging.warning('Extra line is found: '+line)
+                    logging.getLogger('MA5').warning('Extra line is found: '+line)
                 statisticsTag.newline()    
 
             # Looking from histogram data [ histo and histoLogX ]
@@ -552,7 +552,7 @@ class JobReader():
                         data_positive.append(results[0])
                         data_negative.append(results[1])
                 else:
-                    logging.warning('Extra line is found: '+line)
+                    logging.getLogger('MA5').warning('Extra line is found: '+line)
                 dataTag.newline()    
 
             # Looking from histogram data [ histoFreq ]
@@ -568,20 +568,20 @@ class JobReader():
             
         # Information found ?
         if beginTag.Nactivated==0 or beginTag.activated:
-            logging.error("SAF header <SAFheader> and </SAFheader> is not "+\
+            logging.getLogger('MA5').error("SAF header <SAFheader> and </SAFheader> is not "+\
                           "found.")
         if endTag.Nactivated==0 or endTag.activated:
-            logging.error("SAF footer <SAFfooter> and </SAFfooter> is not "+\
+            logging.getLogger('MA5').error("SAF footer <SAFfooter> and </SAFfooter> is not "+\
                           "found.")
         if globalTag.Nactivated==0 or globalTag.activated:
-            logging.error("Information corresponding to the block "+\
+            logging.getLogger('MA5').error("Information corresponding to the block "+\
                           "<SampleGlobalInfo> is not found.")
-            logging.error("Information on the dataset '"+dataset.name+\
+            logging.getLogger('MA5').error("Information on the dataset '"+dataset.name+\
                           "' are not updated.")
         if detailTag.Nactivated==0 or globalTag.activated:
-            logging.error("Information corresponding to the block "+\
+            logging.getLogger('MA5').error("Information corresponding to the block "+\
                           "<SampleDetailInfo> is not found.")
-            logging.error("Information on the dataset '"+dataset.name+\
+            logging.getLogger('MA5').error("Information on the dataset '"+dataset.name+\
                           "' are not updated.")
             
         # Closing the file

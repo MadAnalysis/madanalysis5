@@ -52,7 +52,7 @@ class HTMLReportWriter(TextFileWriter.TextFileWriter):
         self.pdffile=pdffile
         self.style = HTMLCSSWriter(filename.replace('index.html','style.css'))
         if not self.style.Open():
-            logging.info('HTML style file already open')
+            logging.getLogger('MA5').info('HTML style file already open')
             return
         self.style.WriteCSSLinks()
         self.style.WriteCSSbody()
@@ -187,7 +187,7 @@ class HTMLReportWriter(TextFileWriter.TextFileWriter):
         self.current_col=self.current_col+1
         
         if  self.current_col>self.number_col:
-            logging.warning(" the number of the current column is bigger than the total number of declared columns.")
+            logging.getLogger('MA5').warning(" the number of the current column is bigger than the total number of declared columns.")
         if self.first_cell==True:
             self.page.append('      <td width=\'' + size + '%\' bgcolor=\'' + \
                 ColorType.convert2hexa(color)+ '\'>\n')
@@ -235,9 +235,9 @@ class HTMLReportWriter(TextFileWriter.TextFileWriter):
     
     def WriteFoot(self):
         if self.bullet!=0:
-            logging.warning(" the number of 'OpenBullet()' and 'CloseBullet()' are different.")
+            logging.getLogger('MA5').warning(" the number of 'OpenBullet()' and 'CloseBullet()' are different.")
         if self.table!=0:
-            logging.warning("open table found. Please check for a missing 'EndTable()'.")
+            logging.getLogger('MA5').warning("open table found. Please check for a missing 'EndTable()'.")
         self.page.append('  <br /><hr size=\'4\' width=\'350\' />\n')
         self.page.append("</div>\n")
         self.page.append("</body>\n")

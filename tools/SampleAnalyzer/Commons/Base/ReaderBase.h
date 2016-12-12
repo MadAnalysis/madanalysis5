@@ -57,6 +57,9 @@ class ReaderBase
   /// Allowing to read compressed file
   MAbool compress_;
 
+  /// Allowing to read fifo file
+  MAbool fifo_;
+
   /// User configuration
   Configuration cfg_;
 
@@ -75,6 +78,14 @@ class ReaderBase
 	/// Destructor
   virtual ~ReaderBase()
   {
+  }
+
+  /// Is FIFO file?
+  static MAbool IsFIFOMode(const std::string& name)
+  {
+    if (name.size()<6) return false;
+    if (name.find(".fifo")==(name.size()-5)) return true;
+    return false;
   }
 
   /// Initialize (virtual pure)

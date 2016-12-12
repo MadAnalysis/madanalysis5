@@ -110,42 +110,89 @@ class Main():
 
 
     def IsGoodFormat(self,file):
-        for item in self.GetSampleFormat():
+        allowed, forbidden = self.GetSampleFormat()
+        for item in allowed:
             if file.endswith(item):
                 return True
         return False
 
+    def PrintErrorFormat(self,file):
+        allowed, forbidden = self.GetSampleFormat()
+        for item in forbidden:
+            if file.endswith(item[0]):
+                return item[1]
+        return "The file format is unknown"
+        
 
     def GetSampleFormat(self):
-        samples = []
+
+        # Initializing containers
+        allowed   = []
+        forbidden = []
+        errormsg  = []
+        
         # Adding format according to MA5 level mode
         if self.mode in [MA5RunningType.PARTON,MA5RunningType.HADRON]:
-            samples.append('.lhe')
-            samples.append('.hep')
-            samples.append('.hepmc')
+            allowed.append('.lhe')
+            allowed.append('.hep')
+            allowed.append('.hepmc')
+            forbidden.append(['.root','ROOT format is only available at the reconstructed level of MA5'])
+            forbidden.append(['.lhco','LHCO format is only available at the reconstructed level of MA5'])
         else:
             if self.recasting.status=="on":
-                samples.append('.hep')
-                samples.append('.hepmc')
+                allowed.append('.hep')
+                allowed.append('.hepmc')
+                forbidden.append(['.lhe','LHE format cannot be used for recasting'])
+                forbidden.append(['.lhco','LHCO format cannot be used for recasting'])
                 if self.archi_info.has_delphes or self.archi_info.has_delphesMA5tune:
-                    samples.append('.root')
+                    allowed.append('.root')
+                else:
+                    forbidden.append(['.root','ROOT format requires the package ROOT'])
             elif self.fastsim.package=="none":
-                samples.append('.lhco')
+                allowed.append('.lhco')
+                forbidden.append(['.lhe','LHE format is only available at the parton or hadron level of MA5'])
+                forbidden.append(['.hep','HEP format is only available at the parton or hadron level of MA5'])
+                forbidden.append(['.hepmc','HEPMC format is only available at the parton or hadron level of MA5'])
                 if self.archi_info.has_delphes or self.archi_info.has_delphesMA5tune:
-                    samples.append('.root')
+                    allowed.append('.root')
+                else:
+                    forbidden.append(['.root','ROOT format is not supported. The ROOT package is required'])
             else:
-                samples.append('.lhe')
-                samples.append('.hep')
-                samples.append('.hepmc')
+                allowed.append('.lhe')
+                allowed.append('.hep')
+                allowed.append('.hepmc')
+                forbidden.append(['.root','ROOT format cannot be used when fastim package is applied'])
+                forbidden.append(['.lhco','LHCO format cannot be used when fastim package is applied'])
 
         # Adding gzip file
         if self.archi_info.has_zlib:
             zipsamples=[]
-            for item in samples:
-                zipsamples.append(item+'.gz')
-            samples.extend(zipsamples)
+            for item in allowed:
+               zipsamples.append(item+'.gz')
+            allowed.extend(zipsamples)
+            zipsamples=[]
+            for item in forbidden:
+               zipsamples.append([item[0]+'.gz',item[1]])
+            forbidden.extend(zipsamples)
+        else:
+            zipsamples=[]
+            for item in allowed:
+               zipsamples.append([item+'.gz','GZ format is not supported. The Zlib package is required'])
+            for item in forbidden:
+               zipsamples.append([item[0]+'.gz','GZ format is not supported. The Zlib package is required'])
+            forbidden.extend(zipsamples)
+ 
+        # fifo format
+        fifosamples = []
+        for item in allowed:
+            fifosamples.append(item+'.fifo')
+        allowed.extend(fifosamples)
+        fifosamples = []
+        for item in forbidden:
+            fifosamples.append([item[0]+'.fifo',item[1]])
+        forbidden.extend(fifosamples)
 
-        return samples
+        return allowed, forbidden
 
 
     def Display(self):
@@ -158,6 +205,14 @@ class Main():
         self.user_DisplayParameter("lumi")
         self.user_DisplayParameter("outputfile")
         self.fom.Display()
+        self.logger.info(" *********************************" )
+        allowed, forbidden = self.GetSampleFormat()
+        forbidden2 = []
+        for item in forbidden:
+            forbidden2.append(item[0]) 
+        self.logger.info(" File extension readable in this session: "+ " ".join(allowed))
+        self.logger.info(" File extension NOT readable in this session: "+ " ".join(forbidden2))
+        self.logger.info(" *********************************" )
         if self.archi_info.has_fastjet:
             self.merging.Display()
         self.fastsim.Display()
@@ -366,6 +421,7 @@ class Main():
 
     def CheckConfig(self,debug=False):
         checkup = CheckUp(self.archi_info, self.session_info, debug, self.script)
+
         if not checkup.CheckArchitecture():
             return False
         if not checkup.ReadUserOptions():

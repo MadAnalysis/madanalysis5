@@ -25,6 +25,10 @@
 // STL headers
 #include <fstream>
 
+// Headers for fifo
+#include <fcntl.h>
+#include <unistd.h>
+
 // ZIP headers
 #ifdef ZIP_USE
    #include "SampleAnalyzer/Interfaces/zlib/gz_istream.h"
@@ -75,6 +79,9 @@ bool ReaderTextBase::Initialize(const std::string& rawfilename,
 #endif
   }
 
+  // Is fifo file?
+  fifo_ = IsFIFOMode(filename_);
+
   // Creating a tag indicating the file is opened correctlly
   bool test=false;
 
@@ -101,6 +108,17 @@ bool ReaderTextBase::Initialize(const std::string& rawfilename,
     gzinput_->open(const_cast<char*>(filename_.c_str()));
     test=gzinput_->good();
 #endif
+  }
+
+  // Input coming from FIFO
+  else if (fifo_)
+  {
+    MAint32 ififo = open(filename_.c_str(), O_RDONLY);
+    if (ififo < 0) return false;
+
+    input_fifo_ = new std::ifstream();
+    input_fifo_->open(filename_.c_str());
+    test=input_fifo_->good();
   }
 
   // Input coming from local disk
@@ -142,6 +160,10 @@ bool ReaderTextBase::Finalize()
     gzinput_->clear();
 #endif
   }
+  else if (fifo_)
+  {
+    input_fifo_->clear();
+  }
   else 
   {
     std::ifstream * myinput = dynamic_cast<std::ifstream*>(input_);
@@ -150,7 +172,8 @@ bool ReaderTextBase::Finalize()
   }
 
   // Free allocated memory for the file streamer
-  if (input_!=0) { delete input_; input_=0; }
+  if (input_     !=0) { delete input_; input_=0; }
+  if (input_fifo_!=0) { delete input_fifo_; input_fifo_=0; }
 
   // OK!
   return true;
@@ -166,8 +189,16 @@ bool ReaderTextBase::ReadLine(std::string& line, bool removeComment)
   while (!getnewline)
   {
     // Getting a new line from the file
-    getline(*input_,line,'\n');
-    if (input_->eof() || input_->fail()) return false;
+    if (!fifo_)
+    {
+      getline(*input_,line,'\n');
+      if (input_->eof() || input_->fail()) return false;
+    }
+    else
+    {
+      std::getline(*input_fifo_,line);
+      if (input_fifo_->eof()) return false;
+    }
 
     // Removing possible comments
     if (removeComment)

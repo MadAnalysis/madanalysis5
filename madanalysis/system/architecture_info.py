@@ -23,7 +23,6 @@
 
 
 import logging
-
 class ArchitectureInfo:
 
     def __init__(self):
@@ -44,13 +43,20 @@ class ArchitectureInfo:
         self.has_zlib           = False
         self.has_delphes        = False
         self.has_delphesMA5tune = False
-        
+
         # Library to put before all the others?
         self.root_priority           = False
         self.zlib_priority           = False
         self.delphes_priority        = False
         self.delphesMA5tune_priority = False
         self.fastjet_priority        = False
+
+        # Library files
+        self.zlib_original_libs           = []
+        self.fastjet_original_bins        = []
+        self.root_original_bins           = []
+        self.delphes_original_libs        = []
+        self.delphesMA5tune_original_libs = []
 
         # Version
         self.python_version   = ""
@@ -73,6 +79,7 @@ class ArchitectureInfo:
         self.toPATH2   = []
         self.toLDPATH2 = []
 
+        self.root_compiler=''
         self.root_bin_path=""
         self.root_inc_path=""
         self.root_lib_path=""

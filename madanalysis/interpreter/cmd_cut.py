@@ -53,7 +53,7 @@ class CmdCut(CmdBase,CmdSelectionBase):
 
         # Skipping empty args
         if len(args)==0:
-            logging.error("wrong syntax")
+            logging.getLogger('MA5').error("wrong syntax")
             self.help()
             return
 
@@ -94,16 +94,16 @@ class CmdCut(CmdBase,CmdSelectionBase):
                     foundOptions=True
 
         if Nbracket1!=0:
-            logging.error("number of opening-bracket '(' and number of " +\
+            logging.getLogger('MA5').error("number of opening-bracket '(' and number of " +\
                           "closing-braket ')' does not match.")
             return
         if Nbracket2!=0:
-            logging.error("number of opening-bracket '[' and number of " +\
+            logging.getLogger('MA5').error("number of opening-bracket '[' and number of " +\
                           "closing-braket ']' does not match.")
             return
 
         if Nbracket3!=0:
-            logging.error("number of opening-bracket '{' and number of " +\
+            logging.getLogger('MA5').error("number of opening-bracket '{' and number of " +\
                           "closing-braket '}' does not match.")
             return
 
@@ -199,7 +199,7 @@ class CmdCut(CmdBase,CmdSelectionBase):
                 # opening-brace is allowed ?
                 if len(current.sequence)!=0 and \
                    current.sequence[-1].__class__.__name__!='ConditionConnector':
-                    logging.error('opening-brace can be used at first position or after a logical connector')
+                    logging.getLogger('MA5').error('opening-brace can be used at first position or after a logical connector')
                     return None
 
                 # looking for the correspondig closing-brace
@@ -216,7 +216,7 @@ class CmdCut(CmdBase,CmdSelectionBase):
 
                 # closing-brace found ?
                 if endBrace==-1:
-                    logging.error('no closing-brace for all opening-braces')
+                    logging.getLogger('MA5').error('no closing-brace for all opening-braces')
                     return None
 
                 # add a new sequence
@@ -232,7 +232,7 @@ class CmdCut(CmdBase,CmdSelectionBase):
             elif words[iword] in ['or','and']:
                 if len(current.sequence)==0 or \
                        current.sequence[-1].__class__.__name__=="ConditionConnector":
-                    logging.error("connector '"+words[iword]+\
+                    logging.getLogger('MA5').error("connector '"+words[iword]+\
                                   "' must be used only after a condition block")
                 else:
                     current.sequence.append(ConditionConnector(words[iword]))
@@ -243,7 +243,7 @@ class CmdCut(CmdBase,CmdSelectionBase):
                 # cut condition is allowed ?
                 if len(current.sequence)!=0 and \
                    current.sequence[-1].__class__.__name__!='ConditionConnector':
-                    logging.error("cut condition beginning by '"+words[iword]+\
+                    logging.getLogger('MA5').error("cut condition beginning by '"+words[iword]+\
                                   "' must be used at first position or " +\
                                   "after a logical connector")
                     return None
@@ -275,7 +275,7 @@ class CmdCut(CmdBase,CmdSelectionBase):
 
         # Last check
         if current.sequence[-1].__class__.__name__=="ConditionConnector":
-            logging.error("a condition cannot be finished with a connector '" +\
+            logging.getLogger('MA5').error("a condition cannot be finished with a connector '" +\
                           current.sequence[-1].GetStringDisplay()+"'.")
             return None
 
@@ -309,7 +309,7 @@ class CmdCut(CmdBase,CmdSelectionBase):
 
         # checking number of arguments
         if len(words)<3:
-            logging.error("condition '"+str(words)+"' is not correct.")
+            logging.getLogger('MA5').error("condition '"+str(words)+"' is not correct.")
             return None
 
         # looking for observable
@@ -317,7 +317,7 @@ class CmdCut(CmdBase,CmdSelectionBase):
         doubleCondition=False
         if words[0] not in self.main.observables.full_list:
             if words[2] not in self.main.observables.full_list:
-                logging.error("no observable found in condition '"+str(words)+ "'")
+                logging.getLogger('MA5').error("no observable found in condition '"+str(words)+ "'")
                 return None
             else:
                 doubleCondition=True
@@ -327,33 +327,33 @@ class CmdCut(CmdBase,CmdSelectionBase):
 
             # checking number of arguments
             if len(words)<5:
-                logging.error("condition '"+str(words)+"' is not correct.")
+                logging.getLogger('MA5').error("condition '"+str(words)+"' is not correct.")
                 return None
             
             # extracting threshold
             try:
                 threshold1=float(words[0])
             except:
-                logging.error("'"+words[0]+"' must be a float value.")
+                logging.getLogger('MA5').error("'"+words[0]+"' must be a float value.")
                 return None
 
             # extracting operator
             operator1=self.extract_operator(words[1])
             if operator1==OperatorType.UNKNOWN:
-                logging.error("operator '"+words[1]+"' is unknown.")
+                logging.getLogger('MA5').error("operator '"+words[1]+"' is unknown.")
                 return None
 
         # extracting threshold
         try:
             threshold=float(words[-1])
         except:
-            logging.error("'"+words[-1]+"' must be a float value.")
+            logging.getLogger('MA5').error("'"+words[-1]+"' must be a float value.")
             return None
 
         # extracting operator
         operator=self.extract_operator(words[-2])
         if operator==OperatorType.UNKNOWN:
-            logging.error("operator '"+words[-2]+"' is unknown.")
+            logging.getLogger('MA5').error("operator '"+words[-2]+"' is unknown.")
             return None
 
         # extracting observable
@@ -362,17 +362,17 @@ class CmdCut(CmdBase,CmdSelectionBase):
             obsName = words[2]
 
         if partType==None and obsName not in self.main.observables.cut_event_list:
-            logging.error("observable '"+obsName+"' cannot be used for "+\
+            logging.getLogger('MA5').error("observable '"+obsName+"' cannot be used for "+\
                           "rejecting an event.")
             return None
         if partType!=None and obsName not in self.main.observables.cut_candidate_list:
-            logging.error("observable '"+obsName+"' cannot be used for "+\
+            logging.getLogger('MA5').error("observable '"+obsName+"' cannot be used for "+\
                           "rejecting a candidate.")
             return None
         
         obsRef=self.main.observables.get(obsName)
         if partType==ArgumentType.COMBINATION and (len(obsRef.args)==0 or obsRef.args[0]==ArgumentType.PARTICLE):
-            logging.error("observable '"+obsName+"' can be used on a particle but not a combination of particles")
+            logging.getLogger('MA5').error("observable '"+obsName+"' can be used on a particle but not a combination of particles")
             return None
 
         # Case with arguments
@@ -383,13 +383,13 @@ class CmdCut(CmdBase,CmdSelectionBase):
             # Checking opening-brace
             if (doubleCondition and words[3]!='(') or \
                (not doubleCondition and words[1]!='(')    :
-                logging.error("wrong syntax for the condition '" +\
+                logging.getLogger('MA5').error("wrong syntax for the condition '" +\
                               str(words)+"'")
                 return None
 
             # Checking closing-brace
             if words[-3]!=")":
-                logging.error("wrong syntax for the condition '" +\
+                logging.getLogger('MA5').error("wrong syntax for the condition '" +\
                               str(words)+"'")
                 return None
 
@@ -418,7 +418,7 @@ class CmdCut(CmdBase,CmdSelectionBase):
         else:
             if (doubleCondition and len(words)!=5) or \
                (not doubleCondition and len(words)!=3) :
-                logging.error("wrong number of arguments in the condition '"+\
+                logging.getLogger('MA5').error("wrong number of arguments in the condition '"+\
                               str(words)+"'")
                 return None
 
@@ -431,7 +431,7 @@ class CmdCut(CmdBase,CmdSelectionBase):
                not (  ( operator1 in [OperatorType.LESS,OperatorType.LESS_EQUAL] ) \
                       and \
                       ( operator  in [OperatorType.LESS,OperatorType.LESS_EQUAL] ) ):
-                logging.error('double conditions allowed are : < obs < , > obs >')
+                logging.getLogger('MA5').error('double conditions allowed are : < obs < , > obs >')
                 return None
             
         # Storing condition
@@ -471,7 +471,7 @@ class CmdCut(CmdBase,CmdSelectionBase):
             # Opening bracket
 #            if item=="(":
 #                if nparameter!=0:
-#                    logging.error("problem with an opening bracket") 
+#                    logging.getLogger('MA5').error("problem with an opening bracket") 
 #                    return None
 #                block=ConditionBlock()
 #                block.mother=current
@@ -479,7 +479,7 @@ class CmdCut(CmdBase,CmdSelectionBase):
 #                current=block
 #            elif item==")":
 #                if nparameter==3:
-#                    logging.error("problem with a closing bracket")
+#                    logging.getLogger('MA5').error("problem with a closing bracket")
 #                    return None
 #                current=current.mother
 
@@ -489,7 +489,7 @@ class CmdCut(CmdBase,CmdSelectionBase):
                 if obs==None:
                     return None
                 if not ObservableType.isCuttable(obs[1]):
-                    logging.error("a cut applied to the observable '"+\
+                    logging.getLogger('MA5').error("a cut applied to the observable '"+\
                                   item+"' is not possible")
                     return None
                 observable1=obs[0]
@@ -508,7 +508,7 @@ class CmdCut(CmdBase,CmdSelectionBase):
                 try:
                     value=float(item)
                 except:
-                    logging.error("the threshold '"+item+\
+                    logging.getLogger('MA5').error("the threshold '"+item+\
                                   "' is not a float value.")
                     return None
                 nparameter=3
@@ -520,7 +520,7 @@ class CmdCut(CmdBase,CmdSelectionBase):
                 elif item=="and":
                     connector=ConnectorType.AND
                 else:    
-                    logging.error("'"+item+"' is not a valid connector")
+                    logging.getLogger('MA5').error("'"+item+"' is not a valid connector")
                     return None
                 nparameter=0
                 block=ConditionType(observable1,observable2,operator,value)
@@ -535,12 +535,12 @@ class CmdCut(CmdBase,CmdSelectionBase):
 
 
     def help(self):
-        logging.info("   Syntax: " + CutType.convert2cmdname(self.cut_type) +\
+        logging.getLogger('MA5').info("   Syntax: " + CutType.convert2cmdname(self.cut_type) +\
                      " observable_name ( multiparticle1 multiparticle2 ... ) operator threshold [ option1 option 2 ]")
-        logging.info("   Declares a cut: ")
-        logging.info("    - related to the distribution of a given observable, associated to one or a combination of (multi)particles,")
-        logging.info("    - supported logical operators: <= , < , >= , > , == , != ,")
-        logging.info("    - threshold being a value.")
+        logging.getLogger('MA5').info("   Declares a cut: ")
+        logging.getLogger('MA5').info("    - related to the distribution of a given observable, associated to one or a combination of (multi)particles,")
+        logging.getLogger('MA5').info("    - supported logical operators: <= , < , >= , > , == , != ,")
+        logging.getLogger('MA5').info("    - threshold being a value.")
 
 
     def complete(self,text,args,begidx,endidx):

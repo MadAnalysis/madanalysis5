@@ -64,7 +64,7 @@ class SetupWriter():
         try:
             file = open(filename,"w")
         except:
-            logging.error('Impossible to create the file "' + filename +'"')
+            logging.getLogger('MA5').error('Impossible to create the file "' + filename +'"')
             return False
 
         # Calling the good shell
@@ -216,7 +216,7 @@ class SetupWriter():
         try:
             file.close()
         except:
-            logging.error('Impossible to close the file "'+filename+'"')
+            logging.getLogger('MA5').error('Impossible to close the file "'+filename+'"')
             return False
 
         return True
@@ -237,7 +237,7 @@ class SetupWriter():
         try:
             file = open(filename,"w")
         except:
-            logging.error('Impossible to create the file "' + filename +'"')
+            logging.getLogger('MA5').error('Impossible to create the file "' + filename +'"')
             return False
 
         # Calling the good shell
@@ -300,7 +300,7 @@ class SetupWriter():
         try:
             file.close()
         except:
-            logging.error('Impossible to close the file "'+filename+'"')
+            logging.getLogger('MA5').error('Impossible to close the file "'+filename+'"')
             return False
 
         return True

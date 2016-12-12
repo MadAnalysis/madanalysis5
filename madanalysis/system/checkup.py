@@ -37,7 +37,9 @@ class CheckUp():
         self.session_info = session_info
         self.debug        = debug
         self.script       = script
+        self.checker      = DetectManager(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
         self.logger       = logging.getLogger('MA5')
+
 
     def CheckArchitecture(self):
 
@@ -284,73 +286,147 @@ class CheckUp():
     def CheckMandatoryPackages(self):
         # Mandatory packages
         self.logger.info("Checking mandatory packages:")
-        checker = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
 
-        if not checker.checkPython():
+        if not self.checker.Execute('python'):
             return False
-        if not checker.checkGPP():
+        if not self.checker.Execute('gpp'):
             return False
-        if not checker.checkMake():
+        if not self.checker.Execute('make'):
             return False
         return True
 
     def CheckOptionalGraphicalPackages(self):
         # Optional packages
         self.logger.info("Checking optional packages devoted to histogramming:")
-        checker = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
-        checker2 = DetectManager(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
 
-        if not checker2.Execute('root_graphical'):
+        if not self.checker.Execute('root_graphical'):
             return False
-        if not checker2.Execute('matplotlib'):
+        if not self.checker.Execute('matplotlib'):
             return False
-        if not checker2.Execute('pdflatex'):
+        if not self.checker.Execute('pdflatex'):
             return False
-        if not checker2.Execute('latex'):
+        if not self.checker.Execute('latex'):
             return False
         return True
 
     def CheckOptionalProcessingPackages(self):
         # Optional packages
         self.logger.info("Checking optional packages devoted to data processing:")
-        checker = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
-        checker2 = DetectManager(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
-        
-        self.archi_info.has_zlib              = checker.checkZLIB()
-        self.archi_info.has_fastjet           = checker.checkFastJet()
-        if not checker2.Execute('root'):
+        checker2 = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
+
+        self.archi_info.has_zlib              = checker2.checkZLIB()
+        if not self.checker.Execute('zlib'):
             return False
-        self.archi_info.has_delphes           = checker.checkDelphes()
-        self.archi_info.has_delphesMA5tune    = checker.checkDelphesMA5tune()
+        if not self.checker.Execute('fastjet'):
+            return False
+        if not self.checker.Execute('root'):
+            return False
+        self.archi_info.has_delphes           = checker2.checkDelphes()
+        self.archi_info.has_delphesMA5tune    = checker2.checkDelphesMA5tune()
         return True
 
 
-    def CheckGraphicalPackages(self):
-        # Optional packages
-        self.logger.info("Checking graphical packages:")
-        checker = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
-        self.session_info.has_gnuplot       = checker.checkGnuplot()
-        self.session_info.has_matplotlib    = checker.checkMatplotlib()
-        self.archi_info.has_root            = checker.checkRoot()
+    def CreateSymLink(self,source,destination):
+
+        # Is it a good source
+        if source=='':
+            self.logger.error('source empty for creating symbolic link: '+source)
+
+        # Is there a previous link?
+        if os.path.islink(destination):
+            try:
+                os.remove(destination)
+            except:
+                self.logger.error('impossible to remove the file '+destination)
+                return False
+
+        # Does the destination exist but it is a file or a folder
+        elif os.path.isfile(destination):
+            self.logger.error('creating symbolic link: destination already exist and it is file')
+            return False
+        elif os.path.isdir(destination):
+            self.logger.error('creating symbolic link: destination already exist and it is folder')
+            return False
+
+        # Creating a link
+        logging.getLogger('MA5').debug('Creating symbolic link from '+source)
+        logging.getLogger('MA5').debug('                       to   '+destination+' ...')
+        try:
+            os.symlink(source,destination)
+        except:
+            self.logger.error('impossible to create the link '+destination)
+            return False
+
         return True
 
+        
     def SetFolder(self):
-        # Set PATH variable
-        self.archi_info.toPATH1=[]
-        self.archi_info.toPATH2=[]
-        self.archi_info.toLDPATH1=[]
-        self.archi_info.toLDPATH2=[]
 
-        self.archi_info.toLDPATH1.append(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/')
-        if self.archi_info.root_priority:
-            self.archi_info.toLDPATH1.append(self.archi_info.root_lib_path)
-            self.archi_info.toPATH1.append(self.archi_info.root_bin_path)
-        else:
-            self.archi_info.toLDPATH2.append(self.archi_info.root_lib_path)
-            self.archi_info.toPATH2.append(self.archi_info.root_bin_path)
+        # Reset the pieces of environment variables
+        self.archi_info.toPATH1=[]   # First in PATH variable 
+        self.archi_info.toPATH2=[]   # Last  in PATH variable
+        self.archi_info.toLDPATH1=[] # First in (DY)LD_LIBRARY_PATH
+        self.archi_info.toLDPATH2=[] # Last  in (DY)LD_LIBRARY_PATH
 
+        # Creating folder Lib if not found
+        folder=os.path.normpath(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/')
+        if not os.path.isdir(folder):
+            try:
+                os.mkdir(folder)
+            except:
+                self.logger.error('impossible to create the folder '+folder)
+        self.archi_info.toLDPATH1.append(folder)
+                
+        # Creating folder ExternalSymLink if not found
+        folder=os.path.normpath(self.archi_info.ma5dir+'/tools/SampleAnalyzer/ExternalSymLink')
+        if not os.path.isdir(folder):
+            try:
+                os.mkdir(folder)
+            except:
+                self.logger.error('impossible to create the folder '+folder)
+
+        # Creating folder ExternalSymLink/Lib if not found
+        folder=os.path.normpath(self.archi_info.ma5dir+'/tools/SampleAnalyzer/ExternalSymLink/Lib')
+        if not os.path.isdir(folder):
+            try:
+                os.mkdir(folder)
+            except:
+                self.logger.error('impossible to create the folder '+folder)
+
+        self.archi_info.toLDPATH1.append(folder)
+        folderSymLinkLib=folder
+
+        # Creating folder ExternalSymLink/Bin if not found
+        folder=os.path.normpath(self.archi_info.ma5dir+'/tools/SampleAnalyzer/ExternalSymLink/Bin')
+        if not os.path.isdir(folder):
+            try:
+                os.mkdir(folder)
+            except:
+                self.logger.error('impossible to create the folder '+folder)
+
+        self.archi_info.toPATH1.append(folder)
+        folderSymLinkBin=folder
+
+        # ROOT
+        if self.archi_info.has_root:
+            for source in self.archi_info.root_original_bins:
+                destination=os.path.normpath(folderSymLinkBin+'/'+source.split('/')[-1])
+                self.CreateSymLink(source,destination)
+
+            if 1: #self.archi_info.root_priority:
+                self.archi_info.toLDPATH1.append(self.archi_info.root_lib_path)
+                self.archi_info.toPATH1.append(self.archi_info.root_bin_path)
+            else:
+                self.archi_info.toLDPATH2.append(self.archi_info.root_lib_path)
+                self.archi_info.toPATH2.append(self.archi_info.root_bin_path)
+
+        # FASTJET
         if self.archi_info.has_fastjet:
-            if self.archi_info.fastjet_priority:
+            for source in self.archi_info.fastjet_original_bins:
+                destination=os.path.normpath(folderSymLinkBin+'/'+source.split('/')[-1])
+                self.CreateSymLink(source,destination)
+
+            if 1: #self.archi_info.fastjet_priority:
                 self.archi_info.toPATH1.append(self.archi_info.fastjet_bin_path)
                 for path in self.archi_info.fastjet_lib_paths:
                     self.archi_info.toLDPATH1.append(path)
@@ -358,37 +434,75 @@ class CheckUp():
                 self.archi_info.toPATH2.append(self.archi_info.fastjet_bin_path)
                 for path in self.archi_info.fastjet_lib_paths:
                     self.archi_info.toLDPATH2.append(path)
-        if self.archi_info.has_zlib:
-            if self.archi_info.zlib_priority:
-                self.archi_info.toLDPATH1.append(self.archi_info.zlib_lib_path)
-            else:
-                self.archi_info.toLDPATH2.append(self.archi_info.zlib_lib_path)
-        if self.archi_info.has_delphes:
-            if self.archi_info.delphes_priority:
-                for path in self.archi_info.delphes_lib_paths:
-                    self.archi_info.toLDPATH1.append(path)
-            else:
-                for path in self.archi_info.delphes_lib_paths:
-                    self.archi_info.toLDPATH2.append(path)
-        if self.archi_info.has_delphesMA5tune:
-            if self.archi_info.delphesMA5tune_priority:
-                for path in self.archi_info.delphesMA5tune_lib_paths:
-                    self.archi_info.toLDPATH1.append(path)
-            else:
-                for path in self.archi_info.delphesMA5tune_lib_paths:
-                    self.archi_info.toLDPATH2.append(path)
 
+        # ZLIB
+        if self.archi_info.has_zlib:
+            for source in self.archi_info.zlib_original_libs:
+                destination=os.path.normpath(folderSymLinkLib+'/'+source.split('/')[-1])
+                self.CreateSymLink(source,destination)
+
+#            if self.archi_info.zlib_priority:
+#                self.archi_info.toLDPATH1.append(self.archi_info.zlib_lib_path)
+#            else:
+#                self.archi_info.toLDPATH2.append(self.archi_info.zlib_lib_path)
+
+        # DELPHES
+        if self.archi_info.has_delphes:
+            for source in self.archi_info.delphes_original_libs:
+                destination=os.path.normpath(folderSymLinkLib+'/'+source.split('/')[-1])
+                self.CreateSymLink(source,destination)
+
+#            if self.archi_info.delphes_priority:
+#                for path in self.archi_info.delphes_lib_paths:
+#                    self.archi_info.toLDPATH1.append(path)
+#            else:
+#                for path in self.archi_info.delphes_lib_paths:
+#                    self.archi_info.toLDPATH2.append(path)
+
+        # DELPHES MA5tune
+        if self.archi_info.has_delphesMA5tune:
+            for source in self.archi_info.delphesMA5tune_original_libs:
+                destination=os.path.normpath(folderSymLinkLib+'/'+source.split('/')[-1])
+                self.CreateSymLink(source,destination)
+#            if self.archi_info.delphesMA5tune_priority:
+#                for path in self.archi_info.delphesMA5tune_lib_paths:
+#                    self.archi_info.toLDPATH1.append(path)
+#            else:
+#                for path in self.archi_info.delphesMA5tune_lib_paths:
+#                    self.archi_info.toLDPATH2.append(path)
+
+
+        # Setting environment variables
+        self.logger.debug('-------- BEGIN: set environment variables --------')
+
+        # - PATH
+        self.logger.debug('before PATH='+str(os.environ['PATH']))
+        self.logger.debug('--------')
         os.environ['PATH'] = ':'.join(self.archi_info.toPATH1) + ":" + \
                              os.environ['PATH'] + ":" + \
                              ':'.join(self.archi_info.toPATH2)
+        self.logger.debug('after PATH='+str(os.environ['PATH']))
+        self.logger.debug('--------')
 
+        # - LD_LIBRARY_PATH     
+        self.logger.debug('before LD_LIBRARY_PATH='+str(os.environ['LD_LIBRARY_PATH']))
+        self.logger.debug('--------')
         os.environ['LD_LIBRARY_PATH'] = ':'.join(self.archi_info.toLDPATH1) + ":" + \
                                         os.environ['LD_LIBRARY_PATH'] + ":" + \
                                         ':'.join(self.archi_info.toLDPATH2)
+        self.logger.debug('after LD_LIBRARY_PATH='+str(os.environ['LD_LIBRARY_PATH']))
+        self.logger.debug('--------')
 
+        # - DYLD_LIBRARY_PATH     
+        self.logger.debug('before DYLD_LIBRARY_PATH='+str(os.environ['DYLD_LIBRARY_PATH']))
+        self.logger.debug('--------')
         if self.archi_info.isMac:
             os.environ['DYLD_LIBRARY_PATH'] = ':'.join(self.archi_info.toLDPATH1) + ":" + \
                                               os.environ['DYLD_LIBRARY_PATH'] + ":" + \
                                               ':'.join(self.archi_info.toLDPATH2)
+        self.logger.debug('after DYLD_LIBRARY_PATH='+str(os.environ['DYLD_LIBRARY_PATH']))
+        self.logger.debug('--------')
+
+        self.logger.debug('-------- END: set environment variables --------')
 
         return True

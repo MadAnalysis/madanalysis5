@@ -38,10 +38,14 @@ class DetectManager():
         self.debug        = debug
         self.logger       = logging.getLogger('MA5')
 
+
     def Execute(self, rawpackage):
 
-        # Selection of the package
+        self.logger.debug('------------------------------------------------------')
         package=rawpackage.lower()
+        self.logger.debug('Detect package '+str(package))
+        
+        # Selection of the package
         if package=='zlib':
             from madanalysis.system.detect_zlib import DetectZlib
             checker=DetectZlib(self.archi_info, self.user_info, self.session_info, self.debug)
@@ -72,6 +76,9 @@ class DetectManager():
         elif package=='pyroot':
             from madanalysis.system.detect_pyroot import DetectPyRoot
             checker=DetectPyRoot(self.archi_info, self.user_info, self.session_info, self.debug)
+        elif package=='python':
+            from madanalysis.system.detect_python import DetectPython
+            checker=DetectPython(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='gpp':
             from madanalysis.system.detect_gpp import DetectGpp
             checker=DetectGpp(self.archi_info, self.user_info, self.session_info, self.debug)
@@ -117,7 +124,7 @@ class DetectManager():
                     if 'PrintInstallMessage' in methods:
                         checker.PrintInstallMessage()
                     return True
-                
+
         # 3. Veto
         if 'IsItVetoed' in methods:
             self.logger.debug('Is there a veto? ...')
@@ -138,7 +145,7 @@ class DetectManager():
         if 'ManualDetection' in methods:
             self.logger.debug('Detection of the package in the location specified by the user ...')
             search = False
-            status = checker.ManualDetection()
+            status, msg = checker.ManualDetection()
 
             # If problem
             if status==DetectStatusType.ISSUE:
@@ -163,7 +170,7 @@ class DetectManager():
         if search and 'ToolsDetection' in methods:
             self.logger.debug('Detection of the package in the "tools" folder ...')
             search = False
-            status = checker.ToolsDetection()
+            status, msg = checker.ToolsDetection()
 
             # If problem
             if status==DetectStatusType.ISSUE:
@@ -184,11 +191,15 @@ class DetectManager():
             elif status==DetectStatusType.UNFOUND:
                 search = True
 
+            # OK -> autodetection
+            elif status==DetectStatusType.FOUND:
+                search = False
+
         # 6. Autodetection of the package
         if search and 'AutoDetection' in methods:
             self.logger.debug('Try to detect automatically the package ...')
             search = False
-            status = checker.AutoDetection()
+            status,msg = checker.AutoDetection()
 
             if status in [DetectStatusType.UNFOUND,DetectStatusType.ISSUE]:
                 if checker.mandatory:

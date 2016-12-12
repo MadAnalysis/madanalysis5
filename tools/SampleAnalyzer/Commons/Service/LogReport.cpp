@@ -53,7 +53,7 @@ void LogReport::WriteGenericReport(LogStream& os) const
 
   // Header
   os << "+";
-  for (unsigned int i=0;i<78;i++) os << "-";
+  for (unsigned int i=0;i<118;i++) os << "-";
   os << "+" << endmsg;
     
   std::string title;
@@ -63,23 +63,23 @@ void LogReport::WriteGenericReport(LogStream& os) const
   os << "|";
   for (unsigned int i=0;i<(index-1);i++) os << " ";
   os << title;
-  for (unsigned int i=(index+title.size());i<79;i++) os << " ";
+  for (unsigned int i=(index+title.size());i<119;i++) os << " ";
   os << "|" << endmsg;
 
   os << "+";
-  for (unsigned int i=0;i<78;i++) os << "-";
+  for (unsigned int i=0;i<118;i++) os << "-";
   os << "+" << endmsg;
 
   // Legend
   os << "| ";
-  os.width(22); os << std::left << "Message";
+  os.width(46); os << std::left << "Message";
   os.width(12); os << std::left << "NIterations";
-  os.width(18); os << std::left << "@ File";
-  os.width(7); os << std::left << "Line";
-  os.width(18); os << std::left << "Function";
+  os.width(2);  os << std::left << "@";
+  os.width(50); os << std::left << "File";
+  os.width(7);  os << std::left << "Line";
   os << "|" << endmsg;
     
-  os << "|"; os.repeat('-',78); os << "|" << endmsg;
+  os << "|"; os.repeat('-',118); os << "|" << endmsg;
 
 
   MAuint32 precision = os.precision();
@@ -90,16 +90,15 @@ void LogReport::WriteGenericReport(LogStream& os) const
        it = table.begin(); it!=table.end(); it++)
   {
     os << "| ";
-    os.width(22); os << std::left << (*it)->first.GetMsg();
+    os.width(46); os << std::left << (*it)->first.GetMsg().substr(0,44);
     os.width(14); os << std::left << (*it)->second.GetCounter();
-    os.width(16); os << std::left << std::scientific << (*it)->first.GetFileName();
-    os.width(7); os << std::left << std::scientific << (*it)->first.GetLine();
-    os.width(18); os << std::left << std::scientific << (*it)->second.GetFunction();
+    os.width(50); os << std::left << std::scientific << (*it)->first.GetFileName().substr(0,48);
+    os.width(7);  os << std::left << std::scientific << (*it)->first.GetLine();
     os << "|" << endmsg;
   }
 
   /// Foot
   os.precision(precision);
-  os << "+"; os.repeat('-',80); os << "+" << endmsg;
+  os << "+"; os.repeat('-',118); os << "+" << endmsg;
 }
 

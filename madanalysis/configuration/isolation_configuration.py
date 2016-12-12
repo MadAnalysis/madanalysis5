@@ -41,7 +41,7 @@ class IsolationConfiguration():
 
     def user_DisplayParameter(self,parameter):
         if parameter=="algorithm":
-            logging.info(" isolation algorithm : "+self.algorithm)
+            logging.getLogger('MA5').info(" isolation algorithm : "+self.algorithm)
         else:
             self.isolation.user_DisplayParameter(parameter)
 
@@ -73,7 +73,7 @@ class IsolationConfiguration():
                 self.algorithm='sumpt'
                 self.isolation=IsolationSumPt()
             else:
-                logging.error("Specified algorithm for muon isolation is not correct. "+\
+                logging.getLogger('MA5').error("Specified algorithm for muon isolation is not correct. "+\
                               "Only possible ones are : 'cone' and 'sumpt'.")
                 return False
         # other    

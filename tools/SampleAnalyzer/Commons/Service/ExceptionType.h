@@ -26,7 +26,7 @@
 #define EXCEPTION_TYPE_H
 
 // ShortCut to the creation of ExceptionType instance 
-#define EXCEPTION_WARNING(msg,details,num) ExceptionType(__FILE__,__LINE__,__FUNCTION__,true,msg,details,num)
+#define EXCEPTION_WARNING(msg,details,num) ExceptionType(__FILE__,__LINE__,__FUNCTION__,true, msg,details,num)
 #define EXCEPTION_ERROR(msg,details,num)   ExceptionType(__FILE__,__LINE__,__FUNCTION__,false,msg,details,num)
 
 // STL headers

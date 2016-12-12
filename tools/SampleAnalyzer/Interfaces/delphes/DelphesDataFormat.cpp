@@ -25,6 +25,7 @@
 // SampleHeader headers
 #include "SampleAnalyzer/Interfaces/delphes/DelphesDataFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
 // ROOT header
 #include <TBranchElement.h>
@@ -175,33 +176,19 @@ void DelphesDataFormat::InitializeBranch(TTree* tree)
   }
 
   // Display warning to main branches
-  if (branchEvent_==0)
+  try
   {
-    WARNING << "Event branch is not found" << endmsg;
+    if (branchEvent_       ==0) throw EXCEPTION_WARNING("Event branch is not found","",0);
+    if (branchMET_         ==0) throw EXCEPTION_WARNING("MET branch is not found","",0);
+    if (branchGenParticle_ ==0) throw EXCEPTION_WARNING("GenParticle branch is not found","",0);
+    if (branchElectron_    ==0) throw EXCEPTION_WARNING("Electron collection branch is not found","",0);
+    if (branchMuon_        ==0) throw EXCEPTION_WARNING("Muon collection branch is not found","",0);
+    if (branchPhoton_      ==0) throw EXCEPTION_WARNING("Photon collection branch is not found","",0);
+    if (branchJet_         ==0) throw EXCEPTION_WARNING("Jet collection branch is not found","",0);
   }
-  if (branchMET_==0)
+  catch (const std::exception& e)
   {
-    WARNING << "MET branch is not found" << endmsg;
-  }
-  if (branchGenParticle_==0)
-  {
-    WARNING << "GenParticle branch is not found" << endmsg;
-  }
-  if (branchElectron_==0)
-  {
-    WARNING << "Electron collection branch is not found" << endmsg;
-  }
-  if (branchMuon_==0)
-  {
-    WARNING << "Muon collection branch is not found" << endmsg;
-  }
-  if (branchPhoton_==0)
-  {
-    WARNING << "Photon collection branch is not found" << endmsg;
-  }
-  if (branchJet_==0)
-  {
-    WARNING << "Jet collection branch is not found" << endmsg;
+    MANAGE_EXCEPTION(e);
   }
 }
 

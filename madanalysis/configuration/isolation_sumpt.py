@@ -43,11 +43,11 @@ class IsolationSumPt():
 
     def user_DisplayParameter(self,parameter):
         if parameter=='sumPT':
-            logging.info('  + sumPT = ' + str(self.sumPT) )
+            logging.getLogger('MA5').info('  + sumPT = ' + str(self.sumPT) )
         elif parameter=='ET_PT':
-            logging.info('  + ET_PT = ' + str(self.ET_PT) )
+            logging.getLogger('MA5').info('  + ET_PT = ' + str(self.ET_PT) )
         else:
-            logging.error("'isolation' has no parameter called '"+parameter+"'")
+            logging.getLogger('MA5').error("'isolation' has no parameter called '"+parameter+"'")
 
         
     def user_GetValues(self,variable):
@@ -69,7 +69,7 @@ class IsolationSumPt():
                 tmp=float(value)
                 self.ET_PT=tmp
             except:
-                logging.error("'"+value+"' is not a float value.")
+                logging.getLogger('MA5').error("'"+value+"' is not a float value.")
                 return False
 
         # sumPT
@@ -78,9 +78,9 @@ class IsolationSumPt():
                 tmp=float(value)
                 self.sumPT=tmp
             except:
-                logging.error("'"+value+"' is not a float value.")
+                logging.getLogger('MA5').error("'"+value+"' is not a float value.")
                 return False
 
         # other    
         else:
-            logging.error("'isolation' has no parameter called '"+parameter+"'")
+            logging.getLogger('MA5').error("'isolation' has no parameter called '"+parameter+"'")

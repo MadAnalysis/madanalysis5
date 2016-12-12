@@ -41,7 +41,7 @@ class InstallSamples:
 
     def Detect(self):
         if not os.path.isdir(self.installdir):
-            logging.debug("The folder "+self.installdir+"' is not found")
+            logging.getLogger('MA5').debug("The folder "+self.installdir+"' is not found")
             return False
         return True
 
@@ -72,10 +72,10 @@ class InstallSamples:
         filesToCheck = self.files.keys()
         ok=True
         for item in filesToCheck:
-            logging.debug('checking file: '+item+ ' ...')
+            logging.getLogger('MA5').debug('checking file: '+item+ ' ...')
             filename=os.path.normpath(self.installdir+'/'+item)
             if not os.path.isfile(filename):
-                logging.error('file called "'+filename+'" is not found')
+                logging.getLogger('MA5').error('file called "'+filename+'" is not found')
                 ok=False
         return ok
 

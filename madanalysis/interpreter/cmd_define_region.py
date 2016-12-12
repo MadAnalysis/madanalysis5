@@ -35,7 +35,7 @@ class CmdDefineRegion(CmdBase.CmdBase):
     def do(self,args):
         #Checking argument number
         if len(args) == 0:
-            logging.error("wrong number of arguments for the command 'define_region'.")
+            logging.getLogger('MA5').error("wrong number of arguments for the command 'define_region'.")
             self.help()
             return True
 
@@ -60,33 +60,33 @@ class CmdDefineRegion(CmdBase.CmdBase):
         # Checking if no dataset with the same name has been defined
         for x in args:
             if self.main.datasets.Find(x):
-                logging.error("A dataset '"+x+"' already exists. Please choose a different name.")
+                logging.getLogger('MA5').error("A dataset '"+x+"' already exists. Please choose a different name.")
                 return False
 
         # Checking if no (multi)particle with the same name has been defined
         for x in args:
             if self.main.multiparticles.Find(x):
-                logging.error("A (multi)particle '"+x+"' already exists. Please choose a different name.")
+                logging.getLogger('MA5').error("A (multi)particle '"+x+"' already exists. Please choose a different name.")
                 return False
 
         # Checking if no observable with the same name has been defined
         for x in args:
             if x in self.main.observables.full_list:
-                logging.error("An observable '"+x+"' already exists. Please choose a different name.")
+                logging.getLogger('MA5').error("An observable '"+x+"' already exists. Please choose a different name.")
                 return False
 
         # Checking if the region has already been defined
         for x in args:
             if self.main.regions.Find(x):
-                logging.error("A region '"+x+"' already exists. Please choose a different name.")
+                logging.getLogger('MA5').error("A region '"+x+"' already exists. Please choose a different name.")
                 return False
             self.main.regions.Add(x)
 
         return True
 
     def help(help):
-        logging.info("   Syntax: define_region <list of regions>")
-        logging.info("   Creates one or more analysis regions.")
+        logging.getLogger('MA5').info("   Syntax: define_region <list of regions>")
+        logging.getLogger('MA5').info("   Creates one or more analysis regions.")
 
     def complete(self,text,line,begidx,endidx):
         return True

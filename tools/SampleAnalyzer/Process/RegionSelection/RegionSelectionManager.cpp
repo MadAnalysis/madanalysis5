@@ -27,6 +27,7 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelectionManager.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
 using namespace MA5;
 
@@ -47,10 +48,13 @@ bool RegionSelectionManager::ApplyCut(bool condition, std::string const &cut)
     }
   }
   // Trying to apply a non-existing cut
-  if(mycut==0)
+  try
+  {  
+    if(mycut==0) throw EXCEPTION_WARNING("Trying to apply the non-declared cut \""+ cut + "\"","",0);
+  }
+  catch (const std::exception& e)
   {
-    WARNING << "Trying to apply the non-declared cut \""
-            << cut << "\"" << endmsg;
+    MANAGE_EXCEPTION(e);
     return true;
   }
 
@@ -92,23 +96,29 @@ void RegionSelectionManager::FillHisto(std::string const&histname, double val)
     }
   }
   // Trying to fill a non-existing histo
-  if(myhisto==0)
+  try
+  {  
+    if(myhisto==0) throw EXCEPTION_WARNING("Trying to fill non-declared histogram \""+ histname + "\"","",0);
+  }
+  catch (const std::exception& e)
   {
-    WARNING << "Trying to fill a non-declared histogram \""
-            << histname << "\"" << endmsg;
+    MANAGE_EXCEPTION(e);
     return;
   }
 
   // Checking if each region is surviving
   if(myhisto->AllSurviving()==0) return;
-  if(myhisto->AllSurviving()==-1)
-  {
-    WARNING << "Trying to fill an histogram for which at least one (but"
-     << " not all) SRs is not surviving the cuts applied so far."
-     << endmsg;
-    WARNING << "Please modify the analysis and declare different histograms"
-      << endmsg;
+  try
+  {  
+    if(myhisto->AllSurviving()==-1) throw EXCEPTION_WARNING("Trying to fill an histogram for which at least one (but not all) SRs is not surviving the cuts applied so far.","",0);
   }
+  catch (const std::exception& e)
+  {
+    MANAGE_EXCEPTION(e);
+    //    WARNING << "Please modify the analysis and declare different histograms"
+    //      << endmsg;
+  }
+
 
   // Filling the histo
   myhisto->IncrementNEvents();

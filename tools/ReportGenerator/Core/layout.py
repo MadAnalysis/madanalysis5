@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -165,7 +165,7 @@ class Layout:
 
         # Checking file presence
         if not os.path.isfile(filename):
-            logging.error("the image '" + \
+            logging.getLogger('MA5').error("the image '" + \
                           filename + \
                           "' is not found.")
             return False
@@ -175,8 +175,8 @@ class Layout:
             shutil.copy(filename,output_path)
             return True
         except:
-            logging.error("Errors have occured during the copy of the file ")
-            logging.error(" "+filename)
+            logging.getLogger('MA5').error("Errors have occured during the copy of the file ")
+            logging.getLogger('MA5').error(" "+filename)
             return False
 
     def WriteDatasetTable(self,report,dataset):
@@ -817,7 +817,7 @@ class Layout:
         if not self.DoPlots(mode,output_path):
             return
         
- #       logging.info("     ** Computing cut efficiencies...")
+ #       logging.getLogger('MA5').info("     ** Computing cut efficiencies...")
         #if not layout.DoEfficiencies():
         #    return
 
@@ -998,26 +998,26 @@ class Layout:
 
             name=os.path.normpath(output_path+'/main.dvi')
             if not os.path.isfile(name):
-                logging.error('DVI file cannot be produced')
-                logging.error('Please have a look to the log file '+output_path+'/latex.log')
+                logging.getLogger('MA5').error('DVI file cannot be produced')
+                logging.getLogger('MA5').error('Please have a look to the log file '+output_path+'/latex.log')
                 return False
             
             # Checking latex log : are there errors
             if not Layout.CheckLatexLog(output_path+'/latex.log'):
-                logging.error('some errors occured during LATEX compilation')
-                logging.error('for more details, have a look to the log file : '+output_path+'/latex.log')
+                logging.getLogger('MA5').error('some errors occured during LATEX compilation')
+                logging.getLogger('MA5').error('for more details, have a look to the log file : '+output_path+'/latex.log')
                 return False
                 
             # Converting DVI file to PDF file
             if self.main.session_info.has_dvipdf:
-                logging.info("     -> Converting the DVI report to a PDF report.")
+                logging.getLogger('MA5').info("     -> Converting the DVI report to a PDF report.")
                 os.system('cd '+output_path+'; dvipdf main.dvi > dvipdf.log 2>&1')
                 name=os.path.normpath(output_path+'/main.pdf')
 
                 # Checking PDF file presence
                 if not os.path.isfile(name):
-                    logging.error('PDF file cannot be produced')
-                    logging.error('Please have a look to the log file '+output_path+'/dvipdf.log')
+                    logging.getLogger('MA5').error('PDF file cannot be produced')
+                    logging.getLogger('MA5').error('Please have a look to the log file '+output_path+'/dvipdf.log')
                     return False
                 
         # ---- PDFLATEX MODE ----
@@ -1028,15 +1028,15 @@ class Layout:
 
             # Checking latex log : are there errors
             if not Layout.CheckLatexLog(output_path+'/latex.log'):
-                logging.error('some errors occured during LATEX compilation')
-                logging.error('for more details, have a look to the log file : '+output_path+'/latex.log')
+                logging.getLogger('MA5').error('some errors occured during LATEX compilation')
+                logging.getLogger('MA5').error('for more details, have a look to the log file : '+output_path+'/latex.log')
                 return False
             
             # Checking PDF file presence
             name=os.path.normpath(output_path+'/main.pdf')
             if not os.path.isfile(name):
-                logging.error('PDF file cannot be produced')
-                logging.error('Please have a look to the log file '+output_path+'/latex2.log')
+                logging.getLogger('MA5').error('PDF file cannot be produced')
+                logging.getLogger('MA5').error('Please have a look to the log file '+output_path+'/latex2.log')
                 return False
             
         

@@ -37,11 +37,11 @@ class CutInfo:
         self.sumw2_neg    = 0.
 
     def Print(self):
-        logging.info("nentries_pos = " + str(self.nentries_pos))
-        logging.info("nentries_neg = " + str(self.nentries_neg))
-        logging.info("sumw_pos     = " + str(self.sumw_pos))
-        logging.info("sumw_neg     = " + str(self.sumw_neg))
-        logging.info("sumw2_pos    = " + str(self.sumw2_pos))
-        logging.info("sumw2_neg    = " + str(self.sumw2_neg))
+        logging.getLogger('MA5').info("nentries_pos = " + str(self.nentries_pos))
+        logging.getLogger('MA5').info("nentries_neg = " + str(self.nentries_neg))
+        logging.getLogger('MA5').info("sumw_pos     = " + str(self.sumw_pos))
+        logging.getLogger('MA5').info("sumw_neg     = " + str(self.sumw_neg))
+        logging.getLogger('MA5').info("sumw2_pos    = " + str(self.sumw2_pos))
+        logging.getLogger('MA5').info("sumw2_neg    = " + str(self.sumw2_neg))
         
         

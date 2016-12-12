@@ -39,7 +39,7 @@ class FolderWriter:
             
         # Asking the safety question
         if question and not Main.forced:
-            logging.warning("Are you sure to remove the directory called '"+path+"' ? (Y/N)")
+            logging.getLogger('MA5').warning("Are you sure to remove the directory called '"+path+"' ? (Y/N)")
             allowed_answers=['n','no','y','yes']
             answer=""
             while answer not in  allowed_answers:
@@ -53,8 +53,8 @@ class FolderWriter:
             shutil.rmtree(path)
             return True, True
         except:
-            logging.error("Impossible to remove the directory :")
-            logging.error(" "+path)
+            logging.getLogger('MA5').error("Impossible to remove the directory :")
+            logging.getLogger('MA5').error(" "+path)
             return False, False
         
         
@@ -70,10 +70,10 @@ class FolderWriter:
         
         elif os.path.isdir(path):
             if not question:
-                logging.error("Directory called '"+path+"' is already defined.")
+                logging.getLogger('MA5').error("Directory called '"+path+"' is already defined.")
                 return False
             else:
-                logging.warning("A directory called '"+path+"' is already "+ \
+                logging.getLogger('MA5').warning("A directory called '"+path+"' is already "+ \
                                 "defined.\nWould you like to remove it ? (Y/N)")
                 allowed_answers=['n','no','y','yes']
                 answer=""
@@ -91,8 +91,8 @@ class FolderWriter:
             os.mkdir(path)
             return True
         except:
-            logging.error("Impossible to create the directory :")
-            logging.error(" "+path)
+            logging.getLogger('MA5').error("Impossible to create the directory :")
+            logging.getLogger('MA5').error(" "+path)
             return False
                 
         

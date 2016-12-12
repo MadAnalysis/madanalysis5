@@ -74,9 +74,9 @@ class IsolationEFlow : public IsolationBase
       MAfloat64 sum=0.;
       if (type==TRACK_COMPONENT || type==ALL_COMPONENTS)
           sum += sumPT(part,event->EFlowTracks(),DR,PTmin);
-      else if (type==PHOTON_COMPONENT || type==ALL_COMPONENTS)
+      if (type==PHOTON_COMPONENT || type==ALL_COMPONENTS)
           sum += sumPT(part,event->EFlowPhotons(),DR,PTmin);
-      else if (type==NEUTRAL_COMPONENT || type==ALL_COMPONENTS)
+      if (type==NEUTRAL_COMPONENT || type==ALL_COMPONENTS)
           sum += sumPT(part,event->EFlowNeutralHadrons(),DR,PTmin);
       sum -= part->pt();
       return sum;
@@ -103,9 +103,9 @@ class IsolationEFlow : public IsolationBase
       MAfloat64 sum=0.;
       if (type==TRACK_COMPONENT || type==ALL_COMPONENTS)
           sum += sumPT(part,event->EFlowTracks(),DR,PTmin);
-      else if (type==PHOTON_COMPONENT /*|| type==ALL_COMPONENTS*/)
+      if (type==PHOTON_COMPONENT /*|| type==ALL_COMPONENTS*/)
           sum += sumPT(part,event->EFlowPhotons(),DR,PTmin);
-      else if (type==NEUTRAL_COMPONENT || type==ALL_COMPONENTS)
+      if (type==NEUTRAL_COMPONENT || type==ALL_COMPONENTS)
           sum += sumPT(part,event->EFlowNeutralHadrons(),DR,PTmin);
       return sum;
     }

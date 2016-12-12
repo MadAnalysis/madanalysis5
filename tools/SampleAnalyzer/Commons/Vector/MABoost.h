@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -36,6 +36,7 @@
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/Vector/MALorentzVector.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
 
 namespace MA5
@@ -95,7 +96,18 @@ class MABoost
   
   // Setting the boost vector
   void SetBoostVector(MALorentzVector& q)
-  { setBoostVector(q.X(),q.Y(),q.Z()); }
+  { 
+    try
+    {
+      if (q.T()==0) throw EXCEPTION_WARNING("Energy equal to zero. Impossible to compute the boost.","",0);
+      setBoostVector(q.X()/q.T(),q.Y()/q.T(),q.Z()/q.T());
+    }
+    catch(const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
+      MABoost();
+    }    
+  }
 
   // Boost a MALorentzVector
   void boost(MALorentzVector& p) const

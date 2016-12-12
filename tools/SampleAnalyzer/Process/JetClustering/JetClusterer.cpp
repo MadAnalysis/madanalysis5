@@ -25,6 +25,8 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/JetClustering/JetClusterer.h"
 #include "SampleAnalyzer/Commons/Service/LoopService.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
+#include "SampleAnalyzer/Commons/Service/ConvertService.h"
 
 using namespace MA5;
 
@@ -55,14 +57,16 @@ bool JetClusterer::Initialize(const std::map<std::string,std::string>& options)
       std::stringstream str;
       str << it->second;
       str >> tmp;
-      if (tmp==1) ExclusiveId_=true;
-      else if (tmp==0) ExclusiveId_=false;
-      else
+      try
       {
-        WARNING << "'exclusive_id' must be equal to 0 or 1. "
-                << "Using default value 'exclusive_id' = " 
-                << ExclusiveId_ << endmsg;
+        if (tmp==1) ExclusiveId_=true;
+        else if (tmp==0) ExclusiveId_=false;
+        else throw EXCEPTION_WARNING("'exclusive_id' must be equal to 0 or 1. Using default value 'exclusive_id' = "+CONVERT->ToString(ExclusiveId_),"",0);
       }
+      catch(const std::exception& e)
+      {
+        MANAGE_EXCEPTION(e);
+      }    
       result=true;
     }
 
@@ -91,7 +95,14 @@ bool JetClusterer::Initialize(const std::map<std::string,std::string>& options)
     }
    
     // Other
-    if (!result) WARNING << "Parameter " << key << " unknown. It will be skipped." << endmsg;
+    try
+    {
+      if (!result) throw EXCEPTION_WARNING("Parameter = "+key+" unknown. It will be skipped.","",0);
+    }
+    catch(const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
+    }    
 
   }
 

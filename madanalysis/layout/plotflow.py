@@ -127,6 +127,13 @@ class PlotFlow:
            newtext = newtext.replace(i,j)
         return newtext
 
+    @staticmethod
+    def NiceTitleMatplotlib(text):
+        text=PlotFlow.NiceTitle(text)
+        text=text.replace('#DeltaR','#Delta R')
+        text='$'+text.replace('#','\\\\')+'$'
+        return text
+
 
     def DrawAll(self,histo_path,modes,output_paths,ListROOTplots):
 
@@ -145,7 +152,7 @@ class PlotFlow:
             
             output_files=[]
             for iout in range(0,len(output_paths)):
-                output_files.append(output_paths[iout]+\
+                output_files.append('../'+output_paths[iout].split('/')[-1]+\
                                     "/selection_"+str(irelhisto)+"."+\
                                     ReportFormatType.convert2filetype(modes[iout]))
 
@@ -202,7 +209,6 @@ class PlotFlow:
            ( ref.stack==StackingMethodType.AUTO and \
              self.main.stack==StackingMethodType.STACK ):
             stackmode=True
-
 
         # Open the file in write-mode
         try:
@@ -263,6 +269,7 @@ class PlotFlow:
             outputC.write('\n')
 
         # Loop over datasets and histos
+        ntot = 0
         for ind in range(0,len(histos)):
 
             # Creating TH1F
@@ -283,6 +290,7 @@ class PlotFlow:
             outputC.write('  '+histoname+'->SetBinContent(0'+\
                           ','+str(histos[ind].summary.underflow*scales[ind])+'); // underflow\n')
             for bin in range(1,xnbin+1):
+                ntot+= histos[ind].summary.array[bin-1]*scales[ind]
                 outputC.write('  '+histoname+'->SetBinContent('+str(bin)+\
                               ','+str(histos[ind].summary.array[bin-1]*scales[ind])+');\n')
             nentries=histos[ind].summary.nentries
@@ -290,19 +298,13 @@ class PlotFlow:
                           ','+str(histos[ind].summary.overflow*scales[ind])+'); // overflow\n')
             outputC.write('  '+histoname+'->SetEntries('+str(nentries)+');\n')
 
-            # linecolor
-            if self.main.datasets[ind].linecolor!=ColorType.AUTO:
-                colorline=ColorType.convert2root( \
-                          self.main.datasets[ind].linecolor,\
-                          self.main.datasets[ind].lineshade)
-
             # reset
             linecolor=0
             linestyle=0
             backcolor=0
             backstyle=0
             linewidth=1
-            
+
             # Setting AUTO settings
             if len(histos)==1:
                 linecolor1 = [9]
@@ -378,6 +380,12 @@ class PlotFlow:
                 linecolor=self.color
                 self.color += 1
 
+            # linecolor
+            if self.main.datasets[ind].linecolor!=ColorType.AUTO:
+                linecolor=ColorType.convert2root( \
+                          self.main.datasets[ind].linecolor,\
+                          self.main.datasets[ind].lineshade)
+
             # lineStyle
             linestyle=LineStyleType.convert2code(self.main.datasets[ind].linestyle)
 
@@ -412,10 +420,8 @@ class PlotFlow:
         PlotFlow.counter+=1
         outputC.write('  THStack* stack = new THStack("mystack_'+str(PlotFlow.counter)+'","mystack");\n')
         # Loop over datasets and histos
-        ntot = 0
         for ind in range(0,len(histos)):
             histoname=histos[ind].name+'_'+str(ind)
-            ntot+=histos[ind].summary.integral
             outputC.write('  stack->Add('+histoname+');\n')
 
         drawoptions=[]
@@ -431,11 +437,13 @@ class PlotFlow:
         axis_titleY = ref.GetYaxis()
 
         # Scale to one ?
+        print "ERIC"
         scale2one = False
         if ref.stack==StackingMethodType.NORMALIZE2ONE or \
            (self.main.stack==StackingMethodType.NORMALIZE2ONE and \
            ref.stack==StackingMethodType.AUTO):
             scale2one = True
+        print "ERIC: scale2one" + str(scale2one)
 
         if scale2one:
             axis_titleY += " ( scaled to one )"
@@ -619,13 +627,13 @@ class PlotFlow:
         for ind in range(0,len(histos)):
 
             # Ntot
-            ntot+=histos[ind].summary.integral
 
             # Creating a new histo
             histoname=histos[ind].name+'_'+str(ind)
             outputPy.write('    # Creating weights for histo: '+histoname+'\n')
             outputPy.write('    '+histoname+'_weights = numpy.array([')
             for bin in range(1,xnbin+1):
+                ntot+=histos[ind].summary.array[bin-1]*scales[ind]
                 if bin!=1:
                     outputPy.write(',')
                 outputPy.write(str(histos[ind].summary.array[bin-1]*scales[ind]))
@@ -656,7 +664,7 @@ class PlotFlow:
         outputPy.write('    # Creating a new Stack\n')
         for ind in range(len(histos)-1,-1,-1):
             myweight = histos[ind].name+'_'+str(ind)+'_weights'
-            mytitle  = '"'+PlotFlow.NiceTitle(self.main.datasets[ind].title)+'"'
+            mytitle  = '"'+PlotFlow.NiceTitleMatplotlib(self.main.datasets[ind].title)+'"'
             mytitle  = mytitle.replace('_','\_')
 
             if not stackmode:
@@ -786,9 +794,10 @@ class PlotFlow:
                                'x=xData, '+\
                                'bins=xBinning, '+\
                                'weights='+myweights+',\\\n'+\
-                               '             label='+mytitle+', '+\
-                               'histtype='+filledmode+', '+\
-                               'rwidth='+str(rWidth)+',\\\n'+\
+                               '             label='+mytitle+', ')
+            if ntot!=0:
+                outputPy.write('histtype='+filledmode+', ')
+            outputPy.write(    'rwidth='+str(rWidth)+',\\\n'+\
                                '             color='+mybackcolor+', '+\
                                'edgecolor='+mylinecolor+', '+\
                                'linewidth='+str(mylinewidth)+', '+\
@@ -799,18 +808,20 @@ class PlotFlow:
 
         # Label
         outputPy.write('    # Axis\n')
-        outputPy.write("    plt.rc('text',usetex=True)\n")
+        outputPy.write("    plt.rc('text',usetex=False)\n")
 
         # X-axis
         if ref.titleX=="": 
             axis_titleX = ref.GetXaxis_Matplotlib()
         else:
-            axis_titleX = PlotFlow.NiceTitle(ref.titleX)
-        outputPy.write('    plt.xlabel("'+axis_titleX+'",\\\n')
+            axis_titleX = ref.titleX
+        axis_titleX = axis_titleX.replace('#DeltaR','#Delta R')
+        axis_titleX = axis_titleX.replace('#','\\')
+        outputPy.write('    plt.xlabel(r"'+axis_titleX+'",\\\n')
         outputPy.write('               fontsize=16,color="black")\n')
 
         # Y-axis
-        axis_titleY = ref.GetYaxis()
+        axis_titleY = ref.GetYaxis_Matplotlib()
 
         # Scale to one ?
         scale2one = False
@@ -820,18 +831,27 @@ class PlotFlow:
             scale2one = True
 
         if scale2one:
-            axis_titleY += " ( scaled to one )"
+            axis_titleY += " $(#mathrm{scaled}\ #mathrm{to}# #mathrm{one})$"
         elif self.main.normalize == NormalizeType.LUMI or \
            self.main.normalize == NormalizeType.LUMI_WEIGHT:
-            axis_titleY += " ( $\mathcal{L}_{\\\\textrm{int}}$ = " + str(self.main.lumi)+ " fb$^{-1}$ )"
+            axis_titleY += " $(#mathcal{L}_{#mathrm{int}} = " + str(self.main.lumi)+ "# #mathrm{fb}^{-1})$ "
         elif self.main.normalize == NormalizeType.NONE:
-            axis_titleY += " (not normalized)"
+            axis_titleY += " $(#mathrm{not}# #mathrm{normalized})$"
 
         if ref.titleY!="": 
             axis_titleY = PlotFlow.NiceTitle(ref.titleY)
-        outputPy.write('    plt.ylabel("'+axis_titleY+'",\\\n')
+        axis_titleY = axis_titleY.replace('#','\\')
+        outputPy.write('    plt.ylabel(r"'+axis_titleY+'",\\\n')
         outputPy.write('               fontsize=16,color="black")\n')
         outputPy.write('\n')
+
+        # Tag Log/Linear
+        is_logx=False
+        if ref.logX and ntot != 0:
+            is_logx=True
+        is_logy=False
+        if ref.logY and ntot != 0:
+            is_logy=True
 
         # Bound y
         outputPy.write('    # Boundary of y-axis\n')
@@ -848,21 +868,62 @@ class PlotFlow:
                     myweights+=','
                 myweights+=histos[ind].name+'_'+str(ind)+'_weights.max()'
             myweights+='])'
-        outputPy.write('    plt.gca().set_ylim(0,('+myweights+').max()*1.1)\n')
+        outputPy.write('    ymax=('+myweights+').max()*1.1\n')
+        outputPy.write('    ')
+        if is_logy:
+            outputPy.write('#')
+        outputPy.write('ymin=0 # linear scale\n')
+
+        myweights=''
+        if stackmode:
+            for ind in range(0,len(histos)):
+                if ind>=1:
+                    myweights+='+'
+                myweights+=histos[ind].name+'_'+str(ind)+'_weights'
+        else:
+            myweights='numpy.array(['
+            for ind in range(0,len(histos)):
+                if ind>=1:
+                    myweights+=','
+                myweights+=histos[ind].name+'_'+str(ind)+'_weights.min()'
+            myweights+='])'
+        outputPy.write('    ')
+        if not is_logy:
+            outputPy.write('#')
+        outputPy.write('ymin=min(1e-2, min(x for x in ('+myweights+') if x)/100.) # log scale\n')
+        outputPy.write('    plt.gca().set_ylim(ymin,ymax)\n')
         outputPy.write('\n')
 
-        # Log
-        outputPy.write('    # Log/Linear scale\n')
-        logx='linear'
-        if ref.logX and ntot != 0:
-            logx='log'
-        logy='linear'
-        if ref.logY and ntot != 0:
-            logy='log'
-        outputPy.write('    plt.gca().set_xscale("'+logx+'")\n')
-        outputPy.write('    plt.gca().set_yscale("'+logy+'")\n')
+        # X axis
+        outputPy.write('    # Log/Linear scale for X-axis\n')
+        # - Linear
+        outputPy.write('    ')
+        if is_logx:
+            outputPy.write('#')
+        outputPy.write('plt.gca().set_xscale("linear")\n')
+        # - Log
+        outputPy.write('    ')
+        if not is_logx:
+            outputPy.write('#')
+        outputPy.write('plt.gca().set_xscale("log",nonposx="clip")\n')
         outputPy.write('\n')
 
+
+        # Y axis
+        outputPy.write('    # Log/Linear scale for Y-axis\n')
+        # - Linear
+        outputPy.write('    ')
+        if is_logy:
+            outputPy.write('#')
+        outputPy.write('plt.gca().set_yscale("linear")\n')
+        # - Log
+        outputPy.write('    ')
+        if not is_logy:
+            outputPy.write('#')
+        outputPy.write('plt.gca().set_yscale("log",nonposy="clip")\n')
+        outputPy.write('\n')
+
+ 
         # Labels
         if frequencyhisto:
             outputPy.write('    # Labels for x-Axis\n')
@@ -874,11 +935,12 @@ class PlotFlow:
             outputPy.write('])\n')
             outputPy.write('    plt.xticks(xData, xLabels, rotation="vertical")\n')
             outputPy.write('\n')
-        
+
+### BENJ: not necessary for getting the png and pdf files
         # Draw
-        outputPy.write('    # Draw\n')
-        outputPy.write('    plt.show()\n')
-        outputPy.write('\n')
+#        outputPy.write('    # Draw\n')
+#        outputPy.write('    plt.show()\n')
+#        outputPy.write('\n')
 
         # Legend
         if legendmode:

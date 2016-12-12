@@ -27,6 +27,7 @@ from shell_command                            import ShellCommand
 import logging
 import shutil
 import os
+import sys
 import commands
 
 class HistoMatplotlibProducer():
@@ -65,21 +66,21 @@ class HistoMatplotlibProducer():
 
     def LaunchInteractiveMatplotlib(self):
         # Commands
-        theCommands=['python','all.py']
+        theCommands=[sys.executable,'all.py']
 
         # Log file name
         logname=os.path.normpath(self.histo_path+'/matplotlib.log')
-        
+
         # Execute
-        logging.debug('shell command: '+' '.join(theCommands))
+        logging.getLogger('MA5').debug('shell command: '+' '.join(theCommands))
         ok, out= ShellCommand.ExecuteWithLog(theCommands,\
                                              logname,\
                                              self.histo_path,\
                                              silent=False)
         # return result
         if not ok:
-            logging.error('impossible to execute MatPlotLib. For more details, see the log file:')
-            logging.error(logname)
+            logging.getLogger('MA5').error('impossible to execute MatPlotLib. For more details, see the log file:')
+            logging.getLogger('MA5').error(logname)
         return ok
 
 

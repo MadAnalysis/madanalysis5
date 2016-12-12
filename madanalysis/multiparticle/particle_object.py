@@ -38,10 +38,10 @@ class ParticleObject():
         return self.table[i]
 
     def Display(self):
-        logging.info(" **list of particles combination**" )
+        logging.getLogger('MA5').info(" **list of particles combination**" )
         for item in self.table:
             item.Display()
-        logging.info(" *********************************" )
+        logging.getLogger('MA5').info(" *********************************" )
 
     def DoYouUseMultiparticle(self,name):
         for item in self.table:
@@ -65,7 +65,7 @@ class ParticleObject():
             self.table=sorted(self.table,\
                               key=attrgetter("name"))
         else:
-            logging.warning(" Several copies of the combination '"\
+            logging.getLogger('MA5').warning(" Several copies of the combination '"\
                             + part.GetStringDisplay() + \
                             "' have been defined. Only one will be kept.")
 

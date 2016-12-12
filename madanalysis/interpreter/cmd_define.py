@@ -35,13 +35,13 @@ class CmdDefine(CmdBase.CmdBase):
 
         #Checking argument number
         if not len(args) > 2:
-            logging.error("wrong number of arguments for the command 'define'.")
+            logging.getLogger('MA5').error("wrong number of arguments for the command 'define'.")
             self.help()
             return
 
         #Looking for '='
         if not args[1] == '=':
-            logging.error("syntax error with the command 'define'.")
+            logging.getLogger('MA5').error("syntax error with the command 'define'.")
             self.help()
             return
         
@@ -53,19 +53,19 @@ class CmdDefine(CmdBase.CmdBase):
         
         # Checking if the name is authorized
         if name in self.reserved_words:
-            logging.error("name '" +name+ "' is a reserved keyword. Please choose a different name.")
+            logging.getLogger('MA5').error("name '" +name+ "' is a reserved keyword. Please choose a different name.")
             return
 
         # Checking if the name is authorized
         if not self.IsAuthorizedLabel(name):
-            logging.error("syntax error with the name '" + name + "'.")
-            logging.error("A correct name contains only characters being letters, digits or the '+', '-', '~' and '_' symbols.")
-            logging.error("Moreover, a correct name  starts with a letter or the '_' symbol.")
+            logging.getLogger('MA5').error("syntax error with the name '" + name + "'.")
+            logging.getLogger('MA5').error("A correct name contains only characters being letters, digits or the '+', '-', '~' and '_' symbols.")
+            logging.getLogger('MA5').error("Moreover, a correct name  starts with a letter or the '_' symbol.")
             return
 
         # Checking if no dataset with the same name has been defined
         if self.main.datasets.Find(name):
-            logging.error("A dataset '"+name+"' already exists. Please choose a different name.")
+            logging.getLogger('MA5').error("A dataset '"+name+"' already exists. Please choose a different name.")
             return
                 
         # Adding ids to the multiparticle
@@ -84,16 +84,16 @@ class CmdDefine(CmdBase.CmdBase):
                 if self.main.multiparticles.Find(item):
                     ids.extend(self.main.multiparticles.Get(item).GetIds())
                 else:
-                    logging.error("The (multi)particle '"+item+"' is not defined.")
+                    logging.getLogger('MA5').error("The (multi)particle '"+item+"' is not defined.")
                     return
 
         self.main.multiparticles.Add(name,ids,forced)
 
     def help(help):
-        logging.info("   Syntax: define <particle name> = PDG-id")
-        logging.info("   Associates a symbol to a specific particle defined by its PDG-id.")
-        logging.info("   Syntax: define <(multi)particle name> = <PDG-id / existing (multi)particle> <PDG-id / (multi)particle> ...")
-        logging.info("   Associates a symbol to a multiparticle defined by several particles.")
+        logging.getLogger('MA5').info("   Syntax: define <particle name> = PDG-id")
+        logging.getLogger('MA5').info("   Associates a symbol to a specific particle defined by its PDG-id.")
+        logging.getLogger('MA5').info("   Syntax: define <(multi)particle name> = <PDG-id / existing (multi)particle> <PDG-id / (multi)particle> ...")
+        logging.getLogger('MA5').info("   Associates a symbol to a multiparticle defined by several particles.")
 
     def complete(self,text,line,begidx,endidx):
 

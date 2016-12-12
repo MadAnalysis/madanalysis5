@@ -123,6 +123,13 @@ class CmdInstall(CmdBase):
             return inst_delphes(self.main,installer)
         elif args[0]=='delphesMA5tune':
             self.logger.warning("The package 'delphesMA5tune' is now obsolete. It is replaced by Delphes with special MA5-tuned cards.")
+            if len(self.main.archi_info.root_version)!=3:
+                self.logger.error("Cannot read the root version correctly. Installation skipped.")
+                return True
+            if int(self.main.archi_info.root_version[0]) > 5:
+                self.logger.error("The delphesMA5tune package is not compliant with Root-6." + \
+                   " Installation skipped.")
+                return True
             if not self.main.forced:
               self.logger.warning("Are you sure to install this package? (Y/N)")
               allowed_answers=['n','no','y','yes']
@@ -151,10 +158,14 @@ class CmdInstall(CmdBase):
         elif args[0]=='numpy':
             installer=InstallManager(self.main)
             return installer.Execute('numpy')
-        elif args[0]=='RecastingTools':
-            installer=InstallManager(self.main)
-            return installer.Execute('RecastingTools')
         elif args[0]=='PADForMA5tune':
+            if len(self.main.archi_info.root_version)!=3:
+                self.logger.error("Cannot read the root version correctly. Installation skipped.")
+                return True
+            if int(self.main.archi_info.root_version[0]) > 5:
+                self.logger.error("The PADForMA5tune framework is not compliant with Root-6." + \
+                   " Installation skipped.")
+                return True
             installer=InstallManager(self.main)
             if inst_ma5tune(self.main,installer,True):
                 return installer.Execute('PADForMA5tune')
@@ -176,7 +187,7 @@ class CmdInstall(CmdBase):
     def help(self):
         self.logger.info("   Syntax: install <component>")
         self.logger.info("   Download and install a MadAnalysis component from the official site.")
-        self.logger.info("   List of available components: samples zlib fastjet delphes delphesMA5tune RecastingTools PAD PADForMA5tune")
+        self.logger.info("   List of available components: samples zlib fastjet delphes delphesMA5tune PAD PADForMA5tune")
 
 
     def complete(self,text,args,begidx,endidx):
@@ -189,7 +200,7 @@ class CmdInstall(CmdBase):
             return []
         else:
             output = ["samples","zlib","fastjet", "delphes", "delphesMA5tune",\
-                "gnuplot", "matplotlib", "root" , "numpy", "RecastingTools", "PAD", "PADForMA5tune"]
+                "gnuplot", "matplotlib", "root" , "numpy", "PAD", "PADForMA5tune"]
             return self.finalize_complete(text,output)
 
 

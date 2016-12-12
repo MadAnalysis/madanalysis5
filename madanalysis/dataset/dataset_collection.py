@@ -37,10 +37,10 @@ class DatasetCollection:
         return self.table[i][1]
 
     def Display(self):
-        logging.info(" ********* List of defined datasets *********" )
+        logging.getLogger('MA5').info(" ********* List of defined datasets *********" )
         for value in self.table:
-            logging.info(" "+value[0]+" ("+value[1].GetStringTag()+")")
-        logging.info(" ********************************************" )
+            logging.getLogger('MA5').info(" "+value[0]+" ("+value[1].GetStringTag()+")")
+        logging.getLogger('MA5').info(" ********************************************" )
 
     def Find(self,name):
         name.lower()

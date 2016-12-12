@@ -51,8 +51,8 @@ def CLs(NumObserved, ExpectedBG, BGError, SigHypothesis, NumToyExperiments):
     try:
         import scipy.stats
     except ImportError:
-        self.logger.warning('scipy is not installed... the CLs module cannot be used.')
-        self.logger.warning('Please install scipy.')
+        logging.getLogger('MA5').warning('scipy is not installed... the CLs module cannot be used.')
+        logging.getLogger('MA5').warning('Please install scipy.')
         return False
     # generate a set of expected-number-of-background-events, one for each toy
     # experiment, distributed according to a Gaussian with the specified mean
@@ -76,6 +76,9 @@ def CLs(NumObserved, ExpectedBG, BGError, SigHypothesis, NumToyExperiments):
 
     # Toy MC for background+signal
     ExpectedBGandS = [expectedbg + SigHypothesis for expectedbg in ExpectedBGs]
+    ExpectedBGandS = [x for x in ExpectedBGandS if x > 0]
+    if len(ExpectedBGandS)==0:
+        return 0.
     ToyBplusS = scipy.stats.poisson.rvs(ExpectedBGandS)
     ToyBplusS = map(float, ToyBplusS)
 
@@ -116,7 +119,7 @@ class RecastConfiguration:
           "delphes_card_atlas_sus_2013_04.tcl": ["atlas_susy_2013_04"] ,
           "delphes_card_cms_b2g_12_012.tcl":    ["CMS_B2G_12_012", "cms_exo_12_047", "cms_exo_12_048"],
           "delphes_card_cms_b2g_14_004.tcl":    ["cms_b2g_12_022", "cms_b2g_14_004"],
-          "delphes_card_ATLAS_1604_07773.tcl": ["ATLAS_1604_07773"]
+          "delphes_card_ATLAS_1604_07773.tcl": ["ATLAS_1604_07773", "atlas_1605_03814"]
         }
 
         self.description = {
@@ -129,6 +132,7 @@ class RecastConfiguration:
           "atlas_higg_2013_03"     : "ATLAS - 8 TeV - ZH to invisible + 2 leptons",
           "ATLAS_EXOT_2014_06"     : "ATLAS - 8 TeV - monophoton",
           "ATLAS_1604_07773"       : "ATLAS - 13 TeV - monojet",
+          "atlas_1605_03814"       : "ATLAS - 13 TeV - multijet (2-6 jets) + met",
           "cms_sus_13_012"         : "CMS   - 8 TeV - squark-gluino - MET/MHT",
           "cms_sus_13_016"         : "CMS   - 8 TeV - gluinos - 2 leptons + bjets + met",
           "cms_sus_14_001_monojet" : "CMS   - 8 TeV - stop - the monojet channel",
@@ -368,7 +372,7 @@ class RecastConfiguration:
             tunefile.close()
         usercard = open(self.card_path)
         for line in usercard:
-            if len(line)==0:
+            if len(line.strip())==0:
                 continue
             if line.lstrip()[0]=='#':
                 continue
@@ -537,9 +541,9 @@ class RecastConfiguration:
         self.delphesruns=[]
         runcard = open(recastcard,'r')
         for line in runcard:
-            if len(line)==0:
+            if len(line.strip())==0:
                 continue
-            if line.lstrip()[0]=='#':
+            if line.strip().startswith('#'):
                 continue
             myline=line.split()
             if myline[2].lower() =='on' and myline[3] not in self.delphesruns:
@@ -550,9 +554,9 @@ class RecastConfiguration:
         self.analysisruns=[]
         runcard = open(recastcard,'r')
         for line in runcard:
-            if len(line)==0:
+            if len(line.strip())==0:
                 continue
-            if line.lstrip()[0]=='#':
+            if line.strip().startswith('#'):
                 continue
             myline=line.split()
             if myline[2].lower() =='on':
@@ -671,13 +675,13 @@ class RecastConfiguration:
                 nobs    = regiondata[reg]["nb"]
             deltanb = regiondata[reg]["deltanb"]
             def GetSig95(xsection):
-                if regiondata[reg]["Nf"]==0:
+                if regiondata[reg]["Nf"]<=0:
                     return 0
                 nsignal=xsection * lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
                 return CLs(nobs,nb,deltanb,nsignal,self.CLs_numofexps)-0.95
             nslow = lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
             nshig = lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
-            if nslow == 0 and nshig == 0:
+            if nslow <= 0 and nshig <= 0:
                 if tag == "obs":
                     regiondata[reg]["s95obs"]="-1"
                 elif tag == "exp":
@@ -686,13 +690,13 @@ class RecastConfiguration:
             low = 1.
             hig = 1.
             while CLs(nobs,nb,deltanb,nslow,self.CLs_numofexps)>0.95:
-              self.logger.debug('region ' + reg + ', lower bound = ' + str(low))
-              nslow=nslow*0.1
-              low  =  low*0.1
+                self.logger.debug('region ' + reg + ', lower bound = ' + str(low))
+                nslow=nslow*0.1
+                low  =  low*0.1
             while CLs(nobs,nb,deltanb,nshig,self.CLs_numofexps)<0.95:
-              self.logger.debug('region ' + reg + ', upper bound = ' + str(hig))
-              nshig=nshig*10.
-              hig  =  hig*10.
+                self.logger.debug('region ' + reg + ', upper bound = ' + str(hig))
+                nshig=nshig*10.
+                hig  =  hig*10.
             ## testing whether scipy is there
             try:
                 import scipy.stats
@@ -700,7 +704,10 @@ class RecastConfiguration:
                 self.logger.warning('scipy is not installed... the CLs module cannot be used.')
                 self.logger.warning('Please install scipy.')
                 return False
-            s95 = scipy.optimize.brentq(GetSig95,low,hig)
+            try:
+                s95 = scipy.optimize.brentq(GetSig95,low,hig,xtol=low/100.)
+            except:
+                s95=-1
             self.logger.debug('region ' + reg + ', s95 = ' + str(s95) + ' pb')
             if tag == "obs":
                 regiondata[reg]["s95obs"]= ("%.7f" % s95)
@@ -717,7 +724,7 @@ class RecastConfiguration:
             nb      = regiondata[reg]["nb"]
             nobs    = regiondata[reg]["nobs"]
             deltanb = regiondata[reg]["deltanb"]
-            if nsignal==0:
+            if nsignal<=0:
                 rSR   = -1
                 myCLs = 0
             else:
@@ -739,6 +746,8 @@ class RecastConfiguration:
     def WriteCLs(self, dirname, analysis, regions,regiondata, summary, xsflag):
         for reg in regions:
             eff    = (regiondata[reg]["Nf"] / regiondata[reg]["N0"])
+            if eff < 0:
+                eff = 0
             stat   = (math.sqrt(eff*(1-eff)/regiondata[reg]["N0"]))
             syst   = 0.
             myeff  = "%.7f" % eff
@@ -809,7 +818,7 @@ class RecastConfiguration:
             if regiondata==-1:
                 self.logger.warning('Info file for '+analysis+' corrupted. Skipping the CLs calculation.')
                 return False
-            ## performing the alculation
+            ## performing the calculation
             regiondata=self.ComputesigCLs(regiondata,regions,lumi,"exp")
             regiondata=self.ComputesigCLs(regiondata,regions,lumi,"obs")
             xsflag=True

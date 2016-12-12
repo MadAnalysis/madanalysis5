@@ -120,7 +120,7 @@ class UserInfo:
             newone = pickle.load(file)
             test=True
         except:
-            self.logger.error("error occured during reading data from "+filename)
+            self.logger.warning("error occured during reading data from "+filename)
             test=False
 
         # Close the file
@@ -161,7 +161,7 @@ class UserInfo:
             self.download_dir=value
         elif option=='webaccess_veto':
             self.webaccess_veto=self.ConvertToBool(option,value,filename)
-            
+
         # Root
         elif   option=='root_bin_path':
             self.root_bin=value

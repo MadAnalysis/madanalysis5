@@ -66,12 +66,12 @@ class DetectPdflatex:
         # Which
         result = ShellCommand.Which('pdflatex',all=False,mute=True)
         if len(result)==0:
-            return DetectStatusType.UNFOUND
+            return DetectStatusType.UNFOUND,''
         if self.debug:
             self.logger.debug("  which:         " + str(result[0]))
 
         # Ok
-        return DetectStatusType.FOUND
+        return DetectStatusType.FOUND,''
 
 
     def ExtractInfo(self):

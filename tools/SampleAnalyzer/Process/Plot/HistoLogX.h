@@ -27,6 +27,7 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Plot/Histo.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
 
 // STL headers
@@ -60,32 +61,46 @@ class HistoLogX : public Histo
   HistoLogX(const std::string& name, MAuint32 nbins, 
             MAfloat64 xmin, MAfloat64 xmax) : Histo(name)
   { 
-    // Setting the description
-    nbins_ = nbins;
-    if (nbins_==0)
+    // Setting the description: nbins
+    try
     {
-      std::cout << "WARNING: nbins cannot be equal to 0. Set 100" << std::endl;
+      if (nbins==0) throw EXCEPTION_WARNING("nbins cannot be equal to 0. Set 100.","",0);
+      nbins_ = nbins;
+    }
+    catch (const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
       nbins_ = 100;
-    }
+    }    
 
-    xmin_ = xmin;
-    xmax_ = xmax;
-    if (xmin<=0)
+    // Setting the description: min
+    try
     {
-      std::cout << "WARNING xmin cannot be less than or equal to zero" << std::endl;
-      std::cout << "Setting xmin to 0.1" << std::endl;
-      xmin_=.1;
+      if (xmin<=0) throw EXCEPTION_WARNING("xmin cannot be less than or equal to zero. Setting xmin to 0.1","",0);
+      xmin_ = xmin;
     }
-    if (xmin_>=xmax)
+    catch (const std::exception& e)
     {
-      std::cout << "WARNING: xmin cannot be equal to or greater than xmax" << std::endl;
-      std::cout << "Setting xmin to 0.1 and xmax to 100." << std::endl;
+      MANAGE_EXCEPTION(e);
+      xmin_=.1;
+    }    
+
+    // Setting the description: max
+    try
+    {
+      if (xmin>=xmax) throw EXCEPTION_WARNING("xmin cannot be equal to or greater than xmax. Setting xmin to 0.1 and xmax to 100.","",0);
+      xmax_ = xmax;
+    }
+    catch (const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
       xmin_=.1;
       xmax_=100.;
-    }
+    }    
+
+
     log_xmin_=std::log10(xmin_);
     log_xmax_=std::log10(xmax_);
-
     step_ = (log_xmax_ - log_xmin_)/static_cast<MAfloat64>(nbins_);
 
     // Reseting the histogram array
@@ -106,20 +121,18 @@ class HistoLogX : public Histo
   /// Filling histogram
   void Fill(MAfloat64 value, MAfloat64 weight=1.0)
   {
-    if (std::isnan(value))
+    // Safety : nan or isinf
+    try
     {
-      WARNING << "Skipping a NaN (Not a Number) value in an histogram." 
-              << endmsg;
-      return;
+      if (std::isnan(value)) throw EXCEPTION_WARNING("Skipping a NaN (Not a Number) value in an histogram.","",0); 
+      if (std::isinf(value)) throw EXCEPTION_WARNING("Skipping a Infinity value in an histogram.","",0); 
     }
-
-    if (std::isinf(value))
+    catch (const std::exception& e)
     {
-      WARNING << "Skipping a Infinity value in an histogram." 
-              << endmsg;
-      return;
-    }
+      MANAGE_EXCEPTION(e);
+    }    
 
+    // Positive weight
     if (weight>=0)
     {
       nentries_.first++;
@@ -133,6 +146,8 @@ class HistoLogX : public Histo
         histo_[std::floor((std::log10(value)-log_xmin_)/step_)].first+=weight;
       }
     }
+
+    // Negative weight
     else
     {
       nentries_.second++;

@@ -49,7 +49,7 @@ class InstallDelphes:
 #        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
 #        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.0.tar.gz"}
 #        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.1.tar.gz"}
-        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.2.tar.gz"}
+        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.3.tar.gz"}
         self.logger = logging.getLogger('MA5')
 
 
@@ -128,23 +128,6 @@ class InstallDelphes:
                     self.logger.error('impossible to move the file/folder '+myfile+' from '+packagedir+' to '+self.installdir)
                     return False
 
-        # Updating ExRootTask
-        filename = self.installdir+'/external/ExRootAnalysis/ExRootTask.cc'
-        self.logger.debug('Updating files: commenting out lines in: '+filename+' ...')
-        self.CommentLines(filename,[64,65,66],'//')
-        
-        # Updating ExRootTask
-        filename = self.installdir+'/external/ExRootAnalysis/ExRootConfReader.cc'
-        self.logger.debug('Updating files: commenting out lines in: '+filename+' ...')
-        self.CommentLines(filename,[180,181,182],'//')
-
-        # Adding files
-        filesToAdd = ["MA5GenParticleFilter"]
-        if not self.CopyFiles(filesToAdd):
-            return False
-        if not self.UpdateDictionnary(filesToAdd):
-            return False
-
         # Updating Makefile
         filename = self.installdir+'/Makefile'
         self.logger.debug('Updating files '+filename+ ': no CMSSW\n')
@@ -153,6 +136,23 @@ class InstallDelphes:
         filename = self.installdir+'/doc/genMakefile.tcl'
         self.logger.debug('Updating files '+filename+ ': no CMSSW\n')
         self.SwitchOffCMSSW(filename)
+
+        # Updating ExRootTask
+        filename = self.installdir+'/external/ExRootAnalysis/ExRootTask.cc'
+        self.logger.debug('Updating files: commenting out lines in: '+filename+' ...')
+        self.CommentLines(filename,[64,65,66],'//')
+        
+        # Updating ExRootTask
+        filename = self.installdir+'/external/ExRootAnalysis/ExRootConfReader.cc'
+        self.logger.debug('Updating files: commenting out lines in: '+filename+' ...')
+        self.CommentLines(filename,[178,189,180],'//')
+
+        # Adding files
+        filesToAdd = ["MA5GenParticleFilter"]
+        if not self.CopyFiles(filesToAdd):
+            return False
+        if not self.UpdateDictionnary(filesToAdd):
+            return False
         
         # Ok
         return True
@@ -499,12 +499,14 @@ class InstallDelphes:
 
             ToRemove=[ 'Makefile_delphes','compilation_delphes.log','linking_delphes.log','cleanup_delphes.log']
             for myfile in ToRemove:
-                os.remove(os.path.normpath(self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/'+myfile))
+                if os.path.isfile(os.path.normpath(self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/'+myfile)):
+                    os.remove(os.path.normpath(self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/'+myfile))
             self.main.archi_info.has_delphes = False
             self.main.archi_info.delphes_priority = False
             self.main.archi_info.delphes_lib_paths = []
             self.main.archi_info.delphes_inc_paths = []
             self.main.archi_info.delphes_lib = ""
+            self.main.archi_info.delphes_original_libs = []
         return True
 
     def Activate(self):
@@ -520,6 +522,8 @@ class InstallDelphes:
             delpath=os.path.normpath(self.main.archi_info.delphes_lib_paths[0])
             deldeac = delpath.replace("DEACT_","")
             self.main.archi_info.delphes_lib=self.main.archi_info.delphes_lib.replace("DEACT_","")
+            self.main.archi_info.delphes_original_libs =\
+               [x.replace("DEACT_","") for x in self.main.archi_info.delphes_original_libs]
             self.main.archi_info.delphes_inc_paths =\
                 [ x.replace("DEACT_","") for x in self.main.archi_info.delphes_inc_paths ]
             if len(self.main.archi_info.delphes_inc_paths)>2:

@@ -25,14 +25,15 @@
 #ifndef HISTO_H
 #define HISTO_H
 
-// SampleAnalyzer headers
-#include "SampleAnalyzer/Process/Plot/PlotBase.h"
-#include "SampleAnalyzer/Process/RegionSelection/RegionSelection.h"
-
 // STL headers
 #include <map>
 #include <cmath>
 #include <vector>
+
+// SampleAnalyzer headers
+#include "SampleAnalyzer/Process/Plot/PlotBase.h"
+#include "SampleAnalyzer/Process/RegionSelection/RegionSelection.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
 namespace MA5
 {
@@ -51,7 +52,7 @@ class Histo : public PlotBase
   std::pair<MAfloat64, MAfloat64> overflow_;
 
   /// Histogram description
-  MAuint32   nbins_;
+  MAuint32  nbins_;
   MAfloat64 xmin_;
   MAfloat64 xmax_;
   MAfloat64 step_;
@@ -91,23 +92,31 @@ class Histo : public PlotBase
   Histo(const std::string& name, MAuint32 nbins, MAfloat64 xmin, MAfloat64 xmax) :
 		PlotBase(name)
   { 
-    // Setting the description
-    nbins_ = nbins;
-    if (nbins_==0)
+    // Setting the description: nbins
+    try
     {
-      std::cout << "WARNING: nbins cannot be equal to 0. Set 100" << std::endl;
-      nbins_ = 100;
+      if (nbins==0) throw EXCEPTION_WARNING("nbins cannot be equal to 0. Set 100.","",0);
+      nbins_ = nbins;
     }
-
-    xmin_ = xmin;
-    xmax_ = xmax;
-    if (xmin_>=xmax)
+    catch (const std::exception& e)
     {
-      std::cout << "WARNING: xmin cannot be equal to or greater than xmax" << std::endl;
-      std::cout << "Setting xmin to 0 and xmax to 100" << std::endl;
+      MANAGE_EXCEPTION(e);
+      nbins_ = 100;
+    }    
+
+    // Setting the description: min & max
+    try
+    {
+      if (xmin>=xmax) throw EXCEPTION_WARNING("xmin cannot be equal to or greater than xmax. Setting xmin to 0 and xmax to 100.","",0);
+      xmin_ = xmin;
+      xmax_ = xmax;
+    }
+    catch (const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
       xmin_=0.;
       xmax_=100.;
-    }
+    }    
 
     step_ = (xmax_ - xmin_)/static_cast<MAfloat64>(nbins_);
 
@@ -148,20 +157,18 @@ class Histo : public PlotBase
   /// Filling histogram
   void Fill(MAfloat64 value, MAfloat64 weight=1.0)
   {
-    if (std::isnan(value))
+    // Safety : nan or isinf
+    try
     {
-      WARNING << "Skipping a NaN (Not a Number) value in an histogram." 
-              << endmsg;
-      return;
+      if (std::isnan(value)) throw EXCEPTION_WARNING("Skipping a NaN (Not a Number) value in an histogram.","",0); 
+      if (std::isinf(value)) throw EXCEPTION_WARNING("Skipping a Infinity value in an histogram.","",0); 
     }
-
-    if (std::isinf(value))
+    catch (const std::exception& e)
     {
-      WARNING << "Skipping a Infinity value in an histogram." 
-              << endmsg;
-      return;
-    }
+      MANAGE_EXCEPTION(e);
+    }    
 
+    // Positive weight
     if (weight>=0)
     {
       nentries_.first++;
@@ -176,6 +183,8 @@ class Histo : public PlotBase
         histo_[std::floor((value-xmin_)/step_)].first+=weight;
       }
     }
+
+    // Negative weight
     else
     {
       nentries_.second++;

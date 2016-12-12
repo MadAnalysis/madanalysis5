@@ -40,9 +40,9 @@ class IsolationCone():
 
     def user_DisplayParameter(self,parameter):
         if parameter=="radius":
-            logging.info("  + cone radius = "+str(self.radius))
+            logging.getLogger('MA5').info("  + cone radius = "+str(self.radius))
         else:
-            logging.error("'isolation' has no parameter called '"+parameter+"'")
+            logging.getLogger('MA5').error("'isolation' has no parameter called '"+parameter+"'")
 
         
     def user_GetValues(self,variable):
@@ -62,13 +62,13 @@ class IsolationCone():
             try:
                 number = float(value)
             except:
-                logging.error("the cone radius must be a float value.")
+                logging.getLogger('MA5').error("the cone radius must be a float value.")
                 return False
             if number<=0:
-                logging.error("the cone radius cannot be negative or null.")
+                logging.getLogger('MA5').error("the cone radius cannot be negative or null.")
                 return False
             self.radius=number
 
         # other    
         else:
-            logging.error("'isolation' has no parameter called '"+parameter+"'")
+            logging.getLogger('MA5').error("'isolation' has no parameter called '"+parameter+"'")

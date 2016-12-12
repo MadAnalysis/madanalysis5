@@ -35,7 +35,6 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/LogStream.h"
-
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 
 

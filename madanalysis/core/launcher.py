@@ -45,6 +45,56 @@ class MA5mode():
 
 
 ################################################################################
+# Function DefaultInstallCard
+################################################################################
+def DefaultInstallCard():
+    logging.getLogger('MA5').info("Generate a default installation_options.dat file...")
+    output = file('installation_options.dat','w')
+    output.write('# WARNING! MA5 SHOULD DETECT AUTOMATICALLY YOUR CONFIGURATION\n')
+    output.write('# IF THIS AUTOMATED MODE FAILS, YOU CAN FORCE SOME \n')
+    output.write('# OPTIONS THROUGH THIS FILE\n')
+    output.write('\n')
+    output.write('# ----GENERAL----\n')
+    output.write('# tmp_dir = /tmp/ma5/\n')
+    output.write('# download_dir = /tmp/downloadma5/\n')
+    output.write('# webaccess_veto = 0 # 0=No, 1=Yes\n')
+    output.write('\n')
+    output.write('# -----ROOT-----\n')
+    output.write('# root_veto     = 0 # 0=No, 1=Yes\n')
+    output.write('# root_bin_path = /home/root/bin\n')
+    output.write('\n')
+    output.write('# -----MATPLOTLIB-----\n')
+    output.write('# matplotlib_veto = 0 # 0=No, 1=Yes\n')
+    output.write('\n')
+    output.write('# -----DELPHES----- \n')
+    output.write('# delphes_veto     = 0 # 0=No, 1=Yes\n')
+    output.write('# delphes_includes = /home/delphes/delphes/include/\n')
+    output.write('# delphes_libs     = /home/delphes/delphes/lib/\n')
+    output.write('\n')
+    output.write('# -----DELPHESMA5TUNE-----\n')
+    output.write('# delphesMA5tune_veto     = 0 # 0=No, 1=Yes\n')
+    output.write('# delphesMA5tune_includes = /home/delphesMA5tune/include\n')
+    output.write('# delphesMA5tune_libs     = /home/delphesMA5tune/lib\n')
+    output.write('\n')
+    output.write('# -----ZLIB-----\n')
+    output.write('# zlib_veto     = 0 # 0=No, 1=Yes\n')
+    output.write('# zlib_includes = /home/zlib/include/\n')
+    output.write('# zlib_libs     = /home/zlib/lib/\n')
+    output.write('\n')
+    output.write('# -----FASTJET-----\n')
+    output.write('# fastjet_veto     = 0 # 0=No, 1=Yes\n')
+    output.write('# fastjet_bin_path = /home/fastjet/build/bin/\n')
+    output.write('\n')
+    output.write('# -----PDFLATEX-----\n')
+    output.write('# pdflatex_veto = 0 # 0=No, 1=Yes\n')
+    output.write('\n')
+    output.write('# -----LATEX-----\n')
+    output.write('# latex_veto = 0 # 0=No, 1=Yes\n')
+    output.write('\n')
+    output.close()
+
+
+################################################################################
 # Function DecodeArguments
 ################################################################################
 def DecodeArguments(version, date):
@@ -56,12 +106,12 @@ def DecodeArguments(version, date):
     import getopt
     try:
         optlist, arglist = getopt.getopt(sys.argv[1:], \
-                                     "PHReEvhfmsbdq", \
+                                     "PHReEvhfmsbdqi", \
                                      ["partonlevel","hadronlevel","recolevel",\
                                       "expert","version","release","help",\
-                                      "forced","script","debug","build","qmode"])
+                                      "forced","script","debug","build","qmode","installcard"])
     except getopt.GetoptError, err:
-        logging.error(str(err))
+        logging.getLogger('MA5').error(str(err))
         Usage()
         sys.exit()
 
@@ -83,7 +133,7 @@ def DecodeArguments(version, date):
         elif o in ["-s","--script"]:
             mode.scriptmode=True
         elif o in ["-v","--version","--release"]:
-            logging.info("MA5 release : " + version + " [ " + date  + " ]")
+            logging.getLogger('MA5').info("MA5 release : " + version + " [ " + date  + " ]")
             sys.exit()
         elif o in ["-d", "--debug"]:
             mode.debug = True
@@ -97,19 +147,27 @@ def DecodeArguments(version, date):
         elif o in ["-h","--help"]:
             Usage()
             sys.exit()
+        elif o in ["-i","--installcard"]:
+            DefaultInstallCard()
+            sys.exit()
+        else:
+            logging.getLogger('MA5').error("Argument '"+o+"' is not found.")
+            Usage()
+            sys.exit()
+
 
     # Checking consistency between arguments
     if mode.partonlevel and mode.hadronlevel:
-       logging.error("Parton mode and hadron mode cannot be set in a same time.\n"
+       logging.getLogger('MA5').error("Parton mode and hadron mode cannot be set in a same time.\n"
                      "Please choose only one of these modes.")
        sys.exit()
     elif mode.partonlevel and mode.recolevel:
-       logging.error("Parton mode and reco mode cannot be set in a same time.\n"
+       logging.getLogger('MA5').error("Parton mode and reco mode cannot be set in a same time.\n"
                      "Please choose only one of these modes.")
        sys.exit()
     
     elif mode.hadronlevel and mode.recolevel:
-       logging.error("Hadron mode and reco mode cannot be set in a same time.\n"
+       logging.getLogger('MA5').error("Hadron mode and reco mode cannot be set in a same time.\n"
                      "Please choose only one of these modes.")
        sys.exit()
 
@@ -151,39 +209,37 @@ def MainSession(mode,arglist,ma5dir,version,date):
     main.developer_mode = mode.developer_mode
 
     # Displaying header
-    logging.info("")
-    logging.info(\
-    "*************************************************************\n" + \
-    "*                                                           *\n" + \
-    "*        W E L C O M E  to  M A D A N A L Y S I S  5        *\n" + \
-    "*                         ______  ______                    *\n" + \
-    "*                 /'\_/`\/\  __ \/\  ___\                   *\n" + \
-    "*                /\      \ \ \_\ \ \ \__/                   *\n" + \
-    "*                \ \ \__\ \ \  __ \ \___``\                 *\n" + \
-    "*                 \ \ \_/\ \ \ \/\ \/\ \_\ \                *\n" + \
-    "*                  \ \_\\\ \_\ \_\ \_\ \____/                *\n" + \
-    "*                   \/_/ \/_/\/_/\/_/\/___/                 *\n" + \
-    "*                                                           *\n" + \
-    "*   MA5 release : " + \
-             "%-24s" % main.archi_info.ma5_version + "%+15s" % main.archi_info.ma5_date  + "   *\n" + \
-    "*                                                           *\n" + \
-    "*         Comput. Phys. Commun. 184 (2013) 222-256          *\n" + \
-    "*             Eur. Phys. J. C74 (2014) 3103                 *\n" + \
-    "*                                                           *\n" + \
-    "*   The MadAnalysis Development Team - Please visit us at   *\n" + \
-    "*            https://launchpad.net/madanalysis5             *\n" + \
-    "*                                                           *\n" + \
-    "*              Type 'help' for in-line help.                *\n" + \
-    "*                                                           *\n" + \
-    "*************************************************************")
+    logging.getLogger('MA5').info("")
+    logging.getLogger('MA5').info("*************************************************************")
+    logging.getLogger('MA5').info("*                                                           *")
+    logging.getLogger('MA5').info("*        W E L C O M E  to  M A D A N A L Y S I S  5        *")
+    logging.getLogger('MA5').info("*                         ______  ______                    *")
+    logging.getLogger('MA5').info("*                 /'\_/`\/\  __ \/\  ___\                   *")
+    logging.getLogger('MA5').info("*                /\      \ \ \_\ \ \ \__/                   *")
+    logging.getLogger('MA5').info("*                \ \ \__\ \ \  __ \ \___``\                 *")
+    logging.getLogger('MA5').info("*                 \ \ \_/\ \ \ \/\ \/\ \_\ \                *")
+    logging.getLogger('MA5').info("*                  \ \_\\\ \_\ \_\ \_\ \____/                *")
+    logging.getLogger('MA5').info("*                   \/_/ \/_/\/_/\/_/\/___/                 *")
+    logging.getLogger('MA5').info("*                                                           *")
+    logging.getLogger('MA5').info("*   MA5 release : " + "%-24s" % main.archi_info.ma5_version + "%+15s" % main.archi_info.ma5_date  + "   *")
+    logging.getLogger('MA5').info("*                                                           *")
+    logging.getLogger('MA5').info("*         Comput. Phys. Commun. 184 (2013) 222-256          *")
+    logging.getLogger('MA5').info("*             Eur. Phys. J. C74 (2014) 3103                 *")
+    logging.getLogger('MA5').info("*                                                           *")
+    logging.getLogger('MA5').info("*   The MadAnalysis Development Team - Please visit us at   *")
+    logging.getLogger('MA5').info("*            https://launchpad.net/madanalysis5             *")
+    logging.getLogger('MA5').info("*                                                           *")
+    logging.getLogger('MA5').info("*              Type 'help' for in-line help.                *")
+    logging.getLogger('MA5').info("*                                                           *")
+    logging.getLogger('MA5').info("*************************************************************")
 
     # Displaying special banner if auto-check mode is activated 
     if mode.debug:
         log = logging.getLogger()
         log.setLevel(logging.DEBUG)
-        logging.debug("")
-        logging.debug("DEBUG MODE ACTIVATED")
-        logging.debug("")
+        logging.getLogger('MA5').debug("")
+        logging.getLogger('MA5').debug("DEBUG MODE ACTIVATED")
+        logging.getLogger('MA5').debug("")
 
     # Checking the present configuration
     if not main.CheckConfig(debug=mode.debug):
@@ -193,7 +249,7 @@ def MainSession(mode,arglist,ma5dir,version,date):
     if not main.BuildLibrary(forced=mode.build):
         sys.exit()	
 
-    logging.info("*************************************************************")
+    logging.getLogger('MA5').info("*************************************************************")
 
 
     # Expert mode
@@ -216,16 +272,24 @@ def MainSession(mode,arglist,ma5dir,version,date):
 
     # Normal mode
     else:
-    
+
         # Launching the interpreter
         from madanalysis.interpreter.interpreter import Interpreter
         interpreter = Interpreter(main)
 
-        # Looking for script
+        # List of ma5script to load
+        myscripts=[]
         for arg in arglist:
             filename=os.path.expanduser(arg)
             filename=os.path.abspath(filename)
-            interpreter.load(filename)
+            if not os.path.isfile(filename):
+               logging.getLogger('MA5').warning("The file called '"+filename+"' is not found and will be skipped.")
+            else:
+               myscripts.append(filename)
+    
+        # Executing the ma5 scripts
+        for myscript in myscripts:
+            interpreter.load(myscript)
     
         # Exit if script mode activated
         if len(arglist)!=0 and main.script:
@@ -245,29 +309,33 @@ def MainSession(mode,arglist,ma5dir,version,date):
 # Function usage
 ################################################################################
 def Usage():
-    logging.info("\nUsage of MadAnalysis 5")
-    logging.info("------------------------")
-    logging.info("Syntax : ./bin/ma5 [options] [scripts]\n")
-    logging.info("[options]")
-    logging.info("This optional argument allows to select the running mode of " +\
+    logging.getLogger('MA5').info("\nUsage of MadAnalysis 5")
+    logging.getLogger('MA5').info("------------------------")
+    logging.getLogger('MA5').info("Syntax : ./bin/ma5 [options] [scripts]\n")
+    
+    logging.getLogger('MA5').info("[options]")
+    logging.getLogger('MA5').info("This optional argument allows to select the running mode of " +\
                  "MadAnalysis 5 appropriate to the type of event files to analyze. " +\
                  "If absent, the parton-level mode is selected. Warning: the " +\
                  "different modes are self-excluding each other and only one " +\
                  "choice has to be made.")
-    logging.info("List of available options :")
-    logging.info(" -P or --partonlevel : parton-level mode")
-    logging.info(" -H or --hadronlevel : hadron-level mode")
-    logging.info(" -R or --recolevel   : detector-level mode")
-    logging.info(" -e or -E or --expert : entering expert mode")
-    logging.info(" -v or --version")
-    logging.info("    or --release     : display the version number of MadAnalysis")
-    logging.info(" -b or --build       : rebuild the SampleAnalyzer static library")
-    logging.info(" -f or --forced      : do not ask for confirmation when MA5 removes a directory or overwrites an object") 
-    logging.info(" -s or --script      : quit automatically MA5 when the script is loaded")
-    logging.info(" -h or --help        : dump this help")
-    logging.info(" -d or --debug       : debug mode\n")
-    logging.info("[scripts]")
-    logging.info("This optional argument is a list of filenames containing a "+\
+    logging.getLogger('MA5').info("List of available options :")
+    logging.getLogger('MA5').info(" -P or --partonlevel : parton-level mode")
+    logging.getLogger('MA5').info(" -H or --hadronlevel : hadron-level mode")
+    logging.getLogger('MA5').info(" -R or --recolevel   : detector-level mode")
+    logging.getLogger('MA5').info(" -e or -E or --expert : entering expert mode")
+    logging.getLogger('MA5').info(" -v or --version")
+    logging.getLogger('MA5').info("    or --release     : display the version number of MadAnalysis")
+    logging.getLogger('MA5').info(" -b or --build       : rebuild the SampleAnalyzer static library")
+    logging.getLogger('MA5').info(" -f or --forced      : do not ask for confirmation when MA5 removes a directory or overwrites an object") 
+    logging.getLogger('MA5').info(" -s or --script      : quit automatically MA5 when the script is loaded")
+    logging.getLogger('MA5').info(" -h or --help        : dump this help")
+    logging.getLogger('MA5').info(" -i or --installcard : produce the default installation card in installation_card.dat")
+    logging.getLogger('MA5').info(" -d or --debug       : debug mode")
+    logging.getLogger('MA5').info(" -q or --qmode       : developper mode only for MA5 developpers\n")
+    
+    logging.getLogger('MA5').info("[scripts]")
+    logging.getLogger('MA5').info("This optional argument is a list of filenames containing a "+\
                  "set of MadAnalysis 5 commands. The file name are handled as "+\
                  "concatenated, and the commands are applied sequentially.\n")
 
@@ -328,11 +396,11 @@ def LaunchMA5(version, date, ma5dir):
             break
 
         # Restart
-        logging.info("")
-        logging.info(StringTools.Fill('-',40))
-        logging.info(StringTools.Center('RESTART THE MADANALYSIS 5 SESSION',40))
-        logging.info(StringTools.Fill('-',40))
-        logging.info("")
+        logging.getLogger('MA5').info("")
+        logging.getLogger('MA5').info(StringTools.Fill('-',40))
+        logging.getLogger('MA5').info(StringTools.Center('RESTART THE MADANALYSIS 5 SESSION',40))
+        logging.getLogger('MA5').info(StringTools.Fill('-',40))
+        logging.getLogger('MA5').info("")
 
 
 

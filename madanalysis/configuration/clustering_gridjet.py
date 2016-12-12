@@ -47,13 +47,13 @@ class ClusteringGridJet():
 
     def user_DisplayParameter(self,parameter):
         if parameter=="ymax":
-            logging.info("  + ymax = "+str(self.ymax))
+            logging.getLogger('MA5').info("  + ymax = "+str(self.ymax))
         elif parameter=="ptmin":
-            logging.info("  + ptmin = "+str(self.ptmin))
+            logging.getLogger('MA5').info("  + ptmin = "+str(self.ptmin))
         elif parameter=="spacing":
-            logging.info("  + requested grid spacing = "+str(self.spacing))
+            logging.getLogger('MA5').info("  + requested grid spacing = "+str(self.spacing))
         else:
-            logging.error("'clustering' has no parameter called '"+parameter+"'")
+            logging.getLogger('MA5').error("'clustering' has no parameter called '"+parameter+"'")
 
 
     def SampleAnalyzerConfigString(self):
@@ -81,7 +81,7 @@ class ClusteringGridJet():
             try:
                 number = float(value)
             except:
-                logging.error("the rapidity maximum must be a float value.")
+                logging.getLogger('MA5').error("the rapidity maximum must be a float value.")
                 return False
             self.radius=number
 
@@ -90,10 +90,10 @@ class ClusteringGridJet():
             try:
                 number = float(value)
             except:
-                logging.error("the requested grid spacing must be a float value.")
+                logging.getLogger('MA5').error("the requested grid spacing must be a float value.")
                 return False
             if number<=0:
-                logging.error("the requested grid spacing cannot be negative or null.")
+                logging.getLogger('MA5').error("the requested grid spacing cannot be negative or null.")
                 return False
             self.spacing=number
 
@@ -102,13 +102,13 @@ class ClusteringGridJet():
             try:
                 number = float(value)
             except:
-                logging.error("the ptmin must be a float value.")
+                logging.getLogger('MA5').error("the ptmin must be a float value.")
                 return False
             if number<0:
-                logging.error("the ptmin cannot be negative.")
+                logging.getLogger('MA5').error("the ptmin cannot be negative.")
                 return False
             self.ptmin=number
 
         # other    
         else:
-            logging.error("'clustering' has no parameter called '"+parameter+"'")
+            logging.getLogger('MA5').error("'clustering' has no parameter called '"+parameter+"'")

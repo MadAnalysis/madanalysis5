@@ -24,6 +24,8 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/TaggerBase.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
+#include "SampleAnalyzer/Commons/Service/ConvertService.h"
 
 
 using namespace MA5;
@@ -51,9 +53,15 @@ bool TaggerBase::SetParameter(const std::string& key,
     std::stringstream str;
     str << value;
     str >> tmp;
-    if (tmp<0 || tmp>3)  WARNING << "Available methods are 1, 2 and 3. Using the default value = " 
-                                 << Method_ << endmsg;
-    else Method_=tmp;
+    try
+    {
+      if (tmp<0 || tmp>3) throw EXCEPTION_WARNING("Available methods are 1, 2 and 3. Using the default value = "+Method_,"",0);
+      Method_=tmp;
+    }
+    catch(const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
+    }    
   }
 
   // deltaR
@@ -63,9 +71,15 @@ bool TaggerBase::SetParameter(const std::string& key,
     std::stringstream str;
     str << value;
     str >> tmp;
-    if (tmp<0)  WARNING << "DeltaRmax must be a positive value. Using the default value = " 
-                                 << DeltaRmax_ << endmsg;
-    else DeltaRmax_=tmp;
+    try
+    {
+      if (tmp<0) throw EXCEPTION_WARNING("DeltaRmax must be a positive value. Using the default value = "+CONVERT->ToString(DeltaRmax_),"",0);
+      DeltaRmax_=tmp;
+    }
+    catch(const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
+    }    
   }
 
   // exclusive
@@ -75,9 +89,15 @@ bool TaggerBase::SetParameter(const std::string& key,
     std::stringstream str;
     str << value;
     str >> tmp;
-    if (tmp<0)  WARNING << "DeltaRmax must be equal to 0 or 1. Using the default value = " 
-                        << static_cast<MAint32>(Exclusive_) << endmsg;
-    else Exclusive_=(tmp==1);
+    try
+    {
+      if (tmp<0) throw EXCEPTION_WARNING("Exclusive_ must be equal to 0 or 1.value. Using the default value = "+CONVERT->ToString(Exclusive_),"",0);
+      Exclusive_=(tmp==1);
+    }
+    catch(const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
+    }    
   }
 
   // efficiency
@@ -87,19 +107,16 @@ bool TaggerBase::SetParameter(const std::string& key,
     std::stringstream str;
     str << value;
     str >> tmp;
-    if (tmp<0)
+    try
     {
-      WARNING << "Efficiency must be a positive value. "
-              << "Using the default value = " 
-              << Efficiency_ << endmsg;
+      if (tmp<0) throw EXCEPTION_WARNING("Efficiency must be a positive value. Using the default value = "+CONVERT->ToString(Efficiency_),"",0);
+      if (tmp>1) throw EXCEPTION_WARNING("Efficiency cannot be greater than 1. Using the default value = "+CONVERT->ToString(Efficiency_),"",0); 
+      Efficiency_=tmp;
     }
-    else if (tmp>1) 
+    catch(const std::exception& e)
     {
-      WARNING << "Efficiency cannot be greater than 1. "
-              << "Using the default value = " 
-              << Efficiency_ << endmsg;
-    }
-    else Efficiency_=tmp;
+      MANAGE_EXCEPTION(e);
+    }    
     if (Efficiency_!=1) doEfficiency_=true; else doEfficiency_=false;
   }
 

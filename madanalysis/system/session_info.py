@@ -37,6 +37,8 @@ class SessionInfo():
         self.has_latex          = False
         self.has_dvipdf         = False
         self.has_web            = True
+        self.gcc_header_search_path  = []
+        self.gcc_library_search_path = []
         self.logger             = logging.getLogger('MA5')
 
     def dump(self):
@@ -90,7 +92,7 @@ class SessionInfo():
             newone = pickle.load(file)
             test=True
         except:
-            self.logger.error("error occured during reading data from "+filename)
+            self.logger.warning("error occured during reading data from "+filename)
             test=False
 
         # Close the file

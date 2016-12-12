@@ -83,7 +83,7 @@ class Dataset:
             elif value=="background":
                 self.background=True
             else:
-                logging.error("The possible values for the attribute 'type' are 'signal' and 'background'.")
+                logging.getLogger('MA5').error("The possible values for the attribute 'type' are 'signal' and 'background'.")
 
         #weighted events
         elif variable == "weighted_events":
@@ -92,7 +92,7 @@ class Dataset:
             elif value=="false":
                 self.weighted_events=False
             else:
-                logging.error("The possible values for the attribute 'weighted_events' are 'true' and 'false'.")
+                logging.getLogger('MA5').error("The possible values for the attribute 'weighted_events' are 'true' and 'false'.")
 
         #linecolor        
         elif variable == "linecolor":
@@ -122,7 +122,7 @@ class Dataset:
             elif value=="auto":
                 self.linecolor=ColorType.AUTO
             else:
-                logging.error("the possible values for the attribute 'linecolor' are 'auto', 'none', 'black', 'white', 'red', 'yellow'," + \
+                logging.getLogger('MA5').error("the possible values for the attribute 'linecolor' are 'auto', 'none', 'black', 'white', 'red', 'yellow'," + \
                 "'blue', 'grey', 'purple', 'cyan', 'orange'.")
                 return
 
@@ -134,7 +134,7 @@ class Dataset:
             try:
                 code=int(value3)
             except:
-                logging.error("the parameter '"+value3+"' is not an integer")
+                logging.getLogger('MA5').error("the parameter '"+value3+"' is not an integer")
                 return
             
             if value2=='+':
@@ -142,7 +142,7 @@ class Dataset:
             elif value2=='-':
                 self.lineshade=code*-1
             else:
-                logging.error("the parameter '"+value2+"' is not '+' or '-'")
+                logging.getLogger('MA5').error("the parameter '"+value2+"' is not '+' or '-'")
                 return
 
         #linestyle
@@ -156,20 +156,20 @@ class Dataset:
             elif value=="dash-dotted":
                 self.linestyle=LineStyleType.DASHDOTTED
             else:
-                logging.error("the possible values for the attribute 'linestyle' are 'solid', 'dashed', 'dotted', 'dash-dotted'.")
+                logging.getLogger('MA5').error("the possible values for the attribute 'linestyle' are 'solid', 'dashed', 'dotted', 'dash-dotted'.")
                 
         #linewidth
         elif variable == "linewidth":
             try:
                 code=int(value)
             except:
-                logging.error("the parameter '"+value+"' is not an integer value")
+                logging.getLogger('MA5').error("the parameter '"+value+"' is not an integer value")
                 return
 
             if code>0 and code<10:
                 self.linewidth=code
             else:
-                logging.error("the parameter '"+value+"' must be > 0 and < 11")
+                logging.getLogger('MA5').error("the parameter '"+value+"' must be > 0 and < 11")
 
         #backstyle
         elif variable == "backstyle":
@@ -184,7 +184,7 @@ class Dataset:
             elif value=="vline":
                 self.backstyle=BackStyleType.VLINE
             else:
-                logging.error("the possible values for the attribute 'backstyle' are 'solid', 'dotted', 'hline', 'dline', 'vline'.")
+                logging.getLogger('MA5').error("the possible values for the attribute 'backstyle' are 'solid', 'dotted', 'hline', 'dline', 'vline'.")
 
         #backcolor        
         elif variable == "backcolor":
@@ -213,7 +213,7 @@ class Dataset:
             elif value=="auto":
                 self.backcolor=ColorType.AUTO
             else:
-                logging.error("the possible value for the attribute 'backcolor' are 'auto', 'none', 'black', 'white', 'red', 'yellow'," + \
+                logging.getLogger('MA5').error("the possible value for the attribute 'backcolor' are 'auto', 'none', 'black', 'white', 'red', 'yellow'," + \
                 "'blue', 'grey', 'purple', 'cyan', 'orange'.")
                 return
                
@@ -225,7 +225,7 @@ class Dataset:
             try:
                 code=int(value3)
             except:
-                logging.error("the parameter '"+value3+"' is not an integer")
+                logging.getLogger('MA5').error("the parameter '"+value3+"' is not an integer")
                 return
             
             if value2=='+':
@@ -233,7 +233,7 @@ class Dataset:
             elif value2=='-':
                 self.backshade=code*-1
             else:
-                logging.error("the parameter '"+value2+"' is not '+' or '-'")
+                logging.getLogger('MA5').error("the parameter '"+value2+"' is not '+' or '-'")
                 return
 
         #weight
@@ -241,7 +241,7 @@ class Dataset:
             try:
                 tmp = float(value)
             except:
-                logging.error("the value of the attribute '"+variable+"' must be set to a positive floating number.")
+                logging.getLogger('MA5').error("the value of the attribute '"+variable+"' must be set to a positive floating number.")
                 return
             if tmp>=0:
                 if variable == "weight":
@@ -250,7 +250,7 @@ class Dataset:
                     self.xsection=tmp
                     self.measured_global.xsection = tmp
             else:
-                logging.error("the value of the attribute '"+variable+"' must be set to a positive floating number.")
+                logging.getLogger('MA5').error("the value of the attribute '"+variable+"' must be set to a positive floating number.")
                 return
 
         # title
@@ -260,17 +260,17 @@ class Dataset:
                 value=value[1:-1]
                 self.title=value 
             else:
-                logging.error("the value of the attribute '"+variable+\
+                logging.getLogger('MA5').error("the value of the attribute '"+variable+\
                               "' must be set to a string.")
                 
         # other    
         else:
-            logging.error("the class dataset has no attribute denoted by '"+variable+"'.")
+            logging.getLogger('MA5').error("the class dataset has no attribute denoted by '"+variable+"'.")
             
 
     def Display(self):
-        logging.info("   ******************************************" )
-        logging.info("   Name of the dataset = " + self.name + " (" + self.GetStringTag() + ")")
+        logging.getLogger('MA5').info("   ******************************************" )
+        logging.getLogger('MA5').info("   Name of the dataset = " + self.name + " (" + self.GetStringTag() + ")")
         self.user_DisplayParameter("title")
         self.user_DisplayParameter("xsection")
         self.user_DisplayParameter("weight")
@@ -280,10 +280,10 @@ class Dataset:
         self.user_DisplayParameter("linewidth")
         self.user_DisplayParameter("backcolor")
         self.user_DisplayParameter("backstyle")
-        logging.info("   List of event files included in this dataset:")
+        logging.getLogger('MA5').info("   List of event files included in this dataset:")
         for item in self.filenames:
-            logging.info("    - " + item) 
-        logging.info("   ******************************************" )
+            logging.getLogger('MA5').info("    - " + item) 
+        logging.getLogger('MA5').info("   ******************************************" )
         msg = "   Cross section = "
         if self.measured_global.xsection==0 or self.measured_global.xerror!=0:
             msg+="("
@@ -291,31 +291,31 @@ class Dataset:
         if self.measured_global.xsection==0 or self.measured_global.xerror!=0:
             msg+=")"
         msg += " pb"
-        logging.info(msg)
-        logging.info("   Total number of events = " + str(self.measured_global.nevents))
+        logging.getLogger('MA5').info(msg)
+        logging.getLogger('MA5').info("   Total number of events = " + str(self.measured_global.nevents))
         if (self.measured_global.sumw_positive + self.measured_global.sumw_negative)==0:
             msg='0.0'
         else:
             msg=str(Layout.Round_to_Ndigits(100.*self.measured_global.sumw_negative / \
                    (self.measured_global.sumw_positive + self.measured_global.sumw_negative ),2 ))
-        logging.info("   Ratio of negative weights = " + str(msg) + ' %')
-        logging.info("   ******************************************" )
+        logging.getLogger('MA5').info("   Ratio of negative weights = " + str(msg) + ' %')
+        logging.getLogger('MA5').info("   ******************************************" )
 
 
     def user_DisplayParameter(self,parameter):
         if parameter=="weight":
-            logging.info("   User-imposed weight of the set = "+str(self.weight))
+            logging.getLogger('MA5').info("   User-imposed weight of the set = "+str(self.weight))
         elif parameter=="xsection":
-            logging.info("   User-imposed cross section = "+str(self.xsection))
+            logging.getLogger('MA5').info("   User-imposed cross section = "+str(self.xsection))
         elif parameter=="type":
-            logging.info("   Type = "+self.GetStringTag())
+            logging.getLogger('MA5').info("   Type = "+self.GetStringTag())
         elif parameter=="weighted_events":
             if self.weighted_events:
-                logging.info("   Taking account of event weight: true")
+                logging.getLogger('MA5').info("   Taking account of event weight: true")
             else:
-                logging.info("   Taking account of event weight: false")
+                logging.getLogger('MA5').info("   Taking account of event weight: false")
         elif parameter=="title":
-            logging.info("   Title = '"+self.title+"'")
+            logging.getLogger('MA5').info("   Title = '"+self.title+"'")
         elif parameter=="linecolor":
             msg=ColorType.convert2string(self.linecolor)
             if self.lineshade!=0 and self.linecolor!=ColorType.AUTO:
@@ -323,11 +323,11 @@ class Dataset:
                     msg+="+"+str(self.lineshade)
                 else:
                     msg+=str(self.lineshade)
-            logging.info("   Line color in histograms = "+msg)
+            logging.getLogger('MA5').info("   Line color in histograms = "+msg)
         elif parameter=="linestyle":
-            logging.info("   Line style in histograms = "+LineStyleType.convert2string(self.linestyle))
+            logging.getLogger('MA5').info("   Line style in histograms = "+LineStyleType.convert2string(self.linestyle))
         elif parameter=="linewidth":
-            logging.info("   Line width in histograms = "+str(self.linewidth))
+            logging.getLogger('MA5').info("   Line width in histograms = "+str(self.linewidth))
         elif parameter=="backcolor":
             msg=ColorType.convert2string(self.backcolor)
             if self.backshade!=0 and self.backcolor!=ColorType.AUTO:
@@ -335,11 +335,11 @@ class Dataset:
                     msg+="+"+str(self.backshade)
                 else:
                     msg+=str(self.backshade)
-            logging.info("   Background color in histograms = "+msg)
+            logging.getLogger('MA5').info("   Background color in histograms = "+msg)
         elif parameter=="backstyle":
-            logging.info("   Background style in histograms = "+BackStyleType.convert2string(self.backstyle))
+            logging.getLogger('MA5').info("   Background style in histograms = "+BackStyleType.convert2string(self.backstyle))
         else:
-            logging.error(" the class dataset has no attribute denoted by '"+parameter+"'")
+            logging.getLogger('MA5').error(" the class dataset has no attribute denoted by '"+parameter+"'")
 
     def GetStringTag(self):
         if self.background:

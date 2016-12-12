@@ -123,7 +123,7 @@ class InstallDelphesMA5tune:
             return False
         # Applying the patch
         logname = os.path.normpath(self.installdir+'/patch.log')
-        theCommands=['python','patch.py']
+        theCommands=[sys.executable,'patch.py']
         self.logger.debug('shell command: '+' '.join(theCommands))
         ok, out= ShellCommand.ExecuteWithLog(theCommands,\
                                              logname,\
@@ -314,27 +314,34 @@ class InstallDelphesMA5tune:
 
             ToRemove=[ 'Makefile_delphesMA5tune','compilation_delphesMA5tune.log','linking_delphesMA5tune.log','cleanup_delphesMA5tune.log']
             for myfile in ToRemove:
-                os.remove(os.path.normpath(self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/'+myfile))
+                if os.path.isfile(os.path.normpath(self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/'+myfile)):
+                    os.remove(os.path.normpath(self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/'+myfile))
             self.main.archi_info.has_delphesMA5tune = False
             self.main.archi_info.delphesMA5tune_priority = False
             self.main.archi_info.delphesMA5tune_lib_paths = []
             self.main.archi_info.delphesMA5tune_inc_paths = []
             self.main.archi_info.delphesMA5tune_lib = ""
+            self.main.archi_info.delphesMA5tune_original_libs = []
         return True
 
     def Activate(self):
         # output =  1: activation successfull.
         # output =  0: nothing is done.
         # output = -1: error
+        self.logger.debug("Starting the activation of delphesMA5tune")
         user_info = UserInfo()
         user_info.ReadUserOptions(self.main.archi_info.ma5dir+'/madanalysis/input/installation_options.dat')
         checker = ConfigChecker(self.main.archi_info, user_info, self.main.session_info, self.main.script, False)
+        self.logger.debug("Checking if delphesMA5tune was previously installed")
         hastune = checker.checkDelphesMA5tune(True)
+        self.logger.debug("  delphesMA5tune available? -> " + str(hastune))
         if hastune:
             # Paths
             delpath=os.path.normpath(self.main.archi_info.delphesMA5tune_lib_paths[0])
             deldeac = delpath.replace("DEACT_","")
             self.main.archi_info.delphesMA5tune_lib=self.main.archi_info.delphesMA5tune_lib.replace("DEACT_","")
+            self.main.archi_info.delphesMA5tune_original_libs =\
+              [x.replace("DEACT_","") for x in self.main.archi_info.delphesMA5tune_original_libs]
             self.main.archi_info.delphesMA5tune_inc_paths =\
                 [ x.replace("DEACT_","") for x in self.main.archi_info.delphesMA5tune_inc_paths ]
             if len(self.main.archi_info.delphesMA5tune_inc_paths)>2:
@@ -351,6 +358,7 @@ class InstallDelphesMA5tune:
             shutil.move(delpath,deldeac)
 
             # Compiler setup
+            self.logger.debug("Preparing makefiles")
             compiler = LibraryWriter('lib',self.main)
             ncores = compiler.get_ncores2()
 
@@ -371,6 +379,7 @@ class InstallDelphesMA5tune:
 
 
             for mypackage in ToBuild:
+                self.logger.debug("Building " + mypackage)
                 if not compiler.WriteMakefileForInterfaces(mypackage):
                     self.logger.error("library building aborted.")
                     return -1

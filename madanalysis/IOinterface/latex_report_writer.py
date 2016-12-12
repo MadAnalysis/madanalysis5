@@ -56,7 +56,7 @@ class LATEXReportWriter(TextFileWriter.TextFileWriter):
         if os.path.isfile(stylepath+'/jheppub.sty'):
             os.system('cp ' + stylepath + '/jheppub.sty ' + dirname)
         else:
-            logging.error('jheppub.sty not found. Cannot generate a latex report.')
+            logging.getLogger('MA5').error('jheppub.sty not found. Cannot generate a latex report.')
 
 
     @staticmethod    
@@ -182,7 +182,7 @@ class LATEXReportWriter(TextFileWriter.TextFileWriter):
         self.current_col=self.current_col+1
 
         if  self.current_col>self.number_col:
-            logging.warning("The number of the current column is larger than the total number of declared columns.")
+            logging.getLogger('MA5').warning("The number of the current column is larger than the total number of declared columns.")
         if self.first_cell==True:
             self.file.write("      \\cellcolor{"+ColorType.convert2string(color)+"}")
             self.first_cell=False
@@ -216,11 +216,11 @@ class LATEXReportWriter(TextFileWriter.TextFileWriter):
             self.file.write("}\n  \\end{center}\n\\end{figure}\n")
 #            self.WriteSpacor()
         else:
-            logging.warning(thefile+self.ext+" does not exist.")
+            logging.getLogger('MA5').warning(thefile+self.ext+" does not exist.")
         
     def WriteFoot(self):
         if self.bullet!=0:
-            logging.warning("the number of 'OpenBullet()' and 'CloseBullet()' are different.")
+            logging.getLogger('MA5').warning("the number of 'OpenBullet()' and 'CloseBullet()' are different.")
         if self.table!=0:
-            logging.warning("there is an open table. Please check for a missing 'EndTable()' tag.")
+            logging.getLogger('MA5').warning("there is an open table. Please check for a missing 'EndTable()' tag.")
         self.file.write("\\end{document}\n")

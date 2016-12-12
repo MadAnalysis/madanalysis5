@@ -24,6 +24,7 @@
 
 // SampleHeader headers
 #include "SampleAnalyzer/Interfaces/delphes/DelphesMemoryInterface.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
 // Delphes header
 #include "classes/DelphesClasses.h"
@@ -136,25 +137,17 @@ void DelphesMemoryInterface::Initialize(TFolder* delphesFolder,
   }
 
   // Display warning to main branches
-  if (MET_==0)
+  try
   {
-    WARNING << "Delphes output: MET is not found" << endmsg;
+    if (MET_      ==0) throw EXCEPTION_WARNING("Delphes output: MET is not found","",0);
+    if (Electron_ ==0) throw EXCEPTION_WARNING("Delphes output: Electron collection is not found","",0);
+    if (Muon_     ==0) throw EXCEPTION_WARNING("Delphes output: Muon collection is not found","",0);
+    if (Photon_   ==0) throw EXCEPTION_WARNING("Delphes output: Photon collection is not found","",0);
+    if (Jet_      ==0) throw EXCEPTION_WARNING("Delphes output: Jet collection is not found","",0);
   }
-  if (Electron_==0)
+  catch (const std::exception& e)
   {
-    WARNING << "Delphes output: Electron collection is not found" << endmsg;
-  }
-  if (Muon_==0)
-  {
-    WARNING << "Delphes output: Muon collection is not found" << endmsg;
-  }
-  if (Photon_==0)
-  {
-    WARNING << "Delphes output: Photon collection is not found" << endmsg;
-  }
-  if (Jet_==0)
-  {
-    WARNING << "Jet output: Jet collection is not found" << endmsg;
+    MANAGE_EXCEPTION(e);
   }
 
 }

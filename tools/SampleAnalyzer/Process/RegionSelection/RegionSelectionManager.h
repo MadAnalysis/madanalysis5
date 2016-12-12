@@ -36,6 +36,7 @@
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelection.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Process/Writer/SAFWriter.h"
+#include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
 namespace MA5
 {
@@ -174,10 +175,17 @@ class RegionSelectionManager
           break;
         }
       }
-      if(myregions.size()==i)
-        WARNING << "Assigning the cut \"" << name
-                << "\" to the non-existing signal region \"" << RSnames[i]
-                << "\"" << endmsg;
+  
+      try
+      {
+        if (myregions.size()==i) throw EXCEPTION_WARNING("Assigning the cut \"" + name + 
+                                                         "\" to the non-existing signal region \"" + RSnames[i] + 
+                                                         "\"","",0);
+      }
+      catch (const std::exception& e)
+      {
+        MANAGE_EXCEPTION(e);
+      }    
     }
 
     // Creating the cut
@@ -234,10 +242,16 @@ class RegionSelectionManager
           break;
         }
       }
-      if(myregions.size()==i)
-        WARNING << "Assigning the histo \"" << name
-                << "\" to the non-existing signal region \"" << RSnames[i]
-                << "\"" << endmsg;
+      try
+      {
+        if (myregions.size()==i) throw EXCEPTION_WARNING("Assigning the histo \"" + name + 
+                                                         "\" to the non-existing signal region \"" + RSnames[i] + 
+                                                         "\"","",0);
+      }
+      catch (const std::exception& e)
+      {
+        MANAGE_EXCEPTION(e);
+      }    
     }
 
     // Creating the histo
@@ -261,8 +275,16 @@ class RegionSelectionManager
     }
 
     // The region has not been found
-    WARNING << "Checking whether the non-declared region \""
-            << RSname << "\" is surviving the applied cuts." << endmsg;
+    try
+    {
+      throw EXCEPTION_WARNING("Checking whether the non-declared region \"" +
+                              RSname + "\" is surviving the applied cuts.","",0);
+    }
+    catch (const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
+    }    
+
     return false;
   }
 
