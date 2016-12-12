@@ -41,9 +41,12 @@ class InstallPadForMA5tune:
         self.delphesdir  = self.installdir + "/Input/Cards"
         self.untardir    = ""
         self.ncores      = 1
-        self.analyses    = ["cms_sus_14_001_monojet", "cms_sus_14_001_TopTag", "cms_sus_13_016", "cms_sus_13_012", "cms_sus_13_011",
-            "atlas_higg_2013_03", "atlas_1405_7875", "atlas_susy_2014_10", "atlas_susy_2013_21", "atlas_susy_2013_11",
-             "atlas_sus_13_05", "atlas_susy_2013_04" ]
+        self.analyses    = []
+        # CMS 8TeV
+        self.analyses.extend(["cms_sus_14_001_monojet", "cms_sus_14_001_TopTag", "cms_sus_13_016", "cms_sus_13_012", "cms_sus_13_011"])
+        # ATLAS 8TeV
+        self.analyses.extend(["atlas_higg_2013_03", "atlas_1405_7875", "atlas_susy_2014_10", "atlas_susy_2013_21", "atlas_susy_2013_11",
+                              "atlas_sus_13_05", "atlas_susy_2013_04" ])
         self.files = {
     "cms_sus_13_011.cpp" : "http://inspirehep.net/record/1301484/files/cms_sus_13_011.cpp",
     "cms_sus_13_011.h"   : "http://inspirehep.net/record/1301484/files/cms_sus_13_011.h",
@@ -296,11 +299,26 @@ class InstallPadForMA5tune:
 
 
     def CreatePackageFolder(self):
-        TheCommand = ['bin/ma5', '-R', '-E', '-f', 'PADForMA5tune', 'cms_sus_13_011']
+
         logname = os.path.normpath(self.main.archi_info.ma5dir+'/PAD-workingdir.log')
-        ok, out= ShellCommand.ExecuteWithLog(TheCommand,logname,self.main.archi_info.ma5dir,silent=False)
-        if not ok:
+
+        # Initialize the expert mode
+        logging.getLogger('MA5').debug('Calling the expert mode for file cms_sus_13_011')
+        from madanalysis.core.expert_mode import ExpertMode
+        expert = ExpertMode(self.main)
+        dirname="PADForMA5tune"
+        if not expert.CreateDirectory(dirname):
             return False
+        filename="cms_sus_13_011"
+        if not expert.Copy(dirname):
+            return False
+
+#        TheCommand = ['bin/ma5', '-R', '-E', '-f', 'PADForMA5tune', 'cms_sus_13_011']
+#        logname = os.path.normpath(self.main.archi_info.ma5dir+'/PAD-workingdir.log')
+#        ok, out= ShellCommand.ExecuteWithLog(TheCommand,logname,self.main.archi_info.ma5dir,silent=False)
+#        if not ok:
+#            return False
+
         for analysis in self.analyses:
           if "cms_sus_13_011" not in analysis:
             TheCommand = ['./newAnalyzer.py', analysis, analysis]

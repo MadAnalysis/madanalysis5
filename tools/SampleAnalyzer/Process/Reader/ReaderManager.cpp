@@ -44,30 +44,41 @@ void ReaderManager::BuildTable()
   Add("lhe",lhe);
 #ifdef ZIP_USE
   Add("lhe.gz",lhe);
+#else
+  AddForbidden("lhe.gz","Zlib library is not detected");
 #endif
 
   LHCOReader* lhco = new LHCOReader();
   Add("lhco",lhco);
 #ifdef ZIP_USE
   Add("lhco.gz",lhco);
+#else
+  AddForbidden("lhco.gz","Zlib library is not detected");
 #endif
 
   STDHEPreader* stdhep = new STDHEPreader();
   Add("hep",stdhep);
 #ifdef ZIP_USE
   Add("hep.gz",stdhep);
+#else
+  AddForbidden("hep.gz","Zlib library is not detected");
 #endif
 
   HEPMCReader* hepmc = new HEPMCReader();
   Add("hepmc",hepmc);
 #ifdef ZIP_USE
   Add("hepmc.gz",hepmc);
+#else
+  AddForbidden("hepmc.gz","Zlib library is not detected");
 #endif
 
 #ifdef ROOT_USE
   ROOTReader* root = new ROOTReader();
   Add("root",root);
+#else
+  AddForbidden("root","ROOT package is not detected");
 #endif
+
 }
 
 
@@ -101,6 +112,30 @@ ReaderBase* ReaderManager::GetByFileExtension(std::string filename)
       return Objects_[it->second];
     }
   }
+
+
+  // IsItForbidden
+  std::string motivation="";
+
+  // Loop over forbidden names
+  for (std::map<std::string, std::string>::const_iterator
+         it = ForbiddenNames_.begin(); it != ForbiddenNames_.end(); it++)
+  {
+    // easy case to reject
+    if (filename.size()<it->first.size()) continue;
+
+    // find pattern in filename
+    if (it->first.compare(0,
+                          it->first.size(),
+                          filename,
+                          filename.size()-it->first.size(),
+                          it->first.size())==0)
+    {
+      ERROR << "File ending with extension " << it->first << " is not allowed." << endmsg;
+      ERROR << "Reason: " << it->second << endmsg;
+    }
+  }
+
 
   // No reader found : return null pointer
   return 0;

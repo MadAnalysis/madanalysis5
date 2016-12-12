@@ -210,7 +210,6 @@ class PlotFlow:
              self.main.stack==StackingMethodType.STACK ):
             stackmode=True
 
-
         # Open the file in write-mode
         try:
             outputC = file(filenameC,'w')
@@ -438,11 +437,13 @@ class PlotFlow:
         axis_titleY = ref.GetYaxis()
 
         # Scale to one ?
+        print "ERIC"
         scale2one = False
         if ref.stack==StackingMethodType.NORMALIZE2ONE or \
            (self.main.stack==StackingMethodType.NORMALIZE2ONE and \
            ref.stack==StackingMethodType.AUTO):
             scale2one = True
+        print "ERIC: scale2one" + str(scale2one)
 
         if scale2one:
             axis_titleY += " ( scaled to one )"

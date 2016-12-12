@@ -57,6 +57,9 @@ class ManagerBase
   /// Mapping between names (lower case) and objects
   std::map<std::string, MAuint32> Names_;
 
+  /// List of forbidden name + the motivation
+  std::map<std::string, std::string> ForbiddenNames_;
+
 
   // -------------------------------------------------------------
   //                       method members
@@ -78,12 +81,18 @@ class ManagerBase
   T* Get(std::string name);
 
   /// Add an object in the collection
-  bool Add(std::string name, T* object);
+  MAbool Add(std::string name, T* object);
+
+  /// Add an object in the collection
+  MAbool AddForbidden(std::string name, std::string motivation);
 
   /// Display the content of the Manager
   void Print(const std::vector<T*>& Objects, 
              const std::map<std::string, MAuint32>& Names,
              LogStream& os=INFO) const;
+
+  /// Is it a forbidden name? motivation=output
+  MAbool IsItForbidden(std::string name, std::string& motivation);
 
 };
 
@@ -113,10 +122,39 @@ T* ManagerBase<T>::Get(std::string name)
 
 
 // -----------------------------------------------------------------------------
+// IsItForbidden?
+// -----------------------------------------------------------------------------
+template <typename T>
+MAbool ManagerBase<T>::IsItForbidden(std::string name, std::string& motivation)
+{
+  // Set the name in lower case
+  std::transform(name.begin(), name.end(),
+                 name.begin(), std::ptr_fun<int, int>(std::tolower));
+
+  // Seach the name
+  std::map<std::string, std::string>::iterator it = ForbiddenNames_.find(name); 
+
+  // Found
+  if (it!=ForbiddenNames_.end())
+  {
+    motivation=std::string(it->second);
+    return true;
+  }
+
+  // No reader found
+  else
+  {
+    motivation=std::string("");
+    return false;
+  }
+}
+
+
+// -----------------------------------------------------------------------------
 // Add
 // -----------------------------------------------------------------------------
 template <typename T>
-bool ManagerBase<T>::Add(std::string name, T* object)
+MAbool ManagerBase<T>::Add(std::string name, T* object)
 {
   // Set the name in lower case
   std::transform(name.begin(), name.end(),
@@ -143,6 +181,26 @@ bool ManagerBase<T>::Add(std::string name, T* object)
   Objects_.push_back(object);
   found.first->second=(Objects_.size()-1);
   return true;  
+}
+
+
+// -----------------------------------------------------------------------------
+// AddForbidden
+// -----------------------------------------------------------------------------
+template <typename T>
+MAbool ManagerBase<T>::AddForbidden(std::string name, std::string motivation)
+{
+  // Set the name in lower case
+  std::transform(name.begin(), name.end(),
+                 name.begin(), std::ptr_fun<int, int>(std::tolower));
+
+  // Insert name in the data base
+  std::pair<std::map<std::string,std::string>::iterator,bool>
+    found = ForbiddenNames_.insert(std::make_pair(name,motivation));
+  
+  // Check if name insertion is failed
+  if (!found.second) return false;
+  else return true;  
 }
 
 

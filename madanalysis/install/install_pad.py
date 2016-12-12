@@ -41,7 +41,13 @@ class InstallPad:
         self.delphesdir  = self.installdir + "/Input/Cards"
         self.untardir    = ""
         self.ncores      = 1
-        self.analyses    = ["CMS_B2G_12_012", "cms_b2g_12_022", "cms_b2g_14_004", "cms_exo_12_048", "cms_exo_12_047", "ATLAS_EXOT_2014_06", "ATLAS_1604_07773", "atlas_1605_03814"]
+        self.analyses    = []
+        # CMS 8TeV 
+        self.analyses.extend(["CMS_B2G_12_012", "cms_b2g_12_022", "cms_b2g_14_004", "cms_exo_12_048", "cms_exo_12_047"])
+        # ATLAS 8TeV
+        self.analyses.extend(["ATLAS_EXOT_2014_06"])
+        # ATLAS 13TeV
+        self.analyses.extend(["ATLAS_1604_07773", "atlas_1605_03814"])
         self.files = {
           "CMS_B2G_12_012.cpp" : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.cpp",
           "CMS_B2G_12_012.h"   : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.h",
@@ -211,14 +217,31 @@ class InstallPad:
 
 
     def CreatePackageFolder(self):
-        TheCommand = ['bin/ma5', '-R', '-E', '-f', 'PAD', 'CMS_B2G_12_012']
+
         logname = os.path.normpath(self.main.archi_info.ma5dir+'/PAD-workingdir.log')
-        ok, out= ShellCommand.ExecuteWithLog(TheCommand,logname,self.main.archi_info.ma5dir,silent=False)
-        if not ok:
+
+        # Initialize the expert mode
+        logging.getLogger('MA5').debug('Calling the expert mode for file CMS_B2G_12_012')
+        from madanalysis.core.expert_mode import ExpertMode
+        expert = ExpertMode(self.main)
+        dirname="PAD"
+        if not expert.CreateDirectory(dirname):
             return False
+        filename="CMS_B2G_12_012"
+        if not expert.Copy(dirname):
+            return False
+
+#        TheCommand = ['bin/ma5', '-R', '-E', '-f', 'PAD', 'CMS_B2G_12_012']
+#        logging.getLogger('MA5').debug(' '.join(TheCommand))
+#        logname = os.path.normpath(self.main.archi_info.ma5dir+'/PAD-workingdir.log')
+#        ok, out= ShellCommand.ExecuteWithLog(TheCommand,logname,self.main.archi_info.ma5dir,silent=False)
+#        if not ok:
+#            return False
+
         for analysis in self.analyses:
           if "CMS_B2G_12_012" not in analysis:
             TheCommand = ['./newAnalyzer.py', analysis, analysis]
+            logging.getLogger('MA5').debug(' '.join(TheCommand))
             lname = os.path.normpath(self.installdir+'/PAD-'+analysis+'.log')
             ok, out= ShellCommand.ExecuteWithLog(TheCommand,lname,\
               self.installdir+'/Build/SampleAnalyzer',silent=False)
@@ -226,19 +249,23 @@ class InstallPad:
                 return False
           TheCommand = ['rm', '-f', self.installdir+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.cpp',\
                 self.installdir+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.h']
+          logging.getLogger('MA5').debug(' '.join(TheCommand))
           ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
           if not ok:
               return False
           TheCommand = ['rm', '-f', self.installdir+'/Build/Main/main.bak']
+          logging.getLogger('MA5').debug(' '.join(TheCommand))
           ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
           if not ok:
               return False
         # Logs
         TheCommand = ['mkdir', self.installdir+'/Logs']
+        logging.getLogger('MA5').debug(' '.join(TheCommand))
         ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
         if not ok:
             return False
         TheCommand = ['mv',logname,self.installdir]
+        logging.getLogger('MA5').debug(' '.join(TheCommand))
         ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
         if not ok:
             return False
