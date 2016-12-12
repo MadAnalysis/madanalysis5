@@ -1,56 +1,15 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
-159  1.5.25   (2016/11/14) fuks:    Bug fix in the madgraph interface (multiparticles) 
-
-158  1.5.24   (2016/10/28) fuks:    Bug in the eflow isolation 
-
-157  1.5.23   (2016/10/27) fuks:    Fixing root detection issue 
-
-153  1.5.22   (2016/09/21) fuks:    Fixing matplotlib installation 
-
-150  1.5.21   (2016/09/03) fuks:    Fixing the mg5-ma5 interface 
-
-149  1.5.20   (2016/09/03) fuks:    fixing last few things for the mg5-ma5 interface 
-
-148  1.5.19   (2016/09/02) fuks:    ma5-mg5 interface 
-
-147  1.5.18   (2016/09/01) fuks:    small fixes for the mg5-ma5 interface 
-
-146  1.5.17   (2016/09/01) fuks:    Fixing fastjet plots for the mg5-ma5 interface 
-
-145  1.5.16   (2016/09/01) fuks:    ma5-mg5 interface 
-
-144  1.5.15   (2016/09/01) fuks:    Fixing installation options for the mg5-ma5 interface 
-
-142  1.5.14   (2016/09/01) fuks:    Protections added for PADMA5tune and delphesMA5tune -> not 
-                                   compatible with root 6 
-
-141  1.5.13   (2016/09/01) fuks:    gzip fix 
-
-140  1.5.12   (2016/09/01) fuks:    FIFO step 1 
-
-137  1.5.11   (2016/08/30) fuks:    Few bugs in the detection module 
-
-133  1.5.10   (2016/08/30) fuks:    Fixing last bugs for the ma5-mg5 interface 
-
-131  1.5.9    (2016/08/30) fuks:    Fixing ma5-mg5 interface issues 
-
-127  1.5.8    (2016/08/30) fuks:    Fixing issues related to the mg5_amc interface 
-
-121  1.5.7    (2016/08/26) fuks:    fixing a few bugs 
-
-120  1.5.6    (2016/08/26) fuks:    Fixing a few bugs 
-
-119  1.5.5    (2016/08/24) fuks:    Small bug with the colors 
-
-118  1.5.4    (2016/07/24) fuks:    Fixing bugs in the recasting module when negative weights are around 
-
-117  1.5.3    (2016/07/24) fuks:    Fixing a few bug in the recasting module (reading of the recasting 
-                                   card) 
-
-115  1.6      (2016/07/23) fuks:    No more RecastingTools 
-
-114  1.5      (2016/07/23) fuks:    Fixing the root detection with the delphes activation methods 
+159  1.5   (2016/11/14) ma5team:    - embedded into MadGraph
+                                    - FIFO mode for MadGraph
+                                    - No more RecastingTools
+                                    - review isolation definitions
+                                    - all loggers become logging.getLogger("MA5")
+                                    - display error message if not-supported file extension
+                                    - improve gzip installation / detection
+                                    - protections added for PADMA5tune and delphesMA5tune -> not 
+                                      compatible with root 6 
+                                    - extend the list of recasted analyses
 
 111  1.4    (2016/07/20) ma5team:   - Root is now optional and Pyroot is not a requirement anymore
                                     - matplotlib can be used for the histograms
