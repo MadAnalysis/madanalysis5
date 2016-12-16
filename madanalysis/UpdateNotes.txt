@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+119           (2016/12/16) econte:  change release number 
+
 118           (2016/12/16) econte:  change log number 
 
 117           (2016/12/16) econte:  change release note 
