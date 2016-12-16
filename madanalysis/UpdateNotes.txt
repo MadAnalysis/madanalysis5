@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+117           (2016/12/16) econte:  change release note 
+
 159  1.5   (2016/11/14) ma5team:    - embedded into MadGraph
                                     - FIFO mode for MadGraph
                                     - No more RecastingTools
