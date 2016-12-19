@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+165           (2016/12/19) econte:  removed unuseless files 
+
 159  1.5.25   (2016/11/14) fuks:    Bug fix in the madgraph interface (multiparticles) 
 
 158  1.5.24   (2016/10/28) fuks:    Bug in the eflow isolation 
