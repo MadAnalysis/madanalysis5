@@ -62,7 +62,7 @@ sys.path.insert(0, servicedir)
 
 # Release version
 # Do not touch it !!!!!  
-version = "1.5.28"
+version = "1.5.29"
 date = "2016/12/19"
 
 # Loading the MadAnalysis session
