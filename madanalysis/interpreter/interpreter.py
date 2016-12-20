@@ -200,11 +200,15 @@ class Interpreter(InterpreterBase):
      # Restart
     def do_restart(self, line):
         """ sending a signal allowing to restart the interpreter """
-#        if self.main.script:
-#            logging.getLogger('MA5').warning("'restart' command is not allowed in script mode.")
 
-        YES=True
+        # Restart not available in script mode
+        # avoiding that the script is read from the beginning
+        if self.main.script:
+            logging.getLogger('MA5').warning("'restart' command is not allowed in script mode.")
+            return None
+
         # Asking the safety question
+        YES=True
         if not Main.forced:
            logging.getLogger('MA5').warning("Are you sure to restart the MadAnalysis 5 session? (Y/N)")
            allowed_answers=['n','no','y','yes']
@@ -224,7 +228,7 @@ class Interpreter(InterpreterBase):
             self.main.repeatSession=True
             return True
         else:
-            pass
+            return None
 
     def help_restart(self):
         logging.getLogger('MA5').info("   Syntax: restart ")
