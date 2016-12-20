@@ -200,29 +200,31 @@ class Interpreter(InterpreterBase):
      # Restart
     def do_restart(self, line):
         """ sending a signal allowing to restart the interpreter """
-        if self.main.script:
-            logging.getLogger('MA5').warning("'restart' command is not allowed in script mode.")
+#        if self.main.script:
+#            logging.getLogger('MA5').warning("'restart' command is not allowed in script mode.")
+
+        YES=True
+        # Asking the safety question
+        if not Main.forced:
+           logging.getLogger('MA5').warning("Are you sure to restart the MadAnalysis 5 session? (Y/N)")
+           allowed_answers=['n','no','y','yes']
+           answer=""
+           while answer not in  allowed_answers:
+              answer=raw_input("Answer: ")
+              answer=answer.lower()
+              if answer=="no" or answer=="n":
+                   YES=False
+                   break
+              elif answer=='yes' or answer=='y':
+                   YES=True
+                   break
+
+        # Restart?
+        if YES:
+            self.main.repeatSession=True
+            return True
         else:
-            YES=False
-            # Asking the safety question
-            if not Main.forced:
-                logging.getLogger('MA5').warning("Are you sure to restart the MadAnalysis 5 session? (Y/N)")
-                allowed_answers=['n','no','y','yes']
-                answer=""
-                while answer not in  allowed_answers:
-                   answer=raw_input("Answer: ")
-                   answer=answer.lower()
-                   if answer=="no" or answer=="n":
-                       YES=False
-                       break
-                   elif answer=='yes' or answer=='y':
-                       YES=True
-                       break
-            if YES:
-                self.main.repeatSession=True
-                return True
-            else:
-                pass
+            pass
 
     def help_restart(self):
         logging.getLogger('MA5').info("   Syntax: restart ")
