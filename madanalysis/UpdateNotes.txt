@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+117           (2016/12/27) econte:  fix bug related to zlib detection + restart is allowed in script 
+                                   mode + fix bug with nan/inf in layou 
+
 159  1.5   (2016/11/14) ma5team:    - embedded into MadGraph
                                     - FIFO mode for MadGraph
                                     - No more RecastingTools

@@ -201,12 +201,7 @@ class Interpreter(InterpreterBase):
     def do_restart(self, line):
         """ sending a signal allowing to restart the interpreter """
 
-        # Restart not available in script mode
-        # avoiding that the script is read from the beginning
-        if self.main.script:
-            logging.getLogger('MA5').warning("'restart' command is not allowed in script mode.")
-            return None
-
+        # Note: Restart is available in script mode
         # Asking the safety question
         YES=True
         if not Main.forced:

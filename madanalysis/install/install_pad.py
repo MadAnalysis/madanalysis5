@@ -258,17 +258,21 @@ class InstallPad:
           ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
           if not ok:
               return False
+          
         # Logs
-        TheCommand = ['mkdir', self.installdir+'/Logs']
-        logging.getLogger('MA5').debug(' '.join(TheCommand))
-        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
-        if not ok:
+        logging.debug('Creating folder '+self.installdir+'/Logs')
+        try:
+            os.mkdir(self.installdir+'/Logs')
+        except:
             return False
-        TheCommand = ['mv',logname,self.installdir]
-        logging.getLogger('MA5').debug(' '.join(TheCommand))
-        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
-        if not ok:
-            return False
+        
+        logging.debug('Move '+logname+' in '+self.installdir)
+        import shutil
+        try:
+            shutil.move(logname,self.installdir+'/'+os.path.basename(logname))
+        except:
+            pass
+        
         #bibtex
         self.CreateBibtex()
         # delphes card directory

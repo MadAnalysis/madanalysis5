@@ -23,6 +23,10 @@
 
 
 """  A file containing different extension of the cmd basic python library"""
+from madanalysis.IOinterface.text_file_reader import TextFileReader
+from madanalysis.core.script_stack            import ScriptStack
+
+# Python import
 import cmd
 import logging
 import os
@@ -30,7 +34,7 @@ import signal
 import traceback
 import subprocess
 import readline
-from madanalysis.IOinterface.text_file_reader import TextFileReader
+
 
 #===============================================================================
 # InterpreterBase
@@ -54,27 +58,20 @@ class InterpreterBase(cmd.Cmd):
     interpreter_operators = ['(',')','[',']','&','|','&',\
                              '^','!','=','>','<',',']
 
-    def load(self,filename):
-        if isinstance(filename,str):
-            self.logger.info("Reading commands from '" + \
-                         filename + "' file ...")
-
-            input = TextFileReader(filename)
-            if not input.Open():
-                return False
-            mycommands = input.file
-        else:
-            mycommands = filename
-
-        for line in mycommands:
-            line = line.rstrip('\r\n')
-            self.logger.info("ma5>"+line)
-            line = self.precmd(line)
-            stop = self.onecmd(line)
-            stop = self.postcmd(stop, line)
-
-        if isinstance(filename,str):
-            input.Close()
+    def load(self):
+        ok = True
+        while ok:
+            line = ScriptStack.Next()
+            if line=='':
+                ok=False
+            else:
+                self.logger.info("ma5>"+line)
+                line = self.precmd(line)
+                stop = self.onecmd(line)
+                stop = self.postcmd(stop, line)
+                if stop==True: #Restart
+                    ok=False
+        return True
 
     def __init__(self, *arg, **opt):
         """Init history and line continuation"""
