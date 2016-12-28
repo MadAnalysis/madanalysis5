@@ -1,10 +1,11 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
-119           (2016/12/16) econte:  change release number 
+121           (2016/12/28) econte:  update 1.6 from the main branch 
 
-118           (2016/12/16) econte:  change log number 
+118           (2016/12/28) econte:  remove warnings in compilation 
 
-117           (2016/12/16) econte:  change release note 
+117           (2016/12/27) econte:  fix bug related to zlib detection + restart is allowed in script 
+                                   mode + fix bug with nan/inf in layou 
 
 159  1.5   (2016/11/14) ma5team:    - embedded into MadGraph
                                     - FIFO mode for MadGraph

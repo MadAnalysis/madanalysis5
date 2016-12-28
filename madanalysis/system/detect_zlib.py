@@ -65,10 +65,14 @@ class DetectZlib:
 
     @staticmethod
     def AddIfValid(path,container):
+        path=os.path.normpath(path)
         dirs=glob.glob(path)
         for item in dirs:
-            if not (item in container):
-                container.append(item)
+            if 'tools/SampleAnalyzer/ExternalSymLink/Lib' in item:
+                continue
+            if item in container:
+                continue
+            container.append(item)
 
 
     def IsItVetoed(self):
@@ -249,6 +253,13 @@ class DetectZlib:
 
 
     def SaveInfo(self):
+
+        # remove symlink
+        library_files2=[]
+        for item in self.library_files:
+            if os.path.islink(item):
+                item=os.readlink(item)
+            library_files2.append(item)
 
         # archi_info
         self.archi_info.zlib_priority      = self.force

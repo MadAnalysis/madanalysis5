@@ -304,6 +304,7 @@ class InstallPadForMA5tune:
 
         # Initialize the expert mode
         logging.getLogger('MA5').debug('Calling the expert mode for file cms_sus_13_011')
+        logging.getLogger('MA5').debug('BEGIN ExpertMode')
         from madanalysis.core.expert_mode import ExpertMode
         expert = ExpertMode(self.main)
         dirname="PADForMA5tune"
@@ -312,6 +313,7 @@ class InstallPadForMA5tune:
         filename="cms_sus_13_011"
         if not expert.Copy(dirname):
             return False
+        logging.getLogger('MA5').debug('END ExpertMode')
 
 #        TheCommand = ['bin/ma5', '-R', '-E', '-f', 'PADForMA5tune', 'cms_sus_13_011']
 #        logname = os.path.normpath(self.main.archi_info.ma5dir+'/PAD-workingdir.log')
@@ -322,6 +324,7 @@ class InstallPadForMA5tune:
         for analysis in self.analyses:
           if "cms_sus_13_011" not in analysis:
             TheCommand = ['./newAnalyzer.py', analysis, analysis]
+            logging.getLogger('MA5').debug(' '.join(TheCommand))
             lname = os.path.normpath(self.installdir+'/PAD-'+analysis+'.log')
             ok, out= ShellCommand.ExecuteWithLog(TheCommand,lname,\
               self.installdir+'/Build/SampleAnalyzer',silent=False)
@@ -329,22 +332,30 @@ class InstallPadForMA5tune:
                 return False
           TheCommand = ['rm', '-f', self.installdir+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.cpp',\
                 self.installdir+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.h']
+          logging.getLogger('MA5').debug(' '.join(TheCommand))
           ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
           if not ok:
             return False
           TheCommand = ['rm', '-f', self.installdir+'/Build/Main/main.bak']
+          logging.getLogger('MA5').debug(' '.join(TheCommand))
           ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
           if not ok:
               return False
+
         # Logs
-        TheCommand = ['mkdir', self.installdir+'/Logs']
-        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
-        if not ok:
+        logging.debug('Creating folder '+self.installdir+'/Logs')
+        try:
+            os.mkdir(self.installdir+'/Logs')
+        except:
             return False
-        TheCommand = ['mv',logname,self.installdir]
-        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
-        if not ok:
-            return False
+        
+        logging.debug('Move '+logname+' in '+self.installdir)
+        import shutil
+        try:
+            shutil.move(logname,self.installdir+'/'+os.path.basename(logname))
+        except:
+            pass
+        
         #bibtex
         self.CreateBibtex()
         # delphes card directory

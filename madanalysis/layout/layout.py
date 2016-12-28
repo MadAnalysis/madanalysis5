@@ -40,7 +40,7 @@ from madanalysis.layout.cutflow                        import CutFlow
 from madanalysis.layout.plotflow                       import PlotFlow
 from madanalysis.layout.merging_plots                  import MergingPlots
 from madanalysis.selection.instance_name               import InstanceName
-from math                                              import log10, floor, ceil
+from math                                              import log10, floor, ceil, isnan, isinf
 import os
 import shutil
 import logging
@@ -77,10 +77,20 @@ class Layout:
             return Layout.DisplayInteger(value / 1000) +\
                    "," + '%03d' % (value % 1000)
 
+
     @staticmethod
     def Round_to_Ndigits(x,N):
+        # Safety 1
         if N<1:
             return ""
+        
+        # Safety 2
+        if isnan(x):
+            return "nan"
+        elif isinf(x):
+            return "inf"
+
+        # Convert
         if x<(10**(N-1)):
             convert = '%.'+str(N)+'G'
             return '%s' % float(convert % x)
@@ -89,6 +99,7 @@ class Layout:
             if len(tmp)>=3 and tmp.endswith('.0'):
                 tmp = tmp[:-2]
             return tmp    
+
 
     @staticmethod
     def DisplayXsection(xsection,xerror):
@@ -109,6 +120,7 @@ class Layout:
             else:
               string2 = Layout.Round_to_Ndigits(100.*xerror/xsection,2)
             return string1 + " @ " + string2 + '%'
+
 
     @staticmethod
     def DisplayXsecCut(xsection,xerror):

@@ -23,12 +23,16 @@
 
 
 # Setting global variables of MadAnalysis main
-from madanalysis.core.main import Main
-from string_tools import StringTools
+from madanalysis.core.script_stack import ScriptStack
+from madanalysis.core.main         import Main
+from string_tools                  import StringTools
+
+# Python import
 import os
 import sys
 import logging
-            
+
+
 class MA5mode():
     
    def __init__(self):
@@ -268,7 +272,8 @@ def MainSession(mode,arglist,ma5dir,version,date):
         if not expert.Copy(dirname):
             sys.exit()
         expert.GiveAdvice()
-        return False
+
+        return False # Exit with no repeation
 
     # Normal mode
     else:
@@ -277,32 +282,25 @@ def MainSession(mode,arglist,ma5dir,version,date):
         from madanalysis.interpreter.interpreter import Interpreter
         interpreter = Interpreter(main)
 
-        # List of ma5script to load
-        myscripts=[]
-        for arg in arglist:
-            filename=os.path.expanduser(arg)
-            filename=os.path.abspath(filename)
-            if not os.path.isfile(filename):
-               logging.getLogger('MA5').warning("The file called '"+filename+"' is not found and will be skipped.")
-            else:
-               myscripts.append(filename)
-    
         # Executing the ma5 scripts
-        for myscript in myscripts:
-            interpreter.load(myscript)
-    
-        # Exit if script mode activated
-        if len(arglist)!=0 and main.script:
-            interpreter.run_cmd("quit")
-            return False
-    
-        # Interpreter loop
-        else:
-            interpreter.cmdloop()
+        if not ScriptStack.IsEmpty() and not ScriptStack.IsFinished():
+            interpreter.load()
+
+            # Must be restarted?
             if main.repeatSession==True:
                 return True
-            else:
-                return False
+             
+            # Exit if script mode activated
+            if main.script:
+                interpreter.run_cmd("quit")
+                return False # Exit with no repeation
+    
+        # Interpreter loop
+        interpreter.cmdloop()
+        if main.repeatSession==True:
+            return True
+        else:
+            return False
         
        
 ################################################################################
@@ -383,6 +381,10 @@ def LaunchMA5(version, date, ma5dir):
     # Read arguments
     mode,arglist = DecodeArguments(version, date)
 
+    # Deal with the scripts in normal mode
+    if not mode.expertmode:
+        for arg in arglist:
+            ScriptStack.AddScript(arg)
 
     # Loop over MA5 sessions
     # Goal: allowing to restart

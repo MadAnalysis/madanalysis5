@@ -178,7 +178,7 @@ MAuint32 MergingPlots::ExtractHardJetNumber(const MCEventFormat* myEvent,
         for(int j=family.size()-1;j>0;j--)
         {
           if (indices[family[j]] ==indices[myPart]) { family.erase(family.begin()+j); continue; }
-          for(int k=j+1;k<family.size();k++)
+          for(unsigned int k=j+1;k<family.size();k++)
             if (indices[family[j]]==indices[family[k]]) { family.erase(family.begin()+k); break; }
         }
         // Checking whether we have partons in the family

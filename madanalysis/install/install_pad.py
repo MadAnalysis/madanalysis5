@@ -222,6 +222,7 @@ class InstallPad:
 
         # Initialize the expert mode
         logging.getLogger('MA5').debug('Calling the expert mode for file CMS_B2G_12_012')
+        logging.getLogger('MA5').debug('BEGIN ExpertMode')
         from madanalysis.core.expert_mode import ExpertMode
         expert = ExpertMode(self.main)
         dirname="PAD"
@@ -230,6 +231,7 @@ class InstallPad:
         filename="CMS_B2G_12_012"
         if not expert.Copy(dirname):
             return False
+        logging.getLogger('MA5').debug('END ExpertMode')
 
 #        TheCommand = ['bin/ma5', '-R', '-E', '-f', 'PAD', 'CMS_B2G_12_012']
 #        logging.getLogger('MA5').debug(' '.join(TheCommand))
@@ -258,17 +260,21 @@ class InstallPad:
           ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
           if not ok:
               return False
+          
         # Logs
-        TheCommand = ['mkdir', self.installdir+'/Logs']
-        logging.getLogger('MA5').debug(' '.join(TheCommand))
-        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
-        if not ok:
+        logging.debug('Creating folder '+self.installdir+'/Logs')
+        try:
+            os.mkdir(self.installdir+'/Logs')
+        except:
             return False
-        TheCommand = ['mv',logname,self.installdir]
-        logging.getLogger('MA5').debug(' '.join(TheCommand))
-        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
-        if not ok:
-            return False
+        
+        logging.debug('Move '+logname+' in '+self.installdir)
+        import shutil
+        try:
+            shutil.move(logname,self.installdir+'/'+os.path.basename(logname))
+        except:
+            pass
+        
         #bibtex
         self.CreateBibtex()
         # delphes card directory
