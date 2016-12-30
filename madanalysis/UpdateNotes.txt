@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+122           (2016/12/30) econte:  fix bug with pileup 
+
 121           (2016/12/28) econte:  update 1.6 from the main branch 
 
 118           (2016/12/28) econte:  remove warnings in compilation 

@@ -165,7 +165,7 @@ class JobWriter():
             recast = (self.main.recasting.status=="on")
             return self.CheckJobStructure(recast)
 
-    def CopyDelphesCard(self,input,output,cfg):
+    def CopyDelphesCard(self,input,output,cfg,theFile):
         TagTreeWriter=False
         TagExecutionPath=False
         
@@ -236,7 +236,7 @@ class JobWriter():
             output.write(line)
         
 
-    def CopyDelphesMA5Card(self,input,output,cfg):
+    def CopyDelphesMA5Card(self,input,output,cfg,theFile):
         TagTreeWriter=False
         TagExecutionPath=False
         
@@ -288,9 +288,9 @@ class JobWriter():
                 theFile = os.path.normpath(theDir+"/"+cfg.pileup)
  
         if self.main.fastsim.package=="delphes":
-            self.CopyDelphesCard(input,output,cfg)
+            self.CopyDelphesCard(input,output,cfg,theFile)
         elif self.main.fastsim.package=="delphesMA5tune": 
-            self.CopyDelphesMA5Card(input,output,cfg)
+            self.CopyDelphesMA5Card(input,output,cfg,theFile)
 
         try:
             input.close()
