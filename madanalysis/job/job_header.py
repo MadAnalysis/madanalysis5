@@ -169,8 +169,11 @@ def WriteParticle2(file,part,rank,status):
     if part.mumType!="":
         mumname=InstanceName.Get(part.mumPart.name+rank+'allstate')
         if part.mumType=="<":
+#            file.write('     if ( !isP_' + mumname +\
+#                       '(part->mother1()) ) return false;\n')
             file.write('     if ( !isP_' + mumname +\
-                       '(part->mother1()) ) return false;\n')
+                       '(part->mother1()) && !isP_' + mumname +\
+                       '(part->mother2()) ) return false;\n')
         elif part.mumType=="<<":
             file.write('     const MCParticleFormat* cand = part;\n')
             file.write('     bool success=false;\n')
