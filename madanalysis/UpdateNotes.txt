@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+121           (2016/12/30) econte:  fix bug with pileup 
+
 118           (2016/12/28) econte:  remove warnings in compilation 
 
 117           (2016/12/27) econte:  fix bug related to zlib detection + restart is allowed in script 
