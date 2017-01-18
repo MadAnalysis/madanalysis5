@@ -277,6 +277,7 @@ class JobWriter():
         except:
             pass
 
+        theFile = ""
         if cfg.pileup!="":
             # Getting current dir
             theDir = os.getcwd()

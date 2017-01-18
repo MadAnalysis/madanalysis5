@@ -23,6 +23,7 @@
 
 
 #include "SampleAnalyzer/Process/JetClustering/cTagger.h"
+#include <cmath>
 using namespace MA5;
 
 // Matching using dr
@@ -34,7 +35,7 @@ void cTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
   for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
   {
     if (PHYSICS->Id->IsInitialState(myEvent.mc()->particles()[i])) continue;
-    if (fabs(myEvent.mc()->particles()[i].pdgid())!=4) continue;
+    if (std::abs(myEvent.mc()->particles()[i].pdgid())!=4) continue;
     if (!IsLast(&myEvent.mc()->particles()[i], myEvent)) continue;
 
     MAbool tag = false;
@@ -197,7 +198,7 @@ void cTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
   // c-tagging using method 1
   for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
   {
-    if (fabs(myEvent.mc()->particles()[i].pdgid())!=4) continue;
+    if (std::abs(myEvent.mc()->particles()[i].pdgid())!=4) continue;
 
     if (!IsLast(&myEvent.mc()->particles()[i], myEvent)) continue;
 

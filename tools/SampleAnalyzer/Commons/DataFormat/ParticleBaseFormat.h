@@ -32,9 +32,8 @@
 #include <iomanip>
 #include <cmath>
 
-#include "SampleAnalyzer/Commons/Vector/MALorentzVector.h"
-
 // SampleAnalyzer
+#include "SampleAnalyzer/Commons/Vector/MALorentzVector.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
 
@@ -162,7 +161,7 @@ class ParticleBaseFormat
   const MAfloat32 eta()     const {return momentum_.Eta();     }
 
   /// Accessor to the particle pseudo-rapidity
-  const MAfloat32 abseta()     const {return fabs(momentum_.Eta());     }
+  const MAfloat32 abseta()     const {return std::abs(momentum_.Eta());     }
 
   /// Accessor to the particle polar angle
   const MAfloat32 theta()   const {return momentum_.Theta();   }
@@ -173,7 +172,7 @@ class ParticleBaseFormat
   /// Accessor to the delta Phi (given in [0, pi] with another particle direction
   const MAfloat32 dphi_0_pi(const ParticleBaseFormat* p) const 
   {
-    double dphi = fabs(momentum_.Phi() - p->momentum().Phi());
+    double dphi = std::abs(momentum_.Phi() - p->momentum().Phi());
     if(dphi>3.14159265) dphi=2.*3.14159265-dphi;
     return dphi;
   }
@@ -181,7 +180,7 @@ class ParticleBaseFormat
   /// Accessor to the delta Phi (given in [0, pi] with another particle direction
   const MAfloat32 dphi_0_pi(const ParticleBaseFormat& p) const 
   {
-    double dphi = fabs(momentum_.Phi() - p.momentum().Phi());
+    double dphi = std::abs(momentum_.Phi() - p.momentum().Phi());
     if(dphi>3.14159265) dphi=2.*3.14159265-dphi;
     return dphi;
   }

@@ -25,7 +25,7 @@
 // SampleAnalyzer headesr
 #include "SampleAnalyzer/Commons/Service/RandomService.h"
 #include "SampleAnalyzer/Process/JetClustering/bTagger.h"
-
+#include <cmath>
 
 using namespace MA5;
 
@@ -248,7 +248,7 @@ void bTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
   // b-tagging using method 1
   for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
   {
-    if (fabs(myEvent.mc()->particles()[i].pdgid())!=5) continue;
+    if (std::abs(myEvent.mc()->particles()[i].pdgid())!=5) continue;
 
     if (!IsLast(&myEvent.mc()->particles()[i], myEvent)) continue;
 

@@ -35,7 +35,7 @@
 //STL headers
 #include <map>
 #include <sstream>
-
+#include <cmath>
 
 using namespace MA5;
 
@@ -74,7 +74,7 @@ void DJRextractor::Finalize()
 MAdouble64 DJRextractor::rapidity(MAdouble64 px, MAdouble64 py, MAdouble64 pz)
 {
   double PTJET = sqrt( px*px + py*py);
-  return fabs(log(std::min((sqrt(PTJET*PTJET+pz*pz)+fabs(pz ))/PTJET,1e5)));
+  return std::abs(log(std::min((sqrt(PTJET*PTJET+pz*pz)+std::abs(pz ))/PTJET,1e5)));
 }
 
 
@@ -143,7 +143,7 @@ void DJRextractor::SelectParticles(std::vector<fastjet::PseudoJet>& inputs,
     else filters[&(myEvent->particles()[i])]=false;
 
     // Selecting partons (but not top quark)
-    if (fabs(myEvent->particles()[i].pdgid())>6 && 
+    if (std::abs(myEvent->particles()[i].pdgid())>6 && 
         myEvent->particles()[i].pdgid()!=21) continue;
 
 
@@ -172,16 +172,16 @@ void DJRextractor::SelectParticles(std::vector<fastjet::PseudoJet>& inputs,
     double ETAJET = rapidity(myEvent->particles()[i].momentum().Px(),
                              myEvent->particles()[i].momentum().Py(),
                              myEvent->particles()[i].momentum().Pz());
-    if (fabs(ETAJET)>5) continue;
+    if (std::abs(ETAJET)>5) continue;
 
     // Remove double counting
     if (myEvent->particles()[i].mother1()!=0 && myEvent->particles()[i].mothup2_==0)
     {
       if (myEvent->particles()[i].pdgid()==myEvent->particles()[i].mother1()->pdgid() &&
           myEvent->particles()[i].statuscode()==myEvent->particles()[i].mother1()->statuscode() &&
-          fabs(myEvent->particles()[i].px()-myEvent->particles()[i].mother1()->px())<1e-04 &&
-          fabs(myEvent->particles()[i].py()-myEvent->particles()[i].mother1()->py())<1e-04 &&
-          fabs(myEvent->particles()[i].pz()-myEvent->particles()[i].mother1()->pz())<1e-04 )
+          std::abs(myEvent->particles()[i].px()-myEvent->particles()[i].mother1()->px())<1e-04 &&
+          std::abs(myEvent->particles()[i].py()-myEvent->particles()[i].mother1()->py())<1e-04 &&
+          std::abs(myEvent->particles()[i].pz()-myEvent->particles()[i].mother1()->pz())<1e-04 )
         continue;
     }
 

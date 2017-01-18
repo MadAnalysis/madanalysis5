@@ -25,13 +25,14 @@
 #ifndef HISTO_LOGX_H
 #define HISTO_LOGX_H
 
+// STL headers
+#include <cmath>
+
+
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Plot/Histo.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
-
-// STL headers
-#include <cmath>
 
 namespace MA5
 {
@@ -151,7 +152,7 @@ class HistoLogX : public Histo
     else
     {
       nentries_.second++;
-      weight=fabs(weight);
+      weight=std::abs(weight);
       sum_w_.second  += weight;
       sum_ww_.second += weight*weight;
       sum_xw_.second += value*weight;

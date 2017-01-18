@@ -22,6 +22,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// STL headers
+#include <cmath>
+
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/JetClustering/TauTagger.h"
 #include "SampleAnalyzer/Commons/Service/RandomService.h"
@@ -82,7 +85,7 @@ void TauTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
         }
 	if (particle->statuscode()==3) break;
 
-        if (fabs(particle->pdgid())==15)
+        if (std::abs(particle->pdgid())==15)
         {
           tag = true;
           myEvent.rec()->jets()[i].mc_ = particle;
@@ -174,7 +177,7 @@ void TauTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
 
         if (particle->statuscode()==3) break;
 
-        if (fabs(particle->pdgid())==15)
+        if (std::abs(particle->pdgid())==15)
         {
           tag = true;
           myEvent.rec()->jets()[i].mc_ = particle;
@@ -197,7 +200,7 @@ void TauTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
   // tau-tagging using method 1
   for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
   {
-    if (fabs(myEvent.mc()->particles()[i].pdgid())!=15) continue;
+    if (std::abs(myEvent.mc()->particles()[i].pdgid())!=15) continue;
 
     if (!IsLast(&myEvent.mc()->particles()[i], myEvent)) continue;
 

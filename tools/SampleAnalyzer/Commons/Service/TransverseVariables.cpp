@@ -23,6 +23,8 @@
 
 
 // STL headers
+#include <cmath>
+
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/TransverseVariables.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
@@ -524,7 +526,7 @@ void LoopForAlphaT(const unsigned int n1, const std::vector<const MCParticleForm
      double THT1 = 0; double THT2 = 0;
      for (unsigned int i=0;i<jets1.size();i++) THT1+=jets1[i]->et();
      for (unsigned int i=0;i<jets2.size();i++) THT2+=jets2[i]->et();
-     double DeltaHT = fabs(THT1-THT2);
+     double DeltaHT = std::abs(THT1-THT2);
      if (DeltaHT<MinDHT) MinDHT=DeltaHT;
 
     // Exit
@@ -560,7 +562,7 @@ void LoopForAlphaT(const unsigned int n1, std::vector<RecJetFormat> jets,
      double THT1 = 0; double THT2 = 0;
      for (unsigned int i=0;i<jets1.size();i++) THT1+=jets1[i].et();
      for (unsigned int i=0;i<jets2.size();i++) THT2+=jets2[i].et();
-     double DeltaHT = fabs(THT1-THT2);
+     double DeltaHT = std::abs(THT1-THT2);
      if (DeltaHT<MinDHT) MinDHT=DeltaHT;
 
     // Exit
