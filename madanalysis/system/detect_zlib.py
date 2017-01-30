@@ -262,6 +262,7 @@ class DetectZlib:
             library_files2.append(item)
 
         # archi_info
+        self.archi_info.has_zlib           = True
         self.archi_info.zlib_priority      = self.force
         self.archi_info.zlib_lib           = self.library_files[0]
         self.archi_info.zlib_inc_path      = os.path.dirname(self.header_files[0])
