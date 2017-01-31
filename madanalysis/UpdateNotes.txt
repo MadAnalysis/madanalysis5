@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+126           (2017/01/31) fuks:    Small bug with the PAD installation 
+
 125           (2017/01/30) econte:  Fix new version zlib + fix pb detection zlib 
 
 123           (2016/12/30) econte:  fix bug with '<' command where mother = initial state 

@@ -224,21 +224,17 @@ class InstallPad:
         logging.getLogger('MA5').debug('Calling the expert mode for file CMS_B2G_12_012')
         logging.getLogger('MA5').debug('BEGIN ExpertMode')
         from madanalysis.core.expert_mode import ExpertMode
+        backup = self.main.expertmode
+        self.main.expertmode = True
         expert = ExpertMode(self.main)
         dirname="PAD"
         if not expert.CreateDirectory(dirname):
             return False
         filename="CMS_B2G_12_012"
-        if not expert.Copy(dirname):
+        if not expert.Copy(filename):
             return False
+        self.main.expertmode=backup
         logging.getLogger('MA5').debug('END ExpertMode')
-
-#        TheCommand = ['bin/ma5', '-R', '-E', '-f', 'PAD', 'CMS_B2G_12_012']
-#        logging.getLogger('MA5').debug(' '.join(TheCommand))
-#        logname = os.path.normpath(self.main.archi_info.ma5dir+'/PAD-workingdir.log')
-#        ok, out= ShellCommand.ExecuteWithLog(TheCommand,logname,self.main.archi_info.ma5dir,silent=False)
-#        if not ok:
-#            return False
 
         for analysis in self.analyses:
           if "CMS_B2G_12_012" not in analysis:
