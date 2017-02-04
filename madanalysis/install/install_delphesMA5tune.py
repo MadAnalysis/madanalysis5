@@ -268,11 +268,13 @@ class InstallDelphesMA5tune:
             self.display_log()
             return False
 
-        if not os.path.isfile(self.installdir+'/libDelphesMA5tune.so'):
-            self.logger.error("library labeled 'libDelphesMA5tune.so' is missing.")
+        if not os.path.isfile(self.installdir+'/libDelphesMA5tune.so')\
+          and not os.path.isfile(self.installdir+'/libDelphesMA5tune.a')\
+          and not os.path.isfile(self.installdir+'/libDelphesMA5tune.dylib'):
+            self.logger.error("A delphesMA5tune library ('libDelphesMA5tune.so', 'libDelphesMA5tune.dylib' or 'libDelphesMA5tune.a') is missing.")
             self.display_log()
             return False
-        
+
         return True
 
     def display_log(self):

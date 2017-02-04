@@ -307,11 +307,13 @@ class InstallDelphes:
             self.display_log()
             return False
 
-        if not os.path.isfile(self.installdir+'/libDelphes.so'):
-            self.logger.error("library labeled 'libDelphes.so' is missing.")
+        if not os.path.isfile(self.installdir+'/libDelphes.so')\
+          and not os.path.isfile(self.installdir+'/libDelphes.a')\
+          and not os.path.isfile(self.installdir+'/libDelphes.dylib'):
+            self.logger.error("A delphes library ('libDelphes.so', 'libDelphes.dylib' or 'libDelphes.a') is missing.")
             self.display_log()
             return False
-        
+
         return True
 
     def display_log(self):

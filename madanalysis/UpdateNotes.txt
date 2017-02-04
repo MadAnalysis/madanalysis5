@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+127           (2017/02/04) fuks:    Fixes for macos sierra 
+
 126           (2017/01/31) fuks:    Small bug with the PAD installation 
 
 125           (2017/01/30) econte:  Fix new version zlib + fix pb detection zlib 

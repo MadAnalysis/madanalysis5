@@ -31,9 +31,9 @@ using namespace MA5;
 PdgDataFormat::PdgDataFormat(const MAint32 Pdgid, const std::string& Name, const MAfloat32 m, const MAint32 q, const MAfloat32 Gamma, const MAfloat32 ctau) :
   Pdgid_(Pdgid), Mass_(m), Charge_(q), GammaTot_(Gamma), Ctau_(ctau), Name_(Name) 
 {
-  if( (std::abs(Pdgid) == 12)       || (std::abs(Pdgid) == 14)       || (std::abs(Pdgid) == 16)      || 
-      (std::abs(Pdgid) == 1000022 ) || (std::abs(Pdgid) == 1000023 ) || (std::abs(Pdgid) == 1000025) || 
-      (std::abs(Pdgid) == 1000035 ) || (std::abs(Pdgid) == 1000045 ) ) IsInvisible_ = true;
+  if( (std::fabs(Pdgid) == 12)       || (std::fabs(Pdgid) == 14)       || (std::fabs(Pdgid) == 16)      || 
+      (std::fabs(Pdgid) == 1000022 ) || (std::fabs(Pdgid) == 1000023 ) || (std::fabs(Pdgid) == 1000025) || 
+      (std::fabs(Pdgid) == 1000035 ) || (std::fabs(Pdgid) == 1000045 ) ) IsInvisible_ = true;
   else IsInvisible_ = false;
 }
 

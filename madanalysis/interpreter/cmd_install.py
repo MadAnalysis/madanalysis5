@@ -55,7 +55,10 @@ class CmdInstall(CmdBase):
                 main.archi_info.has_delphes=True
                 main.archi_info.delphes_priority=True
                 dpath =  os.path.normpath(os.path.join(main.archi_info.ma5dir,'tools','delphes'))
-                mylib = os.path.normpath(os.path.join(dpath,'libDelphes.so'))
+                if os.path.isfile(os.path.normpath(os.path.join(dpath,'libDelphes.so'))):
+                   mylib = os.path.normpath(os.path.join(dpath,'libDelphes.so'))
+                elif os.path.isfile(os.path.normpath(os.path.join(dpath,'libDelphes.dylib'))):
+                   mylib = os.path.normpath(os.path.join(dpath,'libDelphes.dylib'))
                 main.archi_info.libraries['Delphes']= mylib+":"+str(os.stat(mylib).st_mtime)
                 main.archi_info.delphes_lib = mylib
                 main.archi_info.toLDPATH1 = [x for x in main.archi_info.toLDPATH1 if not 'MA5tune' in x]
@@ -86,7 +89,10 @@ class CmdInstall(CmdBase):
                 main.archi_info.has_delphesMA5tune=True
                 main.archi_info.delphesMA5tune_priority=True
                 dpath =  os.path.normpath(os.path.join(main.archi_info.ma5dir,'tools','delphesMA5tune'))
-                mylib = os.path.normpath(os.path.join(dpath,'libDelphesMA5tune.so'))
+                if os.path.isfile(os.path.normpath(os.path.join(dpath,'libDelphesMA5tune.so'))):
+                   mylib = os.path.normpath(os.path.join(dpath,'libDelphesMA5tune.dylib'))
+                elif os.path.isfile(os.path.normpath(os.path.join(dpath,'libDelphesMA5tune.dylib'))):
+                   mylib = os.path.normpath(os.path.join(dpath,'libDelphesMA5tune.so'))
                 main.archi_info.libraries['DelphesMA5tune']= mylib+":"+str(os.stat(mylib).st_mtime)
                 main.archi_info.delphesMA5tune_lib=mylib
                 main.archi_info.toLDPATH1 = [x for x in main.archi_info.toLDPATH1 if not 'delphes' in x]
