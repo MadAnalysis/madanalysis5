@@ -232,7 +232,8 @@ class MadGraphInterface():
                 self.card.append('plot MT_MET(b[' + str(i)+ ']) 40 0 500 [logY]')
                 all_particles.append('b['+str(i)+']')
 
-        self.card.append('# basic properties of the leptons')
+        if (ne+nmu+ntau)>0:
+            self.card.append('# basic properties of the leptons')
         for i in range(1,ne+1):
             self.card.append('plot PT(e['+str(i)+']) 40 0 500 [logY]')
             self.card.append('plot ETA(e['+str(i)+']) 40 -10 10 [logY]')
@@ -249,7 +250,8 @@ class MadGraphInterface():
             self.card.append('plot MT_MET(ta[' + str(i)+ ']) 40 0 500 [logY]')
             all_particles.append('ta['+str(i)+']')
 
-        self.card.append('# basic properties of the photons')
+        if na>0:
+            self.card.append('# basic properties of the photons')
         for i in range(1,na+1):
             self.card.append('plot PT(a['+str(i)+']) 40 0 500 [logY]')
             self.card.append('plot ETA(a['+str(i)+']) 40 -10 10 [logY]')
@@ -431,7 +433,7 @@ class MadGraphInterface():
                 return myprt['antiname']
         else:
             for key, value in self.multiparticles.iteritems():
-                self.logger.debug('new multiparticles ' + key + ' = ' + str(value))
+                self.logger.debug('new multiparticle ' + key + ' = ' + str(value))
                 if sorted(value)==sorted(pdg):
                     return key
         self.logger.error('  ** Cannot find the name associated with the pdg code list' + str(pdg))

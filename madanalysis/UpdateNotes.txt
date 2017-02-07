@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+128           (2017/02/07) fuks:    Bug with the mg5-ma5 interface and the new treatment of the scripts 
+
 127           (2017/02/04) fuks:    Fixes for macos sierra 
 
 126           (2017/01/31) fuks:    Small bug with the PAD installation 

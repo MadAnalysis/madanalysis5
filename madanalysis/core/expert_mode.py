@@ -50,7 +50,10 @@ class ExpertMode:
           name  =answer.replace('-','_');
         self.path = os.path.expanduser(name)
         if not self.path.startswith('/'):
-            self.path = self.main.currentdir+'/'+self.path
+            if name in ['PAD', 'PADForMA5tune']:
+                self.path = self.main.archi_info.ma5dir+'/'+self.path
+            else:
+                self.path = self.main.currentdir+'/'+self.path
         self.path = os.path.normpath(self.path)
 
         # Checking folder
