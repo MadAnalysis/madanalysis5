@@ -36,6 +36,7 @@
 #include "SampleAnalyzer/Commons/DataFormat/ParticleBaseFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
+#include "SampleAnalyzer/Commons/Vector/MABoost.h"
 
 
 namespace MA5
@@ -107,10 +108,15 @@ class MCParticleFormat : public ParticleBaseFormat
   virtual void Reset()
   {
     momentum_.SetPxPyPzE(0.,0.,0.,0.);
-    ctau_=0.; spin_=0.; pdgid_=0; 
-    statuscode_=0; mothup1_=0; mothup2_=0; mother1_=0; mother2_=0; 
-    daughter1_=0; daughter2_=0;
-    extra1_=0; extra2_=0;
+    ctau_       = 0.; 
+    spin_       = 0.; 
+    pdgid_      = 0; 
+    statuscode_ = 0; 
+
+    mothup1_    = 0; mothup2_   = 0; 
+    mother1_    = 0; mother2_   = 0; 
+    daughter1_  = 0; daughter2_ = 0;
+    extra1_     = 0; extra2_    = 0;
     isPU_=false;
   }
 
@@ -165,7 +171,6 @@ class MCParticleFormat : public ParticleBaseFormat
   void setMothUp1(MAuint32 v) {mothup1_=v;}
   void setMothUp2(MAuint32 v) {mothup2_=v;}
 
-  /*
   /// Boosting the four momentum to the restframe of another particle
   void ToRestFrame(const MCParticleFormat* boost)
   {
@@ -175,10 +180,15 @@ class MCParticleFormat : public ParticleBaseFormat
 
   void ToRestFrame(const MCParticleFormat& boost)
   {
-    TVector3 b = -1. * boost.momentum().BoostVector();
-    momentum().Boost(b);
+    MALorentzVector momentum = boost.momentum();
+    momentum.SetPx(-momentum.X());
+    momentum.SetPy(-momentum.Y());
+    momentum.SetPz(-momentum.Z());
+
+    MABoost convertor;
+    convertor.setBoostVector(momentum);
+    convertor.boost(momentum_);
   }
-  */
 
 };
 

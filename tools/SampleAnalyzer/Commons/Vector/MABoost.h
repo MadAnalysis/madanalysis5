@@ -95,7 +95,7 @@ class MABoost
   }
   
   // Setting the boost vector
-  void SetBoostVector(MALorentzVector& q)
+  void setBoostVector(const MALorentzVector& q)
   { 
     try
     {
