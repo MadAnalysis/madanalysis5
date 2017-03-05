@@ -273,7 +273,7 @@ class RecastConfiguration:
             if self.status!="on":
                 self.logger.error("Please first set the recasting mode to 'on'.")
                 return
-            self.CLs_numofexps = value
+            self.CLs_numofexps = int(value)
 
         # path to a recasting card
         elif parameter=="card_path":
