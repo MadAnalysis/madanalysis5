@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+132           (2017/05/22) fuks:    zlib detection triggering an unwanted compilation within the mg5 
+                                   interface 
+
 131           (2017/05/22) fuks:    Adding Maxime's analyses to the PAD + updating older PAD info 
 
 130           (2017/03/05) fuks:    fixing bug #523411 on launchpad 
