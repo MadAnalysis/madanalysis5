@@ -267,10 +267,9 @@ class DetectZlib:
         self.archi_info.zlib_lib           = self.library_files[0]
         self.archi_info.zlib_inc_path      = os.path.dirname(self.header_files[0])
         self.archi_info.zlib_lib_path      = os.path.dirname(self.library_files[0])
-#        self.archi_info.zlib_original_libs.extend(self.library_files)
         self.archi_info.zlib_original_libs.extend([fl for fl in self.library_files if not fl in self.archi_info.zlib_original_libs])
         self.archi_info.libraries['ZLib']=self.archi_info.zlib_lib+":"+str(os.stat(self.archi_info.zlib_lib).st_mtime)
-        
+
         # Ok
         return True
 
