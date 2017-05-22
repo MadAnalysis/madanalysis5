@@ -47,43 +47,58 @@ class InstallPad:
         # ATLAS 8TeV
         self.analyses.extend(["ATLAS_EXOT_2014_06"])
         # ATLAS 13TeV
-        self.analyses.extend(["ATLAS_1604_07773", "atlas_1605_03814"])
+        self.analyses.extend(["ATLAS_1604_07773", "atlas_1605_03814", "ATLAS_CONF_2016_086"])
+        # CMS 13TeV
+        self.analyses.extend(["CMS_EXO_16_037"])
         self.files = {
-          "CMS_B2G_12_012.cpp" : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.cpp",
-          "CMS_B2G_12_012.h"   : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.h",
-          "CMS_B2G_12_012.info": "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.info",
+          "CMS_B2G_12_012.cpp"     : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.cpp",
+          "CMS_B2G_12_012.h"       : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.h",
+          "CMS_B2G_12_012.info"    : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.info",
           "ATLAS_EXOT_2014_06.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2014_06.cpp",
           "ATLAS_EXOT_2014_06.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2014_06.h",
           "ATLAS_EXOT_2014_06.info": "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2014_06.info",
-          "cms_exo_12_047.cpp" : "http://inspirehep.net/record/1411894/files/cms_exo_12_047.cpp",
-          "cms_exo_12_047.h"   : "http://inspirehep.net/record/1411894/files/cms_exo_12_047.h",
-          "cms_exo_12_048.cpp" : "http://inspirehep.net/record/1413153/files/cms_exo_12_048.cpp",
-          "cms_exo_12_048.h"   : "http://inspirehep.net/record/1413153/files/cms_exo_12_048.h",
-#          "cms_exo_12_047.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_12_047.cpp",
-#          "cms_exo_12_047.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_12_047.h",
-#          "cms_exo_12_048.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_12_048.cpp",
-#          "cms_exo_12_048.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_12_048.h",
+          "cms_exo_12_047.cpp"     : "http://inspirehep.net/record/1411894/files/cms_exo_12_047.cpp",
+          "cms_exo_12_047.h"       : "http://inspirehep.net/record/1411894/files/cms_exo_12_047.h",
+          "cms_exo_12_048.cpp"     : "http://inspirehep.net/record/1413153/files/cms_exo_12_048.cpp",
+          "cms_exo_12_048.h"       : "http://inspirehep.net/record/1413153/files/cms_exo_12_048.h",
           "cms_exo_12_047.info"   : "http://inspirehep.net/record/1411894/files/cms_exo_12_047.info?version=1",
           "cms_exo_12_048.info"   : "http://inspirehep.net/record/1413153/files/cms_exo_12_048.info?version=1",
-          "cms_b2g_14_004.cpp"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.cpp",
-          "cms_b2g_14_004.h"      : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.h",
-          "cms_b2g_14_004.info"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.info",
+#          "cms_b2g_14_004.cpp"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.cpp",
+#          "cms_b2g_14_004.h"      : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.h",
+#          "cms_b2g_14_004.info"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_14_004.info",
+          "cms_b2g_14_004.cpp"    : "http://inspirehep.net/record/1456179/files/cms_b2g_14_004.cpp",
+          "cms_b2g_14_004.h"      : "http://inspirehep.net/record/1456179/files/cms_b2g_14_004.h",
+          "cms_b2g_14_004.info"   : "http://inspirehep.net/record/1456179/files/cms_b2g_14_004.info",
           "cms_b2g_12_022.cpp"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_12_022.cpp",
           "cms_b2g_12_022.h"      : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_12_022.h",
           "cms_b2g_12_022.info"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_12_022.info",
-          "ATLAS_1604_07773.cpp"  : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_1604_07773.cpp",
-          "ATLAS_1604_07773.h"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_1604_07773.h",
-          "ATLAS_1604_07773.info" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_1604_07773.info",
-          "atlas_1605_03814.cpp"  : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/atlas_1605_03814.cpp",
-          "atlas_1605_03814.h"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/atlas_1605_03814.h",
-          "atlas_1605_03814.info" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/atlas_1605_03814.info"
+#          "ATLAS_1604_07773.cpp"  : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_1604_07773.cpp",
+#          "ATLAS_1604_07773.h"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_1604_07773.h",
+#          "ATLAS_1604_07773.info" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_1604_07773.info",
+          "ATLAS_1604_07773.cpp"  : "http://inspirehep.net/record/1476800/files/ATLAS_1604_07773.cpp",
+          "ATLAS_1604_07773.h"    : "http://inspirehep.net/record/1476800/files/ATLAS_1604_07773.h",
+          "ATLAS_1604_07773.info" : "http://inspirehep.net/record/1476800/files/ATLAS_1604_07773.info",
+#          "atlas_1605_03814.cpp"  : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/atlas_1605_03814.cpp",
+#          "atlas_1605_03814.h"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/atlas_1605_03814.h",
+#          "atlas_1605_03814.info" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/atlas_1605_03814.info"
+          "atlas_1605_03814.cpp"  : "http://inspirehep.net/record/1510490/files/atlas_1605_03814.cpp",
+          "atlas_1605_03814.h"    : "http://inspirehep.net/record/1510490/files/atlas_1605_03814.h",
+          "atlas_1605_03814.info" : "http://inspirehep.net/record/1510490/files/atlas_1605_03814.info",
+          "ATLAS_CONF_2016_086.cpp"  : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_CONF_2016_086.cpp",
+          "ATLAS_CONF_2016_086.h"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_CONF_2016_086.h",
+          "ATLAS_CONF_2016_086.info" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_CONF_2016_086.info",
+          "CMS_EXO_16_037.cpp"       : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/CMS_EXO_16_037.cpp",
+          "CMS_EXO_16_037.h"         : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/CMS_EXO_16_037.h",
+          "CMS_EXO_16_037.info"      : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/CMS_EXO_16_037.info"
         }
 
         self.delphescards = {
     "delphes_card_cms_b2g_14_004.tcl"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_b2g_14_004.tcl",
     "delphes_card_cms_b2g_12_012.tcl"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_b2g_12_012.tcl",
     "delphes_card_atlas_sus_2013_05_pad.tcl" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_atlas_sus_2013_05_pad.tcl",
-    "delphes_card_ATLAS_1604_07773.tcl"      : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_ATLAS_1604_07773.tcl"
+    "delphes_card_ATLAS_1604_07773.tcl"      : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_ATLAS_1604_07773.tcl",
+    "delphes_card_ATLAS_CONF_2016_086.tcl"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_ATLAS_CONF_2016_086.tcl",
+    "delphes_card_CMS_EXO_16_037.tcl"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_CMS_EXO_16_037.tcl"
         }
 
     def CreateBibtex(self):
@@ -184,6 +199,41 @@ class InstallPad:
       file.write('                        (EXO-12-048)}",\n')
       file.write('      year           = \"2016\",\n')
       file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1413153;%%\"\n')
+      file.write('}\n')
+
+      # ATLAS_1605_03814
+      file.write('@article{1510490,\n')
+      file.write('      key            = \"1510490\",\n')
+      file.write('      author         = \"Fuks, Benjamin and Banerjee, Shankha and Zaldivar, Bryan\",\n')
+      file.write('      title          = \"{MadAnalysis5 implementation of the multijet analysis of\n')
+      file.write('                        ATLAS (arXiv:1605.03814)}\",\n')
+      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.GTF5.RN03\",\n')
+      file.write('      year           = \"2017\",\n')
+      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1510490;%%\"\n')
+      file.write('}\n')
+
+      # ATLAS_1604_07773
+      file.write('@article{1476800,\n')
+      file.write('      key            = \"1476800\",\n')
+      file.write('      author         = \"Dipan Sengupta\",\n')
+      file.write('      title          = \"{Madanalysis5 implementation of the ATLAS monojet and\n')
+      file.write('                        missing transverse momentum search documented in arXiv:\n')
+      file.write('                        1604.07773}\",\n')
+      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.GTH3.RN26\",\n')
+      file.write('      year           = \"2016\",\n')
+      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1476800;%%\"\n')
+      file.write('}\n')
+
+      # CMS-B2G-14-004
+      file.write('@article{,\n')
+      file.write('      key            = \"1456179\",\n')
+      file.write('      author         = \"Fuks, Benjamin and Martini, Antony\",\n')
+      file.write('      title          = \"{MadAnalysis5 implementation of the CMS search for dark\n')
+      file.write('                        matter production with top quark pairs in the single\n')
+      file.write('                        lepton channel (CMS-B2G-14-004)}\",\n')
+      file.write('      doi            = \"10.7484/INSPIREHEP.DATA.MIHA.JR4G\",\n')
+      file.write('      year           = \"2016\",\n')
+      file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1456179;%%\"\n')
       file.write('}\n')
 
       # closing the file

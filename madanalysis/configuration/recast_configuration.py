@@ -110,16 +110,18 @@ class RecastConfiguration:
         self.padtune    = False
         self.store_root = False
         self.DelphesDic = {
-          "delphes_card_cms_standard.tcl":      ["cms_sus_14_001_monojet", "cms_sus_13_016", "cms_sus_13_012", "cms_sus_13_011"],
-          "delphes_card_cms_sus14004.tcl":      ["cms_sus_14_001_TopTag"],
-          "delphes_card_atlas_sus_2013_05.tcl": ["atlas_susy_2013_21", "atlas_sus_13_05"],
+          "delphes_card_cms_standard.tcl"         : ["cms_sus_14_001_monojet", "cms_sus_13_016", "cms_sus_13_012", "cms_sus_13_011"],
+          "delphes_card_cms_sus14004.tcl"         : ["cms_sus_14_001_TopTag"],
+          "delphes_card_atlas_sus_2013_05.tcl"    : ["atlas_susy_2013_21", "atlas_sus_13_05"],
           "delphes_card_atlas_sus_2013_05_pad.tcl": ["ATLAS_EXOT_2014_06"],
-          "delphes_card_atlas_sus_2013_11.tcl": ["atlas_higg_2013_03", "atlas_susy_2013_11", "atlas_1405_7875"],
-          "delphes_card_atlas_sus_2014_10.tcl": ["atlas_susy_2014_10"] ,
-          "delphes_card_atlas_sus_2013_04.tcl": ["atlas_susy_2013_04"] ,
-          "delphes_card_cms_b2g_12_012.tcl":    ["CMS_B2G_12_012", "cms_exo_12_047", "cms_exo_12_048"],
-          "delphes_card_cms_b2g_14_004.tcl":    ["cms_b2g_12_022", "cms_b2g_14_004"],
-          "delphes_card_ATLAS_1604_07773.tcl": ["ATLAS_1604_07773", "atlas_1605_03814"]
+          "delphes_card_atlas_sus_2013_11.tcl"    : ["atlas_higg_2013_03", "atlas_susy_2013_11", "atlas_1405_7875"],
+          "delphes_card_atlas_sus_2014_10.tcl"    : ["atlas_susy_2014_10"] ,
+          "delphes_card_atlas_sus_2013_04.tcl"    : ["atlas_susy_2013_04"] ,
+          "delphes_card_cms_b2g_12_012.tcl"       : ["CMS_B2G_12_012", "cms_exo_12_047", "cms_exo_12_048"],
+          "delphes_card_cms_b2g_14_004.tcl"       : ["cms_b2g_12_022", "cms_b2g_14_004"],
+          "delphes_card_ATLAS_1604_07773.tcl"     : ["ATLAS_1604_07773", "atlas_1605_03814"],
+          "delphes_card_ATLAS_CONF_2016_086.tcl"  : ["ATLAS_CONF_2016_086"],
+          "delphes_card_CMS_EXO_16_037.tcl"       : ["CMS_EXO_16_037"]
         }
 
         self.description = {
@@ -133,6 +135,8 @@ class RecastConfiguration:
           "ATLAS_EXOT_2014_06"     : "ATLAS - 8 TeV - monophoton",
           "ATLAS_1604_07773"       : "ATLAS - 13 TeV - monojet",
           "atlas_1605_03814"       : "ATLAS - 13 TeV - multijet (2-6 jets) + met",
+          "ATLAS_CONF_2016_086"    : "ATLAS - 13 TeV - Dark matter in the b+bar+met channel",
+          "CMS_EXO_16_037"         : "CMS   - 13 TeV - Monojet",
           "cms_sus_13_012"         : "CMS   - 8 TeV - squark-gluino - MET/MHT",
           "cms_sus_13_016"         : "CMS   - 8 TeV - gluinos - 2 leptons + bjets + met",
           "cms_sus_14_001_monojet" : "CMS   - 8 TeV - stop - the monojet channel",
