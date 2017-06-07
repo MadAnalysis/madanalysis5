@@ -193,6 +193,25 @@ MHT = ObservableBase( name          = 'MHT',
                       latex         = '$\slash{H}_T$'
                     )
 
+WEIGHTS = ObservableBase( name      = 'WEIGHTS',
+                      args          = [],
+                      combination   = CombinationType.DEFAULT,
+                      plot_auto     = False,
+                      plot_nbins    = 100,
+                      plot_xmin     = -1.,
+                      plot_xmax     = 1.,
+                      plot_unitX_tlatex    = '',
+                      plot_unitX_latex    = '',
+                      code_parton   = 'PHYSICS->weights(event.mc())',
+                      code_hadron   = 'PHYSICS->weights(event.mc())',
+                      code_reco     = '',
+                      cut_event     = True,
+                      cut_candidate = False,
+                      tlatex        = '#omega',
+                      latex         = '$\omega$'
+                    )
+
+
 NPID = ObservableBase( name          = 'NPID',
                        args          = [],
                        combination   = CombinationType.DEFAULT,

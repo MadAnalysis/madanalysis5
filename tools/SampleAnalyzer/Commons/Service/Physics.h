@@ -97,6 +97,12 @@ class PhysicsService
   RECconfig& recConfig()
   { return Id->recConfig(); }
 
+  /// Weights
+  inline double weights(const MCEventFormat* event) const
+  {
+    return event->weight();
+  }
+
   /// MT 
   MAfloat32 MT(const MCParticleFormat& part, const MCEventFormat* event)
   {
