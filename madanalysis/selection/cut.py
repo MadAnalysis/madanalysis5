@@ -38,7 +38,9 @@ class Cut():
 
     userVariables = { "threshold"  : [], \
                       "rank"       : ["Eordering","Pordering","PTordering","ETordering","PXordering","PYordering","PZordering","ETAordering"], \
-                      "statuscode" : ["finalstate","interstate","allstate","initialstate"]}
+                      "statuscode" : ["finalstate","interstate","allstate","initialstate"], \
+                      "regions": "all"
+    }
 
     userShortcuts = {"finalstate":   ["statuscode","finalstate"], \
                      "interstate":   ["statuscode","interstate"], \
@@ -53,13 +55,14 @@ class Cut():
                      "PZordering":   ["rank",      "PZordering"], \
                      "ETAordering":  ["rank",      "ETAordering"] }
 
-    def __init__(self,part,conditions,cut_type):
+    def __init__(self,part,conditions,cut_type,regions="all"):
         import copy
         self.part       = part
         self.conditions = conditions
         self.rank       = "PTordering"
         self.statuscode = "finalstate"
         self.cut_type   = cut_type
+        self.regions    = regions
         
     def user_GetParameters(self):
         return Cut.userVariables.keys()
@@ -88,13 +91,22 @@ class Cut():
             else:
                 logging.getLogger('MA5').error("'"+value+"' is not a possible value for the variable 'rank'.")
                 return False
-            
+
         # statuscode
         elif variable == "statuscode":
             if value in Cut.userVariables["statuscode"]:
                 self.statuscode=value
             else:
                 logging.getLogger('MA5').error("'"+value+"' is not a possible value for the variable 'statuscode'.")
+                return False
+
+        # regions
+        elif variable == "regions":
+            if isinstance(value,list) and all([isinstance(name,str) for name in value]):
+                self.regions = value
+            else:
+                logging.getLogger('MA5').error("'"+value+"' is not a list of strings, ;"+\
+                     "as necessary for the variable 'regions'.")
                 return False
 
         else:
@@ -108,13 +120,14 @@ class Cut():
             logging.getLogger('MA5').info(" rank = "+self.rank)
         elif variable=="statuscode":
             logging.getLogger('MA5').info(" statuscode = "+self.statuscode) 
+        elif variable=="regions":
+            logging.getLogger('MA5').info(" regions = '"+str(self.regions)+"'")
         else:
             logging.getLogger('MA5').error("no variable called '"+variable+"' is found")
-                            
+
 
     def Display(self):
         logging.getLogger('MA5').info(self.GetStringDisplay())
-        logging.getLogger('MA5').info(self.GetStringDisplay2())
 
     def GetStringDisplay(self):
         msg = "Cut: "
@@ -129,11 +142,10 @@ class Cut():
         # displaying conditions
         msg += " "+self.conditions.GetStringDisplay()
 
+        # displaying regions
+        msg += ", regions = " + str(self.regions)
+
         return msg 
 
     def DoYouUseMultiparticle(self,name):
         return self.part.DoYouUseMultiparticle(name)
-
-    def GetStringDisplay2(self):
-        return "Cut: "
-

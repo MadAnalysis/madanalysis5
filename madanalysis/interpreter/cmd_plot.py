@@ -95,8 +95,8 @@ class CmdPlot(CmdBase,CmdSelectionBase):
                           "closing brakets ')' does not match.")
             return
         if Nbracket2!=0:
-            self.logger.error("number of opening brackets '[' and number of " +\
-                          "closing brakets ']' does not match.")
+            self.logger.error("number of opening squared-brackets '[' and number of " +\
+                          "closing squared-brakets ']' does not match.")
             return
 
         if Nbracket3!=0:
@@ -233,7 +233,7 @@ class CmdPlot(CmdBase,CmdSelectionBase):
         self.logger.info("    - with nbins being the number of bins,")
         self.logger.info("    - xmin being the lower limit on the x-axis,")
         self.logger.info("    - xmax bing the upper limit on the x-axis.")
-        self.logger.info("    - regions to which this histogram applies can be (optionally) given")
+        self.logger.info("    - regions to which this histogram applies can be (optionally) given, or it applies to all regions.")
 
 
     def complete_arguments(self,text,args,obsRef):
@@ -436,6 +436,7 @@ class CmdPlot(CmdBase,CmdSelectionBase):
         # region mode
         if nbracket1==0 and nbracket2==0 and nbracket3==1:
             output=self.main.regions.GetNames()
+            output = [i for i in output if not i in args]
             output.append("}")
             return self.finalize_complete(text,output)
 

@@ -259,7 +259,7 @@ class Histogram():
     def Display(self):
         logging.getLogger('MA5').info(self.GetStringDisplay())
         logging.getLogger('MA5').info(self.GetStringDisplay2())
-        logging.getLogger('MA5').info(self.GetStringDisplayMore())
+        self.GetStringDisplayMore()
 
     def GetStringDisplay(self):
         msg = "  * Plot: "+self.observable.name
@@ -282,28 +282,27 @@ class Histogram():
                ", regions="+str(self.regions)
 
     def GetStringDisplayMore(self):
-        words=''
         if self.logX or self.logY: 
-            words += '  * Log scale: '
+            words = '  * Log scale: '
             if self.logX:
                 words+= 'logX '
             if self.logY:
                 words+= 'logY '
-            words+='\n'
+            logging.getLogger('MA5').info(words)
         if self.stack==StackingMethodType.AUTO or\
             self.stack==StackingMethodType.STACK:
-            words+='  * Stacking method: stacked\n'
+            logging.getLogger('MA5').info('  * Stacking method: stacked')
         elif self.stack == StackingMethodType.SUPERIMPOSE:
-            words+='  * Stacking method: superimposition\n'
+            logging.getLogger('MA5').info('  * Stacking method: superimposition')
         elif self.stack == StackingMethodType.NORMALIZE2ONE:
-            words+='  * Stacking method: superimposition + normalization to one\n'
+            logging.getLogger('MA5').info('  * Stacking method: superimposition + normalization to one')
         if self.titleX !='':
-            words += '  * X-axis title: ' +  self.titleX + '\n'
+            logging.getLogger('MA5').info('  * X-axis title: ' +  self.titleX)
         if self.titleY !='':
-            words += '  * Y-axis title: ' +  self.titleY + '\n'
-        words += '  * Particles under consideration: ' +  self.statuscode + '\n'
-        words += '  * Particle ordering: ' +  self.rank
-        return words
+            logging.getLogger('MA5').info('  * Y-axis title: ' +  self.titleY)
+        logging.getLogger('MA5').info('  * Particles under consideration: ' +  self.statuscode)
+        logging.getLogger('MA5').info('  * Particle ordering: ' +  self.rank)
+        return 
 
     def GetStringArguments(self):
         word=''
