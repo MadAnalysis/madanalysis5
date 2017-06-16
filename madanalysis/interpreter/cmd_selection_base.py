@@ -81,7 +81,6 @@ class CmdSelectionBase():
 
         else:
             return OperatorType.UNKNOWN
-            
 
     def extract_arguments(self,words,obsName,obsRef):
         tmp=[]

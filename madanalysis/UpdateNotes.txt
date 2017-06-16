@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+135           (2017/06/16) fuks:    Histograms can be assigned to regions 
+
 134           (2017/06/07) fuks:    Plotting weights 
 
 132           (2017/05/22) fuks:    zlib detection triggering an unwanted compilation within the mg5 

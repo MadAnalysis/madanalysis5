@@ -90,6 +90,8 @@ class InterpreterBase(cmd.Cmd):
         # set completer delimiter
         delims = readline.get_completer_delims().replace("[","")
         delims = delims.replace("]","")
+        delims = delims.replace("{","")
+        delims = delims.replace("}","")
         delims = delims.replace("=","")
         readline.set_completer_delims(delims)
         
@@ -106,7 +108,6 @@ class InterpreterBase(cmd.Cmd):
         # cleaning the line
         # --> removing additionnal whitespace characters
         line = line.lstrip()
-
         # pattern design
         if len(line)==4 and \
            line[0]=='m' and line[1]=='u' and line[2]=='f' and line[3]=='!':
@@ -156,7 +157,7 @@ class InterpreterBase(cmd.Cmd):
 
         # debug
         self.logger.debug(self.split_arg(line))
-        
+
         # execute the line command
         return line
 
@@ -332,8 +333,10 @@ class InterpreterBase(cmd.Cmd):
     @staticmethod
     def split_arg(line):
         """Split a line of arguments"""
-    
-        split = line.split()
+
+        myline = line.replace('{', ' { ')
+        myline = myline.replace('}', ' } ')
+        split = myline.split()
         out=[]
         tmp=''
         for data in split:

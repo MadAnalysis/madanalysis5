@@ -41,7 +41,8 @@ class Histogram():
                       "rank"  : ["Eordering","Pordering","PTordering","ETordering","PXordering","PYordering","PZordering","ETAordering"], \
                       "statuscode" : ["finalstate","interstate","allstate","initialstate"], \
                       "titleX" :[], \
-                      "titleY" :[]
+                      "titleY" :[], \
+                      "regions": "all"
   }
 
     userShortcuts = {"logX": ["logX","true"], \
@@ -62,7 +63,7 @@ class Histogram():
                      "superimpose": ["stacking_method","superimpose"], \
                      "normalize2one" : ["stacking_method","normalize2one"]}
 
-    def __init__(self,observable,arguments,nbins,xmin,xmax):
+    def __init__(self,observable,arguments,nbins,xmin,xmax,regions="all"):
         self.observable = observable
         self.arguments  = arguments
         self.nbins      = nbins
@@ -75,6 +76,7 @@ class Histogram():
         self.stack      = StackingMethodType.AUTO
         self.titleX     = ""
         self.titleY     = ""
+        self.regions    = regions
 
     def user_GetParameters(self):
         return Histogram.userVariables.keys()
@@ -159,7 +161,7 @@ class Histogram():
             else:
                 logging.getLogger('MA5').error("'"+value+"' is not a possible value for the variable 'rank'.")
                 return False
-            
+
         # statuscode
         elif variable == "statuscode":
             if value in Histogram.userVariables["statuscode"]:
@@ -197,10 +199,18 @@ class Histogram():
             else:
                 logging.getLogger('MA5').error("'"+value+"' is not a string, as necessary for the variable 'titleY'.")
                 return False        # other
+        # regions
+        elif variable == "regions":
+            if isinstance(value,list) and all([isinstance(name,str) for name in value]):
+                self.regions = value
+            else:
+                logging.getLogger('MA5').error("'"+value+"' is not a list of strings, ;"+\
+                     "as necessary for the variable 'regions'.")
+                return False        # other
         else:
             logging.getLogger('MA5').error("variable called '"+variable+"' is unknown")
             return False
-        
+
 
         return True
 
@@ -211,6 +221,8 @@ class Histogram():
             logging.getLogger('MA5').info(" xmin = "+str(self.xmin))
         elif variable=="xmax":
             logging.getLogger('MA5').info(" xmax = "+str(self.xmax))
+        elif variable=="regions":
+            logging.getLogger('MA5').info(" regions = '"+str(self.regions)+"'")
         elif variable=="stacking_method":
             msg=""
             if self.stack==StackingMethodType.AUTO:
@@ -242,7 +254,7 @@ class Histogram():
             logging.getLogger('MA5').info(" titleY = '"+self.titleY+"'")
         else:
             logging.getLogger('MA5').error("no variable called '"+variable+"' is found")
-                            
+
 
     def Display(self):
         logging.getLogger('MA5').info(self.GetStringDisplay())
@@ -266,7 +278,8 @@ class Histogram():
     def GetStringDisplay2(self):
         return "  * Binning: nbins="+str(self.nbins)+\
                ", xmin="+str(self.xmin)+\
-               ", xmax="+str(self.xmax)
+               ", xmax="+str(self.xmax)+\
+               ", regions="+str(self.regions)
 
     def GetStringDisplayMore(self):
         words=''

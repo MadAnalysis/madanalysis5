@@ -107,14 +107,14 @@ class Interpreter(InterpreterBase):
             readline.read_history_file(self.history_file)
         except:
             pass
-                                    
+
     def __del__(self):
         try:
             readline.set_history_length(100)
             readline.write_history_file(self.history_file)
         except:
             pass
-                
+
 
     def do_set(self,line):
         self.cmd_set.do(self.split_arg(line),line)
@@ -309,6 +309,8 @@ class Interpreter(InterpreterBase):
         tmp = tmp.replace(")"," ) ")
         tmp = tmp.replace("("," ( ")
         tmp = tmp.replace(","," , ")
+        tmp = tmp.replace("{"," { ")
+        tmp = tmp.replace("}"," } ")
         return self.cmd_plot.complete(text,self.split_arg(tmp),begidx,endidx)
 
     def do_reject(self,line):
@@ -322,6 +324,8 @@ class Interpreter(InterpreterBase):
         tmp = tmp.replace("]"," ] ")
         tmp = tmp.replace("("," ( ")
         tmp = tmp.replace(")"," ) ")
+        tmp = tmp.replace("{"," { ")
+        tmp = tmp.replace("}"," } ")
         return self.cmd_reject.complete(text,self.split_arg(tmp),begidx,endidx)
 
     def do_select(self,line):
@@ -335,6 +339,8 @@ class Interpreter(InterpreterBase):
         tmp = tmp.replace("]"," ] ")
         tmp = tmp.replace("("," ( ")
         tmp = tmp.replace(")"," ) ")
+        tmp = tmp.replace("{"," { ")
+        tmp = tmp.replace("}"," } ")
         return self.cmd_select.complete(text,self.split_arg(tmp),begidx,endidx)
 
     def InitializeParticle(self):
