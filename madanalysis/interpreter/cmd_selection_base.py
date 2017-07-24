@@ -53,8 +53,6 @@ class CmdSelectionBase():
                               "' is an unwknown observable and cannot be used int a plot definition.")
             return None
 
-
-
     def extract_operator(self,words):
 
         if len(words)==1:
@@ -197,7 +195,7 @@ class CmdSelectionBase():
         motherMode = 0
         nBrackets = 0
         for item in words:
-            
+
             # Common part
             if item=="(":
                 nBrackets+=1
@@ -313,14 +311,14 @@ class CmdSelectionBase():
             self.logger.error("problem with brackets () : too much " +\
                                   "more opening-brackets")
             return
-        
+
         if len(parts)!=0:
             if ALLmode and len(parts)>1:
                 self.logger.error("Reversed word 'all' must be applied in front of only (multi)particle")
                 return
             object.Add(parts,ALLmode)
         return object
-        
+
         #object.Display()    
         #self.main.objects.Add(object)
         #self.main.objects.Display()

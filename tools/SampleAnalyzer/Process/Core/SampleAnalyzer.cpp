@@ -185,13 +185,13 @@ void SampleAnalyzer::CheckDatatypes() const
 
 /// Initialization of the SampleAnalyzer
 bool SampleAnalyzer::Initialize(int argc, char **argv, 
-                                const std::string& pdgFileName, bool useRSM)
+                                const std::string& pdgFileName)
 {
   // Initializing general pointers
   myReader_ = 0;
 
   // Configuration
-  if (!cfg_.Initialize(argc,argv,useRSM)) return false;
+  if (!cfg_.Initialize(argc,argv)) return false;
 
   // Displaying configuration
   cfg_.Display();
@@ -317,6 +317,8 @@ bool SampleAnalyzer::CreateDirectoryStructure()
   size_t pos = dirname.find_last_of('/');
   if(pos!=std::string::npos) dirname = "../Output/" + dirname.substr(pos+1);
   else                       dirname = "../Output/" + dirname;
+  size_t found  = dirname.find(".list");
+  if(found!=std::string::npos) dirname.replace(found,5,"");
   if(CreateDir(dirname)==-1) { return false; }
 
   // Creating one subdirectory for each analysis
@@ -331,7 +333,6 @@ bool SampleAnalyzer::CreateDirectoryStructure()
       if(check==-1) { return false; }
       else          { analyzers_[i]->SetOutputDir( newdirname + "_" + ss.str()); }
     }
-
     // Creating one suybdirectory for the histograms and another one for the cutflow
     if(CreateDir(analyzers_[i]->Output() + "/Histograms")==-1) {  return false; }
     if(CreateDir(analyzers_[i]->Output() + "/Cutflows")==-1) {  return false; }
@@ -343,14 +344,11 @@ bool SampleAnalyzer::CreateDirectoryStructure()
 
 bool SampleAnalyzer::PostInitialize()
 {
-  if(cfg_.useRSM())
+  // Creating the directory structure
+  if(!CreateDirectoryStructure())
   {
-    // Creating the directory structure
-    if(!CreateDirectoryStructure())
-    {
-      ERROR << "The output directory structure cannot be created properly" << endmsg;
-      return false;
-    }
+    ERROR << "The output directory structure cannot be created properly" << endmsg;
+    return false;
   }
 
   // Everything was fine
@@ -379,8 +377,34 @@ WriterBase* SampleAnalyzer::InitializeWriter(const std::string& name,
   // Putting the analysis in container
   writers_.push_back(myWriter);
 
+  // Creating the directory structure
+  // Check if the output directory exists -> if not: create it
+  std::string dirname="../Output";
+  if(CreateDir(dirname)==-1) { return 0; }
+
+  // Check whether a directory for the investigated dataset exists -> if not create it
+  dirname = cfg_.GetInputFileName();
+  size_t pos = dirname.find_last_of('/');
+  if(pos!=std::string::npos) dirname = "../Output/" + dirname.substr(pos+1);
+  else                       dirname = "../Output/" + dirname;
+  size_t found  = dirname.find(".list");
+  if(found!=std::string::npos) dirname.replace(found,5,"");
+  if(CreateDir(dirname)==-1) { return 0; }
+
+  // Creating one ouptput subdirectory for the writer
+  std::string newoutdirname="";
+  std::stringstream ss0; ss0 << (writers_.size()-1);
+  int check = -1;
+  for(unsigned int ii=0; check!=0 ; ii++)
+  {
+    std::stringstream ss; ss << ii;
+    newoutdirname = dirname + "/" + name + "Events" + ss0.str() + "_" + ss.str();
+    check = CreateDir(newoutdirname);
+    if(check==-1) { return 0; }
+  }
+
   // Initializing
-  if (!myWriter->Initialize(&cfg_,outputname))
+  if (!myWriter->Initialize(&cfg_,newoutdirname+'/'+outputname))
   {
     ERROR << "problem during the initialization of the writer called '" 
           << name << "'" << endmsg;
@@ -454,11 +478,39 @@ DetectorBase* SampleAnalyzer::InitializeDetector(
   // Putting the detector in container
   detectors_.push_back(myDetector);
 
+  // Creating the directory structure
+  // Check if the output directory exists -> if not: create it
+  std::string dirname="../Output";
+  if(CreateDir(dirname)==-1) { return 0; }
+
+  // Check whether a directory for the investigated dataset exists -> if not create it
+  dirname = cfg_.GetInputFileName();
+  size_t pos = dirname.find_last_of('/');
+  if(pos!=std::string::npos) dirname = "../Output/" + dirname.substr(pos+1);
+  else                       dirname = "../Output/" + dirname;
+  size_t found  = dirname.find(".list");
+  if(found!=std::string::npos) dirname.replace(found,5,"");
+  if(CreateDir(dirname)==-1) { return 0; }
+
+  // Creating one ouptput subdirectory for the writer
+  std::string newoutdirname="";
+  std::stringstream ss0; ss0 << (detectors_.size()-1);
+  int check = -1;
+  for(unsigned int ii=0; check!=0 ; ii++)
+  {
+    std::stringstream ss; ss << ii;
+    newoutdirname = dirname + "/RecoEvents" + ss0.str() + "_" + ss.str();
+    check = CreateDir(newoutdirname);
+    if(check==-1) { return 0; }
+  }
+  std::map<std::string,std::string> prm2 = parameters;
+  prm2["outputdir"] = newoutdirname;
+
   // Initialize (specific to the detector)
   std::string ma5dir = std::getenv("MA5_BASE");
   //  std::string config = ma5dir+"/tools/SampleAnalyzer/"+configFile;
   std::string config = configFile;
-  if (!myDetector->Initialize(config, parameters))
+  if (!myDetector->Initialize(config, prm2))
   {
     ERROR << "problem during the initialization of the fast-simulation package called '" 
           << name << "'" << endmsg;
@@ -479,7 +531,7 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat& mySample)
   if (myReader_!=0)
   {
     myReader_->Finalize();
-  }  
+  }
 
   // Finalize previous progress bar
   if (!LastFileFail_ && progressBar_!=0)
@@ -694,78 +746,63 @@ bool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
   FillSummary(summary,mySamples);
 
   // Finalize analysis
-  if(cfg_.useRSM())
+  // Creating the general SAF file (sample info)
+  std::string datasetname = cfg_.GetInputFileName();
+  size_t pos = datasetname.find_last_of('/');
+  if(pos!=std::string::npos) datasetname = datasetname.substr(pos+1);
+  size_t found  = datasetname.find(".list");
+  if(found!=std::string::npos) datasetname.replace(found,5,"");
+  std::string general = "../Output/" + datasetname + "/" + datasetname + ".saf";
+  SAFWriter out;
+  out.Initialize(&cfg_, general.c_str());
+  out.WriteHeader(summary);
+  out.WriteFiles(mySamples);
+  out.WriteFoot(summary);
+  out.Finalize();
+
+  // Creating the histo SAF file
+  for(unsigned int i=0; i<analyzers_.size(); i++)
   {
-    // Creating the general SAF file (sample info)
-    std::string datasetname = cfg_.GetInputFileName();
-    size_t pos = datasetname.find_last_of('/');
-    if(pos!=std::string::npos) datasetname = datasetname.substr(pos+1);
-    std::string general = "../Output/" + datasetname + "/" + datasetname + ".saf";
-    SAFWriter out;
-    out.Initialize(&cfg_, general.c_str());
-    out.WriteHeader(summary);
-    out.WriteFoot(summary);
+    std::string safname = analyzers_[i]->Output() + "/Histograms/histos.saf";
+    out.Initialize(&cfg_, safname.c_str());
+    out.WriteHeader();
+    analyzers_[i]->Manager()->GetPlotManager()->Write_TextFormat(out);
+    out.WriteFoot();
     out.Finalize();
-
-    // Creating the histo SAF file
-    for(unsigned int i=0; i<analyzers_.size(); i++)
-    {
-      std::string safname = analyzers_[i]->Output() + "/Histograms/histos.saf";
-      out.Initialize(&cfg_, safname.c_str());
-      out.WriteHeader();
-      analyzers_[i]->Manager()->GetPlotManager()->Write_TextFormat(out);
-      out.WriteFoot();
-      out.Finalize();
-    }
-
-    // Linking the histos to the SRs
-    for(unsigned int i=0; i<analyzers_.size(); i++)
-    {
-      std::string safname = analyzers_[i]->Output() + "/" + analyzers_[i]->name() + ".saf";
-      out.Initialize(&cfg_, safname.c_str());
-      out.WriteHeader();
-      analyzers_[i]->Manager()->WriteHistoDefinition(out);
-      out.WriteFoot();
-      out.Finalize();
-    }
-
-
-    // Saving the cut flows
-    for(unsigned int i=0; i<analyzers_.size(); i++)
-    {
-     AnalyzerBase* myanalysis = analyzers_[i];
-      for(unsigned int j=0; j<myanalysis->Manager()->Regions().size(); j++)
-      {
-        RegionSelection *myRS = myanalysis->Manager()->Regions()[j];
-        std::string safname = myanalysis->Output() + "/Cutflows/" + 
-           CleanName(myRS->GetName()) + ".saf";
-        out.Initialize(&cfg_, safname.c_str());
-        out.WriteHeader();
-        myRS->WriteCutflow(out);
-        out.WriteFoot();
-        out.Finalize();
-      }
-    }
-
-    // The user-defined stuff
-    for(unsigned int i=0; i<analyzers_.size(); i++)
-      analyzers_[i]->Finalize(summary,mySamples);
   }
-  else
-  {
-    for (unsigned int i=0;i<analyzers_.size();i++)
-    {
-      analyzers_[i]->PreFinalize(summary,mySamples);
-      analyzers_[i]->Finalize(summary,mySamples);
-      analyzers_[i]->PostFinalize(summary,mySamples);
-    }
 
-    // Finalize writers
-    for (unsigned int i=0;i<writers_.size();i++)
+  // Linking the histos to the SRs
+  for(unsigned int i=0; i<analyzers_.size(); i++)
+  {
+    std::string safname = analyzers_[i]->Output() + "/" + analyzers_[i]->name() + ".saf";
+    out.Initialize(&cfg_, safname.c_str());
+    out.WriteHeader();
+    analyzers_[i]->Manager()->WriteHistoDefinition(out);
+    out.WriteFoot();
+    out.Finalize();
+  }
+
+
+  // Saving the cut flows
+  for(unsigned int i=0; i<analyzers_.size(); i++)
+  {
+    AnalyzerBase* myanalysis = analyzers_[i];
+    for(unsigned int j=0; j<myanalysis->Manager()->Regions().size(); j++)
     {
-      writers_[i]->WriteFoot(summary);
-      writers_[i]->Finalize();
+      RegionSelection *myRS = myanalysis->Manager()->Regions()[j];
+      std::string safname = myanalysis->Output() + "/Cutflows/" + 
+         CleanName(myRS->GetName()) + ".saf";
+      out.Initialize(&cfg_, safname.c_str());
+      out.WriteHeader();
+      myRS->WriteCutflow(out);
+      out.WriteFoot();
+      out.Finalize();
     }
+  }
+
+  // The user-defined stuff
+  for(unsigned int i=0; i<analyzers_.size(); i++)
+    analyzers_[i]->Finalize(summary,mySamples);
 
     // Finalize clusters
     for (unsigned int i=0;i<clusters_.size();i++)
@@ -778,7 +815,6 @@ bool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
     {
       detectors_[i]->Finalize();
     }
-  }
 
   // Display reports
   MA5::TimeService::GetInstance()->WriteGenericReport();

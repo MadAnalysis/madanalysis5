@@ -93,8 +93,7 @@ class AnalyzerBase
                      const Configuration* cfg)
   {
     weighted_events_ = !cfg->IsNoEventWeight();
-    if(!cfg->useRSM())
-      out_.Initialize(cfg,outputName.c_str());
+    out_.Initialize(cfg,outputName.c_str());
     return true;
   }
 

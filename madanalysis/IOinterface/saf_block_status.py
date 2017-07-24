@@ -38,6 +38,4 @@ class SafBlockStatus():
 
     def newline(self):
         self.Nlines += 1
-        
-
 

@@ -56,7 +56,7 @@ class Configuration;
 class SampleAnalyzer
 {
  private :
- 
+
   std::string analysisName_; 
   std::string datasetName_;
   bool LastFileFail_;
@@ -114,7 +114,7 @@ class SampleAnalyzer
   { return fullDetectors_; }
 
   /// Initialization of the SampleAnalyzer
-  bool Initialize(int argc, char **argv, const std::string& filename,bool=false);
+  bool Initialize(int argc, char **argv, const std::string& filename);
 
   /// Getting pointer to an analyzer
   AnalyzerBase* InitializeAnalyzer(const std::string& name, 

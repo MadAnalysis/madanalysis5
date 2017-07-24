@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+138           (2017/07/24) fuks:    Multiple regions: final commit 
+
 136           (2017/06/16) fuks:    Adding regions for cuts 
 
 135           (2017/06/16) fuks:    Histograms can be assigned to regions 

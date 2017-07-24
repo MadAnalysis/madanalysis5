@@ -80,7 +80,9 @@ class CmdCut(CmdBase,CmdSelectionBase):
                 endArguments=i
             elif args[i]=='[':
                 Nbracket2+=1
-                beginOptions=i
+                if Nbracket1==0:
+                    beginOptions=i
+                    foundOptions=True
             elif args[i]=='{':
                 Nbracket3+=1
                 beginRegions=i
@@ -89,8 +91,6 @@ class CmdCut(CmdBase,CmdSelectionBase):
                 Nbracket3-=1
             elif args[i]==']':
                 Nbracket2-=1
-                if i==(len(args)-1) or '{' in args[i+1:]:
-                    foundOptions=True
 
         if Nbracket1!=0:
             logging.getLogger('MA5').error("number of opening brackets '(' and number of " +\
@@ -134,14 +134,22 @@ class CmdCut(CmdBase,CmdSelectionBase):
             parts = self.extract_particle(args[1:endCandidate])
             if parts==None:
                 return
+            if '[' in parts.GetStringDisplay() and ']' in parts.GetStringDisplay():
+                self.logger.error('Object definitions can only be applied on classes of objects, '+\
+                   'and not on a specific object (like the leading muon)')
+                return
         else:
             parts = ParticleObject()
-
         # Extracting the conditions
         if foundRegions:
             endCondition=beginRegions
         else:
             endCondition=beginOptions
+
+        if beginRegions!=-1 and beginOptions!=-1:
+            if beginOptions<beginRegions:
+                self.logger.error('Cut declaration: regions should be declared before the options')
+                return
 
         condition = ConditionSequence(mother=True)
         if foundCandidate:
@@ -169,22 +177,47 @@ class CmdCut(CmdBase,CmdSelectionBase):
                 self.logger.error('Cut trying to be attached to a non-existing region')
                 return
         else:
-            CutRegionNames="all"
+            CutRegionNames=self.main.regions.GetNames()
 
         if CutRegionNames==[]:
-            CutRegionNames="all"
+            CutRegionNames=self.main.regions.GetNames()
 
         # Creating cut
-        cut = Cut(parts,condition,self.cut_type,regions=CutRegionNames)
-
-        # Setting options
-        if foundOptions:
-            if not self.extract_options(cut,args[beginOptions+1:len(args)-1]):
-                return
-
-        # Adding the cut to selection
-        self.main.selection.Add(cut)
-
+        if not foundCandidate:
+            cut = Cut(parts,condition,self.cut_type,regions=CutRegionNames)
+            # Setting options
+            if foundOptions:
+                if not self.extract_options(cut,args[beginOptions+1:len(args)-1]):
+                    return
+            # Adding the cut to selection
+            self.main.selection.Add(cut)
+        else:
+            setofRegions = self.main.regions.GetClusteredRegions(self.main.selection)
+            if (setofRegions==[[]] and CutRegionNames==[]) or (list(set(CutRegionNames)) in setofRegions):
+                cut = Cut(parts,condition,self.cut_type,regions=CutRegionNames)
+                # Setting options
+                if foundOptions:
+                    if not self.extract_options(cut,args[beginOptions+1:len(args)-1]):
+                        return
+                # Adding the cut to selection
+                self.main.selection.Add(cut)
+            else:
+                self.logger.warning('   Object definition to be attached to distinguishable regions -> multiple declaration:')
+                for myset in setofRegions:
+                    subCutRegionNames = [x for x in CutRegionNames if x in myset]
+                    if subCutRegionNames == []:
+                        continue
+                    cut = Cut(parts,condition,self.cut_type,regions=subCutRegionNames)
+                    # Getting options
+                    if foundOptions:
+                        if not self.extract_options(cut,args[beginOptions+1:len(args)-1]):
+                            return
+                    # Adding the cut to selection
+                    self.main.selection.Add(cut)
+                    title = cut.GetStringDisplay()
+                    if ', regions' in title:
+                        title=title[:title.find(', regions')]
+                    self.logger.warning(title + ' { ' + ' '.join(subCutRegionNames) + ' }')
 
     def clean_sequence(self,sequence):
         if len(sequence)<2:

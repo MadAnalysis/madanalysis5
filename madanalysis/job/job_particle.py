@@ -36,14 +36,13 @@ def GetParticles(main):
     part_list   = []
     option_list = []
     for item in main.selection.table:
-
         # Histogram case
         if item.__class__.__name__=='Histogram':
             ExtractPart(item.arguments,\
                         item.observable,\
                         part_list,\
                         option_list,\
-                        [item.rank,item.statuscode] )
+                        [item.rank,item.statuscode, item.regions] )
 
         # Cut case
         if item.__class__.__name__=='Cut':
@@ -57,13 +56,13 @@ def GetParticles(main):
                 # Loop over the particles
                 for part in combination:
                     part_list.append(part)
-                    option_list.append([item.rank,item.statuscode])
+                    option_list.append([item.rank,item.statuscode, item.regions])
 
             # Loop over canidates in condition
             LoopOverConditions(partType,\
                                item.conditions,\
                                part_list,option_list,\
-                               [item.rank, item.statuscode])
+                               [item.rank, item.statuscode, item.regions])
 
     # For particle selected by a PT rank
     # adding particle without PTrank
@@ -74,11 +73,10 @@ def GetParticles(main):
             newpart = copy.copy(part_list[i])
             newpart.PTrank=0
             newpart_list.append(newpart)
-            newoption_list.append(["PTordering",option_list[i][1]])
+            newoption_list.append(["PTordering",option_list[i][1],option_list[i][2]])
     part_list.extend(newpart_list)
-    option_list.extend(option_list)
-                
-            
+    option_list.extend(newoption_list)
+
     # Removing double counted
     final_list=[]
     for i in range(len(part_list)):
@@ -90,11 +88,10 @@ def GetParticles(main):
                option_list[i]==option_list[j] :
                 doublon=True
         if not doublon:
-            final_list.append([part_list[i], option_list[i][0], option_list[i][1]])
+            final_list.append([part_list[i], option_list[i][0], option_list[i][1], option_list[i][2]])
 
     # End
     return final_list
-
 
 def ExtractPart(args,obs,part_list,option_list,option):
 
@@ -113,9 +110,7 @@ def ExtractPart(args,obs,part_list,option_list,option):
             for part in combination:
                 part_list.append(part)
                 option_list.append(option)
-                
-    
-    
+
 def LoopOverConditions(partType,current,part_list,option_list,option):
 
     i=0

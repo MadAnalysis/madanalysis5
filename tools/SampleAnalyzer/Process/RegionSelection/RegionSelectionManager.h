@@ -124,6 +124,8 @@ class RegionSelectionManager
     NumberOfSurvivingRegions_ = regions_.size();
     for (unsigned int i=0; i<regions_.size(); i++ )
       regions_[i]->InitializeForNewEvent(EventWeight);
+    for (unsigned int i=0; i < plotmanager_.GetNplots(); i++)
+      plotmanager_.GetHistos()[i]->SetFreshEvent(true);
   }
 
   /// This method associates all regions with a cut
@@ -196,6 +198,21 @@ class RegionSelectionManager
   bool ApplyCut(bool, std::string const&);
 
   /// This method associates all signal regions with an histo
+  void AddHistoFrequency(const std::string&name)
+  {
+    // The name of the histo
+    std::string myname=name;
+    if(myname.compare("")==0)
+    {
+      std::stringstream numstream;
+      numstream << plotmanager_.GetHistos().size();
+      myname = "Histo" + numstream.str();
+    }
+    // Adding the histo and linking all regions to the histo
+    plotmanager_.Add_HistoFrequency(myname,regions_);
+  }
+
+  /// This method associates all signal regions with an histo
   void AddHisto(const std::string&name,unsigned int nb,double xmin,double xmax)
   {
     // The name of the histo
@@ -210,12 +227,41 @@ class RegionSelectionManager
     plotmanager_.Add_Histo(myname,nb,xmin,xmax,regions_);
   }
 
+  /// This method associates all signal regions with an histo
+  void AddHistoLogX(const std::string&name,unsigned int nb,double xmin,double xmax)
+  {
+    // The name of the histo
+    std::string myname=name;
+    if(myname.compare("")==0)
+    {
+      std::stringstream numstream;
+      numstream << plotmanager_.GetHistos().size();
+      myname = "Histo" + numstream.str();
+    }
+    // Adding the histo and linking all regions to the histo
+    plotmanager_.Add_HistoLogX(myname,nb,xmin,xmax,regions_);
+  }
+
   /// This method associates one single signal region with an histo
   void AddHisto(const std::string&name,unsigned int nb,double xmin,double xmax,
     const std::string &RSname)
   {
     std::string RSnameA[] = {RSname};
     AddHisto(name, nb, xmin, xmax, RSnameA);
+  }
+
+  /// This method associates one single signal region with an histo
+  void AddHistoLogX(const std::string&name,unsigned int nb,double xmin,double xmax,
+    const std::string &RSname)
+  {
+    std::string RSnameA[] = {RSname};
+    AddHistoLogX(name, nb, xmin, xmax, RSnameA);
+  }
+  /// This method associates one single signal region with an histo
+  void AddHistoFrequency(const std::string&name, const std::string &RSname)
+  {
+    std::string RSnameA[] = {RSname};
+    AddHistoFrequency(name, RSnameA);
   }
 
   /// this method associates an arbitrary number of RS with an histo
@@ -251,11 +297,91 @@ class RegionSelectionManager
       catch (const std::exception& e)
       {
         MANAGE_EXCEPTION(e);
-      }    
+      }
     }
 
     // Creating the histo
     plotmanager_.Add_Histo(myname, nb, xmin, xmax,myregions);
+  }
+
+
+  /// this method associates an arbitrary number of RS with an histo
+  template <int NRS> void AddHistoLogX(const std::string&name, unsigned int nb,
+    double xmin,double xmax, std::string const(&RSnames)[NRS])
+  {
+    // The name of the histo
+    std::string myname=name;
+    if(myname.compare("")==0)
+    {
+      std::stringstream numstream;
+      numstream << plotmanager_.GetNplots();
+      myname = "Histo" + numstream.str();
+    }
+     // Creating the vector of SR of interests
+    std::vector<RegionSelection*> myregions;
+    for(unsigned int i=0; i<NRS; i++)
+    {
+      for(unsigned int j=0; j<regions_.size(); j++)
+      {
+        if(regions_[j]->GetName().compare(RSnames[i])==0)
+        {
+          myregions.push_back(regions_[j]);
+          break;
+        }
+      }
+      try
+      {
+        if (myregions.size()==i) throw EXCEPTION_WARNING("Assigning the histo \"" + name + 
+                                                         "\" to the non-existing signal region \"" + RSnames[i] + 
+                                                         "\"","",0);
+      }
+      catch (const std::exception& e)
+      {
+        MANAGE_EXCEPTION(e);
+      }
+    }
+
+    // Creating the histo
+    plotmanager_.Add_HistoLogX(myname, nb, xmin, xmax,myregions);
+  }
+
+  /// this method associates an arbitrary number of RS with an histo
+  template <int NRS> void AddHistoFrequency(const std::string&name, std::string const(&RSnames)[NRS])
+  {
+    // The name of the histo
+    std::string myname=name;
+    if(myname.compare("")==0)
+    {
+      std::stringstream numstream;
+      numstream << plotmanager_.GetNplots();
+      myname = "Histo" + numstream.str();
+    }
+     // Creating the vector of SR of interests
+    std::vector<RegionSelection*> myregions;
+    for(unsigned int i=0; i<NRS; i++)
+    {
+      for(unsigned int j=0; j<regions_.size(); j++)
+      {
+        if(regions_[j]->GetName().compare(RSnames[i])==0)
+        {
+          myregions.push_back(regions_[j]);
+          break;
+        }
+      }
+      try
+      {
+        if (myregions.size()==i) throw EXCEPTION_WARNING("Assigning the histo \"" + name + 
+                                                         "\" to the non-existing signal region \"" + RSnames[i] + 
+                                                         "\"","",0);
+      }
+      catch (const std::exception& e)
+      {
+        MANAGE_EXCEPTION(e);
+      }
+    }
+
+    // Creating the histo
+    plotmanager_.Add_HistoFrequency(myname,myregions);
   }
 
   /// Filling an histo with a value val
@@ -283,7 +409,7 @@ class RegionSelectionManager
     catch (const std::exception& e)
     {
       MANAGE_EXCEPTION(e);
-    }    
+    }
 
     return false;
   }

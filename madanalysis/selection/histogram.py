@@ -42,7 +42,7 @@ class Histogram():
                       "statuscode" : ["finalstate","interstate","allstate","initialstate"], \
                       "titleX" :[], \
                       "titleY" :[], \
-                      "regions": "all"
+                      "regions": []
   }
 
     userShortcuts = {"logX": ["logX","true"], \
@@ -63,7 +63,7 @@ class Histogram():
                      "superimpose": ["stacking_method","superimpose"], \
                      "normalize2one" : ["stacking_method","normalize2one"]}
 
-    def __init__(self,observable,arguments,nbins,xmin,xmax,regions="all"):
+    def __init__(self,observable,arguments,nbins,xmin,xmax,regions=[]):
         self.observable = observable
         self.arguments  = arguments
         self.nbins      = nbins

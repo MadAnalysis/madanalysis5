@@ -72,7 +72,7 @@ class HistoLogX : public Histo
     {
       MANAGE_EXCEPTION(e);
       nbins_ = 100;
-    }    
+    }
 
     // Setting the description: min
     try
@@ -84,7 +84,7 @@ class HistoLogX : public Histo
     {
       MANAGE_EXCEPTION(e);
       xmin_=.1;
-    }    
+    }
 
     // Setting the description: max
     try
@@ -97,7 +97,7 @@ class HistoLogX : public Histo
       MANAGE_EXCEPTION(e);
       xmin_=.1;
       xmax_=100.;
-    }    
+    }
 
 
     log_xmin_=std::log10(xmin_);
@@ -108,7 +108,7 @@ class HistoLogX : public Histo
     histo_.resize(nbins_,std::make_pair(0.,0.));
     underflow_ = std::make_pair(0.,0.);
     overflow_  = std::make_pair(0.,0.);
-	
+
     // Reseting statistical counters
     sum_w_    = std::make_pair(0.,0.);
     sum_ww_   = std::make_pair(0.,0.);
@@ -131,7 +131,7 @@ class HistoLogX : public Histo
     catch (const std::exception& e)
     {
       MANAGE_EXCEPTION(e);
-    }    
+    }
 
     // Positive weight
     if (weight>=0)

@@ -32,7 +32,7 @@ using namespace MA5;
 void Histo::Write_TextFormat(std::ostream* output)
 {
   // Header
-	*output << "<Histo>" << std::endl;
+  *output << "<Histo>" << std::endl;
 
   // Write the body
   Write_TextFormatBody(output);
@@ -47,118 +47,95 @@ void Histo::Write_TextFormat(std::ostream* output)
 void Histo::Write_TextFormatBody(std::ostream* output)
 {
   // Description
-	*output << "<Description>" << std::endl;
+  *output << "  <Description>" << std::endl;
 
   // Name
-	*output << "\"" << name_ << "\"" << std::endl;
+  *output << "    \"" << name_ << "\"" << std::endl;
 
   // Title 
-  output->width(15);
-	*output << std::left << "# nbins";
+  *output << "    ";
+  output->width(10);
+  *output << std::left << "# nbins";
   output->width(15);
   *output << std::left << "xmin";
   output->width(15);
   *output << std::left << "xmax" << std::endl;
 
- // Data
-  output->width(15);
-	*output << std::left << nbins_;
-  output->width(15);
-  *output << std::left << xmin_; 
-  output->width(15);
-  *output << std::left << xmax_ << std::endl;
+  // Data
+  *output << "      ";
+  output->width( 8); *output << std::left << nbins_;
+  output->width(15); *output << std::left << std::scientific << xmin_;
+  output->width(15); *output << std::left << std::scientific << xmax_ << std::endl;
 
   // SelectionRegions
   if(regions_.size()!=0)
   {
-    *output << std::left << "# associated RegionSelections" << std::endl;
+    unsigned int maxlength=0;
+    for(unsigned int i=0; i < regions_.size(); i++)
+      if (regions_[i]->GetName().size()>maxlength) maxlength=regions_[i]->GetName().size();
+    *output << std::left << "    # Defined regions" << std::endl;
     for(unsigned int i=0; i < regions_.size(); i++)
     {
-      int nsp = 50-regions_[i]->GetName().size();
-      if(nsp<0) nsp=0;
-      *output << " " << regions_[i]->GetName();
-      for (int jj=0; jj<nsp;jj++) *output << " ";
-      *output << "# Region nr. " << i+1 << std::endl;
+      *output << "      " << std::setw(maxlength) << std::left << regions_[i]->GetName();
+      *output << "    # Region nr. " << std::fixed << i+1 << std::endl;
     }
- }
+  }
 
- 
-
-	*output << "</Description>" << std::endl;
+  // End description
+  *output << "  </Description>" << std::endl;
 
   // Statistics
-  *output << "<Statistics>" << std::endl;
+  *output << "  <Statistics>" << std::endl;
 
-  *output << nevents_.first << " " 
-          << nevents_.second << " # nevents" << std::endl;
-  *output << nevents_w_.first << " " 
-          << nevents_w_.second 
-          << " # sum of event-weights over events" << std::endl;
-  *output << nentries_.first << " " 
-          << nentries_.second << " # nentries" << std::endl;
-  *output << sum_w_.first << " " 
-          << sum_w_.second 
-          << " # sum of event-weights over entries" << std::endl;
-  *output << sum_ww_.first << " " 
-          << sum_ww_.second << " # sum weights^2"<<std::endl;
-  *output << sum_xw_.first << " " 
-          << sum_xw_.second << " # sum value*weight"<<std::endl;
-  *output << sum_xxw_.first << " " 
-          << sum_xxw_.second << " # sum value^2*weight"<<std::endl;
-  *output << "</Statistics>" << std::endl;
+  *output << "      ";
+  output->width(15); *output << std::fixed << nevents_.first;
+  output->width(15); *output << std::fixed << nevents_.second;
+  *output << " # nevents" << std::endl;
+  *output << "      ";
+  output->width(15); *output << std::scientific << nevents_w_.first;
+  output->width(15); *output << std::scientific << nevents_w_.second;
+  *output << " # sum of event-weights over events" << std::endl;
+  *output << "      ";
+  output->width(15); *output << std::fixed << nentries_.first;
+  output->width(15); *output << std::fixed << nentries_.second;
+  *output << " # nentries" << std::endl;
+  *output << "      ";
+  output->width(15); *output << std::scientific << sum_w_.first;
+  output->width(15); *output << std::scientific << sum_w_.second;
+  *output << " # sum of event-weights over entries" << std::endl;
+  *output << "      ";
+  output->width(15); *output << std::scientific << sum_ww_.first;
+  output->width(15); *output << std::scientific << sum_ww_.second;
+  *output << " # sum weights^2" << std::endl;
+  *output << "      ";
+  output->width(15); *output << std::scientific << sum_xw_.first;
+  output->width(15); *output << std::scientific << sum_xw_.second;
+  *output << " # sum value*weight" << std::endl;
+  *output << "      ";
+  output->width(15); *output << std::scientific << sum_xxw_.first;
+  output->width(15); *output << std::scientific << sum_xxw_.second;
+  *output << " # sum value^2*weight" << std::endl;
+  *output << "  </Statistics>" << std::endl;
 
   // Data
-  *output << "<Data>" << std::endl;
-  *output << underflow_.first << " " << 
-             underflow_.second << " # underflow" << std::endl;
+  *output << "  <Data>" << std::endl;
+  *output << "      ";
+  output->width(15); *output << std::scientific << underflow_.first;
+  output->width(15); *output << std::scientific << underflow_.second;
+  *output << " # underflow" << std::endl;
   for (unsigned int i=0;i<histo_.size();i++)
   {
-    *output << histo_[i].first << " " << histo_[i].second;
-    if (i<2 || i>=(histo_.size()-2)) 
+    *output << "      ";
+    output->width(15); *output << std::scientific << histo_[i].first;
+    output->width(15); *output << std::scientific << histo_[i].second;
+    if (i<2 || i>=(histo_.size()-2))
       *output << " # bin " << i+1 << " / " << histo_.size();
     *output << std::endl;
-      
   }
-  *output << overflow_.first << " " 
-          << overflow_.second << " # overflow" << std::endl;
-  *output << "</Data>" << std::endl;
+  *output << "      ";
+  output->width(15); *output << std::scientific << overflow_.first;
+  output->width(15); *output << std::scientific << overflow_.second;
+  *output << " # overflow" << std::endl;
+  *output << "  </Data>" << std::endl;
 }
 
-
-/// Write the plot in a ROOT file
-/*
-void Histo::Write_RootFormat(std::pair<TH1F*,TH1F*>& histo)
-{
-  // Creating ROOT histograms
-  histo.first  -> SetBins(nbins_,xmin_,xmax_);
-  histo.second -> SetBins(nbins_,xmin_,xmax_);
-
-  // Filling histos
-  for (unsigned int i=0;i<histo_.size();i++)
-  {
-    histo.first  -> SetBinContent(i+1,histo_[i].first);
-    histo.second -> SetBinContent(i+1,histo_[i].second);
-  }
-  histo.first  -> SetBinContent(0,underflow_.first);
-  histo.second -> SetBinContent(0,underflow_.second);
-  histo.first  -> SetBinContent(histo_.size()+1,overflow_.first);
-  histo.second -> SetBinContent(histo_.size()+1,overflow_.second);
-
-  // Filling statistics for histo with positive weight
-  histo.first  -> SetEntries(nentries_.first);
-  MAfloat64 stats[4];
-  stats[0]=sum_w_.first;
-  stats[1]=sum_ww_.first;
-  stats[2]=sum_xw_.first;
-  stats[3]=sum_xxw_.first;
-  histo.first -> PutStats(stats);
-
-  histo.second -> SetEntries(nentries_.second);
-  stats[0]=sum_w_.second;
-  stats[1]=sum_ww_.second;
-  stats[2]=sum_xw_.second;
-  stats[3]=sum_xxw_.second;
-  histo.second -> PutStats(stats);
-}
-
-*/

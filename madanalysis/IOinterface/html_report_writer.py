@@ -161,6 +161,8 @@ class HTMLReportWriter(TextFileWriter.TextFileWriter):
 
     def NewLine(self):
         self.page.append("<BR>")
+    def NewBlankLine(self):
+        self.page.append("<BR>")
 
     def OpenBullet(self):
         self.bullet=self.bullet+1
@@ -170,7 +172,7 @@ class HTMLReportWriter(TextFileWriter.TextFileWriter):
     def CloseBullet(self):
         self.bullet=self.bullet-1
         self.page.append("  </ul>\n")
-       
+
     def CreateTable(self,col,caption):
         self.table=self.table+1
         self.number_col=len(col)
@@ -182,36 +184,37 @@ class HTMLReportWriter(TextFileWriter.TextFileWriter):
             self.page.append("    </caption>\n")
         self.page.append('    <tr>\n')
 
-    def NewCell(self,color=ColorType.WHITE):
-        size = str(round(self.col_size[self.current_col]/sum(self.col_size)*100,0))
-        self.current_col=self.current_col+1
-        
+    def NewCell(self,color=ColorType.WHITE,span=1):
+        size=0
+        for ii in range(0,span):
+            size += self.col_size[self.current_col+ii]
+        size = str(round(size/sum(self.col_size)*100,0))
+        self.current_col=self.current_col+span
+
         if  self.current_col>self.number_col:
             logging.getLogger('MA5').warning(" the number of the current column is bigger than the total number of declared columns.")
         if self.first_cell==True:
-            self.page.append('      <td width=\'' + size + '%\' bgcolor=\'' + \
-                ColorType.convert2hexa(color)+ '\'>\n')
+            self.page.append('      <td width=\'' + size + '%\' bgcolor=\'' + ColorType.convert2hexa(color)+'\'')
         else:
-            self.page.append('      </td> \n' + \
-                '      <td width=\'' + size + '%\' bgcolor=\'' + \
-                ColorType.convert2hexa(color)+'\'>\n')
+            self.page.append('      </td> \n' + '      <td width=\'' + size + '%\' bgcolor=\'' + ColorType.convert2hexa(color)+'\'')
+        if span>1:
+            self.page.append(' colspan=\"'+ str(span) + '\"')
+        self.page.append('>\n')
         self.first_cell=False
-       
+
     def NewLine(self):
         self.current_col=0
         self.first_cell=True
         self.page.append("      </td>\n    </tr>\n    <tr>\n")
-        
+
     def EndLine(self):
         self.current_col=0
         self.first_cell=True
         self.page.append("      </td>\n    </tr>\n")
-        
+
     def EndTable(self):
         self.table=self.table-1
         self.page.append("  </table><br /> <br />\n")
-
-    
 
     def WriteFigure(self,caption,filename):
         thefile = os.path.normpath(filename)
@@ -231,8 +234,7 @@ class HTMLReportWriter(TextFileWriter.TextFileWriter):
         self.page.append('    <img src=\'' + os.path.basename(filename) + \
                 '.png\' ' + 'height=\''+ str(scale*im.header.height)+'\' alt =\'\' />\n')
         self.page.append("  </center><br /> <br />\n")
-        
-    
+
     def WriteFoot(self):
         if self.bullet!=0:
             logging.getLogger('MA5').warning(" the number of 'OpenBullet()' and 'CloseBullet()' are different.")
@@ -245,4 +247,3 @@ class HTMLReportWriter(TextFileWriter.TextFileWriter):
         self.page.insert(17,self.TableOfContents())
         for item in self.page:
             self.file.write(item)
-            

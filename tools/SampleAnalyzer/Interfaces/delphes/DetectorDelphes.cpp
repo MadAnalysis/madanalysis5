@@ -95,6 +95,12 @@ bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<s
       str << it->second;
       str >> rootfile_;
     }
+    else if (key=="outputdir")
+    {
+      std::stringstream str;
+      str << it->second;
+      str >> outputdir_;
+    }
   }
 
   // Decode configuration file with Delphes class 'ExRootConfReader'
@@ -132,14 +138,14 @@ bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<s
       isPhotonMA5   && isJetMA5      ) MA5card_=true; else MA5card_=false;
 
   // Creating output file
+  std::string ofname;
   if (output_)
   {
-    if (rootfile_=="")
-       outputFile_ = TFile::Open("TheMouth.root", "RECREATE");
-    else
-       outputFile_ = TFile::Open(rootfile_.c_str(), "RECREATE");
+    if (rootfile_=="") ofname = outputdir_+"/DelphesEvents.root";
+    else               ofname = outputdir_+"/"+rootfile_;
   }
-  else outputFile_ = TFile::Open("tmp.root", "RECREATE");
+  else ofname = outputdir_+"/tmp.root";
+  outputFile_ = TFile::Open(ofname.c_str(), "RECREATE");
 
   // Creating output tree
   treeWriter_ = new ExRootTreeWriter(outputFile_, "Delphes");

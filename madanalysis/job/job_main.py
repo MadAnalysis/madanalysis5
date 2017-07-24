@@ -44,7 +44,6 @@ class JobMain:
         JobHeader.WriteCore(self.file,self.main,self.parts)
         JobHeader.WriteFoot(self.file,self.main)
 
-    
     def WriteSource(self):
         self.file.write('#include "SampleAnalyzer/User/Analyzer/user.h"\n')
         self.file.write('using namespace MA5;\n')
@@ -55,4 +54,3 @@ class JobMain:
         JobExecute.WriteExecute(self.file,self.main,self.parts)
         import madanalysis.job.job_finalize as JobFinalize
         JobFinalize.WriteJobFinalize(self.file,self.main)
-    

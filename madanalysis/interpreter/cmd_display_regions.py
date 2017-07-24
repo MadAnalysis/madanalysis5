@@ -32,7 +32,7 @@ class CmdDisplayRegions(CmdBase.CmdBase):
         CmdBase.CmdBase.__init__(self,main,"display_regions")
 
     def do(self,args):
-        self.main.regions.Display()
+        self.main.regions.Display(self.main.selection)
 
     def help(self):
         logging.getLogger('MA5').info("   Syntax: display_regionss")

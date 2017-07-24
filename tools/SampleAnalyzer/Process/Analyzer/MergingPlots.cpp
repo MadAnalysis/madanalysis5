@@ -41,6 +41,10 @@ using namespace MA5;
 bool MergingPlots::Initialize(const Configuration& cfg,
              const std::map<std::string,std::string>& parameters)
 {
+
+  // Create a new region
+  Manager()->AddRegionSelection("myregion");
+
   // Create a new algo
   algo_ = new DJRextractor();
 
@@ -83,7 +87,7 @@ bool MergingPlots::Initialize(const Configuration& cfg,
     str << "DJR" << i+1;
     std::string title;
     str >> title;
-    DJR_[i].Initialize(DJR_.size()+1,title);
+    DJR_[i].Initialize(DJR_.size()+1,title,Manager());
   }
 
   // Initialize the algo
@@ -95,6 +99,17 @@ bool MergingPlots::Initialize(const Configuration& cfg,
 
 bool MergingPlots::Execute(SampleFormat& mySample, const EventFormat& myEvent)
 {
+  // Event weight
+  double myEventWeight;
+  if(Configuration().IsNoEventWeight()) myEventWeight=1.;
+  else if(myEvent.mc()->weight()!=0.) myEventWeight=myEvent.mc()->weight();
+  else
+  {
+    WARNING << "Found one event with a zero weight. Skipping..." << endmsg;
+    return false;
+  }
+  Manager()->InitializeForNewEvent(myEventWeight);
+
   // Getting number of extra jets in the event
   MAuint32 njets = 0;
 
@@ -117,8 +132,14 @@ bool MergingPlots::Execute(SampleFormat& mySample, const EventFormat& myEvent)
   {
     double djr = 0.;
     if (DJRvalues[i]>0) djr = std::log10(sqrt(DJRvalues[i]));
-    DJR_[i].total->Fill(djr);
-    DJR_[i].contribution[njets]->Fill(djr);
+    std::stringstream str,str2;
+    str  << "DJR" << i+1 << "_" << njets << "jet";
+    str2 << "DJR" << i+1 << "_total";
+    std::string title,title2;
+    str  >> title;
+    str2 >> title2;
+    Manager()->FillHisto(title, djr);
+    Manager()->FillHisto(title2, djr);
   }
 
   // Ok
@@ -223,19 +244,8 @@ MAuint32 MergingPlots::ExtractHardJetNumber(const MCEventFormat* myEvent,
 }
 
 
-/// Saving merging plots in the text output file
 void MergingPlots::Write_TextFormat(SAFWriter& output)
 {
-  *output.GetStream() << "<MergingPlots>" << std::endl;
-  for (unsigned int i=0;i<DJR_.size();i++)
-  {
-    DJR_[i].total->Write_TextFormat(output.GetStream());
-    for (unsigned int j=0;j<DJR_[i].contribution.size();j++)
-    {
-      DJR_[i].contribution[j]->Write_TextFormat(output.GetStream());
-    }
-  }
-  *output.GetStream() << "</MergingPlots>" << std::endl;
 }
 
 #endif

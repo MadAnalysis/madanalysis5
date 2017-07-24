@@ -57,6 +57,9 @@ class PlotBase
   /// Sum of event-weight over events
   std::pair<MAfloat64,MAfloat64> nevents_w_;
 
+  /// Flag telling whether a given histo has already been modified for an event
+  bool fresh_event_;
+
 
   // -------------------------------------------------------------
   //                       method members
@@ -65,46 +68,52 @@ class PlotBase
 
   /// Constructor without argument 
   PlotBase()
-  { 
+  {
     // Reseting statistical counters
-    nevents_   = std::make_pair(0,0);
-    nentries_  = std::make_pair(0,0);
-    nevents_w_ = std::make_pair(0,0);
+    nevents_     = std::make_pair(0,0);
+    nentries_    = std::make_pair(0,0);
+    nevents_w_   = std::make_pair(0,0);
+    fresh_event_ = true;
   }
 
   /// Constructor with argument 
   PlotBase(const std::string& name)
-  { 
-    name_      = name;
-    nevents_   = std::make_pair(0,0);
-    nevents_w_ = std::make_pair(0,0);
-    nentries_  = std::make_pair(0,0);
+  {
+    name_        = name;
+    nevents_     = std::make_pair(0,0);
+    nevents_w_   = std::make_pair(0,0);
+    nentries_    = std::make_pair(0,0);
+    fresh_event_ = true;
   }
 
   /// Destructor
   virtual ~PlotBase()
   { }
 
-  /// Write the plot in a ROOT file
-  virtual void Write_TextFormat(std::ostream* output) = 0;
+  /// Accesor for fresh_event
+  bool FreshEvent() { return fresh_event_;}
+
+  /// Modifier for fresh_event
+  void SetFreshEvent(bool tag) { fresh_event_ = tag;}
 
   /// Write the plot in a ROOT file
-  //  virtual void Write_RootFormat(std::pair<TH1F*,TH1F*>& histos) = 0;
+  virtual void Write_TextFormat(std::ostream* output) = 0;
 
   /// Increment number of events
   void IncrementNEvents(MAfloat64 weight=1.0)
   {
-	  if (weight>=0) 
+    if (weight>=0) 
     {
-      nevents_.first++; 
+      nevents_.first++;
       nevents_w_.first+=weight;
     }
-	  else 
+    else
     {
       weight = std::abs(weight);
       nevents_.second++;
       nevents_w_.second+=weight;
     }
+    SetFreshEvent(false);
   }
 
   /// Return Number of events

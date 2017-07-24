@@ -57,65 +57,29 @@ def WriteHeader(file,main):
 
 
 def WriteCore(file,main,part_list):
-
-    # Counting number of plots and cuts
-    Nhistos = 0
-    Ncuts   = 0
-    for item in main.selection.table:
-        if item.__class__.__name__=="Histogram":
-            Nhistos+=1
-        elif item.__class__.__name__=="Cut":
-            Ncuts+=1
-
-
-    # Declaring array of plots
-    file.write('  // Declaring histogram array\n')
-    file.write('  PlotManager plots_;\n\n')
-
-    # Declaring array of cuts
-    file.write('  // Declaring cut array\n')
-    file.write('  CounterManager cuts_;\n\n')
-
-    # Declaring short-cut for each histo
-    if Nhistos!=0:
-        Nhistos=0
-        file.write('  // Declaring shortcut to histograms\n')
-        for ind in range(0,len(main.selection.table)):
-
-            # Histogram case
-            if main.selection.table[ind].__class__.__name__=="Histogram":
-                if main.selection.table[ind].observable.name=="NPID" :
-                    file.write('  HistoFrequency<MAint32>* H'+str(Nhistos)+'_;\n')
-                elif main.selection.table[ind].observable.name=="NAPID" :
-                    file.write('  HistoFrequency<MAuint32>* H'+str(Nhistos)+'_;\n')
-                elif main.selection.table[ind].logX:
-                    file.write('  HistoLogX* H'+str(Nhistos)+'_;\n');
-                else:
-                    file.write('  Histo* H'+str(Nhistos)+'_;\n');
-                Nhistos+=1
-
     # Write particle function
+    file.write('  // Declaring particle containers\n')
     for ind in range(len(part_list)):
         WriteParticle(file,\
-                      part   = part_list[ind][0],\
-                      rank   = part_list[ind][1],\
-                      status = part_list[ind][2],\
-                      level  = main.mode)
+                      part    = part_list[ind][0],\
+                      rank    = part_list[ind][1],\
+                      status  = part_list[ind][2],\
+                      regions = part_list[ind][3],\
+                      level   = main.mode)
 
 
-def WriteParticle(file,part,rank,status,level):
-
+def WriteParticle(file,part,rank,status,regions,level):
     # Skipping if already defined
-    if InstanceName.Find('P_'+part.name+rank+status):
+    if InstanceName.Find('P_'+part.name+rank+status+'_REG_'+'_'.join(regions)):
         return
 
     # Getting new name
-    newname=InstanceName.Get('P_'+part.name+rank+status)
+    newname=InstanceName.Get('P_'+part.name+rank+status+'_REG_'+'_'.join(regions))
 
     if level in [MA5RunningType.PARTON,MA5RunningType.HADRON]:
 
         # Creating new container
-        file.write("   std::vector<const MCParticleFormat*> " +\
+        file.write("  std::vector<const MCParticleFormat*> " +\
                    newname + ";\n")
 
         # Creating function for filling container
@@ -125,7 +89,7 @@ def WriteParticle(file,part,rank,status,level):
     else:
 
         # Creating new container
-        file.write("   std::vector<const RecParticleFormat*> " +\
+        file.write("  std::vector<const RecParticleFormat*> " +\
                    newname + ";\n")
 
 
@@ -143,7 +107,7 @@ def WriteParticle2(file,part,rank,status):
         WriteParticle2(file,part.mumPart,rank,'allstate')
 
     # Identifier function
-    file.write('   bool isP_'+newname+\
+    file.write('  bool isP_'+newname+\
                '(const MCParticleFormat* part) const {\n')
 
     # Null pointer

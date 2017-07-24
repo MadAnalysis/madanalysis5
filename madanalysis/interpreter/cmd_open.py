@@ -51,7 +51,10 @@ class CmdOpen(CmdBase):
                 logging.getLogger('MA5').error("To open an existing report, please type the relevant path.")
                 return
             else:
-                args.append(self.main.lastjob_name+'/HTML')
+                i=0
+                while(os.path.isdir(self.main.lastjob_name+"/Output/HTML/MadAnalysis5job_"+str(i+1))):
+                    i+=1
+                args.append(self.main.lastjob_name+'/Output/HTML/MadAnalysis5job_'+str(i))
         if len(args) != 1:
             logging.getLogger('MA5').error("wrong number of arguments for the command 'open'.")
             self.help()
@@ -78,8 +81,7 @@ class CmdOpen(CmdBase):
         else:
             logging.getLogger('MA5').error("Directory called '"+args[0]+"' has not the structure of a MadAnalysis report")
             return False
-            
-        
+
         # Computing the absolute name
         name = "file://"+os.path.normpath(name + "/" + filename)
 
@@ -88,7 +90,7 @@ class CmdOpen(CmdBase):
 
         # Opening a Web Browser window with the page
         webbrowser.open(name)
-        
+
         return
 
 

@@ -76,11 +76,10 @@ class LATEXReportWriter(TextFileWriter.TextFileWriter):
         self.file.write('% '.ljust(79,'-')+'\n')
         self.file.write('% ' + 'HEADER'.center(78)+'\n')
         self.file.write('% '.ljust(79,'-')+'\n')
-        self.file.write('\\documentclass[a4paper, 11pt]{article}\n')
+        self.file.write('\\documentclass[a4paper, 10pt]{article}\n')
         self.file.write('\\usepackage{jheppub}\n')
         self.file.write('\\usepackage[T1]{fontenc}\n')
-        self.file.write("\\usepackage{colortbl}\n")
-        self.file.write('\\usepackage{float}\n')
+        self.file.write("\\usepackage{colortbl,xcolor,float}\n")
         self.file.write('\\definecolor{orange}{rgb}{1,0.5,0}\n')
         self.file.write('% '.ljust(79,'-')+'\n')
         self.file.write('% ' + 'COVER PAGE'.center(78)+'\n')
@@ -142,7 +141,7 @@ class LATEXReportWriter(TextFileWriter.TextFileWriter):
         if( subsubtitle.find('Histogram')!=-1 or subsubtitle.find('Cut')!=-1 ):
             if self.firstselection:
                 self.firstselection=False
-            else: 
+            elif subsubtitle.find('charts')==-1:
                 self.file.write('\\newpage\n')
         text=TextReport()
         text.Add(subsubtitle)
@@ -174,31 +173,42 @@ class LATEXReportWriter(TextFileWriter.TextFileWriter):
             self.file.write("}\n")
         self.file.write("    \\begin{tabular}{|")
         for item in col: 
-            size = round(item/sum(col)*120,0)
+            size = round(item/sum(col)*140,0)
             self.file.write("m{"+str(size)+"mm}|")
         self.file.write("}\n      \\hline\n")
 
-    def NewCell(self,color=ColorType.WHITE):
-        self.current_col=self.current_col+1
+    def NewCell(self,color=ColorType.WHITE,span=1):
+        self.current_col=self.current_col+span
 
         if  self.current_col>self.number_col:
             logging.getLogger('MA5').warning("The number of the current column is larger than the total number of declared columns.")
         if self.first_cell==True:
-            self.file.write("      \\cellcolor{"+ColorType.convert2string(color)+"}")
+            if span>1:
+                self.file.write('      \multicolumn{' + str(span) + '}{c}{\\cellcolor{'+ColorType.convert2string(color)+"}")
+            else:
+                self.file.write("      {\\cellcolor{"+ColorType.convert2string(color)+"}")
             self.first_cell=False
         else:
-            self.file.write("& \\cellcolor{"+ColorType.convert2string(color)+"}")
-            
-    def NewLine(self):
-        self.current_col=0
-        self.first_cell=True
-        self.file.write("\\\\\n      \\hline\n")
-        
-    def EndLine(self):
+            if span>1:
+                self.file.write('}& \multicolumn{' + str(span) + '}{c}{\\cellcolor{'+ColorType.convert2string(color)+"}")
+            else:
+                self.file.write("}& {\\cellcolor{"+ColorType.convert2string(color)+"}")
+
+    def NewBlankLine(self):
         self.current_col=0
         self.first_cell=True
         self.file.write("\\\\\n")
-        
+
+    def NewLine(self):
+        self.current_col=0
+        self.first_cell=True
+        self.file.write("}\\\\\n      \\hline\n")
+
+    def EndLine(self):
+        self.current_col=0
+        self.first_cell=True
+        self.file.write("}\\\\\n")
+
     def EndTable(self):
         self.table=self.table-1
         self.file.write('\\hline\n    \\end{tabular}\n')
@@ -208,7 +218,7 @@ class LATEXReportWriter(TextFileWriter.TextFileWriter):
     def WriteFigure(self,caption,filename):
         thefile = os.path.normpath(filename)
         if os.path.isfile(thefile+self.ext):
-            scale=0.60
+            scale=0.45
             self.file.write('\\begin{figure}[H]\n  \\begin{center}\n')
             self.file.write('    \\includegraphics[scale='+str(scale)+']{'+\
                   os.path.basename(filename)+self.ext+'}\\\\\n\\caption{')

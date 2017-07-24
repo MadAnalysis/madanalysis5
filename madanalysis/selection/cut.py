@@ -63,7 +63,7 @@ class Cut():
         self.statuscode = "finalstate"
         self.cut_type   = cut_type
         self.regions    = regions
-        
+
     def user_GetParameters(self):
         return Cut.userVariables.keys()
 
@@ -130,7 +130,7 @@ class Cut():
         logging.getLogger('MA5').info(self.GetStringDisplay())
 
     def GetStringDisplay(self):
-        msg = "Cut: "
+        msg = "  * Cut: "
 
         # displaying command
         msg += CutType.convert2cmdname(self.cut_type)

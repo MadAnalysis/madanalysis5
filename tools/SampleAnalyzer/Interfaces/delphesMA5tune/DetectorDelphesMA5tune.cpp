@@ -91,6 +91,12 @@ bool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const std
       str << it->second;
       str >> rootfile_;
     }
+    else if (key=="outputdir")
+    {
+      std::stringstream str;
+      str << it->second;
+      str >> outputdir_;
+    }
   }
 
   // Configure inputs
@@ -98,14 +104,14 @@ bool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const std
   confReader_->ReadFile(configFile_.c_str());
 
   // Configure outputs
+  std::string ofname;
   if (output_)
   {
-    if (rootfile_=="")
-       outputFile_ = TFile::Open("TheMouth.root", "RECREATE");
-    else
-       outputFile_ = TFile::Open(rootfile_.c_str(), "RECREATE");
+    if (rootfile_=="") ofname = outputdir_+"/DelphesMA5tuneEvents.root";
+    else               ofname = outputdir_+"/"+rootfile_;
   }
-  else outputFile_ = TFile::Open("tmp.root", "RECREATE");
+  else ofname = outputdir_+"/tmp.root";
+  outputFile_ = TFile::Open(ofname.c_str(), "RECREATE");
 
   treeWriter_ = new ExRootTreeWriter(outputFile_, "DelphesMA5tune");
   branchEvent_ = treeWriter_->NewBranch("Event", LHEFEvent::Class());

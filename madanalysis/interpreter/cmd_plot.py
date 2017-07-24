@@ -78,11 +78,11 @@ class CmdPlot(CmdBase,CmdSelectionBase):
                 endArguments=i
             elif args[i]=='[':
                 Nbracket2+=1
-                beginOptions=i
+                if Nbracket1==0:
+                    beginOptions=i
+                    foundOptions=True
             elif args[i]==']':
                 Nbracket2-=1
-                if i==(len(args)-1):
-                    foundOptions=True
             elif args[i]=='{':
                 Nbracket3+=1
                 beginRegions=i
@@ -203,27 +203,39 @@ class CmdPlot(CmdBase,CmdSelectionBase):
             if [reg for reg in HistoRegionNames if reg not in  self.main.regions.GetNames()] != []:
                 self.logger.error('Histogram trying to be attached to a non-existing region')
                 return
-            # Checking all regions share the same cuts so far
-            for reg in HistoRegionNames:
-                if self.main.regions.Get(reg).selections!= self.main.regions.Get(HistoRegionNames[0]).selections:
-                    self.logger.error('We cannot attach a histogram to regions that are distinguishable')
-                    return
         else:
-            HistoRegionNames="all"
+            HistoRegionNames=self.main.regions.GetNames()
 
         if HistoRegionNames==[]:
-            HistoRegionNames="all"
+            HistoRegionNames=self.main.regions.GetNames()
 
         # Creating histo
-        histo = Histogram(obsRef,arguments,nbins,xmin,xmax,regions=HistoRegionNames)
-
-        # Getting options
-        if beginOptions!=len(args):
-            if not self.extract_options(histo,args[beginOptions+1:len(args)-1]):
-                return
-
-        # Adding histo
-        self.main.selection.Add(histo)
+        setofRegions = self.main.regions.GetClusteredRegions(self.main.selection)
+        if (setofRegions==[[]] and HistoRegionNames==[]) or (list(set(HistoRegionNames)) in setofRegions):
+            histo = Histogram(obsRef,arguments,nbins,xmin,xmax,regions=HistoRegionNames)
+            # Getting options
+            if beginOptions!=len(args):
+                if not self.extract_options(histo,args[beginOptions+1:len(args)-1]):
+                    return
+            # Adding histo
+            self.main.selection.Add(histo)
+        else:
+            self.logger.warning('   Histogram found to be attached to distinguishable regions -> multiple declaration:')
+            for myset in setofRegions:
+                subHistoRegionNames = [x for x in HistoRegionNames if x in myset]
+                if subHistoRegionNames == []:
+                    continue
+                histo = Histogram(obsRef,arguments,nbins,xmin,xmax,regions=subHistoRegionNames)
+                # Getting options
+                if beginOptions!=len(args):
+                    if not self.extract_options(histo,args[beginOptions+1:len(args)-1]):
+                        return
+                # Adding histo
+                self.main.selection.Add(histo)
+                title = histo.GetStringDisplay()
+                if ', regions' in title:
+                    title=title[:title.find(', regions')]
+                self.logger.warning(title + ' { ' + ' '.join(subHistoRegionNames) + ' }')
 
 
     def help(self):

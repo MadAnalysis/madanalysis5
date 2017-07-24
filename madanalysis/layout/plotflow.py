@@ -136,7 +136,6 @@ class PlotFlow:
 
 
     def DrawAll(self,histo_path,modes,output_paths,ListROOTplots):
-
         # Loop on each histo type
         irelhisto=0
         for iabshisto in range(0,len(self.main.selection)):
@@ -149,11 +148,11 @@ class PlotFlow:
             # Name of output files
             filenameC  = histo_path+"/selection_"+str(irelhisto)+".C"
             filenamePy = histo_path+"/selection_"+str(irelhisto)+".py"
-            
+
             output_files=[]
             for iout in range(0,len(output_paths)):
-                output_files.append('../'+output_paths[iout].split('/')[-1]+\
-                                    "/selection_"+str(irelhisto)+"."+\
+                output_files.append('../../'+output_paths[iout].split('/')[-2]+'/'+\
+                                    output_paths[iout].split('/')[-1]+"/selection_"+str(irelhisto)+"."+\
                                     ReportFormatType.convert2filetype(modes[iout]))
 
             for iset in range(0,len(self.detail)):
@@ -168,12 +167,12 @@ class PlotFlow:
             logging.getLogger('MA5').debug('Producing file '+filenameC+' ...')
             self.DrawROOT(histos,scales,self.main.selection[iabshisto],\
                           irelhisto,filenameC,output_files)
-            
+
             logging.getLogger('MA5').debug('Producing file '+filenamePy+' ...')
             self.DrawMATPLOTLIB\
                          (histos,scales,self.main.selection[iabshisto],\
                           irelhisto,filenamePy,output_files)
-                  
+
             irelhisto+=1
 
 
@@ -274,7 +273,7 @@ class PlotFlow:
 
             # Creating TH1F
             outputC.write('  // Creating a new TH1F\n')
-            histoname=histos[ind].name+'_'+str(ind)
+            histoname="S"+histos[ind].name+'_'+str(ind)
             xmin=histos[ind].xmin
             xmax=histos[ind].xmax
             if logxhisto:
@@ -421,7 +420,7 @@ class PlotFlow:
         outputC.write('  THStack* stack = new THStack("mystack_'+str(PlotFlow.counter)+'","mystack");\n')
         # Loop over datasets and histos
         for ind in range(0,len(histos)):
-            histoname=histos[ind].name+'_'+str(ind)
+            histoname='S'+histos[ind].name+'_'+str(ind)
             outputC.write('  stack->Add('+histoname+');\n')
 
         drawoptions=[]
@@ -431,7 +430,7 @@ class PlotFlow:
             drawoptions.append('bar1')
         outputC.write('  stack->Draw("'+''.join(drawoptions)+'");\n')
         outputC.write('\n')
-        
+
         # Setting Y axis label
         outputC.write('  // Y axis\n')
         axis_titleY = ref.GetYaxis()
@@ -473,7 +472,7 @@ class PlotFlow:
             axis_titleX = ref.GetXaxis_Root()
         else:
             axis_titleX = PlotFlow.NiceTitle(ref.titleX)
-        
+
         # Setting X axis label
         outputC.write('  stack->GetXaxis()->SetLabelSize(0.04);\n')
         outputC.write('  stack->GetXaxis()->SetLabelOffset(0.005);\n')
@@ -498,13 +497,13 @@ class PlotFlow:
         outputC.write('  canvas->SetLogx('+str(logx)+');\n')
         outputC.write('  canvas->SetLogy('+str(logy)+');\n')
         outputC.write('\n')
-        
+
         # Displaying a legend
         if legendmode:
             outputC.write('  // Creating a TLegend\n')
             outputC.write('  TLegend* legend = new TLegend(.73,.5,.97,.95);\n')
             for ind in range(0,len(histos)):
-                histoname=histos[ind].name+'_'+str(ind)
+                histoname='S'+histos[ind].name+'_'+str(ind)
                 nicetitle=PlotFlow.NiceTitle(self.main.datasets[ind].title)
                 outputC.write('  legend->AddEntry('+histoname+',"'+nicetitle+'");\n')
             outputC.write('  legend->SetFillColor(0);\n')
@@ -513,7 +512,7 @@ class PlotFlow:
             outputC.write('  legend->SetY1(TMath::Max(0.15,0.97-0.10*legend->GetListOfPrimitives()->GetSize()));\n')
             outputC.write('  legend->Draw();\n')
             outputC.write('\n')
-        
+
         # Producing the image
         outputC.write('  // Saving the image\n')
         for outputname in outputnames:

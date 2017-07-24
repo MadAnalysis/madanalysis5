@@ -23,7 +23,6 @@
 
 
 from madanalysis.enumeration.ma5_running_type   import MA5RunningType
-from madanalysis.IOinterface.library_writer     import LibraryWriter
 from madanalysis.IOinterface.folder_writer      import FolderWriter
 from shell_command import ShellCommand
 import logging
@@ -456,41 +455,6 @@ class RecastConfiguration:
         else:
             return thecard
 
-    def UpdatePADMain(self,analysislist,PADdir):
-        ## backuping the main file
-        self.logger.info("   Updating the PAD main executable")
-        if os.path.isfile(PADdir+'/Build/Main/main.bak'):
-            shutil.move(PADdir+'/Build/Main/main.bak',PADdir+'/Build/Main/main.cpp')
-        shutil.move(PADdir+'/Build/Main/main.cpp',PADdir+'/Build/Main/main.bak')
-        ## creating the main file with the desired analyses inside
-        mainfile = open(PADdir+"/Build/Main/main.bak",'r')
-        newfile  = open(PADdir+"/Build/Main/main.cpp",'w')
-        ignore = False
-        for line in mainfile:
-            if '// Getting pointer to the analyzer' in line:
-                ignore = True
-                newfile.write(line)
-                for analysis in analysislist:
-                    newfile.write('  std::map<std::string, std::string> prm'+analysis+';\n')
-                    newfile.write('  AnalyzerBase* analyzer_'+analysis+'=\n')
-                    newfile.write('    manager.InitializeAnalyzer(\"'+analysis+'\",\"'+analysis+'.saf\",'+\
-                       'prm'+analysis+');\n')
-                    newfile.write(  '  if (analyzer_'+analysis+'==0) return 1;\n\n')
-            elif '// Post initialization (creates the new output directory structure)' in line:
-                ignore=False
-                newfile.write(line)
-            elif '!analyzer_' in line and not ignore:
-                ignore=True
-                for analysis in analysislist:
-                    newfile.write('      if (!analyzer_'+analysis+'->Execute(mySample,myEvent)) continue;\n')
-            elif '!analyzer1' in line:
-                ignore=False
-            elif not ignore:
-                newfile.write(line)
-        mainfile.close()
-        newfile.close()
-        return True
-
     def RestorePADMain(self,PADdir,dirname,main):
         self.logger.info('   Restoring the PAD in '+PADdir)
         ## Restoring the main file
@@ -498,73 +462,11 @@ class RecastConfiguration:
         self.MakePAD(PADdir,dirname,main,True)
         return True
 
-    def MakePAD(self,PADdir,dirname,main,silent=False):
-        if not silent:
-            self.logger.info('   Compiling the PAD in '+PADdir)
-        compiler = LibraryWriter('lib',main)
-        ncores = compiler.get_ncores2()
-        if ncores>1:
-            strcores='-j'+str(ncores)
-        command = ['make',strcores]
-        logfile = PADdir+'/Build/PADcompilation.log'
-        result, out = ShellCommand.ExecuteWithLog(command,logfile,PADdir+'/Build')
-        if not result:
-            self.logger.error('Impossible to compile the PAD....'+\
-              ' For more details, see the log file:')
-            self.logger.error(logfile)
-            return False
-        return True
-
-    def RunPAD(self,PADdir,eventfile):
-        ## input file
-        if os.path.isfile(PADdir+'/Input/PADevents.list'):
-            os.remove(PADdir+'/Input/PADevents.list')
-        infile = open(PADdir+'/Input/PADevents.list','w')
-        infile.write(eventfile)
-        infile.close()
-        ## cleaning the output directory
-        if not FolderWriter.RemoveDirectory(os.path.normpath(PADdir+'/Output/PADevents.list')):
-            return False
-        ## running
-        command = ['./MadAnalysis5job', '../Input/PADevents.list']
-        ok = ShellCommand.Execute(command,PADdir+'/Build')
-        if not ok:
-            self.logger.error('Problem with the run of the PAD on the file: '+ eventfile)
-            return False
-        os.remove(PADdir+'/Input/PADevents.list')
-        return True
-
     def SavePADOutput(self,PADdir,dirname,analysislist,setname):
-        if not os.path.isfile(dirname+'/Output/PADevents.list.saf'):
-            shutil.move(PADdir+'/Output/PADevents.list/PADevents.list.saf',dirname+'/Output/'+setname+'.saf')
+        if not os.path.isfile(dirname+'/Output/PADevents.saf'):
+            shutil.move(PADdir+'/Output/PADevents/PADevents.saf',dirname+'/Output/'+setname+'.saf')
         for analysis in analysislist:
-            shutil.move(PADdir+'/Output/PADevents.list/'+analysis+'_0',dirname+'/Output/'+setname+'/'+analysis)
-        return True
-
-    def GetDelphesRuns(self,recastcard):
-        self.delphesruns=[]
-        runcard = open(recastcard,'r')
-        for line in runcard:
-            if len(line.strip())==0:
-                continue
-            if line.strip().startswith('#'):
-                continue
-            myline=line.split()
-            if myline[2].lower() =='on' and myline[3] not in self.delphesruns:
-                self.delphesruns.append(myline[1]+'_'+myline[3])
-        return True
-
-    def GetAnalysisRuns(self,recastcard):
-        self.analysisruns=[]
-        runcard = open(recastcard,'r')
-        for line in runcard:
-            if len(line.strip())==0:
-                continue
-            if line.strip().startswith('#'):
-                continue
-            myline=line.split()
-            if myline[2].lower() =='on':
-                self.analysisruns.append(myline[1]+'_'+myline[0])
+            shutil.move(PADdir+'/Output/PADevents/'+analysis+'_0',dirname+'/Output/'+setname+'/'+analysis)
         return True
 
     def ReadInfoFile(self, mytree, myanalysis):
@@ -836,16 +738,6 @@ class RecastConfiguration:
         ## closing the output file
         mysummary.close()
 
-        return True
-
-
-    def CheckDir(self,dirname):
-        if not os.path.isdir(dirname):
-            self.logger.error("The directory '"+dirname+"' has not been found.")
-            return False
-        elif not os.path.isdir(dirname+'/Output'):
-            self.logger.error("The directory '"+dirname+"/Output' has not been found.")
-            return False
         return True
 
     def CheckFile(self,dirname,dataset):

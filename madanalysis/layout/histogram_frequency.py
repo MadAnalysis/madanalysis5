@@ -108,6 +108,12 @@ class HistogramFrequency:
         # warnings
         self.warnings = []
 
+        # regions
+        self.regions = []
+
+    def GetRegions(self):
+        return self.regions
+
 
     def GetBinLowEdge(self,bin):
 

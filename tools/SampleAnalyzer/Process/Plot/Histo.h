@@ -90,7 +90,7 @@ class Histo : public PlotBase
 
   /// Constructor with argument 
   Histo(const std::string& name, MAuint32 nbins, MAfloat64 xmin, MAfloat64 xmax) :
-		PlotBase(name)
+     PlotBase(name)
   { 
     // Setting the description: nbins
     try
@@ -102,7 +102,7 @@ class Histo : public PlotBase
     {
       MANAGE_EXCEPTION(e);
       nbins_ = 100;
-    }    
+    }
 
     // Setting the description: min & max
     try
@@ -166,7 +166,7 @@ class Histo : public PlotBase
     catch (const std::exception& e)
     {
       MANAGE_EXCEPTION(e);
-    }    
+    }
 
     // Positive weight
     if (weight>=0)
