@@ -95,7 +95,7 @@ void RegionSelectionManager::FillHisto(std::string const&histname, double val)
     if(histname.compare(plotmanager_.GetHistos()[i]->GetName())==0)
     {
         // HistoFrequency
-        if(HistoFrequency* hist = dynamic_cast<HistoFrequency*>(plotmanager_.GetHistos()[i]))
+        if(dynamic_cast<HistoFrequency*>(plotmanager_.GetHistos()[i])!=0)
         {
           myhistof = dynamic_cast<HistoFrequency*>(plotmanager_.GetHistos()[i]);
           if(myhistof->AllSurviving()==0) return;
@@ -110,7 +110,7 @@ void RegionSelectionManager::FillHisto(std::string const&histname, double val)
           myhistof->Fill(val,weight_);
        }
       // LogX histo
-      else if(HistoLogX* hist = dynamic_cast<HistoLogX*>(plotmanager_.GetHistos()[i]))
+      else if(dynamic_cast<HistoLogX*>(plotmanager_.GetHistos()[i])!=0)
       {
         myhistoX = dynamic_cast<HistoLogX*>(plotmanager_.GetHistos()[i]);
         if(myhistoX->AllSurviving()==0) return;
@@ -125,7 +125,7 @@ void RegionSelectionManager::FillHisto(std::string const&histname, double val)
         myhistoX->Fill(val,weight_);
       }
       // Normal histo
-      else if(Histo* hist = dynamic_cast<Histo*>(plotmanager_.GetHistos()[i]))
+      else if(dynamic_cast<Histo*>(plotmanager_.GetHistos()[i])!=0)
       {
         myhisto = dynamic_cast<Histo*>(plotmanager_.GetHistos()[i]);
         if(myhisto->AllSurviving()==0) return;
