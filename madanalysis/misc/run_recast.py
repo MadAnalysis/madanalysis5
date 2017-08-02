@@ -85,8 +85,8 @@ class RunRecast():
         self.main.forced=True
         for del_card in list(set(sorted(self.delphes_runcard))):
             ## Extracting run infos and checks
-            version = runcard[:4]
-            card    = runcard[5:]
+            version = del_card[:4]
+            card    = del_card[5:]
             if not self.check_run(version):
                 self.main.forced=self.forced
                 return False
@@ -122,7 +122,15 @@ class RunRecast():
         # Exit
         return True
 
+
     def analysis_single(self, version, card):
+
+        #ERIC
+        PADdir=self.pad
+        dirname=self.dirname
+        forced_bkp=self.forced
+        #ERIC
+
         ## Init and header
         self.analysis_header(version, card)
 
@@ -133,14 +141,18 @@ class RunRecast():
             return False
 
         ## Getting the analyses associated with the given card
-        analyses = [ x.replace(myversion+'_','') for x in self.analysis_runcard if version in x ]
+        analyses = [ x.replace(version+'_','') for x in self.analysis_runcard if version in x ]
         for del_card,ana_list in self.main.recasting.DelphesDic.items():
             if card == del_card:
                 analyses = [ x for x in analyses if x in ana_list]
                 break
+        #ERIC
+        myanalyses=analyses
+        mycard=card
+        #ERIC
 
         # Executing the PAD
-        for item in self.main.datasets:
+        for myset in self.main.datasets:
             ## Preparing the PAD
             if not self.update_pad_main(analyses):
                 self.main.forced=self.forced
@@ -148,31 +160,45 @@ class RunRecast():
             if not self.make_pad():
                 self.main.forced=self.forced
                 return False
-            ## Running the PAD
-            events = os.path.normpath(self.dirname + '/' + item.name + '/RecoEvents/RecoEvents_' +\
+            ## Getting the file name corresponding to the events
+            eventfile = os.path.normpath(self.dirname + '/Output/' + myset.name + '/RecoEvents/RecoEvents_' +\
                    version.replace('.','x')+'_' + card.replace('.tcl','')+'.root')
-            if not self.run_pad(events):
+            if not os.path.isfile(eventfile):
+                logging.getLogger('MA5').error('The file called '+eventfile+' is not found...')
+                return False
+            ## Running the PAD
+            if not self.run_pad(eventfile):
                 self.main.forced=self.forced
                 return False
             ## Restoring the PAD as it was before
-            if not self.restore_pad_main():
-                self.main.forced=self.forced
-                return False
+            #ERIC : restore_pad_main() does not exist!!!!!!
+            #if not self.restore_pad_main():
+            #   self.main.forced=self.forced
+            #    return False
+            #ERIC
             time.sleep(1.);
 
 
 
             ## event file
             for myset in self.main.datasets:
-
-
                 ## saving the output
                 if not self.main.recasting.SavePADOutput(PADdir,dirname,myanalyses,myset.name):
                     self.main.forced=forced_bkp
                     return False
                 if not self.main.recasting.store_root:
-                    os.remove(os.path.normpath(dirname + '/Events/' + myset.name + '_' +\
-                   myversion.replace('.','x')+'_' + mycard.replace('.tcl','')+'.root'))
+                    eventfile = os.path.normpath(self.dirname + '/Output/' + myset.name +\
+                                 '/RecoEvents/RecoEvents_' + version.replace('.','x') +\
+                                 '_' + mycard.replace('.tcl','')+'.root') 
+                    if not os.path.isfile(eventfile):
+                        logging.getLogger('MA5').warning('The file called '+eventfile+\
+                                                         ' is not found and cannot be removed.')
+                    else:
+                        try:
+                            os.remove(eventfile)
+                        except:
+                            logging.getLogger('MA5').warning('Impossible to remove the file called '+eventfile)
+
                 time.sleep(1.);
                 ## Running the CLs exclusion script (if available)
                 if not self.main.recasting.GetCLs(PADdir,dirname,myanalyses,myset.name,myset.xsection,myset.name):
@@ -180,6 +206,8 @@ class RunRecast():
                     return False
                 ## Saving the results
             self.main.forced=forced_bkp
+        return True
+
 
 
     def fastsim_header(self, version):
@@ -328,6 +356,9 @@ class RunRecast():
     def make_pad(self):
         # Initializing the compiler
         logging.getLogger('MA5').info('   Compiling the PAD located in '  +self.pad)
+        #ERIC
+        PADdir=self.pad
+        #ERIC
         compiler = LibraryWriter('lib',self.main)
         ncores = compiler.get_ncores2()
         # compiling
@@ -345,6 +376,9 @@ class RunRecast():
         return True
 
     def run_pad(self,eventfile):
+        #ERIC
+        PADdir=self.pad
+        #ERIC
         ## input file
         if os.path.isfile(self.pad+'/Input/PADevents.list'):
             os.remove(self.pad+'/Input/PADevents.list')

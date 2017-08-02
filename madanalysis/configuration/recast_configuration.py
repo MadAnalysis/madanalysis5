@@ -470,6 +470,7 @@ class RecastConfiguration:
         return True
 
     def ReadInfoFile(self, mytree, myanalysis):
+        self.logger.debug('Read info from the file related to '+myanalysis + '...')
         ## checking the header of the file
         info_root = mytree.getroot()
         if info_root.tag != "analysis":
@@ -522,6 +523,7 @@ class RecastConfiguration:
         return lumi, regions, regiondata
 
     def ReadCutflow(self, dirname,regions,regiondata):
+        self.logger.debug('Read the cutflow from the files:')
         for reg in regions:
             regname = CleanRegionName(reg)
             ## getting the initial and final number of events
@@ -532,7 +534,9 @@ class RecastConfiguration:
             ## checking if regions must be combined
             theregs=regname.split(';')
             for regiontocombine in theregs:
-                if not os.path.isfile(dirname+'/'+regiontocombine+'.saf'):
+                filename=dirname+'/'+regiontocombine+'.saf'
+                self.logger.debug('+ '+filename)
+                if not os.path.isfile(filename):
                     self.logger.warning('Cannot find a cutflow for the region '+regiontocombine+' in ' + dirname)
                     self.logger.warning('Skipping the CLs calculation.')
                     return -1
@@ -573,6 +577,7 @@ class RecastConfiguration:
 
 
     def ComputesigCLs(self,regiondata,regions,lumi,tag):
+        self.logger.debug('Compute signal CL...')
         for reg in regions:
             nb      = regiondata[reg]["nb"]
             if tag == "obs":
@@ -621,7 +626,9 @@ class RecastConfiguration:
                 regiondata[reg]["s95exp"]= ("%.7f" % s95)
         return regiondata
 
+
     def ComputeCLs(self,regiondata,regions,xsection,lumi):
+        self.logger.debug('Compute CLs...')
         ## computing fi a region belongs to the best expected ones, and derive the CLs in all cases
         bestreg=[]
         rMax = -1
@@ -649,7 +656,9 @@ class RecastConfiguration:
                 regiondata[reg]["best"]=0
         return regiondata
 
+
     def WriteCLs(self, dirname, analysis, regions,regiondata, summary, xsflag):
+        self.logger.debug('Write CLs...')
         for reg in regions:
             eff    = (regiondata[reg]["Nf"] / regiondata[reg]["N0"])
             if eff < 0:
@@ -741,13 +750,17 @@ class RecastConfiguration:
         return True
 
     def CheckFile(self,dirname,dataset):
-        if not os.path.isfile(dirname+'/Output/'+dataset.name+'/CLs_output.dat'):
+        filename=os.path.normpath(dirname+'/Output/'+dataset.name+'/CLs_output.dat')
+        self.logger.debug('Check file "'+filename+'"...')
+        if not os.path.isfile(filename):
             self.logger.error("The file '"+dirname+'/Output/'+dataset.name+'/CLs_output.dat" has not been found.')
             return False
         return True
 
     def collect_outputs(self,dirname,datasets):
-        out = open(os.path.normpath(os.path.join(dirname,'Output/CLs_output_summary.dat')),'w')
+        filename=os.path.normpath(os.path.join(dirname,'Output/CLs_output_summary.dat'))
+        self.logger.debug('Check summary file "'+filename+'"...')
+        out = open(filename,'w')
         counter=1
         for item in datasets:
             outset=open(os.path.normpath(os.path.join(dirname,'Output',item.name,'CLs_output.dat')))

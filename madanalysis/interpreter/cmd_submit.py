@@ -401,7 +401,7 @@ class CmdSubmit(CmdBase):
             if not Recaster.init():
                 self.logger.error("job submission aborted.")
                 return False
-            self.main.recasting.delphesruns = Recaster.delphesruncards
+            self.main.recasting.delphesruns = Recaster.delphes_runcard
             ### fastsim
             if not Recaster.fastsim():
                 self.logger.error("job submission aborted.")
