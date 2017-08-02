@@ -69,26 +69,27 @@ class MCParticleFormat : public ParticleBaseFormat
   // -------------------------------------------------------------
  private:
    
-  MAfloat32 		    ctau_;	     /// proper lifetime ctau (in mm)
-  MAfloat32 		    spin_;	     /// cosine of the angle btwn the spin vector and
+  MAfloat32 ctau_;	     /// proper lifetime ctau (in mm)
+  MAfloat32 spin_;	     /// cosine of the angle btwn the spin vector and
                                  /// its 3-momentum, in the lab frame
-  MAint32	          pdgid_;		   /// PDG numbering of the particle
-  MAbool            isPU_;       /// is PileUp particle or not
-  MAint16	          statuscode_; /// status code (-1 for initial state, 
-                                 /// 2 intermediate state, 1 final state)
-  MAint32           extra1_;
-  MAint32           extra2_;
+  MAint32	  pdgid_;		   /// PDG numbering of the particle
+  MAbool    isPU_;       /// is PileUp particle or not
+  MAint16	  statuscode_; /// status code (-1 for initial state, 
+                         /// 2 intermediate state, 1 final state)
+  MAint32   extra1_;
+  MAint32   extra2_;
 
-  std::vector<MCParticleFormat*> daughters_;
+  std::vector<MCParticleFormat*> daughters_; /// list of daughter particles
+  std::vector<MCParticleFormat*> mothers_;   /// list of mother particles
 
-  MCParticleFormat* mother1_ ;  // mother particle
-  MCParticleFormat* mother2_ ;  // mother particle
+  MCParticleFormat* mother1_ ;  /// mother particle
+  MCParticleFormat* mother2_ ;  /// mother particle
 
  public:
-  MAuint32 	        mothup1_;     /// first mother index
-  MAuint32 	        mothup2_;     /// second mother index
-  MAuint32 	        daughter1_;   /// first mother index
-  MAuint32 	        daughter2_;   /// second mother index
+  MAuint32 mothup1_;     /// first mother index
+  MAuint32 mothup2_;     /// second mother index
+  MAuint32 daughter1_;   /// first mother index
+  MAuint32 daughter2_;   /// second mother index
 
 
   // -------------------------------------------------------------
@@ -157,6 +158,12 @@ class MCParticleFormat : public ParticleBaseFormat
 
   /// Accessor to the daughters
   std::vector<MCParticleFormat*>& daughters() {return daughters_;}
+
+  /// Accessor to the daughters (read-only)
+  const std::vector<MCParticleFormat*>& mothers() const {return mothers_;}
+
+  /// Accessor to the daughters
+  std::vector<MCParticleFormat*>& mothers() {return mothers_;}
 
   MCParticleFormat* mother1() {return mother1_;}
   MCParticleFormat* mother2() {return mother2_;}
