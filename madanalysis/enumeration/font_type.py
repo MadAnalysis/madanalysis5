@@ -24,10 +24,10 @@
 
 class FontType(object):
         values = {'none' : ['','','',''],\
-			  'IT'   : ['\\textit{','}','<i>','</i>'],\
-			  'BF'   : ['\\textbf{','}','<b>','</b>'],\
-			  'TT'   : ['\\texttt{','}','  <tt>','</tt>'],\
-			  'ITBF' : ['\\textit{\\textbf{','}}','<i><b>','</i></b>']}
+                  'IT'   : ['\\textit{','}','<i>','</i>'],\
+                  'BF'   : ['\\textbf{','}','<b>','</b>'],\
+                  'TT'   : ['\\texttt{','}','  <tt>','</tt>'],\
+                  'ITBF' : ['\\textit{\\textbf{','}}','<i><b>','</i></b>']}
         
         class __metaclass__(type):
                 def __getattr__(self, name):
