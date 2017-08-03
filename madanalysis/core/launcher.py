@@ -251,7 +251,7 @@ def MainSession(mode,arglist,ma5dir,version,date):
 
     # Building (if necesserary) the SampleAnalyzer library
     if not main.BuildLibrary(forced=mode.build):
-        sys.exit()	
+        sys.exit()
 
     logging.getLogger('MA5').info("*************************************************************")
 

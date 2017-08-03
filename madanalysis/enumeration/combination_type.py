@@ -26,7 +26,7 @@ class CombinationType(object):
     values = { 'UNKNOWN'    : [],\
                'DEFAULT'    : [''],\
                'SUMSCALAR'  : ['s'],\
-	       'SUMVECTOR'  : ['v'],\
+               'SUMVECTOR'  : ['v'],\
                'DIFFSCALAR' : ['ds','sd'],\
                'DIFFVECTOR' : ['d','dv','vd'],\
                'RATIO'      : ['r'] }

@@ -75,7 +75,7 @@ class DetectMake:
             result = ShellCommand.Which('make',all=True,mute=True)
             if len(result)==0:
                 self.logger.error('GNU Make not found. Please install it before ' + \
-	                 'using MadAnalysis 5')
+                                  'using MadAnalysis 5')
                 return False
             self.logger.debug("  which-all:     ")
             for file in result:
@@ -85,7 +85,7 @@ class DetectMake:
         ok, out, err = ShellCommand.ExecuteWithCapture(['make','--version'],'./')
         if not ok:
             self.logger.error('GNU Make not found. Please install it before ' + \
-	             'using MadAnalysis 5')
+                              'using MadAnalysis 5')
             return False
         lines=out.split('\n')
         if len(lines)==0:

@@ -24,13 +24,13 @@
 
 class ReportFormatType(object):
     values = { 'LATEX'    : ['generate_latex','eps'],\
-	       'PDFLATEX' : ['generate_pdflatex','png'],\
+               'PDFLATEX' : ['generate_pdflatex','png'],\
                'HTML'     : ['generate_html','png']  }
 
     class __metaclass__(type):
 
         def __getattr__(self, name):
-	    return self.values.keys().index(name)
+            return self.values.keys().index(name)
 
         def convert2cmd(self,format):
             name = self.values.keys()[format]

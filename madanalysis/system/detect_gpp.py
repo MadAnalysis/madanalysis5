@@ -79,7 +79,7 @@ class DetectGpp:
             result = ShellCommand.Which('g++',all=True,mute=True)
             if len(result)==0:
                 self.logger.error('g++ compiler not found. Please install it before ' + \
-	                 'using MadAnalysis 5')
+                                  'using MadAnalysis 5')
                 return False
             self.logger.debug("  which-all:     ")
             for file in result:
@@ -89,7 +89,7 @@ class DetectGpp:
         ok, out, err = ShellCommand.ExecuteWithCapture(['g++','-dumpversion'],'./')
         if not ok:
             self.logger.error('g++ compiler not found. Please install it before ' + \
-	             'using MadAnalysis 5')
+                              'using MadAnalysis 5')
             return False
         out=out.lstrip()
         out=out.rstrip()
