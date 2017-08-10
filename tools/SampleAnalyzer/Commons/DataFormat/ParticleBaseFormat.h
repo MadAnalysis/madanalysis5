@@ -25,6 +25,7 @@
 #ifndef ParticleBaseFormat_h
 #define ParticleBaseFormat_h
 
+
 // STL headers
 #include <iostream>
 #include <string>

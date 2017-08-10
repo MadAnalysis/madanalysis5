@@ -54,7 +54,7 @@ class SAFWriter : public WriterTextBase
   SAFWriter()
   { }
 
-	/// Destructor
+  /// Destructor
   virtual ~SAFWriter()
   { }
 

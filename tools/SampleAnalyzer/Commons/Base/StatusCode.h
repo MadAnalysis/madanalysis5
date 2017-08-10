@@ -26,6 +26,10 @@
 #define StatusCode_h
 
 
+// STL headers
+#include <iostream>
+
+
 namespace MA5
 {
 

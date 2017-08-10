@@ -25,11 +25,13 @@
 #ifndef PDGDATAFORMAT_H
 #define PDGDATAFORMAT_H
 
+
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 
+// STL headers
 #include <string>
 #include <cmath>
-#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 
 
 namespace MA5

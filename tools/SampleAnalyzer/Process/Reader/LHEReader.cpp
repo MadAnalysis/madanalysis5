@@ -425,9 +425,9 @@ void LHEReader::FillEventParticleLine(const std::string& line,
   std::stringstream str;
   str << tmpline;
 
-  signed int color1;	// color 1 not stored 
-  signed int color2;	// color 2 not stored
-  double     tmp;	    // temporary variable to fill in LorentzVector
+  signed int color1; // color 1 not stored 
+  signed int color2; // color 2 not stored
+  double     tmp;    // temporary variable to fill in LorentzVector
 
   // Get a new particle
   MCParticleFormat * part = myEvent.mc()->GetNewParticle();

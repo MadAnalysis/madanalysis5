@@ -26,13 +26,13 @@
 #define DETECTOR_BASE_H
 
 
-//STL headers
+// STL headers
 #include <map>
 #include <string>
 #include <algorithm>
 #include <locale>
 
-//SampleAnalyser headers
+// SampleAnalyser headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
