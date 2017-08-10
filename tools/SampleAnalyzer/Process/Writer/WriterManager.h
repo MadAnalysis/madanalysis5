@@ -43,7 +43,7 @@ class WriterManager : public ManagerBase<WriterBase>
   WriterManager() : ManagerBase<WriterBase>()
   { }
 
-	/// Destructor
+  /// Destructor
   ~WriterManager()
   { }
 

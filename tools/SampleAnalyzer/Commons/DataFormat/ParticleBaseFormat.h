@@ -60,7 +60,7 @@ class ParticleBaseFormat
  protected:
    
   /// Quadrivector of particle (E, px,py,pz)
-  MALorentzVector 	momentum_;  
+  MALorentzVector momentum_;  
 
 
   // -------------------------------------------------------------
@@ -100,7 +100,7 @@ class ParticleBaseFormat
          << ", "<</*std::setw(8)*/"" << std::left << momentum_.Pz() 
          << ", "<</*std::setw(8)*/"" << std::left << momentum_.E() << ") - ";
   }
-			
+
   /// Accessor to 4-vector momentum (read-only)
   const MALorentzVector& momentum() const {return momentum_;}
 

@@ -68,7 +68,7 @@ class WriterBase
     rfio_=false; compress_=false; FirstEvent_=true;
   }
 
-	/// Destructor
+  /// Destructor
   virtual ~WriterBase()
   {
   }

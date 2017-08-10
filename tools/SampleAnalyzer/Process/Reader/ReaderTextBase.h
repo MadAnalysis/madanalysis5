@@ -72,7 +72,7 @@ class ReaderTextBase : public ReaderBase
     input_fifo_ = 0;
   }
 
-	/// Destructor
+  /// Destructor
   virtual ~ReaderTextBase()
   {
     if (input_     !=0) delete input_;

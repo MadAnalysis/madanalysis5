@@ -55,7 +55,7 @@ MAdouble64 MALorentzVector::operator() (MAuint8 i) const
   else
   {
       std::cout << "Error : operator()() bad index (%d) returning 0"
-	        << i << std::endl;
+          << i << std::endl;
   }
   return e_;
 }
@@ -69,7 +69,7 @@ MAdouble64& MALorentzVector::operator() (MAuint8 i)
   else
   {
       std::cout << "Error : operator()() bad index (%d) returning 0"
-	        << i << std::endl;
+                << i << std::endl;
   }
   return e_;
 }

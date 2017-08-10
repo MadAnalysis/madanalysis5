@@ -56,7 +56,7 @@ class LHCOWriter : public WriterTextBase
   LHCOWriter() : WriterTextBase()
   { counter_=0; }
 
-	/// Destructor
+  /// Destructor
   virtual ~LHCOWriter()
   {}
 

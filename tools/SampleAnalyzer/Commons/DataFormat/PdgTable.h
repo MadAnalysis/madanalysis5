@@ -38,28 +38,28 @@ namespace MA5
 
 class PdgTable {
   public:
-	PdgTable()
+  PdgTable()
   {};
 
   ~PdgTable()
   {};
 
-	PdgTable(const PdgTable& Table);
+  PdgTable(const PdgTable& Table);
 
-	PdgTable& operator=(const PdgTable& Table);
+  PdgTable& operator=(const PdgTable& Table);
 
   const std::map<MAint32, PdgDataFormat>& Table() 
   { return Table_; }
 
-	void Insert(const MAint32 Pdgid, const PdgDataFormat &p);
+  void Insert(const MAint32 Pdgid, const PdgDataFormat &p);
 
-	void Print() const;
+  void Print() const;
 
   const PdgDataFormat& operator[](const MAint32 Pdgid) const;
 
   private:
 
-	std::map<MAint32, PdgDataFormat> Table_;
+  std::map<MAint32, PdgDataFormat> Table_;
   PdgDataFormat empty_;
 };
 

@@ -69,12 +69,12 @@ class MCParticleFormat : public ParticleBaseFormat
   // -------------------------------------------------------------
  private:
    
-  MAfloat32 ctau_;	     /// proper lifetime ctau (in mm)
-  MAfloat32 spin_;	     /// cosine of the angle btwn the spin vector and
-                                 /// its 3-momentum, in the lab frame
-  MAint32	  pdgid_;		   /// PDG numbering of the particle
+  MAfloat32 ctau_;       /// proper lifetime ctau (in mm)
+  MAfloat32 spin_;       /// cosine of the angle btwn the spin vector and
+                         /// its 3-momentum, in the lab frame
+  MAint32   pdgid_;      /// PDG numbering of the particle
   MAbool    isPU_;       /// is PileUp particle or not
-  MAint16	  statuscode_; /// status code (-1 for initial state, 
+  MAint16   statuscode_; /// status code (-1 for initial state, 
                          /// 2 intermediate state, 1 final state)
   MAint32   extra1_;
   MAint32   extra2_;

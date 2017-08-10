@@ -66,7 +66,7 @@ class RecParticleFormat : public ParticleBaseFormat
   // -------------------------------------------------------------
  protected:
    
-  MAfloat32 	              HEoverEE_;    /// hadronic energy over electromagnetic energy
+  MAfloat32               HEoverEE_;    /// hadronic energy over electromagnetic energy
   const MCParticleFormat* mc_ ;         /// mother generated particle
   std::vector<MAuint64>  delphesTags_; /// tag reference for Delphes
 
@@ -100,7 +100,7 @@ class RecParticleFormat : public ParticleBaseFormat
          << ", "<</*set::setw(8)*/"" << std::left << momentum_.Pz() 
          << ", "<</*set::setw(8)*/"" << std::left << momentum_.E() << ") - "
          << "EHoverEE=" << /*set::setw(8)*/"" << std::left << HEoverEE_
-	       << " - ";
+         << " - ";
 
     try
     {

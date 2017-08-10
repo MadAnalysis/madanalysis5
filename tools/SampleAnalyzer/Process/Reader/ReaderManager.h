@@ -43,7 +43,7 @@ class ReaderManager : public ManagerBase<ReaderBase>
   ReaderManager() : ManagerBase<ReaderBase>()
   { }
 
-	/// Destructor
+  /// Destructor
   ~ReaderManager()
   { }
 

@@ -136,8 +136,8 @@ void MAVector3::SetPtEtaPhi(MAdouble64 pt, MAdouble64 eta, MAdouble64 phi)
    //set Pt, Eta and Phi
    MAdouble64 apt = std::abs(pt);
    SetXYZ(apt*std::cos(phi),
-	  apt*std::sin(phi),
-	  apt/std::tan(2.0*std::atan(std::exp(-eta))) );
+   apt*std::sin(phi),
+   apt/std::tan(2.0*std::atan(std::exp(-eta))) );
 }
 
 //______________________________________________________________________________

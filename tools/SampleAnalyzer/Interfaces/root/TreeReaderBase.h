@@ -69,7 +69,7 @@ class TreeReaderBase
   TreeReaderBase(TFile* source, TTree* tree)
   { source_=source; tree_=tree; }
 
-	/// Destructor
+  /// Destructor
   virtual ~TreeReaderBase()
   { }
 

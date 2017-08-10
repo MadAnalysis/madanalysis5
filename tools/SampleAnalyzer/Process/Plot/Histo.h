@@ -124,7 +124,7 @@ class Histo : public PlotBase
     histo_.resize(nbins_,std::make_pair(0.,0.));
     underflow_ = std::make_pair(0.,0.);
     overflow_  = std::make_pair(0.,0.);
-	
+
     // Reseting statistical counters
     sum_w_    = std::make_pair(0.,0.);
     sum_ww_   = std::make_pair(0.,0.);

@@ -143,13 +143,13 @@ void bTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
       MCParticleFormat* particle = & myEvent.mc()->particles()[N];
       while (!b)
       {
-       	if (particle==0)
+        if (particle==0)
         {
           INFO << "No particle" << endmsg;
           break;
         }
 
-	if (particle->statuscode()==3) break;
+  if (particle->statuscode()==3) break;
 
         if (PHYSICS->Id->IsBHadron(particle->pdgid()) && IsLastBHadron(particle, myEvent))
         {
@@ -158,7 +158,7 @@ void bTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
           break;
         }
 
-	if (particle->mother2()!=0 && particle->mother2()!=particle->mother1()) break;
+  if (particle->mother2()!=0 && particle->mother2()!=particle->mother1()) break;
 
         particle = particle->mother1();
       }
@@ -219,13 +219,13 @@ void bTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
       MCParticleFormat* particle = & myEvent.mc()->particles()[N];
       while (!b)
       {
-       	if (particle==0)
+       if (particle==0)
         {
           INFO << "No particle" << endmsg;
           break;
         }
 
-	if (particle->statuscode()==3) break;
+  if (particle->statuscode()==3) break;
 
         if (PHYSICS->Id->IsBHadron(particle->pdgid()) && IsLastBHadron(particle, myEvent))
         {
@@ -234,7 +234,7 @@ void bTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
           break;
         }
 
-	if (particle->mother2()!=0 && particle->mother2()!=particle->mother1()) break;
+  if (particle->mother2()!=0 && particle->mother2()!=particle->mother1()) break;
 
         particle = particle->mother1();
       }

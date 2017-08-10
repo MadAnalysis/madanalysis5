@@ -126,13 +126,13 @@ class PhysicsService
 
   ///Get the decay mode : 1 = Tau --> e nu nu
   ///                     2 = Tau --> mu nu nu
-  ///  	       	       	  3 = Tau --> K nu
-  ///  	       	       	  4 = Tau --> K* nu
-  ///  	       	       	  5 = Tau --> Rho (--> pi pi0) nu
-  ///  	       	       	  6 = Tau --> A1 (--> pi 2pi0) nu
-  ///  	       	       	  7 = Tau --> A1 (--> 3pi) nu
-  ///  	       	       	  8 = Tau --> pi nu
-  ///  	       	       	  9 = Tau --> 3pi pi0 nu
+  ///                     3 = Tau --> K nu
+  ///                     4 = Tau --> K* nu
+  ///                     5 = Tau --> Rho (--> pi pi0) nu
+  ///                     6 = Tau --> A1 (--> pi 2pi0) nu
+  ///                     7 = Tau --> A1 (--> 3pi) nu
+  ///                     8 = Tau --> pi nu
+  ///                     9 = Tau --> 3pi pi0 nu
   ///                     0 = other
   ///                    -1 = error
   MAint32 GetTauDecayMode (const MCParticleFormat* part)
@@ -161,7 +161,7 @@ class PhysicsService
       else if (std::abs(pdgid) == 213) return 5;
       else if (std::abs(pdgid) == 20213)
       {
-       	MAint32 pi = 0;
+        MAint32 pi = 0;
         for (unsigned int j=0;j<part->daughters()[i]->daughters().size();j++)
         {
           if (std::abs(part->daughters()[i]->daughters()[j]->pdgid()) == 211) pi++;
@@ -172,7 +172,7 @@ class PhysicsService
       else if (std::abs(pdgid) == 211) npi++;
       else if (std::abs(pdgid) == 24)
       {
-       	for (unsigned int j=0;j<part->daughters()[i]->daughters().size();j++)
+        for (unsigned int j=0;j<part->daughters()[i]->daughters().size();j++)
         {
           if (std::abs(part->daughters()[i]->daughters()[j]->pdgid()) == 211) npi++;
         }

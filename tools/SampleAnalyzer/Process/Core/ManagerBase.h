@@ -70,7 +70,7 @@ class ManagerBase
   ManagerBase()
   {}
 
-	/// Destructor
+  /// Destructor
   ~ManagerBase()
   { 
     //    for (unsigned int i=0;i<Objects_.size();i++)

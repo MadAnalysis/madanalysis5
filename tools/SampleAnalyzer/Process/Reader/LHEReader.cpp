@@ -189,7 +189,7 @@ bool LHEReader::FinalizeHeader(SampleFormat& mySample)
   {
     xsection += mySample.mc()->processes()[i].xsectionMean();
     xerror   += mySample.mc()->processes()[i].xsectionError() *
-                mySample.mc()->processes()[i].xsectionError();
+      mySample.mc()->processes()[i].xsectionError();
   }
 
   // Filling xsection and its error
@@ -234,14 +234,14 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySamp
     if (!ReadLine(line)) return StatusCode::FAILURE;
     if(line.find("<rwgt>")!=std::string::npos) 
     {
-       bool EndReweighting = false;
-       do
-       { 
-         if (!ReadLine(line)) return StatusCode::FAILURE;
-         EndReweighting = (line.find("</rwgt>")!=std::string::npos);
-       }
-       while(!EndReweighting);
-       if (!ReadLine(line)) return StatusCode::FAILURE;
+      bool EndReweighting = false;
+      do
+      { 
+        if (!ReadLine(line)) return StatusCode::FAILURE;
+        EndReweighting = (line.find("</rwgt>")!=std::string::npos);
+      }
+      while(!EndReweighting);
+      if (!ReadLine(line)) return StatusCode::FAILURE;
     }
     EndOfLoop = (line.find("</event>")!=std::string::npos);
     if (!EndOfLoop)
@@ -425,9 +425,9 @@ void LHEReader::FillEventParticleLine(const std::string& line,
   std::stringstream str;
   str << tmpline;
 
-  signed int 	color1;	// color 1 not stored 
-  signed int	color2;	// color 2 not stored
-  double   		tmp;	  // temporary variable to fill in LorentzVector
+  signed int color1;	// color 1 not stored 
+  signed int color2;	// color 2 not stored
+  double     tmp;	    // temporary variable to fill in LorentzVector
 
   // Get a new particle
   MCParticleFormat * part = myEvent.mc()->GetNewParticle();

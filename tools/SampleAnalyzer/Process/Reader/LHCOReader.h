@@ -54,7 +54,7 @@ class LHCOReader : public ReaderTextBase
   LHCOReader()
   { }
 
-	//! Destructor
+  //! Destructor
   virtual ~LHCOReader()
   { }
 

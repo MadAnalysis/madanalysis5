@@ -86,7 +86,7 @@ class MAMatrix
 
   std::vector<MAdouble64>& operator[] (MAuint16 i)
   { return m_[i]; }
-	   
+
   
 };
  

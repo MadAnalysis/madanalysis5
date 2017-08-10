@@ -597,7 +597,7 @@ double TransverseVariables::AlphaT(const MCEventFormat* event)
 
   // dijet event
   if (jets.size()==2) return std::min(jets[0]->et(),jets[1]->et()) /
-			    ( jets[0]->momentum()+jets[1]->momentum() ).Mt();
+                             ( jets[0]->momentum()+jets[1]->momentum() ).Mt();
 
   double MinDeltaHT = 1e6;
 

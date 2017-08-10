@@ -75,7 +75,7 @@ class ReaderBase
     rfio_=false;  compress_=false; 
   }
 
-	/// Destructor
+  /// Destructor
   virtual ~ReaderBase()
   {
   }

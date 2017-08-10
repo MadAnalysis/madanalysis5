@@ -50,7 +50,7 @@ class LHEReader : public ReaderTextBase
   LHEReader()
   { firstevent_=false; }
 
-	//! Destructor
+  //! Destructor
   virtual ~LHEReader()
   { }
 

@@ -76,7 +76,7 @@ class DelphesTreeReader : public TreeReaderBase
   DelphesTreeReader(TFile* source, TTree* tree): TreeReaderBase(source,tree)
   { }
 
-	/// Destructor
+  /// Destructor
   virtual ~DelphesTreeReader()
   { }
 

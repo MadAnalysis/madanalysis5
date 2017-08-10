@@ -85,7 +85,7 @@ class STDHEPreader : public ReaderTextBase
   {
   }
 
-	/// Destructor
+  /// Destructor
   virtual ~STDHEPreader()
   {
   }

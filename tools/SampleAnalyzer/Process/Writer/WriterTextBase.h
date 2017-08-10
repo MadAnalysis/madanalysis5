@@ -60,7 +60,7 @@ class WriterTextBase : public WriterBase
     output_=0;
   }
 
-	/// Destructor
+  /// Destructor
   virtual ~WriterTextBase()
   {
     if (output_ !=0) delete output_;

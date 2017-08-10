@@ -97,18 +97,18 @@ StatusCode::Type LHCOReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySam
     if(tmp=="0")
     {
       if(firstevent_ )
-	    {
-	      FillEventInitLine(line,myEvent);
+      {
+        FillEventInitLine(line,myEvent);
         firstevent_=false;
         continue;
-	    }
+      }
       else 
-	    {
-	      EndOfLoop = true;
-	      savedline_=line;
-	      saved_=true;
-	      continue;
-	    }
+      {
+        EndOfLoop = true;
+        savedline_=line;
+        saved_=true;
+        continue;
+      }
     }
 
     FillEventParticleLine(line,myEvent);

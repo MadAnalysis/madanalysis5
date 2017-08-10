@@ -169,7 +169,7 @@ void cTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
       MCParticleFormat* particle = & myEvent.mc()->particles()[N];
       while (!c)
       {
-       	if (particle==0)
+        if (particle==0)
         {
           INFO << "No particle" << endmsg;
           break;

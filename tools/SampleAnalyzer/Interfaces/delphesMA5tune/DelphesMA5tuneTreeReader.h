@@ -88,7 +88,7 @@ class DelphesMA5tuneTreeReader : public TreeReaderBase
   DelphesMA5tuneTreeReader(TFile* source, TTree* tree): TreeReaderBase(source,tree)
   { }
 
-	/// Destructor
+  /// Destructor
   virtual ~DelphesMA5tuneTreeReader()
   { }
 

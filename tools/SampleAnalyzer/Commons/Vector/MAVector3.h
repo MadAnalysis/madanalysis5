@@ -179,7 +179,7 @@ class MAVector3
     MAdouble64 factor = Mag();
     if (factor == 0)
     {
-	std::cout << "SetMag : zero vector can't be stretched" << std::endl;
+      std::cout << "SetMag : zero vector can't be stretched" << std::endl;
     }
     else
     {

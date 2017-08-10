@@ -56,7 +56,7 @@ class LHEWriter : public WriterTextBase
   LHEWriter() : WriterTextBase()
   {}
 
-	/// Destructor
+  /// Destructor
   virtual ~LHEWriter()
   {}
 
