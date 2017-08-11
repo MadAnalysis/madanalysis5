@@ -25,6 +25,7 @@
 #ifndef LHCO_WRITER_BASE_h
 #define LHCO_WRITER_BASE_h
 
+
 // STL headers
 #include <fstream>
 #include <iostream>
@@ -33,6 +34,7 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Writer/WriterTextBase.h"
 #include "SampleAnalyzer/Process/Writer/LHCOParticleFormat.h"
+
 
 namespace MA5
 {

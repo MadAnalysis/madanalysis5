@@ -30,6 +30,7 @@
 #include "SampleAnalyzer/Commons/Base/DetectorBase.h"
 #include "SampleAnalyzer/Process/Core/ManagerBase.h"
 
+
 namespace MA5
 {
 

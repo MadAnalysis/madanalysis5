@@ -25,13 +25,15 @@
 #ifndef __MULTIREGIONCOUNTERMANAGER_H
 #define __MULTIREGIONCOUNTERMANAGER_H
 
+
 // STL headers
 #include <vector>
 #include <string>
 
-// SampleAnalyzer
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Counter/MultiRegionCounter.h"
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelection.h"
+
 
 namespace MA5
 {

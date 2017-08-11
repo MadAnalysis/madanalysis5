@@ -25,13 +25,15 @@
 #ifndef MERGING_PLOT_TYPE_H
 #define MERGING_PLOT_TYPE_H
 
-//STL headers
+
+// STL headers
 #include <vector>
 #include <string>
 
-//SampleAnalyzer headers
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Plot/Histo.h"
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelectionManager.h"
+
 
 namespace MA5
 {

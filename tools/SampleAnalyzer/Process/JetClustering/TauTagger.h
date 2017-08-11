@@ -25,8 +25,10 @@
 #ifndef TAUTAGGER_H
 #define TAUTAGGER_H
 
-//SampleAnalyser headers
+
+// SampleAnalyser headers
 #include "SampleAnalyzer/Commons/Base/TaggerBase.h"
+
 
 namespace MA5
 {

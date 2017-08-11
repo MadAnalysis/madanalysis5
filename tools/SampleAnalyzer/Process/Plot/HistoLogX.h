@@ -25,9 +25,9 @@
 #ifndef HISTO_LOGX_H
 #define HISTO_LOGX_H
 
+
 // STL headers
 #include <cmath>
-
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Plot/Histo.h"

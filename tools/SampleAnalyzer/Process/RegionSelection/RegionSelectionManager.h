@@ -25,6 +25,7 @@
 #ifndef __REGIONSELECTIONMANAGER_H
 #define __REGIONSELECTIONMANAGER_H
 
+
 // STL headers
 #include <vector>
 #include <string>
@@ -37,6 +38,7 @@
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Process/Writer/SAFWriter.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
+
 
 namespace MA5
 {

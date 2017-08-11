@@ -25,21 +25,18 @@
 #ifndef SAMPLE_ANALYZER_H
 #define SAMPLE_ANALYZER_H
 
+
 // STL headers
 #include <iostream>
 #include <string>
 #include <vector>
 
-
 // SampleAnalyzer headers
-// |- core functions
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/Base/StatusCode.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
-// |- data format
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
-// |-manager headers
 #include "SampleAnalyzer/Process/Reader/ReaderManager.h"
 #include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"
 #include "SampleAnalyzer/Process/Writer/WriterManager.h"

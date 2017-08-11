@@ -29,7 +29,6 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 
-
 // STL headers
 #include <vector>
 #include <string>

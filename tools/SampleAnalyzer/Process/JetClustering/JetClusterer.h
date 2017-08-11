@@ -25,7 +25,8 @@
 #ifndef JET_CLUSTERER_H
 #define JET_CLUSTERER_H
 
-//SampleAnalyser headers
+
+// SampleAnalyser headers
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
 #include "SampleAnalyzer/Commons/Service/Physics.h"
@@ -34,7 +35,7 @@
 #include "SampleAnalyzer/Process/JetClustering/cTagger.h"
 #include "SampleAnalyzer/Process/JetClustering/TauTagger.h"
 
-//STL headers
+// STL headers
 #include <map>
 #include <algorithm>
 #include <locale>

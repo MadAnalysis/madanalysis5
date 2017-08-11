@@ -25,7 +25,9 @@
 #ifndef BTAGGER_H
 #define BTAGGER_H
 
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/TaggerBase.h"
+
 
 namespace MA5
 {

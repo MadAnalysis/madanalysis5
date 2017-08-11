@@ -25,11 +25,14 @@
 #ifndef LHCO_PARTICLE_FORMAT_h
 #define LHCO_PARTICLE_FORMAT_h
 
+
 // STL headers
 #include <iostream>
 #include <string>
 
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
+
 
 namespace MA5
 {

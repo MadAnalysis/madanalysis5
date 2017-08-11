@@ -279,12 +279,17 @@ int main()
   else
   {
     Header(output);
+    output << "#ifndef PORTABILITY_CHECK" << std::endl;
+    output << "#define PORTABILITY_CHECK" << std::endl;
+    output << std::endl << std::endl;
     output << "// Tags produced automatically by the Portability Check-Up" << std::endl;
     if (!test) output << "// Error detected with the current architecture" << std::endl;
     Print(data,output,true);
     output << std::endl;
     output << "#define INT_4BYTES  " << INT_4BYTES  << std::endl;
     output << "#define LONG_8BYTES " << LONG_8BYTES << std::endl;
+    output << std::endl << std::endl;
+    output << "#endif" << std::endl;
   }
   output.close();
 

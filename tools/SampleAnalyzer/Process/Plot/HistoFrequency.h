@@ -25,6 +25,7 @@
 #ifndef HISTO_FREQUENCY_H
 #define HISTO_FREQUENCY_H
 
+
 // STL headers
 #include <map>
 #include <string>
@@ -32,6 +33,7 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Plot/PlotBase.h"
+
 
 namespace MA5
 {

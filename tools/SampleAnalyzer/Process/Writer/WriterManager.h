@@ -25,9 +25,11 @@
 #ifndef WRITER_MANAGER_h
 #define WRITER_MANAGER_h
 
+
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Writer/WriterBase.h"
 #include "SampleAnalyzer/Process/Core/ManagerBase.h"
+
 
 namespace MA5
 {

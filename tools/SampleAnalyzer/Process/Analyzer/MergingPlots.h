@@ -27,6 +27,7 @@
 
 #ifdef FASTJET_USE
 
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Plot/MergingPlotType.h"
 #include "SampleAnalyzer/Process/Analyzer/AnalyzerBase.h"
 

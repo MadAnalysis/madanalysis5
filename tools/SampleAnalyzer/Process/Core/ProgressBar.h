@@ -25,6 +25,7 @@
 #ifndef ProgressBar_h
 #define ProgressBar_h
 
+
 // STL headers
 #include <iostream>
 #include <string>
@@ -32,9 +33,8 @@
 #include <vector>
 #include <sstream>
 
-#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
-
 // SampleAnalyzer headers
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
 

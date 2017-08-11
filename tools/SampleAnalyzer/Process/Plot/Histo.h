@@ -25,6 +25,7 @@
 #ifndef HISTO_H
 #define HISTO_H
 
+
 // STL headers
 #include <map>
 #include <cmath>
@@ -34,6 +35,7 @@
 #include "SampleAnalyzer/Process/Plot/PlotBase.h"
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelection.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
+
 
 namespace MA5
 {

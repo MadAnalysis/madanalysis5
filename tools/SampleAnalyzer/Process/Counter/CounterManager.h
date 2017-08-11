@@ -25,14 +25,16 @@
 #ifndef COUNTER_MANAGER_H
 #define COUNTER_MANAGER_H
 
+
 // STL headers
 #include <iostream>
 #include <ostream>
 #include <vector>
 
-// SampleAnalyzer
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Counter/Counter.h"
 #include "SampleAnalyzer/Process/Writer/SAFWriter.h"
+
 
 namespace MA5
 {

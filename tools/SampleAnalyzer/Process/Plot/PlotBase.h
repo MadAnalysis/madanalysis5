@@ -25,6 +25,7 @@
 #ifndef PLOT_BASE_H
 #define PLOT_BASE_H
 
+
 // STL headers
 #include <iostream>
 #include <map>
@@ -33,6 +34,7 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/LogService.h"
+
 
 namespace MA5
 {

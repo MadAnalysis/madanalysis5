@@ -31,7 +31,6 @@
 #include <ostream>
 #include <vector>
 
-
 // SampleAnalyzer
 #include "SampleAnalyzer/Process/Plot/PlotBase.h"
 #include "SampleAnalyzer/Process/Plot/Histo.h"

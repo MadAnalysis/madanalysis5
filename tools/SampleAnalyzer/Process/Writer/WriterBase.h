@@ -25,6 +25,7 @@
 #ifndef WRITER_BASE_h
 #define WRITER_BASE_h
 
+
 // STL headers
 #include <fstream>
 #include <iostream>

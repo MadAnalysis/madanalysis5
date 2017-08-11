@@ -25,11 +25,12 @@
 #ifndef __MULTIREGIONCOUNTER_H
 #define __MULTIREGIONCOUNTER_H
 
+
 // STL headers
 #include <string>
 #include <vector>
 
-// SampleAnalyzer
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelection.h"
 
 
