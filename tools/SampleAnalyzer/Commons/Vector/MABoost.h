@@ -25,6 +25,7 @@
 #ifndef MABoost_h
 #define MABoost_h
 
+
 // STL headers
 #include <iostream>
 #include <string>

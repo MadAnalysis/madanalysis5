@@ -25,6 +25,7 @@
 #ifndef RecTauFormat_h
 #define RecTauFormat_h
 
+
 // STL headers
 #include <iostream>
 #include <string>
@@ -34,6 +35,7 @@
 // RecParticleFormat
 #include "SampleAnalyzer/Commons/DataFormat/RecParticleFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
+
 
 namespace MA5
 {

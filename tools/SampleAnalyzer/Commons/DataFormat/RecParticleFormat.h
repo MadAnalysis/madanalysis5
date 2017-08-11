@@ -25,6 +25,7 @@
 #ifndef RecParticleFormat_h
 #define RecParticleFormat_h
 
+
 // STL headers
 #include <iostream>
 #include <string>

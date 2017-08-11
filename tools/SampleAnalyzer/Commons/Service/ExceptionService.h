@@ -25,6 +25,7 @@
 #ifndef EXCEPTION_SERVICE_H
 #define EXCEPTION_SERVICE_H
 
+
 // STL headers
 #include <iostream>
 #include <string>
@@ -35,6 +36,7 @@
 #include "SampleAnalyzer/Commons/Service/LogReport.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionType.h"
+
 
 // ShortCut to display and store an exception
 #define MANAGE_EXCEPTION(e) if (dynamic_cast<const MA5::ExceptionType*>(&e)==0) \

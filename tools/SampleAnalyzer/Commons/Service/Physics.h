@@ -25,6 +25,7 @@
 #ifndef PHYSICS_SERVICE_h
 #define PHYSICS_SERVICE_h
 
+
 // STL headers
 #include <set>
 #include <string>
@@ -41,6 +42,7 @@
 #include "SampleAnalyzer/Commons/Service/Identification.h"
 #include "SampleAnalyzer/Commons/Service/Isolation.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
+
 
 #define PHYSICS MA5::PhysicsService::getInstance()
 

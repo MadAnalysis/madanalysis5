@@ -25,6 +25,7 @@
 #ifndef MALorentzVector_h
 #define MALorentzVector_h
 
+
 // STL headers
 #include <iostream>
 #include <string>
@@ -32,7 +33,7 @@
 #include <iomanip>
 #include <cmath>
 
-// SampleAnalyzer
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Commons/Vector/MAVector3.h"

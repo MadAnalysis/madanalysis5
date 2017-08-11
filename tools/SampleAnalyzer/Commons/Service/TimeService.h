@@ -32,9 +32,8 @@
 #include<iostream>
 #include<ctime>
 
-#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
-
 // SampleAnalyzer headers
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 #include "SampleAnalyzer/Commons/Service/TimeMeasureType.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 

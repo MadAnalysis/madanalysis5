@@ -25,6 +25,7 @@
 #ifndef RECTOOLCONFIG_h
 #define RECTOOLCONFIG_h
 
+
 // STL headers
 #include <set>
 #include <string>

@@ -25,6 +25,7 @@
 #ifndef LOG_SERVICE_H
 #define LOG_SERVICE_H
 
+
 // STL headers
 #include <iostream>
 #include <fstream>

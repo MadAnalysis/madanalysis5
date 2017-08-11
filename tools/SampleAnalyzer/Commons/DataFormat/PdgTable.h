@@ -25,9 +25,11 @@
 #ifndef PDGTABLE_H
 #define PDGTABLE_H
 
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/DataFormat/PdgDataFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
+// STL headers
 #include <string>
 #include <map>
 #include <cmath>

@@ -25,9 +25,11 @@
 #ifndef LOG_MSG_KEY_H
 #define LOG_MSG_KEY_H
 
-// STL headers
-#include<string>
 
+// STL headers
+#include <string>
+
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 
 

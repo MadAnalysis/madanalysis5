@@ -25,6 +25,7 @@
 #ifndef MARotation3euler_h
 #define MARotation3euler_h
 
+
 // STL headers
 #include <iostream>
 #include <string>

@@ -26,7 +26,7 @@
 #define DETECTOR_DELPHES_H
 
 
-//SampleAnalyser headers
+// SampleAnalyser headers
 #include "SampleAnalyzer/Commons/Base/DetectorBase.h"
 #include "SampleAnalyzer/Interfaces/delphes/DelphesMemoryInterface.h"
 

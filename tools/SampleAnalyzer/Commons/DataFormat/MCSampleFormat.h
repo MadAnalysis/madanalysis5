@@ -25,6 +25,7 @@
 #ifndef MCSAMPLE_DATAFORMAT_H
 #define MCSAMPLE_DATAFORMAT_H
 
+
 // STL headers
 #include <map>
 #include <iostream>
@@ -35,6 +36,7 @@
 #include "SampleAnalyzer/Commons/DataFormat/GeneratorInfo.h"
 #include "SampleAnalyzer/Commons/DataFormat/MCProcessFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h" 
+
 
 namespace MA5
 {

@@ -25,6 +25,7 @@
 #ifndef LOG_REPORT_H
 #define LOG_REPORT_H
 
+
 // STL headers
 #include <iostream>
 #include <fstream>

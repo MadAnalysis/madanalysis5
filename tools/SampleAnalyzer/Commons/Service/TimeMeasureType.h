@@ -25,16 +25,20 @@
 #ifndef TIMER_MEASURE_TYPE_H
 #define TIMER_MEASURE_TYPE_H
 
+
+// STL headers
 #include<map>
 #include<string>
 #include<iostream>
 #include<cmath>
 #include<ctime>
 
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 #include "SampleAnalyzer/Commons/Service/LogStream.h"
 #include "SampleAnalyzer/Commons/Service/ConvertService.h"
+
 
 namespace MA5
 {

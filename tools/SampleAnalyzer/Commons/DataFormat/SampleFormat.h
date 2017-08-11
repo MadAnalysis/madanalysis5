@@ -25,6 +25,7 @@
 #ifndef SAMPLE_DATAFORMAT_H
 #define SAMPLE_DATAFORMAT_H
 
+
 // STL headers
 #include <map>
 #include <iostream>
@@ -36,6 +37,7 @@
 #include "SampleAnalyzer/Commons/DataFormat/RecSampleFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
+
 
 namespace MA5
 {

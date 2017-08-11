@@ -25,7 +25,9 @@
 #ifndef ISOLATIONBASE_SERVICE_h
 #define ISOLATIONBASE_SERVICE_h
 
+
 // STL headers
+#include <iostream>
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/DataFormat/RecEventFormat.h"

@@ -26,6 +26,10 @@
 #define GENERATOR_INFO_H
 
 
+// STL headers
+#include <iostream>
+
+
 namespace MA5
 {
 

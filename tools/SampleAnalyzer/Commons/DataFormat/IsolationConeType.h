@@ -25,14 +25,16 @@
 #ifndef IsolationConeType_h
 #define IsolationConeType_h
 
+
 // STL headers
 #include <iostream>
 #include <string>
 #include <sstream>
 #include <iomanip>
 
-// RecParticleFormat
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/LogService.h"
+
 
 namespace MA5
 {

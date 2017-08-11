@@ -25,6 +25,7 @@
 #ifndef RecTrackFormat_h
 #define RecTrackFormat_h
 
+
 // STL headers
 #include <iostream>
 #include <string>
@@ -35,6 +36,7 @@
 #include "SampleAnalyzer/Commons/DataFormat/IsolationConeType.h"
 #include "SampleAnalyzer/Commons/DataFormat/ParticleBaseFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
+
 
 namespace MA5
 {

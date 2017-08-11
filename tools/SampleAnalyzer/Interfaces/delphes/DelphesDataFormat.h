@@ -25,13 +25,14 @@
 #ifndef DELPHES_DATA_FORMAT_h
 #define DELPHES_DATA_FORMAT_h
 
-// STL header
+
+// STL headers
 #include <iostream>
 
-// SampleAnalyzer header
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 
-// ROOT header
+// ROOT headers
 #include <TTree.h>
 #include <TClonesArray.h>
 

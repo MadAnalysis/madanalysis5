@@ -26,7 +26,7 @@
 #define DELPHES_MEMORY_INTERFACE_h
 
 
-// STL header
+// STL headers
 #include <string>
 #include <map>
 #include <iostream>
@@ -37,6 +37,7 @@
 #include "SampleAnalyzer/Commons/Base/StatusCode.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Commons/Base/DetectorBase.h"
+
 
 class TObjArray;
 class TFolder;

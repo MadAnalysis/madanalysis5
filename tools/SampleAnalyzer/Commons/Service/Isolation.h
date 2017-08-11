@@ -25,7 +25,9 @@
 #ifndef ISOLATION_SERVICE_h
 #define ISOLATION_SERVICE_h
 
+
 // STL headers
+#include <iostream>
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/IsolationTracker.h"

@@ -26,7 +26,7 @@
 #define DETECTOR_DELPHESMA5TUNE_H
 
 
-//SampleAnalyser headers
+// SampleAnalyser headers
 #include "SampleAnalyzer/Commons/Base/DetectorBase.h"
 
 

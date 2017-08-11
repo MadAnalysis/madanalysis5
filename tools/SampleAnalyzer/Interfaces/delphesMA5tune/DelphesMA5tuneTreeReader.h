@@ -25,7 +25,8 @@
 #ifndef DELPHESMA5TUNE_TREE_READER_h
 #define DELPHESMA5TUNE_TREE_READER_h
 
-// STL header
+
+// STL headers
 #include <iostream>
 #include <vector>
 #include <map>
@@ -34,7 +35,7 @@
 #include "SampleAnalyzer/Commons/Vector/MALorentzVector.h"
 #include "SampleAnalyzer/Interfaces/root/TreeReaderBase.h"
 
-// ROOT header
+// ROOT headers
 #include <TChain.h>
 #include <TLorentzVector.h>
 #include <TObject.h>

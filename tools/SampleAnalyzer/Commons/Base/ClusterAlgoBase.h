@@ -26,14 +26,14 @@
 #define CLUSTER_ALGO_BASE_H
 
 
-//STL headers
+// STL headers
 #include <vector>
 #include <map>
 #include <string>
 #include <set>
 #include <algorithm>
 
-//SampleAnalyser headers
+// SampleAnalyser headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
