@@ -92,9 +92,9 @@ void TauTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
           break;
         }
 
-        if (particle->mother2()!=0 && particle->mother2()!=particle->mother1()) break;
+      if (particle->mothers().size()>1 && particle->mothers()[1]!=particle->mothers()[0]) break;
 
-        particle = particle->mother1();
+        particle = particle->mothers()[0];
       }
 
       if (tag) break;
@@ -184,9 +184,9 @@ void TauTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
           break;
         }
 
-  if (particle->mother2()!=0 && particle->mother2()!=particle->mother1()) break;
+        if (particle->mothers().size()>1 && particle->mothers()[1]!=particle->mothers()[0]) break;
 
-        particle = particle->mother1();
+        particle = particle->mothers()[0];
       }
 
       if (tag) break;

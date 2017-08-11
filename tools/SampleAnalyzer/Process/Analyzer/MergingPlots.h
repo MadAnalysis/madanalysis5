@@ -25,6 +25,7 @@
 #ifndef MERGING_PLOTS_H
 #define MERGING_PLOTS_H
 
+
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Plot/MergingPlotType.h"
 #include "SampleAnalyzer/Process/Analyzer/AnalyzerBase.h"
@@ -54,10 +55,10 @@ class MergingPlots : public AnalyzerBase
   std::vector<MergingPlotType> DJR_;
 
   /// User configuration
-  MAuint32  merging_njets_;
-  MAuint8 merging_nqmatch_;
-  MAbool  merging_nosingrad_;
-  MAbool  ma5_mode_;
+  MAuint32 merging_njets_;
+  MAuint8  merging_nqmatch_;
+  MAbool   merging_nosingrad_;
+  MAbool   ma5_mode_;
 
   /// Saving merging plots in the output file
   void Write_TextFormat(SAFWriter& output);

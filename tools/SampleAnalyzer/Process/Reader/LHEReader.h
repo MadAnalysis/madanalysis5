@@ -42,6 +42,7 @@ class LHEReader : public ReaderTextBase
  protected:
 
   bool firstevent_;
+  std::vector< std::pair<MAint32,MAint32> > mothers_;
 
   // -------------------------------------------------------------
   //                       method members

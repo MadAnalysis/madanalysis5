@@ -532,23 +532,32 @@ bool STDHEPreader::DecodeEventData(const std::string& version,
   // Check the consistency of the event
   if(!CheckEvent(myEvent,"STDHEP")) return false;
 
+  // Reserve memory for all particles
+  myEvent.mc()->particles_.reserve(nhept_);
+  mothers_.reserve(nhept_);
+
   // Loop over particles
   for (unsigned int i=0;i<static_cast<unsigned int>(nhept_);i++)
   {
     // Get a new particle
     MCParticleFormat * part = myEvent.mc()->GetNewParticle();
 
+    MAuint32 mothup1=0;
+    MAuint32 mothup2=0;
+
     // Fill the data format
-    part->pdgid_=idhept_[i];
-    part->statuscode_=isthept_[i];
-    part->mothup1_=jmohept_[2*i];
-    part->mothup2_=jmohept_[2*i+1];
-    part->daughter1_=jdahept_[2*i];
-    part->daughter2_=jdahept_[2*i+1];
-    part->momentum_.SetPx(phept_[5*i]);
-    part->momentum_.SetPy(phept_[5*i+1]);
-    part->momentum_.SetPz(phept_[5*i+2]);
-    part->momentum_.SetE (phept_[5*i+3]);
+    part->pdgid_      = idhept_[i];
+    part->statuscode_ = isthept_[i];
+    mothup1           = jmohept_[2*i];
+    mothup2           = jmohept_[2*i+1];
+    // daughter1_        = jdahept_[2*i];
+    // daughter2_        = jdahept_[2*i+1];
+    part->momentum_.SetPxPyPzE(phept_[5*i],phept_[5*i]+1,phept_[5*i]+2,phept_[5*i]+3);
+    mothers_.push_back(std::make_pair(mothup1,mothup2));
+
+    // For debug
+    // std::cout << "pdgid=" << part->pdgid_ << "  status=" << part->statuscode_ 
+    //          << "  mothup1=" << mothup1 <<"  mothup2=" << mothup2 << std::endl;         
   }
 
   return true;
@@ -603,7 +612,7 @@ bool STDHEPreader::CheckEvent(const EventFormat& myEvent,
 }
 
 bool STDHEPreader::DecodeSTDHEP4(const std::string& version, 
-                                   EventFormat& myEvent)
+                                 EventFormat& myEvent)
 {
   Reset();
 
@@ -663,23 +672,60 @@ bool STDHEPreader::DecodeSTDHEP4(const std::string& version,
   // Check the consistency of the entries in the event table
   if(!CheckEvent(myEvent, "STDHEP4")) return false;
 
+  // Reserve memory for all particles
+  myEvent.mc()->particles_.reserve(nhept_);
+
   // Loop over particles
   for (unsigned int i=0;i<static_cast<unsigned int>(nhept_);i++)
   {
     // Get a new particle
     MCParticleFormat * part = myEvent.mc()->GetNewParticle();
+    
+    MAuint32 mothup1=0;
+    MAuint32 mothup2=0;
 
     // Fill the data format
-    part->pdgid_=idhept_[i];
-    part->statuscode_=isthept_[i];
-    part->mothup1_=jmohept_[2*i];
-    part->mothup2_=jmohept_[2*i+1];
-    part->daughter1_=jdahept_[2*i];
-    part->daughter2_=jdahept_[2*i+1];
-    part->momentum_.SetPx(phept_[5*i]);
-    part->momentum_.SetPy(phept_[5*i+1]);
-    part->momentum_.SetPz(phept_[5*i+2]);
-    part->momentum_.SetE (phept_[5*i+3]);
+    part->pdgid_      = idhept_[i];
+    part->statuscode_ = isthept_[i];
+    mothup1           = jmohept_[2*i];
+    mothup2           = jmohept_[2*i+1];
+    // daughter1_  = jdahept_[2*i];
+    // daughter2_  = jdahept_[2*i+1];
+    part->momentum_.SetPxPyPzE(phept_[5*i],phept_[5*i]+1,phept_[5*i]+2,phept_[5*i]+3);
+
+    // For debug
+    //    std::cout << "pdgid=" << part->pdgid_ << "  status=" << part->statuscode_ 
+    //              << "  mothup1=" << mothup1 <<"  mothup2=" << mothup2 << std::endl;         
+
+    // Set daughter-mother relation
+    if (mothup1!=0)
+    {
+      if (mothup1>0 && mothup1<=myEvent.mc()->particles().size())
+      {
+        MCParticleFormat* mum = &(myEvent.mc()->particles()[static_cast<MAuint32>(mothup1-1)]);
+        part->mothers().push_back(mum);
+        mum->daughters().push_back(part);
+      }
+      else
+      {
+        std::cout << "ERROR : internal problem with mother-daughter particles" << std::endl;
+      }
+    }
+
+    if (mothup2!=0 && mothup1!=mothup2)
+    {
+      if (mothup2>0 && mothup2<=myEvent.mc()->particles().size())
+      {
+        MCParticleFormat* mum = &(myEvent.mc()->particles()[static_cast<MAuint32>(mothup2-1)]);
+        part->mothers().push_back(mum);
+        mum->daughters().push_back(part);
+      }
+      else
+      {
+        std::cout << "ERROR : internal problem with mother-daughter particles" << std::endl;
+      }
+    }
+
   }
 
   return true;
@@ -696,7 +742,49 @@ bool STDHEPreader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
   nevhept_before_ = nevhept_;
   firstevent=false;
 
-  // Mother pointer assignment
+  // Mother-daughter relations
+  for (MAuint32 i=0; i<mothers_.size();i++)
+  {
+    MCParticleFormat* part = &(myEvent.mc()->particles_[i]);
+    MAint32& mothup1 = mothers_[i].first;
+    MAint32& mothup2 = mothers_[i].second;
+
+    if (mothup1>0)
+    {
+      if (mothup1<=myEvent.mc()->particles().size())
+      {
+        MCParticleFormat* mum = &(myEvent.mc()->particles()[static_cast<MAuint32>(mothup1-1)]);
+        if (part!=mum)
+        {
+          part->mothers().push_back(mum);
+          mum->daughters().push_back(part);
+        }
+      }
+      else
+      {
+        std::cout << "ERROR : internal problem with mother-daughter particles" << std::endl;
+      }
+    }
+    if (mothup2>0 && mothup1!=mothup2)
+    {
+      if (mothup2<=myEvent.mc()->particles().size())
+      {
+        MCParticleFormat* mum = &(myEvent.mc()->particles()[static_cast<MAuint32>(mothup2-1)]);
+        if (mum!=part)
+        {
+          part->mothers().push_back(mum);
+          mum->daughters().push_back(part);
+        }
+      }
+      else
+      {
+        std::cout << "ERROR : internal problem with mother-daughter particles" << std::endl;
+      }
+    }
+  }
+  mothers_.clear();
+
+  // Global event observable
   for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
   {
     MCParticleFormat& part = myEvent.mc()->particles_[i];
@@ -711,42 +799,6 @@ bool STDHEPreader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
         myEvent.mc()->MHT_ -= part.momentum();
         myEvent.mc()->THT_ += part.pt(); 
       }
-    }
-
-    unsigned int index1=myEvent.mc()->particles_[i].mothup1_;
-    unsigned int index2=myEvent.mc()->particles_[i].mothup2_;
-    if (index1!=0 && index2==0) index2=index1;
-    if (index1!=0)
-    {
-      try
-      {
-        if (index1>=myEvent.mc()->particles_.size()) throw EXCEPTION_WARNING("mother index1 is greater to nb of particles","",0);
-        myEvent.mc()->particles_[i].mother1_ = &myEvent.mc()->particles_[index1-1];
-        myEvent.mc()->particles_[index1-1].daughters_.push_back(&myEvent.mc()->particles_[i]);
-      }
-      catch (const std::exception& e)
-      {
-        MANAGE_EXCEPTION(e);
-        //     << " - index1 = " << index1 << endmsg
-        //     << " - particles.size() " << myEvent.mc()->particles_.size()
-        myEvent.mc()->particles_[i].mother1_ = 0;
-      }    
-    }
-    if (index2!=0)
-    {
-      try
-      {
-        if (index2>=myEvent.mc()->particles_.size()) throw EXCEPTION_WARNING("mother index2 is greater to nb of particles","",0);
-        myEvent.mc()->particles_[i].mother2_ = &myEvent.mc()->particles_[index2-1];
-        myEvent.mc()->particles_[index2-1].daughters_.push_back(&myEvent.mc()->particles_[i]);
-      }
-      catch (const std::exception& e)
-      {
-        MANAGE_EXCEPTION(e);
-        //     << " - index1 = " << index1 << endmsg
-        //     << " - particles.size() " << myEvent.mc()->particles_.size()
-        myEvent.mc()->particles_[i].mother2_ = 0;
-      }    
     }
   }
 

@@ -180,18 +180,18 @@ MAuint32 MergingPlots::ExtractHardJetNumber(const MCEventFormat* myEvent,
   for (unsigned int i=0;i<myEvent->particles().size();i++)
   {
     const MCParticleFormat* myPart = &myEvent->particles()[i];
-    if (myPart->mother1()==0) continue;
-    if (myPart->mother1()->mother1()==0) continue;
-    std::vector<MCParticleFormat*> family=myEvent->particles()[i].mother1()->daughters();
+    if (myPart->mothers().size()==0) continue;
+    if (myPart->mothers()[0]->mothers().size()==0) continue;
+    std::vector<MCParticleFormat*> family=myEvent->particles()[i].mothers()[0]->daughters();
 
     // Filters
-    if(myEvent->particles()[i].mothup2_!=0) filters[&(myEvent->particles()[i])] = false;
-    else if(filters.find(myEvent->particles()[i].mother1())!=filters.end())
+    if(myEvent->particles()[i].mothers().size()>1) filters[&(myEvent->particles()[i])] = false;
+    else if(filters.find(myEvent->particles()[i].mothers()[0])!=filters.end())
     {
       // The mother is already filtered (easy)
-      if(filters[myPart->mother1()]) filters[myPart]=true;
+      if(filters[myPart->mothers()[0]]) filters[myPart]=true;
       // This is not a radiation or decay pattern -> let's keep it
-      else if(myPart->mother1()->daughters().size()<2) filters[myPart]=false;
+      else if(myPart->mothers()[0]->daughters().size()<2) filters[myPart]=false;
       // The mother is not filtered -> testing if we have a radiation pattern
       else
       {
@@ -204,16 +204,16 @@ MAuint32 MergingPlots::ExtractHardJetNumber(const MCEventFormat* myEvent,
         }
         // Checking whether we have partons in the family
         unsigned int ng=0, ninit=0, nq=0,nqb=0;
-        if(myPart->pdgid()==myPart->mother1()->pdgid()) ninit++;
+        if(myPart->pdgid()==myPart->mothers()[0]->pdgid()) ninit++;
         for(unsigned int i=0; i< family.size();i++)
         {
           if(family[i]->pdgid()<=4 && family[i]->pdgid()>0) nq++;
           if(family[i]->pdgid()>=-4 && family[i]->pdgid()<0) nqb++;
           if(family[i]->pdgid()==21) ng++;
-          if(family[i]->pdgid()==myPart->mother1()->pdgid()) ninit++;
+          if(family[i]->pdgid()==myPart->mothers()[0]->pdgid()) ninit++;
         }
-        bool condition1 = myPart->mother1()->pdgid()!=21 && ninit>0;
-        bool condition2 = myPart->mother1()->pdgid()==21 && (ng>=2 || (nqb>0 && nq>0));
+        bool condition1 = myPart->mothers()[0]->pdgid()!=21 && ninit>0;
+        bool condition2 = myPart->mothers()[0]->pdgid()==21 && (ng>=2 || (nqb>0 && nq>0));
         if(!condition1 && !condition2) filters[myPart]=true;
         else                           filters[myPart]=false;
       }
@@ -227,12 +227,19 @@ MAuint32 MergingPlots::ExtractHardJetNumber(const MCEventFormat* myEvent,
     if (abs(myPart->pdgid())>merging_nqmatch_ && myPart->pdgid()!=21) continue;
 
     // keep only jets whose mother is one of the initial parton
-    if (myPart->mother1()==0) continue;
+    if (myPart->mothers().size()==0) continue;
 
-    // coming from initial state ?
-    if (myPart->mothup1_>6 && (myPart->mothup1_==0 || myPart->mothup2_==0)) continue;
+    // coming from initial state ? 6 first particles
+    bool initial=false;
+    for (MAuint32 ind=0;ind<6;ind++)
+    {
+      if (myPart->mothers()[0]== &(myEvent->particles()[ind]))
+      { initial=true; break; }
+    }
+    if (initial) continue;
+    if (myPart->mothers()[0]==0 || myPart->mothers()[1]==0) continue;
 
-    // Pythia 6 formt: removing the initial guys
+    // Pythia 6 format: removing the initial guys
     if(i<6 && *mySample->GeneratorType()==MA5GEN::PYTHIA6) continue;
 
     //count particle

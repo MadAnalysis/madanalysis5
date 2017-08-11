@@ -65,15 +65,14 @@ class MCEventFormat
   // -------------------------------------------------------------
  private : 
 
-  MAuint32 nparts_;       /// number of particles in the event
-  MAuint32 processId_;    /// identity of the current process
-  mutable MAfloat64 weight_;      /// event weight
-  MAfloat64 scale_;       /// scale Q of the event
-  MAfloat64 alphaQED_;    /// ALPHA_em value used
-  MAfloat64 alphaQCD_;    /// ALPHA_s value used
-  MAfloat64 PDFscale_;
-  std::pair<MAfloat64,MAfloat64> x_;
-  std::pair<MAfloat64,MAfloat64> xpdf_;
+  MAuint32 processId_;       /// identity of the current process
+  mutable MAfloat64 weight_; /// event weight
+  MAfloat64 scale_;          /// scale Q of the event
+  MAfloat64 alphaQED_;       /// ALPHA_em value used
+  MAfloat64 alphaQCD_;       /// ALPHA_s value used
+  MAfloat64 PDFscale_;       /// scale for PDF 
+  std::pair<MAfloat64,MAfloat64> x_;    /// x values
+  std::pair<MAfloat64,MAfloat64> xpdf_; /// xpdf values
 
   /// List of generated particles
   std::vector<MCParticleFormat> particles_;
@@ -99,7 +98,12 @@ class MCEventFormat
 
   /// Constructor withtout arguments
   MCEventFormat()
-  { Reset(); }
+  {
+    processId_=0; weight_=1.;
+    scale_=0.; alphaQED_=0.; alphaQCD_=0.;
+    TET_=0.;
+    THT_=0.; 
+  }
 
   /// Destructor
   ~MCEventFormat()
@@ -167,7 +171,8 @@ class MCEventFormat
 
   /// Clearing all information
   void Reset()
-  { nparts_=0; processId_=0; weight_=1.;
+  { 
+    processId_=0; weight_=1.;
     scale_=0.; alphaQED_=0.; alphaQCD_=0.;
     particles_.clear(); 
     MET_.Reset();
@@ -179,7 +184,7 @@ class MCEventFormat
   /// Displaying data member values
   void Print() const
   {
-    INFO << "nparts="      << nparts_
+    INFO << "nparts="       << particles_.size()
          << " - processId=" << processId_
          << " - weight="    << weight_
          << " - scale="     << scale_
@@ -187,12 +192,22 @@ class MCEventFormat
          << " - alphaQCD="  << alphaQCD_ << endmsg;
   }
 
+  /// Displaying data 
+  void PrintVertices() const;
+
+  /// Displaying mothers
+  void PrintMothers() const;
+
+  /// Displaying daughters
+  void PrintDaughters() const;
+
   /// Giving a new particle
   MCParticleFormat* GetNewParticle()
   {
     particles_.push_back(MCParticleFormat());
     return &particles_.back();
   }
+
 };
 
 }

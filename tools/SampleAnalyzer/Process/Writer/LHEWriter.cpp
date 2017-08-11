@@ -103,21 +103,21 @@ MAuint32 FindDeeply(const MCParticleFormat* part,
         break;
       }    
     }
-    if (thepart->mother1()==0) 
+    if (thepart->mothers().size()==0) 
     {
       test=true;
       thepart=0;
     }
-    else if (thepart->mother1()->statuscode()==3 || 
-            (  thepart->mother1()->statuscode()>=11 &&
-               thepart->mother1()->statuscode()<=29)  )
+    else if (thepart->mothers()[0]->statuscode()==3 || 
+            (  thepart->mothers()[0]->statuscode()>=11 &&
+               thepart->mothers()[0]->statuscode()<=29)  )
     {
       test=true;
-      thepart=thepart->mother1();
+      thepart=thepart->mothers()[0];
     }
     else
     {
-      thepart=thepart->mother1();
+      thepart=thepart->mothers()[0];
     }
   }
   if (thepart==0) return 0;
@@ -450,12 +450,28 @@ bool LHEWriter::WriteEvent(const EventFormat& myEvent,
   // -> hypothesis : input = LHE
   if (myEvent.mc()!=0 && myEvent.rec()==0)
   {
+    // Filling the temporary gen table for mother-daughter relation
+    std::map<const MCParticleFormat*, MAuint32> gentable;
+    for (MAuint32 i=0;i<myEvent.mc()->particles().size();i++)
+    {
+      gentable[&(myEvent.mc()->particles()[i])]=i+1;
+    }
+    
+    // Writing each particle
     for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
     {
       particles.push_back(LHEParticleFormat());
+      const MCParticleFormat* part = &(myEvent.mc()->particles()[i]);
+      std::vector<MAuint32> mothup(2,0);
+      for (unsigned int m=0;m<part->mothers().size();m++)
+      {
+        if (m>=2) continue;
+        mothup[m]=gentable[part->mothers()[m]];
+      }
+      if (part->mothers().size()==1) mothup[1]=mothup[0];
       WriteParticle(myEvent.mc()->particles()[i],
-                    myEvent.mc()->particles()[i].mothup1_,
-                    myEvent.mc()->particles()[i].mothup2_,
+                    mothup[0],
+                    mothup[1],
                     0,
                     particles.back());
     }
@@ -482,9 +498,13 @@ bool LHEWriter::WriteEvent(const EventFormat& myEvent,
         firstpart=false;
         particles.push_back(LHEParticleFormat());
         pointers.push_back(part);
-        MAint32 moth1 = Find(part->mother1(),pointers);
-        MAint32 moth2 = Find(part->mother2(),pointers);
-        WriteParticle(myEvent.mc()->particles()[i],moth1,moth2,3, particles.back());
+        std::vector<MAint32> mothers(2,0);
+        for (MAuint32 m=0;m<part->mothers().size();m++)
+        {
+          if (m>=2) continue; 
+          mothers[m]=Find(part->mothers()[m],pointers);
+        }
+        WriteParticle(myEvent.mc()->particles()[i],mothers[0],mothers[1],3, particles.back());
       }
       else 
       {

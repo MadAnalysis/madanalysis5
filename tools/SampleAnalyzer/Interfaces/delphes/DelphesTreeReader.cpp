@@ -205,93 +205,155 @@ bool DelphesTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEve
 // -----------------------------------------------------------------------------
 void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
 {
+
   // ---------------------------------------------------------------------------
   // GenParticle collection
   // ---------------------------------------------------------------------------
   std::map<const GenParticle*,unsigned int> gentable;
   std::map<const GenParticle*,unsigned int>::const_iterator genit;
   if (data_.GenParticle_!=0)
-  for (unsigned int i=0;i<static_cast<MAuint32>(data_.GenParticle_->GetEntries());i++)
   {
-    // getting the i-th particle
-    GenParticle* part = dynamic_cast<GenParticle*>(data_.GenParticle_->At(i));
-    if (part==0) continue;
+    // Number of generated particles
+    MAuint32 nparts = static_cast<MAuint32>(data_.GenParticle_->GetEntries());
+    myEvent.mc()->particles_.reserve(nparts);
 
-    // filling the mapping table: pointer address <-> i-th
-    gentable[part]=i;
+    // Temporary vector for mother-daughter relations
+    std::vector<std::pair<MAint32,MAint32> > mothers(nparts);
 
-    // creating new particle and filling particle info
-    MCParticleFormat * gen = myEvent.mc()->GetNewParticle();
-    gen->pdgid_      = part->PID;
-    gen->statuscode_ = part->Status;
-    gen->mothup1_    = part->M1;
-    gen->mothup2_    = part->M2;
-    gen->isPU_      = part->IsPU;
-    gen->momentum_.SetPxPyPzE(part->Px,part->Py, part->Pz, part->E);
+    // Loop over the generated particles
+    for (unsigned int i=0;i<nparts;i++)
+    {
+      // Getting the i-th particle
+      GenParticle* part = dynamic_cast<GenParticle*>(data_.GenParticle_->At(i));
+      if (part==0) continue;
+
+      // Filling the mapping table: pointer address <-> i-th
+      gentable[part]=i;
+
+      // Creating a new particle
+      MCParticleFormat * gen = myEvent.mc()->GetNewParticle();
+
+      // Filling main infos
+      gen->momentum_.SetPxPyPzE(part->Px,part->Py, part->Pz, part->E);
+      gen->pdgid_      = part->PID;
+      gen->statuscode_ = part->Status;
+      gen->isPU_       = part->IsPU;
+
+      // Filling mother-daughter relations
+      mothers[i]=std::make_pair(part->M1,part->M2);
+    }
+
+    // Setting the mother-daughter relations
+    for (MAuint32 i=0;i<myEvent.mc()->particles_.size();i++)
+    {
+      MCParticleFormat* part = &(myEvent.mc()->particles_[i]);
+      std::vector<MAint32> mother_indices(2,0);
+      mother_indices[0]=mothers[i].first;
+      mother_indices[1]=mothers[i].second;
+      for (MAuint32 index=0;index<mother_indices.size();index++)
+      {
+        // No mother case : index=-1
+        if (mother_indices[index]<0) continue;
+
+        // Check if the mother has been registered
+        bool redundant=false;
+        for (MAuint32 index2=0;index2<index;index2++)
+        {
+          if (mother_indices[index]==mother_indices[index2])
+          {
+            redundant=true;
+            break;
+          }
+        }
+        if (redundant) continue;
+
+        // Set the mothers and the daughters
+        MAuint32 newindex = static_cast<MAuint32>(mother_indices[index]);
+        if (newindex < myEvent.mc()->particles().size())
+        {
+          MCParticleFormat* mum = &(myEvent.mc()->particles()[newindex]);
+          if (part!=mum)
+          {
+            mum->daughters().push_back(part);
+            part->mothers().push_back(mum);
+          }
+        } 
+        else
+        {
+          WARNING << "A mother particle is defined after the given particle. ";
+          WARNING << " This daughter-mother link will be skipped" << endmsg;
+        }
+      }
+    }
   }
-
 
   // ---------------------------------------------------------------------------
   // Fill electrons
   // ---------------------------------------------------------------------------
   if (data_.Electron_!=0)
-  for (unsigned int i=0;i<static_cast<MAuint32>(data_.Electron_->GetEntries());i++)
   {
-    // getting the i-th particle
-    Electron* part = dynamic_cast<Electron*>(data_.Electron_->At(i));
-    if (part==0) continue;
-
-    // creating new particle and filling particle info
-    RecLeptonFormat * electron = myEvent.rec()->GetNewElectron();
-    electron->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
-    if (part->Charge>0) electron->charge_=true; else electron->charge_=false;
-    electron->HEoverEE_ = part->EhadOverEem;
-
-    // setting corresponding gen particle
-    const GenParticle* mc = dynamic_cast<const GenParticle*>(part->Particle.GetObject());
-    if (mc!=0)
+    MAuint32 nelectrons = static_cast<MAuint32>(data_.Electron_->GetEntries());
+    myEvent.rec()->electrons_.reserve(nelectrons);
+    for (unsigned int i=0;i<nelectrons;i++)
     {
-      genit = gentable.find(mc);
-      if (genit!=gentable.end()) electron->mc_=&(myEvent.mc()->particles()[genit->second]);
-      else WARNING << "GenParticle corresponding to an electron is not found in the gen table" << endmsg;
-    }
-    electron->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
-  }
+      // getting the i-th particle
+      Electron* part = dynamic_cast<Electron*>(data_.Electron_->At(i));
+      if (part==0) continue;
 
+      // creating new particle and filling particle info
+      RecLeptonFormat * electron = myEvent.rec()->GetNewElectron();
+      electron->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
+      if (part->Charge>0) electron->charge_=true; else electron->charge_=false;
+      electron->HEoverEE_ = part->EhadOverEem;
+
+      // setting corresponding gen particle
+      const GenParticle* mc = dynamic_cast<const GenParticle*>(part->Particle.GetObject());
+      if (mc!=0)
+      {
+        genit = gentable.find(mc);
+        if (genit!=gentable.end()) electron->mc_=&(myEvent.mc()->particles()[genit->second]);
+        else WARNING << "GenParticle corresponding to an electron is not found in the gen table" << endmsg;
+      }
+      electron->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
+    }
+  }
 
   // ---------------------------------------------------------------------------
   // Fill photons
   // ---------------------------------------------------------------------------
   if (data_.Photon_!=0)
-  for (unsigned int i=0;i<static_cast<MAuint32>(data_.Photon_->GetEntries());i++)
   {
-    // getting the i-th particle
-    Photon* part = dynamic_cast<Photon*>(data_.Photon_->At(i));
-    if (part==0) continue;
-
-    // creating new particle and filling particle info
-    RecPhotonFormat * photon = myEvent.rec()->GetNewPhoton();
-    photon->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
-    photon->HEoverEE_ = part->EhadOverEem;
-
-    // setting corresponding gen particle
-    GenParticle* mc=0;
-    for (unsigned int j=0;j<static_cast<MAuint32>(part->Particles.GetEntries());j++)
+    MAuint32 nphotons = static_cast<MAuint32>(data_.Photon_->GetEntries());
+    myEvent.rec()->photons_.reserve(nphotons);
+    for (unsigned int i=0;i<nphotons;i++)
     {
-      GenParticle* ref = dynamic_cast<GenParticle*>(part->Particles.At(j));
-      if (ref==0) continue;
-      if (mc==0) mc=ref;
-      else if (mc->PT<ref->PT) mc=ref;
-    }
-    if (mc!=0)
-    {
-      photon->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
-      genit = gentable.find(mc);
-      if (genit!=gentable.end()) photon->mc_=&(myEvent.mc()->particles()[genit->second]);
-      else WARNING << "GenParticle corresponding to a photon is not found in the gen table" << endmsg;
-    }
-  }
+      // getting the i-th particle
+      Photon* part = dynamic_cast<Photon*>(data_.Photon_->At(i));
+      if (part==0) continue;
 
+      // creating new particle and filling particle info
+      RecPhotonFormat * photon = myEvent.rec()->GetNewPhoton();
+      photon->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
+      photon->HEoverEE_ = part->EhadOverEem;
+
+      // setting corresponding gen particle
+      GenParticle* mc=0;
+      for (unsigned int j=0;j<static_cast<MAuint32>(part->Particles.GetEntries());j++)
+      {
+        GenParticle* ref = dynamic_cast<GenParticle*>(part->Particles.At(j));
+        if (ref==0) continue;
+        if (mc==0) mc=ref;
+        else if (mc->PT<ref->PT) mc=ref;
+      }
+      if (mc!=0)
+      {
+        photon->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
+        genit = gentable.find(mc);
+        if (genit!=gentable.end()) photon->mc_=&(myEvent.mc()->particles()[genit->second]);
+        else WARNING << "GenParticle corresponding to a photon is not found in the gen table" << endmsg;
+      }
+    }
+  }             
 
   // ---------------------------------------------------------------------------
   // Fill Event
@@ -322,175 +384,193 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
   // Fill muons
   // ---------------------------------------------------------------------------
   if (data_.Muon_!=0)
-  for (unsigned int i=0;i<static_cast<MAuint32>(data_.Muon_->GetEntries());i++)
   {
-    // getting the i-th particle
-    Muon* part = dynamic_cast<Muon*>(data_.Muon_->At(i));
-    if (part==0) continue;
-
-    // creating new particle and filling particle info
-    RecLeptonFormat * muon = myEvent.rec()->GetNewMuon();
-    muon->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
-    if (part->Charge>0) muon->charge_=true; else muon->charge_=false;
-
-    // setting corresponding gen particle
-    const GenParticle* mc = dynamic_cast<const GenParticle*>(part->Particle.GetObject());
-    if (mc!=0)
+    MAuint32 nmuons = static_cast<MAuint32>(data_.Muon_->GetEntries());
+    myEvent.rec()->muons_.reserve(nmuons);
+    for (unsigned int i=0;i<nmuons;i++)
     {
-      genit = gentable.find(mc);
-      if (genit!=gentable.end()) muon->mc_=&(myEvent.mc()->particles()[genit->second]);
-      else WARNING << "GenParticle corresponding to a muon is not found in the gen table" << endmsg;
-    }
-    muon->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
-  }
+      // getting the i-th particle
+      Muon* part = dynamic_cast<Muon*>(data_.Muon_->At(i));
+      if (part==0) continue;
 
+      // creating new particle and filling particle info
+      RecLeptonFormat * muon = myEvent.rec()->GetNewMuon();
+      muon->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
+      if (part->Charge>0) muon->charge_=true; else muon->charge_=false;
+
+      // setting corresponding gen particle
+      const GenParticle* mc = dynamic_cast<const GenParticle*>(part->Particle.GetObject());
+      if (mc!=0)
+      {
+        genit = gentable.find(mc);
+        if (genit!=gentable.end()) muon->mc_=&(myEvent.mc()->particles()[genit->second]);
+        else WARNING << "GenParticle corresponding to a muon is not found in the gen table" << endmsg;
+      }
+      muon->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
+    }
+  }
 
   // ---------------------------------------------------------------------------
   // Fill Tower
   // ---------------------------------------------------------------------------
   if (data_.Tower_!=0)
-  for (unsigned int i=0;i<static_cast<MAuint32>(data_.Tower_->GetEntries());i++)
   {
-    // getting the i-th particle
-    Tower* tower = dynamic_cast<Tower*>(data_.Tower_->At(i));
-    if (tower==0) continue;
-
-    // creating new tower and filling particle info
-    RecTowerFormat * part = myEvent.rec()->GetNewTower();
-    part->momentum_.SetPtEtaPhiM(tower->ET,tower->Eta,tower->Phi,0.0);
-
-    // setting corresponding gen particle
-    for (unsigned int j=0;j<static_cast<MAuint32>(tower->Particles.GetEntries());j++)
+    MAuint32 ntowers = static_cast<MAuint32>(data_.Tower_->GetEntries());
+    myEvent.rec()->towers_.reserve(ntowers);
+    for (unsigned int i=0;i<ntowers;i++)
     {
-       const GenParticle* mc = dynamic_cast<const GenParticle*>(tower->Particles[j]);
-       //       if (mc!=0)
-       //       {
-       //         genit = gentable.find(mc);
-       //         if (genit!=gentable.end()) track->mc_=&(myEvent.mc()->particles()[genit->second]);
-       //         else WARNING << "GenParticle corresponding to a track is not found in the gen table" << endmsg;
-       //       }
+      // getting the i-th particle
+      Tower* tower = dynamic_cast<Tower*>(data_.Tower_->At(i));
+      if (tower==0) continue;
 
-       // setting 
-       part->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
+      // creating new tower and filling particle info
+      RecTowerFormat * part = myEvent.rec()->GetNewTower();
+      part->momentum_.SetPtEtaPhiM(tower->ET,tower->Eta,tower->Phi,0.0);
+
+      // setting corresponding gen particle
+      for (unsigned int j=0;j<static_cast<MAuint32>(tower->Particles.GetEntries());j++)
+      {
+        const GenParticle* mc = dynamic_cast<const GenParticle*>(tower->Particles[j]);
+        //       if (mc!=0)
+        //       {
+        //         genit = gentable.find(mc);
+        //         if (genit!=gentable.end()) track->mc_=&(myEvent.mc()->particles()[genit->second]);
+        //         else WARNING << "GenParticle corresponding to a track is not found in the gen table" << endmsg;
+        //       }
+
+        // setting 
+        part->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
+      }
     }
   }
-
 
   // ---------------------------------------------------------------------------
   // Fill EFlowTrack
   // ---------------------------------------------------------------------------
   if (data_.EFlowTrack_!=0)
-  for (unsigned int i=0;i<static_cast<MAuint32>(data_.EFlowTrack_->GetEntries());i++)
   {
-    // getting the i-th particle
-    Track* track = dynamic_cast<Track*>(data_.EFlowTrack_->At(i));
-    if (track==0) continue;
+    MAuint32 neflowtracks = static_cast<MAuint32>(data_.EFlowTrack_->GetEntries());
+    myEvent.rec()->EFlowTracks_.reserve(neflowtracks);
+    for (unsigned int i=0;i<neflowtracks;i++)
+    {
+      // getting the i-th particle
+      Track* track = dynamic_cast<Track*>(data_.EFlowTrack_->At(i));
+      if (track==0) continue;
 
-    // creating new track and filling particle info
-    RecTrackFormat * part = myEvent.rec()->GetNewEFlowTrack();
-    part->momentum_.SetPtEtaPhiM(track->PT,track->Eta,track->Phi,0.0);
+      // creating new track and filling particle info
+      RecTrackFormat * part = myEvent.rec()->GetNewEFlowTrack();
+      part->momentum_.SetPtEtaPhiM(track->PT,track->Eta,track->Phi,0.0);
 
-    // setting corresponding gen particle
-    const GenParticle* mc = dynamic_cast<const GenParticle*>(track->Particle.GetObject());
-    part->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
+      // setting corresponding gen particle
+      const GenParticle* mc = dynamic_cast<const GenParticle*>(track->Particle.GetObject());
+      part->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
 
+    }
   }
-
 
   // ---------------------------------------------------------------------------
   // Fill EFlowPhotons
   // ---------------------------------------------------------------------------
   if (data_.EFlowPhoton_!=0)
-  for (unsigned int i=0;i<static_cast<MAuint32>(data_.EFlowPhoton_->GetEntries());i++)
   {
-    // getting the i-th particle
-    Tower* tower = dynamic_cast<Tower*>(data_.EFlowPhoton_->At(i));
-    if (tower==0) continue;
-
-    // creating new tower and filling particle info
-    RecParticleFormat * part = myEvent.rec()->GetNewEFlowPhoton();
-    part->momentum_.SetPtEtaPhiM(tower->ET,tower->Eta,tower->Phi,0.0);
-
-    // setting corresponding gen particle
-    /*    std::cout << "number of igen : " << tower->Particles.GetEntries() << std::endl;
-    for (unsigned igen=0;igen<tower->Particles.GetEntries();igen++)
+    MAuint32 neflowphotons = static_cast<MAuint32>(data_.EFlowPhoton_->GetEntries());
+    myEvent.rec()->EFlowPhotons_.reserve(neflowphotons);
+    for (unsigned int i=0;i<neflowphotons;i++)
     {
-      std::cout << tower->Particles.At(igen) << std::endl;
-    }
-    */
-  }
+      // getting the i-th particle
+      Tower* tower = dynamic_cast<Tower*>(data_.EFlowPhoton_->At(i));
+      if (tower==0) continue;
 
+      // creating new tower and filling particle info
+      RecParticleFormat * part = myEvent.rec()->GetNewEFlowPhoton();
+      part->momentum_.SetPtEtaPhiM(tower->ET,tower->Eta,tower->Phi,0.0);
+
+      // setting corresponding gen particle
+      /*    std::cout << "number of igen : " << tower->Particles.GetEntries() << std::endl;
+            for (unsigned igen=0;igen<tower->Particles.GetEntries();igen++)
+            {
+            std::cout << tower->Particles.At(igen) << std::endl;
+            }
+      */
+    }
+  }
 
   // ---------------------------------------------------------------------------
   // Fill EFlowNeutralHadrons
   // ---------------------------------------------------------------------------
   if (data_.EFlowNeutral_!=0)
-  for (unsigned int i=0;i<static_cast<MAuint32>(data_.EFlowNeutral_->GetEntries());i++)
   {
-    // getting the i-th particle
-    Tower* tower = dynamic_cast<Tower*>(data_.EFlowNeutral_->At(i));
-    if (tower==0) continue;
-
-    // creating new tower and filling particle info
-    RecParticleFormat * part = myEvent.rec()->GetNewEFlowNeutralHadron();
-    part->momentum_.SetPtEtaPhiM(tower->ET,tower->Eta,tower->Phi,0.0);
-
-    // setting corresponding gen particle
-    /*    std::cout << "number of igen : " << tower->Particles.GetEntries() << std::endl;
-    for (unsigned igen=0;igen<tower->Particles.GetEntries();igen++)
+    MAuint32 neflowneutrals = static_cast<MAuint32>(data_.EFlowNeutral_->GetEntries());
+    myEvent.rec()->EFlowNeutralHadrons_.reserve(neflowneutrals);
+    for (unsigned int i=0;i<neflowneutrals;i++)
     {
-      std::cout << tower->Particles.At(igen) << std::endl;
-    }
-    */
-  }
+      // getting the i-th particle
+      Tower* tower = dynamic_cast<Tower*>(data_.EFlowNeutral_->At(i));
+      if (tower==0) continue;
 
+      // creating new tower and filling particle info
+      RecParticleFormat * part = myEvent.rec()->GetNewEFlowNeutralHadron();
+      part->momentum_.SetPtEtaPhiM(tower->ET,tower->Eta,tower->Phi,0.0);
+
+      // setting corresponding gen particle
+      /*    std::cout << "number of igen : " << tower->Particles.GetEntries() << std::endl;
+            for (unsigned igen=0;igen<tower->Particles.GetEntries();igen++)
+            {
+            std::cout << tower->Particles.At(igen) << std::endl;
+            }
+      */
+    }
+  }
 
   // ---------------------------------------------------------------------------
   // Fill jets and taus
   // ---------------------------------------------------------------------------
   if (data_.Jet_!=0)
-  for (unsigned int i=0;i<static_cast<MAuint32>(data_.Jet_->GetEntries());i++)
   {
-    // getting the i-th particle
-    Jet* part = dynamic_cast<Jet*>(data_.Jet_->At(i));
-    if (part==0) continue;
-
-    // creating new tau
-    if(part->TauTag==1)
+    MAuint32 njets = static_cast<MAuint32>(data_.Jet_->GetEntries());
+    myEvent.rec()->jets_.reserve(njets);
+    for (unsigned int i=0;i<njets;i++)
     {
-      RecTauFormat * tau = myEvent.rec()->GetNewTau();
-      tau->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
-      tau->ntracks_  = 0; // To fix later
-      if (part->Charge>0) tau->charge_=true; else tau->charge_=false;
-      tau->HEoverEE_ = part->EhadOverEem;
-    }
+      // getting the i-th particle
+      Jet* part = dynamic_cast<Jet*>(data_.Jet_->At(i));
+      if (part==0) continue;
 
-    // creating new jet
-    else
-    {
-      // Creating new jet
-      RecJetFormat * jet = myEvent.rec()->GetNewJet();
-
-      // Setting jet info
-      jet->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
-      jet->ntracks_  = 0; // To fix later
-      jet->btag_     = part->BTag;
-      jet->HEoverEE_ = part->EhadOverEem;
-
-      // Setting corresponding gen particle
-      /*      for (unsigned int j=0;j<static_cast<MAuint32>(part->Particles.GetEntries());j++)
+      // creating new tau
+      if(part->TauTag==1)
       {
-        GenParticle* ref = dynamic_cast<GenParticle*>(part->Particles.At(j));
-        if (ref!=0)
-        {
-          genit = gentable.find(ref);
-          if (genit!=gentable.end()) jet->Constituents_.push_back(genit->second);
-          else WARNING << "GenParticle corresponding to a jet constituent is not found in the gen table" << endmsg;
-        }
-        }*/
+        RecTauFormat * tau = myEvent.rec()->GetNewTau();
+        tau->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
+        tau->ntracks_  = 0; // To fix later
+        if (part->Charge>0) tau->charge_=true; else tau->charge_=false;
+        tau->HEoverEE_ = part->EhadOverEem;
+      }
+
+      // creating new jet
+      else
+      {
+        // Creating new jet
+        RecJetFormat * jet = myEvent.rec()->GetNewJet();
+
+        // Setting jet info
+        jet->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
+        jet->ntracks_  = 0; // To fix later
+        jet->btag_     = part->BTag;
+        jet->HEoverEE_ = part->EhadOverEem;
+
+        // Setting corresponding gen particle
+        /*      for (unsigned int j=0;j<static_cast<MAuint32>(part->Particles.GetEntries());j++)
+                {
+                GenParticle* ref = dynamic_cast<GenParticle*>(part->Particles.At(j));
+                if (ref!=0)
+                {
+                genit = gentable.find(ref);
+                if (genit!=gentable.end()) jet->Constituents_.push_back(genit->second);
+                else WARNING << "GenParticle corresponding to a jet constituent is not found in the gen table" << endmsg;
+                }
+                }*/
+      }
     }
   }
-
 
   // ---------------------------------------------------------------------------
   // MET
@@ -532,34 +612,39 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
   // Track collection
   // ---------------------------------------------------------------------------
   if (data_.Track_!=0)
-  for (unsigned int i=0;i<static_cast<MAuint32>(data_.Track_->GetEntries());i++)
   {
-    // getting the i-th track
-    Track* ref = dynamic_cast<Track*>(data_.Track_->At(i));
-    if (ref==0) continue;
-
-    // creating new track
-    RecTrackFormat * track = myEvent.rec()->GetNewTrack();
-
-    // filling track info
-    track->pdgid_ = ref->PID;
-    if (ref->Charge>0) track->charge_=true; else track->charge_=false;
-    track->momentum_.SetPtEtaPhiE(ref->PT,ref->Eta,ref->Phi,ref->PT);
-    track->etaOuter_ = ref->EtaOuter;
-    track->phiOuter_ = ref->PhiOuter;
-
-    // setting corresponding gen particle
-    const GenParticle* mc = dynamic_cast<const GenParticle*>(ref->Particle.GetObject());
-    if (mc!=0)
+    MAuint32 ntracks = static_cast<MAuint32>(data_.Track_->GetEntries());
+    myEvent.rec()->tracks_.reserve(ntracks);
+    for (unsigned int i=0;i<ntracks;i++)
     {
-      genit = gentable.find(mc);
-      if (genit!=gentable.end()) track->mc_=&(myEvent.mc()->particles()[genit->second]);
-      else WARNING << "GenParticle corresponding to a track is not found in the gen table" << endmsg;
-    }
+      // getting the i-th track
+      Track* ref = dynamic_cast<Track*>(data_.Track_->At(i));
+      if (ref==0) continue;
 
-    // setting 
-    track->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
+      // creating new track
+      RecTrackFormat * track = myEvent.rec()->GetNewTrack();
+
+      // filling track info
+      track->pdgid_ = ref->PID;
+      if (ref->Charge>0) track->charge_=true; else track->charge_=false;
+      track->momentum_.SetPtEtaPhiE(ref->PT,ref->Eta,ref->Phi,ref->PT);
+      track->etaOuter_ = ref->EtaOuter;
+      track->phiOuter_ = ref->PhiOuter;
+
+      // setting corresponding gen particle
+      const GenParticle* mc = dynamic_cast<const GenParticle*>(ref->Particle.GetObject());
+      if (mc!=0)
+      {
+        genit = gentable.find(mc);
+        if (genit!=gentable.end()) track->mc_=&(myEvent.mc()->particles()[genit->second]);
+        else WARNING << "GenParticle corresponding to a track is not found in the gen table" << endmsg;
+      }
+
+      // setting 
+      track->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
+    }
   }
 
 }
 
+  

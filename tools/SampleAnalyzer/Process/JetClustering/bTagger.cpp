@@ -158,9 +158,9 @@ void bTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
           break;
         }
 
-  if (particle->mother2()!=0 && particle->mother2()!=particle->mother1()) break;
+        if (particle->mothers().size()>1 && particle->mothers()[1]!=particle->mothers()[0]) break;
 
-        particle = particle->mother1();
+        particle = particle->mothers()[0];
       }
 
       if (b) break;
@@ -234,9 +234,9 @@ void bTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
           break;
         }
 
-  if (particle->mother2()!=0 && particle->mother2()!=particle->mother1()) break;
+        if (particle->mothers().size()>1 && particle->mothers()[1]!=particle->mothers()[0]) break;
 
-        particle = particle->mother1();
+        particle = particle->mothers()[0];
       }
 
       if (b) break;
@@ -289,7 +289,7 @@ MAbool bTagger::IsLastBHadron(MCParticleFormat* part, EventFormat& myEvent)
 {
   for (unsigned int i=0; i<myEvent.mc()->particles().size(); i++)
   {
-    if (myEvent.mc()->particles()[i].mother1()== part)
+    if (myEvent.mc()->particles()[i].mothers()[0]== part)
     {
       if (PHYSICS->Id->IsBHadron(myEvent.mc()->particles()[i].pdgid())) return false;
     }

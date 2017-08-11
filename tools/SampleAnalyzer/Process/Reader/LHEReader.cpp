@@ -266,7 +266,49 @@ bool LHEReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
   // Traditional LHE or simplified LHE ?
   MAbool simplified = (mySample.sampleFormat()==MA5FORMAT::SIMPLIFIED_LHE);
 
-  // Mother pointer assignment
+  // Mother-daughter relations
+  for (MAuint32 i=0; i<mothers_.size();i++)
+  {
+    MCParticleFormat* part = &(myEvent.mc()->particles_[i]);
+    MAint32& mothup1 = mothers_[i].first;
+    MAint32& mothup2 = mothers_[i].second;
+
+    if (mothup1>0)
+    {
+      if (mothup1<=myEvent.mc()->particles().size())
+      {
+        MCParticleFormat* mum = &(myEvent.mc()->particles()[static_cast<MAuint32>(mothup1-1)]);
+        if (mum!=part)
+        {
+          part->mothers().push_back(mum);
+          mum->daughters().push_back(part);
+        }
+      }
+      else
+      {
+        std::cout << "ERROR : internal problem with mother-daughter particles" << std::endl;
+      }
+    }
+    if (mothup2>0 && mothup1!=mothup2)
+    {
+      if (mothup2<=myEvent.mc()->particles().size())
+      {
+        MCParticleFormat* mum = &(myEvent.mc()->particles()[static_cast<MAuint32>(mothup2-1)]);
+        if (mum!=part)
+        {
+          part->mothers().push_back(mum);
+          mum->daughters().push_back(part);
+        }
+      }
+      else
+      {
+        std::cout << "ERROR : internal problem with mother-daughter particles" << std::endl;
+      }
+    }
+  }
+  mothers_.clear();
+
+  // Global event observable
   for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
   {
     MCParticleFormat& part = myEvent.mc()->particles_[i];
@@ -290,43 +332,6 @@ bool LHEReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
         myEvent.mc()->MHT_ -= part.momentum();
         myEvent.mc()->THT_ += part.pt(); 
       }
-    }
-
-    // assigning the correct address for the mother particles
-    unsigned int index1=myEvent.mc()->particles_[i].mothup1_;
-    unsigned int index2=myEvent.mc()->particles_[i].mothup2_;
-    if (index1!=0) // at least one mother
-    {
-      try
-      {
-        if (index1>=myEvent.mc()->particles_.size()) throw EXCEPTION_WARNING("mother index1 is greater to nb of particles","",0);
-        myEvent.mc()->particles_[i].mother1_ = &myEvent.mc()->particles_[index1-1];
-        myEvent.mc()->particles_[index1-1].daughters_.push_back(&myEvent.mc()->particles_[i]);
-      }
-      catch (const std::exception& e)
-      {
-        MANAGE_EXCEPTION(e);
-        //     << " - index1 = " << index1 << endmsg
-        //     << " - particles.size() " << myEvent.mc()->particles_.size()
-        return false;
-      }    
-    }
-
-    if (index2!=0)
-    {
-      try
-      {
-        if (index2>=myEvent.mc()->particles_.size()) throw EXCEPTION_WARNING("mother index2 is greater to nb of particles","",0);
-        myEvent.mc()->particles_[i].mother2_ = &myEvent.mc()->particles_[index2-1];
-        myEvent.mc()->particles_[index2-1].daughters_.push_back(&myEvent.mc()->particles_[i]);
-      }
-      catch (const std::exception& e)
-      {
-        MANAGE_EXCEPTION(e);
-        //     << " - index1 = " << index1 << endmsg
-        //     << " - particles.size() " << myEvent.mc()->particles_.size()
-        myEvent.mc()->particles_[i].mother2_ = 0;
-      }    
     }
   }
 
@@ -398,13 +403,15 @@ void LHEReader::FillEventInitLine(const std::string& line,
 {
   std::stringstream str;
   str << line;
-
-  str >> myEvent.mc()->nparts_;
+  MAuint32 nparts;
+  str >> nparts;
   str >> myEvent.mc()->processId_;
   str >> myEvent.mc()->weight_;
   str >> myEvent.mc()->scale_;
   str >> myEvent.mc()->alphaQED_;
   str >> myEvent.mc()->alphaQCD_;
+  myEvent.mc()->particles_.reserve(nparts);
+  mothers_.reserve(nparts);
 }
 
 
@@ -425,25 +432,33 @@ void LHEReader::FillEventParticleLine(const std::string& line,
   std::stringstream str;
   str << tmpline;
 
-  signed int color1; // color 1 not stored 
-  signed int color2; // color 2 not stored
-  double     tmp;    // temporary variable to fill in LorentzVector
+  MAint32   color1;  // color 1 not stored 
+  MAint32   color2;  // color 2 not stored
+  MAfloat64 tmp;     // temporary
+  MAfloat64 px;      // temporary variable to fill in LorentzVector
+  MAfloat64 py;      // temporary variable to fill in LorentzVector
+  MAfloat64 pz;      // temporary variable to fill in LorentzVector
+  MAfloat64 e;       // temporary variable to fill in LorentzVector
+  MAint32   mothup1; // mother1
+  MAint32   mothup2; // mother2
 
   // Get a new particle
   MCParticleFormat * part = myEvent.mc()->GetNewParticle();
 
   str >> part->pdgid_;
   str >> part->statuscode_;
-  str >> part->mothup1_;
-  str >> part->mothup2_;
+  str >> mothup1;
+  str >> mothup2;
   str >> color1;
   str >> color2;
-  str >> tmp; part->momentum_.SetPx(tmp); 
-  str >> tmp; part->momentum_.SetPy(tmp);
-  str >> tmp; part->momentum_.SetPz(tmp);
-  str >> tmp; part->momentum_.SetE(tmp);
+  str >> px;
+  str >> py;
+  str >> pz;
+  str >> e; 
   str >> tmp;
   str >> part->ctau_;
   str >> part->spin_;
+  part->momentum_.SetPxPyPzE(px,py,pz,e);
+  mothers_.push_back(std::make_pair(mothup1,mothup2));
 }
 
