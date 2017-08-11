@@ -39,6 +39,7 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 DelphesDataFormat::DelphesDataFormat()
 {
+  branchFatJet_       = 0;
   branchJet_          = 0;
   branchElectron_     = 0;
   branchPhoton_       = 0;
@@ -52,6 +53,7 @@ DelphesDataFormat::DelphesDataFormat()
   branchEFlowPhoton_  = 0;
   branchEFlowNeutral_ = 0;
   branchEvent_        = 0;
+  FatJet_       = 0;
   Jet_          = 0;
   Electron_     = 0;
   Photon_       = 0;
@@ -73,6 +75,7 @@ DelphesDataFormat::DelphesDataFormat()
 // -----------------------------------------------------------------------------
 DelphesDataFormat::~DelphesDataFormat()
 {
+  if (FatJet_!=0)       delete FatJet_;
   if (Jet_!=0)          delete Jet_;
   if (Electron_!=0)     delete Electron_;
   if (Photon_!=0)       delete Photon_;
@@ -95,6 +98,7 @@ DelphesDataFormat::~DelphesDataFormat()
 bool DelphesDataFormat::GetEntry(MAint64 treeEntry)
 {
   bool test = true;
+  if (branchFatJet_!=0)       test &= (branchFatJet_       -> GetEntry(treeEntry) >=0);
   if (branchJet_!=0)          test &= (branchJet_          -> GetEntry(treeEntry) >=0);
   if (branchElectron_!=0)     test &= (branchElectron_     -> GetEntry(treeEntry) >=0);
   if (branchPhoton_!=0)       test &= (branchPhoton_       -> GetEntry(treeEntry) >=0);
@@ -123,6 +127,7 @@ void DelphesDataFormat::InitializeData()
   InitializeData(branchMET_,          MET_);
   InitializeData(branchTower_,        Tower_);
   InitializeData(branchTrack_,        Track_);
+  InitializeData(branchFatJet_,       FatJet_);
   InitializeData(branchJet_,          Jet_);
   InitializeData(branchElectron_,     Electron_);
   InitializeData(branchPhoton_,       Photon_);
@@ -146,6 +151,7 @@ void DelphesDataFormat::InitializeBranch(TTree* tree)
   branchTower_        = tree->GetBranch("Tower");
   branchTrack_        = tree->GetBranch("Track");
   branchJet_          = tree->GetBranch("Jet");
+  branchFatJet_       = tree->GetBranch("FatJet");
   branchElectron_     = tree->GetBranch("Electron");
   branchPhoton_       = tree->GetBranch("Photon");
   branchMuon_         = tree->GetBranch("Muon");

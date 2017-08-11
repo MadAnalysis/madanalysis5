@@ -573,6 +573,30 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
   }
 
   // ---------------------------------------------------------------------------
+  // Fill fat jets
+  // ---------------------------------------------------------------------------
+  if (data_.FatJet_!=0)
+  {
+    MAuint32 njets = static_cast<MAuint32>(data_.FatJet_->GetEntries());
+    myEvent.rec()->fatjets_.reserve(njets);
+    for (unsigned int i=0;i<njets;i++)
+    {
+      // getting the i-th particle
+      Jet* part = dynamic_cast<Jet*>(data_.FatJet_->At(i));
+      if (part==0) continue;
+
+      // Creating new jet
+      RecJetFormat * jet = myEvent.rec()->GetNewFatJet();
+
+      // Setting jet info
+      jet->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
+      jet->ntracks_  = 0; // To fix later
+      jet->btag_     = part->BTag;
+      jet->HEoverEE_ = part->EhadOverEem;
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // MET
   // ---------------------------------------------------------------------------
   if (data_.MET_!=0)

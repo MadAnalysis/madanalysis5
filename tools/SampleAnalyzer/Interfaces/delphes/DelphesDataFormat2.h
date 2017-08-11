@@ -40,6 +40,7 @@ namespace MA5
 struct DelphesDataFormat2
 {
   /// Pointers to data
+  TClonesArray* FatJet_;
   TClonesArray* Jet_;
   TClonesArray* Electron_;
   TClonesArray* Photon_;

@@ -22,8 +22,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-// SampleAnalyzer
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelection.h"
+
 
 using namespace MA5;
 

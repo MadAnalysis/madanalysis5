@@ -44,6 +44,7 @@ struct DelphesDataFormat
 {
   /// Pointers to data
   TClonesArray* Jet_;
+  TClonesArray* FatJet_;
   TClonesArray* Electron_;
   TClonesArray* Photon_;
   TClonesArray* Muon_;
@@ -58,6 +59,7 @@ struct DelphesDataFormat
   TClonesArray* EFlowNeutral_;
 
   /// Pointers to branches
+  TBranch* branchFatJet_;
   TBranch* branchJet_;
   TBranch* branchElectron_;
   TBranch* branchPhoton_;

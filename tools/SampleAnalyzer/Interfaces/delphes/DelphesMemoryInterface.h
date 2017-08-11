@@ -51,6 +51,7 @@ class DelphesMemoryInterface
 
   /// Pointers to data
   TObjArray* Jet_;
+  TObjArray* FatJet_;
   TObjArray* Electron_;
   TObjArray* Photon_;
   TObjArray* Muon_;

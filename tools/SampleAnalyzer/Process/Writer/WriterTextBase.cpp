@@ -35,6 +35,7 @@
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Commons/Base/ReaderBase.h"
 
+
 using namespace MA5;
 
 // -----------------------------------------------------------------------------

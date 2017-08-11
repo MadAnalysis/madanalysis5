@@ -29,6 +29,7 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Writer/LHCOParticleFormat.h"
 
+
 using namespace MA5;
 
 // -----------------------------------------------------------------------------

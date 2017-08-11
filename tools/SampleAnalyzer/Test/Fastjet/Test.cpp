@@ -22,7 +22,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-// SampleHeader header
+// SampleHeader headers
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
 #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoStandard.h"
@@ -31,9 +31,12 @@
 #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoCDFJetClu.h"
 #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoGridJet.h"
 
-// STL header
+// STL headers
 #include <iostream>
 #include <vector>
+
+
+// Namespaces
 using namespace MA5;
 
 // -----------------------------------------------------------------------

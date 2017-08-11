@@ -87,6 +87,9 @@ class RecEventFormat
   /// Collection of reconstructed jets
   std::vector<RecJetFormat>    jets_;
 
+  /// Collection of reconstructed fat jets
+  std::vector<RecJetFormat>    fatjets_;
+
   /// Collection of generated jets
   std::vector<RecJetFormat>    genjets_;
 
@@ -163,6 +166,9 @@ class RecEventFormat
   /// Accessor to the tau collection (read-only)
   const std::vector<RecTauFormat>& taus() const {return taus_;}
 
+  /// Accessor to the fat jet collection (read-only)
+  const std::vector<RecJetFormat>& fatjets() const {return fatjets_;}
+
   /// Accessor to the jet collection (read-only)
   const std::vector<RecJetFormat>& jets() const {return jets_;}
 
@@ -225,6 +231,9 @@ class RecEventFormat
   /// Accessor to the jet collection
   std::vector<RecJetFormat>& jets() {return jets_;}
 
+  /// Accessor to the fat jet collection
+  std::vector<RecJetFormat>& fatjets() {return fatjets_;}
+
   /// Accessor to the towers collection
   std::vector<RecTowerFormat>& towers() {return towers_;}
   std::vector<RecTrackFormat>& EFlowTracks() {return EFlowTracks_;}
@@ -277,6 +286,7 @@ class RecEventFormat
     muons_.clear(); 
     taus_.clear();
     jets_.clear();
+    fatjets_.clear();
     towers_ok_=false;
     towers_.clear();
     tracks_ok_=false;
@@ -367,6 +377,13 @@ class RecEventFormat
   {
     jets_.push_back(RecJetFormat());
     return &jets_.back();
+  }
+
+  /// Giving a new fat jet entry
+  RecJetFormat* GetNewFatJet()
+  {
+    fatjets_.push_back(RecJetFormat());
+    return &fatjets_.back();
   }
 
   /// Giving a new gen jet entry

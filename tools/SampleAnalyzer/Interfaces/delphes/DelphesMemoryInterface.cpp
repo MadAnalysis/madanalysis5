@@ -47,6 +47,7 @@ using namespace MA5;
 DelphesMemoryInterface::DelphesMemoryInterface()
 {
   Jet_          = 0;
+  FatJet_       = 0;
   Electron_     = 0;
   Photon_       = 0;
   Muon_         = 0;
@@ -120,6 +121,7 @@ void DelphesMemoryInterface::Initialize(TFolder* delphesFolder,
   EFlowTrack_   = GetCollection(delphesFolder,table,"EFlowTrack");
   EFlowPhoton_  = GetCollection(delphesFolder,table,"EFlowPhoton");
   EFlowNeutral_ = GetCollection(delphesFolder,table,"EFlowNeutralHadron");
+  FatJet_       = GetCollection(delphesFolder,table,"FatJet");
 
   // MA5 Delphes collections
   if (MA5card)

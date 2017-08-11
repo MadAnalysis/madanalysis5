@@ -22,10 +22,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-// SampleHeader header
+// SampleHeader headers
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
 #include "SampleAnalyzer/Interfaces/zlib/gz_istream.h"
+
+
 using namespace MA5;
 
 // -----------------------------------------------------------------------

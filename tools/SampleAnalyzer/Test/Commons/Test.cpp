@@ -22,9 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-// SampleHeader header
+// SampleHeader headers
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
+
+
 using namespace MA5;
 
 // -----------------------------------------------------------------------
