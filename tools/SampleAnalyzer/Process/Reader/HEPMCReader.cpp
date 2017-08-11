@@ -22,10 +22,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-//STL headers
+// STL headers
 #include <sstream>
 
-//SampleHeader headers
+// SampleHeader headers
 #include "SampleAnalyzer/Process/Reader/HEPMCReader.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"

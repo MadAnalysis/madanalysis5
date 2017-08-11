@@ -27,7 +27,7 @@
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
-// ROOT header
+// ROOT headers
 #include <TBranchElement.h>
 #include <TROOT.h>
 

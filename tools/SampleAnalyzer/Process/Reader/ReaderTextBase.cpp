@@ -25,7 +25,7 @@
 // STL headers
 #include <fstream>
 
-// Headers for fifo
+// Fifo headers
 #include <fcntl.h>
 #include <unistd.h>
 

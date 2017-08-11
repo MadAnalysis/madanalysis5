@@ -29,7 +29,7 @@
 #include "SampleAnalyzer/Interfaces/delphesMA5tune/DetectorDelphesMA5tune.h"
 #include "SampleAnalyzer/Commons/Service/DisplayService.h"
 
-// ROOT header
+// ROOT headers
 #include <TError.h>
 #include <TROOT.h>
 #include <TObjArray.h>
@@ -38,7 +38,7 @@
 #include <TParticlePDG.h>
 #include <TFolder.h>
 
-// Delphes header
+// Delphes headers
 #include "external/ExRootAnalysis/ExRootConfReader.h"
 #include "external/ExRootAnalysis/ExRootTreeWriter.h"
 #include "external/ExRootAnalysis/ExRootTreeBranch.h"

@@ -31,6 +31,7 @@
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
+
 using namespace MA5;
 
 // -----------------------------------------------------------------------------

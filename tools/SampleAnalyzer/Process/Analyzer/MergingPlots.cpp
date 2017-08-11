@@ -25,15 +25,14 @@
 #ifdef FASTJET_USE
 
 
-//SampleAnalyzer headers
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Analyzer/MergingPlots.h"
 #include "SampleAnalyzer/Interfaces/fastjet/DJRextractor.h"
 #include "SampleAnalyzer/Commons/Base/Configuration.h"
 #include "SampleAnalyzer/Commons/Service/Physics.h"
 #include "SampleAnalyzer/Commons/Service/CompilationService.h"
 
-
-//STL headers
+// STL headers
 #include <sstream>
 #include <map>
 

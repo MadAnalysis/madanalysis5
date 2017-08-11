@@ -29,7 +29,6 @@
 #include <map>
 #include <sstream>
 
-// Root headers
 
 using namespace MA5;
 

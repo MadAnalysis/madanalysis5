@@ -28,6 +28,7 @@
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 #include "SampleAnalyzer/Commons/Service/ConvertService.h"
 
+
 using namespace MA5;
 
 // -----------------------------------------------------------------------------

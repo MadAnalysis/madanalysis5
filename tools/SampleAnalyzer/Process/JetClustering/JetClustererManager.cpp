@@ -24,6 +24,7 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/JetClustering/JetClustererManager.h"
+
 #ifdef FASTJET_USE
   #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoStandard.h"
   #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoSISCone.h"

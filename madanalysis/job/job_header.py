@@ -133,19 +133,17 @@ def WriteParticle2(file,part,rank,status):
     if part.mumType!="":
         mumname=InstanceName.Get(part.mumPart.name+rank+'allstate')
         if part.mumType=="<":
+            file.write('     if (part->mothers().size()==0) return false;\n')
             file.write('     bool mumOK=true;\n')
             file.write('     for (MAuint32 mum=0;mum<part->mothers().size();mum++)\n')
             file.write('     { \n')
-            file.write('       mumOK &= !isP_'+ mumname + '(part->mothers()[mum]);\n'}
+            file.write('       mumOK &= !isP_'+ mumname + '(part->mothers()[mum]);\n')
             file.write('     }\n')
             file.write('     if (mumOK) return false;\n')
-#            file.write('     if ( !isP_' + mumname +\
-#                       '(part->mother1()) && !isP_' + mumname +\
-#                       '(part->mother2()) ) return false;\n')
         elif part.mumType=="<<":
             file.write('     const MCParticleFormat* cand = part;\n')
             file.write('     bool success=false;\n')
-            file.write('     while(cand->mothers.size()!=0)\n')
+            file.write('     while(cand->mothers().size()!=0)\n')
             file.write('     {\n')
             file.write('       if ( isP_' + mumname +\
                        '(cand->mothers()[0]) ) {success=true;break;}\n')

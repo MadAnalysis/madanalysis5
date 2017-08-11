@@ -26,7 +26,7 @@
 #include "SampleAnalyzer/Interfaces/delphes/DelphesDataFormat2.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
-// ROOT header
+// ROOT headers
 #include <TBranchElement.h>
 #include <TROOT.h>
 

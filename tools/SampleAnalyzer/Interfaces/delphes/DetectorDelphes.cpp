@@ -48,7 +48,6 @@
 #include "modules/Delphes.h"
 
 
-
 using namespace MA5;
 
 
