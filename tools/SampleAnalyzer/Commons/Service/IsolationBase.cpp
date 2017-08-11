@@ -22,7 +22,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/IsolationBase.h"
+
+
 using namespace MA5;
 
 

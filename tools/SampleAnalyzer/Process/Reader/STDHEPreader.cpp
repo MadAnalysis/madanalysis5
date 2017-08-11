@@ -751,7 +751,7 @@ bool STDHEPreader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 
     if (mothup1>0)
     {
-      if (mothup1<=myEvent.mc()->particles().size())
+      if (static_cast<MAuint32>(mothup1)<=myEvent.mc()->particles().size())
       {
         MCParticleFormat* mum = &(myEvent.mc()->particles()[static_cast<MAuint32>(mothup1-1)]);
         if (part!=mum)
@@ -767,7 +767,7 @@ bool STDHEPreader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
     }
     if (mothup2>0 && mothup1!=mothup2)
     {
-      if (mothup2<=myEvent.mc()->particles().size())
+      if (static_cast<MAuint32>(mothup2)<=myEvent.mc()->particles().size())
       {
         MCParticleFormat* mum = &(myEvent.mc()->particles()[static_cast<MAuint32>(mothup2-1)]);
         if (mum!=part)

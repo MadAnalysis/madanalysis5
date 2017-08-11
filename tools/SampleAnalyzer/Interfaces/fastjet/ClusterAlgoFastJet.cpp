@@ -22,15 +22,16 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-//SampleAnalyser headers
+// SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoFastJet.h"
 #include "SampleAnalyzer/Commons/Service/LoopService.h"
 #include "SampleAnalyzer/Commons/Service/Physics.h"
 #include "SampleAnalyzer/Commons/Service/PDGService.h"
 
-//FastJet headers
+// FastJet headers
 #include <fastjet/ClusterSequence.hh>
 #include <fastjet/PseudoJet.hh>
+
 
 using namespace MA5;
 

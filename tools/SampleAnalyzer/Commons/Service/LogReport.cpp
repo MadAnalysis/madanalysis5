@@ -30,6 +30,7 @@
 /// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/LogReport.h"
 
+
 using namespace MA5;
 
 /// Displaying the table

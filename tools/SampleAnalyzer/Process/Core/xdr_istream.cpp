@@ -22,8 +22,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Core/xdr_istream.h"
+
+// STL headers
 #include <iostream>
+
+
 using namespace MA5;
 
 // -----------------------------------------------------------------------------

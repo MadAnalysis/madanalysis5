@@ -23,6 +23,8 @@
 
 
 #ifdef FASTJET_USE
+
+
 //SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Analyzer/MergingPlots.h"
 #include "SampleAnalyzer/Interfaces/fastjet/DJRextractor.h"
@@ -34,6 +36,7 @@
 //STL headers
 #include <sstream>
 #include <map>
+
 
 using namespace MA5;
 

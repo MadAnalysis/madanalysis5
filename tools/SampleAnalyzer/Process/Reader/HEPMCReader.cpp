@@ -556,7 +556,6 @@ void HEPMCReader::FillEventVertexLine(const std::string& line, EventFormat& myEv
   std::stringstream str;
   str << line;
 
-  double tmp=0;
   char linecode;
   MAint32 barcode;
   MAfloat64 ctau;

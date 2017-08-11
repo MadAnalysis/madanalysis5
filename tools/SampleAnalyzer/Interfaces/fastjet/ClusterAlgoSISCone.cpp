@@ -22,13 +22,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-//SampleAnalyser headers
+// SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoSISCone.h"
 
-//FastJet headers
+// FastJet headers
 #include <fastjet/ClusterSequence.hh>
 #include <fastjet/PseudoJet.hh>
 #include <fastjet/SISConePlugin.hh>
+
+
 typedef fastjet::JetDefinition::Plugin FastJetPlugin;
 
 

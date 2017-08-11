@@ -22,20 +22,21 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-//SampleAnalyzer headers
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Interfaces/fastjet/DJRextractor.h"
 #include "SampleAnalyzer/Commons/Base/Configuration.h"
 #include "SampleAnalyzer/Commons/Service/Physics.h"
 #include "SampleAnalyzer/Commons/Service/CompilationService.h"
 
-//FastJet headers
+// FastJet headers
 #include <fastjet/ClusterSequence.hh>
 #include <fastjet/PseudoJet.hh>
 
-//STL headers
+// STL headers
 #include <map>
 #include <sstream>
 #include <cmath>
+
 
 using namespace MA5;
 
