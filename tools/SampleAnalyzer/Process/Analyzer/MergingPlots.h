@@ -25,11 +25,12 @@
 #ifndef MERGING_PLOTS_H
 #define MERGING_PLOTS_H
 
-#ifdef FASTJET_USE
-
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Plot/MergingPlotType.h"
 #include "SampleAnalyzer/Process/Analyzer/AnalyzerBase.h"
+
+
+#ifdef FASTJET_USE
 
 
 namespace MA5

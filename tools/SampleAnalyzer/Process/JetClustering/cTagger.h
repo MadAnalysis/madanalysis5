@@ -25,6 +25,7 @@
 #ifndef CTAGGER_H
 #define CTAGGER_H
 
+
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/TaggerBase.h"
 

@@ -31,7 +31,7 @@
 #include <string>
 #include <sstream>
 
-// SampleAnalyzer
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Counter/MultiRegionCounterManager.h"
 #include "SampleAnalyzer/Process/Plot/PlotManager.h"
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelection.h"
