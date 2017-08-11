@@ -25,11 +25,12 @@
 #ifndef GZ_STREAM_BASE_H
 #define GZ_STREAM_BASE_H
 
+
 // STL headers
 #include <iostream>
 #include <fstream>
 
-// SampleAnalyzer header
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 
 

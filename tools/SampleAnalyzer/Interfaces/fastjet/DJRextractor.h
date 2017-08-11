@@ -26,12 +26,12 @@
 #define DJR_EXTRACTOR_H
 
 
-//STL headers
+// STL headers
 #include <vector>
 #include <map>
 #include <string>
 
-//SampleAnalyser headers
+// SampleAnalyser headers
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
 #include "SampleAnalyzer/Commons/Base/Configuration.h"

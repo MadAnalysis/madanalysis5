@@ -32,7 +32,7 @@
 #include <sstream>
 #include <iomanip>
 
-// RecParticleFormat
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/DataFormat/RecParticleFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 

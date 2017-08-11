@@ -27,11 +27,11 @@
 
 
 // STL headers
-#include<map>
-#include<string>
-#include<iostream>
-#include<cmath>
-#include<ctime>
+#include <map>
+#include <string>
+#include <iostream>
+#include <cmath>
+#include <ctime>
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 

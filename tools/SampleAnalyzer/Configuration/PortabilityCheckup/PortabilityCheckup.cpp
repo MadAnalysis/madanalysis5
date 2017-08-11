@@ -22,10 +22,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// STL headers
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <cstdlib>
+
 
 struct datatypes
 {
@@ -44,6 +46,34 @@ struct datatypes
   unsigned int double_size;
   unsigned int ldouble_size;
 };
+
+
+void Header(std::ostream& str)
+{
+  str << "////////////////////////////////////////////////////////////////////////////////" << std::endl;
+  str << "//" << std::endl;
+  str << "//  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks" << std::endl;
+  str << "//  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>" << std::endl;
+  str << "//" << std::endl;
+  str << "//  This file is part of MadAnalysis 5." << std::endl;
+  str << "//  Official website: <https://launchpad.net/madanalysis5>" << std::endl;
+  str << "//" << std::endl;
+  str << "//  MadAnalysis 5 is free software: you can redistribute it and/or modify" << std::endl;
+  str << "//  it under the terms of the GNU General Public License as published by" << std::endl;
+  str << "//  the Free Software Foundation, either version 3 of the License, or" << std::endl;
+  str << "//  (at your option) any later version." << std::endl;
+  str << "//" << std::endl;
+  str << "//  MadAnalysis 5 is distributed in the hope that it will be useful," << std::endl;
+  str << "//  but WITHOUT ANY WARRANTY; without even the implied warranty of" << std::endl;
+  str << "//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the" << std::endl;
+  str << "//  GNU General Public License for more details." << std::endl;
+  str << "//" << std::endl;
+  str << "//  You should have received a copy of the GNU General Public License" << std::endl;
+  str << "//  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>" << std::endl;
+  str << "//" << std::endl;
+  str << "////////////////////////////////////////////////////////////////////////////////" << std::endl;
+  str << std::endl << std::endl;
+}
 
 void Print(const datatypes& data, std::ostream& str, bool comment)
 {
@@ -248,6 +278,7 @@ int main()
   }
   else
   {
+    Header(output);
     output << "// Tags produced automatically by the Portability Check-Up" << std::endl;
     if (!test) output << "// Error detected with the current architecture" << std::endl;
     Print(data,output,true);

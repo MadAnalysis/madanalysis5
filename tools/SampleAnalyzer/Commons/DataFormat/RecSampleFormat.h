@@ -31,7 +31,6 @@
 #include <iostream>
 #include <vector>
 
-
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 

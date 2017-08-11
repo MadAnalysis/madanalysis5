@@ -38,7 +38,6 @@
 #include "SampleAnalyzer/Commons/Service/LogMsgKey.h"
 #include "SampleAnalyzer/Commons/Service/LogMsgValue.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
-
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 
 

@@ -33,7 +33,7 @@
 #include <iomanip>
 #include <cmath>
 
-// SampleAnalyzer
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/Vector/MALorentzVector.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"

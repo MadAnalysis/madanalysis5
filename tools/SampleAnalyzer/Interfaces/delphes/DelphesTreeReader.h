@@ -36,7 +36,7 @@
 #include "SampleAnalyzer/Interfaces/root/TreeReaderBase.h"
 #include "SampleAnalyzer/Interfaces/delphes/DelphesDataFormat.h"
 
-// ROOT header
+// ROOT headers
 #include <TChain.h>
 #include <TLorentzVector.h>
 #include <TObject.h>
