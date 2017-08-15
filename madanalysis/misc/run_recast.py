@@ -31,6 +31,7 @@ from madanalysis.IOinterface.library_writer                     import LibraryWr
 from shell_command                                              import ShellCommand
 from string_tools                                               import StringTools
 import logging
+import math
 import os
 import shutil
 import time
@@ -47,6 +48,7 @@ class RunRecast():
         self.pad              = ""
         self.first11          = True
         self.first12          = True
+        self.ntoys            = self.main.recasting.CLs_numofexps
 
     def init(self):
         ### First, the analyses to take care off
@@ -64,6 +66,65 @@ class RunRecast():
         ### Exit
         return True
 
+    ################################################
+    ### GENERAL METHODS
+    ################################################
+
+    ## Prompt to edit the recasting card
+    def edit_recasting_card(self):
+        if self.forced or self.main.script:
+            return
+        logging.getLogger('MA5').info("Would you like to edit the recasting Card ? (Y/N)")
+        allowed_answers=['n','no','y','yes']
+        answer=""
+        while answer not in  allowed_answers:
+            answer=raw_input("Answer: ")
+            answer=answer.lower()
+        if answer=="no" or answer=="n":
+            return
+        else:
+            os.system(self.main.session_info.editor+" "+self.dirname+"/Input/recasting_card.dat")
+        return
+
+    ## Checking the recasting card to get the analysis to run
+    def get_runs(self):
+        del_runs = []
+        ana_runs = []
+        ## decoding the card
+        runcard = open(self.dirname+"/Input/recasting_card.dat",'r')
+        for line in runcard:
+            if len(line.strip())==0 or line.strip().startswith('#'):
+                continue
+            myline=line.split()
+            if myline[2].lower() =='on' and myline[3] not in del_runs:
+                del_runs.append(myline[1]+'_'+myline[3])
+            if myline[2].lower() =='on':
+                ana_runs.append(myline[1]+'_'+myline[0])
+        ## saving the information and exti
+        self.delphes_runcard = del_runs
+        self.analysis_runcard = ana_runs
+        return
+
+    def check_run(self,version):
+        ## setup
+        if version == "v1.1":
+            self.detector = "delphesMA5tune"
+            self.pad      = self.main.archi_info.ma5dir+'/PADForMA5tune'
+            check         = self.main.recasting.ma5tune
+        else:
+            self.detector = "delphes"
+            self.pad      = self.main.archi_info.ma5dir+'/PAD'
+            check         = self.main.recasting.delphes
+        ## Check and exit
+        if not check:
+           logging.getLogger('MA5').error('The ' + detector + ' library is not present -> the associated analyses cannot be used')
+           return False
+        return True
+
+    ################################################
+    ### DELPHES RUN
+    ################################################
+
     def fastsim(self):
         self.main.forced=True
         for runcard in sorted(self.delphes_runcard):
@@ -76,24 +137,6 @@ class RunRecast():
 
             ## Running the fastsim
             if not self.fastsim_single(version, card):
-                self.main.forced=self.forced
-                return False
-        ## exit
-        self.main.forced=self.forced
-        return True
-
-    def analysis(self):
-        self.main.forced=True
-        for del_card in list(set(sorted(self.delphes_runcard))):
-            ## Extracting run infos and checks
-            version = del_card[:4]
-            card    = del_card[5:]
-            if not self.check_run(version):
-                self.main.forced=self.forced
-                return False
-
-            ## Running the analyses
-            if not self.analysis_single(version, card):
                 self.main.forced=self.forced
                 return False
         ## exit
@@ -123,94 +166,6 @@ class RunRecast():
         # Exit
         return True
 
-
-    def analysis_single(self, version, card):
-
-        #ERIC
-        PADdir=self.pad
-        dirname=self.dirname
-        forced_bkp=self.forced
-        #ERIC
-
-        ## Init and header
-        self.analysis_header(version, card)
-
-        # Activating the right delphes
-        detector_handler = DetectorManager(self.main)
-        if not detector_handler.manage(self.detector):
-            logging.getLogger('MA5').error('Problem with the activation of delphesMA5tune')
-            return False
-
-        ## Getting the analyses associated with the given card
-        analyses = [ x.replace(version+'_','') for x in self.analysis_runcard if version in x ]
-        for del_card,ana_list in self.main.recasting.DelphesDic.items():
-            if card == del_card:
-                analyses = [ x for x in analyses if x in ana_list]
-                break
-        #ERIC
-        myanalyses=analyses
-        mycard=card
-        #ERIC
-
-        # Executing the PAD
-        for myset in self.main.datasets:
-            ## Preparing the PAD
-            if not self.update_pad_main(analyses):
-                self.main.forced=self.forced
-                return False
-            if not self.make_pad():
-                self.main.forced=self.forced
-                return False
-            ## Getting the file name corresponding to the events
-            eventfile = os.path.normpath(self.dirname + '/Output/' + myset.name + '/RecoEvents/RecoEvents_' +\
-                   version.replace('.','x')+'_' + card.replace('.tcl','')+'.root')
-            if not os.path.isfile(eventfile):
-                logging.getLogger('MA5').error('The file called '+eventfile+' is not found...')
-                return False
-            ## Running the PAD
-            if not self.run_pad(eventfile):
-                self.main.forced=self.forced
-                return False
-            ## Restoring the PAD as it was before
-            #ERIC : restore_pad_main() does not exist!!!!!!
-            #if not self.restore_pad_main():
-            #   self.main.forced=self.forced
-            #    return False
-            #ERIC
-            time.sleep(1.);
-
-
-
-            ## event file
-            for myset in self.main.datasets:
-                ## saving the output
-                if not self.main.recasting.SavePADOutput(PADdir,dirname,myanalyses,myset.name):
-                    self.main.forced=forced_bkp
-                    return False
-                if not self.main.recasting.store_root:
-                    eventfile = os.path.normpath(self.dirname + '/Output/' + myset.name +\
-                                 '/RecoEvents/RecoEvents_' + version.replace('.','x') +\
-                                 '_' + mycard.replace('.tcl','')+'.root') 
-                    if not os.path.isfile(eventfile):
-                        logging.getLogger('MA5').warning('The file called '+eventfile+\
-                                                         ' is not found and cannot be removed.')
-                    else:
-                        try:
-                            os.remove(eventfile)
-                        except:
-                            logging.getLogger('MA5').warning('Impossible to remove the file called '+eventfile)
-
-                time.sleep(1.);
-                ## Running the CLs exclusion script (if available)
-                if not self.main.recasting.GetCLs(PADdir,dirname,myanalyses,myset.name,myset.xsection,myset.name):
-                    self.main.forced=forced_bkp
-                    return False
-                ## Saving the results
-            self.main.forced=forced_bkp
-        return True
-
-
-
     def fastsim_header(self, version):
         ## Gettign the version dependent stuff
         to_print = False
@@ -228,52 +183,7 @@ class RunRecast():
             logging.getLogger('MA5').info("   "+StringTools.Center(tag+' detector simulations',57))
             logging.getLogger('MA5').info("   **********************************************************")
 
-    def analysis_header(self, version, card):
-        ## Printing
-        logging.getLogger('MA5').info("   **********************************************************")
-        logging.getLogger('MA5').info("   "+StringTools.Center(version+' running of the PAD'+\
-               ' on events generated with',57))
-        logging.getLogger('MA5').info("   "+StringTools.Center(card,57))
-        logging.getLogger('MA5').info("   **********************************************************")
-
-    def generate_events(self,dataset,card):
-        # Preparing the run
-        self.main.recasting.status="off"
-        self.main.fastsim.package=self.detector
-        self.main.fastsim.clustering=0
-        if self.detector=="delphesMA5tune":
-            self.main.fastsim.delphes=0
-            self.main.fastsim.delphesMA5tune = DelphesMA5tuneConfiguration()
-            self.main.fastsim.delphesMA5tune.card = os.path.normpath("../../../../PADForMA5tune/Input/Cards/"+card)
-        elif self.detector=="delphes":
-            self.main.fastsim.delphesMA5tune = 0
-            self.main.fastsim.delphes        = DelphesConfiguration()
-            self.main.fastsim.delphes.card   = os.path.normpath("../../../../PAD/Input/Cards/"+card)
-        # Execution
-        if not self.RunDelphes(dataset):
-            logging.getLogger('MA5').error('The ' + detector + ' problem with the running of the fastsim')
-            return False
-        # Restoring the run
-        self.main.recasting.status="on"
-        self.main.fastsim.package="none"
-        ## Saving the output
-        if not os.path.isdir(self.dirname+'/Output/'+dataset.name):
-            os.mkdir(self.dirname+'/Output/'+dataset.name)
-        if not os.path.isdir(self.dirname+'/Output/'+dataset.name+'/RecoEvents'):
-            os.mkdir(self.dirname+'/Output/'+dataset.name+'/RecoEvents')
-        if self.detector=="delphesMA5tune":
-            shutil.move(self.dirname+'_FastSimRun/Output/_defaultset/RecoEvents0_0/DelphesMA5tuneEvents.root',\
-                self.dirname+'/Output/'+dataset.name+'/RecoEvents/RecoEvents_v1x1_'+card.replace('.tcl','')+'.root')
-        elif self.detector=="delphes":
-            shutil.move(self.dirname+'_FastSimRun/Output/_defaultset/RecoEvents0_0/DelphesEvents.root',\
-                self.dirname+'/Output/'+dataset.name+'/RecoEvents/RecoEvents_v1x2_'+card.replace('.tcl','')+'.root')
-        ## Cleaning the temporary directory
-        if not FolderWriter.RemoveDirectory(os.path.normpath(self.dirname+'_FastSimRun')):
-            return False
-        ## Exit
-        return True
-
-    def RunDelphes(self,dataset):
+    def run_delphes(self,dataset):
         # Initializing the JobWriter
         jobber = JobWriter(self.main,self.dirname+'_FastSimRun')
 
@@ -314,6 +224,127 @@ class RunRecast():
 
         # Exit
         return True
+
+    def generate_events(self,dataset,card):
+        # Preparing the run
+        self.main.recasting.status="off"
+        self.main.fastsim.package=self.detector
+        self.main.fastsim.clustering=0
+        if self.detector=="delphesMA5tune":
+            self.main.fastsim.delphes=0
+            self.main.fastsim.delphesMA5tune = DelphesMA5tuneConfiguration()
+            self.main.fastsim.delphesMA5tune.card = os.path.normpath("../../../../PADForMA5tune/Input/Cards/"+card)
+        elif self.detector=="delphes":
+            self.main.fastsim.delphesMA5tune = 0
+            self.main.fastsim.delphes        = DelphesConfiguration()
+            self.main.fastsim.delphes.card   = os.path.normpath("../../../../PAD/Input/Cards/"+card)
+        # Execution
+        if not self.run_delphes(dataset):
+            logging.getLogger('MA5').error('The ' + detector + ' problem with the running of the fastsim')
+            return False
+        # Restoring the run
+        self.main.recasting.status="on"
+        self.main.fastsim.package="none"
+        ## Saving the output
+        if not os.path.isdir(self.dirname+'/Output/'+dataset.name):
+            os.mkdir(self.dirname+'/Output/'+dataset.name)
+        if not os.path.isdir(self.dirname+'/Output/'+dataset.name+'/RecoEvents'):
+            os.mkdir(self.dirname+'/Output/'+dataset.name+'/RecoEvents')
+        if self.detector=="delphesMA5tune":
+            shutil.move(self.dirname+'_FastSimRun/Output/_'+dataset.name+'/RecoEvents0_0/DelphesMA5tuneEvents.root',\
+                self.dirname+'/Output/'+dataset.name+'/RecoEvents/RecoEvents_v1x1_'+card.replace('.tcl','')+'.root')
+        elif self.detector=="delphes":
+            shutil.move(self.dirname+'_FastSimRun/Output/_'+dataset.name+'/RecoEvents0_0/DelphesEvents.root',\
+                self.dirname+'/Output/'+dataset.name+'/RecoEvents/RecoEvents_v1x2_'+card.replace('.tcl','')+'.root')
+        ## Cleaning the temporary directory
+        if not FolderWriter.RemoveDirectory(os.path.normpath(self.dirname+'_FastSimRun')):
+            return False
+        ## Exit
+        return True
+
+    ################################################
+    ### ANALYSIS EXECUTION
+    ################################################
+
+    def analysis(self):
+        self.main.forced=True
+        for del_card in list(set(sorted(self.delphes_runcard))):
+            ## Extracting run infos and checks
+            version = del_card[:4]
+            card    = del_card[5:]
+            if not self.check_run(version):
+                self.main.forced=self.forced
+                return False
+
+            ## Running the analyses
+            if not self.analysis_single(version, card):
+                self.main.forced=self.forced
+                return False
+        ## exit
+        self.main.forced=self.forced
+        return True
+
+    def analysis_single(self, version, card):
+        ## Init and header
+        self.analysis_header(version, card)
+
+        # Activating the right delphes
+        detector_handler = DetectorManager(self.main)
+        if not detector_handler.manage(self.detector):
+            logging.getLogger('MA5').error('Problem with the activation of delphesMA5tune')
+            return False
+
+        ## Getting the analyses associated with the given card
+        analyses = [ x.replace(version+'_','') for x in self.analysis_runcard if version in x ]
+        for del_card,ana_list in self.main.recasting.DelphesDic.items():
+            if card == del_card:
+                analyses = [ x for x in analyses if x in ana_list]
+                break
+
+        # Executing the PAD
+        for myset in self.main.datasets:
+            ## Preparing the PAD
+            self.update_pad_main(analyses)
+            if not self.make_pad():
+                self.main.forced=self.forced
+                return False
+            ## Getting the file name corresponding to the events
+            eventfile = os.path.normpath(self.dirname + '/Output/' + myset.name + '/RecoEvents/RecoEvents_' +\
+                   version.replace('.','x')+'_' + card.replace('.tcl','')+'.root')
+            if not os.path.isfile(eventfile):
+                logging.getLogger('MA5').error('The file called '+eventfile+' is not found...')
+                return False
+            ## Running the PAD
+            if not self.run_pad(eventfile):
+                self.main.forced=self.forced
+                return False
+            ## Restoring the PAD as it was before
+            if not self.restore_pad_main():
+                self.main.forced=self.forced
+                return False
+            ## Saving the output and cleaning
+            if not self.save_output('\"'+eventfile+'\"', myset.name, analyses):
+                self.main.forced=self.forced
+                return False
+
+            if not self.main.recasting.store_root:
+                os.remove(eventfile)
+            time.sleep(1.);
+
+            ## Running the CLs exclusion script (if available)
+            if not self.compute_cls(analyses,myset):
+                self.main.forced=self.forced
+                return False
+        # exit
+        return True
+
+    def analysis_header(self, version, card):
+        ## Printing
+        logging.getLogger('MA5').info("   **********************************************************")
+        logging.getLogger('MA5').info("   "+StringTools.Center(version+' running of the PAD'+\
+               ' on events generated with',57))
+        logging.getLogger('MA5').info("   "+StringTools.Center(card,57))
+        logging.getLogger('MA5').info("   **********************************************************")
 
     def update_pad_main(self,analysislist):
         ## backuping the main files and init
@@ -357,9 +388,6 @@ class RunRecast():
     def make_pad(self):
         # Initializing the compiler
         logging.getLogger('MA5').info('   Compiling the PAD located in '  +self.pad)
-        #ERIC
-        PADdir=self.pad
-        #ERIC
         compiler = LibraryWriter('lib',self.main)
         ncores = compiler.get_ncores2()
         # compiling
@@ -367,7 +395,7 @@ class RunRecast():
             strcores='-j'+str(ncores)
         command = ['make',strcores]
         logfile = self.pad+'/Build/PADcompilation.log'
-        result, out = ShellCommand.ExecuteWithLog(command,logfile,PADdir+'/Build')
+        result, out = ShellCommand.ExecuteWithLog(command,logfile,self.pad+'/Build')
         time.sleep(1.);
         # Checks and exit
         if not result:
@@ -377,9 +405,6 @@ class RunRecast():
         return True
 
     def run_pad(self,eventfile):
-        #ERIC
-        PADdir=self.pad
-        #ERIC
         ## input file
         if os.path.isfile(self.pad+'/Input/PADevents.list'):
             os.remove(self.pad+'/Input/PADevents.list')
@@ -396,62 +421,406 @@ class RunRecast():
         if not ok:
             logging.getLogger('MA5').error('Problem with the run of the PAD on the file: '+ eventfile)
             return False
-        os.remove(PADdir+'/Input/PADevents.list')
+        os.remove(self.pad+'/Input/PADevents.list')
         ## exit
         time.sleep(1.);
         return True
 
-    ## Prompt to edit the recasting card
-    def edit_recasting_card(self):
-        if self.forced or self.main.script:
-            return
-        logging.getLogger('MA5').info("Would you like to edit the recasting Card ? (Y/N)")
-        allowed_answers=['n','no','y','yes']
-        answer=""
-        while answer not in  allowed_answers:
-            answer=raw_input("Answer: ")
-            answer=answer.lower()
-        if answer=="no" or answer=="n":
-            return
-        else:
-            os.system(self.main.session_info.editor+" "+self.dirname+"/Input/recasting_card.dat")
-        return
-
-    ## Checking the recasting card to get the analysis to run
-    def get_runs(self):
-        del_runs = []
-        ana_runs = []
-        ## decoding the card
-        runcard = open(self.dirname+"/Input/recasting_card.dat",'r')
-        for line in runcard:
-            if len(line.strip())==0 or line.strip().startswith('#'):
-                continue
-            myline=line.split()
-            if myline[2].lower() =='on' and myline[3] not in del_runs:
-                del_runs.append(myline[1]+'_'+myline[3])
-            if myline[2].lower() =='on':
-                ana_runs.append(myline[1]+'_'+myline[0])
-        ## saving the information and exti
-        self.delphes_runcard = del_runs
-        self.analysis_runcard = ana_runs
-        return
-
-
-    def check_run(self,version):
-        ## setup
-        if version == "v1.1":
-            self.detector = "delphesMA5tune"
-            self.pad      = self.main.archi_info.ma5dir+'/PADForMA5tune'
-            check         = self.main.recasting.ma5tune
-        else:
-            self.detector = "delphes"
-            self.pad      = self.main.archi_info.ma5dir+'/PAD'
-            check         = self.main.recasting.delphes
-        ## Check and exit
-        if not check:
-           logging.getLogger('MA5').error('The ' + detector + ' library is not present -> the associated analyses cannot be used')
-           return False
+    def restore_pad_main(self):
+        ## Restoring the main file
+        logging.getLogger('MA5').info('   Restoring the PAD located in '+ self.pad)
+        shutil.move(self.pad+'/Build/Main/main.bak',self.pad+'/Build/Main/main.cpp')
+        ## Compiling
+        if not self.make_pad():
+            return False
+        ## exit
         return True
 
+    def save_output(self, eventfile, setname, analyses):
+        outfile = self.dirname+'/Output/'+setname+'/'+setname+'.saf'
+        if not os.path.isfile(outfile):
+            shutil.move(self.pad+'/Output/PADevents/PADevents.saf',outfile)
+        else:
+            inp = open(outfile, 'r')
+            out = open(outfile+'.2', 'w')
+            intag  = False
+            stack  = []
+            maxl   = len(eventfile)
+            for line in inp:
+                if '<FileInfo>' in line:
+                    out.write(line)
+                    intag = True
+                elif '</FileInfo>' in line:
+                    for i in range(len(stack)):
+                        out.write(stack[i].ljust(maxl)+ ' # file ' + str(i+1) + '/' + str(len(stack)+1) + '\n')
+                    out.write(eventfile.ljust(maxl)+' # file ' + str(len(stack)+1)+'/'+str(len(stack)+1)+'\n')
+                    out.write(line)
+                    intag = False
+                elif intag:
+                    stack.append(line.strip().split('#')[0])
+                    maxl = max(maxl,len(line.strip().split('#')[0]))
+                else:
+                    out.write(line)
+            inp.close()
+            out.close()
+            shutil.move(outfile+'.2', outfile)
+        for analysis in analyses:
+            shutil.move(self.pad+'/Output/PADevents/'+analysis+'_0',self.dirname+'/Output/'+setname+'/'+analysis)
+        return True
+
+    ################################################
+    ### CLS CALCULATIONS AND OUTPUT
+    ################################################
+
+    def compute_cls(self, analyses, dataset):
+        logging.getLogger('MA5').info('   Calculation of the exclusion CLs')
+        ## Checking whether the CLs module can be used
+        ET =  self.check_xml_scipy_methods()
+        if not ET:
+            return False
+
+        ## Preparing the output file and checking whether a cross section has been defined
+        outfile = self.dirname+'/Output/'+dataset.name+'/CLs_output.dat'
+        if os.path.isfile(outfile):
+            mysummary=open(outfile,'a')
+        else:
+             mysummary=open(outfile,'w')
+             self.write_cls_header(dataset.xsection, mysummary)
+
+        ## running over all analysis
+        for analysis in analyses:
+            # Getting the info file information
+            lumi, regions, regiondata = self.parse_info_file(ET,analysis)
+            if lumi==-1 or regions==-1 or regiondata==-1:
+                logging.getLogger('MA5').warning('Info file for '+analysis+' missing or corrupted. Skipping the CLs calculation.')
+                return False
+
+            ## Reading the cutflow information
+            regiondata=self.read_cutflows(self.dirname+'/Output/'+dataset.name+'/'+analysis+'/Cutflows',regions,regiondata)
+            if regiondata==-1:
+                logging.getLogger('MA5').warning('Info file for '+analysis+' corrupted. Skipping the CLs calculation.')
+                return False
+
+            ## Performing the CLS calculation
+            regiondata=self.extract_sig_cls(regiondata,regions,lumi,"exp")
+            regiondata=self.extract_sig_cls(regiondata,regions,lumi,"obs")
+            xsflag=True
+            if dataset.xsection > 0:
+                xsflag=False
+                regiondata=self.extract_cls(regiondata,regions,dataset.xsection,lumi)
+            ## writing the output file
+            self.write_cls_output(analysis, regions, regiondata, mysummary, xsflag)
+            mysummary.write('\n')
+
+        ## Closing the output file
+        mysummary.close()
+        return True
+
+    def check_xml_scipy_methods(self):
+        ## Checking whether scipy is installed
+        try:
+            import scipy.stats
+        except ImportError:
+            logging.getLogger('MA5').warning('scipy is not installed... the CLs module cannot be used.')
+            logging.getLogger('MA5').warning('Please install scipy.')
+            return False
+        ## Checking XML parsers
+        try:
+            from lxml import ET
+        except:
+            try:
+                import xml.etree.ElementTree as ET
+            except:
+                logging.getLogger('MA5').warning('lxml or xml not available... the CLs module cannot be used')
+                return False
+        # exit
+        return ET
+
+    def parse_info_file(self, etree, analysis):
+        ## Is file existing?
+        if not os.path.isfile(self.pad+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.info'):
+            return -1, -1, -1
+        ## Getting the XML information
+        try:
+            info_input = open(self.pad+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.info')
+            info_tree = etree.parse(info_input)
+            info_input.close()
+            results = self.header_info_file(info_tree,analysis)
+            return results
+        except:
+            return -1, -1, -1
+
+    def header_info_file(self, etree, analysis):
+        logging.getLogger('MA5').debug('Read info from the file related to '+analysis + '...')
+        ## checking the header of the file
+        info_root = etree.getroot()
+        if info_root.tag != "analysis":
+            logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): <analysis> tag.')
+            return -1,-1,-1
+        if info_root.attrib["id"].lower() != analysis.lower():
+            logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): <analysis id> tag.')
+            return -1,-1,-1
+        ## extracting the information
+        lumi    = 0
+        regions = []
+        regiondata = {}
+        for child in info_root:
+            # Luminosity
+            if child.tag == "lumi":
+                try:
+                    lumi = float(child.text)
+                except:
+                    logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): ill-defined lumi')
+                    return -1,-1,-1
+                logging.getLogger('MA5').debug('The luminosity of ' + analysis + ' is ' + str(lumi) + ' fb-1.')
+            # regions
+            if child.tag == "region" and ("type" not in child.attrib or child.attrib["type"] == "signal"):
+                if "id" not in child.attrib:
+                    logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): <region id> tag.')
+                    return -1,-1,-1
+                if child.attrib["id"] in regions:
+                    logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): doubly-defined region.')
+                    return -1,-1,-1
+                regions.append(child.attrib["id"])
+                nobs    = -1
+                nb      = -1
+                deltanb = -1
+                for rchild in child:
+                    try:
+                        myval=float(rchild.text)
+                    except:
+                        logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): region data ill-defined.')
+                        return -1,-1,-1
+                    if rchild.tag=="nobs":
+                        nobs = myval
+                    elif rchild.tag=="nb":
+                        nb = myval
+                    elif rchild.tag=="deltanb":
+                        deltanb = myval
+                    else:
+                        logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): unknown region subtag.')
+                        return -1,-1,-1
+                regiondata[child.attrib["id"]] = { "nobs":nobs, "nb":nb, "deltanb":deltanb }
+        return lumi, regions, regiondata
+
+    def write_cls_header(self, xs, out):
+            if xs <=0:
+                logging.getLogger('MA5').info('   Signal xsection not defined. The 95% excluded xsection will be calculated.')
+                out.write("# analysis name".ljust(30, ' ') + "signal region".ljust(50,' ') + \
+                 'sig95(exp)'.ljust(15, ' ') + 'sig95(obs)'.ljust(15, ' ') +' ||    ' + 'efficiency'.ljust(15,' ') +\
+                 "stat. unc.".ljust(15,' ') + "syst. unc.".ljust(15," ") + "tot. unc.".ljust(15," ") + '\n')
+            else:
+                out.write("# analysis name".ljust(30, ' ') + "signal region".ljust(50,' ') + \
+                 "best?".ljust(10,' ') + 'sig95(exp)'.ljust(15,' ') + 'sig95(obs)'.ljust(15, ' ') +\
+                 'CLs'.ljust(10,' ') + ' ||    ' + 'efficiency'.ljust(15,' ') +\
+                 "stat. unc.".ljust(15,' ') + "syst. unc.".ljust(15," ") + "tot. unc.".ljust(15," ") + '\n')
+
+    def read_cutflows(self, path, regions, regiondata):
+        logging.getLogger('MA5').debug('Read the cutflow from the files:')
+        for reg in regions:
+            regname = clean_region_name(reg)
+            ## getting the initial and final number of events
+            IsInitial = False
+            IsCounter = False
+            N0 = 0.
+            Nf = 0.
+            ## checking if regions must be combined
+            theregs=regname.split(';')
+            for regiontocombine in theregs:
+                filename=path+'/'+regiontocombine+'.saf'
+                logging.getLogger('MA5').debug('+ '+filename)
+                if not os.path.isfile(filename):
+                    logging.getLogger('MA5').warning('Cannot find a cutflow for the region '+regiontocombine+' in ' + path)
+                    logging.getLogger('MA5').warning('Skipping the CLs calculation.')
+                    return -1
+                mysaffile = open(filename)
+                myN0=-1
+                myNf=-1
+                for line in mysaffile:
+                    if "<InitialCounter>" in line:
+                        IsInitial = True
+                        continue
+                    elif "</InitialCounter>" in line:
+                        IsInitial = False
+                        continue
+                    elif "<Counter>" in line:
+                        IsCounter = True
+                        continue
+                    elif "</Counter>" in line:
+                        IsCounter = False
+                        continue
+                    if IsInitial and "sum of weights" in line and not '^2' in line:
+                        myN0 = float(line.split()[0])+float(line.split()[1])
+                    if IsCounter and "sum of weights" in line and not '^2' in line:
+                        myNf = float(line.split()[0])+float(line.split()[1])
+                mysaffile.close()
+                if myNf==-1 or myN0==-1:
+                    logging.getLogger('MA5').warning('Invalid cutflow for the region ' + reg +'('+regname+') in ' + path)
+                    logging.getLogger('MA5').warning('Skipping the CLs calculation.')
+                    return -1
+                Nf+=myNf
+                N0+=myN0
+            if Nf==0 and N0==0:
+                logging.getLogger('MA5').warning('Invalid cutflow for the region ' + reg +'('+regname+') in ' + path)
+                logging.getLogger('MA5').warning('Skipping the CLs calculation.')
+                return -1
+            regiondata[reg]["N0"]=N0
+            regiondata[reg]["Nf"]=Nf
+        return regiondata
+
+    def extract_cls(self,regiondata,regions,xsection,lumi):
+        logging.getLogger('MA5').debug('Compute CLs...')
+        ## computing fi a region belongs to the best expected ones, and derive the CLs in all cases
+        bestreg=[]
+        rMax = -1
+        for reg in regions:
+            nsignal = xsection * lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
+            nb      = regiondata[reg]["nb"]
+            nobs    = regiondata[reg]["nobs"]
+            deltanb = regiondata[reg]["deltanb"]
+            if nsignal<=0:
+                rSR   = -1
+                myCLs = 0
+            else:
+                n95     = float(regiondata[reg]["s95exp"]) * lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
+                rSR     = nsignal/n95
+                myCLs   = cls(nobs, nb, deltanb, nsignal, self.ntoys)
+            regiondata[reg]["rSR"] = rSR
+            regiondata[reg]["CLs"]     = myCLs
+            if rSR > rMax:
+                regiondata[reg]["best"]=1
+                for mybr in bestreg:
+                    regiondata[mybr]["best"]=0
+                bestreg = [reg]
+                rMax = rSR
+            else:
+                regiondata[reg]["best"]=0
+        return regiondata
+
+    def extract_sig_cls(self,regiondata,regions,lumi,tag):
+        logging.getLogger('MA5').debug('Compute signal CL...')
+        for reg in regions:
+            nb = regiondata[reg]["nb"]
+            if tag == "obs":
+                nobs = regiondata[reg]["nobs"]
+            elif tag == "exp":
+                nobs = regiondata[reg]["nb"]
+            deltanb = regiondata[reg]["deltanb"]
+            def sig95(xsection):
+                if regiondata[reg]["Nf"]<=0:
+                    return 0
+                nsignal=xsection * lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
+                return cls(nobs,nb,deltanb,nsignal,self.ntoys)-0.95
+            nslow = lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
+            nshig = lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
+            if nslow <= 0 and nshig <= 0:
+                if tag == "obs":
+                    regiondata[reg]["s95obs"]="-1"
+                elif tag == "exp":
+                    regiondata[reg]["s95exp"]="-1"
+                continue
+            low = 1.
+            hig = 1.
+            while cls(nobs,nb,deltanb,nslow,self.ntoys)>0.95:
+                logging.getLogger('MA5').debug('region ' + reg + ', lower bound = ' + str(low))
+                nslow=nslow*0.1
+                low  =  low*0.1
+            while cls(nobs,nb,deltanb,nshig,self.ntoys)<0.95:
+                logging.getLogger('MA5').debug('region ' + reg + ', upper bound = ' + str(hig))
+                nshig=nshig*10.
+                hig  =  hig*10.
+            try:
+                import scipy
+                s95 = scipy.optimize.brentq(sig95,low,hig,xtol=low/100.)
+            except:
+                s95=-1
+            logging.getLogger('MA5').debug('region ' + reg + ', s95 = ' + str(s95) + ' pb')
+            if tag == "obs":
+                regiondata[reg]["s95obs"]= ("%.7f" % s95)
+            elif tag == "exp":
+                regiondata[reg]["s95exp"]= ("%.7f" % s95)
+        return regiondata
+
+    def write_cls_output(self, analysis, regions, regiondata, summary, xsflag):
+        logging.getLogger('MA5').debug('Write CLs...')
+        for reg in regions:
+            eff    = (regiondata[reg]["Nf"] / regiondata[reg]["N0"])
+            if eff < 0:
+                eff = 0
+            stat   = (math.sqrt(eff*(1-eff)/regiondata[reg]["N0"]))
+            syst   = 0.
+            myeff  = "%.7f" % eff
+            mystat = "%.7f" % stat
+            mysyst = "%.7f" % syst
+            mytot  = "%.7f" % (math.sqrt(stat**2+syst**2))
+            myxsexp = regiondata[reg]["s95exp"]
+            myxsobs = regiondata[reg]["s95obs"]
+            if not xsflag:
+                mycls  = "%.7f" % regiondata[reg]["CLs"]
+                summary.write(analysis.ljust(30,' ') + reg.ljust(50,' ') +\
+                   str(regiondata[reg]["best"]).ljust(10, ' ') +\
+                   myxsexp.ljust(15,' ') + myxsobs.ljust(15,' ') + mycls.ljust(10,' ') + \
+                   ' ||    ' + myeff.ljust(15,' ') + mystat.ljust(15,' ') + mysyst.ljust(15, ' ') +\
+                   mytot.ljust(15,' ') + '\n')
+            else:
+                summary.write(analysis.ljust(30,' ') + reg.ljust(50,' ') +\
+                   myxsexp.ljust(15,' ') + myxsobs.ljust(15,' ') + \
+                   ' ||    ' + myeff.ljust(15,' ') + mystat.ljust(15,' ') + mysyst.ljust(15, ' ') +\
+                   mytot.ljust(15,' ') + '\n')
+
+def clean_region_name(mystr):
+    newstr = mystr.replace("/",  "_slash_")
+    newstr = newstr.replace("->", "_to_")
+    newstr = newstr.replace(">=", "_greater_than_or_equal_to_")
+    newstr = newstr.replace(">",  "_greater_than_")
+    newstr = newstr.replace("<=", "_smaller_than_or_equal_to_")
+    newstr = newstr.replace("<",  "_smaller_than_")
+    newstr = newstr.replace(" ",  "_")
+    newstr = newstr.replace(",",  "_")
+    newstr = newstr.replace("+",  "_")
+    newstr = newstr.replace("-",  "_")
+    newstr = newstr.replace("(",  "_lp_")
+    newstr = newstr.replace(")",  "_rp_")
+    return newstr
+
+
+def cls(NumObserved, ExpectedBG, BGError, SigHypothesis, NumToyExperiments):
+    import scipy.stats
+    # generate a set of expected-number-of-background-events, one for each toy
+    # experiment, distributed according to a Gaussian with the specified mean
+    # and uncertainty
+    ExpectedBGs = scipy.stats.norm.rvs(loc=ExpectedBG, scale=BGError, size=NumToyExperiments)
+
+    # Ignore values in the tail of the Gaussian extending to negative numbers
+    ExpectedBGs = [value for value in ExpectedBGs if value > 0]
+
+    # For each toy experiment, get the actual number of background events by
+    # taking one value from a Poisson distribution created using the expected
+    # number of events.
+    ToyBGs = scipy.stats.poisson.rvs(ExpectedBGs)
+    ToyBGs = map(float, ToyBGs)
+
+    # The probability for the background alone to fluctutate as LOW as
+    # observed = the fraction of the toy experiments with backgrounds as low as
+    # observed = p_b.
+    # NB (1 - this p_b) corresponds to what is usually called p_b for CLs.
+    p_b = scipy.stats.percentileofscore(ToyBGs, NumObserved, kind='weak')*.01
+
+    # Toy MC for background+signal
+    ExpectedBGandS = [expectedbg + SigHypothesis for expectedbg in ExpectedBGs]
+    ExpectedBGandS = [x for x in ExpectedBGandS if x > 0]
+    if len(ExpectedBGandS)==0:
+        return 0.
+    ToyBplusS = scipy.stats.poisson.rvs(ExpectedBGandS)
+    ToyBplusS = map(float, ToyBplusS)
+
+    # Calculate the fraction of these that are >= the number observed,
+    # giving p_(S+B). Divide by (1 - p_b) a la the CLs prescription.
+    p_SplusB = scipy.stats.percentileofscore(ToyBplusS, NumObserved, kind='weak')*.01
+
+    if p_SplusB>p_b:
+        return 0.
+    else:
+        return 1.-(p_SplusB / p_b) # 1 - CLs
 
 
