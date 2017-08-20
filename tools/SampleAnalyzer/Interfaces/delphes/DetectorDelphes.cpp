@@ -280,10 +280,10 @@ void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat&
     candidate->M2=0;
     candidate->D1=0;
     candidate->D2=0;
-    std::vector<MAint32*> mothers(2,0);
+    std::vector<MAint32*> mothers;
     mothers[0]=&(candidate->M1);
     mothers[1]=&(candidate->M2);
-    std::vector<MAint32*> daughters(2,0);
+    std::vector<MAint32*> daughters;
     daughters[0]=&(candidate->D1);
     daughters[1]=&(candidate->D2);
     for(MAuint32 mum=0;mum<std::min(static_cast<MAuint32>(part->mothers().size()),
