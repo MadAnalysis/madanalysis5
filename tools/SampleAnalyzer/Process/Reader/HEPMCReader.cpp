@@ -259,7 +259,7 @@ MAbool HEPMCReader::FillHeavyIons(const std::string& line)
 {
   try
   {
-    if (line!="") if (firstHeavyIons_) EXCEPTION_WARNING("HeavyIons block is not read by SampleAnalyzer","",0);
+    if (line!="") if (firstHeavyIons_) throw EXCEPTION_WARNING("HeavyIons block is not read by SampleAnalyzer","",0);
   }
   catch(const std::exception& e)
   {
@@ -318,7 +318,7 @@ MAbool HEPMCReader::FillEvent(const std::string& line,
     // ignore other cases
     try
     {
-      EXCEPTION_WARNING("HEPMC linecode unknown","",0);
+      throw EXCEPTION_WARNING("HEPMC linecode unknown","",0);
     }
     catch(const std::exception& e)
     {

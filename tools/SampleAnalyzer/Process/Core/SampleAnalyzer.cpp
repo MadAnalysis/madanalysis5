@@ -74,9 +74,9 @@ void SampleAnalyzer::CheckDatatypes() const
   try
   {
     value = sizeof(MAint8);
-    if (value!=1) EXCEPTION_WARNING("MAint8 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
+    if (value!=1) throw EXCEPTION_WARNING("MAint8 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
   }
-  catch(const std::exception& e)
+  catch(std::exception const& e)
   {
     MANAGE_EXCEPTION(e);
   }    
@@ -85,7 +85,7 @@ void SampleAnalyzer::CheckDatatypes() const
   try
   {
     value = sizeof(MAuint8);
-    if (value!=1) EXCEPTION_WARNING("MAuint8 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
+    if (value!=1) throw EXCEPTION_WARNING("MAuint8 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
   }
   catch(const std::exception& e)
   {
@@ -97,7 +97,7 @@ void SampleAnalyzer::CheckDatatypes() const
   try
   {
     value = sizeof(MAint16);
-    if (value!=2) EXCEPTION_WARNING("MAint16 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
+    if (value!=2) throw EXCEPTION_WARNING("MAint16 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
   }
   catch(const std::exception& e)
   {
@@ -108,7 +108,7 @@ void SampleAnalyzer::CheckDatatypes() const
   try
   {
     value = sizeof(MAuint16);
-    if (value!=2) EXCEPTION_WARNING("MAuint16 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
+    if (value!=2) throw EXCEPTION_WARNING("MAuint16 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
   }
   catch(const std::exception& e)
   {
@@ -119,7 +119,7 @@ void SampleAnalyzer::CheckDatatypes() const
   try
   {
     value = sizeof(MAint32);
-    if (value!=4) EXCEPTION_WARNING("MAint32 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
+    if (value!=4) throw EXCEPTION_WARNING("MAint32 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
   }
   catch(const std::exception& e)
   {
@@ -130,7 +130,7 @@ void SampleAnalyzer::CheckDatatypes() const
   try
   {
     value = sizeof(MAuint32);
-    if (value!=4) EXCEPTION_WARNING("MAuint32 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
+    if (value!=4) throw EXCEPTION_WARNING("MAuint32 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
   }
   catch(const std::exception& e)
   {
@@ -141,7 +141,7 @@ void SampleAnalyzer::CheckDatatypes() const
   try
   {
     value = sizeof(MAint64);
-    if (value!=8) EXCEPTION_WARNING("MAint64 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
+    if (value!=8) throw EXCEPTION_WARNING("MAint64 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
   }
   catch(const std::exception& e)
   {
@@ -152,7 +152,7 @@ void SampleAnalyzer::CheckDatatypes() const
   try
   {
     value = sizeof(MAuint64);
-    if (value!=8) EXCEPTION_WARNING("MAuint64 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
+    if (value!=8) throw EXCEPTION_WARNING("MAuint64 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
   }
   catch(const std::exception& e)
   {
@@ -163,7 +163,7 @@ void SampleAnalyzer::CheckDatatypes() const
   try
   {
     value = sizeof(MAfloat32);
-    if (value!=4) EXCEPTION_WARNING("MAfloat32 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
+    if (value!=4) throw EXCEPTION_WARNING("MAfloat32 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
   }
   catch(const std::exception& e)
   {
@@ -174,7 +174,7 @@ void SampleAnalyzer::CheckDatatypes() const
   try
   {
     value = sizeof(MAfloat64);
-    if (value!=8) EXCEPTION_WARNING("MAfloat64 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
+    if (value!=8) throw EXCEPTION_WARNING("MAfloat64 type corresponds to "+CONVERT->ToString(value*8)+" bits","",0);
   }
   catch(const std::exception& e)
   {

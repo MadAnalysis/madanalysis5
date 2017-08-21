@@ -392,7 +392,7 @@ void LHCOReader::FillEventParticleLine(const std::string& line, EventFormat& myE
   {
     try
     {
-      EXCEPTION_WARNING("Unknown type of object : "+muf,"",0);
+      throw EXCEPTION_WARNING("Unknown type of object : "+muf,"",0);
     }
     catch(const std::exception& e)
     {

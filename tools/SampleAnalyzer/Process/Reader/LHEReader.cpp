@@ -212,8 +212,58 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySamp
 
   // Declaring a new string for line
   std::string line;
-  bool EndOfLoop=false;
+  bool EndOfEvent=false;
+  bool event_block=false;
+  bool event_header=false;
+  bool multiweight_block=false;
 
+  // Loop over the LHE lines
+  while(!EndOfEvent)
+  {
+    // Read the line
+    if (!ReadLine(line)) return StatusCode::FAILURE;
+
+    // Detect tags
+    if (line.find("<event>")!=std::string::npos)
+    {
+      event_block=true;
+      event_header=true;
+      continue;
+    }
+    else if (line.find("</event>")!=std::string::npos)
+    {
+      event_block=false;
+      EndOfEvent=true;
+      continue;
+    }
+    else if (line.find("<rwgt>")!=std::string::npos || line.find("mgrwt")!=std::string::npos)
+    {
+      multiweight_block=true;
+      continue;
+    }
+    else if (line.find("</rwgt>")!=std::string::npos || line.find("/mgrwt")!=std::string::npos)
+    {
+      multiweight_block=false;
+      continue;
+    }
+ 
+    // Actions
+    if (event_block && !multiweight_block)
+    {
+      if (event_header)
+      {
+        FillEventInitLine(line,myEvent);
+        event_header=false;
+      }
+      else FillEventParticleLine(line,myEvent);
+    }
+    else if (event_block && multiweight_block)
+    {
+      FillWeightLine(line,myEvent);
+    }
+  }
+
+    /*
   // Read line by line the file until tag <event>
   if (!firstevent_)
   {
@@ -233,7 +283,7 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySamp
   do 
   { 
     if (!ReadLine(line)) return StatusCode::FAILURE;
-    if(line.find("<rwgt>")!=std::string::npos) 
+    if (line.find("<rwgt>")!=std::string::npos) 
     {
       bool EndReweighting = false;
       do
@@ -254,6 +304,7 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySamp
     first=false;
   }
   while(!EndOfLoop);
+    */
 
   // Normal end
   return StatusCode::KEEP;
@@ -276,7 +327,7 @@ bool LHEReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
     MAint32& mothup2 = mothers_[i].second;
 
     if (mothup1>0)
-    {
+    { 
       if (static_cast<MAuint32>(mothup1)<=myEvent.mc()->particles().size())
       {
         MCParticleFormat* mum = &(myEvent.mc()->particles()[static_cast<MAuint32>(mothup1-1)]);
@@ -288,7 +339,16 @@ bool LHEReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
       }
       else
       {
-        std::cout << "ERROR : internal problem with mother-daughter particles" << std::endl;
+        std::stringstream str;
+        str << "index=" << mothup1 << " but #particles=" << myEvent.mc()->particles().size();
+        try
+        {
+          throw EXCEPTION_WARNING("internal problem with mother-daughter particles",str.str(),0);
+        }
+        catch(const std::exception& e)
+        {
+          MANAGE_EXCEPTION(e);
+        }
       }
     }
     if (mothup2>0 && mothup1!=mothup2)
@@ -304,7 +364,17 @@ bool LHEReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
       }
       else
       {
-        std::cout << "ERROR : internal problem with mother-daughter particles" << std::endl;
+        std::stringstream str;
+        str << "index=" << mothup2 << " but #particles=" << myEvent.mc()->particles().size();
+        try
+        {
+          throw EXCEPTION_WARNING("internal problem with mother-daughter particles",str.str(),0);
+        }
+        catch(const std::exception& e)
+        {
+          std::cout << "MUFMUF" << std::endl;
+          MANAGE_EXCEPTION(e);
+        }
       }
     }
   }

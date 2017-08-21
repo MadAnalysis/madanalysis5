@@ -21,6 +21,7 @@
 //  
 ////////////////////////////////////////////////////////////////////////////////
 
+
 // STL headers
 #include <fstream>
 
@@ -36,6 +37,7 @@
 // SampleHeader headers
 #include "SampleAnalyzer/Process/Reader/ReaderTextBase.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
+
 
 using namespace MA5;
 
