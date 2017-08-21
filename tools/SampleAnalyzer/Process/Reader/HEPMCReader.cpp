@@ -230,32 +230,24 @@ MAbool HEPMCReader::FillWeightNames(const std::string& line)
   str >> firstWord;
 
   // Extracting the number of weights
-  int nweights;
+  MAuint32 nweights;
   str >> nweights;
-  if (nweights<0)
-  {
-    ERROR << "Number of weights is not correct: " 
-          << nweights << endmsg;
-    return false;
-  }
-
-  try
-  {
-    if (nweights>=2) throw EXCEPTION_WARNING("Several event-weights are defined. Only the first one will be used.","",0);
-  }
-  catch (const std::exception& e)
-  {
-    MANAGE_EXCEPTION(e);
-  }    
-
 
   // Storing weight names
-  weightnames_.clear();
-  weightnames_.resize(static_cast<unsigned int>(nweights));
+  std::vector<std::string> weight_names(nweights);
 
   // Filling weight names
-  for (unsigned int i=0;i<weightnames_.size();i++) str >> weightnames_[i];
+  for (MAuint32 i=0;i<weight_names.size();i++)
+  {
+    std::string tmp;
+    str >> tmp;
+    if (tmp=="") continue;
+    
+    if (tmp[0]=='"' && tmp[tmp.size()-1]=='"') tmp=tmp.substr(1,tmp.size()-2);
+    weight_names[i]=tmp;
+  }
 
+  // Ok
   return true;
 }
 
@@ -374,11 +366,13 @@ void HEPMCReader::FillEventInformations(const std::string& line,
   str >> tmp;
   if (tmp>0)
   {
-    std::vector<double> weights(static_cast<unsigned int>(tmp));
-    for (unsigned int i=0;i<weights.size();i++)
+    MAuint32 nweights=static_cast<MAuint32>(tmp);
+    for (MAuint32 i=0;i<nweights;i++)
     {
-      if (i==0) str >> myEvent.mc()->weight_;
-      str >> weights[i];
+      MAfloat64 value;
+      str >> value;
+      if (i==0) myEvent.mc()->weight_=value;
+      myEvent.mc()->multiweights().Add(i+1,value);
     }
   }
 

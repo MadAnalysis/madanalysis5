@@ -207,6 +207,25 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
 {
 
   // ---------------------------------------------------------------------------
+  // Weight
+  // ---------------------------------------------------------------------------
+  if (data_.Weight_!=0)
+  {
+    // Number of generated particles
+    MAuint32 nweights = static_cast<MAuint32>(data_.Weight_->GetEntries());
+
+    for (unsigned int i=0;i<static_cast<MAuint32>(data_.Weight_->GetEntries());i++)
+    {
+      // getting the i-th particle
+      LHEFWeight* weight = dynamic_cast<LHEFWeight*>(data_.Weight_->At(i));
+      if (weight==0) continue;
+
+      // creating new particle and filling particle info
+      myEvent.mc()->multiweights().Add(weight->ID,weight->Weight);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // GenParticle collection
   // ---------------------------------------------------------------------------
   std::map<const GenParticle*,unsigned int> gentable;

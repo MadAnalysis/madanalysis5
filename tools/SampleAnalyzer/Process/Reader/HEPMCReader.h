@@ -51,7 +51,6 @@ class HEPMCReader : public ReaderTextBase
   float energy_unit_;
   float length_unit_;
   std::string savedline_;     // last saved line
-  std::vector<std::string> weightnames_;
   bool firstHeavyIons_;
   MAuint64 nparts_max_;
   MAuint64 nvertices_max_;

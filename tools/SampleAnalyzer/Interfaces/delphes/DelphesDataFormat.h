@@ -54,6 +54,7 @@ struct DelphesDataFormat
   TClonesArray* Track_;
   TClonesArray* Tower_;
   TClonesArray* Event_;
+  TClonesArray* Weight_;
   TClonesArray* EFlowTrack_;
   TClonesArray* EFlowPhoton_;
   TClonesArray* EFlowNeutral_;
@@ -70,6 +71,7 @@ struct DelphesDataFormat
   TBranch* branchTrack_;
   TBranch* branchTower_;
   TBranch* branchEvent_;
+  TBranch* branchWeight_;
   TBranch* branchEFlowTrack_;
   TBranch* branchEFlowPhoton_;
   TBranch* branchEFlowNeutral_;

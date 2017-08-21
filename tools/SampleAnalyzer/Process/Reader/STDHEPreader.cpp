@@ -518,7 +518,7 @@ bool STDHEPreader::DecodeEventData(const std::string& version,
   *xdrinput_ >> idhept_;
 
   // Extracting jmohept
-  *xdrinput_ >>  jmohept_;
+  *xdrinput_ >> jmohept_;
 
   // Extracting jdahept
   *xdrinput_ >> jdahept_;
@@ -629,7 +629,7 @@ bool STDHEPreader::DecodeSTDHEP4(const std::string& version,
   *xdrinput_ >> idhept_;
 
   // Extracting jmohept
-  *xdrinput_ >>  jmohept_;
+  *xdrinput_ >> jmohept_;
 
   // Extracting jdahept
   *xdrinput_ >> jdahept_;

@@ -240,6 +240,7 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySamp
       { 
         if (!ReadLine(line)) return StatusCode::FAILURE;
         EndReweighting = (line.find("</rwgt>")!=std::string::npos);
+        FillWeightLine(line,myEvent);
       }
       while(!EndReweighting);
       if (!ReadLine(line)) return StatusCode::FAILURE;
@@ -463,3 +464,41 @@ void LHEReader::FillEventParticleLine(const std::string& line,
   mothers_.push_back(std::make_pair(mothup1,mothup2));
 }
 
+
+// -----------------------------------------------------------------------------
+// FillWeightLine
+// -----------------------------------------------------------------------------
+void LHEReader::FillWeightLine(const std::string& line,
+                               EventFormat& myEvent)
+{
+  std::stringstream str;
+  str << line;
+
+  std::string tmp;
+  str >> tmp;
+  if (tmp!="<wgt") return;
+
+  std::size_t found1 = line.find("\"");
+  if (found1==std::string::npos) return;
+  std::size_t found2 = line.find("\"",found1+1);
+  if (found2==std::string::npos) return;
+  std::string idstring = line.substr(found1+1,found2-found1-1);
+
+  std::stringstream str2;
+  str2<<idstring;
+  MAuint32 id;
+  str2>>id;
+  
+  found1 = line.find(">");
+  if (found1==std::string::npos) return;
+  found2 = line.find("<",found1+1);
+  if (found2==std::string::npos) return;
+  std::string valuestring = line.substr(found1+1,found2-found1-1);
+
+  std::stringstream str3;
+  str3<<valuestring;
+  MAfloat64 value;
+  str3>>value;
+
+  myEvent.mc()->multiweights().Add(id,value);
+}

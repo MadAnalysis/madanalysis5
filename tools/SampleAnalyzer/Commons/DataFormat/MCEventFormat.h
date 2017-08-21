@@ -34,6 +34,7 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/DataFormat/MCParticleFormat.h"
+#include "SampleAnalyzer/Commons/DataFormat/WeightCollection.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
 
@@ -89,6 +90,8 @@ class MCEventFormat
   /// Computed Scalar sum of hadronic transverse energy
   MAfloat64 THT_;
 
+  /// List of weights
+  WeightCollection multiweights_;
 
 
   // -------------------------------------------------------------
@@ -148,6 +151,15 @@ class MCEventFormat
   /// Accessor to alpha_QCD
   const MAfloat64& alphaQCD()  const {return alphaQCD_; }
 
+  /// Accessor to multiweights
+  const WeightCollection& multiweights()  const {return multiweights_; }
+
+  /// Accessor to multiweights
+  WeightCollection& multiweights() {return multiweights_; }
+
+  /// Accessor to multiweights
+  const MAfloat64& multiweights(MAuint32 weight)  const {return multiweights_[weight]; }
+
   /// Accessor to the generated particle collection (read-only)
   const std::vector<MCParticleFormat>& particles() const {return particles_;}
 
@@ -175,6 +187,7 @@ class MCEventFormat
     processId_=0; weight_=1.;
     scale_=0.; alphaQED_=0.; alphaQCD_=0.;
     particles_.clear(); 
+    multiweights_.Reset();
     MET_.Reset();
     MHT_.Reset();
     TET_=0.;
@@ -190,6 +203,7 @@ class MCEventFormat
          << " - scale="     << scale_
          << " - alphaQED="  << alphaQED_
          << " - alphaQCD="  << alphaQCD_ << endmsg;
+    INFO << "nweights=" << multiweights_.size() << endmsg;
   }
 
   /// Displaying data 

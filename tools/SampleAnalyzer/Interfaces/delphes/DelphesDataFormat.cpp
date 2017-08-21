@@ -53,6 +53,7 @@ DelphesDataFormat::DelphesDataFormat()
   branchEFlowPhoton_  = 0;
   branchEFlowNeutral_ = 0;
   branchEvent_        = 0;
+  branchWeight_       = 0;
   FatJet_       = 0;
   Jet_          = 0;
   Electron_     = 0;
@@ -67,6 +68,7 @@ DelphesDataFormat::DelphesDataFormat()
   EFlowPhoton_  = 0;
   EFlowNeutral_ = 0;
   Event_        = 0;
+  Weight_       = 0;
   delphesMA5card_ = false;
 }
 
@@ -89,6 +91,7 @@ DelphesDataFormat::~DelphesDataFormat()
   if (EFlowPhoton_!=0)  delete EFlowPhoton_;
   if (EFlowNeutral_!=0) delete EFlowNeutral_;
   if (Event_!=0)        delete Event_;
+  if (Weight_!=0)       delete Weight_;
 }
 
 
@@ -112,6 +115,7 @@ bool DelphesDataFormat::GetEntry(MAint64 treeEntry)
   if (branchEFlowPhoton_!=0)  test &= (branchEFlowPhoton_  -> GetEntry(treeEntry) >=0);
   if (branchEFlowNeutral_!=0) test &= (branchEFlowNeutral_ -> GetEntry(treeEntry) >=0);
   if (branchEvent_!=0)        test &= (branchEvent_        -> GetEntry(treeEntry) >=0);
+  if (branchWeight_!=0)       test &= (branchWeight_       -> GetEntry(treeEntry) >=0);
   return test;
 }
 
@@ -123,6 +127,7 @@ void DelphesDataFormat::InitializeData()
 {
   // Official Delphes collections
   InitializeData(branchEvent_,        Event_);
+  InitializeData(branchWeight_,       Weight_);
   InitializeData(branchGenParticle_,  GenParticle_);
   InitializeData(branchMET_,          MET_);
   InitializeData(branchTower_,        Tower_);
@@ -146,6 +151,7 @@ void DelphesDataFormat::InitializeBranch(TTree* tree)
 {
   // Official Delphes collections
   branchEvent_        = tree->GetBranch("Event");
+  branchWeight_       = tree->GetBranch("Weight");
   branchGenParticle_  = tree->GetBranch("Particle");
   branchMET_          = tree->GetBranch("MissingET");
   branchTower_        = tree->GetBranch("Tower");

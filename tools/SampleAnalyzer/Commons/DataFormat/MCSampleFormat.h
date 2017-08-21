@@ -35,6 +35,7 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/DataFormat/GeneratorInfo.h"
 #include "SampleAnalyzer/Commons/DataFormat/MCProcessFormat.h"
+#include "SampleAnalyzer/Commons/DataFormat/WeightDefinition.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h" 
 
 
@@ -69,14 +70,16 @@ class MCSampleFormat
  private:
 
   // ---------------------- physics info -------------------------
-  std::pair<MAint32,MAint32>        beamPDGID_;    
-  std::pair<MAfloat64,MAfloat64>  beamE_;        
-  std::pair<MAuint32,MAuint32>      beamPDFauthor_;
-  std::pair<MAuint32,MAuint32>      beamPDFID_;
-  MAint32                         weightMode_;
-  std::vector<ProcessFormat>    processes_;
-  const MA5GEN::GeneratorType*  sample_generator_;
+  std::pair<MAint32,MAint32>     beamPDGID_;    
+  std::pair<MAfloat64,MAfloat64> beamE_;        
+  std::pair<MAuint32,MAuint32>   beamPDFauthor_;
+  std::pair<MAuint32,MAuint32>   beamPDFID_;
+  MAint32                        weightMode_;
+  std::vector<ProcessFormat>     processes_;
+  const MA5GEN::GeneratorType*   sample_generator_;
 
+  // ----------------------- multiweights ------------------------
+  WeightDefinition weight_definition_;
 
   // ----------------------- file info ---------------------------
   MAfloat64 xsection_;
@@ -111,6 +114,9 @@ class MCSampleFormat
     beamPDFID_          = std::make_pair(0,0);
     weightMode_         = 0; 
     processes_.clear();
+
+    // WeightDefinition
+    weight_definition_.Reset();
 
     // File info
     xsection_           = 0.;
@@ -170,6 +176,14 @@ class MCSampleFormat
   /// Accessor to the process collection
   std::vector<ProcessFormat>& processes()
   { return processes_; }
+
+  /// Accessor to the weight definition (read-only)
+  const WeightDefinition& weight_definition() const
+  { return weight_definition_; }
+  
+  /// Accessor to the weight definition
+  WeightDefinition& weight_definition()
+  { return weight_definition_; }
 
   /// Set the PDG ID of the intial partons
   void setBeamPDGID(MAint32 a, MAint32 b) 
