@@ -29,6 +29,7 @@
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelectionManager.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
+
 using namespace MA5;
 
 /// Apply a cut

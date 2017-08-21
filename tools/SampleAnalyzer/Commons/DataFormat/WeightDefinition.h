@@ -25,6 +25,7 @@
 #ifndef WEIGHT_DEFINITION_H
 #define WEIGHT_DEFINITION_H
 
+
 // STL headers
 #include <map>
 #include <set>

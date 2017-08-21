@@ -214,7 +214,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
     // Number of generated particles
     MAuint32 nweights = static_cast<MAuint32>(data_.Weight_->GetEntries());
 
-    for (unsigned int i=0;i<static_cast<MAuint32>(data_.Weight_->GetEntries());i++)
+    for (unsigned int i=0;i<nweights;i++)
     {
       // getting the i-th particle
       LHEFWeight* weight = dynamic_cast<LHEFWeight*>(data_.Weight_->At(i));

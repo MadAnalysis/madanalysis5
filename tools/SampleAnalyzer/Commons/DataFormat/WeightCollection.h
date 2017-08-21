@@ -25,6 +25,7 @@
 #ifndef WEIGHT_COLLECTION_H
 #define WEIGHT_COLLECTION_H
 
+
 // STL headers
 #include <map>
 #include <iostream>
