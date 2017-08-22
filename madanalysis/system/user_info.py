@@ -38,6 +38,9 @@ class UserInfo:
         # MatPlotLib
         self.matplotlib_veto = None
 
+        # SciPy
+        self.scipy_veto = None
+
         # Delphes
         self.delphes_veto     = None
         self.delphes_includes = None
@@ -171,6 +174,10 @@ class UserInfo:
         # Matplotlib
         elif   option=='matplotlib_veto':
             self.matplotlib_veto=self.ConvertToBool(option,value,filename)
+
+        # Scipy
+        elif   option=='scipy_veto':
+            self.scipy_veto=self.ConvertToBool(option,value,filename)
 
         # Delphes
         elif option=='delphes_veto':

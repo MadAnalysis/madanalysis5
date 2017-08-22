@@ -28,6 +28,7 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/DisplayService.h"
+#include "SampleAnalyzer/Commons/Service/ConvertService.h"
 #include "SampleAnalyzer/Interfaces/delphes/DetectorDelphes.h"
 #include "SampleAnalyzer/Interfaces/delphes/DelphesMemoryInterface.h"
 
@@ -256,34 +257,60 @@ void DetectorDelphes::StoreEventHeader(SampleFormat& mySample, EventFormat& myEv
 
 void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat& myEvent)
 {
+  // Create a table for generated particle
   std::map<const MCParticleFormat*,MAuint32> gentable; 
   std::map<const MCParticleFormat*,MAuint32>::iterator ret;
-  for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
+  for (MAuint32 i=0;i<myEvent.mc()->particles().size();i++)
   {
     const MCParticleFormat* part = &(myEvent.mc()->particles()[i]);
     gentable[part]=i;
   }
 
-  for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
+  // Loop over generated particles
+  for (MAuint32 i=0;i<myEvent.mc()->particles().size();i++)
   {
+    // Shortcut to the MA5 particle 
     const MCParticleFormat* part = &(myEvent.mc()->particles()[i]);
+    MAuint32 pdgCode=std::abs(part->pdgid());
+
+    // Adding a new Delphes particle
     Candidate* candidate = factory_->NewCandidate();
 
+    // Filling Delphes particle with obvious information
     candidate->PID = part->pdgid();
-    unsigned int pdgCode=std::abs(part->pdgid());
-
     candidate->Status = part->statuscode();
     candidate->Momentum.SetPxPyPzE(part->px(), part->py(), part->pz(), part->e());
     candidate->Position.SetXYZT(0., 0., 0., 0.);
 
+    // Filling Delphes particle with PDG information
+    TParticlePDG* pdgParticle = PDG_->GetParticle(part->pdgid());
+    if (pdgParticle==0) // Unknown particle?
+    { 
+        try
+        {
+          if (candidate->Status==1) throw EXCEPTION_WARNING("Unknown particle by Delphes in the final state","particle with PDGID="+CONVERT->ToString(part->pdgid()),0);
+        }
+        catch(const std::exception& e)
+        {
+          MANAGE_EXCEPTION(e);
+        }
+        // not filled Mass & Charge
+    }
+    else
+    {
+      candidate->Charge = pdgParticle ? int(pdgParticle->Charge()/3.0) : -999;
+      candidate->Mass   = pdgParticle ? pdgParticle->Mass() : -999.9;
+    }
+
+    // Filling mother-daughter information
     candidate->M1=0;
     candidate->M2=0;
     candidate->D1=0;
     candidate->D2=0;
-    std::vector<MAint32*> mothers;
+    std::vector<MAint32*> mothers(2);
     mothers[0]=&(candidate->M1);
     mothers[1]=&(candidate->M2);
-    std::vector<MAint32*> daughters;
+    std::vector<MAint32*> daughters(2);
     daughters[0]=&(candidate->D1);
     daughters[1]=&(candidate->D2);
     for(MAuint32 mum=0;mum<std::min(static_cast<MAuint32>(part->mothers().size()),
@@ -313,22 +340,15 @@ void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat&
       }
     }
 
-    TParticlePDG* pdgParticle = PDG_->GetParticle(part->pdgid());
-    if (pdgParticle==0) 
-    { 
-      //FIX ERIC: WARNING << "Particle not found in PDG" << endmsg;
-      allParticleOutputArray_->Add(candidate);
-      continue;
-    }
-
-    candidate->Charge = pdgParticle ? int(pdgParticle->Charge()/3.0) : -999;
-    candidate->Mass = pdgParticle ? pdgParticle->Mass() : -999.9;
+    // Saving the particle in AllGenParticle
     allParticleOutputArray_->Add(candidate);
 
+    // Saving the particle in StableParticle collection
     if(part->statuscode() == 1 && pdgParticle->Stable())
     {
       stableParticleOutputArray_->Add(candidate);
     }
+    // Saving the particle in Parton collection
     else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15)
     {
       partonOutputArray_->Add(candidate);

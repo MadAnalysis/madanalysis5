@@ -67,6 +67,9 @@ class DetectManager():
         elif package=='matplotlib':
             from madanalysis.system.detect_matplotlib import DetectMatplotlib
             checker=DetectMatplotlib(self.archi_info, self.user_info, self.session_info, self.debug)
+        elif package=='scipy':
+            from madanalysis.system.detect_scipy import DetectScipy
+            checker=DetectScipy(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='root_graphical':
             from madanalysis.system.detect_root_graphical import DetectRootGraphical
             checker=DetectRootGraphical(self.archi_info, self.user_info, self.session_info, self.debug)

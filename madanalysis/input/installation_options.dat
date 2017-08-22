@@ -39,3 +39,5 @@
 # -----LATEX-----
 # latex_veto = 0 # 0=No, 1=Yes
 
+# -----SCIPY-----
+# scipy_veto = 0 # 0=No, 1=Yes

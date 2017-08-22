@@ -147,7 +147,7 @@ class InstallDelphes:
         # Updating ExRootTask
         filename = self.installdir+'/external/ExRootAnalysis/ExRootConfReader.cc'
         self.logger.debug('Updating files: commenting out lines in: '+filename+' ...')
-        self.CommentLines(filename,[178,189,180],'//')
+        self.CommentLines(filename,[177,178,179,180],'//')
 
         # Adding files
         filesToAdd = ["MA5GenParticleFilter"]

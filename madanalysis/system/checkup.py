@@ -317,6 +317,8 @@ class CheckUp():
 #        self.archi_info.has_zlib              = checker2.checkZLIB()
         if not self.checker.Execute('zlib'):
             return False
+        if not self.checker.Execute('scipy'):
+            return False
         if not self.checker.Execute('fastjet'):
             return False
         if not self.checker.Execute('root'):
