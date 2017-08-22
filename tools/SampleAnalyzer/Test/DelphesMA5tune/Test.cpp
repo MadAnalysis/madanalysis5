@@ -33,7 +33,7 @@ using namespace MA5;
 // -----------------------------------------------------------------------
 // main program
 // -----------------------------------------------------------------------
-int main(int argc, char *argv[])
+MAint32 main(int argc, char *argv[])
 {
   std::cout << "BEGIN-SAMPLEANALYZER-TEST" << std::endl;
   std::cout << std::endl;

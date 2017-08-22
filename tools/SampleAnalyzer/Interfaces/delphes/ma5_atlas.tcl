@@ -13,6 +13,9 @@ set ExecutionPath {
   ElectronMomentumSmearing
   MuonMomentumSmearing
 
+  ElectronTrackingEfficiencyD0
+  MuonTrackingEfficiencyD0
+
   TrackMerger
 
   ECal
@@ -176,6 +179,34 @@ module MomentumSmearing MuonMomentumSmearing {
                          (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1) * sqrt(0.025^2 + pt^2*3.5e-4^2)}
 }
 
+
+##############################
+# Electron tracking efficiency
+##############################
+
+module MA5EfficiencyD0 ElectronTrackingEfficiencyD0 {
+  set InputArray  ElectronMomentumSmearing/electrons
+  set OutputArray electrons
+
+  # tracking efficiency formula for electrons
+  set EfficiencyFormula {1.0}
+}
+
+
+
+##############################
+# Muon tracking efficiency
+##############################
+
+module MA5EfficiencyD0 MuonTrackingEfficiencyD0 {
+  set InputArray  MuonMomentumSmearing/muons
+  set OutputArray muons
+
+  # tracking efficiency formula for electrons
+  set EfficiencyFormula {1.0}
+}
+
+
 ##############
 # Track merger
 ##############
@@ -183,8 +214,8 @@ module MomentumSmearing MuonMomentumSmearing {
 module Merger TrackMerger {
 # add InputArray InputArray
   add InputArray ChargedHadronMomentumSmearing/chargedHadrons
-  add InputArray ElectronMomentumSmearing/electrons
-  add InputArray MuonMomentumSmearing/muons
+  add InputArray ElectronTrackingEfficiencyD0/electrons
+  add InputArray MuonTrackingEfficiencyD0/muons
   set OutputArray tracks
 }
 
@@ -469,7 +500,7 @@ module Efficiency ElectronEfficiency {
 #################
 
 module Efficiency MuonEfficiency {
-  set InputArray MuonMomentumSmearing/muons
+  set InputArray MuonTrackingEfficiencyD0/muons
   set OutputArray muons
 
   # set EfficiencyFormula {efficiency as a function of eta and pt}

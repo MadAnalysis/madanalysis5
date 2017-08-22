@@ -25,6 +25,8 @@
 // SampleHeader headers
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
+
+// FastJet headers
 #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoStandard.h"
 #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoSISCone.h"
 #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoCDFMidpoint.h"
@@ -42,7 +44,7 @@ using namespace MA5;
 // -----------------------------------------------------------------------
 // main program
 // -----------------------------------------------------------------------
-int main(int argc, char *argv[])
+MAint32 main(int argc, char *argv[])
 {
   std::cout << "BEGIN-SAMPLEANALYZER-TEST" << std::endl;
   std::cout << std::endl;
@@ -59,7 +61,7 @@ int main(int argc, char *argv[])
   tests.push_back(new ClusterAlgoCDFJetClu());
   tests.push_back(new ClusterAlgoGridJet());
 
-  for (unsigned int i=0;i<tests.size();i++) delete tests[i];
+  for (MAuint32 i=0;i<tests.size();i++) delete tests[i];
 
   std::cout << "END-SAMPLEANALYZER-TEST" << std::endl;
   return 0;

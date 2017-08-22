@@ -150,7 +150,7 @@ class InstallDelphes:
         self.CommentLines(filename,[177,178,179,180],'//')
 
         # Adding files
-        filesToAdd = ["MA5GenParticleFilter"]
+        filesToAdd = ["MA5GenParticleFilter","MA5EfficiencyD0"]
         if not self.CopyFiles(filesToAdd):
             return False
         if not self.UpdateDictionnary(filesToAdd):
@@ -405,6 +405,8 @@ class InstallDelphes:
     def CopyFiles(self,filesToAdd):
 
         for file in filesToAdd:
+            logging.debug("Add module *"+file+"* ...")
+
 
             inputname  = self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/delphes/'+file+'.cc.install'
             outputname = self.installdir+'/modules/'+file+'.cc'
@@ -426,7 +428,7 @@ class InstallDelphes:
                 self.logger.error("impossible to copy "+inputname+' in '+outputname)
                 return False
 
-            return True
+        return True
 
 
     def UpdateDictionnary(self,filesToAdd):
