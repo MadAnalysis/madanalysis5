@@ -628,7 +628,7 @@ class PlotFlow:
             # Creating a new histo
             histoname=histos[ind].name+'_'+str(ind)
             outputPy.write('    # Creating weights for histo: '+histoname+'\n')
-            outputPy.write('    '+histoname+'_weights = numpy.array([')
+            outputPy.write('    y'+histoname+'_weights = numpy.array([')
             for bin in range(1,xnbin+1):
                 ntot+=histos[ind].summary.array[bin-1]*scales[ind]
                 if bin!=1:
@@ -660,18 +660,18 @@ class PlotFlow:
         # Stack
         outputPy.write('    # Creating a new Stack\n')
         for ind in range(len(histos)-1,-1,-1):
-            myweight = histos[ind].name+'_'+str(ind)+'_weights'
+            myweight = 'y'+histos[ind].name+'_'+str(ind)+'_weights'
             mytitle  = '"'+PlotFlow.NiceTitleMatplotlib(self.main.datasets[ind].title)+'"'
             mytitle  = mytitle.replace('_','\_')
 
             if not stackmode:
-                myweights=histos[ind].name+'_'+str(ind)+'_weights'
+                myweights='y'+histos[ind].name+'_'+str(ind)+'_weights'
             else:
                 myweights=''
                 for ind2 in range(0,ind+1):
                     if ind2>=1:
                         myweights+='+'
-                    myweights+=histos[ind2].name+'_'+str(ind2)+'_weights'
+                    myweights+='y'+histos[ind2].name+'_'+str(ind2)+'_weights'
 
             # reset
             linecolor=0
@@ -786,7 +786,6 @@ class PlotFlow:
             mylinewidth  = self.main.datasets[ind].linewidth
             mylinestyle  = LineStyleType.convert2matplotlib(self.main.datasets[ind].linestyle)
 
-                
             outputPy.write('    pad.hist('+\
                                'x=xData, '+\
                                'bins=xBinning, '+\
@@ -857,7 +856,7 @@ class PlotFlow:
             for ind in range(0,len(histos)):
                 if ind>=1:
                     myweights+='+'
-                myweights+=histos[ind].name+'_'+str(ind)+'_weights'
+                myweights+='y'+histos[ind].name+'_'+str(ind)+'_weights'
         else:
             myweights='numpy.array(['
             for ind in range(0,len(histos)):
@@ -876,13 +875,13 @@ class PlotFlow:
             for ind in range(0,len(histos)):
                 if ind>=1:
                     myweights+='+'
-                myweights+=histos[ind].name+'_'+str(ind)+'_weights'
+                myweights+='y'+histos[ind].name+'_'+str(ind)+'_weights'
         else:
             myweights='numpy.array(['
             for ind in range(0,len(histos)):
                 if ind>=1:
                     myweights+=','
-                myweights+=histos[ind].name+'_'+str(ind)+'_weights.min()'
+                myweights+='y'+histos[ind].name+'_'+str(ind)+'_weights.min()'
             myweights+='])'
         outputPy.write('    ')
         if not is_logy:
