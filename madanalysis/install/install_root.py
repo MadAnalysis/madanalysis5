@@ -23,6 +23,7 @@
 
 
 from madanalysis.install.install_service import InstallService
+from madanalysis.IOinterface.folder_writer import FolderWriter
 from shell_command import ShellCommand
 import os
 import sys

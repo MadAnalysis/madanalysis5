@@ -43,11 +43,16 @@ class ExpertMode:
         
     def CreateDirectory(self,name):
         if name=="":
+          logging.getLogger('MA5').debug("Debug mode: no directory name is specified.")
           logging.getLogger('MA5').info("\nWelcome to the expert mode of MadAnalysis")
           logging.getLogger('MA5').info("Please enter a folder name for creating an empty SampleAnalyzer job")
           answer=raw_input("Answer: ")
-          answer=answer.replace(' ','_');
-          name  =answer.replace('-','_');
+          answer=answer.replace(' ','_')
+          name  =answer.replace('-','_')
+        else:
+          logging.getLogger('MA5').debug("Debug mode: a directory name is specified.")
+
+        # Getting the full path
         self.path = os.path.expanduser(name)
         if not self.path.startswith('/'):
             if name in ['PAD', 'PADForMA5tune']:
@@ -55,27 +60,25 @@ class ExpertMode:
             else:
                 self.path = self.main.currentdir+'/'+self.path
         self.path = os.path.normpath(self.path)
+        logging.getLogger('MA5').debug("Full path of the working directory: "+self.path)
 
         # Checking folder
+        logging.getLogger('MA5').debug("Check that the path is not forbidden...")
         if self.path in self.forbiddenpaths:
             logging.getLogger('MA5').error("the folder '"+anwser+"' is a MadAnalysis folder. " + \
                          "You cannot overwrite it. Please choose another folder.")
             return False
 
-        # Checking if the job folder exists
+        # Checking if the job folder exists, if not remove it
         if os.path.isdir(self.path):
-            logging.getLogger('MA5').warning("A directory called '"+self.path+"' is already "+ \
-                            "defined.\nWould you like to remove it ? (Y/N)")
-            allowed_answers=['n','no','y','yes']
-            answer=""
-            while answer not in  allowed_answers:
-                answer=raw_input("Answer: ")
-                answer=answer.lower()
-            if answer=="no" or answer=="n":
+            logging.getLogger('MA5').debug("Remove the previous folder?")
+            question="A directory called '"+self.path+"' is already defined.\n"+\
+                 "Would you like to remove it ? (Y/N)"
+            from madanalysis.IOinterface.folder_writer import FolderWriter
+            test = FolderWriter.RemoveDirectory(self.path,question)
+            if not test[0] or not test[1]:
                 return False
-            else:
-                if not FolderWriter.RemoveDirectory(self.path,False):
-                    return False
+
         return True
 
 
