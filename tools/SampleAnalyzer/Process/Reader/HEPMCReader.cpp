@@ -494,7 +494,6 @@ void HEPMCReader::FillEventParticleLine(const std::string& line,
   str >> e;                 // Lorentz-vector e
   str >> tmp;               // Lorentz-vector mass
   str >> part->statuscode_; // statuscode
-
   str >> tmp;               // color flow
   str >> tmp;               // pointer to the production vertex
   str >> decay_barcode;     // pointer to the decay vertex

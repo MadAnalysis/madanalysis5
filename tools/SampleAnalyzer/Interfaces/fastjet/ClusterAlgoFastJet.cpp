@@ -54,13 +54,15 @@ bool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent, b
   //               - visible
   //               - if exclusiveID=1: particles not vetoed
   //               - if exclusiveID=0: all particles except muons 
-  for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
+  for (MAuint32 i=0;i<myEvent.mc()->particles().size();i++)
   {
     const MCParticleFormat& part = myEvent.mc()->particles()[i];
 
     // Selecting input for jet clustering
-    if (myEvent.mc()->particles()[i].statuscode()!=1)       continue;
-    if (PHYSICS->Id->IsInvisible(myEvent.mc()->particles()[i])) continue;
+    // | final state only
+    if (part.statuscode()!=1) continue;
+    // ! not invisible: reject neutrinos, neutralinos, ...
+    if (PHYSICS->Id->IsInvisible(part)) continue;
 
     // ExclusiveId mode
     if (ExclusiveId)
@@ -70,17 +72,22 @@ bool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent, b
     }
 
     // NonExclusive Id mode
-    else if (std::abs(myEvent.mc()->particles()[i].pdgid())==13) continue;
+    else if (std::abs(part.pdgid())==13) continue;
 
+    double e = 0;
+    if (part.e()>0) e=part.e();
     // Filling good particle for clustering
-    inputs.push_back(
-          fastjet::PseudoJet ( myEvent.mc()->particles()[i].px(), 
-                               myEvent.mc()->particles()[i].py(),
-                               myEvent.mc()->particles()[i].pz(),
-                               myEvent.mc()->particles()[i].e()   ));
+    inputs.push_back(fastjet::PseudoJet( part.px(), 
+                                         part.py(),
+                                         part.pz(),
+                                         part.e()   ));
     inputs.back().set_user_index(i);
   }
 
+  /*  for (unsigned int i=0;i<inputs.size();i++)
+  {
+    std::cout << "px=" << inputs[i].px() << " py=" << inputs[i].py() << " pz=" << inputs[i].pz() << " e=" << inputs[i].e() << std::endl;
+    }*/
 
   // Clustering
   fastjet::ClusterSequence clust_seq(inputs, *JetDefinition_);
@@ -98,7 +105,7 @@ bool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent, b
   double & TET = myEvent.rec()->TET();
   double & THT = myEvent.rec()->THT();
 
-  for (unsigned int i=0;i<jets.size();i++)
+  for (MAuint32 i=0;i<jets.size();i++)
   {
     MALorentzVector q(jets[i].px(),jets[i].py(),jets[i].pz(),jets[i].e());
     (*MET) -= q;
@@ -112,13 +119,13 @@ bool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent, b
   else jets = clust_seq.inclusive_jets(Ptmin_);
 
   // Filling the dataformat with jets
-  for (unsigned int i=0;i<jets.size();i++)
+  for (MAuint32 i=0;i<jets.size();i++)
   {
     RecJetFormat * jet = myEvent.rec()->GetNewJet();
     jet->setMomentum(MALorentzVector(jets[i].px(),jets[i].py(),jets[i].pz(),jets[i].e()));
     std::vector<fastjet::PseudoJet> constituents = clust_seq.constituents(jets[i]);
     MAuint32 tracks = 0;
-    for (unsigned int j=0;j<constituents.size();j++)
+    for (MAuint32 j=0;j<constituents.size();j++)
     {
       jet->AddConstituent(constituents[j].user_index());
       //      if (std::abs(myEvent.mc()->particles()[constituents[j].user_index()].pdgid())==11) continue;

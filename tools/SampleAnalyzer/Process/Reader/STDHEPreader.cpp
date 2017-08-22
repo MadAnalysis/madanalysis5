@@ -552,7 +552,7 @@ bool STDHEPreader::DecodeEventData(const std::string& version,
     mothup2           = jmohept_[2*i+1];
     // daughter1_        = jdahept_[2*i];
     // daughter2_        = jdahept_[2*i+1];
-    part->momentum_.SetPxPyPzE(phept_[5*i],phept_[5*i]+1,phept_[5*i]+2,phept_[5*i]+3);
+    part->momentum_.SetPxPyPzE(phept_[5*i],phept_[5*i+1],phept_[5*i+2],phept_[5*i+3]);
     mothers_.push_back(std::make_pair(mothup1,mothup2));
 
     // For debug
@@ -691,41 +691,12 @@ bool STDHEPreader::DecodeSTDHEP4(const std::string& version,
     mothup2           = jmohept_[2*i+1];
     // daughter1_  = jdahept_[2*i];
     // daughter2_  = jdahept_[2*i+1];
-    part->momentum_.SetPxPyPzE(phept_[5*i],phept_[5*i]+1,phept_[5*i]+2,phept_[5*i]+3);
+    part->momentum_.SetPxPyPzE(phept_[5*i],phept_[5*i+1],phept_[5*i+2],phept_[5*i+3]);
+    mothers_.push_back(std::make_pair(mothup1,mothup2));
 
     // For debug
     //    std::cout << "pdgid=" << part->pdgid_ << "  status=" << part->statuscode_ 
     //              << "  mothup1=" << mothup1 <<"  mothup2=" << mothup2 << std::endl;         
-
-    // Set daughter-mother relation
-    if (mothup1!=0)
-    {
-      if (mothup1>0 && mothup1<=myEvent.mc()->particles().size())
-      {
-        MCParticleFormat* mum = &(myEvent.mc()->particles()[static_cast<MAuint32>(mothup1-1)]);
-        part->mothers().push_back(mum);
-        mum->daughters().push_back(part);
-      }
-      else
-      {
-        std::cout << "ERROR : internal problem with mother-daughter particles" << std::endl;
-      }
-    }
-
-    if (mothup2!=0 && mothup1!=mothup2)
-    {
-      if (mothup2>0 && mothup2<=myEvent.mc()->particles().size())
-      {
-        MCParticleFormat* mum = &(myEvent.mc()->particles()[static_cast<MAuint32>(mothup2-1)]);
-        part->mothers().push_back(mum);
-        mum->daughters().push_back(part);
-      }
-      else
-      {
-        std::cout << "ERROR : internal problem with mother-daughter particles" << std::endl;
-      }
-    }
-
   }
 
   return true;
