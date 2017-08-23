@@ -194,8 +194,13 @@ module MA5EfficiencyD0 ElectronTrackingEfficiencyD0 {
   set InputArray  ElectronMomentumSmearing/electrons
   set OutputArray electrons
 
-  # tracking efficiency formula for electrons
-  set EfficiencyFormula {1.0}
+  # standard-algo (d0 in mm)
+  #  set EfficiencyFormula { (d0 <=600) * (7.48324e-16 * d0**6 - 1.51117e-12 * d0**5 + 1.19454e-09 * d0**4 - 4.69901e-07 * d0**3 + 9.79836E-05 * d0**2 - 0.0115465 * d0 + 1) + 
+  #                          (d0 >=600) * (0.00) }
+
+  # displaced-algo for 13 TeV (d0 in mm)
+  set EfficiencyFormula { (d0 <=600) * (1.13477e-16 * d0**6 - 2.54327e-13 * d0**5 + 2.28586e-10 * d0**4 - 1,05512E-07 * d0**3 + 2,62108E-05 * d0**2 - 0.00375463 * d0 + 1) + 
+                          (d0 >=600) * (0.00) }
 }
 
 
@@ -208,9 +213,16 @@ module MA5EfficiencyD0 MuonTrackingEfficiencyD0 {
   set InputArray  MuonMomentumSmearing/muons
   set OutputArray muons
 
-  # tracking efficiency formula for electrons
-  set EfficiencyFormula {1.0}
+  # standard-algo (d0 in mm)
+  #  set EfficiencyFormula { (d0 <=600) * (7.48324e-16 * d0**6 - 1.51117e-12 * d0**5 + 1.19454e-09 * d0**4 - 4.69901e-07 * d0**3 + 9.79836E-05 * d0**2 - 0.0115465 * d0 + 1) + 
+  #                          (d0 >=600) * (0.00) }
+
+  # displaced-algo for 13 TeV (d0 in mm)
+  set EfficiencyFormula { (d0 <=600) * (1.13477e-16 * d0**6 - 2.54327e-13 * d0**5 + 2.28586e-10 * d0**4 - 1,05512E-07 * d0**3 + 2,62108E-05 * d0**2 - 0.00375463 * d0 + 1) + 
+                          (d0 >=600) * (0.00) }
+
 }
+
 
 
 ##############

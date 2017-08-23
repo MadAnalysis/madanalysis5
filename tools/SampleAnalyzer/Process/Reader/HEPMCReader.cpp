@@ -565,6 +565,8 @@ void HEPMCReader::FillEventVertexLine(const std::string& line, EventFormat& myEv
   str >> z;        // z
   str >> ctau;     // ctau
 
+  //  std::cout << "x=" << x << " y=" << y << " z=" << z << " ctau=" << ctau << std::endl;
+
   /*
   std::map<MAint32,HEPVertex>::iterator it = vertices_.find(barcode);
   if (it!=vertices_.end())
