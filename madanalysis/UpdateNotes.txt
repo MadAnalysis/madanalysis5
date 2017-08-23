@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+168           (2017/08/23) fuks:    Bug fix in the computation of the histogram limits with matplotlib 
+
 163           (2017/08/22) fuks:    Fixing bugs with matplotlib 
 
 156           (2017/08/20) fuks:    Fixing the delphes interface for new g++ versions 

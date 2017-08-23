@@ -626,9 +626,9 @@ class PlotFlow:
             # Ntot
 
             # Creating a new histo
-            histoname=histos[ind].name+'_'+str(ind)
+            histoname='y'+histos[ind].name+'_'+str(ind)
             outputPy.write('    # Creating weights for histo: '+histoname+'\n')
-            outputPy.write('    y'+histoname+'_weights = numpy.array([')
+            outputPy.write('    '+histoname+'_weights = numpy.array([')
             for bin in range(1,xnbin+1):
                 ntot+=histos[ind].summary.array[bin-1]*scales[ind]
                 if bin!=1:
@@ -862,7 +862,7 @@ class PlotFlow:
             for ind in range(0,len(histos)):
                 if ind>=1:
                     myweights+=','
-                myweights+=histos[ind].name+'_'+str(ind)+'_weights.max()'
+                myweights+='y'+histos[ind].name+'_'+str(ind)+'_weights.max()'
             myweights+='])'
         outputPy.write('    ymax=('+myweights+').max()*1.1\n')
         outputPy.write('    ')
@@ -882,11 +882,11 @@ class PlotFlow:
                 if ind>=1:
                     myweights+=','
                 myweights+='y'+histos[ind].name+'_'+str(ind)+'_weights.min()'
-            myweights+='])'
+            myweights+=',1.])'
         outputPy.write('    ')
         if not is_logy:
             outputPy.write('#')
-        outputPy.write('ymin=min(1e-2, min(x for x in ('+myweights+') if x)/100.) # log scale\n')
+        outputPy.write('ymin=min([x for x in ('+myweights+') if x])/100. # log scale\n')
         outputPy.write('    plt.gca().set_ylim(ymin,ymax)\n')
         outputPy.write('\n')
 
