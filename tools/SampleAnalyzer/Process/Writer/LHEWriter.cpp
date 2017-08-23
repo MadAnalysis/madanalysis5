@@ -619,7 +619,7 @@ void LHEWriter::WriteParticle(const MCParticleFormat& myPart,
   lhe.pz      = myPart.momentum().Pz();
   lhe.e       = myPart.momentum().E();
   lhe.m       = myPart.momentum().M();
-  lhe.ctau    = myPart.ctau_;
+  lhe.ctau    = myPart.decay_vertex().T();
   lhe.spin    = myPart.spin_;
 }
 

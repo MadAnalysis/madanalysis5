@@ -71,7 +71,7 @@ void MA5EfficiencyD0::Init()
 {
   // read efficiency formula
 
-  fFormula->Compile(GetString("MA5EfficiencyD0Formula", "1.0"));
+  fFormula->Compile(GetString("EfficiencyFormula", "1.0"));
 
   // import input array
 
@@ -81,6 +81,12 @@ void MA5EfficiencyD0::Init()
   // create output array
 
   fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
+
+  // debugging 
+  //  std::cout << "benchmark: d0=100mm -> eff=" << fFormula->Eval(0, 0, 0, 100)
+  //            << " ; d0=300mm -> eff=" << fFormula->Eval(0, 0, 0, 300)
+  //            << " ; d0=500mm -> eff=" << fFormula->Eval(0, 0, 0, 500)
+  //            << std::endl;
 }
 
 //------------------------------------------------------------------------------
@@ -95,7 +101,10 @@ void MA5EfficiencyD0::Finish()
 void MA5EfficiencyD0::Process()
 { 
   Candidate *candidate;
-  Double_t pt, eta, phi, e;
+  Double_t d0;
+  Double_t pt;
+  Double_t eta;
+  Double_t phi;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
@@ -104,11 +113,14 @@ void MA5EfficiencyD0::Process()
     const TLorentzVector &candidateMomentum = candidate->Momentum;
     eta = candidatePosition.Eta();
     phi = candidatePosition.Phi();
-    pt = candidateMomentum.Pt();
-    e = candidateMomentum.E();
+    pt  = candidateMomentum.Pt();
+    d0  = std::abs(candidate->D0);
+
+    // debugging
+    //    std::cout << "d0=" << d0 << " - eff=" << fFormula->Eval(pt, eta, phi, d0) << std::endl;
 
     // apply an efficency formula
-    if(gRandom->Uniform() > fFormula->Eval(pt, eta, phi, e)) continue;
+    if(gRandom->Uniform() > fFormula->Eval(pt, eta, phi, d0)) continue;
     
     fOutputArray->Add(candidate);
   }

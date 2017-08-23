@@ -78,13 +78,10 @@ class MCParticleFormat : public ParticleBaseFormat
   /// For PYTHIA: more sophisticated 
   MAint16 statuscode_;
 
-  /// Proper lifetime ctau (in mm)
-  MAfloat32 ctau_;
-
   /// Cosine of the angle btwn the spin vector and its 3-momentum, in the lab frame
   MAfloat32 spin_;
 
-  /// Is PileUp particle or not?
+  /// Is a PileUp particle or not?
   MAbool isPU_;       
 
   /// List of daughter particles
@@ -92,6 +89,10 @@ class MCParticleFormat : public ParticleBaseFormat
 
   /// List of mother particles
   std::vector<MCParticleFormat*> mothers_;
+
+  // Decay position in time & space (in s & mm)
+  MALorentzVector decay_vertex_; 
+
 
  public:
 
@@ -105,7 +106,6 @@ class MCParticleFormat : public ParticleBaseFormat
   MCParticleFormat()
   {
     momentum_.SetPxPyPzE(0.,0.,0.,0.);
-    ctau_       = 0.; 
     spin_       = 0.; 
     pdgid_      = 0; 
     statuscode_ = 0; 
@@ -120,13 +120,13 @@ class MCParticleFormat : public ParticleBaseFormat
   virtual void Reset()
   {
     momentum_.SetPxPyPzE(0.,0.,0.,0.);
-    ctau_       = 0.; 
     spin_       = 0.; 
     pdgid_      = 0; 
     statuscode_ = 0; 
     isPU_       = false;
     daughters_.clear();
     mothers_.clear();
+    decay_vertex_.clear();
   }
 
   /// Print particle informations
@@ -136,7 +136,7 @@ class MCParticleFormat : public ParticleBaseFormat
          << ", "<</*set::setw(8)*/"" << std::left << momentum_.Py()  
          << ", "<</*set::setw(8)*/"" << std::left << momentum_.Pz() 
          << ", "<</*set::setw(8)*/"" << std::left << momentum_.E() << ") - " << endmsg;
-    INFO << "ctau=" << /*set::setw(8)*/"" << std::left << ctau_ << " - "
+    INFO << "ctau=" << /*set::setw(8)*/"" << std::left << decay_vertex_.T() << " - "
          << "spin=" << /*set::setw(8)*/"" << std::left << spin_ << " - "
          << "PDGID=" << /*set::setw(8)*/"" << std::left << pdgid_ << " - "
          << "StatusCode=" << /*set::setw(3)*/"" << std::left 
@@ -146,7 +146,7 @@ class MCParticleFormat : public ParticleBaseFormat
   }
 
   const MAbool& isPU()  const {return isPU_;}
-  const MAfloat32& ctau() const {return ctau_;}
+  const MAfloat64& ctau() const {return decay_vertex_.T();}
   const MAfloat32& spin() const {return spin_;}
   const MAint32& pdgid()  const {return pdgid_;}
   const MAint16& statuscode() const {return statuscode_;}
@@ -162,9 +162,12 @@ class MCParticleFormat : public ParticleBaseFormat
 
   /// Accessor to the daughters
   std::vector<MCParticleFormat*>& mothers() {return mothers_;}
+
+  /// Accessor to the decay vertex
+  const MALorentzVector& decay_vertex() const {return decay_vertex_;}
+
   // mutators
   void setIsPU(MAbool v)   {isPU_=v;}
-  void setCtau(MAfloat32 v)  {ctau_=v;}
   void setSpin(MAfloat32 v)  {spin_=v;}
   void setPdgid(MAint32 v)   {pdgid_=v;}
   void setStatuscode(MAint16 v)  {statuscode_=v;}

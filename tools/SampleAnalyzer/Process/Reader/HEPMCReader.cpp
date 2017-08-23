@@ -151,10 +151,18 @@ bool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
   if (myEvent.mc()->particles_.size()>nparts_max_) nparts_max_=myEvent.mc()->particles_.size();
 
 
-  // Mother+daughter relations
+  // Fill vertices information
   for (std::map<MAint32,HEPVertex>::iterator it=vertices_.begin();
        it!=vertices_.end(); it++)
   {
+    // Decay position & lifetime
+    for (MAuint32 i=0;i<it->second.out_.size();i++)
+    {
+        MCParticleFormat* part = &(myEvent.mc()->particles_[it->second.out_[i]]);
+        part->decay_vertex_.SetXYZT(it->second.x_,it->second.y_,it->second.z_,it->second.ctau_);
+    }
+
+    // Mother+daughter relations
     for (MAuint32 i=0;i<it->second.in_.size();i++)
     {
       for (MAuint32 j=0;j<it->second.out_.size();j++)
@@ -518,25 +526,6 @@ void HEPMCReader::FillEventParticleLine(const std::string& line,
   ret = vertices_.insert(std::make_pair(decay_barcode,HEPVertex()));
   ret.first->second.in_.push_back(part_index);
 
-  /*
-  // Set production vertex
-  std::map<MAint32,HEPVertex>::iterator it;
-  it = vertices_.find(currentvertex_);
-  if (it==vertices_.end())
-  {
-    vertices_[currentvertex_]=HEPVertex();
-  }
-  vertices_[currentvertex_].out_.push_back(part_index);
-
-  // Set decay vertex
-  it = vertices_.find(decay_barcode);
-  if (it==vertices_.end())
-  {
-    vertices_[decay_barcode]=HEPVertex();
-  }
-  vertices_[decay_barcode].in_.push_back(part_index);   
-  */
-
   // Ok
   return;
 }
@@ -551,44 +540,28 @@ void HEPMCReader::FillEventVertexLine(const std::string& line, EventFormat& myEv
 
   char linecode;
   MAint32 barcode;
-  MAfloat64 ctau;
-  MAfloat64 id;
-  MAfloat64 x;
-  MAfloat64 y;
-  MAfloat64 z;
+  HEPVertex vertex;
 
-  str >> linecode; // character 'V'
-  str >> barcode;  // barcode
-  str >> id;       // id
-  str >> x;        // x
-  str >> y;        // y
-  str >> z;        // z
-  str >> ctau;     // ctau
+  str >> linecode;      // character 'V'
+  str >> barcode;       // barcode
+  str >> vertex.id_;    // id
+  str >> vertex.x_;     // x
+  str >> vertex.y_;     // y
+  str >> vertex.z_;     // z
+  str >> vertex.ctau_;  // ctau
 
-  //  std::cout << "x=" << x << " y=" << y << " z=" << z << " ctau=" << ctau << std::endl;
-
-  /*
-  std::map<MAint32,HEPVertex>::iterator it = vertices_.find(barcode);
-  if (it!=vertices_.end())
+    // Adding this vertex to the vertex collection
+  std::pair<std::map<MAint32,HEPVertex>::iterator,MAbool> res = vertices_.insert(std::make_pair(barcode,vertex));
+  if (!res.second)
   {
-    it->second.ctau_ = ctau;
-    it->second.id_   = id;
-    it->second.x_    = x;
-    it->second.y_    = y;
-    it->second.z_    = z;
+    res.first->second.id_   = vertex.id_;
+    res.first->second.x_    = vertex.x_;
+    res.first->second.y_    = vertex.y_;
+    res.first->second.z_    = vertex.z_;
+    res.first->second.ctau_ = vertex.ctau_;
   }
-  else
-  {
-    HEPVertex vertex;
-    vertex.ctau_ = ctau;
-    vertex.id_ = id;
-    vertex.x_ = x;
-    vertex.y_ = y;
-    vertex.z_ = z;
-    vertices_[barcode]=vertex;
-  }
-  */
 
+  // Set the current vertex barcode
   currentvertex_ = barcode;
 }
 

@@ -511,6 +511,7 @@ void LHEReader::FillEventParticleLine(const std::string& line,
   MAfloat64 py;      // temporary variable to fill in LorentzVector
   MAfloat64 pz;      // temporary variable to fill in LorentzVector
   MAfloat64 e;       // temporary variable to fill in LorentzVector
+  MAfloat64 ctau;    // temporary variable to fill in LorentzVector
   MAint32   mothup1; // mother1
   MAint32   mothup2; // mother2
 
@@ -528,9 +529,10 @@ void LHEReader::FillEventParticleLine(const std::string& line,
   str >> pz;
   str >> e; 
   str >> tmp;
-  str >> part->ctau_;
+  str >> ctau;
   str >> part->spin_;
   part->momentum_.SetPxPyPzE(px,py,pz,e);
+  part->decay_vertex_.SetT(ctau);
   mothers_.push_back(std::make_pair(mothup1,mothup2));
 }
 

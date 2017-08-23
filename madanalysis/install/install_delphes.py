@@ -135,9 +135,15 @@ class InstallDelphes:
         self.logger.debug('Updating files '+filename+ ': no CMSSW\n')
         self.SwitchOffCMSSW(filename)
         
+        # Updating Makefile
         filename = self.installdir+'/doc/genMakefile.tcl'
         self.logger.debug('Updating files '+filename+ ': no CMSSW\n')
         self.SwitchOffCMSSW(filename)
+
+        # Updating DelphesFormula
+        filename = self.installdir+'/classes/DelphesFormula.cc'
+        self.logger.debug('Updating files '+filename+ ': adding d0\n')
+        self.AddD0(filename)
 
         # Updating ExRootTask
         filename = self.installdir+'/external/ExRootAnalysis/ExRootTask.cc'
@@ -389,6 +395,45 @@ class InstallDelphes:
         for line in input:
             output.write(line.replace('HAS_CMSSW = true','HAS_CMSSW = false'))
 
+        #close
+        input.close()
+        output.close()
+
+        try:
+            shutil.copy(filename+'.savema5',filename)
+        except:
+            self.logger.error("impossible to copy "+filename+'.savema5 in '+filename)
+            return False
+
+        return True
+
+
+    def AddD0(self,filename):
+        # open input file
+        try:
+            input = open(filename)
+        except:
+            self.logger.error("impossible to read the file:" + filename)
+            return False
+
+        # open output file
+        try:
+            output = open(filename+'.savema5','w')
+        except:
+            self.logger.error("impossible to read the file:" + filename+'.savema5')
+            return False
+
+        # lines
+        for line in input:
+            line2=line.lstrip()
+            line2=line2.rstrip()
+            line2=line2.replace(' ','')
+            if line2.startswith('buffer.ReplaceAll("energy"'):
+                output.write(line)
+                output.write('  buffer.ReplaceAll("d0",     "t");\n')
+            else:
+                output.write(line)
+ 
         #close
         input.close()
         output.close()

@@ -104,6 +104,16 @@ bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<s
     }
   }
 
+  // Creating output file
+  std::string ofname;
+  if (output_)
+  {
+    if (rootfile_=="") ofname = outputdir_+"/DelphesEvents.root";
+    else               ofname = outputdir_+"/"+rootfile_;
+  }
+  else ofname = outputdir_+"/tmp.root";
+  outputFile_ = TFile::Open(ofname.c_str(), "RECREATE");
+
   // Decode configuration file with Delphes class 'ExRootConfReader'
   confReader_ = new ExRootConfReader;
   confReader_->ReadFile(configFile_.c_str());
@@ -137,16 +147,6 @@ bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<s
   }
   if (isElectronMA5 && isMuonMA5 && 
       isPhotonMA5   && isJetMA5      ) MA5card_=true; else MA5card_=false;
-
-  // Creating output file
-  std::string ofname;
-  if (output_)
-  {
-    if (rootfile_=="") ofname = outputdir_+"/DelphesEvents.root";
-    else               ofname = outputdir_+"/"+rootfile_;
-  }
-  else ofname = outputdir_+"/tmp.root";
-  outputFile_ = TFile::Open(ofname.c_str(), "RECREATE");
 
   // Creating output tree
   treeWriter_ = new ExRootTreeWriter(outputFile_, "Delphes");
@@ -280,7 +280,10 @@ void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat&
     candidate->PID = part->pdgid();
     candidate->Status = part->statuscode();
     candidate->Momentum.SetPxPyPzE(part->px(), part->py(), part->pz(), part->e());
-    candidate->Position.SetXYZT(0., 0., 0., 0.);
+    candidate->Position.SetXYZT(part->decay_vertex().X(), 
+                                part->decay_vertex().Y(),
+                                part->decay_vertex().Z(),
+                                part->decay_vertex().T());
 
     // Filling Delphes particle with PDG information
     TParticlePDG* pdgParticle = PDG_->GetParticle(part->pdgid());

@@ -46,7 +46,7 @@ MALorentzVector::MALorentzVector(const MALorentzVector & q)
 MALorentzVector::~MALorentzVector()
 {}
 
-MAdouble64 MALorentzVector::operator() (MAuint8 i) const
+const MAdouble64& MALorentzVector::operator() (MAuint8 i) const
 {
   if (i==0) return p_(0);
   else if (i==1) return p_(1);

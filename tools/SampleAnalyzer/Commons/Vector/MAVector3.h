@@ -82,6 +82,8 @@ class MAVector3
 
   void Reset()
   {x_=0.; y_=0.; z_=0.;}
+  void clear()
+  {Reset();}
 
   // Static methods ----------------------------------------------
 
@@ -93,22 +95,22 @@ class MAVector3
 
   
   // Access operator (read-only mode) ----------------------------
-  MAdouble64 operator () (MAuint8) const;
-  MAdouble64 operator [] (MAuint8 i) const {return operator()(i);}
+  const MAdouble64& operator() (MAuint8) const;
+  const MAdouble64& operator[] (MAuint8 i) const {return operator()(i);}
 
   
   // Access operator (read-write mode) ---------------------------
-  MAdouble64 & operator () (MAuint8);
-  MAdouble64 & operator [] (MAuint8 i) {return operator()(i);}
+  MAdouble64& operator() (MAuint8);
+  MAdouble64& operator[] (MAuint8 i) {return operator()(i);}
 
   
   // Simple accessors --------------------------------------------
-  MAdouble64 X()  const {return x_;}
-  MAdouble64 Y()  const {return y_;}
-  MAdouble64 Z()  const {return z_;}
-  MAdouble64 Px() const {return x_;}
-  MAdouble64 Py() const {return y_;}
-  MAdouble64 Pz() const {return z_;}
+  const MAdouble64& X()  const {return x_;}
+  const MAdouble64& Y()  const {return y_;}
+  const MAdouble64& Z()  const {return z_;}
+  const MAdouble64& Px() const {return x_;}
+  const MAdouble64& Py() const {return y_;}
+  const MAdouble64& Pz() const {return z_;}
 
   
   // Simple mutators ---------------------------------------------

@@ -59,7 +59,7 @@ MAdouble64 MAVector3::Phi_mpi_pi(MAdouble64 x)
 }
 
 //______________________________________________________________________________
-MAdouble64 MAVector3::operator() (MAuint8 i) const
+const MAdouble64& MAVector3::operator() (MAuint8 i) const
 {
   if (i==0) return x_;
   else if (i==1) return y_;
