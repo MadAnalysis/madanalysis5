@@ -74,7 +74,6 @@ bool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent, b
     // NonExclusive Id mode
     else if (std::abs(part.pdgid())==13) continue;
 
-    if (part.e()>0) e=part.e();
     // Filling good particle for clustering
     inputs.push_back(fastjet::PseudoJet( part.px(), 
                                          part.py(),
