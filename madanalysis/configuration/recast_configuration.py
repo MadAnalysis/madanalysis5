@@ -60,7 +60,7 @@ class RecastConfiguration:
           "delphes_card_ATLAS_1604_07773.tcl"     : ["ATLAS_1604_07773", "atlas_1605_03814"],
           "delphes_card_ATLAS_CONF_2016_086.tcl"  : ["ATLAS_CONF_2016_086"],
           "delphes_card_CMS_EXO_16_037.tcl"       : ["CMS_EXO_16_037"],
-          "delphes_card_cms_exo_16_010.tcl"       : ["cms_exo_16_010"]
+          "delphes_card_cms_exo_16_010_pileup.tcl"   : ["cms_exo_16_010"]
         }
 
         self.description = {

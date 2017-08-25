@@ -25,6 +25,17 @@
 import logging
 import os
 
+class DelphesModule():
+    
+    def __init__(self):
+        self.name=''
+        self.type=''
+        self.inputs=[]
+        self.outputs=[]
+        self.ModuleExecutionPaths=[]
+        self.Modules=[]
+        self.PileUps=[]
+
 
 class DelphesCardChecker():
 
@@ -70,7 +81,9 @@ class DelphesCardChecker():
 
     def checkContentCard(self):
         logging.getLogger('MA5').debug("Check the content of the Delphes card: "+self.getNameCard()+' ...')
-        test=False
+
+        self.extractContentCard()
+        test = self.decodeContentCard()
         if test or self.main.forced or self.main.script:
             return test
         else:
@@ -85,3 +98,79 @@ class DelphesCardChecker():
             else:
                 return True # go on       
     
+
+    def extractContentCard(self):
+        ExecutionMode=False
+        self.ModuleExecutionPaths=[]
+        self.Modules=[]
+        self.PileUps=[]
+        module=""
+        input = open(self.getNameCard())
+        counter=0
+        for line in input:
+            counter = counter+1
+
+            #isolating '=' character 
+            line = line.replace('=',' = ')
+            line = line.replace('{',' { ')
+            line = line.replace('}',' } ')
+            
+            #cleaning the line
+            line = line.lstrip()
+
+            #rejecting comment line
+            if line.startswith('#'):
+                continue
+
+            #rejecting comment part of a line
+            if '#' in line:
+                line = line.split('#')[0]
+            line = line.rstrip()
+
+            #splitting line
+            split = line.split()
+            if len(split)==0:
+                continue
+            if ExecutionMode:
+                if split[0]=='}':
+                    ExecutionMode=False
+                elif len(split)==1:
+                    self.ModuleExecutionPaths.append(split[0])
+                else:
+                    logging.getLogger("MA5").warning('Incorrect syntax @ line '+str(counter))
+                continue
+            if len(split)>=3 and split[0]=='module':
+                MyModule=DelphesModule()
+                MyModule.name = split[2]
+                MyModule.type = split[1]
+                module=MyModule.type
+                self.Modules.append(MyModule)
+            if len(split)>=3 and split[0]=='set' and split[1]=='PileUpFile' and module=='PileUpMerger':
+                self.PileUps.append(split[2])
+            if len(split)>=2 and split[0]=='set' and split[1]=='ExecutionPath':
+                ExecutionMode=True
+            
+        input.close()
+ 
+    def decodeContentCard(self):
+        logging.getLogger("MA5").debug("- Check that the moduless to execute are declared (#modules="+str(len(self.ModuleExecutionPaths))+")...")
+        test = True
+        for i in self.ModuleExecutionPaths:
+            ok=False
+            for j in self.Modules: 
+                if i==j.name:
+                    ok=True
+                    break
+            if not ok:
+                logging.getLogger("MA5").warning("Problem with Delphes card: module "+item+" is not declared.")
+                test=False
+
+
+        logging.getLogger("MA5").debug("- Check the pile-up files (#files="+str(len(self.PileUps))+")...")
+        for item in self.PileUps:
+            if not os.path.isfile(item):
+                logging.getLogger("MA5").warning("Problem with Delphes card: the pile-up file "+item+" is not found.")
+                test=False
+        return test 
+
+        
