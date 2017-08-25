@@ -41,12 +41,19 @@ def WritePlot(file,main,iabs,ihisto):
         WritePlotWith0Arg(file,main,iabs,ihisto)
     elif len(main.selection[iabs].arguments)==1:
         WritePlotWith1Arg(file,main,iabs,ihisto)
+    elif len(main.selection[iabs].arguments)==2:
+        WritePlotWith2Args(file,main,iabs,ihisto) 
+    else:
+        logging.getLogger('MA5').error("observable with more than 2 arguments are " +\
+                       "not managed by MadAnalysis 5")
 
     # Closing bracket for the current histo
     file.write('  }\n')
 
 
 def WritePlotWith0Arg(file,main,iabs,ihisto):
+    logging.getLogger('MA5').debug("  Writing histogram with 0 argument...")
+
     if main.selection[iabs].observable.name in ['NPID','NAPID']:
         WriteJobNPID(file,main,iabs,ihisto)
     else:
@@ -133,6 +140,9 @@ def WriteJobNPID(file,main,iabs,ihisto):
 
 def WritePlotWith1Arg(file,main,iabs,ihisto):
 
+
+    logging.getLogger('MA5').debug("  Writing histogram with 1 argument...")
+
     # Skip observable with INT of FLOAT argument
     # Temporary
     if main.selection[iabs].arguments[0] in [ArgumentType.FLOAT,\
@@ -147,6 +157,8 @@ def WritePlotWith1Arg(file,main,iabs,ihisto):
 
 
 def WritePlotWith2Args(file,main,iabs,ihisto):
+    
+    logging.getLogger('MA5').debug("  Writing histogram with 2 arguments...")
 
     # Loop over combination
     for combi1 in main.selection[iabs].arguments[0]:

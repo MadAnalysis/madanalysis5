@@ -287,6 +287,7 @@ void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat&
 
     // Filling Delphes particle with PDG information
     TParticlePDG* pdgParticle = PDG_->GetParticle(part->pdgid());
+
     if (pdgParticle==0) // Unknown particle?
     { 
         try
@@ -297,12 +298,12 @@ void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat&
         {
           MANAGE_EXCEPTION(e);
         }
-        // not filled Mass & Charge
+        candidate->Mass = part->m();
+        candidate->Charge = 0;
     }
     else
     {
       candidate->Charge = pdgParticle ? int(pdgParticle->Charge()/3.0) : -999;
-      candidate->Mass   = pdgParticle ? pdgParticle->Mass() : -999.9;
     }
 
     // Filling mother-daughter information
@@ -313,9 +314,14 @@ void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat&
     std::vector<MAint32*> mothers(2);
     mothers[0]=&(candidate->M1);
     mothers[1]=&(candidate->M2);
+    *(mothers[0])=-1;
+    *(mothers[1])=-1;
     std::vector<MAint32*> daughters(2);
     daughters[0]=&(candidate->D1);
     daughters[1]=&(candidate->D2);
+    *(daughters[0])=-1;
+    *(daughters[1])=-1;
+
     for(MAuint32 mum=0;mum<std::min(static_cast<MAuint32>(part->mothers().size()),
                                     static_cast<MAuint32>(2));mum++)
     {
@@ -329,6 +335,7 @@ void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat&
         ERROR << "internal problem with daughter-mother relation" << endmsg;
       }
     }
+
     for(MAuint32 mum=0;mum<std::min(static_cast<MAuint32>(part->daughters().size()),
                                     static_cast<MAuint32>(2));mum++)
     {
@@ -345,6 +352,8 @@ void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat&
 
     // Saving the particle in AllGenParticle
     allParticleOutputArray_->Add(candidate);
+    if (pdgParticle==0) continue;
+
 
     // Saving the particle in StableParticle collection
     if(part->statuscode() == 1 && pdgParticle->Stable())
