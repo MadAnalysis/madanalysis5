@@ -60,7 +60,7 @@ class SampleFormat
  private:
 
   std::string                 name_;      /// file name
-  MAuint64                   nevents_;   /// number of events in the file
+  MAuint64                    nevents_;   /// number of events in the file
   MCSampleFormat  *           mc_;
   RecSampleFormat *           rec_;
   MA5GEN::GeneratorType       sample_generator_;

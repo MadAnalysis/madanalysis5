@@ -32,6 +32,9 @@ from madanalysis.layout.layout                                  import Layout
 from madanalysis.install.install_manager                        import InstallManager
 from madanalysis.install.detector_manager                       import DetectorManager
 from madanalysis.misc.run_recast                                import RunRecast
+from madanalysis.IOinterface.delphescard_checker                import DelphesCardChecker
+
+
 from string_tools  import StringTools
 import logging
 import glob
@@ -339,26 +342,6 @@ class CmdSubmit(CmdBase):
 
 
 
-    def editDelphesCard(self,dirname):
-        if self.main.forced or self.main.script:
-            return
-
-        self.logger.info("Would you like to edit the Delphes Card ? (Y/N)")
-        allowed_answers=['n','no','y','yes']
-        answer=""
-        while answer not in  allowed_answers:
-            answer=raw_input("Answer: ")
-            answer=answer.lower()
-        if answer=="no" or answer=="n":
-            return
-        else:
-            if self.main.fastsim.package=="delphes":
-                cardname = self.main.fastsim.delphes.card
-            elif self.main.fastsim.package=="delphesMA5tune":
-                cardname = self.main.fastsim.delphesMA5tune.card
-            os.system(self.main.session_info.editor+" "+dirname+"/Input/"+cardname)
-
-
     def submit(self,dirname,history):
 
         # checking if delphes is needed and installing/activating it if relevant
@@ -441,9 +424,19 @@ class CmdSubmit(CmdBase):
                 self.logger.error("job submission aborted.")
                 return False
 
-        # Edit the delphes or recasting cards
+        # Edit & check the delphes or recasting cards
         if self.main.fastsim.package in ["delphes","delphesMA5tune"]:
-            self.editDelphesCard(dirname)
+            delphesCheck = DelphesCardChecker(dirname,self.main)
+            if not delphesCheck.checkPresenceCard():
+                self.logger.error("job submission aborted.")
+                return False
+            if not delphesCheck.editCard():
+                self.logger.error("job submission aborted.")
+                return False
+            self.logger.info("   Checking the content of the Delphes card...")
+            if not delphesCheck.checkContentCard():
+                self.logger.error("job submission aborted.")
+                return False
 
         if self.resubmit and not self.main.recasting.status=='on':
             self.logger.info("   Cleaning 'SampleAnalyzer'...")
