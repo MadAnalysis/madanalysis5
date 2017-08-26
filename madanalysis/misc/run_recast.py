@@ -52,13 +52,12 @@ class RunRecast():
 
     def init(self):
         ### First, the analyses to take care off
+        logging.getLogger("MA5").debug("  Inviting the user to edit the recasting card...")
         self.edit_recasting_card()
-        logging.getLogger('MA5').info("   Getting the list of delphes simulation to be performed...")
-
         ### Getting the list of analyses to recast
+        logging.getLogger('MA5').info("   Getting the list of delphes simulation to be performed...")
         self.get_runs()
-
-        ### Check if we have abnything to do
+        ### Check if we have anything to do
         if len(self.delphes_runcard)==0:
             logging.getLogger('MA5').warning('No recasting to do... Please check the recasting card')
             return False
@@ -144,21 +143,26 @@ class RunRecast():
         return True
 
     def fastsim_single(self,version,delphescard):
+        logging.getLogger('MA5').debug('Launch a bunch of fastsim with the delphes card: '+delphescard)
+
         # Init and header
         self.fastsim_header(version)
 
         # Activating the right delphes
+        logging.getLogger('MA5').debug('Activating the detector (switch delphes/delphesMA5tune)')
         detector_handler = DetectorManager(self.main)
         if not detector_handler.manage(self.detector):
             logging.getLogger('MA5').error('Problem with the activation of delphesMA5tune')
             return False
 
         # Checking whether events have already been generated and if not, event generation
+        logging.getLogger('MA5').debug('Loop over the datatsets...')
         for item in self.main.datasets:
             if self.detector=="delphesMA5tune":
                 evtfile = self.dirname+'/Output/'+item.name+'/RecoEvents_v1x1_'+delphescard.replace('.tcl','')+'.root'
             elif self.detector=="delphes":
                 evtfile = self.dirname+'/Output/'+item.name+'/RecoEvents_v1x2_'+delphescard.replace('.tcl','')+'.root'
+            logging.getLogger('MA5').debug('- applying fastsim and producing '+evtfile+'...')
             if not os.path.isfile(os.path.normpath(evtfile)):
                 if not self.generate_events(item,delphescard):
                     return False
@@ -183,7 +187,7 @@ class RunRecast():
             logging.getLogger('MA5').info("   "+StringTools.Center(tag+' detector simulations',57))
             logging.getLogger('MA5').info("   **********************************************************")
 
-    def run_delphes(self,dataset):
+    def run_delphes(self,dataset,card):
         # Initializing the JobWriter
         jobber = JobWriter(self.main,self.dirname+'_FastSimRun')
 
@@ -206,6 +210,8 @@ class RunRecast():
         logging.getLogger('MA5').info("   Creating Makefiles...")
         if not jobber.WriteMakefiles():
             return False
+        logging.getLogger('MA5').debug("   Fixing the pileup path...")
+        self.fix_pileup(self.dirname+'_FastSimRun/Input/'+card)
 
         # Creating executable
         logging.getLogger('MA5').info("   Compiling 'SampleAnalyzer'...")
@@ -239,8 +245,8 @@ class RunRecast():
             self.main.fastsim.delphes        = DelphesConfiguration()
             self.main.fastsim.delphes.card   = os.path.normpath("../../../../PAD/Input/Cards/"+card)
         # Execution
-        if not self.run_delphes(dataset):
-            logging.getLogger('MA5').error('The ' + detector + ' problem with the running of the fastsim')
+        if not self.run_delphes(dataset,card):
+            logging.getLogger('MA5').error('The '+detector+' problem with the running of the fastsim')
             return False
         # Restoring the run
         self.main.recasting.status="on"
@@ -549,6 +555,55 @@ class RunRecast():
             return results
         except:
             return -1, -1, -1
+    
+    def fix_pileup(self,filename):
+        # 
+        logging.getLogger('MA5').debug('delphes card is here: '+filename)        
+
+        # Container for pileup
+        FoundPileup=[]
+
+        # Safe
+        if not os.path.isfile(filename):
+            logging.getLogger('MA5').error('internal error: file '+filename+' is not found')
+            return False
+
+        # Estimate the newpath of pileup
+        if self.detector=="delphesMA5tune":
+            newpath=self.main.archi_info.ma5dir+'/PADForMA5tune/Input/Pileup'
+        else:
+            newpath=self.main.archi_info.ma5dir+'/PAD/Input/Pileup'
+
+        # Safe copy
+        shutil.copyfile(filename,filename+'.original')
+        input = open(filename+'.original','r')
+        output = open(filename,'w')
+
+        # Loop on lines
+        for line in input:
+            line2=line.lstrip()
+            line2=line2.rstrip()
+            words=line2.split()
+            if len(words)>=3 and words[0]=='set' and words[1]=='PileUpFile':
+                pileup=words[2].split('/')[-1]
+                newfilename = os.path.normpath(newpath+'/'+pileup)
+                output.write(line.replace(words[2],newfilename))
+                FoundPileup.append(newfilename)
+            else:
+                output.write(line)
+
+        # Close
+        input.close()
+        output.close()
+
+        # Found pileup?
+        logging.getLogger("MA5").debug(str(len(FoundPileup))+' pile-up samples has been declared')
+        for item in FoundPileup:
+            if not os.path.isfile(item):
+                logging.getLogger("MA5").warning("Problem with Delphes card: pile-up sample is not found: "+item)
+                return False
+
+        return True
 
     def header_info_file(self, etree, analysis):
         logging.getLogger('MA5').debug('Read info from the file related to '+analysis + '...')
@@ -824,3 +879,4 @@ def cls(NumObserved, ExpectedBG, BGError, SigHypothesis, NumToyExperiments):
         return 1.-(p_SplusB / p_b) # 1 - CLs
 
 
+    

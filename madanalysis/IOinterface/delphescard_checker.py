@@ -137,7 +137,7 @@ class DelphesCardChecker():
                 elif len(split)==1:
                     self.ModuleExecutionPaths.append(split[0])
                 else:
-                    logging.getLogger("MA5").warning('Incorrect syntax @ line '+str(counter))
+                    logging.getLogger("MA5").warning('Problem with Delphes card: incorrect syntax @ line '+str(counter))
                 continue
             if len(split)>=3 and split[0]=='module':
                 MyModule=DelphesModule()
@@ -145,6 +145,19 @@ class DelphesCardChecker():
                 MyModule.type = split[1]
                 module=MyModule.type
                 self.Modules.append(MyModule)
+            if len(split)>=3 and split[0] in ['set','add'] and split[1].endswith('InputArray'):
+                if len(self.Modules)==0:
+                    logging.getLogger("MA5").warning('Problem with Delphes card: InputArray before module definition @ line '+str(counter))
+                else:          
+                    self.Modules[-1].inputs.append(split[2])
+                    if len(split)==4:
+                        self.Modules[-1].outputs.append(split[3])
+                    
+            if len(split)>=3 and split[0]=='set' and split[1].endswith('OutputArray'):
+                if len(self.Modules)==0:
+                    logging.getLogger("MA5").warning('Problem with Delphes card OutputArray before module definition @ line '+str(counter))
+                else:          
+                    self.Modules[-1].outputs.append(split[2])
             if len(split)>=3 and split[0]=='set' and split[1]=='PileUpFile' and module=='PileUpMerger':
                 self.PileUps.append(split[2])
             if len(split)>=2 and split[0]=='set' and split[1]=='ExecutionPath':
@@ -153,7 +166,8 @@ class DelphesCardChecker():
         input.close()
  
     def decodeContentCard(self):
-        logging.getLogger("MA5").debug("- Check that the moduless to execute are declared (#modules="+str(len(self.ModuleExecutionPaths))+")...")
+        # check that modules are declared
+        logging.getLogger("MA5").debug("- Check that the modules to execute are declared (#modules="+str(len(self.ModuleExecutionPaths))+")...")
         test = True
         for i in self.ModuleExecutionPaths:
             ok=False
@@ -165,12 +179,46 @@ class DelphesCardChecker():
                 logging.getLogger("MA5").warning("Problem with Delphes card: module "+item+" is not declared.")
                 test=False
 
-
+        # check pileup path
         logging.getLogger("MA5").debug("- Check the pile-up files (#files="+str(len(self.PileUps))+")...")
         for item in self.PileUps:
             if not os.path.isfile(item):
                 logging.getLogger("MA5").warning("Problem with Delphes card: the pile-up file "+item+" is not found.")
                 test=False
+
+        # check inputs and output
+        logging.getLogger("MA5").debug("- Check the input of modules...")
+        for module in self.Modules:
+            for input in module.inputs:
+                words=input.split('/')
+                if len(words)!=2:
+                    logging.getLogger("MA5").warning("Problem with Delphes card: the module "+module.name+" has a bad syntax for the input collection: "+input)
+                    test=False
+                else:
+                    theModule=words[0]
+                    theCollection=words[1]
+
+                    ok=False
+                    outputModule=0
+                    for i in self.Modules:
+                       if theModule==i.name:
+                           outputModule=i
+                           ok=True
+                           break
+                    if not ok and theModule!='Delphes':
+                        logging.getLogger("MA5").warning("Problem with Delphes card: the module "+module.name+" has unknown InputArray module called: "+theModule)
+                        test=False
+                    elif theModule!='Delphes':
+                        ok=False
+                        for j in outputModule.outputs:
+                            if j==theCollection:
+                                ok=True
+                                break
+                        if not ok:
+                            logging.getLogger("MA5").warning("Problem with Delphes card: the module "+module.name+" has unknown InputArray label called: "+theCollection)
+                            test=False
+
+
         return test 
 
         
