@@ -83,15 +83,15 @@ class ClusterAlgoBase
     virtual ~ClusterAlgoBase() {}
 
     /// Jet clustering
-    virtual bool Execute(SampleFormat& mySample, EventFormat& myEvent, 
-                         bool ExclusiveId, const std::vector<bool>& vetos,
+    virtual MAbool Execute(SampleFormat& mySample, EventFormat& myEvent, 
+                         MAbool ExclusiveId, const std::vector<bool>& vetos,
                          const std::set<const MCParticleFormat*> vetos2)=0;
 
     /// Set parameter
-    virtual bool SetParameter(const std::string& key, const std::string& value)=0;
+    virtual MAbool SetParameter(const std::string& key, const std::string& value)=0;
 
     /// Initialization
-    virtual bool Initialize()=0;
+    virtual MAbool Initialize()=0;
 
     /// Putting the string in lower case
     static std::string Lower(const std::string& word)

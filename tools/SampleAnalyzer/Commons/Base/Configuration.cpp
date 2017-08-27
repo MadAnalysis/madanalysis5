@@ -88,7 +88,7 @@ bool Configuration::Initialize(int &argc, char *argv[])
   }
 
   // Decoding options
-  if (argc>=3) for (unsigned int i=1;i<static_cast<unsigned int>(argc-1);i++)
+  if (argc>=3) for (MAuint32 i=1;i<static_cast<MAuint32>(argc-1);i++)
   {
     // converting const char to string
     std::string option = std::string(argv[i]);
@@ -142,7 +142,7 @@ bool Configuration::Initialize(int &argc, char *argv[])
   }
 
   // Extracting the input list
-  input_list_name_ = std::string(argv[static_cast<unsigned int>(argc-1)]);
+  input_list_name_ = std::string(argv[static_cast<MAuint32>(argc-1)]);
 
   // Ok
   return true;

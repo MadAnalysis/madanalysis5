@@ -372,7 +372,6 @@ bool LHEReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
         }
         catch(const std::exception& e)
         {
-          std::cout << "MUFMUF" << std::endl;
           MANAGE_EXCEPTION(e);
         }
       }

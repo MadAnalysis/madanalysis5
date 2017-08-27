@@ -434,41 +434,41 @@ class MakefileWriter():
         # Header target
         file.write('# Header target\n')
         file.write('header:\n')
-        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
-        file.write('\t@echo -e "'+StringTools.Center('Building '+title,50)+'"\n')
-        file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
+        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',56)+'"\n')
+        file.write('\t@echo -e "'+StringTools.Center('Building '+title,56)+'"\n')
+        file.write('\t@echo -e "'+StringTools.Fill('-',56)+'"$(NORMAL)\n')
         file.write('\n')
 
         # Compile_header target
         file.write('# Compile_header target\n')
         file.write('compile_header:\n')
-        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
-        file.write('\t@echo -e "'+StringTools.Center('Compilation',50)+'"\n')
-        file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
+        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',56)+'"\n')
+        file.write('\t@echo -e "'+StringTools.Center('Compilation',56)+'"\n')
+        file.write('\t@echo -e "'+StringTools.Fill('-',56)+'"$(NORMAL)\n')
         file.write('\n')
 
         # Linking_header target
         file.write('# Link_header target\n')
         file.write('link_header:\n')
-        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
-        file.write('\t@echo -e "'+StringTools.Center('Linking',50)+'"\n')
-        file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
+        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',56)+'"\n')
+        file.write('\t@echo -e "'+StringTools.Center('Linking',56)+'"\n')
+        file.write('\t@echo -e "'+StringTools.Fill('-',56)+'"$(NORMAL)\n')
         file.write('\n')
 
         # Clean_header target
         file.write('# clean_header target\n')
         file.write('clean_header:\n')
-        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
-        file.write('\t@echo -e "'+StringTools.Center('Removing intermediate files from building',50)+'"\n')
-        file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
+        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',56)+'"\n')
+        file.write('\t@echo -e "'+StringTools.Center('Removing intermediate files from building',56)+'"\n')
+        file.write('\t@echo -e "'+StringTools.Fill('-',56)+'"$(NORMAL)\n')
         file.write('\n')
 
         # Mrproper_header target
         file.write('# mrproper_header target\n')
         file.write('mrproper_header:\n')
-        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',50)+'"\n')
-        file.write('\t@echo -e "'+StringTools.Center('Cleaning all the project',50)+'"\n')
-        file.write('\t@echo -e "'+StringTools.Fill('-',50)+'"$(NORMAL)\n')
+        file.write('\t@echo -e $(YELLOW)"'+StringTools.Fill('-',56)+'"\n')
+        file.write('\t@echo -e "'+StringTools.Center('Cleaning all the project',56)+'"\n')
+        file.write('\t@echo -e "'+StringTools.Fill('-',56)+'"$(NORMAL)\n')
         file.write('\n')
 
         # Precompile

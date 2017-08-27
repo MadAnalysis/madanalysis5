@@ -77,7 +77,7 @@ class Configuration
     { }
 
     /// Initialization
-    bool Initialize(int&argc, char *argv[]);
+    MAbool Initialize(int &argc, char *argv[]);
  
     /// Printing the configuration status
     void Display();
