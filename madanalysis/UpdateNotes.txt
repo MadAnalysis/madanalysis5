@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+181           (2017/09/01) fuks:    Install PAD - minor change 
+
 169           (2017/08/23) fuks:    Adding weights to the analysis template in the NewAnalyzer script 
 
 168           (2017/08/23) fuks:    Bug fix in the computation of the histogram limits with matplotlib 

@@ -81,9 +81,9 @@ class InstallPad:
           "CMS_EXO_16_037.cpp"       : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/CMS_EXO_16_037.cpp",
           "CMS_EXO_16_037.h"         : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/CMS_EXO_16_037.h",
           "CMS_EXO_16_037.info"      : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/CMS_EXO_16_037.info",
-          "cms_exo_16_010.cpp"       : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_16_010.cpp",
-          "cms_exo_16_010.h"         : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_16_010.h",
-          "cms_exo_16_010.info"      : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_exo_16_010.info"
+          "cms_exo_16_010.cpp"       : "http://inspirehep.net/record/1618045/files/cms_exo_16_010.cpp",
+          "cms_exo_16_010.h"         : "http://inspirehep.net/record/1618045/files/cms_exo_16_010.h",
+          "cms_exo_16_010.info"      : "http://inspirehep.net/record/1618045/files/cms_exo_16_010.info"
         }
 
         self.delphescards = {
@@ -220,7 +220,7 @@ class InstallPad:
       file.write('}\n')
 
       # CMS-B2G-14-004
-      file.write('@article{,\n')
+      file.write('@article{1456179,\n')
       file.write('      key            = \"1456179\",\n')
       file.write('      author         = \"Fuks, Benjamin and Martini, Antony\",\n')
       file.write('      title          = \"{MadAnalysis5 implementation of the CMS search for dark\n')
@@ -229,6 +229,17 @@ class InstallPad:
       file.write('      doi            = \"10.7484/INSPIREHEP.DATA.MIHA.JR4G\",\n')
       file.write('      year           = \"2016\",\n')
       file.write('      SLACcitation   = \"%%CITATION = INSPIRE-1456179;%%\"\n')
+      file.write('}\n')
+
+      # CMS-EXO-16-010
+      file.write('@article{1618045,\n')
+      file.write('      key            = "1618045",\n')
+      file.write('      author         = "Fuks, Benjamin",\n')
+      file.write('      title          = "{MadAnalysis5 implementation of the mono-Z analysis of\n')
+      file.write('                        CMS with 2.3 fb-1 of data (CMS-EXO-16-010)}",\n')
+      file.write('      doi            = "10.7484/INSPIREHEP.DATA.RK53.S39D",\n')
+      file.write('      year           = "2017",\n')
+      file.write('      SLACcitation   = "%%CITATION = INSPIRE-1618045;%%"\n')
       file.write('}\n')
 
       # closing the file
