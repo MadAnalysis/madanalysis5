@@ -39,6 +39,7 @@ class InstallPad:
         self.downloaddir = self.main.session_info.downloaddir
         self.PADdir      = self.installdir + "/Build/SampleAnalyzer/User/Analyzer"
         self.delphesdir  = self.installdir + "/Input/Cards"
+        self.pileupdir   = self.installdir + "/Input/Pileup"
         self.untardir    = ""
         self.ncores      = 1
         self.analyses    = []
@@ -94,6 +95,10 @@ class InstallPad:
     "delphes_card_ATLAS_CONF_2016_086.tcl"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_ATLAS_CONF_2016_086.tcl",
     "delphes_card_CMS_EXO_16_037.tcl"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_CMS_EXO_16_037.tcl",
     "delphes_card_cms_exo_16_010.tcl"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_exo_16_010.tcl"
+        }
+
+        self.pileupfiles = {
+            "MinBias.pileup" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/MinBias.pileup"
         }
 
     def CreateBibtex(self):
@@ -326,15 +331,21 @@ class InstallPad:
             shutil.move(logname,self.installdir+'/'+os.path.basename(logname))
         except:
             pass
-        
+
         #bibtex
-        self.CreateBibtex()
         # delphes card directory
         TheCommand = ['mkdir', self.installdir+'/Input/Cards']
         ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
         if not ok:
             return False
+        # pileup directory
+        TheCommand = ['mkdir', self.pileupdir]
+        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+        if not ok:
+            return False
         self.CreateBibtex()
+
+        # EXIT
         return True
 
 
@@ -351,6 +362,10 @@ class InstallPad:
         # delphes cards
         logname = os.path.normpath(self.installdir+'/wget_delphescards.log')
         if not InstallService.wget(self.delphescards,logname,self.downloaddir):
+            return False
+        # pileup files
+        logname = os.path.normpath(self.installdir+'/wget_pileupfiles.log')
+        if not InstallService.wget(self.pileupfiles,logname,self.downloaddir):
             return False
         # Ok
         return True
@@ -380,6 +395,10 @@ class InstallPad:
         # the delphes cards
         for myfile, src in self.delphescards.items():
             shutil.copy(self.downloaddir+'/'+myfile, self.delphesdir)
+
+        # the pileup files
+        for myfile, src in self.pileupfiles.items():
+            shutil.copy(self.downloaddir+'/'+myfile, self.pileupdir)
 
         return True
 
