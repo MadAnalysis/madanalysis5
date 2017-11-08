@@ -79,10 +79,12 @@ class ScriptStack:
     @staticmethod
     def IsFinished():
         if ScriptStack.IsEmpty():
-            return True         
-        if (ScriptStack.sub_index+1)>=len(ScriptStack.stack[ScriptStack.main_index][1]):
+            return True 
+        if (ScriptStack.sub_index+1)>len(ScriptStack.stack[ScriptStack.main_index][1]):
             if (ScriptStack.main_index+1)>=len(ScriptStack.stack):
                 return True
+            else:
+                return False
         else:
             return False
 

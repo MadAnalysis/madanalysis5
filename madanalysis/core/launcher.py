@@ -172,7 +172,7 @@ def DecodeArguments(version, date):
        logging.getLogger('MA5').error("Parton mode and reco mode cannot be set in a same time.\n"
                      "Please choose only one of these modes.")
        sys.exit()
-    
+
     elif mode.hadronlevel and mode.recolevel:
        logging.getLogger('MA5').error("Hadron mode and reco mode cannot be set in a same time.\n"
                      "Please choose only one of these modes.")
@@ -182,7 +182,7 @@ def DecodeArguments(version, date):
        mode.forcedmode=True
 
     return mode, arglist
-        
+
 
 ################################################################################
 # Function MainSession
