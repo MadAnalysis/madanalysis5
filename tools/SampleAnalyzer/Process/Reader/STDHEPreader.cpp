@@ -769,6 +769,7 @@ bool STDHEPreader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
       {
         myEvent.mc()->MHT_ -= part.momentum();
         myEvent.mc()->THT_ += part.pt(); 
+        myEvent.mc()->Meff_ += part.pt(); 
       }
     }
   }
@@ -778,6 +779,7 @@ bool STDHEPreader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
   myEvent.mc()->MET_.momentum().SetE(myEvent.mc()->MET_.momentum().Pt());
   myEvent.mc()->MHT_.momentum().SetPz(0.);
   myEvent.mc()->MHT_.momentum().SetE(myEvent.mc()->MHT_.momentum().Pt());
+  myEvent.mc()->Meff_ += myEvent.mc()->MET_.pt();
 
   // Normal end
   return true;

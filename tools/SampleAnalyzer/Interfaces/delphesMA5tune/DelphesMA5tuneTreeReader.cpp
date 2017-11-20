@@ -153,6 +153,7 @@ bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat
     myEvent.rec()->MHT_ -= myEvent.rec()->jets_[i].momentum();
     if (branchScalarHT_==0) myEvent.rec()->THT_ += myEvent.rec()->jets_[i].pt();
     myEvent.rec()->TET_ += myEvent.rec()->jets_[i].pt();
+    myEvent.rec()->Meff_ += myEvent.rec()->jets_[i].pt();
   }
 
   // TET
@@ -200,6 +201,7 @@ bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat
       {
         myEvent.mc()->MHT_ -= part.momentum();
         myEvent.mc()->THT_ += part.pt(); 
+        myEvent.mc()->Meff_ += part.pt();
       }
     }
     
@@ -235,6 +237,10 @@ bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat
   myEvent.mc()->MET_.momentum().SetE(myEvent.mc()->MET_.momentum().Pt());
   myEvent.mc()->MHT_.momentum().SetPz(0.);
   myEvent.mc()->MHT_.momentum().SetE(myEvent.mc()->MHT_.momentum().Pt());
+
+  // Effective mass
+  myEvent.rec()->Meff_ += myEvent.rec()->MET_.pt();
+  myEvent.mc()->Meff_  += myEvent.mc()->MET_.pt();
 
   // Link muons with MC particles
   for (unsigned int i=0;i<myEvent.rec()->muons().size();i++)

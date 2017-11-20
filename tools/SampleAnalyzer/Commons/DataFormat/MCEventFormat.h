@@ -90,6 +90,9 @@ class MCEventFormat
   /// Computed Scalar sum of hadronic transverse energy
   MAfloat64 THT_;
 
+  /// Computed total effective mass (sum of jet's PT + MET
+  MAfloat64 Meff_;
+
   /// List of weights
   WeightCollection multiweights_;
 
@@ -104,8 +107,9 @@ class MCEventFormat
   {
     processId_=0; weight_=1.;
     scale_=0.; alphaQED_=0.; alphaQCD_=0.;
-    TET_=0.;
-    THT_=0.; 
+    TET_ = 0.;
+    THT_ = 0.;
+    Meff_= 0.;
   }
 
   /// Destructor
@@ -124,6 +128,9 @@ class MCEventFormat
   /// Accessor to the Total Hadronic Transverse Energy (read-only)
   const MAfloat64& THT() const {return THT_;}
 
+  /// Accessor to the Total effective mass (read-only)
+  const MAfloat64& Meff() const {return Meff_;}
+
   /// Accessor to the Missing Transverse Energy
   MCParticleFormat& MET() {return MET_;}
 
@@ -135,6 +142,9 @@ class MCEventFormat
 
   /// Accessor to the Total Hadronic Transverse Energy
   MAfloat64& THT() {return THT_;}
+
+  /// Accessor to the Total effective mass
+  MAfloat64& Meff() {return Meff_;}
 
   /// Accessor to the process identity
   const MAuint32& processId()  const {return processId_;}
@@ -190,8 +200,9 @@ class MCEventFormat
     multiweights_.Reset();
     MET_.Reset();
     MHT_.Reset();
-    TET_=0.;
-    THT_=0.; 
+    TET_  = 0.;
+    THT_  = 0.;
+    Meff_ = 0.;
   }
 
   /// Displaying data member values

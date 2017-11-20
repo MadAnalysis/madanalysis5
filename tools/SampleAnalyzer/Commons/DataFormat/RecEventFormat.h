@@ -125,6 +125,9 @@ class RecEventFormat
   /// Reconstructed Scalar sum of hadronic transverse energy
   MAfloat64 THT_;
 
+  /// Computed total effective mass (sum of jet's PT + MET
+  MAfloat64 Meff_;
+
   /// Monte Carlo taus decaying hadronically
   std::vector<const MCParticleFormat*> MCHadronicTaus_;
 
@@ -196,6 +199,9 @@ class RecEventFormat
   /// Accessor to the Total Hadronic Transverse Energy (read-only)
   const MAfloat64& THT() const {return THT_;}
 
+  /// Accessor to the Total effective mass (read-only)
+  const MAfloat64& Meff() const {return Meff_;}
+
   /// Accessor to the Monte Carlo taus decaying hadronically
   const std::vector<const MCParticleFormat*>& MCHadronicTaus() const
   {return MCHadronicTaus_;}
@@ -258,6 +264,9 @@ class RecEventFormat
   /// Accessor to the Total Hadronic Transverse Energy
   MAfloat64& THT() {return THT_;}
 
+  /// Accessor to the Total effective mass
+  MAfloat64& Meff() {return Meff_;}
+
   /// Accessor to the Monte Carlo taus decaying hadronically
   std::vector<const MCParticleFormat*>& MCHadronicTaus()
   {return MCHadronicTaus_;}
@@ -300,8 +309,9 @@ class RecEventFormat
     genjets_.clear();
     MET_.Reset();
     MHT_.Reset();
-    TET_=0.;
-    THT_=0.; 
+    TET_  = 0.;
+    THT_  = 0.;
+    Meff_ = 0.;
     MCHadronicTaus_.clear();
     MCMuonicTaus_.clear();
     MCElectronicTaus_.clear();

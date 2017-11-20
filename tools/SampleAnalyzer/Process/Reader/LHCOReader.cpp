@@ -132,7 +132,9 @@ bool LHCOReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
     myEvent.rec()->MHT_ -= myEvent.rec()->jets_[i].momentum();
     myEvent.rec()->THT_ += myEvent.rec()->jets_[i].pt();
     myEvent.rec()->TET_ += myEvent.rec()->jets_[i].pt();
+    myEvent.rec()->Meff_+= myEvent.rec()->jets_[i].pt();
   }
+  myEvent.rec()->Meff_ += myEvent.rec()->MET_.pt();
 
   // TET
   for (unsigned int i=0; i<myEvent.rec()->muons_.size();i++)

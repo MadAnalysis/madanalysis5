@@ -166,6 +166,12 @@ class TransverseVariables
       return event->THT();
     }
 
+    /// Compute the total effective mass
+    inline double EventMEFF(const MCEventFormat* event) const
+    {
+      return event->Meff();
+    }
+
     /// Compute the missing hadronic transverse energy
     inline double EventMHT(const MCEventFormat* event) const
     {
@@ -188,6 +194,12 @@ class TransverseVariables
     inline double EventTHT(const RecEventFormat* event) const
     {
       return event->THT();
+    }
+
+    /// Compute the total effective mass
+    inline double EventMEFF(const RecEventFormat* event) const
+    {
+      return event->Meff();
     }
 
     /// Compute the missing hadronic transverse energy

@@ -99,9 +99,10 @@ bool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent, b
   ParticleBaseFormat* MET = myEvent.rec()->GetNewMet();
   ParticleBaseFormat* MHT = myEvent.rec()->GetNewMht();
 
-  // shortcut for TET & THT
+  // shortcut for Meff, TET & THT
   double & TET = myEvent.rec()->TET();
   double & THT = myEvent.rec()->THT();
+  double & Meff= myEvent.rec()->Meff();
 
   for (MAuint32 i=0;i<jets.size();i++)
   {
@@ -110,7 +111,9 @@ bool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent, b
     (*MHT) -= q;
     THT += jets[i].pt();
     TET += jets[i].pt();
+    Meff += jets[i].pt();
   }
+  Meff += MET->pt();
 
   // Getting jets with PTmin
   if (Exclusive_) jets = clust_seq.exclusive_jets(Ptmin_);

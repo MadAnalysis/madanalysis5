@@ -122,6 +122,7 @@ bool DelphesTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEve
     myEvent.rec()->MHT_ -= myEvent.rec()->jets_[i].momentum();
     if (data_.branchHT_==0) myEvent.rec()->THT_ += myEvent.rec()->jets_[i].pt();
     myEvent.rec()->TET_ += myEvent.rec()->jets_[i].pt();
+    myEvent.rec()->Meff_ += myEvent.rec()->jets_[i].pt();
   }
 
   // TET
@@ -161,9 +162,10 @@ bool DelphesTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEve
       {
         myEvent.mc()->MHT_ -= part.momentum();
         myEvent.mc()->THT_ += part.pt(); 
+        myEvent.mc()->Meff_ += part.pt();
       }
     }
-    
+
     /*    unsigned int index1=myEvent.mc()->particles_[i].mothup1_;
     unsigned int index2=myEvent.mc()->particles_[i].mothup2_;
     if (index1!=0 && index2!=0)
@@ -192,6 +194,10 @@ bool DelphesTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEve
   myEvent.mc()->MET_.momentum().SetE(myEvent.mc()->MET_.momentum().Pt());
   myEvent.mc()->MHT_.momentum().SetPz(0.);
   myEvent.mc()->MHT_.momentum().SetE(myEvent.mc()->MHT_.momentum().Pt());
+
+  // Effective mass
+  myEvent.rec()->Meff_ += myEvent.rec()->MET_.pt();
+  myEvent.mc()->Meff_  += myEvent.mc()->MET_.pt();
 
   // Normal end
   return true; 
