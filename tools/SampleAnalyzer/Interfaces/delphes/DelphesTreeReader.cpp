@@ -148,7 +148,7 @@ bool DelphesTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEve
   myEvent.rec()->MHT_.momentum().SetE(myEvent.rec()->MHT_.momentum().Pt());
 
 
-  // Mother pointer assignment
+  // Compute transverse observable
   for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
   {
     MCParticleFormat& part = myEvent.mc()->particles_[i];

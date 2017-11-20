@@ -145,8 +145,6 @@ StatusCode::Type DelphesMA5tuneTreeReader::ReadEvent(EventFormat& myEvent, Sampl
 // -----------------------------------------------------------------------------
 bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 {
-  std::map<MAint32,unsigned int> MA5index;
-
   // MHT & THT
   for (unsigned int i=0; i<myEvent.rec()->jets_.size();i++)
   {
@@ -179,15 +177,7 @@ bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat
   myEvent.rec()->MHT_.momentum().SetE(myEvent.rec()->MHT_.momentum().Pt());
 
 
-  // Keep the MA5index
-  for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
-  {
-    MCParticleFormat& part = myEvent.mc()->particles_[i];
-    MA5index[part.extra1_] = i;
-    //std::cout << "part.extra1 = " << part.extra1_ << std::endl;
-  }
-
-  // Mother pointer assignment
+  // Compute transverse observable
   for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
   {
     MCParticleFormat& part = myEvent.mc()->particles_[i];
@@ -204,8 +194,8 @@ bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat
         myEvent.mc()->Meff_ += part.pt();
       }
     }
-    
-    
+
+    /*  
     bool debug=false;
     int index1=myEvent.mc()->particles_[i].mothup1_;
     int index2=myEvent.mc()->particles_[i].mothup2_;
@@ -230,7 +220,9 @@ bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat
         myEvent.mc()->particles_[MA5index[index2]].daughters_.push_back(&myEvent.mc()->particles_[i]);
       }
     }
+    */
   }
+
 
   // Finalize event
   myEvent.mc()->MET_.momentum().SetPz(0.);
@@ -242,6 +234,8 @@ bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat
   myEvent.rec()->Meff_ += myEvent.rec()->MET_.pt();
   myEvent.mc()->Meff_  += myEvent.mc()->MET_.pt();
 
+
+          /*
   // Link muons with MC particles
   for (unsigned int i=0;i<myEvent.rec()->muons().size();i++)
   {
@@ -258,6 +252,7 @@ bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat
     part.setMc(&myEvent.mc()->particles_[MA5index[ElectronIndex_[i]]]);
   }
 
+  */
   // Normal end
   return true; 
 }
@@ -463,30 +458,86 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
 
   // GenParticle collection
   if (branchGenParticle_!=0)
-  for (unsigned int i=0;i<static_cast<MAuint32>(branchGenParticle_->GetEntries());i++)
   {
-    GenParticle* part = dynamic_cast<GenParticle*>(branchGenParticle_->At(i));
-    MCParticleFormat * gen = myEvent.mc()->GetNewParticle();
-    gen->pdgid_      = part->PID;
-    gen->statuscode_ = part->Status;
-    gen->momentum_.SetPxPyPzE(part->Px,part->Py, part->Pz, part->E);
+    // Number of generated particles
+    MAuint32 nparts = static_cast<MAuint32>(branchGenParticle_->GetEntries());
+    myEvent.mc()->particles_.reserve(nparts);
 
-    // conventions: part->M1=0,1,2,3,...
-    // 0 -> no mother
-    // 1 -> first line
-    if (part->M1<0) gen->mothup1_ = 0;
-    else gen->mothup1_ = static_cast<MAuint32>(part->M1)+1;
-    if (part->M2<0) gen->mothup2_ = 0;
-    else gen->mothup2_ = static_cast<MAuint32>(part->M2)+1;
-    if (part->MA5index<0) gen->extra1_ = 0;
-    else gen->extra1_ = part->MA5index+1;
+    // Temporary vector for mother-daughter relations
+    std::vector<std::pair<MAint32,MAint32> > mothers(nparts);
 
-    bool debug=false;
-    if (debug)
+    for (unsigned int i=0;i<nparts;i++)
     {
-      std::cout << "DEBUG i=" << i+1 << "\t" << gen->pdgid_ 
-                << "[" << gen->statuscode_ << "]\tMA5index=" << gen->extra1_ 
-                << "\tM1=" << gen->mothup1_ << "\tM2=" << gen->mothup2_ << std::endl;
+      GenParticle* part = dynamic_cast<GenParticle*>(branchGenParticle_->At(i));
+      MCParticleFormat * gen = myEvent.mc()->GetNewParticle();
+      gen->pdgid_      = part->PID;
+      gen->statuscode_ = part->Status;
+      gen->momentum_.SetPxPyPzE(part->Px,part->Py, part->Pz, part->E);
+
+      // Filling mother-daughter relations
+      mothers[i]=std::make_pair(part->M1,part->M2);
+      /*
+      // conventions: part->M1=0,1,2,3,...
+      // 0 -> no mother
+      // 1 -> first line
+      if (part->M1<0) gen->mothup1_ = 0;
+      else gen->mothup1_ = static_cast<MAuint32>(part->M1)+1;
+      if (part->M2<0) gen->mothup2_ = 0;
+      else gen->mothup2_ = static_cast<MAuint32>(part->M2)+1;
+      if (part->MA5index<0) gen->extra1_ = 0;
+      else gen->extra1_ = part->MA5index+1;
+
+      bool debug=false;
+      if (debug)
+      {
+        std::cout << "DEBUG i=" << i+1 << "\t" << gen->pdgid_ 
+                  << "[" << gen->statuscode_ << "]\tMA5index=" << gen->extra1_ 
+                  << "\tM1=" << gen->mothup1_ << "\tM2=" << gen->mothup2_ << std::endl;
+      }
+      */
+    }
+
+    // Setting the mother-daughter relations
+    for (MAuint32 i=0;i<myEvent.mc()->particles_.size();i++)
+    {
+      MCParticleFormat* part = &(myEvent.mc()->particles_[i]);
+      std::vector<MAint32> mother_indices(2,0);
+      mother_indices[0]=mothers[i].first;
+      mother_indices[1]=mothers[i].second;
+      for (MAuint32 index=0;index<mother_indices.size();index++)
+      {
+        // No mother case : index=-1
+        if (mother_indices[index]<0) continue;
+
+        // Check if the mother has been registered
+        bool redundant=false;
+        for (MAuint32 index2=0;index2<index;index2++)
+        {
+          if (mother_indices[index]==mother_indices[index2])
+          {
+            redundant=true;
+            break;
+          }
+        }
+        if (redundant) continue;
+
+        // Set the mothers and the daughters
+        MAuint32 newindex = static_cast<MAuint32>(mother_indices[index]);
+        if (newindex < myEvent.mc()->particles().size())
+        {
+          MCParticleFormat* mum = &(myEvent.mc()->particles()[newindex]);
+          if (part!=mum)
+          {
+            mum->daughters().push_back(part);
+            part->mothers().push_back(mum);
+          }
+        } 
+        else
+        {
+          WARNING << "A mother particle is defined after the given particle. ";
+          WARNING << " This daughter-mother link will be skipped" << endmsg;
+        }
+      }
     }
   }
 
