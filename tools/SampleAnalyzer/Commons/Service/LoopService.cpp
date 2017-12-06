@@ -82,7 +82,7 @@ MAbool LoopService::ComingFromHadronDecay_core(const MCParticleFormat* part,
 
   // Weird case ? Safety: removing this case
   if (part->mothers().size()==0) return true;
-  //  std::cout << "part id=" << part->pdgid() << "\tstatus=" << part->statuscode() << "\tmother=" << part->mother1()->pdgid() << std::endl;
+//   std::cout << "  [][][][] part id=" << part->pdgid() << "\tstatus=" << part->statuscode() << "\tmother=" << part->mothers().size() << std::endl;
 
   // Patch for Herwig
   if (mySample.sampleGenerator()==MA5GEN::HERWIG6)
@@ -92,6 +92,9 @@ MAbool LoopService::ComingFromHadronDecay_core(const MCParticleFormat* part,
 
   // Weird case
   //  if (part->mother1()==part) { std::cout << "exit" << std::endl; exit(0); }
+
+  // Checking if hard-scattering photons directly generated from the initial state
+  if(part->mothers().size()==2 && part->mothers()[0]->statuscode()==21 && part->mothers()[1]->statuscode()==21) return false;
 
   // Checking if mother is hadron
   MAbool had = PHYSICS->Id->IsHadronic(part->mothers()[0]->pdgid()) && part->mothers()[0]->pdgid()!=21;

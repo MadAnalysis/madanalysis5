@@ -57,10 +57,11 @@ class RecastConfiguration:
           "delphes_card_atlas_sus_2013_04.tcl"    : ["atlas_susy_2013_04"] ,
           "delphes_card_cms_b2g_12_012.tcl"       : ["CMS_B2G_12_012", "cms_exo_12_047", "cms_exo_12_048"],
           "delphes_card_cms_b2g_14_004.tcl"       : ["cms_b2g_12_022", "cms_b2g_14_004"],
-          "delphes_card_ATLAS_1604_07773.tcl"     : ["ATLAS_1604_07773", "atlas_1605_03814"],
+          "delphes_card_ATLAS_1604_07773.tcl"     : ["ATLAS_1604_07773", "atlas_1605_03814", "ATLAS_1711_03301"],
           "delphes_card_ATLAS_CONF_2016_086.tcl"  : ["ATLAS_CONF_2016_086"],
           "delphes_card_CMS_EXO_16_037.tcl"       : ["CMS_EXO_16_037"],
-          "delphes_card_cms_exo_16_010.tcl"       : ["cms_exo_16_010"]
+          "delphes_card_cms_exo_16_010.tcl"       : ["cms_exo_16_010"],
+          "delphes_card_cms_SUS_16_052.tcl"       : ["CMS_SUS_16_052"]
         }
 
         self.description = {
@@ -72,11 +73,13 @@ class RecastConfiguration:
           "atlas_1405_7875"        : "ATLAS - 8 TeV - squark-gluino - 0 leptons + 2-6 jets + met",
           "atlas_higg_2013_03"     : "ATLAS - 8 TeV - ZH to invisible + 2 leptons",
           "ATLAS_EXOT_2014_06"     : "ATLAS - 8 TeV - monophoton",
-          "ATLAS_1604_07773"       : "ATLAS - 13 TeV - monojet",
+          "ATLAS_1604_07773"       : "ATLAS - 13 TeV - monojet (3.2 fb-1)",
+          "ATLAS_1711_03301"       : "ATLAS - 13 TeV - monojet (36.1 fb-1)",
           "atlas_1605_03814"       : "ATLAS - 13 TeV - multijet (2-6 jets) + met",
           "ATLAS_CONF_2016_086"    : "ATLAS - 13 TeV - Dark matter in the b+bar+met channel",
-          "CMS_EXO_16_037"         : "CMS   - 13 TeV - Monojet",
           "cms_exo_16_010"         : "CMS   - 13 TeV - Mono-Z",
+          "CMS_EXO_16_037"         : "CMS   - 13 TeV - Monojet",
+          "CMS_SUS_16_052"         : "CMS   - 13 TeV - SUSY 1 lepton + jets",
           "cms_sus_13_012"         : "CMS   - 8 TeV - squark-gluino - MET/MHT",
           "cms_sus_13_016"         : "CMS   - 8 TeV - gluinos - 2 leptons + bjets + met",
           "cms_sus_14_001_monojet" : "CMS   - 8 TeV - stop - the monojet channel",
