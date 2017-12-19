@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+188           (2017/12/19) fuks:    Addind 2 analyses to the PAD 
+
 187           (2017/12/07) fuks:    Fixing an unclear comment 
 
 186           (2017/12/06) fuks:    Fixing a bug with the jet clusterer when hard scattering photons are 

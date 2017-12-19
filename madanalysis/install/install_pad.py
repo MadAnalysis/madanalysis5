@@ -99,9 +99,10 @@ class InstallPad:
     "delphes_card_atlas_sus_2013_05_pad.tcl" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_atlas_sus_2013_05_pad.tcl",
     "delphes_card_ATLAS_1604_07773.tcl"      : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_ATLAS_1604_07773.tcl",
     "delphes_card_ATLAS_CONF_2016_086.tcl"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_ATLAS_CONF_2016_086.tcl",
+    "delphes_card_ATLAS_1711_03301.tcl"      : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_ATLAS_1711_03301.tcl",
     "delphes_card_CMS_EXO_16_037.tcl"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_CMS_EXO_16_037.tcl",
     "delphes_card_cms_exo_16_010.tcl"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_exo_16_010.tcl",
-    "delphes_card_cms_SUS_16_052.tcl"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_exo_16_010.tcl"
+    "delphes_card_cms_SUS_16_052.tcl"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_sus_16_052.tcl"
         }
 
         self.pileupfiles = {
