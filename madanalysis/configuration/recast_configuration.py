@@ -62,6 +62,7 @@ class RecastConfiguration:
           "delphes_card_ATLAS_CONF_2016_086.tcl"  : ["ATLAS_CONF_2016_086"],
           "delphes_card_CMS_EXO_16_037.tcl"       : ["CMS_EXO_16_037"],
           "delphes_card_cms_exo_16_010.tcl"       : ["cms_exo_16_010"],
+          "delphes_card_cms_exo_16_012.tcl"       : ["CMS_16_012_2gamma"],
           "delphes_card_cms_SUS_16_052.tcl"       : ["CMS_SUS_16_052"]
         }
 
@@ -79,6 +80,7 @@ class RecastConfiguration:
           "atlas_1605_03814"       : "ATLAS - 13 TeV - multijet (2-6 jets) + met",
           "ATLAS_CONF_2016_086"    : "ATLAS - 13 TeV - Dark matter in the b+bar+met channel",
           "cms_exo_16_010"         : "CMS   - 13 TeV - Mono-Z",
+          "cms_exo_16_012"         : "CMS   - 13 TeV - Mono-Higgs with H in digamma (2.3 fb-1)",
           "CMS_EXO_16_037"         : "CMS   - 13 TeV - Monojet",
           "CMS_SUS_16_052"         : "CMS   - 13 TeV - SUSY 1 lepton + jets (36 fb-1)",
           "cms_sus_13_012"         : "CMS   - 8 TeV - squark-gluino - MET/MHT",
