@@ -48,9 +48,9 @@ class InstallPad:
         # ATLAS 8TeV
         self.analyses.extend(["ATLAS_EXOT_2014_06"])
         # ATLAS 13TeV
-        self.analyses.extend(["ATLAS_1604_07773", "atlas_1605_03814", "ATLAS_CONF_2016_086", "ATLAS_1711_03301"])
+        self.analyses.extend(["ATLAS_1604_07773", "atlas_1605_03814", "ATLAS_CONF_2016_086", "ATLAS_1711_03301", "ATLAS_EXOT_2016_32"])
         # CMS 13TeV
-        self.analyses.extend(["CMS_EXO_16_037", "cms_exo_16_010", "CMS_SUS_16_052", "CMS_16_012_2gamma"])
+        self.analyses.extend(["CMS_EXO_16_037", "cms_exo_16_010", "CMS_SUS_16_052", "CMS_EXO_16_012_2gamma"])
         self.files = {
           "CMS_B2G_12_012.cpp"     : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.cpp",
           "CMS_B2G_12_012.h"       : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.h",
@@ -91,9 +91,12 @@ class InstallPad:
           "ATLAS_1711_03301.cpp"     : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_1711_03301.cpp",
           "ATLAS_1711_03301.h"       : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_1711_03301.h",
           "ATLAS_1711_03301.info"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_1711_03301.info",
-          "CMS_16_012_2gamma.cpp"    : "http://inspirehep.net/record/1642631/files/CMS_16_012_2gamma.cpp",
-          "CMS_16_012_2gamma.h"      : "http://inspirehep.net/record/1642631/files/CMS_16_012_2gamma.h",
-          "CMS_16_012_2gamma.info"   : "http://inspirehep.net/record/1642631/files/CMS_16_012_2gamma.info"
+          "CMS_EXO_16_012_2gamma.cpp" :"https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/CMS_EXO_16_012_2gamma.cpp",
+          "CMS_EXO_16_012_2gamma.h"   :"https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/CMS_EXO_16_012_2gamma.h",
+          "CMS_EXO_16_012_2gamma.info":"https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/CMS_EXO_16_012_2gamma.info",
+          "ATLAS_EXOT_2016_32.cpp"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2016_32.cpp",
+          "ATLAS_EXOT_2016_32.h"     : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2016_32.h",
+          "ATLAS_EXOT_2016_32.info"  : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2016_32.info"
         }
 
         self.delphescards = {
@@ -106,7 +109,8 @@ class InstallPad:
     "delphes_card_CMS_EXO_16_037.tcl"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_CMS_EXO_16_037.tcl",
     "delphes_card_cms_exo_16_010.tcl"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_exo_16_010.tcl",
     "delphes_card_cms_exo_16_012.tcl"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_exo_16_012.tcl",
-    "delphes_card_cms_SUS_16_052.tcl"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_sus_16_052.tcl"
+    "delphes_card_cms_SUS_16_052.tcl"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_sus_16_052.tcl",
+    "delphes_card_atlas_2016_32.tcl"         : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_atlas_2016_32.tcl"
         }
 
         self.pileupfiles = {

@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+190           (2017/12/21) fuks:    Adding new analyses to the PAD 
+
 189           (2017/12/20) fuks:    adding analyses to the pad 
 
 188           (2017/12/19) fuks:    Addind 2 analyses to the PAD 

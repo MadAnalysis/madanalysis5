@@ -62,11 +62,21 @@ class RecastConfiguration:
           "delphes_card_ATLAS_CONF_2016_086.tcl"  : ["ATLAS_CONF_2016_086"],
           "delphes_card_CMS_EXO_16_037.tcl"       : ["CMS_EXO_16_037"],
           "delphes_card_cms_exo_16_010.tcl"       : ["cms_exo_16_010"],
-          "delphes_card_cms_exo_16_012.tcl"       : ["CMS_16_012_2gamma"],
-          "delphes_card_cms_SUS_16_052.tcl"       : ["CMS_SUS_16_052"]
+          "delphes_card_cms_exo_16_012.tcl"       : ["CMS_EXO_16_012_2gamma"],
+          "delphes_card_cms_SUS_16_052.tcl"       : ["CMS_SUS_16_052"],
+          "delphes_card_atlas_2016_32.tcl"        : ["ATLAS_EXOT_2016_32"]
         }
 
         self.description = {
+          "ATLAS_1604_07773"       : "ATLAS - 13 TeV - monojet (3.2 fb-1)",
+          "ATLAS_1711_03301"       : "ATLAS - 13 TeV - monojet (36.1 fb-1)",
+          "ATLAS_EXOT_2016_32"     : "ATLAS - 13 TeV - monophoton (36.1 fb-1)",
+          "atlas_1605_03814"       : "ATLAS - 13 TeV - multijet (2-6 jets) + met",
+          "ATLAS_CONF_2016_086"    : "ATLAS - 13 TeV - Dark matter in the b+bar+met channel",
+          "cms_exo_16_010"         : "CMS   - 13 TeV - Mono-Z",
+          "CMS_EXO_16_012_2gamma"  : "CMS   - 13 TeV - Mono-Higgs with H in digamma (2.3 fb-1)",
+          "CMS_EXO_16_037"         : "CMS   - 13 TeV - Monojet",
+          "CMS_SUS_16_052"         : "CMS   - 13 TeV - SUSY 1 lepton + jets (36 fb-1)",
           "atlas_susy_2013_04"     : "ATLAS - 8 TeV - multijet + met", 
           "atlas_sus_13_05"        : "ATLAS - 8 TeV - stop/sbottom - 0 lepton + 2 bjets + met",
           "atlas_susy_2013_11"     : "ATLAS - 8 TeV - ewkinos - 2 leptons + met",
@@ -75,14 +85,6 @@ class RecastConfiguration:
           "atlas_1405_7875"        : "ATLAS - 8 TeV - squark-gluino - 0 leptons + 2-6 jets + met",
           "atlas_higg_2013_03"     : "ATLAS - 8 TeV - ZH to invisible + 2 leptons",
           "ATLAS_EXOT_2014_06"     : "ATLAS - 8 TeV - monophoton",
-          "ATLAS_1604_07773"       : "ATLAS - 13 TeV - monojet (3.2 fb-1)",
-          "ATLAS_1711_03301"       : "ATLAS - 13 TeV - monojet (36.1 fb-1)",
-          "atlas_1605_03814"       : "ATLAS - 13 TeV - multijet (2-6 jets) + met",
-          "ATLAS_CONF_2016_086"    : "ATLAS - 13 TeV - Dark matter in the b+bar+met channel",
-          "cms_exo_16_010"         : "CMS   - 13 TeV - Mono-Z",
-          "cms_exo_16_012"         : "CMS   - 13 TeV - Mono-Higgs with H in digamma (2.3 fb-1)",
-          "CMS_EXO_16_037"         : "CMS   - 13 TeV - Monojet",
-          "CMS_SUS_16_052"         : "CMS   - 13 TeV - SUSY 1 lepton + jets (36 fb-1)",
           "cms_sus_13_012"         : "CMS   - 8 TeV - squark-gluino - MET/MHT",
           "cms_sus_13_016"         : "CMS   - 8 TeV - gluinos - 2 leptons + bjets + met",
           "cms_sus_14_001_monojet" : "CMS   - 8 TeV - stop - the monojet channel",
