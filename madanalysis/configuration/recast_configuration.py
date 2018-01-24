@@ -64,7 +64,8 @@ class RecastConfiguration:
           "delphes_card_cms_exo_16_010.tcl"       : ["cms_exo_16_010"],
           "delphes_card_cms_exo_16_012.tcl"       : ["CMS_EXO_16_012_2gamma"],
           "delphes_card_cms_SUS_16_052.tcl"       : ["CMS_SUS_16_052"],
-          "delphes_card_atlas_2016_32.tcl"        : ["ATLAS_EXOT_2016_32"]
+          "delphes_card_atlas_2016_32.tcl"        : ["ATLAS_EXOT_2016_32"],
+          "delphes_card_cms_sus_16_041.tcl"       : ["cms_sus_16_041"]
         }
 
         self.description = {
@@ -76,6 +77,7 @@ class RecastConfiguration:
           "cms_exo_16_010"         : "CMS   - 13 TeV - Mono-Z",
           "CMS_EXO_16_012_2gamma"  : "CMS   - 13 TeV - Mono-Higgs with H in digamma (2.3 fb-1)",
           "CMS_EXO_16_037"         : "CMS   - 13 TeV - Monojet",
+          "cms_sus_16_041"         : "CMS   - 13 TeV - SUSY multilepton + jets (35.9 fb-1)",
           "CMS_SUS_16_052"         : "CMS   - 13 TeV - SUSY 1 lepton + jets (36 fb-1)",
           "atlas_susy_2013_04"     : "ATLAS - 8 TeV - multijet + met", 
           "atlas_sus_13_05"        : "ATLAS - 8 TeV - stop/sbottom - 0 lepton + 2 bjets + met",
