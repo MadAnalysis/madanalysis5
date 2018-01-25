@@ -50,7 +50,7 @@ class InstallPad:
         # ATLAS 13TeV
         self.analyses.extend(["ATLAS_1604_07773", "atlas_1605_03814", "ATLAS_CONF_2016_086", "ATLAS_1711_03301", "ATLAS_EXOT_2016_32"])
         # CMS 13TeV
-        self.analyses.extend(["CMS_EXO_16_037", "cms_exo_16_010", "CMS_SUS_16_052", "CMS_EXO_16_012_2gamma, cms_sus_16_041"])
+        self.analyses.extend(["CMS_EXO_16_037", "cms_exo_16_010", "CMS_SUS_16_052", "CMS_EXO_16_012_2gamma", "cms_sus_16_041"])
         self.files = {
           "CMS_B2G_12_012.cpp"     : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.cpp",
           "CMS_B2G_12_012.h"       : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.h",

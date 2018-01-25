@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+192           (2018/01/25) fuks:    Bug fix in the PAD installation 
+
 191           (2018/01/24) fuks:    Adding cms_sus_16_041 to the PAD 
 
 190           (2017/12/21) fuks:    Adding new analyses to the PAD 
