@@ -292,20 +292,20 @@ def MainSession(mode,arglist,ma5dir,version,date):
             # Must be restarted?
             if main.repeatSession==True:
                 return True
-             
+
             # Exit if script mode activated
             if main.script:
                 interpreter.run_cmd("quit")
                 return False # Exit with no repeation
-    
+
         # Interpreter loop
         interpreter.cmdloop()
         if main.repeatSession==True:
             return True
         else:
             return False
-        
-       
+
+
 ################################################################################
 # Function usage
 ################################################################################

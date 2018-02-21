@@ -357,7 +357,6 @@ class Interpreter(InterpreterBase):
         self.prompt = 'ma5>'
 #        if readline and not 'libedit' in readline.__doc__:
 #            readline.set_completion_display_matches_hook(self.print_suggestions)
-            
 
     def deal_multiple_categories(self, dico):
         """convert the multiple category in a formatted list understand by our
