@@ -128,7 +128,7 @@ class CmdInstall(CmdBase):
             installer=InstallManager(self.main)
             return inst_delphes(self.main,installer)
         elif args[0]=='delphesMA5tune':
-            self.logger.warning("The package 'delphesMA5tune' is now obsolete. It is replaced by Delphes with special MA5-tuned cards.")
+            self.logger.warning("The package 'delphesMA5tune' must be used with root-5. It is replaced by Delphes with special MA5-tuned cards in the root-6 case.")
             if len(self.main.archi_info.root_version)!=3:
                 self.logger.error("Cannot read the root version correctly. Installation skipped.")
                 return True

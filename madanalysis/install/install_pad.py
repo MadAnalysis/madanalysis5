@@ -50,7 +50,8 @@ class InstallPad:
         # ATLAS 13TeV
         self.analyses.extend(["ATLAS_1604_07773", "atlas_1605_03814", "ATLAS_CONF_2016_086", "ATLAS_1711_03301", "ATLAS_EXOT_2016_32"])
         # CMS 13TeV
-        self.analyses.extend(["CMS_EXO_16_037", "cms_exo_16_010", "CMS_SUS_16_052", "CMS_EXO_16_012_2gamma"])
+        self.analyses.extend(["CMS_EXO_16_037", "cms_exo_16_010", "CMS_SUS_16_052", "cms_sus_17_001", "CMS_EXO_16_012_2gamma", "cms_top_17_009"])
+
         self.files = {
           "CMS_B2G_12_012.cpp"     : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.cpp",
           "CMS_B2G_12_012.h"       : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.h",
@@ -96,7 +97,13 @@ class InstallPad:
           "ATLAS_1711_03301.info"     : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_1711_03301.info",
           "ATLAS_EXOT_2016_32.cpp"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2016_32.cpp",
           "ATLAS_EXOT_2016_32.h"      : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2016_32.h",
-          "ATLAS_EXOT_2016_32.info"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2016_32.info"
+          "ATLAS_EXOT_2016_32.info"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2016_32.info",
+          "cms_sus_17_001.cpp"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_sus_17_001.cpp",
+          "cms_sus_17_001.h"          : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_sus_17_001.h",
+          "cms_sus_17_001.info"       : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_sus_17_001.info",
+          "cms_top_17_009.cpp"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_top_17_009.cpp",
+          "cms_top_17_009.h"          : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_top_17_009.h",
+          "cms_top_17_009.info"       : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_top_17_009.info"
         }
 
         self.delphescards = {
