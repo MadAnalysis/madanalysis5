@@ -61,7 +61,8 @@ class RecastConfiguration:
           "delphes_card_ATLAS_1711_03301.tcl"     : ["ATLAS_1711_03301"],
           "delphes_card_ATLAS_CONF_2016_086.tcl"  : ["ATLAS_CONF_2016_086"],
           "delphes_card_CMS_EXO_16_037.tcl"       : ["CMS_EXO_16_037"],
-          "delphes_card_cms_exo_16_010.tcl"       : ["cms_exo_16_010", "cms_sus_17_001", "cms_top_17_009"],
+          "delphes_card_cms_exo_16_010.tcl"       : ["cms_exo_16_010", "cms_sus_17_001"],
+          "delphes_card_cms_top_17_009.tcl"       : ["cms_top_17_009"],
           "delphes_card_cms_exo_16_012.tcl"       : ["CMS_EXO_16_012_2gamma"],
           "delphes_card_cms_SUS_16_052.tcl"       : ["CMS_SUS_16_052"],
           "delphes_card_atlas_2016_32.tcl"        : ["ATLAS_EXOT_2016_32"]
