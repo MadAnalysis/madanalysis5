@@ -25,6 +25,7 @@
 #ifndef PHYSICS_SERVICE_h
 #define PHYSICS_SERVICE_h
 
+
 // STL headers
 #include <set>
 #include <string>
@@ -41,6 +42,7 @@
 #include "SampleAnalyzer/Commons/Service/Identification.h"
 #include "SampleAnalyzer/Commons/Service/Isolation.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
+
 
 #define PHYSICS MA5::PhysicsService::getInstance()
 
@@ -97,6 +99,12 @@ class PhysicsService
   RECconfig& recConfig()
   { return Id->recConfig(); }
 
+  /// Weights
+  inline double weights(const MCEventFormat* event) const
+  {
+    return event->weight();
+  }
+
   /// MT 
   MAfloat32 MT(const MCParticleFormat& part, const MCEventFormat* event)
   {
@@ -120,13 +128,13 @@ class PhysicsService
 
   ///Get the decay mode : 1 = Tau --> e nu nu
   ///                     2 = Tau --> mu nu nu
-  ///  	       	       	  3 = Tau --> K nu
-  ///  	       	       	  4 = Tau --> K* nu
-  ///  	       	       	  5 = Tau --> Rho (--> pi pi0) nu
-  ///  	       	       	  6 = Tau --> A1 (--> pi 2pi0) nu
-  ///  	       	       	  7 = Tau --> A1 (--> 3pi) nu
-  ///  	       	       	  8 = Tau --> pi nu
-  ///  	       	       	  9 = Tau --> 3pi pi0 nu
+  ///                     3 = Tau --> K nu
+  ///                     4 = Tau --> K* nu
+  ///                     5 = Tau --> Rho (--> pi pi0) nu
+  ///                     6 = Tau --> A1 (--> pi 2pi0) nu
+  ///                     7 = Tau --> A1 (--> 3pi) nu
+  ///                     8 = Tau --> pi nu
+  ///                     9 = Tau --> 3pi pi0 nu
   ///                     0 = other
   ///                    -1 = error
   MAint32 GetTauDecayMode (const MCParticleFormat* part)
@@ -135,7 +143,7 @@ class PhysicsService
 
     try
     {
-      if (fabs(part->pdgid())!=15) throw EXCEPTION_WARNING("Particle is not a Tau.","",0);
+      if (std::abs(part->pdgid())!=15) throw EXCEPTION_WARNING("Particle is not a Tau.","",0);
     }
     catch(const std::exception& e)
     {
@@ -148,27 +156,27 @@ class PhysicsService
     for (unsigned int i=0;i<part->daughters().size();i++)
     {
       MAint32 pdgid = part->daughters()[i]->pdgid();
-      if (fabs(pdgid) == 11) return 1;
-      else if (fabs(pdgid) == 13) return 2;
-      else if (fabs(pdgid) == 321) return 3;
-      else if (fabs(pdgid) == 323) return 4;
-      else if (fabs(pdgid) == 213) return 5;
-      else if (fabs(pdgid) == 20213)
+      if (std::abs(pdgid) == 11) return 1;
+      else if (std::abs(pdgid) == 13) return 2;
+      else if (std::abs(pdgid) == 321) return 3;
+      else if (std::abs(pdgid) == 323) return 4;
+      else if (std::abs(pdgid) == 213) return 5;
+      else if (std::abs(pdgid) == 20213)
       {
-       	MAint32 pi = 0;
+        MAint32 pi = 0;
         for (unsigned int j=0;j<part->daughters()[i]->daughters().size();j++)
         {
-          if (fabs(part->daughters()[i]->daughters()[j]->pdgid()) == 211) pi++;
+          if (std::abs(part->daughters()[i]->daughters()[j]->pdgid()) == 211) pi++;
         }
         if (pi == 1) return 6;
         else if (pi == 3) return 7;
       }
-      else if (fabs(pdgid) == 211) npi++;
-      else if (fabs(pdgid) == 24)
+      else if (std::abs(pdgid) == 211) npi++;
+      else if (std::abs(pdgid) == 24)
       {
-       	for (unsigned int j=0;j<part->daughters()[i]->daughters().size();j++)
+        for (unsigned int j=0;j<part->daughters()[i]->daughters().size();j++)
         {
-          if (fabs(part->daughters()[i]->daughters()[j]->pdgid()) == 211) npi++;
+          if (std::abs(part->daughters()[i]->daughters()[j]->pdgid()) == 211) npi++;
         }
       }
     }

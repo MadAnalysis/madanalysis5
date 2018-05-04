@@ -45,7 +45,7 @@ class TextReport():
             for i,j in dic.iteritems():
                 word = word.replace(i,j)
             return word
-            
+
         def WriteHTML(self,file):
             if self.text=='':
                 return
@@ -60,14 +60,15 @@ class TextReport():
             file.append(ScriptType.htmlscriptclose(self.script))
 
         def WriteLATEX(self,file):
-            
             if self.text.find('ma5>')!=-1:
                 self.text = self.text + '\\\\\n'
             file.write(ScriptType.latexscript(self.script))
             file.write(FontType.convert2latex(self.font))
             if ColorType.convert2string(self.color) == 'black':
-                file.write(' ' + self.ReplaceAll(self.text,\
-                       TextReport.FormattedText.dicolatex))
+                if not 'Plot' in self.text and not 'ma5>' in self.text and not 'Cut' in self.text:
+                    file.write(' ' + self.ReplaceAll(self.text,TextReport.FormattedText.dicolatex))
+                else:
+                    file.write(self.ReplaceAll(self.text,TextReport.FormattedText.dicolatex))
             else:
                 file.write("\\textcolor{"+\
                        ColorType.convert2string(self.color)+"}{")
@@ -75,7 +76,7 @@ class TextReport():
                        TextReport.FormattedText.dicolatex)+"}")
             file.write(FontType.convert2latexclose(self.font))
             file.write(ScriptType.latexscriptclose(self.script))
-    
+
     class NewLine():
 
         @staticmethod
@@ -85,10 +86,10 @@ class TextReport():
         @staticmethod
         def WriteLATEX(file):
             file.write('\n')
-        
+
     def __init__(self):
         self.Reset()
-        
+
     def SetNormal(self):
         self.font = FontType.none
         self.color = ColorType.BLACK
@@ -99,7 +100,7 @@ class TextReport():
 
     def SetColor(self,color):
         self.color = color
-        
+
     def SetScript(self,script):
         self.script = script
 
@@ -127,11 +128,3 @@ class TextReport():
             if type(item)==type(TextReport.NewLine()):
                 return True
         return False
-    
-
-                            
-
-        
-        
-    
-        

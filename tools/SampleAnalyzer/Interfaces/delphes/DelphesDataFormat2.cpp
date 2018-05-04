@@ -26,7 +26,7 @@
 #include "SampleAnalyzer/Interfaces/delphes/DelphesDataFormat2.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
-// ROOT header
+// ROOT headers
 #include <TBranchElement.h>
 #include <TROOT.h>
 
@@ -38,6 +38,7 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 DelphesDataFormat2::DelphesDataFormat2()
 {
+  FatJet_       = 0;
   Jet_          = 0;
   Electron_     = 0;
   Photon_       = 0;
@@ -59,6 +60,7 @@ DelphesDataFormat2::DelphesDataFormat2()
 // -----------------------------------------------------------------------------
 DelphesDataFormat2::~DelphesDataFormat2()
 {
+  if (FatJet_!=0)       delete FatJet_;
   if (Jet_!=0)          delete Jet_;
   if (Electron_!=0)     delete Electron_;
   if (Photon_!=0)       delete Photon_;

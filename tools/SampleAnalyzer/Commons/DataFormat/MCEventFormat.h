@@ -25,6 +25,7 @@
 #ifndef MCEventFormat_h
 #define MCEventFormat_h
 
+
 // STL headers
 #include <iostream>
 #include <sstream>
@@ -33,6 +34,7 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/DataFormat/MCParticleFormat.h"
+#include "SampleAnalyzer/Commons/DataFormat/WeightCollection.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
 
@@ -64,15 +66,14 @@ class MCEventFormat
   // -------------------------------------------------------------
  private : 
 
-  MAuint32 nparts_;       /// number of particles in the event
-  MAuint32 processId_;    /// identity of the current process
-  mutable MAfloat64 weight_;      /// event weight
-  MAfloat64 scale_;       /// scale Q of the event
-  MAfloat64 alphaQED_;    /// ALPHA_em value used
-  MAfloat64 alphaQCD_;    /// ALPHA_s value used
-  MAfloat64 PDFscale_;
-  std::pair<MAfloat64,MAfloat64> x_;
-  std::pair<MAfloat64,MAfloat64> xpdf_;
+  MAuint32 processId_;       /// identity of the current process
+  mutable MAfloat64 weight_; /// event weight
+  MAfloat64 scale_;          /// scale Q of the event
+  MAfloat64 alphaQED_;       /// ALPHA_em value used
+  MAfloat64 alphaQCD_;       /// ALPHA_s value used
+  MAfloat64 PDFscale_;       /// scale for PDF 
+  std::pair<MAfloat64,MAfloat64> x_;    /// x values
+  std::pair<MAfloat64,MAfloat64> xpdf_; /// xpdf values
 
   /// List of generated particles
   std::vector<MCParticleFormat> particles_;
@@ -89,6 +90,11 @@ class MCEventFormat
   /// Computed Scalar sum of hadronic transverse energy
   MAfloat64 THT_;
 
+  /// Computed total effective mass (sum of jet's PT + MET
+  MAfloat64 Meff_;
+
+  /// List of weights
+  WeightCollection multiweights_;
 
 
   // -------------------------------------------------------------
@@ -98,7 +104,13 @@ class MCEventFormat
 
   /// Constructor withtout arguments
   MCEventFormat()
-  { Reset(); }
+  {
+    processId_=0; weight_=1.;
+    scale_=0.; alphaQED_=0.; alphaQCD_=0.;
+    TET_ = 0.;
+    THT_ = 0.;
+    Meff_= 0.;
+  }
 
   /// Destructor
   ~MCEventFormat()
@@ -116,6 +128,9 @@ class MCEventFormat
   /// Accessor to the Total Hadronic Transverse Energy (read-only)
   const MAfloat64& THT() const {return THT_;}
 
+  /// Accessor to the Total effective mass (read-only)
+  const MAfloat64& Meff() const {return Meff_;}
+
   /// Accessor to the Missing Transverse Energy
   MCParticleFormat& MET() {return MET_;}
 
@@ -127,6 +142,9 @@ class MCEventFormat
 
   /// Accessor to the Total Hadronic Transverse Energy
   MAfloat64& THT() {return THT_;}
+
+  /// Accessor to the Total effective mass
+  MAfloat64& Meff() {return Meff_;}
 
   /// Accessor to the process identity
   const MAuint32& processId()  const {return processId_;}
@@ -142,6 +160,15 @@ class MCEventFormat
 
   /// Accessor to alpha_QCD
   const MAfloat64& alphaQCD()  const {return alphaQCD_; }
+
+  /// Accessor to multiweights
+  const WeightCollection& multiweights()  const {return multiweights_; }
+
+  /// Accessor to multiweights
+  WeightCollection& multiweights() {return multiweights_; }
+
+  /// Accessor to multiweights
+  const MAfloat64& multiweights(MAuint32 weight)  const {return multiweights_[weight]; }
 
   /// Accessor to the generated particle collection (read-only)
   const std::vector<MCParticleFormat>& particles() const {return particles_;}
@@ -166,25 +193,38 @@ class MCEventFormat
 
   /// Clearing all information
   void Reset()
-  { nparts_=0; processId_=0; weight_=1.;
+  { 
+    processId_=0; weight_=1.;
     scale_=0.; alphaQED_=0.; alphaQCD_=0.;
     particles_.clear(); 
+    multiweights_.Reset();
     MET_.Reset();
     MHT_.Reset();
-    TET_=0.;
-    THT_=0.; 
+    TET_  = 0.;
+    THT_  = 0.;
+    Meff_ = 0.;
   }
 
   /// Displaying data member values
   void Print() const
   {
-    INFO << "nparts="      << nparts_
+    INFO << "nparts="       << particles_.size()
          << " - processId=" << processId_
          << " - weight="    << weight_
          << " - scale="     << scale_
          << " - alphaQED="  << alphaQED_
          << " - alphaQCD="  << alphaQCD_ << endmsg;
+    INFO << "nweights=" << multiweights_.size() << endmsg;
   }
+
+  /// Displaying data 
+  void PrintVertices() const;
+
+  /// Displaying mothers
+  void PrintMothers() const;
+
+  /// Displaying daughters
+  void PrintDaughters() const;
 
   /// Giving a new particle
   MCParticleFormat* GetNewParticle()
@@ -192,6 +232,7 @@ class MCEventFormat
     particles_.push_back(MCParticleFormat());
     return &particles_.back();
   }
+
 };
 
 }

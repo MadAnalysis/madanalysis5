@@ -24,23 +24,23 @@
 
 class ConnectorType(object):
     values = { 'OR'      : ["or","||"],\
-	       'AND'     : ["and","&&"],\
-	       'XOR'     : ["xor",""],\
+               'AND'     : ["and","&&"],\
+               'XOR'     : ["xor",""],\
                'UNKNOWN' : ["",""]
                }
 
     class __metaclass__(type):
-	    
+    
         def __getattr__(self, name):
             if name in self.values.keys():
                 return self.values.keys().index(name)
-  	    else:
+            else:
                 return self.values.keys().index('UNKNOWN')
 
         def convert2string(self,op):
-	    name = self.values.keys()[op]
-	    return self.values[name][0]
+            name = self.values.keys()[op]
+            return self.values[name][0]
 
         def convert2cpp(self,op):
-	    name = self.values.keys()[op]
-	    return self.values[name][1]
+            name = self.values.keys()[op]
+            return self.values[name][1]

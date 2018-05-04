@@ -73,7 +73,7 @@ class ClusteringCDFJetClu():
         mydict['cluster.R']                = str(self.radius)
         mydict['cluster.PTmin']            = str(self.ptmin)
         mydict['cluster.OverlapThreshold'] = str(self.overlap)
-        mydict['cluster.SeedThreshol']     = str(self.seed)
+        mydict['cluster.SeedThreshold']    = str(self.seed)
         mydict['cluster.Iratch']           = str(self.iratch)
         return mydict
 

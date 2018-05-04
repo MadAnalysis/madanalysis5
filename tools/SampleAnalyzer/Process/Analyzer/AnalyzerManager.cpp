@@ -22,11 +22,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-// STL headeres
-// SampleAnalyzer headers
 #ifdef FASTJET_USE
+
+  // SampleAnalyzer headers
   #include "SampleAnalyzer/Process/Analyzer/MergingPlots.h"
+
 #endif
+
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 

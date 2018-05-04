@@ -22,15 +22,17 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-//STL headers
+// STL headers
 #include <sstream>
 
-//SampleHeader headers
+// SampleHeader headers
 #include "SampleAnalyzer/Process/Reader/HEPMCReader.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
+
 using namespace MA5;
+
 
 // -----------------------------------------------------------------------------
 // ReadHeader
@@ -85,6 +87,9 @@ StatusCode::Type HEPMCReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySa
 {
   // Initializing MC event
   myEvent.InitializeMC();
+
+  // Allocating memory for all particles
+  myEvent.mc()->particles_.reserve(nparts_max_);
 
   MAbool eventOnGoing=false;
 
@@ -142,55 +147,58 @@ StatusCode::Type HEPMCReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySa
 // -----------------------------------------------------------------------------
 bool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 {
-  // Computing met, mht, ... + mother to daughter relations
-  for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
+  // Compute max numbers of particles & vertices
+  if (myEvent.mc()->particles_.size()>nparts_max_) nparts_max_=myEvent.mc()->particles_.size();
+
+
+  // Fill vertices information
+  for (std::map<MAint32,HEPVertex>::iterator it=vertices_.begin();
+       it!=vertices_.end(); it++)
   {
-    MCParticleFormat& part = myEvent.mc()->particles_[i];
-
-    // Setting mother
-    if (part.extra1_!=part.extra2_)
+    // Decay position & lifetime
+    for (MAuint32 i=0;i<it->second.out_.size();i++)
     {
-      unsigned int nmother=0;
-      for (unsigned int j=0; j < myEvent.mc()->particles_.size();j++)
-      {
-        if (i==j) continue;
-        if (part.extra1_ == myEvent.mc()->particles_[j].extra2_)
-        {
-          // set daughter
-          myEvent.mc()->particles_[j].daughters_.push_back(&part);
+        MCParticleFormat* part = &(myEvent.mc()->particles_[it->second.out_[i]]);
+        part->decay_vertex_.SetXYZT(it->second.x_,it->second.y_,it->second.z_,it->second.ctau_);
+    }
 
-          // set mother
-          nmother++;
-          if      (nmother==1) part.mother1_=&(myEvent.mc()->particles()[j]);
-          else if (nmother==2) part.mother2_=&(myEvent.mc()->particles()[j]);
-          else 
-          { 
-            try
-            {
-              if (warnmother_) throw EXCEPTION_WARNING("Number of mothers greather than 2","",0);
-            }
-            catch (const std::exception& e)
-            {
-              MANAGE_EXCEPTION(e);
-              warnmother_=false; 
-            }    
+    // Mother+daughter relations
+    for (MAuint32 i=0;i<it->second.in_.size();i++)
+    {
+      for (MAuint32 j=0;j<it->second.out_.size();j++)
+      {
+        MCParticleFormat* mum = &(myEvent.mc()->particles_[it->second.in_[i]]);
+        MCParticleFormat* dau = &(myEvent.mc()->particles_[it->second.out_[j]]);
+
+        // Deal with HERWIG initial particle : initial part = part whose mother is itself 
+        if (mum!=dau)
+        {
+          // Safety: be sure to have not 2 same daughters
+          bool found=false;
+          for (MAuint32 h=0;h<mum->daughters().size();h++)
+          {
+            if (mum->daughters()[h]==dau) {found=true; break;}
           }
+          if (!found) mum -> daughters().push_back(dau);
+
+          // Safety: be sure to have not 2 same mothers
+          found=false;
+          for (MAuint32 h=0;h<dau->mothers().size();h++)
+          {
+            if (dau->mothers()[h]==mum) {found=true; break;}
+          }
+          if (!found) dau -> mothers().push_back(mum);
         }
       }
-      if(nmother>0) part.mothup1_ = part.mother1_-&myEvent.mc()->particles_[0]+1;
-      if(nmother>1) part.mothup2_ = part.mother2_-&myEvent.mc()->particles_[0]+1;
     }
+  }
+  vertices_.clear();
 
+
+  // Computing met, mht, ... 
   for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
   {
     MCParticleFormat& part = myEvent.mc()->particles_[i];
-    if(part.daughters_.size()>0)
-    {
-       part.daughter1_ = part.daughters()[0]-&myEvent.mc()->particles_[0] + 1;
-       part.daughter2_ = part.daughters()[part.daughters().size()-1]-&myEvent.mc()->particles_[0] + 1;
-    }
-  }
-
 
     // MET, MHT, TET, THT
     if (part.statuscode()==1 && !PHYSICS->Id->IsInvisible(part))
@@ -201,6 +209,7 @@ bool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
       {
         myEvent.mc()->MHT_ -= part.momentum();
         myEvent.mc()->THT_ += part.pt(); 
+        myEvent.mc()->Meff_ += part.pt(); 
       }
     }
   }
@@ -210,6 +219,7 @@ bool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
   myEvent.mc()->MET_.momentum().SetE(myEvent.mc()->MET_.momentum().Pt());
   myEvent.mc()->MHT_.momentum().SetPz(0.);
   myEvent.mc()->MHT_.momentum().SetE(myEvent.mc()->MHT_.momentum().Pt());
+  myEvent.mc()->Meff_ += myEvent.mc()->MET_.pt();
 
   // Normal end 
   return true; 
@@ -230,32 +240,24 @@ MAbool HEPMCReader::FillWeightNames(const std::string& line)
   str >> firstWord;
 
   // Extracting the number of weights
-  int nweights;
+  MAuint32 nweights;
   str >> nweights;
-  if (nweights<0)
-  {
-    ERROR << "Number of weights is not correct: " 
-          << nweights << endmsg;
-    return false;
-  }
-
-  try
-  {
-    if (nweights>=2) throw EXCEPTION_WARNING("Several event-weights are defined. Only the first one will be used.","",0);
-  }
-  catch (const std::exception& e)
-  {
-    MANAGE_EXCEPTION(e);
-  }    
-
 
   // Storing weight names
-  weightnames_.clear();
-  weightnames_.resize(static_cast<unsigned int>(nweights));
+  std::vector<std::string> weight_names(nweights);
 
   // Filling weight names
-  for (unsigned int i=0;i<weightnames_.size();i++) str >> weightnames_[i];
+  for (MAuint32 i=0;i<weight_names.size();i++)
+  {
+    std::string tmp;
+    str >> tmp;
+    if (tmp=="") continue;
+    
+    if (tmp[0]=='"' && tmp[tmp.size()-1]=='"') tmp=tmp.substr(1,tmp.size()-2);
+    weight_names[i]=tmp;
+  }
 
+  // Ok
   return true;
 }
 
@@ -267,7 +269,7 @@ MAbool HEPMCReader::FillHeavyIons(const std::string& line)
 {
   try
   {
-    if (line!="") if (firstHeavyIons_) EXCEPTION_WARNING("HeavyIons block is not read by SampleAnalyzer","",0);
+    if (line!="") if (firstHeavyIons_) throw EXCEPTION_WARNING("HeavyIons block is not read by SampleAnalyzer","",0);
   }
   catch(const std::exception& e)
   {
@@ -326,7 +328,7 @@ MAbool HEPMCReader::FillEvent(const std::string& line,
     // ignore other cases
     try
     {
-      EXCEPTION_WARNING("HEPMC linecode unknown","",0);
+      throw EXCEPTION_WARNING("HEPMC linecode unknown","",0);
     }
     catch(const std::exception& e)
     {
@@ -342,7 +344,7 @@ MAbool HEPMCReader::FillEvent(const std::string& line,
 // FillEventInformations
 // -----------------------------------------------------------------------------
 void HEPMCReader::FillEventInformations(const std::string& line,
-                                  EventFormat& myEvent)
+                                        EventFormat& myEvent)
 {
   std::stringstream str;
   str << line;
@@ -374,11 +376,13 @@ void HEPMCReader::FillEventInformations(const std::string& line,
   str >> tmp;
   if (tmp>0)
   {
-    std::vector<double> weights(static_cast<unsigned int>(tmp));
-    for (unsigned int i=0;i<weights.size();i++)
+    MAuint32 nweights=static_cast<MAuint32>(tmp);
+    for (MAuint32 i=0;i<nweights;i++)
     {
-      if (i==0) str >> myEvent.mc()->weight_;
-      str >> weights[i];
+      MAfloat64 value;
+      str >> value;
+      if (i==0) myEvent.mc()->weight_=value;
+      myEvent.mc()->multiweights().Add(i+1,value);
     }
   }
 
@@ -484,20 +488,48 @@ void HEPMCReader::FillEventParticleLine(const std::string& line,
   // Get a new particle
   MCParticleFormat * part = myEvent.mc()->GetNewParticle();
   char linecode;
-  str >> linecode;
-  MAuint32 partnum;
-  str >> partnum;
-  str >> part->pdgid_;
-  str >> tmp; part->momentum_.SetPx(tmp*energy_unit_);
-  str >> tmp; part->momentum_.SetPy(tmp*energy_unit_);
-  str >> tmp; part->momentum_.SetPz(tmp*energy_unit_);
-  str >> tmp; part->momentum_.SetE (tmp*energy_unit_);
-  str >> tmp; 
-  str >> part->statuscode_;
-  str >> tmp; 
-  str >> tmp; 
-  str >> part->extra2_;
-  part->extra1_=current_vertex_.barcode_;
+  MAfloat64 px=0.;
+  MAfloat64 py=0.;
+  MAfloat64 pz=0.;
+  MAfloat64 e=0.;
+  MAuint32  partnum;
+  MAint32   decay_barcode;
+
+  str >> linecode;          // letter 'P'
+  str >> partnum;           // particle number
+  str >> part->pdgid_;      // pdgid
+  str >> px;                // Lorentz-vector px
+  str >> py;                // Lorentz-vector py
+  str >> pz;                // Lorentz-vector pz
+  str >> e;                 // Lorentz-vector e
+  str >> tmp;               // Lorentz-vector mass
+  str >> part->statuscode_; // statuscode
+  str >> tmp;               // color flow
+  str >> tmp;               // pointer to the production vertex
+  str >> decay_barcode;     // pointer to the decay vertex
+  // not loaded
+  //  MAuint32 barcode;         // barcode = an integer which uniquely 
+  //  str >> barcode;           //           identifies the GenParticle within the event.
+  
+
+  part->momentum_.SetPxPyPzE (px * energy_unit_,
+                              py * energy_unit_,
+                              pz * energy_unit_,
+                              e  * energy_unit_);
+
+  MAuint32 part_index = myEvent.mc()->particles_.size()-1;
+
+  // Set production vertex
+  std::pair<std::map<MAint32,HEPVertex>::iterator,bool> ret;
+  ret = vertices_.insert(std::make_pair(currentvertex_,HEPVertex()));
+  ret.first->second.out_.push_back(part_index);
+
+  // Set decay vertex
+  ret = vertices_.insert(std::make_pair(decay_barcode,HEPVertex()));
+  ret.first->second.in_.push_back(part_index);
+
+  // Ok
+  return;
 }
 
 // -----------------------------------------------------------------------------
@@ -508,60 +540,30 @@ void HEPMCReader::FillEventVertexLine(const std::string& line, EventFormat& myEv
   std::stringstream str;
   str << line;
 
-  double tmp=0;
   char linecode;
-  str >> linecode;                  // character 'V'
-  str >> current_vertex_.barcode_;  // barcode
-  str >> tmp;                       // id
-  str >> tmp;                       // x
-  str >> tmp;                       // y
-  str >> tmp;                       // z
-  str >> current_vertex_.ctau_;     // ctau
-}
+  MAint32 barcode;
+  HEPVertex vertex;
 
+  str >> linecode;      // character 'V'
+  str >> barcode;       // barcode
+  str >> vertex.id_;    // id
+  str >> vertex.x_;     // x
+  str >> vertex.y_;     // y
+  str >> vertex.z_;     // z
+  str >> vertex.ctau_;  // ctau
 
-//--------------------------------------------------------------------------
-// SetMother
-//--------------------------------------------------------------------------
-void HEPMCReader::SetMother(MCParticleFormat* const part, EventFormat& myEvent)
-{
-  /*  std::cout << current_vertex_.barcode_ << std::endl;
-
-  // No history
-  if (myEvent.mc()->particles().size()==0) return;
-
-  //ERIC orphan special treatment 
-  if (part->extra_==current_vertex_.barcode_) return;
-
-  std::cout << "---------------------------------------------" << std::endl;
-  for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
+    // Adding this vertex to the vertex collection
+  std::pair<std::map<MAint32,HEPVertex>::iterator,MAbool> res = vertices_.insert(std::make_pair(barcode,vertex));
+  if (!res.second)
   {
-    std::cout << "i=" << i << "\t" << myEvent.mc()->particles()[i].pdgid() << " from ";
-    if (myEvent.mc()->particles()[i].mother1()!=0) std::cout <<  myEvent.mc()->particles()[i].mother1()->pdgid();
-    std::cout << " extra=" << myEvent.mc()->particles()[i].extra_ << " current=" << current_vertex_.barcode_ << std::endl;
-    std::cout << std::endl;
+    res.first->second.id_   = vertex.id_;
+    res.first->second.x_    = vertex.x_;
+    res.first->second.y_    = vertex.y_;
+    res.first->second.z_    = vertex.z_;
+    res.first->second.ctau_ = vertex.ctau_;
   }
 
-
-  unsigned int nmother=0;
-  for (unsigned int i=0;i<(myEvent.mc()->particles().size()-1);i++)
-  {
-    if(myEvent.mc()->particles()[i].extra_==current_vertex_.barcode_)
-    {
-      nmother++;
-      if      (nmother==1) part->mother1_=&(myEvent.mc()->particles()[i]);
-      else if (nmother==2) part->mother2_=&(myEvent.mc()->particles()[i]);
-      else 
-      { 
-        if (warnmother_) 
-        {
-          EXCEPTION_WARNING << "Number of mothers greather than 2 : " << nmother << endmsg; 
-          warnmother_=false; 
-        }
-      }
-    }
-  }
-
-    if (part->pdgid()==-24) {std::cout << "MMMMHHH" << std::endl; ComingFromHadronDecay(part); }
-  */
+  // Set the current vertex barcode
+  currentvertex_ = barcode;
 }
+

@@ -77,7 +77,7 @@ class Histogram:
         self.summary.overflow  = self.positive.overflow  - self.negative.overflow
         if self.summary.overflow<0:
             self.summary.overflow=0
-            
+
         # Data
         data = []
         for i in range(0,len(self.positive.array)):
@@ -95,7 +95,6 @@ class Histogram:
         self.positive.ComputeIntegral()
         self.negative.ComputeIntegral()
         self.summary.ComputeIntegral()
-            
 
     def CreateHistogram(self):
         pass
@@ -103,7 +102,7 @@ class Histogram:
 
 
     def Reset(self):
-        
+
         # General info
         self.name  = ""
         self.nbins = 100
@@ -122,8 +121,11 @@ class Histogram:
         # warnings
         self.warnings = []
 
+        # regions
+        self.regions = []
 
-
+    def GetRegions(self):
+        return self.regions
 
     def GetBinLowEdge(self,bin):
 
@@ -133,10 +135,10 @@ class Histogram:
 
         if bin>=self.nbins:
             return self.xmax
-        
+
         # Computing steps
         step = (self.xmax - self.xmin) / float (self.nbins)
-        
+
         # value
         return self.xmin+bin*step
 
@@ -149,10 +151,10 @@ class Histogram:
 
         if bin>=self.nbins:
             return self.xmax
-        
+
         # Computing steps
         step = (self.xmax - self.xmin) / float (self.nbins)
-        
+
         # value
         return self.xmin+(bin+1)*step
 
@@ -165,12 +167,9 @@ class Histogram:
 
         if bin>=self.nbins:
             return self.xmax
-        
+
         # Computing steps
         step = (self.xmax - self.xmin) / float (self.nbins)
-        
+
         # value
         return self.xmin+(bin+0.5)*step
-    
-
-    

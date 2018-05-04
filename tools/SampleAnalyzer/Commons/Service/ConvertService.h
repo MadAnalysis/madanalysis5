@@ -25,14 +25,15 @@
 #ifndef CONVERT_SERVICE_H
 #define CONVERT_SERVICE_H
 
-/// STL headers 
+
+// STL headers 
 #include <iostream>
 #include <string>
 #include <sstream>
 #include <algorithm>
 #include <cctype> // std::tolower
 
-// SampleAnalyzer header
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 

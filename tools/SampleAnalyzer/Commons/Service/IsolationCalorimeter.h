@@ -25,7 +25,9 @@
 #ifndef ISOLATIONCALORIMETER_SERVICE_h
 #define ISOLATIONCALORIMETER_SERVICE_h
 
+
 // STL headers
+#include <iostream>
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/IsolationBase.h"

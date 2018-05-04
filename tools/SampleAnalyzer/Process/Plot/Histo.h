@@ -25,6 +25,7 @@
 #ifndef HISTO_H
 #define HISTO_H
 
+
 // STL headers
 #include <map>
 #include <cmath>
@@ -34,6 +35,7 @@
 #include "SampleAnalyzer/Process/Plot/PlotBase.h"
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelection.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
+
 
 namespace MA5
 {
@@ -90,7 +92,7 @@ class Histo : public PlotBase
 
   /// Constructor with argument 
   Histo(const std::string& name, MAuint32 nbins, MAfloat64 xmin, MAfloat64 xmax) :
-		PlotBase(name)
+     PlotBase(name)
   { 
     // Setting the description: nbins
     try
@@ -102,7 +104,7 @@ class Histo : public PlotBase
     {
       MANAGE_EXCEPTION(e);
       nbins_ = 100;
-    }    
+    }
 
     // Setting the description: min & max
     try
@@ -124,7 +126,7 @@ class Histo : public PlotBase
     histo_.resize(nbins_,std::make_pair(0.,0.));
     underflow_ = std::make_pair(0.,0.);
     overflow_  = std::make_pair(0.,0.);
-	
+
     // Reseting statistical counters
     sum_w_    = std::make_pair(0.,0.);
     sum_ww_   = std::make_pair(0.,0.);
@@ -166,7 +168,7 @@ class Histo : public PlotBase
     catch (const std::exception& e)
     {
       MANAGE_EXCEPTION(e);
-    }    
+    }
 
     // Positive weight
     if (weight>=0)

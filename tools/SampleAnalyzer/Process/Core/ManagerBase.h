@@ -25,6 +25,7 @@
 #ifndef MANAGER_BASE_h
 #define MANAGER_BASE_h
 
+
 // STL headers
 #include <fstream>
 #include <iostream>
@@ -33,9 +34,8 @@
 #include <functional>
 #include <algorithm>
 
-#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
-
 // SampleAnalyzer headers
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
 
@@ -70,7 +70,7 @@ class ManagerBase
   ManagerBase()
   {}
 
-	/// Destructor
+  /// Destructor
   ~ManagerBase()
   { 
     //    for (unsigned int i=0;i<Objects_.size();i++)

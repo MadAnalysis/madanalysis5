@@ -25,8 +25,10 @@
 #ifndef HEPMC_READER_h
 #define HEPMC_READER_h
 
+
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Reader/ReaderTextBase.h"
+
 
 namespace MA5
 {
@@ -49,16 +51,26 @@ class HEPMCReader : public ReaderTextBase
   float energy_unit_;
   float length_unit_;
   std::string savedline_;     // last saved line
-  std::vector<std::string> weightnames_;
   bool firstHeavyIons_;
+  MAuint64 nparts_max_;
+  MAuint64 nvertices_max_;
 
   struct HEPVertex
   {
-    MAint32 barcode_;
     MAfloat64 ctau_;
+    MAfloat64 id_;
+    MAfloat64 x_;
+    MAfloat64 y_;
+    MAfloat64 z_;
+    MAint32 barcode_;
+    std::vector<MAuint32> in_;
+    std::vector<MAuint32> out_;
+    HEPVertex()
+    { ctau_=0; id_=0; x_=0; y_=0; z_=0; barcode_=0; }
   };
 
-  HEPVertex current_vertex_;
+  std::map<MAint32,HEPVertex> vertices_;
+  MAint32 currentvertex_;
 
   // -------------------------------------------------------------
   //                       method members
@@ -70,6 +82,8 @@ class HEPMCReader : public ReaderTextBase
   { 
     firstevent_=false; 
     firstHeavyIons_=true;
+    nparts_max_=0;
+    nvertices_max_=0;
   }
 
   /// Destructor
@@ -91,13 +105,12 @@ class HEPMCReader : public ReaderTextBase
  private:
   
   MAbool FillEvent(const std::string& line, EventFormat& myEvent, SampleFormat& mySample);
-  void FillEventInformations(const std::string& line, EventFormat& myEvent);
-  void FillCrossSection(const std::string& line, SampleFormat& mySample);
-  void FillUnits(const std::string& line);
-  void FillEventPDFInfo(const std::string& line, SampleFormat& mySample, EventFormat& myEvent);
-  void FillEventParticleLine(const std::string& line, EventFormat& myEvent);
-  void FillEventVertexLine(const std::string& line, EventFormat& myEvent);
-  void SetMother(MCParticleFormat* const part, EventFormat& myEvent);
+  void   FillEventInformations(const std::string& line, EventFormat& myEvent);
+  void   FillCrossSection(const std::string& line, SampleFormat& mySample);
+  void   FillUnits(const std::string& line);
+  void   FillEventPDFInfo(const std::string& line, SampleFormat& mySample, EventFormat& myEvent);
+  void   FillEventParticleLine(const std::string& line, EventFormat& myEvent);
+  void   FillEventVertexLine(const std::string& line, EventFormat& myEvent);
   MAbool FillWeightNames(const std::string& line);
   MAbool FillHeavyIons(const std::string& line);
 

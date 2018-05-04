@@ -175,6 +175,24 @@ THT = ObservableBase( name          = 'THT',
                       latex         = '$H_T$'
                     )
 
+MEFF = ObservableBase( name          = 'MEFF',
+                      args          = [],
+                      combination   = CombinationType.DEFAULT,
+                      plot_auto     = False,
+                      plot_nbins    = 100,
+                      plot_xmin     = 0.,
+                      plot_xmax     = 1000.,
+                      plot_unitX_tlatex    = 'GeV',
+                      plot_unitX_latex    = 'GeV',
+                      code_parton   = 'PHYSICS->Transverse->EventMEFF(event.mc())',
+                      code_hadron   = 'PHYSICS->Transverse->EventMEFF(event.mc())',
+                      code_reco     = 'PHYSICS->Transverse->EventMEFF(event.rec())',
+                      cut_event     = True,
+                      cut_candidate = True,
+                      tlatex        = 'M_{eff}',
+                      latex         = '$M_{eff}$'
+                    )
+
 MHT = ObservableBase( name          = 'MHT',
                       args          = [],
                       combination   = CombinationType.DEFAULT,
@@ -192,6 +210,25 @@ MHT = ObservableBase( name          = 'MHT',
                       tlatex        = '#slash{H}_{T}',
                       latex         = '$\slash{H}_T$'
                     )
+
+WEIGHTS = ObservableBase( name      = 'WEIGHTS',
+                      args          = [],
+                      combination   = CombinationType.DEFAULT,
+                      plot_auto     = False,
+                      plot_nbins    = 100,
+                      plot_xmin     = -1.,
+                      plot_xmax     = 1.,
+                      plot_unitX_tlatex    = '',
+                      plot_unitX_latex    = '',
+                      code_parton   = 'PHYSICS->weights(event.mc())',
+                      code_hadron   = 'PHYSICS->weights(event.mc())',
+                      code_reco     = '',
+                      cut_event     = True,
+                      cut_candidate = False,
+                      tlatex        = '#omega',
+                      latex         = '$\omega$'
+                    )
+
 
 NPID = ObservableBase( name          = 'NPID',
                        args          = [],

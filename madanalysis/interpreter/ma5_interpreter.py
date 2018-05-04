@@ -175,7 +175,10 @@ class MA5Interpreter(Interpreter):
 
     @freeze_environment
     def load(self, *args, **opts):
-        Interpreter.load(self,*args,**opts)
+        from madanalysis.core.script_stack import ScriptStack
+        ScriptStack.stack.append(['',args[0]])
+        Interpreter.load(self)
+#        Interpreter.load(self,*args,**opts)
 
     @freeze_environment
     def setLogLevel(self,level):

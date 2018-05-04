@@ -25,6 +25,7 @@
 #ifndef TERMINATE_H
 #define TERMINATE_H
 
+
 // STL headers
 #include <exception>
 #include <cstdlib>

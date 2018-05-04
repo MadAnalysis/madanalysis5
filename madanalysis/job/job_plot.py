@@ -37,30 +37,28 @@ def WritePlot(file,main,iabs,ihisto):
     # Opening bracket for the current histo
     file.write('  {\n')
 
-    # Counting number of times this block is read
-    file.write('  H'+str(ihisto)+'_->IncrementNEvents(__event_weight__);\n')
     if len(main.selection[iabs].arguments)==0:
         WritePlotWith0Arg(file,main,iabs,ihisto)
     elif len(main.selection[iabs].arguments)==1:
         WritePlotWith1Arg(file,main,iabs,ihisto)
     elif len(main.selection[iabs].arguments)==2:
-        WritePlotWith2Args(file,main,iabs,ihisto)
+        WritePlotWith2Args(file,main,iabs,ihisto) 
     else:
         logging.getLogger('MA5').error("observable with more than 2 arguments are " +\
-                      "not managed by MadAnalysis 5")
+                       "not managed by MadAnalysis 5")
 
     # Closing bracket for the current histo
     file.write('  }\n')
 
 
 def WritePlotWith0Arg(file,main,iabs,ihisto):
+    logging.getLogger('MA5').debug("  Writing histogram with 0 argument...")
+
     if main.selection[iabs].observable.name in ['NPID','NAPID']:
         WriteJobNPID(file,main,iabs,ihisto)
     else:
-        file.write('    H'+str(ihisto)+'_->Fill(' +\
-                   main.selection[iabs].observable.code(main.mode)+\
-                   ',__event_weight__);\n')
-
+        file.write('    Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", ' +\
+           main.selection[iabs].observable.code(main.mode)+');\n')
 
 def WriteJobNPID(file,main,iabs,ihisto):
 
@@ -78,11 +76,11 @@ def WriteJobNPID(file,main,iabs,ihisto):
         elif main.selection[iabs].statuscode=="interstate":
             file.write('    if (!PHYSICS->Id->IsInterState(event.mc()->particles()[i])) continue;\n')
         if npid:
-            file.write('    H'+str(ihisto)+'_' +\
-                   '->Fill(event.mc()->particles()[i].pdgid(),__event_weight__);\n')
+            file.write('    Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", ' +\
+                   'event.mc()->particles()[i].pdgid());\n')
         else:
-            file.write('    H'+str(ihisto)+'_' +\
-                   '->Fill(std::abs(event.mc()->particles()[i].pdgid()),__event_weight__);\n')
+            file.write('    Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", '  +\
+                   'std::abs(event.mc()->particles()[i].pdgid()));\n')
         file.write('  }\n')
 
     # RECO mode
@@ -91,53 +89,59 @@ def WriteJobNPID(file,main,iabs,ihisto):
         # photons
         file.write('  for (unsigned int i=0;i<event.rec()->photons().size();i++)\n')
         file.write('  {\n')
-        file.write('    H'+str(ihisto)+'_->Fill(22,__event_weight__);\n')
+        file.write('        Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\" , 22);\n')
         file.write('  }\n')
 
         # electrons
         file.write('  for (unsigned int i=0;i<event.rec()->electrons().size();i++)\n')
         file.write('  {\n')
         if npid:
-            file.write('    if (event.rec()->electrons()[i].charge()<0) H' +\
-                       str(ihisto)+'_->Fill(+11,__event_weight__); else H' +\
-                       str(ihisto)+'_->Fill(-11,__event_weight__);\n')
+            file.write('    if (event.rec()->electrons()[i].charge()<0) \n' +\
+                       '          Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", +11);\n' +\
+                       '    else\n' +\
+                       '          Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", -11);\n')
         else:
-            file.write('    H'+str(ihisto)+'_->Fill(+11,__event_weight__);\n')
+            file.write('        Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", 11);\n')
         file.write('  }\n')
 
         # muons
         file.write('  for (unsigned int i=0;i<event.rec()->muons().size();i++)\n')
         file.write('  {\n')
         if npid:
-            file.write('    if (event.rec()->muons()[i].charge()<0) H' +\
-                       str(ihisto)+'_->Fill(+13,__event_weight__); else H' +\
-                       str(ihisto)+'_->Fill(-13,__event_weight__);\n')
+            file.write('    if (event.rec()->muons()[i].charge()<0) \n' +\
+                       '          Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", +13);\n' +\
+                       '    else\n' +\
+                       '          Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", -13);\n')
         else:
-            file.write('    H'+str(ihisto)+'_->Fill(+13,__event_weight__);\n')
+            file.write('        Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", 13);\n')
         file.write('  }\n')
 
         # taus
         file.write('  for (unsigned int i=0;i<event.rec()->taus().size();i++)\n')
         file.write('  {\n')
         if npid:
-            file.write('    if (event.rec()->taus()[i].charge()<0) H' +\
-                       str(ihisto)+'_->Fill(+15,__event_weight__); else H' +\
-                       str(ihisto)+'_->Fill(-15,__event_weight__);\n')
+            file.write('    if (event.rec()->taus()[i].charge()<0) \n' +\
+                       '          Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", +15);\n' +\
+                       '    else\n' +\
+                       '          Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", -15);\n')
         else:
-            file.write('    H'+str(ihisto)+'_->Fill(+15,__event_weight__);\n')
+            file.write('        Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", 15);\n')
         file.write('  }\n')
 
         # jets
         file.write('  for (unsigned int i=0;i<event.rec()->jets().size();i++)\n')
         file.write('  {\n')
-        file.write('    H'+str(ihisto)+'_->Fill(+21,__event_weight__);\n')
-        file.write('    if (event.rec()->jets()[i].btag()) H'+str(ihisto)+'_->Fill(+5);\n') 
-        file.write('    else H'+str(ihisto)+'_->Fill(+1);\n') 
+        file.write('        Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", +21);\n')
+        file.write('    if (event.rec()->jets()[i].btag())\n'+
+                   '            Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", +5);\n')
+        file.write('    else\n'+
+                   '            Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", +1);\n')
         file.write('  }\n')
 
-
-
 def WritePlotWith1Arg(file,main,iabs,ihisto):
+
+
+    logging.getLogger('MA5').debug("  Writing histogram with 1 argument...")
 
     # Skip observable with INT of FLOAT argument
     # Temporary
@@ -153,6 +157,8 @@ def WritePlotWith1Arg(file,main,iabs,ihisto):
 
 
 def WritePlotWith2Args(file,main,iabs,ihisto):
+    
+    logging.getLogger('MA5').debug("  Writing histogram with 2 arguments...")
 
     # Loop over combination
     for combi1 in main.selection[iabs].arguments[0]:
@@ -180,12 +186,12 @@ def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
     for combi in combi2:
         common.append(combi)
     redundancies0 = HasDoubleCounting(common)
-    
+
     # ----------------------------------------------------------
     #                  No ALL in the observable
     # ----------------------------------------------------------
     if not allmode1 and not allmode2:
-        
+
         # FOR loop for first combi
         WriteJobLoop(file,iabs,ihisto,combi1,redundancies1,main,'a')
 
@@ -201,10 +207,10 @@ def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
         # Managing redundancies between arguments
         if redundancies0:
             WriteAvoidRedundancies(file,iabs,ihisto,combi1,combi2,main,'a','b')
-        
+
         # Write body
         WriteBody2(file,iabs,ihisto,combi1,combi2,main,'a','b')
-    
+
         # End Loop
         WriteEndLoop(file,iabs,ihisto,combi1,main)
         WriteEndLoop(file,iabs,ihisto,combi2,main)
@@ -216,7 +222,7 @@ def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
 
         # Before loop block
         WriteBeforeLoop(file,iabs,ihisto,combi1,main,value='value1',q='q1')
-        
+
         # FOR loop for first combi
         WriteJobLoop(file,iabs,ihisto,combi1,redundancies1,main,'a')
 
@@ -225,7 +231,7 @@ def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
 
         # Write body
         WriteBody(file,iabs,ihisto,combi1,main,iterator='a',value='value1',q='q1')
-        
+
         # End Loop
         WriteEndLoop(file,iabs,ihisto,combi1,main)
 
@@ -241,7 +247,7 @@ def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
             containers2.append(InstanceName.Get('P_'+\
                                                 item.name+\
                                                 histo.rank+\
-                                                histo.statuscode))
+                                                histo.statuscode+'_REG_'+'_'.join(histo.regions)))
 
         # Case of one particle/multiparticle
         if len(combi2)==1:
@@ -251,9 +257,9 @@ def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
               TheObs=obs.code_hadron[:-2]
             else:
               TheObs=obs.code_reco[:-2]
-            file.write('      H'+str(ihisto)+'_->Fill('\
+            file.write('          Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", ' +\
                        'q1.'+TheObs+'('+containers2[0]+\
-                       '[b[0]]),__event_weight__);\n')
+                       '[b[0]]));\n')
 
         # Operation : sum or diff
         else :
@@ -287,8 +293,8 @@ def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
                   TheObs=obs.code_hadron[:-2]
                 else:
                   TheObs=obs.code_reco[:-2]
-                file.write('    H'+str(ihisto)+'_->Fill('+\
-                               'q1.'+TheObs+'(q2),__event_weight__);\n')
+                file.write('        Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", ' +\
+                               'q1.'+TheObs+'(q2));\n')
 
         # End Loop
         WriteEndLoop(file,iabs,ihisto,combi2,main)
@@ -325,7 +331,7 @@ def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
             containers1.append(InstanceName.Get('P_'+\
                                                 item.name+\
                                                 histo.rank+\
-                                                histo.statuscode))
+                                                histo.statuscode+'_REG_'+'_'.join(histo.regions)))
 
         # Case of one particle/multiparticle
         if len(combi1)==1:
@@ -335,9 +341,8 @@ def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
               TheObs=obs.code_hadron[:-2]
             else:
               TheObs=obs.code_reco[:-2]
-            file.write('      H'+str(ihisto)+'_->Fill('\
-                       'q2.'+TheObs+'('+containers1[0]+\
-                       '[a[0]]),__event_weight__);\n')
+            file.write('          Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", ' +\
+                       'q2.'+TheObs+'('+containers1[0]+'[a[0]]));\n')
 
         # Operation : sum or diff
         else:
@@ -371,8 +376,8 @@ def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
                   TheObs=obs.code_hadron[:-2]
                 else:
                   TheObs=obs.code_reco[:-2]
-                file.write('    H'+str(ihisto)+'_->Fill('+\
-                               'q1.'+TheObs+'(q2),__event_weight__);\n')
+                file.write('        Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", ' +
+                               'q1.'+TheObs+'(q2));\n')
 
         # End Loop
         WriteEndLoop(file,iabs,ihisto,combi1,main)
@@ -408,7 +413,7 @@ def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
 
         # Write body
         WriteBody(file,iabs,ihisto,combi2,main,iterator='b',value='value2',q='q2')
-    
+
         # End Loop
         WriteEndLoop(file,ihisto,iabs,combi2,main)
 
@@ -419,11 +424,11 @@ def WriteJobExecute2Nbody(file,iabs,ihisto,combi1,combi2,main):
           TheObs=obs.code_hadron[:-2]
         else:
           TheObs=obs.code_reco[:-2]
-        file.write('    H'+str(ihisto)+'_->Fill(q1.'+TheObs+'(q2),__event_weight__);\n')
-        
+        file.write('        Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", ' +\
+            'q1.'+TheObs+'(q2));\n')
 
 def WriteBeforeLoop(file,iabs,ihisto,combination,main,value='value',q='q'):
-    
+
     # shortcut
     obs = main.selection[iabs].observable
     allmode = ( len(combination)==1 and combination.ALL )
@@ -441,8 +446,6 @@ def WriteBeforeLoop(file,iabs,ihisto,combination,main,value='value',q='q'):
         else:
             file.write('    ParticleBaseFormat '+q+';\n')
 
-
-    
 def WriteEndLoop(file,iabs,ihisto,combination,main):
     for combi in range(len(combination)):
         file.write('    }\n')
@@ -456,25 +459,23 @@ def WriteAfterLoop(file,iabs,ihisto,combination,main):
 
     # Case of ALL
     if allmode:
-    
+
         # Case of observable N
         if obs.name in ['N','vN','sN','sdN','dsN','dvN','vdN','dN','rN']:
-            file.write('    H'+str(ihisto)+'_->Fill(1,__event_weight__);\n')
+            file.write('        Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", 1);\n')
 
         # Case of other observable
         else:
             if obs.combination in [CombinationType.SUMSCALAR,\
                                    CombinationType.DIFFSCALAR]:
-                file.write('    H'+str(ihisto)+'_->Fill(value,__event_weight__);\n')
+                file.write('        Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", value);\n')
             else:
-                file.write('    H'+str(ihisto)+'_->Fill(q.'+\
-                           obs.code(main.mode)+\
-                           ',__event_weight__);\n')
+                file.write('        Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", q.'+\
+                           obs.code(main.mode)+');\n')
 
     # Case of observable N but not ALL
     elif obs.name in ['N','vN','sN','sdN','dsN','dvN','vdN','dN','rN']:
-        file.write('    H'+str(ihisto)+'_->Fill(Ncounter,__event_weight__);\n')
-
+        file.write('        Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", Ncounter);\n')
 
 def WriteBody(file,iabs,ihisto,combination,main,iterator='ind',value='value',q='q'):
 
@@ -500,14 +501,12 @@ def WriteBody(file,iabs,ihisto,combination,main,iterator='ind',value='value',q='
         containers.append(InstanceName.Get('P_'+\
                                            item.name+\
                                            histo.rank+\
-                                           histo.statuscode))
+                                           histo.statuscode+'_REG_'+'_'.join(histo.regions)))
 
     # Only one particle (but not ALL)
     if len(combination)==1 and not allmode:
-        file.write('      H'+str(ihisto)+'_->Fill('\
-                   +containers[0]+'['+iterator+'[0]]->'+\
-                   obs.code(main.mode)+\
-                   ',__event_weight__);\n')
+        file.write('      Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", ' +\
+           containers[0]+'['+iterator+'[0]]->'+obs.code(main.mode)+');\n')
         return
 
     # Operation : sum or diff
@@ -533,8 +532,8 @@ def WriteBody(file,iabs,ihisto,combination,main,iterator='ind',value='value',q='
                        obs.code(main.mode)+';\n')
 
         if not allmode:
-            file.write('    H'+str(ihisto)+'_->Fill(' +\
-                       value+',__event_weight__);\n')
+            file.write('      Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", ' +\
+               value+');\n')
 
     # Vector sum/diff
     elif obs.combination in [CombinationType.DEFAULT,\
@@ -542,7 +541,7 @@ def WriteBody(file,iabs,ihisto,combination,main,iterator='ind',value='value',q='
                              CombinationType.DIFFVECTOR]:
         if not allmode:
             file.write('    ParticleBaseFormat '+q+';\n')
-            
+
         for ind in range(len(combination)):
             TheOper='+'
             if ind!=0:
@@ -551,25 +550,21 @@ def WriteBody(file,iabs,ihisto,combination,main,iterator='ind',value='value',q='
                        containers[ind]+'['+iterator+'['+str(ind)+']]->'+\
                        'momentum();\n')
         if not allmode:
-            file.write('    H'+str(ihisto)+'_->Fill('+\
-                       q+'.')
-            file.write(obs.code(main.mode)+\
-                       ',__event_weight__);\n');
-            
-    # ratio       
+            file.write('      Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", ' +\
+                q+'.'+obs.code(main.mode)+');\n')
+
+    # ratio
     elif obs.combination==CombinationType.RATIO and \
         len(combination)==2:
-        file.write('    H'+str(ihisto)+'_->Fill((' +\
-                   containers[0]+'['+iterator+'[0]]->'+\
-                   obs.code(main.mode)+\
-                   '-'+\
-                   containers[1]+'['+iterator+'[1]]->'+\
-                   obs.code(main.mode)+\
-                   ') / '+\
-                   containers[0]+'['+iterator+'[0]]->'+\
-                   obs.code(main.mode)+\
-                   ',__event_weight__);\n');
-
+        file.write('      Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", (' +\
+            containers[0]+'['+iterator+'[0]]->'+\
+            obs.code(main.mode)+\
+            '-'+\
+            containers[1]+'['+iterator+'[1]]->'+\
+            obs.code(main.mode)+\
+            ') / '+\
+            containers[0]+'['+iterator+'[0]]->'+\
+            obs.code(main.mode)+');\n')
 
 def WriteBody2(file,iabs,ihisto,combi1,combi2,main,iterator1,iterator2):
 
@@ -585,7 +580,7 @@ def WriteBody2(file,iabs,ihisto,combi1,combi2,main,iterator1,iterator2):
         containers1.append(InstanceName.Get('P_'+\
                                             item.name+\
                                             histo.rank+\
-                                            histo.statuscode))
+                                            histo.statuscode+'_REG_'+'_'.join(histo.regions)))
 
     # Getting container name
     containers2=[]
@@ -593,7 +588,7 @@ def WriteBody2(file,iabs,ihisto,combi1,combi2,main,iterator1,iterator2):
         containers2.append(InstanceName.Get('P_'+\
                                             item.name+\
                                             histo.rank+\
-                                            histo.statuscode))
+                                            histo.statuscode+'_REG_'+'_'.join(histo.regions)))
 
     # Case of one particle/multiparticle
     if len(combi1)==1 and len(combi2)==1:
@@ -603,9 +598,9 @@ def WriteBody2(file,iabs,ihisto,combi1,combi2,main,iterator1,iterator2):
           TheObs=obs.code_hadron[:-2]
         else:
           TheObs=obs.code_reco[:-2]
-        file.write('      H'+str(ihisto)+'_->Fill('+\
+        file.write('      Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", ' +\
                    containers1[0]+'['+iterator1+'[0]]->'+\
-                   TheObs+'('+containers2[0]+'['+iterator2+'[0]]),__event_weight__);\n')
+                   TheObs+'('+containers2[0]+'['+iterator2+'[0]]));\n')
         return
 
     # Operation : sum or diff
@@ -648,14 +643,13 @@ def WriteBody2(file,iabs,ihisto,combi1,combi2,main,iterator1,iterator2):
           TheObs=obs.code_hadron[:-2]
         else:
           TheObs=obs.code_reco[:-2]
-        file.write('    H'+str(ihisto)+'_->Fill('+\
-                       'q1.'+TheObs+'(q2),__event_weight__);\n')
-
+        file.write('        Manager()->FillHisto(\"'+str(ihisto)+'_'+main.selection[iabs].observable.name+'\", ' +\
+                       'q1.'+TheObs+'(q2));\n')
 
 def HasDoubleCounting(combination):
     if len(combination)<=1:
         return False
-    
+
     for i in range(len(combination)):
         for j in range(len(combination)):
             if i==j:
@@ -664,9 +658,8 @@ def HasDoubleCounting(combination):
                                                     combination[j].particle):
                 return True
 
-    return False            
-                
-    
+    return False
+
 def WriteJobExecuteNbody(file,iabs,ihisto,combination,main):
 
     # shortcut
@@ -687,13 +680,13 @@ def WriteJobExecuteNbody(file,iabs,ihisto,combination,main):
 
     # Write body
     WriteBody(file,iabs,ihisto,combination,main)
-    
+
     # End Loop
     WriteEndLoop(file,iabs,ihisto,combination,main)
 
     # After Loop
     WriteAfterLoop(file,iabs,ihisto,combination,main)
-    
+
 
 def WriteAvoidRedundancies(file,iabs,ihisto,combi1,combi2,main,iterator1,iterator2):
 
@@ -709,7 +702,7 @@ def WriteAvoidRedundancies(file,iabs,ihisto,combi1,combi2,main,iterator1,iterato
         containers1.append(InstanceName.Get('P_'+\
                                             item.name+\
                                             histo.rank+\
-                                            histo.statuscode))
+                                            histo.statuscode+'_REG_'+'_'.join(histo.regions)))
 
     # Getting container name
     containers2=[]
@@ -717,7 +710,7 @@ def WriteAvoidRedundancies(file,iabs,ihisto,combi1,combi2,main,iterator1,iterato
         containers2.append(InstanceName.Get('P_'+\
                                             item.name+\
                                             histo.rank+\
-                                            histo.statuscode))
+                                            histo.statuscode+'_REG_'+'_'.join(histo.regions)))
 
     # Case of one particle/multiparticle
     if len(combi1)==1 and len(combi2)==1:
@@ -733,7 +726,7 @@ def WriteJobLoop(file,iabs,ihisto,combination,redundancies,main,iterator='ind'):
     containers=[]
     for item in combination:
         containers.append(InstanceName.Get('P_'+\
-                                           item.name+histo.rank+histo.statuscode))
+                                           item.name+histo.rank+histo.statuscode+'_REG_'+'_'.join(histo.regions)))
 
     # Declaring indicator
     file.write('    MAuint32 '+iterator+'['+str(len(combination))+'];\n')
@@ -764,7 +757,7 @@ def WriteJobLoop(file,iabs,ihisto,combination,redundancies,main,iterator='ind'):
 
 
 def WriteJobSameCombi(file,iabs,ihisto,combination,redundancies,main,iterator='ind'):
-    
+
     if len(combination)==1 or not redundancies:
         return
 
@@ -774,7 +767,7 @@ def WriteJobSameCombi(file,iabs,ihisto,combination,redundancies,main,iterator='i
     containers=[]
     for item in combination:
         containers.append(InstanceName.Get('P_'+\
-                                           item.name+histo.rank+histo.statuscode))
+                                           item.name+histo.rank+histo.statuscode+'_REG_'+'_'.join(histo.regions)))
 
     file.write('\n    // Checking if consistent combination\n')
     if main.mode in [MA5RunningType.PARTON,MA5RunningType.HADRON]:

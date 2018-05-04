@@ -69,9 +69,6 @@ class MergingPlots:
         # Saving files
         for item in rootfiles:
             ListROOTplots.append(item)
-            
-
-
 
     def DrawDatasetPlots(self,histos,dataset,histo_path,modes,output_paths,rootfiles):
 

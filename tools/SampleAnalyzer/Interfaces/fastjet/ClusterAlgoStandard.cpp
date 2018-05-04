@@ -22,10 +22,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-//SampleAnalyser headers
+// SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoStandard.h"
 
-//FastJet headers
+// FastJet headers
 #include <fastjet/ClusterSequence.hh>
 #include <fastjet/PseudoJet.hh>
 

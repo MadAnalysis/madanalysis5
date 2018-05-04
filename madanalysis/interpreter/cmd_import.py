@@ -353,7 +353,7 @@ class CmdImport(CmdBase.CmdBase):
             if self.main.IsGoodFormat(file):
                 files.append(file)
             else:
-                logging.getLogger('MA5').warning("file "+file+" is skipped: "+self.main.PrintErrorFormat(file))
+#                logging.getLogger('MA5').warning("file "+file+" is skipped: "+self.main.PrintErrorFormat(file))
                 if self.main.mode == MA5RunningType.RECO:
                     if file.endswith(".lhe") or file.endswith(".lhe.gz") or\
                        file.endswith(".hep") or file.endswith(".hep.gz"):
@@ -421,8 +421,8 @@ class CmdImport(CmdBase.CmdBase):
                 if os.path.isfile(file):
                     if self.main.IsGoodFormat(file):
                         output.append(file)
-                    else:
-                        logging.getLogger('MA5').warning("file "+file+" is skipped: "+self.main.PrintErrorFormat(file))
+#                    else:
+#                        logging.getLogger('MA5').warning("file "+file+" is skipped: "+self.main.PrintErrorFormat(file))
                 else:
                     output.append(file) # directory
             return self.finalize_complete(text,output)

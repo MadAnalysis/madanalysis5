@@ -74,7 +74,7 @@ class DetectPython:
             result = ShellCommand.Which('python',all=False,mute=True)
             if len(result)==0:
                 self.logger.error('python compiler not found. Please install it before ' + \
-	             'using MadAnalysis 5')
+                                  'using MadAnalysis 5')
                 return False
             self.logger.debug("  which:                  " + str(result[0]))
 
@@ -83,7 +83,7 @@ class DetectPython:
             result = ShellCommand.Which('python',all=True,mute=True)
             if len(result)==0:
                 self.logger.error('g++ compiler not found. Please install it before ' + \
-	                 'using MadAnalysis 5')
+                                  'using MadAnalysis 5')
                 return False
             self.logger.debug("  which-all:              ")
             for file in result:

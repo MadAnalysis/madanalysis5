@@ -25,6 +25,7 @@
 #ifndef RECSAMPLE_DATAFORMAT_H
 #define RECSAMPLE_DATAFORMAT_H
 
+
 // STL headers
 #include <map>
 #include <iostream>

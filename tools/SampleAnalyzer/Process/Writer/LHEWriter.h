@@ -25,6 +25,7 @@
 #ifndef LHE_WRITER_BASE_h
 #define LHE_WRITER_BASE_h
 
+
 // STL headers
 #include <fstream>
 #include <iostream>
@@ -33,6 +34,7 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Writer/WriterTextBase.h"
 #include "SampleAnalyzer/Process/Writer/LHEParticleFormat.h"
+
 
 namespace MA5
 {
@@ -56,7 +58,7 @@ class LHEWriter : public WriterTextBase
   LHEWriter() : WriterTextBase()
   {}
 
-	/// Destructor
+  /// Destructor
   virtual ~LHEWriter()
   {}
 

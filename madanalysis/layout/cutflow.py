@@ -31,7 +31,6 @@ from madanalysis.layout.measure               import Measure
 from madanalysis.layout.fom_calculation       import FomCalculation
 from math                                     import sqrt
 
-                           
 class CutFlow:
 
     def __init__(self,main):
@@ -60,7 +59,7 @@ class CutFlow:
         # Initialize B/S
         self.CalculateSummary(self.signal,background=False)
         self.CalculateSummary(self.background,background=True)
-            
+
 
     def calculateBSratio(self,B,eB,S,eS):
         return self.fom.Compute(S,eS,B,eB)
@@ -78,37 +77,42 @@ class CutFlow:
         summary.Ntotal.error = sqrt(summary.Ntotal.error)
 
         # Prepare vectors
-        for i in range(0,len(self.detail[0].Nselected)):
-            summary.Nselected.append(Measure())
-            summary.Nrejected.append(Measure())
-            summary.eff.append(Measure())
-            summary.effcumu.append(Measure())
+        myregs = self.main.regions.GetNames()
+        if myregs == []:
+            myregs = ['myregion']
+        for reg in range(len(myregs)):
+            for i in range(0,len(self.detail[0].Nselected[reg])):
+                summary.Nselected[reg].append(Measure())
+                summary.Nrejected[reg].append(Measure())
+                summary.eff[reg].append(Measure())
+                summary.effcumu[reg].append(Measure())
 
         # Fill selected and rejected
         for iset in range (0,len(self.detail)):
-
             if background!=self.main.datasets[iset].background:
                 continue
-            
-            for icut in range (0,len(self.detail[iset].Nselected)):
-                summary.Nselected[icut].mean  += self.detail[iset].Nselected[icut].mean
-                summary.Nrejected[icut].mean  += self.detail[iset].Nrejected[icut].mean
-                summary.Nselected[icut].error += self.detail[iset].Nselected[icut].error**2
-                summary.Nrejected[icut].error += self.detail[iset].Nrejected[icut].error**2
-        for icut in range (0,len(self.detail[0].Nselected)):
-            summary.Nselected[icut].error = sqrt(summary.Nselected[icut].error)
-            summary.Nrejected[icut].error = sqrt(summary.Nrejected[icut].error)
+            for reg in range(len(myregs)):
+                for icut in range (0,len(self.detail[iset].Nselected[reg])):
+                    summary.Nselected[reg][icut].mean  += self.detail[iset].Nselected[reg][icut].mean
+                    summary.Nrejected[reg][icut].mean  += self.detail[iset].Nrejected[reg][icut].mean
+                    summary.Nselected[reg][icut].error += self.detail[iset].Nselected[reg][icut].error**2
+                    summary.Nrejected[reg][icut].error += self.detail[iset].Nrejected[reg][icut].error**2
+        for reg in range(len(myregs)):
+            for icut in range (0,len(self.detail[0].Nselected[reg])):
+                summary.Nselected[reg][icut].error = sqrt(summary.Nselected[reg][icut].error)
+                summary.Nrejected[reg][icut].error = sqrt(summary.Nrejected[reg][icut].error)
 
         # Compute efficiencies
-        for i in range(0,len(summary.eff)):
-            if summary.Ntotal.mean!=0:
-                summary.effcumu[i].mean=float(summary.Nselected[i].mean)/float(summary.Ntotal.mean)
-                summary.effcumu[i].error=Measure.binomialError(summary.Nselected[i].mean,summary.Ntotal.mean)
-            if i==0:
+        for reg in range(len(myregs)):
+            for i in range(0,len(summary.eff[reg])):
                 if summary.Ntotal.mean!=0:
-                    summary.eff[i].mean=float(summary.Nselected[i].mean)/float(summary.Ntotal.mean)
-                    summary.eff[i].error=Measure.binomialError(summary.Nselected[i].mean,summary.Ntotal.mean)
-            else:
-                if summary.Nselected[i-1].mean!=0:
-                    summary.eff[i].mean=float(summary.Nselected[i].mean)/float(summary.Nselected[i-1].mean)
-                    summary.eff[i].error=Measure.binomialError(summary.Nselected[i].mean,summary.Nselected[i-1].mean)
+                    summary.effcumu[reg][i].mean=float(summary.Nselected[reg][i].mean)/float(summary.Ntotal.mean)
+                    summary.effcumu[reg][i].error=Measure.binomialError(summary.Nselected[reg][i].mean,summary.Ntotal.mean)
+                if i==0:
+                    if summary.Ntotal.mean!=0:
+                        summary.eff[reg][i].mean=float(summary.Nselected[reg][i].mean)/float(summary.Ntotal.mean)
+                        summary.eff[reg][i].error=Measure.binomialError(summary.Nselected[reg][i].mean,summary.Ntotal.mean)
+                else:
+                    if summary.Nselected[reg][i-1].mean!=0:
+                        summary.eff[reg][i].mean=float(summary.Nselected[reg][i].mean)/float(summary.Nselected[reg][i-1].mean)
+                        summary.eff[reg][i].error=Measure.binomialError(summary.Nselected[reg][i].mean,summary.Nselected[reg][i-1].mean)

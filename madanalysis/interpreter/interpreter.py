@@ -107,14 +107,14 @@ class Interpreter(InterpreterBase):
             readline.read_history_file(self.history_file)
         except:
             pass
-                                    
+
     def __del__(self):
         try:
             readline.set_history_length(100)
             readline.write_history_file(self.history_file)
         except:
             pass
-                
+
 
     def do_set(self,line):
         self.cmd_set.do(self.split_arg(line),line)
@@ -309,6 +309,8 @@ class Interpreter(InterpreterBase):
         tmp = tmp.replace(")"," ) ")
         tmp = tmp.replace("("," ( ")
         tmp = tmp.replace(","," , ")
+        tmp = tmp.replace("{"," { ")
+        tmp = tmp.replace("}"," } ")
         return self.cmd_plot.complete(text,self.split_arg(tmp),begidx,endidx)
 
     def do_reject(self,line):
@@ -322,6 +324,8 @@ class Interpreter(InterpreterBase):
         tmp = tmp.replace("]"," ] ")
         tmp = tmp.replace("("," ( ")
         tmp = tmp.replace(")"," ) ")
+        tmp = tmp.replace("{"," { ")
+        tmp = tmp.replace("}"," } ")
         return self.cmd_reject.complete(text,self.split_arg(tmp),begidx,endidx)
 
     def do_select(self,line):
@@ -335,6 +339,8 @@ class Interpreter(InterpreterBase):
         tmp = tmp.replace("]"," ] ")
         tmp = tmp.replace("("," ( ")
         tmp = tmp.replace(")"," ) ")
+        tmp = tmp.replace("{"," { ")
+        tmp = tmp.replace("}"," } ")
         return self.cmd_select.complete(text,self.split_arg(tmp),begidx,endidx)
 
     def InitializeParticle(self):
@@ -351,7 +357,6 @@ class Interpreter(InterpreterBase):
         self.prompt = 'ma5>'
 #        if readline and not 'libedit' in readline.__doc__:
 #            readline.set_completion_display_matches_hook(self.print_suggestions)
-            
 
     def deal_multiple_categories(self, dico):
         """convert the multiple category in a formatted list understand by our

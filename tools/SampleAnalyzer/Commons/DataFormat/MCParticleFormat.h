@@ -25,6 +25,7 @@
 #ifndef MCParticleFormat_h
 #define MCParticleFormat_h
 
+
 // STL headers
 #include <iostream>
 #include <string>
@@ -36,6 +37,7 @@
 #include "SampleAnalyzer/Commons/DataFormat/ParticleBaseFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
+#include "SampleAnalyzer/Commons/Vector/MABoost.h"
 
 
 namespace MA5
@@ -67,27 +69,32 @@ class MCParticleFormat : public ParticleBaseFormat
   //                        data members
   // -------------------------------------------------------------
  private:
-   
-  MAfloat32 		    ctau_;	     /// proper lifetime ctau (in mm)
-  MAfloat32 		    spin_;	     /// cosine of the angle btwn the spin vector and
-                                 /// its 3-momentum, in the lab frame
-  MAint32	          pdgid_;		   /// PDG numbering of the particle
-  MAbool            isPU_;       /// is PileUp particle or not
-  MAint16	          statuscode_; /// status code (-1 for initial state, 
-                                 /// 2 intermediate state, 1 final state)
-  MAint32           extra1_;
-  MAint32           extra2_;
 
+  /// PDG numbering of the particle
+  MAint32 pdgid_;   
+
+  /// Status code of the particle
+  /// For LHE: -1 for initial state, 2 intermediate state, 1 final state
+  /// For PYTHIA: more sophisticated 
+  MAint16 statuscode_;
+
+  /// Cosine of the angle btwn the spin vector and its 3-momentum, in the lab frame
+  MAfloat32 spin_;
+
+  /// Is a PileUp particle or not?
+  MAbool isPU_;       
+
+  /// List of daughter particles
   std::vector<MCParticleFormat*> daughters_;
 
-  MCParticleFormat* mother1_ ;  // mother particle
-  MCParticleFormat* mother2_ ;  // mother particle
+  /// List of mother particles
+  std::vector<MCParticleFormat*> mothers_;
+
+  // Decay position in time & space (in s & mm)
+  MALorentzVector decay_vertex_; 
+
 
  public:
-  MAuint32 	        mothup1_;     /// first mother index
-  MAuint32 	        mothup2_;     /// second mother index
-  MAuint32 	        daughter1_;   /// first mother index
-  MAuint32 	        daughter2_;   /// second mother index
 
 
   // -------------------------------------------------------------
@@ -97,7 +104,13 @@ class MCParticleFormat : public ParticleBaseFormat
 
   /// Constructor without arguments
   MCParticleFormat()
-  { Reset(); }
+  {
+    momentum_.SetPxPyPzE(0.,0.,0.,0.);
+    spin_       = 0.; 
+    pdgid_      = 0; 
+    statuscode_ = 0; 
+    isPU_       = false;
+  }
 
   /// Destructor
   virtual ~MCParticleFormat()
@@ -107,11 +120,13 @@ class MCParticleFormat : public ParticleBaseFormat
   virtual void Reset()
   {
     momentum_.SetPxPyPzE(0.,0.,0.,0.);
-    ctau_=0.; spin_=0.; pdgid_=0; 
-    statuscode_=0; mothup1_=0; mothup2_=0; mother1_=0; mother2_=0; 
-    daughter1_=0; daughter2_=0;
-    extra1_=0; extra2_=0;
-    isPU_=false;
+    spin_       = 0.; 
+    pdgid_      = 0; 
+    statuscode_ = 0; 
+    isPU_       = false;
+    daughters_.clear();
+    mothers_.clear();
+    decay_vertex_.clear();
   }
 
   /// Print particle informations
@@ -121,30 +136,20 @@ class MCParticleFormat : public ParticleBaseFormat
          << ", "<</*set::setw(8)*/"" << std::left << momentum_.Py()  
          << ", "<</*set::setw(8)*/"" << std::left << momentum_.Pz() 
          << ", "<</*set::setw(8)*/"" << std::left << momentum_.E() << ") - " << endmsg;
-    INFO << "ctau=" << /*set::setw(8)*/"" << std::left << ctau_ << " - "
+    INFO << "ctau=" << /*set::setw(8)*/"" << std::left << decay_vertex_.T() << " - "
          << "spin=" << /*set::setw(8)*/"" << std::left << spin_ << " - "
          << "PDGID=" << /*set::setw(8)*/"" << std::left << pdgid_ << " - "
          << "StatusCode=" << /*set::setw(3)*/"" << std::left 
          << static_cast<signed int>(statuscode_) << " - " << endmsg;
-
-    try
-    {
-      if (mother1_==0) throw EXCEPTION_ERROR("NoMum1","",0);
-      if (mother2_==0) throw EXCEPTION_ERROR("NoMum2","",0);
-    }
-    catch(const std::exception& e)
-    {
-      MANAGE_EXCEPTION(e);
-    }    
+    INFO << "Number of mothers=" << mothers_.size() << " - " 
+         << "Number of daughters=" << daughters_.size() << endmsg;
   }
 
   const MAbool& isPU()  const {return isPU_;}
-  const MAfloat32& ctau() const {return ctau_;}
+  const MAfloat64& ctau() const {return decay_vertex_.T();}
   const MAfloat32& spin() const {return spin_;}
   const MAint32& pdgid()  const {return pdgid_;}
   const MAint16& statuscode() const {return statuscode_;}
-  const MCParticleFormat* mother1() const {return mother1_;}
-  const MCParticleFormat* mother2() const {return mother2_;}
 
   /// Accessor to the daughters (read-only)
   const std::vector<MCParticleFormat*>& daughters() const {return daughters_;}
@@ -152,20 +157,22 @@ class MCParticleFormat : public ParticleBaseFormat
   /// Accessor to the daughters
   std::vector<MCParticleFormat*>& daughters() {return daughters_;}
 
-  MCParticleFormat* mother1() {return mother1_;}
-  MCParticleFormat* mother2() {return mother2_;}
+  /// Accessor to the daughters (read-only)
+  const std::vector<MCParticleFormat*>& mothers() const {return mothers_;}
+
+  /// Accessor to the daughters
+  std::vector<MCParticleFormat*>& mothers() {return mothers_;}
+
+  /// Accessor to the decay vertex
+  const MALorentzVector& decay_vertex() const {return decay_vertex_;}
 
   // mutators
   void setIsPU(MAbool v)   {isPU_=v;}
-  void setCtau(MAfloat32 v)  {ctau_=v;}
   void setSpin(MAfloat32 v)  {spin_=v;}
   void setPdgid(MAint32 v)   {pdgid_=v;}
   void setStatuscode(MAint16 v)  {statuscode_=v;}
   void setMomentum(const MALorentzVector& v)  {momentum_=v;}
-  void setMothUp1(MAuint32 v) {mothup1_=v;}
-  void setMothUp2(MAuint32 v) {mothup2_=v;}
 
-  /*
   /// Boosting the four momentum to the restframe of another particle
   void ToRestFrame(const MCParticleFormat* boost)
   {
@@ -175,10 +182,15 @@ class MCParticleFormat : public ParticleBaseFormat
 
   void ToRestFrame(const MCParticleFormat& boost)
   {
-    TVector3 b = -1. * boost.momentum().BoostVector();
-    momentum().Boost(b);
+    MALorentzVector momentum = boost.momentum();
+    momentum.SetPx(-momentum.X());
+    momentum.SetPy(-momentum.Y());
+    momentum.SetPz(-momentum.Z());
+
+    MABoost convertor;
+    convertor.setBoostVector(momentum);
+    convertor.boost(momentum_);
   }
-  */
 
 };
 

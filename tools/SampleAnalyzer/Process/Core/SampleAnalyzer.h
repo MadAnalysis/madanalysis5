@@ -25,21 +25,18 @@
 #ifndef SAMPLE_ANALYZER_H
 #define SAMPLE_ANALYZER_H
 
+
 // STL headers
 #include <iostream>
 #include <string>
 #include <vector>
 
-
 // SampleAnalyzer headers
-// |- core functions
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/Base/StatusCode.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
-// |- data format
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
-// |-manager headers
 #include "SampleAnalyzer/Process/Reader/ReaderManager.h"
 #include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"
 #include "SampleAnalyzer/Process/Writer/WriterManager.h"
@@ -56,7 +53,7 @@ class Configuration;
 class SampleAnalyzer
 {
  private :
- 
+
   std::string analysisName_; 
   std::string datasetName_;
   bool LastFileFail_;
@@ -114,7 +111,7 @@ class SampleAnalyzer
   { return fullDetectors_; }
 
   /// Initialization of the SampleAnalyzer
-  bool Initialize(int argc, char **argv, const std::string& filename,bool=false);
+  bool Initialize(int argc, char **argv, const std::string& filename);
 
   /// Getting pointer to an analyzer
   AnalyzerBase* InitializeAnalyzer(const std::string& name, 

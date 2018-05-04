@@ -80,31 +80,30 @@ class CmdCut(CmdBase,CmdSelectionBase):
                 endArguments=i
             elif args[i]=='[':
                 Nbracket2+=1
-                beginOptions=i
+                if Nbracket1==0:
+                    beginOptions=i
+                    foundOptions=True
             elif args[i]=='{':
                 Nbracket3+=1
                 beginRegions=i
+                foundRegions=True
             elif args[i]=='}':
                 Nbracket3-=1
-                if i==(len(args)-1) or '[' in args[i+1:]:
-                    foundRegions=True
             elif args[i]==']':
                 Nbracket2-=1
-                if i==(len(args)-1) or '{' in args[i+1:]:
-                    foundOptions=True
 
         if Nbracket1!=0:
-            logging.getLogger('MA5').error("number of opening-bracket '(' and number of " +\
-                          "closing-braket ')' does not match.")
+            logging.getLogger('MA5').error("number of opening brackets '(' and number of " +\
+                          "closing brakets ')' does not match.")
             return
         if Nbracket2!=0:
-            logging.getLogger('MA5').error("number of opening-bracket '[' and number of " +\
-                          "closing-braket ']' does not match.")
+            logging.getLogger('MA5').error("number of opening squared-brackets '[' and number of " +\
+                          "closing squared-brakets ']' does not match.")
             return
 
         if Nbracket3!=0:
-            logging.getLogger('MA5').error("number of opening-bracket '{' and number of " +\
-                          "closing-braket '}' does not match.")
+            logging.getLogger('MA5').error("number of opening curly-brackets '{' and number of " +\
+                          "closing curly-brakets '}' does not match.")
             return
 
         if not foundOptions:
@@ -135,10 +134,23 @@ class CmdCut(CmdBase,CmdSelectionBase):
             parts = self.extract_particle(args[1:endCandidate])
             if parts==None:
                 return
+            if '[' in parts.GetStringDisplay() and ']' in parts.GetStringDisplay():
+                self.logger.error('Object definitions can only be applied on classes of objects, '+\
+                   'and not on a specific object (like the leading muon)')
+                return
         else:
             parts = ParticleObject()
-            
         # Extracting the conditions
+        if foundRegions:
+            endCondition=beginRegions
+        else:
+            endCondition=beginOptions
+
+        if beginRegions!=-1 and beginOptions!=-1:
+            if beginOptions<beginRegions:
+                self.logger.error('Cut declaration: regions should be declared before the options')
+                return
+
         condition = ConditionSequence(mother=True)
         if foundCandidate:
             argType=ArgumentType.PARTICLE
@@ -146,27 +158,66 @@ class CmdCut(CmdBase,CmdSelectionBase):
                 if len(part)>1:
                     argType=ArgumentType.COMBINATION
 
+
             result = self.extract_sequence(condition,\
-                                           args[endCandidate+1:beginOptions],\
+                                           args[endCandidate+1:endCondition],\
                                            partType=argType)
         else:
             result = self.extract_sequence(condition,\
-                                           args[:beginOptions],\
+                                           args[:endCondition],\
                                            partType=None)
         if result==None:
             return
 
-        # Creating cut
-        cut = Cut(parts,condition,self.cut_type)
-
-        # Setting options
-        if foundOptions:
-            if not self.extract_options(cut,args[beginOptions+1:len(args)-1]):
+        # Extracting regions
+        if foundRegions:
+            CutRegionNames=args[beginRegions+1:beginOptions-1]
+            # checking all regions exist
+            if [reg for reg in CutRegionNames if reg not in  self.main.regions.GetNames()] != []:
+                self.logger.error('Cut trying to be attached to a non-existing region')
                 return
+        else:
+            CutRegionNames=self.main.regions.GetNames()
 
-        # Adding the cut to selection
-        self.main.selection.Add(cut)
+        if CutRegionNames==[]:
+            CutRegionNames=self.main.regions.GetNames()
 
+        # Creating cut
+        if not foundCandidate:
+            cut = Cut(parts,condition,self.cut_type,regions=CutRegionNames)
+            # Setting options
+            if foundOptions:
+                if not self.extract_options(cut,args[beginOptions+1:len(args)-1]):
+                    return
+            # Adding the cut to selection
+            self.main.selection.Add(cut)
+        else:
+            setofRegions = self.main.regions.GetClusteredRegions(self.main.selection)
+            if (setofRegions==[[]] and CutRegionNames==[]) or (list(set(CutRegionNames)) in setofRegions):
+                cut = Cut(parts,condition,self.cut_type,regions=CutRegionNames)
+                # Setting options
+                if foundOptions:
+                    if not self.extract_options(cut,args[beginOptions+1:len(args)-1]):
+                        return
+                # Adding the cut to selection
+                self.main.selection.Add(cut)
+            else:
+                self.logger.warning('   Object definition to be attached to distinguishable regions -> multiple declaration:')
+                for myset in setofRegions:
+                    subCutRegionNames = [x for x in CutRegionNames if x in myset]
+                    if subCutRegionNames == []:
+                        continue
+                    cut = Cut(parts,condition,self.cut_type,regions=subCutRegionNames)
+                    # Getting options
+                    if foundOptions:
+                        if not self.extract_options(cut,args[beginOptions+1:len(args)-1]):
+                            return
+                    # Adding the cut to selection
+                    self.main.selection.Add(cut)
+                    title = cut.GetStringDisplay()
+                    if ', regions' in title:
+                        title=title[:title.find(', regions')]
+                    self.logger.warning(title + ' { ' + ' '.join(subCutRegionNames) + ' }')
 
     def clean_sequence(self,sequence):
         if len(sequence)<2:
@@ -536,17 +587,17 @@ class CmdCut(CmdBase,CmdSelectionBase):
 
     def help(self):
         logging.getLogger('MA5').info("   Syntax: " + CutType.convert2cmdname(self.cut_type) +\
-                     " observable_name ( multiparticle1 multiparticle2 ... ) operator threshold [ option1 option 2 ]")
+                     " observable_name ( multiparticle1 multiparticle2 ... ) operator threshold { regions } [ option1 option 2 ]")
         logging.getLogger('MA5').info("   Declares a cut: ")
         logging.getLogger('MA5').info("    - related to the distribution of a given observable, associated to one or a combination of (multi)particles,")
         logging.getLogger('MA5').info("    - supported logical operators: <= , < , >= , > , == , != ,")
         logging.getLogger('MA5').info("    - threshold being a value.")
+        logging.getLogger('MA5').info("    - regions to which this cut applies can be (optionally) given (or it applies to all regions).")
 
 
     def complete(self,text,args,begidx,endidx):
-
-        # cut ( part ... ) > = 100 and ... [ ]
-        # 0   1 2    3      
+        # cut ( part ... ) > = 100 and ... { } [ ]
+        # 0   1 2    3
 
         # Getting back arguments
         nargs=len(args)
@@ -565,10 +616,11 @@ class CmdCut(CmdBase,CmdSelectionBase):
         elif nargs>2:
             if args[1]!='(' and not (args[1] in ObservableType.get_cutlist1(self.main.mode)):
                 return []
-                    
-        # counting number of () and []
+
+        # counting number of (),  [] or {}
         nbracket1=0
         nbracket2=0
+        nbracket3=0
         endArguments=-1
         for i in range(len(args)):
             if args[i]=="(":
@@ -581,6 +633,10 @@ class CmdCut(CmdBase,CmdSelectionBase):
                 nbracket2+=1
             if args[i]=="]":
                 nbracket2-=1
+            if args[i]=="{":
+                nbracket3+=1
+            if args[i]=="}":
+                nbracket3-=1
 
         # User is writting particle combination
         if nbracket1>0 and endArguments==-1:
@@ -617,13 +673,20 @@ class CmdCut(CmdBase,CmdSelectionBase):
 
         # observable with particle
         if nargs==endArguments+4:
-            output=['and','or','[']
+            output=['and','or','[' ,'{']
             return self.finalize_complete(text,output)
 
         # options mode
-        if nbracket1==0 and nbracket2==1:
+        if nbracket1==0 and nbracket2==1 and nbracket3==0:
             output=Cut.userShortcuts.keys()
             output.append("]")
+            return self.finalize_complete(text,output)
+
+        # region mode
+        if nbracket1==0 and nbracket2==0 and nbracket3==1:
+            output=self.main.regions.GetNames()
+            output = [i for i in output if not i in args]
+            output.append("}")
             return self.finalize_complete(text,output)
 
         # loop over arguments
@@ -662,7 +725,7 @@ class CmdCut(CmdBase,CmdSelectionBase):
         elif case==3:
             return []
         elif case==4:
-            output=['and','or','[']
+            output=['and','or','[', '{']
             return self.finalize_complete(text,output)
         
         return []

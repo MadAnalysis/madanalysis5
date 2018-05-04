@@ -42,7 +42,7 @@ class JobWriter():
         self.fastsim    = self.main.fastsim
         self.merging    = self.main.merging
 
-    @staticmethod     
+    @staticmethod
     def CheckJobStructureMute(path,recastflag):
         if not os.path.isdir(path):
             return False
@@ -61,6 +61,16 @@ class JobWriter():
                 return False
         if not os.path.isdir(path+"/Output"):
             return False
+        if not os.path.isdir(path+"/Output/Histos"):
+            return False
+        if not os.path.isdir(path+"/Output/HTML"):
+            return False
+        if self.main.session_info.has_pdflatex:
+            if not os.path.isdir(path+"/Output/PDF"):
+                return False
+        if self.main.session_info.has_latex:
+            if not os.path.isdir(path+"/Output/DVI"):
+                return False
         elif not os.path.isdir(path+"/Input"):
             return False
         elif not os.path.isfile(path+"/history.ma5"):
@@ -68,7 +78,7 @@ class JobWriter():
         return True
 
 
-    @staticmethod     
+    @staticmethod
     def CreateJobStructure(path,recastflag):
         if not os.path.isdir(path):
             return False
@@ -112,6 +122,26 @@ class JobWriter():
             os.mkdir(path+"/Output")
         except:
             logging.getLogger('MA5').error("Impossible to create the folder 'Output'")
+            return False
+        try:
+            os.mkdir(path+"/Output/HTML")
+        except:
+            logging.getLogger('MA5').error("Impossible to create the folder 'Output/HTML'")
+            return False
+        try:
+            os.mkdir(path+"/Output/Histos")
+        except:
+            logging.getLogger('MA5').error("Impossible to create the folder 'Output/Histos'")
+            return False
+        try:
+            os.mkdir(path+"/Output/PDF")
+        except:
+            logging.getLogger('MA5').error("Impossible to create the folder 'Output/PDF'")
+            return False
+        try:
+            os.mkdir(path+"/Output/DVI")
+        except:
+            logging.getLogger('MA5').error("Impossible to create the folder 'Output/DVI'")
             return False
         try:
             os.mkdir(path+"/Input")
@@ -277,6 +307,7 @@ class JobWriter():
         except:
             pass
 
+        theFile = ""
         if cfg.pileup!="":
             # Getting current dir
             theDir = os.getcwd()
@@ -367,12 +398,8 @@ class JobWriter():
         file.write('  // ---------------------------------------------------\n')
         file.write('  INFO << "    * Initializing all components" << endmsg;\n\n')
         file.write('  // Initializing the manager\n')
-        if self.main.expertmode:
-          file.write('  if (!manager.Initialize(argc,argv,"pdg.ma5",true)) '+\
-                   'return 1;\n\n')
-        else:
-          file.write('  if (!manager.Initialize(argc,argv,"pdg.ma5")) '+\
-                   'return 1;\n\n')
+        file.write('  if (!manager.Initialize(argc,argv,"pdg.ma5")) '+\
+            'return 1;\n\n')
         file.write('  // Creating data format for storing data\n')
         file.write('  EventFormat myEvent;\n')
         file.write('  std::vector<SampleFormat> mySamples;\n\n')
@@ -410,7 +437,7 @@ class JobWriter():
             file.write('  JetClusterer* cluster1 = \n')
             file.write('      manager.InitializeJetClusterer("'+self.main.fastsim.clustering.algorithm+'",parametersC1);\n')
             file.write('  if (cluster1==0) return 1;\n\n')
-            
+
         # + Case Delphes
         if self.main.fastsim.package in ["delphes","delphesMA5tune"]:
             file.write('  //Getting pointer to fast-simulation package\n')
@@ -435,9 +462,9 @@ class JobWriter():
                     cardname=cardname.split('/')[-1]
 
             if self.main.fastsim.package=="delphes":
-                file.write('      manager.InitializeDetector("delphes","../../Input/'+cardname+'",parametersD1);\n')
+                file.write('      manager.InitializeDetector("delphes","../Input/'+cardname+'",parametersD1);\n')
             else:
-                file.write('      manager.InitializeDetector("delphesMA5tune","../../Input/'+cardname+'",parametersD1);\n')
+                file.write('      manager.InitializeDetector("delphesMA5tune","../Input/'+cardname+'",parametersD1);\n')
 
             file.write('  if (fastsim1==0) return 1;\n\n')
 
@@ -547,7 +574,7 @@ class JobWriter():
 
         from madanalysis.build.makefile_writer import MakefileWriter
         options=MakefileWriter.MakefileOptions()
-        
+
         # Name of the Makefile
         filename = self.path+"/Build/SampleAnalyzer/Makefile"
 
@@ -731,7 +758,7 @@ class JobWriter():
         if not result:
             logging.getLogger('MA5').error('impossible to link the project. For more details, see the log file:')
             logging.getLogger('MA5').error(logfile)
-            
+
         return result
 
 
@@ -772,12 +799,12 @@ class JobWriter():
         # Creating Output folder is not defined
         if not os.path.isdir(self.path+"/Output/"+name):
             os.mkdir(self.path+"/Output/"+name)
-            
+
         # folder where the program is launched
-        folder = self.path+'/Output/'+name
+        folder = self.path+'/Build/'
 
         # shell command
-        commands = ['../../Build/MadAnalysis5job']
+        commands = ['./MadAnalysis5job']
 
         # Weighted events
         if not dataset.weighted_events:
@@ -789,7 +816,7 @@ class JobWriter():
                         self.main.archi_info.ma5_date+'"')
 
         # Inputs
-        commands.append('../../Input/'+name+'.list')
+        commands.append('../Input/'+name+'.list')
 
         # Running SampleAnalyzer
         if self.main.redirectSAlogger:
@@ -798,9 +825,3 @@ class JobWriter():
             result = ShellCommand.Execute(commands,folder)
 
         return result
-
-        
-        
-        
-        
-        

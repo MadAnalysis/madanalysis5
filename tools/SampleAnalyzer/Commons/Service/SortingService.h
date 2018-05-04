@@ -25,6 +25,7 @@
 #ifndef SORT_SERVICE_h
 #define SORT_SERVICE_h
 
+
 // STL headers
 #include <vector>
 #include <algorithm>
@@ -33,6 +34,7 @@
 #include "SampleAnalyzer/Commons/DataFormat/MCEventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecEventFormat.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
+
 
 #define SORTER MA5::SortingService::getInstance()
 

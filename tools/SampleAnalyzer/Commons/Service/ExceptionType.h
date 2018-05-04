@@ -25,16 +25,20 @@
 #ifndef EXCEPTION_TYPE_H
 #define EXCEPTION_TYPE_H
 
-// ShortCut to the creation of ExceptionType instance 
-#define EXCEPTION_WARNING(msg,details,num) ExceptionType(__FILE__,__LINE__,__FUNCTION__,true, msg,details,num)
-#define EXCEPTION_ERROR(msg,details,num)   ExceptionType(__FILE__,__LINE__,__FUNCTION__,false,msg,details,num)
 
 // STL headers
 #include <iostream>
 #include <string>
 #include <exception>
 
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
+
+
+// ShortCut to the creation of ExceptionType instance 
+#define EXCEPTION_WARNING(msg,details,num) MA5::ExceptionType(__FILE__,__LINE__,__FUNCTION__,true, msg,details,num)
+#define EXCEPTION_ERROR(msg,details,num)   MA5::ExceptionType(__FILE__,__LINE__,__FUNCTION__,false,msg,details,num)
+
 
 namespace MA5
 {
@@ -93,7 +97,8 @@ class ExceptionType : public std::exception
                 const MAbool& warning,
                 const std::string& msg,
                 const std::string& details="",
-                const MAint32& Num=0  ) : FileName_(filename),
+                const MAint32& Num=0  ) throw() :
+                                        FileName_(filename),
                                         Msg_(msg), 
                                         Function_(function),
                                         Details_(details),
@@ -115,31 +120,31 @@ class ExceptionType : public std::exception
   { return Num_; }
 
   /// Is WARNING logger used ? 
-  MAbool IsWarning() const
+  MAbool IsWarning() const throw()
   { return Warning_; }
 
-  /// Is ERROR logger used ? 
-  MAbool IsError() const
+  /// Is ERROR logger used ?
+  MAbool IsError() const throw()
   { return !Warning_; }
 
   /// Accessor to the description of the exception
-  const std::string& GetMsg() const
+  const std::string& GetMsg() const throw()
   { return Msg_; }
 
   /// Accessor to the file name
-  const std::string& GetFileName() const
+  const std::string& GetFileName() const throw()
   { return FileName_; }
 
   /// Accessor to the line number
-  const MAuint32& GetLine() const
+  const MAuint32& GetLine() const throw()
   { return Line_; }
 
   /// Accessor to the function name
-  const std::string& GetFunction() const
+  const std::string& GetFunction() const throw()
   { return Function_; }
 
   /// Accessor to the details about the exception 
-  const std::string& GetDetails() const
+  const std::string& GetDetails() const throw()
   { return Details_; }
 
 };

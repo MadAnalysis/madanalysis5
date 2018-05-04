@@ -26,13 +26,13 @@
 #define DETECTOR_BASE_H
 
 
-//STL headers
+// STL headers
 #include <map>
 #include <string>
 #include <algorithm>
 #include <locale>
 
-//SampleAnalyser headers
+// SampleAnalyser headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
@@ -64,10 +64,10 @@ namespace MA5
     { }
 
     /// Jet clustering
-    virtual bool Execute(SampleFormat& mySample, EventFormat& myEvent)=0;
+    virtual MAbool Execute(SampleFormat& mySample, EventFormat& myEvent)=0;
 
     /// Initialization
-    virtual bool Initialize(const std::string& configFile, const std::map<std::string,std::string>& options)=0;
+    virtual MAbool Initialize(const std::string& configFile, const std::map<std::string,std::string>& options)=0;
 
     /// Finalization
     virtual void Finalize()=0;

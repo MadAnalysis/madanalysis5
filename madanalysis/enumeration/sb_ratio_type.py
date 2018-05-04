@@ -23,17 +23,17 @@
 
 
 class SBratioType(object):
-	values = {'S_OVER_B' : ['S/B'],\
-		  'B_OVER_S' : ['B/S'],\
-		  'S_OVER_SB': ['S/sqrt(S+B)']}
+        values = {'S_OVER_B' : ['S/B'],\
+                  'B_OVER_S' : ['B/S'],\
+                  'S_OVER_SB': ['S/sqrt(S+B)']}
 
         class __metaclass__(type):
             def __getattr__(self, name):
-		return self.values.keys().index(name)
-		    
+                return self.values.keys().index(name)
+   
             def convert2string(self,val):
                 name = self.values.keys()[val]
                 return self.values[name][0]
 
-		    
+  
 

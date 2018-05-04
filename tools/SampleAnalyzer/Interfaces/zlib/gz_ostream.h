@@ -25,6 +25,7 @@
 #ifndef GZ_OSTREAM_H
 #define GZ_OSTREAM_H
 
+
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Interfaces/zlib/gz_streambase.h"
 

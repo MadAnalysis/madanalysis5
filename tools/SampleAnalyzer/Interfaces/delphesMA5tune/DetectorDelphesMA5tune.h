@@ -26,7 +26,7 @@
 #define DETECTOR_DELPHESMA5TUNE_H
 
 
-//SampleAnalyser headers
+// SampleAnalyser headers
 #include "SampleAnalyzer/Commons/Base/DetectorBase.h"
 
 
@@ -71,6 +71,7 @@ class DetectorDelphesMA5tune: public DetectorBase
 
     // parameters
     bool output_;
+    std::string outputdir_;
     std::string rootfile_;
     bool first_;
     unsigned long nprocesses_;
@@ -83,7 +84,7 @@ class DetectorDelphesMA5tune: public DetectorBase
 
     /// Constructor without argument
     DetectorDelphesMA5tune() 
-    { output_=false; first_=false; nprocesses_=0; }
+    { outputdir_="."; output_=false; first_=false; nprocesses_=0; }
 
     /// Destructor
     virtual ~DetectorDelphesMA5tune()

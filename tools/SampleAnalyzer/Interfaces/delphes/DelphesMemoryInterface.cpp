@@ -26,16 +26,17 @@
 #include "SampleAnalyzer/Interfaces/delphes/DelphesMemoryInterface.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
-// Delphes header
+// Delphes headers
 #include "classes/DelphesClasses.h"
 
-//ROOT header
+// ROOT headers
 #include <TObjArray.h>
 #include <TFile.h>
 #include <TDatabasePDG.h>
 #include <TParticlePDG.h>
 #include <TFolder.h>
 #include <TClonesArray.h>
+
 
 using namespace MA5;
 
@@ -46,6 +47,7 @@ using namespace MA5;
 DelphesMemoryInterface::DelphesMemoryInterface()
 {
   Jet_          = 0;
+  FatJet_       = 0;
   Electron_     = 0;
   Photon_       = 0;
   Muon_         = 0;
@@ -119,6 +121,7 @@ void DelphesMemoryInterface::Initialize(TFolder* delphesFolder,
   EFlowTrack_   = GetCollection(delphesFolder,table,"EFlowTrack");
   EFlowPhoton_  = GetCollection(delphesFolder,table,"EFlowPhoton");
   EFlowNeutral_ = GetCollection(delphesFolder,table,"EFlowNeutralHadron");
+  FatJet_       = GetCollection(delphesFolder,table,"FatJet");
 
   // MA5 Delphes collections
   if (MA5card)

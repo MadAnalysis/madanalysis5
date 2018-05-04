@@ -447,62 +447,85 @@ def WriteJobInitialize(file,main):
                        str(main.isolation.isolation.ET_PT) + ');\n')
         file.write('\n')
 
-    # Counting number of plots and cuts
-    Nhistos = 0
-    Ncuts   = 0
+    # Region initiatization
+    file.write('  // ===== Signal region ===== //\n')
+    if main.regions.GetNames() == []:
+        file.write('  Manager()->AddRegionSelection(\"myregion\");\n');
+    else:
+        for reg in main.regions.GetNames():
+            file.write('  Manager()->AddRegionSelection(\"' + reg + '\");\n');
+    file.write('\n')
+
+    # Cut initiatization
+    counter = 0
+    file.write('  // ===== Selections ===== //\n')
+    for item in main.selection.table:
+        if item.__class__.__name__=="Cut":
+            if len(item.part)==0:
+                counter+=1;
+                if len(item.regions)!=len(main.regions):
+                    if len(item.regions)!=1:
+                        file.write('  std::string RNc'+str(counter)+'[]={'+\
+                            (', '.join('"'+reg+'"' for reg in item.regions))+'};\n')
+                        file.write('  Manager()->AddCut(\"' + str(counter) + '_' + item.conditions.GetStringDisplay() +\
+                            '\", RNc'+ str(counter)+');\n');
+                    else:
+                        file.write('  Manager()->AddCut(\"' + str(counter) + '_' + item.conditions.GetStringDisplay() + '\", '+\
+                           '\"'+item.regions[0]+'\");\n');
+                else:
+                    file.write('  Manager()->AddCut(\"' + str(counter) + '_' + item.conditions.GetStringDisplay() + '\");\n');
+    file.write('\n')
+
+    # Histo initiatization
+    counter = 0
+    file.write('  // ===== Histograms ===== //\n')
     for item in main.selection.table:
         if item.__class__.__name__=="Histogram":
-            Nhistos+=1
-        elif item.__class__.__name__=="Cut":
-            Ncuts+=1
-
-    # Initializing array of cuts     
-    if Ncuts!=0:
-        file.write('  // Initializing cut array\n')
-    icut=1
-    for item in main.selection.table:
-      if item.__class__.__name__=="Cut":
-        file.write("  cuts_.InitCut(\""+item.conditions.GetStringDisplay()+"\");\n")
-    if Ncuts!=0:
-        file.write('\n')
-
-    # Initializing each item
-    ihisto  = 0
-    file.write('  // Initializing each selection item\n')
-    for item in main.selection.table:
-
-        # Histogram case
-        if item.__class__.__name__=="Histogram":
-
-            # Common part
-            file.write('  H'+str(ihisto)+'_ = plots_.Add_')
-
-            # NPID
-            if item.observable.name=="NPID" :
-                file.write('HistoFrequency<MAint32>("selection_'+str(ihisto)+'");\n')
-
-            # NAPID    
-            elif item.observable.name=="NAPID" :
-                file.write('HistoFrequency<MAuint32>("selection_'+str(ihisto)+'");\n')
-
-            # Histo with LogX
-            elif item.logX:
-                file.write('HistoLogX("selection_'+str(ihisto)+'",'+\
-                           str(item.nbins)+','+\
-                           str(item.xmin)+','+\
-                           str(item.xmax)+');\n')
-
-            # Normal histo    
+            counter+=1;
+            if len(item.regions)!=len(main.regions):
+                if len(item.regions)!=1:
+                    file.write('  std::string RNh'+str(counter)+'[]={'+\
+                        (', '.join('"'+reg+'"' for reg in item.regions))+'};\n')
+                    # NPID and NAPID
+                    if item.observable.name in ["NPID", "NAPID"] :
+                        file.write('  Manager()->AddHistoFrequency(\"' + str(counter) + '_' + item.observable.name +\
+                            '\", RNh'+ str(counter)+');\n');
+                    # Histo with LogX
+                    elif item.logX:
+                        file.write('  Manager()->AddHistoLogX(\"' + str(counter) + '_' + item.observable.name +\
+                            '\", ' + str(item.nbins)+','+ str(item.xmin)+','+ str(item.xmax)+', RNh'+ str(counter)+');\n');
+                    # Normal Histo
+                    else:
+                        file.write('  Manager()->AddHisto(\"' + str(counter) + '_' + item.observable.name +\
+                            '\", ' + str(item.nbins)+','+ str(item.xmin)+','+ str(item.xmax)+', RNh'+ str(counter)+');\n');
+                else:
+                    # NPID and NAPID
+                    if item.observable.name in ["NPID", "NAPID"] :
+                        file.write('  Manager()->AddHistoFrequency(\"' + str(counter) + '_' + item.observable.name +\
+                            '\", \"'+item.regions[0]+'\");\n');
+                    # Histo with LogX
+                    elif item.logX:
+                        file.write('  Manager()->AddHistoLogX(\"' + str(counter) + '_' + item.observable.name +\
+                          '\", ' + str(item.nbins)+','+ str(item.xmin)+','+ str(item.xmax)+', \"'+item.regions[0]+'\");\n');
+                    # Normal Histo
+                    else:
+                        file.write('  Manager()->AddHisto(\"' + str(counter) + '_' + item.observable.name + '\", '+\
+                           str(item.nbins)+','+ str(item.xmin)+','+ str(item.xmax)+', \"'+item.regions[0]+'\");\n');
             else:
-                file.write('Histo("selection_'+str(ihisto)+'",'+\
-                           str(item.nbins)+','+\
-                           str(item.xmin)+','+\
-                           str(item.xmax)+');\n')
-
-            ihisto+=1    
+               # NPID and NAPID
+               if item.observable.name in ["NPID", "NAPID"] :
+                   file.write('  Manager()->AddHistoFrequency(\"' + str(counter) + '_' + item.observable.name +'\");\n');
+               # Histo with LogX
+               elif item.logX:
+                   file.write('  Manager()->AddHistoLogX(\"' + str(counter) + '_' + item.observable.name +\
+                     '\", ' + str(item.nbins)+','+ str(item.xmin)+','+ str(item.xmax)+');\n');
+               # Normal Histo
+               else:
+                    file.write('  Manager()->AddHisto(\"' + str(counter) + '_' + item.observable.name + '\", ' +\
+                      str(item.nbins)+','+ str(item.xmin)+','+ str(item.xmax)+');\n');
+    file.write('\n')
 
     # End
-    file.write('\n')
     file.write('  // No problem during initialization\n')
     file.write('  return true;\n')
     file.write('}\n\n')

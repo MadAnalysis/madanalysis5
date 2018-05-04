@@ -31,8 +31,7 @@
 #include <ostream>
 #include <vector>
 
-
-// SampleAnalyzer
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Plot/PlotBase.h"
 #include "SampleAnalyzer/Process/Plot/Histo.h"
 #include "SampleAnalyzer/Process/Plot/HistoLogX.h"
@@ -112,11 +111,27 @@ class PlotManager
     return myhisto;
   }
 
-  /// Adding a 1D histogram for frequency
-  template <typename T> 
-  HistoFrequency<T>* Add_HistoFrequency(const std::string& name)
+  HistoLogX* Add_HistoLogX(const std::string& name, MAuint32 bins,
+                   MAfloat64 xmin, MAfloat64 xmax, std::vector<RegionSelection*> regions)
   {
-    HistoFrequency<T>* myhisto = new HistoFrequency<T>(name);
+    HistoLogX* myhisto = new HistoLogX(name, bins,  xmin, xmax);
+    myhisto->SetSelectionRegions(regions);
+    plots_.push_back(myhisto);
+    return myhisto;
+  }
+
+  /// Adding a 1D histogram for frequency
+  HistoFrequency* Add_HistoFrequency(const std::string& name)
+  {
+    HistoFrequency* myhisto = new HistoFrequency(name);
+    plots_.push_back(myhisto);
+    return myhisto;
+  }
+
+  HistoFrequency* Add_HistoFrequency(const std::string& name, std::vector<RegionSelection*> regions)
+  {
+    HistoFrequency* myhisto = new HistoFrequency(name);
+    myhisto->SetSelectionRegions(regions);
     plots_.push_back(myhisto);
     return myhisto;
   }

@@ -25,8 +25,10 @@
 #ifndef LHE_READER_h
 #define LHE_READER_h
 
+
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Reader/ReaderTextBase.h"
+
 
 namespace MA5
 {
@@ -40,6 +42,7 @@ class LHEReader : public ReaderTextBase
  protected:
 
   bool firstevent_;
+  std::vector< std::pair<MAint32,MAint32> > mothers_;
 
   // -------------------------------------------------------------
   //                       method members
@@ -50,7 +53,7 @@ class LHEReader : public ReaderTextBase
   LHEReader()
   { firstevent_=false; }
 
-	//! Destructor
+  //! Destructor
   virtual ~LHEReader()
   { }
 
@@ -88,6 +91,7 @@ class LHEReader : public ReaderTextBase
   //! Fill the event from text line 
   void FillEventInitLine(const std::string& line, EventFormat& myFormat);
   void FillEventParticleLine(const std::string& line, EventFormat& myFormat);
+  void FillWeightLine(const std::string& line, EventFormat& myEvent);
 
 };
 

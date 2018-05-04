@@ -25,6 +25,7 @@
 #ifndef ParticleBaseFormat_h
 #define ParticleBaseFormat_h
 
+
 // STL headers
 #include <iostream>
 #include <string>
@@ -32,9 +33,9 @@
 #include <iomanip>
 #include <cmath>
 
+// SampleAnalyzer headers
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/Vector/MALorentzVector.h"
-
-// SampleAnalyzer
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
 
@@ -61,7 +62,7 @@ class ParticleBaseFormat
  protected:
    
   /// Quadrivector of particle (E, px,py,pz)
-  MALorentzVector 	momentum_;  
+  MALorentzVector momentum_;  
 
 
   // -------------------------------------------------------------
@@ -101,7 +102,7 @@ class ParticleBaseFormat
          << ", "<</*std::setw(8)*/"" << std::left << momentum_.Pz() 
          << ", "<</*std::setw(8)*/"" << std::left << momentum_.E() << ") - ";
   }
-			
+
   /// Accessor to 4-vector momentum (read-only)
   const MALorentzVector& momentum() const {return momentum_;}
 
@@ -162,7 +163,7 @@ class ParticleBaseFormat
   const MAfloat32 eta()     const {return momentum_.Eta();     }
 
   /// Accessor to the particle pseudo-rapidity
-  const MAfloat32 abseta()     const {return fabs(momentum_.Eta());     }
+  const MAfloat32 abseta()     const {return std::abs(momentum_.Eta());     }
 
   /// Accessor to the particle polar angle
   const MAfloat32 theta()   const {return momentum_.Theta();   }
@@ -173,7 +174,7 @@ class ParticleBaseFormat
   /// Accessor to the delta Phi (given in [0, pi] with another particle direction
   const MAfloat32 dphi_0_pi(const ParticleBaseFormat* p) const 
   {
-    double dphi = fabs(momentum_.Phi() - p->momentum().Phi());
+    double dphi = std::abs(momentum_.Phi() - p->momentum().Phi());
     if(dphi>3.14159265) dphi=2.*3.14159265-dphi;
     return dphi;
   }
@@ -181,7 +182,7 @@ class ParticleBaseFormat
   /// Accessor to the delta Phi (given in [0, pi] with another particle direction
   const MAfloat32 dphi_0_pi(const ParticleBaseFormat& p) const 
   {
-    double dphi = fabs(momentum_.Phi() - p.momentum().Phi());
+    double dphi = std::abs(momentum_.Phi() - p.momentum().Phi());
     if(dphi>3.14159265) dphi=2.*3.14159265-dphi;
     return dphi;
   }

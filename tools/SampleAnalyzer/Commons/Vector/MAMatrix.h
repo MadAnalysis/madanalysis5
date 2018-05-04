@@ -25,6 +25,7 @@
 #ifndef MAMatrix_h
 #define MAMatrix_h
 
+
 // STL headers
 #include <iostream>
 #include <string>
@@ -33,7 +34,7 @@
 #include <cmath>
 #include <vector>
 
-// SampleAnalyzer
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/Vector/MALorentzVector.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
@@ -86,7 +87,7 @@ class MAMatrix
 
   std::vector<MAdouble64>& operator[] (MAuint16 i)
   { return m_[i]; }
-	   
+
   
 };
  

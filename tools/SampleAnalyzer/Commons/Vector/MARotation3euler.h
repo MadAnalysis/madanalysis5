@@ -25,6 +25,7 @@
 #ifndef MARotation3euler_h
 #define MARotation3euler_h
 
+
 // STL headers
 #include <iostream>
 #include <string>
@@ -33,7 +34,7 @@
 #include <cmath>
 #include <vector>
 
-// SampleAnalyzer
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/Vector/MAMatrix.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
@@ -114,9 +115,9 @@ class MARotation3euler
     MAVector3 result;
     for (unsigned int i=0;i<3;i++)
       for (unsigned int j=0;j<3;j++)
-	{
-	  result[i] = m_[i][j]*p[j];
-	}
+      {
+        result[i] = m_[i][j]*p[j];
+      }
     return result;
   }
   

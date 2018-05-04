@@ -24,6 +24,7 @@
 
 from madanalysis.enumeration.sb_ratio_type             import SBratioType
 from madanalysis.enumeration.color_type                import ColorType
+from madanalysis.enumeration.cut_type                  import CutType
 from madanalysis.enumeration.report_format_type        import ReportFormatType
 from madanalysis.enumeration.normalize_type            import NormalizeType
 from madanalysis.enumeration.observable_type           import ObservableType
@@ -63,7 +64,6 @@ class Layout:
         # Creating histograms
         self.plotflow.Initialize()
         self.merging.Initialize()
-
 
     @staticmethod
     def DisplayInteger(value):
@@ -262,7 +262,7 @@ class Layout:
 
         # Cross section imposed by the user
         if dataset.xsection != 0.0:
-            text.Add('* Cross section imposed by the user: ')
+            text.Add('Cross section imposed by the user: ')
             text.SetColor(ColorType.BLUE)
             text.Add(str(dataset.xsection))
             text.SetColor(ColorType.BLACK)
@@ -272,7 +272,7 @@ class Layout:
 
         # Weight of the events, if different from one
         if dataset.weight != 1.0:
-            text.Add('* Event weight imposed by the user: ')
+            text.Add('Event weight imposed by the user: ')
             text.SetColor(ColorType.BLUE)
             text.Add(str(dataset.weight))
             text.SetColor(ColorType.BLACK)
@@ -460,8 +460,7 @@ class Layout:
         text.Reset()
 
     # Writing Final Table
-    def WriteFinalTable(self,report):
-
+    def WriteFinalTable(self,report,cutinfo):
         # Information
         report.OpenBullet()
         text=TextReport()
@@ -473,7 +472,6 @@ class Layout:
         text.Add('.\n')
         report.WriteText(text)
         text.Reset()
-
 #       text.Add("Associated uncertainty: ")
 #       text.SetColor(ColorType.BLUE)
 #       text.Add(self.main.SBerror)
@@ -481,91 +479,71 @@ class Layout:
 #       text.Add('.\n')
 #       report.WriteText(text)
 #       text.Reset()
+        text.Add("Object definition selections are indicated in cyan.")
+        report.WriteText(text)
+        text.Reset()
+        text.Add("Reject and select are indicated by 'REJ' and 'SEL' respectively")
+        report.WriteText(text)
+        text.Reset()
         report.CloseBullet()
 
-        # Caption
-        text.Add("Signal and Background comparison")
-        report.CreateTable([2.6,2.5,3.6,3.6,2.1],text)
-        report.NewCell(ColorType.YELLOW)
-        text.Reset()
-        text.Add("        Cuts")
-        report.WriteText(text)
-        report.NewCell(ColorType.YELLOW)
-        text.Reset()
-        text.Add("        Signal (S)")
-        report.WriteText(text)
-        report.NewCell(ColorType.YELLOW)
-        text.Reset()
-        text.Add("        Background (B)")# (+/- err)")
-        report.WriteText(text)
-        report.NewCell(ColorType.YELLOW)
-        text.Reset()
-        text.Add("        S vs B")
-        report.WriteText(text)
-        report.NewLine()
-        text.Reset()
-
-        # Initial
-        report.NewCell()
-        text.Reset()
-        text.Add("        Initial (no cut)")
-        report.WriteText(text)
-        report.NewCell()
-        text.Reset()
-        if self.cutflow.isSignal:
-            text.Add("        " +\
-                     Layout.DisplayXsecCut(self.cutflow.signal.Ntotal.mean,
-                                           self.cutflow.signal.Ntotal.error))
-        else:
-            text.Add("        ")
-        report.WriteText(text)
-        report.NewCell()
-        text.Reset()
-        if self.cutflow.isBackground:
-            text.Add("        " +\
-                   Layout.DisplayXsecCut(self.cutflow.background.Ntotal.mean,\
-                                         self.cutflow.background.Ntotal.error))
-        else:
-            text.Add("        ")
-        report.WriteText(text)
-        report.NewCell()
-        text.Reset()
-        if self.cutflow.isSignal and self.cutflow.isBackground:
-            value = self.cutflow.calculateBSratio(\
-                self.cutflow.background.Ntotal.mean,\
-                self.cutflow.background.Ntotal.error,\
-                self.cutflow.signal.Ntotal.mean,\
-                self.cutflow.signal.Ntotal.error)
-            text.Add("        " + Layout.DisplayXsecCut(value.mean,value.error))
-        else:
-            text.Add("        ")
-        report.WriteText(text)
-        report.NewLine()
-        text.Reset()
-
-        # Loop
-        for ind in range(0,len(self.cutflow.detail[0].Nselected)):
+        myregs = self.main.regions.GetNames()
+        noreg = False
+        if myregs==[]:
+            myregs = ["myregion"]
+            noreg = True
+        for reg in myregs:
+            # Getting the cutflow names
+            reg_cflow  = [ x[0] for x in cutinfo if reg in x[1]]
+            type_cflow = [ x[2] for x in cutinfo if reg in x[1]]
+            # Printing the table
+            report.CreateTable([3.25,3.25,3.25,3.00],text)
+            if not noreg:
+                report.NewCell(ColorType.GREY,span=4)
+                text.Reset()
+                text.SetColor(ColorType.WHITE)
+                text.Add("Region: \"" + reg + '\"')
+                report.WriteText(text)
+                text.Reset()
+                report.NewLine()
+            report.NewCell(ColorType.YELLOW)
+            text.Reset()
+            text.Add("        Cuts")
+            report.WriteText(text)
+            report.NewCell(ColorType.YELLOW)
+            text.Reset()
+            text.Add("        Signal (S)")
+            report.WriteText(text)
+            report.NewCell(ColorType.YELLOW)
+            text.Reset()
+            text.Add("        Background (B)")# (+/- err)")
+            report.WriteText(text)
+            report.NewCell(ColorType.YELLOW)
+            text.Reset()
+            text.Add("        S vs B")
+            report.WriteText(text)
+            report.NewLine()
+            text.Reset()
+            # Initial
             report.NewCell()
             text.Reset()
-            text.Add("        Cut " + str(ind+1))
+            text.Add("        Initial (no cut)")
             report.WriteText(text)
             report.NewCell()
             text.Reset()
             if self.cutflow.isSignal:
-                text.Add("        " + \
-                         Layout.DisplayXsecCut(\
-                             self.cutflow.signal.Nselected[ind].mean,\
-                             self.cutflow.signal.Nselected[ind].error) )
+                text.Add("        " +\
+                   Layout.DisplayXsecCut(self.cutflow.signal.Ntotal.mean,
+                                               self.cutflow.signal.Ntotal.error))
             else:
                 text.Add("        ")
             report.WriteText(text)
             report.NewCell()
             text.Reset()
             if self.cutflow.isBackground:
-                text.Add("        " + \
-                         Layout.DisplayXsecCut(\
-                            self.cutflow.background.Nselected[ind].mean,\
-                            self.cutflow.background.Nselected[ind].error) )
+                text.Add("        " +\
+                       Layout.DisplayXsecCut(self.cutflow.background.Ntotal.mean,\
+                                             self.cutflow.background.Ntotal.error))
             else:
                 text.Add("        ")
             report.WriteText(text)
@@ -573,129 +551,260 @@ class Layout:
             text.Reset()
             if self.cutflow.isSignal and self.cutflow.isBackground:
                 value = self.cutflow.calculateBSratio(\
-                    self.cutflow.background.Nselected[ind].mean,\
-                    self.cutflow.background.Nselected[ind].error,\
-                    self.cutflow.signal.Nselected[ind].mean,\
-                    self.cutflow.signal.Nselected[ind].error)
+                    self.cutflow.background.Ntotal.mean,\
+                    self.cutflow.background.Ntotal.error,\
+                    self.cutflow.signal.Ntotal.mean,\
+                    self.cutflow.signal.Ntotal.error)
                 text.Add("        " + Layout.DisplayXsecCut(value.mean,value.error))
             else:
                 text.Add("        ")
             report.WriteText(text)
-            if ind == (len(self.cutflow.detail[0].Nselected)-1):
+            # Loop
+            id_flow=0
+            for myflow in self.cutflow.detail[0].cuts:
+                if len(myflow)==0:
+                    id_flow+=1
+                    continue
+                if len(myflow[0].cutregion)!=1:
+                    self.logger.error('Problem with the interpretation of the output')
+                    return False
+                if reg in myflow[0].cutregion:
+                    break
+                id_flow+=1
+            if id_flow == len(self.cutflow.detail[0].cuts):
                 report.EndLine()
-            else:
-                report.NewLine()
-            text.Reset()
-        report.EndTable()    
-
-
-    # Writing Efficiency Table
-    def WriteEfficiencyTable(self,index,report):
-        
-        text=TextReport()
-        report.CreateTable([2.1,2.8,2.8,3.4,3.3],text)
-        report.NewCell(ColorType.YELLOW)
-        text.Reset()
-        text.Add("        Dataset")
-        report.WriteText(text)
-        report.NewCell(ColorType.YELLOW)
-        text.Reset()
-        text.Add("        Events kept:\n")
-        text.Add("        K")
-        report.WriteText(text)
-        report.NewCell(ColorType.YELLOW)
-        text.Reset()
-        text.Add("        Rejected events:\n")
-        text.Add("        R")
-        report.WriteText(text)
-        report.NewCell(ColorType.YELLOW)
-        text.Reset()
-        text.Add("        Efficiency:\n")
-        text.Add("        K / (K + R)")
-        report.WriteText(text)
-        report.NewCell(ColorType.YELLOW)
-        text.Reset()
-        text.Add("        Cumul. efficiency:\n")
-        text.Add("        K / Initial")
-        report.WriteText(text)
-        text.Reset()
-        report.NewLine()
-        for i in range(0,len(self.main.datasets)):
-            # DatasetName
-            report.NewCell()
-            text.Reset()
-            text.Add('        '+self.main.datasets[i].name)
-            report.WriteText(text)
-
-            # SelectedEvents
-            report.NewCell()
-            text.Reset()
-            text.Add('        ' + Layout.DisplayXsecCut(self.cutflow.detail[i].Nselected[index].mean,\
-               self.cutflow.detail[i].Nselected[index].error))
-            report.WriteText(text)
-            
-            # RejectedEvents
-            report.NewCell()
-            text.Reset()
-            text.Add('        ' + Layout.DisplayXsecCut(self.cutflow.detail[i].Nrejected[index].mean,\
-               self.cutflow.detail[i].Nrejected[index].error)) 
-            report.WriteText(text)
-
-            # Efficiency Events
-            report.NewCell()
-            text.Reset()
-            text.Add('        ' + Layout.DisplayXsecCut(self.cutflow.detail[i].eff[index].mean,\
-               self.cutflow.detail[i].eff[index].error))
-            report.WriteText(text)
-
-            # Cumulative efficiency events
-            report.NewCell()
-            text.Reset()
-            text.Add('        ' + Layout.DisplayXsecCut(self.cutflow.detail[i].effcumu[index].mean,\
-               self.cutflow.detail[i].effcumu[index].error))
-            report.WriteText(text)
-
-            if i == (len(self.main.datasets)-1):
-                report.EndLine()
-            else:
-                report.NewLine()
-            
-        text.Reset()
-        report.EndTable()    
-        text.Reset()
-
-        # Checking if warnings (due to negative weights)
-        warning_test=False
-        for i in range(0,len(self.main.datasets)):
-            if len(self.cutflow.detail[i].warnings[index])!=0:
-                warning_test=True
-                break
-
-        # Displaying warnings
-        if warning_test:
-            report.CreateTable([12],text)
-            report.NewCell()
-            text.SetColor(ColorType.RED)
-            text.Add("Warnings related to negative event-weights:")
-            report.WriteText(text)
+                report.EndTable()
+                text.Reset()
+                continue
             report.NewLine()
-            for item in range(0,len(self.main.datasets)):
-                for line in self.cutflow.detail[i].warnings[index]:
-                    report.NewCell()
+            text.Reset()
+            iregf=0
+            for ind in range(0,len(self.cutflow.detail[0].Nselected[id_flow])):
+                if not self.cutflow.detail[0].cuts[id_flow][ind].cutname[(self.cutflow.detail[0].cuts[id_flow][ind].cutname.find('_')+1):-1] in reg_cflow[iregf]:
+                    report.NewCell(ColorType.CYAN)
                     text.Reset()
-                    text.SetColor(ColorType.RED)
-                    text.Add(line)
+                    if 'select' in reg_cflow[iregf]:
+                        text.Add('SEL: '+ reg_cflow[iregf].strip()[14:][:45])
+                    else:
+                        text.Add('REJ: '+ reg_cflow[iregf].strip()[14:][:45])
+                    report.WriteText(text)
+                    report.NewCell(ColorType.CYAN)
+                    text.Reset()
+                    text.Add("   -   ")
+                    report.WriteText(text)
+                    report.NewCell(ColorType.CYAN)
+                    text.Reset()
+                    text.Add("   -   ")
+                    report.WriteText(text)
+                    report.NewCell(ColorType.CYAN)
+                    text.Reset()
+                    text.Add("   -   ")
                     report.WriteText(text)
                     report.NewLine()
-            report.EndTable()    
+                    text.Reset()
+                    iregf+=1
+                iregf+=1
+                report.NewCell()
+                text.Reset()
+                if type_cflow[iregf-1]==CutType.SELECT:
+                    text.Add('SEL: ' + self.cutflow.detail[0].cuts[id_flow][ind].cutname[3:-1][:45])
+                else:
+                    text.Add('REJ: ' + self.cutflow.detail[0].cuts[id_flow][ind].cutname[3:-1][:45])
+                report.WriteText(text)
+                report.NewCell()
+                text.Reset()
+                if self.cutflow.isSignal:
+                    text.Add("        " + \
+                             Layout.DisplayXsecCut(\
+                                 self.cutflow.signal.Nselected[id_flow][ind].mean,\
+                                 self.cutflow.signal.Nselected[id_flow][ind].error) )
+                else:
+                    text.Add("        ")
+                report.WriteText(text)
+                report.NewCell()
+                text.Reset()
+                if self.cutflow.isBackground:
+                    text.Add("        " + \
+                             Layout.DisplayXsecCut(\
+                                self.cutflow.background.Nselected[id_flow][ind].mean,\
+                                self.cutflow.background.Nselected[id_flow][ind].error) )
+                else:
+                    text.Add("        ")
+                report.WriteText(text)
+                report.NewCell()
+                text.Reset()
+                if self.cutflow.isSignal and self.cutflow.isBackground:
+                    value = self.cutflow.calculateBSratio(\
+                        self.cutflow.background.Nselected[id_flow][ind].mean,\
+                        self.cutflow.background.Nselected[id_flow][ind].error,\
+                        self.cutflow.signal.Nselected[id_flow][ind].mean,\
+                        self.cutflow.signal.Nselected[id_flow][ind].error)
+                    text.Add("        " + Layout.DisplayXsecCut(value.mean,value.error))
+                else:
+                    text.Add("        ")
+                report.WriteText(text)
+                if ind == (len(self.cutflow.detail[0].Nselected[id_flow])-1) and iregf==len(reg_cflow):
+                    report.EndLine()
+                else:
+                    report.NewLine()
+                text.Reset()
+            for cand in range(iregf,len(reg_cflow)):
+                report.NewCell(ColorType.CYAN)
+                text.Reset()
+                if 'select' in reg_cflow[cand]:
+                    text.Add('SEL: '+ reg_cflow[cand].strip()[14:][:45])
+                else:
+                    text.Add('REJ: '+ reg_cflow[cand].strip()[14:][:45])
+                report.WriteText(text)
+                report.NewCell(ColorType.CYAN)
+                text.Reset()
+                text.Add("   -   ")
+                report.WriteText(text)
+                report.NewCell(ColorType.CYAN)
+                text.Reset()
+                text.Add("   -   ")
+                report.WriteText(text)
+                report.NewCell(ColorType.CYAN)
+                text.Reset()
+                text.Add("   -   ")
+                report.WriteText(text)
+                if cand == len(reg_cflow)-1:
+                    report.EndLine()
+                else:
+                    report.NewLine()
+                text.Reset()
+            report.EndTable()
+
+    # Writing Efficiency Table
+    def WriteEfficiencyTable(self,index,icut,report):
+        warning_test = False
+        text=TextReport()
+        myregs = self.main.selection[index].regions
+        noreg = False
+        if myregs==[]:
+            myregs = ["myregion"]
+            noreg = True
+        for reg in myregs:
+            text.Reset()
+            report.CreateTable([2.1,2.8,2.8,3.4,3.3],text)
+            if not noreg:
+                report.NewCell(ColorType.GREY,span=5)
+                text.Reset()
+                text.SetColor(ColorType.WHITE)
+                text.Add("Region: \"" + reg + '\"')
+                report.WriteText(text)
+                text.Reset()
+                report.NewLine()
+            report.NewCell(ColorType.YELLOW)
+            text.Reset()
+            text.Add("        Dataset")
+            report.WriteText(text)
+            report.NewCell(ColorType.YELLOW)
+            text.Reset()
+            text.Add("        Events kept:\n")
+            text.Add("        K")
+            report.WriteText(text)
+            report.NewCell(ColorType.YELLOW)
+            text.Reset()
+            text.Add("        Rejected events:\n")
+            text.Add("        R")
+            report.WriteText(text)
+            report.NewCell(ColorType.YELLOW)
+            text.Reset()
+            text.Add("        Efficiency:\n")
+            text.Add("        K / (K + R)")
+            report.WriteText(text)
+            report.NewCell(ColorType.YELLOW)
+            text.Reset()
+            text.Add("        Cumul. efficiency:\n")
+            text.Add("        K / Initial")
+            report.WriteText(text)
+            text.Reset()
+            report.NewLine()
+            warnings = []
+            for i in range(0,len(self.main.datasets)):
+                # DatasetName
+                report.NewCell()
+                text.Reset()
+                text.Add('        '+self.main.datasets[i].name)
+                report.WriteText(text)
+                # get the right region (and thus the right cutflow)
+                id_flow=0
+                for myflow in self.cutflow.detail[i].cuts:
+                    if len(myflow)==0:
+                        id_flow+=1
+                        continue
+                    if len(myflow[0].cutregion)!=1:
+                        self.logger.error('Problem with the interpretation of the output')
+                        return False
+                    if reg in myflow[0].cutregion:
+                        break
+                    id_flow+=1
+                # getting the right cut in the cutflow
+                id_cut=0
+                for running_cut in self.cutflow.detail[i].cuts[id_flow]:
+                    if running_cut.cutname.startswith('\"'+str(icut+1)+'_'):
+                        break
+                    id_cut+=1
+                # SelectedEvents
+                report.NewCell()
+                text.Reset()
+                text.Add('        ' + Layout.DisplayXsecCut(self.cutflow.detail[i].Nselected[id_flow][id_cut].mean,\
+                   self.cutflow.detail[i].Nselected[id_flow][id_cut].error))
+                report.WriteText(text)
+                # RejectedEvents
+                report.NewCell()
+                text.Reset()
+                text.Add('        ' + Layout.DisplayXsecCut(self.cutflow.detail[i].Nrejected[id_flow][id_cut].mean,\
+                   self.cutflow.detail[i].Nrejected[id_flow][id_cut].error))
+                report.WriteText(text)
+                # Efficiency Events
+                report.NewCell()
+                text.Reset()
+                text.Add('        ' + Layout.DisplayXsecCut(self.cutflow.detail[i].eff[id_flow][id_cut].mean,\
+                   self.cutflow.detail[i].eff[id_flow][id_cut].error))
+                report.WriteText(text)
+                # Cumulative efficiency events
+                report.NewCell()
+                text.Reset()
+                text.Add('        ' + Layout.DisplayXsecCut(self.cutflow.detail[i].effcumu[id_flow][id_cut].mean,\
+                   self.cutflow.detail[i].effcumu[id_flow][id_cut].error))
+                report.WriteText(text)
+                if i == (len(self.main.datasets)-1):
+                    report.EndLine()
+                else:
+                    report.NewLine()
+                # warnings ?
+                if len(self.cutflow.detail[i].warnings[id_flow][id_cut])!=0:
+                    warning_test=True
+                    warnings.append([i,id_flow,id_cut])
+                text.Reset()
+            report.EndTable()
+            text.Reset()
+            # Displaying warnings
+            if warning_test:
+                report.CreateTable([12],text)
+                report.NewCell()
+                text.SetColor(ColorType.RED)
+                text.Add("Warnings related to negative event-weights:")
+                report.WriteText(text)
+                report.NewLine()
+                for item in warnings:
+                    for line in self.cutflow.detail[i].warnings[id_flow][id_cut]:
+                        report.NewCell()
+                        text.Reset()
+                        text.SetColor(ColorType.RED)
+                        text.Add(line)
+                        report.WriteText(text)
+                        report.NewLine()
+                report.EndTable()
 
 
     # Writing Statistics Table
     def WriteStatisticsTable(self,index,report):
-        
         text=TextReport()
-        text.Add("Statistics table")
-        report.CreateTable([2.6,4.1,2.3,2.8,2.8,2.1,2.1],text)
+#        text.Add("Statistics table")
+        report.CreateTable([2.6,2.5,2.0,2.1,2.1,2.1,2.1],text)
         report.NewCell(ColorType.YELLOW)
         text.Reset()
         text.Add("        Dataset")
@@ -706,7 +815,7 @@ class Layout:
         report.WriteText(text)
         report.NewCell(ColorType.YELLOW)
         text.Reset()
-        text.Add("        Entries / events")
+        text.Add("        Entries per event")
         report.WriteText(text)
         report.NewCell(ColorType.YELLOW)
         text.Reset()
@@ -718,18 +827,17 @@ class Layout:
         report.WriteText(text)
         report.NewCell(ColorType.YELLOW)
         text.Reset()
-        text.Add("        %Underflow")
+        text.Add("        % underflow")
         report.WriteText(text)
         report.NewCell(ColorType.YELLOW)
         text.Reset()
-        text.Add("        %Overflow")
+        text.Add("        % overflow")
         report.WriteText(text)
         report.NewLine()
-        
+
         # Looping over dataset
         warning_test=False
         for iset in range(0,len(self.plotflow.detail)):
-
             # Is there warning ?
             if len(self.plotflow.detail[iset][index].warnings)!=0:
                 warning_test=True
@@ -740,20 +848,19 @@ class Layout:
             # Getting underflow and overflow
             uflow = self.plotflow.detail[iset][index].summary.underflow
             oflow = self.plotflow.detail[iset][index].summary.overflow
-           
+
             # Computing underflow and overflow ratio / integral
             uflow_percent=0
             oflow_percent=0
             if integral!=0:
                 uflow_percent = uflow*100/integral
                 oflow_percent = oflow*100/integral
-                
             # mean value
             mean = self.plotflow.detail[iset][index].summary.GetMean()
-                
+
             # root mean square + error 
             rms = self.plotflow.detail[iset][index].summary.GetRMS()
-                
+
             # writing the table
             report.NewCell()
             text.Reset()
@@ -835,21 +942,88 @@ class Layout:
                     text.Add(line)
                     report.WriteText(text)
                     report.NewLine()
-            report.EndTable()    
-                
-            
+            report.EndTable()
+
     # Writing Statistics Table
     def WriteStatisticsTablePID(self,index,report):
-        
         text=TextReport()
         text.Add("Statistics table")
-        report.CreateTable([12],text)
+        report.CreateTable([2.6,4.1,2.3],text)
         report.NewCell(ColorType.YELLOW)
         text.Reset()
-        text.Add("  ")
+        text.Add("        Dataset")
+        report.WriteText(text)
+        report.NewCell(ColorType.YELLOW)
+        text.Reset()
+        text.Add('        Integral')
+        report.WriteText(text)
+        report.NewCell(ColorType.YELLOW)
+        text.Reset()
+        text.Add("        Entries / events")
         report.WriteText(text)
         report.NewLine()
-        report.EndTable()    
+
+        # Looping over dataset
+        warning_test=False
+        for iset in range(0,len(self.plotflow.detail)):
+            # Is there warning ?
+            if len(self.plotflow.detail[iset][index].warnings)!=0:
+                warning_test=True
+
+            # Getting the number of entries
+            integral = self.plotflow.detail[iset][index].summary.integral
+
+            # writing the table
+            report.NewCell()
+            text.Reset()
+            text.Add('        '+self.main.datasets[iset].name)
+            report.WriteText(text)
+            report.NewCell()
+
+            # Nentries
+            text.Reset()
+            text.Add('        '+Layout.DisplayXsecCut(integral*self.plotflow.detail[iset][index].scale,0))
+            report.WriteText(text)
+            report.NewCell()
+
+            # Getting the number of events and number of entries
+            nentries = self.plotflow.detail[iset][index].summary.nentries
+            nevents  = self.plotflow.detail[iset][index].summary.nevents
+
+            # Nentries / Nevents
+            text.Reset()
+
+            if nevents!=0.:
+                text.Add('        ' + \
+                   str(Layout.Round_to_Ndigits(float(nentries)/float(nevents),3)))
+            else:
+                text.Add("        0.")
+            report.WriteText(text)
+            if iset==(len(self.plotflow.detail)-1):
+                report.EndLine()
+            else:
+                report.NewLine()
+        text.Reset()
+        report.EndTable()
+        text.Reset()
+
+        # Displaying warnings
+        if warning_test:
+            report.CreateTable([12],text)
+            report.NewCell()
+            text.SetColor(ColorType.RED)
+            text.Add("Warnings related to negative event-weights:")
+            report.WriteText(text)
+            report.NewLine()
+            for iset in range(0,len(self.plotflow.detail)):
+                for line in self.plotflow.detail[iset][index].warnings:
+                    report.NewCell()
+                    text.Reset()
+                    text.SetColor(ColorType.RED)
+                    text.Add(line)
+                    report.WriteText(text)
+                    report.NewLine()
+            report.EndTable()
 
 
     def CreateFolders(self,histo_folder,output_paths,modes):
@@ -872,16 +1046,12 @@ class Layout:
 
 
     def GenerateReport(self,history,output_path,mode):
-
- #       self.logger.info("     ** Computing cut efficiencies...")
-        #if not layout.DoEfficiencies():
-        #    return
-
         # Find a name for PDF file
+        ma5_id = output_path.split('/')[-1]
         if self.main.session_info.has_pdflatex:
-           self.pdffile=self.main.lastjob_name+'/PDF/main.pdf'
+           self.pdffile=self.main.lastjob_name+'/Output/PDF/'+ma5_id+'/main.pdf'
         elif self.main.session_info.has_latex and self.main.session_info.has_dvipdf:
-           self.pdffile=self.main.lastjob_name+'/DVI/main.pdf'
+           self.pdffile=self.main.lastjob_name+'/Output/DVI/'+ma5_id+'/main.pdf'
         else:
            self.pdffile=''
 
@@ -990,20 +1160,36 @@ class Layout:
         # Plots display
         if len(self.main.selection)!=0:
             report.WriteSubTitle('Histos and cuts')
-        
+
         # Plots
         ihisto=0
         icut=0
+        iobject=0
+        cutinfo = []
         for ind in range(0,len(self.main.selection)):
             if self.main.selection[ind].__class__.__name__=="Histogram":
                 report.WriteSubSubTitle("Histogram "+str(ihisto+1))
                 text.Reset()
-                text.Add('  ')
                 text.SetFont(FontType.BF)
-                text.Add(self.main.selection[ind].GetStringDisplay()+'\n')
+                text.Add(self.main.selection[ind].GetStringDisplay().lstrip())
                 report.WriteText(text)
                 text.Reset()
-                text.Add('\\ \n')
+                text.SetFont(FontType.BF)
+                report.NewBlankLine()
+                if self.main.regions.GetNames()!=[]:
+                    text.Add('* Regions: ')
+                    text.SetFont(FontType.none)
+                    for reg in self.main.selection[ind].regions:
+                        text.Add(reg)
+                        if reg!=self.main.selection[ind].regions[-1]:
+                            text.Add(', ')
+                    report.WriteText(text)
+                    report.NewBlankLine()
+                text.Reset()
+                text.Add('\n\n')
+                report.WriteText(text)
+                text.Reset()
+                text.Add('\n\n')
                 if self.main.selection[ind].observable.name not in ['NPID','NAPID']:
                     self.WriteStatisticsTable(ihisto,report)
                 else:
@@ -1014,26 +1200,73 @@ class Layout:
                 report.WriteText(text)
                 text.Reset()
                 ihisto+=1
-            if self.main.selection[ind].__class__.__name__=="Cut":
-                report.WriteSubSubTitle("Cut "+str(icut+1))
-                text.Reset()
-                text.Add('  ')
-                text.SetFont(FontType.BF)
-                text.Add(self.main.selection[ind].GetStringDisplay()+'\n')
-                report.WriteText(text)
-                text.Reset()
-                self.WriteEfficiencyTable(icut,report)
-                text.Add('\n\n')
-                report.WriteText(text)
-                text.Reset()
-                icut+=1
+            elif self.main.selection[ind].__class__.__name__=="Cut":
+                cutstring = self.main.selection[ind].GetStringDisplay().lstrip()
+                if ', regions' in cutstring:
+                    cutstring=cutstring[:cutstring.find(', regions')]
+                cutregions =[]
+                for reg in self.main.selection[ind].regions:
+                    cutregions.append(reg)
+                if cutregions == []:
+                    cutregions = ['myregion']
+                cutinfo.append([cutstring, cutregions, self.main.selection[ind].cut_type])
+                if len(self.main.selection[ind].part)==0:
+                    report.WriteSubSubTitle("Cut "+str(icut+1))
+                    text.Reset()
+                    text.SetFont(FontType.BF)
+                    text.Add(cutstring)
+                    report.WriteText(text)
+                    text.Reset()
+                    report.NewBlankLine()
+                    text.SetFont(FontType.BF)
+                    if self.main.regions.GetNames()!=[]:
+                        text.Add('* Regions: ')
+                        text.SetFont(FontType.none)
+                        for reg in self.main.selection[ind].regions:
+                            text.Add(reg)
+                            if reg!=self.main.selection[ind].regions[-1]:
+                                text.Add(', ')
+                        report.WriteText(text)
+                        report.NewBlankLine()
+                    text.Reset()
+                    text.Add('\n\n')
+                    report.WriteText(text)
+                    text.Reset()
+                    self.WriteEfficiencyTable(ind,icut,report)
+                    text.Add('\n\n')
+                    report.WriteText(text)
+                    text.Reset()
+                    icut+=1
+                else:
+                    report.WriteSubSubTitle("Object definition "+str(iobject+1))
+                    text.Reset()
+                    text.SetFont(FontType.BF)
+                    text.Add(cutstring)
+                    report.WriteText(text)
+                    text.Reset()
+                    report.NewBlankLine()
+                    text.SetFont(FontType.BF)
+                    if self.main.regions.GetNames()!=[]:
+                        text.Add('* Regions: ')
+                        text.SetFont(FontType.none)
+                        for reg in self.main.selection[ind].regions:
+                            text.Add(reg)
+                            if reg!=self.main.selection[ind].regions[-1]:
+                                text.Add(', ')
+                        report.WriteText(text)
+                        report.NewBlankLine()
+                    text.Reset()
+                    text.Add('\n\n')
+                    report.WriteText(text)
+                    text.Reset()
+                    iobject+=1
 
         # Final table
         if self.main.selection.Ncuts!=0:
             report.WriteSubTitle('Summary')
-            report.WriteSubSubTitle('Cut-flow chart')
-            self.WriteFinalTable(report)
-            
+            report.WriteSubSubTitle('Cut-flow charts')
+            self.WriteFinalTable(report,cutinfo)
+
         # Foot
         report.WriteFoot()
 
@@ -1041,7 +1274,7 @@ class Layout:
         report.Close()
 
         return True
-        
+
 
     @staticmethod
     def CheckLatexLog(file):
@@ -1071,7 +1304,7 @@ class Layout:
                 self.logger.error('some errors occured during LATEX compilation')
                 self.logger.error('for more details, have a look to the log file : '+output_path+'/latex.log')
                 return False
-                
+
             # Converting DVI file to PDF file
 #            if self.main.session_info.has_dvipdf:
 #                self.logger.info("     -> Converting the DVI report to a PDF report.")
@@ -1083,7 +1316,7 @@ class Layout:
 #                    self.logger.error('PDF file cannot be produced')
 #                    self.logger.error('Please have a look to the log file '+output_path+'/dvipdf.log')
 #                    return False
-                
+
         # ---- PDFLATEX MODE ----
         elif mode==ReportFormatType.PDFLATEX:
 
@@ -1095,16 +1328,10 @@ class Layout:
                 self.logger.error('some errors occured during LATEX compilation')
                 self.logger.error('for more details, have a look to the log file : '+output_path+'/latex.log')
                 return False
-            
+
             # Checking PDF file presence
             name=os.path.normpath(output_path+'/main.pdf')
             if not os.path.isfile(name):
                 self.logger.error('PDF file cannot be produced')
                 self.logger.error('Please have a look to the log file '+output_path+'/latex2.log')
                 return False
-            
-        
-            
-            
-        
-    

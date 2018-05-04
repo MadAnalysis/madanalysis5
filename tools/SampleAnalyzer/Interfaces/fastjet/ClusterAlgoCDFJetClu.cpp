@@ -22,14 +22,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-//SampleAnalyser headers
+// SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoCDFJetClu.h"
 
-//FastJet headers
+// FastJet headers
 #include <fastjet/ClusterSequence.hh>
 #include <fastjet/PseudoJet.hh>
 #include <fastjet/CDFJetCluPlugin.hh>
-
 
 
 using namespace MA5;

@@ -25,13 +25,14 @@
 #ifndef DELPHES_DATA_FORMAT_h
 #define DELPHES_DATA_FORMAT_h
 
-// STL header
+
+// STL headers
 #include <iostream>
 
-// SampleAnalyzer header
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 
-// ROOT header
+// ROOT headers
 #include <TTree.h>
 #include <TClonesArray.h>
 
@@ -43,6 +44,7 @@ struct DelphesDataFormat
 {
   /// Pointers to data
   TClonesArray* Jet_;
+  TClonesArray* FatJet_;
   TClonesArray* Electron_;
   TClonesArray* Photon_;
   TClonesArray* Muon_;
@@ -52,11 +54,13 @@ struct DelphesDataFormat
   TClonesArray* Track_;
   TClonesArray* Tower_;
   TClonesArray* Event_;
+  TClonesArray* Weight_;
   TClonesArray* EFlowTrack_;
   TClonesArray* EFlowPhoton_;
   TClonesArray* EFlowNeutral_;
 
   /// Pointers to branches
+  TBranch* branchFatJet_;
   TBranch* branchJet_;
   TBranch* branchElectron_;
   TBranch* branchPhoton_;
@@ -67,6 +71,7 @@ struct DelphesDataFormat
   TBranch* branchTrack_;
   TBranch* branchTower_;
   TBranch* branchEvent_;
+  TBranch* branchWeight_;
   TBranch* branchEFlowTrack_;
   TBranch* branchEFlowPhoton_;
   TBranch* branchEFlowNeutral_;

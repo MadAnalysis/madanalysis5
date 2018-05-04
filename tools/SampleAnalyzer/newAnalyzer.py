@@ -37,17 +37,17 @@ class AnalyzerManager:
 
     def CheckFilePresence(self):
         if not os.path.isdir(self.currentdir + "/User/Analyzer"):
-            print "Error: the directory called 'User/Analyzer' is not found."
+            print "        Error: the directory called 'User/Analyzer' is not found."
             return False
         if os.path.isfile(self.currentdir + "/User/Analyzer/" + self.name + ".cpp"):
-            print "Error: a file called 'User/Analyzer/"+self.name+\
+            print "        Error: a file called 'User/Analyzer/"+self.name+\
                      ".cpp' is already defined."
-            print "Please remove this file before."
+            print "        Please remove this file before."
             return False
         if os.path.isfile(self.currentdir + "/User/Analyzer/" + self.name + ".h"):
-            print "Error: a file called 'User/Analyzer/"+self.name+\
+            print "        Error: a file called 'User/Analyzer/"+self.name+\
                      ".h' is already defined."
-            print "Please remove this file before."
+            print "        Please remove this file before."
             return False
         return True
 
@@ -160,8 +160,12 @@ class AnalyzerManager:
         file.write('  {\n')
         file.write('    cout << "---------------NEW EVENT-------------------" << endl;\n')
         file.write('\n')
+        file.write('    // Event weight\n')
+        file.write('    double myWeight=1.;\n')
+        file.write('    if (!Configuration().IsNoEventWeight()) myWeight=event.mc()->weight();\n')
+        file.write('\n')
         file.write('    // Initial state\n')
-        file.write('    for (unsigned int i=0;i<event.mc()->particles().size();i++)\n')
+        file.write('    for (MAuint32 i=0;i<event.mc()->particles().size();i++)\n')
         file.write('    {\n')
         file.write('      const MCParticleFormat& part = event.mc()->particles()[i];\n')
         file.write('\n')
@@ -196,23 +200,19 @@ class AnalyzerManager:
         file.write('                << " phi=" << part.phi() << endl;\n')
         file.write('\n')
         file.write('      // display particle mother id\n')
-        file.write('      if (part.mother1()==0) \n')
+        file.write('      if (part.mothers().empty()) \n')
         file.write('      {\n')
         file.write('        cout << "particle with no mother." << endl;\n')
         file.write('      }\n')
-        file.write('      else if (part.mother2()==0 || part.mother1()==part.mother2())\n')
-        file.write('      {\n')
-        file.write('        const MCParticleFormat* mother = part.mother1();\n')
-        file.write('        cout << "particle coming from the decay of " \n')
-        file.write('             << mother->pdgid() << "." << endl;\n')
-        file.write('      }\n')
         file.write('      else\n')
         file.write('      {\n')
-        file.write('        const MCParticleFormat* mother1 = part.mother1();\n')
-        file.write('        const MCParticleFormat* mother2 = part.mother2();\n')
-        file.write('        cout << "particle coming from interaction between "\n')
-        file.write('             << mother1->pdgid() << " and " << mother2->pdgid()\n')
-        file.write('             << "." << endl;\n')
+        file.write('        std::cout << "particle coming from the decay of";\n')
+        file.write('        for(MAuint32 j=0;j<part.mothers().size();j++)\n')
+        file.write('        {\n')
+        file.write('          const MCParticleFormat* mother = part.mothers()[j];\n')
+        file.write('          cout << " " << mother->pdgid();\n')
+        file.write('        }\n')
+        file.write('        std::cout << "." << endl;\n')
         file.write('      }\n')
         file.write('    }\n')
         file.write('\n')
@@ -245,12 +245,17 @@ class AnalyzerManager:
         file.write('  //   - LHE/STDHEP/HEPMC samples after applying jet-clustering algorithm\n')
         file.write('  // ***************************************************************************\n')
         file.write('  /*\n')
+        file.write('  // Event weight\n')
+        file.write('  double myWeight=1.;\n')
+        file.write('  if (!Configuration().IsNoEventWeight() && event.mc()!=0) myWeight=event.mc()->weight();\n')
+        file.write('\n')
+        file.write('  Manager()->InitializeForNewEvent(myWeight);\n\n')
         file.write('  if (event.rec()!=0)\n')
         file.write('  {\n')
         file.write('    cout << "---------------NEW EVENT-------------------" << endl;\n')
         file.write('\n')
         file.write('    // Looking through the reconstructed electron collection\n')
-        file.write('    for (unsigned int i=0;i<event.rec()->electrons().size();i++)\n')
+        file.write('    for (MAuint32 i=0;i<event.rec()->electrons().size();i++)\n')
         file.write('    {\n')
         file.write('      const RecLeptonFormat& elec = event.rec()->electrons()[i];\n')
         file.write('      cout << "----------------------------------" << endl;\n')
@@ -272,7 +277,7 @@ class AnalyzerManager:
         file.write('    }\n')
         file.write('\n')
         file.write('    // Looking through the reconstructed muon collection\n')
-        file.write('    for (unsigned int i=0;i<event.rec()->muons().size();i++)\n')
+        file.write('    for (MAuint32 i=0;i<event.rec()->muons().size();i++)\n')
         file.write('    {\n')
         file.write('      const RecLeptonFormat& mu = event.rec()->muons()[i];\n')
         file.write('      cout << "----------------------------------" << endl;\n')
@@ -295,7 +300,7 @@ class AnalyzerManager:
         file.write('    }\n')
         file.write('\n')
         file.write('    // Looking through the reconstructed hadronic tau collection\n')
-        file.write('    for (unsigned int i=0;i<event.rec()->taus().size();i++)\n')
+        file.write('    for (MAuint32 i=0;i<event.rec()->taus().size();i++)\n')
         file.write('    {\n')
         file.write('      const RecTauFormat& tau = event.rec()->taus()[i];\n')
         file.write('      cout << "----------------------------------" << endl;\n')
@@ -317,7 +322,7 @@ class AnalyzerManager:
         file.write('    }\n')
         file.write('\n')
         file.write('    // Looking through the reconstructed jet collection\n')
-        file.write('    for (unsigned int i=0;i<event.rec()->jets().size();i++)\n')
+        file.write('    for (MAuint32 i=0;i<event.rec()->jets().size();i++)\n')
         file.write('    {\n')
         file.write('      const RecJetFormat& jet = event.rec()->jets()[i];\n')
         file.write('      cout << "----------------------------------" << endl;\n')
@@ -398,16 +403,16 @@ mute=False
 if len(sys.argv)==3:
     mute=True
 elif len(sys.argv)!=2:
-    print "Error: number of argument incorrect"
-    print "Syntax: ./newAnalyzer.py name"
-    print "with name the name of the analyzer"
+    print "        Error: number of argument incorrect"
+    print "        Syntax: ./newAnalyzer.py name"
+    print "        with name the name of the analyzer"
     sys.exit()
 
 
-print "A new class called '" + sys.argv[1] + "' will be created."
+print "        A new class called '" + sys.argv[1] + "' will be created."
 if not mute:
-  print "Please enter a title for your analyzer : "
-  title=raw_input("Title : ")
+  print "        Please enter a title for your analyzer : "
+  title=raw_input("        Title : ")
 else:
   title=sys.argv[1]
 
@@ -424,7 +429,7 @@ analyzer.WriteSource()
 # Adding analysis in analysisList.h
 analyzer.AddAnalyzer()
 
-print "Done !"
+print "        Done !"
 
 
 

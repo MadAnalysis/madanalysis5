@@ -25,6 +25,7 @@
 #ifndef WRITER_BASE_h
 #define WRITER_BASE_h
 
+
 // STL headers
 #include <fstream>
 #include <iostream>
@@ -68,7 +69,7 @@ class WriterBase
     rfio_=false; compress_=false; FirstEvent_=true;
   }
 
-	/// Destructor
+  /// Destructor
   virtual ~WriterBase()
   {
   }

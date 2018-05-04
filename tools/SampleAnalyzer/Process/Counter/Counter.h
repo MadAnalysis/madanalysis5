@@ -25,6 +25,7 @@
 #ifndef COUNTER_h
 #define COUNTER_h
 
+
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 

@@ -40,8 +40,8 @@ using namespace MA5;
 // Initializing static data members
 // -----------------------------------------------------------------------------
 // DO NOT TOUCH THESE LINES
-const std::string Configuration::sampleanalyzer_version_ = "1.5";
-const std::string Configuration::sampleanalyzer_date_    = "2016/12/30";
+const std::string Configuration::sampleanalyzer_version_ = "1.6";
+const std::string Configuration::sampleanalyzer_date_    = "2018/05/04";
 // DO NOT TOUCH THESE LINES
 
 // -----------------------------------------------------------------------------
@@ -76,11 +76,8 @@ void Configuration::Lower(std::string& word)
 // -----------------------------------------------------------------------------
 // Initialize
 // -----------------------------------------------------------------------------
-bool Configuration::Initialize(int &argc, char *argv[], const bool &useRSM)
+bool Configuration::Initialize(int &argc, char *argv[])
 {
-  // Using a Region Selection Manager or not
-  useRSM_=useRSM;
-
   // Checking number of arguments
   // <filelist> is compulsory
   if (argc<2)
@@ -91,7 +88,7 @@ bool Configuration::Initialize(int &argc, char *argv[], const bool &useRSM)
   }
 
   // Decoding options
-  if (argc>=3) for (unsigned int i=1;i<static_cast<unsigned int>(argc-1);i++)
+  if (argc>=3) for (MAuint32 i=1;i<static_cast<MAuint32>(argc-1);i++)
   {
     // converting const char to string
     std::string option = std::string(argv[i]);
@@ -145,7 +142,7 @@ bool Configuration::Initialize(int &argc, char *argv[], const bool &useRSM)
   }
 
   // Extracting the input list
-  input_list_name_ = std::string(argv[static_cast<unsigned int>(argc-1)]);
+  input_list_name_ = std::string(argv[static_cast<MAuint32>(argc-1)]);
 
   // Ok
   return true;

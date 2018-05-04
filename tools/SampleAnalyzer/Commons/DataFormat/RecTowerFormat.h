@@ -25,15 +25,17 @@
 #ifndef RecTowerFormat_h
 #define RecTowerFormat_h
 
+
 // STL headers
 #include <iostream>
 #include <string>
 #include <sstream>
 #include <iomanip>
 
-// MCParticleDataFormat
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/DataFormat/ParticleBaseFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
+
 
 namespace MA5
 {

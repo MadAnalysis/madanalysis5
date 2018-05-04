@@ -25,10 +25,13 @@
 #ifndef LOG_MSG_VALUE_H
 #define LOG_MSG_VALUE_H
 
-// STL headers
-#include<string>
 
+// STL headers
+#include <string>
+
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
+
 
 namespace MA5
 {

@@ -49,7 +49,9 @@ class InstallDelphes:
 #        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
 #        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.0.tar.gz"}
 #        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.1.tar.gz"}
-        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.3.tar.gz"}
+#        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.3.tar.gz"}
+        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.4.1.tar.gz"}
+#https://madanalysis.irmp.ucl.ac.be/attachment/wiki/WikiStart/Delphes-3.4.1.tar.gz
         self.logger = logging.getLogger('MA5')
 
 
@@ -133,9 +135,15 @@ class InstallDelphes:
         self.logger.debug('Updating files '+filename+ ': no CMSSW\n')
         self.SwitchOffCMSSW(filename)
         
+        # Updating Makefile
         filename = self.installdir+'/doc/genMakefile.tcl'
         self.logger.debug('Updating files '+filename+ ': no CMSSW\n')
         self.SwitchOffCMSSW(filename)
+
+        # Updating DelphesFormula
+        filename = self.installdir+'/classes/DelphesFormula.cc'
+        self.logger.debug('Updating files '+filename+ ': adding d0\n')
+        self.AddD0(filename)
 
         # Updating ExRootTask
         filename = self.installdir+'/external/ExRootAnalysis/ExRootTask.cc'
@@ -145,10 +153,10 @@ class InstallDelphes:
         # Updating ExRootTask
         filename = self.installdir+'/external/ExRootAnalysis/ExRootConfReader.cc'
         self.logger.debug('Updating files: commenting out lines in: '+filename+' ...')
-        self.CommentLines(filename,[178,189,180],'//')
+        self.CommentLines(filename,[177,178,179,180],'//')
 
         # Adding files
-        filesToAdd = ["MA5GenParticleFilter"]
+        filesToAdd = ["MA5GenParticleFilter","MA5EfficiencyD0"]
         if not self.CopyFiles(filesToAdd):
             return False
         if not self.UpdateDictionnary(filesToAdd):
@@ -307,11 +315,13 @@ class InstallDelphes:
             self.display_log()
             return False
 
-        if not os.path.isfile(self.installdir+'/libDelphes.so'):
-            self.logger.error("library labeled 'libDelphes.so' is missing.")
+        if not os.path.isfile(self.installdir+'/libDelphes.so')\
+          and not os.path.isfile(self.installdir+'/libDelphes.a')\
+          and not os.path.isfile(self.installdir+'/libDelphes.dylib'):
+            self.logger.error("A delphes library ('libDelphes.so', 'libDelphes.dylib' or 'libDelphes.a') is missing.")
             self.display_log()
             return False
-        
+
         return True
 
     def display_log(self):
@@ -398,9 +408,50 @@ class InstallDelphes:
         return True
 
 
+    def AddD0(self,filename):
+        # open input file
+        try:
+            input = open(filename)
+        except:
+            self.logger.error("impossible to read the file:" + filename)
+            return False
+
+        # open output file
+        try:
+            output = open(filename+'.savema5','w')
+        except:
+            self.logger.error("impossible to read the file:" + filename+'.savema5')
+            return False
+
+        # lines
+        for line in input:
+            line2=line.lstrip()
+            line2=line2.rstrip()
+            line2=line2.replace(' ','')
+            if line2.startswith('buffer.ReplaceAll("energy"'):
+                output.write(line)
+                output.write('  buffer.ReplaceAll("d0",     "t");\n')
+            else:
+                output.write(line)
+ 
+        #close
+        input.close()
+        output.close()
+
+        try:
+            shutil.copy(filename+'.savema5',filename)
+        except:
+            self.logger.error("impossible to copy "+filename+'.savema5 in '+filename)
+            return False
+
+        return True
+
+
     def CopyFiles(self,filesToAdd):
 
         for file in filesToAdd:
+            logging.debug("Add module *"+file+"* ...")
+
 
             inputname  = self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/delphes/'+file+'.cc.install'
             outputname = self.installdir+'/modules/'+file+'.cc'
@@ -422,7 +473,7 @@ class InstallDelphes:
                 self.logger.error("impossible to copy "+inputname+' in '+outputname)
                 return False
 
-            return True
+        return True
 
 
     def UpdateDictionnary(self,filesToAdd):

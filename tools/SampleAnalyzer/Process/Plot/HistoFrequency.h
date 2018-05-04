@@ -25,6 +25,7 @@
 #ifndef HISTO_FREQUENCY_H
 #define HISTO_FREQUENCY_H
 
+
 // STL headers
 #include <map>
 #include <string>
@@ -33,10 +34,10 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Plot/PlotBase.h"
 
+
 namespace MA5
 {
 
-template <typename T> 
 class HistoFrequency : public PlotBase
 {
 
@@ -46,26 +47,26 @@ class HistoFrequency : public PlotBase
  protected :
 
   /// Collection of observables
-  std::map<T, std::pair<MAfloat64,MAfloat64> > stack_;
+  std::map<int, std::pair<MAfloat64,MAfloat64> > stack_;
 
   /// Sum of event-weights over entries
   std::pair<MAfloat64,MAfloat64> sum_w_;
+
+  /// RegionSelections attached to the histo
+  std::vector<RegionSelection*> regions_;
 
   // -------------------------------------------------------------
   //                       method members
   // -------------------------------------------------------------
  public :
 
-  typedef typename std::map<T,std::pair<MAfloat64,MAfloat64> >::iterator
-       iterator; 
-  typedef typename std::map<T,std::pair<MAfloat64,MAfloat64> >::const_iterator
-       const_iterator; 
-  typedef typename std::map<T,std::pair<MAfloat64,MAfloat64> >::size_type
-       size_type;
+  typedef std::map<int,std::pair<MAfloat64,MAfloat64> >::iterator iterator; 
+  typedef std::map<int,std::pair<MAfloat64,MAfloat64> >::const_iterator const_iterator; 
+  typedef std::map<int,std::pair<MAfloat64,MAfloat64> >::size_type size_type;
 
   /// Constructor with argument 
   HistoFrequency(const std::string& name) : PlotBase(name)
-  {     
+  {
     // Reseting statistical counters
     sum_w_ = std::make_pair(0.,0.);
   }
@@ -74,8 +75,27 @@ class HistoFrequency : public PlotBase
   virtual ~HistoFrequency()
   { }
 
+  /// Setting the linked regions
+  void SetSelectionRegions(std::vector<RegionSelection*> myregions)
+    { regions_.insert(regions_.end(), myregions.begin(), myregions.end()); }
+
+  /// Checking that all regions of the histo are surviving
+  /// Returns 0 if all regions are failing (includes te case with 0 SR)
+  /// Returns 1 if all regions are passing 
+  // returns -1 otherwise
+  int AllSurviving()
+  {
+    if (regions_.size() == 0) return 0;
+    bool FirstRegionSurvival = regions_[0]->IsSurviving();
+    for(unsigned int ii=1; ii < regions_.size(); ii++)
+      if(regions_[ii]->IsSurviving() != FirstRegionSurvival) return -1;
+    if(FirstRegionSurvival) return 1;
+    else                    return 0;
+  }
+
+
   /// Adding an entry for a given observable
-  void Fill(const T& obs, MAfloat64 weight=1.0)
+  void Fill(const int& obs, MAfloat64 weight=1.0)
   {
     // Looking for the value
     iterator it = stack_.find(obs);
@@ -108,49 +128,69 @@ class HistoFrequency : public PlotBase
   /// Write the plot in a ROOT file
   virtual void Write_TextFormat(std::ostream* output)
   {
-  // Header
-	*output << "<HistoFrequency>" << std::endl;
+    // Header
+    *output << "<HistoFrequency>" << std::endl;
 
-  // Description
-	*output << "<Description>" << std::endl;
-	*output << "\"" << name_ << "\"" << std::endl;
-	*output << "</Description>" << std::endl;
+    // Description
+    *output << "  <Description>" << std::endl;
+    *output << "    \"" << name_ << "\"" << std::endl;
 
-  // Statistics
-  *output << "<Statistics>" << std::endl;
-  *output << nevents_.first << " " 
-          << nevents_.second << " # nevents" << std::endl;
-  *output << nevents_w_.first << " " 
-          << nevents_w_.second 
-          << " # sum of event-weights over events" << std::endl;
-  *output << nentries_.first << " " 
-          << nentries_.second << " # nentries" << std::endl;
-  *output << sum_w_.first << " " 
-          << sum_w_.second 
-          << " # sum of event-weights over events" << std::endl;
-  *output << "</Statistics>" << std::endl;
+    // SelectionRegions
+    if(regions_.size()!=0)
+    {
+      unsigned int maxlength=0;
+      for(unsigned int i=0; i < regions_.size(); i++)
+        if (regions_[i]->GetName().size()>maxlength) maxlength=regions_[i]->GetName().size();
+      *output << std::left << "    # Defined regions" << std::endl;
+      for(unsigned int i=0; i < regions_.size(); i++)
+      {
+        *output << "      " << std::setw(maxlength) << std::left << regions_[i]->GetName();
+        *output << "    # Region nr. " << std::fixed << i+1 << std::endl;
+      }
+    }
 
-  // Data
-  *output << "<Data>" << std::endl;
-  unsigned int i=0;
-  for (const_iterator it = stack_.begin(); it!=stack_.end(); it++)
-  {
-    output->width(15);
-    *output << std::left << it->first;
-    output->width(15);
-    *output << std::left << it->second.first;
-    output->width(15);
-    *output << std::left << it->second.second;
-    if (i<2 || i>=(stack_.size()-2)) 
-       *output << " # bin " << i+1 << " / " << stack_.size();
+    // End description
+    *output << "  </Description>" << std::endl;
+
+    // Statistics
+    *output << "  <Statistics>" << std::endl;
+    *output << "      ";
+    output->width(15); *output << std::fixed << nevents_.first;
+    output->width(15); *output << std::fixed << nevents_.second;
+    *output << " # nevents" << std::endl;
+    *output << "      ";
+    output->width(15); *output << std::scientific << nevents_w_.first;
+    output->width(15); *output << std::scientific << nevents_w_.second;
+    *output << " # sum of event-weights over events" << std::endl;
+    *output << "      ";
+    output->width(15); *output << std::fixed << nentries_.first;
+    output->width(15); *output << std::fixed << nentries_.second;
+    *output << " # nentries" << std::endl;
+    *output << "      ";
+    output->width(15); *output << std::scientific << sum_w_.first;
+    output->width(15); *output << std::scientific << sum_w_.second;
+    *output << " # sum of event-weights over entries" << std::endl;
+    *output << "  </Statistics>" << std::endl;
+
+    // Data
+    *output << "  <Data>" << std::endl;
+    unsigned int i=0;
+    for (const_iterator it = stack_.begin(); it!=stack_.end(); it++)
+    {
+      *output << "      ";
+      output->width(15); *output << std::left << std::fixed      << it->first;
+      output->width(15); *output << std::left << std::scientific << it->second.first;
+      output->width(15); *output << std::left << std::scientific << it->second.second;
+      if (i<2 || i>=(stack_.size()-2))
+         *output << " # bin " << i+1 << " / " << stack_.size();
+      *output << std::endl;
+      i++;
+    }
+    *output << "  </Data>" << std::endl;
+
+    // Footer
+    *output << "</HistoFrequency>" << std::endl;
     *output << std::endl;
-    i++;
-  }
-  *output << "</Data>" << std::endl;
-
-  // Foot
-  *output << "</HistoFrequency>" << std::endl;
-  *output << std::endl;
   }
 
   /// Write the plot in a ROOT file

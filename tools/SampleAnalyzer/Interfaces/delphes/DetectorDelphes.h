@@ -26,7 +26,7 @@
 #define DETECTOR_DELPHES_H
 
 
-//SampleAnalyser headers
+// SampleAnalyser headers
 #include "SampleAnalyzer/Commons/Base/DetectorBase.h"
 #include "SampleAnalyzer/Interfaces/delphes/DelphesMemoryInterface.h"
 
@@ -65,13 +65,13 @@ class DetectorDelphes: public DetectorBase
     TObjArray*        allParticleOutputArray_;
     TObjArray*        stableParticleOutputArray_;
     TObjArray*        partonOutputArray_;
-    TObjArray*        jets_;
     TFile*            outputFile_;
     TDatabasePDG*     PDG_;
     TFolder*          delphesFolder_;
 
     // parameters
     bool output_;
+    std::string outputdir_;
     std::string rootfile_;
     bool MA5card_;
     std::map<std::string,std::string> table_;
@@ -86,7 +86,7 @@ class DetectorDelphes: public DetectorBase
 
     /// Constructor without argument
     DetectorDelphes() 
-    { output_=false; MA5card_=false; nprocesses_=0;}
+    { outputdir_="."; output_=false; MA5card_=false; nprocesses_=0;}
 
     /// Destructor
     virtual ~DetectorDelphes()

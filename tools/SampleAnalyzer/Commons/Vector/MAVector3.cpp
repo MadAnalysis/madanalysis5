@@ -59,7 +59,7 @@ MAdouble64 MAVector3::Phi_mpi_pi(MAdouble64 x)
 }
 
 //______________________________________________________________________________
-MAdouble64 MAVector3::operator() (MAuint8 i) const
+const MAdouble64& MAVector3::operator() (MAuint8 i) const
 {
   if (i==0) return x_;
   else if (i==1) return y_;
@@ -136,8 +136,8 @@ void MAVector3::SetPtEtaPhi(MAdouble64 pt, MAdouble64 eta, MAdouble64 phi)
    //set Pt, Eta and Phi
    MAdouble64 apt = std::abs(pt);
    SetXYZ(apt*std::cos(phi),
-	  apt*std::sin(phi),
-	  apt/std::tan(2.0*std::atan(std::exp(-eta))) );
+   apt*std::sin(phi),
+   apt/std::tan(2.0*std::atan(std::exp(-eta))) );
 }
 
 //______________________________________________________________________________

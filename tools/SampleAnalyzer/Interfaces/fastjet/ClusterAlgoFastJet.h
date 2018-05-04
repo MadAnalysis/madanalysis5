@@ -26,12 +26,12 @@
 #define JET_CLUSTERING_FASTJET_H
 
 
-//SampleAnalyser headers
+// SampleAnalyser headers
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
 #include "SampleAnalyzer/Commons/Base/ClusterAlgoBase.h"
 
-//STL header
+// STL headers
 #include <set>
 #include <map>
 #include <vector>

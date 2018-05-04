@@ -25,6 +25,7 @@
 #ifndef EventFormat_h
 #define EventFormat_h
 
+
 // STL headers
 #include <iostream>
 #include <sstream>

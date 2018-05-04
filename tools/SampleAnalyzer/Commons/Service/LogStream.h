@@ -25,6 +25,7 @@
 #ifndef LOG_STREAM_H
 #define LOG_STREAM_H
 
+
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 

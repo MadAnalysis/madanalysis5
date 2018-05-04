@@ -22,8 +22,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Core/xdr_istream.h"
+
+// STL headers
 #include <iostream>
+
+
 using namespace MA5;
 
 // -----------------------------------------------------------------------------
@@ -32,19 +37,19 @@ using namespace MA5;
 xdr_istream& xdr_istream::operator>>(std::string &s)
 {
   if (eof()) return (*this);
-	MAuint32 len=0;
-	(*this)>>len;
+  MAuint32 len=0;
+  (*this)>>len;
 
   if (eof()) return (*this);
 
-	char line[len];
-	sb_->sgetn(line, len);
-	s=std::string(line,line+len);
-	
-	size_t pad = (4-len)&3; //change 4-len&3
-	char dummy[pad];
-	sb_->sgetn(dummy,pad);
-	return *this;
+  char line[len];
+  sb_->sgetn(line, len);
+  s=std::string(line,line+len);
+
+  size_t pad = (4-len)&3; //change 4-len&3
+  char dummy[pad];
+  sb_->sgetn(dummy,pad);
+  return *this;
 }
 
 // -----------------------------------------------------------------------------
@@ -54,13 +59,13 @@ xdr_istream& xdr_istream::operator>>(MAuint32 &v)
 {
   if (eof()) return (*this);
 
-	v=0;
-	for(int i=0;i<32; i+=8)
+  v=0;
+  for(int i=0;i<32; i+=8)
   {
-		v<<=8;
-		v += static_cast<MAuint32>(sb_->sbumpc());
-	}
-	return *this;
+    v<<=8;
+    v += static_cast<MAuint32>(sb_->sbumpc());
+  }
+  return *this;
 }
 
 // -----------------------------------------------------------------------------
@@ -70,10 +75,10 @@ xdr_istream& xdr_istream::operator>>(MAint32 &v)
 {
   if (eof()) return (*this);
 
-	MAuint32 _v=0;
-	(*this)>>_v;
-	v=static_cast<MAint32>(_v);
-	return (*this);
+  MAuint32 _v=0;
+  (*this)>>_v;
+  v=static_cast<MAint32>(_v);
+  return (*this);
 }
 
 
@@ -84,13 +89,13 @@ xdr_istream& xdr_istream::operator>>(MAuint64 &v)
 {
   if (eof()) return (*this);
 
-	v=0;
-	for(int i=0;i<64; i+=8)
+  v=0;
+  for(int i=0;i<64; i+=8)
   {
-		v<<=8;
-		v += static_cast<MAuint64>(sb_->sbumpc());
-	}
-	return *this;
+    v<<=8;
+    v += static_cast<MAuint64>(sb_->sbumpc());
+  }
+  return *this;
 }
 
 
@@ -101,10 +106,10 @@ xdr_istream& xdr_istream::operator>>(MAint64 &v)
 {
   if (eof()) return (*this);
 
-	MAuint64 _v=0;
-	(*this)>>_v;
-	v=static_cast<MAint64>(_v);
-	return (*this);
+  MAuint64 _v=0;
+  (*this)>>_v;
+  v=static_cast<MAint64>(_v);
+  return (*this);
 }
 
 
@@ -115,11 +120,11 @@ xdr_istream& xdr_istream::operator>>(MAfloat32 &v)
 {
   if (eof()) return (*this);
 
-	MAuint32 n=0;
-	(*this)>>n;
-	MAfloat32* vp = reinterpret_cast<MAfloat32*>(&n);
-	v=*vp;
-	return *this;
+  MAuint32 n=0;
+  (*this)>>n;
+  MAfloat32* vp = reinterpret_cast<MAfloat32*>(&n);
+  v=*vp;
+  return *this;
 }
 
 
@@ -130,9 +135,9 @@ xdr_istream& xdr_istream::operator>>(MAfloat64 &v)
 {
   if (eof()) return (*this);
 
-	MAuint64 n=0;
-	(*this)>>n;
-	MAfloat64* vp = reinterpret_cast<MAfloat64*>(&n);
-	v=*vp;
-	return *this;
+  MAuint64 n=0;
+  (*this)>>n;
+  MAfloat64* vp = reinterpret_cast<MAfloat64*>(&n);
+  v=*vp;
+  return *this;
 }

@@ -25,16 +25,18 @@
 #ifndef RecJetFormat_h
 #define RecJetFormat_h
 
+
 // STL headers
 #include <iostream>
 #include <string>
 #include <sstream>
 #include <iomanip>
 
-// RecParticleFormat
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/DataFormat/IsolationConeType.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecParticleFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
+
 
 namespace MA5
 {

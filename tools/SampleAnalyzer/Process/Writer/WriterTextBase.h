@@ -25,6 +25,7 @@
 #ifndef WRITER_TEXT_BASE_h
 #define WRITER_TEXT_BASE_h
 
+
 // STL headers
 #include <fstream>
 #include <iostream>
@@ -32,6 +33,7 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Writer/WriterBase.h"
+
 
 namespace MA5
 {
@@ -60,7 +62,7 @@ class WriterTextBase : public WriterBase
     output_=0;
   }
 
-	/// Destructor
+  /// Destructor
   virtual ~WriterTextBase()
   {
     if (output_ !=0) delete output_;

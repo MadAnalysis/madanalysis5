@@ -25,6 +25,7 @@
 #ifndef RecEventFormat_h
 #define RecEventFormat_h
 
+
 // STL headers
 #include <iostream>
 #include <sstream>
@@ -86,6 +87,9 @@ class RecEventFormat
   /// Collection of reconstructed jets
   std::vector<RecJetFormat>    jets_;
 
+  /// Collection of reconstructed fat jets
+  std::vector<RecJetFormat>    fatjets_;
+
   /// Collection of generated jets
   std::vector<RecJetFormat>    genjets_;
 
@@ -120,6 +124,9 @@ class RecEventFormat
 
   /// Reconstructed Scalar sum of hadronic transverse energy
   MAfloat64 THT_;
+
+  /// Computed total effective mass (sum of jet's PT + MET
+  MAfloat64 Meff_;
 
   /// Monte Carlo taus decaying hadronically
   std::vector<const MCParticleFormat*> MCHadronicTaus_;
@@ -162,6 +169,9 @@ class RecEventFormat
   /// Accessor to the tau collection (read-only)
   const std::vector<RecTauFormat>& taus() const {return taus_;}
 
+  /// Accessor to the fat jet collection (read-only)
+  const std::vector<RecJetFormat>& fatjets() const {return fatjets_;}
+
   /// Accessor to the jet collection (read-only)
   const std::vector<RecJetFormat>& jets() const {return jets_;}
 
@@ -188,6 +198,9 @@ class RecEventFormat
 
   /// Accessor to the Total Hadronic Transverse Energy (read-only)
   const MAfloat64& THT() const {return THT_;}
+
+  /// Accessor to the Total effective mass (read-only)
+  const MAfloat64& Meff() const {return Meff_;}
 
   /// Accessor to the Monte Carlo taus decaying hadronically
   const std::vector<const MCParticleFormat*>& MCHadronicTaus() const
@@ -224,6 +237,9 @@ class RecEventFormat
   /// Accessor to the jet collection
   std::vector<RecJetFormat>& jets() {return jets_;}
 
+  /// Accessor to the fat jet collection
+  std::vector<RecJetFormat>& fatjets() {return fatjets_;}
+
   /// Accessor to the towers collection
   std::vector<RecTowerFormat>& towers() {return towers_;}
   std::vector<RecTrackFormat>& EFlowTracks() {return EFlowTracks_;}
@@ -247,6 +263,9 @@ class RecEventFormat
 
   /// Accessor to the Total Hadronic Transverse Energy
   MAfloat64& THT() {return THT_;}
+
+  /// Accessor to the Total effective mass
+  MAfloat64& Meff() {return Meff_;}
 
   /// Accessor to the Monte Carlo taus decaying hadronically
   std::vector<const MCParticleFormat*>& MCHadronicTaus()
@@ -276,6 +295,7 @@ class RecEventFormat
     muons_.clear(); 
     taus_.clear();
     jets_.clear();
+    fatjets_.clear();
     towers_ok_=false;
     towers_.clear();
     tracks_ok_=false;
@@ -289,8 +309,9 @@ class RecEventFormat
     genjets_.clear();
     MET_.Reset();
     MHT_.Reset();
-    TET_=0.;
-    THT_=0.; 
+    TET_  = 0.;
+    THT_  = 0.;
+    Meff_ = 0.;
     MCHadronicTaus_.clear();
     MCMuonicTaus_.clear();
     MCElectronicTaus_.clear();
@@ -366,6 +387,13 @@ class RecEventFormat
   {
     jets_.push_back(RecJetFormat());
     return &jets_.back();
+  }
+
+  /// Giving a new fat jet entry
+  RecJetFormat* GetNewFatJet()
+  {
+    fatjets_.push_back(RecJetFormat());
+    return &fatjets_.back();
   }
 
   /// Giving a new gen jet entry

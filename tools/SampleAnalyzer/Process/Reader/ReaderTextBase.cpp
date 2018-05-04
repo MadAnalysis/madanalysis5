@@ -25,7 +25,7 @@
 // STL headers
 #include <fstream>
 
-// Headers for fifo
+// Fifo headers
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -37,6 +37,7 @@
 // SampleHeader headers
 #include "SampleAnalyzer/Process/Reader/ReaderTextBase.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
+
 
 using namespace MA5;
 

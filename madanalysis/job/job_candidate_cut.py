@@ -64,7 +64,7 @@ def GetFinalCondition(current,index,tagName):
     
 
 
-def WriteCandidateCut(file,main,iabs,icut,part_list):
+def WriteCandidateCut(file,main,iabs,part_list):
 
     # Opening bracket for the current histo
     file.write('  {\n')
@@ -79,7 +79,6 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
             logging.getLogger('MA5').warning("sorry but the possibility to apply a cut on a combination of " +\
                             "particles is not still implemented in MadAnalysis 5.")
             logging.getLogger('MA5').warning("this cut will be disabled.")
-            file.write('  cuts_['+str(icut)+'].Increment(__event_weight__);\n')
             file.write('  }\n')
             return
 
@@ -92,7 +91,7 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
         # container
         container=InstanceName.Get('P_'+combination.name+\
                                    main.selection[iabs].rank+\
-                                   main.selection[iabs].statuscode)
+                                   main.selection[iabs].statuscode+'_REG_'+'_'.join(main.selection[iabs].regions))
 
         # create new container
         file.write('    std::vector<const ');
@@ -113,14 +112,14 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
         # Loop over conditions
         for ind in range(len(conditions)):
             file.write('      {\n')
-            WriteFactorizedConditions(file,main,iabs,icut,container,\
+            WriteFactorizedConditions(file,main,iabs,container,\
                                       tagName,tagIndex=ind,condition=conditions[ind])
             file.write('      }\n')
 
         # Writing final tag
         file.write('      MAbool ' + tagName + '_global = ' +\
                    GetFinalCondition(main.selection[iabs].conditions,0,tagName)[0]+';\n')
-        
+
         # Add candidate ?
         file.write('      if (')
         if main.selection[iabs].cut_type==CutType.SELECT:
@@ -136,27 +135,31 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
 
         # Loop over containers
         for other_part in part_list:
- 
+
             # Skip container with particle with a PTrank
             if other_part[0].PTrank!=0:
                 continue
-            
-            # Get next container
-            container2 = InstanceName.Get('P_'+other_part[0].name+\
-                                          main.selection[iabs].rank+\
-                                          main.selection[iabs].statuscode)
 
-            logging.getLogger('MA5').debug("-- Is the following container concerned? "+other_part[0].name+" -> "+container2)
+            # Get next container
+            container2 = InstanceName.Get('P_'+other_part[0].name+other_part[1]+other_part[2]+'_REG_'+'_'.join(other_part[3]))
+
+            logging.getLogger('MA5').debug("-- Is the following container concerned? -> "+container2)
 
             # Is this container concerned by the cut ?
             concerned=False
             for other in other_part:
                 if other_part[0].particle.IsThereCommonPart(combination.particle):
-                    concerned=True
-                    break
+                    if other_part[2]!=main.selection[iabs].statuscode:
+                        continue
+                    if [x for x in other_part[3] if x in main.selection[iabs].regions] !=[]:
+                        concerned=True
+                        break
+                    if other_part[3]==[] and main.selection[iabs].regions ==[]:
+                        concerned=True
+                        break
             if not concerned:
                 continue
-            logging.getLogger('MA5').debug("---> YES. Cutting on container: "+other_part[0].name+" -> "+container2)
+            logging.getLogger('MA5').debug("---> YES. Cutting on container "+container2)
 
             # Bracket for begin 
             file.write('    {\n')
@@ -181,40 +184,43 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
             file.write('      if (!reject) tmp.push_back('+container2+'[i]);\n')
             file.write('    }\n') 
             file.write('    '+container2+'=tmp;\n')
-            
+
             # Bracket for end
             file.write('    }\n')
 
-        # Remove candidate from all containers    
+        # Remove candidate from all containers
         first = True
         logging.getLogger('MA5').debug("- Updating all connected containers WITH pt rank")
         for other_part in part_list: # Loop over containers
 
-
-            # Skip container with particle with a PTrank
+            # Skip container with particle without a PTrank
             if other_part[0].PTrank==0:
                 continue
 
             # Get next container
-            container2 = InstanceName.Get('P_'+other_part[0].name+\
-                                          main.selection[iabs].rank+\
-                                          main.selection[iabs].statuscode)
+            container2 = InstanceName.Get('P_'+other_part[0].name+other_part[1]+other_part[2]+'_REG_'+'_'.join(other_part[3]))
+
             refpart = copy.copy(other_part[0])
             refpart.PTrank=0
             newcontainer2 = InstanceName.Get('P_'+refpart.name+\
                                              main.selection[iabs].rank+\
-                                             main.selection[iabs].statuscode)
+                                             main.selection[iabs].statuscode+'_REG_'+'_'.join(other_part[3]))
 
-            logging.getLogger('MA5').debug("-- Is the following container concerned? "+other_part[0].name+" -> "+container2+" derivated from "+newcontainer2)
+            logging.getLogger('MA5').debug("-- Is the following container concerned? -> "+container2+" to be derived from "+\
+              newcontainer2)
 
             # Is this container concerned by the cut ?
             concerned=False
             for other in other_part:
                 if refpart.particle.IsThereCommonPart(combination.particle):
-#                if other_part[0].particle.IsThereCommonPart(combination.particle) \
-#                  and other_part[2]==main.selection[iabs].rank:
-                    concerned=True
-                    break
+                    if other_part[2] != main.selection[iabs].statuscode:
+                        continue
+                    if [x for x in other_part[3] if x in main.selection[iabs].regions] !=[]:
+                        concerned=True
+                        break
+                    if other_part[3]==[] and main.selection[iabs].regions ==[]:
+                        concerned=True
+                        break
             if not concerned:
                 continue
 
@@ -222,27 +228,20 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
                 first=False
                 file.write('    // Sorting particles according PTrank\n')
 
-            logging.getLogger('MA5').debug("---> YES. Updating the container: "+other_part[0].name+" -> "+container2)
+            logging.getLogger('MA5').debug("---> YES. Updating the container "+container2)
 
             # Bracket for begin 
             file.write('    {\n')
 
             file.write('      '+container2+'=SORTER->rankFilter('+\
                         newcontainer2+','+str(other_part[0].PTrank)+','+\
-                        'PTordering'+');\n\n')
-            
+                        other_part[1]+');\n\n')
 
             # Bracket for end
             file.write('    }\n')
 
-
-#        file.write('    }\n')
-        
         # Opening-brace for possible candidate
         file.write('  }\n')
-
-    # Counter
-    file.write('  cuts_['+str(icut)+'].Increment(__event_weight__);\n')
 
     # Closing bracket for the current cut
     file.write('  }\n')
@@ -250,20 +249,20 @@ def WriteCandidateCut(file,main,iabs,icut,part_list):
     return
 
 
-def WriteFactorizedConditions(file,main,iabs,icut,container,\
+def WriteFactorizedConditions(file,main,iabs,container,\
                               tagName,tagIndex,condition):
     if len(condition.parts)==0:
-        WriteFactorizedCutWith0Arg(file,main,iabs,icut,container,\
+        WriteFactorizedCutWith0Arg(file,main,iabs,container,\
                                    tagName,tagIndex,condition)
     elif len(condition.parts)==1:
-        WriteFactorizedCutWith1Arg(file,main,iabs,icut,container,\
+        WriteFactorizedCutWith1Arg(file,main,iabs,container,\
                                    tagName,tagIndex,condition)
     else:
         logging.getLogger('MA5').error("observable with more than 2 arguments are " +\
                       "not managed by MadAnalysis 5")
 
 
-def WriteFactorizedCutWith0Arg(file,main,iabs,icut,container,tagName,tagIndex,condition):
+def WriteFactorizedCutWith0Arg(file,main,iabs,container,tagName,tagIndex,condition):
     file.write('        if (')
     file.write(container+'[muf]->' +\
                condition.observable.code(main.mode) +\
@@ -272,16 +271,16 @@ def WriteFactorizedCutWith0Arg(file,main,iabs,icut,container,tagName,tagIndex,co
                ') '+tagName+'['+str(tagIndex)+']=true;\n')
 
 
-def WriteFactorizedCutWith1Arg(file,main,iabs,icut,container,tagName,tagIndex,condition):
+def WriteFactorizedCutWith1Arg(file,main,iabs,container,tagName,tagIndex,condition):
 
     for item in condition.parts[0]:
         file.write('      {\n')
-        WriteJobExecuteNbody(file,iabs,icut,item,main,container,\
+        WriteJobExecuteNbody(file,iabs,item,main,container,\
                              tagName,tagIndex,condition) 
         file.write('      }\n')
 
 
-def WriteJobExecuteNbody(file,iabs,icut,combi1,main,container,tagName,tagIndex,condition):
+def WriteJobExecuteNbody(file,iabs,combi1,main,container,tagName,tagIndex,condition):
 
     obs = condition.observable
     cut = main.selection[iabs]
@@ -305,17 +304,17 @@ def WriteJobExecuteNbody(file,iabs,icut,combi1,main,container,tagName,tagIndex,c
                     redundancies = True
 
     # FOR loop for first combi
-    WriteJobLoop(file,iabs,icut,combi1,redundancies1,main,'a')
+    WriteJobLoop(file,iabs,combi1,redundancies1,main,'a')
 
     # Checking redundancies for second combi
-    WriteJobSameCombi(file,iabs,icut,combi1,redundancies1,main,'a')
+    WriteJobSameCombi(file,iabs,combi1,redundancies1,main,'a')
 
 
     # Getting container name
     containers1=[]
     for item in combi1:
         containers1.append(InstanceName.Get('P_'+\
-                                           item.name+cut.rank+cut.statuscode))
+                                           item.name+cut.rank+cut.statuscode+'_REG_'+'_'.join(cut.regions)))
 
     # Case of one particle/multiparticle
     if len(combi1)==1:
@@ -382,7 +381,7 @@ def WriteJobExecuteNbody(file,iabs,icut,combi1,main,container,tagName,tagIndex,c
         file.write('    }\n')
 
 
-def WriteJobLoop(file,iabs,icut,combination,redundancies,main,iterator='ind'):
+def WriteJobLoop(file,iabs,combination,redundancies,main,iterator='ind'):
 
     cut = main.selection[iabs]
 
@@ -390,7 +389,7 @@ def WriteJobLoop(file,iabs,icut,combination,redundancies,main,iterator='ind'):
     containers=[]
     for item in combination:
         containers.append(InstanceName.Get('P_'+\
-                                           item.name+cut.rank+cut.statuscode))
+                                           item.name+cut.rank+cut.statuscode+'_REG_'+'_'.join(main.selection[iabs].regions)))
 
     if len(combination)==1:
         file.write('    for (MAuint32 '+iterator+'=0;'+iterator+'<' + containers[0] + '.size();'+iterator+'++)\n')
@@ -420,8 +419,7 @@ def WriteJobLoop(file,iabs,icut,combination,redundancies,main,iterator='ind'):
                 file.write(') continue;\n')     
 
 
-def WriteJobSameCombi(file,iabs,icut,combination,redundancies,main,iterator='ind'):
-    
+def WriteJobSameCombi(file,iabs,combination,redundancies,main,iterator='ind'):
     if len(combination)==1 or not redundancies:
         return
 
@@ -431,7 +429,7 @@ def WriteJobSameCombi(file,iabs,icut,combination,redundancies,main,iterator='ind
     containers=[]
     for item in combination:
         containers.append(InstanceName.Get('P_'+\
-                                           item.name+cut.rank+cut.statuscode))
+                                           item.name+cut.rank+cut.statuscode+'_REG_'+'_'.join(cut.regions)))
 
     file.write('\n    // Checking if consistent combination\n')
     if main.mode in [MA5RunningType.PARTON,MA5RunningType.HADRON]:

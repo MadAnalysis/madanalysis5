@@ -27,7 +27,7 @@ class CutInfo:
 
     def __init__(self):
         self.Reset()
-        
+
     def Reset(self):
         self.nentries_pos = 0
         self.nentries_neg = 0
@@ -35,6 +35,8 @@ class CutInfo:
         self.sumw_neg     = 0.
         self.sumw2_pos    = 0.
         self.sumw2_neg    = 0.
+        self.cutname      = ""
+        self.cutregion    = ""
 
     def Print(self):
         logging.getLogger('MA5').info("nentries_pos = " + str(self.nentries_pos))

@@ -25,7 +25,7 @@
 // SampleAnalyzer headesr
 #include "SampleAnalyzer/Commons/Service/RandomService.h"
 #include "SampleAnalyzer/Process/JetClustering/bTagger.h"
-
+#include <cmath>
 
 using namespace MA5;
 
@@ -143,13 +143,13 @@ void bTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
       MCParticleFormat* particle = & myEvent.mc()->particles()[N];
       while (!b)
       {
-       	if (particle==0)
+        if (particle==0)
         {
           INFO << "No particle" << endmsg;
           break;
         }
 
-	if (particle->statuscode()==3) break;
+  if (particle->statuscode()==3) break;
 
         if (PHYSICS->Id->IsBHadron(particle->pdgid()) && IsLastBHadron(particle, myEvent))
         {
@@ -158,9 +158,9 @@ void bTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
           break;
         }
 
-	if (particle->mother2()!=0 && particle->mother2()!=particle->mother1()) break;
+        if (particle->mothers().size()>1 && particle->mothers()[1]!=particle->mothers()[0]) break;
 
-        particle = particle->mother1();
+        particle = particle->mothers()[0];
       }
 
       if (b) break;
@@ -219,13 +219,13 @@ void bTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
       MCParticleFormat* particle = & myEvent.mc()->particles()[N];
       while (!b)
       {
-       	if (particle==0)
+       if (particle==0)
         {
           INFO << "No particle" << endmsg;
           break;
         }
 
-	if (particle->statuscode()==3) break;
+  if (particle->statuscode()==3) break;
 
         if (PHYSICS->Id->IsBHadron(particle->pdgid()) && IsLastBHadron(particle, myEvent))
         {
@@ -234,9 +234,9 @@ void bTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
           break;
         }
 
-	if (particle->mother2()!=0 && particle->mother2()!=particle->mother1()) break;
+        if (particle->mothers().size()>1 && particle->mothers()[1]!=particle->mothers()[0]) break;
 
-        particle = particle->mother1();
+        particle = particle->mothers()[0];
       }
 
       if (b) break;
@@ -248,7 +248,7 @@ void bTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
   // b-tagging using method 1
   for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
   {
-    if (fabs(myEvent.mc()->particles()[i].pdgid())!=5) continue;
+    if (std::abs(myEvent.mc()->particles()[i].pdgid())!=5) continue;
 
     if (!IsLast(&myEvent.mc()->particles()[i], myEvent)) continue;
 
@@ -289,7 +289,7 @@ MAbool bTagger::IsLastBHadron(MCParticleFormat* part, EventFormat& myEvent)
 {
   for (unsigned int i=0; i<myEvent.mc()->particles().size(); i++)
   {
-    if (myEvent.mc()->particles()[i].mother1()== part)
+    if (myEvent.mc()->particles()[i].mothers()[0]== part)
     {
       if (PHYSICS->Id->IsBHadron(myEvent.mc()->particles()[i].pdgid())) return false;
     }

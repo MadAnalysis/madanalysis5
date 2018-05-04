@@ -32,6 +32,7 @@ class SessionInfo():
         self.downloaddir        = ""
         self.has_root           = False
         self.has_matplotlib     = False
+        self.has_scipy          = False
         self.has_gnuplot        = False
         self.has_pdflatex       = False
         self.has_latex          = False

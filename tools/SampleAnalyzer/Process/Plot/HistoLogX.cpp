@@ -31,7 +31,7 @@ using namespace MA5;
 void HistoLogX::Write_TextFormat(std::ostream* output)
 {
   // Header
-	*output << "<HistoLogX>" << std::endl;
+  *output << "<HistoLogX>" << std::endl;
 
   // Write the body
   Write_TextFormatBody(output);

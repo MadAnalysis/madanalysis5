@@ -22,10 +22,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// STL headers
+#include <cmath>
+
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/JetClustering/TauTagger.h"
 #include "SampleAnalyzer/Commons/Service/RandomService.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
+
+
 using namespace MA5;
 
 
@@ -75,23 +80,23 @@ void TauTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
       MCParticleFormat* particle = & myEvent.mc()->particles()[N];
       while (!tag)
       {
-       	if (particle==0)
+        if (particle==0)
         {
           ERROR << "No particle" << endmsg;
           break;
         }
-	if (particle->statuscode()==3) break;
+  if (particle->statuscode()==3) break;
 
-        if (fabs(particle->pdgid())==15)
+        if (std::abs(particle->pdgid())==15)
         {
           tag = true;
           myEvent.rec()->jets()[i].mc_ = particle;
           break;
         }
 
-	if (particle->mother2()!=0 && particle->mother2()!=particle->mother1()) break;
+      if (particle->mothers().size()>1 && particle->mothers()[1]!=particle->mothers()[0]) break;
 
-        particle = particle->mother1();
+        particle = particle->mothers()[0];
       }
 
       if (tag) break;
@@ -114,7 +119,7 @@ void TauTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
       while (j<n)
       {
         // If two candidates are matching with the same tau, erasing the one with the greater Delta R and reducing n (the size of the vector)
-       	if (Candidates[i]->mc()==Candidates[j]->mc())
+        if (Candidates[i]->mc()==Candidates[j]->mc())
         {
           MAfloat32 DeltaR2 = Candidates[j]->mc()->dr(Candidates[j]);
 
@@ -122,8 +127,8 @@ void TauTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
 
           Candidates.erase(Candidates.begin()+j);
           n--;
-	}
-	else j++;
+  }
+  else j++;
       }
 
       i++;
@@ -166,7 +171,7 @@ void TauTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
       MCParticleFormat* particle = & myEvent.mc()->particles()[N];
       while (!tag)
       {
-       	if (particle==0)
+        if (particle==0)
         {
           ERROR << "No particle" << endmsg;
           break;
@@ -174,16 +179,16 @@ void TauTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
 
         if (particle->statuscode()==3) break;
 
-        if (fabs(particle->pdgid())==15)
+        if (std::abs(particle->pdgid())==15)
         {
           tag = true;
           myEvent.rec()->jets()[i].mc_ = particle;
           break;
         }
 
-	if (particle->mother2()!=0 && particle->mother2()!=particle->mother1()) break;
+        if (particle->mothers().size()>1 && particle->mothers()[1]!=particle->mothers()[0]) break;
 
-        particle = particle->mother1();
+        particle = particle->mothers()[0];
       }
 
       if (tag) break;
@@ -197,7 +202,7 @@ void TauTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
   // tau-tagging using method 1
   for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
   {
-    if (fabs(myEvent.mc()->particles()[i].pdgid())!=15) continue;
+    if (std::abs(myEvent.mc()->particles()[i].pdgid())!=15) continue;
 
     if (!IsLast(&myEvent.mc()->particles()[i], myEvent)) continue;
 
@@ -216,8 +221,8 @@ void TauTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
           tag = true;
           DeltaRmax = DeltaR;
         }
-     	Taus.push_back(Candidates[j-1]);
-	Candidates.erase(Candidates.begin()+j-1);
+     Taus.push_back(Candidates[j-1]);
+     Candidates.erase(Candidates.begin()+j-1);
       }
     }
   }

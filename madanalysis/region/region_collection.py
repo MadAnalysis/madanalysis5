@@ -22,6 +22,7 @@
 ################################################################################
 
 
+import copy
 import logging
 import madanalysis.region.region as Region
 
@@ -37,11 +38,23 @@ class RegionCollection:
     def __getitem__(self,i):
         return self.table[i][1]
 
-    def Display(self):
-        self.logger.info(" ********* List of defined regions *********" )
+    def Display(self,selections):
+        ireg=1
+        self.logger.info(" ****************** List of defined regions ******************" )
         for value in self.table:
-            self.logger.info(" "+value[0])
-        self.logger.info(" ********************************************" )
+            myreg = value[0]
+            self.logger.info(" > Region " + str(ireg) + ": " + myreg)
+            ireg+=1
+            icut=1
+            for ind in range(0,len(selections)):
+                if selections[ind].__class__.__name__=="Cut":
+                    cutstring = selections[ind].GetStringDisplay().lstrip()
+                    if ', regions' in cutstring:
+                        cutstring=cutstring[:cutstring.find(', regions')]
+                    if myreg in selections[ind].regions:
+                        self.logger.info("  ** Cut - "+str(icut)+': ' + cutstring[7:])
+                        icut+=1
+        self.logger.info(" **************************************************************" )
 
     def Find(self,name):
         name.lower()
@@ -79,3 +92,26 @@ class RegionCollection:
         for item in self.table:
             names.append(item[0])
         return names
+
+    def GetClusteredRegions(self, selections):
+        clusteredregions = copy.copy([self.GetNames()])
+        if clusteredregions == [[]]:
+            return clusteredregions
+        for myselection in selections:
+            if myselection.__class__.__name__!="Cut":
+                continue
+            newclusteredregions = copy.copy(clusteredregions)
+            for icluster in range(0,len(clusteredregions)):
+                newcluster = []
+                oldcluster = copy.copy(clusteredregions[icluster])
+                for singleregion in clusteredregions[icluster]:
+                    if singleregion in myselection.regions:
+                        newcluster.append(singleregion)
+                        oldcluster.remove(singleregion)
+                newclusteredregions.append(newcluster)
+                newclusteredregions[icluster] = oldcluster
+            clusteredregions=newclusteredregions
+            clusteredregions=[x for x in clusteredregions if x != [] ]
+        clusteredregions=[list(set(x)) for x in clusteredregions ]
+        return clusteredregions
+

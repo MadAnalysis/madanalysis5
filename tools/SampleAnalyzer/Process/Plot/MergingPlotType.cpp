@@ -28,6 +28,7 @@
 // STL headers
 #include <sstream>
 
+
 using namespace MA5;
 
 
@@ -36,37 +37,22 @@ const MAfloat64 MergingPlotType::xmin  = 0.;
 const MAfloat64 MergingPlotType::xmax  = 3.;
 
 
-void MergingPlotType::Initialize(unsigned int ncontrib, const std::string& name)
+void MergingPlotType::Initialize(unsigned int ncontrib, const std::string& name, RegionSelectionManager* manager)
 {
-  contribution.resize(ncontrib);
-  for (unsigned int i=0;i<contribution.size();i++)
+//  contribution.resize(ncontrib);
+  n_contribs=ncontrib;
+  for (unsigned int i=0;i<n_contribs;i++)
   {
     std::stringstream str;
     str << name << "_" << i << "jet";
     std::string title;
     str >> title;
-    contribution[i]=new Histo(title,
-                              MergingPlotType::nbins,
-                              MergingPlotType::xmin,
-                              MergingPlotType::xmax);
+    manager->AddHisto(title, MergingPlotType::nbins, MergingPlotType::xmin, MergingPlotType::xmax);
   }
   std::stringstream str;
   str << name << "_total";
   std::string title;
   str >> title;
-  total=new Histo(title,
-                  MergingPlotType::nbins,
-                  MergingPlotType::xmin,
-                  MergingPlotType::xmax);
+  manager->AddHisto(title, MergingPlotType::nbins, MergingPlotType::xmin, MergingPlotType::xmax);
 }
 
-
-void MergingPlotType::Finalize()
-{
-  if (total!=0) delete total;
-
-  for (unsigned int i=0;i<contribution.size();i++)
-    if (contribution[i]!=0) delete contribution[i];
-
-  contribution.clear();
-}

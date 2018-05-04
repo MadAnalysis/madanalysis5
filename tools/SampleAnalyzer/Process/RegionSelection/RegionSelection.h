@@ -25,13 +25,15 @@
 #ifndef __REGIONSELECTION_H
 #define __REGIONSELECTION_H
 
+
 // STL headers
 #include <string>
 #include <vector>
 
-// SampleAnalyzer
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Counter/CounterManager.h"
 #include "SampleAnalyzer/Process/Writer/SAFWriter.h"
+
 
 namespace MA5
 {

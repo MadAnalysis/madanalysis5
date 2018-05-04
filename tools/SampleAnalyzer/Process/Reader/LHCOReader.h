@@ -25,8 +25,10 @@
 #ifndef LHCO_READER_h
 #define LHCO_READER_h
 
+
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Reader/ReaderTextBase.h"
+
 
 namespace MA5
 {
@@ -54,7 +56,7 @@ class LHCOReader : public ReaderTextBase
   LHCOReader()
   { }
 
-	//! Destructor
+  //! Destructor
   virtual ~LHCOReader()
   { }
 

@@ -62,7 +62,12 @@ class HistogramLogX:
         # Warnings
         self.warnings = []
 
-        
+        # regions
+        self.regions = []
+
+    def GetRegions(self):
+        return self.regions
+
     def FinalizeReading(self,main,dataset):
 
         # Statistics

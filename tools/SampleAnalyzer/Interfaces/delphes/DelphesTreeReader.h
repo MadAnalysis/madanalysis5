@@ -25,7 +25,8 @@
 #ifndef DELPHES_TREE_READER_h
 #define DELPHES_TREE_READER_h
 
-// STL header
+
+// STL headers
 #include <iostream>
 #include <vector>
 #include <map>
@@ -35,7 +36,7 @@
 #include "SampleAnalyzer/Interfaces/root/TreeReaderBase.h"
 #include "SampleAnalyzer/Interfaces/delphes/DelphesDataFormat.h"
 
-// ROOT header
+// ROOT headers
 #include <TChain.h>
 #include <TLorentzVector.h>
 #include <TObject.h>
@@ -76,7 +77,7 @@ class DelphesTreeReader : public TreeReaderBase
   DelphesTreeReader(TFile* source, TTree* tree): TreeReaderBase(source,tree)
   { }
 
-	/// Destructor
+  /// Destructor
   virtual ~DelphesTreeReader()
   { }
 

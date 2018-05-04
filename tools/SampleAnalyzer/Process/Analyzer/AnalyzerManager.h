@@ -25,9 +25,11 @@
 #ifndef ANALYSIS_MANAGER_h
 #define ANALYSIS_MANAGER_h
 
+
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Analyzer/AnalyzerBase.h"
 #include "SampleAnalyzer/Process/Core/ManagerBase.h"
+
 
 namespace MA5
 {

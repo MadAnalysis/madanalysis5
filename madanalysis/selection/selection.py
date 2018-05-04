@@ -110,7 +110,7 @@ class Selection:
                 if item.observable.name in ["NPID","NAPID"]:
                     self.Npid+=1 
                     self.Nevent_histos+=1
-                elif item.observable.name in ["TET", "MET", "THT", "MHT", "SQRTS"]:
+                elif item.observable.name in ["TET", "MET", "THT", "MHT", "SQRTS", "MEFF"]:
                     self.Nevent_histos+=1
                 else:
                     self.Npart_histos+=1

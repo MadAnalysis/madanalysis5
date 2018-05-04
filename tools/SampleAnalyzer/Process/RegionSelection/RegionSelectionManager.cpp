@@ -29,6 +29,7 @@
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelectionManager.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
+
 using namespace MA5;
 
 /// Apply a cut
@@ -85,44 +86,70 @@ bool RegionSelectionManager::ApplyCut(bool condition, std::string const &cut)
 /// Filling an histo with a value val
 void RegionSelectionManager::FillHisto(std::string const&histname, double val)
 {
-  /// Get the histo under consideration
+  // Current histo
   Histo *myhisto=0;
+  HistoFrequency *myhistof=0;
+  HistoLogX *myhistoX=0;
+  // Looping over all histos
   for(unsigned int i=0; i<plotmanager_.GetNplots(); i++)
   {
     if(histname.compare(plotmanager_.GetHistos()[i]->GetName())==0)
     {
-      myhisto=dynamic_cast<Histo*>(plotmanager_.GetHistos()[i]);
+        // HistoFrequency
+        if(dynamic_cast<HistoFrequency*>(plotmanager_.GetHistos()[i])!=0)
+        {
+          myhistof = dynamic_cast<HistoFrequency*>(plotmanager_.GetHistos()[i]);
+          if(myhistof->AllSurviving()==0) return;
+          try
+          {
+            if(myhistof->AllSurviving()==-1) throw
+              EXCEPTION_WARNING("Filling an histogram with not all SRs surviving the cuts applied so far","",0);
+          }
+          catch (const std::exception& e)  { MANAGE_EXCEPTION(e); }
+          // Filling the histo
+          if (myhistof->FreshEvent())  myhistof->IncrementNEvents(weight_);
+          myhistof->Fill(val,weight_);
+       }
+      // LogX histo
+      else if(dynamic_cast<HistoLogX*>(plotmanager_.GetHistos()[i])!=0)
+      {
+        myhistoX = dynamic_cast<HistoLogX*>(plotmanager_.GetHistos()[i]);
+        if(myhistoX->AllSurviving()==0) return;
+        try
+        {
+          if(myhistoX->AllSurviving()==-1) throw
+            EXCEPTION_WARNING("Filling an histogram with not all SRs surviving the cuts applied so far","",0);
+        }
+        catch (const std::exception& e)  { MANAGE_EXCEPTION(e); }
+        // Filling the histo
+        if (myhistoX->FreshEvent())  myhistoX->IncrementNEvents(weight_);
+        myhistoX->Fill(val,weight_);
+      }
+      // Normal histo
+      else if(dynamic_cast<Histo*>(plotmanager_.GetHistos()[i])!=0)
+      {
+        myhisto = dynamic_cast<Histo*>(plotmanager_.GetHistos()[i]);
+        if(myhisto->AllSurviving()==0) return;
+        try
+        {
+          if(myhisto->AllSurviving()==-1) throw
+            EXCEPTION_WARNING("Filling an histogram with not all SRs surviving the cuts applied so far","",0);
+        }
+        catch (const std::exception& e)  { MANAGE_EXCEPTION(e); }
+        // Filling the histo
+        if (myhisto->FreshEvent())  myhisto->IncrementNEvents(weight_);
+        myhisto->Fill(val,weight_);
+      }
       break;
     }
   }
   // Trying to fill a non-existing histo
   try
-  {  
-    if(myhisto==0) throw EXCEPTION_WARNING("Trying to fill non-declared histogram \""+ histname + "\"","",0);
-  }
-  catch (const std::exception& e)
   {
-    MANAGE_EXCEPTION(e);
-    return;
+    if( (myhisto==0) && (myhistof==0) && (myhistoX==0) ) throw
+       EXCEPTION_WARNING("Trying to fill non-declared histogram \""+ histname + "\"","",0);
   }
-
-  // Checking if each region is surviving
-  if(myhisto->AllSurviving()==0) return;
-  try
-  {  
-    if(myhisto->AllSurviving()==-1) throw EXCEPTION_WARNING("Trying to fill an histogram for which at least one (but not all) SRs is not surviving the cuts applied so far.","",0);
-  }
-  catch (const std::exception& e)
-  {
-    MANAGE_EXCEPTION(e);
-    //    WARNING << "Please modify the analysis and declare different histograms"
-    //      << endmsg;
-  }
-
-
-  // Filling the histo
-  myhisto->IncrementNEvents();
-  myhisto->Fill(val,weight_);
+  catch (const std::exception& e)    { MANAGE_EXCEPTION(e); return; }
 }
 
 void RegionSelectionManager::WriteHistoDefinition(SAFWriter& output)

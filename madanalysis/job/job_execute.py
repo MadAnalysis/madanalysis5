@@ -41,6 +41,8 @@ def WriteExecute(file,main,part_list):
     file.write('  if (weighted_events_ && event.mc()!=0) ' +\
                '__event_weight__ = event.mc()->weight();\n\n')  
     file.write('  if (sample.mc()!=0) sample.mc()->addWeightedEvents(__event_weight__);\n')
+    file.write('  Manager()->InitializeForNewEvent(__event_weight__);\n')
+    file.write('\n')
 
     # Reseting instance name
     InstanceName.Clear()
@@ -55,7 +57,7 @@ def WriteExecute(file,main,part_list):
     file.write('  return true;\n')
     file.write('}\n\n')
 
-def WriteJobRank(part,file,rank,status):
+def WriteJobRank(part,file,rank,status,regions):
 
     if part.PTrank==0:
         return
@@ -63,10 +65,10 @@ def WriteJobRank(part,file,rank,status):
     # Skipping if already defined
     if InstanceName.Find("PTRANK_"+part.name+rank+status):
         return
-    container=InstanceName.Get('P_'+part.name+rank+status)
+    container=InstanceName.Get('P_'+part.name+rank+status+'_REG_'+'_'.join(regions))
     refpart = copy.copy(part)
     refpart.PTrank=0
-    newcontainer=InstanceName.Get('P_'+refpart.name+rank+status);
+    newcontainer=InstanceName.Get('P_'+refpart.name+'PTordering'+status+'_REG_'+'_'.join(regions));
 
     file.write('  // Sorting particle collection according to '+rank+'\n')
     file.write('  // for getting '+str(part.PTrank)+'th particle\n')
@@ -74,53 +76,52 @@ def WriteJobRank(part,file,rank,status):
                newcontainer+','+str(part.PTrank)+','+rank+');\n\n')
 
 
-def WriteCleanContainer(part,file,rank,status):
-
+def WriteCleanContainer(part,file,rank,status,regions):
     # Skipping if already defined
-    if InstanceName.Find('P_'+part.name+rank+status):
+    if InstanceName.Find('P_'+part.name+rank+status+'_REG_'+'_'.join(regions)):
         return
 
     # Getting container name
-    container=InstanceName.Get('P_'+part.name+rank+status)
+    container=InstanceName.Get('P_'+part.name+rank+status+'_REG_'+'_'.join(regions))
 
     # Getting id name
-    id='isP_'+InstanceName.Get(part.name+rank+status)
+    id='isP_'+InstanceName.Get(part.name+rank+status+'_REG_'+'_'.join(regions))
 
     file.write('      ' + container + '.clear();\n')
 
 
-def WriteFillContainer(part,file,rank,status):
+def WriteFillContainer(part,file,rank,status,regions):
 
     # If PTrank, no fill
     if part.PTrank!=0:
         return
-    
+
     # Skipping if already defined
-    if InstanceName.Find('P_'+part.name+rank+status):
+    if InstanceName.Find('P_'+part.name+rank+status+'_REG_'+'_'.join(regions)):
         return
 
     # Getting container name
-    container=InstanceName.Get('P_'+part.name+rank+status)
+    container=InstanceName.Get('P_'+part.name+rank+status+'_REG_'+'_'.join(regions))
 
     # Getting id name
     id='isP_'+InstanceName.Get(part.name+rank+status)
 
     file.write('      if ('+id+'((&(event.mc()->particles()[i])))) ' +\
                container + '.push_back(&(event.mc()->particles()[i]));\n')
-        
 
-def WriteFillWithJetContainer(part,file,rank,status):
-    
+
+def WriteFillWithJetContainer(part,file,rank,status,regions):
+
     # If PTrank, no fill
     if part.PTrank!=0:
         return
 
     # Skipping if already defined
-    if InstanceName.Find('P_'+part.name+rank+status):
+    if InstanceName.Find('P_'+part.name+rank+status+'_REG_'+'_'.join(regions)):
         return
 
     # Getting container name
-    container=InstanceName.Get('P_'+part.name+rank+status)
+    container=InstanceName.Get('P_'+part.name+rank+status+'_REG_'+'_'.join(regions))
 
     # Put jet
     if part.particle.Find(21):
@@ -139,18 +140,18 @@ def WriteFillWithJetContainer(part,file,rank,status):
                    container+'.push_back(&(event.rec()->jets()[i]));\n')
 
 
-def WriteFillWithElectronContainer(part,file,rank,status):
-    
+def WriteFillWithElectronContainer(part,file,rank,status,regions):
+
     # If PTrank, no fill
     if part.PTrank!=0:
         return
 
     # Skipping if already defined
-    if InstanceName.Find('P_'+part.name+rank+status):
+    if InstanceName.Find('P_'+part.name+rank+status+'_REG_'+'_'.join(regions)):
         return
 
     # Getting container name
-    container=InstanceName.Get('P_'+part.name+rank+status)
+    container=InstanceName.Get('P_'+part.name+rank+status+'_REG_'+'_'.join(regions))
 
     # Put negative electron
     if part.particle.Find(11):
@@ -163,36 +164,36 @@ def WriteFillWithElectronContainer(part,file,rank,status):
                    container+'.push_back(&(event.rec()->electrons()[i]));\n')
 
 
-def WriteFillWithPhotonContainer(part,file,rank,status):
-    
+def WriteFillWithPhotonContainer(part,file,rank,status,regions):
+
     # If PTrank, no fill
     if part.PTrank!=0:
         return
 
     # Skipping if already defined
-    if InstanceName.Find('P_'+part.name+rank+status):
+    if InstanceName.Find('P_'+part.name+rank+status+'_REG_'+'_'.join(regions)):
         return
 
     # Getting container name
-    container=InstanceName.Get('P_'+part.name+rank+status)
+    container=InstanceName.Get('P_'+part.name+rank+status+'_REG_'+'_'.join(regions))
 
     # Put photon
     if part.particle.Find(22):
         file.write('      '+container+'.push_back(&(event.rec()->photons()[i]));\n')
 
 
-def WriteFillWithMuonContainer(part,file,rank,status):
-    
+def WriteFillWithMuonContainer(part,file,rank,status,regions):
+
     # If PTrank, no fill
     if part.PTrank!=0:
         return
-    
+
     # Skipping if already defined
-    if InstanceName.Find('P_'+part.name+rank+status):
+    if InstanceName.Find('P_'+part.name+rank+status+'_REG_'+'_'.join(regions)):
         return
 
     # Getting container name
-    container=InstanceName.Get('P_'+part.name+rank+status)
+    container=InstanceName.Get('P_'+part.name+rank+status+'_REG_'+'_'.join(regions))
 
     # Put negative muon
     if part.particle.Find(13):
@@ -217,18 +218,18 @@ def WriteFillWithMuonContainer(part,file,rank,status):
                container+'.push_back(&(event.rec()->muons()[i]));\n')
 
 
-def WriteFillWithTauContainer(part,file,rank,status):
-    
+def WriteFillWithTauContainer(part,file,rank,status,regions):
+
     # If PTrank, no fill
     if part.PTrank!=0:
         return
 
     # Skipping if already defined
-    if InstanceName.Find('P_'+part.name+rank+status):
+    if InstanceName.Find('P_'+part.name+rank+status+'_REG_'+'_'.join(regions)):
         return
 
     # Getting container name
-    container=InstanceName.Get('P_'+part.name+rank+status)
+    container=InstanceName.Get('P_'+part.name+rank+status+'_REG_'+'_'.join(regions))
 
     # Put negative tau
     if part.particle.Find(15):
@@ -239,10 +240,9 @@ def WriteFillWithTauContainer(part,file,rank,status):
     if part.particle.Find(-15):
         file.write('      if (event.rec()->taus()[i].charge()>0) '+\
                    container+'.push_back(&(event.rec()->taus()[i]));\n')
-    
 
 def WriteFillWithMETContainer(part,file,rank,status):
-    
+
     # If PTrank, no fill
     if part.PTrank!=0:
         return
@@ -261,7 +261,7 @@ def WriteFillWithMETContainer(part,file,rank,status):
 
 
 def WriteFillWithMHTContainer(part,file,rank,status):
-    
+
     # If PTrank, no fill
     if part.PTrank!=0:
         return
@@ -280,7 +280,7 @@ def WriteFillWithMHTContainer(part,file,rank,status):
 
 
 def WriteFillWithMETContainerMC(part,file,rank,status):
-    
+
     # If PTrank, no fill
     if part.PTrank!=0:
         return
@@ -327,9 +327,10 @@ def WriteContainer(file,main,part_list):
     file.write('  // Clearing particle containers\n') 
     file.write('  {\n')
     for item in part_list:
-        WriteCleanContainer(item[0],file,item[1],item[2])
+        WriteCleanContainer(item[0],file,item[1],item[2], item[3])
     file.write('  }\n')
     InstanceName.Clear()
+    file.write('\n')
 
     # Filling particle containers
     file.write('  // Filling particle containers\n') 
@@ -352,7 +353,7 @@ def WriteContainer(file,main,part_list):
             if item[0].particle.Find(99) or item[0].particle.Find(100):
                 pass
             else:
-                WriteFillContainer(item[0],file,item[1],item[2])
+                WriteFillContainer(item[0],file,item[1],item[2],item[3])
         file.write('    }\n')
         InstanceName.Clear()
 
@@ -363,7 +364,7 @@ def WriteContainer(file,main,part_list):
         file.write('    for (MAuint32 i=0;i<event.rec()->jets().size();i++)\n')
         file.write('    {\n')
         for item in part_list:
-            WriteFillWithJetContainer(item[0],file,item[1],item[2])
+            WriteFillWithJetContainer(item[0],file,item[1],item[2],item[3])
         file.write('    }\n')
         InstanceName.Clear()
 
@@ -371,7 +372,7 @@ def WriteContainer(file,main,part_list):
         file.write('    for (MAuint32 i=0;i<event.rec()->photons().size();i++)\n')
         file.write('    {\n')
         for item in part_list:
-            WriteFillWithPhotonContainer(item[0],file,item[1],item[2])
+            WriteFillWithPhotonContainer(item[0],file,item[1],item[2],item[3])
         file.write('    }\n')
         InstanceName.Clear()
 
@@ -379,7 +380,7 @@ def WriteContainer(file,main,part_list):
         file.write('    for (MAuint32 i=0;i<event.rec()->electrons().size();i++)\n')
         file.write('    {\n')
         for item in part_list:
-            WriteFillWithElectronContainer(item[0],file,item[1],item[2])
+            WriteFillWithElectronContainer(item[0],file,item[1],item[2],item[3])
         file.write('    }\n')
         InstanceName.Clear()
 
@@ -387,7 +388,7 @@ def WriteContainer(file,main,part_list):
         file.write('    for (MAuint32 i=0;i<event.rec()->muons().size();i++)\n')
         file.write('    {\n')
         for item in part_list:
-            WriteFillWithMuonContainer(item[0],file,item[1],item[2])
+            WriteFillWithMuonContainer(item[0],file,item[1],item[2],item[3])
         file.write('    }\n')
         InstanceName.Clear()
 
@@ -395,7 +396,7 @@ def WriteContainer(file,main,part_list):
         file.write('    for (MAuint32 i=0;i<event.rec()->taus().size();i++)\n')
         file.write('    {\n')
         for item in part_list:
-            WriteFillWithTauContainer(item[0],file,item[1],item[2])
+            WriteFillWithTauContainer(item[0],file,item[1],item[2],item[3])
         file.write('    }\n')
         InstanceName.Clear()
 
@@ -418,7 +419,7 @@ def WriteContainer(file,main,part_list):
     # Managing PT rank
     file.write('  // Sorting particles\n') 
     for item in part_list:
-        WriteJobRank(item[0],file,item[1],item[2])
+        WriteJobRank(item[0],file,item[1],item[2],item[3])
     InstanceName.Clear()
 
 
@@ -428,48 +429,39 @@ def WriteSelection(file,main,part_list):
     import madanalysis.job.job_event_cut     as JobEventCut
     import madanalysis.job.job_candidate_cut as JobCandidateCut
 
-    # Is there cuts
-    Ncuts   = 0
-    for item in main.selection.table:
-        if item.__class__.__name__=="Cut":
-            Ncuts+=1
-
-    # Initial number of events
-    if Ncuts!=0:
-        file.write('  // Filling initial number\n')
-        file.write('  cuts_.IncrementNInitial(__event_weight__);\n\n')
-
     # Loop over histogram and cut
-    ihisto = 0
-    icut = 0
+    ihisto  = 1
+    icut    = 1
+    iobject = 1
     for iabs in range(len(main.selection.table)):
 
         logging.getLogger('MA5').debug("--------------------------------------------")
         logging.getLogger('MA5').debug("SELECTION STEP "+str(iabs)+": "+main.selection[iabs].GetStringDisplay())
-        file.write('  // Histogram/Cut number '+str(iabs)+'\n')
-        file.write('  // '+main.selection[iabs].GetStringDisplay()+'\n')
-        
+
         if main.selection[iabs].__class__.__name__=="Histogram":
             logging.getLogger('MA5').debug("- selection step = histogram")
+            file.write('  // Histogram number '+str(ihisto)+'\n')
+            file.write('  // '+main.selection[iabs].GetStringDisplay()+'\n')
             JobPlot.WritePlot(file,main,iabs,ihisto)
             ihisto+=1
-            
-        elif main.selection[iabs].__class__.__name__=="Cut":
 
+        elif main.selection[iabs].__class__.__name__=="Cut":
             # Event cut
             if len(main.selection[iabs].part)==0:
                 logging.getLogger('MA5').debug("- selection step = cut on event")
+                file.write('  // Event selection number '+str(icut)+'\n')
+                file.write('  // '+main.selection[iabs].GetStringDisplay()+'\n')
                 JobEventCut.WriteEventCut(file,main,iabs,icut)
+                icut+=1
 
-            # Candidate cut    
+            # Candidate cut
             else:
                 logging.getLogger('MA5').debug("- selection step = cut on candidate")
-                JobCandidateCut.WriteCandidateCut(file,main,iabs,icut,part_list)
+                file.write('  // Object selection number '+str(iobject)+'\n')
+                file.write('  // '+main.selection[iabs].GetStringDisplay()+'\n')
+                JobCandidateCut.WriteCandidateCut(file,main,iabs,part_list)
+                iobject+=1
 
-            icut+=1
-            
         file.write('\n')
     logging.getLogger('MA5').debug("--------------------------------------------")
-
-
 

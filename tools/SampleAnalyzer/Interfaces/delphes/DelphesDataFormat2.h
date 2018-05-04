@@ -25,12 +25,14 @@
 #ifndef DELPHES_DATA_FORMAT2_h
 #define DELPHES_DATA_FORMAT2_h
 
-// ROOT header
+
+// ROOT headers
 #include <TTree.h>
 #include <TClonesArray.h>
 
-// STL header
+// STL headers
 #include <iostream>
+
 
 namespace MA5
 {
@@ -38,6 +40,7 @@ namespace MA5
 struct DelphesDataFormat2
 {
   /// Pointers to data
+  TClonesArray* FatJet_;
   TClonesArray* Jet_;
   TClonesArray* Electron_;
   TClonesArray* Photon_;

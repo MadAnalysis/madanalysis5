@@ -25,12 +25,15 @@
 #ifndef MERGING_PLOT_TYPE_H
 #define MERGING_PLOT_TYPE_H
 
-//STL headers
+
+// STL headers
 #include <vector>
 #include <string>
 
-//SampleAnalyzer headers
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Plot/Histo.h"
+#include "SampleAnalyzer/Process/RegionSelection/RegionSelectionManager.h"
+
 
 namespace MA5
 {
@@ -42,8 +45,9 @@ class MergingPlotType
 //---------------------------------------------------------------------------------
  public:
 
-  std::vector<Histo*> contribution;
-  Histo* total;
+  MAuint32 n_contribs;
+//  std::vector<Histo*> contribution;
+//  Histo* total;
 
   static const MAuint32   nbins;
   static const MAfloat64 xmin;
@@ -60,9 +64,9 @@ class MergingPlotType
   ~MergingPlotType()
   {}
 
-  void Initialize(unsigned int ncontrib,const std::string& name);
+  void Initialize(unsigned int, const std::string&, RegionSelectionManager*);
 
-  void Finalize();
+  void Finalize() { };
 
 };
 

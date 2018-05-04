@@ -42,16 +42,16 @@ MAbool LoopService::IrrelevantPhoton_core(const MCParticleFormat* part,
   if (ReachThreshold()) return false;
 
   // Reach the initial State ? -> end
-  if (part->mother1()==0) return false;
+  if (part->mothers().size()==0) return false;
 
   // Patch for Herwig
   if (mySample.sampleGenerator()==MA5GEN::HERWIG6) 
-    if (part->mother1()->statuscode()==103 || 
-        part->mother1()->statuscode()==110 ||
-        part->mother1()->statuscode()==120) return false;
+    if (part->mothers()[0]->statuscode()==103 || 
+        part->mothers()[0]->statuscode()==110 ||
+        part->mothers()[0]->statuscode()==120) return false;
 
   // Checking mother
-  MAuint32 absid = std::abs(part->mother1()->pdgid());
+  MAuint32 absid = std::abs(part->mothers()[0]->pdgid());
 
   if (absid==15) return true;
 
@@ -63,7 +63,7 @@ MAbool LoopService::IrrelevantPhoton_core(const MCParticleFormat* part,
       }*/
   // BENJ: end of herwig fix
 
-  else return IrrelevantPhoton_core(part->mother1(),mySample);
+  else return IrrelevantPhoton_core(part->mothers()[0],mySample);
 
   // Default
   return false;
@@ -81,26 +81,29 @@ MAbool LoopService::ComingFromHadronDecay_core(const MCParticleFormat* part,
   if (ReachThreshold()) return false;
 
   // Weird case ? Safety: removing this case
-  if (part->mother1()==0) return true;
-  //  std::cout << "part id=" << part->pdgid() << "\tstatus=" << part->statuscode() << "\tmother=" << part->mother1()->pdgid() << std::endl;
+  if (part->mothers().size()==0) return true;
+//   std::cout << "  [][][][] part id=" << part->pdgid() << "\tstatus=" << part->statuscode() << "\tmother=" << part->mothers().size() << std::endl;
 
   // Patch for Herwig
   if (mySample.sampleGenerator()==MA5GEN::HERWIG6)
-    if (part->mother1()->statuscode()==103 || 
-        part->mother1()->statuscode()==110 ||
-        part->mother1()->statuscode()==120) return false;
+    if (part->mothers()[0]->statuscode()==103 || 
+        part->mothers()[0]->statuscode()==110 ||
+        part->mothers()[0]->statuscode()==120) return false;
 
   // Weird case
   //  if (part->mother1()==part) { std::cout << "exit" << std::endl; exit(0); }
 
+  // Checking if hard-scattering objects directly generated from the initial state
+  if(part->mothers().size()==2 && part->mothers()[0]->statuscode()==21 && part->mothers()[1]->statuscode()==21) return false;
+
   // Checking if mother is hadron
-  MAbool had = PHYSICS->Id->IsHadronic(part->mother1()->pdgid()) && part->mother1()->pdgid()!=21;
+  MAbool had = PHYSICS->Id->IsHadronic(part->mothers()[0]->pdgid()) && part->mothers()[0]->pdgid()!=21;
 
   // First case : initial parton
-  if (had && part->mother1()->mother1()==0) return false;
+  if (had && part->mothers()[0]->mothers().size()==0) return false;
 
   // Second case: hadron
   else if (had) return true;
 
-  else return ComingFromHadronDecay(part->mother1(),mySample);
+  else return ComingFromHadronDecay(part->mothers()[0],mySample);
 }

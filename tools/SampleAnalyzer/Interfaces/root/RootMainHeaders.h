@@ -25,16 +25,14 @@
 #ifndef ROOT_MAIN_HEADERS_h
 #define ROOT_MAIN_HEADERS_h
 
+
 // ROOT headers
-// -- general
 #include <TROOT.h>
-// -- file & data format
 #include <TFile.h>
 #include <TTree.h>
 #include <TVector.h>
 #include <TLorentzVector.h>
 #include <TClonesArray.h>
-// -- plot
 #include <TStyle.h>
 #include <TLine.h>
 #include <TLegend.h>
@@ -43,7 +41,6 @@
 #include <TH2F.h>
 #include <TH1D.h>
 #include <TH2D.h>
-
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Vector/MALorentzVector.h"

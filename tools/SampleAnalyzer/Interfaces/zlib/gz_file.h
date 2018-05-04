@@ -25,6 +25,7 @@
 #ifndef GZ_FILE_H
 #define GZ_FILE_H
 
+
 // ZLib headers
 #include "zlib.h"
 

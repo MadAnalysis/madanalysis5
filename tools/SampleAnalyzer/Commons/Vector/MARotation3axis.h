@@ -25,6 +25,7 @@
 #ifndef MARotation3axis_h
 #define MARotation3axis_h
 
+
 // STL headers
 #include <iostream>
 #include <string>
@@ -32,7 +33,7 @@
 #include <iomanip>
 #include <cmath>
 
-// SampleAnalyzer
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/Vector/MALorentzVector.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
@@ -116,23 +117,23 @@ class MARotation3axis
     if (axis_==Xaxis)
     {
       return MALorentzVector(q.X(),
-			     c_*q.Y() - s_*q.Z(),
-			     s_*q.Y() + c_*q.Z(),
-			     q.E());
+             c_*q.Y() - s_*q.Z(),
+             s_*q.Y() + c_*q.Z(),
+             q.E());
     }
     else if (axis_==Yaxis)
     {
       return MALorentzVector(s_*q.Z() + c_*q.X(),
-			     q.Y(),
-			     c_*q.Z() - s_*q.X(),
-			     q.E());
+             q.Y(),
+             c_*q.Z() - s_*q.X(),
+             q.E());
     }
     else if (axis_==Zaxis)
     {
       return MALorentzVector(c_*q.X() - s_*q.Y(),
-			     s_*q.X() + c_*q.Y(),
-			     q.Z(),
-			     q.E());
+             s_*q.X() + c_*q.Y(),
+             q.Z(),
+             q.E());
     }
 
   }
@@ -142,20 +143,20 @@ class MARotation3axis
     if (axis_==Xaxis)
     {
       return MAVector3(p.X(),
-		       c_*p.Y() - s_*p.Z(),
-		       s_*p.Y() + c_*p.Z());
+           c_*p.Y() - s_*p.Z(),
+           s_*p.Y() + c_*p.Z());
     }
     else if (axis_==Yaxis)
     {
       return MAVector3(s_*p.Z() + c_*p.X(),
-		       p.Y(),
-		       c_*p.Z() - s_*p.X());
+             p.Y(),
+             c_*p.Z() - s_*p.X());
     }
     else if (axis_==Zaxis)
     {
       return MAVector3(c_*p.X() - s_*p.Y(),
-		       s_*p.X() + c_*p.Y(),
-		       p.Z());
+           s_*p.X() + c_*p.Y(),
+           p.Z());
     }
   }
   

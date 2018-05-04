@@ -25,9 +25,11 @@
 #ifndef READER_MANAGER_h
 #define READER_MANAGER_h
 
+
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/ReaderBase.h"
 #include "SampleAnalyzer/Process/Core/ManagerBase.h"
+
 
 namespace MA5
 {
@@ -43,7 +45,7 @@ class ReaderManager : public ManagerBase<ReaderBase>
   ReaderManager() : ManagerBase<ReaderBase>()
   { }
 
-	/// Destructor
+  /// Destructor
   ~ReaderManager()
   { }
 

@@ -97,18 +97,18 @@ StatusCode::Type LHCOReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySam
     if(tmp=="0")
     {
       if(firstevent_ )
-	    {
-	      FillEventInitLine(line,myEvent);
+      {
+        FillEventInitLine(line,myEvent);
         firstevent_=false;
         continue;
-	    }
+      }
       else 
-	    {
-	      EndOfLoop = true;
-	      savedline_=line;
-	      saved_=true;
-	      continue;
-	    }
+      {
+        EndOfLoop = true;
+        savedline_=line;
+        saved_=true;
+        continue;
+      }
     }
 
     FillEventParticleLine(line,myEvent);
@@ -132,7 +132,9 @@ bool LHCOReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
     myEvent.rec()->MHT_ -= myEvent.rec()->jets_[i].momentum();
     myEvent.rec()->THT_ += myEvent.rec()->jets_[i].pt();
     myEvent.rec()->TET_ += myEvent.rec()->jets_[i].pt();
+    myEvent.rec()->Meff_+= myEvent.rec()->jets_[i].pt();
   }
+  myEvent.rec()->Meff_ += myEvent.rec()->MET_.pt();
 
   // TET
   for (unsigned int i=0; i<myEvent.rec()->muons_.size();i++)
@@ -392,7 +394,7 @@ void LHCOReader::FillEventParticleLine(const std::string& line, EventFormat& myE
   {
     try
     {
-      EXCEPTION_WARNING("Unknown type of object : "+muf,"",0);
+      throw EXCEPTION_WARNING("Unknown type of object : "+muf,"",0);
     }
     catch(const std::exception& e)
     {

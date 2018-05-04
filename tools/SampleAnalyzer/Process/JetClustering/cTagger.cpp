@@ -22,7 +22,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Process/JetClustering/cTagger.h"
+
+// STL headers
+#include <cmath>
+
+
 using namespace MA5;
 
 // Matching using dr
@@ -34,7 +40,7 @@ void cTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
   for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
   {
     if (PHYSICS->Id->IsInitialState(myEvent.mc()->particles()[i])) continue;
-    if (fabs(myEvent.mc()->particles()[i].pdgid())!=4) continue;
+    if (std::abs(myEvent.mc()->particles()[i].pdgid())!=4) continue;
     if (!IsLast(&myEvent.mc()->particles()[i], myEvent)) continue;
 
     MAbool tag = false;
@@ -103,9 +109,9 @@ void cTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
           break;
         }
 
-        if (particle->mother2()!=0 && particle->mother2()!=particle->mother1()) break;
+        if (particle->mothers()[1]!=0 && particle->mothers()[1]!=particle->mothers()[0]) break;
 
-        particle = particle->mother1();
+        particle = particle->mothers()[0];
       }
 
       if (c) break;
@@ -168,7 +174,7 @@ void cTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
       MCParticleFormat* particle = & myEvent.mc()->particles()[N];
       while (!c)
       {
-       	if (particle==0)
+        if (particle==0)
         {
           INFO << "No particle" << endmsg;
           break;
@@ -183,9 +189,9 @@ void cTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
           break;
         }
 
-        if (particle->mother2()!=0 && particle->mother2()!=particle->mother1()) break;
+        if (particle->mothers()[1]!=0 && particle->mothers()[1]!=particle->mothers()[0]) break;
 
-        particle = particle->mother1();
+        particle = particle->mothers()[0];
       }
 
       if (c) break;
@@ -197,7 +203,7 @@ void cTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
   // c-tagging using method 1
   for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
   {
-    if (fabs(myEvent.mc()->particles()[i].pdgid())!=4) continue;
+    if (std::abs(myEvent.mc()->particles()[i].pdgid())!=4) continue;
 
     if (!IsLast(&myEvent.mc()->particles()[i], myEvent)) continue;
 
@@ -238,7 +244,7 @@ MAbool cTagger::IsLastCHadron(MCParticleFormat* part, EventFormat& myEvent)
 {
   for (unsigned int i=0; i<myEvent.mc()->particles().size(); i++)
   {
-    if (myEvent.mc()->particles()[i].mother1()== part)
+    if (myEvent.mc()->particles()[i].mothers()[0]== part)
     {
       if (PHYSICS->Id->IsCHadron(myEvent.mc()->particles()[i].pdgid())) return false;
     }

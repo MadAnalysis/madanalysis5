@@ -24,38 +24,7 @@
 
 import logging
 def WriteJobFinalize(file,main):
- 
+
     # Function header
     file.write('void user::Finalize(const SampleFormat& summary, const std::vector<SampleFormat>& files)\n{\n')
-
-    # Opening ROOT file
-    #file.write('  // Creating output root file\n')
-    #file.write('  TFile* output = new TFile((outputName_+".root").c_str(),"RECREATE");\n')
-
-    # Creating subdirectories
-    #file.write('  // Creating directories in the ROOT file\n')
-    #file.write('  output->mkdir("plots");\n')
-
-    # Saving histos in a ROOT file
-    file.write('  // Saving histogram\n')
-    #file.write('  output->cd("plots");\n')
-    #file.write('  plots_.Write_RootFormat(output);\n')
-    file.write('  *out().GetStream() << "<Selection>\\n";\n\n')
-    file.write('  plots_.Write_TextFormat(out());\n')
-
-    # Saving cuts in a ROOT file
-    file.write('  // Saving cut cuts\n')
-    file.write('  cuts_.Write_TextFormat(out());\n\n')
-    file.write('  *out().GetStream() << "</Selection>\\n";\n\n')
-
-    # Finalizing cuts and histos
-    file.write('  // Finalizing cuts and histos\n')
-    file.write('  plots_.Finalize();\n')
-    file.write('  cuts_.Finalize();\n\n')
-
-    # End
-    #file.write('  // Closing the output file\n')
-    #file.write('  delete output;\n')
     file.write('}\n')
-
-

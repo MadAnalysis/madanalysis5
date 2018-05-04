@@ -25,6 +25,7 @@
 #ifndef WRITER_SAF_h
 #define WRITER_SAF_h
 
+
 // STL headers
 #include <fstream>
 #include <iostream>
@@ -32,6 +33,7 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Writer/WriterTextBase.h"
+
 
 namespace MA5
 {
@@ -54,7 +56,7 @@ class SAFWriter : public WriterTextBase
   SAFWriter()
   { }
 
-	/// Destructor
+  /// Destructor
   virtual ~SAFWriter()
   { }
 

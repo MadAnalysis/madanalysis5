@@ -25,7 +25,9 @@
 #ifndef IDENTIFICATION_SERVICE_h
 #define IDENTIFICATION_SERVICE_h
 
+
 // STL headers
+#include <iostream>
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/MCconfig.h"

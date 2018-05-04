@@ -22,13 +22,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-/// STL headers
+// STL headers
 #include <iomanip>
 #include <algorithm>
 #include <vector>
 
-/// SampleAnalyzer headers
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/LogReport.h"
+
 
 using namespace MA5;
 

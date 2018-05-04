@@ -27,14 +27,13 @@
 
 
 // STL headers
-#include<map>
-#include<string>
-#include<iostream>
-#include<ctime>
-
-#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
+#include <map>
+#include <string>
+#include <iostream>
+#include <ctime>
 
 // SampleAnalyzer headers
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h" 
 #include "SampleAnalyzer/Commons/Service/TimeMeasureType.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 

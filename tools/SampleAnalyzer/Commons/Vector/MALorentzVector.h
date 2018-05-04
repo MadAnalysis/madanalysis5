@@ -25,6 +25,7 @@
 #ifndef MALorentzVector_h
 #define MALorentzVector_h
 
+
 // STL headers
 #include <iostream>
 #include <string>
@@ -32,7 +33,7 @@
 #include <iomanip>
 #include <cmath>
 
-// SampleAnalyzer
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Commons/Vector/MAVector3.h"
@@ -76,10 +77,12 @@ class MALorentzVector
 
   void Reset()
   {e_=0.; p_.Reset();}
+  void clear()
+  { Reset(); }
   
   // Access operator (read-only mode) ----------------------------
-  MAdouble64 operator () (MAuint8) const;
-  MAdouble64 operator [] (MAuint8 i) const {return operator()(i);}
+  const MAdouble64& operator () (MAuint8) const;
+  const MAdouble64& operator [] (MAuint8 i) const {return operator()(i);}
 
   
   // Access operator (read-write mode) ---------------------------
@@ -88,15 +91,15 @@ class MALorentzVector
 
   
   // Simple accessors --------------------------------------------
-  MAdouble64 X()      const {return p_.X();}
-  MAdouble64 Y()      const {return p_.Y();}
-  MAdouble64 Z()      const {return p_.Z();}
-  MAdouble64 T()      const {return e_;    }
-  MAdouble64 Px()     const {return p_.X();}
-  MAdouble64 Py()     const {return p_.Y();}
-  MAdouble64 Pz()     const {return p_.Z();}
-  MAdouble64 E()      const {return e_;    }
-  MAdouble64 Energy() const {return e_;    }
+  const MAdouble64& X()      const {return p_.X();}
+  const MAdouble64& Y()      const {return p_.Y();}
+  const MAdouble64& Z()      const {return p_.Z();}
+  const MAdouble64& T()      const {return e_;    }
+  const MAdouble64& Px()     const {return p_.X();}
+  const MAdouble64& Py()     const {return p_.Y();}
+  const MAdouble64& Pz()     const {return p_.Z();}
+  const MAdouble64& E()      const {return e_;    }
+  const MAdouble64& Energy() const {return e_;    }
 
   const MAVector3& Vect() const {return p_;}
   MAVector3&       Vect()       {return p_;}

@@ -25,8 +25,11 @@
 #ifndef STDHEP_READER_h
 #define STDHEP_READER_h
 
+
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Reader/ReaderTextBase.h"
 #include "SampleAnalyzer/Process/Core/xdr_istream.h"
+
 
 namespace MA5
 {
@@ -64,12 +67,13 @@ class STDHEPreader : public ReaderTextBase
   MAint32 nhept_;
   MAbool firstevent;
 
-  std::vector<MAint32>    isthept_;
-  std::vector<MAint32>    idhept_;
-  std::vector<MAint32>    jmohept_;
-  std::vector<MAint32>    jdahept_;
+  std::vector<MAint32>   isthept_;
+  std::vector<MAint32>   idhept_;
+  std::vector<MAint32>   jmohept_;
+  std::vector<MAint32>   jdahept_;
   std::vector<MAfloat64> phept_;
   std::vector<MAfloat64> vhept_;
+  std::vector< std::pair<MAint32,MAint32> > mothers_;
 
   // data related to the format
   STDHEPversion version_;
@@ -85,7 +89,7 @@ class STDHEPreader : public ReaderTextBase
   {
   }
 
-	/// Destructor
+  /// Destructor
   virtual ~STDHEPreader()
   {
   }

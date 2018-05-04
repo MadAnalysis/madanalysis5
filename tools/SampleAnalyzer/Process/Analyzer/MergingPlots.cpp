@@ -23,17 +23,19 @@
 
 
 #ifdef FASTJET_USE
-//SampleAnalyzer headers
+
+
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Analyzer/MergingPlots.h"
 #include "SampleAnalyzer/Interfaces/fastjet/DJRextractor.h"
 #include "SampleAnalyzer/Commons/Base/Configuration.h"
 #include "SampleAnalyzer/Commons/Service/Physics.h"
 #include "SampleAnalyzer/Commons/Service/CompilationService.h"
 
-
-//STL headers
+// STL headers
 #include <sstream>
 #include <map>
+
 
 using namespace MA5;
 
@@ -41,6 +43,10 @@ using namespace MA5;
 bool MergingPlots::Initialize(const Configuration& cfg,
              const std::map<std::string,std::string>& parameters)
 {
+
+  // Create a new region
+  Manager()->AddRegionSelection("myregion");
+
   // Create a new algo
   algo_ = new DJRextractor();
 
@@ -83,7 +89,7 @@ bool MergingPlots::Initialize(const Configuration& cfg,
     str << "DJR" << i+1;
     std::string title;
     str >> title;
-    DJR_[i].Initialize(DJR_.size()+1,title);
+    DJR_[i].Initialize(DJR_.size()+1,title,Manager());
   }
 
   // Initialize the algo
@@ -95,6 +101,17 @@ bool MergingPlots::Initialize(const Configuration& cfg,
 
 bool MergingPlots::Execute(SampleFormat& mySample, const EventFormat& myEvent)
 {
+  // Event weight
+  double myEventWeight;
+  if(Configuration().IsNoEventWeight()) myEventWeight=1.;
+  else if(myEvent.mc()->weight()!=0.) myEventWeight=myEvent.mc()->weight();
+  else
+  {
+    WARNING << "Found one event with a zero weight. Skipping..." << endmsg;
+    return false;
+  }
+  Manager()->InitializeForNewEvent(myEventWeight);
+
   // Getting number of extra jets in the event
   MAuint32 njets = 0;
 
@@ -117,8 +134,14 @@ bool MergingPlots::Execute(SampleFormat& mySample, const EventFormat& myEvent)
   {
     double djr = 0.;
     if (DJRvalues[i]>0) djr = std::log10(sqrt(DJRvalues[i]));
-    DJR_[i].total->Fill(djr);
-    DJR_[i].contribution[njets]->Fill(djr);
+    std::stringstream str,str2;
+    str  << "DJR" << i+1 << "_" << njets << "jet";
+    str2 << "DJR" << i+1 << "_total";
+    std::string title,title2;
+    str  >> title;
+    str2 >> title2;
+    Manager()->FillHisto(title, djr);
+    Manager()->FillHisto(title2, djr);
   }
 
   // Ok
@@ -159,18 +182,18 @@ MAuint32 MergingPlots::ExtractHardJetNumber(const MCEventFormat* myEvent,
   for (unsigned int i=0;i<myEvent->particles().size();i++)
   {
     const MCParticleFormat* myPart = &myEvent->particles()[i];
-    if (myPart->mother1()==0) continue;
-    if (myPart->mother1()->mother1()==0) continue;
-    std::vector<MCParticleFormat*> family=myEvent->particles()[i].mother1()->daughters();
+    if (myPart->mothers().size()==0) continue;
+    if (myPart->mothers()[0]->mothers().size()==0) continue;
+    std::vector<MCParticleFormat*> family=myEvent->particles()[i].mothers()[0]->daughters();
 
     // Filters
-    if(myEvent->particles()[i].mothup2_!=0) filters[&(myEvent->particles()[i])] = false;
-    else if(filters.find(myEvent->particles()[i].mother1())!=filters.end())
+    if(myEvent->particles()[i].mothers().size()>1) filters[&(myEvent->particles()[i])] = false;
+    else if(filters.find(myEvent->particles()[i].mothers()[0])!=filters.end())
     {
       // The mother is already filtered (easy)
-      if(filters[myPart->mother1()]) filters[myPart]=true;
+      if(filters[myPart->mothers()[0]]) filters[myPart]=true;
       // This is not a radiation or decay pattern -> let's keep it
-      else if(myPart->mother1()->daughters().size()<2) filters[myPart]=false;
+      else if(myPart->mothers()[0]->daughters().size()<2) filters[myPart]=false;
       // The mother is not filtered -> testing if we have a radiation pattern
       else
       {
@@ -183,16 +206,16 @@ MAuint32 MergingPlots::ExtractHardJetNumber(const MCEventFormat* myEvent,
         }
         // Checking whether we have partons in the family
         unsigned int ng=0, ninit=0, nq=0,nqb=0;
-        if(myPart->pdgid()==myPart->mother1()->pdgid()) ninit++;
+        if(myPart->pdgid()==myPart->mothers()[0]->pdgid()) ninit++;
         for(unsigned int i=0; i< family.size();i++)
         {
           if(family[i]->pdgid()<=4 && family[i]->pdgid()>0) nq++;
           if(family[i]->pdgid()>=-4 && family[i]->pdgid()<0) nqb++;
           if(family[i]->pdgid()==21) ng++;
-          if(family[i]->pdgid()==myPart->mother1()->pdgid()) ninit++;
+          if(family[i]->pdgid()==myPart->mothers()[0]->pdgid()) ninit++;
         }
-        bool condition1 = myPart->mother1()->pdgid()!=21 && ninit>0;
-        bool condition2 = myPart->mother1()->pdgid()==21 && (ng>=2 || (nqb>0 && nq>0));
+        bool condition1 = myPart->mothers()[0]->pdgid()!=21 && ninit>0;
+        bool condition2 = myPart->mothers()[0]->pdgid()==21 && (ng>=2 || (nqb>0 && nq>0));
         if(!condition1 && !condition2) filters[myPart]=true;
         else                           filters[myPart]=false;
       }
@@ -206,12 +229,19 @@ MAuint32 MergingPlots::ExtractHardJetNumber(const MCEventFormat* myEvent,
     if (abs(myPart->pdgid())>merging_nqmatch_ && myPart->pdgid()!=21) continue;
 
     // keep only jets whose mother is one of the initial parton
-    if (myPart->mother1()==0) continue;
+    if (myPart->mothers().size()==0) continue;
 
-    // coming from initial state ?
-    if (myPart->mothup1_>6 && (myPart->mothup1_==0 || myPart->mothup2_==0)) continue;
+    // coming from initial state ? 6 first particles
+    bool initial=false;
+    for (MAuint32 ind=0;ind<6;ind++)
+    {
+      if (myPart->mothers()[0]== &(myEvent->particles()[ind]))
+      { initial=true; break; }
+    }
+    if (initial) continue;
+    if (myPart->mothers()[0]==0 || myPart->mothers()[1]==0) continue;
 
-    // Pythia 6 formt: removing the initial guys
+    // Pythia 6 format: removing the initial guys
     if(i<6 && *mySample->GeneratorType()==MA5GEN::PYTHIA6) continue;
 
     //count particle
@@ -223,19 +253,8 @@ MAuint32 MergingPlots::ExtractHardJetNumber(const MCEventFormat* myEvent,
 }
 
 
-/// Saving merging plots in the text output file
 void MergingPlots::Write_TextFormat(SAFWriter& output)
 {
-  *output.GetStream() << "<MergingPlots>" << std::endl;
-  for (unsigned int i=0;i<DJR_.size();i++)
-  {
-    DJR_[i].total->Write_TextFormat(output.GetStream());
-    for (unsigned int j=0;j<DJR_[i].contribution.size();j++)
-    {
-      DJR_[i].contribution[j]->Write_TextFormat(output.GetStream());
-    }
-  }
-  *output.GetStream() << "</MergingPlots>" << std::endl;
 }
 
 #endif

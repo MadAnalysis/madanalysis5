@@ -29,6 +29,7 @@ from madanalysis.IOinterface.saf_block_status import SafBlockStatus
 from madanalysis.layout.histogram             import Histogram
 from madanalysis.layout.histogram_logx        import HistogramLogX
 from madanalysis.layout.histogram_frequency   import HistogramFrequency
+import glob
 import logging
 import shutil
 import os
@@ -54,10 +55,10 @@ class JobReader():
 
     def CheckFile(self,dataset):
         name=InstanceName.Get(dataset.name)
-        if os.path.isfile(self.safdir+"/"+name+"/MadAnalysis5job.saf"):
+        if os.path.isfile(self.safdir+"/"+name+"/"+name+".saf"):
             return True
         else:
-            logging.getLogger('MA5').error("File called '"+self.safdir+"/"+name+".saf' is not found.")
+            logging.getLogger('MA5').error("File called '"+self.safdir+"/"+name+'/'+name+".saf' is not found.")
             return False
 
 
@@ -65,7 +66,7 @@ class JobReader():
 
         # Creating container for info
         results = SampleInfo()
-        
+
         # Extracting xsection
         try:
             results.xsection=float(words[0])
@@ -146,7 +147,6 @@ class JobReader():
         # Returning exracting values
         return [a,b,c]
 
-        
     def ExtractStatisticsInt(self,words,numline,filename):
 
         # Extracting positive
@@ -225,14 +225,12 @@ class JobReader():
     # cut counters       -> initial & cut
     # merging plots      -> merging
     # selection plots    -> plot
-    def Extract(self,dataset,cut,merging,plot,domerging):
+
+    def ExtractGeneral(self,dataset):
 
         # Getting the output file name
         name=InstanceName.Get(dataset.name)
-        if not domerging:
-            filename = self.safdir+"/"+name+"/MadAnalysis5job.saf"
-        else:
-            filename = self.safdir+"/"+name+"/MergingPlots.saf"
+        filename = self.safdir+"/"+name+"/"+name+".saf"
 
         # Opening the file
         try:
@@ -244,27 +242,8 @@ class JobReader():
         # Initializing tags
         beginTag       = SafBlockStatus()
         endTag         = SafBlockStatus()
-        initialTag     = SafBlockStatus()
-        cutTag         = SafBlockStatus()
         globalTag      = SafBlockStatus()
         detailTag      = SafBlockStatus()
-        selectionTag   = SafBlockStatus()
-        mergingTag     = SafBlockStatus()
-        histoTag       = SafBlockStatus()
-        histoLogXTag   = SafBlockStatus()
-        histoFreqTag   = SafBlockStatus()
-        descriptionTag = SafBlockStatus()
-        statisticsTag  = SafBlockStatus()
-        dataTag        = SafBlockStatus()
-
-        # Initializing temporary containers
-        cutinfo       = CutInfo()
-        histoinfo     = Histogram() 
-        histologxinfo = HistogramLogX() 
-        histofreqinfo = HistogramFrequency()
-        data_positive = []
-        data_negative = []
-        labels        = []
 
         # Loop over the lines
         numline=0
@@ -272,7 +251,7 @@ class JobReader():
 
             # Incrementing line counter
             numline+=1
-            
+
             # Removing comments
             index=line.find('#')
             if index!=-1:
@@ -303,24 +282,100 @@ class JobReader():
                     detailTag.activate()
                 elif words[0].lower()=='</sampledetailedinfo>':
                     detailTag.desactivate()
-                elif words[0].lower()=='<initialcounter>':
-                    initialTag.activate()
-                elif words[0].lower()=='</initialcounter>':
-                    initialTag.desactivate()
-                elif words[0].lower()=='<selection>':
-                    selectionTag.activate()
-                elif words[0].lower()=='</selection>':
-                    selectionTag.desactivate()
-                elif words[0].lower()=='<mergingplots>':
-                    mergingTag.activate()
-                elif words[0].lower()=='</mergingplots>':
-                    mergingTag.desactivate()
-                elif words[0].lower()=='<counter>':
-                    cutTag.activate()
-                elif words[0].lower()=='</counter>':
-                    cutTag.desactivate()
-                    cut.cuts.append(copy.copy(cutinfo))
-                    cutinfo.Reset()
+
+            # Looking for summary sample info
+            elif globalTag.activated and len(words)==5:
+                dataset.measured_global = self.ExtractSampleInfo(words,numline,filename)
+
+            # Looking for detail sample info (one line for each file)
+            elif detailTag.activated and len(words)==5:
+                dataset.measured_detail.append(self.ExtractSampleInfo(words,numline,filename))
+
+        # Information found ?
+        if beginTag.Nactivated==0 or beginTag.activated:
+            logging.getLogger('MA5').error("SAF header <SAFheader> and </SAFheader> is not found.")
+        if endTag.Nactivated==0 or endTag.activated:
+            logging.getLogger('MA5').error("SAF footer <SAFfooter> and </SAFfooter> is not found.")
+        if globalTag.Nactivated==0 or globalTag.activated:
+            logging.getLogger('MA5').error("Information corresponding to the block "+\
+                          "<SampleGlobalInfo> is not found.")
+            logging.getLogger('MA5').error("Information on the dataset '"+dataset.name+\
+                          "' are not updated.")
+        if detailTag.Nactivated==0 or globalTag.activated:
+            logging.getLogger('MA5').error("Information corresponding to the block "+\
+                          "<SampleDetailInfo> is not found.")
+            logging.getLogger('MA5').error("Information on the dataset '"+dataset.name+\
+                          "' are not updated.")
+
+        # Closing the file
+        file.close()
+
+    def ExtractHistos(self,dataset,plot,merging=False):
+        # Getting the output file name
+        name=InstanceName.Get(dataset.name)
+        i=0
+        if merging:
+            while(os.path.isdir(self.safdir+"/"+name+"/MergingPlots_"+str(i))):
+                i+=1
+            filename = self.safdir+"/"+name+"/MergingPlots_"+str(i-1)+"/Histograms/histos.saf"
+        else:
+            while(os.path.isdir(self.safdir+"/"+name+"/MadAnalysis5job_"+str(i))):
+                i+=1
+            filename = self.safdir+"/"+name+"/MadAnalysis5job_"+str(i-1)+"/Histograms/histos.saf"
+
+        # Opening the file
+        try:
+            file = open(filename,'r')
+        except:
+            logging.getLogger('MA5').error("File called '"+filename+"' is not found")
+            return
+
+        # Initializing tags
+        beginTag       = SafBlockStatus()
+        endTag         = SafBlockStatus()
+        histoTag       = SafBlockStatus()
+        histoLogXTag   = SafBlockStatus()
+        histoFreqTag   = SafBlockStatus()
+        descriptionTag = SafBlockStatus()
+        statisticsTag  = SafBlockStatus()
+        dataTag        = SafBlockStatus()
+
+        # Initializing temporary containers
+        histoinfo     = Histogram() 
+        histologxinfo = HistogramLogX() 
+        histofreqinfo = HistogramFrequency()
+        data_positive = []
+        data_negative = []
+        labels        = []
+
+        # Loop over the lines
+        numline=0
+        for line in file:
+            # Incrementing line counter
+            numline+=1
+
+            # Removing comments
+            index=line.find('#')
+            if index!=-1:
+                line=line[:index]
+
+            # Treating line
+            line=line.lstrip()
+            line=line.rstrip()
+            words=line.split()
+            if len(words)==0:
+                continue
+
+            # decoding the file
+            if len(words)==1 and words[0][0]=='<' and words[0][-1]=='>':
+                if words[0].lower()=='<safheader>':
+                    beginTag.activate()
+                elif words[0].lower()=='</safheader>':
+                    beginTag.desactivate()
+                elif words[0].lower()=='<saffooter>':
+                    endTag.activate()
+                elif words[0].lower()=='</saffooter>':
+                    endTag.desactivate()
                 elif words[0].lower()=='<description>':
                     descriptionTag.activate()
                 elif words[0].lower()=='</description>':
@@ -337,14 +392,9 @@ class JobReader():
                     histoTag.activate()
                 elif words[0].lower()=='</histo>':
                     histoTag.desactivate()
-                    if selectionTag.activated and not domerging:
-                        plot.histos.append(copy.copy(histoinfo))
-                        plot.histos[-1].positive.array = data_positive[:]
-                        plot.histos[-1].negative.array = data_negative[:]
-                    elif mergingTag.activated and domerging:
-                        merging.histos.append(copy.copy(histoinfo))
-                        merging.histos[-1].positive.array = data_positive[:]
-                        merging.histos[-1].negative.array = data_negative[:]
+                    plot.histos.append(copy.copy(histoinfo))
+                    plot.histos[-1].positive.array = data_positive[:]
+                    plot.histos[-1].negative.array = data_negative[:]
                     histoinfo.Reset()
                     data_positive = []
                     data_negative = []
@@ -352,11 +402,10 @@ class JobReader():
                     histoFreqTag.activate()
                 elif words[0].lower()=='</histofrequency>':
                     histoFreqTag.desactivate()
-                    if selectionTag.activated and not domerging:
-                        plot.histos.append(copy.copy(histofreqinfo))
-                        plot.histos[-1].labels = labels[:]
-                        plot.histos[-1].positive.array = data_positive[:]
-                        plot.histos[-1].negative.array = data_negative[:]
+                    plot.histos.append(copy.copy(histofreqinfo))
+                    plot.histos[-1].labels = labels[:]
+                    plot.histos[-1].positive.array = data_positive[:]
+                    plot.histos[-1].negative.array = data_negative[:]
                     histofreqinfo.Reset()
                     data_positive = []
                     data_negative = []
@@ -365,59 +414,15 @@ class JobReader():
                     histoLogXTag.activate()
                 elif words[0].lower()=='</histologx>':
                     histoLogXTag.desactivate()
-                    if selectionTag.activated and not domerging:
-                        plot.histos.append(copy.copy(histologxinfo))
-                        plot.histos[-1].positive.array = data_positive[:]
-                        plot.histos[-1].negative.array = data_negative[:]
+                    plot.histos.append(copy.copy(histologxinfo))
+                    plot.histos[-1].positive.array = data_positive[:]
+                    plot.histos[-1].negative.array = data_negative[:]
                     histologxinfo.Reset()
                     data_positive = []
                     data_negative = []
 
-            # Looking for summary sample info
-            elif globalTag.activated and not domerging and len(words)==5:
-                dataset.measured_global = self.ExtractSampleInfo(words,numline,filename)
-
-            # Looking for detail sample info (one line for each file)
-            elif detailTag.activated and not domerging and len(words)==5:
-                dataset.measured_detail.append(self.ExtractSampleInfo(words,numline,filename))
-
-            # Looking for initial counter
-            elif initialTag.activated and \
-                 selectionTag.activated and len(words)==2:
-                results = self.ExtractCutLine(words,numline,filename)
-                if initialTag.Nlines==0:
-                    cut.initial.nentries_pos = results[0]
-                    cut.initial.nentries_neg = results[1]
-                elif initialTag.Nlines==1:
-                    cut.initial.sumw_pos = results[0]
-                    cut.initial.sumw_neg = results[1]
-                elif initialTag.Nlines==2:
-                    cut.initial.sumw2_pos = results[0]
-                    cut.initial.sumw2_neg = results[1]
-                else:
-                    logging.getLogger('MA5').warning('Extra line is found: '+line)
-                initialTag.newline()
-
-            # Looking for cut counter
-            elif cutTag.activated and \
-                 selectionTag.activated and len(words)==2:
-                results = self.ExtractCutLine(words,numline,filename)
-                if cutTag.Nlines==0:
-                    cutinfo.nentries_pos = results[0]
-                    cutinfo.nentries_neg = results[1]
-                elif cutTag.Nlines==1:
-                    cutinfo.sumw_pos = results[0]
-                    cutinfo.sumw_neg = results[1]
-                elif cutTag.Nlines==2:
-                    cutinfo.sumw2_pos = results[0]
-                    cutinfo.sumw2_neg = results[1]
-                else:
-                    logging.getLogger('MA5').warning('Extra line is found: '+line)
-                cutTag.newline()    
-
             # Looking from histogram description
-            elif descriptionTag.activated and \
-                 (selectionTag.activated or mergingTag.activated):
+            elif descriptionTag.activated:
                 if descriptionTag.Nlines==0:
                     if len(line)>1 and line[0]=='"' and line[-1]=='"':
                         myname=line[1:-1]
@@ -430,8 +435,7 @@ class JobReader():
                     else:
                         logging.getLogger('MA5').error('invalid name for histogram @ line=' + str(numline) +' : ')
                         logging.getLogger('MA5').error(str(line))
-                elif descriptionTag.Nlines==1 and not histoFreqTag.activated and \
-                     len(words)==3:
+                elif descriptionTag.Nlines==1 and not histoFreqTag.activated and len(words)==3:
                     results = self.ExtractDescription(words,numline,filename)
                     if histoTag.activated:
                         histoinfo.nbins=results[0]
@@ -441,14 +445,25 @@ class JobReader():
                         histologxinfo.nbins=results[0]
                         histologxinfo.xmin=results[1]
                         histologxinfo.xmax=results[2]
+                    else:
+                        logging.getLogger('MA5').error('invalid histogram description @ line=' + str(numline) +' : ')
+                        logging.getLogger('MA5').error(str(line))
+                elif descriptionTag.Nlines>=1:
+                    if histoTag.activated and len(words)==1:
+                        histoinfo.regions.append(words[0])
+                    elif histoLogXTag.activated and len(words)==1:
+                        histologxinfo.regions.append(words[0])
+                    elif histoFreqTag.activated and len(words)==1:
+                        histofreqinfo.regions.append(words[0])
+                    else:
+                        logging.getLogger('MA5').error('invalid region for a histogram @ line=' + str(numline) +' : ')
+                        logging.getLogger('MA5').error(str(line))
                 else:
                     logging.getLogger('MA5').warning('Extra line is found: '+line)
-                descriptionTag.newline()    
+                descriptionTag.newline()
 
             # Looking from histogram statistics
-            elif statisticsTag.activated and \
-                 (selectionTag.activated or mergingTag.activated) and \
-                 len(words)==2:
+            elif statisticsTag.activated and len(words)==2:
                 if statisticsTag.Nlines==0:
                     results = self.ExtractStatisticsInt(words,numline,filename)
                     if histoTag.activated:
@@ -526,12 +541,10 @@ class JobReader():
 
                 else:
                     logging.getLogger('MA5').warning('Extra line is found: '+line)
-                statisticsTag.newline()    
+                statisticsTag.newline()
 
             # Looking from histogram data [ histo and histoLogX ]
-            elif dataTag.activated and \
-                 (selectionTag.activated or mergingTag.activated) and \
-                 len(words)==2 and (histoTag.activated or histoLogXTag.activated):
+            elif dataTag.activated and len(words)==2 and (histoTag.activated or histoLogXTag.activated):
                 results = self.ExtractStatisticsFloat(words,numline,filename)
                 if dataTag.Nlines==0:
                     if histoTag.activated:
@@ -553,42 +566,135 @@ class JobReader():
                         data_negative.append(results[1])
                 else:
                     logging.getLogger('MA5').warning('Extra line is found: '+line)
-                dataTag.newline()    
+                dataTag.newline()
 
             # Looking from histogram data [ histoFreq ]
-            elif dataTag.activated and \
-                 (selectionTag.activated or mergingTag.activated) and \
-                 len(words)==3 and histoFreqTag.activated:
+            elif dataTag.activated and len(words)==3 and histoFreqTag.activated:
                 results = self.ExtractDataFreq(words,numline,filename)
                 labels.append(results[0])
                 data_positive.append(results[1])
                 data_negative.append(results[2])
                 dataTag.newline()    
 
-            
         # Information found ?
         if beginTag.Nactivated==0 or beginTag.activated:
-            logging.getLogger('MA5').error("SAF header <SAFheader> and </SAFheader> is not "+\
-                          "found.")
+            logging.getLogger('MA5').error("histos.saf: SAF header <SAFheader> and </SAFheader> is not found.")
         if endTag.Nactivated==0 or endTag.activated:
-            logging.getLogger('MA5').error("SAF footer <SAFfooter> and </SAFfooter> is not "+\
-                          "found.")
-        if globalTag.Nactivated==0 or globalTag.activated:
-            logging.getLogger('MA5').error("Information corresponding to the block "+\
-                          "<SampleGlobalInfo> is not found.")
-            logging.getLogger('MA5').error("Information on the dataset '"+dataset.name+\
-                          "' are not updated.")
-        if detailTag.Nactivated==0 or globalTag.activated:
-            logging.getLogger('MA5').error("Information corresponding to the block "+\
-                          "<SampleDetailInfo> is not found.")
-            logging.getLogger('MA5').error("Information on the dataset '"+dataset.name+\
-                          "' are not updated.")
-            
+            logging.getLogger('MA5').error("histos.saf: SAF footer <SAFfooter> and </SAFfooter> is not found.")
+
         # Closing the file
         file.close()
 
-        # End
+    def ExtractCuts(self,dataset,cut):
+        # Getting the output file name
+        name=InstanceName.Get(dataset.name)
+        i=0
+        while(os.path.isdir(self.safdir+"/"+name+"/MadAnalysis5job_"+str(i))):
+            i+=1
+        filenames = glob.glob(self.safdir+"/"+name+"/MadAnalysis5job_"+str(i-1)+"/Cutflows/*.saf")
 
+        # Treating the files one by one
+        for myfile in filenames:
+            # Opening the file
+            try:
+                file = open(myfile,'r')
+            except:
+                logging.getLogger('MA5').error("File called '"+myfile+"' is not found")
+                return
 
-        
-        
+            # Initializing tags
+            beginTag       = SafBlockStatus()
+            endTag         = SafBlockStatus()
+            initialTag     = SafBlockStatus()
+            cutTag         = SafBlockStatus()
+            cutinfo       = CutInfo()
+            cutflow_for_region = []
+
+            # Loop over the lines
+            numline=0
+            for line in file:
+
+                # Incrementing line counter
+                numline+=1
+
+                # Removing comments
+                index=line.find('#')
+                if index!=-1:
+                    line=line[:index]
+
+                # Treating line
+                line=line.lstrip()
+                line=line.rstrip()
+                words=line.split()
+                if len(words)==0:
+                    continue
+
+                # Looking for tag 'SampleGlobalInfo'
+                if len(words)==1 and words[0][0]=='<' and words[0][-1]=='>':
+                    if words[0].lower()=='<safheader>':
+                        beginTag.activate()
+                    elif words[0].lower()=='</safheader>':
+                        beginTag.desactivate()
+                    elif words[0].lower()=='<saffooter>':
+                        endTag.activate()
+                    elif words[0].lower()=='</saffooter>':
+                        endTag.desactivate()
+                    elif words[0].lower()=='<initialcounter>':
+                        initialTag.activate()
+                    elif words[0].lower()=='</initialcounter>':
+                        initialTag.desactivate()
+                    elif words[0].lower()=='<counter>':
+                        cutTag.activate()
+                    elif words[0].lower()=='</counter>':
+                        cutTag.desactivate()
+                        cutinfo.cutregion = myfile.split('/')[-1].split('.')[:-1]
+                        cutflow_for_region.append(copy.copy(cutinfo))
+                        cutinfo.Reset()
+
+                elif initialTag.activated and len(words)==2:
+                    results = self.ExtractCutLine(words,numline,myfile)
+                    if initialTag.Nlines==0:
+                        cut.initial.nentries_pos = results[0]
+                        cut.initial.nentries_neg = results[1]
+                    elif initialTag.Nlines==1:
+                        cut.initial.sumw_pos = results[0]
+                        cut.initial.sumw_neg = results[1]
+                    elif initialTag.Nlines==2:
+                        cut.initial.sumw2_pos = results[0]
+                        cut.initial.sumw2_neg = results[1]
+                    else:
+                        logging.getLogger('MA5').warning('Extra line is found: '+line)
+                    initialTag.newline()
+
+                # Looking for cut counter
+                elif cutTag.activated and '"' in line:
+                    if cutTag.Nlines==0:
+                        cutinfo.cutname = line.strip()
+                    else:
+                        logging.getLogger('MA5').warning('Extra line is found: '+line)
+                    cutTag.newline()
+
+                elif cutTag.activated and len(words)==2:
+                    results = self.ExtractCutLine(words,numline,myfile)
+                    if cutTag.Nlines==1:
+                        cutinfo.nentries_pos = results[0]
+                        cutinfo.nentries_neg = results[1]
+                    elif cutTag.Nlines==2:
+                        cutinfo.sumw_pos = results[0]
+                        cutinfo.sumw_neg = results[1]
+                    elif cutTag.Nlines==3:
+                        cutinfo.sumw2_pos = results[0]
+                        cutinfo.sumw2_neg = results[1]
+                    else:
+                        logging.getLogger('MA5').warning('Extra line is found: '+line)
+                    cutTag.newline()
+
+            # Information found ?
+            if beginTag.Nactivated==0 or beginTag.activated:
+                logging.getLogger('MA5').error(myfile.split('/')[-1]+": SAF header <SAFheader> and </SAFheader> is not found.")
+            if endTag.Nactivated==0 or endTag.activated:
+                logging.getLogger('MA5').error(myfile.split('/')[-1]+": SAF footer <SAFfooter> and </SAFfooter> is not found.")
+
+            # Closing the file
+            file.close()
+            cut.cuts.append(copy.copy(cutflow_for_region))

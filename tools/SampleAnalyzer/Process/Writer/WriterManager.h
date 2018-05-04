@@ -25,9 +25,11 @@
 #ifndef WRITER_MANAGER_h
 #define WRITER_MANAGER_h
 
+
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Writer/WriterBase.h"
 #include "SampleAnalyzer/Process/Core/ManagerBase.h"
+
 
 namespace MA5
 {
@@ -43,7 +45,7 @@ class WriterManager : public ManagerBase<WriterBase>
   WriterManager() : ManagerBase<WriterBase>()
   { }
 
-	/// Destructor
+  /// Destructor
   ~WriterManager()
   { }
 

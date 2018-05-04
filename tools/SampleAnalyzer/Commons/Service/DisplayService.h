@@ -25,6 +25,7 @@
 #ifndef DISPLAY_SERVICE_H
 #define DISPLAY_SERVICE_H
 
+
 // STL headers
 #include <iostream>
 #include <string>
@@ -34,6 +35,7 @@
 #include "SampleAnalyzer/Commons/Service/LogReport.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionType.h"
+
 
 // ShortCut to display and store an exception
 #define DISPLAY MA5::DisplayService::GetInstance()

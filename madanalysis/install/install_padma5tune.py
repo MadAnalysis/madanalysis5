@@ -306,13 +306,16 @@ class InstallPadForMA5tune:
         logging.getLogger('MA5').debug('Calling the expert mode for file cms_sus_13_011')
         logging.getLogger('MA5').debug('BEGIN ExpertMode')
         from madanalysis.core.expert_mode import ExpertMode
+        backup = self.main.expertmode
+        self.main.expertmode = True
         expert = ExpertMode(self.main)
         dirname="PADForMA5tune"
         if not expert.CreateDirectory(dirname):
             return False
         filename="cms_sus_13_011"
-        if not expert.Copy(dirname):
+        if not expert.Copy(filename):
             return False
+        self.main.expertmode=backup
         logging.getLogger('MA5').debug('END ExpertMode')
 
 #        TheCommand = ['bin/ma5', '-R', '-E', '-f', 'PADForMA5tune', 'cms_sus_13_011']

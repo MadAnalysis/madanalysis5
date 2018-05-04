@@ -25,16 +25,18 @@
 #ifndef READER_TEXT_BASE_h
 #define READER_TEXT_BASE_h
 
+
 // STL headers
 #include <fstream>
 #include <iostream>
 #include <sstream>
 
-class gz_istream;
-
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/Base/ReaderBase.h"
+
+
+class gz_istream;
 
 namespace MA5
 {
@@ -72,7 +74,7 @@ class ReaderTextBase : public ReaderBase
     input_fifo_ = 0;
   }
 
-	/// Destructor
+  /// Destructor
   virtual ~ReaderTextBase()
   {
     if (input_     !=0) delete input_;

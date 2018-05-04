@@ -25,6 +25,7 @@
 #ifndef MABoost_h
 #define MABoost_h
 
+
 // STL headers
 #include <iostream>
 #include <string>
@@ -32,7 +33,7 @@
 #include <iomanip>
 #include <cmath>
 
-// SampleAnalyzer
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/Vector/MALorentzVector.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
@@ -95,7 +96,7 @@ class MABoost
   }
   
   // Setting the boost vector
-  void SetBoostVector(MALorentzVector& q)
+  void setBoostVector(const MALorentzVector& q)
   { 
     try
     {

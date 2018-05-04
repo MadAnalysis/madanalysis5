@@ -29,7 +29,7 @@
 #include "SampleAnalyzer/Interfaces/delphesMA5tune/DetectorDelphesMA5tune.h"
 #include "SampleAnalyzer/Commons/Service/DisplayService.h"
 
-// ROOT header
+// ROOT headers
 #include <TError.h>
 #include <TROOT.h>
 #include <TObjArray.h>
@@ -38,7 +38,7 @@
 #include <TParticlePDG.h>
 #include <TFolder.h>
 
-// Delphes header
+// Delphes headers
 #include "external/ExRootAnalysis/ExRootConfReader.h"
 #include "external/ExRootAnalysis/ExRootTreeWriter.h"
 #include "external/ExRootAnalysis/ExRootTreeBranch.h"
@@ -91,6 +91,12 @@ bool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const std
       str << it->second;
       str >> rootfile_;
     }
+    else if (key=="outputdir")
+    {
+      std::stringstream str;
+      str << it->second;
+      str >> outputdir_;
+    }
   }
 
   // Configure inputs
@@ -98,14 +104,14 @@ bool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const std
   confReader_->ReadFile(configFile_.c_str());
 
   // Configure outputs
+  std::string ofname;
   if (output_)
   {
-    if (rootfile_=="")
-       outputFile_ = TFile::Open("TheMouth.root", "RECREATE");
-    else
-       outputFile_ = TFile::Open(rootfile_.c_str(), "RECREATE");
+    if (rootfile_=="") ofname = outputdir_+"/DelphesMA5tuneEvents.root";
+    else               ofname = outputdir_+"/"+rootfile_;
   }
-  else outputFile_ = TFile::Open("tmp.root", "RECREATE");
+  else ofname = outputdir_+"/tmp.root";
+  outputFile_ = TFile::Open(ofname.c_str(), "RECREATE");
 
   treeWriter_ = new ExRootTreeWriter(outputFile_, "DelphesMA5tune");
   branchEvent_ = treeWriter_->NewBranch("Event", LHEFEvent::Class());
@@ -213,24 +219,78 @@ void DetectorDelphesMA5tune::Finalize()
 
 void DetectorDelphesMA5tune::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat& myEvent)
 {
+  // Create a table for generated particle
+  std::map<const MCParticleFormat*,MAuint32> gentable; 
+  std::map<const MCParticleFormat*,MAuint32>::iterator ret;
+  for (MAuint32 i=0;i<myEvent.mc()->particles().size();i++)
+  {
+    const MCParticleFormat* part = &(myEvent.mc()->particles()[i]);
+    gentable[part]=i;
+  }
+
   for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
   {
-    const MCParticleFormat& part = myEvent.mc()->particles()[i];
+    const MCParticleFormat* part = &(myEvent.mc()->particles()[i]);
     Candidate* candidate = factory_->NewCandidate();
 
-    candidate->PID = part.pdgid();
-    unsigned int pdgCode=std::abs(part.pdgid());
+    candidate->PID = part->pdgid();
+    unsigned int pdgCode=std::abs(part->pdgid());
 
-    candidate->Status = part.statuscode();
-    candidate->Momentum.SetPxPyPzE(part.px(), part.py(), part.pz(), part.e());
+    candidate->Status = part->statuscode();
+    candidate->Momentum.SetPxPyPzE(part->px(), part->py(), part->pz(), part->e());
     candidate->Position.SetXYZT(0., 0., 0., 0.);
 
-    candidate->M1 = part.mothup1_ - 1;
+    // Filling mother-daughter information
+    candidate->M1=0;
+    candidate->M2=0;
+    candidate->D1=0;
+    candidate->D2=0;
+    std::vector<MAint32*> mothers(2);
+    mothers[0]=&(candidate->M1);
+    mothers[1]=&(candidate->M2);
+    *(mothers[0])=-1;
+    *(mothers[1])=-1;
+    std::vector<MAint32*> daughters(2);
+    daughters[0]=&(candidate->D1);
+    daughters[1]=&(candidate->D2);
+    *(daughters[0])=-1;
+    *(daughters[1])=-1;
+
+    for(MAuint32 mum=0;mum<std::min(static_cast<MAuint32>(part->mothers().size()),
+                                    static_cast<MAuint32>(2));mum++)
+    {
+      ret = gentable.find(part->mothers()[mum]);
+      if (ret!= gentable.end())
+      {
+        *(mothers[mum])=ret->second;
+      }
+      else
+      {
+        ERROR << "internal problem with daughter-mother relation" << endmsg;
+      }
+    }
+
+    for(MAuint32 mum=0;mum<std::min(static_cast<MAuint32>(part->daughters().size()),
+                                    static_cast<MAuint32>(2));mum++)
+    {
+      ret = gentable.find(part->daughters()[mum]);
+      if (ret!= gentable.end())
+      {
+        *(daughters[mum])=ret->second;
+      }
+      else
+      {
+        ERROR << "internal problem with daughter-mother relation" << endmsg;
+      }
+    }
+
+    /*    candidate->M1 = part.mothup1_ - 1;
     candidate->M2 = part.mothup2_ - 1;
     candidate->D1 = part.daughter1_ -1;
     candidate->D2 = part.daughter2_ -1;
+    */
 
-    TParticlePDG* pdgParticle = PDG_->GetParticle(part.pdgid());
+    TParticlePDG* pdgParticle = PDG_->GetParticle(part->pdgid());
     if (pdgParticle==0) 
     { 
       //FIX ERIC: WARNING << "Particle not found in PDG" << endmsg;
@@ -242,7 +302,7 @@ void DetectorDelphesMA5tune::TranslateMA5toDELPHES(SampleFormat& mySample, Event
     candidate->Mass = pdgParticle ? pdgParticle->Mass() : -999.9;
     allParticleOutputArray_->Add(candidate);
 
-    if(part.statuscode() == 1 && pdgParticle->Stable())
+    if(part->statuscode() == 1 && pdgParticle->Stable())
     {
       stableParticleOutputArray_->Add(candidate);
     }

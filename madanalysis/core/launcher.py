@@ -95,6 +95,9 @@ def DefaultInstallCard():
     output.write('# -----LATEX-----\n')
     output.write('# latex_veto = 0 # 0=No, 1=Yes\n')
     output.write('\n')
+    output.write('# -----SCIPY-----\n')
+    output.write('# scipy_veto = 0 # 0=No, 1=Yes\n')
+    output.write('\n')
     output.close()
 
 
@@ -169,7 +172,7 @@ def DecodeArguments(version, date):
        logging.getLogger('MA5').error("Parton mode and reco mode cannot be set in a same time.\n"
                      "Please choose only one of these modes.")
        sys.exit()
-    
+
     elif mode.hadronlevel and mode.recolevel:
        logging.getLogger('MA5').error("Hadron mode and reco mode cannot be set in a same time.\n"
                      "Please choose only one of these modes.")
@@ -179,7 +182,7 @@ def DecodeArguments(version, date):
        mode.forcedmode=True
 
     return mode, arglist
-        
+
 
 ################################################################################
 # Function MainSession
@@ -251,7 +254,7 @@ def MainSession(mode,arglist,ma5dir,version,date):
 
     # Building (if necesserary) the SampleAnalyzer library
     if not main.BuildLibrary(forced=mode.build):
-        sys.exit()	
+        sys.exit()
 
     logging.getLogger('MA5').info("*************************************************************")
 
@@ -289,20 +292,20 @@ def MainSession(mode,arglist,ma5dir,version,date):
             # Must be restarted?
             if main.repeatSession==True:
                 return True
-             
+
             # Exit if script mode activated
             if main.script:
                 interpreter.run_cmd("quit")
                 return False # Exit with no repeation
-    
+
         # Interpreter loop
         interpreter.cmdloop()
         if main.repeatSession==True:
             return True
         else:
             return False
-        
-       
+
+
 ################################################################################
 # Function usage
 ################################################################################

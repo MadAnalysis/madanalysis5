@@ -25,6 +25,7 @@
 #ifndef ANALYSISBASE_h
 #define ANALYSISBASE_h
 
+
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
@@ -36,6 +37,7 @@
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Commons/Base/Configuration.h"
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelectionManager.h"
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 
 // STL headers
 #include <set>
@@ -43,8 +45,6 @@
 #include <cmath>
 #include <vector>
 #include <map>
-
-#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 
 
 // initializing MACRO 
@@ -93,8 +93,7 @@ class AnalyzerBase
                      const Configuration* cfg)
   {
     weighted_events_ = !cfg->IsNoEventWeight();
-    if(!cfg->useRSM())
-      out_.Initialize(cfg,outputName.c_str());
+    out_.Initialize(cfg,outputName.c_str());
     return true;
   }
 

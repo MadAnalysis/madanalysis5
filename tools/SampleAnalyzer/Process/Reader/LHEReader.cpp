@@ -31,6 +31,7 @@
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
+
 using namespace MA5;
 
 // -----------------------------------------------------------------------------
@@ -189,7 +190,7 @@ bool LHEReader::FinalizeHeader(SampleFormat& mySample)
   {
     xsection += mySample.mc()->processes()[i].xsectionMean();
     xerror   += mySample.mc()->processes()[i].xsectionError() *
-                mySample.mc()->processes()[i].xsectionError();
+      mySample.mc()->processes()[i].xsectionError();
   }
 
   // Filling xsection and its error
@@ -211,8 +212,58 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySamp
 
   // Declaring a new string for line
   std::string line;
-  bool EndOfLoop=false;
+  bool EndOfEvent=false;
+  bool event_block=false;
+  bool event_header=false;
+  bool multiweight_block=false;
 
+  // Loop over the LHE lines
+  while(!EndOfEvent)
+  {
+    // Read the line
+    if (!ReadLine(line)) return StatusCode::FAILURE;
+
+    // Detect tags
+    if (line.find("<event>")!=std::string::npos)
+    {
+      event_block=true;
+      event_header=true;
+      continue;
+    }
+    else if (line.find("</event>")!=std::string::npos)
+    {
+      event_block=false;
+      EndOfEvent=true;
+      continue;
+    }
+    else if (line.find("<rwgt>")!=std::string::npos || line.find("mgrwt")!=std::string::npos)
+    {
+      multiweight_block=true;
+      continue;
+    }
+    else if (line.find("</rwgt>")!=std::string::npos || line.find("/mgrwt")!=std::string::npos)
+    {
+      multiweight_block=false;
+      continue;
+    }
+ 
+    // Actions
+    if (event_block && !multiweight_block)
+    {
+      if (event_header)
+      {
+        FillEventInitLine(line,myEvent);
+        event_header=false;
+      }
+      else FillEventParticleLine(line,myEvent);
+    }
+    else if (event_block && multiweight_block)
+    {
+      FillWeightLine(line,myEvent);
+    }
+  }
+
+    /*
   // Read line by line the file until tag <event>
   if (!firstevent_)
   {
@@ -232,16 +283,17 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySamp
   do 
   { 
     if (!ReadLine(line)) return StatusCode::FAILURE;
-    if(line.find("<rwgt>")!=std::string::npos) 
+    if (line.find("<rwgt>")!=std::string::npos) 
     {
-       bool EndReweighting = false;
-       do
-       { 
-         if (!ReadLine(line)) return StatusCode::FAILURE;
-         EndReweighting = (line.find("</rwgt>")!=std::string::npos);
-       }
-       while(!EndReweighting);
-       if (!ReadLine(line)) return StatusCode::FAILURE;
+      bool EndReweighting = false;
+      do
+      { 
+        if (!ReadLine(line)) return StatusCode::FAILURE;
+        EndReweighting = (line.find("</rwgt>")!=std::string::npos);
+        FillWeightLine(line,myEvent);
+      }
+      while(!EndReweighting);
+      if (!ReadLine(line)) return StatusCode::FAILURE;
     }
     EndOfLoop = (line.find("</event>")!=std::string::npos);
     if (!EndOfLoop)
@@ -252,6 +304,7 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySamp
     first=false;
   }
   while(!EndOfLoop);
+    */
 
   // Normal end
   return StatusCode::KEEP;
@@ -266,7 +319,67 @@ bool LHEReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
   // Traditional LHE or simplified LHE ?
   MAbool simplified = (mySample.sampleFormat()==MA5FORMAT::SIMPLIFIED_LHE);
 
-  // Mother pointer assignment
+  // Mother-daughter relations
+  for (MAuint32 i=0; i<mothers_.size();i++)
+  {
+    MCParticleFormat* part = &(myEvent.mc()->particles_[i]);
+    MAint32& mothup1 = mothers_[i].first;
+    MAint32& mothup2 = mothers_[i].second;
+
+    if (mothup1>0)
+    { 
+      if (static_cast<MAuint32>(mothup1)<=myEvent.mc()->particles().size())
+      {
+        MCParticleFormat* mum = &(myEvent.mc()->particles()[static_cast<MAuint32>(mothup1-1)]);
+        if (mum!=part)
+        {
+          part->mothers().push_back(mum);
+          mum->daughters().push_back(part);
+        }
+      }
+      else
+      {
+        std::stringstream str;
+        str << "index=" << mothup1 << " but #particles=" << myEvent.mc()->particles().size();
+        try
+        {
+          throw EXCEPTION_WARNING("internal problem with mother-daughter particles",str.str(),0);
+        }
+        catch(const std::exception& e)
+        {
+          MANAGE_EXCEPTION(e);
+        }
+      }
+    }
+    if (mothup2>0 && mothup1!=mothup2)
+    {
+      if (static_cast<MAuint32>(mothup2)<=myEvent.mc()->particles().size())
+      {
+        MCParticleFormat* mum = &(myEvent.mc()->particles()[static_cast<MAuint32>(mothup2-1)]);
+        if (mum!=part)
+        {
+          part->mothers().push_back(mum);
+          mum->daughters().push_back(part);
+        }
+      }
+      else
+      {
+        std::stringstream str;
+        str << "index=" << mothup2 << " but #particles=" << myEvent.mc()->particles().size();
+        try
+        {
+          throw EXCEPTION_WARNING("internal problem with mother-daughter particles",str.str(),0);
+        }
+        catch(const std::exception& e)
+        {
+          MANAGE_EXCEPTION(e);
+        }
+      }
+    }
+  }
+  mothers_.clear();
+
+  // Global event observable
   for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
   {
     MCParticleFormat& part = myEvent.mc()->particles_[i];
@@ -287,46 +400,10 @@ bool LHEReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
       myEvent.mc()->TET_ += part.pt();
       if (PHYSICS->Id->IsHadronic(part))
       {
-        myEvent.mc()->MHT_ -= part.momentum();
-        myEvent.mc()->THT_ += part.pt(); 
+        myEvent.mc()->MHT_  -= part.momentum();
+        myEvent.mc()->THT_  += part.pt(); 
+        myEvent.mc()->Meff_ += part.pt(); 
       }
-    }
-
-    // assigning the correct address for the mother particles
-    unsigned int index1=myEvent.mc()->particles_[i].mothup1_;
-    unsigned int index2=myEvent.mc()->particles_[i].mothup2_;
-    if (index1!=0) // at least one mother
-    {
-      try
-      {
-        if (index1>=myEvent.mc()->particles_.size()) throw EXCEPTION_WARNING("mother index1 is greater to nb of particles","",0);
-        myEvent.mc()->particles_[i].mother1_ = &myEvent.mc()->particles_[index1-1];
-        myEvent.mc()->particles_[index1-1].daughters_.push_back(&myEvent.mc()->particles_[i]);
-      }
-      catch (const std::exception& e)
-      {
-        MANAGE_EXCEPTION(e);
-        //     << " - index1 = " << index1 << endmsg
-        //     << " - particles.size() " << myEvent.mc()->particles_.size()
-        return false;
-      }    
-    }
-
-    if (index2!=0)
-    {
-      try
-      {
-        if (index2>=myEvent.mc()->particles_.size()) throw EXCEPTION_WARNING("mother index2 is greater to nb of particles","",0);
-        myEvent.mc()->particles_[i].mother2_ = &myEvent.mc()->particles_[index2-1];
-        myEvent.mc()->particles_[index2-1].daughters_.push_back(&myEvent.mc()->particles_[i]);
-      }
-      catch (const std::exception& e)
-      {
-        MANAGE_EXCEPTION(e);
-        //     << " - index1 = " << index1 << endmsg
-        //     << " - particles.size() " << myEvent.mc()->particles_.size()
-        myEvent.mc()->particles_[i].mother2_ = 0;
-      }    
     }
   }
 
@@ -335,6 +412,7 @@ bool LHEReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
   myEvent.mc()->MET_.momentum().SetE(myEvent.mc()->MET_.momentum().Pt());
   myEvent.mc()->MHT_.momentum().SetPz(0.);
   myEvent.mc()->MHT_.momentum().SetE(myEvent.mc()->MHT_.momentum().Pt());
+  myEvent.mc()->Meff_ += myEvent.mc()->MET_.pt();
 
   // Normal end
   return true; 
@@ -398,13 +476,15 @@ void LHEReader::FillEventInitLine(const std::string& line,
 {
   std::stringstream str;
   str << line;
-
-  str >> myEvent.mc()->nparts_;
+  MAuint32 nparts;
+  str >> nparts;
   str >> myEvent.mc()->processId_;
   str >> myEvent.mc()->weight_;
   str >> myEvent.mc()->scale_;
   str >> myEvent.mc()->alphaQED_;
   str >> myEvent.mc()->alphaQCD_;
+  myEvent.mc()->particles_.reserve(nparts);
+  mothers_.reserve(nparts);
 }
 
 
@@ -425,25 +505,73 @@ void LHEReader::FillEventParticleLine(const std::string& line,
   std::stringstream str;
   str << tmpline;
 
-  signed int 	color1;	// color 1 not stored 
-  signed int	color2;	// color 2 not stored
-  double   		tmp;	  // temporary variable to fill in LorentzVector
+  MAint32   color1;  // color 1 not stored 
+  MAint32   color2;  // color 2 not stored
+  MAfloat64 tmp;     // temporary
+  MAfloat64 px;      // temporary variable to fill in LorentzVector
+  MAfloat64 py;      // temporary variable to fill in LorentzVector
+  MAfloat64 pz;      // temporary variable to fill in LorentzVector
+  MAfloat64 e;       // temporary variable to fill in LorentzVector
+  MAfloat64 ctau;    // temporary variable to fill in LorentzVector
+  MAint32   mothup1; // mother1
+  MAint32   mothup2; // mother2
 
   // Get a new particle
   MCParticleFormat * part = myEvent.mc()->GetNewParticle();
 
   str >> part->pdgid_;
   str >> part->statuscode_;
-  str >> part->mothup1_;
-  str >> part->mothup2_;
+  str >> mothup1;
+  str >> mothup2;
   str >> color1;
   str >> color2;
-  str >> tmp; part->momentum_.SetPx(tmp); 
-  str >> tmp; part->momentum_.SetPy(tmp);
-  str >> tmp; part->momentum_.SetPz(tmp);
-  str >> tmp; part->momentum_.SetE(tmp);
+  str >> px;
+  str >> py;
+  str >> pz;
+  str >> e; 
   str >> tmp;
-  str >> part->ctau_;
+  str >> ctau;
   str >> part->spin_;
+  part->momentum_.SetPxPyPzE(px,py,pz,e);
+  part->decay_vertex_.SetT(ctau);
+  mothers_.push_back(std::make_pair(mothup1,mothup2));
 }
 
+
+// -----------------------------------------------------------------------------
+// FillWeightLine
+// -----------------------------------------------------------------------------
+void LHEReader::FillWeightLine(const std::string& line,
+                               EventFormat& myEvent)
+{
+  std::stringstream str;
+  str << line;
+
+  std::string tmp;
+  str >> tmp;
+  if (tmp!="<wgt") return;
+
+  std::size_t found1 = line.find("\"");
+  if (found1==std::string::npos) return;
+  std::size_t found2 = line.find("\"",found1+1);
+  if (found2==std::string::npos) return;
+  std::string idstring = line.substr(found1+1,found2-found1-1);
+
+  std::stringstream str2;
+  str2<<idstring;
+  MAuint32 id;
+  str2>>id;
+  
+  found1 = line.find(">");
+  if (found1==std::string::npos) return;
+  found2 = line.find("<",found1+1);
+  if (found2==std::string::npos) return;
+  std::string valuestring = line.substr(found1+1,found2-found1-1);
+
+  std::stringstream str3;
+  str3<<valuestring;
+  MAfloat64 value;
+  str3>>value;
+
+  myEvent.mc()->multiweights().Add(id,value);
+}

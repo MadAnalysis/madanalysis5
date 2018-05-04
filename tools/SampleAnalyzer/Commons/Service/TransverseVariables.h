@@ -25,6 +25,7 @@
 #ifndef TRANSVERSE_VARIABLE_SERVICE_h
 #define TRANSVERSE_VARIABLE_SERVICE_h
 
+
 // STL headers
 #include <iostream>
 #include <vector>
@@ -130,9 +131,9 @@ class TransverseVariables
       mw2_=pow(mw_,2.);
       // dot products
       plpb1_ = p1_.E()*p2_.E() -
-	       p1_.Px()*p2_.Px() -
-	       p1.Py()*p2_.Py() -
-	       p1.Pz()*p2_.Pz();
+       p1_.Px()*p2_.Px() -
+       p1.Py()*p2_.Py() -
+       p1.Pz()*p2_.Pz();
     }
 
     /// Core function for mt2w
@@ -165,6 +166,12 @@ class TransverseVariables
       return event->THT();
     }
 
+    /// Compute the total effective mass
+    inline double EventMEFF(const MCEventFormat* event) const
+    {
+      return event->Meff();
+    }
+
     /// Compute the missing hadronic transverse energy
     inline double EventMHT(const MCEventFormat* event) const
     {
@@ -187,6 +194,12 @@ class TransverseVariables
     inline double EventTHT(const RecEventFormat* event) const
     {
       return event->THT();
+    }
+
+    /// Compute the total effective mass
+    inline double EventMEFF(const RecEventFormat* event) const
+    {
+      return event->Meff();
     }
 
     /// Compute the missing hadronic transverse energy

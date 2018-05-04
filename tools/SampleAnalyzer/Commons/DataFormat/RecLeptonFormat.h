@@ -25,16 +25,18 @@
 #ifndef RecLeptonFormat_h
 #define RecLeptonFormat_h
 
+
 // STL headers
 #include <iostream>
 #include <string>
 #include <sstream>
 #include <iomanip>
 
-// RecParticleFormat
+// SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/DataFormat/IsolationConeType.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecParticleFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
+
 
 namespace MA5
 {
@@ -65,6 +67,8 @@ class RecLeptonFormat : public RecParticleFormat
   std::vector<IsolationConeType> isolCones_; // isolation cones
   MAuint64 refmc_;
   MAuint32   pdg_;
+  MAfloat32  d0_;
+  MAfloat32  d0error_;
 
   // -------------------------------------------------------------
   //                        method members
@@ -116,6 +120,7 @@ class RecLeptonFormat : public RecParticleFormat
     sumPT_isol_=0.;
     pdg_=0;
     isolCones_.clear();
+    d0_=0; d0error_=0;
   }
 
   /// Accessor to the electric charge 
@@ -171,6 +176,14 @@ class RecLeptonFormat : public RecParticleFormat
   /// is it a muon?
   void setMuonId()
   { pdg_=13; }
+
+  // d0
+  MAfloat32 d0() const
+  { return d0_; }
+
+  // d0error
+  MAfloat32 d0error() const
+  { return d0error_; }
 
 };
 
