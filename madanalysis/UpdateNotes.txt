@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+124           (2018/05/13) fuks:    Bug fix for deltaR used with combinations 
+
 
 196  1.6   (2018/05/04) ma5team:    - Finalization of the interface with mg5
                                     - Two jet collections are now allowed in the expert mode

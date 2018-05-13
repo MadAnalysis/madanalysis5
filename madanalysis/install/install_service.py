@@ -364,8 +364,11 @@ class InstallService():
                 else:
                     info = urllib2.urlopen(url)
             except:
-                logging.getLogger('MA5').warning("Impossible to access the url: "+url)
-                ok=False
+                try:
+                    os.system('wget --no-check-certificate '+url)
+                else:
+                    logging.getLogger('MA5').warning("Impossible to access the url: "+url)
+                    ok=False
             if ok:
                 break
 
