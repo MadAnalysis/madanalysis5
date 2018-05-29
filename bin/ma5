@@ -2,7 +2,7 @@
 
 ################################################################################
 #  
-#  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -62,8 +62,8 @@ sys.path.insert(0, servicedir)
 
 # Release version
 # Do not touch it !!!!!  
-version = "1.7.1"
-date = "2018/05/13"
+version = "1.7.2"
+date = "2018/05/29"
 
 # Loading the MadAnalysis session
 import madanalysis.core.launcher

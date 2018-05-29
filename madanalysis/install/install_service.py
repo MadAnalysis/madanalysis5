@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -364,11 +364,8 @@ class InstallService():
                 else:
                     info = urllib2.urlopen(url)
             except:
-                try:
-                    os.system('wget --no-check-certificate '+url)
-                else:
-                    logging.getLogger('MA5').warning("Impossible to access the url: "+url)
-                    ok=False
+                logging.getLogger('MA5').warning("Impossible to access the url: "+url)
+                ok=False
             if ok:
                 break
 

@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2016 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -57,9 +57,9 @@ class InstallPad:
           "CMS_B2G_12_012.cpp"     : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.cpp",
           "CMS_B2G_12_012.h"       : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.h",
           "CMS_B2G_12_012.info"    : "http://inspirehep.net/record/1402144/files/CMS_B2G_12_012.info",
-          "ATLAS_EXOT_2014_06.cpp" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2014_06.cpp",
-          "ATLAS_EXOT_2014_06.h"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2014_06.h",
-          "ATLAS_EXOT_2014_06.info": "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2014_06.info",
+          "ATLAS_EXOT_2014_06.cpp" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2014_06.cpp",
+          "ATLAS_EXOT_2014_06.h"   : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2014_06.h",
+          "ATLAS_EXOT_2014_06.info": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2014_06.info",
           "cms_exo_12_047.cpp"     : "http://inspirehep.net/record/1411894/files/cms_exo_12_047.cpp",
           "cms_exo_12_047.h"       : "http://inspirehep.net/record/1411894/files/cms_exo_12_047.h",
           "cms_exo_12_048.cpp"     : "http://inspirehep.net/record/1413153/files/cms_exo_12_048.cpp",
@@ -69,9 +69,9 @@ class InstallPad:
           "cms_b2g_14_004.cpp"    : "http://inspirehep.net/record/1456179/files/cms_b2g_14_004.cpp",
           "cms_b2g_14_004.h"      : "http://inspirehep.net/record/1456179/files/cms_b2g_14_004.h",
           "cms_b2g_14_004.info"   : "http://inspirehep.net/record/1456179/files/cms_b2g_14_004.info",
-          "cms_b2g_12_022.cpp"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_12_022.cpp",
-          "cms_b2g_12_022.h"      : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_12_022.h",
-          "cms_b2g_12_022.info"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_12_022.info",
+          "cms_b2g_12_022.cpp"    : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_12_022.cpp",
+          "cms_b2g_12_022.h"      : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_12_022.h",
+          "cms_b2g_12_022.info"   : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_b2g_12_022.info",
           "ATLAS_1604_07773.cpp"  : "http://inspirehep.net/record/1476800/files/ATLAS_1604_07773.cpp",
           "ATLAS_1604_07773.h"    : "http://inspirehep.net/record/1476800/files/ATLAS_1604_07773.h",
           "ATLAS_1604_07773.info" : "http://inspirehep.net/record/1476800/files/ATLAS_1604_07773.info",
@@ -84,46 +84,46 @@ class InstallPad:
           "cms_exo_16_010.cpp"        : "http://inspirehep.net/record/1618045/files/cms_exo_16_010.cpp",
           "cms_exo_16_010.h"          : "http://inspirehep.net/record/1618045/files/cms_exo_16_010.h",
           "cms_exo_16_010.info"       : "http://inspirehep.net/record/1618045/files/cms_exo_16_010.info",
-          "CMS_EXO_16_012_2gamma.cpp" : "https://inspirehep.net/record/1642631/files/CMS_EXO_16_012_2gamma.cpp",
-          "CMS_EXO_16_012_2gamma.h"   : "https://inspirehep.net/record/1642631/files/CMS_EXO_16_012_2gamma.h",
-          "CMS_EXO_16_012_2gamma.info": "https://inspirehep.net/record/1642631/files/CMS_EXO_16_012_2gamma.info",
-          "CMS_SUS_16_052.cpp"        : "https://inspirehep.net/record/1644684/files/CMS_SUS_16_052.cpp",
-          "CMS_SUS_16_052.h"          : "https://inspirehep.net/record/1644684/files/CMS_SUS_16_052.h",
-          "CMS_SUS_16_052.info"       : "https://inspirehep.net/record/1644684/files/CMS_SUS_16_052.info",
-          "ATLAS_1711_03301.cpp"      : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_1711_03301.cpp",
-          "ATLAS_1711_03301.h"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_1711_03301.h",
-          "ATLAS_1711_03301.info"     : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_1711_03301.info",
-          "ATLAS_EXOT_2016_25.cpp"    : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2016_25.cpp",
-          "ATLAS_EXOT_2016_25.h"      : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2016_25.h",
-          "ATLAS_EXOT_2016_25.info"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2016_25.info",
-          "ATLAS_EXOT_2016_32.cpp"    : "https://inspirehep.net/record/1642639/files/ATLAS_EXOT_2016_32.cpp",
-          "ATLAS_EXOT_2016_32.h"      : "https://inspirehep.net/record/1642639/files/ATLAS_EXOT_2016_32.h",
-          "ATLAS_EXOT_2016_32.info"   : "https://inspirehep.net/record/1642639/files/ATLAS_EXOT_2016_32.info",
-          "cms_sus_17_001.cpp"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_sus_17_001.cpp",
-          "cms_sus_17_001.h"          : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_sus_17_001.h",
-          "cms_sus_17_001.info"       : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_sus_17_001.info",
-          "cms_top_17_009.cpp"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_top_17_009.cpp",
-          "cms_top_17_009.h"          : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_top_17_009.h",
-          "cms_top_17_009.info"       : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_top_17_009.info"
+          "CMS_EXO_16_012_2gamma.cpp" : "http://inspirehep.net/record/1642631/files/CMS_EXO_16_012_2gamma.cpp",
+          "CMS_EXO_16_012_2gamma.h"   : "http://inspirehep.net/record/1642631/files/CMS_EXO_16_012_2gamma.h",
+          "CMS_EXO_16_012_2gamma.info": "http://inspirehep.net/record/1642631/files/CMS_EXO_16_012_2gamma.info",
+          "CMS_SUS_16_052.cpp"        : "http://inspirehep.net/record/1644684/files/CMS_SUS_16_052.cpp",
+          "CMS_SUS_16_052.h"          : "http://inspirehep.net/record/1644684/files/CMS_SUS_16_052.h",
+          "CMS_SUS_16_052.info"       : "http://inspirehep.net/record/1644684/files/CMS_SUS_16_052.info",
+          "ATLAS_1711_03301.cpp"      : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_1711_03301.cpp",
+          "ATLAS_1711_03301.h"        : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_1711_03301.h",
+          "ATLAS_1711_03301.info"     : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_1711_03301.info",
+          "ATLAS_EXOT_2016_25.cpp"    : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2016_25.cpp",
+          "ATLAS_EXOT_2016_25.h"      : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2016_25.h",
+          "ATLAS_EXOT_2016_25.info"   : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/ATLAS_EXOT_2016_25.info",
+          "ATLAS_EXOT_2016_32.cpp"    : "http://inspirehep.net/record/1642639/files/ATLAS_EXOT_2016_32.cpp",
+          "ATLAS_EXOT_2016_32.h"      : "http://inspirehep.net/record/1642639/files/ATLAS_EXOT_2016_32.h",
+          "ATLAS_EXOT_2016_32.info"   : "http://inspirehep.net/record/1642639/files/ATLAS_EXOT_2016_32.info",
+          "cms_sus_17_001.cpp"        : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_sus_17_001.cpp",
+          "cms_sus_17_001.h"          : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_sus_17_001.h",
+          "cms_sus_17_001.info"       : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_sus_17_001.info",
+          "cms_top_17_009.cpp"        : "http://inspirehep.net/record/1672876/files/cms_top_17_009.cpp",
+          "cms_top_17_009.h"          : "http://inspirehep.net/record/1672876/files/cms_top_17_009.h",
+          "cms_top_17_009.info"       : "http://inspirehep.net/record/1672876/files/cms_top_17_009.info"
         }
 
         self.delphescards = {
-    "delphes_card_cms_b2g_14_004.tcl"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_b2g_14_004.tcl",
-    "delphes_card_cms_b2g_12_012.tcl"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_b2g_12_012.tcl",
-    "delphes_card_atlas_sus_2013_05_pad.tcl" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_atlas_sus_2013_05_pad.tcl",
-    "delphes_card_ATLAS_1604_07773.tcl"      : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_ATLAS_1604_07773.tcl",
-    "delphes_card_ATLAS_CONF_2016_086.tcl"   : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_ATLAS_CONF_2016_086.tcl",
-    "delphes_card_ATLAS_1711_03301.tcl"      : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_ATLAS_1711_03301.tcl",
-    "delphes_card_cms_exo_16_010.tcl"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_exo_16_010.tcl",
-    "delphes_card_cms_exo_16_012.tcl"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_exo_16_012.tcl",
-    "delphes_card_cms_SUS_16_052.tcl"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_sus_16_052.tcl",
-    "delphes_card_atlas_2016_32.tcl"         : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_atlas_2016_32.tcl",
-    "delphes_card_atlas_2016_25.tcl"         : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_atlas_2016_25.tcl",
-    "delphes_card_cms_top_17_009.tcl"        : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_top_17_009.tcl"
+    "delphes_card_cms_b2g_14_004.tcl"        : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_b2g_14_004.tcl",
+    "delphes_card_cms_b2g_12_012.tcl"        : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_b2g_12_012.tcl",
+    "delphes_card_atlas_sus_2013_05_pad.tcl" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_atlas_sus_2013_05_pad.tcl",
+    "delphes_card_ATLAS_1604_07773.tcl"      : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_ATLAS_1604_07773.tcl",
+    "delphes_card_ATLAS_CONF_2016_086.tcl"   : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_ATLAS_CONF_2016_086.tcl",
+    "delphes_card_ATLAS_1711_03301.tcl"      : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_ATLAS_1711_03301.tcl",
+    "delphes_card_cms_exo_16_010.tcl"        : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_exo_16_010.tcl",
+    "delphes_card_cms_exo_16_012.tcl"        : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_exo_16_012.tcl",
+    "delphes_card_cms_SUS_16_052.tcl"        : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_sus_16_052.tcl",
+    "delphes_card_atlas_2016_32.tcl"         : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_atlas_2016_32.tcl",
+    "delphes_card_atlas_2016_25.tcl"         : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_atlas_2016_25.tcl",
+    "delphes_card_cms_top_17_009.tcl"        : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes_card_cms_top_17_009.tcl"
         }
 
         self.pileupfiles = {
-            "MinBias.pileup" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/MinBias.pileup"
+            "MinBias.pileup" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/MinBias.pileup"
         }
 
     def CreateBibtex(self):

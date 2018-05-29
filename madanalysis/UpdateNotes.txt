@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+125           (2018/05/29) fuks:    Updating the copyrights 
+
 124           (2018/05/13) fuks:    Bug fix for deltaR used with combinations 
 
 
