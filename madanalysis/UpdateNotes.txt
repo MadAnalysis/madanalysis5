@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+123           (2018/05/29) fuks:    updating copyrights 
+
 
 196  1.6   (2018/05/04) ma5team:    - Finalization of the interface with mg5
                                     - Two jet collections are now allowed in the expert mode
