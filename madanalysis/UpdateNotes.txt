@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+127           (2018/06/26) fuks:    Adding some methods to the RecJetFormat class 
+
 126           (2018/06/06) fuks:    Updating the PAD 
 
 125           (2018/05/29) fuks:    Updating the copyrights 

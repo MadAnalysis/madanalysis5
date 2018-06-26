@@ -71,6 +71,7 @@ class RecJetFormat : public RecParticleFormat
 
   MAuint16 ntracks_;   /// number of tracks
   MAbool btag_;        /// b-tag
+  MAbool ctag_;        /// c-tag
   MAbool true_ctag_;   /// c-tag (before id or misid)
   MAbool true_btag_;   /// b-tag (before id or misid)
   std::vector<MAint32> Constituents_;  /// indices of the MC particles
@@ -93,7 +94,8 @@ class RecJetFormat : public RecParticleFormat
   virtual void Print() const
   {
     INFO << "ntracks ="   << /*set::setw(8)*/"" << std::left << ntracks_  << ", "  
-         << "btag = " << /*set::setw(8)*/"" << std::left << btag_ << ", ";
+         << "btag = " << /*set::setw(8)*/"" << std::left << btag_ << ", "
+         << "ctag = " << /*set::setw(8)*/"" << std::left << ctag_ << ", ";
     RecParticleFormat::Print();
   }
 
@@ -102,6 +104,7 @@ class RecJetFormat : public RecParticleFormat
   {
     ntracks_   = 0; 
     btag_      = false;
+    ctag_      = false;
     true_btag_ = false;
     true_ctag_ = false;
     isolCones_.clear();
@@ -115,6 +118,10 @@ class RecJetFormat : public RecParticleFormat
   const MAbool& btag() const
   {return btag_;}
 
+  /// Accessor to the c-tag
+  const MAbool& ctag() const
+  {return ctag_;}
+
   /// Accessor to the true c-tag
   const MAbool& true_ctag() const
   {return true_ctag_;}
@@ -122,6 +129,22 @@ class RecJetFormat : public RecParticleFormat
   /// Accessor to the true b-tag
   const MAbool& true_btag() const
   {return true_btag_;}
+
+  /// Setting a new true_btag_ value
+  void setTrueBtag(const bool& tag)
+  {true_btag_=tag;}
+
+  /// Setting a new btag_ value
+  void setBtag(const bool& tag)
+  {btag_=tag;}
+
+  /// Setting a new true_ctag_ value
+  void setCtag(const bool& tag)
+  {ctag_=tag;}
+
+  /// Setting a new ctag_ value
+  void setTrueCtag(const bool& tag)
+  {true_ctag_=tag;}
 
   /// Add one constituent
   void AddConstituent (const int& index)
