@@ -336,6 +336,7 @@ class InterpreterBase(cmd.Cmd):
 
         myline = line.replace('{', ' { ')
         myline = myline.replace('}', ' } ')
+        myline = myline.replace(' ^ ', '^')
         split = myline.split()
         out=[]
         tmp=''

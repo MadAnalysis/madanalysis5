@@ -146,10 +146,11 @@ class CmdDisplay(CmdBase.CmdBase):
 
         return
 
-    
     def do(self,args):
         # Checking argument number
-        if len(args)==1:
+        if len(args)>0 and args[0].lower()=='tagger':
+            return self.main.tagger.Display(args[1:])
+        elif len(args)==1:
             return self.do_other(args[0])
         elif len(args)==5 or len(args)==4:
             return self.do_selection(args)
@@ -201,7 +202,7 @@ class CmdDisplay(CmdBase.CmdBase):
         
         # Only object name
         if variable==None:
-            output = ["main","selection"]
+            output = ["main","selection","tagger","smearer"]
             output.extend(self.main.datasets.GetNames())
             output.extend(self.main.multiparticles.GetNames())
             output.extend(self.main.regions.GetNames())

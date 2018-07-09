@@ -31,9 +31,10 @@ from madanalysis.enumeration.color_type            import ColorType
 from madanalysis.enumeration.linestyle_type        import LineStyleType
 from madanalysis.enumeration.backstyle_type        import BackStyleType
 from madanalysis.enumeration.stacking_method_type  import StackingMethodType
-from madanalysis.layout.merging_plots_for_dataset import MergingPlotsForDataset 
+from madanalysis.layout.merging_plots_for_dataset  import MergingPlotsForDataset 
+import madanalysis.enumeration.color_hex
 from math import sqrt
-
+import logging
 
 class MergingPlots:
 
@@ -113,7 +114,8 @@ class MergingPlots:
             filenameC = histo_path+"/merging_" +\
                         datasetname+"_"+str(index)
             rootfiles.append(filenameC)
-            filenameC += '.C'
+            filenamePy = filenameC+'.py'
+            filenameC  += '.C'
             output_files=[]
             for iout in range(0,len(output_paths)):
                 output_files.append(output_paths[iout]+\
@@ -121,8 +123,11 @@ class MergingPlots:
                                     datasetname+"_"+str(index)+"." +\
                                     ReportFormatType.convert2filetype(modes[iout]))
             # Drawing
+            logging.getLogger('MA5').debug('Producing file '+filenameC+' ...')
             self.DrawROOT(DJRplots,dataset,filenameC,output_files,index)
-                
+            logging.getLogger('MA5').debug('Producing file '+filenamePy+' ...')
+            self.DrawMATPLOTLIB(DJRplots,dataset,filenamePy,output_files,index)
+
 
             
     def GetPlotNames(self,mode,output_path):
@@ -328,6 +333,172 @@ class MergingPlots:
             outputC.close()
         except:
             logging.getLogger('MA5').error('Impossible to close the file: '+outputC)
+            return False
+
+        # Ok
+        return True
+
+    def DrawMATPLOTLIB(self,DJRplots,dataset,filenamePy,output_files,index):
+
+        # Open the file in write-mode
+        try:
+            outputPy = file(filenamePy,'w')
+        except:
+            logging.getLogger('MA5').error('Impossible to write the file: '+filenamePy)
+            return False
+
+        # File header
+        function_name = filenamePy[:-3]
+        function_name = function_name.split('/')[-1]
+        outputPy.write('def '+function_name+'():\n')
+        outputPy.write('\n')
+
+        # Import Libraries
+        outputPy.write('    # Library import\n')
+        outputPy.write('    import numpy\n')
+        outputPy.write('    import matplotlib\n')
+        outputPy.write('    import matplotlib.pyplot   as plt\n')
+        outputPy.write('    import matplotlib.gridspec as gridspec\n')
+        outputPy.write('\n')
+
+        # Matplotlib & numpy version
+        outputPy.write('    # Library version\n')
+        outputPy.write('    matplotlib_version = matplotlib.__version__\n')
+        outputPy.write('    numpy_version      = numpy.__version__\n')
+        outputPy.write('\n')
+
+
+        # Getting xsection
+        xsection=dataset.measured_global.xsection
+        if dataset.xsection!=0.:
+            xsection=dataset.xsection
+
+        # Scaling the total plot
+        scales=[]
+        if DJRplots[0].summary.nentries!=0:
+            scales.append( float(xsection) / \
+                           float(DJRplots[0].summary.nentries) )
+        else:
+            scales.append(1.)
+
+        # Loop over other DJR plots    
+        for ind in range(1,len(DJRplots)):
+            if DJRplots[ind].summary.nentries!=0:
+                scales.append( float(xsection) / \
+                               float(DJRplots[0].summary.nentries) )
+            else:
+                scales.append(1.)
+
+        # Binnning and x-axis
+        xmin=DJRplots[0].xmin
+        xmax=DJRplots[0].xmax
+        xnbin=DJRplots[0].nbins
+        outputPy.write('    # Histo binning\n')
+        outputPy.write('    xBinning = numpy.linspace('+\
+                       str(xmin)+','+str(xmax)+','+str(xnbin+1)+\
+                       ',endpoint=True)\n')
+        outputPy.write('\n')
+
+        outputPy.write('    # Creating data sequence: middle of each bin\n')
+        outputPy.write('    xData = numpy.array([')
+        for bin in range(0,xnbin):
+            if bin!=0:
+                outputPy.write(',')
+            outputPy.write(str(DJRplots[ind].GetBinMean(bin)))
+        outputPy.write('])\n\n')
+
+        # Loop over datasets and histos
+        for ind in range(0,len(DJRplots)):
+            # Creating Histogram data
+            histoname=DJRplots[ind].name
+            outputPy.write('    # Creating weights for histo: '+histoname+'\n')
+            outputPy.write('    '+histoname+'_'+str(MergingPlots.counter)+'_weights = numpy.array([')
+            ntot=0
+            for bin in range(1,xnbin+1):
+                ntot+=DJRplots[ind].summary.array[bin-1]*scales[ind]
+                if bin!=1:
+                    outputPy.write(',')
+                outputPy.write(str(DJRplots[ind].summary.array[bin-1]*scales[ind]))
+            outputPy.write('])\n')
+
+        # Canvas
+        outputPy.write('\n    # Creating a new Canvas\n')
+        dpi=80
+        height=500
+        widthx=1000
+        outputPy.write('    fig   = plt.figure(figsize=('+\
+           str(widthx/dpi)+','+str(height/dpi)+\
+           '),dpi='+str(dpi)+')\n')
+        outputPy.write('    frame = gridspec.GridSpec(1,1,right=0.7)\n')
+        outputPy.write('    pad   = fig.add_subplot(frame[0])\n\n')
+
+        ## Curves
+        colors=[1,9,46,8,4,6,2,7,3,42,48]
+        for ind in range(0,len(DJRplots)):
+            histoname=DJRplots[ind].name
+            linecolor='"'+madanalysis.enumeration.color_hex.color_hex[colors[ind]]+'"'
+            if ind==0:
+                linestyle='\"solid\"'
+            else:
+                linestyle='\"dashed\"'
+
+            outputPy.write('    pad.hist('+\
+                'x=xData, '+\
+                'bins=xBinning, '+\
+                'weights='+histoname+'_'+str(MergingPlots.counter)+'_weights,\\\n')
+            if ind==0:
+                outputPy.write('             label=\'Sum\', ')
+            else:
+                outputPy.write('             label=\''+str(ind-1)+'-jet sample\', ')
+            outputPy.write('rwidth=0.8,\\\n'+\
+                '             color='+linecolor+', '+\
+                'edgecolor='+linecolor+', '+\
+                'linewidth=1, '+\
+                'linestyle='+linestyle+',\\\n'+\
+                '             bottom=None, '+\
+                'cumulative=False, normed=False, ' +\
+                'align="mid", orientation="vertical")\n\n')
+
+        # Setting X axis label
+        axis_titleX = "log10(DJR"+str(ind)+")"
+        outputPy.write('    # Axes\n')
+        outputPy.write("    plt.rc('text',usetex=False)\n")
+        outputPy.write('    plt.xlabel(r"'+axis_titleX+'",\\\n')
+        outputPy.write('               fontsize=16,color="black")\n')
+        # Setting Y axis label
+        axis_titleY = "Cross section (pb/bin)"
+        outputPy.write('    plt.ylabel(r"'+axis_titleY+'",\\\n')
+        outputPy.write('               fontsize=16,color="black")\n')
+        outputPy.write('\n')
+        wname = DJRplots[0].name+'_'+str(MergingPlots.counter)+'_weights'
+        outputPy.write('    ymax='+wname+'.max()*1.1\n')
+        minweight='[x for x in ('+wname+') if x]'
+        outputPy.write('    ymin=min('+minweight+')/100\n')
+        outputPy.write('    plt.gca().set_ylim(ymin,ymax)\n')
+        outputPy.write('    plt.gca().set_yscale("log",nonposy="clip")\n')
+        outputPy.write('\n\n')
+
+        # Displaying a legend
+        outputPy.write('    # Legend\n')
+        outputPy.write('    plt.legend(bbox_to_anchor=(1.05,1), loc=2,'+\
+                                ' borderaxespad=0.)\n\n')
+
+        # Producing the image
+        outputPy.write('    # Saving the image\n')
+        for outputname in output_files:
+            outputPy.write("    plt.savefig('"+outputname+"')\n")
+        outputPy.write('\n')
+
+        # Call the function
+        outputPy.write('# Running!\n')
+        outputPy.write("if __name__ == '__main__':\n")
+        outputPy.write('    '+function_name+'()\n')
+
+        # Close the file
+        try:
+            outputPy.close()
+        except:
+            logging.getLogger('MA5').error('Impossible to close the file: '+outputPy)
             return False
 
         # Ok

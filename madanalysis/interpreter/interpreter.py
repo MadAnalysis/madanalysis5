@@ -46,6 +46,8 @@ from madanalysis.enumeration.cut_type import CutType
 from madanalysis.interpreter.cmd_set            import CmdSet
 from madanalysis.interpreter.cmd_define         import CmdDefine
 from madanalysis.interpreter.cmd_define_region  import CmdDefineRegion
+from madanalysis.interpreter.cmd_define_tagger  import CmdDefineTagger
+#from madanalysis.interpreter.cmd_define_smearer import CmdDefineSmearer
 from madanalysis.interpreter.cmd_import         import CmdImport
 from madanalysis.interpreter.cmd_remove         import CmdRemove
 from madanalysis.interpreter.cmd_swap           import CmdSwap
@@ -80,6 +82,8 @@ class Interpreter(InterpreterBase):
         self.cmd_set                    = CmdSet(main)
         self.cmd_define                 = CmdDefine(main)
         self.cmd_define_region          = CmdDefineRegion(main)
+        self.cmd_define_tagger          = CmdDefineTagger(main)
+#        self.cmd_define_smearer         = CmdDefineSmearer(main)
         self.cmd_display                = CmdDisplay(main)
         self.cmd_display_datasets       = CmdDisplayDatasets(main)
         self.cmd_display_multiparticles = CmdDisplayMultiparticles(main)
@@ -87,7 +91,7 @@ class Interpreter(InterpreterBase):
         self.cmd_display_regions        = CmdDisplayRegions(main)
         self.cmd_import                 = CmdImport(main)
         self.cmd_remove                 = CmdRemove(main)
-        self.cmd_swap                   = CmdSwap(main) 
+        self.cmd_swap                   = CmdSwap(main)
         self.cmd_plot                   = CmdPlot(main)
         self.cmd_reject                 = CmdCut(main,CutType.REJECT)
         self.cmd_select                 = CmdCut(main,CutType.SELECT)
@@ -131,11 +135,23 @@ class Interpreter(InterpreterBase):
     def do_define_region(self,line):
         self.cmd_define_region.do(self.split_arg(line))
 
+    def do_define_tagger(self,line):
+        self.cmd_define_tagger.do(self.split_arg(line))
+
+#    def do_define_smearer(self,line):
+#        self.cmd_define_smearer.do(self.split_arg(line))
+
     def help_define(self):
         self.cmd_define.help()
 
     def help_define_region(self):
         self.cmd_define_region.help()
+
+#    def help_define_smearer(self):
+#        self.cmd_define_smearer.help()
+
+    def help_define_tagger(self):
+        self.cmd_define_tagger.help()
 
     def complete_define(self,text,line,begidx,endidx):
         return self.cmd_define.complete(text,line,begidx,endidx)
@@ -176,6 +192,9 @@ class Interpreter(InterpreterBase):
     def do_display_regions(self,line):
         self.cmd_display_regions.do(self.split_arg(line))
 
+#    def do_display_smearer(self,line):
+#        self.cmd_display_smearer.do(self.split_arg(line))
+
     def help_display_datasets(self):
         self.cmd_display_datasets.help()
 
@@ -185,7 +204,7 @@ class Interpreter(InterpreterBase):
     def complete_display_datasets(self,text,line,begidx,endidx):
         return self.cmd_display_datasets.complete(text,line,begidx,endidx)
 
-    def complete_display_regionss(self,text,line,begidx,endidx):
+    def complete_display_regions(self,text,line,begidx,endidx):
         return self.cmd_display_regions.complete(text,line,begidx,endidx)
 
     def do_import(self,line):

@@ -27,6 +27,7 @@ from madanalysis.dataset.dataset_collection             import DatasetCollection
 from madanalysis.selection.selection                    import Selection
 from madanalysis.interpreter.cmd_base                   import CmdBase
 from madanalysis.region.region_collection               import RegionCollection
+from madanalysis.tagging.tagger                         import Tagger
 from madanalysis.system.session_info                    import SessionInfo
 from madanalysis.system.architecture_info               import ArchitectureInfo
 from madanalysis.core.library_builder                   import LibraryBuilder
@@ -86,6 +87,7 @@ class Main():
         self.madgraph       = MadGraphInterface()
         self.logger         = logging.getLogger('MA5')
         self.redirectSAlogger = False
+        self.tagger         = Tagger()
 
 
     def ResetParameters(self):
