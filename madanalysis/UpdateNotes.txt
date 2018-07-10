@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+129           (2018/07/10) fuks:    Bug fix #1780945 
+
 128           (2018/07/10) fuks:    fixing merging plot bug; first steps with tagging 
 
 127           (2018/06/26) fuks:    Adding some methods to the RecJetFormat class 
