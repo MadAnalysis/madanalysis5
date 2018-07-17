@@ -124,6 +124,9 @@ class Configuration
     /// Function to write a string in lower case
     static void Lower(std::string& word);
 
+    /// Decode MA5 version
+    void DecodeMA5version(const std::string& option);
+
     /// Reset
     void Reset()
     {
