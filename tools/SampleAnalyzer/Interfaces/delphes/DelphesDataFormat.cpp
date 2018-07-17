@@ -149,6 +149,18 @@ void DelphesDataFormat::InitializeData()
 // -----------------------------------------------------------------------------
 void DelphesDataFormat::InitializeBranch(TTree* tree)
 {
+  // Getting all branches name
+  TObjArray* branches = tree -> GetListOfBranches();
+  if (branches!=0)
+  {
+    TIter next(branches);
+    TBranch* mybranch=0;
+    while(mybranch=dynamic_cast<TBranch*>(next()))
+    {
+      std::cout << mybranch->GetClassName() << " - " << mybranch->GetName() << std::endl;
+    }
+  }
+
   // Official Delphes collections
   branchEvent_        = tree->GetBranch("Event");
   branchWeight_       = tree->GetBranch("Weight");

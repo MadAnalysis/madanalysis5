@@ -98,10 +98,10 @@ bool Configuration::Initialize(int &argc, char *argv[])
     if (option.size()==0) continue;
 
     // check event
-    if (option=="--check_event") check_event_ = true;
+    if (option.find("--check_event")==0) check_event_ = true;
 
     // weighted event
-    else if (option=="--no_event_weight") no_event_weight_ = true;
+    else if (option.find("--no_event_weight")==0) no_event_weight_ = true;
 
     // version
     else if (option.find("--ma5_version=")==0)

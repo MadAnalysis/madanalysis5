@@ -28,6 +28,8 @@
 
 // STL headers
 #include <iostream>
+#include <vector>
+#include <map>
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
@@ -75,6 +77,9 @@ struct DelphesDataFormat
   TBranch* branchEFlowTrack_;
   TBranch* branchEFlowPhoton_;
   TBranch* branchEFlowNeutral_;
+
+  // List of collection
+  std::vector<std::pair<std::string,std::string> > collections_;
 
   // Switch for MA5card
   bool delphesMA5card_;

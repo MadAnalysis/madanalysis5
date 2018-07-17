@@ -348,6 +348,7 @@ void HEPMCReader::FillEventInformations(const std::string& line,
 {
   std::stringstream str;
   str << line;
+
   std::string firstc;
   int tmp=0;
 
