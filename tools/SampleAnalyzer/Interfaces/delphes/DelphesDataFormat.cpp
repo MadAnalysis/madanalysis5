@@ -157,7 +157,7 @@ void DelphesDataFormat::InitializeBranch(TTree* tree)
     TBranch* mybranch=0;
     while(mybranch=dynamic_cast<TBranch*>(next()))
     {
-      std::cout << mybranch->GetClassName() << " - " << mybranch->GetName() << std::endl;
+//      std::cout << mybranch->GetClassName() << " - " << mybranch->GetName() << std::endl;
     }
   }
 

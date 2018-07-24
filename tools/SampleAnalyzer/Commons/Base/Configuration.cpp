@@ -40,7 +40,7 @@ using namespace MA5;
 // Initializing static data members
 // -----------------------------------------------------------------------------
 // DO NOT TOUCH THESE LINES
-const std::string Configuration::sampleanalyzer_version_ = "1.7.7";
+const std::string Configuration::sampleanalyzer_version_ = "1.7.8";
 const std::string Configuration::sampleanalyzer_date_    = "2018/07/24";
 // DO NOT TOUCH THESE LINES
 
@@ -143,7 +143,7 @@ bool Configuration::Initialize(int &argc, char *argv[])
       else if (argument=="--no_event_weight") no_event_weight_ = true;
 
       // version
-      else if (argument=="--ma5_version=") DecodeMA5version(argument);
+      else if (argument.find("--ma5_version=")==0) DecodeMA5version(argument);
 
       // other = mistake
       else
