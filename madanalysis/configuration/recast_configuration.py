@@ -66,7 +66,8 @@ class RecastConfiguration:
           "delphes_card_cms_SUS_16_052.tcl"       : ["CMS_SUS_16_052"],
           "delphes_card_atlas_2016_32.tcl"        : ["ATLAS_EXOT_2016_32"],
           "delphes_card_atlas_2016_25.tcl"        : ["ATLAS_EXOT_2016_25"],
-          "delphes_card_cms_sus_16_039.tcl"       : ["cms_sus_16_039"]
+          "delphes_card_cms_sus_16_039.tcl"       : ["cms_sus_16_039"],
+          "delphes_card_cms_sus_16_033.tcl"       : ["cms_sus_16_033"]
         }
 
         self.description = {
@@ -78,6 +79,7 @@ class RecastConfiguration:
           "ATLAS_CONF_2016_086"    : "ATLAS - 13 TeV - Dark matter in the b+bar+met channel",
           "cms_exo_16_010"         : "CMS   - 13 TeV - Mono-Z",
           "CMS_EXO_16_012_2gamma"  : "CMS   - 13 TeV - Mono-Higgs in the diphoton channel (2.3 fb-1)",
+          "cms_sus_16_033"         : "CMS   - 13 TeV - SUSY multijets (35.9 fb-1)",
           "cms_sus_16_039"         : "CMS   - 13 TeV - SUSY multileptons (36 fb-1)",
           "CMS_SUS_16_052"         : "CMS   - 13 TeV - SUSY 1 lepton + jets (36 fb-1)",
           "cms_sus_17_001"         : "CMS   - 13 TeV - stops in the OS dilepton + jets channel (35.9 fb-1)",
@@ -87,7 +89,7 @@ class RecastConfiguration:
           "atlas_susy_2013_11"     : "ATLAS - 8 TeV - ewkinos - 2 leptons + met",
           "atlas_susy_2013_21"     : "ATLAS - 8 TeV - monojet",
           "atlas_susy_2014_10"     : "ATLAS - 8 TeV - squark-gluino - 2 leptons + jets + met",
-          "atlas_1405_7875"        : "ATLAS - 8 TeV - squark-gluino - 0 leptons + 2-6 jets + met",
+          "atlas_1405_7875"        : "ATLAS - 8 TeV - squark-gluino - 0 letons + 2-6 jets + met",
           "atlas_higg_2013_03"     : "ATLAS - 8 TeV - ZH to invisible + 2 leptons",
           "ATLAS_EXOT_2014_06"     : "ATLAS - 8 TeV - monophoton",
           "cms_sus_13_012"         : "CMS   - 8 TeV - squark-gluino - MET/MHT",
