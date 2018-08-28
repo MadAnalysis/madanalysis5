@@ -108,9 +108,9 @@ class InstallPad:
           "cms_sus_16_039.cpp"        : "http://inspirehep.net/record/1676304/files/cms_sus_16_039.cpp",
           "cms_sus_16_039.h"          : "http://inspirehep.net/record/1676304/files/cms_sus_16_039.h",
           "cms_sus_16_039.info"       : "http://inspirehep.net/record/1676304/files/cms_sus_16_039.info",
-          "cms_sus_16_033.cpp"        : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_sus_16_033.cpp",
-          "cms_sus_16_033.h"          : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_sus_16_033.h",
-          "cms_sus_16_033.info"       : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/cms_sus_16_033.info"
+          "cms_sus_16_033.cpp"        : "http://inspirehep.net/record/1685439/files/cms_sus_16_033.cpp",
+          "cms_sus_16_033.h"          : "http://inspirehep.net/record/1685439/files/cms_sus_16_033.h",
+          "cms_sus_16_033.info"       : "http://inspirehep.net/record/1685439/files/cms_sus_16_033.info"
         }
 
         self.delphescards = {

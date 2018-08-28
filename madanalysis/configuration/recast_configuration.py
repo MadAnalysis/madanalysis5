@@ -57,7 +57,7 @@ class RecastConfiguration:
           "delphes_card_atlas_sus_2013_04.tcl"    : ["atlas_susy_2013_04"] ,
           "delphes_card_cms_b2g_12_012.tcl"       : ["CMS_B2G_12_012", "cms_exo_12_047", "cms_exo_12_048"],
           "delphes_card_cms_b2g_14_004.tcl"       : ["cms_b2g_12_022", "cms_b2g_14_004"],
-          "delphes_card_ATLAS_1604_07773.tcl"     : ["ATLAS_1604_07773", "atlas_1605_03814"],
+          "delphes_card_ATLAS_1604_07773.tcl"     : ["ATLAS_1604_07773", "atlas_1605_03814", "ATLAS_SUSY_16_07"],
           "delphes_card_ATLAS_1711_03301.tcl"     : ["ATLAS_1711_03301"],
           "delphes_card_ATLAS_CONF_2016_086.tcl"  : ["ATLAS_CONF_2016_086"],
           "delphes_card_cms_exo_16_010.tcl"       : ["cms_exo_16_010", "cms_sus_17_001"],
@@ -73,6 +73,7 @@ class RecastConfiguration:
         self.description = {
           "ATLAS_1604_07773"       : "ATLAS - 13 TeV - Monojet (3.2 fb-1)",
           "ATLAS_1711_03301"       : "ATLAS - 13 TeV - Monojet (36.1 fb-1)",
+          "ATLAS_SUSY_16_07"       : "ATLAS - 13 TeV - Multijet + missing energy (36.1 fb-1)",
           "ATLAS_EXOT_2016_25"     : "ATLAS - 13 TeV - Mono-Higgs in the bbar channel (36.1 fb-1)",
           "ATLAS_EXOT_2016_32"     : "ATLAS - 13 TeV - Monophoton (36.1 fb-1)",
           "atlas_1605_03814"       : "ATLAS - 13 TeV - Multijet (2-6 jets) + met",

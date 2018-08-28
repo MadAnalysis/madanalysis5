@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+134           (2018/08/28) fuks:    Adding analyses to the PAD 
+
 133           (2018/07/24) fuks:    Fixing a problem with the arguments 
 
 132           (2018/07/24) fuks:    Updating the PAD 
