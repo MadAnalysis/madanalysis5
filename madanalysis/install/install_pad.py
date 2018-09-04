@@ -49,7 +49,7 @@ class InstallPad:
         self.analyses.extend(["ATLAS_EXOT_2014_06"])
         # ATLAS 13TeV
         self.analyses.extend(["ATLAS_1604_07773", "atlas_1605_03814", "ATLAS_CONF_2016_086", "ATLAS_1711_03301", "ATLAS_EXOT_2016_25",
-          "ATLAS_EXOT_2016_32"])
+          "ATLAS_EXOT_2016_32", "ATLAS_SUSY_16_07"])
         # CMS 13TeV
         self.analyses.extend(["cms_exo_16_010", "cms_sus_16_033", "cms_sus_16_039", "CMS_SUS_16_052", "cms_sus_17_001", "CMS_EXO_16_012_2gamma", "cms_top_17_009"])
 
@@ -110,7 +110,10 @@ class InstallPad:
           "cms_sus_16_039.info"       : "http://inspirehep.net/record/1676304/files/cms_sus_16_039.info",
           "cms_sus_16_033.cpp"        : "http://inspirehep.net/record/1685439/files/cms_sus_16_033.cpp",
           "cms_sus_16_033.h"          : "http://inspirehep.net/record/1685439/files/cms_sus_16_033.h",
-          "cms_sus_16_033.info"       : "http://inspirehep.net/record/1685439/files/cms_sus_16_033.info"
+          "cms_sus_16_033.info"       : "http://inspirehep.net/record/1685439/files/cms_sus_16_033.info",
+          "ATLAS_SUSY_16_07.cpp"      : "http://inspirehep.net/record/1691534/files/ATLAS_SUSY_16_07.cpp",
+          "ATLAS_SUSY_16_07.h"        : "http://inspirehep.net/record/1691534/files/ATLAS_SUSY_16_07.h",
+          "ATLAS_SUSY_16_07.info"     : "http://inspirehep.net/record/1691534/files/ATLAS_SUSY_16_07.info"
         }
 
         self.delphescards = {
