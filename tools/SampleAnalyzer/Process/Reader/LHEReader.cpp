@@ -222,12 +222,12 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySamp
   {
     // Read the line
     if (!ReadLine(line)) return StatusCode::FAILURE;
-
     // Detect tags
-    if (line.find("<event>")!=std::string::npos)
+    if (line.find("<event>")!=std::string::npos || firstevent_)
     {
       event_block=true;
       event_header=true;
+      firstevent_=false;
       continue;
     }
     else if (line.find("</event>")!=std::string::npos)

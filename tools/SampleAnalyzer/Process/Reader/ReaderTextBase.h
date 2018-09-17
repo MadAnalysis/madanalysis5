@@ -54,6 +54,7 @@ class ReaderTextBase : public ReaderBase
 
   /// Streaming for reading input
   std::istream*  input_;
+  std::streampos oldpos_;
 
   /// Streaming for fifo
   std::ifstream* input_fifo_;
