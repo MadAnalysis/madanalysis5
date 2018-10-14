@@ -221,7 +221,7 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySamp
   while(!EndOfEvent)
   {
     // Read the line
-    if (!ReadLine(line)) return StatusCode::FAILURE;
+    if (!firstevent_ && !ReadLine(line)) return StatusCode::FAILURE;
     // Detect tags
     if (line.find("<event>")!=std::string::npos || firstevent_)
     {
@@ -246,7 +246,7 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySamp
       multiweight_block=false;
       continue;
     }
- 
+
     // Actions
     if (event_block && !multiweight_block)
     {
