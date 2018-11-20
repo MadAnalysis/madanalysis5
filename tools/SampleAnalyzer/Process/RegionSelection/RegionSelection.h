@@ -45,8 +45,8 @@ class RegionSelection
   // -------------------------------------------------------------
  private:
   std::string name_;
-  bool surviving_;
-  unsigned int NumberOfCutsAppliedSoFar_;
+  MAbool surviving_;
+  MAuint32 NumberOfCutsAppliedSoFar_;
 
   CounterManager cutflow_;
 
@@ -67,10 +67,10 @@ class RegionSelection
   std::string GetName()
     { return name_; }
 
-  bool IsSurviving()
+  MAbool IsSurviving()
     { return surviving_; }
 
-  unsigned int GetNumberOfCutsAppliedSoFar()
+  MAuint32 GetNumberOfCutsAppliedSoFar()
     { return NumberOfCutsAppliedSoFar_; }
 
   /// Printing the list of histograms
@@ -84,14 +84,14 @@ class RegionSelection
   void SetName(std::string name)
     { name_ = name; }
 
-  void SetSurvivingTest(bool surviving)
+  void SetSurvivingTest(MAbool surviving)
     { surviving_ = surviving; }
 
-  void SetNumberOfCutsAppliedSoFar(unsigned int NumberOfCutsAppliedSoFar)
+  void SetNumberOfCutsAppliedSoFar(MAuint32 NumberOfCutsAppliedSoFar)
     { NumberOfCutsAppliedSoFar_ = NumberOfCutsAppliedSoFar; }
 
   // Increment CutFlow (when this region passes a cut)
-  void IncrementCutFlow(double weight)
+  void IncrementCutFlow(MAfloat64 weight)
   {
     cutflow_[NumberOfCutsAppliedSoFar_].Increment(weight);
     NumberOfCutsAppliedSoFar_++;
@@ -102,7 +102,7 @@ class RegionSelection
     { cutflow_.InitCut(CutName); }
 
   /// Getting ready for a new event
-  void InitializeForNewEvent(const double &weight)
+  void InitializeForNewEvent(const MAfloat64 &weight)
   {
     SetSurvivingTest(true);
     SetNumberOfCutsAppliedSoFar(0);

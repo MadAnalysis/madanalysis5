@@ -44,7 +44,7 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 // Initialize
 // -----------------------------------------------------------------------------
-bool ReaderTextBase::Initialize(const std::string& rawfilename,
+MAbool ReaderTextBase::Initialize(const std::string& rawfilename,
                                 const Configuration& cfg)
 {
   // Set configuration
@@ -84,7 +84,7 @@ bool ReaderTextBase::Initialize(const std::string& rawfilename,
   fifo_ = IsFIFOMode(filename_);
 
   // Creating a tag indicating the file is opened correctlly
-  bool test=false;
+  MAbool test=false;
 
   // Input coming from RFIO and Compressed
   if (rfio_ && compress_ )
@@ -145,7 +145,7 @@ bool ReaderTextBase::Initialize(const std::string& rawfilename,
 // -----------------------------------------------------------------------------
 // Finalize
 // -----------------------------------------------------------------------------
-bool ReaderTextBase::Finalize()
+MAbool ReaderTextBase::Finalize()
 {
   if (rfio_ && compress_)
   {
@@ -184,9 +184,9 @@ bool ReaderTextBase::Finalize()
 // -----------------------------------------------------------------------------
 // ReadLine
 // -----------------------------------------------------------------------------
-bool ReaderTextBase::ReadLine(std::string& line, bool removeComment)
+MAbool ReaderTextBase::ReadLine(std::string& line, MAbool removeComment)
 {
-  bool getnewline=false;
+  MAbool getnewline=false;
   while (!getnewline)
   {
     // Getting a new line from the file

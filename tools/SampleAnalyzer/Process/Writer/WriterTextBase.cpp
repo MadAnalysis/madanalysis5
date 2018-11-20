@@ -43,7 +43,7 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 
 /// Initialization of the writer
-bool WriterTextBase::Initialize(const Configuration* cfg,
+MAbool WriterTextBase::Initialize(const Configuration* cfg,
                                 const std::string& rawfilename)
 {
   // Saving configuration file
@@ -82,7 +82,7 @@ bool WriterTextBase::Initialize(const Configuration* cfg,
   }
 
   // Creating a tag indicating the file is opened correctlly
-  bool test=false;
+  MAbool test=false;
 
   // Input coming from RFIO and Compressed
   if (rfio_ && compress_ )
@@ -129,7 +129,7 @@ bool WriterTextBase::Initialize(const Configuration* cfg,
 // -----------------------------------------------------------------------------
 // Finalize
 // -----------------------------------------------------------------------------
-bool WriterTextBase::Finalize()
+MAbool WriterTextBase::Finalize()
 {
   if (rfio_ && compress_)
   {

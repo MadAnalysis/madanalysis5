@@ -37,7 +37,7 @@ void cTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
   std::vector<RecJetFormat*> Candidates;
 
   // loop on the particles searching for last c
-  for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
+  for (MAuint32 i=0;i<myEvent.mc()->particles().size();i++)
   {
     if (PHYSICS->Id->IsInitialState(myEvent.mc()->particles()[i])) continue;
     if (std::abs(myEvent.mc()->particles()[i].pdgid())!=4) continue;
@@ -47,7 +47,7 @@ void cTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
     MAfloat64 DeltaRmax = DeltaRmax_;
 
     // loop on the jets
-    for (unsigned int j=0;j<myEvent.rec()->jets().size();j++)
+    for (MAuint32 j=0;j<myEvent.rec()->jets().size();j++)
     {
       if (myEvent.rec()->jets()[j].btag()) continue;
 
@@ -68,7 +68,7 @@ void cTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
     }
 
     // Tagging the candidates
-    for (unsigned int i=0;i<Candidates.size();i++)
+    for (MAuint32 i=0;i<Candidates.size();i++)
     {
       Candidates[i]->true_ctag_ = true;
     }
@@ -82,13 +82,13 @@ void cTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
 { 
   std::vector<RecJetFormat*> Candidates;
 
-  for (unsigned int i=0;i<myEvent.rec()->jets().size();i++)
+  for (MAuint32 i=0;i<myEvent.rec()->jets().size();i++)
   {
     if (myEvent.rec()->jets()[i].btag()) continue;
 
     MAbool c = false;
 
-    for (unsigned int j=0;j<myEvent.rec()->jets()[i].Constituents_.size();j++)
+    for (MAuint32 j=0;j<myEvent.rec()->jets()[i].Constituents_.size();j++)
     {
       MAint32 N = myEvent.rec()->jets()[i].Constituents_[j];
       MCParticleFormat* particle = & myEvent.mc()->particles()[N];
@@ -149,7 +149,7 @@ void cTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
     }
   }
 
-  for (unsigned int i=0;i<Candidates.size();i++)
+  for (MAuint32 i=0;i<Candidates.size();i++)
   {
     Candidates[i]->true_ctag_ = true;
   }
@@ -162,13 +162,13 @@ void cTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
   std::vector<RecJetFormat*> Candidates;
 
   // jet preselection using method 2
-  for (unsigned int i=0;i<myEvent.rec()->jets().size();i++)
+  for (MAuint32 i=0;i<myEvent.rec()->jets().size();i++)
   {
     if (myEvent.rec()->jets()[i].btag()) continue;
 
     MAbool c = false;
 
-    for (unsigned int j=0;j<myEvent.rec()->jets()[i].Constituents_.size();j++)
+    for (MAuint32 j=0;j<myEvent.rec()->jets()[i].Constituents_.size();j++)
     {
       MAint32 N = myEvent.rec()->jets()[i].Constituents_[j];
       MCParticleFormat* particle = & myEvent.mc()->particles()[N];
@@ -201,7 +201,7 @@ void cTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
   }
 
   // c-tagging using method 1
-  for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
+  for (MAuint32 i=0;i<myEvent.mc()->particles().size();i++)
   {
     if (std::abs(myEvent.mc()->particles()[i].pdgid())!=4) continue;
 
@@ -209,7 +209,7 @@ void cTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
 
     MAuint32 k = 0;
 
-    for (unsigned int j=Candidates.size();j>0;j--)
+    for (MAuint32 j=Candidates.size();j>0;j--)
     {
       MAfloat32 DeltaR = myEvent.mc()->particles()[i].dr(Candidates[j-1]);
 
@@ -230,7 +230,7 @@ void cTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
       }
     }
 
-    for (unsigned int j=0;j<k;j++)
+    for (MAuint32 j=0;j<k;j++)
     {
       Candidates[Candidates.size()-1]->true_ctag_=true;
       Candidates.pop_back();
@@ -242,7 +242,7 @@ void cTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
 
 MAbool cTagger::IsLastCHadron(MCParticleFormat* part, EventFormat& myEvent)
 {
-  for (unsigned int i=0; i<myEvent.mc()->particles().size(); i++)
+  for (MAuint32 i=0; i<myEvent.mc()->particles().size(); i++)
   {
     if (myEvent.mc()->particles()[i].mothers()[0]== part)
     {

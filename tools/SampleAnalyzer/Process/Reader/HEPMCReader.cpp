@@ -37,7 +37,7 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 // ReadHeader
 // -----------------------------------------------------------------------------
-bool HEPMCReader::ReadHeader(SampleFormat& mySample)
+MAbool HEPMCReader::ReadHeader(SampleFormat& mySample)
 {
   // Reset the saved line 
   savedline_="";
@@ -75,7 +75,7 @@ bool HEPMCReader::ReadHeader(SampleFormat& mySample)
 // -----------------------------------------------------------------------------
 // FinalizeHeader
 // -----------------------------------------------------------------------------
-bool HEPMCReader::FinalizeHeader(SampleFormat& mySample)
+MAbool HEPMCReader::FinalizeHeader(SampleFormat& mySample)
 {
   return true;
 }
@@ -101,7 +101,7 @@ StatusCode::Type HEPMCReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySa
     savedline_="";
   }
 
-  bool endEvent=false;
+  MAbool endEvent=false;
   
   // Loop over particle
   while(!endEvent)
@@ -145,7 +145,7 @@ StatusCode::Type HEPMCReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySa
 // -----------------------------------------------------------------------------
 // FinalizeEvent
 // -----------------------------------------------------------------------------
-bool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
+MAbool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 {
   // Compute max numbers of particles & vertices
   if (myEvent.mc()->particles_.size()>nparts_max_) nparts_max_=myEvent.mc()->particles_.size();
@@ -174,7 +174,7 @@ bool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
         if (mum!=dau)
         {
           // Safety: be sure to have not 2 same daughters
-          bool found=false;
+          MAbool found=false;
           for (MAuint32 h=0;h<mum->daughters().size();h++)
           {
             if (mum->daughters()[h]==dau) {found=true; break;}
@@ -196,7 +196,7 @@ bool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 
 
   // Computing met, mht, ... 
-  for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
+  for (MAuint32 i=0; i<myEvent.mc()->particles_.size();i++)
   {
     MCParticleFormat& part = myEvent.mc()->particles_[i];
 
@@ -350,7 +350,7 @@ void HEPMCReader::FillEventInformations(const std::string& line,
   str << line;
 
   std::string firstc;
-  int tmp=0;
+  MAint32 tmp=0;
 
   // Filling general info
   str >> firstc;                   // character 'E'
@@ -369,8 +369,8 @@ void HEPMCReader::FillEventInformations(const std::string& line,
   str >> tmp;
   if (tmp>0)
   {
-    std::vector<MAint64> randoms(static_cast<unsigned int>(tmp));
-    for (unsigned int i=0;i<randoms.size();i++) str >> randoms[i];
+    std::vector<MAint64> randoms(static_cast<MAuint32>(tmp));
+    for (MAuint32 i=0;i<randoms.size();i++) str >> randoms[i];
   }
 
   // Extracting weight lists
@@ -484,11 +484,11 @@ void HEPMCReader::FillEventParticleLine(const std::string& line,
   std::stringstream str;
   str << line;
 
-  double tmp;    // temporary variable to fill in LorentzVector
+  MAfloat64 tmp;    // temporary variable to fill in LorentzVector
 
   // Get a new particle
   MCParticleFormat * part = myEvent.mc()->GetNewParticle();
-  char linecode;
+  MAchar linecode;
   MAfloat64 px=0.;
   MAfloat64 py=0.;
   MAfloat64 pz=0.;
@@ -521,7 +521,7 @@ void HEPMCReader::FillEventParticleLine(const std::string& line,
   MAuint32 part_index = myEvent.mc()->particles_.size()-1;
 
   // Set production vertex
-  std::pair<std::map<MAint32,HEPVertex>::iterator,bool> ret;
+  std::pair<std::map<MAint32,HEPVertex>::iterator,MAbool> ret;
   ret = vertices_.insert(std::make_pair(currentvertex_,HEPVertex()));
   ret.first->second.out_.push_back(part_index);
 
@@ -541,7 +541,7 @@ void HEPMCReader::FillEventVertexLine(const std::string& line, EventFormat& myEv
   std::stringstream str;
   str << line;
 
-  char linecode;
+  MAchar linecode;
   MAint32 barcode;
   HEPVertex vertex;
 

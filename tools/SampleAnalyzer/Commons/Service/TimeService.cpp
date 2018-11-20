@@ -49,7 +49,7 @@ void TimeService::WriteGenericReport(LogStream& os) const
   // Skipping print if table empty
   if (table.empty()) return; 
 
-  unsigned int index=0;
+  MAuint32 index=0;
   for (TimeConstIterator it = MeasureTable_.begin(); 
        it!=MeasureTable_.end(); it++)
   { 
@@ -61,17 +61,17 @@ void TimeService::WriteGenericReport(LogStream& os) const
   std::sort(table.begin(),table.end(),TimeService::timingOrder);
 
   os << "+";
-  for (unsigned int i=0;i<78;i++) os << "-";
+  for (MAuint32 i=0;i<78;i++) os << "-";
   os << "+" << endmsg;
     
   os << "|";
-  for (unsigned int i=0;i<34;i++) os << " ";
+  for (MAuint32 i=0;i<34;i++) os << " ";
   os << "TimeReport";
-  for (unsigned int i=0;i<34;i++) os << " ";
+  for (MAuint32 i=0;i<34;i++) os << " ";
   os << "|" << endmsg;
 
   os << "+";
-  for (unsigned int i=0;i<78;i++) os << "-";
+  for (MAuint32 i=0;i<78;i++) os << "-";
   os << "+" << endmsg;
 
   os << "| ";
@@ -84,7 +84,7 @@ void TimeService::WriteGenericReport(LogStream& os) const
   os << "|" << endmsg;
     
   os << "|";
-  for (unsigned int i=0;i<78;i++) os << " ";
+  for (MAuint32 i=0;i<78;i++) os << " ";
   os << "|" << endmsg;
 
 
@@ -107,7 +107,7 @@ void TimeService::WriteGenericReport(LogStream& os) const
   os.precision(precision);
 
   os << "+";
-  for (unsigned int i=0;i<78;i++) os << "-";
+  for (MAuint32 i=0;i<78;i++) os << "-";
   os << "+" << endmsg;
 
 #endif

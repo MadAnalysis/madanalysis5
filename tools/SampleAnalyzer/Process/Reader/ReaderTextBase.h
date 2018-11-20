@@ -83,26 +83,26 @@ class ReaderTextBase : public ReaderBase
   }
 
   /// Initialize
-  virtual bool Initialize(const std::string& rawfilename,
+  virtual MAbool Initialize(const std::string& rawfilename,
                           const Configuration& cfg);
 
   /// Read the sample (virtual pure)
-  virtual bool ReadHeader(SampleFormat& mySample) = 0;
+  virtual MAbool ReadHeader(SampleFormat& mySample) = 0;
 
   /// Finalize the header (virtual pure)
-  virtual bool FinalizeHeader(SampleFormat& mySample) = 0;
+  virtual MAbool FinalizeHeader(SampleFormat& mySample) = 0;
 
   /// Read the event (virtual pure)
   virtual StatusCode::Type ReadEvent(EventFormat& myEvent, SampleFormat& mySample) = 0;
 
   /// Finalize the event (virtual pure)
-  virtual bool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent) = 0;
+  virtual MAbool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent) = 0;
 
   /// Finalize
-  virtual bool Finalize();
+  virtual MAbool Finalize();
 
   /// Read line text
-  bool ReadLine(std::string& line, bool removeComment=true);
+  MAbool ReadLine(std::string& line, MAbool removeComment=true);
 
   /// Get the file size (in octet)
   virtual MAint64 GetFileSize();

@@ -61,19 +61,19 @@ class SAFWriter : public WriterTextBase
   { }
 
   /// Read the sample (virtual pure)
-  virtual bool WriteHeader(const SampleFormat& mySample);
-  virtual bool WriteHeader();
+  virtual MAbool WriteHeader(const SampleFormat& mySample);
+  virtual MAbool WriteHeader();
 
   /// Read the sample (virtual pure)
-  bool WriteFiles(const std::vector<SampleFormat>& mySample);
+  MAbool WriteFiles(const std::vector<SampleFormat>& mySample);
 
   /// Read the event (virtual pure)
-  virtual bool WriteEvent(const EventFormat& myEvent,
+  virtual MAbool WriteEvent(const EventFormat& myEvent,
                           const SampleFormat& mySample);
 
   /// Finalize the event (virtual pure)
-  virtual bool WriteFoot(const SampleFormat& mySample);
-  virtual bool WriteFoot();
+  virtual MAbool WriteFoot(const SampleFormat& mySample);
+  virtual MAbool WriteFoot();
 
   /// Getting stream
   std::ostream* GetStream()

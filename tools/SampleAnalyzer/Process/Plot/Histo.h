@@ -146,11 +146,11 @@ class Histo : public PlotBase
   /// Returns 0 if all regions are failing (includes te case with 0 SR)
   /// Returns 1 if all regions are passing 
   // returns -1 otherwise
-  int AllSurviving()
+  MAint32 AllSurviving()
   {
     if (regions_.size() == 0) return 0;
-    bool FirstRegionSurvival = regions_[0]->IsSurviving();
-    for(unsigned int ii=1; ii < regions_.size(); ii++)
+    MAbool FirstRegionSurvival = regions_[0]->IsSurviving();
+    for(MAuint32 ii=1; ii < regions_.size(); ii++)
       if(regions_[ii]->IsSurviving() != FirstRegionSurvival) return -1;
     if(FirstRegionSurvival) return 1;
     else                    return 0;

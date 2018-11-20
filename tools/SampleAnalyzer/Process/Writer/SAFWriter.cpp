@@ -30,7 +30,7 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 // WriteHeader
 // -----------------------------------------------------------------------------
-bool SAFWriter::WriteHeader()
+MAbool SAFWriter::WriteHeader()
 {
   // Header
   *output_ << "<SAFheader>" << std::endl;
@@ -39,7 +39,7 @@ bool SAFWriter::WriteHeader()
   return true;
 }
 
-bool SAFWriter::WriteHeader(const SampleFormat& mySample)
+MAbool SAFWriter::WriteHeader(const SampleFormat& mySample)
 {
   // Header
   *output_ << "<SAFheader>" << std::endl;
@@ -111,11 +111,11 @@ bool SAFWriter::WriteHeader(const SampleFormat& mySample)
 // -----------------------------------------------------------------------------
 // WriteFiles
 // -----------------------------------------------------------------------------
-bool SAFWriter::WriteFiles(const std::vector<SampleFormat>& mySamples)
+MAbool SAFWriter::WriteFiles(const std::vector<SampleFormat>& mySamples)
 {
   // FileInfo
   *output_ << "<FileInfo>" << std::endl;
-  for (unsigned int i=0;i<mySamples.size();i++)
+  for (MAuint32 i=0;i<mySamples.size();i++)
   {
     output_->width(40); 
     *output_ << std::left << "\""+mySamples[i].name()+"\"";
@@ -143,7 +143,7 @@ bool SAFWriter::WriteFiles(const std::vector<SampleFormat>& mySamples)
   *output_ << std::endl;
 
   // data
-  for (unsigned int i=0;i<mySamples.size();i++)
+  for (MAuint32 i=0;i<mySamples.size();i++)
   {
     if (mySamples[i].mc()!=0)
     {
@@ -197,7 +197,7 @@ bool SAFWriter::WriteFiles(const std::vector<SampleFormat>& mySamples)
 // -----------------------------------------------------------------------------
 // WriteEvent
 // -----------------------------------------------------------------------------
-bool SAFWriter::WriteEvent(const EventFormat& myEvent,
+MAbool SAFWriter::WriteEvent(const EventFormat& myEvent,
                            const SampleFormat& mySample)
 {
   if (myEvent.mc()==0 && mySample.mc()==0) return true;
@@ -208,14 +208,14 @@ bool SAFWriter::WriteEvent(const EventFormat& myEvent,
 // -----------------------------------------------------------------------------
 // WriteFoot
 // -----------------------------------------------------------------------------
-bool SAFWriter::WriteFoot(const SampleFormat& mySample)
+MAbool SAFWriter::WriteFoot(const SampleFormat& mySample)
 {
   *output_ << "<SAFfooter>" << std::endl;
   *output_ << "</SAFfooter>" << std::endl;
   return true;
 }
 
-bool SAFWriter::WriteFoot()
+MAbool SAFWriter::WriteFoot()
 {
   *output_ << "<SAFfooter>" << std::endl;
   *output_ << "</SAFfooter>" << std::endl;

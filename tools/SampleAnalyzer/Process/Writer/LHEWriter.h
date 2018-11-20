@@ -63,20 +63,20 @@ class LHEWriter : public WriterTextBase
   {}
 
   /// Read the sample (virtual)
-  virtual bool WriteHeader(const SampleFormat& mySample);
+  virtual MAbool WriteHeader(const SampleFormat& mySample);
 
   /// Read the event (virtual)
-  virtual bool WriteEvent(const EventFormat& myEvent, 
+  virtual MAbool WriteEvent(const EventFormat& myEvent, 
                           const SampleFormat& mySample);
 
   /// Finalize the event (virtual)
-  virtual bool WriteFoot(const SampleFormat& mySample);
+  virtual MAbool WriteFoot(const SampleFormat& mySample);
  
  private:
 
   /// Writing event global information
-  bool WriteEventHeader(const EventFormat& myEvent,
-                        unsigned int nevents);
+  MAbool WriteEventHeader(const EventFormat& myEvent,
+                        MAuint32 nevents);
 
   /// Writing a particle
   void WriteParticle(const MCParticleFormat& myPart, MAint32 mother1, MAint32 mother2, 

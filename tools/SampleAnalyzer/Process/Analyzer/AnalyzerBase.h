@@ -65,7 +65,7 @@ class AnalyzerBase
   std::string name_;
 
   /// Weighted events mode
-  bool weighted_events_;
+  MAbool weighted_events_;
 
   /// A RS manager is associated with each analysis
   RegionSelectionManager manager_;
@@ -89,7 +89,7 @@ class AnalyzerBase
   { }
 
   /// Initialize (common part to all analyses)
-  bool PreInitialize(const std::string& outputName, 
+  MAbool PreInitialize(const std::string& outputName, 
                      const Configuration* cfg)
   {
     weighted_events_ = !cfg->IsNoEventWeight();
@@ -98,7 +98,7 @@ class AnalyzerBase
   }
 
   /// Initialize (specific to the analysis)
-  virtual bool Initialize(const Configuration& cfg,                  
+  virtual MAbool Initialize(const Configuration& cfg,                  
              const std::map<std::string,std::string>& parameters)=0;
 
   /// PreFinalize
@@ -123,7 +123,7 @@ class AnalyzerBase
   }
 
   /// Execute
-  bool PreExecute(const SampleFormat& mySample,
+  MAbool PreExecute(const SampleFormat& mySample,
                   const EventFormat& myEvent)
   { 
     PHYSICS->Id->SetFinalState(myEvent.mc());
@@ -131,7 +131,7 @@ class AnalyzerBase
     return true;
   }
 
-  virtual bool Execute(SampleFormat& mySample,
+  virtual MAbool Execute(SampleFormat& mySample,
                        const EventFormat& myEvent)=0;
 
   /// Accessor to analysis name

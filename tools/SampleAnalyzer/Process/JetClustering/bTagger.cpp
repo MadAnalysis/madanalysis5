@@ -27,20 +27,22 @@
 #include "SampleAnalyzer/Process/JetClustering/bTagger.h"
 #include <cmath>
 
+
 using namespace MA5;
+
 
 void bTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
 {
   std::vector<RecJetFormat*> Candidates;
 
   // Matching b-quarks to jets
-  for (unsigned int i=0;i<myEvent.rec()->MCBquarks_.size();i++)
+  for (MAuint32 i=0;i<myEvent.rec()->MCBquarks_.size();i++)
   {
     RecJetFormat* tag = 0;
     MAfloat64 DeltaRmax = DeltaRmax_;
 
     // loop on the jets
-    for (unsigned int j=0;j<myEvent.rec()->jets().size();j++)
+    for (MAuint32 j=0;j<myEvent.rec()->jets().size();j++)
     {
       if (myEvent.rec()->jets()[j].pt()<1e-10) continue;
       MAfloat32 DeltaR = myEvent.rec()->MCBquarks_[i]->dr(myEvent.rec()->jets()[j]);
@@ -59,20 +61,20 @@ void bTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
   }
 
   // Tagging the b-jet 
-  for (unsigned int i=0;i<Candidates.size();i++)
+  for (MAuint32 i=0;i<Candidates.size();i++)
   {
     Candidates[i]->true_btag_ = true;
   }
   Candidates.clear();
 
   // Matching c-quarks to jets
-  for (unsigned int i=0;i<myEvent.rec()->MCCquarks_.size();i++)
+  for (MAuint32 i=0;i<myEvent.rec()->MCCquarks_.size();i++)
   {
     RecJetFormat* tag = 0;
     MAfloat64 DeltaRmax = DeltaRmax_;
 
     // loop on the jets
-    for (unsigned int j=0;j<myEvent.rec()->jets().size();j++)
+    for (MAuint32 j=0;j<myEvent.rec()->jets().size();j++)
     {
       if (myEvent.rec()->jets()[j].pt()<1e-10) continue;
 
@@ -93,14 +95,14 @@ void bTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
   }
 
   // Tagging the c-jet 
-  for (unsigned int i=0;i<Candidates.size();i++)
+  for (MAuint32 i=0;i<Candidates.size();i++)
   {
     if (Candidates[i]->true_btag_) continue;
     Candidates[i]->true_ctag_ = true;
   }
 
   // Identification and misidentification
-  for (unsigned int i=0;i<myEvent.rec()->jets().size();i++)
+  for (MAuint32 i=0;i<myEvent.rec()->jets().size();i++)
   {
     RecJetFormat* jet = &(myEvent.rec()->jets()[i]);
 
@@ -133,11 +135,11 @@ void bTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
 { 
   std::vector<RecJetFormat*> Candidates;
 
-  for (unsigned int i=0;i<myEvent.rec()->jets().size();i++)
+  for (MAuint32 i=0;i<myEvent.rec()->jets().size();i++)
   {
     MAbool b = false;
 
-    for (unsigned int j=0;j<myEvent.rec()->jets()[i].Constituents_.size();j++)
+    for (MAuint32 j=0;j<myEvent.rec()->jets()[i].Constituents_.size();j++)
     {
       MAint32 N = myEvent.rec()->jets()[i].Constituents_[j];
       MCParticleFormat* particle = & myEvent.mc()->particles()[N];
@@ -198,7 +200,7 @@ void bTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
     }
   }
 
-  for (unsigned int i=0;i<Candidates.size();i++)
+  for (MAuint32 i=0;i<Candidates.size();i++)
   {
     Candidates[i]->btag_ = true;
   }
@@ -209,11 +211,11 @@ void bTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
   std::vector<RecJetFormat*> Candidates;
 
   // jet preselection using method 2
-  for (unsigned int i=0;i<myEvent.rec()->jets().size();i++)
+  for (MAuint32 i=0;i<myEvent.rec()->jets().size();i++)
   {
     MAbool b = false;
 
-    for (unsigned int j=0;j<myEvent.rec()->jets()[i].Constituents_.size();j++)
+    for (MAuint32 j=0;j<myEvent.rec()->jets()[i].Constituents_.size();j++)
     {
       MAint32 N = myEvent.rec()->jets()[i].Constituents_[j];
       MCParticleFormat* particle = & myEvent.mc()->particles()[N];
@@ -246,7 +248,7 @@ void bTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
   }
 
   // b-tagging using method 1
-  for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
+  for (MAuint32 i=0;i<myEvent.mc()->particles().size();i++)
   {
     if (std::abs(myEvent.mc()->particles()[i].pdgid())!=5) continue;
 
@@ -254,7 +256,7 @@ void bTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
 
     MAuint32 k = 0;
 
-    for (unsigned int j=Candidates.size();j>0;j--)
+    for (MAuint32 j=Candidates.size();j>0;j--)
     {
       MAfloat32 DeltaR = myEvent.mc()->particles()[i].dr(Candidates[j-1]);
 
@@ -275,7 +277,7 @@ void bTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
       }
     }
 
-    for (unsigned int j=0;j<k;j++)
+    for (MAuint32 j=0;j<k;j++)
     {
       Candidates[Candidates.size()-1]->btag_=true;
       Candidates.pop_back();
@@ -287,7 +289,7 @@ void bTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
 
 MAbool bTagger::IsLastBHadron(MCParticleFormat* part, EventFormat& myEvent)
 {
-  for (unsigned int i=0; i<myEvent.mc()->particles().size(); i++)
+  for (MAuint32 i=0; i<myEvent.mc()->particles().size(); i++)
   {
     if (myEvent.mc()->particles()[i].mothers()[0]== part)
     {
@@ -298,7 +300,7 @@ MAbool bTagger::IsLastBHadron(MCParticleFormat* part, EventFormat& myEvent)
 }
 
 
-bool bTagger::SetParameter(const std::string& key, 
+MAbool bTagger::SetParameter(const std::string& key, 
                            const std::string& value, 
                            std::string header)
 {

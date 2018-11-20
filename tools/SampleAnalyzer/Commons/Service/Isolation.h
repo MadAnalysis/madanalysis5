@@ -73,30 +73,30 @@ class Isolation
   std::vector<const RecJetFormat*>
     JetCleaning(const std::vector<const RecJetFormat*>& uncleaned_jets,
                 const std::vector<const RecLeptonFormat*>& leptons,
-                double DeltaRmax = 0.1, double PTmin = 0.5) const;
+                MAfloat64 DeltaRmax = 0.1, MAfloat64 PTmin = 0.5) const;
 
   std::vector<const RecJetFormat*>
     JetCleaning(const std::vector<const RecJetFormat*>& uncleaned_jets,
                 const std::vector<const RecPhotonFormat*>& photons,
-                double DeltaRmax = 0.1, double PTmin = 0.5) const;
+                MAfloat64 DeltaRmax = 0.1, MAfloat64 PTmin = 0.5) const;
 
   std::vector<const RecJetFormat*>
     JetCleaning(const std::vector<RecJetFormat>& uncleaned_jets,
                 const std::vector<const RecLeptonFormat*>& leptons,
-                double DeltaRmax = 0.1, double PTmin = 0.5) const
+                MAfloat64 DeltaRmax = 0.1, MAfloat64 PTmin = 0.5) const
   {
     std::vector<const RecJetFormat*> uncleaned_jets2(uncleaned_jets.size());
-    for (unsigned int i=0;i<uncleaned_jets.size();i++) uncleaned_jets2[i]=&(uncleaned_jets[i]); 
+    for (MAuint32 i=0;i<uncleaned_jets.size();i++) uncleaned_jets2[i]=&(uncleaned_jets[i]); 
     return JetCleaning(uncleaned_jets2,leptons,DeltaRmax,PTmin);
   }
 
   std::vector<const RecJetFormat*>
     JetCleaning(const std::vector<RecJetFormat>& uncleaned_jets,
                 const std::vector<const RecPhotonFormat*>& photons,
-                double DeltaRmax = 0.1, double PTmin = 0.5) const
+                MAfloat64 DeltaRmax = 0.1, MAfloat64 PTmin = 0.5) const
   {
     std::vector<const RecJetFormat*> uncleaned_jets2(uncleaned_jets.size());
-    for (unsigned int i=0;i<uncleaned_jets.size();i++) uncleaned_jets2[i]=&(uncleaned_jets[i]); 
+    for (MAuint32 i=0;i<uncleaned_jets.size();i++) uncleaned_jets2[i]=&(uncleaned_jets[i]); 
     return JetCleaning(uncleaned_jets2,photons,DeltaRmax,PTmin);
   }
 

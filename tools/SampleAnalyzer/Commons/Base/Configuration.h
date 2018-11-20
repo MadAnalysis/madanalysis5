@@ -77,7 +77,7 @@ class Configuration
     { }
 
     /// Initialization
-    MAbool Initialize(int &argc, char *argv[]);
+    MAbool Initialize(MAint32 &argc, MAchar *argv[]);
  
     /// Printing the configuration status
     void Display();

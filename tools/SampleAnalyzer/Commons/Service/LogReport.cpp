@@ -54,7 +54,7 @@ void LogReport::WriteGenericReport(LogStream& os) const
 
   // Header
   os << "+";
-  for (unsigned int i=0;i<118;i++) os << "-";
+  for (MAuint32 i=0;i<118;i++) os << "-";
   os << "+" << endmsg;
     
   std::string title;
@@ -62,13 +62,13 @@ void LogReport::WriteGenericReport(LogStream& os) const
   else title="LogReport-" + Name_;
   index=39-(title.size()/2); 
   os << "|";
-  for (unsigned int i=0;i<(index-1);i++) os << " ";
+  for (MAuint32 i=0;i<(index-1);i++) os << " ";
   os << title;
-  for (unsigned int i=(index+title.size());i<119;i++) os << " ";
+  for (MAuint32 i=(index+title.size());i<119;i++) os << " ";
   os << "|" << endmsg;
 
   os << "+";
-  for (unsigned int i=0;i<118;i++) os << "-";
+  for (MAuint32 i=0;i<118;i++) os << "-";
   os << "+" << endmsg;
 
   // Legend

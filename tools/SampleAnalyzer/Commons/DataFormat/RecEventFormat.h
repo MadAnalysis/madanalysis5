@@ -94,23 +94,23 @@ class RecEventFormat
   std::vector<RecJetFormat>    genjets_;
 
   /// Collection of reconstructed tracks
-  bool tracks_ok_;
+  MAbool tracks_ok_;
   std::vector<RecTrackFormat>  tracks_;
 
   /// Reconstructed towers
-  bool towers_ok_;
+  MAbool towers_ok_;
   std::vector<RecTowerFormat> towers_;
 
   /// Collection of reconstructed EFlow tracks
-  bool EFlowTracks_ok_;
+  MAbool EFlowTracks_ok_;
   std::vector<RecTrackFormat> EFlowTracks_;
 
   /// Collection of reconstructed EFlow tracks
-  bool EFlowPhotons_ok_;
+  MAbool EFlowPhotons_ok_;
   std::vector<RecParticleFormat> EFlowPhotons_;
 
   /// Collection of reconstructed EFlow tracks
-  bool EFlowNeutralHadrons_ok_;
+  MAbool EFlowNeutralHadrons_ok_;
   std::vector<RecParticleFormat> EFlowNeutralHadrons_;
  
   /// Reconstructed Missing Transverse Energy

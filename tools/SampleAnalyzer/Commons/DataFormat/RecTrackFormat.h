@@ -69,7 +69,7 @@ class RecTrackFormat : public RecParticleFormat
   // -------------------------------------------------------------
  protected:
 
-  signed int pdgid_;   /// PDG identity code
+  MAint32 pdgid_;   /// PDG identity code
   MAbool charge_;      /// electric charge
   MAfloat64 etaOuter_;  /// eta @ first layer of calo
   MAfloat64 phiOuter_;  /// phi @ first layer of calo
@@ -112,7 +112,7 @@ class RecTrackFormat : public RecParticleFormat
   }
 
   /// Accessor to the pdgid
-  const signed int pdgid() const
+  const MAint32 pdgid() const
   {return pdgid_;}
 
   /// Accessor to etaCalo
@@ -124,7 +124,7 @@ class RecTrackFormat : public RecParticleFormat
   {return phiOuter_;}
 
   /// Accessor to charge
-  const int charge() const
+  const MAint32 charge() const
   {if (charge_) return +1; else return -1;}
 
   /// Accessor to charge

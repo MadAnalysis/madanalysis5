@@ -98,9 +98,9 @@ DelphesDataFormat::~DelphesDataFormat()
 // -----------------------------------------------------------------------------
 // Getentry
 // -----------------------------------------------------------------------------
-bool DelphesDataFormat::GetEntry(MAint64 treeEntry)
+MAbool DelphesDataFormat::GetEntry(MAint64 treeEntry)
 {
-  bool test = true;
+  MAbool test = true;
   if (branchFatJet_!=0)       test &= (branchFatJet_       -> GetEntry(treeEntry) >=0);
   if (branchJet_!=0)          test &= (branchJet_          -> GetEntry(treeEntry) >=0);
   if (branchElectron_!=0)     test &= (branchElectron_     -> GetEntry(treeEntry) >=0);
@@ -155,7 +155,7 @@ void DelphesDataFormat::InitializeBranch(TTree* tree)
   {
     TIter next(branches);
     TBranch* mybranch=0;
-    while(mybranch=dynamic_cast<TBranch*>(next()))
+    while((mybranch=dynamic_cast<TBranch*>(next())))
     {
 //      std::cout << mybranch->GetClassName() << " - " << mybranch->GetName() << std::endl;
     }
@@ -220,14 +220,14 @@ void DelphesDataFormat::InitializeBranch(TTree* tree)
 // -----------------------------------------------------------------------------
 // Initialize Datum
 // -----------------------------------------------------------------------------
-bool DelphesDataFormat::InitializeData(TBranch*& branch,TClonesArray*& array)
+MAbool DelphesDataFormat::InitializeData(TBranch*& branch,TClonesArray*& array)
 {
   // Convert to BranchElement
   TBranchElement* element = dynamic_cast<TBranchElement*>(branch);
   if (element==0) return false;
 
   // Get ClassInformation
-  const char *className = element->GetClonesName();
+  const MAchar *className = element->GetClonesName();
   MAint32 size = element->GetMaximum();
   TClass *cl = gROOT->GetClass(className);
   if (cl==0) return false;

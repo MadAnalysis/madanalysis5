@@ -106,9 +106,9 @@ class DisplayService
   void endCerrRedirection();
 
   /// Redirecting a stringstream to a file
-  bool redirectToFile(std::stringstream& str,
+  MAbool redirectToFile(std::stringstream& str,
                       const std::string& filename,
-                      bool recreate=true);
+                      MAbool recreate=true);
 
 };
 

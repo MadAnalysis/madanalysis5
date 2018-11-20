@@ -66,7 +66,7 @@ class DelphesMemoryInterface
   TObjArray* EFlowNeutral_;
 
    // Switch for MA5card
-  bool delphesMA5card_;
+  MAbool delphesMA5card_;
 
   /// Constructor without arguments
   DelphesMemoryInterface();
@@ -80,13 +80,13 @@ class DelphesMemoryInterface
   /// Print -- DEBUG --
   static void Print(TFolder* delphesFolder);
 
-  void Initialize(TFolder* delphesFolder, const std::map<std::string,std::string>& table, bool MA5card);
+  void Initialize(TFolder* delphesFolder, const std::map<std::string,std::string>& table, MAbool MA5card);
 
   TObjArray* GetCollection(TFolder* delphesFolder, 
                            const std::map<std::string,std::string>& table,
                            const std::string& name);
 
-  bool TransfertDELPHEStoMA5(SampleFormat& mySample, EventFormat& myEvent);
+  MAbool TransfertDELPHEStoMA5(SampleFormat& mySample, EventFormat& myEvent);
 
 };
 

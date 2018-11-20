@@ -127,11 +127,11 @@ void ProgressBar::Display(MAuint32 ind)
   // Preparing string to display
   std::string todisplay(Nstep_+2,' ');
   todisplay[0]='[';
-  for (unsigned int i=0;i<ind;i++) todisplay[i+1] = '=';
+  for (MAuint32 i=0;i<ind;i++) todisplay[i+1] = '=';
   todisplay[ind+1]='>';
   todisplay[Nstep_+1]=']'; // overwrite the character '>' if ind=Nstep_
 
-  bool newline=false;
+  MAbool newline=false;
   // Go back to the line ? 
   if (ind!=0 && !FirstTime_)
   {
@@ -141,7 +141,7 @@ void ProgressBar::Display(MAuint32 ind)
   }
 
   // Adding header
-  unsigned int toremove = (header+todisplay).size();
+  MAuint32 toremove = (header+todisplay).size();
   todisplay = header + "\x1b[34m"+ todisplay + "\x1b[0m";
 
   // Displaying

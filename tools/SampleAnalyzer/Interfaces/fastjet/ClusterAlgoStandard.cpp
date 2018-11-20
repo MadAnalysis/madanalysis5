@@ -32,12 +32,12 @@
 
 using namespace MA5;
 
-bool ClusterAlgoStandard::SetParameter(const std::string& key, const std::string& value)
+MAbool ClusterAlgoStandard::SetParameter(const std::string& key, const std::string& value)
 {
   // radius
   if (key=="r")
   {
-    float tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
@@ -49,7 +49,7 @@ bool ClusterAlgoStandard::SetParameter(const std::string& key, const std::string
   // ptmin
   else if (key=="ptmin")
   {
-    float tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
@@ -61,7 +61,7 @@ bool ClusterAlgoStandard::SetParameter(const std::string& key, const std::string
   // p
   else if (key=="p")
   {
-    float tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
@@ -71,7 +71,7 @@ bool ClusterAlgoStandard::SetParameter(const std::string& key, const std::string
   // exclusive
   else if (key=="exclusive")
   {
-    int tmp=0;
+    MAint32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
@@ -91,7 +91,7 @@ bool ClusterAlgoStandard::SetParameter(const std::string& key, const std::string
 }
 
 
-bool ClusterAlgoStandard::Initialize()
+MAbool ClusterAlgoStandard::Initialize()
 { 
   // Creating Jet Definition
   if (JetAlgorithm_=="kt")

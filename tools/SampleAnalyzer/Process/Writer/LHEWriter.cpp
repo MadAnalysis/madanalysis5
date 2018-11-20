@@ -75,7 +75,7 @@ MAuint32 Find(const MCParticleFormat* part,
             const std::vector<const MCParticleFormat*>& collection)
 {
   if (part==0) return 0;
-  for (unsigned int i=0;i<collection.size();i++)
+  for (MAuint32 i=0;i<collection.size();i++)
     if (collection[i]==part) return i+1;
   return 0;
 }
@@ -84,9 +84,9 @@ MAuint32 FindDeeply(const MCParticleFormat* part,
             const std::vector<const MCParticleFormat*>& collection)
 {
   if (part==0) return 0;
-  bool test=false;
+  MAbool test=false;
   const MCParticleFormat* thepart = part;
-  unsigned int counter=0;
+  MAuint32 counter=0;
 
   while(!test)
   {
@@ -121,7 +121,7 @@ MAuint32 FindDeeply(const MCParticleFormat* part,
     }
   }
   if (thepart==0) return 0;
-  for (unsigned int i=0;i<collection.size();i++)
+  for (MAuint32 i=0;i<collection.size();i++)
     if (collection[i]==thepart) return i+1;
   return 0;
 }
@@ -180,7 +180,7 @@ std::string LHEWriter::FortranFormat_DoublePrecision(MAfloat64 value,MAuint32 pr
 
 
 /// Read the sample
-bool LHEWriter::WriteHeader(const SampleFormat& mySample)
+MAbool LHEWriter::WriteHeader(const SampleFormat& mySample)
 {
   // Opening tag
   *output_ << "<LesHouchesEvents version=\"1.0\">" << std::endl;
@@ -308,7 +308,7 @@ bool LHEWriter::WriteHeader(const SampleFormat& mySample)
     *output_ << "Original header:" << std::endl;
     *output_ << "" << std::endl;
 
-    for (unsigned int i=0;i<mySample.header().size();i++)
+    for (MAuint32 i=0;i<mySample.header().size();i++)
       *output_ << mySample.header()[i] << std::endl;
   }
   *output_ << "-->" << std::endl;
@@ -359,7 +359,7 @@ bool LHEWriter::WriteHeader(const SampleFormat& mySample)
       *output_ << std::setw(2)  << std::right << mySample.mc()->processes().size();
     }
     *output_ << std::endl;
-    for (unsigned int i=0;i<mySample.mc()->processes().size();i++)
+    for (MAuint32 i=0;i<mySample.mc()->processes().size();i++)
     {
       *output_ << std::setw(19) << std::right << LHEWriter::FortranFormat_DoublePrecision(mySample.mc()->processes_[i].xsectionMean_)  << " ";
       *output_ << std::setw(18) << std::right << LHEWriter::FortranFormat_DoublePrecision(mySample.mc()->processes_[i].xsectionError_) << " ";
@@ -395,7 +395,7 @@ MAint32 GetMotherIndex(MAint32 index)
 }
 
 /// Read the event
-bool LHEWriter::WriteEvent(const EventFormat& myEvent, 
+MAbool LHEWriter::WriteEvent(const EventFormat& myEvent, 
                            const SampleFormat& mySample)
 {
   // FirstEvent
@@ -424,7 +424,7 @@ bool LHEWriter::WriteEvent(const EventFormat& myEvent,
   // -> hypothesis : input = HEP
   else if (myEvent.mc()!=0 && myEvent.rec()!=0)
   {
-    for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
+    for (MAuint32 i=0;i<myEvent.mc()->particles().size();i++)
     {
       if ( InitialMCParticleToSave(myEvent.mc()->particles()[i],mySample) ||
            MCParticleToSave(myEvent.mc()->particles()[i],mySample) ) counter++;
@@ -458,12 +458,12 @@ bool LHEWriter::WriteEvent(const EventFormat& myEvent,
     }
     
     // Writing each particle
-    for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
+    for (MAuint32 i=0;i<myEvent.mc()->particles().size();i++)
     {
       particles.push_back(LHEParticleFormat());
       const MCParticleFormat* part = &(myEvent.mc()->particles()[i]);
       std::vector<MAuint32> mothup(2,0);
-      for (unsigned int m=0;m<part->mothers().size();m++)
+      for (MAuint32 m=0;m<part->mothers().size();m++)
       {
         if (m>=2) continue;
         mothup[m]=gentable[part->mothers()[m]];
@@ -481,8 +481,8 @@ bool LHEWriter::WriteEvent(const EventFormat& myEvent,
   // -> hypothesis : input = HEP
   if (myEvent.mc()!=0 && myEvent.rec()!=0)
   {
-    bool firstpart=true;
-    for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
+    MAbool firstpart=true;
+    for (MAuint32 i=0;i<myEvent.mc()->particles().size();i++)
     {
       const MCParticleFormat* part = &(myEvent.mc()->particles()[i]);
  
@@ -516,35 +516,35 @@ bool LHEWriter::WriteEvent(const EventFormat& myEvent,
   // Writing REC particles
   if (myEvent.rec()!=0)
   {
-    for (unsigned int i=0;i<myEvent.rec()->muons().size();i++)
+    for (MAuint32 i=0;i<myEvent.rec()->muons().size();i++)
     {
       particles.push_back(LHEParticleFormat());
       MAint32 mother = 0; 
       if (mySample.sampleGenerator()!=MA5GEN::HERWIG6) mother=FindDeeply(myEvent.rec()->muons()[i].mc(),pointers);
       WriteMuon(myEvent.rec()->muons()[i],particles.back(),mother);
     }
-    for (unsigned int i=0;i<myEvent.rec()->electrons().size();i++)
+    for (MAuint32 i=0;i<myEvent.rec()->electrons().size();i++)
     {
       particles.push_back(LHEParticleFormat());
       MAint32 mother = 0; 
       if (mySample.sampleGenerator()!=MA5GEN::HERWIG6) mother=FindDeeply(myEvent.rec()->electrons()[i].mc(),pointers);
       WriteElectron(myEvent.rec()->electrons()[i],particles.back(),mother);
     }
-    for (unsigned int i=0;i<myEvent.rec()->taus().size();i++)
+    for (MAuint32 i=0;i<myEvent.rec()->taus().size();i++)
     {
       particles.push_back(LHEParticleFormat());
       MAint32 mother = 0; 
       if (mySample.sampleGenerator()!=MA5GEN::HERWIG6) mother=FindDeeply(myEvent.rec()->taus()[i].mc(),pointers);
       WriteTau(myEvent.rec()->taus()[i],particles.back(),mother);
     }
-    for (unsigned int i=0;i<myEvent.rec()->jets().size();i++)
+    for (MAuint32 i=0;i<myEvent.rec()->jets().size();i++)
     {
       particles.push_back(LHEParticleFormat()); 
       MAint32 mother = 0; 
       if (mySample.sampleGenerator()!=MA5GEN::HERWIG6) mother=FindDeeply(myEvent.rec()->jets()[i].mc(),pointers);
       WriteJet(myEvent.rec()->jets()[i],particles.back(),mother);
     }
-    for (unsigned int i=0;i<myEvent.rec()->photons().size();i++)
+    for (MAuint32 i=0;i<myEvent.rec()->photons().size();i++)
     {
       particles.push_back(LHEParticleFormat());
       MAint32 mother = 0; 
@@ -556,14 +556,14 @@ bool LHEWriter::WriteEvent(const EventFormat& myEvent,
   }
 
   // Event foot
-  for (unsigned int i=0;i<particles.size();i++) particles[i].Print(i+1, output_);
+  for (MAuint32 i=0;i<particles.size();i++) particles[i].Print(i+1, output_);
   *output_ << "</event>" << std::endl;
   return true; 
 }
 
 
 /// Finalize the event
-bool LHEWriter::WriteFoot(const SampleFormat& mySample)
+MAbool LHEWriter::WriteFoot(const SampleFormat& mySample)
 {
   // FirstEvent
   if (FirstEvent_) return false;
@@ -575,14 +575,14 @@ bool LHEWriter::WriteFoot(const SampleFormat& mySample)
 
 
 /// Writing event global information
-bool LHEWriter::WriteEventHeader(const EventFormat& myEvent,
-                                 unsigned int nevents)
+MAbool LHEWriter::WriteEventHeader(const EventFormat& myEvent,
+                                 MAuint32 nevents)
 {
   if (myEvent.mc()!=0)
   {
     *output_ << std::setw(2)  << std::right << nevents << " ";
     *output_ << std::setw(3)  << std::right << myEvent.mc()->processId_ << " ";
-    double myweight = myEvent.mc()->weight_;
+    MAfloat64 myweight = myEvent.mc()->weight_;
     if (myweight==0) myweight=1; 
     *output_ << std::setw(14) << std::right << LHEWriter::FortranFormat_SimplePrecision(myweight)                << " ";
     *output_ << std::setw(14) << std::right << LHEWriter::FortranFormat_SimplePrecision(myEvent.mc()->scale_)    << " ";

@@ -41,7 +41,7 @@ class LHEReader : public ReaderTextBase
   // -------------------------------------------------------------
  protected:
 
-  bool firstevent_;
+  MAbool firstevent_;
   std::vector< std::pair<MAint32,MAint32> > mothers_;
 
   // -------------------------------------------------------------
@@ -58,7 +58,7 @@ class LHEReader : public ReaderTextBase
   { }
 
   /// Initialize
-  virtual bool Initialize(const std::string& rawfilename,
+  virtual MAbool Initialize(const std::string& rawfilename,
                           const Configuration& cfg)
   { 
     firstevent_=false;
@@ -66,20 +66,20 @@ class LHEReader : public ReaderTextBase
   }
 
   /// Finalize
-  virtual bool Finalize()
+  virtual MAbool Finalize()
   { return ReaderTextBase::Finalize(); }
 
   //! Read the header
-  virtual bool ReadHeader(SampleFormat& mySample);
+  virtual MAbool ReadHeader(SampleFormat& mySample);
 
   //! Finalize the header
-  virtual bool FinalizeHeader(SampleFormat& mySample);
+  virtual MAbool FinalizeHeader(SampleFormat& mySample);
 
   //! Read the event
   virtual StatusCode::Type ReadEvent(EventFormat& myEvent, SampleFormat& mySample);
 
   //! Finalize the event
-  virtual bool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent);
+  virtual MAbool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent);
 
 
  private:

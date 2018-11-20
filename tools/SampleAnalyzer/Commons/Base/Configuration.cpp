@@ -40,8 +40,8 @@ using namespace MA5;
 // Initializing static data members
 // -----------------------------------------------------------------------------
 // DO NOT TOUCH THESE LINES
-const std::string Configuration::sampleanalyzer_version_ = "1.7.13";
-const std::string Configuration::sampleanalyzer_date_    = "2018/10/14";
+const std::string Configuration::sampleanalyzer_version_ = "1.7.14";
+const std::string Configuration::sampleanalyzer_date_    = "2018/11/20";
 // DO NOT TOUCH THESE LINES
 
 // -----------------------------------------------------------------------------
@@ -69,7 +69,7 @@ void Configuration::Lower(std::string& word)
 {
   std::transform(word.begin(), word.end(), 
                  word.begin(), 
-                 (int (*)(int))std::tolower);
+                 (MAint32 (*)(MAint32))std::tolower);
 }
 
 
@@ -112,7 +112,7 @@ void Configuration::DecodeMA5version(const std::string& option)
 // -----------------------------------------------------------------------------
 // Initialize
 // -----------------------------------------------------------------------------
-bool Configuration::Initialize(int &argc, char *argv[])
+MAbool Configuration::Initialize(MAint32 &argc, MAchar *argv[])
 {
   // Checking number of arguments
   // <filelist> is compulsory
@@ -126,7 +126,7 @@ bool Configuration::Initialize(int &argc, char *argv[])
   // Decoding arguments
   for (MAuint32 i=1;i<static_cast<MAuint32>(argc);i++)
   {
-    // converting const char to string
+    // converting const characters into string
     std::string argument = std::string(argv[i]);
     Lower(argument);
 

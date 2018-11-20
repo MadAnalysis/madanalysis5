@@ -36,7 +36,7 @@ void WeightDefinition::AddGroup(std::string name, std::string combine)
                  combine.begin(), std::ptr_fun<int, int>(std::tolower));
     
   // Checking the 'combine' value
-  bool test = combine=="none" || combine=="gaussian" || combine=="hessian" || combine=="envelope";
+  MAbool test = combine=="none" || combine=="gaussian" || combine=="hessian" || combine=="envelope";
   try
   {
     if (!test) throw EXCEPTION_WARNING("The WeightGroup '"+name+
@@ -114,12 +114,12 @@ void WeightDefinition::Print() const
   INFO << "#Weights:      " << weights_.size() << endmsg;
 
   // Loop over WeightGroups
-  for (unsigned int j=0;j<groups_.size();j++)
+  for (MAuint32 j=0;j<groups_.size();j++)
   {
     INFO << "|- WeightGroup = '" << groups_[j].name << "' with combine='" << groups_[j].combine << "' " << endmsg;
 
     // Loop over Weights
-    for (unsigned int i=0;i<groups_[j].weights.size();i++)
+    for (MAuint32 i=0;i<groups_[j].weights.size();i++)
     {
       INFO << "  + Weight = " << groups_[j].weights[i]->id << " with name = '" << groups_[j].weights[i]->name << "'" << endmsg; 
     }

@@ -42,12 +42,12 @@ xdr_istream& xdr_istream::operator>>(std::string &s)
 
   if (eof()) return (*this);
 
-  char line[len];
+  MAchar line[len];
   sb_->sgetn(line, len);
   s=std::string(line,line+len);
 
   size_t pad = (4-len)&3; //change 4-len&3
-  char dummy[pad];
+  MAchar dummy[pad];
   sb_->sgetn(dummy,pad);
   return *this;
 }
@@ -60,7 +60,7 @@ xdr_istream& xdr_istream::operator>>(MAuint32 &v)
   if (eof()) return (*this);
 
   v=0;
-  for(int i=0;i<32; i+=8)
+  for(MAuint32 i=0;i<32; i+=8)
   {
     v<<=8;
     v += static_cast<MAuint32>(sb_->sbumpc());
@@ -90,7 +90,7 @@ xdr_istream& xdr_istream::operator>>(MAuint64 &v)
   if (eof()) return (*this);
 
   v=0;
-  for(int i=0;i<64; i+=8)
+  for(MAuint32 i=0;i<64; i+=8)
   {
     v<<=8;
     v += static_cast<MAuint64>(sb_->sbumpc());

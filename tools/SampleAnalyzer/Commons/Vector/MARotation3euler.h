@@ -113,8 +113,8 @@ class MARotation3euler
   MAVector3 operator* (const MAVector3& p) const
   {
     MAVector3 result;
-    for (unsigned int i=0;i<3;i++)
-      for (unsigned int j=0;j<3;j++)
+    for (MAuint32 i=0;i<3;i++)
+      for (MAuint32 j=0;j<3;j++)
       {
         result[i] = m_[i][j]*p[j];
       }

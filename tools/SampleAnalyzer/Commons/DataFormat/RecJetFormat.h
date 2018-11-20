@@ -131,23 +131,23 @@ class RecJetFormat : public RecParticleFormat
   {return true_btag_;}
 
   /// Setting a new true_btag_ value
-  void setTrueBtag(const bool& tag)
+  void setTrueBtag(const MAbool& tag)
   {true_btag_=tag;}
 
   /// Setting a new btag_ value
-  void setBtag(const bool& tag)
+  void setBtag(const MAbool& tag)
   {btag_=tag;}
 
   /// Setting a new true_ctag_ value
-  void setCtag(const bool& tag)
+  void setCtag(const MAbool& tag)
   {ctag_=tag;}
 
   /// Setting a new ctag_ value
-  void setTrueCtag(const bool& tag)
+  void setTrueCtag(const MAbool& tag)
   {true_ctag_=tag;}
 
   /// Add one constituent
-  void AddConstituent (const int& index)
+  void AddConstituent (const MAint32& index)
   {Constituents_.push_back(index);}
 
   /// get constituent collections

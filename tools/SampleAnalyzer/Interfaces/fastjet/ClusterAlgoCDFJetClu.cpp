@@ -33,12 +33,12 @@
 
 using namespace MA5;
 
-bool ClusterAlgoCDFJetClu::SetParameter(const std::string& key, const std::string& value)
+MAbool ClusterAlgoCDFJetClu::SetParameter(const std::string& key, const std::string& value)
 { 
   // radius
   if (key=="r")
   {
-    float tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
@@ -50,7 +50,7 @@ bool ClusterAlgoCDFJetClu::SetParameter(const std::string& key, const std::strin
   // ptmin
   else if (key=="ptmin")
   {
-    float tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
@@ -62,7 +62,7 @@ bool ClusterAlgoCDFJetClu::SetParameter(const std::string& key, const std::strin
   // OverlapThreshold
   else if (key=="overlapthreshold")
   {
-    float tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
@@ -75,7 +75,7 @@ bool ClusterAlgoCDFJetClu::SetParameter(const std::string& key, const std::strin
   // SeedThreshold
   else if (key=="seedthreshold")
   {
-    float tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
@@ -103,7 +103,7 @@ bool ClusterAlgoCDFJetClu::SetParameter(const std::string& key, const std::strin
 }
 
 
-bool ClusterAlgoCDFJetClu::Initialize()
+MAbool ClusterAlgoCDFJetClu::Initialize()
 {
   // Creating plugin
   fastjet::JetDefinition::Plugin* Plugin_ = new fastjet::CDFJetCluPlugin(R_, OverlapThreshold_, SeedThreshold_, Iratch_);

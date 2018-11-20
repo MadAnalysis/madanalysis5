@@ -32,7 +32,7 @@ using namespace MA5;
 
 MAbool TaggerBase::IsLast(MCParticleFormat* part, EventFormat& myEvent)
 {
-  for (unsigned int i=0; i<part->daughters().size(); i++)
+  for (MAuint32 i=0; i<part->daughters().size(); i++)
   {
     if (part->daughters()[i]->pdgid()==part->pdgid()) return false;
   }
@@ -42,7 +42,7 @@ MAbool TaggerBase::IsLast(MCParticleFormat* part, EventFormat& myEvent)
 
 
 
-bool TaggerBase::SetParameter(const std::string& key, 
+MAbool TaggerBase::SetParameter(const std::string& key, 
                               const std::string& value,
                               std::string header)
 {
@@ -50,12 +50,15 @@ bool TaggerBase::SetParameter(const std::string& key,
   if (key=="method")
   {
     MAint32 tmp=0;
-    std::stringstream str;
+    std::stringstream str,str2;
+    std::string Method_str;
     str << value;
     str >> tmp;
+    str2 << Method_;
+    str2 >> Method_str;
     try
     {
-      if (tmp<0 || tmp>3) throw EXCEPTION_WARNING("Available methods are 1, 2 and 3. Using the default value = "+Method_,"",0);
+      if (tmp<0 || tmp>3) throw EXCEPTION_WARNING("Available methods are 1, 2 and 3. Using the default value = "+Method_str,"",0);
       Method_=tmp;
     }
     catch(const std::exception& e)

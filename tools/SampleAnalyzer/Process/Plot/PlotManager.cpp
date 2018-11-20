@@ -35,7 +35,7 @@ using namespace MA5;
 /// Write the counters in a Text file
 void PlotManager::Write_TextFormat(SAFWriter& output)
 {
-  for (unsigned int i=0;i<plots_.size();i++)
+  for (MAuint32 i=0;i<plots_.size();i++)
     plots_[i]->Write_TextFormat(output.GetStream());
 }
 

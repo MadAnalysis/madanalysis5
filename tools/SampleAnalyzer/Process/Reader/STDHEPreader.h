@@ -98,34 +98,34 @@ class STDHEPreader : public ReaderTextBase
   void Reset();
 
   /// Initialize
-  virtual bool Initialize(const std::string& rawfilename,
+  virtual MAbool Initialize(const std::string& rawfilename,
                           const Configuration& cfg);
 
   /// Read the sample (virtual pure)
-  virtual bool ReadHeader(SampleFormat& mySample);
+  virtual MAbool ReadHeader(SampleFormat& mySample);
 
   /// Finalize the header (virtual pure)
-  virtual bool FinalizeHeader(SampleFormat& mySample);
+  virtual MAbool FinalizeHeader(SampleFormat& mySample);
 
   /// Read the event (virtual pure)
   virtual StatusCode::Type ReadEvent(EventFormat& myEvent, SampleFormat& mySample);
 
-  bool DecodeFileHeader(SampleFormat& mySample);
-  bool DecodeEventHeader(const std::string& evt_version);
-  bool DecodeEventTable (const std::string& evt_version);
-  bool DecodeSTDCM1     (const std::string& evt_version, SampleFormat& mySample);
-  bool DecodeEventData  (const std::string& evt_version,EventFormat& myEvent);
-  bool DecodeSTDHEP4    (const std::string& version,EventFormat& myEvent);
+  MAbool DecodeFileHeader(SampleFormat& mySample);
+  MAbool DecodeEventHeader(const std::string& evt_version);
+  MAbool DecodeEventTable (const std::string& evt_version);
+  MAbool DecodeSTDCM1     (const std::string& evt_version, SampleFormat& mySample);
+  MAbool DecodeEventData  (const std::string& evt_version,EventFormat& myEvent);
+  MAbool DecodeSTDHEP4    (const std::string& version,EventFormat& myEvent);
 
   /// Finalize the event (virtual pure)
-  virtual bool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent);
+  virtual MAbool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent);
 
   /// Finalize
-  virtual bool Finalize();
+  virtual MAbool Finalize();
 
  private :
   void SetVersion(const std::string& version);
-  bool CheckEvent(const EventFormat&, const std::string&);
+  MAbool CheckEvent(const EventFormat&, const std::string&);
 
 };
 

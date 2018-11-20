@@ -103,7 +103,7 @@ class TaggerBase
     MAbool IsLast(MCParticleFormat* part, EventFormat& myEvent);
 
     /// Set a parameter
-    virtual bool SetParameter(const std::string& key, const std::string& value, std::string header="");
+    virtual MAbool SetParameter(const std::string& key, const std::string& value, std::string header="");
 
     /// Function for identification
     MAbool IsIdentified() const

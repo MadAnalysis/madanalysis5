@@ -100,7 +100,7 @@ class PhysicsService
   { return Id->recConfig(); }
 
   /// Weights
-  inline double weights(const MCEventFormat* event) const
+  inline MAfloat64 weights(const MCEventFormat* event) const
   {
     return event->weight();
   }
@@ -109,12 +109,12 @@ class PhysicsService
   MAfloat32 MT(const MCParticleFormat& part, const MCEventFormat* event)
   {
     // Computing ET sum
-    double ETsum = part.et() + event->MET().et();
+    MAfloat64 ETsum = part.et() + event->MET().et();
 
     // Computing PT sum
     MALorentzVector pt = part.momentum() + event->MET().momentum();
 
-    double value = ETsum*ETsum - pt.Pt()*pt.Pt();
+    MAfloat64 value = ETsum*ETsum - pt.Pt()*pt.Pt();
     if (value<0) return 0;
     else return sqrt(value);
   }
@@ -153,7 +153,7 @@ class PhysicsService
 
     MAint32 npi = 0;
 
-    for (unsigned int i=0;i<part->daughters().size();i++)
+    for (MAuint32 i=0;i<part->daughters().size();i++)
     {
       MAint32 pdgid = part->daughters()[i]->pdgid();
       if (std::abs(pdgid) == 11) return 1;
@@ -164,7 +164,7 @@ class PhysicsService
       else if (std::abs(pdgid) == 20213)
       {
         MAint32 pi = 0;
-        for (unsigned int j=0;j<part->daughters()[i]->daughters().size();j++)
+        for (MAuint32 j=0;j<part->daughters()[i]->daughters().size();j++)
         {
           if (std::abs(part->daughters()[i]->daughters()[j]->pdgid()) == 211) pi++;
         }
@@ -174,7 +174,7 @@ class PhysicsService
       else if (std::abs(pdgid) == 211) npi++;
       else if (std::abs(pdgid) == 24)
       {
-        for (unsigned int j=0;j<part->daughters()[i]->daughters().size();j++)
+        for (MAuint32 j=0;j<part->daughters()[i]->daughters().size();j++)
         {
           if (std::abs(part->daughters()[i]->daughters()[j]->pdgid()) == 211) npi++;
         }
@@ -192,7 +192,7 @@ class PhysicsService
   }
 
   /// Compute srqt(S)
-  inline double SqrtS(const MCEventFormat* event) const
+  inline MAfloat64 SqrtS(const MCEventFormat* event) const
   {
     MALorentzVector q(0.,0.,0.,0.);
     for (MAuint32 i=0;i<event->particles().size();i++)

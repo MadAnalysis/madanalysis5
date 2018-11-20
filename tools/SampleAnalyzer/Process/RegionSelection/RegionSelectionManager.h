@@ -60,10 +60,10 @@ class RegionSelectionManager
   MultiRegionCounterManager cutmanager_;
 
   /// Index related to the number of surviving regions in an analysis
-  unsigned int NumberOfSurvivingRegions_;
+  MAuint32 NumberOfSurvivingRegions_;
 
   /// Weight associated with the processed event
-  double weight_;
+  MAfloat64 weight_;
 
   // -------------------------------------------------------------
   //                      method members
@@ -78,7 +78,7 @@ class RegionSelectionManager
   /// Reset
   void Reset()
   {
-    for (unsigned int i=0;i<regions_.size();i++)
+    for (MAuint32 i=0;i<regions_.size();i++)
       { if (regions_[i]!=0) delete regions_[i]; }
     regions_.clear();
     cutmanager_.Finalize();
@@ -98,11 +98,11 @@ class RegionSelectionManager
   PlotManager* GetPlotManager()
     { return &plotmanager_; }
 
-  double GetCurrentEventWeight()
+  MAfloat64 GetCurrentEventWeight()
     { return weight_; }
 
   /// Set method
-  void SetCurrentEventWeight(double weight)
+  void SetCurrentEventWeight(MAfloat64 weight)
     { weight_ = weight; }
 
   /// Adding a RegionSelection to the manager
@@ -120,13 +120,13 @@ class RegionSelectionManager
   }
 
   /// Getting ready for a new event
-  void InitializeForNewEvent(double EventWeight)
+  void InitializeForNewEvent(MAfloat64 EventWeight)
   {
     weight_ = EventWeight;
     NumberOfSurvivingRegions_ = regions_.size();
-    for (unsigned int i=0; i<regions_.size(); i++ )
+    for (MAuint32 i=0; i<regions_.size(); i++ )
       regions_[i]->InitializeForNewEvent(EventWeight);
-    for (unsigned int i=0; i < plotmanager_.GetNplots(); i++)
+    for (MAuint32 i=0; i < plotmanager_.GetNplots(); i++)
       plotmanager_.GetHistos()[i]->SetFreshEvent(true);
   }
 
@@ -169,9 +169,9 @@ class RegionSelectionManager
 
     // Creating the vector of SR of interests
     std::vector<RegionSelection*> myregions;
-    for(unsigned int i=0; i<NRS; i++)
+    for(MAuint32 i=0; i<NRS; i++)
     {
-      for(unsigned int j=0; j<regions_.size(); j++)
+      for(MAuint32 j=0; j<regions_.size(); j++)
       {
         if(regions_[j]->GetName().compare(RSnames[i])==0)
         {
@@ -215,7 +215,7 @@ class RegionSelectionManager
   }
 
   /// This method associates all signal regions with an histo
-  void AddHisto(const std::string&name,unsigned int nb,double xmin,double xmax)
+  void AddHisto(const std::string&name,MAuint32 nb,MAfloat64 xmin,MAfloat64 xmax)
   {
     // The name of the histo
     std::string myname=name;
@@ -230,7 +230,7 @@ class RegionSelectionManager
   }
 
   /// This method associates all signal regions with an histo
-  void AddHistoLogX(const std::string&name,unsigned int nb,double xmin,double xmax)
+  void AddHistoLogX(const std::string&name,MAuint32 nb,MAfloat64 xmin,MAfloat64 xmax)
   {
     // The name of the histo
     std::string myname=name;
@@ -245,7 +245,7 @@ class RegionSelectionManager
   }
 
   /// This method associates one single signal region with an histo
-  void AddHisto(const std::string&name,unsigned int nb,double xmin,double xmax,
+  void AddHisto(const std::string&name,MAuint32 nb,MAfloat64 xmin,MAfloat64 xmax,
     const std::string &RSname)
   {
     std::string RSnameA[] = {RSname};
@@ -253,7 +253,7 @@ class RegionSelectionManager
   }
 
   /// This method associates one single signal region with an histo
-  void AddHistoLogX(const std::string&name,unsigned int nb,double xmin,double xmax,
+  void AddHistoLogX(const std::string&name,MAuint32 nb,MAfloat64 xmin,MAfloat64 xmax,
     const std::string &RSname)
   {
     std::string RSnameA[] = {RSname};
@@ -267,8 +267,8 @@ class RegionSelectionManager
   }
 
   /// this method associates an arbitrary number of RS with an histo
-  template <int NRS> void AddHisto(const std::string&name, unsigned int nb,
-    double xmin,double xmax, std::string const(&RSnames)[NRS])
+  template <int NRS> void AddHisto(const std::string&name, MAuint32 nb,
+    MAfloat64 xmin,MAfloat64 xmax, std::string const(&RSnames)[NRS])
   {
     // The name of the histo
     std::string myname=name;
@@ -280,9 +280,9 @@ class RegionSelectionManager
     }
      // Creating the vector of SR of interests
     std::vector<RegionSelection*> myregions;
-    for(unsigned int i=0; i<NRS; i++)
+    for(MAuint32 i=0; i<NRS; i++)
     {
-      for(unsigned int j=0; j<regions_.size(); j++)
+      for(MAuint32 j=0; j<regions_.size(); j++)
       {
         if(regions_[j]->GetName().compare(RSnames[i])==0)
         {
@@ -308,8 +308,8 @@ class RegionSelectionManager
 
 
   /// this method associates an arbitrary number of RS with an histo
-  template <int NRS> void AddHistoLogX(const std::string&name, unsigned int nb,
-    double xmin,double xmax, std::string const(&RSnames)[NRS])
+  template <int NRS> void AddHistoLogX(const std::string&name, MAuint32 nb,
+    MAfloat64 xmin,MAfloat64 xmax, std::string const(&RSnames)[NRS])
   {
     // The name of the histo
     std::string myname=name;
@@ -321,9 +321,9 @@ class RegionSelectionManager
     }
      // Creating the vector of SR of interests
     std::vector<RegionSelection*> myregions;
-    for(unsigned int i=0; i<NRS; i++)
+    for(MAuint32 i=0; i<NRS; i++)
     {
-      for(unsigned int j=0; j<regions_.size(); j++)
+      for(MAuint32 j=0; j<regions_.size(); j++)
       {
         if(regions_[j]->GetName().compare(RSnames[i])==0)
         {
@@ -360,9 +360,9 @@ class RegionSelectionManager
     }
      // Creating the vector of SR of interests
     std::vector<RegionSelection*> myregions;
-    for(unsigned int i=0; i<NRS; i++)
+    for(MAuint32 i=0; i<NRS; i++)
     {
-      for(unsigned int j=0; j<regions_.size(); j++)
+      for(MAuint32 j=0; j<regions_.size(); j++)
       {
         if(regions_[j]->GetName().compare(RSnames[i])==0)
         {
@@ -387,7 +387,7 @@ class RegionSelectionManager
   }
 
   /// Filling an histo with a value val
-  void FillHisto(std::string const&, double val);
+  void FillHisto(std::string const&, MAfloat64 val);
 
   /// Writing the definition saf file
   void WriteHistoDefinition(SAFWriter& output);
@@ -396,7 +396,7 @@ class RegionSelectionManager
   bool IsSurviving(const std::string &RSname)
   {
     // Looking for the region and checking its status
-    for(unsigned int i=0; i<regions_.size(); i++)
+    for(MAuint32 i=0; i<regions_.size(); i++)
     {
       if(regions_[i]->GetName().compare(RSname) == 0)
         return regions_[i]->IsSurviving();

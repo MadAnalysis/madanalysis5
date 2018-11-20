@@ -37,12 +37,12 @@ typedef fastjet::JetDefinition::Plugin FastJetPlugin;
 
 using namespace MA5;
 
-bool ClusterAlgoSISCone::SetParameter(const std::string& key, const std::string& value)
+MAbool ClusterAlgoSISCone::SetParameter(const std::string& key, const std::string& value)
 { 
   // radius
   if (key=="r")
   {
-    float tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
@@ -54,7 +54,7 @@ bool ClusterAlgoSISCone::SetParameter(const std::string& key, const std::string&
   // ptmin
   else if (key=="ptmin")
   {
-    float tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
@@ -66,7 +66,7 @@ bool ClusterAlgoSISCone::SetParameter(const std::string& key, const std::string&
   // OverlapThreshold
   else if (key=="overlapthreshold")
   {
-    float tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
@@ -90,7 +90,7 @@ bool ClusterAlgoSISCone::SetParameter(const std::string& key, const std::string&
   // Protojet_ptmin
   else if (key=="protojet_ptmin")
   {
-    float tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
@@ -105,7 +105,7 @@ bool ClusterAlgoSISCone::SetParameter(const std::string& key, const std::string&
 }
 
 
-bool ClusterAlgoSISCone::Initialize()
+MAbool ClusterAlgoSISCone::Initialize()
 {
   // Creating plugin
   fastjet::JetDefinition::Plugin* Plugin_ = new fastjet::SISConePlugin(R_, OverlapThreshold_, NPassMax_, Protojet_ptmin_);

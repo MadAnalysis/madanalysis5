@@ -45,7 +45,7 @@ void CounterManager::Write_RootFormat(TFile* output) const
   TVector initial2_neg    (1);
 
   // Filling ROOT containers with info
-  for (unsigned int i=0; i<counters_.size();i++)
+  for (MAuint32 i=0; i<counters_.size();i++)
   {
     nentries_pos[i]   = counters_[i].nentries_.first;
     sumweight_pos[i]  = counters_[i].sumweight_.first;
@@ -114,16 +114,16 @@ void CounterManager::Write_TextFormat(SAFWriter& output) const
 
 
   // Loop over the counters
-  for (unsigned int i=0;i<counters_.size();i++)
+  for (MAuint32 i=0;i<counters_.size();i++)
   {
     // header
     *output.GetStream() << "<Counter>" << std::endl;
 
     // name
-    int nsp = 30-counters_[i].name_.size();
+    MAint32 nsp = 30-counters_[i].name_.size();
     if(nsp<0) nsp=0;
     *output.GetStream() << "\"" << counters_[i].name_  << "\"";
-    for (unsigned int jj=0; jj<static_cast<unsigned int>(nsp);jj++) *output.GetStream() << " ";
+    for (MAuint32 jj=0; jj<static_cast<MAuint32>(nsp);jj++) *output.GetStream() << " ";
     *output.GetStream() << "# " << i+1 <<"st cut" << std::endl;
 
     // nentries

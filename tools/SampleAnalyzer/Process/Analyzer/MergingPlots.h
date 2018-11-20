@@ -73,14 +73,14 @@ class MergingPlots : public AnalyzerBase
  public : 
 
   /// Initialization
-  virtual bool Initialize(const Configuration& cfg,
+  virtual MAbool Initialize(const Configuration& cfg,
              const std::map<std::string,std::string>& parameters);
 
   /// Finalization
   virtual void Finalize(const SampleFormat& summary, const std::vector<SampleFormat>& files);
 
   /// Execution
-  virtual bool Execute(SampleFormat& sample, const EventFormat& event);
+  virtual MAbool Execute(SampleFormat& sample, const EventFormat& event);
 
 };
 }

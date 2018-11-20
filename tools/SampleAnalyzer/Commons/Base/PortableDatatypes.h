@@ -36,6 +36,7 @@ typedef bool MAbool;
 // 8-bit integer
 typedef signed   char MAint8;
 typedef unsigned char MAuint8;
+typedef          char MAchar;
 
 // 16-bit integer
 typedef signed   short MAint16;
@@ -73,7 +74,8 @@ typedef unsigned short MAuint16;
 typedef float  MAfloat32;
 
 // 64-bit floating values
-typedef double MAfloat64;
-typedef double MAdouble64;
+typedef double      MAfloat64;
+typedef double      MAdouble64;
+typedef long double MAfloat128;
 
 #endif

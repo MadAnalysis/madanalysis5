@@ -60,7 +60,7 @@ class PlotBase
   std::pair<MAfloat64,MAfloat64> nevents_w_;
 
   /// Flag telling whether a given histo has already been modified for an event
-  bool fresh_event_;
+  MAbool fresh_event_;
 
 
   // -------------------------------------------------------------
@@ -93,10 +93,10 @@ class PlotBase
   { }
 
   /// Accesor for fresh_event
-  bool FreshEvent() { return fresh_event_;}
+  MAbool FreshEvent() { return fresh_event_;}
 
   /// Modifier for fresh_event
-  void SetFreshEvent(bool tag) { fresh_event_ = tag;}
+  void SetFreshEvent(MAbool tag) { fresh_event_ = tag;}
 
   /// Write the plot in a ROOT file
   virtual void Write_TextFormat(std::ostream* output) = 0;

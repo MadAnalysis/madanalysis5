@@ -37,7 +37,7 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 // ReadHeader
 // -----------------------------------------------------------------------------
-bool LHEReader::ReadHeader(SampleFormat& mySample)
+MAbool LHEReader::ReadHeader(SampleFormat& mySample)
 {
   // Initiliaze MC
   mySample.InitializeMC();
@@ -55,11 +55,11 @@ bool LHEReader::ReadHeader(SampleFormat& mySample)
   // Read line by line the file until tag <header>
   // Note from Benj: the header tags are optional according to LHE standards
   //                 the init tags are alsways the last ones before the events
-  bool EndOfLoop=false, GoodInit = false;
+  MAbool EndOfLoop=false, GoodInit = false;
 
   while(!GoodInit)
   {
-    bool HeaderFound = false, InitFound = false;
+    MAbool HeaderFound = false, InitFound = false;
     do
     {
       if (!ReadLine(line)) return false;
@@ -100,7 +100,7 @@ bool LHEReader::ReadHeader(SampleFormat& mySample)
     {
       // Read line by line the file until tag </init>
       EndOfLoop=false;
-      bool first=true;
+      MAbool first=true;
       do
       {
         if (!ReadLine(line)) return false;
@@ -181,12 +181,12 @@ bool LHEReader::ReadHeader(SampleFormat& mySample)
 // -----------------------------------------------------------------------------
 // FinalizeHeader
 // -----------------------------------------------------------------------------
-bool LHEReader::FinalizeHeader(SampleFormat& mySample)
+MAbool LHEReader::FinalizeHeader(SampleFormat& mySample)
 {
   // Computing xsection an its error for the sample
   MAfloat64 xsection = 0.;
   MAfloat64 xerror   = 0.;
-  for (unsigned int i=0;i<mySample.mc()->processes().size();i++)
+  for (MAuint32 i=0;i<mySample.mc()->processes().size();i++)
   {
     xsection += mySample.mc()->processes()[i].xsectionMean();
     xerror   += mySample.mc()->processes()[i].xsectionError() *
@@ -212,10 +212,10 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySamp
 
   // Declaring a new string for line
   std::string line;
-  bool EndOfEvent=false;
-  bool event_block=false;
-  bool event_header=false;
-  bool multiweight_block=false;
+  MAbool EndOfEvent=false;
+  MAbool event_block=false;
+  MAbool event_header=false;
+  MAbool multiweight_block=false;
 
   // Loop over the LHE lines
   while(!EndOfEvent)
@@ -279,13 +279,13 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySamp
   // Read the particles
   EndOfLoop=false;
   firstevent_=false;
-  bool first=true;
+  MAbool first=true;
   do 
   { 
     if (!ReadLine(line)) return StatusCode::FAILURE;
     if (line.find("<rwgt>")!=std::string::npos) 
     {
-      bool EndReweighting = false;
+      MAbool EndReweighting = false;
       do
       { 
         if (!ReadLine(line)) return StatusCode::FAILURE;
@@ -314,7 +314,7 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySamp
 // -----------------------------------------------------------------------------
 // FinalizeEvent
 // -----------------------------------------------------------------------------
-bool LHEReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
+MAbool LHEReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 {
   // Traditional LHE or simplified LHE ?
   MAbool simplified = (mySample.sampleFormat()==MA5FORMAT::SIMPLIFIED_LHE);
@@ -380,7 +380,7 @@ bool LHEReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
   mothers_.clear();
 
   // Global event observable
-  for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
+  for (MAuint32 i=0; i<myEvent.mc()->particles_.size();i++)
   {
     MCParticleFormat& part = myEvent.mc()->particles_[i];
 

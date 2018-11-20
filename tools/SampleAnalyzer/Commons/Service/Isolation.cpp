@@ -35,7 +35,7 @@ using namespace MA5;
 std::vector<const RecJetFormat*>
 Isolation::JetCleaning(const std::vector<const RecJetFormat*>& uncleaned_jets,
                             const std::vector<const RecLeptonFormat*>& leptons,
-                            double DeltaRmax, double PTmin) const
+                            MAfloat64 DeltaRmax, MAfloat64 PTmin) const
 {
   // cleaned collection of jets
   std::vector<const RecJetFormat*> cleaned_jets;
@@ -45,23 +45,23 @@ Isolation::JetCleaning(const std::vector<const RecJetFormat*>& uncleaned_jets,
   std::vector<bool> mask(uncleaned_jets.size(),false);
 
   // apply the cut on PT
-  for (unsigned int i=0;i<uncleaned_jets.size();i++)
+  for (MAuint32 i=0;i<uncleaned_jets.size();i++)
   {
     if (uncleaned_jets[i]->pt()<PTmin) mask[i]=true;
   }
 
-  for (unsigned int i=0;i<leptons.size();i++)
+  for (MAuint32 i=0;i<leptons.size();i++)
   {
     // safety
     if (leptons[i]==0) continue;
     if (leptons[i]->pt()<1e-6) continue;
 
     //
-    int jet_index=-1;
-    double deltaR_min=0;
+    MAint32 jet_index=-1;
+    MAfloat64 deltaR_min=0;
 
     // loop over jtes
-    for (unsigned int j=0;j<uncleaned_jets.size();j++)
+    for (MAuint32 j=0;j<uncleaned_jets.size();j++)
     {
       // shortcut to jet
       const RecJetFormat& jet = *(uncleaned_jets[j]);
@@ -70,7 +70,7 @@ Isolation::JetCleaning(const std::vector<const RecJetFormat*>& uncleaned_jets,
       if (mask[j]) continue;
 
       // cut on DeltaR
-      double dr = leptons[i]->momentum().DeltaR(jet.momentum());
+      MAfloat64 dr = leptons[i]->momentum().DeltaR(jet.momentum());
       if (dr>DeltaRmax) continue;
 
       // is it the closest lepton to the jet?
@@ -90,7 +90,7 @@ Isolation::JetCleaning(const std::vector<const RecJetFormat*>& uncleaned_jets,
   }
 
   // save the jets
-  for (unsigned int i=0;i<uncleaned_jets.size();i++)
+  for (MAuint32 i=0;i<uncleaned_jets.size();i++)
   {
     if (!mask[i]) cleaned_jets.push_back(uncleaned_jets[i]);
   }
@@ -105,7 +105,7 @@ Isolation::JetCleaning(const std::vector<const RecJetFormat*>& uncleaned_jets,
 std::vector<const RecJetFormat*>
 Isolation::JetCleaning(const std::vector<const RecJetFormat*>& uncleaned_jets,
                             const std::vector<const RecPhotonFormat*>& photons,
-                            double DeltaRmax, double PTmin) const
+                            MAfloat64 DeltaRmax, MAfloat64 PTmin) const
 {
   // cleaned collection of jets
   std::vector<const RecJetFormat*> cleaned_jets;
@@ -115,24 +115,24 @@ Isolation::JetCleaning(const std::vector<const RecJetFormat*>& uncleaned_jets,
   std::vector<bool> mask(uncleaned_jets.size(),false);
 
   // apply the cut on PT
-  for (unsigned int i=0;i<uncleaned_jets.size();i++)
+  for (MAuint32 i=0;i<uncleaned_jets.size();i++)
   {
     if (uncleaned_jets[i]->pt()<PTmin) mask[i]=true;
   }
 
   // loop over photons
-  for (unsigned int i=0;i<photons.size();i++)
+  for (MAuint32 i=0;i<photons.size();i++)
   {
     // safety
     if (photons[i]==0) continue;
     if (photons[i]->pt()<1e-6) continue;
 
     //
-    int jet_index=-1;
-    double deltaR_min=0;
+    MAint32 jet_index=-1;
+    MAfloat64 deltaR_min=0;
 
     // loop over jtes
-    for (unsigned int j=0;j<uncleaned_jets.size();j++)
+    for (MAuint32 j=0;j<uncleaned_jets.size();j++)
     {
       // shortcut to jet
       const RecJetFormat& jet = *(uncleaned_jets[j]);
@@ -141,7 +141,7 @@ Isolation::JetCleaning(const std::vector<const RecJetFormat*>& uncleaned_jets,
       if (mask[j]) continue;
 
       // cut on DeltaR
-      double dr = photons[i]->momentum().DeltaR(jet.momentum());
+      MAfloat64 dr = photons[i]->momentum().DeltaR(jet.momentum());
       if (dr>DeltaRmax) continue;
 
       // is it the closest photon to the jet?
@@ -161,7 +161,7 @@ Isolation::JetCleaning(const std::vector<const RecJetFormat*>& uncleaned_jets,
   }
 
   // save the jets
-  for (unsigned int i=0;i<uncleaned_jets.size();i++)
+  for (MAuint32 i=0;i<uncleaned_jets.size();i++)
   {
     if (!mask[i]) cleaned_jets.push_back(uncleaned_jets[i]);
   }

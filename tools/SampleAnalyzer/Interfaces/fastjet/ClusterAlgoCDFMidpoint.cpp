@@ -36,12 +36,12 @@ typedef fastjet::JetDefinition::Plugin FastJetPlugin;
 
 using namespace MA5;
 
-bool ClusterAlgoCDFMidpoint::SetParameter(const std::string& key, const std::string& value)
+MAbool ClusterAlgoCDFMidpoint::SetParameter(const std::string& key, const std::string& value)
 { 
   // radius
   if (key=="r")
   {
-    float tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
@@ -53,7 +53,7 @@ bool ClusterAlgoCDFMidpoint::SetParameter(const std::string& key, const std::str
   // ptmin
   else if (key=="ptmin")
   {
-    float tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
@@ -65,7 +65,7 @@ bool ClusterAlgoCDFMidpoint::SetParameter(const std::string& key, const std::str
   // OverlapThreshold
   else if (key=="overlapthreshold")
   {
-    float tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
@@ -78,7 +78,7 @@ bool ClusterAlgoCDFMidpoint::SetParameter(const std::string& key, const std::str
   // SeedThreshold
   else if (key=="seedthreshold")
   {
-    float tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
@@ -90,7 +90,7 @@ bool ClusterAlgoCDFMidpoint::SetParameter(const std::string& key, const std::str
   // ConeArea
   else if (key=="conearea")
   {
-    float tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
@@ -106,7 +106,7 @@ bool ClusterAlgoCDFMidpoint::SetParameter(const std::string& key, const std::str
 }
 
 
-bool ClusterAlgoCDFMidpoint::Initialize()
+MAbool ClusterAlgoCDFMidpoint::Initialize()
 {
   // Creating plugin
   fastjet::JetDefinition::Plugin* Plugin_ = new fastjet::CDFMidPointPlugin(R_, OverlapThreshold_, 

@@ -37,11 +37,11 @@ const MAfloat64 MergingPlotType::xmin  = 0.;
 const MAfloat64 MergingPlotType::xmax  = 3.;
 
 
-void MergingPlotType::Initialize(unsigned int ncontrib, const std::string& name, RegionSelectionManager* manager)
+void MergingPlotType::Initialize(MAuint32 ncontrib, const std::string& name, RegionSelectionManager* manager)
 {
 //  contribution.resize(ncontrib);
   n_contribs=ncontrib;
-  for (unsigned int i=0;i<n_contribs;i++)
+  for (MAuint32 i=0;i<n_contribs;i++)
   {
     std::stringstream str;
     str << name << "_" << i << "jet";

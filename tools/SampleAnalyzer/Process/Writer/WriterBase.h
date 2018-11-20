@@ -50,13 +50,13 @@ class WriterBase
  protected:
 
   /// Allowing to read data from RFIO
-  bool rfio_;
+  MAbool rfio_;
 
   /// Allowing to read compressed file
-  bool compress_;
+  MAbool compress_;
 
   /// Tag for the first event
-  bool FirstEvent_;
+  MAbool FirstEvent_;
 
   // -------------------------------------------------------------
   //                       method members
@@ -75,21 +75,21 @@ class WriterBase
   }
 
   /// Initialize (virtual pure)
-  virtual bool Initialize(const Configuration* cfg,
+  virtual MAbool Initialize(const Configuration* cfg,
                           const std::string& filename) = 0;
 
   /// Read the sample (virtual pure)
-  virtual bool WriteHeader(const SampleFormat& mySample) = 0;
+  virtual MAbool WriteHeader(const SampleFormat& mySample) = 0;
 
   /// Read the event (virtual pure)
-  virtual bool WriteEvent(const EventFormat& myEvent, 
+  virtual MAbool WriteEvent(const EventFormat& myEvent, 
                           const SampleFormat& mySample) = 0;
 
   /// Finalize the event (virtual pure)
-  virtual bool WriteFoot(const SampleFormat& mySample) = 0;
+  virtual MAbool WriteFoot(const SampleFormat& mySample) = 0;
 
   /// Finalize
-  virtual bool Finalize() = 0;
+  virtual MAbool Finalize() = 0;
 
 
 };

@@ -43,7 +43,7 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 // Initialize
 // -----------------------------------------------------------------------------
-bool DelphesMA5tuneTreeReader::Initialize()
+MAbool DelphesMA5tuneTreeReader::Initialize()
 {
   // Create object of class ExRootTreeReader
   treeReader_    = new ExRootTreeReader(tree_);
@@ -104,7 +104,7 @@ bool DelphesMA5tuneTreeReader::Initialize()
 // -----------------------------------------------------------------------------
 // ReadHeader
 // -----------------------------------------------------------------------------
-bool DelphesMA5tuneTreeReader::ReadHeader(SampleFormat& mySample)
+MAbool DelphesMA5tuneTreeReader::ReadHeader(SampleFormat& mySample)
 {
   mySample.InitializeRec();
   mySample.SetSampleFormat(MA5FORMAT::DELPHESMA5TUNE);
@@ -143,10 +143,10 @@ StatusCode::Type DelphesMA5tuneTreeReader::ReadEvent(EventFormat& myEvent, Sampl
 // -----------------------------------------------------------------------------
 // FinalizeEvent
 // -----------------------------------------------------------------------------
-bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
+MAbool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 {
   // MHT & THT
-  for (unsigned int i=0; i<myEvent.rec()->jets_.size();i++)
+  for (MAuint32 i=0; i<myEvent.rec()->jets_.size();i++)
   {
     myEvent.rec()->MHT_ -= myEvent.rec()->jets_[i].momentum();
     if (branchScalarHT_==0) myEvent.rec()->THT_ += myEvent.rec()->jets_[i].pt();
@@ -155,19 +155,19 @@ bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat
   }
 
   // TET
-  for (unsigned int i=0; i<myEvent.rec()->muons_.size();i++)
+  for (MAuint32 i=0; i<myEvent.rec()->muons_.size();i++)
   {
     myEvent.rec()->TET_ += myEvent.rec()->muons_[i].pt();
   }
-  for (unsigned int i=0; i<myEvent.rec()->electrons_.size();i++)
+  for (MAuint32 i=0; i<myEvent.rec()->electrons_.size();i++)
   {
     myEvent.rec()->TET_ += myEvent.rec()->electrons_[i].pt();
   }
-  for (unsigned int i=0; i<myEvent.rec()->taus_.size();i++)
+  for (MAuint32 i=0; i<myEvent.rec()->taus_.size();i++)
   {
     myEvent.rec()->TET_ += myEvent.rec()->taus_[i].pt();
   }
-  for (unsigned int i=0; i<myEvent.rec()->photons_.size();i++)
+  for (MAuint32 i=0; i<myEvent.rec()->photons_.size();i++)
   {
     myEvent.rec()->TET_ += myEvent.rec()->photons_[i].pt();
   }
@@ -178,7 +178,7 @@ bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat
 
 
   // Compute transverse observable
-  for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
+  for (MAuint32 i=0; i<myEvent.mc()->particles_.size();i++)
   {
     MCParticleFormat& part = myEvent.mc()->particles_[i];
 
@@ -196,9 +196,9 @@ bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat
     }
 
     /*  
-    bool debug=false;
-    int index1=myEvent.mc()->particles_[i].mothup1_;
-    int index2=myEvent.mc()->particles_[i].mothup2_;
+    MAbool debug=false;
+    MAint32 index1=myEvent.mc()->particles_[i].mothup1_;
+    MAint32 index2=myEvent.mc()->particles_[i].mothup2_;
     if (debug)  std::cout << "index1=" << index1 << "\tindex2=" << index2 << std::endl;
     if (index1!=0)
     {
@@ -237,7 +237,7 @@ bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat
 
           /*
   // Link muons with MC particles
-  for (unsigned int i=0;i<myEvent.rec()->muons().size();i++)
+  for (MAuint32 i=0;i<myEvent.rec()->muons().size();i++)
   {
     RecLeptonFormat& part =myEvent.rec()->muons()[i];
     if (MuonIndex_[i]<0) continue;
@@ -245,7 +245,7 @@ bool DelphesMA5tuneTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat
   }
 
   // Link electrons with MC particles
-  for (unsigned int i=0;i<myEvent.rec()->electrons().size();i++)
+  for (MAuint32 i=0;i<myEvent.rec()->electrons().size();i++)
   {
     RecLeptonFormat& part = myEvent.rec()->electrons()[i];
     if (ElectronIndex_[i]<0) continue;
@@ -270,7 +270,7 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
 
   // Fill electrons
   if (branchElectron_!=0)
-  for (unsigned int i=0;i<static_cast<MAuint32>(branchElectron_->GetEntries());i++)
+  for (MAuint32 i=0;i<static_cast<MAuint32>(branchElectron_->GetEntries());i++)
   {
     Electron* part = dynamic_cast<Electron*>(branchElectron_->At(i));
     RecLeptonFormat * electron = myEvent.rec()->GetNewElectron();
@@ -306,14 +306,14 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
     isolcone02->eflow_sumPT_ = part->sumPTeflow02;
     isolcone02->deltaR_  = 0.2;
 
-    int index=0;
+    MAint32 index=0;
     if (part->MA5index>=0) index=part->MA5index+1;
     ElectronIndex_.push_back(index);
   }
 
   // Fill photons
   if (branchPhoton_!=0)
-  for (unsigned int i=0;i<static_cast<MAuint32>(branchPhoton_->GetEntries());i++)
+  for (MAuint32 i=0;i<static_cast<MAuint32>(branchPhoton_->GetEntries());i++)
   {
     Photon* part = dynamic_cast<Photon*>(branchPhoton_->At(i));
     RecPhotonFormat * photon = myEvent.rec()->GetNewPhoton();
@@ -351,7 +351,7 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
   }
 
   if (branchMuon_!=0)
-  for (unsigned int i=0;i<static_cast<MAuint32>(branchMuon_->GetEntries());i++)
+  for (MAuint32 i=0;i<static_cast<MAuint32>(branchMuon_->GetEntries());i++)
   {
     Muon* part = dynamic_cast<Muon*>(branchMuon_->At(i));
     RecLeptonFormat * muon = myEvent.rec()->GetNewMuon();
@@ -386,7 +386,7 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
     isolcone02->eflow_sumPT_ = part->sumPTeflow02;
     isolcone02->deltaR_  = 0.2;
 
-    int index=0;
+    MAint32 index=0;
     if (part->MA5index>=0) index=part->MA5index+1;
     MuonIndex_.push_back(index);
   }
@@ -396,7 +396,7 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
   // ---------------------------------------------------------------------------
   if (branchEvent_!=0)
   {
-    for (unsigned int i=0;i<static_cast<MAuint32>(branchEvent_->GetEntries());i++)
+    for (MAuint32 i=0;i<static_cast<MAuint32>(branchEvent_->GetEntries());i++)
     {
       // Get the header 
       LHEFEvent* header1 =  dynamic_cast<LHEFEvent*>(branchEvent_->At(i));
@@ -417,7 +417,7 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
 
   // Fill jets and taus
   if (branchJet_!=0)
-  for (unsigned int i=0;i<static_cast<MAuint32>(branchJet_->GetEntries());i++)
+  for (MAuint32 i=0;i<static_cast<MAuint32>(branchJet_->GetEntries());i++)
   {
     Jet* part = dynamic_cast<Jet*>(branchJet_->At(i));
     if(part->TauTag==1)
@@ -466,7 +466,7 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
     // Temporary vector for mother-daughter relations
     std::vector<std::pair<MAint32,MAint32> > mothers(nparts);
 
-    for (unsigned int i=0;i<nparts;i++)
+    for (MAuint32 i=0;i<nparts;i++)
     {
       GenParticle* part = dynamic_cast<GenParticle*>(branchGenParticle_->At(i));
       MCParticleFormat * gen = myEvent.mc()->GetNewParticle();
@@ -487,7 +487,7 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
       if (part->MA5index<0) gen->extra1_ = 0;
       else gen->extra1_ = part->MA5index+1;
 
-      bool debug=false;
+      MAbool debug=false;
       if (debug)
       {
         std::cout << "DEBUG i=" << i+1 << "\t" << gen->pdgid_ 
@@ -510,7 +510,7 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
         if (mother_indices[index]<0) continue;
 
         // Check if the mother has been registered
-        bool redundant=false;
+        MAbool redundant=false;
         for (MAuint32 index2=0;index2<index;index2++)
         {
           if (mother_indices[index]==mother_indices[index2])
@@ -543,7 +543,7 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
 
   // Track collection
   if (branchTrack_!=0)
-  for (unsigned int i=0;i<static_cast<MAuint32>(branchTrack_->GetEntries());i++)
+  for (MAuint32 i=0;i<static_cast<MAuint32>(branchTrack_->GetEntries());i++)
   {
     Track* ref = dynamic_cast<Track*>(branchTrack_->At(i));
     RecTrackFormat * track = myEvent.rec()->GetNewTrack();

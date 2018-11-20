@@ -58,10 +58,10 @@ class ClusterAlgoGridJet: public ClusterAlgoPlugin
     virtual ~ClusterAlgoGridJet () {}
 
     /// Initialization
-    virtual bool Initialize();
+    virtual MAbool Initialize();
 
     /// Set parameter
-    virtual bool SetParameter(const std::string& key, const std::string& value);
+    virtual MAbool SetParameter(const std::string& key, const std::string& value);
 
     /// Print parameters
     virtual void PrintParam ();

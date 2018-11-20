@@ -34,7 +34,7 @@ using namespace MA5;
 
 
 /// Read the sample
-bool LHCOWriter::WriteHeader(const SampleFormat& mySample)
+MAbool LHCOWriter::WriteHeader(const SampleFormat& mySample)
 {
   // MA5 logo
   WriteMA5header();
@@ -112,7 +112,7 @@ bool LHCOWriter::WriteHeader(const SampleFormat& mySample)
     *output_ << "#Original header:" << std::endl;
     *output_ << "" << std::endl;
 
-    for (unsigned int i=0;i<mySample.header().size();i++)
+    for (MAuint32 i=0;i<mySample.header().size();i++)
       *output_ << "#" << mySample.header()[i] << std::endl;
   }
 
@@ -124,7 +124,7 @@ bool LHCOWriter::WriteHeader(const SampleFormat& mySample)
 }
 
 /// Read the event
-bool LHCOWriter::WriteEvent(const EventFormat& myEvent, 
+MAbool LHCOWriter::WriteEvent(const EventFormat& myEvent, 
                            const SampleFormat& mySample)
 {
   // FirstEvent
@@ -148,21 +148,21 @@ bool LHCOWriter::WriteEvent(const EventFormat& myEvent,
                      myEvent.rec()->jets().size() + 1 /*MET*/);
 
   // Writing photons (=0)
-  for (unsigned int i=0;i<myEvent.rec()->photons().size();i++)
+  for (MAuint32 i=0;i<myEvent.rec()->photons().size();i++)
   {
     PartTable.push_back(LHCOParticleFormat());
     WritePhoton(myEvent.rec()->photons()[i],&PartTable.back());
   } 
 
   // Writing electrons (=1)
-  for (unsigned int i=0;i<myEvent.rec()->electrons().size();i++)
+  for (MAuint32 i=0;i<myEvent.rec()->electrons().size();i++)
   {
     PartTable.push_back(LHCOParticleFormat());
     WriteElectron(myEvent.rec()->electrons()[i],&PartTable.back());
   } 
 
   // Writing muons (=2)
-  for (unsigned int i=0;i<myEvent.rec()->muons().size();i++)
+  for (MAuint32 i=0;i<myEvent.rec()->muons().size();i++)
   {
     PartTable.push_back(LHCOParticleFormat());
     WriteMuon(myEvent.rec()->muons()[i],&PartTable.back(),myEvent.rec(),
@@ -172,14 +172,14 @@ bool LHCOWriter::WriteEvent(const EventFormat& myEvent,
   }
 
   // Writing taus (=3)
-  for (unsigned int i=0;i<myEvent.rec()->taus().size();i++)
+  for (MAuint32 i=0;i<myEvent.rec()->taus().size();i++)
   {
     PartTable.push_back(LHCOParticleFormat());
     WriteTau(myEvent.rec()->taus()[i],&PartTable.back());
   }
     
   // Writing jets (=4)
-  for (unsigned int i=0;i<myEvent.rec()->jets().size();i++)
+  for (MAuint32 i=0;i<myEvent.rec()->jets().size();i++)
   {
     PartTable.push_back(LHCOParticleFormat());
     WriteJet(myEvent.rec()->jets()[i],&PartTable.back());
@@ -202,7 +202,7 @@ bool LHCOWriter::WriteEvent(const EventFormat& myEvent,
 
 
 /// Finalize the event
-bool LHCOWriter::WriteFoot(const SampleFormat& mySample)
+MAbool LHCOWriter::WriteFoot(const SampleFormat& mySample)
 {
   return true;
 }
@@ -224,7 +224,7 @@ void LHCOWriter::WriteJet(const RecJetFormat& jet,
 void LHCOWriter::WriteMuon(const RecLeptonFormat& muon,
                            LHCOParticleFormat* lhco, 
                            const RecEventFormat* myEvent,
-                           unsigned int npart)
+                           MAuint32 npart)
 {
   lhco->id    = 2;
   lhco->eta   = muon.momentum().Eta();
@@ -234,9 +234,9 @@ void LHCOWriter::WriteMuon(const RecLeptonFormat& muon,
   if (muon.charge()>0) lhco->ntrk=+1.; else lhco->ntrk=-1.;
 
   //------------- the closest jet ---------------
-  unsigned int theClosestJet=0;
+  MAuint32 theClosestJet=0;
   MAfloat64 minDeltaR=-1;
-  for (unsigned int i=0;i<myEvent->jets().size();i++)
+  for (MAuint32 i=0;i<myEvent->jets().size();i++)
   {
     if (myEvent->jets()[i].pt()==0) continue;
     MAfloat64 DeltaR=muon.dr(myEvent->jets()[i]);
@@ -252,11 +252,11 @@ void LHCOWriter::WriteMuon(const RecLeptonFormat& muon,
   //---------------- isolation ------------------
 
   // isolation : sumPT_isol
-  double isolation = 0;
+  MAfloat64 isolation = 0;
   isolation += std::floor(muon.sumPT_isol());
 
   // isolation : sumET_isol
-  double ET_PT = 0;
+  MAfloat64 ET_PT = 0;
   if (muon.pt()!=0) ET_PT=muon.sumET_isol()/muon.pt();
 
   // gathering isolation variables

@@ -21,13 +21,24 @@
 #  
 ################################################################################
 
+
 import logging
+# from FunctionInterpreter import FunctionInterpreter
 
 class Tagger:
 
     def __init__(self):
         self.logger = logging.getLogger('MA5')
-        self.dico = {}
+        self.rules = {
+          'bTagEff'     :{},
+          'bMistagC'    :{},
+          'bMistagLight':{},
+          'cTagEff'     :{},
+          'cMistag'     :{},
+          'tauTagEff'   :{},
+          'tauMistag'   :{}
+        }
+        self.vars = []
 
     def __len__(self):
         return len(self.table)
@@ -37,6 +48,8 @@ class Tagger:
 
     def Display(self, args):
         ## what to display
+        print "Please fix me"
+        blabla
         if len(args) == 0:
             to_display = self.dico.keys()
         else:
@@ -77,12 +90,52 @@ class Tagger:
         print "FIX EFFICIENCIES"
 #            self.SetEfficiency.user_DisplayRules(module)
 
-    def Add(self,mod,fct,bounds):
-        ## Checking bounds
-        if not mod in self.dico.keys():
-            self.dico[mod]=[[fct, bounds]]
-        else:
-            self.dico[mod].append([fct, bounds])
+    def Add(self,mod,function,bounds=['default']):
+
+        ## Getting the rule ID and initialization
+        ## Bounds are returns as { var: [min, max], .... }
+        key_number = len(self.rules[mod].keys())+1
+        bounds_code, interpreted_bounds = bound_interpreter(bounds)
+
+        ## Checking the overlap between the new bounds and the existing ones
+        if bounds!=['default']:
+            self.vars += [x for x in interpreted_bounds.keys() if x not in self.vars]
+            intersec = True
+            for ID, val in self.rules[mod].items():
+                for myvar in self.vars:
+                    if myvar not in interpreted_bounds.keys():
+                        continue
+                    if myvar not in val['bounds'].keys():
+                        continue
+                    if not (
+                       (interpreted_bounds[myvar][0] > val['bounds'][myvar][1]) or \
+                       (interpreted_bounds[myvar][1] < val['bounds'][myvar][0]) ):
+                        continue
+                    intersec = False
+                    break
+                if intersec:
+                    break
+            if intersec:
+                self.logger.warning('The bounds intersect with an existing rule. Ignoring')
+                return False
+
+        ## Checking the function
+#        F  = FunctionInterpreter()
+#        Fx = F.convert(function)
+#        if Fx == None:
+#            self.logger.warning('The efficiency function is invalid. Ignoring')
+#            return False
+#        if F.tag_val_tester(interpreted_bounds, Fx):
+#            self.logger.warning('The efficiency function may be above one. Ignoring')
+#            return False
+
+        # Creating the rule
+        self.rules[mod][key_number] = {}
+        self.rules[mod][key_number]['bounds'    ]     = interpreted_bounds
+        self.rules[mod][key_number]['bound_code']     = bounds_code
+#        self.rules[mod][key_number]['function'  ]     = function
+#        self.rules[mod][key_number]['function_code' ] = Fx
+
 
     def module_finder(self,args):
         ## Security
@@ -105,6 +158,7 @@ class Tagger:
             return None
 
         ### Find the module
+        ### This returns a keyword for each allowed tagger
         if   arg0==5 and arg1==5:
                 return 'bTagEff'
         elif arg0==4 and arg1==5:

@@ -60,7 +60,7 @@ class MultiRegionCounterManager
   /// Reset
   void Reset()
   {
-    for (unsigned int i=0;i<cuts_.size();i++)
+    for (MAuint32 i=0;i<cuts_.size();i++)
       { if (cuts_[i]!=0) delete cuts_[i]; }
     cuts_.clear();
   }
@@ -72,7 +72,7 @@ class MultiRegionCounterManager
   std::vector<MultiRegionCounter*> GetCuts()
     { return cuts_; }
 
-  unsigned int GetNcuts()
+  MAuint32 GetNcuts()
     { return cuts_.size(); }
 
   /// Adding a Cut to the manager with the link to the appropriate SRs

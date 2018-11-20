@@ -112,7 +112,7 @@ class ExceptionType : public std::exception
   {}
 
   /// Accessor to the description of the exception
-  virtual const char* what() const throw()
+  virtual const MAchar* what() const throw()
   { return Msg_.c_str(); }
 
   /// Accessor to the number ID

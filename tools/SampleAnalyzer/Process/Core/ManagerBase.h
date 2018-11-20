@@ -73,7 +73,7 @@ class ManagerBase
   /// Destructor
   ~ManagerBase()
   { 
-    //    for (unsigned int i=0;i<Objects_.size();i++)
+    //    for (MAuint32 i=0;i<Objects_.size();i++)
     //      if (Objects_[i]!=0) delete Objects_[i];
   }
 

@@ -107,7 +107,7 @@ TObjArray* DelphesMemoryInterface::GetCollection(TFolder* delphesFolder,
 // -----------------------------------------------------------------------------
 void DelphesMemoryInterface::Initialize(TFolder* delphesFolder, 
                                         const std::map<std::string,std::string>& table, 
-                                        bool MA5card)
+                                        MAbool MA5card)
 {
   // DelphesMA5 card ?
   delphesMA5card_=MA5card;
@@ -159,12 +159,12 @@ void DelphesMemoryInterface::Initialize(TFolder* delphesFolder,
 // -----------------------------------------------------------------------------
 // TransfertDELPHEStoMA5
 // -----------------------------------------------------------------------------
-bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, EventFormat& myEvent)
+MAbool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, EventFormat& myEvent)
 {
   // --------------Jet collection
   if (Jet_!=0)
   {
-    for (unsigned int i=0;i<static_cast<MAuint32>(Jet_->GetEntries());i++)
+    for (MAuint32 i=0;i<static_cast<MAuint32>(Jet_->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(Jet_->At(i));
       if (cand==0) 
@@ -194,7 +194,7 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
   // --------------GenJet collection
   /*  if (genjetsArray!=0)
   {
-    for (unsigned int i=0;i<static_cast<MAuint32>(genjetsArray->GetEntries());i++)
+    for (MAuint32 i=0;i<static_cast<MAuint32>(genjetsArray->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(genjetsArray->At(i));
       if (cand==0) 
@@ -211,7 +211,7 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
   // --------------Muon collection
   if (Muon_!=0)
   {
-    for (unsigned int i=0;i<static_cast<MAuint32>(Muon_->GetEntries());i++)
+    for (MAuint32 i=0;i<static_cast<MAuint32>(Muon_->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(Muon_->At(i));
       if (cand==0) 
@@ -228,7 +228,7 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
   // --------------Electron collection
   if (Electron_!=0)
   {
-    for (unsigned int i=0;i<static_cast<MAuint32>(Electron_->GetEntries());i++)
+    for (MAuint32 i=0;i<static_cast<MAuint32>(Electron_->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(Electron_->At(i));
       if (cand==0) 
@@ -245,7 +245,7 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
   // --------------Photon collection
   if (Photon_!=0)
   {
-    for (unsigned int i=0;i<static_cast<MAuint32>(Photon_->GetEntries());i++)
+    for (MAuint32 i=0;i<static_cast<MAuint32>(Photon_->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(Photon_->At(i));
       if (cand==0) 
@@ -265,7 +265,7 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
   // --------------Track collection
   if (Track_!=0)
   {
-    for (unsigned int i=0;i<static_cast<MAuint32>(Track_->GetEntries());i++)
+    for (MAuint32 i=0;i<static_cast<MAuint32>(Track_->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(Track_->At(i));
       if (cand==0) 
@@ -292,9 +292,9 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
     }
     else
     {
-      double pt = metCand->Momentum.Pt();
-      double px = metCand->Momentum.Px();
-      double py = metCand->Momentum.Py();
+      MAfloat64 pt = metCand->Momentum.Pt();
+      MAfloat64 px = metCand->Momentum.Px();
+      MAfloat64 py = metCand->Momentum.Py();
       myEvent.rec()->MET().momentum_.SetPxPyPzE(px,py,0,pt);
     }
   }
@@ -316,7 +316,7 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
   // --------------Tower collection
   if (Tower_!=0)
   {
-    for (unsigned int i=0;i<static_cast<MAuint32>(Tower_->GetEntries());i++)
+    for (MAuint32 i=0;i<static_cast<MAuint32>(Tower_->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(Tower_->At(i));
       if (cand==0) 
@@ -332,7 +332,7 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
   // --------------EFlowTrack collection
   if (EFlowTrack_!=0)
   {
-    for (unsigned int i=0;i<static_cast<MAuint32>(EFlowTrack_->GetEntries());i++)
+    for (MAuint32 i=0;i<static_cast<MAuint32>(EFlowTrack_->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(EFlowTrack_->At(i));
       if (cand==0) 
@@ -348,7 +348,7 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
   // --------------EFlowPhoton collection
   if (EFlowPhoton_!=0)
   {
-    for (unsigned int i=0;i<static_cast<MAuint32>(EFlowPhoton_->GetEntries());i++)
+    for (MAuint32 i=0;i<static_cast<MAuint32>(EFlowPhoton_->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(EFlowPhoton_->At(i));
       if (cand==0) 
@@ -364,7 +364,7 @@ bool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Event
   // --------------EFlowNeutral collection
   if (EFlowNeutral_!=0)
   {
-    for (unsigned int i=0;i<static_cast<MAuint32>(EFlowNeutral_->GetEntries());i++)
+    for (MAuint32 i=0;i<static_cast<MAuint32>(EFlowNeutral_->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(EFlowNeutral_->At(i));
       if (cand==0) 

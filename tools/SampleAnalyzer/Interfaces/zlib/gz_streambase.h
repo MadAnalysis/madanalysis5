@@ -55,8 +55,8 @@ class gz_streambuf : public std::streambuf
   static const MAint32 bufferSize = 47+256;    
 
   gz_file* file;               // file handle for compressed file
-  char     buffer[bufferSize]; // data buffer
-  char     opened;             // open/close state of stream
+  MAchar   buffer[bufferSize]; // data buffer
+  MAchar   opened;             // open/close state of stream
   MAint32  mode;               // I/O mode
 
 
@@ -80,7 +80,7 @@ class gz_streambuf : public std::streambuf
   MAint32 is_open() { return opened; }
 
   /// Opening the gzip file
-  gz_streambuf* open(const char* name, MAint32 open_mode);
+  gz_streambuf* open(const MAchar* name, MAint32 open_mode);
 
   /// Closing the file
   gz_streambuf* close();
@@ -124,7 +124,7 @@ class gz_streambase : virtual public std::ios
   { init(&buf); }
 
   /// Constructor with arguments
-  gz_streambase( const char* name, MAint32 open_mode)
+  gz_streambase( const MAchar* name, MAint32 open_mode)
   {
     init( &buf);
     open( name, open_mode);
@@ -135,7 +135,7 @@ class gz_streambase : virtual public std::ios
   { buf.close(); }
 
   /// Open a gzip file
-  void open( const char* name, MAint32 open_mode)
+  void open( const MAchar* name, MAint32 open_mode)
   {
     if (!buf.open( name, open_mode))
         clear( rdstate() | std::ios::badbit);

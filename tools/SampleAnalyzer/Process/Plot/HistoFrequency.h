@@ -83,11 +83,11 @@ class HistoFrequency : public PlotBase
   /// Returns 0 if all regions are failing (includes te case with 0 SR)
   /// Returns 1 if all regions are passing 
   // returns -1 otherwise
-  int AllSurviving()
+  MAint32 AllSurviving()
   {
     if (regions_.size() == 0) return 0;
-    bool FirstRegionSurvival = regions_[0]->IsSurviving();
-    for(unsigned int ii=1; ii < regions_.size(); ii++)
+    MAbool FirstRegionSurvival = regions_[0]->IsSurviving();
+    for(MAuint32 ii=1; ii < regions_.size(); ii++)
       if(regions_[ii]->IsSurviving() != FirstRegionSurvival) return -1;
     if(FirstRegionSurvival) return 1;
     else                    return 0;
@@ -95,7 +95,7 @@ class HistoFrequency : public PlotBase
 
 
   /// Adding an entry for a given observable
-  void Fill(const int& obs, MAfloat64 weight=1.0)
+  void Fill(const MAint32& obs, MAfloat64 weight=1.0)
   {
     // Looking for the value
     iterator it = stack_.find(obs);
@@ -138,11 +138,11 @@ class HistoFrequency : public PlotBase
     // SelectionRegions
     if(regions_.size()!=0)
     {
-      unsigned int maxlength=0;
-      for(unsigned int i=0; i < regions_.size(); i++)
+      MAuint32 maxlength=0;
+      for(MAuint32 i=0; i < regions_.size(); i++)
         if (regions_[i]->GetName().size()>maxlength) maxlength=regions_[i]->GetName().size();
       *output << std::left << "    # Defined regions" << std::endl;
-      for(unsigned int i=0; i < regions_.size(); i++)
+      for(MAuint32 i=0; i < regions_.size(); i++)
       {
         *output << "      " << std::setw(maxlength) << std::left << regions_[i]->GetName();
         *output << "    # Region nr. " << std::fixed << i+1 << std::endl;
@@ -174,7 +174,7 @@ class HistoFrequency : public PlotBase
 
     // Data
     *output << "  <Data>" << std::endl;
-    unsigned int i=0;
+    MAuint32 i=0;
     for (const_iterator it = stack_.begin(); it!=stack_.end(); it++)
     {
       *output << "      ";
@@ -217,7 +217,7 @@ class HistoFrequency : public PlotBase
                             static_cast<MAfloat64>(stack_.size()));
  
     // Layouting the histogram
-    unsigned int i=0;
+    MAuint32 i=0;
     for (const_iterator it=stack_.begin();it!=stack_.end();it++)
     {
       std::string tmp;

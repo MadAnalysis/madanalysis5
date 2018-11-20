@@ -49,42 +49,42 @@ enum OrderingObservable{Eordering, Pordering, PTordering,
 struct PointerComparison
 {
   template<typename T>
-  static bool ESortPredicate(T* part1, 
+  static MAbool ESortPredicate(T* part1, 
                              T* part2)
   { return part1->e() > part2->e(); }
 
   template<typename T>
-  static bool ETSortPredicate(T* part1, 
+  static MAbool ETSortPredicate(T* part1, 
                               T* part2)
   { return part1->et() > part2->et(); }
 
   template<typename T>
-  static bool PSortPredicate(T* part1, 
+  static MAbool PSortPredicate(T* part1, 
                              T* part2)
   { return part1->p() > part2->p(); }
 
   template<typename T>
-  static bool PTSortPredicate(T* part1, 
+  static MAbool PTSortPredicate(T* part1, 
                               T* part2)
   { return part1->pt() > part2->pt(); }
 
   template<typename T>
-  static bool ETASortPredicate(T* part1, 
+  static MAbool ETASortPredicate(T* part1, 
                                T* part2)
   { return part1->eta() > part2->eta(); }
 
   template<typename T>
-  static bool PXSortPredicate(T* part1, 
+  static MAbool PXSortPredicate(T* part1, 
                               T* part2)
   { return part1->px() > part2->px(); }
 
   template<typename T>
-  static bool PYSortPredicate(T* part1, 
+  static MAbool PYSortPredicate(T* part1, 
                        T* part2)
   { return part1->py() > part2->py(); }
 
   template<typename T>
-  static bool PZSortPredicate(T* part1, 
+  static MAbool PZSortPredicate(T* part1, 
                               T* part2)
   { return part1->pz() > part2->pz(); }
 

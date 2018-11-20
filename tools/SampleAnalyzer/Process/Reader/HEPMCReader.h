@@ -41,17 +41,17 @@ class HEPMCReader : public ReaderTextBase
   // -------------------------------------------------------------
  protected:
   
-  bool firstevent_;
-  bool endevent_;
-  bool saved_;
-  bool EndOfFile_;
-  bool warnmother_;
-  int partcode_;
-  int vertcode_;
-  float energy_unit_;
-  float length_unit_;
+  MAbool firstevent_;
+  MAbool endevent_;
+  MAbool saved_;
+  MAbool EndOfFile_;
+  MAbool warnmother_;
+  MAint32 partcode_;
+  MAint32 vertcode_;
+  MAfloat32 energy_unit_;
+  MAfloat32 length_unit_;
   std::string savedline_;     // last saved line
-  bool firstHeavyIons_;
+  MAbool firstHeavyIons_;
   MAuint64 nparts_max_;
   MAuint64 nvertices_max_;
 
@@ -91,16 +91,16 @@ class HEPMCReader : public ReaderTextBase
   { }
   
   /// Read the header
-  virtual bool ReadHeader(SampleFormat& mySample);
+  virtual MAbool ReadHeader(SampleFormat& mySample);
   
   /// Finalize the header
-  virtual bool FinalizeHeader(SampleFormat& mySample);
+  virtual MAbool FinalizeHeader(SampleFormat& mySample);
   
   /// Read the event
   virtual StatusCode::Type ReadEvent(EventFormat& myEvent, SampleFormat& mySample);
   
   /// Finalize the event
-  virtual bool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent);
+  virtual MAbool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent);
   
  private:
   

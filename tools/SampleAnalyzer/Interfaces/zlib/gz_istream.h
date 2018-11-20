@@ -54,7 +54,7 @@ class gz_istream : public gz_streambase, public std::istream
   {}
 
   /// Constructor with arguments
-  gz_istream( const char* name, int open_mode = std::ios::in)
+  gz_istream( const MAchar* name, MAint32 open_mode = std::ios::in)
       : gz_streambase( name, open_mode), std::istream( &buf) 
   {}
 
@@ -67,7 +67,7 @@ class gz_istream : public gz_streambase, public std::istream
   { return gz_streambase::rdbuf(); }
 
   /// open a gzip file
-  void open( const char* name, int open_mode = std::ios::in)
+  void open( const MAchar* name, MAint32 open_mode = std::ios::in)
   { gz_streambase::open( name, open_mode); }
 
   /// get position of the cursor in the file

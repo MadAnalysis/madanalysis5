@@ -48,19 +48,19 @@ class TransverseVariables
     /// The MT2 variable requires 2 momenta + the missing energy + one test mass
     /// The MT2W variable requires a 3rd momentum
     MALorentzVector p1_, p2_, p3_;
-    double pmx_, pmy_;
-    double m_;
-    double E2sq_;
+    MAfloat64 pmx_, pmy_;
+    MAfloat64 m_;
+    MAfloat64 E2sq_;
 
     /// The w mass (useful for mt2w)
-    double mw_, mw2_;
+    MAfloat64 mw_, mw2_;
 
     /// Other usefull kinematical variables
-    double msq_, pmtsq_, pmtm_, p1met_, plpb1_;
+    MAfloat64 msq_, pmtsq_, pmtm_, p1met_, plpb1_;
 
     /// Initialization with two momenta + met
     void InitializeMT2(const MALorentzVector&p1, const MALorentzVector&p2, const MALorentzVector&met,
-      const double mass)
+      const MAfloat64 mass)
     {
       // Coefficients
       C1_.resize(0); C2_.resize(0);
@@ -80,9 +80,9 @@ class TransverseVariables
     }
 
     /// the MT2 method requires two series of 6 coefficients + associated fcns
-    std::vector<double> C1_, C2_;
+    std::vector<MAfloat64> C1_, C2_;
 
-    void InitC(const MALorentzVector &p, std::vector<double> &C)
+    void InitC(const MALorentzVector &p, std::vector<MAfloat64> &C)
     {
       C.push_back( 1. - pow(p.Px(),2)/p.Mt2() );
       C.push_back( -p.Px()*p.Py()/p.Mt2() );
@@ -92,14 +92,14 @@ class TransverseVariables
       C.push_back( 0. );
     }
 
-    void UpdateC1(const double &del)
+    void UpdateC1(const MAfloat64 &del)
     {
       C1_[3] = -p2_.Px()*del;
       C1_[4] = -p2_.Py()*del;
       C1_[5] = msq_ - p2_.Mt2()*pow(del,2);
     }
 
-    void UpdateC2(const double &del)
+    void UpdateC2(const MAfloat64 &del)
     {
       C2_[3] = -pmx_ + p1_.Px()*del;
       C2_[4] = -pmy_ + p1_.Py()*del;
@@ -109,12 +109,12 @@ class TransverseVariables
     void InitCoefs()   { InitC(p2_,C1_); InitC(p1_,C2_); }
 
     /// Bissection method to extract MT2
-    int Nsolutions(const double&);
-    int Nsolutions_massless(const double&);
-    bool FindHigh(double &dsqH);
+    MAint32 Nsolutions(const MAfloat64&);
+    MAint32 Nsolutions_massless(const MAfloat64&);
+    MAbool FindHigh(MAfloat64 &dsqH);
 
     /// Special case: both particles are nearly massless
-    double GetMT2_massless();
+    MAfloat64 GetMT2_massless();
 
     /// Initialization with three momenta + met
     void InitializeMT2W(const MALorentzVector&p1, const MALorentzVector&p2, const MALorentzVector&p3,
@@ -137,8 +137,8 @@ class TransverseVariables
     }
 
     /// Core function for mt2w
-    bool TestComp(const double&);
-    double GetMT2W(const ParticleBaseFormat*,const ParticleBaseFormat*,const ParticleBaseFormat*,
+    MAbool TestComp(const MAfloat64&);
+    MAfloat64 GetMT2W(const ParticleBaseFormat*,const ParticleBaseFormat*,const ParticleBaseFormat*,
        const ParticleBaseFormat&);
 
   public:
@@ -149,90 +149,90 @@ class TransverseVariables
     ~TransverseVariables() { }
 
     /// Compute the total transverse energy
-    inline double EventTET(const MCEventFormat* event) const
+    inline MAfloat64 EventTET(const MCEventFormat* event) const
     {
       return event->TET();
     }
 
     /// Compute the missing transverse energy
-    inline double EventMET(const MCEventFormat* event) const
+    inline MAfloat64 EventMET(const MCEventFormat* event) const
     {
       return event->MET().pt();
     }
 
     /// Compute the total hadronic transverse energy
-    inline double EventTHT(const MCEventFormat* event) const
+    inline MAfloat64 EventTHT(const MCEventFormat* event) const
     {
       return event->THT();
     }
 
     /// Compute the total effective mass
-    inline double EventMEFF(const MCEventFormat* event) const
+    inline MAfloat64 EventMEFF(const MCEventFormat* event) const
     {
       return event->Meff();
     }
 
     /// Compute the missing hadronic transverse energy
-    inline double EventMHT(const MCEventFormat* event) const
+    inline MAfloat64 EventMHT(const MCEventFormat* event) const
     {
       return event->MHT().pt();
     }
 
     /// Compute the total transverse energy
-    inline double EventTET(const RecEventFormat* event) const
+    inline MAfloat64 EventTET(const RecEventFormat* event) const
     {
       return event->TET();
     }
 
     /// Compute the missing transverse energy
-    inline double EventMET(const RecEventFormat* event) const
+    inline MAfloat64 EventMET(const RecEventFormat* event) const
     {
       return event->MET().pt();
     }
 
     /// Compute the total hadronic transverse energy
-    inline double EventTHT(const RecEventFormat* event) const
+    inline MAfloat64 EventTHT(const RecEventFormat* event) const
     {
       return event->THT();
     }
 
     /// Compute the total effective mass
-    inline double EventMEFF(const RecEventFormat* event) const
+    inline MAfloat64 EventMEFF(const RecEventFormat* event) const
     {
       return event->Meff();
     }
 
     /// Compute the missing hadronic transverse energy
-    inline double EventMHT(const RecEventFormat* event) const
+    inline MAfloat64 EventMHT(const RecEventFormat* event) const
     {
       return event->MHT().pt();
     }
 
     /// MT2 methods
-    double MT2(const MALorentzVector* p1, const MALorentzVector* p2,
-      const MALorentzVector& met, const double &mass)
+    MAfloat64 MT2(const MALorentzVector* p1, const MALorentzVector* p2,
+      const MALorentzVector& met, const MAfloat64 &mass)
     {
       InitializeMT2(*p1, *p2, met,mass);
       return GetMT2();
     }
 
     /// MT2 methods
-    double MT2(const ParticleBaseFormat* p1, const ParticleBaseFormat* p2,
-      const ParticleBaseFormat& met, const double &mass)
+    MAfloat64 MT2(const ParticleBaseFormat* p1, const ParticleBaseFormat* p2,
+      const ParticleBaseFormat& met, const MAfloat64 &mass)
     {
       InitializeMT2(p1->momentum(), p2->momentum(), met.momentum(),mass);
       return GetMT2();
     }
 
-    double GetMT2();
+    MAfloat64 GetMT2();
 
     /// MT2W method
-    double MT2W(std::vector<const RecJetFormat*>,const RecLeptonFormat*,const ParticleBaseFormat&);
-    double MT2W(std::vector<const MCParticleFormat*>,const MCParticleFormat*,const ParticleBaseFormat&);
+    MAfloat64 MT2W(std::vector<const RecJetFormat*>,const RecLeptonFormat*,const ParticleBaseFormat&);
+    MAfloat64 MT2W(std::vector<const MCParticleFormat*>,const MCParticleFormat*,const ParticleBaseFormat&);
 
   /// The Alpha_T variable
-  double AlphaT(const MCEventFormat*);
-  double AlphaT(const RecEventFormat*);
+  MAfloat64 AlphaT(const MCEventFormat*);
+  MAfloat64 AlphaT(const RecEventFormat*);
 
 
 };

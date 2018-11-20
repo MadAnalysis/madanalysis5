@@ -70,13 +70,13 @@ class DetectorDelphes: public DetectorBase
     TFolder*          delphesFolder_;
 
     // parameters
-    bool output_;
+    MAbool output_;
     std::string outputdir_;
     std::string rootfile_;
-    bool MA5card_;
+    MAbool MA5card_;
     std::map<std::string,std::string> table_;
     DelphesMemoryInterface interface_;
-    unsigned long nprocesses_;
+    MAuint64 nprocesses_;
 
 
 //---------------------------------------------------------------------------------
@@ -93,7 +93,7 @@ class DetectorDelphes: public DetectorBase
     {}
 
     /// Initialization
-    virtual bool Initialize(const std::string& configFile, const std::map<std::string,std::string>& options);
+    virtual MAbool Initialize(const std::string& configFile, const std::map<std::string,std::string>& options);
 
     /// Finalization
     virtual void Finalize();
@@ -109,7 +109,7 @@ class DetectorDelphes: public DetectorBase
     virtual std::string GetParameters();
 
     /// Jet clustering
-    virtual bool Execute(SampleFormat& mySample, EventFormat& myEvent);
+    virtual MAbool Execute(SampleFormat& mySample, EventFormat& myEvent);
 
     /// Translation functions
     void TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat& myEvent);

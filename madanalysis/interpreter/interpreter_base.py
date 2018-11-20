@@ -269,6 +269,7 @@ class InterpreterBase(cmd.Cmd):
             self.logger.info('History is cleaned')
             return
         elif len(args)==1:
+            BLA
             if os.path.exists(args[0]):
                 self.logger.error('The file ' + args[0] + ' already exists.' + \
                     ' Please chose another filename.')

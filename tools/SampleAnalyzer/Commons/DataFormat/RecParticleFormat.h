@@ -139,25 +139,25 @@ class RecParticleFormat : public ParticleBaseFormat
   { return false; }
 
   /// Accessor to the electric charge
-  virtual const int charge() const
+  virtual const MAint32 charge() const
   { return 0; }
 
   const std::vector<MAuint64>& delphesTags() const {return delphesTags_;}
 
-  bool isDelphesUnique(const std::vector<MAuint64>& delphesTags) const
+  MAbool isDelphesUnique(const std::vector<MAuint64>& delphesTags) const
   {
-    for (unsigned int i=0;i<delphesTags_.size();i++)
-      for (unsigned int j=0;j<delphesTags.size();j++)
+    for (MAuint32 i=0;i<delphesTags_.size();i++)
+      for (MAuint32 j=0;j<delphesTags.size();j++)
     {
       if (delphesTags_[i]==delphesTags[j]) return true;
     }
     return false;
   }
 
-  bool isDelphesUnique(const RecParticleFormat* part) const
+  MAbool isDelphesUnique(const RecParticleFormat* part) const
   { return isDelphesUnique(part->delphesTags()); }
 
-  bool isDelphesUnique(const RecParticleFormat& part) const
+  MAbool isDelphesUnique(const RecParticleFormat& part) const
   { return isDelphesUnique(part.delphesTags()); }
 
 };

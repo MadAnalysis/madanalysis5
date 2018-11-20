@@ -70,11 +70,11 @@ class DetectorDelphesMA5tune: public DetectorBase
     TFolder*          delphesFolder_;
 
     // parameters
-    bool output_;
+    MAbool output_;
     std::string outputdir_;
     std::string rootfile_;
-    bool first_;
-    unsigned long nprocesses_;
+    MAbool first_;
+    MAuint64 nprocesses_;
 
 
 //---------------------------------------------------------------------------------
@@ -91,7 +91,7 @@ class DetectorDelphesMA5tune: public DetectorBase
     {}
 
     /// Initialization
-    virtual bool Initialize(const std::string& configFile, const std::map<std::string,std::string>& options);
+    virtual MAbool Initialize(const std::string& configFile, const std::map<std::string,std::string>& options);
 
     /// Finalization
     virtual void Finalize();
@@ -107,7 +107,7 @@ class DetectorDelphesMA5tune: public DetectorBase
     virtual std::string GetParameters();
 
     /// Jet clustering
-    virtual bool Execute(SampleFormat& mySample, EventFormat& myEvent);
+    virtual MAbool Execute(SampleFormat& mySample, EventFormat& myEvent);
 
     /// Store Event block
     void StoreEventHeader(SampleFormat& mySample, EventFormat& myEvent);
