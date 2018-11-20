@@ -197,7 +197,7 @@ class RegionSelectionManager
   }
 
   /// Apply a cut
-  bool ApplyCut(bool, std::string const&);
+  MAbool ApplyCut(MAbool, std::string const&);
 
   /// This method associates all signal regions with an histo
   void AddHistoFrequency(const std::string&name)
@@ -393,7 +393,7 @@ class RegionSelectionManager
   void WriteHistoDefinition(SAFWriter& output);
 
   /// Checking if a given RS is surviging
-  bool IsSurviving(const std::string &RSname)
+  MAbool IsSurviving(const std::string &RSname)
   {
     // Looking for the region and checking its status
     for(MAuint32 i=0; i<regions_.size(); i++)
