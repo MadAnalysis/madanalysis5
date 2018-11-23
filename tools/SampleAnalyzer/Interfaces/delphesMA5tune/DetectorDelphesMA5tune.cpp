@@ -54,7 +54,7 @@ using namespace MA5;
 
 MAbool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const std::map<std::string,std::string>& options)
 { 
-
+  nprocesses_=0;
 
   // Save the name of the configuration file
   configFile_ = configFile;
@@ -118,10 +118,33 @@ MAbool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const s
   confReader_ = new ExRootConfReader;
   confReader_->ReadFile(configFile_.c_str());
 
+  WARNING << "init = 0" << endmsg; 
+  // Studying configuration part for TreeWriter module
+  ExRootConfParam param = confReader_->GetParam("TreeWriter::Branch");
+  if (param.GetSize()==0) 
+  {
+    ERROR << "Problem with Delphes card: no 'add Branch' line in TreeWriter module" << endmsg;
+    return false;
+  }
+  if (param.GetSize()%3!=0) 
+  {
+    ERROR << "Problem with Delphes card: problem with one or several 'add Branch' lines" << endmsg;
+    return false;
+  }
+
+  for(MAuint32 i=0; i<static_cast<MAuint32>(param.GetSize())/3; i++)
+  {
+    std::string branchInputArray = param[i*3+0].GetString();
+    std::string branchName       = param[i*3+1].GetString();
+    table_[branchName]=branchInputArray;
+  }
 
   treeWriter_ = new ExRootTreeWriter(outputFile_, "DelphesMA5tune");
+    WARNING << "init = 3a" << endmsg;
   branchEvent_ = treeWriter_->NewBranch("Event", LHEFEvent::Class());
+    WARNING << "init = 3b" << endmsg;
   branchWeight_ = treeWriter_->NewBranch("Weight", Weight::Class());
+    WARNING << "init = 3c" << endmsg;
 
   // Initializing delphes
   modularDelphes_ = new Delphes("Delphes");
@@ -134,15 +157,18 @@ MAbool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const s
   }
   modularDelphes_->SetConfReader(confReader_);
   modularDelphes_->SetTreeWriter(treeWriter_);
+    WARNING << "init = 4" << endmsg;
 
   factory_ = modularDelphes_->GetFactory();
   allParticleOutputArray_    = modularDelphes_->ExportArray("allParticles");
   stableParticleOutputArray_ = modularDelphes_->ExportArray("stableParticles");
   partonOutputArray_         = modularDelphes_->ExportArray("partons");
   modularDelphes_->InitTask();
+    WARNING << "init = 5" << endmsg;
 
   // Delphes PDG service
   PDG_ = TDatabasePDG::Instance();
+    WARNING << "init = 6" << endmsg;
 
   // Reset
   treeWriter_->Clear();

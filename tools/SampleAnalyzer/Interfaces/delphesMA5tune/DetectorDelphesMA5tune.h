@@ -73,6 +73,7 @@ class DetectorDelphesMA5tune: public DetectorBase
     MAbool output_;
     std::string outputdir_;
     std::string rootfile_;
+    std::map<std::string,std::string> table_;
     MAbool first_;
     MAuint64 nprocesses_;
 
@@ -101,7 +102,7 @@ class DetectorDelphesMA5tune: public DetectorBase
 
     /// Accessor to the jet clusterer name
     virtual std::string GetName()
-    { return "delphesMA5tune"; }
+    { return "delphes"; }
 
     /// Accessor to the jet clusterer parameters
     virtual std::string GetParameters();

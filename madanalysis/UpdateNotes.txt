@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+149           (2018/11/24) fuks:    Updating delphesMA5tune installer 
+
 147           (2018/11/23) fuks:    Externalizing the PAD 
 
 139           (2018/11/20) fuks:    cleaning the code (syntax improvements) 

@@ -45,7 +45,8 @@ class InstallDelphesMA5tune:
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir = os.path.normpath(self.tmpdir + '/MA5_delphesMA5tune/')
         self.ncores     = 1
-        self.files = {"delphestune.tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/delphesma5tune.tar.gz"}
+#        self.files = {"delphestune.tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/delphesma5tune.tar.gz"}
+        self.files = {"delphestune.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.4.1.tar.gz"}
         self.logger = logging.getLogger('MA5')
 
     def Detect(self):
@@ -104,6 +105,7 @@ class InstallDelphesMA5tune:
             return False
         # Copying the patch
         self.logger.debug('Copying the patch ...')
+#        input=self.toolsdir+'/SampleAnalyzer/Interfaces/delphesMA5tune/patch_delphesMA5tune.tgz'
         input=self.toolsdir+'/SampleAnalyzer/Interfaces/delphesMA5tune/patch_delphesMA5tune.tgz'
         output=packagedir+'/patch_delphesMA5tune.tgz'
         try:
@@ -159,6 +161,24 @@ class InstallDelphesMA5tune:
         self.logger.debug('Updating files '+filename+ ': no CMSSW\n')
         self.SwitchOffCMSSW(filename)
 
+        # Updating ExRootTask
+        filename = self.installdir+'/external/ExRootAnalysis/ExRootTask.cc'
+        self.logger.debug('Updating files: commenting out lines in: '+filename+' ...')
+        self.CommentLines(filename,[64,65,66],'//')
+
+        # Updating ExRootTask
+        filename = self.installdir+'/external/ExRootAnalysis/ExRootConfReader.cc'
+        self.logger.debug('Updating files: commenting out lines in: '+filename+' ...')
+        self.CommentLines(filename,[177,178,179,180],'//')
+
+        # Adding files
+        filesToAdd = ["MA5GenParticleFilter"]
+        if not self.CopyFiles(filesToAdd):
+            return False
+        if not self.UpdateDictionnary(filesToAdd):
+            return False
+
+
         # Ok
         return True
 
@@ -174,26 +194,26 @@ class InstallDelphesMA5tune:
                                              self.installdir,\
                                              silent=False)
         # Fixing the Makefile for root 6
-        infile  = open(os.path.join(self.installdir, 'Makefile'), 'r')
-        outfile = open(os.path.join(self.installdir, 'Makefile.new'), 'w')
-        intcl = False
-        for line in infile:
-            if line.startswith('CXXFLAGS += '):
-                outfile.write(line)
-                newline =    line.replace('CXXFLAGS', 'CXXFLAGS2')
-                newline = newline.replace('$(ROOTCFLAGS)', ' ')
-                outfile.write(newline)
-            elif line.startswith('$(TCL_OBJ)'):
-                intcl=True
-                outfile.write(line)
-            elif intcl and 'gcc' in line:
-                intcl=False
-                outfile.write(line.replace('CXXFLAGS','CXXFLAGS2'))
-            else:
-                outfile.write(line)
-        infile.close()
-        outfile.close()
-        shutil.move(os.path.join(self.installdir, 'Makefile.new'), os.path.join(self.installdir, 'Makefile'))
+##         infile  = open(os.path.join(self.installdir, 'Makefile'), 'r')
+##         outfile = open(os.path.join(self.installdir, 'Makefile.new'), 'w')
+##         intcl = False
+##         for line in infile:
+##             if line.startswith('CXXFLAGS += '):
+##                 outfile.write(line)
+##                 newline =    line.replace('CXXFLAGS', 'CXXFLAGS2')
+##                 newline = newline.replace('$(ROOTCFLAGS)', ' ')
+##                 outfile.write(newline)
+##             elif line.startswith('$(TCL_OBJ)'):
+##                 intcl=True
+##                 outfile.write(line)
+##             elif intcl and 'gcc' in line:
+##                 intcl=False
+##                 outfile.write(line.replace('CXXFLAGS','CXXFLAGS2'))
+##             else:
+##                 outfile.write(line)
+##         infile.close()
+##         outfile.close()
+##         shutil.move(os.path.join(self.installdir, 'Makefile.new'), os.path.join(self.installdir, 'Makefile'))
         self.SwitchOffCMSSW(os.path.join(self.installdir, 'Makefile'))
 
         # return result
@@ -276,6 +296,45 @@ class InstallDelphesMA5tune:
     def NeedToRestart(self):
         return True
 
+
+    def CommentLines(self,filename,thelines,charac='//'):
+        # open input file
+        try:
+            input = open(filename)
+        except:
+            self.logger.error("impossible to read the file:" + filename)
+            return False
+
+        # open output file
+        try:
+            output = open(filename+'.savema5','w')
+        except:
+            self.logger.error("impossible to read the file:" + filename+'.savema5')
+            return False
+
+        # lines
+        ind = 0
+        for line in input:
+            ind+=1
+            if ind in thelines:
+                output.write(charac+' '+line)
+            else:
+                output.write(line)
+
+        #close
+        input.close()
+        output.close()
+
+        try:
+            shutil.copy(filename+'.savema5',filename)
+        except:
+            self.logger.error("impossible to copy "+filename+'.savema5 in '+filename)
+            return False
+
+        return True
+
+
+
     def SwitchOffCMSSW(self,filename):
         # open input file
         try:
@@ -307,6 +366,81 @@ class InstallDelphesMA5tune:
 
         return True
 
+
+    def CopyFiles(self,filesToAdd):
+
+        for file in filesToAdd:
+            logging.debug("Add module *"+file+"* ...")
+
+
+            inputname  = self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/delphes/'+file+'.cc.install'
+            outputname = self.installdir+'/modules/'+file+'.cc'
+            self.logger.debug("Copying file from '"+inputname+"' to '"+outputname+'" ...')
+
+            try:
+                shutil.copy(inputname,outputname)
+            except:
+                self.logger.error("impossible to copy "+inputname+' in '+outputname)
+                return False
+             
+            inputname  = self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/delphes/'+file+'.h.install'
+            outputname = self.installdir+'/modules/'+file+'.h'
+            self.logger.debug("Copying file from '"+inputname+"' to '"+outputname+'" ...')
+
+            try:
+                shutil.copy(inputname,outputname)
+            except:
+                self.logger.error("impossible to copy "+inputname+' in '+outputname)
+                return False
+
+        return True
+
+
+    def UpdateDictionnary(self,filesToAdd):
+
+        inputname = self.installdir+'/modules/ModulesLinkDef.h'
+        self.logger.debug("Updating the Delphes dictionnary '"+inputname+'" ...')
+        try:
+            input = open(inputname)
+        except:
+            self.logger.error('impossible to open '+inputname)
+            return False
+
+        outputname = self.installdir+'/modules/ModulesLinkDef.savema5'
+        try:
+            output = open(outputname,'w')
+        except:
+            self.logger.error('impossible to write '+outputname)
+            return False
+
+        for line in input:
+            myline = line.lstrip()
+            myline = myline.rstrip()
+            words = myline.split()
+
+            if len(words)>=2:
+                if words[0]=='#include' and words[1]=='"modules/ExampleModule.h"':
+                    for file in filesToAdd:
+                        output.write('#include "modules/'+file+'.h"\n')
+            if len(words)>=5:
+                if words[0]=='#pragma' and words[1]=='link' and \
+                   words[2]=='C++' and words[3]=='class' and \
+                   words[4]=='ExampleModule+;':
+                    for file in filesToAdd:
+                        output.write('#pragma link C++ class '+file+'+;\n')
+
+            output.write(line)
+
+        input.close()
+        output.close()
+
+        try:
+            shutil.copy(outputname,inputname)
+        except:
+            self.logger.error("impossible to copy "+outputname+' in '+inputname)
+            return False
+
+        return True
 
 
 

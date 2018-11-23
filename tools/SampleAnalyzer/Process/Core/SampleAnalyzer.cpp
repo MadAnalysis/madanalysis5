@@ -473,7 +473,7 @@ DetectorBase* SampleAnalyzer::InitializeDetector(
 
   // Display
   INFO << "      - fast-simulation package '"
-       << myDetector->GetName() << "' -> " << name << endmsg;
+       << myDetector->GetName() << "'" << endmsg;
 
   // Putting the detector in container
   detectors_.push_back(myDetector);
