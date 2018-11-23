@@ -41,6 +41,53 @@ if not sys.version_info[0] == 2 or sys.version_info[1] < 6:
 
 
 ################################################################################
+# CLASS ARGUMENT
+################################################################################
+class Argument():
+   
+    @staticmethod
+    def PrintSyntax():
+        print "Syntax of the program: ./makedoc <arg>"
+        print "where <arg> can be:"
+        print "  help      ->  displying this message"
+        print "  clean     ->  removing temporary files (aux, bbl, log, ..."
+        print "  mrproper  ->  removing PDF files and temporary files"
+
+    @staticmethod
+    def Clean():
+        import glob
+        import os
+        todelete=glob.glob("*.aux")
+        todelete.extend(glob.glob("*.bbl"))
+        todelete.extend(glob.glob("*.bgl"))
+        todelete.extend(glob.glob("*.log"))
+        todelete.extend(glob.glob("*.out"))
+        todelete.extend(glob.glob("*.dvi"))
+        todelete.extend(glob.glob("*.blg"))
+        todelete.extend(glob.glob("*~"))
+        todelete.extend(glob.glob("*/*.aux"))
+        todelete.extend(glob.glob("*/*.bbl"))
+        todelete.extend(glob.glob("*/*.bgl"))
+        todelete.extend(glob.glob("*/*.log"))
+        todelete.extend(glob.glob("*/*.out"))
+        todelete.extend(glob.glob("*/*.dvi"))
+        todelete.extend(glob.glob("*/*.blg"))
+        todelete.extend(glob.glob("*/*~"))
+        for item in todelete:
+            os.remove(item)
+
+    @staticmethod
+    def Mrproper():
+        import glob
+        import os
+        Argument.Clean()
+        todelete=glob.glob("*.pdf")
+        todelete.extend(glob.glob("*/*.pdf"))
+        for item in todelete:
+            os.remove(item)
+
+
+################################################################################
 # CLASS MAKELATEX
 ################################################################################
 class MakeLatex():
@@ -119,7 +166,7 @@ class MakeLatex():
         log.write('BUILDING THE LATEX FILE\n')
         log.write(self.texfilename+'\n\n')
 
-        print '    - step 1/4...'
+        print '    - step 1/4: producing .aux file...'
         log.write('\n')
         log.write('*****************************************************\n')
         log.write(' STEP 1/4\n') 
@@ -134,7 +181,7 @@ class MakeLatex():
             bibname = bibname[:-4]
         bibtex_cmd  = ['bibtex', bibname]
 
-        print '    - step 2/4...'
+        print '    - step 2/4: producing .bbl file with references...'
         log.write('\n')
         log.write('*****************************************************\n')
         log.write(' STEP 2/4\n') 
@@ -144,20 +191,20 @@ class MakeLatex():
         if not test:
             return False
 
-        print '    - step 3/4...'
+        print '    - step 3/4: creating the reference labels...'
         log.write('\n')
         log.write('*****************************************************\n')
-        log.write(' STEP 3/4\n') 
+        log.write(' STEP 3/4 \n') 
         log.write('*****************************************************\n')
         test, result = MakeLatex.ExecuteCommand(latex_cmd,  self.workfolder, show=True)
         log.write('\n'.join(result)) 
         if not test:
             return False
 
-        print '    - step 4/4...'
+        print '    - step 4/4: including the reference labels...'
         log.write('\n')
         log.write('*****************************************************\n')
-        log.write(' STEP 4/4\n') 
+        log.write(' STEP 4/4 \n') 
         log.write('*****************************************************\n')
         test, result = MakeLatex.ExecuteCommand(latex_cmd,  self.workfolder, show=True)
         log.write('\n'.join(result)) 
@@ -178,72 +225,87 @@ class MakeLatex():
 # MAIN PROGRAM
 ################################################################################
 
+# Treating argument
+arguments=sys.argv[1:]
+if len(arguments)==1:
+    if arguments[0]=='clean':
+        Argument.Clean()
+        sys.exit()
+    elif arguments[0]=='mrproper':
+        Argument.Mrproper()
+        sys.exit()
+    elif arguments[0]=='help':
+        Argument.PrintSyntax()
+        sys.exit()
+    else:
+        print 'ERROR: wrong arguments'
+        Argument.PrintSyntax()
+        sys.exit()
+elif len(arguments)>=1:
+    print 'ERROR: wrong arguments'
+    PrintSyntax()
+    sys.exit()
+
+# Defining colors
+cyan   = '\x1b[36m'
+red    = '\x1b[31m'
+green  = '\x1b[32m'
+endmsg = '\x1b[0m'
+
+
 # The beginning
-print "Welcome to MA5 reference-card maker!"
+print ""
+print cyan+"Welcome to MA5 reference-card maker!"+endmsg
+print ""
 
 # Finding the doc folder
 import os
 docpath = os.path.split(os.path.realpath( __file__ ))[0]
 if not os.path.isdir(docpath):
-    sys.exit('ERROR: the documentation folder is not here:\n'+docpath)
-print "- Documentation folder to process is here: "+docpath
+    print red+'ERROR: '+endmsg+'the documentation folder is not here:\n'+docpath
+    print ""
+    sys.exit()
+print cyan+"- Documentation folder to process is here: "+endmsg+docpath
 
 # Detecting pdflatex and bibtex
-print "- Detecting of the presence of the Latex programs..."
+print cyan+"- Detecting of the presence of the Latex programs..."+endmsg
 if not MakeLatex.CheckPrograms():
-    sys.exit("Aborted")
+    print red+'Aborted'
+    print ""
+    sys.exit() 
 ok = True
 
-# Remove old files
-import glob
-todelete=glob.glob("*.aux")
-todelete.extend(glob.glob("*.bbl"))
-todelete.extend(glob.glob("*.bgl"))
-todelete.extend(glob.glob("*.log"))
-todelete.extend(glob.glob("*.out"))
-todelete.extend(glob.glob("*.dvi"))
-todelete.extend(glob.glob("*.blg"))
-todelete.extend(glob.glob("*.pdf"))
-todelete.extend(glob.glob("*~"))
-todelete.extend(glob.glob("*/*.aux"))
-todelete.extend(glob.glob("*/*.bbl"))
-todelete.extend(glob.glob("*/*.bgl"))
-todelete.extend(glob.glob("*/*.log"))
-todelete.extend(glob.glob("*/*.out"))
-todelete.extend(glob.glob("*/*.dvi"))
-todelete.extend(glob.glob("*/*.blg"))
-todelete.extend(glob.glob("*/*.pdf"))
-todelete.extend(glob.glob("*/*~"))
-for item in todelete:
-    os.remove(item)
-sys.exit()
-
 # Building normal-mode reference-card
-print "- Building reference card for the normal mode..."
+print cyan+"- Building reference card for the normal mode..."+endmsg
 maker=MakeLatex(docpath+'/normal_mode/main_normal.tex',\
                 docpath+'/normal_mode/main_normal.bib',\
                 docpath+'/normal_mode.pdf',\
                 docpath+'/normal_mode.log',\
                 docpath+'/normal_mode/')
 if not maker.Execute():
-    print "      ERROR: Impossible to build the reference card for the normal mode!" 
+    print red+"      ERROR:"+endmsg+" Impossible to build the reference card for the normal mode!" 
     print "      see the log file: "+docpath+'/normal_mode.log'  
     ok = False
 
 # Building expert-mode reference-card
-print "- Building reference card for the expert mode..."
+print cyan+"- Building reference card for the expert mode..."+endmsg
 maker=MakeLatex(docpath+'/expert_mode/main_expert.tex',\
                 docpath+'/expert_mode/main_expert.bib',\
                 docpath+'/expert_mode.pdf',\
                 docpath+'/expert_mode.log',\
                 docpath+'/expert_mode/')
 if not maker.Execute():
-    print "      ERROR: Impossible to build the reference card for the expert mode!" 
+    print red+"      ERROR:"+endmsg+" Impossible to build the reference card for the expert mode!" 
     print "      see the log file: "+docpath+'/expert_mode.log'  
     ok = False
 
 # It's the end of the word as we know it!
 if ok:
-    print "Goodbye! Have a good day!"
+    print green+"Success!"+endmsg
+    print ""
+    print cyan+"Goodbye! Have a good day!"+endmsg
+    print ""  
 else:
-    print "Aborted"
+    print red+"Aborted"+endmsg
+    print ""
+
