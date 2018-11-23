@@ -1,0 +1,249 @@
+#!/usr/bin/env python
+
+################################################################################
+#  
+#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
+#  
+#  This file is part of MadAnalysis 5.
+#  Official website: <https://launchpad.net/madanalysis5>
+#  
+#  MadAnalysis 5 is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#  
+#  MadAnalysis 5 is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
+#  
+################################################################################
+
+
+################################################################################
+# PYTHON VERSION CRITERION
+################################################################################
+
+"""This is the main executable, a simple frontend to set up the PYTHONPATH
+and call immediately the command line interface scripts"""
+
+# Checking if the correct release of Python is installed
+import sys
+if not sys.version_info[0] == 2 or sys.version_info[1] < 6:
+    sys.exit('Python release '+ sys.version + ' is detected.\n' + \
+    'MadAnalysis 5 works only with python 2.6 ' + \
+    'or later (but not python 3.X).\n' + \
+    'Please upgrade your version of python.')
+
+
+################################################################################
+# CLASS MAKELATEX
+################################################################################
+class MakeLatex():
+   
+    def __init__(self, texfilename, bibfilename, outfilename, logfilename, workfolder):
+        self.texfilename = texfilename # latex file to compile
+        self.bibfilename = bibfilename # bib file associated to the latex file
+        self.outfilename = outfilename # pdf file to produce
+        self.logfilename = logfilename # log file to produce
+        self.workfolder  = workfolder  # folder where the temporary file
+                                       # (aux, bbl, log, ...) will be produced
+
+    @staticmethod
+    def ExecuteCommand(theCommands,workfolder='./',mute=True,show=False):
+        import subprocess
+
+        # Show
+        if show:
+             print '      command line: '+' '.join(theCommands)
+
+        # Launching the commands
+        try:
+            result=subprocess.Popen(theCommands,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=workfolder)
+        except:
+            if not mute:
+                print '      ERROR: impossible to execute the commands: '+' '.join(theCommands)
+            return False, []
+
+        # Getting stdout
+        out, err = result.communicate()
+        if out==None:
+            return False, []
+
+        # Splitting the lines
+        msg = out.split('\n')
+
+        # Removing irrelevant component
+        msg2 = []
+        for item in msg:
+            if item=='':
+                continue
+            if len(msg2)!=0:
+                if msg2[-1]==item:
+                    continue
+            msg2.append(item)
+            
+        # Getting results
+        if result.returncode!=0:
+            if not mute:
+                print '      ERROR: command '+str(theCommands)+' is not found'
+            return False, msg2
+
+        # Return results
+        return True, msg2
+
+
+    @staticmethod  
+    def CheckPrograms():
+        ok = True
+
+        # Detection of pdflatex
+        test, result = MakeLatex.ExecuteCommand(['which','pdflatex'],mute=True)
+        ok = ok and test and (len(result)!=0)
+        if (not test) or len(result)==0:
+            print "  ERROR: pdflatex is not found"
+
+        # Detection of biblatex
+        result = MakeLatex.ExecuteCommand(['which','bibtex'],mute=True)
+        ok = ok and test and (len(result)!=0)
+        if (not test) or len(result)==0:
+            print "  ERROR: bibtex is not found"
+        return ok
+ 
+    def Execute(self):
+        log = file(self.logfilename,'w')
+        log.write('BUILDING THE LATEX FILE\n')
+        log.write(self.texfilename+'\n\n')
+
+        print '    - step 1/4...'
+        log.write('\n')
+        log.write('*****************************************************\n')
+        log.write(' STEP 1/4\n') 
+        log.write('*****************************************************\n')
+        latex_cmd   = ['pdflatex','-interaction=nonstopmode', self.texfilename]
+        test, result = MakeLatex.ExecuteCommand(latex_cmd,  self.workfolder, show=True)
+        log.write('\n'.join(result)) 
+        if not test: 
+            return False
+        bibname = self.bibfilename
+        if self.bibfilename.endswith('.bib'):
+            bibname = bibname[:-4]
+        bibtex_cmd  = ['bibtex', bibname]
+
+        print '    - step 2/4...'
+        log.write('\n')
+        log.write('*****************************************************\n')
+        log.write(' STEP 2/4\n') 
+        log.write('*****************************************************\n')
+        test, result = MakeLatex.ExecuteCommand(bibtex_cmd, self.workfolder, show=True)
+        log.write('\n'.join(result)) 
+        if not test:
+            return False
+
+        print '    - step 3/4...'
+        log.write('\n')
+        log.write('*****************************************************\n')
+        log.write(' STEP 3/4\n') 
+        log.write('*****************************************************\n')
+        test, result = MakeLatex.ExecuteCommand(latex_cmd,  self.workfolder, show=True)
+        log.write('\n'.join(result)) 
+        if not test:
+            return False
+
+        print '    - step 4/4...'
+        log.write('\n')
+        log.write('*****************************************************\n')
+        log.write(' STEP 4/4\n') 
+        log.write('*****************************************************\n')
+        test, result = MakeLatex.ExecuteCommand(latex_cmd,  self.workfolder, show=True)
+        log.write('\n'.join(result)) 
+        if not test:
+            return False
+
+        log.close()
+        print '    - finalizing the PDF file'
+        pdfname = self.texfilename[:-3]+'pdf'
+        if not os.path.isfile(pdfname):
+            print '      ERROR: PDF file is not found: '+pdfname
+            return False
+        os.rename(pdfname,self.outfilename)
+        return True
+
+
+################################################################################
+# MAIN PROGRAM
+################################################################################
+
+# The beginning
+print "Welcome to MA5 reference-card maker!"
+
+# Finding the doc folder
+import os
+docpath = os.path.split(os.path.realpath( __file__ ))[0]
+if not os.path.isdir(docpath):
+    sys.exit('ERROR: the documentation folder is not here:\n'+docpath)
+print "- Documentation folder to process is here: "+docpath
+
+# Detecting pdflatex and bibtex
+print "- Detecting of the presence of the Latex programs..."
+if not MakeLatex.CheckPrograms():
+    sys.exit("Aborted")
+ok = True
+
+# Remove old files
+import glob
+todelete=glob.glob("*.aux")
+todelete.extend(glob.glob("*.bbl"))
+todelete.extend(glob.glob("*.bgl"))
+todelete.extend(glob.glob("*.log"))
+todelete.extend(glob.glob("*.out"))
+todelete.extend(glob.glob("*.dvi"))
+todelete.extend(glob.glob("*.blg"))
+todelete.extend(glob.glob("*.pdf"))
+todelete.extend(glob.glob("*~"))
+todelete.extend(glob.glob("*/*.aux"))
+todelete.extend(glob.glob("*/*.bbl"))
+todelete.extend(glob.glob("*/*.bgl"))
+todelete.extend(glob.glob("*/*.log"))
+todelete.extend(glob.glob("*/*.out"))
+todelete.extend(glob.glob("*/*.dvi"))
+todelete.extend(glob.glob("*/*.blg"))
+todelete.extend(glob.glob("*/*.pdf"))
+todelete.extend(glob.glob("*/*~"))
+for item in todelete:
+    os.remove(item)
+sys.exit()
+
+# Building normal-mode reference-card
+print "- Building reference card for the normal mode..."
+maker=MakeLatex(docpath+'/normal_mode/main_normal.tex',\
+                docpath+'/normal_mode/main_normal.bib',\
+                docpath+'/normal_mode.pdf',\
+                docpath+'/normal_mode.log',\
+                docpath+'/normal_mode/')
+if not maker.Execute():
+    print "      ERROR: Impossible to build the reference card for the normal mode!" 
+    print "      see the log file: "+docpath+'/normal_mode.log'  
+    ok = False
+
+# Building expert-mode reference-card
+print "- Building reference card for the expert mode..."
+maker=MakeLatex(docpath+'/expert_mode/main_expert.tex',\
+                docpath+'/expert_mode/main_expert.bib',\
+                docpath+'/expert_mode.pdf',\
+                docpath+'/expert_mode.log',\
+                docpath+'/expert_mode/')
+if not maker.Execute():
+    print "      ERROR: Impossible to build the reference card for the expert mode!" 
+    print "      see the log file: "+docpath+'/expert_mode.log'  
+    ok = False
+
+# It's the end of the word as we know it!
+if ok:
+    print "Goodbye! Have a good day!"
+else:
+    print "Aborted"
