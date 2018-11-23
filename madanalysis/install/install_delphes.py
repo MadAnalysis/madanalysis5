@@ -29,7 +29,6 @@ from madanalysis.IOinterface.library_writer import LibraryWriter
 from madanalysis.IOinterface.folder_writer  import FolderWriter
 from madanalysis.system.checkup             import CheckUp
 from shell_command import ShellCommand
-from string_tools  import StringTools
 import os
 import sys
 import logging
@@ -130,11 +129,13 @@ class InstallDelphes:
                     self.logger.error('impossible to move the file/folder '+myfile+' from '+packagedir+' to '+self.installdir)
                     return False
 
+        ## ONLY DELPHESMA4TUnE (but DELPHES TRACKS YES)
+
         # Updating Makefile
         filename = self.installdir+'/Makefile'
         self.logger.debug('Updating files '+filename+ ': no CMSSW\n')
         self.SwitchOffCMSSW(filename)
-        
+
         # Updating Makefile
         filename = self.installdir+'/doc/genMakefile.tcl'
         self.logger.debug('Updating files '+filename+ ': no CMSSW\n')
@@ -149,7 +150,7 @@ class InstallDelphes:
         filename = self.installdir+'/external/ExRootAnalysis/ExRootTask.cc'
         self.logger.debug('Updating files: commenting out lines in: '+filename+' ...')
         self.CommentLines(filename,[64,65,66],'//')
-        
+
         # Updating ExRootTask
         filename = self.installdir+'/external/ExRootAnalysis/ExRootConfReader.cc'
         self.logger.debug('Updating files: commenting out lines in: '+filename+' ...')
@@ -161,7 +162,7 @@ class InstallDelphes:
             return False
         if not self.UpdateDictionnary(filesToAdd):
             return False
-        
+
         # Ok
         return True
 
@@ -169,7 +170,6 @@ class InstallDelphes:
     def Configure(self):
 
         # KNOWn DELPHES ISsues: GENERATE ISSUES BECAuse IT USES TCSLSH COMMAND
-        
         # Input
         theCommands=['./configure']
         logname=os.path.normpath(self.installdir+'/configuration.log')
@@ -186,87 +186,11 @@ class InstallDelphes:
             self.logger.error(logname)
         return ok
 
-        
-    def BuildOld(self):
-
-        # Input
-        theCommands=['make','ClassesDict_rdict.pcm','ExRootAnalysisDict_rdict.pcm', 'ModulesDict_rdict.pcm', 'FastJetDict_rdict.pcm']
-        logname=os.path.normpath(self.installdir+'/compilation_Dict.log')
-        # Execute
-        self.logger.debug('shell command: '+' '.join(theCommands))
-        ok, out= ShellCommand.ExecuteWithLog(theCommands,\
-                                             logname,\
-                                             self.installdir,\
-                                             silent=False)
-        # return result
-        if not ok:
-            pass # only for ROOT6
-
-        # Input
-        theCommands=['make','-j'+str(self.ncores),'libDelphes.so']
-        logname=os.path.normpath(self.installdir+'/compilation_libDelphes.log')
-        # Execute
-        self.logger.debug('shell command: '+' '.join(theCommands))
-        ok, out= ShellCommand.ExecuteWithLog(theCommands,\
-                                             logname,\
-                                             self.installdir,\
-                                             silent=False)
-        # return result
-        if not ok:
-            self.logger.error('impossible to build the project. For more details, see the log file:')
-            self.logger.error(logname)
-            return ok
-
-        # Input
-        theCommands=['make','DelphesSTDHEP']
-        logname=os.path.normpath(self.installdir+'/compilation_STDHEP.log')
-        # Execute
-        self.logger.debug('shell command: '+' '.join(theCommands))
-        ok, out= ShellCommand.ExecuteWithLog(theCommands,\
-                                             logname,\
-                                             self.installdir,\
-                                             silent=False)
-        # return result
-        if not ok:
-            self.logger.error('impossible to build the project. For more details, see the log file:')
-            self.logger.error(logname)
-            return ok
-
-        # Input
-        theCommands=['make','DelphesLHEF']
-        logname=os.path.normpath(self.installdir+'/compilation_LHEF.log')
-        # Execute
-        self.logger.debug('shell command: '+' '.join(theCommands))
-        ok, out= ShellCommand.ExecuteWithLog(theCommands,\
-                                             logname,\
-                                             self.installdir,\
-                                             silent=False)
-        # return result
-        if not ok:
-            self.logger.error('impossible to build the project. For more details, see the log file:')
-            self.logger.error(logname)
-            return ok
-
-        # Input
-        theCommands=['make','DelphesHepMC']
-        logname=os.path.normpath(self.installdir+'/compilation_HepMC.log')
-        # Execute
-        self.logger.debug('shell command: '+' '.join(theCommands))
-        ok, out= ShellCommand.ExecuteWithLog(theCommands,\
-                                             logname,\
-                                             self.installdir,\
-                                             silent=False)
-        # return result
-        if not ok:
-            self.logger.error('impossible to build the project. For more details, see the log file:')
-            self.logger.error(logname)
-        return ok
-
 
     def Build(self):
 
         # Input
-        theCommands=['make']
+        theCommands=['make', '-j'+str(self.ncores)]
         logname=os.path.normpath(self.installdir+'/compilation.log')
         # Execute
         self.logger.debug('shell command: '+' '.join(theCommands))
@@ -328,17 +252,14 @@ class InstallDelphes:
         self.logger.error("More details can be found into the log files:")
         self.logger.error(" - "+os.path.normpath(self.installdir+"/wget.log"))
         self.logger.error(" - "+os.path.normpath(self.installdir+"/unpack.log"))
-        self.logger.error(" - "+os.path.normpath(self.installdir+"/configuration_libDelphes.log"))
-        self.logger.error(" - "+os.path.normpath(self.installdir+"/configuration_LHEF.log"))
-        self.logger.error(" - "+os.path.normpath(self.installdir+"/configuration_STDHEP.log"))
-        self.logger.error(" - "+os.path.normpath(self.installdir+"/configuration_HepMC.log"))
+        self.logger.error(" - "+os.path.normpath(self.installdir+"/configuration.log"))
         self.logger.error(" - "+os.path.normpath(self.installdir+"/compilation.log"))
         self.logger.error(" - "+os.path.normpath(self.installdir+"/clean.log"))
 
     def NeedToRestart(self):
         return True
-    
-        
+
+
     def CommentLines(self,filename,thelines,charac='//'):
         # open input file
         try:
@@ -375,7 +296,7 @@ class InstallDelphes:
 
         return True
 
-            
+
     def SwitchOffCMSSW(self,filename):
         # open input file
         try:

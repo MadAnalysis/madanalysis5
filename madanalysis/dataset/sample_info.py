@@ -29,5 +29,3 @@ class SampleInfo():
         self.nevents  = 0L
         self.sumw_positive = 0.
         self.sumw_negative = 0.
-        
-        

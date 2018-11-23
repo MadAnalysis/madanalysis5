@@ -26,6 +26,7 @@ from madanalysis.install.install_service    import InstallService
 from madanalysis.system.user_info           import UserInfo
 from madanalysis.system.config_checker      import ConfigChecker
 from madanalysis.IOinterface.library_writer import LibraryWriter
+from madanalysis.IOinterface.folder_writer  import FolderWriter
 from madanalysis.system.checkup             import CheckUp
 from shell_command import ShellCommand
 import os
@@ -44,7 +45,7 @@ class InstallDelphesMA5tune:
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir = os.path.normpath(self.tmpdir + '/MA5_delphesMA5tune/')
         self.ncores     = 1
-        self.files = {"delphestune.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
+        self.files = {"delphestune.tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/delphesma5tune.tar.gz"}
         self.logger = logging.getLogger('MA5')
 
     def Detect(self):
@@ -152,6 +153,12 @@ class InstallDelphesMA5tune:
                 except:
                     self.logger.error('impossible to move the file/folder '+myfile+' from '+packagedir+' to '+self.installdir)
                     return False
+
+        # Updating Makefile
+        filename = self.installdir+'/doc/genMakefile.tcl'
+        self.logger.debug('Updating files '+filename+ ': no CMSSW\n')
+        self.SwitchOffCMSSW(filename)
+
         # Ok
         return True
 
@@ -166,16 +173,39 @@ class InstallDelphesMA5tune:
                                              logname,\
                                              self.installdir,\
                                              silent=False)
+        # Fixing the Makefile for root 6
+        infile  = open(os.path.join(self.installdir, 'Makefile'), 'r')
+        outfile = open(os.path.join(self.installdir, 'Makefile.new'), 'w')
+        intcl = False
+        for line in infile:
+            if line.startswith('CXXFLAGS += '):
+                outfile.write(line)
+                newline =    line.replace('CXXFLAGS', 'CXXFLAGS2')
+                newline = newline.replace('$(ROOTCFLAGS)', ' ')
+                outfile.write(newline)
+            elif line.startswith('$(TCL_OBJ)'):
+                intcl=True
+                outfile.write(line)
+            elif intcl and 'gcc' in line:
+                intcl=False
+                outfile.write(line.replace('CXXFLAGS','CXXFLAGS2'))
+            else:
+                outfile.write(line)
+        infile.close()
+        outfile.close()
+        shutil.move(os.path.join(self.installdir, 'Makefile.new'), os.path.join(self.installdir, 'Makefile'))
+        self.SwitchOffCMSSW(os.path.join(self.installdir, 'Makefile'))
+
         # return result
         if not ok:
             self.logger.error('impossible to configure the project. For more details, see the log file:')
             self.logger.error(logname)
         return ok
 
-        
+
     def Build(self):
         # Input
-        theCommands=['make','-j'+str(self.ncores),'libDelphesMA5tune.so']
+        theCommands=['make','-j'+str(self.ncores)]
         logname=os.path.normpath(self.installdir+'/compilation.log')
         # Execute
         self.logger.debug('shell command: '+' '.join(theCommands))
@@ -183,56 +213,14 @@ class InstallDelphesMA5tune:
                                              logname,\
                                              self.installdir,\
                                              silent=False)
-        # return result
-        if not ok:
-            self.logger.error('impossible to build the project. For more details, see the log file:')
-            self.logger.error(logname)
-            return ok
-
-        # Input
-        theCommands=['make','DelphesSTDHEP']
-        logname=os.path.normpath(self.installdir+'/compilation_STDHEP.log')
-        # Execute
-        self.logger.debug('shell command: '+' '.join(theCommands))
-        ok, out= ShellCommand.ExecuteWithLog(theCommands,\
-                                             logname,\
-                                             self.installdir,\
-                                             silent=False)
-        # return result
-        if not ok:
-            self.logger.error('impossible to build the project. For more details, see the log file:')
-            self.logger.error(logname)
-            return ok
-
-        # Input
-        theCommands=['make','DelphesLHEF']
-        logname=os.path.normpath(self.installdir+'/compilation_LHEF.log')
-        # Execute
-        self.logger.debug('shell command: '+' '.join(theCommands))
-        ok, out= ShellCommand.ExecuteWithLog(theCommands,\
-                                             logname,\
-                                             self.installdir,\
-                                             silent=False)
-        # return result
-        if not ok:
-            self.logger.error('impossible to build the project. For more details, see the log file:')
-            self.logger.error(logname)
-            return ok
-
-        # Input
-        theCommands=['make','DelphesHepMC']
-        logname=os.path.normpath(self.installdir+'/compilation_HepMC.log')
-        # Execute
-        self.logger.debug('shell command: '+' '.join(theCommands))
-        ok, out= ShellCommand.ExecuteWithLog(theCommands,\
-                                             logname,\
-                                             self.installdir,\
-                                             silent=False)
+        self.logger.debug(" out = "+ str(out))
+        self.logger.debug(" ok= " +  str(ok))
         # return result
         if not ok:
             self.logger.error('impossible to build the project. For more details, see the log file:')
             self.logger.error(logname)
         return ok
+
 
     def Clean(self):
         # Input
@@ -287,6 +275,41 @@ class InstallDelphesMA5tune:
 
     def NeedToRestart(self):
         return True
+
+    def SwitchOffCMSSW(self,filename):
+        # open input file
+        try:
+            input = open(filename)
+        except:
+            self.logger.error("impossible to read the file:" + filename)
+            return False
+
+        # open output file
+        try:
+            output = open(filename+'.savema5','w')
+        except:
+            self.logger.error("impossible to read the file:" + filename+'.savema5')
+            return False
+
+        # lines
+        for line in input:
+            output.write(line.replace('HAS_CMSSW = true','HAS_CMSSW = false'))
+
+        #close
+        input.close()
+        output.close()
+
+        try:
+            shutil.copy(filename+'.savema5',filename)
+        except:
+            self.logger.error("impossible to copy "+filename+'.savema5 in '+filename)
+            return False
+
+        return True
+
+
+
+
 
     def Deactivate(self):
         if self.main.archi_info.delphesMA5tune_lib_paths==[]:

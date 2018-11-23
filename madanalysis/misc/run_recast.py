@@ -150,13 +150,14 @@ class RunRecast():
 
         # Activating the right delphes
         logging.getLogger('MA5').debug('Activating the detector (switch delphes/delphesMA5tune)')
+        self.main.fastsim.package = self.detector
         detector_handler = DetectorManager(self.main)
         if not detector_handler.manage(self.detector):
             logging.getLogger('MA5').error('Problem with the activation of delphesMA5tune')
             return False
 
         # Checking whether events have already been generated and if not, event generation
-        logging.getLogger('MA5').debug('Loop over the datatsets...')
+        logging.getLogger('MA5').debug('Loop over the datasets...')
         for item in self.main.datasets:
             if self.detector=="delphesMA5tune":
                 evtfile = self.dirname+'/Output/'+item.name+'/RecoEvents_v1x1_'+delphescard.replace('.tcl','')+'.root'
@@ -878,5 +879,3 @@ def cls(NumObserved, ExpectedBG, BGError, SigHypothesis, NumToyExperiments):
     else:
         return 1.-(p_SplusB / p_b) # 1 - CLs
 
-
-    

@@ -24,13 +24,15 @@
 
 // STL headers
 #include <fstream>
+#include <algorithm>
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Interfaces/delphesMA5tune/DetectorDelphesMA5tune.h"
 #include "SampleAnalyzer/Commons/Service/DisplayService.h"
+#include "SampleAnalyzer/Commons/Service/ConvertService.h"
+
 
 // ROOT headers
-#include <TError.h>
 #include <TROOT.h>
 #include <TObjArray.h>
 #include <TFile.h>
@@ -49,8 +51,11 @@
 
 using namespace MA5;
 
+
 MAbool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const std::map<std::string,std::string>& options)
 { 
+
+
   // Save the name of the configuration file
   configFile_ = configFile;
   rootfile_="";
@@ -99,10 +104,6 @@ MAbool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const s
     }
   }
 
-  // Configure inputs
-  confReader_ = new ExRootConfReader;
-  confReader_->ReadFile(configFile_.c_str());
-
   // Configure outputs
   std::string ofname;
   if (output_)
@@ -112,6 +113,11 @@ MAbool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const s
   }
   else ofname = outputdir_+"/tmp.root";
   outputFile_ = TFile::Open(ofname.c_str(), "RECREATE");
+
+  // Configure inputs
+  confReader_ = new ExRootConfReader;
+  confReader_->ReadFile(configFile_.c_str());
+
 
   treeWriter_ = new ExRootTreeWriter(outputFile_, "DelphesMA5tune");
   branchEvent_ = treeWriter_->NewBranch("Event", LHEFEvent::Class());

@@ -47,63 +47,24 @@ class RecastConfiguration:
         self.pad        = False
         self.padtune    = False
         self.store_root = False
-        self.DelphesDic = {
-          "delphes_card_cms_standard.tcl"         : ["cms_sus_14_001_monojet", "cms_sus_13_016", "cms_sus_13_012", "cms_sus_13_011"],
-          "delphes_card_cms_sus14004.tcl"         : ["cms_sus_14_001_TopTag"],
-          "delphes_card_atlas_sus_2013_05.tcl"    : ["atlas_susy_2013_21", "atlas_sus_13_05"],
-          "delphes_card_atlas_sus_2013_05_pad.tcl": ["ATLAS_EXOT_2014_06"],
-          "delphes_card_atlas_sus_2013_11.tcl"    : ["atlas_higg_2013_03", "atlas_susy_2013_11", "atlas_1405_7875"],
-          "delphes_card_atlas_sus_2014_10.tcl"    : ["atlas_susy_2014_10"] ,
-          "delphes_card_atlas_sus_2013_04.tcl"    : ["atlas_susy_2013_04"] ,
-          "delphes_card_cms_b2g_12_012.tcl"       : ["CMS_B2G_12_012", "cms_exo_12_047", "cms_exo_12_048"],
-          "delphes_card_cms_b2g_14_004.tcl"       : ["cms_b2g_12_022", "cms_b2g_14_004"],
-          "delphes_card_ATLAS_1604_07773.tcl"     : ["ATLAS_1604_07773", "atlas_1605_03814", "ATLAS_SUSY_16_07"],
-          "delphes_card_ATLAS_1711_03301.tcl"     : ["ATLAS_1711_03301"],
-          "delphes_card_ATLAS_CONF_2016_086.tcl"  : ["ATLAS_CONF_2016_086"],
-          "delphes_card_cms_exo_16_010.tcl"       : ["cms_exo_16_010", "cms_sus_17_001"],
-          "delphes_card_cms_top_17_009.tcl"       : ["cms_top_17_009"],
-          "delphes_card_cms_exo_16_012.tcl"       : ["CMS_EXO_16_012_2gamma"],
-          "delphes_card_cms_SUS_16_052.tcl"       : ["CMS_SUS_16_052"],
-          "delphes_card_atlas_2016_32.tcl"        : ["ATLAS_EXOT_2016_32"],
-          "delphes_card_atlas_2016_25.tcl"        : ["ATLAS_EXOT_2016_25"],
-          "delphes_card_cms_sus_16_039.tcl"       : ["cms_sus_16_039"],
-          "delphes_card_cms_sus_16_033.tcl"       : ["cms_sus_16_033"]
-        }
-
-        self.description = {
-          "ATLAS_1604_07773"       : "ATLAS - 13 TeV - Monojet (3.2 fb-1)",
-          "ATLAS_1711_03301"       : "ATLAS - 13 TeV - Monojet (36.1 fb-1)",
-          "ATLAS_SUSY_16_07"       : "ATLAS - 13 TeV - Multijet + missing energy (36.1 fb-1)",
-          "ATLAS_EXOT_2016_25"     : "ATLAS - 13 TeV - Mono-Higgs in the bbar channel (36.1 fb-1)",
-          "ATLAS_EXOT_2016_32"     : "ATLAS - 13 TeV - Monophoton (36.1 fb-1)",
-          "atlas_1605_03814"       : "ATLAS - 13 TeV - Multijet (2-6 jets) + met",
-          "ATLAS_CONF_2016_086"    : "ATLAS - 13 TeV - Dark matter in the b+bar+met channel",
-          "cms_exo_16_010"         : "CMS   - 13 TeV - Mono-Z",
-          "CMS_EXO_16_012_2gamma"  : "CMS   - 13 TeV - Mono-Higgs in the diphoton channel (2.3 fb-1)",
-          "cms_sus_16_033"         : "CMS   - 13 TeV - SUSY multijets (35.9 fb-1)",
-          "cms_sus_16_039"         : "CMS   - 13 TeV - SUSY multileptons (36 fb-1)",
-          "CMS_SUS_16_052"         : "CMS   - 13 TeV - SUSY 1 lepton + jets (36 fb-1)",
-          "cms_sus_17_001"         : "CMS   - 13 TeV - stops in the OS dilepton + jets channel (35.9 fb-1)",
-          "cms_top_17_009"         : "CMS   - 13 TeV - 4 top analysis in the SS2L and multilepton channel (35.9 fb-1)",
-          "atlas_susy_2013_04"     : "ATLAS - 8 TeV - multijet + met", 
-          "atlas_sus_13_05"        : "ATLAS - 8 TeV - stop/sbottom - 0 lepton + 2 bjets + met",
-          "atlas_susy_2013_11"     : "ATLAS - 8 TeV - ewkinos - 2 leptons + met",
-          "atlas_susy_2013_21"     : "ATLAS - 8 TeV - monojet",
-          "atlas_susy_2014_10"     : "ATLAS - 8 TeV - squark-gluino - 2 leptons + jets + met",
-          "atlas_1405_7875"        : "ATLAS - 8 TeV - squark-gluino - 0 letons + 2-6 jets + met",
-          "atlas_higg_2013_03"     : "ATLAS - 8 TeV - ZH to invisible + 2 leptons",
-          "ATLAS_EXOT_2014_06"     : "ATLAS - 8 TeV - monophoton",
-          "cms_sus_13_012"         : "CMS   - 8 TeV - squark-gluino - MET/MHT",
-          "cms_sus_13_016"         : "CMS   - 8 TeV - gluinos - 2 leptons + bjets + met",
-          "cms_sus_14_001_monojet" : "CMS   - 8 TeV - stop - the monojet channel",
-          "cms_sus_14_001_TopTag"  : "CMS   - 8 TeV - stop - the top tagging channel",
-          "cms_sus_13_011"         : "CMS   - 8 TeV - stop - 1 lepton + bjets + met",
-          "cms_exo_12_047"         : "CMS   - 8 TeV - monophoton",
-          "cms_exo_12_048"         : "CMS   - 8 TeV - monojet",
-          "CMS_B2G_12_012"         : "CMS   - 8 TeV - T5/3 partners in the SSDL channel",
-          "cms_b2g_12_022"         : "CMS   - 8 TeV - Monotop search",
-          "cms_b2g_14_004"         : "CMS   - 8 TeV - Dark matter production with a ttbar pair"
-        }
+        self.DelphesDic = { }
+        self.description = { }
+        self.ma5dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),os.pardir,os.pardir))
+        for mypad in ['PAD', 'PADForMa5tune']:
+            if os.path.isfile(os.path.join(self.ma5dir,mypad,'Input','recast_config.dat')):
+                dico_file = open(os.path.join(self.ma5dir,mypad,'Input','recast_config.dat'), 'r')
+                for line in dico_file:
+                    if line.strip().startswith('#'):
+                        continue
+                    self.DelphesDic[line.split('|')[0].strip()] = line.split('|')[1].split()
+                dico_file.close()
+            if os.path.isfile(os.path.join(self.ma5dir,mypad,'Input','analysis_description.dat')):
+                dico_file = open(os.path.join(self.ma5dir,mypad,'Input','analysis_description.dat'), 'r')
+                for line in dico_file:
+                    if line.strip().startswith('#'):
+                        continue
+                    self.description[line.split('|')[0].strip()] = line.split('|')[1][:-1]
+                dico_file.close()
 
         self.CLs_numofexps= 100000
         self.card_path= ""
@@ -307,12 +268,11 @@ class RecastConfiguration:
         ToLoopOver=[]
         padlist=[]
         tunelist=[]
-        ma5dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),os.pardir,os.pardir))
         if self.pad:
-            padfile  = open(os.path.normpath(os.path.join(ma5dir,"PAD/Build/Main/main.cpp")), 'r')
+            padfile  = open(os.path.normpath(os.path.join(self.ma5dir,"PAD/Build/Main/main.cpp")), 'r')
             ToLoopOver.append([padfile, padlist])
         if self.padtune:
-            tunefile = open(os.path.normpath(os.path.join(ma5dir,"PADForMA5tune/Build/Main/main.cpp")), 'r')
+            tunefile = open(os.path.normpath(os.path.join(self.ma5dir,"PADForMA5tune/Build/Main/main.cpp")), 'r')
             ToLoopOver.append([tunefile, tunelist])
         for myfile,mylist in ToLoopOver:
             for line in myfile:
@@ -343,14 +303,14 @@ class RecastConfiguration:
                 if myver!="v1.2":
                     self.logger.error("Recasting card: invalid analysis (not present in the PAD): " + myana)
                     return False
-                if not os.path.isfile(os.path.normpath(os.path.join(ma5dir,'PAD/Input/Cards',mydelphes))):
+                if not os.path.isfile(os.path.normpath(os.path.join(self.ma5dir,'PAD/Input/Cards',mydelphes))):
                     self.logger.error("Recasting card: PAD analysis linked to an invalid delphes card: " + myana + " - " + mydelphes)
                     return False
             elif myana in  [x[0] for x in tunelist]:
                 if myver!="v1.1":
                     self.logger.error("Recasting card: invalid analysis (not present in the PADForMA5tune): " + myana)
                     return False
-                if not os.path.isfile(os.path.normpath(os.path.join(ma5dir,'PADForMA5tune/Input/Cards',mydelphes))):
+                if not os.path.isfile(os.path.normpath(os.path.join(self.ma5dir,'PADForMA5tune/Input/Cards',mydelphes))):
                     self.logger.error("Recasting card: PADForMA5tune analysis linked to an invalid delphes card: " + myana + " - " + mydelphes)
                     return False
             else:
@@ -373,8 +333,7 @@ class RecastConfiguration:
 
 
     def CreateMyCard(self,dirname,padtype,write=True):
-        ma5dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),os.pardir,os.pardir))
-        mainfile  = open(os.path.normpath(os.path.join(ma5dir,padtype,"Build/Main/main.cpp")), 'r')
+        mainfile  = open(os.path.normpath(os.path.join(self.ma5dir,padtype,"Build/Main/main.cpp")), 'r')
         thecard=[]
         if write:
             exist=os.path.isfile(dirname+'/Input/recasting_card.dat')
@@ -402,7 +361,7 @@ class RecastConfiguration:
                 thecard.append(analysis.ljust(30,' ') + mytype.ljust(12,' ') + 'on    ' + mydelphes.ljust(50, ' ')+\
                       ' # '+descr)
         mainfile.close()
-        thecard.append('')
+        thecard.sort()
         if write:
             card = open(dirname+'/Input/recasting_card.dat','a')
             card.write('\n'.join(thecard))

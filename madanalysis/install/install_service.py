@@ -54,12 +54,12 @@ class InstallService():
     def reporthook2(bytes_so_far, chunk_size, total_size):
         percent = float(bytes_so_far) / total_size
         percent = round(percent*100, 2)
-        sys.stdout.write("      "+"Download "+\
+        sys.stdout.write("             --> Download "+\
                          InstallService.convert_bytes(bytes_so_far)+\
                          " of "+\
                          InstallService.convert_bytes(total_size)+\
                          " (%0.1f%%)      \r"%(percent))
-        
+
     @staticmethod
     def reporthook(numblocks,blocksize,filesize):
         try:
@@ -261,13 +261,13 @@ class InstallService():
                     if sizeURLFile != sizeSYSFile :
                         logging.getLogger('MA5').debug('-> Difference detected!')
                         logging.getLogger('MA5').info("   '" + file + "' is corrupted or is an old version." + os.linesep +\
-                                     "   Downloading a new package ...")
+                                     "         --> Downloading a new package ...")
                         ok=False
 
                 # Case where the two files are identifical -> do nothing
                 if ok:
                     logging.getLogger('MA5').debug('-> NO difference detected!')
-                    logging.getLogger('MA5').info("   '" + file + "' already exists. Package not downloaded.")
+                    logging.getLogger('MA5').info("        --> '" + file + "' already exists. Package not downloaded.")
 
                 # Other cases: download is necessary
                 if not ok:

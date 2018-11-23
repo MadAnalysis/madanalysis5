@@ -101,7 +101,7 @@ class DetectorDelphesMA5tune: public DetectorBase
 
     /// Accessor to the jet clusterer name
     virtual std::string GetName()
-    { return "delphes"; }
+    { return "delphesMA5tune"; }
 
     /// Accessor to the jet clusterer parameters
     virtual std::string GetParameters();

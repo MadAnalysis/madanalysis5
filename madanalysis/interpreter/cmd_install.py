@@ -90,9 +90,9 @@ class CmdInstall(CmdBase):
                 main.archi_info.delphesMA5tune_priority=True
                 dpath =  os.path.normpath(os.path.join(main.archi_info.ma5dir,'tools','delphesMA5tune'))
                 if os.path.isfile(os.path.normpath(os.path.join(dpath,'libDelphesMA5tune.so'))):
-                   mylib = os.path.normpath(os.path.join(dpath,'libDelphesMA5tune.dylib'))
-                elif os.path.isfile(os.path.normpath(os.path.join(dpath,'libDelphesMA5tune.dylib'))):
                    mylib = os.path.normpath(os.path.join(dpath,'libDelphesMA5tune.so'))
+                elif os.path.isfile(os.path.normpath(os.path.join(dpath,'libDelphesMA5tune.dylib'))):
+                   mylib = os.path.normpath(os.path.join(dpath,'libDelphesMA5tune.dylib'))
                 main.archi_info.libraries['DelphesMA5tune']= mylib+":"+str(os.stat(mylib).st_mtime)
                 main.archi_info.delphesMA5tune_lib=mylib
                 main.archi_info.toLDPATH1 = [x for x in main.archi_info.toLDPATH1 if not 'delphes' in x]
@@ -128,14 +128,14 @@ class CmdInstall(CmdBase):
             installer=InstallManager(self.main)
             return inst_delphes(self.main,installer)
         elif args[0]=='delphesMA5tune':
-            self.logger.warning("The package 'delphesMA5tune' must be used with root-5. It is replaced by Delphes with special MA5-tuned cards in the root-6 case.")
+#            self.logger.warning("The package 'delphesMA5tune' must be used with root-5. It is replaced by Delphes with special MA5-tuned cards in the root-6 case.")
             if len(self.main.archi_info.root_version)!=3:
                 self.logger.error("Cannot read the root version correctly. Installation skipped.")
                 return True
-            if int(self.main.archi_info.root_version[0]) > 5:
-                self.logger.error("The delphesMA5tune package is not compliant with Root-6." + \
-                   " Installation skipped.")
-                return True
+#            if int(self.main.archi_info.root_version[0]) > 5:
+#                self.logger.error("The delphesMA5tune package is not compliant with Root-6." + \
+#                   " Installation skipped.")
+#                return True
             if not self.main.forced:
               self.logger.warning("Are you sure to install this package? (Y/N)")
               allowed_answers=['n','no','y','yes']
@@ -168,10 +168,10 @@ class CmdInstall(CmdBase):
             if len(self.main.archi_info.root_version)!=3:
                 self.logger.error("Cannot read the root version correctly. Installation skipped.")
                 return True
-            if int(self.main.archi_info.root_version[0]) > 5:
-                self.logger.error("The PADForMA5tune framework is not compliant with Root-6." + \
-                   " Installation skipped.")
-                return True
+#            if int(self.main.archi_info.root_version[0]) > 5:
+#                self.logger.error("The PADForMA5tune framework is not compliant with Root-6." + \
+#                   " Installation skipped.")
+#                return True
             installer=InstallManager(self.main)
             if inst_ma5tune(self.main,installer,True):
                 return installer.Execute('PADForMA5tune')
