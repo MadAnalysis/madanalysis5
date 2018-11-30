@@ -34,7 +34,7 @@ class InstallPadForMA5tune:
 
     def __init__(self,main):
         self.main        = main
-        self.installdir  = os.path.normpath(self.main.archi_info.ma5dir+'/PADForMA5tune')
+        self.installdir  = os.path.normpath(self.main.archi_info.ma5dir+'/tools/PADForMA5tune')
         self.tmpdir      = self.main.session_info.tmpdir
         self.downloaddir = self.main.session_info.downloaddir
         self.PADdir      = self.installdir + "/Build/SampleAnalyzer/User/Analyzer"
@@ -61,10 +61,10 @@ class InstallPadForMA5tune:
         import time
         bkpname = "pad_forma5tune-v" + time.strftime("%Y%m%d-%Hh%M") + ".tgz"
         logging.getLogger('MA5').info("     => Backuping the previous installation: " + bkpname)
-        logname = os.path.normpath(self.main.archi_info.ma5dir+'/pad-backup.log')
+        logname = os.path.normpath(self.main.archi_info.ma5dir+'/tools/pad-backup.log')
         TheCommand = ['tar', 'czf', bkpname, 'PADForMA5tune']
         logging.getLogger('MA5').debug('Shell command: '+' '.join(TheCommand))
-        ok, out= ShellCommand.ExecuteWithLog(TheCommand,logname,self.main.archi_info.ma5dir,silent=False)
+        ok, out= ShellCommand.ExecuteWithLog(TheCommand,logname,self.main.archi_info.ma5dir+'/tools',silent=False)
         if not ok:
             return False
         logging.getLogger('MA5').info("     => Backup done")
@@ -78,7 +78,7 @@ class InstallPadForMA5tune:
 
 
     def CreatePackageFolder(self):
-        logname = os.path.normpath(self.main.archi_info.ma5dir+'/PAD-workingdir.log')
+        logname = os.path.normpath(self.main.archi_info.ma5dir+'/tools/PAD-workingdir.log')
 
         # Initialize the expert mode
         logging.getLogger('MA5').debug('Calling the expert mode for file cms_sus_13_011')
@@ -87,7 +87,7 @@ class InstallPadForMA5tune:
         backup = self.main.expertmode
         self.main.expertmode = True
         expert = ExpertMode(self.main)
-        dirname="PADForMA5tune"
+        dirname="tools/PADForMA5tune"
         if not expert.CreateDirectory(dirname):
             return False
         filename="cms_sus_13_011"
@@ -112,7 +112,7 @@ class InstallPadForMA5tune:
 
         # delphes card directory
         TheCommand = ['mkdir', self.delphesdir]
-        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir+'/tools')
         if not ok:
             return False
 
@@ -181,7 +181,7 @@ class InstallPadForMA5tune:
                 for onefile in ['Build/SampleAnalyzer/User/Analyzer/'+new_analysis+'.cpp', 'Build/SampleAnalyzer/User/Analyzer/'+new_analysis+'.h', 'Build/Main/main.bak']:
                     TheCommand = ['rm', '-f', os.path.join(self.installdir,onefile)]
                     logging.getLogger('MA5').debug('  -->  ' + ' '.join(TheCommand))
-                    ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+                    ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir+'/tools')
                     if not ok:
                         return False
                 ## Preparing the download of the analysis files
@@ -223,7 +223,7 @@ class InstallPadForMA5tune:
         logging.getLogger('MA5').debug(" ** Getting the bibliography file " + self.installdir+"/bibliography.bib")
         TheCommand = ['cp', os.path.join(self.downloaddir,'bib_padma5tune.dat'), self.installdir+"/bibliography.bib"]
         logging.getLogger('MA5').debug('  -->  ' + ' '.join(TheCommand))
-        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir+'/tools')
         if not ok:
             return False
 
@@ -277,7 +277,7 @@ class InstallPadForMA5tune:
     def Configure(self):
         # Updating the makefile
         TheCommand = ['mv',self.installdir+'/Build/Makefile', self.installdir+'/Build/Makefile.save']
-        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir+'/tools')
         if not ok:
             return False
         inp = open(self.installdir+'/Build/Makefile.save', 'r')
@@ -289,13 +289,13 @@ class InstallPadForMA5tune:
         inp.close()
         out.close()
         TheCommand = ['rm', '-f', self.installdir+'/Build/Makefile.save']
-        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir+'/tools')
         if not ok:
             return False
 
         # Updating the main in order to get a correct file name for the template analysis
         TheCommand = ['mv',self.installdir+'/Build/Main/main.cpp', self.installdir+'/Build/Main/main.cpp.save']
-        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir+'/tools')
         if not ok:
             return False
         inp = open(self.installdir+'/Build/Main/main.cpp.save', 'r')
@@ -308,7 +308,7 @@ class InstallPadForMA5tune:
         inp.close()
         out.close()
         TheCommand = ['rm', '-f', self.installdir+'/Build/Main/main.cpp.save']
-        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir+'/tools')
         if not ok:
             return False
         return ok

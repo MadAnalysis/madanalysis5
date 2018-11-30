@@ -51,15 +51,15 @@ class RecastConfiguration:
         self.description = { }
         self.ma5dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),os.pardir,os.pardir))
         for mypad in ['PAD', 'PADForMa5tune']:
-            if os.path.isfile(os.path.join(self.ma5dir,mypad,'Input','recast_config.dat')):
-                dico_file = open(os.path.join(self.ma5dir,mypad,'Input','recast_config.dat'), 'r')
+            if os.path.isfile(os.path.join(self.ma5dir,'tools',mypad,'Input','recast_config.dat')):
+                dico_file = open(os.path.join(self.ma5dir,'tools',mypad,'Input','recast_config.dat'), 'r')
                 for line in dico_file:
                     if line.strip().startswith('#'):
                         continue
                     self.DelphesDic[line.split('|')[0].strip()] = line.split('|')[1].split()
                 dico_file.close()
-            if os.path.isfile(os.path.join(self.ma5dir,mypad,'Input','analysis_description.dat')):
-                dico_file = open(os.path.join(self.ma5dir,mypad,'Input','analysis_description.dat'), 'r')
+            if os.path.isfile(os.path.join(self.ma5dir,'tools',mypad,'Input','analysis_description.dat')):
+                dico_file = open(os.path.join(self.ma5dir,'tools',mypad,'Input','analysis_description.dat'), 'r')
                 for line in dico_file:
                     if line.strip().startswith('#'):
                         continue
@@ -120,7 +120,7 @@ class RecastConfiguration:
             return
         return
 
-    def user_SetParameter(self,parameter,value,level,hasroot,hasdelphes,hasMA5tune,datasets, hasPAD, hasPADtune):
+    def user_SetParameter(self,parameter,value,level,archi_info,session_info,datasets):
         # algorithm
         if parameter=="status":
             # Switch on the clustering
@@ -132,28 +132,28 @@ class RecastConfiguration:
                     return
 
                 # Only if ROOT is install
-                if not hasroot:
+                if not archi_info.has_root:
                     self.logger.error("recasting is only available if ROOT is installed")
                     return
 
                 canrecast=False
                 # Delphes and the PAD?
-                if hasdelphes:
+                if archi_info.has_delphes:
                     self.delphes=True
-                if hasPAD:
+                if session_info.has_pad:
                     self.pad=True
-                if not hasPAD or not hasdelphes:
+                if not archi_info.has_delphes or not session_info.has_pad:
                     self.logger.warning("Delphes and/or the PAD are not installed (or deactivated): " + \
                         "the corresponding analyses will be unavailable")
                 else:
                     canrecast=True
 
                 # DelphesMA5tune and the PADFor MA5TUne?
-                if hasMA5tune:
+                if archi_info.has_delphesMA5tune:
                     self.ma5tune=True
-                if hasPADtune:
+                if session_info.has_padma5:
                     self.padtune=True
-                if not hasPADtune or not hasMA5tune:
+                if not archi_info.has_delphesMA5tune or not session_info.has_padma5:
                     self.logger.warning("DelphesMA5tune and/or the PADForMA5tune are not installed " + \
                         "(or deactivated): the corresponding analyses will be unavailable")
                 else:
@@ -333,7 +333,7 @@ class RecastConfiguration:
 
 
     def CreateMyCard(self,dirname,padtype,write=True):
-        mainfile  = open(os.path.normpath(os.path.join(self.ma5dir,padtype,"Build/Main/main.cpp")), 'r')
+        mainfile  = open(os.path.normpath(os.path.join(self.ma5dir,'tools',padtype,"Build/Main/main.cpp")), 'r')
         thecard=[]
         if write:
             exist=os.path.isfile(dirname+'/Input/recasting_card.dat')

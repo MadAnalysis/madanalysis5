@@ -314,17 +314,28 @@ class CheckUp():
         self.logger.info("Checking optional packages devoted to data processing:")
         checker2 = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
 
-#        self.archi_info.has_zlib              = checker2.checkZLIB()
         if not self.checker.Execute('zlib'):
-            return False
-        if not self.checker.Execute('scipy'):
             return False
         if not self.checker.Execute('fastjet'):
             return False
         if not self.checker.Execute('root'):
             return False
+
         self.archi_info.has_delphes           = checker2.checkDelphes()
         self.archi_info.has_delphesMA5tune    = checker2.checkDelphesMA5tune()
+        return True
+
+
+    def CheckOptionalReinterpretationPackages(self):
+        # Optional packages
+        self.logger.info("Checking optional packages devoted to reinterpretation:")
+
+        if not self.checker.Execute('scipy'):
+            return False
+        if not self.checker.Execute('pad'):
+            return False
+        if not self.checker.Execute('padma5'):
+            return False
         return True
 
 
@@ -478,6 +489,8 @@ class CheckUp():
         self.logger.debug('-------- BEGIN: set environment variables --------')
 
         # - PATH
+        if 'PATH' not in os.environ:
+            os.environ['PATH'] = ''
         self.logger.debug('before PATH='+str(os.environ['PATH']))
         self.logger.debug('--------')
         os.environ['PATH'] = ':'.join(self.archi_info.toPATH1) + ":" + \
@@ -487,6 +500,8 @@ class CheckUp():
         self.logger.debug('--------')
 
         # - LD_LIBRARY_PATH     
+        if 'LD_LIBRARY_PATH' not in os.environ:
+            os.environ['LD_LIBRARY_PATH'] = ''
         self.logger.debug('before LD_LIBRARY_PATH='+str(os.environ['LD_LIBRARY_PATH']))
         self.logger.debug('--------')
         os.environ['LD_LIBRARY_PATH'] = ':'.join(self.archi_info.toLDPATH1) + ":" + \
@@ -496,6 +511,8 @@ class CheckUp():
         self.logger.debug('--------')
 
         # - DYLD_LIBRARY_PATH     
+        if 'DYLD_LIBRARY_PATH' not in os.environ:
+            os.environ['DYLD_LIBRARY_PATH'] = ''
         self.logger.debug('before DYLD_LIBRARY_PATH='+str(os.environ['DYLD_LIBRARY_PATH']))
         self.logger.debug('--------')
         if self.archi_info.isMac:

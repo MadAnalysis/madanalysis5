@@ -434,13 +434,23 @@ class Main():
             return False
         if not checkup.CheckOptionalProcessingPackages():
             return False
+        if not checkup.SetFolder():
+            return False
+        return True
+
+
+    def CheckConfig2(self,debug=False):
+        checkup = CheckUp(self.archi_info, self.session_info, debug, self.script)
+        # Reinterpretation packages
+        if not checkup.CheckOptionalReinterpretationPackages():
+            return False
+
+        # Graphical packages
         if not checkup.CheckOptionalGraphicalPackages():
             return False
         self.AutoSetGraphicalRenderer()
-#        if not checkup.CheckGraphicalPackages():
-#            return False
-        if not checkup.SetFolder():
-            return False
+
+        # Ok
         return True
 
 

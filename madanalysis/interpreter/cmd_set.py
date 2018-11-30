@@ -109,7 +109,7 @@ class CmdSet(CmdBase.CmdBase):
             hasMA5tune = checker.checkDelphesMA5tune(True)
             hasPAD     = checker.checkPAD()
             hasPADtune = checker.checkPADForMA5tune()
-            self.main.recasting.user_SetParameter("status",args[2],self.main.mode,self.main.archi_info.has_root,hasdelphes,hasMA5tune,self.main.datasets, hasPAD,hasPADtune)
+            self.main.recasting.user_SetParameter("status",args[2],self.main.mode,self.main.archi_info,self.main.session_info, self.main.datasets)
             if args[2]=='on' and self.main.fastsim.package!='none':
                 logging.getLogger('MA5').warning("Fastsim package switched off and internally handled")
                 self.main.fastsim.package="none"
@@ -154,7 +154,7 @@ class CmdSet(CmdBase.CmdBase):
             hasMA5tune = checker.checkDelphesMA5tune(True)
             hasPAD     = checker.checkPAD()
             hasPADtune = checker.checkPADForMA5tune()
-            self.main.recasting.user_SetParameter(objs[2],args[2],self.main.mode,self.main.archi_info.has_root,hasdelphes,hasMA5tune,self.main.datasets, hasPAD,hasPADtune)
+            self.main.recasting.user_SetParameter(objs[2],args[2],self.main.mode,self.main.archi_info,self.main.session_info, self.main.datasets)            
         else:
             logging.getLogger('MA5').error("syntax error with the command 'set'.")
             self.help()

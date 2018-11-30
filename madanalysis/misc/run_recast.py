@@ -108,11 +108,11 @@ class RunRecast():
         ## setup
         if version == "v1.1":
             self.detector = "delphesMA5tune"
-            self.pad      = self.main.archi_info.ma5dir+'/PADForMA5tune'
+            self.pad      = self.main.archi_info.ma5dir+'/tools/PADForMA5tune'
             check         = self.main.recasting.ma5tune
         else:
             self.detector = "delphes"
-            self.pad      = self.main.archi_info.ma5dir+'/PAD'
+            self.pad      = self.main.archi_info.ma5dir+'/tools/PAD'
             check         = self.main.recasting.delphes
         ## Check and exit
         if not check:
@@ -240,14 +240,14 @@ class RunRecast():
         if self.detector=="delphesMA5tune":
             self.main.fastsim.delphes=0
             self.main.fastsim.delphesMA5tune = DelphesMA5tuneConfiguration()
-            self.main.fastsim.delphesMA5tune.card = os.path.normpath("../../../../PADForMA5tune/Input/Cards/"+card)
+            self.main.fastsim.delphesMA5tune.card = os.path.normpath("../../../../tools/PADForMA5tune/Input/Cards/"+card)
         elif self.detector=="delphes":
             self.main.fastsim.delphesMA5tune = 0
             self.main.fastsim.delphes        = DelphesConfiguration()
-            self.main.fastsim.delphes.card   = os.path.normpath("../../../../PAD/Input/Cards/"+card)
+            self.main.fastsim.delphes.card   = os.path.normpath("../../../../tools/PAD/Input/Cards/"+card)
         # Execution
         if not self.run_delphes(dataset,card):
-            logging.getLogger('MA5').error('The '+detector+' problem with the running of the fastsim')
+            logging.getLogger('MA5').error('The '+self.detector+' problem with the running of the fastsim')
             return False
         # Restoring the run
         self.main.recasting.status="on"
@@ -571,9 +571,9 @@ class RunRecast():
 
         # Estimate the newpath of pileup
         if self.detector=="delphesMA5tune":
-            newpath=self.main.archi_info.ma5dir+'/PADForMA5tune/Input/Pileup'
+            newpath=self.main.archi_info.ma5dir+'/tools/PADForMA5tune/Input/Pileup'
         else:
-            newpath=self.main.archi_info.ma5dir+'/PAD/Input/Pileup'
+            newpath=self.main.archi_info.ma5dir+'/tools/PAD/Input/Pileup'
 
         # Safe copy
         shutil.copyfile(filename,filename+'.original')

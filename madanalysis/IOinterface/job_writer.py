@@ -382,6 +382,20 @@ class JobWriter():
         return
 
     def CreateMainFct(self,file,analysisName,outputName):
+
+        # Info function
+        file.write('// -----------------------------------------------------------------------\n')
+        file.write('// Info function\n')
+        file.write('// -----------------------------------------------------------------------\n')
+        file.write('int Info(SampleAnalyzer& manager)\n')
+        file.write('{\n')
+        file.write('  INFO << "BEGIN " << __FILE__ << endmsg;\n')
+        file.write('  manager.AnalyzerList().Print();\n')
+        file.write('  INFO << "END " << __FILE__ << endmsg;\n')
+        file.write('  return 0;\n')
+        file.write('}\n')
+
+        # Main program
         file.write('// -----------------------------------------------------------------------\n')
         file.write('// main program\n')
         file.write('// -----------------------------------------------------------------------\n')
@@ -390,6 +404,15 @@ class JobWriter():
         file.write('  // Creating a manager\n')
         file.write('  SampleAnalyzer manager;\n')
         file.write('  BuildUserTable(manager.AnalyzerList());\n')
+        file.write('\n')
+
+        # Info about the job
+        file.write('  // Identifying --info argument\n')
+        file.write('  if (argc==2)\n')
+        file.write('  {\n')
+        file.write('    std::string arg=argv[1];\n')
+        file.write('    if (arg=="--info") return Info(manager);\n')
+        file.write('  }\n')
         file.write('\n')
 
         # Initializing

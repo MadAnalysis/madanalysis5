@@ -89,6 +89,14 @@ def DefaultInstallCard():
     output.write('# fastjet_veto     = 0 # 0=No, 1=Yes\n')
     output.write('# fastjet_bin_path = /home/fastjet/build/bin/\n')
     output.write('\n')
+    output.write('# -----PAD-----\n')
+    output.write('# pad_veto = 0 # 0=No, 1=Yes\n')
+    output.write('# pad_build_path = /home/PAD/build/\n')
+    output.write('\n')
+    output.write('# -----PADForMA5Tune-----\n')
+    output.write('# padma5_veto = 0 # 0=No, 1=Yes\n')
+    output.write('# padma5_build_path = /home/PADForMA5tune/build/\n')
+    output.write('\n')
     output.write('# -----PDFLATEX-----\n')
     output.write('# pdflatex_veto = 0 # 0=No, 1=Yes\n')
     output.write('\n')
@@ -254,6 +262,10 @@ def MainSession(mode,arglist,ma5dir,version,date):
 
     # Building (if necesserary) the SampleAnalyzer library
     if not main.BuildLibrary(forced=mode.build):
+        sys.exit()
+
+    # Checking the present configuration
+    if not main.CheckConfig2(debug=mode.debug):
         sys.exit()
 
     logging.getLogger('MA5').info("*************************************************************")

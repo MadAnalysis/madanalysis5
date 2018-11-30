@@ -60,6 +60,14 @@ class UserInfo:
         self.fastjet_veto     = None
         self.fastjet_bin_path = None
 
+        # PAD
+        self.pad_veto       = None
+        self.pad_build_path = None
+
+        # PADForMA5Tune
+        self.padma5_veto       = None
+        self.padma5_build_path = None
+
         # Pdflatex
         self.pdflatex_veto = None
 
@@ -208,6 +216,18 @@ class UserInfo:
             self.fastjet_veto=self.ConvertToBool(option,value,filename)
         elif option=='fastjet_bin_path':
             self.fastjet_bin_path=value
+
+        # PAD
+        elif option=='pad_veto':
+            self.pad_veto=self.ConvertToBool(option,value,filename)
+        elif option=='pad_build_path':
+            self.pad_build_path=value
+
+        # PADForMA5Tune
+        elif option=='padma5_veto':
+            self.padma5_veto=self.ConvertToBool(option,value,filename)
+        elif option=='padma5_build_path':
+            self.padma5_build_path=value
 
         # Pdflatex
         elif option=='pdflatex_veto':

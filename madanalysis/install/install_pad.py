@@ -34,7 +34,7 @@ class InstallPad:
 
     def __init__(self,main):
         self.main        = main
-        self.installdir  = os.path.normpath(self.main.archi_info.ma5dir+'/PAD')
+        self.installdir  = os.path.normpath(self.main.archi_info.ma5dir+'/tools/PAD')
         self.tmpdir      = self.main.session_info.tmpdir
         self.downloaddir = self.main.session_info.downloaddir
         self.PADdir      = self.installdir + "/Build/SampleAnalyzer/User/Analyzer"
@@ -63,10 +63,10 @@ class InstallPad:
         import time
         bkpname = "pad-v" + time.strftime("%Y%m%d-%Hh%M") + ".tgz"
         logging.getLogger('MA5').info("     => Backuping the previous installation: " + bkpname)
-        logname = os.path.normpath(self.main.archi_info.ma5dir+'/pad-backup.log')
+        logname = os.path.normpath(self.main.archi_info.ma5dir+'/tools/pad-backup.log')
         TheCommand = ['tar', 'czf', bkpname, 'PAD']
         logging.getLogger('MA5').debug('Shell command: '+' '.join(TheCommand))
-        ok, out= ShellCommand.ExecuteWithLog(TheCommand,logname,self.main.archi_info.ma5dir,silent=False)
+        ok, out= ShellCommand.ExecuteWithLog(TheCommand,logname,self.main.archi_info.ma5dir+'/tools',silent=False)
         if not ok:
             return False
         logging.getLogger('MA5').info("     => Backup done")
@@ -80,7 +80,7 @@ class InstallPad:
 
 
     def CreatePackageFolder(self):
-        logname = os.path.normpath(self.main.archi_info.ma5dir+'/PAD-workingdir.log')
+        logname = os.path.normpath(self.main.archi_info.ma5dir+'/tools/PAD-workingdir.log')
 
         # Initialize the expert mode
         logging.getLogger('MA5').debug('Calling the expert mode for file cms_b2g_12_012')
@@ -89,7 +89,7 @@ class InstallPad:
         backup = self.main.expertmode
         self.main.expertmode = True
         expert = ExpertMode(self.main)
-        dirname="PAD"
+        dirname="tools/PAD"
         if not expert.CreateDirectory(dirname):
             return False
         filename="cms_b2g_12_012"
@@ -114,7 +114,7 @@ class InstallPad:
         # delphes card and pileip directory
         for mydir in [ self.delphesdir,  self.pileupdir ]:
             TheCommand = ['mkdir', mydir]
-            ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+            ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir+'/tools')
             if not ok:
                 return False
 
@@ -188,7 +188,7 @@ class InstallPad:
                 for onefile in ['Build/SampleAnalyzer/User/Analyzer/'+new_analysis+'.cpp', 'Build/SampleAnalyzer/User/Analyzer/'+new_analysis+'.h', 'Build/Main/main.bak']:
                     TheCommand = ['rm', '-f', os.path.join(self.installdir,onefile)]
                     logging.getLogger('MA5').debug('  -->  ' + ' '.join(TheCommand))
-                    ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+                    ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir+'/tools')
                     if not ok:
                         return False
                 ## Preparing the download of the analysis files
@@ -239,7 +239,7 @@ class InstallPad:
         logging.getLogger('MA5').debug(" ** Getting the bibliography file " + self.installdir+"/bibliography.bib")
         TheCommand = ['cp', os.path.join(self.downloaddir,'bib_pad.dat'), self.installdir+"/bibliography.bib"]
         logging.getLogger('MA5').debug('  -->  ' + ' '.join(TheCommand))
-        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir+'/tools')
         if not ok:
             return False
 
@@ -289,7 +289,7 @@ class InstallPad:
         # Updating the makefile
         logging.getLogger('MA5').debug(" ** Preparing the Makefile to build the PAD")
         TheCommand = ['mv',os.path.join(self.installdir,'Build', 'Makefile'), os.path.join(self.installdir,'Build','Makefile.save')]
-        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir+'/tools')
         if not ok:
             return False
         inp = open(os.path.join(self.installdir,'Build', 'Makefile.save'), 'r')
@@ -301,14 +301,14 @@ class InstallPad:
         inp.close()
         out.close()
         TheCommand = ['rm', '-f', os.path.join(self.installdir,'Build','Makefile.save')]
-        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir+'/tools')
         if not ok:
             return False
 
         # Updating the main in order to get a correct file name for the template analysis
         logging.getLogger('MA5').debug(" ** Preparing the main program of the PAD")
         TheCommand = ['mv',os.path.join(self.installdir,'Build','Main','main.cpp'), os.path.join(self.installdir,'Build','Main','main.cpp.save')]
-        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir+'/tools')
         if not ok:
             return False
         inp = open(os.path.join(self.installdir,'Build','Main','main.cpp.save'), 'r')
@@ -321,7 +321,7 @@ class InstallPad:
         inp.close()
         out.close()
         TheCommand = ['rm', '-f', os.path.join(self.installdir,'Build','Main','main.cpp.save')]
-        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir)
+        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir+'/tools')
         if not ok:
             return False
         return ok

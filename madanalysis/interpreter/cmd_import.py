@@ -347,12 +347,18 @@ class CmdImport(CmdBase.CmdBase):
         # Getting all files corresponding to filename
         files=[]
         recowarning = False
+        allowed, forbidden = self.main.GetSampleFormat()
+        self.logger.debug("Allowed formats: "+str(allowed))
+        self.logger.debug("List of imported file:")
         for file in glob.glob(filename):
             if not os.path.isfile(file) and not stat.S_ISFIFO(os.stat(file).st_mode):
                 continue
+
             if self.main.IsGoodFormat(file):
+                self.logger.debug(" - "+file+": ok")
                 files.append(file)
             else:
+                self.logger.debug(" - "+file+": BAD")
 #                logging.getLogger('MA5').warning("file "+file+" is skipped: "+self.main.PrintErrorFormat(file))
                 if self.main.mode == MA5RunningType.RECO:
                     if file.endswith(".lhe") or file.endswith(".lhe.gz") or\

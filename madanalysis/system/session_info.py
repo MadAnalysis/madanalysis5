@@ -38,8 +38,14 @@ class SessionInfo():
         self.has_latex          = False
         self.has_dvipdf         = False
         self.has_web            = True
+        self.has_pad            = False
+        self.has_padma5         = False
         self.gcc_header_search_path  = []
         self.gcc_library_search_path = []
+        self.padma5_build_path = ""
+        self.padma5_original_bins = []
+        self.pad_build_path = ""
+        self.pad_original_bins = []
         self.logger             = logging.getLogger('MA5')
 
     def dump(self):
