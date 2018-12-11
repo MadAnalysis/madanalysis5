@@ -25,15 +25,17 @@
 import logging
 class FomConfiguration:
 
-    userVariables = { "formula" : ['1','2','3','4','5'] }
+    userVariables = { "formula" : ['1','2','3','4','5','6'] }
 
     # 1: S/B
     # 2: S/sqrt(B)
     # 3: S/(S+B)
     # 4: S/sqrt(S+B)
     # 5: S/sqrt(S+B+(xB)**2)
+    # 6: sqrt(2)*sqrt((S+B)log(1+S/B)-S)
 
-    allformula = [ 'S/B', 'S/sqrt(B)', 'S/(S+B)', 'S/sqrt(S+B)', 'S/sqrt(S+B+(xB)**2)' ]
+    allformula = [ 'S/B', 'S/sqrt(B)', 'S/(S+B)', 'S/sqrt(S+B)', 'S/sqrt(S+B+(xB)**2)',\
+                   'sqrt(2)*sqrt((S+B)log(1+S/B)-S)']
 
 
     def __init__(self):

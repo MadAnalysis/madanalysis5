@@ -24,7 +24,7 @@
 
 from madanalysis.layout.measure               import Measure
 from math import sqrt
-
+from math import log
 
 class FomCalculation:
 
@@ -55,9 +55,11 @@ class FomCalculation:
                 value.mean = S/sqrt(S+B)
             elif self.formula==5:
                 value.mean = S/sqrt(S+B+(self.x*B)**2)
+            elif self.formula==6:
+                value.mean = sqrt(2)*sqrt((S+B)*log(1+S/B)-S)
         except ZeroDivisionError:  # division by 0
             value.mean=-1
-        except ValueError: # negative sqrt
+        except ValueError: # negative sqrt or log
             value.mean=-1
 
         # Error value
@@ -77,10 +79,14 @@ class FomCalculation:
             elif self.formula==5:
                 value.error = 1./(2*pow(S+B+self.x*B**2,3./2.))*\
                              sqrt((S+2*B+2*self.x*B**2)**2*ES**2+S**2*(2*self.x*B+1)**2*EB**2)
+            elif self.formula==6:
+                value.error = sqrt(2)/(2.*value.mean)*\
+                              sqrt( ES**2 * (log(1+S/B))**2 +\
+                                    EB**2 * (log(1+S/B)-S/B)**2 )
 
         except ZeroDivisionError: # division by 0
             value.mean=-1
-        except ValueError: # negative sqrt
+        except ValueError: # negative sqrt or log
             value.mean=-1
 
         return value
