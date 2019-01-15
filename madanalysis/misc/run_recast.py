@@ -174,11 +174,11 @@ class RunRecast():
     def fastsim_header(self, version):
         ## Gettign the version dependent stuff
         to_print = False
-        if version=="1.1" and self.first11:
+        if version=="v1.1" and self.first11:
             to_print = True
             tag = version
             self.first11 = False
-        elif version!="1.1" and self.first12:
+        elif version!="v1.1" and self.first12:
             to_print = True
             tag = "v1.2+"
             self.first12 = False
@@ -282,6 +282,7 @@ class RunRecast():
             if not self.check_run(version):
                 self.main.forced=self.forced
                 return False
+            self.main.fastsim.package = self.detector
 
             ## Running the analyses
             if not self.analysis_single(version, card):
@@ -525,12 +526,12 @@ class RunRecast():
 
     def check_xml_scipy_methods(self):
         ## Checking whether scipy is installed
-        try:
-            import scipy.stats
-        except ImportError:
+        if not self.main.session_info.has_scipy:
             logging.getLogger('MA5').warning('scipy is not installed... the CLs module cannot be used.')
             logging.getLogger('MA5').warning('Please install scipy.')
             return False
+        else:
+            import scipy.stats
         ## Checking XML parsers
         try:
             from lxml import ET

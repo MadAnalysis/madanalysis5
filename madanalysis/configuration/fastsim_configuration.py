@@ -78,7 +78,7 @@ class FastsimConfiguration:
             return {}
 
 
-    def user_SetParameter(self,parameter,value,datasets,level,fastjet,delphes,delphesMA5tune):
+    def user_SetParameter(self,parameter,value,datasets,level,archi_info):
 
         # algorithm
         if parameter=="package":
@@ -112,17 +112,17 @@ class FastsimConfiguration:
                     return
                 
                 # Fastjet ?
-                if value=='fastjet' and not fastjet:
+                if value=='fastjet' and not archi_info.has_fastjet:
                     logging.getLogger('MA5').error("fastjet library is not installed. Clustering algorithms are not available.")
                     return
 
                 # Delphes ?
-                if value=='delphes' and not delphes:
+                if value=='delphes' and not archi_info.has_delphes:
                     logging.getLogger('MA5').error("delphes library is not installed. This fast-simulation package is not available.")
                     return
 
                 # DelphesMA5tune ?
-                if value=='delphesMA5tune' and not delphesMA5tune:
+                if value=='delphesMA5tune' and not archi_info.has_delphesMA5tune:
                     logging.getLogger('MA5').error("delphesMA5tune library is not installed. This fast-simulation package is not available.")
                     return
 

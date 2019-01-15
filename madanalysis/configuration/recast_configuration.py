@@ -269,10 +269,10 @@ class RecastConfiguration:
         padlist=[]
         tunelist=[]
         if self.pad:
-            padfile  = open(os.path.normpath(os.path.join(self.ma5dir,"PAD/Build/Main/main.cpp")), 'r')
+            padfile  = open(os.path.normpath(os.path.join(self.ma5dir,"tools/PAD/Build/Main/main.cpp")), 'r')
             ToLoopOver.append([padfile, padlist])
         if self.padtune:
-            tunefile = open(os.path.normpath(os.path.join(self.ma5dir,"PADForMA5tune/Build/Main/main.cpp")), 'r')
+            tunefile = open(os.path.normpath(os.path.join(self.ma5dir,"tools/PADForMA5tune/Build/Main/main.cpp")), 'r')
             ToLoopOver.append([tunefile, tunelist])
         for myfile,mylist in ToLoopOver:
             for line in myfile:
@@ -303,14 +303,14 @@ class RecastConfiguration:
                 if myver!="v1.2":
                     self.logger.error("Recasting card: invalid analysis (not present in the PAD): " + myana)
                     return False
-                if not os.path.isfile(os.path.normpath(os.path.join(self.ma5dir,'PAD/Input/Cards',mydelphes))):
+                if not os.path.isfile(os.path.normpath(os.path.join(self.ma5dir,'tools/PAD/Input/Cards',mydelphes))):
                     self.logger.error("Recasting card: PAD analysis linked to an invalid delphes card: " + myana + " - " + mydelphes)
                     return False
             elif myana in  [x[0] for x in tunelist]:
                 if myver!="v1.1":
                     self.logger.error("Recasting card: invalid analysis (not present in the PADForMA5tune): " + myana)
                     return False
-                if not os.path.isfile(os.path.normpath(os.path.join(self.ma5dir,'PADForMA5tune/Input/Cards',mydelphes))):
+                if not os.path.isfile(os.path.normpath(os.path.join(self.ma5dir,'tools/PADForMA5tune/Input/Cards',mydelphes))):
                     self.logger.error("Recasting card: PADForMA5tune analysis linked to an invalid delphes card: " + myana + " - " + mydelphes)
                     return False
             else:
@@ -365,6 +365,7 @@ class RecastConfiguration:
         if write:
             card = open(dirname+'/Input/recasting_card.dat','a')
             card.write('\n'.join(thecard))
+            card.write('#\n')
             card.close()
         else:
             return thecard

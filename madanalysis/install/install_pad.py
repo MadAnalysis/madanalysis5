@@ -24,17 +24,18 @@
 
 from madanalysis.install.install_service import InstallService
 from shell_command import ShellCommand
+import glob
 import os
 import sys
 import logging
-import glob
 import shutil
 
 class InstallPad:
 
-    def __init__(self,main):
+    def __init__(self,main, padname):
         self.main        = main
-        self.installdir  = os.path.normpath(self.main.archi_info.ma5dir+'/tools/PAD')
+        self.padname     = padname
+        self.installdir  = os.path.join(self.main.archi_info.ma5dir,'tools', padname.upper())
         self.tmpdir      = self.main.session_info.tmpdir
         self.downloaddir = self.main.session_info.downloaddir
         self.PADdir      = self.installdir + "/Build/SampleAnalyzer/User/Analyzer"
@@ -42,10 +43,15 @@ class InstallPad:
         self.pileupdir   = self.installdir + "/Input/Pileup"
         self.untardir    = ""
         self.ncores      = 1
-        self.files       = {
+        self.files= {
           "pad.dat"    : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/pad.dat",
           "bib_pad.dat": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/bib_pad.dat"
         }
+        if padname=='padforma5tune':
+            self._files  = {
+                "padma5tune.dat"   : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/padma5tune.dat",
+                "bib_padma5tune.dat": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/bib_padma5tune.dat"
+            }
         self.analyses       = []
         self.analysis_files = []
         self.pileup_files   = []
@@ -61,9 +67,9 @@ class InstallPad:
 
     def Remove(self,question=True):
         import time
-        bkpname = "pad-v" + time.strftime("%Y%m%d-%Hh%M") + ".tgz"
+        bkpname = self.padname + "-v" + time.strftime("%Y%m%d-%Hh%M") + ".tgz"
         logging.getLogger('MA5').info("     => Backuping the previous installation: " + bkpname)
-        logname = os.path.normpath(self.main.archi_info.ma5dir+'/tools/pad-backup.log')
+        logname = os.path.normpath(self.main.archi_info.ma5dir+'/tools/'+self.padname+'-backup.log')
         TheCommand = ['tar', 'czf', bkpname, 'PAD']
         logging.getLogger('MA5').debug('Shell command: '+' '.join(TheCommand))
         ok, out= ShellCommand.ExecuteWithLog(TheCommand,logname,self.main.archi_info.ma5dir+'/tools',silent=False)
@@ -80,19 +86,21 @@ class InstallPad:
 
 
     def CreatePackageFolder(self):
-        logname = os.path.normpath(self.main.archi_info.ma5dir+'/tools/PAD-workingdir.log')
+        logname = os.path.normpath(self.main.archi_info.ma5dir+'/tools/'+self.padname+'-workingdir.log')
 
         # Initialize the expert mode
-        logging.getLogger('MA5').debug('Calling the expert mode for file cms_b2g_12_012')
+        filename="cms_b2g_12_012"
+        if self.padname == 'padforma5tune':
+            filename="cms_sus_13_011"
+        logging.getLogger('MA5').debug('Calling the expert mode for file ' + filename)
         logging.getLogger('MA5').debug('BEGIN ExpertMode')
         from madanalysis.core.expert_mode import ExpertMode
         backup = self.main.expertmode
         self.main.expertmode = True
         expert = ExpertMode(self.main)
-        dirname="tools/PAD"
+        dirname="tools/"+self.padname.upper()
         if not expert.CreateDirectory(dirname):
             return False
-        filename="cms_b2g_12_012"
         if not expert.Copy(filename):
             return False
         self.main.expertmode=backup
@@ -128,6 +136,8 @@ class InstallPad:
         new_analysis = new_analysis.replace('ATLAS_SUSY_16_07'     ,'atlas_susy_2016_07')
         new_analysis = new_analysis.replace('atlas_1605_03814'     ,'atlas_susy_2015_06')
         new_analysis = new_analysis.replace('CMS_EXO_16_012_2gamma','cms_exo_16_012')
+        new_analysis = new_analysis.replace('atlas_1405_7875', 'atlas_susy_2013_02')
+        new_analysis = new_analysis.replace('atlas_sus_13_05' ,'atlas_susy_2013_05')
         new_analysis = new_analysis.replace('-','_')
         return new_analysis.lower()
 
@@ -144,8 +154,9 @@ class InstallPad:
             return False
 
         # Getting the analysis one by one (and creating first skeleton analyses for each of them)
-        logging.getLogger('MA5').debug('Reading the analysis list in ' + os.path.join(self.downloaddir,'pad.dat'))
-        analysis_file = open(os.path.join(self.downloaddir,'pad.dat'))
+        logging.getLogger('MA5').debug('Reading the analysis list in ' + \
+          os.path.join(self.downloaddir,self.padname.replace('for','')+'.dat'))
+        analysis_file = open(os.path.join(self.downloaddir,self.padname.replace('for','')+'.dat'))
         delphes_dictionary = {}
         analysis_info      = {}
         # Looping over all analyses
@@ -171,13 +182,13 @@ class InstallPad:
             else:
                 delphes_dictionary[new_delphes].append(new_analysis)
                 download_delphes = False
-            logname  = os.path.join(self.installdir,'PAD-'+analysis+'.log')
+            logname  = os.path.join(self.installdir,self.padname+'-'+analysis+'.log')
             files = {}
             # Making space in the PAD for the analysis and preparing to download the analysis files
             if len(analysis)!=0 and len(url)!=0:
                 logging.getLogger('MA5').debug(" ** Getting the analysis " + new_analysis + ' located at ' + url)
                 ## Creating a skeleton if necessary (+ inclusion in the analysis list and in the main)
-                if new_analysis != "cms_b2g_12_012":
+                if not new_analysis in ["cms_b2g_12_012", "cms_sus_13_011"]:
                     logging.getLogger('MA5').debug('  --> Creating a skeleton analysis for ' + new_analysis)
                     TheCommand = ['./newAnalyzer.py', new_analysis, new_analysis]
                     logging.getLogger('MA5').debug('  -->  ' + ' '.join(TheCommand))
@@ -237,7 +248,7 @@ class InstallPad:
 
         # Bibliography file
         logging.getLogger('MA5').debug(" ** Getting the bibliography file " + self.installdir+"/bibliography.bib")
-        TheCommand = ['cp', os.path.join(self.downloaddir,'bib_pad.dat'), self.installdir+"/bibliography.bib"]
+        TheCommand = ['cp', os.path.join(self.downloaddir,'bib_'+self.padname.replace('for','')+'.dat'), self.installdir+"/bibliography.bib"]
         logging.getLogger('MA5').debug('  -->  ' + ' '.join(TheCommand))
         ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir+'/tools')
         if not ok:
@@ -259,9 +270,15 @@ class InstallPad:
                     if 'RootMainHeaders.h' in line:
                         rootheaders=True
                     if 'TLorentzVector' in line:
-                        newfile.write(line.replace('TLorentzVector','MALorentzVector'))
+                        if new_analysis=='atlas_susy_2013_05' and extension=='h' and self.padname=='padforma5tune':
+                            newfile.write(line.replace('TLorentzVector','MA5::MALorentzVector'))
+                        else:
+                            newfile.write(line.replace('TLorentzVector','MALorentzVector'))
                     elif 'WARNING' in line:
                         newfile.write(line.replace('WARNING','//WARNING'))
+                    elif new_analysis=='atlas_susy_2013_02' and 'pt() > 130' in line and '6jm' in line and not 'AddCut' in line:
+                        newfile.write('}}}}\n')
+                        newfile.write(line)
                     elif analysis in line:
                         newfile.write(line.replace(analysis, new_analysis))
                     else:
@@ -287,7 +304,7 @@ class InstallPad:
 
     def Configure(self):
         # Updating the makefile
-        logging.getLogger('MA5').debug(" ** Preparing the Makefile to build the PAD")
+        logging.getLogger('MA5').debug(" ** Preparing the Makefile to build the " + self.padname.upper())
         TheCommand = ['mv',os.path.join(self.installdir,'Build', 'Makefile'), os.path.join(self.installdir,'Build','Makefile.save')]
         ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir+'/tools')
         if not ok:
@@ -314,8 +331,10 @@ class InstallPad:
         inp = open(os.path.join(self.installdir,'Build','Main','main.cpp.save'), 'r')
         out = open(os.path.join(self.installdir,'Build','Main','main.cpp'     ), 'w')
         for line in inp:
-          if 'user.saf' in line:
+          if 'user.saf' in line and self.padname=='pad':
             out.write("      manager.InitializeAnalyzer(\"cms_b2g_12_012\",\"cms_b2g_12_012.saf\",parametersA1);\n")
+          elif 'user.saf' in line and self.padname=='padforma5tune':
+            out.write("      manager.InitializeAnalyzer(\"cms_sus_13_011\",\"cms_sus_13_011.saf\",parametersA1);\n")
           else:
             out.write(line)
         inp.close()

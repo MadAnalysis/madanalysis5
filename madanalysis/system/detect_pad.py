@@ -31,6 +31,7 @@ import re
 import platform
 from shell_command  import ShellCommand
 from madanalysis.enumeration.detect_status_type import DetectStatusType
+from madanalysis.system.config_checker          import ConfigChecker
 
 
 class DetectPAD:
@@ -71,16 +72,16 @@ class DetectPAD:
 
 
     def AreDependenciesInstalled(self):
+        checker = ConfigChecker(self.archi_info, self.user_info, self.session_info, False, False)
         if self.ma5tune:
-            if not self.archi_info.has_delphesMA5tune:
+            if not checker.checkDelphesMA5tune(True):
                 self.logger.debug("dependency 'DelphesMA5tune' is not installed")
                 return False
         else:
-            if self.archi_info.has_delphesMA5tune:
+            if not checker.checkDelphes(True):
                 self.logger.debug("dependency 'Delphes' is not installed")
                 return False
         return True
- 
 
     def ManualDetection(self):
         msg = ''

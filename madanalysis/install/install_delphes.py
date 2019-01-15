@@ -451,6 +451,10 @@ class InstallDelphes:
                 return True
         if os.path.isdir(self.main.archi_info.delphes_lib_paths[0]):
             self.logger.warning("Delphes is installed. Deactivating it.")
+            # Symbolic links
+            for x in self.main.archi_info.delphes_original_libs:
+                if os.path.exists(x) and 'ExternalSymLink' in x:
+                    os.remove(x)
             # Paths
             delpath=os.path.normpath(self.main.archi_info.delphes_lib_paths[0])
             deldeac = delpath.replace(delpath.split('/')[-1],"DEACT_"+delpath.split('/')[-1])
@@ -510,6 +514,14 @@ class InstallDelphes:
 
             # naming
             shutil.move(delpath,deldeac)
+
+            # creating the virtual links
+            checkup = CheckUp(self.main.archi_info, self.main.session_info, False, self.main.script)
+            for x in self.main.archi_info.delphes_original_libs:
+                destination=os.path.normpath(self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/ExternalSymLink/'+\
+                   x.split('/')[-1])
+                if not checkup.CreateSymLink(x,destination):
+                    return -1
 
             # Compiler setup
             compiler = LibraryWriter('lib',self.main)

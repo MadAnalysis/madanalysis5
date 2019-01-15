@@ -74,19 +74,13 @@ class InstallManager():
         elif package=='numpy':
             from madanalysis.install.install_numpy import InstallNumpy
             installer=InstallNumpy(self.main)
-        elif package=='padforma5tune':
-            if self.main.archi_info.has_root:
-                from madanalysis.install.install_padma5tune import InstallPadForMA5tune
-                installer=InstallPadForMA5tune(self.main)
-            else:
-                self.logger.warning('the package "'+rawpackage+'" cannot be installed without root; installation skipped')
-                return True
-        elif package=='pad':
-            if self.main.archi_info.has_root:
+        elif package in ['pad', 'padforma5tune']:
+            if self.main.archi_info.has_root and self.main.session_info.has_scipy:
                 from madanalysis.install.install_pad import InstallPad
-                installer=InstallPad(self.main)
+                installer=InstallPad(self.main, package)
             else:
-                self.logger.warning('the package "'+rawpackage+'" cannot be installed without root; installation skipped')
+                self.logger.warning('the package "' + rawpackage + '" cannot be installed without root ' +\
+                    'and scipy; installation skipped')
                 return True
         else:
             self.logger.error('the package "'+rawpackage+'" is unknown')

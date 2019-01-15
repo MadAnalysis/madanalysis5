@@ -118,7 +118,6 @@ MAbool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const s
   confReader_ = new ExRootConfReader;
   confReader_->ReadFile(configFile_.c_str());
 
-  WARNING << "init = 0" << endmsg; 
   // Studying configuration part for TreeWriter module
   ExRootConfParam param = confReader_->GetParam("TreeWriter::Branch");
   if (param.GetSize()==0) 
@@ -140,11 +139,8 @@ MAbool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const s
   }
 
   treeWriter_ = new ExRootTreeWriter(outputFile_, "DelphesMA5tune");
-    WARNING << "init = 3a" << endmsg;
   branchEvent_ = treeWriter_->NewBranch("Event", LHEFEvent::Class());
-    WARNING << "init = 3b" << endmsg;
   branchWeight_ = treeWriter_->NewBranch("Weight", Weight::Class());
-    WARNING << "init = 3c" << endmsg;
 
   // Initializing delphes
   modularDelphes_ = new Delphes("Delphes");
@@ -157,18 +153,15 @@ MAbool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const s
   }
   modularDelphes_->SetConfReader(confReader_);
   modularDelphes_->SetTreeWriter(treeWriter_);
-    WARNING << "init = 4" << endmsg;
 
   factory_ = modularDelphes_->GetFactory();
   allParticleOutputArray_    = modularDelphes_->ExportArray("allParticles");
   stableParticleOutputArray_ = modularDelphes_->ExportArray("stableParticles");
   partonOutputArray_         = modularDelphes_->ExportArray("partons");
   modularDelphes_->InitTask();
-    WARNING << "init = 5" << endmsg;
 
   // Delphes PDG service
   PDG_ = TDatabasePDG::Instance();
-    WARNING << "init = 6" << endmsg;
 
   // Reset
   treeWriter_->Clear();

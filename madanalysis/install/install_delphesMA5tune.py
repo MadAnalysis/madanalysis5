@@ -453,6 +453,10 @@ class InstallDelphesMA5tune:
                 return True
         if os.path.isdir(self.main.archi_info.delphesMA5tune_lib_paths[0]):
             self.logger.warning("DelphesMA5tune is installed. Deactivating it.")
+            # Symbolic links
+            for x in self.main.archi_info.delphesMA5tune_original_libs:
+                if os.path.exists(x) and 'ExternalSymLink' in x:
+                    os.remove(x)
             # Paths
             delpath=os.path.normpath(self.main.archi_info.delphesMA5tune_lib_paths[0])
             deldeac = delpath.replace(delpath.split('/')[-1],"DEACT_"+delpath.split('/')[-1])
@@ -515,6 +519,14 @@ class InstallDelphesMA5tune:
 
             # naming
             shutil.move(delpath,deldeac)
+
+            # creating the virtual links
+            checkup = CheckUp(self.main.archi_info, self.main.session_info, False, self.main.script)
+            for x in self.main.archi_info.delphes_original_libs:
+                destination=os.path.normpath(self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/ExternalSymLink/'+\
+                   x.split('/')[-1])
+                if not checkup.CreateSymLink(x,destination):
+                    return -1
 
             # Compiler setup
             self.logger.debug("Preparing makefiles")
