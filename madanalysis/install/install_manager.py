@@ -45,17 +45,10 @@ class InstallManager():
         elif package=='fastjet-contrib':
             from madanalysis.install.install_fastjetcontrib import InstallFastjetContrib
             installer=InstallFastjetContrib(self.main)
-        elif package=='delphes':
+        elif package in ['delphes', 'delphesma5tune']:
             if self.main.archi_info.has_root:
                 from madanalysis.install.install_delphes import InstallDelphes
-                installer=InstallDelphes(self.main)
-            else:
-                self.logger.warning('the package "'+rawpackage+'" cannot be installed without root; installation skipped')
-                return True
-        elif package=='delphesma5tune':
-            if self.main.archi_info.has_root:
-                from madanalysis.install.install_delphesMA5tune import InstallDelphesMA5tune
-                installer=InstallDelphesMA5tune(self.main)
+                installer=InstallDelphes(self.main,package)
             else:
                 self.logger.warning('the package "'+rawpackage+'" cannot be installed without root; installation skipped')
                 return True
@@ -218,31 +211,25 @@ class InstallManager():
 
     def Deactivate(self, rawpackage):
         package=rawpackage.lower()
-        if package=='delphes':
+        if package in ['delphes', 'delphesma5tune']:
             from madanalysis.install.install_delphes import InstallDelphes
-            installer=InstallDelphes(self.main)
-        elif package=='delphesma5tune':
-            from madanalysis.install.install_delphesMA5tune import InstallDelphesMA5tune
-            installer=InstallDelphesMA5tune(self.main)
+            installer=InstallDelphes(self.main,package)
+            if not installer.Deactivate():
+                return False
         else:
             self.logger.error('the package "'+rawpackage+'" is unknown')
             return False
 
-        if not installer.Deactivate():
-            return False
         return True
 
 
     def Activate(self, rawpackage):
         package=rawpackage.lower()
-        if package=='delphes':
+        if package in ['delphes', 'delphesma5tune']:
             from madanalysis.install.install_delphes import InstallDelphes
-            installer=InstallDelphes(self.main)
-        elif package=='delphesma5tune':
-            from madanalysis.install.install_delphesMA5tune import InstallDelphesMA5tune
-            installer=InstallDelphesMA5tune(self.main)
+            installer=InstallDelphes(self.main, package)
+            return installer.Activate()
         else:
             self.logger.error('the package "'+rawpackage+'" is unknown')
             return -1
-        return installer.Activate()
 
