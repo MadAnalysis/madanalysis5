@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+155           (2019/01/23) fuks:    Fixing a typo in install_pad 
+
 154           (2019/01/17) fuks:    Fixing the linecolor bug #1807107 (connected to matplotlib) 
 
 153           (2019/01/17) fuks:    Reorganisation of the delphes(MA5tune) installation and activation 
