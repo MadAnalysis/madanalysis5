@@ -31,7 +31,6 @@
 #include "SampleAnalyzer/Commons/Service/DisplayService.h"
 #include "SampleAnalyzer/Commons/Service/ConvertService.h"
 
-
 // ROOT headers
 #include <TROOT.h>
 #include <TObjArray.h>
@@ -210,6 +209,8 @@ MAbool DetectorDelphesMA5tune::Execute(SampleFormat& mySample, EventFormat& myEv
 
   // Reset
   treeWriter_->Clear();
+  modularDelphes_->Clear();
+  // Second Reset (seems necessary)
   modularDelphes_->Clear();
   
   return true;
