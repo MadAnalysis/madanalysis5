@@ -95,7 +95,7 @@ namespace MA5
       std::string result;
       std::transform(word.begin(), word.end(), 
                      std::back_inserter(result), 
-                     (int (*)(int))std::tolower);
+                     (MAint32 (*)(MAint32))std::tolower);
       return result;
     }
 

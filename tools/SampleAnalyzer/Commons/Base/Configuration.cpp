@@ -40,8 +40,8 @@ using namespace MA5;
 // Initializing static data members
 // -----------------------------------------------------------------------------
 // DO NOT TOUCH THESE LINES
-const std::string Configuration::sampleanalyzer_version_ = "1.6.1";
-const std::string Configuration::sampleanalyzer_date_    = "2018/05/29";
+const std::string Configuration::sampleanalyzer_version_ = "1.7.21";
+const std::string Configuration::sampleanalyzer_date_    = "2019/02/07";
 // DO NOT TOUCH THESE LINES
 
 // -----------------------------------------------------------------------------
@@ -69,14 +69,50 @@ void Configuration::Lower(std::string& word)
 {
   std::transform(word.begin(), word.end(), 
                  word.begin(), 
-                 (int (*)(int))std::tolower);
+                 (MAint32 (*)(MAint32))std::tolower);
+}
+
+
+
+// -----------------------------------------------------------------------------
+// DecodeMA5version
+// -----------------------------------------------------------------------------
+void Configuration::DecodeMA5version(const std::string& option)
+{
+  std::string stamp = option.substr(14,std::string::npos);
+  std::size_t result = stamp.find(";");
+  try
+  {
+    // check the syntax
+    if (result==std::string::npos) throw EXCEPTION_WARNING("MA5 version '"+stamp+"' is not valid.","",0);
+
+    // version
+    pythoninterface_version_ = stamp.substr(0,result);
+    if (pythoninterface_version_.find("\"")==0)
+      pythoninterface_version_ = pythoninterface_version_.substr(1,std::string::npos);
+    if (pythoninterface_version_.size()>=2) 
+      if (pythoninterface_version_.find("\"")==(pythoninterface_version_.size()-1))
+        pythoninterface_version_ = pythoninterface_version_.substr(0,(pythoninterface_version_.size()-1));
+
+    // date
+    pythoninterface_date_ = stamp.substr(result+1,std::string::npos);
+    if (pythoninterface_date_.find("\"")==0)
+      pythoninterface_date_ = pythoninterface_date_.substr(1,std::string::npos);
+    if (pythoninterface_date_.size()>=2) 
+      if (pythoninterface_date_.find("\"")==(pythoninterface_date_.size()-1))
+        pythoninterface_date_ = pythoninterface_date_.substr(0,(pythoninterface_date_.size()-1));
+  }
+  catch(const std::exception& e)
+  {
+    MANAGE_EXCEPTION(e);
+  }    
 }
 
 
 // -----------------------------------------------------------------------------
 // Initialize
 // -----------------------------------------------------------------------------
-bool Configuration::Initialize(int &argc, char *argv[])
+MAbool Configuration::Initialize(MAint32 &argc, MAchar *argv[])
 {
   // Checking number of arguments
   // <filelist> is compulsory
@@ -87,62 +123,63 @@ bool Configuration::Initialize(int &argc, char *argv[])
     return false;
   }
 
-  // Decoding options
-  if (argc>=3) for (MAuint32 i=1;i<static_cast<MAuint32>(argc-1);i++)
+  // Decoding arguments
+  for (MAuint32 i=1;i<static_cast<MAuint32>(argc);i++)
   {
-    // converting const char to string
-    std::string option = std::string(argv[i]);
-    Lower(option);
+    // converting const characters into string
+    std::string argument = std::string(argv[i]);
+    Lower(argument);
 
     // safety : skip empty string
-    if (option.size()==0) continue;
+    if (argument.size()==0) continue;
 
-    // check event
-    if (option=="--check_event") check_event_ = true;
-
-    // weighted event
-    else if (option=="--no_event_weight") no_event_weight_ = true;
-
-    // version
-    else if (option.find("--ma5_version=")==0)
+    // Is it an option?
+    if (argument.size()>=2 && argument[0]=='-' && argument[1]=='-')
     {
-      std::string stamp = option.substr(14,std::string::npos);
-      std::size_t result = stamp.find(";");
-      try
+      // check event
+      if (argument=="--check_event") check_event_ = true;
+
+      // weighted event
+      else if (argument=="--no_event_weight") no_event_weight_ = true;
+
+      // version
+      else if (argument.find("--ma5_version=")==0) DecodeMA5version(argument);
+
+      // other = mistake
+      else
       {
-        if (result==std::string::npos) throw EXCEPTION_WARNING("MA5 version '"+stamp+"' is not valid.","",0);
-
-        pythoninterface_version_ = stamp.substr(0,result);
-        if (pythoninterface_version_.find("\"")==0)
-          pythoninterface_version_ = pythoninterface_version_.substr(1,std::string::npos);
-        if (pythoninterface_version_.size()>=2) 
-          if (pythoninterface_version_.find("\"")==(pythoninterface_version_.size()-1))
-            pythoninterface_version_ = pythoninterface_version_.substr(0,(pythoninterface_version_.size()-1));
-
-        pythoninterface_date_ = stamp.substr(result+1,std::string::npos);
-        if (pythoninterface_date_.find("\"")==0)
-          pythoninterface_date_ = pythoninterface_date_.substr(1,std::string::npos);
-        if (pythoninterface_date_.size()>=2) 
-          if (pythoninterface_date_.find("\"")==(pythoninterface_date_.size()-1))
-            pythoninterface_date_ = pythoninterface_date_.substr(0,(pythoninterface_date_.size()-1));
+        ERROR << "option '" << argument << "' is unknown !!!" << endmsg;
+        PrintSyntax();
+        return false;
       }
-      catch(const std::exception& e)
-      {
-        MANAGE_EXCEPTION(e);
-      }    
-    }
+    } 
 
-    // unknown option
+    // It is not an option? So it is a list of samples
     else
     {
-      ERROR << "argument '" << option << "' is unknown !!!" << endmsg;
-      PrintSyntax();
-      return false;
+      if (input_list_name_=="" || input_list_name_==std::string(argv[i]))
+      {
+        // Extracting the input list
+        input_list_name_ = std::string(argv[i]);
+      }
+      else
+      {
+        // only one list of samples is required
+        ERROR << "several list of samples have been declared: '" 
+              << input_list_name_ << "' and '" << argv[i] 
+              << "'. Only one is required." << endmsg;
+        return false;
+      }
     }
   }
 
-  // Extracting the input list
-  input_list_name_ = std::string(argv[static_cast<MAuint32>(argc-1)]);
+  // Check that the input list is supplied
+  if (input_list_name_=="")
+  {
+    ERROR << "no list of samples has been provided." << endmsg;
+    PrintSyntax();
+    return false;
+  }
 
   // Ok
   return true;

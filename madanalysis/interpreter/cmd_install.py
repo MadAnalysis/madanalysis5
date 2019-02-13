@@ -50,140 +50,102 @@ class CmdInstall(CmdBase):
             return True
 
         # delphes preinstallation
-        def inst_delphes(main,installer,pad=False):
+        def inst_delphes(main,installer,release,pad=False):
+            ## INIT
+            if release=='delphes':
+                to_activate   = 'Delphes'
+                to_deactivate = 'DelphesMA5tune'
+            elif release == 'delphesMA5tune':
+                to_activate   = 'DelphesMA5tune'
+                to_deactivate = 'Delphes'
+
+            ## to update all the paths
             def UpdatePaths():
-                main.archi_info.has_delphes=True
-                main.archi_info.delphes_priority=True
-                dpath =  os.path.normpath(os.path.join(main.archi_info.ma5dir,'tools','delphes'))
-                if os.path.isfile(os.path.normpath(os.path.join(dpath,'libDelphes.so'))):
-                   mylib = os.path.normpath(os.path.join(dpath,'libDelphes.so'))
-                elif os.path.isfile(os.path.normpath(os.path.join(dpath,'libDelphes.dylib'))):
-                   mylib = os.path.normpath(os.path.join(dpath,'libDelphes.dylib'))
-                main.archi_info.libraries['Delphes']= mylib+":"+str(os.stat(mylib).st_mtime)
-                main.archi_info.delphes_lib = mylib
-                main.archi_info.toLDPATH1 = [x for x in main.archi_info.toLDPATH1 if not 'MA5tune' in x]
+                print ('MUF = ', to_activate, to_deactivate)
+                if release=='delphes':
+                    main.archi_info.has_delphes             = True
+                    main.archi_info.delphes_priority        = True
+                elif release == 'delphesMA5tune':
+                    main.archi_info.has_delphesMA5tune      = True
+                    main.archi_info.delphesMA5tune_priority = True
+                libname = 'lib'+to_activate
+                dpath   =  os.path.join(main.archi_info.ma5dir,'tools',release)
+                main.archi_info.toLDPATH1 = [x for x in main.archi_info.toLDPATH1 if not release in x]
                 main.archi_info.toLDPATH1.append(dpath)
-                main.archi_info.delphes_lib_paths = [dpath]
-                main.archi_info.delphes_inc_paths =[dpath, os.path.normpath(os.path.join(dpath,'external'))]
-            if not installer.Deactivate('delphesMA5tune'):
+
+                if os.path.isfile(os.path.join(dpath,libname+'.so')):
+                   mylib = os.path.join(dpath,libname+'.so')
+                elif os.path.isfile(os.path.join(dpath,libname+'.dylib')):
+                   mylib = os.path.join(dpath,libname+'.dylib')
+
+                main.archi_info.libraries[to_activate]= mylib+":"+str(os.stat(mylib).st_mtime)
+
+                if release=='delphes':
+                    main.archi_info.delphes_lib       = mylib
+                    main.archi_info.delphes_lib_paths = [dpath]
+                    main.archi_info.delphes_inc_paths = [dpath, os.path.join(dpath,'external')]
+                elif release == 'delphesMA5tune':
+                    main.archi_info.delphesMA5tune_lib       = mylib
+                    main.archi_info.delphesMA5tune_lib_paths = [dpath]
+                    main.archi_info.delphesMA5tune_inc_paths = [dpath,os.path.join(dpath,'external')]
+
+            ## Deactivating the other delphes, if relevant
+            if not installer.Deactivate(to_deactivate):
                 return False
-            ResuActi = installer.Activate('delphes')
+
+            ## Activating the good delphes, if relevant
+            ResuActi = installer.Activate(to_activate)
+            if release=='delphes':
+                has_release = self.main.archi_info.has_delphes
+            elif release=='delphesMA5tune':
+                has_release = self.main.archi_info.has_delphesMA5tune
+
             if ResuActi == -1:
                 return False
-            elif ResuActi == 1 and not self.main.archi_info.has_delphes:
-                self.logger.warning("Delphes not installed: installing it...")
-                resu = installer.Execute('delphes')
+            elif ResuActi == 1 and not has_release:
+                self.logger.warning(to_activate + " is not installed: installing it...")
+                resu = installer.Execute(release)
                 if resu:
                     UpdatePaths()
                     if not main.CheckConfig():
                         return False
                     return resu
-            elif ResuActi == 0 and self.main.archi_info.has_delphes and not pad:
-                self.logger.warning("A previous installation of Delphes has been found. Skipping the installation.")
-                self.logger.warning("To update Delphes, please remove the tools/delphes directory")
-            return True
-
-        # ma5tune preinstallation
-        def inst_ma5tune(main,installer,pad=False):
-            def UpdatePaths():
-                main.archi_info.has_delphesMA5tune=True
-                main.archi_info.delphesMA5tune_priority=True
-                dpath =  os.path.normpath(os.path.join(main.archi_info.ma5dir,'tools','delphesMA5tune'))
-                if os.path.isfile(os.path.normpath(os.path.join(dpath,'libDelphesMA5tune.so'))):
-                   mylib = os.path.normpath(os.path.join(dpath,'libDelphesMA5tune.dylib'))
-                elif os.path.isfile(os.path.normpath(os.path.join(dpath,'libDelphesMA5tune.dylib'))):
-                   mylib = os.path.normpath(os.path.join(dpath,'libDelphesMA5tune.so'))
-                main.archi_info.libraries['DelphesMA5tune']= mylib+":"+str(os.stat(mylib).st_mtime)
-                main.archi_info.delphesMA5tune_lib=mylib
-                main.archi_info.toLDPATH1 = [x for x in main.archi_info.toLDPATH1 if not 'delphes' in x]
-                main.archi_info.toLDPATH1.append(dpath)
-                main.archi_info.delphesMA5tune_lib_paths = [dpath]
-                main.archi_info.delphesMA5tune_inc_paths=[dpath,os.path.normpath(os.path.join(dpath,'external'))]
-            if not installer.Deactivate('delphes'):
-                return False
-            ResuActi = installer.Activate('delphesMA5tune')
-            if ResuActi == -1:
-                return False
-            elif ResuActi == 1 and not self.main.archi_info.has_delphesMA5tune:
-                self.logger.warning("DelphesMA5tune not installed: installing it...")
-                resu = installer.Execute('delphesMA5tune')
-                if resu:
-                    UpdatePaths()
-                    if not main.CheckConfig():
-                        return False
-                return resu
-            elif ResuActi == 0 and self.main.archi_info.has_delphesMA5tune and not pad:
-                self.logger.warning("A previous installation of DelphesMA5tune has been found. Skipping the installation.")
-                self.logger.warning("To update DelphesMA5tune, please remove the tools/delphesMA5tune directory")
+            elif ResuActi == 0 and has_release and not pad:
+                self.logger.warning("A previous " + release +' installation has been found. Skipping...')
+                self.logger.warning('To update ;' + release + ', please remove first the tools/' + release + 'delphes directory')
             return True
 
         # Calling selection method
+        installer=InstallManager(self.main)
         if args[0]=='samples':
-            installer=InstallManager(self.main)
             return installer.Execute('samples')
         elif args[0]=='zlib':
-            installer=InstallManager(self.main)
             return installer.Execute('zlib')
-        elif args[0]=='delphes':
-            installer=InstallManager(self.main)
-            return inst_delphes(self.main,installer)
-        elif args[0]=='delphesMA5tune':
-            self.logger.warning("The package 'delphesMA5tune' must be used with root-5. It is replaced by Delphes with special MA5-tuned cards in the root-6 case.")
-            if len(self.main.archi_info.root_version)!=3:
-                self.logger.error("Cannot read the root version correctly. Installation skipped.")
-                return True
-            if int(self.main.archi_info.root_version[0]) > 5:
-                self.logger.error("The delphesMA5tune package is not compliant with Root-6." + \
-                   " Installation skipped.")
-                return True
-            if not self.main.forced:
-              self.logger.warning("Are you sure to install this package? (Y/N)")
-              allowed_answers=['n','no','y','yes']
-              answer=""
-              while answer not in  allowed_answers:
-                 answer=raw_input("Answer: ")
-                 answer=answer.lower()
-              if answer=="no" or answer=="n":
-                  return True
-            installer=InstallManager(self.main)
-            return inst_ma5tune(self.main,installer)
+        elif args[0] in ['delphes', 'delphesMA5tune']:
+            return inst_delphes(self.main,installer,args[0])
         elif args[0]=='fastjet':
-            installer=InstallManager(self.main)
             if installer.Execute('fastjet')==False:
                 return False
             return installer.Execute('fastjet-contrib')
         elif args[0]=='gnuplot':
-            installer=InstallManager(self.main)
             return installer.Execute('gnuplot')
         elif args[0]=='matplotlib':
-            installer=InstallManager(self.main)
             return installer.Execute('matplotlib')
         elif args[0]=='root':
-            installer=InstallManager(self.main)
             return installer.Execute('root')
         elif args[0]=='numpy':
-            installer=InstallManager(self.main)
             return installer.Execute('numpy')
         elif args[0]=='PADForMA5tune':
-            if len(self.main.archi_info.root_version)!=3:
-                self.logger.error("Cannot read the root version correctly. Installation skipped.")
-                return True
-            if int(self.main.archi_info.root_version[0]) > 5:
-                self.logger.error("The PADForMA5tune framework is not compliant with Root-6." + \
-                   " Installation skipped.")
-                return True
-            installer=InstallManager(self.main)
-            if inst_ma5tune(self.main,installer,True):
+            if inst_delphes(self.main,installer,'delphesMA5tune',True):
                 return installer.Execute('PADForMA5tune')
             else:
-                self.logger.warning('DelphesMA5tune is now installed... please exit the program and install the pad')
+                self.logger.warning('DelphesMA5tune is not installed... please exit the program and install the pad')
                 return True
         elif args[0]=='PAD':
-            installer=InstallManager(self.main)
-            if inst_delphes(self.main,installer,True):
+            if inst_delphes(self.main,installer,'delphes',True):
                 return installer.Execute('PAD')
             else:
-                self.logger.warning('Delphes is now installed... please exit the program and install the pad')
+                self.logger.warning('Delphes is not installed... please exit the program and install the pad')
                 return True
         else:
             self.logger.error("the syntax is not correct.")

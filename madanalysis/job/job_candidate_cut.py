@@ -318,6 +318,9 @@ def WriteJobExecuteNbody(file,iabs,combi1,main,container,tagName,tagIndex,condit
 
     # Case of one particle/multiparticle
     if len(combi1)==1:
+        if containers1[0]==container:
+            file.write('    if(a==muf)\n')
+            file.write('        continue;\n\n')
         file.write('    if (')
         if main.mode == MA5RunningType.PARTON:
           TheObs=obs.code_parton[:-2]

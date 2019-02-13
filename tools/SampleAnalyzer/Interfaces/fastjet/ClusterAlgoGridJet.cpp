@@ -36,12 +36,12 @@ typedef fastjet::JetDefinition::Plugin FastJetPlugin;
 
 using namespace MA5;
 
-bool ClusterAlgoGridJet::SetParameter(const std::string& key, const std::string& value)
+MAbool ClusterAlgoGridJet::SetParameter(const std::string& key, const std::string& value)
 { 
   // radius
   if (key=="ymax")
   {
-    float tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
@@ -53,7 +53,7 @@ bool ClusterAlgoGridJet::SetParameter(const std::string& key, const std::string&
   // ptmin
   else if (key=="ptmin")
   {
-    float tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
@@ -65,7 +65,7 @@ bool ClusterAlgoGridJet::SetParameter(const std::string& key, const std::string&
   // Requested Grid Spacing
   else if (key=="requestedgridspacing")
   {
-    float tmp=0;
+    MAfloat32 tmp=0;
     std::stringstream str;
     str << value;
     str >> tmp;
@@ -81,7 +81,7 @@ bool ClusterAlgoGridJet::SetParameter(const std::string& key, const std::string&
 }
 
 
-bool ClusterAlgoGridJet::Initialize()
+MAbool ClusterAlgoGridJet::Initialize()
 { 
   // Creating Plugin
   fastjet::JetDefinition::Plugin* Plugin_ = new fastjet::GridJetPlugin(Ymax_, RequestedGridSpacing_);

@@ -63,14 +63,14 @@ class LHCOWriter : public WriterTextBase
   {}
 
   /// Read the sample (virtual)
-  virtual bool WriteHeader(const SampleFormat& mySample);
+  virtual MAbool WriteHeader(const SampleFormat& mySample);
 
   /// Read the event (virtual)
-  virtual bool WriteEvent(const EventFormat& myEvent, 
+  virtual MAbool WriteEvent(const EventFormat& myEvent, 
                           const SampleFormat& mySample);
 
   /// Finalize the event (virtual)
-  virtual bool WriteFoot(const SampleFormat& mySample);
+  virtual MAbool WriteFoot(const SampleFormat& mySample);
  
  private:
 
@@ -78,7 +78,7 @@ class LHCOWriter : public WriterTextBase
   // Writing a reconstructed jet
 
   void WriteJet(const RecJetFormat& jet, LHCOParticleFormat* lhco);
-  void WriteMuon(const RecLeptonFormat& muon, LHCOParticleFormat* lhco, const RecEventFormat* myEvent, unsigned int npart);
+  void WriteMuon(const RecLeptonFormat& muon, LHCOParticleFormat* lhco, const RecEventFormat* myEvent, MAuint32 npart);
   void WriteElectron(const RecLeptonFormat& electron, LHCOParticleFormat* lhco);
   void WritePhoton(const RecPhotonFormat& photon, LHCOParticleFormat* lhco);
   void WriteTau(const RecTauFormat& tau, LHCOParticleFormat* lhco);

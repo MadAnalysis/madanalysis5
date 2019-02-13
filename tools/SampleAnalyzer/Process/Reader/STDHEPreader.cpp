@@ -34,7 +34,7 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 // Initialize
 // -----------------------------------------------------------------------------
-bool STDHEPreader::Initialize(const std::string& rawfilename,
+MAbool STDHEPreader::Initialize(const std::string& rawfilename,
                               const Configuration& cfg)
 {
   nevhept_before_ = 0;
@@ -65,7 +65,7 @@ void STDHEPreader::Reset()
 // -----------------------------------------------------------------------------
 // ReadHeader
 // -----------------------------------------------------------------------------
-bool STDHEPreader::ReadHeader(SampleFormat& mySample)
+MAbool STDHEPreader::ReadHeader(SampleFormat& mySample)
 {
   // Initiliaze MC
   mySample.InitializeMC();
@@ -85,8 +85,8 @@ StatusCode::Type STDHEPreader::ReadEvent(EventFormat& myEvent, SampleFormat& myS
   // Initiliaze MC
   myEvent.InitializeMC();
 
-  bool eventRead=false;
-  bool eventskip=false;
+  MAbool eventRead=false;
+  MAbool eventskip=false;
   while(!eventRead)
   {
     // Read blockid
@@ -131,7 +131,7 @@ StatusCode::Type STDHEPreader::ReadEvent(EventFormat& myEvent, SampleFormat& myS
 // -----------------------------------------------------------------------------
 // DecodeFileHeader
 // -----------------------------------------------------------------------------
-bool STDHEPreader::DecodeFileHeader(SampleFormat& mySample)
+MAbool STDHEPreader::DecodeFileHeader(SampleFormat& mySample)
 {
   // temporary variables used for reading the xdr format file
   std::string  tmps;
@@ -244,15 +244,15 @@ bool STDHEPreader::DecodeFileHeader(SampleFormat& mySample)
   /*if (version_!=V1 && nNTuples!=0)
   {
     // Loop over ntuple
-    for (unsigned int i=0;i<nNTuples;i++)
+    for (MAuint32 i=0;i<nNTuples;i++)
     {
       // Number of characters in title
       if ( !xdr_int(&xdr_, &tmpi) ) return false;
-      unsigned int nctitle = tmpi;
+      MAuint32 nctitle = tmpi;
 
       // Number of characters in category
       if ( !xdr_int(&xdr_, &tmpi) ) return false;
-      unsigned int nccategory = tmpi;
+      MAuint32 nccategory = tmpi;
 
       // IdRef
       if ( !xdr_int(&xdr_, &tmpi) ) return false;
@@ -279,7 +279,7 @@ bool STDHEPreader::DecodeFileHeader(SampleFormat& mySample)
 // -----------------------------------------------------------------------------
 // FinalizeHeader
 // -----------------------------------------------------------------------------
-bool STDHEPreader::FinalizeHeader(SampleFormat& mySample)
+MAbool STDHEPreader::FinalizeHeader(SampleFormat& mySample)
 {
 
 
@@ -290,7 +290,7 @@ bool STDHEPreader::FinalizeHeader(SampleFormat& mySample)
 // -----------------------------------------------------------------------------
 // DecodeEventTable
 // -----------------------------------------------------------------------------
-bool STDHEPreader::DecodeEventTable(const std::string& evt_version)
+MAbool STDHEPreader::DecodeEventTable(const std::string& evt_version)
 {
   // Decoding the event
   // Case: classical 
@@ -367,7 +367,7 @@ bool STDHEPreader::DecodeEventTable(const std::string& evt_version)
 // -----------------------------------------------------------------------------
 // DecodeEventHeader
 // -----------------------------------------------------------------------------
-bool STDHEPreader::DecodeEventHeader(const std::string& evt_version)
+MAbool STDHEPreader::DecodeEventHeader(const std::string& evt_version)
 {
   MAint32 evtnum=0;
   *xdrinput_ >> evtnum;
@@ -391,8 +391,8 @@ bool STDHEPreader::DecodeEventHeader(const std::string& evt_version)
   MAuint32 dimNTuples=0;
 
   // Is there NTuple
-  bool skipNTuples = false;
-  bool add64bit=false;
+  MAbool skipNTuples = false;
+  MAbool add64bit=false;
   if (evt_version=="2.00" || evt_version=="3.00") skipNTuples=true;
   if (evt_version=="3.00") add64bit=true;
 
@@ -450,7 +450,7 @@ bool STDHEPreader::DecodeEventHeader(const std::string& evt_version)
 // -----------------------------------------------------------------------------
 // DecodeSTDCM1
 // -----------------------------------------------------------------------------
-bool STDHEPreader::DecodeSTDCM1(const std::string& version, SampleFormat& mySample)
+MAbool STDHEPreader::DecodeSTDCM1(const std::string& version, SampleFormat& mySample)
 {
   MAint32 nevtreq; 
   *xdrinput_ >> nevtreq;
@@ -500,7 +500,7 @@ bool STDHEPreader::DecodeSTDCM1(const std::string& version, SampleFormat& mySamp
 // -----------------------------------------------------------------------------
 // DecodeEventFormat
 // -----------------------------------------------------------------------------
-bool STDHEPreader::DecodeEventData(const std::string& version, 
+MAbool STDHEPreader::DecodeEventData(const std::string& version, 
                                    EventFormat& myEvent)
 {
   Reset();
@@ -537,7 +537,7 @@ bool STDHEPreader::DecodeEventData(const std::string& version,
   mothers_.reserve(nhept_);
 
   // Loop over particles
-  for (unsigned int i=0;i<static_cast<unsigned int>(nhept_);i++)
+  for (MAuint32 i=0;i<static_cast<MAuint32>(nhept_);i++)
   {
     // Get a new particle
     MCParticleFormat * part = myEvent.mc()->GetNewParticle();
@@ -563,7 +563,7 @@ bool STDHEPreader::DecodeEventData(const std::string& version,
   return true;
 }
 
-bool STDHEPreader::CheckEvent(const EventFormat& myEvent, 
+MAbool STDHEPreader::CheckEvent(const EventFormat& myEvent, 
                               const std::string& blk)
 {
   if(nhept_<0) 
@@ -611,7 +611,7 @@ bool STDHEPreader::CheckEvent(const EventFormat& myEvent,
   return true;
 }
 
-bool STDHEPreader::DecodeSTDHEP4(const std::string& version, 
+MAbool STDHEPreader::DecodeSTDHEP4(const std::string& version, 
                                  EventFormat& myEvent)
 {
   Reset();
@@ -676,7 +676,7 @@ bool STDHEPreader::DecodeSTDHEP4(const std::string& version,
   myEvent.mc()->particles_.reserve(nhept_);
 
   // Loop over particles
-  for (unsigned int i=0;i<static_cast<unsigned int>(nhept_);i++)
+  for (MAuint32 i=0;i<static_cast<MAuint32>(nhept_);i++)
   {
     // Get a new particle
     MCParticleFormat * part = myEvent.mc()->GetNewParticle();
@@ -706,7 +706,7 @@ bool STDHEPreader::DecodeSTDHEP4(const std::string& version,
 // -----------------------------------------------------------------------------
 // FinalizeEvent
 // -----------------------------------------------------------------------------
-bool STDHEPreader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
+MAbool STDHEPreader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 {
   // Is it a bugged event ?
   if (!firstevent && nevhept_ == nevhept_before_) return false;  
@@ -733,7 +733,7 @@ bool STDHEPreader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
       }
       else
       {
-        std::cout << "ERROR : internal problem with mother-daughter particles" << std::endl;
+        std::cout << "ERROR: internal problem with mother-daughter particles" << std::endl;
       }
     }
     if (mothup2>0 && mothup1!=mothup2)
@@ -749,14 +749,14 @@ bool STDHEPreader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
       }
       else
       {
-        std::cout << "ERROR : internal problem with mother-daughter particles" << std::endl;
+        std::cout << "ERROR: internal problem with mother-daughter particles" << std::endl;
       }
     }
   }
   mothers_.clear();
 
   // Global event observable
-  for (unsigned int i=0; i<myEvent.mc()->particles_.size();i++)
+  for (MAuint32 i=0; i<myEvent.mc()->particles_.size();i++)
   {
     MCParticleFormat& part = myEvent.mc()->particles_[i];
 
@@ -789,7 +789,7 @@ bool STDHEPreader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 // -----------------------------------------------------------------------------
 // Finalize
 // -----------------------------------------------------------------------------
-bool STDHEPreader::Finalize()
+MAbool STDHEPreader::Finalize()
 {
   if (!ReaderTextBase::Finalize()) return false;
   if (xdrinput_!=0) delete xdrinput_;

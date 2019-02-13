@@ -34,7 +34,7 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 // Initialize
 // -----------------------------------------------------------------------------
-bool JetClusterer::Initialize(const std::map<std::string,std::string>& options)
+MAbool JetClusterer::Initialize(const std::map<std::string,std::string>& options)
 {
   // algo defined ?
   if (algo_==0) return false;
@@ -49,12 +49,12 @@ bool JetClusterer::Initialize(const std::map<std::string,std::string>& options)
        it=options.begin();it!=options.end();it++)
   {
     std::string key = ClusterAlgoBase::Lower(it->first);
-    bool result=false;
+    MAbool result=false;
 
     // exclusive_id
     if (key=="exclusive_id")
     {
-      int tmp=0;
+      MAint32 tmp=0;
       std::stringstream str;
       str << it->second;
       str >> tmp;
@@ -132,7 +132,7 @@ void JetClusterer::Finalize()
 // -----------------------------------------------------------------------------
 void JetClusterer::GetFinalState(const MCParticleFormat* part, std::set<const MCParticleFormat*>& finalstates)
 {
-  for (unsigned int i=0; i<part->daughters().size(); i++)
+  for (MAuint32 i=0; i<part->daughters().size(); i++)
   {
     if (PHYSICS->Id->IsFinalState(part->daughters()[i])) finalstates.insert(part->daughters()[i]);
     else return GetFinalState(part->daughters()[i],finalstates);
@@ -145,7 +145,7 @@ void JetClusterer::GetFinalState(const MCParticleFormat* part, std::set<const MC
 // -----------------------------------------------------------------------------
 MAbool JetClusterer::IsLast(const MCParticleFormat* part, EventFormat& myEvent)
 {
-  for (unsigned int i=0; i<part->daughters().size(); i++)
+  for (MAuint32 i=0; i<part->daughters().size(); i++)
   {
     if (part->daughters()[i]->pdgid()==part->pdgid()) return false;
   }
@@ -156,7 +156,7 @@ MAbool JetClusterer::IsLast(const MCParticleFormat* part, EventFormat& myEvent)
 // -----------------------------------------------------------------------------
 // Execute
 // -----------------------------------------------------------------------------
-bool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
+MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
 {
   // Safety
   if (mySample.mc()==0 || myEvent.mc()==0) return false;
@@ -167,11 +167,11 @@ bool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
   myEvent.rec()->Reset();
 
   // Veto
-  std::vector<bool> vetos(myEvent.mc()->particles().size(),false);
+  std::vector<MAbool> vetos(myEvent.mc()->particles().size(),false);
   std::set<const MCParticleFormat*> vetos2;
 
   // Filling the dataformat with electron/muon
-  for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
+  for (MAuint32 i=0;i<myEvent.mc()->particles().size();i++)
   {
     const MCParticleFormat& part = myEvent.mc()->particles()[i];
     MAuint32 absid = std::abs(part.pdgid());
@@ -191,8 +191,8 @@ bool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
       // looking for b quarks
       if (absid==5)
       {
-        bool found=false;
-        for (unsigned int j=0;j<myEvent.rec()->MCBquarks_.size();j++)
+        MAbool found=false;
+        for (MAuint32 j=0;j<myEvent.rec()->MCBquarks_.size();j++)
         {
           if (myEvent.rec()->MCBquarks_[j]==&(part)) 
           {found=true; break;}
@@ -203,8 +203,8 @@ bool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
       // looking for c quarks
       else if (absid==4)
       {
-        bool found=false;
-        for (unsigned int j=0;j<myEvent.rec()->MCCquarks_.size();j++)
+        MAbool found=false;
+        for (MAuint32 j=0;j<myEvent.rec()->MCCquarks_.size();j++)
         {
           if (myEvent.rec()->MCCquarks_[j]==&(part)) 
           {found=true; break;}
@@ -219,10 +219,10 @@ bool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
         if (LOOP->ComingFromHadronDecay(&part,mySample)) continue;
 
         // Looking taus daughters id
-        bool leptonic   = true;
-        bool muonic     = false;
-        bool electronic = false;
-        for (unsigned int j=0;j<part.daughters().size();j++)
+        MAbool leptonic   = true;
+        MAbool muonic     = false;
+        MAbool electronic = false;
+        for (MAuint32 j=0;j<part.daughters().size();j++)
         {
           MAuint32 pdgid = std::abs(part.daughters()[j]->pdgid());
           if      (pdgid==13) muonic=true;
@@ -236,8 +236,8 @@ bool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
         // Saving taus decaying into muons (only one copy)
         if (muonic)
         {
-          bool found=false;
-          for (unsigned int j=0;j<myEvent.rec()->MCMuonicTaus_.size();j++)
+          MAbool found=false;
+          for (MAuint32 j=0;j<myEvent.rec()->MCMuonicTaus_.size();j++)
           {
             if (myEvent.rec()->MCMuonicTaus_[j]==&(part)) 
             {found=true; break;}
@@ -248,8 +248,8 @@ bool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
         // Saving taus decaying into electrons (only one copy)
         else if (electronic)
         {
-          bool found=false;
-          for (unsigned int j=0;j<myEvent.rec()->MCElectronicTaus_.size();j++)
+          MAbool found=false;
+          for (MAuint32 j=0;j<myEvent.rec()->MCElectronicTaus_.size();j++)
           {
             if (myEvent.rec()->MCElectronicTaus_[j]==&(part)) 
             {found=true; break;}
@@ -260,8 +260,8 @@ bool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
         // Saving taus decaying into hadrons (only copy)
         else
         {
-          bool found=false;
-          for (unsigned int j=0;j<myEvent.rec()->MCHadronicTaus_.size();j++)
+          MAbool found=false;
+          for (MAuint32 j=0;j<myEvent.rec()->MCHadronicTaus_.size();j++)
           {
             if (myEvent.rec()->MCHadronicTaus_[j]==&(part)) 
             {found=true; break;}
@@ -341,32 +341,32 @@ bool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
   algo_->Execute(mySample,myEvent,ExclusiveId_,vetos,vetos2);
 
   // shortcut for TET & THT
-  double & TET = myEvent.rec()->TET();
-  //  double & THT = myEvent.rec()->THT();
+  MAfloat64 & TET = myEvent.rec()->TET();
+  //  MAfloat64 & THT = myEvent.rec()->THT();
   RecParticleFormat* MET = &(myEvent.rec()->MET());
   RecParticleFormat* MHT = &(myEvent.rec()->MHT());
 
   // End
   if (ExclusiveId_)
   {
-    for (unsigned int i=0;i<myEvent.rec()->electrons().size();i++)
+    for (MAuint32 i=0;i<myEvent.rec()->electrons().size();i++)
     {
       (*MET) -= myEvent.rec()->electrons()[i].momentum();
       TET += myEvent.rec()->electrons()[i].pt();
     }
-    for (unsigned int i=0;i<myEvent.rec()->photons().size();i++)
+    for (MAuint32 i=0;i<myEvent.rec()->photons().size();i++)
     {
       (*MET) -= myEvent.rec()->photons()[i].momentum();
       TET += myEvent.rec()->photons()[i].pt();
     }
-    for (unsigned int i=0;i<myEvent.rec()->taus().size();i++)
+    for (MAuint32 i=0;i<myEvent.rec()->taus().size();i++)
     {
       (*MET) -= myEvent.rec()->taus()[i].momentum();
       TET += myEvent.rec()->taus()[i].pt();
     }
   }
 
-  for (unsigned int i=0;i<myEvent.rec()->muons().size();i++)
+  for (MAuint32 i=0;i<myEvent.rec()->muons().size();i++)
   {
     (*MET) -= myEvent.rec()->muons()[i].momentum();
     TET += myEvent.rec()->muons()[i].pt();

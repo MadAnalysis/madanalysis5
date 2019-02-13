@@ -142,7 +142,7 @@ class DetectFastjet:
         ok, out, err = ShellCommand.ExecuteWithCapture(theCommands,'./')
         if not ok:
             msg = 'fastjet-config program does not work properly.'
-            return False,msg
+            return False#,msg
         out=out.lstrip()
         out=out.rstrip()
         self.version = str(out)
@@ -155,7 +155,7 @@ class DetectFastjet:
         ok, out, err = ShellCommand.ExecuteWithCapture(theCommands,'./')
         if not ok:
             msg = 'fastjet-config program does not work properly.'
-            return False,msg
+            return False#,msg
 
         # Extracting FastJet library and header path
         out=out.lstrip()

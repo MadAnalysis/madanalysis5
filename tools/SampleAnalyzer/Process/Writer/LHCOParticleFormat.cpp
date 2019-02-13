@@ -48,9 +48,9 @@ void LHCOParticleFormat::Print(MAuint32 num, std::ostream* out)
   *out << std::setw(2) << std::right << id;
   *out << "  ";
   *out << std::fixed;
-  unsigned int pres = out->precision();
+  MAuint32 pres = out->precision();
   out->precision(3);
-  double myeta = eta;
+  MAfloat64 myeta = eta;
   if (myeta>9) myeta=9.999;
   else if (myeta<-9) myeta=-9.999;
   *out << std::setw(6) << std::right << myeta;  // -X.YYY
@@ -61,7 +61,7 @@ void LHCOParticleFormat::Print(MAuint32 num, std::ostream* out)
   *out << "  ";
   *out << std::setw(6) << std::right << jmass;  // -X.YYY
   *out << "  ";
-  double myntrk = ntrk;
+  MAfloat64 myntrk = ntrk;
   if (myntrk>9) myntrk=9.999;
   else if (myntrk<-9) myntrk=-9.999;
   *out << std::setw(6) << std::right << myntrk;   // -X.YYY
@@ -82,7 +82,7 @@ void LHCOParticleFormat::Print(MAuint32 num, std::ostream* out)
 // -----------------------------------------------------------------------------
 // Print the event header
 // -----------------------------------------------------------------------------
-void LHCOParticleFormat::WriteEventHeader(unsigned int numEvent,
+void LHCOParticleFormat::WriteEventHeader(MAuint32 numEvent,
                                           std::ostream* out)
 {
   // Particle number

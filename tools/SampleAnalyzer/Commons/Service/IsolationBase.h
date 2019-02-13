@@ -45,27 +45,27 @@ class IsolationBase
 
     MAfloat64 sumPT(const RecLeptonFormat* part, 
                    const std::vector<RecTrackFormat>& tracks,
-                   const double& DR,double PTmin) const; 
+                   const MAfloat64& DR,MAfloat64 PTmin) const; 
 
     MAfloat64 sumPT(const RecLeptonFormat* part, 
                    const std::vector<RecParticleFormat>& towers,
-                   const double& DR,double PTmin) const;
+                   const MAfloat64& DR,MAfloat64 PTmin) const;
 
     MAfloat64 sumPT(const RecLeptonFormat* part, 
                    const std::vector<RecTowerFormat>& towers,
-                   const double& DR,double PTmin) const;
+                   const MAfloat64& DR,MAfloat64 PTmin) const;
 
     MAfloat64 sumPT(const RecPhotonFormat* part, 
                    const std::vector<RecTrackFormat>& tracks,
-                   const double& DR,double PTmin) const; 
+                   const MAfloat64& DR,MAfloat64 PTmin) const; 
 
     MAfloat64 sumPT(const RecPhotonFormat* part, 
                    const std::vector<RecParticleFormat>& towers,
-                   const double& DR,double PTmin) const;
+                   const MAfloat64& DR,MAfloat64 PTmin) const;
 
     MAfloat64 sumPT(const RecPhotonFormat* part, 
                    const std::vector<RecTowerFormat>& towers,
-                   const double& DR,double PTmin) const;
+                   const MAfloat64& DR,MAfloat64 PTmin) const;
 
   public:
 
@@ -81,22 +81,22 @@ class IsolationBase
     // -------------------------------------------------------------
 
     /// Methods for leptons
-    virtual MAfloat64 relIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin) const = 0;
+    virtual MAfloat64 relIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const MAfloat64& DR, MAfloat64 PTmin) const = 0;
 
-    virtual MAfloat64 relIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const double& DR, double PTmin) const = 0;
+    virtual MAfloat64 relIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const MAfloat64& DR, MAfloat64 PTmin) const = 0;
 
-    virtual MAfloat64 sumIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const double& DR, double PTmin) const = 0;
+    virtual MAfloat64 sumIsolation(const RecLeptonFormat& part, const RecEventFormat* event, const MAfloat64& DR, MAfloat64 PTmin) const = 0;
 
-    virtual MAfloat64 sumIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const double& DR, double PTmin) const = 0;
+    virtual MAfloat64 sumIsolation(const RecLeptonFormat* part, const RecEventFormat* event, const MAfloat64& DR, MAfloat64 PTmin) const = 0;
 
     /// Methods for photons
-    virtual MAfloat64 relIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin) const = 0;
+    virtual MAfloat64 relIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const MAfloat64& DR, MAfloat64 PTmin) const = 0;
 
-    virtual MAfloat64 relIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin) const = 0;
+    virtual MAfloat64 relIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const MAfloat64& DR, MAfloat64 PTmin) const = 0;
 
-    virtual MAfloat64 sumIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const double& DR, double PTmin) const = 0;
+    virtual MAfloat64 sumIsolation(const RecPhotonFormat& part, const RecEventFormat* event, const MAfloat64& DR, MAfloat64 PTmin) const = 0;
 
-    virtual MAfloat64 sumIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const double& DR, double PTmin) const = 0;
+    virtual MAfloat64 sumIsolation(const RecPhotonFormat* part, const RecEventFormat* event, const MAfloat64& DR, MAfloat64 PTmin) const = 0;
 
 
     // -------------------------------------------------------------
@@ -105,19 +105,19 @@ class IsolationBase
 
     virtual std::vector<const RecLeptonFormat*> getRelIsolated(const std::vector<RecLeptonFormat>& leptons, 
                                                                const RecEventFormat* event, 
-                                                               const double& threshold, const double& DR, double PTmin=0.5) const = 0;
+                                                               const MAfloat64& threshold, const MAfloat64& DR, MAfloat64 PTmin=0.5) const = 0;
 
     virtual std::vector<const RecLeptonFormat*> getRelIsolated(const std::vector<const RecLeptonFormat*>& leptons, 
                                                                const RecEventFormat* event, 
-                                                               const double& threshold, const double& DR, double PTmin=0.5) const = 0;
+                                                               const MAfloat64& threshold, const MAfloat64& DR, MAfloat64 PTmin=0.5) const = 0;
 
     virtual std::vector<const RecPhotonFormat*> getRelIsolated(const std::vector<RecPhotonFormat>& photons, 
                                                                const RecEventFormat* event, 
-                                                               const double& threshold, const double& DR, double PTmin=0.5) const = 0;
+                                                               const MAfloat64& threshold, const MAfloat64& DR, MAfloat64 PTmin=0.5) const = 0;
 
     virtual std::vector<const RecPhotonFormat*> getRelIsolated(const std::vector<const RecPhotonFormat*>& photons, 
                                                                const RecEventFormat* event, 
-                                                               const double& threshold, const double& DR, double PTmin=0.5) const = 0;
+                                                               const MAfloat64& threshold, const MAfloat64& DR, MAfloat64 PTmin=0.5) const = 0;
 
 };
 

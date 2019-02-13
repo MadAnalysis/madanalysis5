@@ -100,7 +100,7 @@ class TimeService
   {}
 
   /// Order relation for sorting the table according to timing
-  static bool timingOrder(const std::pair<const std::string,TimeMeasureType>* a,
+  static MAbool timingOrder(const std::pair<const std::string,TimeMeasureType>* a,
                           const std::pair<const std::string,TimeMeasureType>* b)
   { return (a->second.GetAverage()>b->second.GetAverage()); }
 
@@ -110,7 +110,7 @@ class TimeService
     TimeIterator it = MeasureTable_.find(name);
     if (it==MeasureTable_.end())
     {
-      std::pair<TimeIterator,bool> test = 
+      std::pair<TimeIterator,MAbool> test = 
        MeasureTable_.insert(
               std::pair<std::string,TimeMeasureType>(name,TimeMeasureType()));
       if (!test.second)

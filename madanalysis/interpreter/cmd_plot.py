@@ -220,7 +220,8 @@ class CmdPlot(CmdBase,CmdSelectionBase):
             # Adding histo
             self.main.selection.Add(histo)
         else:
-            self.logger.warning('   Histogram found to be attached to distinguishable regions -> multiple declaration:')
+            self.logger.warning('   Histogram found to be attached to distinguishable regions.')
+            self.logger.warning('   The correct way (that MadAnalysis 5 enforced automatically) would have been:')
             for myset in setofRegions:
                 subHistoRegionNames = [x for x in HistoRegionNames if x in myset]
                 if subHistoRegionNames == []:

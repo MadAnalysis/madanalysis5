@@ -1,6 +1,49 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
-123           (2018/05/29) fuks:    updating copyrights 
+156           (2019/02/07) fuks:    Adding the jet mass information to the delphes reader 
+
+155           (2019/01/23) fuks:    Fixing a typo in install_pad 
+
+154           (2019/01/17) fuks:    Fixing the linecolor bug #1807107 (connected to matplotlib) 
+
+153           (2019/01/17) fuks:    Reorganisation of the delphes(MA5tune) installation and activation 
+                                   modules 
+
+152           (2019/01/15) fuks:    Many improvements: PAD and PADForMA5tune are again both available; 
+                                   delphes installation, delphes ma5tune installation; delphes 
+                                   detection, compatiblitily of delphsma5tun with root6, etc. 
+
+149           (2018/11/24) fuks:    Updating delphesMA5tune installer 
+
+147           (2018/11/23) fuks:    Externalizing the PAD 
+
+139           (2018/11/20) fuks:    cleaning the code (syntax improvements) 
+
+138           (2018/10/14) fuks:    Bug fixing in LHE event reader 
+
+137           (2018/09/17) fuks:    Bug when reading the first event of an LHE file 
+
+136           (2018/09/11) fuks:    pad update 
+
+135           (2018/09/04) fuks:    Updating the PAD 
+
+134           (2018/08/28) fuks:    Adding analyses to the PAD 
+
+133           (2018/07/24) fuks:    Fixing a problem with the arguments 
+
+132           (2018/07/24) fuks:    Updating the PAD 
+
+129           (2018/07/10) fuks:    Bug fix #1780945 
+
+128           (2018/07/10) fuks:    fixing merging plot bug; first steps with tagging 
+
+127           (2018/06/26) fuks:    Adding some methods to the RecJetFormat class 
+
+126           (2018/06/06) fuks:    Updating the PAD 
+
+125           (2018/05/29) fuks:    Updating the copyrights 
+
+124           (2018/05/13) fuks:    Bug fix for deltaR used with combinations 
 
 
 196  1.6   (2018/05/04) ma5team:    - Finalization of the interface with mg5

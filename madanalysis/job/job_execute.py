@@ -241,7 +241,7 @@ def WriteFillWithTauContainer(part,file,rank,status,regions):
         file.write('      if (event.rec()->taus()[i].charge()>0) '+\
                    container+'.push_back(&(event.rec()->taus()[i]));\n')
 
-def WriteFillWithMETContainer(part,file,rank,status):
+def WriteFillWithMETContainer(part,file,rank,status,regions):
 
     # If PTrank, no fill
     if part.PTrank!=0:
@@ -252,7 +252,7 @@ def WriteFillWithMETContainer(part,file,rank,status):
         return
 
     # Getting container name
-    container=InstanceName.Get('P_'+part.name+rank+status)
+    container=InstanceName.Get('P_'+part.name+rank+status+'_REG_'+'_'.join(regions))
 
     # Put MET
     if part.particle.Find(100):
@@ -260,7 +260,7 @@ def WriteFillWithMETContainer(part,file,rank,status):
                    '.push_back(&(event.rec()->MET()));\n')
 
 
-def WriteFillWithMHTContainer(part,file,rank,status):
+def WriteFillWithMHTContainer(part,file,rank,status,regions):
 
     # If PTrank, no fill
     if part.PTrank!=0:
@@ -271,7 +271,7 @@ def WriteFillWithMHTContainer(part,file,rank,status):
         return
 
     # Getting container name
-    container=InstanceName.Get('P_'+part.name+rank+status)
+    container=InstanceName.Get('P_'+part.name+rank+status+'_REG_'+'_'.join(regions))
 
     # Put MHT
     if part.particle.Find(99):
@@ -279,7 +279,7 @@ def WriteFillWithMHTContainer(part,file,rank,status):
                    '.push_back(&(event.rec()->MHT()));\n')
 
 
-def WriteFillWithMETContainerMC(part,file,rank,status):
+def WriteFillWithMETContainerMC(part,file,rank,status,regions):
 
     # If PTrank, no fill
     if part.PTrank!=0:
@@ -290,7 +290,7 @@ def WriteFillWithMETContainerMC(part,file,rank,status):
         return
 
     # Getting container name
-    container=InstanceName.Get('P_'+part.name+rank+status)
+    container=InstanceName.Get('P_'+part.name+rank+status+'_REG_'+'_'.join(regions))
 
     # Put MET
     if part.particle.Find(100):
@@ -298,7 +298,7 @@ def WriteFillWithMETContainerMC(part,file,rank,status):
                    '.push_back(&(event.mc()->MET()));\n')
 
 
-def WriteFillWithMHTContainerMC(part,file,rank,status):
+def WriteFillWithMHTContainerMC(part,file,rank,status,regions):
     
     # If PTrank, no fill
     if part.PTrank!=0:
@@ -309,7 +309,7 @@ def WriteFillWithMHTContainerMC(part,file,rank,status):
         return
 
     # Getting container name
-    container=InstanceName.Get('P_'+part.name+rank+status)
+    container=InstanceName.Get('P_'+part.name+rank+status+'_REG_'+'_'.join(regions))
 
     # Put MHT
     if part.particle.Find(99):
@@ -343,8 +343,8 @@ def WriteContainer(file,main,part_list):
         # Special particles : MET or MHT
         for item in part_list:
             if item[0].particle.Find(99) or item[0].particle.Find(100):
-                WriteFillWithMETContainerMC(item[0],file,item[1],item[2]) 
-                WriteFillWithMHTContainerMC(item[0],file,item[1],item[2])
+                WriteFillWithMETContainerMC(item[0],file,item[1],item[2],item[3])
+                WriteFillWithMHTContainerMC(item[0],file,item[1],item[2],item[3])
 
         # Ordinary particles
         file.write('    for (MAuint32 i=0;i<event.mc()->particles().size();i++)\n')
@@ -403,14 +403,14 @@ def WriteContainer(file,main,part_list):
         # Filling with MET
         file.write('    {\n')
         for item in part_list:
-            WriteFillWithMETContainer(item[0],file,item[1],item[2])
+            WriteFillWithMETContainer(item[0],file,item[1],item[2],item[3])
         file.write('    }\n')
         InstanceName.Clear()
 
         # Filling with MHT
         file.write('    {\n')
         for item in part_list:
-            WriteFillWithMHTContainer(item[0],file,item[1],item[2])
+            WriteFillWithMHTContainer(item[0],file,item[1],item[2],item[3])
         file.write('    }\n')
         InstanceName.Clear()
 

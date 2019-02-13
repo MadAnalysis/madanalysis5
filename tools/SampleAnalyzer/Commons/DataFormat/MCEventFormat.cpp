@@ -26,6 +26,7 @@
 #include "SampleAnalyzer/Commons/DataFormat/MCEventFormat.h"
 #include <set>
 
+
 using namespace MA5;
 
 struct VertexInfo
@@ -38,8 +39,8 @@ MAbool CompareMothers(const std::vector<const MCParticleFormat*>& a, const std::
 {
   std::set<const MCParticleFormat*> aa;
   std::set<const MCParticleFormat*> bb;
-  for (unsigned int i=0;i<a.size();i++) aa.insert(a[i]);
-  for (unsigned int i=0;i<b.size();i++) bb.insert(b[i]);
+  for (MAuint32 i=0;i<a.size();i++) aa.insert(a[i]);
+  for (MAuint32 i=0;i<b.size();i++) bb.insert(b[i]);
   if (aa==bb) return true; else return false;
 }
 
@@ -47,8 +48,8 @@ MAbool CompareMothers(const std::vector<const MCParticleFormat*>& a, const std::
 {
   std::set<const MCParticleFormat*> aa;
   std::set<const MCParticleFormat*> bb;
-  for (unsigned int i=0;i<a.size();i++) aa.insert(a[i]);
-  for (unsigned int i=0;i<b.size();i++) bb.insert(b[i]);
+  for (MAuint32 i=0;i<a.size();i++) aa.insert(a[i]);
+  for (MAuint32 i=0;i<b.size();i++) bb.insert(b[i]);
   if (aa==bb) return true; else return false;
 }
 
@@ -72,7 +73,7 @@ void MCEventFormat::PrintVertices() const
         myVertex.out.push_back(&(particles_[j]));
       }
     }
-    bool ok=true;
+    MAbool ok=true;
     for (MAuint32 j=0;j<vertices.size();j++)
     {
       if (CompareMothers(myVertex.in,vertices[j].in) && CompareMothers(myVertex.out,vertices[j].out))
@@ -83,16 +84,16 @@ void MCEventFormat::PrintVertices() const
     if (ok) vertices.push_back(myVertex);
   }
   std::cout << "# vertices = " << vertices.size() << std::endl;
-  for (unsigned int i=0;i<vertices.size();i++)
+  for (MAuint32 i=0;i<vertices.size();i++)
   {
     std::cout << " - ( ";
-    for (unsigned int j=0;j<vertices[i].in.size();j++)
+    for (MAuint32 j=0;j<vertices[i].in.size();j++)
     {
       if (j!=0) std::cout << " ++ ";
       std::cout << vertices[i].in[j]->pdgid();
     }
     std::cout << " ) --> ( ";
-    for (unsigned int j=0;j<vertices[i].out.size();j++)
+    for (MAuint32 j=0;j<vertices[i].out.size();j++)
     {
       if (j!=0) std::cout << " ++ ";
       std::cout << vertices[i].out[j]->pdgid();

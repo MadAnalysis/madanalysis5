@@ -124,7 +124,7 @@ class RecLeptonFormat : public RecParticleFormat
   }
 
   /// Accessor to the electric charge 
-  virtual const int charge() const
+  virtual const MAint32 charge() const
   { if (charge_) return +1; else return -1; }
 
   /// Mutator related to the electric charge 

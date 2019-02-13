@@ -41,7 +41,7 @@
 using namespace MA5;
 
 
-bool DJRextractor::Initialize()
+MAbool DJRextractor::Initialize()
 {
   // Initializing clustering algorithm
   JetDefinition_ = new fastjet::JetDefinition(fastjet::kt_algorithm,1.0);
@@ -74,7 +74,7 @@ void DJRextractor::Finalize()
 
 MAdouble64 DJRextractor::rapidity(MAdouble64 px, MAdouble64 py, MAdouble64 pz)
 {
-  double PTJET = sqrt( px*px + py*py);
+  MAfloat64 PTJET = sqrt( px*px + py*py);
   return std::abs(log(std::min((sqrt(PTJET*PTJET+pz*pz)+std::abs(pz ))/PTJET,1e5)));
 }
 
@@ -83,7 +83,7 @@ void DJRextractor::ExtractDJR(const std::vector<fastjet::PseudoJet>& inputs,std:
 {
   // JetDefinition_
   fastjet::ClusterSequence sequence(inputs, *JetDefinition_);
-  for (unsigned int i=0;i<DJRvalues.size();i++)
+  for (MAuint32 i=0;i<DJRvalues.size();i++)
   {
     DJRvalues[i]=sequence.exclusive_dmerge(i);
   }
@@ -95,12 +95,12 @@ void DJRextractor::SelectParticles(std::vector<fastjet::PseudoJet>& inputs,
 {
   // Indexing
   std::map<const MCParticleFormat*,int> indices;
-  for (unsigned int i=0;i<myEvent->particles().size();i++)
+  for (MAuint32 i=0;i<myEvent->particles().size();i++)
     indices[&(myEvent->particles()[i])]=i;
 
   // The main routine
   std::map<const MCParticleFormat*,MAbool> filters;
-  for (unsigned int i=0;i<myEvent->particles().size();i++)
+  for (MAuint32 i=0;i<myEvent->particles().size();i++)
   {
     if (myEvent->particles()[i].mothers().size()==0) continue;
     if (myEvent->particles()[i].mothers()[0]->mothers().size()==0) continue;
@@ -118,7 +118,7 @@ void DJRextractor::SelectParticles(std::vector<fastjet::PseudoJet>& inputs,
       // The mother is not filtered -> testing if we have a radiation pattern
       else
       {
-        // Get all brothers and sisters and kill doubles
+        // Get all brothers and sisters and kill MAfloat64s
         for(MAint32 j=family.size()-1;j>0;j--)
         {
           if (indices[family[j]] ==indices[part]) { family.erase(family.begin()+j); continue; }
@@ -126,9 +126,9 @@ void DJRextractor::SelectParticles(std::vector<fastjet::PseudoJet>& inputs,
             if (indices[family[j]]==indices[family[k]]) { family.erase(family.begin()+k); break; }
         }
         // Checking whether we have partons in the family
-        unsigned int ng=0, ninit=0, nq=0,nqb=0;
+        MAuint32 ng=0, ninit=0, nq=0,nqb=0;
         if(part->pdgid()==part->mothers()[0]->pdgid()) ninit++;
-        for(unsigned int i=0; i< family.size();i++)
+        for(MAuint32 i=0; i< family.size();i++)
         {
           if(family[i]->pdgid()<= 4 && family[i]->pdgid()>0) nq++;
           if(family[i]->pdgid()>=-4 && family[i]->pdgid()<0) nqb++;
@@ -173,12 +173,12 @@ void DJRextractor::SelectParticles(std::vector<fastjet::PseudoJet>& inputs,
     if (!test) continue;
 
     // Cut on the rapidity
-    double ETAJET = rapidity(myEvent->particles()[i].momentum().Px(),
+    MAfloat64 ETAJET = rapidity(myEvent->particles()[i].momentum().Px(),
                              myEvent->particles()[i].momentum().Py(),
                              myEvent->particles()[i].momentum().Pz());
     if (std::abs(ETAJET)>5) continue;
 
-    // Remove double counting
+    // Remove MAfloat64 counting
     if (myEvent->particles()[i].mothers().size()==1)
     {
       if (myEvent->particles()[i].pdgid()      == myEvent->particles()[i].mothers()[0]->pdgid() &&

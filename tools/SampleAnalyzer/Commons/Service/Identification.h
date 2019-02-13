@@ -43,8 +43,8 @@ class Identification
   //                       data members
   // -------------------------------------------------------------
   private:
-    int finalstate_;
-    int initialstate_;
+    MAint32 finalstate_;
+    MAint32 initialstate_;
     MCconfig mcConfig_;
     RECconfig recConfig_;
 
@@ -122,60 +122,60 @@ class Identification
   }
 
   /// Is hadronic ?
-  inline bool IsHadronic(const RecParticleFormat* part) const
+  inline MAbool IsHadronic(const RecParticleFormat* part) const
   {
     if (dynamic_cast<const RecJetFormat*>(part)==0) return false;
     else return true;
   }
 
   /// Is invisible ?
-  inline bool IsInvisible(const RecParticleFormat* part) const
+  inline MAbool IsInvisible(const RecParticleFormat* part) const
   {
     return false;
   }
 
-  inline bool IsHadronic(const RecParticleFormat& part) const
+  inline MAbool IsHadronic(const RecParticleFormat& part) const
   {
     return IsHadronic(&part);
   }
 
   /// Is invisible ?
-  inline bool IsInvisible(const RecParticleFormat& part) const
+  inline MAbool IsInvisible(const RecParticleFormat& part) const
   {
     return IsInvisible(&part);
   }
 
 
   /// Is hadronic ?
-  inline bool IsHadronic(const MCParticleFormat& part) const
+  inline MAbool IsHadronic(const MCParticleFormat& part) const
   {
     std::set<MAint32>::iterator found = mcConfig_.hadronic_ids_.find(part.pdgid());
     if (found==mcConfig_.hadronic_ids_.end()) return false; else return true;
   }
 
   /// Is hadronic ?
-  inline bool IsHadronic(MAint32 pdgid) const
+  inline MAbool IsHadronic(MAint32 pdgid) const
   {
     std::set<MAint32>::iterator found = mcConfig_.hadronic_ids_.find(pdgid);
     if (found==mcConfig_.hadronic_ids_.end()) return false; else return true;
   }
 
   /// Is hadronic ?
-  inline bool IsHadronic(const MCParticleFormat* part) const
+  inline MAbool IsHadronic(const MCParticleFormat* part) const
   {
     if (part==0) return false;
     return IsHadronic(*part);
   }
 
   /// Is invisible ?
-  inline bool IsInvisible(const MCParticleFormat& part) const
+  inline MAbool IsInvisible(const MCParticleFormat& part) const
   {
     std::set<MAint32>::iterator found = mcConfig_.invisible_ids_.find(part.pdgid());
     if (found==mcConfig_.invisible_ids_.end()) return false; else return true;
   }
 
   /// Is invisible ?
-  inline bool IsInvisible(const MCParticleFormat* part) const
+  inline MAbool IsInvisible(const MCParticleFormat* part) const
   {
     if (part==0) return false;
     return IsInvisible(*part);
@@ -240,7 +240,7 @@ class Identification
     if (recConfig_.deltaRalgo_)
     {
       // Loop over jets
-      for (unsigned int i=0;i<event->jets().size();i++)
+      for (MAuint32 i=0;i<event->jets().size();i++)
       {
         if ( muon->dr(event->jets()[i]) < recConfig_.deltaR_ ) return false;
       }

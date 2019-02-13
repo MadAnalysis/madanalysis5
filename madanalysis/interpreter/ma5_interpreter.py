@@ -45,6 +45,8 @@ from madanalysis.IOinterface.multiparticle_reader import MultiparticleReader
 from madanalysis.system.checkup                   import CheckUp
 from madanalysis.install.install_manager          import InstallManager
 from madanalysis.system.user_info                 import UserInfo
+from madanalysis.system.session_info              import SessionInfo
+from madanalysis.system.architecture_info         import ArchitectureInfo
 
 
 class InvalidPython(Exception):
@@ -400,9 +402,24 @@ class MA5Interpreter(Interpreter):
                 self.logger.error('Impossible to install the PADForMA5tune.')
                 return False
 
-        # Compilation
+        # Reinitialization of main
+        # Remember of FR/MG2018: fastjet installation bug
+        tmp1 = self.main.archi_info.ma5dir 
+        tmp2 = self.main.archi_info.ma5_version
+        tmp3 = self.main.archi_info.ma5_date
+        #
+        self.main.archi_info   = ArchitectureInfo()
+        self.main.session_info = SessionInfo()
+        #
+        self.main.archi_info.ma5dir      = tmp1
+        self.main.archi_info.ma5_version = tmp2
+        self.main.archi_info.ma5_date    = tmp3
+
+        # Detection
         if not self.main.CheckConfig(debug=False):
             raise MA5Configuration('Issue with the configuration')
+
+        # Building sampleanalyzer
         self.compile()
 
         # restoring the log level

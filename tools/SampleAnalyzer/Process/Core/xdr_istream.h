@@ -66,7 +66,7 @@ class xdr_istream
   }
 
   /// Returns if end of file
-  bool eof()
+  MAbool eof()
   { return (sb_->sgetc()==EOF); }
 
   /// Overloading operator >> for simple types

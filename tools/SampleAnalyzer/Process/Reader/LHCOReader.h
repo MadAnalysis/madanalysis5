@@ -41,9 +41,9 @@ class LHCOReader : public ReaderTextBase
   // -------------------------------------------------------------
  protected:
 
-  bool saved_;
-  bool firstevent_;
-  bool EndOfFile_;
+  MAbool saved_;
+  MAbool firstevent_;
+  MAbool EndOfFile_;
   std::string savedline_;
 
 
@@ -61,16 +61,16 @@ class LHCOReader : public ReaderTextBase
   { }
 
   //! Read the header
-  virtual bool ReadHeader(SampleFormat& mySample);
+  virtual MAbool ReadHeader(SampleFormat& mySample);
 
   //! Finalize the header
-  virtual bool FinalizeHeader(SampleFormat& mySample);
+  virtual MAbool FinalizeHeader(SampleFormat& mySample);
 
   //! Read the event
   virtual StatusCode::Type ReadEvent(EventFormat& myEvent, SampleFormat& mySample);
 
   //! Finalize the event
-  virtual bool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent);
+  virtual MAbool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent);
 
 
  private:

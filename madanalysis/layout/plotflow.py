@@ -201,7 +201,7 @@ class PlotFlow:
             if histo.__class__.__name__!='HistogramLogX':
                 logxhisto = False
                 break
-            
+
         # Stacking or superimposing histos ?
         stackmode = False
         if ref.stack==StackingMethodType.STACK or \
@@ -552,7 +552,7 @@ class PlotFlow:
             if histo.__class__.__name__!='HistogramLogX':
                 logxhisto = False
                 break
-            
+
         # Stacking or superimposing histos ?
         stackmode = False
         if ref.stack==StackingMethodType.STACK or \
@@ -618,12 +618,10 @@ class PlotFlow:
                 outputPy.write(',')
             outputPy.write(str(histos[0].GetBinMean(bin)))
         outputPy.write('])\n\n')
-        
+
         # Loop over datasets and histos
         ntot = 0
         for ind in range(0,len(histos)):
-
-            # Ntot
 
             # Creating a new histo
             histoname='y'+histos[ind].name+'_'+str(ind)
@@ -755,6 +753,11 @@ class PlotFlow:
                 linecolor=self.color
                 self.color += 1
 
+            # linecolor
+            if self.main.datasets[ind].linecolor!=ColorType.AUTO:
+                linecolor=ColorType.convert2root( \
+                          self.main.datasets[ind].linecolor,\
+                          self.main.datasets[ind].lineshade)
             # lineStyle
             linestyle=LineStyleType.convert2code(self.main.datasets[ind].linestyle)
 

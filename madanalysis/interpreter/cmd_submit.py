@@ -425,7 +425,7 @@ class CmdSubmit(CmdBase):
                 return False
 
         # Edit & check the delphes or recasting cards
-        if self.main.fastsim.package in ["delphes","delphesMA5tune"]:
+        if self.main.fastsim.package in ["delphes","delphesMA5tune"] and not self.main.recasting.status=='on':
             delphesCheck = DelphesCardChecker(dirname,self.main)
             if not delphesCheck.checkPresenceCard():
                 self.logger.error("job submission aborted.")

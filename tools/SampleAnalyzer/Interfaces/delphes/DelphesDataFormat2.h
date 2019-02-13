@@ -33,6 +33,9 @@
 // STL headers
 #include <iostream>
 
+// SampleAnalyzer headers
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
+
 
 namespace MA5
 {
@@ -56,7 +59,7 @@ struct DelphesDataFormat2
   TClonesArray* EFlowNeutral_;
 
    // Switch for MA5card
-  bool delphesMA5card_;
+  MAbool delphesMA5card_;
 
   /// Constructor without arguments
   DelphesDataFormat2();

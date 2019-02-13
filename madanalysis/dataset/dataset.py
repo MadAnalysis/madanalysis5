@@ -59,7 +59,7 @@ class Dataset:
         self.weighted_events   = True
         self.measured_global   = SampleInfo() 
         self.measured_detail   = []
-        
+
     def __len__(self):
         return len(self.filenames)
 
@@ -237,7 +237,7 @@ class Dataset:
                 return
 
         #weight
-        elif variable == "weight" or variable == "xsection":
+        elif variable in ["weight", "xsection"]:
             try:
                 tmp = float(value)
             except:
@@ -304,7 +304,7 @@ class Dataset:
 
     def user_DisplayParameter(self,parameter):
         if parameter=="weight":
-            logging.getLogger('MA5').info("   User-imposed weight of the set = "+str(self.weight))
+            logging.getLogger('MA5').info("   User-imposed weight value for the set = "+str(self.weight))
         elif parameter=="xsection":
             logging.getLogger('MA5').info("   User-imposed cross section = "+str(self.xsection))
         elif parameter=="type":

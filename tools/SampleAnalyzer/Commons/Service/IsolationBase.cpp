@@ -35,14 +35,14 @@ using namespace MA5;
 /// -----------------------------------------------
 MAfloat64 IsolationBase::sumPT(const RecLeptonFormat* part, 
                               const std::vector<RecTrackFormat>& tracks,
-                              const double& DR, 
-                              double PTmin) const
+                              const MAfloat64& DR, 
+                              MAfloat64 PTmin) const
 {
-  double sumPT=0.;
-  unsigned int counter=0;
+  MAfloat64 sumPT=0.;
+  MAuint32 counter=0;
 
   // Loop over the towers
-  for (unsigned int i=0;i<tracks.size();i++)
+  for (MAuint32 i=0;i<tracks.size();i++)
   {
     const RecTrackFormat& track = tracks[i];
 
@@ -70,14 +70,14 @@ MAfloat64 IsolationBase::sumPT(const RecLeptonFormat* part,
 /// -----------------------------------------------
 MAfloat64 IsolationBase::sumPT(const RecLeptonFormat* part, 
                               const std::vector<RecTowerFormat>& towers,
-                              const double& DR, 
-                              double PTmin) const
+                              const MAfloat64& DR, 
+                              MAfloat64 PTmin) const
 {
-  double sumPT=0.;
-  unsigned int counter=0;
+  MAfloat64 sumPT=0.;
+  MAuint32 counter=0;
 
   // Loop over the tracks
-  for (unsigned int i=0;i<towers.size();i++)
+  for (MAuint32 i=0;i<towers.size();i++)
   {
     const RecTowerFormat& tower = towers[i];
 
@@ -102,14 +102,14 @@ MAfloat64 IsolationBase::sumPT(const RecLeptonFormat* part,
 /// -----------------------------------------------
 MAfloat64 IsolationBase::sumPT(const RecLeptonFormat* part, 
                               const std::vector<RecParticleFormat>& towers,
-                              const double& DR, 
-                              double PTmin) const
+                              const MAfloat64& DR, 
+                              MAfloat64 PTmin) const
 {
-  double sumPT=0.;
-  unsigned int counter=0;
+  MAfloat64 sumPT=0.;
+  MAuint32 counter=0;
 
   // Loop over the tracks
-  for (unsigned int i=0;i<towers.size();i++)
+  for (MAuint32 i=0;i<towers.size();i++)
   {
     const RecParticleFormat& tower = towers[i];
 
@@ -134,14 +134,14 @@ MAfloat64 IsolationBase::sumPT(const RecLeptonFormat* part,
 /// -----------------------------------------------
 MAfloat64 IsolationBase::sumPT(const RecPhotonFormat* part, 
                               const std::vector<RecTrackFormat>& tracks,
-                              const double& DR, 
-                              double PTmin) const
+                              const MAfloat64& DR, 
+                              MAfloat64 PTmin) const
 {
-  double sumPT=0.;
-  unsigned int counter=0;
+  MAfloat64 sumPT=0.;
+  MAuint32 counter=0;
 
   // Loop over the towers
-  for (unsigned int i=0;i<tracks.size();i++)
+  for (MAuint32 i=0;i<tracks.size();i++)
   {
     const RecTrackFormat& track = tracks[i];
 
@@ -166,14 +166,14 @@ MAfloat64 IsolationBase::sumPT(const RecPhotonFormat* part,
 /// -----------------------------------------------
 MAfloat64 IsolationBase::sumPT(const RecPhotonFormat* part, 
                          const std::vector<RecTowerFormat>& towers,
-                         const double& DR, 
-                         double PTmin) const
+                         const MAfloat64& DR, 
+                         MAfloat64 PTmin) const
 {
-  double sumPT=0.;
-  unsigned int counter=0;
+  MAfloat64 sumPT=0.;
+  MAuint32 counter=0;
 
   // Loop over the tracks
-  for (unsigned int i=0;i<towers.size();i++)
+  for (MAuint32 i=0;i<towers.size();i++)
   {
     const RecTowerFormat& tower = towers[i];
 
@@ -198,14 +198,14 @@ MAfloat64 IsolationBase::sumPT(const RecPhotonFormat* part,
 /// -----------------------------------------------
 MAfloat64 IsolationBase::sumPT(const RecPhotonFormat* part, 
                          const std::vector<RecParticleFormat>& towers,
-                         const double& DR, 
-                         double PTmin) const
+                         const MAfloat64& DR, 
+                         MAfloat64 PTmin) const
 {
-  double sumPT=0.;
-  unsigned int counter=0;
+  MAfloat64 sumPT=0.;
+  MAuint32 counter=0;
 
   // Loop over the tracks
-  for (unsigned int i=0;i<towers.size();i++)
+  for (MAuint32 i=0;i<towers.size();i++)
   {
     const RecParticleFormat& tower = towers[i];
 

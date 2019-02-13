@@ -22,15 +22,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// SampleAnalyzer headers for merging plots (requires fastjet)
 #ifdef FASTJET_USE
-  // SampleAnalyzer headers
   #include "SampleAnalyzer/Process/Analyzer/MergingPlots.h"
-
 #endif
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
+
 
 using namespace MA5;
 
@@ -49,7 +49,7 @@ AnalyzerBase* AnalyzerManager::ChoiceAnalyzer()
        << Objects_.size()-1 << ") : "
        << endmsg;
   std::cout << "answer: ";
-  unsigned int n=0;
+  MAuint32 n=0;
   std::cin >> n;
 
   // Check the choice

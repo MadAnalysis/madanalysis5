@@ -33,6 +33,14 @@
 # fastjet_veto     = 0 # 0=No, 1=Yes
 # fastjet_bin_path = /home/fastjet/build/bin/
 
+# -----PAD-----
+# pad_veto = 0 # 0=No, 1=Yes
+# pad_build_path = /home/PAD/build/
+
+# -----PADForMA5Tune-----
+# padma5_veto = 0 # 0=No, 1=Yes
+# padma5_build_path = /home/PADForMA5tune/build/
+
 # -----PDFLATEX-----
 # pdflatex_veto = 0 # 0=No, 1=Yes
 
@@ -41,3 +49,4 @@
 
 # -----SCIPY-----
 # scipy_veto = 0 # 0=No, 1=Yes
+

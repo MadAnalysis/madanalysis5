@@ -105,11 +105,13 @@ class CmdSet(CmdBase.CmdBase):
             user_info    = UserInfo()
             user_info.ReadUserOptions(self.main.archi_info.ma5dir+'/madanalysis/input/installation_options.dat')
             checker = ConfigChecker(self.main.archi_info, user_info, self.main.session_info, self.main.script, False)
-            hasdelphes = checker.checkDelphes(True)
-            hasMA5tune = checker.checkDelphesMA5tune(True)
-            hasPAD     = checker.checkPAD()
-            hasPADtune = checker.checkPADForMA5tune()
-            self.main.recasting.user_SetParameter("status",args[2],self.main.mode,self.main.archi_info.has_root,hasdelphes,hasMA5tune,self.main.datasets, hasPAD,hasPADtune)
+            bkp_delphes = self.main.archi_info.has_delphes
+            bkp_ma5tune = self.main.archi_info.has_delphesMA5tune
+            self.main.archi_info.has_delphes = checker.checkDelphes(True)
+            self.main.archi_info.has_delphesMA5tune = checker.checkDelphesMA5tune(True)
+            self.main.recasting.user_SetParameter("status",args[2],self.main.mode,self.main.archi_info,self.main.session_info, self.main.datasets)
+            self.main.archi_info.has_delphes = bkp_delphes
+            self.main.archi_info.has_delphesMA5tune = bkp_ma5tune
             if args[2]=='on' and self.main.fastsim.package!='none':
                 logging.getLogger('MA5').warning("Fastsim package switched off and internally handled")
                 self.main.fastsim.package="none"
@@ -140,9 +142,13 @@ class CmdSet(CmdBase.CmdBase):
             user_info    = UserInfo()
             user_info.ReadUserOptions(self.main.archi_info.ma5dir+'/madanalysis/input/installation_options.dat')
             checker = ConfigChecker(self.main.archi_info, user_info, self.main.session_info, self.main.script, False)
-            hasdelphes = checker.checkDelphes(True)
-            hasMA5tune = checker.checkDelphesMA5tune(True)
-            self.main.fastsim.user_SetParameter(objs[2],args[2],self.main.datasets,self.main.mode,self.main.archi_info.has_fastjet,hasdelphes,hasMA5tune) 
+            bkp_delphes = self.main.archi_info.has_delphes
+            bkp_ma5tune = self.main.archi_info.has_delphesMA5tune
+            self.main.archi_info.has_delphes = checker.checkDelphes(True)
+            self.main.archi_info.has_delphesMA5tune = checker.checkDelphesMA5tune(True)
+            self.main.fastsim.user_SetParameter(objs[2],args[2],self.main.datasets,self.main.mode,self.main.archi_info) 
+            self.main.archi_info.has_delphes = bkp_delphes
+            self.main.archi_info.has_delphesMA5tune = bkp_ma5tune
             if objs[2]=='package' and args[2] in ['fastjet', 'delphes', 'delphesMA5tune'] and self.main.recasting.status=='on':
                 logging.getLogger('MA5').warning("Recasting mode switched off")
                 self.main.recasting.status ="off"
@@ -150,11 +156,13 @@ class CmdSet(CmdBase.CmdBase):
             user_info    = UserInfo()
             user_info.ReadUserOptions(self.main.archi_info.ma5dir+'/madanalysis/input/installation_options.dat')
             checker = ConfigChecker(self.main.archi_info, user_info, self.main.session_info, self.main.script, False)
-            hasdelphes = checker.checkDelphes(True)
-            hasMA5tune = checker.checkDelphesMA5tune(True)
-            hasPAD     = checker.checkPAD()
-            hasPADtune = checker.checkPADForMA5tune()
-            self.main.recasting.user_SetParameter(objs[2],args[2],self.main.mode,self.main.archi_info.has_root,hasdelphes,hasMA5tune,self.main.datasets, hasPAD,hasPADtune)
+            bkp_delphes = self.main.archi_info.has_delphes
+            bkp_ma5tune = self.main.archi_info.has_delphesMA5tune
+            self.main.archi_info.has_delphes = checker.checkDelphes(True)
+            self.main.archi_info.has_delphesMA5tune = checker.checkDelphesMA5tune(True)
+            self.main.recasting.user_SetParameter(objs[2],args[2],self.main.mode,self.main.archi_info,self.main.session_info, self.main.datasets)            
+            self.main.archi_info.has_delphes = bkp_delphes
+            self.main.archi_info.has_delphesMA5tune = bkp_ma5tune
         else:
             logging.getLogger('MA5').error("syntax error with the command 'set'.")
             self.help()

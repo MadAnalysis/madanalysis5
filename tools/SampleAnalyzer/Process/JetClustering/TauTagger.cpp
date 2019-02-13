@@ -39,8 +39,8 @@ void TauTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
   // Performing mis-id
   if (doMisefficiency_)
   {
-    std::vector<unsigned int> toRemove;
-    for (unsigned int i=0;i<myEvent.rec()->jets().size();i++)
+    std::vector<MAuint32> toRemove;
+    for (MAuint32 i=0;i<myEvent.rec()->jets().size();i++)
     {
       // keeping only light jets
       if (myEvent.rec()->jets()[i].true_ctag_ || 
@@ -54,7 +54,7 @@ void TauTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
         toRemove.push_back(i);
       }
     }
-    for (unsigned int i =0;i<toRemove.size();i++)
+    for (MAuint32 i =0;i<toRemove.size();i++)
     {
       myEvent.rec()->jets().erase(myEvent.rec()->jets().begin()
                                   + toRemove[i]);
@@ -67,13 +67,13 @@ void TauTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
 {
   std::vector<RecJetFormat*> Candidates;
 
-  for (unsigned int i=0;i<myEvent.rec()->jets().size();i++)
+  for (MAuint32 i=0;i<myEvent.rec()->jets().size();i++)
   {
     if (myEvent.rec()->jets()[i].ntracks()!=1 && myEvent.rec()->jets()[i].ntracks()!=3) continue;
 
     MAbool tag = false;
     // Loop on the jets constituents
-    for (unsigned int j=0;j<myEvent.rec()->jets()[i].Constituents_.size();j++)
+    for (MAuint32 j=0;j<myEvent.rec()->jets()[i].Constituents_.size();j++)
     {
       // Searching for a tau in the history
       MAint32 N = myEvent.rec()->jets()[i].Constituents_[j];
@@ -137,15 +137,15 @@ void TauTagger::Method2 (SampleFormat& mySample, EventFormat& myEvent)
 
   sort(Candidates.begin(),Candidates.end());
 
-  for (unsigned int i=Candidates.size();i>0;i--)
+  for (MAuint32 i=Candidates.size();i>0;i--)
   {
     RecTauFormat* myTau = myEvent.rec()->GetNewTau();
     Jet2Tau(Candidates[i-1], myTau, myEvent);
     // BENJ PB COMPIL:   myEvent.rec()->jets().erase((std::vector<RecJetFormat>::iterator) Candidates[i-1]);
     
     // Remove the tau-identified jet from the list
-    unsigned int pos=myEvent.rec()->jets().size();
-    for (unsigned int ind=0;ind<myEvent.rec()->jets().size();ind++)
+    MAuint32 pos=myEvent.rec()->jets().size();
+    for (MAuint32 ind=0;ind<myEvent.rec()->jets().size();ind++)
     {
       if (&(myEvent.rec()->jets()[ind])==Candidates[i-1]) {pos=ind;break;}
     }
@@ -160,12 +160,12 @@ void TauTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
   std::vector<RecJetFormat*> Candidates;
 
   // Jets preselection using method 2
-  for (unsigned int i=0;i<myEvent.rec()->jets().size();i++)
+  for (MAuint32 i=0;i<myEvent.rec()->jets().size();i++)
   {
     if (myEvent.rec()->jets()[i].ntracks()!=1 && myEvent.rec()->jets()[i].ntracks()!=3) continue;
 
     MAbool tag = false;
-    for (unsigned int j=0;j<myEvent.rec()->jets()[i].Constituents_.size();j++)
+    for (MAuint32 j=0;j<myEvent.rec()->jets()[i].Constituents_.size();j++)
     {
       MAint32 N = myEvent.rec()->jets()[i].Constituents_[j];
       MCParticleFormat* particle = & myEvent.mc()->particles()[N];
@@ -200,7 +200,7 @@ void TauTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
   std::vector<RecJetFormat*> Taus;
 
   // tau-tagging using method 1
-  for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
+  for (MAuint32 i=0;i<myEvent.mc()->particles().size();i++)
   {
     if (std::abs(myEvent.mc()->particles()[i].pdgid())!=15) continue;
 
@@ -209,7 +209,7 @@ void TauTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
     MAfloat64 DeltaRmax = DeltaRmax_; 
     MAbool tag = false;
 
-    for (unsigned int j=Candidates.size();j>0;j--)
+    for (MAuint32 j=Candidates.size();j>0;j--)
     {
       MAfloat32 DeltaR = myEvent.mc()->particles()[i].dr(Candidates[j-1]);
 
@@ -229,15 +229,15 @@ void TauTagger::Method3 (SampleFormat& mySample, EventFormat& myEvent)
 
   sort(Taus.begin(),Taus.end());
 
-  for (unsigned int j=Taus.size();j>0;j--)
+  for (MAuint32 j=Taus.size();j>0;j--)
   {
     RecTauFormat* myTau = myEvent.rec()->GetNewTau();
     Jet2Tau(Taus[j-1], myTau, myEvent);
     // PB Benj compil:  myEvent.rec()->jets().erase((std::vector<RecJetFormat>::iterator) Taus[j-1]);
 
     // Remove the tau-identified jet from the list
-    unsigned int pos=myEvent.rec()->jets().size();
-    for (unsigned int ind=0;ind<myEvent.rec()->jets().size();ind++)
+    MAuint32 pos=myEvent.rec()->jets().size();
+    for (MAuint32 ind=0;ind<myEvent.rec()->jets().size();ind++)
     {
       if (&(myEvent.rec()->jets()[ind])==Taus[j-1]) {pos=ind;break;}
     }
@@ -261,7 +261,7 @@ void TauTagger::Jet2Tau (RecJetFormat* myJet, RecTauFormat* myTau, EventFormat& 
 
   MAint32 charge = 0;
 
-  for (unsigned int i=0;i<myJet->Constituents_.size();i++)
+  for (MAuint32 i=0;i<myJet->Constituents_.size();i++)
   {
     charge += PDG->GetCharge(myEvent.mc()->particles()[myJet->Constituents_[i]].pdgid());
   }
@@ -271,7 +271,7 @@ void TauTagger::Jet2Tau (RecJetFormat* myJet, RecTauFormat* myTau, EventFormat& 
 }
 
 
-bool TauTagger::SetParameter(const std::string& key, 
+MAbool TauTagger::SetParameter(const std::string& key, 
                              const std::string& value, 
                              std::string header)
 {

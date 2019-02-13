@@ -82,16 +82,16 @@ class DelphesTreeReader : public TreeReaderBase
   { }
 
   /// Initialize
-  virtual bool Initialize();
+  virtual MAbool Initialize();
 
   /// Read the header
-  virtual bool ReadHeader(SampleFormat& mySample);
+  virtual MAbool ReadHeader(SampleFormat& mySample);
 
   /// Read the event
   virtual StatusCode::Type ReadEvent(EventFormat& myEvent, SampleFormat& mySample);
 
   /// Finalize the event
-  virtual bool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent);
+  virtual MAbool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent);
 
 
  private:

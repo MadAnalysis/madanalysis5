@@ -24,13 +24,14 @@
 
 // STL headers
 #include <fstream>
+#include <algorithm>
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Interfaces/delphesMA5tune/DetectorDelphesMA5tune.h"
 #include "SampleAnalyzer/Commons/Service/DisplayService.h"
+#include "SampleAnalyzer/Commons/Service/ConvertService.h"
 
 // ROOT headers
-#include <TError.h>
 #include <TROOT.h>
 #include <TObjArray.h>
 #include <TFile.h>
@@ -49,8 +50,11 @@
 
 using namespace MA5;
 
-bool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const std::map<std::string,std::string>& options)
+
+MAbool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const std::map<std::string,std::string>& options)
 { 
+  nprocesses_=0;
+
   // Save the name of the configuration file
   configFile_ = configFile;
   rootfile_="";
@@ -73,7 +77,7 @@ bool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const std
     // output
     if (key=="output")
     {
-      unsigned int tmp=0;
+      MAuint32 tmp=0;
       std::stringstream str;
       str << it->second;
       str >> tmp;
@@ -99,10 +103,6 @@ bool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const std
     }
   }
 
-  // Configure inputs
-  confReader_ = new ExRootConfReader;
-  confReader_->ReadFile(configFile_.c_str());
-
   // Configure outputs
   std::string ofname;
   if (output_)
@@ -112,6 +112,30 @@ bool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const std
   }
   else ofname = outputdir_+"/tmp.root";
   outputFile_ = TFile::Open(ofname.c_str(), "RECREATE");
+
+  // Configure inputs
+  confReader_ = new ExRootConfReader;
+  confReader_->ReadFile(configFile_.c_str());
+
+  // Studying configuration part for TreeWriter module
+  ExRootConfParam param = confReader_->GetParam("TreeWriter::Branch");
+  if (param.GetSize()==0) 
+  {
+    ERROR << "Problem with Delphes card: no 'add Branch' line in TreeWriter module" << endmsg;
+    return false;
+  }
+  if (param.GetSize()%3!=0) 
+  {
+    ERROR << "Problem with Delphes card: problem with one or several 'add Branch' lines" << endmsg;
+    return false;
+  }
+
+  for(MAuint32 i=0; i<static_cast<MAuint32>(param.GetSize())/3; i++)
+  {
+    std::string branchInputArray = param[i*3+0].GetString();
+    std::string branchName       = param[i*3+1].GetString();
+    table_[branchName]=branchInputArray;
+  }
 
   treeWriter_ = new ExRootTreeWriter(outputFile_, "DelphesMA5tune");
   branchEvent_ = treeWriter_->NewBranch("Event", LHEFEvent::Class());
@@ -162,7 +186,7 @@ std::string DetectorDelphesMA5tune::GetParameters()
 
 
 /// Jet clustering
-bool DetectorDelphesMA5tune::Execute(SampleFormat& mySample, EventFormat& myEvent)
+MAbool DetectorDelphesMA5tune::Execute(SampleFormat& mySample, EventFormat& myEvent)
 {
   nprocesses_++;
 
@@ -185,6 +209,8 @@ bool DetectorDelphesMA5tune::Execute(SampleFormat& mySample, EventFormat& myEven
 
   // Reset
   treeWriter_->Clear();
+  modularDelphes_->Clear();
+  // Second Reset (seems necessary)
   modularDelphes_->Clear();
   
   return true;
@@ -228,13 +254,13 @@ void DetectorDelphesMA5tune::TranslateMA5toDELPHES(SampleFormat& mySample, Event
     gentable[part]=i;
   }
 
-  for (unsigned int i=0;i<myEvent.mc()->particles().size();i++)
+  for (MAuint32 i=0;i<myEvent.mc()->particles().size();i++)
   {
     const MCParticleFormat* part = &(myEvent.mc()->particles()[i]);
     Candidate* candidate = factory_->NewCandidate();
 
     candidate->PID = part->pdgid();
-    unsigned int pdgCode=std::abs(part->pdgid());
+    MAuint32 pdgCode=std::abs(part->pdgid());
 
     candidate->Status = part->statuscode();
     candidate->Momentum.SetPxPyPzE(part->px(), part->py(), part->pz(), part->e());
@@ -298,7 +324,7 @@ void DetectorDelphesMA5tune::TranslateMA5toDELPHES(SampleFormat& mySample, Event
       continue;
     }
 
-    candidate->Charge = pdgParticle ? int(pdgParticle->Charge()/3.0) : -999;
+    candidate->Charge = pdgParticle ? MAint32(pdgParticle->Charge()/3.0) : -999;
     candidate->Mass = pdgParticle ? pdgParticle->Mass() : -999.9;
     allParticleOutputArray_->Add(candidate);
 
@@ -326,7 +352,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
   if (jetsArray==0) {if (!first_) WARNING << "no jets collection found" << endmsg;}
   else
   {
-    for (unsigned int i=0;i<static_cast<MAuint32>(jetsArray->GetEntries());i++)
+    for (MAuint32 i=0;i<static_cast<MAuint32>(jetsArray->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(jetsArray->At(i));
       if (cand==0) 
@@ -337,10 +363,10 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
       if (cand->TauTag==1)
       {
         RecTauFormat* tau = myEvent.rec()->GetNewTau();
-        double px = cand->Momentum.Px();
-        double py = cand->Momentum.Py();
-        double pz = cand->Momentum.Pz();
-        double e  = cand->Momentum.E();
+        MAfloat64 px = cand->Momentum.Px();
+        MAfloat64 py = cand->Momentum.Py();
+        MAfloat64 pz = cand->Momentum.Pz();
+        MAfloat64 e  = cand->Momentum.E();
         tau->momentum_.SetPxPyPzE(px,py,pz,e);
         if (cand->Charge>0) tau->charge_=true; else tau->charge_=false;
 
@@ -350,10 +376,10 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
       else
       {
         RecJetFormat* jet = myEvent.rec()->GetNewJet();
-        double px = cand->Momentum.Px();
-        double py = cand->Momentum.Py();
-        double pz = cand->Momentum.Pz();
-        double e  = cand->Momentum.E();
+        MAfloat64 px = cand->Momentum.Px();
+        MAfloat64 py = cand->Momentum.Py();
+        MAfloat64 pz = cand->Momentum.Pz();
+        MAfloat64 e  = cand->Momentum.E();
         jet->momentum_.SetPxPyPzE(px,py,pz,e);
         jet->btag_ = cand->BTag;
         if (cand->Eem!=0) jet->HEoverEE_ = cand->Ehad/cand->Eem; else jet->HEoverEE_ = 999.;
@@ -367,7 +393,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
   if (genjetsArray==0) {if (!first_) WARNING << "no genjets collection found" << endmsg;}
   else
   {
-    for (unsigned int i=0;i<static_cast<MAuint32>(genjetsArray->GetEntries());i++)
+    for (MAuint32 i=0;i<static_cast<MAuint32>(genjetsArray->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(genjetsArray->At(i));
       if (cand==0) 
@@ -376,10 +402,10 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
         continue;
       }
       RecJetFormat* genjet = myEvent.rec()->GetNewGenJet();
-      double px = cand->Momentum.Px();
-      double py = cand->Momentum.Py();
-      double pz = cand->Momentum.Pz();
-      double e  = cand->Momentum.E();
+      MAfloat64 px = cand->Momentum.Px();
+      MAfloat64 py = cand->Momentum.Py();
+      MAfloat64 pz = cand->Momentum.Pz();
+      MAfloat64 e  = cand->Momentum.E();
       genjet->momentum_.SetPxPyPzE(px,py,pz,e);
       genjet->btag_ = cand->BTag;
     }
@@ -391,7 +417,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
   if (muonArray==0) {if (!first_) WARNING << "no muons collection found" << endmsg;}
   else
   {
-    for (unsigned int i=0;i<static_cast<MAuint32>(muonArray->GetEntries());i++)
+    for (MAuint32 i=0;i<static_cast<MAuint32>(muonArray->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(muonArray->At(i));
       if (cand==0) 
@@ -400,10 +426,10 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
         continue;
       }
       RecLeptonFormat* muon = myEvent.rec()->GetNewMuon();
-      double px = cand->Momentum.Px();
-      double py = cand->Momentum.Py();
-      double pz = cand->Momentum.Pz();
-      double e  = cand->Momentum.E();
+      MAfloat64 px = cand->Momentum.Px();
+      MAfloat64 py = cand->Momentum.Py();
+      MAfloat64 pz = cand->Momentum.Pz();
+      MAfloat64 e  = cand->Momentum.E();
       muon->momentum_.SetPxPyPzE(px,py,pz,e);
       muon->SetCharge(cand->Charge);
     }
@@ -415,7 +441,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
   if (elecArray==0) {if (!first_) WARNING << "no elecs collection found" << endmsg;}
   else
   {
-    for (unsigned int i=0;i<static_cast<MAuint32>(elecArray->GetEntries());i++)
+    for (MAuint32 i=0;i<static_cast<MAuint32>(elecArray->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(elecArray->At(i));
       if (cand==0) 
@@ -424,10 +450,10 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
         continue;
       }
       RecLeptonFormat* elec = myEvent.rec()->GetNewElectron();
-      double px = cand->Momentum.Px();
-      double py = cand->Momentum.Py();
-      double pz = cand->Momentum.Pz();
-      double e  = cand->Momentum.E();
+      MAfloat64 px = cand->Momentum.Px();
+      MAfloat64 py = cand->Momentum.Py();
+      MAfloat64 pz = cand->Momentum.Pz();
+      MAfloat64 e  = cand->Momentum.E();
       elec->momentum_.SetPxPyPzE(px,py,pz,e);
       elec->SetCharge(cand->Charge);
     }
@@ -439,7 +465,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
   if (trackArray==0) {if (!first_) WARNING << "no tracks collection found" << endmsg;}
   else
   {
-    for (unsigned int i=0;i<static_cast<MAuint32>(trackArray->GetEntries());i++)
+    for (MAuint32 i=0;i<static_cast<MAuint32>(trackArray->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(trackArray->At(i));
       if (cand==0) 
@@ -450,10 +476,10 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
       RecTrackFormat* track = myEvent.rec()->GetNewTrack();
       track->pdgid_ = cand->PID;
       if (cand->Charge>0) track->charge_=true; else track->charge_=false;
-      double px = cand->Momentum.Px();
-      double py = cand->Momentum.Py();
-      double pz = cand->Momentum.Pz();
-      double e  = cand->Momentum.E();
+      MAfloat64 px = cand->Momentum.Px();
+      MAfloat64 py = cand->Momentum.Py();
+      MAfloat64 pz = cand->Momentum.Pz();
+      MAfloat64 e  = cand->Momentum.E();
       track->momentum_.SetPxPyPzE(px,py,pz,e);
       track->etaOuter_=cand->Position.Eta();
       track->phiOuter_=cand->Position.Phi();
@@ -473,9 +499,9 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
     }
     else
     {
-      double pt = metCand->Momentum.Pt();
-      double px = metCand->Momentum.Px();
-      double py = metCand->Momentum.Py();
+      MAfloat64 pt = metCand->Momentum.Pt();
+      MAfloat64 px = metCand->Momentum.Px();
+      MAfloat64 py = metCand->Momentum.Py();
       myEvent.rec()->MET().momentum_.SetPxPyPzE(px,py,0,pt);
     }
   }

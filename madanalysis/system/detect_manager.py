@@ -52,6 +52,12 @@ class DetectManager():
         elif package=='fastjet':
             from madanalysis.system.detect_fastjet import DetectFastjet
             checker=DetectFastjet(self.archi_info, self.user_info, self.session_info, self.debug)
+        elif package=='pad':
+            from madanalysis.system.detect_pad import DetectPAD
+            checker=DetectPAD(self.archi_info, self.user_info, self.session_info, self.debug, ma5=False)
+        elif package=='padma5':
+            from madanalysis.system.detect_pad import DetectPAD
+            checker=DetectPAD(self.archi_info, self.user_info, self.session_info, self.debug, ma5=True)
         elif package=='fastjet-contrib':
             from madanalysis.system.detect_fastjetcontrib import DetectFastjetContrib
             checker=DetectFastjetContrib(self.archi_info, self.user_info, self.session_info, self.debug)
@@ -139,6 +145,22 @@ class DetectManager():
                 # normal case
                 else:
                     self.PrintUSERDISABLED(package_name)
+                    if 'PrintDisableMessage' in methods:
+                        checker.PrintDisableMessage()
+                    return True
+
+        # 3bis. Dependencies
+        if 'AreDependenciesInstalled' in methods:
+            self.logger.debug('Are dependencies installed on the machine? ...')
+            if not checker.AreDependenciesInstalled():
+                # Should not happen because veto possible only on optional packages
+                if checker.mandatory:
+                    self.logger.error('Dependencies are missing.')
+                    self.logger.error('This package is a mandatory package: MadAnalysis 5 can not run without it.')
+                    return False
+                # normal case
+                else:
+                    self.PrintDISABLED(package_name)
                     if 'PrintDisableMessage' in methods:
                         checker.PrintDisableMessage()
                     return True

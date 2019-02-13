@@ -27,6 +27,7 @@ from madanalysis.dataset.dataset_collection             import DatasetCollection
 from madanalysis.selection.selection                    import Selection
 from madanalysis.interpreter.cmd_base                   import CmdBase
 from madanalysis.region.region_collection               import RegionCollection
+from madanalysis.tagging.tagger                         import Tagger
 from madanalysis.system.session_info                    import SessionInfo
 from madanalysis.system.architecture_info               import ArchitectureInfo
 from madanalysis.core.library_builder                   import LibraryBuilder
@@ -86,6 +87,7 @@ class Main():
         self.madgraph       = MadGraphInterface()
         self.logger         = logging.getLogger('MA5')
         self.redirectSAlogger = False
+        self.tagger         = Tagger()
 
 
     def ResetParameters(self):
@@ -432,13 +434,23 @@ class Main():
             return False
         if not checkup.CheckOptionalProcessingPackages():
             return False
+        if not checkup.SetFolder():
+            return False
+        return True
+
+
+    def CheckConfig2(self,debug=False):
+        checkup = CheckUp(self.archi_info, self.session_info, debug, self.script)
+        # Reinterpretation packages
+        if not checkup.CheckOptionalReinterpretationPackages():
+            return False
+
+        # Graphical packages
         if not checkup.CheckOptionalGraphicalPackages():
             return False
         self.AutoSetGraphicalRenderer()
-#        if not checkup.CheckGraphicalPackages():
-#            return False
-        if not checkup.SetFolder():
-            return False
+
+        # Ok
         return True
 
 

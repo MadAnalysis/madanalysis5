@@ -58,16 +58,16 @@ namespace MA5
       SpyStreamBuffer(std::streambuf* buf) : buf_(buf)
       {
         add_endl_=false;
-        // no buffering, overflow on every char
+        // no buffering, overflow on every character
         setp(0, 0);
       }
 
       /// Set ProgressBar mode
-      void SetProgressBarMode(bool status=true)
+      void SetProgressBarMode(MAbool status=true)
       { add_endl_=status; }
 
       /// Accessor to ProgressBar mode status
-      bool GetProgressBarMode() const
+      MAbool GetProgressBarMode() const
       { return add_endl_; }
 
       /// Overflow method
@@ -84,7 +84,7 @@ namespace MA5
     private:
 
       std::streambuf* buf_;
-      bool add_endl_;
+      MAbool add_endl_;
     };
 
   // -------------------------------------------------------------

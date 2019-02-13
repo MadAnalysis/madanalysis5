@@ -175,7 +175,7 @@ class ConvertService
   {
     std::string result=value;
     std::transform(value.begin(), value.end(), result.begin(),
-                   (int(*)(int)) std::tolower);
+                   (MAint32(*)(MAint32)) std::tolower);
     return result;
   }
 
@@ -184,7 +184,7 @@ class ConvertService
   {
     std::string result=value;
     std::transform(value.begin(), value.end(), result.begin(),
-                   (int(*)(int)) std::toupper);
+                   (MAint32(*)(MAint32)) std::toupper);
     return result;
   }
 

@@ -42,8 +42,8 @@ ClusterAlgoFastJet::ClusterAlgoFastJet(std::string Algo):ClusterAlgoBase(Algo)
 ClusterAlgoFastJet::~ClusterAlgoFastJet() 
 { if (JetDefinition_!=0) delete JetDefinition_; }
 
-bool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent, bool ExclusiveId,   
-                                 const std::vector<bool>& vetos,
+MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent, MAbool ExclusiveId,   
+                                 const std::vector<MAbool>& vetos,
                                  const std::set<const MCParticleFormat*> vetos2)
 {
   // Creating a container for inputs
@@ -82,7 +82,7 @@ bool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent, b
     inputs.back().set_user_index(i);
   }
 
-  /*  for (unsigned int i=0;i<inputs.size();i++)
+  /*  for (MAuint32 i=0;i<inputs.size();i++)
   {
     std::cout << "px=" << inputs[i].px() << " py=" << inputs[i].py() << " pz=" << inputs[i].pz() << " e=" << inputs[i].e() << std::endl;
     }*/
@@ -100,9 +100,9 @@ bool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent, b
   ParticleBaseFormat* MHT = myEvent.rec()->GetNewMht();
 
   // shortcut for Meff, TET & THT
-  double & TET = myEvent.rec()->TET();
-  double & THT = myEvent.rec()->THT();
-  double & Meff= myEvent.rec()->Meff();
+  MAfloat64 & TET = myEvent.rec()->TET();
+  MAfloat64 & THT = myEvent.rec()->THT();
+  MAfloat64 & Meff= myEvent.rec()->Meff();
 
   for (MAuint32 i=0;i<jets.size();i++)
   {

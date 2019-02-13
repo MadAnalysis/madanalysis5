@@ -32,6 +32,7 @@ class DetectorManager():
     def manage(self, detector):
         # initialization
         # Getting the 'already installed' flags
+        import logging
         if detector == 'delphes':
             installed     = self.main.archi_info.has_delphes
             uninstalled   = self.main.archi_info.has_delphesMA5tune

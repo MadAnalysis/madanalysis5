@@ -77,7 +77,7 @@ MAint64 gz_streambuf::tellg()
 // -----------------------------------------------------------------------------
 // Opening a gzip file
 // -----------------------------------------------------------------------------
-gz_streambuf* gz_streambuf::open( const char* name, int open_mode) 
+gz_streambuf* gz_streambuf::open( const MAchar* name, MAint32 open_mode) 
 {
   if (is_open()) return (gz_streambuf*)0;
 
@@ -88,8 +88,8 @@ gz_streambuf* gz_streambuf::open( const char* name, int open_mode)
       (  (mode & std::ios::in) && 
          (mode & std::ios::out)    )) return (gz_streambuf*)0;
 
-  char  fmode[10];
-  char* fmodeptr = fmode;
+  MAchar  fmode[10];
+  MAchar* fmodeptr = fmode;
   if ( mode & std::ios::in) *fmodeptr++ = 'r';
   else if ( mode & std::ios::out) *fmodeptr++ = 'w';
 
@@ -123,20 +123,20 @@ gz_streambuf * gz_streambuf::close()
 // -----------------------------------------------------------------------------
 // Underflow
 // -----------------------------------------------------------------------------
-int gz_streambuf::underflow()
+MAint32 gz_streambuf::underflow()
 { 
   if ( gptr() && ( gptr() < egptr()))
-    return * reinterpret_cast<unsigned char *>( gptr());
+    return * reinterpret_cast<MAuint8 *>( gptr());
 
   if ( ! (mode & std::ios::in) || ! opened)
     return EOF;
-  
-  int n_putback = gptr() - eback();
+
+  MAint32 n_putback = gptr() - eback();
   if ( n_putback > 4)
     n_putback = 4;
   memcpy( buffer + (4 - n_putback), gptr() - n_putback, n_putback);
 
-  signed int num = gzread( file->get(), buffer+4, bufferSize-4);
+  MAint32 num = gzread( file->get(), buffer+4, bufferSize-4);
   if (num <= 0) return EOF;
 
   // reset buffer pointers
@@ -145,16 +145,16 @@ int gz_streambuf::underflow()
         buffer + 4 + num);          // end of buffer
 
   // return next character
-  return * reinterpret_cast<unsigned char *>( gptr());    
+  return * reinterpret_cast<MAuint8 *>( gptr());    
 }
 
 
 // -----------------------------------------------------------------------------
 // Flush the buffer
 // -----------------------------------------------------------------------------
-int gz_streambuf::flush_buffer()
+MAint32 gz_streambuf::flush_buffer()
 {
-    int w = pptr() - pbase();
+    MAint32 w = pptr() - pbase();
     if ( gzwrite( file->get(), pbase(), w) != w) return EOF;
     pbump( -w);
     return w;
@@ -164,7 +164,7 @@ int gz_streambuf::flush_buffer()
 // -----------------------------------------------------------------------------
 // Overflow
 // -----------------------------------------------------------------------------
-int gz_streambuf::overflow( int c)
+MAint32 gz_streambuf::overflow( MAint32 c)
 {
   if ( ! ( mode & std::ios::out) || ! opened) return EOF;
   if (c != EOF) 
@@ -181,7 +181,7 @@ int gz_streambuf::overflow( int c)
 // -----------------------------------------------------------------------------
 // Synchronize the input buffer
 // -----------------------------------------------------------------------------
-int gz_streambuf::sync() 
+MAint32 gz_streambuf::sync() 
 {
   if ( pptr() && pptr() > pbase())
   {

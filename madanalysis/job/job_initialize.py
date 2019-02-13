@@ -483,7 +483,7 @@ def WriteJobInitialize(file,main):
         if item.__class__.__name__=="Histogram":
             counter+=1;
             if len(item.regions)!=len(main.regions):
-                if len(item.regions)!=1:
+                if len(item.regions)>1:
                     file.write('  std::string RNh'+str(counter)+'[]={'+\
                         (', '.join('"'+reg+'"' for reg in item.regions))+'};\n')
                     # NPID and NAPID
@@ -498,7 +498,7 @@ def WriteJobInitialize(file,main):
                     else:
                         file.write('  Manager()->AddHisto(\"' + str(counter) + '_' + item.observable.name +\
                             '\", ' + str(item.nbins)+','+ str(item.xmin)+','+ str(item.xmax)+', RNh'+ str(counter)+');\n');
-                else:
+                elif len(item.regions)==1:
                     # NPID and NAPID
                     if item.observable.name in ["NPID", "NAPID"] :
                         file.write('  Manager()->AddHistoFrequency(\"' + str(counter) + '_' + item.observable.name +\
@@ -511,6 +511,18 @@ def WriteJobInitialize(file,main):
                     else:
                         file.write('  Manager()->AddHisto(\"' + str(counter) + '_' + item.observable.name + '\", '+\
                            str(item.nbins)+','+ str(item.xmin)+','+ str(item.xmax)+', \"'+item.regions[0]+'\");\n');
+                else:
+                    # NPID and NAPID
+                    if item.observable.name in ["NPID", "NAPID"] :
+                        file.write('  Manager()->AddHistoFrequency(\"' + str(counter) + '_' + item.observable.name +');\n');
+                    # Histo with LogX
+                    elif item.logX:
+                        file.write('  Manager()->AddHistoLogX(\"' + str(counter) + '_' + item.observable.name +\
+                          '\", ' + str(item.nbins)+','+ str(item.xmin)+','+ str(item.xmax)+');\n');
+                    # Normal Histo
+                    else:
+                        file.write('  Manager()->AddHisto(\"' + str(counter) + '_' + item.observable.name + '\", '+\
+                           str(item.nbins)+','+ str(item.xmin)+','+ str(item.xmax)+');\n');
             else:
                # NPID and NAPID
                if item.observable.name in ["NPID", "NAPID"] :

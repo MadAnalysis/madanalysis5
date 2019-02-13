@@ -33,14 +33,14 @@
 using namespace MA5;
 
 /// Apply a cut
-bool RegionSelectionManager::ApplyCut(bool condition, std::string const &cut)
+MAbool RegionSelectionManager::ApplyCut(MAbool condition, std::string const &cut)
 {
   /// Skip the cut if all regions are already failing the previous cut
   if (NumberOfSurvivingRegions_==0) { return false; }
 
   /// Get the cut under consideration
   MultiRegionCounter *mycut=0;
-  for(unsigned int i=0; i<cutmanager_.GetNcuts(); i++)
+  for(MAuint32 i=0; i<cutmanager_.GetNcuts(); i++)
   {
     if(cut.compare(cutmanager_.GetCuts()[i]->GetName())==0)
     {
@@ -61,7 +61,7 @@ bool RegionSelectionManager::ApplyCut(bool condition, std::string const &cut)
 
   // Looping over all regions the cut needs to be applied
   std::vector<RegionSelection*> RegionsForThisCut = mycut->Regions();
-  for (unsigned int i=0; i<RegionsForThisCut.size(); i++)
+  for (MAuint32 i=0; i<RegionsForThisCut.size(); i++)
   {
     RegionSelection* ThisRegion = RegionsForThisCut[i];
 
@@ -84,14 +84,14 @@ bool RegionSelectionManager::ApplyCut(bool condition, std::string const &cut)
 }
 
 /// Filling an histo with a value val
-void RegionSelectionManager::FillHisto(std::string const&histname, double val)
+void RegionSelectionManager::FillHisto(std::string const&histname, MAfloat64 val)
 {
   // Current histo
   Histo *myhisto=0;
   HistoFrequency *myhistof=0;
   HistoLogX *myhistoX=0;
   // Looping over all histos
-  for(unsigned int i=0; i<plotmanager_.GetNplots(); i++)
+  for(MAuint32 i=0; i<plotmanager_.GetNplots(); i++)
   {
     if(histname.compare(plotmanager_.GetHistos()[i]->GetName())==0)
     {
@@ -155,7 +155,7 @@ void RegionSelectionManager::FillHisto(std::string const&histname, double val)
 void RegionSelectionManager::WriteHistoDefinition(SAFWriter& output)
 {
   *output.GetStream() << "<RegionSelection>" << std::endl;
-  for(unsigned int i=0; i<regions_.size();i++)
+  for(MAuint32 i=0; i<regions_.size();i++)
     regions_[i]->WriteDefinition(output);
   *output.GetStream() << "</RegionSelection>" << std::endl << std::endl;
 }

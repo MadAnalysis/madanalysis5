@@ -67,7 +67,7 @@ class CounterManager
   { }
 
   /// Initialize
-  void Initialize(const unsigned int& n)
+  void Initialize(const MAuint32& n)
   { counters_.resize(n); }
 
 
@@ -83,9 +83,9 @@ class CounterManager
   { counters_.clear(); }
 
   /// Overloading operator []
-  const Counter& operator[] (const unsigned int& index) const
+  const Counter& operator[] (const MAuint32& index) const
   { return counters_[index];}
-  Counter& operator[] (const unsigned int& index)
+  Counter& operator[] (const MAuint32& index)
   { return counters_[index];}
 
   /// Incrementing the initial number of events

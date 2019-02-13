@@ -108,11 +108,11 @@ class RunRecast():
         ## setup
         if version == "v1.1":
             self.detector = "delphesMA5tune"
-            self.pad      = self.main.archi_info.ma5dir+'/PADForMA5tune'
+            self.pad      = self.main.archi_info.ma5dir+'/tools/PADForMA5tune'
             check         = self.main.recasting.ma5tune
         else:
             self.detector = "delphes"
-            self.pad      = self.main.archi_info.ma5dir+'/PAD'
+            self.pad      = self.main.archi_info.ma5dir+'/tools/PAD'
             check         = self.main.recasting.delphes
         ## Check and exit
         if not check:
@@ -150,13 +150,14 @@ class RunRecast():
 
         # Activating the right delphes
         logging.getLogger('MA5').debug('Activating the detector (switch delphes/delphesMA5tune)')
+        self.main.fastsim.package = self.detector
         detector_handler = DetectorManager(self.main)
         if not detector_handler.manage(self.detector):
             logging.getLogger('MA5').error('Problem with the activation of delphesMA5tune')
             return False
 
         # Checking whether events have already been generated and if not, event generation
-        logging.getLogger('MA5').debug('Loop over the datatsets...')
+        logging.getLogger('MA5').debug('Loop over the datasets...')
         for item in self.main.datasets:
             if self.detector=="delphesMA5tune":
                 evtfile = self.dirname+'/Output/'+item.name+'/RecoEvents_v1x1_'+delphescard.replace('.tcl','')+'.root'
@@ -173,11 +174,11 @@ class RunRecast():
     def fastsim_header(self, version):
         ## Gettign the version dependent stuff
         to_print = False
-        if version=="1.1" and self.first11:
+        if version=="v1.1" and self.first11:
             to_print = True
             tag = version
             self.first11 = False
-        elif version!="1.1" and self.first12:
+        elif version!="v1.1" and self.first12:
             to_print = True
             tag = "v1.2+"
             self.first12 = False
@@ -239,14 +240,14 @@ class RunRecast():
         if self.detector=="delphesMA5tune":
             self.main.fastsim.delphes=0
             self.main.fastsim.delphesMA5tune = DelphesMA5tuneConfiguration()
-            self.main.fastsim.delphesMA5tune.card = os.path.normpath("../../../../PADForMA5tune/Input/Cards/"+card)
+            self.main.fastsim.delphesMA5tune.card = os.path.normpath("../../../../tools/PADForMA5tune/Input/Cards/"+card)
         elif self.detector=="delphes":
             self.main.fastsim.delphesMA5tune = 0
             self.main.fastsim.delphes        = DelphesConfiguration()
-            self.main.fastsim.delphes.card   = os.path.normpath("../../../../PAD/Input/Cards/"+card)
+            self.main.fastsim.delphes.card   = os.path.normpath("../../../../tools/PAD/Input/Cards/"+card)
         # Execution
         if not self.run_delphes(dataset,card):
-            logging.getLogger('MA5').error('The '+detector+' problem with the running of the fastsim')
+            logging.getLogger('MA5').error('The '+self.detector+' problem with the running of the fastsim')
             return False
         # Restoring the run
         self.main.recasting.status="on"
@@ -281,6 +282,7 @@ class RunRecast():
             if not self.check_run(version):
                 self.main.forced=self.forced
                 return False
+            self.main.fastsim.package = self.detector
 
             ## Running the analyses
             if not self.analysis_single(version, card):
@@ -524,12 +526,12 @@ class RunRecast():
 
     def check_xml_scipy_methods(self):
         ## Checking whether scipy is installed
-        try:
-            import scipy.stats
-        except ImportError:
+        if not self.main.session_info.has_scipy:
             logging.getLogger('MA5').warning('scipy is not installed... the CLs module cannot be used.')
             logging.getLogger('MA5').warning('Please install scipy.')
             return False
+        else:
+            import scipy.stats
         ## Checking XML parsers
         try:
             from lxml import ET
@@ -570,9 +572,9 @@ class RunRecast():
 
         # Estimate the newpath of pileup
         if self.detector=="delphesMA5tune":
-            newpath=self.main.archi_info.ma5dir+'/PADForMA5tune/Input/Pileup'
+            newpath=self.main.archi_info.ma5dir+'/tools/PADForMA5tune/Input/Pileup'
         else:
-            newpath=self.main.archi_info.ma5dir+'/PAD/Input/Pileup'
+            newpath=self.main.archi_info.ma5dir+'/tools/PAD/Input/Pileup'
 
         # Safe copy
         shutil.copyfile(filename,filename+'.original')
@@ -878,5 +880,3 @@ def cls(NumObserved, ExpectedBG, BGError, SigHypothesis, NumToyExperiments):
     else:
         return 1.-(p_SplusB / p_b) # 1 - CLs
 
-
-    

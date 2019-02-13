@@ -73,7 +73,7 @@ class MultiRegionCounter
   /// methods to associate a vector of regions to this cut
   void AddRegionSelection(std::vector<RegionSelection*> RSVector)
   {
-    for (unsigned int i=0; i<RSVector.size(); i++)
+    for (MAuint32 i=0; i<RSVector.size(); i++)
       { RSVector[i]->AddCut(name_); }
     regions_.insert(regions_.end(), RSVector.begin(),RSVector.end());
   }

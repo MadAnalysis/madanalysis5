@@ -68,7 +68,7 @@ SampleAnalyzer::SampleAnalyzer()
 /// CheckDatatypes
 void SampleAnalyzer::CheckDatatypes() const
 {
-  unsigned int value = 0;
+  MAuint32 value = 0;
 
   // MAint8
   try
@@ -184,7 +184,7 @@ void SampleAnalyzer::CheckDatatypes() const
 
 
 /// Initialization of the SampleAnalyzer
-bool SampleAnalyzer::Initialize(int argc, char **argv, 
+MAbool SampleAnalyzer::Initialize(MAint32 argc, MAchar**argv, 
                                 const std::string& pdgFileName)
 {
   // Initializing general pointers
@@ -297,7 +297,7 @@ AnalyzerBase* SampleAnalyzer::InitializeAnalyzer(const std::string& name,
 }
 
 /// Post initialization: creation of the output directory structure
-inline int CreateDir(std::string dirname)
+inline MAint32 CreateDir(std::string dirname)
 {
   struct stat myStat;
   if (!((stat(dirname.c_str(), &myStat) == 0) && (((myStat.st_mode) & S_IFMT) == S_IFDIR)))
@@ -306,7 +306,7 @@ inline int CreateDir(std::string dirname)
   return 0;
 }
 
-bool SampleAnalyzer::CreateDirectoryStructure()
+MAbool SampleAnalyzer::CreateDirectoryStructure()
 {
   // Check if the output directory exists -> if not: create it
   std::string dirname="../Output";
@@ -322,11 +322,11 @@ bool SampleAnalyzer::CreateDirectoryStructure()
   if(CreateDir(dirname)==-1) { return false; }
 
   // Creating one subdirectory for each analysis
-  for(unsigned int i=0;i<analyzers_.size(); i++)
+  for(MAuint32 i=0;i<analyzers_.size(); i++)
   {
     std::string newdirname = dirname + "/" + analyzers_[i]->name();
-    int check = -1;
-    for(unsigned int ii=0; check!=0 ; ii++)
+    MAint32 check = -1;
+    for(MAuint32 ii=0; check!=0 ; ii++)
     {
       std::stringstream ss; ss << ii;
       check = CreateDir(newdirname + "_" + ss.str());
@@ -342,7 +342,7 @@ bool SampleAnalyzer::CreateDirectoryStructure()
   return true;
 }
 
-bool SampleAnalyzer::PostInitialize()
+MAbool SampleAnalyzer::PostInitialize()
 {
   // Creating the directory structure
   if(!CreateDirectoryStructure())
@@ -394,8 +394,8 @@ WriterBase* SampleAnalyzer::InitializeWriter(const std::string& name,
   // Creating one ouptput subdirectory for the writer
   std::string newoutdirname="";
   std::stringstream ss0; ss0 << (writers_.size()-1);
-  int check = -1;
-  for(unsigned int ii=0; check!=0 ; ii++)
+  MAint32 check = -1;
+  for(MAuint32 ii=0; check!=0 ; ii++)
   {
     std::stringstream ss; ss << ii;
     newoutdirname = dirname + "/" + name + "Events" + ss0.str() + "_" + ss.str();
@@ -495,8 +495,8 @@ DetectorBase* SampleAnalyzer::InitializeDetector(
   // Creating one ouptput subdirectory for the writer
   std::string newoutdirname="";
   std::stringstream ss0; ss0 << (detectors_.size()-1);
-  int check = -1;
-  for(unsigned int ii=0; check!=0 ; ii++)
+  MAint32 check = -1;
+  for(MAuint32 ii=0; check!=0 ; ii++)
   {
     std::stringstream ss; ss << ii;
     newoutdirname = dirname + "/RecoEvents" + ss0.str() + "_" + ss.str();
@@ -713,7 +713,7 @@ inline std::string CleanName(const std::string &name)
 }
 
 /// Finalize fuction
-bool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples, 
+MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples, 
                               EventFormat& myEvent)
 {
   // -----------------------------------------------------------------------
@@ -723,10 +723,10 @@ bool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
   MAuint64 nInitial = 0;
   MAuint64 nPassed  = 0;
 
-  for (unsigned int i=0;i<counter_read_.size();i++)   
+  for (MAuint32 i=0;i<counter_read_.size();i++)   
       nInitial+=counter_read_[i];
 
-  for (unsigned int i=0;i<counter_passed_.size();i++)
+  for (MAuint32 i=0;i<counter_passed_.size();i++)
       nPassed+=counter_passed_[i];
 
   if ((nInitial-nPassed)==0)
@@ -741,7 +741,7 @@ bool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
 
   // Saving global information
   SampleFormat summary;
-  for (unsigned int i=0;i<counter_read_.size();i++)
+  for (MAuint32 i=0;i<counter_read_.size();i++)
   { mySamples[i].setNEvents(counter_read_[i]); }
   FillSummary(summary,mySamples);
 
@@ -761,7 +761,7 @@ bool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
   out.Finalize();
 
   // Creating the histo SAF file
-  for(unsigned int i=0; i<analyzers_.size(); i++)
+  for(MAuint32 i=0; i<analyzers_.size(); i++)
   {
     std::string safname = analyzers_[i]->Output() + "/Histograms/histos.saf";
     out.Initialize(&cfg_, safname.c_str());
@@ -772,7 +772,7 @@ bool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
   }
 
   // Linking the histos to the SRs
-  for(unsigned int i=0; i<analyzers_.size(); i++)
+  for(MAuint32 i=0; i<analyzers_.size(); i++)
   {
     std::string safname = analyzers_[i]->Output() + "/" + analyzers_[i]->name() + ".saf";
     out.Initialize(&cfg_, safname.c_str());
@@ -784,10 +784,10 @@ bool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
 
 
   // Saving the cut flows
-  for(unsigned int i=0; i<analyzers_.size(); i++)
+  for(MAuint32 i=0; i<analyzers_.size(); i++)
   {
     AnalyzerBase* myanalysis = analyzers_[i];
-    for(unsigned int j=0; j<myanalysis->Manager()->Regions().size(); j++)
+    for(MAuint32 j=0; j<myanalysis->Manager()->Regions().size(); j++)
     {
       RegionSelection *myRS = myanalysis->Manager()->Regions()[j];
       std::string safname = myanalysis->Output() + "/Cutflows/" + 
@@ -801,17 +801,17 @@ bool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
   }
 
   // The user-defined stuff
-  for(unsigned int i=0; i<analyzers_.size(); i++)
+  for(MAuint32 i=0; i<analyzers_.size(); i++)
     analyzers_[i]->Finalize(summary,mySamples);
 
     // Finalize clusters
-    for (unsigned int i=0;i<clusters_.size();i++)
+    for (MAuint32 i=0;i<clusters_.size();i++)
     {
       clusters_[i]->Finalize();
     }
 
     // Finalize detectors
-    for (unsigned int i=0;i<detectors_.size();i++)
+    for (MAuint32 i=0;i<detectors_.size();i++)
     {
       detectors_[i]->Finalize();
     }
@@ -845,7 +845,7 @@ void SampleAnalyzer::FillSummary(SampleFormat& summary,
   summary.InitializeRec();
 
   // Loop over samples
-  for (unsigned int i=0;i<samples.size();i++)
+  for (MAuint32 i=0;i<samples.size();i++)
   {
     // Total number of events
     summary.nevents_ += samples[i].nevents_;

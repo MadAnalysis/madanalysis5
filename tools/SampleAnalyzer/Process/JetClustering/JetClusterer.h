@@ -92,10 +92,10 @@ namespace MA5
     { }
 
     /// Initialization
-    bool Initialize(const std::map<std::string,std::string>& options);
+    MAbool Initialize(const std::map<std::string,std::string>& options);
 
     /// Jet clustering
-    bool Execute(SampleFormat& mySample, EventFormat& myEvent);
+    MAbool Execute(SampleFormat& mySample, EventFormat& myEvent);
 
     /// Finalization
     void Finalize();

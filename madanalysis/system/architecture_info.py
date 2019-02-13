@@ -96,6 +96,7 @@ class ArchitectureInfo:
         self.fastjet_bin_path=""
         self.fastjet_lib_paths=[]
 
+
     def dump(self):
         for item in self.__dict__:
             logging.getLogger('MA5').debug(item+'\t'+str(self.__dict__[item]))

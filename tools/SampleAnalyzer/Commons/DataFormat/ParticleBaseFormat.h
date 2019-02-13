@@ -133,13 +133,13 @@ class ParticleBaseFormat
   const MAfloat32 mt_met(const MALorentzVector& MET) const 
   { 
     // Computing ET sum
-    double ETsum = sqrt( momentum_.M()*momentum_.M() +
+    MAfloat64 ETsum = sqrt( momentum_.M()*momentum_.M() +
                          momentum_.Pt()*momentum_.Pt() )  + MET.Pt();
 
     // Computing PT sum
     MALorentzVector pt = momentum_ + MET;
 
-    double value = ETsum*ETsum - pt.Pt()*pt.Pt();
+    MAfloat64 value = ETsum*ETsum - pt.Pt()*pt.Pt();
     if (value<0) return 0;
     else return sqrt(value);
   }
@@ -174,7 +174,7 @@ class ParticleBaseFormat
   /// Accessor to the delta Phi (given in [0, pi] with another particle direction
   const MAfloat32 dphi_0_pi(const ParticleBaseFormat* p) const 
   {
-    double dphi = std::abs(momentum_.Phi() - p->momentum().Phi());
+    MAfloat64 dphi = std::abs(momentum_.Phi() - p->momentum().Phi());
     if(dphi>3.14159265) dphi=2.*3.14159265-dphi;
     return dphi;
   }
@@ -182,7 +182,7 @@ class ParticleBaseFormat
   /// Accessor to the delta Phi (given in [0, pi] with another particle direction
   const MAfloat32 dphi_0_pi(const ParticleBaseFormat& p) const 
   {
-    double dphi = std::abs(momentum_.Phi() - p.momentum().Phi());
+    MAfloat64 dphi = std::abs(momentum_.Phi() - p.momentum().Phi());
     if(dphi>3.14159265) dphi=2.*3.14159265-dphi;
     return dphi;
   }
@@ -190,7 +190,7 @@ class ParticleBaseFormat
   /// Accessor to the delta Phi (given in [0, 2pi] with another particle direction
   const MAfloat32 dphi_0_2pi(const ParticleBaseFormat* p) const 
   {
-    double dphi =momentum_.Phi() - p->momentum().Phi();
+    MAfloat64 dphi =momentum_.Phi() - p->momentum().Phi();
     if(dphi<0.) dphi+=2.*3.14159265;
     return dphi;
   }
@@ -198,7 +198,7 @@ class ParticleBaseFormat
   /// Accessor to the delta Phi (given in [0, 2pi] with another particle direction
   const MAfloat32 dphi_0_2pi(const ParticleBaseFormat& p) const 
   {
-    double dphi = momentum_.Phi() - p.momentum().Phi();
+    MAfloat64 dphi = momentum_.Phi() - p.momentum().Phi();
     if(dphi<0.) dphi+=2.*3.14159265;
     return dphi;
   }

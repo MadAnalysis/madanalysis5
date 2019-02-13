@@ -48,7 +48,7 @@ void HistoLogX::Write_RootFormat(std::pair<TH1F*,TH1F*>& histo)
 {
   // Creating binning for histograms
   MAfloat64 binnings[histo_.size()+1];
-  for (unsigned int i=0;i<histo_.size();i++)
+  for (MAuint32 i=0;i<histo_.size();i++)
   {
     binnings[i]=std::pow(static_cast<MAfloat32>(10.),static_cast<MAfloat32>(log_xmin_+i*step_));
   }
@@ -59,7 +59,7 @@ void HistoLogX::Write_RootFormat(std::pair<TH1F*,TH1F*>& histo)
   histo.second -> SetBins(nbins_,binnings);
 
   // Filling histos
-  for (unsigned int i=0;i<histo_.size();i++)
+  for (MAuint32 i=0;i<histo_.size();i++)
   {
     histo.first  -> SetBinContent(i+1,histo_[i].first);
     histo.second -> SetBinContent(i+1,histo_[i].second);

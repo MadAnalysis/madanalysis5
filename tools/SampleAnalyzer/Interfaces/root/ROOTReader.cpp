@@ -80,7 +80,7 @@ MAbool ROOTReader::ReadHeader(SampleFormat& mySample)
 // -----------------------------------------------------------------------------
 // Initialize
 // -----------------------------------------------------------------------------
-bool ROOTReader::Initialize(const std::string& rawfilename,
+MAbool ROOTReader::Initialize(const std::string& rawfilename,
                             const Configuration& cfg)
 {
   // Set configuration
@@ -108,7 +108,7 @@ bool ROOTReader::Initialize(const std::string& rawfilename,
   source_ = TFile::Open(filename_.c_str());
   
   // Check if the input is properly opened
-  bool test=true;
+  MAbool test=true;
   if (source_==0) test=false;
   else if (!source_->IsOpen() || source_->IsZombie()) test=false;
   if (!test)
@@ -126,11 +126,11 @@ bool ROOTReader::Initialize(const std::string& rawfilename,
 // -----------------------------------------------------------------------------
 // SelectTreeReader
 // -----------------------------------------------------------------------------
-bool ROOTReader::SelectTreeReader()
+MAbool ROOTReader::SelectTreeReader()
 {
   TTree* mytree = 0;
-  bool DelphesMA5tune_Tag=false;
-  bool Delphes_Tag=false;
+  MAbool DelphesMA5tune_Tag=false;
+  MAbool Delphes_Tag=false;
 
   // First case: Delphes
 #ifdef DELPHES_USE
@@ -194,7 +194,7 @@ bool ROOTReader::SelectTreeReader()
 // -----------------------------------------------------------------------------
 // Finalize
 // -----------------------------------------------------------------------------
-bool ROOTReader::Finalize()
+MAbool ROOTReader::Finalize()
 {
   // OK!
   if (source_!=0) source_->Close();

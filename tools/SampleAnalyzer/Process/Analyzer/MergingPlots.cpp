@@ -22,6 +22,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// To be included only if fastjet is available
 #ifdef FASTJET_USE
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Analyzer/MergingPlots.h"
@@ -38,7 +39,7 @@
 using namespace MA5;
 
 
-bool MergingPlots::Initialize(const Configuration& cfg,
+MAbool MergingPlots::Initialize(const Configuration& cfg,
              const std::map<std::string,std::string>& parameters)
 {
 
@@ -81,7 +82,7 @@ bool MergingPlots::Initialize(const Configuration& cfg,
     return false;
   }
   DJR_.resize(merging_njets_);
-  for (unsigned int i=0;i<DJR_.size();i++)
+  for (MAuint32 i=0;i<DJR_.size();i++)
   {
     std::stringstream str;
     str << "DJR" << i+1;
@@ -97,10 +98,10 @@ bool MergingPlots::Initialize(const Configuration& cfg,
 }
 
 
-bool MergingPlots::Execute(SampleFormat& mySample, const EventFormat& myEvent)
+MAbool MergingPlots::Execute(SampleFormat& mySample, const EventFormat& myEvent)
 {
   // Event weight
-  double myEventWeight;
+  MAfloat64 myEventWeight;
   if(Configuration().IsNoEventWeight()) myEventWeight=1.;
   else if(myEvent.mc()->weight()!=0.) myEventWeight=myEvent.mc()->weight();
   else
@@ -128,9 +129,9 @@ bool MergingPlots::Execute(SampleFormat& mySample, const EventFormat& myEvent)
   if (!algo_->Execute(mySample,myEvent,DJRvalues)) return false;
 
   // Getting results
-  for (unsigned int i=0;i<DJR_.size();i++)
+  for (MAuint32 i=0;i<DJR_.size();i++)
   {
-    double djr = 0.;
+    MAfloat64 djr = 0.;
     if (DJRvalues[i]>0) djr = std::log10(sqrt(DJRvalues[i]));
     std::stringstream str,str2;
     str  << "DJR" << i+1 << "_" << njets << "jet";
@@ -158,7 +159,7 @@ void MergingPlots::Finalize(const SampleFormat& summary,
   Write_TextFormat(out());
 
   // Deleting plots
-  for (unsigned int i=0;i<DJR_.size();i++) DJR_[i].Finalize();
+  for (MAuint32 i=0;i<DJR_.size();i++) DJR_[i].Finalize();
   DJR_.clear();
 
 }
@@ -172,12 +173,12 @@ MAuint32 MergingPlots::ExtractHardJetNumber(const MCEventFormat* myEvent,
 
   // Indexing
   std::map<const MCParticleFormat*,int> indices;
-  for (unsigned int i=0;i<myEvent->particles().size();i++)
+  for (MAuint32 i=0;i<myEvent->particles().size();i++)
     indices[&(myEvent->particles()[i])]=i;
 
   // Filters
-  std::map<const MCParticleFormat*,bool> filters;
-  for (unsigned int i=0;i<myEvent->particles().size();i++)
+  std::map<const MCParticleFormat*,MAbool> filters;
+  for (MAuint32 i=0;i<myEvent->particles().size();i++)
   {
     const MCParticleFormat* myPart = &myEvent->particles()[i];
     if (myPart->mothers().size()==0) continue;
@@ -195,25 +196,25 @@ MAuint32 MergingPlots::ExtractHardJetNumber(const MCEventFormat* myEvent,
       // The mother is not filtered -> testing if we have a radiation pattern
       else
       {
-        // Get all brothers and sisters and kill doubles
-        for(int j=family.size()-1;j>0;j--)
+        // Get all brothers and sisters and kill MAfloat64s
+        for(MAint32 j=family.size()-1;j>0;j--)
         {
           if (indices[family[j]] ==indices[myPart]) { family.erase(family.begin()+j); continue; }
-          for(unsigned int k=j+1;k<family.size();k++)
+          for(MAuint32 k=j+1;k<family.size();k++)
             if (indices[family[j]]==indices[family[k]]) { family.erase(family.begin()+k); break; }
         }
         // Checking whether we have partons in the family
-        unsigned int ng=0, ninit=0, nq=0,nqb=0;
+        MAuint32 ng=0, ninit=0, nq=0,nqb=0;
         if(myPart->pdgid()==myPart->mothers()[0]->pdgid()) ninit++;
-        for(unsigned int i=0; i< family.size();i++)
+        for(MAuint32 i=0; i< family.size();i++)
         {
           if(family[i]->pdgid()<=4 && family[i]->pdgid()>0) nq++;
           if(family[i]->pdgid()>=-4 && family[i]->pdgid()<0) nqb++;
           if(family[i]->pdgid()==21) ng++;
           if(family[i]->pdgid()==myPart->mothers()[0]->pdgid()) ninit++;
         }
-        bool condition1 = myPart->mothers()[0]->pdgid()!=21 && ninit>0;
-        bool condition2 = myPart->mothers()[0]->pdgid()==21 && (ng>=2 || (nqb>0 && nq>0));
+        MAbool condition1 = myPart->mothers()[0]->pdgid()!=21 && ninit>0;
+        MAbool condition2 = myPart->mothers()[0]->pdgid()==21 && (ng>=2 || (nqb>0 && nq>0));
         if(!condition1 && !condition2) filters[myPart]=true;
         else                           filters[myPart]=false;
       }
@@ -230,7 +231,7 @@ MAuint32 MergingPlots::ExtractHardJetNumber(const MCEventFormat* myEvent,
     if (myPart->mothers().size()==0) continue;
 
     // coming from initial state ? 6 first particles
-    bool initial=false;
+    MAbool initial=false;
     for (MAuint32 ind=0;ind<6;ind++)
     {
       if (myPart->mothers()[0]== &(myEvent->particles()[ind]))

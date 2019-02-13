@@ -56,7 +56,7 @@ class SampleAnalyzer
 
   std::string analysisName_; 
   std::string datasetName_;
-  bool LastFileFail_;
+  MAbool LastFileFail_;
 
   /// Configuration of SampleAnalyzer
   Configuration cfg_;
@@ -79,8 +79,8 @@ class SampleAnalyzer
   std::vector<DetectorBase*>  detectors_;
 
   /// Reading status
-  unsigned int file_index_;
-  bool next_file_;
+  MAuint32 file_index_;
+  MAbool next_file_;
 
   /// Counters
   std::vector<MAuint64> counter_read_;
@@ -111,7 +111,7 @@ class SampleAnalyzer
   { return fullDetectors_; }
 
   /// Initialization of the SampleAnalyzer
-  bool Initialize(int argc, char **argv, const std::string& filename);
+  MAbool Initialize(MAint32 argc, MAchar **argv, const std::string& filename);
 
   /// Getting pointer to an analyzer
   AnalyzerBase* InitializeAnalyzer(const std::string& name, 
@@ -141,13 +141,13 @@ class SampleAnalyzer
   StatusCode::Type NextFile(SampleFormat& mysample);
 
   /// Finalization of the SampleAnalyzer
-  bool Finalize(std::vector<SampleFormat>& mysamples, EventFormat& myevent);
+  MAbool Finalize(std::vector<SampleFormat>& mysamples, EventFormat& myevent);
 
   /// Updating the progress bar
   void UpdateProgressBar();
 
   /// Creating the directory structure associated with the SRM
-  bool PostInitialize();
+  MAbool PostInitialize();
 
  private:
 
@@ -160,7 +160,7 @@ class SampleAnalyzer
 
 
   /// Creating the directory structure associated with the SRM
-  bool CreateDirectoryStructure();
+  MAbool CreateDirectoryStructure();
 
 
 };

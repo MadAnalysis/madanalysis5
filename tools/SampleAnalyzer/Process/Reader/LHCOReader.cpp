@@ -36,7 +36,7 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 // ReadHeader
 // -----------------------------------------------------------------------------
-bool LHCOReader::ReadHeader(SampleFormat& mySample)
+MAbool LHCOReader::ReadHeader(SampleFormat& mySample)
 {
   EndOfFile_=false;
 
@@ -53,7 +53,7 @@ bool LHCOReader::ReadHeader(SampleFormat& mySample)
 // -----------------------------------------------------------------------------
 // FinalizeHeader
 // -----------------------------------------------------------------------------
-bool LHCOReader::FinalizeHeader(SampleFormat& mySample)
+MAbool LHCOReader::FinalizeHeader(SampleFormat& mySample)
 {
   // Normal end
   return true;
@@ -69,7 +69,7 @@ StatusCode::Type LHCOReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySam
 
   myEvent.InitializeRec();
 
-  bool EndOfLoop = false;
+  MAbool EndOfLoop = false;
   
   // Declarging a new string for line
   std::string line;
@@ -124,10 +124,10 @@ StatusCode::Type LHCOReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySam
 // -----------------------------------------------------------------------------
 // FinalizeEvent
 // -----------------------------------------------------------------------------
-bool LHCOReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
+MAbool LHCOReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 {
   // MHT & THT
-  for (unsigned int i=0; i<myEvent.rec()->jets_.size();i++)
+  for (MAuint32 i=0; i<myEvent.rec()->jets_.size();i++)
   {
     myEvent.rec()->MHT_ -= myEvent.rec()->jets_[i].momentum();
     myEvent.rec()->THT_ += myEvent.rec()->jets_[i].pt();
@@ -137,19 +137,19 @@ bool LHCOReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
   myEvent.rec()->Meff_ += myEvent.rec()->MET_.pt();
 
   // TET
-  for (unsigned int i=0; i<myEvent.rec()->muons_.size();i++)
+  for (MAuint32 i=0; i<myEvent.rec()->muons_.size();i++)
   {
     myEvent.rec()->TET_ += myEvent.rec()->muons_[i].pt();
   }
-  for (unsigned int i=0; i<myEvent.rec()->electrons_.size();i++)
+  for (MAuint32 i=0; i<myEvent.rec()->electrons_.size();i++)
   {
     myEvent.rec()->TET_ += myEvent.rec()->electrons_[i].pt();
   }
-  for (unsigned int i=0; i<myEvent.rec()->taus_.size();i++)
+  for (MAuint32 i=0; i<myEvent.rec()->taus_.size();i++)
   {
     myEvent.rec()->TET_ += myEvent.rec()->taus_[i].pt();
   }
-  for (unsigned int i=0; i<myEvent.rec()->photons_.size();i++)
+  for (MAuint32 i=0; i<myEvent.rec()->photons_.size();i++)
   {
     myEvent.rec()->TET_ += myEvent.rec()->photons_[i].pt();
   }
@@ -291,7 +291,7 @@ void LHCOReader::FillEventParticleLine(const std::string& line, EventFormat& myE
 
     MAfloat32 ET_PT=tmp-muon->sumPT_isol_;
     MAbool test=false;
-    for (unsigned int j=0;j<5;j++)
+    for (MAuint32 j=0;j<5;j++)
     {
       ET_PT*=10;
       if (std::floor(ET_PT)==ET_PT)

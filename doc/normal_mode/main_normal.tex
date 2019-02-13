@@ -1,0 +1,641 @@
+\documentclass[a4paper]{article}
+
+%% Language and font encodings
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{url,slashed,multirow,cite,verbdef}
+\usepackage{hyperref}
+
+%% Sets page size and margins
+\usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+%% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\definecolor{ao}{rgb}{0.0, 0.0, 0.55}
+\usepackage{url}
+% faire des boites
+\usepackage{framed,color}
+\definecolor{shadecolor}{rgb}{0.4, 0.6, 0.8}
+
+% Tools
+\newcommand{\MG}{\textsc{MadGraph}~5\_aMC@NLO}
+\newcommand{\PY}{\textsc{Pythia}~8}
+\newcommand{\MA}{\textsc{MadAnalysis}~5}
+\newcommand{\MW}{\textsc{MadWidth}}
+\newcommand{\MS}{\textsc{MadSpin}}
+\newcommand{\MAnorm}{{MadAnalysis}~5}
+\newcommand{\FJ}{\textsc{FastJet}}
+\newcommand{\FJnorm}{{FastJet}}
+\newcommand{\DEL}{\textsc{Delphes}}
+\newcommand{\DELnorm}{{Delphes}}
+\newcommand{\ROOT}{\textsc{Root}}
+\newcommand{\lhe}{\textsc{Lhe}}
+\newcommand{\lhco}{\textsc{Lhco}}
+\newcommand{\hepmc}{\textsc{HepMC}}
+\newcommand{\stdhep}{\textsc{StdHep}}
+\newcommand{\INSP}{\textsc{Inspire}}
+\newcommand{\python}{\textsc{Python}}
+\newcommand{\spla}{\textsc{SampleAnalyzer}}
+%latin
+\newcommand{\eg}{\textit{e.g.}}
+\newcommand{\ie}{\textit{i.e.}}
+\newcommand{\etc}{\textit{etc.}}
+
+% environments
+\def\be{\begin{equation}}
+\def\ee{\end{equation}}
+\def\bsp#1\esp{\begin{split}#1\end{split}}
+
+
+
+
+
+
+\begin{document}
+\begin{center} 
+{\color{ao} \huge \textbf{\textsc{MadAnalysis} 5 v1.6}} \\ \vspace{0.25cm}
+{\color{ao} \huge \textbf{Normal-Mode reference card}} \\ \vspace{0.25cm}
+\vspace{0.1cm} \textsl{\today}\\
+\vspace{0.1cm} \textsl{website: \url{http://madanalysis.irmp.ucl.ac.be/}}\\
+\vspace{0.1cm} \textsl{references: \href{https://arxiv.org/abs/1206.1599}{arXiv:1206.1599[hep-ph]}, \href{https://arxiv.org/abs/1405.3982}{arXiv:1405.3982[hep-ph]}, \href{https://arxiv.org/abs/1407.3278}{arXiv:1407.3278[hep-ph]}}
+\end{center}
+
+\hspace{0.5cm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{shaded}
+\section{\Large Starting the \MAnorm\ interpreter}
+\end{shaded}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent The \MA\ command line interface can be started by typing in a shell\\
+{\color{ao}\begin{verbatim} bin/ma5 [options] [script] \end{verbatim}}
+\noindent where the potential options ({\color{ao}\verb+[options]+}) are given in the table below.
+\verbdef{\vv}{-v}
+\renewcommand{\arraystretch}{1.2}%
+\begin{center}\begin{tabular}{ p{2cm} p{2.5cm} p{8.1cm}}
+\hline
+Short & Full & Description\\
+\hline
+\color{ao}\verb?-P? & \color{ao}\verb?--partonlevel? & Parton-level mode.\\
+\color{ao}\verb?-H? & \color{ao}\verb?--hadronlevel? & Hadron-level mode.\\
+\color{ao}\verb?-R? & \color{ao}\verb?--recolevel?   & Reconstructed-level mode.\\
+\color{ao}\verb?-E? & \color{ao}\verb?--expert?      & Expert mode.\\
+\multirow{2}{*}{\color{ao}\vv} & \color{ao}\verb?--version?
+          & \multirow{2}{*}{Displays the current \MA\ version number.}\\
+          &  \color{ao}\verb?--release?    & \\
+\color{ao}\verb?-b? & \color{ao}\verb?--build?       & Builds of the \spla\ library.\\
+\color{ao}\verb?-f? & \color{ao}\verb?--forced?      & Skips \MA\ confirmation messages.\\
+\color{ao}\verb?-s? & \color{ao}\verb?--script?      & Executes a script containing all analysis
+    commands and exits the program. The file containing the script has to be
+    provided as {\color{ao}\verb+[script]+}. Removing the {\color{ao}\verb+-s+}
+    option prevents \MA\ from exiting.\\
+\color{ao}\verb?-h? & \color{ao}\verb?--help?        & Print all the available commands.\\
+\color{ao}\verb?-i? & \color{ao}\verb?--installcard? & Generates a file with information on the
+     \MA\ dependencies, \verb?installation_card.dat?, that is located in the
+     \verb+madanalysis/input+ folder.\\
+\color{ao}\verb?-d? & \color{ao}\verb?--debug?       & Debug mode.\\
+\hline
+\end{tabular}
+\end{center}
+In case of installation issues, the usage of the dependencies can be tuned by
+editing the file:\\
+{\centering \color{ao} \verb?madanalysis/input/installation_options.dat?}\\
+\noindent More information can be found in the original \MA\ manual~\cite{Conte:2012fm}.
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{shaded}
+\section{\Large Installation of optional packages}
+\end{shaded}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent \MA\ is interfaced to several high-energy physics packages and can be linked to
+a variety of external plugins. Any of those can be installed by typing in the
+\MA\ interpreter,
+{\color{ao}\begin{verbatim} install [package]\end{verbatim}}
+where the different choices for \verb+[package]+ are given in the table below.
+\renewcommand{\arraystretch}{1.2}%
+\begin{center}\begin{tabular}{l p{9.2cm}}
+\hline
+Package & Description\\
+\hline
+\color{ao} \verb?PAD?            & The \MA\ Public Analysis Database of recasted LHC
+   analyses relying on \DEL~3 for the simulation of the detector effects.\\
+\color{ao}\verb?PADforMA5tune?  & The \MA\ Public Analysis Database of recasted LHC
+   analyses relying on the old tuned version of \DEL~3 for the simulation of the
+   detector effects.\\
+\color{ao}\verb?delphes?        & The current release of \DEL~3.\\
+\color{ao}\verb?delphesMA5tune? & The old tuned version of \DEL~3.\\
+\color{ao}\verb?fastjet?        & The \FJ\ and {\sc FastJetContrib} packages.\\
+\color{ao}\verb?samples?        & Some test Monte Carlo samples.\\
+\color{ao}\verb?zlib?           & The {\sc ZLib} library allowing to handle gzipped
+                        compressed files.\\
+\hline
+\end{tabular}
+\end{center}
+\vspace{2cm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{shaded}
+\section{\Large Commands available from the \MAnorm\ interpreter}
+\end{shaded}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent A small set of commands, to be typed from the \MA\ interpreter, are related to
+console actions.\\
+\renewcommand{\arraystretch}{1.2}%
+\begin{center}\begin{tabular}{l p{8.8cm}}
+\hline
+Command & Description\\
+\hline
+\color{ao} \verb?quit?           & \multirow{2}{*}{Exits \MA.}\\
+\color{ao} \verb?EOF?            & \\
+\color{ao} \verb?help?           & Displays the list of available commands.\\
+\color{ao} \verb?help [command]? & Displays details about a specific command.\\
+\color{ao} \verb?history?        & Displays the history of all commands that have been
+                        typed by the user.\\
+\color{ao} \verb?reset?          & Clears the \MA\ memory as when the program is started.\\
+\color{ao} \verb?restart?        & Restarts \MA.\\
+\color{ao} \verb?shell [command]?& \multirow{2}{*}{Executes a {\sc Unix} command from the
+   interpreter.}\\
+\color{ao} \verb?![command]?     & \\
+\color{ao} \verb?#[text]?        & Indicates a comment.\\
+\hline
+\end{tabular}
+\end{center}
+\verbdef{\verbtexta}{define [(multi)particle label] = [ID1] [ID2] ...}
+\verbdef{\verbtextb}{define_region [label1] [label2] ...}
+\verbdef{\verbtextc}|plot [obs]([part1] [part2] ...) nbins min max [ [opts] ] { [regs] }|
+\verbdef{\verbtextda}{reject ([part]) [criterion]}
+\verbdef{\verbtextdb}{select ([part]) [criterion]}
+\verbdef{\verbtexte}{[criterion]}
+\verbdef{\verbtextf}{swap main.selection[n1] main.selection[n2]}
+In order to design an analysis in the \MA\ framework, the user can rely on the
+following commands.
+\renewcommand{\arraystretch}{1.2}%
+\begin{center}\begin{tabular}{p{3.40cm} p{8.75cm}}
+\hline
+Command & Description\\
+\hline
+\multicolumn{2}{l}{\color{ao} \verbtexta}\\
+   & Creates a new (multi)particle label attached to the provided PDG codes
+      \verb+[ID1]+, \verb+[ID2]+, $\ldots$\\
+\multicolumn{2}{l}{\color{ao} \verbtextb}\\
+   & Creates one or more signal regions named \verb+[label1]+, \verb+[label2]+,
+   ...\\
+\color{ao} \verb?import [label]?        & Imports a sample or a UFO model.\\
+\color{ao} \verb?open [folder]?         & Opens a report from the folder \verb?[folder]?.
+   If the folder is unspecified, the last created report is open.\\
+\multicolumn{2}{l}{\color{ao} \verbtextc}\\
+   & Defines a histogram with the distribution in the observable \verb?[obs]?.
+    Its computation may require to combine the momenta of several objects
+    \verb?[part1]?, \verb+[part2]+, $\ldots$ Any other parameter is optional.
+    The \verb?nbins?,
+    \verb?min? and \verb?max? quantities respectively correspond to the number
+    of bins, and the upper and lower bound of the $x$-axis of the histogram. The
+    options \verb?[opts]? (see below) allow the user to tune the
+    display of the histogram, and \verb+[regs]+ indicates to which signal region
+    one needs to attach this histogram.\\
+\color{ao} \verb?reject [criterion]?
+\color{ao} \verb?select [criterion]? & Defines a selection cut that leads
+  to the rejection (or selection) of an event if the \verbtexte condition is
+  satisfied.\\
+\multicolumn{2}{l}{\color{ao} \verbtextda}\\
+\multicolumn{2}{l}{\color{ao} \verbtextdb}\\
+  & Defines a selection cut that leads to the rejection (or selection) of an
+    object candidate if the \verb?[criterion]? condition is satisfied.\\
+\color{ao} \verb?remove [object]? & Deletes an object (a (multi)particle label, a region, a
+ histogram or a cut).\\
+\color{ao} \verb?resubmit? & Adjusts the last generated C++ code relatively to the commands
+  issued after the last \verb?submit? command, and executes it.\\
+\color{ao} \verb?set [obj] = [val]? & Sets an attribute of a specific object to a given
+  value.\\
+\color{ao} \verb?submit [folder]? & Generates, compiles and executes the C++ code
+  corresponding to the current analysis either in a folder named
+  \verb?[folder]?, if specified, or in an arbitrary folder otherwise.\\
+\multicolumn{2}{l}{\color{ao} \verbtextf}\\ & Swaps the analysis steps
+   number \verb?[n1]? and \verb?[n2]?.\\
+\hline
+\end{tabular}
+\end{center}
+Throughout the analysis, information can be printed to the screen by means of
+the following commands.
+\renewcommand{\arraystretch}{1.2}%
+\begin{center}\begin{tabular}{p{4.00cm} p{7.70cm}}
+\hline
+Command & Description\\
+\hline
+\color{ao} \verb+display [object]+       & Displays the properties of a specific object.\\
+\color{ao} \verb+display_datasets+       & Displays the list of all defined datasets.\\
+\color{ao} \verb+display_multiparticles+ &
+   Displays the list of all defined multiparticle labels.\\
+\color{ao} \verb+display_particles+      &
+   Displays the list of all defined particle labels.\\
+\color{ao} \verb+display_regions+        &
+   Displays the list of all defined signal regions.\\
+\hline
+\end{tabular}
+\end{center}
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{shaded}
+\section{\Large Properties of the main object}
+\end{shaded}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+The \verb+main+ object of \MA\ allows to setup varied options (see the table
+below) to impact the code on run time. They can be modified and
+displayed by using the \verb+set+ and \verb+display+ commands introduced above.\\
+
+\renewcommand{\arraystretch}{1.2}%
+\begin{center}\begin{tabular}{l p{7.50cm}}
+\hline
+Command & Description\\
+\hline
+\color{ao} \verb?main.currentdir?     & Folder containing \MA.\\
+\color{ao} \verb?main.fastsim.package?& The package used for the fast-simulation of the
+  detector response. The available choices are \verb?fastjet?, \verb?delphes?,
+  \verb?delphesMA5tune? and \verb?none?.\\
+\color{ao} \verb?main.fom.formula?    & Formula to be used to calculate the figure of merit
+  in the cutflow charts. Denoting by $S$ and $B$ the number of signal and
+  background events, the available choices are 1 ($S/B$), 2 ($S/\sqrt{B}$), 3
+  ($S/\sqrt{B}$), 4 ($S/\sqrt{S+B}$) and 5 ($S/\sqrt{S+B+x_B^2}$). For this last
+  formula, the $x_B$ parameter is specified via \verb?main.fom.x?.\\
+\color{ao} \verb?main.graphic_render? & Package to use for figure generation. The
+  available choices are \verb?root?, \verb?matplotlib? and \verb?none?.\\
+\color{ao} \verb?main.isolation.algorithm? & Algorithm to be used for particle isolation.
+  The available choices are \verb?cone? (no activity in a cone of radius
+  specified by \verb+main.isolation.radius+) and \verb+sumpt+ (the scalar sum of
+  the transverse momenta of all particles lying in a given cone around the
+  candidate must be smaller than \verb?main.isolation.sumPT? and the ratio of
+  the transverse energy of all particles in this cone to the transverse momentum
+  of the candidate must be smaller than
+  \verb?main.isolation.ET_PT?).\\
+\end{tabular}
+\begin{tabular}{l p{8.4cm}}
+\color{ao} \verb?main.lumi? & Integrated luminosity, in $\textrm{fb}^{-1}$, to use for
+  histogram and cutflow normalization.\\
+\color{ao} \verb?main.normalize? & Way in which histograms have to be normalized. The
+  available choices are \verb?none? (each event counts for 1), \verb?lumi?
+  (normalization to the integrated luminosity without taking into account the
+  event weights), \verb?lumi_weight? (as \verb?lumi? but with the
+  event weights).\\
+\color{ao} \verb?main.outputfile? & Name of the output file to write events onto.\\
+\color{ao} \verb?main.recast? & Switching the recasting mode \verb?on? and \verb?off?.\\
+\color{ao} \verb?main.stacking_method? & Way in which the contributions of the different
+  datasets to a histogram are displayed. The available choices are
+  \verb?normalize2one? (the integral of each contribution equals 1),
+  \verb?stack? (each contribution is stacked) and \verb?superimpose? (each
+  contribution is superimposed).\\
+\hline
+\end{tabular}
+\end{center}
+\newpage 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{shaded}
+\section{\Large Observables to be used for histograms and cuts}
+\end{shaded}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+As shown in the tables above, the definition of a histogram or of a cut
+condition necessitates to provide an observable that could depend on the momentum
+of one or more particles or objects. We list in the tables below all observables
+supported by \MA, and begin with those that do not depend on the momenta of any
+object. They are therefore called without any argument.\\
+\renewcommand{\arraystretch}{1.2}%
+\begin{center}\begin{tabular}{l p{10.2cm}}
+\hline
+Symbol& Description\\
+\hline
+\color{ao} \verb?ALPHA_QCD? & Value of the QCD coupling constant.\\
+\color{ao} \verb?ALPHA_QED? & Value of the electromagnetic coupling constant.\\
+\color{ao} \verb?ALPHA_T?   & The $\alpha_T$ variable\cite{Randall:2008rw}.\\
+\color{ao} \verb?MEFF?      & Effective mass being defined as the sum of the transverse
+                   momentum of all final-state objects and the missing
+                   transverse energy.\\
+\color{ao} \verb?MET?       & Missing transverse energy.\\
+\color{ao} \verb?MHT?       & Missing transverse energy defined from the jet activity
+                   only.\\
+\color{ao} \verb?NPID?      & Particle content (PDG code distribution).\\
+\color{ao} \verb?NAPID?     & Particle content (PDG code distribution in
+                   absolute value).\\
+\color{ao} \verb?SQRTS?     & Partonic center-of-mass energy.\\
+\color{ao} \verb?SCALE?     & Energy scale of the event.\\
+\color{ao} \verb?TET?       & Scalar sum of the transverse energy of all final-state
+                   objects.\\
+\color{ao} \verb?THT?       & Scalar sum of the transverse energy of all final-state
+                   jets.\\
+\color{ao} \verb?WEIGHTS?   & Event weights.\\
+\hline
+\end{tabular}
+\end{center}
+The set of observables provided in the following table can be used to study the
+properties of a given object or particle, and thus requires to provide one
+four-momentum or one combination of four-momenta as an argument of the
+observable function.
+\renewcommand{\arraystretch}{1.2}%
+\begin{center}\begin{tabular}{l p{10.2cm}}
+\hline
+Symbol& Description\\
+\hline
+\color{ao} \verb?ABSETA? & Absolute value of the pseudorapidity.\\
+\color{ao} \verb?BETA?   & Velocity $\beta=v/c$ (relatively to the speed of light).\\
+\color{ao} \verb?E?      & Energy.\\
+\color{ao} \verb?EE_HE?  & Ratio of the electromagnetic energy to the hadronic energy (for
+   a jet).\\
+\color{ao} \verb?ET?     & Transverse energy.\\
+\color{ao} \verb?ETA?    & Pseudorapidity.\\
+\color{ao} \verb?GAMMA?  & Lorentz-factor.\\
+\color{ao} \verb?HE_EE?  & Ratio of the hadronic energy to the electromagnetic energy (for
+   a jet).\\
+\color{ao} \verb?M?      & Invariant mass.\\
+\color{ao} \verb?MT?     & Transverse mass.\\
+\color{ao} \verb?MT_MET? & Transverse mass of the system comprised of the object and the
+   missing momentum.\\
+\color{ao} \verb?NTRACKS?& Number of tracks (inside a jet).\\
+\color{ao} \verb?P?      & Magnitude of the three-momentum.\\
+\color{ao} \verb?PHI?    & Azimuthal angle.\\
+\color{ao} \verb?PT?     & Transverse momentum.\\
+\color{ao} \verb?PX?     & $x$-component of the momentum.\\
+\color{ao} \verb?PY?     & $y$-component of the momentum.\\
+\color{ao} \verb?PZ?     & $z$-component of the momentum.\\
+\color{ao} \verb?R?      & Position in the $(\eta, \phi)$ plane.\\
+\color{ao} \verb?Y?      & Rapidity.\\
+\hline
+\end{tabular}
+\end{center}
+\noindent Three additional observables involving two objects are also available, the
+methods given in the table below taking thus two arguments separated by a comma.
+\renewcommand{\arraystretch}{1.2}%
+\begin{center}\begin{tabular}{l p{10.0cm}}
+\hline
+Symbol& Description\\
+\hline
+\color{ao} \verb?DELTAR?     & Angular distance, in the transverse plane, between the
+  objects.\\
+\color{ao} \verb?DPHI_0_PI?  & Angular distance in azimuth between the objects. The
+  bounds for the angle are $[0,\pi]$.\\
+\color{ao} \verb?DPHI_0_2PI? & Angular distance in azimuth between the objects. The
+  bounds for the angle are $[0,2\pi]$.\\
+\hline
+\end{tabular}
+\end{center}
+\noindent For all arguments of any of the above observable, any sequence of momenta
+separated with spaces will lead to a sum of these momenta before computing the
+observable. For instance,
+{\color{ao} \begin{verbatim}
+  plot M(e+ e-)
+\end{verbatim}}
+\noindent allows for the computation of the invariant of an electron-positron system.
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{shaded}
+\section{\Large Options for histograms}
+\end{shaded}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent The command \verb+plot+ accept varied options \verb+[opts]+,
+{\color{ao} \begin{verbatim}
+plot [obs]([part1] [part2] ...) nbins min max [ [opts] ] { [regs] }
+\end{verbatim}}
+to be provided between squared brackets. The list of all available choices is
+given in the table below.
+\renewcommand{\arraystretch}{1.2}%
+\begin{center}\begin{tabular}{l p{9.4cm}}
+\hline
+Symbol& Description\\
+\hline
+\color{ao} \verb?Eordering?     & Sorts the objects in increasing energy.\\
+\color{ao} \verb?ETordering?    & Sorts the objects in increasing transverse energy.\\
+\color{ao} \verb?ETAordering?   & Sorts the objects in increasing pseudorapidity.\\
+\color{ao} \verb?Pordering?     & Sorts the objects in increasing three-momentum magnitude.
+  \\
+\color{ao} \verb?PTordering?    & Sorts the objects in increasing transverse momentum.\\
+\color{ao} \verb?PXordering?    & Sorts the objects in increasing momentum $x$-component.\\
+\color{ao} \verb?PYordering?    & Sorts the objects in increasing momentum $y$-component.\\
+\color{ao} \verb?PZordering?    & Sorts the objects in increasing momentum $z$-component.\\
+\color{ao} \verb?allstate?      & Considers all (initial-state, final-state and
+  intermediate-state) objects in the events.\\
+\color{ao} \verb?finalstate?    & Considers only final-state objects (default).\\
+\color{ao} \verb?initialstate?  & Considers only initial-state objects.\\
+\color{ao} \verb?interstate?    & Considers only objects that are neither initial-state nor
+  final-state objects.\\
+\color{ao} \verb?logX?          & Logarithmic scale for the $x$-axis.\\
+\color{ao} \verb?logY?          & Logarithmic scale for the $y$-axis.\\
+\color{ao} \verb?normalize2one? & Normalizes the histogram to 1.\\
+\color{ao} \verb?stack?         & Stacks the contributions of different datasets in the
+  histogram.\\
+\color{ao} \verb?superimpose?   & Superimposes the contributions of different datasets in
+  the histogram.\\
+\hline
+\end{tabular}
+\end{center}
+
+\vspace{2cm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{shaded}
+\section{\Large Options for datasets}
+\end{shaded}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent Once one or more samples have been imported as a dataset, properties that will
+impact the display of the subsequent contribution in histograms can be modified
+by using the \verb+set+ command. For instance, a dataset named \verb?defaultset?
+can be imported as
+{\color{ao} \begin{verbatim}
+  import <path-to-sample> as defaultset
+\end{verbatim}}
+\noindent and its properties can be modified by typing in
+{\color{ao} \begin{verbatim}
+  set defaulset.<property> = <value>
+\end{verbatim}}
+\noindent The list of available properties is given in the table below, together with the
+allowed values.
+\renewcommand{\arraystretch}{1.2}%
+\begin{center}\begin{tabular}{l p{9.1cm}}
+\hline
+Symbol& Description\\
+\hline
+\color{ao} \verb?backcolor? & Background color in a histogram. The available colors are
+   \verb?auto?, \verb?black?, \verb?blue?, \verb?cyan?, \verb?green?,
+   \verb?grey?, \verb?none? (transparent), \verb?orange?, \verb?purple?,
+   \verb?red?, \verb?white? and \verb?yellow?. The color can be made lighter or
+    darker by adding an explicit $\pm 1$, $\pm 2$ or $\pm 3$.\\
+\color{ao} \verb?backstyle? & Background texture in a histogram. The available values are
+   \verb?dline? (diagonal-lines), \verb?dotted? (dots), \verb?hline? (horizontal
+   lines), \verb?solid? (uniform color) and \verb?vline? (vertical lines).\\
+\color{ao} \verb?linecolor? & Color of the histogram lines. The available colors are the
+   same as for the \verb?backcolor? attribute.\\
+\color{ao} \verb?linestyle? & Style of the histogram lines. The available values are
+   \verb?dash-dotted?, \verb?dashed?, \verb?dotted? and \verb?solid?.\\
+\color{ao} \verb?linewidth? & Width of the histogram lines, given as an integer smaller
+   than 10.\\
+\color{ao} \verb?title?     & Name of the dataset (for histogram legends).\\
+\color{ao} \verb?type?      & \verb?background? or \verb?signal? nature of a given sample
+  (for figure-of-merit calculations).\\
+\color{ao} \verb?weight?    & Reweights each histogram entry with a constant factor. The
+  value has to be a floating-point number.\\
+\color{ao} \verb?weighted_events? & Allows \MA\ to ignore the weights of the events
+  (property to be set to \verb?true? or \verb?false?).\\
+\color{ao} \verb?xsection?  & This overwrites the event sample cross section. The value has
+  to be given in pb.\\
+\hline
+\end{tabular}
+\end{center}
+
+\vspace{2cm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{shaded}
+\section{\Large Using \FJnorm\ through \MAnorm}
+\end{shaded}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent In order to activate the usage of \FJ\ through \MA, the program has to be
+started in the reconstructed mode and the first command to be typed in the
+interpreter has to be
+{\color{ao} \begin{verbatim}
+  set main.fastsim.package = fastjet
+\end{verbatim}}
+\noindent This allows for various option of the \verb+main.fastsim+ object, tuning the
+properties of the jet algorithm that has to be employed. Those options are set
+by typing in
+{\color{ao} \begin{verbatim}
+  set main.fastsim.<property> = <value>
+\end{verbatim}}
+\noindent the list of all available properties being presented, together with the allowed
+values, in the following table.
+\renewcommand{\arraystretch}{1.2}%
+\begin{center}\begin{tabular}{l p{9.4cm}}
+\hline
+Symbol& Description\\
+\hline
+\color{ao} \verb?algorithm? & Sets up the jet algorithm to use. The allowed
+  values are \verb?antikt?\cite{Cacciari:2008gp}, \verb?Cambridge?\cite{%
+   Dokshitzer:1997in,Wobisch:1998wt}, \verb?cdfjetclu?\cite{Abe:1991ui},
+   \verb?cdfmidpoint?\cite{Blazey:2000qt}, \verb?genkt?\cite{Cacciari:2011ma},
+   \verb?gridjet?\cite{Cacciari:2011ma}, \verb?kt?\cite{Catani:1993hr,%
+   Ellis:1993tq}, \verb?none? and \verb?siscone?\cite{Salam:2007xv}.\\
+\color{ao} \verb?areafraction? & Controls the size of the cones in the CDF midpoint
+  algorithm.\\
+\color{ao} \verb?exclusive_id? & Exclusive mode for jet reconstruction. If set
+  to \verb+false+, electrons muons and photons issued from hadron decays are
+  included into the electron, muon and photon collections respectively.\\
+\color{ao} \verb?input_ptmin? & Soft protojet threshold in the siscone
+  algorithm.\\
+\color{ao} \verb?iratch? & Switching on ratcheting for the CDF jet clustering algorithm.\\
+\color{ao} \verb?npassmax? & Number of iterations in the siscone algorithm.\\
+\color{ao} \verb?overlap? & Fraction of overlapping momentum used to combine
+  protojets in the siscone and CDF reconstruction algorithms.\\
+\color{ao} \verb?p? & $p$ parameter of the generalized $k_T$ algorithm.\\
+\color{ao} \verb?ptmin? & Threshold for the transverse momentum of the
+  reconstructed jets.\\
+\color{ao} \verb?radius? & Radius parameter relevant for most jet
+  clustering algorithms.\\
+\color{ao} \verb?seed? & Threshold parameter used in the constituent merging
+  procedure of the CDF reconstruction algorithms.\\
+\color{ao} \verb?spacing? & Grid spacing in the grid jet algorithm.\\
+\color{ao} \verb?ymax? & Maximum rapidity value in the grid jet algorithm.\\
+\hline
+\end{tabular}
+\end{center}
+\vspace{0.1cm}
+\noindent In addition, basic detector simulation effects can be mimicked through setting
+up the parameters included in the table below.
+\renewcommand{\arraystretch}{1.2}%
+\begin{center}\begin{tabular}{l p{8.4cm}}
+\hline
+Symbol& Description\\
+\hline
+\color{ao} \verb?bjet_id.efficiency? & $b$-tagging efficiency, as a float.\\
+\color{ao} \verb?bjet_id.exclusive? & Allows several $b$-jets to be issued from a single
+  $B$-hadron.\\
+\color{ao} \verb?bjet_id.matching_dr? & Angular distance parameter matching a $b$-jet
+  with a $B$-hadron.\\
+\color{ao} \verb?bjet_id.misid_cjet? & Mistagging rate of a $c$-jet as a $b$-jet, as
+  a float.\\
+\color{ao} \verb?bjet_id.misid_ljet? & Mistagging rate of a light jet as a $b$-jet,
+  as a float.\\
+\color{ao} \verb?tau_id.efficiency? & Tau-tagging efficiency, as a float.\\
+\color{ao} \verb?tau_id.misid_ljet? &  Mistagging rate of a light jet as a hadronic tau,
+   as a float.\\
+\hline
+\end{tabular}
+\end{center}
+
+\vspace{2cm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{shaded}
+\section{\Large Using \DELnorm\ through \MAnorm}
+\end{shaded}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\noindent In order to activate the usage of \DEL\ through \MA, the program has to be
+started in the reconstructed mode and the first command to be typed in the
+interpreter has to be
+{\color{ao}\begin{verbatim}
+  set main.fastsim.package = delphes
+\end{verbatim}}
+\noindent The properties of the simulation of the detector can then be adjusted through
+{\color{ao} \begin{verbatim}  set main.fastsim.<property> = <value>
+\end{verbatim}}
+the allowed choices being given in the table below.
+\renewcommand{\arraystretch}{1.2}%
+\begin{center}\begin{tabular}{l p{8.4cm}}
+\hline
+Symbol& Description\\
+\hline
+\color{ao} \verb?detector? & Determines which detector card to use. The card can be further
+  modified on run time).\\
+\color{ao} \verb?output?   & Saves the output \ROOT\ file (\verb+true+ or \verb+false+).\\
+\color{ao} \verb?rootfile? & Name of the output file.\\
+\color{ao} \verb?pileup? & Specifies the path to the input pile-up event file.\\
+\color{ao} \verb?skim_genparticles? & If set to \verb?true?, the generator-level
+  particles are not stored in the output file.\\
+\color{ao} \verb?skim_tracks? & If set to \verb?true?, the track collection is not stored
+  in the output file.\\
+\color{ao} \verb?skim_towers? & If set to \verb?true?, the collection of calorimetric
+  towers is not stored in the output file.\\
+\color{ao} \verb?skim_eflow? & If set to \verb?true?, the collection of particle-flow
+  towers is not stored in the output file.\\
+\hline
+\end{tabular}
+\end{center}
+
+\vspace{2cm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{shaded}
+\section{\Large Multipartonic matrix element merging}
+\end{shaded}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent \MA\ can be used to double check the merging procedure of event samples related
+to a given hard process but with matrix elements featuring a different
+final-state jet multiplicity. \MA\ has to be started in the hadronic mode, and
+the check is then performed by typing in
+{\color{ao}\begin{verbatim}
+ set main.merging.check = true
+\end{verbatim}}
+\noindent Two extra options are available,
+{\color{ao}\begin{verbatim}
+  set main.merging.ma5_mode = <true or false>
+  set main.merging.njets = <integer>
+\end{verbatim}}
+\noindent the first one indicating to extract the number of extra hard jets from the
+process identifier, and the second one setting up the maximum number of extra
+jets to consider.
+
+\newpage
+\bibliographystyle{plain} 
+\bibliography{main_normal}
+
+\end{document}

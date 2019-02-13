@@ -57,7 +57,7 @@ class LHCOParticleFormat
   static const std::string header;
 
   void Print(MAuint32 num, std::ostream* out);
-  static void WriteEventHeader(unsigned int numEvent,std::ostream* out);
+  static void WriteEventHeader(MAuint32 numEvent,std::ostream* out);
 };
 
 

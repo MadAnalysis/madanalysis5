@@ -54,7 +54,7 @@ class gz_ostream : public gz_streambase, public std::ostream
   {}
 
   /// Constructor with arguments
-  gz_ostream( const char* name, int open_mode = std::ios::out)
+  gz_ostream( const MAchar* name, MAint32 open_mode = std::ios::out)
       : gz_streambase( name, open_mode), std::ostream( &buf) 
   {}
   
@@ -63,7 +63,7 @@ class gz_ostream : public gz_streambase, public std::ostream
   { return gz_streambase::rdbuf(); }
 
   /// open a gzip file
-  void open( const char* name, int open_mode = std::ios::out)
+  void open( const MAchar* name, MAint32 open_mode = std::ios::out)
   { gz_streambase::open( name, open_mode); }
 
 };

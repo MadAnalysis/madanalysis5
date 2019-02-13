@@ -52,7 +52,7 @@
 using namespace MA5;
 
 
-bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<std::string,std::string>& options)
+MAbool DetectorDelphes::Initialize(const std::string& configFile, const std::map<std::string,std::string>& options)
 { 
   nprocesses_=0;
 
@@ -78,7 +78,7 @@ bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<s
     // output
     if (key=="output")
     {
-      unsigned int tmp=0;
+      MAuint32 tmp=0;
       std::stringstream str;
       str << it->second;
       str >> tmp;
@@ -131,11 +131,11 @@ bool DetectorDelphes::Initialize(const std::string& configFile, const std::map<s
     return false;
   }
 
-  bool isElectronMA5 = false;
-  bool isMuonMA5     = false;
-  bool isPhotonMA5   = false;
-  bool isJetMA5      = false;
-  for(unsigned int i=0; i<static_cast<unsigned int>(param.GetSize())/3; i++)
+  MAbool isElectronMA5 = false;
+  MAbool isMuonMA5     = false;
+  MAbool isPhotonMA5   = false;
+  MAbool isJetMA5      = false;
+  for(MAuint32 i=0; i<static_cast<MAuint32>(param.GetSize())/3; i++)
   {
     std::string branchInputArray = param[i*3+0].GetString();
     std::string branchName       = param[i*3+1].GetString();
@@ -201,7 +201,7 @@ std::string DetectorDelphes::GetParameters()
 
 
 /// Jet clustering
-bool DetectorDelphes::Execute(SampleFormat& mySample, EventFormat& myEvent)
+MAbool DetectorDelphes::Execute(SampleFormat& mySample, EventFormat& myEvent)
 {
   nprocesses_++;
 
@@ -303,7 +303,7 @@ void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat&
     }
     else
     {
-      candidate->Charge = pdgParticle ? int(pdgParticle->Charge()/3.0) : -999;
+      candidate->Charge = pdgParticle ? MAint32(pdgParticle->Charge()/3.0) : -999;
     }
 
     // Filling mother-daughter information

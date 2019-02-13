@@ -69,21 +69,21 @@ class WriterTextBase : public WriterBase
   }
 
   /// Initialize
-  virtual bool Initialize(const Configuration* cfg,
+  virtual MAbool Initialize(const Configuration* cfg,
                           const std::string& filename);
 
   /// Read the sample (virtual pure)
-  virtual bool WriteHeader(const SampleFormat& mySample) = 0;
+  virtual MAbool WriteHeader(const SampleFormat& mySample) = 0;
 
   /// Read the event (virtual pure)
-  virtual bool WriteEvent(const EventFormat& myEvent,
+  virtual MAbool WriteEvent(const EventFormat& myEvent,
                           const SampleFormat& mySample) = 0;
 
   /// Finalize the event (virtual pure)
-  virtual bool WriteFoot(const SampleFormat& mySample) = 0;
+  virtual MAbool WriteFoot(const SampleFormat& mySample) = 0;
 
   /// Finalize
-  virtual bool Finalize();
+  virtual MAbool Finalize();
 
   /// MA5 logo
   void WriteMA5header();

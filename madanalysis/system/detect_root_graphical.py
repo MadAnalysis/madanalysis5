@@ -56,8 +56,14 @@ class DetectRootGraphical:
             self.logger.debug("no user veto")
             return False
 
-    def AutoDetection(self):
+    def AreDependenciesInstalled(self):
+        if not self.archi_info.has_root:
+            self.logger.debug("dependency 'ROOT' is not installed")
+            return False
+        return True
 
+
+    def AutoDetection(self):
         if self.archi_info.has_root:
             return DetectStatusType.FOUND,''
         else:

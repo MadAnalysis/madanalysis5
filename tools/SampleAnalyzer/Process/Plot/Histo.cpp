@@ -70,11 +70,11 @@ void Histo::Write_TextFormatBody(std::ostream* output)
   // SelectionRegions
   if(regions_.size()!=0)
   {
-    unsigned int maxlength=0;
-    for(unsigned int i=0; i < regions_.size(); i++)
+    MAuint32 maxlength=0;
+    for(MAuint32 i=0; i < regions_.size(); i++)
       if (regions_[i]->GetName().size()>maxlength) maxlength=regions_[i]->GetName().size();
     *output << std::left << "    # Defined regions" << std::endl;
-    for(unsigned int i=0; i < regions_.size(); i++)
+    for(MAuint32 i=0; i < regions_.size(); i++)
     {
       *output << "      " << std::setw(maxlength) << std::left << regions_[i]->GetName();
       *output << "    # Region nr. " << std::fixed << i+1 << std::endl;
@@ -123,7 +123,7 @@ void Histo::Write_TextFormatBody(std::ostream* output)
   output->width(15); *output << std::scientific << underflow_.first;
   output->width(15); *output << std::scientific << underflow_.second;
   *output << " # underflow" << std::endl;
-  for (unsigned int i=0;i<histo_.size();i++)
+  for (MAuint32 i=0;i<histo_.size();i++)
   {
     *output << "      ";
     output->width(15); *output << std::scientific << histo_[i].first;

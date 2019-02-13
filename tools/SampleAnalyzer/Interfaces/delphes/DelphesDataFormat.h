@@ -28,6 +28,8 @@
 
 // STL headers
 #include <iostream>
+#include <vector>
+#include <map>
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
@@ -76,8 +78,11 @@ struct DelphesDataFormat
   TBranch* branchEFlowPhoton_;
   TBranch* branchEFlowNeutral_;
 
+  // List of collection
+  std::vector<std::pair<std::string,std::string> > collections_;
+
   // Switch for MA5card
-  bool delphesMA5card_;
+  MAbool delphesMA5card_;
 
   /// Constructor without arguments
   DelphesDataFormat();
@@ -86,7 +91,7 @@ struct DelphesDataFormat
   ~DelphesDataFormat();
 
   /// GetEntry
-  bool GetEntry(MAint64 treeEntry);
+  MAbool GetEntry(MAint64 treeEntry);
 
   /// Initialize all data
   void InitializeData();
@@ -95,7 +100,7 @@ struct DelphesDataFormat
   void InitializeBranch(TTree* tree);
 
   // Initialize a specific datum 
-  bool InitializeData(TBranch*& branch,TClonesArray*& array);
+  MAbool InitializeData(TBranch*& branch,TClonesArray*& array);
 
 };
 

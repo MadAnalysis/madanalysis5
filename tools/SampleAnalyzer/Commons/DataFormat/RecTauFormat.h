@@ -107,7 +107,7 @@ class RecTauFormat : public RecParticleFormat
   }
 
   /// Accessor to the electric charge
-  const int  charge() const  
+  const MAint32  charge() const
   { if (charge_) return +1; else return -1; }
 
   /// Mutator to the electric charge
