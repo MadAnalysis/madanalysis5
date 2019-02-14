@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -49,8 +49,10 @@ class DelphesCardChecker():
             cardname = self.main.fastsim.delphes.card
         elif self.main.fastsim.package=="delphesMA5tune":
             cardname = self.main.fastsim.delphesMA5tune.card
-        return self.dirname+"/Input/"+cardname        
-        
+        elif self.main.fastsim.package=="delphesLLP":
+            cardname = self.main.fastsim.delphesLLP.card
+        return self.dirname+"/Input/"+cardname
+
 
     def checkPresenceCard(self):
         logging.getLogger('MA5').debug("Check the presence of the Delphes card: "+self.getNameCard()+' ...')
@@ -58,7 +60,7 @@ class DelphesCardChecker():
             logging.getLogger('MA5').error('DelphesCard is not found: '+self.getNameCard())
             return False
         return True
-                          
+
 
     def editCard(self):
         logging.getLogger('MA5').debug("Invite the user to edit the Delphes card: "+self.getNameCard()+' ...')

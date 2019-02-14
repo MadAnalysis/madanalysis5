@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -41,6 +41,7 @@ class MadGraphInterface():
         self.has_matplotlib     = True
         self.has_delphes        = True
         self.has_delphesMA5tune = True
+        self.has_delphesLLP     = True
 
     class InvalidCard(Exception):
         pass
@@ -75,6 +76,10 @@ class MadGraphInterface():
             if self.has_root and not self.has_delphesMA5tune:
                 self.card.append('# Recasting functionalities based on DelphesMA5tune turned off. Please type')
                 self.card.append('#       install MadAnalysis5 --update --with_delphesMA5tune')
+                self.card.append('# in the MG5 interpereter to turn them on.\n')
+            if self.has_root and not self.has_delphesLLP:
+                self.card.append('# Recasting functionalities based on DelphesLLP turned off. Please type')
+                self.card.append('#       install MadAnalysis5 --update --with_delphesLLP')
                 self.card.append('# in the MG5 interpereter to turn them on.\n')
 
             self.card.append('@MG5aMC inputs = *.hepmc, *.hep, *.stdhep, *.lhco, *.fifo\n')
@@ -159,9 +164,15 @@ class MadGraphInterface():
             self.card.append('@MG5aMC reco_output = root')
             self.card.append('set main.fastsim.package  = delphesMA5tune')
             self.card.append('set main.fastsim.detector = cms')
+        elif self.has_root and self.has_delphesLLP:
+            self.card.append('\n# Reconstruction using Delphes')
+            self.card.append('@MG5aMC reconstruction_name = CMSReco')
+            self.card.append('@MG5aMC reco_output = root')
+            self.card.append('set main.fastsim.package  = delphesLLP')
+            self.card.append('set main.fastsim.detector = cms')
 
 
-        if self.has_root and (self.has_delphes or self.has_delphesMA5tune):
+        if self.has_root and (self.has_delphes or self.has_delphesMA5tune or self.has_delphesLLP):
             self.card.append('\n# Analysis using both reco')
             self.card.append('@MG5aMC analysis_name = analysis2')
             self.card.append('# Uncomment the next line to bypass this analysis')
@@ -272,14 +283,14 @@ class MadGraphInterface():
                     self.card.append('plot DELTAR('+','.join(perm)+') 40 0 10 [logY]')
 
         # recasting
-        if self.has_root and (self.has_delphes or self.has_delphesMA5tune):
+        if self.has_root and (self.has_delphes or self.has_delphesMA5tune or self.has_delphesLLP):
             self.card.append('\n# Recasting')
             self.card.append('@MG5aMC recasting_commands')
             self.card.append('set main.recast = on')
             self.card.append('set main.recast.store_root = False')
             self.card.append('@MG5aMC recasting_card')
             self.card.append('# Uncomment the analyses to run')
-            self.card.append('# Delphes cards must be located in the PAD(ForMA5tune) directory')
+            self.card.append('# Delphes cards must be located in the PAD(ForMA5tune/LLP) directory')
             self.card.append('# Switches must be on or off')
             self.card.append('# AnalysisName               PADType    Switch     DelphesCard')
             ma5dir = \
@@ -292,6 +303,11 @@ class MadGraphInterface():
             if self.has_delphesMA5tune:
                 cpath = os.path.normpath(os.path.join(ma5dir,'PADForMA5tune'))
                 tmp = self.recastinfo.CreateMyCard(cpath,"PADForMA5tune",False)
+                tmp = ['# '+x for x in tmp]
+                self.card+= tmp
+            if self.has_delphesLLP:
+                cpath = os.path.normpath(os.path.join(ma5dir,'PADLLP'))
+                tmp = self.recastinfo.CreateMyCard(cpath,"PADLLP",False)
                 tmp = ['# '+x for x in tmp]
                 self.card+= tmp
 

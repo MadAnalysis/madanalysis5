@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -198,7 +198,7 @@ class JobWriter():
     def CopyDelphesCard(self,input,output,cfg,theFile):
         TagTreeWriter=False
         TagExecutionPath=False
-        
+
         # READING THE FILE  
         for line in input:
 
@@ -213,7 +213,7 @@ class JobWriter():
             if myline.startswith('#'):
                 output.write(line)
                 continue
-                
+
             if len(words)>=2:
                 if words[0].lower()=='set' and \
                    words[1].lower()=='executionpath':
@@ -264,12 +264,11 @@ class JobWriter():
             
             # Enter TreeWriter
             output.write(line)
-        
 
     def CopyDelphesMA5Card(self,input,output,cfg,theFile):
         TagTreeWriter=False
         TagExecutionPath=False
-        
+
         # READING THE FILE  
         for line in input:
 
@@ -285,18 +284,21 @@ class JobWriter():
 
         if self.main.fastsim.package=="delphes":
             cardname = self.main.fastsim.delphes.card
+            cfg      = self.main.fastsim.delphes
         elif self.main.fastsim.package=="delphesMA5tune":
             cardname = self.main.fastsim.delphesMA5tune.card
-        if self.main.fastsim.package=="delphesMA5tune":
-            cfg=self.main.fastsim.delphesMA5tune
-        else:
-            cfg=self.main.fastsim.delphes
+            cfg      = self.main.fastsim.delphesMA5tune
+        elif self.main.fastsim.package=="delphesLLP":
+            cardname = self.main.fastsim.delphesLLP.card
+            cfg      = self.main.fastsim.delphesLLP
 
         try:
             if self.main.fastsim.package=="delphes":
                 input = open(self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Interfaces/delphes/"+cardname,'r')
             elif self.main.fastsim.package=="delphesMA5tune":
                 input = open(self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Interfaces/delphesMA5tune/"+cardname,'r')
+            elif self.main.fastsim.package=="delphesLLP":
+                input = open(self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Interfaces/delphesLLP/"+cardname,'r')
         except:
             logging.getLogger('MA5').error("impossible to find "+self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Interfaces/delphes/"+cardname)
         if "../../../.." in cardname:
@@ -317,8 +319,8 @@ class JobWriter():
                 theFile = cfg.pileup
             else:    
                 theFile = os.path.normpath(theDir+"/"+cfg.pileup)
- 
-        if self.main.fastsim.package=="delphes":
+
+        if self.main.fastsim.package in ['delphes', 'delphesLLP']:
             self.CopyDelphesCard(input,output,cfg,theFile)
         elif self.main.fastsim.package=="delphesMA5tune": 
             self.CopyDelphesMA5Card(input,output,cfg,theFile)
@@ -354,7 +356,7 @@ class JobWriter():
                 logging.getLogger('MA5').error('Impossible to make executable the file "newAnalyzer"')
                 return False
 
-        if self.main.fastsim.package in ["delphes","delphesMA5tune"]:
+        if self.main.fastsim.package in ["delphes","delphesMA5tune",'delphesLLP']:
             self.CreateDelphesCard()
 
         if self.main.recasting.status=="on":
@@ -462,13 +464,21 @@ class JobWriter():
             file.write('  if (cluster1==0) return 1;\n\n')
 
         # + Case Delphes
-        if self.main.fastsim.package in ["delphes","delphesMA5tune"]:
+        if self.main.fastsim.package in ["delphes","delphesMA5tune",'delphesLLP']:
             file.write('  //Getting pointer to fast-simulation package\n')
             file.write('  std::map<std::string, std::string> parametersD1;\n')
             if self.fastsim.package=="delphesMA5tune":
-                cfg=self.main.fastsim.delphesMA5tune
-            else:
-                cfg=self.main.fastsim.delphes
+                cfg      = self.main.fastsim.delphesMA5tune
+                cardname = self.main.fastsim.delphesMA5tune.card
+            elif self.fastsim.package=="delphes":
+                cfg      = self.main.fastsim.delphes
+                cardname = self.main.fastsim.delphes.card
+            elif self.fastsim.package=="delphesLLP":
+                cfg      = self.main.fastsim.delphesLLP
+                cardname = self.main.fastsim.delphesLLP.card
+            if "../../../.." in cardname:
+                cardname=cardname.split('/')[-1]
+
             parameters = self.main.fastsim.SampleAnalyzerConfigString()
             for k,v in sorted(parameters.iteritems(),\
                               key=lambda (k,v): (k,v)):
@@ -476,18 +486,11 @@ class JobWriter():
             file.write('  DetectorBase* fastsim1 = \n')
 
             if self.main.fastsim.package=="delphes":
-                cardname = self.main.fastsim.delphes.card
-                if "../../../.." in cardname:
-                    cardname=cardname.split('/')[-1]
-            elif self.main.fastsim.package=="delphesMA5tune":
-                cardname = self.main.fastsim.delphesMA5tune.card
-                if "../../../.." in cardname:
-                    cardname=cardname.split('/')[-1]
-
-            if self.main.fastsim.package=="delphes":
                 file.write('      manager.InitializeDetector("delphes","../Input/'+cardname+'",parametersD1);\n')
-            else:
+            elif self.main.fastsim.package=="delphesMA5tune":
                 file.write('      manager.InitializeDetector("delphesMA5tune","../Input/'+cardname+'",parametersD1);\n')
+            elif self.main.fastsim.package=="delphesLLP":
+                file.write('      manager.InitializeDetector("delphesLLP","../Input/'+cardname+'",parametersD1);\n')
 
             file.write('  if (fastsim1==0) return 1;\n\n')
 
@@ -528,9 +531,7 @@ class JobWriter():
             file.write('      if (!analyzer2->Execute(mySample,myEvent)) continue;\n')
         if self.main.fastsim.package=="fastjet":
             file.write('      cluster1->Execute(mySample,myEvent);\n')
-        elif self.main.fastsim.package=="delphes":
-            file.write('      fastsim1->Execute(mySample,myEvent);\n')
-        elif self.main.fastsim.package=="delphesMA5tune":
+        elif self.main.fastsim.package in ["delphes",'delphesLLP','delphesMA5tune']:
             file.write('      fastsim1->Execute(mySample,myEvent);\n')
         file.write('      if (!analyzer1->Execute(mySample,myEvent)) continue;\n')
         if self.output!="" and  not self.output.lower().endswith('root'):
