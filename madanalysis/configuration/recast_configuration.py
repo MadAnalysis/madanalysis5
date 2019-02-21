@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2019 Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -159,22 +159,11 @@ class RecastConfiguration:
                 else:
                     canrecast=True
 
-                # DelphesLLP and the PADLLP?
-                if archi_info.has_delphesLLP:
-                    self.ma5tune=True
-                if session_info.has_padllp:
-                    self.padtune=True
-                if not archi_info.has_delphesLLP or not session_info.has_padllp:
-                    self.logger.warning("DelphesLlp and/or the PADLLP are not installed " + \
-                        "(or deactivated): the corresponding analyses will be unavailable")
-                else:
-                    canrecast=True
-
                 # can we use the recasting mode
                 if canrecast:
                     self.status="on"
                 else:
-                    self.logger.error("The recasting modules (PAD/Delphes, PADForMA5tune/DelphesMa5tune, PADLLP/DelphesLLP) " + \
+                    self.logger.error("The recasting modules (PAD/Delphes, PADForMA5tune/DelphesMa5tune) " + \
                        "are not available. The recasting mode cannot be activated")
                     return
 
@@ -261,8 +250,6 @@ class RecastConfiguration:
         if self.card_path=="":
             if self.padtune and self.ma5tune:
                 self.CreateMyCard(dirname,"PADForMA5tune",write)
-            if self.padllp and self.delphesllp:
-                self.CreateMyCard(dirname,"PADForMA5tune",write)
             if self.pad and self.delphes:
                 self.CreateMyCard(dirname,"PAD",write)
             return True
@@ -278,19 +265,15 @@ class RecastConfiguration:
 
     def CheckCard(self,dirname):
         self.logger.info('   Checking the recasting card...')
-        ToLoopOver = []
-        padlist    = []
-        llplist    = []
-        tunelist   = []
+        ToLoopOver=[]
+        padlist=[]
+        tunelist=[]
         if self.pad:
             padfile  = open(os.path.normpath(os.path.join(self.ma5dir,"tools/PAD/Build/Main/main.cpp")), 'r')
             ToLoopOver.append([padfile, padlist])
         if self.padtune:
             tunefile = open(os.path.normpath(os.path.join(self.ma5dir,"tools/PADForMA5tune/Build/Main/main.cpp")), 'r')
             ToLoopOver.append([tunefile, tunelist])
-        if self.padllp:
-            llpfile = open(os.path.normpath(os.path.join(self.ma5dir,"tools/PADLLP/Build/Main/main.cpp")), 'r')
-            ToLoopOver.append([llpfile, llplist])
         for myfile,mylist in ToLoopOver:
             for line in myfile:
                 if "manager.InitializeAnalyzer" in line:
@@ -305,8 +288,6 @@ class RecastConfiguration:
             padfile.close()
         if self.padtune:
             tunefile.close()
-        if self.padllp:
-            llpfile.close()
         usercard = open(self.card_path)
         for line in usercard:
             if len(line.strip())==0:
@@ -331,13 +312,6 @@ class RecastConfiguration:
                     return False
                 if not os.path.isfile(os.path.normpath(os.path.join(self.ma5dir,'tools/PADForMA5tune/Input/Cards',mydelphes))):
                     self.logger.error("Recasting card: PADForMA5tune analysis linked to an invalid delphes card: " + myana + " - " + mydelphes)
-                    return False
-            elif myana in  [x[0] for x in llplist]:
-                if myver!="v1.2":
-                    self.logger.error("Recasting card: invalid analysis (not present in the PADLLP): " + myana)
-                    return False
-                if not os.path.isfile(os.path.normpath(os.path.join(self.ma5dir,'tools/PADLLP/Input/Cards',mydelphes))):
-                    self.logger.error("Recasting card: PADLLP analysis linked to an invalid delphes card: " + myana + " - " + mydelphes)
                     return False
             else:
                 self.logger.error("Recasting card: invalid analysis (not present in the PAD and in the PADForMA5tune): " + myana)
@@ -364,10 +338,10 @@ class RecastConfiguration:
         if write:
             exist=os.path.isfile(dirname+'/Input/recasting_card.dat')
             if not exist and write:
-                thecard.append('# Delphes cards must be located in the PAD(ForMA5tune/LLP) directory')
+                thecard.append('# Delphes cards must be located in the PAD(ForMA5tune) directory')
                 thecard.append('# Switches must be on or off')
                 thecard.append('# AnalysisName               PADType    Switch     DelphesCard')
-        if padtype in ["PAD", "PADLLP"]:
+        if padtype=="PAD":
             mytype="v1.2"
         else:
             mytype="v1.1"

@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2019 Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -129,8 +129,6 @@ class LibraryWriter():
             filename = self.path+"/SampleAnalyzer/Test/Makefile_delphes"
         elif package=='test_delphesMA5tune':
             filename = self.path+"/SampleAnalyzer/Test/Makefile_delphesMA5tune"
-        elif package=='test_delphesLLP':
-            filename = self.path+"/SampleAnalyzer/Test/Makefile_delphesLLP"
         elif package=='test_root':
             filename = self.path+"/SampleAnalyzer/Test/Makefile_root"
 
@@ -154,8 +152,6 @@ class LibraryWriter():
             title='*delphes-interface* test'
         elif package=='test_delphesMA5tune':
             title='*delphesMA5tune-interface* test'
-        elif package=='test_delphesLLP':
-            title='*delphesLLP-interface* test'
         elif package=='test_root':
             title='*root-interface* test'
         else:
@@ -214,8 +210,6 @@ class LibraryWriter():
             options.has_delphes_ma5lib        = self.main.archi_info.has_delphes
             options.has_delphesMA5tune_tag    = self.main.archi_info.has_delphesMA5tune
             options.has_delphesMA5tune_ma5lib = self.main.archi_info.has_delphesMA5tune
-            options.has_delphesLLP_tag        = self.main.archi_info.has_delphesLLP
-            options.has_delphesLLP_ma5lib     = self.main.archi_info.has_delphesLLP
             toRemove.extend(['compilation_root.log','linking_root.log','cleanup_root.log','mrproper_root.log'])
         elif package=='test_root':
             options.has_commons     = True
@@ -225,9 +219,6 @@ class LibraryWriter():
             if self.main.archi_info.has_delphesMA5tune:
                 options.has_delphesMA5tune_tag    = True
                 options.has_delphesMA5tune_ma5lib = True
-            if self.main.archi_info.has_delphesLLP:
-                options.has_delphesLLP_tag    = True
-                options.has_delphesLLP_ma5lib = True
             options.has_root        = True
             options.has_root_ma5lib = True
             options.has_root_inc    = True
@@ -248,32 +239,15 @@ class LibraryWriter():
             options.has_root_lib    = True
          #   options.has_delphesMA5tune_lib = True
             toRemove.extend(['compilation_delphesMA5tune.log','linking_delphesMA5tune.log','cleanup_delphesMA5tune.log','mrproper_delphesMA5tune.log','../Bin/TestDelphesMA5tune.log'])
-        elif package=='delphesLLP':
-            options.has_commons            = True
-            options.has_delphesLLP_lib     = True
-            options.has_delphesLLP_inc     = True
-            options.has_root               = True
-            options.has_root_inc           = True
-            options.has_root_lib           = True
-            toRemove.extend(['compilation_delphesLLP.log','linking_delphesLLP.log','cleanup_delphesLLP.log','mrproper_delphesLLP.log'])
-        elif package=='test_delphesLLP':
-            options.has_commons           = True
-            options.has_delphesLLP_ma5lib = True
-            options.has_root_inc          = True
-            options.has_root_lib          = True
-         #   options.has_delphesLLP_lib = True
-            toRemove.extend(['compilation_delphesLLP.log','linking_delphesLLP.log','cleanup_delphesLLP.log','mrproper_delphesLLP.log','../Bin/TestDelphesLLP.log'])
         elif package=='process':
             options.has_commons=True
             options.has_fastjet_ma5lib        = self.main.archi_info.has_fastjet
             options.has_delphes_ma5lib        = self.main.archi_info.has_delphes
             options.has_delphesMA5tune_ma5lib = self.main.archi_info.has_delphesMA5tune
-            options.has_delphesLLP_ma5lib     = self.main.archi_info.has_delphesLLP
             options.has_zlib_ma5lib           = self.main.archi_info.has_zlib
             options.has_fastjet_tag           = self.main.archi_info.has_fastjet
             options.has_delphes_tag           = self.main.archi_info.has_delphes
             options.has_delphesMA5tune_tag    = self.main.archi_info.has_delphesMA5tune
-            options.has_delphesLLP_tag        = self.main.archi_info.has_delphesLLP
             options.has_zlib_tag              = self.main.archi_info.has_zlib
             options.has_root_tag              = self.main.archi_info.has_root
             options.has_root_ma5lib           = self.main.archi_info.has_root
@@ -284,17 +258,14 @@ class LibraryWriter():
           #  options.has_fastjet_ma5lib        = self.main.archi_info.has_fastjet
           #  options.has_delphes_ma5lib        = self.main.archi_info.has_delphes
           #  options.has_delphesMA5tune_ma5lib = self.main.archi_info.has_delphesMA5tune
-          #  options.has_delphesLLP_ma5lib     = self.main.archi_info.has_delphesLLP
           #  options.has_zlib_ma5lib           = self.main.archi_info.has_zlib
           #  options.has_fastjet_lib           = self.main.archi_info.has_fastjet
           #  options.has_delphes_lib           = self.main.archi_info.has_delphes
           #  options.has_delphesMA5tune_lib    = self.main.archi_info.has_delphesMA5tune
-          #  options.has_delphesLLP_lib        = self.main.archi_info.has_delphesLLP
           #  options.has_zlib_lib              = self.main.archi_info.has_zlib
           #  options.has_fastjet_tag           = self.main.archi_info.has_fastjet
           #  options.has_delphes_tag           = self.main.archi_info.has_delphes
           #  options.has_delphesMA5tune_tag    = self.main.archi_info.has_delphesMA5tune
-          #  options.has_delphesLLP_tag        = self.main.archi_info.has_delphesLLP
           #  options.has_zlib_tag              = self.main.archi_info.has_zlib
             toRemove.extend(['compilation_process.log','linking_process.log','cleanup_process.log','mrproper_process.log','../Bin/TestSampleAnalyzer.log'])
 
@@ -320,9 +291,6 @@ class LibraryWriter():
         elif package=='test_delphesMA5tune':
             cppfiles = ['DelphesMA5tune/*.cpp']
             hfiles   = ['DelphesMA5tune/*.h']
-        elif package=='test_delphesLLP':
-            cppfiles = ['DelphesLLP/*.cpp']
-            hfiles   = ['DelphesLLP/*.h']
         elif package=='test_root':
             cppfiles = ['Root/*.cpp']
             hfiles   = ['Root/*.h']
@@ -363,10 +331,6 @@ class LibraryWriter():
             isLibrary=False
             ProductName='TestDelphesMA5tune'
             ProductPath='../Bin/'
-        elif package=='test_delphesLLP':
-            isLibrary=False
-            ProductName='TestDelphesLLP'
-            ProductPath='../Bin/'
         else:
             isLibrary=True
             ProductName='lib'+package+'_for_ma5.so'
@@ -388,7 +352,7 @@ class LibraryWriter():
         # log file name
         if package in ['process','commons','test','configuration']:
             logfile = folder+'/compilation.log'
-        elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_root','test_delphes','test_delphesMA5tune','test_delphesLLP']:
+        elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_root','test_delphes','test_delphesMA5tune']:
             logfile = folder+'/compilation_'+package[5:]+'.log'
         else:
             logfile = folder+'/compilation_'+package+'.log'
@@ -396,7 +360,7 @@ class LibraryWriter():
         # makefile
         if package in ['process','commons','test','configuration']:
             makefile = 'Makefile'
-        elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_root','test_delphes','test_delphesMA5tune','test_delphesLLP']:
+        elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_root','test_delphes','test_delphesMA5tune']:
             makefile = 'Makefile_'+package[5:]
         else:
             makefile = 'Makefile_'+package
@@ -423,7 +387,7 @@ class LibraryWriter():
         # log file name
         if package in ['process','commons','test','configuration']:
             logfile = folder+'/linking.log'
-        elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_root','test_delphes','test_delphesMA5tune','test_delphesLLP']:
+        elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_root','test_delphes','test_delphesMA5tune']:
             logfile = folder+'/linking_'+package[5:]+'.log'
         else:
             logfile = folder+'/linking_'+package+'.log'
@@ -431,7 +395,7 @@ class LibraryWriter():
         # makefile
         if package in ['process','commons','test','configuration']:
             makefile = 'Makefile'
-        elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_root','test_delphes','test_delphesMA5tune','test_delphesLLP']:
+        elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_root','test_delphes','test_delphesMA5tune']:
             makefile = 'Makefile_'+package[5:]
         else:
             makefile = 'Makefile_'+package
@@ -455,7 +419,7 @@ class LibraryWriter():
         # log file name
         if package in ['process','commons','configuration','test']:
             logfile = folder+'/cleanup.log'
-        elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_root','test_delphes','test_delphesMA5tune','test_delphesLLP']:
+        elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_root','test_delphes','test_delphesMA5tune']:
             logfile = folder+'/cleanup_'+package[5:]+'.log'
         else:
             logfile = folder+'/cleanup_'+package+'.log'
@@ -463,7 +427,7 @@ class LibraryWriter():
         # makefile
         if package in ['process','commons','test','configuration']:
             makefile = 'Makefile'
-        elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_root','test_delphes','test_delphesMA5tune','test_delphesLLP']:
+        elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_root','test_delphes','test_delphesMA5tune']:
             makefile = 'Makefile_'+package[5:]
         else:
             makefile = 'Makefile_'+package
@@ -487,7 +451,7 @@ class LibraryWriter():
         # log file name
         if package in ['process','commons','configuration']:
             logfile = folder+'/mrproper.log'
-        elif package in ['test_process','test_commons','test_zlib','test_root','test_fastjet','test_delphes','test_delphesMA5tune','test_delphesLLP']:
+        elif package in ['test_process','test_commons','test_zlib','test_root','test_fastjet','test_delphes','test_delphesMA5tune']:
             logfile = folder+'/mrproper_'+package[5:]+'.log'
         else:
             logfile = folder+'/mrproper_'+package+'.log'
@@ -497,7 +461,7 @@ class LibraryWriter():
         # makefile
         if package in ['process','commons','test','configuration']:
             makefile = 'Makefile'
-        elif package in ['test_process','test_commons','test_zlib','test_root','test_fastjet','test_delphes','test_delphesMA5tune','test_delphesLLP']:
+        elif package in ['test_process','test_commons','test_zlib','test_root','test_fastjet','test_delphes','test_delphesMA5tune']:
             makefile = 'Makefile_'+package[5:]
         else:
             makefile = 'Makefile_'+package

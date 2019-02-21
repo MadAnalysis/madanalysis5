@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2019 Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -38,7 +38,6 @@ class MakefileWriter():
             self.has_fastjet        = False
             self.has_delphes        = False
             self.has_delphesMA5tune = False
-            self.has_delphesLLP     = False
 
 
     @staticmethod
@@ -94,9 +93,6 @@ class MakefileWriter():
         if options.has_delphesMA5tune:
             file.write('\tcd Interfaces && $(MAKE) -f Makefile_delphesMA5tune\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_delphesMA5tune\n')
-        if options.has_delphesLLP:
-            file.write('\tcd Interfaces && $(MAKE) -f Makefile_delphesLLP\n')
-            file.write('\tcd Test && $(MAKE) -f Makefile_delphesLLP\n')
         if options.has_process:
             file.write('\tcd Process && $(MAKE) -f Makefile\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_process\n')
@@ -123,9 +119,6 @@ class MakefileWriter():
         if options.has_delphesMA5tune:
             file.write('\tcd Interfaces && $(MAKE) -f Makefile_delphesMA5tune clean\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_delphesMA5tune clean\n')
-        if options.has_delphesLLP:
-            file.write('\tcd Interfaces && $(MAKE) -f Makefile_delphesLLP clean\n')
-            file.write('\tcd Test && $(MAKE) -f Makefile_delphesLLP clean\n')
         if options.has_process:
             file.write('\tcd Process && $(MAKE) -f Makefile clean\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_process clean\n')
@@ -153,9 +146,6 @@ class MakefileWriter():
         if options.has_delphesMA5tune:
             file.write('\tcd Interfaces && $(MAKE) -f Makefile_delphesMA5tune mrproper\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_delphesMA5tune mrproper\n')
-        if options.has_delphesLLP:
-            file.write('\tcd Interfaces && $(MAKE) -f Makefile_delphesLLP mrproper\n')
-            file.write('\tcd Test && $(MAKE) -f Makefile_delphesLLP mrproper\n')
         if options.has_process:
             file.write('\tcd Process && $(MAKE) -f Makefile mrproper\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_process mrproper\n')
@@ -175,24 +165,20 @@ class MakefileWriter():
             self.has_fastjet_tag           = False
             self.has_delphes_tag           = False
             self.has_delphesMA5tune_tag    = False
-            self.has_delphesLLP_tag        = False
             self.has_root_tag              = False
             self.has_zlib_tag              = False
             self.has_fastjet_inc           = False
             self.has_delphes_inc           = False
             self.has_delphesMA5tune_inc    = False
-            self.has_delphesLLP_inc        = False
             self.has_zlib_inc              = False
             self.has_root_inc              = False
             self.has_fastjet_lib           = False
             self.has_delphes_lib           = False
             self.has_delphesMA5tune_lib    = False
-            self.has_delphesLLP_lib        = False
             self.has_zlib_lib              = False
             self.has_fastjet_ma5lib        = False
             self.has_delphes_ma5lib        = False
             self.has_delphesMA5tune_ma5lib = False
-            self.has_delphesLLP_ma5lib     = False
             self.has_zlib_ma5lib           = False
             self.has_root                  = False
             self.has_root_tag              = False
@@ -268,13 +254,6 @@ class MakefileWriter():
                 cxxflags.extend(['-I'+header])
             file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
 
-        # - delphesLLP
-        if options.has_delphesLLP_inc:
-            cxxflags=[]
-            for header in archi_info.delphesLLP_inc_paths:
-                cxxflags.extend(['-I'+header])
-            file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
-
         # - tags
         cxxflags=[]
         if options.has_root_tag:
@@ -287,8 +266,6 @@ class MakefileWriter():
              cxxflags.extend(['-DDELPHES_USE'])
         if options.has_delphesMA5tune_tag:
              cxxflags.extend(['-DDELPHESMA5TUNE_USE'])
-        if options.has_delphesLLP_tag:
-             cxxflags.extend(['-DDELPHESLLP_USE'])
         if len(cxxflags)!=0:
             file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
         file.write('\n')
@@ -366,16 +343,6 @@ class MakefileWriter():
                 libs.extend(['-lDelphesMA5tune'])
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
 
-        # - delphesLLP
-        if options.has_delphesLLP_ma5lib or options.has_delphesLLP_lib:
-            libs=[]
-            if options.has_delphesLLP_ma5lib:
-                libs.extend(['-ldelphesLLP_for_ma5'])
-            if options.has_delphesLLP_lib:
-#                libs.extend(['-L'+archi_info.delphesLLP_lib_paths[0],'-lDelphesLLP'])
-                libs.extend(['-lDelphesLLP'])
-            file.write('LIBFLAGS += '+' '.join(libs)+'\n')
-
         # - Commons
         if options.has_commons:
             libs=[]
@@ -407,8 +374,6 @@ class MakefileWriter():
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libroot_for_ma5.so')
         if options.has_delphesMA5tune_ma5lib:
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libdelphesMA5tune_for_ma5.so')
-        if options.has_delphesLLP_ma5lib:
-            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libdelphesLLP_for_ma5.so')
         if options.has_fastjet_ma5lib:
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so')
         if len(libs)!=0:

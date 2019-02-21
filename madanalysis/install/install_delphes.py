@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2019 Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -42,17 +42,17 @@ class InstallDelphes:
         self.package     = 'delphes'
         if package == 'delphesma5tune':
             self.package = 'delphesMA5tune'
-        elif package == 'delphesllp':
-            self.package = 'delphesLLP'
         self.toolsdir    = os.path.join(self.main.archi_info.ma5dir,'tools')
         self.installdir  = os.path.join(self.toolsdir,self.package)
         self.tmpdir      = self.main.session_info.tmpdir
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir    = os.path.join(self.tmpdir, 'MA5_'+self.package)
         self.ncores      = 1
+#        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
+#        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.0.tar.gz"}
+#        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.1.tar.gz"}
+#        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.3.tar.gz"}
         self.files = {package+".tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.4.1.tar.gz"}
-        if package == 'delphesllp':
-            self.files[package+".tar.gz"] = "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/DelphesTracks-3.4.1.tar.gz"
         self.logger = logging.getLogger('MA5')
 
 
@@ -165,7 +165,7 @@ class InstallDelphes:
                     self.logger.error('impossible to move the file/folder '+myfile+' from '+packagedir+' to '+self.installdir)
                     return False
 
-        if self.package in ['delphes', 'delphesLLP']:
+        if self.package=='delphes':
             # Updating DelphesFormula
             filename = self.installdir+'/classes/DelphesFormula.cc'
             self.logger.debug('Updating files '+filename+ ': adding d0\n')
@@ -187,7 +187,7 @@ class InstallDelphes:
         self.CommentLines(filename,[177,178,179,180],'//')
 
         # Adding files
-        if self.package in ['delphes', 'delphesLLP']:
+        if self.package=='delphes':
             filesToAdd = ["MA5GenParticleFilter","MA5EfficiencyD0"]
         elif self.package=='delphesMA5tune':
             filesToAdd = ["MA5GenParticleFilter"]
@@ -267,7 +267,7 @@ class InstallDelphes:
             return False
 
         # Check the libraries
-        if self.package in ['delphes', 'delphesLLP']:
+        if self.package=='delphes':
             libname = 'libDelphes'
         elif self.package=='delphesMA5tune':
             libname = 'libDelphesMA5tune'
@@ -386,7 +386,7 @@ class InstallDelphes:
                 output.write('  buffer.ReplaceAll("d0",     "t");\n')
             else:
                 output.write(line)
-
+ 
         #close
         input.close()
         output.close()
@@ -415,7 +415,7 @@ class InstallDelphes:
             except:
                 self.logger.error("impossible to copy "+inputname+' in '+outputname)
                 return False
-
+             
             inputname  = self.main.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces/delphes/'+file+'.h.install'
             outputname = self.installdir+'/modules/'+file+'.h'
             self.logger.debug("Copying file from '"+inputname+"' to '"+outputname+'" ...')
@@ -485,10 +485,6 @@ class InstallDelphes:
             libpaths  = self.main.archi_info.delphesMA5tune_lib_paths
             originals = self.main.archi_info.delphesMA5tune_original_libs
             key       = 'DelphesMA5tune'
-        elif self.package=='delphesLLP':
-            libpaths  = self.main.archi_info.delphesLLP_lib_paths
-            originals = self.main.archi_info.delphesLLP_original_libs
-            key       = 'DelphesLLP'
 
         ## Checking whether anything has to be deactivated
         if libpaths == []:
@@ -540,13 +536,6 @@ class InstallDelphes:
             self.main.archi_info.delphesMA5tune_inc_paths     = []
             self.main.archi_info.delphesMA5tune_lib           = ""
             self.main.archi_info.delphesMA5tune_original_libs = []
-        elif self.package=='delphesLLP':
-            self.main.archi_info.has_delphesLLP           = False
-            self.main.archi_info.delphesLLP_priority      = False
-            self.main.archi_info.delphesLLP_lib_paths     = []
-            self.main.archi_info.delphesLLP_inc_paths     = []
-            self.main.archi_info.delphesLLP_lib           = ""
-            self.main.archi_info.delphesLLP_original_libs = []
 
         return True
 
@@ -569,8 +558,6 @@ class InstallDelphes:
             has_delphes = checker.checkDelphes(True)
         elif self.package=='delphesMA5tune':
             has_delphes = checker.checkDelphesMA5tune(True)
-        elif self.package=='delphesLLP':
-            has_delphes = checker.checkDelphesLLP(True)
         self.logger.debug("  " + self.package + ' available? -> ' + str(has_delphes))
 
         ## Nothing to activate
@@ -611,20 +598,6 @@ class InstallDelphes:
                 [ activate(x) for x in self.main.archi_info.delphesMA5tune_lib_paths ])
             # Updating shortcuts
             originals    = self.main.archi_info.delphesMA5tune_original_libs
-        elif self.package=='delphesLLP':
-            # shortcuts
-            delphes_path = self.main.archi_info.delphesLLP_lib_paths[0]
-            originals    = self.main.archi_info.delphesLLP_original_libs
-            # architecture
-            self.main.archi_info.delphesLLP_lib           = activate(self.main.archi_info.delphesLLP_lib)
-            self.main.archi_info.delphesLLP_original_libs = [activate(x) for x in originals]
-            self.main.archi_info.delphesLLP_inc_paths     = libclean(
-                [ activate(x) for x in self.main.archi_info.delphesLLP_inc_paths ])
-            self.main.archi_info.delphesLLP_lib_paths     = libclean(
-                [ activate(x) for x in self.main.archi_info.delphesLLP_lib_paths ])
-            # Updating shortcuts
-            originals    = self.main.archi_info.delphesMA5tune_original_libs
-
         activated_path = activate(delphes_path)
 
         # do we have to activate delphes?
@@ -654,23 +627,17 @@ class InstallDelphes:
             self.main.archi_info.has_delphes      = True
             self.main.archi_info.delphes_priority = True
             key     = 'Delphes'
-            antikey = ['delphesMA5tune','delphesLLP']
+            antikey = 'delphesMA5tune'
         elif self.package=='delphesMA5tune':
             self.main.archi_info.has_delphesMA5tune      = True
             self.main.archi_info.delphesMA5tune_priority = True
             key     = 'DelphesMA5tune'
-            antikey = ['delphes','delphesLLP']
-        elif self.package=='delphesLLP':
-            self.main.archi_info.has_delphesLLP      = True
-            self.main.archi_info.delphesLLP_priority = True
-            key     = 'DelphesLLP'
-            antikey = ['delphes','delphesMA5tune']
+            antikey = 'delphes'
 
         install_path = os.path.join(self.main.archi_info.ma5dir,'tools',self.package)
         mylib = os.path.join(install_path,'lib' + key + '.so')
         self.main.archi_info.libraries[key] = mylib + ":" + str(os.stat(mylib).st_mtime)
-        for akey in antikey:
-            self.main.archi_info.toLDPATH1 = [x for x in self.main.archi_info.toLDPATH1 if not akey in x]
+        self.main.archi_info.toLDPATH1 = [x for x in self.main.archi_info.toLDPATH1 if not antikey in x]
         self.main.archi_info.toLDPATH1.append(install_path)
 
         # Makefile
