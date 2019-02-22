@@ -541,6 +541,7 @@ class Main():
         libraries.append(['process', 'SampleAnalyzer core', 'process', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libprocess_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Process',False])
         libraries.append(['test_process','SampleAnalyzer core', 'test_process', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestSampleAnalyzer',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
 
+  
         # Writing the Makefiles
         self.logger.info("")
         self.logger.info("   **********************************************************")
@@ -550,6 +551,11 @@ class Main():
 
         # Getting number of cores
         ncores = compiler.get_ncores2()
+
+        # Chronometer start
+        from chronometer  import Chronometer
+        chrono = Chronometer()
+        chrono.Start()
 
         # Writing the main Makefile
         from madanalysis.build.makefile_writer import MakefileWriter
@@ -646,6 +652,12 @@ class Main():
 
             # Print Ok
             self.logger.info('      => Status: \x1b[32m'+'[OK]'+'\x1b[0m')
+
+        self.logger.info("   **********************************************************")
+
+        # Chrono end
+        chrono.Stop()
+        self.logger.info("   Elapsed time = "+chrono.Display())
 
         self.logger.info("   **********************************************************")
         self.logger.info("")

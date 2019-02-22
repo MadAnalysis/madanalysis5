@@ -61,7 +61,6 @@ class CmdInstall(CmdBase):
 
             ## to update all the paths
             def UpdatePaths():
-                print ('MUF = ', to_activate, to_deactivate)
                 if release=='delphes':
                     main.archi_info.has_delphes             = True
                     main.archi_info.delphes_priority        = True

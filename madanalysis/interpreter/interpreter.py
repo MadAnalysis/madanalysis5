@@ -26,9 +26,6 @@
    Uses the cmd package for command interpretation and tab completion.
 """
 
-import logging
-import readline
-import os
 
 # Import Interpreter core
 from madanalysis.interpreter.interpreter_base import InterpreterBase
@@ -62,6 +59,10 @@ from madanalysis.interpreter.cmd_submit         import CmdSubmit
 from madanalysis.interpreter.cmd_open           import CmdOpen
 from madanalysis.interpreter.cmd_reset          import CmdReset
 from madanalysis.interpreter.cmd_install        import CmdInstall
+
+import logging
+import readline
+import os
 
 
 #===============================================================================
@@ -105,19 +106,29 @@ class Interpreter(InterpreterBase):
         self.InitializeParticle()
         self.InitializeMultiparticle()
 
+
+    def InitializeHistory(self):
         # Importing history
         self.history_file = os.path.normpath(self.main.archi_info.ma5dir + '/.ma5history')
-        try:
-            readline.read_history_file(self.history_file)
-        except:
-            pass
+        logging.getLogger('MA5').debug("Importing history from: "+self.history_file+" ...")
+        if os.path.exists(self.history_file):
+            logging.getLogger('MA5').debug("-> File found. Reading history ...")
+            try:
+                readline.read_history_file(self.history_file)
+            except:
+                logging.getLogger('MA5').debug("-> Problem during the reading. The history is skipped!")
+        logging.getLogger('MA5').debug("-> Success!")
 
-    def __del__(self):
+
+    def FinalizeHistory(self):
+        # Importing history
+        logging.getLogger('MA5').debug("Exporting the history to: "+self.history_file+" ...")
+        readline.set_history_length(500)
         try:
-            readline.set_history_length(100)
             readline.write_history_file(self.history_file)
         except:
-            pass
+            logging.getLogger('MA5').debug("-> Problem during the writing. The history is not saved!")
+        logging.getLogger('MA5').debug("-> Success!")
 
 
     def do_set(self,line):

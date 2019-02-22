@@ -1084,7 +1084,7 @@ class Layout:
         report.WriteSubSubTitle('Command history')
         text.Reset()
         text.SetFont(FontType.TT)
-        for item in history:
+        for item in history.history:
             text.Add('ma5>'+ item+'\n\n')
         report.WriteText(text)
 

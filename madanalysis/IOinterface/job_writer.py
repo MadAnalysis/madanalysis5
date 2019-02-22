@@ -788,7 +788,7 @@ class JobWriter():
     def WriteHistory(self,history,firstdir):
         file = open(self.path+"/history.ma5","w")
         file.write('set main.currentdir = '+firstdir+'\n') 
-        for line in history:
+        for line in history.history:
             items = line.split(';')
             for item in items :
                 if item.startswith('help') or \

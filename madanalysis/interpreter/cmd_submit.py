@@ -35,11 +35,11 @@ from madanalysis.misc.run_recast                                import RunRecast
 from madanalysis.IOinterface.delphescard_checker                import DelphesCardChecker
 
 
+from chronometer   import Chronometer
 from string_tools  import StringTools
 import logging
 import glob
 import os
-import time
 import commands
 import shutil
 
@@ -57,31 +57,6 @@ class CmdSubmit(CmdBase):
         self.forbiddenpaths.append(os.path.normpath(self.main.archi_info.ma5dir+'/bin'))
         self.forbiddenpaths.append(os.path.normpath(self.main.archi_info.ma5dir+'/madanalysis'))
 
-    @staticmethod
-    def chronometer_display(diff):
-        fill=False
-        theLast=time.localtime(diff)
-        theLastStr=""
-        if theLast.tm_mday>1:
-            theLastStr=time.strftime('%d days ',theLast)
-            fill=True
-        elif theLast.tm_mday==0:
-            theLastStr=time.strftime('%d day ',theLast)
-        if theLast.tm_hour>1:
-            theLastStr=time.strftime('%H hours ',theLast)
-            fill=True
-        elif theLast.tm_hour==0 or fill:
-            theLastStr=time.strftime('%H hour ',theLast)
-        if theLast.tm_min>1:
-            theLastStr=time.strftime('%M minutes ',theLast)
-            fill=True
-        elif theLast.tm_min==0 or fill:
-            theLastStr=time.strftime('%M minute ',theLast)
-        if theLast.tm_sec>1:
-            theLastStr=time.strftime('%s seconds ',theLast)
-        else:
-            theLastStr=time.strftime('%s second ',theLast)
-        return theLastStr
 
     def do(self,args,history):
         if not self.resubmit:
@@ -93,7 +68,8 @@ class CmdSubmit(CmdBase):
     def do_resubmit(self,args,history):
 
         # Start time
-        start_time=time.time()
+        chrono = Chronometer()
+        chrono.Start()
 
         # Checking argument number
         if len(args)!=0:
@@ -170,15 +146,16 @@ class CmdSubmit(CmdBase):
         # Creating the reports
         self.CreateReports([self.main.lastjob_name],history,layout)
 
-        # End time 
-        end_time=time.time()
+        # End of time 
+        chrono.Stop()
 
-        self.logger.info("   Well done! Elapsed time = " + CmdSubmit.chronometer_display(end_time-start_time) )
+        self.logger.info("   Well done! Elapsed time = "+chrono.Display())
 
     def do_submit(self,args,history):
 
         # Start time
-        start_time=time.time()
+        chrono = Chronometer()
+        chrono.Start()
 
         # No arguments
         if len(args)==0:
@@ -238,9 +215,11 @@ class CmdSubmit(CmdBase):
         if not self.main.recasting.status=="on":
             self.CreateReports(args,history,layout)
 
-        # End time 
-        end_time=time.time()
-        self.logger.info("   Well done! Elapsed time = " + CmdSubmit.chronometer_display(end_time-start_time) )
+        # End of time 
+        chrono.Stop()
+
+        self.logger.info("   Well done! Elapsed time = "+chrono.Display())
+
 
     # Generating the reports
     def CreateReports(self,args,history,layout):

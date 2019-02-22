@@ -44,8 +44,8 @@ class InstallPad:
         self.untardir    = ""
         self.ncores      = 1
         self.files= {
-          "pad.dat"    : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/pad.dat",
-          "bib_pad.dat": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/bib_pad.dat"
+          "pad.dat"    : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/pad2.dat",
+          "bib_pad.dat": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/bib_pad2.dat"
         }
         if padname=='padforma5tune':
             self.files  = {

@@ -219,7 +219,7 @@ def MainSession(mode,arglist,ma5dir,version,date):
         main.InitObservables(main.mode)
 
     main.forced         = mode.forcedmode
-    Main.forced         = mode.forcedmode
+#    Main.forced         = mode.forcedmode
     main.script         = mode.scriptmode
     main.developer_mode = mode.developer_mode
 
@@ -296,6 +296,7 @@ def MainSession(mode,arglist,ma5dir,version,date):
         # Launching the interpreter
         from madanalysis.interpreter.interpreter import Interpreter
         interpreter = Interpreter(main)
+        interpreter.InitializeHistory()
 
         # Executing the ma5 scripts
         if not ScriptStack.IsEmpty() and not ScriptStack.IsFinished():
@@ -312,6 +313,7 @@ def MainSession(mode,arglist,ma5dir,version,date):
 
         # Interpreter loop
         interpreter.cmdloop()
+        interpreter.FinalizeHistory()
         if main.repeatSession==True:
             return True
         else:
@@ -370,28 +372,28 @@ def LaunchMA5(version, date, ma5dir):
     from madanalysis.core.main import Main
 
     # Configurating tab completion
-    try: 
-        import readline
-    except ImportError:
-        try:
-            import pyreadline as readline
-        except:
-            print "For tab completion and history, install module readline."
-    else:
-        import rlcompleter
-    
-        if 'r261:67515' in sys.version and  'GCC 4.2.1 (Apple Inc. build 5646)' in sys.version:
-            readline.parse_and_bind("bind ^I rl_complete")
-            readline.__doc__ = 'libedit'  
-    
-        elif hasattr(readline, '__doc__'):
-            if 'libedit' not in readline.__doc__:
-                readline.parse_and_bind("tab: complete")
-            else:
-                readline.parse_and_bind("bind ^I rl_complete")
-        else:
-            readline.__doc__ = 'GNU'
-            readline.parse_and_bind("tab: complete")
+#    try: 
+#        import readline
+#    except ImportError:
+#        try:
+#            import pyreadline as readline
+#        except:
+#            print "For tab completion and history, install module readline."
+#    else:
+#        import rlcompleter
+#    
+#        if 'r261:67515' in sys.version and  'GCC 4.2.1 (Apple Inc. build 5646)' in sys.version:
+#            readline.parse_and_bind("bind ^I rl_complete")
+#            readline.__doc__ = 'libedit'  
+#    
+#        elif hasattr(readline, '__doc__'):
+#            if 'libedit' not in readline.__doc__:
+#                readline.parse_and_bind("tab: complete")
+#            else:
+#                readline.parse_and_bind("bind ^I rl_complete")
+#        else:
+#            readline.__doc__ = 'GNU'
+#            readline.parse_and_bind("tab: complete")
 
     # Read arguments
     mode,arglist = DecodeArguments(version, date)

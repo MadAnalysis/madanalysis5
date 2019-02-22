@@ -25,12 +25,15 @@
 import logging
 import sys
 
-from string_tools                                       import StringTools
+from string_tools import StringTools
+from chronometer  import Chronometer
+
 class InstallManager():
 
     def __init__(self,main):
-        self.main=main
+        self.main   = main
         self.logger = logging.getLogger('MA5')
+        self.chrono = Chronometer()
 
     def Execute(self, rawpackage):
 
@@ -88,6 +91,9 @@ class InstallManager():
         # Get list of the methods of the installer class
         # If the method does not exist, the method is not called
         methods = dir(installer)
+
+        # Chrono start
+        self.chrono.Start()
 
         # 0. Detecting previous installation
         if 'Detect' in methods:
@@ -193,18 +199,33 @@ class InstallManager():
 
     def PrintGood(self):
         self.logger.info("   Installation complete.")
+
+        # Chrono end
+        self.chrono.Stop()
+        self.logger.info("   Elapsed time = "+self.chrono.Display())
+
         self.logger.info('   => Status: \x1b[32m'+'[OK]'+'\x1b[0m')
         self.logger.info("   **********************************************************")
         self.logger.info("")
 
     def PrintSkip(self):
         self.logger.info("   Installation skipped.")
+
+        # Chrono end
+        self.chrono.Stop()
+        self.logger.info("   Elapsed time = "+self.chrono.Display())
+
         self.logger.info('   => Status: \x1b[35m'+'[SKIPPED]'+'\x1b[0m')
         self.logger.info("   **********************************************************")
         self.logger.info("")
 
     def PrintBad(self):
         self.logger.info("   Installation NOT complete.")
+
+        # Chrono end
+        self.chrono.Stop()
+        self.logger.info("   Elapsed time = "+self.chrono.Display())
+
         self.logger.info('   => Status: \x1b[31m'+'[FAILURE]'+'\x1b[0m')
         self.logger.info("   **********************************************************")
         self.logger.info("")
