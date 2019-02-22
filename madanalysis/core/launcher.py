@@ -219,7 +219,7 @@ def MainSession(mode,arglist,ma5dir,version,date):
         main.InitObservables(main.mode)
 
     main.forced         = mode.forcedmode
-#    Main.forced         = mode.forcedmode
+    Main.forced         = mode.forcedmode
     main.script         = mode.scriptmode
     main.developer_mode = mode.developer_mode
 
