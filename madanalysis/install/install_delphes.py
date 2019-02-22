@@ -52,8 +52,10 @@ class InstallDelphes:
 #        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.0.tar.gz"}
 #        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.1.tar.gz"}
 #        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.3.tar.gz"}
-#        self.files = {package+".tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.4.1.tar.gz"}
-        self.files = {package+".tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/delphes342pre.tar.gz"} # Delphes for LLP not release yet
+        if package == 'delphesma5tune':
+            self.files = {package+".tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.4.1.tar.gz"}
+        else:
+            self.files = {package+".tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/delphes342pre.tar.gz"} # Delphes for LLP not release yet
         self.logger = logging.getLogger('MA5')
 
 
