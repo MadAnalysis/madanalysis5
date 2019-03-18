@@ -27,7 +27,7 @@ from madanalysis.dataset.dataset_collection             import DatasetCollection
 from madanalysis.selection.selection                    import Selection
 from madanalysis.interpreter.cmd_base                   import CmdBase
 from madanalysis.region.region_collection               import RegionCollection
-from madanalysis.tagging.tagger                         import Tagger
+from madanalysis.fastsim.fastsim                        import SuperFastSim
 from madanalysis.system.session_info                    import SessionInfo
 from madanalysis.system.architecture_info               import ArchitectureInfo
 from madanalysis.core.library_builder                   import LibraryBuilder
@@ -87,12 +87,12 @@ class Main():
         self.madgraph       = MadGraphInterface()
         self.logger         = logging.getLogger('MA5')
         self.redirectSAlogger = False
-        self.tagger         = Tagger()
 
 
     def ResetParameters(self):
         self.merging        = MergingConfiguration()
         self.fastsim        = FastsimConfiguration()
+        self.superfastsim   = SuperFastSim()
         self.recasting      = RecastConfiguration()
         self.fom            = FomConfiguration()
         self.lumi           = 10
@@ -106,9 +106,12 @@ class Main():
             self.normalize = NormalizeType.NONE
         else:
             self.normalize = NormalizeType.LUMI_WEIGHT
+        self.superfastsim.InitObservables(self.observables)
+
 
     def InitObservables(self,mode):
         self.observables = ObservableManager(mode)
+        self.superfastsim.InitObservables(self.observables)
 
 
     def IsGoodFormat(self,file):

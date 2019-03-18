@@ -117,6 +117,10 @@ class LayoutWriter():
                 file.write('  titleY = "'+str(item.GetYaxis())+'"\n')
                 file.write('  xmin = '+str(item.xmin)+'\n')
                 file.write('  xmax = '+str(item.xmax)+'\n')
+                if item.ymin!=[]:
+                    file.write('  ymin = '+str(item.ymin)+'\n')
+                if item.ymax!=[]:
+                    file.write('  ymax = '+str(item.ymax)+'\n')
                 file.write('</Histogram>\n')
                 file.write('\n')
 

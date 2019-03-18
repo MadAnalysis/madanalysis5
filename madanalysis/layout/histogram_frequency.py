@@ -32,10 +32,14 @@ class HistogramFrequency:
 
 
     def Print(self):
-       # Data
-       self.positive.Print()
-       self.negative.Print()
-       self.summary.Print()
+        # General info
+        if self.ymin!=[] or self.ymax!=[]:
+            logging.getLogger('MA5').info(' ' + str(self.ymin) + ' ' + str(self.ymax))
+
+        # Data
+        self.positive.Print()
+        self.negative.Print()
+        self.summary.Print()
 
 
     def FinalizeReading(self,main,dataset):
@@ -95,6 +99,8 @@ class HistogramFrequency:
         self.nbins    = 0
         self.xmin     = 0.
         self.xmax     = 1.
+        self.ymin     = []
+        self.ymax     = []
 
         # labels
         self.labels       = [] # int: PDG id 

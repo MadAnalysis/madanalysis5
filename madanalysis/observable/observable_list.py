@@ -593,6 +593,27 @@ DPHI_0_2PI = ObservableBase( name          = 'DPHI_0_2PI',
                              latex         = '$\Delta\Phi_{0,2\pi}$'
                            )
 
+RECOIL = ObservableBase( name          = 'RECOIL',
+                         args          = [ArgumentType.COMBINATION,\
+                                         ArgumentType.COMBINATION],
+                         combination   = CombinationType.SUMVECTOR,
+                         plot_auto     = False,
+                         plot_nbins    = 100,
+                         plot_xmin     = 0.,
+                         plot_xmax     = 500.,
+                         plot_unitX_tlatex    = 'GeV/c^{2}',
+                         plot_unitX_latex    = 'GeV$^2$',
+                         code_parton   = 'recoil()',
+                         code_hadron   = 'recoil()',
+                         code_reco     = 'recoil()',
+                         cut_event     = True,
+                         cut_candidate = True,
+                         tlatex        = '#Delta M',
+                         latex         = '$\Delta M$'
+                       )
+
+
+
 ETA = ObservableBase( name          = 'ETA',
                       args          = [ArgumentType.COMBINATION],
                       combination   = CombinationType.SUMVECTOR,

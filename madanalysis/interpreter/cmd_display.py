@@ -148,8 +148,8 @@ class CmdDisplay(CmdBase.CmdBase):
 
     def do(self,args):
         # Checking argument number
-        if len(args)>0 and args[0].lower()=='tagger':
-            return self.main.tagger.Display(args[1:])
+        if len(args)>0 and args[0].lower() in ['tagger','smearer']:
+            return self.main.superfastsim.display(args)
         elif len(args)==1:
             return self.do_other(args[0])
         elif len(args)==5 or len(args)==4:

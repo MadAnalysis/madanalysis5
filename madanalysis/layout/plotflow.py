@@ -156,7 +156,6 @@ class PlotFlow:
                                     ReportFormatType.convert2filetype(modes[iout]))
 
             for iset in range(0,len(self.detail)):
-
             # Appending histo
                 histos.append(self.detail[iset][irelhisto])
 #               if mode==2:
@@ -463,6 +462,10 @@ class PlotFlow:
         outputC.write('  stack->GetYaxis()->SetTitleFont(22);\n')
         outputC.write('  stack->GetYaxis()->SetTitleOffset(1);\n')
         outputC.write('  stack->GetYaxis()->SetTitle("'+axis_titleY+'");\n')
+        if ref.ymin!=[]:
+            outputC.write('  stack->SetMinimum('+str(ref.ymin)+');\n')
+        if ref.ymax!=[]:
+            outputC.write('  stack->SetMaximum('+str(ref.ymax)+');\n')
 
         outputC.write('\n')
         outputC.write('  // X axis\n')
@@ -867,11 +870,19 @@ class PlotFlow:
                     myweights+=','
                 myweights+='y'+histos[ind].name+'_'+str(ind)+'_weights.max()'
             myweights+='])'
-        outputPy.write('    ymax=('+myweights+').max()*1.1\n')
+        if ref.ymax==[]:
+            outputPy.write('    ymax=('+myweights+').max()*1.1\n')
+        else:
+            outputPy.write('    ymax='+str(ref.ymax)+'\n')
         outputPy.write('    ')
-        if is_logy:
-            outputPy.write('#')
-        outputPy.write('ymin=0 # linear scale\n')
+        if ref.ymin==[]:
+            if is_logy:
+                outputPy.write('#')
+            outputPy.write('ymin=0 # linear scale\n')
+        else:
+            if is_logy and ref.ymin<=0:
+                outputPy.write('#')
+            outputPy.write('ymin=' + str(ref.ymin)+' # linear scale\n')
 
         myweights=''
         if stackmode:
@@ -887,9 +898,14 @@ class PlotFlow:
                 myweights+='y'+histos[ind].name+'_'+str(ind)+'_weights.min()'
             myweights+=',1.])'
         outputPy.write('    ')
-        if not is_logy:
-            outputPy.write('#')
-        outputPy.write('ymin=min([x for x in ('+myweights+') if x])/100. # log scale\n')
+        if ref.ymin==[]:
+            if not is_logy:
+                outputPy.write('#')
+            outputPy.write('ymin=min([x for x in ('+myweights+') if x])/100. # log scale\n')
+        else:
+            if is_logy and ref.ymin<=0:
+                outputPy.write('#')
+            outputPy.write('ymin=' + str(ref.ymin)+' # log scale\n')
         outputPy.write('    plt.gca().set_ylim(ymin,ymax)\n')
         outputPy.write('\n')
 

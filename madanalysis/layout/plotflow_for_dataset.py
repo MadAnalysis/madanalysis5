@@ -71,7 +71,6 @@ class PlotFlowForDataset:
 
         # Loop over plot
         for iabshisto in range(0,len(self.main.selection)):
-
             # Keep only histogram
             if self.main.selection[iabshisto].__class__.__name__!="Histogram":
                 continue

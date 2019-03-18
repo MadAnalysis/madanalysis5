@@ -229,6 +229,8 @@ class MergingPlots:
             histoname=DJRplots[ind].name
             xmin=DJRplots[ind].xmin
             xmax=DJRplots[ind].xmax
+            ymin=DJRplots[ind].ymin
+            ymax=DJRplots[ind].ymax
             xnbin=DJRplots[ind].nbins
             outputC.write('  TH1F* '+histoname+' = new TH1F("'+histoname+\
                           '_'+str(MergingPlots.counter)+'","'+\
@@ -282,6 +284,10 @@ class MergingPlots:
         outputC.write('  stack->GetYaxis()->SetTitleFont(22);\n')
         outputC.write('  stack->GetYaxis()->SetTitleOffset(1);\n')
         outputC.write('  stack->GetYaxis()->SetTitle("'+axis_titleY+'");\n')
+        if DJRplots[ind].ymin!=[]:
+            outputC.write('  stack->SetMinimum('+DJRplots[ind].ymin+');\n')
+        if DJRplots[ind].ymax!=[]:
+            outputC.write('  stack->SetMinimum('+DJRplots[ind].ymax+');\n')
         outputC.write('\n')
 
         # Setting X axis label
@@ -392,6 +398,8 @@ class MergingPlots:
         # Binnning and x-axis
         xmin=DJRplots[0].xmin
         xmax=DJRplots[0].xmax
+        ymin=DJRplots[0].ymin
+        ymax=DJRplots[0].ymax
         xnbin=DJRplots[0].nbins
         outputPy.write('    # Histo binning\n')
         outputPy.write('    xBinning = numpy.linspace('+\
@@ -471,9 +479,15 @@ class MergingPlots:
         outputPy.write('               fontsize=16,color="black")\n')
         outputPy.write('\n')
         wname = DJRplots[0].name+'_'+str(MergingPlots.counter)+'_weights'
-        outputPy.write('    ymax='+wname+'.max()*1.1\n')
-        minweight='[x for x in ('+wname+') if x]'
-        outputPy.write('    ymin=min('+minweight+')/100\n')
+        if DJRplots[ind].ymax==[]:
+            outputPy.write('    ymax='+wname+'.max()*1.1\n')
+        else:
+            outputPy.write('    ymax='+str(DJRplots[ind].ymax)+'\n')
+        if DJRplots[ind].ymin==[]:
+            minweight='[x for x in ('+wname+') if x]'
+            outputPy.write('    ymin=min('+minweight+')/100\n')
+        else:
+            outputPy.write('    ymin='+str(DJRplots[ind].ymin)+'\n')
         outputPy.write('    plt.gca().set_ylim(ymin,ymax)\n')
         outputPy.write('    plt.gca().set_yscale("log",nonposy="clip")\n')
         outputPy.write('\n\n')

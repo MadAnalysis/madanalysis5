@@ -187,6 +187,14 @@ class ParticleBaseFormat
     return dphi;
   }
 
+  /// Accessor to the recoil class (computed wrt another particle)
+  const MAfloat32 recoil(const ParticleBaseFormat* p) const
+    { return std::abs((momentum_ - p->momentum()).M()); }
+
+  /// Accessor to the recoil class (computed wrt another particle)
+  const MAfloat32 recoil(const ParticleBaseFormat& p) const
+    { return std::abs((momentum_ - p.momentum()).M()); }
+
   /// Accessor to the delta Phi (given in [0, 2pi] with another particle direction
   const MAfloat32 dphi_0_2pi(const ParticleBaseFormat* p) const 
   {

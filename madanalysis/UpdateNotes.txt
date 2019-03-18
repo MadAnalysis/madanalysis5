@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+132           (2019/03/18) fuks:    Adding a ymax/ymin option for histograms 
+
 125  1.7   (2019/02/07) ma5team:    - Simplification of the multiple PAD management (externalisation)
                                     - Simplification of the multiple delphes management
                                     - Restoring compatibility with the older PAD4MA5tune (root6)

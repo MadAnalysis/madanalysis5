@@ -364,7 +364,7 @@ def WriteJobExecuteNbody(file,iabs,combi1,main,container,tagName,tagIndex,condit
 
         # Result    
         file.write('    if (q1.')
-        if obs.name in ['DELTAR','vDELTAR','DPHI_0_PI','DPHI_0_2PI']:
+        if obs.name in ['DELTAR','vDELTAR','DPHI_0_PI','DPHI_0_2PI', 'RECOIL']:
             if main.mode == MA5RunningType.PARTON:
               TheObs=obs.code_parton[:-2]
             elif main.mode == MA5RunningType.HADRON:

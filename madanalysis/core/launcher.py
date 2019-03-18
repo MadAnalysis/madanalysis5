@@ -372,28 +372,28 @@ def LaunchMA5(version, date, ma5dir):
     from madanalysis.core.main import Main
 
     # Configurating tab completion
-#    try: 
-#        import readline
-#    except ImportError:
-#        try:
-#            import pyreadline as readline
-#        except:
-#            print "For tab completion and history, install module readline."
-#    else:
-#        import rlcompleter
-#    
-#        if 'r261:67515' in sys.version and  'GCC 4.2.1 (Apple Inc. build 5646)' in sys.version:
-#            readline.parse_and_bind("bind ^I rl_complete")
-#            readline.__doc__ = 'libedit'  
-#    
-#        elif hasattr(readline, '__doc__'):
-#            if 'libedit' not in readline.__doc__:
-#                readline.parse_and_bind("tab: complete")
-#            else:
-#                readline.parse_and_bind("bind ^I rl_complete")
-#        else:
-#            readline.__doc__ = 'GNU'
-#            readline.parse_and_bind("tab: complete")
+    try: 
+        import readline
+    except ImportError:
+        try:
+            import pyreadline as readline
+        except:
+            print "For tab completion and history, install module readline."
+    else:
+        import rlcompleter
+    
+        if 'r261:67515' in sys.version and  'GCC 4.2.1 (Apple Inc. build 5646)' in sys.version:
+            readline.parse_and_bind("bind ^I rl_complete")
+            readline.__doc__ = 'libedit'  
+    
+        elif hasattr(readline, '__doc__'):
+            if 'libedit' not in readline.__doc__:
+                readline.parse_and_bind("tab: complete")
+            else:
+                readline.parse_and_bind("bind ^I rl_complete")
+        else:
+            readline.__doc__ = 'GNU'
+            readline.parse_and_bind("tab: complete")
 
     # Read arguments
     mode,arglist = DecodeArguments(version, date)
