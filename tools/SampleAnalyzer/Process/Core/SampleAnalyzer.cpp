@@ -804,17 +804,24 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
   for(MAuint32 i=0; i<analyzers_.size(); i++)
     analyzers_[i]->Finalize(summary,mySamples);
 
-    // Finalize clusters
-    for (MAuint32 i=0;i<clusters_.size();i++)
-    {
-      clusters_[i]->Finalize();
-    }
+  // Finalize clusters
+  for (MAuint32 i=0;i<clusters_.size();i++)
+  {
+    clusters_[i]->Finalize();
+  }
 
-    // Finalize detectors
-    for (MAuint32 i=0;i<detectors_.size();i++)
-    {
-      detectors_[i]->Finalize();
-    }
+  // Finalize wrtiers
+  for(MAuint32 i=0; i<writers_.size(); i++)
+  {
+    writers_[i]->WriteFoot(summary);
+    writers_[i]->Finalize();
+  }
+
+  // Finalize detectors
+  for (MAuint32 i=0;i<detectors_.size();i++)
+  {
+    detectors_[i]->Finalize();
+  }
 
   // Display reports
   MA5::TimeService::GetInstance()->WriteGenericReport();

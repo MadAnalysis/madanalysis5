@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+133           (2019/03/19) fuks:    Fixing a small issue with the LHE writer (the final closing xml tag 
+                                   was missing) 
+
 132           (2019/03/18) fuks:    Adding a ymax/ymin option for histograms 
 
 125  1.7   (2019/02/07) ma5team:    - Simplification of the multiple PAD management (externalisation)
