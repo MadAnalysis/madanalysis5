@@ -30,16 +30,26 @@ class AST:
 
     # Initialization
     def __init__(self, id_, vars_):
-        self.logger    = logging.getLogger('MA5')
-        self.id        = id_
-        self.leaves    = []
-        self.variables = vars_
-        self.unary_ops = ['acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh',
+        self.logger     = logging.getLogger('MA5')
+        self.id         = id_
+        self.leaves     = []
+        self.variables  = vars_
+        self.unary_ops  = ['acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh',
            'cos', 'cosh', 'erf', 'erfc', 'exp', 'fabs', 'gamma', 'lgamma', 'log',
            'log10', 'sin', 'sinh', 'sqrt', 'tan', 'tanh']
+        self.binary2_ops = [ 'atan2', 'fmod', 'hypot',  'pow']
+        self.binary1_ops = { '^':1, '+':3, '-':3, '*':2, '/':2, '<=':4 ,'>=':4,
+          '<':4, '>':4, '==':4, 'and':5, 'or':5}
 
+
+    # Number of leaves
     def size(self):
         return len(self.leaves)
+
+
+    # Number of leaves
+    def reset(self):
+        self.leaves=[]
 
     # printing all the info on an ast
     def info(self):
@@ -50,36 +60,91 @@ class AST:
 
     # Main method: creating an ast from a formula
     def feed(self, formula_string):
-        frml = formula_string.split()
+        frml = formula_string.replace('**', ' ^ ')
+        for op in self.binary1_ops.keys():
+            frml = frml.replace(op, ' ' + op + ' ')
+        for op in [ '> =', '< =' ]:
+            frml = frml.replace(op, op.replace(' ',''))
+        frml = frml.split()
         frml = self.ToBasicLeaves(frml)
-        print 'init formula = ', frml
         while ')' in frml:
             id_end   = frml.index(')')
             id_start = [i for i,x in enumerate(frml[:id_end]) if x=='('][-1]
-            print "ooooh", id_start, id_end
-            print frml[id_start+1:id_end-1]
-            sub_tree = self.MakeConnections(frml[id_start+1:id_end])
-            del frml[id_start:id_end+1]
-            frml.insert(id_start, sub_tree)
-        print "cleaned; finalizing", frml
+            if ',' in frml[id_start+1:id_end-1]:
+                comma_pos   = frml.index(',')
+                sub_tree1 = self.MakeConnections(frml[id_start+1:comma_pos])
+                sub_tree2 = self.MakeConnections(frml[comma_pos+1:id_end])
+                if sub_tree1==False or sub_tree2==False:
+                    self.reset()
+                    return
+                del frml[id_start:id_end+1]
+                frml[id_start:id_start] = sub_tree1
+                frml[id_start+1:id_start+1] = sub_tree2
+                sub_tree = self.MakeConnections(frml[id_start-1:id_start+2])
+                if sub_tree==False:
+                    self.reset()
+                del frml[id_start-1:id_start+2]
+                frml[id_start-1:id_start-1] = sub_tree
+            else:
+                sub_tree = self.MakeConnections(frml[id_start+1:id_end])
+                if sub_tree==False:
+                    self.reset()
+                del frml[id_start:id_end+1]
+                frml[id_start:id_start] = sub_tree
         frml = self.MakeConnections(frml)
-        print "finalized", frml
-        bla
+        if frml==False:
+            self.reset()
 
 
     # Allow to make connections between leaves
     # There is no parentheses so that we can proceed straightforwardly
     def MakeConnections(self, sub_formula):
         frml = sub_formula
-        print 'To connect', frml
         while len(frml)>1:
             for i in range (0,len(frml)):
-                print i, frml[i]
-                print " --> ", frml[i].type
-                if frml[i].type == 'un_op':
+                if not isinstance(frml[i], Leaf):
+                    self.logger.error('Incorrect formula: '+ str(sub_formula) + \
+                       ' -> Ignored')
+                    return False
+                if frml[i].daughters!=[]:
+                    continue
+                if frml[i].type in ['var', 'cst', 'bin1_op']:
+                    continue
+                elif frml[i].type == 'un_op':
                     if frml[i].name in self.unary_ops:
-                        print frml[i], frml[i+1]
-                        blablabla
+                        sub_formula[i].connect([frml[i+1]])
+                        del frml[i+1]
+                        break
+                elif frml[i].type == 'bin2_op':
+                    if frml[i].name in self.binary2_ops:
+                        sub_formula[i].connect([frml[i+1],frml[i+2]])
+                        del frml[i+1:i+3]
+                        break
+                else:
+                   print frml[i]
+                   aieaieaaie
+            for prior in range(1,6):
+                replacement_done = False
+                bin_ignore = [x for x in self.binary1_ops.keys() if self.binary1_ops[x]!=prior]
+                for i in range (0,len(frml)):
+                    if frml[i].daughters!=[]:
+                        continue
+                    if frml[i].type in ['var', 'cst']:
+                        continue
+                    if frml[i].name in bin_ignore:
+                        continue
+                    if frml[i].type == 'bin1_op':
+                        if frml[i].name in self.binary1_ops:
+                            sub_formula[i].connect([frml[i-1],frml[i+1]])
+                            del frml[i+1]
+                            del frml[i-1]
+                            replacement_done = True
+                            break
+                    else:
+                       print frml[i]
+                       aieaieaaie2
+                if replacement_done:
+                    break
         return frml
 
 
@@ -97,12 +162,20 @@ class AST:
                 new_leaf = Leaf(self.size(), 'un_op', elem.lower(), [], [])
                 new_formula.append(new_leaf)
                 self.leaves.append(new_leaf)
-            # real numbers and integers
-            elif re.match("^\d+?\.\d+?$", elem):
-                new_leaf = Leaf(self.size(), 'cst', elem, [], [])
+            # unary operators
+            elif elem.lower() in self.binary2_ops:
+                new_leaf = Leaf(self.size(), 'bin2_op', elem.lower(), [], [])
                 new_formula.append(new_leaf)
                 self.leaves.append(new_leaf)
-            elif elem.isdigit() or (elem[0]=='-' and elem[1:].isdigit()):
+            # unary operators
+            elif elem.lower() in self.binary1_ops.keys():
+                new_leaf = Leaf(self.size(), 'bin1_op', elem.lower(), [], [])
+                new_formula.append(new_leaf)
+                self.leaves.append(new_leaf)
+            # real numbers and integers
+            elif re.match("^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$", elem) or\
+              re.match("^[-+]?[0-9]+\.?[0-9]*$", elem) or elem.isdigit() or \
+              (elem[0]=='-' and elem[1:].isdigit()):
                 new_leaf = Leaf(self.size(), 'cst', elem, [], [])
                 new_formula.append(new_leaf)
                 self.leaves.append(new_leaf)
@@ -111,22 +184,30 @@ class AST:
                 new_formula.append(elem)
         return new_formula
 
-    # transforming an op into an ast
-    def ToAST(self, leaf1, leaf2, bin_op):
-        for leaf in [leaf1, leaf2, bin_op]:
-            if not isinstance(leaf,Leaf):
-                self.logger.error('AST build: The element '+str(leaf)+' is not a Leaf')
-                return
-        if bin_op.daughters!=[]:
-            self.logger.error('AST build: The operator '+str(op)+' is connected to leaves')
-            return
-        for leaf in [leaf1, leaf2]:
-            if leaf.mother!=[]:
-                self.logger.error('AST build: The leaf '+str(leaf)+' is connected to an operator')
-                return
-        bin_op.daughters = [leaf1.id, leaf2.id]
-        leaf1.mother = [bin_op.id]
-        leaf2.mother = [bin_op.id]
-        for leaf in [leaf1, leaf2, bin_op]:
-            self.leaves.append(leaf)
 
+    # getting a given leaf
+    def get(self, nr):
+        result = [x for x in self.leaves if x.id==nr]
+        if len(result)!=1:
+            self.logger('trying to access an unexisting leaf')
+        return result[0]
+
+
+    # Writing a string out of the AST
+    def tostring(self):
+        main_mother = [x for x in self.leaves if x.mother==[]]
+        if len(main_mother)!=1:
+            self.logger.warning('Undefined AST without any identified main mother')
+        return main_mother[0].write(self)
+
+    # Writing a c++ string out of the AST
+    def tocpp(self,cpp_type, name):
+        spacing = '       '
+        main_mother = [x for x in self.leaves if x.mother==[]]
+        obs = list(set([x.name for x in self.leaves if x.type=='var']))
+        if len(main_mother)!=1:
+            self.logger.warning('Undefined AST without any identified main mother')
+        result = spacing + cpp_type + ' fct_'+name+'('+', '.join(obs)+')\n'+spacing+'{\n'
+        result += spacing + '   return ' + main_mother[0].write_cpp(self) + ';'
+        result+='\n'+spacing+'}'
+        return result

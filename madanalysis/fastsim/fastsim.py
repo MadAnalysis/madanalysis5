@@ -23,6 +23,7 @@
 
 
 import logging
+from madanalysis.fastsim.ast    import AST
 from madanalysis.fastsim.tagger import Tagger
 
 class SuperFastSim:
@@ -70,15 +71,15 @@ class SuperFastSim:
 
         ## Getting the bounds and the function
         function, bounds = self.decode_args(to_decode)
-        if function == '':
-            self.logger.error('cannot decode the function')
+        if function.size()==0:
+            self.logger.error('Cannot decode the function or the bounds')
             return
 
         ## Adding a rule to a tagger/smearer
         if args[0]=='tagger':
             self.tagger.add_rule(true_id,reco_id,function,bounds)
-
-        self.logger.warning('we need to implement what todo with a rulefor a tagger/smearer')
+        elif args[0]=='smearer':
+            self.logger.warning('we need to implement what todo with a smearer')
         return
 
 
@@ -121,65 +122,23 @@ class SuperFastSim:
             self.logger.error("number of opening '[' and closing ']' does not match.")
             return '', []
 
-        ## Main function
-        function = ''
-        for elem in args[:beginOptions]:
-            function += elem.upper()
-
-        ## Putting the bounds in an AST
-        ## To AST: creating an empty ast
-        from madanalysis.fastsim.ast import AST
-        ast_id     = 0
-        ast_bounds = AST(ast_id, self.observables.full_list)
-
-        ## feeding the AST with the bound formula
+        ## Putting the bounds into an AST
         bounds = ' '.join(args[beginOptions+1:endOptions])
+        ast_bounds = AST(0, self.observables.full_list)
         ast_bounds.feed(bounds)
-        bla
 
-
-        from madanalysis.fastsim.ast_leaf import Leaf
-        import re
-        binary_ops_list = ['atan2', 'copysign', 'fmod', 'hypot', 'ldexp', 'pow', '^', '+',
-          '-', '*', '/', '<' ,'>', '<=', '>=', '==']
-        formatted_bounds = []
-
-        ## To AST: Observables and constants to leafs
-
-        print (' new bounds =', formatted_bounds)
-
-        ## Getting the operator structure
-        ast_id+=1
-        ast_bounds.info()
-
-        for i in range(2,len(formatted_bounds)):
-            if isinstance(formatted_bounds[i],Leaf) and isinstance(formatted_bounds[i-1],Leaf) and\
-              isinstance(formatted_bounds[i-2],Leaf):
-                ast_bounds.ToAST(formatted_bounds[i-2],formatted_bounds[i],formatted_bounds[i-1])
-
-        ast_bounds.info()
-
-        vla
-        bounds   = []
-        current_bound = ''
-        for elem in args[beginOptions+1:endOptions]:
-            if elem.upper() != 'AND':
-                current_bound += elem.upper()
-            else:
-                bounds.append(current_bound)
-                current_bound = ''
-        if current_bound!='':
-            bounds.append(current_bound)
-        if bounds == []:
-            bounds = ['default']
-
-        ## Return
-        return function, bounds
-
+        ## Putting the efficiency into an AST
+        efficiency = ' ' .join(args[:beginOptions])
+        ast_eff = AST(1, self.observables.full_list)
+        ast_eff.feed(efficiency)
+        return ast_eff, ast_bounds
 
     # Display of a taggers/smearer
     def display(self,args):
-        logging.getLogger('MA5').warning('we need to implement how to display a tagger/smearer')
+        if args[0]=='tagger':
+            self.tagger.display()
+        elif args[0]=='smearer':
+            logging.getLogger('MA5').warning('we need to implement the smearer display')
         return
 
 

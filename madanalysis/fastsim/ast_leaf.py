@@ -40,7 +40,7 @@ class Leaf:
     def __repr__(self):
         if self.type in ['var', 'cst']:
             return 'LEAF[ ' + self.name+': { id:' + str(self.id) + ' }]'
-        elif self.type in ['bin_op', 'un_op']:
+        elif self.type in ['bin2_op', 'bin1_op', 'un_op']:
             return 'OP[ ' + self.name+': { id:' + str(self.id) + ' }]'
 
 
@@ -50,3 +50,59 @@ class Leaf:
         self.logger.info('    -> type/name = ' + self.type + ' ('+ self.name +')')
         self.logger.info('    -> mother: ' + str(self.mother))
         self.logger.info('    -> daugthers: '+ str(self.daughters))
+
+
+    ## Connecting leaves as mother and daughters
+    def connect(self, daughter_leafs):
+        for daughter in daughter_leafs:
+            if daughter.mother==[]:
+                daughter.mother = [self.id]
+            else:
+                self.logger.error('daughter leaf already having a mother')
+                daughter.info()
+                return
+            self.daughters.append(daughter.id)
+
+    ## Method to get a string out of an ast leaf
+    def write(self, tree):
+        if self.type in ['cst', 'var']:
+            return self.name
+        elif self.type == 'un_op' and len(self.daughters)==1:
+            return self.name + '(' + tree.get(self.daughters[0]).write(tree) + ')'
+        elif self.type == 'bin2_op' and len(self.daughters)==2:
+            return self.name + '(' + tree.get(self.daughters[0]).write(tree) + ', ' + \
+             tree.get(self.daughters[1]).write(tree) + ')'
+        elif self.type == 'bin1_op' and len(self.daughters)==2:
+            return '(' + tree.get(self.daughters[0]).write(tree) + ' ' + \
+               self.name + ' ' + tree.get(self.daughters[1]).write(tree) + ')'
+        else:
+            self.logger.warning('cannot write this ast')
+            self.info
+            return
+
+
+    ## From AT to c++
+    def write_cpp(self, tree):
+        if self.type in ['cst', 'var']:
+            return self.name
+        elif self.type == 'un_op' and len(self.daughters)==1:
+            return 'std::'+self.name + '(' +\
+              tree.get(self.daughters[0]).write_cpp(tree) + ')'
+        elif self.type == 'bin2_op' and len(self.daughters)==2:
+            return 'std::'+self.name + '(' +\
+              tree.get(self.daughters[0]).write_cpp(tree) + ', ' + \
+              tree.get(self.daughters[1]).write_cpp(tree) + ')'
+        elif self.type == 'bin1_op' and len(self.daughters)==2 and self.name != '^':
+            op = self.name.replace('and',' && ').replace('or',' || ')
+            return '(' + tree.get(self.daughters[0]).write_cpp(tree) + ' ' + \
+               op + ' ' + tree.get(self.daughters[1]).write_cpp(tree) + ')'
+        elif self.name=='^' and len(self.daughters)==2:
+            return 'pow(' + tree.get(self.daughters[0]).write_cpp(tree) + ', ' + \
+               tree.get(self.daughters[1]).write_cpp(tree) + ')'
+        else:
+            self.logger.warning('cannot write this ast')
+            self.info
+            return
+
+
+

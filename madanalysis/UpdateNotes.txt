@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+134           (2019/04/03) fuks:    Abstract syntax trees + tagger at the python level 
+
 133           (2019/03/19) fuks:    Fixing a small issue with the LHE writer (the final closing xml tag 
                                    was missing) 
 
