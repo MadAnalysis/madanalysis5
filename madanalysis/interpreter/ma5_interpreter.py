@@ -137,6 +137,9 @@ class MA5Interpreter(Interpreter):
         # Checking the configuration
         if not main.CheckConfig(debug=(LoggerLevel<=logging.DEBUG)):
             raise MA5Configuration('Issue with the configuration')
+        if not main.CheckConfig2(debug=(LoggerLevel<=logging.DEBUG)):
+            raise MA5Configuration('Issue with the configuration')
+
         self.ma5_environ = dict(os.environ)
         main.madgraph.has_root           = main.archi_info.has_root
         main.madgraph.has_delphes        = main.archi_info.has_delphes
@@ -195,7 +198,7 @@ class MA5Interpreter(Interpreter):
         self.main.datasets.Reset()
         self.main.selection.Reset()
         self.main.ResetParameters()
-        self.history=[]
+        self.InitializeHistory()
 
         # Graphical mode
         self.main.AutoSetGraphicalRenderer()
@@ -222,7 +225,7 @@ class MA5Interpreter(Interpreter):
         self.main.datasets.Reset()
         self.main.selection.Reset()
         self.main.ResetParameters()
-        self.history=[]
+        self.InitializeHistory()
 
         # Graphical mode
         self.main.AutoSetGraphicalRenderer()
