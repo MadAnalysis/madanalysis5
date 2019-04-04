@@ -55,7 +55,7 @@ class ExpertMode:
         # Getting the full path
         self.path = os.path.expanduser(name)
         if not self.path.startswith('/'):
-            if name in ['PAD', 'PADForMA5tune']:
+            if name in ['tools/PAD', 'tools/PADForMA5tune']:
                 self.path = self.main.archi_info.ma5dir+'/'+self.path
             else:
                 self.path = self.main.currentdir+'/'+self.path
