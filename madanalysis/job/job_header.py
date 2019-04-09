@@ -40,6 +40,8 @@ def WriteHeader(file,main):
     if main.archi_info.has_root:
         file.write('#include "SampleAnalyzer/Interfaces/root/RootMainHeaders.h"\n')
     file.write('\n')
+    if main.superfastsim.tagger.rules!={}:
+        file.write('#include "NewTagger.h"\n')
 
     # Namespace
     file.write('namespace MA5\n')
@@ -52,8 +54,8 @@ def WriteHeader(file,main):
     file.write('  virtual bool Initialize(const MA5::Configuration& cfg,\n')
     file.write('                          const std::map<std::string,std::string>& parameters);\n')
     file.write('  virtual void Finalize(const SampleFormat& summary, const std::vector<SampleFormat>& files);\n')
-    file.write('  virtual bool Execute(SampleFormat& sample, const EventFormat& event);\n\n')
-    file.write(' private : \n')
+    file.write('  virtual bool Execute(SampleFormat& sample, const EventFormat& event);\n')
+    file.write('\n private : \n')
 
 
 def WriteCore(file,main,part_list):

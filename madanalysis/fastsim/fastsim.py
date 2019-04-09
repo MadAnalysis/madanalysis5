@@ -142,6 +142,3 @@ class SuperFastSim:
         return
 
 
-
-
-

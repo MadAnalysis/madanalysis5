@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+137           (2019/04/09) fuks:    Adding the C++ structure required for the generic tagger 
+
 136           (2019/04/04) fuks:    Fixing a last thing with the mg5 interface 
 
 135           (2019/04/04) fuks:    Updating the mg5_amc interface 

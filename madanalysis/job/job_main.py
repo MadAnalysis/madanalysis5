@@ -54,3 +54,5 @@ class JobMain:
         JobExecute.WriteExecute(self.file,self.main,self.parts)
         import madanalysis.job.job_finalize as JobFinalize
         JobFinalize.WriteJobFinalize(self.file,self.main)
+
+

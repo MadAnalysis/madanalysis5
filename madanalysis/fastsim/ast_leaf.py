@@ -83,7 +83,9 @@ class Leaf:
 
     ## From AT to c++
     def write_cpp(self, tree):
-        if self.type in ['cst', 'var']:
+        if self.type == 'cst':
+            return str(float(self.name))
+        elif self.type =='var':
             return self.name
         elif self.type == 'un_op' and len(self.daughters)==1:
             return 'std::'+self.name + '(' +\

@@ -25,6 +25,8 @@
 import logging
 import re
 from madanalysis.fastsim.ast_leaf import Leaf
+import madanalysis.observable.observable_list as obs_list
+
 
 class AST:
 
@@ -200,14 +202,30 @@ class AST:
             self.logger.warning('Undefined AST without any identified main mother')
         return main_mother[0].write(self)
 
+
     # Writing a c++ string out of the AST
-    def tocpp(self,cpp_type, name):
-        spacing = '       '
+    def tocpp(self,cpp_type,name):
         main_mother = [x for x in self.leaves if x.mother==[]]
         obs = list(set([x.name for x in self.leaves if x.type=='var']))
         if len(main_mother)!=1:
             self.logger.warning('Undefined AST without any identified main mother')
-        result = spacing + cpp_type + ' fct_'+name+'('+', '.join(obs)+')\n'+spacing+'{\n'
-        result += spacing + '   return ' + main_mother[0].write_cpp(self) + ';'
-        result+='\n'+spacing+'}'
+        if obs!=[]:
+            result =  cpp_type + ' fct_'+name+'(MAdouble64& '+ ', MAdouble64& '.join(obs)+')\n'+'{\n'
+            result +=  '   return ' + main_mother[0].write_cpp(self) + ';'
+        else: 
+            result =  cpp_type + ' fct_'+name+'()\n'+'{\n'
+            if len(main_mother)!=1:
+                result +=  '   return 1;'
+            else:
+                result +=  '   return ' + main_mother[0].write_cpp(self) + ';'
+        result+='\n'+'}\n'
+        return result
+
+
+    # Setting the c++ in text initialization
+    def tocpp_call(self,obj,name):
+        obs = list(set([x.name for x in self.leaves if x.type=='var']))
+        result  = ' fct_' + name + '('
+        result += ', '.join([obj+'->'+obs_list.__dict__[x].code_reco for x in obs])
+        result += ') '
         return result

@@ -56,7 +56,7 @@ class Tagger:
         self.logger.info('*********************************')
         for key in self.rules.keys():
             myrule = self.rules[key]
-            self.logger.info('Tagging a true PDG-' + str(myrule['id_true']) + \
+            self.logger.info(str(key) + ' - Tagging a true PDG-' + str(myrule['id_true']) + \
                ' as a PDG-' + str(myrule['id_reco']))
             for eff_key in myrule['efficiencies'].keys():
                 cpp_name = 'eff_'+str(myrule['id_true'])+'_'+str(myrule['id_reco'])+\
@@ -66,10 +66,10 @@ class Tagger:
                 myeff = myrule['efficiencies'][eff_key]
                 self.logger.info('  ** function: ' + myeff['function'].tostring())
                 self.logger.info('  ** bounds:   ' + myeff['bounds'].tostring())
-                self.logger.info(' C++ version for the function: \n'  + \
-                   myeff['function'].tocpp('double', cpp_name))
-                self.logger.info(' C++ version for the bounds: \n'  + \
-                   myeff['bounds'].tocpp('bool', bnd_name))
+                self.logger.info(' C++ version for the function: \n        '  + \
+                   myeff['function'].tocpp('MAdouble64', cpp_name).replace('\n','\n        '))
+                self.logger.info(' C++ version for the bounds: \n        '  + \
+                   myeff['bounds'].tocpp('MAbool', bnd_name).replace('\n','\n        '))
                 self.logger.info('  --------------------')
             self.logger.info('  --------------------')
 

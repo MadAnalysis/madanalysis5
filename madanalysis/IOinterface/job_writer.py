@@ -460,6 +460,9 @@ class JobWriter():
             file.write('  JetClusterer* cluster1 = \n')
             file.write('      manager.InitializeJetClusterer("'+self.main.fastsim.clustering.algorithm+'",parametersC1);\n')
             file.write('  if (cluster1==0) return 1;\n\n')
+            if self.main.superfastsim.tagger.rules!={}:
+                file.write('  // Declaration of a generic tagger\n')
+                file.write('  NewTagger* tagger = new NewTagger();\n\n')
 
         # + Case Delphes
         if self.main.fastsim.package in ["delphes","delphesMA5tune"]:
@@ -528,6 +531,8 @@ class JobWriter():
             file.write('      if (!analyzer2->Execute(mySample,myEvent)) continue;\n')
         if self.main.fastsim.package=="fastjet":
             file.write('      cluster1->Execute(mySample,myEvent);\n')
+            if self.main.superfastsim.tagger.rules!={}:
+                file.write('      tagger->Execute(mySample,myEvent);\n')
         elif self.main.fastsim.package=="delphes":
             file.write('      fastsim1->Execute(mySample,myEvent);\n')
         elif self.main.fastsim.package=="delphesMA5tune":
@@ -565,6 +570,17 @@ class JobWriter():
         job = JobMain.JobMain(file,main)
         job.WriteHeader()
         file.close()
+
+        ## Do we need a tagger?
+        if main.superfastsim.tagger.rules!={}:
+            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/newTagger.h","w")
+            import madanalysis.job.job_tagger_header as JobTaggerHeader
+            job = JobTaggerHeader.JobTaggerHeader(main.superfastsim)
+            job.WriteNewTaggerHeader(file)
+            file.close()
+            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/efficiencies.h","w")
+            job.WriteNewTaggerEfficiencies(file)
+            file.close()
         return True
 
     def WriteSelectionSource(self,main):
@@ -574,6 +590,14 @@ class JobWriter():
         job = JobMain.JobMain(file,main)
         job.WriteSource()
         file.close()
+
+        ## Do we need a tagger?
+        if main.superfastsim.tagger.rules!={}:
+            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/newTagger.cpp","w")
+            import madanalysis.job.job_tagger_main as JobTaggerMain
+            job = JobTaggerMain.JobTaggerMain(main.superfastsim)
+            job.WriteNewTaggerSource(file)
+            file.close()
 
         file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/analysisList.h","w")
         file.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"\n')
@@ -848,3 +872,8 @@ class JobWriter():
             result = ShellCommand.Execute(commands,folder)
 
         return result
+
+
+    def WriteTagger(self):
+        # header file
+        bla
