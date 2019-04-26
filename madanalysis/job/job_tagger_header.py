@@ -61,8 +61,6 @@ class JobTaggerHeader:
         file.write('#include <cmath>\n')
         file.write('#include <math.h>\n')
         file.write('#include <iostream>\n')
-        import logging
-        logger = logging.getLogger('MA5')
         for key, value in self.fastsim.tagger.rules.items():
             for eff_key in value['efficiencies'].keys():
                  eff_fnc = value['efficiencies'][eff_key]['function']
@@ -70,7 +68,7 @@ class JobTaggerHeader:
                  file.write(eff_fnc.tocpp('MAdouble64', \
                      'eff_'+str(value['id_true']) + '_' + str(value['id_reco'])+'_'+\
                        str(eff_key))+'\n')
-                 file.write(eff_bnd.tocpp('MAdouble64', \
+                 file.write(eff_bnd.tocpp('MAbool', \
                      'bnd_'+str(value['id_true']) + '_' + str(value['id_reco'])+'_'+\
                        str(eff_key)) + '\n')
         file.write('#endif')

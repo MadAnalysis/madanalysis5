@@ -210,7 +210,7 @@ class AST:
         if len(main_mother)!=1:
             self.logger.warning('Undefined AST without any identified main mother')
         if obs!=[]:
-            result =  cpp_type + ' fct_'+name+'(MAdouble64& '+ ', MAdouble64& '.join(obs)+')\n'+'{\n'
+            result =  cpp_type + ' fct_'+name+'(MAdouble64 '+ ', MAdouble64 '.join(obs)+')\n'+'{\n'
             result +=  '   return ' + main_mother[0].write_cpp(self) + ';'
         else: 
             result =  cpp_type + ' fct_'+name+'()\n'+'{\n'

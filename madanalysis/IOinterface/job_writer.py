@@ -573,7 +573,7 @@ class JobWriter():
 
         ## Do we need a tagger?
         if main.superfastsim.tagger.rules!={}:
-            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/newTagger.h","w")
+            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/newtagger.h","w")
             import madanalysis.job.job_tagger_header as JobTaggerHeader
             job = JobTaggerHeader.JobTaggerHeader(main.superfastsim)
             job.WriteNewTaggerHeader(file)
@@ -593,7 +593,7 @@ class JobWriter():
 
         ## Do we need a tagger?
         if main.superfastsim.tagger.rules!={}:
-            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/newTagger.cpp","w")
+            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/newtagger.cpp","w")
             import madanalysis.job.job_tagger_main as JobTaggerMain
             job = JobTaggerMain.JobTaggerMain(main.superfastsim)
             job.WriteNewTaggerSource(file)

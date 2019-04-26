@@ -146,6 +146,10 @@ class RecJetFormat : public RecParticleFormat
   void setTrueCtag(const MAbool& tag)
   {true_ctag_=tag;}
 
+  /// Setting ntracks
+  void setNtracks(MAuint16 ntracks)
+  { ntracks_=ntracks; }
+
   /// Add one constituent
   void AddConstituent (const MAint32& index)
   {Constituents_.push_back(index);}

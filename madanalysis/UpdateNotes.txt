@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+138           (2019/04/26) fuks:    Superfastsim: tagger functionalities added (b-tagging, c-tagging and 
+                                   tau-tagging) 
+
 137           (2019/04/09) fuks:    Adding the C++ structure required for the generic tagger 
 
 136           (2019/04/04) fuks:    Fixing a last thing with the mg5 interface 
