@@ -36,6 +36,7 @@ class AST:
         self.id         = id_
         self.leaves     = []
         self.variables  = vars_
+        self.boolean     = ['true','false']
         self.unary_ops  = ['acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh',
            'cos', 'cosh', 'erf', 'erfc', 'exp', 'fabs', 'gamma', 'lgamma', 'log',
            'log10', 'sin', 'sinh', 'sqrt', 'tan', 'tanh']
@@ -65,8 +66,11 @@ class AST:
         frml = formula_string.replace('**', ' ^ ')
         for op in self.binary1_ops.keys():
             frml = frml.replace(op, ' ' + op + ' ')
+        frml = frml.replace('e + ', 'e+')
+        frml = frml.replace('e - ', 'e-')
         for op in [ '> =', '< =' ]:
             frml = frml.replace(op, op.replace(' ',''))
+        frml = frml.replace('(  - ', '( -')
         frml = frml.split()
         frml = self.ToBasicLeaves(frml)
         while ')' in frml:
@@ -154,8 +158,13 @@ class AST:
     def ToBasicLeaves(self, formula):
         new_formula = []
         for elem in formula:
+            # constants
+            if re.match("""(?x) ^ [+-]?\ *  (  \d+ ( \.\d* )? |\.\d+ ) ([eE][+-]?\d+)? $""", elem):
+                new_leaf = Leaf(self.size(), 'cst', elem, [], [])
+                new_formula.append(new_leaf)
+                self.leaves.append(new_leaf)
             # variables
-            if elem.upper() in self.variables:
+            elif elem.upper() in self.variables:
                 new_leaf = Leaf(self.size(), 'var', elem.upper(), [], [])
                 new_formula.append(new_leaf)
                 self.leaves.append(new_leaf)
@@ -169,16 +178,14 @@ class AST:
                 new_leaf = Leaf(self.size(), 'bin2_op', elem.lower(), [], [])
                 new_formula.append(new_leaf)
                 self.leaves.append(new_leaf)
+            # booleans
+            elif elem.lower() in self.boolean:
+                new_leaf = Leaf(self.size(), 'bool', elem.lower(), [], [])
+                new_formula.append(new_leaf)
+                self.leaves.append(new_leaf)
             # unary operators
             elif elem.lower() in self.binary1_ops.keys():
                 new_leaf = Leaf(self.size(), 'bin1_op', elem.lower(), [], [])
-                new_formula.append(new_leaf)
-                self.leaves.append(new_leaf)
-            # real numbers and integers
-            elif re.match("^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$", elem) or\
-              re.match("^[-+]?[0-9]+\.?[0-9]*$", elem) or elem.isdigit() or \
-              (elem[0]=='-' and elem[1:].isdigit()):
-                new_leaf = Leaf(self.size(), 'cst', elem, [], [])
                 new_formula.append(new_leaf)
                 self.leaves.append(new_leaf)
             # only parentheses

@@ -40,7 +40,7 @@ class Leaf:
     def __repr__(self):
         if self.type in ['var', 'cst']:
             return 'LEAF[ ' + self.name+': { id:' + str(self.id) + ' }]'
-        elif self.type in ['bin2_op', 'bin1_op', 'un_op']:
+        elif self.type in ['bin2_op', 'bin1_op', 'un_op', 'bool']:
             return 'OP[ ' + self.name+': { id:' + str(self.id) + ' }]'
 
 
@@ -65,7 +65,7 @@ class Leaf:
 
     ## Method to get a string out of an ast leaf
     def write(self, tree):
-        if self.type in ['cst', 'var']:
+        if self.type in ['cst', 'var', 'bool']:
             return self.name
         elif self.type == 'un_op' and len(self.daughters)==1:
             return self.name + '(' + tree.get(self.daughters[0]).write(tree) + ')'
@@ -85,7 +85,7 @@ class Leaf:
     def write_cpp(self, tree):
         if self.type == 'cst':
             return str(float(self.name))
-        elif self.type =='var':
+        elif self.type in ['var', 'bool']:
             return self.name
         elif self.type == 'un_op' and len(self.daughters)==1:
             return 'std::'+self.name + '(' +\

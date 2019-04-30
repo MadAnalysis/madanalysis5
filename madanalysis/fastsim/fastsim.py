@@ -124,6 +124,8 @@ class SuperFastSim:
 
         ## Putting the bounds into an AST
         bounds = ' '.join(args[beginOptions+1:endOptions])
+        if bounds in ['', ' ']:
+            bounds = 'true'
         ast_bounds = AST(0, self.observables.full_list)
         ast_bounds.feed(bounds)
 

@@ -46,7 +46,7 @@ class JobTaggerMain:
         file.write('  std::vector<MAuint32> toRemove;\n\n')
         # b/c-tagging + tau mistagging
         file.write('  // b/c-tagging + tau-mistagging\n')
-        file.write('  for (unsigned int i=0; i<event.rec()->jets().size(); i++)\n')
+        file.write('  for (MAuint32 i=0; i<event.rec()->jets().size(); i++)\n')
         file.write('  {\n')
         file.write('    // We have a true b-jet: is it b-tagged?\n')
         file.write('    if (event.rec()->jets()[i].true_btag())\n')
@@ -100,7 +100,7 @@ class JobTaggerMain:
         # tau-tagging
         file.write('  // tau-tagging\n')
         file.write('  toRemove.clear();\n')
-        file.write('  for (unsigned int i=0; i<event.rec()->taus().size(); i++)\n')
+        file.write('  for (MAuint32 i=0; i<event.rec()->taus().size(); i++)\n')
         file.write('  {\n')
         self.PrintTagger(['15', 'ta'], ['15', 'ta'],file,'(&event.rec()->taus()[i])','Tautag')
         file.write('  }\n\n')
@@ -121,7 +121,7 @@ class JobTaggerMain:
                     my_eff_str += eff_val['function'].tocpp_call(obj,\
                       'eff_'+str(val['id_true'])+'_'+str(val['id_reco'])+'_'+str(eff_key))
                     eff_str.append(my_eff_str)
-                file.write('      double efficiency = ' + ' + '.join(eff_str) +';\n')
+                file.write('      MAdouble64 efficiency = ' + ' + '.join(eff_str) +';\n')
                 if prop=='TauMistag':
                     file.write('      if (RANDOM->flat() < efficiency)\n')
                     file.write('      {\n')

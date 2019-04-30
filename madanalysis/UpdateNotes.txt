@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+140           (2019/04/30) fuks:    Fixinga few bugs with the tagger 
+
 139           (2019/04/30) fuks:    Small bug fix: avoid multiple delphes simulations in the recast mode 
                                    (when not needed) 
 
