@@ -160,9 +160,9 @@ class RunRecast():
         logging.getLogger('MA5').debug('Loop over the datasets...')
         for item in self.main.datasets:
             if self.detector=="delphesMA5tune":
-                evtfile = self.dirname+'/Output/'+item.name+'/RecoEvents_v1x1_'+delphescard.replace('.tcl','')+'.root'
+                evtfile = self.dirname+'/Output/'+item.name+'/RecoEvents/RecoEvents_v1x1_'+delphescard.replace('.tcl','')+'.root'
             elif self.detector=="delphes":
-                evtfile = self.dirname+'/Output/'+item.name+'/RecoEvents_v1x2_'+delphescard.replace('.tcl','')+'.root'
+                evtfile = self.dirname+'/Output/'+item.name+'/RecoEvents/RecoEvents_v1x2_'+delphescard.replace('.tcl','')+'.root'
             logging.getLogger('MA5').debug('- applying fastsim and producing '+evtfile+'...')
             if not os.path.isfile(os.path.normpath(evtfile)):
                 if not self.generate_events(item,delphescard):
