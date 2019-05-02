@@ -67,12 +67,17 @@ class AST:
         for op in self.binary1_ops.keys():
             frml = frml.replace(op, ' ' + op + ' ')
         frml = frml.replace('e + ', 'e+')
+        frml = frml.replace('E - ', 'e-')
+        frml = frml.replace('E + ', 'e+')
         frml = frml.replace('e - ', 'e-')
+        frml = frml.replace('^   - ', '^ -')
+        frml = frml.replace('^   + ', '^ +')
         for op in [ '> =', '< =' ]:
             frml = frml.replace(op, op.replace(' ',''))
         frml = frml.replace('(  - ', '( -')
         frml = frml.split()
         frml = self.ToBasicLeaves(frml)
+        print frml
         while ')' in frml:
             id_end   = frml.index(')')
             id_start = [i for i,x in enumerate(frml[:id_end]) if x=='('][-1]
