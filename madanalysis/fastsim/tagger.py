@@ -36,6 +36,9 @@ class Tagger:
     # Adding a rule to the tagger
     # The bounds and function are written as ASTs
     def add_rule(self,id_true, id_reco, function, bounds):
+        ## Checking wether the tagger is supported
+        if not self.is_supported(id_true, id_reco):
+            return
         ## Checking whether the reco/true pair already exists
         key_number=len(self.rules.keys())+1
         for key, value in self.rules.items():
@@ -73,3 +76,9 @@ class Tagger:
                 self.logger.info('  --------------------')
             self.logger.info('  --------------------')
 
+    def is_supported(self,id_true, id_reco):
+        supported = { '5':['21','4','5'], '4':['21','4','5'], '15':['15','21'] }
+        if id_reco not in supported.keys() or id_true not in supported[id_reco]:
+            self.logger.warning('This tagger is currently not supported (tagging '+ id_true + ' as ' + id_reco + '). Tagger ignored.')
+            return False
+        return True

@@ -40,30 +40,51 @@ class SuperFastSim:
 
     # Definition of a new tagging/smearing rule
     def define(self,args,prts):
+        ## list of PDG codes associated with a a multiparticle
         def is_pdgcode(prt):
             return (prt[0] in ('-','+') and prt[1:].isdigit()) or prt.isdigit()
 
         ## Checking the length of the argument list
         if (args[0]=='tagger' and len(args)<5) or (args[0]=='smearer' and len(args)<3):
-            self.logger.error('Not enough arguments for a tagger/smnearer')
+            self.logger.error('Not enough arguments for a tagger/smearer')
             return
 
         ## Chercking the first argument
         true_id = args[1]
-        if not (true_id in prts or is_pdgcode(true_id)):
+        #### First, do we have either a multiparticle or a PDG code
+        if not (true_id in prts.GetNames() or is_pdgcode(true_id)):
             self.logger.error('the 1st argument must be a PDG code or (multi)particle label')
             return
+        #### Second let's check if we have a multiparticle associated with a unique PDGID
+        if true_id in prts.GetNames() and len(list(set([abs(x) for x in prts[true_id]])))==1:
+            true_id = str(abs(prts[true_id][0]))
+        #### Third, we have a number
+        elif is_pdgcode(true_id):
+            true_id=str(abs(int(true_id)))
+        #### light jet protection
+        if true_id in ['1','2','3']:
+            true_id = '21'
 
-        ## Chercking the second and third arguments of a tagger
+        ## Checking the second and third arguments of a tagger
         if args[0]=='tagger':
             if args[2]!='as':
                 self.logger.error('the 2nd argument must be the keyword \'as\'')
                 return
 
             reco_id = args[3]
-            if not (reco_id in prts or is_pdgcode(reco_id)):
+            #### First, do we have either a multiparticle or a PDG code
+            if not (reco_id in prts.GetNames() or is_pdgcode(reco_id)):
                 self.logger.error('the 4th argument must be a PDG code or (multi)particle label')
                 return
+            #### Second let's check if we have a multiparticle associated with a unique PDGID
+            if reco_id in prts.GetNames() and len(list(set([abs(x) for x in prts[reco_id]])))==1:
+                reco_id = str(abs(prts[reco_id][0]))
+            #### Third, we have a number
+            elif is_pdgcode(reco_id):
+                reco_id=str(abs(int(reco_id)))
+            #### light jet protection
+            if reco_id in ['1','2','3']:
+                reco_id = '21'
             to_decode=args[4:]
         else:
             reco_id = true_id
@@ -72,7 +93,7 @@ class SuperFastSim:
         ## Getting the bounds and the function
         function, bounds = self.decode_args(to_decode)
         if function.size()==0:
-            self.logger.error('Cannot decode the function or the bounds')
+            self.logger.warning('Cannot decode the function or the bounds. Tagger ignored.')
             return
 
         ## Adding a rule to a tagger/smearer
@@ -116,10 +137,10 @@ class SuperFastSim:
 
         ## Sanity
         if Nbracket1!=0:
-            self.logger.error("number of opening '(' and closing ')' does not match.")
+            self.logger.warning("number of opening '(' and closing ')' does not match.")
             return '', []
         if Nbracket2!=0:
-            self.logger.error("number of opening '[' and closing ']' does not match.")
+            self.logger.warning("number of opening '[' and closing ']' does not match.")
             return '', []
 
         ## Putting the bounds into an AST

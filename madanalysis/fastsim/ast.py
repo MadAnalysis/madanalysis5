@@ -77,7 +77,6 @@ class AST:
         frml = frml.replace('(  - ', '( -')
         frml = frml.split()
         frml = self.ToBasicLeaves(frml)
-        print frml
         while ')' in frml:
             id_end   = frml.index(')')
             id_start = [i for i,x in enumerate(frml[:id_end]) if x=='('][-1]
@@ -111,10 +110,15 @@ class AST:
     # There is no parentheses so that we can proceed straightforwardly
     def MakeConnections(self, sub_formula):
         frml = sub_formula
+        iterator_limit = 0
         while len(frml)>1:
+            iterator_limit += 1
+            if iterator_limit > 100:
+                self.logger.warning('Incorrect formula: ' + str(sub_formula))
+                return False
             for i in range (0,len(frml)):
                 if not isinstance(frml[i], Leaf):
-                    self.logger.error('Incorrect formula: '+ str(sub_formula) + \
+                    self.logger.warning('Incorrect formula: '+ str(sub_formula) + \
                        ' -> Ignored')
                     return False
                 if frml[i].daughters!=[]:

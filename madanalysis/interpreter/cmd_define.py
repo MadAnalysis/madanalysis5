@@ -35,7 +35,7 @@ class CmdDefine(CmdBase.CmdBase):
 
         # tagger / smearer
         if args[0] in ['tagger', 'smearer']:
-            self.main.superfastsim.define(args,self.main.multiparticles.GetNames())
+            self.main.superfastsim.define(args,self.main.multiparticles)
             return
 
         #Checking argument number
