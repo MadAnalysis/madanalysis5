@@ -42,6 +42,8 @@ def WriteHeader(file,main):
     file.write('\n')
     if main.superfastsim.tagger.rules!={}:
         file.write('#include "newtagger.h"\n')
+    if main.superfastsim.smearer.rules!={}:
+        file.write('#include "newsmearer.h"\n')
 
     # Namespace
     file.write('namespace MA5\n')

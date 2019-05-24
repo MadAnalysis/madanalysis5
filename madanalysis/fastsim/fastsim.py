@@ -23,8 +23,9 @@
 
 
 import logging
-from madanalysis.fastsim.ast    import AST
-from madanalysis.fastsim.tagger import Tagger
+from madanalysis.fastsim.ast     import AST
+from madanalysis.fastsim.tagger  import Tagger
+from madanalysis.fastsim.smearer import Smearer
 
 class SuperFastSim:
 
@@ -32,7 +33,7 @@ class SuperFastSim:
     def __init__(self):
         self.logger      = logging.getLogger('MA5')
         self.tagger      = Tagger()
-        self.smearer     = Tagger()
+        self.smearer     = Smearer()
         self.observables = ''
 
     def InitObservables(self, obs_list):
@@ -49,7 +50,7 @@ class SuperFastSim:
             self.logger.error('Not enough arguments for a tagger/smearer')
             return
 
-        ## Chercking the first argument
+        ## Checking the first argument
         true_id = args[1]
         #### First, do we have either a multiparticle or a PDG code
         if not (true_id in prts.GetNames() or is_pdgcode(true_id)):
@@ -62,7 +63,7 @@ class SuperFastSim:
         elif is_pdgcode(true_id):
             true_id=str(abs(int(true_id)))
         #### light jet protection
-        if true_id in ['1','2','3']:
+        if true_id in ['1','2','3', 'j']:
             true_id = '21'
 
         ## Checking the second and third arguments of a tagger
@@ -70,7 +71,6 @@ class SuperFastSim:
             if args[2]!='as':
                 self.logger.error('the 2nd argument must be the keyword \'as\'')
                 return
-
             reco_id = args[3]
             #### First, do we have either a multiparticle or a PDG code
             if not (reco_id in prts.GetNames() or is_pdgcode(reco_id)):
@@ -83,24 +83,32 @@ class SuperFastSim:
             elif is_pdgcode(reco_id):
                 reco_id=str(abs(int(reco_id)))
             #### light jet protection
-            if reco_id in ['1','2','3']:
+            if reco_id in ['1','2','3', 'j']:
                 reco_id = '21'
             to_decode=args[4:]
-        else:
-            reco_id = true_id
-            to_decode=args[2:]
+
+        ## Checking the second and third arguments of a smearer
+        elif args[0] == 'smearer':
+            if args[2]!='with':
+                self.logger.error('the 2nd argument must be the keyword \'with\'')
+                return
+            obs = args[3].upper()
+            if not (obs in self.smearer.vars):
+                self.logger.error('the 4th argument must be an observable in '+ ', '.join(self.smearer.vars))
+                return
+            to_decode=args[4:]
 
         ## Getting the bounds and the function
         function, bounds = self.decode_args(to_decode)
         if function.size()==0:
-            self.logger.warning('Cannot decode the function or the bounds. Tagger ignored.')
+            self.logger.error('Cannot decode the function or the bounds - ' + args[0] + ' ignored.')
             return
 
         ## Adding a rule to a tagger/smearer
         if args[0]=='tagger':
             self.tagger.add_rule(true_id,reco_id,function,bounds)
         elif args[0]=='smearer':
-            self.logger.warning('we need to implement what todo with a smearer')
+            self.smearer.add_rule(true_id,obs,function,bounds)
         return
 
 
@@ -137,10 +145,10 @@ class SuperFastSim:
 
         ## Sanity
         if Nbracket1!=0:
-            self.logger.warning("number of opening '(' and closing ')' does not match.")
+            self.logger.error("number of opening '(' and closing ')' does not match.")
             return '', []
         if Nbracket2!=0:
-            self.logger.warning("number of opening '[' and closing ']' does not match.")
+            self.logger.error("number of opening '[' and closing ']' does not match.")
             return '', []
 
         ## Putting the bounds into an AST
@@ -161,7 +169,7 @@ class SuperFastSim:
         if args[0]=='tagger':
             self.tagger.display()
         elif args[0]=='smearer':
-            logging.getLogger('MA5').warning('we need to implement the smearer display')
+            self.smearer.display()
         return
 
 

@@ -99,14 +99,15 @@ class CmdDefine(CmdBase.CmdBase):
         logging.getLogger('MA5').info("   Syntax: define <(multi)particle name> = <PDG-id / existing (multi)particle> <PDG-id / (multi)particle> ...")
         logging.getLogger('MA5').info("   Associates a symbol to a multiparticle defined by several particles.")
         logging.getLogger('MA5').info("")
-        logging.getLogger('MA5').info("   Syntax: define tagger  <p1> as <p2> <function> <bounds>")
+        logging.getLogger('MA5').info("   Syntax: define tagger  <p1> as <p2> <function> [<bounds>]")
         logging.getLogger('MA5').info("   Create a tagger of an object <p1> as an object <p2>.")
         logging.getLogger('MA5').info("   The tagging efficiency is given by the function <function>.")
         logging.getLogger('MA5').info("   The bounds correspond to the domain the tagger applies (pt > ..., eta < ..., etc.).")
         logging.getLogger('MA5').info("")
-        logging.getLogger('MA5').info("   Syntax: define smearer <p1> <function> <bounds>")
+        logging.getLogger('MA5').info("   Syntax: define smearer <p1> with <variable> <function> [<bounds>]")
         logging.getLogger('MA5').info("   Create a smearer for the object <p1>.")
         logging.getLogger('MA5').info("   The smearing function is given by the function <function>.")
+        logging.getLogger('MA5').info("   The variable to which the smearer applies is given by <variable>.")
         logging.getLogger('MA5').info("   The bounds correspond to the domain the smearer applies (pt > ..., eta < ..., etc.).")
 
 
@@ -130,6 +131,14 @@ class CmdDefine(CmdBase.CmdBase):
 
         elif nargs==4 and args[1] == 'tagger':
             output = ['as']
+            return self.finalize_complete(text,output)
+
+        elif nargs==4 and args[1] == 'smearer':
+            output = ['with']
+            return self.finalize_complete(text,output)
+
+        elif nargs==5 and args[1] == 'smearer':
+            output = ['PT','ETA','PHI','E','D0','PX','PY','PZ']
             return self.finalize_complete(text,output)
 
         elif nargs>3 and args[1] not in ['tagger', 'smearer']:

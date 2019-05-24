@@ -460,6 +460,9 @@ class JobWriter():
             file.write('  JetClusterer* cluster1 = \n')
             file.write('      manager.InitializeJetClusterer("'+self.main.fastsim.clustering.algorithm+'",parametersC1);\n')
             file.write('  if (cluster1==0) return 1;\n\n')
+            if self.main.superfastsim.smearer.rules!={}:
+                file.write('  // Declaration of the smearer\n')
+                file.write('  NewSmearer* smearer = new NewSmearer();\n\n')
             if self.main.superfastsim.tagger.rules!={}:
                 file.write('  // Declaration of a generic tagger\n')
                 file.write('  NewTagger* tagger = new NewTagger();\n\n')
@@ -531,6 +534,8 @@ class JobWriter():
             file.write('      if (!analyzer2->Execute(mySample,myEvent)) continue;\n')
         if self.main.fastsim.package=="fastjet":
             file.write('      cluster1->Execute(mySample,myEvent);\n')
+            if self.main.superfastsim.smearer.rules!={}:
+                file.write('      smearer->Execute(mySample,myEvent);\n')
             if self.main.superfastsim.tagger.rules!={}:
                 file.write('      tagger->Execute(mySample,myEvent);\n')
         elif self.main.fastsim.package=="delphes":
@@ -571,6 +576,17 @@ class JobWriter():
         job.WriteHeader()
         file.close()
 
+        ## Do we need a smearer?
+        if main.superfastsim.smearer.rules!={}:
+            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/newsmearer.h","w")
+            import madanalysis.job.job_smearer_header as JobSmearerHeader
+            job = JobSmearerHeader.JobSmearerHeader(main.superfastsim)
+            job.WriteNewSmearerHeader(file)
+            file.close()
+            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/sigmas.h","w")
+            job.WriteNewSmearerEfficiencies(file)
+            file.close()
+
         ## Do we need a tagger?
         if main.superfastsim.tagger.rules!={}:
             file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/newtagger.h","w")
@@ -590,6 +606,14 @@ class JobWriter():
         job = JobMain.JobMain(file,main)
         job.WriteSource()
         file.close()
+
+        ## Do we need a smearer?
+        if main.superfastsim.smearer.rules!={}:
+            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/newsmearer.cpp","w")
+            import madanalysis.job.job_smearer_main as JobSmearerMain
+            job = JobSmearerMain.JobSmearerMain(main.superfastsim)
+            job.WriteNewSmearerSource(file)
+            file.close()
 
         ## Do we need a tagger?
         if main.superfastsim.tagger.rules!={}:

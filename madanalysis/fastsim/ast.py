@@ -114,11 +114,11 @@ class AST:
         while len(frml)>1:
             iterator_limit += 1
             if iterator_limit > 100:
-                self.logger.warning('Incorrect formula: ' + str(sub_formula))
+                self.logger.error('Incorrect formula: ' + str(sub_formula))
                 return False
             for i in range (0,len(frml)):
                 if not isinstance(frml[i], Leaf):
-                    self.logger.warning('Incorrect formula: '+ str(sub_formula) + \
+                    self.logger.error('Incorrect formula: '+ str(sub_formula) + \
                        ' -> Ignored')
                     return False
                 if frml[i].daughters!=[]:
@@ -215,7 +215,7 @@ class AST:
     def tostring(self):
         main_mother = [x for x in self.leaves if x.mother==[]]
         if len(main_mother)!=1:
-            self.logger.warning('Undefined AST without any identified main mother')
+            self.logger.error('Undefined AST without any identified main mother')
         return main_mother[0].write(self)
 
 
@@ -224,7 +224,7 @@ class AST:
         main_mother = [x for x in self.leaves if x.mother==[]]
         obs = list(set([x.name for x in self.leaves if x.type=='var']))
         if len(main_mother)!=1:
-            self.logger.warning('Undefined AST without any identified main mother')
+            self.logger.error('Undefined AST without any identified main mother')
         if obs!=[]:
             result =  cpp_type + ' fct_'+name+'(MAdouble64 '+ ', MAdouble64 '.join(obs)+')\n'+'{\n'
             result +=  '   return ' + main_mother[0].write_cpp(self) + ';'
