@@ -25,27 +25,29 @@
 import logging
 
 
-class Tagger:
+class Smearer:
 
     # Initialization
     def __init__(self):
         self.logger = logging.getLogger('MA5');
         self.rules = {}
+        self.vars = ['PT','ETA','PHI','E','PX','PY','PZ'] 
 
 
     # Adding a rule to the tagger
     # The bounds and function are written as ASTs
-    def add_rule(self,id_true, id_reco, function, bounds):
-        ## Checking wether the tagger is supported
-        if not self.is_supported(id_true, id_reco):
+    def add_rule(self, id_true, obs, function, bounds):
+        ## Checking whether the smearer is supported
+        check, id_true = self.is_supported(id_true, obs)
+        if not check:
             return
         ## Checking whether the reco/true pair already exists
         key_number=len(self.rules.keys())+1
         for key, value in self.rules.items():
-            if value['id_true']==id_true and value['id_reco']==id_reco:
+            if value['id_true']==id_true and value['obs']==obs:
                 key_number = key
         if not key_number in self.rules.keys():
-            self.rules[key_number] = { 'id_true':id_true, 'id_reco':id_reco,
+            self.rules[key_number] = { 'id_true':id_true, 'obs':obs,
               'efficiencies':{} }
 
         ## Defining a new rule ID for an existing tagger
@@ -56,16 +58,16 @@ class Tagger:
 
     def display(self):
         self.logger.info('*********************************')
-        self.logger.info('       Tagger  information       ')
+        self.logger.info('       Smearer information       ')
         self.logger.info('*********************************')
         for key in self.rules.keys():
             myrule = self.rules[key]
-            self.logger.info(str(key) + ' - Tagging a true PDG-' + str(myrule['id_true']) + \
-               ' as a PDG-' + str(myrule['id_reco']))
+            self.logger.info(str(key) + ' - Smearing an object of PDG ' + str(myrule['id_true']) + \
+               ' from  the observable ' + str(myrule['obs']))
             for eff_key in myrule['efficiencies'].keys():
-                cpp_name = 'eff_'+str(myrule['id_true'])+'_'+str(myrule['id_reco'])+\
+                cpp_name = 'eff_'+str(myrule['id_true'])+'_'+str(myrule['obs'])+\
                   '_'+str(eff_key)
-                bnd_name = 'bnd_'+str(myrule['id_true'])+'_'+str(myrule['id_reco'])+\
+                bnd_name = 'bnd_'+str(myrule['id_true'])+'_'+str(myrule['obs'])+\
                   '_'+str(eff_key)
                 myeff = myrule['efficiencies'][eff_key]
                 self.logger.info('  ** function: ' + myeff['function'].tostring())
@@ -78,9 +80,19 @@ class Tagger:
             self.logger.info('  --------------------')
 
 
-    def is_supported(self,id_true, id_reco):
-        supported = { '5':['21','4','5'], '4':['21','4','5'], '15':['15','21'] }
-        if id_reco not in supported.keys() or id_true not in supported[id_reco]:
-            self.logger.error('This tagger is currently not supported (tagging '+ id_true + ' as ' + id_reco + '). Tagger ignored.')
-            return False
-        return True
+    def is_supported(self,id_true,obs):
+        supported = {'e':'11', 'mu':'13', 'ta':'15', 'j':'21', 'a':'22'}
+        if not obs in self.vars:
+            self.logger.error('Unsupported smearer. The smeared variable must be part of ' + \
+              ', '.join(self.vars))
+            self.logger.error('Smearer ignored')
+            return False, id_true
+        if id_true in supported.keys():
+            return True, supported[id_true]
+        elif id_true in supported.values():
+            return True, id_true
+        else:
+            self.logger.error('Unsupported smearer ('+id_true+'). Only the following objects can be smeared: '\
+                 + ', '.join(supported.keys()))
+            self.logger.error('Smearer ignored')
+            return False, id_true

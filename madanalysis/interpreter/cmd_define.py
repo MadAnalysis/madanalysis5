@@ -23,6 +23,7 @@
 
 
 import madanalysis.interpreter.cmd_base as CmdBase
+from madanalysis.enumeration.ma5_running_type       import MA5RunningType
 import logging
 
 class CmdDefine(CmdBase.CmdBase):
@@ -35,6 +36,13 @@ class CmdDefine(CmdBase.CmdBase):
 
         # tagger / smearer
         if args[0] in ['tagger', 'smearer']:
+            if self.main.mode != MA5RunningType.RECO:
+                logging.getLogger('MA5').error("Smearing/tagging is only available in the RECO mode")
+                logging.getLogger('MA5').error("Please restart the program with './bin/ma5 -R '")
+                return
+            if self.main.fastsim.package != 'fastjet':
+                logging.getLogger('MA5').error("Smearing/tagging requires fastjet as a fastsim package. ")
+                return
             self.main.superfastsim.define(args,self.main.multiparticles)
             return
 

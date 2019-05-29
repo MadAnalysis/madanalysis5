@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+144           (2019/05/29) fuks:    Final version of the tagger/smearer 
+
 143           (2019/05/24) fuks:    Finalizing the smearer 
 
 142           (2019/05/17) fuks:    Adding a few security protections for the tagger module 

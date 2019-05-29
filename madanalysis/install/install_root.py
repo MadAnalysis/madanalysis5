@@ -41,7 +41,7 @@ class InstallRoot:
         self.ncores     = 1
 #        self.files = {"root.tar.gz" : "ftp://root.cern.ch/root/root_v5.34.18.source.tar.gz"}
         self.files = {"root.tar.gz" : "https://root.cern.ch/download/root_v6.04.08.source.tar.gz"}
-
+        self.logger = logging.getLogger('MA5')
 
     def Detect(self):
         if not os.path.isdir(self.toolsdir):

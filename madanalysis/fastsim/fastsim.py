@@ -41,6 +41,7 @@ class SuperFastSim:
 
     # Definition of a new tagging/smearing rule
     def define(self,args,prts):
+        prts.Add('c',[4])
         ## list of PDG codes associated with a a multiparticle
         def is_pdgcode(prt):
             return (prt[0] in ('-','+') and prt[1:].isdigit()) or prt.isdigit()
@@ -48,6 +49,7 @@ class SuperFastSim:
         ## Checking the length of the argument list
         if (args[0]=='tagger' and len(args)<5) or (args[0]=='smearer' and len(args)<3):
             self.logger.error('Not enough arguments for a tagger/smearer')
+            prts.Remove('c', None)
             return
 
         ## Checking the first argument
@@ -55,6 +57,7 @@ class SuperFastSim:
         #### First, do we have either a multiparticle or a PDG code
         if not (true_id in prts.GetNames() or is_pdgcode(true_id)):
             self.logger.error('the 1st argument must be a PDG code or (multi)particle label')
+            prts.Remove('c', None)
             return
         #### Second let's check if we have a multiparticle associated with a unique PDGID
         if true_id in prts.GetNames() and len(list(set([abs(x) for x in prts[true_id]])))==1:
@@ -70,11 +73,13 @@ class SuperFastSim:
         if args[0]=='tagger':
             if args[2]!='as':
                 self.logger.error('the 2nd argument must be the keyword \'as\'')
+                prts.Remove('c', None)
                 return
             reco_id = args[3]
             #### First, do we have either a multiparticle or a PDG code
             if not (reco_id in prts.GetNames() or is_pdgcode(reco_id)):
                 self.logger.error('the 4th argument must be a PDG code or (multi)particle label')
+                prts.Remove('c', None)
                 return
             #### Second let's check if we have a multiparticle associated with a unique PDGID
             if reco_id in prts.GetNames() and len(list(set([abs(x) for x in prts[reco_id]])))==1:
@@ -91,10 +96,12 @@ class SuperFastSim:
         elif args[0] == 'smearer':
             if args[2]!='with':
                 self.logger.error('the 2nd argument must be the keyword \'with\'')
+                prts.Remove('c', None)
                 return
             obs = args[3].upper()
             if not (obs in self.smearer.vars):
                 self.logger.error('the 4th argument must be an observable in '+ ', '.join(self.smearer.vars))
+                prts.Remove('c', None)
                 return
             to_decode=args[4:]
 
@@ -102,6 +109,7 @@ class SuperFastSim:
         function, bounds = self.decode_args(to_decode)
         if function.size()==0:
             self.logger.error('Cannot decode the function or the bounds - ' + args[0] + ' ignored.')
+            prts.Remove('c', None)
             return
 
         ## Adding a rule to a tagger/smearer
@@ -109,6 +117,7 @@ class SuperFastSim:
             self.tagger.add_rule(true_id,reco_id,function,bounds)
         elif args[0]=='smearer':
             self.smearer.add_rule(true_id,obs,function,bounds)
+        prts.Remove('c', None)
         return
 
 
