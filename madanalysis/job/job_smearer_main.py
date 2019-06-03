@@ -40,22 +40,32 @@ class JobSmearerMain:
         file.write('\n')
         file.write('void NewSmearer::Execute(SampleFormat& sample, ' +\
             'EventFormat& event)\n{\n')
-        # MET
+        # MET, Meff, TET & THT
         file.write('  // New Lorentz Vector for recalculating the missing energy after smearing\n')
         file.write('  MALorentzVector pTmiss;\n')
+        file.write('  // shortcut for Meff, TET & THT\n')
+        file.write('  MAfloat64 & TET  = event.rec()->TET();\n')
+        file.write('  MAfloat64 & THT  = event.rec()->THT();\n')
+        file.write('  MAfloat64 & Meff = event.rec()->Meff();\n')
+        file.write('  TET = 0.; THT = 0.; Meff = 0.;\n\n')
         # Jet Smearing
         file.write('  // Jet smearing\n')
         file.write('  for (MAuint32 i=0; i<event.rec()->jets().size(); i++)\n')
         file.write('  {\n')
         self.PrintSmearer(['21', 'j'], ['PT','ETA','PHI','E','PX','PY','PZ'],file,'(&event.rec()->jets()[i])')
         file.write('    pTmiss -= event.rec()->jets()[i].momentum();\n')
+        file.write('    THT    += event.rec()->jets()[i].pt();\n')
+        file.write('    TET    += event.rec()->jets()[i].pt();\n')
+        file.write('    Meff   += event.rec()->jets()[i].pt();\n')
         file.write('  }\n\n')
+        file.write('  (&event.rec()->MHT().momentum())->SetPxPyPzE(pTmiss.Px(), pTmiss.Py(), 0., pTmiss.E());\n')
         # Electron smearing
         file.write('  // Electron smearing \n')
         file.write('  for (MAuint32 i=0; i<event.rec()->electrons().size(); i++)\n')
         file.write('  {\n')
         self.PrintSmearer(['11', 'e'], ['PT','ETA','PHI','E','PX','PY','PZ'],file,'(&event.rec()->electrons()[i])')
         file.write('    pTmiss -= event.rec()->electrons()[i].momentum();\n')
+        file.write('    TET    += event.rec()->electrons()[i].pt();\n')
         file.write('  }\n\n')
         # Muon smearing
         file.write('  // Muon smearing \n')
@@ -63,6 +73,7 @@ class JobSmearerMain:
         file.write('  {\n')
         self.PrintSmearer(['13', 'mu'], ['PT','ETA','PHI','E','PX','PY','PZ'],file,'(&event.rec()->muons()[i])')
         file.write('    pTmiss -= event.rec()->muons()[i].momentum();\n')
+        file.write('    TET    += event.rec()->muons()[i].pt();\n')
         file.write('  }\n\n')
         # Tau smearing
         file.write('  // Tau smearing\n')
@@ -70,6 +81,7 @@ class JobSmearerMain:
         file.write('  {\n')
         self.PrintSmearer(['15', 'ta'], ['PT','ETA','PHI','E','PX','PY','PZ'],file,'(&event.rec()->taus()[i])')
         file.write('    pTmiss -= event.rec()->taus()[i].momentum();\n')
+        file.write('    TET    += event.rec()->taus()[i].pt();\n')
         file.write('  }\n\n')
         # Photon smearing
         file.write('  // Photon smearing\n')
@@ -77,10 +89,12 @@ class JobSmearerMain:
         file.write('  {\n')
         self.PrintSmearer(['22', 'a'], ['PT','ETA', 'PHI', 'E','PX','PY','PZ'],file,'(&event.rec()->photons()[i])')
         file.write('    pTmiss -= event.rec()->photons()[i].momentum();\n')
+        file.write('    TET    += event.rec()->photons()[i].pt();\n')
         file.write('  }\n')
         # Set missing transverse energy
         file.write('  // New MET\n')
         file.write('  (&event.rec()->MET().momentum())->SetPxPyPzE(pTmiss.Px(), pTmiss.Py(), 0., pTmiss.E());\n')
+        file.write('  Meff += event.rec()->MET().pt();\n')
         file.write('}\n\n')
 
         # Gaussian
