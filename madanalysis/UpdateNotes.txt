@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+145           (2019/06/03) fuks:    Fixing a bug with the tagger (double loops) 
+
 144           (2019/05/29) fuks:    Final version of the tagger/smearer 
 
 143           (2019/05/24) fuks:    Finalizing the smearer 
