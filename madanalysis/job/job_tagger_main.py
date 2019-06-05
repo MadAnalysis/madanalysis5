@@ -32,7 +32,7 @@ class JobTaggerMain:
     ## Writing NewTagger.h
     def WriteNewTaggerSource(self, file):
         # header
-        file.write('#include "SampleAnalyzer/User/Analyzer/newtagger.h"\n')
+        file.write('#include "SampleAnalyzer/User/Analyzer/new_tagger.h"\n')
         file.write('#include "SampleAnalyzer/User/Analyzer/efficiencies.h"\n')
         file.write('#include "SampleAnalyzer/Commons/Service/RandomService.h"\n')
         file.write('#include "SampleAnalyzer/Commons/Service/PDGService.h"\n')

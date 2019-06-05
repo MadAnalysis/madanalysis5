@@ -35,13 +35,13 @@ class CmdDefine(CmdBase.CmdBase):
     def do(self,args):
 
         # tagger / smearer
-        if args[0] in ['tagger', 'smearer']:
+        if args[0] in ['tagger', 'smearer', 'reco_efficiency']:
             if self.main.mode != MA5RunningType.RECO:
-                logging.getLogger('MA5').error("Smearing/tagging is only available in the RECO mode")
+                logging.getLogger('MA5').error("Smearing/tagging/reconstruction are only available in the RECO mode")
                 logging.getLogger('MA5').error("Please restart the program with './bin/ma5 -R '")
                 return
             if self.main.fastsim.package != 'fastjet':
-                logging.getLogger('MA5').error("Smearing/tagging requires fastjet as a fastsim package. ")
+                logging.getLogger('MA5').error("Smearing/tagging/reconstruction require fastjet as a fastsim package. ")
                 return
             self.main.superfastsim.define(args,self.main.multiparticles)
             return
@@ -79,12 +79,12 @@ class CmdDefine(CmdBase.CmdBase):
         if self.main.datasets.Find(name):
             logging.getLogger('MA5').error("A dataset '"+name+"' already exists. Please choose a different name.")
             return
-                
+
         # Adding ids to the multiparticle
         ids = []
         for item in args:
             isPDGid = True
-            
+
             try:
                 id = int(item)
             except ValueError:
@@ -117,6 +117,12 @@ class CmdDefine(CmdBase.CmdBase):
         logging.getLogger('MA5').info("   The smearing function is given by the function <function>.")
         logging.getLogger('MA5').info("   The variable to which the smearer applies is given by <variable>.")
         logging.getLogger('MA5').info("   The bounds correspond to the domain the smearer applies (pt > ..., eta < ..., etc.).")
+        logging.getLogger('MA5').info("")
+        logging.getLogger('MA5').info("   Syntax: define reco_efficiency <p1> <function> [<bounds>]")
+        logging.getLogger('MA5').info("   Define the efficiency to reconstruct the object <p1>.")
+        logging.getLogger('MA5').info("   The corresponding efficiency function is given by <function>.")
+        logging.getLogger('MA5').info("   The variable to which the smearer applies is given by <variable>.")
+        logging.getLogger('MA5').info("   The bounds correspond to the domain the efficiency applies (pt > ..., eta < ..., etc.).")
 
 
     def complete(self,text,line,begidx,endidx):
@@ -128,12 +134,12 @@ class CmdDefine(CmdBase.CmdBase):
             nargs += 1
 
         if nargs==2:
-            output=['tagger', 'smearer']
+            output=['tagger', 'smearer', 'reco_efficiency']
             return self.finalize_complete(text,output)
 
         elif nargs==3 or (nargs==5 and args[1] == 'tagger'):
             output=['=']
-            if args[1] in ['tagger', 'smearer']:
+            if args[1] in ['tagger', 'smearer', 'reco_efficiency']:
                 output=self.main.multiparticles.GetNames()
             return self.finalize_complete(text,output)
 
@@ -149,7 +155,7 @@ class CmdDefine(CmdBase.CmdBase):
             output = ['PT','ETA','PHI','E','D0','PX','PY','PZ']
             return self.finalize_complete(text,output)
 
-        elif nargs>3 and args[1] not in ['tagger', 'smearer']:
+        elif nargs>3 and args[1] not in ['tagger', 'smearer', 'reco_efficiency']:
             output=self.main.multiparticles.GetNames()
             return self.finalize_complete(text,output)
         else:

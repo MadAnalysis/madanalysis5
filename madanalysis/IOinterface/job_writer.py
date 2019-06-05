@@ -577,19 +577,24 @@ class JobWriter():
         file.close()
 
         ## Do we need a smearer?
-        if main.superfastsim.smearer.rules!={}:
-            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/newsmearer.h","w")
-            import madanalysis.job.job_smearer_header as JobSmearerHeader
-            job = JobSmearerHeader.JobSmearerHeader(main.superfastsim)
-            job.WriteNewSmearerHeader(file)
+        if main.superfastsim.smearer.rules!={} or main.superfastsim.reco.rules!={}:
+            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/new_smearer_reco.h","w")
+            import madanalysis.job.job_smearer_reco_header as JobSmearerRecoHeader
+            job = JobSmearerRecoHeader.JobSmearerRecoHeader(main.superfastsim)
+            job.WriteNewSmearerRecoHeader(file)
             file.close()
-            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/sigmas.h","w")
-            job.WriteNewSmearerEfficiencies(file)
-            file.close()
+            if main.superfastsim.smearer.rules!={}:
+                file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/sigmas.h","w")
+                job.WriteNewSmearerEfficiencies(file)
+                file.close()
+            if main.superfastsim.reco.rules!={}:
+                file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/reco.h","w")
+                job.WriteNewRecoEfficiencies(file)
+                file.close()
 
         ## Do we need a tagger?
         if main.superfastsim.tagger.rules!={}:
-            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/newtagger.h","w")
+            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/new_tagger.h","w")
             import madanalysis.job.job_tagger_header as JobTaggerHeader
             job = JobTaggerHeader.JobTaggerHeader(main.superfastsim)
             job.WriteNewTaggerHeader(file)
@@ -609,15 +614,15 @@ class JobWriter():
 
         ## Do we need a smearer?
         if main.superfastsim.smearer.rules!={}:
-            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/newsmearer.cpp","w")
-            import madanalysis.job.job_smearer_main as JobSmearerMain
-            job = JobSmearerMain.JobSmearerMain(main.superfastsim)
-            job.WriteNewSmearerSource(file)
+            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/new_smearer_reco.cpp","w")
+            import madanalysis.job.job_smearer_reco_main as JobSmearerRecoMain
+            job = JobSmearerRecoMain.JobSmearerRecoMain(main.superfastsim)
+            job.WriteNewSmearerRecoSource(file)
             file.close()
 
         ## Do we need a tagger?
         if main.superfastsim.tagger.rules!={}:
-            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/newtagger.cpp","w")
+            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/new_tagger.cpp","w")
             import madanalysis.job.job_tagger_main as JobTaggerMain
             job = JobTaggerMain.JobTaggerMain(main.superfastsim)
             job.WriteNewTaggerSource(file)

@@ -23,9 +23,10 @@
 
 
 import logging
-from madanalysis.fastsim.ast     import AST
-from madanalysis.fastsim.tagger  import Tagger
-from madanalysis.fastsim.smearer import Smearer
+from madanalysis.fastsim.ast            import AST
+from madanalysis.fastsim.tagger         import Tagger
+from madanalysis.fastsim.smearer        import Smearer
+from madanalysis.fastsim.recoefficiency import RecoEfficiency
 
 class SuperFastSim:
 
@@ -34,6 +35,7 @@ class SuperFastSim:
         self.logger      = logging.getLogger('MA5')
         self.tagger      = Tagger()
         self.smearer     = Smearer()
+        self.reco        = RecoEfficiency()
         self.observables = ''
 
     def InitObservables(self, obs_list):
@@ -47,8 +49,9 @@ class SuperFastSim:
             return (prt[0] in ('-','+') and prt[1:].isdigit()) or prt.isdigit()
 
         ## Checking the length of the argument list
-        if (args[0]=='tagger' and len(args)<5) or (args[0]=='smearer' and len(args)<3):
-            self.logger.error('Not enough arguments for a tagger/smearer')
+        if (args[0]=='tagger' and len(args)<5) or (args[0]=='smearer' and len(args)<3) \
+           or  (args[0]=='reco_efficiency' and len(args)<3):
+            self.logger.error('Not enough arguments for a tagger/smearer/reconstruction')
             prts.Remove('c', None)
             return
 
@@ -105,6 +108,10 @@ class SuperFastSim:
                 return
             to_decode=args[4:]
 
+        ## Checking the second and third arguments of a smearer
+        elif args[0] == 'reco_efficiency':
+            to_decode=args[2:]
+
         ## Getting the bounds and the function
         function, bounds = self.decode_args(to_decode)
         if function.size()==0:
@@ -117,6 +124,8 @@ class SuperFastSim:
             self.tagger.add_rule(true_id,reco_id,function,bounds)
         elif args[0]=='smearer':
             self.smearer.add_rule(true_id,obs,function,bounds)
+        elif args[0]=='reco_efficiency':
+            self.reco.add_rule(true_id,function,bounds)
         prts.Remove('c', None)
         return
 
@@ -179,6 +188,8 @@ class SuperFastSim:
             self.tagger.display()
         elif args[0]=='smearer':
             self.smearer.display()
+        elif args[0]=='reco_efficiency':
+            self.acceptance.display()
         return
 
 

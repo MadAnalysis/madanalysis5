@@ -22,7 +22,7 @@
 ################################################################################
 
 
-class JobSmearerHeader:
+class JobSmearerRecoHeader:
 
     ## Initialization
     def __init__(self, fastsim):
@@ -30,7 +30,7 @@ class JobSmearerHeader:
 
 
     ## Writing NewTagger.h
-    def WriteNewSmearerHeader(self, file):
+    def WriteNewSmearerRecoHeader(self, file):
         file.write('#ifndef NEW_SMEARER_H\n')
         file.write('#define NEW_SMEARER_H\n')
         file.write('// SampleAnalyzer headers\n')
@@ -74,4 +74,22 @@ class JobSmearerHeader:
                      'bnd_'+str(value['id_true']) + '_' + str(value['obs'])+'_'+\
                        str(eff_key)) + '\n')
         file.write('#endif')
+
+    ## Reconstruction efficiencies and bounds
+    def WriteNewRecoEfficiencies(self,file):
+        file.write('#ifndef ACC_H_INCLUDED\n')
+        file.write('#define ACC_H_INCLUDED\n')
+        file.write('#include <cmath>\n')
+        file.write('#include <math.h>\n')
+        file.write('#include <iostream>\n')
+        for key, value in self.fastsim.reco.rules.items():
+            for eff_key in value['efficiencies'].keys():
+                 eff_fnc = value['efficiencies'][eff_key]['function']
+                 eff_bnd = value['efficiencies'][eff_key]['bounds'  ]
+                 file.write(eff_fnc.tocpp('MAdouble64', \
+                     'reco_'+str(value['id_reco']) + '_' + str(eff_key))+'\n')
+                 file.write(eff_bnd.tocpp('MAbool', \
+                     'reco_bnd_'+str(value['id_reco']) +'_'+str(eff_key)) + '\n')
+        file.write('#endif')
+
 
