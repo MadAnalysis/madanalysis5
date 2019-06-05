@@ -207,10 +207,8 @@ class JobSmearerRecoMain:
                                obj+'->py(), smeared_object, '+obj+'->e());\n')
                 elif val['obs'] == 'E':
                     file.write('      if (smeared_object < 0.) smeared_object = 0.;\n')
-                    file.write('      '+obj+\
-                               '->momentum().SetPtEtaPhiE('+obj+'->pt(), '+\
-                               obj+'->eta(), '+obj+'->phi(), '+\
-                               'smeared_object);\n')
+                    file.write('      '+obj+'->momentum().SetPtEtaPhiE('+obj+'->pt(), '+\
+                               obj+'->eta(), '+obj+'->phi(), '+'smeared_object);\n')
                 file.write('    }\n')
                 check_initializer+=1
 

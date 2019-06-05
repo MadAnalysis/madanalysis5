@@ -61,8 +61,8 @@ class RecoEfficiency:
             myrule = self.rules[key]
             self.logger.info(str(key) + ' - Efficiency to reconstruct an object of PDG-' + str(myrule['id_reco']))
             for eff_key in myrule['efficiencies'].keys():
-                cpp_name = 'acc_'+str(myrule['id_reco'])+'_'+str(eff_key)
-                bnd_name = 'acc_bnd_'+str(myrule['id_reco'])+'_'+str(eff_key)
+                cpp_name = 'reco_'+str(myrule['id_reco'])+'_'+str(eff_key)
+                bnd_name = 'reco_bnd_'+str(myrule['id_reco'])+'_'+str(eff_key)
                 myeff = myrule['efficiencies'][eff_key]
                 self.logger.info('  ** function: ' + myeff['function'].tostring())
                 self.logger.info('  ** bounds:   ' + myeff['bounds'].tostring())

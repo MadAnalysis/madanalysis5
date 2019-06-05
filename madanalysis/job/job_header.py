@@ -42,7 +42,7 @@ def WriteHeader(file,main):
     file.write('\n')
     if main.superfastsim.tagger.rules!={}:
         file.write('#include "new_tagger.h"\n')
-    if main.superfastsim.smearer.rules!={} or main.superfastsim.recoeffiency.rules!={}:
+    if main.superfastsim.smearer.rules!={} or main.superfastsim.reco.rules!={}:
         file.write('#include "new_smearer_reco.h"\n')
 
     # Namespace

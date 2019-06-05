@@ -189,7 +189,7 @@ class SuperFastSim:
         elif args[0]=='smearer':
             self.smearer.display()
         elif args[0]=='reco_efficiency':
-            self.acceptance.display()
+            self.reco.display()
         return
 
 

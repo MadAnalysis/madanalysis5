@@ -460,7 +460,7 @@ class JobWriter():
             file.write('  JetClusterer* cluster1 = \n')
             file.write('      manager.InitializeJetClusterer("'+self.main.fastsim.clustering.algorithm+'",parametersC1);\n')
             file.write('  if (cluster1==0) return 1;\n\n')
-            if self.main.superfastsim.smearer.rules!={}:
+            if self.main.superfastsim.smearer.rules!={}  or self.main.superfastsim.reco.rules!={}:
                 file.write('  // Declaration of the smearer\n')
                 file.write('  NewSmearer* smearer = new NewSmearer();\n\n')
             if self.main.superfastsim.tagger.rules!={}:
@@ -534,7 +534,7 @@ class JobWriter():
             file.write('      if (!analyzer2->Execute(mySample,myEvent)) continue;\n')
         if self.main.fastsim.package=="fastjet":
             file.write('      cluster1->Execute(mySample,myEvent);\n')
-            if self.main.superfastsim.smearer.rules!={}:
+            if self.main.superfastsim.smearer.rules!={} or self.main.superfastsim.reco.rules!={}:
                 file.write('      smearer->Execute(mySample,myEvent);\n')
             if self.main.superfastsim.tagger.rules!={}:
                 file.write('      tagger->Execute(mySample,myEvent);\n')
@@ -613,7 +613,7 @@ class JobWriter():
         file.close()
 
         ## Do we need a smearer?
-        if main.superfastsim.smearer.rules!={}:
+        if main.superfastsim.smearer.rules!={}  or self.main.superfastsim.reco.rules!={}:
             file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/new_smearer_reco.cpp","w")
             import madanalysis.job.job_smearer_reco_main as JobSmearerRecoMain
             job = JobSmearerRecoMain.JobSmearerRecoMain(main.superfastsim)

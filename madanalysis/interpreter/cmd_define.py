@@ -121,7 +121,6 @@ class CmdDefine(CmdBase.CmdBase):
         logging.getLogger('MA5').info("   Syntax: define reco_efficiency <p1> <function> [<bounds>]")
         logging.getLogger('MA5').info("   Define the efficiency to reconstruct the object <p1>.")
         logging.getLogger('MA5').info("   The corresponding efficiency function is given by <function>.")
-        logging.getLogger('MA5').info("   The variable to which the smearer applies is given by <variable>.")
         logging.getLogger('MA5').info("   The bounds correspond to the domain the efficiency applies (pt > ..., eta < ..., etc.).")
 
 

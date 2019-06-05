@@ -77,8 +77,8 @@ class JobSmearerRecoHeader:
 
     ## Reconstruction efficiencies and bounds
     def WriteNewRecoEfficiencies(self,file):
-        file.write('#ifndef ACC_H_INCLUDED\n')
-        file.write('#define ACC_H_INCLUDED\n')
+        file.write('#ifndef RECO_H_INCLUDED\n')
+        file.write('#define RECO_H_INCLUDED\n')
         file.write('#include <cmath>\n')
         file.write('#include <math.h>\n')
         file.write('#include <iostream>\n')
