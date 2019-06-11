@@ -139,16 +139,22 @@ class CmdSet(CmdBase.CmdBase):
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='merging':
             self.main.merging.user_SetParameter(objs[2],args[2],self.main.mode,self.main.archi_info.has_fastjet)
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='fastsim':
-            user_info    = UserInfo()
-            user_info.ReadUserOptions(self.main.archi_info.ma5dir+'/madanalysis/input/installation_options.dat')
-            checker = ConfigChecker(self.main.archi_info, user_info, self.main.session_info, self.main.script, False)
-            bkp_delphes = self.main.archi_info.has_delphes
-            bkp_ma5tune = self.main.archi_info.has_delphesMA5tune
-            self.main.archi_info.has_delphes = checker.checkDelphes(True)
-            self.main.archi_info.has_delphesMA5tune = checker.checkDelphesMA5tune(True)
-            self.main.fastsim.user_SetParameter(objs[2],args[2],self.main.datasets,self.main.mode,self.main.archi_info) 
-            self.main.archi_info.has_delphes = bkp_delphes
-            self.main.archi_info.has_delphesMA5tune = bkp_ma5tune
+            if objs[2] == 'jetrecomode':
+                if args[2] in ['jets', 'constituents']:
+                    self.main.superfastsim.jetrecomode = args[2]
+                else:
+                    logging.getLogger('MA5').error("Jet smearing can only be based on the jet ('jets') or on its constituents ('constituents').")
+            else:
+                user_info    = UserInfo()
+                user_info.ReadUserOptions(self.main.archi_info.ma5dir+'/madanalysis/input/installation_options.dat')
+                checker = ConfigChecker(self.main.archi_info, user_info, self.main.session_info, self.main.script, False)
+                bkp_delphes = self.main.archi_info.has_delphes
+                bkp_ma5tune = self.main.archi_info.has_delphesMA5tune
+                self.main.archi_info.has_delphes = checker.checkDelphes(True)
+                self.main.archi_info.has_delphesMA5tune = checker.checkDelphesMA5tune(True)
+                self.main.fastsim.user_SetParameter(objs[2],args[2],self.main.datasets,self.main.mode,self.main.archi_info) 
+                self.main.archi_info.has_delphes = bkp_delphes
+                self.main.archi_info.has_delphesMA5tune = bkp_ma5tune
             if objs[2]=='package' and args[2] in ['fastjet', 'delphes', 'delphesMA5tune'] and self.main.recasting.status=='on':
                 logging.getLogger('MA5').warning("Recasting mode switched off")
                 self.main.recasting.status ="off"

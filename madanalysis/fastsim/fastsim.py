@@ -36,6 +36,7 @@ class SuperFastSim:
         self.tagger      = Tagger()
         self.smearer     = Smearer()
         self.reco        = RecoEfficiency()
+        self.jetrecomode = 'jets'
         self.observables = ''
 
     def InitObservables(self, obs_list):
@@ -187,7 +188,7 @@ class SuperFastSim:
         if args[0]=='tagger':
             self.tagger.display()
         elif args[0]=='smearer':
-            self.smearer.display()
+            self.smearer.display(self.jetrecomode)
         elif args[0]=='reco_efficiency':
             self.reco.display()
         return

@@ -42,7 +42,8 @@ class ClusteringConfiguration:
                                      "siscone",\
                                      "cdfjetclu", "cdfmidpoint",\
                                      "none"],
-                      "exclusive_id" : ["true","false"]
+                      "exclusive_id" : ["true","false"],
+                      "jetrecomode" : ["jets","constituents"]
                     }
 
     def __init__(self):

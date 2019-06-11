@@ -58,11 +58,31 @@ class JobSmearerRecoMain:
         file.write('  TET = 0.; THT = 0.; Meff = 0.;\n\n')
 
         # Jet smearing and reconstruction
-        file.write('  // Jet smearing\n')
+        file.write('  // Jet smearing in the \''+self.fastsim.jetrecomode+'\' mode\n')
         file.write('  for (MAuint32 i=0; i<event.rec()->jets().size(); i++)\n')
         file.write('  {\n')
-        self.PrintReco(['21', 'j'],file,'(&event.rec()->jets()[i])')
-        self.PrintSmearer(['21', 'j'], ['PT','ETA','PHI','E','PX','PY','PZ'],file,'(&event.rec()->jets()[i])')
+        if self.fastsim.jetrecomode == 'jets':
+            self.PrintReco(['21', 'j'],file,'(&event.rec()->jets()[i])')
+            self.PrintSmearer(['21', 'j'], ['PT','ETA','PHI','E','PX','PY','PZ'],file,'(&event.rec()->jets()[i])')
+        elif self.fastsim.jetrecomode == 'constituents':
+            file.write('    MAuint32 Ntracks = 0;\n')
+            file.write('    MALorentzVector JetMomentum;\n')
+            file.write('    for (MAuint32 icnst=0;icnst<(&event.rec()->jets()[i])->constituents().size();icnst++)\n')
+            file.write('    {\n')
+            file.write('      MCParticleFormat* particle = &event.mc()->particles()[event.rec()->jets()[i].constituents()[icnst]];\n')
+            self.PrintReco(['21', 'j'],file,'particle', set2Remove=False)
+            self.PrintSmearer(['21', 'j'], ['PT','ETA','PHI','E','PX','PY','PZ'],file,'particle')
+            file.write('      JetMomentum += particle->momentum();\n')
+            file.write('      Ntracks++;\n')
+            file.write('    }\n')
+            file.write('    if (Ntracks == 0)\n')
+            file.write('    {\n')
+            file.write('      toRemove.push_back(i);\n')
+            file.write('      continue;\n')
+            file.write('    }\n')
+            file.write('    (&event.rec()->jets()[i])->momentum().SetPxPyPzE(JetMomentum.Px(), '+\
+                               'JetMomentum.Py(), JetMomentum.Pz(), JetMomentum.E());\n')
+            file.write('    (&event.rec()->jets()[i])->setNtracks(Ntracks);\n')
         file.write('    pTmiss -= event.rec()->jets()[i].momentum();\n')
         file.write('    THT    += event.rec()->jets()[i].pt();\n')
         file.write('    TET    += event.rec()->jets()[i].pt();\n')
@@ -86,7 +106,7 @@ class JobSmearerRecoMain:
         file.write('  }\n')
         file.write('  // Removal of the non-reconstructed electrons\n')
         file.write('  for (MAuint32 i=toRemove.size();i>0;i--)\n')
-        file.write('    event.rec()->electrons().erase(event.rec()->electrons().begin() + toRemove[i]);\n')
+        file.write('    event.rec()->electrons().erase(event.rec()->electrons().begin() + toRemove[i-1]);\n')
         file.write('  toRemove.clear();\n\n')
 
         # Muon smearing
@@ -100,7 +120,7 @@ class JobSmearerRecoMain:
         file.write('  }\n')
         file.write('  // Removal of the non-reconstructed muons\n')
         file.write('  for (MAuint32 i=toRemove.size();i>0;i--)\n')
-        file.write('    event.rec()->muons().erase(event.rec()->muons().begin() + toRemove[i]);\n')
+        file.write('    event.rec()->muons().erase(event.rec()->muons().begin() + toRemove[i-1]);\n')
         file.write('  toRemove.clear();\n\n')
 
         # Tau smearing
@@ -114,7 +134,7 @@ class JobSmearerRecoMain:
         file.write('  }\n')
         file.write('  // Removal of the non-reconstructed taus\n')
         file.write('  for (MAuint32 i=toRemove.size();i>0;i--)\n')
-        file.write('    event.rec()->taus().erase(event.rec()->taus().begin() + toRemove[i]);\n')
+        file.write('    event.rec()->taus().erase(event.rec()->taus().begin() + toRemove[i-1]);\n')
         file.write('  toRemove.clear();\n\n')
 
         # Photon smearing
@@ -128,11 +148,11 @@ class JobSmearerRecoMain:
         file.write('  }\n')
         file.write('  // Removal of the non-reconstructed photons\n')
         file.write('  for (MAuint32 i=toRemove.size();i>0;i--)\n')
-        file.write('    event.rec()->photons().erase(event.rec()->photons().begin() + toRemove[i]);\n')
+        file.write('    event.rec()->photons().erase(event.rec()->photons().begin() + toRemove[i-1]);\n')
         file.write('  toRemove.clear();\n\n')
 
         # Set missing transverse energy
-        file.write('  // New MET\n')
+        file.write('  // New MET (and Meff)\n')
         file.write('  (&event.rec()->MET().momentum())->SetPxPyPzE(pTmiss.Px(), pTmiss.Py(), 0., pTmiss.E());\n')
         file.write('  Meff += event.rec()->MET().pt();\n')
         file.write('}\n\n')
@@ -213,7 +233,7 @@ class JobSmearerRecoMain:
                 check_initializer+=1
 
 
-    def PrintReco(self, reco_list, file, obj):
+    def PrintReco(self, reco_list, file, obj, set2Remove=True):
         for key, val in self.fastsim.reco.rules.items():
             if val['id_reco'] in reco_list:
                 eff_str = []
@@ -227,7 +247,8 @@ class JobSmearerRecoMain:
                 file.write('      MAdouble64 acceptance = ' + ' + '.join(eff_str) +';\n')
                 file.write('      if (RANDOM->flat() > acceptance)\n')
                 file.write('      {\n')
-                file.write('        toRemove.push_back(i);\n')
+                if set2Remove:
+                    file.write('        toRemove.push_back(i);\n')
                 file.write('        continue;\n')
                 file.write('      }\n')
 

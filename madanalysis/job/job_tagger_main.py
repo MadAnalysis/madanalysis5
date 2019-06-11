@@ -94,8 +94,8 @@ class JobTaggerMain:
         self.PrintTagger(['21', 'j'], ['15', 'ta'],file,'(&event.rec()->jets()[i])','TauMistag')
         file.write('    }\n')
         file.write('  }\n\n')
-        file.write('  for (MAuint32 i=0;i<toRemove.size();i++)\n')
-        file.write('    event.rec()->jets().erase(event.rec()->jets().begin() + toRemove[i]);\n\n')
+        file.write('  for (MAuint32 i=toRemove.size();i>0;i--)\n')
+        file.write('    event.rec()->jets().erase(event.rec()->jets().begin() + toRemove[i-1]);\n\n')
 
         # tau-tagging
         file.write('  // tau-tagging\n')
@@ -104,8 +104,8 @@ class JobTaggerMain:
         file.write('  {\n')
         self.PrintTagger(['15', 'ta'], ['15', 'ta'],file,'(&event.rec()->taus()[i])','Tautag')
         file.write('  }\n\n')
-        file.write('  for (MAuint32 i=0;i<toRemove.size();i++)\n')
-        file.write('    event.rec()->taus().erase(event.rec()->taus().begin() + toRemove[i]);\n\n')
+        file.write('  for (MAuint32 i=toRemove.size();i>0;i--)\n')
+        file.write('    event.rec()->taus().erase(event.rec()->taus().begin() + toRemove[i-1]);\n\n')
         # End
         file.write('}\n\n')
 

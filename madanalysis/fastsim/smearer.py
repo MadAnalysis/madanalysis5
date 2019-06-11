@@ -56,10 +56,12 @@ class Smearer:
             'bounds': bounds }
 
 
-    def display(self):
+    def display(self, jetrecomode):
         self.logger.info('*********************************')
         self.logger.info('       Smearer information       ')
         self.logger.info('*********************************')
+        if self.rules.keys() != []:
+            self.logger.info(' - Running in the '+jetrecomode+' reconstruction mode.')
         for key in self.rules.keys():
             myrule = self.rules[key]
             self.logger.info(str(key) + ' - Smearing an object of PDG ' + str(myrule['id_true']) + \
