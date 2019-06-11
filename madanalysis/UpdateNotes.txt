@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+150           (2019/06/11) fuks:    Fixing a bug and improving the LHE writer/reader 
+
 149           (2019/06/05) fuks:    Fixing a few bugs with the reco efficiencies 
 
 147           (2019/06/05) fuks:    Adding the reconstrution efficiencies 

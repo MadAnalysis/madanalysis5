@@ -65,7 +65,8 @@ MAbool InitialMCParticleToSave(const MCParticleFormat& part, const SampleFormat&
   else
   {
     return (part.statuscode()==3  && part.pt()==0) ||
-           (part.statuscode()>=11 && part.statuscode()<=19);
+           (part.statuscode()>=11 && part.statuscode()<=19) ||
+           (part.statuscode()==21 && part.pt()==0);
   }
 }
 
@@ -487,7 +488,14 @@ MAbool LHEWriter::WriteEvent(const EventFormat& myEvent,
       const MCParticleFormat* part = &(myEvent.mc()->particles()[i]);
  
      if ( firstpart && InitialMCParticleToSave(*part,mySample) )
+     {
+       particles.push_back(LHEParticleFormat());
+       pointers.push_back(part);
+       WriteParticle(myEvent.mc()->particles()[i],0,0,-1, particles.back());
+     }
+     else if ( InitialMCParticleToSave(*part,mySample) )
       {
+        firstpart=false;
         particles.push_back(LHEParticleFormat());
         pointers.push_back(part);
         WriteParticle(myEvent.mc()->particles()[i],0,0,-1, particles.back());
@@ -626,7 +634,9 @@ void LHEWriter::WriteParticle(const MCParticleFormat& myPart,
 
 void LHEWriter::WriteJet(const RecJetFormat& jet, LHEParticleFormat& lhe, MAint32& mother)
 {
-  if (jet.btag()) lhe.id = 5; else lhe.id = 21;
+  if      (jet.btag()) lhe.id = 5;
+  else if (jet.ctag()) lhe.id = 4;
+  else    lhe.id = 21;
   lhe.status  = 1;
   lhe.mother1 = mother;
   lhe.mother2 = mother;
