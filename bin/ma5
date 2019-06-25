@@ -62,8 +62,8 @@ sys.path.insert(0, servicedir)
 
 # Release version
 # Do not touch it !!!!!  
-version = "1.8.19"
-date = "2019/06/11"
+version = "1.8.20"
+date = "2019/06/25"
 
 # Loading the MadAnalysis session
 import madanalysis.core.launcher

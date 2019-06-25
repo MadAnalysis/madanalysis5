@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+152           (2019/06/25) fuks:    Adding a few useful hidden functions for recasting correlation 
+                                   studies 
+
 151           (2019/06/11) fuks:    Adding two options for jet smearing and reco 
 
 150           (2019/06/11) fuks:    Fixing a bug and improving the LHE writer/reader 

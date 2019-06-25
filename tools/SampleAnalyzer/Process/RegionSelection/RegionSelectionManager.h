@@ -416,6 +416,10 @@ class RegionSelectionManager
     return false;
   }
 
+  /// Dumping the content of the counters
+  void HeadSR(std::ostream &, const std::string&);
+  void DumpSR(std::ostream &);
+
 };
 
 }

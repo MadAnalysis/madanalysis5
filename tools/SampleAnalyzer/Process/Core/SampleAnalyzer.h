@@ -149,6 +149,11 @@ class SampleAnalyzer
   /// Creating the directory structure associated with the SRM
   MAbool PostInitialize();
 
+  /// Dumping the content of the counters
+  void DumpSR(std::ostream &);
+  void HeadSR(std::ostream &);
+
+
  private:
 
   /// CheckDatatypes
