@@ -199,17 +199,17 @@ class JobSmearerRecoMain:
                 # we dont want momentum and energy to be negative
                 if val['obs'] == 'PT':
                     file.write('      if (smeared_object < 0.) smeared_object = 0.;\n')
-                    file.write('      '+obj+'->momentum().SetPtEtaPhiM(smeared_object, '+\
+                    file.write('      '+obj+'->momentum().SetPtEtaPhiE(smeared_object, '+\
                                obj+'->eta(), '+obj+'->phi(), '+\
-                               obj+'->m());\n')
+                               obj+'->e());\n')
                 elif val['obs'] == 'ETA':
                     file.write('      '+obj+\
-                               '->momentum().SetPtEtaPhiM('+obj+'->pt(), '+\
-                               'smeared_object, '+obj+'->phi(), '+ obj+'->m());\n')
+                               '->momentum().SetPtEtaPhiE('+obj+'->pt(), '+\
+                               'smeared_object, '+obj+'->phi(), '+ obj+'->e());\n')
                 elif val['obs'] == 'PHI':
                     file.write('      '+obj+\
-                               '->momentum().SetPtEtaPhiM('+obj+'->pt(), '+\
-                               +obj+'->eta(), smeared_object, '+ obj+'->m());\n')
+                               '->momentum().SetPtEtaPhiE('+obj+'->pt(), '+\
+                               +obj+'->eta(), smeared_object, '+ obj+'->e());\n')
                 elif val['obs'] == 'PX':
                     file.write('      if (smeared_object < 0.) smeared_object = 0.;\n')
                     file.write('      '+obj+\

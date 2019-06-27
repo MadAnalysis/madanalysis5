@@ -41,73 +41,92 @@ class JobTaggerMain:
         file.write('\n')
         file.write('void NewTagger::Execute(SampleFormat& sample, ' +\
             'EventFormat& event)\n{\n')
-        # tau-tagging
-        file.write('  // Storing the IDs of tau-tagged jets\n')
+
+        # Removal container
+        file.write('  // Storing the IDs of objects that need to leave a collection\n')
         file.write('  std::vector<MAuint32> toRemove;\n\n')
+
         # b/c-tagging + tau mistagging
         file.write('  // b/c-tagging + tau-mistagging\n')
+        file.write('  unsigned int Ntaus = event.rec()->taus().size();\n')
         file.write('  for (MAuint32 i=0; i<event.rec()->jets().size(); i++)\n')
         file.write('  {\n')
-        file.write('    // We have a true b-jet: is it b-tagged?\n')
-        file.write('    if (event.rec()->jets()[i].true_btag())\n')
-        file.write('    {\n')
-        self.PrintTagger(['5', 'b'], ['5', 'b'],file,'(&event.rec()->jets()[i])','Btag')
-        file.write('    }\n\n')
-        file.write('    // We have a true c-jet: is it b-tagged?\n')
-        file.write('    else if (event.rec()->jets()[i].true_ctag())\n')
-        file.write('    {\n')
-        self.PrintTagger(['4', 'c'], ['5', 'b'],file,'(&event.rec()->jets()[i])','Btag')
-        file.write('    }\n\n')
-        file.write('    // We have a true light jet: is it b-tagged?\n')
-        file.write('    else\n')
-        file.write('    {\n')
-        self.PrintTagger(['21', 'j'], ['5', 'b'],file,'(&event.rec()->jets()[i])','Btag')
-        file.write('    }\n\n')
-        file.write('    // ------------------------------------------------------------------------ //\n\n')
-        file.write('    // We have a b-tagged jet -> moving on with the next jet\n')
-        file.write('    if (event.rec()->jets()[i].btag()) { continue; }\n\n')
-        file.write('    // ------------------------------------------------------------------------ //\n\n')
-        file.write('    // We have a true c-jet -> is it c-tagged?\n')
-        file.write('    if (event.rec()->jets()[i].true_ctag())\n')
-        file.write('    {\n')
-        self.PrintTagger(['4', 'c'], ['4', 'c'],file,'(&event.rec()->jets()[i])','Ctag')
-        file.write('    }\n\n')
-        file.write('    // We have a true (non-b-tagged) b-jet -> is it c-tagged?\n')
-        file.write('    else if (event.rec()->jets()[i].true_btag())\n')
-        file.write('    {\n')
-        self.PrintTagger(['5', 'b'], ['4', 'c'],file,'(&event.rec()->jets()[i])','Ctag')
-        file.write('    }\n\n')
-        file.write('    // We have a true light jet -> is it c-tagged?\n')
-        file.write('    else\n')
-        file.write('    {\n')
-        self.PrintTagger(['21', 'j'], ['4', 'c'],file,'(&event.rec()->jets()[i])','Ctag')
-        file.write('    }\n')
-        file.write('    // ------------------------------------------------------------------------ //\n\n')
-        file.write('    // We have a c-tagged jet -> moving on with the next jet\n')
-        file.write('    if (event.rec()->jets()[i].ctag()) { continue; }\n\n')
-        file.write('    // ------------------------------------------------------------------------ //\n\n')
-        file.write('    // We have a true b/c-jet -> not tau-tagged\n')
-        file.write('    if (event.rec()->jets()[i].true_btag() || event.rec()->jets()[i].true_ctag()) { continue; }\n\n')
-        file.write('    // if not, is it tau-tagged?\n')
-        file.write('    else\n')
-        file.write('    {\n')
-        self.PrintTagger(['21', 'j'], ['15', 'ta'],file,'(&event.rec()->jets()[i])','TauMistag')
-        file.write('    }\n')
+        for reco_ID in [ ['5', 'b', 'Btag'], ['4', 'c', 'Ctag'] ]:
+            pretag=''
+            for true_ID in [ ['5', 'b', 'true_btag'], ['4', 'c', 'true_ctag'], ['21', 'j', '' ] ]:
+                if self.HaveRules(true_ID[:-1], reco_ID[:-1]):
+                    file.write('    // We have a true ' + true_ID[-2].replace('j','light') + '-jet: is it ' + reco_ID[-2] + '-tagged?\n')
+                    if true_ID[-1]=='':
+                        file.write('    ' + pretag + '\n')
+                    else:
+                        file.write('    ' + pretag + 'if (event.rec()->jets()[i].' + true_ID[-1]+ '())\n')
+                    file.write('    {\n')
+                    self.PrintTagger(true_ID[:-1], reco_ID[:-1], file,'(&event.rec()->jets()[i])',reco_ID[-1])
+                    file.write('    }\n\n')
+                    pretag='else '
+            file.write('    // We have a '+reco_ID[-2]+'-tagged jet -> moving on with the next jet\n')
+            file.write('    if (event.rec()->jets()[i].'+reco_ID[-1].lower()+'()) { continue; }\n\n')
+        if self.HaveRules(['21', 'j'], ['15', 'ta']):
+            file.write('    // We have a true b/c-jet -> not tau-tagged\n')
+            file.write('    if (event.rec()->jets()[i].true_btag() || event.rec()->jets()[i].true_ctag()) { continue; }\n\n')
+            file.write('    // if not, is it tau-tagged?\n')
+            file.write('    else\n')
+            file.write('    {\n')
+            self.PrintTagger(['21', 'j'], ['15', 'ta'],file,'(&event.rec()->jets()[i])','TauMistag')
+            file.write('    }\n')
         file.write('  }\n\n')
         file.write('  for (MAuint32 i=toRemove.size();i>0;i--)\n')
-        file.write('    event.rec()->jets().erase(event.rec()->jets().begin() + toRemove[i-1]);\n\n')
+        file.write('    event.rec()->jets().erase(event.rec()->jets().begin() + toRemove[i-1]);\n')
+        file.write('  toRemove.clear();\n\n')
 
         # tau-tagging
-        file.write('  // tau-tagging\n')
-        file.write('  toRemove.clear();\n')
-        file.write('  for (MAuint32 i=0; i<event.rec()->taus().size(); i++)\n')
-        file.write('  {\n')
-        self.PrintTagger(['15', 'ta'], ['15', 'ta'],file,'(&event.rec()->taus()[i])','Tautag')
-        file.write('  }\n\n')
-        file.write('  for (MAuint32 i=toRemove.size();i>0;i--)\n')
-        file.write('    event.rec()->taus().erase(event.rec()->taus().begin() + toRemove[i-1]);\n\n')
+        if self.HaveRules(['15', 'ta'], ['15', 'ta']):
+            file.write('  // tau-tagging\n')
+            file.write('  for (MAuint32 i=0; i<Ntaus; i++)\n')
+            file.write('  {\n')
+            self.PrintTagger(['15', 'ta'], ['15', 'ta'],file,'(&event.rec()->taus()[i])','Jet')
+            file.write('  }\n')
+            file.write('  for (MAuint32 i=toRemove.size();i>0;i--)\n')
+            file.write('    event.rec()->taus().erase(event.rec()->taus().begin() + toRemove[i-1]);\n')
+            file.write('  toRemove.clear();\n\n')
+
+        # global event variables
+        file.write('  // Shortcut for global event variables\n')
+        file.write('  MAfloat64 & THT  = event.rec()->THT();\n')
+        file.write('  MAfloat64 & Meff = event.rec()->Meff();\n\n')
+
+        # Muon and electron mis-tagging
+        file.write('  // Numbers of objects before mistagging\n')
+        file.write('  MAuint32 Nelectrons = event.rec()->electrons().size();\n')
+        file.write('  MAuint32 Nmuons     = event.rec()->muons().size();\n')
+        file.write('  MAuint32 Nphotons   = event.rec()->photons().size();\n')
+        for true_ID in [  ['13', 'mu', 'muons'],  ['11', 'e', 'electrons'],  ['22', 'a', 'photons']  ]:
+            head=True
+            for reco_ID in [ ['21', 'j', 'Jet'], ['11', 'e', 'Electron'], ['13', 'mu', 'Muon'], ['22', 'a', 'Photon'] ]:
+                if true_ID[0]==reco_ID[0]:
+                    continue
+                if self.HaveRules(true_ID[:-1], reco_ID[:-1]):
+                    if head:
+                        file.write('  // Mistagging of ' + true_ID[-1] + '\n')
+                        head=False;
+                    file.write('  for (MAuint32 i=0; i<N' + true_ID[-1] + '; i++)\n')
+                    file.write('  {\n')
+                    self.PrintTagger(true_ID[:-1], reco_ID[:-1],file,'(&event.rec()->' + true_ID[-1] + '()[i])',reco_ID[-1])
+                    file.write('  }\n')
+                    file.write('  for (MAuint32 i=toRemove.size();i>0;i--)\n')
+                    file.write('    event.rec()->' + true_ID[-1] + '().erase(event.rec()->' + true_ID[-1] + '().begin() + toRemove[i-1]);\n')
+                    file.write('  N'+true_ID[-1] +'-=toRemove.size();\n')
+                    file.write('  toRemove.clear();\n\n')
+
         # End
         file.write('}\n\n')
+
+
+    def HaveRules(self, true_list, reco_list):
+        for key, val in self.fastsim.tagger.rules.items():
+            if val['id_true'] in true_list and val['id_reco'] in reco_list:
+                return True
+        return False
 
 
     def PrintTagger(self, true_list, reco_list, file, obj, prop):
@@ -136,15 +155,38 @@ class JobTaggerMain:
                     file.write('        newTau->setCharge(charge>0);\n')
                     file.write('        toRemove.push_back(i);\n')
                     file.write('      }\n')
-                elif prop=='Tautag':
-                    file.write('      if (RANDOM->flat() > efficiency)\n')
+                elif prop in ['Jet', 'Electron', 'Muon']:
+                    if 'tau' in obj and prop=='Jet':
+                        file.write('      if (RANDOM->flat() > efficiency)\n')
+                    else:
+                        file.write('      if (RANDOM->flat() < efficiency)\n')
                     file.write('      {\n')
-                    file.write('        RecJetFormat* newJet = event.rec()->GetNewJet();\n')
-                    file.write('        newJet->setMomentum('+obj+'->momentum());\n')
-                    file.write('        newJet->setNtracks(' + obj + '->ntracks());\n')
-                    file.write('        newJet->setMc(' + obj + '->mc());\n')
+                    file.write('        Rec'+prop.replace('Electron','Lepton').replace('Muon','Lepton')+'Format* NewParticle = event.rec()->GetNew'+prop+'();\n')
+                    file.write('        NewParticle->setMomentum('+obj+'->momentum());\n')
+                    file.write('        NewParticle->setMc(' + obj + '->mc());\n')
+                    if prop in ['Electron', 'Muon']:
+                         if 'muon' in obj or 'electron' in obj:
+                             file.write('        NewParticle->SetCharge(' + obj + '->charge());\n')
+                         else:
+                             file.write('        if(RANDOM->flat() > 0.5)\n')
+                             file.write('            NewParticle->SetCharge(1.);\n')
+                             file.write('        else)\n')
+                             file.write('            NewParticle->SetCharge(-1.);\n')
+                    elif prop=='Jet':
+                        if 'tau' in obj:
+                            file.write('        NewParticle->setNtracks(' + obj + '->ntracks());\n')
+                        else:
+                            file.write('        NewParticle->setNtracks(1);\n')
+                            file.write('        THT    += '+obj+'->pt();\n')
+                            file.write('        Meff   += '+obj+'->pt();\n')
+                            file.write('        MALorentzVector MissHT = event.rec()->MHT().momentum() - '+obj+'->momentum();\n')
+                            file.write('        (&event.rec()->MHT().momentum())->SetPxPyPzE(MissHT.Px(), MissHT.Py(), 0., MissHT.E());\n')
                     file.write('        toRemove.push_back(i);\n')
                     file.write('      }\n')
                 else:
-                    file.write('      if (RANDOM->flat() < efficiency)')
-                    file.write(' { ' + obj+'->set'+prop+'(true); }\n')
+                    if true_list[0] in reco_list:
+                        file.write('      if (RANDOM->flat() > efficiency)')
+                        file.write(' { ' + obj+'->set'+prop+'(false); }\n')
+                    else:
+                        file.write('      if (RANDOM->flat() < efficiency)')
+                        file.write(' { ' + obj+'->set'+prop+'(true); }\n')
