@@ -96,27 +96,17 @@ class JobTaggerMain:
         file.write('  MAfloat64 & Meff = event.rec()->Meff();\n\n')
 
         # Muon and electron mis-tagging
-        file.write('  // Numbers of objects before mistagging\n')
-        file.write('  MAuint32 Nelectrons = event.rec()->electrons().size();\n')
-        file.write('  MAuint32 Nmuons     = event.rec()->muons().size();\n')
-        file.write('  MAuint32 Nphotons   = event.rec()->photons().size();\n')
         for true_ID in [  ['13', 'mu', 'muons'],  ['11', 'e', 'electrons'],  ['22', 'a', 'photons']  ]:
-            head=True
-            for reco_ID in [ ['21', 'j', 'Jet'], ['11', 'e', 'Electron'], ['13', 'mu', 'Muon'], ['22', 'a', 'Photon'] ]:
-                if true_ID[0]==reco_ID[0]:
-                    continue
-                if self.HaveRules(true_ID[:-1], reco_ID[:-1]):
-                    if head:
-                        file.write('  // Mistagging of ' + true_ID[-1] + '\n')
-                        head=False;
-                    file.write('  for (MAuint32 i=0; i<N' + true_ID[-1] + '; i++)\n')
-                    file.write('  {\n')
-                    self.PrintTagger(true_ID[:-1], reco_ID[:-1],file,'(&event.rec()->' + true_ID[-1] + '()[i])',reco_ID[-1])
-                    file.write('  }\n')
-                    file.write('  for (MAuint32 i=toRemove.size();i>0;i--)\n')
-                    file.write('    event.rec()->' + true_ID[-1] + '().erase(event.rec()->' + true_ID[-1] + '().begin() + toRemove[i-1]);\n')
-                    file.write('  N'+true_ID[-1] +'-=toRemove.size();\n')
-                    file.write('  toRemove.clear();\n\n')
+            if self.HaveRules(true_ID[:-1], ['11', 'e', '22', 'a', '21', 'j', '13', 'mu']):
+                file.write('  // Mistagging of ' + true_ID[-1] + '\n')
+                file.write('  for (MAuint32 i=0; i<event.rec()->' + true_ID[-1] + '().size(); i++)\n')
+                file.write('  {\n')
+                self.PrintTagger(true_ID[:-1], ['11', 'e', '22', 'a', '21', 'j', '13', 'mu'], file,
+                   '(&event.rec()->' + true_ID[-1] + '()[i])','LeptonicMistag')
+                file.write('  }\n')
+                file.write('  for (MAuint32 i=toRemove.size();i>0;i--)\n')
+                file.write('    event.rec()->' + true_ID[-1] + '().erase(event.rec()->' + true_ID[-1] + '().begin() + toRemove[i-1]);\n')
+                file.write('  toRemove.clear();\n\n')
 
         # End
         file.write('}\n\n')
@@ -130,9 +120,14 @@ class JobTaggerMain:
 
 
     def PrintTagger(self, true_list, reco_list, file, obj, prop):
+        # To get information on the existence of a tagger for a given particle species
+        check_initializer = 0
         for key, val in self.fastsim.tagger.rules.items():
             if val['id_true'] in true_list and val['id_reco'] in reco_list:
                 eff_str = []
+                initializer = 'MAdouble64 '
+                if check_initializer > 0:
+                    initializer = ''
                 for eff_key, eff_val in val['efficiencies'].items():
                     my_eff_str = eff_val['bounds'].tocpp_call(obj,\
                       'bnd_'+str(val['id_true'])+'_'+str(val['id_reco'])+'_'+str(eff_key))
@@ -140,7 +135,7 @@ class JobTaggerMain:
                     my_eff_str += eff_val['function'].tocpp_call(obj,\
                       'eff_'+str(val['id_true'])+'_'+str(val['id_reco'])+'_'+str(eff_key))
                     eff_str.append(my_eff_str)
-                file.write('      MAdouble64 efficiency = ' + ' + '.join(eff_str) +';\n')
+                file.write('      ' + initializer  + ' efficiency = ' + ' + '.join(eff_str) +';\n')
                 if prop=='TauMistag':
                     file.write('      if (RANDOM->flat() < efficiency)\n')
                     file.write('      {\n')
@@ -155,16 +150,27 @@ class JobTaggerMain:
                     file.write('        newTau->setCharge(charge>0);\n')
                     file.write('        toRemove.push_back(i);\n')
                     file.write('      }\n')
-                elif prop in ['Jet', 'Electron', 'Muon']:
+                elif prop in ['Jet', 'LeptonicMistag']:
                     if 'tau' in obj and prop=='Jet':
                         file.write('      if (RANDOM->flat() > efficiency)\n')
                     else:
                         file.write('      if (RANDOM->flat() < efficiency)\n')
+                    # Get the object for the reco object
+                    newprop = prop
+                    if val['id_reco'] in ['11', 'e']  :
+                        newprop = 'Electron'
+                    elif val['id_reco'] in ['13', 'mu'] :
+                        newprop = 'Muon'
+                    elif val['id_reco'] in ['22', 'a']  :
+                        newprop = 'Photon'
+                    elif val['id_reco'] in ['21', 'j']  :
+                        newprop = 'Jet'
                     file.write('      {\n')
-                    file.write('        Rec'+prop.replace('Electron','Lepton').replace('Muon','Lepton')+'Format* NewParticle = event.rec()->GetNew'+prop+'();\n')
+                    file.write('        Rec'+newprop.replace('Electron','Lepton').replace('Muon','Lepton')+ \
+                         'Format* NewParticle = event.rec()->GetNew'+newprop+'();\n')
                     file.write('        NewParticle->setMomentum('+obj+'->momentum());\n')
                     file.write('        NewParticle->setMc(' + obj + '->mc());\n')
-                    if prop in ['Electron', 'Muon']:
+                    if newprop in ['Electron', 'Muon']:
                          if 'muon' in obj or 'electron' in obj:
                              file.write('        NewParticle->SetCharge(' + obj + '->charge());\n')
                          else:
@@ -172,7 +178,7 @@ class JobTaggerMain:
                              file.write('            NewParticle->SetCharge(1.);\n')
                              file.write('        else)\n')
                              file.write('            NewParticle->SetCharge(-1.);\n')
-                    elif prop=='Jet':
+                    elif newprop=='Jet':
                         if 'tau' in obj:
                             file.write('        NewParticle->setNtracks(' + obj + '->ntracks());\n')
                         else:
@@ -182,6 +188,7 @@ class JobTaggerMain:
                             file.write('        MALorentzVector MissHT = event.rec()->MHT().momentum() - '+obj+'->momentum();\n')
                             file.write('        (&event.rec()->MHT().momentum())->SetPxPyPzE(MissHT.Px(), MissHT.Py(), 0., MissHT.E());\n')
                     file.write('        toRemove.push_back(i);\n')
+                    file.write('        continue;\n')
                     file.write('      }\n')
                 else:
                     if true_list[0] in reco_list:
@@ -190,3 +197,4 @@ class JobTaggerMain:
                     else:
                         file.write('      if (RANDOM->flat() < efficiency)')
                         file.write(' { ' + obj+'->set'+prop+'(true); }\n')
+                check_initializer+=1

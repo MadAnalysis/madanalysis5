@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+154           (2019/07/09) fuks:    Making the lepton mistagging more efficient 
+
 153           (2019/06/27) fuks:    Upgrading and extending the super fastsim module 
 
 152           (2019/06/25) fuks:    Adding a few useful hidden functions for recasting correlation 
