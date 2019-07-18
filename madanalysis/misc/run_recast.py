@@ -30,6 +30,7 @@ from madanalysis.IOinterface.job_writer                         import JobWriter
 from madanalysis.IOinterface.library_writer                     import LibraryWriter
 from shell_command                                              import ShellCommand
 from string_tools                                               import StringTools
+import copy
 import logging
 import math
 import os
@@ -116,7 +117,7 @@ class RunRecast():
             check         = self.main.recasting.delphes
         ## Check and exit
         if not check:
-           logging.getLogger('MA5').error('The ' + detector + ' library is not present -> the associated analyses cannot be used')
+           logging.getLogger('MA5').error('The ' + self.detector + ' library is not present -> the associated analyses cannot be used')
            return False
         return True
 
@@ -481,47 +482,98 @@ class RunRecast():
     ################################################
 
     def compute_cls(self, analyses, dataset):
-        logging.getLogger('MA5').info('   Calculation of the exclusion CLs')
         ## Checking whether the CLs module can be used
         ET =  self.check_xml_scipy_methods()
         if not ET:
             return False
 
-        ## Preparing the output file and checking whether a cross section has been defined
-        outfile = self.dirname+'/Output/'+dataset.name+'/CLs_output.dat'
-        if os.path.isfile(outfile):
-            mysummary=open(outfile,'a')
-        else:
-             mysummary=open(outfile,'w')
-             self.write_cls_header(dataset.xsection, mysummary)
 
-        ## running over all analysis
-        for analysis in analyses:
-            # Getting the info file information
-            lumi, regions, regiondata = self.parse_info_file(ET,analysis)
-            if lumi==-1 or regions==-1 or regiondata==-1:
-                logging.getLogger('MA5').warning('Info file for '+analysis+' missing or corrupted. Skipping the CLs calculation.')
-                return False
+        ## Running over all luminosities to extrapolate
+        for extrapolated_lumi in ['default']+self.main.recasting.extrapolated_luminosities:
+            logging.getLogger('MA5').info('   Calculation of the exclusion CLs for a lumi of ' + \
+              str(extrapolated_lumi))
+            ## Preparing the output file and checking whether a cross section has been defined
+            if extrapolated_lumi == 'default':
+                outfile = self.dirname+'/Output/'+dataset.name+'/CLs_output.dat'
+            else:
+                outfile = self.dirname+'/Output/'+dataset.name+'/CLs_output_lumi_{:.3f}.dat'.format(extrapolated_lumi)
+            if os.path.isfile(outfile):
+                mysummary=open(outfile,'a')
+            else:
+                 mysummary=open(outfile,'w')
+                 self.write_cls_header(dataset.xsection, mysummary)
 
-            ## Reading the cutflow information
-            regiondata=self.read_cutflows(self.dirname+'/Output/'+dataset.name+'/'+analysis+'/Cutflows',regions,regiondata)
-            if regiondata==-1:
-                logging.getLogger('MA5').warning('Info file for '+analysis+' corrupted. Skipping the CLs calculation.')
-                return False
+            ## running over all analysis
+            for analysis in analyses:
+                # Getting the info file information (possibly rescaled)
+                lumi, regions, regiondata = self.parse_info_file(ET,analysis,extrapolated_lumi)
+                if lumi==-1 or regions==-1 or regiondata==-1:
+                    logging.getLogger('MA5').warning('Info file for '+analysis+' missing or corrupted. Skipping the CLs calculation.')
+                    return False
 
-            ## Performing the CLS calculation
-            regiondata=self.extract_sig_cls(regiondata,regions,lumi,"exp")
-            regiondata=self.extract_sig_cls(regiondata,regions,lumi,"obs")
-            xsflag=True
-            if dataset.xsection > 0:
-                xsflag=False
-                regiondata=self.extract_cls(regiondata,regions,dataset.xsection,lumi)
-            ## writing the output file
-            self.write_cls_output(analysis, regions, regiondata, mysummary, xsflag)
-            mysummary.write('\n')
+                ## Reading the cutflow information
+                regiondata=self.read_cutflows(self.dirname+'/Output/'+dataset.name+'/'+analysis+'/Cutflows',regions,regiondata)
+                if regiondata==-1:
+                    logging.getLogger('MA5').warning('Info file for '+analysis+' corrupted. Skipping the CLs calculation.')
+                    return False
 
-        ## Closing the output file
-        mysummary.close()
+                ## Performing the CLS calculation
+                regiondata=self.extract_sig_cls(regiondata,regions,lumi,"exp")
+                if extrapolated_lumi=='default':
+                    regiondata=self.extract_sig_cls(regiondata,regions,lumi,"obs")
+                else:
+                    for reg in regions:
+                        regiondata[reg]["nobs"]=regiondata[reg]["nb"]
+                xsflag=True
+                if dataset.xsection > 0:
+                    xsflag=False
+                    regiondata=self.extract_cls(regiondata,regions,dataset.xsection,lumi)
+
+                ## Uncertainties on the rates
+                Error_dict = {}
+                if dataset.scaleup != None:
+                    Error_dict['scale_up'] =  round(dataset.scaleup,8)
+                    Error_dict['scale_dn'] = -round(dataset.scaledn,8)
+                else:
+                    Error_dict['scale_up'] = 0.0
+                    Error_dict['scale_dn'] = 0.0
+                if dataset.pdfup != None:
+                    Error_dict['pdf_up'] =  round(dataset.pdfup,8)
+                    Error_dict['pdf_dn'] = -round(dataset.pdfdn,8)
+                else:
+                    Error_dict['pdf_up'] = 0.0
+                    Error_dict['pdf_dn'] = 0.0
+                if self.main.recasting.THerror_combination == 'linear':
+                    Error_dict['TH_up'] = round(Error_dict['scale_up'] + Error_dict['pdf_up'],8)
+                    Error_dict['TH_dn'] = round(Error_dict['scale_dn'] + Error_dict['pdf_dn'],8)
+                else:
+                    Error_dict['TH_up'] =  round(math.sqrt(Error_dict['pdf_up']**2 + Error_dict['scale_up']**2),8)
+                    Error_dict['TH_dn'] = -round(math.sqrt(Error_dict['pdf_dn']**2 + Error_dict['scale_dn']**2),8)
+                syst_up=0
+                syst_dn=0
+                if len(self.main.recasting.systematics)>0:
+                    for unc in self.main.recasting.systematics:
+                        syst_up = round(syst_up + unc[0]**2,8)
+                        syst_dn = round(syst_dn + unc[1]**2,8)
+                Error_dict['up'] =  round(math.sqrt(Error_dict['TH_up']**2+syst_up),8)
+                Error_dict['dn'] = -round(math.sqrt(Error_dict['TH_dn']**2+syst_dn),8)
+
+                ## Computation of the uncertainties on the limits
+                regiondata_errors = {}
+                for error_key, error_value in Error_dict.items():
+                    varied_xsec = max(round(dataset.xsection*(1.0+error_value),10),0.0)
+                    if varied_xsec > 0:
+                        xsflag=False
+                        regiondata_errors[error_key] = copy.deepcopy(regiondata)
+                        if error_value!=0.0:
+                            regiondata_errors[error_key] = self.extract_cls(regiondata_errors[error_key],regions,varied_xsec,lumi)
+
+                ## writing the output file
+                self.write_cls_output(analysis, regions, regiondata, regiondata_errors, mysummary, xsflag, lumi)
+                mysummary.write('\n')
+
+            ## Closing the output file
+            mysummary.close()
         return True
 
     def check_xml_scipy_methods(self):
@@ -544,7 +596,7 @@ class RunRecast():
         # exit
         return ET
 
-    def parse_info_file(self, etree, analysis):
+    def parse_info_file(self, etree, analysis, extrapolated_lumi):
         ## Is file existing?
         if not os.path.isfile(self.pad+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.info'):
             return -1, -1, -1
@@ -553,13 +605,13 @@ class RunRecast():
             info_input = open(self.pad+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.info')
             info_tree = etree.parse(info_input)
             info_input.close()
-            results = self.header_info_file(info_tree,analysis)
+            results = self.header_info_file(info_tree,analysis,extrapolated_lumi)
             return results
         except:
             return -1, -1, -1
-    
+
     def fix_pileup(self,filename):
-        # 
+        #x 
         logging.getLogger('MA5').debug('delphes card is here: '+filename)        
 
         # Container for pileup
@@ -607,7 +659,7 @@ class RunRecast():
 
         return True
 
-    def header_info_file(self, etree, analysis):
+    def header_info_file(self, etree, analysis, extrapolated_lumi):
         logging.getLogger('MA5').debug('Read info from the file related to '+analysis + '...')
         ## checking the header of the file
         info_root = etree.getroot()
@@ -618,14 +670,18 @@ class RunRecast():
             logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): <analysis id> tag.')
             return -1,-1,-1
         ## extracting the information
-        lumi    = 0
-        regions = []
-        regiondata = {}
+        lumi         = 0
+        lumi_scaling = 1.
+        regions      = []
+        regiondata   = {}
         for child in info_root:
             # Luminosity
             if child.tag == "lumi":
                 try:
                     lumi = float(child.text)
+                    if extrapolated_lumi!='default':
+                        lumi_scaling = round(extrapolated_lumi/lumi,8)
+                        lumi=lumi*lumi_scaling
                 except:
                     logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): ill-defined lumi')
                     return -1,-1,-1
@@ -657,19 +713,23 @@ class RunRecast():
                     else:
                         logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): unknown region subtag.')
                         return -1,-1,-1
-                regiondata[child.attrib["id"]] = { "nobs":nobs, "nb":nb, "deltanb":deltanb }
+                err_scale = lumi_scaling
+                if self.main.recasting.error_extrapolation=='sqrt':
+                    err_scale=math.sqrt(err_scale)
+                regiondata[child.attrib["id"]] = { "nobs":nobs*lumi_scaling, "nb":nb*lumi_scaling, \
+                  "deltanb":deltanb*err_scale}
         return lumi, regions, regiondata
 
     def write_cls_header(self, xs, out):
             if xs <=0:
                 logging.getLogger('MA5').info('   Signal xsection not defined. The 95% excluded xsection will be calculated.')
                 out.write("# analysis name".ljust(30, ' ') + "signal region".ljust(50,' ') + \
-                 'sig95(exp)'.ljust(15, ' ') + 'sig95(obs)'.ljust(15, ' ') +' ||    ' + 'efficiency'.ljust(15,' ') +\
+                 'sig95(exp)'.ljust(15, ' ') + 'sig95(obs)'.ljust(10, ' ') +' ||    ' + 'efficiency'.ljust(15,' ') +\
                  "stat. unc.".ljust(15,' ') + "syst. unc.".ljust(15," ") + "tot. unc.".ljust(15," ") + '\n')
             else:
                 out.write("# analysis name".ljust(30, ' ') + "signal region".ljust(50,' ') + \
                  "best?".ljust(10,' ') + 'sig95(exp)'.ljust(15,' ') + 'sig95(obs)'.ljust(15, ' ') +\
-                 'CLs'.ljust(10,' ') + ' ||    ' + 'efficiency'.ljust(15,' ') +\
+                 'CLs'.ljust( 7,' ') + ' ||    ' + 'efficiency'.ljust(15,' ') +\
                  "stat. unc.".ljust(15,' ') + "syst. unc.".ljust(15," ") + "tot. unc.".ljust(15," ") + '\n')
 
     def read_cutflows(self, path, regions, regiondata):
@@ -743,7 +803,7 @@ class RunRecast():
                 rSR     = nsignal/n95
                 myCLs   = cls(nobs, nb, deltanb, nsignal, self.ntoys)
             regiondata[reg]["rSR"] = rSR
-            regiondata[reg]["CLs"]     = myCLs
+            regiondata[reg]["CLs"] = myCLs
             if rSR > rMax:
                 regiondata[reg]["best"]=1
                 for mybr in bestreg:
@@ -798,27 +858,45 @@ class RunRecast():
                 regiondata[reg]["s95exp"]= ("%.7f" % s95)
         return regiondata
 
-    def write_cls_output(self, analysis, regions, regiondata, summary, xsflag):
+    def write_cls_output(self, analysis, regions, regiondata, errordata, summary, xsflag, lumi):
         logging.getLogger('MA5').debug('Write CLs...')
         for reg in regions:
             eff    = (regiondata[reg]["Nf"] / regiondata[reg]["N0"])
             if eff < 0:
                 eff = 0
-            stat   = (math.sqrt(eff*(1-eff)/regiondata[reg]["N0"]))
-            syst   = 0.
+            stat   = round(math.sqrt(eff*(1-eff)/(regiondata[reg]["N0"]*lumi)),10)
+            syst   = 0
+            if len(self.main.recasting.systematics)>0:
+                syst_up=0
+                syst_dn=0
+                for unc in self.main.recasting.systematics:
+                    syst_up = round(syst_up + unc[0]**2,8)
+                    syst_dn = round(syst_dn + unc[1]**2,8)
+                syst = round(.5*(math.sqrt(syst_up)+math.sqrt(syst_dn))*eff,8)
             myeff  = "%.7f" % eff
             mystat = "%.7f" % stat
             mysyst = "%.7f" % syst
             mytot  = "%.7f" % (math.sqrt(stat**2+syst**2))
             myxsexp = regiondata[reg]["s95exp"]
-            myxsobs = regiondata[reg]["s95obs"]
+            if "s95obs" in regiondata[reg].keys():
+                myxsobs = regiondata[reg]["s95obs"]
+            else:
+                myxsobs = "-1"
             if not xsflag:
-                mycls  = "%.7f" % regiondata[reg]["CLs"]
+                mycls  = "%.4f" % regiondata[reg]["CLs"]
                 summary.write(analysis.ljust(30,' ') + reg.ljust(50,' ') +\
                    str(regiondata[reg]["best"]).ljust(10, ' ') +\
-                   myxsexp.ljust(15,' ') + myxsobs.ljust(15,' ') + mycls.ljust(10,' ') + \
+                   myxsexp.ljust(15,' ') + myxsobs.ljust(15,' ') + mycls.ljust( 7,' ') + \
                    ' ||    ' + myeff.ljust(15,' ') + mystat.ljust(15,' ') + mysyst.ljust(15, ' ') +\
                    mytot.ljust(15,' ') + '\n')
+                band = []
+                for error_set in [ ['scale_up', 'scale_dn', 'Scale var.'], ['TH_up', 'TH_dn', 'TH   error'], ['up', 'dn', 'Tot. error']]:
+                    if len([ x for x in ['up', 'dn'] if x in errordata.keys() ])==2:
+                        band = band + [errordata[error_set[0]][reg]['CLs'], errordata[error_set[1]][reg]['CLs'], regiondata[reg]['CLs'] ]
+                        if len(set(band))==1:
+                            continue
+                        summary.write(''.ljust(90,' ') + error_set[2] + ' band:         [' + \
+                          ("%.4f" % min(band)) + ', ' + ("%.4f" % max(band)) + ']\n')
             else:
                 summary.write(analysis.ljust(30,' ') + reg.ljust(50,' ') +\
                    myxsexp.ljust(15,' ') + myxsobs.ljust(15,' ') + \

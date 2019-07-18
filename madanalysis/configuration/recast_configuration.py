@@ -34,21 +34,27 @@ class RecastConfiguration:
     default_CLs_numofexps = 100000
 
     userVariables ={
-         "status"        : ["on","off"],\
-         "CLs_numofexps" : [str(default_CLs_numofexps)],\
-         "card_path"     : "",\
-         "store_root"    : ["True", "False"]
+         "status"              : ["on","off"],\
+         "CLs_numofexps"       : [str(default_CLs_numofexps)],\
+         "card_path"           : "",\
+         "store_root"          : ["True", "False"] , \
+         "THerror_combination" : ["quadratic","linear"], \
+         "error_extrapolation" : ["linear", "sqrt"]
     }
 
     def __init__(self):
-        self.status     = "off"
-        self.delphes    = False
-        self.ma5tune    = False
-        self.pad        = False
-        self.padtune    = False
-        self.store_root = False
-        self.DelphesDic = { }
-        self.description = { }
+        self.status                     = "off"
+        self.delphes                    = False
+        self.ma5tune                    = False
+        self.pad                        = False
+        self.padtune                    = False
+        self.store_root                 = False
+        self.systematics                = []
+        self.extrapolated_luminosities  = []
+        self.THerror_combination        = "linear"
+        self.error_extrapolation        = "linear"
+        self.DelphesDic                 = { }
+        self.description                = { }
         self.ma5dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),os.pardir,os.pardir))
         for mypad in ['PAD', 'PADForMa5tune']:
             if os.path.isfile(os.path.join(self.ma5dir,'tools',mypad,'Input','recast_config.dat')):
@@ -80,6 +86,10 @@ class RecastConfiguration:
             self.user_DisplayParameter("CLs_numofexps")
             self.user_DisplayParameter("card_path")
             self.user_DisplayParameter("store_root")
+            self.user_DisplayParameter("extrapolated_luminosities")
+            self.user_DisplayParameter("systematics")
+            self.user_DisplayParameter("THerror_combination")
+            self.user_DisplayParameter("error_extrapolation")
 
     def user_DisplayParameter(self,parameter):
         if parameter=="status":
@@ -118,9 +128,33 @@ class RecastConfiguration:
         elif parameter=="store_root":
             self.logger.info("   * Keeping the root files: "+str(self.store_root))
             return
+        elif parameter=="systematics":
+            if len(self.systematics) > 0:
+                for i in range(0,len(self.systematics)):
+                    up, dn = self.systematics[i]
+                    self.logger.info("   * Systematics "+str(i+1)+": [+{:.1%}, -{:.1%}]".format(up,dn))
+            return
+        elif parameter=="extrapolated_luminosity":
+            if len(self.extrapolated_luminosities) > 0:
+                tmp = ["{:.1f}".format(x)+" fb^{-1}" for x in self.extrapolated_lumi]
+                self.logger.info("   * Results extrapolated for the luminosities: "+', '.join(tmp))
+            return
+        elif parameter=="THerror_combination":
+            self.logger.info("   * Theory errors (if provided) are combined in a " + self.THerror_combination + " way")
+            return
+        elif parameter=="error_extrapolation":
+            self.logger.info("   * Errors on the background will be extrapolated " + self.error_extrapolation + "ly (if necessary)")
+            return
         return
 
-    def user_SetParameter(self,parameter,value,level,archi_info,session_info,datasets):
+    def user_SetParameter(self,parameters,values,level,archi_info,session_info,datasets):
+        # Make sure that previous features are unchanged:  the 'add' keyword is properly dealt with
+        if isinstance(parameters, list):
+            parameter = parameters[0]
+            value = values[0]
+        else:
+            parameter=parameters
+            value=values
         # algorithm
         if parameter=="status":
             # Switch on the clustering
@@ -219,14 +253,73 @@ class RecastConfiguration:
                 self.logger.error("Do the root files need to be stored? (True/False)")
                 return
 
+        # Systematic uncertainties and Luminosity extrapolation
+        elif parameter=="add":
+            if self.status!="on":
+                self.logger.error("Please first set the recasting mode to 'on'.")
+                return
+            ## Checking the values
+            try:
+                vals = [float(x) for x in values if x!=',']
+            except:
+                self.logger.error("Values for the systematic uncertainties and extrapolated luminosities should be real")
+                return
+            ## Systematics
+            if len(parameters)>1 and parameters[1]=='systematics':
+                if len(vals) == 1 and vals[0] >= 0. and vals[0] <= 1.:
+                    self.systematics.append((vals[0],vals[0]))
+                elif len(vals) == 2 and vals[0]>=0. and vals[0]<=1. and vals[1]>= 0. and vals[1]<= 1.:
+                    self.systematics.append((vals[0],vals[1]))
+                else:
+                    self.logger.error("Invalid syntax for adding systematics uncertainties.")
+                    return
+            ## Extrapolated lumis
+            elif len(parameters)>1 and  parameters[1]=='extrapolated_luminosity':
+                if len(vals) >= 1:
+                    self.extrapolated_luminosities += vals
+                else:
+                    self.logger.error("Invalid syntax for adding extrapolated luminosities.")
+                    return
+            ## protection
+            else:
+                self.logger.error("Invalid syntax with the \'add\' keyword")
+                return
+
+        # Error combination
+        elif parameter=="THerror_combination":
+            if self.status!="on":
+                self.logger.error("Please first set the recasting mode to 'on'.")
+                return
+            if value in ["quadratic","linear"]:
+                self.THerror_combination = value
+            else:
+                self.logger.error("Theoretical uncertainties can only be combined")
+                self.logger.error("linearly [linear] or quadratically [quadratic].")
+                return
+
+        # Error extrapolation
+        elif parameter=="error_extrapolation":
+            if self.status!="on":
+                self.logger.error("Please first set the recasting mode to 'on'.")
+                return
+            if value in ["linear", "sqrt"]:
+                self.error_extrapolation = value
+            else:
+                self.logger.error("When extrapolating to different luminosities, uncertainties")
+                self.logger.error("can only be extrapolated linearly [linear] or sqrtly [sqrt].")
+                return
+
         # other rejection if no algo specified
         else:
-            self.logger.error("the recast module has no parameter called '"+parameter+"'")
+            self.logger.error("the recast module has no parameter called '"+str(parameter)+"'")
             return
 
-    def user_GetParameters(self):
+    def user_GetParameters(self,var=''):
         if self.status=="on":
-            table = ["CLs_numofexps", "card_path", "store_root"]
+            if var == "add":
+                table = ["extrapolated_luminosity", "systematics"]
+            else:
+                table = ["CLs_numofexps", "card_path", "store_root", "add", "THerror_combination", "error_extrapolation"]
         else:
            table = []
         return table
@@ -242,6 +335,10 @@ class RecastConfiguration:
                 table.extend(RecastConfiguration.userVariables["card_path"])
         elif variable =="store_root":
                 table.extend(RecastConfiguration.userVariables["store_root"])
+        elif variable =="THerror_combination":
+                table.extend(RecastConfiguration.userVariables["THerror_combination"])
+        elif variable =="error_extrapolation":
+                table.extend(RecastConfiguration.userVariables["error_extrapolation"])
         return table
 
 

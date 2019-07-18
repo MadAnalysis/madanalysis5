@@ -39,6 +39,12 @@ class Dataset:
                       "linewidth"   : [], \
                       "weight"      : [], \
                       "xsection"    : [], \
+                      "scale_up_variation"   : [], \
+                      "scale_down_variation" : [], \
+                      "scale_variation"      : [], \
+                      "pdf_up_variation"     : [], \
+                      "pdf_down_variation"   : [], \
+                      "pdf_variation"        : [], \
                       "title"       : [], \
                       "weighted_events": ["true","false"]}
 
@@ -46,6 +52,10 @@ class Dataset:
         self.name              = name.lower()
         self.weight            = 1.
         self.xsection          = 0.
+        self.scaleup           = None
+        self.scaledn           = None
+        self.pdfup             = None
+        self.pdfdn             = None
         self.background        = False
         self.linecolor         = ColorType.AUTO
         self.linestyle         = LineStyleType.SOLID
@@ -253,6 +263,41 @@ class Dataset:
                 logging.getLogger('MA5').error("the value of the attribute '"+variable+"' must be set to a positive floating number.")
                 return
 
+        # uncertainties
+        elif variable in ["scale_up_variation","scale_down_variation","pdf_up_variation","pdf_down_variation",
+           "scale_variation", "pdf_variation"]:
+            try:
+                tmp = float(value)
+            except:
+                logging.getLogger('MA5').error("the value of the attribute '"+variable+"' must be set to a floating-point number in [0,1].")
+                return
+            if tmp>=0 and tmp<=1:
+                if variable == "scale_up_variation":
+                    self.scaleup = tmp
+                    if self.scaledn == None:
+                        self.scaledn = .0
+                elif variable == "scale_down_variation":
+                    self.scaledn = tmp
+                    if self.scaleup == None:
+                        self.scaleup = 0.
+                elif variable == "pdf_up_variation":
+                    self.pdfup = tmp
+                    if self.pdfdn == None:
+                        self.pdfdn = 0.
+                elif variable == "pdf_down_variation":
+                    self.pdfdn = tmp
+                    if self.pdfup == None:
+                        self.pdfup = 0.
+                elif variable == "scale_variation":
+                    self.scaledn = tmp
+                    self.scaleup = tmp
+                elif variable == "pdf_variation":
+                    self.pdfdn = tmp
+                    self.pdfup = tmp
+            else:
+                logging.getLogger('MA5').error("the value of the attribute '"+variable+"' must be set to a floating-point number in [0,1].")
+                return
+
         # title
         elif variable == "title":
             quoteTag = False
@@ -273,6 +318,8 @@ class Dataset:
         logging.getLogger('MA5').info("   Name of the dataset = " + self.name + " (" + self.GetStringTag() + ")")
         self.user_DisplayParameter("title")
         self.user_DisplayParameter("xsection")
+        self.user_DisplayParameter("scale_unc")
+        self.user_DisplayParameter("PDF_unc")
         self.user_DisplayParameter("weight")
         self.user_DisplayParameter("weighted_events")
         self.user_DisplayParameter("linecolor")
@@ -307,6 +354,12 @@ class Dataset:
             logging.getLogger('MA5').info("   User-imposed weight value for the set = "+str(self.weight))
         elif parameter=="xsection":
             logging.getLogger('MA5').info("   User-imposed cross section = "+str(self.xsection))
+        elif parameter=="scale_unc":
+            if not self.scaleup == None and not self.scaledn == None:
+                logging.getLogger('MA5').info("   User-imposed scale uncertainties: -{:.1%}, +{:.1%}".format(self.scaledn,self.scaleup))
+        elif parameter=="PDF_unc":
+            if not self.pdfup == None and not self.pdfdn == None:
+                logging.getLogger('MA5').info("   User-imposed PDF uncertainties: -{:.1%}, +{:.1%}".format(self.pdfdn,self.pdfup))
         elif parameter=="type":
             logging.getLogger('MA5').info("   Type = "+self.GetStringTag())
         elif parameter=="weighted_events":

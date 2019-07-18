@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+155           (2019/07/18) fuks:    Recasting can now handle uncertainties 
+
 154           (2019/07/09) fuks:    Making the lepton mistagging more efficient 
 
 153           (2019/06/27) fuks:    Upgrading and extending the super fastsim module 
