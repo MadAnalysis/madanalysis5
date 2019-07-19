@@ -88,12 +88,29 @@ class JobSmearerRecoMain:
         file.write('    TET    += event.rec()->jets()[i].pt();\n')
         file.write('    Meff   += event.rec()->jets()[i].pt();\n')
         file.write('  }\n')
-        file.write('  // Updating HT\n')
-        file.write('  (&event.rec()->MHT().momentum())->SetPxPyPzE(pTmiss.Px(), pTmiss.Py(), 0., pTmiss.E());\n')
         file.write('  // Removal of the non-reconstructed jets\n')
         file.write('  for (MAuint32 i=toRemove.size();i>0;i--)\n')
         file.write('    event.rec()->jets().erase(event.rec()->jets().begin() + toRemove[i-1]);\n')
         file.write('  toRemove.clear();\n\n')
+
+        # Tau smearing
+        file.write('  // Tau smearing\n')
+        file.write('  for (MAuint32 i=0; i<event.rec()->taus().size(); i++)\n')
+        file.write('  {\n')
+        self.PrintReco(['15', 'ta'],file,'(&event.rec()->taus()[i])')
+        self.PrintSmearer(['15', 'ta'], ['PT','ETA','PHI','E','PX','PY','PZ'],file,'(&event.rec()->taus()[i])')
+        file.write('    pTmiss -= event.rec()->taus()[i].momentum();\n')
+        file.write('    THT    += event.rec()->jets()[i].pt();\n')
+        file.write('    TET    += event.rec()->taus()[i].pt();\n')
+        file.write('  }\n')
+        file.write('  // Removal of the non-reconstructed taus\n')
+        file.write('  for (MAuint32 i=toRemove.size();i>0;i--)\n')
+        file.write('    event.rec()->taus().erase(event.rec()->taus().begin() + toRemove[i-1]);\n')
+        file.write('  toRemove.clear();\n\n')
+
+        # Updating the missing HT
+        file.write('  // Updating MHT\n')
+        file.write('  (&event.rec()->MHT().momentum())->SetPxPyPzE(pTmiss.Px(), pTmiss.Py(), 0., pTmiss.E());\n')
 
         # Electron smearing
         file.write('  // Electron smearing \n')
@@ -121,20 +138,6 @@ class JobSmearerRecoMain:
         file.write('  // Removal of the non-reconstructed muons\n')
         file.write('  for (MAuint32 i=toRemove.size();i>0;i--)\n')
         file.write('    event.rec()->muons().erase(event.rec()->muons().begin() + toRemove[i-1]);\n')
-        file.write('  toRemove.clear();\n\n')
-
-        # Tau smearing
-        file.write('  // Tau smearing\n')
-        file.write('  for (MAuint32 i=0; i<event.rec()->taus().size(); i++)\n')
-        file.write('  {\n')
-        self.PrintReco(['15', 'ta'],file,'(&event.rec()->taus()[i])')
-        self.PrintSmearer(['15', 'ta'], ['PT','ETA','PHI','E','PX','PY','PZ'],file,'(&event.rec()->taus()[i])')
-        file.write('    pTmiss -= event.rec()->taus()[i].momentum();\n')
-        file.write('    TET    += event.rec()->taus()[i].pt();\n')
-        file.write('  }\n')
-        file.write('  // Removal of the non-reconstructed taus\n')
-        file.write('  for (MAuint32 i=toRemove.size();i>0;i--)\n')
-        file.write('    event.rec()->taus().erase(event.rec()->taus().begin() + toRemove[i-1]);\n')
         file.write('  toRemove.clear();\n\n')
 
         # Photon smearing
