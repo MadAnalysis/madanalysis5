@@ -93,12 +93,14 @@ class AST:
                 sub_tree = self.MakeConnections(frml[id_start-1:id_start+2])
                 if sub_tree==False:
                     self.reset()
+                    return
                 del frml[id_start-1:id_start+2]
                 frml[id_start-1:id_start-1] = sub_tree
             else:
                 sub_tree = self.MakeConnections(frml[id_start+1:id_end])
                 if sub_tree==False:
                     self.reset()
+                    return
                 del frml[id_start:id_end+1]
                 frml[id_start:id_start] = sub_tree
         frml = self.MakeConnections(frml)

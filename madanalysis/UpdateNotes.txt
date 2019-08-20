@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+157           (2019/08/20) fuks:    Bug fix for the old PADMA5Tune 
+
 156           (2019/07/19) fuks:    Small bug in the fastsim module (HT/MHT calculations ignoring 
                                    hadronic taus) 
 

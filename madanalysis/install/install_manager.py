@@ -73,7 +73,7 @@ class InstallManager():
         elif package in ['pad', 'padforma5tune']:
             if self.main.archi_info.has_root and self.main.session_info.has_scipy:
                 from madanalysis.install.install_pad import InstallPad
-                installer=InstallPad(self.main, package)
+                installer=InstallPad(self.main, rawpackage)
             else:
                 self.logger.warning('the package "' + rawpackage + '" cannot be installed without root ' +\
                     'and scipy; installation skipped')

@@ -115,7 +115,7 @@ class SuperFastSim:
 
         ## Getting the bounds and the function
         function, bounds = self.decode_args(to_decode)
-        if function.size()==0:
+        if function=='':
             self.logger.error('Cannot decode the function or the bounds - ' + args[0] + ' ignored.')
             prts.Remove('c', None)
             return
