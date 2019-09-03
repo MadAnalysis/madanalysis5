@@ -87,8 +87,11 @@ class Leaf:
             return str(float(self.name))
         elif self.type in ['var', 'bool']:
             return self.name
-        elif self.type == 'un_op' and len(self.daughters)==1:
-            return 'std::'+self.name + '(' +\
+        elif self.type == 'un_op' and len(self.daughters)==1 and self.name!='-':
+            return 'std::'+self.name.replace('gamma','tgamma') + '(' +\
+              tree.get(self.daughters[0]).write_cpp(tree) + ')'
+        elif self.type == 'un_op' and len(self.daughters)==1 and self.name=='-':
+            return self.name + '(' +\
               tree.get(self.daughters[0]).write_cpp(tree) + ')'
         elif self.type == 'bin2_op' and len(self.daughters)==2:
             return 'std::'+self.name + '(' +\

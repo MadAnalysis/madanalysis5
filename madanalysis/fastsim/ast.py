@@ -66,12 +66,14 @@ class AST:
         frml = formula_string.replace('**', ' ^ ')
         for op in self.binary1_ops.keys():
             frml = frml.replace(op, ' ' + op + ' ')
+        frml = frml.replace('-', '- ')
+        frml = frml.replace('  ', ' ')
         frml = frml.replace('e + ', 'e+')
         frml = frml.replace('E - ', 'e-')
         frml = frml.replace('E + ', 'e+')
         frml = frml.replace('e - ', 'e-')
-        frml = frml.replace('^   - ', '^ -')
-        frml = frml.replace('^   + ', '^ +')
+#        frml = frml.replace('^   - ', '^ -')
+#        frml = frml.replace('^   + ', '^ +')
         for op in [ '> =', '< =' ]:
             frml = frml.replace(op, op.replace(' ',''))
         frml = frml.replace('(  - ', '( -')
@@ -116,8 +118,10 @@ class AST:
         while len(frml)>1:
             iterator_limit += 1
             if iterator_limit > 100:
-                self.logger.error('Incorrect formula: ' + str(sub_formula))
+                self.logger.error('Incorrect formula (ignoring the line): ' + str(sub_formula))
+                self.info()
                 return False
+            reset = False
             for i in range (0,len(frml)):
                 if not isinstance(frml[i], Leaf):
                     self.logger.error('Incorrect formula: '+ str(sub_formula) + \
@@ -131,15 +135,19 @@ class AST:
                     if frml[i].name in self.unary_ops:
                         sub_formula[i].connect([frml[i+1]])
                         del frml[i+1]
+                        reset=True
                         break
                 elif frml[i].type == 'bin2_op':
                     if frml[i].name in self.binary2_ops:
                         sub_formula[i].connect([frml[i+1],frml[i+2]])
                         del frml[i+1:i+3]
+                        reset=True
                         break
                 else:
                    print frml[i]
                    aieaieaaie
+            if reset:
+                continue
             for prior in range(1,6):
                 replacement_done = False
                 bin_ignore = [x for x in self.binary1_ops.keys() if self.binary1_ops[x]!=prior]
@@ -152,13 +160,18 @@ class AST:
                         continue
                     if frml[i].type == 'bin1_op':
                         if frml[i].name in self.binary1_ops:
-                            sub_formula[i].connect([frml[i-1],frml[i+1]])
-                            del frml[i+1]
-                            del frml[i-1]
+                            if i==0:
+                                sub_formula[i].connect([frml[i+1]])
+                                frml[i].type='un_op'
+                                del frml[i+1]
+                            else:
+                                sub_formula[i].connect([frml[i-1],frml[i+1]])
+                                del frml[i+1]
+                                del frml[i-1]
                             replacement_done = True
                             break
                     else:
-                       print frml[i]
+                       print(frml, i, '->', frml[i])
                        aieaieaaie2
                 if replacement_done:
                     break
@@ -175,7 +188,7 @@ class AST:
                 new_formula.append(new_leaf)
                 self.leaves.append(new_leaf)
             # variables
-            elif elem.upper() in self.variables:
+            elif elem.upper() in self.variables and elem!='gamma':
                 new_leaf = Leaf(self.size(), 'var', elem.upper(), [], [])
                 new_formula.append(new_leaf)
                 self.leaves.append(new_leaf)
