@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+159           (2019/09/19) fuks:    Generalising the treatment of the uncertainties when extrapolations 
+                                   are at stake for recasting 
+
 158           (2019/09/03) fuks:    Fixing a few bugs for the fastsim module (important only in special 
                                    cases) 
 

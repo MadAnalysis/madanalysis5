@@ -698,6 +698,8 @@ class RunRecast():
                 nobs    = -1
                 nb      = -1
                 deltanb = -1
+                syst    = -1
+                stat    = -1
                 for rchild in child:
                     try:
                         myval=float(rchild.text)
@@ -710,14 +712,25 @@ class RunRecast():
                         nb = myval
                     elif rchild.tag=="deltanb":
                         deltanb = myval
+                    elif rchild.tag=="syst":
+                        syst = myval
+                    elif rchild.tag=="stat":
+                        stat = myval
                     else:
                         logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): unknown region subtag.')
                         return -1,-1,-1
-                err_scale = lumi_scaling
-                if self.main.recasting.error_extrapolation=='sqrt':
-                    err_scale=math.sqrt(err_scale)
-                regiondata[child.attrib["id"]] = { "nobs":nobs*lumi_scaling, "nb":nb*lumi_scaling, \
-                  "deltanb":deltanb*err_scale}
+                if syst == -1 and stat == -1:
+                    err_scale = lumi_scaling
+                    if self.main.recasting.error_extrapolation=='sqrt':
+                        err_scale=math.sqrt(err_scale)
+                    deltanb = round(deltanb*err_scale,8)
+                else:
+                    if syst==-1:
+                        syst=0.
+                    if stat==-1:
+                        stat=0.
+                    deltanb = round(math.sqrt( (syst/nb)**2 + (stat/(nb*math.sqrt(lumi_scaling)))**2 )*nb*lumi_scaling,8)
+                regiondata[child.attrib["id"]] = { "nobs":nobs*lumi_scaling, "nb":nb*lumi_scaling, "deltanb":deltanb}
         return lumi, regions, regiondata
 
     def write_cls_header(self, xs, out):
@@ -864,7 +877,7 @@ class RunRecast():
             eff    = (regiondata[reg]["Nf"] / regiondata[reg]["N0"])
             if eff < 0:
                 eff = 0
-            stat   = round(math.sqrt(eff*(1-eff)/(regiondata[reg]["N0"]*lumi)),10)
+            stat   = round(math.sqrt(eff*(1-eff)/(abs(regiondata[reg]["N0"])*lumi)),10)
             syst   = 0
             if len(self.main.recasting.systematics)>0:
                 syst_up=0
