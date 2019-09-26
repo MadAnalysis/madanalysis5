@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+160           (2019/09/26) fuks:    Fixing the treatment of the systematics in the recasting case 
+
 159           (2019/09/19) fuks:    Generalising the treatment of the uncertainties when extrapolations 
                                    are at stake for recasting 
 

@@ -549,24 +549,23 @@ class RunRecast():
                 else:
                     Error_dict['TH_up'] =  round(math.sqrt(Error_dict['pdf_up']**2 + Error_dict['scale_up']**2),8)
                     Error_dict['TH_dn'] = -round(math.sqrt(Error_dict['pdf_dn']**2 + Error_dict['scale_dn']**2),8)
-                syst_up=0
-                syst_dn=0
-                if len(self.main.recasting.systematics)>0:
+                for i in range(0,len(self.main.recasting.systematics)):
                     for unc in self.main.recasting.systematics:
-                        syst_up = round(syst_up + unc[0]**2,8)
-                        syst_dn = round(syst_dn + unc[1]**2,8)
-                Error_dict['up'] =  round(math.sqrt(Error_dict['TH_up']**2+syst_up),8)
-                Error_dict['dn'] = -round(math.sqrt(Error_dict['TH_dn']**2+syst_dn),8)
+                        Error_dict['sys'+str(i)+'_up'] =\
+                            round(math.sqrt(Error_dict['TH_up']**2+self.main.recasting.systematics[i][0]**2),8)
+                        Error_dict['sys'+str(i)+'_dn'] =\
+                           -round(math.sqrt(Error_dict['TH_dn']**2+self.main.recasting.systematics[i][1]**2),8)
 
                 ## Computation of the uncertainties on the limits
                 regiondata_errors = {}
-                for error_key, error_value in Error_dict.items():
-                    varied_xsec = max(round(dataset.xsection*(1.0+error_value),10),0.0)
-                    if varied_xsec > 0:
-                        xsflag=False
-                        regiondata_errors[error_key] = copy.deepcopy(regiondata)
-                        if error_value!=0.0:
-                            regiondata_errors[error_key] = self.extract_cls(regiondata_errors[error_key],regions,varied_xsec,lumi)
+                if dataset.xsection > 0.:
+                    for error_key, error_value in Error_dict.items():
+                        varied_xsec = max(round(dataset.xsection*(1.0+error_value),10),0.0)
+                        if varied_xsec > 0:
+                            xsflag=False
+                            regiondata_errors[error_key] = copy.deepcopy(regiondata)
+                            if error_value!=0.0:
+                                regiondata_errors[error_key] = self.extract_cls(regiondata_errors[error_key],regions,varied_xsec,lumi)
 
                 ## writing the output file
                 self.write_cls_output(analysis, regions, regiondata, regiondata_errors, mysummary, xsflag, lumi)
@@ -738,12 +737,19 @@ class RunRecast():
                 logging.getLogger('MA5').info('   Signal xsection not defined. The 95% excluded xsection will be calculated.')
                 out.write("# analysis name".ljust(30, ' ') + "signal region".ljust(50,' ') + \
                  'sig95(exp)'.ljust(15, ' ') + 'sig95(obs)'.ljust(10, ' ') +' ||    ' + 'efficiency'.ljust(15,' ') +\
-                 "stat. unc.".ljust(15,' ') + "syst. unc.".ljust(15," ") + "tot. unc.".ljust(15," ") + '\n')
+                 "stat".ljust(15,' '));
+                for i in range(0,len(self.main.recasting.systematics)):
+                    out.write(("syst" + str(i+1) + "(" + str(self.main.recasting.systematics[i][0]*100) + "%)").ljust(15," "))
+                out.write('\n');
             else:
                 out.write("# analysis name".ljust(30, ' ') + "signal region".ljust(50,' ') + \
                  "best?".ljust(10,' ') + 'sig95(exp)'.ljust(15,' ') + 'sig95(obs)'.ljust(15, ' ') +\
                  'CLs'.ljust( 7,' ') + ' ||    ' + 'efficiency'.ljust(15,' ') +\
-                 "stat. unc.".ljust(15,' ') + "syst. unc.".ljust(15," ") + "tot. unc.".ljust(15," ") + '\n')
+                 "stat".ljust(15,' '));
+                for i in range(0,len(self.main.recasting.systematics)):
+                    out.write(("syst" + str(i+1) + "(" + str(self.main.recasting.systematics[i][0]*100) + "%)").ljust(15," "))
+                out.write('\n');
+
 
     def read_cutflows(self, path, regions, regiondata):
         logging.getLogger('MA5').debug('Read the cutflow from the files:')
@@ -878,18 +884,15 @@ class RunRecast():
             if eff < 0:
                 eff = 0
             stat   = round(math.sqrt(eff*(1-eff)/(abs(regiondata[reg]["N0"])*lumi)),10)
-            syst   = 0
+            syst   = []
             if len(self.main.recasting.systematics)>0:
-                syst_up=0
-                syst_dn=0
                 for unc in self.main.recasting.systematics:
-                    syst_up = round(syst_up + unc[0]**2,8)
-                    syst_dn = round(syst_dn + unc[1]**2,8)
-                syst = round(.5*(math.sqrt(syst_up)+math.sqrt(syst_dn))*eff,8)
+                    syst.append(round(.5*(unc[0]+unc[1])*eff,8))
+            else:
+                syst = [0]
             myeff  = "%.7f" % eff
             mystat = "%.7f" % stat
-            mysyst = "%.7f" % syst
-            mytot  = "%.7f" % (math.sqrt(stat**2+syst**2))
+            mysyst = ["%.7f" % x for x in syst]
             myxsexp = regiondata[reg]["s95exp"]
             if "s95obs" in regiondata[reg].keys():
                 myxsobs = regiondata[reg]["s95obs"]
@@ -900,21 +903,35 @@ class RunRecast():
                 summary.write(analysis.ljust(30,' ') + reg.ljust(50,' ') +\
                    str(regiondata[reg]["best"]).ljust(10, ' ') +\
                    myxsexp.ljust(15,' ') + myxsobs.ljust(15,' ') + mycls.ljust( 7,' ') + \
-                   ' ||    ' + myeff.ljust(15,' ') + mystat.ljust(15,' ') + mysyst.ljust(15, ' ') +\
-                   mytot.ljust(15,' ') + '\n')
+                   '   ||    ' + myeff.ljust(15,' ') + mystat.ljust(15,' '));
+                for onesyst in mysyst:
+                    summary.write(onesyst.ljust(15, ' '))
+                summary.write('\n')
                 band = []
-                for error_set in [ ['scale_up', 'scale_dn', 'Scale var.'], ['TH_up', 'TH_dn', 'TH   error'], ['up', 'dn', 'Tot. error']]:
-                    if len([ x for x in ['up', 'dn'] if x in errordata.keys() ])==2:
+                err_sets = [ ['scale_up', 'scale_dn', 'Scale var.'], ['TH_up', 'TH_dn', 'TH   error'] ]
+                for error_set in err_sets:
+                    if len([ x for x in error_set if x in errordata.keys() ])==2:
                         band = band + [errordata[error_set[0]][reg]['CLs'], errordata[error_set[1]][reg]['CLs'], regiondata[reg]['CLs'] ]
                         if len(set(band))==1:
                             continue
                         summary.write(''.ljust(90,' ') + error_set[2] + ' band:         [' + \
                           ("%.4f" % min(band)) + ', ' + ("%.4f" % max(band)) + ']\n')
+                for i in range(0, len(self.main.recasting.systematics)):
+                    error_set = [ 'sys'+str(i)+'_up',  'sys'+str(i)+'_dn' ]
+                    if len([ x for x in error_set if x in errordata.keys() ])==2:
+                        band = band + [errordata[error_set[0]][reg]['CLs'], errordata[error_set[1]][reg]['CLs'], regiondata[reg]['CLs'] ]
+                        if len(set(band))==1:
+                            continue
+                        summary.write(''.ljust(90,' ') + (str(self.main.recasting.systematics[i][0]) + '% syst:').ljust(25,' ') + '[' + \
+                          ("%.4f" % min(band)) + ', ' + ("%.4f" % max(band)) + ']\n')
             else:
                 summary.write(analysis.ljust(30,' ') + reg.ljust(50,' ') +\
                    myxsexp.ljust(15,' ') + myxsobs.ljust(15,' ') + \
-                   ' ||    ' + myeff.ljust(15,' ') + mystat.ljust(15,' ') + mysyst.ljust(15, ' ') +\
-                   mytot.ljust(15,' ') + '\n')
+                   ' ||    ' + myeff.ljust(15,' ') + mystat.ljust(15,' '))
+                for onesyst in mysyst:
+                    summary.write(onesyst.ljust(15, ' '))
+                summary.write('\n')
+
 
 def clean_region_name(mystr):
     newstr = mystr.replace("/",  "_slash_")
