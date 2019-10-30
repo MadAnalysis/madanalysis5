@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+161           (2019/10/30) fuks:    Adding the treatment of covariance information within the recasting 
+                                   module 
+
 160           (2019/09/26) fuks:    Fixing the treatment of the systematics in the recasting case 
 
 159           (2019/09/19) fuks:    Generalising the treatment of the uncertainties when extrapolations 

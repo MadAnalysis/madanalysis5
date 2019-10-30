@@ -269,9 +269,9 @@ class Dataset:
             try:
                 tmp = float(value)
             except:
-                logging.getLogger('MA5').error("the value of the attribute '"+variable+"' must be set to a floating-point number in [0,1].")
+                logging.getLogger('MA5').error("the value of the attribute '"+variable+"' must be set to a positive floating-point number")
                 return
-            if tmp>=0 and tmp<=1:
+            if tmp>=0:
                 if variable == "scale_up_variation":
                     self.scaleup = tmp
                     if self.scaledn == None:
@@ -295,7 +295,7 @@ class Dataset:
                     self.pdfdn = tmp
                     self.pdfup = tmp
             else:
-                logging.getLogger('MA5').error("the value of the attribute '"+variable+"' must be set to a floating-point number in [0,1].")
+                logging.getLogger('MA5').error("the value of the attribute '"+variable+"' must be set to a positive floating-point number")
                 return
 
         # title
