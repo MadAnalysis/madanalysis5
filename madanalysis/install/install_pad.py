@@ -34,7 +34,7 @@ class InstallPad:
 
     def __init__(self,main, padname):
         self.main        = main
-        self.padname     = padname
+        self.padname     = padname.replace('pad','PAD').replace('ma5','MA5');
         self.installdir  = os.path.join(self.main.archi_info.ma5dir,'tools', padname)
         self.tmpdir      = self.main.session_info.tmpdir
         self.downloaddir = self.main.session_info.downloaddir
