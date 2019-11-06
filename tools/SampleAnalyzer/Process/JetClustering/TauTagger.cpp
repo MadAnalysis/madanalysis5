@@ -54,7 +54,7 @@ void TauTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
         toRemove.push_back(i);
       }
     }
-    for (MAuint32 i =0;i<toRemove.size();i++)
+    for (MAint32 i=toRemove.size()-1; i>=0;i--)
     {
       myEvent.rec()->jets().erase(myEvent.rec()->jets().begin()
                                   + toRemove[i]);

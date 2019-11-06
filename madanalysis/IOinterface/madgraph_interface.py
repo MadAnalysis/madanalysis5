@@ -258,6 +258,8 @@ class MadGraphInterface():
             self.card.append('plot MT_MET(a[' + str(i)+ ']) 40 0 500 [logY]')
             all_particles.append('a['+str(i)+']')
 
+        if len(all_particles)>15:
+            all_particles = [x for x in all_particles if ("1" in x) or ("2" in x) ]
         permlist = [c for i in range(1,len(all_particles)) for c in itertools.combinations(all_particles, i+1)]
         permlist.sort()
         permlist=list(permlist for permlist,_ in itertools.groupby(permlist))
@@ -403,6 +405,8 @@ class MadGraphInterface():
         permlist = [c for i in range(1,len(allstate)) for c in itertools.combinations(allstate, i+1)]
         permlist.sort()
         permlist=list(permlist for permlist,_ in itertools.groupby(permlist))
+        if len(permlist)>75:
+            permlist = []
         if len(permlist)>0:
             self.card.append('# Invariant-mass distributions')
         for perm in permlist:
