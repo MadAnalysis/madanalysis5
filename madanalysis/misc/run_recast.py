@@ -755,6 +755,10 @@ class RunRecast():
                                     '): unknown region (' + region +') ignored');
                             else:
                                 j = regions.index(rchild.attrib["region"])
+                                if self.main.recasting.error_extrapolation=='sqrt':
+                                    myval *= lumi_scaling
+                                else:
+                                    myval *= lumi_scaling**2
                                 covariance[i][j] = myval
                     else:
                         logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): unknown region subtag.')
@@ -875,7 +879,10 @@ class RunRecast():
             else:
                 regiondata[reg]["best"]=0
         if self.cov_switch:
-            regiondata["globalCLs"]=self.process_likelihood(regiondata,regions,xsection,lumi,covariance)
+            if all(s <= 0. for s in [regiondata[reg]["Nf"] for reg in regions]):
+                regiondata["globalCLs"]=0.
+            else:
+                regiondata["globalCLs"]=self.process_likelihood(regiondata,regions,xsection,lumi,covariance)
         return regiondata
 
 
@@ -946,6 +953,10 @@ class RunRecast():
     # Calculating the upper limits on sigma with simplified likelihood
     def extract_sig_lhcls(self,regiondata,regions,lumi,covariance,tag):
         logging.getLogger('MA5').debug('Compute signal CL...')
+        if all(s <= 0. for s in [regiondata[reg]["Nf"] for reg in regions]):
+            regiondata["lhs95obs"]= "-1"
+            regiondata["lhs95exp"]= "-1"
+            return regiondata
         if tag=="obs": 
             expected = False
         elif tag=="exp":
@@ -1033,9 +1044,9 @@ class RunRecast():
         if self.cov_switch:
             myxsexp = regiondata["lhs95exp"]
             myxsobs = regiondata["lhs95obs"]
-            myglobalcls = "%.7f" % regiondata["globalCLs"]
+            myglobalcls = "%.4f" % regiondata["globalCLs"]
             summary.write(analysis.ljust(30,' ') + "GlobalCLs".ljust(50,' ') + ''.ljust(10, ' ') + myxsexp.ljust(15,' ') + \
-               myxsobs.ljust(15,' ') + myglobalcls.ljust(7, ' ') + ' ||\n')
+               myxsobs.ljust(15,' ') + myglobalcls.ljust(7, ' ') + '   ||    \n')
 
 
 def clean_region_name(mystr):
