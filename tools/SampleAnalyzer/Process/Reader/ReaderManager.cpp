@@ -95,8 +95,7 @@ ReaderBase* ReaderManager::GetByFileExtension(std::string filename)
   if (n!=std::string::npos) filename.erase(n,5);
 
   // Set the extension in lower case
-  std::transform(filename.begin(), filename.end(),
-                 filename.begin(), std::ptr_fun<int, int>(std::tolower));
+  std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
 
  // Loop over names
   for (std::map<std::string, MAuint32>::const_iterator

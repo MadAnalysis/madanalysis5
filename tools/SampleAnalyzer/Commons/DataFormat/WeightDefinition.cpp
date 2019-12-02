@@ -32,9 +32,8 @@ using namespace MA5;
 void WeightDefinition::AddGroup(std::string name, std::string combine)
 {
   // combine: Moving to lower case
-  std::transform(combine.begin(), combine.end(),
-                 combine.begin(), std::ptr_fun<int, int>(std::tolower));
-    
+  std::transform(combine.begin(), combine.end(), combine.begin(), ::tolower);
+
   // Checking the 'combine' value
   MAbool test = combine=="none" || combine=="gaussian" || combine=="hessian" || combine=="envelope";
   try

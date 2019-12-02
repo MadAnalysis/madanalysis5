@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+164           (2019/12/02) fuks:    Compatibility with Catalina + small fix in the latest PAD analysis 
+
 163           (2019/11/06) fuks:    Bug fix in the pad installation (when called from mg5) 
 
 162           (2019/11/06) fuks:    Fixing a bug in the tautagger and in the madgraph interface 

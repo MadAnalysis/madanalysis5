@@ -279,6 +279,8 @@ class InstallPad:
                     elif new_analysis=='atlas_susy_2013_02' and 'pt() > 130' in line and '6jm' in line and not 'AddCut' in line:
                         newfile.write('}}}}\n')
                         newfile.write(line)
+                    elif new_analysis=='atlas_conf_2019_040' and 'if (signalJets.size()>=1' in line:
+                        newfile.write('    if (signalJets.size()>1)\n')
                     elif new_analysis in ['atlas_exot_2014_06', 'cms_exo_12_047'] and 'preselection=' in line:
                         newfile.write(line.replace('preselection=','preselection=myEventWeight*'))
                     elif new_analysis in ['atlas_exot_2016_32'] and 'tight=' in line:
