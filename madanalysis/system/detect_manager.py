@@ -54,10 +54,13 @@ class DetectManager():
             checker=DetectFastjet(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='pad':
             from madanalysis.system.detect_pad import DetectPAD
-            checker=DetectPAD(self.archi_info, self.user_info, self.session_info, self.debug, ma5=False)
+            checker=DetectPAD(self.archi_info, self.user_info, self.session_info, self.debug, padtype='')
         elif package=='padma5':
             from madanalysis.system.detect_pad import DetectPAD
-            checker=DetectPAD(self.archi_info, self.user_info, self.session_info, self.debug, ma5=True)
+            checker=DetectPAD(self.archi_info, self.user_info, self.session_info, self.debug, padtype="ma5")
+        elif package=='padsfs':
+            from madanalysis.system.detect_pad import DetectPAD
+            checker=DetectPAD(self.archi_info, self.user_info, self.session_info, self.debug, padtype="sfs")
         elif package=='fastjet-contrib':
             from madanalysis.system.detect_fastjetcontrib import DetectFastjetContrib
             checker=DetectFastjetContrib(self.archi_info, self.user_info, self.session_info, self.debug)

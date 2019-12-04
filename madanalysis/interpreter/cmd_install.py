@@ -146,6 +146,8 @@ class CmdInstall(CmdBase):
             else:
                 self.logger.warning('Delphes is not installed... please exit the program and install the pad')
                 return True
+        elif args[0]=='PADForSFS':
+            return installer.Execute('PADForSFS')
         else:
             self.logger.error("the syntax is not correct.")
             self.help()
@@ -154,7 +156,7 @@ class CmdInstall(CmdBase):
     def help(self):
         self.logger.info("   Syntax: install <component>")
         self.logger.info("   Download and install a MadAnalysis component from the official site.")
-        self.logger.info("   List of available components: samples zlib fastjet delphes delphesMA5tune PAD PADForMA5tune")
+        self.logger.info("   List of available components: samples zlib fastjet delphes delphesMA5tune PAD PADForMA5tune PADForSFS")
 
 
     def complete(self,text,args,begidx,endidx):
@@ -167,7 +169,7 @@ class CmdInstall(CmdBase):
             return []
         else:
             output = ["samples","zlib","fastjet", "delphes", "delphesMA5tune",\
-                "gnuplot", "matplotlib", "root" , "numpy", "PAD", "PADForMA5tune"]
+                "gnuplot", "matplotlib", "root" , "numpy", "PAD", "PADForMA5tune", "PADForSFS"]
             return self.finalize_complete(text,output)
 
 

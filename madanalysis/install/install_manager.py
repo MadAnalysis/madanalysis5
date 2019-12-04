@@ -70,8 +70,8 @@ class InstallManager():
         elif package=='numpy':
             from madanalysis.install.install_numpy import InstallNumpy
             installer=InstallNumpy(self.main)
-        elif package in ['pad', 'padforma5tune']:
-            if self.main.archi_info.has_root and self.main.session_info.has_scipy:
+        elif package in ['pad', 'padforma5tune', 'padforsfs']:
+            if (package == 'padforsfs') or (self.main.archi_info.has_root and self.main.session_info.has_scipy):
                 from madanalysis.install.install_pad import InstallPad
                 installer=InstallPad(self.main, rawpackage)
             else:

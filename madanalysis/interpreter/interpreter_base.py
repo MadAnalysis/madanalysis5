@@ -59,14 +59,15 @@ class InterpreterBase(cmd.Cmd):
     interpreter_operators = ['(',')','[',']','&','|','&',\
                              '^','!','=','>','<',',']
 
-    def load(self):
+    def load(self, verbose=True):
         ok = True
         while ok:
             line = ScriptStack.Next()
             if line=='':
                 ok=False
             else:
-                self.logger.info("ma5>"+line)
+                if verbose:
+                    self.logger.info("ma5>"+line)
                 line = self.precmd(line)
                 stop = self.onecmd(line)
                 stop = self.postcmd(stop, line)

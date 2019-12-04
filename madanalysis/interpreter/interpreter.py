@@ -355,7 +355,7 @@ class Interpreter(InterpreterBase):
         return self.cmd_select.complete(text,self.split_arg(tmp),begidx,endidx)
 
     def InitializeParticle(self):
-        input = ParticleReader(self.main.archi_info.ma5dir,self.cmd_define,self.main.mode)
+        input = ParticleReader(self.main.archi_info.ma5dir,self.cmd_define,self.main.mode,self.main.forced)
         input.Load()
 
     def InitializeMultiparticle(self):

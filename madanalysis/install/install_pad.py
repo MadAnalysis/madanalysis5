@@ -52,6 +52,11 @@ class InstallPad:
                 "padma5tune.dat"   : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/padma5tune.dat",
                 "bib_padma5tune.dat": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/bib_padma5tune.dat"
             }
+        elif padname=='PADForSFS':
+            self.files  = {
+                "padsfs.dat"     : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/padsfs.dat",
+                "bib_padsfs.dat" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/bib_padsfs.dat"
+            }
         self.analyses       = []
         self.analysis_files = []
         self.pileup_files   = []
@@ -92,6 +97,8 @@ class InstallPad:
         filename="cms_b2g_12_012"
         if self.padname == 'PADForMA5tune':
             filename="cms_sus_13_011"
+        elif self.padname == 'PADForSFS':
+            filename="sfs_test"
         logging.getLogger('MA5').debug('Calling the expert mode for file ' + filename)
         logging.getLogger('MA5').debug('BEGIN ExpertMode')
         from madanalysis.core.expert_mode import ExpertMode
@@ -188,7 +195,7 @@ class InstallPad:
             if len(analysis)!=0 and len(url)!=0:
                 logging.getLogger('MA5').debug(" ** Getting the analysis " + new_analysis + ' located at ' + url)
                 ## Creating a skeleton if necessary (+ inclusion in the analysis list and in the main)
-                if not new_analysis in ["cms_b2g_12_012", "cms_sus_13_011"]:
+                if not new_analysis in ["cms_b2g_12_012", "cms_sus_13_011", "sfs_test"]:
                     logging.getLogger('MA5').debug('  --> Creating a skeleton analysis for ' + new_analysis)
                     TheCommand = ['./newAnalyzer.py', new_analysis, new_analysis]
                     logging.getLogger('MA5').debug('  -->  ' + ' '.join(TheCommand))
@@ -215,8 +222,11 @@ class InstallPad:
                     self.analysis_files.append(new_analysis+'.'+extension)
                 analysis_info[new_analysis] = dscrptn
             # Preparing to dnwload the delphes card
+            detector = "delphes"
+            if self.padname == "PADForSFS":
+                detector = "MA5-SFS"
             if len(delphes)!=0 and download_delphes:
-                logging.getLogger('MA5').debug(" ** Getting the delphes card " + new_delphes)
+                logging.getLogger('MA5').debug(" ** Getting the " + detector + " card " + new_delphes)
                 if len(analysis)!=0:
                     files[new_delphes] = os.path.join('http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox', delphes)
                 else:
@@ -291,7 +301,7 @@ class InstallPad:
                         newfile.write(line)
                 newfile.close()
                 oldfile.close()
-                if (extension == 'h') and not rootheaders:
+                if (extension == 'h') and not rootheaders and self.padname != 'PADForSFS':
                     with open(os.path.join(self.PADdir, new_analysis+'.'+extension), 'r+') as f:
                         content = f.read()
                         f.seek(0, 0)
@@ -309,6 +319,9 @@ class InstallPad:
         return True
 
     def Configure(self):
+        ## not needed for the SFS
+        if self.padname == 'PADForSFS':
+            return True
         # Updating the makefile
         logging.getLogger('MA5').debug(" ** Preparing the Makefile to build the " + self.padname)
         TheCommand = ['mv',os.path.join(self.installdir,'Build', 'Makefile'), os.path.join(self.installdir,'Build','Makefile.save')]
@@ -352,6 +365,9 @@ class InstallPad:
         return ok
 
     def Build(self):
+        ## not needed for the SFS
+        if self.padname == 'PADForSFS':
+            return True
         # Input
         theCommands=['make','-j'+str(self.ncores)]
         logname=os.path.normpath(os.path.join(self.installdir,'Build','compilation.log'))

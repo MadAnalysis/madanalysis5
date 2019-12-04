@@ -176,7 +176,7 @@ class DelphesCardChecker():
                     ok=True
                     break
             if not ok:
-                logging.getLogger("MA5").warning("Problem with Delphes card: module "+item+" is not declared.")
+                logging.getLogger("MA5").warning("Problem with Delphes card: module "+i+" is not declared.")
                 test=False
 
         # check pileup path

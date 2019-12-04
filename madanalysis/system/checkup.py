@@ -336,6 +336,8 @@ class CheckUp():
             return False
         if not self.checker.Execute('padma5'):
             return False
+        if not self.checker.Execute('padsfs'):
+            return False
         return True
 
 

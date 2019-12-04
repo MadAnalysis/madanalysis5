@@ -25,6 +25,7 @@
 from madanalysis.enumeration.ma5_running_type   import MA5RunningType
 from madanalysis.IOinterface.folder_writer      import FolderWriter
 from shell_command import ShellCommand
+import glob
 import logging
 import shutil
 import os
@@ -48,6 +49,7 @@ class RecastConfiguration:
         self.ma5tune                    = False
         self.pad                        = False
         self.padtune                    = False
+        self.padsfs                     = False
         self.store_root                 = False
         self.systematics                = []
         self.extrapolated_luminosities  = []
@@ -56,7 +58,7 @@ class RecastConfiguration:
         self.DelphesDic                 = { }
         self.description                = { }
         self.ma5dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),os.pardir,os.pardir))
-        for mypad in ['PAD', 'PADForMa5tune']:
+        for mypad in ['PAD', 'PADForMa5tune', 'PADForSFS']:
             if os.path.isfile(os.path.join(self.ma5dir,'tools',mypad,'Input','recast_config.dat')):
                 dico_file = open(os.path.join(self.ma5dir,'tools',mypad,'Input','recast_config.dat'), 'r')
                 for line in dico_file:
@@ -83,6 +85,7 @@ class RecastConfiguration:
             self.user_DisplayParameter("ma5tune")
             self.user_DisplayParameter("pad")
             self.user_DisplayParameter("padtune")
+            self.user_DisplayParameter("padsfs")
             self.user_DisplayParameter("CLs_numofexps")
             self.user_DisplayParameter("card_path")
             self.user_DisplayParameter("store_root")
@@ -118,6 +121,12 @@ class RecastConfiguration:
                 self.logger.info("   * the PADForMa5tune is         : available")
             else:
                 self.logger.info("   * the PADForMa5tune is         : not available")
+            return
+        elif parameter=="padsfs":
+            if self.padsfs:
+                self.logger.info("   * the PADForSFS is             : available")
+            else:
+                self.logger.info("   * the PADForSFS is             : not available")
             return
         elif parameter=="CLs_numofexps":
             self.logger.info("   * Number of toy experiments for the CLs calculation: "+str(self.CLs_numofexps))
@@ -165,16 +174,16 @@ class RecastConfiguration:
                     self.logger.error("recasting is only available in the RECO mode")
                     return
 
-                # Only if ROOT is install
-                if not archi_info.has_root:
-                    self.logger.error("recasting is only available if ROOT is installed")
-                    return
+#                # Only if ROOT is install
+#                if not archi_info.has_root:
+#                    self.logger.error("recasting is only available if ROOT is installed")
+#                    return
 
                 canrecast=False
                 # Delphes and the PAD?
-                if archi_info.has_delphes:
+                if archi_info.has_root and archi_info.has_delphes:
                     self.delphes=True
-                if session_info.has_pad:
+                if archi_info.has_root and session_info.has_pad:
                     self.pad=True
                 if not archi_info.has_delphes or not session_info.has_pad:
                     self.logger.warning("Delphes and/or the PAD are not installed (or deactivated): " + \
@@ -183,13 +192,22 @@ class RecastConfiguration:
                     canrecast=True
 
                 # DelphesMA5tune and the PADFor MA5TUne?
-                if archi_info.has_delphesMA5tune:
+                if archi_info.has_root and archi_info.has_delphesMA5tune:
                     self.ma5tune=True
-                if session_info.has_padma5:
+                if archi_info.has_root and session_info.has_padma5:
                     self.padtune=True
                 if not archi_info.has_delphesMA5tune or not session_info.has_padma5:
                     self.logger.warning("DelphesMA5tune and/or the PADForMA5tune are not installed " + \
                         "(or deactivated): the corresponding analyses will be unavailable")
+                else:
+                    canrecast=True
+
+                # PADForSFS?
+                if session_info.has_padsfs:
+                    self.padsfs=True
+                if not self.padsfs:
+                    self.logger.warning("PAD for Simplified-FastSim is not installed: " + \
+                        "the corresponding analyses will be unavailable")
                 else:
                     canrecast=True
 
@@ -349,6 +367,8 @@ class RecastConfiguration:
                 self.CreateMyCard(dirname,"PADForMA5tune",write)
             if self.pad and self.delphes:
                 self.CreateMyCard(dirname,"PAD",write)
+            if self.padsfs:
+                self.CreateMyCard(dirname,"PADForSFS",write)
             return True
         #using and checking an existing card
         else:
@@ -362,15 +382,28 @@ class RecastConfiguration:
 
     def CheckCard(self,dirname):
         self.logger.info('   Checking the recasting card...')
-        ToLoopOver=[]
-        padlist=[]
-        tunelist=[]
+        ToLoopOver = []
+        padlist    = []
+        tunelist   = []
+        sfslist    = []
         if self.pad:
             padfile  = open(os.path.normpath(os.path.join(self.ma5dir,"tools/PAD/Build/Main/main.cpp")), 'r')
             ToLoopOver.append([padfile, padlist])
         if self.padtune:
             tunefile = open(os.path.normpath(os.path.join(self.ma5dir,"tools/PADForMA5tune/Build/Main/main.cpp")), 'r')
             ToLoopOver.append([tunefile, tunelist])
+        if self.padsfs:
+            # get the analysis list that is available in the folder
+            sfs_path = os.path.normpath(os.path.join(self.ma5dir,"tools/PADForSFS/Build/SampleAnalyzer/User/Analyzer"))
+            analysislist  = [x.split('/')[-1] for x in glob.glob(sfs_path+'/*.cpp')];
+            analysislist  = [x.split('.cpp')[0] for x in analysislist]
+            # getting the list of available detector cards
+            sfs_path = os.path.normpath(os.path.join(self.ma5dir,"tools/PADForSFS/Input/Cards"))
+            cardlist  = [x.split('/')[-1] for x in glob.glob(sfs_path+'/*.ma5')];
+            # final list with analyses
+            for analysis, ma5card in self.DelphesDic.items():
+                if analysis in analysislist and ma5card in cardlist:
+                     sfslist.append([analysis, ma5card])
         for myfile,mylist in ToLoopOver:
             for line in myfile:
                 if "manager.InitializeAnalyzer" in line:
@@ -410,8 +443,15 @@ class RecastConfiguration:
                 if not os.path.isfile(os.path.normpath(os.path.join(self.ma5dir,'tools/PADForMA5tune/Input/Cards',mydelphes))):
                     self.logger.error("Recasting card: PADForMA5tune analysis linked to an invalid delphes card: " + myana + " - " + mydelphes)
                     return False
+            elif myana in  [x[0] for x in sfslist]:
+                if myver!="vSFS":
+                    self.logger.error("Recasting card: invalid analysis (not present in PADForSFS): " + myana)
+                    return False
+                if not os.path.isfile(os.path.normpath(os.path.join(self.ma5dir,'tools/PADForSFS/Input/Cards',mydelphes))):
+                    self.logger.error("Recasting card: PADForSFS analysis linked to an invalid SFS card: " + myana + " - " + mydelphes)
+                    return False
             else:
-                self.logger.error("Recasting card: invalid analysis (not present in the PAD and in the PADForMA5tune): " + myana)
+                self.logger.error("Recasting card: invalid analysis (not present in the PAD, PADForMA5tune and PADForSFS): " + myana)
                 return False
             # checking the matching between the delphes card and the analysis
             for mycard,alist in self.DelphesDic.items():
@@ -430,34 +470,43 @@ class RecastConfiguration:
 
 
     def CreateMyCard(self,dirname,padtype,write=True):
-        mainfile  = open(os.path.normpath(os.path.join(self.ma5dir,'tools',padtype,"Build/Main/main.cpp")), 'r')
         thecard=[]
         if write:
             exist=os.path.isfile(dirname+'/Input/recasting_card.dat')
             if not exist and write:
-                thecard.append('# Delphes cards must be located in the PAD(ForMA5tune) directory')
+                thecard.append('# Detector cards must be located in the PAD(ForMA5tune/ForSFS) directory')
                 thecard.append('# Switches must be on or off')
-                thecard.append('# AnalysisName               PADType    Switch     DelphesCard')
-        if padtype=="PAD":
-            mytype="v1.2"
-        else:
-            mytype="v1.1"
-        for line in mainfile:
-            if "manager.InitializeAnalyzer" in line:
-                analysis = str(line.split('\"')[1])
-                mydelphes="UNKNOWN"
-                descr="UNKNOWN"
-                for mycard,alist in self.DelphesDic.items():
-                      if analysis in alist:
-                          mydelphes=mycard
-                          break
-                for myana,mydesc in self.description.items():
-                      if analysis == myana:
-                          descr=mydesc
-                          break
-                thecard.append(analysis.ljust(30,' ') + mytype.ljust(12,' ') + 'on    ' + mydelphes.ljust(50, ' ')+\
-                      ' # '+descr)
-        mainfile.close()
+                thecard.append('# AnalysisName               PADType    Switch     DetectorCard')
+        if padtype in ['PAD','PADForMA5tune']:
+            mainfile  = open(os.path.normpath(os.path.join(self.ma5dir,'tools',padtype,"Build/Main/main.cpp")), 'r')
+            if padtype=="PAD":
+                mytype="v1.2"
+            else:
+                mytype="v1.1"
+            for line in mainfile:
+                if "manager.InitializeAnalyzer" in line:
+                    analysis = str(line.split('\"')[1])
+                    mydelphes="UNKNOWN"
+                    descr="UNKNOWN"
+                    for mycard,alist in self.DelphesDic.items():
+                          if analysis in alist:
+                              mydelphes=mycard
+                              break
+                    for myana,mydesc in self.description.items():
+                          if analysis == myana:
+                              descr=mydesc
+                              break
+                    thecard.append(analysis.ljust(30,' ') + mytype.ljust(12,' ') + 'on    ' + mydelphes.ljust(50, ' ')+\
+                          ' # '+descr)
+            mainfile.close()
+        elif padtype == 'PADForSFS':
+            for mycard,alist in self.DelphesDic.items():
+                for analysis in alist:
+                    descr = 'UNKNOWN'
+                    if analysis in self.description.keys():
+                        descr = self.description[analysis]
+                    thecard.append(analysis.ljust(30,' ') + 'vSFS        on    ' + mycard.ljust(50, ' ')+\
+                          ' # '+descr)
         thecard.sort()
         if write:
             card = open(dirname+'/Input/recasting_card.dat','a')

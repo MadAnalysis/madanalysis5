@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+166           (2019/12/04) fuks:    Adding the firs tbuilding block of the PADForSFS module 
+
 165           (2019/12/02) fuks:    Fixing small issues with the covariance treatment (recasting) 
 
 164           (2019/12/02) fuks:    Compatibility with Catalina + small fix in the latest PAD analysis 

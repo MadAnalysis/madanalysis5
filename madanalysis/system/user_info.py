@@ -68,6 +68,10 @@ class UserInfo:
         self.padma5_veto       = None
         self.padma5_build_path = None
 
+        # PADForSFS
+        self.padsfs_veto       = None
+        self.padsfs_build_path = None
+
         # Pdflatex
         self.pdflatex_veto = None
 
@@ -228,6 +232,12 @@ class UserInfo:
             self.padma5_veto=self.ConvertToBool(option,value,filename)
         elif option=='padma5_build_path':
             self.padma5_build_path=value
+
+        # PAD
+        elif option=='padsfs_veto':
+            self.padsfs_veto=self.ConvertToBool(option,value,filename)
+        elif option=='padsfs_build_path':
+            self.padsfs_build_path=value
 
         # Pdflatex
         elif option=='pdflatex_veto':

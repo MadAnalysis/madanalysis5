@@ -36,14 +36,17 @@ from madanalysis.system.config_checker          import ConfigChecker
 
 class DetectPAD:
 
-    def __init__(self,archi_info, user_info, session_info, debug, ma5):
+    def __init__(self,archi_info, user_info, session_info, debug, padtype=''):
         self.archi_info   = archi_info
         self.user_info    = user_info
         self.session_info = session_info
         self.debug        = debug
-        self.ma5tune      = ma5
+        self.ma5tune      = (padtype=="ma5")
+        self.sfs          = (padtype=="sfs")
         if self.ma5tune:
             self.name  = 'PADForMA5tune'
+        elif self.sfs:
+            self.name  = 'PADForSFS'
         else:
             self.name  = 'PAD'
         self.mandatory   = False
@@ -58,6 +61,13 @@ class DetectPAD:
         if self.ma5tune:
             if self.user_info.padma5_veto:
                 self.logger.debug("user setting: veto on PADForMA5Tune")
+                return True
+            else:
+                self.logger.debug("no user veto")
+                return False
+        elif self.sfs:
+            if self.user_info.padsfs_veto:
+                self.logger.debug("user setting: veto on PADForSFS")
                 return True
             else:
                 self.logger.debug("no user veto")
@@ -77,7 +87,7 @@ class DetectPAD:
             if not checker.checkDelphesMA5tune(True):
                 self.logger.debug("dependency 'DelphesMA5tune' is not installed")
                 return False
-        else:
+        elif not self.sfs:
             if not checker.checkDelphes(True):
                 self.logger.debug("dependency 'Delphes' is not installed")
                 return False
@@ -96,6 +106,16 @@ class DetectPAD:
             # Folder name
             folder = os.path.normpath(self.user_info.padma5_build_path)
 
+        if self.sfs:
+            # User setting
+            if self.user_info.padsfs_build_path==None:
+                return DetectStatusType.UNFOUND, msg
+
+            self.logger.debug("User setting: PADForSFS build path is specified.")
+
+            # Folder name
+            folder = os.path.normpath(self.user_info.padsfs_build_path)
+
         else:
             # User setting
             if self.user_info.pad_build_path==None:
@@ -108,9 +128,9 @@ class DetectPAD:
 
         filename = folder+'/MadAnalysis5job'
 
-        # Detection of fastjet-config
+        # Detection of the PAD exectuable
         self.logger.debug("Detecting MadAnalysis5job in the path specified by the user ...")
-        if not os.path.isfile(filename):
+        if not os.path.isfile(filename) and not self.sfs:
             logging.getLogger('MA5').debug('-> not found')
             msg  = "MadAnalysis5job program is not found in folder: "+folder+"\n"
             msg += "Please check that "+self.name+" is properly installed."
@@ -130,11 +150,16 @@ class DetectPAD:
 
         if self.ma5tune:
             thefolder = 'PADForMA5tune'
+        elif self.sfs:
+            thefolder = 'PADForSFS'
         else:
             thefolder = 'PAD'
 
         filename = os.path.normpath(self.archi_info.ma5dir+'/tools/'+thefolder+'/Build/MadAnalysis5job')
-        self.logger.debug("Look for "+self.name+" in the folder here:"+filename+" ...")
+        if self.sfs:
+            filename = os.path.normpath(self.archi_info.ma5dir+'/tools/'+thefolder+'/Build/SampleAnalyzer/User/Analyzer/analysislist.h')
+
+        self.logger.debug("Look for "+self.name+" in the folder here :"+filename+" ...")
         if os.path.isfile(filename):
             self.logger.debug("-> found")
             self.build_file=filename
@@ -147,6 +172,8 @@ class DetectPAD:
 
 
     def ExtractInfo(self):
+        if self.sfs:
+            return True
         theCommands = [self.build_file,'--info']
         ok, out, err = ShellCommand.ExecuteWithCapture(theCommands,'./')
         if not ok:
@@ -182,6 +209,10 @@ class DetectPAD:
              self.session_info.has_padma5           = True
              self.session_info.padma5_build_path    = self.build_path
              self.session_info.padma5_original_bins = [self.build_file]
+        elif self.sfs:
+             self.session_info.has_padsfs           = True
+             self.session_info.padsfs_build_path    = self.build_path
+             self.session_info.padsfs_original_bins = [self.build_file]
         else:
              self.session_info.has_pad              = True
              self.session_info.pad_build_path       = self.build_path

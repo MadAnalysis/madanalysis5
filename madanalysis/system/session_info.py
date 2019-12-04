@@ -39,6 +39,7 @@ class SessionInfo():
         self.has_dvipdf         = False
         self.has_web            = True
         self.has_pad            = False
+        self.has_padsfs         = False
         self.has_padma5         = False
         self.gcc_header_search_path  = []
         self.gcc_library_search_path = []
