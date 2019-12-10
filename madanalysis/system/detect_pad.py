@@ -157,7 +157,7 @@ class DetectPAD:
 
         filename = os.path.normpath(self.archi_info.ma5dir+'/tools/'+thefolder+'/Build/MadAnalysis5job')
         if self.sfs:
-            filename = os.path.normpath(self.archi_info.ma5dir+'/tools/'+thefolder+'/Build/SampleAnalyzer/User/Analyzer/analysislist.h')
+            filename = os.path.normpath(self.archi_info.ma5dir+'/tools/'+thefolder+'/Build/SampleAnalyzer/User/Analyzer/analysisList.h')
 
         self.logger.debug("Look for "+self.name+" in the folder here :"+filename+" ...")
         if os.path.isfile(filename):

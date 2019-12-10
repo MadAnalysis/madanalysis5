@@ -100,7 +100,7 @@ class JobSmearerRecoMain:
         self.PrintReco(['15', 'ta'],file,'(&event.rec()->taus()[i])')
         self.PrintSmearer(['15', 'ta'], ['PT','ETA','PHI','E','PX','PY','PZ'],file,'(&event.rec()->taus()[i])')
         file.write('    pTmiss -= event.rec()->taus()[i].momentum();\n')
-        file.write('    THT    += event.rec()->jets()[i].pt();\n')
+        file.write('    THT    += event.rec()->taus()[i].pt();\n')
         file.write('    TET    += event.rec()->taus()[i].pt();\n')
         file.write('  }\n')
         file.write('  // Removal of the non-reconstructed taus\n')

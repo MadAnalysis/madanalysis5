@@ -438,7 +438,7 @@ class LikelihoodComputer:
             ## for now deal with variances only
             ntot = nb + nsig
             cov = NP.array(sigma2)
-            weight = cov**(-1) ## weight matrix
+            weight = NP.linalg.inv(cov)  ## weight matrix
             diag_cov = NP.diag(cov)
             # first: no covariances:
             q = diag_cov * ( ntot - nobs )

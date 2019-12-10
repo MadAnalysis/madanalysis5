@@ -114,10 +114,14 @@ class RunRecast():
             self.detector = "delphesMA5tune"
             self.pad      = self.main.archi_info.ma5dir+'/tools/PADForMA5tune'
             check         = self.main.recasting.ma5tune
-        else:
+        elif version == "v1.2":
             self.detector = "delphes"
             self.pad      = self.main.archi_info.ma5dir+'/tools/PAD'
             check         = self.main.recasting.delphes
+        elif version == "vSFS":
+            self.detector = "fastjet"
+            self.pad      = self.main.archi_info.ma5dir+'/tools/PADForSFS'
+            check         = True
         ## Check and exit
         if not check:
            logging.getLogger('MA5').error('The ' + self.detector + ' library is not present -> the associated analyses cannot be used')
@@ -153,12 +157,13 @@ class RunRecast():
         self.fastsim_header(version)
 
         # Activating the right delphes
-        logging.getLogger('MA5').debug('Activating the detector (switch delphes/delphesMA5tune)')
-        self.main.fastsim.package = self.detector
-        detector_handler = DetectorManager(self.main)
-        if not detector_handler.manage(self.detector):
-            logging.getLogger('MA5').error('Problem with the activation of delphesMA5tune')
-            return False
+        if self.detector!="fastjet":
+            logging.getLogger('MA5').debug('Activating the detector (switch delphes/delphesMA5tune)')
+            self.main.fastsim.package = self.detector
+            detector_handler = DetectorManager(self.main)
+            if not detector_handler.manage(self.detector):
+                logging.getLogger('MA5').error('Problem with the activation of delphesMA5tune')
+                return False
 
         # Checking whether events have already been generated and if not, event generation
         logging.getLogger('MA5').debug('Loop over the datasets...')
@@ -167,6 +172,9 @@ class RunRecast():
                 evtfile = self.dirname+'/Output/'+item.name+'/RecoEvents/RecoEvents_v1x1_'+delphescard.replace('.tcl','')+'.root'
             elif self.detector=="delphes":
                 evtfile = self.dirname+'/Output/'+item.name+'/RecoEvents/RecoEvents_v1x2_'+delphescard.replace('.tcl','')+'.root'
+            elif self.detector=="fastjet":
+                return True
+
             logging.getLogger('MA5').debug('- applying fastsim and producing '+evtfile+'...')
             if not os.path.isfile(os.path.normpath(evtfile)):
                 if not self.generate_events(item,delphescard):
@@ -235,6 +243,185 @@ class RunRecast():
 
         # Exit
         return True
+
+
+    def run_SimplifiedFastSim(self,dataset,card,analysislist):
+        """
+        This function generates a folder named ANALYSIS_X_SFSRun using the card 
+        provided in PADForSFS/Input/Cards, this sets up the fastjet initializations
+        and efficiency/smearing functions. Then it copies necessary analysis files 
+        and runs the analysis. Generated cutflow table and histograms are copied 
+        to ANALYSIS_X and ANALYSIS_X_SFSRun is removed.
+        """
+
+        # Load the analysis card
+        from madanalysis.core.script_stack import ScriptStack
+        ScriptStack.AddScript(card)
+        self.main.recasting.status="off"
+        script_mode = self.main.script
+        self.main.script = True
+        from madanalysis.interpreter.interpreter import Interpreter
+        interpreter = Interpreter(self.main)
+        interpreter.load(verbose=self.main.developer_mode)
+        self.main.script = script_mode
+        old_fastsim = self.main.fastsim.package
+        self.main.fastsim.package="fastjet"
+        if self.main.recasting.store_events:
+            output_name = "SFS_events.lhe"
+            if self.main.archi_info.has_zlib:
+                output_name += ".gz"
+            logging.getLogger('MA5').debug("   Setting the output LHE file :"+output_name)
+
+        # Initializing the JobWriter
+        jobber = JobWriter(self.main,self.dirname+'_SFSRun')
+
+        # Writing process
+        logging.getLogger('MA5').info("   Creating folder '"+self.dirname.split('/')[-1]  + "'...")
+        if not jobber.Open():
+            return False
+        logging.getLogger('MA5').info("   Copying 'SampleAnalyzer' source files...")
+        if not jobber.CopyLHEAnalysis():
+            return False
+        if not jobber.CreateBldDir(analysisName="SFSRun",outputName="SFSRun.saf"):
+            return False
+        if not jobber.WriteSelectionHeader(self.main):
+            return False
+        os.remove(self.dirname+'_SFSRun/Build/SampleAnalyzer/User/Analyzer/user.h')
+        if not jobber.WriteSelectionSource(self.main):
+            return False
+        os.remove(self.dirname+'_SFSRun/Build/SampleAnalyzer/User/Analyzer/user.cpp')
+        #######
+        logging.getLogger('MA5').info("   Writing the list of datasets...")
+        jobber.WriteDatasetList(dataset)
+        logging.getLogger('MA5').info("   Creating Makefiles...")
+        if not jobber.WriteMakefiles():
+            return False
+        # Copying the analysis files
+        analysisList = open(self.dirname+'_SFSRun/Build/SampleAnalyzer/User/Analyzer/analysisList.h','w')
+        for ana in analysislist:
+            analysisList.write('#include "SampleAnalyzer/User/Analyzer/'+ana+'.h"\n')
+        analysisList.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"\n')
+        analysisList.write('#include "SampleAnalyzer/Commons/Service/LogStream.h"\n\n')
+        analysisList.write('// -----------------------------------------------------------------------------\n')
+        analysisList.write('// BuildUserTable\n')
+        analysisList.write('// -----------------------------------------------------------------------------\n')
+        analysisList.write('void BuildUserTable(MA5::AnalyzerManager& manager)\n')
+        analysisList.write('{\n')
+        analysisList.write('  using namespace MA5;\n')
+        try:
+            for ana in analysislist:
+                shutil.copyfile\
+                    (self.pad+'/Build/SampleAnalyzer/User/Analyzer/'+ana+'.cpp',\
+                     self.dirname+'_SFSRun/Build/SampleAnalyzer/User/Analyzer/'+ana+'.cpp')
+                shutil.copyfile\
+                    (self.pad+'/Build/SampleAnalyzer/User/Analyzer/'+ana+'.h',\
+                     self.dirname+'_SFSRun/Build/SampleAnalyzer/User/Analyzer/'+ana+'.h')
+                analysisList.write('  manager.Add("'+ana+'", new '+ana+');\n')
+        except: 
+            logging.getLogger('MA5').error('Cannot copy the analysis: '+ana)
+            logging.getLogger('MA5').error('Please make sure that corresponding analysis downloaded propoerly.')
+            return False
+        analysisList.write('}\n')
+        analysisList.close()
+
+        # Update Main
+        logging.getLogger('MA5').info("   Updating the main executable")
+        shutil.move(self.dirname+'_SFSRun/Build/Main/main.cpp',\
+                    self.dirname+'_SFSRun/Build/Main/main.bak')
+        mainfile = open(self.dirname+"_SFSRun/Build/Main/main.bak",'r')
+        newfile  = open(self.dirname+"_SFSRun/Build/Main/main.cpp",'w')
+        ignore = False
+        for line in mainfile:
+            if '// Getting pointer to the analyzer' in line:
+                ignore = True
+                newfile.write(line)
+                for analysis in analysislist:
+                    newfile.write('  std::map<std::string, std::string> prm'+analysis+';\n')
+                    newfile.write('  AnalyzerBase* analyzer_'+analysis+'=\n')
+                    newfile.write('    manager.InitializeAnalyzer(\"'+analysis+'\",\"'+analysis+'.saf\",'+\
+                       'prm'+analysis+');\n')
+                    newfile.write(  '  if (analyzer_'+analysis+'==0) return 1;\n\n')
+                if self.main.recasting.store_events:
+                    newfile.write('  //Getting pointer to the writer\n')
+                    newfile.write('  WriterBase* writer1 = \n')
+                    newfile.write('      manager.InitializeWriter("lhe","'+output_name+'");\n')
+                    newfile.write('  if (writer1==0) return 1;\n\n')
+            elif '//Getting pointer to the clusterer' in line:
+                ignore=False
+                newfile.write(line)
+            elif '!analyzer1' in line and not ignore:
+                ignore=True
+                if self.main.recasting.store_events:
+                    newfile.write('      writer1->WriteEvent(myEvent,mySample);\n')
+                for analysis in analysislist:
+                    newfile.write('      if (!analyzer_'+analysis+'->Execute(mySample,myEvent)) continue;\n')
+            elif '    }' in line:
+                newfile.write(line)
+                ignore=False
+            elif not ignore:
+                newfile.write(line)
+        mainfile.close()
+        newfile.close()
+        #restore
+        self.main.recasting.status = "on"
+        self.main.fastsim.package  = old_fastsim
+        # Creating executable
+        logging.getLogger('MA5').info("   Compiling 'SampleAnalyzer'...")
+        if not jobber.CompileJob():
+            logging.getLogger('MA5').error("job submission aborted.")
+            return False
+        logging.getLogger('MA5').info("   Linking 'SampleAnalyzer'...")
+        if not jobber.LinkJob():
+            logging.getLogger('MA5').error("job submission aborted.")
+            return False
+        # Running
+        logging.getLogger('MA5').info("   Running 'SampleAnalyzer' over dataset '" +dataset.name+"'...")
+        logging.getLogger('MA5').info("    *******************************************************")
+        if not jobber.RunJob(dataset):
+            logging.getLogger('MA5').error("run over '"+dataset.name+"' aborted.")
+            return False
+        logging.getLogger('MA5').info("    *******************************************************")
+        
+        if not os.path.isdir(self.dirname+'/Output/'+dataset.name):
+            os.mkdir(self.dirname+'/Output/'+dataset.name)
+        for analysis in analysislist:
+            if not os.path.isdir(self.dirname+'/Output/'+dataset.name+'/'+analysis):
+                os.mkdir(self.dirname+'/Output/'+dataset.name+'/'+analysis)
+            if not os.path.isdir(self.dirname+'/Output/'+dataset.name+'/'+analysis+'/CutFlows'):
+                os.mkdir(self.dirname+'/Output/'+dataset.name+'/'+analysis+'/Cutflows')
+            if not os.path.isdir(self.dirname+'/Output/'+dataset.name+'/'+analysis+'/Histograms'):
+                os.mkdir(self.dirname+'/Output/'+dataset.name+'/'+analysis+'/Histograms')
+            if not os.path.isdir(self.dirname+'/Output/'+dataset.name+'/'+analysis+'/RecoEvents') and self.main.recasting.store_events :
+                os.mkdir(self.dirname+'/Output/'+dataset.name+'/'+analysis+'/RecoEvents')
+            cutflow_list   = os.listdir(self.dirname+'_SFSRun/Output/_'+ dataset.name+'/'+analysis+'_0/Cutflows')
+            histogram_list = os.listdir(self.dirname+'_SFSRun/Output/_'+ dataset.name+'/'+analysis+'_0/Histograms')
+            for cutflow in cutflow_list:
+                shutil.move(self.dirname+'_SFSRun/Output/_'+\
+                                      dataset.name+'/'+analysis+'_0/Cutflows/'+cutflow,\
+                                      self.dirname+'/Output/'+dataset.name+'/'+\
+                                      analysis+'/Cutflows/'+cutflow)
+            for histos in histogram_list:
+                shutil.move(self.dirname+'_SFSRun/Output/_'+\
+                                      dataset.name+'/'+analysis+'_0/Histograms/'+histos,\
+                                      self.dirname+'/Output/'+dataset.name+'/'+\
+                                      analysis+'/Histograms/'+histos)
+            if self.main.recasting.store_events:
+                event_list     = os.listdir(self.dirname+'_SFSRun/Output/_'+ dataset.name+'/lheEvents0_0/')
+                if len(event_list) > 0:
+                    shutil.move(self.dirname+'_SFSRun/Output/_'+dataset.name+\
+                                '/lheEvents0_0/'+event_list[0], self.dirname+\
+                                '/Output/'+dataset.name+'/'+analysis+'/RecoEvents/'+\
+                                event_list[0])
+
+        if not self.main.developer_mode:
+            # Remove the analysis folder
+            if not FolderWriter.RemoveDirectory(os.path.normpath(self.dirname+'_SFSRun')):
+                logging.getLogger('MA5').error("Cannot remove directory: "+self.dirname+'_SFSRun')
+        else:
+            logging.getLogger('MA5').debug("Analysis kept in "+self.dirname+'_SFSRun folder.')
+
+        return True
+
 
     def generate_events(self,dataset,card):
         # Preparing the run
@@ -315,33 +502,41 @@ class RunRecast():
 
         # Executing the PAD
         for myset in self.main.datasets:
-            ## Preparing the PAD
-            self.update_pad_main(analyses)
-            if not self.make_pad():
-                self.main.forced=self.forced
-                return False
-            ## Getting the file name corresponding to the events
-            eventfile = os.path.normpath(self.dirname + '/Output/' + myset.name + '/RecoEvents/RecoEvents_' +\
-                   version.replace('.','x')+'_' + card.replace('.tcl','')+'.root')
-            if not os.path.isfile(eventfile):
-                logging.getLogger('MA5').error('The file called '+eventfile+' is not found...')
-                return False
-            ## Running the PAD
-            if not self.run_pad(eventfile):
-                self.main.forced=self.forced
-                return False
-            ## Restoring the PAD as it was before
-            if not self.restore_pad_main():
-                self.main.forced=self.forced
-                return False
-            ## Saving the output and cleaning
-            if not self.save_output('\"'+eventfile+'\"', myset.name, analyses):
-                self.main.forced=self.forced
-                return False
-
-            if not self.main.recasting.store_root:
-                os.remove(eventfile)
-            time.sleep(1.);
+            if version in ['v1.1', 'v1.2']:
+                ## Preparing the PAD
+                self.update_pad_main(analyses)
+                if not self.make_pad():
+                    self.main.forced=self.forced
+                    return False
+                ## Getting the file name corresponding to the events
+                eventfile = os.path.normpath(self.dirname + '/Output/' + myset.name + '/RecoEvents/RecoEvents_' +\
+                       version.replace('.','x')+'_' + card.replace('.tcl','')+'.root')
+                if not os.path.isfile(eventfile):
+                    logging.getLogger('MA5').error('The file called '+eventfile+' is not found...')
+                    return False
+                ## Running the PAD
+                if not self.run_pad(eventfile):
+                    self.main.forced=self.forced
+                    return False
+                ## Restoring the PAD as it was before
+                if not self.restore_pad_main():
+                    self.main.forced=self.forced
+                    return False
+                ## Saving the output and cleaning
+                if not self.save_output('\"'+eventfile+'\"', myset.name, analyses):
+                    self.main.forced=self.forced
+                    return False
+                if not self.main.recasting.store_root:
+                    os.remove(eventfile)
+                time.sleep(1.);
+            else:
+                # Run SFS
+                if not self.run_SimplifiedFastSim(myset,self.main.archi_info.ma5dir+\
+                                                  '/tools/PADForSFS/Input/Cards/'+\
+                                                  card,analyses):
+                    return False
+                if self.main.recasting.store_root:
+                    logging.getLogger('MA5').warning("Simplified-FastSim does not use root, hence file will not be stored.")
 
             ## Running the CLs exclusion script (if available)
             if not self.compute_cls(analyses,myset):
@@ -1043,7 +1238,10 @@ class RunRecast():
         # Adding the global CLs from simplified likelihood
         if self.cov_switch:
             myxsexp = regiondata["lhs95exp"]
-            myxsobs = regiondata["lhs95obs"]
+            if "lhs95obs" in regiondata[reg].keys():
+                myxsobs = regiondata[reg]["lhs95obs"]
+            else:
+                myxsobs = "-1"
             myglobalcls = "%.4f" % regiondata["globalCLs"]
             summary.write(analysis.ljust(30,' ') + "GlobalCLs".ljust(50,' ') + ''.ljust(10, ' ') + myxsexp.ljust(15,' ') + \
                myxsobs.ljust(15,' ') + myglobalcls.ljust(7, ' ') + '   ||    \n')

@@ -36,7 +36,6 @@ from madanalysis.core.main import Main
 # Import Readers for multiparticles initializing
 from madanalysis.IOinterface.particle_reader import ParticleReader
 from madanalysis.IOinterface.multiparticle_reader import MultiparticleReader
-from madanalysis.enumeration.report_format_type import ReportFormatType
 from madanalysis.enumeration.cut_type import CutType
 
 # List of command
@@ -444,7 +443,7 @@ class Interpreter(InterpreterBase):
         except Exception, error:
             if __debug__:
                  print error
-            
+
     def getTerminalSize(self):
         def ioctl_GWINSZ(fd):
             try:
@@ -464,7 +463,7 @@ class Interpreter(InterpreterBase):
                 pass
         if not cr:
             try:
-                cr = (env['LINES'], env['COLUMNS'])
+                cr = (os.environ['LINES'], os.environ['COLUMNS'])
             except:
                 cr = (25, 80)
         return int(cr[1])
@@ -540,15 +539,3 @@ class Interpreter(InterpreterBase):
             #    print error
             #    print '\n'
             return None    
-
-
-    def correct_splitting(line):
-        """if the line finish with a '-' the code splits in a weird way
-           on GNU_SPLITTING"""
-                
-        line = line.lstrip()
-        if line[-1] in [' ','\t']:
-            return '', line, len(line),len(enidx)
-        return text, line, begidx, endidx
-
-        

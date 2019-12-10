@@ -39,6 +39,7 @@ class RecastConfiguration:
          "CLs_numofexps"       : [str(default_CLs_numofexps)],\
          "card_path"           : "",\
          "store_root"          : ["True", "False"] , \
+         "store_events"        : ["True", "False"] , \
          "THerror_combination" : ["quadratic","linear"], \
          "error_extrapolation" : ["linear", "sqrt"]
     }
@@ -51,6 +52,7 @@ class RecastConfiguration:
         self.padtune                    = False
         self.padsfs                     = False
         self.store_root                 = False
+        self.store_events               = False
         self.systematics                = []
         self.extrapolated_luminosities  = []
         self.THerror_combination        = "linear"
@@ -88,7 +90,7 @@ class RecastConfiguration:
             self.user_DisplayParameter("padsfs")
             self.user_DisplayParameter("CLs_numofexps")
             self.user_DisplayParameter("card_path")
-            self.user_DisplayParameter("store_root")
+            self.user_DisplayParameter("store_events")
             self.user_DisplayParameter("extrapolated_luminosities")
             self.user_DisplayParameter("systematics")
             self.user_DisplayParameter("THerror_combination")
@@ -134,8 +136,8 @@ class RecastConfiguration:
         elif parameter=="card_path":
             self.logger.info("   * Path to a recasting card: "+str(self.card_path))
             return
-        elif parameter=="store_root":
-            self.logger.info("   * Keeping the root files: "+str(self.store_root))
+        elif parameter=="store_root" or parameter=="store_events":
+            self.logger.info("   * Keeping the event files: "+str(self.store_root or self.store_events))
             return
         elif parameter=="systematics":
             if len(self.systematics) > 0:
@@ -259,14 +261,16 @@ class RecastConfiguration:
                 return
 
         # Keeping the root files
-        elif parameter=="store_root":
+        elif parameter=="store_root" or parameter=="store_events":
             if self.status!="on":
                 self.logger.error("Please first set the recasting mode to 'on'.")
                 return
             if value == 'True':
-                self.store_root=True
+                self.store_root   = True
+                self.store_events = True
             elif value == 'False':
-                self.store_root=False
+                self.store_root   = False
+                self.store_events = False
             else:
                 self.logger.error("Do the root files need to be stored? (True/False)")
                 return
@@ -337,7 +341,7 @@ class RecastConfiguration:
             if var == "add":
                 table = ["extrapolated_luminosity", "systematics"]
             else:
-                table = ["CLs_numofexps", "card_path", "store_root", "add", "THerror_combination", "error_extrapolation"]
+                table = ["CLs_numofexps", "card_path", "store_events", "add", "THerror_combination", "error_extrapolation"]
         else:
            table = []
         return table
@@ -353,6 +357,8 @@ class RecastConfiguration:
                 table.extend(RecastConfiguration.userVariables["card_path"])
         elif variable =="store_root":
                 table.extend(RecastConfiguration.userVariables["store_root"])
+        elif variable =="store_events":
+                table.extend(RecastConfiguration.userVariables["store_events"])
         elif variable =="THerror_combination":
                 table.extend(RecastConfiguration.userVariables["THerror_combination"])
         elif variable =="error_extrapolation":
@@ -395,8 +401,10 @@ class RecastConfiguration:
         if self.padsfs:
             # get the analysis list that is available in the folder
             sfs_path = os.path.normpath(os.path.join(self.ma5dir,"tools/PADForSFS/Build/SampleAnalyzer/User/Analyzer"))
-            analysislist  = [x.split('/')[-1] for x in glob.glob(sfs_path+'/*.cpp')];
-            analysislist  = [x.split('.cpp')[0] for x in analysislist]
+            analysislist  = [x.split('/')[-1].split('.cpp')[0] for x in glob.glob(sfs_path+'/*.cpp')];
+            # should check corresponding headers, keep only the analyses with headers
+            headerlist = [x.split('/')[-1].split('.h')[0] for x in glob.glob(sfs_path+'/*.h') if not x.startswith('analysisList')]
+            analysislist = [i for i in analysislist if i in headerlist]
             # getting the list of available detector cards
             sfs_path = os.path.normpath(os.path.join(self.ma5dir,"tools/PADForSFS/Input/Cards"))
             cardlist  = [x.split('/')[-1] for x in glob.glob(sfs_path+'/*.ma5')];
@@ -500,8 +508,12 @@ class RecastConfiguration:
                           ' # '+descr)
             mainfile.close()
         elif padtype == 'PADForSFS':
+            sfs_path = os.path.normpath(os.path.join(self.ma5dir,"tools/PADForSFS/Build/SampleAnalyzer/User/Analyzer"))
+            analysislist  = [x.split('/')[-1].split('.cpp')[0] for x in glob.glob(sfs_path+'/*.cpp')];
             for mycard,alist in self.DelphesDic.items():
                 for analysis in alist:
+                    if analysis not in analysislist:
+                        continue
                     descr = 'UNKNOWN'
                     if analysis in self.description.keys():
                         descr = self.description[analysis]
