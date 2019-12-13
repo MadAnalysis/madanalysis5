@@ -40,8 +40,8 @@ import copy
 class JobReader():
 
     def __init__(self,jobdir):
-        self.path       = jobdir
-        self.safdir    = os.path.normpath(self.path+"/Output")
+        self.path   = jobdir
+        self.safdir = os.path.normpath(self.path+"/Output/SAF/")
 
     def CheckDir(self):
         if not os.path.isdir(self.path):

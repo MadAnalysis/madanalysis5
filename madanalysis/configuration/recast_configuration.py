@@ -529,20 +529,20 @@ class RecastConfiguration:
             return thecard
 
     def CheckFile(self,dirname,dataset):
-        filename=os.path.normpath(dirname+'/Output/'+dataset.name+'/CLs_output.dat')
+        filename=os.path.normpath(dirname+'/Output/SAF/'+dataset.name+'/CLs_output.dat')
         self.logger.debug('Check file "'+filename+'"...')
         if not os.path.isfile(filename):
-            self.logger.error("The file '"+dirname+'/Output/'+dataset.name+'/CLs_output.dat" has not been found.')
+            self.logger.error("The file '"+dirname+'/Output/SAF/'+dataset.name+'/CLs_output.dat" has not been found.')
             return False
         return True
 
     def collect_outputs(self,dirname,datasets):
-        filename=os.path.normpath(os.path.join(dirname,'Output/CLs_output_summary.dat'))
+        filename=os.path.normpath(os.path.join(dirname,'Output/SAF/CLs_output_summary.dat'))
         self.logger.debug('Check summary file "'+filename+'"...')
         out = open(filename,'w')
         counter=1
         for item in datasets:
-            outset=open(os.path.normpath(os.path.join(dirname,'Output',item.name,'CLs_output.dat')))
+            outset=open(os.path.normpath(os.path.join(dirname,'Output','SAF',item.name,'CLs_output.dat')))
             for line in outset:
                 if counter==1 and '# analysis name' in line:
                     out.write('# dataset name'.ljust(30) + line[2:])

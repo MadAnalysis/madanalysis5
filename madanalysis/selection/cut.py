@@ -129,6 +129,7 @@ class Cut():
     def Display(self):
         logging.getLogger('MA5').info(self.GetStringDisplay())
 
+        
     def GetStringDisplay(self):
         msg = "  * Cut: "
 

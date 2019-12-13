@@ -61,6 +61,8 @@ class JobWriter():
                 return False
         if not os.path.isdir(path+"/Output"):
             return False
+        if not os.path.isdir(path+"/Output/SAF"):
+            return False
         if not os.path.isdir(path+"/Output/Histos"):
             return False
         if not os.path.isdir(path+"/Output/HTML"):
@@ -123,6 +125,10 @@ class JobWriter():
         except:
             logging.getLogger('MA5').error("Impossible to create the folder 'Output'")
             return False
+        try:
+            os.mkdir(path+"/Output/SAF")
+        except:
+            logging.getLogger('MA5').error("Impossible to create the folder 'Output/SAF'")
         try:
             os.mkdir(path+"/Output/HTML")
         except:
@@ -872,9 +878,9 @@ class JobWriter():
         # Getting the dataset name    
         name=InstanceName.Get(dataset.name)
 
-        # Creating Output folder is not defined
-        if not os.path.isdir(self.path+"/Output/"+name):
-            os.mkdir(self.path+"/Output/"+name)
+        # Creating a folder specific to the dataset
+        if not os.path.isdir(self.path+"/Output/SAF/"+name):
+            os.mkdir(self.path+"/Output/SAF/"+name)
 
         # folder where the program is launched
         folder = self.path+'/Build/'

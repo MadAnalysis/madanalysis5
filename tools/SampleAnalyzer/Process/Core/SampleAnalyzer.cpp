@@ -306,17 +306,22 @@ inline MAint32 CreateDir(std::string dirname)
   return 0;
 }
 
+/// Creating the Output directory and its sub-structure
 MAbool SampleAnalyzer::CreateDirectoryStructure()
 {
   // Check if the output directory exists -> if not: create it
   std::string dirname="../Output";
-  if(CreateDir(dirname)==-1) { return false; }
+  if (CreateDir(dirname)==-1) return false;
+
+  // Check if the SAF directory exists -> if not: create it
+  dirname="../Output/SAF";
+  if (CreateDir(dirname)==-1) return false;
 
   // Check whether a directory for the investigated dataset exists -> if not create it
   dirname = cfg_.GetInputFileName();
   size_t pos = dirname.find_last_of('/');
-  if(pos!=std::string::npos) dirname = "../Output/" + dirname.substr(pos+1);
-  else                       dirname = "../Output/" + dirname;
+  if(pos!=std::string::npos) dirname = "../Output/SAF/" + dirname.substr(pos+1);
+  else                       dirname = "../Output/SAF/" + dirname;
   size_t found  = dirname.find(".list");
   if(found!=std::string::npos) dirname.replace(found,5,"");
   if(CreateDir(dirname)==-1) { return false; }
@@ -333,11 +338,12 @@ MAbool SampleAnalyzer::CreateDirectoryStructure()
       if(check==-1) { return false; }
       else          { analyzers_[i]->SetOutputDir( newdirname + "_" + ss.str()); }
     }
+
     // Creating one suybdirectory for the histograms and another one for the cutflow
     if(CreateDir(analyzers_[i]->Output() + "/Histograms")==-1) {  return false; }
     if(CreateDir(analyzers_[i]->Output() + "/Cutflows")==-1) {  return false; }
   }
-
+  
   // Everything is fine
   return true;
 }
@@ -382,11 +388,15 @@ WriterBase* SampleAnalyzer::InitializeWriter(const std::string& name,
   std::string dirname="../Output";
   if(CreateDir(dirname)==-1) { return 0; }
 
+  // Check if the SAF directory exists -> if not: create it
+  dirname="../Output/SAF";
+  if(CreateDir(dirname)==-1) { return 0; }
+
   // Check whether a directory for the investigated dataset exists -> if not create it
   dirname = cfg_.GetInputFileName();
   size_t pos = dirname.find_last_of('/');
-  if(pos!=std::string::npos) dirname = "../Output/" + dirname.substr(pos+1);
-  else                       dirname = "../Output/" + dirname;
+  if(pos!=std::string::npos) dirname = "../Output/SAF/" + dirname.substr(pos+1);
+  else                       dirname = "../Output/SAF/" + dirname;
   size_t found  = dirname.find(".list");
   if(found!=std::string::npos) dirname.replace(found,5,"");
   if(CreateDir(dirname)==-1) { return 0; }
@@ -483,11 +493,15 @@ DetectorBase* SampleAnalyzer::InitializeDetector(
   std::string dirname="../Output";
   if(CreateDir(dirname)==-1) { return 0; }
 
+  // Check if the SAF directory exists -> if not: create it
+  dirname="../SAF";
+  if(CreateDir(dirname)==-1) { return 0; }
+
   // Check whether a directory for the investigated dataset exists -> if not create it
   dirname = cfg_.GetInputFileName();
   size_t pos = dirname.find_last_of('/');
-  if(pos!=std::string::npos) dirname = "../Output/" + dirname.substr(pos+1);
-  else                       dirname = "../Output/" + dirname;
+  if(pos!=std::string::npos) dirname = "../Output/SAF/" + dirname.substr(pos+1);
+  else                       dirname = "../Output/SAF/" + dirname;
   size_t found  = dirname.find(".list");
   if(found!=std::string::npos) dirname.replace(found,5,"");
   if(CreateDir(dirname)==-1) { return 0; }
@@ -752,7 +766,7 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
   if(pos!=std::string::npos) datasetname = datasetname.substr(pos+1);
   size_t found  = datasetname.find(".list");
   if(found!=std::string::npos) datasetname.replace(found,5,"");
-  std::string general = "../Output/" + datasetname + "/" + datasetname + ".saf";
+  std::string general = "../Output/SAF/" + datasetname + "/" + datasetname + ".saf";
   SAFWriter out;
   out.Initialize(&cfg_, general.c_str());
   out.WriteHeader(summary);

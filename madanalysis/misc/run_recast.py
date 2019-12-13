@@ -28,8 +28,6 @@ from madanalysis.configuration.delphes_configuration            import DelphesCo
 from madanalysis.IOinterface.folder_writer                      import FolderWriter
 from madanalysis.IOinterface.job_writer                         import JobWriter
 from madanalysis.IOinterface.library_writer                     import LibraryWriter
-from madanalysis.misc.simplified_likelihood                     import Data
-from madanalysis.misc.simplified_likelihood                     import CLsComputer
 from shell_command                                              import ShellCommand
 from string_tools                                               import StringTools
 import copy
@@ -169,9 +167,9 @@ class RunRecast():
         logging.getLogger('MA5').debug('Loop over the datasets...')
         for item in self.main.datasets:
             if self.detector=="delphesMA5tune":
-                evtfile = self.dirname+'/Output/'+item.name+'/RecoEvents/RecoEvents_v1x1_'+delphescard.replace('.tcl','')+'.root'
+                evtfile = self.dirname+'/Output/SAF/'+item.name+'/RecoEvents/RecoEvents_v1x1_'+delphescard.replace('.tcl','')+'.root'
             elif self.detector=="delphes":
-                evtfile = self.dirname+'/Output/'+item.name+'/RecoEvents/RecoEvents_v1x2_'+delphescard.replace('.tcl','')+'.root'
+                evtfile = self.dirname+'/Output/SAF/'+item.name+'/RecoEvents/RecoEvents_v1x2_'+delphescard.replace('.tcl','')+'.root'
             elif self.detector=="fastjet":
                 return True
 
@@ -444,16 +442,16 @@ class RunRecast():
         self.main.recasting.status="on"
         self.main.fastsim.package="none"
         ## Saving the output
-        if not os.path.isdir(self.dirname+'/Output/'+dataset.name):
-            os.mkdir(self.dirname+'/Output/'+dataset.name)
-        if not os.path.isdir(self.dirname+'/Output/'+dataset.name+'/RecoEvents'):
-            os.mkdir(self.dirname+'/Output/'+dataset.name+'/RecoEvents')
+        if not os.path.isdir(self.dirname+'/Output/SAF/'+dataset.name):
+            os.mkdir(self.dirname+'/Output/SAF/'+dataset.name)
+        if not os.path.isdir(self.dirname+'/Output/SAF/'+dataset.name+'/RecoEvents'):
+            os.mkdir(self.dirname+'/Output/SAF/'+dataset.name+'/RecoEvents')
         if self.detector=="delphesMA5tune":
-            shutil.move(self.dirname+'_FastSimRun/Output/_'+dataset.name+'/RecoEvents0_0/DelphesMA5tuneEvents.root',\
-                self.dirname+'/Output/'+dataset.name+'/RecoEvents/RecoEvents_v1x1_'+card.replace('.tcl','')+'.root')
+            shutil.move(self.dirname+'_FastSimRun/Output/SAF/_'+dataset.name+'/RecoEvents0_0/DelphesMA5tuneEvents.root',\
+                self.dirname+'/Output/SAF/'+dataset.name+'/RecoEvents/RecoEvents_v1x1_'+card.replace('.tcl','')+'.root')
         elif self.detector=="delphes":
-            shutil.move(self.dirname+'_FastSimRun/Output/_'+dataset.name+'/RecoEvents0_0/DelphesEvents.root',\
-                self.dirname+'/Output/'+dataset.name+'/RecoEvents/RecoEvents_v1x2_'+card.replace('.tcl','')+'.root')
+            shutil.move(self.dirname+'_FastSimRun/Output/SAF/_'+dataset.name+'/RecoEvents0_0/DelphesEvents.root',\
+                self.dirname+'/Output/SAF/'+dataset.name+'/RecoEvents/RecoEvents_v1x2_'+card.replace('.tcl','')+'.root')
         ## Cleaning the temporary directory
         if not FolderWriter.RemoveDirectory(os.path.normpath(self.dirname+'_FastSimRun')):
             return False
@@ -619,7 +617,7 @@ class RunRecast():
         infile.write(eventfile)
         infile.close()
         ## cleaning the output directory
-        if not FolderWriter.RemoveDirectory(os.path.normpath(self.pad+'/Output/PADevents')):
+        if not FolderWriter.RemoveDirectory(os.path.normpath(self.pad+'/Output/SAF/PADevents')):
             return False
         ## running
         command = ['./MadAnalysis5job', '../Input/PADevents.list']
@@ -644,9 +642,9 @@ class RunRecast():
         return True
 
     def save_output(self, eventfile, setname, analyses):
-        outfile = self.dirname+'/Output/'+setname+'/'+setname+'.saf'
+        outfile = self.dirname+'/Output/SAF/'+setname+'/'+setname+'.saf'
         if not os.path.isfile(outfile):
-            shutil.move(self.pad+'/Output/PADevents/PADevents.saf',outfile)
+            shutil.move(self.pad+'/Output/SAF/PADevents/PADevents.saf',outfile)
         else:
             inp = open(outfile, 'r')
             out = open(outfile+'.2', 'w')
@@ -672,7 +670,7 @@ class RunRecast():
             out.close()
             shutil.move(outfile+'.2', outfile)
         for analysis in analyses:
-            shutil.move(self.pad+'/Output/PADevents/'+analysis+'_0',self.dirname+'/Output/'+setname+'/'+analysis)
+            shutil.move(self.pad+'/Output/SAF/PADevents/'+analysis+'_0',self.dirname+'/Output/SAF/'+setname+'/'+analysis)
         return True
 
     ################################################
@@ -684,7 +682,6 @@ class RunRecast():
         ET =  self.check_xml_scipy_methods()
         if not ET:
             return False
-
 
         ## Running over all luminosities to extrapolate
         for extrapolated_lumi in ['default']+self.main.recasting.extrapolated_luminosities:
@@ -1095,7 +1092,9 @@ class RunRecast():
             backgrounds.append(regiondata[reg]["nb"])
             observed.append(regiondata[reg]["nobs"])
         # data
+        from madanalysis.misc.simplified_likelihood import Data
         LHdata = Data(observed, backgrounds, covariance, None, nsignal)
+        from madanalysis.misc.simplified_likelihood import CLsComputer
         computer = CLsComputer()
         # calculation and output
         return computer.computeCLs(LHdata, expected=expected)

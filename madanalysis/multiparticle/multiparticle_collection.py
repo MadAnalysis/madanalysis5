@@ -134,3 +134,38 @@ class MultiParticleCollection:
         else:
             return s1 + "/" + s2
 
+
+    def LoadWithSAF(self,ast):
+        # Reseting the multiparticle collection
+        self.Reset()
+        
+        # Getting multiparticles branches
+        multiparticles = ast.GetBranch("multiparticles",1)
+        if multiparticles==None:
+            return
+
+            # Looping over the branches of the tree
+        for key, value in multiparticles.GetBranches().iteritems():
+
+            # Keeping only 'multiparticle' branches
+            if key[0]!='multiparticle':
+                continue
+
+            # Getting the name of the multiparticle (if it exists)
+            name = value.GetParameterToStringWithoutQuotes('name')
+            if name==None:
+                logging.getLogger('MA5').error('multiparticle name is not found in the tree')
+                continue
+
+            # Getting all PIDs
+            tmp=[]
+            for item in value.GetStack():
+                try:
+                    a = int(item)
+                except:
+                    print "ERROR: impossible to convert '"+str(item)+"' to integer value"
+                tmp.append(a)
+            self.Add(name,tmp,forced=False)
+                
+            
+        

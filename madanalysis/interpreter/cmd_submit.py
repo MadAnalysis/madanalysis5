@@ -390,9 +390,9 @@ class CmdSubmit(CmdBase):
         if self.main.recasting.status == "on":
             self.main.recasting.collect_outputs(dirname,self.main.datasets)
             self.logger.info('    -> the results can be found in:') 
-            self.logger.info('       '+ dirname + '/Output/CLs_output_summary.dat')
+            self.logger.info('       '+ dirname + '/Output/SAF/CLs_output_summary.dat')
             for item in self.main.datasets:
-                self.logger.info('       '+ dirname + '/Output/'+ item.name + '/CLs_output.dat')
+                self.logger.info('       '+ dirname + '/Output/SAF/'+ item.name + '/CLs_output.dat')
         else:
             layouter = LayoutWriter(self.main, dirname)
             layouter.WriteLayoutConfig()

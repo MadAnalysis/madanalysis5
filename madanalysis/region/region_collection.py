@@ -115,3 +115,30 @@ class RegionCollection:
         clusteredregions=[list(set(x)) for x in clusteredregions ]
         return clusteredregions
 
+
+    def LoadWithSAF(self,ast):
+        # Reseting the region collection
+        self.Reset()
+        
+        # Getting region branches
+        regions = ast.GetBranch("regions",1)
+        if regions==None:
+            return
+
+        # Looping over the branches of the tree
+        for key, value in regions.GetBranches().iteritems():
+
+            # Keeping only 'region' branches
+            if key[0]!='region':
+                continue
+
+            # Getting the name of the region (if it exists)
+            name = value.GetParameterToStringWithoutQuotes('name')
+            if name==None:
+                logging.getLogger('MA5').error('multiparticle name is not found in the tree')
+                continue
+
+            self.Add(name)
+                
+            
+        
