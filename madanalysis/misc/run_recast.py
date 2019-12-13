@@ -380,35 +380,35 @@ class RunRecast():
             return False
         logging.getLogger('MA5').info("    *******************************************************")
         
-        if not os.path.isdir(self.dirname+'/Output/'+dataset.name):
-            os.mkdir(self.dirname+'/Output/'+dataset.name)
+        if not os.path.isdir(self.dirname+'/Output/SAF/'+dataset.name):
+            os.mkdir(self.dirname+'/Output/SAF/'+dataset.name)
         for analysis in analysislist:
-            if not os.path.isdir(self.dirname+'/Output/'+dataset.name+'/'+analysis):
-                os.mkdir(self.dirname+'/Output/'+dataset.name+'/'+analysis)
-            if not os.path.isdir(self.dirname+'/Output/'+dataset.name+'/'+analysis+'/CutFlows'):
-                os.mkdir(self.dirname+'/Output/'+dataset.name+'/'+analysis+'/Cutflows')
-            if not os.path.isdir(self.dirname+'/Output/'+dataset.name+'/'+analysis+'/Histograms'):
-                os.mkdir(self.dirname+'/Output/'+dataset.name+'/'+analysis+'/Histograms')
-            if not os.path.isdir(self.dirname+'/Output/'+dataset.name+'/'+analysis+'/RecoEvents') and self.main.recasting.store_events :
-                os.mkdir(self.dirname+'/Output/'+dataset.name+'/'+analysis+'/RecoEvents')
-            cutflow_list   = os.listdir(self.dirname+'_SFSRun/Output/_'+ dataset.name+'/'+analysis+'_0/Cutflows')
-            histogram_list = os.listdir(self.dirname+'_SFSRun/Output/_'+ dataset.name+'/'+analysis+'_0/Histograms')
+            if not os.path.isdir(self.dirname+'/Output/SAF/'+dataset.name+'/'+analysis):
+                os.mkdir(self.dirname+'/Output/SAF/'+dataset.name+'/'+analysis)
+            if not os.path.isdir(self.dirname+'/Output/SAF/'+dataset.name+'/'+analysis+'/CutFlows'):
+                os.mkdir(self.dirname+'/Output/SAF/'+dataset.name+'/'+analysis+'/Cutflows')
+            if not os.path.isdir(self.dirname+'/Output/SAF/'+dataset.name+'/'+analysis+'/Histograms'):
+                os.mkdir(self.dirname+'/Output/SAF/'+dataset.name+'/'+analysis+'/Histograms')
+            if not os.path.isdir(self.dirname+'/Output/SAF/'+dataset.name+'/'+analysis+'/RecoEvents') and self.main.recasting.store_events :
+                os.mkdir(self.dirname+'/Output/SAF/'+dataset.name+'/'+analysis+'/RecoEvents')
+            cutflow_list   = os.listdir(self.dirname+'_SFSRun/Output/SAF/_'+ dataset.name+'/'+analysis+'_0/Cutflows')
+            histogram_list = os.listdir(self.dirname+'_SFSRun/Output/SAF/_'+ dataset.name+'/'+analysis+'_0/Histograms')
             for cutflow in cutflow_list:
-                shutil.move(self.dirname+'_SFSRun/Output/_'+\
+                shutil.move(self.dirname+'_SFSRun/Output/SAF/_'+\
                                       dataset.name+'/'+analysis+'_0/Cutflows/'+cutflow,\
-                                      self.dirname+'/Output/'+dataset.name+'/'+\
+                                      self.dirname+'/Output/SAF/'+dataset.name+'/'+\
                                       analysis+'/Cutflows/'+cutflow)
             for histos in histogram_list:
-                shutil.move(self.dirname+'_SFSRun/Output/_'+\
+                shutil.move(self.dirname+'_SFSRun/Output/SAF/_'+\
                                       dataset.name+'/'+analysis+'_0/Histograms/'+histos,\
-                                      self.dirname+'/Output/'+dataset.name+'/'+\
+                                      self.dirname+'/Output/SAF/'+dataset.name+'/'+\
                                       analysis+'/Histograms/'+histos)
             if self.main.recasting.store_events:
-                event_list     = os.listdir(self.dirname+'_SFSRun/Output/_'+ dataset.name+'/lheEvents0_0/')
+                event_list     = os.listdir(self.dirname+'_SFSRun/Output/SAF/_'+ dataset.name+'/lheEvents0_0/')
                 if len(event_list) > 0:
-                    shutil.move(self.dirname+'_SFSRun/Output/_'+dataset.name+\
+                    shutil.move(self.dirname+'_SFSRun/Output/SAF/_'+dataset.name+\
                                 '/lheEvents0_0/'+event_list[0], self.dirname+\
-                                '/Output/'+dataset.name+'/'+analysis+'/RecoEvents/'+\
+                                '/Output/SAF/'+dataset.name+'/'+analysis+'/RecoEvents/'+\
                                 event_list[0])
 
         if not self.main.developer_mode:
@@ -507,7 +507,7 @@ class RunRecast():
                     self.main.forced=self.forced
                     return False
                 ## Getting the file name corresponding to the events
-                eventfile = os.path.normpath(self.dirname + '/Output/' + myset.name + '/RecoEvents/RecoEvents_' +\
+                eventfile = os.path.normpath(self.dirname + '/Output/SAF/' + myset.name + '/RecoEvents/RecoEvents_' +\
                        version.replace('.','x')+'_' + card.replace('.tcl','')+'.root')
                 if not os.path.isfile(eventfile):
                     logging.getLogger('MA5').error('The file called '+eventfile+' is not found...')
@@ -689,9 +689,9 @@ class RunRecast():
               str(extrapolated_lumi))
             ## Preparing the output file and checking whether a cross section has been defined
             if extrapolated_lumi == 'default':
-                outfile = self.dirname+'/Output/'+dataset.name+'/CLs_output.dat'
+                outfile = self.dirname+'/Output/SAF/'+dataset.name+'/CLs_output.dat'
             else:
-                outfile = self.dirname+'/Output/'+dataset.name+'/CLs_output_lumi_{:.3f}.dat'.format(extrapolated_lumi)
+                outfile = self.dirname+'/Output/SAF/'+dataset.name+'/CLs_output_lumi_{:.3f}.dat'.format(extrapolated_lumi)
             if os.path.isfile(outfile):
                 mysummary=open(outfile,'a')
             else:
@@ -711,7 +711,7 @@ class RunRecast():
                     return False
 
                 ## Reading the cutflow information
-                regiondata=self.read_cutflows(self.dirname+'/Output/'+dataset.name+'/'+analysis+'/Cutflows',regions,regiondata)
+                regiondata=self.read_cutflows(self.dirname+'/Output/SAF/'+dataset.name+'/'+analysis+'/Cutflows',regions,regiondata)
                 if regiondata==-1:
                     logging.getLogger('MA5').warning('Info file for '+analysis+' corrupted. Skipping the CLs calculation.')
                     return False

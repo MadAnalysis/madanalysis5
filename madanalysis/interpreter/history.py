@@ -76,3 +76,13 @@ class History():
         file.close()
 
         return True
+
+
+    def __len__(self):
+        return len(self.history)
+
+
+    def __getitem__(self, key):
+        return self.history[key]
+
+ 

@@ -96,6 +96,9 @@ class ArchitectureInfo:
         self.fastjet_bin_path=""
         self.fastjet_lib_paths=[]
 
+        # Flags for validations tests
+        self.ultra_strict_compilation = False
+
 
     def dump(self):
         for item in self.__dict__:
