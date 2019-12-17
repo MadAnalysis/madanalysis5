@@ -42,13 +42,16 @@ xdr_istream& xdr_istream::operator>>(std::string &s)
 
   if (eof()) return (*this);
 
-  MAchar line[len];
+  MAchar* line = new MAchar[len];
   sb_->sgetn(line, len);
   s=std::string(line,line+len);
 
   size_t pad = (4-len)&3; //change 4-len&3
-  MAchar dummy[pad];
+  MAchar* dummy = new MAchar[pad];
   sb_->sgetn(dummy,pad);
+
+  delete line;
+  delete dummy;
   return *this;
 }
 

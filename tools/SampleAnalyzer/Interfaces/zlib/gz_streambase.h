@@ -157,7 +157,8 @@ class gz_streambase : virtual public std::ios
 
 };
 
-};
+
+}
 
 
 #endif

@@ -95,6 +95,6 @@ class TreeReaderBase
 
 };
 
-};
+}
 
 #endif

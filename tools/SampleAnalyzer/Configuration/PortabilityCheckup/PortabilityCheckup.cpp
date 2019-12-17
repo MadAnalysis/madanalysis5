@@ -126,11 +126,11 @@ int main()
 
   // C++ integer
   std::cout << "cross-check of C++ hierarchy for int   = ";
-  if (1               <= data.char_size && 
+  if (1               <= data.char_size  && 
       data.char_size  <= data.short_size && 
-      data.short_size <= data.int_size && 
-      data.int_size   <= data.long_size && 
-      data.long_size  <= data.llong_size)
+      data.short_size <= data.int_size   && 
+      data.int_size   <= data.long_size  && 
+      data.long_size  <= data.llong_size    )
   {
     std::cout << "OK" << std::endl;
   }

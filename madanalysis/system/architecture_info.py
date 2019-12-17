@@ -97,7 +97,8 @@ class ArchitectureInfo:
         self.fastjet_lib_paths=[]
 
         # Flags for validations tests
-        self.ultra_strict_compilation = False
+        # 0 = normal, Other possible values: 1, 2, 3 and 4 (4=ultra strict compilation)
+        self.compilation_severity = 0
 
 
     def dump(self):
