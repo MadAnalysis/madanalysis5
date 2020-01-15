@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+173           (2020/01/15) fuks:    Fixing the covariance treatment 
+
 168           (2019/12/13) econte:  bug reports, SAF in output 
 
 167           (2019/12/10) fuks:    Fixing bugs in the SFS and the covariance module 

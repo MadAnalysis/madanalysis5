@@ -4,7 +4,7 @@
 .. module:: simplified_likelihood
    :synopsis: Code that implements the simplified likelihoods as presented
               in CMS-NOTE-2017-001, see https://cds.cern.ch/record/2242860.
-              In collaboration with Andy Buckley, Sylvain Fichet and Nickolas Wardle.
+              Copied from the SModelS v1.2 simplifiedLikelihood.py module (arXiv:1811.10624)
               Additional developments will be presented in a future publication.
              
 
@@ -14,6 +14,7 @@
 
 from __future__ import print_function
 from scipy import stats, optimize, integrate, special
+from scipy import __version__ as scipy_version
 from numpy  import sqrt, exp, log, sign, array, ndarray
 from functools import reduce
 import numpy as NP
@@ -72,6 +73,10 @@ class Data:
         self.name = name
         self.deltas_rel = deltas_rel
         self._computeABC()
+        # Checking the scip version
+        v = float(scipy_version.split(".")[0])
+        if v < 1.0:
+            logger.warning("You're using an old version of scipy. This might impact the global CLs calculation.")
 
     def totalCovariance ( self, nsig ):
         """ get the total covariance matrix, taking into account
@@ -240,7 +245,7 @@ class Data:
         :param mu: Total number of signal events summed over all datasets.
         """
         
-        return (mu*self.signal_rel)
+        return (mu*self.nsignal)
 
 class LikelihoodComputer:
 
@@ -825,7 +830,17 @@ class CLsComputer:
             except ValueError as e: ## it could still be that the signs arent opposite
                 # in that case, try again
                 pass
-                
+
+    """
+    .. method:: computeCLs
+    :synopsis: Method that implements CLs calculation from simplified likelihoods as presented
+                in CMS-NOTE-2017-001. It basically consist in fixing mu to 1.0 instead of varying it
+                like it is done in the previous ulSigma method
+
+    .. methodauthor:: Gael Alguero <gael.alguero@lpsc.in2p3.fr>
+
+    """
+
     def computeCLs(self, model, marginalize=False, toys=None, expected=False ):
         """ exclusion confidence level obtained from the defined Data (using the signal prediction
             for each signal regio/dataset), by using
@@ -862,31 +877,29 @@ class CLsComputer:
         mu_hatA = compA.findMuHat(aModel.nsignal)
         # if mu_hat < 0.:
             # mu_hat = 0.
-        # L(mu = 0, theta(0))
-        nll0 = computer.likelihood(0.,
-                                     marginalize=marginalize,
-                                     nll=True)
+        # -log L(mu_hat, theta_hat(mu_hat))
+        nll0 = computer.likelihood(model.signals(mu_hat),
+                                        marginalize=marginalize,
+                                        nll=True)
         if NP.isinf(nll0) and marginalize==False:
             logger.warning("nll is infinite in profiling! we switch to marginalization, but only for this one!" )
             marginalize=True
-            nll0 = computer.likelihood(0.,
-                                         marginalize=True,
-                                         nll=True)
+            nll0 = computer.likelihood(model.signals(mu_hat),
+                                            marginalize=True,
+                                            nll=True)
             if NP.isinf(nll0):
                 logger.warning("marginalization didnt help either. switch back.")
                 marginalize=False
             else:
                 logger.warning("marginalization worked.")
-        # L_A(mu = 0, theta(0))
-        nll0A = compA.likelihood(0.,
-                                   marginalize=marginalize,
-                                   nll=True)
+        nll0A = compA.likelihood(aModel.signals(mu_hatA),
+                                    marginalize=marginalize,
+                                    nll=True)
         
         # nsig = model.signals(1.)
         computer.ntot = model.backgrounds + model.nsignal
-        # L(mu = 1, theta(1))
+        # -log L(mu = 1, theta(1))
         nll = computer.likelihood(model.nsignal, marginalize=marginalize, nll=True )
-        # L_A(mu = 1, theta(1))
         nllA = compA.likelihood(model.nsignal, marginalize=marginalize, nll=True )
         qmu =  2*( nll - nll0 )
         if qmu<0.: qmu=0.

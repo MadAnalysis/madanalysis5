@@ -700,15 +700,19 @@ class RunRecast():
 
             ## running over all analysis
             for analysis in analyses:
+                # Re-initializing the covariance switch for backward compatibility
+                self.cov_switch = False
                 # Getting the info file information (possibly rescaled)
-                lumi, regions, regiondata, covariance = self.parse_info_file(ET,analysis,extrapolated_lumi)
+                lumi, regions, regiondata, covariance, cov_regions = self.parse_info_file(ET,analysis,extrapolated_lumi)
                 logging.getLogger('MA5').debug('lumi = ' + str(lumi));
-                logging.getLogger('MA5').debug('refgions = ' + str(regions));
+                logging.getLogger('MA5').debug('regions = ' + str(regions));
                 logging.getLogger('MA5').debug('regiondata = ' + str(regiondata));
                 logging.getLogger('MA5').debug('cov = '+ str(covariance));
                 if lumi==-1 or regions==-1 or regiondata==-1:
                     logging.getLogger('MA5').warning('Info file for '+analysis+' missing or corrupted. Skipping the CLs calculation.')
                     return False
+                if self.cov_switch:
+                    logging.getLogger('MA5').info('     Performing simplified likelihood combination on '+regiondata["covsubset"]+' for '+analysis)
 
                 ## Reading the cutflow information
                 regiondata=self.read_cutflows(self.dirname+'/Output/SAF/'+dataset.name+'/'+analysis+'/Cutflows',regions,regiondata)
@@ -718,16 +722,16 @@ class RunRecast():
 
                 ## Sanity check for the covariance information
                 if self.cov_switch and covariance==-1:
-                    logging.getLogger('MA5').warning('Corrupted covariance data in the '+analysis+' info file. Skipping the CLs calculation.')
-                    return False
+                    logging.getLogger('MA5').warning('Corrupted covariance data in the '+analysis+' info file. Skipping the global CLs calculation.')
+                    self.cov_switch = False
 
                 ## Performing the CLS calculation
                 regiondata=self.extract_sig_cls(regiondata,regions,lumi,"exp")
                 if self.cov_switch:
-                    regiondata=self.extract_sig_lhcls(regiondata,regions,lumi,covariance,"exp")
+                    regiondata=self.extract_sig_lhcls(regiondata,cov_regions,lumi,covariance,"exp")
                 if extrapolated_lumi=='default':
                     if self.cov_switch:
-                        regiondata=self.extract_sig_lhcls(regiondata,regions,lumi,covariance,"obs")
+                        regiondata=self.extract_sig_lhcls(regiondata,cov_regions,lumi,covariance,"obs")
                     else:
                         regiondata=self.extract_sig_cls(regiondata,regions,lumi,"obs")
                 else:
@@ -736,7 +740,7 @@ class RunRecast():
                 xsflag=True
                 if dataset.xsection > 0:
                     xsflag=False
-                    regiondata=self.extract_cls(regiondata,regions,dataset.xsection,lumi,covariance)
+                    regiondata=self.extract_cls(regiondata,regions,cov_regions,dataset.xsection,lumi,covariance)
 
                 ## Uncertainties on the rates
                 Error_dict = {}
@@ -777,7 +781,7 @@ class RunRecast():
                                 regiondata_errors[error_key] = self.extract_cls(regiondata_errors[error_key],regions,varied_xsec,lumi,covariance)
 
                 ## writing the output file
-                self.write_cls_output(analysis, regions, regiondata, regiondata_errors, mysummary, xsflag, lumi)
+                self.write_cls_output(analysis, regions, cov_regions, regiondata, regiondata_errors, mysummary, xsflag, lumi)
                 mysummary.write('\n')
 
             ## Closing the output file
@@ -807,7 +811,7 @@ class RunRecast():
     def parse_info_file(self, etree, analysis, extrapolated_lumi):
         ## Is file existing?
         if not os.path.isfile(self.pad+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.info'):
-            return -1, -1, -1, -1
+            return -1,-1, -1, -1, -1
         ## Getting the XML information
         try:
             info_input = open(self.pad+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.info')
@@ -816,7 +820,7 @@ class RunRecast():
             results = self.header_info_file(info_tree,analysis,extrapolated_lumi)
             return results
         except:
-            return -1, -1, -1, -1
+            return -1,-1, -1, -1, -1
 
     def fix_pileup(self,filename):
         #x 
@@ -867,22 +871,29 @@ class RunRecast():
 
         return True
 
+
     def header_info_file(self, etree, analysis, extrapolated_lumi):
         logging.getLogger('MA5').debug('Reading info from the file related to '+analysis + '...')
         ## checking the header of the file
         info_root = etree.getroot()
         if info_root.tag != "analysis":
             logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): <analysis> tag.')
-            return -1,-1,-1,-1
+            return -1,-1,-1,-1,-1
         if info_root.attrib["id"].lower() != analysis.lower():
             logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): <analysis id> tag.')
-            return -1,-1,-1,-1
+            return -1,-1,-1,-1,-1
         ## extracting the information
         lumi         = 0
         lumi_scaling = 1.
         regions      = []
+        cov_regions  = []
         regiondata   = {}
         covariance   = []
+        # Getting the description of the subset of SRs having covariances
+        # Now the cov_switch is activated here
+        if "cov_subset" in info_root.attrib:
+            self.cov_switch = True
+            regiondata["covsubset"] = info_root.attrib["cov_subset"]
         ## firs twe need to get the number of regions
         for child in info_root:
             # Luminosity
@@ -894,22 +905,22 @@ class RunRecast():
                         lumi=lumi*lumi_scaling
                 except:
                     logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): ill-defined lumi')
-                    return -1,-1,-1,-1
+                    return -1,-1,-1,-1,-1
                 logging.getLogger('MA5').debug('The luminosity of ' + analysis + ' is ' + str(lumi) + ' fb-1.')
             # regions
             if child.tag == "region" and ("type" not in child.attrib or child.attrib["type"] == "signal"):
                 if "id" not in child.attrib:
                     logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): <region id> tag.')
-                    return -1,-1,-1,-1
+                    return 0-1,-1,-1,-1,-1
                 if child.attrib["id"] in regions:
                     logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): doubly-defined region.')
-                    return -1,-1,-1,-1
+                    return -1,-1,-1,-1,-1
                 regions.append(child.attrib["id"])
                 # If one covariance entry is found, the covariance switch is turned on
                 if "covariance" in [rchild.tag for rchild in child]:
-                    self.cov_switch = True
+                    cov_regions.append(child.attrib["id"])
         if self.cov_switch:
-            covariance  = [[0. for i in range(len(regions))] for j in range(len(regions))]
+            covariance  = [[0. for i in range(len(cov_regions))] for j in range(len(cov_regions))]
         ## getting the region information
         for child in info_root:
             if child.tag == "region" and ("type" not in child.attrib or child.attrib["type"] == "signal"):
@@ -918,16 +929,12 @@ class RunRecast():
                 deltanb = -1
                 syst    = -1
                 stat    = -1
-                # Checking if each region contains at least one covariance data
-                if self.cov_switch and "covariance" not in [rchild.tag for rchild in child]:
-                    logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): missing covariance information.')
-                    return -1, -1, -1, -1
                 for rchild in child:
                     try:
                         myval=float(rchild.text)
                     except:
                         logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): region data ill-defined.')
-                        return -1,-1,-1,-1
+                        return -1,-1,-1,-1,-1
                     if rchild.tag=="nobs":
                         nobs = myval
                     elif rchild.tag=="nb":
@@ -940,13 +947,13 @@ class RunRecast():
                         stat = myval
                     elif rchild.tag=="covariance":
                         if self.cov_switch:
-                            i = regions.index(child.attrib["id"])
+                            i = cov_regions.index(child.attrib["id"])
                             region = rchild.attrib["region"]
-                            if region not in regions:
+                            if region not in cov_regions:
                                 logging.getLogger('MA5').warning('Invalid covariance information (info file for ' + analysis+ \
                                     '): unknown region (' + region +') ignored');
                             else:
-                                j = regions.index(rchild.attrib["region"])
+                                j = cov_regions.index(rchild.attrib["region"])
                                 if self.main.recasting.error_extrapolation=='sqrt':
                                     myval *= lumi_scaling
                                 else:
@@ -954,7 +961,7 @@ class RunRecast():
                                 covariance[i][j] = myval
                     else:
                         logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): unknown region subtag.')
-                        return -1,-1,-1,-1
+                        return -1,-1,-1,-1,-1
                 if syst == -1 and stat == -1:
                     err_scale = lumi_scaling
                     if self.main.recasting.error_extrapolation=='sqrt':
@@ -969,7 +976,7 @@ class RunRecast():
                 regiondata[child.attrib["id"]] = { "nobs":nobs*lumi_scaling, "nb":nb*lumi_scaling, "deltanb":deltanb}
         if covariance==[]:
             covariance=-1;
-        return lumi, regions, regiondata, covariance
+        return lumi, regions, regiondata, covariance, cov_regions
 
     def write_cls_header(self, xs, out):
             if xs <=0:
@@ -1043,7 +1050,7 @@ class RunRecast():
             regiondata[reg]["Nf"]=Nf
         return regiondata
 
-    def extract_cls(self,regiondata,regions,xsection,lumi,covariance):
+    def extract_cls(self,regiondata,regions,cov_regions,xsection,lumi,covariance):
         logging.getLogger('MA5').debug('Compute CLs...')
         ## computing fi a region belongs to the best expected ones, and derive the CLs in all cases
         bestreg=[]
@@ -1071,15 +1078,16 @@ class RunRecast():
             else:
                 regiondata[reg]["best"]=0
         if self.cov_switch:
-            if all(s <= 0. for s in [regiondata[reg]["Nf"] for reg in regions]):
+            if all(s <= 0. for s in [regiondata[reg]["Nf"] for reg in cov_regions]):
                 regiondata["globalCLs"]=0.
             else:
-                regiondata["globalCLs"]=self.process_likelihood(regiondata,regions,xsection,lumi,covariance)
+                regiondata["globalCLs"]=self.slhCLs(regiondata,cov_regions,xsection,lumi,covariance)
         return regiondata
 
 
-    def process_likelihood(self,regiondata,regions,xsection,lumi,covariance,expected=False):
-        """ Compute a global CLs combining the different region yields by using a simplified
+    def slhCLs(self,regiondata,cov_regions,xsection,lumi,covariance,expected=False):
+        """ (slh for simplified likelihood)
+            Compute a global CLs combining the different region yields by using a simplified
             likelihood method (see CMS-NOTE-2017-001 for more information). It relies on the
             simplifiedLikelihood.py code designed by Wolfgang Waltenberger. The method
             returns the computed CLs value. """
@@ -1087,7 +1095,7 @@ class RunRecast():
         backgrounds = []
         nsignal     = []
         # Collect the input data necessary for the simplified_likelyhood.py method
-        for i_reg, reg in enumerate(regions):
+        for reg in cov_regions:
             nsignal.append(xsection*lumi*1000.*regiondata[reg]["Nf"]/regiondata[reg]["N0"])
             backgrounds.append(regiondata[reg]["nb"])
             observed.append(regiondata[reg]["nobs"])
@@ -1145,9 +1153,9 @@ class RunRecast():
         return regiondata
 
     # Calculating the upper limits on sigma with simplified likelihood
-    def extract_sig_lhcls(self,regiondata,regions,lumi,covariance,tag):
+    def extract_sig_lhcls(self,regiondata,cov_regions,lumi,covariance,tag):
         logging.getLogger('MA5').debug('Compute signal CL...')
-        if all(s <= 0. for s in [regiondata[reg]["Nf"] for reg in regions]):
+        if all(s <= 0. for s in [regiondata[reg]["Nf"] for reg in cov_regions]):
             regiondata["lhs95obs"]= "-1"
             regiondata["lhs95exp"]= "-1"
             return regiondata
@@ -1156,13 +1164,13 @@ class RunRecast():
         elif tag=="exp":
             expected = True
         def sig95(xsection):
-            return self.process_likelihood(regiondata,regions,xsection,lumi,covariance,expected)-0.95
+            return self.slhCLs(regiondata,cov_regions,xsection,lumi,covariance,expected)-0.95
         low = 1.
         hig = 1.
-        while self.process_likelihood(regiondata,regions,low,lumi,covariance,expected)>0.95:
+        while self.slhCLs(regiondata,cov_regions,low,lumi,covariance,expected)>0.95:
             logging.getLogger('MA5').debug('lower bound = ' + str(low))
             low  =  low*0.1
-        while self.process_likelihood(regiondata,regions,hig,lumi,covariance,expected)<0.95:
+        while self.slhCLs(regiondata,cov_regions,hig,lumi,covariance,expected)<0.95:
             logging.getLogger('MA5').debug('upper bound = ' + str(hig))
             hig  =  hig*10.
         try:
@@ -1178,7 +1186,7 @@ class RunRecast():
         return regiondata
 
 
-    def write_cls_output(self, analysis, regions, regiondata, errordata, summary, xsflag, lumi):
+    def write_cls_output(self, analysis, regions, cov_regions, regiondata, errordata, summary, xsflag, lumi):
         logging.getLogger('MA5').debug('Write CLs...')
         for reg in regions:
             eff    = (regiondata[reg]["Nf"] / regiondata[reg]["N0"])
@@ -1237,12 +1245,10 @@ class RunRecast():
         # Adding the global CLs from simplified likelihood
         if self.cov_switch:
             myxsexp = regiondata["lhs95exp"]
-            if "lhs95obs" in regiondata[reg].keys():
-                myxsobs = regiondata[reg]["lhs95obs"]
-            else:
-                myxsobs = "-1"
+            myxsobs = regiondata["lhs95obs"]
             myglobalcls = "%.4f" % regiondata["globalCLs"]
-            summary.write(analysis.ljust(30,' ') + "GlobalCLs".ljust(50,' ') + ''.ljust(10, ' ') + myxsexp.ljust(15,' ') + \
+            description = "Simplified likelihood CLs for "+regiondata["covsubset"]
+            summary.write(analysis.ljust(30,' ') + description.ljust(50,' ') + ''.ljust(10, ' ') + myxsexp.ljust(15,' ') + \
                myxsobs.ljust(15,' ') + myglobalcls.ljust(7, ' ') + '   ||    \n')
 
 
