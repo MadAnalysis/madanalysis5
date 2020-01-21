@@ -45,7 +45,8 @@ class InstallPad:
         self.ncores      = 1
         self.files= {
           "pad.dat"    : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/pad2.dat",
-          "bib_pad.dat": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/bib_pad2.dat"
+          "bib_pad.dat": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/bib_pad2.dat",
+          "json_pad.dat":"http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/json_pad.dat"
         }
         if padname=='PADForMA5tune':
             self.files  = {
@@ -61,6 +62,7 @@ class InstallPad:
         self.analysis_files = []
         self.pileup_files   = []
         self.delphes_cards  = []
+        self.json_cards     = []
 
 
     def Detect(self):
@@ -160,6 +162,16 @@ class InstallPad:
         if not InstallService.wget(self.files,logname,self.downloaddir):
             return False
 
+       # Json information for pyhf
+        json_dictionary    = {}
+        logging.getLogger('MA5').debug(" ** Getting the list of pyhf-cpompatible analyses in " + self.downloaddir+"/json_pad.dat")
+        json_input = open(os.path.join(self.downloaddir,'json_pad.dat'));
+        for line in json_input:
+            if len(line.strip())==0 or line.strip().startswith('#'):
+                continue;
+            json_dictionary[line.strip().split('|')[0].strip()] = line.strip().split('|')[1].split();
+        json_input.close();
+
         # Getting the analysis one by one (and creating first skeleton analyses for each of them)
         logging.getLogger('MA5').debug('Reading the analysis list in ' + \
           os.path.join(self.downloaddir,self.padname.replace('For','').lower()+'.dat'))
@@ -221,7 +233,13 @@ class InstallPad:
                         files[new_analysis+'.'+extension] = os.path.join(url,analysis+'.'+extension)
                     self.analysis_files.append(new_analysis+'.'+extension)
                 analysis_info[new_analysis] = dscrptn
-            # Preparing to dnwload the delphes card
+                ## Preparing to downloading the necessary json files
+                if analysis in json_dictionary.keys():
+                    for json in json_dictionary[analysis]:
+                        files[new_analysis+'_'+json+'.json'] = os.path.join(url,new_analysis+'_'+json+'.json')
+                        self.json_cards.append(new_analysis+'_'+json+'.json')
+                        self.analysis_files.append(new_analysis+'_'+json+'.json')
+            # Preparing to download the delphes card
             detector = "delphes"
             if self.padname == "PADForSFS":
                 detector = "MA5-SFS"
@@ -307,6 +325,10 @@ class InstallPad:
                         f.seek(0, 0)
                         f.truncate()
                         f.write(content.replace('#include','#include \"SampleAnalyzer/Interfaces/root/RootMainHeaders.h\"\n#include'))
+
+        # json files fopr pyhf
+        for json in self.json_cards:
+            shutil.copy(os.path.join(self.downloaddir,json), self.PADdir)
 
         # the delphes cards
         for myfile in self.delphes_cards:

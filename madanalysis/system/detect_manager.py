@@ -100,6 +100,9 @@ class DetectManager():
         elif package=='numpy':
             from madanalysis.system.detect_numpy import DetectNumpy
             checker=DetectNumpy(self.archi_info, self.user_info, self.session_info, self.debug)
+        elif package=='pyhf':
+            from madanalysis.system.detect_pyhf import Detectpyhf
+            checker=Detectpyhf(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='pdflatex':
             from madanalysis.system.detect_pdflatex import DetectPdflatex
             checker=DetectPdflatex(self.archi_info, self.user_info, self.session_info, self.debug)

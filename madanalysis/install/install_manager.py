@@ -78,6 +78,9 @@ class InstallManager():
                 self.logger.warning('the package "' + rawpackage + '" cannot be installed without root ' +\
                     'and scipy; installation skipped')
                 return True
+        elif package=='pyhf':
+            from madanalysis.install.install_pyhf import Installpyhf
+            installer=Installpyhf(self.main)
         else:
             self.logger.error('the package "'+rawpackage+'" is unknown')
             return False

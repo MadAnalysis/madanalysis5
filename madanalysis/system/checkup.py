@@ -338,6 +338,8 @@ class CheckUp():
             return False
         if not self.checker.Execute('padsfs'):
             return False
+        if not self.checker.Execute('pyhf'):
+            return False
         return True
 
 

@@ -148,6 +148,8 @@ class CmdInstall(CmdBase):
                 return True
         elif args[0]=='PADForSFS':
             return installer.Execute('PADForSFS')
+        elif args[0]=='pyhf':
+            return installer.Execute('pyhf')
         else:
             self.logger.error("the syntax is not correct.")
             self.help()
@@ -169,7 +171,8 @@ class CmdInstall(CmdBase):
             return []
         else:
             output = ["samples","zlib","fastjet", "delphes", "delphesMA5tune",\
-                "gnuplot", "matplotlib", "root" , "numpy", "PAD", "PADForMA5tune", "PADForSFS"]
+                "gnuplot", "matplotlib", "root" , "numpy", "PAD", "PADForMA5tune",\
+                "PADForSFS", "pyhf"]
             return self.finalize_complete(text,output)
 
 

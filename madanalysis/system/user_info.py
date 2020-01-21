@@ -41,6 +41,9 @@ class UserInfo:
         # SciPy
         self.scipy_veto = None
 
+        # pyhf
+        self.pyhf_veto = None
+
         # Delphes
         self.delphes_veto     = None
         self.delphes_includes = None
@@ -190,6 +193,10 @@ class UserInfo:
         # Scipy
         elif   option=='scipy_veto':
             self.scipy_veto=self.ConvertToBool(option,value,filename)
+
+        # pyhf
+        elif   option=='pyhf_veto':
+            self.pyhf_veto=self.ConvertToBool(option,value,filename)
 
         # Delphes
         elif option=='delphes_veto':

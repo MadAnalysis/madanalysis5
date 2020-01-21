@@ -5,8 +5,6 @@
    :synopsis: Code that implements the simplified likelihoods as presented
               in CMS-NOTE-2017-001, see https://cds.cern.ch/record/2242860.
               Copied from the SModelS v1.2 simplifiedLikelihood.py module (arXiv:1811.10624)
-              Additional developments will be presented in a future publication.
-             
 
 .. moduleauthor:: Wolfgang Waltenberger <wolfgang.waltenberger@gmail.com>
 
