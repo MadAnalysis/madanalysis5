@@ -136,6 +136,17 @@ class HistFactory(object):
         return HF
 
 
+def get_HFID(file,SRname):
+    if os.path.isfile(file):
+        with open(file,'r') as json_file:
+            HF = json.load(json_file)
+    else:
+        return False
+    for ch in HF['channels']:
+        if ch['name'] == SRname:
+            return HF['channels'].index(ch)
+    return False
+
 
 class HF_Background(HistFactory):
     def __init__(self, pyhf_config, expected=False):

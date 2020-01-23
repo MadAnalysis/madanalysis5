@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+175           (2020/01/23) fuks:    Fixing bugs in the pyhf interface (+ fine-tuning) 
+
 174           (2020/01/21) fuks:    Adding the PYHF interface + fixing a small bug in the covariance 
                                    routines 
 
