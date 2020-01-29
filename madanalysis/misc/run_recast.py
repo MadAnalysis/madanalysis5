@@ -1049,11 +1049,12 @@ class RunRecast():
                                         file = os.path.join(pyhf_config[likelihood_profile]['path'],
                                                             pyhf_config[likelihood_profile]['name'])
                                         ID = get_HFID(file, channel.attrib['name'])
-                                        if ID != False:
+                                        if type(ID) != str:
                                             pyhf_config[likelihood_profile]['SR'][channel.attrib['name']]['channels'] = str(ID)
                                         else:
-                                            logging.getLogger('MA5').warning('Invalid or corrupted info file')
-                                            logging.getLogger('MA5').warning('Please check '+channel.attrib['name'])
+                                            logging.getLogger('MA5').warning(ID)
+                                            logging.getLogger('MA5').warning('Please check '+likelihood_profile+\
+                                                             'and/or '+channel.attrib['name'])
                                             to_remove.append(likelihood_profile)
 
         # validate
@@ -1082,16 +1083,16 @@ class RunRecast():
     def write_cls_header(self, xs, out):
         if xs <=0:
             logging.getLogger('MA5').info('   Signal xsection not defined. The 95% excluded xsection will be calculated.')
-            out.write("# analysis name".ljust(30, ' ') + "signal region".ljust(50,' ') + \
+            out.write("# analysis name".ljust(30, ' ') + "signal region".ljust(60,' ') + \
              'sig95(exp)'.ljust(15, ' ') + 'sig95(obs)'.ljust(10, ' ') +'        ||    ' + 'efficiency'.ljust(15,' ') +\
              "stat".ljust(15,' '));
             for i in range(0,len(self.main.recasting.systematics)):
                 out.write(("syst" + str(i+1) + "(" + str(self.main.recasting.systematics[i][0]*100) + "%)").ljust(15," "))
             out.write('\n');
         else:
-            out.write("# analysis name".ljust(30, ' ') + "signal region".ljust(50,' ') + \
+            out.write("# analysis name".ljust(30, ' ') + "signal region".ljust(60,' ') + \
              "best?".ljust(10,' ') + 'sig95(exp)'.ljust(15,' ') + 'sig95(obs)'.ljust(15, ' ') +\
-             'CLs'.ljust( 7,' ') + ' ||    ' + 'efficiency'.ljust(15,' ') +\
+             '1-CLs'.ljust( 5,' ') + ' ||    ' + 'efficiency'.ljust(15,' ') +\
              "stat".ljust(15,' '));
             for i in range(0,len(self.main.recasting.systematics)):
                 out.write(("syst" + str(i+1) + "(" + str(self.main.recasting.systematics[i][0]*100) + "%)").ljust(15," "))
@@ -1397,7 +1398,7 @@ class RunRecast():
                 myxsobs = "-1"
             if not xsflag:
                 mycls  = "%.4f" % regiondata[reg]["CLs"]
-                summary.write(analysis.ljust(30,' ') + reg.ljust(50,' ') +\
+                summary.write(analysis.ljust(30,' ') + reg.ljust(60,' ') +\
                    str(regiondata[reg]["best"]).ljust(10, ' ') +\
                    myxsexp.ljust(15,' ') + myxsobs.ljust(15,' ') + mycls.ljust( 7,' ') + \
                    '   ||    ' + myeff.ljust(15,' ') + mystat.ljust(15,' '));
@@ -1422,7 +1423,7 @@ class RunRecast():
                         summary.write(''.ljust(90,' ') + '+{:.1f}% -{:.1f}% syst:'.format(up*100.,dn*100.).ljust(25,' ') + '[' + \
                           ("%.4f" % min(band)) + ', ' + ("%.4f" % max(band)) + ']\n')
             else:
-                summary.write(analysis.ljust(30,' ') + reg.ljust(50,' ') +\
+                summary.write(analysis.ljust(30,' ') + reg.ljust(60,' ') +\
                    myxsexp.ljust(15,' ') + myxsobs.ljust(15,' ') + \
                    ' ||    ' + myeff.ljust(15,' ') + mystat.ljust(15,' '))
                 if syst!=[0]:
@@ -1435,8 +1436,8 @@ class RunRecast():
                 myxsexp = regiondata["lhs95exp"]
                 myxsobs = regiondata["lhs95obs"]
                 myglobalcls = "%.4f" % regiondata["globalCLs"]
-                description = "SL-CLs-for-"+regiondata["covsubset"]
-                summary.write(analysis.ljust(30,' ') + description.ljust(50,' ') + ''.ljust(10, ' ') + myxsexp.ljust(15,' ') + \
+                description = "[SL]-"+regiondata["covsubset"]
+                summary.write(analysis.ljust(30,' ') + description.ljust(60,' ') + ''.ljust(10, ' ') + myxsexp.ljust(15,' ') + \
                     myxsobs.ljust(15,' ') + myglobalcls.ljust(7, ' ') + '   ||    \n')
                 band = []
                 for error_set in err_sets:
@@ -1458,8 +1459,8 @@ class RunRecast():
             else:
                 myxsexp = regiondata["lhs95exp"]
                 myxsobs = regiondata["lhs95obs"]
-                description = "SL-CLs-for-"+regiondata["covsubset"]
-                summary.write(analysis.ljust(30,' ') + description.ljust(50,' ') +\
+                description = "[SL]-"+regiondata["covsubset"]
+                summary.write(analysis.ljust(30,' ') + description.ljust(60,' ') +\
                     myxsexp.ljust(15,' ') + myxsobs.ljust(15,' ') + \
                     ' ||    \n')
 
@@ -1472,7 +1473,7 @@ class RunRecast():
                 logging.getLogger('MA5').debug(str(pyhf_data))
                 mycls   = '{:.4f}'.format(pyhf_data.get(likelihood_profile,{}).get('CLs', 0.))
                 best    = str(pyhf_data.get(likelihood_profile,{}).get('best', 0))
-                summary.write(analysis.ljust(30,' ') + ('[pyhf]-'+likelihood_profile+'-profile').ljust(50,' ') +\
+                summary.write(analysis.ljust(30,' ') + ('[pyhf]-'+likelihood_profile+'-profile').ljust(60,' ') +\
                        best.ljust(10, ' ') +myxsexp.ljust(15,' ') + myxsobs.ljust(15,' ') +\
                        mycls.ljust( 7,' ') + '   ||    ' + ''.ljust(15,' ') + ''.ljust(15,' '));
                 summary.write('\n')
@@ -1498,7 +1499,7 @@ class RunRecast():
                         summary.write(''.ljust(90,' ') + '+{:.1f}% -{:.1f}% syst:'.format(up*100.,dn*100.).ljust(25,' ') + '[' + \
                           ("%.4f" % min(band)) + ', ' + ("%.4f" % max(band)) + ']\n')
             else:
-                summary.write(analysis.ljust(30,' ') + ('[pyhf]-'+likelihood_profile+'-profile').ljust(50,' ') +\
+                summary.write(analysis.ljust(30,' ') + ('[pyhf]-'+likelihood_profile+'-profile').ljust(60,' ') +\
                    myxsexp.ljust(15,' ') + myxsobs.ljust(15,' ') + \
                    ' ||    ' + ''.ljust(15,' ') + ''.ljust(15,' ')) 
                 summary.write('\n')

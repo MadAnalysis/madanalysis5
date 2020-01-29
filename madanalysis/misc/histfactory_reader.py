@@ -141,11 +141,11 @@ def get_HFID(file,SRname):
         with open(file,'r') as json_file:
             HF = json.load(json_file)
     else:
-        return False
+        return 'Can not find background file: '+file
     for ch in HF['channels']:
         if ch['name'] == SRname:
             return HF['channels'].index(ch)
-    return False
+    return 'Invalid or corrupted info file.'
 
 
 class HF_Background(HistFactory):

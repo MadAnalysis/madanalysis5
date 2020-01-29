@@ -591,7 +591,7 @@ class JobReader():
         i=0
         while(os.path.isdir(self.safdir+"/"+name+"/MadAnalysis5job_"+str(i))):
             i+=1
-        filenames = glob.glob(self.safdir+"/"+name+"/MadAnalysis5job_"+str(i-1)+"/Cutflows/*.saf")
+        filenames = sorted(glob.glob(self.safdir+"/"+name+"/MadAnalysis5job_"+str(i-1)+"/Cutflows/*.saf"))
 
         # Treating the files one by one
         for myfile in filenames:
