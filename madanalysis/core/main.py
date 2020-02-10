@@ -444,6 +444,11 @@ class Main():
 
     def CheckConfig2(self,debug=False):
         checkup = CheckUp(self.archi_info, self.session_info, debug, self.script)
+
+        # Read user options
+        if not checkup.ReadUserOptions():
+            return False
+
         # Reinterpretation packages
         if not checkup.CheckOptionalReinterpretationPackages():
             return False

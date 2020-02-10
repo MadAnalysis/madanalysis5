@@ -38,6 +38,9 @@ class UserInfo:
         # MatPlotLib
         self.matplotlib_veto = None
 
+        # Gnuplot
+        self.gnuplot_veto = None
+
         # SciPy
         self.scipy_veto = None
 
@@ -189,6 +192,10 @@ class UserInfo:
         # Matplotlib
         elif   option=='matplotlib_veto':
             self.matplotlib_veto=self.ConvertToBool(option,value,filename)
+
+        # Gnuplot
+        elif   option=='gnuplot_veto':
+            self.gnuplot_veto_veto=self.ConvertToBool(option,value,filename)
 
         # Scipy
         elif   option=='scipy_veto':

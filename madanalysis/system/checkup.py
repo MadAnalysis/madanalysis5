@@ -303,6 +303,8 @@ class CheckUp():
             return False
         if not self.checker.Execute('matplotlib'):
             return False
+        if not self.checker.Execute('gnuplot'):
+            return False
         if not self.checker.Execute('pdflatex'):
             return False
         if not self.checker.Execute('latex'):

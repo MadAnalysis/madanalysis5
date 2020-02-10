@@ -71,10 +71,13 @@ class DetectManager():
             from madanalysis.system.detect_delphesMA5tune import DetectDelphesMA5tune
             checker=DetectDelphesMA5tune(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='gnuplot':
-            from madanalysis.system.detect_gnuplot import DetectGnuplot
-            checker=DetectGnuplot(self.archi_info, self.user_info, self.session_info, self.debug)
+            from madanalysis.system.detect_gnuplot import DetectGnuPlot
+            checker=DetectGnuPlot(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='matplotlib':
             from madanalysis.system.detect_matplotlib import DetectMatplotlib
+            checker=DetectMatplotlib(self.archi_info, self.user_info, self.session_info, self.debug)
+        elif package=='gnuplot':
+            from madanalysis.system.detect_gnuplot import DetectGnuPlot
             checker=DetectMatplotlib(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='scipy':
             from madanalysis.system.detect_scipy import DetectScipy

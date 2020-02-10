@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -27,6 +27,7 @@ from madanalysis.fastsim.ast            import AST
 from madanalysis.fastsim.tagger         import Tagger
 from madanalysis.fastsim.smearer        import Smearer
 from madanalysis.fastsim.recoefficiency import RecoEfficiency
+
 
 class SuperFastSim:
 
