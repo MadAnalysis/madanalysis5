@@ -33,10 +33,12 @@ class InstallSamples:
     def __init__(self,main):
         self.main       = main
         self.installdir = os.path.normpath(self.main.archi_info.ma5dir+'/samples')
-        self.files = { "ttbar_fh.lhe.gz" :   "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_fh.lhe.gz",\
-                       "ttbar_sl_1.lhe.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_sl_1.lhe.gz",\
-                       "ttbar_sl_2.lhe.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_sl_2.lhe.gz",\
-                       "zz.lhe.gz" :         "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/zz.lhe.gz" }
+        self.files = { "ttbar_fh.lhe.gz":   "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_fh.lhe.gz",\
+                       "ttbar_sl_1.lhe.gz": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_sl_1.lhe.gz",\
+                       "ttbar_sl_2.lhe.gz": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_sl_2.lhe.gz",\
+                       "ttbar_sl_1.lhe":    "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_sl_1.lhe",\
+                       "ttbar_sl_2.lhe":    "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_sl_2.lhe",\
+                       "zz.lhe.gz":         "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/zz.lhe.gz" }
 
 
     def Detect(self):
