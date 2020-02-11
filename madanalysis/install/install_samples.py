@@ -38,7 +38,10 @@ class InstallSamples:
                        "ttbar_sl_2.lhe.gz": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_sl_2.lhe.gz",\
                        "ttbar_sl_1.lhe":    "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_sl_1.lhe",\
                        "ttbar_sl_2.lhe":    "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_sl_2.lhe",\
-                       "zz.lhe.gz":         "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/zz.lhe.gz" }
+                       "zz.lhe.gz":         "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/zz.lhe.gz",\
+                       "mg5_ttbar2l.lhco":  "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/mg5_ttbar2l.lhco",\
+                       "mg5_zll.lhco":      "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/mg5_zll.lhco"\
+                      }
 
 
     def Detect(self):
