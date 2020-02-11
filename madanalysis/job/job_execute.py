@@ -33,7 +33,7 @@ import copy
 def WriteExecute(file,main,part_list):
 
     # Function header
-    file.write('bool user::Execute(SampleFormat& sample, ' +\
+    file.write('MAbool user::Execute(SampleFormat& sample, ' +\
                'const EventFormat& event)\n{\n')
 
     # Getting the event weight

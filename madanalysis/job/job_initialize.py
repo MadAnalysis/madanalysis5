@@ -40,7 +40,7 @@ def WriteInvisibleList(file,main):
 def WriteJobInitialize(file,main):
 
     # Function header
-    file.write('bool user::Initialize(const MA5::Configuration& cfg,\n')
+    file.write('MAbool user::Initialize(const MA5::Configuration& cfg,\n')
     file.write('                      const std::map<std::string,std::string>& parameters)\n')
     file.write('{\n')
 
