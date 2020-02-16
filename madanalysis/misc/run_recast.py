@@ -780,7 +780,7 @@ class RunRecast():
 
                 ## Computation of the uncertainties on the limits
                 regiondata_errors = {}
-                if dataset.xsection > 0.:
+                if dataset.xsection > 0. and any([x!=0 for x in Error_dict.values()]):
                     for error_key, error_value in Error_dict.items():
                         varied_xsec = max(round(dataset.xsection*(1.0+error_value),10),0.0)
                         if varied_xsec > 0:
@@ -1017,15 +1017,19 @@ class RunRecast():
             if child.tag == 'lumi':
                 default_lumi = float(child.text)
             if child.tag == 'pyhf':
-                likelihood_profile = child.attrib.get('id','Likelihood Profile '+str(nprofile))
-                if likelihood_profile == 'Likelihood Profile '+str(nprofile):
+                likelihood_profile = child.attrib.get('id','HF-Likelihood-'+str(nprofile))
+                if likelihood_profile == 'Global-Likelihood':
+                    logging.getLogger('MA5').warning(likelihood_profile+' is preserved.')
+                    logging.getLogger('MA5').warning('HF-Likelihood-'+str(nprofile)+' will be used instead.')
+                    likelihood_profile = 'HF-Likelihood-'+str(nprofile)
+                if likelihood_profile == 'HF-Likelihood-'+str(nprofile):
                     nprofile += 1
                 if not likelihood_profile in pyhf_config.keys():
                     pyhf_config[likelihood_profile] = {'name' : 'No File name in info file...',
                                                        'path' : os.path.join(self.pad,
                                                                              'Build/SampleAnalyzer/User/Analyzer'),
                                                        'lumi' : default_lumi,
-                                                       'SR'   : {}
+                                                       'SR'   :  OrderedDict()
                                                        }
                 for subchild in child:
                     if subchild.tag == 'name':
@@ -1186,41 +1190,63 @@ class RunRecast():
                 regiondata["globalCLs"]=self.slhCLs(regiondata,cov_regions,xsection,lumi,covariance)
 
         #initialize pyhf for cls calculation
-        bestreg=[]
-        rMax = -1
-        for likelihood_profile, config in self.pyhf_config.items():
-            if regiondata['pyhf'].get(likelihood_profile, False) == False:
-                # safety check, just in case
+        bestreg =[]
+        rMax    = -1
+        number_of_merged_bkg = 0
+        iterator = []
+        if self.pyhf_config!={}:
+            iterator = copy.deepcopy(self.pyhf_config.items())+[('Global-Likelihood',{})]
+        for n, (likelihood_profile, config) in enumerate(iterator):
+            logging.getLogger('MA5').debug('    * Running CLs for '+likelihood_profile)
+            # safety check, just in case
+            if regiondata.get('pyhf',{}).get(likelihood_profile, False) == False:
                 continue
-            background = HF_Background(config)
-            signal     = HF_Signal(config,regiondata,xsection=xsection)
-            CLs        = -1
+            if likelihood_profile != 'Global-Likelihood':
+                background = HF_Background(config)
+                if n == 0:
+                    # Construct Global likelihood profile
+                    global_bacgkround = background
+                else:
+                    global_bacgkround, i  = merge_backgrounds(global_bacgkround,background)
+                    number_of_merged_bkg += i
+            else:
+                if number_of_merged_bkg <= 1:
+                    regiondata['pyhf'].pop(likelihood_profile)
+                    continue
+                background   = global_bacgkround
+                config['SR'] = background.global_config
+            logging.getLogger('MA5').debug('Config = '+str(config))
+            signal = HF_Signal(config,regiondata,xsection=xsection)
+            CLs    = -1
             if signal.isAlive():
                 CLs = pyhf_wrapper(background(lumi), signal(lumi))
                 if CLs >= 0.:
                     regiondata['pyhf'][likelihood_profile]['CLs']  = CLs
-                s95 = max(float(regiondata['pyhf'][likelihood_profile]['s95exp']),0.)
-                #import the efficiencies
-                n95 = []
-                for SR,item in signal.signal_config.items():
-                    for dat in item['data']:
-                        n95.append(dat)
-                n95 = max([s95*x*1000.*lumi for x in n95])
-                nsignal = []
-                if n95>0.:
-                    for SR in signal(lumi):
-                        for dat in SR.get('value',{}).get('data',[]):
-                            if dat > 0.:
-                                nsignal.append(dat)
-                    rSR = 0.
-                    if len(nsignal)>0:
-                        rSR = min(nsignal)/n95
-                    if rSR > rMax:
-                        regiondata['pyhf'][likelihood_profile]["best"] = 1
-                        for mybr in bestreg:
-                            regiondata['pyhf'][mybr]["best"]=0
-                        bestreg = [likelihood_profile]
-                        rMax = rSR
+                if likelihood_profile == 'Global-Likelihood':
+                    regiondata['pyhf'][likelihood_profile]["best"] = ''
+                else:
+                    s95 = max(float(regiondata['pyhf'][likelihood_profile]['s95exp']),0.)
+                    #import the efficiencies
+                    n95 = []
+                    for SR,item in signal.signal_config.items():
+                        for dat in item['data']:
+                            n95.append(dat)
+                    n95 = max([s95*x*1000.*lumi for x in n95])
+                    nsignal = []
+                    if n95>0.:
+                        for SR in signal(lumi):
+                            for dat in SR.get('value',{}).get('data',[]):
+                                if dat > 0.:
+                                    nsignal.append(dat)
+                        rSR = 0.
+                        if len(nsignal)>0:
+                            rSR = min(nsignal)/n95
+                        if rSR > rMax:
+                            regiondata['pyhf'][likelihood_profile]["best"] = 1
+                            for mybr in bestreg:
+                                regiondata['pyhf'][mybr]["best"]=0
+                            bestreg = [likelihood_profile]
+                            rMax = rSR
         return regiondata
 
 
@@ -1330,12 +1356,30 @@ class RunRecast():
         if 'pyhf' not in regiondata.keys():
             regiondata['pyhf'] = {}
 
-        for likelihood_profile, config in self.pyhf_config.items():
+        number_of_merged_bkg = 0
+        iterator = []
+        if self.pyhf_config!={}:
+            iterator = copy.deepcopy(self.pyhf_config.items())+[('Global-Likelihood',{})]
+        for n, (likelihood_profile, config) in enumerate(iterator):
             logging.getLogger('MA5').debug('    * Running sig95'+tag+' for '+likelihood_profile)
             if likelihood_profile not in regiondata['pyhf'].keys():
                 regiondata['pyhf'][likelihood_profile] = {}
-            background = HF_Background(config,expected=(tag=='exp'))
-            if not HF_Signal(config,regiondata,xsection=1.).isAlive():
+            if likelihood_profile != 'Global-Likelihood':
+                background = HF_Background(config,expected=(tag=='exp'))
+                if n == 0:
+                    # Construct Global likelihood profile
+                    global_bacgkround = background
+                else:
+                    global_bacgkround, i  = merge_backgrounds(global_bacgkround,background)
+                    number_of_merged_bkg += i
+            else:
+                if number_of_merged_bkg <= 1:
+                    regiondata['pyhf'].pop(likelihood_profile)
+                    continue
+                background   = global_bacgkround
+                config['SR'] = background.global_config
+            logging.getLogger('MA5').debug('Config : '+str(config))
+            if not HF_Signal(config,regiondata,xsection=1.,background=background).isAlive():
                 logging.getLogger('MA5').debug(likelihood_profile+' has no signal event.')
                 regiondata['pyhf'][likelihood_profile]["s95"+tag] = "-1"
                 continue
@@ -1369,9 +1413,14 @@ class RunRecast():
         logging.getLogger('MA5').debug('Write CLs...')
         if self.main.developer_mode:
             import json
-            to_save = {'regiondata' : regiondata,
-                       'errordata'  : errordata}
+            to_save = {analysis : {'regiondata' : regiondata,
+                                   'errordata'  : errordata}}
             name = summary.name.split('.dat')[0]+'.json'
+            if os.path.isfile(name):
+                with open(name,'r') as json_file:
+                    past = json.load(json_file)
+                for key, item in past.items():
+                    to_save[key] = item
             logging.getLogger('MA5').debug('Saving dictionary : '+name)
             results = open(name,'w')
             results.write(json.dumps(to_save, indent=4))
@@ -1465,8 +1514,10 @@ class RunRecast():
                     ' ||    \n')
 
         # pyhf results
-        for likelihood_profile in self.pyhf_config.keys():
-            pyhf_data = regiondata.get('pyhf',{})
+        pyhf_data = regiondata.get('pyhf',{})
+        for likelihood_profile in self.pyhf_config.keys()+['Global-Likelihood']:
+            if likelihood_profile not in pyhf_data.keys():
+                continue
             myxsexp   = pyhf_data.get(likelihood_profile,{}).get('s95exp',"-1")
             myxsobs   = pyhf_data.get(likelihood_profile,{}).get('s95obs',"-1")
             if not xsflag:
@@ -1530,13 +1581,13 @@ def pyhf_wrapper(background,signal,qtilde=True):
                                                     })
     def get_CLs(bounds=None):
         try:
-            CLs = pyhf.utils.hypotest(1.0, 
-                                      workspace.data(model), 
-                                      model, 
-                                      qtilde=qtilde,
-                                      par_bounds=bounds)[0]
+            CLs = float(pyhf.utils.hypotest(1.0, 
+                                            workspace.data(model), 
+                                            model, 
+                                            qtilde=qtilde,
+                                            par_bounds=bounds)[0])
             return 1. - CLs
-        except AssertionError as err:
+        except AssertionError:
             # dont use false here 1.-CLs = 0 can be interpreted as false
             return 'update bounds' 
 
@@ -1548,9 +1599,11 @@ def pyhf_wrapper(background,signal,qtilde=True):
         CLs = get_CLs(bounds=update_bounds)
         if CLs == 'update bounds':
             update_bounds[model.config.poi_index] = (0,2*update_bounds[model.config.poi_index][1])
-        else:
+            iteration_limit += 1
+        elif type(CLs) == float:
             break
-        iteration_limit += 1
+        else:
+            iteration_limit += .5
         # hard limit on iteration required if it exceeds this value it means
         # Nsig >>>>> Nobs 
         if iteration_limit>=3:

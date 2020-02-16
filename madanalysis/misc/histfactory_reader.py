@@ -27,16 +27,17 @@ import json, os, copy, math, logging
 
 class HistFactory(object):
     def __init__(self,pyhf_config):
-        if type(self) == HF_Background:
-            self.hf      = {}
-        elif type(self) == HF_Signal:
-            self.hf      = []
         self.pyhf_config = pyhf_config.get('SR'  , {})
         self.lumi        = pyhf_config.get('lumi', 1.)
         self.path        = pyhf_config.get('path', 'missing_path')
         self.name        = pyhf_config.get('name', 'missing_name')
         self.logger      = logging.getLogger('MA5')
-    
+        if type(self) == HF_Background:
+            self.hf             = {}
+            self.global_config  = self.pyhf_config
+        elif type(self) == HF_Signal:
+            self.hf      = []
+
     def __call__(self,lumi):
         return self.extrapolate(lumi)
 
@@ -136,22 +137,10 @@ class HistFactory(object):
         return HF
 
 
-def get_HFID(file,SRname):
-    if os.path.isfile(file):
-        with open(file,'r') as json_file:
-            HF = json.load(json_file)
-    else:
-        return 'Can not find background file: '+file
-    for ch in HF['channels']:
-        if ch['name'] == SRname:
-            return HF['channels'].index(ch)
-    return 'Invalid or corrupted info file.'
-
-
 class HF_Background(HistFactory):
     def __init__(self, pyhf_config, expected=False):
         super(HF_Background, self).__init__(pyhf_config)
-        self.logger.debug('Reading '+self.name)
+        self.logger.debug('Reading : '+os.path.join(self.path,self.name))
         if os.path.isfile(os.path.join(self.path,self.name)):
             with open(os.path.join(self.path,self.name),'r') as json_file:
                 self.hf = json.load(json_file)
@@ -287,20 +276,24 @@ class HF_Signal(HistFactory):
         to_validate = [False]*len(bkg_bins)
         if HF == {}:
             return all(to_validate)
-        for sample in HF:
-            # check if the size of the bins in the data matches the background
-            if sample['op'] == 'remove':
-                to_validate[int(sample['path'].split('/')[2])] = True
-                continue
-            elif len(sample['value']['data']) == bkg_bins[int(sample['path'].split('/')[2])]:
-                to_validate[int(sample['path'].split('/')[2])] = True
-            # also check if the modifier data size matches with the background
-            for modifier in sample['value']['modifiers']:
-                if modifier['type'] == 'histosys':
-                    if len(modifier['data']['hi_data']) != bkg_bins[int(sample['path'].split('/')[2])]:
-                        to_validate[int(sample['path'].split('/')[2])] = False
-                    if len(modifier['data']['lo_data']) != bkg_bins[int(sample['path'].split('/')[2])]:
-                        to_validate[int(sample['path'].split('/')[2])] = False
+        try:
+            for sample in HF:
+                # check if the size of the bins in the data matches the background
+                if sample['op'] == 'remove':
+                    to_validate[int(sample['path'].split('/')[2])] = True
+                    continue
+                elif len(sample['value']['data']) == bkg_bins[int(sample['path'].split('/')[2])]:
+                    to_validate[int(sample['path'].split('/')[2])] = True
+                # also check if the modifier data size matches with the background
+                for modifier in sample['value']['modifiers']:
+                    if modifier['type'] == 'histosys':
+                        if len(modifier['data']['hi_data']) != bkg_bins[int(sample['path'].split('/')[2])]:
+                            to_validate[int(sample['path'].split('/')[2])] = False
+                        if len(modifier['data']['lo_data']) != bkg_bins[int(sample['path'].split('/')[2])]:
+                            to_validate[int(sample['path'].split('/')[2])] = False
+        except:
+            self.logger.debug('Signal HistFactory : Key error in dictionary...')
+            return False
         return all(to_validate)
 
     def isAlive(self):
@@ -345,4 +338,71 @@ class HF_Signal(HistFactory):
                                                   'name': 'mu_SIG', 
                                                   'type': 'normfactor'}
                                                 ]
+
+
+
+
+
+def get_HFID(file,SRname):
+    """
+        Extract the location of the profiles within the JSON file.
+    """
+    if os.path.isfile(file):
+        with open(file,'r') as json_file:
+            HF = json.load(json_file)
+    else:
+        return 'Can not find background file: '+file
+    for ch in HF['channels']:
+        if ch['name'] == SRname:
+            return HF['channels'].index(ch)
+    return 'Invalid or corrupted info file.'
+
+
+
+
+def merge_backgrounds(Background1,Background2):
+    """
+        Merging method for two bakcground JSON file. It merges "only" the files 
+        with same POI and version.
+    """
+    if {} in [Background1.hf, Background2.hf] or type(Background1) != type(Background2):
+        return Background1, 0
+    logging.getLogger('MA5').debug('merging :'+', '.join(Background1.global_config.keys()+\
+                                                         Background2.pyhf_config.keys()))
+    measurements = []
+    # merge common measurements
+    for measurement1 in Background1.hf.get('measurements',[]):
+        poi   = measurement1['config']['poi']
+        param = measurement1['config']['parameters'] 
+        for measurement2 in Background2.hf.get('measurements',[]):
+            if poi == measurement2['config']['poi']:
+                for parameter in measurement2['config']['parameters'] :
+                    if parameter not in param:
+                        param += parameter
+                measurements.append({'name'   : measurement1['name'],
+                                     'config' : {'parameters' : param,
+                                                 'poi'        : poi
+                                                 }})
+
+    if measurements == [] or Background1.hf['version'] != Background2.hf['version'] :
+        logging.getLogger('MA5').warning('Merging failed: Either measurements or versions does not match...')
+        logging.getLogger('MA5').warning(', '.join(Background2.pyhf_config.keys())+' will not be added.')
+        return Background1, 0 # only get uncontradctory poi
+
+    logging.getLogger('MA5').debug('measurements are matching...')
+    extend = len(Background1.get_observed())
+    for profile, info in Background2.pyhf_config.items():
+        check = [x for x in Background1.global_config.keys() if x.startswith(profile)]
+        profile += ''+(len(check)>0)*('_ma5_'+str(len(check)))
+        Background1.global_config[profile] = {}
+        Background1.global_config[profile]['channels'] = str(int(info['channels'])+extend)
+        #print str(int(info['channels'])+extend)
+        Background1.global_config[profile]['data'    ] = info['data']
+
+    for ch in Background2.hf['channels']:
+        Background1.hf['channels'].append(ch)
+    for obs in Background2.hf['observations']:
+        Background1.hf['observations'].append(obs)
+    Background1.hf['measurements'] = measurements
+    return Background1, 1
 
