@@ -701,11 +701,48 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
         if (genit!=gentable.end()) track->mc_=&(myEvent.mc()->particles()[genit->second]);
         else WARNING << "GenParticle corresponding to a track is not found in the gen table" << endmsg;
       }
-
-      // setting 
       track->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
     }
   }
+
+
+  // ---------------------------------------------------------------------------
+  // Vertex collection
+  // ---------------------------------------------------------------------------
+  if (data_.Vertex_!=0)
+  {
+    MAuint32 nvertices = static_cast<MAuint32>(data_.Vertex_->GetEntries());
+    myEvent.rec()->vertices_.reserve(nvertices);
+    for (MAuint32 i=0;i<nvertices;i++)
+    {
+      // getting the i-th vertex
+      Vertex* ref = dynamic_cast<Vertex*>(data_.Vertex_->At(i));
+      if (ref==0) continue;
+
+      // creating new vertex
+      RecVertexFormat * vertex = myEvent.rec()->GetNewVertex();
+
+      // filling vertex info
+      vertex->position_.SetXYZT(ref->X,ref->Y,ref->Z,ref->T);
+      vertex->error_.SetXYZT(ref->ErrorX,ref->ErrorY,ref->ErrorZ,ref->ErrorT);
+      vertex->ndf_ = ref->NDF;
+	
+      // setting corresponding gen particle
+      MAuint32 nconstituents = static_cast<MAuint32>(ref->Constituents.GetEntries());
+      for (MAuint32 j=0;j<nconstituents;j++)
+      {
+	const GenParticle* mc = dynamic_cast<const GenParticle*>(ref->Constituents.At(j));
+        if (mc!=0)
+        {
+           genit = gentable.find(mc);
+           if (genit!=gentable.end()) vertex->constituents_.push_back(&(myEvent.mc()->particles()[genit->second]));
+           else WARNING << "GenParticle corresponding to a vertex is not found in the gen table" << endmsg;
+        }
+	//        vertex->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
+      }
+    }
+  }
+
 
 }
 

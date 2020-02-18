@@ -39,6 +39,7 @@
 #include "SampleAnalyzer/Commons/DataFormat/RecJetFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecPhotonFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecTrackFormat.h"
+#include "SampleAnalyzer/Commons/DataFormat/RecVertexFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
 
@@ -96,6 +97,10 @@ class RecEventFormat
   /// Collection of reconstructed tracks
   MAbool tracks_ok_;
   std::vector<RecTrackFormat>  tracks_;
+
+  /// Collection of reconstructed vertices
+  MAbool vertices_ok_;
+  std::vector<RecVertexFormat>  vertices_;
 
   /// Reconstructed towers
   MAbool towers_ok_;
@@ -300,6 +305,8 @@ class RecEventFormat
     towers_.clear();
     tracks_ok_=false;
     tracks_.clear();
+    vertices_ok_=false;
+    vertices_.clear();
     EFlowTracks_ok_=false;
     EFlowTracks_.clear();
     EFlowPhotons_ok_=false;
@@ -361,7 +368,7 @@ class RecEventFormat
     return &EFlowTracks_.back();
   }
 
-  /// Giving a new EFlowTrack entry
+  /// Giving a new EFlowPhoton entry
   RecParticleFormat* GetNewEFlowPhoton()
   {
     EFlowPhotons_.push_back(RecParticleFormat());
@@ -408,6 +415,13 @@ class RecEventFormat
   {
     tracks_.push_back(RecTrackFormat());
     return &tracks_.back();
+  }
+
+  /// Giving a new vertex entry
+  RecVertexFormat* GetNewVertex()
+  {
+    vertices_.push_back(RecVertexFormat());
+    return &vertices_.back();
   }
 
   /// Giving a pointer to the Missing Transverse Energy

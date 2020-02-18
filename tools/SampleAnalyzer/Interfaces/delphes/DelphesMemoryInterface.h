@@ -59,6 +59,7 @@ class DelphesMemoryInterface
   TObjArray* HT_;
   TObjArray* GenParticle_;
   TObjArray* Track_;
+  TObjArray* Vertex_;
   TObjArray* Tower_;
   TObjArray* Event_;
   TObjArray* EFlowTrack_;

@@ -63,6 +63,7 @@ DelphesDataFormat::DelphesDataFormat()
   HT_           = 0;
   GenParticle_  = 0;
   Track_        = 0;
+  Vertex_       = 0;
   Tower_        = 0;
   EFlowTrack_   = 0;
   EFlowPhoton_  = 0;
@@ -86,6 +87,7 @@ DelphesDataFormat::~DelphesDataFormat()
   if (HT_!=0)           delete HT_;
   if (GenParticle_!=0)  delete GenParticle_;
   if (Track_!=0)        delete Track_;
+  if (Vertex_!=0)       delete Vertex_;
   if (Tower_!=0)        delete Tower_;
   if (EFlowTrack_!=0)   delete EFlowTrack_;
   if (EFlowPhoton_!=0)  delete EFlowPhoton_;
@@ -110,6 +112,7 @@ MAbool DelphesDataFormat::GetEntry(MAint64 treeEntry)
   if (branchHT_!=0)           test &= (branchHT_           -> GetEntry(treeEntry) >=0);
   if (branchGenParticle_!=0)  test &= (branchGenParticle_  -> GetEntry(treeEntry) >=0);
   if (branchTrack_!=0)        test &= (branchTrack_        -> GetEntry(treeEntry) >=0);
+  if (branchVertex_!=0)       test &= (branchVertex_       -> GetEntry(treeEntry) >=0);
   if (branchTower_!=0)        test &= (branchTower_        -> GetEntry(treeEntry) >=0);
   if (branchEFlowTrack_!=0)   test &= (branchEFlowTrack_   -> GetEntry(treeEntry) >=0);
   if (branchEFlowPhoton_!=0)  test &= (branchEFlowPhoton_  -> GetEntry(treeEntry) >=0);
@@ -132,6 +135,7 @@ void DelphesDataFormat::InitializeData()
   InitializeData(branchMET_,          MET_);
   InitializeData(branchTower_,        Tower_);
   InitializeData(branchTrack_,        Track_);
+  InitializeData(branchVertex_,       Vertex_);
   InitializeData(branchFatJet_,       FatJet_);
   InitializeData(branchJet_,          Jet_);
   InitializeData(branchElectron_,     Electron_);
@@ -168,6 +172,7 @@ void DelphesDataFormat::InitializeBranch(TTree* tree)
   branchMET_          = tree->GetBranch("MissingET");
   branchTower_        = tree->GetBranch("Tower");
   branchTrack_        = tree->GetBranch("Track");
+  branchVertex_       = tree->GetBranch("Vertex");
   branchJet_          = tree->GetBranch("Jet");
   branchFatJet_       = tree->GetBranch("FatJet");
   branchElectron_     = tree->GetBranch("Electron");

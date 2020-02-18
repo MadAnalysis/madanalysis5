@@ -54,6 +54,7 @@ struct DelphesDataFormat
   TClonesArray* HT_;
   TClonesArray* GenParticle_;
   TClonesArray* Track_;
+  TClonesArray* Vertex_;
   TClonesArray* Tower_;
   TClonesArray* Event_;
   TClonesArray* Weight_;
@@ -71,6 +72,7 @@ struct DelphesDataFormat
   TBranch* branchHT_;
   TBranch* branchGenParticle_;
   TBranch* branchTrack_;
+  TBranch* branchVertex_;
   TBranch* branchTower_;
   TBranch* branchEvent_;
   TBranch* branchWeight_;
