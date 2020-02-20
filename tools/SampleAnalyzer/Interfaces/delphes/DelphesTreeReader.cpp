@@ -260,9 +260,10 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
 
       // Filling main infos
       gen->momentum_.SetPxPyPzE(part->Px,part->Py, part->Pz, part->E);
-      gen->pdgid_      = part->PID;
-      gen->statuscode_ = part->Status;
-      gen->isPU_       = part->IsPU;
+      gen->pdgid_        = part->PID;
+      gen->statuscode_   = part->Status;
+      gen->isPU_         = part->IsPU;
+      gen->decay_vertex_.SetXYZT(part->X,part->Y,part->Z,part->T);
 
       // Filling mother-daughter relations
       mothers[i]=std::make_pair(part->M1,part->M2);

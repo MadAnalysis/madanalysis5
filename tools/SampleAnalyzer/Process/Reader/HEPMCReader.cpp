@@ -563,7 +563,7 @@ void HEPMCReader::FillEventVertexLine(const std::string& line, EventFormat& myEv
     res.first->second.z_    = vertex.z_;
     res.first->second.ctau_ = vertex.ctau_;
   }
-
+    
   // Set the current vertex barcode
   currentvertex_ = barcode;
 }
