@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+188           (2020/04/03) fuks:    Adding a new option for background error extrapolations 
+                                   (user-defined) 
+
 184           (2020/02/16) fuks:    Fixing a few bugs in the pyhf interface + improved efficiency 
 
 177           (2020/01/29) fuks:    Fixing a major bug in job reader and a few improvements in the 

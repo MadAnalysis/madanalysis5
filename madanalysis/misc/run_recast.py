@@ -968,8 +968,11 @@ class RunRecast():
                                 j = cov_regions.index(rchild.attrib["region"])
                                 if self.main.recasting.error_extrapolation=='sqrt':
                                     myval *= lumi_scaling
-                                else:
+                                elif self.main.recasting.error_extrapolation=='linear':
                                     myval *= lumi_scaling**2
+                                else:
+                                    myval *= self.main.recasting.error_extrapolation
+
                                 covariance[i][j] = myval
                     else:
                         logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): unknown region subtag.')
@@ -978,6 +981,8 @@ class RunRecast():
                     err_scale = lumi_scaling
                     if self.main.recasting.error_extrapolation=='sqrt':
                         err_scale=math.sqrt(err_scale)
+                    elif type(self.main.recasting.error_extrapolation) == float:
+                        err_scale=self.main.recasting.error_extrapolation
                     deltanb = round(deltanb*err_scale,8)
                 else:
                     if syst==-1:

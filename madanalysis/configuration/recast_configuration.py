@@ -154,7 +154,10 @@ class RecastConfiguration:
             self.logger.info("   * Theory errors (if provided) are combined in a " + self.THerror_combination + " way")
             return
         elif parameter=="error_extrapolation":
-            self.logger.info("   * Errors on the background will be extrapolated " + self.error_extrapolation + "ly (if necessary)")
+            if type(self.error_extrapolation) == str:
+                self.logger.info("   * Errors on the background extrapolated " + self.error_extrapolation + "ly (if necessary)")
+            else:
+                self.logger.info("   * Errors on the extrapolated background taken as {:.1%}".format(self.error_extrapolation))
             return
         return
 
@@ -327,9 +330,20 @@ class RecastConfiguration:
             if value in ["linear", "sqrt"]:
                 self.error_extrapolation = value
             else:
-                self.logger.error("When extrapolating to different luminosities, uncertainties")
-                self.logger.error("can only be extrapolated linearly [linear] or sqrtly [sqrt].")
-                return
+                try:
+                    tmp = float(value)
+                    if 0<=tmp<=1:
+                        self.error_extrapolation = tmp
+                    else:
+                        self.logger.error("When extrapolating to different luminosities, uncertainties")
+                        self.logger.error("can only be extrapolated linearly [linear], sqrtly [sqrt] ")
+                        self.logger.error("or overwriten by a user defined value between [0,1].")
+                        return
+                except:
+                    self.logger.error("When extrapolating to different luminosities, uncertainties")
+                    self.logger.error("can only be extrapolated linearly [linear], sqrtly [sqrt] ")
+                    self.logger.error("or taken as a user-defined value in [0,1].")
+                    return
 
         # other rejection if no algo specified
         else:
