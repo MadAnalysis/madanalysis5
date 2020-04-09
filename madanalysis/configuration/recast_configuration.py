@@ -157,7 +157,10 @@ class RecastConfiguration:
             if type(self.error_extrapolation) == str:
                 self.logger.info("   * Errors on the background extrapolated " + self.error_extrapolation + "ly (if necessary)")
             else:
-                self.logger.info("   * Errors on the extrapolated background taken as {:.1%}".format(self.error_extrapolation))
+                if self.error_extrapolation[1]==0:
+                    self.logger.info("   * Relative error on the extrapolated background taken as {:.1%}".format(self.error_extrapolation[0]))
+                else:
+                    self.logger.info("   * Relative error on the extrapolated background Nb taken as sqrt({:.2f}^2 + ({:.2f}/Nb)^2)".format(self.error_extrapolation[0],self.error_extrapolation[1]))
             return
         return
 
@@ -324,25 +327,28 @@ class RecastConfiguration:
 
         # Error extrapolation
         elif parameter=="error_extrapolation":
+            def error_message():
+                self.logger.error("When extrapolating to different luminosities, uncertainties")
+                self.logger.error("can only be extrapolated linearly [linear], sqrtly [sqrt], ")
+                self.logger.error("overwriten by a single user-defined value (systs)")
+                self.logger.error("or taken as two comma-separated user-defined values (systs + stats)")
             if self.status!="on":
                 self.logger.error("Please first set the recasting mode to 'on'.")
                 return
             if value in ["linear", "sqrt"]:
                 self.error_extrapolation = value
             else:
+                all_values = [x for x in values if x !=','];
+                if len(all_values)>2:
+                    error_message();
+                    return;
                 try:
-                    tmp = float(value)
-                    if 0<=tmp<=1:
-                        self.error_extrapolation = tmp
+                    if len(all_values)==1:
+                        self.error_extrapolation = [float(value),0]
                     else:
-                        self.logger.error("When extrapolating to different luminosities, uncertainties")
-                        self.logger.error("can only be extrapolated linearly [linear], sqrtly [sqrt] ")
-                        self.logger.error("or overwriten by a user defined value between [0,1].")
-                        return
+                        self.error_extrapolation = [float(x) for x in all_values];
                 except:
-                    self.logger.error("When extrapolating to different luminosities, uncertainties")
-                    self.logger.error("can only be extrapolated linearly [linear], sqrtly [sqrt] ")
-                    self.logger.error("or taken as a user-defined value in [0,1].")
+                    error_message();
                     return
 
         # other rejection if no algo specified

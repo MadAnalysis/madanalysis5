@@ -967,23 +967,26 @@ class RunRecast():
                             else:
                                 j = cov_regions.index(rchild.attrib["region"])
                                 if self.main.recasting.error_extrapolation=='sqrt':
-                                    myval *= lumi_scaling
+                                    myval = round(math.sqrt(myval)*lumi_scaling,8);
                                 elif self.main.recasting.error_extrapolation=='linear':
                                     myval *= lumi_scaling**2
                                 else:
-                                    myval *= self.main.recasting.error_extrapolation
+                                    myval = round(myval*lumi_scaling**2*self.main.recasting.error_extrapolation[0]**2 + sqrt(myval)*lumi_scaling*self.main.recasting.error_extrapolation[1]**2,8);
 
                                 covariance[i][j] = myval
                     else:
                         logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): unknown region subtag.')
                         return -1,-1,-1,-1,-1
                 if syst == -1 and stat == -1:
-                    err_scale = lumi_scaling
                     if self.main.recasting.error_extrapolation=='sqrt':
                         err_scale=math.sqrt(err_scale)
-                    elif type(self.main.recasting.error_extrapolation) == float:
-                        err_scale=self.main.recasting.error_extrapolation
-                    deltanb = round(deltanb*err_scale,8)
+                        deltanb = round(deltanb*err_scale,8)
+                    elif self.main.recasting.error_extrapolation=='linear':
+                        err_scale = lumi_scaling
+                        deltanb = round(deltanb*err_scale,8)
+                    else:
+                        nb_new = nb*lumi_scaling;
+                        deltanb = round(math.sqrt(self.main.recasting.error_extrapolation[0]**2*nb_new**2 + self.main.recasting.error_extrapolation[1]**2*nb_new), 8);
                 else:
                     if syst==-1:
                         syst=0.
