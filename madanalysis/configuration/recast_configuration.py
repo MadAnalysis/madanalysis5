@@ -331,7 +331,7 @@ class RecastConfiguration:
                 self.logger.error("When extrapolating to different luminosities, uncertainties")
                 self.logger.error("can only be extrapolated linearly [linear], sqrtly [sqrt], ")
                 self.logger.error("overwriten by a single user-defined value (systs)")
-                self.logger.error("or taken as two comma-separated user-defined values (systs + stats)")
+                self.logger.error("or taken as two comma-separated user-defined values (systs, stats)")
             if self.status!="on":
                 self.logger.error("Please first set the recasting mode to 'on'.")
                 return
