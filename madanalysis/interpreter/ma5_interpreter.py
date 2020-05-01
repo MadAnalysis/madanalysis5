@@ -181,7 +181,15 @@ class MA5Interpreter(Interpreter):
     @freeze_environment
     def load(self, *args, **opts):
         from madanalysis.core.script_stack import ScriptStack
-        ScriptStack.stack.append(['',args[0]])
+        ScriptStack.Reset()
+        ScriptStack.stack = [] # reset does not 
+        arguments = args[0]
+        for arg in args[0]:
+            if 'set main.mode = parton' in arg:
+                self.init_parton()
+                arguments.remove('set main.mode = parton')
+                break
+        ScriptStack.stack.append(['',arguments])
         Interpreter.load(self)
 #        Interpreter.load(self,*args,**opts)
 

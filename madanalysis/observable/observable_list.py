@@ -406,6 +406,7 @@ MT_MET = ObservableBase( name          = 'MT_MET',
                          latex         = '$M_T$',
                        )
 
+
 vMT_MET  = MT_MET
 sMT_MET  = ObservableBase.Clone(MT_MET, name='sMT_MET', combination=CombinationType.SUMSCALAR, tlatex='sM_{T}', latex='$sM_T$') 
 sdMT_MET = dsMT_MET = ObservableBase.Clone(MT_MET, name='sdMT_MET', combination=CombinationType.DIFFSCALAR, tlatex='sdM_{T}', latex='$sdM_T$') 

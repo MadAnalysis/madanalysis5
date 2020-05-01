@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+191           (2020/05/01) fuks:    Small bug in the MG5_aMC interface 
+
 190           (2020/04/17) fuks:    Small bug fix with error extrapolations (recasting module) 
 
 189           (2020/04/09) fuks:    Adding a new option for the extrapolation opf the background errors 
