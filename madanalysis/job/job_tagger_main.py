@@ -46,9 +46,14 @@ class JobTaggerMain:
         file.write('  // Storing the IDs of objects that need to leave a collection\n')
         file.write('  std::vector<MAuint32> toRemove;\n\n')
 
-        # b/c-tagging + tau mistagging
-        file.write('  // b/c-tagging + tau-mistagging\n')
-        file.write('  unsigned int Ntaus = event.rec()->taus().size();\n')
+        # global event variables
+        file.write('  // Shortcut for global event variables\n')
+        file.write('  MAfloat64 & THT  = event.rec()->THT();\n')
+        file.write('  MAfloat64 & Meff = event.rec()->Meff();\n\n')
+
+        # b/c-tagging + jet mistagging as any other object
+        file.write('  // b/c-tagging + jet-mistagging\n')
+        file.write('  MAuint32 Ntaus = event.rec()->taus().size();\n')
         file.write('  for (MAuint32 i=0; i<event.rec()->jets().size(); i++)\n')
         file.write('  {\n')
         for reco_ID in [ ['5', 'b', 'Btag'], ['4', 'c', 'Ctag'] ]:
@@ -66,13 +71,21 @@ class JobTaggerMain:
                     pretag='else '
             file.write('    // We have a '+reco_ID[-2]+'-tagged jet -> moving on with the next jet\n')
             file.write('    if (event.rec()->jets()[i].'+reco_ID[-1].lower()+'()) { continue; }\n\n')
-        if self.HaveRules(['21', 'j'], ['15', 'ta']):
-            file.write('    // We have a true b/c-jet -> not tau-tagged\n')
+        # Do we have some mistagging of a jet as any other object
+        if self.HaveRules(['21', 'j'], ['15', 'ta','11','e','22','a']):
+            file.write('    // We have a true b/c-jet -> cannot be mistagged\n')
             file.write('    if (event.rec()->jets()[i].true_btag() || event.rec()->jets()[i].true_ctag()) { continue; }\n\n')
-            file.write('    // if not, is it tau-tagged?\n')
+            file.write('    // if not, is it mis-tagged as anything?\n')
             file.write('    else\n')
             file.write('    {\n')
-            self.PrintTagger(['21', 'j'], ['15', 'ta'],file,'(&event.rec()->jets()[i])','TauMistag')
+            for reco_ID in [  ['15', 'ta', 'TauMistag'],  ['11', 'e', 'Electron'],  ['22', 'a', 'Photon']  ]:
+                #  Checking the existence of the related rules
+                if not self.HaveRules(['21', 'j'], reco_ID[:-1]):
+                    continue
+                file.write('     {\n')
+                file.write('       // if not, is it '+reco_ID[2].split('Mistag')[0]+'-tagged?\n')
+                self.PrintTagger(['21', 'j'], reco_ID[:-1],file,'(&event.rec()->jets()[i])',reco_ID[2])
+                file.write('     }\n')
             file.write('    }\n')
         file.write('  }\n\n')
         file.write('  for (MAuint32 i=toRemove.size();i>0;i--)\n')
@@ -89,11 +102,6 @@ class JobTaggerMain:
             file.write('  for (MAuint32 i=toRemove.size();i>0;i--)\n')
             file.write('    event.rec()->taus().erase(event.rec()->taus().begin() + toRemove[i-1]);\n')
             file.write('  toRemove.clear();\n\n')
-
-        # global event variables
-        file.write('  // Shortcut for global event variables\n')
-        file.write('  MAfloat64 & THT  = event.rec()->THT();\n')
-        file.write('  MAfloat64 & Meff = event.rec()->Meff();\n\n')
 
         # Muon and electron mis-tagging
         for true_ID in [  ['13', 'mu', 'muons'],  ['11', 'e', 'electrons'],  ['22', 'a', 'photons']  ]:
@@ -149,8 +157,9 @@ class JobTaggerMain:
                     file.write('          charge += PDG->GetCharge(event.mc()->particles()['+obj+'->constituents()[icst]].pdgid());\n')
                     file.write('        newTau->setCharge(charge>0);\n')
                     file.write('        toRemove.push_back(i);\n')
+                    file.write('        continue;\n')
                     file.write('      }\n')
-                elif prop in ['Jet', 'LeptonicMistag']:
+                elif prop in ['Jet', 'LeptonicMistag', 'Electron', 'Photon']:
                     if 'tau' in obj and prop=='Jet':
                         file.write('      if (RANDOM->flat() > efficiency)\n')
                     else:
@@ -187,6 +196,11 @@ class JobTaggerMain:
                             file.write('        Meff   += '+obj+'->pt();\n')
                             file.write('        MALorentzVector MissHT = event.rec()->MHT().momentum() - '+obj+'->momentum();\n')
                             file.write('        (&event.rec()->MHT().momentum())->SetPxPyPzE(MissHT.Px(), MissHT.Py(), 0., MissHT.E());\n')
+                    if 'jets' in obj and newprop in ['Electron', 'Photon']:
+                        file.write('        THT    -= '+obj+'->pt();\n')
+                        file.write('        Meff   -= '+obj+'->pt();\n')
+                        file.write('        MALorentzVector MissHT = event.rec()->MHT().momentum() + '+obj+'->momentum();\n')
+                        file.write('        (&event.rec()->MHT().momentum())->SetPxPyPzE(MissHT.Px(), MissHT.Py(), 0., MissHT.E());\n')
                     file.write('        toRemove.push_back(i);\n')
                     file.write('        continue;\n')
                     file.write('      }\n')

@@ -80,8 +80,8 @@ class Tagger:
 
     def is_supported(self,id_true, id_reco):
         supported = { '5':['21','4','5'], '4':['21','4','5'], '15':['15','21'],
-                      '21' : ['11','13','22'], '11' : ['13','22'],
-                      '13' : ['11','22'],      '22' : ['11','13']}
+                      '21' : ['11','13','22'], '11' : ['13','22', '21'],
+                      '13' : ['11','22'],      '22' : ['11','13', '21']}
         if id_reco not in supported.keys() or id_true not in supported[id_reco]:
             self.logger.error('This tagger is currently not supported (tagging '+ id_true + ' as ' + id_reco + '). Tagger ignored.')
             return False

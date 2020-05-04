@@ -277,14 +277,24 @@ def MainSession(mode,arglist,ma5dir,version,date):
         main.expertmode = True
         expert = ExpertMode(main)
         dirname=""
-        if len(arglist)>0:
-          dirname=arglist[0]
+        config_file = ''
+        rest_arglist = arglist
+
+        # Get Config file with .ma5 extention and remove from the args list
+        conf_tmp = [x for x in arglist if x.endswith('.ma5')]
+        if len(conf_tmp)==1:
+            if os.path.isfile(conf_tmp[0]):
+                config_file = conf_tmp[0]
+                rest_arglist = [x for x in arglist if x not in conf_tmp]
+
+        if len(rest_arglist)>0:
+          dirname=rest_arglist[0]
         if not expert.CreateDirectory(dirname):
             sys.exit()
         dirname=""
-        if len(arglist)>1:
-          dirname=arglist[1]
-        if not expert.Copy(dirname):
+        if len(rest_arglist)>1:
+          dirname=rest_arglist[1]
+        if not expert.Copy(dirname,config=config_file):
             sys.exit()
         expert.GiveAdvice()
 
