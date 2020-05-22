@@ -27,34 +27,85 @@ class JobSmearerRecoHeader:
     ## Initialization
     def __init__(self, fastsim):
         self.fastsim = fastsim
+        self.electron_smearing    = False
+        self.muon_smearing        = False
+        self.photon_smearing      = False
+        self.tau_smearing         = False
+        self.jet_smearing         = False
+        self.constituent_smearing = False
+        for key, val in self.fastsim.smearer.rules.items():
+            if val['id_true'] in ['21','j']:
+                self.jet_smearing         = True
+                self.constituent_smearing = True
+            elif val['id_true'] in ['22','a']:
+                self.photon_smearing      = True
+            elif val['id_true'] in ['13','mu']:
+                self.muon_smearing        = True
+            elif val['id_true'] in ['11','e']:
+                self.electron_smearing    = True
+            elif val['id_true'] in ['15','ta']:
+                self.tau_smearing         = True
+        for key, val in self.fastsim.reco.rules.items():
+            if val['id_reco'] in ['21','j']:
+                self.jet_smearing         = True
+                self.constituent_smearing = True
+            elif val['id_reco'] in ['22','a']:
+                self.photon_smearing      = True
+            elif val['id_reco'] in ['13','mu']:
+                self.muon_smearing        = True
+            elif val['id_reco'] in ['11','e']:
+                self.electron_smearing    = True
+            elif val['id_reco'] in ['15','ta']:
+                self.tau_smearing         = True
+        if self.fastsim.jetrecomode == 'constituents':
+            self.jet_smearing         = False
+        else:
+            self.constituent_smearing = False
 
 
-    ## Writing NewTagger.h
+    ## Writing NewSmearer.h
     def WriteNewSmearerRecoHeader(self, file):
         file.write('#ifndef NEW_SMEARER_H\n')
         file.write('#define NEW_SMEARER_H\n')
         file.write('// SampleAnalyzer headers\n')
         file.write('#include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"\n')
         file.write('#include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"\n')
+        file.write('#include "SampleAnalyzer/Commons/Base/SmearerBase.h"\n')
         file.write('namespace MA5\n')
         file.write('{\n')
-        file.write('  class NewSmearer\n')
+        file.write('  class NewSmearer: public SmearerBase\n')
         file.write('  {\n')
+        file.write('    private:\n')
+        file.write('      MCParticleFormat output_;\n')
         file.write('    public :\n')
         file.write('      /// Constructor without argument\n')
-        file.write('      NewSmearer() \n')
-        file.write('      {\n')
-        file.write('      }\n\n')
+        file.write('      NewSmearer() {}\n')
         file.write('      /// Destructor\n')
-        file.write('      virtual ~NewSmearer() {}\n\n')
-        file.write('      /// Smearer execution\n')
-        file.write('      void Execute(SampleFormat &mySample, EventFormat &myEvent);\n\n')
-        file.write('      /// Smearer Gaussian function\n')
-        file.write('      MAdouble64 Gaussian(MAdouble64 sigma, MAdouble64 object);\n\n')
+        file.write('      ~NewSmearer() {}\n\n')
+        file.write('      /// Smearer methods: \n')
+        if self.electron_smearing:
+            file.write('      /// Electron smearing method\n')
+            file.write('      MCParticleFormat ElectronSmearer(const MCParticleFormat * part);\n\n')
+        if self.muon_smearing:
+            file.write('      /// Muon smearing method\n')
+            file.write('      MCParticleFormat MuonSmearer(const MCParticleFormat * part);\n\n')
+        if self.photon_smearing:
+            file.write('      /// Photon smearing method\n')
+            file.write('      MCParticleFormat PhotonSmearer(const MCParticleFormat * part);\n\n')
+        if self.tau_smearing:
+            file.write('      /// Hadronic Tau smearing method\n')
+            file.write('      MCParticleFormat TauSmearer(const MCParticleFormat * part);\n\n')
+        if self.jet_smearing:
+            file.write('      /// Jet smearing method\n')
+            file.write('      MCParticleFormat JetSmearer(const MCParticleFormat * part);\n\n')
+            file.write('      // Checking whether jet smearing is on\n')
+            file.write('      MAbool isJetSmearerOn() {return true;}\n\n')
+        if self.constituent_smearing:
+            file.write('      /// Jet Constituent smearing method\n')
+            file.write('      MCParticleFormat ConstituentSmearer(const MCParticleFormat * part);\n\n')
         file.write('  };\n')
         file.write('}\n')
         file.write('#endif')
-
 
     ## efficiencies and bounds
     def WriteNewSmearerEfficiencies(self,file):
@@ -76,7 +127,7 @@ class JobSmearerRecoHeader:
         file.write('#endif')
 
     ## Reconstruction efficiencies and bounds
-    def WriteNewRecoEfficiencies(self,file):
+    def WriteNewRecoEfficiencies(self,file, constituents=False):
         file.write('#ifndef RECO_H_INCLUDED\n')
         file.write('#define RECO_H_INCLUDED\n')
         file.write('#include <cmath>\n')

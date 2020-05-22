@@ -452,7 +452,7 @@ MAfloat64 TransverseVariables::MT2W(std::vector<const MCParticleFormat*> jets, c
   std::vector<const MCParticleFormat*> bjets, nbjets;
   for(MAuint32 ii=0 ;ii<jets.size(); ii++)
   {
-    if(abs(jets[ii]->pdgid()==5))  bjets.push_back(jets[ii]);
+    if(abs(jets[ii]->pdgid())==5) bjets.push_back(jets[ii]);
     else                          nbjets.push_back(jets[ii]);
   }
   /// pt-ordering

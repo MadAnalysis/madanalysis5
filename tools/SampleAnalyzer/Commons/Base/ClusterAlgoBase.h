@@ -37,6 +37,7 @@
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
+#include "SampleAnalyzer/Commons/Base/SmearerBase.h"
 
 
 namespace MA5
@@ -85,7 +86,8 @@ class ClusterAlgoBase
     /// Jet clustering
     virtual MAbool Execute(SampleFormat& mySample, EventFormat& myEvent, 
                          MAbool ExclusiveId, const std::vector<bool>& vetos,
-                         const std::set<const MCParticleFormat*> vetos2)=0;
+                         const std::set<const MCParticleFormat*> vetos2,
+                         SmearerBase* smearer)=0;
 
     /// Set parameter
     virtual MAbool SetParameter(const std::string& key, const std::string& value)=0;

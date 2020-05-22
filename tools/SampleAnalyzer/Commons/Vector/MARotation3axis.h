@@ -135,7 +135,6 @@ class MARotation3axis
              q.Z(),
              q.E());
     }
-
   }
   // Operator *
   MAVector3 operator* (const MAVector3& p) const

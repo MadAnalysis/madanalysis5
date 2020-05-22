@@ -26,7 +26,6 @@
 #include "SampleAnalyzer/Commons/Vector/MAVector3.h"
 using namespace MA5;
 
-MAdouble64 const  PI        = M_PI;
 MAdouble64 const  TWOPI     = 2.*M_PI;
 
 

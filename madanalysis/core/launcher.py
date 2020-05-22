@@ -280,12 +280,16 @@ def MainSession(mode,arglist,ma5dir,version,date):
         config_file = ''
         rest_arglist = arglist
 
-        # Get Config file with .ma5 extention and remove from the args list
-        conf_tmp = [x for x in arglist if x.endswith('.ma5')]
-        if len(conf_tmp)==1:
-            if os.path.isfile(conf_tmp[0]):
-                config_file = conf_tmp[0]
-                rest_arglist = [x for x in arglist if x not in conf_tmp]
+        # Scan the arglist to find the configuration file, if it exists 
+        # separate it from the arglist
+        conf_tmp = [x for x in arglist if os.path.isfile(x)]
+        if len(conf_tmp)>=1:
+            # the config file name might be the same with analysis name so just
+            # take the last appearence of the name.
+            config_file = conf_tmp[0]
+            rest_arglist.reverse() # reverse to remove the last appearance as config file
+            rest_arglist.remove(config_file)
+            rest_arglist.reverse() # reverse again to pick up the same order
 
         if len(rest_arglist)>0:
           dirname=rest_arglist[0]

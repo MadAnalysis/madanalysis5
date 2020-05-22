@@ -452,9 +452,8 @@ class ConfigChecker:
             if not getpaths:
                 self.logger.debug("Look for the libraries in folder "+str(self.archi_info.delphes_lib_paths)+" ...")
             mypath, myfiles = self.FindFilesWithPattern2(self.archi_info.delphes_lib_paths,"libDelphes.*",libnames)
-            self.archi_info.delphes_lib=os.path.normpath(myfiles[0])
-            if not getpaths:
-                self.logger.debug("-> result: "+str(self.archi_info.delphes_lib))
+            if len(myfiles)>0:
+                self.archi_info.delphes_lib=os.path.normpath(myfiles[0])
             if self.archi_info.delphes_lib=="":
                 if not getpaths:
                     self.PrintFAIL(package_name,warning=True)
@@ -462,6 +461,8 @@ class ConfigChecker:
 #                    self.logger.warning("Delphes ROOT format will be disabled.")
 #                    self.logger.warning("To enable this format, please type 'install delphes'.")
                 return False
+            if not getpaths:
+                self.logger.debug("-> result: "+str(self.archi_info.delphes_lib))
             self.archi_info.delphes_original_libs.extend([fl for fl in myfiles if not fl in self.archi_info.delphes_original_libs])
             delphes_dict=glob.glob(os.path.dirname(self.archi_info.delphes_lib)+'/*.pcm')
             self.archi_info.delphes_original_libs.extend([fl for fl in delphes_dict if not fl in self.archi_info.delphes_original_libs])
