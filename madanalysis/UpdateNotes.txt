@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+194           (2020/05/28) fuks:    Final push: super fastsim 
+
 193           (2020/05/22) fuks:    Updating and improving the smearers 
 
 192           (2020/05/04) fuks:    Adding jets faking photons and electrons in the fastsim 

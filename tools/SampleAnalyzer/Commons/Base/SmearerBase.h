@@ -86,6 +86,8 @@ namespace MA5
                 output_.momentum().SetPxPyPzE(part->px(),part->py(),part->pz(),part->e());
                 return output_;
             }
+            // Check whether electron smearing is on (code-efficiency-related)
+            virtual MAbool isElectronSmearerOn() {return false;}
 
             // Muon smearing method
             virtual MCParticleFormat MuonSmearer(const MCParticleFormat * part)
@@ -94,6 +96,8 @@ namespace MA5
                 output_.momentum().SetPxPyPzE(part->px(),part->py(),part->pz(),part->e());
                 return output_;
             }
+            // Check whether muon smearing is on (code-efficiency-related)
+            virtual MAbool isMuonSmearerOn() {return false;}
 
             // Hadronic Tau smearing method
             virtual MCParticleFormat TauSmearer(const MCParticleFormat * part)
@@ -102,6 +106,8 @@ namespace MA5
                 output_.momentum().SetPxPyPzE(part->px(),part->py(),part->pz(),part->e());
                 return output_;
             }
+            // Check whether tau smearing is on (code-efficiency-related)
+            virtual MAbool isTauSmearerOn() {return false;}
 
             // Photon smearing method
             virtual MCParticleFormat PhotonSmearer(const MCParticleFormat * part)
@@ -110,6 +116,8 @@ namespace MA5
                 output_.momentum().SetPxPyPzE(part->px(),part->py(),part->pz(),part->e());
                 return output_;
             }
+            // Check whether photon smearing is on (code-efficiency-related)
+            virtual MAbool isPhotonSmearerOn() {return false;}
 
             // Jet smearing method
             virtual MCParticleFormat JetSmearer(const MCParticleFormat * part)

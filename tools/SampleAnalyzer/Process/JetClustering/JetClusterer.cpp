@@ -157,6 +157,13 @@ MAbool JetClusterer::IsLast(const MCParticleFormat* part, EventFormat& myEvent)
 
 
 // -----------------------------------------------------------------------------
+// Sorting the reco objects (necessary after smearing)
+// -----------------------------------------------------------------------------
+MAbool sort_by_leptonPT(RecLeptonFormat const & a, RecLeptonFormat const & b) { return a.pt() < b.pt(); };
+MAbool sort_by_photonPT(RecPhotonFormat const & a, RecPhotonFormat const & b) { return a.pt() < b.pt(); };
+MAbool    sort_by_tauPT(RecTauFormat const & a,    RecTauFormat const & b   ) { return a.pt() < b.pt(); };
+
+// -----------------------------------------------------------------------------
 // Execute
 // -----------------------------------------------------------------------------
 MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
@@ -360,6 +367,16 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
       }
     }
   }
+
+  // Sorting the objecfts after smearing
+  if (mySmearer_->isElectronSmearerOn())
+      std::sort(myEvent.rec()->electrons_.begin(), myEvent.rec()->electrons_.end(), sort_by_leptonPT);
+  if (mySmearer_->isMuonSmearerOn())
+      std::sort(myEvent.rec()->muons_.begin(),     myEvent.rec()->muons_.end(),     sort_by_leptonPT);
+  if (mySmearer_->isTauSmearerOn())
+      std::sort(myEvent.rec()->taus_.begin(),      myEvent.rec()->taus_.end(),      sort_by_tauPT);
+  if (mySmearer_->isPhotonSmearerOn())
+      std::sort(myEvent.rec()->photons_.begin(),   myEvent.rec()->photons_.end(),   sort_by_photonPT);
 
   // Launching the clustering
   // -> Filling the collection: myEvent->rec()->jets()

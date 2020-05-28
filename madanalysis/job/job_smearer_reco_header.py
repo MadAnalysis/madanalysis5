@@ -86,19 +86,27 @@ class JobSmearerRecoHeader:
         if self.electron_smearing:
             file.write('      /// Electron smearing method\n')
             file.write('      MCParticleFormat ElectronSmearer(const MCParticleFormat * part);\n\n')
+            file.write('      // Boolean to check if electron smearer is on\n')
+            file.write('      MAbool isElectronSmearerOn() {return true;}\n\n')
         if self.muon_smearing:
             file.write('      /// Muon smearing method\n')
             file.write('      MCParticleFormat MuonSmearer(const MCParticleFormat * part);\n\n')
+            file.write('      // Boolean to check if muon smearer is on\n')
+            file.write('      MAbool isMuonSmearerOn() {return true;}\n\n')
         if self.photon_smearing:
             file.write('      /// Photon smearing method\n')
             file.write('      MCParticleFormat PhotonSmearer(const MCParticleFormat * part);\n\n')
+            file.write('      // Boolean to check if photon smearer is on\n')
+            file.write('      MAbool isPhotonSmearerOn() {return true;}\n\n')
         if self.tau_smearing:
             file.write('      /// Hadronic Tau smearing method\n')
             file.write('      MCParticleFormat TauSmearer(const MCParticleFormat * part);\n\n')
+            file.write('      // Boolean to check if tau smearer is on\n')
+            file.write('      MAbool isTauSmearerOn() {return true;}\n\n')
         if self.jet_smearing:
             file.write('      /// Jet smearing method\n')
             file.write('      MCParticleFormat JetSmearer(const MCParticleFormat * part);\n\n')
-            file.write('      // Checking whether jet smearing is on\n')
+            file.write('      // Boolean to check if jet smearer is on\n')
             file.write('      MAbool isJetSmearerOn() {return true;}\n\n')
         if self.constituent_smearing:
             file.write('      /// Jet Constituent smearing method\n')
