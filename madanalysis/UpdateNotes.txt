@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+195           (2020/06/09) fuks:    Updating the PAD with SFS functionalities 
+
 194           (2020/05/28) fuks:    Final push: super fastsim 
 
 193           (2020/05/22) fuks:    Updating and improving the smearers 

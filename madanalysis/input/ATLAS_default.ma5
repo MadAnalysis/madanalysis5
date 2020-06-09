@@ -1,0 +1,134 @@
+#<><><><><><><><><><><><><><><><><><><><><><><><><>
+#                                                <>
+#   ATLAS-Default                                <>
+#   Author: Jack Y. Araz, Benjamin Fuks          <>
+#						 <>
+#   	Please cite arXiv:2006.XXXX		 <>
+#						 <>
+#   Based on MadAnalysis 5 v1.8                  <>
+#                                                <>
+#<><><><><><><><><><><><><><><><><><><><><><><><><>
+
+# Set FastJet variables
+
+set main.fastsim.package = fastjet
+set main.fastsim.algorithm = antikt
+set main.fastsim.radius = 0.6
+set main.fastsim.bjet_id.matching_dr = 0.3
+set main.fastsim.bjet_id.exclusive = true
+set main.fastsim.exclusive_id = false
+set main.fastsim.ptmin = 20.0
+set main.fastsim.jetrecomode = jets 
+
+# Jet Smearing
+
+## Tracker effects are approximated (optimized for dijet process)
+define reco_efficiency j 0.75  [abseta <= 1.5]
+define reco_efficiency j 0.975 [abseta > 1.5 and abseta <= 2.5]
+define reco_efficiency j 0.98  [abseta > 2.5 and abseta <= 3.5]
+define reco_efficiency j 0.975 [abseta > 3.5 ]
+
+
+#define smearer j with PT sqrt(0.06^2 + pt^2*1.3e-3^2) [abseta <= 0.5 and pt > 0.1]
+#define smearer j with PT sqrt(0.10^2 + pt^2*1.7e-3^2) [abseta > 0.5 and abseta <= 1.5 and pt > 0.1]
+#define smearer j with PT sqrt(0.25^2 + pt^2*3.1e-3^2) [abseta > 1.5 and abseta <= 2.5 and pt > 0.1]
+
+## HCAL
+# http://arxiv.org/pdf/hep-ex/0004009v1
+# http://villaolmo.mib.infn.it/ICATPP9th_2005/Calorimetry/Schram.p.pdf
+# set HCalResolutionFormula {resolution formula as a function of eta and energy}
+
+define smearer j with E sqrt(E^2*0.0302^2 + E*0.5205^2 + 1.59^2)  [abseta <= 1.7]
+define smearer j with E sqrt(E^2*0.05^2   + E*0.706^2)            [abseta > 1.7 and abseta <= 3.2]
+define smearer j with E sqrt(E^2*0.0942^2 + E)                    [abseta > 3.2 and abseta <= 4.9]
+
+### Electron Smearing
+
+## Momentum Smearing
+define smearer e with PT sqrt(0.03^2 + pt^2*1.3e-3^2) [abseta <= 0.5 and pt > 0.1]
+define smearer e with PT sqrt(0.05^2 + pt^2*1.7e-3^2) [abseta > 0.5 and abseta <= 1.5 and pt > 0.1]
+define smearer e with PT sqrt(0.15^2 + pt^2*3.1e-3^2) [abseta > 1.5 and abseta <= 2.5 and pt > 0.1]
+
+## ECAL
+# set ECalResolutionFormula {resolution formula as a function of eta and energy}
+# http://arxiv.org/pdf/physics/0608012v1 jinst8_08_s08003
+# http://villaolmo.mib.infn.it/ICATPP9th_2005/Calorimetry/Schram.p.pdf
+# http://www.physics.utoronto.ca/~krieger/procs/ComoProceedings.pdf
+
+define smearer e with E sqrt(E^2*0.0017^2 + E*0.101^2) [abseta <= 3.2]
+define smearer e with E sqrt(E^2*0.0350^2 + E*0.285^2) [abseta>3.2 and abseta<=4.9]
+
+## Reconstruction efficiency (optimized for Drell Yan process)
+
+define reco_efficiency e 0.0 [pt <= 10.0 or abseta > 2.5]
+define reco_efficiency e 0.9 [abseta <=1.5 and pt > 10.0]
+define reco_efficiency e 0.7 [abseta > 1.5 and abseta <= 2.5 and pt > 10.0]
+
+
+## Muon Smearing
+
+
+## Momentum Smearing
+
+define smearer mu with PT sqrt(0.01^2  + pt^2*1.0e-4^2) [abseta <= 0.5 and pt > 0.1]
+define smearer mu with PT sqrt(0.015^2 + pt^2*1.5e-4^2) [abseta > 0.5 and abseta <= 1.5 and pt > 0.1]
+define smearer mu with PT sqrt(0.025^2 + pt^2*3.5e-4^2) [abseta > 1.5 and abseta <= 2.5 and pt > 0.1]
+
+## Reconstruction efficiency
+
+
+## with Tracker (optimized for Drell Yan process)
+define reco_efficiency mu 0.0  [abseta >  2.5 or  pt <= 10.0]
+define reco_efficiency mu 0.95 [ABSETA <= 1.5 and pt > 10.0]
+define reco_efficiency mu 0.85 [ABSETA >  1.5 and abseta < 2.5 and pt > 10.0]
+
+
+
+### Photon reconstruction
+
+## ECAL
+# set ECalResolutionFormula {resolution formula as a function of eta and energy}
+# http://arxiv.org/pdf/physics/0608012v1 jinst8_08_s08003
+# http://villaolmo.mib.infn.it/ICATPP9th_2005/Calorimetry/Schram.p.pdf
+# http://www.physics.utoronto.ca/~krieger/procs/ComoProceedings.pdf
+
+define smearer a with E sqrt(E^2*0.0017^2 + E*0.101^2) [abseta <= 3.2]
+define smearer a with E sqrt(E^2*0.0350^2 + E*0.285^2) [abseta>3.2 and abseta<=4.9]
+
+# Reconstruction efficiency (optimized for diphoton process)
+define reco_efficiency a 0.0  [pt <= 10.0 or abseta > 2.5]
+define reco_efficiency a 0.95 [abseta <=1.5 and pt > 10.0]
+define reco_efficiency a 0.85 [abseta > 1.5 and abseta <= 2.5 and pt > 10.0]
+
+
+### Particle Identification
+
+## B tagging
+# based on ATL-PHYS-PUB-2015-022
+define tagger j as b 0.002+7.3e-06*pt
+define tagger c as b 0.20*tanh(0.02*pt)*(1/(1+0.0034*pt))  [abseta < 2.5]
+define tagger c as b 0.0                                   [abseta >=2.5]
+define tagger b as b 0.80*tanh(0.003*pt)*(30/(1+0.086*pt)) [abseta < 2.5]
+define tagger b as b 0.0                                   [abseta >= 2.5]
+
+## Hadronic Taus
+
+## HCAL
+
+define smearer ta with E sqrt(E^2*0.0302^2 + E*0.5205^2 + 1.59^2)  [abseta <= 1.7]
+define smearer ta with E sqrt(E^2*0.05^2   + E*0.706^2)            [abseta > 1.7 and abseta <= 3.2]
+define smearer ta with E sqrt(E^2*0.0942^2 + E)                    [abseta > 3.2 and abseta <= 4.9]
+
+define tagger j as ta 0.01 [ntracks >= 2 and abseta <= 2.7]
+define tagger j as ta 0.02 [ntracks == 1 and abseta <= 2.7]
+define tagger j as ta 0.0  [abseta > 2.7]
+
+define tagger ta as ta 0.6 [abseta <= 2.5 and ntracks >= 2]
+define tagger ta as ta 0.7 [abseta <= 2.5 and ntracks == 1]
+define tagger ta as ta 0.0 [abseta > 2.5]
+
+# reconstruction efficiencies (optimized for ditau process)
+define reco_efficiency ta 0.0  [pt <= 20.]
+define reco_efficiency ta 0.65 [pt > 20. and abseta <= 2.5]
+define reco_efficiency ta 1.   [pt > 20. and abseta > 2.5]  # safety
+

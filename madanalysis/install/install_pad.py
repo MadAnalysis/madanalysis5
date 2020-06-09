@@ -50,13 +50,13 @@ class InstallPad:
         }
         if padname=='PADForMA5tune':
             self.files  = {
-                "padma5tune.dat"   : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/padma5tune.dat",
-                "bib_padma5tune.dat": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/bib_padma5tune.dat"
+             "padma5tune.dat"   : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/padma5tune.dat",
+             "bib_padma5tune.dat": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/bib_padma5tune.dat"
             }
         elif padname=='PADForSFS':
             self.files  = {
-                "padsfs.dat"     : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/padsfs.dat",
-                "bib_padsfs.dat" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/bib_padsfs.dat"
+             "padsfs.dat"     : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/SFS/padsfs.dat",
+             "bib_padsfs.dat" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/SFS/bib_padsfs.dat"
             }
         self.analyses       = []
         self.analysis_files = []
@@ -77,11 +77,11 @@ class InstallPad:
         bkpname = self.padname + "-v" + time.strftime("%Y%m%d-%Hh%M") + ".tgz"
         logging.getLogger('MA5').info("     => Backuping the previous installation: " + bkpname)
         logname = os.path.normpath(self.main.archi_info.ma5dir+'/tools/'+self.padname+'-backup.log')
-        TheCommand = ['tar', 'czf', bkpname, 'PAD']
+        TheCommand = ['tar', 'czf', bkpname, self.padname]
         logging.getLogger('MA5').debug('Shell command: '+' '.join(TheCommand))
         ok, out= ShellCommand.ExecuteWithLog(TheCommand,logname,self.main.archi_info.ma5dir+'/tools',silent=False)
         if not ok:
-            return False
+            return False, False
         logging.getLogger('MA5').info("     => Backup done")
         from madanalysis.IOinterface.folder_writer import FolderWriter
         return FolderWriter.RemoveDirectory(self.installdir,question)
@@ -162,15 +162,16 @@ class InstallPad:
         if not InstallService.wget(self.files,logname,self.downloaddir):
             return False
 
-       # Json information for pyhf
+        # Json information for pyhf
         json_dictionary    = {}
-        logging.getLogger('MA5').debug(" ** Getting the list of pyhf-cpompatible analyses in " + self.downloaddir+"/json_pad.dat")
-        json_input = open(os.path.join(self.downloaddir,'json_pad.dat'));
-        for line in json_input:
-            if len(line.strip())==0 or line.strip().startswith('#'):
-                continue;
-            json_dictionary[line.strip().split('|')[0].strip()] = line.strip().split('|')[1].split();
-        json_input.close();
+        if self.padname=='PAD':
+            logging.getLogger('MA5').debug(" ** Getting the list of pyhf-cpompatible analyses in " + self.downloaddir+"/json_pad.dat")
+            json_input = open(os.path.join(self.downloaddir,'json_pad.dat'));
+            for line in json_input:
+                if len(line.strip())==0 or line.strip().startswith('#'):
+                    continue;
+                json_dictionary[line.strip().split('|')[0].strip()] = line.strip().split('|')[1].split();
+            json_input.close();
 
         # Getting the analysis one by one (and creating first skeleton analyses for each of them)
         logging.getLogger('MA5').debug('Reading the analysis list in ' + \
@@ -223,7 +224,11 @@ class InstallPad:
                         return False
                 ## Preparing the download of the analysis files
                 if url=='MA5-local':
-                    url='http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox'
+                    url='http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/'
+                    if self.padname == 'PADForSFS':
+                        url += 'SFS'
+                    else:
+                        url += 'MA5SandBox'
                 else:
                     url=os.path.join(url,'files')
                 for extension in ['cpp', 'info', 'h']:
@@ -240,15 +245,17 @@ class InstallPad:
                         self.json_cards.append(new_analysis+'_'+json+'.json')
                         self.analysis_files.append(new_analysis+'_'+json+'.json')
             # Preparing to download the delphes card
-            detector = "delphes"
+            detector  = "delphes"
+            wiki_page = 'MA5SandBox'
             if self.padname == "PADForSFS":
-                detector = "MA5-SFS"
+                detector  = "MA5-SFS"
+                wiki_page = 'SFS'
             if len(delphes)!=0 and download_delphes:
                 logging.getLogger('MA5').debug(" ** Getting the " + detector + " card " + new_delphes)
                 if len(analysis)!=0:
-                    files[new_delphes] = os.path.join('http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox', delphes)
+                    files[new_delphes] = os.path.join('http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/'+wiki_page, delphes)
                 else:
-                    files[delphes] = os.path.join('http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox', delphes)
+                    files[delphes] = os.path.join('http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/'+wiki_page, delphes)
             # download in a temporary folder
             if len(new_analysis)!=0:
                 logging.getLogger('MA5').info('    --> Downloading the files for ' + new_analysis)

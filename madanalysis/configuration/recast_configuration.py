@@ -531,6 +531,9 @@ class RecastConfiguration:
             sfs_path = os.path.normpath(os.path.join(self.ma5dir,"tools/PADForSFS/Build/SampleAnalyzer/User/Analyzer"))
             analysislist  = [x.split('/')[-1].split('.cpp')[0] for x in glob.glob(sfs_path+'/*.cpp')];
             for mycard,alist in self.DelphesDic.items():
+                # it the analysis name is the same skip the one which has delphes card
+                if mycard.endswith('tcl'):
+                    continue
                 for analysis in alist:
                     if analysis not in analysislist:
                         continue
