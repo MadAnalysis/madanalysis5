@@ -88,8 +88,11 @@ class InstallPad:
 
 
     def GetNcores(self):
-        self.ncores = InstallService.get_ncores(self.main.archi_info.ncores,\
-                                                self.main.forced)
+        if self.padname != 'PADForSFS':
+            self.ncores = InstallService.get_ncores(self.main.archi_info.ncores,\
+                                                    self.main.forced)
+        else:
+            self.ncores = 1
 
 
     def CreatePackageFolder(self):
