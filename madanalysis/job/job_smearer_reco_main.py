@@ -37,8 +37,8 @@ class JobSmearerRecoMain:
         self.constituent_smearing = False
         for key, val in self.fastsim.smearer.rules.items():
             if val['id_true'] in ['21','j']:
-                self.jet_smearing         = True
-                self.constituent_smearing = True
+                self.jet_smearing         = (self.fastsim.jetrecomode == 'jets')
+                self.constituent_smearing = (self.fastsim.jetrecomode == 'constituents')
             elif val['id_true'] in ['22','a']:
                 self.photon_smearing      = True
             elif val['id_true'] in ['13','mu']:
@@ -50,7 +50,6 @@ class JobSmearerRecoMain:
         for key, val in self.fastsim.reco.rules.items():
             if val['id_reco'] in ['21','j']:
                 self.jet_smearing         = True
-                self.constituent_smearing = True
             elif val['id_reco'] in ['22','a']:
                 self.photon_smearing      = True
             elif val['id_reco'] in ['13','mu']:
@@ -59,10 +58,6 @@ class JobSmearerRecoMain:
                 self.electron_smearing    = True
             elif val['id_reco'] in ['15','ta']:
                 self.tau_smearing         = True
-        if self.fastsim.jetrecomode == 'constituents':
-            self.jet_smearing         = False
-        else:
-            self.constituent_smearing = False
 
     ## Writing NewTagger.h
     def WriteNewSmearerRecoSource(self, file):
@@ -93,10 +88,18 @@ class JobSmearerRecoMain:
         file.write('{\n')
         file.write('    MCParticleFormat *'+obj+' = &(output_);\n')
         file.write('    '+obj+'->Reset();\n')
-        self.PrintReco(reco_list,file,'part')
+
+        # Dont use reco eff for constituents
+        if obj != 'Constituent':
+            self.PrintReco(reco_list,file,'part')
+
         #if not eliminated set hadron momentum
         file.write('    '+obj+'->momentum().SetPxPyPzE(part->px(),part->py(),part->pz(),part->e());\n')
-        self.PrintSmearer(reco_list, ['PT','ETA','PHI','E','PX','PY','PZ'],file,obj)
+
+        # If constituents method is in use jet smearing is only done for constituents
+        if (obj != 'Jet') or (obj=='Jet' and self.fastsim.jetrecomode == 'jets'):
+            self.PrintSmearer(reco_list, ['PT','ETA','PHI','E','PX','PY','PZ'],file,obj)
+
         file.write('    return output_;\n')
         file.write('}\n\n')
 
@@ -126,7 +129,7 @@ class JobSmearerRecoMain:
                 if val['obs'] == 'PT':
                     file.write('      if (smeared_object < 0.) smeared_object = 0.;\n')
                     file.write('      '+obj+'->momentum().SetPtEtaPhiE(smeared_object, '+\
-                               obj+'->eta(), '+obj+'->phi(), '+obj+'->e());\n')
+                          obj+'->eta(), '+obj+'->phi(), smeared_object*cosh('+obj+'->eta()));\n')
                 elif val['obs'] == 'ETA':
                     file.write('      '+obj+\
                                '->momentum().SetPtEtaPhiE('+obj+'->pt(), '+\
@@ -152,8 +155,8 @@ class JobSmearerRecoMain:
                                obj+'->py(), smeared_object, '+obj+'->e());\n')
                 elif val['obs'] == 'E':
                     file.write('      if (smeared_object < 0.) smeared_object = 0.;\n')
-                    file.write('      '+obj+'->momentum().SetPtEtaPhiE('+obj+'->pt(), '+\
-                               obj+'->eta(), '+obj+'->phi(), '+'smeared_object);\n')
+                    file.write('      '+obj+'->momentum().SetPtEtaPhiE(smeared_object/cosh('+\
+                           obj+'->eta()), '+obj+'->eta(), '+obj+'->phi(), smeared_object);\n')
                 file.write('    }\n')
                 check_initializer+=1
 

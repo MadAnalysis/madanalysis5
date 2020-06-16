@@ -35,8 +35,8 @@ class JobSmearerRecoHeader:
         self.constituent_smearing = False
         for key, val in self.fastsim.smearer.rules.items():
             if val['id_true'] in ['21','j']:
-                self.jet_smearing         = True
-                self.constituent_smearing = True
+                self.jet_smearing         = (self.fastsim.jetrecomode == 'jets')
+                self.constituent_smearing = (self.fastsim.jetrecomode == 'constituents')
             elif val['id_true'] in ['22','a']:
                 self.photon_smearing      = True
             elif val['id_true'] in ['13','mu']:
@@ -48,7 +48,6 @@ class JobSmearerRecoHeader:
         for key, val in self.fastsim.reco.rules.items():
             if val['id_reco'] in ['21','j']:
                 self.jet_smearing         = True
-                self.constituent_smearing = True
             elif val['id_reco'] in ['22','a']:
                 self.photon_smearing      = True
             elif val['id_reco'] in ['13','mu']:
@@ -57,10 +56,6 @@ class JobSmearerRecoHeader:
                 self.electron_smearing    = True
             elif val['id_reco'] in ['15','ta']:
                 self.tau_smearing         = True
-        if self.fastsim.jetrecomode == 'constituents':
-            self.jet_smearing         = False
-        else:
-            self.constituent_smearing = False
 
 
     ## Writing NewSmearer.h

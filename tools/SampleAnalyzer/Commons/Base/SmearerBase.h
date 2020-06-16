@@ -140,20 +140,62 @@ namespace MA5
 
             /// Smearer Gaussian function 
             /// (one smears the quantity 'property' with a Gaussian of variance 'sigma')
+            ///
+            /// REFERENCE:  - W. Hoermann and G. Derflinger (1990):
+            ///              The ACR Method for generating normal random variables,
+            ///              OR Spektrum 12 (1990), 181-185.
+            ///
+            /// Implementation taken from
+            /// UNURAN (c) 2000  W. Hoermann & J. Leydold, Institut f. Statistik, WU Wien
+            /// Taken from ROOT: https://root.cern.ch/doc/master/TRandom_8cxx_source.html#l00263
             MAdouble64 Gaussian(MAdouble64 sigma, MAdouble64 property)
             {
-                MAdouble64 PI = 3.141592653589793;
-                MAdouble64 N  = 1.0 / (sigma * sqrt(2.0 * PI));
-                if (N > 1e20)
+              MAdouble64 kC1 = 1.448242853;          MAdouble64 kAs = 0.8853395638;
+              MAdouble64 kC2 = 3.307147487;          MAdouble64 kBs = 0.2452635696;
+              MAdouble64 kC3 = 1.46754004;           MAdouble64 kCs = 0.2770276848;
+              MAdouble64 kD1 = 1.036467755;          MAdouble64 kB  = 0.5029324303;
+              MAdouble64 kD2 = 5.295844968;          MAdouble64 kX0 = 0.4571828819;
+              MAdouble64 kD3 = 3.631288474;          MAdouble64 kYm = 0.187308492 ;
+              MAdouble64 kHm = 0.483941449;          MAdouble64 kS  = 0.7270572718 ;
+              MAdouble64 kZm = 0.107981933;          MAdouble64 kT  = 0.03895759111;
+              MAdouble64 kHp = 4.132731354;          MAdouble64 kHp1 = 3.132731354;
+              MAdouble64 kZp = 18.52161694;          MAdouble64 kHzm = 0.375959516;
+              MAdouble64 kPhln = 0.4515827053;       MAdouble64 kHzmp = 0.591923442;
+              MAdouble64 kHm1 = 0.516058551;
+
+              MAdouble64 result, rn,x,y,z;
+              do
+              {
+                y = RANDOM->flat();
+                if (y>kHm1) { result = kHp*y-kHp1; break; }
+                else if (y<kZm) { rn = kZp*y-1; result = (rn>0) ? (1+rn) : (-1+rn); break; }
+                else if (y<kHm)
                 {
-                    WARNING << "Infinite normalization found in a smearing function" << endmsg;
-                    WARNING << "Smearing ignored." << endmsg;
-                    return property;
+                  rn = RANDOM->flat();
+                  rn = rn-1+rn;
+                  z = (rn>0) ? 2-rn : -2-rn;
+                  if ((kC1-y)*(kC3+fabs(z))<kC2) { result = z; break; }
+                  else
+                  {
+                    x = rn*rn;
+                    if ((y+kD1)*(kD3+x)<kD2) { result = rn; break; }
+                    else if (kHzmp-y<exp(-(z*z+kPhln)/2)) { result = z; break; }
+                    else if (y+kHzm<exp(-(x+kPhln)/2)) { result = rn; break; }
+                  }
                 }
-                MAdouble64 gaussian = N * exp( -pow( property / sigma, 2.0) * 0.5 );
-                MAdouble64 r        = RANDOM->flat();
-                MAdouble64 sign     = (r >= 0.5) * 1.0 + (r < 0.5) * (-1.0);
-                return property + sign * RANDOM->flat() * gaussian * 0.5;
+                while (1)
+                {
+                  x = RANDOM->flat();
+                  y = kYm * RANDOM->flat();
+                  z = kX0 - kS*x - y;
+                  if (z>0) rn = 2+y/x;
+                  else { x = 1-x;y = kYm-y;rn = -(2+y/x); }
+                  if ((y-kAs+x)*(kCs+x)+kBs<0) { result = rn; break; }
+                  else if (y<x+kT)
+                    if (rn*rn<4*(kB-log(x))) { result = rn; break; }
+                }
+              } while(0);
+              return property + sigma * result;
             }
 
             /// Smearer Cumulative distribution function TO BE TESTED
