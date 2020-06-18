@@ -429,9 +429,10 @@ class RecastConfiguration:
             sfs_path = os.path.normpath(os.path.join(self.ma5dir,"tools/PADForSFS/Input/Cards"))
             cardlist  = [x.split('/')[-1] for x in glob.glob(sfs_path+'/*.ma5')];
             # final list with analyses
-            for analysis, ma5card in self.DelphesDic.items():
-                if analysis in analysislist and ma5card in cardlist:
-                     sfslist.append([analysis, ma5card])
+            for ma5card, analysis in self.DelphesDic.items():
+                for ana in analysis:
+                    if ana in analysislist and ma5card in cardlist:
+                        sfslist.append([ana, ma5card])
         for myfile,mylist in ToLoopOver:
             for line in myfile:
                 if "manager.InitializeAnalyzer" in line:
