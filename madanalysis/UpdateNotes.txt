@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+198           (2020/06/18) fuks:    Fixing the default LHC SFS cards 
+
 197           (2020/06/16) fuks:    Fixing a last bug with particle smearing 
 
 196           (2020/06/10) fuks:    Last fix for the PAD4SFS 

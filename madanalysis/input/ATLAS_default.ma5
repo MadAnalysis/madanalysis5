@@ -3,7 +3,7 @@
 #   ATLAS-Default                                <>
 #   Author: Jack Y. Araz, Benjamin Fuks          <>
 #						 <>
-#   	Please cite arXiv:2006.XXXX		 <>
+#   	Please cite arXiv:2006.09387		 <>
 #						 <>
 #   Based on MadAnalysis 5 v1.8                  <>
 #                                                <>
@@ -23,7 +23,7 @@ set main.fastsim.jetrecomode = jets
 # Jet Smearing
 
 ## Tracker effects are approximated (optimized for dijet process)
-define reco_efficiency j 0.75  [abseta <= 1.5]
+define reco_efficiency j 0.6   [abseta <= 1.5]
 define reco_efficiency j 0.975 [abseta > 1.5 and abseta <= 2.5]
 define reco_efficiency j 0.98  [abseta > 2.5 and abseta <= 3.5]
 define reco_efficiency j 0.975 [abseta > 3.5 ]

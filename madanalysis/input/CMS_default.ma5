@@ -3,7 +3,7 @@
 #   CMS-Default                                  <>
 #   Author: Jack Y. Araz, Benjamin Fuks          <>
 #						 <>
-#   	Please cite arXiv:2006.XXXX		 <>
+#   	Please cite arXiv:2006.09387		 <>
 #						 <>
 #   Based on MadAnalysis 5 v1.8                  <>
 #                                                <>
@@ -61,7 +61,7 @@ define smearer e with E sqrt(E^2*0.107^2 + E*2.08^2)                            
 
 define reco_efficiency e 0.0   [pt <= 10.0 or abseta > 2.5]
 define reco_efficiency e 0.7   [pt > 10.0 and abseta <= 1.5]
-define reco_efficiency e 0.55  [pt > 10.0 and abseta > 1.5 and abseta <= 2.5]
+define reco_efficiency e 0.525 [pt > 10.0 and abseta > 1.5 and abseta <= 2.5]
 
 
 ## Muon Smearing
@@ -99,9 +99,9 @@ define smearer a with E sqrt(E^2*0.107^2 + E*2.08^2)                            
 
 # Reconstruction efficiency (optimized for diphoton process)
 
-define reco_efficiency a 0.0  [pt <= 10.0 or abseta > 2.5]
-define reco_efficiency a 0.95 [abseta <= 1.5 and pt > 10.0]
-define reco_efficiency a 0.85 [abseta > 1.5 and abseta <= 2.5 and pt > 10.0]
+define reco_efficiency a 0.0   [pt <= 10.0 or abseta > 2.5]
+define reco_efficiency a 0.96  [abseta <= 1.5 and pt > 10.0]
+define reco_efficiency a 0.875 [abseta > 1.5 and abseta <= 2.5 and pt > 10.0]
 
 
 ## B tagging
@@ -129,9 +129,9 @@ define tagger ta as ta 0.6 [abseta < 2.5]
 define tagger ta as ta 0.0 [abseta >= 2.5]
 
 # Reconstruction efficiency (optimized for ditau process)
-define reco_efficiency ta 0.0  [pt <= 20.]
-define reco_efficiency ta 0.65 [pt > 20. and abseta<2.5]
-define reco_efficiency ta 1.0  [pt > 20. and abseta>=2.5] #safety
+define reco_efficiency ta 0.0 [pt <= 20.]
+define reco_efficiency ta 0.7 [pt > 20. and abseta<2.5]
+define reco_efficiency ta 1.0 [pt > 20. and abseta>=2.5] #safety
 
 
 
