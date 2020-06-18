@@ -248,11 +248,21 @@ class RunRecast():
 
     def run_SimplifiedFastSim(self,dataset,card,analysislist):
         """
-        This function generates a folder named ANALYSIS_X_SFSRun using the card 
-        provided in PADForSFS/Input/Cards, this sets up the fastjet initializations
-        and efficiency/smearing functions. Then it copies necessary analysis files 
-        and runs the analysis. Generated cutflow table and histograms are copied 
-        to ANALYSIS_X and ANALYSIS_X_SFSRun is removed.
+
+        Parameters
+        ----------
+        dataset : MA5 Dataset
+            one of the datasets from self.main.dataset
+        card : SFS Run Card
+            SFS description for the detector simulation
+        analysislist : LIST of STR
+            list of analysis names
+
+        Returns
+        -------
+        bool
+            SFS run correctly (True), there was a mistake (False)
+
         """
 
         # Load the analysis card
@@ -275,6 +285,14 @@ class RunRecast():
 
         # Initializing the JobWriter
         jobber = JobWriter(self.main,self.dirname+'_SFSRun')
+
+        logging.getLogger('MA5').info('   <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>')
+        logging.getLogger('MA5').info('   <>                                                              <>')
+        logging.getLogger('MA5').info('   <>     Simplified Fast Detector Simulation in MadAnalysis 5     <>')
+        logging.getLogger('MA5').info('   <>                 Please Cite arXiv: 2006.09387                <>')
+        logging.getLogger('MA5').info('   <>                                                              <>')
+        logging.getLogger('MA5').info('   <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>')
+
 
         # Writing process
         logging.getLogger('MA5').info("   Creating folder '"+self.dirname.split('/')[-1]  + "'...")
@@ -396,6 +414,9 @@ class RunRecast():
                 os.mkdir(self.dirname+'/Output/SAF/'+dataset.name+'/'+analysis+'/RecoEvents')
             cutflow_list   = os.listdir(self.dirname+'_SFSRun/Output/SAF/_'+ dataset.name+'/'+analysis+'_0/Cutflows')
             histogram_list = os.listdir(self.dirname+'_SFSRun/Output/SAF/_'+ dataset.name+'/'+analysis+'_0/Histograms')
+            # Copy dataset info file
+            shutil.move(self.dirname+'_SFSRun/Output/SAF/_'+ dataset.name+'/_'+ dataset.name+'.saf',\
+                        self.dirname+'/Output/SAF/'+dataset.name+'/'+ dataset.name+'.saf')
             for cutflow in cutflow_list:
                 shutil.move(self.dirname+'_SFSRun/Output/SAF/_'+\
                                       dataset.name+'/'+analysis+'_0/Cutflows/'+cutflow,\
