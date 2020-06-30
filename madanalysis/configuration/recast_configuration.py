@@ -60,7 +60,7 @@ class RecastConfiguration:
         self.DelphesDic                 = { }
         self.description                = { }
         self.ma5dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),os.pardir,os.pardir))
-        for mypad in ['PAD', 'PADForMa5tune', 'PADForSFS']:
+        for mypad in ['PAD', 'PADForMA5tune', 'PADForSFS']:
             if os.path.isfile(os.path.join(self.ma5dir,'tools',mypad,'Input','recast_config.dat')):
                 dico_file = open(os.path.join(self.ma5dir,'tools',mypad,'Input','recast_config.dat'), 'r')
                 for line in dico_file:

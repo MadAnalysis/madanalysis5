@@ -97,6 +97,10 @@ def DefaultInstallCard():
     output.write('# padma5_veto = 0 # 0=No, 1=Yes\n')
     output.write('# padma5_build_path = /home/PADForMA5tune/build/\n')
     output.write('\n')
+    output.write('# -----PADForSFS-----\n')
+    output.write('# padsfs_veto = 0 # 0=No, 1=Yes\n')
+    output.write('# padsfs_build_path = /home/PADForSFS/build/\n')
+    output.write('\n')
     output.write('# -----PDFLATEX-----\n')
     output.write('# pdflatex_veto = 0 # 0=No, 1=Yes\n')
     output.write('\n')
@@ -115,7 +119,6 @@ def DefaultInstallCard():
 def DecodeArguments(version, date):
     
     import sys
-    import os
     
     # Checking arguments
     import getopt

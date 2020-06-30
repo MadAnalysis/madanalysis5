@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+201           (2020/06/30) fuks:    Small fix with the SFS configuration 
+
 200           (2020/06/18) fuks:    Fixing some text output and comment stuff 
 
 199           (2020/06/18) fuks:    Small bug fix with the SFS PAD installation 

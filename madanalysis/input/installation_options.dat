@@ -14,9 +14,6 @@
 # -----MATPLOTLIB-----
 # matplotlib_veto = 0 # 0=No, 1=Yes
 
-# -----GNUPLOT-----
-# gnuplot_veto = 1 # 0=No, 1=Yes
-
 # -----DELPHES----- 
 # delphes_veto     = 0 # 0=No, 1=Yes
 # delphes_includes = /home/delphes/delphes/include/
@@ -43,6 +40,10 @@
 # -----PADForMA5Tune-----
 # padma5_veto = 0 # 0=No, 1=Yes
 # padma5_build_path = /home/PADForMA5tune/build/
+
+# -----PADForSFS-----
+# padsfs_veto = 0 # 0=No, 1=Yes
+# padsfs_build_path = /home/PADForSFS/build/
 
 # -----PDFLATEX-----
 # pdflatex_veto = 0 # 0=No, 1=Yes
