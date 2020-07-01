@@ -264,7 +264,9 @@ class RunRecast():
             SFS run correctly (True), there was a mistake (False)
 
         """
-
+        if any([(x.endswith('root')) or (x.endswith('lhco')) or (x.endswith('lhco.gz')) for x in dataset.filenames]):
+            logging.getLogger('MA5').error("   Dataset can not contain reconstructed file type.")
+            return False
         # Load the analysis card
         from madanalysis.core.script_stack import ScriptStack
         ScriptStack.AddScript(card)
@@ -415,8 +417,9 @@ class RunRecast():
             cutflow_list   = os.listdir(self.dirname+'_SFSRun/Output/SAF/_'+ dataset.name+'/'+analysis+'_0/Cutflows')
             histogram_list = os.listdir(self.dirname+'_SFSRun/Output/SAF/_'+ dataset.name+'/'+analysis+'_0/Histograms')
             # Copy dataset info file
-            shutil.move(self.dirname+'_SFSRun/Output/SAF/_'+ dataset.name+'/_'+ dataset.name+'.saf',\
-                        self.dirname+'/Output/SAF/'+dataset.name+'/'+ dataset.name+'.saf')
+            if os.path.isfile(self.dirname+'_SFSRun/Output/SAF/_'+ dataset.name+'/_'+ dataset.name+'.saf'):
+                shutil.move(self.dirname+'_SFSRun/Output/SAF/_'+ dataset.name+'/_'+ dataset.name+'.saf',\
+                            self.dirname+'/Output/SAF/'+dataset.name+'/'+ dataset.name+'.saf')
             for cutflow in cutflow_list:
                 shutil.move(self.dirname+'_SFSRun/Output/SAF/_'+\
                                       dataset.name+'/'+analysis+'_0/Cutflows/'+cutflow,\
