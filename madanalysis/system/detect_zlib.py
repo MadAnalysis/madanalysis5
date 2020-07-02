@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -98,6 +98,8 @@ class DetectZlib:
         DetectZlib.AddIfValid('/usr/local/include',self.search_incs)
         DetectZlib.AddIfValid('/local/include',self.search_incs)
         DetectZlib.AddIfValid('/opt/local/include',self.search_incs)
+        for path in self.session_info.gcc_header_search_path:
+            DetectZlib.AddIfValid(path,self.search_libs)
 
 
     def FillLibraries(self):
@@ -130,6 +132,8 @@ class DetectZlib:
         DetectZlib.AddIfValid('/usr/local/lib*',self.search_libs)
         DetectZlib.AddIfValid('/local/lib*',self.search_libs)
         DetectZlib.AddIfValid('/opt/local/lib*',self.search_libs)
+        for path in self.session_info.gcc_library_search_path:
+            DetectZlib.AddIfValid(path,self.search_libs)
         
 
     def ManualDetection(self):

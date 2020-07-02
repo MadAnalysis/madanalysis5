@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -25,12 +25,15 @@
 import logging
 import sys
 
-from string_tools                                       import StringTools
+from string_tools import StringTools
+from chronometer  import Chronometer
+
 class InstallManager():
 
     def __init__(self,main):
-        self.main=main
+        self.main   = main
         self.logger = logging.getLogger('MA5')
+        self.chrono = Chronometer()
 
     def Execute(self, rawpackage):
 
@@ -67,14 +70,17 @@ class InstallManager():
         elif package=='numpy':
             from madanalysis.install.install_numpy import InstallNumpy
             installer=InstallNumpy(self.main)
-        elif package in ['pad', 'padforma5tune']:
-            if self.main.archi_info.has_root and self.main.session_info.has_scipy:
+        elif package in ['pad', 'padforma5tune', 'padforsfs']:
+            if (package == 'padforsfs') or (self.main.archi_info.has_root and self.main.session_info.has_scipy):
                 from madanalysis.install.install_pad import InstallPad
-                installer=InstallPad(self.main, package)
+                installer=InstallPad(self.main, rawpackage)
             else:
                 self.logger.warning('the package "' + rawpackage + '" cannot be installed without root ' +\
                     'and scipy; installation skipped')
                 return True
+        elif package=='pyhf':
+            from madanalysis.install.install_pyhf import Installpyhf
+            installer=Installpyhf(self.main)
         else:
             self.logger.error('the package "'+rawpackage+'" is unknown')
             return False
@@ -88,6 +94,9 @@ class InstallManager():
         # Get list of the methods of the installer class
         # If the method does not exist, the method is not called
         methods = dir(installer)
+
+        # Chrono start
+        self.chrono.Start()
 
         # 0. Detecting previous installation
         if 'Detect' in methods:
@@ -193,18 +202,33 @@ class InstallManager():
 
     def PrintGood(self):
         self.logger.info("   Installation complete.")
+
+        # Chrono end
+        self.chrono.Stop()
+        self.logger.info("   Elapsed time = "+self.chrono.Display())
+
         self.logger.info('   => Status: \x1b[32m'+'[OK]'+'\x1b[0m')
         self.logger.info("   **********************************************************")
         self.logger.info("")
 
     def PrintSkip(self):
         self.logger.info("   Installation skipped.")
+
+        # Chrono end
+        self.chrono.Stop()
+        self.logger.info("   Elapsed time = "+self.chrono.Display())
+
         self.logger.info('   => Status: \x1b[35m'+'[SKIPPED]'+'\x1b[0m')
         self.logger.info("   **********************************************************")
         self.logger.info("")
 
     def PrintBad(self):
         self.logger.info("   Installation NOT complete.")
+
+        # Chrono end
+        self.chrono.Stop()
+        self.logger.info("   Elapsed time = "+self.chrono.Display())
+
         self.logger.info('   => Status: \x1b[31m'+'[FAILURE]'+'\x1b[0m')
         self.logger.info("   **********************************************************")
         self.logger.info("")

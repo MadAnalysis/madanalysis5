@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -33,7 +33,7 @@ import copy
 def WriteExecute(file,main,part_list):
 
     # Function header
-    file.write('bool user::Execute(SampleFormat& sample, ' +\
+    file.write('MAbool user::Execute(SampleFormat& sample, ' +\
                'const EventFormat& event)\n{\n')
 
     # Getting the event weight

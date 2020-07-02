@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -43,7 +43,7 @@ class JobWriter():
         self.merging    = self.main.merging
 
     @staticmethod
-    def CheckJobStructureMute(path,recastflag):
+    def CheckJobStructureMute(self,path,recastflag):
         if not os.path.isdir(path):
             return False
         if not recastflag:
@@ -60,6 +60,8 @@ class JobWriter():
             elif not os.path.isdir(path+"/Build/Main"):
                 return False
         if not os.path.isdir(path+"/Output"):
+            return False
+        if not os.path.isdir(path+"/Output/SAF"):
             return False
         if not os.path.isdir(path+"/Output/Histos"):
             return False
@@ -123,6 +125,10 @@ class JobWriter():
         except:
             logging.getLogger('MA5').error("Impossible to create the folder 'Output'")
             return False
+        try:
+            os.mkdir(path+"/Output/SAF")
+        except:
+            logging.getLogger('MA5').error("Impossible to create the folder 'Output/SAF'")
         try:
             os.mkdir(path+"/Output/HTML")
         except:
@@ -460,6 +466,13 @@ class JobWriter():
             file.write('  JetClusterer* cluster1 = \n')
             file.write('      manager.InitializeJetClusterer("'+self.main.fastsim.clustering.algorithm+'",parametersC1);\n')
             file.write('  if (cluster1==0) return 1;\n\n')
+            if self.main.superfastsim.smearer.rules!={}  or self.main.superfastsim.reco.rules!={}:
+                file.write('  // Declaration of the smearer\n')
+                file.write('  SmearerBase* mySmearer = new NewSmearer();\n')
+                file.write('  cluster1->LoadSmearer(mySmearer);\n\n')
+            if self.main.superfastsim.tagger.rules!={}:
+                file.write('  // Declaration of a generic tagger\n')
+                file.write('  NewTagger* tagger = new NewTagger();\n\n')
 
         # + Case Delphes
         if self.main.fastsim.package in ["delphes","delphesMA5tune"]:
@@ -528,6 +541,8 @@ class JobWriter():
             file.write('      if (!analyzer2->Execute(mySample,myEvent)) continue;\n')
         if self.main.fastsim.package=="fastjet":
             file.write('      cluster1->Execute(mySample,myEvent);\n')
+            if self.main.superfastsim.tagger.rules!={}:
+                file.write('      tagger->Execute(mySample,myEvent);\n')
         elif self.main.fastsim.package=="delphes":
             file.write('      fastsim1->Execute(mySample,myEvent);\n')
         elif self.main.fastsim.package=="delphesMA5tune":
@@ -565,6 +580,33 @@ class JobWriter():
         job = JobMain.JobMain(file,main)
         job.WriteHeader()
         file.close()
+
+        ## Do we need a smearer?
+        if main.superfastsim.smearer.rules!={} or main.superfastsim.reco.rules!={}:
+            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/new_smearer_reco.h","w")
+            import madanalysis.job.job_smearer_reco_header as JobSmearerRecoHeader
+            job = JobSmearerRecoHeader.JobSmearerRecoHeader(main.superfastsim)
+            job.WriteNewSmearerRecoHeader(file)
+            file.close()
+            if main.superfastsim.smearer.rules!={}:
+                file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/sigmas.h","w")
+                job.WriteNewSmearerEfficiencies(file)
+                file.close()
+            if main.superfastsim.reco.rules!={}:
+                file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/reco.h","w")
+                job.WriteNewRecoEfficiencies(file)
+                file.close()
+
+        ## Do we need a tagger?
+        if main.superfastsim.tagger.rules!={}:
+            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/new_tagger.h","w")
+            import madanalysis.job.job_tagger_header as JobTaggerHeader
+            job = JobTaggerHeader.JobTaggerHeader(main.superfastsim)
+            job.WriteNewTaggerHeader(file)
+            file.close()
+            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/efficiencies.h","w")
+            job.WriteNewTaggerEfficiencies(file)
+            file.close()
         return True
 
     def WriteSelectionSource(self,main):
@@ -574,6 +616,22 @@ class JobWriter():
         job = JobMain.JobMain(file,main)
         job.WriteSource()
         file.close()
+
+        ## Do we need a smearer?
+        if main.superfastsim.smearer.rules!={}  or self.main.superfastsim.reco.rules!={}:
+            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/new_smearer_reco.cpp","w")
+            import madanalysis.job.job_smearer_reco_main as JobSmearerRecoMain
+            job = JobSmearerRecoMain.JobSmearerRecoMain(main.superfastsim)
+            job.WriteNewSmearerRecoSource(file)
+            file.close()
+
+        ## Do we need a tagger?
+        if main.superfastsim.tagger.rules!={}:
+            file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/new_tagger.cpp","w")
+            import madanalysis.job.job_tagger_main as JobTaggerMain
+            job = JobTaggerMain.JobTaggerMain(main.superfastsim)
+            job.WriteNewTaggerSource(file)
+            file.close()
 
         file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/analysisList.h","w")
         file.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"\n')
@@ -603,6 +661,7 @@ class JobWriter():
 
         # Header
         title='User package'
+        toRemove = []
 
         # Options
         option.has_commons   = True
@@ -788,7 +847,7 @@ class JobWriter():
     def WriteHistory(self,history,firstdir):
         file = open(self.path+"/history.ma5","w")
         file.write('set main.currentdir = '+firstdir+'\n') 
-        for line in history:
+        for line in history.history:
             items = line.split(';')
             for item in items :
                 if item.startswith('help') or \
@@ -819,9 +878,9 @@ class JobWriter():
         # Getting the dataset name    
         name=InstanceName.Get(dataset.name)
 
-        # Creating Output folder is not defined
-        if not os.path.isdir(self.path+"/Output/"+name):
-            os.mkdir(self.path+"/Output/"+name)
+        # Creating a folder specific to the dataset
+        if not os.path.isdir(self.path+"/Output/SAF/"+name):
+            os.mkdir(self.path+"/Output/SAF/"+name)
 
         # folder where the program is launched
         folder = self.path+'/Build/'
@@ -848,3 +907,8 @@ class JobWriter():
             result = ShellCommand.Execute(commands,folder)
 
         return result
+
+
+    def WriteTagger(self):
+        # header file
+        bla

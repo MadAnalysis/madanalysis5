@@ -4,28 +4,25 @@
 \usepackage[english]{babel}
 \usepackage[utf8x]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{url,slashed,multirow,cite,verbdef}
-\usepackage{hyperref}
+\usepackage{url,slashed,multirow,cite,verbdef,hyperref,amsmath,graphicx,xcolor}
+\hypersetup{bookmarks=true,unicode=true,pdftoolbar=false,pdfmenubar=true,
+  pdffitwindow=false,pdfstartview={FitH},pdftitle={MA5 Normal Reference Card},
+  pdfauthor={J.~Araz, E.~Conte, B.~Fuks}, pdfsubject={MA5 Normal Reference Card},
+  pdfcreator={J.~Araz, E.~Conte, B.~Fuks},pdfproducer={PDFLaTeX}, pdfkeywords={MA5normal-mode},
+  pdfnewwindow=true,colorlinks=true,
+  linkcolor=blue,citecolor=magenta,filecolor=magenta,urlcolor=cyan}
 
 %% Sets page size and margins
 \usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
 
-%% Useful packages
-\usepackage{amsmath}
-\usepackage{graphicx}
-\usepackage{xcolor}
-\definecolor{ao}{rgb}{0.0, 0.0, 0.55}
-\usepackage{url}
-% faire des boites
+
+% boxes
 \usepackage{framed,color}
+\definecolor{ao}{rgb}{0.0, 0.0, 0.55}
 \definecolor{shadecolor}{rgb}{0.4, 0.6, 0.8}
 
 % Tools
-\newcommand{\MG}{\textsc{MadGraph}~5\_aMC@NLO}
-\newcommand{\PY}{\textsc{Pythia}~8}
 \newcommand{\MA}{\textsc{MadAnalysis}~5}
-\newcommand{\MW}{\textsc{MadWidth}}
-\newcommand{\MS}{\textsc{MadSpin}}
 \newcommand{\MAnorm}{{MadAnalysis}~5}
 \newcommand{\FJ}{\textsc{FastJet}}
 \newcommand{\FJnorm}{{FastJet}}
@@ -49,18 +46,17 @@
 \def\ee{\end{equation}}
 \def\bsp#1\esp{\begin{split}#1\end{split}}
 
-
-
-
-
-
 \begin{document}
 \begin{center} 
-{\color{ao} \huge \textbf{\textsc{MadAnalysis} 5 v1.6}} \\ \vspace{0.25cm}
+{\color{ao} \huge \textbf{\textsc{MadAnalysis} 5 v1.8}} \\ \vspace{0.25cm}
 {\color{ao} \huge \textbf{Normal-Mode reference card}} \\ \vspace{0.25cm}
 \vspace{0.1cm} \textsl{\today}\\
 \vspace{0.1cm} \textsl{website: \url{http://madanalysis.irmp.ucl.ac.be/}}\\
-\vspace{0.1cm} \textsl{references: \href{https://arxiv.org/abs/1206.1599}{arXiv:1206.1599[hep-ph]}, \href{https://arxiv.org/abs/1405.3982}{arXiv:1405.3982[hep-ph]}, \href{https://arxiv.org/abs/1407.3278}{arXiv:1407.3278[hep-ph]}}
+\vspace{0.1cm} \textsl{References:\\ \href{https://arxiv.org/abs/1206.1599}{arXiv:1206.1599 [hep-ph]}, \href{https://arxiv.org/abs/1405.3982}{arXiv:1405.3982 [hep-ph]}, 
+\href{https://arxiv.org/abs/1407.3278}{arXiv:1407.3278 [hep-ph]},\\
+\href{https://arxiv.org/abs/1910.11418}{arXiv:1910.11418 [hep-ph]},
+\href{https://arxiv.org/abs/2006.09387}{arXiv2006.09387 [hep-ph]}
+}
 \end{center}
 
 \hspace{0.5cm}
@@ -76,7 +72,7 @@
 \noindent where the potential options ({\color{ao}\verb+[options]+}) are given in the table below.
 \verbdef{\vv}{-v}
 \renewcommand{\arraystretch}{1.2}%
-\begin{center}\begin{tabular}{ p{2cm} p{2.5cm} p{8.1cm}}
+\begin{center}\begin{tabular}{ l l  p{8.1cm}}
 \hline
 Short & Full & Description\\
 \hline
@@ -110,7 +106,7 @@ editing the file:\\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{shaded}
 \section{\Large Installation of optional packages}
-\end{shaded}
+\label{sec:install}\end{shaded}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \noindent \MA\ is interfaced to several high-energy physics packages and can be linked to
@@ -176,7 +172,7 @@ Command & Description\\
 In order to design an analysis in the \MA\ framework, the user can rely on the
 following commands.
 \renewcommand{\arraystretch}{1.2}%
-\begin{center}\begin{tabular}{p{3.40cm} p{8.75cm}}
+\begin{center}\begin{tabular}{l p{8.75cm}}
 \hline
 Command & Description\\
 \hline
@@ -224,7 +220,7 @@ Command & Description\\
 Throughout the analysis, information can be printed to the screen by means of
 the following commands.
 \renewcommand{\arraystretch}{1.2}%
-\begin{center}\begin{tabular}{p{4.00cm} p{7.70cm}}
+\begin{center}\begin{tabular}{l p{7.70cm}}
 \hline
 Command & Description\\
 \hline
@@ -299,6 +295,7 @@ Command & Description\\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{shaded}
 \section{\Large Observables to be used for histograms and cuts}
+\label{sec:obs}
 \end{shaded}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -441,6 +438,7 @@ Symbol& Description\\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{shaded}
 \section{\Large Options for datasets}
+\label{sec:datasets}
 \end{shaded}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -485,6 +483,32 @@ Symbol& Description\\
   (property to be set to \verb?true? or \verb?false?).\\
 \color{ao} \verb?xsection?  & This overwrites the event sample cross section. The value has
   to be given in pb.\\
+\color{ao} \verb?scale_variation? & This attaches to the dataset cross section
+  a theory error associated with the variation of the unphysical scales. The
+  value has to lie in the [0,1] interval and the error band is symmetric around
+  the central value. \\
+\color{ao} \verb?pdf_variation?   &  This attaches to the dataset cross section
+  a theory error associated with the variation of the parton densities. The
+  value has to lie in the [0,1] interval and the error band is symmetric around
+  the central value. \\
+\color{ao} \verb?scale_up_variation? & This attaches to the dataset cross section
+  a theory error associated with the variation of the unphysical scales. The
+  value has to lie in the [0,1] interval and this parameter concerns the upper
+  enveloppe of the error band.\\
+\color{ao} \verb?scale_down_variation? & This attaches to the dataset cross section
+  a theory error associated with the variation of the unphysical scales. The
+  value has to lie in the [0,1] interval and this parameter concerns the lower
+  enveloppe of the error band.\\
+\color{ao} \verb?pdf_up_variation? &
+  This attaches to the dataset cross section
+  a theory error associated with the variation of the parton densities. The
+  value has to lie in the [0,1] interval and this parameter concerns the upper
+  enveloppe of the error band.\\
+\color{ao} \verb?pdf_down_variation? &
+  This attaches to the dataset cross section
+  a theory error associated with the variation of the parton densities. The
+  value has to lie in the [0,1] interval and this parameter concerns the lower
+  enveloppe of the error band.\\
 \hline
 \end{tabular}
 \end{center}
@@ -493,7 +517,7 @@ Symbol& Description\\
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{shaded}
-\section{\Large Using \FJnorm\ through \MAnorm}
+\section{\Large Using \FJnorm\ through \MAnorm}\label{sec:fastjet}
 \end{shaded}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -633,6 +657,245 @@ the check is then performed by typing in
 \noindent the first one indicating to extract the number of extra hard jets from the
 process identifier, and the second one setting up the maximum number of extra
 jets to consider.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{shaded}
+	\section{\Large Super-fast detector simulation with \MAnorm}
+\end{shaded}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\MA\ offers the user options to parameterize a super-fast simulation of a
+detector response when event reconstruction is achieved through \FJ. The user
+should first initialize \FJ, through \MA, as shown in~\autoref{sec:fastjet}.
+However, as more advanced $b$-tagging and tau-tagging capabilities are
+available, default values for all tagging options of the \FJ\ interface must be
+enforced to avoid redundancies.
+
+The super-fast detector simulation module (denoted below as the super-fastsim
+package of \MA) offers two ways to treat jets, which can be set as
+{\color{ao} \begin{verbatim}
+  set main.fastsim.jetrecomode = <value>
+\end{verbatim}}
+\noindent Two choices exist for the value \verb+<value>+ of the
+{\tt jetrecomode} attribute,
+\renewcommand{\arraystretch}{1.2}%
+\begin{center}
+  \begin{tabular}{l p{8.4cm}}
+    \hline
+    Symbol& Description\\
+    \hline
+    \color{ao} \verb?jets? &
+      The jet reconstruction probability distribution and smearing functions are
+      applied after the clustering (default).\\
+    \color{ao} \verb?constituents?   &
+      The jet reconstruction probability distribution and smearing functions are
+      applied to each of the jet constituents before their clustering with \FJ.\\
+    \hline
+  \end{tabular}
+\end{center}
+
+\vspace{2cm}
+
+\noindent The super-fastsim package of \MA\ is shipped with three
+submodules, for which dedicated examples will be provided below. Their
+respectively address object reconstruction, the smearing of the momenta of the
+various reconstructed objects and the tagging of a given object as such (tagging
+efficiencies) or as a different object (mistagging rates). These modules are
+\renewcommand{\arraystretch}{1.2}%
+\begin{center}\begin{tabular}{l p{8.4cm}}
+  \hline
+  Symbol& Description\\
+  \hline
+  \color{ao} \verb?reco_efficiency? & Generates a probability
+    distribution relying on a user-defined piecewise function. This distribution
+    describes the efficiency to reconstruct a given object.\\
+  \color{ao} \verb?smearer?  &  Generates a Gaussian smearing function relying
+    on a user-defined piecewise function that reflects the standard deviation of
+    the Gaussian. The four-momentum of the object that the function is attached
+    to is then smeared.\\
+  \color{ao} \verb?tagger?   & Generates a probability distribution relying on a
+    user-defined piecewise function describing the probabily to (mis)tag an
+    object. \\
+  \hline
+ \end{tabular}
+\end{center}
+\noindent The syntax to be employed to make use of the \verb+reco_efficiency+
+submodule reads
+{\color{ao} \begin{verbatim}
+  define reco_efficiency <obj> <function> [<domain>]
+\end{verbatim}}
+\noindent In this expression, \verb+<obj>+ consists in the object for which the
+reconstruction efficiency is given. The {\tt reco\_efficiency} submodule can be
+used for for the reconstruction of jets (\verb+j+), hadronic taus (\verb+ta+),
+muons (\verb+mu+),
+electrons (\verb+e+) and photons (\verb+a+). The piecewise function on which the
+objet reconstruction probability distribution is built from is given through the
+{\tt <function>} and {\tt <domain>} arguments, the former being mandatory and
+the latter optional. One call to {\tt define reco\_efficiency} has to be
+made for each subdomain of the piecewise function. The function {\tt <function>}
+can depend on any observable supported by \MA\ (see~\autoref{sec:obs}). All
+methods implemented in the {\tt cmath} {\sc Python} package are supported, so
+that the code understands for instance all trigonometric, logarithmic and
+cyclometric functions. Numbers can be inputted either in their traditional form
+or following the scientific format. The domain {\tt <domain>} should contains
+one or more inequalities (connected by the logical operators {\tt and} and {\tt
+or}) and the analytical form of the inequalities can rely on any function
+(supported by the {\tt cmath} {\sc Python} package) of the observables available
+in \MA. In the case where the domain is not provided, the efficiency is
+understood to be applicable in all cases.
+
+\noindent The syntax to be employed to make use of the \verb+smearer+ submodule
+reads
+{\color{ao} \begin{verbatim}
+  define smearer <obj> with <comp> <function> [<domain>]
+\end{verbatim}}
+\noindent In this expression, \verb+<obj>+ consists in the object whose momentum
+has to be smeared. The {\tt smearer} submodule can be used for for jets
+(\verb+j+), hadronic taus (\verb+ta+), muons (\verb+mu+), electrons (\verb+e+)
+and photons (\verb+a+). The smearing proceeds by modifying the component of the
+object four-momentum {\tt <comp>} according to a Gaussian distribution specified
+by the user. In practice, the mean of the distribution is taken to be the
+initial value of {\tt <comp>} and its standard deviation stems form the
+piecewise function provided by the user {\tt <function>}. As above,
+the {\tt smearer} module has to be called for each of the subdomain of the
+function. The syntax for providing the function and the domain information is
+identical to what has been described for the {\tt reco\_efficiency} module. The
+momentum component {\tt <comp>} can be the energy (\verb|E|), the transverse
+momentum (\verb|PT|) or any of the three-momentum components (\verb+PX+,
+\verb+PY+ and \verb+PZ+) of the smeared object.
+
+\noindent The \verb+tagger+ submodule can be used following the syntax
+{\color{ao} \begin{verbatim}
+  define tagger <true_obj > as <reco_obj> <function> [<domain>]
+\end{verbatim}}
+\noindent This indicates to the super-fastsim how to tag an object
+{\tt <true\_obj>} as an object {\tt <reco\_obj>} with a given probability
+specified by a piecewise function. This function and its domain are provided
+according to the rules described above, and the allowed tagging and mistagging
+pairs are given in the table below.
+\renewcommand{\arraystretch}{1.2}%
+\begin{center}\begin{tabular}{l p{8.4cm}}
+  \hline
+  Symbol& Description\\
+  \hline
+  \color{ao} \verb?b as b? & Efficiency to tag a true $b$-jet as a $b$-jet.\\
+  \color{ao} \verb?c as b? & Mistagging rate of a true $c$-jet as a $b$-jet.\\
+  \color{ao} \verb?j as b? & Mistagging rate of a true light jet as a $b$-jet.\\
+  \color{ao} \verb?c as c? & Efficiency to tag a true $c$-jet as a $c$-jet.\\
+  \color{ao} \verb?j as c? & Mistagging rate of a true light jet as a $c$-jet.\\
+  \color{ao} \verb?b as c? & Mistagging rate of a true $b$-jet as a $c$-jet.\\
+  \color{ao} \verb?ta as ta? & Efficiency to tag a true hadronic tau as a
+    hadronic tau.\\
+  \color{ao} \verb?j as ta? & Mistagging rate of a true light jet as a hadronic
+    tau.\\
+  \color{ao} \verb?e as j?  & Mistagging rate of a true electron as a jet.\\
+  \color{ao} \verb?e as mu? & Mistagging rate of a true electron as a muon.\\
+  \color{ao} \verb?e as a?  & Mistagging rate of a true electron as a photon.\\
+  \color{ao} \verb?mu as j? & Mistagging rate of a true muon as a jet.\\
+  \color{ao} \verb?mu as e? & Mistagging rate of a true muon as an electron .\\
+  \color{ao} \verb?mu as a? & Mistagging rate of a true muon as a photon.\\
+  \color{ao} \verb?a as j?  & Mistagging rate of a true photon as a jet.\\
+  \color{ao} \verb?a as e?  & Mistagging rate of a true photon as an electron .\\
+  \color{ao} \verb?a as mu? & Mistagging rate of a true photon as a muon.\\
+  \hline
+ \end{tabular}
+\end{center}
+\vspace{2cm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{shaded}
+\section{\Large Recasting LHC analyses with \MA}
+\end{shaded}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+A collection of LHC analyses have been reimplemented in the \MA\ framework and
+are available from the public page
+\href{http://madanalysis.irmp.ucl.ac.be/wiki/PublicAnalysisDatabase}
+{http://madanalysis.irmp.ucl.ac.be/wiki/PublicAnalysisDatabase}. The so-called
+recasting module of \MA\ allows one to download a commented C++ code associated
+with each of these analyses, together with information allowing to extract
+bounds on a given new physics signal. This download is achieved by typing in
+{\color{ao} \begin{verbatim}
+  install delphes
+  install delphesMA5tune
+  install PAD
+  install PADForMA5tune
+  install PADForSFS
+\end{verbatim}}
+\noindent The first two commands trigger the installation of the current release
+of \DEL\ as well as of its old tuned version, whilst the last three commands
+install the three versions of the \MA\ Public Analysis Database of recasted LHC
+analyses. The first version ({\tt PAD}) relies on the current release of \DEL\
+for the simulation of the detector reponse, whilst the second one ({\tt
+PADForMA5tune}) relies on the
+tuned version of \DEL. The third framework ({\tt PADForSFS}) uses the Simplified
+Fast Simulation (SFS) module of \MA\ to deal with the simulation of the
+detector response. More information can be found in~\autoref{sec:install}.
+In order to switch on the recasting module of \MA, the user needs to type in
+{\color{ao} \begin{verbatim}
+  set main.recast = on
+\end{verbatim}}
+\noindent the defaul value being \verb|off|. The user must then import a
+hadron-level dataset stored under the HepMC or StdHep format, as detailed in
+\autoref{sec:datasets}. The options allowing to setup the dataset cross section,
+together with the associated theory uncertainties, are crucial for
+the good functioning of the recasting module and the extraction of a correct
+limit on the signal.
+
+\noindent The module moreover allows the user to add systematic uncertainties on
+the signal and extrapolate the results to differnt luminosities by typing in
+{\color{ao} \begin{verbatim}
+  set main.recast.add.<property> = <value>
+\end{verbatim}}
+\noindent where the implemented properties and possible values are given below.
+\renewcommand{\arraystretch}{1.2}%
+\begin{center}\begin{tabular}{l p{8.4cm}}
+\hline
+  Symbol& Description\\
+  \hline
+  \color{ao} \verb?systematics? & Adds systematic uncertainty to the signal, the
+    value of the attribute being in the [0,1] interval. A single value indicates
+    that the uncertainties are symmetric and two values separated by a space or
+    a comma indicate asymmetric errors. The user can add several systematic
+    uncertainties that will be combined in quadrature. \\
+  \color{ao} \verb?extrapolated_luminosity?  & Indicates that the results will
+    have to be extrapolated to other lumiosities, to be provided in fb$^{-1}$
+    and as floating-point numbers. Multiple luminosities can be added, separated
+    by a space or a comma. A separate output is generated for each luminosity
+    value.\\
+  \hline
+\end{tabular}
+\end{center}
+
+\noindent The module offers the user a few additional properties that can be set
+as
+{\color{ao} \begin{verbatim}
+  set main.recast.<property> = <value>
+\end{verbatim}}
+The list of available options is given below.
+\renewcommand{\arraystretch}{1.2}%
+\begin{center}\begin{tabular}{l p{8.4cm}}
+\hline
+  Symbol& Description\\
+  \hline
+  \color{ao} \verb?CLs_numofexps? & Number of toy experiments to be used in the
+    CLs calculations (the default value is 100000). \\
+  \color{ao} \verb?card_path?     & Path of the recasting card containing the
+    list of analyses to reinterpret (if not provided, a default card is
+    generated ny \MA).\\
+  \color{ao} \verb?store_root?    & Boolean indicatign whether the root file
+    outputted by \DEL\ should be stored (the default value is \verb|false|).\\
+  \color{ao} \verb?THerror_combination? & Indicates how the theoretical
+    uncertainties should be combined, \ie, either quadratically
+    (\verb|quadratic|) or linearly (\verb|linear|, default).\\
+  \color{ao} \verb?error_extrapolation? & Indicates how the uncertainties should
+    be scaled when the results are extrapolated to other luminosities. The
+    possible options are \verb|linear| (\ie, as for systematic uncertainties;
+    default) or \verb|sqrt| (\ie, as for statistical uncertainties).\\
+\hline
+\end{tabular}
+\end{center}
+
+
+
 
 \newpage
 \bibliographystyle{plain} 

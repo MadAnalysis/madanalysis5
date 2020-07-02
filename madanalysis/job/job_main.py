@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -54,3 +54,5 @@ class JobMain:
         JobExecute.WriteExecute(self.file,self.main,self.parts)
         import madanalysis.job.job_finalize as JobFinalize
         JobFinalize.WriteJobFinalize(self.file,self.main)
+
+

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -260,9 +260,10 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
 
       // Filling main infos
       gen->momentum_.SetPxPyPzE(part->Px,part->Py, part->Pz, part->E);
-      gen->pdgid_      = part->PID;
-      gen->statuscode_ = part->Status;
-      gen->isPU_       = part->IsPU;
+      gen->pdgid_        = part->PID;
+      gen->statuscode_   = part->Status;
+      gen->isPU_         = part->IsPU;
+      gen->decay_vertex_.SetXYZT(part->X,part->Y,part->Z,part->T);
 
       // Filling mother-daughter relations
       mothers[i]=std::make_pair(part->M1,part->M2);
@@ -330,6 +331,12 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
       electron->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
       if (part->Charge>0) electron->charge_=true; else electron->charge_=false;
       electron->HEoverEE_ = part->EhadOverEem;
+      electron->d0_       = part->D0;
+      electron->d0error_  = part->ErrorD0;
+      electron->dz_       = part->DZ;
+      electron->dzerror_  = part->ErrorDZ;
+      //      electron->vertex_prod_.SetPxPyPzE(part->Xp, part->Yp, part->Zp, part->Tp);
+      //      electron->closest_point_.SetPxPyPzE(part->Xd, part->Yd, part->Zd, 0.);
 
       // setting corresponding gen particle
       const GenParticle* mc = dynamic_cast<const GenParticle*>(part->Particle.GetObject());
@@ -422,6 +429,13 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
       RecLeptonFormat * muon = myEvent.rec()->GetNewMuon();
       muon->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
       if (part->Charge>0) muon->charge_=true; else muon->charge_=false;
+
+      muon->d0_      = part->D0;
+      muon->d0error_ = part->ErrorD0;
+      muon->dz_      = part->DZ;
+      muon->dzerror_ = part->ErrorDZ;
+      //      muon->vertex_prod_.SetPxPyPzE(part->Xp, part->Yp, part->Zp, part->Tp);
+      //      muon->closest_point_.SetPxPyPzE(part->Xd, part->Yd, part->Zd, 0.);
 
       // setting corresponding gen particle
       const GenParticle* mc = dynamic_cast<const GenParticle*>(part->Particle.GetObject());
@@ -688,11 +702,48 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
         if (genit!=gentable.end()) track->mc_=&(myEvent.mc()->particles()[genit->second]);
         else WARNING << "GenParticle corresponding to a track is not found in the gen table" << endmsg;
       }
-
-      // setting 
       track->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
     }
   }
+
+
+  // ---------------------------------------------------------------------------
+  // Vertex collection
+  // ---------------------------------------------------------------------------
+  if (data_.Vertex_!=0)
+  {
+    MAuint32 nvertices = static_cast<MAuint32>(data_.Vertex_->GetEntries());
+    myEvent.rec()->vertices_.reserve(nvertices);
+    for (MAuint32 i=0;i<nvertices;i++)
+    {
+      // getting the i-th vertex
+      Vertex* ref = dynamic_cast<Vertex*>(data_.Vertex_->At(i));
+      if (ref==0) continue;
+
+      // creating new vertex
+      RecVertexFormat * vertex = myEvent.rec()->GetNewVertex();
+
+      // filling vertex info
+      vertex->position_.SetXYZT(ref->X,ref->Y,ref->Z,ref->T);
+      vertex->error_.SetXYZT(ref->ErrorX,ref->ErrorY,ref->ErrorZ,ref->ErrorT);
+      vertex->ndf_ = ref->NDF;
+
+      // setting corresponding gen particle
+      MAuint32 nconstituents = static_cast<MAuint32>(ref->Constituents.GetEntries());
+      for (MAuint32 j=0;j<nconstituents;j++)
+      {
+        const GenParticle* mc = dynamic_cast<const GenParticle*>(ref->Constituents.At(j));
+        if (mc!=0)
+        {
+           genit = gentable.find(mc);
+           if (genit!=gentable.end()) vertex->constituents_.push_back(&(myEvent.mc()->particles()[genit->second]));
+           else WARNING << "GenParticle corresponding to a vertex is not found in the gen table" << endmsg;
+        }
+        // vertex->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
+      }
+    }
+  }
+
 
 }
 

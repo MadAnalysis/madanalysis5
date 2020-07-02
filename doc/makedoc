@@ -179,7 +179,8 @@ class MakeLatex():
         bibname = self.bibfilename
         if self.bibfilename.endswith('.bib'):
             bibname = bibname[:-4]
-        bibtex_cmd  = ['bibtex', bibname]
+        bibname = bibname.split('/')[-1]
+        bibtex_cmd  = ['bibtex',bibname]
 
         print '    - step 2/4: producing .bbl file with references...'
         log.write('\n')

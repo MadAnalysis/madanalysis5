@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -23,6 +23,7 @@
 
 
 from madanalysis.selection.histogram          import Histogram
+from madanalysis.selection.cut                import Cut
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.enumeration.observable_type  import ObservableType
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
@@ -128,3 +129,47 @@ class Selection:
         self.Ncuts   = self.Nevent_cuts   + self.Npart_cuts         
 
 
+    def LoadWithSAF(self,ast):
+        # Reseting the selection collection
+        self.Reset()
+        
+        # Getting selection branches
+        selection = ast.GetBranch("selection",1)
+        if selection==None:
+            return
+
+        # Looping over the branches of the tree (in the correct order)
+        for key in selection.order:
+
+            # value
+            value = selection.GetBranch(key[0],key[1])
+
+            # Dealing with histogram
+            if key[0]=='histogram':
+
+                print "histogram"
+
+                # Getting the name of the histogram (if it exists)
+                name = value.GetParameterToStringWithoutQuotes('name')
+                if name==None:
+                    logging.getLogger('MA5').error('histogram name is not found in the tree')
+                    continue
+                self.Add(Histogram(name,[],0,0,0,[]))
+                
+                xmin = value.GetParameterToFloat("xmin")
+                self.table[-1].xmin = self.table[-1].xmin if xmin==None else xmin
+
+                xmax = value.GetParameterToFloat("xmax")
+                self.table[-1].xmax = self.table[-1].xmax if xmax==None else xmax
+
+            # Dealing with cut
+            elif key[0]=='cut':
+
+                print "cut"
+                
+                # Getting the name of the histogram (if it exists)
+                name = value.GetParameterToStringWithoutQuotes('name')
+                if name==None:
+                    logging.getLogger('MA5').error('cut name is not found in the tree')
+                    continue
+                self.Add(Cut(name,[],0,'all'))

@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -38,8 +38,14 @@ class UserInfo:
         # MatPlotLib
         self.matplotlib_veto = None
 
+        # Gnuplot
+        self.gnuplot_veto = None
+
         # SciPy
         self.scipy_veto = None
+
+        # pyhf
+        self.pyhf_veto = None
 
         # Delphes
         self.delphes_veto     = None
@@ -67,6 +73,10 @@ class UserInfo:
         # PADForMA5Tune
         self.padma5_veto       = None
         self.padma5_build_path = None
+
+        # PADForSFS
+        self.padsfs_veto       = None
+        self.padsfs_build_path = None
 
         # Pdflatex
         self.pdflatex_veto = None
@@ -183,9 +193,17 @@ class UserInfo:
         elif   option=='matplotlib_veto':
             self.matplotlib_veto=self.ConvertToBool(option,value,filename)
 
+        # Gnuplot
+        elif   option=='gnuplot_veto':
+            self.gnuplot_veto_veto=self.ConvertToBool(option,value,filename)
+
         # Scipy
         elif   option=='scipy_veto':
             self.scipy_veto=self.ConvertToBool(option,value,filename)
+
+        # pyhf
+        elif   option=='pyhf_veto':
+            self.pyhf_veto=self.ConvertToBool(option,value,filename)
 
         # Delphes
         elif option=='delphes_veto':
@@ -228,6 +246,12 @@ class UserInfo:
             self.padma5_veto=self.ConvertToBool(option,value,filename)
         elif option=='padma5_build_path':
             self.padma5_build_path=value
+
+        # PAD
+        elif option=='padsfs_veto':
+            self.padsfs_veto=self.ConvertToBool(option,value,filename)
+        elif option=='padsfs_build_path':
+            self.padsfs_build_path=value
 
         # Pdflatex
         elif option=='pdflatex_veto':

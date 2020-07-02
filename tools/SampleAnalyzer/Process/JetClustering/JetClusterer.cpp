@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -27,6 +27,7 @@
 #include "SampleAnalyzer/Commons/Service/LoopService.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 #include "SampleAnalyzer/Commons/Service/ConvertService.h"
+#include "SampleAnalyzer/Process/JetClustering/NullSmearer.h"
 
 
 using namespace MA5;
@@ -43,6 +44,7 @@ MAbool JetClusterer::Initialize(const std::map<std::string,std::string>& options
   myBtagger_   = new bTagger();
   myCtagger_   = new cTagger();
   myTautagger_ = new TauTagger();
+  mySmearer_   = new NullSmearer();
 
   // Loop over options
   for (std::map<std::string,std::string>::const_iterator
@@ -124,6 +126,7 @@ void JetClusterer::Finalize()
   if (myBtagger_!=0)   delete myBtagger_;
   if (myCtagger_!=0)   delete myCtagger_;
   if (myTautagger_!=0) delete myTautagger_;
+  if (mySmearer_!=0)   delete mySmearer_;
 }
 
 
@@ -152,6 +155,13 @@ MAbool JetClusterer::IsLast(const MCParticleFormat* part, EventFormat& myEvent)
   return true;
 }
 
+
+// -----------------------------------------------------------------------------
+// Sorting the reco objects (necessary after smearing)
+// -----------------------------------------------------------------------------
+MAbool sort_by_leptonPT(RecLeptonFormat const & a, RecLeptonFormat const & b) { return a.pt() < b.pt(); };
+MAbool sort_by_photonPT(RecPhotonFormat const & a, RecPhotonFormat const & b) { return a.pt() < b.pt(); };
+MAbool    sort_by_tauPT(RecTauFormat const & a,    RecTauFormat const & b   ) { return a.pt() < b.pt(); };
 
 // -----------------------------------------------------------------------------
 // Execute
@@ -274,17 +284,24 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
             // Applying efficiency
             if (!myTautagger_->IsIdentified()) continue;
 
-            // Creating reco hadronic taus
-            RecTauFormat* myTau = myEvent.rec()->GetNewTau();
-            if (part.pdgid()>0) myTau->setCharge(-1);
-            else myTau->setCharge(+1);
-            myTau->setMomentum(part.momentum());
-            myTau->setMc(&part);
-            myTau->setDecayMode(PHYSICS->GetTauDecayMode(myTau->mc()));
-            if (myTau->DecayMode()<=0) myTau->setNtracks(0); // ERROR case
-            else if (myTau->DecayMode()==7 || 
-                     myTau->DecayMode()==9) myTau->setNtracks(3); // 3-Prong
-            else myTau->setNtracks(1); // 1-Prong
+            // Smearing the hadronic taus
+            MCParticleFormat smeared = mySmearer_->Execute(&part, absid);
+            // If smeared pt is zero, no need to count the particle but it still needs
+            // to be vetoed for jet clustering.
+            if (smeared.pt() > 1e-10) 
+            {
+                // Creating reco hadronic taus
+                RecTauFormat* myTau = myEvent.rec()->GetNewTau();
+                if (part.pdgid()>0) myTau->setCharge(-1);
+                else myTau->setCharge(+1);
+                myTau->setMomentum(smeared.momentum());
+                myTau->setMc(&part);
+                myTau->setDecayMode(PHYSICS->GetTauDecayMode(myTau->mc()));
+                if (myTau->DecayMode()<=0) myTau->setNtracks(0); // ERROR case
+                else if (myTau->DecayMode()==7 || 
+                         myTau->DecayMode()==9) myTau->setNtracks(3); // 3-Prong
+                else myTau->setNtracks(1); // 1-Prong
+            }
 
             // Searching final state
             GetFinalState(&part,vetos2);
@@ -306,8 +323,13 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
       if (absid==13)
       {
         vetos[i]=true;
+
+        // Smearing its momentum
+        MCParticleFormat smeared = mySmearer_->Execute(&part, absid);
+        if (smeared.pt() <= 1e-10) continue;
+
         RecLeptonFormat * muon = myEvent.rec()->GetNewMuon();
-        muon->setMomentum(part.momentum());
+        muon->setMomentum(smeared.momentum());
         muon->setMc(&(part));
         if (part.pdgid()==13) muon->SetCharge(-1);
         else muon->SetCharge(+1);
@@ -317,8 +339,13 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
       else if (absid==11)
       {
         vetos[i]=true;
+
+        // Smearing the electron momentum
+        MCParticleFormat smeared = mySmearer_->Execute(&part, absid);
+        if (smeared.pt() <= 1e-10) continue;
+
         RecLeptonFormat * elec = myEvent.rec()->GetNewElectron();
-        elec->setMomentum(part.momentum());
+        elec->setMomentum(smeared.momentum());
         elec->setMc(&(part));
         if (part.pdgid()==11) elec->SetCharge(-1);
         else elec->SetCharge(+1);
@@ -329,16 +356,31 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
       {
         if (LOOP->IrrelevantPhoton(&part,mySample)) continue;
         vetos[i]=true;
+
+        // Smearing the photon momentum
+        MCParticleFormat smeared = mySmearer_->Execute(&part, absid);
+        if (smeared.pt() <= 1e-10) continue;
+
         RecPhotonFormat * photon = myEvent.rec()->GetNewPhoton();
-        photon->setMomentum(part.momentum());
+        photon->setMomentum(smeared.momentum());
         photon->setMc(&(part));
       }
     }
   }
 
+  // Sorting the objecfts after smearing
+  if (mySmearer_->isElectronSmearerOn())
+      std::sort(myEvent.rec()->electrons_.begin(), myEvent.rec()->electrons_.end(), sort_by_leptonPT);
+  if (mySmearer_->isMuonSmearerOn())
+      std::sort(myEvent.rec()->muons_.begin(),     myEvent.rec()->muons_.end(),     sort_by_leptonPT);
+  if (mySmearer_->isTauSmearerOn())
+      std::sort(myEvent.rec()->taus_.begin(),      myEvent.rec()->taus_.end(),      sort_by_tauPT);
+  if (mySmearer_->isPhotonSmearerOn())
+      std::sort(myEvent.rec()->photons_.begin(),   myEvent.rec()->photons_.end(),   sort_by_photonPT);
+
   // Launching the clustering
   // -> Filling the collection: myEvent->rec()->jets()
-  algo_->Execute(mySample,myEvent,ExclusiveId_,vetos,vetos2);
+  algo_->Execute(mySample,myEvent,ExclusiveId_,vetos,vetos2,mySmearer_);
 
   // shortcut for TET & THT
   MAfloat64 & TET = myEvent.rec()->TET();

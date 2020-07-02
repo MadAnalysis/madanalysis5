@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -148,8 +148,8 @@ class CmdDisplay(CmdBase.CmdBase):
 
     def do(self,args):
         # Checking argument number
-        if len(args)>0 and args[0].lower()=='tagger':
-            return self.main.tagger.Display(args[1:])
+        if len(args)>0 and args[0].lower() in ['tagger','smearer', 'reco_efficiency']:
+            return self.main.superfastsim.display(args)
         elif len(args)==1:
             return self.do_other(args[0])
         elif len(args)==5 or len(args)==4:
@@ -202,7 +202,7 @@ class CmdDisplay(CmdBase.CmdBase):
         
         # Only object name
         if variable==None:
-            output = ["main","selection","tagger","smearer"]
+            output = ["main","selection","tagger","smearer", 'reco_efficiency']
             output.extend(self.main.datasets.GetNames())
             output.extend(self.main.multiparticles.GetNames())
             output.extend(self.main.regions.GetNames())

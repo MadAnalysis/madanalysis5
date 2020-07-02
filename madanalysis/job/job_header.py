@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -40,6 +40,10 @@ def WriteHeader(file,main):
     if main.archi_info.has_root:
         file.write('#include "SampleAnalyzer/Interfaces/root/RootMainHeaders.h"\n')
     file.write('\n')
+    if main.superfastsim.tagger.rules!={}:
+        file.write('#include "new_tagger.h"\n')
+    if main.superfastsim.smearer.rules!={} or main.superfastsim.reco.rules!={}:
+        file.write('#include "new_smearer_reco.h"\n')
 
     # Namespace
     file.write('namespace MA5\n')
@@ -49,11 +53,11 @@ def WriteHeader(file,main):
     file.write('class user : public AnalyzerBase\n{\n')
     file.write('  INIT_ANALYSIS(user,"MadAnalysis5job")\n\n')
     file.write(' public : \n')
-    file.write('  virtual bool Initialize(const MA5::Configuration& cfg,\n')
+    file.write('  virtual MAbool Initialize(const MA5::Configuration& cfg,\n')
     file.write('                          const std::map<std::string,std::string>& parameters);\n')
     file.write('  virtual void Finalize(const SampleFormat& summary, const std::vector<SampleFormat>& files);\n')
-    file.write('  virtual bool Execute(SampleFormat& sample, const EventFormat& event);\n\n')
-    file.write(' private : \n')
+    file.write('  virtual MAbool Execute(SampleFormat& sample, const EventFormat& event);\n')
+    file.write('\n private : \n')
 
 
 def WriteCore(file,main,part_list):
@@ -107,7 +111,7 @@ def WriteParticle2(file,part,rank,status):
         WriteParticle2(file,part.mumPart,rank,'allstate')
 
     # Identifier function
-    file.write('  bool isP_'+newname+\
+    file.write('  MAbool isP_'+newname+\
                '(const MCParticleFormat* part) const {\n')
 
     # Null pointer
@@ -134,7 +138,7 @@ def WriteParticle2(file,part,rank,status):
         mumname=InstanceName.Get(part.mumPart.name+rank+'allstate')
         if part.mumType=="<":
             file.write('     if (part->mothers().size()==0) return false;\n')
-            file.write('     bool mumOK=true;\n')
+            file.write('     MAbool mumOK=true;\n')
             file.write('     for (MAuint32 mum=0;mum<part->mothers().size();mum++)\n')
             file.write('     { \n')
             file.write('       mumOK &= !isP_'+ mumname + '(part->mothers()[mum]);\n')
@@ -142,7 +146,7 @@ def WriteParticle2(file,part,rank,status):
             file.write('     if (mumOK) return false;\n')
         elif part.mumType=="<<":
             file.write('     const MCParticleFormat* cand = part;\n')
-            file.write('     bool success=false;\n')
+            file.write('     MAbool success=false;\n')
             file.write('     while(cand->mothers().size()!=0)\n')
             file.write('     {\n')
             file.write('       if ( isP_' + mumname +\

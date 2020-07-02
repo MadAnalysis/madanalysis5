@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -34,6 +34,8 @@
 #include "SampleAnalyzer/Process/JetClustering/bTagger.h"
 #include "SampleAnalyzer/Process/JetClustering/cTagger.h"
 #include "SampleAnalyzer/Process/JetClustering/TauTagger.h"
+#include "SampleAnalyzer/Process/JetClustering/NullSmearer.h"
+#include "SampleAnalyzer/Commons/Base/SmearerBase.h"
 
 // STL headers
 #include <map>
@@ -52,9 +54,11 @@ namespace MA5
   protected :
 
     ClusterAlgoBase* algo_;
-    bTagger*    myBtagger_;
-    cTagger*    myCtagger_;
-    TauTagger*  myTautagger_;
+    bTagger*     myBtagger_;
+    cTagger*     myCtagger_;
+    TauTagger*   myTautagger_;
+    SmearerBase* mySmearer_;
+
     /// Exclusive id for tau-elec-photon-jet
     MAbool ExclusiveId_;
 
@@ -78,6 +82,7 @@ namespace MA5
       myBtagger_   = 0;
       myCtagger_   = 0;
       myTautagger_ = 0;
+      mySmearer_   = 0;
       ExclusiveId_ = false;
       muon=0;
       electron=0;
@@ -99,6 +104,12 @@ namespace MA5
 
     /// Finalization
     void Finalize();
+
+    /// Generic loader for the smearer module
+    void LoadSmearer(SmearerBase* smearer)
+    {
+        mySmearer_ = smearer;
+    }
 
     /// Accessor to the jet clusterer name
     std::string GetName() 

@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -176,7 +176,7 @@ class DelphesCardChecker():
                     ok=True
                     break
             if not ok:
-                logging.getLogger("MA5").warning("Problem with Delphes card: module "+item+" is not declared.")
+                logging.getLogger("MA5").warning("Problem with Delphes card: module "+i+" is not declared.")
                 test=False
 
         # check pileup path

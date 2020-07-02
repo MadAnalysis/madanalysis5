@@ -1,0 +1,137 @@
+#<><><><><><><><><><><><><><><><><><><><><><><><><>
+#                                                <>
+#   CMS-Default                                  <>
+#   Author: Jack Y. Araz, Benjamin Fuks          <>
+#						 <>
+#   	Please cite arXiv:2006.09387		 <>
+#						 <>
+#   Based on MadAnalysis 5 v1.8                  <>
+#                                                <>
+#<><><><><><><><><><><><><><><><><><><><><><><><><>
+
+# Set FastJet variables
+
+set main.fastsim.package = fastjet
+set main.fastsim.algorithm = antikt
+set main.fastsim.radius = 0.5
+set main.fastsim.bjet_id.matching_dr = 0.3
+set main.fastsim.bjet_id.exclusive = true
+set main.fastsim.exclusive_id = false
+set main.fastsim.ptmin = 20.0
+set main.fastsim.jetrecomode = jets
+
+# Jet Smearing
+
+## Momentum smearing
+
+# based on arXiv:1405.6569 (optimized for dijet process)
+define reco_efficiency j 0.925 [abseta <= 1.5]
+define reco_efficiency j 0.875 [abseta > 1.5 and abseta <= 2.5]
+define reco_efficiency j 0.80  [abseta > 2.5]
+
+define smearer j with PT sqrt(0.06^2 + pt^2*1.3e-3^2) [abseta <= 0.5 and pt > 0.1]
+define smearer j with PT sqrt(0.10^2 + pt^2*1.7e-3^2) [abseta > 0.5 and abseta <= 1.5 and pt > 0.1]
+define smearer j with PT sqrt(0.25^2 + pt^2*3.1e-3^2) [abseta > 1.5 and abseta <= 2.5 and pt > 0.1]
+
+## HCAL
+
+define smearer j with E sqrt(E^2*0.050^2 + E*1.50^2) [abseta <= 3.0]
+define smearer j with E sqrt(E^2*0.130^2 + E*2.70^2) [abseta > 3.0 and abseta <= 5.0]
+
+### Electron Smearing
+
+## Momentum Smearing
+
+# based on arXiv:1502.02701
+
+define smearer e with PT sqrt(0.03^2 + (pt^2)*((1.3e-3)^2)) [abseta <= 0.5 and pt > 0.1]
+define smearer e with PT sqrt(0.05^2 + pt^2*((1.7e-3)^2))   [abseta > 0.5 and abseta <= 1.5 and pt > 0.1]
+define smearer e with PT sqrt(0.15^2 + pt^2*((3.1e-3)^2))   [abseta > 1.5 and abseta <= 2.5 and pt > 0.1]
+
+## ECAL
+
+# Eta shape from arXiv:1306.2016, Energy shape from arXiv:1502.02701
+
+define smearer e with E (1+0.64*eta^2)*sqrt(E^2*0.008^2 + E*0.11^2 + 0.40^2)            [abseta <= 1.5]
+define smearer e with E (2.16 + 5.6*(abseta-2)^2)*sqrt(E^2*0.008^2 + E*0.11^2 + 0.40^2) [abseta>1.5 and abseta<=2.5]
+define smearer e with E sqrt(E^2*0.107^2 + E*2.08^2)                                    [abseta > 2.5 and abseta <= 5.0]
+
+## Reconstruction efficiency
+# with tracker (optimized for Drell Yan process)
+
+define reco_efficiency e 0.0   [pt <= 10.0 or abseta > 2.5]
+define reco_efficiency e 0.7   [pt > 10.0 and abseta <= 1.5]
+define reco_efficiency e 0.525 [pt > 10.0 and abseta > 1.5 and abseta <= 2.5]
+
+
+## Muon Smearing
+
+
+## Momentum Smearing
+
+define smearer mu with PT sqrt(0.01^2  + pt^2*1.0e-4^2) [abseta <= 0.5 and pt > 0.1]
+define smearer mu with PT sqrt(0.015^2 + pt^2*1.5e-4^2) [abseta > 0.5 and abseta <= 1.5 and pt > 0.1]
+define smearer mu with PT sqrt(0.025^2 + pt^2*3.5e-4^2) [abseta > 1.5 and abseta <= 2.5 and pt > 0.1]
+
+## Reconstruction efficiency
+
+
+## with Tracker (optimized for Drell Yan process)
+
+define reco_efficiency mu 0.0                           [pt <= 10.0 or abseta > 2.4]
+define reco_efficiency mu 0.9*0.99                      [abseta <= 1.5 and pt > 10.0 and pt <= 1000.]
+define reco_efficiency mu 0.9*0.99*exp(0.5 - pt*5.0e-4) [abseta <= 1.5 and pt > 1000.]
+define reco_efficiency mu 0.9*0.98                      [abseta > 1.5 and abseta <= 2.4 and pt > 10.0 and pt <= 1000.]
+define reco_efficiency mu 0.9*0.98*exp(0.5 - pt*5.0e-4) [abseta > 1.5 and abseta <= 2.4 and pt > 1000.]
+
+
+
+### Photon reconstruction
+
+## ECAL
+
+# Eta shape from arXiv:1306.2016, Energy shape from arXiv:1502.02701
+
+define smearer a with E (1+0.64*eta^2)*sqrt(E^2*0.008^2 + E*0.11^2 + 0.40^2)            [abseta <= 1.5]
+define smearer a with E (2.16 + 5.6*(abseta-2)^2)*sqrt(E^2*0.008^2 + E*0.11^2 + 0.40^2) [abseta>1.5 and abseta<=2.5]
+define smearer a with E sqrt(E^2*0.107^2 + E*2.08^2)                                    [abseta > 2.5 and abseta <= 5.0]
+
+
+# Reconstruction efficiency (optimized for diphoton process)
+
+define reco_efficiency a 0.0   [pt <= 10.0 or abseta > 2.5]
+define reco_efficiency a 0.96  [abseta <= 1.5 and pt > 10.0]
+define reco_efficiency a 0.875 [abseta > 1.5 and abseta <= 2.5 and pt > 10.0]
+
+
+## B tagging
+
+define tagger j as b 0.01+0.000038*pt
+define tagger c as b 0.25*tanh(0.018*pt)/(1.0+ 0.0013*pt)     [abseta < 2.5]
+define tagger c as b 0.0                                      [abseta >=2.5]
+define tagger b as b 0.85*tanh(0.0025*pt)*(25.0/(1+0.063*pt)) [abseta < 2.5]
+define tagger b as b 0.0                                      [abseta >= 2.5]
+
+## Tau
+
+# Tracker
+define smearer ta with PT sqrt(0.06^2 + pt^2*1.3e-3^2) [abseta <= 0.5 and pt > 0.1]
+define smearer ta with PT sqrt(0.10^2 + pt^2*1.7e-3^2) [abseta > 0.5 and abseta <= 1.5 and pt > 0.1]
+define smearer ta with PT sqrt(0.25^2 + pt^2*3.1e-3^2) [abseta > 1.5 and abseta <= 2.5 and pt > 0.1]
+
+## HCAL
+define smearer ta with E sqrt(E^2*0.050^2 + E*1.50^2) [abseta <= 3.0]
+define smearer ta with E sqrt(E^2*0.130^2 + E*2.70^2) [abseta > 3.0 and abseta <= 5.0]
+
+# Tagging
+define tagger j as ta 0.01
+define tagger ta as ta 0.6 [abseta < 2.5]
+define tagger ta as ta 0.0 [abseta >= 2.5]
+
+# Reconstruction efficiency (optimized for ditau process)
+define reco_efficiency ta 0.0 [pt <= 20.]
+define reco_efficiency ta 0.7 [pt > 20. and abseta<2.5]
+define reco_efficiency ta 1.0 [pt > 20. and abseta>=2.5] #safety
+
+
+

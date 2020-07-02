@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -40,8 +40,8 @@ import copy
 class JobReader():
 
     def __init__(self,jobdir):
-        self.path       = jobdir
-        self.safdir    = os.path.normpath(self.path+"/Output")
+        self.path   = jobdir
+        self.safdir = os.path.normpath(self.path+"/Output/SAF/")
 
     def CheckDir(self):
         if not os.path.isdir(self.path):
@@ -591,7 +591,7 @@ class JobReader():
         i=0
         while(os.path.isdir(self.safdir+"/"+name+"/MadAnalysis5job_"+str(i))):
             i+=1
-        filenames = glob.glob(self.safdir+"/"+name+"/MadAnalysis5job_"+str(i-1)+"/Cutflows/*.saf")
+        filenames = sorted(glob.glob(self.safdir+"/"+name+"/MadAnalysis5job_"+str(i-1)+"/Cutflows/*.saf"))
 
         # Treating the files one by one
         for myfile in filenames:

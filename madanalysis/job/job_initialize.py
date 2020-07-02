@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -40,7 +40,7 @@ def WriteInvisibleList(file,main):
 def WriteJobInitialize(file,main):
 
     # Function header
-    file.write('bool user::Initialize(const MA5::Configuration& cfg,\n')
+    file.write('MAbool user::Initialize(const MA5::Configuration& cfg,\n')
     file.write('                      const std::map<std::string,std::string>& parameters)\n')
     file.write('{\n')
 

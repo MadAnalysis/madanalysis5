@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -104,8 +104,7 @@ template <typename T>
 T* ManagerBase<T>::Get(std::string name)
 {
   // Set the extension in lower case
-  std::transform(name.begin(), name.end(),
-                 name.begin(), std::ptr_fun<int, int>(std::tolower));
+  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
   // Seach the name
   std::map<std::string, MAuint32>::iterator it = Names_.find(name); 
@@ -128,8 +127,7 @@ template <typename T>
 MAbool ManagerBase<T>::IsItForbidden(std::string name, std::string& motivation)
 {
   // Set the name in lower case
-  std::transform(name.begin(), name.end(),
-                 name.begin(), std::ptr_fun<int, int>(std::tolower));
+  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
   // Seach the name
   std::map<std::string, std::string>::iterator it = ForbiddenNames_.find(name); 
@@ -157,8 +155,7 @@ template <typename T>
 MAbool ManagerBase<T>::Add(std::string name, T* object)
 {
   // Set the name in lower case
-  std::transform(name.begin(), name.end(),
-                 name.begin(), std::ptr_fun<int, int>(std::tolower));
+  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
   // Insert name in the data base
   std::pair<std::map<std::string,MAuint32>::iterator,bool>
@@ -191,8 +188,7 @@ template <typename T>
 MAbool ManagerBase<T>::AddForbidden(std::string name, std::string motivation)
 {
   // Set the name in lower case
-  std::transform(name.begin(), name.end(),
-                 name.begin(), std::ptr_fun<int, int>(std::tolower));
+  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
   // Insert name in the data base
   std::pair<std::map<std::string,std::string>::iterator,bool>

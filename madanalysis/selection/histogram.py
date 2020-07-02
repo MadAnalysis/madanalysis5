@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -35,6 +35,8 @@ class Histogram():
     userVariables = { "nbins" : [], \
                       "xmin"  : [], \
                       "xmax"  : [], \
+                      "ymin"  : [], \
+                      "ymax"  : [], \
                       "stacking_method" : ["auto","stack","superimpose","normalize2one"], \
                       "logX"  : ["true","false"], \
                       "logY"  : ["true","false"], \
@@ -69,6 +71,8 @@ class Histogram():
         self.nbins      = nbins
         self.xmin       = xmin
         self.xmax       = xmax
+        self.ymin       = []
+        self.ymax       = []
         self.logX       = False
         self.logY       = False
         self.rank       = "PTordering"
@@ -135,6 +139,30 @@ class Histogram():
                 return False
             else:
                 self.xmax = tmp
+        # ymin
+        elif variable == "ymin":
+            try:
+                tmp = float(value)
+            except:
+                logging.getLogger('MA5').error("variable 'ymin' must be a float value")
+                return False
+            if tmp > self.ymax:
+                logging.getLogger('MA5').error("'ymin' value must be less than 'ymax' value")
+                return False
+            else:
+                self.ymin = tmp
+        # ymax
+        elif variable == "ymax":
+            try:
+                tmp = float(value)
+            except:
+                logging.getLogger('MA5').error("variable 'ymax' must be a float value")
+                return False
+            if self.ymin!=[] and tmp < self.ymin:
+                logging.getLogger('MA5').error("'ymax' value must be greater than 'ymin' value")
+                return False
+            else:
+                self.ymax = tmp
         # logX
         elif variable == "logX":
             if value=="true":
@@ -221,6 +249,10 @@ class Histogram():
             logging.getLogger('MA5').info(" xmin = "+str(self.xmin))
         elif variable=="xmax":
             logging.getLogger('MA5').info(" xmax = "+str(self.xmax))
+        elif variable=="ymin":
+            logging.getLogger('MA5').info(" ymin = "+str(self.ymin))
+        elif variable=="ymax":
+            logging.getLogger('MA5').info(" ymax = "+str(self.ymax))
         elif variable=="regions":
             logging.getLogger('MA5').info(" regions = '"+str(self.regions)+"'")
         elif variable=="stacking_method":
@@ -276,10 +308,13 @@ class Histogram():
         return self.combination.DoYouUseMultiparticle(name)
 
     def GetStringDisplay2(self):
-        return "  * Binning: nbins="+str(self.nbins)+\
-               ", xmin="+str(self.xmin)+\
-               ", xmax="+str(self.xmax)+\
-               ", regions="+str(self.regions)
+        strng= "  * Binning: nbins="+str(self.nbins)+", xmin="+str(self.xmin)+ ", xmax="+str(self.xmax)
+        if self.ymin!=[]:
+          strng = strng+', ymin='+str(self.ymin)
+        if self.ymax!=[]:
+          strng = strng+', ymax='+str(self.ymax)
+        strng = strng + ", regions="+str(self.regions)
+        return strng
 
     def GetStringDisplayMore(self):
         if self.logX or self.logY: 
@@ -352,7 +387,7 @@ class Histogram():
         if self.observable.name in ['NPID', 'NAPID']:
             word = 'N. of particles';
 
-        elif self.observable.name in ['DELTAR', 'DPHI_0_PI', 'DPHI_0_2PI']:
+        elif self.observable.name in ['DELTAR', 'DPHI_0_PI', 'DPHI_0_2PI', 'RECOIL']:
             if self.GetStringArguments().count('[')!=2 and self.GetStringArguments().count(']')!=2:
                 word='N. of (' + part_string + ') pairs'; 
 

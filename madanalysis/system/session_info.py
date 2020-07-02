@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -32,6 +32,7 @@ class SessionInfo():
         self.downloaddir        = ""
         self.has_root           = False
         self.has_matplotlib     = False
+        self.has_pyhf           = False
         self.has_scipy          = False
         self.has_gnuplot        = False
         self.has_pdflatex       = False
@@ -39,6 +40,7 @@ class SessionInfo():
         self.has_dvipdf         = False
         self.has_web            = True
         self.has_pad            = False
+        self.has_padsfs         = False
         self.has_padma5         = False
         self.gcc_header_search_path  = []
         self.gcc_library_search_path = []

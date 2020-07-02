@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -26,9 +26,6 @@
    Uses the cmd package for command interpretation and tab completion.
 """
 
-import logging
-import readline
-import os
 
 # Import Interpreter core
 from madanalysis.interpreter.interpreter_base import InterpreterBase
@@ -39,15 +36,12 @@ from madanalysis.core.main import Main
 # Import Readers for multiparticles initializing
 from madanalysis.IOinterface.particle_reader import ParticleReader
 from madanalysis.IOinterface.multiparticle_reader import MultiparticleReader
-from madanalysis.enumeration.report_format_type import ReportFormatType
 from madanalysis.enumeration.cut_type import CutType
 
 # List of command
 from madanalysis.interpreter.cmd_set            import CmdSet
 from madanalysis.interpreter.cmd_define         import CmdDefine
 from madanalysis.interpreter.cmd_define_region  import CmdDefineRegion
-from madanalysis.interpreter.cmd_define_tagger  import CmdDefineTagger
-#from madanalysis.interpreter.cmd_define_smearer import CmdDefineSmearer
 from madanalysis.interpreter.cmd_import         import CmdImport
 from madanalysis.interpreter.cmd_remove         import CmdRemove
 from madanalysis.interpreter.cmd_swap           import CmdSwap
@@ -62,6 +56,10 @@ from madanalysis.interpreter.cmd_submit         import CmdSubmit
 from madanalysis.interpreter.cmd_open           import CmdOpen
 from madanalysis.interpreter.cmd_reset          import CmdReset
 from madanalysis.interpreter.cmd_install        import CmdInstall
+
+import logging
+import readline
+import os
 
 
 #===============================================================================
@@ -82,8 +80,6 @@ class Interpreter(InterpreterBase):
         self.cmd_set                    = CmdSet(main)
         self.cmd_define                 = CmdDefine(main)
         self.cmd_define_region          = CmdDefineRegion(main)
-        self.cmd_define_tagger          = CmdDefineTagger(main)
-#        self.cmd_define_smearer         = CmdDefineSmearer(main)
         self.cmd_display                = CmdDisplay(main)
         self.cmd_display_datasets       = CmdDisplayDatasets(main)
         self.cmd_display_multiparticles = CmdDisplayMultiparticles(main)
@@ -105,19 +101,29 @@ class Interpreter(InterpreterBase):
         self.InitializeParticle()
         self.InitializeMultiparticle()
 
+
+    def InitializeHistory(self):
         # Importing history
         self.history_file = os.path.normpath(self.main.archi_info.ma5dir + '/.ma5history')
-        try:
-            readline.read_history_file(self.history_file)
-        except:
-            pass
+        logging.getLogger('MA5').debug("Importing history from: "+self.history_file+" ...")
+        if os.path.exists(self.history_file):
+            logging.getLogger('MA5').debug("-> File found. Reading history ...")
+            try:
+                readline.read_history_file(self.history_file)
+            except:
+                logging.getLogger('MA5').debug("-> Problem during the reading. The history is skipped!")
+        logging.getLogger('MA5').debug("-> Success!")
 
-    def __del__(self):
+
+    def FinalizeHistory(self):
+        # Importing history
+        logging.getLogger('MA5').debug("Exporting the history to: "+self.history_file+" ...")
+        readline.set_history_length(500)
         try:
-            readline.set_history_length(100)
             readline.write_history_file(self.history_file)
         except:
-            pass
+            logging.getLogger('MA5').debug("-> Problem during the writing. The history is not saved!")
+        logging.getLogger('MA5').debug("-> Success!")
 
 
     def do_set(self,line):
@@ -135,23 +141,11 @@ class Interpreter(InterpreterBase):
     def do_define_region(self,line):
         self.cmd_define_region.do(self.split_arg(line))
 
-    def do_define_tagger(self,line):
-        self.cmd_define_tagger.do(self.split_arg(line))
-
-#    def do_define_smearer(self,line):
-#        self.cmd_define_smearer.do(self.split_arg(line))
-
     def help_define(self):
         self.cmd_define.help()
 
     def help_define_region(self):
         self.cmd_define_region.help()
-
-#    def help_define_smearer(self):
-#        self.cmd_define_smearer.help()
-
-    def help_define_tagger(self):
-        self.cmd_define_tagger.help()
 
     def complete_define(self,text,line,begidx,endidx):
         return self.cmd_define.complete(text,line,begidx,endidx)
@@ -191,9 +185,6 @@ class Interpreter(InterpreterBase):
 
     def do_display_regions(self,line):
         self.cmd_display_regions.do(self.split_arg(line))
-
-#    def do_display_smearer(self,line):
-#        self.cmd_display_smearer.do(self.split_arg(line))
 
     def help_display_datasets(self):
         self.cmd_display_datasets.help()
@@ -363,7 +354,7 @@ class Interpreter(InterpreterBase):
         return self.cmd_select.complete(text,self.split_arg(tmp),begidx,endidx)
 
     def InitializeParticle(self):
-        input = ParticleReader(self.main.archi_info.ma5dir,self.cmd_define,self.main.mode)
+        input = ParticleReader(self.main.archi_info.ma5dir,self.cmd_define,self.main.mode,self.main.forced)
         input.Load()
 
     def InitializeMultiparticle(self):
@@ -452,7 +443,7 @@ class Interpreter(InterpreterBase):
         except Exception, error:
             if __debug__:
                  print error
-            
+
     def getTerminalSize(self):
         def ioctl_GWINSZ(fd):
             try:
@@ -472,7 +463,7 @@ class Interpreter(InterpreterBase):
                 pass
         if not cr:
             try:
-                cr = (env['LINES'], env['COLUMNS'])
+                cr = (os.environ['LINES'], os.environ['COLUMNS'])
             except:
                 cr = (25, 80)
         return int(cr[1])
@@ -548,15 +539,3 @@ class Interpreter(InterpreterBase):
             #    print error
             #    print '\n'
             return None    
-
-
-    def correct_splitting(line):
-        """if the line finish with a '-' the code splits in a weird way
-           on GNU_SPLITTING"""
-                
-        line = line.lstrip()
-        if line[-1] in [' ','\t']:
-            return '', line, len(line),len(enidx)
-        return text, line, begidx, endidx
-
-        

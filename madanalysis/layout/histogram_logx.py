@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -36,8 +36,10 @@ class HistogramLogX:
     def Print(self):
 
         # General info
-        logging.getLogger('MA5').info(self.name + ' ' + str(self.nbins) + \
-                     str(self.xmin) + ' ' + str(self.xmax))
+        inform = self.name + ' ' + str(self.nbins) + str(self.xmin) + ' ' + str(self.xmax)
+        if self.ymin!=[] or self.ymax!=[]:
+           inform = inform + ' ' + str(self.ymin) + ' ' + str(self.ymax)
+        logging.getLogger('MA5').info(inform)
 
         # Data
         self.positive.Print()
@@ -52,6 +54,8 @@ class HistogramLogX:
         self.nbins = 100
         self.xmin  = 0.
         self.xmax  = 100.
+        self.ymin  = []
+        self.ymax  = []
         self.scale = 0.
 
         # Data

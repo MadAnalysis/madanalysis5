@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -157,7 +157,8 @@ class gz_streambase : virtual public std::ios
 
 };
 
-};
+
+}
 
 
 #endif

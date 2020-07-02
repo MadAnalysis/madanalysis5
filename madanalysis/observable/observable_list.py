@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -406,6 +406,7 @@ MT_MET = ObservableBase( name          = 'MT_MET',
                          latex         = '$M_T$',
                        )
 
+
 vMT_MET  = MT_MET
 sMT_MET  = ObservableBase.Clone(MT_MET, name='sMT_MET', combination=CombinationType.SUMSCALAR, tlatex='sM_{T}', latex='$sM_T$') 
 sdMT_MET = dsMT_MET = ObservableBase.Clone(MT_MET, name='sdMT_MET', combination=CombinationType.DIFFSCALAR, tlatex='sdM_{T}', latex='$sdM_T$') 
@@ -592,6 +593,27 @@ DPHI_0_2PI = ObservableBase( name          = 'DPHI_0_2PI',
                              tlatex        = '#Delta#Phi_{0,2#pi}',
                              latex         = '$\Delta\Phi_{0,2\pi}$'
                            )
+
+RECOIL = ObservableBase( name          = 'RECOIL',
+                         args          = [ArgumentType.COMBINATION,\
+                                         ArgumentType.COMBINATION],
+                         combination   = CombinationType.SUMVECTOR,
+                         plot_auto     = False,
+                         plot_nbins    = 100,
+                         plot_xmin     = 0.,
+                         plot_xmax     = 500.,
+                         plot_unitX_tlatex    = 'GeV/c^{2}',
+                         plot_unitX_latex    = 'GeV$^2$',
+                         code_parton   = 'recoil()',
+                         code_hadron   = 'recoil()',
+                         code_reco     = 'recoil()',
+                         cut_event     = True,
+                         cut_candidate = True,
+                         tlatex        = '#Delta M',
+                         latex         = '$\Delta M$'
+                       )
+
+
 
 ETA = ObservableBase( name          = 'ETA',
                       args          = [ArgumentType.COMBINATION],

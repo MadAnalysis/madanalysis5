@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -25,6 +25,7 @@
 """  A file containing different extension of the cmd basic python library"""
 from madanalysis.IOinterface.text_file_reader import TextFileReader
 from madanalysis.core.script_stack            import ScriptStack
+from madanalysis.interpreter.history          import History
 
 # Python import
 import cmd
@@ -58,14 +59,15 @@ class InterpreterBase(cmd.Cmd):
     interpreter_operators = ['(',')','[',']','&','|','&',\
                              '^','!','=','>','<',',']
 
-    def load(self):
+    def load(self, verbose=True):
         ok = True
         while ok:
             line = ScriptStack.Next()
             if line=='':
                 ok=False
             else:
-                self.logger.info("ma5>"+line)
+                if verbose:
+                    self.logger.info("ma5>"+line)
                 line = self.precmd(line)
                 stop = self.onecmd(line)
                 stop = self.postcmd(stop, line)
@@ -80,7 +82,7 @@ class InterpreterBase(cmd.Cmd):
         self.logger=logging.getLogger('MA5')
 
         # string table for history
-        self.history = []
+        self.history = History()
 
         # beginning of the incomplete line (line break with '\') 
         self.save_line = ''
@@ -94,7 +96,7 @@ class InterpreterBase(cmd.Cmd):
         delims = delims.replace("}","")
         delims = delims.replace("=","")
         readline.set_completer_delims(delims)
-        
+
     # FORMATTING THE LINE BEFORE INTERPRETING
     def precmd(self, line):
         """ A suite of additional function needed for in the cmd
@@ -108,18 +110,12 @@ class InterpreterBase(cmd.Cmd):
         # cleaning the line
         # --> removing additionnal whitespace characters
         line = line.lstrip()
+
         # pattern design
         if len(line)==4 and \
            line[0]=='m' and line[1]=='u' and line[2]=='f' and line[3]=='!':
             self.pattern_design()
             return ''
-
-        # Add the line to the history
-        # except for useless commands (empty history, help calls and comments)
-        if line != "history" and \
-            not line.startswith('help') and \
-            not line.startswith('#*'):
-            self.history.append(line)
 
         # Check if we are continuing a line:
         if self.save_line:
@@ -142,6 +138,9 @@ class InterpreterBase(cmd.Cmd):
             elif line[ind]=='#' and not open_singlequote and not open_doublequote:
                line = line[0:ind]
                break
+
+        # Add the line to the history
+        self.history.Add(line)
 
         # Isolating operator
         if not line.startswith('shell'):
@@ -262,25 +261,21 @@ class InterpreterBase(cmd.Cmd):
         args = self.split_arg(line)
 
         if len(args) == 0:
-            self.logger.info('\n'.join(self.history))
+            self.logger.info(self.history.Print())
             return
         elif args[0] == 'clean':
-            self.history = []
+            self.history.Reset()
             self.logger.info('History is cleaned')
             return
         elif len(args)==1:
-            BLA
-            if os.path.exists(args[0]):
+            if not self.history.Save(args[0]):
                 self.logger.error('The file ' + args[0] + ' already exists.' + \
-                    ' Please chose another filename.')
-                return
+                                  ' Please chose another filename.')
             else:
-                file = open(args[0], 'w')
-                file.write('\n'.join(self.history))
-                file.close()
                 self.logger.info('Command history written to the file ' + \
-                    args[0] + '.')
-                return
+                              args[0] + '.')
+
+            return
         else:
             self.logger.error("'history' takes either zero or one argument")
             return

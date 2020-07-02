@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -52,7 +52,11 @@ class InstallDelphes:
 #        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.0.tar.gz"}
 #        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.1.tar.gz"}
 #        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.3.tar.gz"}
-        self.files = {package+".tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.4.1.tar.gz"}
+        if package == 'delphesma5tune':
+            self.files = {package+".tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.4.1.tar.gz"}
+        else:
+#             self.files = {package+".tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/delphes342pre.tar.gz"} # Delphes for LLP not release yet
+            self.files = {package+".tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.4.2.tar.gz"}
         self.logger = logging.getLogger('MA5')
 
 
@@ -165,11 +169,13 @@ class InstallDelphes:
                     self.logger.error('impossible to move the file/folder '+myfile+' from '+packagedir+' to '+self.installdir)
                     return False
 
-        if self.package=='delphes':
-            # Updating DelphesFormula
-            filename = self.installdir+'/classes/DelphesFormula.cc'
-            self.logger.debug('Updating files '+filename+ ': adding d0\n')
-            self.AddD0(filename)
+
+# No need with the last release of ROOT
+#        if self.package=='delphes':
+#            # Updating DelphesFormula
+#            filename = self.installdir+'/classes/DelphesFormula.cc'
+#            self.logger.debug('Updating files '+filename+ ': adding d0\n')
+#            self.AddD0(filename)
 
         # Updating Makefile
         filename = self.installdir+'/doc/genMakefile.tcl'
@@ -188,7 +194,7 @@ class InstallDelphes:
 
         # Adding files
         if self.package=='delphes':
-            filesToAdd = ["MA5GenParticleFilter","MA5EfficiencyD0"]
+            filesToAdd = ["MA5GenParticleFilter"]
         elif self.package=='delphesMA5tune':
             filesToAdd = ["MA5GenParticleFilter"]
         if not self.CopyFiles(filesToAdd):

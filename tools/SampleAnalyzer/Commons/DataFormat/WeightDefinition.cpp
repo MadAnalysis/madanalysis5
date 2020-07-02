@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -32,9 +32,8 @@ using namespace MA5;
 void WeightDefinition::AddGroup(std::string name, std::string combine)
 {
   // combine: Moving to lower case
-  std::transform(combine.begin(), combine.end(),
-                 combine.begin(), std::ptr_fun<int, int>(std::tolower));
-    
+  std::transform(combine.begin(), combine.end(), combine.begin(), ::tolower);
+
   // Checking the 'combine' value
   MAbool test = combine=="none" || combine=="gaussian" || combine=="hessian" || combine=="envelope";
   try

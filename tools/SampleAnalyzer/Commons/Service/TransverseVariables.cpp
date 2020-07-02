@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -401,13 +401,15 @@ MAfloat64 TransverseVariables::MT2W(std::vector<const RecJetFormat*> jets, const
   {
     MAfloat64 min_mt2w=1e9;
     for (MAuint32 ii=0; ii<N; ii++)
+    {
       for (MAuint32 jj=0; jj<N; jj++)
       {
         if (ii==jj) continue;
         MAfloat64 tmp_mt2w = GetMT2W(lep, nbjets[ii], nbjets[jj],met);
         if(tmp_mt2w < min_mt2w) min_mt2w = tmp_mt2w;
       }
-      return min_mt2w;
+    }
+    return min_mt2w;
   }
 
   /// 1 b-jet
@@ -429,13 +431,15 @@ MAfloat64 TransverseVariables::MT2W(std::vector<const RecJetFormat*> jets, const
   {
     MAfloat64 min_mt2w=1e9;
     for (MAuint32 ii=0; ii<bjets.size(); ii++)
+    {
       for (MAuint32 jj=0; jj<bjets.size(); jj++)
       {
         if (ii==jj) continue;
         MAfloat64 tmp_mt2w = GetMT2W(lep, bjets[ii], bjets[jj],met);
         if (tmp_mt2w < min_mt2w) min_mt2w = tmp_mt2w;
       }
-      return min_mt2w;
+    }
+    return min_mt2w;
   }
 }
 
@@ -448,7 +452,7 @@ MAfloat64 TransverseVariables::MT2W(std::vector<const MCParticleFormat*> jets, c
   std::vector<const MCParticleFormat*> bjets, nbjets;
   for(MAuint32 ii=0 ;ii<jets.size(); ii++)
   {
-    if(abs(jets[ii]->pdgid()==5))  bjets.push_back(jets[ii]);
+    if(abs(jets[ii]->pdgid())==5) bjets.push_back(jets[ii]);
     else                          nbjets.push_back(jets[ii]);
   }
   /// pt-ordering
@@ -466,13 +470,15 @@ MAfloat64 TransverseVariables::MT2W(std::vector<const MCParticleFormat*> jets, c
   {
     MAfloat64 min_mt2w=1e9;
     for (MAuint32 ii=0; ii<N; ii++)
+    {
       for (MAuint32 jj=0; jj<N; jj++)
       {
         if (ii==jj) continue;
         MAfloat64 tmp_mt2w = GetMT2W(lep, nbjets[ii], nbjets[jj],met);
         if(tmp_mt2w < min_mt2w) min_mt2w = tmp_mt2w;
       }
-      return min_mt2w;
+    }
+    return min_mt2w;
   }
 
   /// 1 b-jet
@@ -494,13 +500,15 @@ MAfloat64 TransverseVariables::MT2W(std::vector<const MCParticleFormat*> jets, c
   {
     MAfloat64 min_mt2w=1e9;
     for (MAuint32 ii=0; ii<bjets.size(); ii++)
+    {
       for (MAuint32 jj=0; jj<bjets.size(); jj++)
       {
         if (ii==jj) continue;
         MAfloat64 tmp_mt2w = GetMT2W(lep, bjets[ii], bjets[jj],met);
         if (tmp_mt2w < min_mt2w) min_mt2w = tmp_mt2w;
       }
-      return min_mt2w;
+    }
+    return min_mt2w;
   }
 }
 

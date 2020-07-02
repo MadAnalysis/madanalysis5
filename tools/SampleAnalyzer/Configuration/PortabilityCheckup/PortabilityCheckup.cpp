@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -126,11 +126,11 @@ int main()
 
   // C++ integer
   std::cout << "cross-check of C++ hierarchy for int   = ";
-  if (1               <= data.char_size && 
+  if (1               <= data.char_size  && 
       data.char_size  <= data.short_size && 
-      data.short_size <= data.int_size && 
-      data.int_size   <= data.long_size && 
-      data.long_size  <= data.llong_size)
+      data.short_size <= data.int_size   && 
+      data.int_size   <= data.long_size  && 
+      data.long_size  <= data.llong_size    )
   {
     std::cout << "OK" << std::endl;
   }

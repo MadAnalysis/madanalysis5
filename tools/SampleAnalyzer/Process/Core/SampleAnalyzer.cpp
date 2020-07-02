@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -306,17 +306,22 @@ inline MAint32 CreateDir(std::string dirname)
   return 0;
 }
 
+/// Creating the Output directory and its sub-structure
 MAbool SampleAnalyzer::CreateDirectoryStructure()
 {
   // Check if the output directory exists -> if not: create it
   std::string dirname="../Output";
-  if(CreateDir(dirname)==-1) { return false; }
+  if (CreateDir(dirname)==-1) return false;
+
+  // Check if the SAF directory exists -> if not: create it
+  dirname="../Output/SAF";
+  if (CreateDir(dirname)==-1) return false;
 
   // Check whether a directory for the investigated dataset exists -> if not create it
   dirname = cfg_.GetInputFileName();
   size_t pos = dirname.find_last_of('/');
-  if(pos!=std::string::npos) dirname = "../Output/" + dirname.substr(pos+1);
-  else                       dirname = "../Output/" + dirname;
+  if(pos!=std::string::npos) dirname = "../Output/SAF/" + dirname.substr(pos+1);
+  else                       dirname = "../Output/SAF/" + dirname;
   size_t found  = dirname.find(".list");
   if(found!=std::string::npos) dirname.replace(found,5,"");
   if(CreateDir(dirname)==-1) { return false; }
@@ -333,11 +338,12 @@ MAbool SampleAnalyzer::CreateDirectoryStructure()
       if(check==-1) { return false; }
       else          { analyzers_[i]->SetOutputDir( newdirname + "_" + ss.str()); }
     }
+
     // Creating one suybdirectory for the histograms and another one for the cutflow
     if(CreateDir(analyzers_[i]->Output() + "/Histograms")==-1) {  return false; }
     if(CreateDir(analyzers_[i]->Output() + "/Cutflows")==-1) {  return false; }
   }
-
+  
   // Everything is fine
   return true;
 }
@@ -382,11 +388,15 @@ WriterBase* SampleAnalyzer::InitializeWriter(const std::string& name,
   std::string dirname="../Output";
   if(CreateDir(dirname)==-1) { return 0; }
 
+  // Check if the SAF directory exists -> if not: create it
+  dirname="../Output/SAF";
+  if(CreateDir(dirname)==-1) { return 0; }
+
   // Check whether a directory for the investigated dataset exists -> if not create it
   dirname = cfg_.GetInputFileName();
   size_t pos = dirname.find_last_of('/');
-  if(pos!=std::string::npos) dirname = "../Output/" + dirname.substr(pos+1);
-  else                       dirname = "../Output/" + dirname;
+  if(pos!=std::string::npos) dirname = "../Output/SAF/" + dirname.substr(pos+1);
+  else                       dirname = "../Output/SAF/" + dirname;
   size_t found  = dirname.find(".list");
   if(found!=std::string::npos) dirname.replace(found,5,"");
   if(CreateDir(dirname)==-1) { return 0; }
@@ -483,11 +493,15 @@ DetectorBase* SampleAnalyzer::InitializeDetector(
   std::string dirname="../Output";
   if(CreateDir(dirname)==-1) { return 0; }
 
+  // Check if the SAF directory exists -> if not: create it
+  dirname="../SAF";
+  if(CreateDir(dirname)==-1) { return 0; }
+
   // Check whether a directory for the investigated dataset exists -> if not create it
   dirname = cfg_.GetInputFileName();
   size_t pos = dirname.find_last_of('/');
-  if(pos!=std::string::npos) dirname = "../Output/" + dirname.substr(pos+1);
-  else                       dirname = "../Output/" + dirname;
+  if(pos!=std::string::npos) dirname = "../Output/SAF/" + dirname.substr(pos+1);
+  else                       dirname = "../Output/SAF/" + dirname;
   size_t found  = dirname.find(".list");
   if(found!=std::string::npos) dirname.replace(found,5,"");
   if(CreateDir(dirname)==-1) { return 0; }
@@ -752,7 +766,7 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
   if(pos!=std::string::npos) datasetname = datasetname.substr(pos+1);
   size_t found  = datasetname.find(".list");
   if(found!=std::string::npos) datasetname.replace(found,5,"");
-  std::string general = "../Output/" + datasetname + "/" + datasetname + ".saf";
+  std::string general = "../Output/SAF/" + datasetname + "/" + datasetname + ".saf";
   SAFWriter out;
   out.Initialize(&cfg_, general.c_str());
   out.WriteHeader(summary);
@@ -804,17 +818,24 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
   for(MAuint32 i=0; i<analyzers_.size(); i++)
     analyzers_[i]->Finalize(summary,mySamples);
 
-    // Finalize clusters
-    for (MAuint32 i=0;i<clusters_.size();i++)
-    {
-      clusters_[i]->Finalize();
-    }
+  // Finalize clusters
+  for (MAuint32 i=0;i<clusters_.size();i++)
+  {
+    clusters_[i]->Finalize();
+  }
 
-    // Finalize detectors
-    for (MAuint32 i=0;i<detectors_.size();i++)
-    {
-      detectors_[i]->Finalize();
-    }
+  // Finalize wrtiers
+  for(MAuint32 i=0; i<writers_.size(); i++)
+  {
+    writers_[i]->WriteFoot(summary);
+    writers_[i]->Finalize();
+  }
+
+  // Finalize detectors
+  for (MAuint32 i=0;i<detectors_.size();i++)
+  {
+    detectors_[i]->Finalize();
+  }
 
   // Display reports
   MA5::TimeService::GetInstance()->WriteGenericReport();
@@ -887,4 +908,24 @@ void SampleAnalyzer::FillSummary(SampleFormat& summary,
 void SampleAnalyzer::UpdateProgressBar()
 {
   progressBar_->Update(myReader_->GetPosition());
+}
+
+
+
+void SampleAnalyzer::HeadSR(std::ostream &outwriter)
+{
+  outwriter << "#";
+  for(MAuint32 i=0; i<analyzers_.size(); i++)
+  {
+    outwriter <<" ";
+    analyzers_[i]->Manager()->HeadSR(outwriter, analyzers_[i]->name());
+  }
+}
+
+
+void SampleAnalyzer::DumpSR(std::ostream &outwriter)
+{
+  for(MAuint32 i=0; i<analyzers_.size(); i++)
+    analyzers_[i]->Manager()->DumpSR(outwriter);
+  outwriter << std::endl;
 }

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -69,6 +69,10 @@ class RecLeptonFormat : public RecParticleFormat
   MAuint32   pdg_;
   MAfloat32  d0_;
   MAfloat32  d0error_;
+  MAfloat32  dz_;
+  MAfloat32  dzerror_;
+  MALorentzVector  vertex_prod_;
+  MALorentzVector  closest_point_;
 
   // -------------------------------------------------------------
   //                        method members
@@ -121,6 +125,8 @@ class RecLeptonFormat : public RecParticleFormat
     pdg_=0;
     isolCones_.clear();
     d0_=0; d0error_=0;
+    dz_=0; dzerror_=0;
+    vertex_prod_.Reset();    
   }
 
   /// Accessor to the electric charge 
@@ -184,6 +190,22 @@ class RecLeptonFormat : public RecParticleFormat
   // d0error
   MAfloat32 d0error() const
   { return d0error_; }
+
+  // dz
+  MAfloat32 dz() const
+  { return dz_; }
+
+  // dzerror
+  MAfloat32 dzerror() const
+  { return dzerror_; }
+
+  // vertex prod
+  const MALorentzVector& vertexProd() const
+  { return vertex_prod_; }
+
+  // vertex prod
+  const MALorentzVector& closestPoint() const
+  { return closest_point_; }
 
 };
 

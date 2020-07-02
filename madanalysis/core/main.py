@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -27,7 +27,7 @@ from madanalysis.dataset.dataset_collection             import DatasetCollection
 from madanalysis.selection.selection                    import Selection
 from madanalysis.interpreter.cmd_base                   import CmdBase
 from madanalysis.region.region_collection               import RegionCollection
-from madanalysis.tagging.tagger                         import Tagger
+from madanalysis.fastsim.fastsim                        import SuperFastSim
 from madanalysis.system.session_info                    import SessionInfo
 from madanalysis.system.architecture_info               import ArchitectureInfo
 from madanalysis.core.library_builder                   import LibraryBuilder
@@ -87,12 +87,12 @@ class Main():
         self.madgraph       = MadGraphInterface()
         self.logger         = logging.getLogger('MA5')
         self.redirectSAlogger = False
-        self.tagger         = Tagger()
 
 
     def ResetParameters(self):
         self.merging        = MergingConfiguration()
         self.fastsim        = FastsimConfiguration()
+        self.superfastsim   = SuperFastSim()
         self.recasting      = RecastConfiguration()
         self.fom            = FomConfiguration()
         self.lumi           = 10
@@ -106,9 +106,12 @@ class Main():
             self.normalize = NormalizeType.NONE
         else:
             self.normalize = NormalizeType.LUMI_WEIGHT
+        self.superfastsim.InitObservables(self.observables)
+
 
     def InitObservables(self,mode):
         self.observables = ObservableManager(mode)
+        self.superfastsim.InitObservables(self.observables)
 
 
     def IsGoodFormat(self,file):
@@ -441,6 +444,11 @@ class Main():
 
     def CheckConfig2(self,debug=False):
         checkup = CheckUp(self.archi_info, self.session_info, debug, self.script)
+
+        # Read user options
+        if not checkup.ReadUserOptions():
+            return False
+
         # Reinterpretation packages
         if not checkup.CheckOptionalReinterpretationPackages():
             return False
@@ -541,6 +549,7 @@ class Main():
         libraries.append(['process', 'SampleAnalyzer core', 'process', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libprocess_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Process',False])
         libraries.append(['test_process','SampleAnalyzer core', 'test_process', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestSampleAnalyzer',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
 
+  
         # Writing the Makefiles
         self.logger.info("")
         self.logger.info("   **********************************************************")
@@ -550,6 +559,11 @@ class Main():
 
         # Getting number of cores
         ncores = compiler.get_ncores2()
+
+        # Chronometer start
+        from chronometer  import Chronometer
+        chrono = Chronometer()
+        chrono.Start()
 
         # Writing the main Makefile
         from madanalysis.build.makefile_writer import MakefileWriter
@@ -646,6 +660,12 @@ class Main():
 
             # Print Ok
             self.logger.info('      => Status: \x1b[32m'+'[OK]'+'\x1b[0m')
+
+        self.logger.info("   **********************************************************")
+
+        # Chrono end
+        chrono.Stop()
+        self.logger.info("   Elapsed time = "+chrono.Display())
 
         self.logger.info("   **********************************************************")
         self.logger.info("")

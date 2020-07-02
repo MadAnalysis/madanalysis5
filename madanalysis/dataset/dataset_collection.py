@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -49,6 +49,9 @@ class DatasetCollection:
                 return True
         return False
 
+    def Reset(self):
+        self.table = []
+    
     def Add(self,name):
         name.lower()
         if not self.Find(name):
@@ -78,3 +81,82 @@ class DatasetCollection:
         for item in self.table:
             names.append(item[0])
         return names
+
+
+    def LoadWithSAF(self,ast):
+        # Reseting the multiparticle collection
+        self.Reset()
+        
+        # Getting datasets branches
+        datasets = ast.GetBranch("datasets",1)
+        if datasets==None:
+            return
+
+        # Looping over the branches of the tree
+        for key, value in datasets.GetBranches().iteritems():
+
+            # Keeping only 'dataset' branches
+            if key[0]!='dataset':
+                continue
+
+            # Getting the name of the dataset (if it exists)
+            name = value.GetParameterToStringWithoutQuotes('name')
+            if name==None:
+                logging.getLogger('MA5').error('dataset name is not found in the tree')
+                continue
+
+            # Creating a new dataset
+            self.Add(name)
+            dataset = self.Get(name)
+
+            # Getting physics parameters
+            physics = value.GetBranch('physics',1)
+            if physics==None:
+                print "ERROR: no physics branch"
+                continue
+            else:
+                background = physics.GetParameterToBool("background")
+                dataset.background = dataset.background if background==None else background
+                
+                weight = physics.GetParameterToFloat("weight")
+                dataset.weight = dataset.weight if weight==None else weight
+                
+                xsection = physics.GetParameterToFloat("xsection")
+                dataset.xsection = dataset.xsection if xsection==None else xsection
+
+            # Getting layout parameters
+            layout = value.GetBranch('layout',1)
+            if layout==None:
+                print "ERROR: no layout branch"
+                continue
+            else:
+                title = layout.GetParameterToStringWithoutQuotes("title")
+                dataset.title = dataset.title if title==None else title
+
+                linecolor = layout.GetParameterToUInt("linecolor")
+                dataset.linecolor = dataset.linecolor if linecolor==None else linecolor
+                
+                linestyle = layout.GetParameterToUInt("linestyle")
+                dataset.linestyle = dataset.linestyle if linestyle==None else linestyle
+
+                lineshade = layout.GetParameterToUInt("lineshade")
+                dataset.lineshade = dataset.lineshade if lineshade==None else lineshade
+
+                linewidth = layout.GetParameterToUInt("linewidth")
+                dataset.linewidth = dataset.linewidth if linewidth==None else linewidth
+
+                backcolor = layout.GetParameterToUInt("backcolor")
+                dataset.backcolor = dataset.backcolor if backcolor==None else backcolor
+                
+                backstyle = layout.GetParameterToUInt("backstyle")
+                dataset.backstyle = dataset.backstyle if backstyle==None else backstyle
+
+                backshade = layout.GetParameterToUInt("backshade")
+                dataset.backshade = dataset.backshade if backshade==None else backshade
+                
+                
+                
+                
+            
+        
+    

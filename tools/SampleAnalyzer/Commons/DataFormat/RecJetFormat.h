@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -145,6 +145,10 @@ class RecJetFormat : public RecParticleFormat
   /// Setting a new ctag_ value
   void setTrueCtag(const MAbool& tag)
   {true_ctag_=tag;}
+
+  /// Setting ntracks
+  void setNtracks(MAuint16 ntracks)
+  { ntracks_=ntracks; }
 
   /// Add one constituent
   void AddConstituent (const MAint32& index)

@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -220,7 +220,62 @@ class MakefileWriter():
         file.write('CXXFLAGS  = '+' '.join(cxxflags)+'\n')
         for item in moreIncludes:
             file.write('CXXFLAGS += '+' -I'+item+'\n')
+
+        # - compilation severity
+        if not options.has_root_inc    and not options.has_fastjet_inc and \
+           not options.has_zlib_inc    and \
+           not options.has_delphes_inc and not options.has_delphesMA5tune_inc:
             
+            # - compilation severity level 1
+            if archi_info.compilation_severity>=1:
+                cxxflags=[]
+                cxxflags.extend(["-Werror"]) # all warnings become errors
+                file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
+
+            # - compilation severity level 2
+            if archi_info.compilation_severity>=2:
+                cxxflags=[]
+                cxxflags.extend(["-ansi","-pedantic"]) # only ANSI compatible code, else rejecting
+                cxxflags.extend(["-Wno-long-long"])    # except 'long long' = 64 bits (mandatory for STDHEP format)
+                file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
+
+            # - compilation severity level 3
+            if archi_info.compilation_severity>=3:
+                cxxflags=[]
+                cxxflags.extend(["-Wall"]) # enables all compiler's warning messages
+                file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
+
+            # - compilation severity level 4
+            if archi_info.compilation_severity>=4:
+                cxxflags=[]
+                cxxflags.extend(["-Wextra"])           # more warnings
+                cxxflags.extend(["-Wstrict-aliasing"])
+                cxxflags.extend(["-fmax-errors=5"])
+                cxxflags.extend(["-Wunreachable-code"])
+                cxxflags.extend(["-Wcast-align"])
+                cxxflags.extend(["-Wcast-qual"])
+                cxxflags.extend(["-Wctor-dtor-privacy"])
+                cxxflags.extend(["-Wdisabled-optimization"])
+                cxxflags.extend(["-Wformat=2"])
+                cxxflags.extend(["-Winit-self"])
+                cxxflags.extend(["-Wlogical-op"])
+                cxxflags.extend(["-Wmissing-include-dirs"])
+                cxxflags.extend(["-Wold-style-cast"])
+                cxxflags.extend(["-Woverloaded-virtual"])
+                cxxflags.extend(["-Wredundant-decls"])
+                cxxflags.extend(["-Wshadow"])
+                cxxflags.extend(["-Wsign-promo"])
+                cxxflags.extend(["-Wstrict-null-sentinel"])
+                cxxflags.extend(["-Wstrict-overflow=5"])
+                cxxflags.extend(["-Wswitch-default"])
+                cxxflags.extend(["-Wundef"])
+#               cxxflags.extend(["-Wno-unused"])
+#               cxxflags.extend(["-Wno-variadic-macros"])
+#               cxxflags.extend(["-Wno-parentheses"])
+#               cxxflags.extend(["-Wnoexcept"])
+                cxxflags.extend(["-fdiagnostics-show-option"])
+                file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
+
         # - root
         if options.has_root_inc:
             cxxflags=[]

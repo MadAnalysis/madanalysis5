@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -139,20 +139,27 @@ class CmdSet(CmdBase.CmdBase):
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='merging':
             self.main.merging.user_SetParameter(objs[2],args[2],self.main.mode,self.main.archi_info.has_fastjet)
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='fastsim':
-            user_info    = UserInfo()
-            user_info.ReadUserOptions(self.main.archi_info.ma5dir+'/madanalysis/input/installation_options.dat')
-            checker = ConfigChecker(self.main.archi_info, user_info, self.main.session_info, self.main.script, False)
-            bkp_delphes = self.main.archi_info.has_delphes
-            bkp_ma5tune = self.main.archi_info.has_delphesMA5tune
-            self.main.archi_info.has_delphes = checker.checkDelphes(True)
-            self.main.archi_info.has_delphesMA5tune = checker.checkDelphesMA5tune(True)
-            self.main.fastsim.user_SetParameter(objs[2],args[2],self.main.datasets,self.main.mode,self.main.archi_info) 
-            self.main.archi_info.has_delphes = bkp_delphes
-            self.main.archi_info.has_delphesMA5tune = bkp_ma5tune
+            if objs[2] == 'jetrecomode':
+                if args[2] in ['jets', 'constituents']:
+                    self.main.superfastsim.jetrecomode = args[2]
+                else:
+                    logging.getLogger('MA5').error("Jet smearing can only be based on the jet ('jets') or on its constituents ('constituents').")
+            else:
+                user_info    = UserInfo()
+                user_info.ReadUserOptions(self.main.archi_info.ma5dir+'/madanalysis/input/installation_options.dat')
+                checker = ConfigChecker(self.main.archi_info, user_info, self.main.session_info, self.main.script, False)
+                bkp_delphes = self.main.archi_info.has_delphes
+                bkp_ma5tune = self.main.archi_info.has_delphesMA5tune
+                self.main.archi_info.has_delphes = checker.checkDelphes(True)
+                self.main.archi_info.has_delphesMA5tune = checker.checkDelphesMA5tune(True)
+                self.main.fastsim.user_SetParameter(objs[2],args[2],self.main.datasets,self.main.mode,self.main.archi_info) 
+                self.main.archi_info.has_delphes = bkp_delphes
+                self.main.archi_info.has_delphesMA5tune = bkp_ma5tune
             if objs[2]=='package' and args[2] in ['fastjet', 'delphes', 'delphesMA5tune'] and self.main.recasting.status=='on':
                 logging.getLogger('MA5').warning("Recasting mode switched off")
                 self.main.recasting.status ="off"
-        elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='recast':
+        elif (len(objs)==3 or (len(objs)>3 and objs[2].lower()=='add')) and \
+          objs[0].lower()=='main' and objs[1].lower()=='recast':
             user_info    = UserInfo()
             user_info.ReadUserOptions(self.main.archi_info.ma5dir+'/madanalysis/input/installation_options.dat')
             checker = ConfigChecker(self.main.archi_info, user_info, self.main.session_info, self.main.script, False)
@@ -160,7 +167,7 @@ class CmdSet(CmdBase.CmdBase):
             bkp_ma5tune = self.main.archi_info.has_delphesMA5tune
             self.main.archi_info.has_delphes = checker.checkDelphes(True)
             self.main.archi_info.has_delphesMA5tune = checker.checkDelphesMA5tune(True)
-            self.main.recasting.user_SetParameter(objs[2],args[2],self.main.mode,self.main.archi_info,self.main.session_info, self.main.datasets)            
+            self.main.recasting.user_SetParameter(objs[2:],args[2:],self.main.mode,self.main.archi_info,self.main.session_info, self.main.datasets)
             self.main.archi_info.has_delphes = bkp_delphes
             self.main.archi_info.has_delphesMA5tune = bkp_ma5tune
         else:
@@ -258,7 +265,6 @@ class CmdSet(CmdBase.CmdBase):
         logging.getLogger('MA5').info("   Modifies or sets an attribute of an object to a specific value.")
 
 
-
     def complete_name2(self,text,object,subobject,variable,withValue):
         # Main object
         if object.lower()=='main':
@@ -273,6 +279,8 @@ class CmdSet(CmdBase.CmdBase):
                          for item in self.main.merging.user_GetParameters() ])
                 output.extend([ object+".recast."+ item \
                          for item in self.main.recasting.user_GetParameters() ])
+                output.extend([ object+".recast.add."+ item \
+                         for item in self.main.recasting.user_GetParameters('add') ])
                 return self.finalize_complete(text,output)
             else:
                 if subobject=="isolation":
@@ -292,7 +300,6 @@ class CmdSet(CmdBase.CmdBase):
 
 
     def complete_name(self,text,object,variable,withValue):
-        
         # Only object name
         if variable==None:
             output = ["main"]
@@ -319,7 +326,7 @@ class CmdSet(CmdBase.CmdBase):
                     else :
                         return self.finalize_complete(text,self.main.selection[index-1].user_GetValues(variable))
             return []
-        
+
         # Main object
         elif object.lower()=='main':
             if not withValue:
@@ -378,7 +385,6 @@ class CmdSet(CmdBase.CmdBase):
         objs = object.split('.')
         for i in range(len(objs)):
             objs[i] = objs[i].replace('XXX','.')
-        
         if len(objs)==1:
             return self.complete_name(text,objs[0],None,False)
         elif len(objs)==2:
@@ -391,8 +397,11 @@ class CmdSet(CmdBase.CmdBase):
             if nargs==4:
                 withValue=True
             return self.complete_name2(text,objs[0],objs[1],objs[2],withValue) 
+        elif len(objs)==4:
+            withValue = False
+            if nargs==4:
+                withValue=True
+            return self.complete_name2(text,objs[0],objs[1],objs[2], withValue)
         else:
             return []
-        
 
-        

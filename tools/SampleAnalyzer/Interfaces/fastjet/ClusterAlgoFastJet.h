@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -30,6 +30,7 @@
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
 #include "SampleAnalyzer/Commons/Base/ClusterAlgoBase.h"
+#include "SampleAnalyzer/Commons/Base/SmearerBase.h"
 
 // STL headers
 #include <set>
@@ -72,7 +73,8 @@ class ClusterAlgoFastJet: public ClusterAlgoBase
     /// Jet clustering
     virtual MAbool Execute(SampleFormat& mySample, EventFormat& myEvent, MAbool ExclusiveId,   
                          const std::vector<MAbool>& vetos,
-                         const std::set<const MCParticleFormat*> vetos2);
+                         const std::set<const MCParticleFormat*> vetos2,
+                         SmearerBase* smearer);
 
     /// Initialization
     virtual MAbool Initialize()=0;

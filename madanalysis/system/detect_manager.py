@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -54,10 +54,13 @@ class DetectManager():
             checker=DetectFastjet(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='pad':
             from madanalysis.system.detect_pad import DetectPAD
-            checker=DetectPAD(self.archi_info, self.user_info, self.session_info, self.debug, ma5=False)
+            checker=DetectPAD(self.archi_info, self.user_info, self.session_info, self.debug, padtype='')
         elif package=='padma5':
             from madanalysis.system.detect_pad import DetectPAD
-            checker=DetectPAD(self.archi_info, self.user_info, self.session_info, self.debug, ma5=True)
+            checker=DetectPAD(self.archi_info, self.user_info, self.session_info, self.debug, padtype="ma5")
+        elif package=='padsfs':
+            from madanalysis.system.detect_pad import DetectPAD
+            checker=DetectPAD(self.archi_info, self.user_info, self.session_info, self.debug, padtype="sfs")
         elif package=='fastjet-contrib':
             from madanalysis.system.detect_fastjetcontrib import DetectFastjetContrib
             checker=DetectFastjetContrib(self.archi_info, self.user_info, self.session_info, self.debug)
@@ -68,10 +71,13 @@ class DetectManager():
             from madanalysis.system.detect_delphesMA5tune import DetectDelphesMA5tune
             checker=DetectDelphesMA5tune(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='gnuplot':
-            from madanalysis.system.detect_gnuplot import DetectGnuplot
-            checker=DetectGnuplot(self.archi_info, self.user_info, self.session_info, self.debug)
+            from madanalysis.system.detect_gnuplot import DetectGnuPlot
+            checker=DetectGnuPlot(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='matplotlib':
             from madanalysis.system.detect_matplotlib import DetectMatplotlib
+            checker=DetectMatplotlib(self.archi_info, self.user_info, self.session_info, self.debug)
+        elif package=='gnuplot':
+            from madanalysis.system.detect_gnuplot import DetectGnuPlot
             checker=DetectMatplotlib(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='scipy':
             from madanalysis.system.detect_scipy import DetectScipy
@@ -97,6 +103,9 @@ class DetectManager():
         elif package=='numpy':
             from madanalysis.system.detect_numpy import DetectNumpy
             checker=DetectNumpy(self.archi_info, self.user_info, self.session_info, self.debug)
+        elif package=='pyhf':
+            from madanalysis.system.detect_pyhf import Detectpyhf
+            checker=Detectpyhf(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='pdflatex':
             from madanalysis.system.detect_pdflatex import DetectPdflatex
             checker=DetectPdflatex(self.archi_info, self.user_info, self.session_info, self.debug)

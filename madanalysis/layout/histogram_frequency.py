@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -32,10 +32,14 @@ class HistogramFrequency:
 
 
     def Print(self):
-       # Data
-       self.positive.Print()
-       self.negative.Print()
-       self.summary.Print()
+        # General info
+        if self.ymin!=[] or self.ymax!=[]:
+            logging.getLogger('MA5').info(' ' + str(self.ymin) + ' ' + str(self.ymax))
+
+        # Data
+        self.positive.Print()
+        self.negative.Print()
+        self.summary.Print()
 
 
     def FinalizeReading(self,main,dataset):
@@ -95,6 +99,8 @@ class HistogramFrequency:
         self.nbins    = 0
         self.xmin     = 0.
         self.xmax     = 1.
+        self.ymin     = []
+        self.ymax     = []
 
         # labels
         self.labels       = [] # int: PDG id 

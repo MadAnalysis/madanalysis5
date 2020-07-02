@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -55,7 +55,7 @@ class ExpertMode:
         # Getting the full path
         self.path = os.path.expanduser(name)
         if not self.path.startswith('/'):
-            if name in ['PAD', 'PADForMA5tune']:
+            if name in ['tools/PAD', 'tools/PADForMA5tune']:
                 self.path = self.main.archi_info.ma5dir+'/'+self.path
             else:
                 self.path = self.main.currentdir+'/'+self.path
@@ -65,7 +65,7 @@ class ExpertMode:
         # Checking folder
         logging.getLogger('MA5').debug("Check that the path is not forbidden...")
         if self.path in self.forbiddenpaths:
-            logging.getLogger('MA5').error("the folder '"+anwser+"' is a MadAnalysis folder. " + \
+            logging.getLogger('MA5').error("the folder '"+answer+"' is a MadAnalysis folder. " + \
                          "You cannot overwrite it. Please choose another folder.")
             return False
 
@@ -74,7 +74,6 @@ class ExpertMode:
             logging.getLogger('MA5').debug("Remove the previous folder?")
             question="A directory called '"+self.path+"' is already defined.\n"+\
                  "Would you like to remove it ? (Y/N)"
-            from madanalysis.IOinterface.folder_writer import FolderWriter
             test = FolderWriter.RemoveDirectory(self.path,question)
             if not test[0] or not test[1]:
                 return False
@@ -82,11 +81,20 @@ class ExpertMode:
         return True
 
 
-    def Copy(self,name):
-        
+    def Copy(self,name,config=''):
+        if config!='':
+            # Load the analysis card
+            from madanalysis.core.script_stack       import ScriptStack
+            from madanalysis.interpreter.interpreter import Interpreter
+            ScriptStack.AddScript(config)
+            self.main.script = True
+            interpreter = Interpreter(self.main)
+            interpreter.load(verbose=self.main.developer_mode)
+
+
         # Initializing the JobWriter
         jobber = JobWriter(self.main,self.path,False)
-        
+
         # Writing process
         logging.getLogger('MA5').info("   Creating folder '"+self.path+"'...")
         if not jobber.Open():
@@ -98,6 +106,16 @@ class ExpertMode:
         if not jobber.CopyLHEAnalysis():
             logging.getLogger('MA5').error("   job submission aborted.")
             return False
+
+        # Write config file inputs
+        if config!='':
+            if not jobber.WriteSelectionHeader(self.main):
+                return False
+            os.remove(self.path+'/Build/SampleAnalyzer/User/Analyzer/user.h')
+            if not jobber.WriteSelectionSource(self.main):
+                return False
+            os.remove(self.path+'/Build/SampleAnalyzer/User/Analyzer/user.cpp')
+            os.remove(self.path+'/Build/SampleAnalyzer/User/Analyzer/analysisList.h')
 
         # Writing an empty analysis
         if name=="":
@@ -133,9 +151,19 @@ class ExpertMode:
             logging.getLogger('MA5').error("   job submission aborted.")
             return False
 
-        # adding the CLs script if available
+        # if fastsim functionalities are needed
+        if config!='':
+            with open(self.path+'/Build/SampleAnalyzer/User/Analyzer/'+title+'.h','r') as f:
+                header = f.readlines()
+            to_include = [x for x in os.listdir(self.path+'/Build/SampleAnalyzer/User/Analyzer/') if x in ['new_smearer_reco.h',
+                                                                                                                'new_tagger.h']]
+            top_header    = header[:header.index('namespace MA5\n')]
+            bottom_header = header[header.index('namespace MA5\n'):]
+            for inc in to_include:
+                top_header.append('#include "'+inc+'"\n')
+            open(self.path+'/Build/SampleAnalyzer/User/Analyzer/'+title+'.h','w').writelines(top_header+bottom_header)
 
-        return True    
+        return True
 
 
     def GiveAdvice(self):

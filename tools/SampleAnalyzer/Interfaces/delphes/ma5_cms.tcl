@@ -190,7 +190,7 @@ module MomentumSmearing MuonMomentumSmearing {
 # Electron tracking efficiency
 ##############################
 
-module MA5EfficiencyD0 ElectronTrackingEfficiencyD0 {
+module Efficiency ElectronTrackingEfficiencyD0 {
   set InputArray  ElectronMomentumSmearing/electrons
   set OutputArray electrons
 
@@ -209,7 +209,7 @@ module MA5EfficiencyD0 ElectronTrackingEfficiencyD0 {
 # Muon tracking efficiency
 ##############################
 
-module MA5EfficiencyD0 MuonTrackingEfficiencyD0 {
+module Efficiency MuonTrackingEfficiencyD0 {
   set InputArray  MuonMomentumSmearing/muons
   set OutputArray muons
 

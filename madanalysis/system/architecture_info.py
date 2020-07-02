@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -95,6 +95,10 @@ class ArchitectureInfo:
         self.delphesMA5tune_lib=""
         self.fastjet_bin_path=""
         self.fastjet_lib_paths=[]
+
+        # Flags for validations tests
+        # 0 = normal, Other possible values: 1, 2, 3 and 4 (4=ultra strict compilation)
+        self.compilation_severity = 0
 
 
     def dump(self):

@@ -2,7 +2,7 @@
 
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -137,6 +137,9 @@ class MA5Interpreter(Interpreter):
         # Checking the configuration
         if not main.CheckConfig(debug=(LoggerLevel<=logging.DEBUG)):
             raise MA5Configuration('Issue with the configuration')
+        if not main.CheckConfig2(debug=(LoggerLevel<=logging.DEBUG)):
+            raise MA5Configuration('Issue with the configuration')
+
         self.ma5_environ = dict(os.environ)
         main.madgraph.has_root           = main.archi_info.has_root
         main.madgraph.has_delphes        = main.archi_info.has_delphes
@@ -178,7 +181,15 @@ class MA5Interpreter(Interpreter):
     @freeze_environment
     def load(self, *args, **opts):
         from madanalysis.core.script_stack import ScriptStack
-        ScriptStack.stack.append(['',args[0]])
+        ScriptStack.Reset()
+        ScriptStack.stack = [] # reset does not 
+        arguments = args[0]
+        for arg in args[0]:
+            if 'set main.mode = parton' in arg:
+                self.init_parton()
+                arguments.remove('set main.mode = parton')
+                break
+        ScriptStack.stack.append(['',arguments])
         Interpreter.load(self)
 #        Interpreter.load(self,*args,**opts)
 
@@ -195,7 +206,7 @@ class MA5Interpreter(Interpreter):
         self.main.datasets.Reset()
         self.main.selection.Reset()
         self.main.ResetParameters()
-        self.history=[]
+        self.InitializeHistory()
 
         # Graphical mode
         self.main.AutoSetGraphicalRenderer()
@@ -222,7 +233,7 @@ class MA5Interpreter(Interpreter):
         self.main.datasets.Reset()
         self.main.selection.Reset()
         self.main.ResetParameters()
-        self.history=[]
+        self.InitializeHistory()
 
         # Graphical mode
         self.main.AutoSetGraphicalRenderer()

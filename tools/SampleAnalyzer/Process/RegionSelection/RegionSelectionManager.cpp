@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -152,6 +152,8 @@ void RegionSelectionManager::FillHisto(std::string const&histname, MAfloat64 val
   catch (const std::exception& e)    { MANAGE_EXCEPTION(e); return; }
 }
 
+
+
 void RegionSelectionManager::WriteHistoDefinition(SAFWriter& output)
 {
   *output.GetStream() << "<RegionSelection>" << std::endl;
@@ -160,4 +162,18 @@ void RegionSelectionManager::WriteHistoDefinition(SAFWriter& output)
   *output.GetStream() << "</RegionSelection>" << std::endl << std::endl;
 }
 
+
+
+void RegionSelectionManager::HeadSR(std::ostream &outwriter, const std::string &ananame)
+{
+  for (MAuint32 i=0;i<regions_.size();i++)
+    outwriter <<  " " << ananame << "-" << regions_[i]->GetName();
+}
+
+
+void RegionSelectionManager::DumpSR(std::ostream &outwriter)
+{
+  for (MAuint32 i=0;i<regions_.size();i++)
+    outwriter<< "  " << regions_[i]->IsSurviving();
+}
 

@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -61,7 +61,6 @@ class CmdInstall(CmdBase):
 
             ## to update all the paths
             def UpdatePaths():
-                print ('MUF = ', to_activate, to_deactivate)
                 if release=='delphes':
                     main.archi_info.has_delphes             = True
                     main.archi_info.delphes_priority        = True
@@ -147,6 +146,10 @@ class CmdInstall(CmdBase):
             else:
                 self.logger.warning('Delphes is not installed... please exit the program and install the pad')
                 return True
+        elif args[0]=='PADForSFS':
+            return installer.Execute('PADForSFS')
+        elif args[0]=='pyhf':
+            return installer.Execute('pyhf')
         else:
             self.logger.error("the syntax is not correct.")
             self.help()
@@ -155,7 +158,7 @@ class CmdInstall(CmdBase):
     def help(self):
         self.logger.info("   Syntax: install <component>")
         self.logger.info("   Download and install a MadAnalysis component from the official site.")
-        self.logger.info("   List of available components: samples zlib fastjet delphes delphesMA5tune PAD PADForMA5tune")
+        self.logger.info("   List of available components: samples zlib fastjet delphes delphesMA5tune PAD PADForMA5tune PADForSFS")
 
 
     def complete(self,text,args,begidx,endidx):
@@ -168,7 +171,8 @@ class CmdInstall(CmdBase):
             return []
         else:
             output = ["samples","zlib","fastjet", "delphes", "delphesMA5tune",\
-                "gnuplot", "matplotlib", "root" , "numpy", "PAD", "PADForMA5tune"]
+                "gnuplot", "matplotlib", "root" , "numpy", "PAD", "PADForMA5tune",\
+                "PADForSFS", "pyhf"]
             return self.finalize_complete(text,output)
 
 

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+//  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -186,6 +186,14 @@ class ParticleBaseFormat
     if(dphi>3.14159265) dphi=2.*3.14159265-dphi;
     return dphi;
   }
+
+  /// Accessor to the recoil class (computed wrt another particle)
+  const MAfloat32 recoil(const ParticleBaseFormat* p) const
+    { return std::abs((momentum_ - p->momentum()).M()); }
+
+  /// Accessor to the recoil class (computed wrt another particle)
+  const MAfloat32 recoil(const ParticleBaseFormat& p) const
+    { return std::abs((momentum_ - p.momentum()).M()); }
 
   /// Accessor to the delta Phi (given in [0, 2pi] with another particle direction
   const MAfloat32 dphi_0_2pi(const ParticleBaseFormat* p) const 

@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2018 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -97,6 +97,10 @@ def DefaultInstallCard():
     output.write('# padma5_veto = 0 # 0=No, 1=Yes\n')
     output.write('# padma5_build_path = /home/PADForMA5tune/build/\n')
     output.write('\n')
+    output.write('# -----PADForSFS-----\n')
+    output.write('# padsfs_veto = 0 # 0=No, 1=Yes\n')
+    output.write('# padsfs_build_path = /home/PADForSFS/build/\n')
+    output.write('\n')
     output.write('# -----PDFLATEX-----\n')
     output.write('# pdflatex_veto = 0 # 0=No, 1=Yes\n')
     output.write('\n')
@@ -115,7 +119,6 @@ def DefaultInstallCard():
 def DecodeArguments(version, date):
     
     import sys
-    import os
     
     # Checking arguments
     import getopt
@@ -277,14 +280,28 @@ def MainSession(mode,arglist,ma5dir,version,date):
         main.expertmode = True
         expert = ExpertMode(main)
         dirname=""
-        if len(arglist)>0:
-          dirname=arglist[0]
+        config_file = ''
+        rest_arglist = arglist
+
+        # Scan the arglist to find the configuration file, if it exists 
+        # separate it from the arglist
+        conf_tmp = [x for x in arglist if os.path.isfile(x)]
+        if len(conf_tmp)>=1:
+            # the config file name might be the same with analysis name so just
+            # take the last appearence of the name.
+            config_file = conf_tmp[0]
+            rest_arglist.reverse() # reverse to remove the last appearance as config file
+            rest_arglist.remove(config_file)
+            rest_arglist.reverse() # reverse again to pick up the same order
+
+        if len(rest_arglist)>0:
+          dirname=rest_arglist[0]
         if not expert.CreateDirectory(dirname):
             sys.exit()
         dirname=""
-        if len(arglist)>1:
-          dirname=arglist[1]
-        if not expert.Copy(dirname):
+        if len(rest_arglist)>1:
+          dirname=rest_arglist[1]
+        if not expert.Copy(dirname,config=config_file):
             sys.exit()
         expert.GiveAdvice()
 
@@ -296,6 +313,7 @@ def MainSession(mode,arglist,ma5dir,version,date):
         # Launching the interpreter
         from madanalysis.interpreter.interpreter import Interpreter
         interpreter = Interpreter(main)
+        interpreter.InitializeHistory()
 
         # Executing the ma5 scripts
         if not ScriptStack.IsEmpty() and not ScriptStack.IsFinished():
@@ -312,6 +330,7 @@ def MainSession(mode,arglist,ma5dir,version,date):
 
         # Interpreter loop
         interpreter.cmdloop()
+        interpreter.FinalizeHistory()
         if main.repeatSession==True:
             return True
         else:
