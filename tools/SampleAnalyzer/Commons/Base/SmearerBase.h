@@ -25,6 +25,7 @@
 #ifndef SMEARERBASE_H
 #define SMEARERBASE_H
 
+
 // STL headers
 #include <algorithm>
 #include <cmath>

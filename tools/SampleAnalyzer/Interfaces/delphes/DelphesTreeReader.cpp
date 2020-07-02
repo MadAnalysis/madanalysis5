@@ -727,19 +727,19 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
       vertex->position_.SetXYZT(ref->X,ref->Y,ref->Z,ref->T);
       vertex->error_.SetXYZT(ref->ErrorX,ref->ErrorY,ref->ErrorZ,ref->ErrorT);
       vertex->ndf_ = ref->NDF;
-	
+
       // setting corresponding gen particle
       MAuint32 nconstituents = static_cast<MAuint32>(ref->Constituents.GetEntries());
       for (MAuint32 j=0;j<nconstituents;j++)
       {
-	const GenParticle* mc = dynamic_cast<const GenParticle*>(ref->Constituents.At(j));
+        const GenParticle* mc = dynamic_cast<const GenParticle*>(ref->Constituents.At(j));
         if (mc!=0)
         {
            genit = gentable.find(mc);
            if (genit!=gentable.end()) vertex->constituents_.push_back(&(myEvent.mc()->particles()[genit->second]));
            else WARNING << "GenParticle corresponding to a vertex is not found in the gen table" << endmsg;
         }
-	//        vertex->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
+        // vertex->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
       }
     }
   }
