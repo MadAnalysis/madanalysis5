@@ -52,7 +52,11 @@
 {\color{ao} \huge \textbf{Normal-Mode reference card}} \\ \vspace{0.25cm}
 \vspace{0.1cm} \textsl{\today}\\
 \vspace{0.1cm} \textsl{website: \url{http://madanalysis.irmp.ucl.ac.be/}}\\
-\vspace{0.1cm} \textsl{references: \href{https://arxiv.org/abs/1206.1599}{arXiv:1206.1599[hep-ph]}, \href{https://arxiv.org/abs/1405.3982}{arXiv:1405.3982[hep-ph]}, \href{https://arxiv.org/abs/1407.3278}{arXiv:1407.3278[hep-ph]}}
+\vspace{0.1cm} \textsl{References:\\ \href{https://arxiv.org/abs/1206.1599}{arXiv:1206.1599 [hep-ph]}, \href{https://arxiv.org/abs/1405.3982}{arXiv:1405.3982 [hep-ph]}, 
+\href{https://arxiv.org/abs/1407.3278}{arXiv:1407.3278 [hep-ph]},\\
+\href{https://arxiv.org/abs/1910.11418}{arXiv:1910.11418 [hep-ph]},
+\href{https://arxiv.org/abs/2006.09387}{arXiv2006.09387 [hep-ph]}
+}
 \end{center}
 
 \hspace{0.5cm}
@@ -814,14 +818,17 @@ bounds on a given new physics signal. This download is achieved by typing in
   install delphesMA5tune
   install PAD
   install PADForMA5tune
+  install PADForSFS
 \end{verbatim}}
 \noindent The first two commands trigger the installation of the current release
-of \DEL\ as well as of its old tuned version, whilst the last two commands
-install the two versions of the \MA\ Public Analysis Database of recasted LHC
+of \DEL\ as well as of its old tuned version, whilst the last three commands
+install the three versions of the \MA\ Public Analysis Database of recasted LHC
 analyses. The first version ({\tt PAD}) relies on the current release of \DEL\
 for the simulation of the detector reponse, whilst the second one ({\tt
 PADForMA5tune}) relies on the
-tuned version of \DEL. More information can be found in~\autoref{sec:install}.
+tuned version of \DEL. The third framework ({\tt PADForSFS}) uses the Simplified
+Fast Simulation (SFS) module of \MA\ to deal with the simulation of the
+detector response. More information can be found in~\autoref{sec:install}.
 In order to switch on the recasting module of \MA, the user needs to type in
 {\color{ao} \begin{verbatim}
   set main.recast = on

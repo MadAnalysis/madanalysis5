@@ -6,6 +6,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{url,slashed,multirow,cite,verbdef}
 \usepackage{hyperref}
+
 %% Sets page size and margins
 \usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
 
@@ -59,7 +60,8 @@
 {\color{ao} \huge \textbf{Expert-Mode reference card}} \\ \vspace{0.25cm}
 \vspace{0.1cm} \textsl{\today}\\
 \vspace{0.1cm} \textsl{website: \url{http://madanalysis.irmp.ucl.ac.be/}}\\
-\vspace{0.1cm} \textsl{references: \href{https://arxiv.org/abs/1206.1599}{arXiv:1206.1599[hep-ph]}, \href{https://arxiv.org/abs/1405.3982}{arXiv:1405.3982[hep-ph]}, \href{https://arxiv.org/abs/1407.3278}{arXiv:1407.3278[hep-ph]}}
+\vspace{0.1cm} \textsl{References:\\ \href{https://arxiv.org/abs/1206.1599}{arXiv:1206.1599[hep-ph]}, \href{https://arxiv.org/abs/1405.3982}{arXiv:1405.3982[hep-ph]}, \href{https://arxiv.org/abs/1407.3278}{arXiv:1407.3278[hep-ph]},
+\href{https://arxiv.org/abs/2006.09387}{arXiv:2006.09387[hep-ph]}}
 \end{center}
 
 \hspace{0.5cm}
@@ -82,10 +84,14 @@ well as information on the name of the analysis class that will have to be
 designed. Those two pieces of information can be provided as arguments when
 calling \MA\ from the shell,
 {\color{ao}\begin{verbatim}
-  bin/ma5 -E <dirname> <analysis>
+  bin/ma5 -E <dirname> <analysis> <config>
 \end{verbatim}}
 \noindent where \verb+<dirname>+ consists in the working directory name, and
-\verb+analysis+ the name of the analysis class.\\
+\verb+analysis+ the name of the analysis class. The argument \verb+config+ is
+optional and referes to a file containing the configuration of the SFS module
+of \MA, that allows for a fast simulation of the detector response. It hence
+contains information for both the run of {\sc FastJet} and the efficiency and
+smearing functions mimicking the detector effects.\\
 
 \noindent For a proper use of the program, the user has to setup some environment
 variables accordingly. This can be done by entering the \verb+Build+ subfolder

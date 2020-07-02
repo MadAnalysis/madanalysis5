@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+203           (2020/07/02) fuks:    Updating the reference cards 
+
 202           (2020/07/01) fuks:    Small bug in the SFS-recast 
 
 201           (2020/06/30) fuks:    Small fix with the SFS configuration 
