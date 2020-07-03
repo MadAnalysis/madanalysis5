@@ -1,130 +1,15 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
-203           (2020/07/02) fuks:    Updating the reference cards 
-
-202           (2020/07/01) fuks:    Small bug in the SFS-recast 
-
-201           (2020/06/30) fuks:    Small fix with the SFS configuration 
-
-200           (2020/06/18) fuks:    Fixing some text output and comment stuff 
-
-199           (2020/06/18) fuks:    Small bug fix with the SFS PAD installation 
-
-198           (2020/06/18) fuks:    Fixing the default LHC SFS cards 
-
-197           (2020/06/16) fuks:    Fixing a last bug with particle smearing 
-
-196           (2020/06/10) fuks:    Last fix for the PAD4SFS 
-
-195           (2020/06/09) fuks:    Updating the PAD with SFS functionalities 
-
-194           (2020/05/28) fuks:    Final push: super fastsim 
-
-193           (2020/05/22) fuks:    Updating and improving the smearers 
-
-192           (2020/05/04) fuks:    Adding jets faking photons and electrons in the fastsim 
-
-191           (2020/05/01) fuks:    Small bug in the MG5_aMC interface 
-
-190           (2020/04/17) fuks:    Small bug fix with error extrapolations (recasting module) 
-
-189           (2020/04/09) fuks:    Adding a new option for the extrapolation opf the background errors 
-                                   (recasting) 
-
-188           (2020/04/03) fuks:    Adding a new option for background error extrapolations 
-                                   (user-defined) 
-
-184           (2020/02/16) fuks:    Fixing a few bugs in the pyhf interface + improved efficiency 
-
-177           (2020/01/29) fuks:    Fixing a major bug in job reader and a few improvements in the 
-                                   likelihood stuff 
-
-175           (2020/01/23) fuks:    Fixing bugs in the pyhf interface (+ fine-tuning) 
-
-174           (2020/01/21) fuks:    Adding the PYHF interface + fixing a small bug in the covariance 
-                                   routines 
-
-173           (2020/01/15) fuks:    Fixing the covariance treatment 
-
-168           (2019/12/13) econte:  bug reports, SAF in output 
-
-167           (2019/12/10) fuks:    Fixing bugs in the SFS and the covariance module 
-
-166           (2019/12/04) fuks:    Adding the firs tbuilding block of the PADForSFS module 
-
-165           (2019/12/02) fuks:    Fixing small issues with the covariance treatment (recasting) 
-
-164           (2019/12/02) fuks:    Compatibility with Catalina + small fix in the latest PAD analysis 
-
-163           (2019/11/06) fuks:    Bug fix in the pad installation (when called from mg5) 
-
-162           (2019/11/06) fuks:    Fixing a bug in the tautagger and in the madgraph interface 
-
-161           (2019/10/30) fuks:    Adding the treatment of covariance information within the recasting 
-                                   module 
-
-160           (2019/09/26) fuks:    Fixing the treatment of the systematics in the recasting case 
-
-159           (2019/09/19) fuks:    Generalising the treatment of the uncertainties when extrapolations 
-                                   are at stake for recasting 
-
-158           (2019/09/03) fuks:    Fixing a few bugs for the fastsim module (important only in special 
-                                   cases) 
-
-157           (2019/08/20) fuks:    Bug fix for the old PADMA5Tune 
-
-156           (2019/07/19) fuks:    Small bug in the fastsim module (HT/MHT calculations ignoring 
-                                   hadronic taus) 
-
-155           (2019/07/18) fuks:    Recasting can now handle uncertainties 
-
-154           (2019/07/09) fuks:    Making the lepton mistagging more efficient 
-
-153           (2019/06/27) fuks:    Upgrading and extending the super fastsim module 
-
-152           (2019/06/25) fuks:    Adding a few useful hidden functions for recasting correlation 
-                                   studies 
-
-151           (2019/06/11) fuks:    Adding two options for jet smearing and reco 
-
-150           (2019/06/11) fuks:    Fixing a bug and improving the LHE writer/reader 
-
-149           (2019/06/05) fuks:    Fixing a few bugs with the reco efficiencies 
-
-147           (2019/06/05) fuks:    Adding the reconstrution efficiencies 
-
-146           (2019/06/03) fuks:    Fixing the MET/MHT calculation after smearing. 
-
-145           (2019/06/03) fuks:    Fixing a bug with the tagger (double loops) 
-
-144           (2019/05/29) fuks:    Final version of the tagger/smearer 
-
-143           (2019/05/24) fuks:    Finalizing the smearer 
-
-142           (2019/05/17) fuks:    Adding a few security protections for the tagger module 
-
-141           (2019/05/02) fuks:    Small bug fix with the tagger (when exponents are used) 
-
-140           (2019/04/30) fuks:    Fixinga few bugs with the tagger 
-
-139           (2019/04/30) fuks:    Small bug fix: avoid multiple delphes simulations in the recast mode 
-                                   (when not needed) 
-
-138           (2019/04/26) fuks:    Superfastsim: tagger functionalities added (b-tagging, c-tagging and 
-                                   tau-tagging) 
-
-137           (2019/04/09) fuks:    Adding the C++ structure required for the generic tagger 
-
-136           (2019/04/04) fuks:    Fixing a last thing with the mg5 interface 
-
-135           (2019/04/04) fuks:    Updating the mg5_amc interface 
-
-134           (2019/04/03) fuks:    Abstract syntax trees + tagger at the python level 
-
-133           (2019/03/19) fuks:    Fixing a small issue with the LHE writer (the final closing xml tag 
-                                   was missing) 
-
-132           (2019/03/18) fuks:    Adding a ymax/ymin option for histograms 
+203  1.8   (2020/07/03) ma5team:    - New simplified fast simulation (SFS) module for event reconstruction
+                                      (arxiv:2006.09387)
+                                    - Update of the recasting functionalities to handle SFS detector simulations
+                                    - Including extralolations and uncertainties in the CLs extraction module
+                                      (arxiv:1910.11418)
+                                    - Modification of the structure of the SAF output
+                                    - Modification and improvement of the interface with MG5
+                                    - Improvement of the code efficiency (especialyl in the recast mode)
+                                    - New analyses added to the PAD
+                                    - Various bug fixes including compatibility with recent MACOS versions
 
 125  1.7   (2019/02/07) ma5team:    - Simplification of the multiple PAD management (externalisation)
                                     - Simplification of the multiple delphes management
