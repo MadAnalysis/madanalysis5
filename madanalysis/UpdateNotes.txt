@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+128           (2020/07/03) fuks:    Fixing the header of each file 
+
 203  1.8   (2020/07/03) ma5team:    - New simplified fast simulation (SFS) module for event reconstruction
                                       (arxiv:2006.09387)
                                     - Update of the recasting functionalities to handle SFS detector simulations

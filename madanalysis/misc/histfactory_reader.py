@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2019 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2020 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -23,8 +23,6 @@
 
 
 import json, os, copy, math, logging
-
-
 class HistFactory(object):
     def __init__(self,pyhf_config):
         self.pyhf_config = pyhf_config.get('SR'  , {})
