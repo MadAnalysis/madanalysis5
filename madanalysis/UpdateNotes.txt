@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+131           (2020/07/13) fuks:    Small fix (LLP support) 
+
 130           (2020/07/13) fuks:    Adding LLP support 
 
 128  1.8   (2020/07/03) ma5team:    - New simplified fast simulation (SFS) module for event reconstruction

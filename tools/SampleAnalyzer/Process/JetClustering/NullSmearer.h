@@ -40,7 +40,7 @@ namespace MA5
             /// Constructor without argument
             NullSmearer()
             {
-                print_header  = false;
+                print_header_  = false;
             }
             /// Destructor
             ~NullSmearer() {}
