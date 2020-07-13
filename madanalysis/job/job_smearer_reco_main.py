@@ -93,11 +93,15 @@ class JobSmearerRecoMain:
             self.PrintReco(reco_list,file,'part')
 
         #if not eliminated set hadron momentum
-        file.write('    '+obj+'->momentum().SetPxPyPzE(part->px(),part->py(),part->pz(),part->e());\n')
+        file.write('    SetDefaultOutput(part, output_);\n')
 
         # If constituents method is in use jet smearing is only done for constituents
         if (obj != 'Jet') or (obj=='Jet' and self.fastsim.jetrecomode == 'jets'):
-            self.PrintSmearer(reco_list, ['PT','ETA','PHI','E','PX','PY','PZ'],file,obj)
+            observable_list = ['PT','ETA','PHI','E','PX','PY','PZ']
+            # displacemwent is only allowed for electrons and muons at the moment
+            if obj in ['Electron','Muon']:
+                observable_list += ['D0','DZ']
+            self.PrintSmearer(reco_list, observable_list, file, obj)
 
         file.write('    return output_;\n')
         file.write('}\n\n')
@@ -156,6 +160,8 @@ class JobSmearerRecoMain:
                     file.write('      if (smeared_object < 0.) smeared_object = 0.;\n')
                     file.write('      '+obj+'->momentum().SetPtEtaPhiE(smeared_object/cosh('+\
                            obj+'->eta()), '+obj+'->eta(), '+obj+'->phi(), smeared_object);\n')
+                elif val['obs'] in ['D0','DZ']:
+                    file.write('      '+obj+'->set'+val['obs']+'(smeared_object);\n')
                 file.write('    }\n')
                 check_initializer+=1
 

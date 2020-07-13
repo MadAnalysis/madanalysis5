@@ -288,14 +288,6 @@ class RunRecast():
         # Initializing the JobWriter
         jobber = JobWriter(self.main,self.dirname+'_SFSRun')
 
-        logging.getLogger('MA5').info('   <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>')
-        logging.getLogger('MA5').info('   <>                                                              <>')
-        logging.getLogger('MA5').info('   <>     Simplified Fast Detector Simulation in MadAnalysis 5     <>')
-        logging.getLogger('MA5').info('   <>                 Please Cite arXiv: 2006.09387                <>')
-        logging.getLogger('MA5').info('   <>                                                              <>')
-        logging.getLogger('MA5').info('   <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>')
-
-
         # Writing process
         logging.getLogger('MA5').info("   Creating folder '"+self.dirname.split('/')[-1]  + "'...")
         if not jobber.Open():

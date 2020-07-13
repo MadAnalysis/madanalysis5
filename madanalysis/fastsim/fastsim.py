@@ -38,6 +38,10 @@ class SuperFastSim:
         self.smearer     = Smearer()
         self.reco        = RecoEfficiency()
         self.jetrecomode = 'jets'
+        self.mag_field   = 1e-9
+        self.radius      = 1e-9
+        self.half_length = 1e-9
+        self.propagator  = False
         self.observables = ''
 
     def InitObservables(self, obs_list):

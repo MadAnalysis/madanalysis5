@@ -161,7 +161,7 @@ MAbool JetClusterer::IsLast(const MCParticleFormat* part, EventFormat& myEvent)
 // -----------------------------------------------------------------------------
 MAbool sort_by_leptonPT(RecLeptonFormat const & a, RecLeptonFormat const & b) { return a.pt() < b.pt(); };
 MAbool sort_by_photonPT(RecPhotonFormat const & a, RecPhotonFormat const & b) { return a.pt() < b.pt(); };
-MAbool    sort_by_tauPT(RecTauFormat const & a,    RecTauFormat const & b   ) { return a.pt() < b.pt(); };
+MAbool    sort_by_tauPT(RecTauFormat    const & a, RecTauFormat    const & b) { return a.pt() < b.pt(); };
 
 // -----------------------------------------------------------------------------
 // Execute
@@ -330,6 +330,10 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
 
         RecLeptonFormat * muon = myEvent.rec()->GetNewMuon();
         muon->setMomentum(smeared.momentum());
+        muon->setD0(smeared.d0());
+        muon->setDZ(smeared.dz());
+        muon->setVertexPoint(smeared.position());
+        muon->setClosestPoint(smeared.closestPoint());
         muon->setMc(&(part));
         if (part.pdgid()==13) muon->SetCharge(-1);
         else muon->SetCharge(+1);
@@ -346,6 +350,10 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
 
         RecLeptonFormat * elec = myEvent.rec()->GetNewElectron();
         elec->setMomentum(smeared.momentum());
+        elec->setD0(smeared.d0());
+        elec->setDZ(smeared.dz());
+        elec->setVertexPoint(smeared.position());
+        elec->setClosestPoint(smeared.closestPoint());
         elec->setMc(&(part));
         if (part.pdgid()==11) elec->SetCharge(-1);
         else elec->SetCharge(+1);

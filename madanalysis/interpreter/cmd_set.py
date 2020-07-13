@@ -144,6 +144,29 @@ class CmdSet(CmdBase.CmdBase):
                     self.main.superfastsim.jetrecomode = args[2]
                 else:
                     logging.getLogger('MA5').error("Jet smearing can only be based on the jet ('jets') or on its constituents ('constituents').")
+            elif objs[2] == 'magneticfield':
+                try:
+                    self.main.superfastsim.mag_field  = float(args[2])
+                    self.main.superfastsim.propagator = True
+                except:
+                    logging.getLogger('MA5').error("The magnetic field has to be numerical (in Tesla).")
+            elif objs[2] == 'tracker_radius':
+                try:
+                    self.main.superfastsim.radius      = float(args[2])
+                    self.main.superfastsim.propagator  = True
+                except:
+                    logging.getLogger('MA5').error("The tracker cylinder radius has to be numerical (in meters).")
+            elif objs[2] == 'half_length':
+                try:
+                    self.main.superfastsim.half_length = float(args[2])
+                    self.main.superfastsim.propagator  = True
+                except:
+                    logging.getLogger('MA5').error("The tracker cylinder half length needs to numerical (in meters).")
+            elif objs[2] == 'particle_propagator':
+                if args[2] in ['on', 'off']:
+                    self.main.superfastsim.propagator = (args[2]=='on')
+                else:
+                    logging.getLogger('MA5').error("Particle propagation can be either on or off (default: off).")
             else:
                 user_info    = UserInfo()
                 user_info.ReadUserOptions(self.main.archi_info.ma5dir+'/madanalysis/input/installation_options.dat')

@@ -32,6 +32,7 @@ class JobSmearerRecoHeader:
         self.tau_smearing         = False
         self.jet_smearing         = False
         self.constituent_smearing = False
+        self.propagator           = fastsim.propagator
         for key, val in self.fastsim.smearer.rules.items():
             if val['id_true'] in ['21','j']:
                 self.jet_smearing         = (self.fastsim.jetrecomode == 'jets')
@@ -73,7 +74,11 @@ class JobSmearerRecoHeader:
         file.write('      MCParticleFormat output_;\n')
         file.write('    public :\n')
         file.write('      /// Constructor without argument\n')
-        file.write('      NewSmearer() {}\n')
+        file.write('      NewSmearer()\n')
+        file.write('      {\n')
+        file.write('          output_.Reset();\n')
+        file.write('          print_header_ = true;\n')
+        file.write('      }\n')
         file.write('      /// Destructor\n')
         file.write('      ~NewSmearer() {}\n\n')
         file.write('      /// Smearer methods: \n')
@@ -105,6 +110,17 @@ class JobSmearerRecoHeader:
         if self.constituent_smearing:
             file.write('      /// Jet Constituent smearing method\n')
             file.write('      MCParticleFormat ConstituentSmearer(const MCParticleFormat * part);\n\n')
+        if self.propagator:
+            file.write('      /// Boolean to check if propagator is on\n')
+            file.write('      MAbool isPropagatorOn() {return true;}\n\n')
+            if any([x>1e-9 for x in [self.fastsim.mag_field, self.fastsim.radius, self.fastsim.half_length]]):
+                file.write('      /// Tracker parameters\n')
+                file.write('      void SetTrackerParameters()\n')
+                file.write('      {\n')
+                file.write('          Bz_         = {:.6E};\n'.format(self.fastsim.mag_field))
+                file.write('          Radius_     = {:.6E};\n'.format(self.fastsim.radius))
+                file.write('          HalfLength_ = {:.6E};\n'.format(self.fastsim.half_length))
+                file.write('      }\n\n')
         file.write('  };\n')
         file.write('}\n')
         file.write('#endif')

@@ -38,7 +38,10 @@ namespace MA5
             MCParticleFormat output_;
         public:
             /// Constructor without argument
-            NullSmearer() {}
+            NullSmearer()
+            {
+                print_header  = false;
+            }
             /// Destructor
             ~NullSmearer() {}
 
@@ -48,32 +51,28 @@ namespace MA5
             // Electron smearing method
             MCParticleFormat ElectronSmearer(const MCParticleFormat * part)
             {
-                output_.Reset();
-                output_.momentum().SetPxPyPzE(part->px(),part->py(),part->pz(),part->e());
+                SetDefaultOutput(part,output_);
                 return output_;
             }
 
             // Muon smearing method
             MCParticleFormat MuonSmearer(const MCParticleFormat * part)
             {
-                output_.Reset();
-                output_.momentum().SetPxPyPzE(part->px(),part->py(),part->pz(),part->e());
+                SetDefaultOutput(part,output_);
                 return output_;
             }
 
             // Hadronic Tau smearing method
             MCParticleFormat TauSmearer(const MCParticleFormat * part)
             {
-                output_.Reset();
-                output_.momentum().SetPxPyPzE(part->px(),part->py(),part->pz(),part->e());
+                SetDefaultOutput(part,output_);
                 return output_;
             }
 
             // Photon smearing method
             MCParticleFormat PhotonSmearer(const MCParticleFormat * part)
             {
-                output_.Reset();
-                output_.momentum().SetPxPyPzE(part->px(),part->py(),part->pz(),part->e());
+                SetDefaultOutput(part,output_);
                 return output_;
             }
 
@@ -81,8 +80,7 @@ namespace MA5
             // Jet smearing method
             MCParticleFormat JetSmearer(const MCParticleFormat * part)
             {
-                output_.Reset();
-                output_.momentum().SetPxPyPzE(part->px(),part->py(),part->pz(),part->e());
+                SetDefaultOutput(part,output_);
                 return output_;
             }
 
@@ -90,8 +88,7 @@ namespace MA5
             // Jet Constituent smearing method
             MCParticleFormat ConstituentSmearer(const MCParticleFormat * part)
             {
-                output_.Reset();
-                output_.momentum().SetPxPyPzE(part->px(),part->py(),part->pz(),part->e());
+                SetDefaultOutput(part,output_);
                 return output_;
             }
 

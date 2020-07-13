@@ -865,3 +865,122 @@ NTRACKS = ObservableBase( name          = 'NTRACKS',
                           tlatex        = 'n_{tracks}',
                           latex         = '$n_\textrm{tracks}$'
                         )
+
+D0 = ObservableBase(  name          = 'D0',
+                      args          = [ArgumentType.COMBINATION],
+                      combination   = CombinationType.DEFAULT,
+                      plot_auto     = False,
+                      plot_nbins    = 100,
+                      plot_xmin     = -20.,
+                      plot_xmax     = 20.,
+                      plot_unitX_tlatex    = 'mm',
+                      plot_unitX_latex    = 'mm',
+                      code_parton   = 'd0()',
+                      code_hadron   = 'd0()',
+                      code_reco     = 'd0()',
+                      cut_event     = True,
+                      cut_candidate = True,
+                      tlatex        = '#d_{0}',
+                      latex         = '$d_0$'
+                    )
+vD0  = D0
+sD0  = ObservableBase.Clone(D0, name='sD0', combination=CombinationType.SUMSCALAR, tlatex='sd_{0}', latex='$sd_{0}$') 
+sdD0 = dsD0 = ObservableBase.Clone(D0, name='sdD0', combination=CombinationType.DIFFSCALAR, tlatex='sdd_{0}', latex='$sdd_{0}$') 
+dD0  = dvD0 = vdD0 = ObservableBase.Clone(D0, name='dD0', combination=CombinationType.DIFFVECTOR, tlatex='dd_{0}', latex='$dd_{0}$')
+rD0  = ObservableBase.Clone(D0, name='rD0', combination=CombinationType.RATIO, tlatex='rd_{0}', latex='$rd_{0}$')
+
+DZ = ObservableBase(  name          = 'DZ',
+                      args          = [ArgumentType.COMBINATION],
+                      combination   = CombinationType.DEFAULT,
+                      plot_auto     = False,
+                      plot_nbins    = 100,
+                      plot_xmin     = -20.,
+                      plot_xmax     = 20.,
+                      plot_unitX_tlatex    = 'mm',
+                      plot_unitX_latex    = 'mm',
+                      code_parton   = 'dz()',
+                      code_hadron   = 'dz()',
+                      code_reco     = 'dz()',
+                      cut_event     = True,
+                      cut_candidate = True,
+                      tlatex        = '#d_{z}',
+                      latex         = '$d_z$'
+                    )
+vDZ  = DZ
+sDZ  = ObservableBase.Clone(DZ, name='sDZ', combination=CombinationType.SUMSCALAR, tlatex='sd_{z}', latex='$sd_{z}$') 
+sdDZ = dsDZ = ObservableBase.Clone(DZ, name='sdDZ', combination=CombinationType.DIFFSCALAR, tlatex='sdd_{z}', latex='$sdd_{z}$') 
+dDZ  = dvDZ = vdDZ = ObservableBase.Clone(DZ, name='dDZ', combination=CombinationType.DIFFVECTOR, tlatex='dd_{z}', latex='$dd_{z}$')
+rDZ  = ObservableBase.Clone(DZ, name='rDZ', combination=CombinationType.RATIO, tlatex='rd_{z}', latex='$rd_{z}$')
+
+XD = ObservableBase( name          = 'XD',
+                     args          = [ArgumentType.COMBINATION],
+                     combination   = CombinationType.SUMVECTOR,
+                     plot_auto     = False,
+                     plot_nbins    = 100,
+                     plot_xmin     = -20.,
+                     plot_xmax     = +20.,
+                     plot_unitX_tlatex    = 'mm',
+                     plot_unitX_latex    = 'mm',
+                     code_parton   = 'closestPoint().X()',
+                     code_hadron   = 'closestPoint().X()',
+                     code_reco     = 'closestPoint().X()',
+                     cut_event     = True,
+                     cut_candidate = True,
+                     tlatex        = 'x_{d}',
+                     latex         = '$x_d$'
+                   )
+
+vXD  = XD
+sXD  = ObservableBase.Clone(XD, name='sXD', combination=CombinationType.SUMSCALAR, tlatex='sx_{d}', latex='$sx_{d}$') 
+sdXD = dsXD = ObservableBase.Clone(XD, name='sdXD', combination=CombinationType.DIFFSCALAR, tlatex='sdx_{d}', latex='$sdx_{d}$') 
+dXD  = dvXD = vdXD = ObservableBase.Clone(XD, name='dXD', combination=CombinationType.DIFFVECTOR, tlatex='dx_{d}', latex='$dx_{d}$')
+rXD  = ObservableBase.Clone(XD, name='rXD', combination=CombinationType.RATIO, tlatex='rx_{d}', latex='$rx_{d}$')
+
+YD = ObservableBase( name          = 'YD',
+                     args          = [ArgumentType.COMBINATION],
+                     combination   = CombinationType.SUMVECTOR,
+                     plot_auto     = False,
+                     plot_nbins    = 100,
+                     plot_xmin     = -20.,
+                     plot_xmax     = +20.,
+                     plot_unitX_tlatex    = 'mm',
+                     plot_unitX_latex    = 'mm',
+                     code_parton   = 'closestPoint().Y()',
+                     code_hadron   = 'closestPoint().Y()',
+                     code_reco     = 'closestPoint().Y()',
+                     cut_event     = True,
+                     cut_candidate = True,
+                     tlatex        = 'y_{d}',
+                     latex         = '$y_d$'
+                   )
+
+vYD  = YD
+sYD  = ObservableBase.Clone(YD, name='sYD', combination=CombinationType.SUMSCALAR, tlatex='sy_{d}', latex='$sy_{d}$') 
+sdYD = dsYD = ObservableBase.Clone(YD, name='sdYD', combination=CombinationType.DIFFSCALAR, tlatex='sdy_{d}', latex='$sdy_{d}$') 
+dYD  = dvYD = vdPY = ObservableBase.Clone(YD, name='dYD', combination=CombinationType.DIFFVECTOR, tlatex='dy_{d}', latex='$dy_{d}$')
+rYD  = ObservableBase.Clone(YD, name='rYD', combination=CombinationType.RATIO, tlatex='ry_{d}', latex='$ry_{d}$')
+
+ZD = ObservableBase( name          = 'ZD',
+                     args          = [ArgumentType.COMBINATION],
+                     combination   = CombinationType.SUMVECTOR,
+                     plot_auto     = False,
+                     plot_nbins    = 100,
+                     plot_xmin     = -20.,
+                     plot_xmax     = +20.,
+                     plot_unitX_tlatex    = 'mm',
+                     plot_unitX_latex    = 'mm',
+                     code_parton   = 'closestPoint().Z()',
+                     code_hadron   = 'closestPoint().Z()',
+                     code_reco     = 'closestPoint().Z()',
+                     cut_event     = True,
+                     cut_candidate = True,
+                     tlatex        = 'z_{d}',
+                     latex         = '$z_d$'
+                   )
+
+vZD  = ZD
+sZD  = ObservableBase.Clone(ZD, name='sZD', combination=CombinationType.SUMSCALAR, tlatex='sz_{d}', latex='$sz_{d}$') 
+sdZD = dsZD = ObservableBase.Clone(ZD, name='sdZD', combination=CombinationType.DIFFSCALAR, tlatex='sdz_{d}', latex='$sdz_{d}$') 
+dZD  = dvZD = vdPY = ObservableBase.Clone(ZD, name='dZD', combination=CombinationType.DIFFVECTOR, tlatex='dz_{d}', latex='$dz_{d}$')
+rZD  = ObservableBase.Clone(ZD, name='rZD', combination=CombinationType.RATIO, tlatex='rz_{d}', latex='$rz_{d}$')
+

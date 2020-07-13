@@ -29,7 +29,7 @@ class Smearer:
     def __init__(self):
         self.logger = logging.getLogger('MA5');
         self.rules = {}
-        self.vars = ['PT','ETA','PHI','E','PX','PY','PZ'] 
+        self.vars = ['PT','ETA','PHI','E','PX','PY','PZ','D0','DZ']
 
 
     # Adding a rule to the tagger

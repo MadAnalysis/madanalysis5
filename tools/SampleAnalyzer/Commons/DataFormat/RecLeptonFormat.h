@@ -187,6 +187,8 @@ class RecLeptonFormat : public RecParticleFormat
   MAfloat32 d0() const
   { return d0_; }
 
+  void setD0(MAdouble64 d0) { d0_=d0; }
+
   // d0error
   MAfloat32 d0error() const
   { return d0error_; }
@@ -194,6 +196,8 @@ class RecLeptonFormat : public RecParticleFormat
   // dz
   MAfloat32 dz() const
   { return dz_; }
+
+  void setDZ(MAdouble64 dz) { dz_=dz; }
 
   // dzerror
   MAfloat32 dzerror() const
@@ -203,9 +207,14 @@ class RecLeptonFormat : public RecParticleFormat
   const MALorentzVector& vertexProd() const
   { return vertex_prod_; }
 
+  void setVertexPoint(const MALorentzVector& v) { vertex_prod_=v; }
+
   // vertex prod
   const MALorentzVector& closestPoint() const
   { return closest_point_; }
+
+  void setClosestPoint(const MALorentzVector& v) { closest_point_=v; }
+
 
 };
 

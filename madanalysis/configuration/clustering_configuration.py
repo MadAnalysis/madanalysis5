@@ -42,8 +42,13 @@ class ClusteringConfiguration:
                                      "siscone",\
                                      "cdfjetclu", "cdfmidpoint",\
                                      "none"],
-                      "exclusive_id" : ["true","false"],
-                      "jetrecomode" : ["jets","constituents"]
+                      "exclusive_id"        : ["true","false"],
+                      "jetrecomode"         : ["jets","constituents"],
+                      "magneticfield"       : ["3.8"],
+                      "tracker_radius"      : ["1.29"],
+                      "half_length"         : ["3.0"],
+                      "particle_propagator" : ["on","off"]
+
                     }
 
     def __init__(self):
