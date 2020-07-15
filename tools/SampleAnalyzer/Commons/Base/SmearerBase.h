@@ -44,10 +44,6 @@ namespace MA5
         //                              private data members
         //---------------------------------------------------------------------------------
         private:
-
-            // Creating a container for the smeared output
-            MCParticleFormat output_;
-
             // Set constants: speed of light & pi
             MAdouble64 c_;
             MAdouble64 pi_;
@@ -57,8 +53,8 @@ namespace MA5
         //---------------------------------------------------------------------------------
         public:
 
-            // Header
-            MAbool print_header_;
+            // Creating a container for the smeared output
+            MCParticleFormat output_;
 
             // Magnetic field along beam axis
             MAdouble64 Bz_;
@@ -69,32 +65,42 @@ namespace MA5
             // Tracker half length
             MAdouble64 HalfLength_;
 
+            // To optimise the code running time
+            MAbool MuonSmearer_;
+            MAbool ElectronSmearer_;
+            MAbool PhotonSmearer_;
+            MAbool TauSmearer_;
+            MAbool JetSmearer_;
+            MAbool ParticlePropagator_;
+
             //---------------------------------------------------------------------------------
             //                                method members
             //---------------------------------------------------------------------------------
             /// Constructor without argument
-            SmearerBase()
-            {
-                output_.Reset();
-                c_             = 2.99792458E+8; // [m/s]
-                pi_            = 3.141592653589793;
-                print_header_  = false;
-            }
+            SmearerBase() { }
 
             /// Destructor
-            virtual ~SmearerBase()
-            {}
+            virtual ~SmearerBase() {}
+
+            /// Initialisation
+            void Initialize(MAbool base=false)
+            {
+                if (!base) { PrintHeader(); }
+                SetParameters();
+                PrintDebug();
+                output_.Reset();
+                c_  = 2.99792458E+8; // [m/s]
+                pi_ = 3.141592653589793;
+            }
 
             /// Matching general method
             MCParticleFormat Execute(const MCParticleFormat * part, MAuint32 absid)
             {
-                PrintHeader();
-                Print();
+                // Clearing the output vector
                 output_.Reset();
 
-                SetTrackerParameters();
+                // Propagation
                 MCParticleFormat propagated_part;
-
                 if (isPropagatorOn() && ((absid==13)||(absid==11))) propagated_part = ParticlePropagator(part);
                 else SetDefaultOutput(part, propagated_part);
 
@@ -137,6 +143,19 @@ namespace MA5
                 }
             }
 
+            // Set parameters
+            virtual void SetParameters()
+            {
+                Bz_                 = 1.0e-9;
+                Radius_             = 1.0e-9;
+                HalfLength_         = 1.0e-9;
+                ParticlePropagator_ = false;
+                MuonSmearer_        = false;
+                ElectronSmearer_    = false;
+                PhotonSmearer_      = false;
+                TauSmearer_         = false;
+                JetSmearer_         = false;
+            }
 
             // For all methods below, the only relevant part of the output object is the momentum
             // The reset allows to clear the left-over from the previous object
@@ -148,7 +167,7 @@ namespace MA5
                 return output_;
             }
             // Check whether electron smearing is on (code-efficiency-related)
-            virtual MAbool isElectronSmearerOn() {return false;}
+            MAbool isElectronSmearerOn() {return ElectronSmearer_;}
 
             // Muon smearing method
             virtual MCParticleFormat MuonSmearer(const MCParticleFormat * part)
@@ -157,7 +176,7 @@ namespace MA5
                 return output_;
             }
             // Check whether muon smearing is on (code-efficiency-related)
-            virtual MAbool isMuonSmearerOn() {return false;}
+            MAbool isMuonSmearerOn() {return MuonSmearer_;}
 
             // Hadronic Tau smearing method
             virtual MCParticleFormat TauSmearer(const MCParticleFormat * part)
@@ -166,7 +185,7 @@ namespace MA5
                 return output_;
             }
             // Check whether tau smearing is on (code-efficiency-related)
-            virtual MAbool isTauSmearerOn() {return false;}
+            MAbool isTauSmearerOn() {return TauSmearer_;}
 
             // Photon smearing method
             virtual MCParticleFormat PhotonSmearer(const MCParticleFormat * part)
@@ -175,7 +194,7 @@ namespace MA5
                 return output_;
             }
             // Check whether photon smearing is on (code-efficiency-related)
-            virtual MAbool isPhotonSmearerOn() {return false;}
+            MAbool isPhotonSmearerOn() {return PhotonSmearer_;}
 
             // Jet smearing method
             virtual MCParticleFormat JetSmearer(const MCParticleFormat * part)
@@ -185,7 +204,7 @@ namespace MA5
             }
 
             // Check whether jet smearing is on (code-efficiency-related)
-            virtual MAbool isJetSmearerOn() {return false;}
+            MAbool isJetSmearerOn() {return JetSmearer_;}
 
             // Jet Constituent smearing method
             virtual MCParticleFormat ConstituentSmearer(const MCParticleFormat * part)
@@ -197,16 +216,9 @@ namespace MA5
             //================================//
             //   Particle Propagator Method   //
             //================================//
-            // Set tracker parameters
-            virtual void SetTrackerParameters()
-            {
-                Bz_         = 1.0e-9;
-                Radius_     = 1.0e-9;
-                HalfLength_ = 1.0e-9;
-            }
 
             // Check whether particle propagator is on (code-efficiency-related)
-            virtual MAbool isPropagatorOn() {return false;}
+            MAbool isPropagatorOn() {return ParticlePropagator_;}
 
             // Particle propagator method
             MCParticleFormat ParticlePropagator(const MCParticleFormat * part)
@@ -459,21 +471,30 @@ namespace MA5
 //                return property + sign * RANDOM->flat() * (1. + err) * 0.5;
 //            }
 
-            virtual void Print() { if (print_header_) DEBUG << "   -> Default Smearer." << endmsg; }
+            virtual void PrintDebug()
+            {
+                DEBUG << "   -> Default Smearer." << endmsg;
+                DEBUG << "   * Magnetic field [T] = " << Bz_ << endmsg;
+                DEBUG << "   * Radius [m]         = " << Radius_ << endmsg;
+                DEBUG << "   * Half Length [m]    = " << HalfLength_ << endmsg;
+                DEBUG << "   * Propagator         = " << ParticlePropagator_ << endmsg;
+                DEBUG << "   * Muon Smearer       = " << MuonSmearer_ << endmsg;
+                DEBUG << "   * Electron Smearer   = " << ElectronSmearer_ << endmsg;
+                DEBUG << "   * Photon Smearer     = " << PhotonSmearer_ << endmsg;
+                DEBUG << "   * Tau Smearer        = " << TauSmearer_ << endmsg;
+                DEBUG << "   * Jet Smearer        = " << JetSmearer_ << endmsg;
+            }
+
 
             void PrintHeader()
             {
-                if (print_header_) 
-                {
-                    INFO << "   <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endmsg;
-                    INFO << "   <>                                                              <>" << endmsg;
-                    INFO << "   <>     Simplified Fast Detector Simulation in MadAnalysis 5     <>" << endmsg;
-                    INFO << "   <>            Please cite arXiv:2006.09387 [hep-ph]             <>" << endmsg;
-                    INFO << "   <>         https://madanalysis.irmp.ucl.ac.be/wiki/SFS          <>" << endmsg;
-                    INFO << "   <>                                                              <>" << endmsg;
-                    INFO << "   <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endmsg;
-                    print_header_ = false;
-                }
+                INFO << "   <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endmsg;
+                INFO << "   <>                                                              <>" << endmsg;
+                INFO << "   <>     Simplified Fast Detector Simulation in MadAnalysis 5     <>" << endmsg;
+                INFO << "   <>            Please cite arXiv:2006.09387 [hep-ph]             <>" << endmsg;
+                INFO << "   <>         https://madanalysis.irmp.ucl.ac.be/wiki/SFS          <>" << endmsg;
+                INFO << "   <>                                                              <>" << endmsg;
+                INFO << "   <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endmsg;
             }
     };
 }

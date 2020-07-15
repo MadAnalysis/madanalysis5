@@ -45,6 +45,7 @@ MAbool JetClusterer::Initialize(const std::map<std::string,std::string>& options
   myCtagger_   = new cTagger();
   myTautagger_ = new TauTagger();
   mySmearer_   = new NullSmearer();
+  mySmearer_->Initialize(true);
 
   // Loop over options
   for (std::map<std::string,std::string>::const_iterator

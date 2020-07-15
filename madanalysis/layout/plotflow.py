@@ -412,7 +412,7 @@ class PlotFlow:
                 outputC.write('  '+histoname+'->SetBarWidth(0.8);\n')
                 outputC.write('  '+histoname+'->SetBarOffset(0.1);\n')
             outputC.write('\n')
-        
+
         # Creating the THStack
         outputC.write('  // Creating a new THStack\n')
         PlotFlow.counter+=1

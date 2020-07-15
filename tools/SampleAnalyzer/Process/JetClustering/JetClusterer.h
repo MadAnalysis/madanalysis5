@@ -109,6 +109,7 @@ namespace MA5
     void LoadSmearer(SmearerBase* smearer)
     {
         mySmearer_ = smearer;
+        mySmearer_->Initialize();
     }
 
     /// Accessor to the jet clusterer name

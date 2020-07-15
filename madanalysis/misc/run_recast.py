@@ -203,10 +203,13 @@ class RunRecast():
 
     def run_delphes(self,dataset,card):
         # Initializing the JobWriter
-        jobber = JobWriter(self.main,self.dirname+'_FastSimRun')
+        if os.path.isdir(self.dirname+'_RecastRun'):
+            if not FolderWriter.RemoveDirectory(os.path.normpath(self.dirname+'_RecastRun')):
+                return False
+        jobber = JobWriter(self.main,self.dirname+'_RecastRun')
 
         # Writing process
-        logging.getLogger('MA5').info("   Creating folder '"+self.dirname.split('/')[-1]  + "'...")
+        logging.getLogger('MA5').info("   Creating folder '"+self.dirname.split('/')[-1]  + "_RecastRun'...")
         if not jobber.Open():
             return False
         logging.getLogger('MA5').info("   Copying 'SampleAnalyzer' source files...")
@@ -225,7 +228,7 @@ class RunRecast():
         if not jobber.WriteMakefiles():
             return False
         logging.getLogger('MA5').debug("   Fixing the pileup path...")
-        self.fix_pileup(self.dirname+'_FastSimRun/Input/'+card)
+        self.fix_pileup(self.dirname+'_RecastRun/Input/'+card)
 
         # Creating executable
         logging.getLogger('MA5').info("   Compiling 'SampleAnalyzer'...")
@@ -466,14 +469,11 @@ class RunRecast():
         if not os.path.isdir(self.dirname+'/Output/SAF/'+dataset.name+'/RecoEvents'):
             os.mkdir(self.dirname+'/Output/SAF/'+dataset.name+'/RecoEvents')
         if self.detector=="delphesMA5tune":
-            shutil.move(self.dirname+'_FastSimRun/Output/SAF/_'+dataset.name+'/RecoEvents0_0/DelphesMA5tuneEvents.root',\
+            shutil.move(self.dirname+'_RecastRun/Output/SAF/_'+dataset.name+'/RecoEvents0_0/DelphesMA5tuneEvents.root',\
                 self.dirname+'/Output/SAF/'+dataset.name+'/RecoEvents/RecoEvents_v1x1_'+card.replace('.tcl','')+'.root')
         elif self.detector=="delphes":
-            shutil.move(self.dirname+'_FastSimRun/Output/SAF/_'+dataset.name+'/RecoEvents0_0/DelphesEvents.root',\
+            shutil.move(self.dirname+'_RecastRun/Output/SAF/_'+dataset.name+'/RecoEvents0_0/DelphesEvents.root',\
                 self.dirname+'/Output/SAF/'+dataset.name+'/RecoEvents/RecoEvents_v1x2_'+card.replace('.tcl','')+'.root')
-        ## Cleaning the temporary directory
-        if not FolderWriter.RemoveDirectory(os.path.normpath(self.dirname+'_FastSimRun')):
-            return False
         ## Exit
         return True
 
@@ -496,7 +496,9 @@ class RunRecast():
             if not self.analysis_single(version, card):
                 self.main.forced=self.forced
                 return False
-        ## exit
+        ## Cleaning and exit
+        if not FolderWriter.RemoveDirectory(os.path.normpath(self.dirname+'_RecastRun')):
+            return False
         self.main.forced=self.forced
         return True
 
@@ -535,17 +537,14 @@ class RunRecast():
                 if not self.run_pad(eventfile):
                     self.main.forced=self.forced
                     return False
-                ## Restoring the PAD as it was before
-                if not self.restore_pad_main():
-                    self.main.forced=self.forced
-                    return False
                 ## Saving the output and cleaning
                 if not self.save_output('\"'+eventfile+'\"', myset.name, analyses):
                     self.main.forced=self.forced
                     return False
                 if not self.main.recasting.store_root:
                     os.remove(eventfile)
-                time.sleep(1.);
+                else:
+                    time.sleep(1.);
             else:
                 # Run SFS
                 if not self.run_SimplifiedFastSim(myset,self.main.archi_info.ma5dir+\
@@ -560,7 +559,8 @@ class RunRecast():
             if not self.compute_cls(analyses,myset):
                 self.main.forced=self.forced
                 return False
-        # exit
+
+        # Exit
         return True
 
     def analysis_header(self, version, card):
@@ -572,13 +572,37 @@ class RunRecast():
         logging.getLogger('MA5').info("   **********************************************************")
 
     def update_pad_main(self,analysislist):
-        ## backuping the main files and init
-        logging.getLogger('MA5').info("   Updating the PAD main executable")
-        if os.path.isfile(self.pad+'/Build/Main/main.bak'):
-            shutil.move(self.pad+'/Build/Main/main.bak',self.pad+'/Build/Main/main.cpp')
-        shutil.move(self.pad+'/Build/Main/main.cpp',self.pad+'/Build/Main/main.bak')
-        mainfile = open(self.pad+"/Build/Main/main.bak",'r')
-        newfile  = open(self.pad+"/Build/Main/main.cpp",'w')
+        ## Migrating the necessary files to the working directory
+        logging.getLogger('MA5').info("   Writing the PAD analyses")
+        ## Safety (for backwards compatibility)
+        if not os.path.isfile(self.pad+'/Build/Main/main.bak'):
+            shutil.copy(self.pad+'/Build/Main/main.cpp',self.pad+'/Build/Main/main.bak')
+        mainfile     = open(self.pad+"/Build/Main/main.bak",'r')
+        newfile      = open(self.dirname+"_RecastRun/Build/Main/main.cpp",'w')
+        # Clean the analyzer folder
+        if not FolderWriter.RemoveDirectory(os.path.normpath(self.dirname+'_RecastRun/Build/SampleAnalyzer/User/Analyzer')):
+            return False
+        os.mkdir(os.path.normpath(self.dirname+'_RecastRun/Build/SampleAnalyzer/User/Analyzer'))
+        # Including the necessary analyses
+        analysisList = open(self.dirname+"_RecastRun/Build/SampleAnalyzer/User/Analyzer/analysisList.h",'w')
+        analysisList_header  = '#include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"\n'+\
+                               '#include "SampleAnalyzer/Commons/Service/LogStream.h"\n'
+        analysisList_body    = '\n// -----------------------------------------------------------------------------\n'+\
+                               '//                                 BuildTable\n'+\
+                               '// -----------------------------------------------------------------------------\n'+\
+                               'void BuildUserTable(MA5::AnalyzerManager& manager)\n{\n    using namespace MA5;\n'
+        for analysis in analysislist:
+            analysisList_header  += '#include "SampleAnalyzer/User/Analyzer/'+analysis+'.h"\n'
+            analysisList_body    += '    manager.Add("'+analysis+'",new '+analysis+');\n'
+            shutil.copy(self.pad+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.cpp',
+                        self.dirname+"_RecastRun/Build/SampleAnalyzer/User/Analyzer/"+analysis+".cpp")
+            shutil.copy(self.pad+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.h',
+                        self.dirname+"_RecastRun/Build/SampleAnalyzer/User/Analyzer/"+analysis+".h")
+        # Finalisation
+        analysisList_body += '}\n'
+        analysisList.write(analysisList_header)
+        analysisList.write(analysisList_body)
+        analysisList.close()
         ignore = False
 
         ## creating the main file with the desired analyses inside
@@ -612,15 +636,15 @@ class RunRecast():
 
     def make_pad(self):
         # Initializing the compiler
-        logging.getLogger('MA5').info('   Compiling the PAD located in '  +self.pad)
+        logging.getLogger('MA5').info('   Compiling the PAD located in '  +self.dirname+'_RecastRun');
         compiler = LibraryWriter('lib',self.main)
         ncores = compiler.get_ncores2()
         # compiling
         if ncores>1:
             strcores='-j'+str(ncores)
         command = ['make',strcores]
-        logfile = self.pad+'/Build/PADcompilation.log'
-        result, out = ShellCommand.ExecuteWithLog(command,logfile,self.pad+'/Build')
+        logfile = self.dirname+'_RecastRun/Build/Log/PADcompilation.log'
+        result, out = ShellCommand.ExecuteWithLog(command,logfile,self.dirname+'_RecastRun/Build')
         time.sleep(1.);
         # Checks and exit
         if not result:
@@ -631,40 +655,31 @@ class RunRecast():
 
     def run_pad(self,eventfile):
         ## input file
-        if os.path.isfile(self.pad+'/Input/PADevents.list'):
-            os.remove(self.pad+'/Input/PADevents.list')
-        infile = open(self.pad+'/Input/PADevents.list','w')
+        if os.path.isfile(self.dirname+'_RecastRun/Input/PADevents.list'):
+            os.remove(self.dirname+'_RecastRun/Input/PADevents.list')
+        infile = open(self.dirname+'_RecastRun/Input/PADevents.list','w')
         infile.write(eventfile)
         infile.close()
         ## cleaning the output directory
-        if not FolderWriter.RemoveDirectory(os.path.normpath(self.pad+'/Output/SAF/PADevents')):
-            return False
+        if os.path.isdir(os.path.normpath(self.dirname+'_RecastRun/Output/SAF/PADevents')):
+            if not FolderWriter.RemoveDirectory(os.path.normpath(self.dirname+'_RecastRun/Output/SAF/PADevents')):
+                return False
         ## running
         command = ['./MadAnalysis5job', '../Input/PADevents.list']
-        ok = ShellCommand.Execute(command,self.pad+'/Build')
+        ok = ShellCommand.Execute(command,self.dirname+'_RecastRun/Build')
         ## checks
         if not ok:
             logging.getLogger('MA5').error('Problem with the run of the PAD on the file: '+ eventfile)
             return False
-        os.remove(self.pad+'/Input/PADevents.list')
+        os.remove(self.dirname+'_RecastRun/Input/PADevents.list')
         ## exit
         time.sleep(1.);
-        return True
-
-    def restore_pad_main(self):
-        ## Restoring the main file
-        logging.getLogger('MA5').info('   Restoring the PAD located in '+ self.pad)
-        shutil.move(self.pad+'/Build/Main/main.bak',self.pad+'/Build/Main/main.cpp')
-        ## Compiling
-        if not self.make_pad():
-            return False
-        ## exit
         return True
 
     def save_output(self, eventfile, setname, analyses):
         outfile = self.dirname+'/Output/SAF/'+setname+'/'+setname+'.saf'
         if not os.path.isfile(outfile):
-            shutil.move(self.pad+'/Output/SAF/PADevents/PADevents.saf',outfile)
+            shutil.move(self.dirname+'_RecastRun/Output/SAF/PADevents/PADevents.saf',outfile)
         else:
             inp = open(outfile, 'r')
             out = open(outfile+'.2', 'w')
@@ -690,7 +705,7 @@ class RunRecast():
             out.close()
             shutil.move(outfile+'.2', outfile)
         for analysis in analyses:
-            shutil.move(self.pad+'/Output/SAF/PADevents/'+analysis+'_0',self.dirname+'/Output/SAF/'+setname+'/'+analysis)
+            shutil.move(self.dirname+'_RecastRun/Output/SAF/PADevents/'+analysis+'_0',self.dirname+'/Output/SAF/'+setname+'/'+analysis)
         return True
 
     ################################################

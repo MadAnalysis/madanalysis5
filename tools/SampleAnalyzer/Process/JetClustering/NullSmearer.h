@@ -33,69 +33,13 @@
 namespace MA5
 {
     class NullSmearer: public SmearerBase {
-
-        private:
-            MCParticleFormat output_;
         public:
             /// Constructor without argument
-            NullSmearer()
-            {
-                print_header_  = false;
-            }
+            NullSmearer() { }
+
             /// Destructor
             ~NullSmearer() {}
 
-            // For all methods below, the only relevant part of the output object is the momentum
-            // The reset allows to clear the left-over from the previous object
-
-            // Electron smearing method
-            MCParticleFormat ElectronSmearer(const MCParticleFormat * part)
-            {
-                SetDefaultOutput(part,output_);
-                return output_;
-            }
-
-            // Muon smearing method
-            MCParticleFormat MuonSmearer(const MCParticleFormat * part)
-            {
-                SetDefaultOutput(part,output_);
-                return output_;
-            }
-
-            // Hadronic Tau smearing method
-            MCParticleFormat TauSmearer(const MCParticleFormat * part)
-            {
-                SetDefaultOutput(part,output_);
-                return output_;
-            }
-
-            // Photon smearing method
-            MCParticleFormat PhotonSmearer(const MCParticleFormat * part)
-            {
-                SetDefaultOutput(part,output_);
-                return output_;
-            }
-
-
-            // Jet smearing method
-            MCParticleFormat JetSmearer(const MCParticleFormat * part)
-            {
-                SetDefaultOutput(part,output_);
-                return output_;
-            }
-
-
-            // Jet Constituent smearing method
-            MCParticleFormat ConstituentSmearer(const MCParticleFormat * part)
-            {
-                SetDefaultOutput(part,output_);
-                return output_;
-            }
-
-            void Print()
-            {
-                DEBUG << "Null Smearer" << endmsg;
-            }
     };
 }
 
