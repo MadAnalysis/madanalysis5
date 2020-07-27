@@ -124,23 +124,10 @@ namespace MA5
             {
                 output.Reset();
                 output.momentum().SetPxPyPzE(part->px(),part->py(),part->pz(),part->e());
+                output.setPosition(part->decay_vertex());
+                output.setD0(part->d0());
+                output.setDZ(part->dz());
 
-                if (isPropagatorOn()) // (code-efficiency-related)
-                {
-                    // Set position of the decay vertex
-                    MALorentzVector pos;
-                    pos.SetXYZT(part->decay_vertex().X(),
-                                part->decay_vertex().Y(),
-                                part->decay_vertex().Z(),
-                                part->decay_vertex().T());
-                    output.setPosition(pos);
-
-                    output.setD0((part->decay_vertex().X() * part->py() - \
-                                  part->decay_vertex().Y() * part->px()) / part->pt()); // in [mm]
-
-                    output.setDZ(part->decay_vertex().Z() - (part->decay_vertex().X() * \
-                                 part->px() + part->decay_vertex().Y() * part->py()) / part->pt() * sinh(part->eta())); // in [mm]
-                }
             }
 
             // Set parameters
@@ -236,7 +223,6 @@ namespace MA5
                 MAdouble64 x      = part->decay_vertex().X() * 1.0E-3; // in [m]
                 MAdouble64 y      = part->decay_vertex().Y() * 1.0E-3; // in [m]
                 MAdouble64 z      = part->decay_vertex().Z() * 1.0E-3; // in [m]
-                MAdouble64 theta  = part->theta();
                 MAdouble64 e      = part->e();
                 MAdouble64 px     = part->px();
                 MAdouble64 py     = part->py();
@@ -248,7 +234,7 @@ namespace MA5
 
                 // Check if the particle is in the range of the tracker and if there
                 // isn't a valid tracker skip propagation
-                if ((hypot(x,y) > Radius_ || fabs(z) > HalfLength_ || pt2 < 1e-9) || (Radius_<=1e-9 || HalfLength_<=1e-9))
+                if ((hypot(x,y) > Radius_ || std::fabs(z) > HalfLength_ || pt2 < 1e-9) || (Radius_<=1e-9 || HalfLength_<=1e-9))
                 {
                     MALorentzVector pos;
                     pos.SetXYZT(x * 1.0E+3, y * 1.0E+3, z * 1.0E+3, part->decay_vertex().T());
@@ -258,7 +244,7 @@ namespace MA5
                     return tmp_part;
                 }
 
-                if (abs(q) < 1.0E-9 || fabs(Bz_) < 1.0E-9)
+                if (std::abs(q) < 1.0E-9 || std::fabs(Bz_) < 1.0E-9)
                 {
                     // solve pt2*t^2 + 2*(px*x + py*y)*t - (Radius_^2 - x*x - y*y) = 0    (1)
                     MAdouble64 Lxy    = px * y - py * x;
@@ -281,11 +267,11 @@ namespace MA5
                     MAdouble64 t     = (t1 < 0.0) ? t2 : t1;
 
                     MAdouble64 z_t = z + pz * t;
-                    if(fabs(z_t) > HalfLength_)
+                    if(std::fabs(z_t) > HalfLength_)
                     {
                         MAdouble64 t3 = (HalfLength_  - z) / pz;
                         MAdouble64 t4 = (-HalfLength_ - z) / pz;
-                        MAdouble64 t  = (t3 < 0.0) ? t4 : t3;
+                                   t  = (t3 < 0.0) ? t4 : t3;
                     }
 
                     MAdouble64 x_t = x + px * t;
@@ -317,10 +303,10 @@ namespace MA5
 
                     // calculate coordinates of closest approach to track circle
                     // in transverse plane xd, yd, zd
-                    MAdouble64 xd = x_helix * x_helix * x_helix - x_helix * fabs(R) * r_helix + x_helix * y_helix * y_helix;
+                    MAdouble64 xd = x_helix * x_helix * x_helix - x_helix * std::fabs(R) * r_helix + x_helix * y_helix * y_helix;
                     xd = (r_helix*r_helix > 0.0) ? xd / r_helix*r_helix : -999.;
 
-                    MAdouble64 yd = y_helix * (-fabs(R) * r_helix + r_helix*r_helix);
+                    MAdouble64 yd = y_helix * (-std::fabs(R) * r_helix + r_helix*r_helix);
                     yd = (r_helix*r_helix > 0.0) ? yd / r_helix*r_helix : -999.;
 
                     MAdouble64 zd = z + (hypot(xd,yd) - hypot(x,y)) * pz / pt;
@@ -345,17 +331,16 @@ namespace MA5
                     // 3. time evaluation t = min(t_r, t_z)
                     //    t_r : time to exit from the sides
                     //    t_z : time to exit from the front or the back
-                    MAdouble64 t_r  = 0.0; // in [ns]
                     MAint32 sign_pz = (pz > 0.0) ? 1 : -1;
                     MAdouble64 t_z, t;
                     if(pz == 0.0) t_z = 1.0E+99;
                     else          t_z = gammam / (pz * 1.0E+9 / c_) * (-z + HalfLength_ * sign_pz);
 
                     // helix does not cross the cylinder sides
-                    if (r_helix + fabs(R) < Radius_) t = t_z;
+                    if (r_helix + std::fabs(R) < Radius_) t = t_z;
                     else
                     {
-                        MAdouble64 asinrho = asin((Radius_*Radius_-r_helix*r_helix-R*R)/(2.*fabs(R)*r_helix));
+                        MAdouble64 asinrho = asin((Radius_*Radius_-r_helix*r_helix-R*R)/(2.*std::fabs(R)*r_helix));
                         MAdouble64 delta   = phi_0 - phi;
 
                         if(delta < -pi_) delta += 2 * pi_;
@@ -385,7 +370,6 @@ namespace MA5
                     MAdouble64 x_t = x_helix + R * sin(omega * t - phi_0);
                     MAdouble64 y_t = y_helix + R * cos(omega * t - phi_0);
                     MAdouble64 z_t = z + pz * 1.0E+9 / c_ / gammam * t;
-                    MAdouble64 r_t = hypot(x_t, y_t);
 
                     // compute path length for an helix
                     MAdouble64 alpha = pz * 1.0E+9 / c_ / gammam;
@@ -438,7 +422,7 @@ namespace MA5
                   rn = RANDOM->flat();
                   rn = rn-1+rn;
                   z = (rn>0) ? 2-rn : -2-rn;
-                  if ((kC1-y)*(kC3+fabs(z))<kC2) { result = z; break; }
+                  if ((kC1-y)*(kC3+std::fabs(z))<kC2) { result = z; break; }
                   else
                   {
                     x = rn*rn;

@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+133           (2020/07/27) fuks:    Small bug with the LLP developments is now fixed 
+
 132           (2020/07/15) fuks:    Upgrading the SFS-LLP functionalities 
 
 131           (2020/07/13) fuks:    Small fix (LLP support) 
