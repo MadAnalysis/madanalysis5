@@ -31,20 +31,20 @@ class FontType(object):
         
         class __metaclass__(type):
                 def __getattr__(self, name):
-                        return self.values.keys().index(name)
+                        return list(self.values.keys()).index(name)
 
                 def convert2latex(self,font):
-                        name = self.values.keys()[font]
+                        name = list(self.values.keys())[font]
                         return self.values[name][0]
 
                 def convert2latexclose(self,font):
-                        name = self.values.keys()[font]
+                        name = list(self.values.keys())[font]
                         return self.values[name][1]
 
                 def convert2html(self,font):
-                        name = self.values.keys()[font]
+                        name = list(self.values.keys())[font]
                         return self.values[name][2]
 
                 def convert2htmlclose(self,font):
-                        name = self.values.keys()[font]
+                        name = list(self.values.keys())[font]
                         return self.values[name][3]

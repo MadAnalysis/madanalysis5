@@ -30,16 +30,16 @@ class ReportFormatType(object):
     class __metaclass__(type):
 
         def __getattr__(self, name):
-            return self.values.keys().index(name)
+            return list(self.values.keys()).index(name)
 
         def convert2cmd(self,format):
-            name = self.values.keys()[format]
+            name = list(self.values.keys())[format]
             return self.values[name][0]
 
         def convert2string(self,format):
-            return self.values.keys()[format]
+            return list(self.values.keys())[format]
 
         def convert2filetype(self,format):
-            name = self.values.keys()[format]
+            name = list(self.values.keys())[format]
             return self.values[name][1]
 

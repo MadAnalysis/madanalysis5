@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 import glob
 import os
@@ -31,6 +32,7 @@ import re
 import platform
 from shell_command  import ShellCommand
 from madanalysis.enumeration.detect_status_type import DetectStatusType
+import six
 
 
 class DetectRoot:
@@ -229,7 +231,7 @@ class DetectRoot:
         self.archi_info.root_compiler      = self.compiler
 
 
-        for k, v in self.libraries.iteritems():
+        for k, v in six.iteritems(self.libraries):
             self.archi_info.libraries[k]=v
         for feature in self.features:
             if not feature in self.archi_info.root_features:

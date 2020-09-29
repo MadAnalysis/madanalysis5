@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 class ClusteringAntiKt():
 
@@ -66,7 +67,7 @@ class ClusteringAntiKt():
 
     
     def user_GetParameters(self):
-        return ClusteringAntiKt.userVariables.keys()
+        return list(ClusteringAntiKt.userVariables.keys())
 
 
     def user_SetParameter(self,parameter,value):

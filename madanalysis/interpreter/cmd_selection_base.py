@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.multiparticle.particle_object import ParticleObject
 from madanalysis.multiparticle.extraparticle   import ExtraParticle
 from madanalysis.enumeration.operator_type     import OperatorType
@@ -32,6 +33,7 @@ from madanalysis.selection.condition_type      import ConditionType
 from madanalysis.selection.condition_sequence  import ConditionSequence
 from madanalysis.selection.condition_connector import ConditionConnector
 import logging
+from six.moves import range
 
 class CmdSelectionBase():
 

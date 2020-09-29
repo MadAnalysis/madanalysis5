@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.enumeration.ma5_running_type   import MA5RunningType
 from madanalysis.IOinterface.folder_writer      import FolderWriter
 from shell_command import ShellCommand
@@ -29,6 +30,7 @@ import glob
 import logging
 import shutil
 import os
+from six.moves import range
 
 class RecastConfiguration:
 
@@ -539,7 +541,7 @@ class RecastConfiguration:
                     if analysis not in analysislist:
                         continue
                     descr = 'UNKNOWN'
-                    if analysis in self.description.keys():
+                    if analysis in list(self.description.keys()):
                         descr = self.description[analysis]
                     thecard.append(analysis.ljust(30,' ') + 'vSFS        on    ' + mycard.ljust(50, ' ')+\
                           ' # '+descr)

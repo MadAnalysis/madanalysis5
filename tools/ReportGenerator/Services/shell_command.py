@@ -47,6 +47,7 @@
 
 
 # Standard modules
+from __future__ import absolute_import
 import logging
 import shutil
 import os
@@ -134,7 +135,7 @@ class ShellCommand():
         if not stdin:
             stdin_value=None
         else:
-            input = file(os.devnull)
+            input = open(os.devnull)
             stdin_value= input
         
         # Launching the commands

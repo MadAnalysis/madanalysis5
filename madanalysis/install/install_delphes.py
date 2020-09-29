@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.install.install_service    import InstallService
 from madanalysis.system.user_info           import UserInfo
 from madanalysis.system.config_checker      import ConfigChecker
@@ -507,7 +508,7 @@ class InstallDelphes:
         # Updating the architecture
         deac_path = libpaths[0].replace(libpaths[0].split('/')[-1],"DEACT_"+libpaths[0].split('/')[-1])
         self.main.archi_info.toLDPATH1 = [x for x in self.main.archi_info.toLDPATH1 if not self.package in x]
-        if key in self.main.archi_info.libraries.keys():
+        if key in list(self.main.archi_info.libraries.keys()):
             del self.main.archi_info.libraries[key]
 
         # If the deactivated directory already exists -> suppression

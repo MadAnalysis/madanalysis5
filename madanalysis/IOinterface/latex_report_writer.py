@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import madanalysis.IOinterface.text_file_writer as TextFileWriter
 from madanalysis.enumeration.color_type import ColorType
 from madanalysis.enumeration.font_type import FontType

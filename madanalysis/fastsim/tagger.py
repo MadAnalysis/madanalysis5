@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 class Tagger:
 
@@ -38,11 +39,11 @@ class Tagger:
         if not self.is_supported(id_true, id_reco):
             return
         ## Checking whether the reco/true pair already exists
-        key_number=len(self.rules.keys())+1
+        key_number=len(list(self.rules.keys()))+1
         for key, value in self.rules.items():
             if value['id_true']==id_true and value['id_reco']==id_reco:
                 key_number = key
-        if not key_number in self.rules.keys():
+        if not key_number in list(self.rules.keys()):
             self.rules[key_number] = { 'id_true':id_true, 'id_reco':id_reco,
               'efficiencies':{} }
 
@@ -80,7 +81,7 @@ class Tagger:
         supported = { '5':['21','4','5'], '4':['21','4','5'], '15':['15','21'],
                       '21' : ['11','13','22'], '11' : ['13','22', '21'],
                       '13' : ['11','22'],      '22' : ['11','13', '21']}
-        if id_reco not in supported.keys() or id_true not in supported[id_reco]:
+        if id_reco not in list(supported.keys()) or id_true not in supported[id_reco]:
             self.logger.error('This tagger is currently not supported (tagging '+ id_true + ' as ' + id_reco + '). Tagger ignored.')
             return False
         return True

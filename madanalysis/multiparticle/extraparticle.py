@@ -22,9 +22,10 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.selection.instance_name import InstanceName
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
-from multiparticle import MultiParticle
+from .multiparticle import MultiParticle
 import logging
 
 class ExtraParticle():

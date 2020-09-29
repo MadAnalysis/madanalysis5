@@ -24,6 +24,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 import os
 import shutil
@@ -285,7 +286,7 @@ class MA5Interpreter(Interpreter):
                 user_info.SetValue(usrkey,value,'')
                 update_options(usrkey,value)
                 if archi_reset != '':
-                    self.main.archi_info.__dict__[archi_reset.keys()[0]] = archi_reset.values()[0]
+                    self.main.archi_info.__dict__[list(archi_reset.keys())[0]] = list(archi_reset.values())[0]
             elif opts[key] not in [True,None]:
                 self.logger.warning('Non-existing ' + key.replace('with-','') + \
                    ' path. Automatic detection used.')

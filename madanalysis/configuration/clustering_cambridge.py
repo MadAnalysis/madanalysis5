@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 class ClusteringCambridge():
 
@@ -65,7 +66,7 @@ class ClusteringCambridge():
 
     
     def user_GetParameters(self):
-        return ClusteringCambridge.userVariables.keys()
+        return list(ClusteringCambridge.userVariables.keys())
 
 
     def user_SetParameter(self,parameter,value):

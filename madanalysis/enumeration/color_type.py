@@ -52,22 +52,22 @@ class ColorType(object):
 
         def __getattr__(self, name):
             if (name)=='GRAY':
-                return self.values.keys().index('GREY')
+                return list(self.values.keys()).index('GREY')
             else:
-                return self.values.keys().index(name)
+                return list(self.values.keys()).index(name)
 
         def convert2string(self,color):
-            name = self.values.keys()[color]
+            name = list(self.values.keys())[color]
             return self.values[name][0]
   
         def convert2hexa(self,color):
-            name = self.values.keys()[color]
+            name = list(self.values.keys())[color]
             return self.values[name][1]
 
         def convert2rootcode(self,color):
-            name = self.values.keys()[color]
+            name = list(self.values.keys())[color]
             return self.values[name][2]
 
         def convert2root(self,color,shade=0):
-            name = self.values.keys()[color]
+            name = list(self.values.keys())[color]
             return self.values[name][3][shade+4]

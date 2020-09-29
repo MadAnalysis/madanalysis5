@@ -35,16 +35,16 @@ class BackStyleType(object):
         class __metaclass__(type):
 
                 def __getattr__(self, name):
-                        return self.values.keys().index(name)
+                        return list(self.values.keys()).index(name)
 
                 def convert2code(self,color):
-                        name = self.values.keys()[color]
+                        name = list(self.values.keys())[color]
                         return self.values[name][0]
 
                 def convert2string(self,color):
-                        name = self.values.keys()[color]
+                        name = list(self.values.keys())[color]
                         return self.values[name][1]
 
                 def convert2matplotlib(self,color):
-                        name = self.values.keys()[color]
+                        name = list(self.values.keys())[color]
                         return self.values[name][2]

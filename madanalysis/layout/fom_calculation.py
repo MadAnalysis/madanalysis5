@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.layout.measure               import Measure
 from math import sqrt
 from math import log

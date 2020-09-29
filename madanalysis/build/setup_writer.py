@@ -22,8 +22,10 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 from string_tools import StringTools
+from six.moves import range
 
 
 class SetupWriter():

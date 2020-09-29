@@ -22,10 +22,12 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.layout.histogram_core import HistogramCore
 import logging
 from math import sqrt, log10, pow
 import array
+from six.moves import range
 
 class HistogramLogX:
 

@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.enumeration.uncertainty_type     import UncertaintyType
 from madanalysis.enumeration.normalize_type       import NormalizeType
 from madanalysis.enumeration.report_format_type   import ReportFormatType
@@ -31,6 +32,7 @@ from madanalysis.enumeration.linestyle_type       import LineStyleType
 from madanalysis.enumeration.backstyle_type       import BackStyleType
 from madanalysis.enumeration.stacking_method_type import StackingMethodType
 import copy
+from six.moves import range
 
 
 class PlotFlowForDataset:

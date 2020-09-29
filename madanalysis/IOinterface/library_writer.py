@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.selection.instance_name   import InstanceName
 from madanalysis.IOinterface.folder_writer import FolderWriter
 from madanalysis.IOinterface.job_writer    import JobWriter
@@ -32,6 +33,7 @@ import shutil
 import os
 import commands
 import subprocess
+from six.moves import input
 
 
 class LibraryWriter():
@@ -52,7 +54,7 @@ class LibraryWriter():
         if not self.main.forced:
             test=False
             while(not test):
-                answer=raw_input("     Answer: ")
+                answer=input("     Answer: ")
                 if answer=="":
                     test=True
                     ncores=nmaxcores
@@ -81,7 +83,7 @@ class LibraryWriter():
         if not self.main.forced:
             test=False
             while(not test):
-                answer=raw_input("   Answer: ")
+                answer=input("   Answer: ")
                 if answer=="":
                     test=True
                     ncores=nmaxcores

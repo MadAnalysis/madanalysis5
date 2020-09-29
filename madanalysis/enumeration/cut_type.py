@@ -29,10 +29,10 @@ class CutType(object):
     class __metaclass__(type):
 
         def __getattr__(self, name):
-            return self.values.keys().index(name)
+            return list(self.values.keys()).index(name)
 
         def convert2cmdname(self,cut):
-            name = self.values.keys()[cut]
+            name = list(self.values.keys())[cut]
             return self.values[name][0]
     
 

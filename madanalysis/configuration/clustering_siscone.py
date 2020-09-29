@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 class ClusteringSisCone():
     
@@ -86,7 +87,7 @@ class ClusteringSisCone():
 
     
     def user_GetParameters(self):
-        return ClusteringSisCone.userVariables.keys()
+        return list(ClusteringSisCone.userVariables.keys())
 
 
     def user_SetParameter(self,parameter,value):

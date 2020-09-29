@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.interpreter.cmd_base       import CmdBase
 from madanalysis.install.install_manager    import InstallManager
 from madanalysis.system.user_info           import UserInfo
@@ -30,7 +31,7 @@ import logging
 import os
 import sys
 import shutil
-import urllib
+import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
 import pwd
 
 class CmdInstall(CmdBase):

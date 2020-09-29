@@ -31,4 +31,4 @@ class ArgumentType(object):
     class __metaclass__(type):
 
         def __getattr__(self, name):
-            return self.values.keys().index(name)
+            return list(self.values.keys()).index(name)

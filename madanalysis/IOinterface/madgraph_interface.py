@@ -22,10 +22,13 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.configuration.recast_configuration     import RecastConfiguration
 import itertools
 import logging
 import os
+import six
+from six.moves import range
 
 class MadGraphInterface():
 
@@ -436,7 +439,7 @@ class MadGraphInterface():
             else:
                 return myprt['antiname']
         else:
-            for key, value in self.multiparticles.iteritems():
+            for key, value in six.iteritems(self.multiparticles):
                 self.logger.debug('new multiparticle ' + key + ' = ' + str(value))
                 if sorted(value)==sorted(pdg):
                     return key
@@ -450,12 +453,12 @@ class MadGraphInterface():
             if isinstance( int(prt), int ):
                return int(prt)
         except:
-            for key, value in self.model.get('particle_dict').iteritems():
+            for key, value in six.iteritems(self.model.get('particle_dict')):
                 if value['antiname']==prt and not value['is_part']:
                     return key
                 elif value['name']==prt and value['is_part']:
                     return key
-            if prt in self.multiparticles.keys():
+            if prt in list(self.multiparticles.keys()):
                 return self.multiparticles[prt]
             else:
                 self.logger.error("  ** Problem with the multiparticle definitions")
@@ -465,7 +468,7 @@ class MadGraphInterface():
     def get_invisible(self, card_type='parton'):
         do_parton = card_type=='parton'
         # Do we have MET?
-        for key, value in self.model.get('particle_dict').iteritems():
+        for key, value in six.iteritems(self.model.get('particle_dict')):
             if value['width'] == 'ZERO' and value['color']==1 and value['charge']==0 and not value['name']=='a':
                 self.invisible_particles.append(value['name'])
                 self.invisible_particles.append(value['antiname'])
@@ -478,7 +481,7 @@ class MadGraphInterface():
                 self.card.append('define invisible = ' + ' '.join(list(set(self.invisible_pdgs))))
 
     def write_multiparticles(self):
-        for key, value in self.multiparticles.iteritems():
+        for key, value in six.iteritems(self.multiparticles):
             if len([ x for x in value if x in [self.get_pdg_code(y) for y in self.invisible_particles] ])==len(value):
                 self.invisible_particles.append(key)
                 self.card.append('define ' + key + ' = ' + ' '.join([str(x) for x in value]))

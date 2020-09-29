@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.dataset.sample_info          import SampleInfo
 from madanalysis.layout.cut_info              import CutInfo

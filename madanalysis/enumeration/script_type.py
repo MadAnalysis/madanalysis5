@@ -29,20 +29,20 @@ class ScriptType(object):
 
         class __metaclass__(type):
                 def __getattr__(self, name):
-                        return self.values.keys().index(name)
+                        return list(self.values.keys()).index(name)
 
                 def latexscript(self,script):
-                        name = self.values.keys()[script]
+                        name = list(self.values.keys())[script]
                         return self.values[name][0]
 
                 def latexscriptclose(self,script):
-                        name = self.values.keys()[script]
+                        name = list(self.values.keys())[script]
                         return self.values[name][1]
 
                 def htmlscript(self,script):
-                        name = self.values.keys()[script]
+                        name = list(self.values.keys())[script]
                         return self.values[name][2]
 
                 def htmlscriptclose(self,script):
-                        name = self.values.keys()[script]
+                        name = list(self.values.keys())[script]
                         return self.values[name][3]

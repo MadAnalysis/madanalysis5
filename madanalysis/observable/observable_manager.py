@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
 import madanalysis.observable.observable_list
 
@@ -29,7 +30,7 @@ class ObservableManager():
 
     def __init__(self,mode):
 
-        list = madanalysis.observable.observable_list.__dict__.keys()
+        list = list(madanalysis.observable.observable_list.__dict__.keys())
 
         # extract native list
         self.full_list      = []
@@ -65,7 +66,7 @@ class ObservableManager():
         
     def get(self,name):
         if name not in \
-               madanalysis.observable.observable_list.__dict__.keys():
+               list(madanalysis.observable.observable_list.__dict__.keys()):
             return None
         return madanalysis.observable.observable_list.__dict__[name]
 

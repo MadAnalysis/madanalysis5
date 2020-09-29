@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import madanalysis.IOinterface.text_file_writer as TextFileWriter
 from madanalysis.IOinterface.html_style_writer  import HTMLCSSWriter
 from madanalysis.enumeration.color_type         import ColorType
@@ -34,6 +35,7 @@ import os
 import logging
 import time
 import pwd
+from six.moves import range
 
 class HTMLReportWriter(TextFileWriter.TextFileWriter):
     """Generate HTML report"""

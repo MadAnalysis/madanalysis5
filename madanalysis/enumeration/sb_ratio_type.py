@@ -29,10 +29,10 @@ class SBratioType(object):
 
         class __metaclass__(type):
             def __getattr__(self, name):
-                return self.values.keys().index(name)
+                return list(self.values.keys()).index(name)
    
             def convert2string(self,val):
-                name = self.values.keys()[val]
+                name = list(self.values.keys())[val]
                 return self.values[name][0]
 
   

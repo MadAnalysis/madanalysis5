@@ -22,7 +22,9 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import json, os, copy, math, logging
+from six.moves import range
 class HistFactory(object):
     def __init__(self,pyhf_config):
         self.pyhf_config = pyhf_config.get('SR'  , {})
@@ -365,8 +367,8 @@ def merge_backgrounds(Background1,Background2):
     """
     if {} in [Background1.hf, Background2.hf] or type(Background1) != type(Background2):
         return Background1, 0
-    logging.getLogger('MA5').debug('merging :'+', '.join(Background1.global_config.keys()+\
-                                                         Background2.pyhf_config.keys()))
+    logging.getLogger('MA5').debug('merging :'+', '.join(list(Background1.global_config.keys())+\
+                                                         list(Background2.pyhf_config.keys())))
     measurements = []
     # merge common measurements
     for measurement1 in Background1.hf.get('measurements',[]):
@@ -384,7 +386,7 @@ def merge_backgrounds(Background1,Background2):
 
     if measurements == [] or Background1.hf['version'] != Background2.hf['version'] :
         logging.getLogger('MA5').warning('Merging failed: Either measurements or versions does not match...')
-        logging.getLogger('MA5').warning(', '.join(Background2.pyhf_config.keys())+' will not be added.')
+        logging.getLogger('MA5').warning(', '.join(list(Background2.pyhf_config.keys()))+' will not be added.')
         return Background1, 0 # only get uncontradctory poi
 
     logging.getLogger('MA5').debug('measurements are matching...')

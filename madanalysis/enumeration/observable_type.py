@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
 import math
 
@@ -60,20 +61,20 @@ class ObservableType(object):
 
     class __metaclass__(type):
         def __getattr__(self, name):
-            if name in self.values.keys():
-                return self.values.keys().index(name)
+            if name in list(self.values.keys()):
+                return list(self.values.keys()).index(name)
             else:
-                return self.values.keys().index('UNKNOWN')
+                return list(self.values.keys()).index('UNKNOWN')
 
         def accept_particles(self, index):
-            name = self.values.keys()[index]
+            name = list(self.values.keys())[index]
             return self.values[name][0]
 
         def convert2string(self,index):
-            return self.values.keys()[index]
+            return list(self.values.keys())[index]
 
         def convert2job_string(self,index,level):
-            name = self.values.keys()[index]
+            name = list(self.values.keys())[index]
             if level==MA5RunningType.PARTON:
                 return self.values[name][1]
             elif level==MA5RunningType.HADRON:
@@ -83,33 +84,33 @@ class ObservableType(object):
             return ""
 
         def convert2unit(self,index):
-            name = self.values.keys()[index]
+            name = list(self.values.keys())[index]
             return self.values[name][4]
 
         def convert2nbins(self,index):
-            name = self.values.keys()[index]
+            name = list(self.values.keys())[index]
             return self.values[name][5]
 
         def convert2xmin(self,index):
-            name = self.values.keys()[index]
+            name = list(self.values.keys())[index]
             return self.values[name][6]
 
         def convert2xmax(self,index):
-            name = self.values.keys()[index]
+            name = list(self.values.keys())[index]
             return self.values[name][7]
 
         def isCuttable(self,index):
-            name = self.values.keys()[index]
+            name = list(self.values.keys())[index]
             return self.values[name][8]
 
         def prefix(self,index):
-            name = self.values.keys()[index]
+            name = list(self.values.keys())[index]
             return self.values[name][9]
 
         def get_list(self,level=MA5RunningType.PARTON):
             output = []
             for item in self.values.keys():
-                x = ObservableType.convert2job_string(self.values.keys().index(item),level)
+                x = ObservableType.convert2job_string(list(self.values.keys()).index(item),level)
                 if x=="":
                     continue
                 output.append(item)
@@ -130,7 +131,7 @@ class ObservableType(object):
                 if item=="N":
                     output.append(item)
                     continue
-                x = ObservableType.convert2job_string(self.values.keys().index(item),level)
+                x = ObservableType.convert2job_string(list(self.values.keys()).index(item),level)
                 if x=="":
                     continue
                 if not self.values[item][8]:
@@ -143,7 +144,7 @@ class ObservableType(object):
         def get_cutlist2(self,level=MA5RunningType.PARTON):
             output = []
             for item in self.values.keys():
-                x = ObservableType.convert2job_string(self.values.keys().index(item),level)
+                x = ObservableType.convert2job_string(list(self.values.keys()).index(item),level)
                 if item=="N":
                     continue
                 if x=="":

@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.enumeration.ma5_running_type           import MA5RunningType
 from madanalysis.configuration.clustering_configuration import ClusteringConfiguration
 from madanalysis.configuration.delphes_configuration    import DelphesConfiguration
@@ -180,13 +181,13 @@ class FastsimConfiguration:
         
     def user_GetParameters(self):
         if self.package=="fastjet":
-            table = FastsimConfiguration.userVariables.keys()
+            table = list(FastsimConfiguration.userVariables.keys())
             table.extend(self.clustering.user_GetParameters())
         elif self.package=="delphes":
-            table = FastsimConfiguration.userVariables.keys()
+            table = list(FastsimConfiguration.userVariables.keys())
             table.extend(self.delphes.user_GetParameters())
         elif self.package=="delphesMA5tune":
-            table = FastsimConfiguration.userVariables.keys()
+            table = list(FastsimConfiguration.userVariables.keys())
             table.extend(self.delphesMA5tune.user_GetParameters())
         else:
             table = ["package"]

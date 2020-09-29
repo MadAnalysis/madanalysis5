@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.install.install_service import InstallService
 from shell_command import ShellCommand
 import glob
@@ -242,7 +243,7 @@ class InstallPad:
                     self.analysis_files.append(new_analysis+'.'+extension)
                 analysis_info[new_analysis] = dscrptn
                 ## Preparing to downloading the necessary json files
-                if analysis in json_dictionary.keys():
+                if analysis in list(json_dictionary.keys()):
                     for json in json_dictionary[analysis]:
                         files[new_analysis+'_'+json+'.json'] = os.path.join(url,new_analysis+'_'+json+'.json')
                         self.json_cards.append(new_analysis+'_'+json+'.json')

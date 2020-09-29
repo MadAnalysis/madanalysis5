@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.configuration.clustering_kt          import ClusteringKt
 from madanalysis.configuration.clustering_antikt      import ClusteringAntiKt
 from madanalysis.configuration.clustering_genkt       import ClusteringGenKt
@@ -121,7 +122,7 @@ class MergingConfiguration:
 
         
     def user_GetParameters(self):
-        return MergingConfiguration.userVariables.keys()
+        return list(MergingConfiguration.userVariables.keys())
 
 
     def user_GetValues(self,variable):

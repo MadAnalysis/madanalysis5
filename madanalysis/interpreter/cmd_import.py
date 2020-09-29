@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.interpreter.cmd_define           import CmdDefine
 from madanalysis.enumeration.ma5_running_type     import MA5RunningType
 from madanalysis.IOinterface.ufo_reader           import UFOReader
@@ -37,6 +38,8 @@ import logging
 import glob
 import os
 import stat
+from six.moves import range
+from six.moves import input
 
 class CmdImport(CmdBase.CmdBase):
     """Command IMPORT"""
@@ -141,7 +144,7 @@ class CmdImport(CmdBase.CmdBase):
             allowed_answers=['n','no','y','yes']
             answer=""
             while answer not in  allowed_answers:
-               answer=raw_input("Answer: ")
+               answer=input("Answer: ")
                answer=answer.lower()
             if answer=="no" or answer=="n":
                 return False

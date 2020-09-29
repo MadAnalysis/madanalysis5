@@ -22,11 +22,14 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from shell_command import ShellCommand
 import logging
 import os
 import sys
 import shutil
+from six.moves import range
+from six.moves import input
 
 class InstallService():
 
@@ -89,7 +92,7 @@ class InstallService():
         if not forced:
             test=False
             while(not test):
-                answer=raw_input("   => Answer: ")
+                answer=input("   => Answer: ")
                 if answer=="":
                     test=True
                     ncores=nmaxcores
@@ -196,7 +199,7 @@ class InstallService():
         for file,url in filesToDownload.items():
             ind+=1
             result="OK"
-            logging.getLogger('MA5').info('    - ' + str(ind)+"/"+str(len(filesToDownload.keys()))+" "+url+" ...")
+            logging.getLogger('MA5').info('    - ' + str(ind)+"/"+str(len(list(filesToDownload.keys())))+" "+url+" ...")
             output = installdir+'/'+file
 
             # Try to connect the file
@@ -331,7 +334,7 @@ class InstallService():
     @staticmethod
     def UrlAccess(url):
 
-        import urllib2
+        import six.moves.urllib.request, six.moves.urllib.error, six.moves.urllib.parse
         import ssl
         import time
 
@@ -360,9 +363,9 @@ class InstallService():
             logging.getLogger('MA5').debug("Attempt "+str(nAttempt+1)+"/"+str(nMaxAttempts)+" to access the url")
             try:
                 if modeSSL:
-                    info = urllib2.urlopen(url, context=ssl._create_unverified_context())
+                    info = six.moves.urllib.request.urlopen(url, context=ssl._create_unverified_context())
                 else:
-                    info = urllib2.urlopen(url)
+                    info = six.moves.urllib.request.urlopen(url)
             except:
                 logging.getLogger('MA5').warning("Impossible to access the url: "+url)
                 ok=False

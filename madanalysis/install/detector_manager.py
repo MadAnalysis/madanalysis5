@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.install.install_manager      import InstallManager
 class DetectorManager():
 
