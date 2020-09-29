@@ -87,12 +87,12 @@ class MultiParticleCollection:
         self.table = {}
             
     def ResetParticles(self):
-        for key in self.table.keys():
+        for key in list(self.table.keys()):
             if len(self.table[key])==1:
                 del self.table[key]
 
     def ResetMultiparticles(self):
-        for key in self.table.keys():
+        for key in list(self.table.keys()):
             if len(self.table[key])!=1:
                 del self.table[key]
 

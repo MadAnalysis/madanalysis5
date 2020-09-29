@@ -119,6 +119,7 @@ class ShellCommand():
 
         while True:
             my_out = result.stdout.readline()
+            my_out = my_out.decode()
             if my_out == '' and result.poll() is not None:
                 break
             if my_out and not 'progress' in my_out:

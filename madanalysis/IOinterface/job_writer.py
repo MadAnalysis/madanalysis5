@@ -33,7 +33,7 @@ import shutil
 import os
 import six
 
-class JobWriter():
+class JobWriter(object):
 
     def __init__(self,main,jobdir,resubmit=False):
         self.main       = main
@@ -44,7 +44,7 @@ class JobWriter():
         self.merging    = self.main.merging
 
     @staticmethod
-    def CheckJobStructureMute(self,path,recastflag):
+    def CheckJobStructureMute(path,recastflag):
         if not os.path.isdir(path):
             return False
         if not recastflag:
