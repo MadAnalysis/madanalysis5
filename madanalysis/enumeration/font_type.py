@@ -20,16 +20,9 @@
 #  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
 #  
 ################################################################################
+import six
 
-
-class FontType(object):
-        values = {'none' : ['','','',''],\
-                  'IT'   : ['\\textit{','}','<i>','</i>'],\
-                  'BF'   : ['\\textbf{','}','<b>','</b>'],\
-                  'TT'   : ['\\texttt{','}','  <tt>','</tt>'],\
-                  'ITBF' : ['\\textit{\\textbf{','}}','<i><b>','</i></b>']}
-        
-        class __metaclass__(type):
+class metaclass(type):
                 def __getattr__(self, name):
                         return list(self.values.keys()).index(name)
 
@@ -48,3 +41,13 @@ class FontType(object):
                 def convert2htmlclose(self,font):
                         name = list(self.values.keys())[font]
                         return self.values[name][3]
+
+@six.add_metaclass(metaclass)
+class FontType(object):
+        values = {'none' : ['','','',''],\
+                  'IT'   : ['\\textit{','}','<i>','</i>'],\
+                  'BF'   : ['\\textbf{','}','<b>','</b>'],\
+                  'TT'   : ['\\texttt{','}','  <tt>','</tt>'],\
+                  'ITBF' : ['\\textit{\\textbf{','}}','<i><b>','</i></b>']}
+        
+

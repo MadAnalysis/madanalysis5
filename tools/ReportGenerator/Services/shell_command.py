@@ -51,7 +51,6 @@ from __future__ import absolute_import
 import logging
 import shutil
 import os
-import commands
 import subprocess
 
 
@@ -78,6 +77,7 @@ class ShellCommand():
 
         # Getting stdout
         out, err = result.communicate()
+        out = out.decode()
         if out!=None:
             for line in out:
                output.write(line)
@@ -149,11 +149,12 @@ class ShellCommand():
 
         # Getting stdout
         out, err = result.communicate()
+        
             
         # Return results
         if stdin:
             input.close()
-        return (result.returncode==0), out, err
+        return (result.returncode==0), out.decode(), err.decode() if err else err
     
 
 
@@ -176,6 +177,7 @@ class ShellCommand():
 
         # Getting stdout
         out, err = result.communicate()
+        out = out.decode()
         if out==None:
             return []
 

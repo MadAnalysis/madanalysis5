@@ -178,7 +178,9 @@ class LATEXReportWriter(TextFileWriter.TextFileWriter):
             self.file.write("m{"+str(size)+"mm}|")
         self.file.write("}\n      \\hline\n")
 
-    def NewCell(self,color=ColorType.WHITE,span=1):
+    def NewCell(self,color=None,span=1):
+        if color is None:
+            color=ColorType.WHITE
         self.current_col=self.current_col+span
 
         if  self.current_col>self.number_col:

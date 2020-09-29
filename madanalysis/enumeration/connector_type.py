@@ -20,16 +20,9 @@
 #  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
 #  
 ################################################################################
+import six
 
-
-class ConnectorType(object):
-    values = { 'OR'      : ["or","||"],\
-               'AND'     : ["and","&&"],\
-               'XOR'     : ["xor",""],\
-               'UNKNOWN' : ["",""]
-               }
-
-    class __metaclass__(type):
+class metaclass(type):
     
         def __getattr__(self, name):
             if name in list(self.values.keys()):
@@ -44,3 +37,13 @@ class ConnectorType(object):
         def convert2cpp(self,op):
             name = list(self.values.keys())[op]
             return self.values[name][1]
+
+
+@six.add_metaclass(metaclass)
+class ConnectorType(object):
+    values = { 'OR'      : ["or","||"],\
+               'AND'     : ["and","&&"],\
+               'XOR'     : ["xor",""],\
+               'UNKNOWN' : ["",""]
+               }
+

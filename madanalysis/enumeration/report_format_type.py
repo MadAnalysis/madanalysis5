@@ -20,26 +20,30 @@
 #  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
 #  
 ################################################################################
+import six
 
+class metaclass(type):
 
+    def __getattr__(self, name):
+        return list(self.values.keys()).index(name)
+
+    def convert2cmd(self,format):
+        name = list(self.values.keys())[format]
+        return self.values[name][0]
+
+    def convert2string(self,format):
+        return list(self.values.keys())[format]
+
+    def convert2filetype(self,format):
+        name = list(self.values.keys())[format]
+        return self.values[name][1]
+
+    
+@six.add_metaclass(metaclass)
 class ReportFormatType(object):
     values = { 'LATEX'    : ['generate_latex','eps'],\
                'PDFLATEX' : ['generate_pdflatex','png'],\
                'HTML'     : ['generate_html','png']  }
 
-    class __metaclass__(type):
 
-        def __getattr__(self, name):
-            return list(self.values.keys()).index(name)
-
-        def convert2cmd(self,format):
-            name = list(self.values.keys())[format]
-            return self.values[name][0]
-
-        def convert2string(self,format):
-            return list(self.values.keys())[format]
-
-        def convert2filetype(self,format):
-            name = list(self.values.keys())[format]
-            return self.values[name][1]
 

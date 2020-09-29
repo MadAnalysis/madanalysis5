@@ -30,7 +30,7 @@ class ObservableManager():
 
     def __init__(self,mode):
 
-        list = list(madanalysis.observable.observable_list.__dict__.keys())
+        mlist = list(madanalysis.observable.observable_list.__dict__.keys())
 
         # extract native list
         self.full_list      = []
@@ -38,7 +38,7 @@ class ObservableManager():
         self.cut_event_list = []
         self.cut_candidate_list = []
 
-        for item in list:
+        for item in mlist:
             if item.startswith('__'):
                 continue
             if item=="ObservableBase":

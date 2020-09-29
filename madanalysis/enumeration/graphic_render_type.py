@@ -20,15 +20,18 @@
 #  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
 #  
 ################################################################################
+import six
 
-
-class GraphicRenderType(object):
-        values = {'NONE' : ['none'] ,'ROOT':['Root'],'MATPLOTLIB':['Matplotlib']}
-
-        class __metaclass__(type):
+class metaclass(type):
             def __getattr__(self, name):
                 return list(self.values.keys()).index(name)
 
             def convert2string(self,index):
                 name = list(self.values.keys())[index]
                 return self.values[name][0]
+
+@six.add_metaclass(metaclass)
+class GraphicRenderType(object):
+        values = {'NONE' : ['none'] ,'ROOT':['Root'],'MATPLOTLIB':['Matplotlib']}
+
+

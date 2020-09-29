@@ -21,7 +21,26 @@
 #  
 ################################################################################
 
+import six
 
+class metaclass(type):
+
+        def __getattr__(self, name):
+                return list(self.values.keys()).index(name)
+
+        def convert2code(self,color):
+                name = list(self.values.keys())[color]
+                return self.values[name][0]
+
+        def convert2string(self,color):
+                name = list(self.values.keys())[color]
+                return self.values[name][1]
+
+        def convert2matplotlib(self,color):
+                name = list(self.values.keys())[color]
+                return self.values[name][2]
+
+@six.add_metaclass(metaclass)
 class BackStyleType(object):
         values = { 'AUTO'   : [0,   'auto',  'None'],\
                    'SOLID'  : [1001,'solid', 'None'],\
@@ -32,19 +51,3 @@ class BackStyleType(object):
 
 #            matplotlib -> hatch   = ['/', '\\', '|', '-', '+', 'x', 'o', 'O', '.', '*']
 
-        class __metaclass__(type):
-
-                def __getattr__(self, name):
-                        return list(self.values.keys()).index(name)
-
-                def convert2code(self,color):
-                        name = list(self.values.keys())[color]
-                        return self.values[name][0]
-
-                def convert2string(self,color):
-                        name = list(self.values.keys())[color]
-                        return self.values[name][1]
-
-                def convert2matplotlib(self,color):
-                        name = list(self.values.keys())[color]
-                        return self.values[name][2]

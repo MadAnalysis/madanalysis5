@@ -20,18 +20,9 @@
 #  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
 #  
 ################################################################################
+import six
 
-
-class CombinationType(object):
-    values = { 'UNKNOWN'    : [],\
-               'DEFAULT'    : [''],\
-               'SUMSCALAR'  : ['s'],\
-               'SUMVECTOR'  : ['v'],\
-               'DIFFSCALAR' : ['ds','sd'],\
-               'DIFFVECTOR' : ['d','dv','vd'],\
-               'RATIO'      : ['r'] }
-               
-    class __metaclass__(type):
+class metaclass(type):
 
         def __getattr__(self, name):
             return list(self.values.keys()).index(name)
@@ -48,3 +39,16 @@ class CombinationType(object):
             else:
                 name = list(self.values.keys())[index]
                 return self.values[name][0]
+
+
+
+@six.add_metaclass(metaclass)
+class CombinationType(object):
+    values = { 'UNKNOWN'    : [],\
+               'DEFAULT'    : [''],\
+               'SUMSCALAR'  : ['s'],\
+               'SUMVECTOR'  : ['v'],\
+               'DIFFSCALAR' : ['ds','sd'],\
+               'DIFFVECTOR' : ['d','dv','vd'],\
+               'RATIO'      : ['r'] }
+               

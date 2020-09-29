@@ -34,7 +34,6 @@ import glob
 import logging
 import shutil
 import os
-import commands
 import copy
 
 

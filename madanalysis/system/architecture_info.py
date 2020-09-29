@@ -136,7 +136,7 @@ class ArchitectureInfo:
 
         # Open the file
         try:
-            file = open(filename,"w")
+            file = open(filename,"wb")
         except:
             logging.getLogger('MA5').error("impossible to write the configuration file '" + \
                           filename + "'")
@@ -161,7 +161,7 @@ class ArchitectureInfo:
 
         # Open the file
         try:
-            file = open(filename,"r")
+            file = open(filename,"rb")
         except:
             logging.getLogger('MA5').error("impossible to read the configuration file '" + \
                           filename + "'")
@@ -172,7 +172,9 @@ class ArchitectureInfo:
         try:
             newone = pickle.load(file)
             test=True
-        except:
+        except Exception as error:
+            if __debug__:
+                print('PICKLE ERROR:', error)
             logging.getLogger('MA5').error("error occured during reading data from "+filename)
             test=False
 

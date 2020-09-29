@@ -30,7 +30,6 @@ from string_tools                             import StringTools
 import logging
 import shutil
 import os
-import commands
 
 class LayoutWriter():
 

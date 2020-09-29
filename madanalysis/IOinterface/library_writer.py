@@ -31,7 +31,6 @@ from shell_command                         import ShellCommand
 import logging
 import shutil
 import os
-import commands
 import subprocess
 from six.moves import input
 

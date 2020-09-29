@@ -25,41 +25,9 @@
 from __future__ import absolute_import
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
 import math
+import six
 
-class ObservableType(object):
-
-    # name : accept_particles 
-    values = { 'UNKNOWN' : [False,'','','','',0,0,0,False,False],\
-               'SQRTS' :   [False,'PHYSICS->SqrtS(event.mc())','PHYSICS->SqrtS(event.mc())','','GeV',100,0.,1000., True, False],\
-               'TET' :     [False,'PHYSICS->Transverse->EventTET(event.mc())','PHYSICS->Transverse->EventTET(event.mc())','PHYSICS->Transverse->EventTET(event.rec())','GeV',100,0.,1000., True,False],\
-               'MET' :     [False,'PHYSICS->Transverse->EventMET(event.mc())','PHYSICS->Transverse->EventMET(event.mc())','PHYSICS->Transverse->EventMET(event.rec())','GeV',100,0.,1000., True,False],\
-               'THT' :     [False,'PHYSICS->Transverse->EventTHT(event.mc())','PHYSICS->Transverse->EventTHT(event.mc())','PHYSICS->Transverse->EventTHT(event.rec())','GeV',100,0.,1000., True,False],\
-               'MHT' :     [False,'PHYSICS->Transverse->EventMHT(event.mc())','PHYSICS->Transverse->EventMHT(event.mc())','PHYSICS->Transverse->EventMHT(event.rec())','GeV',100,0.,1000.,True,False],\
-               'WEIGHTS' : [False,'PHYSICS->weights(event.mc())','PHYSICS->weights(event.mc())','','',100,0.,1., True,False],\
-               'NPID':     [False,'NPID','NPID','NPID','',100,0.,100.,False,False],\
-               'NAPID':    [False,'NAPID','NAPID','NAPID','',100,0.,100.,False,False],\
-               'E'   :     [True,'e()','e()','e()','GeV',100,0.,1000.,True,True],\
-               'M'   :     [True,'m()','m()','m()','GeV/c^{2}',100,0.,1000.,True,True],\
-               'P'   :     [True,'p()','p()','p()','GeV/c',100,0.,1000.,True,True],\
-               'ET'  :     [True,'et()','et()','et()','GeV',100,0.,1000.,True,True],\
-               'MT'  :     [True,'mt()','mt()','mt()','GeV/c^{2}',100,0.,1000.,True,True],\
-               'PT'  :     [True,'pt()','pt()','pt()','GeV/c',100,0.,1000.,True,True],\
-               'PX'  :     [True,'px()','px()','px()','GeV/c',100,-1000.,1000.,True,True],\
-               'PY'  :     [True,'py()','py()','py()','GeV/c',100,-1000.,1000.,True,True],\
-               'PZ'  :     [True,'pz()','pz()','pz()','GeV/c',100,-1000.,1000.,True,True],\
-               'R'   :     [True,'r()','r()','r()','',100,0.,1000.,True,True],\
-               'THETA' :   [True,'theta()','theta()','theta()','',100,0.,2*math.pi+0.01,True,True],\
-               'ETA' :     [True,'eta()','eta()','eta()','',100,-8.0,+8.0,True,True],\
-               'PHI' :     [True,'phi()','phi()','phi()','',100,0.,2*math.pi+0.01,True,True],\
-               'Y'   :     [True,'y()','y()','y()','',100,-8.0,+8.0,True,True],\
-               'BETA' :    [True,'beta()','beta()','beta()','',100,0.,1.,True,True],\
-               'GAMMA':    [True,'gamma()','gamma()','gamma()','',100,1.,1000.,True,True],\
-               'N'    :    [True,'N()','N()','N()','',20,0.,20.,True,True],\
-               'ISOL' :    [True,'','','isolated()','',2,0,1,True,False],\
-               'HE_EE':    [True,'','','HEoverEE()','',100,0,100,True,False],\
-               'NTRACKS':  [True,'','','ntracks()','',100,0,100,True,False]  }
-
-    class __metaclass__(type):
+class metaclass(type):
         def __getattr__(self, name):
             if name in list(self.values.keys()):
                 return list(self.values.keys()).index(name)
@@ -107,7 +75,9 @@ class ObservableType(object):
             name = list(self.values.keys())[index]
             return self.values[name][9]
 
-        def get_list(self,level=MA5RunningType.PARTON):
+        def get_list(self,level=None):
+            if level == None:
+                level = MA5RunningType.PARTON
             output = []
             for item in self.values.keys():
                 x = ObservableType.convert2job_string(list(self.values.keys()).index(item),level)
@@ -125,7 +95,9 @@ class ObservableType(object):
                     output.append('r'+item)
             return output
 
-        def get_cutlist1(self,level=MA5RunningType.PARTON):
+        def get_cutlist1(self,level=None):
+            if level is None:
+                level = MA5RunningType.PARTON
             output = []
             for item in self.values.keys():
                 if item=="N":
@@ -141,7 +113,9 @@ class ObservableType(object):
                 output.append(item)
             return output
 
-        def get_cutlist2(self,level=MA5RunningType.PARTON):
+        def get_cutlist2(self,level=None):
+            if level is None:
+                level = MA5RunningType.PARTON
             output = []
             for item in self.values.keys():
                 x = ObservableType.convert2job_string(list(self.values.keys()).index(item),level)
@@ -169,4 +143,40 @@ class ObservableType(object):
 
 
 
+
+
+
+@six.add_metaclass(metaclass)
+class ObservableType(object):
+
+    # name : accept_particles 
+    values = { 'UNKNOWN' : [False,'','','','',0,0,0,False,False],\
+               'SQRTS' :   [False,'PHYSICS->SqrtS(event.mc())','PHYSICS->SqrtS(event.mc())','','GeV',100,0.,1000., True, False],\
+               'TET' :     [False,'PHYSICS->Transverse->EventTET(event.mc())','PHYSICS->Transverse->EventTET(event.mc())','PHYSICS->Transverse->EventTET(event.rec())','GeV',100,0.,1000., True,False],\
+               'MET' :     [False,'PHYSICS->Transverse->EventMET(event.mc())','PHYSICS->Transverse->EventMET(event.mc())','PHYSICS->Transverse->EventMET(event.rec())','GeV',100,0.,1000., True,False],\
+               'THT' :     [False,'PHYSICS->Transverse->EventTHT(event.mc())','PHYSICS->Transverse->EventTHT(event.mc())','PHYSICS->Transverse->EventTHT(event.rec())','GeV',100,0.,1000., True,False],\
+               'MHT' :     [False,'PHYSICS->Transverse->EventMHT(event.mc())','PHYSICS->Transverse->EventMHT(event.mc())','PHYSICS->Transverse->EventMHT(event.rec())','GeV',100,0.,1000.,True,False],\
+               'WEIGHTS' : [False,'PHYSICS->weights(event.mc())','PHYSICS->weights(event.mc())','','',100,0.,1., True,False],\
+               'NPID':     [False,'NPID','NPID','NPID','',100,0.,100.,False,False],\
+               'NAPID':    [False,'NAPID','NAPID','NAPID','',100,0.,100.,False,False],\
+               'E'   :     [True,'e()','e()','e()','GeV',100,0.,1000.,True,True],\
+               'M'   :     [True,'m()','m()','m()','GeV/c^{2}',100,0.,1000.,True,True],\
+               'P'   :     [True,'p()','p()','p()','GeV/c',100,0.,1000.,True,True],\
+               'ET'  :     [True,'et()','et()','et()','GeV',100,0.,1000.,True,True],\
+               'MT'  :     [True,'mt()','mt()','mt()','GeV/c^{2}',100,0.,1000.,True,True],\
+               'PT'  :     [True,'pt()','pt()','pt()','GeV/c',100,0.,1000.,True,True],\
+               'PX'  :     [True,'px()','px()','px()','GeV/c',100,-1000.,1000.,True,True],\
+               'PY'  :     [True,'py()','py()','py()','GeV/c',100,-1000.,1000.,True,True],\
+               'PZ'  :     [True,'pz()','pz()','pz()','GeV/c',100,-1000.,1000.,True,True],\
+               'R'   :     [True,'r()','r()','r()','',100,0.,1000.,True,True],\
+               'THETA' :   [True,'theta()','theta()','theta()','',100,0.,2*math.pi+0.01,True,True],\
+               'ETA' :     [True,'eta()','eta()','eta()','',100,-8.0,+8.0,True,True],\
+               'PHI' :     [True,'phi()','phi()','phi()','',100,0.,2*math.pi+0.01,True,True],\
+               'Y'   :     [True,'y()','y()','y()','',100,-8.0,+8.0,True,True],\
+               'BETA' :    [True,'beta()','beta()','beta()','',100,0.,1.,True,True],\
+               'GAMMA':    [True,'gamma()','gamma()','gamma()','',100,1.,1000.,True,True],\
+               'N'    :    [True,'N()','N()','N()','',20,0.,20.,True,True],\
+               'ISOL' :    [True,'','','isolated()','',2,0,1,True,False],\
+               'HE_EE':    [True,'','','HEoverEE()','',100,0,100,True,False],\
+               'NTRACKS':  [True,'','','ntracks()','',100,0,100,True,False]  }
 

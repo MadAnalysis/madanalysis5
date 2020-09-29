@@ -28,7 +28,6 @@ from shell_command                            import ShellCommand
 import logging
 import shutil
 import os
-import commands
 
 class HistoRootProducer():
 

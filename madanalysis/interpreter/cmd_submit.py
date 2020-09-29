@@ -41,7 +41,6 @@ from string_tools  import StringTools
 import logging
 import glob
 import os
-import commands
 import shutil
 from six.moves import range
 
