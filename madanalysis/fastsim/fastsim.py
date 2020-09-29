@@ -22,11 +22,13 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 from madanalysis.fastsim.ast            import AST
 from madanalysis.fastsim.tagger         import Tagger
 from madanalysis.fastsim.smearer        import Smearer
 from madanalysis.fastsim.recoefficiency import RecoEfficiency
+from six.moves import range
 
 
 class SuperFastSim:

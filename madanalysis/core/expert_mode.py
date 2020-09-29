@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.IOinterface.folder_writer import FolderWriter
 from madanalysis.IOinterface.job_writer import JobWriter
 import logging
@@ -30,6 +31,7 @@ import os
 import commands
 import sys
 import shutil
+from six.moves import input
 
 class ExpertMode:
 
@@ -46,7 +48,7 @@ class ExpertMode:
           logging.getLogger('MA5').debug("Debug mode: no directory name is specified.")
           logging.getLogger('MA5').info("\nWelcome to the expert mode of MadAnalysis")
           logging.getLogger('MA5').info("Please enter a folder name for creating an empty SampleAnalyzer job")
-          answer=raw_input("Answer: ")
+          answer=input("Answer: ")
           answer=answer.replace(' ','_')
           name  =answer.replace('-','_')
         else:
@@ -120,7 +122,7 @@ class ExpertMode:
         # Writing an empty analysis
         if name=="":
           logging.getLogger('MA5').info("Please enter a name for your analysis")
-          title=raw_input("Answer: ")
+          title=input("Answer: ")
           if title=="":
               title="user"
           title=title.replace(' ', '_');

@@ -22,11 +22,14 @@
 ################################################################################
 
 
+from __future__ import absolute_import
+from __future__ import print_function
 import logging
 import shutil
 import os
-import commands
+#import commands
 import copy
+from six.moves import range
 
 
 class PngHeader():
@@ -71,13 +74,13 @@ class PngHeader():
        
 
     def Print(self):
-        print 'PNG file with width='+str(self.width)+\
+        print('PNG file with width='+str(self.width)+\
               ' height='+str(self.height)+\
               ' bit_depth='+str(self.bit_depth)+\
               ' color_type='+str(self.color_type)+\
               ' compression_type='+str(self.compression_type)+\
               ' filter_type='+str(self.filter_type)+\
-              ' interlace_type='+str(self.interlace_type)
+              ' interlace_type='+str(self.interlace_type))
 
         
 

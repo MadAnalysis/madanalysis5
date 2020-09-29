@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.selection.instance_name          import InstanceName
 from madanalysis.enumeration.combination_type     import CombinationType
 from madanalysis.enumeration.observable_type      import ObservableType
@@ -29,6 +30,8 @@ from madanalysis.enumeration.ma5_running_type     import MA5RunningType
 from madanalysis.enumeration.stacking_method_type import StackingMethodType
 from madanalysis.enumeration.argument_type        import ArgumentType
 import logging
+import six
+from six.moves import range
 
 class Histogram():
 
@@ -83,10 +86,10 @@ class Histogram():
         self.regions    = regions
 
     def user_GetParameters(self):
-        return Histogram.userVariables.keys()
+        return list(Histogram.userVariables.keys())
 
     def user_GetShortcuts(self):
-        return Histogram.userShortcuts.keys()
+        return list(Histogram.userShortcuts.keys())
 
     def user_GetValues(self,variable):
         try:
@@ -95,7 +98,7 @@ class Histogram():
             return []
 
     def user_SetShortcuts(self,name):
-        if name in Histogram.userShortcuts.keys():
+        if name in list(Histogram.userShortcuts.keys()):
             return self.user_SetParameter(Histogram.userShortcuts[name][0],Histogram.userShortcuts[name][1])
         else:
             logging.getLogger('MA5').error("option '" + name + "' is unknown.")
@@ -354,12 +357,12 @@ class Histogram():
     dicoargs = { '[':'_{',']':'}' } 
 
     def ReplaceAll(self,word,dico):
-        for i,j in dico.iteritems():
+        for i,j in six.iteritems(dico):
             word = word.replace(i,j)
         return word    
 
     def ReplaceAll_Matplotlib(self,word,dico):
-        for i,j in dico.iteritems():
+        for i,j in six.iteritems(dico):
             word = word.replace(i,j)
         return word    
 

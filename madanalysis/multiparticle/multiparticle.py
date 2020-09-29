@@ -22,7 +22,9 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
+from six.moves import range
 class MultiParticle:
 
     def __init__(self,name,ids):

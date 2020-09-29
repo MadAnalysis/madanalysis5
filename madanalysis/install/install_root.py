@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.install.install_service import InstallService
 from madanalysis.IOinterface.folder_writer import FolderWriter
 from shell_command import ShellCommand

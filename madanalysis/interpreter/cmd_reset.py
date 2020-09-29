@@ -22,12 +22,14 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.IOinterface.particle_reader      import ParticleReader
 from madanalysis.IOinterface.multiparticle_reader import MultiparticleReader
 from madanalysis.enumeration.ma5_running_type     import MA5RunningType
 from madanalysis.interpreter.cmd_define           import CmdDefine
 from madanalysis.interpreter.cmd_base             import CmdBase
 import logging
+from six.moves import input
 
 class CmdReset(CmdBase):
     """Command RESET"""
@@ -52,7 +54,7 @@ class CmdReset(CmdBase):
             allowed_answers=['n','no','y','yes']
             answer=""
             while answer not in  allowed_answers:
-               answer=raw_input("Answer: ")
+               answer=input("Answer: ")
                answer=answer.lower()
             if answer=="no" or answer=="n":
                 return False

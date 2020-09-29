@@ -22,9 +22,11 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.selection.instance_name import InstanceName
 from operator import itemgetter, attrgetter
 import logging
+from six.moves import range
 
 class ParticleCombination():
 

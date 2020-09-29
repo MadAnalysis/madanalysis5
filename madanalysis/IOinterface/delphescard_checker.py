@@ -22,8 +22,10 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 import os
+from six.moves import input
 
 class DelphesModule():
     
@@ -69,7 +71,7 @@ class DelphesCardChecker():
         allowed_answers=['n','no','y','yes']
         answer=""
         while answer not in  allowed_answers:
-            answer=raw_input("Answer: ")
+            answer=input("Answer: ")
             answer=answer.lower()
         if answer=="no" or answer=="n":
             return True
@@ -91,7 +93,7 @@ class DelphesCardChecker():
             allowed_answers=['n','no','y','yes']
             answer=""
             while answer not in  allowed_answers:
-                answer=raw_input("Answer: ")
+                answer=input("Answer: ")
                 answer=answer.lower()
             if answer=="no" or answer=="n":
                 return False # no, give up

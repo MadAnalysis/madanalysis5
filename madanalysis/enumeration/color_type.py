@@ -20,8 +20,35 @@
 #  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
 #  
 ################################################################################
+import six
+
+class metaclass(type):
+
+        def __getattr__(self, name):
+            if (name)=='GRAY':
+                return list(self.values.keys()).index('GREY')
+            else:
+                return list(self.values.keys()).index(name)
+
+        def convert2string(self,color):
+            name = list(self.values.keys())[color]
+            return self.values[name][0]
+  
+        def convert2hexa(self,color):
+            name = list(self.values.keys())[color]
+            return self.values[name][1]
+
+        def convert2rootcode(self,color):
+            name = list(self.values.keys())[color]
+            return self.values[name][2]
+
+        def convert2root(self,color,shade=0):
+            name = list(self.values.keys())[color]
+            return self.values[name][3][shade+4]
 
 
+
+@six.add_metaclass(metaclass)
 class ColorType(object):
     values = { 'AUTO'   : ['auto',     '',         0, \
                            [0,0,0,0,0,0,0,0,0] ],\
@@ -48,26 +75,3 @@ class ColorType(object):
                'WHITE'  : ['white',    '#FFFFFF',   10, \
                            [10,10,10,10,10,19,18,17,16] ] }
 
-    class __metaclass__(type):
-
-        def __getattr__(self, name):
-            if (name)=='GRAY':
-                return self.values.keys().index('GREY')
-            else:
-                return self.values.keys().index(name)
-
-        def convert2string(self,color):
-            name = self.values.keys()[color]
-            return self.values[name][0]
-  
-        def convert2hexa(self,color):
-            name = self.values.keys()[color]
-            return self.values[name][1]
-
-        def convert2rootcode(self,color):
-            name = self.values.keys()[color]
-            return self.values[name][2]
-
-        def convert2root(self,color,shade=0):
-            name = self.values.keys()[color]
-            return self.values[name][3][shade+4]

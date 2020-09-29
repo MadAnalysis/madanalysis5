@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.selection.histogram          import Histogram
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.enumeration.observable_type  import ObservableType
@@ -30,6 +31,7 @@ from madanalysis.enumeration.ma5_running_type import MA5RunningType
 from madanalysis.enumeration.combination_type import CombinationType
 from madanalysis.interpreter.cmd_cut          import CmdCut
 import logging
+from six.moves import range
 
 
 def WritePlot(file,main,iabs,ihisto):

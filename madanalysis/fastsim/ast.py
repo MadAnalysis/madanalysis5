@@ -22,10 +22,13 @@
 ################################################################################
 
 
+from __future__ import absolute_import
+from __future__ import print_function
 import logging
 import re
 from madanalysis.fastsim.ast_leaf import Leaf
 import madanalysis.observable.observable_list as obs_list
+from six.moves import range
 
 
 class AST:
@@ -144,7 +147,7 @@ class AST:
                         reset=True
                         break
                 else:
-                   print frml[i]
+                   print(frml[i])
                    aieaieaaie
             if reset:
                 continue
@@ -171,7 +174,7 @@ class AST:
                             replacement_done = True
                             break
                     else:
-                       print(frml, i, '->', frml[i])
+                       print((frml, i, '->', frml[i]))
                        aieaieaaie2
                 if replacement_done:
                     break
@@ -208,7 +211,7 @@ class AST:
                 new_formula.append(new_leaf)
                 self.leaves.append(new_leaf)
             # unary operators
-            elif elem.lower() in self.binary1_ops.keys():
+            elif elem.lower() in list(self.binary1_ops.keys()):
                 new_leaf = Leaf(self.size(), 'bin1_op', elem.lower(), [], [])
                 new_formula.append(new_leaf)
                 self.leaves.append(new_leaf)

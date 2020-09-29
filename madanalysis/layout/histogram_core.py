@@ -22,8 +22,10 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 from math import sqrt
+from six.moves import range
 
 
 class HistogramCore:

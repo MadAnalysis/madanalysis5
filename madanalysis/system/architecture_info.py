@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 class ArchitectureInfo:
 
@@ -111,7 +112,7 @@ class ArchitectureInfo:
         logging.getLogger('MA5').debug(str(self.__dict__))
         logging.getLogger('MA5').debug("The other   one (number of items="+str(len(other.__dict__))+"):")
         logging.getLogger('MA5').debug(str(other.__dict__))
-        items_ok = self.__dict__.keys() == other.__dict__.keys()
+        items_ok = list(self.__dict__.keys()) == list(other.__dict__.keys())
         if not items_ok:
             diff = list(set(self.__dict__.keys()) - set(other.__dict__.keys()))
             logging.getLogger('MA5').debug("The comparison of categories -> differences detected: "+str(diff))
@@ -135,7 +136,7 @@ class ArchitectureInfo:
 
         # Open the file
         try:
-            file = open(filename,"w")
+            file = open(filename,"wb")
         except:
             logging.getLogger('MA5').error("impossible to write the configuration file '" + \
                           filename + "'")
@@ -160,7 +161,7 @@ class ArchitectureInfo:
 
         # Open the file
         try:
-            file = open(filename,"r")
+            file = open(filename,"rb")
         except:
             logging.getLogger('MA5').error("impossible to read the configuration file '" + \
                           filename + "'")
@@ -171,7 +172,9 @@ class ArchitectureInfo:
         try:
             newone = pickle.load(file)
             test=True
-        except:
+        except Exception as error:
+            if __debug__:
+                print('PICKLE ERROR:', error)
             logging.getLogger('MA5').error("error occured during reading data from "+filename)
             test=False
 

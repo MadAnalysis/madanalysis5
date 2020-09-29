@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.interpreter.cmd_base                           import CmdBase
 from madanalysis.IOinterface.job_writer                         import JobWriter
 from madanalysis.IOinterface.layout_writer                      import LayoutWriter
@@ -40,8 +41,8 @@ from string_tools  import StringTools
 import logging
 import glob
 import os
-import commands
 import shutil
+from six.moves import range
 
 class CmdSubmit(CmdBase):
     """Command SUBMIT"""

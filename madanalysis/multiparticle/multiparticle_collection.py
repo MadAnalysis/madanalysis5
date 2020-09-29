@@ -22,9 +22,13 @@
 ################################################################################
 
 
+from __future__ import absolute_import
+from __future__ import print_function
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
 from madanalysis.multiparticle.multiparticle  import MultiParticle
 import logging
+import six
+from six.moves import input
 
 class MultiParticleCollection:
 
@@ -55,7 +59,7 @@ class MultiParticleCollection:
 
     def Find(self,name):
         name.lower()
-        if name in self.table.keys():
+        if name in list(self.table.keys()):
             return True
         return False
 
@@ -69,7 +73,7 @@ class MultiParticleCollection:
             allowed_answers=['n','no','y','yes']
             answer=""
             while answer not in  allowed_answers:
-                answer=raw_input("Answer: ")
+                answer=input("Answer: ")
                 answer=answer.lower()
             if answer=="no" or answer=="n":
                 return
@@ -145,7 +149,7 @@ class MultiParticleCollection:
             return
 
             # Looping over the branches of the tree
-        for key, value in multiparticles.GetBranches().iteritems():
+        for key, value in six.iteritems(multiparticles.GetBranches()):
 
             # Keeping only 'multiparticle' branches
             if key[0]!='multiparticle':
@@ -163,7 +167,7 @@ class MultiParticleCollection:
                 try:
                     a = int(item)
                 except:
-                    print "ERROR: impossible to convert '"+str(item)+"' to integer value"
+                    print("ERROR: impossible to convert '"+str(item)+"' to integer value")
                 tmp.append(a)
             self.Add(name,tmp,forced=False)
                 

@@ -22,9 +22,11 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import os
 import shutil
 import logging
+from six.moves import input
 
 class FolderWriter:
 
@@ -43,7 +45,7 @@ class FolderWriter:
             allowed_answers=['n','no','y','yes']
             answer=""
             while answer not in  allowed_answers:
-               answer=raw_input("Answer: ")
+               answer=input("Answer: ")
                answer=answer.lower()
             if answer=="no" or answer=="n":
                 return False, True
@@ -78,7 +80,7 @@ class FolderWriter:
                 allowed_answers=['n','no','y','yes']
                 answer=""
                 while answer not in  allowed_answers:
-                    answer=raw_input("Answer: ")
+                    answer=input("Answer: ")
                     answer=answer.lower()
                 if answer=="no" or answer=="n":
                     return False

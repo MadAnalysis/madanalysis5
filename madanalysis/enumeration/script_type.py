@@ -20,29 +20,32 @@
 #  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
 #  
 ################################################################################
+import six
+
+class metaclass(type):
+        def __getattr__(self, name):
+                return list(self.values.keys()).index(name)
+
+        def latexscript(self,script):
+                name = list(self.values.keys())[script]
+                return self.values[name][0]
+
+        def latexscriptclose(self,script):
+                name = list(self.values.keys())[script]
+                return self.values[name][1]
+
+        def htmlscript(self,script):
+                name = list(self.values.keys())[script]
+                return self.values[name][2]
+        
+        def htmlscriptclose(self,script):
+                name = list(self.values.keys())[script]
+                return self.values[name][3]
 
 
+@six.add_metaclass(metaclass)
 class ScriptType(object):
         values = {'none' : ['','','',''],\
                           'SUB'   : ['$_{','}$','<sub>','</sub>'],\
                           'SUP'   : ['$^{','}$','<sup>','</sup>']}
 
-        class __metaclass__(type):
-                def __getattr__(self, name):
-                        return self.values.keys().index(name)
-
-                def latexscript(self,script):
-                        name = self.values.keys()[script]
-                        return self.values[name][0]
-
-                def latexscriptclose(self,script):
-                        name = self.values.keys()[script]
-                        return self.values[name][1]
-
-                def htmlscript(self,script):
-                        name = self.values.keys()[script]
-                        return self.values[name][2]
-
-                def htmlscriptclose(self,script):
-                        name = self.values.keys()[script]
-                        return self.values[name][3]

@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import madanalysis.observable.observable_list as observable_list
 class JobSmearerRecoMain:
 

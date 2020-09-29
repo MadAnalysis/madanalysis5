@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.multiparticle.multiparticle_collection import MultiParticleCollection
 from madanalysis.dataset.dataset_collection             import DatasetCollection
 from madanalysis.selection.selection                    import Selection
@@ -50,6 +51,7 @@ import logging
 import os
 import sys
 import platform
+from six.moves import range
 
 class Main():
 
@@ -67,10 +69,15 @@ class Main():
     date = ""
 
     def __init__(self):
+        print("init", os.getcwd())
         self.currentdir     = os.getcwd()
+        print("PASS IN INIT0-A")
         self.firstdir       = os.getcwd()
+        print("PASS IN INIT0-B")
         self.archi_info     = ArchitectureInfo()
+        print("PASS IN INIT0-C")
         self.session_info   = SessionInfo()
+        print("PASS IN INIT0")
         self.mode           = MA5RunningType.PARTON
         self.forced         = False
         self.multiparticles = MultiParticleCollection()
@@ -78,6 +85,7 @@ class Main():
         self.regions        = RegionCollection()
         self.selection      = Selection()
         self.script         = False
+        print("PASS IN INIT1")
         self.observables    = ObservableManager(self.mode)
         self.expertmode     = False
         self.repeatSession  = False
@@ -85,6 +93,7 @@ class Main():
         self.recast         = "off"
         self.ResetParameters()
         self.madgraph       = MadGraphInterface()
+        print("PASS IN INIT?")
         self.logger         = logging.getLogger('MA5')
         self.redirectSAlogger = False
 
@@ -228,6 +237,7 @@ class Main():
 
 
     def user_DisplayParameter(self,parameter):
+        print(type(self))
         if  parameter=="currentdir":
             self.logger.info(" currentdir = "+self.get_currentdir())
         elif parameter=="stacking_method":
@@ -281,7 +291,7 @@ class Main():
                 return []
 
     def user_GetParameters(self):
-        return Main.userVariables.keys()
+        return list(Main.userVariables.keys())
 
     def user_SetParameter(self,parameter,value):
         # currentdir
@@ -404,7 +414,10 @@ class Main():
             os.chdir(theDir)
         except:
             self.logger.error("Impossible to access the directory : "+theDir)
-        self.user_DisplayParameter("currentdir")
+        try:
+            self.user_DisplayParameter("currentdir")
+        except:
+            pass
 
     currentdir = property(get_currentdir, set_currentdir)
 

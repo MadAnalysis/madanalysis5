@@ -20,27 +20,31 @@
 #  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
 #  
 ################################################################################
+import six
 
 
+class metaclass(type):
+
+                def __getattr__(self, name):
+                        return list(self.values.keys()).index(name)
+
+                def convert2code(self,color):
+                        name = list(self.values.keys())[color]
+                        return self.values[name][0]
+
+                def convert2string(self,color):
+                        name = list(self.values.keys())[color]
+                        return self.values[name][1]
+
+                def convert2matplotlib(self,style):
+                        name = list(self.values.keys())[style]
+                        return self.values[name][2]
+
+
+@six.add_metaclass(metaclass)
 class LineStyleType(object):
         values = { 'SOLID'      : [1,'solid','"solid"'],\
                    'DASHED'     : [2,'dashed','"dashed"'],\
                    'DOTTED'     : [3,'dotted','"dotted"'],\
                    'DASHDOTTED' : [4,'dash-dotted','"dashdot"'] }
 
-        class __metaclass__(type):
-
-                def __getattr__(self, name):
-                        return self.values.keys().index(name)
-
-                def convert2code(self,color):
-                        name = self.values.keys()[color]
-                        return self.values[name][0]
-
-                def convert2string(self,color):
-                        name = self.values.keys()[color]
-                        return self.values[name][1]
-
-                def convert2matplotlib(self,style):
-                        name = self.values.keys()[style]
-                        return self.values[name][2]

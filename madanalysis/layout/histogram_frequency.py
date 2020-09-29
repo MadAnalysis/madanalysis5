@@ -22,8 +22,10 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.layout.histogram_frequency_core import HistogramFrequencyCore
 import logging
+from six.moves import range
 
 class HistogramFrequency:
 

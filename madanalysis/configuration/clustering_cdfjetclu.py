@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 class ClusteringCDFJetClu():
     
@@ -86,7 +87,7 @@ class ClusteringCDFJetClu():
 
     
     def user_GetParameters(self):
-        return ClusteringCDFJetClu.userVariables.keys()
+        return list(ClusteringCDFJetClu.userVariables.keys())
 
 
     def user_SetParameter(self,parameter,value):

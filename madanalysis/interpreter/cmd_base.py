@@ -22,9 +22,11 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 import glob
 import os
+from six.moves import range
 
 class CmdBase():
     """Command CMDBase"""

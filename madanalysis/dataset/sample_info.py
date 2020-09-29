@@ -26,6 +26,6 @@ class SampleInfo():
     def __init__(self):
         self.xsection = 0.
         self.xerror   = 0.
-        self.nevents  = 0L
+        self.nevents  = 0
         self.sumw_positive = 0.
         self.sumw_negative = 0.

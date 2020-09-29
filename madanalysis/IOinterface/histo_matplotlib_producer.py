@@ -22,13 +22,13 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from string_tools                             import StringTools
 from shell_command                            import ShellCommand
 import logging
 import shutil
 import os
 import sys
-import commands
 
 class HistoMatplotlibProducer():
 

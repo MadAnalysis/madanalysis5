@@ -22,8 +22,10 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.interpreter.cmd_base import CmdBase
 import logging
+from six.moves import range
 
 class CmdSwap(CmdBase):
     """Command SWAP"""
