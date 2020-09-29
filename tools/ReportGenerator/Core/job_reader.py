@@ -33,7 +33,6 @@ from madanalysis.layout.histogram_frequency   import HistogramFrequency
 import logging
 import shutil
 import os
-import commands
 import copy
 
 

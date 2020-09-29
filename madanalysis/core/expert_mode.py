@@ -28,7 +28,6 @@ from madanalysis.IOinterface.job_writer import JobWriter
 import logging
 import glob
 import os
-import commands
 import sys
 import shutil
 from six.moves import input

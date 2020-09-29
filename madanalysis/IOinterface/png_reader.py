@@ -27,7 +27,6 @@ from __future__ import print_function
 import logging
 import shutil
 import os
-#import commands
 import copy
 from six.moves import range
 
