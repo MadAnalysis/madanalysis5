@@ -141,6 +141,8 @@ class CmdSelectionBase():
             # float value
             elif obsRef.args[iarg]==ArgumentType.FLOAT:
                 result=self.extract_float(arguments[iarg])
+            else:
+                result=None
 
             # checking result
             if result==None:

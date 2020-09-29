@@ -77,7 +77,7 @@ class CmdSubmit(CmdBase):
             self.logger.warning("Command 'resubmit' takes no argument. Any argument will be skipped.")
 
         # Checking presence of a valid job
-        if self.main.lastjob_name is "":
+        if self.main.lastjob_name == "":
             self.logger.error("an analysis must be defined and ran before using the resubmit command.") 
             return False
 

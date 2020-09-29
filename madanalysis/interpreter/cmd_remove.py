@@ -44,7 +44,7 @@ class CmdRemove(CmdBase.CmdBase):
        # Multiparticle removal
         if self.main.multiparticles.Find(name):
             theList = self.main.selection.GetItemsUsingMultiparticle(name) 
-            if len(theList) is 0:
+            if len(theList) == 0:
                 self.main.multiparticles.Remove(name,self.main.mode)
             else:
                 logging.getLogger('MA5').error("The Particle/Multiparticle '" + name + \

@@ -69,15 +69,10 @@ class Main():
     date = ""
 
     def __init__(self):
-        print("init", os.getcwd())
         self.currentdir     = os.getcwd()
-        print("PASS IN INIT0-A")
         self.firstdir       = os.getcwd()
-        print("PASS IN INIT0-B")
         self.archi_info     = ArchitectureInfo()
-        print("PASS IN INIT0-C")
         self.session_info   = SessionInfo()
-        print("PASS IN INIT0")
         self.mode           = MA5RunningType.PARTON
         self.forced         = False
         self.multiparticles = MultiParticleCollection()
@@ -85,7 +80,6 @@ class Main():
         self.regions        = RegionCollection()
         self.selection      = Selection()
         self.script         = False
-        print("PASS IN INIT1")
         self.observables    = ObservableManager(self.mode)
         self.expertmode     = False
         self.repeatSession  = False
@@ -93,7 +87,6 @@ class Main():
         self.recast         = "off"
         self.ResetParameters()
         self.madgraph       = MadGraphInterface()
-        print("PASS IN INIT?")
         self.logger         = logging.getLogger('MA5')
         self.redirectSAlogger = False
 

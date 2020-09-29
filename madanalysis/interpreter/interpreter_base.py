@@ -297,7 +297,7 @@ class InterpreterBase(cmd.Cmd):
     def do_shell(self, line):
         "run a shell command"
 
-        if line.strip() is '':
+        if line.strip() == '':
             self.help_shell()
         else:
             self.logger.info("   Running the shell command: " + line + ".")
