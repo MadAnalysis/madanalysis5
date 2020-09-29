@@ -33,7 +33,7 @@ import math
 
 SQRTS = ObservableBase( name          = 'SQRTS',
                         args          = [],
-                        combination   = CombinationType.values['DEFAULT'],
+                        combination   = CombinationType.DEFAULT,
                         plot_auto     = False,
                         plot_nbins    = 100,
                         plot_xmin     = 0.,
@@ -51,7 +51,7 @@ SQRTS = ObservableBase( name          = 'SQRTS',
 
 SCALE = ObservableBase( name          = 'SCALE',
                         args          = [],
-                        combination   = CombinationType.values['DEFAULT'],
+                        combination   = CombinationType.DEFAULT,
                         plot_auto     = False,
                         plot_nbins    = 100,
                         plot_xmin     = 0.,
@@ -69,7 +69,7 @@ SCALE = ObservableBase( name          = 'SCALE',
 
 ALPHA_QCD = ObservableBase( name          = 'ALPHA_QCD',
                             args          = [],
-                            combination   = CombinationType.values['DEFAULT'],
+                            combination   = CombinationType.DEFAULT,
                             plot_auto     = False,
                             plot_nbins    = 100,
                             plot_xmin     = 0.,
@@ -87,7 +87,7 @@ ALPHA_QCD = ObservableBase( name          = 'ALPHA_QCD',
 
 ALPHA_QED = ObservableBase( name          = 'ALPHA_QED',
                             args          = [],
-                            combination   = CombinationType.values['DEFAULT'],
+                            combination   = CombinationType.DEFAULT,
                             plot_auto     = False,
                             plot_nbins    = 100,
                             plot_xmin     = 0.,
@@ -105,7 +105,7 @@ ALPHA_QED = ObservableBase( name          = 'ALPHA_QED',
 
 ALPHAT = ObservableBase( name          = 'ALPHAT',
                          args          = [],
-                         combination   = CombinationType.values['DEFAULT'],
+                         combination   = CombinationType.DEFAULT,
                          plot_auto     = False,
                          plot_nbins    = 100,
                          plot_xmin     = 0.,
@@ -124,7 +124,7 @@ ALPHAT = ObservableBase( name          = 'ALPHAT',
 
 TET = ObservableBase( name          = 'TET',
                       args          = [],
-                      combination   = CombinationType.values['DEFAULT'],
+                      combination   = CombinationType.DEFAULT,
                       plot_auto     = False,
                       plot_nbins    = 100,
                       plot_xmin     = 0.,
@@ -142,7 +142,7 @@ TET = ObservableBase( name          = 'TET',
 
 MET = ObservableBase( name          = 'MET',
                       args          = [],
-                      combination   = CombinationType.values['DEFAULT'],
+                      combination   = CombinationType.DEFAULT,
                       plot_auto     = False,
                       plot_nbins    = 100,
                       plot_xmin     = 0.,
@@ -160,7 +160,7 @@ MET = ObservableBase( name          = 'MET',
 
 THT = ObservableBase( name          = 'THT',
                       args          = [],
-                      combination   = CombinationType.values['DEFAULT'],
+                      combination   = CombinationType.DEFAULT,
                       plot_auto     = False,
                       plot_nbins    = 100,
                       plot_xmin     = 0.,
@@ -178,7 +178,7 @@ THT = ObservableBase( name          = 'THT',
 
 MEFF = ObservableBase( name          = 'MEFF',
                       args          = [],
-                      combination   = CombinationType.values['DEFAULT'],
+                      combination   = CombinationType.DEFAULT,
                       plot_auto     = False,
                       plot_nbins    = 100,
                       plot_xmin     = 0.,
@@ -196,7 +196,7 @@ MEFF = ObservableBase( name          = 'MEFF',
 
 MHT = ObservableBase( name          = 'MHT',
                       args          = [],
-                      combination   = CombinationType.values['DEFAULT'],
+                      combination   = CombinationType.DEFAULT,
                       plot_auto     = False,
                       plot_nbins    = 100,
                       plot_xmin     = 0.,
@@ -214,7 +214,7 @@ MHT = ObservableBase( name          = 'MHT',
 
 WEIGHTS = ObservableBase( name      = 'WEIGHTS',
                       args          = [],
-                      combination   = CombinationType.values['DEFAULT'],
+                      combination   = CombinationType.DEFAULT,
                       plot_auto     = False,
                       plot_nbins    = 100,
                       plot_xmin     = -1.,
@@ -233,7 +233,7 @@ WEIGHTS = ObservableBase( name      = 'WEIGHTS',
 
 NPID = ObservableBase( name          = 'NPID',
                        args          = [],
-                       combination   = CombinationType.values['DEFAULT'],
+                       combination   = CombinationType.DEFAULT,
                        plot_auto     = True,
                        plot_nbins    = 100,
                        plot_xmin     = 0.,
@@ -251,7 +251,7 @@ NPID = ObservableBase( name          = 'NPID',
 
 NAPID = ObservableBase( name          = 'NAPID',
                         args          = [],
-                        combination   = CombinationType.values['DEFAULT'],
+                        combination   = CombinationType.DEFAULT,
                         plot_auto     = True,
                         plot_nbins    = 100,
                         plot_xmin     = 0.,
@@ -268,8 +268,8 @@ NAPID = ObservableBase( name          = 'NAPID',
                       )
 
 E = ObservableBase( name          = 'E',
-                    args          = [ArgumentType.values['COMBINATION']],
-                    combination   = CombinationType.values['SUMVECTOR'],
+                    args          = [ArgumentType.COMBINATION],
+                    combination   = CombinationType.SUMVECTOR,
                     plot_auto     = False,
                     plot_nbins    = 100,
                     plot_xmin     = 0.,
@@ -286,14 +286,14 @@ E = ObservableBase( name          = 'E',
                   )
 
 vE  = E
-sE  = ObservableBase.Clone(E, name='sE', combination=CombinationType.values['SUMSCALAR'], tlatex='sE', latex='sE') 
-sdE = dsE = ObservableBase.Clone(E, name='sdE', combination=CombinationType.values['DIFFSCALAR'], tlatex='sdE', latex='sdE') 
-dE  = dvE = vdE = ObservableBase.Clone(E, name='dE', combination=CombinationType.values['DIFFVECTOR'], tlatex='dE', latex='dE')
-rE  = ObservableBase.Clone(E, name='rE', combination=CombinationType.values['RATIO'], tlatex='rE', latex='rE')
+sE  = ObservableBase.Clone(E, name='sE', combination=CombinationType.SUMSCALAR, tlatex='sE', latex='sE') 
+sdE = dsE = ObservableBase.Clone(E, name='sdE', combination=CombinationType.DIFFSCALAR, tlatex='sdE', latex='sdE') 
+dE  = dvE = vdE = ObservableBase.Clone(E, name='dE', combination=CombinationType.DIFFVECTOR, tlatex='dE', latex='dE')
+rE  = ObservableBase.Clone(E, name='rE', combination=CombinationType.RATIO, tlatex='rE', latex='rE')
 
 M = ObservableBase( name          = 'M',
-                    args          = [ArgumentType.values['COMBINATION']],
-                    combination   = CombinationType.values['SUMVECTOR'],
+                    args          = [ArgumentType.COMBINATION],
+                    combination   = CombinationType.SUMVECTOR,
                     plot_auto     = False,
                     plot_nbins    = 100,
                     plot_xmin     = 0.,
@@ -310,15 +310,15 @@ M = ObservableBase( name          = 'M',
                   )
 
 vM  = M
-sM  = ObservableBase.Clone(M, name='sM', combination=CombinationType.values['SUMSCALAR'], tlatex='sM', latex='sM') 
-sdM = dsM = ObservableBase.Clone(M, name='sdM', combination=CombinationType.values['DIFFSCALAR'], tlatex='sdM', latex='sdM') 
-dM  = dvM = vdM = ObservableBase.Clone(M, name='dM', combination=CombinationType.values['DIFFVECTOR'], tlatex='dM', latex='dM')
-rM  = ObservableBase.Clone(M, name='rM', combination=CombinationType.values['RATIO'], tlatex='rM', latex='rM')
+sM  = ObservableBase.Clone(M, name='sM', combination=CombinationType.SUMSCALAR, tlatex='sM', latex='sM') 
+sdM = dsM = ObservableBase.Clone(M, name='sdM', combination=CombinationType.DIFFSCALAR, tlatex='sdM', latex='sdM') 
+dM  = dvM = vdM = ObservableBase.Clone(M, name='dM', combination=CombinationType.DIFFVECTOR, tlatex='dM', latex='dM')
+rM  = ObservableBase.Clone(M, name='rM', combination=CombinationType.RATIO, tlatex='rM', latex='rM')
 
 
 P = ObservableBase( name          = 'P',
-                    args          = [ArgumentType.values['COMBINATION']],
-                    combination   = CombinationType.values['SUMVECTOR'],
+                    args          = [ArgumentType.COMBINATION],
+                    combination   = CombinationType.SUMVECTOR,
                     plot_auto     = False,
                     plot_nbins    = 100,
                     plot_xmin     = 0.,
@@ -335,14 +335,14 @@ P = ObservableBase( name          = 'P',
                   )
 
 vP  = P
-sP  = ObservableBase.Clone(P, name='sP', combination=CombinationType.values['SUMSCALAR'], tlatex='sp', latex='sp') 
-sdP = dsP = ObservableBase.Clone(P, name='sdP', combination=CombinationType.values['DIFFSCALAR'], tlatex='sdp', latex='sdp') 
-dP  = dvP = vdP = ObservableBase.Clone(P, name='dP', combination=CombinationType.values['DIFFVECTOR'], tlatex='dp', latex='dp')
-rP  = ObservableBase.Clone(P, name='rP', combination=CombinationType.values['RATIO'], tlatex='rp', latex='rp')
+sP  = ObservableBase.Clone(P, name='sP', combination=CombinationType.SUMSCALAR, tlatex='sp', latex='sp') 
+sdP = dsP = ObservableBase.Clone(P, name='sdP', combination=CombinationType.DIFFSCALAR, tlatex='sdp', latex='sdp') 
+dP  = dvP = vdP = ObservableBase.Clone(P, name='dP', combination=CombinationType.DIFFVECTOR, tlatex='dp', latex='dp')
+rP  = ObservableBase.Clone(P, name='rP', combination=CombinationType.RATIO, tlatex='rp', latex='rp')
 
 ET = ObservableBase( name          = 'ET',
-                     args          = [ArgumentType.values['COMBINATION']],
-                     combination   = CombinationType.values['SUMVECTOR'],
+                     args          = [ArgumentType.COMBINATION],
+                     combination   = CombinationType.SUMVECTOR,
                      plot_auto     = False,
                      plot_nbins    = 100,
                      plot_xmin     = 0.,
@@ -359,14 +359,14 @@ ET = ObservableBase( name          = 'ET',
                    )
  
 vET  = ET
-sET  = ObservableBase.Clone(ET, name='sET', combination=CombinationType.values['SUMSCALAR'], tlatex='sE_{T}', latex='$sE_T$') 
-sdET = dsET = ObservableBase.Clone(ET, name='sdET', combination=CombinationType.values['DIFFSCALAR'], tlatex='dsE_{T}', latex='$dsE_T$') 
-dET  = dvET = vdET = ObservableBase.Clone(ET, name='dET', combination=CombinationType.values['DIFFVECTOR'], tlatex='dE_{T}', latex='dE_T$')
-rET  = ObservableBase.Clone(ET, name='rET', combination=CombinationType.values['RATIO'], tlatex='rE_{T}', latex='$rE_T$')
+sET  = ObservableBase.Clone(ET, name='sET', combination=CombinationType.SUMSCALAR, tlatex='sE_{T}', latex='$sE_T$') 
+sdET = dsET = ObservableBase.Clone(ET, name='sdET', combination=CombinationType.DIFFSCALAR, tlatex='dsE_{T}', latex='$dsE_T$') 
+dET  = dvET = vdET = ObservableBase.Clone(ET, name='dET', combination=CombinationType.DIFFVECTOR, tlatex='dE_{T}', latex='dE_T$')
+rET  = ObservableBase.Clone(ET, name='rET', combination=CombinationType.RATIO, tlatex='rE_{T}', latex='$rE_T$')
 
 MT = ObservableBase( name          = 'MT',
-                     args          = [ArgumentType.values['COMBINATION']],
-                     combination   = CombinationType.values['SUMVECTOR'],
+                     args          = [ArgumentType.COMBINATION],
+                     combination   = CombinationType.SUMVECTOR,
                      plot_auto     = False,
                      plot_nbins    = 100,
                      plot_xmin     = 0.,
@@ -383,15 +383,15 @@ MT = ObservableBase( name          = 'MT',
                    )
 
 vMT  = MT
-sMT  = ObservableBase.Clone(MT, name='sMT', combination=CombinationType.values['SUMSCALAR'], tlatex='sM_{T}', latex='$sM_T$') 
-sdMT = dsMT = ObservableBase.Clone(MT, name='sdMT', combination=CombinationType.values['DIFFSCALAR'], tlatex='sdM_{T}', latex='$sdM_T$') 
-dMT  = dvMT = vdMT = ObservableBase.Clone(MT, name='dMT', combination=CombinationType.values['DIFFVECTOR'], tlatex='dM_{T}', latex='$dM_T$')
-rMT  = ObservableBase.Clone(MT, name='rMT', combination=CombinationType.values['RATIO'], tlatex='rM_{T}', latex='$rM_T$')
+sMT  = ObservableBase.Clone(MT, name='sMT', combination=CombinationType.SUMSCALAR, tlatex='sM_{T}', latex='$sM_T$') 
+sdMT = dsMT = ObservableBase.Clone(MT, name='sdMT', combination=CombinationType.DIFFSCALAR, tlatex='sdM_{T}', latex='$sdM_T$') 
+dMT  = dvMT = vdMT = ObservableBase.Clone(MT, name='dMT', combination=CombinationType.DIFFVECTOR, tlatex='dM_{T}', latex='$dM_T$')
+rMT  = ObservableBase.Clone(MT, name='rMT', combination=CombinationType.RATIO, tlatex='rM_{T}', latex='$rM_T$')
 
 
 MT_MET = ObservableBase( name          = 'MT_MET',
-                         args          = [ArgumentType.values['COMBINATION']],
-                         combination   = CombinationType.values['SUMVECTOR'],
+                         args          = [ArgumentType.COMBINATION],
+                         combination   = CombinationType.SUMVECTOR,
                          plot_auto     = False,
                          plot_nbins    = 100,
                          plot_xmin     = 0.,
@@ -409,14 +409,14 @@ MT_MET = ObservableBase( name          = 'MT_MET',
 
 
 vMT_MET  = MT_MET
-sMT_MET  = ObservableBase.Clone(MT_MET, name='sMT_MET', combination=CombinationType.values['SUMSCALAR'], tlatex='sM_{T}', latex='$sM_T$') 
-sdMT_MET = dsMT_MET = ObservableBase.Clone(MT_MET, name='sdMT_MET', combination=CombinationType.values['DIFFSCALAR'], tlatex='sdM_{T}', latex='$sdM_T$') 
-dMT_MET  = dvMT_MET = vdMT_MET = ObservableBase.Clone(MT_MET, name='dMT_MET', combination=CombinationType.values['DIFFVECTOR'], tlatex='dM_{T}', latex='$dM_T$')
-rMT_MET  = ObservableBase.Clone(MT_MET, name='rMT_MET', combination=CombinationType.values['RATIO'], tlatex='rM_{T}', latex='$rM_T$')
+sMT_MET  = ObservableBase.Clone(MT_MET, name='sMT_MET', combination=CombinationType.SUMSCALAR, tlatex='sM_{T}', latex='$sM_T$') 
+sdMT_MET = dsMT_MET = ObservableBase.Clone(MT_MET, name='sdMT_MET', combination=CombinationType.DIFFSCALAR, tlatex='sdM_{T}', latex='$sdM_T$') 
+dMT_MET  = dvMT_MET = vdMT_MET = ObservableBase.Clone(MT_MET, name='dMT_MET', combination=CombinationType.DIFFVECTOR, tlatex='dM_{T}', latex='$dM_T$')
+rMT_MET  = ObservableBase.Clone(MT_MET, name='rMT_MET', combination=CombinationType.RATIO, tlatex='rM_{T}', latex='$rM_T$')
 
 PT = ObservableBase( name          = 'PT',
-                     args          = [ArgumentType.values['COMBINATION']],
-                     combination   = CombinationType.values['SUMVECTOR'],
+                     args          = [ArgumentType.COMBINATION],
+                     combination   = CombinationType.SUMVECTOR,
                      plot_auto     = False,
                      plot_nbins    = 100,
                      plot_xmin     = 0.,
@@ -433,14 +433,14 @@ PT = ObservableBase( name          = 'PT',
                    )
 
 vPT  = PT
-sPT  = ObservableBase.Clone(PT, name='sPT', combination=CombinationType.values['SUMSCALAR'], tlatex='sp_{T}', latex='$sp_T$') 
-sdPT = dsPT = ObservableBase.Clone(PT, name='sdPT', combination=CombinationType.values['DIFFSCALAR'], tlatex='sdp_{T}', latex='$sdp_T$') 
-dPT  = dvPT = vdPT = ObservableBase.Clone(PT, name='dPT', combination=CombinationType.values['DIFFVECTOR'], tlatex='dp_{T}', latex='$dp_T$')
-rPT  = ObservableBase.Clone(PT, name='rPT', combination=CombinationType.values['RATIO'], tlatex='rp_{T}', latex='$rp_T$')
+sPT  = ObservableBase.Clone(PT, name='sPT', combination=CombinationType.SUMSCALAR, tlatex='sp_{T}', latex='$sp_T$') 
+sdPT = dsPT = ObservableBase.Clone(PT, name='sdPT', combination=CombinationType.DIFFSCALAR, tlatex='sdp_{T}', latex='$sdp_T$') 
+dPT  = dvPT = vdPT = ObservableBase.Clone(PT, name='dPT', combination=CombinationType.DIFFVECTOR, tlatex='dp_{T}', latex='$dp_T$')
+rPT  = ObservableBase.Clone(PT, name='rPT', combination=CombinationType.RATIO, tlatex='rp_{T}', latex='$rp_T$')
 
 PX = ObservableBase( name          = 'PX',
-                     args          = [ArgumentType.values['COMBINATION']],
-                     combination   = CombinationType.values['SUMVECTOR'],
+                     args          = [ArgumentType.COMBINATION],
+                     combination   = CombinationType.SUMVECTOR,
                      plot_auto     = False,
                      plot_nbins    = 100,
                      plot_xmin     = -1000.,
@@ -457,14 +457,14 @@ PX = ObservableBase( name          = 'PX',
                    )
 
 vPX  = PX
-sPX  = ObservableBase.Clone(PX, name='sPX', combination=CombinationType.values['SUMSCALAR'], tlatex='sp_{x}', latex='$sp_x$') 
-sdPX = dsPX = ObservableBase.Clone(PX, name='sdPX', combination=CombinationType.values['DIFFSCALAR'], tlatex='sdp_{x}', latex='$sdp_x$') 
-dPX  = dvPX = vdPX = ObservableBase.Clone(PX, name='dPX', combination=CombinationType.values['DIFFVECTOR'], tlatex='dp_{x}', latex='$dp_x$')
-rPX  = ObservableBase.Clone(PX, name='rPX', combination=CombinationType.values['RATIO'], tlatex='rp_{x}', latex='$rp_x$')
+sPX  = ObservableBase.Clone(PX, name='sPX', combination=CombinationType.SUMSCALAR, tlatex='sp_{x}', latex='$sp_x$') 
+sdPX = dsPX = ObservableBase.Clone(PX, name='sdPX', combination=CombinationType.DIFFSCALAR, tlatex='sdp_{x}', latex='$sdp_x$') 
+dPX  = dvPX = vdPX = ObservableBase.Clone(PX, name='dPX', combination=CombinationType.DIFFVECTOR, tlatex='dp_{x}', latex='$dp_x$')
+rPX  = ObservableBase.Clone(PX, name='rPX', combination=CombinationType.RATIO, tlatex='rp_{x}', latex='$rp_x$')
 
 PY = ObservableBase( name          = 'PY',
-                     args          = [ArgumentType.values['COMBINATION']],
-                     combination   = CombinationType.values['SUMVECTOR'],
+                     args          = [ArgumentType.COMBINATION],
+                     combination   = CombinationType.SUMVECTOR,
                      plot_auto     = False,
                      plot_nbins    = 100,
                      plot_xmin     = -1000.,
@@ -481,14 +481,14 @@ PY = ObservableBase( name          = 'PY',
                    )
 
 vPY  = PY
-sPY  = ObservableBase.Clone(PY, name='sPY', combination=CombinationType.values['SUMSCALAR'], tlatex='sp_{y}', latex='$sp_y$') 
-sdPY = dsPY = ObservableBase.Clone(PY, name='sdPY', combination=CombinationType.values['DIFFSCALAR'], tlatex='sdp_{y}', latex='$sdp_y$') 
-dPY  = dvPY = vdPY = ObservableBase.Clone(PY, name='dPY', combination=CombinationType.values['DIFFVECTOR'], tlatex='dp_{y}', latex='$dp_y$')
-rPY  = ObservableBase.Clone(PY, name='rPY', combination=CombinationType.values['RATIO'], tlatex='rp_{y}', latex='$rp_y$')
+sPY  = ObservableBase.Clone(PY, name='sPY', combination=CombinationType.SUMSCALAR, tlatex='sp_{y}', latex='$sp_y$') 
+sdPY = dsPY = ObservableBase.Clone(PY, name='sdPY', combination=CombinationType.DIFFSCALAR, tlatex='sdp_{y}', latex='$sdp_y$') 
+dPY  = dvPY = vdPY = ObservableBase.Clone(PY, name='dPY', combination=CombinationType.DIFFVECTOR, tlatex='dp_{y}', latex='$dp_y$')
+rPY  = ObservableBase.Clone(PY, name='rPY', combination=CombinationType.RATIO, tlatex='rp_{y}', latex='$rp_y$')
 
 PZ = ObservableBase( name          = 'PZ',
-                     args          = [ArgumentType.values['COMBINATION']],
-                     combination   = CombinationType.values['SUMVECTOR'],
+                     args          = [ArgumentType.COMBINATION],
+                     combination   = CombinationType.SUMVECTOR,
                      plot_auto     = False,
                      plot_nbins    = 100,
                      plot_xmin     = -1000.,
@@ -505,14 +505,14 @@ PZ = ObservableBase( name          = 'PZ',
                    )
 
 vPZ  = PZ
-sPZ  = ObservableBase.Clone(PZ, name='sPZ', combination=CombinationType.values['SUMSCALAR'], tlatex='sp_{z}', latex='$sp_z$') 
-sdPZ = dsPZ = ObservableBase.Clone(PZ, name='sdPZ', combination=CombinationType.values['DIFFSCALAR'], tlatex='sdp_{z}', latex='$sdp_z$') 
-dPZ  = dvPZ = vdPZ = ObservableBase.Clone(PZ, name='dPZ', combination=CombinationType.values['DIFFVECTOR'], tlatex='dp_{z}', latex='$dp_z$')
-rPZ  = ObservableBase.Clone(PZ, name='rPZ', combination=CombinationType.values['RATIO'], tlatex='rp_{z}', latex='$rp_z$')
+sPZ  = ObservableBase.Clone(PZ, name='sPZ', combination=CombinationType.SUMSCALAR, tlatex='sp_{z}', latex='$sp_z$') 
+sdPZ = dsPZ = ObservableBase.Clone(PZ, name='sdPZ', combination=CombinationType.DIFFSCALAR, tlatex='sdp_{z}', latex='$sdp_z$') 
+dPZ  = dvPZ = vdPZ = ObservableBase.Clone(PZ, name='dPZ', combination=CombinationType.DIFFVECTOR, tlatex='dp_{z}', latex='$dp_z$')
+rPZ  = ObservableBase.Clone(PZ, name='rPZ', combination=CombinationType.RATIO, tlatex='rp_{z}', latex='$rp_z$')
 
 R = ObservableBase( name          = 'R',
-                    args          = [ArgumentType.values['COMBINATION']],
-                    combination   = CombinationType.values['SUMVECTOR'],
+                    args          = [ArgumentType.COMBINATION],
+                    combination   = CombinationType.SUMVECTOR,
                     plot_auto     = False,
                     plot_nbins    = 100,
                     plot_xmin     = 0.,
@@ -529,16 +529,16 @@ R = ObservableBase( name          = 'R',
                   )
 
 vR  = R
-sR  = ObservableBase.Clone(R, name='sR', combination=CombinationType.values['SUMSCALAR'], tlatex='sR', latex='sR') 
-sdR = dsR = ObservableBase.Clone(R, name='sdR', combination=CombinationType.values['DIFFSCALAR'], tlatex='sdR', latex='sdR') 
-dR  = dvR = vdR = ObservableBase.Clone(R, name='dR', combination=CombinationType.values['DIFFVECTOR'], tlatex='dR', latex='dR')
-rR  = ObservableBase.Clone(R, name='rR', combination=CombinationType.values['RATIO'], tlatex='rR', latex='rR')
+sR  = ObservableBase.Clone(R, name='sR', combination=CombinationType.SUMSCALAR, tlatex='sR', latex='sR') 
+sdR = dsR = ObservableBase.Clone(R, name='sdR', combination=CombinationType.DIFFSCALAR, tlatex='sdR', latex='sdR') 
+dR  = dvR = vdR = ObservableBase.Clone(R, name='dR', combination=CombinationType.DIFFVECTOR, tlatex='dR', latex='dR')
+rR  = ObservableBase.Clone(R, name='rR', combination=CombinationType.RATIO, tlatex='rR', latex='rR')
 
 
 DELTAR = ObservableBase( name          = 'DELTAR',
-                         args          = [ArgumentType.values['COMBINATION'],\
-                                         ArgumentType.values['COMBINATION']],
-                         combination   = CombinationType.values['SUMVECTOR'],
+                         args          = [ArgumentType.COMBINATION,\
+                                         ArgumentType.COMBINATION],
+                         combination   = CombinationType.SUMVECTOR,
                          plot_auto     = False,
                          plot_nbins    = 100,
                          plot_xmin     = 0.,
@@ -555,12 +555,12 @@ DELTAR = ObservableBase( name          = 'DELTAR',
                        )
 
 vDELTAR  = DELTAR
-dDELTAR  = dvDELTAR = vdDELTAR = ObservableBase.Clone(DELTAR, name='dDELTAR', combination=CombinationType.values['DIFFVECTOR'], tlatex='d#DeltaR', latex='$d\Delta R$')
+dDELTAR  = dvDELTAR = vdDELTAR = ObservableBase.Clone(DELTAR, name='dDELTAR', combination=CombinationType.DIFFVECTOR, tlatex='d#DeltaR', latex='$d\Delta R$')
 
 DPHI_0_PI = ObservableBase( name          = 'DPHI_0_PI',
-                            args          = [ArgumentType.values['COMBINATION'],\
-                                             ArgumentType.values['COMBINATION']],
-                            combination   = CombinationType.values['SUMVECTOR'],
+                            args          = [ArgumentType.COMBINATION,\
+                                             ArgumentType.COMBINATION],
+                            combination   = CombinationType.SUMVECTOR,
                             plot_auto     = False,
                             plot_nbins    = 100,
                             plot_xmin     = 0.,
@@ -577,9 +577,9 @@ DPHI_0_PI = ObservableBase( name          = 'DPHI_0_PI',
                           )
 
 DPHI_0_2PI = ObservableBase( name          = 'DPHI_0_2PI',
-                             args          = [ArgumentType.values['COMBINATION'],\
-                                              ArgumentType.values['COMBINATION']],
-                             combination   = CombinationType.values['SUMVECTOR'],
+                             args          = [ArgumentType.COMBINATION,\
+                                              ArgumentType.COMBINATION],
+                             combination   = CombinationType.SUMVECTOR,
                              plot_auto     = False,
                              plot_nbins    = 100,
                              plot_xmin     = 0.,
@@ -596,9 +596,9 @@ DPHI_0_2PI = ObservableBase( name          = 'DPHI_0_2PI',
                            )
 
 RECOIL = ObservableBase( name          = 'RECOIL',
-                         args          = [ArgumentType.values['COMBINATION'],\
-                                         ArgumentType.values['COMBINATION']],
-                         combination   = CombinationType.values['SUMVECTOR'],
+                         args          = [ArgumentType.COMBINATION,\
+                                         ArgumentType.COMBINATION],
+                         combination   = CombinationType.SUMVECTOR,
                          plot_auto     = False,
                          plot_nbins    = 100,
                          plot_xmin     = 0.,
@@ -617,8 +617,8 @@ RECOIL = ObservableBase( name          = 'RECOIL',
 
 
 ETA = ObservableBase( name          = 'ETA',
-                      args          = [ArgumentType.values['COMBINATION']],
-                      combination   = CombinationType.values['SUMVECTOR'],
+                      args          = [ArgumentType.COMBINATION],
+                      combination   = CombinationType.SUMVECTOR,
                       plot_auto     = False,
                       plot_nbins    = 100,
                       plot_xmin     = -8.0,
@@ -635,14 +635,14 @@ ETA = ObservableBase( name          = 'ETA',
                     )
 
 vETA  = ETA
-sETA  = ObservableBase.Clone(ETA, name='sETA', combination=CombinationType.values['SUMSCALAR'], tlatex='s#eta', latex='$s\eta$') 
-sdETA = dsETA = ObservableBase.Clone(ETA, name='sdETA', combination=CombinationType.values['DIFFSCALAR'], tlatex='sd#eta', latex='$sd\eta$') 
-dETA  = dvETA = vdETA = ObservableBase.Clone(ETA, name='dETA', combination=CombinationType.values['DIFFVECTOR'], tlatex='d#eta', latex='$d\eta$')
-rETA  = ObservableBase.Clone(ETA, name='rETA', combination=CombinationType.values['RATIO'], tlatex='r#eta', latex='$r\eta$')
+sETA  = ObservableBase.Clone(ETA, name='sETA', combination=CombinationType.SUMSCALAR, tlatex='s#eta', latex='$s\eta$') 
+sdETA = dsETA = ObservableBase.Clone(ETA, name='sdETA', combination=CombinationType.DIFFSCALAR, tlatex='sd#eta', latex='$sd\eta$') 
+dETA  = dvETA = vdETA = ObservableBase.Clone(ETA, name='dETA', combination=CombinationType.DIFFVECTOR, tlatex='d#eta', latex='$d\eta$')
+rETA  = ObservableBase.Clone(ETA, name='rETA', combination=CombinationType.RATIO, tlatex='r#eta', latex='$r\eta$')
 
 ABSETA = ObservableBase( name          = 'ABSETA',
-                         args          = [ArgumentType.values['COMBINATION']],
-                         combination   = CombinationType.values['SUMVECTOR'],
+                         args          = [ArgumentType.COMBINATION],
+                         combination   = CombinationType.SUMVECTOR,
                          plot_auto     = False,
                          plot_nbins    =  50,
                          plot_xmin     =  0.0,
@@ -659,15 +659,15 @@ ABSETA = ObservableBase( name          = 'ABSETA',
                        )
 
 vABSETA  = ABSETA
-sABSETA  = ObservableBase.Clone(ABSETA, name='sABSETA', combination=CombinationType.values['SUMSCALAR'], tlatex='s|#eta|', latex='$s|\eta|$') 
-sdABSETA = dsABSETA = ObservableBase.Clone(ABSETA, name='sdABSETA', combination=CombinationType.values['DIFFSCALAR'], tlatex='sd|#eta|', latex='$sd|\eta|$') 
-dABSETA  = dvABSETA = vdABSETA = ObservableBase.Clone(ABSETA, name='dABSETA', combination=CombinationType.values['DIFFVECTOR'], tlatex='d|#eta|', latex='$d|\eta|$')
-rABSETA  = ObservableBase.Clone(ABSETA, name='rABSETA', combination=CombinationType.values['RATIO'], tlatex='r|#eta|', latex='$r|\eta|$')
+sABSETA  = ObservableBase.Clone(ABSETA, name='sABSETA', combination=CombinationType.SUMSCALAR, tlatex='s|#eta|', latex='$s|\eta|$') 
+sdABSETA = dsABSETA = ObservableBase.Clone(ABSETA, name='sdABSETA', combination=CombinationType.DIFFSCALAR, tlatex='sd|#eta|', latex='$sd|\eta|$') 
+dABSETA  = dvABSETA = vdABSETA = ObservableBase.Clone(ABSETA, name='dABSETA', combination=CombinationType.DIFFVECTOR, tlatex='d|#eta|', latex='$d|\eta|$')
+rABSETA  = ObservableBase.Clone(ABSETA, name='rABSETA', combination=CombinationType.RATIO, tlatex='r|#eta|', latex='$r|\eta|$')
 
 
 THETA = ObservableBase( name          = 'THETA',
-                        args          = [ArgumentType.values['COMBINATION']],
-                        combination   = CombinationType.values['SUMVECTOR'],
+                        args          = [ArgumentType.COMBINATION],
+                        combination   = CombinationType.SUMVECTOR,
                         plot_auto     = False,
                         plot_nbins    = 100,
                         plot_xmin     = 0.,
@@ -684,14 +684,14 @@ THETA = ObservableBase( name          = 'THETA',
                   )
 
 vTHETA  = THETA
-sTHETA  = ObservableBase.Clone(THETA, name='sTHETA', combination=CombinationType.values['SUMSCALAR'], tlatex='s#theta', latex='$s\theta$') 
-sdTHETA = dsTHETA = ObservableBase.Clone(THETA, name='sdTHETA', combination=CombinationType.values['DIFFSCALAR'], tlatex='sd#theta', latex='$sd\theta$' ) 
-dTHETA  = dvTHETA = vdTHETA = ObservableBase.Clone(THETA, name='dTHETA', combination=CombinationType.values['DIFFVECTOR'], tlatex='d#theta', latex='$d\theta$')
-rTHETA  = ObservableBase.Clone(THETA, name='rTHETA', combination=CombinationType.values['RATIO'], tlatex='r#theta', latex='$r\theta$')
+sTHETA  = ObservableBase.Clone(THETA, name='sTHETA', combination=CombinationType.SUMSCALAR, tlatex='s#theta', latex='$s\theta$') 
+sdTHETA = dsTHETA = ObservableBase.Clone(THETA, name='sdTHETA', combination=CombinationType.DIFFSCALAR, tlatex='sd#theta', latex='$sd\theta$' ) 
+dTHETA  = dvTHETA = vdTHETA = ObservableBase.Clone(THETA, name='dTHETA', combination=CombinationType.DIFFVECTOR, tlatex='d#theta', latex='$d\theta$')
+rTHETA  = ObservableBase.Clone(THETA, name='rTHETA', combination=CombinationType.RATIO, tlatex='r#theta', latex='$r\theta$')
 
 PHI = ObservableBase( name          = 'PHI',
-                      args          = [ArgumentType.values['COMBINATION']],
-                      combination   = CombinationType.values['SUMVECTOR'],
+                      args          = [ArgumentType.COMBINATION],
+                      combination   = CombinationType.SUMVECTOR,
                       plot_auto     = False,
                       plot_nbins    = 100,
                       plot_xmin     = -math.pi-0.01,
@@ -708,17 +708,17 @@ PHI = ObservableBase( name          = 'PHI',
                   )
 
 vPHI  = PHI
-sPHI  = ObservableBase.Clone(PHI, name='sPHI', combination=CombinationType.values['SUMSCALAR'], tlatex='s#phi', latex='$s\phi$',
+sPHI  = ObservableBase.Clone(PHI, name='sPHI', combination=CombinationType.SUMSCALAR, tlatex='s#phi', latex='$s\phi$',
   plot_xmin=-2.*math.pi-0.01, plot_xmax=2.*math.pi+0.01)
-sdPHI = dsPHI = ObservableBase.Clone(PHI, name='sdPHI', combination=CombinationType.values['DIFFSCALAR'], tlatex='sd#phi', latex='$sd\phi$',
+sdPHI = dsPHI = ObservableBase.Clone(PHI, name='sdPHI', combination=CombinationType.DIFFSCALAR, tlatex='sd#phi', latex='$sd\phi$',
   plot_xmin=-2.*math.pi-0.01, plot_xmax=2.*math.pi+0.01)
-dPHI  = dvPHI = vdPHI = ObservableBase.Clone(PHI, name='dPHI', combination=CombinationType.values['DIFFVECTOR'], tlatex='d#phi', latex='$d\phi$')
-rPHI  = ObservableBase.Clone(PHI, name='rPHI', combination=CombinationType.values['RATIO'], tlatex='r#phi', latex='$r\phi$')
+dPHI  = dvPHI = vdPHI = ObservableBase.Clone(PHI, name='dPHI', combination=CombinationType.DIFFVECTOR, tlatex='d#phi', latex='$d\phi$')
+rPHI  = ObservableBase.Clone(PHI, name='rPHI', combination=CombinationType.RATIO, tlatex='r#phi', latex='$r\phi$')
 
 
 Y = ObservableBase( name          = 'Y',
-                    args          = [ArgumentType.values['COMBINATION']],
-                    combination   = CombinationType.values['SUMVECTOR'],
+                    args          = [ArgumentType.COMBINATION],
+                    combination   = CombinationType.SUMVECTOR,
                     plot_auto     = False,
                     plot_nbins    = 100,
                     plot_xmin     = -8.0,
@@ -735,14 +735,14 @@ Y = ObservableBase( name          = 'Y',
                   )
 
 vY  = Y
-sY  = ObservableBase.Clone(Y, name='sY', combination=CombinationType.values['SUMSCALAR'], tlatex='sy', latex='sy') 
-sdY = dsY = ObservableBase.Clone(Y, name='sdY', combination=CombinationType.values['DIFFSCALAR'], tlatex='sdy', latex='sdy') 
-dY  = dvY = vdY = ObservableBase.Clone(Y, name='dY', combination=CombinationType.values['DIFFVECTOR'], tlatex='dy', latex='dy')
-rY  = ObservableBase.Clone(Y, name='rY', combination=CombinationType.values['RATIO'], tlatex='ry', latex='ry')
+sY  = ObservableBase.Clone(Y, name='sY', combination=CombinationType.SUMSCALAR, tlatex='sy', latex='sy') 
+sdY = dsY = ObservableBase.Clone(Y, name='sdY', combination=CombinationType.DIFFSCALAR, tlatex='sdy', latex='sdy') 
+dY  = dvY = vdY = ObservableBase.Clone(Y, name='dY', combination=CombinationType.DIFFVECTOR, tlatex='dy', latex='dy')
+rY  = ObservableBase.Clone(Y, name='rY', combination=CombinationType.RATIO, tlatex='ry', latex='ry')
 
 BETA = ObservableBase( name          = 'BETA',
-                       args          = [ArgumentType.values['COMBINATION']],
-                       combination   = CombinationType.values['SUMVECTOR'],
+                       args          = [ArgumentType.COMBINATION],
+                       combination   = CombinationType.SUMVECTOR,
                        plot_auto     = False,
                        plot_nbins    = 100,
                        plot_xmin     = 0.,
@@ -759,15 +759,15 @@ BETA = ObservableBase( name          = 'BETA',
                      )
 
 vBETA  = BETA
-sBETA  = ObservableBase.Clone(BETA, name='sBETA', combination=CombinationType.values['SUMSCALAR'], tlatex='s#beta', latex='$s\beta$') 
-sdBETA = dsBETA = ObservableBase.Clone(BETA, name='sdBETA', combination=CombinationType.values['DIFFSCALAR'], tlatex='sd#beta', latex='$sd\beta$') 
-dBETA  = dvBETA = vdBETA = ObservableBase.Clone(BETA, name='dBETA', combination=CombinationType.values['DIFFVECTOR'], tlatex='d#beta', latex='$d\beta$')
-rBETA  = ObservableBase.Clone(BETA, name='rBETA', combination=CombinationType.values['RATIO'], tlatex='r#beta', latex='$r\beta$')
+sBETA  = ObservableBase.Clone(BETA, name='sBETA', combination=CombinationType.SUMSCALAR, tlatex='s#beta', latex='$s\beta$') 
+sdBETA = dsBETA = ObservableBase.Clone(BETA, name='sdBETA', combination=CombinationType.DIFFSCALAR, tlatex='sd#beta', latex='$sd\beta$') 
+dBETA  = dvBETA = vdBETA = ObservableBase.Clone(BETA, name='dBETA', combination=CombinationType.DIFFVECTOR, tlatex='d#beta', latex='$d\beta$')
+rBETA  = ObservableBase.Clone(BETA, name='rBETA', combination=CombinationType.RATIO, tlatex='r#beta', latex='$r\beta$')
 
 
 GAMMA = ObservableBase( name          = 'GAMMA',
-                        args          = [ArgumentType.values['COMBINATION']],
-                        combination   = CombinationType.values['SUMVECTOR'],
+                        args          = [ArgumentType.COMBINATION],
+                        combination   = CombinationType.SUMVECTOR,
                         plot_auto     = False,
                         plot_nbins    = 100,
                         plot_xmin     = 1,
@@ -784,14 +784,14 @@ GAMMA = ObservableBase( name          = 'GAMMA',
                       )
 
 vGAMMA  = GAMMA
-sGAMMA  = ObservableBase.Clone(GAMMA, name='sGAMMA', combination=CombinationType.values['SUMSCALAR'], tlatex='s#gamma', latex='$s\gamma$') 
-sdGAMMA = dsGAMMA = ObservableBase.Clone(GAMMA, name='sdGAMMA', combination=CombinationType.values['DIFFSCALAR'], tlatex='sd#gamma', latex='$sd\gamma$') 
-dGAMMA  = dvGAMMA = vdGAMMA = ObservableBase.Clone(GAMMA, name='dGAMMA', combination=CombinationType.values['DIFFVECTOR'], tlatex='d#gamma', latex='$d\gamma$')
-rGAMMA  = ObservableBase.Clone(GAMMA, name='rGAMMA', combination=CombinationType.values['RATIO'], tlatex='r#gamma', latex='$r\gamma$')
+sGAMMA  = ObservableBase.Clone(GAMMA, name='sGAMMA', combination=CombinationType.SUMSCALAR, tlatex='s#gamma', latex='$s\gamma$') 
+sdGAMMA = dsGAMMA = ObservableBase.Clone(GAMMA, name='sdGAMMA', combination=CombinationType.DIFFSCALAR, tlatex='sd#gamma', latex='$sd\gamma$') 
+dGAMMA  = dvGAMMA = vdGAMMA = ObservableBase.Clone(GAMMA, name='dGAMMA', combination=CombinationType.DIFFVECTOR, tlatex='d#gamma', latex='$d\gamma$')
+rGAMMA  = ObservableBase.Clone(GAMMA, name='rGAMMA', combination=CombinationType.RATIO, tlatex='r#gamma', latex='$r\gamma$')
 
 N = ObservableBase( name          = 'N',
-                    args          = [ArgumentType.values['COMBINATION']],
-                    combination   = CombinationType.values['DEFAULT'],
+                    args          = [ArgumentType.COMBINATION],
+                    combination   = CombinationType.DEFAULT,
                     plot_auto     = False,
                     plot_nbins    = 20,
                     plot_xmin     = 0.,
@@ -808,14 +808,14 @@ N = ObservableBase( name          = 'N',
                   )
 
 vN  = N
-sN  = ObservableBase.Clone(N, name='sN', combination=CombinationType.values['SUMSCALAR'], tlatex='sN', latex='sN') 
-sdN = dsN = ObservableBase.Clone(N, name='sdN', combination=CombinationType.values['DIFFSCALAR'], tlatex='sdN', latex='sdN') 
-dN  = dvN = vdN = ObservableBase.Clone(N, name='dN', combination=CombinationType.values['DIFFVECTOR'], tlatex='dN', latex='dN')
-rN  = ObservableBase.Clone(N, name='rN', combination=CombinationType.values['RATIO'], tlatex='rN', latex='rN')
+sN  = ObservableBase.Clone(N, name='sN', combination=CombinationType.SUMSCALAR, tlatex='sN', latex='sN') 
+sdN = dsN = ObservableBase.Clone(N, name='sdN', combination=CombinationType.DIFFSCALAR, tlatex='sdN', latex='sdN') 
+dN  = dvN = vdN = ObservableBase.Clone(N, name='dN', combination=CombinationType.DIFFVECTOR, tlatex='dN', latex='dN')
+rN  = ObservableBase.Clone(N, name='rN', combination=CombinationType.RATIO, tlatex='rN', latex='rN')
 
 HE_EE = ObservableBase( name          = 'HE_EE',
-                        args          = [ArgumentType.values['PARTICLE']],
-                        combination   = CombinationType.values['DEFAULT'],
+                        args          = [ArgumentType.PARTICLE],
+                        combination   = CombinationType.DEFAULT,
                         plot_auto     = False,
                         plot_nbins    = 100,
                         plot_xmin     = 0.,
@@ -832,8 +832,8 @@ HE_EE = ObservableBase( name          = 'HE_EE',
                       )
 
 EE_HE = ObservableBase( name          = 'EE_HE',
-                        args          = [ArgumentType.values['PARTICLE']],
-                        combination   = CombinationType.values['DEFAULT'],
+                        args          = [ArgumentType.PARTICLE],
+                        combination   = CombinationType.DEFAULT,
                         plot_auto     = False,
                         plot_nbins    = 100,
                         plot_xmin     = 0.,
@@ -850,8 +850,8 @@ EE_HE = ObservableBase( name          = 'EE_HE',
                       )
 
 NTRACKS = ObservableBase( name          = 'NTRACKS',
-                          args          = [ArgumentType.values['PARTICLE']],
-                          combination   = CombinationType.values['DEFAULT'],
+                          args          = [ArgumentType.PARTICLE],
+                          combination   = CombinationType.DEFAULT,
                           plot_auto     = False,
                           plot_nbins    = 100,
                           plot_xmin     = 0.,
@@ -868,8 +868,8 @@ NTRACKS = ObservableBase( name          = 'NTRACKS',
                         )
 
 D0 = ObservableBase(  name          = 'D0',
-                      args          = [ArgumentType.values['COMBINATION']],
-                      combination   = CombinationType.values['DEFAULT'],
+                      args          = [ArgumentType.COMBINATION],
+                      combination   = CombinationType.DEFAULT,
                       plot_auto     = False,
                       plot_nbins    = 100,
                       plot_xmin     = -20.,
@@ -885,14 +885,14 @@ D0 = ObservableBase(  name          = 'D0',
                       latex         = '$d_0$'
                     )
 vD0  = D0
-sD0  = ObservableBase.Clone(D0, name='sD0', combination=CombinationType.values['SUMSCALAR'], tlatex='sd_{0}', latex='$sd_{0}$') 
-sdD0 = dsD0 = ObservableBase.Clone(D0, name='sdD0', combination=CombinationType.values['DIFFSCALAR'], tlatex='sdd_{0}', latex='$sdd_{0}$') 
-dD0  = dvD0 = vdD0 = ObservableBase.Clone(D0, name='dD0', combination=CombinationType.values['DIFFVECTOR'], tlatex='dd_{0}', latex='$dd_{0}$')
-rD0  = ObservableBase.Clone(D0, name='rD0', combination=CombinationType.values['RATIO'], tlatex='rd_{0}', latex='$rd_{0}$')
+sD0  = ObservableBase.Clone(D0, name='sD0', combination=CombinationType.SUMSCALAR, tlatex='sd_{0}', latex='$sd_{0}$') 
+sdD0 = dsD0 = ObservableBase.Clone(D0, name='sdD0', combination=CombinationType.DIFFSCALAR, tlatex='sdd_{0}', latex='$sdd_{0}$') 
+dD0  = dvD0 = vdD0 = ObservableBase.Clone(D0, name='dD0', combination=CombinationType.DIFFVECTOR, tlatex='dd_{0}', latex='$dd_{0}$')
+rD0  = ObservableBase.Clone(D0, name='rD0', combination=CombinationType.RATIO, tlatex='rd_{0}', latex='$rd_{0}$')
 
 DZ = ObservableBase(  name          = 'DZ',
-                      args          = [ArgumentType.values['COMBINATION']],
-                      combination   = CombinationType.values['DEFAULT'],
+                      args          = [ArgumentType.COMBINATION],
+                      combination   = CombinationType.DEFAULT,
                       plot_auto     = False,
                       plot_nbins    = 100,
                       plot_xmin     = -20.,
@@ -908,14 +908,14 @@ DZ = ObservableBase(  name          = 'DZ',
                       latex         = '$d_z$'
                     )
 vDZ  = DZ
-sDZ  = ObservableBase.Clone(DZ, name='sDZ', combination=CombinationType.values['SUMSCALAR'], tlatex='sd_{z}', latex='$sd_{z}$') 
-sdDZ = dsDZ = ObservableBase.Clone(DZ, name='sdDZ', combination=CombinationType.values['DIFFSCALAR'], tlatex='sdd_{z}', latex='$sdd_{z}$') 
-dDZ  = dvDZ = vdDZ = ObservableBase.Clone(DZ, name='dDZ', combination=CombinationType.values['DIFFVECTOR'], tlatex='dd_{z}', latex='$dd_{z}$')
-rDZ  = ObservableBase.Clone(DZ, name='rDZ', combination=CombinationType.values['RATIO'], tlatex='rd_{z}', latex='$rd_{z}$')
+sDZ  = ObservableBase.Clone(DZ, name='sDZ', combination=CombinationType.SUMSCALAR, tlatex='sd_{z}', latex='$sd_{z}$') 
+sdDZ = dsDZ = ObservableBase.Clone(DZ, name='sdDZ', combination=CombinationType.DIFFSCALAR, tlatex='sdd_{z}', latex='$sdd_{z}$') 
+dDZ  = dvDZ = vdDZ = ObservableBase.Clone(DZ, name='dDZ', combination=CombinationType.DIFFVECTOR, tlatex='dd_{z}', latex='$dd_{z}$')
+rDZ  = ObservableBase.Clone(DZ, name='rDZ', combination=CombinationType.RATIO, tlatex='rd_{z}', latex='$rd_{z}$')
 
 XD = ObservableBase( name          = 'XD',
-                     args          = [ArgumentType.values['COMBINATION']],
-                     combination   = CombinationType.values['SUMVECTOR'],
+                     args          = [ArgumentType.COMBINATION],
+                     combination   = CombinationType.SUMVECTOR,
                      plot_auto     = False,
                      plot_nbins    = 100,
                      plot_xmin     = -20.,
@@ -932,14 +932,14 @@ XD = ObservableBase( name          = 'XD',
                    )
 
 vXD  = XD
-sXD  = ObservableBase.Clone(XD, name='sXD', combination=CombinationType.values['SUMSCALAR'], tlatex='sx_{d}', latex='$sx_{d}$') 
-sdXD = dsXD = ObservableBase.Clone(XD, name='sdXD', combination=CombinationType.values['DIFFSCALAR'], tlatex='sdx_{d}', latex='$sdx_{d}$') 
-dXD  = dvXD = vdXD = ObservableBase.Clone(XD, name='dXD', combination=CombinationType.values['DIFFVECTOR'], tlatex='dx_{d}', latex='$dx_{d}$')
-rXD  = ObservableBase.Clone(XD, name='rXD', combination=CombinationType.values['RATIO'], tlatex='rx_{d}', latex='$rx_{d}$')
+sXD  = ObservableBase.Clone(XD, name='sXD', combination=CombinationType.SUMSCALAR, tlatex='sx_{d}', latex='$sx_{d}$') 
+sdXD = dsXD = ObservableBase.Clone(XD, name='sdXD', combination=CombinationType.DIFFSCALAR, tlatex='sdx_{d}', latex='$sdx_{d}$') 
+dXD  = dvXD = vdXD = ObservableBase.Clone(XD, name='dXD', combination=CombinationType.DIFFVECTOR, tlatex='dx_{d}', latex='$dx_{d}$')
+rXD  = ObservableBase.Clone(XD, name='rXD', combination=CombinationType.RATIO, tlatex='rx_{d}', latex='$rx_{d}$')
 
 YD = ObservableBase( name          = 'YD',
-                     args          = [ArgumentType.values['COMBINATION']],
-                     combination   = CombinationType.values['SUMVECTOR'],
+                     args          = [ArgumentType.COMBINATION],
+                     combination   = CombinationType.SUMVECTOR,
                      plot_auto     = False,
                      plot_nbins    = 100,
                      plot_xmin     = -20.,
@@ -956,14 +956,14 @@ YD = ObservableBase( name          = 'YD',
                    )
 
 vYD  = YD
-sYD  = ObservableBase.Clone(YD, name='sYD', combination=CombinationType.values['SUMSCALAR'], tlatex='sy_{d}', latex='$sy_{d}$') 
-sdYD = dsYD = ObservableBase.Clone(YD, name='sdYD', combination=CombinationType.values['DIFFSCALAR'], tlatex='sdy_{d}', latex='$sdy_{d}$') 
-dYD  = dvYD = vdPY = ObservableBase.Clone(YD, name='dYD', combination=CombinationType.values['DIFFVECTOR'], tlatex='dy_{d}', latex='$dy_{d}$')
-rYD  = ObservableBase.Clone(YD, name='rYD', combination=CombinationType.values['RATIO'], tlatex='ry_{d}', latex='$ry_{d}$')
+sYD  = ObservableBase.Clone(YD, name='sYD', combination=CombinationType.SUMSCALAR, tlatex='sy_{d}', latex='$sy_{d}$') 
+sdYD = dsYD = ObservableBase.Clone(YD, name='sdYD', combination=CombinationType.DIFFSCALAR, tlatex='sdy_{d}', latex='$sdy_{d}$') 
+dYD  = dvYD = vdPY = ObservableBase.Clone(YD, name='dYD', combination=CombinationType.DIFFVECTOR, tlatex='dy_{d}', latex='$dy_{d}$')
+rYD  = ObservableBase.Clone(YD, name='rYD', combination=CombinationType.RATIO, tlatex='ry_{d}', latex='$ry_{d}$')
 
 ZD = ObservableBase( name          = 'ZD',
-                     args          = [ArgumentType.values['COMBINATION']],
-                     combination   = CombinationType.values['SUMVECTOR'],
+                     args          = [ArgumentType.COMBINATION],
+                     combination   = CombinationType.SUMVECTOR,
                      plot_auto     = False,
                      plot_nbins    = 100,
                      plot_xmin     = -20.,
@@ -980,8 +980,8 @@ ZD = ObservableBase( name          = 'ZD',
                    )
 
 vZD  = ZD
-sZD  = ObservableBase.Clone(ZD, name='sZD', combination=CombinationType.values['SUMSCALAR'], tlatex='sz_{d}', latex='$sz_{d}$') 
-sdZD = dsZD = ObservableBase.Clone(ZD, name='sdZD', combination=CombinationType.values['DIFFSCALAR'], tlatex='sdz_{d}', latex='$sdz_{d}$') 
-dZD  = dvZD = vdPY = ObservableBase.Clone(ZD, name='dZD', combination=CombinationType.values['DIFFVECTOR'], tlatex='dz_{d}', latex='$dz_{d}$')
-rZD  = ObservableBase.Clone(ZD, name='rZD', combination=CombinationType.values['RATIO'], tlatex='rz_{d}', latex='$rz_{d}$')
+sZD  = ObservableBase.Clone(ZD, name='sZD', combination=CombinationType.SUMSCALAR, tlatex='sz_{d}', latex='$sz_{d}$') 
+sdZD = dsZD = ObservableBase.Clone(ZD, name='sdZD', combination=CombinationType.DIFFSCALAR, tlatex='sdz_{d}', latex='$sdz_{d}$') 
+dZD  = dvZD = vdPY = ObservableBase.Clone(ZD, name='dZD', combination=CombinationType.DIFFVECTOR, tlatex='dz_{d}', latex='$dz_{d}$')
+rZD  = ObservableBase.Clone(ZD, name='rZD', combination=CombinationType.RATIO, tlatex='rz_{d}', latex='$rz_{d}$')
 
