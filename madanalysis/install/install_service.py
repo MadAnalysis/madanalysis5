@@ -30,6 +30,7 @@ import sys
 import shutil
 from six.moves import range
 from six.moves import input
+import six
 
 class InstallService():
 
@@ -222,10 +223,14 @@ class InstallService():
             
             # Decoding the size of the remote file
             logging.getLogger('MA5').debug('Decoding the size of the remote file...')
-            sizeURLFile = 0
+            sizeURLFile = 0                    
             try:
-                sizeURLFile = int(info.info().getheaders("Content-Length")[0])
-            except:
+                if six.PY2:
+                    sizeURLFile = int(info.info().getheaders("Content-Length")[0])
+                else:
+                    sizeURLFile = int(info.info().get("Content-Length")[0])
+            except Exception as err:
+                print(err)
                 logging.getLogger('MA5').debug('-> Problem to decode it')
                 logging.getLogger('MA5').warning("Bad description for "+url)
                 result="ERROR"
