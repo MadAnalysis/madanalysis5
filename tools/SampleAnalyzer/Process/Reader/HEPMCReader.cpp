@@ -152,13 +152,12 @@ MAbool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 
 
   // Fill vertices information
-  for (std::map<MAint32,HEPVertex>::iterator it=vertices_.begin();
-       it!=vertices_.end(); it++)
+  for (std::map<MAint32,HEPVertex>::iterator it=vertices_.begin(); it!=vertices_.end(); it++)
   {
     // Decay position & lifetime
-    for (MAuint32 i=0;i<it->second.out_.size();i++)
+    for (MAuint32 i=0;i<it->second.in_.size();i++)
     {
-        MCParticleFormat* part = &(myEvent.mc()->particles_[it->second.out_[i]]);
+        MCParticleFormat* part = &(myEvent.mc()->particles_[it->second.in_[i]]);
         part->decay_vertex_.SetXYZT(it->second.x_,it->second.y_,it->second.z_,it->second.ctau_);
     }
 
