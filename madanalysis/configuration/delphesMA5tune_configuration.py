@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.enumeration.ma5_running_type         import MA5RunningType
 import os
 import logging
@@ -160,7 +161,7 @@ class DelphesMA5tuneConfiguration:
 
         
     def user_GetParameters(self):
-        return DelphesMA5tuneConfiguration.userVariables.keys()
+        return list(DelphesMA5tuneConfiguration.userVariables.keys())
 
 
     def user_GetValues(self,variable):

@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.interpreter.cmd_base           import CmdBase
 from madanalysis.interpreter.cmd_selection_base import CmdSelectionBase
 from madanalysis.multiparticle.particle_object  import ParticleObject
@@ -31,6 +32,7 @@ from madanalysis.enumeration.observable_type    import ObservableType
 from madanalysis.enumeration.argument_type      import ArgumentType
 from madanalysis.selection.histogram            import Histogram
 import logging
+from six.moves import range
 
 
 class CmdPlot(CmdBase,CmdSelectionBase):
@@ -442,7 +444,7 @@ class CmdPlot(CmdBase,CmdSelectionBase):
 
         # options mode
         if nbracket1==0 and nbracket2==1 and nbracket3==0:
-            output=Histogram.userShortcuts.keys()
+            output=list(Histogram.userShortcuts.keys())
             output.append("]")
             return self.finalize_complete(text,output)
 

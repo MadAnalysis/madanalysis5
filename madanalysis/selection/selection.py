@@ -22,6 +22,8 @@
 ################################################################################
 
 
+from __future__ import absolute_import
+from __future__ import print_function
 from madanalysis.selection.histogram          import Histogram
 from madanalysis.selection.cut                import Cut
 from madanalysis.selection.instance_name      import InstanceName
@@ -29,6 +31,7 @@ from madanalysis.enumeration.observable_type  import ObservableType
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
 from madanalysis.interpreter.cmd_cut          import CmdCut
 import logging
+from six.moves import range
 
 class Selection:
 
@@ -147,7 +150,7 @@ class Selection:
             # Dealing with histogram
             if key[0]=='histogram':
 
-                print "histogram"
+                print("histogram")
 
                 # Getting the name of the histogram (if it exists)
                 name = value.GetParameterToStringWithoutQuotes('name')
@@ -165,7 +168,7 @@ class Selection:
             # Dealing with cut
             elif key[0]=='cut':
 
-                print "cut"
+                print("cut")
                 
                 # Getting the name of the histogram (if it exists)
                 name = value.GetParameterToStringWithoutQuotes('name')

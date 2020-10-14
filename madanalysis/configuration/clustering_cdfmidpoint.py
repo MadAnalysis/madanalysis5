@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 class ClusteringCDFMidPoint():
 
@@ -86,7 +87,7 @@ class ClusteringCDFMidPoint():
 
     
     def user_GetParameters(self):
-        return ClusteringCDFMidPoint.userVariables.keys()
+        return list(ClusteringCDFMidPoint.userVariables.keys())
 
 
     def user_SetParameter(self,parameter,value):

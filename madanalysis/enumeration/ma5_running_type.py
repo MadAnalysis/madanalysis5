@@ -20,12 +20,15 @@
 #  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
 #  
 ################################################################################
+import six
 
+class metaclass(type):
+    def __getattr__(self, name):
+        return self.values.index(name)
 
+@six.add_metaclass(metaclass)
 class MA5RunningType(object):
         values = ['PARTON','HADRON','RECO']
 
-        class __metaclass__(type):
-            def __getattr__(self, name):
-                            return self.values.index(name)
+
 

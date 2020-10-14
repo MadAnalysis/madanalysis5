@@ -22,9 +22,12 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import copy
 import logging
 import madanalysis.region.region as Region
+import six
+from six.moves import range
 
 class RegionCollection:
 
@@ -126,7 +129,7 @@ class RegionCollection:
             return
 
         # Looping over the branches of the tree
-        for key, value in regions.GetBranches().iteritems():
+        for key, value in six.iteritems(regions.GetBranches()):
 
             # Keeping only 'region' branches
             if key[0]!='region':

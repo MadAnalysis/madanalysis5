@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.enumeration.uncertainty_type     import UncertaintyType
 from madanalysis.enumeration.normalize_type       import NormalizeType
 from madanalysis.enumeration.report_format_type   import ReportFormatType
@@ -36,6 +37,8 @@ import madanalysis.enumeration.color_hex
 import time
 import copy
 import logging
+import six
+from six.moves import range
 
 
 class PlotFlow:
@@ -123,7 +126,7 @@ class PlotFlow:
     @staticmethod
     def NiceTitle(text):
         newtext=text 
-        for i,j in PlotFlow.diconicetitle.iteritems():
+        for i,j in six.iteritems(PlotFlow.diconicetitle):
            newtext = newtext.replace(i,j)
         return newtext
 
@@ -210,7 +213,7 @@ class PlotFlow:
 
         # Open the file in write-mode
         try:
-            outputC = file(filenameC,'w')
+            outputC = open(filenameC,'w')
         except:
             logging.getLogger('MA5').error('Impossible to write the file: '+filenameC)
             return False
@@ -566,7 +569,7 @@ class PlotFlow:
 
         # Open the file in write-mode
         try:
-            outputPy = file(filenamePy,'w')
+            outputPy = open(filenamePy,'w')
         except:
             logging.getLogger('MA5').error('Impossible to write the file: '+filenamePy)
             return False

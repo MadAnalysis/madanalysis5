@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.enumeration.argument_type    import ArgumentType
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
@@ -29,6 +30,7 @@ from madanalysis.observable.observable_base   import ObservableBase
 import copy
 import logging
 import sys
+from six.moves import range
 
 def GetParticles(main):
 

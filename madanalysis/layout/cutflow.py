@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.enumeration.uncertainty_type import UncertaintyType
 from madanalysis.enumeration.normalize_type   import NormalizeType
 from madanalysis.IOinterface.job_reader       import JobReader
@@ -30,6 +31,7 @@ from madanalysis.layout.cutflow_for_dataset   import CutFlowForDataset
 from madanalysis.layout.measure               import Measure
 from madanalysis.layout.fom_calculation       import FomCalculation
 from math                                     import sqrt
+from six.moves import range
 
 class CutFlow:
 

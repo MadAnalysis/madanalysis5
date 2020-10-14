@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.selection.instance_name           import InstanceName
 from madanalysis.enumeration.uncertainty_type      import UncertaintyType
 from madanalysis.enumeration.normalize_type        import NormalizeType
@@ -35,6 +36,7 @@ from madanalysis.layout.merging_plots_for_dataset  import MergingPlotsForDataset
 import madanalysis.enumeration.color_hex
 from math import sqrt
 import logging
+from six.moves import range
 
 class MergingPlots:
 
@@ -163,7 +165,7 @@ class MergingPlots:
 
         # Open the file in write-mode
         try:
-            outputC = file(filenameC,'w')
+            outputC = open(filenameC,'w')
         except:
             logging.getLogger('MA5').error('Impossible to write the file: '+filenameC)
             return False
@@ -348,7 +350,7 @@ class MergingPlots:
 
         # Open the file in write-mode
         try:
-            outputPy = file(filenamePy,'w')
+            outputPy = open(filenamePy,'w')
         except:
             logging.getLogger('MA5').error('Impossible to write the file: '+filenamePy)
             return False

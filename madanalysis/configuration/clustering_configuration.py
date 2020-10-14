@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.configuration.clustering_kt          import ClusteringKt
 from madanalysis.configuration.clustering_antikt      import ClusteringAntiKt
 from madanalysis.configuration.clustering_genkt       import ClusteringGenKt
@@ -209,7 +210,7 @@ class ClusteringConfiguration:
         
     def user_GetParameters(self):
         if self.algorithm!="none":
-            table = ClusteringConfiguration.userVariables.keys()
+            table = list(ClusteringConfiguration.userVariables.keys())
             table.extend(self.clustering.user_GetParameters())
             table.extend(self.beauty.user_GetParameters())
             table.extend(self.tau.user_GetParameters())

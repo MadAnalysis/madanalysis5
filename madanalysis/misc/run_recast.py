@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.install.detector_manager                       import DetectorManager
 from madanalysis.configuration.delphesMA5tune_configuration     import DelphesMA5tuneConfiguration
 from madanalysis.configuration.delphes_configuration            import DelphesConfiguration
@@ -38,6 +39,9 @@ import math
 import os
 import shutil
 import time
+from six.moves import map
+from six.moves import range
+from six.moves import input
 
 class RunRecast():
 
@@ -82,7 +86,7 @@ class RunRecast():
         allowed_answers=['n','no','y','yes']
         answer=""
         while answer not in  allowed_answers:
-            answer=raw_input("Answer: ")
+            answer=input("Answer: ")
             answer=answer.lower()
         if answer=="no" or answer=="n":
             return
@@ -1063,7 +1067,7 @@ class RunRecast():
                     likelihood_profile = 'HF-Likelihood-'+str(nprofile)
                 if likelihood_profile == 'HF-Likelihood-'+str(nprofile):
                     nprofile += 1
-                if not likelihood_profile in pyhf_config.keys():
+                if not likelihood_profile in list(pyhf_config.keys()):
                     pyhf_config[likelihood_profile] = {'name' : 'No File name in info file...',
                                                        'path' : os.path.join(self.pad,
                                                                              'Build/SampleAnalyzer/User/Analyzer'),
@@ -1234,7 +1238,7 @@ class RunRecast():
         number_of_merged_bkg = 0
         iterator = []
         if self.pyhf_config!={}:
-            iterator = copy.deepcopy(self.pyhf_config.items())+[('Global-Likelihood',{})]
+            iterator = copy.deepcopy(list(self.pyhf_config.items()))+[('Global-Likelihood',{})]
         for n, (likelihood_profile, config) in enumerate(iterator):
             logging.getLogger('MA5').debug('    * Running CLs for '+likelihood_profile)
             # safety check, just in case
@@ -1392,16 +1396,16 @@ class RunRecast():
     def pyhf_sig95Wrapper(self,lumi,regiondata,tag):
         if self.pyhf_config == {}:
             return regiondata
-        if 'pyhf' not in regiondata.keys():
+        if 'pyhf' not in list(regiondata.keys()):
             regiondata['pyhf'] = {}
 
         number_of_merged_bkg = 0
         iterator = []
         if self.pyhf_config!={}:
-            iterator = copy.deepcopy(self.pyhf_config.items())+[('Global-Likelihood',{})]
+            iterator = copy.deepcopy(list(self.pyhf_config.items()))+[('Global-Likelihood',{})]
         for n, (likelihood_profile, config) in enumerate(iterator):
             logging.getLogger('MA5').debug('    * Running sig95'+tag+' for '+likelihood_profile)
-            if likelihood_profile not in regiondata['pyhf'].keys():
+            if likelihood_profile not in list(regiondata['pyhf'].keys()):
                 regiondata['pyhf'][likelihood_profile] = {}
             if likelihood_profile != 'Global-Likelihood':
                 background = HF_Background(config,expected=(tag=='exp'))
@@ -1480,7 +1484,7 @@ class RunRecast():
             mystat = "%.7f" % stat
             mysyst = ["%.7f" % x for x in syst]
             myxsexp = regiondata[reg]["s95exp"]
-            if "s95obs" in regiondata[reg].keys():
+            if "s95obs" in list(regiondata[reg].keys()):
                 myxsobs = regiondata[reg]["s95obs"]
             else:
                 myxsobs = "-1"
@@ -1495,7 +1499,7 @@ class RunRecast():
                 summary.write('\n')
                 band = []
                 for error_set in err_sets:
-                    if len([ x for x in error_set if x in errordata.keys() ])==2:
+                    if len([ x for x in error_set if x in list(errordata.keys()) ])==2:
                         band = band + [errordata[error_set[0]][reg]['CLs'], errordata[error_set[1]][reg]['CLs'], regiondata[reg]['CLs'] ]
                         if len(set(band))==1:
                             continue
@@ -1503,7 +1507,7 @@ class RunRecast():
                           ("%.4f" % min(band)) + ', ' + ("%.4f" % max(band)) + ']\n')
                 for i in range(0, len(self.main.recasting.systematics)):
                     error_set = [ 'sys'+str(i)+'_up',  'sys'+str(i)+'_dn' ]
-                    if len([ x for x in error_set if x in errordata.keys() ])==2:
+                    if len([ x for x in error_set if x in list(errordata.keys()) ])==2:
                         band = band + [errordata[error_set[0]][reg]['CLs'], errordata[error_set[1]][reg]['CLs'], regiondata[reg]['CLs'] ]
                         if len(set(band))==1:
                             continue
@@ -1529,7 +1533,7 @@ class RunRecast():
                     myxsobs.ljust(15,' ') + myglobalcls.ljust(7, ' ') + '   ||    \n')
                 band = []
                 for error_set in err_sets:
-                    if len([ x for x in error_set if x in errordata.keys() ])==2:
+                    if len([ x for x in error_set if x in list(errordata.keys()) ])==2:
                         band = band + [errordata[error_set[0]]["globalCLs"], errordata[error_set[1]]["globalCLs"], regiondata["globalCLs"] ]
                         if len(set(band))==1:
                             continue
@@ -1537,7 +1541,7 @@ class RunRecast():
                           ("%.4f" % min(band)) + ', ' + ("%.4f" % max(band)) + ']\n')
                 for i in range(0, len(self.main.recasting.systematics)):
                     error_set = [ 'sys'+str(i)+'_up',  'sys'+str(i)+'_dn' ]
-                    if len([ x for x in error_set if x in errordata.keys() ])==2:
+                    if len([ x for x in error_set if x in list(errordata.keys()) ])==2:
                         band = band + [errordata[error_set[0]]["globalCLs"], errordata[error_set[1]]["globalCLs"], regiondata["globalCLs"] ]
                         if len(set(band))==1:
                             continue
@@ -1554,8 +1558,8 @@ class RunRecast():
 
         # pyhf results
         pyhf_data = regiondata.get('pyhf',{})
-        for likelihood_profile in self.pyhf_config.keys()+['Global-Likelihood']:
-            if likelihood_profile not in pyhf_data.keys():
+        for likelihood_profile in list(self.pyhf_config.keys())+['Global-Likelihood']:
+            if likelihood_profile not in list(pyhf_data.keys()):
                 continue
             myxsexp   = pyhf_data.get(likelihood_profile,{}).get('s95exp',"-1")
             myxsobs   = pyhf_data.get(likelihood_profile,{}).get('s95obs',"-1")
@@ -1569,7 +1573,7 @@ class RunRecast():
                 summary.write('\n')
                 band = []
                 for error_set in err_sets:
-                    if len([ x for x in error_set if x in errordata.keys() ])==2:
+                    if len([ x for x in error_set if x in list(errordata.keys()) ])==2:
                         band = band + [errordata[error_set[0]].get('pyhf',{}).get(likelihood_profile,{}).get('CLs',0.0),
                                        errordata[error_set[1]].get('pyhf',{}).get(likelihood_profile,{}).get('CLs',0.0),
                                        pyhf_data.get(likelihood_profile,{}).get('CLs', 0.)]
@@ -1579,7 +1583,7 @@ class RunRecast():
                           ("%.4f" % min(band)) + ', ' + ("%.4f" % max(band)) + ']\n')
                 for i in range(0, len(self.main.recasting.systematics)):
                     error_set = [ 'sys'+str(i)+'_up',  'sys'+str(i)+'_dn' ]
-                    if len([ x for x in error_set if x in errordata.keys() ])==2:
+                    if len([ x for x in error_set if x in list(errordata.keys()) ])==2:
                         band = band + [errordata[error_set[0]].get('pyhf',{}).get(likelihood_profile,{}).get('CLs',0.0),
                                        errordata[error_set[1]].get('pyhf',{}).get(likelihood_profile,{}).get('CLs',0.0),
                                        pyhf_data.get(likelihood_profile,{}).get('CLs', 0.)]
@@ -1664,7 +1668,7 @@ def cls(NumObserved, ExpectedBG, BGError, SigHypothesis, NumToyExperiments):
     # taking one value from a Poisson distribution created using the expected
     # number of events.
     ToyBGs = scipy.stats.poisson.rvs(ExpectedBGs)
-    ToyBGs = map(float, ToyBGs)
+    ToyBGs = list(map(float, ToyBGs))
 
     # The probability for the background alone to fluctutate as LOW as
     # observed = the fraction of the toy experiments with backgrounds as low as
@@ -1678,7 +1682,7 @@ def cls(NumObserved, ExpectedBG, BGError, SigHypothesis, NumToyExperiments):
     if len(ExpectedBGandS)==0:
         return 0.
     ToyBplusS = scipy.stats.poisson.rvs(ExpectedBGandS)
-    ToyBplusS = map(float, ToyBplusS)
+    ToyBplusS = list(map(float, ToyBplusS))
 
     # Calculate the fraction of these that are >= the number observed,
     # giving p_(S+B). Divide by (1 - p_b) a la the CLs prescription.

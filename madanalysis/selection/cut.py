@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.enumeration.combination_type import CombinationType
 from madanalysis.enumeration.observable_type  import ObservableType
@@ -65,10 +66,10 @@ class Cut():
         self.regions    = regions
 
     def user_GetParameters(self):
-        return Cut.userVariables.keys()
+        return list(Cut.userVariables.keys())
 
     def user_GetShortcuts(self):
-        return Cut.userShortcuts.keys()
+        return list(Cut.userShortcuts.keys())
 
     def user_GetValues(self,variable):
         try:
@@ -77,7 +78,7 @@ class Cut():
             return []
 
     def user_SetShortcuts(self,name):
-        if name in Cut.userShortcuts.keys():
+        if name in list(Cut.userShortcuts.keys()):
             return self.user_SetParameter(Cut.userShortcuts[name][0],Cut.userShortcuts[name][1])
         else:
             logging.getLogger('MA5').error("option '" + name + "' is unknown.")

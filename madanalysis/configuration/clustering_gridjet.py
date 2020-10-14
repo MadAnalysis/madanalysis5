@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 class ClusteringGridJet():
 
@@ -72,7 +73,7 @@ class ClusteringGridJet():
 
     
     def user_GetParameters(self):
-        return ClusteringGridJet.userVariables.keys()
+        return list(ClusteringGridJet.userVariables.keys())
 
 
     def user_SetParameter(self,parameter,value):

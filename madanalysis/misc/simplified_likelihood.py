@@ -34,6 +34,7 @@
 """
 
 from __future__ import print_function
+from __future__ import absolute_import
 from scipy import stats, optimize, integrate, special
 from scipy import __version__ as scipy_version
 from numpy  import sqrt, exp, log, sign, array, ndarray
@@ -41,6 +42,8 @@ from functools import reduce
 import numpy as NP
 import math
 import copy
+from six.moves import range
+from six.moves import zip
 
 def getLogger():
     """

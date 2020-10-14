@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.system.config_checker            import ConfigChecker
 from madanalysis.system.user_info                 import UserInfo
 from madanalysis.enumeration.ma5_running_type     import MA5RunningType
@@ -30,6 +31,7 @@ from madanalysis.IOinterface.multiparticle_reader import MultiparticleReader
 from madanalysis.interpreter.cmd_define           import CmdDefine
 import madanalysis.interpreter.cmd_base as CmdBase
 import logging
+from six.moves import range
 
 class CmdSet(CmdBase.CmdBase):
     """Command SET"""

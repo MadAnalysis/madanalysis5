@@ -23,6 +23,8 @@
 
 
 # Setting global variables of MadAnalysis main
+from __future__ import absolute_import
+from __future__ import print_function
 from madanalysis.core.script_stack import ScriptStack
 from madanalysis.core.main         import Main
 from string_tools                  import StringTools
@@ -53,7 +55,7 @@ class MA5mode():
 ################################################################################
 def DefaultInstallCard():
     logging.getLogger('MA5').info("Generate a default installation_options.dat file...")
-    output = file('installation_options.dat','w')
+    output = open('installation_options.dat','w')
     output.write('# WARNING! MA5 SHOULD DETECT AUTOMATICALLY YOUR CONFIGURATION\n')
     output.write('# IF THIS AUTOMATED MODE FAILS, YOU CAN FORCE SOME \n')
     output.write('# OPTIONS THROUGH THIS FILE\n')
@@ -128,7 +130,7 @@ def DecodeArguments(version, date):
                                      ["partonlevel","hadronlevel","recolevel",\
                                       "expert","version","release","help",\
                                       "forced","script","debug","build","qmode","installcard"])
-    except getopt.GetoptError, err:
+    except getopt.GetoptError as err:
         logging.getLogger('MA5').error(str(err))
         Usage()
         sys.exit()
@@ -159,9 +161,9 @@ def DecodeArguments(version, date):
             mode.build = True
         elif o in ["-q","--qmode"]:
             mode.developer_mode = True
-            print ""
-            print " **** DEVELOPER MODE DETECTED **** "
-            print ""
+            print("")
+            print(" **** DEVELOPER MODE DETECTED **** ")
+            print("")
         elif o in ["-h","--help"]:
             Usage()
             sys.exit()
@@ -395,7 +397,7 @@ def LaunchMA5(version, date, ma5dir):
         try:
             import pyreadline as readline
         except:
-            print "For tab completion and history, install module readline."
+            print("For tab completion and history, install module readline.")
     else:
         import rlcompleter
     

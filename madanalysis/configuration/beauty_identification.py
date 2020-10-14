@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 class BeautyIdentification():
 
@@ -95,7 +96,7 @@ class BeautyIdentification():
 
     
     def user_GetParameters(self):
-        return BeautyIdentification.userVariables.keys()
+        return list(BeautyIdentification.userVariables.keys())
 
 
     def user_SetParameter(self,parameter,value):

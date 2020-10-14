@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.IOinterface.folder_writer    import FolderWriter
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
@@ -30,9 +31,9 @@ from shell_command                            import ShellCommand
 import logging
 import shutil
 import os
-import commands
+import six
 
-class JobWriter():
+class JobWriter(object):
 
     def __init__(self,main,jobdir,resubmit=False):
         self.main       = main
@@ -43,7 +44,7 @@ class JobWriter():
         self.merging    = self.main.merging
 
     @staticmethod
-    def CheckJobStructureMute(self,path,recastflag):
+    def CheckJobStructureMute(path,recastflag):
         if not os.path.isdir(path):
             return False
         if not recastflag:
@@ -355,7 +356,7 @@ class JobWriter():
                 logging.getLogger('MA5').error('Impossible to copy the file "newAnalyzer"')
                 return False
             try:    
-                os.chmod(self.path+"/Build/SampleAnalyzer/newAnalyzer.py",0755)
+                os.chmod(self.path+"/Build/SampleAnalyzer/newAnalyzer.py",0o755)
             except:
                 logging.getLogger('MA5').error('Impossible to make executable the file "newAnalyzer"')
                 return False
@@ -460,8 +461,8 @@ class JobWriter():
             file.write('  //Getting pointer to the clusterer\n')
             file.write('  std::map<std::string, std::string> parametersC1;\n')
             parameters = self.main.fastsim.SampleAnalyzerConfigString()
-            for k,v in sorted(parameters.iteritems(),\
-                              key=lambda (k,v): (k,v)):
+            for k,v in sorted(six.iteritems(parameters),\
+                              key=lambda k_v: (k_v[0],k_v[1])):
                 file.write('  parametersC1["'+k+'"]="'+v+'";\n')
             file.write('  JetClusterer* cluster1 = \n')
             file.write('      manager.InitializeJetClusterer("'+self.main.fastsim.clustering.algorithm+'",parametersC1);\n')
@@ -483,8 +484,8 @@ class JobWriter():
             else:
                 cfg=self.main.fastsim.delphes
             parameters = self.main.fastsim.SampleAnalyzerConfigString()
-            for k,v in sorted(parameters.iteritems(),\
-                              key=lambda (k,v): (k,v)):
+            for k,v in sorted(six.iteritems(parameters),\
+                              key=lambda k_v1: (k_v1[0],k_v1[1])):
                 file.write('  parametersD1["'+k+'"]="'+v+'";\n')
             file.write('  DetectorBase* fastsim1 = \n')
 

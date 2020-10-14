@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 class ClusteringGenKt():
 
@@ -93,7 +94,7 @@ class ClusteringGenKt():
 
     
     def user_GetParameters(self):
-        return ClusteringGenKt.userVariables.keys()
+        return list(ClusteringGenKt.userVariables.keys())
 
 
     def user_SetParameter(self,parameter,value):

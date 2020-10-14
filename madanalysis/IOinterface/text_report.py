@@ -22,10 +22,12 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.enumeration.color_type import ColorType
 from madanalysis.enumeration.font_type import FontType
 from madanalysis.enumeration.script_type import ScriptType
 import logging
+import six
 
 class TextReport():
 
@@ -42,7 +44,7 @@ class TextReport():
         
         def ReplaceAll(self,text,dic):
             word = text
-            for i,j in dic.iteritems():
+            for i,j in six.iteritems(dic):
                 word = word.replace(i,j)
             return word
 

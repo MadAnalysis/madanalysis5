@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.enumeration.combination_type import CombinationType
 from madanalysis.enumeration.argument_type    import ArgumentType
 from madanalysis.observable.observable_base   import ObservableBase

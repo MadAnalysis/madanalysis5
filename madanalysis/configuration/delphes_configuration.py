@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.enumeration.ma5_running_type         import MA5RunningType
 import os
 import logging
@@ -262,7 +263,7 @@ class DelphesConfiguration:
 
         
     def user_GetParameters(self):
-        return DelphesConfiguration.userVariables.keys()
+        return list(DelphesConfiguration.userVariables.keys())
 
 
     def user_GetValues(self,variable):

@@ -22,11 +22,11 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.system.architecture_info import ArchitectureInfo
 import logging
 import glob
 import os
-import commands
 import sys
 
 class LibraryBuilder:

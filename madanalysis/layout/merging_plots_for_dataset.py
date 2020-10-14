@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.enumeration.uncertainty_type     import UncertaintyType
 from madanalysis.enumeration.normalize_type       import NormalizeType
 from madanalysis.enumeration.report_format_type   import ReportFormatType

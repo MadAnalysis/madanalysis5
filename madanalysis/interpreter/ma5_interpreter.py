@@ -24,6 +24,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 import os
 import shutil
@@ -84,9 +85,9 @@ class MA5Interpreter(Interpreter):
         old_environ = dict(os.environ)
 
         # Checking if the correct release of Python is installed and tab completion
-        if not sys.version_info[0] == 2 or sys.version_info[1] < 6:
+        if sys.version_info[1] < 6:
             raise InvalidPython('Python release '+ sys.version + ' not supported.\n' + \
-            'MadAnalysis 5 works only with python 2.6 or later (but not python 3.X).')
+            'MadAnalysis 5 works only with python 2.7 or  python 3.7 and later.')
 
         # Checking the MA5 path and adding it to sys.path
         if not os.path.isdir(ma5dir):
@@ -285,7 +286,7 @@ class MA5Interpreter(Interpreter):
                 user_info.SetValue(usrkey,value,'')
                 update_options(usrkey,value)
                 if archi_reset != '':
-                    self.main.archi_info.__dict__[archi_reset.keys()[0]] = archi_reset.values()[0]
+                    self.main.archi_info.__dict__[list(archi_reset.keys())[0]] = list(archi_reset.values())[0]
             elif opts[key] not in [True,None]:
                 self.logger.warning('Non-existing ' + key.replace('with-','') + \
                    ' path. Automatic detection used.')

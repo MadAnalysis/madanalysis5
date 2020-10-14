@@ -22,8 +22,10 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.layout.histogram_core import HistogramCore
 import logging
+from six.moves import range
 
 
 class Histogram:

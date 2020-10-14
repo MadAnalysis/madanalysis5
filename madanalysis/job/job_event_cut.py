@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.selection.histogram          import Histogram
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.enumeration.observable_type  import ObservableType
@@ -32,6 +33,7 @@ from madanalysis.enumeration.argument_type    import ArgumentType
 from madanalysis.interpreter.cmd_cut          import CmdCut
 from madanalysis.enumeration.combination_type import CombinationType
 import logging
+from six.moves import range
 
 
 def GetConditions(current,table):
@@ -208,7 +210,7 @@ def WriteJobExecute2Nbody(file,iabs,icut,combi1,combi2,main,tagName,tagIndex,con
         for combi in range(len(combination)):
             file.write('      }\n')
             file.write('      }\n')
-        file('      if ( Ncounter ')
+        open('      if ( Ncounter ')
         file.write(OperatorType.convert2cpp(condition.operator) + \
                    str(condition.threshold) +   \
                    ') '+tagName+'['+tagIndex+']=true;\n')

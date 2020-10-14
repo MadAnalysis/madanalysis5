@@ -22,8 +22,10 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import madanalysis.interpreter.cmd_base as CmdBase
 import logging
+from six.moves import range
 
 class CmdDisplay(CmdBase.CmdBase):
     """Command DISPLAY"""

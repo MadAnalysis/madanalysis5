@@ -22,10 +22,10 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 import glob
 import os
-import commands
 import sys
 import shutil
 

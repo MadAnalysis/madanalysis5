@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.IOinterface.folder_writer    import FolderWriter
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
@@ -29,7 +30,6 @@ from string_tools                             import StringTools
 import logging
 import shutil
 import os
-import commands
 
 class LayoutWriter():
 

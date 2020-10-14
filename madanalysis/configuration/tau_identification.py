@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 class TauIdentification():
 
@@ -70,7 +71,7 @@ class TauIdentification():
 
     
     def user_GetParameters(self):
-        return TauIdentification.userVariables.keys()
+        return list(TauIdentification.userVariables.keys())
 
 
     def user_SetParameter(self,parameter,value):

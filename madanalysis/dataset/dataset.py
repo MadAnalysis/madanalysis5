@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.enumeration.linestyle_type import LineStyleType
 from madanalysis.enumeration.backstyle_type import BackStyleType
 from madanalysis.enumeration.color_type import ColorType
@@ -83,7 +84,7 @@ class Dataset:
             return []
 
     def user_GetParameters(self):
-        return Dataset.userVariables.keys()
+        return list(Dataset.userVariables.keys())
 
     def user_SetParameter(self,variable,value,value2="",value3=""):
         #type

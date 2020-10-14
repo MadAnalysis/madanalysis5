@@ -28,6 +28,8 @@
 
 
 # Import Interpreter core
+from __future__ import absolute_import
+from __future__ import print_function
 from madanalysis.interpreter.interpreter_base import InterpreterBase
 
 # Import MadAnalysis main class
@@ -60,6 +62,7 @@ from madanalysis.interpreter.cmd_install        import CmdInstall
 import logging
 import readline
 import os
+from six.moves import input
 
 
 #===============================================================================
@@ -219,7 +222,7 @@ class Interpreter(InterpreterBase):
            allowed_answers=['n','no','y','yes']
            answer=""
            while answer not in  allowed_answers:
-              answer=raw_input("Answer: ")
+              answer=input("Answer: ")
               answer=answer.lower()
               if answer=="no" or answer=="n":
                    YES=False
@@ -440,9 +443,9 @@ class Interpreter(InterpreterBase):
     
             self.stdout.write(self.prompt+readline.get_line_buffer())
             self.stdout.flush()
-        except Exception, error:
+        except Exception as error:
             if __debug__:
-                 print error
+                 print(error)
 
     def getTerminalSize(self):
         def ioctl_GWINSZ(fd):
@@ -521,8 +524,8 @@ class Interpreter(InterpreterBase):
                 data = compfunc(Ntext, line, Nbegidx, endidx)
                 self.completion_matches = [p[to_rm:] for p in data 
                                               if len(p)>to_rm]
-             except Exception, error:
-                 print error
+             except Exception as error:
+                 print(error)
             else:
                 self.completion_prefix = ''
                 self.completion_matches = compfunc(text, line, begidx, endidx)
@@ -533,7 +536,7 @@ class Interpreter(InterpreterBase):
         
         try:
             return self.completion_matches[state]
-        except IndexError, error:
+        except IndexError as error:
             #if __debug__:
             #    print '\n Completion ERROR:'
             #    print error

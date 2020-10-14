@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 class Smearer:
 
@@ -40,11 +41,11 @@ class Smearer:
         if not check:
             return
         ## Checking whether the reco/true pair already exists
-        key_number=len(self.rules.keys())+1
+        key_number=len(list(self.rules.keys()))+1
         for key, value in self.rules.items():
             if value['id_true']==id_true and value['obs']==obs:
                 key_number = key
-        if not key_number in self.rules.keys():
+        if not key_number in list(self.rules.keys()):
             self.rules[key_number] = { 'id_true':id_true, 'obs':obs,
               'efficiencies':{} }
 
@@ -58,7 +59,7 @@ class Smearer:
         self.logger.info('*********************************')
         self.logger.info('       Smearer information       ')
         self.logger.info('*********************************')
-        if self.rules.keys() != []:
+        if list(self.rules.keys()) != []:
             self.logger.info(' - Running in the '+jetrecomode+' reconstruction mode.')
         for key in self.rules.keys():
             myrule = self.rules[key]
@@ -87,12 +88,12 @@ class Smearer:
               ', '.join(self.vars))
             self.logger.error('Smearer ignored')
             return False, id_true
-        if id_true in supported.keys():
+        if id_true in list(supported.keys()):
             return True, supported[id_true]
-        elif id_true in supported.values():
+        elif id_true in list(supported.values()):
             return True, id_true
         else:
             self.logger.error('Unsupported smearer ('+id_true+'). Only the following objects can be smeared: '\
-                 + ', '.join(supported.keys()))
+                 + ', '.join(list(supported.keys())))
             self.logger.error('Smearer ignored')
             return False, id_true

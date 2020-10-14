@@ -22,12 +22,14 @@
 ################################################################################
 
 
+from __future__ import absolute_import
+from __future__ import print_function
 import logging
 import shutil
 import os
-import commands
 import copy
-
+from six.moves import range
+import six
 
 class PngHeader():
 
@@ -71,13 +73,13 @@ class PngHeader():
        
 
     def Print(self):
-        print 'PNG file with width='+str(self.width)+\
+        print('PNG file with width='+str(self.width)+\
               ' height='+str(self.height)+\
               ' bit_depth='+str(self.bit_depth)+\
               ' color_type='+str(self.color_type)+\
               ' compression_type='+str(self.compression_type)+\
               ' filter_type='+str(self.filter_type)+\
-              ' interlace_type='+str(self.interlace_type)
+              ' interlace_type='+str(self.interlace_type))
 
         
 
@@ -121,12 +123,18 @@ class PngReader():
             logging.getLogger('MA5').error('The file "'+self.filename+'" seems to be empty.')
             return False
 
+#        if six.PY3:
+#            head = str(head).decode()
         # Check the PNG stamp
         ok=True
+        print(head)
         for ind in range(0,len(head)):
-            if ord(head[ind])!=PngReader.png_header[ind]:
+            if  six.PY2 and ord(head[ind])!=PngReader.png_header[ind]:
                 ok=False
-                break
+                break                
+            elif head[ind]!=PngReader.png_header[ind]:
+                ok=False
+                break                
         if not ok:
             logging.getLogger('MA5').error('The file "'+self.filename+'" is not a PNG file.')
             return False
@@ -141,12 +149,13 @@ class PngReader():
         try:
             head_length = self.input.read(4)
             head_type   = self.input.read(4)
-        except:
+        except Exception as error:
+            print(error)
             logging.getLogger('MA5').error('The file "'+self.filename+'" does not contain a PNG header.')
             return False
 
         # Check the header begin
-        if head_type.upper()!='IHDR':
+        if six.PY2 and head_type.upper()!='IHDR':
             logging.getLogger('MA5').error('The file "'+self.filename+'" does not contain a PNG header.')
             return False
 
@@ -162,18 +171,24 @@ class PngReader():
         except:
             logging.getLogger('MA5').error('Wrong PNG header for the file "'+self.filename+'".')
             return False
-
+        
+        def decode(d):
+            if six.PY2:
+                return ord(d)
+            else:
+                return d
+        
         # Decode the header
-        self.header.bit_depth        = ord(bit_depth)
-        self.header.color_type       = ord(color_type)
-        self.header.compression_type = ord(compression_type)
-        self.header.filter_type      = ord(filter_type)
-        self.header.interlace_type   = ord(interlace_type)
+        self.header.bit_depth        = decode(bit_depth)
+        self.header.color_type       = decode(color_type)
+        self.header.compression_type = decode(compression_type)
+        self.header.filter_type      = decode(filter_type)
+        self.header.interlace_type   = decode(interlace_type)
         self.header.width            = 0
         self.header.height           = 0
         for ind in range(0,4):
-            self.header.width  += ord(width[ind]) *((2**8)**(3-ind))
-            self.header.height += ord(height[ind])*((2**8)**(3-ind))
+            self.header.width  += decode(width[ind]) *((2**8)**(3-ind))
+            self.header.height += decode(height[ind])*((2**8)**(3-ind))
 
         # Ok
         return True

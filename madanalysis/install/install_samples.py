@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.install.install_service import InstallService
 from shell_command import ShellCommand
 import os
@@ -74,7 +75,7 @@ class InstallSamples:
 
     def Check(self):
 
-        filesToCheck = self.files.keys()
+        filesToCheck = list(self.files.keys())
         ok=True
         for item in filesToCheck:
             logging.getLogger('MA5').debug('checking file: '+item+ ' ...')

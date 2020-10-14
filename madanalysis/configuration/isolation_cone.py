@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 class IsolationCone():
 
@@ -53,7 +54,7 @@ class IsolationCone():
 
     
     def user_GetParameters(self):
-        return IsolationCone.userVariables.keys()
+        return list(IsolationCone.userVariables.keys())
 
 
     def user_SetParameter(self,parameter,value):

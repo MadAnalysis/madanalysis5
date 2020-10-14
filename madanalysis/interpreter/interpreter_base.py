@@ -23,6 +23,7 @@
 
 
 """  A file containing different extension of the cmd basic python library"""
+from __future__ import absolute_import
 from madanalysis.IOinterface.text_file_reader import TextFileReader
 from madanalysis.core.script_stack            import ScriptStack
 from madanalysis.interpreter.history          import History
@@ -35,6 +36,7 @@ import signal
 import traceback
 import subprocess
 import readline
+from six.moves import range
 
 
 #===============================================================================
@@ -295,7 +297,7 @@ class InterpreterBase(cmd.Cmd):
     def do_shell(self, line):
         "run a shell command"
 
-        if line.strip() is '':
+        if line.strip() == '':
             self.help_shell()
         else:
             self.logger.info("   Running the shell command: " + line + ".")

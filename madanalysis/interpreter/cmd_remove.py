@@ -22,9 +22,11 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import madanalysis.interpreter.cmd_base as CmdBase
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
 import logging
+from six.moves import range
 
 class CmdRemove(CmdBase.CmdBase):
     """Command REMOVE"""
@@ -42,7 +44,7 @@ class CmdRemove(CmdBase.CmdBase):
        # Multiparticle removal
         if self.main.multiparticles.Find(name):
             theList = self.main.selection.GetItemsUsingMultiparticle(name) 
-            if len(theList) is 0:
+            if len(theList) == 0:
                 self.main.multiparticles.Remove(name,self.main.mode)
             else:
                 logging.getLogger('MA5').error("The Particle/Multiparticle '" + name + \
