@@ -908,7 +908,8 @@ class RunRecast():
     def header_info_file(self, etree, analysis, extrapolated_lumi):
         logging.getLogger('MA5').debug('Reading info from the file related to '+analysis + '...')
         ## checking the header of the file
-        info_root = etree.getroot()
+        etree_secure = copy.deepcopy(etree)
+        info_root = etree_secure.getroot()
         if info_root.tag != "analysis":
             logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): <analysis> tag.')
             return -1,-1,-1,-1,-1
@@ -929,9 +930,11 @@ class RunRecast():
             regiondata["covsubset"] = info_root.attrib["cov_subset"]
         # activate pyhf
         self.pyhf_config = self.pyhf_info_file(info_root)
-        logging.getLogger('MA5').debug(str(self.pyhf_config))
+        logging.getLogger('MA5').debug("PYHF config = "+str(self.pyhf_config))
         ## first we need to get the number of regions
+        logging.getLogger('MA5').debug("info_root items = "+str(info_root.items()))
         for child in info_root:
+            logging.getLogger('MA5').debug("info_root child = "+str(child.tag))
             # Luminosity
             if child.tag == "lumi":
                 try:
@@ -945,6 +948,9 @@ class RunRecast():
                 logging.getLogger('MA5').debug('The luminosity of ' + analysis + ' is ' + str(lumi) + ' fb-1.')
             # regions
             if child.tag == "region" and ("type" not in child.attrib or child.attrib["type"] == "signal"):
+                logging.getLogger('MA5').debug("info_root current items = "+str(child.tag)+" "+
+                                               str(child.attrib)+" "+str(child.attrib["type"])+
+                                               " "+str(child.attrib["id"]))
                 if "id" not in child.attrib:
                     logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): <region id> tag.')
                     return 0-1,-1,-1,-1,-1
@@ -955,11 +961,18 @@ class RunRecast():
                 # If one covariance entry is found, the covariance switch is turned on
                 if "covariance" in [rchild.tag for rchild in child]:
                     cov_regions.append(child.attrib["id"])
+        logging.getLogger('MA5').debug("Regions = "+str(regions))
         if self.cov_switch:
             covariance  = [[0. for i in range(len(cov_regions))] for j in range(len(cov_regions))]
-        ## getting the region information
+        ##getting the region information
+        logging.getLogger('MA5').debug(" getting the region information")
+        logging.getLogger('MA5').debug("info_root items = "+str(info_root.items()))
         for child in info_root:
+            logging.getLogger('MA5').debug("Child tag = "+child.tag)
             if child.tag == "region" and ("type" not in child.attrib or child.attrib["type"] == "signal"):
+                logging.getLogger('MA5').debug("info_root current items second loop = "+str(child.tag)+" "+
+                                               str(child.attrib)+" "+str(child.attrib["type"])+
+                                               " "+str(child.attrib["id"]))
                 nobs    = -1
                 nb      = -1
                 deltanb = -1
@@ -995,15 +1008,15 @@ class RunRecast():
                                 elif self.main.recasting.error_extrapolation=='linear':
                                     myval *= lumi_scaling**2
                                 else:
-                                    myval = round(myval*lumi_scaling**2*self.main.recasting.error_extrapolation[0]**2 + sqrt(myval)*lumi_scaling*self.main.recasting.error_extrapolation[1]**2,8);
-
+                                    myval = round(myval*lumi_scaling**2*self.main.recasting.error_extrapolation[0]**2 +\
+                                                  math.sqrt(myval)*lumi_scaling*self.main.recasting.error_extrapolation[1]**2,8)
                                 covariance[i][j] = myval
                     else:
                         logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): unknown region subtag.')
                         return -1,-1,-1,-1,-1
                 if syst == -1 and stat == -1:
                     if self.main.recasting.error_extrapolation=='sqrt':
-                        err_scale=math.sqrt(err_scale)
+                        err_scale=math.sqrt(lumi_scaling)
                         deltanb = round(deltanb*err_scale,8)
                     elif self.main.recasting.error_extrapolation=='linear':
                         err_scale = lumi_scaling
