@@ -977,6 +977,8 @@ class RunRecast():
                 syst    = -1
                 stat    = -1
                 for rchild in child:
+                    logging.getLogger('MA5').debug(rchild.tag)
+                    logging.getLogger('MA5').debug(lumi, regions, regiondata)
                     try:
                         myval=float(rchild.text)
                     except:
@@ -1006,7 +1008,8 @@ class RunRecast():
                                 elif self.main.recasting.error_extrapolation=='linear':
                                     myval *= lumi_scaling**2
                                 else:
-                                    myval = round(myval*lumi_scaling**2*self.main.recasting.error_extrapolation[0]**2 + sqrt(myval)*lumi_scaling*self.main.recasting.error_extrapolation[1]**2,8);
+                                    myval = round(myval*lumi_scaling**2*self.main.recasting.error_extrapolation[0]**2 + \
+                                                  math.sqrt(myval)*lumi_scaling*self.main.recasting.error_extrapolation[1]**2,8);
 
                                 covariance[i][j] = myval
                     else:
@@ -1014,7 +1017,7 @@ class RunRecast():
                         return -1,-1,-1,-1,-1
                 if syst == -1 and stat == -1:
                     if self.main.recasting.error_extrapolation=='sqrt':
-                        err_scale=math.sqrt(err_scale)
+                        err_scale=math.sqrt(lumi_scaling)
                         deltanb = round(deltanb*err_scale,8)
                     elif self.main.recasting.error_extrapolation=='linear':
                         err_scale = lumi_scaling
