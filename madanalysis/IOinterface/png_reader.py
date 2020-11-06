@@ -127,7 +127,6 @@ class PngReader():
 #            head = str(head).decode()
         # Check the PNG stamp
         ok=True
-        print(head)
         for ind in range(0,len(head)):
             if  six.PY2 and ord(head[ind])!=PngReader.png_header[ind]:
                 ok=False

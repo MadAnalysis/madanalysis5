@@ -215,7 +215,8 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySamp
   MAbool EndOfEvent=false;
   MAbool event_block=false;
   MAbool event_header=false;
-  MAbool multiweight_block=false;
+  MAbool multiweight_block = false;
+  MAbool clustering_block  = false;
 
   // Loop over the LHE lines
   while(!EndOfEvent)
@@ -246,9 +247,21 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySamp
       multiweight_block=false;
       continue;
     }
+    else if (line.find("<scales>")!=std::string::npos || line.find("</scales")!=std::string::npos)
+       continue;
+    else if (line.find("<clustering")!=std::string::npos)
+    {
+       clustering_block=true;
+       continue;
+    }
+    else if (line.find("</clustering")!=std::string::npos)
+    {
+       clustering_block=false;
+       continue;
+    }
 
     // Actions
-    if (event_block && !multiweight_block)
+    if (event_block && !multiweight_block && !clustering_block)
     {
       if (event_header)
       {
@@ -257,9 +270,13 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySamp
       }
       else FillEventParticleLine(line,myEvent);
     }
-    else if (event_block && multiweight_block)
+    else if (event_block && multiweight_block && !clustering_block)
     {
       FillWeightLine(line,myEvent);
+    }
+    else if (event_block && !multiweight_block && clustering_block)
+    {
+      continue;
     }
   }
 
