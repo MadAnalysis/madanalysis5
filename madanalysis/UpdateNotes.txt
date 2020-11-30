@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+138           (2020/11/30) fuks:    Bug fix with the PAD/PADForSFS 
+
 137           (2020/11/06) fuks:    Bug fix with the LHE reader (see bug #1851196 on Launchpad) 
 
 136           (2020/11/02) fuks:    Small bug in the recasting facilities 
