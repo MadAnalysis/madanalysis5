@@ -24,10 +24,11 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+import copy
 import logging
 import shutil
 import os
-import copy
+import sys
 from six.moves import range
 import six
 
@@ -123,17 +124,13 @@ class PngReader():
             logging.getLogger('MA5').error('The file "'+self.filename+'" seems to be empty.')
             return False
 
-#        if six.PY3:
-#            head = str(head).decode()
         # Check the PNG stamp
         ok=True
         for ind in range(0,len(head)):
-            if  six.PY2 and ord(head[ind])!=PngReader.png_header[ind]:
+            if (sys.version_info[0]==2 and ord(head[ind])!=PngReader.png_header[ind]) or \
+              (sys.version_info[0]==3 and head[ind]!=PngReader.png_header[ind]):
                 ok=False
-                break                
-            elif head[ind]!=PngReader.png_header[ind]:
-                ok=False
-                break                
+                break
         if not ok:
             logging.getLogger('MA5').error('The file "'+self.filename+'" is not a PNG file.')
             return False

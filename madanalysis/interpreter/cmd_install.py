@@ -74,9 +74,11 @@ class CmdInstall(CmdBase):
                 main.archi_info.toLDPATH1.append(dpath)
 
                 if os.path.isfile(os.path.join(dpath,libname+'.so')):
-                   mylib = os.path.join(dpath,libname+'.so')
+                    mylib = os.path.join(dpath,libname+'.so')
                 elif os.path.isfile(os.path.join(dpath,libname+'.dylib')):
-                   mylib = os.path.join(dpath,libname+'.dylib')
+                    mylib = os.path.join(dpath,libname+'.dylib')
+                else:
+                    return;
 
                 main.archi_info.libraries[to_activate]= mylib+":"+str(os.stat(mylib).st_mtime)
 

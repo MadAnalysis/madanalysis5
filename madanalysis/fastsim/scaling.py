@@ -24,17 +24,19 @@
 
 from __future__ import absolute_import
 import logging
-class Smearer:
+class Scaling:
 
     # Initialization
     def __init__(self):
-        self.logger = logging.getLogger('MA5');
-        self.rules = {}
-        self.vars = ['PT','ETA','PHI','E','PX','PY','PZ','D0','DZ']
+        self.logger    = logging.getLogger('MA5');
+        self.rules     = {}
+        self.vars      = ['PT','ETA','PHI','E','PX','PY','PZ']
 
 
     # Adding a rule to the tagger
     # The bounds and function are written as ASTs
+    # JES option is to make sure that the jet scaling is only applied on 
+    # clustered jets
     def add_rule(self, id_true, obs, function, bounds):
         ## Checking whether the smearer is supported
         check, id_true = self.is_supported(id_true, obs)
@@ -47,7 +49,7 @@ class Smearer:
                 key_number = key
         if not key_number in list(self.rules.keys()):
             self.rules[key_number] = { 'id_true':id_true, 'obs':obs,
-              'efficiencies':{} }
+              'efficiencies':{}}
 
         ## Defining a new rule ID for an existing tagger
         eff_key = len(self.rules[key_number]['efficiencies'])+1
@@ -57,16 +59,19 @@ class Smearer:
 
     def display(self, jetrecomode):
         self.logger.info('*********************************')
-        self.logger.info('       Smearer information       ')
+        self.logger.info('       Scaling information       ')
         self.logger.info('*********************************')
         if list(self.rules.keys()) != []:
             self.logger.info(' - Running in the '+jetrecomode+' reconstruction mode.')
         for key in self.rules.keys():
             myrule = self.rules[key]
-            self.logger.info(str(key) + ' - Smearing an object of PDG ' + str(myrule['id_true']) + \
-               ' from  the observable ' + str(myrule['obs']))
+            if myrule['id_true'] == 'JES':
+                self.logger.info(str(key) + ' - Jet Energy Scaling')
+            else:
+                self.logger.info(str(key) + ' - Scaling an object of PDG ' + str(myrule['id_true']) + \
+                   ' from  the observable ' + str(myrule['obs']))
             for eff_key in myrule['efficiencies'].keys():
-                cpp_name = 'eff_'+str(myrule['id_true'])+'_'+str(myrule['obs'])+\
+                cpp_name = 'scale_'+str(myrule['id_true'])+'_'+str(myrule['obs'])+\
                   '_'+str(eff_key)
                 bnd_name = 'bnd_'+str(myrule['id_true'])+'_'+str(myrule['obs'])+\
                   '_'+str(eff_key)
@@ -82,18 +87,18 @@ class Smearer:
 
 
     def is_supported(self,id_true,obs):
-        supported = {'e':'11', 'mu':'13', 'ta':'15', 'j':'21', 'a':'22', 'track':'track'}
+        supported = {'e':'11', 'mu':'13', 'ta':'15', 'j':'21', 'a':'22', 'track':'track', 'JES':'JES'}
         if not obs in self.vars:
-            self.logger.error('Unsupported smearer. The smeared variable must be part of ' + \
+            self.logger.error('Unsupported scaling. The scaling variable must be part of ' + \
               ', '.join(self.vars))
-            self.logger.error('Smearer ignored')
+            self.logger.error('Scaling ignored')
             return False, id_true
         if id_true in list(supported.keys()):
             return True, supported[id_true]
         elif id_true in list(supported.values()):
             return True, id_true
         else:
-            self.logger.error('Unsupported smearer ('+id_true+'). Only the following objects can be smeared: '\
+            self.logger.error('Unsupported scaling ('+id_true+'). Only the following objects can be scaled: '\
                  + ', '.join(list(supported.keys())))
-            self.logger.error('Smearer ignored')
+            self.logger.error('Scaling ignored')
             return False, id_true

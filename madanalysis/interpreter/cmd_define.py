@@ -36,13 +36,13 @@ class CmdDefine(CmdBase.CmdBase):
     def do(self,args):
 
         # tagger / smearer
-        if args[0] in ['tagger', 'smearer', 'reco_efficiency']:
+        if args[0] in ['tagger', 'smearer', 'reco_efficiency', 'jes', 'scaling', 'energy_scaling']:
             if self.main.mode != MA5RunningType.RECO:
-                logging.getLogger('MA5').error("Smearing/tagging/reconstruction are only available in the RECO mode")
+                logging.getLogger('MA5').error("Smearing/tagging/reconstruction/scaling are only available in the RECO mode")
                 logging.getLogger('MA5').error("Please restart the program with './bin/ma5 -R '")
                 return
             if self.main.fastsim.package != 'fastjet':
-                logging.getLogger('MA5').error("Smearing/tagging/reconstruction require fastjet as a fastsim package. ")
+                logging.getLogger('MA5').error("Smearing/tagging/reconstruction/scaling requires FastJet as a fastsim package. ")
                 return
             self.main.superfastsim.define(args,self.main.multiparticles)
             return
@@ -123,6 +123,22 @@ class CmdDefine(CmdBase.CmdBase):
         logging.getLogger('MA5').info("   Define the efficiency to reconstruct the object <p1>.")
         logging.getLogger('MA5').info("   The corresponding efficiency function is given by <function>.")
         logging.getLogger('MA5').info("   The bounds correspond to the domain the efficiency applies (pt > ..., eta < ..., etc.).")
+        logging.getLogger('MA5').info("")
+        logging.getLogger('MA5').info("   Syntax: define jes <function> [<bounds>]")
+        logging.getLogger('MA5').info("   Define the Jet Energy Scale (JES) corrections to apply to clustered jets.")
+        logging.getLogger('MA5').info("   The corresponding JES function is given by <function>.")
+        logging.getLogger('MA5').info("   The bounds correspond to the domain that JES applies (pt > ..., eta < ..., etc.).")
+        logging.getLogger('MA5').info("")
+        logging.getLogger('MA5').info("   Syntax: define energy_scaling <p1> <function> [<bounds>]")
+        logging.getLogger('MA5').info("   Define the rescaling corrections to apply to the energy of a reconstructed object <p1>.")
+        logging.getLogger('MA5').info("   The corresponding energy scaling function is given by <function>.")
+        logging.getLogger('MA5').info("   The bounds correspond to the domain that scaling function applies (pt > ..., eta < ..., etc.).")
+        # For the future:
+        # logging.getLogger('MA5').info("")
+        # logging.getLogger('MA5').info("   Syntax: define scaling <variable> for <p1> <function> [<bounds>]")
+        # logging.getLogger('MA5').info("   Define rescaling corrections to apply to a variable <variable> for a reconstructed object <p1>.")
+        # logging.getLogger('MA5').info("   The corresponding scaling function is given by <function>.")
+        # logging.getLogger('MA5').info("   The bounds correspond to the domain that scaling function applies (pt > ..., eta < ..., etc.).")
 
 
     def complete(self,text,line,begidx,endidx):

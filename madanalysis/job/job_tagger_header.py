@@ -43,6 +43,17 @@ class JobTaggerHeader:
         file.write('      /// Constructor without argument\n')
         file.write('      NewTagger() \n')
         file.write('      {\n')
+        if not self.fastsim.isNewSmearerOn():
+            # If tagger is on but SmearerBase wont be initialized, write SFS reference
+            # This way whenever SFS is used it will consistently show the ref.
+            file.write('        INFO <<"   <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endmsg;\n')
+            file.write('        INFO <<"   <>                                                              <>" << endmsg;\n')
+            file.write('        INFO <<"   <>     Simplified Fast Detector Simulation in MadAnalysis 5     <>" << endmsg;\n')
+            file.write('        INFO <<"   <>            Please cite arXiv:2006.09387 [hep-ph]             <>" << endmsg;\n')
+            file.write('        INFO <<"   <>                                                              <>" << endmsg;\n')
+            file.write('        INFO <<"   <>         https://madanalysis.irmp.ucl.ac.be/wiki/SFS          <>" << endmsg;\n')
+            file.write('        INFO <<"   <>                                                              <>" << endmsg;\n')
+            file.write('        INFO <<"   <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endmsg;\n')
         file.write('      }\n\n')
         file.write('      /// Destructor\n')
         file.write('      virtual ~NewTagger() {}\n\n')

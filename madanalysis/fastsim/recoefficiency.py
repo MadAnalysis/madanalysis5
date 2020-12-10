@@ -74,7 +74,7 @@ class RecoEfficiency:
 
 
     def is_supported(self, id_reco):
-        supported = {'e':'11', 'mu':'13', 'ta':'15', 'j':'21', 'a':'22'}
+        supported = {'e':'11', 'mu':'13', 'ta':'15', 'j':'21', 'a':'22', 'track':'track'}
         if id_reco in (list(supported.keys())+list(supported.values())):
             return True
         self.logger.error('The reconstruction of such an object (' + id_reco + ') is currently not supported.'+\

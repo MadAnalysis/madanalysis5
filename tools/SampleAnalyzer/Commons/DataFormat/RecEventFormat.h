@@ -186,6 +186,9 @@ class RecEventFormat
   /// Accessor to the track collection (read-only)
   const std::vector<RecTrackFormat>& tracks() const {return tracks_;}
 
+  /// Accessor to the vertex collection (read-only)
+  const std::vector<RecVertexFormat>& vertex() const {return vertices_;}
+
   /// Accessor to the tower collection (read-only)
   const std::vector<RecTowerFormat>& towers() const {return towers_;}
   const std::vector<RecTrackFormat>& EFlowTracks() const {return EFlowTracks_;}

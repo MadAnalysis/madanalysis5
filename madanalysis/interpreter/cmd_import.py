@@ -79,7 +79,7 @@ class CmdImport(CmdBase.CmdBase):
             
         elif len(args)==1 and os.path.isdir(filename):
             recastflag =  self.main.recasting.status=='on'
-            if JobWriter.CheckJobStructureMute(path=filename,recastflag=recastflag):
+            if JobWriter.CheckJobStructureMute(self.main.session_info,path=filename,recastflag=recastflag):
                 self.ImportJob(filename,myinterpreter,history)
                 return
             elif UFOReader.CheckStructure(filename):

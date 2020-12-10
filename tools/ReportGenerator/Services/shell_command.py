@@ -52,6 +52,7 @@ import logging
 import shutil
 import os
 import subprocess
+import sys
 
 
 class ShellCommand():
@@ -77,7 +78,8 @@ class ShellCommand():
 
         # Getting stdout
         out, err = result.communicate()
-        out = out.decode()
+        if sys.version_info[0]==3:
+            out = out.decode()
         if out!=None:
             for line in out:
                output.write(line)
@@ -119,7 +121,8 @@ class ShellCommand():
 
         while True:
             my_out = result.stdout.readline()
-            my_out = my_out.decode()
+            if sys.version_info[0]==3:
+                my_out = my_out.decode()
             if my_out == '' and result.poll() is not None:
                 break
             if my_out and not 'progress' in my_out:
@@ -150,13 +153,15 @@ class ShellCommand():
 
         # Getting stdout
         out, err = result.communicate()
-        
-            
+
         # Return results
         if stdin:
             input.close()
-        return (result.returncode==0), out.decode(), err.decode() if err else err
-    
+        if sys.version_info[0]==3:
+            out = out.decode()
+            err = err.decode() if err else err
+        return (result.returncode==0), out, err
+
 
 
     @staticmethod
@@ -178,7 +183,8 @@ class ShellCommand():
 
         # Getting stdout
         out, err = result.communicate()
-        out = out.decode()
+        if sys.version_info[0]==3:
+            out = out.decode()
         if out==None:
             return []
 

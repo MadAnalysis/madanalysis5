@@ -23,12 +23,8 @@
 
 
 from __future__ import absolute_import
-from madanalysis.enumeration.argument_type    import ArgumentType
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
-from madanalysis.observable.observable_base   import ObservableBase
-import logging
-import sys
 from six.moves import range
 
 def WriteHeader(file,main):
@@ -42,9 +38,9 @@ def WriteHeader(file,main):
     if main.archi_info.has_root:
         file.write('#include "SampleAnalyzer/Interfaces/root/RootMainHeaders.h"\n')
     file.write('\n')
-    if main.superfastsim.tagger.rules!={}:
+    if main.superfastsim.isTaggerOn():
         file.write('#include "new_tagger.h"\n')
-    if main.superfastsim.smearer.rules!={} or main.superfastsim.reco.rules!={} or main.superfastsim.propagator:
+    if main.superfastsim.isNewSmearerOn():
         file.write('#include "new_smearer_reco.h"\n')
 
     # Namespace
@@ -56,7 +52,7 @@ def WriteHeader(file,main):
     file.write('  INIT_ANALYSIS(user,"MadAnalysis5job")\n\n')
     file.write(' public : \n')
     file.write('  virtual MAbool Initialize(const MA5::Configuration& cfg,\n')
-    file.write('                          const std::map<std::string,std::string>& parameters);\n')
+    file.write('                            const std::map<std::string,std::string>& parameters);\n')
     file.write('  virtual void Finalize(const SampleFormat& summary, const std::vector<SampleFormat>& files);\n')
     file.write('  virtual MAbool Execute(SampleFormat& sample, const EventFormat& event);\n')
     file.write('\n private : \n')

@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+139           (2020/12/10) fuks:    Fixing bugs with the python3 compatibility; adding tracks and 
+                                   particle propagation in the SFS module 
+
 138           (2020/11/30) fuks:    Bug fix with the PAD/PADForSFS 
 
 137           (2020/11/06) fuks:    Bug fix with the LHE reader (see bug #1851196 on Launchpad) 

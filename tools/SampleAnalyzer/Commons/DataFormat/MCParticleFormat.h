@@ -52,6 +52,7 @@ class LHEWriter;
 class MergingPlots;
 class DelphesTreeReader;
 class DelphesMA5tuneTreeReader;
+class SmearerBase;
 
 class MCParticleFormat : public ParticleBaseFormat
 {
@@ -64,6 +65,7 @@ class MCParticleFormat : public ParticleBaseFormat
   friend class MergingPlots;
   friend class DelphesTreeReader;
   friend class DelphesMA5tuneTreeReader;
+  friend class SmearerBase;
 
   // -------------------------------------------------------------
   //                        data members
@@ -90,20 +92,12 @@ class MCParticleFormat : public ParticleBaseFormat
   /// List of mother particles
   std::vector<MCParticleFormat*> mothers_;
 
-  // Decay position in time & space (in s & mm)
+  /// Decay position in time & space (in s & mm)
   MALorentzVector decay_vertex_; 
 
-  // Propagated position in time & space (in s & mm)
-  MALorentzVector Position_;
-
-  // Closest approach in transverse plane (in mm)
-  MALorentzVector Closest_approach_;
-
-  // Impact parameter
-  MAfloat64 D0_;
-  MAfloat64 DZ_;
-
- public:
+  /// Angle defining the rotation the momentum is subjected to during its
+  /// propagation in the magnetic field
+  MAdouble64 momentum_rotation_;
 
 
   // -------------------------------------------------------------
@@ -115,14 +109,14 @@ class MCParticleFormat : public ParticleBaseFormat
   MCParticleFormat()
   {
     momentum_.SetPxPyPzE(0.,0.,0.,0.);
-    Position_.SetXYZT(0.,0.,0.,0.);
-    Closest_approach_.SetXYZT(0.,0.,0.,0.);
+    closest_approach_.SetXYZ(0.,0.,0.);
     spin_       = 0.; 
     pdgid_      = 0; 
     statuscode_ = 0; 
     isPU_       = false;
-    D0_         = 0.;
-    DZ_         = 0.;
+    d0_         = 0.; d0_approx_  = 0.;
+    dz_         = 0.; dz_approx_  = 0.;
+    momentum_rotation_ = 0.;
   }
 
   /// Destructor
@@ -140,10 +134,9 @@ class MCParticleFormat : public ParticleBaseFormat
     daughters_.clear();
     mothers_.clear();
     decay_vertex_.clear();
-    Position_.clear();
-    Closest_approach_.clear();
-    D0_         = 0.;
-    DZ_         = 0.;
+    closest_approach_.clear();
+    d0_         = 0.;
+    dz_         = 0.;
   }
 
   /// Print particle informations
@@ -155,8 +148,8 @@ class MCParticleFormat : public ParticleBaseFormat
          << ", "<</*set::setw(8)*/"" << std::left << momentum_.E() << ") - " << endmsg;
     INFO << "ctau=" << /*set::setw(8)*/"" << std::left << decay_vertex_.T() << " - "
          << "spin=" << /*set::setw(8)*/"" << std::left << spin_ << " - "
-         << "D0=" << /*set::setw(8)*/"" << std::left << D0_ << " - "
-         << "DZ=" << /*set::setw(8)*/"" << std::left << DZ_ << " - "
+         << "d0=" << /*set::setw(8)*/"" << std::left << d0_ << " - "
+         << "dz=" << /*set::setw(8)*/"" << std::left << dz_ << " - "
          << "PDGID=" << /*set::setw(8)*/"" << std::left << pdgid_ << " - "
          << "StatusCode=" << /*set::setw(3)*/"" << std::left 
          << static_cast<signed int>(statuscode_) << " - " << endmsg;
@@ -169,8 +162,6 @@ class MCParticleFormat : public ParticleBaseFormat
   const MAfloat32& spin() const {return spin_;}
   const MAint32& pdgid()  const {return pdgid_;}
   const MAint16& statuscode() const {return statuscode_;}
-  const MAfloat64& d0() const {return D0_;}
-  const MAfloat64& dz() const {return DZ_;}
 
   /// Accessor to the daughters (read-only)
   const std::vector<MCParticleFormat*>& daughters() const {return daughters_;}
@@ -178,31 +169,27 @@ class MCParticleFormat : public ParticleBaseFormat
   /// Accessor to the daughters
   std::vector<MCParticleFormat*>& daughters() {return daughters_;}
 
-  /// Accessor to the daughters (read-only)
+  /// Accessor to the mothers (read-only)
   const std::vector<MCParticleFormat*>& mothers() const {return mothers_;}
 
-  /// Accessor to the daughters
+  /// Accessor to the mothers
   std::vector<MCParticleFormat*>& mothers() {return mothers_;}
 
-  /// Accessor to the decay vertex
+  /// Accessor to the decay vertex (read-only)
   const MALorentzVector& decay_vertex() const {return decay_vertex_;}
 
-  /// Accessor to the propagated vertex
-  const MALorentzVector& position() const {return Position_;}
+  /// Accessor to the rotation angle of the momentum (read-only)
+  const MAdouble64& momentum_rotation() const {return momentum_rotation_;}
 
-  /// Accessor to the propagated vertex
-  const MALorentzVector& closestPoint() const {return Closest_approach_;}
 
-  // mutators
+  /// Mutators
+  void setDecayVertex(const MALorentzVector& v) {decay_vertex_=v;}
   void setIsPU(MAbool v)   {isPU_=v;}
   void setSpin(MAfloat32 v)  {spin_=v;}
   void setPdgid(MAint32 v)   {pdgid_=v;}
   void setStatuscode(MAint16 v)  {statuscode_=v;}
   void setMomentum(const MALorentzVector& v)  {momentum_=v;}
-  void setD0(MAfloat64 v)  {D0_=v;}
-  void setDZ(MAfloat64 v)  {DZ_=v;}
-  void setPosition(const MALorentzVector& v)  {Position_=v;}
-  void setClosestPoint(const MALorentzVector& v)  {Closest_approach_=v;}
+  void setMomentumRotation(MAdouble64 v) {momentum_rotation_=v;}
 
   /// Boosting the four momentum to the restframe of another particle
   void ToRestFrame(const MCParticleFormat* boost)

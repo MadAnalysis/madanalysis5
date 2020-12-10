@@ -335,8 +335,6 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
       electron->d0error_  = part->ErrorD0;
       electron->dz_       = part->DZ;
       electron->dzerror_  = part->ErrorDZ;
-      //      electron->vertex_prod_.SetPxPyPzE(part->Xp, part->Yp, part->Zp, part->Tp);
-      //      electron->closest_point_.SetPxPyPzE(part->Xd, part->Yd, part->Zd, 0.);
 
       // setting corresponding gen particle
       const GenParticle* mc = dynamic_cast<const GenParticle*>(part->Particle.GetObject());
@@ -429,13 +427,10 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
       RecLeptonFormat * muon = myEvent.rec()->GetNewMuon();
       muon->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
       if (part->Charge>0) muon->charge_=true; else muon->charge_=false;
-
       muon->d0_      = part->D0;
       muon->d0error_ = part->ErrorD0;
       muon->dz_      = part->DZ;
       muon->dzerror_ = part->ErrorDZ;
-      //      muon->vertex_prod_.SetPxPyPzE(part->Xp, part->Yp, part->Zp, part->Tp);
-      //      muon->closest_point_.SetPxPyPzE(part->Xd, part->Yd, part->Zd, 0.);
 
       // setting corresponding gen particle
       const GenParticle* mc = dynamic_cast<const GenParticle*>(part->Particle.GetObject());

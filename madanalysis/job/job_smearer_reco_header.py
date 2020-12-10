@@ -32,6 +32,7 @@ class JobSmearerRecoHeader:
         self.tau_smearing         = False
         self.jet_smearing         = False
         self.constituent_smearing = False
+        self.track_smearing       = False
         self.propagator           = fastsim.propagator
         for key, val in self.fastsim.smearer.rules.items():
             if val['id_true'] in ['21','j']:
@@ -45,6 +46,8 @@ class JobSmearerRecoHeader:
                 self.electron_smearing    = True
             elif val['id_true'] in ['15','ta']:
                 self.tau_smearing         = True
+            elif val['id_true'] in ['track']:
+                self.track_smearing       = True
         for key, val in self.fastsim.reco.rules.items():
             if val['id_reco'] in ['21','j']:
                 self.jet_smearing         = True
@@ -56,6 +59,26 @@ class JobSmearerRecoHeader:
                 self.electron_smearing    = True
             elif val['id_reco'] in ['15','ta']:
                 self.tau_smearing         = True
+            elif val['id_reco'] in ['track']:
+                self.track_smearing       = True
+        for key, val in self.fastsim.scaling.rules.items():
+            if val['id_true'] == 'JES':
+                self.jet_smearing         = True
+            elif val['id_true'] in ['21','j']:
+                if self.fastsim.jetrecomode == 'jets':
+                    self.jet_smearing         = True
+                else:
+                    self.constituent_smearing = True
+            elif val['id_true'] in ['22','a']:
+                self.photon_smearing      = True
+            elif val['id_true'] in ['13','mu']:
+                self.muon_smearing        = True
+            elif val['id_true'] in ['11','e']:
+                self.electron_smearing    = True
+            elif val['id_true'] in ['15','ta']:
+                self.tau_smearing         = True
+            elif val['id_true'] in ['track']:
+                self.track_smearing       = True
 
 
     ## Writing NewSmearer.h
@@ -84,10 +107,11 @@ class JobSmearerRecoHeader:
         file.write('      {\n')
         file.write('          // Magnetic field along beam axis\n')
         file.write('          Bz_                 = {:.6E};\n'.format(self.fastsim.mag_field))
-        file.write('          // Tracker cylinder radius\n')
-        file.write('          Radius_             = {:.6E};\n'.format(self.fastsim.radius))
-        file.write('          // Tracker half length\n')
-        file.write('          HalfLength_         = {:.6E};\n'.format(self.fastsim.half_length))
+        # Not in use at the moment
+        # file.write('          // Tracker cylinder radius\n')
+        # file.write('          Radius_             = {:.6E};\n'.format(self.fastsim.radius))
+        # file.write('          // Tracker half length\n')
+        # file.write('          HalfLength_         = {:.6E};\n'.format(self.fastsim.half_length))
         file.write('          // Code-efficiency parameters\n')
         file.write('          ParticlePropagator_ = '+(self.propagator*'true'       + (not self.propagator)*'false')+';\n')
         file.write('          MuonSmearer_        = '+(self.muon_smearing*'true'    + (not self.muon_smearing)*'false')+';\n')
@@ -114,19 +138,9 @@ class JobSmearerRecoHeader:
         if self.constituent_smearing:
             file.write('      /// Jet Constituent smearing method\n')
             file.write('      MCParticleFormat ConstituentSmearer(const MCParticleFormat * part);\n\n')
-        file.write('      void PrintDebug()\n')
-        file.write('      {\n')
-        file.write('          DEBUG << "   -> User Defined Smearer." << endmsg;\n')
-        file.write('          DEBUG << "   * Magnetic field [T] = " << Bz_ << endmsg;\n')
-        file.write('          DEBUG << "   * Radius [m]         = " << Radius_ << endmsg;\n')
-        file.write('          DEBUG << "   * Half Length [m]    = " << HalfLength_ << endmsg;\n')
-        file.write('          DEBUG << "   * Propagator         = " << ParticlePropagator_ << endmsg;\n')
-        file.write('          DEBUG << "   * Muon Smearer       = " << MuonSmearer_ << endmsg;\n')
-        file.write('          DEBUG << "   * Electron Smearer   = " << ElectronSmearer_ << endmsg;\n')
-        file.write('          DEBUG << "   * Photon Smearer     = " << PhotonSmearer_ << endmsg;\n')
-        file.write('          DEBUG << "   * Tau Smearer        = " << TauSmearer_ << endmsg;\n')
-        file.write('          DEBUG << "   * Jet Smearer        = " << JetSmearer_ << endmsg;\n')
-        file.write('      }\n\n')
+        if self.track_smearing:
+            file.write('      /// Track smearing method\n')
+            file.write('      MCParticleFormat TrackSmearer(const MCParticleFormat * part);\n\n')
         file.write('  };\n')
         file.write('}\n')
         file.write('#endif')
@@ -167,4 +181,24 @@ class JobSmearerRecoHeader:
                      'reco_bnd_'+str(value['id_reco']) +'_'+str(eff_key)) + '\n')
         file.write('#endif')
 
+
+    ## scales and bounds
+    def WriteNewScales(self,file):
+        file.write('#ifndef SC_H_INCLUDED\n')
+        file.write('#define SC_H_INCLUDED\n')
+        file.write('#include <cmath>\n')
+        file.write('#include <math.h>\n')
+        file.write('#include <iostream>\n')
+        for key, value in self.fastsim.scaling.rules.items():
+            for eff_key in value['efficiencies'].keys():
+                 eff_fnc = value['efficiencies'][eff_key]['function']
+                 eff_bnd = value['efficiencies'][eff_key]['bounds'  ]
+                 file.write(eff_fnc.tocpp('MAdouble64', 'scale_'+\
+                                          str(value['id_true']) + '_' + str(value['obs'])+'_'+\
+                                          str(eff_key))+'\n')
+                 file.write(eff_bnd.tocpp('MAbool', \
+                                          'scale_bnd_'+str(value['id_true']) +\
+                                          '_' + str(value['obs'])+'_'+\
+                                          str(eff_key)) + '\n')
+        file.write('#endif')
 
