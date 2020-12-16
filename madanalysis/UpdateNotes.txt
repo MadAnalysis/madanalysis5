@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+140           (2020/12/16) fuks:    Bug fixes in particle propagation 
+
 139           (2020/12/10) fuks:    Fixing bugs with the python3 compatibility; adding tracks and 
                                    particle propagation in the SFS module 
 

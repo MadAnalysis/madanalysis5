@@ -94,7 +94,7 @@ void SmearerBase::ParticlePropagator(MCParticleFormat * part)
     xd = x_helix * (1 - std::abs(R)/r_helix);
     yd = y_helix * (1 - std::abs(R)/r_helix);
     zd = part->mothers()[0]->decay_vertex().Z()
-     + part->pz()/part->pt() * R * atan2(part->px()*x_helix+part->py()*y_helix,part->px()*y_helix-part->py()*x_helix);
+     + part->pz()/part->pt() * R * atan2(-copysign(1.0,R)*part->px()*x_helix+part->py()*y_helix,-copysign(1.0,R)*part->px()*y_helix-part->py()*x_helix);
 
     part->setClosestApproach(MAVector3(xd,yd,zd));
     part->setD0(copysign(1.0, R)*(r_helix-std::abs(R)));
@@ -105,7 +105,7 @@ void SmearerBase::ParticlePropagator(MCParticleFormat * part)
   if (!PHYSICS->Id->IsFinalState(part))
   {
     // Properties of the propagated momentum in the transverse plane
-    MAdouble64 omegat = prop_ctime * PDG->GetCharge(part->pdgid()) * Bz()/part->e()*1.0e-09*c_;
+    MAdouble64 omegat = prop_ctime * PDG->GetCharge(part->pdgid())/3. * Bz()/part->e()*1.0e-12*c_;
     MAdouble64 px_new = part->px() * cos(omegat) + part->py() * sin(omegat);
     MAdouble64 py_new = part->py() * cos(omegat) - part->px() * sin(omegat);
     RotAngle += atan2(py_new, px_new) - part->phi() + ((RotAngle < 0.) - (RotAngle >= 2.*pi_)) * 2.*pi_;
