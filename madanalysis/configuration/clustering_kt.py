@@ -26,7 +26,7 @@ from __future__ import absolute_import
 import logging
 class ClusteringKt():
 
-    default_radius    = 1.
+    default_radius    = 0.4
     default_exclusive = False
     default_ptmin     = 5.
 

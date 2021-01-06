@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+141           (2021/01/06) fuks:    Changing the default jet radius from 1 to 0.4 in the fastjet 
+                                   interface 
+
 140           (2020/12/16) fuks:    Bug fixes in particle propagation 
 
 139           (2020/12/10) fuks:    Fixing bugs with the python3 compatibility; adding tracks and 

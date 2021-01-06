@@ -26,7 +26,7 @@ from __future__ import absolute_import
 import logging
 class ClusteringSisCone():
     
-    default_radius       = 1.
+    default_radius       = 0.4
     default_overlap      = 0.5
     default_npassmax     = 0
     default_input_ptmin  = 0.
