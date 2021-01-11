@@ -193,6 +193,12 @@ class InstallDelphes:
         self.logger.debug('Updating files: commenting out lines in: '+filename+' ...')
         self.CommentLines(filename,[177,178,179,180],'//')
 
+        # Updating ValidationDelphes
+        filename = self.installdir+'/validation/DelphesValidation.cpp'
+        self.logger.debug('Updating file (missing include): '+filename+' ...')
+        self.MissingInclude(filename)
+
+
         # Adding files
         if self.package=='delphes':
             filesToAdd = ["MA5GenParticleFilter"]
@@ -405,6 +411,84 @@ class InstallDelphes:
             return False
 
         return True
+
+
+    def MissingInclude(self,filename):
+        # open input file
+        try:
+            input = open(filename)
+        except:
+            self.logger.error("impossible to read the file:" + filename)
+            return False
+
+        # open output file
+        try:
+            output = open(filename+'.savema5','w')
+        except:
+            self.logger.error("impossible to read the file:" + filename+'.savema5')
+            return False
+
+        # lines
+        for line in input:
+            if 'TH1.h' in line:
+                output.write("#include \"TF1.h\"")
+            output.write(line);
+
+        #close
+        input.close()
+        output.close()
+
+        # Copy
+        try:
+            shutil.copy(filename+'.savema5',filename)
+        except:
+            self.logger.error("impossible to copy "+filename+'.savema5 in '+filename)
+            return False
+
+        return True
+
+
+    def AddD0(self,filename):
+        # open input file
+        try:
+            input = open(filename)
+        except:
+            self.logger.error("impossible to read the file:" + filename)
+            return False
+
+        # open output file
+        try:
+            output = open(filename+'.savema5','w')
+        except:
+            self.logger.error("impossible to read the file:" + filename+'.savema5')
+            return False
+
+        # lines
+        for line in input:
+            line2=line.lstrip()
+            line2=line2.rstrip()
+            line2=line2.replace(' ','')
+            if line2.startswith('buffer.ReplaceAll("energy"'):
+                output.write(line)
+                output.write('  buffer.ReplaceAll("d0",     "t");\n')
+            else:
+                output.write(line)
+ 
+        #close
+        input.close()
+        output.close()
+
+        try:
+            shutil.copy(filename+'.savema5',filename)
+        except:
+            self.logger.error("impossible to copy "+filename+'.savema5 in '+filename)
+            return False
+
+        return True
+
+
+
+
 
 
     def CopyFiles(self,filesToAdd):

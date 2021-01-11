@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+142           (2021/01/11) fuks:    Bug-fixing delphes so that it works with the latest ROOT 
+
 141           (2021/01/06) fuks:    Changing the default jet radius from 1 to 0.4 in the fastjet 
                                    interface 
 
