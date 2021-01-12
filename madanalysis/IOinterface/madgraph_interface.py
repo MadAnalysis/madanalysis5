@@ -97,6 +97,9 @@ class MadGraphInterface():
                 self.logger.debug('pdgs = '+str(myline[3:]))
                 mypdgs= [self.get_pdg_code(prt) for prt in myline[3:]]
                 self.multiparticles[myline[1]]=sorted(sum([e if isinstance(e,list) else [e] for e in mypdgs],[]))
+        for key, value in self.multiparticles.items():
+            if len([x for x in value if x != '']) == 0:
+                del self.multiparticles[key]
         self.logger.debug('  >> ' + str(self.multiparticles))
         self.logger.debug('  >> invisible: ' + str(self.invisible_particles))
         if card_type=='parton':
@@ -461,8 +464,7 @@ class MadGraphInterface():
             if prt in list(self.multiparticles.keys()):
                 return self.multiparticles[prt]
             else:
-                self.logger.error("  ** Problem with the multiparticle definitions")
-                raise self.MultiParts("  ** Problem with the multiparticle definitions")
+                return ''
 
     # adding the particle definitions
     def get_invisible(self, card_type='parton'):
