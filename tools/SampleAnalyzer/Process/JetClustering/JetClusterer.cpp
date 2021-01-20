@@ -199,7 +199,7 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
     if (PDG->IsCharged(part.pdgid()) && part.mothers().size()>0)
     {
         // Minimum tracking requirement is around 0.5 mm see ref. 1007.1988
-        if (part.ctau()*part.beta()*part.gamma() > 0. || PHYSICS->Id->IsFinalState(part))
+        if (part.ctau() > 0. || PHYSICS->Id->IsFinalState(part))
         {
             // Reminder: -1 is reserved for the tracks
             MCParticleFormat smeared_track = mySmearer_->Execute(&part, -1);
