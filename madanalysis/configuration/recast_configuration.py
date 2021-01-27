@@ -24,12 +24,9 @@
 
 from __future__ import absolute_import
 from madanalysis.enumeration.ma5_running_type   import MA5RunningType
-from madanalysis.IOinterface.folder_writer      import FolderWriter
-from shell_command import ShellCommand
-import glob
-import logging
-import shutil
-import os
+#from madanalysis.IOinterface.folder_writer      import FolderWriter
+#from shell_command import ShellCommand
+import glob, logging, shutil, os
 from six.moves import range
 
 class RecastConfiguration:
