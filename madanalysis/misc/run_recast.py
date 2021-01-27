@@ -59,6 +59,7 @@ class RunRecast():
         self.cov_switch       = False
         self.pyhf_config      = {} # initialize and configure histfactory
 
+
     def init(self):
         ### First, the analyses to take care off
         logging.getLogger("MA5").debug("  Inviting the user to edit the recasting card...")
@@ -935,12 +936,13 @@ class RunRecast():
         covariance   = []
         # Getting the description of the subset of SRs having covariances
         # Now the cov_switch is activated here
-        if "cov_subset" in info_root.attrib:
+        if "cov_subset" in info_root.attrib and self.main.recasting.global_likelihood_switch:
             self.cov_switch = True
             regiondata["covsubset"] = info_root.attrib["cov_subset"]
         # activate pyhf
-        self.pyhf_config = self.pyhf_info_file(info_root)
-        logging.getLogger('MA5').debug(str(self.pyhf_config))
+        if self.main.recasting.global_likelihood_switch:
+            self.pyhf_config = self.pyhf_info_file(info_root)
+            logging.getLogger('MA5').debug(str(self.pyhf_config))
         ## first we need to get the number of regions
         for child in info_root:
             # Luminosity
