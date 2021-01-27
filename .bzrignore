@@ -1,0 +1,8 @@
+*.pyc
+*.log
+.ma5history
+tools/PADForSFS
+.DS_Store
+*.sh
+*.csh
+Makefile_*

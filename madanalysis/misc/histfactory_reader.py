@@ -360,49 +360,49 @@ def get_HFID(file,SRname):
 
 
 
-def merge_backgrounds(Background1,Background2):
-    """
-        Merging method for two bakcground JSON file. It merges "only" the files 
-        with same POI and version.
-    """
-    if {} in [Background1.hf, Background2.hf] or type(Background1) != type(Background2):
-        return Background1, 0
-    logging.getLogger('MA5').debug('merging :'+', '.join(list(Background1.global_config.keys())+\
-                                                         list(Background2.pyhf_config.keys())))
-    measurements = []
-    # merge common measurements
-    for measurement1 in Background1.hf.get('measurements',[]):
-        poi   = measurement1['config']['poi']
-        param = measurement1['config']['parameters'] 
-        for measurement2 in Background2.hf.get('measurements',[]):
-            if poi == measurement2['config']['poi']:
-                for parameter in measurement2['config']['parameters'] :
-                    if parameter not in param:
-                        param += parameter
-                measurements.append({'name'   : measurement1['name'],
-                                     'config' : {'parameters' : param,
-                                                 'poi'        : poi
-                                                 }})
-
-    if measurements == [] or Background1.hf['version'] != Background2.hf['version'] :
-        logging.getLogger('MA5').warning('Merging failed: Either measurements or versions does not match...')
-        logging.getLogger('MA5').warning(', '.join(list(Background2.pyhf_config.keys()))+' will not be added.')
-        return Background1, 0 # only get uncontradctory poi
-
-    logging.getLogger('MA5').debug('measurements are matching...')
-    extend = len(Background1.get_observed())
-    for profile, info in Background2.pyhf_config.items():
-        check = [x for x in Background1.global_config.keys() if x.startswith(profile)]
-        profile += ''+(len(check)>0)*('_ma5_'+str(len(check)))
-        Background1.global_config[profile] = {}
-        Background1.global_config[profile]['channels'] = str(int(info['channels'])+extend)
-        #print str(int(info['channels'])+extend)
-        Background1.global_config[profile]['data'    ] = info['data']
-
-    for ch in Background2.hf['channels']:
-        Background1.hf['channels'].append(ch)
-    for obs in Background2.hf['observations']:
-        Background1.hf['observations'].append(obs)
-    Background1.hf['measurements'] = measurements
-    return Background1, 1
+#def merge_backgrounds(Background1,Background2):
+#    """
+#        Merging method for two bakcground JSON file. It merges "only" the files 
+#        with same POI and version.
+#    """
+#    if {} in [Background1.hf, Background2.hf] or type(Background1) != type(Background2):
+#        return Background1, 0
+#    logging.getLogger('MA5').debug('merging :'+', '.join(list(Background1.global_config.keys())+\
+#                                                         list(Background2.pyhf_config.keys())))
+#    measurements = []
+#    # merge common measurements
+#    for measurement1 in Background1.hf.get('measurements',[]):
+#        poi   = measurement1['config']['poi']
+#        param = measurement1['config']['parameters'] 
+#        for measurement2 in Background2.hf.get('measurements',[]):
+#            if poi == measurement2['config']['poi']:
+#                for parameter in measurement2['config']['parameters'] :
+#                    if parameter not in param:
+#                        param += parameter
+#                measurements.append({'name'   : measurement1['name'],
+#                                     'config' : {'parameters' : param,
+#                                                 'poi'        : poi
+#                                                 }})
+#
+#    if measurements == [] or Background1.hf['version'] != Background2.hf['version'] :
+#        logging.getLogger('MA5').warning('Merging failed: Either measurements or versions does not match...')
+#        logging.getLogger('MA5').warning(', '.join(list(Background2.pyhf_config.keys()))+' will not be added.')
+#        return Background1, 0 # only get uncontradctory poi
+#
+#    logging.getLogger('MA5').debug('measurements are matching...')
+#    extend = len(Background1.get_observed())
+#    for profile, info in Background2.pyhf_config.items():
+#        check = [x for x in Background1.global_config.keys() if x.startswith(profile)]
+#        profile += ''+(len(check)>0)*('_ma5_'+str(len(check)))
+#        Background1.global_config[profile] = {}
+#        Background1.global_config[profile]['channels'] = str(int(info['channels'])+extend)
+#        #print str(int(info['channels'])+extend)
+#        Background1.global_config[profile]['data'    ] = info['data']
+#
+#    for ch in Background2.hf['channels']:
+#        Background1.hf['channels'].append(ch)
+#    for obs in Background2.hf['observations']:
+#        Background1.hf['observations'].append(obs)
+#    Background1.hf['measurements'] = measurements
+#    return Background1, 1
 
