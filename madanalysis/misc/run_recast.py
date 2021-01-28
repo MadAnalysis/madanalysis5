@@ -91,6 +91,11 @@ class RunRecast():
         else:
             err = os.system(self.main.session_info.editor+" "+self.dirname+"/Input/recasting_card.dat")
             # @JACK: MacOS Big Sur changed the DYLD library structure...
+            ## Error Message: 
+            #dyld: Symbol not found: __cg_jpeg_resync_to_restart
+            #  Referenced from: /System/Library/Frameworks/ImageIO.framework/Versions/A/ImageIO
+            #  Expected in: /usr/local/lib/libJPEG.dylib
+            # in /System/Library/Frameworks/ImageIO.framework/Versions/A/ImageIO
             if err != 0:
                 os.environ['DYLD_LIBRARY_PATH'] = os.environ['DYLD_LIBRARY_PATH'].replace(':/usr/local/lib:',':')
                 os.environ['DYLD_LIBRARY_PATH'] = os.environ['DYLD_LIBRARY_PATH'].replace(':/usr/local/lib','')
@@ -725,6 +730,7 @@ class RunRecast():
         if not ET:
             return False
 
+        print_gl_citation = self.main.recasting.global_likelihood_switch
         if len(self.main.recasting.extrapolated_luminosities)>0 or \
             any([x!=None for x in [dataset.scaleup,dataset.scaledn, dataset.pdfup, dataset.pdfdn]]) or \
             any([a+b>0. for a,b in self.main.recasting.systematics]):
@@ -764,6 +770,17 @@ class RunRecast():
                     return False
                 if self.cov_switch:
                     self.logger.info('    Performing simplified likelihood combination on '+regiondata["covsubset"]+' for '+analysis)
+
+                # Citation notifications for Global Likelihoods
+                if (self.cov_switch or self.pyhf_config!={}) and print_gl_citation:
+                    # TODO: Update arXiv number this is Les Houches arxiv number
+                    print_gl_citation = False
+                    self.logger.info("\033[1m   * Using Global likelihoods for CLs calculations\033[0m")
+                    self.logger.info("\033[1m     Please cite arXiv:2002.12220 [hep-ph]\033[0m")
+                    if self.pyhf_config!={}:
+                        self.logger.info("\033[1m                 pyhf DOI: 10.5281/zenodo.1169739\033[0m")
+                    elif self.cov_switch:
+                        self.logger.info("\033[1m                 CMS-NOTE-2017-001\033[0m")
 
                 ## Reading the cutflow information
                 regiondata=self.read_cutflows(self.dirname+'/Output/SAF/'+dataset.name+'/'+analysis+'/Cutflows',regions,regiondata)
