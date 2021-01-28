@@ -35,7 +35,7 @@ from shell_command                                              import ShellComm
 from string_tools                                               import StringTools
 from six.moves                                                  import map, range, input
 
-import copy, logging, math, os, shutil, time
+import copy, logging, math, os, shutil, time, sys
 
 
 
@@ -778,7 +778,10 @@ class RunRecast():
                     self.logger.info("\033[1m   * Using Global likelihoods for CLs calculations\033[0m")
                     self.logger.info("\033[1m     Please cite arXiv:2002.12220 [hep-ph]\033[0m")
                     if self.pyhf_config!={}:
-                        self.logger.info("\033[1m                 pyhf DOI: 10.5281/zenodo.1169739\033[0m")
+                        self.logger.info("\033[1m                 pyhf DOI:10.5281/zenodo.1169739\033[0m")
+                        if sys.version_info[0]==2:
+                            self.logger.warning("Please note that pyhf no longer supports Python2,"+\
+                                                " an old version is in use. Results may vary.")
                     elif self.cov_switch:
                         self.logger.info("\033[1m                 CMS-NOTE-2017-001\033[0m")
 

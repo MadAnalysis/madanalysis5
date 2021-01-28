@@ -22,12 +22,11 @@
 ################################################################################
 
 
-from __future__ import absolute_import
+from __future__                          import absolute_import
 from madanalysis.install.install_service import InstallService
-from shell_command import ShellCommand
-import os
-import sys
-import logging
+from shell_command                       import ShellCommand
+import os, sys, logging
+
 
 class Installpyhf:
     def __init__(self,main):
@@ -38,8 +37,12 @@ class Installpyhf:
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir    = os.path.normpath(self.tmpdir + '/MA5_pyhf/')
         self.ncores      = 1
-        self.files = {"pyhf.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/pyhf_v0.1.2.tar.gz"}
-        self.pyhf_version= "0.1.2";
+        if sys.version_info[0] == 2:
+            self.files = {"pyhf_python2.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/SRCombinations/pyhf_python2.tar.gz"}
+            self.pyhf_version= "0.1.2"
+        elif sys.version_info[0] > 2:
+            self.files = {}
+            self.pyhf_version= ""
 
     def Detect(self):
         if not os.path.isdir(self.toolsdir):
@@ -83,9 +86,10 @@ class Installpyhf:
         # Logname
         logname = os.path.normpath(self.installdir+'/unpack.log')
         # Unpacking the tarball
-        ok, packagedir = InstallService.untar(logname, self.downloaddir, self.installdir,'pyhf.tar.gz')
-        if not ok:
-            return False
+        for key in self.files.keys():
+            ok, packagedir = InstallService.untar(logname, self.downloaddir, self.installdir, key)
+            if not ok:
+                return False
         # Ok: returning the good folder
         self.tmpdir=packagedir
         return True
