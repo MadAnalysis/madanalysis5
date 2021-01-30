@@ -34,7 +34,6 @@ from collections                                                import OrderedDi
 from shell_command                                              import ShellCommand
 from string_tools                                               import StringTools
 from six.moves                                                  import map, range, input
-
 import copy, logging, math, os, shutil, time, sys
 
 
@@ -91,7 +90,7 @@ class RunRecast():
         else:
             err = os.system(self.main.session_info.editor+" "+self.dirname+"/Input/recasting_card.dat")
             # @JACK: MacOS Big Sur changed the DYLD library structure...
-            ## Error Message: 
+            ## Error Message: (only in python 2)
             #dyld: Symbol not found: __cg_jpeg_resync_to_restart
             #  Referenced from: /System/Library/Frameworks/ImageIO.framework/Versions/A/ImageIO
             #  Expected in: /usr/local/lib/libJPEG.dylib
@@ -779,6 +778,7 @@ class RunRecast():
                     self.logger.info("\033[1m     Please cite arXiv:2002.12220 [hep-ph]\033[0m")
                     if self.pyhf_config!={}:
                         self.logger.info("\033[1m                 pyhf DOI:10.5281/zenodo.1169739\033[0m")
+                        self.logger.info("\033[1m                 For more details see https://scikit-hep.org/pyhf/\033[0m")
                         if sys.version_info[0]==2:
                             self.logger.warning("Please note that pyhf no longer supports Python2,"+\
                                                 " an old version is in use. Results may vary.")
@@ -889,7 +889,7 @@ class RunRecast():
             self.logger.debug('Info File does not exist...')
             return -1,-1, -1, -1, -1
         ## Getting the XML information
-        try:
+        try: 
             info_input = open(self.pad+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.info')
             info_tree = etree.parse(info_input)
             info_input.close()
@@ -973,16 +973,15 @@ class RunRecast():
             regiondata["covsubset"] = info_root.attrib["cov_subset"]
         # activate pyhf
         if self.main.recasting.global_likelihood_switch:
-            try:
+            try: 
                 self.pyhf_config = self.pyhf_info_file(info_root)
             except:
                 self.logger.debug('Check pyhf_info_file function!')
                 self.pyhf_config = {}
             self.logger.debug(str(self.pyhf_config))
-        self.logger.debug('HERE1')
+
         ## first we need to get the number of regions
         for child in info_root:
-            self.logger.debug('HERE loop')
             # Luminosity
             if child.tag == "lumi":
                 try:
@@ -1018,7 +1017,7 @@ class RunRecast():
                 stat    = -1
                 for rchild in child:
                     self.logger.debug(rchild.tag)
-                    self.logger.debug(lumi, regions, regiondata)
+                    self.logger.debug(str(lumi)+' '+str(regions)+ ' '+str(regiondata))
                     try:
                         myval=float(rchild.text)
                     except:
@@ -1082,16 +1081,23 @@ class RunRecast():
             the location of the specific background-only likelihood json files that are given
             in the info file. The collection of SR contributing to a given profile must be
             provided. One can process multiple likelihood profiles dedicated to different sets
-            of SRs."""
-        if 'pyhf' in [x.tag for x in info_root]:
-            pyhf_path = os.path.join(self.main.archi_info.ma5dir,'tools/pyhf')
+            of SRs.
+        """
+        import sys
+        self.logger.debug(' === Getting ready! === does pyhf exist? '+str(any([x.tag=='pyhf' for x in info_root])))
+        if any([x.tag=='pyhf' for x in info_root]): 
+            pyhf_path = os.path.join(self.main.archi_info.ma5dir, 'tools/pyhf'+(sys.version_info[0]>2)*'/src')
+            self.logger.debug('pyhf_path: '+ pyhf_path)
             try:
-                import sys
                 if os.path.isdir(pyhf_path) and pyhf_path not in sys.path:
                     sys.path.append(pyhf_path)
                 import pyhf
-            except:
+                self.logger.debug('Pyhf v'+str(pyhf.__version__))
+            except ImportError:
                 self.logger.warning('To use full profile likelihoods please install pyhf via "install pyhf" command')
+                return {}
+            except:
+                self.logger.debug('Problem with pyhf_info_file function!!')
                 return {}
         else:
             return {}
@@ -1099,9 +1105,12 @@ class RunRecast():
         analysis    = info_root.attrib['id']
         nprofile    = 0
         to_remove   = []
+        self.logger.debug(' === Reading info file for pyhf ===')
         for child in info_root:
+            self.logger.debug('pyhf_info_file: info_root, child:' + str(child.tag))
             if child.tag == 'lumi':
                 default_lumi = float(child.text)
+                self.logger.debug('pyhf_info_file: lumi:' + str(default_lumi))
             if child.tag == 'pyhf':
                 likelihood_profile = child.attrib.get('id','HF-Likelihood-'+str(nprofile))
                 if likelihood_profile == 'HF-Likelihood-'+str(nprofile):
@@ -1113,6 +1122,7 @@ class RunRecast():
                                                        'lumi' : default_lumi,
                                                        'SR'   :  OrderedDict()
                                                        }
+                self.logger.debug('pyhf_info_file: likelihood_profile:' + str(likelihood_profile))
                 for subchild in child:
                     if subchild.tag == 'name':
                         pyhf_config[likelihood_profile]['name'] = str(subchild.text)
@@ -1144,6 +1154,7 @@ class RunRecast():
                                             to_remove.append(likelihood_profile)
 
         # validate
+        self.logger.debug('pyhf_info_file: Starting validation:' + str(pyhf_config))
         for likelihood_profile, config in pyhf_config.items():
             if likelihood_profile in to_remove:
                 continue
@@ -1622,14 +1633,96 @@ def clean_region_name(mystr):
     newstr = newstr.replace(")",  "_rp_")
     return newstr
 
-def pyhf_wrapper(background,signal,qtilde=True):
+
+def pyhf_wrapper(background,signal,**kwargs):
+    if sys.version_info[0] == 2:
+        return pyhf_wrapper_py2(background, signal,  qtilde=kwargs.get('qtilde',True))
+    elif sys.version_info[0] > 2:
+        return pyhf_wrapper_py3(background, signal)
+    else:
+        return -1
+
+
+def pyhf_wrapper_py3(background,signal):
     import pyhf
-    workspace = pyhf.Workspace(background)
-    model     = workspace.model(patches=[signal],
-                                modifier_settings={
-                                                    'normsys': {'interpcode': 'code4'},
-                                                    'histosys': {'interpcode': 'code4p'},
-                                                    })
+    from numpy import warnings
+    warnings.filterwarnings('ignore')
+
+    # Scilence pyhf's messages
+    pyhf.pdf.log.setLevel(logging.CRITICAL)
+    pyhf.workspace.log.setLevel(logging.CRITICAL)
+    pyhf.set_backend('numpy')
+
+    try:
+        workspace = pyhf.Workspace(background)
+        model     = workspace.model(patches=[signal],
+                                    modifier_settings={'normsys': {'interpcode': 'code4'},
+                                                       'histosys': {'interpcode': 'code4p'}})
+    except (pyhf.exceptions.InvalidSpecification, KeyError) as e:
+        logging.getLogger('MA5').debug("Invalid JSON file :: "+str(e))
+        return 1.
+    except:
+        logging.getLogger('MA5').debug("Unknown error, check pyhf_wrapper_py3")
+        return 1.
+
+    def get_CLs(**kwargs):
+        try:
+            CLs = pyhf.infer.hypotest(kwargs.get('mu',1.), 
+                                      workspace.data(model),
+                                      model, 
+                                      test_stat="qtilde",
+                                      par_bounds=kwargs.get('bounds',
+                                                            model.config.suggested_bounds()),
+                                      return_expected=True)
+            #taking the upper bound!!!
+            try:
+                CLs = float(CLs[1].tolist()) 
+            except TypeError:
+                CLs = float(CLs[1][0])
+        except (AssertionError, pyhf.exceptions.FailedMinimization) as err:
+            logging.getLogger('MA5').debug(str(err))
+            # dont use false here 1.-CLs = 0 can be interpreted as false
+            return 'update bounds' 
+        return CLs
+
+    #pyhf can raise an error if the poi_test bounds are too stringent
+    #they need to be updated dynamically.
+    update_bounds = model.config.suggested_bounds()
+    iteration_limit = 0
+    while True:
+        CLs = get_CLs(bounds=update_bounds)
+        if CLs == 'update bounds':
+            update_bounds[model.config.poi_index] = (0,2*update_bounds[model.config.poi_index][1])
+            iteration_limit += 1
+        elif type(CLs) == float:
+            break
+        else:
+            iteration_limit += 1
+        # hard limit on iteration required if it exceeds this value it means
+        # Nsig >>>>> Nobs 
+        if iteration_limit>=5:
+            return 1.
+
+    return 1.-CLs
+
+
+def pyhf_wrapper_py2(background,signal,qtilde=True):
+    import pyhf
+
+    try:
+        workspace = pyhf.Workspace(background)
+        model     = workspace.model(patches=[signal],
+                                    modifier_settings={
+                                                        'normsys': {'interpcode': 'code4'},
+                                                        'histosys': {'interpcode': 'code4p'},
+                                                        })
+    except (pyhf.exceptions.InvalidSpecification, KeyError) as e:
+        logging.getLogger('MA5').debug("Invalid JSON file :: "+str(e))
+        return -1
+    except:
+        logging.getLogger('MA5').debug("Unknown error, check pyhf_wrapper_py3")
+        return -1
+
     def get_CLs(bounds=None):
         try:
             CLs = float(pyhf.utils.hypotest(1.0, 
@@ -1640,7 +1733,12 @@ def pyhf_wrapper(background,signal,qtilde=True):
             return 1. - CLs
         except AssertionError:
             # dont use false here 1.-CLs = 0 can be interpreted as false
-            return 'update bounds' 
+            return 'update bounds'
+        except:
+            logging.getLogger('MA5').error('There is something wrong with pyhf module.')
+            logging.getLogger('MA5').error('pyhf version '+pyhf.__version__+\
+                                           ' Python version {}.{}'.format(sys.version_info[0],sys.version_info[1]))
+            return -1
 
     #pyhf can raise an error if the poi_test bounds are too stringent
     #they need to be updated dynamically.

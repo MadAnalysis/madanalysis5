@@ -24,7 +24,6 @@
 
 from __future__                          import absolute_import
 from madanalysis.install.install_service import InstallService
-from shell_command                       import ShellCommand
 import os, sys, logging
 
 
@@ -41,8 +40,8 @@ class Installpyhf:
             self.files = {"pyhf_python2.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/SRCombinations/pyhf_python2.tar.gz"}
             self.pyhf_version= "0.1.2"
         elif sys.version_info[0] > 2:
-            self.files = {}
-            self.pyhf_version= ""
+            self.files = {"pyhf_py3.tgz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/SRCombinations/pyhf_py3.tgz"}
+            self.pyhf_version= "0.5.4"
 
     def Detect(self):
         if not os.path.isdir(self.toolsdir):
@@ -96,20 +95,8 @@ class Installpyhf:
 
 
     def Build(self):
-        # Input
-        theCommands=[sys.executable,'setup.py','build']
-        logname=os.path.normpath(self.installdir+'/compilation.log')
-        # Execute
-        logging.getLogger('MA5').debug('shell command: '+' '.join(theCommands))
-        ok, out= ShellCommand.ExecuteWithLog(theCommands,\
-                                             logname,\
-                                             self.tmpdir,\
-                                             silent=False)
-        # return result
-        if not ok:
-            logging.getLogger('MA5').error('impossible to build the project. For more details, see the log file:')
-            logging.getLogger('MA5').error(logname)
-        return ok
+        # all checks are done in Check function.
+        return True
 
 
     def Install(self):
@@ -119,14 +106,24 @@ class Installpyhf:
     def Check(self):
         try:
             if os.path.isdir(self.installdir) and not self.installdir in sys.path:
-                sys.path.append(self.installdir)
+                print(self.installdir+(sys.version_info[0] > 2)*'/src/')
+                sys.path.append(self.installdir+(sys.version_info[0] > 2)*'/src/')
             import pyhf
             if str(pyhf.__version__) != self.pyhf_version:
-                logging.getLogger('MA5').error("Not using the right version of pyhf.")
+                if sys.version_info[0] > 2:
+                    logging.getLogger('MA5').warning("Not using the right version of pyhf. pyhf version = "+str(pyhf.__version__))
+                    logging.getLogger('MA5').warning("Please note that MadAnalysis 5 currently supports pyhf version "+\
+                                                     str(self.pyhf_version))
+                    return True
+                logging.getLogger('MA5').error("Not using the right version of pyhf. pyhf version = "+str(pyhf.__version__))
+                logging.getLogger('MA5').error("Please note that MadAnalysis 5 currently supports pyhf version "+\
+                                               str(self.pyhf_version))
                 self.display_log()
                 return False
-        except:
+        except ImportError as err:
             logging.getLogger('MA5').error("Cannot use pyhf. Please double check the required dependencies and/or (re-)install it.")
+            logging.getLogger('MA5').error("phyf requires following dependencies: click, tqdm, six, jsonschema, jsonpatch, pyyaml")
+            logging.getLogger('MA5').debug(err)
             self.display_log()
             return False
         return True
@@ -135,9 +132,7 @@ class Installpyhf:
         logging.getLogger('MA5').error("More details can be found into the log files:")
         logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/wget.log"))
         logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/unpack.log"))
-        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/configuration.log"))
-        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/compilation.log"))
-        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/installation.log"))
+
 
     def NeedToRestart(self):
         return False
