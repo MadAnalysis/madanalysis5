@@ -37,6 +37,9 @@
 #include "SampleAnalyzer/Commons/DataFormat/RecParticleFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
+#ifdef FASTJET_USE
+    #include "fastjet/PseudoJet.hh"
+#endif
 
 namespace MA5
 {
@@ -76,6 +79,12 @@ class RecJetFormat : public RecParticleFormat
   MAbool true_btag_;   /// b-tag (before id or misid)
   std::vector<MAint32> Constituents_;  /// indices of the MC particles
   std::vector<IsolationConeType> isolCones_; // isolation cones
+
+#ifdef FASTJET_USE
+    // @Jack: Save the modified jet as pseudojet for jet substructure applications
+    //        This will make it faster and avoid extra for loops.
+    fastjet::PseudoJet pseudojet_;
+#endif
 
   // -------------------------------------------------------------
   //                        method members
@@ -165,6 +174,14 @@ class RecJetFormat : public RecParticleFormat
   /// get the collection of isolation cones
   const std::vector<IsolationConeType>& isolCones() const
   { return isolCones_; }
+
+#ifdef FASTJET_USE
+    // Accessor for pseudojets
+    fastjet::PseudoJet pseudojet () const {return pseudojet_;}
+
+    // Add one pseudojet
+    void setPseudoJet (fastjet::PseudoJet v) {pseudojet_=v;}
+#endif
 
 };
 

@@ -186,6 +186,8 @@ class MakefileWriter():
             self.has_root_tag              = False
             self.has_root_lib              = False
             self.has_root_ma5lib           = False
+            # @JACK: Compile with fastjet original libraries
+            self.with_fastjet              = False
 
 
     @staticmethod

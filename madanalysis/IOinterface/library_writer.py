@@ -173,6 +173,11 @@ class LibraryWriter():
         elif package=='configuration':
             toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
         elif package=='commons':
+            # @JACK: This will allow us to dynamically use the FJ libraries in commons
+            options.has_fastjet_tag    = self.main.archi_info.has_fastjet
+            options.has_fastjet_inc    = self.main.archi_info.has_fastjet
+            options.has_fastjet_lib    = self.main.archi_info.has_fastjet
+#            options.has_fastjet_ma5lib = self.main.archi_info.has_fastjet
             toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
         elif package=='test_commons':
             options.has_commons  = True
