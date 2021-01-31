@@ -30,7 +30,6 @@
 #include "SampleAnalyzer/Commons/Base/SmearerBase.h"
 
 // FastJet headers
-#include <fastjet/ClusterSequence.hh>
 #include <fastjet/PseudoJet.hh>
 
 
@@ -91,18 +90,13 @@ MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
     inputs.back().set_user_index(i);
   }
 
-  /*  for (MAuint32 i=0;i<inputs.size();i++)
-  {
-    std::cout << "px=" << inputs[i].px() << " py=" << inputs[i].py() << " pz=" << inputs[i].pz() << " e=" << inputs[i].e() << std::endl;
-    }*/
-
   // Clustering
-  fastjet::ClusterSequence clust_seq(inputs, *JetDefinition_);
+  clust_seq.reset(new fastjet::ClusterSequence(inputs, *JetDefinition_));
 
   // Getting jets with PTmin = 0
   std::vector<fastjet::PseudoJet> jets; 
-  if (Exclusive_) jets = clust_seq.exclusive_jets(0.);
-  else jets = clust_seq.inclusive_jets(0.);
+  if (Exclusive_) jets = clust_seq->exclusive_jets(0.);
+  else jets = clust_seq->inclusive_jets(0.);
 
   // Smearing if necessary
   if (smearer->isJetSmearerOn())
@@ -130,23 +124,25 @@ MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
   MAfloat64 & THT = myEvent.rec()->THT();
   MAfloat64 & Meff= myEvent.rec()->Meff();
 
+
   // Storing
-  for (MAuint32 i=0;i<jets.size();i++)
+  for (MAuint32 ijet=0;ijet<jets.size();ijet++)
   {
-    if (jets[i].pt() <= 1e-10) continue;
-    MALorentzVector q(jets[i].px(),jets[i].py(),jets[i].pz(),jets[i].e());
+    if (jets[ijet].pt() <= 1e-10) continue;
+    MALorentzVector q(jets[ijet].px(),jets[ijet].py(),jets[ijet].pz(),jets[ijet].e());
     (*MET) -= q;
     (*MHT) -= q;
-    THT += jets[i].pt();
-    TET += jets[i].pt();
-    Meff += jets[i].pt();
+    THT += jets[ijet].pt();
+    TET += jets[ijet].pt();
+    Meff += jets[ijet].pt();
 
-    if(jets[i].pt() < Ptmin_) continue;
+    if(jets[ijet].pt() < Ptmin_) continue;
 
     // Saving jet information
     RecJetFormat * jet = myEvent.rec()->GetNewJet();
-    jet->setMomentum(MALorentzVector(jets[i].px(),jets[i].py(),jets[i].pz(),jets[i].e()));
-    std::vector<fastjet::PseudoJet> constituents = clust_seq.constituents(jets[i]);
+    jet->setMomentum(q);//MALorentzVector(jets[ijet].px(),jets[ijet].py(),jets[ijet].pz(),jets[ijet].e()));
+    jet->setPseudoJet(jets[ijet]);
+    std::vector<fastjet::PseudoJet> constituents = clust_seq->constituents(jets[ijet]);
     MAuint32 tracks = 0;
     for (MAuint32 j=0;j<constituents.size();j++)
     {
@@ -156,7 +152,6 @@ MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
     jet->ntracks_ = tracks;
   }
   Meff += MET->pt();
-
   // Filling the dataformat with jets
   return true;
 }

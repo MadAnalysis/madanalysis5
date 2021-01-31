@@ -164,6 +164,8 @@ class LibraryWriter():
             options.has_commons=True
             options.has_fastjet_inc=True
             options.has_fastjet_lib=True
+            # @JACK: To be able to use fastjet in Ma5 data structure
+            options.has_fastjet_tag=True
             toRemove.extend(['compilation_fastjet.log','linking_fastjet.log','cleanup_fastjet.log','mrproper_fastjet.log'])
         elif package=='test_fastjet':
             options.has_commons=True
@@ -257,6 +259,10 @@ class LibraryWriter():
             options.has_zlib_tag              = self.main.archi_info.has_zlib
             options.has_root_tag              = self.main.archi_info.has_root
             options.has_root_ma5lib           = self.main.archi_info.has_root
+            # @JACK: For fastjet to be accessible through ma5 datastructure
+            options.has_fastjet_inc    = self.main.archi_info.has_fastjet
+            options.has_fastjet_lib    = self.main.archi_info.has_fastjet
+
             toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
         elif package=='test_process':
             options.has_commons               = True

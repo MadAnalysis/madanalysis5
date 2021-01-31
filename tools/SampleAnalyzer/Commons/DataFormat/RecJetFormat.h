@@ -39,6 +39,7 @@
 
 #ifdef FASTJET_USE
     #include "fastjet/PseudoJet.hh"
+    #include "fastjet/ClusterSequence.hh"
 #endif
 
 namespace MA5
@@ -84,6 +85,7 @@ class RecJetFormat : public RecParticleFormat
     // @Jack: Save the modified jet as pseudojet for jet substructure applications
     //        This will make it faster and avoid extra for loops.
     fastjet::PseudoJet pseudojet_;
+//    std::vector<fastjet::PseudoJet> pseudo_constituents_;
 #endif
 
   // -------------------------------------------------------------
@@ -177,10 +179,14 @@ class RecJetFormat : public RecParticleFormat
 
 #ifdef FASTJET_USE
     // Accessor for pseudojets
-    fastjet::PseudoJet pseudojet () const {return pseudojet_;}
+    const fastjet::PseudoJet& pseudojet() const {return pseudojet_;}
 
     // Add one pseudojet
-    void setPseudoJet (fastjet::PseudoJet v) {pseudojet_=v;}
+    void setPseudoJet (const fastjet::PseudoJet& v) {pseudojet_=v;}
+    void setPseudoJet (MALorentzVector& v) 
+    {
+        pseudojet_=fastjet::PseudoJet(v.Px(), v.Py(), v.Pz(), v.E());
+    }
 #endif
 
 };

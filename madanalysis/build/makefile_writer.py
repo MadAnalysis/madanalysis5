@@ -186,14 +186,13 @@ class MakefileWriter():
             self.has_root_tag              = False
             self.has_root_lib              = False
             self.has_root_ma5lib           = False
-            # @JACK: Compile with fastjet original libraries
-            self.with_fastjet              = False
+
 
 
     @staticmethod
     def Makefile(MakefileName,title,ProductName,ProductPath,isLibrary,cppfiles,hfiles,options,archi_info,toRemove,moreIncludes=[]):
 
-        import os
+#        import os
         # Open the Makefile
         try:
             file = open(MakefileName,"w")
@@ -293,6 +292,12 @@ class MakefileWriter():
 #            cxxflags.extend(['$(shell fastjet-config --cxxflags)'])
             file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
 
+#        if options.with_fastjet:
+#            # @JACK: This will only work if fastjet is globally defined
+#            cxxflags=[]
+#            cxxflags.extend(['$(shell fastjet-config --cxxflags)'])
+#            file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
+
         # - zlib
         if options.has_zlib_inc:
             cxxflags=[]
@@ -381,6 +386,13 @@ class MakefileWriter():
 #                libs.extend(['$(shell fastjet-config --libs --plugins)']) # --rpath=no)'])
                 libs.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config --libs --plugins)']) # --rpath=no)'])
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
+
+#        if options.with_fastjet:
+#            # @JACK: this will only work if fastjet is globally defined
+#            libs=[]
+#            libs.extend(['$(shell fastjet-config --libs --plugins)'])
+#            file.write('LIBFLAGS += '+' '.join(libs)+'\n')
+
 
         # - delphes
         if options.has_delphes_ma5lib or options.has_delphes_lib:

@@ -25,6 +25,9 @@
 #ifndef JET_CLUSTERING_FASTJET_H
 #define JET_CLUSTERING_FASTJET_H
 
+// FastJet Libraries
+#include <fastjet/ClusterSequence.hh>
+
 
 // SampleAnalyser headers
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
@@ -57,6 +60,9 @@ class ClusterAlgoFastJet: public ClusterAlgoBase
 
     /// Jet definition
     fastjet::JetDefinition* JetDefinition_;
+
+    // Shared Cluster sequence
+    std::shared_ptr<fastjet::ClusterSequence> clust_seq;
 
 
 //---------------------------------------------------------------------------------

@@ -42,7 +42,6 @@
 #include "SampleAnalyzer/Commons/DataFormat/RecVertexFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
-
 namespace MA5
 {
 
