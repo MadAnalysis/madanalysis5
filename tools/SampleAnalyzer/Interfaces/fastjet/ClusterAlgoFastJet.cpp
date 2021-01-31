@@ -140,7 +140,7 @@ MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
 
     // Saving jet information
     RecJetFormat * jet = myEvent.rec()->GetNewJet();
-    jet->setMomentum(q);//MALorentzVector(jets[ijet].px(),jets[ijet].py(),jets[ijet].pz(),jets[ijet].e()));
+    jet->setMomentum(q);
     jet->setPseudoJet(jets[ijet]);
     std::vector<fastjet::PseudoJet> constituents = clust_seq->constituents(jets[ijet]);
     MAuint32 tracks = 0;

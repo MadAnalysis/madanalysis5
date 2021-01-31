@@ -655,7 +655,8 @@ class JobWriter(object):
         return True
 
     def WriteSampleAnalyzerMakefile(self,option=""):
-
+        # @JACK: This function is not in use!!! 
+        #        Also there is a bug -> package is not defined!!
         from madanalysis.build.makefile_writer import MakefileWriter
         options=MakefileWriter.MakefileOptions()
 
@@ -704,9 +705,11 @@ class JobWriter(object):
         # Options
         options.has_commons  = True
         options.has_process  = True
-        if self.main.archi_info.has_root:
-            options.has_root_inc = True
-            options.has_root_lib = True
+        # @JACK enable usage of fastjet
+        options.has_fastjet_tag = self.main.archi_info.has_fastjet
+        options.has_fastjet_lib = self.main.archi_info.has_fastjet
+        options.has_root_inc    = self.main.archi_info.has_root
+        options.has_root_lib    = self.main.archi_info.has_root
         #options.has_userpackage = True
         toRemove=['Log/compilation.log','Log/linking.log','Log/cleanup.log','Log/mrproper.log']
 

@@ -85,7 +85,6 @@ class RecJetFormat : public RecParticleFormat
     // @Jack: Save the modified jet as pseudojet for jet substructure applications
     //        This will make it faster and avoid extra for loops.
     fastjet::PseudoJet pseudojet_;
-//    std::vector<fastjet::PseudoJet> pseudo_constituents_;
 #endif
 
   // -------------------------------------------------------------
