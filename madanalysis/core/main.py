@@ -29,6 +29,7 @@ from madanalysis.selection.selection                    import Selection
 from madanalysis.interpreter.cmd_base                   import CmdBase
 from madanalysis.region.region_collection               import RegionCollection
 from madanalysis.fastsim.fastsim                        import SuperFastSim
+from madanalysis.jet_clustering.jet_collection          import JetCollection
 from madanalysis.system.session_info                    import SessionInfo
 from madanalysis.system.architecture_info               import ArchitectureInfo
 from madanalysis.core.library_builder                   import LibraryBuilder
@@ -95,6 +96,7 @@ class Main():
         self.merging        = MergingConfiguration()
         self.fastsim        = FastsimConfiguration()
         self.superfastsim   = SuperFastSim()
+        self.jet_collection = JetCollection()
         self.recasting      = RecastConfiguration()
         self.fom            = FomConfiguration()
         self.lumi           = 10

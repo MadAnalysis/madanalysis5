@@ -25,9 +25,8 @@
 #ifndef JET_CLUSTERING_FASTJET_H
 #define JET_CLUSTERING_FASTJET_H
 
-// FastJet Libraries
+// FastJet headers
 #include <fastjet/ClusterSequence.hh>
-
 
 // SampleAnalyser headers
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"

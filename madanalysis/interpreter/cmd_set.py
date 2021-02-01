@@ -80,6 +80,10 @@ class CmdSet(CmdBase.CmdBase):
             self.main.datasets.Get(objs[0]).user_SetParameter(objs[1],theValue,theValue2,theValue3)
             return
 
+        elif objs[0] in self.main.jet_collection.GetNames():
+            self.main.jet_collection.Set(objs,value)
+            return
+
         # Anything else
         else :
             logging.getLogger('MA5').error("no object called '"+objs[0]+"' is found")
@@ -329,6 +333,7 @@ class CmdSet(CmdBase.CmdBase):
         if variable==None:
             output = ["main"]
             output.extend(self.main.datasets.GetNames())
+            output.extend(self.main.jet_collection.GetNames())
             output.extend( [ "selection["+str(ind+1)+"]" \
                              for ind in \
                              range(0,len(self.main.selection)) ] )
@@ -380,6 +385,15 @@ class CmdSet(CmdBase.CmdBase):
                 return self.finalize_complete(text,output)
             else:
                 return self.finalize_complete(text,self.main.datasets.Get(object).user_GetValues(variable))
+
+        # Jet Collection object
+        elif object in self.main.jet_collection.GetNames():
+            if not withValue:
+                output = [ object+"."+ item \
+                          for item in \
+                          self.main.jet_collection.Get(object).user_GetParameters() ]
+                return self.finalize_complete(text,output)
+            return self.finalize_complete(text,self.main.jet_collection.Get(object).user_GetValues(variable))
 
         # Other cases
         else:
