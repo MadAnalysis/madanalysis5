@@ -62,6 +62,9 @@ namespace MA5
     /// Exclusive id for tau-elec-photon-jet
     MAbool ExclusiveId_;
 
+    /// Primary Jet ID
+    std::string JetID_;
+
     MAuint32 muon;
     MAuint32 electron;
     MAuint32 tauH;
@@ -84,6 +87,7 @@ namespace MA5
       myTautagger_ = 0;
       mySmearer_   = 0;
       ExclusiveId_ = false;
+      JetID_       = "Ma5Jet";
       muon=0;
       electron=0;
       tauH=0;

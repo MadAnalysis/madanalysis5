@@ -56,7 +56,12 @@ class CmdDefine(CmdBase.CmdBase):
             if self.main.fastsim.package != 'fastjet':
                 logging.getLogger('MA5').error("Jet algorithms requires FastJet as a fastsim package. ")
                 return
-            self.main.jet_collection.define(args,self.main.datasets.GetNames())
+            ok = self.main.jet_collection.define(args,self.main.datasets.GetNames()+\
+                                                     [self.main.fastsim.clustering.JetID])
+            if ok and len(self.main.jet_collection)==1:
+                # Multi-cluster protection
+                logging.getLogger('MA5').warning("Constituent-based smearing will be applied.")
+                self.main.superfastsim.jetrecomode = 'constituents'
             return
 
         #Checking argument number

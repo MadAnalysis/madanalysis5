@@ -22,7 +22,7 @@
 ################################################################################
 
 
-from __future__ import absolute_import
+from __future__                                   import absolute_import
 from madanalysis.jet_clustering.jet_configuration import JetConfiguration
 from collections                                  import OrderedDict
 from six.moves                                    import range
@@ -45,28 +45,28 @@ class JetCollection:
         self.logger.error("                         it can be radius=0.4, ptmin=20 etc.")
 
     # Definition of a new jet
-    def define(self,args,dataset_names=[]):
-        # args[0] -> jet_algorithm
-        # args[1] -> JetID
-        # args[2] -> jet algorithm
+    def define(self, args, dataset_names=[]):
+        # args[0]  -> jet_algorithm
+        # args[1]  -> JetID
+        # args[2]  -> jet algorithm
         # args[3:] -> options: no need to cherry pick them only the relevant ones will be used.
         # dataset_names: names for the datasets to avoid overlaps
 
         if len(args) < 3:
             self.logger.error('Invalid syntax! Correct syntax is as follows:')
             self.help()
-            return
+            return False
 
         if args[2] not in self.algorithms:
             self.logger.error("Clustering algorithm '"+args[2]+"' does not exist.")
             self.logger.error("Available algorithms are : "+", ".join(self.algorithms))
-            return
+            return False
 
         if args[1] in dataset_names+list(self.collection.keys()):
             self.logger.error(args[1]+' has been used as a dataset or jet identifier.')
             if args[1] in self.collection.keys():
                 self.logger.error("To modify clustering properties please use 'set' command.")
-            return
+            return False
 
         JetID     = args[1]
         algorithm = args[2]
@@ -81,27 +81,33 @@ class JetCollection:
         if any([len(x)!=3 for x in chunks]) or any([('=' != x[1]) for x in chunks]):
             self.logger.error('Invalid syntax!')
             self.help()
-            return
+            return False
 
         # Extract options
         options = {}
         for item in chunks:
             try:
                 if item[0] == 'exclusive':
-                    options[item[0]] = True if item[2].lower()=='true' else False
+                    if item[2].lower() in ['true','t']:
+                        options[item[0]] = True
+                    elif item[2].lower() in ['false','f']:
+                        options[item[0]] = False
+                    else:
+                        raise ValueError('Exclusive can only be True or False.')
                 else:
                     options[item[0]] = float(item[2])
-            except:
+            except ValueError as err:
                 if item[0] == 'exclusive':
-                    self.logger.error('Invalid syntax! '+item[0]+' value can be True or False.')
+                    self.logger.error('Invalid syntax! '+str(err))
                 else:
                     self.logger.error('Invalid syntax! '+item[0]+' requires to have a float value.')
-                return
+                return False
+
 
         self.collection[JetID] = JetConfiguration(JetID=JetID,
                                                   algorithm=algorithm, 
                                                   options=options)
-        return
+        return True
 
     def Set(self,obj,value):
         if len(obj) == 2:

@@ -146,7 +146,11 @@ class CmdSet(CmdBase.CmdBase):
             self.main.merging.user_SetParameter(objs[2],args[2],self.main.mode,self.main.archi_info.has_fastjet)
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='fastsim':
             if objs[2] == 'jetrecomode':
-                if args[2] in ['jets', 'constituents']:
+                # Multi-cluster protection
+                if len(self.main.jet_collection)>0 and args[2].lower() == 'jets':
+                    logging.getLogger('MA5').error("Jet smearing can not be based on clustered jets when multi-cluster is in effect.")
+                    logging.getLogger('MA5').error("Jet smearing will be based on constituents")
+                elif args[2] in ['jets', 'constituents']:
                     self.main.superfastsim.jetrecomode = args[2]
                 else:
                     logging.getLogger('MA5').error("Jet smearing can only be based on the jet ('jets') or on its constituents ('constituents').")
@@ -156,6 +160,7 @@ class CmdSet(CmdBase.CmdBase):
                     self.main.superfastsim.propagator = True
                 except:
                     logging.getLogger('MA5').error("The magnetic field has to be numerical (in Tesla).")
+            # @JACK: Tracker radius & halflength are ineffective atm
             elif objs[2] == 'tracker_radius':
                 try:
                     self.main.superfastsim.radius      = float(args[2])
@@ -173,6 +178,14 @@ class CmdSet(CmdBase.CmdBase):
                     self.main.superfastsim.propagator = (args[2]=='on')
                 else:
                     logging.getLogger('MA5').error("Particle propagation can be either on or off (default: off).")
+            elif objs[2].lower() == 'jetid':
+                if self.main.fastsim.package == 'fastjet':
+                    if args[2] not in self.main.jet_collection.GetNames():
+                        self.main.fastsim.clustering.JetID = args[2]
+                    else:
+                        logging.getLogger('MA5').error("Jet ID '"+args[2]+"' is already in use.")
+                else:
+                    logging.getLogger('MA5').error("Jet ID is only available while fastjet package is in use.")
             else:
                 user_info    = UserInfo()
                 user_info.ReadUserOptions(self.main.archi_info.ma5dir+'/madanalysis/input/installation_options.dat')

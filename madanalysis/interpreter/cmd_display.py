@@ -152,7 +152,14 @@ class CmdDisplay(CmdBase.CmdBase):
         if len(args)>0 and args[0].lower() in ['tagger','smearer', 'reco_efficiency', 'jes', 'energy_scaling', 'scaling']:
             return self.main.superfastsim.display(args)
         elif len(args)>0 and args[0].lower() in ['jet_algorithm']:
-            return self.main.jet_collection.Display()
+            logging.getLogger('MA5').info('* Primary Jet Definition :')
+            self.main.fastsim.Display()
+            if len(self.main.jet_collection) > 0:
+                logging.getLogger('MA5').info('   '+'-'*20)
+                logging.getLogger('MA5').info('* Other Jet Definitions: ')
+                return self.main.jet_collection.Display()
+            else:
+                return
         elif len(args)==1:
             return self.do_other(args[0])
         elif len(args)==5 or len(args)==4:

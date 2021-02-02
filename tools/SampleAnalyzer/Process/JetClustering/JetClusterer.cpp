@@ -98,7 +98,14 @@ MAbool JetClusterer::Initialize(const std::map<std::string,std::string>& options
     {
       result=algo_->SetParameter(key.substr(8),it->second);
     }
-   
+
+    // Primary Jet ID
+    else if (key == "jetid")
+    {
+      JetID_ = it->second;
+      result = true;
+    }
+
     // Other
     try
     {

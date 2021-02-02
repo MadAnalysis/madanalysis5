@@ -27,10 +27,24 @@ import logging
 class JetConfiguration:
     
     userVariables = ['antikt','cambridge',
-                     'genkt','gridjet','kt','genkt',
+                     'genkt','gridjet','kt',
                      'cdfjetclu','cdfmidpoint','siscone']
 
     def __init__(self,JetID='Ma5Jet', algorithm='', options={}):
+        """
+            Parameters
+            ----------
+            JetID : STR
+                Jet identification =>  event.rec()->jet("MA5Jet")
+            algorithm: STR
+                Clustering algorithm
+            options: DICT
+                options such as radius, ptmin etc.
+
+            The instance names are used directly in C++ implementation
+            hence change in instance name will require change in C++ portion 
+            as well.
+        """
         self.JetID     = JetID
 
         # Main Jet Configurations
@@ -46,50 +60,51 @@ class JetConfiguration:
         elif algorithm == 'gridjet'     : self.DefaultGridJet(options)
         elif algorithm == 'cdfjetclu'   : self.DefaultCDF(options)
         elif algorithm == 'cdfmidpoint' : self.DefaultCDFMidPoint(options)
+        elif algorithm == 'siscone'     : self.DefaultSisCone(options)
 
     def DefaultAntikT(self,kwargs):
         self.algorithm = 'antikt'
-        self.radius    = kwargs.get('radius', 0.4)
-        self.ptmin     = kwargs.get('ptmin',  5.)
+        self.radius    = kwargs.get('radius',          0.4)
+        self.ptmin     = kwargs.get('ptmin',           5.)
 
     def DefaultkT(self,kwargs):
         self.algorithm = 'kt'
-        self.radius    = kwargs.get('radius',    0.4)
-        self.ptmin     = kwargs.get('ptmin',     5.)
-        self.exclusive = kwargs.get('exclusive', False)
+        self.radius    = kwargs.get('radius',          0.4)
+        self.ptmin     = kwargs.get('ptmin',           5.)
+        self.exclusive = kwargs.get('exclusive',       False)
 
     def DefaultCambridgeAchen(self,kwargs):
         self.algorithm = 'cambridge'
-        self.radius    = kwargs.get('radius', 0.4)
-        self.ptmin     = kwargs.get('ptmin',  5.)
+        self.radius    = kwargs.get('radius',          0.4)
+        self.ptmin     = kwargs.get('ptmin',           5.)
 
     def DefaultGenkT(self,kwargs):
         self.algorithm = 'genkt'
-        self.radius    = kwargs.get('radius',    0.4)
-        self.ptmin     = kwargs.get('ptmin',     5.)
-        self.exclusive = kwargs.get('exclusive', False)
-        self.p         = kwargs.get('p',         -1)
+        self.radius    = kwargs.get('radius',          0.4)
+        self.ptmin     = kwargs.get('ptmin',           5.)
+        self.exclusive = kwargs.get('exclusive',       False)
+        self.p         = kwargs.get('p',               -1)
 
     def DefaultGridJet(self,kwargs):
         self.algorithm = 'gridjet'
-        self.ymax      = kwargs.get('ymax',  3.)
-        self.ptmin     = kwargs.get('ptmin', 5.)
+        self.ymax      = kwargs.get('ymax',            3.)
+        self.ptmin     = kwargs.get('ptmin',           5.)
 
     def DefaultSisCone(self,kwargs):
         self.algorithm   = 'siscone'
-        self.radius      = kwargs.get('radius',      0.4)
-        self.ptmin       = kwargs.get('ptmin',       5.)
-        self.input_ptmin = kwargs.get('input_ptmin', 5.)
-        self.overlap     = kwargs.get('overlap',     0.5)
-        self.npassmax    = kwargs.get('npassmax',    1.)
+        self.radius      = kwargs.get('radius',        0.4)
+        self.ptmin       = kwargs.get('ptmin',         5.)
+        self.input_ptmin = kwargs.get('input_ptmin',   5.)
+        self.overlap     = kwargs.get('overlap',       0.5)
+        self.npassmax    = kwargs.get('npassmax',      1.)
 
     def DefaultCDF(self,kwargs):
         self.algorithm = 'cdfjetclu'
-        self.radius    = kwargs.get('radius',   0.4)
-        self.ptmin     = kwargs.get('ptmin',    5.)
-        self.overlap   = kwargs.get('overlap',  0.5)
-        self.seed      = kwargs.get('seed',     1.)
-        self.iratch    = kwargs.get('iratch',   0.)
+        self.radius    = kwargs.get('radius',          0.4)
+        self.ptmin     = kwargs.get('ptmin',           5.)
+        self.overlap   = kwargs.get('overlap',         0.5)
+        self.seed      = kwargs.get('seed',            1.)
+        self.iratch    = kwargs.get('iratch',          0.)
 
     def DefaultCDFMidPoint(self,kwargs):
         self.algorithm    = 'cdfmidpoint'
@@ -117,33 +132,40 @@ class JetConfiguration:
                                                ', '.join([x for x in self.__dict__.keys() if x!='JetID']))
                 return
             try:
+                # Except exclusive rets of the parameters are floats!!
                 if parameter == 'exclusive':
-                    if value.lower() == 'true':
+                    if value.lower() in ['true','t']:
                         self.exclusive = True
-                    elif value.lower() == 'false':
+                    elif value.lower() in ['false','f']:
                         self.exclusive = False
                     else:
                         raise ValueError
-                tmp = float(value)
-                self.__dict__[parameter] = tmp
-                return True
+                else:
+                    tmp = float(value)
+                    self.__dict__[parameter] = tmp
+                return 
             except ValueError:
                 if parameter == 'exclusive':
                     logging.getLogger('MA5').error("The "+parameter+" value must be True or False.")
                 else:
                     logging.getLogger('MA5').error("The "+parameter+" value must be float.")
-                return False
+                return
         elif parameter == 'algorithm':
-            if parameter not in self.userVariables:
-                logging.getLogger('MA5').error("The clustering algorithm '"+parameter+"' is not available.")
+            if value not in self.userVariables:
+                logging.getLogger('MA5').error("The clustering algorithm '"+value+"' is not available.")
                 logging.getLogger('MA5').error("Available algorithms are : "+ ', '.join(self.userVariables))
-                return False
+                return
             else:
-                for key in self.__dict__.keys():
-                    if key != 'JetID': self.__dict__.pop(key)
-                self.SetDefaultAlgorithm(parameter)
-                logging.getLogger('MA5').warning(self.JetID+' has been reset.')
-        return True
+                # Keep all the relevant options for the new algorithm throw the rest
+                options = {}
+                previous_keys = list(self.__dict__.keys())
+                for key in previous_keys:
+                    if key != 'JetID': 
+                        options[key] = self.__dict__[key]
+                        self.__dict__.pop(key)
+                self.SetDefaultAlgorithm(value,options)
+                # logging.getLogger('MA5').warning(self.JetID+' has been reset.')
+        return
 
     def user_GetParameters(self):
         return [x for x in self.__dict__.keys() if x != 'JetID']
@@ -156,7 +178,7 @@ class JetConfiguration:
             if key=='JetID':
                 continue
             else:
-                logging.getLogger('MA5').info('      - '+key+' : '+str(self.__dict__[key]))
+                logging.getLogger('MA5').info('      - '+key.ljust(15,' ')+' : '+str(self.__dict__[key]))
 
 
 

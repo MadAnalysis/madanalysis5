@@ -232,7 +232,6 @@ class Main():
 
 
     def user_DisplayParameter(self,parameter):
-        print(type(self))
         if  parameter=="currentdir":
             self.logger.info(" currentdir = "+self.get_currentdir())
         elif parameter=="stacking_method":

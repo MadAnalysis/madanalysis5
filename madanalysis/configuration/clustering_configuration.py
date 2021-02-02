@@ -46,10 +46,10 @@ class ClusteringConfiguration:
                       "exclusive_id"        : ["true","false"],
                       "jetrecomode"         : ["jets","constituents"],
                       "magneticfield"       : ["3.8"],
-                      "tracker_radius"      : ["1.29"],
-                      "half_length"         : ["3.0"],
-                      "particle_propagator" : ["on","off"]
-
+                      #"tracker_radius"      : ["1.29"], @JACK : These options are not available atm.
+                      #"half_length"         : ["3.0"],
+                      "particle_propagator" : ["on","off"],
+                      "JetID"               : ["Ma5Jet"]
                     }
 
     def __init__(self):
@@ -58,11 +58,13 @@ class ClusteringConfiguration:
         self.beauty       = BeautyIdentification()
         self.tau          = TauIdentification()
         self.exclusive_id = True
+        self.JetID        = "Ma5Jet"
 
         
     def Display(self):
         self.user_DisplayParameter("algorithm")
         if self.algorithm!="none":
+            logging.getLogger('MA5').info('  + Jet ID : '+self.JetID)
             self.clustering.Display()
             self.user_DisplayParameter("exclusive_id")
             self.beauty.Display()
@@ -92,6 +94,7 @@ class ClusteringConfiguration:
     def SampleAnalyzerConfigString(self):
         if self.algorithm!="none":
             mydict = {}
+            mydict['JetID'] = self.JetID
             if self.exclusive_id:
                 mydict['exclusive_id'] = '1'
             else:
@@ -204,6 +207,8 @@ class ClusteringConfiguration:
             return self.beauty.user_SetParameter(parameter,value)
         elif parameter.startswith('tau_id.'):
             return self.tau.user_SetParameter(parameter,value)
+        elif parameter.lower() == 'jetid':
+            self.JetID = str(value)
         else:
             return self.clustering.user_SetParameter(parameter,value)
 

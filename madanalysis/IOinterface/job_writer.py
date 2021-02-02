@@ -461,7 +461,7 @@ class JobWriter(object):
             parameters = self.main.fastsim.SampleAnalyzerConfigString()
             for k,v in sorted(six.iteritems(parameters),\
                               key=lambda k_v: (k_v[0],k_v[1])):
-                file.write('  parametersC1["'+k+'"]="'+v+'";\n')
+                file.write('  parametersC1['+('"'+k+'"').ljust(21,' ')+']="'+v+'";\n')
             file.write('  JetClusterer* cluster1 = \n')
             file.write('      manager.InitializeJetClusterer("'+self.main.fastsim.clustering.algorithm+'",parametersC1);\n')
             file.write('  if (cluster1==0) return 1;\n\n')
@@ -472,15 +472,19 @@ class JobWriter(object):
             if self.main.superfastsim.isTaggerOn():
                 file.write('  // Declaration of a generic tagger\n')
                 file.write('  NewTagger* tagger = new NewTagger();\n\n')
+            if len(self.main.jet_collection) > 0:
+                #@JACK : Define the jets here
+                jack = 123
 
         # + Case Delphes
         if self.main.fastsim.package in ["delphes","delphesMA5tune"]:
             file.write('  //Getting pointer to fast-simulation package\n')
             file.write('  std::map<std::string, std::string> parametersD1;\n')
-            if self.fastsim.package=="delphesMA5tune":
-                cfg=self.main.fastsim.delphesMA5tune
-            else:
-                cfg=self.main.fastsim.delphes
+            #@JACK: This variable is not used
+            #if self.fastsim.package=="delphesMA5tune":
+            #    cfg=self.main.fastsim.delphesMA5tune
+            #else:
+            #    cfg=self.main.fastsim.delphes
             parameters = self.main.fastsim.SampleAnalyzerConfigString()
             for k,v in sorted(six.iteritems(parameters),\
                               key=lambda k_v1: (k_v1[0],k_v1[1])):
