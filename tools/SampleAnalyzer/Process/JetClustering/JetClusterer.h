@@ -35,7 +35,6 @@
 #include "SampleAnalyzer/Process/JetClustering/TauTagger.h"
 #include "SampleAnalyzer/Process/JetClustering/NullSmearer.h"
 #include "SampleAnalyzer/Commons/Base/SmearerBase.h"
-#include "SampleAnalyzer/Commons/Base/SubstructureBase.h"
 
 #ifdef FASTJET_USE
   #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoStandard.h"
