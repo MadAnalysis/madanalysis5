@@ -454,9 +454,22 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
   if (mySmearer_->isPhotonSmearerOn())
       std::sort(myEvent.rec()->photons_.begin(),   myEvent.rec()->photons_.end(),   sort_by_photonPT);
 
+  // Set Primary Jet ID
+  myEvent.rec()->SetPrimaryJetID(JetID_);
   // Launching the clustering
   // -> Filling the collection: myEvent->rec()->jets()
   algo_->Execute(mySample,myEvent,ExclusiveId_,vetos,vetos2,mySmearer_);
+#ifdef FASTJET_USE
+  // Cluster additional jets separately. In order to save time Execute function
+  // saves hadron inputs into memory and that configuration is used for the rest
+  // of the jets.
+  for (std::map<std::string, ClusterAlgoBase* >::const_iterator
+       it=cluster_collection_.begin();it!=cluster_collection_.end();it++)
+  {
+      it->second->Cluster(myEvent, it->first);
+  }
+#endif
+
 
   // shortcut for TET & THT
   MAfloat64 & TET = myEvent.rec()->TET();

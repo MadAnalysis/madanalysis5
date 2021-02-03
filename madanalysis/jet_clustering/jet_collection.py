@@ -50,7 +50,7 @@ class JetCollection:
         # args[1]  -> JetID
         # args[2]  -> jet algorithm
         # args[3:] -> options: no need to cherry pick them only the relevant ones will be used.
-        # dataset_names: names for the datasets to avoid overlaps
+        # dataset_names: names for the datasets and primary jet to avoid overlaps
 
         if len(args) < 3:
             self.logger.error('Invalid syntax! Correct syntax is as follows:')

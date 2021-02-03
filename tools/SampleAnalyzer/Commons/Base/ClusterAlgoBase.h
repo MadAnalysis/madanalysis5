@@ -89,6 +89,9 @@ class ClusterAlgoBase
                          const std::set<const MCParticleFormat*> vetos2,
                          SmearerBase* smearer)=0;
 
+    // Extra Jet clustering
+    virtual MAbool Cluster(EventFormat& myEvent, std::string JetID)=0;
+
     /// Set parameter
     virtual MAbool SetParameter(const std::string& key, const std::string& value)=0;
 

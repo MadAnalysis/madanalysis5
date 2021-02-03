@@ -455,16 +455,35 @@ class JobWriter(object):
 
         # Fast-Simulation detector
         # + Case Fastsim
+        # + Case extra jet definitions
         if self.main.fastsim.package=="fastjet":
             file.write('  //Getting pointer to the clusterer\n')
             file.write('  std::map<std::string, std::string> parametersC1;\n')
             parameters = self.main.fastsim.SampleAnalyzerConfigString()
             for k,v in sorted(six.iteritems(parameters),\
                               key=lambda k_v: (k_v[0],k_v[1])):
-                file.write('  parametersC1['+('"'+k+'"').ljust(21,' ')+']="'+v+'";\n')
+                file.write('  parametersC1['+('"'+k+'"').ljust(21,' ')+'] = "'+v+'";\n')
             file.write('  JetClusterer* cluster1 = \n')
             file.write('      manager.InitializeJetClusterer("'+self.main.fastsim.clustering.algorithm+'",parametersC1);\n')
             file.write('  if (cluster1==0) return 1;\n\n')
+            if len(self.main.jet_collection) > 0:
+                # Write configuration for other jets
+                for ix, (key, item) in enumerate(self.main.jet_collection.collection.items()):
+                    map_name = "JetConfiguration"+str(ix+1)
+                    file.write('  //Adding new jet with ID ' + key + '\n')
+                    file.write('  std::map<std::string, std::string> '+map_name+';\n')
+                    for opt, val in item.__dict__.items():
+                        if opt in ['JetID','algorithm']:
+                            file.write('  '+map_name+'["'+(opt+'"').ljust(18,' ') + '] = "'+str(val)+'";\n')
+                        else:
+                            # To follow old syntax add "cluster.". 
+                            # This is not necessary but makes sense for unified syntax
+                            opt = opt.replace('radius','R')
+                            opt = opt.replace('ptmin','PTmin')
+                            valule = val if type(val) != bool else val*(1)
+                            file.write('  '+map_name+'["'+('cluster.'+opt+'"').ljust(18,' ') +\
+                                                       '] = "'+str(valule)+'";\n')
+                    file.write('  cluster1->LoadJetConfiguration('+map_name+');\n\n')
             if self.main.superfastsim.isNewSmearerOn():
                 file.write('  // Declaration of the smearer\n')
                 file.write('  SmearerBase* mySmearer = new NewSmearer();\n')
@@ -472,9 +491,7 @@ class JobWriter(object):
             if self.main.superfastsim.isTaggerOn():
                 file.write('  // Declaration of a generic tagger\n')
                 file.write('  NewTagger* tagger = new NewTagger();\n\n')
-            if len(self.main.jet_collection) > 0:
-                #@JACK : Define the jets here
-                jack = 123
+
 
         # + Case Delphes
         if self.main.fastsim.package in ["delphes","delphesMA5tune"]:
@@ -710,10 +727,11 @@ class JobWriter(object):
         options.has_commons  = True
         options.has_process  = True
         # @JACK enable usage of fastjet
-        options.has_fastjet_tag = self.main.archi_info.has_fastjet
-        options.has_fastjet_lib = self.main.archi_info.has_fastjet
-        options.has_root_inc    = self.main.archi_info.has_root
-        options.has_root_lib    = self.main.archi_info.has_root
+        options.has_fastjet_tag    = self.main.archi_info.has_fastjet
+        options.has_fastjet_lib    = self.main.archi_info.has_fastjet
+        options.has_fastjet_ma5lib = self.main.archi_info.has_fastjet
+        options.has_root_inc       = self.main.archi_info.has_root
+        options.has_root_lib       = self.main.archi_info.has_root
         #options.has_userpackage = True
         toRemove=['Log/compilation.log','Log/linking.log','Log/cleanup.log','Log/mrproper.log']
 

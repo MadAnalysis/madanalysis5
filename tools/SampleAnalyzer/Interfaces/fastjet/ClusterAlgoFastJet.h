@@ -60,7 +60,7 @@ class ClusterAlgoFastJet: public ClusterAlgoBase
     /// Jet definition
     fastjet::JetDefinition* JetDefinition_;
 
-    // Shared Cluster sequence
+    // Shared Cluster sequence for primary jet
     std::shared_ptr<fastjet::ClusterSequence> clust_seq;
 
 
@@ -77,13 +77,15 @@ class ClusterAlgoFastJet: public ClusterAlgoBase
 
     /// Jet clustering
     virtual MAbool Execute(SampleFormat& mySample, EventFormat& myEvent, MAbool ExclusiveId,   
-                         const std::vector<MAbool>& vetos,
-                         const std::set<const MCParticleFormat*> vetos2,
-                         SmearerBase* smearer);
+                           const std::vector<MAbool>& vetos,
+                           const std::set<const MCParticleFormat*> vetos2,
+                           SmearerBase* smearer);
 
     /// Initialization
     virtual MAbool Initialize()=0;
- 
+
+    /// Cluster additional jets
+    virtual MAbool Cluster(EventFormat& myEvent, std::string JetID);
 };
 
 }

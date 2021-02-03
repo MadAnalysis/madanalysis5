@@ -37,9 +37,9 @@
 #include "SampleAnalyzer/Commons/DataFormat/RecParticleFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
+// FastJet headers
 #ifdef FASTJET_USE
     #include "fastjet/PseudoJet.hh"
-    #include "fastjet/ClusterSequence.hh"
 #endif
 
 namespace MA5

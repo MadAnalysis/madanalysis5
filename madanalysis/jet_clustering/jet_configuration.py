@@ -26,9 +26,8 @@ import logging
 
 class JetConfiguration:
     
-    userVariables = ['antikt','cambridge',
-                     'genkt','gridjet','kt',
-                     'cdfjetclu','cdfmidpoint','siscone']
+    userVariables = ['antikt','cambridge', 'genkt','kt',
+                     'gridjet', 'cdfjetclu','cdfmidpoint','siscone']
 
     def __init__(self,JetID='Ma5Jet', algorithm='', options={}):
         """

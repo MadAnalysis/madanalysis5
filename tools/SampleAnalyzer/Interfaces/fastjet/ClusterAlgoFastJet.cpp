@@ -43,13 +43,10 @@ ClusterAlgoFastJet::~ClusterAlgoFastJet()
 { if (JetDefinition_!=0) delete JetDefinition_; }
 
 MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent, MAbool ExclusiveId,   
-                                 const std::vector<MAbool>& vetos,
-                                 const std::set<const MCParticleFormat*> vetos2,
-                                 SmearerBase* smearer)
+                                   const std::vector<MAbool>& vetos,
+                                   const std::set<const MCParticleFormat*> vetos2,
+                                   SmearerBase* smearer)
 {
-  // Creating a container for inputs
-  std::vector<fastjet::PseudoJet> inputs;
-
   // Putting the good inputs into the containter
   // Good inputs = - final state
   //               - visible
@@ -83,15 +80,14 @@ MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
     if (smeared.pt() <= 1e-10) continue;
 
     // Filling good particle for clustering
-    inputs.push_back(fastjet::PseudoJet(smeared.px(),
-                                        smeared.py(),
-                                        smeared.pz(),
-                                        smeared.e() ));
-    inputs.back().set_user_index(i);
+    fastjet::PseudoJet input;
+    input.reset(smeared.px(), smeared.py(), smeared.pz(), smeared.e());
+    input.set_user_index(i);
+    myEvent.rec()->AddHadron(input);
   }
 
   // Clustering
-  clust_seq.reset(new fastjet::ClusterSequence(inputs, *JetDefinition_));
+  clust_seq.reset(new fastjet::ClusterSequence(myEvent.rec()->cluster_inputs(), *JetDefinition_));
 
   // Getting jets with PTmin = 0
   std::vector<fastjet::PseudoJet> jets; 
@@ -156,4 +152,33 @@ MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
   return true;
 }
 
+// Additional jet clustering. needs execute to run before!!
+MAbool ClusterAlgoFastJet::Cluster(EventFormat& myEvent, std::string JetID)
+{
+    // Clustering
+    clust_seq.reset(new fastjet::ClusterSequence(myEvent.rec()->cluster_inputs(), 
+                                                 *JetDefinition_));
 
+    std::vector<fastjet::PseudoJet> jets; 
+    if (Exclusive_) jets = clust_seq->exclusive_jets(Ptmin_);
+    else jets = clust_seq->inclusive_jets(Ptmin_);
+    jets = fastjet::sorted_by_pt(jets);
+
+    // Storing
+    for (MAuint32 ijet=0;ijet<jets.size();ijet++)
+    {
+        // Saving jet information
+        RecJetFormat * jet = myEvent.rec()->GetNewJet(JetID);
+        MALorentzVector q(jets[ijet].px(),jets[ijet].py(),jets[ijet].pz(),jets[ijet].e());
+        jet->setMomentum(q);
+        jet->setPseudoJet(jets[ijet]);
+        std::vector<fastjet::PseudoJet> constituents = clust_seq->constituents(jets[ijet]);
+        MAuint32 tracks = 0;
+        for (MAuint32 j=0;j<constituents.size();j++)
+        {
+            jet->AddConstituent(constituents[j].user_index());
+            if (PDG->IsCharged(myEvent.mc()->particles()[constituents[j].user_index()].pdgid())) tracks++;
+        }
+        jet->ntracks_ = tracks;
+    }
+}

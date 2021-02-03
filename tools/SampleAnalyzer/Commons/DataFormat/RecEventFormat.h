@@ -25,6 +25,10 @@
 #ifndef RecEventFormat_h
 #define RecEventFormat_h
 
+// Fastjet headers
+#ifdef FASTJET_USE
+    #include "fastjet/PseudoJet.hh"
+#endif
 
 // STL headers
 #include <iostream>
@@ -84,11 +88,22 @@ class RecEventFormat
   /// Collection of reconstructed taus
   std::vector<RecTauFormat>    taus_;
 
-  /// Collection of reconstructed jets
+  /// Collection of reconstructed primary jets
   std::vector<RecJetFormat>    jets_;
+
+  // Identification of the primary jet. Corresponds to content of the jets_
+  std::string PrimaryJetID_;
 
   /// Collection of reconstructed fat jets
   std::vector<RecJetFormat>    fatjets_;
+
+  /// Collection of reconstructed jet dictionary
+  std::map<std::string, std::vector<RecJetFormat> > jetcollection_;
+
+#ifdef FASTJET_USE
+    // hadrons to be clustered (code efficiency)
+    std::vector<fastjet::PseudoJet> input_hadrons_;
+#endif
 
   /// Collection of generated jets
   std::vector<RecJetFormat>    genjets_;
@@ -177,7 +192,14 @@ class RecEventFormat
   const std::vector<RecJetFormat>& fatjets() const {return fatjets_;}
 
   /// Accessor to the jet collection (read-only)
-  const std::vector<RecJetFormat>& jets() const {return jets_;}
+  const std::vector<RecJetFormat>& jets() const {return jetcollection_.at(PrimaryJetID_);} //{return jets_;}
+
+  /// Accessor to the jet collection dictionary (read-only)
+  const std::map<std::string, std::vector<RecJetFormat> >& jetcollection() const {return jetcollection_;}
+
+  // Accessor to a specific jet dictionary (read-only)
+  const std::vector<RecJetFormat>& jets(std::string id) const {return jetcollection_.at(id);}
+
 
   /// Accessor to the genjet collection (read-only)
   const std::vector<RecJetFormat>& genjets() const {return genjets_;}
@@ -242,7 +264,13 @@ class RecEventFormat
   std::vector<RecTauFormat>& taus() {return taus_;}
 
   /// Accessor to the jet collection
-  std::vector<RecJetFormat>& jets() {return jets_;}
+  std::vector<RecJetFormat>& jets() {return jetcollection_[PrimaryJetID_];} // {return jets_;}
+
+  /// Accessor to the jet dictionary
+  std::map<std::string, std::vector<RecJetFormat> >& jetcollection() {return jetcollection_;}
+
+  /// Accessor to a specific jet in the dictionary
+  std::vector<RecJetFormat>& jets(std::string id) {return jetcollection_[id];}
 
   /// Accessor to the fat jet collection
   std::vector<RecJetFormat>& fatjets() {return fatjets_;}
@@ -297,12 +325,18 @@ class RecEventFormat
   /// Clearing all information
   void Reset()
   { 
+    PrimaryJetID_ = "Ma5Jet";
     photons_.clear(); 
     electrons_.clear(); 
     muons_.clear(); 
     taus_.clear();
     jets_.clear();
+    jetcollection_.clear();
     fatjets_.clear();
+#ifdef FASTJET_USE
+    // pseudojet : only available when fastjet is in use (code efficiency)
+    input_hadrons_.clear();
+#endif
     towers_ok_=false;
     towers_.clear();
     tracks_ok_=false;
@@ -328,9 +362,84 @@ class RecEventFormat
     MCCquarks_.clear();
   }
 
-  /// Displaying data member values
+  // Initialize PrimaryJetID
+  void SetPrimaryJetID(std::string v) {PrimaryJetID_ = v;}
+
+  // Remove an element from jet collection
+  void Remove_Collection(std::string id) 
+  {
+      if (hasJetID(id)) jetcollection_.erase(id);
+      else ERROR << "Remove_Collection:: '" << id << "' does not exist." << endmsg;
+  }
+
+  /// Change Jet ID
+  void ChangeJetID(std::string previous_id, std::string new_id)
+  {
+    if (!hasJetID(new_id) && hasJetID(previous_id))
+    {
+        std::map<std::string, std::vector<RecJetFormat> >::iterator \
+            it = jetcollection_.find(previous_id); 
+        if (it != jetcollection_.end())
+        {
+          std::swap(jetcollection_[new_id],it->second);
+          jetcollection_.erase(it);
+        }
+    }
+    else
+    {
+        if (hasJetID(new_id))
+            ERROR << "ChangeJetID:: '" << new_id << "' already exists." << endmsg;
+        if (!hasJetID(previous_id))
+            ERROR << "ChangeJetID:: '" << previous_id << "' does not exist." << endmsg;
+    }
+  }
+
+  // Get the list of jet collection IDs
+  const std::vector<std::string> GetJetIDs() const
+  {
+    std::vector<std::string> keys;
+    for (std::map<std::string, std::vector<RecJetFormat> >::const_iterator
+         it=jetcollection_.begin();it!=jetcollection_.end();it++)
+         keys.push_back(it->first);
+    return keys;
+  }
+
+  // Check if collection ID exists
+  MAbool hasJetID(std::string id)
+  {
+    std::map<std::string, std::vector<RecJetFormat> >::iterator 
+        jet_check = jetcollection_.find(id);
+    if (jet_check != jetcollection_.end()) return true;
+    return false;
+  }
+
+#ifdef FASTJET_USE
+    // Add a new hadron to be clustered. (for code efficiency)
+    void AddHadron(fastjet::PseudoJet v) {input_hadrons_.push_back(v);}
+
+    // Get hadrons to cluster (code efficiency)
+    std::vector<fastjet::PseudoJet>& cluster_inputs() {return input_hadrons_;}
+#endif
+
+  /// Displaying data member values.
+  /// @JACK: added for debugging purposes. Does not need to be included in the original code.
   void Print() const
   {
+    INFO << "   -------------------------------------------" << endmsg;
+    INFO << "   Event Content : " << endmsg;
+    INFO << "      * Jets Content : " << endmsg;
+    for (std::map<std::string, std::vector<RecJetFormat> >::const_iterator
+             it=jetcollection_.begin();it!=jetcollection_.end();it++)
+    {
+        std::string tag = it->first==PrimaryJetID_ ? " (Primary)" : " ";
+        INFO << "         - Jet ID = " << it->first << ", Number of Jets = " 
+             << it->second.size() << tag << endmsg;
+    }
+    INFO << "      * Number of Taus      = " << taus_.size() << endmsg;
+    INFO << "      * Number of Electrons = " << electrons_.size() << endmsg;
+    INFO << "      * Number of Muons     = " << muons_.size() << endmsg;
+    INFO << "      * Number of Photons   = " << photons_.size() << endmsg;
+    INFO << "   -------------------------------------------" << endmsg;
   }
 
   /// Giving a new photon entry
@@ -391,11 +500,24 @@ class RecEventFormat
     return &taus_.back();
   }
 
-  /// Giving a new jet entry
+  /// Giving a new primary jet entry
   RecJetFormat* GetNewJet()
   {
-    jets_.push_back(RecJetFormat());
-    return &jets_.back();
+//    jets_.push_back(RecJetFormat());
+//    return &jets_.back();
+    std::pair< std::map<std::string, std::vector<RecJetFormat> >::iterator, bool> new_jet;
+    new_jet = jetcollection_.insert(std::make_pair(PrimaryJetID_,std::vector<RecJetFormat>() ));
+    new_jet.first->second.push_back(RecJetFormat());
+    return &(new_jet.first->second.back());
+  }
+
+  // Get a new jet entry with specific ID
+  RecJetFormat* GetNewJet(std::string id)
+  {
+    std::pair< std::map<std::string, std::vector<RecJetFormat> >::iterator,bool> new_jet;
+    new_jet = jetcollection_.insert(std::make_pair(id,std::vector<RecJetFormat>() ));
+    new_jet.first->second.push_back(RecJetFormat());
+    return &(new_jet.first->second.back());
   }
 
   /// Giving a new fat jet entry
