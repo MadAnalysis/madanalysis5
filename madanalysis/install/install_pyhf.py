@@ -106,7 +106,6 @@ class Installpyhf:
     def Check(self):
         try:
             if os.path.isdir(self.installdir) and not self.installdir in sys.path:
-                print(self.installdir+(sys.version_info[0] > 2)*'/src/')
                 sys.path.append(self.installdir+(sys.version_info[0] > 2)*'/src/')
             import pyhf
             if str(pyhf.__version__) != self.pyhf_version:
