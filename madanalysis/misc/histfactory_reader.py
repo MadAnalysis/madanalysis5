@@ -25,6 +25,8 @@
 from __future__ import absolute_import
 import json, os, copy, math, logging
 from six.moves import range
+
+
 class HistFactory(object):
     def __init__(self,pyhf_config):
         self.pyhf_config = pyhf_config.get('SR'  , {})
@@ -243,7 +245,8 @@ class HF_Signal(HistFactory):
             SR_tmp = {'op'    : self.signal_config[SR]['op'],
                       'path'  : self.signal_config[SR]['path'],
                       'value' : {'name'      : 'MA5_signal',
-                                 'data'      : [round(eff*xsection*self.lumi*1000.,6) for eff in self.signal_config[SR]['data']],
+                                 'data'      : [round(eff*xsection*self.lumi*1000.,6) 
+                                                 for eff in self.signal_config[SR]['data'] ],
                                  'modifiers' : [
                                                  {u'data': None, 
                                                   u'name': u'lumi', 

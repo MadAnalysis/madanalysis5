@@ -22,7 +22,7 @@
 ################################################################################
 
 
-from __future__ import absolute_import
+from __future__                                                 import absolute_import
 from madanalysis.install.detector_manager                       import DetectorManager
 from madanalysis.configuration.delphesMA5tune_configuration     import DelphesMA5tuneConfiguration
 from madanalysis.configuration.delphes_configuration            import DelphesConfiguration
@@ -1063,7 +1063,8 @@ class RunRecast():
                         deltanb = round(deltanb*err_scale,8)
                     else:
                         nb_new = nb*lumi_scaling;
-                        deltanb = round(math.sqrt(self.main.recasting.error_extrapolation[0]**2*nb_new**2 + self.main.recasting.error_extrapolation[1]**2*nb_new), 8);
+                        deltanb = round(math.sqrt(self.main.recasting.error_extrapolation[0]**2*nb_new**2 
+                                                  + self.main.recasting.error_extrapolation[1]**2*nb_new), 8);
                 else:
                     if syst==-1:
                         syst=0.
@@ -1084,10 +1085,10 @@ class RunRecast():
             of SRs.
         """
         import sys
-        self.logger.debug(' === Getting ready! === does pyhf exist? '+str(any([x.tag=='pyhf' for x in info_root])))
+        #self.logger.debug(' === Getting ready! === does pyhf exist? '+str(any([x.tag=='pyhf' for x in info_root])))
         if any([x.tag=='pyhf' for x in info_root]): 
             pyhf_path = os.path.join(self.main.archi_info.ma5dir, 'tools/pyhf'+(sys.version_info[0]>2)*'/src')
-            self.logger.debug('pyhf_path: '+ pyhf_path)
+            #self.logger.debug('pyhf_path: '+ pyhf_path)
             try:
                 if os.path.isdir(pyhf_path) and pyhf_path not in sys.path:
                     sys.path.append(pyhf_path)
@@ -1303,8 +1304,8 @@ class RunRecast():
                     regiondata['pyhf'][likelihood_profile]['CLs']  = CLs
                 s95 = max(float(regiondata['pyhf'][likelihood_profile]['s95exp']),0.)
                 #import the efficiencies
-                n95 = []
-                for SR,item in signal.signal_config.items():
+                n95 = [] #-> efficiencies per SR
+                for _, item in signal.signal_config.items():
                     for dat in item['data']:
                         n95.append(dat)
                 n95 = max([s95*x*1000.*lumi for x in n95])
@@ -1323,6 +1324,8 @@ class RunRecast():
                             regiondata['pyhf'][mybr]["best"]=0
                         bestreg = [likelihood_profile]
                         rMax = rSR
+                    else:
+                        regiondata['pyhf'][mybr]["best"]=0
         return regiondata
 
 
