@@ -1284,9 +1284,9 @@ class RunRecast():
                 regiondata["globalCLs"]=self.slhCLs(regiondata,cov_regions,xsection,lumi,covariance)
 
         #initialize pyhf for cls calculation
-        bestreg =[]
-        rMax    = -1
+        bestreg  = []
         iterator = []
+        minsig95 = 1e99
         if self.pyhf_config!={}:
             iterator = copy.deepcopy(list(self.pyhf_config.items()))
         for n, (likelihood_profile, config) in enumerate(iterator):
@@ -1302,30 +1302,38 @@ class RunRecast():
                 CLs = pyhf_wrapper(background(lumi), signal(lumi))
                 if CLs >= 0.:
                     regiondata['pyhf'][likelihood_profile]['CLs']  = CLs
-                s95 = max(float(regiondata['pyhf'][likelihood_profile]['s95exp']),0.)
-                #import the efficiencies
-                n95 = [] #-> efficiencies per SR
-                for _, item in signal.signal_config.items():
-                    for dat in item['data']:
-                        n95.append(dat)
-                n95 = max([s95*x*1000.*lumi for x in n95])
-                nsignal = []
-                if n95>0.:
-                    for SR in signal(lumi):
-                        for dat in SR.get('value',{}).get('data',[]):
-                            if dat > 0.:
-                                nsignal.append(dat)
-                    rSR = 0.
-                    if len(nsignal)>0:
-                        rSR = min(nsignal)/n95
-                    if rSR > rMax:
-                        regiondata['pyhf'][likelihood_profile]["best"] = 1
-                        for mybr in bestreg:
-                            regiondata['pyhf'][mybr]["best"]=0
-                        bestreg = [likelihood_profile]
-                        rMax = rSR
-                    else:
+                s95 = float(regiondata['pyhf'][likelihood_profile]['s95exp'])
+                if 0. < s95 < minsig95:
+                    regiondata['pyhf'][likelihood_profile]["best"] = 1
+                    for mybr in bestreg:
                         regiondata['pyhf'][mybr]["best"]=0
+                    bestreg = [likelihood_profile]
+                    minsig95 = s95
+                else:
+                    regiondata['pyhf'][likelihood_profile]["best"]=0
+                #import the efficiencies
+                #n95 = [] #-> efficiencies per SR
+                #for _, item in signal.signal_config.items():
+                #    for dat in item['data']:
+                #        n95.append(dat)
+                #n95 = max([s95*eff*1000.*lumi for eff in n95])
+                #nsignal = []
+#                if s95>0.:
+#                    for SR in signal(lumi):
+#                        for dat in SR.get('value',{}).get('data',[]):
+#                            if dat > 0.:
+#                                nsignal.append(dat)
+#                    rSR = 0.
+#                    if len(nsignal)>0:
+#                        rSR = min(nsignal)/n95
+#                    if rSR > rMax:
+#                        regiondata['pyhf'][likelihood_profile]["best"] = 1
+#                        for mybr in bestreg:
+#                            regiondata['pyhf'][mybr]["best"]=0
+#                        bestreg = [likelihood_profile]
+#                        rMax = rSR
+#                    else:
+#                        regiondata['pyhf'][likelihood_profile]["best"]=0
         return regiondata
 
 
@@ -1490,6 +1498,22 @@ class RunRecast():
             results = open(name,'w')
             results.write(json.dumps(to_save, indent=4))
             results.close()
+            # Jack remove this part after confirming the results
+            if self.pyhf_config!={}:
+                iterator = copy.deepcopy(list(self.pyhf_config.items()))
+            for n, (likelihood_profile, config) in enumerate(iterator):
+                if regiondata.get('pyhf',{}).get(likelihood_profile, False) == False:
+                    continue
+                background = HF_Background(config)
+                signal = HF_Signal(config,regiondata,xsection=1.)
+                name = summary.name.split('.dat')[0]
+                results = open(name+'_'+likelihood_profile+'_bkg.json','w')
+                results.write(json.dumps(background(lumi), indent=4))
+                results.close()
+                results = open(name+'_'+likelihood_profile+'_sig.json','w')
+                results.write(json.dumps(signal(lumi), indent=4))
+                results.close()
+            ######################################################
         err_sets = [ ['scale_up', 'scale_dn', 'Scale var.'], ['TH_up', 'TH_dn', 'TH   error'] ]
         for reg in regions:
             eff    = (regiondata[reg]["Nf"] / regiondata[reg]["N0"])
@@ -1654,6 +1678,7 @@ def pyhf_wrapper_py3(background,signal):
     # Scilence pyhf's messages
     pyhf.pdf.log.setLevel(logging.CRITICAL)
     pyhf.workspace.log.setLevel(logging.CRITICAL)
+    pyhf.mixins.log.setLevel(logging.CRITICAL)
     pyhf.set_backend('numpy')
 
     try:
