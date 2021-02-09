@@ -25,9 +25,7 @@
 from __future__ import absolute_import
 from madanalysis.interpreter.cmd_base       import CmdBase
 from madanalysis.install.install_manager    import InstallManager
-#from madanalysis.system.user_info           import UserInfo
-#from madanalysis.system.config_checker      import ConfigChecker
-import logging, os #, sys, shutil, pwd
+import logging, os
 
 import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
 
@@ -142,12 +140,12 @@ class CmdInstall(CmdBase):
                 return True
         elif args[0]=='PAD':
             pad_install_check, padsfs_install_check = False, False
-            # PAD requires ma5 to be restarted so first install PADForSFS
+            # PAD requires ma5 to be restarted; therefore we first install PADForSFS
             padsfs_install_check = installer.Execute('PADForSFS')
             if inst_delphes(self.main,installer,'delphes',True):
                 pad_install_check = installer.Execute('PAD')
             else:
-                self.logger.warning('Delphes is not installed... please exit the program and install the pad')
+                self.logger.warning('Delphes is not installed (and will be installed). Then please exit MA5 and re-install the PAD')
             return any([pad_install_check, padsfs_install_check])
         elif args[0]=='PADForSFS':
             return installer.Execute('PADForSFS')
