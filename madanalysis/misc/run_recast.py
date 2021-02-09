@@ -729,11 +729,11 @@ class RunRecast():
         if not ET:
             return False
 
-        print_gl_citation = self.main.recasting.global_likelihood_switch
+        print_gl_citation = self.main.recasting.global_likelihoods_switch
         if len(self.main.recasting.extrapolated_luminosities)>0 or \
             any([x!=None for x in [dataset.scaleup,dataset.scaledn, dataset.pdfup, dataset.pdfdn]]) or \
             any([a+b>0. for a,b in self.main.recasting.systematics]):
-            self.logger.info("\033[1m   * Using Uncertainties and Higher-Luminosity Estimations Module\033[0m")
+            self.logger.info("\033[1m   * Using Uncertainties and Higher-Luminosity Estimates\033[0m")
             self.logger.info("\033[1m     Please cite arXiv:1910.11418 [hep-ph]\033[0m")
 
 
@@ -774,14 +774,14 @@ class RunRecast():
                 if (self.cov_switch or self.pyhf_config!={}) and print_gl_citation:
                     # TODO: Update arXiv number this is Les Houches arxiv number
                     print_gl_citation = False
-                    self.logger.info("\033[1m   * Using Global likelihoods for CLs calculations\033[0m")
+                    self.logger.info("\033[1m   * Using global likelihoods to improve CLs calculations\033[0m")
                     self.logger.info("\033[1m     Please cite arXiv:2002.12220 [hep-ph]\033[0m")
                     if self.pyhf_config!={}:
                         self.logger.info("\033[1m                 pyhf DOI:10.5281/zenodo.1169739\033[0m")
                         self.logger.info("\033[1m                 For more details see https://scikit-hep.org/pyhf/\033[0m")
                         if sys.version_info[0]==2:
-                            self.logger.warning("Please note that pyhf no longer supports Python2,"+\
-                                                " an old version is in use. Results may vary.")
+                            self.logger.warning("Please note that recent pyhf releases no longer support Python 2."+\
+                                                " An older version has been used. Results may be impacted.")
                     elif self.cov_switch:
                         self.logger.info("\033[1m                 CMS-NOTE-2017-001\033[0m")
 
@@ -889,14 +889,14 @@ class RunRecast():
             self.logger.debug('Info File does not exist...')
             return -1,-1, -1, -1, -1
         ## Getting the XML information
-        try: 
+        try:
             info_input = open(self.pad+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.info')
             info_tree = etree.parse(info_input)
             info_input.close()
             results = self.header_info_file(info_tree,analysis,extrapolated_lumi)
             return results
         except:
-            self.logger.debug('Can not parse the info file')
+            self.logger.debug('Cannot parse the info file')
             return -1,-1, -1, -1, -1
 
     def fix_pileup(self,filename):
@@ -968,11 +968,11 @@ class RunRecast():
         covariance   = []
         # Getting the description of the subset of SRs having covariances
         # Now the cov_switch is activated here
-        if "cov_subset" in info_root.attrib and self.main.recasting.global_likelihood_switch:
+        if "cov_subset" in info_root.attrib and self.main.recasting.global_likelihoods_switch:
             self.cov_switch = True
             regiondata["covsubset"] = info_root.attrib["cov_subset"]
         # activate pyhf
-        if self.main.recasting.global_likelihood_switch:
+        if self.main.recasting.global_likelihoods_switch:
             try: 
                 self.pyhf_config = self.pyhf_info_file(info_root)
             except:
@@ -1084,18 +1084,15 @@ class RunRecast():
             provided. One can process multiple likelihood profiles dedicated to different sets
             of SRs.
         """
-        import sys
-        #self.logger.debug(' === Getting ready! === does pyhf exist? '+str(any([x.tag=='pyhf' for x in info_root])))
         if any([x.tag=='pyhf' for x in info_root]): 
             pyhf_path = os.path.join(self.main.archi_info.ma5dir, 'tools/pyhf'+(sys.version_info[0]>2)*'/src')
-            #self.logger.debug('pyhf_path: '+ pyhf_path)
             try:
                 if os.path.isdir(pyhf_path) and pyhf_path not in sys.path:
                     sys.path.append(pyhf_path)
                 import pyhf
                 self.logger.debug('Pyhf v'+str(pyhf.__version__))
             except ImportError:
-                self.logger.warning('To use full profile likelihoods please install pyhf via "install pyhf" command')
+                self.logger.warning('To use the global likelihood PYHF machinery, please type "install pyhf"')
                 return {}
             except:
                 self.logger.debug('Problem with pyhf_info_file function!!')
@@ -1108,10 +1105,8 @@ class RunRecast():
         to_remove   = []
         self.logger.debug(' === Reading info file for pyhf ===')
         for child in info_root:
-            self.logger.debug('pyhf_info_file: info_root, child:' + str(child.tag))
             if child.tag == 'lumi':
                 default_lumi = float(child.text)
-                self.logger.debug('pyhf_info_file: lumi:' + str(default_lumi))
             if child.tag == 'pyhf':
                 likelihood_profile = child.attrib.get('id','HF-Likelihood-'+str(nprofile))
                 if likelihood_profile == 'HF-Likelihood-'+str(nprofile):
@@ -1123,7 +1118,6 @@ class RunRecast():
                                                        'lumi' : default_lumi,
                                                        'SR'   :  OrderedDict()
                                                        }
-                self.logger.debug('pyhf_info_file: likelihood_profile:' + str(likelihood_profile))
                 for subchild in child:
                     if subchild.tag == 'name':
                         pyhf_config[likelihood_profile]['name'] = str(subchild.text)
@@ -1155,7 +1149,6 @@ class RunRecast():
                                             to_remove.append(likelihood_profile)
 
         # validate
-        self.logger.debug('pyhf_info_file: Starting validation:' + str(pyhf_config))
         for likelihood_profile, config in pyhf_config.items():
             if likelihood_profile in to_remove:
                 continue
@@ -1295,7 +1288,7 @@ class RunRecast():
             if regiondata.get('pyhf',{}).get(likelihood_profile, False) == False:
                 continue
             background = HF_Background(config)
-            self.logger.debug('Config = '+str(config))
+            self.logger.debug('current pyhf Configuration = '+str(config))
             signal = HF_Signal(config,regiondata,xsection=xsection)
             CLs    = -1
             if signal.isAlive():
@@ -1311,29 +1304,6 @@ class RunRecast():
                     minsig95 = s95
                 else:
                     regiondata['pyhf'][likelihood_profile]["best"]=0
-                #import the efficiencies
-                #n95 = [] #-> efficiencies per SR
-                #for _, item in signal.signal_config.items():
-                #    for dat in item['data']:
-                #        n95.append(dat)
-                #n95 = max([s95*eff*1000.*lumi for eff in n95])
-                #nsignal = []
-#                if s95>0.:
-#                    for SR in signal(lumi):
-#                        for dat in SR.get('value',{}).get('data',[]):
-#                            if dat > 0.:
-#                                nsignal.append(dat)
-#                    rSR = 0.
-#                    if len(nsignal)>0:
-#                        rSR = min(nsignal)/n95
-#                    if rSR > rMax:
-#                        regiondata['pyhf'][likelihood_profile]["best"] = 1
-#                        for mybr in bestreg:
-#                            regiondata['pyhf'][mybr]["best"]=0
-#                        bestreg = [likelihood_profile]
-#                        rMax = rSR
-#                    else:
-#                        regiondata['pyhf'][likelihood_profile]["best"]=0
         return regiondata
 
 
@@ -1499,6 +1469,7 @@ class RunRecast():
             results.write(json.dumps(to_save, indent=4))
             results.close()
             # Jack remove this part after confirming the results
+            # this part does not need to be included in the main branch
             if self.pyhf_config!={}:
                 iterator = copy.deepcopy(list(self.pyhf_config.items()))
             for n, (likelihood_profile, config) in enumerate(iterator):
@@ -1688,10 +1659,10 @@ def pyhf_wrapper_py3(background,signal):
                                                        'histosys': {'interpcode': 'code4p'}})
     except (pyhf.exceptions.InvalidSpecification, KeyError) as e:
         logging.getLogger('MA5').debug("Invalid JSON file :: "+str(e))
-        return 1.
+        return -1
     except:
-        logging.getLogger('MA5').debug("Unknown error, check pyhf_wrapper_py3")
-        return 1.
+        logging.getLogger('MA5').debug("Unknown error, check pyhf_wrapper_py3 "+ str(e))
+        return -1
 
     def get_CLs(**kwargs):
         try:
@@ -1748,7 +1719,7 @@ def pyhf_wrapper_py2(background,signal,qtilde=True):
         logging.getLogger('MA5').debug("Invalid JSON file :: "+str(e))
         return -1
     except:
-        logging.getLogger('MA5').debug("Unknown error, check pyhf_wrapper_py3")
+        logging.getLogger('MA5').debug("Unknown error, check pyhf_wrapper_py2 "+str(e))
         return -1
 
     def get_CLs(bounds=None):

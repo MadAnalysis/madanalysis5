@@ -110,18 +110,18 @@ class Installpyhf:
             import pyhf
             if str(pyhf.__version__) != self.pyhf_version:
                 if sys.version_info[0] > 2:
-                    logging.getLogger('MA5').warning("Not using the right version of pyhf. pyhf version = "+str(pyhf.__version__))
+                    logging.getLogger('MA5').warning("An incorrect version of pyhf has been detected ("+str(pyhf.__version__)+")");
                     logging.getLogger('MA5').warning("Please note that MadAnalysis 5 currently supports pyhf version "+\
                                                      str(self.pyhf_version))
                     return True
-                logging.getLogger('MA5').error("Not using the right version of pyhf. pyhf version = "+str(pyhf.__version__))
+                logging.getLogger('MA5').error("An incorrect version of pyhf has been detected ("+str(pyhf.__version__)+")");
                 logging.getLogger('MA5').error("Please note that MadAnalysis 5 currently supports pyhf version "+\
                                                str(self.pyhf_version))
                 self.display_log()
                 return False
         except ImportError as err:
-            logging.getLogger('MA5').error("Cannot use pyhf. Please double check the required dependencies and/or (re-)install it.")
-            logging.getLogger('MA5').error("phyf requires following dependencies: click, tqdm, six, jsonschema, jsonpatch, pyyaml")
+            logging.getLogger('MA5').error("The pyhf module cannot be used. Please check that all requirements are available and (re-)install it.")
+            logging.getLogger('MA5').error("Using phyf requires the click, tqdm, six, jsonschema, jsonpatch and pyyaml packages")
             logging.getLogger('MA5').debug(err)
             self.display_log()
             return False

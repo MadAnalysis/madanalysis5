@@ -108,7 +108,7 @@ class DetectPAD:
 
         if self.sfs:
             # User setting
-            if self.user_info.padsfs_build_path==None:
+            if self.user_info.padsfs_build_path==None or not self.archi_info.has_fastjet:
                 return DetectStatusType.UNFOUND, msg
 
             self.logger.debug("User setting: PADForSFS build path is specified.")
@@ -152,6 +152,8 @@ class DetectPAD:
             thefolder = 'PADForMA5tune'
         elif self.sfs:
             thefolder = 'PADForSFS'
+            if not self.archi_info.has_fastjet:
+                return DetectStatusType.UNFOUND, msg
         else:
             thefolder = 'PAD'
 
