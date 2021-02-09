@@ -729,11 +729,11 @@ class RunRecast():
         if not ET:
             return False
 
-        print_gl_citation = self.main.recasting.global_likelihood_switch
+        print_gl_citation = self.main.recasting.global_likelihoods_switch
         if len(self.main.recasting.extrapolated_luminosities)>0 or \
             any([x!=None for x in [dataset.scaleup,dataset.scaledn, dataset.pdfup, dataset.pdfdn]]) or \
             any([a+b>0. for a,b in self.main.recasting.systematics]):
-            self.logger.info("\033[1m   * Using Uncertainties and Higher-Luminosity Estimations Module\033[0m")
+            self.logger.info("\033[1m   * Using Uncertainties and Higher-Luminosity Estimates\033[0m")
             self.logger.info("\033[1m     Please cite arXiv:1910.11418 [hep-ph]\033[0m")
 
 
@@ -774,14 +774,14 @@ class RunRecast():
                 if (self.cov_switch or self.pyhf_config!={}) and print_gl_citation:
                     # TODO: Update arXiv number this is Les Houches arxiv number
                     print_gl_citation = False
-                    self.logger.info("\033[1m   * Using Global likelihoods for CLs calculations\033[0m")
+                    self.logger.info("\033[1m   * Using global likelihoods to improve CLs calculations\033[0m")
                     self.logger.info("\033[1m     Please cite arXiv:2002.12220 [hep-ph]\033[0m")
                     if self.pyhf_config!={}:
                         self.logger.info("\033[1m                 pyhf DOI:10.5281/zenodo.1169739\033[0m")
                         self.logger.info("\033[1m                 For more details see https://scikit-hep.org/pyhf/\033[0m")
                         if sys.version_info[0]==2:
-                            self.logger.warning("Please note that pyhf no longer supports Python2,"+\
-                                                " an old version is in use. Results may vary.")
+                            self.logger.warning("Please note that recent pyhf releases no longer support Python 2."+\
+                                                " An older version has been used. Results may be impacted.")
                     elif self.cov_switch:
                         self.logger.info("\033[1m                 CMS-NOTE-2017-001\033[0m")
 
@@ -889,14 +889,14 @@ class RunRecast():
             self.logger.debug('Info File does not exist...')
             return -1,-1, -1, -1, -1
         ## Getting the XML information
-        try: 
+        try:
             info_input = open(self.pad+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.info')
             info_tree = etree.parse(info_input)
             info_input.close()
             results = self.header_info_file(info_tree,analysis,extrapolated_lumi)
             return results
         except:
-            self.logger.debug('Can not parse the info file')
+            self.logger.debug('Cannot parse the info file')
             return -1,-1, -1, -1, -1
 
     def fix_pileup(self,filename):
@@ -968,11 +968,11 @@ class RunRecast():
         covariance   = []
         # Getting the description of the subset of SRs having covariances
         # Now the cov_switch is activated here
-        if "cov_subset" in info_root.attrib and self.main.recasting.global_likelihood_switch:
+        if "cov_subset" in info_root.attrib and self.main.recasting.global_likelihoods_switch:
             self.cov_switch = True
             regiondata["covsubset"] = info_root.attrib["cov_subset"]
         # activate pyhf
-        if self.main.recasting.global_likelihood_switch:
+        if self.main.recasting.global_likelihoods_switch:
             try: 
                 self.pyhf_config = self.pyhf_info_file(info_root)
             except:
@@ -1084,18 +1084,15 @@ class RunRecast():
             provided. One can process multiple likelihood profiles dedicated to different sets
             of SRs.
         """
-        import sys
-        #self.logger.debug(' === Getting ready! === does pyhf exist? '+str(any([x.tag=='pyhf' for x in info_root])))
         if any([x.tag=='pyhf' for x in info_root]): 
             pyhf_path = os.path.join(self.main.archi_info.ma5dir, 'tools/pyhf'+(sys.version_info[0]>2)*'/src')
-            #self.logger.debug('pyhf_path: '+ pyhf_path)
             try:
                 if os.path.isdir(pyhf_path) and pyhf_path not in sys.path:
                     sys.path.append(pyhf_path)
                 import pyhf
                 self.logger.debug('Pyhf v'+str(pyhf.__version__))
             except ImportError:
-                self.logger.warning('To use full profile likelihoods please install pyhf via "install pyhf" command')
+                self.logger.warning('To use the global likelihood PYHF machinery, please type "install pyhf"')
                 return {}
             except:
                 self.logger.debug('Problem with pyhf_info_file function!!')
