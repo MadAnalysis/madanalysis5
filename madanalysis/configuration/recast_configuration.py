@@ -24,8 +24,6 @@
 
 from __future__ import absolute_import
 from madanalysis.enumeration.ma5_running_type   import MA5RunningType
-#from madanalysis.IOinterface.folder_writer      import FolderWriter
-#from shell_command import ShellCommand
 import glob, logging, shutil, os
 from six.moves import range
 
@@ -53,7 +51,7 @@ class RecastConfiguration:
         self.padsfs                     = False
         self.store_root                 = False
         self.store_events               = False
-        self.global_likelihood_switch   = True
+        self.global_likelihoods_switch  = True
         self.systematics                = []
         self.extrapolated_luminosities  = []
         self.THerror_combination        = "linear"
@@ -165,8 +163,8 @@ class RecastConfiguration:
                     self.logger.info("   * Relative error on the extrapolated background Nb taken as sqrt({:.2f}^2 + ({:.2f}/Nb)^2)".format(self.error_extrapolation[0],self.error_extrapolation[1]))
             return
         elif parameter=="global_likelihoods":
-            self.logger.info("   * Global-Likelihoods will"+(not self.global_likelihood_switch)*' not'+\
-                             ' be calculated'+(self.global_likelihood_switch)*', if available'+'.')
+            self.logger.info("   * Global-Likelihoods will"+(not self.global_likelihoods_switch)*' not'+\
+                             ' be calculated'+(self.global_likelihoods_switch)*', if available'+'.')
             return
         return
 
@@ -363,9 +361,9 @@ class RecastConfiguration:
                 self.logger.error("Please first set the recasting mode to 'on'.")
                 return
             if value.lower() in ["on", "off"]:
-                self.global_likelihood_switch = (value.lower()=="on")
+                self.global_likelihoods_switch = (value.lower()=="on")
             else:
-                self.logger.error("You can only switch 'on' or 'off' the Global-Likelihood machinery.")
+                self.logger.error("You can only switch the global-likelihood machinery to 'on' or 'off'.")
                 return
 
         # other rejection if no algo specified
