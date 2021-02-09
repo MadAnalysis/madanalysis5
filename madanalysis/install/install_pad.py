@@ -169,7 +169,7 @@ class InstallPad:
         if self.padname in ['PAD', 'PADForSFS']:
             json_struct_name = [x for x in self.files.keys() if 'json' in x]
             if len(json_struct_name) == 1:
-                logging.getLogger('MA5').debug(" ** Getting the list of pyhf-cpompatible analyses in " + self.downloaddir+"/"+json_struct_name[0])
+                logging.getLogger('MA5').debug(" ** Getting the list of pyhf-compatible analyses in " + self.downloaddir+"/"+json_struct_name[0])
                 json_input = open(os.path.join(self.downloaddir,json_struct_name[0]));
                 for line in json_input:
                     if len(line.strip())==0 or line.strip().startswith('#'):
