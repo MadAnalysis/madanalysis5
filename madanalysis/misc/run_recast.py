@@ -793,7 +793,8 @@ class RunRecast():
 
                 ## Sanity check for the covariance information
                 if self.cov_switch and covariance==-1:
-                    self.logger.warning('Corrupted covariance data in the '+analysis+' info file. Skipping the global CLs calculation.')
+                    self.logger.warning('Corrupted covariance data in the '+analysis+\
+                                        ' info file. Skipping the global CLs calculation.')
                     self.cov_switch = False
 
                 ## Performing the CLS calculation
@@ -815,7 +816,8 @@ class RunRecast():
                 xsflag=True
                 if dataset.xsection > 0:
                     xsflag=False
-                    regiondata=self.extract_cls(regiondata,regions,cov_regions,dataset.xsection,lumi,covariance)
+                    regiondata=self.extract_cls(regiondata,regions,cov_regions,
+                                                dataset.xsection,lumi,covariance)
 
                 ## Uncertainties on the rates
                 Error_dict = {}
@@ -853,10 +855,13 @@ class RunRecast():
                             xsflag=False
                             regiondata_errors[error_key] = copy.deepcopy(regiondata)
                             if error_value!=0.0:
-                                regiondata_errors[error_key] = self.extract_cls(regiondata_errors[error_key],regions,cov_regions,varied_xsec,lumi,covariance)
+                                regiondata_errors[error_key] = self.extract_cls(regiondata_errors[error_key],
+                                                                                regions,cov_regions,varied_xsec,
+                                                                                lumi,covariance)
 
                 ## writing the output file
-                self.write_cls_output(analysis, regions, cov_regions, regiondata, regiondata_errors, mysummary, xsflag, lumi)
+                self.write_cls_output(analysis, regions, cov_regions, regiondata,
+                                      regiondata_errors, mysummary, xsflag, lumi)
                 mysummary.write('\n')
 
             ## Closing the output file
@@ -1183,7 +1188,7 @@ class RunRecast():
         else:
             out.write("# analysis name".ljust(30, ' ') + "signal region".ljust(60,' ') + \
              "best?".ljust(10,' ') + 'sig95(exp)'.ljust(15,' ') + 'sig95(obs)'.ljust(15, ' ') +\
-             '1-CLs'.ljust( 5,' ') + ' ||    ' + 'efficiency'.ljust(15,' ') +\
+             '1-CLs'.ljust( 5,' ') + '     ||    ' + 'efficiency'.ljust(15,' ') +\
              "stat".ljust(15,' '));
             for i in range(0,len(self.main.recasting.systematics)):
                 out.write(("syst" + str(i+1) + "(" + str(self.main.recasting.systematics[i][0]*100) + "%)").ljust(15," "))
@@ -1290,11 +1295,15 @@ class RunRecast():
             background = HF_Background(config)
             self.logger.debug('current pyhf Configuration = '+str(config))
             signal = HF_Signal(config,regiondata,xsection=xsection)
+            is_not_extrapolated = signal.lumi == lumi
             CLs    = -1
             if signal.isAlive():
                 CLs = pyhf_wrapper(background(lumi), signal(lumi))
-                if CLs >= 0.:
-                    regiondata['pyhf'][likelihood_profile]['CLs']  = CLs
+                # Take observed if default lumi used, use expected if extrapolated
+                CLs_out = CLs['CLs_obs'] if is_not_extrapolated else CLs['CLs_exp']
+                regiondata['pyhf'][likelihood_profile]['full_CLs_output'] = CLs
+                if CLs_out >= 0.:
+                    regiondata['pyhf'][likelihood_profile]['CLs']  = CLs_out
                 s95 = float(regiondata['pyhf'][likelihood_profile]['s95exp'])
                 if 0. < s95 < minsig95:
                     regiondata['pyhf'][likelihood_profile]["best"] = 1
@@ -1428,16 +1437,16 @@ class RunRecast():
                 continue
             def sig95(xsection):
                 signal = HF_Signal(config,regiondata,xsection=xsection)
-                return pyhf_wrapper(background(lumi), signal(lumi))-0.95
+                return pyhf_wrapper(background(lumi), signal(lumi))['CLs_'+tag]-0.95
 
             low, hig = 1., 1.;
             while pyhf_wrapper(background(lumi),\
-                               HF_Signal(config, regiondata,xsection=low)(lumi)) > 0.95:
+                               HF_Signal(config, regiondata,xsection=low)(lumi))['CLs_'+tag] > 0.95:
                 self.logger.debug(tag+': profile '+likelihood_profile+\
                                                ', lower bound = '+str(low))
                 low *= 0.1
             while pyhf_wrapper(background(lumi),\
-                               HF_Signal(config, regiondata,xsection=hig)(lumi)) < 0.95:
+                               HF_Signal(config, regiondata,xsection=hig)(lumi))['CLs_'+tag] < 0.95:
                 self.logger.debug(tag+': profile '+likelihood_profile+\
                                                ', higher bound = '+str(hig))
                 hig *= 10.
@@ -1468,23 +1477,20 @@ class RunRecast():
             results = open(name,'w')
             results.write(json.dumps(to_save, indent=4))
             results.close()
-            # Jack remove this part after confirming the results
-            # this part does not need to be included in the main branch
-            if self.pyhf_config!={}:
-                iterator = copy.deepcopy(list(self.pyhf_config.items()))
-            for n, (likelihood_profile, config) in enumerate(iterator):
-                if regiondata.get('pyhf',{}).get(likelihood_profile, False) == False:
-                    continue
-                background = HF_Background(config)
-                signal = HF_Signal(config,regiondata,xsection=1.)
-                name = summary.name.split('.dat')[0]
-                results = open(name+'_'+likelihood_profile+'_bkg.json','w')
-                results.write(json.dumps(background(lumi), indent=4))
-                results.close()
-                results = open(name+'_'+likelihood_profile+'_sig.json','w')
-                results.write(json.dumps(signal(lumi), indent=4))
-                results.close()
-            ######################################################
+            ###################################################################
+            # @Jack : For debugging purposes in the future. This slice of code
+            #         prints the Json file for signal WITH XSEC=1 !!!
+            #if self.pyhf_config!={}:
+            #    iterator = copy.deepcopy(list(self.pyhf_config.items()))
+            #for n, (likelihood_profile, config) in enumerate(iterator):
+            #    if regiondata.get('pyhf',{}).get(likelihood_profile, False) == False:
+            #        continue
+            #    signal = HF_Signal(config,regiondata,xsection=1.)
+            #    name = summary.name.split('.dat')[0]
+            #    results = open(name+'_'+likelihood_profile+'_sig.json','w')
+            #    results.write(json.dumps(signal(lumi), indent=4))
+            #    results.close()
+            ###################################################################
         err_sets = [ ['scale_up', 'scale_dn', 'Scale var.'], ['TH_up', 'TH_dn', 'TH   error'] ]
         for reg in regions:
             eff    = (regiondata[reg]["Nf"] / regiondata[reg]["N0"])
@@ -1643,13 +1649,14 @@ def pyhf_wrapper(background,signal,**kwargs):
 
 def pyhf_wrapper_py3(background,signal):
     import pyhf
+    from pyhf.optimize import mixins
     from numpy import warnings
     warnings.filterwarnings('ignore')
 
     # Scilence pyhf's messages
     pyhf.pdf.log.setLevel(logging.CRITICAL)
     pyhf.workspace.log.setLevel(logging.CRITICAL)
-    pyhf.mixins.log.setLevel(logging.CRITICAL)
+    mixins.log.setLevel(logging.CRITICAL)
     pyhf.set_backend('numpy')
 
     try:
@@ -1657,32 +1664,29 @@ def pyhf_wrapper_py3(background,signal):
         model     = workspace.model(patches=[signal],
                                     modifier_settings={'normsys': {'interpcode': 'code4'},
                                                        'histosys': {'interpcode': 'code4p'}})
-    except (pyhf.exceptions.InvalidSpecification, KeyError) as e:
-        logging.getLogger('MA5').debug("Invalid JSON file :: "+str(e))
-        return -1
+    except (pyhf.exceptions.InvalidSpecification, KeyError) as err:
+        logging.getLogger('MA5').error("Invalid JSON file!! "+str(err))
+        return {'CLs_obs':-1. , 'CLs_exp' : -1.}
     except:
-        logging.getLogger('MA5').debug("Unknown error, check pyhf_wrapper_py3 "+ str(e))
-        return -1
+        logging.getLogger('MA5').debug("Unknown error, check pyhf_wrapper_py3 "+ str(err))
+        return {'CLs_obs':-1. , 'CLs_exp' : -1.}
 
     def get_CLs(**kwargs):
         try:
-            CLs = pyhf.infer.hypotest(kwargs.get('mu',1.), 
-                                      workspace.data(model),
-                                      model, 
-                                      test_stat="qtilde",
-                                      par_bounds=kwargs.get('bounds',
-                                                            model.config.suggested_bounds()),
-                                      return_expected=True)
-            #taking the upper bound!!!
-            try:
-                CLs = float(CLs[1].tolist()) 
-            except TypeError:
-                CLs = float(CLs[1][0])
+            CLs_obs, CLs_exp = pyhf.infer.hypotest(kwargs.get('mu',1.), 
+                                                   workspace.data(model),
+                                                   model, 
+                                                   test_stat="qtilde",
+                                                   par_bounds=kwargs.get('bounds',
+                                                                    model.config.suggested_bounds()),
+                                                   return_expected=True)
+
         except (AssertionError, pyhf.exceptions.FailedMinimization) as err:
             logging.getLogger('MA5').debug(str(err))
             # dont use false here 1.-CLs = 0 can be interpreted as false
             return 'update bounds' 
-        return CLs
+
+        return {'CLs_obs':1.-CLs_obs , 'CLs_exp' : 1.- CLs_exp}
 
     #pyhf can raise an error if the poi_test bounds are too stringent
     #they need to be updated dynamically.
@@ -1693,16 +1697,16 @@ def pyhf_wrapper_py3(background,signal):
         if CLs == 'update bounds':
             update_bounds[model.config.poi_index] = (0,2*update_bounds[model.config.poi_index][1])
             iteration_limit += 1
-        elif type(CLs) == float:
+        elif isinstance(CLs, dict):
             break
         else:
             iteration_limit += 1
         # hard limit on iteration required if it exceeds this value it means
         # Nsig >>>>> Nobs 
-        if iteration_limit>=5:
-            return 1.
+        if iteration_limit>=3:
+            return {'CLs_obs':1. , 'CLs_exp' : 1.}
 
-    return 1.-CLs
+    return CLs
 
 
 def pyhf_wrapper_py2(background,signal,qtilde=True):
@@ -1717,10 +1721,10 @@ def pyhf_wrapper_py2(background,signal,qtilde=True):
                                                         })
     except (pyhf.exceptions.InvalidSpecification, KeyError) as e:
         logging.getLogger('MA5').debug("Invalid JSON file :: "+str(e))
-        return -1
+        return {'CLs_obs':-1. , 'CLs_exp' : -1.}
     except:
         logging.getLogger('MA5').debug("Unknown error, check pyhf_wrapper_py2 "+str(e))
-        return -1
+        return {'CLs_obs':-1. , 'CLs_exp' : -1.}
 
     def get_CLs(bounds=None):
         try:
@@ -1737,7 +1741,7 @@ def pyhf_wrapper_py2(background,signal,qtilde=True):
             logging.getLogger('MA5').error('There is something wrong with pyhf module.')
             logging.getLogger('MA5').error('pyhf version '+pyhf.__version__+\
                                            ' Python version {}.{}'.format(sys.version_info[0],sys.version_info[1]))
-            return -1
+            return {'CLs_obs':-1. , 'CLs_exp' : -1.}
 
     #pyhf can raise an error if the poi_test bounds are too stringent
     #they need to be updated dynamically.
@@ -1755,8 +1759,8 @@ def pyhf_wrapper_py2(background,signal,qtilde=True):
         # hard limit on iteration required if it exceeds this value it means
         # Nsig >>>>> Nobs 
         if iteration_limit>=3:
-            return 1.
-    return CLs
+            return {'CLs_obs':1. , 'CLs_exp' : 1.}
+    return {'CLs_obs': CLs , 'CLs_exp' : CLs}
 
 
 def cls(NumObserved, ExpectedBG, BGError, SigHypothesis, NumToyExperiments):

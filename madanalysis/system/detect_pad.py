@@ -179,7 +179,6 @@ class DetectPAD:
         theCommands = [self.build_file,'--info']
         ok, out, err = ShellCommand.ExecuteWithCapture(theCommands,'./')
         if not ok:
-            msg = 'MadAnalyis5job program does not work properly.'
             self.logger.debug("->ERROR: MadAnalyis5job program does not work properly.")
             self.logger.debug(str(out))
             self.logger.debug(str(err))

@@ -241,10 +241,10 @@ class HF_Signal(HistFactory):
         HF = []
         if xsection<=0.:
             return HF
-        for SR in self.signal_config.keys():
+        for ix, SR in enumerate(self.signal_config.keys()):
             SR_tmp = {'op'    : self.signal_config[SR]['op'],
                       'path'  : self.signal_config[SR]['path'],
-                      'value' : {'name'      : 'MA5_signal',
+                      'value' : {'name'      : 'MA5_signal_'+str(ix),
                                  'data'      : [round(eff*xsection*self.lumi*1000.,6) 
                                                  for eff in self.signal_config[SR]['data'] ],
                                  'modifiers' : [
