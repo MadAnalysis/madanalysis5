@@ -23,13 +23,7 @@
 
 
 from __future__ import absolute_import
-import logging
-import glob
-import os
-import sys
-import re
-import platform
-from shell_command  import ShellCommand
+import logging, os, sys
 from madanalysis.enumeration.detect_status_type import DetectStatusType
 
 class Detectpyhf:
@@ -60,7 +54,7 @@ class Detectpyhf:
     def AutoDetection(self):
 
         # Checking if scipy is installed on the system
-        pyhf_path = os.path.join(self.archi_info.ma5dir,'tools/pyhf')
+        pyhf_path = os.path.join(self.archi_info.ma5dir,'tools/pyhf'+(sys.version_info[0] > 2)*'/src')
         if os.path.isdir(pyhf_path) and pyhf_path not in sys.path:
             sys.path.append(pyhf_path)
         try:
