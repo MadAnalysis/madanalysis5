@@ -151,7 +151,12 @@ class CmdInstall(CmdBase):
                 self.logger.warning('Delphes is not installed (and will be installed). Then please exit MA5 and re-install the PAD')
             return any([pad_install_check, padsfs_install_check])
         elif args[0]=='PADForSFS':
-            return installer.Execute('PADForSFS')
+            padsfs_install_check = False
+            if self.main.archi_info.has_fastjet:
+                padsfs_install_check = installer.Execute('PADForSFS')
+            else:
+                self.logger.warning('PADForSFS can not be installed without FastJet.')
+            return padsfs_install_check
         elif args[0]=='pyhf':
             return installer.Execute('pyhf')
         else:
