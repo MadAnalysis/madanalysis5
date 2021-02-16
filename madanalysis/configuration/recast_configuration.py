@@ -24,12 +24,7 @@
 
 from __future__ import absolute_import
 from madanalysis.enumeration.ma5_running_type   import MA5RunningType
-from madanalysis.IOinterface.folder_writer      import FolderWriter
-from shell_command import ShellCommand
-import glob
-import logging
-import shutil
-import os
+import glob, logging, shutil, os
 from six.moves import range
 
 class RecastConfiguration:
@@ -43,7 +38,8 @@ class RecastConfiguration:
          "store_root"          : ["True", "False"] , \
          "store_events"        : ["True", "False"] , \
          "THerror_combination" : ["quadratic","linear"], \
-         "error_extrapolation" : ["linear", "sqrt"]
+         "error_extrapolation" : ["linear", "sqrt"],
+         "global_likelihoods"  : ["on","off"]
     }
 
     def __init__(self):
@@ -55,6 +51,7 @@ class RecastConfiguration:
         self.padsfs                     = False
         self.store_root                 = False
         self.store_events               = False
+        self.global_likelihoods_switch  = True
         self.systematics                = []
         self.extrapolated_luminosities  = []
         self.THerror_combination        = "linear"
@@ -97,6 +94,7 @@ class RecastConfiguration:
             self.user_DisplayParameter("systematics")
             self.user_DisplayParameter("THerror_combination")
             self.user_DisplayParameter("error_extrapolation")
+            self.user_DisplayParameter("global_likelihoods")
 
     def user_DisplayParameter(self,parameter):
         if parameter=="status":
@@ -163,6 +161,10 @@ class RecastConfiguration:
                     self.logger.info("   * Relative error on the extrapolated background taken as {:.1%}".format(self.error_extrapolation[0]))
                 else:
                     self.logger.info("   * Relative error on the extrapolated background Nb taken as sqrt({:.2f}^2 + ({:.2f}/Nb)^2)".format(self.error_extrapolation[0],self.error_extrapolation[1]))
+            return
+        elif parameter=="global_likelihoods":
+            self.logger.info("   * Global-Likelihoods will"+(not self.global_likelihoods_switch)*' not'+\
+                             ' be calculated'+(self.global_likelihoods_switch)*', if available'+'.')
             return
         return
 
@@ -353,6 +355,17 @@ class RecastConfiguration:
                     error_message();
                     return
 
+        # Switch to turn off the global likelihood calculations
+        elif parameter=="global_likelihoods":
+            if self.status!="on":
+                self.logger.error("Please first set the recasting mode to 'on'.")
+                return
+            if value.lower() in ["on", "off"]:
+                self.global_likelihoods_switch = (value.lower()=="on")
+            else:
+                self.logger.error("You can only switch the global-likelihood machinery to 'on' or 'off'.")
+                return
+
         # other rejection if no algo specified
         else:
             self.logger.error("the recast module has no parameter called '"+str(parameter)+"'")
@@ -363,7 +376,8 @@ class RecastConfiguration:
             if var == "add":
                 table = ["extrapolated_luminosity", "systematics"]
             else:
-                table = ["CLs_numofexps", "card_path", "store_events", "add", "THerror_combination", "error_extrapolation"]
+                table = ["CLs_numofexps", "card_path", "store_events", "add", 
+                         "THerror_combination", "error_extrapolation", "global_likelihoods"]
         else:
            table = []
         return table
@@ -385,6 +399,8 @@ class RecastConfiguration:
                 table.extend(RecastConfiguration.userVariables["THerror_combination"])
         elif variable =="error_extrapolation":
                 table.extend(RecastConfiguration.userVariables["error_extrapolation"])
+        elif variable =="global_likelihoods":
+                table.extend(RecastConfiguration.userVariables["global_likelihoods"])
         return table
 
 

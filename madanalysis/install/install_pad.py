@@ -22,14 +22,11 @@
 ################################################################################
 
 
-from __future__ import absolute_import
+from __future__                          import absolute_import
 from madanalysis.install.install_service import InstallService
-from shell_command import ShellCommand
-import glob
-import os
-import sys
-import logging
-import shutil
+from shell_command                       import ShellCommand
+import glob, os, logging, shutil
+
 
 class InstallPad:
 
@@ -57,7 +54,8 @@ class InstallPad:
         elif padname=='PADForSFS':
             self.files  = {
              "padsfs.dat"     : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/SFS/padsfs.dat",
-             "bib_padsfs.dat" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/SFS/bib_padsfs.dat"
+             "bib_padsfs.dat" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/SFS/bib_padsfs.dat",
+             "json_padsfs.dat": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/SFS/json_padsfs.dat"
             }
         self.analyses       = []
         self.analysis_files = []
@@ -168,14 +166,16 @@ class InstallPad:
 
         # Json information for pyhf
         json_dictionary    = {}
-        if self.padname=='PAD':
-            logging.getLogger('MA5').debug(" ** Getting the list of pyhf-cpompatible analyses in " + self.downloaddir+"/json_pad.dat")
-            json_input = open(os.path.join(self.downloaddir,'json_pad.dat'));
-            for line in json_input:
-                if len(line.strip())==0 or line.strip().startswith('#'):
-                    continue;
-                json_dictionary[line.strip().split('|')[0].strip()] = line.strip().split('|')[1].split();
-            json_input.close();
+        if self.padname in ['PAD', 'PADForSFS']:
+            json_struct_name = [x for x in self.files.keys() if 'json' in x]
+            if len(json_struct_name) == 1:
+                logging.getLogger('MA5').debug(" ** Getting the list of pyhf-compatible analyses in " + self.downloaddir+"/"+json_struct_name[0])
+                json_input = open(os.path.join(self.downloaddir,json_struct_name[0]));
+                for line in json_input:
+                    if len(line.strip())==0 or line.strip().startswith('#'):
+                        continue;
+                    json_dictionary[line.strip().split('|')[0].strip()] = line.strip().split('|')[1].split();
+                json_input.close();
 
         # Getting the analysis one by one (and creating first skeleton analyses for each of them)
         logging.getLogger('MA5').debug('Reading the analysis list in ' + \

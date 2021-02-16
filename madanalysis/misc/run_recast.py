@@ -22,26 +22,21 @@
 ################################################################################
 
 
-from __future__ import absolute_import
+from __future__                                                 import absolute_import
 from madanalysis.install.detector_manager                       import DetectorManager
 from madanalysis.configuration.delphesMA5tune_configuration     import DelphesMA5tuneConfiguration
 from madanalysis.configuration.delphes_configuration            import DelphesConfiguration
 from madanalysis.IOinterface.folder_writer                      import FolderWriter
 from madanalysis.IOinterface.job_writer                         import JobWriter
 from madanalysis.IOinterface.library_writer                     import LibraryWriter
-from madanalysis.misc.histfactory_reader                        import *
+from madanalysis.misc.histfactory_reader                        import HF_Background, HF_Signal, get_HFID
 from collections                                                import OrderedDict
 from shell_command                                              import ShellCommand
 from string_tools                                               import StringTools
-import copy
-import logging
-import math
-import os
-import shutil
-import time
-from six.moves import map
-from six.moves import range
-from six.moves import input
+from six.moves                                                  import map, range, input
+import copy, logging, math, os, shutil, time, sys
+
+
 
 class RunRecast():
 
@@ -58,17 +53,19 @@ class RunRecast():
         self.ntoys            = self.main.recasting.CLs_numofexps
         self.cov_switch       = False
         self.pyhf_config      = {} # initialize and configure histfactory
+        self.logger           = logging.getLogger('MA5')
+
 
     def init(self):
         ### First, the analyses to take care off
         logging.getLogger("MA5").debug("  Inviting the user to edit the recasting card...")
         self.edit_recasting_card()
         ### Getting the list of analyses to recast
-        logging.getLogger('MA5').info("   Getting the list of delphes simulation to be performed...")
+        self.logger.info("   Getting the list of delphes simulation to be performed...")
         self.get_runs()
         ### Check if we have anything to do
         if len(self.delphes_runcard)==0:
-            logging.getLogger('MA5').warning('No recasting to do... Please check the recasting card')
+            self.logger.warning('No recasting to do... Please check the recasting card')
             return False
 
         ### Exit
@@ -82,7 +79,7 @@ class RunRecast():
     def edit_recasting_card(self):
         if self.forced or self.main.script:
             return
-        logging.getLogger('MA5').info("Would you like to edit the recasting Card ? (Y/N)")
+        self.logger.info("Would you like to edit the recasting Card ? (Y/N)")
         allowed_answers=['n','no','y','yes']
         answer=""
         while answer not in  allowed_answers:
@@ -91,7 +88,17 @@ class RunRecast():
         if answer=="no" or answer=="n":
             return
         else:
-            os.system(self.main.session_info.editor+" "+self.dirname+"/Input/recasting_card.dat")
+            err = os.system(self.main.session_info.editor+" "+self.dirname+"/Input/recasting_card.dat")
+            # @JACK: MacOS Big Sur changed the DYLD library structure...
+            ## Error Message: (only in python 2)
+            #dyld: Symbol not found: __cg_jpeg_resync_to_restart
+            #  Referenced from: /System/Library/Frameworks/ImageIO.framework/Versions/A/ImageIO
+            #  Expected in: /usr/local/lib/libJPEG.dylib
+            # in /System/Library/Frameworks/ImageIO.framework/Versions/A/ImageIO
+            if err != 0:
+                os.environ['DYLD_LIBRARY_PATH'] = os.environ['DYLD_LIBRARY_PATH'].replace(':/usr/local/lib:',':')
+                os.environ['DYLD_LIBRARY_PATH'] = os.environ['DYLD_LIBRARY_PATH'].replace(':/usr/local/lib','')
+                os.system(self.main.session_info.editor+" "+self.dirname+"/Input/recasting_card.dat")
         return
 
     ## Checking the recasting card to get the analysis to run
@@ -129,7 +136,7 @@ class RunRecast():
             check         = True
         ## Check and exit
         if not check:
-           logging.getLogger('MA5').error('The ' + self.detector + ' library is not present -> the associated analyses cannot be used')
+           self.logger.error('The ' + self.detector + ' library is not present -> the associated analyses cannot be used')
            return False
         return True
 
@@ -156,22 +163,22 @@ class RunRecast():
         return True
 
     def fastsim_single(self,version,delphescard):
-        logging.getLogger('MA5').debug('Launch a bunch of fastsim with the delphes card: '+delphescard)
+        self.logger.debug('Launch a bunch of fastsim with the delphes card: '+delphescard)
 
         # Init and header
         self.fastsim_header(version)
 
         # Activating the right delphes
         if self.detector!="fastjet":
-            logging.getLogger('MA5').debug('Activating the detector (switch delphes/delphesMA5tune)')
+            self.logger.debug('Activating the detector (switch delphes/delphesMA5tune)')
             self.main.fastsim.package = self.detector
             detector_handler = DetectorManager(self.main)
             if not detector_handler.manage(self.detector):
-                logging.getLogger('MA5').error('Problem with the activation of delphesMA5tune')
+                self.logger.error('Problem with the activation of delphesMA5tune')
                 return False
 
         # Checking whether events have already been generated and if not, event generation
-        logging.getLogger('MA5').debug('Loop over the datasets...')
+        self.logger.debug('Loop over the datasets...')
         for item in self.main.datasets:
             if self.detector=="delphesMA5tune":
                 evtfile = self.dirname+'/Output/SAF/'+item.name+'/RecoEvents/RecoEvents_v1x1_'+delphescard.replace('.tcl','')+'.root'
@@ -180,7 +187,7 @@ class RunRecast():
             elif self.detector=="fastjet":
                 return True
 
-            logging.getLogger('MA5').debug('- applying fastsim and producing '+evtfile+'...')
+            self.logger.debug('- applying fastsim and producing '+evtfile+'...')
             if not os.path.isfile(os.path.normpath(evtfile)):
                 if not self.generate_events(item,delphescard):
                     return False
@@ -201,9 +208,9 @@ class RunRecast():
             self.first12 = False
         ## Printing
         if to_print:
-            logging.getLogger('MA5').info("   **********************************************************")
-            logging.getLogger('MA5').info("   "+StringTools.Center(tag+' detector simulations',57))
-            logging.getLogger('MA5').info("   **********************************************************")
+            self.logger.info("   **********************************************************")
+            self.logger.info("   "+StringTools.Center(tag+' detector simulations',57))
+            self.logger.info("   **********************************************************")
 
     def run_delphes(self,dataset,card):
         # Initializing the JobWriter
@@ -213,41 +220,41 @@ class RunRecast():
         jobber = JobWriter(self.main,self.dirname+'_RecastRun')
 
         # Writing process
-        logging.getLogger('MA5').info("   Creating folder '"+self.dirname.split('/')[-1]  + "_RecastRun'...")
+        self.logger.info("   Creating folder '"+self.dirname.split('/')[-1]  + "_RecastRun'...")
         if not jobber.Open():
             return False
-        logging.getLogger('MA5').info("   Copying 'SampleAnalyzer' source files...")
+        self.logger.info("   Copying 'SampleAnalyzer' source files...")
         if not jobber.CopyLHEAnalysis():
             return False
         if not jobber.CreateBldDir():
             return False
-        logging.getLogger('MA5').info("   Inserting your selection into 'SampleAnalyzer'...")
+        self.logger.info("   Inserting your selection into 'SampleAnalyzer'...")
         if not jobber.WriteSelectionHeader(self.main):
             return False
         if not jobber.WriteSelectionSource(self.main):
             return False
-        logging.getLogger('MA5').info("   Writing the list of datasets...")
+        self.logger.info("   Writing the list of datasets...")
         jobber.WriteDatasetList(dataset)
-        logging.getLogger('MA5').info("   Creating Makefiles...")
+        self.logger.info("   Creating Makefiles...")
         if not jobber.WriteMakefiles():
             return False
-        logging.getLogger('MA5').debug("   Fixing the pileup path...")
+        self.logger.debug("   Fixing the pileup path...")
         self.fix_pileup(self.dirname+'_RecastRun/Input/'+card)
 
         # Creating executable
-        logging.getLogger('MA5').info("   Compiling 'SampleAnalyzer'...")
+        self.logger.info("   Compiling 'SampleAnalyzer'...")
         if not jobber.CompileJob():
             return False
-        logging.getLogger('MA5').info("   Linking 'SampleAnalyzer'...")
+        self.logger.info("   Linking 'SampleAnalyzer'...")
         if not jobber.LinkJob():
             return False
 
         # Running
-        logging.getLogger('MA5').info("   Running 'SampleAnalyzer' over dataset '" +dataset.name+"'...")
-        logging.getLogger('MA5').info("    *******************************************************")
+        self.logger.info("   Running 'SampleAnalyzer' over dataset '" +dataset.name+"'...")
+        self.logger.info("    *******************************************************")
         if not jobber.RunJob(dataset):
-            logging.getLogger('MA5').error("run over '"+dataset.name+"' aborted.")
-        logging.getLogger('MA5').info("    *******************************************************")
+            self.logger.error("run over '"+dataset.name+"' aborted.")
+        self.logger.info("    *******************************************************")
 
         # Exit
         return True
@@ -272,7 +279,7 @@ class RunRecast():
 
         """
         if any([(x.endswith('root')) or (x.endswith('lhco')) or (x.endswith('lhco.gz')) for x in dataset.filenames]):
-            logging.getLogger('MA5').error("   Dataset can not contain reconstructed file type.")
+            self.logger.error("   Dataset can not contain reconstructed file type.")
             return False
         # Load the analysis card
         from madanalysis.core.script_stack import ScriptStack
@@ -290,16 +297,16 @@ class RunRecast():
             output_name = "SFS_events.lhe"
             if self.main.archi_info.has_zlib:
                 output_name += ".gz"
-            logging.getLogger('MA5').debug("   Setting the output LHE file :"+output_name)
+            self.logger.debug("   Setting the output LHE file :"+output_name)
 
         # Initializing the JobWriter
         jobber = JobWriter(self.main,self.dirname+'_SFSRun')
 
         # Writing process
-        logging.getLogger('MA5').info("   Creating folder '"+self.dirname.split('/')[-1]  + "'...")
+        self.logger.info("   Creating folder '"+self.dirname.split('/')[-1]  + "'...")
         if not jobber.Open():
             return False
-        logging.getLogger('MA5').info("   Copying 'SampleAnalyzer' source files...")
+        self.logger.info("   Copying 'SampleAnalyzer' source files...")
         if not jobber.CopyLHEAnalysis():
             return False
         if not jobber.CreateBldDir(analysisName="SFSRun",outputName="SFSRun.saf"):
@@ -311,9 +318,9 @@ class RunRecast():
             return False
         os.remove(self.dirname+'_SFSRun/Build/SampleAnalyzer/User/Analyzer/user.cpp')
         #######
-        logging.getLogger('MA5').info("   Writing the list of datasets...")
+        self.logger.info("   Writing the list of datasets...")
         jobber.WriteDatasetList(dataset)
-        logging.getLogger('MA5').info("   Creating Makefiles...")
+        self.logger.info("   Creating Makefiles...")
         if not jobber.WriteMakefiles():
             return False
         # Copying the analysis files
@@ -338,14 +345,14 @@ class RunRecast():
                      self.dirname+'_SFSRun/Build/SampleAnalyzer/User/Analyzer/'+ana+'.h')
                 analysisList.write('  manager.Add("'+ana+'", new '+ana+');\n')
         except: 
-            logging.getLogger('MA5').error('Cannot copy the analysis: '+ana)
-            logging.getLogger('MA5').error('Please make sure that corresponding analysis downloaded propoerly.')
+            self.logger.error('Cannot copy the analysis: '+ana)
+            self.logger.error('Please make sure that corresponding analysis downloaded propoerly.')
             return False
         analysisList.write('}\n')
         analysisList.close()
 
         # Update Main
-        logging.getLogger('MA5').info("   Updating the main executable")
+        self.logger.info("   Updating the main executable")
         shutil.move(self.dirname+'_SFSRun/Build/Main/main.cpp',\
                     self.dirname+'_SFSRun/Build/Main/main.bak')
         mainfile = open(self.dirname+"_SFSRun/Build/Main/main.bak",'r')
@@ -386,21 +393,21 @@ class RunRecast():
         self.main.recasting.status = "on"
         self.main.fastsim.package  = old_fastsim
         # Creating executable
-        logging.getLogger('MA5').info("   Compiling 'SampleAnalyzer'...")
+        self.logger.info("   Compiling 'SampleAnalyzer'...")
         if not jobber.CompileJob():
-            logging.getLogger('MA5').error("job submission aborted.")
+            self.logger.error("job submission aborted.")
             return False
-        logging.getLogger('MA5').info("   Linking 'SampleAnalyzer'...")
+        self.logger.info("   Linking 'SampleAnalyzer'...")
         if not jobber.LinkJob():
-            logging.getLogger('MA5').error("job submission aborted.")
+            self.logger.error("job submission aborted.")
             return False
         # Running
-        logging.getLogger('MA5').info("   Running 'SampleAnalyzer' over dataset '" +dataset.name+"'...")
-        logging.getLogger('MA5').info("    *******************************************************")
+        self.logger.info("   Running 'SampleAnalyzer' over dataset '" +dataset.name+"'...")
+        self.logger.info("    *******************************************************")
         if not jobber.RunJob(dataset):
-            logging.getLogger('MA5').error("run over '"+dataset.name+"' aborted.")
+            self.logger.error("run over '"+dataset.name+"' aborted.")
             return False
-        logging.getLogger('MA5').info("    *******************************************************")
+        self.logger.info("    *******************************************************")
         
         if not os.path.isdir(self.dirname+'/Output/SAF/'+dataset.name):
             os.mkdir(self.dirname+'/Output/SAF/'+dataset.name)
@@ -440,9 +447,9 @@ class RunRecast():
         if not self.main.developer_mode:
             # Remove the analysis folder
             if not FolderWriter.RemoveDirectory(os.path.normpath(self.dirname+'_SFSRun')):
-                logging.getLogger('MA5').error("Cannot remove directory: "+self.dirname+'_SFSRun')
+                self.logger.error("Cannot remove directory: "+self.dirname+'_SFSRun')
         else:
-            logging.getLogger('MA5').debug("Analysis kept in "+self.dirname+'_SFSRun folder.')
+            self.logger.debug("Analysis kept in "+self.dirname+'_SFSRun folder.')
 
         return True
 
@@ -462,7 +469,7 @@ class RunRecast():
             self.main.fastsim.delphes.card   = os.path.normpath("../../../../tools/PAD/Input/Cards/"+card)
         # Execution
         if not self.run_delphes(dataset,card):
-            logging.getLogger('MA5').error('The '+self.detector+' problem with the running of the fastsim')
+            self.logger.error('The '+self.detector+' problem with the running of the fastsim')
             return False
         # Restoring the run
         self.main.recasting.status="on"
@@ -513,7 +520,7 @@ class RunRecast():
         # Activating the right delphes
         detector_handler = DetectorManager(self.main)
         if not detector_handler.manage(self.detector):
-            logging.getLogger('MA5').error('Problem with the activation of delphesMA5tune')
+            self.logger.error('Problem with the activation of delphesMA5tune')
             return False
 
         ## Getting the analyses associated with the given card
@@ -535,7 +542,7 @@ class RunRecast():
                 eventfile = os.path.normpath(self.dirname + '/Output/SAF/' + myset.name + '/RecoEvents/RecoEvents_' +\
                        version.replace('.','x')+'_' + card.replace('.tcl','')+'.root')
                 if not os.path.isfile(eventfile):
-                    logging.getLogger('MA5').error('The file called '+eventfile+' is not found...')
+                    self.logger.error('The file called '+eventfile+' is not found...')
                     return False
                 ## Running the PAD
                 if not self.run_pad(eventfile):
@@ -556,10 +563,10 @@ class RunRecast():
                                                   card,analyses):
                     return False
                 if self.main.recasting.store_root:
-                    logging.getLogger('MA5').warning("Simplified-FastSim does not use root, hence file will not be stored.")
+                    self.logger.warning("Simplified-FastSim does not use root, hence file will not be stored.")
 
             ## Running the CLs exclusion script (if available)
-            logging.getLogger('MA5').debug('Compute CLs exclusion for '+myset.name)
+            self.logger.debug('Compute CLs exclusion for '+myset.name)
             if not self.compute_cls(analyses,myset):
                 self.main.forced=self.forced
                 return False
@@ -569,15 +576,15 @@ class RunRecast():
 
     def analysis_header(self, version, card):
         ## Printing
-        logging.getLogger('MA5').info("   **********************************************************")
-        logging.getLogger('MA5').info("   "+StringTools.Center(version+' running of the PAD'+\
+        self.logger.info("   **********************************************************")
+        self.logger.info("   "+StringTools.Center(version+' running of the PAD'+\
                ' on events generated with',57))
-        logging.getLogger('MA5').info("   "+StringTools.Center(card,57))
-        logging.getLogger('MA5').info("   **********************************************************")
+        self.logger.info("   "+StringTools.Center(card,57))
+        self.logger.info("   **********************************************************")
 
     def update_pad_main(self,analysislist):
         ## Migrating the necessary files to the working directory
-        logging.getLogger('MA5').info("   Writing the PAD analyses")
+        self.logger.info("   Writing the PAD analyses")
         ## Safety (for backwards compatibility)
         if not os.path.isfile(self.pad+'/Build/Main/main.bak'):
             shutil.copy(self.pad+'/Build/Main/main.cpp',self.pad+'/Build/Main/main.bak')
@@ -640,7 +647,7 @@ class RunRecast():
 
     def make_pad(self):
         # Initializing the compiler
-        logging.getLogger('MA5').info('   Compiling the PAD located in '  +self.dirname+'_RecastRun');
+        self.logger.info('   Compiling the PAD located in '  +self.dirname+'_RecastRun');
         compiler = LibraryWriter('lib',self.main)
         ncores = compiler.get_ncores2()
         # compiling
@@ -652,8 +659,8 @@ class RunRecast():
         time.sleep(1.);
         # Checks and exit
         if not result:
-            logging.getLogger('MA5').error('Impossible to compile the PAD. For more details, see the log file:')
-            logging.getLogger('MA5').error(logfile)
+            self.logger.error('Impossible to compile the PAD. For more details, see the log file:')
+            self.logger.error(logfile)
             return False
         return True
 
@@ -673,7 +680,7 @@ class RunRecast():
         ok = ShellCommand.Execute(command,self.dirname+'_RecastRun/Build')
         ## checks
         if not ok:
-            logging.getLogger('MA5').error('Problem with the run of the PAD on the file: '+ eventfile)
+            self.logger.error('Problem with the run of the PAD on the file: '+ eventfile)
             return False
         os.remove(self.dirname+'_RecastRun/Input/PADevents.list')
         ## exit
@@ -722,9 +729,18 @@ class RunRecast():
         if not ET:
             return False
 
+        print_gl_citation = self.main.recasting.global_likelihoods_switch
+        if len(self.main.recasting.extrapolated_luminosities)>0 or \
+            any([x!=None for x in [dataset.scaleup,dataset.scaledn, dataset.pdfup, dataset.pdfdn]]) or \
+            any([a+b>0. for a,b in self.main.recasting.systematics]):
+            self.logger.info("\033[1m   * Using Uncertainties and Higher-Luminosity Estimates\033[0m")
+            self.logger.info("\033[1m     Please cite arXiv:1910.11418 [hep-ph]\033[0m")
+
+
+
         ## Running over all luminosities to extrapolate
         for extrapolated_lumi in ['default']+self.main.recasting.extrapolated_luminosities:
-            logging.getLogger('MA5').info('   Calculation of the exclusion CLs for a lumi of ' + \
+            self.logger.info('   Calculation of the exclusion CLs for a lumi of ' + \
               str(extrapolated_lumi))
             ## Preparing the output file and checking whether a cross section has been defined
             if extrapolated_lumi == 'default':
@@ -739,30 +755,46 @@ class RunRecast():
 
             ## running over all analysis
             for analysis in analyses:
-                logging.getLogger('MA5').debug('Running CLs exclusion calculation for '+analysis)
+                self.logger.debug('Running CLs exclusion calculation for '+analysis)
                 # Re-initializing the covariance switch for backward compatibility
                 self.cov_switch = False
                 # Getting the info file information (possibly rescaled)
                 lumi, regions, regiondata, covariance, cov_regions = self.parse_info_file(ET,analysis,extrapolated_lumi)
-                logging.getLogger('MA5').debug('lumi = ' + str(lumi));
-                logging.getLogger('MA5').debug('regions = ' + str(regions));
-                logging.getLogger('MA5').debug('regiondata = ' + str(regiondata));
-                logging.getLogger('MA5').debug('cov = '+ str(covariance));
+                self.logger.debug('lumi = ' + str(lumi));
+                self.logger.debug('regions = ' + str(regions));
+                self.logger.debug('regiondata = ' + str(regiondata));
+                self.logger.debug('cov = '+ str(covariance));
                 if lumi==-1 or regions==-1 or regiondata==-1:
-                    logging.getLogger('MA5').warning('Info file for '+analysis+' missing or corrupted. Skipping the CLs calculation.')
+                    self.logger.warning('Info file for '+analysis+' missing or corrupted. Skipping the CLs calculation.')
                     return False
                 if self.cov_switch:
-                    logging.getLogger('MA5').info('    Performing simplified likelihood combination on '+regiondata["covsubset"]+' for '+analysis)
+                    self.logger.info('    Performing simplified likelihood combination on '+regiondata["covsubset"]+' for '+analysis)
+
+                # Citation notifications for Global Likelihoods
+                if (self.cov_switch or self.pyhf_config!={}) and print_gl_citation:
+                    # TODO: Update arXiv number this is Les Houches arxiv number
+                    print_gl_citation = False
+                    self.logger.info("\033[1m   * Using global likelihoods to improve CLs calculations\033[0m")
+                    self.logger.info("\033[1m     Please cite arXiv:2002.12220 [hep-ph]\033[0m")
+                    if self.pyhf_config!={}:
+                        self.logger.info("\033[1m                 pyhf DOI:10.5281/zenodo.1169739\033[0m")
+                        self.logger.info("\033[1m                 For more details see https://scikit-hep.org/pyhf/\033[0m")
+                        if sys.version_info[0]==2:
+                            self.logger.warning("Please note that recent pyhf releases no longer support Python 2."+\
+                                                " An older version has been used. Results may be impacted.")
+                    elif self.cov_switch:
+                        self.logger.info("\033[1m                 CMS-NOTE-2017-001\033[0m")
 
                 ## Reading the cutflow information
                 regiondata=self.read_cutflows(self.dirname+'/Output/SAF/'+dataset.name+'/'+analysis+'/Cutflows',regions,regiondata)
                 if regiondata==-1:
-                    logging.getLogger('MA5').warning('Info file for '+analysis+' corrupted. Skipping the CLs calculation.')
+                    self.logger.warning('Info file for '+analysis+' corrupted. Skipping the CLs calculation.')
                     return False
 
                 ## Sanity check for the covariance information
                 if self.cov_switch and covariance==-1:
-                    logging.getLogger('MA5').warning('Corrupted covariance data in the '+analysis+' info file. Skipping the global CLs calculation.')
+                    self.logger.warning('Corrupted covariance data in the '+analysis+\
+                                        ' info file. Skipping the global CLs calculation.')
                     self.cov_switch = False
 
                 ## Performing the CLS calculation
@@ -784,7 +816,8 @@ class RunRecast():
                 xsflag=True
                 if dataset.xsection > 0:
                     xsflag=False
-                    regiondata=self.extract_cls(regiondata,regions,cov_regions,dataset.xsection,lumi,covariance)
+                    regiondata=self.extract_cls(regiondata,regions,cov_regions,
+                                                dataset.xsection,lumi,covariance)
 
                 ## Uncertainties on the rates
                 Error_dict = {}
@@ -822,10 +855,13 @@ class RunRecast():
                             xsflag=False
                             regiondata_errors[error_key] = copy.deepcopy(regiondata)
                             if error_value!=0.0:
-                                regiondata_errors[error_key] = self.extract_cls(regiondata_errors[error_key],regions,cov_regions,varied_xsec,lumi,covariance)
+                                regiondata_errors[error_key] = self.extract_cls(regiondata_errors[error_key],
+                                                                                regions,cov_regions,varied_xsec,
+                                                                                lumi,covariance)
 
                 ## writing the output file
-                self.write_cls_output(analysis, regions, cov_regions, regiondata, regiondata_errors, mysummary, xsflag, lumi)
+                self.write_cls_output(analysis, regions, cov_regions, regiondata,
+                                      regiondata_errors, mysummary, xsflag, lumi)
                 mysummary.write('\n')
 
             ## Closing the output file
@@ -835,8 +871,8 @@ class RunRecast():
     def check_xml_scipy_methods(self):
         ## Checking whether scipy is installed
         if not self.main.session_info.has_scipy:
-            logging.getLogger('MA5').warning('scipy is not installed... the CLs module cannot be used.')
-            logging.getLogger('MA5').warning('Please install scipy.')
+            self.logger.warning('scipy is not installed... the CLs module cannot be used.')
+            self.logger.warning('Please install scipy.')
             return False
         else:
             import scipy.stats
@@ -847,7 +883,7 @@ class RunRecast():
             try:
                 import xml.etree.ElementTree as ET
             except:
-                logging.getLogger('MA5').warning('lxml or xml not available... the CLs module cannot be used')
+                self.logger.warning('lxml or xml not available... the CLs module cannot be used')
                 return False
         # exit
         return ET
@@ -855,6 +891,7 @@ class RunRecast():
     def parse_info_file(self, etree, analysis, extrapolated_lumi):
         ## Is file existing?
         if not os.path.isfile(self.pad+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.info'):
+            self.logger.debug('Info File does not exist...')
             return -1,-1, -1, -1, -1
         ## Getting the XML information
         try:
@@ -864,18 +901,19 @@ class RunRecast():
             results = self.header_info_file(info_tree,analysis,extrapolated_lumi)
             return results
         except:
+            self.logger.debug('Cannot parse the info file')
             return -1,-1, -1, -1, -1
 
     def fix_pileup(self,filename):
         #x 
-        logging.getLogger('MA5').debug('delphes card is here: '+filename)        
+        self.logger.debug('delphes card is here: '+filename)        
 
         # Container for pileup
         FoundPileup=[]
 
         # Safe
         if not os.path.isfile(filename):
-            logging.getLogger('MA5').error('internal error: file '+filename+' is not found')
+            self.logger.error('internal error: file '+filename+' is not found')
             return False
 
         # Estimate the newpath of pileup
@@ -917,14 +955,14 @@ class RunRecast():
 
 
     def header_info_file(self, etree, analysis, extrapolated_lumi):
-        logging.getLogger('MA5').debug('Reading info from the file related to '+analysis + '...')
+        self.logger.debug('Reading info from the file related to '+analysis + '...')
         ## checking the header of the file
         info_root = etree.getroot()
         if info_root.tag != "analysis":
-            logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): <analysis> tag.')
+            self.logger.warning('Invalid info file (' + analysis+ '): <analysis> tag.')
             return -1,-1,-1,-1,-1
         if info_root.attrib["id"].lower() != analysis.lower():
-            logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): <analysis id> tag.')
+            self.logger.warning('Invalid info file (' + analysis+ '): <analysis id> tag.')
             return -1,-1,-1,-1,-1
         ## extracting the information
         lumi         = 0
@@ -935,12 +973,18 @@ class RunRecast():
         covariance   = []
         # Getting the description of the subset of SRs having covariances
         # Now the cov_switch is activated here
-        if "cov_subset" in info_root.attrib:
+        if "cov_subset" in info_root.attrib and self.main.recasting.global_likelihoods_switch:
             self.cov_switch = True
             regiondata["covsubset"] = info_root.attrib["cov_subset"]
         # activate pyhf
-        self.pyhf_config = self.pyhf_info_file(info_root)
-        logging.getLogger('MA5').debug(str(self.pyhf_config))
+        if self.main.recasting.global_likelihoods_switch:
+            try: 
+                self.pyhf_config = self.pyhf_info_file(info_root)
+            except:
+                self.logger.debug('Check pyhf_info_file function!')
+                self.pyhf_config = {}
+            self.logger.debug(str(self.pyhf_config))
+
         ## first we need to get the number of regions
         for child in info_root:
             # Luminosity
@@ -951,16 +995,16 @@ class RunRecast():
                         lumi_scaling = round(extrapolated_lumi/lumi,8)
                         lumi=lumi*lumi_scaling
                 except:
-                    logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): ill-defined lumi')
+                    self.logger.warning('Invalid info file (' + analysis+ '): ill-defined lumi')
                     return -1,-1,-1,-1,-1
-                logging.getLogger('MA5').debug('The luminosity of ' + analysis + ' is ' + str(lumi) + ' fb-1.')
+                self.logger.debug('The luminosity of ' + analysis + ' is ' + str(lumi) + ' fb-1.')
             # regions
             if child.tag == "region" and ("type" not in child.attrib or child.attrib["type"] == "signal"):
                 if "id" not in child.attrib:
-                    logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): <region id> tag.')
+                    self.logger.warning('Invalid info file (' + analysis+ '): <region id> tag.')
                     return 0-1,-1,-1,-1,-1
                 if child.attrib["id"] in regions:
-                    logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): doubly-defined region.')
+                    self.logger.warning('Invalid info file (' + analysis+ '): doubly-defined region.')
                     return -1,-1,-1,-1,-1
                 regions.append(child.attrib["id"])
                 # If one covariance entry is found, the covariance switch is turned on
@@ -977,12 +1021,12 @@ class RunRecast():
                 syst    = -1
                 stat    = -1
                 for rchild in child:
-                    logging.getLogger('MA5').debug(rchild.tag)
-                    logging.getLogger('MA5').debug(lumi, regions, regiondata)
+                    self.logger.debug(rchild.tag)
+                    self.logger.debug(str(lumi)+' '+str(regions)+ ' '+str(regiondata))
                     try:
                         myval=float(rchild.text)
                     except:
-                        logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): region data ill-defined.')
+                        self.logger.warning('Invalid info file (' + analysis+ '): region data ill-defined.')
                         return -1,-1,-1,-1,-1
                     if rchild.tag=="nobs":
                         nobs = myval
@@ -999,7 +1043,7 @@ class RunRecast():
                             i = cov_regions.index(child.attrib["id"])
                             region = rchild.attrib["region"]
                             if region not in cov_regions:
-                                logging.getLogger('MA5').warning('Invalid covariance information (info file for ' + analysis+ \
+                                self.logger.warning('Invalid covariance information (info file for ' + analysis+ \
                                     '): unknown region (' + region +') ignored');
                             else:
                                 j = cov_regions.index(rchild.attrib["region"])
@@ -1013,7 +1057,7 @@ class RunRecast():
 
                                 covariance[i][j] = myval
                     else:
-                        logging.getLogger('MA5').warning('Invalid info file (' + analysis+ '): unknown region subtag.')
+                        self.logger.warning('Invalid info file (' + analysis+ '): unknown region subtag.')
                         return -1,-1,-1,-1,-1
                 if syst == -1 and stat == -1:
                     if self.main.recasting.error_extrapolation=='sqrt':
@@ -1024,7 +1068,8 @@ class RunRecast():
                         deltanb = round(deltanb*err_scale,8)
                     else:
                         nb_new = nb*lumi_scaling;
-                        deltanb = round(math.sqrt(self.main.recasting.error_extrapolation[0]**2*nb_new**2 + self.main.recasting.error_extrapolation[1]**2*nb_new), 8);
+                        deltanb = round(math.sqrt(self.main.recasting.error_extrapolation[0]**2*nb_new**2 
+                                                  + self.main.recasting.error_extrapolation[1]**2*nb_new), 8);
                 else:
                     if syst==-1:
                         syst=0.
@@ -1042,16 +1087,20 @@ class RunRecast():
             the location of the specific background-only likelihood json files that are given
             in the info file. The collection of SR contributing to a given profile must be
             provided. One can process multiple likelihood profiles dedicated to different sets
-            of SRs."""
-        if 'pyhf' in [x.tag for x in info_root]:
-            pyhf_path = os.path.join(self.main.archi_info.ma5dir,'tools/pyhf')
+            of SRs.
+        """
+        if any([x.tag=='pyhf' for x in info_root]): 
+            pyhf_path = os.path.join(self.main.archi_info.ma5dir, 'tools/pyhf'+(sys.version_info[0]>2)*'/src')
             try:
-                import sys
                 if os.path.isdir(pyhf_path) and pyhf_path not in sys.path:
                     sys.path.append(pyhf_path)
                 import pyhf
+                self.logger.debug('Pyhf v'+str(pyhf.__version__))
+            except ImportError:
+                self.logger.warning('To use the global likelihood PYHF machinery, please type "install pyhf"')
+                return {}
             except:
-                logging.getLogger('MA5').warning('To use full profile likelihoods please install pyhf via "install pyhf" command')
+                self.logger.debug('Problem with pyhf_info_file function!!')
                 return {}
         else:
             return {}
@@ -1059,15 +1108,12 @@ class RunRecast():
         analysis    = info_root.attrib['id']
         nprofile    = 0
         to_remove   = []
+        self.logger.debug(' === Reading info file for pyhf ===')
         for child in info_root:
             if child.tag == 'lumi':
                 default_lumi = float(child.text)
             if child.tag == 'pyhf':
                 likelihood_profile = child.attrib.get('id','HF-Likelihood-'+str(nprofile))
-                if likelihood_profile == 'Global-Likelihood':
-                    logging.getLogger('MA5').warning(likelihood_profile+' is preserved.')
-                    logging.getLogger('MA5').warning('HF-Likelihood-'+str(nprofile)+' will be used instead.')
-                    likelihood_profile = 'HF-Likelihood-'+str(nprofile)
                 if likelihood_profile == 'HF-Likelihood-'+str(nprofile):
                     nprofile += 1
                 if not likelihood_profile in list(pyhf_config.keys()):
@@ -1084,8 +1130,8 @@ class RunRecast():
                         for channel in subchild:
                             if channel.tag == 'channel':
                                 if not channel.attrib.get('name',False):
-                                    logging.getLogger('MA5').warning('Invalid or corrupted info file')
-                                    logging.getLogger('MA5').warning('Please check '+likelihood_profile)
+                                    self.logger.warning('Invalid or corrupted info file')
+                                    self.logger.warning('Please check '+likelihood_profile)
                                     to_remove.append(likelihood_profile)
                                 else:
                                     data = []
@@ -1102,8 +1148,8 @@ class RunRecast():
                                         if type(ID) != str:
                                             pyhf_config[likelihood_profile]['SR'][channel.attrib['name']]['channels'] = str(ID)
                                         else:
-                                            logging.getLogger('MA5').warning(ID)
-                                            logging.getLogger('MA5').warning('Please check '+likelihood_profile+\
+                                            self.logger.warning(ID)
+                                            self.logger.warning('Please check '+likelihood_profile+\
                                                              'and/or '+channel.attrib['name'])
                                             to_remove.append(likelihood_profile)
 
@@ -1117,9 +1163,9 @@ class RunRecast():
                                    background = background,
                                    validate   = True)
             if signal.hf != []:
-                logging.getLogger('MA5').debug('Likelihood profile "'+str(likelihood_profile)+'" is valid.')
+                self.logger.debug('Likelihood profile "'+str(likelihood_profile)+'" is valid.')
             else:
-                logging.getLogger('MA5').warning('Invalid profile in '+analysis+' ignoring :'+\
+                self.logger.warning('Invalid profile in '+analysis+' ignoring :'+\
                                  str(likelihood_profile))
                 to_remove.append(likelihood_profile)
         #remove invalid profiles
@@ -1132,7 +1178,7 @@ class RunRecast():
 
     def write_cls_header(self, xs, out):
         if xs <=0:
-            logging.getLogger('MA5').info('   Signal xsection not defined. The 95% excluded xsection will be calculated.')
+            self.logger.info('   Signal xsection not defined. The 95% excluded xsection will be calculated.')
             out.write("# analysis name".ljust(30, ' ') + "signal region".ljust(60,' ') + \
              'sig95(exp)'.ljust(15, ' ') + 'sig95(obs)'.ljust(10, ' ') +'        ||    ' + 'efficiency'.ljust(15,' ') +\
              "stat".ljust(15,' '));
@@ -1142,7 +1188,7 @@ class RunRecast():
         else:
             out.write("# analysis name".ljust(30, ' ') + "signal region".ljust(60,' ') + \
              "best?".ljust(10,' ') + 'sig95(exp)'.ljust(15,' ') + 'sig95(obs)'.ljust(15, ' ') +\
-             '1-CLs'.ljust( 5,' ') + ' ||    ' + 'efficiency'.ljust(15,' ') +\
+             '1-CLs'.ljust( 5,' ') + '     ||    ' + 'efficiency'.ljust(15,' ') +\
              "stat".ljust(15,' '));
             for i in range(0,len(self.main.recasting.systematics)):
                 out.write(("syst" + str(i+1) + "(" + str(self.main.recasting.systematics[i][0]*100) + "%)").ljust(15," "))
@@ -1150,7 +1196,7 @@ class RunRecast():
 
 
     def read_cutflows(self, path, regions, regiondata):
-        logging.getLogger('MA5').debug('Read the cutflow from the files:')
+        self.logger.debug('Read the cutflow from the files:')
         for reg in regions:
             regname = clean_region_name(reg)
             ## getting the initial and final number of events
@@ -1162,10 +1208,10 @@ class RunRecast():
             theregs=regname.split(';')
             for regiontocombine in theregs:
                 filename=path+'/'+regiontocombine+'.saf'
-                logging.getLogger('MA5').debug('+ '+filename)
+                self.logger.debug('+ '+filename)
                 if not os.path.isfile(filename):
-                    logging.getLogger('MA5').warning('Cannot find a cutflow for the region '+regiontocombine+' in ' + path)
-                    logging.getLogger('MA5').warning('Skipping the CLs calculation.')
+                    self.logger.warning('Cannot find a cutflow for the region '+regiontocombine+' in ' + path)
+                    self.logger.warning('Skipping the CLs calculation.')
                     return -1
                 mysaffile = open(filename)
                 myN0=-1
@@ -1189,21 +1235,21 @@ class RunRecast():
                         myNf = float(line.split()[0])+float(line.split()[1])
                 mysaffile.close()
                 if myNf==-1 or myN0==-1:
-                    logging.getLogger('MA5').warning('Invalid cutflow for the region ' + reg +'('+regname+') in ' + path)
-                    logging.getLogger('MA5').warning('Skipping the CLs calculation.')
+                    self.logger.warning('Invalid cutflow for the region ' + reg +'('+regname+') in ' + path)
+                    self.logger.warning('Skipping the CLs calculation.')
                     return -1
                 Nf+=myNf
                 N0+=myN0
             if Nf==0 and N0==0:
-                logging.getLogger('MA5').warning('Invalid cutflow for the region ' + reg +'('+regname+') in ' + path)
-                logging.getLogger('MA5').warning('Skipping the CLs calculation.')
+                self.logger.warning('Invalid cutflow for the region ' + reg +'('+regname+') in ' + path)
+                self.logger.warning('Skipping the CLs calculation.')
                 return -1
             regiondata[reg]["N0"]=N0
             regiondata[reg]["Nf"]=Nf
         return regiondata
 
     def extract_cls(self,regiondata,regions,cov_regions,xsection,lumi,covariance):
-        logging.getLogger('MA5').debug('Compute CLs...')
+        self.logger.debug('Compute CLs...')
         ## computing fi a region belongs to the best expected ones, and derive the CLs in all cases
         bestreg=[]
         rMax = -1
@@ -1236,63 +1282,37 @@ class RunRecast():
                 regiondata["globalCLs"]=self.slhCLs(regiondata,cov_regions,xsection,lumi,covariance)
 
         #initialize pyhf for cls calculation
-        bestreg =[]
-        rMax    = -1
-        number_of_merged_bkg = 0
+        bestreg  = []
         iterator = []
+        minsig95 = 1e99
         if self.pyhf_config!={}:
-            iterator = copy.deepcopy(list(self.pyhf_config.items()))+[('Global-Likelihood',{})]
+            iterator = copy.deepcopy(list(self.pyhf_config.items()))
         for n, (likelihood_profile, config) in enumerate(iterator):
-            logging.getLogger('MA5').debug('    * Running CLs for '+likelihood_profile)
+            self.logger.debug('    * Running CLs for '+likelihood_profile)
             # safety check, just in case
             if regiondata.get('pyhf',{}).get(likelihood_profile, False) == False:
                 continue
-            if likelihood_profile != 'Global-Likelihood':
-                background = HF_Background(config)
-                if n == 0:
-                    # Construct Global likelihood profile
-                    global_bacgkround = background
-                else:
-                    global_bacgkround, i  = merge_backgrounds(global_bacgkround,background)
-                    number_of_merged_bkg += i
-            else:
-                if number_of_merged_bkg <= 1:
-                    regiondata['pyhf'].pop(likelihood_profile)
-                    continue
-                background   = global_bacgkround
-                config['SR'] = background.global_config
-            logging.getLogger('MA5').debug('Config = '+str(config))
+            background = HF_Background(config)
+            self.logger.debug('current pyhf Configuration = '+str(config))
             signal = HF_Signal(config,regiondata,xsection=xsection)
+            is_not_extrapolated = signal.lumi == lumi
             CLs    = -1
             if signal.isAlive():
                 CLs = pyhf_wrapper(background(lumi), signal(lumi))
-                if CLs >= 0.:
-                    regiondata['pyhf'][likelihood_profile]['CLs']  = CLs
-                if likelihood_profile == 'Global-Likelihood':
-                    regiondata['pyhf'][likelihood_profile]["best"] = ''
+                # Take observed if default lumi used, use expected if extrapolated
+                CLs_out = CLs['CLs_obs'] if is_not_extrapolated else CLs['CLs_exp']
+                regiondata['pyhf'][likelihood_profile]['full_CLs_output'] = CLs
+                if CLs_out >= 0.:
+                    regiondata['pyhf'][likelihood_profile]['CLs']  = CLs_out
+                s95 = float(regiondata['pyhf'][likelihood_profile]['s95exp'])
+                if 0. < s95 < minsig95:
+                    regiondata['pyhf'][likelihood_profile]["best"] = 1
+                    for mybr in bestreg:
+                        regiondata['pyhf'][mybr]["best"]=0
+                    bestreg = [likelihood_profile]
+                    minsig95 = s95
                 else:
-                    s95 = max(float(regiondata['pyhf'][likelihood_profile]['s95exp']),0.)
-                    #import the efficiencies
-                    n95 = []
-                    for SR,item in signal.signal_config.items():
-                        for dat in item['data']:
-                            n95.append(dat)
-                    n95 = max([s95*x*1000.*lumi for x in n95])
-                    nsignal = []
-                    if n95>0.:
-                        for SR in signal(lumi):
-                            for dat in SR.get('value',{}).get('data',[]):
-                                if dat > 0.:
-                                    nsignal.append(dat)
-                        rSR = 0.
-                        if len(nsignal)>0:
-                            rSR = min(nsignal)/n95
-                        if rSR > rMax:
-                            regiondata['pyhf'][likelihood_profile]["best"] = 1
-                            for mybr in bestreg:
-                                regiondata['pyhf'][mybr]["best"]=0
-                            bestreg = [likelihood_profile]
-                            rMax = rSR
+                    regiondata['pyhf'][likelihood_profile]["best"]=0
         return regiondata
 
 
@@ -1320,7 +1340,7 @@ class RunRecast():
 
 
     def extract_sig_cls(self,regiondata,regions,lumi,tag):
-        logging.getLogger('MA5').debug('Compute signal CL...')
+        self.logger.debug('Compute signal CL...')
         for reg in regions:
             nb = regiondata[reg]["nb"]
             if tag == "obs":
@@ -1344,11 +1364,11 @@ class RunRecast():
             low = 1.
             hig = 1.
             while cls(nobs,nb,deltanb,nslow,self.ntoys)>0.95:
-                logging.getLogger('MA5').debug('region ' + reg + ', lower bound = ' + str(low))
+                self.logger.debug('region ' + reg + ', lower bound = ' + str(low))
                 nslow=nslow*0.1
                 low  =  low*0.1
             while cls(nobs,nb,deltanb,nshig,self.ntoys)<0.95:
-                logging.getLogger('MA5').debug('region ' + reg + ', upper bound = ' + str(hig))
+                self.logger.debug('region ' + reg + ', upper bound = ' + str(hig))
                 nshig=nshig*10.
                 hig  =  hig*10.
             try:
@@ -1356,7 +1376,7 @@ class RunRecast():
                 s95 = scipy.optimize.brentq(sig95,low,hig,xtol=low/100.)
             except:
                 s95=-1
-            logging.getLogger('MA5').debug('region ' + reg + ', s95 = ' + str(s95) + ' pb')
+            self.logger.debug('region ' + reg + ', s95 = ' + str(s95) + ' pb')
             if tag == "obs":
                 regiondata[reg]["s95obs"]= ("%.7f" % s95)
             elif tag == "exp":
@@ -1365,7 +1385,7 @@ class RunRecast():
 
     # Calculating the upper limits on sigma with simplified likelihood
     def extract_sig_lhcls(self,regiondata,cov_regions,lumi,covariance,tag):
-        logging.getLogger('MA5').debug('Compute signal CL...')
+        self.logger.debug('Compute signal CL...')
         if all(s <= 0. for s in [regiondata[reg]["Nf"] for reg in cov_regions]):
             regiondata["lhs95obs"]= "-1"
             regiondata["lhs95exp"]= "-1"
@@ -1379,17 +1399,17 @@ class RunRecast():
         low = 1.
         hig = 1.
         while self.slhCLs(regiondata,cov_regions,low,lumi,covariance,expected)>0.95:
-            logging.getLogger('MA5').debug('lower bound = ' + str(low))
+            self.logger.debug('lower bound = ' + str(low))
             low  =  low*0.1
         while self.slhCLs(regiondata,cov_regions,hig,lumi,covariance,expected)<0.95:
-            logging.getLogger('MA5').debug('upper bound = ' + str(hig))
+            self.logger.debug('upper bound = ' + str(hig))
             hig  =  hig*10.
         try:
             import scipy
             s95 = scipy.optimize.brentq(sig95,low,hig,xtol=low/100.)
         except:
             s95=-1
-        logging.getLogger('MA5').debug('s95 = ' + str(s95) + ' pb')
+        self.logger.debug('s95 = ' + str(s95) + ' pb')
         if tag == "obs":
             regiondata["lhs95obs"]= ("%.7f" % s95)
         elif tag == "exp":
@@ -1402,61 +1422,47 @@ class RunRecast():
         if 'pyhf' not in list(regiondata.keys()):
             regiondata['pyhf'] = {}
 
-        number_of_merged_bkg = 0
         iterator = []
         if self.pyhf_config!={}:
-            iterator = copy.deepcopy(list(self.pyhf_config.items()))+[('Global-Likelihood',{})]
+            iterator = copy.deepcopy(list(self.pyhf_config.items()))
         for n, (likelihood_profile, config) in enumerate(iterator):
-            logging.getLogger('MA5').debug('    * Running sig95'+tag+' for '+likelihood_profile)
+            self.logger.debug('    * Running sig95'+tag+' for '+likelihood_profile)
             if likelihood_profile not in list(regiondata['pyhf'].keys()):
                 regiondata['pyhf'][likelihood_profile] = {}
-            if likelihood_profile != 'Global-Likelihood':
-                background = HF_Background(config,expected=(tag=='exp'))
-                if n == 0:
-                    # Construct Global likelihood profile
-                    global_bacgkround = background
-                else:
-                    global_bacgkround, i  = merge_backgrounds(global_bacgkround,background)
-                    number_of_merged_bkg += i
-            else:
-                if number_of_merged_bkg <= 1:
-                    regiondata['pyhf'].pop(likelihood_profile)
-                    continue
-                background   = global_bacgkround
-                config['SR'] = background.global_config
-            logging.getLogger('MA5').debug('Config : '+str(config))
+            background = HF_Background(config,expected=(tag=='exp'))
+            self.logger.debug('Config : '+str(config))
             if not HF_Signal(config,regiondata,xsection=1.,background=background).isAlive():
-                logging.getLogger('MA5').debug(likelihood_profile+' has no signal event.')
+                self.logger.debug(likelihood_profile+' has no signal event.')
                 regiondata['pyhf'][likelihood_profile]["s95"+tag] = "-1"
                 continue
             def sig95(xsection):
                 signal = HF_Signal(config,regiondata,xsection=xsection)
-                return pyhf_wrapper(background(lumi), signal(lumi))-0.95
+                return pyhf_wrapper(background(lumi), signal(lumi))['CLs_'+tag]-0.95
 
             low, hig = 1., 1.;
             while pyhf_wrapper(background(lumi),\
-                               HF_Signal(config, regiondata,xsection=low)(lumi)) > 0.95:
-                logging.getLogger('MA5').debug(tag+': profile '+likelihood_profile+\
+                               HF_Signal(config, regiondata,xsection=low)(lumi))['CLs_'+tag] > 0.95:
+                self.logger.debug(tag+': profile '+likelihood_profile+\
                                                ', lower bound = '+str(low))
                 low *= 0.1
             while pyhf_wrapper(background(lumi),\
-                               HF_Signal(config, regiondata,xsection=hig)(lumi)) < 0.95:
-                logging.getLogger('MA5').debug(tag+': profile '+likelihood_profile+\
+                               HF_Signal(config, regiondata,xsection=hig)(lumi))['CLs_'+tag] < 0.95:
+                self.logger.debug(tag+': profile '+likelihood_profile+\
                                                ', higher bound = '+str(hig))
                 hig *= 10.
             try:
                 import scipy
                 s95 = scipy.optimize.brentq(sig95,low,hig,xtol=low/100.)
             except:
-                logging.getLogger('MA5').debug('Can not calculate sig95'+tag+' for '+likelihood_profile)
+                self.logger.debug('Can not calculate sig95'+tag+' for '+likelihood_profile)
                 s95=-1
             regiondata['pyhf'][likelihood_profile]["s95"+tag] = "{:.7f}".format(s95)
-            logging.getLogger('MA5').debug(likelihood_profile+' sig95'+tag+' = {:.7f} pb'.format(s95))
+            self.logger.debug(likelihood_profile+' sig95'+tag+' = {:.7f} pb'.format(s95))
         return regiondata
 
 
     def write_cls_output(self, analysis, regions, cov_regions, regiondata, errordata, summary, xsflag, lumi):
-        logging.getLogger('MA5').debug('Write CLs...')
+        self.logger.debug('Write CLs...')
         if self.main.developer_mode:
             import json
             to_save = {analysis : {'regiondata' : regiondata,
@@ -1467,10 +1473,24 @@ class RunRecast():
                     past = json.load(json_file)
                 for key, item in past.items():
                     to_save[key] = item
-            logging.getLogger('MA5').debug('Saving dictionary : '+name)
+            self.logger.debug('Saving dictionary : '+name)
             results = open(name,'w')
             results.write(json.dumps(to_save, indent=4))
             results.close()
+            ###################################################################
+            # @Jack : For debugging purposes in the future. This slice of code
+            #         prints the Json file for signal WITH XSEC=1 !!!
+            #if self.pyhf_config!={}:
+            #    iterator = copy.deepcopy(list(self.pyhf_config.items()))
+            #for n, (likelihood_profile, config) in enumerate(iterator):
+            #    if regiondata.get('pyhf',{}).get(likelihood_profile, False) == False:
+            #        continue
+            #    signal = HF_Signal(config,regiondata,xsection=1.)
+            #    name = summary.name.split('.dat')[0]
+            #    results = open(name+'_'+likelihood_profile+'_sig.json','w')
+            #    results.write(json.dumps(signal(lumi), indent=4))
+            #    results.close()
+            ###################################################################
         err_sets = [ ['scale_up', 'scale_dn', 'Scale var.'], ['TH_up', 'TH_dn', 'TH   error'] ]
         for reg in regions:
             eff    = (regiondata[reg]["Nf"] / regiondata[reg]["N0"])
@@ -1561,13 +1581,13 @@ class RunRecast():
 
         # pyhf results
         pyhf_data = regiondata.get('pyhf',{})
-        for likelihood_profile in list(self.pyhf_config.keys())+['Global-Likelihood']:
+        for likelihood_profile in list(self.pyhf_config.keys()):
             if likelihood_profile not in list(pyhf_data.keys()):
                 continue
             myxsexp   = pyhf_data.get(likelihood_profile,{}).get('s95exp',"-1")
             myxsobs   = pyhf_data.get(likelihood_profile,{}).get('s95obs',"-1")
             if not xsflag:
-                logging.getLogger('MA5').debug(str(pyhf_data))
+                self.logger.debug(str(pyhf_data))
                 mycls   = '{:.4f}'.format(pyhf_data.get(likelihood_profile,{}).get('CLs', 0.))
                 best    = str(pyhf_data.get(likelihood_profile,{}).get('best', 0))
                 summary.write(analysis.ljust(30,' ') + ('[pyhf]-'+likelihood_profile+'-profile').ljust(60,' ') +\
@@ -1617,14 +1637,95 @@ def clean_region_name(mystr):
     newstr = newstr.replace(")",  "_rp_")
     return newstr
 
-def pyhf_wrapper(background,signal,qtilde=True):
+
+def pyhf_wrapper(background,signal,**kwargs):
+    if sys.version_info[0] == 2:
+        return pyhf_wrapper_py2(background, signal,  qtilde=kwargs.get('qtilde',True))
+    elif sys.version_info[0] > 2:
+        return pyhf_wrapper_py3(background, signal)
+    else:
+        return -1
+
+
+def pyhf_wrapper_py3(background,signal):
     import pyhf
-    workspace = pyhf.Workspace(background)
-    model     = workspace.model(patches=[signal],
-                                modifier_settings={
-                                                    'normsys': {'interpcode': 'code4'},
-                                                    'histosys': {'interpcode': 'code4p'},
-                                                    })
+    from pyhf.optimize import mixins
+    from numpy import warnings
+    warnings.filterwarnings('ignore')
+
+    # Scilence pyhf's messages
+    pyhf.pdf.log.setLevel(logging.CRITICAL)
+    pyhf.workspace.log.setLevel(logging.CRITICAL)
+    mixins.log.setLevel(logging.CRITICAL)
+    pyhf.set_backend('numpy')
+
+    try:
+        workspace = pyhf.Workspace(background)
+        model     = workspace.model(patches=[signal],
+                                    modifier_settings={'normsys': {'interpcode': 'code4'},
+                                                       'histosys': {'interpcode': 'code4p'}})
+    except (pyhf.exceptions.InvalidSpecification, KeyError) as err:
+        logging.getLogger('MA5').error("Invalid JSON file!! "+str(err))
+        return {'CLs_obs':-1. , 'CLs_exp' : -1.}
+    except:
+        logging.getLogger('MA5').debug("Unknown error, check pyhf_wrapper_py3 "+ str(err))
+        return {'CLs_obs':-1. , 'CLs_exp' : -1.}
+
+    def get_CLs(**kwargs):
+        try:
+            CLs_obs, CLs_exp = pyhf.infer.hypotest(kwargs.get('mu',1.), 
+                                                   workspace.data(model),
+                                                   model, 
+                                                   test_stat="qtilde",
+                                                   par_bounds=kwargs.get('bounds',
+                                                                    model.config.suggested_bounds()),
+                                                   return_expected=True)
+
+        except (AssertionError, pyhf.exceptions.FailedMinimization) as err:
+            logging.getLogger('MA5').debug(str(err))
+            # dont use false here 1.-CLs = 0 can be interpreted as false
+            return 'update bounds' 
+
+        return {'CLs_obs':1.-CLs_obs , 'CLs_exp' : 1.- CLs_exp}
+
+    #pyhf can raise an error if the poi_test bounds are too stringent
+    #they need to be updated dynamically.
+    update_bounds = model.config.suggested_bounds()
+    iteration_limit = 0
+    while True:
+        CLs = get_CLs(bounds=update_bounds)
+        if CLs == 'update bounds':
+            update_bounds[model.config.poi_index] = (0,2*update_bounds[model.config.poi_index][1])
+            iteration_limit += 1
+        elif isinstance(CLs, dict):
+            break
+        else:
+            iteration_limit += 1
+        # hard limit on iteration required if it exceeds this value it means
+        # Nsig >>>>> Nobs 
+        if iteration_limit>=3:
+            return {'CLs_obs':1. , 'CLs_exp' : 1.}
+
+    return CLs
+
+
+def pyhf_wrapper_py2(background,signal,qtilde=True):
+    import pyhf
+
+    try:
+        workspace = pyhf.Workspace(background)
+        model     = workspace.model(patches=[signal],
+                                    modifier_settings={
+                                                        'normsys': {'interpcode': 'code4'},
+                                                        'histosys': {'interpcode': 'code4p'},
+                                                        })
+    except (pyhf.exceptions.InvalidSpecification, KeyError) as e:
+        logging.getLogger('MA5').debug("Invalid JSON file :: "+str(e))
+        return {'CLs_obs':-1. , 'CLs_exp' : -1.}
+    except:
+        logging.getLogger('MA5').debug("Unknown error, check pyhf_wrapper_py2 "+str(e))
+        return {'CLs_obs':-1. , 'CLs_exp' : -1.}
+
     def get_CLs(bounds=None):
         try:
             CLs = float(pyhf.utils.hypotest(1.0, 
@@ -1635,7 +1736,12 @@ def pyhf_wrapper(background,signal,qtilde=True):
             return 1. - CLs
         except AssertionError:
             # dont use false here 1.-CLs = 0 can be interpreted as false
-            return 'update bounds' 
+            return 'update bounds'
+        except:
+            logging.getLogger('MA5').error('There is something wrong with pyhf module.')
+            logging.getLogger('MA5').error('pyhf version '+pyhf.__version__+\
+                                           ' Python version {}.{}'.format(sys.version_info[0],sys.version_info[1]))
+            return {'CLs_obs':-1. , 'CLs_exp' : -1.}
 
     #pyhf can raise an error if the poi_test bounds are too stringent
     #they need to be updated dynamically.
@@ -1649,12 +1755,12 @@ def pyhf_wrapper(background,signal,qtilde=True):
         elif type(CLs) == float:
             break
         else:
-            iteration_limit += .5
+            iteration_limit += 1
         # hard limit on iteration required if it exceeds this value it means
         # Nsig >>>>> Nobs 
         if iteration_limit>=3:
-            return 1.
-    return CLs
+            return {'CLs_obs':1. , 'CLs_exp' : 1.}
+    return {'CLs_obs': CLs , 'CLs_exp' : CLs}
 
 
 def cls(NumObserved, ExpectedBG, BGError, SigHypothesis, NumToyExperiments):
