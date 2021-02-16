@@ -54,12 +54,12 @@ class HistoMatplotlibProducer():
             output.write('import '+item.split('/')[-1][:-3]+'\n')
         output.write('\n')
         output.write('# Producing each histograms\n')
-        output.write('print "BEGIN-STAMP"\n')
+        output.write('print("BEGIN-STAMP")\n')
         for item in self.filenames:
             myname=item.split('/')[-1][:-3]
-            output.write('print "- Producing histo '+myname+'..."\n')
+            output.write('print("- Producing histo '+myname+'...")\n')
             output.write(myname+'.'+myname+'()\n')
-        output.write('print "END-STAMP"\n')
+        output.write('print("END-STAMP")\n')
         output.close()
         return True
 

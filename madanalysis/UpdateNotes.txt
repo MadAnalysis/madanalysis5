@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+146           (2021/02/16) fuks:    Small bug with the python3 compatibility 
+
 145           (2021/02/16) fuks:    Finalisation of the PYHF interface and fixing a few bugs fir the 
                                    PADForSFS 
 
