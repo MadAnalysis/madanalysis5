@@ -258,7 +258,7 @@ class MA5Interpreter(Interpreter):
         # initialization
         install_delphes         = False
         install_delphesMA5tune  = False
-        user_info           = UserInfo()
+        user_info               = UserInfo()
 
         # A few useful methods
         def validate_bool_key(key):
@@ -327,8 +327,10 @@ class MA5Interpreter(Interpreter):
                 install_delphes = validate_bool_key(key)
             elif key=='with-delphesMA5tune':
                 install_delphesMA5tune = validate_bool_key(key)
+            elif key in ['with-PADForSFS','with-padforsfs','PADForSFS']:
+                install_padforsfs = value
             else:
-                raise UNK_OPT('Unknown options for further_install')
+                raise UNK_OPT('Unknown options for further_install : '+str(key))
 
         # Muting the logger
         lvl = self.logger.getEffectiveLevel()
@@ -366,6 +368,13 @@ class MA5Interpreter(Interpreter):
             installer=InstallManager(self.main)
             if not installer.Execute('fastjet'):
                 self.logger.error('Impossible to install fastjet.')
+                return False
+
+        # If FastJet is installed, install PADForSFS
+        if self.main.archi_info.has_fastjet and install_padforsfs:
+            self.logger.info('Installing PAD for SFS')
+            if not installer.Execute('padforsfs'):
+                self.logger.error('Impossible to install PAD For SFS.')
                 return False
 
         # Delphes installation
