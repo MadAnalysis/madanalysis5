@@ -22,12 +22,13 @@
 ################################################################################
 
 
-from __future__ import absolute_import
+from __future__                             import absolute_import
 from madanalysis.interpreter.cmd_base       import CmdBase
 from madanalysis.install.install_manager    import InstallManager
 import logging, os
 
-import six.moves.urllib.request, six.moves.urllib.parse , six.moves.urllib.error
+# not used
+#import six.moves.urllib.request, six.moves.urllib.parse #, six.moves.urllib.error
 
 class CmdInstall(CmdBase):
     """Command INSTALL"""
@@ -144,18 +145,47 @@ class CmdInstall(CmdBase):
             if self.main.archi_info.has_fastjet:
                 padsfs_install_check = installer.Execute('PADForSFS')
             else:
-                self.logger.warning('PADForSFS can not be installed without FastJet.')
+                self.logger.warning("PADForSFS requires FastJet to be installed.")
+                self.logger.info("Would you like to install FastJet? [Y/N]")
+                while True:
+                    answer = input("Answer : ")
+                    if answer.lower() in ['y','n','yes','no']:
+                        break
+                if answer.lower() in ['y','yes']:
+                    if not installer.Execute('fastjet'):
+                        return False
+                    if not installer.Execute('fastjet-contrib'):
+                        return False
+                    if not installer.Execute('PADForSFS'):
+                        return False
+                    padsfs_install_check = 'restart'
             if inst_delphes(self.main,installer,'delphes',True):
                 pad_install_check = installer.Execute('PAD')
             else:
-                self.logger.warning('Delphes is not installed (and will be installed). Then please exit MA5 and re-install the PAD')
+                self.logger.warning('Delphes is not installed (and will be installed). '+
+                                    'Then please exit MA5 and re-install the PAD')
+            if 'restrart' in [pad_install_check, padsfs_install_check]:
+                return 'restrart'
             return any([pad_install_check, padsfs_install_check])
         elif args[0]=='PADForSFS':
             padsfs_install_check = False
             if self.main.archi_info.has_fastjet:
                 padsfs_install_check = installer.Execute('PADForSFS')
             else:
-                self.logger.warning('PADForSFS can not be installed without FastJet.')
+                self.logger.warning("PADForSFS requires FastJet to be installed.")
+                self.logger.info("Would you like to install FastJet? [Y/N]")
+                while True:
+                    answer = input("Answer : ")
+                    if answer.lower() in ['y','n','yes','no']:
+                        break
+                if answer.lower() in ['y','yes']:
+                    if not installer.Execute('fastjet'):
+                        return False
+                    if not installer.Execute('fastjet-contrib'):
+                        return False
+                    if not installer.Execute('PADForSFS'):
+                        return False
+                    return 'restart'
             return padsfs_install_check
         elif args[0]=='pyhf':
             return installer.Execute('pyhf')
