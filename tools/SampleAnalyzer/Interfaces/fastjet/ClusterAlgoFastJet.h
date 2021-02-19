@@ -76,9 +76,7 @@ class ClusterAlgoFastJet: public ClusterAlgoBase
     virtual ~ClusterAlgoFastJet(); 
 
     /// Jet clustering
-    virtual MAbool Execute(SampleFormat& mySample, EventFormat& myEvent, MAbool ExclusiveId,   
-                           const std::vector<MAbool>& vetos,
-                           const std::set<const MCParticleFormat*> vetos2,
+    virtual MAbool Execute(SampleFormat& mySample, EventFormat& myEvent,
                            SmearerBase* smearer);
 
     /// Initialization

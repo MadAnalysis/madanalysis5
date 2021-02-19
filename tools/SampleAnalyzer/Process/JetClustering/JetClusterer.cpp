@@ -30,6 +30,10 @@
 #include "SampleAnalyzer/Commons/Service/PDGService.h"
 #include "SampleAnalyzer/Process/JetClustering/NullSmearer.h"
 
+#ifdef FASTJET_USE
+    // FastJet headers
+    #include <fastjet/PseudoJet.hh>
+#endif
 
 using namespace MA5;
 
@@ -366,81 +370,116 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
     else if (PHYSICS->Id->IsFinalState(part))
     {
       // keeping only electron, muon and photon
-      if (absid!=22 && absid!=11 && absid!=13) continue;
-
-      // rejecting particle if coming from hadronization
-      if (ExclusiveId_ && LOOP->ComingFromHadronDecay(&part,mySample)) continue;
-
-      // Muons
-      if (absid==13)
+      if (absid==22 || absid==11 || absid==13)
       {
-        vetos[i]=true;
+          // rejecting particle if coming from hadronization
+          if ( !(ExclusiveId_ && LOOP->ComingFromHadronDecay(&part,mySample)))
+          {
 
-        // Smearing its momentum
-        MCParticleFormat smeared = mySmearer_->Execute(&part, static_cast<MAint32>(absid));
-        if (smeared.pt() <= 1e-10) continue;
+              // Muons
+              if (absid==13)
+              {
+                vetos[i]=true;
 
-        RecLeptonFormat * muon = myEvent.rec()->GetNewMuon();
-        muon->setMomentum(smeared.momentum());
-        muon->setD0(smeared.d0());
-        muon->setDZ(smeared.dz());
-        muon->setD0Approx(smeared.d0_approx());
-        muon->setDZApprox(smeared.dz_approx());
-        muon->setProductionVertex(MALorentzVector(part.mothers()[0]->decay_vertex().X(),
-                                                  part.mothers()[0]->decay_vertex().Y(),
-                                                  part.mothers()[0]->decay_vertex().Z(),0.0));
-        muon->setClosestApproach(smeared.closest_approach());
-        muon->setMc(&(part));
-        if (part.pdgid()==13) muon->SetCharge(-1);
-        else muon->SetCharge(+1);
+                // Smearing its momentum
+                MCParticleFormat smeared = mySmearer_->Execute(&part, static_cast<MAint32>(absid));
+                if (smeared.pt() <= 1e-10) continue;
+
+                RecLeptonFormat * muon = myEvent.rec()->GetNewMuon();
+                muon->setMomentum(smeared.momentum());
+                muon->setD0(smeared.d0());
+                muon->setDZ(smeared.dz());
+                muon->setD0Approx(smeared.d0_approx());
+                muon->setDZApprox(smeared.dz_approx());
+                muon->setProductionVertex(MALorentzVector(part.mothers()[0]->decay_vertex().X(),
+                                                          part.mothers()[0]->decay_vertex().Y(),
+                                                          part.mothers()[0]->decay_vertex().Z(),0.0));
+                muon->setClosestApproach(smeared.closest_approach());
+                muon->setMc(&(part));
+                if (part.pdgid()==13) muon->SetCharge(-1);
+                else muon->SetCharge(+1);
+              }
+
+              // Electrons
+              else if (absid==11)
+              {
+                vetos[i]=true;
+
+                // Smearing the electron momentum
+                MCParticleFormat smeared = mySmearer_->Execute(&part, static_cast<MAint32>(absid));
+                if (smeared.pt() <= 1e-10) continue;
+
+                RecLeptonFormat * elec = myEvent.rec()->GetNewElectron();
+                elec->setMomentum(smeared.momentum());
+                elec->setD0(smeared.d0());
+                elec->setDZ(smeared.dz());
+                elec->setD0Approx(smeared.d0_approx());
+                elec->setDZApprox(smeared.dz_approx());
+                elec->setProductionVertex(MALorentzVector(part.mothers()[0]->decay_vertex().X(),
+                                                          part.mothers()[0]->decay_vertex().Y(),
+                                                          part.mothers()[0]->decay_vertex().Z(),0.0));
+                elec->setClosestApproach(smeared.closest_approach());
+                elec->setMc(&(part));
+                if (part.pdgid()==11) elec->SetCharge(-1);
+                else elec->SetCharge(+1);
+              }
+
+              // Photons
+              else if (absid==22)
+              {
+                if (!LOOP->IrrelevantPhoton(&part,mySample))
+                {
+                    vetos[i]=true;
+
+                    // Smearing the photon momentum
+                    MCParticleFormat smeared = mySmearer_->Execute(&part, static_cast<MAint32>(absid));
+                    if (smeared.pt() <= 1e-10) continue;
+
+                    RecPhotonFormat * photon = myEvent.rec()->GetNewPhoton();
+                    photon->setMomentum(smeared.momentum());
+                    photon->setD0(smeared.d0());
+                    photon->setDZ(smeared.dz());
+                    photon->setD0Approx(smeared.d0_approx());
+                    photon->setDZApprox(smeared.dz_approx());
+                    photon->setProductionVertex(MALorentzVector(part.mothers()[0]->decay_vertex().X(),
+                                                                part.mothers()[0]->decay_vertex().Y(),
+                                                                part.mothers()[0]->decay_vertex().Z(),0.0));
+                    photon->setClosestApproach(smeared.closest_approach());
+                    photon->setMc(&(part));
+                }
+              }
+        }
       }
+#ifdef FASTJET_USE
+    // Putting the good inputs into the containter
+    // Good inputs = - final state
+    //               - visible
+    //               - if exclusiveID=1: particles not vetoed
+    //               - if exclusiveID=0: all particles except muons 
+    if (PHYSICS->Id->IsInvisible(part)) continue;
 
-      // Electrons
-      else if (absid==11)
-      {
-        vetos[i]=true;
+    // ExclusiveId mode
+    if (ExclusiveId_)
+    {
+      if (vetos[i]) continue;
+      if (vetos2.find(&part)!=vetos2.end()) continue;
+    }
 
-        // Smearing the electron momentum
-        MCParticleFormat smeared = mySmearer_->Execute(&part, static_cast<MAint32>(absid));
-        if (smeared.pt() <= 1e-10) continue;
+    // NonExclusive Id mode
+    else if (std::abs(part.pdgid())==13) continue;
 
-        RecLeptonFormat * elec = myEvent.rec()->GetNewElectron();
-        elec->setMomentum(smeared.momentum());
-        elec->setD0(smeared.d0());
-        elec->setDZ(smeared.dz());
-        elec->setD0Approx(smeared.d0_approx());
-        elec->setDZApprox(smeared.dz_approx());
-        elec->setProductionVertex(MALorentzVector(part.mothers()[0]->decay_vertex().X(),
-                                                  part.mothers()[0]->decay_vertex().Y(),
-                                                  part.mothers()[0]->decay_vertex().Z(),0.0));
-        elec->setClosestApproach(smeared.closest_approach());
-        elec->setMc(&(part));
-        if (part.pdgid()==11) elec->SetCharge(-1);
-        else elec->SetCharge(+1);
-      }
+    // Smearer module returns a smeared MCParticleFormat object
+    // Default: NullSmearer, that does nothing
+    // Reminder: 0 is reserved for the jet constituents
+    MCParticleFormat smeared = mySmearer_->Execute(&part, 0);
+    if (smeared.pt() <= 1e-10) continue;
 
-      // Photons
-      else if (absid==22)
-      {
-        if (LOOP->IrrelevantPhoton(&part,mySample)) continue;
-        vetos[i]=true;
-
-        // Smearing the photon momentum
-        MCParticleFormat smeared = mySmearer_->Execute(&part, static_cast<MAint32>(absid));
-        if (smeared.pt() <= 1e-10) continue;
-
-        RecPhotonFormat * photon = myEvent.rec()->GetNewPhoton();
-        photon->setMomentum(smeared.momentum());
-        photon->setD0(smeared.d0());
-        photon->setDZ(smeared.dz());
-        photon->setD0Approx(smeared.d0_approx());
-        photon->setDZApprox(smeared.dz_approx());
-        photon->setProductionVertex(MALorentzVector(part.mothers()[0]->decay_vertex().X(),
-                                                    part.mothers()[0]->decay_vertex().Y(),
-                                                    part.mothers()[0]->decay_vertex().Z(),0.0));
-        photon->setClosestApproach(smeared.closest_approach());
-        photon->setMc(&(part));
-      }
+    // Filling good particle for clustering
+    fastjet::PseudoJet input;
+    input.reset(smeared.px(), smeared.py(), smeared.pz(), smeared.e());
+    input.set_user_index(i);
+    myEvent.rec()->AddHadron(input);
+#endif
     }
   }
 
@@ -458,7 +497,8 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
   myEvent.rec()->SetPrimaryJetID(JetID_);
   // Launching the clustering
   // -> Filling the collection: myEvent->rec()->jets()
-  algo_->Execute(mySample,myEvent,ExclusiveId_,vetos,vetos2,mySmearer_);
+  algo_->Execute(mySample,myEvent,mySmearer_);
+
 #ifdef FASTJET_USE
   // Cluster additional jets separately. In order to save time Execute function
   // saves hadron inputs into memory and that configuration is used for the rest

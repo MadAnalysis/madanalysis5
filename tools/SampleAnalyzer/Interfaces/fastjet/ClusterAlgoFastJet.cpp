@@ -42,49 +42,9 @@ ClusterAlgoFastJet::ClusterAlgoFastJet(std::string Algo):ClusterAlgoBase(Algo)
 ClusterAlgoFastJet::~ClusterAlgoFastJet() 
 { if (JetDefinition_!=0) delete JetDefinition_; }
 
-MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent, MAbool ExclusiveId,   
-                                   const std::vector<MAbool>& vetos,
-                                   const std::set<const MCParticleFormat*> vetos2,
+MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
                                    SmearerBase* smearer)
 {
-  // Putting the good inputs into the containter
-  // Good inputs = - final state
-  //               - visible
-  //               - if exclusiveID=1: particles not vetoed
-  //               - if exclusiveID=0: all particles except muons 
-  for (MAuint32 i=0;i<myEvent.mc()->particles().size();i++)
-  {
-    const MCParticleFormat& part = myEvent.mc()->particles()[i];
-
-    // Selecting input for jet clustering
-    // | final state only
-    if (part.statuscode()!=1) continue;
-    // ! not invisible: reject neutrinos, neutralinos, ...
-    if (PHYSICS->Id->IsInvisible(part)) continue;
-
-    // ExclusiveId mode
-    if (ExclusiveId)
-    {
-      if (vetos[i]) continue;
-      if (vetos2.find(&part)!=vetos2.end()) continue;
-    }
-
-    // NonExclusive Id mode
-    else if (std::abs(part.pdgid())==13) continue;
-
-
-    // Smearer module returns a smeared MCParticleFormat object
-    // Default: NullSmearer, that does nothing
-    // Reminder: 0 is reserved for the jet constituents
-    MCParticleFormat smeared = smearer->Execute(&part, 0);
-    if (smeared.pt() <= 1e-10) continue;
-
-    // Filling good particle for clustering
-    fastjet::PseudoJet input;
-    input.reset(smeared.px(), smeared.py(), smeared.pz(), smeared.e());
-    input.set_user_index(i);
-    myEvent.rec()->AddHadron(input);
-  }
 
   // Clustering
   clust_seq.reset(new fastjet::ClusterSequence(myEvent.rec()->cluster_inputs(), *JetDefinition_));

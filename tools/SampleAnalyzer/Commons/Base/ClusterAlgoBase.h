@@ -84,10 +84,8 @@ class ClusterAlgoBase
     virtual ~ClusterAlgoBase() {}
 
     /// Jet clustering
-    virtual MAbool Execute(SampleFormat& mySample, EventFormat& myEvent, 
-                         MAbool ExclusiveId, const std::vector<bool>& vetos,
-                         const std::set<const MCParticleFormat*> vetos2,
-                         SmearerBase* smearer)=0;
+    virtual MAbool Execute(SampleFormat& mySample, EventFormat& myEvent,
+                           SmearerBase* smearer)=0;
 
     // Extra Jet clustering
     virtual MAbool Cluster(EventFormat& myEvent, std::string JetID)=0;
