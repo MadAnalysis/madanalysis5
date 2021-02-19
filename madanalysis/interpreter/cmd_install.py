@@ -27,9 +27,6 @@ from madanalysis.interpreter.cmd_base       import CmdBase
 from madanalysis.install.install_manager    import InstallManager
 import logging, os
 
-# not used
-#import six.moves.urllib.request, six.moves.urllib.parse #, six.moves.urllib.error
-
 class CmdInstall(CmdBase):
     """Command INSTALL"""
 
@@ -164,8 +161,8 @@ class CmdInstall(CmdBase):
             else:
                 self.logger.warning('Delphes is not installed (and will be installed). '+
                                     'Then please exit MA5 and re-install the PAD')
-            if 'restrart' in [pad_install_check, padsfs_install_check]:
-                return 'restrart'
+            if 'restart' in [pad_install_check, padsfs_install_check]:
+                return 'restart'
             return any([pad_install_check, padsfs_install_check])
         elif args[0]=='PADForSFS':
             padsfs_install_check = False
