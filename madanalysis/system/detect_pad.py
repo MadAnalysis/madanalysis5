@@ -22,16 +22,11 @@
 ################################################################################
 
 
-from __future__ import absolute_import
-import logging
-import glob
-import os
-import sys
-import re
-import platform
-from shell_command  import ShellCommand
+from __future__                                 import absolute_import
+from shell_command                              import ShellCommand
 from madanalysis.enumeration.detect_status_type import DetectStatusType
 from madanalysis.system.config_checker          import ConfigChecker
+import logging, os
 
 
 class DetectPAD:

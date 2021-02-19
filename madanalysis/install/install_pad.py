@@ -169,7 +169,8 @@ class InstallPad:
         if self.padname in ['PAD', 'PADForSFS']:
             json_struct_name = [x for x in self.files.keys() if 'json' in x]
             if len(json_struct_name) == 1:
-                logging.getLogger('MA5').debug(" ** Getting the list of pyhf-compatible analyses in " + self.downloaddir+"/"+json_struct_name[0])
+                logging.getLogger('MA5').debug(" ** Getting the list of pyhf-compatible analyses in " +\
+                                               self.downloaddir+"/"+json_struct_name[0])
                 json_input = open(os.path.join(self.downloaddir,json_struct_name[0]));
                 for line in json_input:
                     if len(line.strip())==0 or line.strip().startswith('#'):
@@ -216,11 +217,15 @@ class InstallPad:
                     logging.getLogger('MA5').debug('  --> Creating a skeleton analysis for ' + new_analysis)
                     TheCommand = ['./newAnalyzer.py', new_analysis, new_analysis]
                     logging.getLogger('MA5').debug('  -->  ' + ' '.join(TheCommand))
-                    ok, out= ShellCommand.ExecuteWithLog(TheCommand,logname,self.installdir+'/Build/SampleAnalyzer',silent=False)
+                    ok, out= ShellCommand.ExecuteWithLog(TheCommand,logname,
+                                                         self.installdir+'/Build/SampleAnalyzer',
+                                                         silent=False)
                     if not ok:
                         return False
                 ## Making space for the new files
-                for onefile in ['Build/SampleAnalyzer/User/Analyzer/'+new_analysis+'.cpp', 'Build/SampleAnalyzer/User/Analyzer/'+new_analysis+'.h', 'Build/Main/main.bak']:
+                for onefile in ['Build/SampleAnalyzer/User/Analyzer/'+new_analysis+'.cpp', 
+                                'Build/SampleAnalyzer/User/Analyzer/'+new_analysis+'.h', 
+                                'Build/Main/main.bak']:
                     TheCommand = ['rm', '-f', os.path.join(self.installdir,onefile)]
                     logging.getLogger('MA5').debug('  -->  ' + ' '.join(TheCommand))
                     ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir+'/tools')
