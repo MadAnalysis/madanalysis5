@@ -170,6 +170,7 @@ class LibraryWriter():
         elif package=='test_fastjet':
             options.has_commons=True
             options.has_fastjet_ma5lib=True
+            options.has_fastjet_inc=True
           #  options.has_fastjet_lib=True
             toRemove.extend(['compilation_fastjet.log','linking_fastjet.log','cleanup_fastjet.log','mrproper_fastjet.log','../Bin/TestFastjet.log'])
         elif package=='configuration':
