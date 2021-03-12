@@ -165,6 +165,8 @@ class MakefileWriter():
             self.has_commons               = False
             self.has_process               = False
             self.has_fastjet_tag           = False
+            # @JACK: cant use FASTJET_USE tag, it clashes with ROOT
+            self.ma5_fastjet_mode          = False
             self.has_delphes_tag           = False
             self.has_delphesMA5tune_tag    = False
             self.has_root_tag              = False
@@ -317,6 +319,8 @@ class MakefileWriter():
             cxxflags.extend(['-DROOT_USE'])
         if options.has_fastjet_tag:
             cxxflags.extend(['-DFASTJET_USE'])
+        if options.ma5_fastjet_mode:
+            cxxflags.extend(['-DMA5_FASTJET_MODE'])
         if options.has_zlib_tag:
             cxxflags.extend(['-DZIP_USE'])
         if options.has_delphes_tag:

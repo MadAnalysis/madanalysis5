@@ -38,7 +38,7 @@
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
 // FastJet headers
-#ifdef FASTJET_USE
+#ifdef MA5_FASTJET_MODE
     #include "fastjet/PseudoJet.hh"
 #endif
 
@@ -81,7 +81,7 @@ class RecJetFormat : public RecParticleFormat
   std::vector<MAint32> Constituents_;  /// indices of the MC particles
   std::vector<IsolationConeType> isolCones_; // isolation cones
 
-#ifdef FASTJET_USE
+#ifdef MA5_FASTJET_MODE
     // @Jack: Save the modified jet as pseudojet for jet substructure applications
     //        This will make it faster and avoid extra for loops.
     fastjet::PseudoJet pseudojet_;
@@ -176,7 +176,7 @@ class RecJetFormat : public RecParticleFormat
   const std::vector<IsolationConeType>& isolCones() const
   { return isolCones_; }
 
-#ifdef FASTJET_USE
+#ifdef MA5_FASTJET_MODE
     // Accessor for pseudojets
     const fastjet::PseudoJet& pseudojet() const {return pseudojet_;}
 

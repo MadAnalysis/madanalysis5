@@ -165,7 +165,7 @@ class LibraryWriter():
             options.has_fastjet_inc=True
             options.has_fastjet_lib=True
             # @JACK: To be able to use fastjet in Ma5 data structure
-            options.has_fastjet_tag=True
+            options.ma5_fastjet_mode=True
             toRemove.extend(['compilation_fastjet.log','linking_fastjet.log','cleanup_fastjet.log','mrproper_fastjet.log'])
         elif package=='test_fastjet':
             options.has_commons=True
@@ -177,10 +177,10 @@ class LibraryWriter():
             toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
         elif package=='commons':
             # @JACK: This will allow us to dynamically use the FJ libraries in commons
-            options.has_fastjet_tag    = self.main.archi_info.has_fastjet
+            options.ma5_fastjet_mode   = self.main.archi_info.has_fastjet
             options.has_fastjet_inc    = self.main.archi_info.has_fastjet
             options.has_fastjet_lib    = self.main.archi_info.has_fastjet
-#            options.has_fastjet_ma5lib = self.main.archi_info.has_fastjet
+            # options.has_fastjet_ma5lib = self.main.archi_info.has_fastjet
             toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
         elif package=='test_commons':
             options.has_commons  = True
@@ -263,6 +263,7 @@ class LibraryWriter():
             # @JACK: For fastjet to be accessible through ma5 datastructure
             options.has_fastjet_inc    = self.main.archi_info.has_fastjet
             options.has_fastjet_lib    = self.main.archi_info.has_fastjet
+            options.ma5_fastjet_mode   = self.main.archi_info.has_fastjet
 
             toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
         elif package=='test_process':

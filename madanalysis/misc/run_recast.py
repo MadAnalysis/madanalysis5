@@ -236,7 +236,7 @@ class RunRecast():
         self.logger.info("   Writing the list of datasets...")
         jobber.WriteDatasetList(dataset)
         self.logger.info("   Creating Makefiles...")
-        if not jobber.WriteMakefiles():
+        if not jobber.WriteMakefiles(ma5_fastjet_mode=False):
             return False
         self.logger.debug("   Fixing the pileup path...")
         self.fix_pileup(self.dirname+'_RecastRun/Input/'+card)

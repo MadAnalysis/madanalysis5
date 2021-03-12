@@ -30,7 +30,7 @@
 #include "SampleAnalyzer/Commons/Service/PDGService.h"
 #include "SampleAnalyzer/Process/JetClustering/NullSmearer.h"
 
-#ifdef FASTJET_USE
+#ifdef MA5_FASTJET_MODE
     // FastJet headers
     #include <fastjet/PseudoJet.hh>
 #endif
@@ -450,7 +450,7 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
               }
         }
       }
-#ifdef FASTJET_USE
+#ifdef MA5_FASTJET_MODE
     // Putting the good inputs into the containter
     // Good inputs = - final state
     //               - visible
@@ -499,7 +499,7 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
   // -> Filling the collection: myEvent->rec()->jets()
   algo_->Execute(mySample,myEvent,mySmearer_);
 
-#ifdef FASTJET_USE
+#ifdef MA5_FASTJET_MODE
   // Cluster additional jets separately. In order to save time Execute function
   // saves hadron inputs into memory and that configuration is used for the rest
   // of the jets.

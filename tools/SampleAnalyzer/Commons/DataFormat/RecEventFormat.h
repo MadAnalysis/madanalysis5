@@ -26,7 +26,7 @@
 #define RecEventFormat_h
 
 // Fastjet headers
-#ifdef FASTJET_USE
+#ifdef MA5_FASTJET_MODE
     #include "fastjet/PseudoJet.hh"
 #endif
 
@@ -100,7 +100,7 @@ class RecEventFormat
   /// Collection of reconstructed jet dictionary
   std::map<std::string, std::vector<RecJetFormat> > jetcollection_;
 
-#ifdef FASTJET_USE
+#ifdef MA5_FASTJET_MODE
     // hadrons to be clustered (code efficiency)
     std::vector<fastjet::PseudoJet> input_hadrons_;
 #endif
@@ -333,7 +333,7 @@ class RecEventFormat
     jets_.clear();
     jetcollection_.clear();
     fatjets_.clear();
-#ifdef FASTJET_USE
+#ifdef MA5_FASTJET_MODE
     // pseudojet : only available when fastjet is in use (code efficiency)
     input_hadrons_.clear();
 #endif
@@ -413,7 +413,7 @@ class RecEventFormat
     return false;
   }
 
-#ifdef FASTJET_USE
+#ifdef MA5_FASTJET_MODE
     // Add a new hadron to be clustered. (for code efficiency)
     void AddHadron(fastjet::PseudoJet v) {input_hadrons_.push_back(v);}
 

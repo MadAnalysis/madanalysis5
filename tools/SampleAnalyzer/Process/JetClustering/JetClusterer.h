@@ -36,7 +36,7 @@
 #include "SampleAnalyzer/Process/JetClustering/NullSmearer.h"
 #include "SampleAnalyzer/Commons/Base/SmearerBase.h"
 
-#ifdef FASTJET_USE
+#ifdef MA5_FASTJET_MODE
   #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoStandard.h"
   #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoSISCone.h"
   #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoCDFMidpoint.h"
@@ -72,7 +72,7 @@ namespace MA5
     /// Primary Jet ID
     std::string JetID_;
 
-#ifdef FASTJET_USE
+#ifdef MA5_FASTJET_MODE
     /// Jet collection configurations
     std::map<std::string, ClusterAlgoBase*> cluster_collection_;
 #endif
@@ -94,7 +94,7 @@ namespace MA5
     {
       // Initializing tagger
       algo_        = algo;
-#ifdef FASTJET_USE
+#ifdef MA5_FASTJET_MODE
       cluster_collection_.clear();
 #endif
       myBtagger_   = 0;
@@ -134,7 +134,7 @@ namespace MA5
     // Load additional Jets
     void LoadJetConfiguration(const std::map<std::string,std::string>& options)
     {
-#ifdef FASTJET_USE
+#ifdef MA5_FASTJET_MODE
         MAbool IDflag = false;
         std::string new_jetid;
         std::map<std::string, std::string> clustering_params;
