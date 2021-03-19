@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+148           (2021/03/19) fuks:    Upgrading to delphes 3.4.3 
+
 147           (2021/02/19) fuks:    Small bug fixes with the SFS/PADForSFS 
 
 146           (2021/02/16) fuks:    Small bug with the python3 compatibility 
