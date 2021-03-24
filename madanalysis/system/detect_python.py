@@ -23,13 +23,8 @@
 
 
 from __future__ import absolute_import
-import logging
-import glob
-import os
-import sys
-import re
-import platform
-from shell_command  import ShellCommand
+import logging, os, sys, platform
+from shell_command import ShellCommand
 from madanalysis.enumeration.detect_status_type import DetectStatusType
 
 
@@ -107,6 +102,11 @@ class DetectPython:
                 for path in tmp:
                     self.logger.debug("    - "+path)
             self.logger.debug("")
+
+        # Warn for python 2 usage
+        if sys.version_info[0] < 3:
+            self.logger.warning("Python version " + sys.version.split()[0] + " detected.")
+            self.logger.warning("Python 2 functionality is deprecated, and will no longer be supported in a close future.")
 
         # Ok
         return True
