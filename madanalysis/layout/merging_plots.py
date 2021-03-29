@@ -466,7 +466,7 @@ class MergingPlots:
                 'linewidth=1, '+\
                 'linestyle='+linestyle+',\\\n'+\
                 '             bottom=None, '+\
-                'cumulative=False, normed=False, ' +\
+                'cumulative=False, density=False, ' +\
                 'align="mid", orientation="vertical")\n\n')
 
         # Setting X axis label

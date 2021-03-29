@@ -808,7 +808,7 @@ class PlotFlow:
                                'linewidth='+str(mylinewidth)+', '+\
                                'linestyle='+mylinestyle+',\\\n'+\
                                '             bottom=None, '+\
-                               'cumulative=False, normed=False, align="mid", orientation="vertical")\n\n')
+                               'cumulative=False, density=False, align="mid", orientation="vertical")\n\n')
         outputPy.write('\n')
 
         # Label
