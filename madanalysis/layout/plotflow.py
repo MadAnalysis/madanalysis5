@@ -802,13 +802,25 @@ class PlotFlow:
                                '             label='+mytitle+', ')
             if ntot!=0:
                 outputPy.write('histtype='+filledmode+', ')
-            outputPy.write(    'rwidth='+str(rWidth)+',\\\n'+\
-                               '             color='+mybackcolor+', '+\
-                               'edgecolor='+mylinecolor+', '+\
-                               'linewidth='+str(mylinewidth)+', '+\
-                               'linestyle='+mylinestyle+',\\\n'+\
-                               '             bottom=None, '+\
-                               'cumulative=False, normed=False, align="mid", orientation="vertical")\n\n')
+            try:
+                import matplotlib.pyplot as plt
+                plt.hist([0],normed=True)
+                outputPy.write(    'rwidth='+str(rWidth)+',\\\n'+\
+                                   '             color='+mybackcolor+', '+\
+                                   'edgecolor='+mylinecolor+', '+\
+                                   'linewidth='+str(mylinewidth)+', '+\
+                                   'linestyle='+mylinestyle+',\\\n'+\
+                                   '             bottom=None, '+\
+                                   'cumulative=False, normed=False, align="mid", orientation="vertical")\n\n')
+            except:
+                outputPy.write(    'rwidth='+str(rWidth)+',\\\n'+\
+                                   '             color='+mybackcolor+', '+\
+                                   'edgecolor='+mylinecolor+', '+\
+                                   'linewidth='+str(mylinewidth)+', '+\
+                                   'linestyle='+mylinestyle+',\\\n'+\
+                                   '             bottom=None, '+\
+                                   'cumulative=False, density=False, align="mid",'+\
+                                   ' orientation="vertical")\n\n')
         outputPy.write('\n')
 
         # Label

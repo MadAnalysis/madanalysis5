@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+150           (2021/05/03) fuks:    Matplotlib compatibility with py2 and py3 
+
 149           (2021/03/24) fuks:    Adding a warning message when Python2 is used 
 
 148           (2021/03/19) fuks:    Upgrading to delphes 3.4.3 
