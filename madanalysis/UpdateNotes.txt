@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+151           (2021/05/11) fuks:    Bug fix (696972) in the MG5 interface 
+
 150           (2021/05/03) fuks:    Matplotlib compatibility with py2 and py3 
 
 149           (2021/03/24) fuks:    Adding a warning message when Python2 is used 

@@ -373,6 +373,7 @@ class MA5Interpreter(Interpreter):
         # If FastJet is installed, install PADForSFS
         if self.main.archi_info.has_fastjet and install_padforsfs:
             self.logger.info('Installing PAD for SFS')
+            installer=InstallManager(self.main)
             if not installer.Execute('padforsfs'):
                 self.logger.error('Impossible to install PAD For SFS.')
                 return False
