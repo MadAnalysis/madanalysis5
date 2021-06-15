@@ -97,9 +97,11 @@ class RunRecast():
                 self.main.forced=self.forced
                 return False
 
-        ## Cleaning and exit
-        if not FolderWriter.RemoveDirectory(os.path.normpath(self.dirname+'_RecastRun')):
-            return False
+            ## Cleaning
+            if not FolderWriter.RemoveDirectory(os.path.normpath(self.dirname+'_RecastRun')):
+                return False
+
+        # exit
         self.main.forced=self.forced
         return True
 
