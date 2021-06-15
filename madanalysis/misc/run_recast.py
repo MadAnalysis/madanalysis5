@@ -75,6 +75,35 @@ class RunRecast():
     ### GENERAL METHODS
     ################################################
 
+    ## Running the machinery
+    def execute(self):
+        self.main.forced=True
+        for delphescard in list(set(sorted(self.delphes_runcard))):
+            ## Extracting run infos and checks
+            version = delphescard[:4]
+            card    = delphescard[5:]
+            if not self.check_run(version):
+                self.main.forced=self.forced
+                return False
+
+            ## Running the fastsim
+            if not self.fastsim_single(version, card):
+                self.main.forced=self.forced
+                return False
+            self.main.fastsim.package = self.detector
+
+            ## Running the analyses
+            if not self.analysis_single(version, card):
+                self.main.forced=self.forced
+                return False
+
+        ## Cleaning and exit
+        if not FolderWriter.RemoveDirectory(os.path.normpath(self.dirname+'_RecastRun')):
+            return False
+        self.main.forced=self.forced
+        return True
+
+
     ## Prompt to edit the recasting card
     def edit_recasting_card(self):
         if self.forced or self.main.script:
@@ -143,25 +172,6 @@ class RunRecast():
     ################################################
     ### DELPHES RUN
     ################################################
-
-    def fastsim(self):
-        self.main.forced=True
-        for runcard in sorted(self.delphes_runcard):
-            ## Extracting run infos and checks
-            version = runcard[:4]
-            card    = runcard[5:]
-            if not self.check_run(version):
-                self.main.forced=self.forced
-                return False
-
-            ## Running the fastsim
-            if not self.fastsim_single(version, card):
-                self.main.forced=self.forced
-                return False
-        ## exit
-        self.main.forced=self.forced
-        return True
-
     def fastsim_single(self,version,delphescard):
         self.logger.debug('Launch a bunch of fastsim with the delphes card: '+delphescard)
 
@@ -491,28 +501,6 @@ class RunRecast():
     ################################################
     ### ANALYSIS EXECUTION
     ################################################
-
-    def analysis(self):
-        self.main.forced=True
-        for del_card in list(set(sorted(self.delphes_runcard))):
-            ## Extracting run infos and checks
-            version = del_card[:4]
-            card    = del_card[5:]
-            if not self.check_run(version):
-                self.main.forced=self.forced
-                return False
-            self.main.fastsim.package = self.detector
-
-            ## Running the analyses
-            if not self.analysis_single(version, card):
-                self.main.forced=self.forced
-                return False
-        ## Cleaning and exit
-        if not FolderWriter.RemoveDirectory(os.path.normpath(self.dirname+'_RecastRun')):
-            return False
-        self.main.forced=self.forced
-        return True
-
     def analysis_single(self, version, card):
         ## Init and header
         self.analysis_header(version, card)
