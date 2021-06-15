@@ -49,12 +49,8 @@ class InstallDelphes:
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir    = os.path.join(self.tmpdir, 'MA5_'+self.package)
         self.ncores      = 1
-#        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
-#        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.0.tar.gz"}
-#        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.1.tar.gz"}
-#        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.3.tar.gz"}
         if package == 'delphesma5tune':
-            self.files = {package+".tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.4.1.tar.gz"}
+            self.files = {package+".tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes-3.5.0.tar.gz"}
         else:
 #             self.files = {package+".tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/delphes342pre.tar.gz"} # Delphes for LLP not release yet
 #            self.files = {package+".tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.4.2.tar.gz"}
@@ -663,7 +659,7 @@ class InstallDelphes:
         checkup = CheckUp(self.main.archi_info, self.main.session_info, False, self.main.script)
         for link in [x.split('/')[-1] for x in originals]:
             dest = os.path.join(self.main.archi_info.ma5dir,'tools','SampleAnalyzer', 'ExternalSymLink', link)
-            if not checkup.CreateSymLink(x,dest):
+            if not checkup.CreateSymLink(link,dest):
                 return -1
 
         # Compiler setup

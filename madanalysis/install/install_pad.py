@@ -42,20 +42,20 @@ class InstallPad:
         self.untardir    = ""
         self.ncores      = 1
         self.files= {
-          "pad.dat"    : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/pad2.dat",
-          "bib_pad.dat": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/bib_pad2.dat",
-          "json_pad.dat":"http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/json_pad.dat"
+          "pad.dat"    : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/pad3.dat",
+          "bib_pad.dat": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/bib_pad3.dat",
+          "json_pad.dat":"http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/json_pad3.dat"
         }
         if padname=='PADForMA5tune':
             self.files  = {
-             "padma5tune.dat"   : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/padma5tune.dat",
-             "bib_padma5tune.dat": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/bib_padma5tune.dat"
+             "padma5tune.dat"   : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/padma5tune3.dat",
+             "bib_padma5tune.dat": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/bib_pad3.dat"
             }
         elif padname=='PADForSFS':
             self.files  = {
-             "padsfs.dat"     : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/SFS/padsfs.dat",
-             "bib_padsfs.dat" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/SFS/bib_padsfs.dat",
-             "json_padsfs.dat": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/SFS/json_padsfs.dat"
+             "padsfs.dat"     : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/SFS/padsfs3.dat",
+             "bib_padsfs.dat" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/bib_pad3.dat",
+             "json_padsfs.dat": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/SFS/json_padsfs3.dat"
             }
         self.analyses       = []
         self.analysis_files = []
@@ -102,7 +102,7 @@ class InstallPad:
         if self.padname == 'PADForMA5tune':
             filename="cms_sus_13_011"
         elif self.padname == 'PADForSFS':
-            filename="sfs_test"
+            filename="atlas_susy_2016_07"
         logging.getLogger('MA5').debug('Calling the expert mode for file ' + filename)
         logging.getLogger('MA5').debug('BEGIN ExpertMode')
         from madanalysis.core.expert_mode import ExpertMode
@@ -140,23 +140,11 @@ class InstallPad:
         # EXIT
         return True
 
-    # Formatting
-    def formatting(self,analysis):
-        new_analysis =     analysis.replace('ATLAS_1604_07773'     ,'atlas_exot_2015_03')
-        new_analysis = new_analysis.replace('ATLAS_1711_03301'     ,'atlas_exot_2016_27')
-        new_analysis = new_analysis.replace('ATLAS_SUSY_16_07'     ,'atlas_susy_2016_07')
-        new_analysis = new_analysis.replace('atlas_1605_03814'     ,'atlas_susy_2015_06')
-        new_analysis = new_analysis.replace('CMS_EXO_16_012_2gamma','cms_exo_16_012')
-        new_analysis = new_analysis.replace('atlas_1405_7875', 'atlas_susy_2013_02')
-        new_analysis = new_analysis.replace('atlas_sus_13_05' ,'atlas_susy_2013_05')
-        new_analysis = new_analysis.replace('-','_')
-        return new_analysis.lower()
-
     def Download(self):
         # Checking connection with InSpire and the ma5 website
-        if not InstallService.check_inspire():
-            return False
         if not InstallService.check_ma5site():
+            return False
+        if not InstallService.check_dataverse():
             return False
 
         # Downloading the files with the information on the implemented analyses
@@ -175,7 +163,7 @@ class InstallPad:
                 for line in json_input:
                     if len(line.strip())==0 or line.strip().startswith('#'):
                         continue;
-                    json_dictionary[line.strip().split('|')[0].strip()] = line.strip().split('|')[1].split();
+                    json_dictionary[line.strip().split('|')[0].strip()] = [ line.strip().split('|')[1].split(), line.strip().split('|')[2].split()];
                 json_input.close();
 
         # Getting the analysis one by one (and creating first skeleton analyses for each of them)
@@ -196,26 +184,34 @@ class InstallPad:
             url      = line.split('|')[1].strip()
             delphes  = line.split('|')[2].strip()
             dscrptn  = line.split('|')[3].strip()
-            new_delphes  = self.formatting(delphes)
-            new_analysis = self.formatting(analysis)
+            # getting the dataverse URLs
+            delphes_url='';
+            if 'dataverse' in delphes:
+                delphes_url = 'https://dataverse.uclouvain.be/api/access/datafile/'+delphes.split()[-1][:-1];
+                if len(analysis)==0 and len(url)==0:
+                   delphes = delphes.split()[1]
+                elif self.padname!='PADForSFS':
+                   delphes = 'delphes_card_'+delphes.split()[1]+'.tcl';
+                else:
+                   delphes = 'sfs_card_'+delphes.split()[1]+'.ma5';
             # filling the global vectors
             if len(analysis)==0 and len(url)==0:
                 self.pileup_files.append(delphes)
-            elif not new_delphes in self.delphes_cards:
-                self.delphes_cards.append(new_delphes)
-                delphes_dictionary[new_delphes] = [new_analysis]
+            elif not delphes in self.delphes_cards:
+                self.delphes_cards.append(delphes)
+                delphes_dictionary[delphes] = [analysis]
             else:
-                delphes_dictionary[new_delphes].append(new_analysis)
+                delphes_dictionary[delphes].append(analysis)
                 download_delphes = False
             logname  = os.path.join(self.installdir,self.padname+'-'+analysis+'.log')
             files = {}
             # Making space in the PAD for the analysis and preparing to download the analysis files
             if len(analysis)!=0 and len(url)!=0:
-                logging.getLogger('MA5').debug(" ** Getting the analysis " + new_analysis + ' located at ' + url)
+                logging.getLogger('MA5').debug(" ** Getting the analysis " + analysis + ' located at ' + url)
                 ## Creating a skeleton if necessary (+ inclusion in the analysis list and in the main)
-                if not new_analysis in ["cms_b2g_12_012", "cms_sus_13_011", "sfs_test"]:
-                    logging.getLogger('MA5').debug('  --> Creating a skeleton analysis for ' + new_analysis)
-                    TheCommand = ['./newAnalyzer.py', new_analysis, new_analysis]
+                if not (analysis in ["cms_b2g_12_012", "cms_sus_13_011"] or (analysis=="atlas_susy_2016_07" and self.padname=='PADForSFS')):
+                    logging.getLogger('MA5').debug('  --> Creating a skeleton analysis for ' + analysis)
+                    TheCommand = ['./newAnalyzer.py', analysis, analysis]
                     logging.getLogger('MA5').debug('  -->  ' + ' '.join(TheCommand))
                     ok, out= ShellCommand.ExecuteWithLog(TheCommand,logname,
                                                          self.installdir+'/Build/SampleAnalyzer',
@@ -223,8 +219,8 @@ class InstallPad:
                     if not ok:
                         return False
                 ## Making space for the new files
-                for onefile in ['Build/SampleAnalyzer/User/Analyzer/'+new_analysis+'.cpp', 
-                                'Build/SampleAnalyzer/User/Analyzer/'+new_analysis+'.h', 
+                for onefile in ['Build/SampleAnalyzer/User/Analyzer/'+analysis+'.cpp', 
+                                'Build/SampleAnalyzer/User/Analyzer/'+analysis+'.h', 
                                 'Build/Main/main.bak']:
                     TheCommand = ['rm', '-f', os.path.join(self.installdir,onefile)]
                     logging.getLogger('MA5').debug('  -->  ' + ' '.join(TheCommand))
@@ -232,27 +228,31 @@ class InstallPad:
                     if not ok:
                         return False
                 ## Preparing the download of the analysis files
-                if url=='MA5-local':
-                    url='http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/'
-                    if self.padname == 'PADForSFS':
-                        url += 'SFS'
-                    else:
-                        url += 'MA5SandBox'
+                if 'dataverse' in url:
+                    exts = ['cpp', 'h', 'info'];
+                    anl_files = url.split(']')[0].split()[1:];
+                    for i in range(len(anl_files)):
+                        files[analysis+'.'+exts[i]] = 'https://dataverse.uclouvain.be/api/access/datafile/'+anl_files[i];
+                    ## json files
+                    if analysis in list(json_dictionary.keys()):
+                        for i_json in range(len(json_dictionary[analysis][0])):
+                            files[analysis+'_'+json_dictionary[analysis][0][i_json]+'.json'] =\
+                               'https://dataverse.uclouvain.be/api/access/datafile/' + json_dictionary[analysis][1][i_json]
+                            self.json_cards.append(analysis+'_'+json_dictionary[analysis][0][i_json]+'.json')
+                            self.analysis_files.append(analysis+'_'+json_dictionary[analysis][0][i_json]+'.json')
                 else:
-                    url=os.path.join(url,'files')
-                for extension in ['cpp', 'info', 'h']:
-                    if analysis=='cms_exo_12_048' and extension=='info':
-                        files[new_analysis+'.'+extension] = os.path.join(url,analysis+'.'+extension+'?version=1')
+                    if url=='MA5-local':
+                        url='http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/'
+                        if self.padname == 'PADForSFS':
+                            url += 'SFS'
+                        else:
+                            url += 'MA5SandBox'
                     else:
-                        files[new_analysis+'.'+extension] = os.path.join(url,analysis+'.'+extension)
-                    self.analysis_files.append(new_analysis+'.'+extension)
-                analysis_info[new_analysis] = dscrptn
-                ## Preparing to downloading the necessary json files
-                if analysis in list(json_dictionary.keys()):
-                    for json in json_dictionary[analysis]:
-                        files[new_analysis+'_'+json+'.json'] = os.path.join(url,new_analysis+'_'+json+'.json')
-                        self.json_cards.append(new_analysis+'_'+json+'.json')
-                        self.analysis_files.append(new_analysis+'_'+json+'.json')
+                        url=os.path.join(url,'files')
+                    for extension in ['cpp', 'info', 'h']:
+                        files[analysis+'.'+extension] = os.path.join(url,analysis+'.'+extension)
+                        self.analysis_files.append(analysis+'.'+extension)
+                analysis_info[analysis] = dscrptn
             # Preparing to download the delphes card
             detector  = "delphes"
             wiki_page = 'MA5SandBox'
@@ -260,14 +260,14 @@ class InstallPad:
                 detector  = "MA5-SFS"
                 wiki_page = 'SFS'
             if len(delphes)!=0 and download_delphes:
-                logging.getLogger('MA5').debug(" ** Getting the " + detector + " card " + new_delphes)
-                if len(analysis)!=0:
-                    files[new_delphes] = os.path.join('http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/'+wiki_page, delphes)
-                else:
+                logging.getLogger('MA5').debug(" ** Getting the " + detector + " card " + delphes)
+                if not 'dataverse' in delphes_url:
                     files[delphes] = os.path.join('http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/'+wiki_page, delphes)
+                else:
+                    files[delphes] = delphes_url;
             # download in a temporary folder
-            if len(new_analysis)!=0:
-                logging.getLogger('MA5').info('    --> Downloading the files for ' + new_analysis)
+            if len(analysis)!=0:
+                logging.getLogger('MA5').info('    --> Downloading the files for ' + analysis)
             else:
                 logging.getLogger('MA5').info('    --> Downloading the pileup file ' + delphes)
             for onefile in files.values():
@@ -302,45 +302,12 @@ class InstallPad:
         return True
 
     def Unpack(self):
-        # Restoring the compatibility with MA5 versions posterior to v1.4
-        logging.getLogger('MA5').debug(" ** Restoring the compatibility with MA5 versions posterior to v1.4")
+        # Copying the analysis files
         for analysis in self.analyses:
-            new_analysis = self.formatting(analysis)
             for extension in ['h','cpp', 'info']:
-                newfile=open(os.path.join(self.PADdir,      new_analysis + '.'+extension),'w')
-                oldfile=open(os.path.join(self.downloaddir, new_analysis + '.'+extension),'r')
-                rootheaders=False
-                for line in oldfile:
-                    if 'RootMainHeaders.h' in line:
-                        rootheaders=True
-                    if 'TLorentzVector' in line:
-                        if new_analysis=='atlas_susy_2013_05' and extension=='h' and self.padname=='PADForMA5tune':
-                            newfile.write(line.replace('TLorentzVector','MA5::MALorentzVector'))
-                        else:
-                            newfile.write(line.replace('TLorentzVector','MALorentzVector'))
-                    elif 'WARNING' in line:
-                        newfile.write(line.replace('WARNING','//WARNING'))
-                    elif new_analysis=='atlas_susy_2013_02' and 'pt() > 130' in line and '6jm' in line and not 'AddCut' in line:
-                        newfile.write('}}}}\n')
-                        newfile.write(line)
-                    elif new_analysis=='atlas_conf_2019_040' and 'if (signalJets.size()>=1' in line:
-                        newfile.write('    if (signalJets.size()>1)\n')
-                    elif new_analysis in ['atlas_exot_2014_06', 'cms_exo_12_047'] and 'preselection=' in line:
-                        newfile.write(line.replace('preselection=','preselection=myEventWeight*'))
-                    elif new_analysis in ['atlas_exot_2016_32'] and 'tight=' in line:
-                        newfile.write(line.replace('tight=','tight=myEventWeight*'))
-                    elif analysis in line:
-                        newfile.write(line.replace(analysis, new_analysis))
-                    else:
-                        newfile.write(line)
-                newfile.close()
-                oldfile.close()
-                if (extension == 'h') and not rootheaders and self.padname != 'PADForSFS':
-                    with open(os.path.join(self.PADdir, new_analysis+'.'+extension), 'r+') as f:
-                        content = f.read()
-                        f.seek(0, 0)
-                        f.truncate()
-                        f.write(content.replace('#include','#include \"SampleAnalyzer/Interfaces/root/RootMainHeaders.h\"\n#include'))
+                newfile = os.path.join(self.PADdir,      analysis + '.'+extension)
+                oldfile = os.path.join(self.downloaddir, analysis + '.'+extension)
+                shutil.copy(oldfile,newfile)
 
         # json files fopr pyhf
         for json in self.json_cards:

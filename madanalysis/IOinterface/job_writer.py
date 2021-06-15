@@ -304,6 +304,7 @@ class JobWriter(object):
                 input = open(self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Interfaces/delphesMA5tune/"+cardname,'r')
         except:
             logging.getLogger('MA5').error("impossible to find "+self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Interfaces/delphes/"+cardname)
+            return False
         if "../../../.." in cardname:
             cardname=cardname.split('/')[-1]
 
@@ -338,6 +339,8 @@ class JobWriter(object):
         except:
             pass
 
+        return True
+
 
     def CopyLHEAnalysis(self):
         recast = (self.main.recasting.status=="on")
@@ -360,7 +363,8 @@ class JobWriter(object):
                 return False
 
         if self.main.fastsim.package in ["delphes","delphesMA5tune"]:
-            self.CreateDelphesCard()
+            if not self.CreateDelphesCard():
+                return False
 
         if self.main.recasting.status=="on":
             if not self.main.recasting.CreateCard(self.path):
