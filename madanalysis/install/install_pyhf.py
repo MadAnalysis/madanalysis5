@@ -106,8 +106,9 @@ class Installpyhf:
     def Check(self):
         try:
             if os.path.isdir(self.installdir) and not self.installdir in sys.path:
-                sys.path.append(self.installdir+(sys.version_info[0] > 2)*'/src/')
+                sys.path.insert(0, self.installdir+(sys.version_info[0] > 2)*'/src/')
             import pyhf
+            self.logger.debug("pyhf has been imported from "+" ".join(pyhf.__path__))
             if str(pyhf.__version__) != self.pyhf_version:
                 if sys.version_info[0] > 2:
                     logging.getLogger('MA5').warning("An incorrect version of pyhf has been detected ("+str(pyhf.__version__)+")");

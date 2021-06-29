@@ -56,10 +56,12 @@ class Detectpyhf:
         # Checking if scipy is installed on the system
         pyhf_path = os.path.join(self.archi_info.ma5dir,'tools/pyhf'+(sys.version_info[0] > 2)*'/src')
         if os.path.isdir(pyhf_path) and pyhf_path not in sys.path:
-            sys.path.append(pyhf_path)
+            sys.path.insert(0, pyhf_path)
         try:
             import pyhf
-        except:
+            self.logger.debug("pyhf has been imported from "+" ".join(pyhf.__path__))
+        except ModuleNotFoundError as err:
+            self.logger.debug(str(err))
             return DetectStatusType.UNFOUND,''
 
         # Checking release
