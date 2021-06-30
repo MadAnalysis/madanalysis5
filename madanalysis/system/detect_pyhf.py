@@ -60,7 +60,7 @@ class Detectpyhf:
         try:
             import pyhf
             self.logger.debug("pyhf has been imported from "+" ".join(pyhf.__path__))
-        except ModuleNotFoundError as err:
+        except ImportError as err:
             self.logger.debug(str(err))
             return DetectStatusType.UNFOUND,''
 
