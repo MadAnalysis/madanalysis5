@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+159           (2021/06/30) fuks:    Bug with the pyhf fix. 
+
 158           (2021/06/30) fuks:    Updating pyhf version management 
 
 155           (2021/06/29) fuks:    Allowing for python 3.6 
