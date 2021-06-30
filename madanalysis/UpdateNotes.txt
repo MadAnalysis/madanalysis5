@@ -1,5 +1,9 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+161           (2021/06/30) fuks:    Fixing PY2/PY3 compatibility 
+
+161           (2021/06/30) fuks:    PYHF-PY2 compatiblity 
+
 159           (2021/06/30) fuks:    Bug with the pyhf fix. 
 
 158           (2021/06/30) fuks:    Updating pyhf version management 

@@ -1086,6 +1086,7 @@ class RunRecast():
                     sys.path.insert(0, pyhf_path)
                 import pyhf
                 self.logger.debug('Pyhf v'+str(pyhf.__version__))
+                self.logger.debug("pyhf has been imported from "+" ".join(pyhf.__path__))
             except ImportError:
                 self.logger.warning('To use the global likelihood PYHF machinery, please type "install pyhf"')
                 return {}
