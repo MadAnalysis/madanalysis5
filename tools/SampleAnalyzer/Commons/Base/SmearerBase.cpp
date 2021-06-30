@@ -21,6 +21,7 @@
 //  
 ////////////////////////////////////////////////////////////////////////////////
 
+
 // STL headers
 #include <algorithm>
 #include <cmath>
@@ -28,6 +29,7 @@
 // SampleAnalyser headers
 #include "SampleAnalyzer/Commons/Base/SmearerBase.h"
 #include "SampleAnalyzer/Commons/Vector/MARotation3axis.h"
+
 
 using namespace MA5;
 
