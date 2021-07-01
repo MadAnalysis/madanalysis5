@@ -362,7 +362,7 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
       if (absid!=22 && absid!=11 && absid!=13) continue;
 
       // rejecting particle if coming from hadronization
-      if (ExclusiveId_ && LOOP->ComingFromHadronDecay(&part,mySample)) continue;
+      if (ExclusiveId_ && LOOP->ComingFromHadronDecay(&part,mySample,myEvent.mc()->particles().size())) continue;
 
       // Muons
       if (absid==13)
