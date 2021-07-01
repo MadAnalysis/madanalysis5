@@ -1083,9 +1083,10 @@ class RunRecast():
             pyhf_path = os.path.join(self.main.archi_info.ma5dir, 'tools/pyhf'+(sys.version_info[0]>2)*'/src')
             try:
                 if os.path.isdir(pyhf_path) and pyhf_path not in sys.path:
-                    sys.path.append(pyhf_path)
+                    sys.path.insert(0, pyhf_path)
                 import pyhf
                 self.logger.debug('Pyhf v'+str(pyhf.__version__))
+                self.logger.debug("pyhf has been imported from "+" ".join(pyhf.__path__))
             except ImportError:
                 self.logger.warning('To use the global likelihood PYHF machinery, please type "install pyhf"')
                 return {}
