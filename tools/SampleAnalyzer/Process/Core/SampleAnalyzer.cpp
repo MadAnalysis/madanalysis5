@@ -292,6 +292,7 @@ AnalyzerBase* SampleAnalyzer::InitializeAnalyzer(const std::string& name,
     return 0;
   }
 
+
   // Returning the analysis
   return myAnalysis;
 }

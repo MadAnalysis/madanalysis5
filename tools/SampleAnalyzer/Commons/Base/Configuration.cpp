@@ -58,6 +58,8 @@ void Configuration::PrintSyntax()
        << endmsg;
   INFO << "   --no_event_weight  : the event weights are not used"
        << endmsg;
+  INFO << "  Any aditional option for the analyzer can be given with the following syntax:" << endmsg;
+  INFO << "   --<opt_name>=<val>" << endmsg;
   INFO << endmsg;
 }
 
@@ -123,6 +125,9 @@ MAbool Configuration::Initialize(MAint32 &argc, MAchar *argv[])
     return false;
   }
 
+  // provide sample list which includes list path and sample name as option
+  options_["sample_list"] = argv[1];
+
   // Decoding arguments
   for (MAuint32 i=1;i<static_cast<MAuint32>(argc);i++)
   {
@@ -148,9 +153,22 @@ MAbool Configuration::Initialize(MAint32 &argc, MAchar *argv[])
       // other = mistake
       else
       {
-        ERROR << "option '" << argument << "' is unknown !!!" << endmsg;
-        PrintSyntax();
-        return false;
+          std::string arg   = argv[i];
+          MAuint32 loc      = arg.find("=");
+          if (loc == 0)
+          {
+            ERROR << "option '" << argument << "' is unknown !!!" << endmsg;
+            PrintSyntax();
+            return false;
+          }
+          std::string name  = arg.substr(2,loc-2);
+          std::string value = arg.substr(loc+1,arg.length()-1);
+          if (name == "sample_list")
+          {
+            ERROR << "sample_list is a private option." << endmsg;
+            return false;
+          }
+          options_[name] = value;
       }
     } 
 

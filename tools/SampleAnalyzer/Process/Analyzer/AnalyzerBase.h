@@ -74,6 +74,9 @@ class AnalyzerBase
   /// Writer SAF
   SAFWriter out_;
 
+  // options
+  std::map<std::string, std::string> options_;
+
 
   // -------------------------------------------------------------
   //                       method members
@@ -94,6 +97,7 @@ class AnalyzerBase
   {
     weighted_events_ = !cfg->IsNoEventWeight();
     out_.Initialize(cfg,outputName.c_str());
+    options_ = cfg->Options();
     return true;
   }
 
@@ -153,6 +157,35 @@ class AnalyzerBase
   SAFWriter& out()
   { return out_; }
 
+  void SetOptions(std::map<std::string, std::string> options) {options_=options;}
+
+  /// Get an option for this analysis instance as a string.
+  std::string getOption(std::string optname) const
+  {
+    if ( options_.find(optname) != options_.end() )
+       return options_.find(optname)->second;
+    return "";
+  }
+
+    /// Get an option for this analysis instance converted to a specific type
+    /// The return type is given by the specified @a def value, or by an explicit template
+    /// type-argument, e.g. getOption<double>("FOO", 3).
+    template<typename T>
+    T getOption(std::string optname, T def) const {
+      if (options_.find(optname) == options_.end()) return def;
+      std::stringstream ss;
+      ss << options_.find(optname)->second;
+      T ret;
+      ss >> ret;
+      return ret;
+    }
+
+    /// overload for literal character strings (which don't play well with stringstream)
+    /// Note this isn't a template specialisation, because we can't return a non-static
+    /// char*, and T-as-return-type is built into the template function definition.
+    std::string getOption(std::string optname, const char* def) {
+      return getOption<std::string>(optname, def);
+    }
 
  protected :
 
