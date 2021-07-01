@@ -103,7 +103,22 @@ class RegionSelectionManager
 
   /// Set method
   void SetCurrentEventWeight(MAfloat64 weight)
-    { weight_ = weight; }
+  {
+    weight_=weight;
+    for(MAuint16 i=0; i<regions_.size(); i++)
+    {
+        regions_[i]->SetWeight(weight);
+    }
+  }
+
+    /// Set method
+    void SetRegionWeight(std::string name, MAfloat64 weight)
+    {
+      for(MAuint16 i=0; i<regions_.size(); i++)
+      {
+          if (regions_[i]->GetName() == name) {regions_[i]->SetWeight(weight); break;}
+      }
+    }
 
   /// Adding a RegionSelection to the manager
   void AddRegionSelection(const std::string& name)

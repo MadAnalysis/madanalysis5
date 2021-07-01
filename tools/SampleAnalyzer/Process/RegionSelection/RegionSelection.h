@@ -47,6 +47,7 @@ class RegionSelection
   std::string name_;
   MAbool surviving_;
   MAuint32 NumberOfCutsAppliedSoFar_;
+  MAfloat64 weight_;
 
   CounterManager cutflow_;
 
@@ -84,6 +85,12 @@ class RegionSelection
   void SetName(std::string name)
     { name_ = name; }
 
+  /// Set weight
+  void SetWeight(MAfloat64 weight) { weight_=weight;}
+
+  /// Set weight
+  MAfloat64 GetWeight() { return weight_;}
+
   void SetSurvivingTest(MAbool surviving)
     { surviving_ = surviving; }
 
@@ -107,6 +114,7 @@ class RegionSelection
     SetSurvivingTest(true);
     SetNumberOfCutsAppliedSoFar(0);
     cutflow_.IncrementNInitial(weight);
+    weight_=weight;
   }
 
 };

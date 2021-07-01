@@ -69,7 +69,7 @@ MAbool RegionSelectionManager::ApplyCut(MAbool condition, std::string const &cut
     if(!ThisRegion->IsSurviving() ) { continue; }
 
     /// Check the current cut:
-    if(condition) { ThisRegion->IncrementCutFlow(weight_); }
+    if(condition) { ThisRegion->IncrementCutFlow(ThisRegion->GetWeight()); }
     else
     {
       ThisRegion->SetSurvivingTest(false);
