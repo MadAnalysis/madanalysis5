@@ -107,5 +107,31 @@ namespace MA5
       return cleaned_v1;
     }
 
+
+    // Example:  signaljets = conditional_removal(signaljets,signalel,
+    //            [] (const RecJetFormat * jet, const RecLeptonFormat * el) {return jet->dr(el) > 0.2;});
+    template<typename T1, typename T2, typename FN>
+    std::vector<const T1*> conditional_removal(
+        std::vector<const T1*> &v1, std::vector<const T2*> &v2, FN func
+    )
+    {
+        // Determining with objects should be removed
+        std::vector<bool> mask(v1.size(),false);
+        for (MAuint32 j=0;j<v1.size();j++)
+            for (MAuint32 i=0;i<v2.size();i++)
+                if (func(v1[j], v2[i]))
+                {
+                    mask[j]=true;
+                    break;
+                }
+
+        // Building the cleaned container
+        std::vector<const T1*> cleaned_v1;
+        for (MAuint32 i=0;i<v1.size();i++)
+            if (!mask[i]) cleaned_v1.push_back(v1[i]);
+
+        return cleaned_v1;
+    }
+
 }
 #endif
