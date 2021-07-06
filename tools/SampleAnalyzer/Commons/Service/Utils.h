@@ -44,19 +44,45 @@ namespace MA5
 
     // Example: std::vector<const RecJetFormat*> signaljets = filter<RecJetFormat>(event.rec()->jets(), ptmin, etamax);
     template<class Type>
-    std::vector<const Type *> filter(std::vector<Type> objects, MAfloat64 ptmin, MAfloat64 etamax)
+    std::vector<const Type *> filter(
+        std::vector<Type> objects, MAfloat64 ptmin, MAfloat64 absetamax, MAfloat64 absetamin=-1.
+    )
     {
       // Helper function to select subset of objects passing pt and eta selections
       std::vector<const Type *> filtered;
-      for(MAuint32 i=0; i<objects.size(); i++)
+      for(auto &obj: objects)
       {
-        if(objects[i].pt() < ptmin) continue;
-        if(fabs(objects[i].eta()) > etamax) continue;
-        filtered.push_back(&(objects[i]));
+        if(obj.pt() < ptmin || obj.abseta() > absetamax || obj.abseta() < absetamin) continue;
+        filtered.push_back(&obj);
       }
       return filtered;
     }
 
+    // Example:  std::vector<const RecJetFormat*> filtered_jets = filter_select(event.rec()->jets(),
+    //                                                [] (RecJetFormat jet) { return jet.pt()>50.; });
+    template<class Type, typename FN>
+    std::vector<const Type * > filter_select(std::vector<Type> objects, FN func)
+    {
+        std::vector<const Type *> filtered;
+        for (auto &obj: objects)
+        {
+            if (func(obj)) filtered.push_back(&obj);
+        }
+        return filtered;
+    }
+
+    // Example: std::vector<const RecJetFormat*> filtered_jets = filter_select(signaljets,
+    //                                        [] (const RecJetFormat * jet) { return jet->pt()>50.; });
+    template<class Type, typename FN>
+    std::vector<const Type * > filter_select(std::vector<const Type *> objects, FN func)
+    {
+        std::vector<const Type *> filtered;
+        for (auto obj: objects)//(MAuint32 i=0; i<objects.size(); i++)
+        {
+            if (func(obj)) filtered.push_back(obj);
+        }
+        return filtered;
+    }
 
     // Overlap Removal
     template<typename T1, typename T2> std::vector<const T1*>

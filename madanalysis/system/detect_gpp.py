@@ -81,6 +81,10 @@ class DetectGpp:
         os.remove(os.path.join(self.archi_info.ma5dir,"cxxtest.cc"))
         os.remove(os.path.join(self.archi_info.ma5dir,"cxxtest"))
 
+        if not self.archi_info.cpp11:
+            return DetectStatusType.UNFOUND, "Please update C++ compiler. " + \
+                                             "Old compilers are no longer supported."
+
         # Ok
         return DetectStatusType.FOUND,msg
 
