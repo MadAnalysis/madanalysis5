@@ -33,6 +33,7 @@
 #include "SampleAnalyzer/Process/Counter/CounterManager.h"
 #include "SampleAnalyzer/Process/Writer/SAFWriter.h"
 #include "SampleAnalyzer/Commons/Service/Physics.h"
+#include "SampleAnalyzer/Commons/Service/Utils.h"
 #include "SampleAnalyzer/Commons/Service/SortingService.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Commons/Base/Configuration.h"
