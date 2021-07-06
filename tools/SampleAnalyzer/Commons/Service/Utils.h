@@ -33,14 +33,9 @@
 #include <cmath>
 
 // SampleAnalyzer headers
-#include "SampleAnalyzer/Commons/Service/MCconfig.h"
-#include "SampleAnalyzer/Commons/Service/RECconfig.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Commons/DataFormat/MCEventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecEventFormat.h"
-#include "SampleAnalyzer/Commons/Service/TransverseVariables.h"
-#include "SampleAnalyzer/Commons/Service/Identification.h"
-#include "SampleAnalyzer/Commons/Service/Isolation.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
 
