@@ -143,11 +143,14 @@ class CmdInstall(CmdBase):
                 padsfs_install_check = installer.Execute('PADForSFS')
             else:
                 self.logger.warning("PADForSFS requires FastJet to be installed.")
-                self.logger.info("Would you like to install FastJet? [Y/N]")
-                while True:
-                    answer = input("Answer : ")
-                    if answer.lower() in ['y','n','yes','no']:
-                        break
+                if not self.main.forced:
+                    self.logger.info("Would you like to install FastJet? [Y/N]")
+                    while True:
+                        answer = input("Answer : ")
+                        if answer.lower() in ['y','n','yes','no']:
+                            break
+                else:
+                    answer = "y"
                 if answer.lower() in ['y','yes']:
                     if not installer.Execute('fastjet'):
                         return False
@@ -169,12 +172,15 @@ class CmdInstall(CmdBase):
             if self.main.archi_info.has_fastjet:
                 padsfs_install_check = installer.Execute('PADForSFS')
             else:
-                self.logger.warning("PADForSFS requires FastJet to be installed.")
-                self.logger.info("Would you like to install FastJet? [Y/N]")
-                while True:
-                    answer = input("Answer : ")
-                    if answer.lower() in ['y','n','yes','no']:
-                        break
+                if not self.main.forced:
+                    self.logger.warning("PADForSFS requires FastJet to be installed.")
+                    self.logger.info("Would you like to install FastJet? [Y/N]")
+                    while True:
+                        answer = input("Answer : ")
+                        if answer.lower() in ['y','n','yes','no']:
+                            break
+                else:
+                    answer = "y"
                 if answer.lower() in ['y','yes']:
                     if not installer.Execute('fastjet'):
                         return False
