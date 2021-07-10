@@ -125,9 +125,6 @@ MAbool Configuration::Initialize(MAint32 &argc, MAchar *argv[])
     return false;
   }
 
-  // provide sample list which includes list path and sample name as option
-  options_["sample_list"] = argv[1];
-
   // Decoding arguments
   for (MAuint32 i=1;i<static_cast<MAuint32>(argc);i++)
   {
@@ -150,12 +147,12 @@ MAbool Configuration::Initialize(MAint32 &argc, MAchar *argv[])
       // version
       else if (argument.find("--ma5_version=")==0) DecodeMA5version(argument);
 
-      // other = mistake
+      // other = comman line options
       else
       {
           std::string arg   = argv[i];
           MAuint32 loc      = arg.find("=");
-          if (loc == 0)
+          if (loc == 0 || loc > arg.length())
           {
             ERROR << "option '" << argument << "' is unknown !!!" << endmsg;
             PrintSyntax();
@@ -163,11 +160,6 @@ MAbool Configuration::Initialize(MAint32 &argc, MAchar *argv[])
           }
           std::string name  = arg.substr(2,loc-2);
           std::string value = arg.substr(loc+1,arg.length()-1);
-          if (name == "sample_list")
-          {
-            ERROR << "sample_list is a private option." << endmsg;
-            return false;
-          }
           options_[name] = value;
       }
     } 

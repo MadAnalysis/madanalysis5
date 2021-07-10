@@ -78,6 +78,8 @@ class AnalyzerBase
   // options
   std::map<std::string, std::string> options_;
 
+  // parameters
+  std::map<std::string, std::string> parameters_;
 
   // -------------------------------------------------------------
   //                       method members
@@ -105,6 +107,11 @@ class AnalyzerBase
   /// Initialize (specific to the analysis)
   virtual MAbool Initialize(const Configuration& cfg,                  
              const std::map<std::string,std::string>& parameters)=0;
+
+  MAbool Initialize(const Configuration& cfg)
+  {
+    return Initialize(cfg, parameters_);
+  }
 
   /// PreFinalize
   void PreFinalize(const SampleFormat& summary, 
@@ -158,7 +165,14 @@ class AnalyzerBase
   SAFWriter& out()
   { return out_; }
 
+  // Set command line options
   void SetOptions(std::map<std::string, std::string> options) {options_=options;}
+
+  // Set parameters, initialized in main.cpp
+  void SetParameters(std::map<std::string, std::string> params) {parameters_=params;}
+
+  // Accessor to parameters
+  const std::map<std::string, std::string> GetParameters() {return parameters_;}
 
   /// Get an option for this analysis instance as a string.
   std::string getOption(std::string optname) const
