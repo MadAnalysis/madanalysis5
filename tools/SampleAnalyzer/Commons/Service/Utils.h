@@ -59,14 +59,14 @@ namespace MA5
     }
 
     // Example:  std::vector<const RecJetFormat*> filtered_jets = filter_select(event.rec()->jets(),
-    //                                                [] (RecJetFormat jet) { return jet.pt()>50.; });
+//                                                [] (const RecJetFormat* jet) { return jet->pt()>50.; });
     template<class Type, typename FN>
     std::vector<const Type * > filter_select(std::vector<Type> objects, FN func)
     {
         std::vector<const Type *> filtered;
         for (auto &obj: objects)
         {
-            if (func(obj)) filtered.push_back(&obj);
+            if (func(&obj)) filtered.push_back(&obj);
         }
         return filtered;
     }

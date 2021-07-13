@@ -61,7 +61,7 @@ class RecLeptonFormat : public RecParticleFormat
   // -------------------------------------------------------------             
  protected:
 
-  MAbool charge_;       /// charge of the particle 0 = -1, 1 = +1
+  MAint32 charge_;       /// charge of the particle 0 = -1, 1 = +1
   MAfloat32 sumET_isol_;  /// sumET in an isolation cone
   MAfloat32 sumPT_isol_;  /// sumPT in an isolation cone
   std::vector<IsolationConeType> isolCones_; // isolation cones
@@ -107,7 +107,7 @@ class RecLeptonFormat : public RecParticleFormat
   {}
 
   /// Dump information
-  virtual void Print() const
+  void Print() const
   {
     INFO << "charge ="   << /*set::setw(8)*/"" << std::left << charge_  << ", "  
          << "sumET_isol_ = " << /*set::setw(8)*/"" << std::left << sumET_isol_ << ", "
@@ -117,9 +117,9 @@ class RecLeptonFormat : public RecParticleFormat
   }
 
   /// Clear all information
-  virtual void Reset()
+  void Reset()
   {
-    charge_=false;
+    charge_=0;
     sumET_isol_=0.;
     sumPT_isol_=0.;
     pdg_=0;
@@ -131,23 +131,21 @@ class RecLeptonFormat : public RecParticleFormat
   }
 
   /// Accessor to the electric charge 
-  virtual const MAint32 charge() const
-  { if (charge_) return +1; else return -1; }
+  const MAint32 charge() const { return charge_; }
 
   /// Mutator related to the electric charge 
-  virtual void SetCharge(MAint32 charge)
-  { if (charge>0) charge_=true; else charge_=false; }
+  void SetCharge(MAint32 charge) { charge_ = charge > 0 ? 1 : -1; }
 
   /// Accessor to sumET_isol
-  virtual const MAfloat32 sumET_isol() const
+  const MAfloat32 sumET_isol() const
   { return sumET_isol_; }
 
   /// Accessor to sumPT_isol
-  virtual const MAfloat32 sumPT_isol() const
+  const MAfloat32 sumPT_isol() const
   { return sumPT_isol_; }
 
   /// Accessor to ET_PT
-  virtual const MAfloat32 ET_PT_isol() const
+  const MAfloat32 ET_PT_isol() const
   { if (sumPT_isol_!=0) return sumET_isol_/sumPT_isol_;
     else return 0; }
 

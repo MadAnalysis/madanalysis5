@@ -144,8 +144,8 @@ class RecParticleFormat : public ParticleBaseFormat
   { return false; }
 
   /// Accessor to the electric charge
-  virtual const MAint32 charge() const
-  { return 0; }
+  // virtual const MAint32 charge() const
+  // { return 0; }
 
   const std::vector<MAuint64>& delphesTags() const {return delphesTags_;}
 
