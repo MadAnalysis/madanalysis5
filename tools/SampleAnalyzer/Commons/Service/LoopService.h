@@ -103,17 +103,21 @@ class LoopService
 
   /// Determing if a photon coming from signal
   MAbool IrrelevantPhoton(const MCParticleFormat* part, 
-                          const SampleFormat& mySample)
+                          const SampleFormat& mySample,
+                          MAuint32 Threshold = 100000)
   {
     Ncalls_=0;
+    NcallThreshold_ = Threshold;
     return IrrelevantPhoton_core(part,mySample);
   }
 
   /// Determing if a particle coming from hadron decay
   MAbool ComingFromHadronDecay(const MCParticleFormat* part, 
-                               const SampleFormat& mySample)
+                               const SampleFormat& mySample,
+                               MAuint32 Threshold = 100000)
   {
     Ncalls_=0;
+    NcallThreshold_ = Threshold;
     return ComingFromHadronDecay_core(part,mySample);
   }
 

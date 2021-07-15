@@ -29,8 +29,8 @@ using namespace MA5;
 
 /// Initializing the static member 
 LoopService* LoopService::Service_ = 0;
-const MAuint32 LoopService::NcallThreshold_ = 100000;
-
+//const MAuint32 LoopService::NcallThreshold_ = 100000;
+//@JACK: threshold has been set automatically
 
 // -----------------------------------------------------------------------------
 // IrrelevantPhoton
@@ -105,5 +105,5 @@ MAbool LoopService::ComingFromHadronDecay_core(const MCParticleFormat* part,
   // Second case: hadron
   else if (had) return true;
 
-  else return ComingFromHadronDecay(part->mothers()[0],mySample);
+  else return ComingFromHadronDecay_core(part->mothers()[0],mySample);
 }
