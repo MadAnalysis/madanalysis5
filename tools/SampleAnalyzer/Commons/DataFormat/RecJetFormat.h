@@ -91,7 +91,7 @@ class RecJetFormat : public RecParticleFormat
   {}
 
   /// Dump information
-  virtual void Print() const override
+  virtual void Print() const
   {
     INFO << "ntracks ="   << /*set::setw(8)*/"" << std::left << ntracks_  << ", "  
          << "btag = " << /*set::setw(8)*/"" << std::left << btag_ << ", "
@@ -100,7 +100,7 @@ class RecJetFormat : public RecParticleFormat
   }
 
   /// Clear all information
-  virtual void Reset() override
+  virtual void Reset()
   {
     ntracks_   = 0; 
     btag_      = false;

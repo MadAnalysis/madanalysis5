@@ -90,7 +90,7 @@ class RecTrackFormat : public RecParticleFormat
   {}
 
   /// Dump information
-  virtual void Print() const override
+  virtual void Print() const
   {
     INFO << "pdgid = " << pdgid_ << ", "  
          << "charge = " << charge_ << ", "
@@ -100,7 +100,7 @@ class RecTrackFormat : public RecParticleFormat
   }
 
   /// Clear all information
-  virtual void Reset() override
+  virtual void Reset()
   {
     pdgid_    = 0;
     mc_       = 0;

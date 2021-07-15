@@ -107,7 +107,7 @@ class RecLeptonFormat : public RecParticleFormat
   {}
 
   /// Dump information
-  void Print() const override
+  void Print() const
   {
     INFO << "charge ="   << /*set::setw(8)*/"" << std::left << charge_  << ", "  
          << "sumET_isol_ = " << /*set::setw(8)*/"" << std::left << sumET_isol_ << ", "
@@ -117,7 +117,7 @@ class RecLeptonFormat : public RecParticleFormat
   }
 
   /// Clear all information
-  virtual void Reset() override
+  virtual void Reset()
   {
     charge_=false;
     sumET_isol_=0.;
@@ -131,7 +131,7 @@ class RecLeptonFormat : public RecParticleFormat
   }
 
   /// Accessor to the electric charge 
-  virtual const MAint32 charge() const override
+  virtual const MAint32 charge() const
   { if (charge_) return +1; else return -1; }
 
   /// Mutator related to the electric charge

@@ -92,7 +92,7 @@ class RecTauFormat : public RecParticleFormat
   {}
 
   /// Dump information
-  virtual void Print() const override
+  virtual void Print() const
   {
     INFO << "charge ="   << /*set::setw(8)*/"" << std::left << charge_  << ", "  
          << "ntracks = " << /*set::setw(8)*/"" << std::left << ntracks_ << ", ";
@@ -100,14 +100,14 @@ class RecTauFormat : public RecParticleFormat
   }
 
   /// Clear all information
-  virtual void Reset() override
+  virtual void Reset()
   {
     charge_=0.; 
     ntracks_=0;
   }
 
   /// Accessor to the electric charge
-  virtual const MAint32 charge() const override
+  virtual const MAint32 charge() const
   { if (charge_) return +1; else return -1; }
 
   /// Mutator to the electric charge
