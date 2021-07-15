@@ -63,7 +63,13 @@ class DetectScipy:
         # Checking if scipy is installed on the system
         try:
             import scipy
-        except:
+        except ImportError as err:
+            self.logger.debug(err)
+            return DetectStatusType.UNFOUND,''
+
+        version = [int(x) for x in scipy.__version__.split('.')]
+        if version[0] < 1 or (version[0] == 1 and version[1] < 5):
+            self.logger.error("Please update scipy module.")
             return DetectStatusType.UNFOUND,''
 
         # Checking release

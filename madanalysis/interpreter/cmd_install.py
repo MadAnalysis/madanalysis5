@@ -185,7 +185,12 @@ class CmdInstall(CmdBase):
                     return 'restart'
             return padsfs_install_check
         elif args[0]=='pyhf':
-            return installer.Execute('pyhf')
+            if self.main.session_info.has_scipy:
+                return installer.Execute('pyhf')
+            else:
+                self.logger.error("The pyhf module requires scipy, please try again "+\
+                                  "after installing scipy.")
+                return True
         else:
             self.logger.error("the syntax is not correct.")
             self.help()
