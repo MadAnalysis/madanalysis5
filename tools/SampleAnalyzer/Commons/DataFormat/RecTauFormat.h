@@ -92,7 +92,7 @@ class RecTauFormat : public RecParticleFormat
   {}
 
   /// Dump information
-  virtual void Print() const
+  virtual void Print() const override
   {
     INFO << "charge ="   << /*set::setw(8)*/"" << std::left << charge_  << ", "  
          << "ntracks = " << /*set::setw(8)*/"" << std::left << ntracks_ << ", ";
@@ -100,26 +100,26 @@ class RecTauFormat : public RecParticleFormat
   }
 
   /// Clear all information
-  virtual void Reset()
+  virtual void Reset() override
   {
     charge_=0.; 
     ntracks_=0;
   }
 
   /// Accessor to the electric charge
-  const MAint32  charge() const
+  virtual const MAint32 charge() const override
   { if (charge_) return +1; else return -1; }
 
   /// Mutator to the electric charge
-  void setCharge(MAfloat32 charge )
+  virtual void setCharge(MAfloat32 charge )
   { if (charge>0) charge_=true; else charge_=false; }
 
   /// Accessor to the number of tracks
-  const MAuint16 ntracks() const 
+  const MAuint16 ntracks() const
   { return ntracks_; }
 
   /// Mutator to the number of tracks
-  void setNtracks(MAuint16 ntracks)
+  virtual void setNtracks(MAuint16 ntracks)
   { ntracks_=ntracks; }
 
   /// Accessor to the decay mode

@@ -78,14 +78,14 @@ class RecPhotonFormat : public RecParticleFormat
   {}
 
   /// Dump information
-  virtual void Print() const
+  virtual void Print() const override
   {
 
     RecParticleFormat::Print();
   }
 
   /// Clear all information
-  virtual void Reset()
+  virtual void Reset() override
   {
     isolCones_.clear(); 
   }

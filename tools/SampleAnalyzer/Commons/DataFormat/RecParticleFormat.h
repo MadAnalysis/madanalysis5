@@ -91,7 +91,7 @@ class RecParticleFormat : public ParticleBaseFormat
   {
     momentum_.SetPxPyPzE(0.,0.,0.,0.);
     delphesTags_.clear();
-    HEoverEE_=0.; 
+    HEoverEE_=0.;
     closest_approach_.SetXYZ(0.,0.,0.);
     d0_=0.; d0_approx_=0.;
     dz_=0.; d0_approx_=0.;
@@ -136,16 +136,16 @@ class RecParticleFormat : public ParticleBaseFormat
   }
 
   /// Accessor to the number of tracks
-  virtual const MAuint16 ntracks() const
-  { return 0; }
+//  virtual const MAuint16 ntracks() const
+//  { return 0; }
 
   /// Accessor to the isolation tag
   virtual const MAbool isolated() const
   { return false; }
 
   /// Accessor to the electric charge
-  // virtual const MAint32 charge() const
-  // { return 0; }
+  virtual const MAint32 charge() const
+  { return 0; }
 
   const std::vector<MAuint64>& delphesTags() const {return delphesTags_;}
 

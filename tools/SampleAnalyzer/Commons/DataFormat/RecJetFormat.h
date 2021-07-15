@@ -91,7 +91,7 @@ class RecJetFormat : public RecParticleFormat
   {}
 
   /// Dump information
-  virtual void Print() const
+  virtual void Print() const override
   {
     INFO << "ntracks ="   << /*set::setw(8)*/"" << std::left << ntracks_  << ", "  
          << "btag = " << /*set::setw(8)*/"" << std::left << btag_ << ", "
@@ -100,7 +100,7 @@ class RecJetFormat : public RecParticleFormat
   }
 
   /// Clear all information
-  virtual void Reset()
+  virtual void Reset() override
   {
     ntracks_   = 0; 
     btag_      = false;
@@ -111,7 +111,7 @@ class RecJetFormat : public RecParticleFormat
   }
 
   /// Accessor to the number of tracks
-  virtual const MAuint16 ntracks() const
+  const MAuint16 ntracks() const
   {return ntracks_;}
 
   /// Accessor to the b-tag

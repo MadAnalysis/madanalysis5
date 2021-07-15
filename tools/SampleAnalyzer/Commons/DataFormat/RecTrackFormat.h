@@ -90,7 +90,7 @@ class RecTrackFormat : public RecParticleFormat
   {}
 
   /// Dump information
-  virtual void Print() const
+  virtual void Print() const override
   {
     INFO << "pdgid = " << pdgid_ << ", "  
          << "charge = " << charge_ << ", "
@@ -100,7 +100,7 @@ class RecTrackFormat : public RecParticleFormat
   }
 
   /// Clear all information
-  virtual void Reset()
+  virtual void Reset() override
   {
     pdgid_    = 0;
     mc_       = 0;
@@ -124,8 +124,12 @@ class RecTrackFormat : public RecParticleFormat
   {return phiOuter_;}
 
   /// Accessor to charge
-  const MAint32 charge() const
+  virtual const MAint32 charge() const override
   {if (charge_) return +1; else return -1;}
+
+  /// Mutator related to the electric charge
+  virtual void SetCharge(MAint32 charge)
+  { if (charge>0) charge_=true; else charge_=false; }
 
   /// Accessor to charge
   const MCParticleFormat* mc() const

@@ -222,6 +222,7 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
                 track->setProductionVertex(new_vertex);
                 track->setClosestApproach(smeared_track.closest_approach());
                 track->setMc(&(part));
+                track->SetCharge(PDG->GetCharge(part.pdgid()) / 3.);
             }
         }
     }
