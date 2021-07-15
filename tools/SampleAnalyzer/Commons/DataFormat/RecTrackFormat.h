@@ -132,8 +132,9 @@ class RecTrackFormat : public RecParticleFormat
   { if (charge>0) charge_=true; else charge_=false; }
 
   /// Accessor to charge
-  const MCParticleFormat* mc() const
-  {return mc_;}
+  //@JACK: already exist in recparticlebase
+//  const MCParticleFormat* mc() const
+//  {return mc_;}
 
   /// giving a new isolation cone entry
   IsolationConeType* GetNewIsolCone()
