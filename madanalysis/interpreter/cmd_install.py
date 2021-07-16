@@ -188,7 +188,7 @@ class CmdInstall(CmdBase):
             if self.main.session_info.has_scipy:
                 return installer.Execute('pyhf')
             else:
-                self.logger.error("The pyhf module requires scipy, please try again "+\
+                self.logger.error("The PYHF module requires scipy, please retry"+\
                                   "after installing scipy.")
                 return True
         else:
