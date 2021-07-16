@@ -29,8 +29,6 @@ using namespace MA5;
 
 /// Initializing the static member 
 LoopService* LoopService::Service_ = 0;
-//MAuint32 LoopService::NcallThreshold_ = 100000;
-
 
 // -----------------------------------------------------------------------------
 // IrrelevantPhoton

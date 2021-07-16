@@ -264,7 +264,7 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
       else if (absid==15)
       {
         // rejecting particle if coming from hadronization
-        if (LOOP->ComingFromHadronDecay(&part,mySample)) continue;
+        if (LOOP->ComingFromHadronDecay(&part,mySample,myEvent.mc()->particles().size())) continue;
 
         // Looking taus daughters id
         MAbool leptonic   = true;
