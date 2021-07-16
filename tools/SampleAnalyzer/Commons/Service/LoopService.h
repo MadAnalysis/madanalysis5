@@ -63,7 +63,7 @@ class LoopService
   static LoopService* Service_;
 
   /// Threshold to the number of calls
-  static const MAuint32 NcallThreshold_;
+  MAuint32 NcallThreshold_;
 
   /// Current number of calls
   MAuint32 Ncalls_;
