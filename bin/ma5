@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 ################################################################################
 #  
@@ -69,8 +69,8 @@ sys.path.insert(0, servicedir)
 
 # Release version
 # Do not touch it !!!!!  
-version = "1.9.29"
-date = "2021/06/30"
+version = "1.9.30"
+date = "2021/07/16"
 
 # Loading the MadAnalysis session
 import madanalysis.core.launcher
