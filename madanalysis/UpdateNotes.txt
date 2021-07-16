@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+164           (2021/07/16) fuks:    Fixing scipy version detection (when version numbers contain 
+                                   letters) 
+
 163           (2021/07/16) fuks:    Last bug fix before another round of validation 
 
 162           (2021/07/16) fuks:    Last bug fixes before v1.9 release (cf. validation) 
