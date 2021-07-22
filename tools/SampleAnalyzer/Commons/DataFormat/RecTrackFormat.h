@@ -36,6 +36,7 @@
 #include "SampleAnalyzer/Commons/DataFormat/IsolationConeType.h"
 #include "SampleAnalyzer/Commons/DataFormat/ParticleBaseFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
+#include "SampleAnalyzer/Commons/DataFormat/MCParticleFormat.h"
 
 
 namespace MA5
@@ -74,7 +75,7 @@ class RecTrackFormat : public RecParticleFormat
   MAfloat64 etaOuter_;  /// eta @ first layer of calo
   MAfloat64 phiOuter_;  /// phi @ first layer of calo
   std::vector<IsolationConeType> isolCones_; // isolation cones
-  MCParticleFormat* mc_;
+//  MCParticleFormat* mc_; @JACK causes seg fault already exists in RecParticleFormat
 
   // -------------------------------------------------------------
   //                        method members
@@ -102,7 +103,7 @@ class RecTrackFormat : public RecParticleFormat
   /// Clear all information
   virtual void Reset()
   {
-    pdgid_    = 0;
+    pdgid_    = -1;
     mc_       = 0;
     charge_   = false;
     etaOuter_ = 0.;
@@ -113,7 +114,15 @@ class RecTrackFormat : public RecParticleFormat
 
   /// Accessor to the pdgid
   const MAint32 pdgid() const
-  {return pdgid_;}
+  {
+    // @JACK: use MC pdgid if there is no PDGID smearing
+    //        setter can be used for PDGID smearing.
+    if (pdgid_ == -1) return mc_->pdgid();
+    else return pdgid_;
+  }
+
+  // Setter for pdgid
+  void setPdgid(MAint32 v)   {pdgid_=v;}
 
   /// Accessor to etaCalo
   const MAfloat64& etaCalo() const
