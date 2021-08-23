@@ -135,7 +135,7 @@ class CmdSet(CmdBase.CmdBase):
             else:
                 self.main.user_SetParameter(objs[1],args[2])
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='isolation':
-            self.main.isolation.user_SetParameter(objs[2],args[2])
+            self.main.isolation.user_SetParameter(objs[2],args[2:])
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='fom':
             self.main.fom.user_SetParameter(objs[2],args[2])
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='merging':

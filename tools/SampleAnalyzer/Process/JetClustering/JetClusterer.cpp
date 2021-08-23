@@ -98,7 +98,13 @@ MAbool JetClusterer::Initialize(const std::map<std::string,std::string>& options
     {
       result=algo_->SetParameter(key.substr(8),it->second);
     }
-   
+
+    // Isolation cone radius for tracker
+    else if (key.find("isolation.radius")==0)
+    {
+      result=algo_->SetParameter("isolation.radius",it->second);
+    }
+
     // Other
     try
     {
@@ -222,6 +228,7 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
                 track->setProductionVertex(new_vertex);
                 track->setClosestApproach(smeared_track.closest_approach());
                 track->setMc(&(part));
+                track->SetCharge(PDG->GetCharge(part.pdgid()) / 3.);
             }
         }
     }
