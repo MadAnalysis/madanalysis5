@@ -62,6 +62,9 @@ class ClusterAlgoBase
     /// Exclusive id for tau-elec-photon-jet
     MAbool ExclusiveId_;
 
+    // Track Isolation radius
+    std::vector<MAfloat64> isocone_radius_;
+
 
 
 
@@ -76,6 +79,7 @@ class ClusterAlgoBase
       JetAlgorithm_=Algo;
       // Initializing common parameters
       Ptmin_       = 0.;
+      isocone_radius_.clear();
       Exclusive_   = false;
       ExclusiveId_ = false;
     }

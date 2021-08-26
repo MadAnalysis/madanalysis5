@@ -127,9 +127,14 @@ class RecTrackFormat : public RecParticleFormat
   const MAint32 charge() const
   {if (charge_) return +1; else return -1;}
 
+  /// Mutator related to the electric charge
+  virtual void SetCharge(MAint32 charge)
+  { if (charge>0) charge_=true; else charge_=false; }
+
   /// Accessor to charge
-  const MCParticleFormat* mc() const
-  {return mc_;}
+  //@JACK: already exist in recparticlebase
+//  const MCParticleFormat* mc() const
+//  {return mc_;}
 
   /// giving a new isolation cone entry
   IsolationConeType* GetNewIsolCone()

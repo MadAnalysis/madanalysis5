@@ -84,6 +84,17 @@ MAbool ClusterAlgoStandard::SetParameter(const std::string& key, const std::stri
     }
   }
 
+  // isolation radius for track
+  else if (key=="isolation.radius")
+  {
+    std::stringstream str(value);
+    for (MAfloat64 tmp; str >> tmp;)
+    {
+        if (tmp>0.) isocone_radius_.push_back(tmp);
+        if (str.peek() == ',' || str.peek() == ' ') str.ignore();
+    }
+  }
+
   // other
   else return false;
 

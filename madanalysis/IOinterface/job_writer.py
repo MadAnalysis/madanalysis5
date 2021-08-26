@@ -466,8 +466,15 @@ class JobWriter(object):
             for k,v in sorted(six.iteritems(parameters),\
                               key=lambda k_v: (k_v[0],k_v[1])):
                 file.write('  parametersC1["'+k+'"]="'+v+'";\n')
+            if isinstance(self.main.isolation.isolation.radius, float):
+                file.write('  parametersC1["isolation.radius"]="'+\
+                           self.main.isolation.isolation.radius+'";\n')
+            elif isinstance(self.main.isolation.isolation.radius, list):
+                file.write('  parametersC1["isolation.radius"]="'+ \
+                           ','.join([str(x) for x in self.main.isolation.isolation.radius])+'";\n')
             file.write('  JetClusterer* cluster1 = \n')
-            file.write('      manager.InitializeJetClusterer("'+self.main.fastsim.clustering.algorithm+'",parametersC1);\n')
+            file.write('      manager.InitializeJetClusterer("'+\
+                       self.main.fastsim.clustering.algorithm+'",parametersC1);\n')
             file.write('  if (cluster1==0) return 1;\n\n')
             if self.main.superfastsim.isNewSmearerOn():
                 file.write('  // Declaration of the smearer\n')
