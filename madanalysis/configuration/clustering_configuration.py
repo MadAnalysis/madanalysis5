@@ -48,7 +48,8 @@ class ClusteringConfiguration:
                       "magneticfield"       : ["3.8"],
                       "tracker_radius"      : ["1.29"],
                       "half_length"         : ["3.0"],
-                      "particle_propagator" : ["on","off"]
+                      "particle_propagator" : ["on","off"],
+                      "track_isocone_radius": ["0.5"]
 
                     }
 

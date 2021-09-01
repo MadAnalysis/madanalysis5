@@ -135,7 +135,7 @@ class CmdSet(CmdBase.CmdBase):
             else:
                 self.main.user_SetParameter(objs[1],args[2])
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='isolation':
-            self.main.isolation.user_SetParameter(objs[2],args[2:])
+            self.main.isolation.user_SetParameter(objs[2],args[2])
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='fom':
             self.main.fom.user_SetParameter(objs[2],args[2])
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='merging':
@@ -169,6 +169,20 @@ class CmdSet(CmdBase.CmdBase):
                     self.main.superfastsim.propagator = (args[2]=='on')
                 else:
                     logging.getLogger('MA5').error("Particle propagation can be either on or off (default: off).")
+            elif objs[2] == 'track_isocone_radius':
+                tmp = []
+                for x in args[2:]:
+                    if x in [",", ' ']:
+                        continue
+                    try:
+                        tmp_val = float(x)
+                    except:
+                        logging.getLogger('MA5').error("Radius input can only be float, " + \
+                                                       str(x) + " has been given.")
+                        continue
+                    tmp.append(tmp_val)
+                self.main.superfastsim.track_isocone_radius = tmp
+
             else:
                 user_info    = UserInfo()
                 user_info.ReadUserOptions(self.main.archi_info.ma5dir+'/madanalysis/input/installation_options.dat')
