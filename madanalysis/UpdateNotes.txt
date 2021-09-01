@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+167           (2021/09/01) fuks:    Compatibility with older gcc compilers 
+
 165           (2021/08/26) fuks:    Bug fix in the TrackFormat + adding isolation cones to the SFS 
                                    framework 
 
