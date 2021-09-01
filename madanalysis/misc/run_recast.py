@@ -1672,7 +1672,7 @@ def pyhf_wrapper_py3(background,signal):
                                                                     model.config.suggested_bounds()),
                                                    return_expected=True)
 
-        except (AssertionError, pyhf.exceptions.FailedMinimization) as err:
+        except (AssertionError, pyhf.exceptions.FailedMinimization, ValueError) as err:
             logging.getLogger('MA5').debug(str(err))
             # dont use false here 1.-CLs = 0 can be interpreted as false
             return 'update bounds' 

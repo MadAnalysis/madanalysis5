@@ -74,7 +74,7 @@ class RecTrackFormat : public RecParticleFormat
   MAfloat64 etaOuter_;  /// eta @ first layer of calo
   MAfloat64 phiOuter_;  /// phi @ first layer of calo
   std::vector<IsolationConeType> isolCones_; // isolation cones
-  MCParticleFormat* mc_;
+  //MCParticleFormat* mc_;
 
   // -------------------------------------------------------------
   //                        method members
