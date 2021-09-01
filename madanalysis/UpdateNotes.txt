@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+165           (2021/08/26) fuks:    Bug fix in the TrackFormat + adding isolation cones to the SFS 
+                                   framework 
+
 164           (2021/07/16) fuks:    Fixing scipy version detection (when version numbers contain 
                                    letters) 
 
