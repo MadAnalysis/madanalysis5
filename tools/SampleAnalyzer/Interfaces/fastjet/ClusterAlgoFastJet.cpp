@@ -36,6 +36,22 @@
 
 using namespace MA5;
 
+// Create data structure for track isocones
+struct TrackIsoCone
+{
+    // Initialization will cause warnings this is only allowed in c++11
+    MAfloat32 sumPT, sumET, deltaR;
+    MAuint16 ntracks;
+
+    void Initialize()
+    {
+        sumPT = 0.;
+        sumET = 0.;
+        deltaR = 0.;
+        ntracks = 0;
+    };
+};
+
 
 ClusterAlgoFastJet::ClusterAlgoFastJet(std::string Algo):ClusterAlgoBase(Algo)
 { JetAlgorithm_=Algo; JetDefinition_=0; }
@@ -51,18 +67,12 @@ MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
   // Creating a container for inputs
   std::vector<fastjet::PseudoJet> inputs;
 
-  // Create data structure for track isocones
-  struct TrackIsoCone
-  {
-    // Initialization will cause warnings this is only allowed in c++11
-    MAfloat32 sumPT=0., sumET=0., deltaR=0.;
-    MAuint16 ntracks=0;
-  };
   // Track info will get tracker iteration number and info
-  std::map<MAfloat32, std::vector<TrackIsoCone> > TrackInfo;
+  std::map<MAfloat64, std::vector<TrackIsoCone> > TrackInfo;
   for (MAuint32 iR=0; iR<isocone_radius_.size(); iR++)
   {
     TrackIsoCone current_cone;
+    current_cone.Initialize();
     current_cone.deltaR = isocone_radius_[iR];
     std::vector<TrackIsoCone> tmp_info;
     for (MAuint32 itrk=0; itrk<myEvent.rec()->tracks().size(); itrk++)
