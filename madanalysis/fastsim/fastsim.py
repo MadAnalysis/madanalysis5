@@ -36,17 +36,18 @@ class SuperFastSim:
 
     # Initialization
     def __init__(self):
-        self.logger      = logging.getLogger('MA5')
-        self.tagger      = Tagger()
-        self.smearer     = Smearer()
-        self.reco        = RecoEfficiency()
-        self.scaling     = Scaling()
-        self.jetrecomode = 'jets'
-        self.mag_field   = 1e-9
-        self.radius      = 1e+99
-        self.half_length = 1e+99
-        self.propagator  = False
-        self.observables = ''
+        self.logger               = logging.getLogger('MA5')
+        self.tagger               = Tagger()
+        self.smearer              = Smearer()
+        self.reco                 = RecoEfficiency()
+        self.scaling              = Scaling()
+        self.jetrecomode          = 'jets'
+        self.mag_field            = 1e-9
+        self.radius               = 1e+99
+        self.half_length          = 1e+99
+        self.propagator           = False
+        self.track_isocone_radius = []
+        self.observables          = ''
 
     def InitObservables(self, obs_list):
         self.observables = obs_list

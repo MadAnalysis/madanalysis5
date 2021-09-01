@@ -26,7 +26,7 @@ from __future__ import absolute_import
 import logging
 class IsolationCone():
 
-    default_radius  = 0.
+    default_radius  = 0.5
 
     userVariables = { "radius" : [str(default_radius)] }
 
@@ -60,36 +60,15 @@ class IsolationCone():
     def user_SetParameter(self,parameter,value):
         # radius
         if parameter=="radius":
-            if isinstance(value, (str,int,float)):
-                try:
-                    number = float(value)
-                except:
-                    logging.getLogger('MA5').error("the cone radius must be a float value.")
-                    return False
-                if number<=0:
-                    logging.getLogger('MA5').error("the cone radius cannot be negative or null.")
-                    return False
-                self.radius=number
-            elif isinstance(value, (list, tuple)):
-                self.radius = []
-                for val in value:
-                    if val not in [" ", ","]:
-                        try:
-                            number = float(val)
-                        except:
-                            logging.getLogger('MA5').error(
-                                "the cone radius must be a float value."
-                            )
-                            self.radius  = IsolationCone.default_radius
-                            return False
-                        if number<=0:
-                            logging.getLogger('MA5').error(
-                                "the cone radius cannot be negative or null."
-                            )
-                            self.radius  = IsolationCone.default_radius
-                            return False
-                        self.radius.append(number)
-
+            try:
+                number = float(value)
+            except:
+                logging.getLogger('MA5').error("the cone radius must be a float value.")
+                return False
+            if number<=0:
+                logging.getLogger('MA5').error("the cone radius cannot be negative or null.")
+                return False
+            self.radius=number
 
         # other    
         else:
