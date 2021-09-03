@@ -118,11 +118,6 @@ class SetupWriter():
         toLDPATH, toLDPATHsh, toLDPATHcsh = SetupWriter.OrderPath(archi_info.toLDPATH1,'$LD_LIBRARY_PATH',archi_info.toLDPATH2,ma5dir)
         toDYLDPATH, toDYLDPATHsh, toDYLDPATHcsh = SetupWriter.OrderPath(archi_info.toLDPATH1,'$DYLD_LIBRARY_PATH',archi_info.toLDPATH2,ma5dir)
 
-        # @JACK: /usr/local/lib shouldnt be in DYLD_LIBRARY_PATH
-        toDYLDPATHsh = [x for x in toDYLDPATHsh if x != '/usr/local/lib']
-        toLDPATH = [x for x in toLDPATH if x != '/usr/local/lib']
-        toDYLDPATHcsh = [x for x in toDYLDPATHcsh if x != '/usr/local/lib']
-        
         # Configuring PATH environment variable
         if len(toPATH)!=0:
             file.write('# Configuring PATH environment variable\n')

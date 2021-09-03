@@ -523,9 +523,6 @@ class CheckUp():
         self.logger.debug('before DYLD_LIBRARY_PATH='+str(os.environ['DYLD_LIBRARY_PATH']))
         self.logger.debug('--------')
         if self.archi_info.isMac:
-            # @JACK: dont add /usr/local/lib it clashes with other libraries
-            add_dyld1 = [x for x in self.archi_info.toLDPATH1 if x != '/usr/local/lib']
-            add_dyld2 = [x for x in self.archi_info.toLDPATH2 if x != '/usr/local/lib']
             os.environ['DYLD_LIBRARY_PATH'] = ':'.join(add_dyld1) + ":" + \
                                               os.environ['DYLD_LIBRARY_PATH'] + ":" + \
                                               ':'.join(add_dyld2)
