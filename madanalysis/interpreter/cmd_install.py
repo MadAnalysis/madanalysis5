@@ -25,7 +25,9 @@
 from __future__                             import absolute_import
 from madanalysis.interpreter.cmd_base       import CmdBase
 from madanalysis.install.install_manager    import InstallManager
+from six.moves import input
 import logging, os
+
 
 class CmdInstall(CmdBase):
     """Command INSTALL"""
@@ -148,6 +150,8 @@ class CmdInstall(CmdBase):
                     answer = input("Answer : ")
                     if answer.lower() in ['y','n','yes','no']:
                         break
+                    else:
+                        self.logger.warning("Please answer as \'y\', \'n\'")
                 if answer.lower() in ['y','yes']:
                     if not installer.Execute('fastjet'):
                         return False
