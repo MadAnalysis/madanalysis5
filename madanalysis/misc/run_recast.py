@@ -55,6 +55,16 @@ class RunRecast():
         self.pyhf_config      = {} # initialize and configure histfactory
         self.logger           = logging.getLogger('MA5')
 
+        def calculator(switch):
+            if switch == "pyhf":
+                return pyhf_uncorrelated
+            elif switch == "native":
+                return cls
+
+        self.cls_calculator = calculator("native")
+        if self.main.session_info.has_pyhf and self.main.recasting.CLs_calculator_backend == "pyhf":
+            self.cls_calculator = calculator("pyhf")
+
 
     def init(self):
         ### First, the analyses to take care off
@@ -1127,7 +1137,7 @@ class RunRecast():
                                         file = os.path.join(pyhf_config[likelihood_profile]['path'],
                                                             pyhf_config[likelihood_profile]['name'])
                                         ID = get_HFID(file, channel.attrib['name'])
-                                        if type(ID) != str:
+                                        if not isinstance(ID, str):
                                             pyhf_config[likelihood_profile]['SR'][channel.attrib['name']]['channels'] = str(ID)
                                         else:
                                             self.logger.warning(ID)
@@ -1246,7 +1256,7 @@ class RunRecast():
             else:
                 n95     = float(regiondata[reg]["s95exp"]) * lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
                 rSR     = nsignal/n95
-                myCLs   = cls(nobs, nb, deltanb, nsignal, self.ntoys)
+                myCLs   = self.cls_calculator(nobs, nb, deltanb, nsignal, self.ntoys)
             regiondata[reg]["rSR"] = rSR
             regiondata[reg]["CLs"] = myCLs
             if rSR > rMax:
@@ -1339,7 +1349,7 @@ class RunRecast():
                 if regiondata[reg]["Nf"]<=0:
                     return 0
                 nsignal=xsection * lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
-                return cls(nobs,nb,deltanb,nsignal,self.ntoys)-0.95
+                return self.cls_calculator(nobs,nb,deltanb,nsignal,self.ntoys)-0.95
             nslow = lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
             nshig = lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
             if nslow <= 0 and nshig <= 0:
@@ -1350,11 +1360,11 @@ class RunRecast():
                 continue
             low = 1.
             hig = 1.
-            while cls(nobs,nb,deltanb,nslow,self.ntoys)>0.95:
+            while self.cls_calculator(nobs,nb,deltanb,nslow,self.ntoys)>0.95:
                 self.logger.debug('region ' + reg + ', lower bound = ' + str(low))
                 nslow=nslow*0.1
                 low  =  low*0.1
-            while cls(nobs,nb,deltanb,nshig,self.ntoys)<0.95:
+            while self.cls_calculator(nobs,nb,deltanb,nshig,self.ntoys)<0.95:
                 self.logger.debug('region ' + reg + ', upper bound = ' + str(hig))
                 nshig=nshig*10.
                 hig  =  hig*10.
@@ -1832,3 +1842,50 @@ def cls(NumObserved, ExpectedBG, BGError, SigHypothesis, NumToyExperiments):
     else:
         return 1.-(p_SplusB / p_b) # 1 - CLs
 
+
+def pyhf_uncorrelated(NumObserved, ExpectedBG, BGError, SigHypothesis, *args, **kwargs):
+    """
+    CLs calculator for uncorrelated SR through pyhf.
+
+    Parameters
+    ----------
+    NumObserved : FLOAT
+        Number of observed events.
+    ExpectedBG : FLOAT
+        Number of expected events in the background
+    BGError : FLOAT
+        background uncertainty
+    SigHypothesis : FLOAT
+        Number of events in signal.
+    kwargs :
+        pyhf related keyword arguments.
+
+    Returns
+    -------
+    FLOAT
+        1 - CLs value
+    """
+    import pyhf
+    from pyhf.optimize import mixins
+    from numpy import warnings, isnan, ndarray
+
+    # Scilence pyhf's messages
+    pyhf.pdf.log.setLevel(logging.CRITICAL)
+    pyhf.workspace.log.setLevel(logging.CRITICAL)
+    mixins.log.setLevel(logging.CRITICAL)
+    pyhf.set_backend('numpy', precision="64b")
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore')
+
+        model = pyhf.simplemodels.uncorrelated_background(
+            [SigHypothesis], [ExpectedBG], [BGError]
+        )
+        data = [NumObserved] + model.config.auxdata
+        cls_obs, cls_exp = pyhf.infer.hypotest(
+            1., data,  model, test_stat="qtilde",
+            par_bounds=model.config.suggested_bounds(),
+            return_expected_set=True
+        )
+
+    return 1. - cls_obs
