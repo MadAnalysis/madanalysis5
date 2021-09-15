@@ -43,13 +43,16 @@ class ClusteringConfiguration:
                                      "siscone",\
                                      "cdfjetclu", "cdfmidpoint",\
                                      "none"],
-                      "exclusive_id"        : ["true","false"],
-                      "jetrecomode"         : ["jets","constituents"],
-                      "magneticfield"       : ["3.8"],
-                      "tracker_radius"      : ["1.29"],
-                      "half_length"         : ["3.0"],
-                      "particle_propagator" : ["on","off"],
-                      "track_isocone_radius": ["0.5"]
+                      "exclusive_id"            : ["true","false"],
+                      "jetrecomode"             : ["jets","constituents"],
+                      "magneticfield"           : ["3.8"],
+                      "tracker_radius"          : ["1.29"],
+                      "half_length"             : ["3.0"],
+                      "particle_propagator"     : ["on","off"],
+                      "track_isocone_radius"    : ["0.5"],
+                      "electron_isocone_radius" : ["0.5"],
+                      "muon_isocone_radius"     : ["0.5"],
+                      "photon_isocone_radius"   : ["0.5"],
 
                     }
 

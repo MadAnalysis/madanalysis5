@@ -100,9 +100,9 @@ MAbool JetClusterer::Initialize(const std::map<std::string,std::string>& options
     }
 
     // Isolation cone radius for tracker
-    else if (key.find("isolation.radius")==0)
+    else if (key.find("isolation")==0)
     {
-      result=algo_->SetParameter("isolation.radius",it->second);
+      result=algo_->SetParameter(key,it->second);
     }
 
     // Other

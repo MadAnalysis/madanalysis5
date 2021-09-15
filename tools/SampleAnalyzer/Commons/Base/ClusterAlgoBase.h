@@ -63,9 +63,16 @@ class ClusterAlgoBase
     MAbool ExclusiveId_;
 
     // Track Isolation radius
-    std::vector<MAfloat64> isocone_radius_;
+    std::vector<MAfloat64> isocone_track_radius_;
 
+    // Electron Isolation radius
+    std::vector<MAfloat64> isocone_electron_radius_;
 
+    // Muon Isolation radius
+    std::vector<MAfloat64> isocone_muon_radius_;
+
+    // Photon Isolation radius
+    std::vector<MAfloat64> isocone_photon_radius_;
 
 
 //---------------------------------------------------------------------------------
@@ -79,7 +86,10 @@ class ClusterAlgoBase
       JetAlgorithm_=Algo;
       // Initializing common parameters
       Ptmin_       = 0.;
-      isocone_radius_.clear();
+      isocone_track_radius_.clear();
+      isocone_electron_radius_.clear();
+      isocone_muon_radius_.clear();
+      isocone_photon_radius_.clear();
       Exclusive_   = false;
       ExclusiveId_ = false;
     }

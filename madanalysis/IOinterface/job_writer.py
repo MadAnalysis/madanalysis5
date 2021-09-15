@@ -467,12 +467,13 @@ class JobWriter(object):
                               key=lambda k_v: (k_v[0],k_v[1])):
                 file.write('  parametersC1["'+k+'"]="'+v+'";\n')
 
-            if len(self.main.superfastsim.track_isocone_radius) != 0:
-                file.write(
-                    '  parametersC1["isolation.radius"]="'+ ','.join(
-                        [str(x) for x in self.main.superfastsim.track_isocone_radius]
-                    )+'";\n'
-                )
+            for obj in ["electron","muon","track","photon"]:
+                if len(getattr(self.main.superfastsim, obj+"_isocone_radius")) != 0:
+                    file.write(
+                        '  parametersC1["isolation.'+obj+'.radius"]="'+ ','.join(
+                        [str(x) for x in getattr(self.main.superfastsim, obj+"_isocone_radius")]
+                        )+'";\n'
+                    )
             file.write('  JetClusterer* cluster1 = \n')
             file.write('      manager.InitializeJetClusterer("'+\
                        self.main.fastsim.clustering.algorithm+'",parametersC1);\n')

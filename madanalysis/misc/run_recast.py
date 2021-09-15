@@ -731,18 +731,17 @@ class RunRecast():
 
         ## Running over all luminosities to extrapolate
         for extrapolated_lumi in ['default']+self.main.recasting.extrapolated_luminosities:
-            self.logger.info('   Calculation of the exclusion CLs for a lumi of ' + \
-              str(extrapolated_lumi))
+            self.logger.info('   Calculation of the exclusion CLs for a lumi of ' +
+                             str(extrapolated_lumi))
             ## Preparing the output file and checking whether a cross section has been defined
-            if extrapolated_lumi == 'default':
-                outfile = self.dirname+'/Output/SAF/'+dataset.name+'/CLs_output.dat'
-            else:
-                outfile = self.dirname+'/Output/SAF/'+dataset.name+'/CLs_output_lumi_{:.3f}.dat'.format(extrapolated_lumi)
+            outext  = "" if extrapolated_lumi == 'default' else "_lumi_{:.3f}".format(extrapolated_lumi)
+            outfile = os.path.join(self.dirname, 'Output/SAF',
+                                   dataset.name, 'CLs_output'+outext+'.dat')
+            mysummary=open(outfile,'a+')
             if os.path.isfile(outfile):
-                mysummary=open(outfile,'a')
+                mysummary.write("\n")
             else:
-                 mysummary=open(outfile,'w')
-                 self.write_cls_header(dataset.xsection, mysummary)
+                self.write_cls_header(dataset.xsection, mysummary)
 
             ## running over all analysis
             for analysis in analyses:
@@ -870,11 +869,13 @@ class RunRecast():
         ## Checking XML parsers
         try:
             from lxml import ET
-        except:
+        except Exception as err:
+            self.logger.debug(str(err))
             try:
                 import xml.etree.ElementTree as ET
-            except:
+            except Exception as err:
                 self.logger.warning('lxml or xml not available... the CLs module cannot be used')
+                self.logger.debug(str(err))
                 return False
         # exit
         return ET

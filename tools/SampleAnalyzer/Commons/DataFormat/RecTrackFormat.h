@@ -143,6 +143,16 @@ class RecTrackFormat : public RecParticleFormat
     return &isolCones_.back();
   }
 
+  IsolationConeType* GetIsolCone(MAfloat32 radius)
+  {
+    for (MAuint32 i=0; i<isolCones_.size(); i++)
+        if (radius == isolCones_[i].deltaR()) return &isolCones_[i];
+
+    isolCones_.push_back(IsolationConeType());
+    isolCones_.back().setDeltaR(radius);
+    return &isolCones_.back();
+  }
+
   /// get the collection of isolation cones
   const std::vector<IsolationConeType>& isolCones() const
   { return isolCones_; }

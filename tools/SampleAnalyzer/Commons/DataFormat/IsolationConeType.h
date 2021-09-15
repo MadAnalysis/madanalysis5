@@ -45,6 +45,7 @@ class DelphesTreeReader;
 class DelphesMA5tuneTreeReader;
 class DetectorDelphes;
 class DetectorDelphesMA5tune;
+class ClusterAlgoBase;
 
 class IsolationConeType
 {
@@ -59,17 +60,20 @@ class IsolationConeType
   friend class DetectorDelphesMA5tune;
   friend class DelphesTreeReader;
   friend class DelphesMA5tuneTreeReader;
+  friend class ClusterAlgoBase;
 
   // -------------------------------------------------------------
   //                        data members
   // -------------------------------------------------------------
- protected:
+ private:
 
   MAuint16 ntracks_;    /// number of tracks
   MAfloat32 sumPT_;       /// sum PT
   MAfloat32 eflow_sumPT_; /// sum PT eflow
   MAfloat32 sumET_;       /// sum ET
   MAfloat32 deltaR_;      /// deltaR of the cone
+  MAfloat32 selfET_;
+  MAfloat32 selfPT_;
 
   // -------------------------------------------------------------
   //                        method members
@@ -97,6 +101,8 @@ class IsolationConeType
     sumET_       = 0.;
     eflow_sumPT_ = 0.;
     deltaR_      = 0.;
+    selfET_      = 0.;
+    selfPT_      = 0.;
   }
 
   /// Accessor to the number of tracks
@@ -104,12 +110,12 @@ class IsolationConeType
   {return ntracks_;}
 
   /// Accessor to sumPT
-  const MAfloat32& sumPT() const
-  {return sumPT_;}
+  const MAfloat32 sumPT() const
+  { return sumPT_ - selfPT_; }
 
   /// Accessor to sumET
-  const MAfloat32& sumET() const
-  {return sumET_;}
+  const MAfloat32 sumET() const
+  { return sumET_ - selfET_; }
 
   /// Accessor to deltaR
   const MAfloat32& deltaR() const
@@ -123,17 +129,35 @@ class IsolationConeType
   void setNtracks(MAuint16 tracks)
   {ntracks_=tracks;}
 
+  /// add to the number of tracks
+  void addNtracks(MAuint16 tracks)
+  {ntracks_+=tracks;}
+
   /// Mutator to sumPT
   void setsumPT(MAfloat32 sumPT)
   {sumPT_=sumPT;}
+
+  void addsumPT(MAfloat32 sumPT)
+  {sumPT_+=sumPT;}
 
   /// Mutator to sumET
   void setSumET(MAfloat32 sumET)
   {sumET_=sumET;}
 
+  void addSumET(MAfloat32 sumET)
+  {sumET_+=sumET;}
+
   /// Mutator to deltaR
   void setDeltaR(MAfloat32 deltaR)
   {deltaR_=deltaR;}
+
+  /// Mutator to sumPT
+  void setSelfPT(MAfloat32 PT)
+  {selfPT_=PT;}
+
+  /// Mutator to sumET
+  void setSelfET(MAfloat32 ET)
+  {selfET_=ET;}
 
   /// Mutator to sumPTeflow
   void setSumPTeflow(MAfloat32 eflow_sumPT)
