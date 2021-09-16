@@ -111,15 +111,11 @@ class RecTrackFormat : public RecParticleFormat
     isolCones_.clear();
   }
 
-  /// Accessor to the pdgid
-  const MAint32 pdgid() const
-  {return pdgid_;}
-
-  /// Accessor to etaCalo
+  /// Accessor to etaCalo (only for Delphes)
   const MAfloat64& etaCalo() const
   {return etaOuter_;}
 
-  /// Accessor to etaCalo
+  /// Accessor to etaCalo (only for Delphes)
   const MAfloat64& phiCalo() const
   {return phiOuter_;}
 
@@ -131,11 +127,6 @@ class RecTrackFormat : public RecParticleFormat
   virtual void SetCharge(MAint32 charge)
   { if (charge>0) charge_=true; else charge_=false; }
 
-  /// Accessor to charge
-  //@JACK: already exist in recparticlebase
-//  const MCParticleFormat* mc() const
-//  {return mc_;}
-
   /// giving a new isolation cone entry
   IsolationConeType* GetNewIsolCone()
   {
@@ -143,6 +134,7 @@ class RecTrackFormat : public RecParticleFormat
     return &isolCones_.back();
   }
 
+  // Accessor to Isolation cone with speciffic radius. (only for SFS)
   IsolationConeType* GetIsolCone(MAfloat32 radius)
   {
     for (MAuint32 i=0; i<isolCones_.size(); i++)
