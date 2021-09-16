@@ -122,7 +122,7 @@ MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
     // Set Electron isolation
     SetConeRadius(isocone_electron_radius_, myEvent.rec()->electrons(), smeared, isCharged, !ExclusiveId);
     // Set Muon isolation
-    SetConeRadius(isocone_muon_radius_,     myEvent.rec()->muons(),     smeared, isCharged, true);
+    SetConeRadius(isocone_muon_radius_,     myEvent.rec()->muons(),     smeared, isCharged, false);
     // Set Photon isolation
     SetConeRadius(isocone_photon_radius_,   myEvent.rec()->photons(),   smeared, isCharged, !ExclusiveId);
 
