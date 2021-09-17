@@ -1492,17 +1492,16 @@ class RunRecast():
             ###################################################################
             # @Jack : For debugging purposes in the future. This slice of code
             #         prints the Json file for signal WITH XSEC=1 !!!
-            if self.main.developer_mode:
-                if self.pyhf_config!={}:
-                    iterator = copy.deepcopy(list(self.pyhf_config.items()))
-                    for n, (likelihood_profile, config) in enumerate(iterator):
-                       if regiondata.get('pyhf',{}).get(likelihood_profile, False) == False:
-                           continue
-                       signal = HF_Signal(config,regiondata,xsection=1.)
-                       name = summary.name.split('.dat')[0]
-                       results = open(name+'_'+likelihood_profile+'_sig.json','w')
-                       results.write(json.dumps(signal(lumi), indent=4))
-                       results.close()
+            if self.main.developer_mode and self.pyhf_config!={}:
+                iterator = copy.deepcopy(list(self.pyhf_config.items()))
+                for n, (likelihood_profile, config) in enumerate(iterator):
+                   if regiondata.get('pyhf',{}).get(likelihood_profile, False) == False:
+                       continue
+                   signal = HF_Signal(config,regiondata,xsection=1.)
+                   name = summary.name.split('.dat')[0]
+                   results = open(name+'_'+likelihood_profile+'_sig.json','w')
+                   results.write(json.dumps(signal(lumi), indent=4))
+                   results.close()
             ###################################################################
         err_sets = [ ['scale_up', 'scale_dn', 'Scale var.'], ['TH_up', 'TH_dn', 'TH   error'] ]
         for reg in regions:
