@@ -111,6 +111,10 @@ class RecTrackFormat : public RecParticleFormat
     isolCones_.clear();
   }
 
+  /// Accessor to the pdgid
+  const MAint32 pdgid() const
+  {return pdgid_;}
+
   /// Accessor to etaCalo (only for Delphes)
   const MAfloat64& etaCalo() const
   {return etaOuter_;}
