@@ -737,10 +737,11 @@ class RunRecast():
             outext  = "" if extrapolated_lumi == 'default' else "_lumi_{:.3f}".format(extrapolated_lumi)
             outfile = os.path.join(self.dirname, 'Output/SAF',
                                    dataset.name, 'CLs_output'+outext+'.dat')
-            mysummary=open(outfile,'a+')
             if os.path.isfile(outfile):
+                mysummary=open(outfile,'a+')
                 mysummary.write("\n")
             else:
+                mysummary=open(outfile,'a+')
                 self.write_cls_header(dataset.xsection, mysummary)
 
             ## running over all analysis
@@ -797,8 +798,7 @@ class RunRecast():
                 if extrapolated_lumi=='default':
                     if self.cov_switch:
                         regiondata=self.extract_sig_lhcls(regiondata,cov_regions,lumi,covariance,"obs")
-                    else:
-                        regiondata=self.extract_sig_cls(regiondata,regions,lumi,"obs")
+                    regiondata = self.extract_sig_cls(regiondata,regions,lumi,"obs")
                     regiondata = self.pyhf_sig95Wrapper(lumi,regiondata,'obs')
                 else:
                     for reg in regions:
