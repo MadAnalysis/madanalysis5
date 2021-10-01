@@ -32,14 +32,15 @@ class RecastConfiguration:
     default_CLs_numofexps = 100000
 
     userVariables ={
-         "status"              : ["on","off"],\
-         "CLs_numofexps"       : [str(default_CLs_numofexps)],\
-         "card_path"           : "",\
-         "store_root"          : ["True", "False"] , \
-         "store_events"        : ["True", "False"] , \
-         "THerror_combination" : ["quadratic","linear"], \
-         "error_extrapolation" : ["linear", "sqrt"],
-         "global_likelihoods"  : ["on","off"]
+         "status"                 : ["on","off"],\
+         "CLs_numofexps"          : [str(default_CLs_numofexps)],\
+         "card_path"              : "",\
+         "store_root"             : ["True", "False"] , \
+         "store_events"           : ["True", "False"] , \
+         "THerror_combination"    : ["quadratic","linear"], \
+         "error_extrapolation"    : ["linear", "sqrt"],
+         "global_likelihoods"     : ["on","off"],
+         "CLs_calculator_backend" : ["native", "pyhf"]
     }
 
     def __init__(self):
@@ -52,6 +53,7 @@ class RecastConfiguration:
         self.store_root                 = False
         self.store_events               = False
         self.global_likelihoods_switch  = True
+        self.CLs_calculator_backend     = "native"
         self.systematics                = []
         self.extrapolated_luminosities  = []
         self.THerror_combination        = "linear"
@@ -95,6 +97,7 @@ class RecastConfiguration:
             self.user_DisplayParameter("THerror_combination")
             self.user_DisplayParameter("error_extrapolation")
             self.user_DisplayParameter("global_likelihoods")
+            self.user_DisplayParameter("CLs_calculator_backend")
 
     def user_DisplayParameter(self,parameter):
         if parameter=="status":
@@ -166,6 +169,11 @@ class RecastConfiguration:
             self.logger.info("   * Global-Likelihoods will"+(not self.global_likelihoods_switch)*' not'+\
                              ' be calculated'+(self.global_likelihoods_switch)*', if available'+'.')
             return
+        elif parameter=="CLs_calculator_backend":
+            self.logger.info("   * Exclusion limits will be calculated with " +
+                             (self.CLs_calculator_backend == "native")*' MadAnalysis 5 native calculator'+ \
+                             (self.CLs_calculator_backend == "pyhf")*' pyhf'+'.')
+            return
         return
 
     def user_SetParameter(self,parameters,values,level,archi_info,session_info,datasets):
@@ -186,10 +194,10 @@ class RecastConfiguration:
                     self.logger.error("recasting is only available in the RECO mode")
                     return
 
-#                # Only if ROOT is install
-#                if not archi_info.has_root:
-#                    self.logger.error("recasting is only available if ROOT is installed")
-#                    return
+               # # Only if ROOT is install
+               # if not archi_info.has_root:
+               #     self.logger.error("recasting is only available if ROOT is installed")
+               #     return
 
                 canrecast=False
                 # Delphes and the PAD?
@@ -366,6 +374,25 @@ class RecastConfiguration:
                 self.logger.error("You can only switch the global-likelihood machinery to 'on' or 'off'.")
                 return
 
+        # Set exclusion limit calculator
+        elif parameter == "CLs_calculator_backend":
+            if self.status!="on":
+                self.logger.error("Please first set the recasting mode to 'on'.")
+                return
+            if value.lower() in ["native", "pyhf"]:
+                if value.lower() == "pyhf":
+                    # if self.session_info.has_pyhf:
+                    self.CLs_calculator_backend = "pyhf"
+                    self.logger.warning("pyhf will be used as exclusion limit calculator, if available.")
+                    # else:
+                    #     self.logger.error("Please install pyhf first by typing `install pyhf`")
+                    #     return
+                else:
+                    self.CLs_calculator_backend = "native"
+            else:
+                self.logger.error(f"Unknown calculator {value}. Please choose between native or pyhf")
+                return
+
         # other rejection if no algo specified
         else:
             self.logger.error("the recast module has no parameter called '"+str(parameter)+"'")
@@ -377,7 +404,8 @@ class RecastConfiguration:
                 table = ["extrapolated_luminosity", "systematics"]
             else:
                 table = ["CLs_numofexps", "card_path", "store_events", "add", 
-                         "THerror_combination", "error_extrapolation", "global_likelihoods"]
+                         "THerror_combination", "error_extrapolation", "global_likelihoods",
+                         "CLs_calculator_backend"]
         else:
            table = []
         return table
@@ -401,6 +429,8 @@ class RecastConfiguration:
                 table.extend(RecastConfiguration.userVariables["error_extrapolation"])
         elif variable =="global_likelihoods":
                 table.extend(RecastConfiguration.userVariables["global_likelihoods"])
+        elif variable =="CLs_calculator_backend":
+            table.extend(RecastConfiguration.userVariables["CLs_calculator_backend"])
         return table
 
 

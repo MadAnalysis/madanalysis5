@@ -36,28 +36,36 @@
 
 using namespace MA5;
 
-// Create data structure for track isocones
-struct TrackIsoCone
-{
-    // Initialization will cause warnings this is only allowed in c++11
-    MAfloat32 sumPT, sumET, deltaR;
-    MAuint16 ntracks;
-
-    void Initialize()
-    {
-        sumPT = 0.;
-        sumET = 0.;
-        deltaR = 0.;
-        ntracks = 0;
-    };
-};
-
-
 ClusterAlgoFastJet::ClusterAlgoFastJet(std::string Algo):ClusterAlgoBase(Algo)
 { JetAlgorithm_=Algo; JetDefinition_=0; }
 
 ClusterAlgoFastJet::~ClusterAlgoFastJet() 
 { if (JetDefinition_!=0) delete JetDefinition_; }
+
+template<class Type>
+void SetConeRadius(std::vector<MAfloat64> cone_radius, std::vector<Type>& objects,
+                   MCParticleFormat part, MAbool ischarged=false, MAbool addself=false)
+{
+  for (MAuint32 iR=0; iR<cone_radius.size(); iR++)
+  {
+    for (MAuint32 i=0; i<objects.size(); i++)
+    {
+      IsolationConeType* current_isocone = objects[i].GetIsolCone(cone_radius[iR]);
+      if (objects[i].dr(part.momentum()) < cone_radius[iR])
+      {
+          current_isocone->addsumPT(part.pt());
+          current_isocone->addSumET(part.et());
+          if (addself)
+          {
+            current_isocone->setSelfPT(objects[i].pt());
+            current_isocone->setSelfET(objects[i].et());
+          }
+          if (ischarged) current_isocone->addNtracks(1);
+      }
+    }
+  }
+}
+
 
 MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent, MAbool ExclusiveId,   
                                  const std::vector<MAbool>& vetos,
@@ -66,19 +74,6 @@ MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
 {
   // Creating a container for inputs
   std::vector<fastjet::PseudoJet> inputs;
-
-  // Track info will get tracker iteration number and info
-  std::map<MAfloat64, std::vector<TrackIsoCone> > TrackInfo;
-  for (MAuint32 iR=0; iR<isocone_radius_.size(); iR++)
-  {
-    TrackIsoCone current_cone;
-    current_cone.Initialize();
-    current_cone.deltaR = isocone_radius_[iR];
-    std::vector<TrackIsoCone> tmp_info;
-    for (MAuint32 itrk=0; itrk<myEvent.rec()->tracks().size(); itrk++)
-        tmp_info.push_back(current_cone);
-    TrackInfo[isocone_radius_[iR]] = tmp_info;
-  }
 
   // Putting the good inputs into the containter
   // Good inputs = - final state
@@ -122,35 +117,15 @@ MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
     // Set track isolation
     // Isolation cone is applied to each particle that deposits energy in HCAL;
     // all hadronic activity assumed to reach to HCAL
-    for (MAuint32 iR=0; iR<isocone_radius_.size(); iR++)
-    {
-      for (MAuint32 itrk=0; itrk<myEvent.rec()->tracks().size(); itrk++)
-      {
-        if (myEvent.rec()->tracks()[itrk].dr(smeared.momentum()) < isocone_radius_[iR])
-        {
-            TrackInfo[isocone_radius_[iR]][itrk].sumPT += smeared.pt();
-            TrackInfo[isocone_radius_[iR]][itrk].sumET += smeared.et();
-            if (PDG->IsCharged(myEvent.mc()->particles()[i].pdgid()))
-                TrackInfo[isocone_radius_[iR]][itrk].ntracks += 1;
-        }
-      }
-    }
+    MAbool isCharged = PDG->IsCharged(myEvent.mc()->particles()[i].pdgid());
+    SetConeRadius(isocone_track_radius_,    myEvent.rec()->tracks(),    smeared, isCharged, false);
+    // Set Electron isolation
+    SetConeRadius(isocone_electron_radius_, myEvent.rec()->electrons(), smeared, isCharged, !ExclusiveId);
+    // Set Muon isolation
+    SetConeRadius(isocone_muon_radius_,     myEvent.rec()->muons(),     smeared, isCharged, false);
+    // Set Photon isolation
+    SetConeRadius(isocone_photon_radius_,   myEvent.rec()->photons(),   smeared, isCharged, !ExclusiveId);
 
-  }
-
-  if (isocone_radius_.size() > 0)
-  {
-      for (MAuint32 itrk=0; itrk<myEvent.rec()->tracks().size(); itrk++)
-      {
-        for (MAuint32 iR=0; iR<isocone_radius_.size(); iR++)
-        {
-            IsolationConeType* current_isocone = myEvent.rec()->tracks()[itrk].GetNewIsolCone();
-            current_isocone->setDeltaR(isocone_radius_[iR]);
-            current_isocone->setsumPT(TrackInfo[isocone_radius_[iR]][itrk].sumPT);
-            current_isocone->setSumET(TrackInfo[isocone_radius_[iR]][itrk].sumET);
-            current_isocone->setNtracks(TrackInfo[isocone_radius_[iR]][itrk].ntracks);
-        }
-      }
   }
 
   // Clustering

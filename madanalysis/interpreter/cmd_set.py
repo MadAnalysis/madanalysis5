@@ -169,7 +169,7 @@ class CmdSet(CmdBase.CmdBase):
                     self.main.superfastsim.propagator = (args[2]=='on')
                 else:
                     logging.getLogger('MA5').error("Particle propagation can be either on or off (default: off).")
-            elif objs[2] == 'track_isocone_radius':
+            elif objs[2] in [x+"_isocone_radius" for x in ["electron","muon","track","photon"]]:
                 tmp = []
                 for x in args[2:]:
                     if x in [",", ' ']:
@@ -181,7 +181,7 @@ class CmdSet(CmdBase.CmdBase):
                                                        str(x) + " has been given.")
                         continue
                     tmp.append(tmp_val)
-                self.main.superfastsim.track_isocone_radius = tmp
+                setattr(self.main.superfastsim, objs[2], tmp)
 
             else:
                 user_info    = UserInfo()
