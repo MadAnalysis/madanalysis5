@@ -777,7 +777,10 @@ class RunRecast():
                         self.logger.info("\033[1m                 CMS-NOTE-2017-001\033[0m")
 
                 ## Reading the cutflow information
-                regiondata=self.read_cutflows(self.dirname+'/Output/SAF/'+dataset.name+'/'+analysis+'/Cutflows',regions,regiondata)
+                regiondata=self.read_cutflows(
+                    self.dirname+'/Output/SAF/'+dataset.name+'/'+analysis+'/Cutflows',
+                    regions, regiondata
+                )
                 if regiondata==-1:
                     self.logger.warning('Info file for '+analysis+' corrupted. Skipping the CLs calculation.')
                     return False
@@ -793,7 +796,7 @@ class RunRecast():
                 if self.cov_switch:
                     regiondata=self.extract_sig_lhcls(regiondata,cov_regions,lumi,covariance,"exp")
                 # CLs calculation for pyhf
-                regiondata = self.pyhf_sig95Wrapper(lumi,regiondata,'exp')
+                regiondata = self.pyhf_sig95Wrapper(lumi, regiondata, "exp")
 
                 if extrapolated_lumi=='default':
                     if self.cov_switch:
@@ -1414,7 +1417,7 @@ class RunRecast():
             regiondata["lhs95exp"]= ("%.7f" % s95)
         return regiondata
 
-    def pyhf_sig95Wrapper(self,lumi,regiondata,tag):
+    def pyhf_sig95Wrapper(self, lumi, regiondata, tag):
         if self.pyhf_config == {}:
             return regiondata
         if 'pyhf' not in list(regiondata.keys()):
@@ -1432,22 +1435,17 @@ class RunRecast():
                 return get_pyhf_result(bkg(lumi), signal(lumi))-0.95
             return CLs
 
-        iterator = []
-        if self.pyhf_config!={}:
-            iterator = copy.deepcopy(list(self.pyhf_config.items()))
+        iterator = [] if self.pyhf_config=={} else copy.deepcopy(list(self.pyhf_config.items()))
         for n, (likelihood_profile, config) in enumerate(iterator):
             self.logger.debug('    * Running sig95'+tag+' for '+likelihood_profile)
             if likelihood_profile not in list(regiondata['pyhf'].keys()):
                 regiondata['pyhf'][likelihood_profile] = {}
-            background = HF_Background(config,expected=(tag=='exp'))
+            background = HF_Background(config)
             self.logger.debug('Config : '+str(config))
-            if not HF_Signal(config,regiondata,xsection=1.,background=background).isAlive():
+            if not HF_Signal(config, regiondata, xsection=1., background=background).isAlive():
                 self.logger.debug(likelihood_profile+' has no signal event.')
                 regiondata['pyhf'][likelihood_profile]["s95"+tag] = "-1"
                 continue
-            # def sig95(xsection):
-            #     signal = HF_Signal(config,regiondata,xsection=xsection)
-            #     return get_pyhf_result(background(lumi), signal(lumi))-0.95
 
             low, hig = 1., 1.;
             while get_pyhf_result(background(lumi),\
