@@ -34,8 +34,7 @@ from collections                                                import OrderedDi
 from shell_command                                              import ShellCommand
 from string_tools                                               import StringTools
 from six.moves                                                  import map, range, input
-import copy, logging, math, os, shutil, time, sys
-
+import copy, logging, math, os, shutil, time, sys, json
 
 
 class RunRecast():
@@ -773,6 +772,9 @@ class RunRecast():
                         if sys.version_info[0]==2:
                             self.logger.warning("Please note that recent pyhf releases no longer support Python 2."+\
                                                 " An older version has been used. Results may be impacted.")
+                        if self.main.recasting.simplify_likelihoods and self.main.session_info.has_simplify:
+                            self.logger.info("\033[1m                 using simplify: ATL-PHYS-PUB-2021-038\033[0m")
+                            self.logger.info("\033[1m                 For more details see https://github.com/eschanet/simplify\033[0m")
                     elif self.cov_switch:
                         self.logger.info("\033[1m                 CMS-NOTE-2017-001\033[0m")
 
@@ -972,11 +974,11 @@ class RunRecast():
             self.cov_switch = True
             regiondata["covsubset"] = info_root.attrib["cov_subset"]
         # activate pyhf
-        if self.main.recasting.global_likelihoods_switch:
-            try: 
+        if self.main.recasting.global_likelihoods_switch and self.main.session_info.has_pyhf:
+            try:
                 self.pyhf_config = self.pyhf_info_file(info_root)
-            except:
-                self.logger.debug('Check pyhf_info_file function!')
+            except Exception as err:
+                self.logger.debug('Check pyhf_info_file function!\n' + str(err))
                 self.pyhf_config = {}
             self.logger.debug(str(self.pyhf_config))
 
@@ -1113,15 +1115,70 @@ class RunRecast():
                 if likelihood_profile == 'HF-Likelihood-'+str(nprofile):
                     nprofile += 1
                 if not likelihood_profile in list(pyhf_config.keys()):
-                    pyhf_config[likelihood_profile] = {'name' : 'No File name in info file...',
-                                                       'path' : os.path.join(self.pad,
-                                                                             'Build/SampleAnalyzer/User/Analyzer'),
-                                                       'lumi' : default_lumi,
-                                                       'SR'   :  OrderedDict()
-                                                       }
+                    pyhf_config[likelihood_profile] = {
+                        'name' : 'No File name in info file...',
+                        'path' : os.path.join(self.pad, 'Build/SampleAnalyzer/User/Analyzer'),
+                        'lumi' : default_lumi,
+                        'SR'   :  OrderedDict()
+                    }
                 for subchild in child:
                     if subchild.tag == 'name':
-                        pyhf_config[likelihood_profile]['name'] = str(subchild.text)
+                        if self.main.recasting.simplify_likelihoods and self.main.session_info.has_simplify:
+                            main_path = pyhf_config[likelihood_profile]["path"]
+                            full = str(subchild.text)
+                            simplified = full.split(".json")[0] + "_simplified.json"
+                            if os.path.isfile(os.path.join(main_path, simplified)):
+                                pyhf_config[likelihood_profile]['name'] = simplified
+                            else:
+                                simplify_path = os.path.join(self.main.archi_info.ma5dir,
+                                                             'tools/simplify/src')
+                                try:
+                                    if os.path.isdir(simplify_path) and simplify_path not in sys.path:
+                                        sys.path.insert(0, simplify_path)
+                                    import simplify
+                                    self.logger.debug("simplify has been imported from "+\
+                                                      " ".join(simplify.__path__))
+                                    self.logger.debug("simplifying "+full)
+                                    with open(os.path.join(main_path, full), "r") as f:
+                                        spec = json.load(f)
+                                    # Get model and data
+                                    poi_name = "lumi"
+                                    try:
+                                        original_poi =  spec['measurements'][0]["config"]["poi"]
+                                        spec['measurements'][0]["config"]["poi"] = poi_name
+                                    except IndexError:
+                                        raise simplify.exceptions.InvalidMeasurement(
+                                            "The measurement index 0 is out of bounds."
+                                        )
+                                    model, data = simplify.model_tools.model_and_data(spec)
+
+                                    fixed_params = model.config.suggested_fixed()
+                                    init_pars = model.config.suggested_init()
+                                    # Fit the model to data
+                                    fit_result = simplify.fitter.fit(
+                                        model, data, init_pars=init_pars, fixed_pars=fixed_params
+                                    )
+                                    # Get yields
+                                    ylds = simplify.yields.get_yields(spec, fit_result, [])
+                                    newspec = simplify.simplified.get_simplified_spec(
+                                        spec, ylds, allowed_modifiers=[],
+                                        prune_channels=[], include_signal=False
+                                    )
+                                    newspec['measurements'][0]["config"]["poi"] = original_poi
+                                    new_spec_out = open(os.path.join(main_path,simplified), "w")
+                                    new_spec_out.write(json.dumps(newspec, indent=4))
+                                    new_spec_out.close()
+                                    pyhf_config[likelihood_profile]['name'] = simplified
+                                except ImportError:
+                                    self.logger.warning('To use simplified likelihoods, please install simplify')
+                                    pyhf_config[likelihood_profile]['name'] = str(subchild.text)
+                                except (Exception, simplify.exceptions.InvalidMeasurement) as err:
+                                    self.logger.warning('Can not simplify '+full)
+                                    self.logger.debug(str(err))
+                                    pyhf_config[likelihood_profile]['name'] = str(subchild.text)
+                        else:
+                            pyhf_config[likelihood_profile]['name'] = str(subchild.text)
+                        self.logger.debug(pyhf_config[likelihood_profile]['name'] + " file will be used.")
                     elif subchild.tag == 'regions':
                         for channel in subchild:
                             if channel.tag == 'channel':
@@ -1134,19 +1191,23 @@ class RunRecast():
                                     if channel.text != None:
                                         data = channel.text.split()
                                     pyhf_config[likelihood_profile]['SR'][channel.attrib['name']] = {
-                                                    'channels' : channel.attrib.get('id',-1),
-                                                    'data'     : data
-                                                }
+                                        'channels' : channel.attrib.get('id',-1),
+                                        'data'     : data
+                                    }
                                     if pyhf_config[likelihood_profile]['SR'][channel.attrib['name']]['channels'] == -1:
-                                        file = os.path.join(pyhf_config[likelihood_profile]['path'],
-                                                            pyhf_config[likelihood_profile]['name'])
+                                        file = os.path.join(
+                                            pyhf_config[likelihood_profile]['path'],
+                                            pyhf_config[likelihood_profile]['name']
+                                        )
                                         ID = get_HFID(file, channel.attrib['name'])
                                         if not isinstance(ID, str):
                                             pyhf_config[likelihood_profile]['SR'][channel.attrib['name']]['channels'] = str(ID)
                                         else:
                                             self.logger.warning(ID)
-                                            self.logger.warning('Please check '+likelihood_profile+\
-                                                             'and/or '+channel.attrib['name'])
+                                            self.logger.warning(
+                                                'Please check '+likelihood_profile + \
+                                                'and/or '+channel.attrib['name']
+                                            )
                                             to_remove.append(likelihood_profile)
 
         # validate
@@ -1158,6 +1219,7 @@ class RunRecast():
             signal     = HF_Signal(config,{},xsection=1.,
                                    background = background,
                                    validate   = True)
+
             if signal.hf != []:
                 self.logger.debug('Likelihood profile "'+str(likelihood_profile)+'" is valid.')
             else:
@@ -1453,11 +1515,15 @@ class RunRecast():
                 self.logger.debug(tag+': profile '+likelihood_profile+\
                                                ', lower bound = '+str(low))
                 low *= 0.1
+                if low < 1e-10:
+                    break
             while get_pyhf_result(background(lumi),\
                                   HF_Signal(config, regiondata,xsection=hig)(lumi)) < 0.95:
                 self.logger.debug(tag+': profile '+likelihood_profile+\
                                                ', higher bound = '+str(hig))
                 hig *= 10.
+                if hig > 1e10:
+                    break
             try:
                 import scipy
                 s95 = scipy.optimize.brentq(
@@ -1710,7 +1776,7 @@ def pyhf_wrapper_py3(background,signal):
 
         #pyhf can raise an error if the poi_test bounds are too stringent
         #they need to be updated dynamically.
-        args = dict(bounds=model.config.suggested_bounds())
+        args = dict(bounds=model.config.suggested_bounds(), stats="qtilde")
         iteration_limit = 0
         while True:
             CLs = get_CLs(**args)

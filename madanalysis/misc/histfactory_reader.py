@@ -373,7 +373,7 @@ def get_HFID(file,SRname):
         Extract the location of the profiles within the JSON file.
     """
     if os.path.isfile(file):
-        with open(file,'r') as json_file:
+        with open(file, 'r') as json_file:
             HF = json.load(json_file)
     else:
         return 'Can not find background file: '+file

@@ -24,7 +24,7 @@
 
 from __future__ import absolute_import
 from madanalysis.enumeration.ma5_running_type   import MA5RunningType
-import glob, logging, shutil, os
+import glob, logging, shutil, os, sys
 from six.moves import range
 
 class RecastConfiguration:
@@ -40,7 +40,8 @@ class RecastConfiguration:
          "THerror_combination"    : ["quadratic","linear"], \
          "error_extrapolation"    : ["linear", "sqrt"],
          "global_likelihoods"     : ["on","off"],
-         "CLs_calculator_backend" : ["native", "pyhf"]
+         "CLs_calculator_backend" : ["native", "pyhf"],
+         "simplify_likelihoods"   : ["True", "False"]
     }
 
     def __init__(self):
@@ -54,6 +55,7 @@ class RecastConfiguration:
         self.store_events               = False
         self.global_likelihoods_switch  = True
         self.CLs_calculator_backend     = "native"
+        self.simplify_likelihoods       = False
         self.systematics                = []
         self.extrapolated_luminosities  = []
         self.THerror_combination        = "linear"
@@ -98,6 +100,7 @@ class RecastConfiguration:
             self.user_DisplayParameter("error_extrapolation")
             self.user_DisplayParameter("global_likelihoods")
             self.user_DisplayParameter("CLs_calculator_backend")
+            self.user_DisplayParameter("simplify_likelihoods")
 
     def user_DisplayParameter(self,parameter):
         if parameter=="status":
@@ -174,6 +177,11 @@ class RecastConfiguration:
                              (self.CLs_calculator_backend == "native")*' MadAnalysis 5 native calculator'+ \
                              (self.CLs_calculator_backend == "pyhf")*' pyhf'+'.')
             return
+        elif parameter=="simplify_likelihoods":
+            if simplify_likelihoods:
+                self.logger.info("   * Simplified profile likelihoods will be used when available.")
+            return
+
         return
 
     def user_SetParameter(self,parameters,values,level,archi_info,session_info,datasets):
@@ -393,6 +401,17 @@ class RecastConfiguration:
                 self.logger.error(f"Unknown calculator {value}. Please choose between native or pyhf")
                 return
 
+        #Set simplified likelihoods
+        elif parameter == "simplify_likelihoods":
+            if self.status!="on":
+                self.logger.error("Please first set the recasting mode to 'on'.")
+                return
+            if value.lower() in ["true", "false"]:
+                self.simplify_likelihoods = (value.lower() == "true")
+            else:
+                self.logger.error("Please type either True or False.")
+                return
+
         # other rejection if no algo specified
         else:
             self.logger.error("the recast module has no parameter called '"+str(parameter)+"'")
@@ -405,7 +424,7 @@ class RecastConfiguration:
             else:
                 table = ["CLs_numofexps", "card_path", "store_events", "add", 
                          "THerror_combination", "error_extrapolation", "global_likelihoods",
-                         "CLs_calculator_backend"]
+                         "CLs_calculator_backend", "simplify_likelihoods"]
         else:
            table = []
         return table
@@ -431,6 +450,8 @@ class RecastConfiguration:
                 table.extend(RecastConfiguration.userVariables["global_likelihoods"])
         elif variable =="CLs_calculator_backend":
             table.extend(RecastConfiguration.userVariables["CLs_calculator_backend"])
+        elif variable =="simplify_likelihoods":
+            table.extend(RecastConfiguration.userVariables["simplify_likelihoods"])
         return table
 
 
