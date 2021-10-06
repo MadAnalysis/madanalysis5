@@ -195,6 +195,13 @@ class CmdInstall(CmdBase):
                 self.logger.error("The PYHF module requires scipy, please retry"+\
                                   "after installing scipy.")
                 return True
+        elif args[0]=='simplify':
+            if self.main.session_info.has_scipy and self.main.session_info.has_pyhf:
+                return installer.Execute('simplify')
+            else:
+                self.logger.error("The simplify module requires pyhf, please retry"+ \
+                                  "after installing pyhf.")
+                return True
         else:
             self.logger.error("the syntax is not correct.")
             self.help()
@@ -217,7 +224,7 @@ class CmdInstall(CmdBase):
         else:
             output = ["samples","zlib","fastjet", "delphes", "delphesMA5tune",\
                 "gnuplot", "matplotlib", "root" , "numpy", "PAD", "PADForMA5tune",\
-                "PADForSFS", "pyhf"]
+                "PADForSFS", "pyhf", "simplify"]
             return self.finalize_complete(text,output)
 
 
