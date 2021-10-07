@@ -398,7 +398,7 @@ class RecastConfiguration:
                 else:
                     self.CLs_calculator_backend = "native"
             else:
-                self.logger.error(f"Unknown calculator {value}. Please choose between native or pyhf")
+                self.logger.error("Unknown calculator {value}. Please choose between native or pyhf")
                 return
 
         #Set simplified likelihoods
