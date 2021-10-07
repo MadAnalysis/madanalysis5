@@ -356,7 +356,8 @@ class RunRecast():
                     (self.pad+'/Build/SampleAnalyzer/User/Analyzer/'+ana+'.h',\
                      self.dirname+'_SFSRun/Build/SampleAnalyzer/User/Analyzer/'+ana+'.h')
                 analysisList.write('  manager.Add("'+ana+'", new '+ana+');\n')
-        except: 
+        except Exception as err:
+            self.logger.debug(str(err))
             self.logger.error('Cannot copy the analysis: '+ana)
             self.logger.error('Please make sure that corresponding analysis downloaded propoerly.')
             return False
@@ -897,7 +898,8 @@ class RunRecast():
             info_input.close()
             results = self.header_info_file(info_tree,analysis,extrapolated_lumi)
             return results
-        except:
+        except Exception as err:
+            self.logger.debug(str(err))
             self.logger.debug('Cannot parse the info file')
             return -1,-1, -1, -1, -1
 
@@ -974,13 +976,14 @@ class RunRecast():
             self.cov_switch = True
             regiondata["covsubset"] = info_root.attrib["cov_subset"]
         # activate pyhf
-        if self.main.recasting.global_likelihoods_switch and self.main.session_info.has_pyhf:
+        if self.main.recasting.global_likelihoods_switch and self.main.session_info.has_pyhf and not self.cov_switch:
             try:
                 self.pyhf_config = self.pyhf_info_file(info_root)
+                self.logger.debug(str(self.pyhf_config))
             except Exception as err:
                 self.logger.debug('Check pyhf_info_file function!\n' + str(err))
                 self.pyhf_config = {}
-            self.logger.debug(str(self.pyhf_config))
+
 
         ## first we need to get the number of regions
         for child in info_root:
@@ -991,8 +994,9 @@ class RunRecast():
                     if extrapolated_lumi!='default':
                         lumi_scaling = round(extrapolated_lumi/lumi,8)
                         lumi=lumi*lumi_scaling
-                except:
+                except Exception as err:
                     self.logger.warning('Invalid info file (' + analysis+ '): ill-defined lumi')
+                    self.logger.debug(str(err))
                     return -1,-1,-1,-1,-1
                 self.logger.debug('The luminosity of ' + analysis + ' is ' + str(lumi) + ' fb-1.')
             # regions
@@ -1009,6 +1013,7 @@ class RunRecast():
                     cov_regions.append(child.attrib["id"])
         if self.cov_switch:
             covariance  = [[0. for i in range(len(cov_regions))] for j in range(len(cov_regions))]
+            self.logger.debug("Covariance : " + str(covariance))
         ## getting the region information
         for child in info_root:
             if child.tag == "region" and ("type" not in child.attrib or child.attrib["type"] == "signal"):
@@ -1018,12 +1023,13 @@ class RunRecast():
                 syst    = -1
                 stat    = -1
                 for rchild in child:
-                    self.logger.debug(rchild.tag)
-                    self.logger.debug(str(lumi)+' '+str(regions)+ ' '+str(regiondata))
+                    # self.logger.debug(rchild.tag)
+                    # self.logger.debug(str(lumi)+' '+str(regions)+ ' '+str(regiondata))
                     try:
                         myval=float(rchild.text)
-                    except:
+                    except Exception as err:
                         self.logger.warning('Invalid info file (' + analysis+ '): region data ill-defined.')
+                        self.logger.debug(str(err))
                         return -1,-1,-1,-1,-1
                     if rchild.tag=="nobs":
                         nobs = myval
@@ -1086,8 +1092,10 @@ class RunRecast():
             provided. One can process multiple likelihood profiles dedicated to different sets
             of SRs.
         """
+        self.pyhf_config = {} # reset
         if any([x.tag=='pyhf' for x in info_root]): 
-            pyhf_path = os.path.join(self.main.archi_info.ma5dir, 'tools/pyhf'+(sys.version_info[0]>2)*'/src')
+            pyhf_path = os.path.join(self.main.archi_info.ma5dir,
+                                     'tools/pyhf' + (sys.version_info[0]>2) * '/src')
             try:
                 if os.path.isdir(pyhf_path) and pyhf_path not in sys.path:
                     sys.path.insert(0, pyhf_path)
@@ -1097,8 +1105,9 @@ class RunRecast():
             except ImportError:
                 self.logger.warning('To use the global likelihood PYHF machinery, please type "install pyhf"')
                 return {}
-            except:
+            except Exception as err:
                 self.logger.debug('Problem with pyhf_info_file function!!')
+                self.logger.debug(str(err))
                 return {}
         else:
             return {}
@@ -1165,9 +1174,8 @@ class RunRecast():
                                         prune_channels=[], include_signal=False
                                     )
                                     newspec['measurements'][0]["config"]["poi"] = original_poi
-                                    new_spec_out = open(os.path.join(main_path,simplified), "w")
-                                    new_spec_out.write(json.dumps(newspec, indent=4))
-                                    new_spec_out.close()
+                                    with open(os.path.join(main_path,simplified), "w+") as out_file:
+                                        json.dump(newspec, out_file, indent=4, sort_keys=True)
                                     pyhf_config[likelihood_profile]['name'] = simplified
                                 except ImportError:
                                     self.logger.warning('To use simplified likelihoods, please install simplify')
@@ -1406,77 +1414,74 @@ class RunRecast():
         self.logger.debug('Compute signal CL...')
         for reg in regions:
             nb = regiondata[reg]["nb"]
-            if tag == "obs":
-                nobs = regiondata[reg]["nobs"]
-            elif tag == "exp":
-                nobs = regiondata[reg]["nb"]
+            nobs = regiondata[reg]["nobs"] if tag == "obs" else regiondata[reg]["nb"]
             deltanb = regiondata[reg]["deltanb"]
+
             def sig95(xsection):
-                if regiondata[reg]["Nf"]<=0:
+                if regiondata[reg]["Nf"]<=0.:
                     return 0
                 nsignal=xsection * lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
                 return self.cls_calculator(nobs,nb,deltanb,nsignal,self.ntoys)-0.95
+
             nslow = lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
             nshig = lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
+
             if nslow <= 0 and nshig <= 0:
-                if tag == "obs":
-                    regiondata[reg]["s95obs"]="-1"
-                elif tag == "exp":
-                    regiondata[reg]["s95exp"]="-1"
+                regiondata[reg]["s95"+tag]="-1"
                 continue
-            low = 1.
-            hig = 1.
+
+            low,hig = 1., 1.
             while self.cls_calculator(nobs,nb,deltanb,nslow,self.ntoys)>0.95:
                 self.logger.debug('region ' + reg + ', lower bound = ' + str(low))
-                nslow=nslow*0.1
-                low  =  low*0.1
+                nslow*=0.1; low  *=0.1
             while self.cls_calculator(nobs,nb,deltanb,nshig,self.ntoys)<0.95:
                 self.logger.debug('region ' + reg + ', upper bound = ' + str(hig))
-                nshig=nshig*10.
-                hig  =  hig*10.
+                nshig*=10.; hig  *=10.
+
             try:
                 import scipy
                 s95 = scipy.optimize.brentq(sig95,low,hig,xtol=low/100.)
-            except:
-                s95=-1
+            except ImportError as err:
+                self.logger.debug("Can't import scipy"); s95=-1
+            except Exception as err:
+                self.logger.debug(str(err)); s95=-1
+
             self.logger.debug('region ' + reg + ', s95 = ' + str(s95) + ' pb')
-            if tag == "obs":
-                regiondata[reg]["s95obs"]= ("%.7f" % s95)
-            elif tag == "exp":
-                regiondata[reg]["s95exp"]= ("%.7f" % s95)
+            regiondata[reg]["s95"+tag] = ("%.7f" % s95)
+
         return regiondata
 
     # Calculating the upper limits on sigma with simplified likelihood
     def extract_sig_lhcls(self,regiondata,cov_regions,lumi,covariance,tag):
         self.logger.debug('Compute signal CL...')
         if all(s <= 0. for s in [regiondata[reg]["Nf"] for reg in cov_regions]):
-            regiondata["lhs95obs"]= "-1"
-            regiondata["lhs95exp"]= "-1"
+            regiondata["lhs95obs"]= "-1"; regiondata["lhs95exp"]= "-1"
             return regiondata
-        if tag=="obs": 
-            expected = False
-        elif tag=="exp":
-            expected = True
+
         def sig95(xsection):
-            return self.slhCLs(regiondata,cov_regions,xsection,lumi,covariance,expected)-0.95
-        low = 1.
-        hig = 1.
-        while self.slhCLs(regiondata,cov_regions,low,lumi,covariance,expected)>0.95:
+            return self.slhCLs(regiondata,cov_regions,xsection,lumi,covariance,(tag=="exp"))-0.95
+
+        low, hig = 1., 1.
+        while self.slhCLs(regiondata,cov_regions,low,lumi,covariance,(tag=="exp"))>0.95:
             self.logger.debug('lower bound = ' + str(low))
             low  =  low*0.1
-        while self.slhCLs(regiondata,cov_regions,hig,lumi,covariance,expected)<0.95:
+        while self.slhCLs(regiondata,cov_regions,hig,lumi,covariance,(tag=="exp"))<0.95:
             self.logger.debug('upper bound = ' + str(hig))
             hig  =  hig*10.
+
         try:
             import scipy
             s95 = scipy.optimize.brentq(sig95,low,hig,xtol=low/100.)
-        except:
+        except ImportError as err:
+            self.logger.debug("Can't import scipy")
             s95=-1
+        except Exception as err:
+            self.logger.debug(str(err))
+            s95=-1
+
         self.logger.debug('s95 = ' + str(s95) + ' pb')
-        if tag == "obs":
-            regiondata["lhs95obs"]= ("%.7f" % s95)
-        elif tag == "exp":
-            regiondata["lhs95exp"]= ("%.7f" % s95)
+        regiondata["lhs95"+tag]= ("%.7f" % s95)
+
         return regiondata
 
     def pyhf_sig95Wrapper(self, lumi, regiondata, tag):
@@ -1486,14 +1491,14 @@ class RunRecast():
             regiondata['pyhf'] = {}
 
         def get_pyhf_result(*args):
-            rslt = pyhf_wrapper(*args)['CLs_'+tag]
-            if tag == "exp" and isinstance(rslt, list):
-                return rslt[2]
+            rslt = pyhf_wrapper(*args)['CLs_obs']
+            # if tag == "exp" and isinstance(rslt, list):
+            #     return rslt[2]
             return rslt[0] if isinstance(rslt, list) else rslt
 
         def sig95(conf, regdat, bkg):
             def CLs(xsec):
-                signal = HF_Signal(conf,regdat,xsection=xsec)
+                signal = HF_Signal(conf, regdat, xsection=xsec)
                 return get_pyhf_result(bkg(lumi), signal(lumi))-0.95
             return CLs
 
@@ -1502,34 +1507,31 @@ class RunRecast():
             self.logger.debug('    * Running sig95'+tag+' for '+likelihood_profile)
             if likelihood_profile not in list(regiondata['pyhf'].keys()):
                 regiondata['pyhf'][likelihood_profile] = {}
-            background = HF_Background(config)
+            background = HF_Background(config, expected=(tag=='exp'))
             self.logger.debug('Config : '+str(config))
             if not HF_Signal(config, regiondata, xsection=1., background=background).isAlive():
                 self.logger.debug(likelihood_profile+' has no signal event.')
                 regiondata['pyhf'][likelihood_profile]["s95"+tag] = "-1"
                 continue
 
-            low, hig = 1., 1.;
+            low, hig = 1., 1.
             while get_pyhf_result(background(lumi),\
                                   HF_Signal(config, regiondata,xsection=low)(lumi)) > 0.95:
                 self.logger.debug(tag+': profile '+likelihood_profile+\
                                                ', lower bound = '+str(low))
-                low *= 0.1
-                if low < 1e-10:
-                    break
+                low *= 0.1; if low < 1e-10: break
             while get_pyhf_result(background(lumi),\
                                   HF_Signal(config, regiondata,xsection=hig)(lumi)) < 0.95:
                 self.logger.debug(tag+': profile '+likelihood_profile+\
                                                ', higher bound = '+str(hig))
-                hig *= 10.
-                if hig > 1e10:
-                    break
+                hig *= 10.; if hig > 1e10: break
             try:
                 import scipy
                 s95 = scipy.optimize.brentq(
                     sig95(config, regiondata, background),low,hig,xtol=low/100.
                 )
-            except:
+            except Exception as err:
+                self.logger.debug(str(err))
                 self.logger.debug('Can not calculate sig95'+tag+' for '+likelihood_profile)
                 s95=-1
             regiondata['pyhf'][likelihood_profile]["s95"+tag] = "{:.7f}".format(s95)
@@ -1537,36 +1539,33 @@ class RunRecast():
         return regiondata
 
 
-    def write_cls_output(self, analysis, regions, cov_regions, regiondata, errordata, summary, xsflag, lumi):
+    def write_cls_output(self, analysis, regions, cov_regions, regiondata,
+                         errordata, summary, xsflag, lumi):
         self.logger.debug('Write CLs...')
         if self.main.developer_mode:
-            import json
-            to_save = {analysis : {'regiondata' : regiondata,
-                                   'errordata'  : errordata}}
-            name = summary.name.split('.dat')[0]+'.json'
+            to_save = {analysis : {'regiondata' : regiondata, 'errordata' : errordata}}
+            name = summary.name.split('.dat')[0] + '.json'
             if os.path.isfile(name):
                 with open(name,'r') as json_file:
                     past = json.load(json_file)
-                for key, item in past.items():
+                for key, item in [(k,i) for k,i in past.items() if k not in list(to_save.keys())]:
                     to_save[key] = item
             self.logger.debug('Saving dictionary : '+name)
-            results = open(name,'w')
-            results.write(json.dumps(to_save, indent=4))
-            results.close()
-            ###################################################################
+            with open(name,'w+') as results:
+                json.dump(to_save, results, indent=4)
+            ###################################################################################
             # @Jack : For debugging purposes in the future. This slice of code
             #         prints the Json file for signal WITH XSEC=1 !!!
-            if self.main.developer_mode and self.pyhf_config!={}:
+            if self.pyhf_config!={}:
                 iterator = copy.deepcopy(list(self.pyhf_config.items()))
                 for n, (likelihood_profile, config) in enumerate(iterator):
                    if regiondata.get('pyhf',{}).get(likelihood_profile, False) == False:
                        continue
                    signal = HF_Signal(config,regiondata,xsection=1.)
                    name = summary.name.split('.dat')[0]
-                   results = open(name+'_'+likelihood_profile+'_sig.json','w')
-                   results.write(json.dumps(signal(lumi), indent=4))
-                   results.close()
-            ###################################################################
+                   with open(name+'_'+likelihood_profile+'_sig.json','w+') as out_file:
+                       json.dump(signal(lumi), out_file, indent=4)
+            ###################################################################################
         err_sets = [ ['scale_up', 'scale_dn', 'Scale var.'], ['TH_up', 'TH_dn', 'TH   error'] ]
         for reg in regions:
             eff    = (regiondata[reg]["Nf"] / regiondata[reg]["N0"])
@@ -1826,7 +1825,8 @@ def pyhf_wrapper_py2(background,signal,qtilde=True):
     except (pyhf.exceptions.InvalidSpecification, KeyError) as e:
         logging.getLogger('MA5').debug("Invalid JSON file :: "+str(e))
         return {'CLs_obs':-1. , 'CLs_exp' : [-1]*5}
-    except:
+    except Exception as err:
+        self.logger.debug(str(err))
         logging.getLogger('MA5').debug("Unknown error, check pyhf_wrapper_py2 "+str(e))
         return {'CLs_obs':-1. , 'CLs_exp' : [-1]*5}
 
@@ -1841,7 +1841,8 @@ def pyhf_wrapper_py2(background,signal,qtilde=True):
         except AssertionError:
             # dont use false here 1.-CLs = 0 can be interpreted as false
             return 'update bounds'
-        except:
+        except Exception as err:
+            self.logger.debug(str(err))
             logging.getLogger('MA5').error('There is something wrong with pyhf module.')
             logging.getLogger('MA5').error('pyhf version '+pyhf.__version__+\
                                            ' Python version {}.{}'.format(sys.version_info[0],sys.version_info[1]))

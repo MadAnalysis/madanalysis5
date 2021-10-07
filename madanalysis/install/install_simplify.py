@@ -35,7 +35,7 @@ class InstallSimplify:
         self.untardir    = os.path.normpath(self.tmpdir + '/MA5_simplify/')
         self.ncores      = 1
         self.files = {
-            "simplify.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/SRCombinations/simplify.tar.gz"
+            "simplify-master.zip" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/SRCombinations/simplify-master.zip"
         }
         self.simplify_version= None # there is no version info
 
