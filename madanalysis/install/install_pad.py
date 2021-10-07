@@ -388,7 +388,10 @@ class InstallPad:
 
     def Check(self):
         for path in glob.glob(self.installdir+"/*.log"):
-          shutil.move(path, self.installdir+'/Logs')
+            shutil.move(path, self.installdir+'/Logs')
+        setattr(self.main.session_info,
+                "has_"+self.padname.lower().replace("for","").replace("tune",""),
+                True)
         return True
 
     def NeedToRestart(self):
