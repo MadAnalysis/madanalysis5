@@ -40,29 +40,12 @@ from scipy import __version__ as scipy_version
 from numpy  import sqrt, exp, log, sign, array, ndarray
 from functools import reduce
 import numpy as NP
-import math
+import math, copy, logging
 import copy
 from six.moves import range
 from six.moves import zip
 
-def getLogger():
-    """
-    Configure the logging facility. Maybe adapted to fit into
-    your framework.
-    """
-    
-    import logging
-    
-    logger = logging.getLogger("SL")
-    formatter = logging.Formatter('%(module)s - %(levelname)s: %(message)s')
-    ch = logging.StreamHandler()
-    ch.setFormatter(formatter)
-    ch.setLevel(logging.DEBUG)
-    logger.addHandler(ch)
-    return logger
-
-logger=getLogger()
-
+logger = logging.getLogger('MA5')
 
 class Data:
     """ A very simple observed container to collect all the data

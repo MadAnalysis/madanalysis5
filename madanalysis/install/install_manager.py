@@ -82,6 +82,9 @@ class InstallManager():
         elif package=='pyhf':
             from madanalysis.install.install_pyhf import Installpyhf
             installer=Installpyhf(self.main)
+        elif package=='simplify':
+            from madanalysis.install.install_simplify import InstallSimplify
+            installer=InstallSimplify(self.main)
         else:
             self.logger.error('the package "'+rawpackage+'" is unknown')
             return False

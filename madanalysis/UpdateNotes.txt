@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+173           (2021/10/07) fuks:    PYHF / Covariance treatment fixes 
+
 172           (2021/10/01) fuks:    Merging last LLP fixes 
 
 169           (2021/09/07) fuks:    Bug fix for the py2/py3 compatibility 

@@ -58,8 +58,8 @@ class HistFactory(object):
             return self.hf
         HF = copy.deepcopy(self.hf)
         lumi_scale = round(lumi/self.lumi, 6)
-        self.logger.debug(f"\n\nis bkg: {isinstance(self, HF_Background)} or sig {isinstance(self, HF_Signal)}\n\n")
-        if isinstance(self, HF_Background):#type(self) == HF_Background:
+
+        if isinstance(self, HF_Background):
             # Background extrapolation
             total_expected = {}
             for SR, item in self.pyhf_config.items():
@@ -373,7 +373,7 @@ def get_HFID(file,SRname):
         Extract the location of the profiles within the JSON file.
     """
     if os.path.isfile(file):
-        with open(file,'r') as json_file:
+        with open(file, 'r') as json_file:
             HF = json.load(json_file)
     else:
         return 'Can not find background file: '+file
