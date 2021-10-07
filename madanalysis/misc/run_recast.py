@@ -50,8 +50,8 @@ class RunRecast():
         self.first11          = True
         self.first12          = True
         self.ntoys            = self.main.recasting.CLs_numofexps
-        self.cov_switch       = False
         self.pyhf_config      = {} # initialize and configure histfactory
+        self.cov_config       = {}
         self.logger           = logging.getLogger('MA5')
 
         def calculator(switch):
@@ -747,22 +747,17 @@ class RunRecast():
             ## running over all analysis
             for analysis in analyses:
                 self.logger.debug('Running CLs exclusion calculation for '+analysis)
-                # Re-initializing the covariance switch for backward compatibility
-                self.cov_switch = False
                 # Getting the info file information (possibly rescaled)
-                lumi, regions, regiondata, covariance, cov_regions = self.parse_info_file(ET,analysis,extrapolated_lumi)
+                lumi, regions, regiondata = self.parse_info_file(ET,analysis,extrapolated_lumi)
                 self.logger.debug('lumi = ' + str(lumi));
                 self.logger.debug('regions = ' + str(regions));
                 self.logger.debug('regiondata = ' + str(regiondata));
-                self.logger.debug('cov = '+ str(covariance));
                 if lumi==-1 or regions==-1 or regiondata==-1:
                     self.logger.warning('Info file for '+analysis+' missing or corrupted. Skipping the CLs calculation.')
                     return False
-                if self.cov_switch:
-                    self.logger.info('    Performing simplified likelihood combination on '+regiondata["covsubset"]+' for '+analysis)
 
                 # Citation notifications for Global Likelihoods
-                if (self.cov_switch or self.pyhf_config!={}) and print_gl_citation:
+                if (self.cov_config != {} or self.pyhf_config!={}) and print_gl_citation:
                     # TODO: Update arXiv number this is Les Houches arxiv number
                     print_gl_citation = False
                     self.logger.info("\033[1m   * Using global likelihoods to improve CLs calculations\033[0m")
@@ -776,7 +771,7 @@ class RunRecast():
                         if self.main.recasting.simplify_likelihoods and self.main.session_info.has_simplify:
                             self.logger.info("\033[1m                 using simplify: ATL-PHYS-PUB-2021-038\033[0m")
                             self.logger.info("\033[1m                 For more details see https://github.com/eschanet/simplify\033[0m")
-                    elif self.cov_switch:
+                    elif self.cov_config != {}:
                         self.logger.info("\033[1m                 CMS-NOTE-2017-001\033[0m")
 
                 ## Reading the cutflow information
@@ -788,22 +783,16 @@ class RunRecast():
                     self.logger.warning('Info file for '+analysis+' corrupted. Skipping the CLs calculation.')
                     return False
 
-                ## Sanity check for the covariance information
-                if self.cov_switch and covariance==-1:
-                    self.logger.warning('Corrupted covariance data in the '+analysis+\
-                                        ' info file. Skipping the global CLs calculation.')
-                    self.cov_switch = False
-
                 ## Performing the CLS calculation
                 regiondata=self.extract_sig_cls(regiondata,regions,lumi,"exp")
-                if self.cov_switch:
-                    regiondata=self.extract_sig_lhcls(regiondata,cov_regions,lumi,covariance,"exp")
+                if self.cov_config != {}:
+                    regiondata=self.extract_sig_lhcls(regiondata,lumi,"exp")
                 # CLs calculation for pyhf
                 regiondata = self.pyhf_sig95Wrapper(lumi, regiondata, "exp")
 
                 if extrapolated_lumi=='default':
-                    if self.cov_switch:
-                        regiondata=self.extract_sig_lhcls(regiondata,cov_regions,lumi,covariance,"obs")
+                    if self.cov_config != {}:
+                        regiondata=self.extract_sig_lhcls(regiondata,lumi,"obs")
                     regiondata = self.extract_sig_cls(regiondata,regions,lumi,"obs")
                     regiondata = self.pyhf_sig95Wrapper(lumi,regiondata,'obs')
                 else:
@@ -812,8 +801,7 @@ class RunRecast():
                 xsflag=True
                 if dataset.xsection > 0:
                     xsflag=False
-                    regiondata=self.extract_cls(regiondata,regions,cov_regions,
-                                                dataset.xsection,lumi,covariance)
+                    regiondata=self.extract_cls(regiondata,regions,dataset.xsection,lumi)
 
                 ## Uncertainties on the rates
                 Error_dict = {}
@@ -821,14 +809,12 @@ class RunRecast():
                     Error_dict['scale_up'] =  round(dataset.scaleup,8)
                     Error_dict['scale_dn'] = -round(dataset.scaledn,8)
                 else:
-                    Error_dict['scale_up'] = 0.0
-                    Error_dict['scale_dn'] = 0.0
+                    Error_dict['scale_up'], Error_dict['scale_dn'] = 0., 0.
                 if dataset.pdfup != None:
                     Error_dict['pdf_up'] =  round(dataset.pdfup,8)
                     Error_dict['pdf_dn'] = -round(dataset.pdfdn,8)
                 else:
-                    Error_dict['pdf_up'] = 0.0
-                    Error_dict['pdf_dn'] = 0.0
+                    Error_dict['pdf_up'], Error_dict['pdf_dn'] = 0., 0.
                 if self.main.recasting.THerror_combination == 'linear':
                     Error_dict['TH_up'] = round(Error_dict['scale_up'] + Error_dict['pdf_up'],8)
                     Error_dict['TH_dn'] = round(Error_dict['scale_dn'] + Error_dict['pdf_dn'],8)
@@ -851,13 +837,14 @@ class RunRecast():
                             xsflag=False
                             regiondata_errors[error_key] = copy.deepcopy(regiondata)
                             if error_value!=0.0:
-                                regiondata_errors[error_key] = self.extract_cls(regiondata_errors[error_key],
-                                                                                regions,cov_regions,varied_xsec,
-                                                                                lumi,covariance)
+                                regiondata_errors[error_key] = self.extract_cls(
+                                    regiondata_errors[error_key], regions, varied_xsec, lumi
+                                )
 
                 ## writing the output file
-                self.write_cls_output(analysis, regions, cov_regions, regiondata,
-                                      regiondata_errors, mysummary, xsflag, lumi)
+                self.write_cls_output(
+                    analysis, regions, regiondata, regiondata_errors, mysummary, xsflag, lumi
+                )
                 mysummary.write('\n')
 
             ## Closing the output file
@@ -959,24 +946,25 @@ class RunRecast():
         info_root = etree.getroot()
         if info_root.tag != "analysis":
             self.logger.warning('Invalid info file (' + analysis+ '): <analysis> tag.')
-            return -1,-1,-1,-1,-1
+            return -1,-1,-1
         if info_root.attrib["id"].lower() != analysis.lower():
             self.logger.warning('Invalid info file (' + analysis+ '): <analysis id> tag.')
-            return -1,-1,-1,-1,-1
+            return -1,-1,-1
         ## extracting the information
         lumi         = 0
         lumi_scaling = 1.
         regions      = []
-        cov_regions  = []
+        self.cov_config  = {}
+        self.pyhf_config = {}
         regiondata   = {}
-        covariance   = []
         # Getting the description of the subset of SRs having covariances
         # Now the cov_switch is activated here
         if "cov_subset" in info_root.attrib and self.main.recasting.global_likelihoods_switch:
-            self.cov_switch = True
-            regiondata["covsubset"] = info_root.attrib["cov_subset"]
+            # self.cov_switch = True
+            self.cov_config[info_root.attrib["cov_subset"]] = dict(cov_regions = [], covariance = [])
+            # regiondata["covsubset"] = info_root.attrib["cov_subset"]
         # activate pyhf
-        if self.main.recasting.global_likelihoods_switch and self.main.session_info.has_pyhf and not self.cov_switch:
+        if self.main.recasting.global_likelihoods_switch and self.main.session_info.has_pyhf and self.cov_config == {}:
             try:
                 self.pyhf_config = self.pyhf_info_file(info_root)
                 self.logger.debug(str(self.pyhf_config))
@@ -997,31 +985,44 @@ class RunRecast():
                 except Exception as err:
                     self.logger.warning('Invalid info file (' + analysis+ '): ill-defined lumi')
                     self.logger.debug(str(err))
-                    return -1,-1,-1,-1,-1
+                    return -1,-1,-1
                 self.logger.debug('The luminosity of ' + analysis + ' is ' + str(lumi) + ' fb-1.')
             # regions
             if child.tag == "region" and ("type" not in child.attrib or child.attrib["type"] == "signal"):
                 if "id" not in child.attrib:
                     self.logger.warning('Invalid info file (' + analysis+ '): <region id> tag.')
-                    return 0-1,-1,-1,-1,-1
+                    return 0-1,-1,-1
                 if child.attrib["id"] in regions:
                     self.logger.warning('Invalid info file (' + analysis+ '): doubly-defined region.')
-                    return -1,-1,-1,-1,-1
+                    return -1,-1,-1
                 regions.append(child.attrib["id"])
                 # If one covariance entry is found, the covariance switch is turned on
                 if "covariance" in [rchild.tag for rchild in child]:
-                    cov_regions.append(child.attrib["id"])
-        if self.cov_switch:
-            covariance  = [[0. for i in range(len(cov_regions))] for j in range(len(cov_regions))]
-            self.logger.debug("Covariance : " + str(covariance))
+                    for grand_child in [gchild for gchild in child if gchild.tag == "covariance"]:
+                        if "cov_subset" in info_root.attrib:
+                            if grand_child.attrib.get("cov_subset", "default") in [info_root.attrib["cov_subset"], "default"]:
+                                if child.attrib["id"] not in self.cov_config[info_root.attrib["cov_subset"]]["cov_regions"]:
+                                    self.cov_config[info_root.attrib["cov_subset"]]["cov_regions"].append(child.attrib["id"])
+                        else:
+                            if grand_child.attrib.get("cov_subset", False) != False:
+                                subsetID = grand_child.attrib["cov_subset"]
+                                if subsetID not in list(self.cov_config.keys()):
+                                    self.cov_config[subsetID] = dict(cov_regions = [],
+                                                                     covariance  = [] )
+                                if child.attrib["id"] not in self.cov_config[subsetID]["cov_regions"]:
+                                    self.cov_config[subsetID]["cov_regions"].append(child.attrib["id"])
+
+        if self.cov_config != {}:
+            for cov_subset in self.cov_config.keys():
+                length = len(self.cov_config[cov_subset]["cov_regions"])
+                self.cov_config[cov_subset]["covariance"] = [
+                    [0. for i in range(length)] for j in range(length)
+                ]
+
         ## getting the region information
         for child in info_root:
             if child.tag == "region" and ("type" not in child.attrib or child.attrib["type"] == "signal"):
-                nobs    = -1
-                nb      = -1
-                deltanb = -1
-                syst    = -1
-                stat    = -1
+                nobs, nb, deltanb, syst, stat = [-1]*5
                 for rchild in child:
                     # self.logger.debug(rchild.tag)
                     # self.logger.debug(str(lumi)+' '+str(regions)+ ' '+str(regiondata))
@@ -1030,7 +1031,7 @@ class RunRecast():
                     except Exception as err:
                         self.logger.warning('Invalid info file (' + analysis+ '): region data ill-defined.')
                         self.logger.debug(str(err))
-                        return -1,-1,-1,-1,-1
+                        return -1,-1,-1
                     if rchild.tag=="nobs":
                         nobs = myval
                     elif rchild.tag=="nb":
@@ -1042,14 +1043,13 @@ class RunRecast():
                     elif rchild.tag=="deltanb_stat":
                         stat = myval
                     elif rchild.tag=="covariance":
-                        if self.cov_switch:
-                            i = cov_regions.index(child.attrib["id"])
-                            region = rchild.attrib["region"]
-                            if region not in cov_regions:
-                                self.logger.warning('Invalid covariance information (info file for ' + analysis+ \
-                                    '): unknown region (' + region +') ignored');
-                            else:
-                                j = cov_regions.index(rchild.attrib["region"])
+                        if self.cov_config != {}:
+                            for cov_subset, item in self.cov_config.items():
+                                if child.attrib["id"] not in item["cov_regions"] or \
+                                        rchild.attrib["region"] not in item["cov_regions"]:
+                                    continue
+                                i = item["cov_regions"].index(child.attrib["id"])
+                                j = item["cov_regions"].index(rchild.attrib["region"])
                                 if self.main.recasting.error_extrapolation=='sqrt':
                                     myval = round(math.sqrt(myval)*lumi_scaling,8);
                                 elif self.main.recasting.error_extrapolation=='linear':
@@ -1058,10 +1058,10 @@ class RunRecast():
                                     myval = round(myval*lumi_scaling**2*self.main.recasting.error_extrapolation[0]**2 + \
                                                   math.sqrt(myval)*lumi_scaling*self.main.recasting.error_extrapolation[1]**2,8);
 
-                                covariance[i][j] = myval
+                                self.cov_config[cov_subset]["covariance"][i][j] = myval
                     else:
                         self.logger.warning('Invalid info file (' + analysis+ '): unknown region subtag.')
-                        return -1,-1,-1,-1,-1
+                        return -1,-1,-1
                 if syst == -1 and stat == -1:
                     if self.main.recasting.error_extrapolation=='sqrt':
                         err_scale=math.sqrt(lumi_scaling)
@@ -1080,9 +1080,14 @@ class RunRecast():
                         stat=0.
                     deltanb = round(math.sqrt( (syst/nb)**2 + (stat/(nb*math.sqrt(lumi_scaling)))**2 )*nb*lumi_scaling,8)
                 regiondata[child.attrib["id"]] = { "nobs":nobs*lumi_scaling, "nb":nb*lumi_scaling, "deltanb":deltanb}
-        if covariance==[]:
-            covariance=-1;
-        return lumi, regions, regiondata, covariance, cov_regions
+
+        tmp = {}
+        for cov_subset, item in self.cov_config.items():
+            if item["covariance"] != []:
+                tmp[cov_subset] = item
+        self.cov_config = tmp
+
+        return lumi, regions, regiondata
 
 
     def pyhf_info_file(self,info_root):
@@ -1314,7 +1319,7 @@ class RunRecast():
             regiondata[reg]["Nf"]=Nf
         return regiondata
 
-    def extract_cls(self,regiondata,regions,cov_regions,xsection,lumi,covariance):
+    def extract_cls(self,regiondata,regions,xsection,lumi):
         self.logger.debug('Compute CLs...')
         ## computing fi a region belongs to the best expected ones, and derive the CLs in all cases
         bestreg=[]
@@ -1341,18 +1346,30 @@ class RunRecast():
                 rMax = rSR
             else:
                 regiondata[reg]["best"]=0
-        if self.cov_switch:
-            if all(s <= 0. for s in [regiondata[reg]["Nf"] for reg in cov_regions]):
-                regiondata["globalCLs"]=0.
-            else:
-                regiondata["globalCLs"]=self.slhCLs(regiondata,cov_regions,xsection,lumi,covariance)
+
+        if self.cov_config != {}:
+            minsig95, bestreg = 1e99, []
+            for cov_subset in self.cov_config.keys():
+                cov_regions = self.cov_config[cov_subset]["cov_regions"]
+                covariance  = self.cov_config[cov_subset]["covariance" ]
+                if all(s <= 0. for s in [regiondata[reg]["Nf"] for reg in cov_regions]):
+                    regiondata["cov_subset"][cov_subset]["CLs"]= 0.
+                    continue
+                CLs = self.slhCLs(regiondata,cov_regions,xsection,lumi,covariance)
+                s95 = float(regiondata["cov_subset"][cov_subset]["s95exp"])
+                regiondata["cov_subset"][cov_subset]["CLs"] = CLs
+                if 0. < s95 < minsig95:
+                    regiondata['cov_subset'][cov_subset]["best"] = 1
+                    for mybr in bestreg:
+                        regiondata['cov_subset'][mybr]["best"]=0
+                    bestreg = [cov_subset]
+                    minsig95 = s95
+                else:
+                    regiondata['cov_subset'][cov_subset]["best"]=0
 
         #initialize pyhf for cls calculation
-        bestreg  = []
-        iterator = []
-        minsig95 = 1e99
-        if self.pyhf_config!={}:
-            iterator = copy.deepcopy(list(self.pyhf_config.items()))
+        iterator = [] if self.pyhf_config=={} else copy.deepcopy(list(self.pyhf_config.items()))
+        minsig95, bestreg = 1e99, []
         for n, (likelihood_profile, config) in enumerate(iterator):
             self.logger.debug('    * Running CLs for '+likelihood_profile)
             # safety check, just in case
@@ -1387,7 +1404,8 @@ class RunRecast():
         return regiondata
 
 
-    def slhCLs(self,regiondata,cov_regions,xsection,lumi,covariance,expected=False):
+    @staticmethod
+    def slhCLs(regiondata,cov_regions,xsection,lumi,covariance,expected=False):
         """ (slh for simplified likelihood)
             Compute a global CLs combining the different region yields by using a simplified
             likelihood method (see CMS-NOTE-2017-001 for more information). It relies on the
@@ -1452,37 +1470,61 @@ class RunRecast():
         return regiondata
 
     # Calculating the upper limits on sigma with simplified likelihood
-    def extract_sig_lhcls(self,regiondata,cov_regions,lumi,covariance,tag):
+    def extract_sig_lhcls(self,regiondata,lumi,tag):
+        """
+        Compute gloabal upper limit on cross section.
+
+        Parameters
+        ----------
+        regiondata : Dict
+            Dictionary including all the information about SR yields
+        lumi : float
+            luminosity
+        tag : str
+            expected or observed
+        """
         self.logger.debug('Compute signal CL...')
-        if all(s <= 0. for s in [regiondata[reg]["Nf"] for reg in cov_regions]):
-            regiondata["lhs95obs"]= "-1"; regiondata["lhs95exp"]= "-1"
-            return regiondata
+        if "cov_subset" not in regiondata.keys():
+            regiondata["cov_subset"] = {}
 
-        def sig95(xsection):
-            return self.slhCLs(regiondata,cov_regions,xsection,lumi,covariance,(tag=="exp"))-0.95
+        def get_s95(regs, matrix):
+            def sig95(xsection):
+                return self.slhCLs(regiondata,regs,xsection,lumi,matrix,(tag=="exp"))-0.95
+            return sig95
 
-        low, hig = 1., 1.
-        while self.slhCLs(regiondata,cov_regions,low,lumi,covariance,(tag=="exp"))>0.95:
-            self.logger.debug('lower bound = ' + str(low))
-            low  =  low*0.1
-        while self.slhCLs(regiondata,cov_regions,hig,lumi,covariance,(tag=="exp"))<0.95:
-            self.logger.debug('upper bound = ' + str(hig))
-            hig  =  hig*10.
+        for cov_subset in self.cov_config.keys():
+            cov_regions = self.cov_config[cov_subset]["cov_regions"]
+            covariance  = self.cov_config[cov_subset]["covariance" ]
+            if cov_subset not in regiondata["cov_subset"].keys():
+                regiondata["cov_subset"][cov_subset] = {}
+            if all(s <= 0. for s in [regiondata[reg]["Nf"] for reg in cov_regions]):
+                regiondata["cov_subset"][cov_subset]["s95"+tag]= "-1"
+                continue
 
-        try:
-            import scipy
-            s95 = scipy.optimize.brentq(sig95,low,hig,xtol=low/100.)
-        except ImportError as err:
-            self.logger.debug("Can't import scipy")
-            s95=-1
-        except Exception as err:
-            self.logger.debug(str(err))
-            s95=-1
+            low, hig = 1., 1.
+            while self.slhCLs(regiondata,cov_regions,low,lumi,covariance,(tag=="exp"))>0.95:
+                self.logger.debug('lower bound = ' + str(low))
+                low *= 0.1
+            while self.slhCLs(regiondata,cov_regions,hig,lumi,covariance,(tag=="exp"))<0.95:
+                self.logger.debug('upper bound = ' + str(hig))
+                hig *= 10.
 
-        self.logger.debug('s95 = ' + str(s95) + ' pb')
-        regiondata["lhs95"+tag]= ("%.7f" % s95)
+            try:
+                import scipy
+                sig95 = get_s95(cov_regions, covariance)
+                s95 = scipy.optimize.brentq(sig95,low,hig,xtol=low/100.)
+            except ImportError as err:
+                self.logger.debug("Can't import scipy")
+                s95=-1
+            except Exception as err:
+                self.logger.debug(str(err))
+                s95=-1
+
+            self.logger.debug('s95 = ' + str(s95) + ' pb')
+            regiondata["cov_subset"][cov_subset]["s95"+tag] = ("%.7f" % s95)
 
         return regiondata
+
 
     def pyhf_sig95Wrapper(self, lumi, regiondata, tag):
         if self.pyhf_config == {}:
@@ -1519,12 +1561,14 @@ class RunRecast():
                                   HF_Signal(config, regiondata,xsection=low)(lumi)) > 0.95:
                 self.logger.debug(tag+': profile '+likelihood_profile+\
                                                ', lower bound = '+str(low))
-                low *= 0.1; if low < 1e-10: break
+                low *= 0.1
+                if low < 1e-10: break
             while get_pyhf_result(background(lumi),\
                                   HF_Signal(config, regiondata,xsection=hig)(lumi)) < 0.95:
                 self.logger.debug(tag+': profile '+likelihood_profile+\
                                                ', higher bound = '+str(hig))
-                hig *= 10.; if hig > 1e10: break
+                hig *= 10.
+                if hig > 1e10: break
             try:
                 import scipy
                 s95 = scipy.optimize.brentq(
@@ -1539,8 +1583,7 @@ class RunRecast():
         return regiondata
 
 
-    def write_cls_output(self, analysis, regions, cov_regions, regiondata,
-                         errordata, summary, xsflag, lumi):
+    def write_cls_output(self, analysis, regions, regiondata, errordata, summary, xsflag, lumi):
         self.logger.debug('Write CLs...')
         if self.main.developer_mode:
             to_save = {analysis : {'regiondata' : regiondata, 'errordata' : errordata}}
@@ -1621,18 +1664,22 @@ class RunRecast():
                         summary.write(onesyst.ljust(15, ' '))
                 summary.write('\n')
         # Adding the global CLs from simplified likelihood
-        if self.cov_switch:
+        for cov_subset in self.cov_config.keys():
             if not xsflag:
-                myxsexp = regiondata["lhs95exp"]
-                myxsobs = regiondata["lhs95obs"]
-                myglobalcls = "%.4f" % regiondata["globalCLs"]
-                description = "[SL]-"+regiondata["covsubset"]
-                summary.write(analysis.ljust(30,' ') + description.ljust(60,' ') + ''.ljust(10, ' ') + myxsexp.ljust(15,' ') + \
-                    myxsobs.ljust(15,' ') + myglobalcls.ljust(7, ' ') + '   ||    \n')
+                myxsexp = regiondata["cov_subset"][cov_subset]["s95exp"]
+                myxsobs = regiondata["cov_subset"][cov_subset]["s95obs"]
+                best    = str(regiondata["cov_subset"][cov_subset].get("best",0))
+                myglobalcls = "%.4f" % regiondata["cov_subset"][cov_subset]["CLs"]
+                description = "[SL]-"+cov_subset
+                summary.write(analysis.ljust(30,' ') + description.ljust(60,' ') + best.ljust(10, ' ') +
+                              myxsexp.ljust(15,' ') + myxsobs.ljust(15,' ') +
+                              myglobalcls.ljust(7, ' ') + '   ||    \n')
                 band = []
                 for error_set in err_sets:
                     if len([ x for x in error_set if x in list(errordata.keys()) ])==2:
-                        band = band + [errordata[error_set[0]]["globalCLs"], errordata[error_set[1]]["globalCLs"], regiondata["globalCLs"] ]
+                        band = band + [errordata[error_set[0]]["cov_subset"][cov_subset]["CLs"],
+                                       errordata[error_set[1]]["cov_subset"][cov_subset]["CLs"],
+                                       regiondata["cov_subset"][cov_subset]["CLs"] ]
                         if len(set(band))==1:
                             continue
                         summary.write(''.ljust(90,' ') + error_set[2] + ' band:         [' + \
@@ -1640,16 +1687,18 @@ class RunRecast():
                 for i in range(0, len(self.main.recasting.systematics)):
                     error_set = [ 'sys'+str(i)+'_up',  'sys'+str(i)+'_dn' ]
                     if len([ x for x in error_set if x in list(errordata.keys()) ])==2:
-                        band = band + [errordata[error_set[0]]["globalCLs"], errordata[error_set[1]]["globalCLs"], regiondata["globalCLs"] ]
+                        band = band + [errordata[error_set[0]]["cov_subset"][cov_subset]["CLs"],
+                                       errordata[error_set[1]]["cov_subset"][cov_subset]["CLs"],
+                                       regiondata["cov_subset"][cov_subset]["CLs"] ]
                         if len(set(band))==1:
                             continue
                         up, dn = self.main.recasting.systematics[i]
                         summary.write(''.ljust(90,' ') + '+{:.1f}% -{:.1f}% syst:'.format(up*100.,dn*100.).ljust(25,' ') + '[' + \
                           ("%.4f" % min(band)) + ', ' + ("%.4f" % max(band)) + ']\n')
             else:
-                myxsexp = regiondata["lhs95exp"]
-                myxsobs = regiondata["lhs95obs"]
-                description = "[SL]-"+regiondata["covsubset"]
+                myxsexp = regiondata["cov_subset"][cov_subset]["s95exp"]
+                myxsobs = regiondata["cov_subset"][cov_subset]["s95obs"]
+                description = "[SL]-"+cov_subset
                 summary.write(analysis.ljust(30,' ') + description.ljust(60,' ') +\
                     myxsexp.ljust(15,' ') + myxsobs.ljust(15,' ') + \
                     ' ||    \n')
