@@ -1425,7 +1425,11 @@ class RunRecast():
         from madanalysis.misc.simplified_likelihood import CLsComputer
         computer = CLsComputer()
         # calculation and output
-        return computer.computeCLs(LHdata, expected=expected)
+        try:
+            return computer.computeCLs(LHdata, expected=expected)
+        except Exception as err:
+            logging.getLogger('MA5').debug("slhCLs : " + str(err))
+            return 0.0
 
 
     def extract_sig_cls(self,regiondata,regions,lumi,tag):
@@ -1505,9 +1509,11 @@ class RunRecast():
             while self.slhCLs(regiondata,cov_regions,low,lumi,covariance,(tag=="exp"))>0.95:
                 self.logger.debug('lower bound = ' + str(low))
                 low *= 0.1
+                if low < 1e-10: break
             while self.slhCLs(regiondata,cov_regions,hig,lumi,covariance,(tag=="exp"))<0.95:
                 self.logger.debug('upper bound = ' + str(hig))
                 hig *= 10.
+                if hig > 1e10: break
 
             try:
                 import scipy
