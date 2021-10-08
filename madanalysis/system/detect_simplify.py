@@ -34,7 +34,7 @@ class DetectSimplify:
         self.user_info    = user_info
         self.session_info = session_info
         self.debug        = debug
-        self.name         = 'simplify'
+        self.name         = 'likelihood simplifier'
         self.mandatory    = False
         self.log          = []
         self.logger       = logging.getLogger('MA5')

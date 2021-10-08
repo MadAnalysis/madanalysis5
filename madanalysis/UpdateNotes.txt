@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+175           (2021/10/08) fuks:    Fine-tuning the simplified likelihoods methods 
+
 174           (2021/10/07) fuks:    PYHF/Covariance fixes 
 
 173           (2021/10/07) fuks:    PYHF / Covariance treatment fixes 
