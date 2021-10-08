@@ -224,7 +224,7 @@ class CmdInstall(CmdBase):
         else:
             output = ["samples","zlib","fastjet", "delphes", "delphesMA5tune",\
                 "gnuplot", "matplotlib", "root" , "numpy", "PAD", "PADForMA5tune",\
-                "PADForSFS", "pyhf", "likelihood_simplifier"]
+                "PADForSFS", "pyhf"]
             return self.finalize_complete(text,output)
 
 
