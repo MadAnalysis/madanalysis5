@@ -31,6 +31,9 @@ from madanalysis.enumeration.detect_status_type import DetectStatusType
 
 class DetectManager():
 
+    # same as checker.name
+    hidden_packages = ["likelihood simplifier"]
+
     def __init__(self,archi_info,user_info,session_info,script,debug):
         self.archi_info   = archi_info
         self.user_info    = user_info
@@ -326,7 +329,8 @@ class DetectManager():
                     return True
 
         # Ok
-        self.PrintOK(package_name)
+        if checker.name not in self.hidden_packages:
+            self.PrintOK(package_name)
         return True
 
 
