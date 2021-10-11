@@ -63,6 +63,9 @@ class DetectSimplify:
         except ImportError as err:
             self.logger.debug(str(err))
             return DetectStatusType.UNFOUND,''
+        except Exception as err:
+            self.logger.debug(str(err))
+            return DetectStatusType.UNFOUND,''
         else:
             self.logger.debug("Simplify has been imported from "+" ".join(simplify.__path__))
 

@@ -409,6 +409,9 @@ class RecastConfiguration:
                 return
             if value.lower() in ["true", "false"]:
                 self.simplify_likelihoods = (value.lower() == "true")
+                if self.simplify_likelihoods:
+                    self.logger.warning("Please note that this method is currently under "+\
+                                        "development and relies on third party software.")
             else:
                 self.logger.error("Please type either True or False.")
                 return
@@ -425,7 +428,7 @@ class RecastConfiguration:
             else:
                 table = ["CLs_numofexps", "card_path", "store_events", "add", 
                          "THerror_combination", "error_extrapolation", "global_likelihoods",
-                         "CLs_calculator_backend", "simplify_likelihoods"]
+                         "CLs_calculator_backend"]#, "simplify_likelihoods"
         else:
            table = []
         return table
