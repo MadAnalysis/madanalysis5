@@ -64,13 +64,10 @@ class DetectSimplify:
             self.logger.debug(str(err))
             return DetectStatusType.UNFOUND,''
         else:
-            self.logger.debug("pyhf has been imported from "+" ".join(simplify.__path__))
+            self.logger.debug("Simplify has been imported from "+" ".join(simplify.__path__))
 
         # Checking release
         if self.debug:
-            # pyhf version
-            # self.logger.debug("  release = "+pyhf.__version__)
-            # pyhf location
             self.logger.debug("  where? = "+simplify.__file__)
 
         # Ok
