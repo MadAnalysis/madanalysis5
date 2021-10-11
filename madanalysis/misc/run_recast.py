@@ -877,7 +877,7 @@ class RunRecast():
         ## Is file existing?
         if not os.path.isfile(self.pad+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.info'):
             self.logger.debug('Info File does not exist...')
-            return -1,-1, -1, -1, -1
+            return -1,-1, -1
         ## Getting the XML information
         try:
             info_input = open(self.pad+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.info')
@@ -888,7 +888,7 @@ class RunRecast():
         except Exception as err:
             self.logger.debug(str(err))
             self.logger.debug('Cannot parse the info file')
-            return -1,-1, -1, -1, -1
+            return -1,-1, -1
 
     def fix_pileup(self,filename):
         #x 
@@ -960,9 +960,8 @@ class RunRecast():
         # Getting the description of the subset of SRs having covariances
         # Now the cov_switch is activated here
         if "cov_subset" in info_root.attrib and self.main.recasting.global_likelihoods_switch:
-            # self.cov_switch = True
-            self.cov_config[info_root.attrib["cov_subset"]] = dict(cov_regions = [], covariance = [])
-            # regiondata["covsubset"] = info_root.attrib["cov_subset"]
+            self.cov_config[info_root.attrib["cov_subset"]] = dict(cov_regions = [],
+                                                                   covariance = [])
         # activate pyhf
         if self.main.recasting.global_likelihoods_switch and self.main.session_info.has_pyhf and self.cov_config == {}:
             try:
@@ -991,7 +990,7 @@ class RunRecast():
             if child.tag == "region" and ("type" not in child.attrib or child.attrib["type"] == "signal"):
                 if "id" not in child.attrib:
                     self.logger.warning('Invalid info file (' + analysis+ '): <region id> tag.')
-                    return 0-1,-1,-1
+                    return -1,-1,-1
                 if child.attrib["id"] in regions:
                     self.logger.warning('Invalid info file (' + analysis+ '): doubly-defined region.')
                     return -1,-1,-1

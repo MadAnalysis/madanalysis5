@@ -141,25 +141,26 @@ class CmdInstall(CmdBase):
         elif args[0]=='PAD':
             pad_install_check, padsfs_install_check = False, False
             # PAD requires ma5 to be restarted; therefore we first install PADForSFS
-            if self.main.archi_info.has_fastjet:
-                padsfs_install_check = installer.Execute('PADForSFS')
-            else:
-                self.logger.warning("PADForSFS requires FastJet to be installed.")
-                self.logger.info("Would you like to install FastJet? [Y/N]")
-                while True:
-                    answer = input("Answer : ")
-                    if answer.lower() in ['y','n','yes','no']:
-                        break
-                    else:
-                        self.logger.warning("Please answer as \'y\', \'n\'")
-                if answer.lower() in ['y','yes']:
-                    if not installer.Execute('fastjet'):
-                        return False
-                    if not installer.Execute('fastjet-contrib'):
-                        return False
-                    if not installer.Execute('PADForSFS'):
-                        return False
-                    padsfs_install_check = 'restart'
+            if not self.main.session_info.has_padsfs:
+                if self.main.archi_info.has_fastjet:
+                    padsfs_install_check = installer.Execute('PADForSFS')
+                else:
+                    self.logger.warning("PADForSFS requires FastJet to be installed.")
+                    self.logger.info("Would you like to install FastJet? [Y/N]")
+                    while True:
+                        answer = input("Answer : ")
+                        if answer.lower() in ['y','n','yes','no']:
+                            break
+                        else:
+                            self.logger.warning("Please answer as \'y\', \'n\'")
+                    if answer.lower() in ['y','yes']:
+                        if not installer.Execute('fastjet'):
+                            return False
+                        if not installer.Execute('fastjet-contrib'):
+                            return False
+                        if not installer.Execute('PADForSFS'):
+                            return False
+                        padsfs_install_check = 'restart'
             if inst_delphes(self.main,installer,'delphes',True):
                 pad_install_check = installer.Execute('PAD')
             else:

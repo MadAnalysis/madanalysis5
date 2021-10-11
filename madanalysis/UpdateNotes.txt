@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+178           (2021/10/11) fuks:    Last fixes with the likelihood simplifier 
+
 177           (2021/10/08) fuks:    Further fixes 
 
 176           (2021/10/08) fuks:    Bug fix with simplified likelihoods 
