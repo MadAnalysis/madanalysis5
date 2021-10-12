@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+180           (2021/10/12) fuks:    Small fix in the recast toolbox (about an option) 
+
 179           (2021/10/11) fuks:    Last fix with the likelihood simplifier 
 
 178           (2021/10/11) fuks:    Last fixes with the likelihood simplifier 

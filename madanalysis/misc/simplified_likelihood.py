@@ -255,9 +255,6 @@ class Data:
         return (mu*self.nsignal)
 
 class LikelihoodComputer:
-
-    debug_mode = False
-
     def __init__(self, data, ntoys = 10000 ):
         """
         :param data: a Data object.
@@ -719,8 +716,6 @@ class LikelihoodComputer:
             return chi2
 
 class CLsComputer:
-    debug_mode = False
-
     def __init__(self, ntoys=10000, cl=.95):
 
         """
