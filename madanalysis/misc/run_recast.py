@@ -1354,7 +1354,7 @@ class RunRecast():
                 if all(s <= 0. for s in [regiondata[reg]["Nf"] for reg in cov_regions]):
                     regiondata["cov_subset"][cov_subset]["CLs"]= 0.
                     continue
-                CLs = self.slhCLs(regiondata,cov_regions,xsection,lumi,covariance)
+                CLs = self.slhCLs(regiondata,cov_regions,xsection,lumi,covariance, ntoys = self.ntoys)
                 s95 = float(regiondata["cov_subset"][cov_subset]["s95exp"])
                 regiondata["cov_subset"][cov_subset]["CLs"] = CLs
                 if 0. < s95 < minsig95:
@@ -1404,15 +1404,13 @@ class RunRecast():
 
 
     @staticmethod
-    def slhCLs(regiondata,cov_regions,xsection,lumi,covariance,expected=False):
+    def slhCLs(regiondata,cov_regions,xsection,lumi,covariance,expected=False, ntoys = 10000):
         """ (slh for simplified likelihood)
             Compute a global CLs combining the different region yields by using a simplified
             likelihood method (see CMS-NOTE-2017-001 for more information). It relies on the
             simplifiedLikelihood.py code designed by Wolfgang Waltenberger. The method
             returns the computed CLs value. """
-        observed    = []
-        backgrounds = []
-        nsignal     = []
+        observed, backgrounds, nsignal = [], [], []
         # Collect the input data necessary for the simplified_likelyhood.py method
         for reg in cov_regions:
             nsignal.append(xsection*lumi*1000.*regiondata[reg]["Nf"]/regiondata[reg]["N0"])
@@ -1422,7 +1420,7 @@ class RunRecast():
         from madanalysis.misc.simplified_likelihood import Data
         LHdata = Data(observed, backgrounds, covariance, None, nsignal)
         from madanalysis.misc.simplified_likelihood import CLsComputer
-        computer = CLsComputer()
+        computer = CLsComputer(ntoys = ntoys, cl = .95)
         # calculation and output
         try:
             return computer.computeCLs(LHdata, expected=expected)
@@ -1492,7 +1490,7 @@ class RunRecast():
 
         def get_s95(regs, matrix):
             def sig95(xsection):
-                return self.slhCLs(regiondata,regs,xsection,lumi,matrix,(tag=="exp"))-0.95
+                return self.slhCLs(regiondata,regs,xsection,lumi,matrix,(tag=="exp"), ntoys = self.ntoys)-0.95
             return sig95
 
         for cov_subset in self.cov_config.keys():
@@ -1505,11 +1503,11 @@ class RunRecast():
                 continue
 
             low, hig = 1., 1.
-            while self.slhCLs(regiondata,cov_regions,low,lumi,covariance,(tag=="exp"))>0.95:
+            while self.slhCLs(regiondata,cov_regions,low,lumi,covariance,(tag=="exp"), ntoys = self.ntoys)>0.95:
                 self.logger.debug('lower bound = ' + str(low))
                 low *= 0.1
                 if low < 1e-10: break
-            while self.slhCLs(regiondata,cov_regions,hig,lumi,covariance,(tag=="exp"))<0.95:
+            while self.slhCLs(regiondata,cov_regions,hig,lumi,covariance,(tag=="exp"), ntoys = self.ntoys)<0.95:
                 self.logger.debug('upper bound = ' + str(hig))
                 hig *= 10.
                 if hig > 1e10: break
