@@ -53,17 +53,8 @@ class RunRecast():
         self.pyhf_config      = {} # initialize and configure histfactory
         self.cov_config       = {}
         self.logger           = logging.getLogger('MA5')
-
-        def calculator(switch):
-            if switch == "pyhf":
-                return pyhf_uncorrelated
-            elif switch == "native":
-                return cls
-
-        self.cls_calculator = calculator("native")
-        if self.main.session_info.has_pyhf and self.main.recasting.CLs_calculator_backend == "pyhf":
-            self.cls_calculator = calculator("pyhf")
-
+        self.is_apriori       = True
+        self.cls_calculator   = cls
 
     def init(self):
         ### First, the analyses to take care off
@@ -79,6 +70,24 @@ class RunRecast():
 
         ### Exit
         return True
+
+
+    def SetCLsCalculator(self):
+        if self.main.session_info.has_pyhf and self.main.recasting.CLs_calculator_backend == "pyhf":
+            self.cls_calculator = pyhf_wrapper_py3
+        elif not self.main.session_info.has_pyhf:
+            self.main.recasting.CLs_calculator_backend = "native"
+
+        if self.main.session_info.has_pyhf and self.main.recasting.expectation_assumption == "aposteriori":
+            self.cls_calculator = pyhf_wrapper_py3
+            self.main.recasting.CLs_calculator_backend = "pyhf"
+            self.is_apriori = False
+        elif not self.main.session_info.has_pyhf:
+            self.main.recasting.expectation_assumption = "apriori"
+            self.main.recasting.CLs_calculator_backend = "native"
+            self.is_apriori = True
+            self.logger.warning("A posteriori expectation calculation is not available, " + \
+                                "a priori limits will be calculated.")
 
     ################################################
     ### GENERAL METHODS
@@ -720,13 +729,13 @@ class RunRecast():
         if not ET:
             return False
 
-        print_gl_citation = self.main.recasting.global_likelihoods_switch
+        self.SetCLsCalculator()
+        print_gl_citation = self.main.recasting.global_likelihoods_switch or (self.main.recasting.CLs_calculator_backend == "pyhf")
         if len(self.main.recasting.extrapolated_luminosities)>0 or \
             any([x!=None for x in [dataset.scaleup,dataset.scaledn, dataset.pdfup, dataset.pdfdn]]) or \
             any([a+b>0. for a,b in self.main.recasting.systematics]):
             self.logger.info("\033[1m   * Using Uncertainties and Higher-Luminosity Estimates\033[0m")
             self.logger.info("\033[1m     Please cite arXiv:1910.11418 [hep-ph]\033[0m")
-
 
 
         ## Running over all luminosities to extrapolate
@@ -741,7 +750,7 @@ class RunRecast():
                 mysummary=open(outfile,'a+')
                 mysummary.write("\n")
             else:
-                mysummary=open(outfile,'a+')
+                mysummary=open(outfile,'w')
                 self.write_cls_header(dataset.xsection, mysummary)
 
             ## running over all analysis
@@ -773,8 +782,16 @@ class RunRecast():
                             self.logger.info("\033[1m                 For more details see https://github.com/eschanet/simplify\033[0m")
                     elif self.cov_config != {}:
                         self.logger.info("\033[1m                 CMS-NOTE-2017-001\033[0m")
+                elif print_gl_citation and self.main.recasting.CLs_calculator_backend == "pyhf":
+                    print_gl_citation = False
+                    self.logger.info("\033[1m   * Using `pyhf` for CLs calculation\033[0m")
+                    self.logger.info("\033[1m     DOI:10.5281/zenodo.1169739\033[0m")
+                    self.logger.info("\033[1m     For more details see https://scikit-hep.org/pyhf/\033[0m")
+                    # TODO: Update arXiv number this is Les Houches arxiv number
+                    self.logger.info("\033[1m     Please cite arXiv:2002.12220 [hep-ph]\033[0m")
 
-                ## Reading the cutflow information
+
+            ## Reading the cutflow information
                 regiondata=self.read_cutflows(
                     self.dirname+'/Output/SAF/'+dataset.name+'/'+analysis+'/Cutflows',
                     regions, regiondata
@@ -1098,8 +1115,7 @@ class RunRecast():
         """
         self.pyhf_config = {} # reset
         if any([x.tag=='pyhf' for x in info_root]): 
-            pyhf_path = os.path.join(self.main.archi_info.ma5dir,
-                                     'tools/pyhf' + (sys.version_info[0]>2) * '/src')
+            pyhf_path = os.path.join(self.main.archi_info.ma5dir, 'tools/pyhf/pyhf-master/src')
             try:
                 if os.path.isdir(pyhf_path) and pyhf_path not in sys.path:
                     sys.path.insert(0, pyhf_path)
@@ -1144,7 +1160,7 @@ class RunRecast():
                                 pyhf_config[likelihood_profile]['name'] = simplified
                             else:
                                 simplify_path = os.path.join(self.main.archi_info.ma5dir,
-                                                             'tools/simplify/src')
+                                                             'tools/simplify/simplify-master/src')
                                 try:
                                     if os.path.isdir(simplify_path) and simplify_path not in sys.path:
                                         sys.path.insert(0, simplify_path)
@@ -1334,7 +1350,7 @@ class RunRecast():
             else:
                 n95     = float(regiondata[reg]["s95exp"]) * lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
                 rSR     = nsignal/n95
-                myCLs   = self.cls_calculator(nobs, nb, deltanb, nsignal, self.ntoys)
+                myCLs   = self.cls_calculator(nobs, nb, deltanb, nsignal, self.ntoys, CLs_obs = True)
             regiondata[reg]["rSR"] = rSR
             regiondata[reg]["CLs"] = myCLs
             if rSR > rMax:
@@ -1433,14 +1449,18 @@ class RunRecast():
         self.logger.debug('Compute signal CL...')
         for reg in regions:
             nb = regiondata[reg]["nb"]
-            nobs = regiondata[reg]["nobs"] if tag == "obs" else regiondata[reg]["nb"]
+            nobs = regiondata[reg]["nobs"]
+            if tag == "exp" and self.is_apriori:
+                nobs = regiondata[reg]["nb"]
             deltanb = regiondata[reg]["deltanb"]
 
             def sig95(xsection):
                 if regiondata[reg]["Nf"]<=0.:
                     return 0
                 nsignal=xsection * lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
-                return self.cls_calculator(nobs,nb,deltanb,nsignal,self.ntoys)-0.95
+                return self.cls_calculator(
+                    nobs, nb, deltanb, nsignal, self.ntoys, **{"CLs_"+tag : True}
+                ) - 0.95
 
             nslow = lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
             nshig = lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
@@ -1450,10 +1470,10 @@ class RunRecast():
                 continue
 
             low,hig = 1., 1.
-            while self.cls_calculator(nobs,nb,deltanb,nslow,self.ntoys)>0.95:
+            while self.cls_calculator(nobs,nb,deltanb,nslow,self.ntoys, **{"CLs_"+tag : True})>0.95:
                 self.logger.debug('region ' + reg + ', lower bound = ' + str(low))
                 nslow*=0.1; low  *=0.1
-            while self.cls_calculator(nobs,nb,deltanb,nshig,self.ntoys)<0.95:
+            while self.cls_calculator(nobs,nb,deltanb,nshig,self.ntoys, **{"CLs_"+tag : True})<0.95:
                 self.logger.debug('region ' + reg + ', upper bound = ' + str(hig))
                 nshig*=10.; hig  *=10.
 
@@ -1536,10 +1556,10 @@ class RunRecast():
             regiondata['pyhf'] = {}
 
         def get_pyhf_result(*args):
-            rslt = pyhf_wrapper(*args)['CLs_obs']
-            # if tag == "exp" and isinstance(rslt, list):
-            #     return rslt[2]
-            return rslt[0] if isinstance(rslt, list) else rslt
+            rslt = pyhf_wrapper(*args)
+            if tag == "exp" and not self.is_apriori:
+                return rslt["CLs_exp"][2]
+            return rslt['CLs_obs']
 
         def sig95(conf, regdat, bkg):
             def CLs(xsec):
@@ -1552,7 +1572,7 @@ class RunRecast():
             self.logger.debug('    * Running sig95'+tag+' for '+likelihood_profile)
             if likelihood_profile not in list(regiondata['pyhf'].keys()):
                 regiondata['pyhf'][likelihood_profile] = {}
-            background = HF_Background(config, expected=(tag=='exp'))
+            background = HF_Background(config, expected=(tag=='exp' and self.is_apriori))
             self.logger.debug('Config : '+str(config))
             if not HF_Signal(config, regiondata, xsection=1., background=background).isAlive():
                 self.logger.debug(likelihood_profile+' has no signal event.')
@@ -1765,16 +1785,7 @@ def clean_region_name(mystr):
     return newstr
 
 
-def pyhf_wrapper(background,signal,**kwargs):
-    if sys.version_info[0] == 2:
-        return pyhf_wrapper_py2(background, signal,  qtilde=kwargs.get('qtilde',True))
-    elif sys.version_info[0] > 2:
-        return pyhf_wrapper_py3(background, signal)
-    else:
-        return -1
-
-
-def pyhf_wrapper_py3(background,signal):
+def pyhf_wrapper(*args, **kwargs):
     import pyhf
     from pyhf.optimize import mixins
     from numpy import warnings, isnan, ndarray
@@ -1788,23 +1799,39 @@ def pyhf_wrapper_py3(background,signal):
     with warnings.catch_warnings():
         warnings.filterwarnings('ignore')
         try:
-            workspace = pyhf.Workspace(background)
-            model     = workspace.model(
-                patches=[signal],
-                modifier_settings={'normsys': {'interpcode': 'code4'},
-                                   'histosys': {'interpcode': 'code4p'}}
-            )
+            if len(args) == 2 and all([isinstance(x, (dict, list)) for x in args]):
+                background, signal = args
+                workspace = pyhf.Workspace(background)
+                model     = workspace.model(
+                    patches=[signal],
+                    modifier_settings={'normsys': {'interpcode': 'code4'},
+                                       'histosys': {'interpcode': 'code4p'}}
+                )
+
+                data = workspace.data(model)
+
+            elif len(args) == 5 and all([isinstance(x, (float, int)) for x in args]):
+                NumObserved, ExpectedBG, BGError, SigHypothesis, _ = args
+                model = pyhf.simplemodels.uncorrelated_background(
+                    [max(SigHypothesis, 0.0)], [ExpectedBG], [BGError]
+                )
+                data = [NumObserved] + model.config.auxdata
+
         except (pyhf.exceptions.InvalidSpecification, KeyError) as err:
             logging.getLogger('MA5').error("Invalid JSON file!! "+str(err))
+            if kwargs.get("CLs_exp", False) or kwargs.get("CLs_obs", False):
+                return -1
             return {'CLs_obs':-1 , 'CLs_exp' : [-1]*5}
         except Exception as err:
             logging.getLogger('MA5').debug("Unknown error, check pyhf_wrapper_py3 "+ str(err))
+            if kwargs.get("CLs_exp", False) or kwargs.get("CLs_obs", False):
+                return -1
             return {'CLs_obs':-1 , 'CLs_exp' : [-1]*5}
 
         def get_CLs(**kwargs):
             try:
                 CLs_obs, CLs_exp = pyhf.infer.hypotest(
-                    1., workspace.data(model), model,
+                    1., data, model,
                     test_stat=kwargs.get("stats", "qtilde"),
                     par_bounds=kwargs.get('bounds', model.config.suggested_bounds()),
                     return_expected_set=True
@@ -1827,30 +1854,30 @@ def pyhf_wrapper_py3(background,signal):
 
         #pyhf can raise an error if the poi_test bounds are too stringent
         #they need to be updated dynamically.
-        args = dict(bounds=model.config.suggested_bounds(), stats="qtilde")
+        arguments = dict(bounds=model.config.suggested_bounds(), stats="qtilde")
         iteration_limit = 0
         while True:
-            CLs = get_CLs(**args)
+            CLs = get_CLs(**arguments)
             if CLs == 'update bounds':
-                args["bounds"][model.config.poi_index] = (
-                    args["bounds"][model.config.poi_index][0],
-                    2*args["bounds"][model.config.poi_index][1]
+                arguments["bounds"][model.config.poi_index] = (
+                    arguments["bounds"][model.config.poi_index][0],
+                    2*arguments["bounds"][model.config.poi_index][1]
                 )
                 logging.getLogger("MA5").debug(
                     "Hypothesis test inference integration bounds has been increased to " + \
-                    str(args["bounds"][model.config.poi_index])
+                    str(arguments["bounds"][model.config.poi_index])
                 )
                 iteration_limit += 1
             elif isinstance(CLs, dict):
                 if isnan(CLs["CLs_obs"]) or any([isnan(x) for x in CLs["CLs_exp"]]):
-                    args["stats"] = "q"
-                    args["bounds"][model.config.poi_index] = (
-                        args["bounds"][model.config.poi_index][0]-5,
-                        args["bounds"][model.config.poi_index][1]
+                    arargumentsgs["stats"] = "q"
+                    arguments["bounds"][model.config.poi_index] = (
+                        arguments["bounds"][model.config.poi_index][0]-5,
+                        arguments["bounds"][model.config.poi_index][1]
                     )
                     logging.getLogger("MA5").debug(
                         "Hypothesis test inference integration bounds has been increased to " + \
-                        str(args["bounds"][model.config.poi_index])
+                        str(arguments["bounds"][model.config.poi_index])
                     )
                 else:
                     break
@@ -1859,68 +1886,19 @@ def pyhf_wrapper_py3(background,signal):
             # hard limit on iteration required if it exceeds this value it means
             # Nsig >>>>> Nobs
             if iteration_limit>=3:
+                if kwargs.get("CLs_exp", False) or kwargs.get("CLs_obs", False):
+                    return 1
                 return {'CLs_obs':1. , 'CLs_exp' : [1.]*5}
+
+    if kwargs.get("CLs_exp", False):
+        return CLs["CLs_exp"][2]
+    elif kwargs.get("CLs_obs", False):
+        return CLs["CLs_obs"]
 
     return CLs
 
 
-def pyhf_wrapper_py2(background,signal,qtilde=True):
-    import pyhf
-
-    try:
-        workspace = pyhf.Workspace(background)
-        model     = workspace.model(patches=[signal],
-                                    modifier_settings={
-                                                        'normsys': {'interpcode': 'code4'},
-                                                        'histosys': {'interpcode': 'code4p'},
-                                                        })
-    except (pyhf.exceptions.InvalidSpecification, KeyError) as e:
-        logging.getLogger('MA5').debug("Invalid JSON file :: "+str(e))
-        return {'CLs_obs':-1. , 'CLs_exp' : [-1]*5}
-    except Exception as err:
-        self.logger.debug(str(err))
-        logging.getLogger('MA5').debug("Unknown error, check pyhf_wrapper_py2 "+str(e))
-        return {'CLs_obs':-1. , 'CLs_exp' : [-1]*5}
-
-    def get_CLs(bounds=None):
-        try:
-            CLs = float(pyhf.utils.hypotest(1.0, 
-                                            workspace.data(model), 
-                                            model, 
-                                            qtilde=qtilde,
-                                            par_bounds=bounds)[0])
-            return 1. - CLs
-        except AssertionError:
-            # dont use false here 1.-CLs = 0 can be interpreted as false
-            return 'update bounds'
-        except Exception as err:
-            self.logger.debug(str(err))
-            logging.getLogger('MA5').error('There is something wrong with pyhf module.')
-            logging.getLogger('MA5').error('pyhf version '+pyhf.__version__+\
-                                           ' Python version {}.{}'.format(sys.version_info[0],sys.version_info[1]))
-            return {'CLs_obs':-1 , 'CLs_exp' : [-1]*5}
-
-    #pyhf can raise an error if the poi_test bounds are too stringent
-    #they need to be updated dynamically.
-    update_bounds = model.config.suggested_bounds()
-    iteration_limit = 0
-    while True:
-        CLs = get_CLs(bounds=update_bounds)
-        if CLs == 'update bounds':
-            update_bounds[model.config.poi_index] = (0,2*update_bounds[model.config.poi_index][1])
-            iteration_limit += 1
-        elif type(CLs) == float:
-            break
-        else:
-            iteration_limit += 1
-        # hard limit on iteration required if it exceeds this value it means
-        # Nsig >>>>> Nobs 
-        if iteration_limit>=3:
-            return {'CLs_obs':1. , 'CLs_exp' : [1.]*5}
-    return {'CLs_obs': CLs , 'CLs_exp' : [CLs]*5}
-
-
-def cls(NumObserved, ExpectedBG, BGError, SigHypothesis, NumToyExperiments):
+def cls(NumObserved, ExpectedBG, BGError, SigHypothesis, NumToyExperiments, **kwargs):
     import scipy.stats
     # generate a set of expected-number-of-background-events, one for each toy
     # experiment, distributed according to a Gaussian with the specified mean
@@ -1958,51 +1936,3 @@ def cls(NumObserved, ExpectedBG, BGError, SigHypothesis, NumToyExperiments):
         return 0.
     else:
         return 1.-(p_SplusB / p_b) # 1 - CLs
-
-
-def pyhf_uncorrelated(NumObserved, ExpectedBG, BGError, SigHypothesis, *args, **kwargs):
-    """
-    CLs calculator for uncorrelated SR through pyhf.
-
-    Parameters
-    ----------
-    NumObserved : FLOAT
-        Number of observed events.
-    ExpectedBG : FLOAT
-        Number of expected events in the background
-    BGError : FLOAT
-        background uncertainty
-    SigHypothesis : FLOAT
-        Number of events in signal.
-    kwargs :
-        pyhf related keyword arguments.
-
-    Returns
-    -------
-    FLOAT
-        1 - CLs value
-    """
-    import pyhf
-    from pyhf.optimize import mixins
-    from numpy import warnings, isnan, ndarray
-
-    # Scilence pyhf's messages
-    pyhf.pdf.log.setLevel(logging.CRITICAL)
-    pyhf.workspace.log.setLevel(logging.CRITICAL)
-    mixins.log.setLevel(logging.CRITICAL)
-    pyhf.set_backend('numpy', precision="64b")
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings('ignore')
-
-        model = pyhf.simplemodels.uncorrelated_background(
-            [SigHypothesis], [ExpectedBG], [BGError]
-        )
-        data = [NumObserved] + model.config.auxdata
-        cls_obs, cls_exp = pyhf.infer.hypotest(
-            1., data,  model, test_stat="qtilde",
-            par_bounds=model.config.suggested_bounds(),
-            return_expected_set=True
-        )
-
-    return 1. - cls_obs

@@ -41,7 +41,8 @@ class RecastConfiguration:
          "error_extrapolation"    : ["linear", "sqrt"],
          "global_likelihoods"     : ["on","off"],
          "CLs_calculator_backend" : ["native", "pyhf"],
-         "simplify_likelihoods"   : ["True", "False"]
+         "simplify_likelihoods"   : ["True", "False"],
+         "expectation_assumption" : ["apriori", "aposteriori"],
     }
 
     def __init__(self):
@@ -56,23 +57,30 @@ class RecastConfiguration:
         self.global_likelihoods_switch  = True
         self.CLs_calculator_backend     = "native"
         self.simplify_likelihoods       = False
+        self.expectation_assumption     = "apriori"
         self.systematics                = []
         self.extrapolated_luminosities  = []
         self.THerror_combination        = "linear"
         self.error_extrapolation        = "linear"
         self.DelphesDic                 = { }
         self.description                = { }
-        self.ma5dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),os.pardir,os.pardir))
+        self.ma5dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),
+                                                   os.pardir,os.pardir))
         for mypad in ['PAD', 'PADForMA5tune', 'PADForSFS']:
             if os.path.isfile(os.path.join(self.ma5dir,'tools',mypad,'Input','recast_config.dat')):
-                dico_file = open(os.path.join(self.ma5dir,'tools',mypad,'Input','recast_config.dat'), 'r')
+                dico_file = open(
+                    os.path.join(self.ma5dir,'tools',mypad,'Input','recast_config.dat'), 'r'
+                )
                 for line in dico_file:
                     if line.strip().startswith('#'):
                         continue
                     self.DelphesDic[line.split('|')[0].strip()] = line.split('|')[1].split()
                 dico_file.close()
             if os.path.isfile(os.path.join(self.ma5dir,'tools',mypad,'Input','analysis_description.dat')):
-                dico_file = open(os.path.join(self.ma5dir,'tools',mypad,'Input','analysis_description.dat'), 'r')
+                dico_file = open(
+                    os.path.join(self.ma5dir,'tools',mypad,'Input','analysis_description.dat'),
+                    'r'
+                )
                 for line in dico_file:
                     if line.strip().startswith('#'):
                         continue
@@ -101,6 +109,7 @@ class RecastConfiguration:
             self.user_DisplayParameter("global_likelihoods")
             self.user_DisplayParameter("CLs_calculator_backend")
             self.user_DisplayParameter("simplify_likelihoods")
+            self.user_DisplayParameter("expectation_assumption")
 
     def user_DisplayParameter(self,parameter):
         if parameter=="status":
@@ -175,11 +184,15 @@ class RecastConfiguration:
         elif parameter=="CLs_calculator_backend":
             self.logger.info("   * Exclusion limits will be calculated with " +
                              (self.CLs_calculator_backend == "native")*' MadAnalysis 5 native calculator'+ \
-                             (self.CLs_calculator_backend == "pyhf")*' pyhf'+'.')
+                             (self.CLs_calculator_backend == "pyhf")*' pyhf (if available)'+'.')
             return
         elif parameter=="simplify_likelihoods":
-            if simplify_likelihoods:
-                self.logger.info("   * Simplified profile likelihoods will be used when available.")
+            if self.simplify_likelihoods:
+                self.logger.debug("   * Simplified profile likelihoods will be used when available.")
+            return
+        elif parameter=="expectation_assumption":
+            self.logger.info("   * A "+self.expectation_assumption[1:]+
+                             " expected exclusion limits will be used.")
             return
 
         return
@@ -416,6 +429,25 @@ class RecastConfiguration:
                 self.logger.error("Please type either True or False.")
                 return
 
+        #Set expectation assumption
+        elif parameter == "expectation_assumption":
+            if sys.version_info[0] != 3 and sys.version_info[1] < 6:
+                self.logger.error("This option is only available for python>=3.6")
+                return
+            if self.status!="on":
+                self.logger.error("Please first set the recasting mode to 'on'.")
+                return
+            if value.lower() in ["apriori", "aposteriori"]:
+                self.expectation_assumption = value.lower()
+                if self.expectation_assumption == "aposteriori":
+                    self.logger.warning("A posteriori expected confidence limit calculation is " +\
+                                        "only available with `pyhf` module.")
+                    self.logger.warning("Setting CLs calculator to `pyhf`.")
+                    self.CLs_calculator_backend = "pyhf"
+            else:
+                self.logger.error("Expectation assumption can either be `apriori` or `aposteriori`.")
+                return
+
         # other rejection if no algo specified
         else:
             self.logger.error("the recast module has no parameter called '"+str(parameter)+"'")
@@ -428,7 +460,7 @@ class RecastConfiguration:
             else:
                 table = ["CLs_numofexps", "card_path", "store_events", "add", 
                          "THerror_combination", "error_extrapolation", "global_likelihoods",
-                         "CLs_calculator_backend"]#, "simplify_likelihoods"
+                         "CLs_calculator_backend", "expectation_assumption"]#, "simplify_likelihoods"
         else:
            table = []
         return table
@@ -456,6 +488,8 @@ class RecastConfiguration:
             table.extend(RecastConfiguration.userVariables["CLs_calculator_backend"])
         elif variable =="simplify_likelihoods":
             table.extend(RecastConfiguration.userVariables["simplify_likelihoods"])
+        elif variable =="expectation_assumption":
+            table.extend(RecastConfiguration.userVariables["expectation_assumption"])
         return table
 
 
