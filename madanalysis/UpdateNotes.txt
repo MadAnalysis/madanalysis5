@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+182           (2021/10/14) fuks:    Allowing for TACO in the normal mode 
+
 181           (2021/10/14) fuks:    Updating PYHF 
 
 180           (2021/10/12) fuks:    Small fix in the recast toolbox (about an option) 

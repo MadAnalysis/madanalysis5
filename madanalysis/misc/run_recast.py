@@ -55,6 +55,7 @@ class RunRecast():
         self.logger           = logging.getLogger('MA5')
         self.is_apriori       = True
         self.cls_calculator   = cls
+        self.TACO_output      = self.main.recasting.TACO_output
 
     def init(self):
         ### First, the analyses to take care off
@@ -395,6 +396,9 @@ class RunRecast():
                     newfile.write('  WriterBase* writer1 = \n')
                     newfile.write('      manager.InitializeWriter("lhe","'+output_name+'");\n')
                     newfile.write('  if (writer1==0) return 1;\n\n')
+            elif '// Post initialization (creates the new output directory structure)' in line and self.TACO_output!='':
+                newfile.write('    std::ofstream out;\n      out.open(\"../Output/' + self.TACO_output+'\");\n')
+                newfile.write('\n      manager.HeadSR(out);\n      out << std::endl;\n');
             elif '//Getting pointer to the clusterer' in line:
                 ignore=False
                 newfile.write(line)
@@ -404,9 +408,14 @@ class RunRecast():
                     newfile.write('      writer1->WriteEvent(myEvent,mySample);\n')
                 for analysis in analysislist:
                     newfile.write('      if (!analyzer_'+analysis+'->Execute(mySample,myEvent)) continue;\n')
+                if self.TACO_output!='':
+                    newfile.write('\n      manager.DumpSR(out);\n');
             elif '    }' in line:
                 newfile.write(line)
                 ignore=False
+            elif 'manager.Finalize(mySamples,myEvent);' in line and self.TACO_output!='':
+                newfile.write(line);
+                newfile.write('  out.close();\n');
             elif not ignore:
                 newfile.write(line)
         mainfile.close()
@@ -465,6 +474,9 @@ class RunRecast():
                                 '/lheEvents0_0/'+event_list[0], self.dirname+\
                                 '/Output/SAF/'+dataset.name+'/'+analysis+'/RecoEvents/'+\
                                 event_list[0])
+            if self.TACO_output!='':
+                filename  = '.'.join(self.TACO_output.split('.')[:-1]) + '_' + card.split('/')[-1].replace('ma5','') + self.TACO_output.split('.')[-1]
+                shutil.move(self.dirname+'_SFSRun/Output/'+self.TACO_output,self.dirname+'/Output/SAF/'+dataset.name+'/'+filename)
 
         if not self.main.developer_mode:
             # Remove the analysis folder
@@ -549,7 +561,7 @@ class RunRecast():
                     self.main.forced=self.forced
                     return False
                 ## Saving the output and cleaning
-                if not self.save_output('\"'+eventfile+'\"', myset.name, analyses):
+                if not self.save_output('\"'+eventfile+'\"', myset.name, analyses, card):
                     self.main.forced=self.forced
                     return False
                 if not self.main.recasting.store_root:
@@ -630,12 +642,20 @@ class RunRecast():
             elif '// Post initialization (creates the new output directory structure)' in line:
                 ignore=False
                 newfile.write(line)
+                if self.TACO_output!='':
+                    newfile.write('      std::ofstream out;\n      out.open(\"../Output/' + self.TACO_output+'\");\n')
+                    newfile.write('      manager.HeadSR(out);\n      out << std::endl;\n');
             elif '!analyzer_' in line and not ignore:
                 ignore=True
                 for analysis in analysislist:
                     newfile.write('      if (!analyzer_'+analysis+'->Execute(mySample,myEvent)) continue;\n')
             elif '!analyzer1' in line:
+                if self.TACO_output!='':
+                    newfile.write('\nmanager.DumpSR(out);\n');
                 ignore=False
+            elif 'manager.Finalize(mySamples,myEvent);' in line and self.TACO_output!='':
+                newfile.write(line);
+                newfile.write('  out.close();\n');
             elif not ignore:
                 newfile.write(line)
 
@@ -687,7 +707,7 @@ class RunRecast():
         time.sleep(1.);
         return True
 
-    def save_output(self, eventfile, setname, analyses):
+    def save_output(self, eventfile, setname, analyses, card):
         outfile = self.dirname+'/Output/SAF/'+setname+'/'+setname+'.saf'
         if not os.path.isfile(outfile):
             shutil.move(self.dirname+'_RecastRun/Output/SAF/PADevents/PADevents.saf',outfile)
@@ -717,6 +737,9 @@ class RunRecast():
             shutil.move(outfile+'.2', outfile)
         for analysis in analyses:
             shutil.move(self.dirname+'_RecastRun/Output/SAF/PADevents/'+analysis+'_0',self.dirname+'/Output/SAF/'+setname+'/'+analysis)
+        if self.TACO_output!='':
+            filename  = '.'.join(self.TACO_output.split('.')[:-1]) + '_' + card.replace('tcl','') + self.TACO_output.split('.')[-1]
+            shutil.move(self.dirname+'_RecastRun/Output/'+self.TACO_output,self.dirname+'/Output/SAF/'+setname+'/'+filename)
         return True
 
     ################################################

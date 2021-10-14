@@ -38,11 +38,12 @@ class RecastConfiguration:
          "store_root"             : ["True", "False"] , \
          "store_events"           : ["True", "False"] , \
          "THerror_combination"    : ["quadratic","linear"], \
-         "error_extrapolation"    : ["linear", "sqrt"],
-         "global_likelihoods"     : ["on","off"],
-         "CLs_calculator_backend" : ["native", "pyhf"],
-         "simplify_likelihoods"   : ["True", "False"],
-         "expectation_assumption" : ["apriori", "aposteriori"],
+         "error_extrapolation"    : ["linear", "sqrt"],\
+         "global_likelihoods"     : ["on","off"],\
+         "CLs_calculator_backend" : ["native", "pyhf"],\
+         "simplify_likelihoods"   : ["True", "False"],\
+         "expectation_assumption" : ["apriori", "aposteriori"],\
+         "TACO_output"            : ""
     }
 
     def __init__(self):
@@ -54,6 +55,7 @@ class RecastConfiguration:
         self.padsfs                     = False
         self.store_root                 = False
         self.store_events               = False
+        self.TACO_output                = ""
         self.global_likelihoods_switch  = True
         self.CLs_calculator_backend     = "native"
         self.simplify_likelihoods       = False
@@ -102,6 +104,7 @@ class RecastConfiguration:
             self.user_DisplayParameter("CLs_numofexps")
             self.user_DisplayParameter("card_path")
             self.user_DisplayParameter("store_events")
+            self.user_DisplayParameter("TACO_output")
             self.user_DisplayParameter("extrapolated_luminosities")
             self.user_DisplayParameter("systematics")
             self.user_DisplayParameter("THerror_combination")
@@ -153,6 +156,9 @@ class RecastConfiguration:
             return
         elif parameter=="store_root" or parameter=="store_events":
             self.logger.info("   * Keeping the event files: "+str(self.store_root or self.store_events))
+            return
+        elif parameter=="TACO_output":
+            self.logger.info("   * Running in TACO mode and storing the results at " +str(self.TACO_output));
             return
         elif parameter=="systematics":
             if len(self.systematics) > 0:
@@ -314,6 +320,13 @@ class RecastConfiguration:
                 self.logger.error("Do the root files need to be stored? (True/False)")
                 return
 
+        # Running in TACO mode
+        elif parameter=="TACO_output":
+            if self.status!="on":
+                self.logger.error("Please first set the recasting mode to 'on'.")
+                return
+            self.TACO_output  = value
+
         # Systematic uncertainties and Luminosity extrapolation
         elif parameter=="add":
             if self.status!="on":
@@ -458,7 +471,7 @@ class RecastConfiguration:
             if var == "add":
                 table = ["extrapolated_luminosity", "systematics"]
             else:
-                table = ["CLs_numofexps", "card_path", "store_events", "add", 
+                table = ["CLs_numofexps", "card_path", "store_events", 'TACO_output', "add",
                          "THerror_combination", "error_extrapolation", "global_likelihoods",
                          "CLs_calculator_backend", "expectation_assumption"]#, "simplify_likelihoods"
         else:
@@ -478,6 +491,8 @@ class RecastConfiguration:
                 table.extend(RecastConfiguration.userVariables["store_root"])
         elif variable =="store_events":
                 table.extend(RecastConfiguration.userVariables["store_events"])
+        elif variable =="TACO_output":
+                table.extend(RecastConfiguration.userVariables["TACO_output"])
         elif variable =="THerror_combination":
                 table.extend(RecastConfiguration.userVariables["THerror_combination"])
         elif variable =="error_extrapolation":
@@ -565,22 +580,22 @@ class RecastConfiguration:
             myver = myline[1]
             mydelphes = myline[3]
             # checking the presence of the analysis and the delphes card
-            if myana in  [x[0] for x in padlist]:
-                if myver!="v1.2":
+            if myver=="v1.2":
+                if not myana in  [x[0] for x in padlist]:
                     self.logger.error("Recasting card: invalid analysis (not present in the PAD): " + myana)
                     return False
                 if not os.path.isfile(os.path.normpath(os.path.join(self.ma5dir,'tools/PAD/Input/Cards',mydelphes))):
                     self.logger.error("Recasting card: PAD analysis linked to an invalid delphes card: " + myana + " - " + mydelphes)
                     return False
-            elif myana in  [x[0] for x in tunelist]:
-                if myver!="v1.1":
+            elif myver=="v1.1":
+                if not myana in  [x[0] for x in tunelist]:
                     self.logger.error("Recasting card: invalid analysis (not present in the PADForMA5tune): " + myana)
                     return False
                 if not os.path.isfile(os.path.normpath(os.path.join(self.ma5dir,'tools/PADForMA5tune/Input/Cards',mydelphes))):
                     self.logger.error("Recasting card: PADForMA5tune analysis linked to an invalid delphes card: " + myana + " - " + mydelphes)
                     return False
-            elif myana in  [x[0] for x in sfslist]:
-                if myver!="vSFS":
+            elif myver=="vSFS":
+                if not myana in  [x[0] for x in sfslist]:
                     self.logger.error("Recasting card: invalid analysis (not present in PADForSFS): " + myana)
                     return False
                 if not os.path.isfile(os.path.normpath(os.path.join(self.ma5dir,'tools/PADForSFS/Input/Cards',mydelphes))):
@@ -591,7 +606,7 @@ class RecastConfiguration:
                 return False
             # checking the matching between the delphes card and the analysis
             for mycard,alist in self.DelphesDic.items():
-                if myana in alist:
+                if myana in alist and myver!='vSFS':
                     if mydelphes!=mycard:
                         self.logger.error("Invalid delphes card associated with the analysis: " + myana)
                         return False
