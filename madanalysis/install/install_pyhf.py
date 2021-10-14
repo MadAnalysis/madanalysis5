@@ -24,6 +24,7 @@
 
 from __future__                          import absolute_import
 from madanalysis.install.install_service import InstallService
+from shell_command import ShellCommand
 import os, sys, logging
 
 
@@ -36,9 +37,9 @@ class Installpyhf:
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir    = os.path.normpath(self.tmpdir + '/MA5_pyhf/')
         self.ncores      = 1
-        self.files = {
-            "master.zip" : "https://github.com/scikit-hep/pyhf/archive/refs/heads/master.zip"
-        }
+        # self.files = {
+        #     "master.zip" : "https://github.com/scikit-hep/pyhf/archive/refs/heads/master.zip"
+        # }
         self.pyhf_version = "0.6.3"
 
     def Detect(self):
@@ -75,23 +76,41 @@ class Installpyhf:
         if not InstallService.check_ma5site():
             return False
         # Launching wget
-        logname = os.path.normpath(self.installdir+'/wget.log')
-        if not InstallService.wget(self.files,logname,self.downloaddir):
+        logname = os.path.normpath(self.installdir+'/pyhf.log')
+        ok, out= ShellCommand.ExecuteWithLog(
+            ["pip", "--version"], logname, self.tmpdir, silent=False
+        )
+        if not ok:
+            self.logger.debug(out)
+            self.logger.error("pypi is not accessible please try to install by hand using " +\
+                              "`pip install pyhf==" + self.pyhf_version + "` command.")
             return False
+        logcommand = os.path.normpath(self.installdir+'/command.log')
+        ok, out = ShellCommand.ExecuteWithLog(
+            ["pip", "--log "+logname, "--no-input","install", "pyhf==" + self.pyhf_version],
+            logcommand, self.tmpdir, silent=False
+        )
+        if not ok:
+            self.logger.debug(out)
+            self.logger.error("Can not install pyhf at the moment please try instaling using " + \
+                              "`pip install pyhf=="+self.pyhf_version+"` command.")
+            return False
+        # if not InstallService.wget(self.files,logname,self.downloaddir):
+        #     return False
         # Ok
         return True
 
 
     def Unpack(self):
         # Logname
-        logname = os.path.normpath(self.installdir+'/unpack.log')
-        # Unpacking the tarball
-        for key in self.files.keys():
-            ok, packagedir = InstallService.untar(logname, self.downloaddir, self.installdir, key)
-            if not ok:
-                return False
-        # Ok: returning the good folder
-        self.tmpdir=packagedir
+        # logname = os.path.normpath(self.installdir+'/unpack.log')
+        # # Unpacking the tarball
+        # for key in self.files.keys():
+        #     ok, packagedir = InstallService.untar(logname, self.downloaddir, self.installdir, key)
+        #     if not ok:
+        #         return False
+        # # Ok: returning the good folder
+        # self.tmpdir=packagedir
         return True
 
 
@@ -106,8 +125,8 @@ class Installpyhf:
 
     def Check(self):
         try:
-            if os.path.isdir(self.installdir) and not self.installdir in sys.path:
-                sys.path.insert(0, self.installdir+'/pyhf-master/src/')
+            # if os.path.isdir(self.installdir) and not self.installdir in sys.path:
+            #     sys.path.insert(0, self.installdir+'/pyhf-master/src/')
             import pyhf
             logging.getLogger('MA5').debug("pyhf has been imported from "+" ".join(pyhf.__path__))
             if str(pyhf.__version__) != self.pyhf_version:
@@ -126,8 +145,8 @@ class Installpyhf:
 
     def display_log(self):
         logging.getLogger('MA5').error("More details can be found into the log files:")
-        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/wget.log"))
-        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/unpack.log"))
+        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/pyhf.log"))
+        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/command.log"))
 
 
     def NeedToRestart(self):

@@ -1115,10 +1115,10 @@ class RunRecast():
         """
         self.pyhf_config = {} # reset
         if any([x.tag=='pyhf' for x in info_root]): 
-            pyhf_path = os.path.join(self.main.archi_info.ma5dir, 'tools/pyhf/pyhf-master/src')
+            # pyhf_path = os.path.join(self.main.archi_info.ma5dir, 'tools/pyhf/pyhf-master/src')
             try:
-                if os.path.isdir(pyhf_path) and pyhf_path not in sys.path:
-                    sys.path.insert(0, pyhf_path)
+                # if os.path.isdir(pyhf_path) and pyhf_path not in sys.path:
+                #     sys.path.insert(0, pyhf_path)
                 import pyhf
                 self.logger.debug('Pyhf v'+str(pyhf.__version__))
                 self.logger.debug("pyhf has been imported from "+" ".join(pyhf.__path__))
