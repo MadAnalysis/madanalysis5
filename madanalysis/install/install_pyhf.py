@@ -70,7 +70,7 @@ class Installpyhf:
 
     def Download(self):
         if sys.version_info[0] == 2:
-            self.logger.error("pyhf is only available for python 3")
+            logging.getLogger('MA5').error("pyhf is only available for python 3")
             return False
         # Checking connection with MA5 web site
         if not InstallService.check_ma5site():
@@ -81,8 +81,8 @@ class Installpyhf:
             ["pip", "--version"], logname, self.tmpdir, silent=False
         )
         if not ok:
-            self.logger.debug(out)
-            self.logger.error("pypi is not accessible please try to install by hand using " +\
+            logging.getLogger('MA5').debug(out)
+            logging.getLogger('MA5').error("pypi is not accessible please try to install by hand using " +\
                               "`pip install pyhf==" + self.pyhf_version + "` command.")
             return False
         logcommand = os.path.normpath(self.installdir+'/command.log')
@@ -91,8 +91,8 @@ class Installpyhf:
             logcommand, self.tmpdir, silent=False
         )
         if not ok:
-            self.logger.debug(out)
-            self.logger.error("Can not install pyhf at the moment please try instaling using " + \
+            logging.getLogger('MA5').debug(out)
+            logging.getLogger('MA5').error("Can not install pyhf at the moment please try instaling using " + \
                               "`pip install pyhf=="+self.pyhf_version+"` command.")
             return False
         # if not InstallService.wget(self.files,logname,self.downloaddir):
