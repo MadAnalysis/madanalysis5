@@ -24,6 +24,7 @@
 
 from __future__                          import absolute_import
 from madanalysis.install.install_service import InstallService
+from shell_command import ShellCommand
 import os, sys, logging
 
 
@@ -36,12 +37,10 @@ class Installpyhf:
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir    = os.path.normpath(self.tmpdir + '/MA5_pyhf/')
         self.ncores      = 1
-        if sys.version_info[0] == 2:
-            self.files = {"pyhf_python2.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/SRCombinations/pyhf_python2.tar.gz"}
-            self.pyhf_version= "0.1.2"
-        elif sys.version_info[0] > 2:
-            self.files = {"pyhf_py3.tgz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/SRCombinations/pyhf_py3.tgz"}
-            self.pyhf_version= "0.5.4"
+        # self.files = {
+        #     "master.zip" : "https://github.com/scikit-hep/pyhf/archive/refs/heads/master.zip"
+        # }
+        self.pyhf_version = "0.6.3"
 
     def Detect(self):
         if not os.path.isdir(self.toolsdir):
@@ -70,27 +69,48 @@ class Installpyhf:
         return ok
 
     def Download(self):
+        if sys.version_info[0] == 2:
+            self.logger.error("pyhf is only available for python 3")
+            return False
         # Checking connection with MA5 web site
         if not InstallService.check_ma5site():
             return False
         # Launching wget
-        logname = os.path.normpath(self.installdir+'/wget.log')
-        if not InstallService.wget(self.files,logname,self.downloaddir):
+        logname = os.path.normpath(self.installdir+'/pyhf.log')
+        ok, out= ShellCommand.ExecuteWithLog(
+            ["pip", "--version"], logname, self.tmpdir, silent=False
+        )
+        if not ok:
+            self.logger.debug(out)
+            self.logger.error("pypi is not accessible please try to install by hand using " +\
+                              "`pip install pyhf==" + self.pyhf_version + "` command.")
             return False
+        logcommand = os.path.normpath(self.installdir+'/command.log')
+        ok, out = ShellCommand.ExecuteWithLog(
+            ["pip", "--log "+logname, "--no-input","install", "pyhf==" + self.pyhf_version],
+            logcommand, self.tmpdir, silent=False
+        )
+        if not ok:
+            self.logger.debug(out)
+            self.logger.error("Can not install pyhf at the moment please try instaling using " + \
+                              "`pip install pyhf=="+self.pyhf_version+"` command.")
+            return False
+        # if not InstallService.wget(self.files,logname,self.downloaddir):
+        #     return False
         # Ok
         return True
 
 
     def Unpack(self):
         # Logname
-        logname = os.path.normpath(self.installdir+'/unpack.log')
-        # Unpacking the tarball
-        for key in self.files.keys():
-            ok, packagedir = InstallService.untar(logname, self.downloaddir, self.installdir, key)
-            if not ok:
-                return False
-        # Ok: returning the good folder
-        self.tmpdir=packagedir
+        # logname = os.path.normpath(self.installdir+'/unpack.log')
+        # # Unpacking the tarball
+        # for key in self.files.keys():
+        #     ok, packagedir = InstallService.untar(logname, self.downloaddir, self.installdir, key)
+        #     if not ok:
+        #         return False
+        # # Ok: returning the good folder
+        # self.tmpdir=packagedir
         return True
 
 
@@ -105,16 +125,11 @@ class Installpyhf:
 
     def Check(self):
         try:
-            if os.path.isdir(self.installdir) and not self.installdir in sys.path:
-                sys.path.insert(0, self.installdir+(sys.version_info[0] > 2)*'/src/')
+            # if os.path.isdir(self.installdir) and not self.installdir in sys.path:
+            #     sys.path.insert(0, self.installdir+'/pyhf-master/src/')
             import pyhf
             logging.getLogger('MA5').debug("pyhf has been imported from "+" ".join(pyhf.__path__))
             if str(pyhf.__version__) != self.pyhf_version:
-                if sys.version_info[0] > 2:
-                    logging.getLogger('MA5').warning("An incorrect version of pyhf has been detected ("+str(pyhf.__version__)+")");
-                    logging.getLogger('MA5').warning("Please note that MadAnalysis 5 currently supports pyhf version "+\
-                                                     str(self.pyhf_version))
-                    return True
                 logging.getLogger('MA5').error("An incorrect version of pyhf has been detected ("+str(pyhf.__version__)+")");
                 logging.getLogger('MA5').error("Please note that MadAnalysis 5 currently supports pyhf version "+\
                                                str(self.pyhf_version))
@@ -130,8 +145,8 @@ class Installpyhf:
 
     def display_log(self):
         logging.getLogger('MA5').error("More details can be found into the log files:")
-        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/wget.log"))
-        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/unpack.log"))
+        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/pyhf.log"))
+        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/command.log"))
 
 
     def NeedToRestart(self):

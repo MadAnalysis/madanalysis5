@@ -35,7 +35,7 @@ class InstallSimplify:
         self.untardir    = os.path.normpath(self.tmpdir + '/MA5_simplify/')
         self.ncores      = 1
         self.files = {
-            "simplify.tgz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/SRCombinations/simplify.tgz"
+            "master.zip" : "https://github.com/eschanet/simplify/archive/refs/heads/master.zip"
         }
         self.simplify_version= None # there is no version info
 
@@ -100,7 +100,7 @@ class InstallSimplify:
             return False
         try:
             if os.path.isdir(self.installdir) and not self.installdir in sys.path:
-                sys.path.insert(0, self.installdir+'/src/')
+                sys.path.insert(0, self.installdir+'/simplify-master/src/')
             import simplify
             logging.getLogger('MA5').debug("simplify has been imported from "+" ".join(simplify.__path__))
 
