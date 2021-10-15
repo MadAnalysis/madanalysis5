@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+185           (2021/10/15) fuks:    Fixing PYHF installation 
+
 184           (2021/10/14) fuks:    Logger redirection fixed in the pyhf installer 
 
 182           (2021/10/14) fuks:    Allowing for TACO in the normal mode 

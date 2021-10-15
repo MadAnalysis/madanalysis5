@@ -78,7 +78,7 @@ class Installpyhf:
         # Launching wget
         logname = os.path.normpath(self.installdir+'/pyhf.log')
         ok, out= ShellCommand.ExecuteWithLog(
-            ["pip", "--version"], logname, self.tmpdir, silent=False
+            [sys.executable, "-m", "pip", "--version"], logname, self.tmpdir, silent=False
         )
         if not ok:
             logging.getLogger('MA5').debug(out)
@@ -87,7 +87,8 @@ class Installpyhf:
             return False
         logcommand = os.path.normpath(self.installdir+'/command.log')
         ok, out = ShellCommand.ExecuteWithLog(
-            ["pip", "--log "+logname, "--no-input","install", "pyhf==" + self.pyhf_version],
+            [sys.executable, "-m", "pip", #"--log "+logname, "--no-input",
+             "install", "pyhf==" + self.pyhf_version],
             logcommand, self.tmpdir, silent=False
         )
         if not ok:
