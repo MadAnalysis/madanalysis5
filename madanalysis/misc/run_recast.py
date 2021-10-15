@@ -82,7 +82,7 @@ class RunRecast():
             self.cls_calculator = pyhf_wrapper_py3
             self.main.recasting.CLs_calculator_backend = "pyhf"
             self.is_apriori = False
-        elif not self.main.session_info.has_pyhf:
+        elif not self.main.session_info.has_pyhf and self.main.recasting.expectation_assumption == "aposteriori":
             self.main.recasting.expectation_assumption = "apriori"
             self.main.recasting.CLs_calculator_backend = "native"
             self.is_apriori = True
