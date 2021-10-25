@@ -48,7 +48,7 @@
 
 \begin{document}
 \begin{center} 
-{\color{ao} \huge \textbf{\textsc{MadAnalysis} 5 v1.8}} \\ \vspace{0.25cm}
+{\color{ao} \huge \textbf{\textsc{MadAnalysis} 5 v1.9}} \\ \vspace{0.25cm}
 {\color{ao} \huge \textbf{Normal-Mode reference card}} \\ \vspace{0.25cm}
 \vspace{0.1cm} \textsl{\today}\\
 \vspace{0.1cm} \textsl{website: \url{http://madanalysis.irmp.ucl.ac.be/}}\\
@@ -124,12 +124,15 @@ Package & Description\\
 \color{ao}\verb?PADforMA5tune?  & The \MA\ Public Analysis Database of recasted LHC
    analyses relying on the old tuned version of \DEL~3 for the simulation of the
    detector effects.\\
+\color{ao}\verb?PADforSFS?  & The \MA\ Public Analysis Database of recasted LHC
+analyses relying on the SFS module for the simulation of the detector effects. See ref.~\cite{Araz:2020lnp} for more information.\\
 \color{ao}\verb?delphes?        & The current release of \DEL~3.\\
 \color{ao}\verb?delphesMA5tune? & The old tuned version of \DEL~3.\\
 \color{ao}\verb?fastjet?        & The \FJ\ and {\sc FastJetContrib} packages.\\
 \color{ao}\verb?samples?        & Some test Monte Carlo samples.\\
 \color{ao}\verb?zlib?           & The {\sc ZLib} library allowing to handle gzipped
                         compressed files.\\
+\color{ao}\verb?pyhf?           & The \texttt{pyhf} module for $CL_s$ calculations in the \MA\ recast mode.\\
 \hline
 \end{tabular}
 \end{center}
@@ -434,6 +437,33 @@ Symbol& Description\\
 \end{tabular}
 \end{center}
 
+In order to manipulate the properties of a histogram, we can make use of the \texttt{set} command, to be applied on the respective selection. To see which selection corresponds to the desired histogram, it is sufficient to type \texttt{display selection} and choose the identifier of the plot to be modified. The properties of the given plot can hence be modified via
+{\color{ao} \begin{verbatim}
+		set selection[<selection ID>].<property> = <value>
+\end{verbatim}}
+\noindent The list of properties are given in the table below.
+
+\renewcommand{\arraystretch}{1.2}%
+\begin{center}\begin{tabular}{l p{9.4cm}}
+		\hline
+		Symbol& Description\\
+		\hline
+		\color{ao} \verb?logX?     & Logarithmic scale for the $x$-axis.\\
+		\color{ao} \verb?logY?    & Logarithmic scale for the $y$-axis.\\
+		\color{ao} \verb?nbins?   & Number of bins for the histogram.\\
+		\color{ao} \verb?rank?     & Set how to sort the objects in the histogram.		\\
+		\color{ao} \verb?regions?    & Set which regions for the histogram to be plotted.\\
+		\color{ao} \verb?stacking_method?    &  Stacking method to be used for the contributions of different datasets in the histogram.\\
+		\color{ao} \verb?statuscode?    & Which objects to be considered in the histogram {\it i.e.} final-state, initial-state, all states, interstate.\\
+		\color{ao} \verb?titleX?    & Title of the $x$-axis.\\
+		\color{ao} \verb?titleY?      & Title of the $y$-axis.\\
+		\color{ao} \verb?xmax?    & Maximum value of the $x$-axis.\\
+		\color{ao} \verb?xmin?  & Minimum value of the $x$-axis.\\
+		\color{ao} \verb?ymax?    & Maximum value of the $y$-axis.\\
+		\color{ao} \verb?ymin?          & Minimum value of the $y$-axis.\\\hline
+	\end{tabular}
+\end{center}
+
 \vspace{2cm}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{shaded}
@@ -658,14 +688,14 @@ the check is then performed by typing in
 process identifier, and the second one setting up the maximum number of extra
 jets to consider.
 
-
+\vspace{2cm}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{shaded}
-	\section{\Large Super-fast detector simulation with \MAnorm}
+	\section{\Large Simplified-fast detector simulation with \MAnorm}
 \end{shaded}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \MA\ offers the user options to parameterize a super-fast simulation of a
-detector response when event reconstruction is achieved through \FJ. The user
+detector response when event reconstruction is achieved through \FJ. See ref.~\cite{Araz:2020lnp} for more information. The user
 should first initialize \FJ, through \MA, as shown in~\autoref{sec:fastjet}.
 However, as more advanced $b$-tagging and tau-tagging capabilities are
 available, default values for all tagging options of the \FJ\ interface must be
@@ -800,7 +830,7 @@ pairs are given in the table below.
   \hline
  \end{tabular}
 \end{center}
-\vspace{2cm}
+\vspace{3cm}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{shaded}
 \section{\Large Recasting LHC analyses with \MA}
@@ -890,6 +920,8 @@ The list of available options is given below.
     be scaled when the results are extrapolated to other luminosities. The
     possible options are \verb|linear| (\ie, as for systematic uncertainties;
     default) or \verb|sqrt| (\ie, as for statistical uncertainties).\\
+  \color{ao} \verb?expectation_assumption? & Indicates the assumption made for the calculation of the expected excluded cross section. \texttt{apriori} (default) assumes that the SM is in agreement with data and calculates the exclusion accordingly ({\it i.e.}\ it is not sensitive to fluctuations in data); \texttt{aposteriori} generates Asimov data with respect to the observed values within a bin and calculates the exclusion limit accordingly ({\it i.e.}\ it is sensitive to fluctuations in data).\\
+  \color{ao} \verb?global_likelihoods? & Boolean to turn on and off global exclusion limit calculations; the default is \texttt{True}.\\
 \hline
 \end{tabular}
 \end{center}

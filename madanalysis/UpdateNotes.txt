@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+189           (2021/10/25) fuks:    Updating the normnal mode reference card 
+
 186           (2021/10/25) fuks:    Adding the possibility to skip the CLs calculation 
 
 185           (2021/10/15) fuks:    Fixing PYHF installation 
