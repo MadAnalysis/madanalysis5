@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+186           (2021/10/25) fuks:    Adding the possibility to skip the CLs calculation 
+
 185           (2021/10/15) fuks:    Fixing PYHF installation 
 
 184           (2021/10/14) fuks:    Logger redirection fixed in the pyhf installer 

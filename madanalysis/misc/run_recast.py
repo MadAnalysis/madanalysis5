@@ -579,7 +579,7 @@ class RunRecast():
 
             ## Running the CLs exclusion script (if available)
             self.logger.debug('Compute CLs exclusion for '+myset.name)
-            if not self.compute_cls(analyses,myset):
+            if self.ntoys>0 and not self.compute_cls(analyses,myset):
                 self.main.forced=self.forced
                 return False
 

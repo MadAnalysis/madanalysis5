@@ -675,6 +675,7 @@ class RecastConfiguration:
             return thecard
 
     def CheckFile(self,dirname,dataset):
+        if self.CLs_numofexps <=0: return True;
         filename=os.path.normpath(dirname+'/Output/SAF/'+dataset.name+'/CLs_output.dat')
         self.logger.debug('Check file "'+filename+'"...')
         if not os.path.isfile(filename):
@@ -683,6 +684,7 @@ class RecastConfiguration:
         return True
 
     def collect_outputs(self,dirname,datasets):
+        if self.CLs_numofexps <=0: return
         filename=os.path.normpath(os.path.join(dirname,'Output/SAF/CLs_output_summary.dat'))
         self.logger.debug('Check summary file "'+filename+'"...')
         out = open(filename,'w')
