@@ -890,6 +890,28 @@ sdD0 = dsD0 = ObservableBase.Clone(D0, name='sdD0', combination=CombinationType.
 dD0  = dvD0 = vdD0 = ObservableBase.Clone(D0, name='dD0', combination=CombinationType.DIFFVECTOR, tlatex='dd_{0}', latex='$dd_{0}$')
 rD0  = ObservableBase.Clone(D0, name='rD0', combination=CombinationType.RATIO, tlatex='rd_{0}', latex='$rd_{0}$')
 
+D0APPROX = ObservableBase(  name          = 'D0APPROX',
+                            args          = [ArgumentType.COMBINATION],
+                            combination   = CombinationType.DEFAULT,
+                            plot_auto     = False,
+                            plot_nbins    = 100,
+                            plot_xmin     = -20.,
+                            plot_xmax     = 20.,
+                            plot_unitX_tlatex    = 'mm',
+                            plot_unitX_latex    = 'mm',
+                            code_parton   = 'd0_approx()',
+                            code_hadron   = 'd0_approx()',
+                            code_reco     = 'd0_approx()',
+                            cut_event     = True,
+                            cut_candidate = True,
+                            tlatex        = '#d_{0}^{approx.}',
+                            latex         = '$d_0^{\\rm approx.}$')
+vD0APPROX  = D0APPROX
+sD0APPROX  = ObservableBase.Clone(D0APPROX, name='sD0APPROX', combination=CombinationType.SUMSCALAR, tlatex='sd_{0}^{approx.}', latex='$sd_{0}^{\\rm approx.}$')
+sdD0APPROX = dsD0APPROX = ObservableBase.Clone(D0APPROX, name='sdD0APPROX', combination=CombinationType.DIFFSCALAR, tlatex='sdd_{0}^{approx.}', latex='$sdd_{0}^{\\rm approx.}$')
+dD0APPROX  = dvD0APPROX = vdD0APPROX = ObservableBase.Clone(D0APPROX, name='dD0APPROX', combination=CombinationType.DIFFVECTOR, tlatex='dd_{0}^{approx.}', latex='$dd_{0}^{\\rm approx.}$')
+rD0APPROX  = ObservableBase.Clone(D0APPROX, name='rD0APPROX', combination=CombinationType.RATIO, tlatex='rd_{0}^{approx.}', latex='$rd_{0}^{\\rm approx.}$')
+
 DZ = ObservableBase(  name          = 'DZ',
                       args          = [ArgumentType.COMBINATION],
                       combination   = CombinationType.DEFAULT,
@@ -912,6 +934,32 @@ sDZ  = ObservableBase.Clone(DZ, name='sDZ', combination=CombinationType.SUMSCALA
 sdDZ = dsDZ = ObservableBase.Clone(DZ, name='sdDZ', combination=CombinationType.DIFFSCALAR, tlatex='sdd_{z}', latex='$sdd_{z}$') 
 dDZ  = dvDZ = vdDZ = ObservableBase.Clone(DZ, name='dDZ', combination=CombinationType.DIFFVECTOR, tlatex='dd_{z}', latex='$dd_{z}$')
 rDZ  = ObservableBase.Clone(DZ, name='rDZ', combination=CombinationType.RATIO, tlatex='rd_{z}', latex='$rd_{z}$')
+
+
+DZAPPROX = ObservableBase(  name          = 'DZAPPROX',
+                      args          = [ArgumentType.COMBINATION],
+                      combination   = CombinationType.DEFAULT,
+                      plot_auto     = False,
+                      plot_nbins    = 100,
+                      plot_xmin     = -20.,
+                      plot_xmax     = 20.,
+                      plot_unitX_tlatex    = 'mm',
+                      plot_unitX_latex    = 'mm',
+                      code_parton   = 'dz_approx()',
+                      code_hadron   = 'dz_approx()',
+                      code_reco     = 'dz_approx()',
+                      cut_event     = True,
+                      cut_candidate = True,
+                      tlatex        = '#d_{z}^{approx.}',
+                      latex         = '$d_z^{\\rm approx.}$'
+                      )
+vDZAPPROX  = DZAPPROX
+sDZAPPROX  = ObservableBase.Clone(DZAPPROX, name='sDZAPPROX', combination=CombinationType.SUMSCALAR, tlatex='sd_{z}^{approx.}', latex='$sd_{z}^{\\rm approx.}$')
+sdDZAPPROX = dsDZAPPROX = ObservableBase.Clone(DZAPPROX, name='sdDZAPPROX', combination=CombinationType.DIFFSCALAR, tlatex='sdd_{z}^{approx.}', latex='$sdd_{z}^{\\rm approx.}$')
+dDZAPPROX  = dvDZAPPROX = vdDZAPPROX = ObservableBase.Clone(DZAPPROX, name='dDZAPPROX', combination=CombinationType.DIFFVECTOR, tlatex='dd_{z}^{approx.}', latex='$dd_{z}^{\\rm approx.}$')
+rDZAPPROX  = ObservableBase.Clone(DZAPPROX, name='rDZAPPROX', combination=CombinationType.RATIO, tlatex='rd_{z}^{approx.}', latex='$rd_{z}^{\\rm approx.}$')
+
+
 
 XD = ObservableBase( name          = 'XD',
                      args          = [ArgumentType.COMBINATION],
