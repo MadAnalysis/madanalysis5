@@ -367,6 +367,13 @@ Symbol& Description\\
 \color{ao} \verb?PZ?     & $z$-component of the momentum.\\
 \color{ao} \verb?R?      & Position in the $(\eta, \phi)$ plane.\\
 \color{ao} \verb?Y?      & Rapidity.\\
+\color{ao} \verb?D0?      & Transverse impact parameter.\\
+\color{ao} \verb?DZ?      & Longitudinal impact parameter.\\
+\color{ao} \verb?D0APPROX?      & Transverse impact parameter with straight line trajectory.\\
+\color{ao} \verb?DZAPPROX?      & Longitudinal impact parameter with straight line trajectory.\\
+\color{ao} \verb?XD?      & $ x $-axis of the closest approach.\\
+\color{ao} \verb?YD?      & $ y $-axis of the closest approach.\\
+\color{ao} \verb?ZD?      & $ z $-axis of the closest approach.\\
 \hline
 \end{tabular}
 \end{center}
@@ -688,7 +695,7 @@ the check is then performed by typing in
 process identifier, and the second one setting up the maximum number of extra
 jets to consider.
 
-\vspace{2cm}
+\vspace{.8cm}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{shaded}
 	\section{\Large Simplified-fast detector simulation with \MAnorm}
@@ -746,7 +753,9 @@ efficiencies) or as a different object (mistagging rates). These modules are
   \color{ao} \verb?tagger?   & Generates a probability distribution relying on a
     user-defined piecewise function describing the probabily to (mis)tag an
     object. \\
-  \hline
+  \color{ao} \verb?jes?   & Generates a function to scale reconstructed jet energy. \\
+  \color{ao} \verb?energy_scaling?   & Generates a function to scale reconstructed object energy. \\
+    \hline
  \end{tabular}
 \end{center}
 \noindent The syntax to be employed to make use of the \verb+reco_efficiency+
@@ -830,7 +839,21 @@ pairs are given in the table below.
   \hline
  \end{tabular}
 \end{center}
-\vspace{3cm}
+
+\noindent The \verb+jes+ submodule can be used following the syntax
+{\color{ao} \begin{verbatim}
+		define jes <function> [<domain>]
+\end{verbatim}}
+Define the Jet Energy Scale (JES) corrections to apply to clustered jets. The corresponding JES function is given by {\tt <function>}. The bounds correspond to the domain that JES applies ({\tt PT > ..., ETA < ...,} etc.).
+
+\noindent The \verb+energy_scaling+ submodule can be used following the syntax
+{\color{ao} \begin{verbatim}
+		define energy_scaling <p1> <function> [<domain>]
+\end{verbatim}}
+Define the rescaling corrections to apply to the energy of a reconstructed object {\tt <p1>}.
+The corresponding energy scaling function is given by {\tt <function>}.
+The bounds correspond to the domain that scaling function applies ({\tt PT > ..., ETA < ...}, etc.).
+%\vspace{3cm}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{shaded}
 \section{\Large Recasting LHC analyses with \MA}
