@@ -1,5 +1,8 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+191           (2021/11/15) fuks:    Expanding documentation + adding d0/dz (approx) to the list of 
+                                   observables in the normal mode 
+
 190           (2021/11/12) fuks:    Small bug fix with the PYHF wrapper 
 
 189           (2021/10/25) fuks:    Updating the normnal mode reference card 
