@@ -146,7 +146,7 @@ class CmdSet(CmdBase.CmdBase):
                     self.main.superfastsim.jetrecomode = args[2]
                 else:
                     logging.getLogger('MA5').error("Jet smearing can only be based on the jet ('jets') or on its constituents ('constituents').")
-            elif objs[2] == 'magneticfield':
+            elif objs[2] == 'magnetic_field':
                 try:
                     self.main.superfastsim.mag_field  = float(args[2])
                     self.main.superfastsim.propagator = True
