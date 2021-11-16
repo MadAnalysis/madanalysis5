@@ -45,7 +45,7 @@ class ClusteringConfiguration:
                                      "none"],
                       "exclusive_id"            : ["true","false"],
                       "jetrecomode"             : ["jets","constituents"],
-                      "magneticfield"           : ["3.8"],
+                      "magnetic_field"          : ["3.8"],
                       # "tracker_radius"          : ["1.29"],
                       # "half_length"             : ["3.0"],
                       "particle_propagator"     : ["on","off"],
