@@ -60,7 +60,8 @@ void SetConeRadius(std::vector<MAfloat64> cone_radius, std::vector<Type>& object
             current_isocone->setSelfPT(objects[i].pt());
             current_isocone->setSelfET(objects[i].et());
           }
-          if (ischarged) current_isocone->addNtracks(1);
+          // if (ischarged) current_isocone->addNtracks(1);
+          // ntracks depends on track matching
       }
     }
   }

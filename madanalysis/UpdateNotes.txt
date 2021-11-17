@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+193           (2021/11/17) fuks:    Polishing a few things for the v1.9 release 
+
 192           (2021/11/16) fuks:    change megneticfield -> magnetic_field 
 
 191           (2021/11/15) fuks:    Expanding documentation + adding d0/dz (approx) to the list of 
