@@ -82,6 +82,9 @@ class InstallManager():
         elif package=='pyhf':
             from madanalysis.install.install_pyhf import Installpyhf
             installer=Installpyhf(self.main)
+        elif package=='simplify':
+            from madanalysis.install.install_simplify import InstallSimplify
+            installer=InstallSimplify(self.main)
         else:
             self.logger.error('the package "'+rawpackage+'" is unknown')
             return False
@@ -92,15 +95,11 @@ class InstallManager():
         self.logger.info("   "+StringTools.Center('Installing '+rawpackage,57))
         self.logger.info("   **********************************************************")
 
-        # Get list of the methods of the installer class
-        # If the method does not exist, the method is not called
-        methods = dir(installer)
-
         # Chrono start
         self.chrono.Start()
 
         # 0. Detecting previous installation
-        if 'Detect' in methods:
+        if hasattr(installer, 'Detect'):
             self.logger.info("   Detecting a previous installation ...")
             if installer.Detect():
                 self.logger.info("   => found")
@@ -116,26 +115,26 @@ class InstallManager():
                 self.logger.info("   => not found. OK")
 
         # 1. Asking for number of cores
-        if 'GetNcores' in methods:
+        if hasattr(installer, 'GetNcores'):
             installer.GetNcores()
             self.logger.info("   **********************************************************")
 
         # 2. Creating a folder
-        if 'CreatePackageFolder' in methods:
+        if hasattr(installer, 'CreatePackageFolder'):
             self.logger.info("   Creating a devoted folder ...")
             if not installer.CreatePackageFolder():
                 self.PrintBad()
                 return False
 
         # 3. Creating a temporary folder
-        if 'CreateTmpFolder' in methods:
+        if hasattr(installer, 'CreateTmpFolder'):
             self.logger.info("   Creating a temporary folder ...")
             if not installer.CreateTmpFolder():
                 self.PrintBad()
                 return False
 
         # 4. Downloading
-        if 'Download' in methods:
+        if hasattr(installer, 'Download'):
             if self.main.session_info.has_web:
                 self.logger.info("   Downloading the package ...")
                 if not installer.Download():
@@ -145,49 +144,49 @@ class InstallManager():
                 self.logger.warning("   Download is not allowed because the internet access is disabled.")
 
         # 5. Unpacking
-        if 'Unpack' in methods:
+        if hasattr(installer, 'Unpack'):
             self.logger.info("   Unpacking the package ...")
             if not installer.Unpack():
                 self.PrintBad()
                 return False
 
         # 6. Configuring
-        if 'Configure' in methods:
+        if hasattr(installer, 'Configure'):
             self.logger.info("   Configuring the package ...")
             if not installer.Configure():
                 self.PrintBad()
                 return False
 
         # 7. Compiling
-        if 'Build' in methods:
+        if hasattr(installer, 'Build'):
             self.logger.info("   Building the package ...")
             if not installer.Build():
                 self.PrintBad()
                 return False
 
         # 8. Checking
-        if 'PreCheck' in methods:
+        if hasattr(installer, 'PreCheck'):
             self.logger.info("   Checking the building ...")
             if not installer.PreCheck():
                 self.PrintBad()
                 return False
 
         # 9. Clean
-        if 'Clean' in methods:
+        if hasattr(installer, 'Clean'):
             self.logger.info("   Cleaning the building ...")
             if not installer.Clean():
                 self.PrintBad()
                 return False
 
         # 9. Install
-        if 'Install' in methods:
+        if hasattr(installer, 'Install'):
             self.logger.info("   Transfering the data from the temporary to the definitive folder ...")
             if not installer.Install():
                 self.PrintBad()
                 return False
 
         # 10. Checking (again)
-        if 'Check' in methods:
+        if hasattr(installer, 'Check'):
             self.logger.info("   Checking the installation ...")
             if not installer.Check():
                 self.PrintBad()

@@ -75,7 +75,7 @@ class RecTrackFormat : public RecParticleFormat
   MAfloat64 etaOuter_;  /// eta @ first layer of calo
   MAfloat64 phiOuter_;  /// phi @ first layer of calo
   std::vector<IsolationConeType> isolCones_; // isolation cones
-//  MCParticleFormat* mc_; @JACK causes seg fault already exists in RecParticleFormat
+  //  MCParticleFormat* mc_; @JACK causes seg fault already exists in RecParticleFormat
 
   // -------------------------------------------------------------
   //                        method members
@@ -124,11 +124,11 @@ class RecTrackFormat : public RecParticleFormat
   // Setter for pdgid
   void setPdgid(MAint32 v)   {pdgid_=v;}
 
-  /// Accessor to etaCalo
+  /// Accessor to etaCalo (only for Delphes)
   const MAfloat64& etaCalo() const
   {return etaOuter_;}
 
-  /// Accessor to etaCalo
+  /// Accessor to etaCalo (only for Delphes)
   const MAfloat64& phiCalo() const
   {return phiOuter_;}
 
@@ -142,13 +142,24 @@ class RecTrackFormat : public RecParticleFormat
 
   /// Accessor to charge
   //@JACK: already exist in recparticlebase
-//  const MCParticleFormat* mc() const
-//  {return mc_;}
+  //  const MCParticleFormat* mc() const
+  //  {return mc_;}
 
   /// giving a new isolation cone entry
   IsolationConeType* GetNewIsolCone()
   {
     isolCones_.push_back(IsolationConeType());
+    return &isolCones_.back();
+  }
+
+  // Accessor to Isolation cone with speciffic radius. (only for SFS)
+  IsolationConeType* GetIsolCone(MAfloat32 radius)
+  {
+    for (MAuint32 i=0; i<isolCones_.size(); i++)
+        if (radius == isolCones_[i].deltaR()) return &isolCones_[i];
+
+    isolCones_.push_back(IsolationConeType());
+    isolCones_.back().setDeltaR(radius);
     return &isolCones_.back();
   }
 

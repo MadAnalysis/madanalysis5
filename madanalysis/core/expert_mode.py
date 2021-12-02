@@ -127,7 +127,8 @@ class ExpertMode:
           title=title.replace(' ', '_');
           name=title.replace('-', '_');
         logging.getLogger('MA5').info("   Writing an empty analysis...")
-        os.system("cd "+self.path+"/Build/SampleAnalyzer; python newAnalyzer.py " + name + " 1")
+        import sys
+        os.system("cd "+self.path+"/Build/SampleAnalyzer; "+sys.executable+" newAnalyzer.py " + name + " 1")
 
         # Extracting analysis name
         file = open(self.path+"/Build/SampleAnalyzer/User/Analyzer/analysisList.h")

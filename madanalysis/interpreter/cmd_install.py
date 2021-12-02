@@ -25,7 +25,9 @@
 from __future__                             import absolute_import
 from madanalysis.interpreter.cmd_base       import CmdBase
 from madanalysis.install.install_manager    import InstallManager
+from six.moves import input
 import logging, os
+
 
 class CmdInstall(CmdBase):
     """Command INSTALL"""
@@ -138,27 +140,26 @@ class CmdInstall(CmdBase):
                 return True
         elif args[0]=='PAD':
             pad_install_check, padsfs_install_check = False, False
-            # PAD requires ma5 to be restarted; therefore we first install PADForSFS
-            if self.main.archi_info.has_fastjet:
-                padsfs_install_check = installer.Execute('PADForSFS')
-            else:
-                self.logger.warning("PADForSFS requires FastJet to be installed.")
-                if not self.main.forced:
-                    self.logger.info("Would you like to install FastJet? [Y/N]")
-                    while True:
-                        answer = input("Answer : ")
-                        if answer.lower() in ['y','n','yes','no']:
-                            break
-                else:
+            # First check if PAD4SFS is installed
+            if not self.main.session_info.has_padsfs:
+                # check if FastJet is installed
+                if not self.main.archi_info.has_fastjet:
                     answer = "y"
-                if answer.lower() in ['y','yes']:
-                    if not installer.Execute('fastjet'):
-                        return False
-                    if not installer.Execute('fastjet-contrib'):
-                        return False
-                    if not installer.Execute('PADForSFS'):
-                        return False
-                    padsfs_install_check = 'restart'
+                    if not self.main.forced:
+                        self.logger.warning("PADForSFS requires FastJet to be installed.")
+                        self.logger.info("Would you like to install FastJet? [Y/N]")
+                        while True:
+                            answer = input("Answer : ")
+                            if answer.lower() in ['y','n','yes','no', "yeap", "nope"]:
+                                break
+                    if answer.lower() in ['y','yes',"yeap"]:
+                        for package in ["fastjet", "fastjet-contrib", "PADForSFS"]:
+                            if not installer.Execute(package):
+                                return False
+                        padsfs_install_check = 'restart'
+                else:
+                    padsfs_install_check = installer.Execute('PADForSFS')
+
             if inst_delphes(self.main,installer,'delphes',True):
                 pad_install_check = installer.Execute('PAD')
             else:
@@ -172,22 +173,18 @@ class CmdInstall(CmdBase):
             if self.main.archi_info.has_fastjet:
                 padsfs_install_check = installer.Execute('PADForSFS')
             else:
+                answer = "y"
                 if not self.main.forced:
                     self.logger.warning("PADForSFS requires FastJet to be installed.")
                     self.logger.info("Would you like to install FastJet? [Y/N]")
                     while True:
                         answer = input("Answer : ")
-                        if answer.lower() in ['y','n','yes','no']:
+                        if answer.lower() in ['y','n','yes','no', "yeap", "nope"]:
                             break
-                else:
-                    answer = "y"
-                if answer.lower() in ['y','yes']:
-                    if not installer.Execute('fastjet'):
-                        return False
-                    if not installer.Execute('fastjet-contrib'):
-                        return False
-                    if not installer.Execute('PADForSFS'):
-                        return False
+                if answer.lower() in ['y','yes',"yeap"]:
+                    for package in ["fastjet", "fastjet-contrib", "PADForSFS"]:
+                        if not installer.Execute(package):
+                            return False
                     return 'restart'
             return padsfs_install_check
         elif args[0]=='pyhf':
@@ -196,6 +193,13 @@ class CmdInstall(CmdBase):
             else:
                 self.logger.error("The PYHF module requires scipy, please retry"+\
                                   "after installing scipy.")
+                return True
+        elif args[0]=='likelihood_simplifier':
+            if self.main.session_info.has_scipy and self.main.session_info.has_pyhf:
+                return installer.Execute('simplify')
+            else:
+                self.logger.error("The `simplify` module requires pyhf, please retry"+ \
+                                  "after installing pyhf.")
                 return True
         else:
             self.logger.error("the syntax is not correct.")

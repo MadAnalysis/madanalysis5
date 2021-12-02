@@ -211,7 +211,8 @@ class InstallPad:
                 ## Creating a skeleton if necessary (+ inclusion in the analysis list and in the main)
                 if not (analysis in ["cms_b2g_12_012", "cms_sus_13_011"] or (analysis=="atlas_susy_2016_07" and self.padname=='PADForSFS')):
                     logging.getLogger('MA5').debug('  --> Creating a skeleton analysis for ' + analysis)
-                    TheCommand = ['./newAnalyzer.py', analysis, analysis]
+                    import sys
+                    TheCommand = [sys.executable,'newAnalyzer.py', analysis, analysis]
                     logging.getLogger('MA5').debug('  -->  ' + ' '.join(TheCommand))
                     ok, out= ShellCommand.ExecuteWithLog(TheCommand,logname,
                                                          self.installdir+'/Build/SampleAnalyzer',
@@ -387,7 +388,10 @@ class InstallPad:
 
     def Check(self):
         for path in glob.glob(self.installdir+"/*.log"):
-          shutil.move(path, self.installdir+'/Logs')
+            shutil.move(path, self.installdir+'/Logs')
+        setattr(self.main.session_info,
+                "has_"+self.padname.lower().replace("for","").replace("tune",""),
+                True)
         return True
 
     def NeedToRestart(self):

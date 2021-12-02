@@ -368,7 +368,8 @@ class InstallService():
                     info = six.moves.urllib.request.urlopen(url, context=ssl._create_unverified_context())
                 else:
                     info = six.moves.urllib.request.urlopen(url)
-            except:
+            except Exception as err:
+                logging.getLogger('MA5').debug(err)
                 logging.getLogger('MA5').warning("Impossible to access the url: "+url)
                 ok=False
             if ok:

@@ -1,5 +1,53 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+193           (2021/11/17) fuks:    Polishing a few things for the v1.9 release 
+
+192           (2021/11/16) fuks:    change megneticfield -> magnetic_field 
+
+191           (2021/11/15) fuks:    Expanding documentation + adding d0/dz (approx) to the list of 
+                                   observables in the normal mode 
+
+190           (2021/11/12) fuks:    Small bug fix with the PYHF wrapper 
+
+189           (2021/10/25) fuks:    Updating the normnal mode reference card 
+
+186           (2021/10/25) fuks:    Adding the possibility to skip the CLs calculation 
+
+185           (2021/10/15) fuks:    Fixing PYHF installation 
+
+184           (2021/10/14) fuks:    Logger redirection fixed in the pyhf installer 
+
+182           (2021/10/14) fuks:    Allowing for TACO in the normal mode 
+
+181           (2021/10/14) fuks:    Updating PYHF 
+
+180           (2021/10/12) fuks:    Small fix in the recast toolbox (about an option) 
+
+179           (2021/10/11) fuks:    Last fix with the likelihood simplifier 
+
+178           (2021/10/11) fuks:    Last fixes with the likelihood simplifier 
+
+177           (2021/10/08) fuks:    Further fixes 
+
+176           (2021/10/08) fuks:    Bug fix with simplified likelihoods 
+
+175           (2021/10/08) fuks:    Fine-tuning the simplified likelihoods methods 
+
+174           (2021/10/07) fuks:    PYHF/Covariance fixes 
+
+173           (2021/10/07) fuks:    PYHF / Covariance treatment fixes 
+
+172           (2021/10/01) fuks:    Merging last LLP fixes 
+
+169           (2021/09/07) fuks:    Bug fix for the py2/py3 compatibility 
+
+168           (2021/09/01) fuks:    Several bug fixes (pyhf + llp_tracks) 
+
+167           (2021/09/01) fuks:    Compatibility with older gcc compilers 
+
+165           (2021/08/26) fuks:    Bug fix in the TrackFormat + adding isolation cones to the SFS 
+                                   framework 
+
 164           (2021/07/16) fuks:    Fixing scipy version detection (when version numbers contain 
                                    letters) 
 
