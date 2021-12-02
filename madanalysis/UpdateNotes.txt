@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+194           (2021/12/02) fuks:    Adding a reset function for the SFS module 
+
 193           (2021/11/17) fuks:    Polishing a few things for the v1.9 release 
 
 192           (2021/11/16) fuks:    change megneticfield -> magnetic_field 
