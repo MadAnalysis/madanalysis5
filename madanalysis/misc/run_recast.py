@@ -304,6 +304,7 @@ class RunRecast():
             return False
         # Load the analysis card
         from madanalysis.core.script_stack import ScriptStack
+        self.main.superfastsim.Reset()
         ScriptStack.AddScript(card)
         self.main.recasting.status="off"
         script_mode = self.main.script
@@ -321,7 +322,7 @@ class RunRecast():
             self.logger.debug("   Setting the output LHE file :"+output_name)
 
         # Initializing the JobWriter
-        jobber = JobWriter(self.main,self.dirname+'_SFSRun')
+        jobber = JobWriter(self.main, self.dirname + '_SFSRun')
 
         # Writing process
         self.logger.info("   Creating folder '"+self.dirname.split('/')[-1]  + "'...")
