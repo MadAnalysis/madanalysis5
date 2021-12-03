@@ -35,17 +35,15 @@
 
 using namespace MA5;
 
-
 ClusterAlgoFastJet::ClusterAlgoFastJet(std::string Algo):ClusterAlgoBase(Algo)
 { JetAlgorithm_=Algo; JetDefinition_=0; }
 
 ClusterAlgoFastJet::~ClusterAlgoFastJet() 
 { if (JetDefinition_!=0) delete JetDefinition_; }
 
-MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
-                                   SmearerBase* smearer)
-{
 
+MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent, SmearerBase* smearer)
+{
   // Clustering
   clust_seq.reset(new fastjet::ClusterSequence(myEvent.rec()->cluster_inputs(), *JetDefinition_));
 

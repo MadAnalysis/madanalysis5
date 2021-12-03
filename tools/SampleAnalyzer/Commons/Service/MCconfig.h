@@ -28,6 +28,7 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
+#include "SampleAnalyzer/Commons/Service/LogService.h"
 
 // STL headers
 #include <set>
@@ -81,11 +82,36 @@ struct MCconfig
     hadronic_ids_.insert(id);
   } 
 
+  /// Remove hadronic id
+  void RemoveHadronicId(MAint32 id)
+  {
+    hadronic_ids_.erase(id);
+  }
+
   /// Add invisible id
   void AddInvisibleId(MAint32 id)
   {
     invisible_ids_.insert(id);
   } 
+
+  /// Remove invisible id
+  void RemoveInvisibleId(MAint32 id)
+  {
+    invisible_ids_.erase(id);
+  }
+
+  void Print()
+  {
+    INFO << "Hadronic IDs " ;
+    for (auto id : hadronic_ids_)
+        INFO << id << ", ";
+    INFO << endmsg;
+
+    INFO << "\nInvisible IDs ";
+    for (auto id : invisible_ids_)
+        INFO << id << ", ";
+    INFO << endmsg;
+  }
 
 };
 

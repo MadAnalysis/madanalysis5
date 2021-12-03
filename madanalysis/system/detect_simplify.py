@@ -23,17 +23,10 @@
 
 
 from __future__ import absolute_import
-import logging
-import glob
-import os
-import sys
-import re
-import platform
-from shell_command  import ShellCommand
+import logging, os, sys
 from madanalysis.enumeration.detect_status_type import DetectStatusType
 
-
-class DetectScipy:
+class DetectSimplify:
 
     def __init__(self, archi_info, user_info, session_info, debug):
         # mandatory options
@@ -41,61 +34,49 @@ class DetectScipy:
         self.user_info    = user_info
         self.session_info = session_info
         self.debug        = debug
-        self.name         = 'SciPy'
+        self.name         = 'likelihood simplifier'
         self.mandatory    = False
         self.log          = []
         self.logger       = logging.getLogger('MA5')
-        self.moreInfo     = 'For more details, type: config_info SciPy'
+        self.moreInfo     = 'For more details see https://github.com/eschanet/simplify'
         # adding what you want here
 
 
     def IsItVetoed(self):
-        if self.user_info.scipy_veto:
-            self.logger.debug("user setting: veto on scipy")
+        if self.user_info.pyhf_veto:
+            self.logger.debug("user setting: veto on simplify")
             return True
         else:
             self.logger.debug("no user veto")
             return False
 
-        
+
     def AutoDetection(self):
 
         # Checking if scipy is installed on the system
-        try:
-            import scipy
-        except ImportError as err:
-            self.logger.debug(err)
-            return DetectStatusType.UNFOUND,''
+        simplify_path = os.path.join(self.archi_info.ma5dir,'tools/simplify'+'/src')
+        if os.path.isdir(simplify_path) and simplify_path not in sys.path:
+            sys.path.insert(0, simplify_path)
 
-        version = scipy.__version__.split('.');
-        if int(version[0]) < 1 or (int(version[0]) == 1 and int(version[1]) < 5):
-            self.logger.error("Please update the local scipy installation with a newer version.")
+        try:
+            import simplify
+        except ImportError as err:
+            self.logger.debug(str(err))
             return DetectStatusType.UNFOUND,''
+        except Exception as err:
+            self.logger.debug(str(err))
+            return DetectStatusType.UNFOUND,''
+        else:
+            self.logger.debug("Simplify has been imported from "+" ".join(simplify.__path__))
 
         # Checking release
         if self.debug:
-            # Matplotlib version
-            self.logger.debug("  release = "+scipy.__version__)
-            # Matplotlib location
-            self.logger.debug("  where? = "+scipy.__file__)
+            self.logger.debug("  where? = "+simplify.__file__)
 
-#        word=matplotlib.__version__
-#        word=word.lstrip()
-#        word=word.rstrip()
-#        numbers = word.split('.')
-#        if len(numbers)>=1:
-#            if numbers[0]=='0':
-#                self.logger.error("Release must be greater to 1.0.0. Please upgrade the Matplotlib package.")
-#                return DetectStatusType.UNFOUND,''
-#        else:
-#            self.logger.warning("Impossible to decode the Matplotlib release")
-            
         # Ok
         return DetectStatusType.FOUND,''
 
 
     def SaveInfo(self):
-        self.session_info.has_scipy = True
+        self.session_info.has_simplify = True
         return True
-
-

@@ -220,7 +220,6 @@ class InstallService():
                 # skip the file
                 continue
 
-            
             # Decoding the size of the remote file
             logging.getLogger('MA5').debug('Decoding the size of the remote file...')
             sizeURLFile = 0                    
@@ -228,7 +227,7 @@ class InstallService():
                 if six.PY2:
                     sizeURLFile = int(info.info().getheaders("Content-Length")[0])
                 else:
-                    sizeURLFile = int(info.info().get("Content-Length")[0])
+                    sizeURLFile = int(info.info().get("Content-Length"))
             except Exception as err:
                 print(err)
                 logging.getLogger('MA5').debug('-> Problem to decode it')
@@ -251,7 +250,7 @@ class InstallService():
                 logging.getLogger('MA5').debug("A file with the same name '"+output+"' has been found on the machine.")
 
                 ok=True
-                        
+
                 # Decoding the size of the local file
                 if ok:
                     logging.getLogger('MA5').debug('Decoding the size of the local file...')
@@ -369,7 +368,8 @@ class InstallService():
                     info = six.moves.urllib.request.urlopen(url, context=ssl._create_unverified_context())
                 else:
                     info = six.moves.urllib.request.urlopen(url)
-            except:
+            except Exception as err:
+                logging.getLogger('MA5').debug(err)
                 logging.getLogger('MA5').warning("Impossible to access the url: "+url)
                 ok=False
             if ok:
@@ -395,27 +395,21 @@ class InstallService():
     def check_ma5site():
         url='http://madanalysis.irmp.ucl.ac.be'
         logging.getLogger('MA5').debug("Testing the access to MadAnalysis 5 website: "+url+" ...")
-
         info = InstallService.UrlAccess(url)
-
-        # Close the access
-        if info!=None:
-            info.close()
-        return True        
-
-        
-    @staticmethod
-    def check_inspire():
-        url='http://inspirehep.net/'
-        logging.getLogger('MA5').debug("Testing the access to InSpire: "+url+" ...")
-
-        info = InstallService.UrlAccess(url)
-
         # Close the access
         if info!=None:
             info.close()
         return True
 
+    @staticmethod
+    def check_dataverse():
+        url='http://dataverse.uclouvain.be'
+        logging.getLogger('MA5').debug("Testing access to the MadAnalysis5 dataverse: "+url+" ...")
+        info = InstallService.UrlAccess(url)
+        # Close the access
+        if info!=None:
+            info.close()
+        return True
 
     @staticmethod
     def create_tools_folder(path):

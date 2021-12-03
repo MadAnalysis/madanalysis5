@@ -49,15 +49,12 @@ class InstallDelphes:
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir    = os.path.join(self.tmpdir, 'MA5_'+self.package)
         self.ncores      = 1
-#        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
-#        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.0.tar.gz"}
-#        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.1.tar.gz"}
-#        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.3.tar.gz"}
         if package == 'delphesma5tune':
-            self.files = {package+".tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.4.1.tar.gz"}
+            self.files = {package+".tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes-3.5.0.tar.gz"}
         else:
 #             self.files = {package+".tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/delphes342pre.tar.gz"} # Delphes for LLP not release yet
-            self.files = {package+".tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.4.2.tar.gz"}
+#            self.files = {package+".tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.4.2.tar.gz"}
+            self.files = {package+".tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes3.4.3.tar.gz"}
         self.logger = logging.getLogger('MA5')
 
 
@@ -192,12 +189,6 @@ class InstallDelphes:
         filename = self.installdir+'/external/ExRootAnalysis/ExRootConfReader.cc'
         self.logger.debug('Updating files: commenting out lines in: '+filename+' ...')
         self.CommentLines(filename,[177,178,179,180],'//')
-
-        # Updating ValidationDelphes
-        filename = self.installdir+'/validation/DelphesValidation.cpp'
-        self.logger.debug('Updating file (missing include): '+filename+' ...')
-        self.MissingInclude(filename)
-
 
         # Adding files
         if self.package=='delphes':
@@ -404,41 +395,6 @@ class InstallDelphes:
         input.close()
         output.close()
 
-        try:
-            shutil.copy(filename+'.savema5',filename)
-        except:
-            self.logger.error("impossible to copy "+filename+'.savema5 in '+filename)
-            return False
-
-        return True
-
-
-    def MissingInclude(self,filename):
-        # open input file
-        try:
-            input = open(filename)
-        except:
-            self.logger.error("impossible to read the file:" + filename)
-            return False
-
-        # open output file
-        try:
-            output = open(filename+'.savema5','w')
-        except:
-            self.logger.error("impossible to read the file:" + filename+'.savema5')
-            return False
-
-        # lines
-        for line in input:
-            if 'TH1.h' in line:
-                output.write("#include \"TF1.h\"")
-            output.write(line);
-
-        #close
-        input.close()
-        output.close()
-
-        # Copy
         try:
             shutil.copy(filename+'.savema5',filename)
         except:
@@ -703,7 +659,7 @@ class InstallDelphes:
         checkup = CheckUp(self.main.archi_info, self.main.session_info, False, self.main.script)
         for link in [x.split('/')[-1] for x in originals]:
             dest = os.path.join(self.main.archi_info.ma5dir,'tools','SampleAnalyzer', 'ExternalSymLink', link)
-            if not checkup.CreateSymLink(x,dest):
+            if not checkup.CreateSymLink(link,dest):
                 return -1
 
         # Compiler setup

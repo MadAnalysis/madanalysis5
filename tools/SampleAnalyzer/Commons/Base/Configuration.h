@@ -63,6 +63,9 @@ class Configuration
     /// input list name
     std::string input_list_name_;
 
+    /// input options
+    std::map<std::string, std::string> options_;
+
   // -------------------------------------------------------------
   //                       method members
   // -------------------------------------------------------------
@@ -146,6 +149,9 @@ class Configuration
     /// Accessor to CheckEvent
     MAbool IsCheckEvent() const
     { return check_event_; }
+
+    /// Accessor to options
+    std::map<std::string, std::string> Options() const {return options_;}
 
 };
 

@@ -121,7 +121,7 @@ class RecJetFormat : public RecParticleFormat
   }
 
   /// Accessor to the number of tracks
-  virtual const MAuint16 ntracks() const
+  const MAuint16 ntracks() const
   {return ntracks_;}
 
   /// Accessor to the b-tag

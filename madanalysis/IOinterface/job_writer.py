@@ -304,6 +304,7 @@ class JobWriter(object):
                 input = open(self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Interfaces/delphesMA5tune/"+cardname,'r')
         except:
             logging.getLogger('MA5').error("impossible to find "+self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Interfaces/delphes/"+cardname)
+            return False
         if "../../../.." in cardname:
             cardname=cardname.split('/')[-1]
 
@@ -338,6 +339,8 @@ class JobWriter(object):
         except:
             pass
 
+        return True
+
 
     def CopyLHEAnalysis(self):
         recast = (self.main.recasting.status=="on")
@@ -360,7 +363,8 @@ class JobWriter(object):
                 return False
 
         if self.main.fastsim.package in ["delphes","delphesMA5tune"]:
-            self.CreateDelphesCard()
+            if not self.CreateDelphesCard():
+                return False
 
         if self.main.recasting.status=="on":
             if not self.main.recasting.CreateCard(self.path):
@@ -460,11 +464,18 @@ class JobWriter(object):
             file.write('  //Getting pointer to the clusterer\n')
             file.write('  std::map<std::string, std::string> parametersC1;\n')
             parameters = self.main.fastsim.SampleAnalyzerConfigString()
-            for k,v in sorted(six.iteritems(parameters),\
-                              key=lambda k_v: (k_v[0],k_v[1])):
-                file.write('  parametersC1['+('"'+k+'"').ljust(21,' ')+'] = "'+v+'";\n')
+            for k,v in sorted(six.iteritems(parameters),key=lambda k_v: (k_v[0],k_v[1])):
+                file.write('  parametersC1["'+k+'"]="'+v+'";\n')
+            for obj in ["electron","muon","track","photon"]:
+                if len(getattr(self.main.superfastsim, obj+"_isocone_radius")) != 0:
+                    file.write(
+                        '  parametersC1["isolation.'+obj+'.radius"]="'+ ','.join(
+                        [str(x) for x in getattr(self.main.superfastsim, obj+"_isocone_radius")]
+                        )+'";\n'
+                    )
             file.write('  JetClusterer* cluster1 = \n')
-            file.write('      manager.InitializeJetClusterer("'+self.main.fastsim.clustering.algorithm+'",parametersC1);\n')
+            file.write('      manager.InitializeJetClusterer("'+\
+                       self.main.fastsim.clustering.algorithm+'",parametersC1);\n')
             file.write('  if (cluster1==0) return 1;\n\n')
             if len(self.main.jet_collection) > 0:
                 # Write configuration for other jets

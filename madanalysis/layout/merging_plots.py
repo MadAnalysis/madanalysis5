@@ -460,14 +460,27 @@ class MergingPlots:
                 outputPy.write('             label=\'Sum\', ')
             else:
                 outputPy.write('             label=\''+str(ind-1)+'-jet sample\', ')
-            outputPy.write('rwidth=0.8,\\\n'+\
-                '             color='+linecolor+', '+\
-                'edgecolor='+linecolor+', '+\
-                'linewidth=1, '+\
-                'linestyle='+linestyle+',\\\n'+\
-                '             bottom=None, '+\
-                'cumulative=False, density=False, ' +\
-                'align="mid", orientation="vertical")\n\n')
+
+            try:
+                import matplotlib.pyplot as plt
+                plt.hist([0],normed=True)
+                outputPy.write('rwidth=0.8,\\\n'+\
+                                '             color='+linecolor+', '+\
+                                'edgecolor='+linecolor+', '+\
+                                'linewidth=1, '+\
+                                'linestyle='+linestyle+',\\\n'+\
+                                '             bottom=None, '+\
+                                'cumulative=False, normed=False, ' +\
+                                'align="mid", orientation="vertical")\n\n')
+            except:
+                outputPy.write('rwidth=0.8,\\\n'+\
+                    '             color='+linecolor+', '+\
+                    'edgecolor='+linecolor+', '+\
+                    'linewidth=1, '+\
+                    'linestyle='+linestyle+',\\\n'+\
+                    '             bottom=None, '+\
+                    'cumulative=False, density=False, ' +\
+                    'align="mid", orientation="vertical")\n\n')
 
         # Setting X axis label
         axis_titleX = "log10(DJR"+str(ind)+")"

@@ -174,7 +174,7 @@ class CmdDefine(CmdBase.CmdBase):
             nargs += 1
 
         if nargs==2:
-            output=['tagger', 'smearer', 'reco_efficiency','jet_algorithm']
+            output=['tagger', 'smearer', 'reco_efficiency', "jes", "energy_scaling", "jet_algorithm"]
             return self.finalize_complete(text,output)
 
         elif nargs==3 or (nargs==5 and args[1] == 'tagger'):

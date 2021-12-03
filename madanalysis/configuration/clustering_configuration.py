@@ -43,13 +43,17 @@ class ClusteringConfiguration:
                                      "siscone",\
                                      "cdfjetclu", "cdfmidpoint",\
                                      "none"],
-                      "exclusive_id"        : ["true","false"],
-                      "jetrecomode"         : ["jets","constituents"],
-                      "magneticfield"       : ["3.8"],
-                      #"tracker_radius"      : ["1.29"], @JACK : These options are not available atm.
-                      #"half_length"         : ["3.0"],
-                      "particle_propagator" : ["on","off"],
-                      "JetID"               : ["Ma5Jet"]
+                      "exclusive_id"            : ["true","false"],
+                      "jetrecomode"             : ["jets","constituents"],
+                      "magnetic_field"          : ["3.8"],
+                      # "tracker_radius"          : ["1.29"], @JACK these are not available atm
+                      # "half_length"             : ["3.0"],
+                      "particle_propagator"     : ["on","off"],
+                      "JetID"                   : ["Ma5Jet"],
+                      "track_isocone_radius"    : ["0.5"],
+                      "electron_isocone_radius" : ["0.5"],
+                      "muon_isocone_radius"     : ["0.5"],
+                      "photon_isocone_radius"   : ["0.5"],
                     }
 
     def __init__(self):

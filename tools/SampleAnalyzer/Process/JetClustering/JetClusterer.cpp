@@ -37,6 +37,33 @@
 
 using namespace MA5;
 
+/// Set isolation cones for tracks, e, mu, photon based on tower objects
+template<class Type>
+void SetConeRadius(
+    std::vector<MAfloat64> cone_radius, std::vector<Type>& objects, MCParticleFormat part, MAbool addself=false
+)
+{
+    for (MAuint32 iR=0; iR<cone_radius.size(); iR++)
+    {
+        for (MAuint32 i=0; i<objects.size(); i++)
+        {
+            IsolationConeType* current_isocone = objects[i].GetIsolCone(cone_radius[iR]);
+            if (objects[i].dr(part.momentum()) < cone_radius[iR])
+            {
+                current_isocone->addsumPT(part.pt());
+                current_isocone->addSumET(part.et());
+                if (addself)
+                {
+                    current_isocone->setSelfPT(objects[i].pt());
+                    current_isocone->setSelfET(objects[i].et());
+                }
+            }
+        }
+    }
+}
+
+
+
 // -----------------------------------------------------------------------------
 // Initialize
 // -----------------------------------------------------------------------------
@@ -106,8 +133,23 @@ MAbool JetClusterer::Initialize(const std::map<std::string,std::string>& options
     // Primary Jet ID
     else if (key == "jetid")
     {
-      JetID_ = it->second;
-      result = true;
+        JetID_ = it->second;
+        result = true;
+    }
+
+    // Isolation cone radius for tracker
+    else if (key.find("isolation")==0)
+    {
+        std::stringstream str(it->second);
+        for (MAfloat64 tmp; str >> tmp;)
+        {
+            if (tmp>0. && key.substr(10) == "track.radius")    isocone_track_radius_.push_back(tmp);
+            if (tmp>0. && key.substr(10) == "electron.radius") isocone_electron_radius_.push_back(tmp);
+            if (tmp>0. && key.substr(10) == "muon.radius")     isocone_muon_radius_.push_back(tmp);
+            if (tmp>0. && key.substr(10) == "photon.radius")   isocone_photon_radius_.push_back(tmp);
+            if (str.peek() == ',' || str.peek() == ' ') str.ignore();
+        }
+        result = true;
     }
 
     // Other
@@ -233,6 +275,7 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
                 track->setProductionVertex(new_vertex);
                 track->setClosestApproach(smeared_track.closest_approach());
                 track->setMc(&(part));
+                track->SetCharge(PDG->GetCharge(part.pdgid()) / 3.);
             }
         }
     }
@@ -274,7 +317,7 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
       else if (absid==15)
       {
         // rejecting particle if coming from hadronization
-        if (LOOP->ComingFromHadronDecay(&part,mySample)) continue;
+        if (LOOP->ComingFromHadronDecay(&part,mySample,myEvent.mc()->particles().size())) continue;
 
         // Looking taus daughters id
         MAbool leptonic   = true;
@@ -480,6 +523,7 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
     input.set_user_index(i);
     myEvent.rec()->AddHadron(input);
 #endif
+
     }
   }
 
@@ -550,6 +594,28 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
 
   myBtagger_->Execute(mySample,myEvent);
   myTautagger_->Execute(mySample,myEvent);
+
+  // Setup isolation cones
+  if (isocone_track_radius_.size() > 0 || isocone_electron_radius_.size() > 0 || \
+      isocone_muon_radius_.size() > 0  || isocone_photon_radius_.size() > 0)
+  {
+    for (auto &part: myEvent.rec()->cluster_inputs())
+    {
+        MCParticleFormat current_jet;
+        current_jet.momentum().SetPxPyPzE(part.px(),part.py(),part.pz(),part.e());
+        // Set track isolation
+        // Isolation cone is applied to each particle that deposits energy in HCAL;
+        // all hadronic activity assumed to reach to HCAL
+        SetConeRadius(isocone_track_radius_,    myEvent.rec()->tracks(),    current_jet, false);
+        // Set Electron isolation
+        SetConeRadius(isocone_electron_radius_, myEvent.rec()->electrons(), current_jet, !ExclusiveId_);
+        // Set Muon isolation
+        SetConeRadius(isocone_muon_radius_,     myEvent.rec()->muons(),     current_jet, false);
+        // Set Photon isolation
+        SetConeRadius(isocone_photon_radius_,   myEvent.rec()->photons(),   current_jet, !ExclusiveId_);
+    }
+
+  }
 
 
   return true;

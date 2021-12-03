@@ -343,6 +343,8 @@ class CheckUp():
             return False
         if not self.checker.Execute('pyhf'):
             return False
+        if not self.checker.Execute('simplify'):
+            return False
         return True
 
 

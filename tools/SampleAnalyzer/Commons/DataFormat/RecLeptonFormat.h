@@ -107,7 +107,7 @@ class RecLeptonFormat : public RecParticleFormat
   {}
 
   /// Dump information
-  virtual void Print() const
+  void Print() const
   {
     INFO << "charge ="   << /*set::setw(8)*/"" << std::left << charge_  << ", "  
          << "sumET_isol_ = " << /*set::setw(8)*/"" << std::left << sumET_isol_ << ", "
@@ -134,20 +134,20 @@ class RecLeptonFormat : public RecParticleFormat
   virtual const MAint32 charge() const
   { if (charge_) return +1; else return -1; }
 
-  /// Mutator related to the electric charge 
+  /// Mutator related to the electric charge
   virtual void SetCharge(MAint32 charge)
   { if (charge>0) charge_=true; else charge_=false; }
 
   /// Accessor to sumET_isol
-  virtual const MAfloat32 sumET_isol() const
+  const MAfloat32 sumET_isol() const
   { return sumET_isol_; }
 
   /// Accessor to sumPT_isol
-  virtual const MAfloat32 sumPT_isol() const
+  const MAfloat32 sumPT_isol() const
   { return sumPT_isol_; }
 
   /// Accessor to ET_PT
-  virtual const MAfloat32 ET_PT_isol() const
+  const MAfloat32 ET_PT_isol() const
   { if (sumPT_isol_!=0) return sumET_isol_/sumPT_isol_;
     else return 0; }
 
@@ -159,6 +159,16 @@ class RecLeptonFormat : public RecParticleFormat
   IsolationConeType* GetNewIsolCone()
   {
     isolCones_.push_back(IsolationConeType());
+    return &isolCones_.back();
+  }
+
+  IsolationConeType* GetIsolCone(MAfloat32 radius)
+  {
+    for (MAuint32 i=0; i<isolCones_.size(); i++)
+        if (radius == isolCones_[i].deltaR()) return &isolCones_[i];
+
+    isolCones_.push_back(IsolationConeType());
+    isolCones_.back().setDeltaR(radius);
     return &isolCones_.back();
   }
 

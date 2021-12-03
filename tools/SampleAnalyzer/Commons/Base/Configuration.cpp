@@ -40,8 +40,8 @@ using namespace MA5;
 // Initializing static data members
 // -----------------------------------------------------------------------------
 // DO NOT TOUCH THESE LINES
-const std::string Configuration::sampleanalyzer_version_ = "1.9.17";
-const std::string Configuration::sampleanalyzer_date_    = "2021/02/19";
+const std::string Configuration::sampleanalyzer_version_ = "1.9.55";
+const std::string Configuration::sampleanalyzer_date_    = "2021/11/17";
 // DO NOT TOUCH THESE LINES
 
 // -----------------------------------------------------------------------------
@@ -58,6 +58,8 @@ void Configuration::PrintSyntax()
        << endmsg;
   INFO << "   --no_event_weight  : the event weights are not used"
        << endmsg;
+  INFO << "  Any aditional option for the analyzer can be given with the following syntax:" << endmsg;
+  INFO << "   --<opt_name>=<val>" << endmsg;
   INFO << endmsg;
 }
 
@@ -145,12 +147,20 @@ MAbool Configuration::Initialize(MAint32 &argc, MAchar *argv[])
       // version
       else if (argument.find("--ma5_version=")==0) DecodeMA5version(argument);
 
-      // other = mistake
+      // other = comman line options
       else
       {
-        ERROR << "option '" << argument << "' is unknown !!!" << endmsg;
-        PrintSyntax();
-        return false;
+          std::string arg   = argv[i];
+          MAuint32 loc      = arg.find("=");
+          if (loc == 0 || loc > arg.length())
+          {
+            ERROR << "option '" << argument << "' is unknown !!!" << endmsg;
+            PrintSyntax();
+            return false;
+          }
+          std::string name  = arg.substr(2,loc-2);
+          std::string value = arg.substr(loc+1,arg.length()-1);
+          options_[name] = value;
       }
     } 
 

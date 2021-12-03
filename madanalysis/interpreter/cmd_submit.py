@@ -364,12 +364,8 @@ class CmdSubmit(CmdBase):
             if not Recaster.init():
                 return False
             self.main.recasting.delphesruns = Recaster.delphes_runcard
-            ### fastsim
-            if not Recaster.fastsim():
-                self.logger.error("job submission aborted.")
-                return False
-            ### Analyses
-            if not Recaster.analysis():
+            ### Executing the PAD
+            if not Recaster.execute():
                 self.logger.error("job submission aborted.")
                 return False
         # Otherwise, standard job
