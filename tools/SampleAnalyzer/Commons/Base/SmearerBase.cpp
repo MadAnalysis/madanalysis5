@@ -96,7 +96,8 @@ void SmearerBase::ParticlePropagator(MCParticleFormat * part)
     xd = x_helix * (1 - std::abs(R)/r_helix);
     yd = y_helix * (1 - std::abs(R)/r_helix);
     zd = part->mothers()[0]->decay_vertex().Z()
-     + part->pz()/part->pt() * R * atan2(-copysign(1.0,R)*part->px()*x_helix+part->py()*y_helix,-copysign(1.0,R)*part->px()*y_helix-part->py()*x_helix);
+     + part->pz()/part->pt() * R * atan2(-copysign(1.0,R)*(part->px()*x_helix+part->py()*y_helix),
+                                         -copysign(1.0,R)*(part->px()*y_helix-part->py()*x_helix));
 
     part->setClosestApproach(MAVector3(xd,yd,zd));
     part->setD0(copysign(1.0, R)*(r_helix-std::abs(R)));
@@ -116,11 +117,17 @@ void SmearerBase::ParticlePropagator(MCParticleFormat * part)
     part->setMomentumRotation(RotAngle);
 
     // Calculating the new decay vertex position
-    part->setDecayVertex(MALorentzVector(
-      x_helix + R/part->pt() * (part->px()*sin(omegat) - part->py()*cos(omegat)),
-      y_helix + R/part->pt() * (part->py()*sin(omegat) + part->px()*cos(omegat)),
-      part->mothers()[0]->decay_vertex().Z() + part->pz()/part->e()*prop_ctime,
-      part->ctau()));
+    if (prop_ctime == 0.)
+    {
+        part->setDecayVertex(part->decay_vertex());
+    } else
+    {
+        part->setDecayVertex(MALorentzVector(
+          x_helix + R/part->pt() * (part->px()*sin(omegat) - part->py()*cos(omegat)),
+          y_helix + R/part->pt() * (part->py()*sin(omegat) + part->px()*cos(omegat)),
+          part->mothers()[0]->decay_vertex().Z() + part->pz()/part->e()*prop_ctime,
+          part->ctau()));
+    }
   }
 }
 
