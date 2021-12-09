@@ -68,7 +68,7 @@ class DetectScipy:
             return DetectStatusType.UNFOUND,''
 
         version = scipy.__version__.split('.');
-        if int(version[0]) < 1 or (int(version[0]) == 1 and int(version[1]) < 5):
+        if int(version[0]) < 1 or (int(version[0]) == 1 and int(version[1]) < 2):
             self.logger.error("Please update the local scipy installation with a newer version.")
             return DetectStatusType.UNFOUND,''
 

@@ -305,7 +305,6 @@ class RunRecast():
             return False
         # Load the analysis card
         from madanalysis.core.script_stack import ScriptStack
-        self.main.superfastsim.Reset()
         ScriptStack.AddScript(card)
         self.main.recasting.status="off"
         script_mode = self.main.script
@@ -323,7 +322,7 @@ class RunRecast():
             self.logger.debug("   Setting the output LHE file :"+output_name)
 
         # Initializing the JobWriter
-        jobber = JobWriter(self.main, self.dirname + '_SFSRun')
+        jobber = JobWriter(self.main,self.dirname+'_SFSRun')
 
         # Writing process
         self.logger.info("   Creating folder '"+self.dirname.split('/')[-1]  + "'...")
@@ -672,9 +671,11 @@ class RunRecast():
         compiler = LibraryWriter('lib',self.main)
         ncores = compiler.get_ncores2()
         # compiling
+        command = ['make']
+        strcores='' #ERIC
         if ncores>1:
             strcores='-j'+str(ncores)
-        command = ['make',strcores]
+            command.append(strcores)
         logfile = self.dirname+'_RecastRun/Build/Log/PADcompilation.log'
         result, out = ShellCommand.ExecuteWithLog(command,logfile,self.dirname+'_RecastRun/Build')
         time.sleep(1.);
@@ -916,19 +917,26 @@ class RunRecast():
 
     def parse_info_file(self, etree, analysis, extrapolated_lumi):
         ## Is file existing?
-        if not os.path.isfile(self.pad+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.info'):
-            self.logger.debug('Info File does not exist...')
+        filename=self.pad+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.info'   #ERIC
+        if not os.path.isfile(filename):
+            self.logger.warning('Info '+filename+' does not exist...')
             return -1,-1, -1
         ## Getting the XML information
         try:
-            info_input = open(self.pad+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.info')
+            info_input = open(filename)
             info_tree = etree.parse(info_input)
             info_input.close()
+        except Exception as err:
+            self.logger.warning("Error during HMTL parsing: "+str(err))
+            self.logger.warning('Cannot parse the info file')
+            return -1,-1, -1
+
+        try:
             results = self.header_info_file(info_tree,analysis,extrapolated_lumi)
             return results
         except Exception as err:
-            self.logger.debug(str(err))
-            self.logger.debug('Cannot parse the info file')
+            self.logger.warning("Error during extracting header info file: "+str(err))
+            self.logger.warning('Cannot parse the info file')
             return -1,-1, -1
 
     def fix_pileup(self,filename):
@@ -1894,7 +1902,7 @@ def pyhf_wrapper(*args, **kwargs):
                 iteration_limit += 1
             elif isinstance(CLs, dict):
                 if isnan(CLs["CLs_obs"]) or any([isnan(x) for x in CLs["CLs_exp"]]):
-                    arguments["stats"] = "q"
+                    arargumentsgs["stats"] = "q"
                     arguments["bounds"][model.config.poi_index] = (
                         arguments["bounds"][model.config.poi_index][0]-5,
                         arguments["bounds"][model.config.poi_index][1]
