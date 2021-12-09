@@ -595,6 +595,7 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
   myBtagger_->Execute(mySample,myEvent);
   myTautagger_->Execute(mySample,myEvent);
 
+#ifdef MA5_FASTJET_MODE
   // Setup isolation cones
   if (isocone_track_radius_.size() > 0 || isocone_electron_radius_.size() > 0 || \
       isocone_muon_radius_.size() > 0  || isocone_photon_radius_.size() > 0)
@@ -616,7 +617,7 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
     }
 
   }
-
+#endif
 
   return true;
 }
