@@ -22,9 +22,11 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import madanalysis.core.main as Main
 import logging
 import os
+from six.moves import range
 
 
 class UFOParticle:

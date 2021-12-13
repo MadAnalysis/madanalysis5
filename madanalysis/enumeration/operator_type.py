@@ -22,6 +22,25 @@
 ################################################################################
 
 
+import six
+
+class metaclass(type):
+    
+        def __getattr__(self, name):
+            if name in list(self.values.keys()):
+                return list(self.values.keys()).index(name)
+            else:
+                return list(self.values.keys()).index('UNKNOWN')
+
+        def convert2string(self,op):
+            name = list(self.values.keys())[op]
+            return self.values[name][0]
+
+        def convert2cpp(self,op):
+            name = list(self.values.keys())[op]
+            return self.values[name][1]
+
+@six.add_metaclass(metaclass)
 class OperatorType(object):
     values = { 'GREATER'       : [">",">"],\
                'GREATER_EQUAL' : [">=",">="],\
@@ -32,18 +51,4 @@ class OperatorType(object):
                'UNKNOWN'       : ["",""]
                }
 
-    class __metaclass__(type):
-    
-        def __getattr__(self, name):
-            if name in self.values.keys():
-                return self.values.keys().index(name)
-            else:
-                return self.values.keys().index('UNKNOWN')
 
-        def convert2string(self,op):
-            name = self.values.keys()[op]
-            return self.values[name][0]
-
-        def convert2cpp(self,op):
-            name = self.values.keys()[op]
-            return self.values[name][1]

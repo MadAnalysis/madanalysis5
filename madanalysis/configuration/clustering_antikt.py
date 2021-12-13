@@ -22,10 +22,11 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 class ClusteringAntiKt():
 
-    default_radius    = 1.
+    default_radius    = 0.4
     default_ptmin     = 5.
 
     userVariables = { "radius" : [str(default_radius)],\
@@ -66,7 +67,7 @@ class ClusteringAntiKt():
 
     
     def user_GetParameters(self):
-        return ClusteringAntiKt.userVariables.keys()
+        return list(ClusteringAntiKt.userVariables.keys())
 
 
     def user_SetParameter(self,parameter,value):

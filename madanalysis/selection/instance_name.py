@@ -27,7 +27,7 @@ class InstanceName():
 
     @staticmethod
     def Find(name):
-        if name in InstanceName.table.keys():
+        if name in list(InstanceName.table.keys()):
             return True
         return False
 
@@ -37,7 +37,7 @@ class InstanceName():
         
     @staticmethod
     def Get(name):
-        if name in InstanceName.table.keys():
+        if name in list(InstanceName.table.keys()):
             return InstanceName.table[name]
         else:
             newname="_"+name.lstrip()
@@ -52,7 +52,7 @@ class InstanceName():
                 if not (item.isalpha() or item.isdigit() or item=="_"):
                     item="X"
 
-            if newname in InstanceName.table.values():
+            if newname in list(InstanceName.table.values()):
                 parts = newname.split('__')
                 try:
                     index=int(parts[-1])

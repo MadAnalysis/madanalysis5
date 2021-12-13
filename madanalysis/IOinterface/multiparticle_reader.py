@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
 from madanalysis.core.main                    import Main
 import logging

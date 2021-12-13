@@ -22,11 +22,11 @@
 ################################################################################
 
 
+from __future__                          import absolute_import
 from madanalysis.install.install_service import InstallService
 from shell_command import ShellCommand
-import os
-import sys
-import logging
+import os, sys, logging
+
 
 class Installpyhf:
     def __init__(self,main):
@@ -37,8 +37,10 @@ class Installpyhf:
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir    = os.path.normpath(self.tmpdir + '/MA5_pyhf/')
         self.ncores      = 1
-        self.files = {"pyhf.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/pyhf_v0.1.2.tar.gz"}
-        self.pyhf_version= "0.1.2";
+        # self.files = {
+        #     "master.zip" : "https://github.com/scikit-hep/pyhf/archive/refs/heads/master.zip"
+        # }
+        self.pyhf_version = "0.6.3"
 
     def Detect(self):
         if not os.path.isdir(self.toolsdir):
@@ -67,44 +69,55 @@ class Installpyhf:
         return ok
 
     def Download(self):
+        if sys.version_info[0] == 2:
+            logging.getLogger('MA5').error("pyhf is only available for python 3")
+            return False
         # Checking connection with MA5 web site
         if not InstallService.check_ma5site():
             return False
         # Launching wget
-        logname = os.path.normpath(self.installdir+'/wget.log')
-        if not InstallService.wget(self.files,logname,self.downloaddir):
+        logname = os.path.normpath(self.installdir+'/pyhf.log')
+        ok, out= ShellCommand.ExecuteWithLog(
+            [sys.executable, "-m", "pip", "--version"], logname, self.tmpdir, silent=False
+        )
+        if not ok:
+            logging.getLogger('MA5').debug(out)
+            logging.getLogger('MA5').error("pypi is not accessible please try to install by hand using " +\
+                              "`pip install pyhf==" + self.pyhf_version + "` command.")
             return False
+        logcommand = os.path.normpath(self.installdir+'/command.log')
+        ok, out = ShellCommand.ExecuteWithLog(
+            [sys.executable, "-m", "pip", #"--log "+logname, "--no-input",
+             "install", "pyhf==" + self.pyhf_version],
+            logcommand, self.tmpdir, silent=False
+        )
+        if not ok:
+            logging.getLogger('MA5').debug(out)
+            logging.getLogger('MA5').error("Can not install pyhf at the moment please try instaling using " + \
+                              "`pip install pyhf=="+self.pyhf_version+"` command.")
+            return False
+        # if not InstallService.wget(self.files,logname,self.downloaddir):
+        #     return False
         # Ok
         return True
 
 
     def Unpack(self):
         # Logname
-        logname = os.path.normpath(self.installdir+'/unpack.log')
-        # Unpacking the tarball
-        ok, packagedir = InstallService.untar(logname, self.downloaddir, self.installdir,'pyhf.tar.gz')
-        if not ok:
-            return False
-        # Ok: returning the good folder
-        self.tmpdir=packagedir
+        # logname = os.path.normpath(self.installdir+'/unpack.log')
+        # # Unpacking the tarball
+        # for key in self.files.keys():
+        #     ok, packagedir = InstallService.untar(logname, self.downloaddir, self.installdir, key)
+        #     if not ok:
+        #         return False
+        # # Ok: returning the good folder
+        # self.tmpdir=packagedir
         return True
 
 
     def Build(self):
-        # Input
-        theCommands=[sys.executable,'setup.py','build']
-        logname=os.path.normpath(self.installdir+'/compilation.log')
-        # Execute
-        logging.getLogger('MA5').debug('shell command: '+' '.join(theCommands))
-        ok, out= ShellCommand.ExecuteWithLog(theCommands,\
-                                             logname,\
-                                             self.tmpdir,\
-                                             silent=False)
-        # return result
-        if not ok:
-            logging.getLogger('MA5').error('impossible to build the project. For more details, see the log file:')
-            logging.getLogger('MA5').error(logname)
-        return ok
+        # all checks are done in Check function.
+        return True
 
 
     def Install(self):
@@ -113,26 +126,29 @@ class Installpyhf:
 
     def Check(self):
         try:
-            if os.path.isdir(self.installdir) and not self.installdir in sys.path:
-                sys.path.append(self.installdir)
+            # if os.path.isdir(self.installdir) and not self.installdir in sys.path:
+            #     sys.path.insert(0, self.installdir+'/pyhf-master/src/')
             import pyhf
+            logging.getLogger('MA5').debug("pyhf has been imported from "+" ".join(pyhf.__path__))
             if str(pyhf.__version__) != self.pyhf_version:
-                logging.getLogger('MA5').error("Not using the right version of pyhf.")
+                logging.getLogger('MA5').error("An incorrect version of pyhf has been detected ("+str(pyhf.__version__)+")");
+                logging.getLogger('MA5').error("Please note that MadAnalysis 5 currently supports pyhf version "+\
+                                               str(self.pyhf_version))
                 self.display_log()
                 return False
-        except:
-            logging.getLogger('MA5').error("Cannot use pyhf. Please double check the required dependencies and/or (re-)install it.")
+        except ImportError as err:
+            logging.getLogger('MA5').error("The pyhf module cannot be used. Please check that all requirements are available and (re-)install it.")
+            logging.getLogger('MA5').error("Using phyf requires the click, tqdm, six, jsonschema, jsonpatch and pyyaml packages")
+            logging.getLogger('MA5').debug(err)
             self.display_log()
             return False
         return True
 
     def display_log(self):
         logging.getLogger('MA5').error("More details can be found into the log files:")
-        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/wget.log"))
-        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/unpack.log"))
-        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/configuration.log"))
-        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/compilation.log"))
-        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/installation.log"))
+        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/pyhf.log"))
+        logging.getLogger('MA5').error(" - "+os.path.normpath(self.installdir+"/command.log"))
+
 
     def NeedToRestart(self):
         return False

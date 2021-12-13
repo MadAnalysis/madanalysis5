@@ -7,6 +7,13 @@
 \usepackage{url,slashed,multirow,cite,verbdef}
 \usepackage{hyperref}
 
+\hypersetup{bookmarks=true,unicode=true,pdftoolbar=false,pdfmenubar=true,
+	pdffitwindow=false,pdfstartview={FitH},pdftitle={MA5 Expert Mode Reference Card},
+	pdfauthor={J.~Araz, E.~Conte, B.~Fuks}, pdfsubject={MA5 Normal Reference Card},
+	pdfcreator={J.~Araz, E.~Conte, B.~Fuks},pdfproducer={PDFLaTeX}, pdfkeywords={MA5expert-mode},
+	pdfnewwindow=true,colorlinks=true,
+	linkcolor=blue,citecolor=magenta,filecolor=magenta,urlcolor=cyan}
+
 %% Sets page size and margins
 \usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
 
@@ -369,7 +376,10 @@ are collected in the table below.
 \color{ao}\verb+const MAfloat32 pz() const+  & $z$-component of the momentum.\\
 \color{ao}\verb+const MAfloat32 r() const+   & Position in the $\eta-\phi$ plane.\\
 \color{ao}\verb+const MAfloat32 theta() const+  & Polar angle.\\
-\color{ao}\verb+const MAfloat32 y() const+ & Rapidity.\\
+\color{ao}\verb+const MAdouble64 d0() const+ & Transverse impact parameter.\\
+\color{ao}\verb+const MAdouble64 dz() const+ & Longitudinal impact parameter.\\
+\color{ao}\verb+const MAdouble64 d0_approx() const+ & Transverse impact parameter with straight line approximation.\\
+\color{ao}\verb+const MAdouble64 dz_approx() const+ & Longitudinal impact parameter with straight line approximation.\\
 \hline
 \end{tabular}
 \end{center}
@@ -456,18 +466,18 @@ with the following methods.
 \multicolumn{2}{l}{\color{ao}\expccb}\\  & Reconstructed electrons.\\
 \multicolumn{2}{l}{\color{ao}\expccc}\\  & Reconstructed muons.\\
 \multicolumn{2}{l}{\color{ao}\expccd}\\  & Reconstructed hadronic taus.\\
-\multicolumn{2}{l}{\color{ao}\expcce}\\  & Reconstructed fat jets.\\
+\multicolumn{2}{l}{\color{ao}\expcce}\\  & Reconstructed fat jets.(Only with Delphes)\\
 \multicolumn{2}{l}{\color{ao}\expccf}\\  & Reconstructed jets.\\
-\multicolumn{2}{l}{\color{ao}\expccg}\\  & Parton-level jets.\\
+\multicolumn{2}{l}{\color{ao}\expccg}\\  & Parton-level jets. (Only with Delphes)\\
 \multicolumn{2}{l}{\color{ao}\expcch}\\  & Tracks left in a detector.\\
 \multicolumn{2}{l}{\color{ao}\expcch}\\  & Vertices left in a detector.\\
-\multicolumn{2}{l}{\color{ao}\expcci}\\  & Calorimetric deposits left in a detector.\\
+\multicolumn{2}{l}{\color{ao}\expcci}\\  & Calorimetric deposits left in a detector. (Only with Delphes)\\
 \multicolumn{2}{l}{\color{ao}\expccj}\\  & Tracks left in a detector, reconstructed from
-  the particle flow information.\\
+  the particle flow information. (Only with Delphes)\\
 \multicolumn{2}{l}{\color{ao}\expcck}\\  & Photons, reconstructed from the particle flow
-  information.\\
+  information.(Only with Delphes)\\
 \multicolumn{2}{l}{\color{ao}\expccl}\\  & Neutral hadrons, reconstructed from the
-  particle flow information.\\
+  particle flow information.(Only with Delphes)\\
 \multicolumn{2}{l}{\color{ao}\expccm}\\  & Missing transverse energy.\\
 \multicolumn{2}{l}{\color{ao}\expccn}\\  & Missing hadronic energy.\\
 \multicolumn{2}{l}{\color{ao}\expcco}\\  & Visible transverse energy.\\
@@ -515,9 +525,9 @@ All these new classes include the following set of methods.
 \begin{center}\begin{tabular}{p{2.7cm} p{9.0cm}}
 \hline
 \multicolumn{2}{l}{\color{ao}\expddb}\\  & Ratio of the electromagnetic to
-  hadronic calorimetric energy associated with the object.\\
+  hadronic calorimetric energy associated with the object.(Only with Delphes)\\
 \multicolumn{2}{l}{\color{ao}\expdda}\\  & Ratio of the hadronic to
-  electromagnetic calorimetric energy associated with the object.\\
+  electromagnetic calorimetric energy associated with the object.(Only with Delphes)\\
 \multicolumn{2}{l}{\color{ao}\expddn}\\  & Identifier of the decay mode of a
   \verb+RecTauFormat+ object. The available choices are 1 ($\tau\to e \nu \nu$),
   2 ($\tau \to \mu \nu \nu$),  3 ($\tau \to K \nu$), 4 ($\tau \to K^* \nu$),

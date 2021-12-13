@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.configuration.clustering_kt          import ClusteringKt
 from madanalysis.configuration.clustering_antikt      import ClusteringAntiKt
 from madanalysis.configuration.clustering_genkt       import ClusteringGenKt
@@ -42,8 +43,17 @@ class ClusteringConfiguration:
                                      "siscone",\
                                      "cdfjetclu", "cdfmidpoint",\
                                      "none"],
-                      "exclusive_id" : ["true","false"],
-                      "jetrecomode" : ["jets","constituents"]
+                      "exclusive_id"            : ["true","false"],
+                      "jetrecomode"             : ["jets","constituents"],
+                      "magnetic_field"          : ["3.8"],
+                      # "tracker_radius"          : ["1.29"],
+                      # "half_length"             : ["3.0"],
+                      "particle_propagator"     : ["on","off"],
+                      "track_isocone_radius"    : ["0.5"],
+                      "electron_isocone_radius" : ["0.5"],
+                      "muon_isocone_radius"     : ["0.5"],
+                      "photon_isocone_radius"   : ["0.5"],
+
                     }
 
     def __init__(self):
@@ -204,7 +214,7 @@ class ClusteringConfiguration:
         
     def user_GetParameters(self):
         if self.algorithm!="none":
-            table = ClusteringConfiguration.userVariables.keys()
+            table = list(ClusteringConfiguration.userVariables.keys())
             table.extend(self.clustering.user_GetParameters())
             table.extend(self.beauty.user_GetParameters())
             table.extend(self.tau.user_GetParameters())

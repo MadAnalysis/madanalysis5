@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.enumeration.uncertainty_type     import UncertaintyType
 from madanalysis.enumeration.normalize_type       import NormalizeType
 from madanalysis.enumeration.report_format_type   import ReportFormatType
@@ -36,6 +37,8 @@ import madanalysis.enumeration.color_hex
 import time
 import copy
 import logging
+import six
+from six.moves import range
 
 
 class PlotFlow:
@@ -123,7 +126,7 @@ class PlotFlow:
     @staticmethod
     def NiceTitle(text):
         newtext=text 
-        for i,j in PlotFlow.diconicetitle.iteritems():
+        for i,j in six.iteritems(PlotFlow.diconicetitle):
            newtext = newtext.replace(i,j)
         return newtext
 
@@ -210,7 +213,7 @@ class PlotFlow:
 
         # Open the file in write-mode
         try:
-            outputC = file(filenameC,'w')
+            outputC = open(filenameC,'w')
         except:
             logging.getLogger('MA5').error('Impossible to write the file: '+filenameC)
             return False
@@ -412,7 +415,7 @@ class PlotFlow:
                 outputC.write('  '+histoname+'->SetBarWidth(0.8);\n')
                 outputC.write('  '+histoname+'->SetBarOffset(0.1);\n')
             outputC.write('\n')
-        
+
         # Creating the THStack
         outputC.write('  // Creating a new THStack\n')
         PlotFlow.counter+=1
@@ -566,7 +569,7 @@ class PlotFlow:
 
         # Open the file in write-mode
         try:
-            outputPy = file(filenamePy,'w')
+            outputPy = open(filenamePy,'w')
         except:
             logging.getLogger('MA5').error('Impossible to write the file: '+filenamePy)
             return False
@@ -799,13 +802,25 @@ class PlotFlow:
                                '             label='+mytitle+', ')
             if ntot!=0:
                 outputPy.write('histtype='+filledmode+', ')
-            outputPy.write(    'rwidth='+str(rWidth)+',\\\n'+\
-                               '             color='+mybackcolor+', '+\
-                               'edgecolor='+mylinecolor+', '+\
-                               'linewidth='+str(mylinewidth)+', '+\
-                               'linestyle='+mylinestyle+',\\\n'+\
-                               '             bottom=None, '+\
-                               'cumulative=False, normed=False, align="mid", orientation="vertical")\n\n')
+            try:
+                import matplotlib.pyplot as plt
+                plt.hist([0],normed=True)
+                outputPy.write(    'rwidth='+str(rWidth)+',\\\n'+\
+                                   '             color='+mybackcolor+', '+\
+                                   'edgecolor='+mylinecolor+', '+\
+                                   'linewidth='+str(mylinewidth)+', '+\
+                                   'linestyle='+mylinestyle+',\\\n'+\
+                                   '             bottom=None, '+\
+                                   'cumulative=False, normed=False, align="mid", orientation="vertical")\n\n')
+            except:
+                outputPy.write(    'rwidth='+str(rWidth)+',\\\n'+\
+                                   '             color='+mybackcolor+', '+\
+                                   'edgecolor='+mylinecolor+', '+\
+                                   'linewidth='+str(mylinewidth)+', '+\
+                                   'linestyle='+mylinestyle+',\\\n'+\
+                                   '             bottom=None, '+\
+                                   'cumulative=False, density=False, align="mid",'+\
+                                   ' orientation="vertical")\n\n')
         outputPy.write('\n')
 
         # Label

@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.install.install_service    import InstallService
 from madanalysis.system.user_info           import UserInfo
 from madanalysis.system.config_checker      import ConfigChecker
@@ -48,15 +49,12 @@ class InstallDelphes:
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir    = os.path.join(self.tmpdir, 'MA5_'+self.package)
         self.ncores      = 1
-#        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.1.1.tar.gz"}
-#        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.0.tar.gz"}
-#        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.1.tar.gz"}
-#        self.files = {"delphes.tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.3.3.tar.gz"}
         if package == 'delphesma5tune':
-            self.files = {package+".tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.4.1.tar.gz"}
+            self.files = {package+".tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes-3.5.0.tar.gz"}
         else:
 #             self.files = {package+".tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/delphes342pre.tar.gz"} # Delphes for LLP not release yet
-            self.files = {package+".tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.4.2.tar.gz"}
+#            self.files = {package+".tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.4.2.tar.gz"}
+            self.files = {package+".tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes3.4.3.tar.gz"}
         self.logger = logging.getLogger('MA5')
 
 
@@ -406,6 +404,49 @@ class InstallDelphes:
         return True
 
 
+    def AddD0(self,filename):
+        # open input file
+        try:
+            input = open(filename)
+        except:
+            self.logger.error("impossible to read the file:" + filename)
+            return False
+
+        # open output file
+        try:
+            output = open(filename+'.savema5','w')
+        except:
+            self.logger.error("impossible to read the file:" + filename+'.savema5')
+            return False
+
+        # lines
+        for line in input:
+            line2=line.lstrip()
+            line2=line2.rstrip()
+            line2=line2.replace(' ','')
+            if line2.startswith('buffer.ReplaceAll("energy"'):
+                output.write(line)
+                output.write('  buffer.ReplaceAll("d0",     "t");\n')
+            else:
+                output.write(line)
+ 
+        #close
+        input.close()
+        output.close()
+
+        try:
+            shutil.copy(filename+'.savema5',filename)
+        except:
+            self.logger.error("impossible to copy "+filename+'.savema5 in '+filename)
+            return False
+
+        return True
+
+
+
+
+
+
     def CopyFiles(self,filesToAdd):
 
         for file in filesToAdd:
@@ -507,7 +548,7 @@ class InstallDelphes:
         # Updating the architecture
         deac_path = libpaths[0].replace(libpaths[0].split('/')[-1],"DEACT_"+libpaths[0].split('/')[-1])
         self.main.archi_info.toLDPATH1 = [x for x in self.main.archi_info.toLDPATH1 if not self.package in x]
-        if key in self.main.archi_info.libraries.keys():
+        if key in list(self.main.archi_info.libraries.keys()):
             del self.main.archi_info.libraries[key]
 
         # If the deactivated directory already exists -> suppression
@@ -618,7 +659,7 @@ class InstallDelphes:
         checkup = CheckUp(self.main.archi_info, self.main.session_info, False, self.main.script)
         for link in [x.split('/')[-1] for x in originals]:
             dest = os.path.join(self.main.archi_info.ma5dir,'tools','SampleAnalyzer', 'ExternalSymLink', link)
-            if not checkup.CreateSymLink(x,dest):
+            if not checkup.CreateSymLink(link,dest):
                 return -1
 
         # Compiler setup

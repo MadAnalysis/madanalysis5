@@ -22,8 +22,10 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import madanalysis.interpreter.cmd_base as CmdBase
 import logging
+from six.moves import range
 
 class CmdDisplay(CmdBase.CmdBase):
     """Command DISPLAY"""
@@ -34,7 +36,6 @@ class CmdDisplay(CmdBase.CmdBase):
     def do_other(self,object):
 
         # Looking for one dot in the name
-#        object = object.lower()
         object = object.replace('fastsim.bjet_id.','fastsim.bjet_idXXX')
         object = object.replace('fastsim.tau_id.','fastsim.tau_idXXX')
         objs = object.split('.')
@@ -148,7 +149,7 @@ class CmdDisplay(CmdBase.CmdBase):
 
     def do(self,args):
         # Checking argument number
-        if len(args)>0 and args[0].lower() in ['tagger','smearer', 'reco_efficiency']:
+        if len(args)>0 and args[0].lower() in ['tagger','smearer', 'reco_efficiency', 'jes', 'energy_scaling', 'scaling']:
             return self.main.superfastsim.display(args)
         elif len(args)==1:
             return self.do_other(args[0])
@@ -202,7 +203,7 @@ class CmdDisplay(CmdBase.CmdBase):
         
         # Only object name
         if variable==None:
-            output = ["main","selection","tagger","smearer", 'reco_efficiency']
+            output = ["main","selection","tagger","smearer", 'reco_efficiency', 'jes', 'energy_scaling', 'scaling']
             output.extend(self.main.datasets.GetNames())
             output.extend(self.main.multiparticles.GetNames())
             output.extend(self.main.regions.GetNames())

@@ -22,7 +22,11 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import json, os, copy, math, logging
+from six.moves import range
+
+
 class HistFactory(object):
     def __init__(self,pyhf_config):
         self.pyhf_config = pyhf_config.get('SR'  , {})
@@ -55,7 +59,7 @@ class HistFactory(object):
         HF = copy.deepcopy(self.hf)
         lumi_scale = round(lumi/self.lumi, 6)
 
-        if type(self) == HF_Background:
+        if isinstance(self, HF_Background):
             # Background extrapolation
             total_expected = {}
             for SR, item in self.pyhf_config.items():
@@ -103,7 +107,7 @@ class HistFactory(object):
                         if item != []:
                             HF['observations'][iobs]['data'] = item
 
-        elif type(self) == HF_Signal:
+        elif isinstance(self,HF_Signal):#type(self) == HF_Signal:
             # Signal extrapolation
             for i in range(len(HF)):
                 if HF[i]['op'] == 'remove':
@@ -212,14 +216,22 @@ class HF_Signal(HistFactory):
     def __init__(self,pyhf_config, regiondata, xsection=-1, **kwargs):
         super(HF_Signal,self).__init__(pyhf_config)
         self.signal_config = {}
+
+        with open(os.path.join(self.path, self.name), 'r') as json_file:
+            tmp_bkg = json.load(json_file)
+
         for key, item in self.pyhf_config.items():
             if key != 'lumi':
-                self.signal_config[key] = {'path' : '/channels/'+\
-                                                    str(item['channels'])+'/samples/0'}
+                self.signal_config[key] = {}
                 if item['data'] == []:
                     self.signal_config[key]['op'] = 'remove'
+                    self.signal_config[key]["path"] = '/channels/' + str(item['channels'])
                 else:
                     self.signal_config[key]['op'] = 'add'
+                    self.signal_config[key]["path"] = \
+                        '/channels/' + str(item['channels']) + '/samples/' + \
+                        str(len(tmp_bkg["channels"][int(item['channels'])]["samples"])-1)
+
                 self.signal_config[key]['data'] = []
                 for SRname in item['data']:
                     if kwargs.get('validate',False):
@@ -227,7 +239,9 @@ class HF_Signal(HistFactory):
                         # background to be given in kwargs
                         self.signal_config[key]['data'].append(1.)
                     else:
-                        self.signal_config[key]['data'].append(regiondata[SRname]['Nf']/regiondata[SRname]['N0'])
+                        self.signal_config[key]['data'].append(
+                            regiondata[SRname]['Nf']/regiondata[SRname]['N0']
+                        )
 
         self.hf = self.set_HF(xsection, background   = kwargs.get('background',  {}),
                                         add_normsys  = kwargs.get('add_normsys', []),
@@ -237,23 +251,35 @@ class HF_Signal(HistFactory):
         HF = []
         if xsection<=0.:
             return HF
-        for SR in self.signal_config.keys():
-            SR_tmp = {'op'    : self.signal_config[SR]['op'],
-                      'path'  : self.signal_config[SR]['path'],
-                      'value' : {'name'      : 'MA5_signal',
-                                 'data'      : [round(eff*xsection*self.lumi*1000.,6) for eff in self.signal_config[SR]['data']],
-                                 'modifiers' : [
-                                                 {u'data': None, 
-                                                  u'name': u'lumi', 
-                                                  u'type': u'lumi'},
-                                                 {u'data': None, 
-                                                  u'name': u'mu_SIG', 
-                                                  u'type': u'normfactor'}
-                                                ]}
-                      }
-            if self.signal_config[SR]['op'] == 'remove':
-                SR_tmp['value']['modifiers'] = []
-            HF.append(SR_tmp)
+        toRemove = []
+        for ix, SR in enumerate(self.signal_config.keys()):
+            if self.signal_config[SR]['op'] != 'remove':
+                SR_tmp = {
+                    'op'    : self.signal_config[SR]['op'],
+                    'path'  : self.signal_config[SR]['path'],
+                    'value' : {
+                        'name'      : 'MA5_signal_' + str(ix),
+                        'data'      : [
+                            eff * xsection * self.lumi * 1000.
+                            for eff in self.signal_config[SR]['data']
+                        ],
+                        'modifiers' : [
+                            {u'data': None, u'name': u'lumi', u'type': u'lumi'},
+                            {u'data': None, u'name': u'mu_SIG', u'type': u'normfactor'},
+                        ]
+                    }
+                }
+                HF.append(SR_tmp)
+            else:
+                toRemove.append(
+                    {'op'   : self.signal_config[SR]['op'],
+                     'path' : self.signal_config[SR]['path']}
+                )
+
+        # Need to sort correctly the paths to the channels to be removed
+        toRemove.sort(key = lambda p : p["path"].split("/")[-1], reverse = True)
+        for d in toRemove:
+            HF.append(d)
 
         for sys in kwargs.get('add_normsys',[]):
             HF = self.add_normsys(HF,sys['hi'],sys['lo'],sys['name'])
@@ -296,8 +322,9 @@ class HF_Signal(HistFactory):
 
     def isAlive(self):
         for sample in self.hf:
-            if any([s>0 for s in sample['value']['data']]):
-                return True
+            if sample['op'] != "remove":
+                if any([s>0 for s in sample['value']['data']]):
+                    return True
         return False
 
     def add_normsys(self,HF, hi, lo, name):
@@ -346,7 +373,7 @@ def get_HFID(file,SRname):
         Extract the location of the profiles within the JSON file.
     """
     if os.path.isfile(file):
-        with open(file,'r') as json_file:
+        with open(file, 'r') as json_file:
             HF = json.load(json_file)
     else:
         return 'Can not find background file: '+file
@@ -358,49 +385,49 @@ def get_HFID(file,SRname):
 
 
 
-def merge_backgrounds(Background1,Background2):
-    """
-        Merging method for two bakcground JSON file. It merges "only" the files 
-        with same POI and version.
-    """
-    if {} in [Background1.hf, Background2.hf] or type(Background1) != type(Background2):
-        return Background1, 0
-    logging.getLogger('MA5').debug('merging :'+', '.join(Background1.global_config.keys()+\
-                                                         Background2.pyhf_config.keys()))
-    measurements = []
-    # merge common measurements
-    for measurement1 in Background1.hf.get('measurements',[]):
-        poi   = measurement1['config']['poi']
-        param = measurement1['config']['parameters'] 
-        for measurement2 in Background2.hf.get('measurements',[]):
-            if poi == measurement2['config']['poi']:
-                for parameter in measurement2['config']['parameters'] :
-                    if parameter not in param:
-                        param += parameter
-                measurements.append({'name'   : measurement1['name'],
-                                     'config' : {'parameters' : param,
-                                                 'poi'        : poi
-                                                 }})
-
-    if measurements == [] or Background1.hf['version'] != Background2.hf['version'] :
-        logging.getLogger('MA5').warning('Merging failed: Either measurements or versions does not match...')
-        logging.getLogger('MA5').warning(', '.join(Background2.pyhf_config.keys())+' will not be added.')
-        return Background1, 0 # only get uncontradctory poi
-
-    logging.getLogger('MA5').debug('measurements are matching...')
-    extend = len(Background1.get_observed())
-    for profile, info in Background2.pyhf_config.items():
-        check = [x for x in Background1.global_config.keys() if x.startswith(profile)]
-        profile += ''+(len(check)>0)*('_ma5_'+str(len(check)))
-        Background1.global_config[profile] = {}
-        Background1.global_config[profile]['channels'] = str(int(info['channels'])+extend)
-        #print str(int(info['channels'])+extend)
-        Background1.global_config[profile]['data'    ] = info['data']
-
-    for ch in Background2.hf['channels']:
-        Background1.hf['channels'].append(ch)
-    for obs in Background2.hf['observations']:
-        Background1.hf['observations'].append(obs)
-    Background1.hf['measurements'] = measurements
-    return Background1, 1
+#def merge_backgrounds(Background1,Background2):
+#    """
+#        Merging method for two bakcground JSON file. It merges "only" the files 
+#        with same POI and version.
+#    """
+#    if {} in [Background1.hf, Background2.hf] or type(Background1) != type(Background2):
+#        return Background1, 0
+#    logging.getLogger('MA5').debug('merging :'+', '.join(list(Background1.global_config.keys())+\
+#                                                         list(Background2.pyhf_config.keys())))
+#    measurements = []
+#    # merge common measurements
+#    for measurement1 in Background1.hf.get('measurements',[]):
+#        poi   = measurement1['config']['poi']
+#        param = measurement1['config']['parameters'] 
+#        for measurement2 in Background2.hf.get('measurements',[]):
+#            if poi == measurement2['config']['poi']:
+#                for parameter in measurement2['config']['parameters'] :
+#                    if parameter not in param:
+#                        param += parameter
+#                measurements.append({'name'   : measurement1['name'],
+#                                     'config' : {'parameters' : param,
+#                                                 'poi'        : poi
+#                                                 }})
+#
+#    if measurements == [] or Background1.hf['version'] != Background2.hf['version'] :
+#        logging.getLogger('MA5').warning('Merging failed: Either measurements or versions does not match...')
+#        logging.getLogger('MA5').warning(', '.join(list(Background2.pyhf_config.keys()))+' will not be added.')
+#        return Background1, 0 # only get uncontradctory poi
+#
+#    logging.getLogger('MA5').debug('measurements are matching...')
+#    extend = len(Background1.get_observed())
+#    for profile, info in Background2.pyhf_config.items():
+#        check = [x for x in Background1.global_config.keys() if x.startswith(profile)]
+#        profile += ''+(len(check)>0)*('_ma5_'+str(len(check)))
+#        Background1.global_config[profile] = {}
+#        Background1.global_config[profile]['channels'] = str(int(info['channels'])+extend)
+#        #print str(int(info['channels'])+extend)
+#        Background1.global_config[profile]['data'    ] = info['data']
+#
+#    for ch in Background2.hf['channels']:
+#        Background1.hf['channels'].append(ch)
+#    for obs in Background2.hf['observations']:
+#        Background1.hf['observations'].append(obs)
+#    Background1.hf['measurements'] = measurements
+#    return Background1, 1
 

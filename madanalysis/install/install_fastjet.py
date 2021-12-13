@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.install.install_service import InstallService
 from shell_command import ShellCommand
 import os
@@ -45,6 +46,7 @@ class InstallFastjet:
 #        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.3.0.tar.gz"}
 #        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.3.2.tar.gz"}
         self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.3.3.tar.gz"}
+#        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.4.0.tar.gz"}
 
     def Detect(self):
         if not os.path.isdir(self.toolsdir):

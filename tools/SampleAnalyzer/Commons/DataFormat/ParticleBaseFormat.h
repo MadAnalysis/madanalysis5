@@ -64,6 +64,12 @@ class ParticleBaseFormat
   /// Quadrivector of particle (E, px,py,pz)
   MALorentzVector momentum_;  
 
+  // Point of closest approach (+ straight line approximation)
+  MAVector3 closest_approach_;
+  MAdouble64 d0_;
+  MAdouble64 dz_;
+  MAdouble64 d0_approx_;
+  MAdouble64 dz_approx_;
 
   // -------------------------------------------------------------
   //                      method members
@@ -76,11 +82,11 @@ class ParticleBaseFormat
 
   /// Constructor without argument
   ParticleBaseFormat(MAfloat64 px, MAfloat64 py, MAfloat64 pz, MAfloat64 e)
-  { momentum_.SetPxPyPzE(px,py,pz,e); }
+  { Reset(); momentum_.SetPxPyPzE(px,py,pz,e); }
 
   /// Constructor without argument
   ParticleBaseFormat(const MALorentzVector& p)
-  { momentum_.SetPxPyPzE(p.Px(),p.Py(),p.Pz(),p.E()); }
+  { Reset(); momentum_.SetPxPyPzE(p.Px(),p.Py(),p.Pz(),p.E()); }
 
   /// Destructor
   virtual ~ParticleBaseFormat()
@@ -90,6 +96,9 @@ class ParticleBaseFormat
   virtual void Reset()
   {
     momentum_.SetPxPyPzE(0.,0.,0.,0.);
+    closest_approach_.SetXYZ(0.,0.,0.);
+    d0_        = 0.; dz_        = 0.;
+    d0_approx_ = 0.; dz_approx_ = 0.;
   }
 
   /// Print particle informations
@@ -276,6 +285,23 @@ class ParticleBaseFormat
   ParticleBaseFormat& operator -= (const ParticleBaseFormat& p)
   { this->momentum_ -= p.momentum_;
     return *this; }
+
+  /// Accessor to the point of closest approach (read-only)
+  const MAVector3& closest_approach() const {return closest_approach_;}
+  const MAdouble64& d0() const {return d0_;}
+  const MAdouble64& dz() const {return dz_;}
+
+  /// Accessor to the d0/dz for a straight line approximation (read-only)
+  const MAdouble64& d0_approx() const {return d0_approx_;}
+  const MAdouble64& dz_approx() const {return dz_approx_;}
+
+  void setD0(MAdouble64 v)        {d0_=v;}
+  void setDZ(MAdouble64 v)        {dz_=v;}
+  void setD0Approx(MAdouble64 v)  {d0_approx_=v;}
+  void setDZApprox(MAdouble64 v)  {dz_approx_=v;}
+  void setClosestApproach(const MAVector3& v)  {closest_approach_=v;}
+
+
 
 };
 

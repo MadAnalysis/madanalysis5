@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 import sys
 from string_tools import StringTools
@@ -30,13 +31,17 @@ from madanalysis.enumeration.detect_status_type import DetectStatusType
 
 class DetectManager():
 
+    # same as checker.name
+    hidden_packages = ["likelihood simplifier"]
+
     def __init__(self,archi_info,user_info,session_info,script,debug):
-        self.archi_info   = archi_info
-        self.user_info    = user_info
-        self.session_info = session_info
-        self.script       = script
-        self.debug        = debug
-        self.logger       = logging.getLogger('MA5')
+        self.archi_info      = archi_info
+        self.user_info       = user_info
+        self.session_info    = session_info
+        self.script          = script
+        self.debug           = debug
+        self.logger          = logging.getLogger('MA5')
+        self.hidden_packages = [self.PrintPackageName(x) for x in self.hidden_packages]
 
 
     def Execute(self, rawpackage):
@@ -44,7 +49,7 @@ class DetectManager():
         self.logger.debug('------------------------------------------------------')
         package=rawpackage.lower()
         self.logger.debug('Detect package '+str(package))
-        
+
         # Selection of the package
         if package=='zlib':
             from madanalysis.system.detect_zlib import DetectZlib
@@ -106,6 +111,9 @@ class DetectManager():
         elif package=='pyhf':
             from madanalysis.system.detect_pyhf import Detectpyhf
             checker=Detectpyhf(self.archi_info, self.user_info, self.session_info, self.debug)
+        elif package=='simplify':
+            from madanalysis.system.detect_simplify import DetectSimplify
+            checker=DetectSimplify(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='pdflatex':
             from madanalysis.system.detect_pdflatex import DetectPdflatex
             checker=DetectPdflatex(self.archi_info, self.user_info, self.session_info, self.debug)
@@ -119,15 +127,11 @@ class DetectManager():
             self.logger.error('the package "'+rawpackage+'" is unknown')
             return False
 
-        # Get list of the methods of the chcker class
-        # If the method does not exist, the method is not called
-        methods = dir(checker)
-
         # 1. Displaying the name of the package
         package_name = self.PrintPackageName(checker.name)
 
         # 2. Initialization
-        if 'Initialize' in methods:
+        if hasattr(checker, 'Initialize'):
             self.logger.debug('Initialization ...')
             if not checker.Initialize():
                 self.PrintFAILURE(package_name)
@@ -137,14 +141,14 @@ class DetectManager():
                         self.logger.error(line)
                     return False
                 else:
-                    if 'PrintDisableMessage' in methods:
+                    if hasattr(checker, 'PrintDisableMessage'):
                         checker.PrintDisableMessage()
-                    if 'PrintInstallMessage' in methods:
+                    if hasattr(checker, 'PrintInstallMessage'):
                         checker.PrintInstallMessage()
                     return True
 
         # 3. Veto
-        if 'IsItVetoed' in methods:
+        if hasattr(checker, 'IsItVetoed'):
             self.logger.debug('Is there a veto? ...')
             if checker.IsItVetoed():
                 # Should not happen because veto possible only on optional packages
@@ -154,12 +158,12 @@ class DetectManager():
                 # normal case
                 else:
                     self.PrintUSERDISABLED(package_name)
-                    if 'PrintDisableMessage' in methods:
+                    if hasattr(checker, 'PrintDisableMessage'):
                         checker.PrintDisableMessage()
                     return True
 
         # 3bis. Dependencies
-        if 'AreDependenciesInstalled' in methods:
+        if hasattr(checker, 'AreDependenciesInstalled'):
             self.logger.debug('Are dependencies installed on the machine? ...')
             if not checker.AreDependenciesInstalled():
                 # Should not happen because veto possible only on optional packages
@@ -170,13 +174,13 @@ class DetectManager():
                 # normal case
                 else:
                     self.PrintDISABLED(package_name)
-                    if 'PrintDisableMessage' in methods:
+                    if hasattr(checker, 'PrintDisableMessage'):
                         checker.PrintDisableMessage()
                     return True
 
         # 4. Does the user force something?
         search = True
-        if 'ManualDetection' in methods:
+        if hasattr(checker, 'ManualDetection'):
             self.logger.debug('Detection of the package in the location specified by the user ...')
             search = False
             status, msg = checker.ManualDetection()
@@ -190,9 +194,9 @@ class DetectManager():
                         self.logger.error(line)
                     return False
                 else:
-                    if 'PrintDisableMessage' in methods:
+                    if hasattr(checker, 'PrintDisableMessage'):
                         checker.PrintDisableMessage()
-                    if 'PrintInstallMessage' in methods:
+                    if hasattr(checker, 'PrintInstallMessage'):
                         checker.PrintInstallMessage()
                     return True
 
@@ -201,7 +205,7 @@ class DetectManager():
                 search = True
 
         # 5. Is it installed in the tools folder?
-        if search and 'ToolsDetection' in methods:
+        if search and hasattr(checker, 'ToolsDetection'):
             self.logger.debug('Detection of the package in the "tools" folder ...')
             search = False
             status, msg = checker.ToolsDetection()
@@ -215,9 +219,9 @@ class DetectManager():
                         self.logger.error(line)
                     return False
                 else:
-                    if 'PrintDisableMessage' in methods:
+                    if hasattr(checker, 'PrintDisableMessage'):
                         checker.PrintDisableMessage()
-                    if 'PrintInstallMessage' in methods:
+                    if hasattr(checker, 'PrintInstallMessage'):
                         checker.PrintInstallMessage()
                     return True
 
@@ -230,7 +234,7 @@ class DetectManager():
                 search = False
 
         # 6. Autodetection of the package
-        if search and 'AutoDetection' in methods:
+        if search and hasattr(checker, 'AutoDetection'):
             self.logger.debug('Try to detect automatically the package ...')
             search = False
             status,msg = checker.AutoDetection()
@@ -247,9 +251,9 @@ class DetectManager():
                         self.PrintDISABLED(package_name)
                     else:
                         self.PrintFAILURE(package_name)
-                    if 'PrintDisableMessage' in methods:
+                    if hasattr(checker, 'PrintDisableMessage'):
                         checker.PrintDisableMessage()
-                    if 'PrintInstallMessage' in methods:
+                    if hasattr(checker, 'PrintInstallMessage'):
                         checker.PrintInstallMessage()
                     return True
 
@@ -263,14 +267,14 @@ class DetectManager():
                 return False
             else:
                 self.PrintDISABLED(package_name)
-                if 'PrintDisableMessage' in methods:
+                if hasattr(checker, 'PrintDisableMessage'):
                     checker.PrintDisableMessage()
-                if 'PrintInstallMessage' in methods:
+                if hasattr(checker, 'PrintInstallMessage'):
                     checker.PrintInstallMessage()
                 return True
 
         # 7. Getting more details about the package
-        if 'ExtractInfo' in methods:
+        if hasattr(checker, 'ExtractInfo'):
             self.logger.debug('Extract more informations related to the package ...')
             if not checker.ExtractInfo():
                 self.PrintFAILURE(package_name)
@@ -280,15 +284,15 @@ class DetectManager():
                         self.logger.error(line)
                     return False
                 else:
-                    if 'PrintDisableMessage' in methods:
+                    if hasattr(checker, 'PrintDisableMessage'):
                         checker.PrintDisableMessage()
-                    if 'PrintInstallMessage' in methods:
+                    if hasattr(checker, 'PrintInstallMessage'):
                         checker.PrintInstallMessage()
                     return True
 
 
         # 8. Saving package information
-        if 'SaveInfo' in methods:
+        if hasattr(checker, 'SaveInfo'):
             self.logger.debug('Saving informations ...')
             if not checker.SaveInfo():
                 self.PrintFAILURE(package_name)
@@ -298,14 +302,14 @@ class DetectManager():
                         self.logger.error(line)
                     return False
                 else:
-                    if 'PrintDisableMessage' in methods:
+                    if hasattr(checker, 'PrintDisableMessage'):
                         checker.PrintDisableMessage()
-                    if 'PrintInstallMessage' in methods:
+                    if hasattr(checker, 'PrintInstallMessage'):
                         checker.PrintInstallMessage()
                     return True
 
         # 9. Finalize: displaying OK
-        if 'Finalize' in methods:
+        if hasattr(checker, 'Finalize'):
             self.logger.debug('Finalization ...')
             if not checker.Finalize():
                 self.PrintFAILURE(package_name)
@@ -315,9 +319,9 @@ class DetectManager():
                         self.logger.error(line)
                     return False
                 else:
-                    if 'PrintDisableMessage' in methods:
+                    if hasattr(checker, 'PrintDisableMessage'):
                         checker.PrintDisableMessage()
-                    if 'PrintInstallMessage' in methods:
+                    if hasattr(checker, 'PrintInstallMessage'):
                         checker.PrintInstallMessage()
                     return True
 
@@ -337,27 +341,43 @@ class DetectManager():
             PrintFAILURE('')
 
     def PrintOK(self,text):
-        self.logger.info(text+'\x1b[32m'+'[OK]'+'\x1b[0m')
+        if text not in self.hidden_packages:
+            self.logger.info(text+'\x1b[32m'+'[OK]'+'\x1b[0m')
+        else:
+            self.logger.debug(text+'\x1b[32m'+'[OK]'+'\x1b[0m')
 
 
     def PrintFAILURE(self,text):
-        self.logger.info(text + '\x1b[31m'+'[FAILURE]'+'\x1b[0m')
+        if text not in self.hidden_packages:
+            self.logger.info(text + '\x1b[31m'+'[FAILURE]'+'\x1b[0m')
+        else:
+            self.logger.debug(text + '\x1b[31m'+'[FAILURE]'+'\x1b[0m')
 
 
     def PrintDISABLED(self,text):
-        self.logger.info(text + '\x1b[35m'+'[DISABLED]'+'\x1b[0m')
+        if text not in self.hidden_packages:
+            self.logger.info(text + '\x1b[35m'+'[DISABLED]'+'\x1b[0m')
+        else:
+            self.logger.debug(text + '\x1b[35m'+'[DISABLED]'+'\x1b[0m')
 
 
     def PrintUSERDISABLED(self,text):
-        self.logger.info(text+'\x1b[35m'+'[DISABLED BY THE USER]'+'\x1b[0m')
-
+        if text not in self.hidden_packages:
+            self.logger.info(text+'\x1b[35m'+'[DISABLED BY THE USER]'+'\x1b[0m')
+        else:
+            self.logger.debug(text+'\x1b[35m'+'[DISABLED BY THE USER]'+'\x1b[0m')
 
     def PrintDEACTIVATED(self,text):
-        self.logger.info(text+'\x1b[33m'+'[DEACTIVATED]'+'\x1b[0m')
-
+        if text not in self.hidden_packages:
+            self.logger.info(text+'\x1b[33m'+'[DEACTIVATED]'+'\x1b[0m')
+        else:
+            self.logger.debug(text+'\x1b[33m'+'[DEACTIVATED]'+'\x1b[0m')
 
     def PrintWARNING(self,text):
-        self.logger.info(text+'\x1b[35m'+'[WARNING]'+'\x1b[0m')
+        if text not in self.hidden_packages:
+            self.logger.info(text+'\x1b[35m'+'[WARNING]'+'\x1b[0m')
+        else:
+            self.logger.debug(text+'\x1b[35m'+'[WARNING]'+'\x1b[0m')
 
 
     def PrintPackageName(self,text,tab=5,width=25):

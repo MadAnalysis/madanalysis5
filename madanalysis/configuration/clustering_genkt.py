@@ -22,10 +22,11 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 class ClusteringGenKt():
 
-    default_radius    = 1.
+    default_radius    = 0.4
     default_exclusive = False
     default_ptmin     = 5.
     default_P         = -1.
@@ -93,7 +94,7 @@ class ClusteringGenKt():
 
     
     def user_GetParameters(self):
-        return ClusteringGenKt.userVariables.keys()
+        return list(ClusteringGenKt.userVariables.keys())
 
 
     def user_SetParameter(self,parameter,value):

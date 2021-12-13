@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 class IsolationSumPt():
 
@@ -58,7 +59,7 @@ class IsolationSumPt():
 
     
     def user_GetParameters(self):
-        return IsolationSumPt.userVariables.keys()
+        return list(IsolationSumPt.userVariables.keys())
 
 
     def user_SetParameter(self,parameter,value):

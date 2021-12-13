@@ -22,10 +22,12 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.enumeration.connector_type     import ConnectorType
 from madanalysis.enumeration.operator_type      import OperatorType
 from madanalysis.enumeration.combination_type   import CombinationType
 import logging
+from six.moves import range
 
 
 class ConditionType():

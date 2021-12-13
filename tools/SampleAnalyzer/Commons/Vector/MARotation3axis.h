@@ -135,6 +135,7 @@ class MARotation3axis
              q.Z(),
              q.E());
     }
+    else {return MALorentzVector();}
   }
   // Operator *
   MAVector3 operator* (const MAVector3& p) const
@@ -157,6 +158,7 @@ class MARotation3axis
            s_*p.X() + c_*p.Y(),
            p.Z());
     }
+    else {return MAVector3();}
   }
   
 };

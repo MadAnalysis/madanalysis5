@@ -22,11 +22,15 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from shell_command import ShellCommand
 import logging
 import os
 import sys
 import shutil
+from six.moves import range
+from six.moves import input
+import six
 
 class InstallService():
 
@@ -89,7 +93,7 @@ class InstallService():
         if not forced:
             test=False
             while(not test):
-                answer=raw_input("   => Answer: ")
+                answer=input("   => Answer: ")
                 if answer=="":
                     test=True
                     ncores=nmaxcores
@@ -196,7 +200,7 @@ class InstallService():
         for file,url in filesToDownload.items():
             ind+=1
             result="OK"
-            logging.getLogger('MA5').info('    - ' + str(ind)+"/"+str(len(filesToDownload.keys()))+" "+url+" ...")
+            logging.getLogger('MA5').info('    - ' + str(ind)+"/"+str(len(list(filesToDownload.keys())))+" "+url+" ...")
             output = installdir+'/'+file
 
             # Try to connect the file
@@ -216,13 +220,16 @@ class InstallService():
                 # skip the file
                 continue
 
-            
             # Decoding the size of the remote file
             logging.getLogger('MA5').debug('Decoding the size of the remote file...')
-            sizeURLFile = 0
+            sizeURLFile = 0                    
             try:
-                sizeURLFile = int(info.info().getheaders("Content-Length")[0])
-            except:
+                if six.PY2:
+                    sizeURLFile = int(info.info().getheaders("Content-Length")[0])
+                else:
+                    sizeURLFile = int(info.info().get("Content-Length"))
+            except Exception as err:
+                print(err)
                 logging.getLogger('MA5').debug('-> Problem to decode it')
                 logging.getLogger('MA5').warning("Bad description for "+url)
                 result="ERROR"
@@ -243,7 +250,7 @@ class InstallService():
                 logging.getLogger('MA5').debug("A file with the same name '"+output+"' has been found on the machine.")
 
                 ok=True
-                        
+
                 # Decoding the size of the local file
                 if ok:
                     logging.getLogger('MA5').debug('Decoding the size of the local file...')
@@ -331,7 +338,7 @@ class InstallService():
     @staticmethod
     def UrlAccess(url):
 
-        import urllib2
+        import six.moves.urllib.request, six.moves.urllib.error, six.moves.urllib.parse
         import ssl
         import time
 
@@ -343,9 +350,7 @@ class InstallService():
         
         # ssl method for python v>2.7.9
         try:
-            modeSSL = (sys.version_info[0]>=2 and \
-                       sys.version_info[1]>=7 and \
-                       sys.version_info[2]>=9 )
+            modeSSL = ( (sys.version_info[0]==2 and sys.version_info[1]>=7 and sys.version_info[2]>=9) or (sys.version_info[0]==3) )
         except:
             logging.getLogger('MA5').warning("Problem with Python version decoding!")
             modeSSL = False
@@ -360,10 +365,11 @@ class InstallService():
             logging.getLogger('MA5').debug("Attempt "+str(nAttempt+1)+"/"+str(nMaxAttempts)+" to access the url")
             try:
                 if modeSSL:
-                    info = urllib2.urlopen(url, context=ssl._create_unverified_context())
+                    info = six.moves.urllib.request.urlopen(url, context=ssl._create_unverified_context())
                 else:
-                    info = urllib2.urlopen(url)
-            except:
+                    info = six.moves.urllib.request.urlopen(url)
+            except Exception as err:
+                logging.getLogger('MA5').debug(err)
                 logging.getLogger('MA5').warning("Impossible to access the url: "+url)
                 ok=False
             if ok:
@@ -389,27 +395,21 @@ class InstallService():
     def check_ma5site():
         url='http://madanalysis.irmp.ucl.ac.be'
         logging.getLogger('MA5').debug("Testing the access to MadAnalysis 5 website: "+url+" ...")
-
         info = InstallService.UrlAccess(url)
-
-        # Close the access
-        if info!=None:
-            info.close()
-        return True        
-
-        
-    @staticmethod
-    def check_inspire():
-        url='http://inspirehep.net/'
-        logging.getLogger('MA5').debug("Testing the access to InSpire: "+url+" ...")
-
-        info = InstallService.UrlAccess(url)
-
         # Close the access
         if info!=None:
             info.close()
         return True
 
+    @staticmethod
+    def check_dataverse():
+        url='http://dataverse.uclouvain.be'
+        logging.getLogger('MA5').debug("Testing access to the MadAnalysis5 dataverse: "+url+" ...")
+        info = InstallService.UrlAccess(url)
+        # Close the access
+        if info!=None:
+            info.close()
+        return True
 
     @staticmethod
     def create_tools_folder(path):

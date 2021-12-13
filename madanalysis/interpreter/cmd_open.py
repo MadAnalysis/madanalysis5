@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.interpreter.cmd_base            import CmdBase
 from madanalysis.IOinterface.html_report_writer  import HTMLReportWriter
 from madanalysis.IOinterface.latex_report_writer import LATEXReportWriter

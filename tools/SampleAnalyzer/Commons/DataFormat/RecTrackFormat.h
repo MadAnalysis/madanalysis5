@@ -74,7 +74,7 @@ class RecTrackFormat : public RecParticleFormat
   MAfloat64 etaOuter_;  /// eta @ first layer of calo
   MAfloat64 phiOuter_;  /// phi @ first layer of calo
   std::vector<IsolationConeType> isolCones_; // isolation cones
-  MCParticleFormat* mc_;
+  //MCParticleFormat* mc_;
 
   // -------------------------------------------------------------
   //                        method members
@@ -115,11 +115,11 @@ class RecTrackFormat : public RecParticleFormat
   const MAint32 pdgid() const
   {return pdgid_;}
 
-  /// Accessor to etaCalo
+  /// Accessor to etaCalo (only for Delphes)
   const MAfloat64& etaCalo() const
   {return etaOuter_;}
 
-  /// Accessor to etaCalo
+  /// Accessor to etaCalo (only for Delphes)
   const MAfloat64& phiCalo() const
   {return phiOuter_;}
 
@@ -127,14 +127,25 @@ class RecTrackFormat : public RecParticleFormat
   const MAint32 charge() const
   {if (charge_) return +1; else return -1;}
 
-  /// Accessor to charge
-  const MCParticleFormat* mc() const
-  {return mc_;}
+  /// Mutator related to the electric charge
+  virtual void SetCharge(MAint32 charge)
+  { if (charge>0) charge_=true; else charge_=false; }
 
   /// giving a new isolation cone entry
   IsolationConeType* GetNewIsolCone()
   {
     isolCones_.push_back(IsolationConeType());
+    return &isolCones_.back();
+  }
+
+  // Accessor to Isolation cone with speciffic radius. (only for SFS)
+  IsolationConeType* GetIsolCone(MAfloat32 radius)
+  {
+    for (MAuint32 i=0; i<isolCones_.size(); i++)
+        if (radius == isolCones_[i].deltaR()) return &isolCones_[i];
+
+    isolCones_.push_back(IsolationConeType());
+    isolCones_.back().setDeltaR(radius);
     return &isolCones_.back();
   }
 

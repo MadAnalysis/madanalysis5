@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.enumeration.sb_ratio_type       import SBratioType
 from madanalysis.enumeration.color_type          import ColorType
 from madanalysis.IOinterface.root_file_reader    import RootFileReader
@@ -42,6 +43,7 @@ from math                                        import log10, floor, ceil
 import os
 import shutil
 import logging
+from six.moves import range
 
 class Layout:
 

@@ -22,26 +22,28 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.enumeration.ma5_running_type   import MA5RunningType
-from madanalysis.IOinterface.folder_writer      import FolderWriter
-from shell_command import ShellCommand
-import glob
-import logging
-import shutil
-import os
+import glob, logging, shutil, os, sys
+from six.moves import range
 
 class RecastConfiguration:
 
     default_CLs_numofexps = 100000
 
     userVariables ={
-         "status"              : ["on","off"],\
-         "CLs_numofexps"       : [str(default_CLs_numofexps)],\
-         "card_path"           : "",\
-         "store_root"          : ["True", "False"] , \
-         "store_events"        : ["True", "False"] , \
-         "THerror_combination" : ["quadratic","linear"], \
-         "error_extrapolation" : ["linear", "sqrt"]
+         "status"                 : ["on","off"],\
+         "CLs_numofexps"          : [str(default_CLs_numofexps)],\
+         "card_path"              : "",\
+         "store_root"             : ["True", "False"] , \
+         "store_events"           : ["True", "False"] , \
+         "THerror_combination"    : ["quadratic","linear"], \
+         "error_extrapolation"    : ["linear", "sqrt"],\
+         "global_likelihoods"     : ["on","off"],\
+         "CLs_calculator_backend" : ["native", "pyhf"],\
+         "simplify_likelihoods"   : ["True", "False"],\
+         "expectation_assumption" : ["apriori", "aposteriori"],\
+         "TACO_output"            : ""
     }
 
     def __init__(self):
@@ -53,23 +55,34 @@ class RecastConfiguration:
         self.padsfs                     = False
         self.store_root                 = False
         self.store_events               = False
+        self.TACO_output                = ""
+        self.global_likelihoods_switch  = True
+        self.CLs_calculator_backend     = "native"
+        self.simplify_likelihoods       = False
+        self.expectation_assumption     = "apriori"
         self.systematics                = []
         self.extrapolated_luminosities  = []
         self.THerror_combination        = "linear"
         self.error_extrapolation        = "linear"
         self.DelphesDic                 = { }
         self.description                = { }
-        self.ma5dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),os.pardir,os.pardir))
+        self.ma5dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),
+                                                   os.pardir,os.pardir))
         for mypad in ['PAD', 'PADForMA5tune', 'PADForSFS']:
             if os.path.isfile(os.path.join(self.ma5dir,'tools',mypad,'Input','recast_config.dat')):
-                dico_file = open(os.path.join(self.ma5dir,'tools',mypad,'Input','recast_config.dat'), 'r')
+                dico_file = open(
+                    os.path.join(self.ma5dir,'tools',mypad,'Input','recast_config.dat'), 'r'
+                )
                 for line in dico_file:
                     if line.strip().startswith('#'):
                         continue
                     self.DelphesDic[line.split('|')[0].strip()] = line.split('|')[1].split()
                 dico_file.close()
             if os.path.isfile(os.path.join(self.ma5dir,'tools',mypad,'Input','analysis_description.dat')):
-                dico_file = open(os.path.join(self.ma5dir,'tools',mypad,'Input','analysis_description.dat'), 'r')
+                dico_file = open(
+                    os.path.join(self.ma5dir,'tools',mypad,'Input','analysis_description.dat'),
+                    'r'
+                )
                 for line in dico_file:
                     if line.strip().startswith('#'):
                         continue
@@ -91,10 +104,15 @@ class RecastConfiguration:
             self.user_DisplayParameter("CLs_numofexps")
             self.user_DisplayParameter("card_path")
             self.user_DisplayParameter("store_events")
+            self.user_DisplayParameter("TACO_output")
             self.user_DisplayParameter("extrapolated_luminosities")
             self.user_DisplayParameter("systematics")
             self.user_DisplayParameter("THerror_combination")
             self.user_DisplayParameter("error_extrapolation")
+            self.user_DisplayParameter("global_likelihoods")
+            self.user_DisplayParameter("CLs_calculator_backend")
+            self.user_DisplayParameter("simplify_likelihoods")
+            self.user_DisplayParameter("expectation_assumption")
 
     def user_DisplayParameter(self,parameter):
         if parameter=="status":
@@ -139,6 +157,9 @@ class RecastConfiguration:
         elif parameter=="store_root" or parameter=="store_events":
             self.logger.info("   * Keeping the event files: "+str(self.store_root or self.store_events))
             return
+        elif parameter=="TACO_output":
+            self.logger.info("   * Running in TACO mode and storing the results at " +str(self.TACO_output));
+            return
         elif parameter=="systematics":
             if len(self.systematics) > 0:
                 for i in range(0,len(self.systematics)):
@@ -162,6 +183,24 @@ class RecastConfiguration:
                 else:
                     self.logger.info("   * Relative error on the extrapolated background Nb taken as sqrt({:.2f}^2 + ({:.2f}/Nb)^2)".format(self.error_extrapolation[0],self.error_extrapolation[1]))
             return
+        elif parameter=="global_likelihoods":
+            self.logger.info("   * Global-Likelihoods will"+(not self.global_likelihoods_switch)*' not'+\
+                             ' be calculated'+(self.global_likelihoods_switch)*', if available'+'.')
+            return
+        elif parameter=="CLs_calculator_backend":
+            self.logger.info("   * Exclusion limits will be calculated with " +
+                             (self.CLs_calculator_backend == "native")*' MadAnalysis 5 native calculator'+ \
+                             (self.CLs_calculator_backend == "pyhf")*' pyhf (if available)'+'.')
+            return
+        elif parameter=="simplify_likelihoods":
+            if self.simplify_likelihoods:
+                self.logger.debug("   * Simplified profile likelihoods will be used when available.")
+            return
+        elif parameter=="expectation_assumption":
+            self.logger.info("   * A "+self.expectation_assumption[1:]+
+                             " expected exclusion limits will be used.")
+            return
+
         return
 
     def user_SetParameter(self,parameters,values,level,archi_info,session_info,datasets):
@@ -182,10 +221,10 @@ class RecastConfiguration:
                     self.logger.error("recasting is only available in the RECO mode")
                     return
 
-#                # Only if ROOT is install
-#                if not archi_info.has_root:
-#                    self.logger.error("recasting is only available if ROOT is installed")
-#                    return
+               # # Only if ROOT is install
+               # if not archi_info.has_root:
+               #     self.logger.error("recasting is only available if ROOT is installed")
+               #     return
 
                 canrecast=False
                 # Delphes and the PAD?
@@ -281,6 +320,13 @@ class RecastConfiguration:
                 self.logger.error("Do the root files need to be stored? (True/False)")
                 return
 
+        # Running in TACO mode
+        elif parameter=="TACO_output":
+            if self.status!="on":
+                self.logger.error("Please first set the recasting mode to 'on'.")
+                return
+            self.TACO_output  = value
+
         # Systematic uncertainties and Luminosity extrapolation
         elif parameter=="add":
             if self.status!="on":
@@ -351,6 +397,70 @@ class RecastConfiguration:
                     error_message();
                     return
 
+        # Switch to turn off the global likelihood calculations
+        elif parameter=="global_likelihoods":
+            if self.status!="on":
+                self.logger.error("Please first set the recasting mode to 'on'.")
+                return
+            if value.lower() in ["on", "off"]:
+                self.global_likelihoods_switch = (value.lower()=="on")
+            else:
+                self.logger.error("You can only switch the global-likelihood machinery to 'on' or 'off'.")
+                return
+
+        # Set exclusion limit calculator
+        elif parameter == "CLs_calculator_backend":
+            if self.status!="on":
+                self.logger.error("Please first set the recasting mode to 'on'.")
+                return
+            if value.lower() in ["native", "pyhf"]:
+                if value.lower() == "pyhf":
+                    # if self.session_info.has_pyhf:
+                    self.CLs_calculator_backend = "pyhf"
+                    self.logger.warning("pyhf will be used as exclusion limit calculator, if available.")
+                    # else:
+                    #     self.logger.error("Please install pyhf first by typing `install pyhf`")
+                    #     return
+                else:
+                    self.CLs_calculator_backend = "native"
+            else:
+                self.logger.error("Unknown calculator "+str(value)+\
+                                  ". Please choose between native or pyhf")
+                return
+
+        #Set simplified likelihoods
+        elif parameter == "simplify_likelihoods":
+            if self.status!="on":
+                self.logger.error("Please first set the recasting mode to 'on'.")
+                return
+            if value.lower() in ["true", "false"]:
+                self.simplify_likelihoods = (value.lower() == "true")
+                if self.simplify_likelihoods:
+                    self.logger.warning("Please note that this method is currently under "+\
+                                        "development and relies on third party software.")
+            else:
+                self.logger.error("Please type either True or False.")
+                return
+
+        #Set expectation assumption
+        elif parameter == "expectation_assumption":
+            if sys.version_info[0] != 3 and sys.version_info[1] < 6:
+                self.logger.error("This option is only available for python>=3.6")
+                return
+            if self.status!="on":
+                self.logger.error("Please first set the recasting mode to 'on'.")
+                return
+            if value.lower() in ["apriori", "aposteriori"]:
+                self.expectation_assumption = value.lower()
+                if self.expectation_assumption == "aposteriori":
+                    self.logger.warning("A posteriori expected confidence limit calculation is " +\
+                                        "only available with `pyhf` module.")
+                    self.logger.warning("Setting CLs calculator to `pyhf`.")
+                    self.CLs_calculator_backend = "pyhf"
+            else:
+                self.logger.error("Expectation assumption can either be `apriori` or `aposteriori`.")
+                return
+
         # other rejection if no algo specified
         else:
             self.logger.error("the recast module has no parameter called '"+str(parameter)+"'")
@@ -361,7 +471,9 @@ class RecastConfiguration:
             if var == "add":
                 table = ["extrapolated_luminosity", "systematics"]
             else:
-                table = ["CLs_numofexps", "card_path", "store_events", "add", "THerror_combination", "error_extrapolation"]
+                table = ["CLs_numofexps", "card_path", "store_events", 'TACO_output', "add",
+                         "THerror_combination", "error_extrapolation", "global_likelihoods",
+                         "CLs_calculator_backend", "expectation_assumption"]#, "simplify_likelihoods"
         else:
            table = []
         return table
@@ -379,10 +491,20 @@ class RecastConfiguration:
                 table.extend(RecastConfiguration.userVariables["store_root"])
         elif variable =="store_events":
                 table.extend(RecastConfiguration.userVariables["store_events"])
+        elif variable =="TACO_output":
+                table.extend(RecastConfiguration.userVariables["TACO_output"])
         elif variable =="THerror_combination":
                 table.extend(RecastConfiguration.userVariables["THerror_combination"])
         elif variable =="error_extrapolation":
                 table.extend(RecastConfiguration.userVariables["error_extrapolation"])
+        elif variable =="global_likelihoods":
+                table.extend(RecastConfiguration.userVariables["global_likelihoods"])
+        elif variable =="CLs_calculator_backend":
+            table.extend(RecastConfiguration.userVariables["CLs_calculator_backend"])
+        elif variable =="simplify_likelihoods":
+            table.extend(RecastConfiguration.userVariables["simplify_likelihoods"])
+        elif variable =="expectation_assumption":
+            table.extend(RecastConfiguration.userVariables["expectation_assumption"])
         return table
 
 
@@ -458,22 +580,22 @@ class RecastConfiguration:
             myver = myline[1]
             mydelphes = myline[3]
             # checking the presence of the analysis and the delphes card
-            if myana in  [x[0] for x in padlist]:
-                if myver!="v1.2":
+            if myver=="v1.2":
+                if not myana in  [x[0] for x in padlist]:
                     self.logger.error("Recasting card: invalid analysis (not present in the PAD): " + myana)
                     return False
                 if not os.path.isfile(os.path.normpath(os.path.join(self.ma5dir,'tools/PAD/Input/Cards',mydelphes))):
                     self.logger.error("Recasting card: PAD analysis linked to an invalid delphes card: " + myana + " - " + mydelphes)
                     return False
-            elif myana in  [x[0] for x in tunelist]:
-                if myver!="v1.1":
+            elif myver=="v1.1":
+                if not myana in  [x[0] for x in tunelist]:
                     self.logger.error("Recasting card: invalid analysis (not present in the PADForMA5tune): " + myana)
                     return False
                 if not os.path.isfile(os.path.normpath(os.path.join(self.ma5dir,'tools/PADForMA5tune/Input/Cards',mydelphes))):
                     self.logger.error("Recasting card: PADForMA5tune analysis linked to an invalid delphes card: " + myana + " - " + mydelphes)
                     return False
-            elif myana in  [x[0] for x in sfslist]:
-                if myver!="vSFS":
+            elif myver=="vSFS":
+                if not myana in  [x[0] for x in sfslist]:
                     self.logger.error("Recasting card: invalid analysis (not present in PADForSFS): " + myana)
                     return False
                 if not os.path.isfile(os.path.normpath(os.path.join(self.ma5dir,'tools/PADForSFS/Input/Cards',mydelphes))):
@@ -484,7 +606,7 @@ class RecastConfiguration:
                 return False
             # checking the matching between the delphes card and the analysis
             for mycard,alist in self.DelphesDic.items():
-                if myana in alist:
+                if myana in alist and myver!='vSFS':
                     if mydelphes!=mycard:
                         self.logger.error("Invalid delphes card associated with the analysis: " + myana)
                         return False
@@ -539,7 +661,7 @@ class RecastConfiguration:
                     if analysis not in analysislist:
                         continue
                     descr = 'UNKNOWN'
-                    if analysis in self.description.keys():
+                    if analysis in list(self.description.keys()):
                         descr = self.description[analysis]
                     thecard.append(analysis.ljust(30,' ') + 'vSFS        on    ' + mycard.ljust(50, ' ')+\
                           ' # '+descr)
@@ -553,6 +675,7 @@ class RecastConfiguration:
             return thecard
 
     def CheckFile(self,dirname,dataset):
+        if self.CLs_numofexps <=0: return True;
         filename=os.path.normpath(dirname+'/Output/SAF/'+dataset.name+'/CLs_output.dat')
         self.logger.debug('Check file "'+filename+'"...')
         if not os.path.isfile(filename):
@@ -561,6 +684,7 @@ class RecastConfiguration:
         return True
 
     def collect_outputs(self,dirname,datasets):
+        if self.CLs_numofexps <=0: return
         filename=os.path.normpath(os.path.join(dirname,'Output/SAF/CLs_output_summary.dat'))
         self.logger.debug('Check summary file "'+filename+'"...')
         out = open(filename,'w')

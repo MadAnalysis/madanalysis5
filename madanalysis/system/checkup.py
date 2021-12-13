@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.system.user_info          import UserInfo
 from madanalysis.system.config_checker     import ConfigChecker
 from madanalysis.system.detect_manager     import DetectManager
@@ -341,6 +342,8 @@ class CheckUp():
         if not self.checker.Execute('padsfs'):
             return False
         if not self.checker.Execute('pyhf'):
+            return False
+        if not self.checker.Execute('simplify'):
             return False
         return True
 

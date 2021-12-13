@@ -22,10 +22,10 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 import glob
 import os
-import commands
 import sys
 import re
 import platform
@@ -496,7 +496,7 @@ class ConfigChecker:
             if mypath!='':
                 if not os.path.normpath(mypath) in self.archi_info.delphes_lib_paths:
                     self.archi_info.delphes_lib_paths.append(os.path.normpath(mypath))
-                self.archi_info.delphes_lib      = os.path.normpath(myfiles[0])
+                self.archi_info.delphes_lib      = os.path.normpath(myfiles[0]) if len(myfiles)>0 else ""
                 if not getpaths:
                     self.logger.debug("-> result for lib paths: "+str(self.archi_info.delphes_lib_paths))
                     self.logger.debug("-> result for lib files: "+str(self.archi_info.delphes_lib))
@@ -655,7 +655,7 @@ class ConfigChecker:
             mypath, myfiles = self.FindFilesWithPattern2(self.archi_info.delphesMA5tune_lib_paths,"libDelphesMA5tune.*",libnames)
             if not os.path.normpath(mypath) in self.archi_info.delphesMA5tune_lib_paths:
                 self.archi_info.delphesMA5tune_lib_paths.append(os.path.normpath(mypath))
-            self.archi_info.delphesMA5tune_lib      = os.path.normpath(myfiles[0])
+            self.archi_info.delphesMA5tune_lib      = os.path.normpath(myfiles[0]) if len(myfiles)>0 else "";
             self.archi_info.delphesMA5tune_original_libs.extend([fl for fl in myfiles if not fl in self.archi_info.delphesMA5tune_original_libs])
             delphesMA5tune_dict=glob.glob(os.path.dirname(self.archi_info.delphesMA5tune_lib)+'/*.pcm')
             self.archi_info.delphesMA5tune_original_libs.extend([fl for fl in delphesMA5tune_dict if not fl in self.archi_info.delphesMA5tune_original_libs])

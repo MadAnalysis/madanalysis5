@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.configuration.isolation_cone  import IsolationCone
 from madanalysis.configuration.isolation_sumpt import IsolationSumPt
 import logging
@@ -46,7 +47,7 @@ class IsolationConfiguration():
             self.isolation.user_DisplayParameter(parameter)
 
     def user_GetParameters(self):
-        table = IsolationConfiguration.userVariables.keys()
+        table = list(IsolationConfiguration.userVariables.keys())
         table.extend(self.isolation.user_GetParameters())
         return table
 

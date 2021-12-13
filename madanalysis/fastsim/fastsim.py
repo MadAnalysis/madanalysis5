@@ -22,47 +22,89 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 from madanalysis.fastsim.ast            import AST
 from madanalysis.fastsim.tagger         import Tagger
 from madanalysis.fastsim.smearer        import Smearer
 from madanalysis.fastsim.recoefficiency import RecoEfficiency
+from madanalysis.fastsim.scaling        import Scaling
+from six.moves import range
 
 
 class SuperFastSim:
 
     # Initialization
     def __init__(self):
-        self.logger      = logging.getLogger('MA5')
-        self.tagger      = Tagger()
-        self.smearer     = Smearer()
-        self.reco        = RecoEfficiency()
-        self.jetrecomode = 'jets'
-        self.observables = ''
+        self.logger                  = logging.getLogger('MA5')
+        self.tagger                  = Tagger()
+        self.smearer                 = Smearer()
+        self.reco                    = RecoEfficiency()
+        self.scaling                 = Scaling()
+        self.jetrecomode             = 'jets'
+        self.mag_field               = 1e-9
+        self.radius                  = 1e+99
+        self.half_length             = 1e+99
+        self.propagator              = False
+        self.track_isocone_radius    = []
+        self.electron_isocone_radius = []
+        self.muon_isocone_radius     = []
+        self.photon_isocone_radius   = []
+        self.observables             = ''
 
     def InitObservables(self, obs_list):
         self.observables = obs_list
 
+    def Reset(self):
+        self.tagger                  = Tagger()
+        self.smearer                 = Smearer()
+        self.reco                    = RecoEfficiency()
+        self.scaling                 = Scaling()
+        self.jetrecomode             = 'jets'
+        self.mag_field               = 1e-9
+        self.radius                  = 1e+99
+        self.half_length             = 1e+99
+        self.propagator              = False
+        self.track_isocone_radius    = []
+        self.electron_isocone_radius = []
+        self.muon_isocone_radius     = []
+        self.photon_isocone_radius   = []
+
     # Definition of a new tagging/smearing rule
     def define(self,args,prts):
         prts.Add('c',[4])
+        prts.Add('track',[]) # PDGID is not important
+        prts.Add('JES',  []) # PDGID is not important
+        prts_remove = ['c','track','JES']
+
+        ## remove all initializations when this session is over
+        def remove_prts_def(prts_remove,prts):
+            for particle in prts_remove:
+                prts.Remove(particle,     None)
+
         ## list of PDG codes associated with a a multiparticle
         def is_pdgcode(prt):
             return (prt[0] in ('-','+') and prt[1:].isdigit()) or prt.isdigit()
 
         ## Checking the length of the argument list
         if (args[0]=='tagger' and len(args)<5) or (args[0]=='smearer' and len(args)<3) \
-           or  (args[0]=='reco_efficiency' and len(args)<3):
-            self.logger.error('Not enough arguments for a tagger/smearer/reconstruction')
-            prts.Remove('c', None)
+           or  (args[0]=='reco_efficiency' and len(args)<3) or (args[0]=='jes' and len(args)<2) \
+           or (args[0]=='energy_scaling' and len(args)<3) or (args[0]=='scaling' and len(args)<4):
+            self.logger.error('Not enough arguments for tagging/smearing/reconstruction/scaling')
+            remove_prts_def(prts_remove,prts)
             return
 
         ## Checking the first argument
-        true_id = args[1]
+        if args[0]=='jes':
+            true_id = 'JES'
+        elif args[0]=='scaling':
+            true_id = args[3]
+        else:
+            true_id = args[1]
         #### First, do we have either a multiparticle or a PDG code
         if not (true_id in prts.GetNames() or is_pdgcode(true_id)):
             self.logger.error('the 1st argument must be a PDG code or (multi)particle label')
-            prts.Remove('c', None)
+            remove_prts_def(prts_remove,prts)
             return
         #### Second let's check if we have a multiparticle associated with a unique PDGID
         if true_id in prts.GetNames() and len(list(set([abs(x) for x in prts[true_id]])))==1:
@@ -78,13 +120,13 @@ class SuperFastSim:
         if args[0]=='tagger':
             if args[2]!='as':
                 self.logger.error('the 2nd argument must be the keyword \'as\'')
-                prts.Remove('c', None)
+                remove_prts_def(prts_remove,prts)
                 return
             reco_id = args[3]
             #### First, do we have either a multiparticle or a PDG code
             if not (reco_id in prts.GetNames() or is_pdgcode(reco_id)):
                 self.logger.error('the 4th argument must be a PDG code or (multi)particle label')
-                prts.Remove('c', None)
+                remove_prts_def(prts_remove,prts)
                 return
             #### Second let's check if we have a multiparticle associated with a unique PDGID
             if reco_id in prts.GetNames() and len(list(set([abs(x) for x in prts[reco_id]])))==1:
@@ -101,12 +143,12 @@ class SuperFastSim:
         elif args[0] == 'smearer':
             if args[2]!='with':
                 self.logger.error('the 2nd argument must be the keyword \'with\'')
-                prts.Remove('c', None)
+                remove_prts_def(prts_remove,prts)
                 return
             obs = args[3].upper()
             if not (obs in self.smearer.vars):
                 self.logger.error('the 4th argument must be an observable in '+ ', '.join(self.smearer.vars))
-                prts.Remove('c', None)
+                remove_prts_def(prts_remove,prts)
                 return
             to_decode=args[4:]
 
@@ -114,11 +156,30 @@ class SuperFastSim:
         elif args[0] == 'reco_efficiency':
             to_decode=args[2:]
 
+        ## Jet energy scaling (and scaling in general)
+        elif args[0]=='jes':
+            to_decode=args[1:]
+            obs = 'E'
+        elif args[0]=='energy_scaling':
+            to_decode=args[2:]
+            obs = 'E'
+        elif args[0]=='scaling':
+            if args[2]!='for':
+                self.logger.error('Scaling - the 2nd argument must be the keyword \'for\'')
+                remove_prts_def(prts_remove,prts)
+                return
+            obs = args[1].upper()
+            if not (obs in self.scaling.vars):
+                self.logger.error('Scaling - the 1st argument must be an observable in '+ ', '.join(self.scaling.vars))
+                remove_prts_def(prts_remove,prts)
+                return
+            to_decode=args[4:]
+
         ## Getting the bounds and the function
         function, bounds = self.decode_args(to_decode)
         if function=='':
             self.logger.error('Cannot decode the function or the bounds - ' + args[0] + ' ignored.')
-            prts.Remove('c', None)
+            remove_prts_def(prts_remove,prts)
             return
 
         ## Adding a rule to a tagger/smearer
@@ -128,7 +189,9 @@ class SuperFastSim:
             self.smearer.add_rule(true_id,obs,function,bounds)
         elif args[0]=='reco_efficiency':
             self.reco.add_rule(true_id,function,bounds)
-        prts.Remove('c', None)
+        elif args[0] in ['jes','energy_scaling','scaling']:
+            self.scaling.add_rule(true_id,obs,function,bounds)
+        remove_prts_def(prts_remove,prts)
         return
 
 
@@ -184,6 +247,8 @@ class SuperFastSim:
         ast_eff.feed(efficiency)
         return ast_eff, ast_bounds
 
+
+
     # Display of a taggers/smearer
     def display(self,args):
         if args[0]=='tagger':
@@ -192,6 +257,28 @@ class SuperFastSim:
             self.smearer.display(self.jetrecomode)
         elif args[0]=='reco_efficiency':
             self.reco.display()
+        elif args[0] in ['jes','energy_scaling','scaling']:
+            self.scaling.display(self.jetrecomode)
         return
 
 
+
+    # On/off checks
+    def isRecoOn(self):
+        return self.reco.rules != {}
+    def isTaggerOn(self):
+        return self.tagger.rules != {}
+    def isSmearerOn(self):
+        return self.smearer.rules != {}
+    def isPropagatorOn(self):
+        return self.propagator
+    def isScalingOn(self):
+        return self.scaling.rules != {}
+    def isRecoSmearerOn(self):
+        # all modules that modifies new_smearer body
+        return (self.isScalingOn() or self.isSmearerOn() or self.isRecoOn())
+    def isNewSmearerOn(self):
+        # all modules that modifies new_smearer header
+        return (self.isRecoSmearerOn() or self.isPropagatorOn())
+    def isSFSOn(self):
+        return (self.isNewSmearerOn() or self.isTaggerOn())

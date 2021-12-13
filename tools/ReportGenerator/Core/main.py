@@ -22,6 +22,9 @@
 ################################################################################
 
 
+from __future__ import absolute_import
+from __future__ import print_function
+from six.moves import range
 class Main():
     def __init__(self,version,date,mr5dir):
         self.version = version
@@ -36,7 +39,7 @@ class Main():
         test=xml.Read()
         if test:
             xml.Print()
-        print "FIN"
+        print("FIN")
         return
         
 
@@ -49,7 +52,7 @@ class Main():
         if not self.extract(filename,layout):
             return
 
-        print "END"
+        print("END")
         return
 
         # Status = GOOD

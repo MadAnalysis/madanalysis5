@@ -22,10 +22,10 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 import glob
 import os
-import commands
 import sys
 import re
 import platform
@@ -63,7 +63,13 @@ class DetectScipy:
         # Checking if scipy is installed on the system
         try:
             import scipy
-        except:
+        except ImportError as err:
+            self.logger.debug(err)
+            return DetectStatusType.UNFOUND,''
+
+        version = scipy.__version__.split('.');
+        if int(version[0]) < 1 or (int(version[0]) == 1 and int(version[1]) < 2):
+            self.logger.error("Please update the local scipy installation with a newer version.")
             return DetectStatusType.UNFOUND,''
 
         # Checking release

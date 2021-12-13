@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.selection.histogram          import Histogram
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.enumeration.observable_type  import ObservableType
@@ -29,6 +30,7 @@ from madanalysis.enumeration.ma5_running_type import MA5RunningType
 from madanalysis.interpreter.cmd_cut          import CmdCut
 import logging
 import copy
+from six.moves import range
 
 def WriteExecute(file,main,part_list):
 

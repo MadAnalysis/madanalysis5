@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import madanalysis.IOinterface.text_file_writer as TextFileWriter
 class HTMLCSSWriter(TextFileWriter.TextFileWriter):
     """Generate HTML CSS page sheet"""

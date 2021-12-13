@@ -24,9 +24,12 @@
 ################################################################################
 
 
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 import sys
 import shutil
+from six.moves import input
 
 class AnalyzerManager:
     
@@ -37,17 +40,17 @@ class AnalyzerManager:
 
     def CheckFilePresence(self):
         if not os.path.isdir(self.currentdir + "/User/Analyzer"):
-            print "        Error: the directory called 'User/Analyzer' is not found."
+            print("        Error: the directory called 'User/Analyzer' is not found.")
             return False
         if os.path.isfile(self.currentdir + "/User/Analyzer/" + self.name + ".cpp"):
-            print "        Error: a file called 'User/Analyzer/"+self.name+\
-                     ".cpp' is already defined."
-            print "        Please remove this file before."
+            print("        Error: a file called 'User/Analyzer/"+self.name+\
+                     ".cpp' is already defined.")
+            print("        Please remove this file before.")
             return False
         if os.path.isfile(self.currentdir + "/User/Analyzer/" + self.name + ".h"):
-            print "        Error: a file called 'User/Analyzer/"+self.name+\
-                     ".h' is already defined."
-            print "        Please remove this file before."
+            print("        Error: a file called 'User/Analyzer/"+self.name+\
+                     ".h' is already defined.")
+            print("        Please remove this file before.")
             return False
         return True
 
@@ -403,16 +406,16 @@ mute=False
 if len(sys.argv)==3:
     mute=True
 elif len(sys.argv)!=2:
-    print "        Error: number of argument incorrect"
-    print "        Syntax: ./newAnalyzer.py name"
-    print "        with name the name of the analyzer"
+    print("        Error: number of argument incorrect")
+    print("        Syntax: ./newAnalyzer.py name")
+    print("        with name the name of the analyzer")
     sys.exit()
 
 
-print "        A new class called '" + sys.argv[1] + "' will be created."
+print("        A new class called '" + sys.argv[1] + "' will be created.")
 if not mute:
-  print "        Please enter a title for your analyzer : "
-  title=raw_input("        Title : ")
+  print("        Please enter a title for your analyzer : ")
+  title=input("        Title : ")
 else:
   title=sys.argv[1]
 
@@ -429,7 +432,7 @@ analyzer.WriteSource()
 # Adding analysis in analysisList.h
 analyzer.AddAnalyzer()
 
-print "        Done !"
+print("        Done !")
 
 
 

@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 class RecoEfficiency:
 
@@ -38,11 +39,11 @@ class RecoEfficiency:
         if not self.is_supported(id_reco):
             return
         ## Checking whether the reco/true pair already exists
-        key_number=len(self.rules.keys())+1
+        key_number=len(list(self.rules.keys()))+1
         for key, value in self.rules.items():
             if value['id_reco']==id_reco:
                 key_number = key
-        if not key_number in self.rules.keys():
+        if not key_number in list(self.rules.keys()):
             self.rules[key_number] = { 'id_reco':id_reco, 'efficiencies':{} }
 
         ## Defining a new rule ID for an existing tagger
@@ -73,8 +74,8 @@ class RecoEfficiency:
 
 
     def is_supported(self, id_reco):
-        supported = {'e':'11', 'mu':'13', 'ta':'15', 'j':'21', 'a':'22'}
-        if id_reco in (supported.keys()+supported.values()):
+        supported = {'e':'11', 'mu':'13', 'ta':'15', 'j':'21', 'a':'22', 'track':'track'}
+        if id_reco in (list(supported.keys())+list(supported.values())):
             return True
         self.logger.error('The reconstruction of such an object (' + id_reco + ') is currently not supported.'+\
                               ' Reconstruction ignored.')

@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.interpreter.cmd_base           import CmdBase
 from madanalysis.interpreter.cmd_selection_base import CmdSelectionBase
 from madanalysis.multiparticle.particle_object  import ParticleObject
@@ -38,6 +39,7 @@ from madanalysis.selection.condition_connector  import ConditionConnector
 from madanalysis.enumeration.argument_type      import ArgumentType
 from madanalysis.observable.observable_base     import ObservableBase
 import logging
+from six.moves import range
 
 
 class CmdCut(CmdBase,CmdSelectionBase):
@@ -678,7 +680,7 @@ class CmdCut(CmdBase,CmdSelectionBase):
 
         # options mode
         if nbracket1==0 and nbracket2==1 and nbracket3==0:
-            output=Cut.userShortcuts.keys()
+            output=list(Cut.userShortcuts.keys())
             output.append("]")
             return self.finalize_complete(text,output)
 

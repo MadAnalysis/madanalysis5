@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import madanalysis.IOinterface.text_file_writer as TextFileWriter
 from madanalysis.IOinterface.html_style_writer  import HTMLCSSWriter
 from madanalysis.enumeration.color_type         import ColorType
@@ -34,6 +35,7 @@ import os
 import logging
 import time
 import pwd
+from six.moves import range
 
 class HTMLReportWriter(TextFileWriter.TextFileWriter):
     """Generate HTML report"""
@@ -184,7 +186,9 @@ class HTMLReportWriter(TextFileWriter.TextFileWriter):
             self.page.append("    </caption>\n")
         self.page.append('    <tr>\n')
 
-    def NewCell(self,color=ColorType.WHITE,span=1):
+    def NewCell(self,color=None,span=1):
+        if color is None:
+            color=ColorType.WHITE
         size=0
         for ii in range(0,span):
             size += self.col_size[self.current_col+ii]

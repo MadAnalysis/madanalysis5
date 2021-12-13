@@ -70,7 +70,8 @@ class RecParticleFormat : public ParticleBaseFormat
    
   MAfloat32               HEoverEE_;    /// hadronic energy over electromagnetic energy
   const MCParticleFormat* mc_ ;         /// mother generated particle
-  std::vector<MAuint64>  delphesTags_; /// tag reference for Delphes
+  std::vector<MAuint64>   delphesTags_; /// tag reference for Delphes
+  MALorentzVector         vertex_prod_; /// information on the production vertex
 
   // -------------------------------------------------------------
   //                      method members
@@ -91,6 +92,10 @@ class RecParticleFormat : public ParticleBaseFormat
     momentum_.SetPxPyPzE(0.,0.,0.,0.);
     delphesTags_.clear();
     HEoverEE_=0.; 
+    closest_approach_.SetXYZ(0.,0.,0.);
+    d0_=0.; d0_approx_=0.;
+    dz_=0.; d0_approx_=0.;
+    vertex_prod_.Reset();
     mc_=0;
   }
 
@@ -159,6 +164,10 @@ class RecParticleFormat : public ParticleBaseFormat
 
   MAbool isDelphesUnique(const RecParticleFormat& part) const
   { return isDelphesUnique(part.delphesTags()); }
+
+  // Accessor and modifier for the production vertex
+  const MALorentzVector& ProductionVertex() const { return vertex_prod_; }
+  void setProductionVertex(const MALorentzVector& v) { vertex_prod_=v; }
 
 };
 

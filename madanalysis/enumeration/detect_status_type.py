@@ -22,10 +22,14 @@
 ################################################################################
 
 
+import six
+
+class metaclass(type):
+        def __getattr__(self, name):
+                return self.values.index(name)
+
+@six.add_metaclass(metaclass)
 class DetectStatusType(object):
         values = ['FOUND','UNFOUND','ISSUE','VETOED','TOBUILD']
 
-        class __metaclass__(type):
-            def __getattr__(self, name):
-                return self.values.index(name)
 

@@ -22,12 +22,12 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from string_tools                             import StringTools
 from shell_command                            import ShellCommand
 import logging
 import shutil
 import os
-import commands
 
 class HistoRootProducer():
 
@@ -73,7 +73,7 @@ class HistoRootProducer():
         import stat
 
         # Commands
-        output = file(self.histo_path+'/Makefile','w')
+        output = open(self.histo_path+'/Makefile','w')
         output.write('CXX     = `$(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/root-config --cxx`\n')
         output.write('CFLAGS  = `$(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/root-config --cflags`\n')
         output.write('LIBS    = `$(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/root-config --libs`\n')
@@ -129,7 +129,7 @@ class HistoRootProducer():
             return ok
 
         # Reading log file
-        input = file(self.histo_path+'/launch_root.log')
+        input = open(self.histo_path+'/launch_root.log')
         ok1 = False
         ok2 = False
         for line in input:

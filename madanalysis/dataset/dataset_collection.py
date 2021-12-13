@@ -22,8 +22,11 @@
 ################################################################################
 
 
+from __future__ import absolute_import
+from __future__ import print_function
 import logging
 import madanalysis.dataset.dataset as Dataset
+import six
 
 class DatasetCollection:
 
@@ -93,7 +96,7 @@ class DatasetCollection:
             return
 
         # Looping over the branches of the tree
-        for key, value in datasets.GetBranches().iteritems():
+        for key, value in six.iteritems(datasets.GetBranches()):
 
             # Keeping only 'dataset' branches
             if key[0]!='dataset':
@@ -112,7 +115,7 @@ class DatasetCollection:
             # Getting physics parameters
             physics = value.GetBranch('physics',1)
             if physics==None:
-                print "ERROR: no physics branch"
+                print("ERROR: no physics branch")
                 continue
             else:
                 background = physics.GetParameterToBool("background")
@@ -127,7 +130,7 @@ class DatasetCollection:
             # Getting layout parameters
             layout = value.GetBranch('layout',1)
             if layout==None:
-                print "ERROR: no layout branch"
+                print("ERROR: no layout branch")
                 continue
             else:
                 title = layout.GetParameterToStringWithoutQuotes("title")

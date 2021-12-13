@@ -22,19 +22,12 @@
 ################################################################################
 
 
-class CombinationType(object):
-    values = { 'UNKNOWN'    : [],\
-               'DEFAULT'    : [''],\
-               'SUMSCALAR'  : ['s'],\
-               'SUMVECTOR'  : ['v'],\
-               'DIFFSCALAR' : ['ds','sd'],\
-               'DIFFVECTOR' : ['d','dv','vd'],\
-               'RATIO'      : ['r'] }
-               
-    class __metaclass__(type):
+import six
+
+class metaclass(type):
 
         def __getattr__(self, name):
-            return self.values.keys().index(name)
+            return list(self.values.keys()).index(name)
 
         def convert_from_string(self,lowerletters):
             for i,j in self.values.items():
@@ -46,5 +39,18 @@ class CombinationType(object):
             if index==self.__getattr__('UNKNOWN'):
                 return 'ERROR'
             else:
-                name = self.values.keys()[index]
+                name = list(self.values.keys())[index]
                 return self.values[name][0]
+
+
+
+@six.add_metaclass(metaclass)
+class CombinationType(object):
+    values = { 'UNKNOWN'    : [],\
+               'DEFAULT'    : [''],\
+               'SUMSCALAR'  : ['s'],\
+               'SUMVECTOR'  : ['v'],\
+               'DIFFSCALAR' : ['ds','sd'],\
+               'DIFFVECTOR' : ['d','dv','vd'],\
+               'RATIO'      : ['r'] }
+               

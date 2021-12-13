@@ -22,10 +22,10 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 import glob
 import os
-import commands
 import sys
 import shutil
 
@@ -68,7 +68,7 @@ class ScriptStack:
                 return False
             else:
                 logging.getLogger('MA5').info("Executing the commands from the script")
-                logging.getLogger('MA5').info(ScriptStack.stack[ScriptStack.main_index][0] + "...")
+                logging.getLogger('MA5').info(ScriptStack.stack[-1][0] + "...")
                 ScriptStack.main_index+=1
                 ScriptStack.sub_index=0
         else:

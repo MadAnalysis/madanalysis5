@@ -1,5 +1,14 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+132  1.9   (2021/12/13) ma5team:    - Adding support for LLP (also in the SFS) [2112.05163].
+                                    - Particle propagation module [2112.05163].
+                                    - PYHF/simplified likelihood interface.
+                                    - TACO methods available.
+                                    - Python3 support.
+                                    - Connection of the PAD to the MA5 dataverse + reorganisation of how it works.
+                                    - Many minor bug fixes.
+                                    - Update to newer Delphes/Root versions
+
 128  1.8   (2020/07/03) ma5team:    - New simplified fast simulation (SFS) module for event reconstruction
                                       (arxiv:2006.09387)
                                     - Update of the recasting functionalities to handle SFS detector simulations

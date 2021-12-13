@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 from madanalysis.multiparticle.multiparticle_collection import MultiParticleCollection
 from madanalysis.dataset.dataset_collection             import DatasetCollection
 from madanalysis.selection.selection                    import Selection
@@ -50,6 +51,7 @@ import logging
 import os
 import sys
 import platform
+from six.moves import range
 
 class Main():
 
@@ -281,7 +283,7 @@ class Main():
                 return []
 
     def user_GetParameters(self):
-        return Main.userVariables.keys()
+        return list(Main.userVariables.keys())
 
     def user_SetParameter(self,parameter,value):
         # currentdir
@@ -404,7 +406,10 @@ class Main():
             os.chdir(theDir)
         except:
             self.logger.error("Impossible to access the directory : "+theDir)
-        self.user_DisplayParameter("currentdir")
+        try:
+            self.user_DisplayParameter("currentdir")
+        except:
+            pass
 
     currentdir = property(get_currentdir, set_currentdir)
 

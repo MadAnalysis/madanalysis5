@@ -27,6 +27,7 @@
 #include "SampleAnalyzer/Commons/Service/LoopService.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 #include "SampleAnalyzer/Commons/Service/ConvertService.h"
+#include "SampleAnalyzer/Commons/Service/PDGService.h"
 #include "SampleAnalyzer/Process/JetClustering/NullSmearer.h"
 
 
@@ -45,6 +46,7 @@ MAbool JetClusterer::Initialize(const std::map<std::string,std::string>& options
   myCtagger_   = new cTagger();
   myTautagger_ = new TauTagger();
   mySmearer_   = new NullSmearer();
+  mySmearer_->Initialize(true);
 
   // Loop over options
   for (std::map<std::string,std::string>::const_iterator
@@ -96,7 +98,13 @@ MAbool JetClusterer::Initialize(const std::map<std::string,std::string>& options
     {
       result=algo_->SetParameter(key.substr(8),it->second);
     }
-   
+
+    // Isolation cone radius for tracker
+    else if (key.find("isolation")==0)
+    {
+      result=algo_->SetParameter(key,it->second);
+    }
+
     // Other
     try
     {
@@ -161,7 +169,7 @@ MAbool JetClusterer::IsLast(const MCParticleFormat* part, EventFormat& myEvent)
 // -----------------------------------------------------------------------------
 MAbool sort_by_leptonPT(RecLeptonFormat const & a, RecLeptonFormat const & b) { return a.pt() < b.pt(); };
 MAbool sort_by_photonPT(RecPhotonFormat const & a, RecPhotonFormat const & b) { return a.pt() < b.pt(); };
-MAbool    sort_by_tauPT(RecTauFormat const & a,    RecTauFormat const & b   ) { return a.pt() < b.pt(); };
+MAbool    sort_by_tauPT(RecTauFormat    const & a, RecTauFormat    const & b) { return a.pt() < b.pt(); };
 
 // -----------------------------------------------------------------------------
 // Execute
@@ -188,6 +196,42 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
 
     // Rejecting particle with a null pt (initial state ?)
     if (part.pt()<1e-10) continue;
+
+    // Run particle propagator
+    if (mySmearer_->isPropagatorOn() && part.mothers().size()>0)
+        mySmearer_->ParticlePropagator(const_cast<MCParticleFormat*>(&part));
+
+    // Set up tracks as charged FS particles OR charged interstate particles with nonzero ctau
+    if (PDG->IsCharged(part.pdgid()) && part.mothers().size()>0)
+    {
+        // Minimum tracking requirement is around 0.5 mm see ref. 1007.1988
+        if (part.ctau() > 0. || PHYSICS->Id->IsFinalState(part))
+        {
+            // Reminder: -1 is reserved for the tracks
+            MCParticleFormat smeared_track = mySmearer_->Execute(&part, -1);
+            if (smeared_track.pt() > 1e-5)
+            {
+                RecTrackFormat * track = myEvent.rec()->GetNewTrack();
+                MALorentzVector trk_mom;
+                trk_mom.SetPtEtaPhiM(smeared_track.pt(),
+                                     smeared_track.eta(),
+                                     smeared_track.phi(),0.0);
+                track->setMomentum(trk_mom);
+                track->setD0(smeared_track.d0());
+                track->setDZ(smeared_track.dz());
+                track->setD0Approx(smeared_track.d0_approx());
+                track->setDZApprox(smeared_track.dz_approx());
+                MAdouble64 ctau = PHYSICS->Id->IsFinalState(part) ? 0.0 : part.mothers()[0]->ctau();
+                MALorentzVector new_vertex(part.mothers()[0]->decay_vertex().X(),
+                                           part.mothers()[0]->decay_vertex().Y(),
+                                           part.mothers()[0]->decay_vertex().Z(), ctau);
+                track->setProductionVertex(new_vertex);
+                track->setClosestApproach(smeared_track.closest_approach());
+                track->setMc(&(part));
+                track->SetCharge(PDG->GetCharge(part.pdgid()) / 3.);
+            }
+        }
+    }
 
     // Treating intermediate particles
     if (PHYSICS->Id->IsInterState(part))
@@ -226,7 +270,7 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
       else if (absid==15)
       {
         // rejecting particle if coming from hadronization
-        if (LOOP->ComingFromHadronDecay(&part,mySample)) continue;
+        if (LOOP->ComingFromHadronDecay(&part,mySample,myEvent.mc()->particles().size())) continue;
 
         // Looking taus daughters id
         MAbool leptonic   = true;
@@ -285,7 +329,7 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
             if (!myTautagger_->IsIdentified()) continue;
 
             // Smearing the hadronic taus
-            MCParticleFormat smeared = mySmearer_->Execute(&part, absid);
+            MCParticleFormat smeared = mySmearer_->Execute(&part, static_cast<MAint32>(absid));
             // If smeared pt is zero, no need to count the particle but it still needs
             // to be vetoed for jet clustering.
             if (smeared.pt() > 1e-10) 
@@ -295,6 +339,14 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
                 if (part.pdgid()>0) myTau->setCharge(-1);
                 else myTau->setCharge(+1);
                 myTau->setMomentum(smeared.momentum());
+                myTau->setD0(smeared.d0());
+                myTau->setDZ(smeared.dz());
+                myTau->setD0Approx(smeared.d0_approx());
+                myTau->setDZApprox(smeared.dz_approx());
+                myTau->setProductionVertex(MALorentzVector(part.mothers()[0]->decay_vertex().X(),
+                                                           part.mothers()[0]->decay_vertex().Y(),
+                                                           part.mothers()[0]->decay_vertex().Z(),0.0));
+                myTau->setClosestApproach(smeared.closest_approach());
                 myTau->setMc(&part);
                 myTau->setDecayMode(PHYSICS->GetTauDecayMode(myTau->mc()));
                 if (myTau->DecayMode()<=0) myTau->setNtracks(0); // ERROR case
@@ -317,7 +369,7 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
       if (absid!=22 && absid!=11 && absid!=13) continue;
 
       // rejecting particle if coming from hadronization
-      if (ExclusiveId_ && LOOP->ComingFromHadronDecay(&part,mySample)) continue;
+      if (ExclusiveId_ && LOOP->ComingFromHadronDecay(&part,mySample,myEvent.mc()->particles().size())) continue;
 
       // Muons
       if (absid==13)
@@ -325,11 +377,19 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
         vetos[i]=true;
 
         // Smearing its momentum
-        MCParticleFormat smeared = mySmearer_->Execute(&part, absid);
+        MCParticleFormat smeared = mySmearer_->Execute(&part, static_cast<MAint32>(absid));
         if (smeared.pt() <= 1e-10) continue;
 
         RecLeptonFormat * muon = myEvent.rec()->GetNewMuon();
         muon->setMomentum(smeared.momentum());
+        muon->setD0(smeared.d0());
+        muon->setDZ(smeared.dz());
+        muon->setD0Approx(smeared.d0_approx());
+        muon->setDZApprox(smeared.dz_approx());
+        muon->setProductionVertex(MALorentzVector(part.mothers()[0]->decay_vertex().X(),
+                                                  part.mothers()[0]->decay_vertex().Y(),
+                                                  part.mothers()[0]->decay_vertex().Z(),0.0));
+        muon->setClosestApproach(smeared.closest_approach());
         muon->setMc(&(part));
         if (part.pdgid()==13) muon->SetCharge(-1);
         else muon->SetCharge(+1);
@@ -341,11 +401,19 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
         vetos[i]=true;
 
         // Smearing the electron momentum
-        MCParticleFormat smeared = mySmearer_->Execute(&part, absid);
+        MCParticleFormat smeared = mySmearer_->Execute(&part, static_cast<MAint32>(absid));
         if (smeared.pt() <= 1e-10) continue;
 
         RecLeptonFormat * elec = myEvent.rec()->GetNewElectron();
         elec->setMomentum(smeared.momentum());
+        elec->setD0(smeared.d0());
+        elec->setDZ(smeared.dz());
+        elec->setD0Approx(smeared.d0_approx());
+        elec->setDZApprox(smeared.dz_approx());
+        elec->setProductionVertex(MALorentzVector(part.mothers()[0]->decay_vertex().X(),
+                                                  part.mothers()[0]->decay_vertex().Y(),
+                                                  part.mothers()[0]->decay_vertex().Z(),0.0));
+        elec->setClosestApproach(smeared.closest_approach());
         elec->setMc(&(part));
         if (part.pdgid()==11) elec->SetCharge(-1);
         else elec->SetCharge(+1);
@@ -358,11 +426,19 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
         vetos[i]=true;
 
         // Smearing the photon momentum
-        MCParticleFormat smeared = mySmearer_->Execute(&part, absid);
+        MCParticleFormat smeared = mySmearer_->Execute(&part, static_cast<MAint32>(absid));
         if (smeared.pt() <= 1e-10) continue;
 
         RecPhotonFormat * photon = myEvent.rec()->GetNewPhoton();
         photon->setMomentum(smeared.momentum());
+        photon->setD0(smeared.d0());
+        photon->setDZ(smeared.dz());
+        photon->setD0Approx(smeared.d0_approx());
+        photon->setDZApprox(smeared.dz_approx());
+        photon->setProductionVertex(MALorentzVector(part.mothers()[0]->decay_vertex().X(),
+                                                    part.mothers()[0]->decay_vertex().Y(),
+                                                    part.mothers()[0]->decay_vertex().Z(),0.0));
+        photon->setClosestApproach(smeared.closest_approach());
         photon->setMc(&(part));
       }
     }

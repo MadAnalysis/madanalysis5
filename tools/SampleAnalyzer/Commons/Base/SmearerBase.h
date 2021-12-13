@@ -31,7 +31,9 @@
 #include <cmath>
 
 // SampleAnalyser headers
+#include "SampleAnalyzer/Commons/Service/PDGService.h"
 #include "SampleAnalyzer/Commons/Service/RandomService.h"
+#include "SampleAnalyzer/Commons/Service/Physics.h"
 
 
 namespace MA5
@@ -40,42 +42,121 @@ namespace MA5
     class SmearerBase
     {
         //---------------------------------------------------------------------------------
-        //                                 data members
+        //                              private data members
         //---------------------------------------------------------------------------------
         private:
+            // Set constants: speed of light & pi
+            MAdouble64 c_;
+            MAdouble64 pi_;
+
+        //---------------------------------------------------------------------------------
+        //                            protected data members
+        //---------------------------------------------------------------------------------
+        protected:
 
             // Creating a container for the smeared output
             MCParticleFormat output_;
 
+            // Magnetic field along beam axis
+            MAdouble64 Bz_;
+
+            // Tracker cylinder radius
+            MAdouble64 Radius_;
+
+            // Tracker half length
+            MAdouble64 HalfLength_;
+
+            // To optimise the code running time
+            MAbool MuonSmearer_;
+            MAbool ElectronSmearer_;
+            MAbool PhotonSmearer_;
+            MAbool TauSmearer_;
+            MAbool JetSmearer_;
+            MAbool ParticlePropagator_;
+
         //---------------------------------------------------------------------------------
-        //                                method members
+        //                              public data members
         //---------------------------------------------------------------------------------
         public:
+            //---------------------------------------------------------------------------------
+            //                                method members
+            //---------------------------------------------------------------------------------
             /// Constructor without argument
-            SmearerBase()
-            {}
+            SmearerBase() { }
+
             /// Destructor
-            virtual ~SmearerBase()
-            {}
+            virtual ~SmearerBase() {}
+
+
+            /// Accessors
+            const MAdouble64 Bz() const { return Bz_; }
+
+            /// Initialisation
+            void Initialize(MAbool base=false)
+            {
+                SetParameters();
+                if (!base) { PrintHeader(); }
+                PrintDebug();
+                output_.Reset();
+                c_  = 2.99792458E+8; // [m/s]
+                pi_ = 3.14159265;
+            }
 
             /// Matching general method
-            MCParticleFormat Execute(const MCParticleFormat * part, MAuint32 absid)
+            MCParticleFormat Execute(const MCParticleFormat * part, MAint32 smearerID)
             {
+                // Clearing the output vector
                 output_.Reset();
-                if      (absid == 21) output_ = JetSmearer(part);
-                else if (absid == 15) output_ = TauSmearer(part);
-                else if (absid == 13) output_ = MuonSmearer(part);
-                else if (absid == 11) output_ = ElectronSmearer(part);
-                else if (absid == 22) output_ = PhotonSmearer(part);
-                else if (absid == 0)  output_ = ConstituentSmearer(part);
+
+                if      (smearerID == 21) output_ = JetSmearer(part);
+                else if (smearerID == 15) output_ = TauSmearer(part);
+                else if (smearerID == 13) output_ = MuonSmearer(part);
+                else if (smearerID == 11) output_ = ElectronSmearer(part);
+                else if (smearerID == 22) output_ = PhotonSmearer(part);
+                else if (smearerID == 0)  output_ = ConstituentSmearer(part);
+                else if (smearerID == -1) output_ = TrackSmearer(part);
                 else
                 {
                     WARNING << "Unknown smearing method" << endmsg;
-                    WARNING << "Smearing skipped for PDGID : "<< absid << endmsg;
-                    output_.momentum().SetPxPyPzE(part->px(),part->py(),part->pz(),part->e());
-                    return output_;
+                    WARNING << "Smearing skipped for PDG-ID : "<< smearerID << endmsg;
+                    SetDefaultOutput(part,output_);
                 }
                 return output_;
+            }
+
+            // Copy part to output
+            void SetDefaultOutput(const MCParticleFormat * part, MCParticleFormat & output)
+            {
+                output.Reset();
+                output.momentum().SetPxPyPzE(part->px(),part->py(),part->pz(),part->e());
+                output.setDecayVertex(part->decay_vertex());
+                if (!isPropagatorOn() && part->mothers().size() > 0)
+                  SetDisplacementObservables(part, output);
+                else
+                {
+                    output.setClosestApproach(part->closest_approach());
+                    output.setD0(part->d0());
+                    output.setDZ(part->dz());
+                    output.setD0Approx(part->d0_approx());
+                    output.setDZApprox(part->dz_approx());
+                }
+            }
+
+            // Calculate displacement observables without magnetic field
+            void SetDisplacementObservables(const MCParticleFormat*, MCParticleFormat &);
+
+            // Set parameters
+            virtual void SetParameters()
+            {
+                Bz_                 = 1.0e-9;
+                Radius_             = 1.0e+99;
+                HalfLength_         = 1.0e+99;
+                ParticlePropagator_ = false;
+                MuonSmearer_        = false;
+                ElectronSmearer_    = false;
+                PhotonSmearer_      = false;
+                TauSmearer_         = false;
+                JetSmearer_         = false;
             }
 
             // For all methods below, the only relevant part of the output object is the momentum
@@ -84,121 +165,76 @@ namespace MA5
             // Electron smearing method
             virtual MCParticleFormat ElectronSmearer(const MCParticleFormat * part)
             {
-                output_.Reset();
-                output_.momentum().SetPxPyPzE(part->px(),part->py(),part->pz(),part->e());
+                SetDefaultOutput(part,output_);
                 return output_;
             }
             // Check whether electron smearing is on (code-efficiency-related)
-            virtual MAbool isElectronSmearerOn() {return false;}
+            MAbool isElectronSmearerOn() {return ElectronSmearer_;}
 
             // Muon smearing method
             virtual MCParticleFormat MuonSmearer(const MCParticleFormat * part)
             {
-                output_.Reset();
-                output_.momentum().SetPxPyPzE(part->px(),part->py(),part->pz(),part->e());
+                SetDefaultOutput(part,output_);
                 return output_;
             }
             // Check whether muon smearing is on (code-efficiency-related)
-            virtual MAbool isMuonSmearerOn() {return false;}
+            MAbool isMuonSmearerOn() {return MuonSmearer_;}
 
             // Hadronic Tau smearing method
             virtual MCParticleFormat TauSmearer(const MCParticleFormat * part)
             {
-                output_.Reset();
-                output_.momentum().SetPxPyPzE(part->px(),part->py(),part->pz(),part->e());
+                SetDefaultOutput(part,output_);
                 return output_;
             }
             // Check whether tau smearing is on (code-efficiency-related)
-            virtual MAbool isTauSmearerOn() {return false;}
+            MAbool isTauSmearerOn() {return TauSmearer_;}
 
             // Photon smearing method
             virtual MCParticleFormat PhotonSmearer(const MCParticleFormat * part)
             {
-                output_.Reset();
-                output_.momentum().SetPxPyPzE(part->px(),part->py(),part->pz(),part->e());
+                SetDefaultOutput(part,output_);
                 return output_;
             }
             // Check whether photon smearing is on (code-efficiency-related)
-            virtual MAbool isPhotonSmearerOn() {return false;}
+            MAbool isPhotonSmearerOn() {return PhotonSmearer_;}
 
             // Jet smearing method
             virtual MCParticleFormat JetSmearer(const MCParticleFormat * part)
             {
-                output_.Reset();
-                output_.momentum().SetPxPyPzE(part->px(),part->py(),part->pz(),part->e());
+                SetDefaultOutput(part,output_);
                 return output_;
             }
 
             // Check whether jet smearing is on (code-efficiency-related)
-            virtual MAbool isJetSmearerOn() {return false;}
+            MAbool isJetSmearerOn() {return JetSmearer_;}
 
             // Jet Constituent smearing method
             virtual MCParticleFormat ConstituentSmearer(const MCParticleFormat * part)
             {
-                output_.Reset();
-                output_.momentum().SetPxPyPzE(part->px(),part->py(),part->pz(),part->e());
+                SetDefaultOutput(part,output_);
                 return output_;
             }
 
-            /// Smearer Gaussian function 
-            /// (one smears the quantity 'property' with a Gaussian of variance 'sigma')
-            ///
-            /// REFERENCE:  - W. Hoermann and G. Derflinger (1990):
-            ///              The ACR Method for generating normal random variables,
-            ///              OR Spektrum 12 (1990), 181-185.
-            ///
-            /// Implementation taken from
-            /// UNURAN (c) 2000  W. Hoermann & J. Leydold, Institut f. Statistik, WU Wien
-            /// Taken from ROOT: https://root.cern.ch/doc/master/TRandom_8cxx_source.html#l00263
-            MAdouble64 Gaussian(MAdouble64 sigma, MAdouble64 property)
+            // Track smearing method
+            virtual MCParticleFormat TrackSmearer(const MCParticleFormat * part)
             {
-              MAdouble64 kC1 = 1.448242853;          MAdouble64 kAs = 0.8853395638;
-              MAdouble64 kC2 = 3.307147487;          MAdouble64 kBs = 0.2452635696;
-              MAdouble64 kC3 = 1.46754004;           MAdouble64 kCs = 0.2770276848;
-              MAdouble64 kD1 = 1.036467755;          MAdouble64 kB  = 0.5029324303;
-              MAdouble64 kD2 = 5.295844968;          MAdouble64 kX0 = 0.4571828819;
-              MAdouble64 kD3 = 3.631288474;          MAdouble64 kYm = 0.187308492 ;
-              MAdouble64 kHm = 0.483941449;          MAdouble64 kS  = 0.7270572718 ;
-              MAdouble64 kZm = 0.107981933;          MAdouble64 kT  = 0.03895759111;
-              MAdouble64 kHp = 4.132731354;          MAdouble64 kHp1 = 3.132731354;
-              MAdouble64 kZp = 18.52161694;          MAdouble64 kHzm = 0.375959516;
-              MAdouble64 kPhln = 0.4515827053;       MAdouble64 kHzmp = 0.591923442;
-              MAdouble64 kHm1 = 0.516058551;
-
-              MAdouble64 result, rn,x,y,z;
-              do
-              {
-                y = RANDOM->flat();
-                if (y>kHm1) { result = kHp*y-kHp1; break; }
-                else if (y<kZm) { rn = kZp*y-1; result = (rn>0) ? (1+rn) : (-1+rn); break; }
-                else if (y<kHm)
-                {
-                  rn = RANDOM->flat();
-                  rn = rn-1+rn;
-                  z = (rn>0) ? 2-rn : -2-rn;
-                  if ((kC1-y)*(kC3+fabs(z))<kC2) { result = z; break; }
-                  else
-                  {
-                    x = rn*rn;
-                    if ((y+kD1)*(kD3+x)<kD2) { result = rn; break; }
-                    else if (kHzmp-y<exp(-(z*z+kPhln)/2)) { result = z; break; }
-                    else if (y+kHzm<exp(-(x+kPhln)/2)) { result = rn; break; }
-                  }
-                }
-                while (1)
-                {
-                  x = RANDOM->flat();
-                  y = kYm * RANDOM->flat();
-                  z = kX0 - kS*x - y;
-                  if (z>0) rn = 2+y/x;
-                  else { x = 1-x;y = kYm-y;rn = -(2+y/x); }
-                  if ((y-kAs+x)*(kCs+x)+kBs<0) { result = rn; break; }
-                  else if (y<x+kT)
-                    if (rn*rn<4*(kB-log(x))) { result = rn; break; }
-                }
-              } while(0);
-              return property + sigma * result;
+                SetDefaultOutput(part,output_);
+                return output_;
             }
+
+
+            //================================//
+            //   Particle Propagator Method   //
+            //================================//
+
+            // Check whether particle propagator is on (code-efficiency-related)
+            MAbool isPropagatorOn() {return ParticlePropagator_;}
+
+            // Particle propagator method
+            void ParticlePropagator(MCParticleFormat * part);
+
+            /// Smearer Gaussian function
+            MAdouble64 Gaussian(MAdouble64, MAdouble64);
 
             /// Smearer Cumulative distribution function TO BE TESTED
 //            MAdouble64 Sigmoid(MAdouble64 sigma, MAdouble64 property)
@@ -209,9 +245,49 @@ namespace MA5
 //                return property + sign * RANDOM->flat() * (1. + err) * 0.5;
 //            }
 
-            virtual void Print()
+            void PrintDebug()
             {
-                DEBUG << "Default Smearer" << endmsg;
+                DEBUG << "   -> Smearer Input Values:" << endmsg;
+                DEBUG << "   * Magnetic field [T] = " << Bz_ << endmsg;
+//                DEBUG << "   * Radius [m]         = " << Radius_ << endmsg;
+//                DEBUG << "   * Half Length [m]    = " << HalfLength_ << endmsg;
+
+                std::string module  = ParticlePropagator_ ? "on" : "off";
+                DEBUG << "       * Propagator         = " << module << endmsg;
+
+                module = MuonSmearer_ ? "on" : "off";
+                DEBUG << "      * Muon Smearer       = " << module << endmsg;
+
+                module = ElectronSmearer_ ? "on" : "off";
+                DEBUG << "      * Electron Smearer   = " << module << endmsg;
+
+                module = PhotonSmearer_ ? "on" : "off";
+                DEBUG << "      * Photon Smearer     = " << module << endmsg;
+
+                module = TauSmearer_ ? "on" : "off";
+                DEBUG << "      * Tau Smearer        = " << module << endmsg;
+
+                module = JetSmearer_ ? "on" : "off";
+                DEBUG << "      * Jet Smearer        = " << module << endmsg;
+            }
+
+
+            void PrintHeader()
+            {
+                INFO << "   <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endmsg;
+                INFO << "   <>                                                              <>" << endmsg;
+                INFO << "   <>     Simplified Fast Detector Simulation in MadAnalysis 5     <>" << endmsg;
+                INFO << "   <>            Please cite arXiv:2006.09387 [hep-ph]             <>" << endmsg;
+                if (isPropagatorOn()) // cite particle propagator module
+                {
+                    INFO << "   <>                                                              <>" << endmsg;
+                    INFO << "   <>            Particle Propagation in MadAnalysis 5             <>" << endmsg;
+                    INFO << "   <>            Please cite arXiv:2112.05163 [hep-ph]             <>" << endmsg;
+                    INFO << "   <>                                                              <>" << endmsg;
+                }
+                INFO << "   <>         https://madanalysis.irmp.ucl.ac.be/wiki/SFS          <>" << endmsg;
+                INFO << "   <>                                                              <>" << endmsg;
+                INFO << "   <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endmsg;
             }
     };
 }

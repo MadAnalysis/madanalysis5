@@ -22,6 +22,7 @@
 ################################################################################
 
 
+from __future__ import absolute_import
 import logging
 class FomConfiguration:
 
@@ -86,14 +87,14 @@ class FomConfiguration:
     
         
     def user_GetParameters(self):
-        table = FomConfiguration.userVariables.keys()
+        table = list(FomConfiguration.userVariables.keys())
         if self.IsX():
             table.extend("x")
         return table
 
 
     def user_GetValues(self,variable):
-        if variable in FomConfiguration.userVariables.keys():
+        if variable in list(FomConfiguration.userVariables.keys()):
             table = FomConfiguration.userVariables[variable]
         if self.IsX() and variable=='x':
             table = ['0.']

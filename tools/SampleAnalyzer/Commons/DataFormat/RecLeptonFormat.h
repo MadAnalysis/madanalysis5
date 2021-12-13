@@ -67,12 +67,12 @@ class RecLeptonFormat : public RecParticleFormat
   std::vector<IsolationConeType> isolCones_; // isolation cones
   MAuint64 refmc_;
   MAuint32   pdg_;
-  MAfloat32  d0_;
+
+  // Old class members that are kept for backwards compatibility
+  MALorentzVector closest_point_;
   MAfloat32  d0error_;
-  MAfloat32  dz_;
   MAfloat32  dzerror_;
-  MALorentzVector  vertex_prod_;
-  MALorentzVector  closest_point_;
+
 
   // -------------------------------------------------------------
   //                        method members
@@ -124,9 +124,10 @@ class RecLeptonFormat : public RecParticleFormat
     sumPT_isol_=0.;
     pdg_=0;
     isolCones_.clear();
-    d0_=0; d0error_=0;
-    dz_=0; dzerror_=0;
-    vertex_prod_.Reset();    
+    closest_approach_.SetXYZ(0.,0.,0.);
+    d0_=0.; d0_approx_=0.; d0error_=0.;
+    dz_=0.; dz_approx_=0.; dzerror_=0.;
+    vertex_prod_.Reset();
   }
 
   /// Accessor to the electric charge 
@@ -161,6 +162,16 @@ class RecLeptonFormat : public RecParticleFormat
     return &isolCones_.back();
   }
 
+  IsolationConeType* GetIsolCone(MAfloat32 radius)
+  {
+    for (MAuint32 i=0; i<isolCones_.size(); i++)
+        if (radius == isolCones_[i].deltaR()) return &isolCones_[i];
+
+    isolCones_.push_back(IsolationConeType());
+    isolCones_.back().setDeltaR(radius);
+    return &isolCones_.back();
+  }
+
   /// giving a new isolation cone entry
   void setIsolCones(const std::vector<IsolationConeType>& cones)
   { isolCones_ = cones; }
@@ -183,29 +194,21 @@ class RecLeptonFormat : public RecParticleFormat
   void setMuonId()
   { pdg_=13; }
 
-  // d0
-  MAfloat32 d0() const
-  { return d0_; }
+  //   --------------------------------------    //
+  // older methods for backwards compatibility
+  //   --------------------------------------    //
 
-  // d0error
-  MAfloat32 d0error() const
-  { return d0error_; }
-
-  // dz
-  MAfloat32 dz() const
-  { return dz_; }
-
-  // dzerror
-  MAfloat32 dzerror() const
-  { return dzerror_; }
+  // d0/dz error
+  MAfloat32 d0error() const { return d0error_; }
+  MAfloat32 dzerror() const { return dzerror_; }
 
   // vertex prod
-  const MALorentzVector& vertexProd() const
-  { return vertex_prod_; }
+  const MALorentzVector& closestPoint() const { return closest_point_; }
+  void setClosestPoint(const MALorentzVector& v) { closest_point_= v; }
 
-  // vertex prod
-  const MALorentzVector& closestPoint() const
-  { return closest_point_; }
+  // Production vertex
+  const MALorentzVector& vertexProd()        const { return vertex_prod_; }
+  void setVertexPoint(const MALorentzVector& v)      { vertex_prod_=v; }
 
 };
 
