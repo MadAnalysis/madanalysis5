@@ -282,7 +282,7 @@ namespace MA5
                 {
                     INFO << "   <>                                                              <>" << endmsg;
                     INFO << "   <>            Particle Propagation in MadAnalysis 5             <>" << endmsg;
-                    INFO << "   <>            Please cite arXiv:XXXX.XXXXX [hep-ph]             <>" << endmsg;
+                    INFO << "   <>            Please cite arXiv:2112.05163 [hep-ph]             <>" << endmsg;
                     INFO << "   <>                                                              <>" << endmsg;
                 }
                 INFO << "   <>         https://madanalysis.irmp.ucl.ac.be/wiki/SFS          <>" << endmsg;
