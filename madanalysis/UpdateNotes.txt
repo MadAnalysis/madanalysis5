@@ -1,5 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+199           (2021/12/13) fuks:    Adding arXiv references for the SFS 
+
 196           (2021/12/07) fuks:    Small fix for analyses carrying a too long filename 
 
 195           (2021/12/06) fuks:    Bug with the calculation of dz 
