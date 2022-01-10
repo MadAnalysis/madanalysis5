@@ -1,0 +1,60 @@
+name: Pull Request
+description: Pull Request
+labels: ""
+
+body:
+  - type: markdown
+    id: description
+    attributes:
+      value: |
+        ## Before submitting
+        Please complete the following checklist when submitting a PR:
+          - [ ] All new features must include a test sequence.
+              If you've fixed a bug or added code that should be tested, add a 
+              test sequence below for it to be checked by other developers.
+          - [ ] All new functions and code must be clearly commented and documented.
+              If you do make documentation changes, make sure that the docs build and
+              render correctly by running `./doc/makedoc`.
+          - [ ] Add a new entry to the `madanalysis/UpdateNotes.txt` file, summarizing the
+              change, and including a link back to the PR.
+  - type: textarea
+    id: system
+    attributes:
+      label: System Settings
+      description: |
+        Please provide
+        - OS: [e.g. macOS v12.1]
+        - Python version
+        - gcc/c++ version
+        - MadAnalysis 5 version
+        - If applicable, versions for other third party software i.e. Fastjet, Delphes, pyhf etc.
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description of the Change
+      description: |
+        Please describe the changes here.
+    validations:
+      required: true
+  - type: textarea
+    id: benefits
+    attributes:
+      label: Benefits
+      description: |
+        Please describe the benefits of the change here.
+    validations:
+      required: true
+  - type: textarea
+    id: drawback
+    attributes:
+      label: Possible Drawbacks
+      description: |
+        What might be the possible drawbacks of the change that has been proposed.
+  - type: textarea
+    id: issues
+    attributes:
+      label: Related GitHub Issues
+      description: |
+        Please refer to any related [GitHub Issues](https://github.com/MadAnalysis/madanalysis5/issues).
