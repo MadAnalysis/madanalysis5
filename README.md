@@ -200,7 +200,7 @@ That's all folks!
 
 ## Credits
 
-If you use MadAnalysis 5, please cite 
+If you use MadAnalysis 5, please cite:
 
  - [E. Conte, B. Fuks and G. Serret; Comput. Phys. Commun. 184 (2013) 222](http://arxiv.org/abs/1206.1599)
  - [E. Conte, B. Dumont, B. Fuks and C. Wymant; Eur. Phys. J. C 74 (2014) 10, 3103](http://arxiv.org/abs/1405.3982)
