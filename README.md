@@ -207,5 +207,5 @@ If you use MadAnalysis 5, please cite
  - [B. Dumont, B. Fuks, S. Kraml et al.; Eur. Phys. J. C 75 (2015) 2, 56](http://arxiv.org/abs/1407.3278)
  - [E. Conte, and B. Fuks; Int. J. Mod. Phys. A 33 (2018) 1830027](http://arxiv.org/abs/1808.00480)
  - [J. Y. Araz, M. Frank and B. Fuks; Eur. Phys. J. C 80 (2020) 6, 531](https://arxiv.org/abs/1910.11418)
- - [J. Y. Araz, B. Fuks and G. Polykratis; Eur. Phys. J. C 81, 329 (2021)](https://arxiv.org/abs/2006.09387)
+ - [J. Y. Araz, B. Fuks and G. Polykratis; Eur. Phys. J. C 81 (2021) 329](https://arxiv.org/abs/2006.09387)
  - [J. Y. Araz, B. Fuks, M. D. Goodsell and M. Utsch; arXiv:2112.05163](https://arxiv.org/abs/2112.05163)
