@@ -13,7 +13,9 @@
  - [Description of the package](#description-of-the-package)
  - [Very first steps with MadAnalysis 5](#very-first-steps-with-madanalysis-5)
  - [Troubleshootings and bug reports](#troubleshootings-and-bug-reports)
+ - [Authors](#authors)
  - [Our famous last words](#our-famous-last-words)
+ - [Credits](#credits)
 
 
 
@@ -35,7 +37,7 @@ opens unlimited possibilities concerning the level of complexity that can be
 reached, the latter being only limited by the programming skills and the
 originality of the user.
 
-More details can be found on the [MadAnalysis 5 website](https://launchpad.net/madanalysis5).
+More details can be found on the [MadAnalysis 5 website](https://madanalysis.irmp.ucl.ac.be).
 
 ### Requirements
 
@@ -190,6 +192,13 @@ suggested to create a report on [GitHub Issues](https://github.com/MadAnalysis/m
 In this way, you also participate to the improvement of MadAnalysis 5 and the
 authors thank you for this.
 
+### Authors
+
+MadAnalysis 5 is openly developed by the core dev team consisting of:
+- [Jack Y. Araz](mailto:jack.araz@durham.ac.uk)
+- [Benjamin Fuks](mailto:fuks@lpthe.jussieu.fr)
+- [Eric Conte](mailto:eric.conte@iphc.cnrs.fr)
+
 ### Our famous last words
 
 The development team of MadAnalysis 5 hopes that the package will meet the
@@ -198,7 +207,7 @@ investigations.
 
 That's all folks!
 
-## Credits
+### Credits
 
 If you use MadAnalysis 5, please cite 
 
