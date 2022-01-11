@@ -45,8 +45,9 @@ MadAnalysis 5 requires several external libraries in order to properly run:
    In order to check the installed version of Python on a system, it is
    sufficient to issue in a shell `$ python --version`.
 
- - The GNU GCC compiler. MadAnalysis 5 has been validated with the versions
-   `4.3.X` and `4.4.X`. The GCC compiler can be downloaded from [this website](http://gcc.gnu.org/).
+ - Either the GNU GCC compiler, or the Apple clang compiler. MadAnalysis 5 has been validated:
+     - with the versions `4.3.X` and `4.4.X`. The GCC compiler can be downloaded from [this website](http://gcc.gnu.org/).
+     - with the version 12.0.5 (clang-1205.0.22.9) of the clang compiler.
 
 To benefit from all options coming with the MadAnalysis 5 program, the following
 (optional) libraries have to be installed on the system:
