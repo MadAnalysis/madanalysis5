@@ -923,11 +923,10 @@ class RunRecast():
             return -1,-1, -1
         ## Getting the XML information
         try:
-            info_input = open(filename)
-            info_tree = etree.parse(info_input)
-            info_input.close()
+            with open(filename, "r") as info_input:
+                info_tree = etree.parse(info_input)
         except Exception as err:
-            self.logger.warning("Error during HMTL parsing: "+str(err))
+            self.logger.warning("Error during XML parsing: "+str(err))
             self.logger.warning('Cannot parse the info file')
             return -1,-1, -1
 
@@ -1251,9 +1250,15 @@ class RunRecast():
                                     if channel.text != None:
                                         data = channel.text.split()
                                     pyhf_config[likelihood_profile]['SR'][channel.attrib['name']] = {
-                                        'channels' : channel.attrib.get('id',-1),
-                                        'data'     : data
+                                        "channels"    : channel.get('id', default = -1),
+                                        "data"        : data,
                                     }
+                                    is_included = (
+                                            channel.get("is_included", default = 0) in ["True", "1", "yes"]
+                                    ) if len(data) == 0 else True
+                                    pyhf_config[likelihood_profile]['SR'][channel.attrib['name']].update(
+                                        {"is_included" : is_included}
+                                    )
                                     if pyhf_config[likelihood_profile]['SR'][channel.attrib['name']]['channels'] == -1:
                                         file = os.path.join(
                                             pyhf_config[likelihood_profile]['path'],
@@ -1276,7 +1281,7 @@ class RunRecast():
                 continue
             # validat pyhf config
             background = HF_Background(config)
-            signal     = HF_Signal(config,{},xsection=1.,
+            signal     = HF_Signal(config, {}, xsection=1.,
                                    background = background,
                                    validate   = True)
 
