@@ -47,8 +47,9 @@ MadAnalysis 5 requires several external libraries in order to properly run:
    In order to check the installed version of Python on a system, it is
    sufficient to issue in a shell `$ python --version`.
 
- - The GNU GCC compiler. MadAnalysis 5 has been validated with the versions
-   `4.3.X` and `4.4.X`. The GCC compiler can be downloaded from [this website](http://gcc.gnu.org/).
+ - Either the GNU GCC compiler, or the Apple clang compiler. MadAnalysis 5 has been validated:
+     - with the versions `4.3.X` and `4.4.X` of the GCC compiler. The GCC compiler can be downloaded from [this website](http://gcc.gnu.org/).
+     - with the version 12.0.5 (clang-1205.0.22.9) of the clang compiler.
 
 To benefit from all options coming with the MadAnalysis 5 program, the following
 (optional) libraries have to be installed on the system:
@@ -209,12 +210,12 @@ That's all folks!
 
 ### Credits
 
-If you use MadAnalysis 5, please cite 
+If you use MadAnalysis 5, please cite:
 
  - [E. Conte, B. Fuks and G. Serret; Comput. Phys. Commun. 184 (2013) 222](http://arxiv.org/abs/1206.1599)
  - [E. Conte, B. Dumont, B. Fuks and C. Wymant; Eur. Phys. J. C 74 (2014) 10, 3103](http://arxiv.org/abs/1405.3982)
  - [B. Dumont, B. Fuks, S. Kraml et al.; Eur. Phys. J. C 75 (2015) 2, 56](http://arxiv.org/abs/1407.3278)
  - [E. Conte, and B. Fuks; Int. J. Mod. Phys. A 33 (2018) 1830027](http://arxiv.org/abs/1808.00480)
  - [J. Y. Araz, M. Frank and B. Fuks; Eur. Phys. J. C 80 (2020) 6, 531](https://arxiv.org/abs/1910.11418)
- - [J. Y. Araz, B. Fuks and G. Polykratis; Eur. Phys. J. C 81, 329 (2021)](https://arxiv.org/abs/2006.09387)
+ - [J. Y. Araz, B. Fuks and G. Polykratis; Eur. Phys. J. C 81 (2021) 329](https://arxiv.org/abs/2006.09387)
  - [J. Y. Araz, B. Fuks, M. D. Goodsell and M. Utsch; arXiv:2112.05163](https://arxiv.org/abs/2112.05163)
