@@ -923,7 +923,7 @@ class CLsComputer:
                 CLb = 1. - stats.multivariate_normal.cdf( (qmu - qA)/(2*sqA) )
         # CLs = 0.
         # if CLb > 0.:
-        CLs = CLsb/CLb
+        CLs = CLsb/CLb if CLb > 0. else 1.
         return 1 - CLs
 
 
