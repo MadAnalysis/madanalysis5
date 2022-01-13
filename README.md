@@ -10,6 +10,7 @@
  - [What is MadAnalysis 5?](#what-is-madanalysis-5)
  - [Requirements](#requirements)
  - [Downloading and installing the MadAnalysis 5 package](#downloading-and-installing-the-madanalysis-5-package)
+ - [Usage of MadAnalysis 5](#usage-of-madanalysis-5)
  - [Description of the package](#description-of-the-package)
  - [Very first steps with MadAnalysis 5](#very-first-steps-with-madanalysis-5)
  - [Troubleshootings and bug reports](#troubleshootings-and-bug-reports)
@@ -63,18 +64,49 @@ also be downloaded by by typing `ma5> install zlib` through MadAnalysis interfac
 
 ### Downloading and installing the MadAnalysis 5 package
 
-We are moving from our previous location in Launchpad but the latest MadAnalysis 5
+We are moving from our previous location in [Launchpad](https://launchpad.net/madanalysis5) but the latest MadAnalysis 5
 version can still be downloaded through [here](https://launchpad.net/madanalysis5) until the 
-release of `v2.0`. Note that future versions will only be available through GitHub. 
+release of `v1.10`. Note that future versions will only be available through GitHub. 
 
 If you satisfy the requirements mentioned [above](#requirements) the only thing that you need to do is
-clone or download this repository and start playing;
+ download the latest release from [here](https://github.com/MadAnalysis/madanalysis5/releases) and 
+start playing;
 ```bash
-$ git clone https://github.com/MadAnalysis/madanalysis5.git # or choose download zip option 
 $ cd madanalysis5
 $ ./bin/ma5
 ```
+During your first execution MadAnalysis 5 will build the entire workspace automatically. 
+Note that release versions are always the stable ones the main repository will be under constant 
+development.
 
+### Usage of MadAnalysis 5
+
+Syntax: `./bin/ma5 [options] [scripts]`
+```
+[options]
+This optional argument allows to select the running mode of MadAnalysis 5 appropriate 
+to the type of event files to analyze. If absent, the parton-level mode is selected. 
+Warning: the different modes are self-excluding each other and only one choice has to be made.
+
+List of available options :
+ -P or --partonlevel  : parton-level mode
+ -H or --hadronlevel  : hadron-level mode
+ -R or --recolevel    : detector-level mode
+ -e or -E or --expert : entering expert mode
+ -v or --version
+    or --release      : display the version number of MadAnalysis
+ -b or --build        : rebuild the SampleAnalyzer static library
+ -f or --forced       : do not ask for confirmation when MA5 removes a directory or overwrites an object
+ -s or --script       : quit automatically MA5 when the script is loaded
+ -h or --help         : dump this help
+ -i or --installcard  : produce the default installation card in installation_card.dat
+ -d or --debug        : debug mode
+ -q or --qmode        : developper mode only for MA5 developpers
+
+[scripts]
+This optional argument is a list of filenames containing a set of MadAnalysis 5 commands. 
+The file name are handled as concatenated, and the commands are applied sequentially.
+```
 ### Description of the package
 
 The directory structure of the MadAnalysis 5 package can be summarized as
