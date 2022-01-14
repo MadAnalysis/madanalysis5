@@ -34,18 +34,14 @@ class HistFactory(object):
         self.path        = pyhf_config.get('path', 'missing_path')
         self.name        = pyhf_config.get('name', 'missing_name')
         self.logger      = logging.getLogger('MA5')
-        if type(self) == HF_Background:
+        if isinstance(self, HF_Background):
             self.hf             = {}
             self.global_config  = self.pyhf_config
-        elif type(self) == HF_Signal:
+        elif isinstance(self, HF_Signal):
             self.hf      = []
 
     def __call__(self,lumi):
         return self.extrapolate(lumi)
-
-    @classmethod
-    def __type__(self):
-        return self.__name__
 
     def extrapolate(self,lumi):
         """ To calculate the HL variables HF needs to be extrapolated. Expected
@@ -107,7 +103,7 @@ class HistFactory(object):
                         if item != []:
                             HF['observations'][iobs]['data'] = item
 
-        elif isinstance(self,HF_Signal):#type(self) == HF_Signal:
+        elif isinstance(self, HF_Signal):#type(self) == HF_Signal:
             # Signal extrapolation
             for i in range(len(HF)):
                 if HF[i]['op'] == 'remove':
@@ -214,16 +210,18 @@ class HF_Signal(HistFactory):
         is failed and correct pyhf_config is needed.
     """
     def __init__(self,pyhf_config, regiondata, xsection=-1, **kwargs):
-        super(HF_Signal,self).__init__(pyhf_config)
+        super(HF_Signal, self).__init__(pyhf_config)
         self.signal_config = {}
 
         with open(os.path.join(self.path, self.name), 'r') as json_file:
             tmp_bkg = json.load(json_file)
 
+        bin_sizes = [len(x.get('data', [])) for x in tmp_bkg.get('observations',[])]
+
         for key, item in self.pyhf_config.items():
             if key != 'lumi':
                 self.signal_config[key] = {}
-                if item['data'] == []:
+                if not item['is_included']:
                     self.signal_config[key]['op'] = 'remove'
                     self.signal_config[key]["path"] = '/channels/' + str(item['channels'])
                 else:
@@ -231,6 +229,8 @@ class HF_Signal(HistFactory):
                     self.signal_config[key]["path"] = \
                         '/channels/' + str(item['channels']) + '/samples/' + \
                         str(len(tmp_bkg["channels"][int(item['channels'])]["samples"])-1)
+                    self.signal_config[key]["bin_size"] = \
+                        bin_sizes[int(self.signal_config[key]["path"].split('/')[2])]
 
                 self.signal_config[key]['data'] = []
                 for SRname in item['data']:
@@ -247,7 +247,7 @@ class HF_Signal(HistFactory):
                                         add_normsys  = kwargs.get('add_normsys', []),
                                         add_histosys = kwargs.get('add_histosys',[]),)
 
-    def set_HF(self,xsection,**kwargs):
+    def set_HF(self, xsection, **kwargs):
         HF = []
         if xsection<=0.:
             return HF
@@ -269,6 +269,8 @@ class HF_Signal(HistFactory):
                         ]
                     }
                 }
+                if len(SR_tmp["value"]["data"]) == 0:
+                    SR_tmp["value"]["data"] = [0.0] * self.signal_config[SR]['bin_size']
                 HF.append(SR_tmp)
             else:
                 toRemove.append(
@@ -287,13 +289,13 @@ class HF_Signal(HistFactory):
             HF = self.add_normsys(HF,sys['hi_data'],sys['lo_data'],sys['name'])
 
         background = kwargs.get('background',{})
-        if type(background) == HF_Background:
-            if not self.validate_bins(background,HF):
+        if isinstance(background, HF_Background):
+            if not self.validate_bins(background, HF):
                 self.logger.warning('Signal HistFactory validation failed.')
                 return []
         return HF
 
-    def validate_bins(self,background,HF=[]):
+    def validate_bins(self, background, HF = []):
         if HF == []:
             HF = self.hf
         bkg_bins    = background.size()

@@ -282,13 +282,13 @@ class InstallPad:
         dico_file.write('#              delphes card             | Analyses\n')
         dico_file.write('#                                       |\n')
         for k,v in sorted(delphes_dictionary.items()):
-            dico_file.write(k.ljust(40,' ') + '| ' + ' '.join([x.ljust(20,' ') for x in v]) + '\n')
+            dico_file.write(k.ljust(40,' ') + '| ' + ' '.join([x.ljust(25,' ') for x in v]) + '\n')
         dico_file.close()
         dico_file = open(os.path.join(self.installdir,'Input','analysis_description.dat'),'w')
         dico_file.write('#    Analysis       | Description\n')
         dico_file.write('#                   |\n')
         for k,v in sorted(analysis_info.items()):
-            dico_file.write(k.ljust(20,' ') + '| ' + v + '\n')
+            dico_file.write(k.ljust(25,' ') + '| ' + v + '\n')
         dico_file.close()
 
         # Bibliography file
