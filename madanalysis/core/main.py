@@ -587,6 +587,13 @@ class Main():
         # Writing the setup
         self.logger.info("   Writing the setup files ...")
         from madanalysis.build.setup_writer import SetupWriter
+
+        # @Jack: git doesn't like empty folders so these have to be created before compilation
+        if not os.path.isdir(
+                os.path.join(self.archi_info.ma5dir,"tools/SampleAnalyzer/","Bin")
+        ):
+            os.mkdir(os.path.join(self.archi_info.ma5dir,"tools/SampleAnalyzer/","Bin"))
+
         SetupWriter.WriteSetupFile(True,self.archi_info.ma5dir+'/tools/SampleAnalyzer/',self.archi_info)
         SetupWriter.WriteSetupFile(False,self.archi_info.ma5dir+'/tools/SampleAnalyzer/',self.archi_info)
         # Writing the makefile

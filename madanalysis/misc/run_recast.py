@@ -671,9 +671,11 @@ class RunRecast():
         compiler = LibraryWriter('lib',self.main)
         ncores = compiler.get_ncores2()
         # compiling
+        command = ['make']
+        strcores='' #ERIC
         if ncores>1:
             strcores='-j'+str(ncores)
-        command = ['make',strcores]
+            command.append(strcores)
         logfile = self.dirname+'_RecastRun/Build/Log/PADcompilation.log'
         result, out = ShellCommand.ExecuteWithLog(command,logfile,self.dirname+'_RecastRun/Build')
         time.sleep(1.);
@@ -915,19 +917,25 @@ class RunRecast():
 
     def parse_info_file(self, etree, analysis, extrapolated_lumi):
         ## Is file existing?
-        if not os.path.isfile(self.pad+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.info'):
-            self.logger.debug('Info File does not exist...')
+        filename=self.pad+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.info'   #ERIC
+        if not os.path.isfile(filename):
+            self.logger.warning('Info '+filename+' does not exist...')
             return -1,-1, -1
         ## Getting the XML information
         try:
-            info_input = open(self.pad+'/Build/SampleAnalyzer/User/Analyzer/'+analysis+'.info')
-            info_tree = etree.parse(info_input)
-            info_input.close()
+            with open(filename, "r") as info_input:
+                info_tree = etree.parse(info_input)
+        except Exception as err:
+            self.logger.warning("Error during XML parsing: "+str(err))
+            self.logger.warning('Cannot parse the info file')
+            return -1,-1, -1
+
+        try:
             results = self.header_info_file(info_tree,analysis,extrapolated_lumi)
             return results
         except Exception as err:
-            self.logger.debug(str(err))
-            self.logger.debug('Cannot parse the info file')
+            self.logger.warning("Error during extracting header info file: "+str(err))
+            self.logger.warning('Cannot parse the info file')
             return -1,-1, -1
 
     def fix_pileup(self,filename):
@@ -1242,9 +1250,15 @@ class RunRecast():
                                     if channel.text != None:
                                         data = channel.text.split()
                                     pyhf_config[likelihood_profile]['SR'][channel.attrib['name']] = {
-                                        'channels' : channel.attrib.get('id',-1),
-                                        'data'     : data
+                                        "channels"    : channel.get('id', default = -1),
+                                        "data"        : data,
                                     }
+                                    is_included = (
+                                            channel.get("is_included", default = 0) in ["True", "1", "yes"]
+                                    ) if len(data) == 0 else True
+                                    pyhf_config[likelihood_profile]['SR'][channel.attrib['name']].update(
+                                        {"is_included" : is_included}
+                                    )
                                     if pyhf_config[likelihood_profile]['SR'][channel.attrib['name']]['channels'] == -1:
                                         file = os.path.join(
                                             pyhf_config[likelihood_profile]['path'],
@@ -1267,7 +1281,7 @@ class RunRecast():
                 continue
             # validat pyhf config
             background = HF_Background(config)
-            signal     = HF_Signal(config,{},xsection=1.,
+            signal     = HF_Signal(config, {}, xsection=1.,
                                    background = background,
                                    validate   = True)
 
@@ -1893,7 +1907,7 @@ def pyhf_wrapper(*args, **kwargs):
                 iteration_limit += 1
             elif isinstance(CLs, dict):
                 if isnan(CLs["CLs_obs"]) or any([isnan(x) for x in CLs["CLs_exp"]]):
-                    arguments["stats"] = "q"
+                    arargumentsgs["stats"] = "q"
                     arguments["bounds"][model.config.poi_index] = (
                         arguments["bounds"][model.config.poi_index][0]-5,
                         arguments["bounds"][model.config.poi_index][1]

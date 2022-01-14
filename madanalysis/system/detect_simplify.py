@@ -71,7 +71,7 @@ class DetectSimplify:
 
         # Checking release
         if self.debug:
-            self.logger.debug("  where? = "+simplify.__file__)
+            self.logger.debug("  where? = " + str(simplify.__file__))
 
         # Ok
         return DetectStatusType.FOUND,''

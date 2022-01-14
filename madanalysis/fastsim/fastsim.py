@@ -55,6 +55,21 @@ class SuperFastSim:
     def InitObservables(self, obs_list):
         self.observables = obs_list
 
+    def Reset(self):
+        self.tagger                  = Tagger()
+        self.smearer                 = Smearer()
+        self.reco                    = RecoEfficiency()
+        self.scaling                 = Scaling()
+        self.jetrecomode             = 'jets'
+        self.mag_field               = 1e-9
+        self.radius                  = 1e+99
+        self.half_length             = 1e+99
+        self.propagator              = False
+        self.track_isocone_radius    = []
+        self.electron_isocone_radius = []
+        self.muon_isocone_radius     = []
+        self.photon_isocone_radius   = []
+
     # Definition of a new tagging/smearing rule
     def define(self,args,prts):
         prts.Add('c',[4])
