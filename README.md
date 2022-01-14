@@ -2,6 +2,7 @@
 
 [![PAD](https://img.shields.io/static/v1?style=plastic&label=Recasting&message=PublicAnalysisDatabase&color=blue)](http://madanalysis.irmp.ucl.ac.be/wiki/PublicAnalysisDatabase)
 [![TUTO](https://img.shields.io/static/v1?style=plastic&label=Tutorials&message=@HomePage&color=red)](https://madanalysis.irmp.ucl.ac.be/wiki/tutorials)
+[![Talks](https://img.shields.io/static/v1?style=plastic&label=Talks&message=@HomePage&color=red)](http://madanalysis.irmp.ucl.ac.be/wiki/Talks)
 [![FAQ](https://img.shields.io/static/v1?style=plastic&label=FAQ&message=NormalMode&color=orange)](http://madanalysis.irmp.ucl.ac.be/wiki/FAQNormalMode)
 
 ![Python v3.8](https://img.shields.io/badge/python-3670A0?style=plastic&logo=python&logoColor=ffdd54&label=3.6|3.7|3.8&color=brightgreen)
