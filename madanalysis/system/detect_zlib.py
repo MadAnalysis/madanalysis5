@@ -98,6 +98,8 @@ class DetectZlib:
         DetectZlib.AddIfValid('/usr/local/include',self.search_incs)
         DetectZlib.AddIfValid('/local/include',self.search_incs)
         DetectZlib.AddIfValid('/opt/local/include',self.search_incs)
+        DetectZlib.AddIfValid('/usr/local/opt/zlib/lib',self.search_incs)
+        DetectZlib.AddIfValid('/usr/local/opt/zlib/include/',self.search_incs)
         for path in self.session_info.gcc_header_search_path:
             DetectZlib.AddIfValid(path,self.search_libs)
 
