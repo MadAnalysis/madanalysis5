@@ -18,9 +18,9 @@ body:
       description: |
         Please provide
         - OS: [e.g. macOS v12.1]
-        - Python version
-        - gcc/c++ version
-        - MadAnalysis 5 version
+        - Python version (print the output of `$ python --version`)
+        - gcc/c++ version (print the output of `$ g++ --version` or `$ gcc --version`)
+        - MadAnalysis 5 version (print the output of `$ ./bin/ma5 --version`)
         - If applicable, versions for other third party software i.e. Fastjet, Delphes, pyhf etc.
     validations:
       required: true
@@ -56,7 +56,9 @@ body:
       description: |
         If applicable, add log files or error messages to help explain your problem.
 
-        Note: When run in debug mode, MadAnalysis 5 can give much more information about the problem. Debug mode can be activated via `$ ./bin/ma5 -d`
+        Note: When run in debug mode, MadAnalysis 5 can give much more information about the problem. 
+        
+        - Debug mode can be activated via `$ ./bin/ma5 -d`
   - type: textarea
     id: info
     attributes:

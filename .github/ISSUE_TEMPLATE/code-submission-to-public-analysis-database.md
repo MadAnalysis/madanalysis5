@@ -1,5 +1,5 @@
 ---
-name: Code Submission to Public Analysis Database
+name: Code submission to Public Analysis Database
 about: Have a recast implementation and you want it to be public? Let us know!
 title: ''
 labels: PAD
@@ -12,11 +12,11 @@ Scientific reproducibility and data preservation solely depend on preserving ana
 More information and examples can be found in the proceedings of [the second MadAnalysis 5 Workshop on LHC recasting in Korea](https://doi.org/10.1142/S0217732321020016). Analysis codes have been published, documented and got a DOI so that they can now be cited.
 
 **System Settings:**
- - OS: [e.g. macOS v12.1]
- - Python version
- - gcc/c++ version
- - MadAnalysis 5 version
- - If applicable, versions for other third party software i.e. Fastjet, Delphes, pyhf etc.
+- OS: [e.g. macOS v12.1]
+- Python version (print the output of `$ python --version`)
+- gcc/c++ version (print the output of `$ g++ --version` or `$ gcc --version`)
+- MadAnalysis 5 version (print the output of `$ ./bin/ma5 --version`)
+- If applicable, versions for other third party software i.e. Fastjet, Delphes, pyhf etc.
 
 **Please make sure you provide the following codes**
 - [ ] Analysis file with `.cpp` extension.
