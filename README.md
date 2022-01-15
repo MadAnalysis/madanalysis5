@@ -45,7 +45,7 @@ More details can be found on the [MadAnalysis 5 website](https://madanalysis.irm
 
 MadAnalysis 5 requires several external libraries in order to properly run:
 
- - Python 3.6 or a more recent version that can be downloaded from [this website](http://www.python.org/)
+ - Python 3.8 or a more recent version that can be downloaded from [this website](http://www.python.org/)
    In order to check the installed version of Python on a system, it is
    sufficient to issue in a shell `$ python --version`.
 
