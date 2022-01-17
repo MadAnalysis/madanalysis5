@@ -14,6 +14,7 @@
  - [Description of the package](#description-of-the-package)
  - [Very first steps with MadAnalysis 5](#very-first-steps-with-madanalysis-5)
  - [Troubleshootings and bug reports](#troubleshootings-and-bug-reports)
+ - [Supported third party software](#supported-third-party-software)
  - [Authors](#authors)
  - [Our famous last words](#our-famous-last-words)
  - [Credits](#credits)
@@ -224,6 +225,16 @@ suggested to create a report on [GitHub Issues](https://github.com/MadAnalysis/m
 
 In this way, you also participate to the improvement of MadAnalysis 5 and the
 authors thank you for this.
+
+### Supported third party software
+
+In the following you can find supported third party software that can be used within MadAnalysis 5.
+The [latest release](https://github.com/MadAnalysis/madanalysis5/releases) of MadAnalysis 5 has been tested with enlisted versions.
+
+- [FastJet](http://fastjet.fr) v3.3.3
+- [Delphes](https://github.com/delphes/delphes) v3.4.3
+- [ROOT](https://root.cern) v6.04.08
+- [pyhf](https://github.com/scikit-hep/pyhf) v0.6.3
 
 ### Authors
 
