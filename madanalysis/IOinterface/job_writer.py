@@ -724,7 +724,8 @@ class JobWriter(object):
     
 
     def WriteMakefiles(self,option="",**kwargs):
-
+        # kwargs: keyword arguments regarding additional mode options such as `ma5_fastjet_mode`
+        # this will protect Delphes based analyses in PAD
         from madanalysis.build.makefile_writer import MakefileWriter
         options=MakefileWriter.MakefileOptions()
 

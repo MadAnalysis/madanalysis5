@@ -80,6 +80,7 @@ class CmdSet(CmdBase.CmdBase):
             self.main.datasets.Get(objs[0]).user_SetParameter(objs[1],theValue,theValue2,theValue3)
             return
 
+        # Set the properties of jet object within the jet collection if given jetID exists.
         elif objs[0] in self.main.jet_collection.GetNames():
             self.main.jet_collection.Set(objs,value)
             return
