@@ -23,35 +23,39 @@
 
 from __future__ import absolute_import
 import logging
+from typing import Text, Dict
 
 class JetConfiguration:
     
     userVariables = ['antikt','cambridge', 'genkt','kt',
                      'gridjet', 'cdfjetclu','cdfmidpoint','siscone']
 
-    def __init__(self,JetID='Ma5Jet', algorithm='', options={}):
+    def __init__(self,JetID: Text = 'Ma5Jet', algorithm: Text = '', options: Dict = None):
         """
-            Parameters
-            ----------
-            JetID : STR
-                Jet identification =>  event.rec()->jet("MA5Jet")
-            algorithm: STR
-                Clustering algorithm
-            options: DICT
-                options such as radius, ptmin etc.
+        Parameters
+        ----------
+        JetID : STR
+            Jet identification =>  event.rec()->jet("MA5Jet")
+        algorithm: STR
+            Clustering algorithm
+        options: DICT
+            options such as radius, ptmin etc.
 
-            The instance names are used directly in C++ implementation
-            hence change in instance name will require change in C++ portion 
-            as well.
+        The instance names are used directly in C++ implementation
+        hence change in instance name will require change in C++ portion
+        as well.
         """
         self.JetID     = JetID
+
+        if options is None:
+            options = {}
 
         # Main Jet Configurations
         if algorithm in self.userVariables:
             self.SetDefaultAlgorithm(algorithm, options)
 
 
-    def SetDefaultAlgorithm(self,algorithm, options):
+    def SetDefaultAlgorithm(self,algorithm: Text, options: Dict):
         if   algorithm == 'antikt'      : self.DefaultAntikT(options)
         elif algorithm == 'cambridge'   : self.DefaultCambridgeAchen(options)
         elif algorithm == 'genkt'       : self.DefaultGenkT(options)
@@ -61,35 +65,35 @@ class JetConfiguration:
         elif algorithm == 'cdfmidpoint' : self.DefaultCDFMidPoint(options)
         elif algorithm == 'siscone'     : self.DefaultSisCone(options)
 
-    def DefaultAntikT(self,kwargs):
+    def DefaultAntikT(self,kwargs: Dict) -> None:
         self.algorithm = 'antikt'
         self.radius    = kwargs.get('radius',          0.4)
         self.ptmin     = kwargs.get('ptmin',           5.)
 
-    def DefaultkT(self,kwargs):
+    def DefaultkT(self,kwargs: Dict) -> None:
         self.algorithm = 'kt'
         self.radius    = kwargs.get('radius',          0.4)
         self.ptmin     = kwargs.get('ptmin',           5.)
         self.exclusive = kwargs.get('exclusive',       False)
 
-    def DefaultCambridgeAchen(self,kwargs):
+    def DefaultCambridgeAchen(self,kwargs: Dict) -> None:
         self.algorithm = 'cambridge'
         self.radius    = kwargs.get('radius',          0.4)
         self.ptmin     = kwargs.get('ptmin',           5.)
 
-    def DefaultGenkT(self,kwargs):
+    def DefaultGenkT(self,kwargs: Dict) -> None:
         self.algorithm = 'genkt'
         self.radius    = kwargs.get('radius',          0.4)
         self.ptmin     = kwargs.get('ptmin',           5.)
         self.exclusive = kwargs.get('exclusive',       False)
         self.p         = kwargs.get('p',               -1)
 
-    def DefaultGridJet(self,kwargs):
+    def DefaultGridJet(self,kwargs: Dict) -> None:
         self.algorithm = 'gridjet'
         self.ymax      = kwargs.get('ymax',            3.)
         self.ptmin     = kwargs.get('ptmin',           5.)
 
-    def DefaultSisCone(self,kwargs):
+    def DefaultSisCone(self,kwargs: Dict) -> None:
         self.algorithm   = 'siscone'
         self.radius      = kwargs.get('radius',        0.4)
         self.ptmin       = kwargs.get('ptmin',         5.)
@@ -97,7 +101,7 @@ class JetConfiguration:
         self.overlap     = kwargs.get('overlap',       0.5)
         self.npassmax    = kwargs.get('npassmax',      1.)
 
-    def DefaultCDF(self,kwargs):
+    def DefaultCDF(self,kwargs: Dict) -> None:
         self.algorithm = 'cdfjetclu'
         self.radius    = kwargs.get('radius',          0.4)
         self.ptmin     = kwargs.get('ptmin',           5.)
@@ -105,7 +109,7 @@ class JetConfiguration:
         self.seed      = kwargs.get('seed',            1.)
         self.iratch    = kwargs.get('iratch',          0.)
 
-    def DefaultCDFMidPoint(self,kwargs):
+    def DefaultCDFMidPoint(self,kwargs: Dict) -> None:
         self.algorithm    = 'cdfmidpoint'
         self.radius       = kwargs.get('radius',       0.4)
         self.ptmin        = kwargs.get('ptmin',        5.)
@@ -117,13 +121,13 @@ class JetConfiguration:
     def GetJetAlgorithms(self):
         return self.userVariables
 
-    def user_GetValues(self,parameter):
+    def user_GetValues(self, parameter: Text):
         if parameter == 'algorithm':
             return self.GetJetAlgorithms()
         else:
             return [str(self.__dict__[parameter])]
 
-    def user_SetParameter(self,parameter,value):
+    def user_SetParameter(self, parameter: Text, value: Text) -> None:
         if parameter not in ['algorithm','JetID']:
             if parameter not in self.__dict__.keys():
                 logging.getLogger('MA5').error("Option '"+parameter+"' is not available for "+self.algorithm+' algorithm.')
