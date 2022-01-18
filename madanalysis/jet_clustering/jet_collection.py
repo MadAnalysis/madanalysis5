@@ -45,15 +45,15 @@ class JetCollection:
     and `siscone`. Rest of the arguments are optional, if user won't define radius, ptmin etc.
     default parameters will be choosen. Each algorithm has its own unique set of parameters i.e.
 
-    | Algorithm | Parameters & Default values |
-    |-----------|-----------------------------|
-    | `antikt`, `cambridge`  | `radius=0.4`, `ptmin=5.` |
-    | `genkt` | `radius=0.4`, `ptmin=5.`, `exclusive=False`, `p=-1` |
-    | `kt` | `radius=0.4`, `ptmin=5.`, `exclusive=False` |
-    | `gridjet` | `ymax=3.`, `ptmin=5.` |
-    | `cdfjetclu` | `radius=0.4`, `ptmin=5.`, `overlap=0.5`, `seed=1.`, `iratch=0.` |
-    | `cdfmidpoint` | `radius=0.4`, `ptmin=5.`, `overlap=0.5`, `seed=1.`, `iratch=0.`, `areafraction=1.` |
-    | `siscone` | `radius=0.4`, `ptmin=5.`, `overlap=0.5`, `input_ptmin=5.`, `npassmax=1.` |
+    |       Algorithm       | Parameters & Default values                                                        |
+    |:---------------------:|------------------------------------------------------------------------------------|
+    | `antikt`, `cambridge` | `radius=0.4`, `ptmin=5.`                                                           |
+    |        `genkt`        | `radius=0.4`, `ptmin=5.`, `exclusive=False`, `p=-1`                                |
+    |         `kt`          | `radius=0.4`, `ptmin=5.`, `exclusive=False`                                        |
+    |       `gridjet`       | `ymax=3.`, `ptmin=5.`                                                              |
+    |      `cdfjetclu`      | `radius=0.4`, `ptmin=5.`, `overlap=0.5`, `seed=1.`, `iratch=0.`                    |
+    |     `cdfmidpoint`     | `radius=0.4`, `ptmin=5.`, `overlap=0.5`, `seed=1.`, `iratch=0.`, `areafraction=1.` |
+    |       `siscone`       | `radius=0.4`, `ptmin=5.`, `overlap=0.5`, `input_ptmin=5.`, `npassmax=1.`           |
 
     It is also possible to modify the entry after defining it
 
