@@ -525,11 +525,9 @@ class CheckUp():
         self.logger.debug('before DYLD_LIBRARY_PATH='+str(os.environ['DYLD_LIBRARY_PATH']))
         self.logger.debug('--------')
         if self.archi_info.isMac:
-            add_dyld1 = [x for x in self.archi_info.toLDPATH1]
-            add_dyld2 = [x for x in self.archi_info.toLDPATH2]
-            os.environ['DYLD_LIBRARY_PATH'] = ':'.join(add_dyld1) + ":" + \
+            os.environ['DYLD_LIBRARY_PATH'] = ':'.join(self.archi_info.toLDPATH1) + ":" + \
                                               os.environ['DYLD_LIBRARY_PATH'] + ":" + \
-                                              ':'.join(add_dyld2)
+                                              ':'.join(self.archi_info.toLDPATH2)
         self.logger.debug('after DYLD_LIBRARY_PATH='+str(os.environ['DYLD_LIBRARY_PATH']))
         self.logger.debug('--------')
 
