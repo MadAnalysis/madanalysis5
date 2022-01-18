@@ -151,11 +151,11 @@ class CmdDefine(CmdBase.CmdBase):
         logging.getLogger('MA5').info("   The corresponding energy scaling function is given by <function>.")
         logging.getLogger('MA5').info("   The bounds correspond to the domain that scaling function applies (pt > ..., eta < ..., etc.).")
         # For the future:
-        # logging.getLogger('MA5').info("")
-        # logging.getLogger('MA5').info("   Syntax: define scaling <variable> for <p1> <function> [<bounds>]")
-        # logging.getLogger('MA5').info("   Define rescaling corrections to apply to a variable <variable> for a reconstructed object <p1>.")
-        # logging.getLogger('MA5').info("   The corresponding scaling function is given by <function>.")
-        # logging.getLogger('MA5').info("   The bounds correspond to the domain that scaling function applies (pt > ..., eta < ..., etc.).")
+        logging.getLogger('MA5').info("")
+        logging.getLogger('MA5').info("   Syntax: define scaling <variable> for <p1> <function> [<bounds>]")
+        logging.getLogger('MA5').info("   Define rescaling corrections to apply to a variable <variable> for a reconstructed object <p1>.")
+        logging.getLogger('MA5').info("   The corresponding scaling function is given by <function>.")
+        logging.getLogger('MA5').info("   The bounds correspond to the domain that scaling function applies (pt > ..., eta < ..., etc.).")
         logging.getLogger('MA5').info("")
         algorithms = ['antikt','cambridge', 'genkt','gridjet','kt','genkt', 'cdfjetclu','cdfmidpoint','siscone']
         logging.getLogger('MA5').info('   Syntax: define jet_algorithm <name> <algorithm> <keyword args>')
@@ -174,7 +174,8 @@ class CmdDefine(CmdBase.CmdBase):
             nargs += 1
 
         if nargs==2:
-            output=['tagger', 'smearer', 'reco_efficiency', "jes", "energy_scaling", "jet_algorithm"]
+            output=['tagger', 'smearer', 'reco_efficiency', "jes",
+                    "energy_scaling", "scaling", "jet_algorithm"]
             return self.finalize_complete(text,output)
 
         elif nargs==3 or (nargs==5 and args[1] == 'tagger'):
