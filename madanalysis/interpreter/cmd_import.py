@@ -304,6 +304,7 @@ class CmdImport(CmdBase.CmdBase):
 
     def ImportDataset(self,filename,name):
 
+        # Dont allow usage of same identifier for jets and samples
         if name in self.main.jet_collection.GetNames():
             self.logger.error(str(name)+" has been used as a jet identifier")
             return
