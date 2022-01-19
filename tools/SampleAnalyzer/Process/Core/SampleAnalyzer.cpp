@@ -284,13 +284,7 @@ AnalyzerBase* SampleAnalyzer::InitializeAnalyzer(const std::string& name,
     return 0;
   }
 
-  // Initialize (specific to the analysis)
-  if (!myAnalysis->Initialize(cfg_,parameters))
-  {
-    ERROR << "problem during the initialization of the analysis called '" 
-          << name << "'" << endmsg;
-    return 0;
-  }
+  myAnalysis->SetParameters(parameters);
 
   // Returning the analysis
   return myAnalysis;
@@ -356,6 +350,20 @@ MAbool SampleAnalyzer::PostInitialize()
     ERROR << "The output directory structure cannot be created properly" << endmsg;
     return false;
   }
+
+    // Initialize (specific to the analysis)
+    // @JACK: this way analysis will have access to output and name information at initialization
+    //        this is particularly important if one wants to build their own output style where they can
+    //        output the file to the proper directory.
+    for(auto myAnalysis: analyzers_)
+    {
+        if (!myAnalysis->Initialize(cfg_))
+        {
+            ERROR << "problem during the initialization of the analysis called '"
+                  << myAnalysis->name() << "'" << endmsg;
+            return 0;
+        }
+    }
 
   // Everything was fine
   return true;

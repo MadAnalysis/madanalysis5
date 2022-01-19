@@ -2,10 +2,11 @@
 
 [![PAD](https://img.shields.io/static/v1?style=plastic&label=Recasting&message=PublicAnalysisDatabase&color=blue)](http://madanalysis.irmp.ucl.ac.be/wiki/PublicAnalysisDatabase)
 [![TUTO](https://img.shields.io/static/v1?style=plastic&label=Tutorials&message=@HomePage&color=red)](https://madanalysis.irmp.ucl.ac.be/wiki/tutorials)
+[![Talks](https://img.shields.io/static/v1?style=plastic&label=Talks&message=@HomePage&color=red)](http://madanalysis.irmp.ucl.ac.be/wiki/Talks)
 [![FAQ](https://img.shields.io/static/v1?style=plastic&label=FAQ&message=NormalMode&color=orange)](http://madanalysis.irmp.ucl.ac.be/wiki/FAQNormalMode)
 
-![Python v3.8](https://img.shields.io/badge/python-3670A0?style=plastic&logo=python&logoColor=ffdd54&label=3.6|3.7|3.8&color=brightgreen)
-![C++](https://img.shields.io/badge/c++-%2300599C.svg?style=plastic&logo=c%2B%2B&logoColor=white&label=98|11)
+![Python v3.8](https://img.shields.io/badge/python-3670A0?style=plastic&logo=python&logoColor=ffdd54&label=3.8&color=brightgreen)
+![C++](https://img.shields.io/badge/c++-%2300599C.svg?style=plastic&logo=c%2B%2B&logoColor=white&label=11)
 ## Outline
  - [What is MadAnalysis 5?](#what-is-madanalysis-5)
  - [Requirements](#requirements)
@@ -45,7 +46,7 @@ More details can be found on the [MadAnalysis 5 website](https://madanalysis.irm
 
 MadAnalysis 5 requires several external libraries in order to properly run:
 
- - Python 3.6 or a more recent version that can be downloaded from [this website](http://www.python.org/)
+ - Python 3.8 or a more recent version that can be downloaded from [this website](http://www.python.org/)
    In order to check the installed version of Python on a system, it is
    sufficient to issue in a shell `$ python --version`.
 

@@ -107,19 +107,19 @@ class RecTauFormat : public RecParticleFormat
   }
 
   /// Accessor to the electric charge
-  const MAint32  charge() const
+  virtual const MAint32 charge() const
   { if (charge_) return +1; else return -1; }
 
   /// Mutator to the electric charge
-  void setCharge(MAfloat32 charge )
+  virtual void setCharge(MAfloat32 charge )
   { if (charge>0) charge_=true; else charge_=false; }
 
   /// Accessor to the number of tracks
-  const MAuint16 ntracks() const 
+  const MAuint16 ntracks() const
   { return ntracks_; }
 
   /// Mutator to the number of tracks
-  void setNtracks(MAuint16 ntracks)
+  virtual void setNtracks(MAuint16 ntracks)
   { ntracks_=ntracks; }
 
   /// Accessor to the decay mode

@@ -1,5 +1,12 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
+
+133  1.10.1 (2021/12/15) ma5team:   - Minimum python version requirement has been increased to 3.8.
+                                    - Minimum GCC compiler requirement has been increased to `std=c++11` compatible.
+                                    - Update in expert mode structure, several new functionalities like filter
+                                      functions, region dependent reweigthing, ability to input command line options.
+                                      For details [see PR input](#link-PR-here).
+
 132  1.9   (2021/12/13) ma5team:    - Adding support for LLP (also in the SFS) [2112.05163].
                                     - Particle propagation module [2112.05163].
                                     - PYHF/simplified likelihood interface.

@@ -97,6 +97,12 @@ class ArchitectureInfo:
         self.fastjet_bin_path=""
         self.fastjet_lib_paths=[]
 
+        # C++ compiler versions
+        self.cpp11 = False
+        self.cpp14 = False
+        self.cpp17 = False
+        self.cpp20 = False
+
         # Flags for validations tests
         # 0 = normal, Other possible values: 1, 2, 3 and 4 (4=ultra strict compilation)
         self.compilation_severity = 0

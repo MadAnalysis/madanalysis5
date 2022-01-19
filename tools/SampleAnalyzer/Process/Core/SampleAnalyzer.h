@@ -153,6 +153,7 @@ class SampleAnalyzer
   void DumpSR(std::ostream &);
   void HeadSR(std::ostream &);
 
+  std::map<std::string, std::string> options() {return cfg_.Options();}
 
  private:
 

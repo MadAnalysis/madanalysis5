@@ -92,11 +92,11 @@ class ShellCommand():
     
 
     @staticmethod
-    def Execute(theCommands,path):
+    def Execute(theCommands,path, **kwargs):
 
         # Launching the commands
         try:
-            result=subprocess.Popen(theCommands, cwd=path)
+            result=subprocess.Popen(theCommands, cwd=path, **kwargs)
         except:
             logging.getLogger('MA5').error('impossible to execute the commands: '+' '.join(theCommands))
             return False

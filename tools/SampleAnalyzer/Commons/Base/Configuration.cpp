@@ -40,8 +40,8 @@ using namespace MA5;
 // Initializing static data members
 // -----------------------------------------------------------------------------
 // DO NOT TOUCH THESE LINES
-const std::string Configuration::sampleanalyzer_version_ = "1.10.0";
-const std::string Configuration::sampleanalyzer_date_    = "2022/01/12";
+const std::string Configuration::sampleanalyzer_version_ = "1.10.1";
+const std::string Configuration::sampleanalyzer_date_    = "2022/01/15";
 // DO NOT TOUCH THESE LINES
 
 // -----------------------------------------------------------------------------
@@ -51,13 +51,13 @@ void Configuration::PrintSyntax()
 {
   INFO << endmsg;
   INFO << "Syntax : SampleAnalyzer [option] <filelist>" << endmsg;
-  INFO << " with <filelist> = txt file containing all sample file names"
-       << endmsg;
+  INFO << " with <filelist> = txt file containing all sample file names" << endmsg;
   INFO << " with [option] = " << endmsg;
-  INFO << "   --check_event      : check the compliance of the event file"
-       << endmsg;
-  INFO << "   --no_event_weight  : the event weights are not used"
-       << endmsg;
+  INFO << "   --check_event      : check the compliance of the event file" << endmsg;
+  INFO << "   --no_event_weight  : the event weights are not used" << endmsg;
+  INFO << "   --ma5_version      : returns the version of this release" << endmsg;
+  INFO << "  Any aditional option for the analyzer can be given with the following syntax:" << endmsg;
+  INFO << "   --<opt_name>=<val>" << endmsg;
   INFO << endmsg;
 }
 
@@ -145,12 +145,20 @@ MAbool Configuration::Initialize(MAint32 &argc, MAchar *argv[])
       // version
       else if (argument.find("--ma5_version=")==0) DecodeMA5version(argument);
 
-      // other = mistake
+      // other = command line options
       else
       {
-        ERROR << "option '" << argument << "' is unknown !!!" << endmsg;
-        PrintSyntax();
-        return false;
+          std::string arg   = argv[i];
+          MAuint32 loc      = arg.find("=");
+          if (loc == 0 || loc > arg.length())
+          {
+            ERROR << "option '" << argument << "' unknown." << endmsg;
+            PrintSyntax();
+            return false;
+          }
+          std::string name  = arg.substr(2,loc-2);
+          std::string value = arg.substr(loc+1,arg.length()-1);
+          options_[name] = value;
       }
     } 
 

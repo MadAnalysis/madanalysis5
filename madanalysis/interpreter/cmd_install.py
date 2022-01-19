@@ -106,7 +106,7 @@ class CmdInstall(CmdBase):
                     UpdatePaths()
                     if not main.CheckConfig():
                         return False
-                    return resu
+                return resu
             elif ResuActi == 0 and has_release and not pad:
                 self.logger.warning("A previous " + release +' installation has been found. Skipping...')
                 self.logger.warning('To update ;' + release + ', please remove first the tools/' + release + 'delphes directory')
@@ -140,27 +140,26 @@ class CmdInstall(CmdBase):
                 return True
         elif args[0]=='PAD':
             pad_install_check, padsfs_install_check = False, False
-            # PAD requires ma5 to be restarted; therefore we first install PADForSFS
+            # First check if PAD4SFS is installed
             if not self.main.session_info.has_padsfs:
-                if self.main.archi_info.has_fastjet:
-                    padsfs_install_check = installer.Execute('PADForSFS')
-                else:
-                    self.logger.warning("PADForSFS requires FastJet to be installed.")
-                    self.logger.info("Would you like to install FastJet? [Y/N]")
-                    while True:
-                        answer = input("Answer : ")
-                        if answer.lower() in ['y','n','yes','no']:
-                            break
-                        else:
-                            self.logger.warning("Please answer as \'y\', \'n\'")
-                    if answer.lower() in ['y','yes']:
-                        if not installer.Execute('fastjet'):
-                            return False
-                        if not installer.Execute('fastjet-contrib'):
-                            return False
-                        if not installer.Execute('PADForSFS'):
-                            return False
+                # check if FastJet is installed
+                if not self.main.archi_info.has_fastjet:
+                    answer = "y"
+                    if not self.main.forced:
+                        self.logger.warning("PADForSFS requires FastJet to be installed.")
+                        self.logger.info("Would you like to install FastJet? [Y/N]")
+                        while True:
+                            answer = input("Answer : ")
+                            if answer.lower() in ['y','n','yes','no', "yeap", "nope"]:
+                                break
+                    if answer.lower() in ['y','yes',"yeap"]:
+                        for package in ["fastjet", "fastjet-contrib", "PADForSFS"]:
+                            if not installer.Execute(package):
+                                return False
                         padsfs_install_check = 'restart'
+                else:
+                    padsfs_install_check = installer.Execute('PADForSFS')
+
             if inst_delphes(self.main,installer,'delphes',True):
                 pad_install_check = installer.Execute('PAD')
             else:
@@ -174,19 +173,18 @@ class CmdInstall(CmdBase):
             if self.main.archi_info.has_fastjet:
                 padsfs_install_check = installer.Execute('PADForSFS')
             else:
-                self.logger.warning("PADForSFS requires FastJet to be installed.")
-                self.logger.info("Would you like to install FastJet? [Y/N]")
-                while True:
-                    answer = input("Answer : ")
-                    if answer.lower() in ['y','n','yes','no']:
-                        break
-                if answer.lower() in ['y','yes']:
-                    if not installer.Execute('fastjet'):
-                        return False
-                    if not installer.Execute('fastjet-contrib'):
-                        return False
-                    if not installer.Execute('PADForSFS'):
-                        return False
+                answer = "y"
+                if not self.main.forced:
+                    self.logger.warning("PADForSFS requires FastJet to be installed.")
+                    self.logger.info("Would you like to install FastJet? [Y/N]")
+                    while True:
+                        answer = input("Answer : ")
+                        if answer.lower() in ['y','n','yes','no', "yeap", "nope"]:
+                            break
+                if answer.lower() in ['y','yes',"yeap"]:
+                    for package in ["fastjet", "fastjet-contrib", "PADForSFS"]:
+                        if not installer.Execute(package):
+                            return False
                     return 'restart'
             return padsfs_install_check
         elif args[0]=='pyhf':
