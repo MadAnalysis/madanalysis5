@@ -1,0 +1,25 @@
+# differential cross-section plot
+# c.f. http://madanalysis.irmp.ucl.ac.be/wiki/FAQNormalMode
+
+# install samples
+install samples
+
+# load sample and set cross-section
+import /root/madanalysis5/samples/zz.lhe.gz as my_sample
+set my_sample.xsection = 123
+
+# plot transverse momentum for leading positron
+plot PT(e+[1])
+
+# Note that automatically this will create a selection
+display selection[1]
+
+# change the luminosity value to get the cross-section
+set main.lumi = 1e-3 * 10
+
+# Format the plot
+set selection[1].titleY = "$\\frac{d\\sigma}{dp_{T}}\ {\\rm [pb/GeV]}$"  # matplotlib formatting
+# set selection[1].titleY = "#frac{d#sigma}{dp_{T}} [pb/GeV]"  # ROOT formatting
+
+# Run an analysis to make the plot
+submit differential_xsec_example
