@@ -51,13 +51,11 @@ void Configuration::PrintSyntax()
 {
   INFO << endmsg;
   INFO << "Syntax : SampleAnalyzer [option] <filelist>" << endmsg;
-  INFO << " with <filelist> = txt file containing all sample file names"
-       << endmsg;
+  INFO << " with <filelist> = txt file containing all sample file names" << endmsg;
   INFO << " with [option] = " << endmsg;
-  INFO << "   --check_event      : check the compliance of the event file"
-       << endmsg;
-  INFO << "   --no_event_weight  : the event weights are not used"
-       << endmsg;
+  INFO << "   --check_event      : check the compliance of the event file" << endmsg;
+  INFO << "   --no_event_weight  : the event weights are not used" << endmsg;
+  INFO << "   --ma5_version      : returns the version of this release" << endmsg;
   INFO << "  Any aditional option for the analyzer can be given with the following syntax:" << endmsg;
   INFO << "   --<opt_name>=<val>" << endmsg;
   INFO << endmsg;
@@ -147,14 +145,14 @@ MAbool Configuration::Initialize(MAint32 &argc, MAchar *argv[])
       // version
       else if (argument.find("--ma5_version=")==0) DecodeMA5version(argument);
 
-      // other = comman line options
+      // other = command line options
       else
       {
           std::string arg   = argv[i];
           MAuint32 loc      = arg.find("=");
           if (loc == 0 || loc > arg.length())
           {
-            ERROR << "option '" << argument << "' is unknown !!!" << endmsg;
+            ERROR << "option '" << argument << "' unknown." << endmsg;
             PrintSyntax();
             return false;
           }

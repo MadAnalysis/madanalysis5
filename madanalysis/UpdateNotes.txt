@@ -1,7 +1,7 @@
 Update notes for MadAnalysis 5 (in reverse time order)
 
 
-132  1.10.1 (2021/12/15) ma5team:   - Minimum python version requirement has been increased to 3.8.
+133  1.10.1 (2021/12/15) ma5team:   - Minimum python version requirement has been increased to 3.8.
                                     - Minimum GCC compiler requirement has been increased to `std=c++11` compatible.
                                     - Update in expert mode structure, several new functionalities like filter
                                       functions, region dependent reweigthing, ability to input command line options.
