@@ -6,10 +6,10 @@ You can start with forking the repository!
 
 - Unless there is a very small fix that does not require discussion, please first [open an issue](https://github.com/MadAnalysis/madanalysis5/issues/new/choose)
 to discuss your PR with ma5-dev team. For a PR example you can check the [PR #12](https://github.com/MadAnalysis/madanalysis5/pull/12) by Matthew Feickert ([@matthewfeickert](https://github.com/matthewfeickert)).
-- If the change is not limited to a single line, please create a draft pull request. This draft should include context of the change and
+- If the change is not limited to a single line, please create a draft pull request. This draft should include context of the change,
 description and benefits of the implementation in detail. If there is a change within `SampleAnalyzer` (the `c++` interface)
 please provide backwards compatibility checks which that are done, these should include a selected set of PAD analyses with 
-different backends (i.e. `SFS`, `Delphes` and `Ma5Tune`) using a large enough sample to make sure everything runs smoothly. 
+different backends (i.e. `SFS`, `Delphes` and `Ma5Tune`); please use a large enough sample to make sure everything runs smoothly. 
 If the change is within python interface please run some standard tests like plotting already existing variables within 
 partonic, hadronic and reconstruction mode. Additionally please make sure to add examples on how to run your implementation.
 - If there are any drawbacks of your implementation please specify and offer possible solutions, if any.
