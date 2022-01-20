@@ -75,7 +75,6 @@ class RecTrackFormat : public RecParticleFormat
   MAfloat64 etaOuter_;  /// eta @ first layer of calo
   MAfloat64 phiOuter_;  /// phi @ first layer of calo
   std::vector<IsolationConeType> isolCones_; // isolation cones
-  //  MCParticleFormat* mc_; @JACK causes seg fault already exists in RecParticleFormat
 
   // -------------------------------------------------------------
   //                        method members
@@ -139,11 +138,6 @@ class RecTrackFormat : public RecParticleFormat
   /// Mutator related to the electric charge
   virtual void SetCharge(MAint32 charge)
   { if (charge>0) charge_=true; else charge_=false; }
-
-  /// Accessor to charge
-  //@JACK: already exist in recparticlebase
-  //  const MCParticleFormat* mc() const
-  //  {return mc_;}
 
   /// giving a new isolation cone entry
   IsolationConeType* GetNewIsolCone()

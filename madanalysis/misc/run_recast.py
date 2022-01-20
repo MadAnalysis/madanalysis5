@@ -1907,7 +1907,7 @@ def pyhf_wrapper(*args, **kwargs):
                 iteration_limit += 1
             elif isinstance(CLs, dict):
                 if isnan(CLs["CLs_obs"]) or any([isnan(x) for x in CLs["CLs_exp"]]):
-                    arargumentsgs["stats"] = "q"
+                    arguments["stats"] = "q"
                     arguments["bounds"][model.config.poi_index] = (
                         arguments["bounds"][model.config.poi_index][0]-5,
                         arguments["bounds"][model.config.poi_index][1]

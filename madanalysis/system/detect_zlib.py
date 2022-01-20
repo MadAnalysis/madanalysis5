@@ -44,7 +44,10 @@ class DetectZlib:
         self.name         = 'Zlib'
         self.mandatory    = False
         self.force        = False
-        
+
+        self.search_libs = []
+        self.search_incs = []
+
         self.logger       = logging.getLogger('MA5')
 
         # NAme of the header
@@ -54,9 +57,6 @@ class DetectZlib:
         self.libnames=['libz.so','libz.a','libz.so.*'] #taking into account: libz.so.1, ...
         if self.archi_info.isMac:
             self.libnames.extend(['libz.dylib'])
-
-        self.search_libs = self.libnames
-        self.search_incs = ['zlib.h']
 
         #specific options
         self.header_files  = []
@@ -96,9 +96,10 @@ class DetectZlib:
         # Filling container with standard include paths
         DetectZlib.AddIfValid('/usr/include',self.search_incs)
         DetectZlib.AddIfValid('/usr/local/include',self.search_incs)
-        DetectZlib.AddIfValid('/usr/local/opt/zlib/include',self.search_incs)
         DetectZlib.AddIfValid('/local/include',self.search_incs)
         DetectZlib.AddIfValid('/opt/local/include',self.search_incs)
+        DetectZlib.AddIfValid('/usr/local/opt/zlib/lib',self.search_incs)
+        DetectZlib.AddIfValid('/usr/local/opt/zlib/include/',self.search_incs)
         for path in self.session_info.gcc_header_search_path:
             DetectZlib.AddIfValid(path,self.search_libs)
 
@@ -130,7 +131,6 @@ class DetectZlib:
 
         # Filling container with standard library paths
         DetectZlib.AddIfValid('/usr/lib*',self.search_libs)
-        DetectZlib.AddIfValid('/usr/local/opt/zlib/lib',self.search_libs)
         DetectZlib.AddIfValid('/usr/local/lib*',self.search_libs)
         DetectZlib.AddIfValid('/local/lib*',self.search_libs)
         DetectZlib.AddIfValid('/opt/local/lib*',self.search_libs)

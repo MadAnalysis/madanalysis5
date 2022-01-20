@@ -106,7 +106,7 @@ class CmdInstall(CmdBase):
                     UpdatePaths()
                     if not main.CheckConfig():
                         return False
-                    return resu
+                return resu
             elif ResuActi == 0 and has_release and not pad:
                 self.logger.warning("A previous " + release +' installation has been found. Skipping...')
                 self.logger.warning('To update ;' + release + ', please remove first the tools/' + release + 'delphes directory')

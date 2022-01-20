@@ -41,9 +41,8 @@ if  sys.version_info[0] != 3 or sys.version_info[1] <= 6:
 try:
     import six
 except:
-    sys.exit('The python "six" module is not found on your system and it is required for MadAnalysis 5 for ' +\
-    'a question of Python 2/3 compatibility. Please install it with the following command:\n' +\
-    'pip install six')  
+    sys.exit('The python "six" module is not found on your system. ' +\
+             'Please install it with the following command:\npython -m pip install six')
 
 # Getting the parent directory (ma5 root dir) of the script real path (bin)
 import os
@@ -67,8 +66,8 @@ sys.path.insert(0, servicedir)
 
 # Release version
 # Do not touch it !!!!!  
-version = "1.10.0"
-date = "2022/01/12"
+version = "1.10.1"
+date = "2022/01/15"
 
 # Loading the MadAnalysis session
 import madanalysis.core.launcher
