@@ -6,3 +6,4 @@ documentations please refer to the publication list referenced [here](https://gi
 
 - `CONTRIBUTING.md` includes information about the best practices of how to send Pull Requests to `madanalysis5` project.
 - `CONTRIBUTORS.md` includes information about people who contributed in the past to `madanalysis5` project.
+- `PAD.md` includes guidelines for analysis submission to PAD.
