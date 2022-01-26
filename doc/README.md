@@ -1,9 +1,18 @@
 # MadAnalysis 5 Brief Documentation
 
-This file includes brief reference cards for Normal and Expert mode of `madanalysis5`. To compile documentations simply
-run `$ ./makedoc`. This will create two files named `normal_mode.pdf` and `expert_mode.pdf` under this folder. For detailed
-documentations please refer to the publication list referenced [here](https://github.com/MadAnalysis/madanalysis5#credits).
+This file includes brief reference cards for the so-called normal and expert
+modes of MadAnalysis5. To compile these cards, it is sufficient to type
+  `$ ./makedoc`
+in a shell. This generates two files named `normal_mode.pdf` and
+`expert_mode.pdf` in the present folder.
 
-- `CONTRIBUTING.md` includes information about the best practices of how to send Pull Requests to `madanalysis5` project.
-- `CONTRIBUTORS.md` includes information about people who contributed in the past to `madanalysis5` project.
-- `PAD.md` includes guidelines for analysis submission to PAD.
+For a more detailed documentation we refer to our list of publications
+referenced [here](https://github.com/MadAnalysis/madanalysis5#credits).
+
+Information can also be found in the following files.
+- `CONTRIBUTING.md`: the best practices to send Pull Requests to the
+                     `MadAnalysis5` project.
+- `CONTRIBUTORS.md`: the list of people who contributed to the `MadAnalysis5`
+                     project from its early days to now.
+- `PAD.md`: guidelines to submit a new analysis to our Public Analysis Database
+            (PAD).
