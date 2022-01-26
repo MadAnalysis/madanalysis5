@@ -9,7 +9,9 @@ Please complete the following checklist when submitting a PR:
       render correctly by running `./doc/makedoc`.
   - [ ] Add a new entry to the `madanalysis/UpdateNotes.txt` file, summarizing the
       change, and including a link back to the PR.
-  
+
+For details please see the documentation [here](../doc/CONTRIBUTING.md).
+
 When all the above are checked, delete everything above the dashed
 line and fill in the pull request template.
   
