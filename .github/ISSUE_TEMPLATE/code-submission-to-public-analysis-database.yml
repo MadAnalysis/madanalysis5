@@ -37,4 +37,4 @@ body:
         - Detector card with `.ma5` extension for [SFS](http://arxiv.org/abs/2006.09387) or `.tcl` extension for Delphes.
         - Validation note. Recommendations regarding the proper validation are given in [arXiv:1407.3278](https://arxiv.org/abs/1407.3278) and ​[arXiv:1808.00480](https://arxiv.org/abs/1407.3278). Note that for every analysis that is part of the PAD, a detailed validation note is required.
       validations:
-      required: true
+        required: true
