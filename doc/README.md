@@ -15,4 +15,4 @@ Information can also be found in the following files.
 - [Contributors](./CONTRIBUTORS.md): the list of people who contributed to the `MadAnalysis5`
                      project from its early days to now.
 - [PAD](./PAD.md): guidelines to submit a new analysis to our Public Analysis Database
-            (PAD).
+                   (PAD).
