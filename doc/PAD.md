@@ -109,7 +109,7 @@ to be put in the same directory as the analysis code,
 i.e. Build/SampleAnalyzer/User/Analyzer/
 -->
 
-<analysis id="cat_ued_16_013">
+<analysis id="xyz_abc_ii_jjj">
   <lumi>20.0</lumi> <!-- in fb^-1 -->
 
   <!-- first, the signal regions targeting stop -> t neutralino -->

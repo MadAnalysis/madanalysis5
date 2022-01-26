@@ -10,9 +10,9 @@ For a more detailed documentation we refer to our list of publications
 referenced [here](https://github.com/MadAnalysis/madanalysis5#credits).
 
 Information can also be found in the following files.
-- `CONTRIBUTING.md`: the best practices to send Pull Requests to the
+- [Contributing](./CONTRIBUTING.md): the best practices to send Pull Requests to the
                      `MadAnalysis5` project.
-- `CONTRIBUTORS.md`: the list of people who contributed to the `MadAnalysis5`
+- [Contributors](./CONTRIBUTORS.md): the list of people who contributed to the `MadAnalysis5`
                      project from its early days to now.
-- `PAD.md`: guidelines to submit a new analysis to our Public Analysis Database
+- [PAD](./PAD.md): guidelines to submit a new analysis to our Public Analysis Database
             (PAD).

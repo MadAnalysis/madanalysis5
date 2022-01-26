@@ -16,6 +16,7 @@
  - [Troubleshootings and bug reports](#troubleshootings-and-bug-reports)
  - [Supported third party software](#supported-third-party-software)
  - [Authors](#authors)
+ - [Developer's Guide: How to contribute to MadAnalysis 5](./doc/CONTRIBUTING.md)
  - [Our famous last words](#our-famous-last-words)
  - [Credits](#credits)
 
