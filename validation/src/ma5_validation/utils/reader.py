@@ -26,11 +26,23 @@ import os
 from typing import Text
 
 from ma5_validation.system.exceptions import InvalidScript, InvalidMode
+from .path_handler import PathHandler
 
 
 class ScriptReader:
     """
     Validation script reader.
+
+    Format of the valiation script:
+    ```
+    #TITLE Script title
+    #MODE Ma5 run mode
+
+    plot MET
+    select MET > 20
+    import $MA5PATH/samples/*lhe*
+    ```
+    `$MA5PATH` indicates madanalysis path which has been in use with the current validation run.
 
     Parameters
     ----------
@@ -40,13 +52,18 @@ class ScriptReader:
 
     _modes = ["PARTON", "HADRON", "RECO", "RECOFAC"]
 
-    def __init__(self, filename: Text, name: Text = None):
+    def __init__(self, filename: Text, name: Text = None, paths: PathHandler = None):
         if name is None:
             self.name = os.path.basename(filename).split(".ma5")[0]
         self.filename = filename
         self._mode = None
         self.title = None
-        self.decode()
+        self.samples = []
+        self._ma5_commands = []
+        if paths is None:
+            self.ma5_path = PathHandler.MA5PATH
+        else:
+            self.ma5_path = paths.MA5PATH
 
     def decode(self) -> None:
         """
@@ -87,7 +104,12 @@ class ScriptReader:
                     else:
                         raise InvalidMode(f"Unknown MadAnalysis 5 mode: {mode}")
                 if not line.startswith("#") and not line.startswith("\n") and "submit" not in line:
-                    script_lines.append(line)
+                    if line.startswith("import"):
+                        script_lines.append(
+                            line.replace("$MA5PATH", os.path.normpath(self.ma5_path))
+                        )
+                    else:
+                        script_lines.append(line)
 
         if None in [self._mode, self.title]:
             raise InvalidScript(
@@ -105,7 +127,7 @@ class ScriptReader:
         -------
         Text: MadAnalysis 5 commands
         """
-        return "".join(self._ma5_commands)
+        return "".join(self._ma5_commands) + "\n#END\n"
 
     @property
     def mode(self) -> Text:
@@ -124,3 +146,5 @@ class ScriptReader:
             return "--recolevel"
         elif self._mode == "RECOFAC":
             return "--FAC --recolevel"
+        else:
+            return ""

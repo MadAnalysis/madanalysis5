@@ -25,52 +25,24 @@
 import os
 from typing import Text, Sequence, Union
 
-from ma5_validation.system.exceptions import InvalidMadAnalysisPath
+from ma5_validation.system.exceptions import MadAnalysis5Error
+from .path_handler import PathHandler
 
 from .reader import ScriptReader
 
 
 class JobHandler:
-    def __init__(self, script: ScriptReader, ma5_path: Text, log_path: Text = None):
+    def __init__(self, script: ScriptReader, paths: PathHandler = None):
+        assert isinstance(script, ScriptReader), f"Unknown input type: {type(script)}"
         self.script = script
-        if log_path is None:
-            self.log_path = os.path.dirname(os.path.realpath(__file__))
-            for _ in range(3):
-                self.log_path = os.path.split(self.log_path)[0]
-            self.log_path = os.path.join(self.log_path, "scripts", "log")
-            if not os.path.isdir(self.log_path):
-                os.mkdir(self.log_path)
+
+        if paths is None:
+            self.ma5_path = PathHandler.MA5PATH
+            self.log_path = PathHandler.LOGPATH
         else:
-            if not os.path.isdir(log_path):
-                os.mkdir(log_path)
-            self.log_path = log_path
-        if not os.path.isdir(ma5_path):
-            raise InvalidMadAnalysisPath(f"Invalid path: {ma5_path}")
-        if not os.path.isdir(os.path.join(ma5_path, "tools/ReportGenerator/Services")):
-            raise InvalidMadAnalysisPath(f"Invalid path: {ma5_path}")
-
-        self.ma5_path = os.path.normpath(ma5_path)
-
-    def install(self, packages: Union[Text, Sequence[Text]] = None):
-        if packages is None:
-            packages = []
-        if isinstance(packages, str):
-            packages = [packages]
-        commands = []
-        for package in packages:
-            commands.append(f"install {package}")
-        self.write_ma5script("\n".join(commands), "installation.ma5")
-
-        commands = [
-            self.ma5_path + "/bin/ma5",
-            "--forced",
-            "--script",
-            "--debug",
-            os.path.join(self.log_path, "installation.ma5"), "&>",
-            os.path.join(self.log_path, "installation.log")
-        ]
-        print("   * Installing packages...")
-        os.system(" ".join(commands))
+            self.ma5_path = paths.MA5PATH
+            self.log_path = paths.LOGPATH
+        self.log_file = os.path.join(self.log_path, self.script.name + ".log")
 
     def write_ma5script(self, commands, name: Text = None):
         script_name = os.path.join(
@@ -91,8 +63,32 @@ class JobHandler:
             "--debug",
             self.script.mode,
             os.path.join(self.log_path, self.script.name + ".ma5"),
+            "&>",
+            self.log_file,
         ]
 
         print("   * Running MadAnalysis 5: " + self.script.title)
         os.system(" ".join(commands))
         return True
+
+
+    def analyze(self):
+        endTag = False
+        errorTag = False
+        log_file = None
+        with open(self.log_file, "r", encoding="utf-8") as log:
+            for line in file:
+                if line.find("ma5>#END") != -1:
+                    endTag = True
+                if endTag:
+                    if line.find("ERROR") != -1 or line.find("MA5-ERROR") != -1:
+                        errorTag = True
+                        break
+            if errorTag:
+                log_file = log.read()
+
+        if errorTag:
+            print(log_file)
+            raise MadAnalysis5Error(
+                f"MadAnalysis has raised an error. For details, please see: {self.log_file}"
+            )

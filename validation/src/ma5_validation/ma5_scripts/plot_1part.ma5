@@ -113,5 +113,5 @@ plot vDELTAR (mu+,j)
 plot DELTAR (j,mu+)
 plot vDELTAR (j,mu+)
 
-import samples/*lhe*
-#SUBMIT log/toto
+import $MA5PATH/samples/*lhe*
+#END

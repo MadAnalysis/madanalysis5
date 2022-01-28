@@ -22,33 +22,21 @@
 ################################################################################
 
 
-Red = "\x1b[31m"
-End = "\x1b[0m"
+import os
+from typing import Text, Sequence, Union
+
+from ma5_validation.system.exceptions import InvalidMadAnalysisPath
+from .path_handler import PathHandler
+from .reader import ScriptReader
 
 
-class InvalidScript(Exception):
-    """Invalid Script Exception"""
+class InstallationHandler(ScriptReader):
+    _installable = ["fastjet", "delphes", "PAD", "PADForSFS", "PADForMA5Tune"]
 
-    def __init__(self, message="Invalid Script!"):
-        super(InvalidScript, self).__init__(Red + message + End)
+    def __init__(self, packages: Sequence[Text], paths: PathHandler = None):
+        super(InstallationHandler, self).__init__(name="install", paths=paths)
 
-
-class InvalidMode(Exception):
-    """Invalid Mode Exception"""
-
-    def __init__(self, message="Invalid mode!"):
-        super(InvalidMode, self).__init__(Red + message + End)
-
-
-class InvalidMadAnalysisPath(Exception):
-    """Invalid Boundary Condition Exception"""
-
-    def __init__(self, message="Invalid MadAnalysis 5 path!"):
-        super(InvalidMadAnalysisPath, self).__init__(Red + message + End)
-
-
-class MadAnalysis5Error(Exception):
-    """Invalid Boundary Condition Exception"""
-
-    def __init__(self, message="MadAnalysis 5 raised an error!"):
-        super(MadAnalysis5Error, self).__init__(Red + message + End)
+        self._ma5_commands = []
+        for package in packages:
+            if package in InstallationHandler._installable:
+                self._ma5_commands.append(f"install {package}\n")
