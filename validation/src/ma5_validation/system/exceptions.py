@@ -21,6 +21,7 @@
 #
 ################################################################################
 
+import warnings
 
 Red = "\x1b[31m"
 End = "\x1b[0m"
@@ -52,3 +53,14 @@ class MadAnalysis5Error(Exception):
 
     def __init__(self, message="MadAnalysis 5 raised an error!"):
         super(MadAnalysis5Error, self).__init__(Red + message + End)
+
+
+class MadAnalysis5ExecutionError(Exception):
+    """Invalid Boundary Condition Exception"""
+
+    def __init__(self, message="MadAnalysis 5 failed during execution!"):
+        super(MadAnalysis5ExecutionError, self).__init__(Red + message + End)
+
+
+def InvalidSyntax(message):
+    warnings.warn(message, SyntaxWarning, stacklevel=2)
