@@ -20,13 +20,38 @@
 #  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
 #
 ################################################################################
-
-
+from enum import Enum, auto
 import os
 from typing import Text
 
 from ma5_validation.system.exceptions import InvalidScript, InvalidMode
 from .path_handler import PathHandler
+
+class _AutoName(Enum):
+    def _generate_next_value_(name, start, count, last_values):
+        return name
+
+class MA5Mode(_AutoName):
+    PARTON = auto()
+    HADRON = auto()
+    RECO = auto()
+    RECOFAC = auto()
+
+    @staticmethod
+    def get_mode(mode: Text):
+        if mode == "PARTON":
+            return MA5Mode.PARTON
+        elif mode == "HADRON":
+            return MA5Mode.HADRON
+        elif mode == "RECO":
+            return MA5Mode.RECO
+        elif mode == "RECOFRAC":
+            return MA5Mode.RECOFAC
+        else:
+            raise InvalidMode(
+                f"Unknown mode: {mode}. Available modes are: " +\
+                ", ".join(MA5Mode._member_names_)
+            )
 
 
 class ScriptReader:
@@ -50,15 +75,16 @@ class ScriptReader:
         script name or full path.
     """
 
-    _modes = ["PARTON", "HADRON", "RECO", "RECOFAC"]
+    _modes = MA5Mode._member_names_
 
-    def __init__(self, filename: Text, name: Text = None, paths: PathHandler = None):
+    def __init__(self, filename: Text = None, name: Text = None, paths: PathHandler = None):
         if name is None:
             self.name = os.path.basename(filename).split(".ma5")[0]
+        else:
+            self.name = name
         self.filename = filename
         self._mode = None
         self.title = None
-        self.samples = []
         self._ma5_commands = []
         if paths is None:
             self.ma5_path = PathHandler.MA5PATH
@@ -78,6 +104,9 @@ class ScriptReader:
         select MET > 20
         ```
         """
+        if self.filename is None:
+            raise InvalidScript("File name is not defined.")
+
         if len(self.filename.split("/")) > 1:
             if os.path.isfile(self.filename):
                 filename = self.filename
@@ -100,7 +129,7 @@ class ScriptReader:
                 elif line.startswith("#MODE"):
                     mode = line.split()[1].upper()
                     if mode in ScriptReader._modes:
-                        self._mode = line.split()[1].upper()
+                        self._mode = MA5Mode.get_mode(line.split()[1].upper())
                     else:
                         raise InvalidMode(f"Unknown MadAnalysis 5 mode: {mode}")
                 if not line.startswith("#") and not line.startswith("\n") and "submit" not in line:
@@ -113,7 +142,7 @@ class ScriptReader:
 
         if None in [self._mode, self.title]:
             raise InvalidScript(
-                "Script does not have mode or title. Please check the script: {filename}"
+                f"Script does not have mode or title. Please check the script: {filename}"
             )
 
         self._ma5_commands = script_lines
@@ -130,7 +159,10 @@ class ScriptReader:
         return "".join(self._ma5_commands) + "\n#END\n"
 
     @property
-    def mode(self) -> Text:
+    def mode(self):
+        return self._mode
+
+    def mode_flag(self) -> Text:
         """
         Return commandline execution mode
 
@@ -138,13 +170,13 @@ class ScriptReader:
         -------
         Text: ma5 execution mode
         """
-        if self._mode == "PARTON":
+        if self._mode == MA5Mode.PARTON:
             return "--partonlevel"
-        elif self._mode == "HADRON":
+        elif self._mode == MA5Mode.HADRON:
             return "--hadronlevel"
-        elif self._mode == "RECO":
+        elif self._mode == MA5Mode.RECO:
             return "--recolevel"
-        elif self._mode == "RECOFAC":
+        elif self._mode == MA5Mode.RECOFAC:
             return "--FAC --recolevel"
         else:
             return ""

@@ -33,8 +33,13 @@ from .reader import ScriptReader
 class InstallationHandler(ScriptReader):
     _installable = ["fastjet", "delphes", "PAD", "PADForSFS", "PADForMA5Tune"]
 
-    def __init__(self, packages: Sequence[Text], paths: PathHandler = None):
+    def __init__(self, packages: Union[Text, Sequence[Text]], paths: PathHandler = None):
         super(InstallationHandler, self).__init__(name="install", paths=paths)
+
+        if isinstance(packages, str):
+            packages = [packages]
+
+        self.title = "Package Installation: " + ", ".join(packages)
 
         self._ma5_commands = []
         for package in packages:

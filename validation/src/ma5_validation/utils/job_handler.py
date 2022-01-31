@@ -25,16 +25,35 @@
 import os
 from typing import Text, Sequence, Union
 
-from ma5_validation.system.exceptions import MadAnalysis5Error
+from ma5_validation.system.exceptions import (
+    MadAnalysis5Error,
+    InvalidSyntax,
+    MadAnalysis5ExecutionError,
+)
 from .path_handler import PathHandler
+import warnings
 
 from .reader import ScriptReader
 
 
 class JobHandler:
-    def __init__(self, script: ScriptReader, paths: PathHandler = None):
+    """
+    Execute and analyse the MadAnalysis 5 jobs.
+
+    Parameters
+    ----------
+    script : ScriptReader
+        Parsed madanalysis script to be executed
+    paths : PathHandler
+        Validated paths.
+    debug: bool
+        Enable or disable debug mode. Default True.
+    """
+
+    def __init__(self, script: ScriptReader, paths: PathHandler = None, debug: bool = True):
         assert isinstance(script, ScriptReader), f"Unknown input type: {type(script)}"
         self.script = script
+        self.debug = debug
 
         if paths is None:
             self.ma5_path = PathHandler.MA5PATH
@@ -60,35 +79,56 @@ class JobHandler:
             self.ma5_path + "/bin/ma5",
             "--forced",
             "--script",
-            "--debug",
-            self.script.mode,
+            # "--debug",
+            self.script.mode_flag(),
             os.path.join(self.log_path, self.script.name + ".ma5"),
             "&>",
             self.log_file,
         ]
+        if self.debug:
+            commands.insert(3, "--debug")
 
         print("   * Running MadAnalysis 5: " + self.script.title)
-        os.system(" ".join(commands))
+        try:
+            os.system(" ".join(commands))
+        except Exception as err:
+            log_file = ""
+            with open(self.log_file, "r", encoding="utf-8") as log:
+                log_file = log.read()
+            raise MadAnalysis5ExecutionError(
+                f"A problem has occured during MadAnalysis 5 execution\n\n{err}\n\n{log_file}"
+            )
+
         return True
 
+    def check(self):
+        """
+        Check the log file for errors
 
-    def analyze(self):
+        Raises
+        ------
+        MadAnalysis5Error
+            If MadAnalysis 5 raised an error during the execution.
+        """
         endTag = False
         errorTag = False
         log_file = None
         with open(self.log_file, "r", encoding="utf-8") as log:
-            for line in file:
+            for line in log:
                 if line.find("ma5>#END") != -1:
                     endTag = True
                 if endTag:
                     if line.find("ERROR") != -1 or line.find("MA5-ERROR") != -1:
                         errorTag = True
+                        log_file = log.read()
                         break
-            if errorTag:
-                log_file = log.read()
+        if not endTag:
+            InvalidSyntax("   * Can not find the end of the script.")
 
         if errorTag:
-            print(log_file)
             raise MadAnalysis5Error(
                 f"MadAnalysis has raised an error. For details, please see: {self.log_file}"
+                f"\n\n\n{log_file}"
             )
+
+        return True
