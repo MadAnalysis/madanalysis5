@@ -1,0 +1,13 @@
+#TITLE testing all observables with Plot and 1 particle
+#MODE HADRON
+define mu = mu+ mu-
+plot E (mu+)
+plot M (mu+ mu-)
+reject (mu+) E > 2.0
+select 80 < M (mu+ mu-) < 120
+import samples/*hep*
+import samples/*hepmc*
+submit 
+set main.normalize = none
+resubmit
+#END

@@ -1,0 +1,14 @@
+#TITLE testing all observables with Plot and 1 particle
+#MODE RECO
+define mu = mu+ mu-
+plot E (mu+)
+plot M (mu+ mu-)
+reject (mu+) E > 2.0
+select 80 < M (mu+ mu-) < 120
+import $MA5PATH/samples/*lhco*
+submit 
+plot PT (j)
+select PT (e+) > 3.0
+reject (mu+) ETA > 1.5
+resubmit
+#END

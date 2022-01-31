@@ -1,0 +1,31 @@
+#TITLE testing help command and applying it on all commands 
+#MODE PARTON
+help
+help help
+help define
+help display
+help display_datasets
+help display_multiparticles
+help display_particles
+help EOF
+help exit
+help generate_html
+help generate_latex
+help generate_pdflatex
+help history
+help import
+help plot
+help open
+help preview
+help quit
+help reject
+help remove
+help reset
+help resubmit
+help select
+help set
+help shell
+help submit
+help swap
+help install
+#END

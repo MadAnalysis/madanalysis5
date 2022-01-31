@@ -1,0 +1,5 @@
+#TITLE testing when no plot and no cut
+#MODE RECO
+import $MA5PATH/samples/*lhco*
+submit 
+#END

@@ -1,0 +1,10 @@
+#TITLE reserved word AND
+#MODE RECO
+
+plot M (mu- mu- and mu+ mu+ and mu mu)
+plot M (mu-_isol mu-_isol and mu+_isol mu+_isol and mu_isol mu_isol)
+plot M (mu-[1] mu- and mu+ mu+[2])
+
+import $MA5PATH/samples/*lhco*
+submit 
+#END

@@ -1,0 +1,18 @@
+#TITLE Testing mother to daughter relation (HADRON mode)
+#MODE HADRON
+
+define mu = mu+ mu-
+define w = w+ w-
+define top = t t~ 
+plot PT (mu+ < w )
+plot PT (mu+ << w )
+plot PT (mu+ < top )
+plot PT (mu+ << top )
+plot PT (mu+ < w < top )
+plot PT (mu+ << w < top )
+plot PT (mu+ < w << top )
+
+import $MA5PATH/samples/*hep*
+import $MA5PATH/samples/*hepmc*
+submit 
+#END

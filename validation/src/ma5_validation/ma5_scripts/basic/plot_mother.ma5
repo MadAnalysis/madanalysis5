@@ -1,0 +1,17 @@
+#TITLE Testing mother to daughter relation
+#MODE PARTON
+
+define mu = mu+ mu-
+define w = w+ w-
+define top = t t~ 
+plot PT (mu+ < w )
+plot PT (mu+ << w )
+plot PT (mu+ < top )
+plot PT (mu+ << top )
+plot PT (mu+ < w < top )
+plot PT (mu+ << w < top )
+plot PT (mu+ < w << top )
+
+import $MA5PATH/samples/*lhe*
+submit 
+#END

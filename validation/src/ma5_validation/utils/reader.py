@@ -88,8 +88,10 @@ class ScriptReader:
         self._ma5_commands = []
         if paths is None:
             self.ma5_path = PathHandler.MA5PATH
+            self.log_path = PathHandler.LOGPATH
         else:
             self.ma5_path = paths.MA5PATH
+            self.log_path = paths.LOGPATH
 
     def decode(self) -> None:
         """
@@ -132,13 +134,16 @@ class ScriptReader:
                         self._mode = MA5Mode.get_mode(line.split()[1].upper())
                     else:
                         raise InvalidMode(f"Unknown MadAnalysis 5 mode: {mode}")
-                if not line.startswith("#") and not line.startswith("\n") and "submit" not in line:
+                if not line.startswith("#") and not line.startswith("\n"):
                     if line.startswith("import"):
                         script_lines.append(
                             line.replace("$MA5PATH", os.path.normpath(self.ma5_path))
                         )
+                    elif "submit" in line:
+                        script_lines.append(f"submit {os.path.join(self.log_path, self.name)}\n")
                     else:
                         script_lines.append(line)
+
 
         if None in [self._mode, self.title]:
             raise InvalidScript(

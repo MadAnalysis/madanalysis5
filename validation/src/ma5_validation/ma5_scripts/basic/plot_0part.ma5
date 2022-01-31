@@ -1,0 +1,12 @@
+#TITLE testing all observables with Plot and 0 particle
+#MODE PARTON
+plot SQRTS
+plot TET
+plot MET
+plot THT
+plot MHT
+plot NPID
+plot NAPID
+import $MA5PATH/samples/*lhe*
+submit 
+#END

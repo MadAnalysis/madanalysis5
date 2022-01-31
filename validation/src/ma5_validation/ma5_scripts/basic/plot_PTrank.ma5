@@ -1,0 +1,83 @@
+#TITLE Sorting particle according to PTrank 
+#MODE PARTON
+
+plot PT (mu+[1])
+plot PT (mu+[2])
+plot PT (mu+[3])
+plot PT (mu+[-1])
+plot PT (mu+[-2])
+plot PT (mu+[-3])
+plot PT (mu+[-4])
+plot N (mu+[1])
+plot N (mu+[2])
+plot N (mu+[3])
+plot N (mu+[-1])
+plot N (mu+[-2])
+plot N (mu+[-3])
+plot N (mu+[-4])
+plot M (mu+[1] mu-[1])
+plot M (mu+[2] mu-[1])
+plot M (mu+[3] mu-[1])
+plot M (mu+[-3] mu-[1])
+plot M (mu+[-4] mu-[1] mu+[2])
+plot dsETA(j[1] j[2])
+plot PT (mu+[1]) [PTordering]
+plot PT (mu+[2]) [PTordering]
+plot PT (mu+[3]) [PTordering]
+plot PT (mu+[-1]) [PTordering]
+plot PT (mu+[-2]) [PTordering]
+plot PT (mu+[-3]) [PTordering]
+plot PT (mu+[-4]) [PTordering]
+plot PT (mu+[1]) [Pordering]
+plot PT (mu+[2]) [Pordering]
+plot PT (mu+[3]) [Pordering]
+plot PT (mu+[-1]) [Pordering]
+plot PT (mu+[-2]) [Pordering]
+plot PT (mu+[-3]) [Pordering]
+plot PT (mu+[-4]) [Pordering]
+plot PT (mu+[1]) [Eordering]
+plot PT (mu+[2]) [Eordering]
+plot PT (mu+[3]) [Eordering]
+plot PT (mu+[-1]) [Eordering]
+plot PT (mu+[-2]) [Eordering]
+plot PT (mu+[-3]) [Eordering]
+plot PT (mu+[-4]) [Eordering]
+plot PT (mu+[1]) [ETordering]
+plot PT (mu+[2]) [ETordering]
+plot PT (mu+[3]) [ETordering]
+plot PT (mu+[-1]) [ETordering]
+plot PT (mu+[-2]) [ETordering]
+plot PT (mu+[-3]) [ETordering]
+plot PT (mu+[-4]) [ETordering]
+plot PT (mu+[1]) [PXordering]
+plot PT (mu+[2]) [PXordering]
+plot PT (mu+[3]) [PXordering]
+plot PT (mu+[-1]) [PXordering]
+plot PT (mu+[-2]) [PXordering]
+plot PT (mu+[-3]) [PXordering]
+plot PT (mu+[-4]) [PXordering]
+plot PT (mu+[1]) [PYordering]
+plot PT (mu+[2]) [PYordering]
+plot PT (mu+[3]) [PYordering]
+plot PT (mu+[-1]) [PYordering]
+plot PT (mu+[-2]) [PYordering]
+plot PT (mu+[-3]) [PYordering]
+plot PT (mu+[-4]) [PYordering]
+plot PT (mu+[1]) [PZordering]
+plot PT (mu+[2]) [PZordering]
+plot PT (mu+[3]) [PZordering]
+plot PT (mu+[-1]) [PZordering]
+plot PT (mu+[-2]) [PZordering]
+plot PT (mu+[-3]) [PZordering]
+plot PT (mu+[-4]) [PZordering]
+plot PT (mu+[1]) [ETAordering]
+plot PT (mu+[2]) [ETAordering]
+plot PT (mu+[3]) [ETAordering]
+plot PT (mu+[-1]) [ETAordering]
+plot PT (mu+[-2]) [ETAordering]
+plot PT (mu+[-3]) [ETAordering]
+plot PT (mu+[-4]) [ETAordering]
+
+import $MA5PATH/samples/*lhe*
+submit 
+#END

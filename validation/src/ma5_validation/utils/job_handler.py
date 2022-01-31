@@ -71,9 +71,7 @@ class JobHandler:
             script.write(commands)
 
     def execute(self):
-        self.write_ma5script(
-            self.script.commands + f"\n\nsubmit {os.path.join(self.log_path, self.script.name)}"
-        )
+        self.write_ma5script(self.script.commands)
 
         commands = [
             self.ma5_path + "/bin/ma5",
