@@ -28,19 +28,46 @@ import argparse, os
 from typing import Text
 import ma5_validation as ma5
 
+
+def run_scripts(path: Text):
+    """
+    A generic function to run MadAnalysis 5 scripts
+
+    Parameters
+    ----------
+    path : Text
+        Path to the scripts folder or full path of the script itself.
+
+    Raises
+    ------
+    MadAnalysis5ExecutionError
+        If execution has failed.
+    MadAnalysis5Error
+        If check has failed.
+    For other exceptions please see `ma5_validation.utils.JobHandler` internal exceptions.
+    """
+
+    def execute(script):
+        current_script.decode()
+        job = ma5.utils.JobHandler(current_script)
+        if not job.execute():
+            raise ma5.system.MadAnalysis5ExecutionError("MadAnalysis execution has failed.")
+        if not job.check():
+            raise ma5.system.MadAnalysis5Error("MadAnalysis has raised an error.")
+
+    if os.path.isdir(path):
+        for script in os.listdir(path):
+            if script.endswith(".ma5"):
+                current_script = ma5.utils.ScriptReader(os.path.join(path, script))
+                execute(current_script)
+    else:
+        current_script = ma5.utils.ScriptReader(path)
+        execute(current_script)
+
+
 def main(args):
 
     ma5.utils.PathHandler.set_ma5path(args.MA5DIR)
-
-    def run_scripts(path: Text):
-        for script in os.listdir(path):
-            current_script = ma5.utils.ScriptReader(os.path.join(path, script))
-            current_script.decode()
-            job = ma5.utils.JobHandler(a)
-            if not job.execute():
-                raise ma5.system.MadAnalysis5ExecutionError("MadAnalysis execution has failed.")
-            if not job.check():
-                raise ma5.system.MadAnalysis5Error("MadAnalysis has raised an error.")
 
     if args.PARTON:
         run_scripts(os.path.join(ma5.utils.PathHandler.MA5_SCRIPTPATH, "parton_level"))
@@ -48,6 +75,8 @@ def main(args):
         run_scripts(os.path.join(ma5.utils.PathHandler.MA5_SCRIPTPATH, "hadron_level"))
     if args.RECO:
         run_scripts(os.path.join(ma5.utils.PathHandler.MA5_SCRIPTPATH, "reco_level"))
+    if args.CUSTOM is not None:
+        run_scripts(args.CUSTOM)
 
 
 if __name__ == "__main__":
@@ -60,8 +89,7 @@ if __name__ == "__main__":
         type=str,
         dest="MA5DIR",
         default=ma5.utils.PathHandler.MA5PATH,
-        help=f"MadAnalysis 5 directory path. "
-        f"Default `{ma5.utils.PathHandler.MA5PATH}`",
+        help=f"MadAnalysis 5 directory path. " f"Default `{ma5.utils.PathHandler.MA5PATH}`",
     )
 
     validation = parser.add_argument_group("Validation Handling")
@@ -88,6 +116,13 @@ if __name__ == "__main__":
         action="store_true",
         default=False,
         help="Validate normal mode in reco level.",
+    )
+    validation.add_argument(
+        "--custom-script",
+        dest="CUSTOM",
+        default=None,
+        type=str,
+        help="Validate a custom MadAnalysis 5 script. Script needs to be written in `ma5_validation` syntax.",
     )
 
     args = parser.parse_args()

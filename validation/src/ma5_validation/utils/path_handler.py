@@ -45,7 +45,7 @@ class PathHandler:
     )
 
     @staticmethod
-    def set_ma5path(ma5path: Text):
+    def set_ma5path(ma5_path: Text):
         if not os.path.isdir(ma5_path):
             raise InvalidMadAnalysisPath(f"Invalid path: {ma5_path}")
         if not os.path.isdir(os.path.join(ma5_path, "tools/ReportGenerator/Services")):
