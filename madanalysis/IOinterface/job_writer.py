@@ -23,13 +23,17 @@
 
 
 from __future__ import absolute_import
-from madanalysis.selection.instance_name      import InstanceName
-from madanalysis.IOinterface.folder_writer    import FolderWriter
-from shell_command                            import ShellCommand
+
 import logging
-import shutil
 import os
+import shutil
+
 import six
+from shell_command import ShellCommand
+
+from madanalysis.IOinterface.folder_writer import FolderWriter
+from madanalysis.selection.instance_name import InstanceName
+
 
 class JobWriter(object):
 
@@ -717,7 +721,10 @@ class JobWriter(object):
         ProductPath='../../Build/Lib/'
 
         # write makefile
-        MakefileWriter.Makefile(filename,title,ProductName,ProductPath,isLibrary,cppfiles,hfiles,options,self.main.archi_info,toRemove)
+        MakefileWriter.Makefile(
+            filename, title, ProductName, ProductPath, isLibrary, cppfiles, hfiles, options,
+            self.main.archi_info, toRemove
+        )
 
         # Ok
         return True
@@ -748,6 +755,8 @@ class JobWriter(object):
         )
         options.has_fastjet_lib    = self.main.archi_info.has_fastjet
         options.has_fastjet_ma5lib = self.main.archi_info.has_fastjet
+        # @JACK: fastjet_inc is required to be able to use the FJ files when FJ mode is on
+        options.has_fastjet_inc    = self.main.archi_info.has_fastjet
         options.has_root_inc       = self.main.archi_info.has_root
         options.has_root_lib       = self.main.archi_info.has_root
         #options.has_userpackage = True

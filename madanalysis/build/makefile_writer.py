@@ -23,10 +23,11 @@
 
 
 from __future__ import absolute_import
+
 import logging
-from shell_command import ShellCommand
-from string_tools  import StringTools
+
 from six.moves import range
+from string_tools import StringTools
 
 
 class MakefileWriter():
@@ -192,7 +193,10 @@ class MakefileWriter():
 
 
     @staticmethod
-    def Makefile(MakefileName,title,ProductName,ProductPath,isLibrary,cppfiles,hfiles,options,archi_info,toRemove,moreIncludes=[]):
+    def Makefile(
+            MakefileName, title, ProductName, ProductPath, isLibrary, cppfiles, hfiles,
+            options, archi_info, toRemove, moreIncludes = []
+    ):
 
         # Open the Makefile
         try:
