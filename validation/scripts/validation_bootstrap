@@ -68,6 +68,7 @@ def run_scripts(path: Text):
 def main(args):
 
     ma5.utils.PathHandler.set_ma5path(args.MA5DIR)
+    ma5.utils.PathHandler.set_logpath(args.LOGDIR)
 
     if args.PARTON:
         run_scripts(os.path.join(ma5.utils.PathHandler.MA5_SCRIPTPATH, "parton_level"))
@@ -90,6 +91,13 @@ if __name__ == "__main__":
         dest="MA5DIR",
         default=ma5.utils.PathHandler.MA5PATH,
         help=f"MadAnalysis 5 directory path. " f"Default `{ma5.utils.PathHandler.MA5PATH}`",
+    )
+    paths.add_argument(
+        "--log-dir",
+        type=str,
+        dest="LOGDIR",
+        default=ma5.utils.PathHandler.LOGPATH,
+        help=f"Log directory path. " f"Default `{ma5.utils.PathHandler.LOGPATH}`",
     )
 
     validation = parser.add_argument_group("Validation Handling")
