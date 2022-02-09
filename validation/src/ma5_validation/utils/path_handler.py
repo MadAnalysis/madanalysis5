@@ -44,6 +44,11 @@ class PathHandler:
         os.path.split(os.path.dirname(os.path.realpath(__file__)))[0], "ma5_scripts"
     )
 
+    PARTON_LEVEL_PATH = os.path.join(PathHandler.MA5_SCRIPTPATH, "parton_level")
+    HADRON_LEVEL_PATH = os.path.join(PathHandler.MA5_SCRIPTPATH, "hadron_level")
+    RECO_LEVEL_PATH = os.path.join(PathHandler.MA5_SCRIPTPATH, "reco_level")
+    EXPERT_LEVEL_PATH = os.path.join(PathHandler.MA5_SCRIPTPATH, "expert_level")
+
     @staticmethod
     def set_ma5path(ma5_path: Text):
         if not os.path.isdir(ma5_path):

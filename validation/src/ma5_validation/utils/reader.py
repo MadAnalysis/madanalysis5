@@ -134,11 +134,24 @@ class ScriptReader:
                         self._mode = MA5Mode.get_mode(line.split()[1].upper())
                     else:
                         raise InvalidMode(f"Unknown MadAnalysis 5 mode: {mode}")
+                elif line.startswith("#CPP"):
+                    new_line = line.split()[1]
+                    self.cpp = new_line.replace("$EXPERT_LEVEL_PATH", PathHandler.EXPERT_LEVEL_PATH)
+                elif line.startswith("#HEADER"):
+                    new_line = line.split()[1]
+                    self.header = new_line.replace(
+                        "$EXPERT_LEVEL_PATH", PathHandler.EXPERT_LEVEL_PATH
+                    )
                 if not line.startswith("#") and not line.startswith("\n"):
                     if line.startswith("import"):
-                        script_lines.append(
-                            line.replace("$MA5PATH", os.path.normpath(self.ma5_path))
-                        )
+                        if self.IsExpert:
+                            script_lines.append(
+                                line.replace("$MA5PATH", os.path.normpath(self.ma5_path))
+                            )
+                        else:
+                            self.sample = line.replace(
+                                "$MA5PATH", os.path.normpath(self.ma5_path)
+                            ).split()[1]
                     elif "submit" in line:
                         script_lines.append(
                             f"submit {os.path.join(self.log_path, self.name + '_' + self.mode.name)}\n"
@@ -167,6 +180,10 @@ class ScriptReader:
     @property
     def mode(self):
         return self._mode
+
+    @property
+    def IsExpert(self):
+        return "EXPERT" in self.mode.name
 
     def mode_flag(self) -> Text:
         """
