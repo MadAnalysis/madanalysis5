@@ -1,0 +1,95 @@
+#!/usr/bin/env python3
+
+################################################################################
+#
+#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
+#  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
+#
+#  This file is part of MadAnalysis 5.
+#  Official website: <https://github.com/MadAnalysis/madanalysis5>
+#
+#  MadAnalysis 5 is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  MadAnalysis 5 is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
+#
+################################################################################
+
+import argparse, os
+
+from typing import Text
+import ma5_validation as ma5
+
+def main(args):
+
+    ma5.utils.PathHandler.set_ma5path(args.MA5DIR)
+
+    def run_scripts(path: Text):
+        for script in os.listdir(path):
+            current_script = ma5.utils.ScriptReader(os.path.join(path, script))
+            current_script.decode()
+            job = ma5.utils.JobHandler(a)
+            if not job.execute():
+                raise ma5.system.MadAnalysis5ExecutionError("MadAnalysis execution has failed.")
+            if not job.check():
+                raise ma5.system.MadAnalysis5Error("MadAnalysis has raised an error.")
+
+    if args.PARTON:
+        run_scripts(os.path.join(ma5.utils.PathHandler.MA5_SCRIPTPATH, "parton_level"))
+    if args.HADRON:
+        run_scripts(os.path.join(ma5.utils.PathHandler.MA5_SCRIPTPATH, "hadron_level"))
+    if args.RECO:
+        run_scripts(os.path.join(ma5.utils.PathHandler.MA5_SCRIPTPATH, "reco_level"))
+
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(description="Validation module executor for MadAnalysis 5")
+
+    paths = parser.add_argument_group("Path handling.")
+    paths.add_argument(
+        "--ma5-dir",
+        type=str,
+        dest="MA5DIR",
+        default=ma5.utils.PathHandler.MA5PATH,
+        help=f"MadAnalysis 5 directory path. "
+        f"Default `{ma5.utils.PathHandler.MA5PATH}`",
+    )
+
+    validation = parser.add_argument_group("Validation Handling")
+    validation.add_argument(
+        "-P",
+        "--parton-level",
+        dest="PARTON",
+        action="store_true",
+        default=False,
+        help="Validate normal mode in parton level.",
+    )
+    validation.add_argument(
+        "-H",
+        "--hadron-level",
+        dest="HADRON",
+        action="store_true",
+        default=False,
+        help="Validate normal mode in hadron level.",
+    )
+    validation.add_argument(
+        "-R",
+        "--reco-level",
+        dest="RECO",
+        action="store_true",
+        default=False,
+        help="Validate normal mode in reco level.",
+    )
+
+    args = parser.parse_args()
+
+    main(args)

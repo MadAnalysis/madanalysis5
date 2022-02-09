@@ -20,16 +20,18 @@
 #  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
 #
 ################################################################################
-from enum import Enum, auto
 import os
+from enum import Enum, auto
 from typing import Text
 
 from ma5_validation.system.exceptions import InvalidScript, InvalidMode
 from .path_handler import PathHandler
 
+
 class _AutoName(Enum):
     def _generate_next_value_(name, start, count, last_values):
         return name
+
 
 class MA5Mode(_AutoName):
     PARTON = auto()
@@ -39,19 +41,13 @@ class MA5Mode(_AutoName):
 
     @staticmethod
     def get_mode(mode: Text):
-        if mode == "PARTON":
-            return MA5Mode.PARTON
-        elif mode == "HADRON":
-            return MA5Mode.HADRON
-        elif mode == "RECO":
-            return MA5Mode.RECO
-        elif mode == "RECOFRAC":
-            return MA5Mode.RECOFAC
-        else:
+        mode = MA5Mode.__dict__.get(mode, False)
+        if not mode:
             raise InvalidMode(
-                f"Unknown mode: {mode}. Available modes are: " +\
-                ", ".join(MA5Mode._member_names_)
+                f"Unknown mode: {mode}. Available modes are: " + ", ".join(MA5Mode._member_names_)
             )
+        else:
+            return mode
 
 
 class ScriptReader:
@@ -140,10 +136,11 @@ class ScriptReader:
                             line.replace("$MA5PATH", os.path.normpath(self.ma5_path))
                         )
                     elif "submit" in line:
-                        script_lines.append(f"submit {os.path.join(self.log_path, self.name)}\n")
+                        script_lines.append(
+                            f"submit {os.path.join(self.log_path, self.name + '_' + self.mode.name)}\n"
+                        )
                     else:
                         script_lines.append(line)
-
 
         if None in [self._mode, self.title]:
             raise InvalidScript(

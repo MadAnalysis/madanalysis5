@@ -40,6 +40,10 @@ class PathHandler:
     for _ in range(4):
         MA5PATH = os.path.split(MA5PATH)[0]
 
+    MA5_SCRIPTPATH = os.path.join(
+        os.path.split(os.path.dirname(os.path.realpath(__file__)))[0], "ma5_scripts"
+    )
+
     @staticmethod
     def set_ma5path(ma5path: Text):
         if not os.path.isdir(ma5_path):

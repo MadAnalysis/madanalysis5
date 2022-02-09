@@ -1,5 +1,0 @@
-#TITLE testing when no plot and no cut
-#MODE PARTON
-import $MA5PATH/samples/*lhe*
-submit 
-#END

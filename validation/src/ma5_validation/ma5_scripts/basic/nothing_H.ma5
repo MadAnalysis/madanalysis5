@@ -1,6 +1,0 @@
-#TITLE testing when no plot and no cut
-#MODE HADRON
-import $MA5PATH/samples/*hep*
-import $MA5PATH/samples/*hepmc*
-submit 
-#END
