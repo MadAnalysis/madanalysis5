@@ -38,6 +38,10 @@ class MA5Mode(_AutoName):
     HADRON = auto()
     RECO = auto()
     RECOFAC = auto()
+    EXPERTRECO = auto()
+    EXPERTHADRON = auto()
+    EXPERTPARTON = auto()
+    EXPERT = auto()
 
     @staticmethod
     def get_mode(mode: Text):
@@ -172,13 +176,15 @@ class ScriptReader:
         -------
         Text: ma5 execution mode
         """
-        if self._mode == MA5Mode.PARTON:
-            return "--partonlevel"
-        elif self._mode == MA5Mode.HADRON:
-            return "--hadronlevel"
-        elif self._mode == MA5Mode.RECO:
-            return "--recolevel"
-        elif self._mode == MA5Mode.RECOFAC:
-            return "--FAC --recolevel"
-        else:
-            return ""
+        flags = {
+            MA5Mode.PARTON: "--partonlevel",
+            MA5Mode.HADRON: "--hadronlevel",
+            MA5Mode.RECO: "--recolevel",
+            MA5Mode.RECOFAC: "--FAC --recolevel",
+            MA5Mode.EXPERTRECO: "-Re",
+            MA5Mode.EXPERTHADRON: "--hadronlevel -e",
+            MA5Mode.EXPERTPARTON: "--partonlevel -e",
+            MA5Mode.EXPERT: "-e",
+        }
+
+        return flags.get(self._mode, " ")
