@@ -33,7 +33,7 @@ from ma5_validation.system.exceptions import (
 from .path_handler import PathHandler
 import warnings
 
-from .reader import ScriptReader
+from .script_handler import ScriptReader
 
 
 class JobHandler:
@@ -63,14 +63,26 @@ class JobHandler:
             self.log_path = paths.LOGPATH
         self.log_file = os.path.join(self.log_path, self.script.name + ".log")
 
-    def write_ma5script(self, commands, name: Text = None):
+    def write_ma5script(self, commands: Text, name: Text = None) -> None:
+        """
+        Write dedicated MadAnalysis 5 script
+        Parameters
+        ----------
+        commands : Text
+            Commands to be executed
+        name : Text
+            Name of the script
+        """
         script_name = os.path.join(
             self.log_path, name if name is not None else self.script.name + ".ma5"
         )
         with open(script_name, "w") as script:
             script.write(commands)
 
-    def execute(self):
+    def execute(self) -> bool:
+        """
+        Execute MadAnalysis 5 script
+        """
         self.write_ma5script(self.script.commands)
 
         commands = [
@@ -128,5 +140,9 @@ class JobHandler:
                 f"MadAnalysis has raised an error. For details, please see: {self.log_file}"
                 f"\n\n\n{log_file}"
             )
+
+        # TODO: This checker needs an numerical validation as well. Currently it only checks
+        # if there is a problem with the execution of the scripts i.e. if SampleAnalyzer or python
+        # interface raises an error.
 
         return True

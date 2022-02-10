@@ -27,7 +27,7 @@ from typing import Text, Sequence, Union
 
 from ma5_validation.system.exceptions import InvalidMadAnalysisPath
 from .path_handler import PathHandler
-from .reader import ScriptReader
+from .script_handler import ScriptReader
 
 
 class InstallationHandler(ScriptReader):

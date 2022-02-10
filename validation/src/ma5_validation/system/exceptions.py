@@ -42,21 +42,21 @@ class InvalidMode(Exception):
 
 
 class InvalidMadAnalysisPath(Exception):
-    """Invalid Boundary Condition Exception"""
+    """Invalid path for MadAnalysis 5 Package"""
 
     def __init__(self, message="Invalid MadAnalysis 5 path!"):
         super(InvalidMadAnalysisPath, self).__init__(Red + message + End)
 
 
 class MadAnalysis5Error(Exception):
-    """Invalid Boundary Condition Exception"""
+    """MadAnalysis 5 Error"""
 
     def __init__(self, message="MadAnalysis 5 raised an error!"):
         super(MadAnalysis5Error, self).__init__(Red + message + End)
 
 
 class MadAnalysis5ExecutionError(Exception):
-    """Invalid Boundary Condition Exception"""
+    """MadAnalysis 5 execution has failed"""
 
     def __init__(self, message="MadAnalysis 5 failed during execution!"):
         super(MadAnalysis5ExecutionError, self).__init__(Red + message + End)

@@ -21,37 +21,11 @@
 #
 ################################################################################
 import os
-from enum import Enum, auto
 from typing import Text
 
 from ma5_validation.system.exceptions import InvalidScript, InvalidMode
 from .path_handler import PathHandler
-
-
-class _AutoName(Enum):
-    def _generate_next_value_(name, start, count, last_values):
-        return name
-
-
-class MA5Mode(_AutoName):
-    PARTON = auto()
-    HADRON = auto()
-    RECO = auto()
-    RECOFAC = auto()
-    EXPERTRECO = auto()
-    EXPERTHADRON = auto()
-    EXPERTPARTON = auto()
-    EXPERT = auto()
-
-    @staticmethod
-    def get_mode(mode: Text):
-        mode = MA5Mode.__dict__.get(mode, False)
-        if not mode:
-            raise InvalidMode(
-                f"Unknown mode: {mode}. Available modes are: " + ", ".join(MA5Mode._member_names_)
-            )
-        else:
-            return mode
+from .mode_handler import MA5Mode
 
 
 class ScriptReader:
@@ -179,10 +153,20 @@ class ScriptReader:
 
     @property
     def mode(self):
+        """
+        Current MadAnalysis 5 Mode
+        """
         return self._mode
 
     @property
-    def IsExpert(self):
+    def IsExpert(self) -> bool:
+        """
+        Is the script tagged as expert mode.
+
+        Returns
+        -------
+        Bool
+        """
         return "EXPERT" in self.mode.name
 
     def mode_flag(self) -> Text:
@@ -193,15 +177,4 @@ class ScriptReader:
         -------
         Text: ma5 execution mode
         """
-        flags = {
-            MA5Mode.PARTON: "--partonlevel",
-            MA5Mode.HADRON: "--hadronlevel",
-            MA5Mode.RECO: "--recolevel",
-            MA5Mode.RECOFAC: "--FAC --recolevel",
-            MA5Mode.EXPERTRECO: "-Re",
-            MA5Mode.EXPERTHADRON: "--hadronlevel -e",
-            MA5Mode.EXPERTPARTON: "--partonlevel -e",
-            MA5Mode.EXPERT: "-e",
-        }
-
-        return flags.get(self._mode, " ")
+        return MA5Mode.get_flag(self.mode)
