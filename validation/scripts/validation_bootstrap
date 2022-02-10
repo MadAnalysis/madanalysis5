@@ -70,6 +70,13 @@ def main(args):
     ma5.utils.PathHandler.set_ma5path(args.MA5DIR)
     ma5.utils.PathHandler.set_logpath(args.LOGDIR)
 
+    # Check if samples are installed
+    if not os.path.isdir(ma5.utils.PathHandler.SMP_PATH):
+        smp_installation = ma5.utils.InstallationHandler("samples")
+        job = ma5.utils.JobHandler(smp_installation)
+        if not (job.execute() and job.check()):
+            raise ma5.system.MadAnalysis5Error("A problem has occured during sample installation.")
+
     if args.PARTON:
         run_scripts(os.path.join(ma5.utils.PathHandler.MA5_SCRIPTPATH, "parton_level"))
     if args.HADRON:
