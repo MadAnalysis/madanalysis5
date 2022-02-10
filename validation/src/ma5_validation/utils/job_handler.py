@@ -83,31 +83,99 @@ class JobHandler:
         """
         Execute MadAnalysis 5 script
         """
-        self.write_ma5script(self.script.commands)
+        if not self.script.IsExpert:
+            self.write_ma5script(self.script.commands)
 
-        commands = [
-            self.ma5_path + "/bin/ma5",
-            "--forced",
-            "--script",
-            # "--debug",
-            self.script.mode_flag(),
-            os.path.join(self.log_path, self.script.name + ".ma5"),
-            "&>",
-            self.log_file,
-        ]
-        if self.debug:
-            commands.insert(3, "--debug")
+            commands = [
+                self.ma5_path + "/bin/ma5",
+                "--forced",
+                "--script",
+                # "--debug",
+                self.script.mode_flag(),
+                os.path.join(self.log_path, self.script.name + ".ma5"),
+                "&>",
+                self.log_file,
+            ]
+            if self.debug:
+                commands.insert(3, "--debug")
 
-        print("   * Running MadAnalysis 5: " + self.script.title)
-        try:
-            os.system(" ".join(commands))
-        except Exception as err:
-            log_file = ""
-            with open(self.log_file, "r", encoding="utf-8") as log:
-                log_file = log.read()
-            raise MadAnalysis5ExecutionError(
-                f"A problem has occured during MadAnalysis 5 execution\n\n{err}\n\n{log_file}"
-            )
+            print("   * Running MadAnalysis 5: " + self.script.title)
+            try:
+                os.system(" ".join(commands))
+            except Exception as err:
+                log_file = ""
+                with open(self.log_file, "r", encoding="utf-8") as log:
+                    log_file = log.read()
+                raise MadAnalysis5ExecutionError(
+                    f"A problem has occured during MadAnalysis 5 execution\n\n{err}\n\n{log_file}"
+                )
+        else:
+            self.write_ma5script(self.script.commands)
+            commands = [
+                self.ma5_path + "/bin/ma5",
+                "--forced",
+                "--script",
+                # "--debug",
+                self.script.mode_flag(),
+                os.path.join(self.log_path, self.script.name),
+                self.script.expert_name,
+                os.path.join(self.log_path, self.script.name + ".ma5"),
+                "&>",
+                self.log_file,
+            ]
+
+            print("   * Running MadAnalysis 5: " + self.script.title)
+            try:
+                os.system(" ".join(commands))
+                curdir = os.getcwd()
+                os.chdir(os.path.join(self.log_path, self.script.name, "Build"))
+                os.system("source setup.sh")
+                with open(
+                    os.path.join(self.log_path, self.script.name, "Input/_defaultset.list"), "w"
+                ) as inputs:
+                    inputs.write("\n".join(self.script.sample))
+
+                # Copy analysis files
+                command = (
+                    "cp "
+                    + self.script.cpp
+                    + " "
+                    + os.path.join(
+                        self.log_path, self.script.name, "Build/SampleAnalyzer/User/Analyzer"
+                    )
+                    + "/."
+                )
+                print("   * Running: " + command)
+                os.system(command)
+
+                command = (
+                    "cp "
+                    + self.script.header
+                    + " "
+                    + os.path.join(
+                        self.log_path, self.script.name, "Build/SampleAnalyzer/User/Analyzer"
+                    )
+                    + "/."
+                )
+                print("   * Running: " + command)
+                os.system(command)
+
+                # Execute
+                os.system(
+                    "source setup.sh && make clean all &> compilation.log && "
+                    + "./MadAnalysis5job "
+                    + os.path.join(self.log_path, self.script.name, "Input/_defaultset.list")
+                    + self.script.command_line
+                    + " &> "
+                    + self.log_file
+                )
+            except Exception as err:
+                log_file = ""
+                with open(self.log_file, "r", encoding="utf-8") as log:
+                    log_file = log.read()
+                raise MadAnalysis5ExecutionError(
+                    f"A problem has occured during MadAnalysis 5 execution\n\n{err}\n\n{log_file}"
+                )
 
         return True
 
@@ -127,12 +195,12 @@ class JobHandler:
             for line in log:
                 if line.find("ma5>#END") != -1:
                     endTag = True
-                if endTag:
+                if endTag or self.script.IsExpert:
                     if line.find("ERROR") != -1 or line.find("MA5-ERROR") != -1:
                         errorTag = True
                         log_file = log.read()
                         break
-        if not endTag:
+        if not endTag and not self.script.IsExpert:
             InvalidSyntax("   * Can not find the end of the script.")
 
         if errorTag:

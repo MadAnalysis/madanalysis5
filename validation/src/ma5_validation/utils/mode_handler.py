@@ -73,14 +73,13 @@ class MA5Mode(_AutoName):
         InvalidMode
             If an unknown mode has been given.
         """
-        mode = MA5Mode.__dict__.get(mode.upper(), False)
-
         if mode.upper() not in MA5Mode._member_names_:
             raise InvalidMode(
                 f"Unknown mode: {mode}. Available modes are: " + ", ".join(MA5Mode._member_names_)
             )
+
         else:
-            return mode
+            return MA5Mode.__dict__.get(mode.upper(), False)
 
     @staticmethod
     def get_flag(mode):
@@ -95,4 +94,4 @@ class MA5Mode(_AutoName):
             MA5Mode.EXPERT: "-e",
         }
 
-        return flags.get(self._mode, " ")
+        return flags.get(mode, " ")

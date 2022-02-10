@@ -51,7 +51,7 @@ class ScriptReader:
 
     _modes = MA5Mode._member_names_
 
-    def __init__(self, filename: Text = None, name: Text = None, paths: PathHandler = None):
+    def __init__(self, filename: Text = None, name: Text = None):
         if name is None:
             self.name = os.path.basename(filename).split(".ma5")[0]
         else:
@@ -60,12 +60,6 @@ class ScriptReader:
         self._mode = None
         self.title = None
         self._ma5_commands = []
-        if paths is None:
-            self.ma5_path = PathHandler.MA5PATH
-            self.log_path = PathHandler.LOGPATH
-        else:
-            self.ma5_path = paths.MA5PATH
-            self.log_path = paths.LOGPATH
 
     def decode(self) -> None:
         """
@@ -101,42 +95,82 @@ class ScriptReader:
             script_lines = []
             for line in script:
                 if line.startswith("#TITLE"):
-                    self.title = line[6:-1]
+                    self.title = " ".join(line[6:-1].split())
+                    continue
                 elif line.startswith("#MODE"):
-                    mode = line.split()[1].upper()
-                    if mode in ScriptReader._modes:
-                        self._mode = MA5Mode.get_mode(line.split()[1].upper())
-                    else:
-                        raise InvalidMode(f"Unknown MadAnalysis 5 mode: {mode}")
-                elif line.startswith("#CPP"):
-                    new_line = line.split()[1]
-                    self.cpp = new_line.replace("$EXPERT_LEVEL_PATH", PathHandler.EXPERT_LEVEL_PATH)
-                elif line.startswith("#HEADER"):
-                    new_line = line.split()[1]
-                    self.header = new_line.replace(
-                        "$EXPERT_LEVEL_PATH", PathHandler.EXPERT_LEVEL_PATH
+                    self.mode = line.split()[1]
+
+                    if self.IsExpert:
+                        # initialize Expert mode attributes
+                        for attr in ["cpp", "header", "sample", "expert_name", "command_line"]:
+                            setattr(self, attr, None)
+
+                    continue
+
+                if None in [self.mode, self.title]:
+                    raise InvalidScript(
+                        f"First two lines of the script needs to include #TITLE and #MODE: {filename}"
                     )
+
+                # Read location of the cpp and header files
+                if self.IsExpert:
+                    if line.startswith("#CPP"):
+                        new_line = line.split()[1]
+                        self.cpp = new_line.replace(
+                            "$EXPERT_LEVEL_PATH", PathHandler.EXPERT_LEVEL_PATH
+                        )
+                    elif line.startswith("#HEADER"):
+                        new_line = line.split()[1]
+                        self.header = new_line.replace(
+                            "$EXPERT_LEVEL_PATH", PathHandler.EXPERT_LEVEL_PATH
+                        )
+                    elif line.startswith("#COMMANDLINE"):
+                        self.command_line = " ".join(line.split("#COMMANDLINE")[1:])
+
                 if not line.startswith("#") and not line.startswith("\n"):
                     if line.startswith("import"):
-                        if self.IsExpert:
+                        if not self.IsExpert:
                             script_lines.append(
-                                line.replace("$MA5PATH", os.path.normpath(self.ma5_path))
+                                line.replace("$MA5PATH", os.path.normpath(PathHandler.MA5PATH)).replace(
+                                    "$SMPPATH", PathHandler.SMP_PATH
+                                )
                             )
                         else:
-                            self.sample = line.replace(
-                                "$MA5PATH", os.path.normpath(self.ma5_path)
-                            ).split()[1]
-                    elif "submit" in line:
+                            sample = (
+                                line.replace("$MA5PATH", os.path.normpath(PathHandler.MA5PATH))
+                                    .replace("$SMPPATH", PathHandler.SMP_PATH)
+                                    .split()[1]
+                            )
+                            if "*" in sample:
+                                from glob import glob
+                                self.sample = glob(sample)
+                            else:
+                                self.sample = [sample]
+
+                    elif "submit" in line and not self.IsExpert:
                         script_lines.append(
-                            f"submit {os.path.join(self.log_path, self.name + '_' + self.mode.name)}\n"
+                            f"submit {os.path.join(PathHandler.LOGPATH, self.name + '_' + self.mode.name)}\n"
                         )
                     else:
                         script_lines.append(line)
 
-        if None in [self._mode, self.title]:
+        if None in [self.mode, self.title]:
             raise InvalidScript(
                 f"Script does not have mode or title. Please check the script: {filename}"
             )
+
+        if self.IsExpert:
+            assert None not in [self.cpp, self.header], "CPP and Header files are not defined"
+            assert (
+                os.path.basename(self.cpp).split(".cpp")[0]
+                == os.path.basename(self.header).split(".h")[0]
+            ), "Invalid expert analysis decleration"
+            assert self.sample is not None, "No sample has been provided."
+            assert os.path.isfile(self.cpp), f"Can't find {self.cpp}"
+            assert os.path.isfile(self.header), f"Can't find {self.header}"
+            self.expert_name = os.path.basename(self.cpp).split(".cpp")[0]
+            self.command_line = "" if self.command_line is None else self.command_line
+
 
         self._ma5_commands = script_lines
 
@@ -154,9 +188,34 @@ class ScriptReader:
     @property
     def mode(self):
         """
-        Current MadAnalysis 5 Mode
+        Get or set MadAnalysis 5 Mode
+
+        Parameters
+        ----------
+        mode : Text
+            Mode indicator
+
+        Raises
+        ------
+        InvalidMode: If Mode has not been implemented in validation suite
         """
         return self._mode
+
+    @mode.setter
+    def mode(self, mode: Text) -> None:
+        """
+        Set MadAnalysis 5 mode
+
+        Parameters
+        ----------
+        mode : Text
+            Mode indicator
+
+        Raises
+        ------
+        InvalidMode: If Mode has not been implemented in validation suite
+        """
+        self._mode = MA5Mode.get_mode(mode.upper())
 
     @property
     def IsExpert(self) -> bool:
