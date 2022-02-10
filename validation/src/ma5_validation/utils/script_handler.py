@@ -131,18 +131,19 @@ class ScriptReader:
                     if line.startswith("import"):
                         if not self.IsExpert:
                             script_lines.append(
-                                line.replace("$MA5PATH", os.path.normpath(PathHandler.MA5PATH)).replace(
-                                    "$SMPPATH", PathHandler.SMP_PATH
-                                )
+                                line.replace(
+                                    "$MA5PATH", os.path.normpath(PathHandler.MA5PATH)
+                                ).replace("$SMPPATH", PathHandler.SMP_PATH)
                             )
                         else:
                             sample = (
                                 line.replace("$MA5PATH", os.path.normpath(PathHandler.MA5PATH))
-                                    .replace("$SMPPATH", PathHandler.SMP_PATH)
-                                    .split()[1]
+                                .replace("$SMPPATH", PathHandler.SMP_PATH)
+                                .split()[1]
                             )
                             if "*" in sample:
                                 from glob import glob
+
                                 self.sample = glob(sample)
                             else:
                                 self.sample = [sample]
@@ -170,7 +171,6 @@ class ScriptReader:
             assert os.path.isfile(self.header), f"Can't find {self.header}"
             self.expert_name = os.path.basename(self.cpp).split(".cpp")[0]
             self.command_line = "" if self.command_line is None else self.command_line
-
 
         self._ma5_commands = script_lines
 

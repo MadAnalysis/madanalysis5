@@ -23,10 +23,36 @@
 #
 ################################################################################
 
-import argparse, os
+import argparse, os, sys
 
 from typing import Text
 import ma5_validation as ma5
+
+
+def ma5_setup(path: Text):
+    if not os.path.isdir(path):
+        ma5.system.InvalidMadAnalysisPath(
+            "Detected MadAnalysis 5 general folder is not correct: " + path
+        )
+    os.environ["MA5_BASE"] = path
+    sys.path.insert(0, path)
+    servicedir = os.path.join(path, "tools/ReportGenerator/Services")
+    if not os.path.isdir(servicedir):
+        ma5.system.InvalidMadAnalysisPath(
+            "Detected MadAnalysis 5 service folder is not correct: " + path
+        )
+    sys.path.insert(0, servicedir)
+    from madanalysis.core.main import Main as ma5_main
+
+    curdir = os.getcwd()
+    os.chdir(os.path.join(path, "bin"))
+    main = ma5_main()
+    main.archi_info.ma5dir = path
+    main.CheckConfig(debug=True)
+    main.CheckConfig2(debug=True)
+    main.Display()
+    os.chdir(curdir)
+    return main.session_info, main.archi_info
 
 
 def run_scripts(path: Text):
@@ -77,12 +103,22 @@ def main(args):
         if not (job.execute() and job.check()):
             raise ma5.system.MadAnalysis5Error("A problem has occured during sample installation.")
 
+    session_info, archi_info = ma5_setup(ma5.utils.PathHandler.MA5PATH)
+
     if args.PARTON:
-        run_scripts(os.path.join(ma5.utils.PathHandler.MA5_SCRIPTPATH, "parton_level"))
+        run_scripts(os.path.join(ma5.utils.PathHandler.PARTON_LEVEL_PATH))
     if args.HADRON:
-        run_scripts(os.path.join(ma5.utils.PathHandler.MA5_SCRIPTPATH, "hadron_level"))
+        run_scripts(os.path.join(ma5.utils.PathHandler.HADRON_LEVEL_PATH))
     if args.RECO:
-        run_scripts(os.path.join(ma5.utils.PathHandler.MA5_SCRIPTPATH, "reco_level"))
+        run_scripts(os.path.join(ma5.utils.PathHandler.RECO_LEVEL_PATH))
+    if args.EXPERT:
+        if not archi_info.has_fastjet:
+            job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("fastjet"))
+            if not (job.execute() and job.check()):
+                raise ma5.system.MadAnalysis5Error(
+                    "A problem has occured during fastjet installation."
+                )
+        run_scripts(os.path.join(ma5.utils.PathHandler.EXPERT_LEVEL_PATH))
     if args.CUSTOM is not None:
         run_scripts(args.CUSTOM)
 
@@ -131,6 +167,14 @@ if __name__ == "__main__":
         action="store_true",
         default=False,
         help="Validate normal mode in reco level.",
+    )
+    validation.add_argument(
+        "-e",
+        "--expert-mode",
+        dest="EXPERT",
+        action="store_true",
+        default=False,
+        help="Validate expert mode.",
     )
     validation.add_argument(
         "--custom-script",
