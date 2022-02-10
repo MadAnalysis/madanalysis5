@@ -56,6 +56,9 @@ class PathHandler:
     for _ in range(4):
         MA5PATH = os.path.split(MA5PATH)[0]
 
+    # Sample path
+    SMP_PATH = os.path.join(MA5PATH, "samples")
+
     # Main path for the validation scripts
     MA5_SCRIPTPATH = os.path.join(
         os.path.split(os.path.dirname(os.path.realpath(__file__)))[0], "ma5_scripts"
@@ -81,6 +84,7 @@ class PathHandler:
         if not os.path.isdir(os.path.join(ma5_path, "tools/ReportGenerator/Services")):
             raise InvalidMadAnalysisPath(f"Invalid path: {ma5_path}")
         PathHandler.MA5PATH = os.path.normpath(ma5_path)
+        SMP_PATH = os.path.join(PathHandler.MA5PATH, "samples")
 
     @staticmethod
     def set_logpath(logpath: Text) -> None:
