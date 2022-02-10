@@ -25,6 +25,19 @@ MadAnalysis 5 session, if not indicated code will assume that full path has been
 Default log path is `./scripts/log`; hence all the files and analysis folders will be generated at that 
 location.
 
+#### Script keywords
+```
+#TITLE: Title of the script
+#MODE : MadAnalysis 5 execution mode
+#CPP : expert mode cpp file
+#HEADER: expert mode header file
+#COMMANDLINE: expert mode command line info
+
+$MA5PATH : Will be replaced with MadAnalysis 5 path
+$SMP_PATH: will be replaced with full path to `madanalysis5/path`
+$EXPERT_LEVEL_PATH: will be replaced with full path for the expert level script location
+```
+
 ### Validating MadAnalysis 5
 Validation scripts are available under `scripts` folder. `validation_bootstrap` includes options to validate
 various level of analyses available withing MadAnalysis interface. For more information about the inner workings
