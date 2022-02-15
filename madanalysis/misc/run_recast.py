@@ -307,6 +307,7 @@ class RunRecast():
         from madanalysis.core.script_stack import ScriptStack
         ScriptStack.AddScript(card)
         self.main.recasting.status="off"
+        self.main.superfastsim.Reset()
         script_mode = self.main.script
         self.main.script = True
         from madanalysis.interpreter.interpreter import Interpreter
