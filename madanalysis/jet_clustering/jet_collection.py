@@ -34,7 +34,7 @@ from typing import Sequence, Text
 class JetCollection:
     """
     Holds a collection of jets. This module is separate from the original jet clustering
-    interface within Ma5. This module can be activated using following command
+    interface shipped with MadAnalysis5. This module can be activated using following command
 
     .. code-block::
 
@@ -42,8 +42,8 @@ class JetCollection:
 
     where `my_jet` is a user-defined jet identifier, `antikt` is the algorithm to be used which
     can be choosen from `antikt`, `cambridge`, `genkt`, `kt`, `gridjet`, `cdfjetclu`, `cdfmidpoint`,
-    and `siscone`. Rest of the arguments are optional, if user won't define radius, ptmin etc.
-    default parameters will be choosen. Each algorithm has its own unique set of parameters i.e.
+    and `siscone`. The rest of the arguments are optional. In this case, default parameters are
+    choosen. Each algorithm has its own unique set of parameters:
 
     |       Algorithm       | Parameters & Default values                                                        |
     |:---------------------:|------------------------------------------------------------------------------------|
@@ -63,12 +63,11 @@ class JetCollection:
         ma5> set my_jet.ptmin = 200.
         ma5> set my_jet.radius = 0.8
 
-    Note that when a `jet_algorithm` is defined MadAnalysis interface will automatically swithch
-    to constituent smearing mode. `set my_jet.+tab` will show the dedicated options available
-    for that particular algorithm.
+    Note that as soon as a `jet_algorithm` is defined, MadAnalysis5 automatically switches the SFS module
+    to its constituent-smearing mode (see the [SFS manual](https://arxiv.org/abs/2006.09387) for more infomation).
+    The command `set my_jet.+tab` will display all options available for that particular algorithm.
 
-    It is possible to display all the jets available in the current session by using `display jet_algorithm`
-    command:
+    It is possible to display all jets defined in the current session by typing the command `display jet_algorithm`:
 
     .. code-block::
 
@@ -103,10 +102,10 @@ class JetCollection:
         MA5:       - iratch          : 0.0
         MA5:       - areafraction    : 1.0
 
-    Here primary jet is defined with the original jet definition syntax of MadAnalysis 5 where
-    since we did not specify anything, it uses default `antikt` configuration. For more info on
-    how to define primary jet see [arXiv:2006.09387](https://arxiv.org/abs/2006.09387). Other jet
-    definitions shows all the jets which are defined via `jet_algorithm` keyword.
+    What is called the primary jet definition is that defined through the original syntax of MadAnalysis5.
+    As nothing was specified, the default `antikt` configuration is used. For more info on how to define
+    this primary jet, we refer to [arXiv:2006.09387](https://arxiv.org/abs/2006.09387). The block with the
+    other jet definitions include all those jets defined via a usage of the `jet_algorithm` keyword.
 
     To remove a `jet_algorithm` definition one can use `remove my_jet` command.
     """
@@ -127,7 +126,7 @@ class JetCollection:
             "      - <keyword args> : (Optional) depending on the nature of the algorithm."
         )
         self.logger.error(
-            "                         it can be radius=0.4, ptmin=20 etc."
+            "                         it can be radius=0.4, ptmin=20, etc."
         )
 
     def define(self, args: Sequence[Text], dataset_names: Sequence = None) -> bool:
