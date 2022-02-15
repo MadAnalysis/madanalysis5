@@ -690,45 +690,6 @@ class JobWriter(object):
         file.close()
         return True
 
-    def WriteSampleAnalyzerMakefile(self,option=""):
-        # @JACK: This function is not in use!!! 
-        #        Also there is a bug -> package is not defined!!
-        from madanalysis.build.makefile_writer import MakefileWriter
-        options=MakefileWriter.MakefileOptions()
-
-        # Name of the Makefile
-        filename = self.path+"/Build/SampleAnalyzer/Makefile"
-
-        # Header
-        title='User package'
-        toRemove = []
-
-        # Options
-        option.has_commons   = True
-        options.has_process  = True
-        if self.main.archi_info.has_root:
-            options.has_root_inc = True
-            options.has_root_lib = True
-        toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
-
-        # File to compile
-        cppfiles = package+'/*.cpp'
-        hfiles   = package+'/*.h'
-
-        # Files to produce
-        isLibrary=True
-        ProductName='libUserPackage_for_ma5.so'
-        ProductPath='../../Build/Lib/'
-
-        # write makefile
-        MakefileWriter.Makefile(
-            filename, title, ProductName, ProductPath, isLibrary, cppfiles, hfiles, options,
-            self.main.archi_info, toRemove
-        )
-
-        # Ok
-        return True
-    
 
     def WriteMakefiles(self,option="",**kwargs):
         # kwargs: keyword arguments regarding additional mode options such as `ma5_fastjet_mode`
