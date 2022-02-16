@@ -23,9 +23,9 @@
 import os
 from typing import Text
 
-from ma5_validation.system.exceptions import InvalidScript, InvalidMode
-from .path_handler import PathHandler
+from ma5_validation.system.exceptions import InvalidScript
 from .mode_handler import MA5Mode
+from .path_handler import PathHandler
 
 
 class ScriptReader:
@@ -60,6 +60,35 @@ class ScriptReader:
         self._mode = None
         self.title = None
         self._ma5_commands = []
+
+    @staticmethod
+    def _modifier(line: Text) -> Text:
+        """
+        Modifies the input string's keywords
+
+        Parameters
+        ----------
+        line : Text
+            input string
+
+        Returns
+        -------
+        Text:
+            modified line
+        """
+        modifications = {
+            "$MA5PATH": PathHandler.MA5PATH,
+            "$SMP_PATH": PathHandler.SMP_PATH,
+            "$LOGPATH": PathHandler.LOGPATH,
+            "$PARTON_LEVEL_PATH": PathHandler.PARTON_LEVEL_PATH,
+            "$HADRON_LEVEL_PATH": PathHandler.HADRON_LEVEL_PATH,
+            "$RECO_LEVEL_PATH": PathHandler.RECO_LEVEL_PATH,
+            "$EXPERT_LEVEL_PATH": PathHandler.EXPERT_LEVEL_PATH,
+            "$FASTJET_INTERFACE_PATH": PathHandler.FASTJET_INTERFACE_PATH,
+        }
+        for key, path in modifications.items():
+            line = line.replace(key, path)
+        return line
 
     def decode(self) -> None:
         """
@@ -115,32 +144,19 @@ class ScriptReader:
                 # Read location of the cpp and header files
                 if self.IsExpert:
                     if line.startswith("#CPP"):
-                        new_line = line.split()[1]
-                        self.cpp = new_line.replace(
-                            "$EXPERT_LEVEL_PATH", PathHandler.EXPERT_LEVEL_PATH
-                        )
+                        self.cpp = self._modifier(line.split()[1])
                     elif line.startswith("#HEADER"):
-                        new_line = line.split()[1]
-                        self.header = new_line.replace(
-                            "$EXPERT_LEVEL_PATH", PathHandler.EXPERT_LEVEL_PATH
-                        )
+                        self.header = self._modifier(line.split()[1])
                     elif line.startswith("#COMMANDLINE"):
                         self.command_line = " ".join(line.split("#COMMANDLINE")[1:])
 
                 if not line.startswith("#") and not line.startswith("\n"):
+                    line = self._modifier(line)
                     if line.startswith("import"):
                         if not self.IsExpert:
-                            script_lines.append(
-                                line.replace(
-                                    "$MA5PATH", os.path.normpath(PathHandler.MA5PATH)
-                                ).replace("$SMPPATH", PathHandler.SMP_PATH)
-                            )
+                            script_lines.append(line)
                         else:
-                            sample = (
-                                line.replace("$MA5PATH", os.path.normpath(PathHandler.MA5PATH))
-                                .replace("$SMPPATH", PathHandler.SMP_PATH)
-                                .split()[1]
-                            )
+                            sample = line
                             if "*" in sample:
                                 from glob import glob
 
