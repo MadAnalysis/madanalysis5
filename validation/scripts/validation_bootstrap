@@ -23,9 +23,10 @@
 #
 ################################################################################
 
-import argparse, os, sys
-
+import argparse
+import os
 from typing import Text
+
 import ma5_validation as ma5
 
 
@@ -77,12 +78,19 @@ def main(args):
 
     session_info, archi_info = ma5.utils.PathHandler.check_ma5_setup()
 
+    # Validate Parton Level
     if args.PARTON:
         run_scripts(ma5.utils.PathHandler.PARTON_LEVEL_PATH)
+
+    # Validate Hadron Level
     if args.HADRON:
         run_scripts(ma5.utils.PathHandler.HADRON_LEVEL_PATH)
+
+    # Validate Reco level
     if args.RECO:
         run_scripts(ma5.utils.PathHandler.RECO_LEVEL_PATH)
+
+    # Validate Expert Mode
     if args.EXPERT:
         if not archi_info.has_fastjet:
             job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("fastjet"))
@@ -92,9 +100,11 @@ def main(args):
                 )
         run_scripts(ma5.utils.PathHandler.EXPERT_LEVEL_PATH)
 
+    # Validate custom script
     if args.CUSTOM is not None:
         run_scripts(args.CUSTOM)
 
+    # Validate Fastjet
     if args.FASTJET:
         if not archi_info.has_fastjet:
             job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("fastjet"))
@@ -103,6 +113,22 @@ def main(args):
                     "A problem has occured during fastjet installation."
                 )
         run_scripts(ma5.utils.PathHandler.FASTJET_INTERFACE_PATH)
+
+    # Validate Delphes
+    if args.DELPHES:
+        if not archi_info.has_delphes:
+            if not archi_info.has_root:
+                job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("root"))
+                if not (job.execute() and job.check()):
+                    raise ma5.system.MadAnalysis5Error(
+                        "A problem has occured during root installation."
+                    )
+            job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("delphes"))
+            if not (job.execute() and job.check()):
+                raise ma5.system.MadAnalysis5Error(
+                    "A problem has occured during delphes installation."
+                )
+        run_scripts(ma5.utils.PathHandler.DELPHES_INTERFACE_PATH)
 
 
 if __name__ == "__main__":
@@ -164,6 +190,13 @@ if __name__ == "__main__":
         action="store_true",
         default=False,
         help="Validate FastJet interface.",
+    )
+    validation.add_argument(
+        "--delphes",
+        dest="DELPHES",
+        action="store_true",
+        default=False,
+        help="Validate Delphes interface.",
     )
     validation.add_argument(
         "--custom-script",
