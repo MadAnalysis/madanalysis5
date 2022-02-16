@@ -71,6 +71,7 @@ class PathHandler:
     RECO_LEVEL_PATH = os.path.join(MA5_SCRIPTPATH, "reco_level")
     EXPERT_LEVEL_PATH = os.path.join(MA5_SCRIPTPATH, "expert_level")
     FASTJET_INTERFACE_PATH = os.path.join(MA5_SCRIPTPATH, "fastjet_interface")
+    DELPHES_INTERFACE_PATH = os.path.join(MA5_SCRIPTPATH, "delphes_interface")
 
     @staticmethod
     def set_ma5path(ma5_path: Text) -> None:

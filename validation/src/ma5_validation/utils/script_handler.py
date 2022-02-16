@@ -85,6 +85,7 @@ class ScriptReader:
             "$RECO_LEVEL_PATH": PathHandler.RECO_LEVEL_PATH,
             "$EXPERT_LEVEL_PATH": PathHandler.EXPERT_LEVEL_PATH,
             "$FASTJET_INTERFACE_PATH": PathHandler.FASTJET_INTERFACE_PATH,
+            "$DELPHES_INTERFACE_PATH": PathHandler.DELPHES_INTERFACE_PATH,
         }
         for key, path in modifications.items():
             line = line.replace(key, path)
