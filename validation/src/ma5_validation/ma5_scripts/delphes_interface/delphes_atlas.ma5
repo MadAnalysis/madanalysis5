@@ -1,0 +1,13 @@
+#TITLE Delphes fastsimulation: ATLAS + no pileup
+#MODE RECO
+
+set main.fastsim.package = delphes
+set main.fastsim.detector = atlas
+set main.fastsim.pileup = none
+display main
+plot MET
+
+import $MA5PATH/samples/*hep*
+import $MA5PATH/samples/*hepmc*
+submit
+#END
