@@ -22,7 +22,7 @@
 ################################################################################
 
 
-import os
+import os, sys
 from typing import Text
 
 from ma5_validation.system.exceptions import InvalidMadAnalysisPath
@@ -41,6 +41,7 @@ class PathHandler:
     HADRON_LEVEL_PATH: Main path for the hadron level validation scripts.
     RECO_LEVEL_PATH: Main path for the reco level validation scripts.
     EXPERT_LEVEL_PATH: Main path for the expert level validation scripts.
+    FASTJET_INTERFACE_PATH: Main path for the fastjet interface validation scripts.
     """
 
     # Set defult log path
@@ -69,6 +70,7 @@ class PathHandler:
     HADRON_LEVEL_PATH = os.path.join(MA5_SCRIPTPATH, "hadron_level")
     RECO_LEVEL_PATH = os.path.join(MA5_SCRIPTPATH, "reco_level")
     EXPERT_LEVEL_PATH = os.path.join(MA5_SCRIPTPATH, "expert_level")
+    FASTJET_INTERFACE_PATH = os.path.join(MA5_SCRIPTPATH, "fastjet_interface")
 
     @staticmethod
     def set_ma5path(ma5_path: Text) -> None:
@@ -98,3 +100,36 @@ class PathHandler:
         if not os.path.isdir(logpath):
             os.mkdir(logpath)
         PathHandler.LOGPATH = logpath
+
+    @staticmethod
+    def check_ma5_setup():
+        """
+        Check current MadAnalysis Architecture
+
+        Returns
+        -------
+        session and architecture info
+        """
+        if not os.path.isdir(PathHandler.MA5PATH):
+            raise InvalidMadAnalysisPath(
+                "Detected MadAnalysis 5 general folder is not correct: " + PathHandler.MA5PATH
+            )
+        os.environ["MA5_BASE"] = PathHandler.MA5PATH
+        sys.path.insert(0, PathHandler.MA5PATH)
+        servicedir = os.path.join(PathHandler.MA5PATH, "tools/ReportGenerator/Services")
+        if not os.path.isdir(servicedir):
+            raise InvalidMadAnalysisPath(
+                "Detected MadAnalysis 5 service folder is not correct: " + PathHandler.MA5PATH
+            )
+        sys.path.insert(0, servicedir)
+        from madanalysis.core.main import Main as ma5_main
+
+        curdir = os.getcwd()
+        os.chdir(os.path.join(PathHandler.MA5PATH, "bin"))
+        main = ma5_main()
+        main.archi_info.ma5dir = PathHandler.MA5PATH
+        main.CheckConfig(debug=True)
+        main.CheckConfig2(debug=True)
+        main.Display()
+        os.chdir(curdir)
+        return main.session_info, main.archi_info
