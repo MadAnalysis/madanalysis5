@@ -12,6 +12,8 @@ body:
         More information and examples can be found in the proceedings of [the second MadAnalysis 5 Workshop on LHC recasting in Korea](https://doi.org/10.1142/S0217732321020016). Analysis codes have been published, documented and got a DOI so that they can now be cited.
 
         **Before submitting:** Please read the [documentation](https://github.com/MadAnalysis/madanalysis5/blob/main/doc/PAD.md) on analysis submission to PAD.
+        
+        * **Please use [Markdown syntax](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).**
   - type: textarea
     id: system
     attributes:
