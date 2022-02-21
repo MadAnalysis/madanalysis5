@@ -193,6 +193,8 @@ class JobHandler:
         log_file = None
         with open(self.log_file, "r", encoding="utf-8") as log:
             for line in log:
+                # Start from the beginning of the validation script to validate the session instead of the end.
+                # This will give the ability to check the errors on the python-interface as well
                 if line.find("ma5>#BEGIN") != -1:
                     beginTag = True
                 if not self.script.IsExpert:
@@ -202,7 +204,7 @@ class JobHandler:
                             log_file = log.read()
                             break
         if not beginTag and not self.script.IsExpert:
-            InvalidSyntax("   * Can not find the end of the script.")
+            InvalidSyntax("   * Can not find the beginning of the script.")
 
         if errorTag:
             raise MadAnalysis5Error(
