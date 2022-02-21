@@ -31,7 +31,7 @@ from .script_handler import ScriptReader
 
 
 class InstallationHandler(ScriptReader):
-    _installable = ["fastjet", "delphes", "PAD", "PADForSFS", "PADForMA5Tune", "samples"]
+    _installable = ["fastjet", "delphes", "root", "PAD", "PADForSFS", "PADForMA5Tune", "samples"]
 
     def __init__(self, packages: Union[Text, Sequence[Text]], paths: PathHandler = None):
         super(InstallationHandler, self).__init__(name="install")
