@@ -195,11 +195,11 @@ class JobHandler:
             for line in log:
                 if line.find("ma5>#END") != -1:
                     endTag = True
-                if endTag or self.script.IsExpert:
-                    if line.find("ERROR") != -1 or line.find("MA5-ERROR") != -1:
-                        errorTag = True
-                        log_file = log.read()
-                        break
+                # if endTag or self.script.IsExpert:
+                if line.find("ERROR") != -1 or line.find("MA5-ERROR") != -1:
+                    errorTag = True
+                    log_file = log.read()
+                    break
         if not endTag and not self.script.IsExpert:
             InvalidSyntax("   * Can not find the end of the script.")
 
