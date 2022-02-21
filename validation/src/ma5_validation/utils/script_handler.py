@@ -200,7 +200,7 @@ class ScriptReader:
         -------
         Text: MadAnalysis 5 commands
         """
-        return "".join(self._ma5_commands) + "\n#END\n"
+        return "#BEGIN\n" + "".join(self._ma5_commands) + "\n#END\n"
 
     @property
     def mode(self):

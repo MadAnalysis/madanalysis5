@@ -41,7 +41,7 @@ class InstallationHandler(ScriptReader):
 
         self.title = "Package Installation: " + ", ".join(packages)
 
-        self._ma5_commands = []
+        self._ma5_commands = ["#BEGIN\n"]
         for package in packages:
             if package in InstallationHandler._installable:
                 self._ma5_commands.append(f"install {package}\n")

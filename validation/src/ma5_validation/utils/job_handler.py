@@ -188,20 +188,20 @@ class JobHandler:
         MadAnalysis5Error
             If MadAnalysis 5 raised an error during the execution.
         """
-        endTag = False
+        beginTag = False
         errorTag = False
         log_file = None
         with open(self.log_file, "r", encoding="utf-8") as log:
             for line in log:
-                if line.find("ma5>#END") != -1:
-                    endTag = True
+                if line.find("ma5>#BEGIN") != -1:
+                    beginTag = True
                 if not self.script.IsExpert:
-                    if endTag:
+                    if beginTag:
                         if line.find("ERROR") != -1 or line.find("MA5-ERROR") != -1:
                             errorTag = True
                             log_file = log.read()
                             break
-        if not endTag and not self.script.IsExpert:
+        if not beginTag and not self.script.IsExpert:
             InvalidSyntax("   * Can not find the end of the script.")
 
         if errorTag:
