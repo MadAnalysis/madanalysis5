@@ -243,7 +243,10 @@ class ScriptReader:
         -------
         Bool
         """
-        return "EXPERT" in self.mode.name
+        try:
+            return "EXPERT" in self.mode.name
+        except AttributeError as err:
+            return False
 
     def mode_flag(self) -> Text:
         """
