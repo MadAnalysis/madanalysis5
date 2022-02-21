@@ -34,7 +34,7 @@ class InstallationHandler(ScriptReader):
     _installable = ["fastjet", "delphes", "PAD", "PADForSFS", "PADForMA5Tune", "samples"]
 
     def __init__(self, packages: Union[Text, Sequence[Text]], paths: PathHandler = None):
-        super(InstallationHandler, self).__init__(name="install", paths=paths)
+        super(InstallationHandler, self).__init__(name="install")
 
         if isinstance(packages, str):
             packages = [packages]
