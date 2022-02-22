@@ -1,0 +1,15 @@
+#TITLE Validate PAD Interface: PAD & PADForSFS
+#MODE RECO
+
+set main.recast = on
+import $MA5PATH/samples/*hepmc* as smp
+set smp.xsection = 123.
+set smp.scale_up_variation = 0.2
+set smp.scale_down_variation = 0.15
+set smp.pdf_down_variation = 0.3
+set smp.pdf_up_variation = 0.25
+set main.recast.add.extrapolated_luminosity = 300 3000
+set main.recast.add.systematics = 0.2 0.3
+set main.recast.add.systematics = 0.15 0.35
+
+submit
