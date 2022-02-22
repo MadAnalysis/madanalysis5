@@ -3,6 +3,23 @@
 ## Installation
 `$ pip install -e .` or `$ make install`
 
+## Quick Validation
+
+The validation script is located in `scripts/validation_bootstrap`. To see available options simply type
+```bash
+$ ./validation_bootstrap -h
+```
+This will show command line arguments to validate your MadAnalysis session. For instance, to validate MadAnalysis
+Parton level mode simply type
+```bash
+$ ./validation_bootstrap -P
+```
+
+## Extended validation
+`validation_bootstrap` uses the samples within `madanalysis5/samples`. These are small samples to ensure MadAnalysis 
+executes analysis successfuly. By adding larger MC samples to this folder one can enable more extensive validation of 
+the software.
+
 # Usage
 
 ### Format of the MadAnalysis 5 Scripts
