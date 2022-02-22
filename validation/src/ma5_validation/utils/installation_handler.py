@@ -42,7 +42,7 @@ class InstallationHandler(ScriptReader):
         "zlib",
     ]
 
-    def __init__(self, packages: Union[Text, Sequence[Text]], paths: PathHandler = None):
+    def __init__(self, packages: Union[Text, Sequence[Text]]):
         super(InstallationHandler, self).__init__(name="install")
 
         if isinstance(packages, str):
@@ -50,7 +50,7 @@ class InstallationHandler(ScriptReader):
 
         self.title = "Package Installation: " + ", ".join(packages)
 
-        self._ma5_commands = ["#BEGIN\n"]
+        self._ma5_commands = [f"#BEGIN\nset main.currentdir = {PathHandler.MA5PATH}\n"]
         for package in packages:
             if package in InstallationHandler._installable:
                 self._ma5_commands.append(f"install {package}\n")
