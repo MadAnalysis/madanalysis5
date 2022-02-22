@@ -192,6 +192,13 @@ def main(args):
                     "A problem has occured during fastjet installation."
                 )
             archi_info.has_fastjet = True
+        if not session_info.has_pad:
+            job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("PAD"))
+            if not (job.execute() and job.check()):
+                raise ma5.system.MadAnalysis5Error(
+                    "A problem has occured during PAD installation."
+                )
+            session_info.has_pad = True
         run_scripts(ma5.utils.PathHandler.PAD_INTERFACE_PATH)
 
 
