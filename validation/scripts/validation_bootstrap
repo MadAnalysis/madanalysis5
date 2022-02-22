@@ -24,10 +24,14 @@
 ################################################################################
 
 import argparse
-import os
+import os, sys
 from typing import Text
 
-import ma5_validation as ma5
+try:
+    import ma5_validation as ma5
+except ModuleNotFoundError as err:
+    sys.exit("Validation interface have not been found. Please install the interface first. "
+             "For details, see `validation/README.md`")
 
 
 def run_scripts(path: Text):
