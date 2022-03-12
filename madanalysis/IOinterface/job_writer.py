@@ -691,7 +691,7 @@ class JobWriter(object):
         return True
 
 
-    def WriteMakefiles(self,option="",**kwargs):
+    def WriteMakefiles(self, option="", **kwargs):
         # kwargs: keyword arguments regarding additional mode options such as `ma5_fastjet_mode`
         # this will protect Delphes based analyses in PAD
         from madanalysis.build.makefile_writer import MakefileWriter
@@ -739,6 +739,7 @@ class JobWriter(object):
         from madanalysis.build.setup_writer import SetupWriter
         SetupWriter.WriteSetupFile(True, self.path+'/Build/',self.main.archi_info)
         SetupWriter.WriteSetupFile(False,self.path+'/Build/',self.main.archi_info)
+        #@JACK: Why are we using C-shell this is not necessary anymore.
         
         # Ok
         return True

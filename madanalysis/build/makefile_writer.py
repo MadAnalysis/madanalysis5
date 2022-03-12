@@ -224,7 +224,7 @@ class MakefileWriter():
 
         # - general
         cxxflags=[]
-        cxxflags.extend(['-Wall','-std=c++11','-O3','-fPIC', '-I$(MA5_BASE)/tools/']) # general
+        cxxflags.extend(['-Wall', '-std=c++11', '-O3', '-fPIC', '-I$(MA5_BASE)/tools/']) # general
         file.write('CXXFLAGS  = '+' '.join(cxxflags)+'\n')
         for item in moreIncludes:
             file.write('CXXFLAGS += '+' -I'+item+'\n')
