@@ -60,6 +60,20 @@ namespace MA5
         return filtered;
     }
 
+    // Example: std::vector<RecJetFormat> signaljets = filter(signaljets, ptmin, etamax);
+    template<class Type>
+    std::vector<const Type *> filter(std::vector<const Type *>& objects, MAfloat64 ptmin,
+                                     MAfloat64 absetamax=20., MAfloat64 absetamin=-1.)
+    {
+        std::vector<const Type*> filtered;
+        for(auto & obj: objects)
+        {
+            if(obj->pt() < ptmin || obj->abseta() > absetamax || obj->abseta() < absetamin) continue;
+            filtered.push_back(obj);
+        }
+        return filtered;
+    }
+
     // Example:  std::vector<RecJetFormat> filtered_jets = filter_select(event.rec()->jets(),
     //                                        [] (RecJetFormat jet) { return jet->pt()>50.; });
     template<class Type, typename FN>
