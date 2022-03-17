@@ -817,27 +817,6 @@ class JobWriter(object):
         return result
 
 
-    def MrproperJob(self):
-
-        # folder
-        folder = self.path+'/Build'
-
-        # log file name
-        logfile = folder+'/Log/mrproper.log'
-        
-        # shell command
-        commands = ['make','mrproper']
-
-        # call
-        result, out = ShellCommand.ExecuteWithLog(commands,logfile,folder)
-
-        # return result
-        if not result:
-            logging.getLogger('MA5').error('impossible to clean the project. For more details, see the log file:')
-            logging.getLogger('MA5').error(logfile)
-            
-        return result
-
 
     def LinkJob(self):
 
