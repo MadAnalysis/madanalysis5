@@ -1,0 +1,14 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Tutorials
+    url: https://madanalysis.irmp.ucl.ac.be/wiki/tutorials
+    about: Various tutorials on MadAnalysis 5; from normal to expert mode.
+  - name: Talks
+    url: http://madanalysis.irmp.ucl.ac.be/wiki/Talks
+    about: List of talks on MadAnalysis 5 software and presentations.
+  - name: How to cite MadAnalysis 5
+    url: https://github.com/MadAnalysis/madanalysis5#credits
+    about: See the list of publications for different stages of development.
+  - name: How to contribute to MadAnalysis 5
+    url: https://github.com/MadAnalysis/madanalysis5/blob/main/doc/CONTRIBUTING.md
+    about: Guidelines for contributing to MadAnalysis 5 software.
