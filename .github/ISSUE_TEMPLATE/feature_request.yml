@@ -10,6 +10,8 @@ body:
         ## Before posting a feature request
         Search existing [GitHub issues](https://github.com/MadAnalysis/madanalysis5/issues) and [Launchpad](https://answers.launchpad.net/madanalysis5) to make sure the issue does not already exist. For general technical details check out our [documentation](http://arxiv.org/abs/1206.1599), [tutorials](https://madanalysis.irmp.ucl.ac.be/wiki/tutorials) and reference cards provided under `doc` folder.
 
+        * **Please use [Markdown syntax](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).**
+
         # Feature description
         Description of the feature request - include code snippets and screenshots here if relevant.
   - type: textarea

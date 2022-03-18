@@ -281,8 +281,6 @@ MAbool STDHEPreader::DecodeFileHeader(SampleFormat& mySample)
 // -----------------------------------------------------------------------------
 MAbool STDHEPreader::FinalizeHeader(SampleFormat& mySample)
 {
-
-
   return true;
 }
 
@@ -704,6 +702,34 @@ MAbool STDHEPreader::DecodeSTDHEP4(const std::string& version,
 
 
 // -----------------------------------------------------------------------------
+// AddMothers
+// -----------------------------------------------------------------------------
+MAbool AddMothers(MCParticleFormat* part,MCParticleFormat* mum)
+{
+  for (MAuint32 i=0;i<part->mothers().size();i++)
+  {
+    MCParticleFormat* m = part->mothers()[i];
+    if (m==mum) return false;
+  }
+  part->mothers().push_back(mum);
+}
+
+
+// -----------------------------------------------------------------------------
+// AddDaughters
+// -----------------------------------------------------------------------------
+MAbool AddDaughters(MCParticleFormat* part,MCParticleFormat* dau)
+{
+  for (MAuint32 i=0;i<part->daughters().size();i++)
+  {
+    MCParticleFormat* d = part->daughters()[i];
+    if (d==dau) return false;
+  }
+  part->daughters().push_back(dau);
+}
+
+
+// -----------------------------------------------------------------------------
 // FinalizeEvent
 // -----------------------------------------------------------------------------
 MAbool STDHEPreader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
@@ -713,8 +739,12 @@ MAbool STDHEPreader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
   nevhept_before_ = nevhept_;
   firstevent=false;
 
+  // BUG FIX HERE : myEvent.mc()->particles()[i] LEADs TO CRASH
+  // MUST USE myEvent.mc()->particles_[i];
+  // WHY?????
+
   // Mother-daughter relations
-  for (MAuint32 i=0; i<mothers_.size();i++)
+  for (MAuint32 i=0; i<myEvent.mc()->particles_.size();i++)
   {
     MCParticleFormat* part = &(myEvent.mc()->particles_[i]);
     MAint32& mothup1 = mothers_[i].first;
@@ -722,34 +752,34 @@ MAbool STDHEPreader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 
     if (mothup1>0)
     {
-      if (static_cast<MAuint32>(mothup1)<=myEvent.mc()->particles().size())
+      if (static_cast<MAuint32>(mothup1)<=myEvent.mc()->particles_.size())
       {
-        MCParticleFormat* mum = &(myEvent.mc()->particles()[static_cast<MAuint32>(mothup1-1)]);
+        MCParticleFormat* mum = &(myEvent.mc()->particles_[static_cast<MAuint32>(mothup1-1)]);
         if (part!=mum)
         {
-          part->mothers().push_back(mum);
-          mum->daughters().push_back(part);
+          AddMothers(part,mum);
+          AddDaughters(mum,part);
         }
       }
       else
       {
-        std::cout << "ERROR: internal problem with mother-daughter particles" << std::endl;
+        std::cout << "ERROR: a particle is its own mother" << std::endl;
       }
     }
-    if (mothup2>0 && mothup1!=mothup2)
+    if (mothup2>0)
     {
-      if (static_cast<MAuint32>(mothup2)<=myEvent.mc()->particles().size())
+      if (static_cast<MAuint32>(mothup2)<=myEvent.mc()->particles_.size())
       {
-        MCParticleFormat* mum = &(myEvent.mc()->particles()[static_cast<MAuint32>(mothup2-1)]);
+        MCParticleFormat* mum = &(myEvent.mc()->particles_[static_cast<MAuint32>(mothup2-1)]);
         if (mum!=part)
         {
-          part->mothers().push_back(mum);
-          mum->daughters().push_back(part);
+          AddMothers(part,mum);
+         AddDaughters(mum,part);
         }
       }
       else
       {
-        std::cout << "ERROR: internal problem with mother-daughter particles" << std::endl;
+        std::cout << "ERROR: a particle is its own mother" << std::endl;
       }
     }
   }
