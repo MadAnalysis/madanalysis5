@@ -224,7 +224,7 @@ class MakefileWriter():
 
         # - general
         cxxflags=[]
-        cxxflags.extend(['-Wall','-std=c++11','-O3','-fPIC', '-I$(MA5_BASE)/tools/']) # general
+        cxxflags.extend(['-Wall', '-std=c++11', '-O3', '-fPIC', '-I$(MA5_BASE)/tools/']) # general
         file.write('CXXFLAGS  = '+' '.join(cxxflags)+'\n')
         for item in moreIncludes:
             file.write('CXXFLAGS += '+' -I'+item+'\n')
@@ -326,7 +326,7 @@ class MakefileWriter():
         if options.ma5_fastjet_mode:
             # @JACK: This flag enables usage of certain modules in SampleAnalyzer which
             # depends on availablity of FastJet library.
-            cxxflags.extend(['-DMA5_FASTJET_MODE'])
+            cxxflags.extend(["$(FASTJET_FLAG)"])
         if options.has_zlib_tag:
             cxxflags.extend(['-DZIP_USE'])
         if options.has_delphes_tag:
