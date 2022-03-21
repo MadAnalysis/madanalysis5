@@ -131,6 +131,14 @@ class SetupWriter():
             file.write('if [ $WITH_FASTJET -eq "1" ]\n')
             file.write('then\n')
             file.write('    export FASTJET_FLAG="-DMA5_FASTJET_MODE"\n')
+            file.write('    echo -e $BLUE"   * SFS-FastJet mode has been initiated."$NORMAL')
+            file.write('fi\n\n')
+
+            file.write('if [ $WITH_DELPHES -eq "1"] || |[$WITH_FASTJET -eq "0"]\n')
+            file.write('then\n')
+            file.write('    echo -e $BLUE"   * SFS-FastJet mode has been turned off."\n')
+            file.write('    usage\n')
+            file.write('    echo - e $NORMAL\n')
             file.write('fi\n\n')
 
         else:

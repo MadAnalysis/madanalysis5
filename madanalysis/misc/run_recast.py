@@ -263,6 +263,11 @@ class RunRecast():
         self.logger.debug("   Fixing the pileup path...")
         self.fix_pileup(self.dirname+'_RecastRun/Input/'+card)
 
+        # @Jack: new setup configuration. In order to run the code in SFS-FastJet mode analysis
+        # has to be compiled with `-DMA5_FASTJET_MODE` flag but this needs to be deactivated for
+        # Delphes-ROOT based analyses.
+        os.environ["FASTJET_FLAG"] = ""
+
         # Creating executable
         self.logger.info("   Compiling 'SampleAnalyzer'...")
         if not jobber.CompileJob():
@@ -424,6 +429,12 @@ class RunRecast():
         #restore
         self.main.recasting.status = "on"
         self.main.fastsim.package  = old_fastsim
+
+        # @Jack: new setup configuration. In order to run the code in SFS-FastJet mode analysis
+        # has to be compiled with `-DMA5_FASTJET_MODE` flag but this needs to be deactivated for
+        # Delphes-ROOT based analyses.
+        os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
+
         # Creating executable
         self.logger.info("   Compiling 'SampleAnalyzer'...")
         if not jobber.CompileJob():

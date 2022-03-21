@@ -207,7 +207,7 @@ class JobWriter(object):
     def CopyDelphesCard(self,input,output,cfg,theFile):
         TagTreeWriter=False
         TagExecutionPath=False
-        
+
         # READING THE FILE  
         for line in input:
 
@@ -222,7 +222,7 @@ class JobWriter(object):
             if myline.startswith('#'):
                 output.write(line)
                 continue
-                
+
             if len(words)>=2:
                 if words[0].lower()=='set' and \
                    words[1].lower()=='executionpath':
@@ -270,15 +270,15 @@ class JobWriter(object):
                     if words[3].lower()=='eflowneutralhadron' and cfg.skim_eflow:
                         output.write('#'+line)
                         continue
-            
+
             # Enter TreeWriter
             output.write(line)
-        
+
 
     def CopyDelphesMA5Card(self,input,output,cfg,theFile):
         TagTreeWriter=False
         TagExecutionPath=False
-        
+
         # READING THE FILE  
         for line in input:
 
@@ -325,12 +325,12 @@ class JobWriter(object):
             # Adding file
             if cfg.pileup.startswith('/'):
                 theFile = cfg.pileup
-            else:    
+            else:
                 theFile = os.path.normpath(theDir+"/"+cfg.pileup)
- 
+
         if self.main.fastsim.package=="delphes":
             self.CopyDelphesCard(input,output,cfg,theFile)
-        elif self.main.fastsim.package=="delphesMA5tune": 
+        elif self.main.fastsim.package=="delphesMA5tune":
             self.CopyDelphesMA5Card(input,output,cfg,theFile)
 
         try:
@@ -360,7 +360,7 @@ class JobWriter(object):
             except:
                 logging.getLogger('MA5').error('Impossible to copy the file "newAnalyzer"')
                 return False
-            try:    
+            try:
                 os.chmod(self.path+"/Build/SampleAnalyzer/newAnalyzer.py",0o755)
             except:
                 logging.getLogger('MA5').error('Impossible to make executable the file "newAnalyzer"')
@@ -390,7 +390,7 @@ class JobWriter(object):
     def PrintIncludes(self,file):
         file.write('// SampleHeader header\n')
         file.write('#include "SampleAnalyzer/Process/Core/SampleAnalyzer.h"\n')
-        file.write('#include "SampleAnalyzer/User/Analyzer/analysisList.h"\n') 
+        file.write('#include "SampleAnalyzer/User/Analyzer/analysisList.h"\n')
         file.write('using namespace MA5;\n\n')
         return
 
@@ -709,8 +709,8 @@ class JobWriter(object):
         # @JACK enable usage of fastjet
         # If there are any root files, fastjet clusterer should not run with MA5_FASTJET_MODE Flag
         options.ma5_fastjet_mode   = (
-            all([all([('root' not in x) for x in dataset.filenames]) for dataset in self.main.datasets]) 
-            and self.main.archi_info.has_fastjet 
+            all([all([('root' not in x) for x in dataset.filenames]) for dataset in self.main.datasets])
+            and self.main.archi_info.has_fastjet
             and kwargs.get('ma5_fastjet_mode',True)
             and self.main.fastsim.package == 'fastjet'
         )
@@ -740,7 +740,7 @@ class JobWriter(object):
         SetupWriter.WriteSetupFile(True, self.path+'/Build/',self.main.archi_info)
         SetupWriter.WriteSetupFile(False,self.path+'/Build/',self.main.archi_info)
         #@JACK: Why are we using C-shell this is not necessary anymore.
-        
+
         # Ok
         return True
 
@@ -780,7 +780,7 @@ class JobWriter(object):
 
         # log file name
         logfile = folder+'/Log/compilation.log'
-        
+
         # shell command
         commands = ['make','compile']
 
@@ -791,7 +791,7 @@ class JobWriter(object):
         if not result:
             logging.getLogger('MA5').error('impossible to compile the project. For more details, see the log file:')
             logging.getLogger('MA5').error(logfile)
-            
+
         return result
 
 
@@ -802,7 +802,7 @@ class JobWriter(object):
 
         # log file name
         logfile = folder+'/Log/mrproper.log'
-        
+
         # shell command
         commands = ['make','mrproper']
 
@@ -813,7 +813,7 @@ class JobWriter(object):
         if not result:
             logging.getLogger('MA5').error('impossible to clean the project. For more details, see the log file:')
             logging.getLogger('MA5').error(logfile)
-            
+
         return result
 
 
@@ -825,7 +825,7 @@ class JobWriter(object):
 
         # log file name
         logfile = folder+'/Log/linking.log'
-        
+
         # shell command
         commands = ['make','link']
 
@@ -842,7 +842,7 @@ class JobWriter(object):
 
     def WriteHistory(self,history,firstdir):
         file = open(self.path+"/history.ma5","w")
-        file.write('set main.currentdir = '+firstdir+'\n') 
+        file.write('set main.currentdir = '+firstdir+'\n')
         for line in history.history:
             items = line.split(';')
             for item in items :
@@ -858,7 +858,7 @@ class JobWriter(object):
                 else:
                     file.write(item)
                     file.write("\n")
-        file.close()    
+        file.close()
 
     def WriteDatasetList(self,dataset):
         name=InstanceName.Get(dataset.name)
@@ -866,7 +866,7 @@ class JobWriter(object):
         for item in dataset:
             file.write(item)
             file.write("\n")
-        file.close()    
+        file.close()
 
 
     def RunJob(self,dataset):
@@ -903,8 +903,3 @@ class JobWriter(object):
             result = ShellCommand.Execute(commands,folder)
 
         return result
-
-
-    def WriteTagger(self):
-        # header file
-        bla
