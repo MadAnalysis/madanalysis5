@@ -9,22 +9,25 @@ The validation script is located in `scripts/validation_bootstrap`. To see avail
 ```bash
 $ ./validation_bootstrap -h
 ```
-This will show command line arguments to validate your MadAnalysis session. For instance, to validate MadAnalysis
-Parton level mode simply type
+This will show command line arguments available to validate your MadAnalysis 5
+session. For instance, to validate your version of MadAnalysis 5 in the parton
+level mode, it is sufficient to type
 ```bash
 $ ./validation_bootstrap -P
 ```
 
 ## Extended validation
-`validation_bootstrap` uses the samples within `madanalysis5/samples`. These are small samples to ensure MadAnalysis 
-executes analysis successfuly. By adding larger MC samples to this folder one can enable more extensive validation of 
-the software.
+`validation_bootstrap` uses test Monte Carlo samples located in
+`madanalysis5/samples`. These are small-size event samples allowing us to ensure
+that MadAnalysis 5 executes an analysis successfuly. By manally adding larger MC
+samples to this folder we can enable a more extensive validathe software.
 
 # Usage
 
 ### Format of the MadAnalysis 5 Scripts
-MadAnalysis scripts which are going to be validated can be found in `src/ma5_validation/ma5_scripts`. Each
-has to follow certain configuration to be able to find the errors quickly.
+MadAnalysis 5 scripts which are going to be used for the validation process can
+be found in `src/ma5_validation/ma5_scripts`. Each has to follow a certain
+structure so that we could find errors quickly.
 ```
 #TITLE <title of the file>
 #MODE <MA5 MODE PARTON HADRON RECO RECOFRAC>
@@ -36,11 +39,12 @@ has to follow certain configuration to be able to find the errors quickly.
 import $MA5PATH/samples/...
 submit 
 ```
-Usual MadAnalysis 5 commands needs to satisfy the usual conditions. `$MA5PATH` sets the anchor to current 
-MadAnalysis 5 session, if not indicated code will assume that full path has been given for the sample. 
-`submit` does not require any name, the name will be choosen according to the script name and the log path.
-Default log path is `./scripts/log`; hence all the files and analysis folders will be generated at that 
-location.
+Usual MadAnalysis 5 commands needs to follow the standard syntax. `$MA5PATH`
+is an anchor to the current MadAnalysis 5 location. If not indicated, the code
+assumes that a full path to the sample is given. `submit` does not require any
+name, the folder name being choosen according to the script name and the path to
+the log. The default log path is `./scripts/log`. All files and analysis folders
+are thus generated at that location.
 
 #### Script keywords
 ```
@@ -50,22 +54,24 @@ location.
 #HEADER: expert mode header file
 #COMMANDLINE: expert mode command line info
 
-$MA5PATH : Will be replaced with MadAnalysis 5 path
-$SMP_PATH: will be replaced with full path to `madanalysis5/path`
-$EXPERT_LEVEL_PATH: will be replaced with full path for the expert level script location
+$MA5PATH : Will be replaced with the path to MadAnalysis 5
+$SMP_PATH: will be replaced with the full path to `madanalysis5/path`
+$EXPERT_LEVEL_PATH: will be replaced with the full path for the expert-level
+                    script location
 ```
 
 ### Validating MadAnalysis 5
-Validation scripts are available under `scripts` folder. `validation_bootstrap` includes options to validate
-various level of analyses available withing MadAnalysis interface. For more information about the inner workings
-of the script simpy type `$ ./validation_bootstrap -h`. 
+Validation scripts are available under the `scripts` folder.
+`validation_bootstrap` includes options to validate the various levels of
+analyses available withing MadAnalysis 5. For more information about the inner
+workings of the validation script, please type `$ ./validation_bootstrap -h`. 
 
 ## Adding validation scripts
 
 Each validation script needs to be written in the format [shown above](#format-of-the-madanalysis-5-scripts). 
-Depending on the mode and nature of the validation script, it can be added to the script collection under 
+Depending on the mode and nature of the validation script, it can be added to the script collection stored in
 `validation/src/ma5_validation/ma5_scripts`. This folder includes various levels of scripts that ensures backwards
-compatibility of MadAnalysis 5 software. Before adding the validation script please run it via `validation_bootstrap`
+compatibility of the MadAnalysis 5 software. Before adding a validation script there, please run it via `validation_bootstrap`
 by using the following command;
 
 ```
