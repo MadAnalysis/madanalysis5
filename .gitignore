@@ -1,0 +1,14 @@
+*/*.pyc
+*/*/*.pyc
+*/*/*/*.pyc
+*/*/*/*.log
+tools/SampleAnalyzer/Interfaces/Makefile_*
+tools/SampleAnalyzer/Test/Makefile_*
+*/*/*.aux
+*/*/*.bbl
+*/*/*.blg
+*/*/*.toc
+*/*/*.out
+*/*/*.log
+doc/??????_mode.log
+doc/??????_mode.pdf
