@@ -210,14 +210,6 @@ MAbool JetClusterer::IsLast(const MCParticleFormat* part, EventFormat& myEvent)
   return true;
 }
 
-
-// -----------------------------------------------------------------------------
-// Sorting the reco objects (necessary after smearing)
-// -----------------------------------------------------------------------------
-MAbool sort_by_leptonPT(RecLeptonFormat const & a, RecLeptonFormat const & b) { return a.pt() < b.pt(); };
-MAbool sort_by_photonPT(RecPhotonFormat const & a, RecPhotonFormat const & b) { return a.pt() < b.pt(); };
-MAbool    sort_by_tauPT(RecTauFormat    const & a, RecTauFormat    const & b) { return a.pt() < b.pt(); };
-
 // -----------------------------------------------------------------------------
 // Execute
 // -----------------------------------------------------------------------------
@@ -529,13 +521,17 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
 
   // Sorting the objecfts after smearing
   if (mySmearer_->isElectronSmearerOn())
-      std::sort(myEvent.rec()->electrons_.begin(), myEvent.rec()->electrons_.end(), sort_by_leptonPT);
+      std::sort(myEvent.rec()->electrons_.begin(), myEvent.rec()->electrons_.end(),
+                [](RecLeptonFormat const & lep1, RecLeptonFormat const & lep2){ return lep1.pt() > lep2.pt(); });
   if (mySmearer_->isMuonSmearerOn())
-      std::sort(myEvent.rec()->muons_.begin(),     myEvent.rec()->muons_.end(),     sort_by_leptonPT);
+      std::sort(myEvent.rec()->muons_.begin(), myEvent.rec()->muons_.end(),
+                [](RecLeptonFormat const & lep1, RecLeptonFormat const & lep2){ return lep1.pt() > lep2.pt(); });
   if (mySmearer_->isTauSmearerOn())
-      std::sort(myEvent.rec()->taus_.begin(),      myEvent.rec()->taus_.end(),      sort_by_tauPT);
+      std::sort(myEvent.rec()->taus_.begin(),      myEvent.rec()->taus_.end(),
+                [](RecTauFormat const & ta1, RecTauFormat const & ta2){ return  ta1.pt() > ta2.pt(); });
   if (mySmearer_->isPhotonSmearerOn())
-      std::sort(myEvent.rec()->photons_.begin(),   myEvent.rec()->photons_.end(),   sort_by_photonPT);
+      std::sort(myEvent.rec()->photons_.begin(), myEvent.rec()->photons_.end(),
+                [](RecPhotonFormat const & ph1, RecPhotonFormat const & ph2){ return  ph1.pt() > ph2.pt(); });
 
   // Set Primary Jet ID
   myEvent.rec()->SetPrimaryJetID(JetID_);
