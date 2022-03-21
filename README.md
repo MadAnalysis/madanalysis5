@@ -63,7 +63,8 @@ also be downloaded by by typing `ma5> install zlib` through MadAnalysis interfac
    downloaded from [this link](http://fastjet.fr/). This package can also be installed by 
   typing `ma5> install fastjet` in MadAnalysis.
  - LaTeX and `pdflatex` compilers for report rendering.
-
+ - All Python libraries that MadAnalysis 5 requires can be installed by typing 
+`$ python3 -m pip install -r requirements.txt`.
 
 ### Downloading and installing the MadAnalysis 5 package
 

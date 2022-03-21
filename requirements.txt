@@ -1,0 +1,5 @@
+matplotlib>=3.4.2
+scipy>=1.7.1
+numpy>=1.19.5
+pyhf==0.6.3
+lxml>=4.6.2
