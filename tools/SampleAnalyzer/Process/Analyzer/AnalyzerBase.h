@@ -40,6 +40,11 @@
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelectionManager.h"
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 
+// FJcontrib tools
+#ifdef MA5_FASTJET_MODE
+#include "SampleAnalyzer/Interfaces/fastjet/SoftDrop.h"
+#endif
+
 // STL headers
 #include <set>
 #include <string>

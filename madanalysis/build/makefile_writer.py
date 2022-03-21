@@ -387,7 +387,9 @@ class MakefileWriter():
                 libs.extend(['-lfastjet_for_ma5'])
             if options.has_fastjet_lib:
 #                libs.extend(['$(shell fastjet-config --libs --plugins)']) # --rpath=no)'])
-                libs.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config --libs --plugins)']) # --rpath=no)'])
+                libs.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config --libs --plugins)'])
+                # Add fjcontrib libraries
+                libs.extend(["-lRecursiveTools"]) # SoftDrop
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
 
         # - delphes
