@@ -426,7 +426,7 @@ class RecEventFormat
   {
     INFO << "   -------------------------------------------" << endmsg;
     INFO << "   Event Content : " << endmsg;
-    INFO << "      * Jets Content : " << endmsg;
+    INFO << "      * Jet Content : " << endmsg;
     for (std::map<std::string, std::vector<RecJetFormat> >::const_iterator
              it=jetcollection_.begin();it!=jetcollection_.end();it++)
     {
