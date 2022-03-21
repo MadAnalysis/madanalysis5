@@ -23,26 +23,30 @@
 
 
 from __future__ import absolute_import
-from madanalysis.install.install_service import InstallService
-from shell_command import ShellCommand
-import os
-import sys
+
 import logging
+import os
+
+from madanalysis.install.install_service import InstallService
+
 
 class InstallSamples:
 
     def __init__(self,main):
         self.main       = main
         self.installdir = os.path.normpath(self.main.archi_info.ma5dir+'/samples')
-        self.files = { "ttbar_fh.lhe.gz":   "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_fh.lhe.gz",\
-                       "ttbar_sl_1.lhe.gz": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_sl_1.lhe.gz",\
-                       "ttbar_sl_2.lhe.gz": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_sl_2.lhe.gz",\
-                       "ttbar_sl_1.lhe":    "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_sl_1.lhe",\
-                       "ttbar_sl_2.lhe":    "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_sl_2.lhe",\
-                       "zz.lhe.gz":         "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/zz.lhe.gz",\
-                       "mg5_ttbar2l.lhco":  "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/mg5_ttbar2l.lhco",\
-                       "mg5_zll.lhco":      "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/mg5_zll.lhco"\
-                      }
+        self.files = {
+            "ttbar_fh.lhe.gz"    : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_fh.lhe.gz", \
+            "ttbar_sl_1.lhe.gz"  : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_sl_1.lhe.gz", \
+            "ttbar_sl_2.lhe.gz"  : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_sl_2.lhe.gz", \
+            "ttbar_sl_1.lhe"     : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_sl_1.lhe", \
+            "ttbar_sl_2.lhe"     : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_sl_2.lhe", \
+            "zz.lhe.gz"          : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/zz.lhe.gz", \
+            "mg5_ttbar2l.lhco"   : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/mg5_ttbar2l.lhco", \
+            "mg5_zll.lhco"       : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/mg5_zll.lhco", \
+            "wplus_prod.hepmc.gz": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/wplus_prod.hepmc.gz",
+            "MinBias.pileup"     : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/MinBias.pileup",
+        }
 
 
     def Detect(self):

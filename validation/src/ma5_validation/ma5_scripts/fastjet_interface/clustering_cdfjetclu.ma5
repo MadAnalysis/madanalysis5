@@ -1,0 +1,17 @@
+#TITLE clustering with cdfjet algorithm
+#MODE RECO
+
+set main.fastsim.package = fastjet
+set main.fastsim.algorithm = cdfjetclu
+set main.fastsim.ptmin = 5
+set main.fastsim.radius = 1.0
+set main.fastsim.seed = 1.0
+set main.fastsim.overlap = 0.5
+set main.fastsim.iratch = 0
+display main
+plot MET
+
+import $MA5PATH/samples/*hep*
+import $MA5PATH/samples/*hepmc*
+submit
+#END
