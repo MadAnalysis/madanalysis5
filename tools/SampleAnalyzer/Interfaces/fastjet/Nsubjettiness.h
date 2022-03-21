@@ -30,13 +30,10 @@
 
 // FastJet headers
 #include "fastjet/contrib/Nsubjettiness.hh"
-#include "fastjet/ClusterSequence.hh"
-#include "fastjet/PseudoJet.hh"
 
 // SampleAnalyser headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecJetFormat.h"
-#include "SampleAnalyzer/Interfaces/fastjet/Cluster.h"
 
 using namespace MA5;
 using namespace std;
