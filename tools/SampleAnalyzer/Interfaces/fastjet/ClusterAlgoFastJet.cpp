@@ -105,6 +105,10 @@ MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
     }
     jet->ntracks_ = tracks;
   }
+
+  // Create an empty accessor
+  if (jets.size() == 0) myEvent.rec()->GetNewEmptyJet();
+
   Meff += MET->pt();
   // Filling the dataformat with jets
   return true;
@@ -139,4 +143,7 @@ MAbool ClusterAlgoFastJet::Cluster(EventFormat& myEvent, std::string JetID)
         }
         jet->ntracks_ = tracks;
     }
+
+    // Create an empty accessor
+    if (jets.size() == 0) myEvent.rec()->CreateEmptyJetAccesor(JetID);
 }
