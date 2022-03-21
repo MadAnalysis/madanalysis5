@@ -200,7 +200,6 @@ class RecEventFormat
   // Accessor to a specific jet dictionary (read-only)
   const std::vector<RecJetFormat>& jets(std::string id) const {return jetcollection_.at(id);}
 
-
   /// Accessor to the genjet collection (read-only)
   const std::vector<RecJetFormat>& genjets() const {return genjets_;}
 
@@ -270,7 +269,7 @@ class RecEventFormat
   std::map<std::string, std::vector<RecJetFormat> >& jetcollection() {return jetcollection_;}
 
   /// Accessor to a specific jet in the dictionary
-  std::vector<RecJetFormat>& jets(std::string id) {return jetcollection_[id];}
+  std::vector<RecJetFormat>& jets(std::string id) { return jetcollection_.at(id); }
 
   /// Accessor to the fat jet collection
   std::vector<RecJetFormat>& fatjets() {return fatjets_;}
@@ -503,12 +502,17 @@ class RecEventFormat
   /// Giving a new primary jet entry
   RecJetFormat* GetNewJet()
   {
-//    jets_.push_back(RecJetFormat());
-//    return &jets_.back();
     std::pair< std::map<std::string, std::vector<RecJetFormat> >::iterator, bool> new_jet;
     new_jet = jetcollection_.insert(std::make_pair(PrimaryJetID_,std::vector<RecJetFormat>() ));
     new_jet.first->second.push_back(RecJetFormat());
     return &(new_jet.first->second.back());
+  }
+
+  /// Giving a new primary jet entry
+  void GetNewEmptyJet()
+  {
+    std::pair< std::map<std::string, std::vector<RecJetFormat> >::iterator, bool> new_jet;
+    new_jet = jetcollection_.insert(std::make_pair(PrimaryJetID_,std::vector<RecJetFormat>() ));
   }
 
   // Get a new jet entry with specific ID
@@ -518,6 +522,13 @@ class RecEventFormat
     new_jet = jetcollection_.insert(std::make_pair(id,std::vector<RecJetFormat>() ));
     new_jet.first->second.push_back(RecJetFormat());
     return &(new_jet.first->second.back());
+  }
+
+  // Create an empty jet accessor with specific id
+  void CreateEmptyJetAccesor(std::string id)
+  {
+    std::pair< std::map<std::string, std::vector<RecJetFormat> >::iterator,bool> new_jet;
+    new_jet = jetcollection_.insert(std::make_pair(id,std::vector<RecJetFormat>() ));
   }
 
   /// Giving a new fat jet entry
