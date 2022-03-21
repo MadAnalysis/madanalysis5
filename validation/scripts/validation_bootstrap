@@ -30,7 +30,7 @@ from typing import Text
 try:
     import ma5_validation as ma5
 except ModuleNotFoundError as err:
-    sys.exit("Validation interface have not been found. Please install the interface first. "
+    sys.exit("The validation interface has not been found. Please install the interface first. "
              "For details, see `validation/README.md`")
 
 
@@ -41,7 +41,7 @@ def run_scripts(path: Text):
     Parameters
     ----------
     path : Text
-        Path to the scripts folder or full path of the script itself.
+        Path to the folder containing the scripts, or the full path of the script itself.
 
     Raises
     ------
@@ -92,7 +92,7 @@ def main(args):
         smp_installation = ma5.utils.InstallationHandler("samples")
         job = ma5.utils.JobHandler(smp_installation)
         if not (job.execute() and job.check()):
-            raise ma5.system.MadAnalysis5Error("A problem has occured during sample installation.")
+            raise ma5.system.MadAnalysis5Error("A problem has occurred during the installation of the samples.")
 
     # Check if samples are installed
     if not os.path.isdir(ma5.utils.PathHandler.SMP_PATH):
@@ -110,7 +110,7 @@ def main(args):
         zlib_installation = ma5.utils.InstallationHandler("zlib")
         job = ma5.utils.JobHandler(zlib_installation)
         if not (job.execute() and job.check()):
-            raise ma5.system.MadAnalysis5Error("A problem has occured during zlib installation.")
+            raise ma5.system.MadAnalysis5Error("A problem has occurred during the installation of zlib.")
         archi_info.has_zlib = True
 
     # Validate Parton Level
@@ -131,7 +131,7 @@ def main(args):
             job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("fastjet"))
             if not (job.execute() and job.check()):
                 raise ma5.system.MadAnalysis5Error(
-                    "A problem has occured during fastjet installation."
+                    "A problem has occurred during the installation of fastjet."
                 )
             archi_info.has_fastjet = True
         run_scripts(ma5.utils.PathHandler.EXPERT_LEVEL_PATH)
@@ -146,7 +146,7 @@ def main(args):
             job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("fastjet"))
             if not (job.execute() and job.check()):
                 raise ma5.system.MadAnalysis5Error(
-                    "A problem has occured during fastjet installation."
+                    "A problem has occurred during the installation of fastjet ."
                 )
             archi_info.has_fastjet = True
         run_scripts(ma5.utils.PathHandler.FASTJET_INTERFACE_PATH)
@@ -158,13 +158,13 @@ def main(args):
                 job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("root"))
                 if not (job.execute() and job.check()):
                     raise ma5.system.MadAnalysis5Error(
-                        "A problem has occured during root installation."
+                        "A problem has occurred during the installation of root."
                     )
                 archi_info.has_root = True
             job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("delphes"))
             if not (job.execute() and job.check()):
                 raise ma5.system.MadAnalysis5Error(
-                    "A problem has occured during delphes installation."
+                    "A problem has occurred during the installation of delphes."
                 )
             archi_info.has_delphes = True
         run_scripts(ma5.utils.PathHandler.DELPHES_INTERFACE_PATH)
@@ -176,27 +176,27 @@ def main(args):
                 job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("root"))
                 if not (job.execute() and job.check()):
                     raise ma5.system.MadAnalysis5Error(
-                        "A problem has occured during root installation."
+                        "A problem has occurred during the installation of root."
                     )
                 archi_info.has_root = True
             job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("delphes"))
             if not (job.execute() and job.check()):
                 raise ma5.system.MadAnalysis5Error(
-                    "A problem has occured during delphes installation."
+                    "A problem has occurred during the installation of delphes."
                 )
             archi_info.has_delphes = True
         if not archi_info.has_fastjet:
             job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("fastjet"))
             if not (job.execute() and job.check()):
                 raise ma5.system.MadAnalysis5Error(
-                    "A problem has occured during fastjet installation."
+                    "A problem has occurred during the installation of fastjet."
                 )
             archi_info.has_fastjet = True
         if not session_info.has_pad:
             job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("PAD"))
             if not (job.execute() and job.check()):
                 raise ma5.system.MadAnalysis5Error(
-                    "A problem has occured during PAD installation."
+                    "A problem has occurred during the installation of the PAD."
                 )
             session_info.has_pad = True
             session_info.has_padsfs = True
@@ -204,7 +204,7 @@ def main(args):
             job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("PADForSFS"))
             if not (job.execute() and job.check()):
                 raise ma5.system.MadAnalysis5Error(
-                    "A problem has occured during PAD installation."
+                    "A problem has occurred during the installation of the PAD for SFS."
                 )
             session_info.has_padsfs = True
         run_scripts(ma5.utils.PathHandler.PAD_INTERFACE_PATH)
