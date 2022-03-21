@@ -45,6 +45,7 @@
 #include "SampleAnalyzer/Interfaces/fastjet/SoftDrop.h"
 #include "SampleAnalyzer/Interfaces/fastjet/Cluster.h"
 #include "SampleAnalyzer/Interfaces/fastjet/Recluster.h"
+#include "SampleAnalyzer/Interfaces/fastjet/Nsubjettiness.h"
 #endif
 
 // STL headers

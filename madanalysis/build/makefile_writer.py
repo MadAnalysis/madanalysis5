@@ -390,6 +390,7 @@ class MakefileWriter():
                 libs.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config --libs --plugins)'])
                 # Add fjcontrib libraries
                 libs.extend(["-lRecursiveTools"]) # SoftDrop
+                libs.extend(["-lNsubjettiness"]) # Nsubjettiness
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
 
         # - delphes
