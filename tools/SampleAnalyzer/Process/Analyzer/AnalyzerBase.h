@@ -43,6 +43,7 @@
 // FJcontrib tools
 #ifdef MA5_FASTJET_MODE
 #include "SampleAnalyzer/Interfaces/fastjet/SoftDrop.h"
+#include "SampleAnalyzer/Interfaces/fastjet/Cluster.h"
 #endif
 
 // STL headers
