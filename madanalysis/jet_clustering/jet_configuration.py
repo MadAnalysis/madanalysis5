@@ -122,13 +122,15 @@ class JetConfiguration:
 
     def DefaultVariableR(self, kwargs: Dict) -> None:
         self.algorithm   = 'VariableR'
-        self.rho         = kwargs.get('rho', 2000.)
-        self.minR        = kwargs.get('minR', 0.)
-        self.maxR        = kwargs.get('maxR', 2.)
-        self.ptmin       = kwargs.get('ptmin', 20.)
-        self.exclusive   = kwargs.get('exclusive', False)
-        self.clustertype = kwargs.get('areafraction', "AKTLIKE")
-        self.strategy    = kwargs.get('areafraction', "Best")
+        self.rho         = float(kwargs.get('rho', 2000.))
+        self.minR        = float(kwargs.get('minR', 0.))
+        self.maxR        = float(kwargs.get('maxR', 2.))
+        self.ptmin       = float(kwargs.get('ptmin', 20.))
+        self.exclusive   = bool(kwargs.get('exclusive', False))
+        ctype = kwargs.get('clustertype', "AKTLIKE")
+        self.clustertype  = ctype if ctype in ["CALIKE", "KTLIKE", "AKTLIKE"] else "AKTLIKE"
+        strategy = kwargs.get('strategy', "Best")
+        self.strategy = strategy if strategy in ["Best", "N2Tiled", "N2Plain", "NNH", "Native"] else "Best"
 
     def GetJetAlgorithms(self):
         return self.userVariables
@@ -155,6 +157,22 @@ class JetConfiguration:
                         self.exclusive = False
                     else:
                         raise ValueError
+                elif parameter == "strategy" and self.algorithm == "VariableR":
+                    strategy = ["Best", "N2Tiled", "N2Plain", "NNH", "Native"]
+                    if value in strategy:
+                        self.strategy = value
+                    else:
+                        self.logger.error(f"Invalid strategy: {value}")
+                        self.logger.error("Available types are: " + ", ".join(strategy))
+                        return
+                elif parameter == "clustertype" and self.algorithm == "VariableR":
+                    ctype = ["CALIKE", "KTLIKE", "AKTLIKE"]
+                    if value.upper() in ctype:
+                        self.clustertype = value.upper()
+                    else:
+                        self.logger.error(f"Invalid cluster type: {value}")
+                        self.logger.error("Available types are: " + ", ".join(ctype))
+                        return
                 else:
                     tmp = float(value)
                     self.__dict__[parameter] = tmp
