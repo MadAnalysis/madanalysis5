@@ -116,15 +116,23 @@ namespace MA5 {
                 void Execute(EventFormat& myEvent, std::string JetID)
                 {
                     MAbool execute = true;
-                    for (auto &jetid: myEvent.rec()->GetJetIDs())
+                    try
                     {
-                        if (JetID == jetid)
+                        for (auto &jetid: myEvent.rec()->GetJetIDs())
                         {
-                            ERROR << "Substructure::Cluster - Jet ID " << JetID
-                                  << " already exits. Skipping execution." << endmsg;
-                            execute = false;
-                            break;
+                            if (JetID == jetid)
+                            {
+                                throw EXCEPTION_ERROR(
+                                        "Substructure::Cluster - Jet ID " + JetID + \
+                                        " already exits. Skipping execution.","",1
+                                );
+                            }
                         }
+                    }
+                    catch (const std::exception& err)
+                    {
+                        MANAGE_EXCEPTION(err);
+                        execute = false;
                     }
 
                     if (execute)
