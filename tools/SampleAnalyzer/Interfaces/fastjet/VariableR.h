@@ -137,22 +137,6 @@ namespace MA5 {
                     precluster_ = false;
                 }
 
-                // Cluster given particles
-                std::vector<fastjet::PseudoJet> __cluster(std::vector<fastjet::PseudoJet> particles)
-                {
-                    fastjet::contrib::VariableRPlugin variableR(
-                        rho_, minR_, maxR_, clusterType_, precluster_, strategy_
-                    );
-                    fastjet::JetDefinition jetDefinition(&variableR);
-                    clust_seq.reset(new fastjet::ClusterSequence(particles, jetDefinition));
-
-                    std::vector<fastjet::PseudoJet> variableR_jets;
-                    if (isExclusive_) variableR_jets = clust_seq->exclusive_jets(ptmin_);
-                    else variableR_jets = clust_seq->inclusive_jets(ptmin_);
-
-                    return fastjet::sorted_by_pt(variableR_jets);
-                }
-
                 // Execute with the Reconstructed event
                 void Execute(EventFormat& myEvent, std::string JetID)
                 {
@@ -253,6 +237,24 @@ namespace MA5 {
                     }
 
                     return output_jets;
+                }
+
+            private:
+
+                // Cluster given particles
+                std::vector<fastjet::PseudoJet> __cluster(std::vector<fastjet::PseudoJet> particles)
+                {
+                    fastjet::contrib::VariableRPlugin variableR(
+                            rho_, minR_, maxR_, clusterType_, precluster_, strategy_
+                    );
+                    fastjet::JetDefinition jetDefinition(&variableR);
+                    clust_seq.reset(new fastjet::ClusterSequence(particles, jetDefinition));
+
+                    std::vector<fastjet::PseudoJet> variableR_jets;
+                    if (isExclusive_) variableR_jets = clust_seq->exclusive_jets(ptmin_);
+                    else variableR_jets = clust_seq->inclusive_jets(ptmin_);
+
+                    return fastjet::sorted_by_pt(variableR_jets);
                 }
         };
     }

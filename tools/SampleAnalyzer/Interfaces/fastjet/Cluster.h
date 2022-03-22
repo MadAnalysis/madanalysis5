@@ -100,18 +100,6 @@ namespace MA5 {
                     ptmin_ = ptmin < 0. ? 0. : ptmin; isExclusive_ = isExclusive;
                 }
 
-                // Cluster given particles
-                std::vector<fastjet::PseudoJet> __cluster(std::vector<fastjet::PseudoJet> particles)
-                {
-                    clust_seq.reset(new fastjet::ClusterSequence(particles, *JetDefinition_));
-
-                    std::vector<fastjet::PseudoJet> jets;
-                    if (isExclusive_) jets = clust_seq->exclusive_jets(ptmin_);
-                    else jets = clust_seq->inclusive_jets(ptmin_);
-
-                    return fastjet::sorted_by_pt(jets);
-                }
-
                 // Execute with the Reconstructed event
                 void Execute(EventFormat& myEvent, std::string JetID)
                 {
@@ -210,6 +198,20 @@ namespace MA5 {
                     }
 
                     return output_jets;
+                }
+
+            private:
+
+                // Cluster given particles
+                std::vector<fastjet::PseudoJet> __cluster(std::vector<fastjet::PseudoJet> particles)
+                {
+                    clust_seq.reset(new fastjet::ClusterSequence(particles, *JetDefinition_));
+
+                    std::vector<fastjet::PseudoJet> jets;
+                    if (isExclusive_) jets = clust_seq->exclusive_jets(ptmin_);
+                    else jets = clust_seq->inclusive_jets(ptmin_);
+
+                    return fastjet::sorted_by_pt(jets);
                 }
         };
     }
