@@ -156,25 +156,38 @@ namespace MA5 {
                 // Execute with the Reconstructed event
                 void Execute(EventFormat& myEvent, std::string JetID)
                 {
-                    std::vector<fastjet::PseudoJet> variableR_jets = __cluster(myEvent.rec()->cluster_inputs());
-
-                    for (auto &VR_jet: variableR_jets)
+                    MAbool execute = true;
+                    for (auto &jetid: myEvent.rec()->GetJetIDs())
                     {
-                        RecJetFormat * jet = myEvent.rec()->GetNewJet(JetID);
-                        MALorentzVector q(VR_jet.px(),VR_jet.py(),VR_jet.pz(),VR_jet.e());
-                        jet->setMomentum(q);
-                        jet->setPseudoJet(VR_jet);
-                        std::vector<fastjet::PseudoJet> constituents = clust_seq->constituents(VR_jet);
-                        MAuint32 tracks = 0;
-                        for (MAuint32 j=0;j<constituents.size();j++)
+                        if (JetID == jetid)
                         {
-                            jet->AddConstituent(constituents[j].user_index());
-                            if (PDG->IsCharged(myEvent.mc()->particles()[constituents[j].user_index()].pdgid()))
-                                tracks++;
+                            ERROR << "Substructure::VariableR - Jet ID " << JetID
+                                  << " already exits. Skipping execution." << endmsg;
+                            execute = false;
+                            break;
                         }
-                        jet->ntracks_ = tracks;
                     }
-                    if (variableR_jets.size() == 0) myEvent.rec()->CreateEmptyJetAccesor(JetID);
+
+                    if (execute)
+                    {
+                        std::vector <fastjet::PseudoJet> variableR_jets = __cluster(myEvent.rec()->cluster_inputs());
+
+                        for (auto &VR_jet: variableR_jets) {
+                            RecJetFormat *jet = myEvent.rec()->GetNewJet(JetID);
+                            MALorentzVector q(VR_jet.px(), VR_jet.py(), VR_jet.pz(), VR_jet.e());
+                            jet->setMomentum(q);
+                            jet->setPseudoJet(VR_jet);
+                            std::vector <fastjet::PseudoJet> constituents = clust_seq->constituents(VR_jet);
+                            MAuint32 tracks = 0;
+                            for (MAuint32 j = 0; j < constituents.size(); j++) {
+                                jet->AddConstituent(constituents[j].user_index());
+                                if (PDG->IsCharged(myEvent.mc()->particles()[constituents[j].user_index()].pdgid()))
+                                    tracks++;
+                            }
+                            jet->ntracks_ = tracks;
+                        }
+                        if (variableR_jets.size() == 0) myEvent.rec()->CreateEmptyJetAccesor(JetID);
+                    }
                 }
 
                 // Wrapper for event based execution
