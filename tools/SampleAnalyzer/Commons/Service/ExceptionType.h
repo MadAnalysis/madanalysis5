@@ -38,7 +38,7 @@
 // ShortCut to the creation of ExceptionType instance 
 #define EXCEPTION_WARNING(msg,details,num) MA5::ExceptionType(__FILE__,__LINE__,__FUNCTION__,true, msg,details,num)
 #define EXCEPTION_ERROR(msg,details,num)   MA5::ExceptionType(__FILE__,__LINE__,__FUNCTION__,false,msg,details,num)
-
+#define EXCEPTION_WARNING_VERBOSE(msg,details,num,verbose) MA5::ExceptionType(__FILE__,__LINE__,__FUNCTION__,true, msg,details,num,verbose)
 
 namespace MA5
 {
@@ -83,6 +83,9 @@ class ExceptionType : public std::exception
 
   /// Number ID specified by the user
   MAint32 Num_;
+
+  // Verbosity
+  MAbool Verbose_;
   
 
   // -------------------------------------------------------------
@@ -97,14 +100,16 @@ class ExceptionType : public std::exception
                 const MAbool& warning,
                 const std::string& msg,
                 const std::string& details="",
-                const MAint32& Num=0  ) throw() :
-                                        FileName_(filename),
-                                        Msg_(msg), 
-                                        Function_(function),
-                                        Details_(details),
-                                        Line_(line),
-                                        Warning_(warning),
-                                        Num_(Num)
+                const MAint32& Num=0,
+                const MAbool& Verbose=true) throw() :
+                                            FileName_(filename),
+                                            Msg_(msg),
+                                            Function_(function),
+                                            Details_(details),
+                                            Line_(line),
+                                            Warning_(warning),
+                                            Num_(Num),
+                                            Verbose_(Verbose)
   { }
  
   /// Destructor
@@ -146,6 +151,10 @@ class ExceptionType : public std::exception
   /// Accessor to the details about the exception 
   const std::string& GetDetails() const throw()
   { return Details_; }
+
+  /// accessor to the verbosity level
+  MAbool verbose() const throw()
+  { return Verbose_; }
 
 };
 
