@@ -47,6 +47,7 @@
 #include "SampleAnalyzer/Interfaces/fastjet/Recluster.h"
 #include "SampleAnalyzer/Interfaces/fastjet/Nsubjettiness.h"
 #include "SampleAnalyzer/Interfaces/fastjet/VariableR.h"
+#include "SampleAnalyzer/Interfaces/fastjet/Pruner.h"
 #endif
 
 // STL headers
