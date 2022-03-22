@@ -40,11 +40,17 @@
 // FastJet headers
 #ifdef MA5_FASTJET_MODE
     #include "fastjet/PseudoJet.hh"
+//    #include "SampleAnalyzer/Interfaces/fastjet/VariableR.h"
 #endif
 
 namespace MA5
 {
-
+//using namespace Substructure;
+//#ifdef MA5_FASTJET_MODE
+namespace Substructure {
+    class VariableR;
+}
+//#endif
 class LHCOReader;
 class ROOTReader;
 class DelphesTreeReader;
@@ -67,6 +73,9 @@ class RecJetFormat : public RecParticleFormat
   friend class DelphesTreeReader;
   friend class DelphesMA5tuneTreeReader;
   friend class DelphesMemoryInterface;
+//#ifdef MA5_FASTJET_MODE
+  friend class Substructure::VariableR;
+//#endif
 
   // -------------------------------------------------------------
   //                        data members
