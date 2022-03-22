@@ -548,6 +548,10 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
   {
       it->second->Cluster(myEvent, it->first);
   }
+  for (auto &variableR: variableR_collection_)
+  {
+      variableR.second->Execute(myEvent, variableR.first);
+  }
 #endif
 
 

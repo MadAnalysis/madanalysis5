@@ -201,6 +201,20 @@ class JetCollection:
                         options[item[0]] = False
                     else:
                         raise ValueError("Exclusive can only be True or False.")
+                elif item[0] == "strategy" and algorithm == "VariableR":
+                    strategy = ["Best", "N2Tiled", "N2Plain", "NNH", "Native"]
+                    if item[2] in strategy:
+                        options[item[0]] = item[2]
+                    else:
+                        self.logger.error(f"Invalid strategy: {item[2]}")
+                        self.logger.error("Available types are: " + ", ".join(strategy))
+                elif item[0] == "clustertype" and algorithm == "VariableR":
+                    ctype = ["CALIKE", "KTLIKE", "AKTLIKE"]
+                    if item[2] in ctype:
+                        options[item[0]] = item[2]
+                    else:
+                        self.logger.error(f"Invalid cluster type: {item[2]}")
+                        self.logger.error("Available types are: " + ", ".join(ctype))
                 else:
                     options[item[0]] = float(item[2])
             except ValueError as err:

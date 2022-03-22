@@ -28,7 +28,8 @@ from typing import Text, Dict
 class JetConfiguration:
     
     userVariables = ['antikt','cambridge', 'genkt','kt',
-                     'gridjet', 'cdfjetclu','cdfmidpoint','siscone']
+                     'gridjet', 'cdfjetclu','cdfmidpoint','siscone',
+                     "VariableR"]
 
     def __init__(self,JetID: Text = 'Ma5Jet', algorithm: Text = '', options: Dict = None):
         """
@@ -64,6 +65,7 @@ class JetConfiguration:
         elif algorithm == 'cdfjetclu'   : self.DefaultCDF(options)
         elif algorithm == 'cdfmidpoint' : self.DefaultCDFMidPoint(options)
         elif algorithm == 'siscone'     : self.DefaultSisCone(options)
+        elif algorithm == 'VariableR'   : self.DefaultVariableR(options)
 
     def DefaultAntikT(self,kwargs: Dict) -> None:
         self.algorithm = 'antikt'
@@ -117,6 +119,16 @@ class JetConfiguration:
         self.seed         = kwargs.get('seed',         1.)
         self.iratch       = kwargs.get('iratch',       0.)
         self.areafraction = kwargs.get('areafraction', 1.)
+
+    def DefaultVariableR(self, kwargs: Dict) -> None:
+        self.algorithm   = 'VariableR'
+        self.rho         = kwargs.get('rho', 2000.)
+        self.minR        = kwargs.get('minR', 0.)
+        self.maxR        = kwargs.get('maxR', 2.)
+        self.ptmin       = kwargs.get('ptmin', 20.)
+        self.exclusive   = kwargs.get('exclusive', False)
+        self.clustertype = kwargs.get('areafraction', "AKTLIKE")
+        self.strategy    = kwargs.get('areafraction', "Best")
 
     def GetJetAlgorithms(self):
         return self.userVariables

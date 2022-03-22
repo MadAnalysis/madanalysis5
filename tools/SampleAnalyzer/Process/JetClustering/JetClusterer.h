@@ -42,6 +42,7 @@
   #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoCDFMidpoint.h"
   #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoCDFJetClu.h"
   #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoGridJet.h"
+  #include "SampleAnalyzer/Interfaces/fastjet/VariableR.h"
 #endif
 
 // STL headers
@@ -75,6 +76,9 @@ namespace MA5
 #ifdef MA5_FASTJET_MODE
     /// Jet collection configurations
     std::map<std::string, ClusterAlgoBase*> cluster_collection_;
+
+    // Jet collection configuration with VariableR
+    std::map<std::string, Substructure::VariableR*> variableR_collection_;
 #endif
 
     MAuint32 muon;
@@ -148,131 +152,185 @@ namespace MA5
     }
 
     // Load additional Jets
-    void LoadJetConfiguration(const std::map<std::string,std::string>& options)
+    MAbool LoadJetConfiguration(std::map<std::string,std::string> options)
     {
 #ifdef MA5_FASTJET_MODE
-        MAbool IDflag = false;
+
         std::string new_jetid;
-        std::map<std::string, std::string> clustering_params;
-
-        // decide if its good to keep this jet
-        MAbool save = true;
-        ClusterAlgoBase* new_algo;
-        // Loop over options
-        for (std::map<std::string,std::string>::const_iterator
-           it=options.begin();it!=options.end();it++)
+        std::string algorithm;
+        if (options.find("algorithm") == options.end())
         {
-            std::string key = ClusterAlgoBase::Lower(it->first);
-            MAbool result=false;
-            if (key=="jetid")
+            ERROR << "Jet configuration needs to have `algorithm` option." << endmsg;
+        }
+        else algorithm = options["algorithm"];
+        if (options.find("JetID") == options.end())
+        {
+            ERROR << "Jet configuration needs to have `JetID` option." << endmsg;
+            return true;
+        }
+        if (variableR_collection_.find(options["JetID"]) != variableR_collection_.end() || \
+                cluster_collection_.find(options["JetID"]) != cluster_collection_.end() )
+        {
+            ERROR << "Jet ID " + options["JetID"] + \
+                " already exists. Jet configuration will be ignored." << endmsg;
+            return true;
+        }
+
+        if (algorithm != "VariableR")
+        {
+            std::map<std::string, std::string> clustering_params;
+
+            // decide if its good to keep this jet
+            MAbool save = true;
+            ClusterAlgoBase* new_algo;
+            // Loop over options
+            for (const auto &it: options)
             {
-                // Check if JetID is used before
-                std::map<std::string, ClusterAlgoBase* >::iterator 
-                    jet_check = cluster_collection_.find(it->second);
-                if (jet_check == cluster_collection_.end() && it->second != JetID_)
+                std::string key = ClusterAlgoBase::Lower(it.first);
+                MAbool result=false;
+                if (key=="jetid")
                 {
-                    new_jetid = it->second;
+                    // Check if JetID is used before
+                    new_jetid = it.second;
                     result    = true;
-                    IDflag    = true;
                 }
-                else
+
+                // Find the clustering algorithm
+                if (key=="algorithm")
                 {
-                    ERROR << "Jet ID '" << it->second 
-                          << "' has already been defined. It will be ignored." << endmsg;
-                    save = false;
+                    if (it.second == "antikt")
+                    {
+                        new_algo = new ClusterAlgoStandard("antikt");
+                        result   = true;
+                    }
+                    else if (it.second == "cambridge")
+                    {
+                        new_algo = new ClusterAlgoStandard("cambridge");
+                        result   = true;
+                    }
+                    else if (it.second == "genkt")
+                    {
+                        new_algo = new ClusterAlgoStandard("genkt");
+                        result   = true;
+                    }
+                    else if (it.second == "kt")
+                    {
+                        new_algo = new ClusterAlgoStandard("kt");
+                        result   = true;
+                    }
+                    else if (it.second == "siscone")
+                    {
+                        new_algo = new ClusterAlgoSISCone();
+                        result   = true;
+                    }
+                    else if (it.second == "cdfmidpoint")
+                    {
+                        new_algo = new ClusterAlgoCDFMidpoint();
+                        result   = true;
+                    }
+                    else if (it.second == "cdfjetclu")
+                    {
+                        new_algo = new ClusterAlgoCDFJetClu();
+                        result   = true;
+                    }
+                    else if (it.second == "gridjet")
+                    {
+                        new_algo = new ClusterAlgoGridJet();
+                        result   = true;
+                    }
+                    else
+                    {
+                        ERROR << "Unknown algorithm : " << it.second
+                              << ". It will be ignored." << endmsg;
+                        result   = true;
+                        save     = false;
+                        return true;
+                    }
+                }
+                // clustering algo -> keep the previous syntax
+                else if (key.find("cluster.")==0)
+                {
+                    clustering_params.insert(std::pair<std::string,std::string>(key.substr(8),it.second));
+                    result = true;
+                }
+
+                // Other
+                try
+                {
+                  if (!result) throw EXCEPTION_WARNING("Parameter = "+key+" unknown. It will be skipped.","",0);
+                }
+                catch(const std::exception& e)
+                {
+                  MANAGE_EXCEPTION(e);
+                  return true;
                 }
             }
 
-            // Find the clustering algorithm 
-            if (key=="algorithm")
+            if (save)
             {
-                if (it->second == "antikt")
-                {
-                    new_algo = new ClusterAlgoStandard("antikt");
-                    result   = true;
-                }
-                else if (it->second == "cambridge")
-                {
-                    new_algo = new ClusterAlgoStandard("cambridge");
-                    result   = true;
-                }
-                else if (it->second == "genkt")
-                {
-                    new_algo = new ClusterAlgoStandard("genkt");
-                    result   = true;
-                }
-                else if (it->second == "kt")
-                {
-                    new_algo = new ClusterAlgoStandard("kt");
-                    result   = true;
-                }
-                else if (it->second == "siscone")
-                {
-                    new_algo = new ClusterAlgoSISCone();
-                    result   = true;
-                }
-                else if (it->second == "cdfmidpoint")
-                {
-                    new_algo = new ClusterAlgoCDFMidpoint();
-                    result   = true;
-                }
-                else if (it->second == "cdfjetclu")
-                {
-                    new_algo = new ClusterAlgoCDFJetClu();
-                    result   = true;
-                }
-                else if (it->second == "gridjet")
-                {
-                    new_algo = new ClusterAlgoGridJet();
-                    result   = true;
-                }
-                else
-                {
-                    ERROR << "Unknown algorithm : " << it->second 
-                          << ". It will be ignored." << endmsg;
-                    result   = true;
-                    save     = false;
-                    break;
-                }
-            }
-            // clustering algo -> keep the previous syntax 
-            else if (key.find("cluster.")==0)
-            {
-                clustering_params.insert(std::pair<std::string,std::string>(key.substr(8),it->second));
-                result = true;
-            }
-
-            // Other
-            try
-            {
-              if (!result) throw EXCEPTION_WARNING("Parameter = "+key+" unknown. It will be skipped.","",0);
-            }
-            catch(const std::exception& e)
-            {
-              MANAGE_EXCEPTION(e);
+                cluster_collection_.insert(std::pair<std::string,ClusterAlgoBase*>(new_jetid,new_algo));
+                for (const auto &it: clustering_params)
+                    cluster_collection_[new_jetid]->SetParameter(it.first, it.second);
+                std::string algoname = cluster_collection_[new_jetid]->GetName();
+                std::string params   = cluster_collection_[new_jetid]->GetParameters();
+                INFO << "      - Adding Jet ID : " << new_jetid << endmsg;
+                INFO << "            with algo : " << algoname << ", " << params << endmsg;
+                cluster_collection_[new_jetid]->Initialize();
             }
         }
-
-        if (!IDflag)
+        else if (algorithm == "VariableR")
         {
-            ERROR << "Please define Jet ID. Jet will not be included in the analysis." << endmsg;
-            save = false;
+            for (std::string key: {"rho", "minR", "maxR", "PTmin", "clustertype", "strategy", "exclusive"})
+            {
+                if (options.find("cluster."+key) == options.end())
+                {
+                    ERROR << "Option 'cluster." + key + "' is missing. VariableR clustering will be ignore." << endmsg;
+                    return true;
+                }
+            }
+            MAfloat32 rho   = std::stof(options["cluster.rho"]);
+            MAfloat32 minR  = std::stof(options["cluster.minR"]);
+            MAfloat32 maxR  = std::stof(options["cluster.maxR"]);
+            MAfloat32 ptmin = std::stof(options["cluster.PTmin"]);
+            MAbool isExclusive = (options["cluster.exclusive"] == "1");
+
+            Substructure::ClusterType ctype = Substructure::AKTLIKE;
+            if (options["cluster.clustertype"] == "CALIKE")       ctype = Substructure::CALIKE;
+            else if (options["cluster.clustertype"] == "KTLIKE")  ctype = Substructure::KTLIKE;
+            else if (options["cluster.clustertype"] == "AKTLIKE") ctype = Substructure::AKTLIKE;
+
+            Substructure::Strategy strategy = Substructure::Best;
+            if (options["cluster.strategy"] == "Best")         strategy = Substructure::Best;
+            else if (options["cluster.strategy"] == "N2Tiled") strategy = Substructure::N2Tiled;
+            else if (options["cluster.strategy"] == "N2Plain") strategy = Substructure::N2Plain;
+            else if (options["cluster.strategy"] == "NNH")     strategy = Substructure::NNH;
+            else if (options["cluster.strategy"] == "Native")  strategy = Substructure::Native;
+
+            Substructure::VariableR* variableR;
+            variableR = new Substructure::VariableR(rho, minR, maxR, ctype, strategy, ptmin, isExclusive);
+
+            variableR_collection_.insert(
+                std::pair<std::string, Substructure::VariableR*>(options["JetID"], variableR)
+            );
+
+            std::string exclusive = isExclusive ? "True" : "False";
+            INFO << "      - Adding Jet ID : " << options["JetID"] << endmsg;
+            INFO << "            with algo : VariableR" << ", "
+                 << "rho = " << options["cluster.rho"] << ", "
+                 << "minR = " << options["cluster.minR"] << ", "
+                 << "maxR = " << options["cluster.maxR"] << ", "
+                 << "ptmin = " << options["cluster.PTmin"] << ", \n"
+                 << "                                   "
+                 << "isExclusive = " << exclusive << ", "
+                 << "clustertype = " << options["cluster.clustertype"] << ", "
+                 << "strategy = " << options["cluster.strategy"]
+                 << endmsg;
         }
 
-        if (save)
-        {
-            cluster_collection_.insert(std::pair<std::string,ClusterAlgoBase*>(new_jetid,new_algo));
-            for (std::map<std::string, std::string>::const_iterator
-                 it=clustering_params.begin();it!=clustering_params.end();it++)
-            { cluster_collection_[new_jetid]->SetParameter(it->first,it->second); }
-            std::string algoname = cluster_collection_[new_jetid]->GetName();
-            std::string params   = cluster_collection_[new_jetid]->GetParameters();
-            INFO << "      - Adding Jet ID : " << new_jetid << endmsg;
-            INFO << "            with algo : " << algoname << ", " << params << endmsg;
-            cluster_collection_[new_jetid]->Initialize();
-        }
+        return true;
 #else
         ERROR << "FastJet has not been enabled. Can not add jets to the analysis." << endmsg;
+        return true;
 #endif
     }
 
