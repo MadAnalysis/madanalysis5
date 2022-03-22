@@ -90,11 +90,7 @@ namespace MA5 {
                 // Execute with a single jet
                 const RecJetFormat * Execute(const RecJetFormat *jet)
                 {
-
-                    fastjet::Pruner pruner(
-                            *const_cast<const fastjet::JetDefinition*>(JetDefinition_), zcut_, Rcut_factor_
-                    );
-                    fastjet::PseudoJet pruned_jet = pruner(jet->pseudojet());
+                    fastjet::PseudoJet pruned_jet = __prune(jet->pseudojet());
 
                     RecJetFormat *NewJet = new RecJetFormat();
                     NewJet->Reset();
@@ -104,6 +100,26 @@ namespace MA5 {
 
                     return NewJet;
                 }
+
+                // Execute with a list of jets
+                std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets)
+                {
+                    std::vector<const RecJetFormat *> output_jets;
+                    for (auto &jet: jets)
+                        output_jets.push_back(Execute(jet));
+                    return output_jets;
+                }
+
+            private:
+
+                fastjet::PseudoJet __prune(fastjet::PseudoJet jet)
+                {
+                    fastjet::Pruner pruner(
+                            *const_cast<const fastjet::JetDefinition*>(JetDefinition_), zcut_, Rcut_factor_
+                    );
+                    return pruner(jet);
+                }
+
         };
     }
 }
