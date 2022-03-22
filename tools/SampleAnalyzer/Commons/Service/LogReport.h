@@ -84,7 +84,7 @@ class LogReport
  public:
 
   /// Constructor withtout argument
-  LogReport() : GeneralCounter_(0), GlobalThreshold_(1), MsgThreshold_(1)
+  LogReport() : GeneralCounter_(0), GlobalThreshold_(1000000), MsgThreshold_(5)
   {}
 
   /// Destructor
@@ -94,8 +94,8 @@ class LogReport
   /// Clearing the content
   void Reset()
   { 
-    GlobalThreshold_ = 1;
-    MsgThreshold_ = 1;
+    GlobalThreshold_ = 1000000;
+    MsgThreshold_ = 5;
     GeneralCounter_ = 0;
     MsgTable_.clear();
     Name_="";
@@ -136,7 +136,7 @@ class LogReport
                                                           LogMsgValue() ));
       if (!test.second)
       {
-        std::cout << "ERREUR" << std::endl;
+        std::cout << "ERROR" << std::endl;
         return MsgTable_.end();
       }
       it = test.first;
