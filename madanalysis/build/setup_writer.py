@@ -134,7 +134,7 @@ class SetupWriter():
             file.write('    echo -e $BLUE"   * SFS-FastJet mode has been initiated."$NORMAL\n')
             file.write('fi\n\n')
 
-            file.write('if [ $WITH_DELPHES -eq "1"] || |[$WITH_FASTJET -eq "0"]\n')
+            file.write('if [ $WITH_DELPHES -eq "1"] || [$WITH_FASTJET -eq "0"]\n')
             file.write('then\n')
             file.write('    echo -e $BLUE"   * SFS-FastJet mode has been turned off."\n')
             file.write('    usage\n')
