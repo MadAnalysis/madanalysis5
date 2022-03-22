@@ -35,6 +35,9 @@
 // SampleAnalyser headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecJetFormat.h"
+#include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
+#include "SampleAnalyzer/Commons/Service/PDGService.h"
+#include "SampleAnalyzer/Commons/Service/LogService.h"
 
 namespace fastjet
 {
@@ -57,6 +60,7 @@ namespace MA5 {
 
                 // External parameters
                 MAfloat32 ptmin_;
+                MAbool isExclusive_;
 
                 /// Jet definition
                 fastjet::JetDefinition* JetDefinition_;
@@ -76,10 +80,10 @@ namespace MA5 {
                 virtual ~Cluster() {}
 
                 // Constructor with arguments
-                Cluster(Algorithm algorithm, MAfloat32 radius, MAfloat32 ptmin=0.)
-                { Initialize(algorithm, radius, ptmin); }
+                Cluster(Algorithm algorithm, MAfloat32 radius, MAfloat32 ptmin=0., MAbool isExclusive = false)
+                { Initialize(algorithm, radius, ptmin, isExclusive); }
 
-                void Initialize(Algorithm algorithm, MAfloat32 radius, MAfloat32 ptmin=0.)
+                void Initialize(Algorithm algorithm, MAfloat32 radius, MAfloat32 ptmin=0., MAbool isExclusive = false)
                 {
                     if (algorithm == Substructure::antikt)
                     {
@@ -93,16 +97,69 @@ namespace MA5 {
                     {
                         JetDefinition_ = new fastjet::JetDefinition(fastjet::kt_algorithm, radius);
                     }
-                    ptmin_ = ptmin < 0. ? 0. : ptmin;
+                    ptmin_ = ptmin < 0. ? 0. : ptmin; isExclusive_ = isExclusive;
+                }
+
+                // Cluster given particles
+                std::vector<fastjet::PseudoJet> __cluster(std::vector<fastjet::PseudoJet> particles)
+                {
+                    clust_seq.reset(new fastjet::ClusterSequence(particles, *JetDefinition_));
+
+                    std::vector<fastjet::PseudoJet> jets;
+                    if (isExclusive_) jets = clust_seq->exclusive_jets(ptmin_);
+                    else jets = clust_seq->inclusive_jets(ptmin_);
+
+                    return fastjet::sorted_by_pt(jets);
+                }
+
+                // Execute with the Reconstructed event
+                void Execute(EventFormat& myEvent, std::string JetID)
+                {
+                    MAbool execute = true;
+                    for (auto &jetid: myEvent.rec()->GetJetIDs())
+                    {
+                        if (JetID == jetid)
+                        {
+                            ERROR << "Substructure::Cluster - Jet ID " << JetID
+                                  << " already exits. Skipping execution." << endmsg;
+                            execute = false;
+                            break;
+                        }
+                    }
+
+                    if (execute)
+                    {
+                        std::vector <fastjet::PseudoJet> jets = __cluster(myEvent.rec()->cluster_inputs());
+
+                        for (auto &jet: jets) {
+                            RecJetFormat *current_jet = myEvent.rec()->GetNewJet(JetID);
+                            MALorentzVector q(jet.px(), jet.py(), jet.pz(), jet.e());
+                            current_jet->setMomentum(q);
+                            current_jet->setPseudoJet(jet);
+                            std::vector <fastjet::PseudoJet> constituents = clust_seq->constituents(jet);
+                            MAuint32 tracks = 0;
+                            for (MAuint32 j = 0; j < constituents.size(); j++) {
+                                current_jet->AddConstituent(constituents[j].user_index());
+                                if (PDG->IsCharged(myEvent.mc()->particles()[constituents[j].user_index()].pdgid()))
+                                    tracks++;
+                            }
+                            current_jet->ntracks_ = tracks;
+                        }
+                        if (jets.size() == 0) myEvent.rec()->CreateEmptyJetAccesor(JetID);
+                    }
+                }
+
+                // Wrapper for event based execution
+                void Execute(const EventFormat& event, std::string JetID)
+                {
+                    Execute(const_cast<EventFormat&>(event), JetID);
                 }
 
                 // Execute with a single jet
                 std::vector<const RecJetFormat *> Execute(const RecJetFormat *jet)
                 {
                     std::vector<const RecJetFormat *> output_jets;
-
-                    clust_seq.reset(new fastjet::ClusterSequence(jet->pseudojet().constituents(), *JetDefinition_));
-                    std::vector<fastjet::PseudoJet> reclustered_jets = sorted_by_pt(clust_seq->exclusive_jets(ptmin_));
+                    std::vector<fastjet::PseudoJet> reclustered_jets = __cluster(jet->pseudojet().constituents());
 
                     for (auto &jet: reclustered_jets)
                     {
@@ -132,8 +189,7 @@ namespace MA5 {
                         );
                     }
 
-                    clust_seq.reset(new fastjet::ClusterSequence(constituents, *JetDefinition_));
-                    std::vector<fastjet::PseudoJet> reclustered_jets = sorted_by_pt(clust_seq->exclusive_jets(ptmin_));
+                    std::vector<fastjet::PseudoJet> reclustered_jets = __cluster(constituents);
 
                     for (auto &jet: reclustered_jets)
                     {

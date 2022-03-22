@@ -52,6 +52,7 @@ namespace MA5
 
 namespace Substructure {
     class VariableR;
+    class Cluster;
 }
 class LHEReader;
 class LHCOReader;
@@ -75,6 +76,7 @@ class RecEventFormat
   friend class DelphesMA5tuneTreeReader;
   friend class DelphesMemoryInterface;
   friend class Substructure::VariableR;
+  friend class Substructure::Cluster;
 
   // -------------------------------------------------------------
   //                        data members

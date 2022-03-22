@@ -49,6 +49,7 @@ namespace MA5
 //#ifdef MA5_FASTJET_MODE
 namespace Substructure {
     class VariableR;
+    class Cluster;
 }
 //#endif
 class LHCOReader;
@@ -73,9 +74,8 @@ class RecJetFormat : public RecParticleFormat
   friend class DelphesTreeReader;
   friend class DelphesMA5tuneTreeReader;
   friend class DelphesMemoryInterface;
-//#ifdef MA5_FASTJET_MODE
   friend class Substructure::VariableR;
-//#endif
+  friend class Substructure::Cluster;
 
   // -------------------------------------------------------------
   //                        data members
