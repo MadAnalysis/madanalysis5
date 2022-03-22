@@ -1,0 +1,10 @@
+#TITLE Test datastructure in expert reco mode
+#MODE EXPERTRECO
+
+set main.fastsim.package = fastjet
+
+import $MA5PATH/samples/*hepmc*
+
+#CPP $EXPERT_LEVEL_PATH/datastructure.cpp
+#HEADER $EXPERT_LEVEL_PATH/datastructure.h
+#COMMANDLINE --test=1

@@ -1,0 +1,13 @@
+#TITLE Delphes fastsimulation: CMS + pileup
+#MODE RECO
+
+set main.fastsim.package = delphes
+set main.fastsim.detector = cms
+set main.fastsim.pileup = $SMP_PATH/MinBias.pileup
+display main
+plot MET
+
+import $SMP_PATH/*hep*
+import $SMP_PATH/*hepmc*
+submit
+#END

@@ -1,0 +1,14 @@
+#TITLE clustering with antikt algorithm
+#MODE RECO
+
+set main.fastsim.package = fastjet
+set main.fastsim.algorithm = antikt
+set main.fastsim.ptmin = 20.0
+set main.fastsim.radius = 0.4
+display main
+plot MET
+
+import $MA5PATH/samples/*hep*
+import $MA5PATH/samples/*hepmc*
+submit
+#END

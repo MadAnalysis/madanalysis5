@@ -1,0 +1,15 @@
+#TITLE fastjet with gridjet algorithm
+#MODE RECO
+
+set main.fastsim.package = fastjet
+set main.fastsim.algorithm = gridjet
+set main.fastsim.ptmin = 5
+set main.fastsim.spacing = 0.1
+set main.fastsim.ymax = 3.0
+display main
+plot MET
+
+import $MA5PATH/samples/*hep*
+import $MA5PATH/samples/*hepmc*
+submit
+#END

@@ -1,0 +1,12 @@
+#TITLE clustering + LHE output
+#MODE RECO
+
+set main.fastsim.package = fastjet
+set main.fastsim.algorithm = antikt
+set main.outputfile = "test.lhe"
+display main
+
+import $MA5PATH/samples/*hep*
+import $MA5PATH/samples/*hepmc*
+submit
+#END
