@@ -83,9 +83,9 @@ class PDGService
   }
 
   /// Get charge
-  MAint32 GetCharge (MAint32 pdgid)
+  MAint32 GetCharge (MAint32 pdgid, MAbool verbose = true)
   {
-    return (*Table_)[pdgid].Charge();
+    return (*Table_).GetParticle(pdgid, verbose).Charge();
   }
 
   /// Get charge
