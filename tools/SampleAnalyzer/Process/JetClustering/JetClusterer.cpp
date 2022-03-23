@@ -240,6 +240,8 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
     if (mySmearer_->isPropagatorOn() && part.mothers().size()>0)
         mySmearer_->ParticlePropagator(const_cast<MCParticleFormat*>(&part));
 
+#ifdef MA5_FASTJET_MODE
+    // @JACK delphes based analyses already has tracks
     // Set up tracks as charged FS particles OR charged interstate particles with nonzero ctau
     if (PDG->IsCharged(part.pdgid()) && part.mothers().size()>0)
     {
@@ -271,6 +273,7 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
             }
         }
     }
+#endif
 
     // Treating intermediate particles
     if (PHYSICS->Id->IsInterState(part))
