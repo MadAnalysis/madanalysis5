@@ -62,27 +62,27 @@ namespace MA5 {
                 /// Destructor
                 virtual ~Recluster() {}
 
+                //============================//
+                //        Initialization      //
+                //============================//
+                // Initialize the parameters of the algorithm. Initialization includes multiple if conditions
+                // Hence it would be optimum execution to initialize the algorithm during the initialisation
+                // of the analysis
+
                 // Constructor with arguments
-                Recluster(Algorithm algorithm, MAfloat32 radius)
-                { Initialize(algorithm, radius); }
+                Recluster(Algorithm algorithm, MAfloat32 radius) { Initialize(algorithm, radius); }
 
                 void Initialize(Algorithm algorithm, MAfloat32 radius)
                 {
-                    if (algorithm == Substructure::antikt)
-                    {
-                        JetDefinition_ = new fastjet::JetDefinition(fastjet::antikt_algorithm, radius);
-                    }
-                    else if (algorithm == Substructure::cambridge)
-                    {
-                        JetDefinition_ = new fastjet::JetDefinition(fastjet::cambridge_algorithm, radius);
-                    }
-                    else if (algorithm == Substructure::kt)
-                    {
-                        JetDefinition_ = new fastjet::JetDefinition(fastjet::kt_algorithm, radius);
-                    }
+                    Cluster cluster(algorithm, radius);
+                    JetDefinition_ = cluster.JetDefinition();
                 }
 
-                // Execute with a single jet
+                //=======================//
+                //        Execution      //
+                //=======================//
+
+                // Method to recluster a given jet. Returns only the hardest reclustered jet.
                 const RecJetFormat* Execute(const RecJetFormat *jet)
                 {
                     RecJetFormat *NewJet = new RecJetFormat();
@@ -90,14 +90,15 @@ namespace MA5 {
                     fastjet::contrib::Recluster recluster(*JetDefinition_);
                     fastjet::PseudoJet reclustered_jet = recluster(jet->pseudojet());
                     MALorentzVector q(
-                            reclustered_jet.px(), reclustered_jet.py(), reclustered_jet.pz(), reclustered_jet.e()
+                            reclustered_jet.px(), reclustered_jet.py(),
+                            reclustered_jet.pz(), reclustered_jet.e()
                     );
                     NewJet->setMomentum(q);
                     NewJet->setPseudoJet(reclustered_jet);
                     return NewJet;
                 }
 
-                // Execute with a list of jets
+                // Method to recluster each jet in a given vector
                 std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets)
                 {
                     std::vector<const RecJetFormat *> output_jets;

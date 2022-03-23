@@ -92,6 +92,13 @@ namespace MA5 {
                 /// Destructor
                 virtual ~VariableR() {}
 
+                //============================//
+                //        Initialization      //
+                //============================//
+                // Initialize the parameters of the algorithm. Initialization includes multiple if conditions
+                // Hence it would be optimum execution to initialize the algorithm during the initialisation
+                // of the analysis
+
                 // Constructor with arguments
                 VariableR(
                     MAfloat32 rho,
@@ -137,57 +144,22 @@ namespace MA5 {
                     precluster_ = false;
                 }
 
-                // Execute with the Reconstructed event
-                void Execute(EventFormat& myEvent, std::string JetID)
-                {
-                    MAbool execute = true;
-                    try
-                    {
-                        for (auto &jetid: myEvent.rec()->GetJetIDs())
-                        {
-                            if (JetID == jetid)
-                            {
-                                throw EXCEPTION_ERROR(
-                                        "Substructure::VariableR - Jet ID " + JetID + \
-                                        " already exits. Skipping execution.","",1
-                                );
-                            }
-                        }
-                    }
-                    catch (const std::exception& err)
-                    {
-                        MANAGE_EXCEPTION(err);
-                        execute = false;
-                    }
+                //=======================//
+                //        Execution      //
+                //=======================//
 
-
-                    if (execute)
-                    {
-                        std::vector <fastjet::PseudoJet> variableR_jets = __cluster(myEvent.rec()->cluster_inputs());
-
-                        for (auto &VR_jet: variableR_jets) {
-                            RecJetFormat *jet = myEvent.rec()->GetNewJet(JetID);
-                            MALorentzVector q(VR_jet.px(), VR_jet.py(), VR_jet.pz(), VR_jet.e());
-                            jet->setMomentum(q);
-                            jet->setPseudoJet(VR_jet);
-                            std::vector <fastjet::PseudoJet> constituents = clust_seq->constituents(VR_jet);
-                            MAuint32 tracks = 0;
-                            for (MAuint32 j = 0; j < constituents.size(); j++) {
-                                jet->AddConstituent(constituents[j].user_index());
-                                if (PDG->IsCharged(myEvent.mc()->particles()[constituents[j].user_index()].pdgid()))
-                                    tracks++;
-                            }
-                            jet->ntracks_ = tracks;
-                        }
-                        if (variableR_jets.size() == 0) myEvent.rec()->CreateEmptyJetAccesor(JetID);
-                    }
-                }
+                /*
+                 TODO currently variableR is redefined in every single execution since its defined under __cluster
+                 however if JetDefinition can be defined during initialization __cluster function can reuse this
+                 every time hence can save time during execution. for simular workflow see Cluster.h.
+                 @JACK tried to inherit Cluster class to use all its functionality since they are basically the same
+                 function. However it only worked for event clustering, for some reason single jet and vector-jet
+                 execution did not work. I assume due to shared_ptr.
+                 */
 
                 // Wrapper for event based execution
                 void Execute(const EventFormat& event, std::string JetID)
-                {
-                    Execute(const_cast<EventFormat&>(event), JetID);
-                }
+                { __execute(const_cast<EventFormat&>(event), JetID); }
 
                 // Execute with a list of jets
                 std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets)
@@ -255,6 +227,39 @@ namespace MA5 {
                     else variableR_jets = clust_seq->inclusive_jets(ptmin_);
 
                     return fastjet::sorted_by_pt(variableR_jets);
+                }
+
+                // Execute with the Reconstructed event. This method creates a new Jet in RecEventFormat which
+                // can be accessed via JetID. The algorithm will only be executed if a unique JetID is given
+                MAbool __execute(EventFormat& myEvent, std::string JetID)
+                {
+                    try {
+                        if (myEvent.rec()->hasJetID(JetID))
+                            throw EXCEPTION_ERROR("Substructure::VariableR - Jet ID `" + JetID + \
+                                                      "` already exits. Skipping execution.","",1);
+                    } catch (const std::exception& err) {
+                        MANAGE_EXCEPTION(err);
+                        return false;
+                    }
+
+                    std::vector <fastjet::PseudoJet> jets = __cluster(myEvent.rec()->cluster_inputs());
+
+                    for (auto &jet: jets) {
+                        RecJetFormat *current_jet = myEvent.rec()->GetNewJet(JetID);
+                        MALorentzVector q(jet.px(), jet.py(), jet.pz(), jet.e());
+                        current_jet->setMomentum(q);
+                        current_jet->setPseudoJet(jet);
+                        std::vector <fastjet::PseudoJet> constituents = clust_seq->constituents(jet);
+                        MAuint32 tracks = 0;
+                        for (MAuint32 j = 0; j < constituents.size(); j++) {
+                            current_jet->AddConstituent(constituents[j].user_index());
+                            if (PDG->IsCharged(myEvent.mc()->particles()[constituents[j].user_index()].pdgid()))
+                                tracks++;
+                        }
+                        current_jet->ntracks_ = tracks;
+                    }
+                    if (jets.size() == 0) myEvent.rec()->CreateEmptyJetAccesor(JetID);
+                    return true;
                 }
         };
     }

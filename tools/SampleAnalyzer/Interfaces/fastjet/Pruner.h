@@ -61,6 +61,13 @@ namespace MA5 {
                 /// Destructor
                 virtual ~Pruner() {}
 
+                //============================//
+                //        Initialization      //
+                //============================//
+                // Initialize the parameters of the algorithm. Initialization includes multiple if conditions
+                // Hence it would be optimum execution to initialize the algorithm during the initialisation
+                // of the analysis
+
                 // Constructor with arguments
                 Pruner(Substructure::Algorithm algorithm, MAfloat32 R, MAfloat32 zcut, MAfloat32 Rcut_factor)
                 { Initialize(algorithm, R, zcut, Rcut_factor); }
@@ -72,12 +79,13 @@ namespace MA5 {
                 void Initialize(Substructure::Algorithm algorithm, MAfloat32 zcut, MAfloat32 Rcut_factor)
                 { Initialize(algorithm, -1., zcut, Rcut_factor); }
 
+                // Initialize with all the arguments. Note that if R <= 0 max allowable radius will be used
                 void Initialize(Substructure::Algorithm algorithm, MAfloat32 R, MAfloat32 zcut, MAfloat32 Rcut_factor)
                 {
                     fastjet::JetAlgorithm algo_;
-                    if (algorithm == Substructure::antikt) algo_ = fastjet::antikt_algorithm;
+                    if (algorithm == Substructure::antikt)         algo_ = fastjet::antikt_algorithm;
                     else if (algorithm == Substructure::cambridge) algo_ = fastjet::cambridge_algorithm;
-                    else if (algorithm == Substructure::kt) algo_ = fastjet::kt_algorithm;
+                    else if (algorithm == Substructure::kt)        algo_ = fastjet::kt_algorithm;
 
                     if (R<=0.)
                         JetDefinition_ = new fastjet::JetDefinition(algo_, fastjet::JetDefinition::max_allowable_R);
@@ -87,7 +95,11 @@ namespace MA5 {
                     zcut_ = zcut; Rcut_factor_=Rcut_factor;
                 }
 
-                // Execute with a single jet
+                //=======================//
+                //        Execution      //
+                //=======================//
+
+                // Method to prune a given jet with respect to initialization parameters
                 const RecJetFormat * Execute(const RecJetFormat *jet)
                 {
                     fastjet::PseudoJet pruned_jet = __prune(jet->pseudojet());
@@ -101,7 +113,7 @@ namespace MA5 {
                     return NewJet;
                 }
 
-                // Execute with a list of jets
+                // Method to prune each given jet individually with respect to initialization parameters
                 std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets)
                 {
                     std::vector<const RecJetFormat *> output_jets;

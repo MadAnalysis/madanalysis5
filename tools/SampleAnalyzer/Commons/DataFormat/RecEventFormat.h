@@ -404,18 +404,15 @@ class RecEventFormat
   const std::vector<std::string> GetJetIDs() const
   {
     std::vector<std::string> keys;
-    for (std::map<std::string, std::vector<RecJetFormat> >::const_iterator
-         it=jetcollection_.begin();it!=jetcollection_.end();it++)
-         keys.push_back(it->first);
+    for (auto &key: jetcollection_)
+        keys.push_back(key.first);
     return keys;
   }
 
   // Check if collection ID exists
   MAbool hasJetID(std::string id)
   {
-    std::map<std::string, std::vector<RecJetFormat> >::iterator 
-        jet_check = jetcollection_.find(id);
-    if (jet_check != jetcollection_.end()) return true;
+    if (jetcollection_.find(id) != jetcollection_.end()) return true;
     return false;
   }
 

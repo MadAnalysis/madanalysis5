@@ -284,7 +284,7 @@ namespace MA5
             {
                 if (options.find("cluster."+key) == options.end())
                 {
-                    ERROR << "Option 'cluster." + key + "' is missing. VariableR clustering will be ignore." << endmsg;
+                    ERROR << "Option 'cluster." + key + "' is missing. VariableR clustering will be ignored." << endmsg;
                     return true;
                 }
             }

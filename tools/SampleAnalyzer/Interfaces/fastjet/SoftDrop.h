@@ -1,4 +1,4 @@
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
 //
 //  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
@@ -19,7 +19,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
 //
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
 
 #ifndef MADANALYSIS5_SOFTDROP_H
 #define MADANALYSIS5_SOFTDROP_H
@@ -42,41 +42,68 @@ namespace MA5 {
     namespace Substructure {
         class SoftDrop {
 
+            // SoftDrop wrapper arXiv:1402.2657.
+            //
+            // For the basic functionalities, we refer the reader to the
+            // documentation of the RecursiveSymmetryCutBase from which SoftDrop
+            // inherits. Here, we mostly put the emphasis on things specific to
+            // SoftDrop:
+            //
+            //  - the cut applied recursively is
+            //     \f[
+            //        z > z_{\rm cut} (\theta/R0)^\beta
+            //     \f]
+            //    with z the asymmetry measure and \f$\theta\f$ the geometrical
+            //    distance between the two subjets. R0 is set to 1 by default.
+            //
+            //  - by default, we work in "grooming mode" i.s. if no substructure
+            //    is found, we return a jet made of a single parton. Note that
+            //    this behaviour differs from the mMDT (and can be a source of
+            //    differences when running SoftDrop with beta=0.)
+            //
+
             //---------------------------------------------------------------------------------
             //                                 data members
             //---------------------------------------------------------------------------------
             protected :
 
                 // SoftDrop input variables
-                MAfloat32 beta_;
-                MAfloat32 symmetry_cut_;
+                MAfloat32 beta_;         // the value of the beta parameter
+                MAfloat32 symmetry_cut_; // the value of the cut on the symmetry measure
+                MAfloat32 R0_;           // the angular distance normalisation [1 by default]
 
             // -------------------------------------------------------------
             //                       method members
             // -------------------------------------------------------------
             public:
 
-                /// Constructor without argument
+                // Constructor without argument
                 SoftDrop() {}
 
-                /// Destructor
+                // Destructor
                 virtual ~SoftDrop() {}
 
+                //============================//
+                //        Initialization      //
+                //============================//
+                
                 // Constructor with arguments
-                SoftDrop(MAfloat32 beta, MAfloat32 symmetry_cut) { Initialize(beta, symmetry_cut); }
+                SoftDrop(MAfloat32 beta, MAfloat32 symmetry_cut, MAfloat32 R0=1.)
+                { Initialize(beta, symmetry_cut, R0); }
 
-                void Initialize(MAfloat32 beta, MAfloat32 symmetry_cut)
-                {
-                    beta_ = beta;
-                    symmetry_cut_ = symmetry_cut;
-                }
+                void Initialize(MAfloat32 beta, MAfloat32 symmetry_cut, MAfloat32 R0=1.)
+                { beta_ = beta; symmetry_cut_ = symmetry_cut; R0_ = R0;}
 
+                //=======================//
+                //        Execution      //
+                //=======================//
+                
                 // Execute with a single jet
                 const RecJetFormat *Execute(const RecJetFormat *jet)
                 {
                     RecJetFormat *NewJet = new RecJetFormat();
                     NewJet->Reset();
-                    fastjet::contrib::SoftDrop sd(beta_, symmetry_cut_);
+                    fastjet::contrib::SoftDrop sd(beta_, symmetry_cut_, R0_);
                     fastjet::PseudoJet sd_jet = sd(jet->pseudojet());
                     MALorentzVector q(sd_jet.px(), sd_jet.py(), sd_jet.pz(), sd_jet.e());
                     NewJet->setMomentum(q);
@@ -90,6 +117,16 @@ namespace MA5 {
                     std::vector<const RecJetFormat *> output_jets;
                     for (auto &jet: jets)
                         output_jets.push_back(Execute(jet));
+
+                    // Sort with respect to jet pT
+                    std::sort(
+                        output_jets.begin(),
+                        output_jets.end(),
+                        [](const RecJetFormat *j1, const RecJetFormat *j2)
+                        {
+                            return (j1->pt() > j2->pt());
+                        }
+                    );
 
                     return output_jets;
                 }

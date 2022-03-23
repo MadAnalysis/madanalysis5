@@ -91,6 +91,13 @@ namespace MA5 {
                 /// Destructor
                 virtual ~Nsubjettiness() {}
 
+                //============================//
+                //        Initialization      //
+                //============================//
+                // Initialize the parameters of the algorithm. Initialization includes multiple if conditions
+                // Hence it would be optimum execution to initialize the algorithm during the initialisation
+                // of the analysis
+
                 // Constructor with arguments
                 Nsubjettiness(
                     MAint32 order,
@@ -170,7 +177,11 @@ namespace MA5 {
                     order_ = order;
                 }
 
-                // Execute with a single jet
+                //=======================//
+                //        Execution      //
+                //=======================//
+
+                // Method to calculate nsub for a given jet with respect to initialization parameters
                 MAdouble64 Execute(const RecJetFormat *jet)
                 {
                     fastjet::contrib::Nsubjettiness nsubjettiness(order_, *axesdef_, *measuredef_);
