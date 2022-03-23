@@ -326,6 +326,11 @@ namespace MA5
                  << "strategy = " << options["cluster.strategy"]
                  << endmsg;
         }
+        else
+        {
+            ERROR << "Unknown algorithm: " << algorithm << endmsg;
+            return false;
+        }
 
         return true;
 #else
