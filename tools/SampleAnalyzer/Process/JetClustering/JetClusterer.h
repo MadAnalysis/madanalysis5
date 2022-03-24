@@ -43,6 +43,7 @@
   #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoCDFJetClu.h"
   #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoGridJet.h"
   #include "SampleAnalyzer/Interfaces/fastjet/VariableR.h"
+  #include "SampleAnalyzer/Interfaces/fastjet/ClusterBase.h"
 #endif
 
 // STL headers
@@ -78,7 +79,7 @@ namespace MA5
     std::map<std::string, ClusterAlgoBase*> cluster_collection_;
 
     // Jet collection configuration with VariableR
-    std::map<std::string, Substructure::VariableR*> variableR_collection_;
+    std::map<std::string, Substructure::ClusterBase*> substructure_collection_;
 #endif
 
     MAuint32 muon;
@@ -168,7 +169,7 @@ namespace MA5
             ERROR << "Jet configuration needs to have `JetID` option." << endmsg;
             return true;
         }
-        if (variableR_collection_.find(options["JetID"]) != variableR_collection_.end() || \
+        if (substructure_collection_.find(options["JetID"]) != substructure_collection_.end() || \
                 cluster_collection_.find(options["JetID"]) != cluster_collection_.end() )
         {
             ERROR << "Jet ID " + options["JetID"] + \
@@ -309,7 +310,7 @@ namespace MA5
             Substructure::VariableR* variableR;
             variableR = new Substructure::VariableR(rho, minR, maxR, ctype, strategy, ptmin, isExclusive);
 
-            variableR_collection_.insert(
+            substructure_collection_.insert(
                 std::pair<std::string, Substructure::VariableR*>(options["JetID"], variableR)
             );
 

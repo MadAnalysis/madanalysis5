@@ -546,15 +546,10 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
   // Cluster additional jets separately. In order to save time Execute function
   // saves hadron inputs into memory and that configuration is used for the rest
   // of the jets.
-  for (std::map<std::string, ClusterAlgoBase* >::const_iterator
-       it=cluster_collection_.begin();it!=cluster_collection_.end();it++)
-  {
-      it->second->Cluster(myEvent, it->first);
-  }
-  for (auto &variableR: variableR_collection_)
-  {
-      variableR.second->Execute(myEvent, variableR.first);
-  }
+  for (auto &collection_item: cluster_collection_)
+      collection_item.second->Cluster(myEvent, collection_item.first);
+  for (auto &substructure: substructure_collection_)
+      substructure.second->Execute(myEvent, substructure.first);
 #endif
 
 
