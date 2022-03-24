@@ -60,11 +60,7 @@ namespace MA5 {
             //                                 data members
             //---------------------------------------------------------------------------------
             protected :
-
-                // SoftDrop input variables
-                MAfloat32 beta_;         // the value of the beta parameter
-                MAfloat32 symmetry_cut_; // the value of the cut on the symmetry measure
-                MAfloat32 R0_;           // the angular distance normalisation [1 by default]
+                fastjet::contrib::SoftDrop * softDrop_;
 
             // -------------------------------------------------------------
             //                       method members
@@ -82,21 +78,24 @@ namespace MA5 {
                 //============================//
                 
                 // Constructor with arguments
-                SoftDrop(MAfloat32 beta, MAfloat32 symmetry_cut, MAfloat32 R0=1.)
+                SoftDrop(
+                    MAfloat32 beta,             // the value of the beta parameter
+                    MAfloat32 symmetry_cut,     // the value of the cut on the symmetry measure
+                    MAfloat32 R0=1.              // the angular distance normalisation [1 by default]
+                 )
                 { Initialize(beta, symmetry_cut, R0); }
 
                 void Initialize(MAfloat32 beta, MAfloat32 symmetry_cut, MAfloat32 R0=1.)
-                { beta_ = beta; symmetry_cut_ = symmetry_cut; R0_ = R0;}
+                { softDrop_ = new fastjet::contrib::SoftDrop(beta, symmetry_cut, R0); }
 
                 //=======================//
                 //        Execution      //
                 //=======================//
                 
                 // Execute with a single jet
-                const RecJetFormat *Execute(const RecJetFormat *jet)
+                const RecJetFormat * Execute(const RecJetFormat *jet)
                 {
-                    fastjet::contrib::SoftDrop sd(beta_, symmetry_cut_, R0_);
-                    fastjet::PseudoJet sd_jet = sd(jet->pseudojet());
+                    fastjet::PseudoJet sd_jet = (*softDrop_)(jet->pseudojet());
                     return ClusterBase().__transform_jet(sd_jet);
                 }
 
