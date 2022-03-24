@@ -24,18 +24,11 @@
 #ifndef MADANALYSIS5_PRUNER_H
 #define MADANALYSIS5_PRUNER_H
 
-// STL headers
-#include <vector>
-#include <algorithm>
-
 // FastJet headers
-#include "fastjet/PseudoJet.hh"
 #include "fastjet/tools/Pruner.hh"
 
 // SampleAnalyser headers
-#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
-#include "SampleAnalyzer/Commons/DataFormat/RecJetFormat.h"
-#include "SampleAnalyzer/Interfaces/fastjet/Cluster.h"
+#include "SampleAnalyzer/Interfaces/fastjet/ClusterBase.h"
 
 using namespace std;
 
@@ -82,10 +75,7 @@ namespace MA5 {
                 // Initialize with all the arguments. Note that if R <= 0 max allowable radius will be used
                 void Initialize(Substructure::Algorithm algorithm, MAfloat32 R, MAfloat32 zcut, MAfloat32 Rcut_factor)
                 {
-                    fastjet::JetAlgorithm algo_;
-                    if (algorithm == Substructure::antikt)         algo_ = fastjet::antikt_algorithm;
-                    else if (algorithm == Substructure::cambridge) algo_ = fastjet::cambridge_algorithm;
-                    else if (algorithm == Substructure::kt)        algo_ = fastjet::kt_algorithm;
+                    fastjet::JetAlgorithm algo_ = ClusterBase().__get_clustering_algorithm(algorithm);
 
                     if (R<=0.)
                         JetDefinition_ = new fastjet::JetDefinition(algo_, fastjet::JetDefinition::max_allowable_R);
@@ -103,14 +93,7 @@ namespace MA5 {
                 const RecJetFormat * Execute(const RecJetFormat *jet)
                 {
                     fastjet::PseudoJet pruned_jet = __prune(jet->pseudojet());
-
-                    RecJetFormat *NewJet = new RecJetFormat();
-                    NewJet->Reset();
-                    MALorentzVector q(pruned_jet.px(), pruned_jet.py(), pruned_jet.pz(), pruned_jet.e());
-                    NewJet->setMomentum(q);
-                    NewJet->setPseudoJet(pruned_jet);
-
-                    return NewJet;
+                    return ClusterBase().__transform_jet(pruned_jet);
                 }
 
                 // Method to prune each given jet individually with respect to initialization parameters

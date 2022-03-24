@@ -24,32 +24,17 @@
 #ifndef MADANALYSIS5_RECLUSTER_H
 #define MADANALYSIS5_RECLUSTER_H
 
-// STL headers
-#include <vector>
-#include <algorithm>
-
 // FastJet headers
 #include "fastjet/contrib/Recluster.hh"
-#include "fastjet/ClusterSequence.hh"
-#include "fastjet/PseudoJet.hh"
 
 // SampleAnalyser headers
-#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
-#include "SampleAnalyzer/Commons/DataFormat/RecJetFormat.h"
-#include "SampleAnalyzer/Interfaces/fastjet/Cluster.h"
+#include "SampleAnalyzer/Interfaces/fastjet/ClusterBase.h"
 
 using namespace std;
 
 namespace MA5 {
     namespace Substructure {
-        class Recluster {
-            //---------------------------------------------------------------------------------
-            //                                 data members
-            //---------------------------------------------------------------------------------
-            protected:
-
-                /// Jet definition
-                fastjet::JetDefinition* JetDefinition_;
+        class Recluster : public ClusterBase{
 
             // -------------------------------------------------------------
             //                       method members
@@ -72,11 +57,7 @@ namespace MA5 {
                 // Constructor with arguments
                 Recluster(Algorithm algorithm, MAfloat32 radius) { Initialize(algorithm, radius); }
 
-                void Initialize(Algorithm algorithm, MAfloat32 radius)
-                {
-                    Cluster cluster(algorithm, radius);
-                    JetDefinition_ = cluster.JetDefinition();
-                }
+                void Initialize(Algorithm algorithm, MAfloat32 radius) { SetJetDef(algorithm, radius); }
 
                 //=======================//
                 //        Execution      //
@@ -85,17 +66,9 @@ namespace MA5 {
                 // Method to recluster a given jet. Returns only the hardest reclustered jet.
                 const RecJetFormat* Execute(const RecJetFormat *jet)
                 {
-                    RecJetFormat *NewJet = new RecJetFormat();
-                    NewJet->Reset();
                     fastjet::contrib::Recluster recluster(*JetDefinition_);
                     fastjet::PseudoJet reclustered_jet = recluster(jet->pseudojet());
-                    MALorentzVector q(
-                            reclustered_jet.px(), reclustered_jet.py(),
-                            reclustered_jet.pz(), reclustered_jet.e()
-                    );
-                    NewJet->setMomentum(q);
-                    NewJet->setPseudoJet(reclustered_jet);
-                    return NewJet;
+                    return __transform_jet(reclustered_jet);
                 }
 
                 // Method to recluster each jet in a given vector
@@ -115,6 +88,28 @@ namespace MA5 {
                     );
 
                     return output_jets;
+                }
+
+                //=============================//
+                //        NOT IMPLEMENTED      //
+                //=============================//
+
+                void Execute(const EventFormat& event, std::string JetID)
+                {
+                    try { throw EXCEPTION_ERROR("This method has not been implemented", "", 1); }
+                    catch (const std::exception& err) {
+                        MANAGE_EXCEPTION(err);
+                    }
+                }
+
+                template<class Func>
+                std::vector<const RecJetFormat *> Execute(const RecJetFormat *jet, Func func)
+                {
+                    try { throw EXCEPTION_ERROR("This method has not been implemented", "", 1); }
+                    catch (const std::exception& err) {
+                        MANAGE_EXCEPTION(err);
+                        return std::vector<const RecJetFormat *>();
+                    }
                 }
         };
     }

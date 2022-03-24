@@ -24,20 +24,11 @@
 #ifndef MADANALYSIS5_VARIABLER_H
 #define MADANALYSIS5_VARIABLER_H
 
-// STL headers
-#include <vector>
-#include <algorithm>
-
 // FastJet headers
-#include "fastjet/ClusterSequence.hh"
-#include "fastjet/PseudoJet.hh"
 #include "fastjet/contrib/VariableRPlugin.hh"
 
 // SampleAnalyser headers
-#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
-#include "SampleAnalyzer/Commons/DataFormat/RecJetFormat.h"
-#include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
-#include "SampleAnalyzer/Commons/Service/PDGService.h"
+#include "SampleAnalyzer/Interfaces/fastjet/ClusterBase.h"
 
 using namespace std;
 
@@ -54,35 +45,21 @@ namespace MA5 {
             Native     ///< original local implemtation of the clustering [the default for FastJet<3.2.0]
         };
 
-        class VariableR {
+        class VariableR : public ClusterBase {
 
             //---------------------------------------------------------------------------------
             //                                 data members
             //---------------------------------------------------------------------------------
             protected:
-                MAfloat32 rho_;   // mass scale for effective radius (i.e. R ~ rho/pT)
-                MAfloat32 minR_; //minimum jet radius
-                MAfloat32 maxR_; // maximum jet radius
-                MAfloat32 ptmin_; // Minimum pT
-                fastjet::contrib::VariableRPlugin::ClusterType clusterType_; // whether to use CA-like, kT-like, or anti-kT-like distance
-                                                            // measure (this value is the same as the p exponent in
+                fastjet::contrib::VariableRPlugin::ClusterType clusterType_; // whether to use CA-like, kT-like,
+                                                            // or anti-kT-like distance measure
+                                                            // (this value is the same as the p exponent in
                                                             // generalized-kt, with anti-kt = -1.0, CA = 0.0, and
                                                             // kT = 1.0)
-                MAbool precluster_; // whether to use optional kT subjets (of size min_r) for preclustering
-                                    // (true is much faster, default=false). At the moment, the only option
-                                    // for preclustering is kT (use fastjet::NestedDefsPjugin otherwise)
-                fastjet::contrib::VariableRPlugin::Strategy strategy_; // decodes which algorithm to apply for the clustering
 
-                // Shared Cluster sequence
-                std::shared_ptr<fastjet::ClusterSequence> clust_seq;
+                fastjet::contrib::VariableRPlugin::Strategy strategy_;
+                // decodes which algorithm to apply for the clustering
 
-                MAbool isExclusive_; // if false return a vector of all jets (in the sense of the inclusive algorithm)
-                                     // with pt >= ptmin. Time taken should be of the order of the number of jets
-                                     // returned. if True return a vector of all jets (in the sense of the exclusive
-                                     // algorithm) that would be obtained when running the algorithm with the given ptmin.
-
-                /// Note that pre-clustering is deprecated and will likely be
-                /// removed in a future releasse of this contrib.
 
             public:
 
@@ -101,12 +78,12 @@ namespace MA5 {
 
                 // Constructor with arguments
                 VariableR(
-                    MAfloat32 rho,
-                    MAfloat32 minR,
-                    MAfloat32 maxR,
+                    MAfloat32 rho,                                  // mass scale for effective radius (i.e. R ~ rho/pT)
+                    MAfloat32 minR,                                 //minimum jet radius
+                    MAfloat32 maxR,                                 // maximum jet radius
                     Substructure::ClusterType clusterType,
                     Substructure::Strategy strategy = Substructure::Best,
-                    MAfloat32 ptmin = 0.,
+                    MAfloat32 ptmin = 0.,                           // Minimum pT
                     MAbool isExclusive = false
                 )
                 { Initialize(rho, minR, maxR, clusterType, strategy, ptmin, isExclusive); }
@@ -140,126 +117,17 @@ namespace MA5 {
                     else if (strategy == Substructure::Native)
                         strategy_ = fastjet::contrib::VariableRPlugin::Native;
 
-                    rho_ = rho; minR_ = minR; maxR_ = maxR; ptmin_ = ptmin; isExclusive_ = isExclusive;
-                    precluster_ = false;
-                }
+                    ptmin_ = ptmin; isExclusive_ = isExclusive;
 
-                //=======================//
-                //        Execution      //
-                //=======================//
-
-                /*
-                 TODO currently variableR is redefined in every single execution since its defined under __cluster
-                 however if JetDefinition can be defined during initialization __cluster function can reuse this
-                 every time hence can save time during execution. for simular workflow see Cluster.h.
-                 @JACK tried to inherit Cluster class to use all its functionality since they are basically the same
-                 function. However it only worked for event clustering, for some reason single jet and vector-jet
-                 execution did not work. I assume due to shared_ptr.
-                 */
-
-                // Wrapper for event based execution
-                void Execute(const EventFormat& event, std::string JetID)
-                { __execute(const_cast<EventFormat&>(event), JetID); }
-
-                // Execute with a list of jets
-                std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets)
-                {
-                    std::vector<const RecJetFormat *> output_jets;
-
-                    std::vector<fastjet::PseudoJet> constituents;
-                    for (auto &jet: jets)
-                    {
-                        std::vector<fastjet::PseudoJet> current_constituents = jet->pseudojet().constituents();
-                        constituents.reserve(constituents.size() + current_constituents.size());
-                        constituents.insert(
-                                constituents.end(), current_constituents.begin(), current_constituents.end()
-                        );
-                    }
-
-                    std::vector<fastjet::PseudoJet> variableR_jets = __cluster(constituents);
-
-                    for (auto &jet: variableR_jets)
-                    {
-                        RecJetFormat *NewJet = new RecJetFormat();
-                        NewJet->Reset();
-                        MALorentzVector q(jet.px(), jet.py(), jet.pz(), jet.e());
-                        NewJet->setMomentum(q);
-                        NewJet->setPseudoJet(jet);
-                        output_jets.push_back(NewJet);
-                    }
-
-                    return output_jets;
-                }
-
-                // Execute with a single jet
-                std::vector<const RecJetFormat *> Execute(const RecJetFormat *jet)
-                {
-                    std::vector<const RecJetFormat *> output_jets;
-
-                    std::vector<fastjet::PseudoJet> variableR_jets = __cluster(jet->pseudojet().constituents());
-
-                    for (auto &jet: variableR_jets)
-                    {
-                        RecJetFormat *NewJet = new RecJetFormat();
-                        NewJet->Reset();
-                        MALorentzVector q(jet.px(), jet.py(), jet.pz(), jet.e());
-                        NewJet->setMomentum(q);
-                        NewJet->setPseudoJet(jet);
-                        output_jets.push_back(NewJet);
-                    }
-
-                    return output_jets;
-                }
-
-            private:
-
-                // Cluster given particles
-                std::vector<fastjet::PseudoJet> __cluster(std::vector<fastjet::PseudoJet> particles)
-                {
-                    fastjet::contrib::VariableRPlugin variableR(
-                            rho_, minR_, maxR_, clusterType_, precluster_, strategy_
+                    JetDefPlugin_ = new fastjet::contrib::VariableRPlugin(
+                            rho, minR, maxR, clusterType_, false, strategy_
                     );
-                    fastjet::JetDefinition jetDefinition(&variableR);
-                    clust_seq.reset(new fastjet::ClusterSequence(particles, jetDefinition));
+                    isPlugin_ = true;
 
-                    std::vector<fastjet::PseudoJet> variableR_jets;
-                    if (isExclusive_) variableR_jets = clust_seq->exclusive_jets(ptmin_);
-                    else variableR_jets = clust_seq->inclusive_jets(ptmin_);
+                    /// Note that pre-clustering is deprecated and will likely be
+                    /// removed in a future releasse of this contrib.
+                    /// (precluster = false at the moment)
 
-                    return fastjet::sorted_by_pt(variableR_jets);
-                }
-
-                // Execute with the Reconstructed event. This method creates a new Jet in RecEventFormat which
-                // can be accessed via JetID. The algorithm will only be executed if a unique JetID is given
-                MAbool __execute(EventFormat& myEvent, std::string JetID)
-                {
-                    try {
-                        if (myEvent.rec()->hasJetID(JetID))
-                            throw EXCEPTION_ERROR("Substructure::VariableR - Jet ID `" + JetID + \
-                                                      "` already exits. Skipping execution.","",1);
-                    } catch (const std::exception& err) {
-                        MANAGE_EXCEPTION(err);
-                        return false;
-                    }
-
-                    std::vector <fastjet::PseudoJet> jets = __cluster(myEvent.rec()->cluster_inputs());
-
-                    for (auto &jet: jets) {
-                        RecJetFormat *current_jet = myEvent.rec()->GetNewJet(JetID);
-                        MALorentzVector q(jet.px(), jet.py(), jet.pz(), jet.e());
-                        current_jet->setMomentum(q);
-                        current_jet->setPseudoJet(jet);
-                        std::vector <fastjet::PseudoJet> constituents = clust_seq->constituents(jet);
-                        MAuint32 tracks = 0;
-                        for (MAuint32 j = 0; j < constituents.size(); j++) {
-                            current_jet->AddConstituent(constituents[j].user_index());
-                            if (PDG->IsCharged(myEvent.mc()->particles()[constituents[j].user_index()].pdgid()))
-                                tracks++;
-                        }
-                        current_jet->ntracks_ = tracks;
-                    }
-                    if (jets.size() == 0) myEvent.rec()->CreateEmptyJetAccesor(JetID);
-                    return true;
                 }
         };
     }

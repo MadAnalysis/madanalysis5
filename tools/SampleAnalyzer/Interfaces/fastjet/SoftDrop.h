@@ -24,17 +24,11 @@
 #ifndef MADANALYSIS5_SOFTDROP_H
 #define MADANALYSIS5_SOFTDROP_H
 
-// STL headers
-#include <vector>
-#include <algorithm>
-
 // FastJet headers
 #include "fastjet/contrib/SoftDrop.hh"
-#include "fastjet/PseudoJet.hh"
 
 // SampleAnalyser headers
-#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
-#include "SampleAnalyzer/Commons/DataFormat/RecJetFormat.h"
+#include "SampleAnalyzer/Interfaces/fastjet/ClusterBase.h"
 
 using namespace std;
 
@@ -101,14 +95,9 @@ namespace MA5 {
                 // Execute with a single jet
                 const RecJetFormat *Execute(const RecJetFormat *jet)
                 {
-                    RecJetFormat *NewJet = new RecJetFormat();
-                    NewJet->Reset();
                     fastjet::contrib::SoftDrop sd(beta_, symmetry_cut_, R0_);
                     fastjet::PseudoJet sd_jet = sd(jet->pseudojet());
-                    MALorentzVector q(sd_jet.px(), sd_jet.py(), sd_jet.pz(), sd_jet.e());
-                    NewJet->setMomentum(q);
-                    NewJet->setPseudoJet(sd_jet);
-                    return NewJet;
+                    return ClusterBase().__transform_jet(sd_jet);
                 }
 
                 // Execute with a list of jets

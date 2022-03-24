@@ -50,12 +50,12 @@ namespace MA5 {
 //            GenKT_Axes,               // (p, R0 = infinity)
 //            WTA_GenKT_Axes,           // (p, R0 = infinity)
 //            GenET_GenKT_Axes,         // (delta, p, R0 = infinity)
-//            Manual_Axes,
-//            OnePass_KT_Axes,
-//            OnePass_CA_Axes,
-//            OnePass_AntiKT_Axes,       // (R0)
-//            OnePass_WTA_KT_Axes,
-//            OnePass_WTA_CA_Axes,
+            Manual_Axes,
+            OnePass_KT_Axes,
+            OnePass_CA_Axes,
+            OnePass_AntiKT_Axes,       // (R0)
+            OnePass_WTA_KT_Axes,
+            OnePass_WTA_CA_Axes,
 //            OnePass_GenKT_Axes,        // (p, R0 = infinity)
 //            OnePass_WTA_GenKT_Axes,    // (p, R0 = infinity)
 //            OnePass_GenET_GenKT_Axes,  // (delta, p, R0 = infinity)
@@ -134,18 +134,18 @@ namespace MA5 {
 //                        axesdef_ = new fastjet::contrib::WTA_GenKT_Axes();
 //                    else if (axesdef == Substructure::GenET_GenKT_Axes)
 //                        axesdef_ = new fastjet::contrib::GenET_GenKT_Axes();
-//                    else if (axesdef == Substructure::Manual_Axes)
-//                        axesdef_ = new fastjet::contrib::Manual_Axes();
-//                    else if (axesdef == Substructure::OnePass_KT_Axes)
-//                        axesdef_ = new fastjet::contrib::OnePass_KT_Axes();
-//                    else if (axesdef == Substructure::OnePass_CA_Axes)
-//                        axesdef_ = new fastjet::contrib::OnePass_CA_Axes();
-//                    else if (axesdef == Substructure::OnePass_AntiKT_Axes)
-//                        axesdef_ = new fastjet::contrib::OnePass_AntiKT_Axes();
-//                    else if (axesdef == Substructure::OnePass_WTA_KT_Axes)
-//                        axesdef_ = new fastjet::contrib::OnePass_WTA_KT_Axes();
-//                    else if (axesdef == Substructure::OnePass_WTA_CA_Axes)
-//                        axesdef_ = new fastjet::contrib::OnePass_WTA_CA_Axes();
+                    else if (axesdef == Substructure::Manual_Axes)
+                        axesdef_ = new fastjet::contrib::Manual_Axes();
+                    else if (axesdef == Substructure::OnePass_KT_Axes)
+                        axesdef_ = new fastjet::contrib::OnePass_KT_Axes();
+                    else if (axesdef == Substructure::OnePass_CA_Axes)
+                        axesdef_ = new fastjet::contrib::OnePass_CA_Axes();
+                    else if (axesdef == Substructure::OnePass_AntiKT_Axes)
+                        axesdef_ = new fastjet::contrib::OnePass_AntiKT_Axes();
+                    else if (axesdef == Substructure::OnePass_WTA_KT_Axes)
+                        axesdef_ = new fastjet::contrib::OnePass_WTA_KT_Axes();
+                    else if (axesdef == Substructure::OnePass_WTA_CA_Axes)
+                        axesdef_ = new fastjet::contrib::OnePass_WTA_CA_Axes();
 //                    else if (axesdef == Substructure::OnePass_GenKT_Axes)
 //                        axesdef_ = new fastjet::contrib::OnePass_GenKT_Axes();
 //                    else if (axesdef == Substructure::OnePass_WTA_GenKT_Axes)

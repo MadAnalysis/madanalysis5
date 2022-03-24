@@ -45,11 +45,9 @@
 namespace MA5
 {
 namespace Substructure {
-    class VariableR;
-    class Cluster;
+    class ClusterBase;
     class Pruner;
     class Nsubjettiness;
-    class Recluster;
     class SoftFrop;
 }
 class LHCOReader;
@@ -76,11 +74,9 @@ class RecJetFormat : public RecParticleFormat
   friend class DelphesMemoryInterface;
 
   // Substructure methods
-  friend class Substructure::VariableR;
-  friend class Substructure::Cluster;
+    friend class Substructure::ClusterBase;
   friend class Substructure::Pruner;
   friend class Substructure::Nsubjettiness;
-  friend class Substructure::Recluster;
   friend class Substructure::SoftFrop;
 
   // -------------------------------------------------------------
