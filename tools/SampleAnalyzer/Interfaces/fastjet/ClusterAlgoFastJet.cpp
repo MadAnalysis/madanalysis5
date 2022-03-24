@@ -107,7 +107,7 @@ MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
   }
 
   // Create an empty accessor
-  if (jets.size() == 0) myEvent.rec()->GetNewEmptyJet();
+  if (jets.size() == 0) myEvent.rec()->CreateEmptyJetAccesor();
 
   Meff += MET->pt();
 

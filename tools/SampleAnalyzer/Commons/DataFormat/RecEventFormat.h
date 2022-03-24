@@ -511,7 +511,7 @@ class RecEventFormat
   }
 
   /// Giving a new primary jet entry
-  void GetNewEmptyJet()
+  void CreateEmptyJetAccesor()
   {
     std::pair< std::map<std::string, std::vector<RecJetFormat> >::iterator, bool> new_jet;
     new_jet = jetcollection_.insert(std::make_pair(PrimaryJetID_,std::vector<RecJetFormat>() ));
