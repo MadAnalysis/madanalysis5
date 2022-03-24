@@ -49,6 +49,7 @@ namespace Substructure {
     class Pruner;
     class Nsubjettiness;
     class SoftFrop;
+    class Filter;
 }
 class LHCOReader;
 class ROOTReader;
@@ -74,10 +75,11 @@ class RecJetFormat : public RecParticleFormat
   friend class DelphesMemoryInterface;
 
   // Substructure methods
-    friend class Substructure::ClusterBase;
+  friend class Substructure::ClusterBase;
   friend class Substructure::Pruner;
   friend class Substructure::Nsubjettiness;
   friend class Substructure::SoftFrop;
+  friend class Substructure::Filter;
 
   // -------------------------------------------------------------
   //                        data members

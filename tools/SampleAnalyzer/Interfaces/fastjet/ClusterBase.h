@@ -55,12 +55,14 @@ namespace MA5{
         class Recluster;
         class SoftDrop;
         class Pruner;
+        class Filter;
 
         class ClusterBase {
 
             friend class Recluster;
             friend class SoftDrop;
             friend class Pruner;
+            friend class Filter;
 
         //---------------------------------------------------------------------------------
         //                                 data members

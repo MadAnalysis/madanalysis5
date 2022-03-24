@@ -48,6 +48,8 @@
     #include "SampleAnalyzer/Interfaces/fastjet/Nsubjettiness.h"
     #include "SampleAnalyzer/Interfaces/fastjet/VariableR.h"
     #include "SampleAnalyzer/Interfaces/fastjet/Pruner.h"
+    #include "SampleAnalyzer/Interfaces/fastjet/Selector.h"
+    #include "SampleAnalyzer/Interfaces/fastjet/Filter.h"
 #endif
 
 // STL headers
