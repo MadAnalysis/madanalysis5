@@ -115,14 +115,27 @@ namespace MA5 {
                     std::vector<const RecJetFormat *> output_jets;
                     std::vector<fastjet::PseudoJet> reclustered_jets = __cluster(jet->pseudojet().constituents());
 
-                    for (auto &jet: reclustered_jets)
+                    for (auto &recjet: reclustered_jets)
                     {
-                        RecJetFormat *NewJet = new RecJetFormat();
-                        NewJet->Reset();
-                        MALorentzVector q(jet.px(), jet.py(), jet.pz(), jet.e());
-                        NewJet->setMomentum(q);
-                        NewJet->setPseudoJet(jet);
+                        RecJetFormat *NewJet = __transform_jet(recjet);
                         output_jets.push_back(NewJet);
+                    }
+
+                    return output_jets;
+                }
+
+                // Execute with a single jet. This method reclusters the given jet using its constituents by filtering
+                // reclustered events with respect to the initial jet
+                template<class Func>
+                std::vector<const RecJetFormat *> Execute(const RecJetFormat *jet, Func func)
+                {
+                    std::vector<const RecJetFormat *> output_jets;
+                    std::vector<fastjet::PseudoJet> reclustered_jets = __cluster(jet->pseudojet().constituents());
+
+                    for (auto &recjet: reclustered_jets)
+                    {
+                        RecJetFormat *NewJet = __transform_jet(recjet);
+                        if (func(jet, const_cast<const RecJetFormat *>(NewJet))) output_jets.push_back(NewJet);
                     }
 
                     return output_jets;
@@ -146,13 +159,9 @@ namespace MA5 {
 
                     std::vector<fastjet::PseudoJet> reclustered_jets = __cluster(constituents);
 
-                    for (auto &jet: reclustered_jets)
+                    for (auto &recjet: reclustered_jets)
                     {
-                        RecJetFormat *NewJet = new RecJetFormat();
-                        NewJet->Reset();
-                        MALorentzVector q(jet.px(), jet.py(), jet.pz(), jet.e());
-                        NewJet->setMomentum(q);
-                        NewJet->setPseudoJet(jet);
+                        RecJetFormat *NewJet = __transform_jet(recjet);
                         output_jets.push_back(NewJet);
                     }
 
@@ -192,6 +201,17 @@ namespace MA5 {
                     else jets = clust_seq->inclusive_jets(ptmin_);
 
                     return fastjet::sorted_by_pt(jets);
+                }
+
+                // Method to transform pseudojet into recjetformat
+                RecJetFormat * __transform_jet(fastjet::PseudoJet jet)
+                {
+                    RecJetFormat * NewJet = new RecJetFormat();
+                    NewJet->Reset();
+                    MALorentzVector q(jet.px(), jet.py(), jet.pz(), jet.e());
+                    NewJet->setMomentum(q);
+                    NewJet->setPseudoJet(jet);
+                    return NewJet;
                 }
 
                 // Execute with the Reconstructed event. This method creates a new Jet in RecEventFormat which
