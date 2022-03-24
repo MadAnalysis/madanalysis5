@@ -141,7 +141,7 @@ namespace MA5 {
                     else if (axesdef == Substructure::OnePass_CA_Axes)
                         axesdef_ = new fastjet::contrib::OnePass_CA_Axes();
                     else if (axesdef == Substructure::OnePass_AntiKT_Axes)
-                        axesdef_ = new fastjet::contrib::OnePass_AntiKT_Axes();
+                        axesdef_ = new fastjet::contrib::OnePass_AntiKT_Axes(R0);
                     else if (axesdef == Substructure::OnePass_WTA_KT_Axes)
                         axesdef_ = new fastjet::contrib::OnePass_WTA_KT_Axes();
                     else if (axesdef == Substructure::OnePass_WTA_CA_Axes)
