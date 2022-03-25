@@ -1,0 +1,85 @@
+name: Quick Validation 
+
+on:
+  push:
+    branches:
+    - release/*
+  # Each pull request should be validated before merging with main or dev
+  pull_request:
+    branches:
+    - main
+    - dev
+  # Enables manual action execution.
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  test:
+    name: OS ${{ matrix.os }}, Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.9', '3.10']
+        os: [ubuntu-latest]
+
+        include:
+          - os: ubuntu-latest
+            compiler: gcc
+            version: 8
+        
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Set up Python version ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      #- name: Set up GCC
+      #  if: matrix.os == 'ubuntu-latest'
+      #  uses: egor-tensin/setup-gcc@v1
+      #  with:
+      #    version: 8
+      #    platform: x64
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip 
+          python -m pip install -r requirements.txt
+          echo $PWD && cd validation
+          python -m pip install -e .
+          
+      - name: List installed dependencies
+        run: python -m pip list
+        
+      - name: Print help message
+        run: |
+          ./validation/scripts/validation_bootstrap -h
+          
+      - name: Validate
+        run: |
+          echo -e "------------------------------"
+          echo -e "Validate Parton-Level analyses"
+          echo -e "------------------------------"
+          ./validation/scripts/validation_bootstrap -P
+          echo -e "------------------------------"
+          echo -e "Validate Hadron-Level analyses"
+          echo -e "------------------------------"
+          ./validation/scripts/validation_bootstrap -H
+          # echo -e "------------------------------"
+          # echo -e " Validate Reco-Level analyses"
+          # echo -e "------------------------------"
+          # ./validation/scripts/validation_bootstrap -R
+          # echo -e "------------------------------"
+          # echo -e "     Validate Expert mode"
+          # echo -e "------------------------------"
+          # ./validation/scripts/validation_bootstrap -e
+          # echo -e "------------------------------"
+          # echo -e "  Validate FastJet interface"
+          # echo -e "------------------------------"
+          # ./validation/scripts/validation_bootstrap --fastjet
+          # echo -e "------------------------------"
+          # echo -e "  Validate Delphes interface"
+          # echo -e "------------------------------"
+          # ./validation/scripts/validation_bootstrap --delphes

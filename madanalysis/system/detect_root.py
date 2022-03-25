@@ -110,7 +110,7 @@ class DetectRoot:
         msg = ''
 
         # Trying to call root-config with which
-        result = ShellCommand.Which('root-config')
+        result = ShellCommand.Which('root-config', mute = True)
         if len(result)==0:
             msg = 'ROOT module called "root-config" is not detected.\n'\
                   +'Two explanations :n'\

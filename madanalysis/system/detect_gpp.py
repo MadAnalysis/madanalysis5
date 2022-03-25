@@ -69,17 +69,22 @@ class DetectGpp:
             self.logger.debug("  which:         " + str(result[0]))
 
         # Check C++ version
-        cpp = open(os.path.join(self.archi_info.ma5dir,"cxxtest.cc"), 'w')
-        cpp.write("int main() { return 0; }")
-        cpp.close()
-        command = \
-            lambda cxx_version : ['g++ -std=c++' + str(cxx_version) + ' cxxtest.cc -o cxxtest']
-        for version in [11,14]: # ,17,20]: for the future
-            result = ShellCommand.Execute(command(version), self.archi_info.ma5dir, shell=True)
-            if result:
-                setattr(self.archi_info, "cpp"+str(version), True)
-        os.remove(os.path.join(self.archi_info.ma5dir,"cxxtest.cc"))
-        os.remove(os.path.join(self.archi_info.ma5dir,"cxxtest"))
+        try:
+            with open(os.path.join(self.archi_info.ma5dir, "cxxtest.cc"), 'w') as f:
+                f.write("int main() { return 0; }\n")
+            command = lambda cxx_version: [
+                f"g++ -std=c++{cxx_version} "
+                f"{os.path.join(self.archi_info.ma5dir, 'cxxtest.cc')} "
+                f"-o {os.path.join(self.archi_info.ma5dir, 'cxxtest')}"
+            ]
+            for version in [11,14]: # ,17,20]: for the future
+                result = ShellCommand.Execute(command(version), self.archi_info.ma5dir, shell=True)
+                if result:
+                    setattr(self.archi_info, "cpp"+str(version), True)
+            os.remove(os.path.join(self.archi_info.ma5dir, "cxxtest.cc"))
+            os.remove(os.path.join(self.archi_info.ma5dir, "cxxtest"))
+        except Exception as err:
+            self.logger.debug(f"Unexpected {err}, {type(err)}")
 
         if not self.archi_info.cpp11:
             return DetectStatusType.UNFOUND, "Please update C++ compiler. " + \
