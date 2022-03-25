@@ -67,19 +67,19 @@ jobs:
           echo -e "Validate Hadron-Level analyses"
           echo -e "------------------------------"
           ./validation/scripts/validation_bootstrap -H
-          echo -e "------------------------------"
-          echo -e " Validate Reco-Level analyses"
-          echo -e "------------------------------"
-          ./validation/scripts/validation_bootstrap -R
-          echo -e "------------------------------"
-          echo -e "     Validate Expert mode"
-          echo -e "------------------------------"
-          ./validation/scripts/validation_bootstrap -e
-          echo -e "------------------------------"
-          echo -e "  Validate FastJet interface"
-          echo -e "------------------------------"
-          ./validation/scripts/validation_bootstrap --fastjet
-          echo -e "------------------------------"
-          echo -e "  Validate Delphes interface"
-          echo -e "------------------------------"
-          ./validation/scripts/validation_bootstrap --delphes
+          # echo -e "------------------------------"
+          # echo -e " Validate Reco-Level analyses"
+          # echo -e "------------------------------"
+          # ./validation/scripts/validation_bootstrap -R
+          # echo -e "------------------------------"
+          # echo -e "     Validate Expert mode"
+          # echo -e "------------------------------"
+          # ./validation/scripts/validation_bootstrap -e
+          # echo -e "------------------------------"
+          # echo -e "  Validate FastJet interface"
+          # echo -e "------------------------------"
+          # ./validation/scripts/validation_bootstrap --fastjet
+          # echo -e "------------------------------"
+          # echo -e "  Validate Delphes interface"
+          # echo -e "------------------------------"
+          # ./validation/scripts/validation_bootstrap --delphes
