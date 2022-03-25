@@ -21,7 +21,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.10']
+        python-version: ['3.8'] # , '3.9', '3.10']
         os: [ubuntu-latest]
 
         include:
@@ -65,10 +65,10 @@ jobs:
           echo -e " Validate Reco-Level analyses"
           echo -e "------------------------------"
           ./validation/scripts/validation_bootstrap -R
-          echo -e "------------------------------"
-          echo -e "     Validate Expert mode"
-          echo -e "------------------------------"
-          ./validation/scripts/validation_bootstrap -e
+          # echo -e "------------------------------"
+          # echo -e "     Validate Expert mode"
+          # echo -e "------------------------------"
+          # ./validation/scripts/validation_bootstrap -e
           echo -e "------------------------------"
           echo -e "  Validate FastJet interface"
           echo -e "------------------------------"
