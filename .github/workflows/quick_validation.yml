@@ -2,7 +2,6 @@ name: MadAnalysis 5 Quick Validation
 
 on:
   push:
-    # Validate main when pushed to release
     branches:
     - release/*
   pull_request:
