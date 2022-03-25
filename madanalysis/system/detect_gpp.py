@@ -70,17 +70,19 @@ class DetectGpp:
 
         # Check C++ version
         try:
-            cpp = open(os.path.join(self.archi_info.ma5dir,"cxxtest.cc"), 'w')
+            cpp = open(os.path.join(self.archi_info.ma5dir, "cxxtest.cc"), 'w')
             cpp.write("int main() { return 0; }")
             cpp.close()
-            command = \
-                lambda cxx_version : ['g++ -std=c++' + str(cxx_version) + ' cxxtest.cc -o cxxtest']
+            command = lambda cxx_version : [
+                f"g++ -std=c++{cxx_version} {os.path.join(self.archi_info.ma5dir, 'cxxtest.cc')} "
+                f"-o {os.path.join(self.archi_info.ma5dir, 'cxxtest')}"
+            ]
             for version in [11,14]: # ,17,20]: for the future
                 result = ShellCommand.Execute(command(version), self.archi_info.ma5dir, shell=True)
                 if result:
                     setattr(self.archi_info, "cpp"+str(version), True)
-            os.remove(os.path.join(self.archi_info.ma5dir,"cxxtest.cc"))
-            os.remove(os.path.join(self.archi_info.ma5dir,"cxxtest"))
+            os.remove(os.path.join(self.archi_info.ma5dir, "cxxtest.cc"))
+            os.remove(os.path.join(self.archi_info.ma5dir, "cxxtest"))
         except Exception as err:
             self.logger.debug(f"Unexpected {err}, {type(err)}")
 
