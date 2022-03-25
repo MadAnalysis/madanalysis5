@@ -4,13 +4,13 @@ on:
   push:
     branches:
     - release/*
+  # Each pull request should be validated before merging with main or dev
   pull_request:
-    # Each pull request should be validated before merging with main or dev
     branches:
     - main
     - dev
+  # Enables manual action execution.
   workflow_dispatch:
-    # Enables manual action execution.
     inputs:
       name: |
         Quick Validation
