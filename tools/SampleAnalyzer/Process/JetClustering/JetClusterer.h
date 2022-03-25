@@ -256,17 +256,17 @@ namespace MA5
             MAfloat32 ptmin = std::stof(options["cluster.PTmin"]);
             MAbool isExclusive = (options["cluster.exclusive"] == "1");
 
-            Substructure::ClusterType ctype = Substructure::AKTLIKE;
-            if (options["cluster.clustertype"] == "CALIKE")       ctype = Substructure::CALIKE;
-            else if (options["cluster.clustertype"] == "KTLIKE")  ctype = Substructure::KTLIKE;
-            else if (options["cluster.clustertype"] == "AKTLIKE") ctype = Substructure::AKTLIKE;
+            Substructure::VariableR::ClusterType ctype = Substructure::VariableR::AKTLIKE;
+            if (options["cluster.clustertype"] == "CALIKE")       ctype = Substructure::VariableR::CALIKE;
+            else if (options["cluster.clustertype"] == "KTLIKE")  ctype = Substructure::VariableR::KTLIKE;
+            else if (options["cluster.clustertype"] == "AKTLIKE") ctype = Substructure::VariableR::AKTLIKE;
 
-            Substructure::Strategy strategy = Substructure::Best;
-            if (options["cluster.strategy"] == "Best")         strategy = Substructure::Best;
-            else if (options["cluster.strategy"] == "N2Tiled") strategy = Substructure::N2Tiled;
-            else if (options["cluster.strategy"] == "N2Plain") strategy = Substructure::N2Plain;
-            else if (options["cluster.strategy"] == "NNH")     strategy = Substructure::NNH;
-            else if (options["cluster.strategy"] == "Native")  strategy = Substructure::Native;
+            Substructure::VariableR::Strategy strategy = Substructure::VariableR::Best;
+            if (options["cluster.strategy"] == "Best")         strategy = Substructure::VariableR::Best;
+            else if (options["cluster.strategy"] == "N2Tiled") strategy = Substructure::VariableR::N2Tiled;
+            else if (options["cluster.strategy"] == "N2Plain") strategy = Substructure::VariableR::N2Plain;
+            else if (options["cluster.strategy"] == "NNH")     strategy = Substructure::VariableR::NNH;
+            else if (options["cluster.strategy"] == "Native")  strategy = Substructure::VariableR::Native;
 
             Substructure::VariableR* variableR;
             variableR = new Substructure::VariableR(rho, minR, maxR, ctype, strategy, ptmin, isExclusive);

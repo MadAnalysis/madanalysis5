@@ -34,17 +34,6 @@ using namespace std;
 
 namespace MA5 {
     namespace Substructure {
-
-        enum ClusterType {CALIKE, KTLIKE, AKTLIKE};
-
-        enum Strategy {
-            Best,      ///< currently N2Tiled or N2Plain for FJ>3.2.0, Native for FastJet<3.2.0
-            N2Tiled,   ///< the default (faster in most cases) [requires FastJet>=3.2.0]
-            N2Plain,   ///< [requires FastJet>=3.2.0]
-            NNH,       ///< slower but already available for FastJet<3.2.0
-            Native     ///< original local implemtation of the clustering [the default for FastJet<3.2.0]
-        };
-
         class VariableR : public ClusterBase {
 
             //---------------------------------------------------------------------------------
@@ -62,6 +51,16 @@ namespace MA5 {
 
 
             public:
+
+                enum ClusterType {CALIKE, KTLIKE, AKTLIKE};
+
+                enum Strategy {
+                    Best,      ///< currently N2Tiled or N2Plain for FJ>3.2.0, Native for FastJet<3.2.0
+                    N2Tiled,   ///< the default (faster in most cases) [requires FastJet>=3.2.0]
+                    N2Plain,   ///< [requires FastJet>=3.2.0]
+                    NNH,       ///< slower but already available for FastJet<3.2.0
+                    Native     ///< original local implemtation of the clustering [the default for FastJet<3.2.0]
+                };
 
                 /// Constructor without argument
                 VariableR() {}
@@ -81,8 +80,8 @@ namespace MA5 {
                     MAfloat32 rho,                                  // mass scale for effective radius (i.e. R ~ rho/pT)
                     MAfloat32 minR,                                 //minimum jet radius
                     MAfloat32 maxR,                                 // maximum jet radius
-                    Substructure::ClusterType clusterType,
-                    Substructure::Strategy strategy = Substructure::Best,
+                    Substructure::VariableR::ClusterType clusterType,
+                    Substructure::VariableR::Strategy strategy = Substructure::VariableR::Best,
                     MAfloat32 ptmin = 0.,                           // Minimum pT
                     MAbool isExclusive = false
                 )
@@ -93,28 +92,28 @@ namespace MA5 {
                     MAfloat32 rho,
                     MAfloat32 minR,
                     MAfloat32 maxR,
-                    Substructure::ClusterType clusterType,
-                    Substructure::Strategy strategy = Substructure::Best,
+                    Substructure::VariableR::ClusterType clusterType,
+                    Substructure::VariableR::Strategy strategy = Substructure::VariableR::Best,
                     MAfloat32 ptmin = 0.,
                     MAbool isExclusive = false
                 )
                 {
-                    if (clusterType == Substructure::CALIKE)
+                    if (clusterType == Substructure::VariableR::CALIKE)
                         clusterType_ = fastjet::contrib::VariableRPlugin::CALIKE;
-                    else if (clusterType == Substructure::KTLIKE)
+                    else if (clusterType == Substructure::VariableR::KTLIKE)
                         clusterType_ = fastjet::contrib::VariableRPlugin::KTLIKE;
-                    else if (clusterType == Substructure::AKTLIKE)
+                    else if (clusterType == Substructure::VariableR::AKTLIKE)
                         clusterType_ = fastjet::contrib::VariableRPlugin::AKTLIKE;
 
-                    if (strategy == Substructure::Best)
+                    if (strategy == Substructure::VariableR::Best)
                         strategy_ = fastjet::contrib::VariableRPlugin::Best;
-                    else if (strategy == Substructure::N2Tiled)
+                    else if (strategy == Substructure::VariableR::N2Tiled)
                         strategy_ = fastjet::contrib::VariableRPlugin::N2Tiled;
-                    else if (strategy == Substructure::N2Plain)
+                    else if (strategy == Substructure::VariableR::N2Plain)
                         strategy_ = fastjet::contrib::VariableRPlugin::N2Plain;
-                    else if (strategy == Substructure::NNH)
+                    else if (strategy == Substructure::VariableR::NNH)
                         strategy_ = fastjet::contrib::VariableRPlugin::NNH;
-                    else if (strategy == Substructure::Native)
+                    else if (strategy == Substructure::VariableR::Native)
                         strategy_ = fastjet::contrib::VariableRPlugin::Native;
 
                     ptmin_ = ptmin; isExclusive_ = isExclusive;
@@ -127,7 +126,6 @@ namespace MA5 {
                     /// Note that pre-clustering is deprecated and will likely be
                     /// removed in a future releasse of this contrib.
                     /// (precluster = false at the moment)
-
                 }
         };
     }
