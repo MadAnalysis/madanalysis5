@@ -117,7 +117,7 @@ namespace MA5{
 
             // Execute with a single jet. This method reclusters the given jet using its constituents by filtering
             // reclustered events with respect to the initial jet
-            template<class Func>
+            template<typename Func>
             std::vector<const RecJetFormat *> Execute(const RecJetFormat *jet, Func func)
             {
                 std::vector<const RecJetFormat *> output_jets;
