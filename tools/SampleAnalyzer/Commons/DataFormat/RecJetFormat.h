@@ -50,6 +50,7 @@ namespace Substructure {
     class Nsubjettiness;
     class SoftFrop;
     class Filter;
+    class EnergyCorrelator;
 }
 class LHCOReader;
 class ROOTReader;
@@ -80,6 +81,7 @@ class RecJetFormat : public RecParticleFormat
   friend class Substructure::Nsubjettiness;
   friend class Substructure::SoftFrop;
   friend class Substructure::Filter;
+  friend class Substructure::EnergyCorrelator;
 
   // -------------------------------------------------------------
   //                        data members

@@ -389,9 +389,10 @@ class MakefileWriter():
 #                libs.extend(['$(shell fastjet-config --libs --plugins)']) # --rpath=no)'])
                 libs.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config --libs --plugins)'])
                 # Add fjcontrib libraries
-                libs.extend(["-lRecursiveTools"]) # SoftDrop
-                libs.extend(["-lNsubjettiness"])  # Nsubjettiness
-                libs.extend(["-lVariableR"])      # VariableR
+                libs.extend(["-lRecursiveTools"])   # SoftDrop
+                libs.extend(["-lNsubjettiness"])    # Nsubjettiness
+                libs.extend(["-lVariableR"])        # VariableR
+                libs.extend(["-lEnergyCorrelator"]) # -lEnergyCorrelator
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
 
         # - delphes

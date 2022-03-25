@@ -50,6 +50,7 @@
     #include "SampleAnalyzer/Interfaces/fastjet/Pruner.h"
     #include "SampleAnalyzer/Interfaces/fastjet/Selector.h"
     #include "SampleAnalyzer/Interfaces/fastjet/Filter.h"
+    #include "SampleAnalyzer/Interfaces/fastjet/EnergyCorrelator.h"
 #endif
 
 // STL headers
