@@ -128,6 +128,10 @@ class JobHandler:
             try:
                 os.system(" ".join(commands))
                 curdir = os.getcwd()
+
+                if not os.path.isdir(os.path.join(self.log_path, self.script.name)):
+                    raise MadAnalysis5ExecutionError("Expert mode workspace is not created.")
+
                 os.system(
                     f"source {os.path.join(self.log_path, self.script.name, 'Build', 'setup.sh')}"
                 )
@@ -138,9 +142,6 @@ class JobHandler:
 
                 # Copy analysis files
                 import shutil
-
-                if not os.path.isdir(os.path.join(self.log_path, self.script.name)):
-                    raise MadAnalysis5ExecutionError("Expert mode workspace is not created.")
 
                 for file in [self.script.cpp, self.script.header]:
                     shutil.copy(
