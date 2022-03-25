@@ -111,16 +111,8 @@ namespace MA5{
             // Execute with a single jet. This method reclusters the given jet using its constituents
             std::vector<const RecJetFormat *> Execute(const RecJetFormat *jet)
             {
-                std::vector<const RecJetFormat *> output_jets;
                 std::vector<fastjet::PseudoJet> reclustered_jets = __cluster(jet->pseudojet().constituents());
-
-                for (auto &recjet: reclustered_jets)
-                {
-                    RecJetFormat *NewJet = __transform_jet(recjet);
-                    output_jets.push_back(NewJet);
-                }
-
-                return output_jets;
+                return __transform_jets(reclustered_jets);
             }
 
             // Execute with a single jet. This method reclusters the given jet using its constituents by filtering
@@ -144,8 +136,6 @@ namespace MA5{
             // of jets by combining their constituents
             std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets)
             {
-                std::vector<const RecJetFormat *> output_jets;
-
                 std::vector<fastjet::PseudoJet> constituents;
                 for (auto &jet: jets)
                 {
@@ -158,10 +148,7 @@ namespace MA5{
 
                 std::vector<fastjet::PseudoJet> reclustered_jets = __cluster(constituents);
 
-                for (auto &recjet: reclustered_jets)
-                    output_jets.push_back(__transform_jet(recjet));
-
-                return output_jets;
+                return __transform_jets(reclustered_jets);
             }
 
             // Handler for clustering step
@@ -186,13 +173,10 @@ namespace MA5{
             std::vector<const RecJetFormat *> exclusive_jets_up_to(MAint32 njets)
             {
                 if (!isClustered_) throw EXCEPTION_ERROR("No clustered jet available", "", 1);
-                std::vector<const RecJetFormat *> output_jets;
                 std::vector<fastjet::PseudoJet> clustered_jets = fastjet::sorted_by_pt(
                         clust_seq->exclusive_jets_up_to(njets)
                 );
-                for (auto &jet: clustered_jets)
-                    output_jets.push_back(__transform_jet(jet));
-                return output_jets;
+                return __transform_jets(clustered_jets);
             }
 
         private:
@@ -226,6 +210,14 @@ namespace MA5{
                 NewJet->setMomentum(q);
                 NewJet->setPseudoJet(jet);
                 return NewJet;
+            }
+
+            static std::vector<const RecJetFormat *> __transform_jets(std::vector<fastjet::PseudoJet> jets)
+            {
+                std::vector<const RecJetFormat *> output_jets;
+                for (auto &jet: jets)
+                    output_jets.push_back(__transform_jet(jet));
+                return output_jets;
             }
 
             // Method to get jet algorithm
