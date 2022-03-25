@@ -1,0 +1,58 @@
+name: MadAnalysis 5 Quick Validation 
+
+on:
+  push:
+    # Validate main when pushed to release
+    branches:
+    - release/*
+  pull_request:
+    # Each pull request should be validated before merging with main or dev
+    branches:
+    - main
+    - dev
+  workflow_dispatch:
+    # Enables manual action execution.
+    inputs:
+      name: |
+        Quick Validation
+        description: |
+          MadAnalysis 5 Quick Validation
+        required: false
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.9', '3.10']
+        
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Set up Python version ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip 
+          python -m pip install -r requirements.txt
+          python -m pip install -e /validation
+          
+      - name: List installed dependencies
+        run: python -m pip list
+        
+      - name: Print help message
+        run: |
+          ./validation/scripts/validation_bootstrap -h
+          
+      - name: Validate Parton-level analysis
+        run: |
+          ./validation/scripts/validation_bootstrap -P
+          
+      - name: Validate Hadron-level analysis
+        run: |
+          ./validation/scripts/validation_bootstrap -H
