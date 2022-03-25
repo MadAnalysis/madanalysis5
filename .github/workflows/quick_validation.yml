@@ -3,6 +3,7 @@ name: Quick Validation
 on:
   push:
     branches:
+    - main
     - release/*
   # Each pull request should be validated before merging with main or dev
   pull_request:
@@ -36,13 +37,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      #- name: Set up GCC
-      #  if: matrix.os == 'ubuntu-latest'
-      #  uses: egor-tensin/setup-gcc@v1
-      #  with:
-      #    version: 8
-      #    platform: x64
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip 
@@ -67,19 +61,24 @@ jobs:
           echo -e "Validate Hadron-Level analyses"
           echo -e "------------------------------"
           ./validation/scripts/validation_bootstrap -H
-          # echo -e "------------------------------"
-          # echo -e " Validate Reco-Level analyses"
-          # echo -e "------------------------------"
-          # ./validation/scripts/validation_bootstrap -R
-          # echo -e "------------------------------"
-          # echo -e "     Validate Expert mode"
-          # echo -e "------------------------------"
-          # ./validation/scripts/validation_bootstrap -e
-          # echo -e "------------------------------"
-          # echo -e "  Validate FastJet interface"
-          # echo -e "------------------------------"
-          # ./validation/scripts/validation_bootstrap --fastjet
+          echo -e "------------------------------"
+          echo -e " Validate Reco-Level analyses"
+          echo -e "------------------------------"
+          ./validation/scripts/validation_bootstrap -R
+          echo -e "------------------------------"
+          echo -e "     Validate Expert mode"
+          echo -e "------------------------------"
+          ./validation/scripts/validation_bootstrap -e
+          echo -e "------------------------------"
+          echo -e "  Validate FastJet interface"
+          echo -e "------------------------------"
+          ./validation/scripts/validation_bootstrap --fastjet
+          # Installation for root and delphes takes excessive amount of time
           # echo -e "------------------------------"
           # echo -e "  Validate Delphes interface"
           # echo -e "------------------------------"
           # ./validation/scripts/validation_bootstrap --delphes
+          echo -e "------------------------------"
+          echo -e "      Validate PADForSFS "
+          echo -e "------------------------------"
+          ./validation/scripts/validation_bootstrap --padforsfs
