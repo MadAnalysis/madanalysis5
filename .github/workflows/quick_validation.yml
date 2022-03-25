@@ -1,4 +1,4 @@
-name: MadAnalysis 5 Quick Validation 
+name: Quick Validation 
 
 on:
   push:
@@ -15,11 +15,13 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   test:
-    runs-on: ubuntu-latest
+    name: Test on OS ${{ matrix.os }} with Python version ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        python-version: ['3.8']
+        python-version: ['3.8', '3.9', '3.10']
+        os: [ubuntu-latest, macOS-latest]
         
     steps:
       - uses: actions/checkout@v2
@@ -43,6 +45,29 @@ jobs:
         run: |
           ./validation/scripts/validation_bootstrap -h
           
-      - name: Validate Parton and Hadron level analysis
+      - name: Validate
         run: |
-          ./validation/scripts/validation_bootstrap -P -H
+          echo -e "------------------------------"
+          echo -e "Validate Parton-Level analyses"
+          echo -e "------------------------------"
+          ./validation/scripts/validation_bootstrap -P
+          echo -e "------------------------------"
+          echo -e "Validate Hadron-Level analyses"
+          echo -e "------------------------------"
+          ./validation/scripts/validation_bootstrap -H
+          echo -e "------------------------------"
+          echo -e " Validate Reco-Level analyses"
+          echo -e "------------------------------"
+          ./validation/scripts/validation_bootstrap -R
+          echo -e "------------------------------"
+          echo -e "     Validate Expert mode"
+          echo -e "------------------------------"
+          ./validation/scripts/validation_bootstrap -e
+          echo -e "------------------------------"
+          echo -e "  Validate FastJet interface"
+          echo -e "------------------------------"
+          ./validation/scripts/validation_bootstrap --fastjet
+          echo -e "------------------------------"
+          echo -e "  Validate Delphes interface"
+          echo -e "------------------------------"
+          ./validation/scripts/validation_bootstrap --delphes
