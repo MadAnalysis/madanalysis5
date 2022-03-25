@@ -15,7 +15,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   test:
-    name: Test on OS ${{ matrix.os }} with Python version ${{ matrix.python-version }}
+    name: OS ${{ matrix.os }}, Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -37,7 +37,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           
       - name: Set up GC
-        if: ${{ matrix.os == ubuntu-latest }}
+        if: matrix.os == 'ubuntu-latest'
         uses: egor-tensin/setup-gcc@v1
         with:
           version: 8
