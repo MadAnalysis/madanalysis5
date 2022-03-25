@@ -21,12 +21,12 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.8']
-        os: [ubuntu-latest, macOS-latest]
+        os: [ubuntu-latest]
         
         include:
           - os: ubuntu-latest
             compiler: gcc
-            version: 7
+            version: 8
           - os: macOS-latest
             compiler: clang
             version: 13.1.6
@@ -38,6 +38,12 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
+          
+      - name: Set up GCC
+        uses: egor-tensin/setup-gcc@v1
+        with:
+          version: 8
+          platform: x64
           
       - name: Install dependencies
         run: |
