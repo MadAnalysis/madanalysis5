@@ -22,13 +22,17 @@ can handle filtering and overlap removal in the background.
  ([#31](https://github.com/MadAnalysis/madanalysis5/pull/31)).
 
 ## Improvements
- * Interface to include CR and VR in the full likelihoods ([#5](https://github.com/MadAnalysis/madanalysis5/pull/5))
+ * Interface to include CR and VR in the full likelihoods 
+  ([#5](https://github.com/MadAnalysis/madanalysis5/pull/5))
 
 ## Bug fixes
- * Zero division error in simplified likelihoods workflow ([#4](https://github.com/MadAnalysis/madanalysis5/pull/4))
+ * Zero division error in simplified likelihoods workflow 
+  ([#4](https://github.com/MadAnalysis/madanalysis5/pull/4))
  * Bug fix in pyhf wrapper ([#10](https://github.com/MadAnalysis/madanalysis5/pull/10))
- * Ability to flush previous executions have been added to PADForSFS ([#17](https://github.com/MadAnalysis/madanalysis5/pull/17))
-
+ * Ability to flush previous executions have been added to PADForSFS 
+  ([#17](https://github.com/MadAnalysis/madanalysis5/pull/17))
+ * `RecParticleFormat` requires `ntracks()` accessor in order to use it in NormalMode 
+  ([#56](https://github.com/MadAnalysis/madanalysis5/pull/56))
 
 ## Contributors
 
