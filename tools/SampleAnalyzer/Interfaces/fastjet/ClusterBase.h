@@ -80,6 +80,7 @@ namespace MA5{
             fastjet::JetDefinition* JetDefinition_;
             fastjet::JetDefinition::Plugin* JetDefPlugin_;
             MAbool isPlugin_;
+            MAbool isClustered_;
 
             // Shared Cluster sequence
             std::shared_ptr<fastjet::ClusterSequence> clust_seq;
@@ -163,6 +164,37 @@ namespace MA5{
                 return output_jets;
             }
 
+            // Handler for clustering step
+            void cluster(const RecJetFormat *jet)
+            {
+                if (isPlugin_)
+                {
+                    fastjet::JetDefinition jetDefinition(JetDefPlugin_);
+                    clust_seq.reset(new fastjet::ClusterSequence(jet->pseudojet().constituents(), jetDefinition));
+                } else {
+                    clust_seq.reset(new fastjet::ClusterSequence(
+                            jet->pseudojet().constituents(),
+                            const_cast<const fastjet::JetDefinition &>(*JetDefinition_)
+                    ));
+                }
+                isClustered_ = true;
+            }
+
+            // return a vector of all jets when the event is clustered (in the exclusive sense) to exactly njets.
+            // If there are fewer than njets particles in the ClusterSequence the function just returns however many
+            // particles there were.
+            std::vector<const RecJetFormat *> exclusive_jets_up_to(MAint32 njets)
+            {
+                if (!isClustered_) throw EXCEPTION_ERROR("No clustered jet available", "", 1);
+                std::vector<const RecJetFormat *> output_jets;
+                std::vector<fastjet::PseudoJet> clustered_jets = fastjet::sorted_by_pt(
+                        clust_seq->exclusive_jets_up_to(njets)
+                );
+                for (auto &jet: clustered_jets)
+                    output_jets.push_back(__transform_jet(jet));
+                return output_jets;
+            }
+
         private:
 
             // Generic clustering method
@@ -177,6 +209,7 @@ namespace MA5{
                             particles, const_cast<const fastjet::JetDefinition &>(*JetDefinition_)
                     ));
                 }
+                isClustered_ = true;
                 std::vector<fastjet::PseudoJet> jets;
                 if (isExclusive_) jets = clust_seq->exclusive_jets(ptmin_);
                 else jets = clust_seq->inclusive_jets(ptmin_);
@@ -236,6 +269,7 @@ namespace MA5{
                     current_jet->ntracks_ = tracks;
                 }
                 if (jets.size() == 0) myEvent.rec()->CreateEmptyJetAccesor(JetID);
+                isClustered_ = false;
                 return true;
             }
         };
