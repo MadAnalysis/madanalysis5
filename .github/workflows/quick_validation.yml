@@ -20,8 +20,16 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.10']
+        python-version: ['3.8']
         os: [ubuntu-latest, macOS-latest]
+        
+        include:
+          - os: ubuntu-latest
+            compiler: gcc
+            version: 7
+          - os: macOS-latest
+            compiler: clang
+            version: 13.1.6
         
     steps:
       - uses: actions/checkout@v2
