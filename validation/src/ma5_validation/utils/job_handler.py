@@ -128,41 +128,32 @@ class JobHandler:
             try:
                 os.system(" ".join(commands))
                 curdir = os.getcwd()
-                os.chdir(os.path.join(self.log_path, self.script.name, "Build"))
-                os.system("source setup.sh")
+                os.system(
+                    f"source {os.path.join(self.log_path, self.script.name, 'Build', 'setup.sh')}"
+                )
                 with open(
                     os.path.join(self.log_path, self.script.name, "Input/_defaultset.list"), "w"
                 ) as inputs:
                     inputs.write("\n".join(self.script.sample))
 
                 # Copy analysis files
-                command = (
-                    "cp "
-                    + self.script.cpp
-                    + " "
-                    + os.path.join(
-                        self.log_path, self.script.name, "Build/SampleAnalyzer/User/Analyzer"
-                    )
-                    + "/."
-                )
-                print("   * Running: " + command)
-                os.system(command)
+                import shutil
 
-                command = (
-                    "cp "
-                    + self.script.header
-                    + " "
-                    + os.path.join(
-                        self.log_path, self.script.name, "Build/SampleAnalyzer/User/Analyzer"
+                if not os.path.isdir(os.path.join(self.log_path, self.script.name)):
+                    raise MadAnalysis5ExecutionError("Expert mode workspace is not created.")
+
+                for file in [self.script.cpp, self.script.header]:
+                    shutil.copy(
+                        file,
+                        os.path.join(
+                            self.log_path, self.script.name, "Build/SampleAnalyzer/User/Analyzer/."
+                        ),
                     )
-                    + "/."
-                )
-                print("   * Running: " + command)
-                os.system(command)
 
                 # Execute
                 os.system(
-                    "source setup.sh && make clean all &> compilation.log && "
+                    f"cd {os.path.join(self.log_path, self.script.name, 'Build')} && source setup.sh && "
+                    f"make clean all &> compilation.log && "
                     + "./MadAnalysis5job "
                     + os.path.join(self.log_path, self.script.name, "Input/_defaultset.list")
                     + self.script.command_line
