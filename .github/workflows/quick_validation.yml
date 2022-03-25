@@ -27,9 +27,6 @@ jobs:
           - os: ubuntu-latest
             compiler: gcc
             version: 8
-          - os: macOS-latest
-            compiler: clang
-            version: 13.1.6
         
     steps:
       - uses: actions/checkout@v2
@@ -39,7 +36,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           
-      - name: Set up GCC
+      - name: Set up GC
+        if: ${{ matrix.os == ubuntu-latest }}
         uses: egor-tensin/setup-gcc@v1
         with:
           version: 8
