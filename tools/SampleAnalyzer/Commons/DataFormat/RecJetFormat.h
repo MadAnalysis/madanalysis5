@@ -111,6 +111,14 @@ class RecJetFormat : public RecParticleFormat
   RecJetFormat()
   { Reset(); }
 
+  /// Constructor with argument
+  RecJetFormat(MAfloat64 px, MAfloat64 py, MAfloat64 pz, MAfloat64 e)
+  { Reset(); momentum_.SetPxPyPzE(px,py,pz,e); }
+
+  /// Constructor with argument
+  RecJetFormat(const MALorentzVector& p)
+  { Reset(); momentum_.SetPxPyPzE(p.Px(),p.Py(),p.Pz(),p.E()); }
+
   /// Destructor
   virtual ~RecJetFormat()
   {}

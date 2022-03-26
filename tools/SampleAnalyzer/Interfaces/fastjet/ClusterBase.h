@@ -204,10 +204,7 @@ namespace MA5{
             // Method to transform pseudojet into recjetformat
             static RecJetFormat * __transform_jet(fastjet::PseudoJet jet)
             {
-                RecJetFormat * NewJet = new RecJetFormat();
-                NewJet->Reset();
-                MALorentzVector q(jet.px(), jet.py(), jet.pz(), jet.e());
-                NewJet->setMomentum(q);
+                RecJetFormat * NewJet = new RecJetFormat(jet.px(), jet.py(), jet.pz(), jet.e());
                 NewJet->setPseudoJet(jet);
                 return NewJet;
             }
@@ -215,6 +212,7 @@ namespace MA5{
             static std::vector<const RecJetFormat *> __transform_jets(std::vector<fastjet::PseudoJet> jets)
             {
                 std::vector<const RecJetFormat *> output_jets;
+                output_jets.reserve(jets.size());
                 for (auto &jet: jets)
                     output_jets.push_back(__transform_jet(jet));
                 return output_jets;
@@ -245,22 +243,20 @@ namespace MA5{
                 }
 
                 std::vector <fastjet::PseudoJet> jets = __cluster(myEvent.rec()->cluster_inputs());
-
+                std::vector<RecJetFormat> output_jets;
+                output_jets.reserve(jets.size());
                 for (auto &jet: jets) {
-                    RecJetFormat *current_jet = myEvent.rec()->GetNewJet(JetID);
-                    MALorentzVector q(jet.px(), jet.py(), jet.pz(), jet.e());
-                    current_jet->setMomentum(q);
-                    current_jet->setPseudoJet(jet);
+                    RecJetFormat current_jet = *__transform_jet(jet);
                     std::vector <fastjet::PseudoJet> constituents = clust_seq->constituents(jet);
-                    MAuint32 tracks = 0;
-                    for (MAuint32 j = 0; j < constituents.size(); j++) {
-                        current_jet->AddConstituent(constituents[j].user_index());
-                        if (PDG->IsCharged(myEvent.mc()->particles()[constituents[j].user_index()].pdgid()))
-                            tracks++;
+                    current_jet.ntracks_ = 0;
+                    for (auto &constit: constituents) {
+                        current_jet.AddConstituent(constit.user_index());
+                        if (PDG->IsCharged(myEvent.mc()->particles()[constit.user_index()].pdgid()))
+                            current_jet.ntracks_++;
                     }
-                    current_jet->ntracks_ = tracks;
+                    output_jets.push_back(current_jet);
                 }
-                if (jets.size() == 0) myEvent.rec()->CreateEmptyJetAccesor(JetID);
+                myEvent.rec()->jetcollection_.insert(std::make_pair(JetID, output_jets));
                 isClustered_ = false;
                 return true;
             }

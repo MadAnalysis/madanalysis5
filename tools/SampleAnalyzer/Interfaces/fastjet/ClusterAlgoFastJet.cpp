@@ -38,114 +38,113 @@ using namespace MA5;
 ClusterAlgoFastJet::ClusterAlgoFastJet(std::string Algo):ClusterAlgoBase(Algo)
 { JetAlgorithm_=Algo; JetDefinition_=0; }
 
-ClusterAlgoFastJet::~ClusterAlgoFastJet() 
+ClusterAlgoFastJet::~ClusterAlgoFastJet()
 { if (JetDefinition_!=0) delete JetDefinition_; }
 
 
 MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent, SmearerBase* smearer)
 {
-  // Clustering
-  clust_seq.reset(new fastjet::ClusterSequence(myEvent.rec()->cluster_inputs(), *JetDefinition_));
+    // Clustering
+    clust_seq.reset(new fastjet::ClusterSequence(myEvent.rec()->cluster_inputs(), *JetDefinition_));
 
-  // Getting jets with PTmin = 0
-  std::vector<fastjet::PseudoJet> jets; 
-  if (Exclusive_) jets = clust_seq->exclusive_jets(0.);
-  else jets = clust_seq->inclusive_jets(0.);
+    // Getting jets with PTmin = 0
+    std::vector<fastjet::PseudoJet> jets;
+    if (Exclusive_) jets = clust_seq->exclusive_jets(0.);
+    else jets = clust_seq->inclusive_jets(0.);
 
-  // Smearing if necessary
-  if (smearer->isJetSmearerOn())
-  {
-    for (MAuint32 i=0;i<jets.size();i++)
+    // Smearing if necessary
+    MAint32 jet_counter = 0;
+    if (smearer->isJetSmearerOn())
     {
-        // Smearer module returns a smeared MCParticleFormat object
-        // Default: NullSmearer, that does nothing
-        // Reminder: 21 is reserved for the reco-jets
-        MCParticleFormat current_jet;
-        current_jet.momentum().SetPxPyPzE(jets[i].px(),jets[i].py(),jets[i].pz(),jets[i].e());
-        MCParticleFormat smeared = smearer->Execute(dynamic_cast<const MCParticleFormat*>(&current_jet), 21);
-        jets[i].reset_momentum(smeared.px(),smeared.py(),smeared.pz(),smeared.e());
+        for (MAuint32 i=0;i<jets.size();i++)
+        {
+            // Smearer module returns a smeared MCParticleFormat object
+            // Default: NullSmearer, that does nothing
+            // Reminder: 21 is reserved for the reco-jets
+            MCParticleFormat current_jet;
+            current_jet.momentum().SetPxPyPzE(jets[i].px(),jets[i].py(),jets[i].pz(),jets[i].e());
+            MCParticleFormat smeared = smearer->Execute(dynamic_cast<const MCParticleFormat*>(&current_jet), 21);
+            jets[i].reset_momentum(smeared.px(),smeared.py(),smeared.pz(),smeared.e());
+            if(jets[i].pt() >= Ptmin_) jet_counter++;
+        }
+        // Sort pseudojets
+        jets = fastjet::sorted_by_pt(jets);
     }
-    // Sort pseudojets
-    jets = fastjet::sorted_by_pt(jets);
-  }
 
-  // Calculating the MET
-  ParticleBaseFormat* MET = myEvent.rec()->GetNewMet();
-  ParticleBaseFormat* MHT = myEvent.rec()->GetNewMht();
+    // Calculating the MET
+    ParticleBaseFormat* MET = myEvent.rec()->GetNewMet();
+    ParticleBaseFormat* MHT = myEvent.rec()->GetNewMht();
 
-  // shortcut for Meff, TET & THT
-  MAfloat64 & TET = myEvent.rec()->TET();
-  MAfloat64 & THT = myEvent.rec()->THT();
-  MAfloat64 & Meff= myEvent.rec()->Meff();
+    // shortcut for Meff, TET & THT
+    MAfloat64 & TET = myEvent.rec()->TET();
+    MAfloat64 & THT = myEvent.rec()->THT();
+    MAfloat64 & Meff= myEvent.rec()->Meff();
 
+    std::vector<RecJetFormat> output_jets;
+    if (smearer->isJetSmearerOn()) output_jets.reserve(jet_counter);
 
-  // Storing
-  for (MAuint32 ijet=0;ijet<jets.size();ijet++)
-  {
-    if (jets[ijet].pt() <= 1e-10) continue;
-    MALorentzVector q(jets[ijet].px(),jets[ijet].py(),jets[ijet].pz(),jets[ijet].e());
-    (*MET) -= q;
-    (*MHT) -= q;
-    THT += jets[ijet].pt();
-    TET += jets[ijet].pt();
-    Meff += jets[ijet].pt();
-
-    if(jets[ijet].pt() < Ptmin_) continue;
-
-    // Saving jet information
-    RecJetFormat * jet = myEvent.rec()->GetNewJet();
-    jet->setMomentum(q);
-    jet->setPseudoJet(jets[ijet]);
-    std::vector<fastjet::PseudoJet> constituents = clust_seq->constituents(jets[ijet]);
-    MAuint32 tracks = 0;
-    for (MAuint32 j=0;j<constituents.size();j++)
+    // Storing
+    for (auto &jet: jets)
     {
-      jet->AddConstituent(constituents[j].user_index());
-      if (PDG->IsCharged(myEvent.mc()->particles()[constituents[j].user_index()].pdgid())) tracks++;
+        if (jet.pt() <= 1e-10) continue;
+        MALorentzVector q(jet.px(),jet.py(),jet.pz(),jet.e());
+        (*MET) -= q;
+        (*MHT) -= q;
+        THT += jet.pt();
+        TET += jet.pt();
+        Meff += jet.pt();
+
+        if(jet.pt() < Ptmin_) continue;
+
+        // Saving jet information
+        RecJetFormat current_jet(q);
+        current_jet.setPseudoJet(jet);
+        std::vector<fastjet::PseudoJet> constituents = clust_seq->constituents(jet);
+        current_jet.ntracks_ = 0;
+        for (MAuint32 j=0;j<constituents.size();j++)
+        {
+            current_jet.AddConstituent(constituents[j].user_index());
+            if (PDG->IsCharged(myEvent.mc()->particles()[constituents[j].user_index()].pdgid())) current_jet.ntracks_++;
+        }
+        output_jets.push_back(current_jet);
     }
-    jet->ntracks_ = tracks;
-  }
-
-  // Create an empty accessor
-  if (jets.size() == 0) myEvent.rec()->CreateEmptyJetAccesor();
-
-  Meff += MET->pt();
-
-  // Filling the dataformat with jets return true;
+    myEvent.rec()->jetcollection_.insert(std::make_pair(myEvent.rec()->PrimaryJetID_, output_jets));
+    Meff += MET->pt();
+    return true;
 }
 
 // Additional jet clustering. needs execute to run before!!
 MAbool ClusterAlgoFastJet::Cluster(EventFormat& myEvent, std::string JetID)
 {
     // Clustering
-    clust_seq.reset(new fastjet::ClusterSequence(myEvent.rec()->cluster_inputs(), 
-                                                 *JetDefinition_));
+    clust_seq.reset(new fastjet::ClusterSequence(myEvent.rec()->cluster_inputs(), *JetDefinition_));
 
-    std::vector<fastjet::PseudoJet> jets; 
+    std::vector<fastjet::PseudoJet> jets;
     if (Exclusive_) jets = clust_seq->exclusive_jets(Ptmin_);
     else jets = clust_seq->inclusive_jets(Ptmin_);
     jets = fastjet::sorted_by_pt(jets);
 
+    std::vector<RecJetFormat> output_jets;
+    output_jets.reserve(jets.size());
+
     // Storing
-    for (MAuint32 ijet=0;ijet<jets.size();ijet++)
+    for (auto &jet: jets)
     {
         // Saving jet information
-        RecJetFormat * jet = myEvent.rec()->GetNewJet(JetID);
-        MALorentzVector q(jets[ijet].px(),jets[ijet].py(),jets[ijet].pz(),jets[ijet].e());
-        jet->setMomentum(q);
-        jet->setPseudoJet(jets[ijet]);
-        std::vector<fastjet::PseudoJet> constituents = clust_seq->constituents(jets[ijet]);
-        MAuint32 tracks = 0;
-        for (MAuint32 j=0;j<constituents.size();j++)
+        RecJetFormat current_jet(jet.px(),jet.py(),jet.pz(),jet.e());
+        current_jet.setPseudoJet(jet);
+        std::vector<fastjet::PseudoJet> constituents = clust_seq->constituents(jet);
+        current_jet.ntracks_ = 0;
+        for (auto &constit: constituents)
         {
-            jet->AddConstituent(constituents[j].user_index());
-            if (PDG->IsCharged(myEvent.mc()->particles()[constituents[j].user_index()].pdgid())) tracks++;
+            current_jet.AddConstituent(constit.user_index());
+            if (PDG->IsCharged(myEvent.mc()->particles()[constit.user_index()].pdgid()))
+                current_jet.ntracks_++;
         }
-        jet->ntracks_ = tracks;
+        output_jets.push_back(current_jet);
     }
 
-    // Create an empty accessor
-    if (jets.size() == 0) myEvent.rec()->CreateEmptyJetAccesor(JetID);
+    myEvent.rec()->jetcollection_.insert(std::make_pair(JetID, output_jets));
 
     // Filling the dataformat with jets
     return true;
