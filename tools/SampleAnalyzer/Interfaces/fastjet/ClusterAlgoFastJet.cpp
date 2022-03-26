@@ -67,8 +67,6 @@ MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
             jets[i].reset_momentum(smeared.px(),smeared.py(),smeared.pz(),smeared.e());
             if(jets[i].pt() >= Ptmin_) jet_counter++;
         }
-        // Sort pseudojets
-        jets = fastjet::sorted_by_pt(jets);
     }
 
     // Calculating the MET
@@ -84,7 +82,7 @@ MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
     if (smearer->isJetSmearerOn()) output_jets.reserve(jet_counter);
 
     // Storing
-    for (auto &jet: jets)
+    for (auto &jet: fastjet::sorted_by_pt(jets))
     {
         if (jet.pt() <= 1e-10) continue;
         MALorentzVector q(jet.px(),jet.py(),jet.pz(),jet.e());
@@ -97,16 +95,17 @@ MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
         if(jet.pt() < Ptmin_) continue;
 
         // Saving jet information
-        RecJetFormat current_jet(q);
-        current_jet.setPseudoJet(jet);
+        output_jets.emplace_back(q);
+        output_jets.back().setPseudoJet(jet);
         std::vector<fastjet::PseudoJet> constituents = clust_seq->constituents(jet);
-        current_jet.ntracks_ = 0;
-        for (MAuint32 j=0;j<constituents.size();j++)
+        output_jets.back().Constituents_.reserve(constituents.size());
+        output_jets.back().ntracks_ = 0;
+        for (auto &constit: constituents)
         {
-            current_jet.AddConstituent(constituents[j].user_index());
-            if (PDG->IsCharged(myEvent.mc()->particles()[constituents[j].user_index()].pdgid())) current_jet.ntracks_++;
+            output_jets.back().Constituents_.emplace_back(constit.user_index());
+            if (PDG->IsCharged(myEvent.mc()->particles()[constit.user_index()].pdgid()))
+                output_jets.back().ntracks_++;
         }
-        output_jets.push_back(current_jet);
     }
     myEvent.rec()->jetcollection_.insert(std::make_pair(myEvent.rec()->PrimaryJetID_, output_jets));
     Meff += MET->pt();
@@ -122,30 +121,29 @@ MAbool ClusterAlgoFastJet::Cluster(EventFormat& myEvent, std::string JetID)
     std::vector<fastjet::PseudoJet> jets;
     if (Exclusive_) jets = clust_seq->exclusive_jets(Ptmin_);
     else jets = clust_seq->inclusive_jets(Ptmin_);
-    jets = fastjet::sorted_by_pt(jets);
 
     std::vector<RecJetFormat> output_jets;
     output_jets.reserve(jets.size());
 
     // Storing
-    for (auto &jet: jets)
+    for (auto &jet: fastjet::sorted_by_pt(jets))
     {
         // Saving jet information
-        RecJetFormat current_jet(jet.px(),jet.py(),jet.pz(),jet.e());
-        current_jet.setPseudoJet(jet);
+        output_jets.emplace_back(jet.px(),jet.py(),jet.pz(),jet.e());
+        output_jets.back().setPseudoJet(jet);
         std::vector<fastjet::PseudoJet> constituents = clust_seq->constituents(jet);
-        current_jet.ntracks_ = 0;
+        output_jets.back().Constituents_.reserve(constituents.size());
+        output_jets.back().ntracks_ = 0;
         for (auto &constit: constituents)
         {
-            current_jet.AddConstituent(constit.user_index());
+            output_jets.back().Constituents_.emplace_back(constit.user_index());
             if (PDG->IsCharged(myEvent.mc()->particles()[constit.user_index()].pdgid()))
-                current_jet.ntracks_++;
+                output_jets.back().ntracks_++;
         }
-        output_jets.push_back(current_jet);
     }
 
+    // Filling the dataformat with jets
     myEvent.rec()->jetcollection_.insert(std::make_pair(JetID, output_jets));
 
-    // Filling the dataformat with jets
     return true;
 }

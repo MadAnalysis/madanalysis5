@@ -243,18 +243,21 @@ namespace MA5{
                 }
 
                 std::vector <fastjet::PseudoJet> jets = __cluster(myEvent.rec()->cluster_inputs());
+
                 std::vector<RecJetFormat> output_jets;
                 output_jets.reserve(jets.size());
+
                 for (auto &jet: jets) {
-                    RecJetFormat current_jet = *__transform_jet(jet);
+                    output_jets.emplace_back(jet.px(),jet.py(),jet.pz(),jet.e());
+                    output_jets.back().setPseudoJet(jet);
                     std::vector <fastjet::PseudoJet> constituents = clust_seq->constituents(jet);
-                    current_jet.ntracks_ = 0;
+                    output_jets.back().Constituents_.reserve(constituents.size());
+                    output_jets.back().ntracks_ = 0;
                     for (auto &constit: constituents) {
-                        current_jet.AddConstituent(constit.user_index());
+                        output_jets.back().Constituents_.emplace_back(constit.user_index());
                         if (PDG->IsCharged(myEvent.mc()->particles()[constit.user_index()].pdgid()))
-                            current_jet.ntracks_++;
+                            output_jets.back().ntracks_++;
                     }
-                    output_jets.push_back(current_jet);
                 }
                 myEvent.rec()->jetcollection_.insert(std::make_pair(JetID, output_jets));
                 isClustered_ = false;

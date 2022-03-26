@@ -39,168 +39,168 @@
 
 // FastJet headers
 #ifdef MA5_FASTJET_MODE
-    #include "fastjet/PseudoJet.hh"
+#include "fastjet/PseudoJet.hh"
 #endif
 
 namespace MA5
 {
-namespace Substructure {
-    class ClusterBase;
-    class Pruner;
-    class Nsubjettiness;
-    class SoftFrop;
-    class Filter;
-    class EnergyCorrelator;
-}
-class LHCOReader;
-class ROOTReader;
-class DelphesTreeReader;
-class DelphesMA5tuneTreeReader;
-class DetectorDelphes;
-class DetectorDelphesMA5tune;
-class DelphesMemoryInterface;
+    namespace Substructure {
+        class ClusterBase;
+        class Pruner;
+        class Nsubjettiness;
+        class SoftFrop;
+        class Filter;
+        class EnergyCorrelator;
+    }
+    class LHCOReader;
+    class ROOTReader;
+    class DelphesTreeReader;
+    class DelphesMA5tuneTreeReader;
+    class DetectorDelphes;
+    class DetectorDelphesMA5tune;
+    class DelphesMemoryInterface;
 
-class RecJetFormat : public RecParticleFormat
-{
+    class RecJetFormat : public RecParticleFormat
+    {
 
-  friend class LHCOReader;
-  friend class ROOTReader;
-  friend class ClusterAlgoFastJet;
-  friend class bTagger;
-  friend class TauTagger;
-  friend class cTagger;
-  friend class DetectorDelphes;
-  friend class DetectorDelphesMA5tune;
-  friend class DelphesTreeReader;
-  friend class DelphesMA5tuneTreeReader;
-  friend class DelphesMemoryInterface;
+        friend class LHCOReader;
+        friend class ROOTReader;
+        friend class ClusterAlgoFastJet;
+        friend class bTagger;
+        friend class TauTagger;
+        friend class cTagger;
+        friend class DetectorDelphes;
+        friend class DetectorDelphesMA5tune;
+        friend class DelphesTreeReader;
+        friend class DelphesMA5tuneTreeReader;
+        friend class DelphesMemoryInterface;
 
-  // Substructure methods
-  friend class Substructure::ClusterBase;
-  friend class Substructure::Pruner;
-  friend class Substructure::Nsubjettiness;
-  friend class Substructure::SoftFrop;
-  friend class Substructure::Filter;
-  friend class Substructure::EnergyCorrelator;
+        // Substructure methods
+        friend class Substructure::ClusterBase;
+        friend class Substructure::Pruner;
+        friend class Substructure::Nsubjettiness;
+        friend class Substructure::SoftFrop;
+        friend class Substructure::Filter;
+        friend class Substructure::EnergyCorrelator;
 
-  // -------------------------------------------------------------
-  //                        data members
-  // -------------------------------------------------------------
- protected:
+        // -------------------------------------------------------------
+        //                        data members
+        // -------------------------------------------------------------
+    protected:
 
-  MAuint16 ntracks_;   /// number of tracks
-  MAbool btag_;        /// b-tag
-  MAbool ctag_;        /// c-tag
-  MAbool true_ctag_;   /// c-tag (before id or misid)
-  MAbool true_btag_;   /// b-tag (before id or misid)
-  std::vector<MAint32> Constituents_;  /// indices of the MC particles
-  std::vector<IsolationConeType> isolCones_; // isolation cones
+        MAuint16 ntracks_;   /// number of tracks
+        MAbool btag_;        /// b-tag
+        MAbool ctag_;        /// c-tag
+        MAbool true_ctag_;   /// c-tag (before id or misid)
+        MAbool true_btag_;   /// b-tag (before id or misid)
+        std::vector<MAint32> Constituents_;  /// indices of the MC particles
+        std::vector<IsolationConeType> isolCones_; // isolation cones
 
 #ifdef MA5_FASTJET_MODE
-    // @Jack: Save the modified jet as pseudojet for jet substructure applications
+        // @Jack: Save the modified jet as pseudojet for jet substructure applications
     //        This will make it faster and avoid extra for loops.
     fastjet::PseudoJet pseudojet_;
 #endif
 
-  // -------------------------------------------------------------
-  //                        method members
-  // -------------------------------------------------------------
- public:
+        // -------------------------------------------------------------
+        //                        method members
+        // -------------------------------------------------------------
+    public:
 
-  /// Constructor without arguments
-  RecJetFormat()
-  { Reset(); }
+        /// Constructor without arguments
+        RecJetFormat()
+        { Reset(); }
 
-  /// Constructor with argument
-  RecJetFormat(MAfloat64 px, MAfloat64 py, MAfloat64 pz, MAfloat64 e)
-  { Reset(); momentum_.SetPxPyPzE(px,py,pz,e); }
+        /// Constructor with argument
+        RecJetFormat(MAfloat64 px, MAfloat64 py, MAfloat64 pz, MAfloat64 e)
+        { Reset(); momentum_.SetPxPyPzE(px,py,pz,e); }
 
-  /// Constructor with argument
-  RecJetFormat(const MALorentzVector& p)
-  { Reset(); momentum_.SetPxPyPzE(p.Px(),p.Py(),p.Pz(),p.E()); }
+        /// Constructor with argument
+        RecJetFormat(const MALorentzVector& p)
+        { Reset(); momentum_.SetPxPyPzE(p.Px(),p.Py(),p.Pz(),p.E()); }
 
-  /// Destructor
-  virtual ~RecJetFormat()
-  {}
+        /// Destructor
+        virtual ~RecJetFormat()
+        {}
 
-  /// Dump information
-  virtual void Print() const
-  {
-    INFO << "ntracks ="   << /*set::setw(8)*/"" << std::left << ntracks_  << ", "  
-         << "btag = " << /*set::setw(8)*/"" << std::left << btag_ << ", "
-         << "ctag = " << /*set::setw(8)*/"" << std::left << ctag_ << ", ";
-    RecParticleFormat::Print();
-  }
+        /// Dump information
+        virtual void Print() const
+        {
+            INFO << "ntracks ="   << /*set::setw(8)*/"" << std::left << ntracks_  << ", "
+                 << "btag = " << /*set::setw(8)*/"" << std::left << btag_ << ", "
+                 << "ctag = " << /*set::setw(8)*/"" << std::left << ctag_ << ", ";
+            RecParticleFormat::Print();
+        }
 
-  /// Clear all information
-  virtual void Reset()
-  {
-    ntracks_   = 0; 
-    btag_      = false;
-    ctag_      = false;
-    true_btag_ = false;
-    true_ctag_ = false;
-    isolCones_.clear();
-  }
+        /// Clear all information
+        virtual void Reset()
+        {
+            ntracks_   = 0;
+            btag_      = false;
+            ctag_      = false;
+            true_btag_ = false;
+            true_ctag_ = false;
+            isolCones_.clear();
+        }
 
-  /// Accessor to the number of tracks
-  const MAuint16 ntracks() const
-  {return ntracks_;}
+        /// Accessor to the number of tracks
+        const MAuint16 ntracks() const
+        {return ntracks_;}
 
-  /// Accessor to the b-tag
-  const MAbool& btag() const
-  {return btag_;}
+        /// Accessor to the b-tag
+        const MAbool& btag() const
+        {return btag_;}
 
-  /// Accessor to the c-tag
-  const MAbool& ctag() const
-  {return ctag_;}
+        /// Accessor to the c-tag
+        const MAbool& ctag() const
+        {return ctag_;}
 
-  /// Accessor to the true c-tag
-  const MAbool& true_ctag() const
-  {return true_ctag_;}
+        /// Accessor to the true c-tag
+        const MAbool& true_ctag() const
+        {return true_ctag_;}
 
-  /// Accessor to the true b-tag
-  const MAbool& true_btag() const
-  {return true_btag_;}
+        /// Accessor to the true b-tag
+        const MAbool& true_btag() const
+        {return true_btag_;}
 
-  /// Setting a new true_btag_ value
-  void setTrueBtag(const MAbool& tag)
-  {true_btag_=tag;}
+        /// Setting a new true_btag_ value
+        void setTrueBtag(const MAbool& tag)
+        {true_btag_=tag;}
 
-  /// Setting a new btag_ value
-  void setBtag(const MAbool& tag)
-  {btag_=tag;}
+        /// Setting a new btag_ value
+        void setBtag(const MAbool& tag)
+        {btag_=tag;}
 
-  /// Setting a new true_ctag_ value
-  void setCtag(const MAbool& tag)
-  {ctag_=tag;}
+        /// Setting a new true_ctag_ value
+        void setCtag(const MAbool& tag)
+        {ctag_=tag;}
 
-  /// Setting a new ctag_ value
-  void setTrueCtag(const MAbool& tag)
-  {true_ctag_=tag;}
+        /// Setting a new ctag_ value
+        void setTrueCtag(const MAbool& tag)
+        {true_ctag_=tag;}
 
-  /// Setting ntracks
-  void setNtracks(MAuint16 ntracks)
-  { ntracks_=ntracks; }
+        /// Setting ntracks
+        void setNtracks(MAuint16 ntracks)
+        { ntracks_=ntracks; }
 
-  /// Add one constituent
-  void AddConstituent (const MAint32& index)
-  {Constituents_.push_back(index);}
+        /// Add one constituent
+        void AddConstituent (const MAint32& index)
+        {Constituents_.push_back(index);}
 
-  /// get constituent collections
-  const std::vector<MAint32>& constituents() const
-  { return Constituents_; }
+        /// get constituent collections
+        const std::vector<MAint32>& constituents() const
+        { return Constituents_; }
 
-  /// Add one isolation cone
-  void AddIsolCone (const IsolationConeType& cone)
-  {isolCones_.push_back(cone);}
+        /// Add one isolation cone
+        void AddIsolCone (const IsolationConeType& cone)
+        {isolCones_.push_back(cone);}
 
-  /// get the collection of isolation cones
-  const std::vector<IsolationConeType>& isolCones() const
-  { return isolCones_; }
+        /// get the collection of isolation cones
+        const std::vector<IsolationConeType>& isolCones() const
+        { return isolCones_; }
 
 #ifdef MA5_FASTJET_MODE
-    // Accessor for pseudojets
+     // Accessor for pseudojets
     const fastjet::PseudoJet& pseudojet() const {return pseudojet_;}
 
     // Add one pseudojet
@@ -210,9 +210,7 @@ class RecJetFormat : public RecParticleFormat
         pseudojet_=fastjet::PseudoJet(v.Px(), v.Py(), v.Pz(), v.E());
     }
 #endif
-
-};
-
+    };
 }
 
 #endif
