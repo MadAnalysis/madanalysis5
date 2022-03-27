@@ -64,6 +64,16 @@
 // initializing MACRO 
 #define INIT_ANALYSIS(CLASS,NAME) public: CLASS() {setName(NAME);} virtual ~CLASS() {} private:
 
+// Introduce shorthand for widely used reconstructed objects
+using Jet     = MA5::RecJetFormat *;
+using Jets    = std::vector<const Jet>;
+using Tau     = MA5::RecTauFormat *;
+using Taus    = std::vector<const Tau>;
+using Lepton  = MA5::RecLeptonFormat *;
+using Leptons = std::vector<const Lepton>;
+using Photon  = MA5::RecPhotonFormat *;
+using Photons = std::vector<const Photon>;
+
 namespace MA5
 {
 
