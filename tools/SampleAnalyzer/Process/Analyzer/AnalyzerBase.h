@@ -65,14 +65,14 @@
 #define INIT_ANALYSIS(CLASS,NAME) public: CLASS() {setName(NAME);} virtual ~CLASS() {} private:
 
 // Introduce shorthand for widely used reconstructed objects
-using Jet     = MA5::RecJetFormat *;
-using Jets    = std::vector<const Jet>;
-using Tau     = MA5::RecTauFormat *;
-using Taus    = std::vector<const Tau>;
-using Lepton  = MA5::RecLeptonFormat *;
-using Leptons = std::vector<const Lepton>;
-using Photon  = MA5::RecPhotonFormat *;
-using Photons = std::vector<const Photon>;
+using RecJet     = MA5::RecJetFormat *;
+using RecJets    = std::vector<const RecJet>;
+using RecTau     = MA5::RecTauFormat *;
+using RecTaus    = std::vector<const RecTau>;
+using RecLepton  = MA5::RecLeptonFormat *;
+using RecLeptons = std::vector<const RecLepton>;
+using RecPhoton  = MA5::RecPhotonFormat *;
+using RecPhotons = std::vector<const RecPhoton>;
 
 namespace MA5
 {
