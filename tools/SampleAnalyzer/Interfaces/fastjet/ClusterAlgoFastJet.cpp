@@ -52,21 +52,24 @@ MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
     if (Exclusive_) jets = clust_seq->exclusive_jets(0.);
     else jets = clust_seq->inclusive_jets(0.);
 
+    // Initialize output jet vector
+    std::vector<RecJetFormat> output_jets;
+
     // Smearing if necessary
     MAint32 jet_counter = 0;
     if (smearer->isJetSmearerOn())
     {
-        for (MAuint32 i=0;i<jets.size();i++)
+        for (auto &jet: jets)
         {
             // Smearer module returns a smeared MCParticleFormat object
             // Default: NullSmearer, that does nothing
             // Reminder: 21 is reserved for the reco-jets
-            MCParticleFormat current_jet;
-            current_jet.momentum().SetPxPyPzE(jets[i].px(),jets[i].py(),jets[i].pz(),jets[i].e());
+            MCParticleFormat current_jet(jet.px(),jet.py(),jet.pz(),jet.e());
             MCParticleFormat smeared = smearer->Execute(dynamic_cast<const MCParticleFormat*>(&current_jet), 21);
-            jets[i].reset_momentum(smeared.px(),smeared.py(),smeared.pz(),smeared.e());
-            if(jets[i].pt() >= Ptmin_) jet_counter++;
+            jet.reset_momentum(smeared.px(),smeared.py(),smeared.pz(),smeared.e());
+            if(jet.pt() >= Ptmin_) jet_counter++;
         }
+        output_jets.reserve(jet_counter);
     }
 
     // Calculating the MET
@@ -77,9 +80,6 @@ MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
     MAfloat64 & TET = myEvent.rec()->TET();
     MAfloat64 & THT = myEvent.rec()->THT();
     MAfloat64 & Meff= myEvent.rec()->Meff();
-
-    std::vector<RecJetFormat> output_jets;
-    if (smearer->isJetSmearerOn()) output_jets.reserve(jet_counter);
 
     // Storing
     for (auto &jet: fastjet::sorted_by_pt(jets))
@@ -95,8 +95,7 @@ MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
         if(jet.pt() < Ptmin_) continue;
 
         // Saving jet information
-        output_jets.emplace_back(q);
-        output_jets.back().setPseudoJet(jet);
+        output_jets.emplace_back(jet);
         std::vector<fastjet::PseudoJet> constituents = clust_seq->constituents(jet);
         output_jets.back().Constituents_.reserve(constituents.size());
         output_jets.back().ntracks_ = 0;
@@ -129,8 +128,7 @@ MAbool ClusterAlgoFastJet::Cluster(EventFormat& myEvent, std::string JetID)
     for (auto &jet: fastjet::sorted_by_pt(jets))
     {
         // Saving jet information
-        output_jets.emplace_back(jet.px(),jet.py(),jet.pz(),jet.e());
-        output_jets.back().setPseudoJet(jet);
+        output_jets.emplace_back(jet);
         std::vector<fastjet::PseudoJet> constituents = clust_seq->constituents(jet);
         output_jets.back().Constituents_.reserve(constituents.size());
         output_jets.back().ntracks_ = 0;

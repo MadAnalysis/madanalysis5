@@ -119,6 +119,16 @@ namespace MA5
         RecJetFormat(const MALorentzVector& p)
         { Reset(); momentum_.SetPxPyPzE(p.Px(),p.Py(),p.Pz(),p.E()); }
 
+#ifdef MA5_FASTJET_MODE
+        /// Constructor with argument
+        RecJetFormat(fastjet::PseudoJet& jet)
+        {
+            Reset();
+            momentum_.SetPxPyPzE(jet.px(), jet.py(), jet.pz(), jet.e());
+            pseudojet_=jet;
+        }
+#endif
+
         /// Destructor
         virtual ~RecJetFormat()
         {}

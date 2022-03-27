@@ -204,8 +204,7 @@ namespace MA5{
             // Method to transform pseudojet into recjetformat
             static RecJetFormat * __transform_jet(fastjet::PseudoJet jet)
             {
-                RecJetFormat * NewJet = new RecJetFormat(jet.px(), jet.py(), jet.pz(), jet.e());
-                NewJet->setPseudoJet(jet);
+                RecJetFormat * NewJet = new RecJetFormat(jet);
                 return NewJet;
             }
 
@@ -248,8 +247,7 @@ namespace MA5{
                 output_jets.reserve(jets.size());
 
                 for (auto &jet: jets) {
-                    output_jets.emplace_back(jet.px(),jet.py(),jet.pz(),jet.e());
-                    output_jets.back().setPseudoJet(jet);
+                    output_jets.emplace_back(jet);
                     std::vector <fastjet::PseudoJet> constituents = clust_seq->constituents(jet);
                     output_jets.back().Constituents_.reserve(constituents.size());
                     output_jets.back().ntracks_ = 0;

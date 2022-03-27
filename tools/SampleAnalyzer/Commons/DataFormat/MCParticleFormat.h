@@ -43,174 +43,168 @@
 namespace MA5
 {
 
-class LHEReader;
-class LHCOReader;
-class STDHEPreader;
-class HEPMCReader;
-class ROOTReader;
-class LHEWriter;
-class MergingPlots;
-class DelphesTreeReader;
-class DelphesMA5tuneTreeReader;
-class SmearerBase;
+    class LHEReader;
+    class LHCOReader;
+    class STDHEPreader;
+    class HEPMCReader;
+    class ROOTReader;
+    class LHEWriter;
+    class MergingPlots;
+    class DelphesTreeReader;
+    class DelphesMA5tuneTreeReader;
+    class SmearerBase;
 
-class MCParticleFormat : public ParticleBaseFormat
-{
-  friend class LHEReader;
-  friend class LHCOReader;
-  friend class STDHEPreader;
-  friend class HEPMCReader;
-  friend class ROOTReader;
-  friend class LHEWriter;
-  friend class MergingPlots;
-  friend class DelphesTreeReader;
-  friend class DelphesMA5tuneTreeReader;
-  friend class SmearerBase;
+    class MCParticleFormat : public ParticleBaseFormat
+    {
+        friend class LHEReader;
+        friend class LHCOReader;
+        friend class STDHEPreader;
+        friend class HEPMCReader;
+        friend class ROOTReader;
+        friend class LHEWriter;
+        friend class MergingPlots;
+        friend class DelphesTreeReader;
+        friend class DelphesMA5tuneTreeReader;
+        friend class SmearerBase;
 
-  // -------------------------------------------------------------
-  //                        data members
-  // -------------------------------------------------------------
- private:
+        // -------------------------------------------------------------
+        //                        data members
+        // -------------------------------------------------------------
+    private:
 
-  /// PDG numbering of the particle
-  MAint32 pdgid_;   
+        /// PDG numbering of the particle
+        MAint32 pdgid_;
 
-  /// Status code of the particle
-  /// For LHE: -1 for initial state, 2 intermediate state, 1 final state
-  /// For PYTHIA: more sophisticated 
-  MAint16 statuscode_;
+        /// Status code of the particle
+        /// For LHE: -1 for initial state, 2 intermediate state, 1 final state
+        /// For PYTHIA: more sophisticated
+        MAint16 statuscode_;
 
-  /// Cosine of the angle btwn the spin vector and its 3-momentum, in the lab frame
-  MAfloat32 spin_;
+        /// Cosine of the angle btwn the spin vector and its 3-momentum, in the lab frame
+        MAfloat32 spin_;
 
-  /// Is a PileUp particle or not?
-  MAbool isPU_;       
+        /// Is a PileUp particle or not?
+        MAbool isPU_;
 
-  /// List of daughter particles
-  std::vector<MCParticleFormat*> daughters_;
+        /// List of daughter particles
+        std::vector<MCParticleFormat*> daughters_;
 
-  /// List of mother particles
-  std::vector<MCParticleFormat*> mothers_;
+        /// List of mother particles
+        std::vector<MCParticleFormat*> mothers_;
 
-  /// Decay position in time & space (in s & mm)
-  MALorentzVector decay_vertex_; 
+        /// Decay position in time & space (in s & mm)
+        MALorentzVector decay_vertex_;
 
-  /// Angle defining the rotation the momentum is subjected to during its
-  /// propagation in the magnetic field
-  MAdouble64 momentum_rotation_;
-
-
-  // -------------------------------------------------------------
-  //                      method members
-  // -------------------------------------------------------------
- public :
-
-  /// Constructor without arguments
-  MCParticleFormat()
-  {
-    momentum_.SetPxPyPzE(0.,0.,0.,0.);
-    closest_approach_.SetXYZ(0.,0.,0.);
-    spin_       = 0.; 
-    pdgid_      = 0; 
-    statuscode_ = 0; 
-    isPU_       = false;
-    d0_         = 0.; d0_approx_  = 0.;
-    dz_         = 0.; dz_approx_  = 0.;
-    momentum_rotation_ = 0.;
-  }
-
-  /// Destructor
-  virtual ~MCParticleFormat()
-  {}
-
-  /// Clear all information
-  virtual void Reset()
-  {
-    momentum_.SetPxPyPzE(0.,0.,0.,0.);
-    spin_       = 0.; 
-    pdgid_      = 0; 
-    statuscode_ = 0; 
-    isPU_       = false;
-    daughters_.clear();
-    mothers_.clear();
-    decay_vertex_.clear();
-    closest_approach_.clear();
-    d0_         = 0.;
-    dz_         = 0.;
-  }
-
-  /// Print particle informations
-  virtual void Print() const
-  {
-    INFO << "momentum=(" << /*set::setw(8)*/"" << std::left << momentum_.Px()
-         << ", "<</*set::setw(8)*/"" << std::left << momentum_.Py()  
-         << ", "<</*set::setw(8)*/"" << std::left << momentum_.Pz() 
-         << ", "<</*set::setw(8)*/"" << std::left << momentum_.E() << ") - " << endmsg;
-    INFO << "ctau=" << /*set::setw(8)*/"" << std::left << decay_vertex_.T() << " - "
-         << "spin=" << /*set::setw(8)*/"" << std::left << spin_ << " - "
-         << "d0=" << /*set::setw(8)*/"" << std::left << d0_ << " - "
-         << "dz=" << /*set::setw(8)*/"" << std::left << dz_ << " - "
-         << "PDGID=" << /*set::setw(8)*/"" << std::left << pdgid_ << " - "
-         << "StatusCode=" << /*set::setw(3)*/"" << std::left 
-         << static_cast<signed int>(statuscode_) << " - " << endmsg;
-    INFO << "Number of mothers=" << mothers_.size() << " - " 
-         << "Number of daughters=" << daughters_.size() << endmsg;
-  }
-
-  const MAbool& isPU()  const {return isPU_;}
-  const MAfloat64& ctau() const {return decay_vertex_.T();}
-  const MAfloat32& spin() const {return spin_;}
-  const MAint32& pdgid()  const {return pdgid_;}
-  const MAint16& statuscode() const {return statuscode_;}
-
-  /// Accessor to the daughters (read-only)
-  const std::vector<MCParticleFormat*>& daughters() const {return daughters_;}
-
-  /// Accessor to the daughters
-  std::vector<MCParticleFormat*>& daughters() {return daughters_;}
-
-  /// Accessor to the mothers (read-only)
-  const std::vector<MCParticleFormat*>& mothers() const {return mothers_;}
-
-  /// Accessor to the mothers
-  std::vector<MCParticleFormat*>& mothers() {return mothers_;}
-
-  /// Accessor to the decay vertex (read-only)
-  const MALorentzVector& decay_vertex() const {return decay_vertex_;}
-
-  /// Accessor to the rotation angle of the momentum (read-only)
-  const MAdouble64& momentum_rotation() const {return momentum_rotation_;}
+        /// Angle defining the rotation the momentum is subjected to during its
+        /// propagation in the magnetic field
+        MAdouble64 momentum_rotation_;
 
 
-  /// Mutators
-  void setDecayVertex(const MALorentzVector& v) {decay_vertex_=v;}
-  void setIsPU(MAbool v)   {isPU_=v;}
-  void setSpin(MAfloat32 v)  {spin_=v;}
-  void setPdgid(MAint32 v)   {pdgid_=v;}
-  void setStatuscode(MAint16 v)  {statuscode_=v;}
-  void setMomentum(const MALorentzVector& v)  {momentum_=v;}
-  void setMomentumRotation(MAdouble64 v) {momentum_rotation_=v;}
+        // -------------------------------------------------------------
+        //                      method members
+        // -------------------------------------------------------------
+    public :
 
-  /// Boosting the four momentum to the restframe of another particle
-  void ToRestFrame(const MCParticleFormat* boost)
-  {
-    if (boost==0) return;
-    ToRestFrame(*boost);
-  }
+        /// Constructor without arguments
+        MCParticleFormat()
+        { Reset(); }
 
-  void ToRestFrame(const MCParticleFormat& boost)
-  {
-    MALorentzVector momentum = boost.momentum();
-    momentum.SetPx(-momentum.X());
-    momentum.SetPy(-momentum.Y());
-    momentum.SetPz(-momentum.Z());
+        /// Destructor
+        virtual ~MCParticleFormat()
+        {}
 
-    MABoost convertor;
-    convertor.setBoostVector(momentum);
-    convertor.boost(momentum_);
-  }
+        /// Constructor with arguments
+        MCParticleFormat(MAfloat64 px, MAfloat64 py, MAfloat64 pz, MAfloat64 e)
+        { Reset(); momentum_.SetPxPyPzE(px,py,pz,e); }
 
-};
+        /// Clear all information
+        virtual void Reset()
+        {
+            momentum_.SetPxPyPzE(0.,0.,0.,0.);
+            spin_       = 0.;
+            pdgid_      = 0;
+            statuscode_ = 0;
+            isPU_       = false;
+            daughters_.clear();
+            mothers_.clear();
+            decay_vertex_.clear();
+            closest_approach_.clear();
+            d0_         = 0.;
+            dz_         = 0.;
+        }
+
+        /// Print particle informations
+        virtual void Print() const
+        {
+            INFO << "momentum=(" << /*set::setw(8)*/"" << std::left << momentum_.Px()
+                 << ", "<</*set::setw(8)*/"" << std::left << momentum_.Py()
+                 << ", "<</*set::setw(8)*/"" << std::left << momentum_.Pz()
+                 << ", "<</*set::setw(8)*/"" << std::left << momentum_.E() << ") - " << endmsg;
+            INFO << "ctau=" << /*set::setw(8)*/"" << std::left << decay_vertex_.T() << " - "
+                 << "spin=" << /*set::setw(8)*/"" << std::left << spin_ << " - "
+                 << "d0=" << /*set::setw(8)*/"" << std::left << d0_ << " - "
+                 << "dz=" << /*set::setw(8)*/"" << std::left << dz_ << " - "
+                 << "PDGID=" << /*set::setw(8)*/"" << std::left << pdgid_ << " - "
+                 << "StatusCode=" << /*set::setw(3)*/"" << std::left
+                 << static_cast<signed int>(statuscode_) << " - " << endmsg;
+            INFO << "Number of mothers=" << mothers_.size() << " - "
+                 << "Number of daughters=" << daughters_.size() << endmsg;
+        }
+
+        const MAbool& isPU()  const {return isPU_;}
+        const MAfloat64& ctau() const {return decay_vertex_.T();}
+        const MAfloat32& spin() const {return spin_;}
+        const MAint32& pdgid()  const {return pdgid_;}
+        const MAint16& statuscode() const {return statuscode_;}
+
+        /// Accessor to the daughters (read-only)
+        const std::vector<MCParticleFormat*>& daughters() const {return daughters_;}
+
+        /// Accessor to the daughters
+        std::vector<MCParticleFormat*>& daughters() {return daughters_;}
+
+        /// Accessor to the mothers (read-only)
+        const std::vector<MCParticleFormat*>& mothers() const {return mothers_;}
+
+        /// Accessor to the mothers
+        std::vector<MCParticleFormat*>& mothers() {return mothers_;}
+
+        /// Accessor to the decay vertex (read-only)
+        const MALorentzVector& decay_vertex() const {return decay_vertex_;}
+
+        /// Accessor to the rotation angle of the momentum (read-only)
+        const MAdouble64& momentum_rotation() const {return momentum_rotation_;}
+
+
+        /// Mutators
+        void setDecayVertex(const MALorentzVector& v) {decay_vertex_=v;}
+        void setIsPU(MAbool v)   {isPU_=v;}
+        void setSpin(MAfloat32 v)  {spin_=v;}
+        void setPdgid(MAint32 v)   {pdgid_=v;}
+        void setStatuscode(MAint16 v)  {statuscode_=v;}
+        void setMomentum(const MALorentzVector& v)  {momentum_=v;}
+        void setMomentumRotation(MAdouble64 v) {momentum_rotation_=v;}
+
+        /// Boosting the four momentum to the restframe of another particle
+        void ToRestFrame(const MCParticleFormat* boost)
+        {
+            if (boost==0) return;
+            ToRestFrame(*boost);
+        }
+
+        void ToRestFrame(const MCParticleFormat& boost)
+        {
+            MALorentzVector momentum = boost.momentum();
+            momentum.SetPx(-momentum.X());
+            momentum.SetPy(-momentum.Y());
+            momentum.SetPz(-momentum.Z());
+
+            MABoost convertor;
+            convertor.setBoostVector(momentum);
+            convertor.boost(momentum_);
+        }
+
+    };
 
 }
 
