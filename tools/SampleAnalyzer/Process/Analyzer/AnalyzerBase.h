@@ -73,6 +73,8 @@
 #define RecLeptons std::vector<const MA5::RecLeptonFormat *>
 #define RecPhoton  MA5::RecPhotonFormat *
 #define RecPhotons std::vector<const MA5::RecPhotonFormat *>
+#define RecTrack   MA5::RecTrackFormat *
+#define RecTracks  std::vector<const MA5::RecTrackFormat *>
 
 namespace MA5
 {
