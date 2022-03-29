@@ -157,7 +157,7 @@ class ScriptReader:
                         if not self.IsExpert:
                             script_lines.append(line)
                         else:
-                            sample = line
+                            sample = line.split()[-1]
                             if "*" in sample:
                                 from glob import glob
 
