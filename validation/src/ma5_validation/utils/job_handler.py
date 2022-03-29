@@ -23,6 +23,8 @@
 
 
 import os
+import shutil
+import subprocess
 from typing import Text, Sequence, Union
 
 from ma5_validation.system.exceptions import (
@@ -79,6 +81,31 @@ class JobHandler:
         with open(script_name, "w") as script:
             script.write(commands)
 
+    def __execute_command(self, commands: Sequence[Text], path: Text, **kwargs) -> bool:
+        """
+        Execute a command
+
+        Parameters
+        ----------
+        commands :  Sequence[Text]
+            list of commands
+        path : Text
+            path where the execution takes place
+        kwargs
+            additional parameters
+
+        Returns
+        -------
+        bool
+        """
+
+        print(" ".join(commands))
+        result = subprocess.Popen(" ".join(commands), cwd=path, **kwargs)
+
+        out, err = result.communicate()
+
+        return result.returncode == 0
+
     def execute(self) -> bool:
         """
         Execute MadAnalysis 5 script
@@ -87,7 +114,7 @@ class JobHandler:
             self.write_ma5script(self.script.commands)
 
             commands = [
-                self.ma5_path + "/bin/ma5",
+                "./bin/ma5",
                 "--forced",
                 "--script",
                 # "--debug",
@@ -101,7 +128,7 @@ class JobHandler:
 
             print("   * Running MadAnalysis 5: " + self.script.title)
             try:
-                os.system(" ".join(commands))
+                result = self.__execute_command(commands, self.ma5_path, shell=True)
             except Exception as err:
                 log_file = ""
                 with open(self.log_file, "r", encoding="utf-8") as log:
@@ -112,7 +139,7 @@ class JobHandler:
         else:
             self.write_ma5script(self.script.commands)
             commands = [
-                self.ma5_path + "/bin/ma5",
+                "./bin/ma5",
                 "--forced",
                 "--script",
                 # "--debug",
@@ -126,49 +153,40 @@ class JobHandler:
 
             print("   * Running MadAnalysis 5: " + self.script.title)
             try:
-                os.system(" ".join(commands))
-                curdir = os.getcwd()
-                os.chdir(os.path.join(self.log_path, self.script.name, "Build"))
-                os.system("source setup.sh")
+                result = self.__execute_command(commands, self.ma5_path, shell=True)
+
+                if not os.path.isdir(os.path.join(self.log_path, self.script.name)):
+                    raise MadAnalysis5ExecutionError("Expert mode workspace is not created.")
+
                 with open(
                     os.path.join(self.log_path, self.script.name, "Input/_defaultset.list"), "w"
                 ) as inputs:
                     inputs.write("\n".join(self.script.sample))
 
                 # Copy analysis files
-                command = (
-                    "cp "
-                    + self.script.cpp
-                    + " "
-                    + os.path.join(
-                        self.log_path, self.script.name, "Build/SampleAnalyzer/User/Analyzer"
+                for file in [self.script.cpp, self.script.header]:
+                    shutil.copy(
+                        file,
+                        os.path.join(
+                            self.log_path, self.script.name, "Build/SampleAnalyzer/User/Analyzer/"
+                        ),
                     )
-                    + "/."
-                )
-                print("   * Running: " + command)
-                os.system(command)
-
-                command = (
-                    "cp "
-                    + self.script.header
-                    + " "
-                    + os.path.join(
-                        self.log_path, self.script.name, "Build/SampleAnalyzer/User/Analyzer"
-                    )
-                    + "/."
-                )
-                print("   * Running: " + command)
-                os.system(command)
 
                 # Execute
-                os.system(
-                    "source setup.sh && make clean all &> compilation.log && "
-                    + "./MadAnalysis5job "
-                    + os.path.join(self.log_path, self.script.name, "Input/_defaultset.list")
-                    + self.script.command_line
-                    + " &> "
-                    + self.log_file
+                result = self.__execute_command(
+                    ["source", "setup.sh", "&>", "setup.log" , "&&"] +
+                    ["make", "clean", "all", "&>", "compilation.log", "&&"] +
+                    [
+                        "./MadAnalysis5job",
+                        os.path.join(self.log_path, self.script.name, "Input/_defaultset.list"),
+                        self.script.command_line,
+                        "&>",
+                        self.log_file,
+                    ],
+                    os.path.join(self.log_path, self.script.name, "Build"),
+                    shell=True,
                 )
+
             except Exception as err:
                 log_file = ""
                 with open(self.log_file, "r", encoding="utf-8") as log:
