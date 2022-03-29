@@ -197,6 +197,7 @@ class JobHandler:
                     f"A problem has occured during MadAnalysis 5 execution\n\n{err}\n\n{log_file}"
                 )
 
+        print("   * Execution completed: " + self.script.title)
         return True
 
     def check(self):
