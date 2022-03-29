@@ -101,7 +101,7 @@ class JobHandler:
 
         print(" ".join(commands))
         result = subprocess.Popen(" ".join(commands), cwd=path, **kwargs)
-
+        p_wait = result.wait()
         out, err = result.communicate()
 
         return result.returncode == 0
@@ -156,7 +156,9 @@ class JobHandler:
                 result = self.__execute_command(commands, self.ma5_path, shell=True)
 
                 if not os.path.isdir(os.path.join(self.log_path, self.script.name)):
-                    raise MadAnalysis5ExecutionError("Expert mode workspace is not created.")
+                    raise MadAnalysis5ExecutionError(
+                        f"Expert mode workspace is not created: {os.path.join(self.log_path, self.script.name)}"
+                    )
 
                 with open(
                     os.path.join(self.log_path, self.script.name, "Input/_defaultset.list"), "w"
