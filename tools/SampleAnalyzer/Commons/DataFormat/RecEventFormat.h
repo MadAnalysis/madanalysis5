@@ -107,6 +107,8 @@ namespace MA5
         std::vector<RecJetFormat>    fatjets_;
 
         /// Collection of reconstructed jet dictionary
+        // @JACK note for the future: if lots of jet input is used change map
+        // to unordered map for efficiency UI is the same!
         std::map<std::string, std::vector<RecJetFormat> > jetcollection_;
 
 #ifdef MA5_FASTJET_MODE
@@ -201,13 +203,31 @@ namespace MA5
         const std::vector<RecJetFormat>& fatjets() const {return fatjets_;}
 
         /// Accessor to the jet collection (read-only)
-        const std::vector<RecJetFormat>& jets() const {return jetcollection_.at(PrimaryJetID_);} //{return jets_;}
+        const std::vector<RecJetFormat>& jets() const
+        {
+            if (jetcollection_.find(PrimaryJetID_) != jetcollection_.end())
+                return jetcollection_.at(PrimaryJetID_);
+            else
+            {
+                static const std::vector<RecJetFormat> empty;
+                return empty;
+            }
+        }
 
         /// Accessor to the jet collection dictionary (read-only)
         const std::map<std::string, std::vector<RecJetFormat> >& jetcollection() const {return jetcollection_;}
 
         // Accessor to a specific jet dictionary (read-only)
-        const std::vector<RecJetFormat>& jets(std::string id) const {return jetcollection_.at(id);}
+        const std::vector<RecJetFormat>& jets(std::string id) const
+        {
+            if (jetcollection_.find(id) != jetcollection_.end())
+                return jetcollection_.at(id);
+            else
+            {
+                static const std::vector<RecJetFormat> empty;
+                return empty;
+            }
+        }
 
         /// Accessor to the genjet collection (read-only)
         const std::vector<RecJetFormat>& genjets() const {return genjets_;}
@@ -272,13 +292,31 @@ namespace MA5
         std::vector<RecTauFormat>& taus() {return taus_;}
 
         /// Accessor to the jet collection
-        std::vector<RecJetFormat>& jets() {return jetcollection_[PrimaryJetID_];} // {return jets_;}
+        std::vector<RecJetFormat>& jets()
+        {
+            if (jetcollection_.find(PrimaryJetID_) != jetcollection_.end())
+                return jetcollection_.at(PrimaryJetID_);
+            else
+            {
+                static std::vector<RecJetFormat> empty;
+                return empty;
+            }
+        }
 
         /// Accessor to the jet dictionary
         std::map<std::string, std::vector<RecJetFormat> >& jetcollection() {return jetcollection_;}
 
         /// Accessor to a specific jet in the dictionary
-        std::vector<RecJetFormat>& jets(std::string id) { return jetcollection_.at(id); }
+        std::vector<RecJetFormat>& jets(std::string id)
+        {
+            if (jetcollection_.find(id) != jetcollection_.end())
+                return jetcollection_.at(id);
+            else
+            {
+                static std::vector<RecJetFormat> empty;
+                return empty;
+            }
+        }
 
         /// Accessor to the fat jet collection
         std::vector<RecJetFormat>& fatjets() {return fatjets_;}
@@ -412,11 +450,7 @@ namespace MA5
         }
 
         // Check if collection ID exists
-        MAbool hasJetID(std::string id)
-        {
-            if (jetcollection_.find(id) != jetcollection_.end()) return true;
-            return false;
-        }
+        MAbool hasJetID(std::string id) { return (jetcollection_.find(id) != jetcollection_.end()); }
 
 #ifdef MA5_FASTJET_MODE
         // Add a new hadron to be clustered. (for code efficiency)
