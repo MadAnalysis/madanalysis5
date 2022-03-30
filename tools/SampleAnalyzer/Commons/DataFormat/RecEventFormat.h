@@ -28,7 +28,6 @@
 // Fastjet headers
 #ifdef MA5_FASTJET_MODE
 #include "fastjet/PseudoJet.hh"
-//    #include "SampleAnalyzer/Interfaces/fastjet/VariableR.h"
 #endif
 
 // STL headers
@@ -423,13 +422,9 @@ namespace MA5
         {
             if (!hasJetID(new_id) && hasJetID(previous_id))
             {
-                std::map<std::string, std::vector<RecJetFormat> >::iterator \
-            it = jetcollection_.find(previous_id);
-                if (it != jetcollection_.end())
-                {
-                    std::swap(jetcollection_[new_id],it->second);
-                    jetcollection_.erase(it);
-                }
+                auto it = jetcollection_.find(previous_id);
+                std::swap(jetcollection_[new_id],it->second);
+                jetcollection_.erase(it);
             }
             else
             {
@@ -444,8 +439,9 @@ namespace MA5
         const std::vector<std::string> GetJetIDs() const
         {
             std::vector<std::string> keys;
+            keys.reserve(jetcollection_.size());
             for (auto &key: jetcollection_)
-                keys.push_back(key.first);
+                keys.emplace_back(key.first);
             return keys;
         }
 
