@@ -96,9 +96,6 @@ namespace MA5
         /// Collection of reconstructed taus
         std::vector<RecTauFormat>    taus_;
 
-        /// Collection of reconstructed primary jets
-        std::vector<RecJetFormat>    jets_;
-
         // Identification of the primary jet. Corresponds to content of the jets_
         std::string PrimaryJetID_;
 
@@ -375,7 +372,6 @@ namespace MA5
             electrons_.clear();
             muons_.clear();
             taus_.clear();
-            jets_.clear();
             jetcollection_.clear();
             fatjets_.clear();
 #ifdef MA5_FASTJET_MODE

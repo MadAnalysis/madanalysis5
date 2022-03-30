@@ -127,12 +127,12 @@ StatusCode::Type LHCOReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySam
 MAbool LHCOReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 {
   // MHT & THT
-  for (MAuint32 i=0; i<myEvent.rec()->jets_.size();i++)
+  for (MAuint32 i=0; i<myEvent.rec()->jets().size();i++)
   {
-    myEvent.rec()->MHT_ -= myEvent.rec()->jets_[i].momentum();
-    myEvent.rec()->THT_ += myEvent.rec()->jets_[i].pt();
-    myEvent.rec()->TET_ += myEvent.rec()->jets_[i].pt();
-    myEvent.rec()->Meff_+= myEvent.rec()->jets_[i].pt();
+    myEvent.rec()->MHT_ -= myEvent.rec()->jets()[i].momentum();
+    myEvent.rec()->THT_ += myEvent.rec()->jets()[i].pt();
+    myEvent.rec()->TET_ += myEvent.rec()->jets()[i].pt();
+    myEvent.rec()->Meff_+= myEvent.rec()->jets()[i].pt();
   }
   myEvent.rec()->Meff_ += myEvent.rec()->MET_.pt();
 
