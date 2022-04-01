@@ -112,8 +112,8 @@ namespace MA5
         { Reset(); }
 
         /// Constructor with argument
-        RecJetFormat(MAfloat64 px, MAfloat64 py, MAfloat64 pz, MAfloat64 e)
-        { Reset(); momentum_.SetPxPyPzE(px,py,pz,e); }
+        RecJetFormat(MAfloat64 pt, MAfloat64 eta, MAfloat64 phi, MAfloat64 m)
+        { Reset(); momentum_.SetPtEtaPhiM(pt,eta,phi,m); }
 
         /// Constructor with argument
         RecJetFormat(const MALorentzVector& p)

@@ -585,11 +585,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
       else
       {
         // Creating new jet
-//        RecJetFormat * jet = myEvent.rec()->GetNewJet();
-
-        // Setting jet info
-        output_jets.emplace_back(part->PX,part->PY,part->PZ,part->E);
-//        jet->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,part->Mass);
+          output_jets.emplace_back(part->PT,part->Eta,part->Phi,part->Mass);
           output_jets.back().ntracks_  = 0; // To fix later
           output_jets.back().btag_     = part->BTag;
           output_jets.back().HEoverEE_ = part->EhadOverEem;
