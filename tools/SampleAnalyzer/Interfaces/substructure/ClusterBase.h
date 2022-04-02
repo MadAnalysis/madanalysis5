@@ -94,112 +94,39 @@ namespace MA5{
             virtual ~ClusterBase() {}
 
             // Set the Jet definition using algorithm and radius input
-            void SetJetDef(Algorithm algorithm, MAfloat32 radius)
-            {
-                isPlugin_ = false;
-                JetDefinition_ = new fastjet::JetDefinition(__get_clustering_algorithm(algorithm), radius);
-            }
+            void SetJetDef(Algorithm algorithm, MAfloat32 radius);
 
             //=======================//
             //        Execution      //
             //=======================//
 
             // Wrapper for event based execution
-            void Execute(const EventFormat& event, std::string JetID)
-            { __execute(const_cast<EventFormat&>(event), JetID); }
+            void Execute(const EventFormat& event, std::string JetID);
 
             // Execute with a single jet. This method reclusters the given jet using its constituents
-            std::vector<const RecJetFormat *> Execute(const RecJetFormat *jet)
-            {
-                std::vector<fastjet::PseudoJet> reclustered_jets = __cluster(jet->pseudojet().constituents());
-                return __transform_jets(reclustered_jets);
-            }
+            std::vector<const RecJetFormat *> Execute(const RecJetFormat *jet);
 
             // Execute with a single jet. This method reclusters the given jet using its constituents by filtering
             // reclustered events with respect to the initial jet
             template<typename Func>
-            std::vector<const RecJetFormat *> Execute(const RecJetFormat *jet, Func func)
-            {
-                std::vector<const RecJetFormat *> output_jets;
-                std::vector<fastjet::PseudoJet> reclustered_jets = __cluster(jet->pseudojet().constituents());
-
-                for (auto &recjet: reclustered_jets)
-                {
-                    RecJetFormat *NewJet = __transform_jet(recjet);
-                    if (func(jet, const_cast<const RecJetFormat *>(NewJet))) output_jets.push_back(NewJet);
-                }
-
-                return output_jets;
-            }
+            std::vector<const RecJetFormat *> Execute(const RecJetFormat *jet, Func func);
 
             // Execute with a list of jets. This method reclusters the given collection
             // of jets by combining their constituents
-            std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets)
-            {
-                std::vector<fastjet::PseudoJet> constituents;
-                for (auto &jet: jets)
-                {
-                    std::vector<fastjet::PseudoJet> current_constituents = jet->pseudojet().constituents();
-                    constituents.reserve(constituents.size() + current_constituents.size());
-                    constituents.insert(
-                            constituents.end(), current_constituents.begin(), current_constituents.end()
-                    );
-                }
-
-                std::vector<fastjet::PseudoJet> reclustered_jets = __cluster(constituents);
-
-                return __transform_jets(reclustered_jets);
-            }
+            std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets);
 
             // Handler for clustering step
-            void cluster(const RecJetFormat *jet)
-            {
-                if (isPlugin_)
-                {
-                    fastjet::JetDefinition jetDefinition(JetDefPlugin_);
-                    clust_seq.reset(new fastjet::ClusterSequence(jet->pseudojet().constituents(), jetDefinition));
-                } else {
-                    clust_seq.reset(new fastjet::ClusterSequence(
-                            jet->pseudojet().constituents(),
-                            const_cast<const fastjet::JetDefinition &>(*JetDefinition_)
-                    ));
-                }
-                isClustered_ = true;
-            }
+            void cluster(const RecJetFormat *jet);
 
             // return a vector of all jets when the event is clustered (in the exclusive sense) to exactly njets.
             // If there are fewer than njets particles in the ClusterSequence the function just returns however many
             // particles there were.
-            std::vector<const RecJetFormat *> exclusive_jets_up_to(MAint32 njets)
-            {
-                if (!isClustered_) throw EXCEPTION_ERROR("No clustered jet available", "", 1);
-                std::vector<fastjet::PseudoJet> clustered_jets = fastjet::sorted_by_pt(
-                        clust_seq->exclusive_jets_up_to(njets)
-                );
-                return __transform_jets(clustered_jets);
-            }
+            std::vector<const RecJetFormat *> exclusive_jets_up_to(MAint32 njets);
 
         private:
 
             // Generic clustering method
-            std::vector<fastjet::PseudoJet> __cluster(std::vector<fastjet::PseudoJet> particles)
-            {
-                if (isPlugin_)
-                {
-                    fastjet::JetDefinition jetDefinition(JetDefPlugin_);
-                    clust_seq.reset(new fastjet::ClusterSequence(particles, jetDefinition));
-                } else {
-                    clust_seq.reset(new fastjet::ClusterSequence(
-                            particles, const_cast<const fastjet::JetDefinition &>(*JetDefinition_)
-                    ));
-                }
-                isClustered_ = true;
-                std::vector<fastjet::PseudoJet> jets;
-                if (isExclusive_) jets = clust_seq->exclusive_jets(ptmin_);
-                else jets = clust_seq->inclusive_jets(ptmin_);
-
-                return fastjet::sorted_by_pt(jets);
-            }
+            std::vector<fastjet::PseudoJet> __cluster(std::vector<fastjet::PseudoJet> particles);
 
             // Method to transform pseudojet into recjetformat
             static RecJetFormat * __transform_jet(fastjet::PseudoJet jet)
@@ -230,37 +157,7 @@ namespace MA5{
 
             // Execute with the Reconstructed event. This method creates a new Jet in RecEventFormat which
             // can be accessed via JetID. The algorithm will only be executed if a unique JetID is given
-            MAbool __execute(EventFormat& myEvent, std::string JetID)
-            {
-                try {
-                    if (myEvent.rec()->hasJetID(JetID))
-                        throw EXCEPTION_ERROR("Substructure::ClusterBase - Jet ID `" + JetID + \
-                                                  "` already exits. Skipping execution.","",1);
-                } catch (const std::exception& err) {
-                    MANAGE_EXCEPTION(err);
-                    return false;
-                }
-
-                std::vector <fastjet::PseudoJet> jets = __cluster(myEvent.rec()->cluster_inputs());
-
-                std::vector<RecJetFormat> output_jets;
-                output_jets.reserve(jets.size());
-
-                for (auto &jet: jets) {
-                    output_jets.emplace_back(jet);
-                    std::vector <fastjet::PseudoJet> constituents = clust_seq->constituents(jet);
-                    output_jets.back().Constituents_.reserve(constituents.size());
-                    output_jets.back().ntracks_ = 0;
-                    for (auto &constit: constituents) {
-                        output_jets.back().Constituents_.emplace_back(constit.user_index());
-                        if (PDG->IsCharged(myEvent.mc()->particles()[constit.user_index()].pdgid()))
-                            output_jets.back().ntracks_++;
-                    }
-                }
-                myEvent.rec()->jetcollection_.insert(std::make_pair(JetID, output_jets));
-                isClustered_ = false;
-                return true;
-            }
+            MAbool __execute(EventFormat& myEvent, std::string JetID);
         };
     }
 }

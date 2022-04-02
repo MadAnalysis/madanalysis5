@@ -28,7 +28,7 @@
 #include "fastjet/contrib/SoftDrop.hh"
 
 // SampleAnalyser headers
-#include "SampleAnalyzer/Interfaces/fastjet/ClusterBase.h"
+#include "SampleAnalyzer/Interfaces/substructure/ClusterBase.h"
 
 using namespace std;
 
@@ -85,40 +85,17 @@ namespace MA5 {
                  )
                 { Initialize(beta, symmetry_cut, R0); }
 
-                void Initialize(MAfloat32 beta, MAfloat32 symmetry_cut, MAfloat32 R0=1.)
-                { softDrop_ = new fastjet::contrib::SoftDrop(beta, symmetry_cut, R0); }
+                void Initialize(MAfloat32 beta, MAfloat32 symmetry_cut, MAfloat32 R0=1.);
 
                 //=======================//
                 //        Execution      //
                 //=======================//
                 
                 // Execute with a single jet
-                const RecJetFormat * Execute(const RecJetFormat *jet)
-                {
-                    fastjet::PseudoJet sd_jet = (*softDrop_)(jet->pseudojet());
-                    return ClusterBase().__transform_jet(sd_jet);
-                }
+                const RecJetFormat * Execute(const RecJetFormat *jet);
 
                 // Execute with a list of jets
-                std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets)
-                {
-                    std::vector<const RecJetFormat *> output_jets;
-                    for (auto &jet: jets)
-                        output_jets.push_back(Execute(jet));
-
-                    // Sort with respect to jet pT
-                    std::sort(
-                        output_jets.begin(),
-                        output_jets.end(),
-                        [](const RecJetFormat *j1, const RecJetFormat *j2)
-                        {
-                            return (j1->pt() > j2->pt());
-                        }
-                    );
-
-                    return output_jets;
-                }
-
+                std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets);
         };
     }
 }

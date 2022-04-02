@@ -28,7 +28,7 @@
 #include "fastjet/contrib/VariableRPlugin.hh"
 
 // SampleAnalyser headers
-#include "SampleAnalyzer/Interfaces/fastjet/ClusterBase.h"
+#include "SampleAnalyzer/Interfaces/substructure/ClusterBase.h"
 
 using namespace std;
 
@@ -96,37 +96,7 @@ namespace MA5 {
                     Substructure::VariableR::Strategy strategy = Substructure::VariableR::Best,
                     MAfloat32 ptmin = 0.,
                     MAbool isExclusive = false
-                )
-                {
-                    if (clusterType == Substructure::VariableR::CALIKE)
-                        clusterType_ = fastjet::contrib::VariableRPlugin::CALIKE;
-                    else if (clusterType == Substructure::VariableR::KTLIKE)
-                        clusterType_ = fastjet::contrib::VariableRPlugin::KTLIKE;
-                    else if (clusterType == Substructure::VariableR::AKTLIKE)
-                        clusterType_ = fastjet::contrib::VariableRPlugin::AKTLIKE;
-
-                    if (strategy == Substructure::VariableR::Best)
-                        strategy_ = fastjet::contrib::VariableRPlugin::Best;
-                    else if (strategy == Substructure::VariableR::N2Tiled)
-                        strategy_ = fastjet::contrib::VariableRPlugin::N2Tiled;
-                    else if (strategy == Substructure::VariableR::N2Plain)
-                        strategy_ = fastjet::contrib::VariableRPlugin::N2Plain;
-                    else if (strategy == Substructure::VariableR::NNH)
-                        strategy_ = fastjet::contrib::VariableRPlugin::NNH;
-                    else if (strategy == Substructure::VariableR::Native)
-                        strategy_ = fastjet::contrib::VariableRPlugin::Native;
-
-                    ptmin_ = ptmin; isExclusive_ = isExclusive;
-
-                    JetDefPlugin_ = new fastjet::contrib::VariableRPlugin(
-                            rho, minR, maxR, clusterType_, false, strategy_
-                    );
-                    isPlugin_ = true;
-
-                    /// Note that pre-clustering is deprecated and will likely be
-                    /// removed in a future releasse of this contrib.
-                    /// (precluster = false at the moment)
-                }
+                );
         };
     }
 }

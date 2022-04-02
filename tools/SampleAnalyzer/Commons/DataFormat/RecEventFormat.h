@@ -25,11 +25,6 @@
 #ifndef RecEventFormat_h
 #define RecEventFormat_h
 
-// Fastjet headers
-#ifdef MA5_FASTJET_MODE
-#include "fastjet/PseudoJet.hh"
-#endif
-
 // STL headers
 #include <iostream>
 #include <sstream>
@@ -45,6 +40,13 @@
 #include "SampleAnalyzer/Commons/DataFormat/RecTrackFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecVertexFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
+
+#ifdef MA5_FASTJET_MODE
+    namespace fastjet {
+        class PseudoJet;
+    }
+#endif
+
 
 namespace MA5
 {
@@ -365,91 +367,29 @@ namespace MA5
         {return MCCquarks_;}
 
         /// Clearing all information
-        void Reset()
-        {
-            PrimaryJetID_ = "Ma5Jet";
-            photons_.clear();
-            electrons_.clear();
-            muons_.clear();
-            taus_.clear();
-            jetcollection_.clear();
-            fatjets_.clear();
-#ifdef MA5_FASTJET_MODE
-            // pseudojet : only available when fastjet is in use (code efficiency)
-    input_hadrons_.clear();
-#endif
-            towers_ok_=false;
-            towers_.clear();
-            tracks_ok_=false;
-            tracks_.clear();
-            vertices_ok_=false;
-            vertices_.clear();
-            EFlowTracks_ok_=false;
-            EFlowTracks_.clear();
-            EFlowPhotons_ok_=false;
-            EFlowPhotons_.clear();
-            EFlowNeutralHadrons_ok_=false;
-            EFlowNeutralHadrons_.clear();
-            genjets_.clear();
-            MET_.Reset();
-            MHT_.Reset();
-            TET_  = 0.;
-            THT_  = 0.;
-            Meff_ = 0.;
-            MCHadronicTaus_.clear();
-            MCMuonicTaus_.clear();
-            MCElectronicTaus_.clear();
-            MCBquarks_.clear();
-            MCCquarks_.clear();
-        }
+        void Reset();
 
         // Initialize PrimaryJetID
         void SetPrimaryJetID(std::string v) {PrimaryJetID_ = v;}
 
         // Remove an element from jet collection
-        void Remove_Collection(std::string id)
-        {
-            if (hasJetID(id)) jetcollection_.erase(id);
-            else ERROR << "Remove_Collection:: '" << id << "' does not exist." << endmsg;
-        }
+        void Remove_Collection(std::string id);
 
         /// Change Jet ID
-        void ChangeJetID(std::string previous_id, std::string new_id)
-        {
-            if (!hasJetID(new_id) && hasJetID(previous_id))
-            {
-                auto it = jetcollection_.find(previous_id);
-                std::swap(jetcollection_[new_id],it->second);
-                jetcollection_.erase(it);
-            }
-            else
-            {
-                if (hasJetID(new_id))
-                    ERROR << "ChangeJetID:: '" << new_id << "' already exists." << endmsg;
-                if (!hasJetID(previous_id))
-                    ERROR << "ChangeJetID:: '" << previous_id << "' does not exist." << endmsg;
-            }
-        }
+        void ChangeJetID(std::string previous_id, std::string new_id);
 
         // Get the list of jet collection IDs
-        const std::vector<std::string> GetJetIDs() const
-        {
-            std::vector<std::string> keys;
-            keys.reserve(jetcollection_.size());
-            for (auto &key: jetcollection_)
-                keys.emplace_back(key.first);
-            return keys;
-        }
+        const std::vector<std::string> GetJetIDs() const;
 
         // Check if collection ID exists
         MAbool hasJetID(std::string id) { return (jetcollection_.find(id) != jetcollection_.end()); }
 
 #ifdef MA5_FASTJET_MODE
         // Add a new hadron to be clustered. (for code efficiency)
-    void AddHadron(fastjet::PseudoJet v) {input_hadrons_.push_back(v);}
+    void AddHadron(fastjet::PseudoJet v);
 
     // Get hadrons to cluster (code efficiency)
-    std::vector<fastjet::PseudoJet>& cluster_inputs() {return input_hadrons_;}
+    std::vector<fastjet::PseudoJet>& cluster_inputs();
 #endif
 
         /// Displaying data member values.
@@ -474,130 +414,58 @@ namespace MA5
         }
 
         /// Giving a new photon entry
-        RecPhotonFormat* GetNewPhoton()
-        {
-            photons_.push_back(RecPhotonFormat());
-            return &photons_.back();
-        }
+        RecPhotonFormat* GetNewPhoton();
 
         /// Giving a new electron entry
-        RecLeptonFormat* GetNewElectron()
-        {
-            electrons_.push_back(RecLeptonFormat());
-            (&electrons_.back())->setElectronId();
-            return &electrons_.back();
-        }
+        RecLeptonFormat* GetNewElectron();
 
         /// Giving a new muon entry
-        RecLeptonFormat* GetNewMuon()
-        {
-            muons_.push_back(RecLeptonFormat());
-            (&muons_.back())->setMuonId();
-            return &muons_.back();
-        }
+        RecLeptonFormat* GetNewMuon();
 
         /// Giving a new tower entry
-        RecTowerFormat* GetNewTower()
-        {
-            towers_.push_back(RecTowerFormat());
-            return &towers_.back();
-        }
+        RecTowerFormat* GetNewTower();
 
         /// Giving a new EFlowTrack entry
-        RecTrackFormat* GetNewEFlowTrack()
-        {
-            EFlowTracks_.push_back(RecTrackFormat());
-            return &EFlowTracks_.back();
-        }
+        RecTrackFormat* GetNewEFlowTrack();
 
         /// Giving a new EFlowPhoton entry
-        RecParticleFormat* GetNewEFlowPhoton()
-        {
-            EFlowPhotons_.push_back(RecParticleFormat());
-            return &EFlowPhotons_.back();
-        }
+        RecParticleFormat* GetNewEFlowPhoton();
 
         /// Giving a new EFlowNeutralHadron entry
-        RecParticleFormat* GetNewEFlowNeutralHadron()
-        {
-            EFlowNeutralHadrons_.push_back(RecParticleFormat());
-            return &EFlowNeutralHadrons_.back();
-        }
+        RecParticleFormat* GetNewEFlowNeutralHadron();
 
         /// Giving a new tau entry
-        RecTauFormat* GetNewTau()
-        {
-            taus_.push_back(RecTauFormat());
-            return &taus_.back();
-        }
+        RecTauFormat* GetNewTau();
 
         /// Giving a new primary jet entry
-        RecJetFormat* GetNewJet()
-        {
-            std::pair< std::map<std::string, std::vector<RecJetFormat> >::iterator, bool> new_jet;
-            new_jet = jetcollection_.insert(std::make_pair(PrimaryJetID_,std::vector<RecJetFormat>() ));
-            new_jet.first->second.push_back(RecJetFormat());
-            return &(new_jet.first->second.back());
-        }
+        RecJetFormat* GetNewJet();
 
         /// Giving a new primary jet entry
-        void CreateEmptyJetAccesor()
-        {
-            std::pair< std::map<std::string, std::vector<RecJetFormat> >::iterator, bool> new_jet;
-            new_jet = jetcollection_.insert(std::make_pair(PrimaryJetID_,std::vector<RecJetFormat>() ));
-        }
+        void CreateEmptyJetAccesor();
 
         // Get a new jet entry with specific ID
-        RecJetFormat* GetNewJet(std::string id)
-        {
-            std::pair< std::map<std::string, std::vector<RecJetFormat> >::iterator,bool> new_jet;
-            new_jet = jetcollection_.insert(std::make_pair(id,std::vector<RecJetFormat>() ));
-            new_jet.first->second.push_back(RecJetFormat());
-            return &(new_jet.first->second.back());
-        }
+        RecJetFormat* GetNewJet(std::string id);
 
         // Create an empty jet accessor with specific id
-        void CreateEmptyJetAccesor(std::string id)
-        {
-            std::pair< std::map<std::string, std::vector<RecJetFormat> >::iterator,bool> new_jet;
-            new_jet = jetcollection_.insert(std::make_pair(id,std::vector<RecJetFormat>() ));
-        }
+        void CreateEmptyJetAccesor(std::string id);
 
         /// Giving a new fat jet entry
-        RecJetFormat* GetNewFatJet()
-        {
-            fatjets_.push_back(RecJetFormat());
-            return &fatjets_.back();
-        }
+        RecJetFormat* GetNewFatJet();
 
         /// Giving a new gen jet entry
-        RecJetFormat* GetNewGenJet()
-        {
-            genjets_.push_back(RecJetFormat());
-            return &genjets_.back();
-        }
+        RecJetFormat* GetNewGenJet();
 
         /// Giving a new track entry
-        RecTrackFormat* GetNewTrack()
-        {
-            tracks_.push_back(RecTrackFormat());
-            return &tracks_.back();
-        }
+        RecTrackFormat* GetNewTrack();
 
         /// Giving a new vertex entry
-        RecVertexFormat* GetNewVertex()
-        {
-            vertices_.push_back(RecVertexFormat());
-            return &vertices_.back();
-        }
+        RecVertexFormat* GetNewVertex();
 
         /// Giving a pointer to the Missing Transverse Energy
-        RecParticleFormat* GetNewMet()
-        { return &MET_; }
+        RecParticleFormat* GetNewMet();
 
         /// Giving a pointer to the Missing Transverse Energy
-        RecParticleFormat* GetNewMht()
-        { return &MHT_; }
+        RecParticleFormat* GetNewMht();
 
     };
 

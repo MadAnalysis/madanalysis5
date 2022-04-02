@@ -28,7 +28,7 @@
 #include "fastjet/tools/Pruner.hh"
 
 // SampleAnalyser headers
-#include "SampleAnalyzer/Interfaces/fastjet/ClusterBase.h"
+#include "SampleAnalyzer/Interfaces/substructure/ClusterBase.h"
 
 using namespace std;
 

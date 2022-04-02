@@ -25,7 +25,7 @@
 #define MADANALYSIS5_CLUSTER_H
 
 // SampleAnalyser headers
-#include "SampleAnalyzer/Interfaces/fastjet/ClusterBase.h"
+#include "SampleAnalyzer/Interfaces/substructure/ClusterBase.h"
 
 using namespace std;
 
@@ -55,11 +55,9 @@ namespace MA5 {
                 Cluster(Algorithm algorithm, MAfloat32 radius, MAfloat32 ptmin=0., MAbool isExclusive = false)
                 { Initialize(algorithm, radius, ptmin, isExclusive); }
 
-                void Initialize(Algorithm algorithm, MAfloat32 radius, MAfloat32 ptmin=0., MAbool isExclusive = false)
-                {
-                    SetJetDef(algorithm, radius);
-                    ptmin_ = ptmin < 0. ? 0. : ptmin; isExclusive_ = isExclusive;
-                }
+                void Initialize(
+                    Algorithm algorithm, MAfloat32 radius, MAfloat32 ptmin=0., MAbool isExclusive = false
+                );
 
         };
     }

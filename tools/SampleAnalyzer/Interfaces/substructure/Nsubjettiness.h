@@ -115,77 +115,14 @@ namespace MA5 {
                     MAfloat32 beta,
                     MAfloat32 R0,
                     MAfloat32 Rcutoff=std::numeric_limits<double>::max()
-                )
-                {
-                    if (axesdef == Substructure::Nsubjettiness::KT_Axes)
-                        axesdef_ = new fastjet::contrib::KT_Axes();
-                    else if (axesdef == Substructure::Nsubjettiness::CA_Axes)
-                        axesdef_ = new fastjet::contrib::CA_Axes();
-                    else if (axesdef == Substructure::Nsubjettiness::AntiKT_Axes)
-                        axesdef_ = new fastjet::contrib::AntiKT_Axes(R0);
-                    else if (axesdef == Substructure::Nsubjettiness::WTA_KT_Axes)
-                        axesdef_ = new fastjet::contrib::WTA_KT_Axes();
-                    else if (axesdef == Substructure::Nsubjettiness::WTA_CA_Axes)
-                        axesdef_ = new fastjet::contrib::WTA_CA_Axes();
-//                    else if (axesdef == Substructure::Nsubjettiness::GenKT_Axes)
-//                        axesdef_ = new fastjet::contrib::GenKT_Axes();
-//                    else if (axesdef == Substructure::Nsubjettiness::WTA_GenKT_Axes)
-//                        axesdef_ = new fastjet::contrib::WTA_GenKT_Axes();
-//                    else if (axesdef == Substructure::Nsubjettiness::GenET_GenKT_Axes)
-//                        axesdef_ = new fastjet::contrib::GenET_GenKT_Axes();
-                    else if (axesdef == Substructure::Nsubjettiness::Manual_Axes)
-                        axesdef_ = new fastjet::contrib::Manual_Axes();
-                    else if (axesdef == Substructure::Nsubjettiness::OnePass_KT_Axes)
-                        axesdef_ = new fastjet::contrib::OnePass_KT_Axes();
-                    else if (axesdef == Substructure::Nsubjettiness::OnePass_CA_Axes)
-                        axesdef_ = new fastjet::contrib::OnePass_CA_Axes();
-                    else if (axesdef == Substructure::Nsubjettiness::OnePass_AntiKT_Axes)
-                        axesdef_ = new fastjet::contrib::OnePass_AntiKT_Axes(R0);
-                    else if (axesdef == Substructure::Nsubjettiness::OnePass_WTA_KT_Axes)
-                        axesdef_ = new fastjet::contrib::OnePass_WTA_KT_Axes();
-                    else if (axesdef == Substructure::Nsubjettiness::OnePass_WTA_CA_Axes)
-                        axesdef_ = new fastjet::contrib::OnePass_WTA_CA_Axes();
-//                    else if (axesdef == Substructure::Nsubjettiness::OnePass_GenKT_Axes)
-//                        axesdef_ = new fastjet::contrib::OnePass_GenKT_Axes();
-//                    else if (axesdef == Substructure::Nsubjettiness::OnePass_WTA_GenKT_Axes)
-//                        axesdef_ = new fastjet::contrib::OnePass_WTA_GenKT_Axes();
-//                    else if (axesdef == Substructure::Nsubjettiness::OnePass_GenET_GenKT_Axes)
-//                        axesdef_ = new fastjet::contrib::OnePass_GenET_GenKT_Axes();
-//                    else if (axesdef == Substructure::Nsubjettiness::OnePass_Manual_Axes)
-//                        axesdef_ = new fastjet::contrib::OnePass_Manual_Axes();
-//                    else if (axesdef == Substructure::Nsubjettiness::MultiPass_Axes)
-//                        axesdef_ = new fastjet::contrib::MultiPass_Axes();
-//                    else if (axesdef == Substructure::Nsubjettiness::MultiPass_Manual_Axes)
-//                        axesdef_ = new fastjet::contrib::MultiPass_Manual_Axes();
-//                    else if (axesdef == Substructure::Nsubjettiness::Comb_GenKT_Axes)
-//                        axesdef_ = new fastjet::contrib::Comb_GenKT_Axes();
-//                    else if (axesdef == Substructure::Nsubjettiness::Comb_WTA_GenKT_Axes)
-//                        axesdef_ = new fastjet::contrib::Comb_WTA_GenKT_Axes();
-//                    else if (axesdef == Substructure::Nsubjettiness::Comb_GenET_GenKT_Axes)
-//                        axesdef_ = new fastjet::contrib::Comb_GenET_GenKT_Axes();
-
-                    if (measuredef == Substructure::Nsubjettiness::NormalizedCutoffMeasure)
-                        measuredef_ = new fastjet::contrib::NormalizedCutoffMeasure(beta, R0, Rcutoff);
-                    else if (measuredef == Substructure::Nsubjettiness::NormalizedMeasure)
-                        measuredef_ = new fastjet::contrib::NormalizedMeasure(beta, R0);
-                    else if (measuredef == Substructure::Nsubjettiness::UnnormalizedMeasure)
-                        measuredef_ = new fastjet::contrib::UnnormalizedMeasure(beta);
-                    else if (measuredef == Substructure::Nsubjettiness::UnnormalizedCutoffMeasure)
-                        measuredef_ = new fastjet::contrib::UnnormalizedCutoffMeasure(beta, Rcutoff);
-
-                    order_ = order;
-                }
+                );
 
                 //=======================//
                 //        Execution      //
                 //=======================//
 
                 // Method to calculate nsub for a given jet with respect to initialization parameters
-                MAdouble64 Execute(const RecJetFormat *jet)
-                {
-                    fastjet::contrib::Nsubjettiness nsubjettiness(order_, *axesdef_, *measuredef_);
-                    return nsubjettiness(jet->pseudojet());
-                }
+                MAdouble64 Execute(const RecJetFormat *jet);
         };
     }
 }

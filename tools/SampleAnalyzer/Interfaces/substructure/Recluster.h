@@ -28,7 +28,7 @@
 #include "fastjet/contrib/Recluster.hh"
 
 // SampleAnalyser headers
-#include "SampleAnalyzer/Interfaces/fastjet/ClusterBase.h"
+#include "SampleAnalyzer/Interfaces/substructure/ClusterBase.h"
 
 using namespace std;
 
@@ -64,53 +64,19 @@ namespace MA5 {
                 //=======================//
 
                 // Method to recluster a given jet. Returns only the hardest reclustered jet.
-                const RecJetFormat* Execute(const RecJetFormat *jet)
-                {
-                    fastjet::contrib::Recluster recluster(*JetDefinition_);
-                    fastjet::PseudoJet reclustered_jet = recluster(jet->pseudojet());
-                    return __transform_jet(reclustered_jet);
-                }
+                const RecJetFormat* Execute(const RecJetFormat *jet);
 
                 // Method to recluster each jet in a given vector
-                std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets)
-                {
-                    std::vector<const RecJetFormat *> output_jets;
-                    for (auto &jet: jets)
-                        output_jets.push_back(Execute(jet));
-
-                    std::sort(
-                        output_jets.begin(),
-                        output_jets.end(),
-                        [](const RecJetFormat *j1, const RecJetFormat *j2)
-                        {
-                            return (j1->pt() > j2->pt());
-                        }
-                    );
-
-                    return output_jets;
-                }
+                std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets);
 
                 //=============================//
                 //        NOT IMPLEMENTED      //
                 //=============================//
 
-                void Execute(const EventFormat& event, std::string JetID)
-                {
-                    try { throw EXCEPTION_ERROR("This method has not been implemented", "", 1); }
-                    catch (const std::exception& err) {
-                        MANAGE_EXCEPTION(err);
-                    }
-                }
+                void Execute(const EventFormat& event, std::string JetID);
 
                 template<class Func>
-                std::vector<const RecJetFormat *> Execute(const RecJetFormat *jet, Func func)
-                {
-                    try { throw EXCEPTION_ERROR("This method has not been implemented", "", 1); }
-                    catch (const std::exception& err) {
-                        MANAGE_EXCEPTION(err);
-                        return std::vector<const RecJetFormat *>();
-                    }
-                }
+                std::vector<const RecJetFormat *> Execute(const RecJetFormat *jet, Func func);
         };
     }
 }
