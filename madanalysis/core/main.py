@@ -540,7 +540,7 @@ class Main():
             libraries.append(['FastJet', 'interface to FastJet', 'fastjet', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces',False])
             libraries.append(['test_fastjet','interface to Fastjet', 'test_fastjet', self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestFastjet',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
             if self.archi_info.has_fjcontrib:
-                libraries.append(['substructure', 'interface to Substructure module', 'substructure',
+                libraries.append(['substructure', 'interface to Jet Substructure module', 'substructure',
                                   self.archi_info.ma5dir + '/tools/SampleAnalyzer/Lib/libsubstructure_for_ma5.so',
                                   self.archi_info.ma5dir + '/tools/SampleAnalyzer/Interfaces', False])
         # Delphes

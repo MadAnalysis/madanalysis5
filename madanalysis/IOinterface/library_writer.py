@@ -277,7 +277,7 @@ class LibraryWriter():
             options.has_fastjet_inc    = self.main.archi_info.has_fastjet
             options.has_fastjet_lib    = self.main.archi_info.has_fastjet
             options.ma5_fastjet_mode   = self.main.archi_info.has_fastjet
-            options.has_substructure   = self.main.archi_info.has_fjcontrib
+            options.has_substructure   = self.main.archi_info.has_fjcontrib and self.main.archi_info.has_fastjet
 
             toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
         elif package=='test_process':
