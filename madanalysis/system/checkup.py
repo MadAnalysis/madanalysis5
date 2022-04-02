@@ -321,6 +321,8 @@ class CheckUp():
             return False
         if not self.checker.Execute('fastjet'):
             return False
+        if not self.checker.Execute('fastjet-contrib'):
+            return False
         if not self.checker.Execute('root'):
             return False
 

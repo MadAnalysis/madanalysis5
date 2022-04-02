@@ -41,6 +41,7 @@ class ArchitectureInfo:
         # Is there optional package?
         self.has_root           = False
         self.has_fastjet        = False
+        self.has_fjcontrib      = True
         self.has_zlib           = False
         self.has_delphes        = False
         self.has_delphesMA5tune = False
