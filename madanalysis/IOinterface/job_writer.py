@@ -718,6 +718,9 @@ class JobWriter(object):
         options.has_fastjet_ma5lib = self.main.archi_info.has_fastjet
         # @JACK: fastjet_inc is required to be able to use the FJ files when FJ mode is on
         options.has_fastjet_inc    = self.main.archi_info.has_fastjet
+        # @Jack: add substructure library
+        options.has_substructure = self.main.archi_info.has_fastjet and self.main.archi_info.has_fjcontrib
+
         options.has_root_inc       = self.main.archi_info.has_root
         options.has_root_lib       = self.main.archi_info.has_root
         #options.has_userpackage = True
