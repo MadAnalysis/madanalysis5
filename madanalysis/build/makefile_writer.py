@@ -168,6 +168,9 @@ class MakefileWriter():
             self.has_fastjet_tag           = False
             # @JACK: cant use FASTJET_USE tag, it clashes with ROOT
             self.ma5_fastjet_mode          = False
+            self.has_fjcontrib             = False
+            self.has_substructure          = False
+
             self.has_delphes_tag           = False
             self.has_delphesMA5tune_tag    = False
             self.has_root_tag              = False
@@ -363,7 +366,6 @@ class MakefileWriter():
             if options.has_zlib_ma5lib:
                 libs.extend(['-lzlib_for_ma5'])
             if options.has_zlib_lib:
-#                libs.extend(['-L'+archi_info.zlib_lib_path,'-lz'])
                 libs.extend(['-lz'])
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
 
@@ -386,14 +388,16 @@ class MakefileWriter():
             if options.has_fastjet_ma5lib:
                 libs.extend(['-lfastjet_for_ma5'])
             if options.has_fastjet_lib:
-#                libs.extend(['$(shell fastjet-config --libs --plugins)']) # --rpath=no)'])
                 libs.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config --libs --plugins)'])
+            file.write('LIBFLAGS += '+' '.join(libs)+'\n')
+            libs=[]
+            if options.has_fjcontrib:
                 # Add fjcontrib libraries
                 libs.extend(["-lRecursiveTools"])   # SoftDrop
                 libs.extend(["-lNsubjettiness"])    # Nsubjettiness
                 libs.extend(["-lVariableR"])        # VariableR
                 libs.extend(["-lEnergyCorrelator"]) # -lEnergyCorrelator
-            file.write('LIBFLAGS += '+' '.join(libs)+'\n')
+                file.write('LIBFLAGS += '+' '.join(libs)+'\n')
 
         # - delphes
         if options.has_delphes_ma5lib or options.has_delphes_lib:
@@ -401,7 +405,6 @@ class MakefileWriter():
             if options.has_delphes_ma5lib:
                 libs.extend(['-ldelphes_for_ma5'])
             if options.has_delphes_lib:
-#                libs.extend(['-L'+archi_info.delphes_lib_paths[0],'-lDelphes'])
                 libs.extend(['-lDelphes'])
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
 
@@ -411,9 +414,12 @@ class MakefileWriter():
             if options.has_delphesMA5tune_ma5lib:
                 libs.extend(['-ldelphesMA5tune_for_ma5'])
             if options.has_delphesMA5tune_lib:
-#                libs.extend(['-L'+archi_info.delphesMA5tune_lib_paths[0],'-lDelphesMA5tune'])
                 libs.extend(['-lDelphesMA5tune'])
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
+
+        # Substructure module
+        if options.has_substructure:
+            file.write('LIBFLAGS += -lsubstructure_for_ma5\n')
 
         # - Commons
         if options.has_commons:
@@ -423,8 +429,6 @@ class MakefileWriter():
 
         # - Root
         libs=[]
-        #libs.extend(['-L'+archi_info.root_lib_path, \
-        #            '-lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic -lEG'])
         # becareful: to not forget -lEG
         if options.has_root:
             libs.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/root-config --libs)','-lEG'])
@@ -448,6 +452,7 @@ class MakefileWriter():
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libdelphesMA5tune_for_ma5.so')
         if options.has_fastjet_ma5lib:
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so')
+            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libsubstructure_for_ma5.so')
         if len(libs)!=0:
             file.write('# Requirements to check before building\n')
             for ind in range(0,len(libs)):

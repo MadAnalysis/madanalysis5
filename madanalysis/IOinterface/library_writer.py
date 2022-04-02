@@ -173,6 +173,19 @@ class LibraryWriter():
             options.has_fastjet_inc=True
           #  options.has_fastjet_lib=True
             toRemove.extend(['compilation_fastjet.log','linking_fastjet.log','cleanup_fastjet.log','mrproper_fastjet.log','../Bin/TestFastjet.log'])
+        elif package == "substructure":
+            options.has_commons=True
+            options.has_fastjet_inc=True
+            options.has_fastjet_lib=True
+            # @JACK: To be able to use fastjet in Ma5 data structure
+            options.ma5_fastjet_mode=True
+            options.has_fjcontrib = True
+            toRemove.extend(
+                ['compilation_substructure.log',
+                 'linking_substructure.log',
+                 'cleanup_substructure.log',
+                 'mrproper_substructure.log']
+            )
         elif package=='configuration':
             toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
         elif package=='commons':
@@ -264,6 +277,7 @@ class LibraryWriter():
             options.has_fastjet_inc    = self.main.archi_info.has_fastjet
             options.has_fastjet_lib    = self.main.archi_info.has_fastjet
             options.ma5_fastjet_mode   = self.main.archi_info.has_fastjet
+            options.has_substructure   = self.main.archi_info.has_fjcontrib
 
             toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
         elif package=='test_process':
