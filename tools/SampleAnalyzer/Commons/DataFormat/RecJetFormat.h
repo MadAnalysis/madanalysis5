@@ -48,7 +48,7 @@ namespace MA5
         class ClusterBase;
         class Pruner;
         class Nsubjettiness;
-        class SoftFrop;
+        class SoftDrop;
         class Filter;
         class EnergyCorrelator;
     }
@@ -79,7 +79,7 @@ namespace MA5
         friend class Substructure::ClusterBase;
         friend class Substructure::Pruner;
         friend class Substructure::Nsubjettiness;
-        friend class Substructure::SoftFrop;
+        friend class Substructure::SoftDrop;
         friend class Substructure::Filter;
         friend class Substructure::EnergyCorrelator;
 
