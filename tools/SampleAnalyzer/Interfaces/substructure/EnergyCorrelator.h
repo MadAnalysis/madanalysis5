@@ -90,7 +90,7 @@ namespace MA5 {
             );
 
             // Method to execute with a single jet
-            MAdouble64 Execute(const RecJetFormat* jet) { return (*_EC)(jet->pseudojet()); }
+            MAdouble64 Execute(const RecJetFormat* jet) const;
         };
     }
 }

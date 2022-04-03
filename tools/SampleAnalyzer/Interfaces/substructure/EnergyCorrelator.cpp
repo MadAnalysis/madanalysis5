@@ -50,5 +50,9 @@ namespace MA5 {
 
             _EC = new fastjet::contrib::EnergyCorrelator(N, beta, measure_, strategy_);
         }
+
+        // Method to execute with a single jet
+        MAdouble64 EnergyCorrelator::Execute(const RecJetFormat* jet) const
+        { return (*_EC)(jet->pseudojet()); }
     }
 }

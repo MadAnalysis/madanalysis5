@@ -92,10 +92,10 @@ namespace MA5 {
                 //=======================//
                 
                 // Execute with a single jet
-                const RecJetFormat * Execute(const RecJetFormat *jet);
+                const RecJetFormat * Execute(const RecJetFormat *jet) const;
 
                 // Execute with a list of jets
-                std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets);
+                std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets) const;
         };
     }
 }

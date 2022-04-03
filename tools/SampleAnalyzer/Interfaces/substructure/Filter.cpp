@@ -58,14 +58,14 @@ namespace MA5 {
         //=======================//
 
         // Method to filter a given jet.
-        const RecJetFormat* Filter::Execute(const RecJetFormat *jet)
+        const RecJetFormat* Filter::Execute(const RecJetFormat *jet) const
         {
             fastjet::PseudoJet filtered_jet = (*JetFilter_)(jet->pseudojet());
             return ClusterBase().__transform_jet(filtered_jet);
         }
 
         // Method to filter all the jets in a vector
-        std::vector<const RecJetFormat*> Filter::Execute(std::vector<const RecJetFormat *> &jets)
+        std::vector<const RecJetFormat*> Filter::Execute(std::vector<const RecJetFormat *> &jets) const
         {
             std::vector<const RecJetFormat *> output_jets;
             for (auto &jet: jets)

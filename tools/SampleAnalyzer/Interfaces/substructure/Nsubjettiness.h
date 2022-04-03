@@ -122,7 +122,7 @@ namespace MA5 {
                 //=======================//
 
                 // Method to calculate nsub for a given jet with respect to initialization parameters
-                MAdouble64 Execute(const RecJetFormat *jet);
+                MAdouble64 Execute(const RecJetFormat *jet) const;
         };
     }
 }

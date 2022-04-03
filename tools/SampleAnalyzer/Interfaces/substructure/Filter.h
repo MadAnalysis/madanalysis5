@@ -94,10 +94,10 @@ namespace MA5 {
                 //=======================//
 
                 // Method to filter a given jet.
-                const RecJetFormat* Execute(const RecJetFormat *jet);
+                const RecJetFormat* Execute(const RecJetFormat *jet) const;
 
                 // Method to filter all the jets in a vector
-                std::vector<const RecJetFormat*> Execute(std::vector<const RecJetFormat *> &jets);
+                std::vector<const RecJetFormat*> Execute(std::vector<const RecJetFormat *> &jets) const;
 
             private:
 

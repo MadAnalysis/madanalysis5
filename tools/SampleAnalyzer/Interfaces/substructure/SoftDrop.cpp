@@ -38,14 +38,14 @@ namespace MA5 {
         //=======================//
 
         // Execute with a single jet
-        const RecJetFormat * SoftDrop::Execute(const RecJetFormat *jet)
+        const RecJetFormat * SoftDrop::Execute(const RecJetFormat *jet) const
         {
             fastjet::PseudoJet sd_jet = (*softDrop_)(jet->pseudojet());
             return ClusterBase().__transform_jet(sd_jet);
         }
 
         // Execute with a list of jets
-        std::vector<const RecJetFormat *> SoftDrop::Execute(std::vector<const RecJetFormat *> &jets)
+        std::vector<const RecJetFormat *> SoftDrop::Execute(std::vector<const RecJetFormat *> &jets) const
         {
             std::vector<const RecJetFormat *> output_jets;
             for (auto &jet: jets)
