@@ -21,6 +21,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+// FastJet headers
+#include "fastjet/tools/Filter.hh"
+
 // SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/substructure/Filter.h"
 
