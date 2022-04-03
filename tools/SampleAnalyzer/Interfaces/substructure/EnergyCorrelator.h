@@ -28,14 +28,17 @@
 #include <vector>
 #include <algorithm>
 
-// FastJet headers
-#include "fastjet/contrib/EnergyCorrelator.hh"
-
 // SampleAnalyser headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecJetFormat.h"
 
 using namespace std;
+
+namespace fastjet {
+    namespace contrib {
+        class EnergyCorrelator;
+    }
+}
 
 namespace MA5 {
     namespace Substructure {

@@ -21,6 +21,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+// FastJet headers
+#include "fastjet/contrib/EnergyCorrelator.hh"
 
 // SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/substructure/EnergyCorrelator.h"
