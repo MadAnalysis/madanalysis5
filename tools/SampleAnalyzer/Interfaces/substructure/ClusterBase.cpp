@@ -21,10 +21,40 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+// FastJet headers
+#include "fastjet/ClusterSequence.hh"
+#include "fastjet/PseudoJet.hh"
+
 #include "SampleAnalyzer/Interfaces/substructure/ClusterBase.h"
 
 namespace MA5 {
     namespace Substructure {
+
+        //=======================//
+        //       Initialize      //
+        //=======================//
+
+        // Set the Jet definition using algorithm and radius input
+        void ClusterBase::SetJetDef(Algorithm algorithm, MAfloat32 radius)
+        {
+            isPlugin_ = false;
+            JetDefinition_ = new fastjet::JetDefinition(__get_clustering_algorithm(algorithm), radius);
+        }
+
+        //=======================//
+        //        Execution      //
+        //=======================//
+
+        // Wrapper for event based execution
+        void ClusterBase::Execute(const EventFormat& event, std::string JetID)
+        { __execute(const_cast<EventFormat&>(event), JetID); }
+
+        // Execute with a single jet. This method reclusters the given jet using its constituents
+        std::vector<const RecJetFormat *> ClusterBase::Execute(const RecJetFormat *jet)
+        {
+            std::vector<fastjet::PseudoJet> reclustered_jets = __cluster(jet->pseudojet().constituents());
+            return __transform_jets(reclustered_jets);
+        }
 
         // Execute with a single jet. This method reclusters the given jet using its constituents by filtering
         // reclustered events with respect to the initial jet
@@ -42,7 +72,6 @@ namespace MA5 {
 
             return output_jets;
         }
-
 
         // Execute with a list of jets. This method reclusters the given collection
         // of jets by combining their constituents
@@ -91,6 +120,10 @@ namespace MA5 {
             return __transform_jets(clustered_jets);
         }
 
+        //=======================//
+        //   Private Functions   //
+        //=======================//
+
         // Generic clustering method
         std::vector<fastjet::PseudoJet> ClusterBase::__cluster(std::vector<fastjet::PseudoJet> particles)
         {
@@ -109,6 +142,34 @@ namespace MA5 {
             else jets = clust_seq->inclusive_jets(ptmin_);
 
             return fastjet::sorted_by_pt(jets);
+        }
+
+        // Method to transform pseudojet into recjetformat
+        RecJetFormat * ClusterBase::__transform_jet(fastjet::PseudoJet jet) const
+        {
+            RecJetFormat * NewJet = new RecJetFormat(jet);
+            return NewJet;
+        }
+
+        // Transform pseudojets into RecJetFormat
+        std::vector<const RecJetFormat *> ClusterBase::__transform_jets(std::vector<fastjet::PseudoJet> jets) const
+        {
+            std::vector<const RecJetFormat *> output_jets;
+            output_jets.reserve(jets.size());
+            for (auto &jet: jets)
+                output_jets.push_back(__transform_jet(jet));
+            return output_jets;
+        }
+
+        // Method to get jet algorithm
+        fastjet::JetAlgorithm ClusterBase::__get_clustering_algorithm(Substructure::Algorithm algorithm) const
+        {
+            fastjet::JetAlgorithm algo_;
+            if (algorithm == Substructure::antikt)         algo_ = fastjet::antikt_algorithm;
+            else if (algorithm == Substructure::cambridge) algo_ = fastjet::cambridge_algorithm;
+            else if (algorithm == Substructure::kt)        algo_ = fastjet::kt_algorithm;
+            else throw EXCEPTION_ERROR("Unknown algorithm","",1);
+            return algo_;
         }
 
         // Execute with the Reconstructed event. This method creates a new Jet in RecEventFormat which
@@ -143,24 +204,6 @@ namespace MA5 {
             myEvent.rec()->jetcollection_.insert(std::make_pair(JetID, output_jets));
             isClustered_ = false;
             return true;
-        }
-
-        // Execute with a single jet. This method reclusters the given jet using its constituents
-        std::vector<const RecJetFormat *> ClusterBase::Execute(const RecJetFormat *jet)
-        {
-            std::vector<fastjet::PseudoJet> reclustered_jets = __cluster(jet->pseudojet().constituents());
-            return __transform_jets(reclustered_jets);
-        }
-
-        // Wrapper for event based execution
-        void ClusterBase::Execute(const EventFormat& event, std::string JetID)
-        { __execute(const_cast<EventFormat&>(event), JetID); }
-
-        // Set the Jet definition using algorithm and radius input
-        void ClusterBase::SetJetDef(Algorithm algorithm, MAfloat32 radius)
-        {
-            isPlugin_ = false;
-            JetDefinition_ = new fastjet::JetDefinition(__get_clustering_algorithm(algorithm), radius);
         }
     }
 }

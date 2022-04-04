@@ -30,7 +30,6 @@
 
 // FastJet headers
 #include "fastjet/ClusterSequence.hh"
-#include "fastjet/PseudoJet.hh"
 
 // SampleAnalyser headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
@@ -42,6 +41,7 @@
 namespace fastjet
 {
     class JetDefinition;
+    class PseudoJet;
 }
 
 using namespace std;
@@ -129,31 +129,13 @@ namespace MA5{
             std::vector<fastjet::PseudoJet> __cluster(std::vector<fastjet::PseudoJet> particles);
 
             // Method to transform pseudojet into recjetformat
-            static RecJetFormat * __transform_jet(fastjet::PseudoJet jet)
-            {
-                RecJetFormat * NewJet = new RecJetFormat(jet);
-                return NewJet;
-            }
+            RecJetFormat * __transform_jet(fastjet::PseudoJet jet) const;
 
-            static std::vector<const RecJetFormat *> __transform_jets(std::vector<fastjet::PseudoJet> jets)
-            {
-                std::vector<const RecJetFormat *> output_jets;
-                output_jets.reserve(jets.size());
-                for (auto &jet: jets)
-                    output_jets.push_back(__transform_jet(jet));
-                return output_jets;
-            }
+            // Transform pseudojets into RecJetFormat
+            std::vector<const RecJetFormat *> __transform_jets(std::vector<fastjet::PseudoJet> jets) const;
 
             // Method to get jet algorithm
-            static fastjet::JetAlgorithm __get_clustering_algorithm(Substructure::Algorithm algorithm)
-            {
-                fastjet::JetAlgorithm algo_;
-                if (algorithm == Substructure::antikt)         algo_ = fastjet::antikt_algorithm;
-                else if (algorithm == Substructure::cambridge) algo_ = fastjet::cambridge_algorithm;
-                else if (algorithm == Substructure::kt)        algo_ = fastjet::kt_algorithm;
-                else throw EXCEPTION_ERROR("Unknown algorithm","",1);
-                return algo_;
-            }
+            fastjet::JetAlgorithm __get_clustering_algorithm(Substructure::Algorithm algorithm) const;
 
             // Execute with the Reconstructed event. This method creates a new Jet in RecEventFormat which
             // can be accessed via JetID. The algorithm will only be executed if a unique JetID is given
