@@ -21,6 +21,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+// FastJet headers
+#include "fastjet/contrib/Nsubjettiness.hh"
+
 #include "SampleAnalyzer/Interfaces/substructure/Nsubjettiness.h"
 
 namespace MA5 {

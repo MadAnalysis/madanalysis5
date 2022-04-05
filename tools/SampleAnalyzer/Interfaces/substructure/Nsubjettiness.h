@@ -25,18 +25,20 @@
 #define MADANALYSIS5_NSUBJETTINESS_H
 
 // STL headers
-#include <vector>
 #include <algorithm>
-
-// FastJet headers
-#include "fastjet/contrib/Nsubjettiness.hh"
 
 // SampleAnalyser headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecJetFormat.h"
 
-using namespace MA5;
 using namespace std;
+
+namespace fastjet {
+    namespace contrib {
+        class AxesDefinition;
+        class MeasureDefinition;
+    }
+}
 
 namespace MA5 {
     namespace Substructure {
