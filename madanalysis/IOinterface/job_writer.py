@@ -720,6 +720,12 @@ class JobWriter(object):
         options.has_fastjet_inc    = self.main.archi_info.has_fastjet
         # @Jack: add substructure library
         options.has_substructure = self.main.archi_info.has_fastjet and self.main.archi_info.has_fjcontrib
+        # @Jack: add HTT library
+        options.has_heptoptagger = (
+                self.main.archi_info.has_fastjet and \
+                self.main.archi_info.has_fjcontrib and \
+                self.main.archi_info.has_heptoptagger
+        )
 
         options.has_root_inc       = self.main.archi_info.has_root
         options.has_root_lib       = self.main.archi_info.has_root

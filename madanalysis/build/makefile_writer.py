@@ -170,6 +170,8 @@ class MakefileWriter():
             self.ma5_fastjet_mode          = False
             self.has_fjcontrib             = False
             self.has_substructure          = False
+            self.has_heptoptagger          = False
+            self.has_nsubjettiness         = False
 
             self.has_delphes_tag           = False
             self.has_delphesMA5tune_tag    = False
@@ -394,9 +396,11 @@ class MakefileWriter():
             if options.has_fjcontrib:
                 # Add fjcontrib libraries
                 libs.extend(["-lRecursiveTools"])   # SoftDrop
-                libs.extend(["-lNsubjettiness"])    # Nsubjettiness
                 libs.extend(["-lVariableR"])        # VariableR
                 libs.extend(["-lEnergyCorrelator"]) # -lEnergyCorrelator
+            if options.has_nsubjettiness:
+                libs.extend(["-lNsubjettiness"])    # Nsubjettiness
+            if options.has_nsubjettiness or options.has_fjcontrib:
                 file.write('LIBFLAGS += '+' '.join(libs)+'\n')
 
         # - delphes
@@ -420,6 +424,10 @@ class MakefileWriter():
         # Substructure module
         if options.has_substructure:
             file.write('LIBFLAGS += -lsubstructure_for_ma5\n')
+
+        # HEPTopTagger module
+        if options.has_heptoptagger:
+            file.write('LIBFLAGS += -lHTT_for_ma5\n')
 
         # - Commons
         if options.has_commons:

@@ -23,15 +23,10 @@
 
 
 from __future__ import absolute_import
-from madanalysis.selection.instance_name   import InstanceName
 from madanalysis.IOinterface.folder_writer import FolderWriter
-from madanalysis.IOinterface.job_writer    import JobWriter
-from string_tools                          import StringTools
 from shell_command                         import ShellCommand
 import logging
-import shutil
 import os
-import subprocess
 from six.moves import input
 
 
@@ -180,11 +175,26 @@ class LibraryWriter():
             # @JACK: To be able to use fastjet in Ma5 data structure
             options.ma5_fastjet_mode=True
             options.has_fjcontrib = True
+            options.has_nsubjettiness = True
             toRemove.extend(
                 ['compilation_substructure.log',
                  'linking_substructure.log',
                  'cleanup_substructure.log',
                  'mrproper_substructure.log']
+            )
+        elif package == "HEPTopTagger":
+            options.has_commons=True
+            options.has_fastjet_inc=True
+            options.has_fastjet_lib=True
+            # @JACK: To be able to use fastjet in Ma5 data structure
+            options.ma5_fastjet_mode=True
+            options.has_nsubjettiness = True
+            options.has_substructure = True
+            toRemove.extend(
+                ['compilation_heptoptagger.log',
+                 'linking_heptoptagger.log',
+                 'cleanup_heptoptagger.log',
+                 'mrproper_heptoptagger.log']
             )
         elif package=='configuration':
             toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
