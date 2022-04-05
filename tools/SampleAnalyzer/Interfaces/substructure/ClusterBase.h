@@ -56,6 +56,7 @@ namespace MA5{
         class SoftDrop;
         class Pruner;
         class Filter;
+        class HTT;
 
         class ClusterBase {
 
@@ -63,6 +64,7 @@ namespace MA5{
             friend class SoftDrop;
             friend class Pruner;
             friend class Filter;
+            friend class HTT;
 
         //---------------------------------------------------------------------------------
         //                                 data members
