@@ -169,7 +169,7 @@ def main(args):
             archi_info.has_delphes = True
         run_scripts(ma5.utils.PathHandler.DELPHES_INTERFACE_PATH)
 
-    # Validate PAD & PADForSFS
+    # Validate PAD
     if args.PAD:
         if not archi_info.has_delphes:
             if not archi_info.has_root:
@@ -185,13 +185,6 @@ def main(args):
                     "A problem has occurred during the installation of delphes."
                 )
             archi_info.has_delphes = True
-        if not archi_info.has_fastjet:
-            job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("fastjet"))
-            if not (job.execute() and job.check()):
-                raise ma5.system.MadAnalysis5Error(
-                    "A problem has occurred during the installation of fastjet."
-                )
-            archi_info.has_fastjet = True
         if not session_info.has_pad:
             job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("PAD"))
             if not (job.execute() and job.check()):
@@ -200,6 +193,17 @@ def main(args):
                 )
             session_info.has_pad = True
             session_info.has_padsfs = True
+        run_scripts(ma5.utils.PathHandler.PAD_INTERFACE_PATH)
+
+    # Validate PADForSFS
+    if args.PADForSFS:
+        if not archi_info.has_fastjet:
+            job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("fastjet"))
+            if not (job.execute() and job.check()):
+                raise ma5.system.MadAnalysis5Error(
+                    "A problem has occurred during the installation of fastjet."
+                )
+            archi_info.has_fastjet = True
         if not session_info.has_padsfs:
             job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("PADForSFS"))
             if not (job.execute() and job.check()):
@@ -208,6 +212,7 @@ def main(args):
                 )
             session_info.has_padsfs = True
         run_scripts(ma5.utils.PathHandler.PAD_INTERFACE_PATH)
+
 
 
 if __name__ == "__main__":
@@ -282,7 +287,14 @@ if __name__ == "__main__":
         dest="PAD",
         action="store_true",
         default=False,
-        help="Validate PAD interface including PAD and PADForSFS.",
+        help="Validate PAD interface including PAD.",
+    )
+    validation.add_argument(
+        "--padforsfs",
+        dest="PADForSFS",
+        action="store_true",
+        default=False,
+        help="Validate PADForSFS interface including PADForSFS.",
     )
     validation.add_argument(
         "--custom-script",
