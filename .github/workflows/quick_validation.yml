@@ -21,7 +21,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.10']
+        python-version: ['3.8']
         os: [ubuntu-latest]
         
     steps:
@@ -65,7 +65,3 @@ jobs:
       - name : Validate FastJet interface
         run : |
           ./validation/scripts/validation_bootstrap --fastjet
-          # echo -e "------------------------------"
-          # echo -e "  Validate Delphes interface"
-          # echo -e "------------------------------"
-          # ./validation/scripts/validation_bootstrap --delphes

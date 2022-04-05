@@ -69,7 +69,6 @@ class RecJetFormat : public RecParticleFormat
   // -------------------------------------------------------------
  protected:
 
-  MAuint16 ntracks_;   /// number of tracks
   MAbool btag_;        /// b-tag
   MAbool ctag_;        /// c-tag
   MAbool true_ctag_;   /// c-tag (before id or misid)
@@ -102,17 +101,12 @@ class RecJetFormat : public RecParticleFormat
   /// Clear all information
   virtual void Reset()
   {
-    ntracks_   = 0; 
     btag_      = false;
     ctag_      = false;
     true_btag_ = false;
     true_ctag_ = false;
     isolCones_.clear();
   }
-
-  /// Accessor to the number of tracks
-  const MAuint16 ntracks() const
-  {return ntracks_;}
 
   /// Accessor to the b-tag
   const MAbool& btag() const

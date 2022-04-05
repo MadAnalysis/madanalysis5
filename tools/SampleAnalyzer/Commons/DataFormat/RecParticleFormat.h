@@ -67,7 +67,8 @@ class RecParticleFormat : public ParticleBaseFormat
   //                        data members
   // -------------------------------------------------------------
  protected:
-   
+
+  MAuint16 ntracks_;   /// number of tracks
   MAfloat32               HEoverEE_;    /// hadronic energy over electromagnetic energy
   const MCParticleFormat* mc_ ;         /// mother generated particle
   std::vector<MAuint64>   delphesTags_; /// tag reference for Delphes
@@ -97,6 +98,7 @@ class RecParticleFormat : public ParticleBaseFormat
     dz_=0.; d0_approx_=0.;
     vertex_prod_.Reset();
     mc_=0;
+    ntracks_ = 0;
   }
 
   /// Print particle informations
@@ -146,6 +148,10 @@ class RecParticleFormat : public ParticleBaseFormat
   /// Accessor to the electric charge
   virtual const MAint32 charge() const
   { return 0; }
+
+  /// Accessor to the number of tracks
+  const MAuint16 ntracks() const
+  {return ntracks_;}
 
   const std::vector<MAuint64>& delphesTags() const {return delphesTags_;}
 
