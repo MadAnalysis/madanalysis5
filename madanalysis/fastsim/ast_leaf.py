@@ -68,7 +68,8 @@ class Leaf:
         if self.type in ['cst', 'var', 'bool']:
             return self.name
         elif self.type == 'un_op' and len(self.daughters)==1:
-            return self.name + '(' + tree.get(self.daughters[0]).write(tree) + ')'
+            if self.name =='minus': return '-' + tree.get(self.daughters[0]).write(tree)
+            else:                   return self.name + '(' + tree.get(self.daughters[0]).write(tree) + ')'
         elif self.type == 'bin2_op' and len(self.daughters)==2:
             return self.name + '(' + tree.get(self.daughters[0]).write(tree) + ', ' + \
              tree.get(self.daughters[1]).write(tree) + ')'
@@ -88,11 +89,10 @@ class Leaf:
         elif self.type in ['var', 'bool']:
             return self.name
         elif self.type == 'un_op' and len(self.daughters)==1 and self.name!='-':
-            return 'std::'+self.name.replace('gamma','tgamma') + '(' +\
-              tree.get(self.daughters[0]).write_cpp(tree) + ')'
+            if self.name=='minus': return '-' + tree.get(self.daughters[0]).write_cpp(tree) 
+            else                 : return 'std::'+self.name.replace('gamma','tgamma') + '(' + tree.get(self.daughters[0]).write_cpp(tree) + ')'
         elif self.type == 'un_op' and len(self.daughters)==1 and self.name=='-':
-            return self.name + '(' +\
-              tree.get(self.daughters[0]).write_cpp(tree) + ')'
+            return self.name + '(' + tree.get(self.daughters[0]).write_cpp(tree) + ')'
         elif self.type == 'bin2_op' and len(self.daughters)==2:
             return 'std::'+self.name + '(' +\
               tree.get(self.daughters[0]).write_cpp(tree) + ', ' + \

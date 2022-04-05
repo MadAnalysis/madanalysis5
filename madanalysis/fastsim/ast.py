@@ -42,7 +42,7 @@ class AST:
         self.boolean     = ['true','false']
         self.unary_ops  = ['acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh',
            'cos', 'cosh', 'erf', 'erfc', 'exp', 'fabs', 'gamma', 'lgamma', 'log',
-           'log10', 'sin', 'sinh', 'sqrt', 'tan', 'tanh']
+           'log10', 'sin', 'sinh', 'sqrt', 'tan', 'tanh', 'minus']
         self.binary2_ops = [ 'atan2', 'fmod', 'hypot',  'pow']
         self.binary1_ops = { '^':1, '+':3, '-':3, '*':2, '/':2, '<=':4 ,'>=':4,
           '<':4, '>':4, '==':4, 'and':5, 'or':5}
@@ -66,6 +66,7 @@ class AST:
 
     # Main method: creating an ast from a formula
     def feed(self, formula_string):
+        self.logger.debug('Handling the formula: ' + formula_string);
         frml = formula_string.replace('**', ' ^ ')
         for op in self.binary1_ops.keys():
             frml = frml.replace(op, ' ' + op + ' ')
@@ -81,7 +82,9 @@ class AST:
             frml = frml.replace(op, op.replace(' ',''))
         frml = frml.replace('(  - ', '( -')
         frml = frml.split()
+        self.logger.debug('  ** Formula ready to be procesed: ' + str(frml));
         frml = self.ToBasicLeaves(frml)
+        self.logger.debug('  ** Formula after basic leaves: ' + str(frml));
         while ')' in frml:
             id_end   = frml.index(')')
             id_start = [i for i,x in enumerate(frml[:id_end]) if x=='('][-1]
@@ -108,6 +111,7 @@ class AST:
                     return
                 del frml[id_start:id_end+1]
                 frml[id_start:id_start] = sub_tree
+        self.logger.debug('  ** Formula after parentheses treated: ' + str(frml));
         frml = self.MakeConnections(frml)
         if frml==False:
             self.reset()
@@ -183,41 +187,49 @@ class AST:
 
     # replacing all constants from the formulas by leaves
     def ToBasicLeaves(self, formula):
-        new_formula = []
+        new_formula = []; last = ""
+        self.logger.debug("  ** ToBasicLeaves formula: " + str(formula));
         for elem in formula:
             # constants
             if re.match("""(?x) ^ [+-]?\ *  (  \d+ ( \.\d* )? |\.\d+ ) ([eE][+-]?\d+)? $""", elem):
                 new_leaf = Leaf(self.size(), 'cst', elem, [], [])
                 new_formula.append(new_leaf)
                 self.leaves.append(new_leaf)
+                last='';
             # variables
             elif elem.upper() in self.variables and elem!='gamma':
                 new_leaf = Leaf(self.size(), 'var', elem.upper(), [], [])
                 new_formula.append(new_leaf)
                 self.leaves.append(new_leaf)
+                last='';
             # unary operators
-            elif elem.lower() in self.unary_ops:
-                new_leaf = Leaf(self.size(), 'un_op', elem.lower(), [], [])
+            elif (elem.lower() in self.unary_ops) or (elem=='-' and last=='bin'):
+                new_leaf = Leaf(self.size(), 'un_op', elem.replace('-','minus').lower(), [], [])
                 new_formula.append(new_leaf)
                 self.leaves.append(new_leaf)
+                last='';
             # unary operators
             elif elem.lower() in self.binary2_ops:
                 new_leaf = Leaf(self.size(), 'bin2_op', elem.lower(), [], [])
                 new_formula.append(new_leaf)
                 self.leaves.append(new_leaf)
+                last = "bin";
             # booleans
             elif elem.lower() in self.boolean:
                 new_leaf = Leaf(self.size(), 'bool', elem.lower(), [], [])
                 new_formula.append(new_leaf)
                 self.leaves.append(new_leaf)
+                last = "bin";
             # unary operators
             elif elem.lower() in list(self.binary1_ops.keys()):
                 new_leaf = Leaf(self.size(), 'bin1_op', elem.lower(), [], [])
                 new_formula.append(new_leaf)
                 self.leaves.append(new_leaf)
+                last = "bin";
             # only parentheses
             else:
                 new_formula.append(elem)
+                last='';
         return new_formula
 
 
