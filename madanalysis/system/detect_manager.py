@@ -69,6 +69,9 @@ class DetectManager():
         elif package=='fastjet-contrib':
             from madanalysis.system.detect_fastjetcontrib import DetectFastjetContrib
             checker=DetectFastjetContrib(self.archi_info, self.user_info, self.session_info, self.debug)
+        elif package=='heptoptagger':
+            from madanalysis.system.detect_heptoptagger import DetectHEPTopTagger
+            checker=DetectHEPTopTagger(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='delphes':
             from madanalysis.system.detect_delphes import DetectDelphes
             checker=DetectDelphes(self.archi_info, self.user_info, self.session_info, self.debug)

@@ -124,6 +124,8 @@ class CmdInstall(CmdBase):
             if installer.Execute('fastjet')==False:
                 return False
             return installer.Execute('fastjet-contrib')
+        elif args[0]=='HEPTopTagger':
+            return installer.Execute('HEPTopTagger')
         elif args[0]=='gnuplot':
             return installer.Execute('gnuplot')
         elif args[0]=='matplotlib':
@@ -223,7 +225,7 @@ class CmdInstall(CmdBase):
         else:
             output = ["samples","zlib","fastjet", "delphes", "delphesMA5tune",\
                 "gnuplot", "matplotlib", "root" , "numpy", "PAD", "PADForMA5tune",\
-                "PADForSFS", "pyhf"]
+                "PADForSFS", "pyhf", "HEPTopTagger"]
             return self.finalize_complete(text,output)
 
 

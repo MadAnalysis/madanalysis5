@@ -24,7 +24,6 @@
 
 from __future__ import absolute_import
 import logging
-import sys
 
 from string_tools import StringTools
 from chronometer  import Chronometer
@@ -49,6 +48,13 @@ class InstallManager():
         elif package=='fastjet-contrib':
             from madanalysis.install.install_fastjetcontrib import InstallFastjetContrib
             installer=InstallFastjetContrib(self.main)
+        elif package=='heptoptagger':
+            if self.main.archi_info.has_fastjet and self.main.archi_info.has_fjcontrib:
+                from madanalysis.install.install_heptoptagger import InstallHEPTopTagger
+                installer=InstallHEPTopTagger(self.main)
+            else:
+                self.logger.error("HEPTopTagger requires FastJet and fjcontrib libraries.")
+                return True
         elif package in ['delphes', 'delphesma5tune']:
             if self.main.archi_info.has_root:
                 from madanalysis.install.install_delphes import InstallDelphes
