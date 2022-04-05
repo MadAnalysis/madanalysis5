@@ -38,6 +38,8 @@
  * The `RecParticleFormat` dataformat now has an `ntracks()` accessor (as
    required by the NormalMode).
    ([#56](https://github.com/MadAnalysis/madanalysis5/pull/56))
+ * Negative value can now be used for SFS bounds.
+   ([#52](https://github.com/MadAnalysis/madanalysis5/pull/52))
 
 ## Contributors
 
