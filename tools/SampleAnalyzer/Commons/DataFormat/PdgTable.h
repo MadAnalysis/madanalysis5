@@ -60,6 +60,8 @@ class PdgTable {
 
   const PdgDataFormat& operator[](const MAint32 Pdgid) const;
 
+  const PdgDataFormat& GetParticle(const MAint32 Pdgid, MAbool verbose=true) const;
+
   private:
 
   std::map<MAint32, PdgDataFormat> Table_;

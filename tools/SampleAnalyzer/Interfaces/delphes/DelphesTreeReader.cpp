@@ -731,8 +731,16 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
         if (mc!=0)
         {
            genit = gentable.find(mc);
-           if (genit!=gentable.end()) vertex->constituents_.push_back(&(myEvent.mc()->particles()[genit->second]));
-           else WARNING << "GenParticle corresponding to a vertex is not found in the gen table" << endmsg;
+           try
+           {
+               if (genit != gentable.end())
+                   vertex->constituents_.push_back(&(myEvent.mc()->particles()[genit->second]));
+               else throw EXCEPTION_WARNING("GenParticle corresponding to a vertex is not found in the gen table","",1);
+           }
+           catch (const std::exception& err)
+           {
+               MANAGE_EXCEPTION(err);
+           }
         }
         // vertex->delphesTags_.push_back(reinterpret_cast<MAuint64>(mc));
       }
