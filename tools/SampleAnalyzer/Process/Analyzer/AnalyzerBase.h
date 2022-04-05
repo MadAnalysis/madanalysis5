@@ -51,6 +51,7 @@
     #include "SampleAnalyzer/Interfaces/substructure/Selector.h"
     #include "SampleAnalyzer/Interfaces/substructure/Filter.h"
     #include "SampleAnalyzer/Interfaces/substructure/EnergyCorrelator.h"
+    #include "SampleAnalyzer/Interfaces/HEPTopTagger/HTT.h"
 #endif
 
 // STL headers
