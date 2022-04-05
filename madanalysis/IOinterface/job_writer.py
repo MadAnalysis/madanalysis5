@@ -708,12 +708,7 @@ class JobWriter(object):
         options.has_process  = True
         # @JACK enable usage of fastjet
         # If there are any root files, fastjet clusterer should not run with MA5_FASTJET_MODE Flag
-        options.ma5_fastjet_mode   = (
-            all([all([('root' not in x) for x in dataset.filenames]) for dataset in self.main.datasets])
-            and self.main.archi_info.has_fastjet
-            and kwargs.get('ma5_fastjet_mode',True)
-            and self.main.fastsim.package == 'fastjet'
-        )
+        options.ma5_fastjet_mode   = self.main.archi_info.has_fastjet and self.main.archi_info.has_fjcontrib
         options.has_fastjet_lib    = self.main.archi_info.has_fastjet
         options.has_fastjet_ma5lib = self.main.archi_info.has_fastjet
         # @JACK: fastjet_inc is required to be able to use the FJ files when FJ mode is on
