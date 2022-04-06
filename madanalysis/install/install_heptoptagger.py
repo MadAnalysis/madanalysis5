@@ -39,9 +39,6 @@ class InstallHEPTopTagger:
         self.ncores = 1
         self.github_repo = "https://api.github.com/repos/MadAnalysis/HEPTopTagger/releases/latest"
         self.meta = {}
-        # self.files = {
-        #     "v1.0.0.tar.gz": "https://github.com/MadAnalysis/HEPTopTagger/archive/refs/tags/v1.0.0.tar.gz"
-        # }
 
     def Detect(self):
         if not os.path.isdir(self.toolsdir):
@@ -111,10 +108,12 @@ class InstallHEPTopTagger:
             return False
 
         found = False
+        main_folder = None
         for file in content:
             if os.path.isdir(file) and "MadAnalysis-HEPTopTagger" in file:
                 content = glob(os.path.join(file, "*"))
                 found = True
+                main_folder = file
                 break
 
         if not found:
@@ -123,7 +122,16 @@ class InstallHEPTopTagger:
         import shutil
         for htt_file in content:
             logging.getLogger("MA5").debug(f"copy {htt_file} to {self.installdir}")
-            shutil.copyfile(htt_file, os.path.join(self.installdir,os.path.basename(htt_file)))
+            shutil.copyfile(htt_file, os.path.join(self.installdir, os.path.basename(htt_file)))
+
+        if main_folder is not None:
+            try:
+                shutil.rmtree(main_folder, ignore_errors=True)
+            except Exception as err:
+                logging.getLogger('MA5').debug(err)
+
+        with open(os.path.join(self.downloaddir, "metadata.json"), "w") as meta:
+            json.dump(self.meta, meta, indent=4)
 
         # Ok: returning the good folder
         self.tmpdir = packagedir
