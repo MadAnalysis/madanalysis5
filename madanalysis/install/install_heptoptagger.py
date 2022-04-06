@@ -24,7 +24,7 @@
 from __future__ import absolute_import
 from madanalysis.install.install_service import InstallService
 from shell_command import ShellCommand
-import os, json, sys
+import os, json
 import logging
 
 
@@ -67,25 +67,27 @@ class InstallHEPTopTagger:
         return ok
 
     def Download(self):
-        logname = os.path.normpath(self.installdir + "/wget.log")
         # Checking connection with MA5 web site
         theCommands=['curl', '-s', self.github_repo]
         logging.getLogger('MA5').debug('shell command: '+' '.join(theCommands))
-        ok, out= ShellCommand.ExecuteWithLog(theCommands, logname,".", silent=False)
+        ok, out = ShellCommand.ExecuteWithLog(
+            theCommands, os.path.normpath(self.installdir + "/github_meta.log"), ".", silent=False
+        )
         if not ok:
             return False
 
         self.meta = json.loads(out)
-        tarball_url = self.meta["tarball_url"]
-        tag = self.meta["name"]
 
-        logging.getLogger('MA5').debug(f"Downloading tag {tag} from {tarball_url}")
+        logging.getLogger('MA5').debug(f"  -> HEPTopTagger {self.meta['tag_name']}")
+        logging.getLogger('MA5').debug(f"  -> Published at {self.meta['published_at']}")
         theCommands = [
             'curl', '-s', "-L", "--create-dirs", "-o",
-            os.path.join(self.downloaddir, tag + ".tar.gz"),
-            tarball_url
+            os.path.join(self.downloaddir, self.meta['tag_name'] + ".tar.gz"),
+            self.meta["tarball_url"]
         ]
-        ok, out= ShellCommand.ExecuteWithLog(theCommands, logname, ".", silent=False)
+        ok, out = ShellCommand.ExecuteWithLog(
+            theCommands, os.path.normpath(self.installdir + "/curl.log"), ".", silent=False
+        )
         logging.getLogger('MA5').debug(f"is download ok? {ok} :: {out}")
 
         return ok
@@ -94,9 +96,9 @@ class InstallHEPTopTagger:
         # Logname
         logname = os.path.normpath(self.installdir + "/unpack.log")
         # Unpacking the tarball
-        logging.getLogger("MA5").debug(f"Unpack : {self.meta['name']+'.tar.gz'}")
+        logging.getLogger("MA5").debug(f"Unpack : {self.meta['tag_name']+'.tar.gz'}")
         ok, packagedir = InstallService.untar(
-            logname, self.downloaddir, self.installdir, self.meta['name']+'.tar.gz'
+            logname, self.downloaddir, self.installdir, self.meta['tag_name']+'.tar.gz'
         )
         logging.getLogger("MA5").debug(f"Unpack : {packagedir} is ok? {ok}")
         if not ok:
@@ -130,7 +132,7 @@ class InstallHEPTopTagger:
             except Exception as err:
                 logging.getLogger('MA5').debug(err)
 
-        with open(os.path.join(self.downloaddir, "metadata.json"), "w") as meta:
+        with open(os.path.join(self.installdir, "metadata.json"), "w") as meta:
             json.dump(self.meta, meta, indent=4)
 
         # Ok: returning the good folder
@@ -149,11 +151,9 @@ class InstallHEPTopTagger:
 
     def display_log(self):
         logging.getLogger("MA5").error("More details can be found into the log files:")
-        logging.getLogger("MA5").error(" - " + os.path.normpath(self.installdir + "/wget.log"))
+        logging.getLogger("MA5").error(" - " + os.path.normpath(self.installdir + "/github_meta.log"))
+        logging.getLogger("MA5").error(" - " + os.path.normpath(self.installdir + "/curl.log"))
         logging.getLogger("MA5").error(" - " + os.path.normpath(self.installdir + "/unpack.log"))
-        logging.getLogger("MA5").error(
-            " - " + os.path.normpath(self.installdir + "/installation.log")
-        )
 
     def NeedToRestart(self):
         return True
