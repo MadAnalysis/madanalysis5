@@ -114,6 +114,9 @@ namespace MA5
     std::vector<fastjet::PseudoJet> input_hadrons_;
 #endif
 
+        /// Create an empty jet
+        std::vector<RecJetFormat>    emptyjet_;
+
         /// Collection of generated jets
         std::vector<RecJetFormat>    genjets_;
 
@@ -207,8 +210,7 @@ namespace MA5
                 return jetcollection_.at(PrimaryJetID_);
             else
             {
-                static const std::vector<RecJetFormat> empty;
-                return empty;
+                return emptyjet_;
             }
         }
 
@@ -222,8 +224,7 @@ namespace MA5
                 return jetcollection_.at(id);
             else
             {
-                static const std::vector<RecJetFormat> empty;
-                return empty;
+                return emptyjet_;
             }
         }
 
@@ -296,8 +297,7 @@ namespace MA5
                 return jetcollection_.at(PrimaryJetID_);
             else
             {
-                static std::vector<RecJetFormat> empty;
-                return empty;
+                return emptyjet_;
             }
         }
 
@@ -311,8 +311,7 @@ namespace MA5
                 return jetcollection_.at(id);
             else
             {
-                static std::vector<RecJetFormat> empty;
-                return empty;
+                return emptyjet_;
             }
         }
 
