@@ -24,9 +24,6 @@
 #ifndef MADANALYSIS5_RECLUSTER_H
 #define MADANALYSIS5_RECLUSTER_H
 
-// FastJet headers
-#include "fastjet/contrib/Recluster.hh"
-
 // SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/substructure/ClusterBase.h"
 

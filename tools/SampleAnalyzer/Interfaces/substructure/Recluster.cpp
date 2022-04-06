@@ -21,6 +21,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+// FastJet headers
+#include "fastjet/contrib/Recluster.hh"
+
 // SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/substructure/Recluster.h"
 
