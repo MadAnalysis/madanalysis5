@@ -21,6 +21,9 @@
 //
 //////////////////////////////////////////////////////
 
+// FastJet headers
+#include "fastjet/contrib/SoftDrop.hh"
+
 // SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/substructure/SoftDrop.h"
 

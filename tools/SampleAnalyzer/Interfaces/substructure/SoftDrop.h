@@ -24,13 +24,14 @@
 #ifndef MADANALYSIS5_SOFTDROP_H
 #define MADANALYSIS5_SOFTDROP_H
 
-// FastJet headers
-#include "fastjet/contrib/SoftDrop.hh"
-
 // SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/substructure/ClusterBase.h"
 
-using namespace std;
+namespace fastjet {
+    namespace contrib {
+        class SoftDrop;
+    }
+}
 
 namespace MA5 {
     namespace Substructure {
