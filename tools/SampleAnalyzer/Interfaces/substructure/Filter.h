@@ -28,8 +28,6 @@
 #include "SampleAnalyzer/Interfaces/substructure/ClusterBase.h"
 #include "SampleAnalyzer/Interfaces/substructure/Selector.h"
 
-using namespace std;
-
 namespace fastjet {
     class Filter;
 }
@@ -55,11 +53,9 @@ namespace MA5 {
             //                                 data members
             //---------------------------------------------------------------------------------
             protected:
-                fastjet::Selector selector_; // the Selector applied to compute the kept subjets
 
                 /// Jet definition
                 fastjet::JetDefinition* JetDefinition_; // the jet definition applied to obtain the subjets
-                MAbool isJetDefined_;
 
                 MAfloat32 rho_; // if non-zero, backgruond-subtract each subjet befor selection
                 MAfloat32 Rfilt_; // the filtering radius
@@ -102,7 +98,7 @@ namespace MA5 {
 
             private:
 
-                void init_filter();
+                void init_filter(Selector selector, MAbool isJetDefined);
 
 
         };

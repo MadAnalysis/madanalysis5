@@ -38,22 +38,22 @@ namespace MA5 {
             JetDefinition_ = new fastjet::JetDefinition(
                     ClusterBase().__get_clustering_algorithm(algorithm), radius
             );
-            selector_ = selector.__get(); Rfilt_=-1.; rho_=rho; isJetDefined_=true;
-            init_filter();
+            Rfilt_=-1.; rho_=rho;
+            init_filter(selector, true);
         }
 
         void Filter::Initialize(MAfloat32 Rfilt, Selector selector, MAfloat32 rho)
         {
-            selector_ = selector.__get(); Rfilt_=Rfilt; rho_=rho; isJetDefined_=false;
-            init_filter();
+            Rfilt_=Rfilt; rho_=rho;
+            init_filter(selector,false);
         }
 
-        void Filter::init_filter()
+        void Filter::init_filter(Selector selector, MAbool isJetDefined)
         {
-            if (isJetDefined_)
-                JetFilter_ = new fastjet::Filter(*JetDefinition_, selector_, rho_);
+            if (isJetDefined)
+                JetFilter_ = new fastjet::Filter(*JetDefinition_, selector.selector_, rho_);
             else
-                JetFilter_ = new fastjet::Filter(Rfilt_, selector_, rho_);
+                JetFilter_ = new fastjet::Filter(Rfilt_, selector.selector_, rho_);
         }
 
         //=======================//
