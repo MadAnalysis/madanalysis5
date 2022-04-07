@@ -6,6 +6,12 @@ algorithm `Execute` function does not return anything but it includes
 various accessors. This example follows the `Substructure` module. Thus
 for details see `tools/SampleAnalyzer/Interfaces/substructure/README.md`.
 
+## Installation
+Simply use `install HEPTopTagger` command through MadAnalysis 5 interface. 
+Please make sure that `FastJet` and `FastJet contrib` has already been installed
+and available to MadAnalysis 5.
+
+## Examples
 ```c++
 #ifndef analysis_test_h
 #define analysis_test_h
