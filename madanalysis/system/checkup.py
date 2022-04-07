@@ -29,7 +29,7 @@ from madanalysis.system.detect_manager     import DetectManager
 from string_tools                          import StringTools
 from shell_command import ShellCommand
 import logging
-import os
+import os, json
 
 class CheckUp():
 
@@ -548,21 +548,10 @@ class CheckUp():
                               f"{os.path.normpath(self.archi_info.ma5dir + '/.github_meta.log')}")
             return True
 
-        import json
         meta = json.loads(out)
 
         latest_version = [int(x) for x in meta['tag_name'][1:].split(".")]
         current_version = [int(x) for x in self.archi_info.ma5_version.split(".")]
-
-        def new_version():
-            self.logger.warning(f"New version of MadAnalysis 5 is available ({meta['tag_name']}).")
-            self.logger.warning(f"The latest version can be downloaded from : ")
-            self.logger.warning(f"{meta['html_url']}")
-
-        def unstable_version():
-            self.logger.warning(f"An unstable version of MadAnalysis 5 is in use ({self.archi_info.ma5_version}).")
-            self.logger.warning(f"The latest stable version can be downloaded from :")
-            self.logger.warning(f"{meta['html_url']}")
 
         def compare_versions(version1, version2):
             if version1 == version2:
@@ -577,7 +566,10 @@ class CheckUp():
                 return False
 
         if compare_versions(latest_version, current_version):
-            new_version()
-
-        if compare_versions(current_version, latest_version):
-            unstable_version()
+            self.logger.warning(f"New version of MadAnalysis 5 is available ({meta['tag_name']}).")
+            self.logger.warning(f"The latest version can be downloaded from : ")
+            self.logger.warning(f"{meta['html_url']}")
+        elif compare_versions(current_version, latest_version):
+            self.logger.warning(f"An unstable version of MadAnalysis 5 is in use ({self.archi_info.ma5_version}).")
+            self.logger.warning(f"The latest stable version can be downloaded from :")
+            self.logger.warning(f"{meta['html_url']}")
