@@ -58,7 +58,20 @@ This will create a MadAnalysis 5 workspace which has the information for a prima
 with `antikt` algorithm `R=0.4` and `ptmin=20` GeV. Further more it will create two additional jets named `AK08`
 and `varR` where former is clustered with `antikt` algorithm `R=0.8` and `ptmin=200` and latter is created with
 `VariableR` algorithm. Each additional jet has been initialized in different method to examplify possible ways 
-of jet definitions. This card can be executed as show below
+of jet definitions. All available `jet_algorithm` definitions are shown with the default values in the table below
+
+|       Algorithm       | Parameters & Default values                                                        |
+|:---------------------:|:-----------------------------------------------------------------------------------|
+| `antikt`, `cambridge` | `radius=0.4`, `ptmin=5.`                                                           |
+|        `genkt`        | `radius=0.4`, `ptmin=5.`, `exclusive=False`, `p=-1`                                |
+|         `kt`          | `radius=0.4`, `ptmin=5.`, `exclusive=False`                                        |
+|       `gridjet`       | `ymax=3.`, `ptmin=5.`                                                              |
+|      `cdfjetclu`      | `radius=0.4`, `ptmin=5.`, `overlap=0.5`, `seed=1.`, `iratch=0.`                    |
+|     `cdfmidpoint`     | `radius=0.4`, `ptmin=5.`, `overlap=0.5`, `seed=1.`, `iratch=0.`, `areafraction=1.` |
+|       `siscone`       | `radius=0.4`, `ptmin=5.`, `overlap=0.5`, `input_ptmin=5.`, `npassmax=1.`           |
+|      `VariableR`      | `rho=2000.`, `minR=0.`, `maxR=2.`, `ptmin=20.` `exclusive=False` `clustertype=CALIKE` `strategy=Best` |
+
+This card can be executed as show below
 ```bash
 cd madanalysis5
 ./bin/ma5 -Re my_workspace test substructure_example.ma5
