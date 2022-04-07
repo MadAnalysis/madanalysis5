@@ -432,6 +432,17 @@ class Main():
     def CheckConfig(self,debug=False):
         checkup = CheckUp(self.archi_info, self.session_info, debug, self.script)
 
+        try:
+            import datetime
+            # check for updates every afternoon between 1 PM and 3 PM
+            now = datetime.datetime.now()
+            if now.hour > 13 and now.hour < 15:
+                checkup.check_updates()
+        except ModuleNotFoundError:
+            from random import random
+            if random() > 0.5:
+                checkup.check_updates()
+
         if not checkup.CheckArchitecture():
             return False
         if not checkup.ReadUserOptions():
