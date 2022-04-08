@@ -727,6 +727,7 @@ MAbool AddDaughters(MCParticleFormat* part,MCParticleFormat* dau)
     if (d==dau) return false;
   }
   part->daughters().push_back(dau);
+  return true;
 }
 
 
