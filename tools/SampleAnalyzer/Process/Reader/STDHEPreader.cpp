@@ -712,6 +712,7 @@ MAbool AddMothers(MCParticleFormat* part,MCParticleFormat* mum)
     if (m==mum) return false;
   }
   part->mothers().push_back(mum);
+  return true;
 }
 
 
