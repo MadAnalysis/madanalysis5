@@ -203,8 +203,23 @@ class AnalyzerBase
     }
 
     // backwards compatibility
-    void AddDefaultHadronic() {}
-    void AddDefaultInvisible() {}
+    void AddDefaultHadronic()
+    {
+      try {
+          throw EXCEPTION_WARNING("This function has been deprecated.", "", 1);
+      } catch (const std::exception& err) {
+          MANAGE_EXCEPTION(err);
+      }
+    }
+
+    void AddDefaultInvisible()
+    {
+        try {
+            throw EXCEPTION_WARNING("This function has been deprecated.", "", 1);
+        } catch (const std::exception& err) {
+            MANAGE_EXCEPTION(err);
+        }
+    }
 
  protected :
 
