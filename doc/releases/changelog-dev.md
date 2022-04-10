@@ -28,6 +28,10 @@
  * We added an interface to include CRs and VRs with using full likelihoods.
    ([#5](https://github.com/MadAnalysis/madanalysis5/pull/5))
 
+ * Installation of Python-based third-party software has been deprecated. 
+   This now will be handled through `requirements.txt`.
+   ([#68](https://github.com/MadAnalysis/madanalysis5/pull/68))
+
 ## Bug fixes
  * Zero division error fixed in the simplified likelihoods workflow.
    ([#4](https://github.com/MadAnalysis/madanalysis5/pull/4))
