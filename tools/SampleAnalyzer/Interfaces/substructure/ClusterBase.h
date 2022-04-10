@@ -103,7 +103,7 @@ namespace MA5{
             //=======================//
 
             // Wrapper for event based execution
-            void Execute(const EventFormat& event, std::string JetID);
+            virtual void Execute(const EventFormat& event, std::string JetID);
 
             // Execute with a single jet. This method reclusters the given jet using its constituents
             std::vector<const RecJetFormat *> Execute(const RecJetFormat *jet);
@@ -115,7 +115,7 @@ namespace MA5{
 
             // Execute with a list of jets. This method reclusters the given collection
             // of jets by combining their constituents
-            std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets);
+            virtual std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets);
 
             // Handler for clustering step
             void cluster(const RecJetFormat *jet);

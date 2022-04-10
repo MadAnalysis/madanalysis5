@@ -64,13 +64,13 @@ namespace MA5 {
                 const RecJetFormat* Execute(const RecJetFormat *jet);
 
                 // Method to recluster each jet in a given vector
-                std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets);
+                std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets) override;
 
                 //=============================//
                 //        NOT IMPLEMENTED      //
                 //=============================//
 
-                void Execute(const EventFormat& event, std::string JetID);
+                void Execute(const EventFormat& event, std::string JetID) override;
 
                 template<class Func>
                 std::vector<const RecJetFormat *> Execute(const RecJetFormat *jet, Func func);
