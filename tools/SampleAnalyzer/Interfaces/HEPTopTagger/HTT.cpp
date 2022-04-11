@@ -30,6 +30,11 @@
 namespace MA5 {
     namespace Substructure {
 
+        HTT::~HTT()
+        {
+            delete _tagger;
+        }
+
         //============================//
         //        Initialization      //
         //============================//

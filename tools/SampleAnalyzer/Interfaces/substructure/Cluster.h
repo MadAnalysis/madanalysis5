@@ -42,7 +42,7 @@ namespace MA5 {
                 Cluster() {}
 
                 /// Destructor
-                virtual ~Cluster() {}
+                ~Cluster() {}
 
                 //============================//
                 //        Initialization      //

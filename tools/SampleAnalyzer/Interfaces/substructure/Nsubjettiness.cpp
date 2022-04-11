@@ -28,6 +28,14 @@
 
 namespace MA5 {
     namespace Substructure {
+
+        Nsubjettiness::~Nsubjettiness()
+        {
+            // clean heap allocation
+            delete axesdef_;
+            delete measuredef_;
+        }
+
         //============================//
         //        Initialization      //
         //============================//

@@ -29,6 +29,13 @@
 
 namespace MA5 {
     namespace Substructure {
+
+        Filter::~Filter()
+        {
+            delete JetDefinition_;
+            delete JetFilter_;
+        }
+
         //============================//
         //        Initialization      //
         //============================//

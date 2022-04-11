@@ -100,7 +100,7 @@ namespace MA5 {
             HTT() {}
 
             // Destructor
-            virtual ~HTT() {}
+            ~HTT();
 
             //============================//
             //        Initialization      //

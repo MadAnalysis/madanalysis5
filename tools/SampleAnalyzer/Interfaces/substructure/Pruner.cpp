@@ -30,6 +30,11 @@
 namespace MA5 {
     namespace Substructure {
 
+        Pruner::~Pruner()
+        {
+            delete JetDefinition_;
+        }
+
         // Initialize with all the arguments. Note that if R <= 0 max allowable radius will be used
         void Pruner::Initialize(
             Substructure::Algorithm algorithm, MAfloat32 R, MAfloat32 zcut, MAfloat32 Rcut_factor

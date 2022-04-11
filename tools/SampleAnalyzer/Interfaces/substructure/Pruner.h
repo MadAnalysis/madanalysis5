@@ -49,7 +49,7 @@ namespace MA5 {
                 Pruner() {}
 
                 /// Destructor
-                virtual ~Pruner() {}
+                ~Pruner();
 
                 //============================//
                 //        Initialization      //

@@ -29,6 +29,12 @@
 
 namespace MA5 {
     namespace Substructure {
+
+        EnergyCorrelator::~EnergyCorrelator()
+        {
+            delete _EC;
+        }
+
         void EnergyCorrelator::Initialize(
                 MAuint32 N,
                 MAfloat32 beta,

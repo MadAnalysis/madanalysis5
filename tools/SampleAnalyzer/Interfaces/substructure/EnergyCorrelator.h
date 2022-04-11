@@ -73,7 +73,7 @@ namespace MA5 {
             EnergyCorrelator() {}
 
             /// Destructor
-            virtual ~EnergyCorrelator() {}
+            ~EnergyCorrelator();
 
             /// constructs an N-point correlator with angular exponent beta,
             /// using the specified choice of energy and angular measure as well

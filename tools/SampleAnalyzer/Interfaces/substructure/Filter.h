@@ -70,7 +70,7 @@ namespace MA5 {
                 Filter() {}
 
                 /// Destructor
-                virtual ~Filter() {}
+                ~Filter();
 
                 //============================//
                 //        Initialization      //

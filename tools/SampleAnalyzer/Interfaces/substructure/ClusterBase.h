@@ -93,7 +93,12 @@ namespace MA5{
             ClusterBase() {}
 
             /// Destructor
-            virtual ~ClusterBase() {}
+            virtual ~ClusterBase()
+            {
+                // clean heap allocation
+                delete JetDefinition_;
+                delete JetDefPlugin_;
+            }
 
             // Set the Jet definition using algorithm and radius input
             void SetJetDef(Algorithm algorithm, MAfloat32 radius);

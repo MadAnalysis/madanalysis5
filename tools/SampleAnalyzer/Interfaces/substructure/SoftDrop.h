@@ -72,7 +72,7 @@ namespace MA5 {
                 SoftDrop() {}
 
                 // Destructor
-                virtual ~SoftDrop() {}
+                ~SoftDrop();
 
                 //============================//
                 //        Initialization      //

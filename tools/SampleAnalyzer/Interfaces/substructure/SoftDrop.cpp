@@ -29,6 +29,12 @@
 
 namespace MA5 {
     namespace Substructure {
+
+        SoftDrop::~SoftDrop()
+        {
+            delete softDrop_;
+        }
+
         //============================//
         //        Initialization      //
         //============================//

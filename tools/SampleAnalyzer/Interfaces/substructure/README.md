@@ -254,13 +254,13 @@ without detailed explanation.
             PHYSICS->recConfig().Reset();
 
             // Initialize Nsubjettiness
+            MAfloat32 beta = 0.1, R0 = 0.2;
             nsub.Initialize(
                 1.,
                 Substructure::Nsubjettiness::KT_Axes,
                 Substructure::Nsubjettiness::NormalizedMeasure,
-                beta = 0.1,
-                R0 = 0.2,
-                Rcutoff=std::numeric_limits<double>::max()
+                beta,
+                R0,
             );
             return true;
         }
@@ -293,7 +293,7 @@ without detailed explanation.
             PHYSICS->recConfig().Reset();
 
             // Initialize Cluster
-            cluster.Initialize(Substructure::cambridge, 0.8, ptmin=200., isExclusive = true);
+            cluster.Initialize(Substructure::cambridge, 0.8, 200., true);
             return true;
         }
         virtual bool Execute(SampleFormat& sample, const EventFormat& event)
@@ -330,13 +330,13 @@ without detailed explanation.
 
             // Initialize Energy Correlator
             varR.Initialize(
-                rho = 2000., // mass scale for effective radius (i.e. R ~ rho/pT)
-                minR = 0., //minimum jet radius
-                maxR = 2., // maximum jet radius
+                2000., // mass scale for effective radius (i.e. R ~ rho/pT)
+                0., //minimum jet radius
+                2., // maximum jet radius
                 Substructure::VariableR::CALIKE,
                 Substructure::VariableR::Best,
-                ptmin = 200.,// Minimum pT
-                isExclusive = false
+                200.,// Minimum pT
+                false // isexclusive
             );
             return true;
         }

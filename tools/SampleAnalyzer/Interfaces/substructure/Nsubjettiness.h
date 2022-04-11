@@ -90,7 +90,7 @@ namespace MA5 {
                 Nsubjettiness() {}
 
                 /// Destructor
-                virtual ~Nsubjettiness() {}
+                ~Nsubjettiness();
 
                 //============================//
                 //        Initialization      //

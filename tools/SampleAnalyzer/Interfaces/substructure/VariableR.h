@@ -66,7 +66,7 @@ namespace MA5 {
                 VariableR() {}
 
                 /// Destructor
-                virtual ~VariableR() {}
+                ~VariableR() {}
 
                 //============================//
                 //        Initialization      //

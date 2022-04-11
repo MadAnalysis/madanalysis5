@@ -42,7 +42,7 @@ namespace MA5 {
                 Recluster() {}
 
                 /// Destructor
-                virtual ~Recluster() {}
+                ~Recluster() {}
 
                 //============================//
                 //        Initialization      //
