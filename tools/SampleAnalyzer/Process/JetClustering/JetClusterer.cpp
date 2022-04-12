@@ -240,40 +240,38 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
         if (mySmearer_->isPropagatorOn() && part.mothers().size()>0)
             mySmearer_->ParticlePropagator(const_cast<MCParticleFormat*>(&part));
 
-#ifdef MA5_FASTJET_MODE
         // @JACK delphes based analyses already has tracks
-    // Set up tracks as charged FS particles OR charged interstate particles with nonzero ctau
-    if (PDG->IsCharged(part.pdgid()) && part.mothers().size()>0)
-    {
-        // Minimum tracking requirement is around 0.5 mm see ref. 1007.1988
-        if (part.ctau() > 0. || PHYSICS->Id->IsFinalState(part))
+        // Set up tracks as charged FS particles OR charged interstate particles with nonzero ctau
+        if (PDG->IsCharged(part.pdgid()) && part.mothers().size()>0 && algo_!=0)
         {
-            // Reminder: -1 is reserved for the tracks
-            MCParticleFormat smeared_track = mySmearer_->Execute(&part, -1);
-            if (smeared_track.pt() > 1e-5)
+            // Minimum tracking requirement is around 0.5 mm see ref. 1007.1988
+            if (part.ctau() > 0. || PHYSICS->Id->IsFinalState(part))
             {
-                RecTrackFormat * track = myEvent.rec()->GetNewTrack();
-                MALorentzVector trk_mom;
-                trk_mom.SetPtEtaPhiM(smeared_track.pt(),
-                                     smeared_track.eta(),
-                                     smeared_track.phi(),0.0);
-                track->setMomentum(trk_mom);
-                track->setD0(smeared_track.d0());
-                track->setDZ(smeared_track.dz());
-                track->setD0Approx(smeared_track.d0_approx());
-                track->setDZApprox(smeared_track.dz_approx());
-                MAdouble64 ctau = PHYSICS->Id->IsFinalState(part) ? 0.0 : part.mothers()[0]->ctau();
-                MALorentzVector new_vertex(part.mothers()[0]->decay_vertex().X(),
-                                           part.mothers()[0]->decay_vertex().Y(),
-                                           part.mothers()[0]->decay_vertex().Z(), ctau);
-                track->setProductionVertex(new_vertex);
-                track->setClosestApproach(smeared_track.closest_approach());
-                track->setMc(&(part));
-                track->SetCharge(PDG->GetCharge(part.pdgid()) / 3.);
+                // Reminder: -1 is reserved for the tracks
+                MCParticleFormat smeared_track = mySmearer_->Execute(&part, -1);
+                if (smeared_track.pt() > 1e-5)
+                {
+                    RecTrackFormat * track = myEvent.rec()->GetNewTrack();
+                    MALorentzVector trk_mom;
+                    trk_mom.SetPtEtaPhiM(smeared_track.pt(),
+                                         smeared_track.eta(),
+                                         smeared_track.phi(),0.0);
+                    track->setMomentum(trk_mom);
+                    track->setD0(smeared_track.d0());
+                    track->setDZ(smeared_track.dz());
+                    track->setD0Approx(smeared_track.d0_approx());
+                    track->setDZApprox(smeared_track.dz_approx());
+                    MAdouble64 ctau = PHYSICS->Id->IsFinalState(part) ? 0.0 : part.mothers()[0]->ctau();
+                    MALorentzVector new_vertex(part.mothers()[0]->decay_vertex().X(),
+                                               part.mothers()[0]->decay_vertex().Y(),
+                                               part.mothers()[0]->decay_vertex().Z(), ctau);
+                    track->setProductionVertex(new_vertex);
+                    track->setClosestApproach(smeared_track.closest_approach());
+                    track->setMc(&(part));
+                    track->SetCharge(PDG->GetCharge(part.pdgid()) / 3.);
+                }
             }
         }
-    }
-#endif
 
         // Treating intermediate particles
         if (PHYSICS->Id->IsInterState(part))
@@ -493,7 +491,7 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
             //               - visible
             //               - if exclusiveID=1: particles not vetoed
             //               - if exclusiveID=0: all particles except muons
-            if (PHYSICS->Id->IsInvisible(part)) continue;
+            if (PHYSICS->Id->IsInvisible(part) || algo_==0) continue;
 
             // ExclusiveId mode
             if (ExclusiveId_)
