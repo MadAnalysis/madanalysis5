@@ -109,10 +109,19 @@ namespace MA5 {
         return keys;
     }
 
-#ifdef MA5_FASTJET_MODE
-    // Add a new hadron to be clustered. (for code efficiency)
-    void RecEventFormat::AddHadron(fastjet::PseudoJet v) {input_hadrons_.push_back(v);}
 
+    // Add a new hadron to be clustered. (for code efficiency)
+    void RecEventFormat::AddHadron(MCParticleFormat& v, MAuint32& idx)
+    {
+#ifdef MA5_FASTJET_MODE
+        fastjet::PseudoJet input;
+        input.reset(v.px(), v.py(), v.pz(), v.e());
+        input.set_user_index(idx);
+        input_hadrons_.push_back(input);
+#endif
+    }
+
+#ifdef MA5_FASTJET_MODE
     // Get hadrons to cluster (code efficiency)
     std::vector<fastjet::PseudoJet>& RecEventFormat::cluster_inputs() {return input_hadrons_;}
 #endif

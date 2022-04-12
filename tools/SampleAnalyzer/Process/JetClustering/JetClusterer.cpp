@@ -32,7 +32,6 @@
 
 #ifdef MA5_FASTJET_MODE
 // FastJet headers
-    #include <fastjet/PseudoJet.hh>
     #include "SampleAnalyzer/Interfaces/substructure/VariableR.h"
 #endif
 
@@ -489,37 +488,31 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
                     }
                 }
             }
-#ifdef MA5_FASTJET_MODE
             // Putting the good inputs into the containter
-    // Good inputs = - final state
-    //               - visible
-    //               - if exclusiveID=1: particles not vetoed
-    //               - if exclusiveID=0: all particles except muons 
-    if (PHYSICS->Id->IsInvisible(part)) continue;
+            // Good inputs = - final state
+            //               - visible
+            //               - if exclusiveID=1: particles not vetoed
+            //               - if exclusiveID=0: all particles except muons
+            if (PHYSICS->Id->IsInvisible(part)) continue;
 
-    // ExclusiveId mode
-    if (ExclusiveId_)
-    {
-      if (vetos[i]) continue;
-      if (vetos2.find(&part)!=vetos2.end()) continue;
-    }
+            // ExclusiveId mode
+            if (ExclusiveId_)
+            {
+                if (vetos[i]) continue;
+                if (vetos2.find(&part)!=vetos2.end()) continue;
+            }
 
-    // NonExclusive Id mode
-    else if (std::abs(part.pdgid())==13) continue;
+                // NonExclusive Id mode
+            else if (std::abs(part.pdgid())==13) continue;
 
-    // Smearer module returns a smeared MCParticleFormat object
-    // Default: NullSmearer, that does nothing
-    // Reminder: 0 is reserved for the jet constituents
-    MCParticleFormat smeared = mySmearer_->Execute(&part, 0);
-    if (smeared.pt() <= 1e-10) continue;
+            // Smearer module returns a smeared MCParticleFormat object
+            // Default: NullSmearer, that does nothing
+            // Reminder: 0 is reserved for the jet constituents
+            MCParticleFormat smeared = mySmearer_->Execute(&part, 0);
+            if (smeared.pt() <= 1e-10) continue;
 
-    // Filling good particle for clustering
-    fastjet::PseudoJet input;
-    input.reset(smeared.px(), smeared.py(), smeared.pz(), smeared.e());
-    input.set_user_index(i);
-    myEvent.rec()->AddHadron(input);
-#endif
-
+            // Filling good particle for clustering
+            myEvent.rec()->AddHadron(smeared, i);
         }
     }
 

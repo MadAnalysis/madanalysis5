@@ -383,10 +383,10 @@ namespace MA5
         // Check if collection ID exists
         MAbool hasJetID(std::string id) { return (jetcollection_.find(id) != jetcollection_.end()); }
 
-#ifdef MA5_FASTJET_MODE
         // Add a new hadron to be clustered. (for code efficiency)
-    void AddHadron(fastjet::PseudoJet v);
+        void AddHadron(MCParticleFormat& v, MAuint32& idx);
 
+#ifdef MA5_FASTJET_MODE
     // Get hadrons to cluster (code efficiency)
     std::vector<fastjet::PseudoJet>& cluster_inputs();
 #endif
