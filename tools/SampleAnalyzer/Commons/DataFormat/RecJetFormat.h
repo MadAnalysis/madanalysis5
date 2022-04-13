@@ -213,6 +213,13 @@ namespace MA5
      // Accessor for pseudojets
     const fastjet::PseudoJet& pseudojet() const {return pseudojet_;}
 
+    // return a vector of all subjets of the current jet (in the sense of the exclusive algorithm)
+    // that would be obtained when running the algorithm with the given dcut.
+    std::vector<const RecJetFormat *> exclusive_subjets(MAfloat32 dcut) const;
+
+    // return the list of subjets obtained by unclustering the supplied jet down to nsub subjets.
+    std::vector<const RecJetFormat *> exclusive_subjets(MAint32 nsub) const;
+
     // Add one pseudojet
     void setPseudoJet (const fastjet::PseudoJet& v) {pseudojet_=v;}
     void setPseudoJet (MALorentzVector& v) 
