@@ -53,17 +53,11 @@ namespace MA5{
         enum Algorithm {antikt, cambridge, kt};
 
         class Recluster;
-        class SoftDrop;
-        class Pruner;
-        class Filter;
         class HTT;
 
         class ClusterBase {
 
             friend class Recluster;
-            friend class SoftDrop;
-            friend class Pruner;
-            friend class Filter;
             friend class HTT;
 
         //---------------------------------------------------------------------------------
