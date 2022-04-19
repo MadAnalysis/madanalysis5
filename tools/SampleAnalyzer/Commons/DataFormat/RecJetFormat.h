@@ -220,6 +220,9 @@ namespace MA5
     // return the list of subjets obtained by unclustering the supplied jet down to nsub subjets.
     std::vector<const RecJetFormat *> exclusive_subjets(MAint32 nsub) const;
 
+    //returns true if the PseudoJet has support for exclusive subjets
+    MAbool has_exclusive_subjets() const;
+
     // Add one pseudojet
     void setPseudoJet (const fastjet::PseudoJet& v) {pseudojet_=v;}
     void setPseudoJet (MALorentzVector& v) 

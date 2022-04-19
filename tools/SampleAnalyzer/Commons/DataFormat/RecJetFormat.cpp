@@ -34,6 +34,14 @@ namespace MA5 {
     std::vector<const RecJetFormat *> RecJetFormat::exclusive_subjets(MAfloat32 dcut) const
     {
         std::vector<const RecJetFormat *> output_jets;
+                try {
+            if (!RecJetFormat::has_exclusive_subjets())
+                throw EXCEPTION_ERROR("This Jet structure has no implementation for exclusive_subjets",
+                                      "Exclusive subjets only exists for Jets clustered in the sense of the exclusive algorithm.", 0);
+        } catch (const std::exception& err) {
+                MANAGE_EXCEPTION(err);
+                return output_jets;
+            }
         std::vector<fastjet::PseudoJet> current_jets = fastjet::sorted_by_pt(pseudojet_.exclusive_subjets(dcut));
         output_jets.reserve(current_jets.size());
         for (auto &jet: current_jets)
@@ -48,6 +56,14 @@ namespace MA5 {
     std::vector<const RecJetFormat *> RecJetFormat::exclusive_subjets(MAint32 nsub) const
     {
         std::vector<const RecJetFormat *> output_jets;
+        try {
+            if (!RecJetFormat::has_exclusive_subjets())
+                throw EXCEPTION_ERROR("This Jet structure has no implementation for exclusive_subjets",
+                                      "Exclusive subjets only exists for Jets clustered in the sense of the exclusive algorithm.", 0);
+        } catch (const std::exception& err) {
+                MANAGE_EXCEPTION(err);
+                return output_jets;
+            }
         std::vector<fastjet::PseudoJet> current_jets = fastjet::sorted_by_pt(pseudojet_.exclusive_subjets(nsub));
         output_jets.reserve(current_jets.size());
         for (auto &jet: current_jets)
@@ -57,5 +73,8 @@ namespace MA5 {
         }
         return output_jets;
     }
+
+    //returns true if the PseudoJet has support for exclusive subjets
+    MAbool RecJetFormat::has_exclusive_subjets() const { return pseudojet_.has_exclusive_subjets(); }
 }
 #endif
