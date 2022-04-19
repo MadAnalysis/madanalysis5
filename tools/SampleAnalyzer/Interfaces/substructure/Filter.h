@@ -25,8 +25,8 @@
 #define MADANALYSIS5_FILTER_H
 
 // SampleAnalyser headers
-#include "SampleAnalyzer/Interfaces/substructure/ClusterBase.h"
 #include "SampleAnalyzer/Interfaces/substructure/Selector.h"
+#include "SampleAnalyzer/Interfaces/substructure/ClusterBase.h"
 
 namespace fastjet {
     class Filter;

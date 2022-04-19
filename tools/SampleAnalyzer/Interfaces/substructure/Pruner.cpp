@@ -40,7 +40,9 @@ namespace MA5 {
             Substructure::Algorithm algorithm, MAfloat32 R, MAfloat32 zcut, MAfloat32 Rcut_factor
         )
         {
-            fastjet::JetAlgorithm algo_ = ClusterBase().__get_clustering_algorithm(algorithm);
+            fastjet::JetAlgorithm algo_ = fastjet::antikt_algorithm;
+            if (algorithm == Substructure::cambridge) algo_ = fastjet::cambridge_algorithm;
+            else if (algorithm == Substructure::kt)   algo_ = fastjet::kt_algorithm;
 
             if (R<=0.)
                 JetDefinition_ = new fastjet::JetDefinition(algo_, fastjet::JetDefinition::max_allowable_R);
@@ -58,13 +60,15 @@ namespace MA5 {
         const RecJetFormat * Pruner::Execute(const RecJetFormat *jet) const
         {
             fastjet::PseudoJet pruned_jet = __prune(jet->pseudojet());
-            return ClusterBase().__transform_jet(pruned_jet);
+            RecJetFormat * NewJet = new RecJetFormat(pruned_jet);
+            return NewJet;
         }
 
         // Method to prune each given jet individually with respect to initialization parameters
         std::vector<const RecJetFormat *> Pruner::Execute(std::vector<const RecJetFormat *> &jets) const
         {
             std::vector<const RecJetFormat *> output_jets;
+            output_jets.reserve(jets.size());
             for (auto &jet: jets)
                 output_jets.push_back(Execute(jet));
             return output_jets;

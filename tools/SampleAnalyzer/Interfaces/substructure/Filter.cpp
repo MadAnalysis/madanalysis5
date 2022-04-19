@@ -42,9 +42,11 @@ namespace MA5 {
 
         void Filter::Initialize(Algorithm algorithm, MAfloat32 radius, Selector selector, MAfloat32 rho)
         {
-            JetDefinition_ = new fastjet::JetDefinition(
-                    ClusterBase().__get_clustering_algorithm(algorithm), radius
-            );
+            fastjet::JetAlgorithm algo_ = fastjet::antikt_algorithm;
+            if (algorithm == Substructure::cambridge) algo_ = fastjet::cambridge_algorithm;
+            else if (algorithm == Substructure::kt)   algo_ = fastjet::kt_algorithm;
+
+            JetDefinition_ = new fastjet::JetDefinition(algo_, radius);
             Rfilt_=-1.; rho_=rho;
             init_filter(selector, true);
         }
@@ -71,13 +73,15 @@ namespace MA5 {
         const RecJetFormat* Filter::Execute(const RecJetFormat *jet) const
         {
             fastjet::PseudoJet filtered_jet = (*JetFilter_)(jet->pseudojet());
-            return ClusterBase().__transform_jet(filtered_jet);
+            RecJetFormat * NewJet = new RecJetFormat(filtered_jet);
+            return NewJet;
         }
 
         // Method to filter all the jets in a vector
         std::vector<const RecJetFormat*> Filter::Execute(std::vector<const RecJetFormat *> &jets) const
         {
             std::vector<const RecJetFormat *> output_jets;
+            output_jets.reserve(jets.size());
             for (auto &jet: jets)
                 output_jets.push_back(Execute(jet));
 
