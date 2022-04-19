@@ -30,10 +30,7 @@
 namespace MA5 {
     namespace Substructure {
 
-        SoftDrop::~SoftDrop()
-        {
-            delete softDrop_;
-        }
+        SoftDrop::~SoftDrop() { delete softDrop_; }
 
         //============================//
         //        Initialization      //
@@ -50,13 +47,15 @@ namespace MA5 {
         const RecJetFormat * SoftDrop::Execute(const RecJetFormat *jet) const
         {
             fastjet::PseudoJet sd_jet = (*softDrop_)(jet->pseudojet());
-            return ClusterBase().__transform_jet(sd_jet);
+            RecJetFormat * NewJet = new RecJetFormat(sd_jet);
+            return NewJet;
         }
 
         // Execute with a list of jets
         std::vector<const RecJetFormat *> SoftDrop::Execute(std::vector<const RecJetFormat *> &jets) const
         {
             std::vector<const RecJetFormat *> output_jets;
+            output_jets.reserve(jets.size());
             for (auto &jet: jets)
                 output_jets.push_back(Execute(jet));
 
