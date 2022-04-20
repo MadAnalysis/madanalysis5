@@ -68,6 +68,21 @@ class DetectGpp:
         if self.debug:
             self.logger.debug("  which:         " + str(result[0]))
 
+        # Check GCC version
+        try:
+            command = ["g++ -dumpversion > .gcc_version"]
+            result = ShellCommand.Execute(command, self.archi_info.ma5dir, shell=True)
+            with open(os.path.join(self.archi_info.ma5dir, ".gcc_version"), "r") as f:
+                result = f.read()
+            os.remove(os.path.join(self.archi_info.ma5dir, ".gcc_version"))
+            gcc_version = [int(x) for x in result.split(".")]
+            if (gcc_version[0] < 8 and not self.archi_info.isMac) or (gcc_version[0] < 13 and self.archi_info.isMac):
+                msg = "MadAnalysis 5 requires " + self.archi_info.isMac*"clang version 13 " + \
+                      (not self.archi_info.isMac)*" GCC version 8 " + "or above"
+                return DetectStatusType.UNFOUND, msg
+        except Exception as err:
+            self.logger.debug("Problem with compiler version detection:: " + err.msg)
+
         # Check C++ version
         cpp = open(os.path.join(self.archi_info.ma5dir,"cxxtest.cc"), 'w')
         cpp.write("int main() { return 0; }")
