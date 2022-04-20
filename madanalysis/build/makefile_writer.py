@@ -427,7 +427,7 @@ class MakefileWriter():
 
         # HEPTopTagger module
         if options.has_heptoptagger:
-            file.write('LIBFLAGS += -lHTT_for_ma5\n')
+            file.write('LIBFLAGS += -lHEPTopTagger_for_ma5\n')
 
         # - Commons
         if options.has_commons:

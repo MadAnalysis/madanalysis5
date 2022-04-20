@@ -561,7 +561,7 @@ class Main():
                                   self.archi_info.ma5dir + '/tools/SampleAnalyzer/Interfaces', False])
                 if self.archi_info.has_heptoptagger:
                     libraries.append(['HEPTopTagger', 'interface to HEPTopTagger module', 'HEPTopTagger',
-                                      self.archi_info.ma5dir + '/tools/SampleAnalyzer/Lib/libHTT_for_ma5.so',
+                                      self.archi_info.ma5dir + '/tools/SampleAnalyzer/Lib/libHEPTopTagger_for_ma5.so',
                                       self.archi_info.ma5dir + '/tools/SampleAnalyzer/Interfaces', False])
         # Delphes
         if self.archi_info.has_delphes:
