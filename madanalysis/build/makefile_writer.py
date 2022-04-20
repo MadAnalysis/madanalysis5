@@ -460,7 +460,10 @@ class MakefileWriter():
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libdelphesMA5tune_for_ma5.so')
         if options.has_fastjet_ma5lib:
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so')
+        if options.has_substructure:
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libsubstructure_for_ma5.so')
+        if options.has_heptoptagger:
+            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libHEPTopTagger_for_ma5.so')
         if len(libs)!=0:
             file.write('# Requirements to check before building\n')
             for ind in range(0,len(libs)):

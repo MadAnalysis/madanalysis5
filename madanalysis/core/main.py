@@ -563,6 +563,9 @@ class Main():
                     libraries.append(['HEPTopTagger', 'interface to HEPTopTagger module', 'HEPTopTagger',
                                       self.archi_info.ma5dir + '/tools/SampleAnalyzer/Lib/libHEPTopTagger_for_ma5.so',
                                       self.archi_info.ma5dir + '/tools/SampleAnalyzer/Interfaces', False])
+                    libraries.append(['test_htt', 'interface to HEPTopTagger module', 'test_htt',
+                                      self.archi_info.ma5dir + '/tools/SampleAnalyzer/Bin/TestHEPTopTagger',
+                                      self.archi_info.ma5dir + '/tools/SampleAnalyzer/Test/', True])
         # Delphes
         if self.archi_info.has_delphes:
             libraries.append(['Delphes', 'interface to Delphes', 'delphes',

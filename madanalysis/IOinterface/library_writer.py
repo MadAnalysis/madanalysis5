@@ -121,6 +121,8 @@ class LibraryWriter():
             filename = self.path+"/SampleAnalyzer/Test/Makefile_zlib"
         elif package=='test_fastjet':
             filename = self.path+"/SampleAnalyzer/Test/Makefile_fastjet"
+        elif package=='test_htt':
+            filename = self.path+"/SampleAnalyzer/Test/Makefile_htt"
         elif package=='test_delphes':
             filename = self.path+"/SampleAnalyzer/Test/Makefile_delphes"
         elif package=='test_delphesMA5tune':
@@ -144,6 +146,8 @@ class LibraryWriter():
             title='*zlib-interface* test'
         elif package=='test_fastjet':
             title='*fastjet-interface* test'
+        elif package=='test_htt':
+            title='*htt-interface* test'
         elif package=='test_delphes':
             title='*delphes-interface* test'
         elif package=='test_delphesMA5tune':
@@ -195,6 +199,21 @@ class LibraryWriter():
                  'linking_heptoptagger.log',
                  'cleanup_heptoptagger.log',
                  'mrproper_heptoptagger.log']
+            )
+        elif package == "test_htt":
+            options.has_commons=True
+            options.has_fastjet_inc=True
+            # options.has_fastjet_lib=True
+            # @JACK: To be able to use fastjet in Ma5 data structure
+            options.ma5_fastjet_mode=True
+            options.has_fastjet_ma5lib = True
+            options.has_substructure = True
+            options.has_heptoptagger = True
+            toRemove.extend(
+                ['compilation_test_heptoptagger.log',
+                 'linking_test_heptoptagger.log',
+                 'cleanup_test_heptoptagger.log',
+                 'mrproper_test_heptoptagger.log']
             )
         elif package=='configuration':
             toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
@@ -323,6 +342,9 @@ class LibraryWriter():
         elif package=='test_fastjet':
             cppfiles = ['Fastjet/*.cpp']
             hfiles   = ['Fastjet/*.h']
+        elif package=='test_htt':
+            cppfiles = ['HEPTopTagger/*.cpp']
+            hfiles   = ['HEPTopTagger/*.h']
         elif package=='test_delphes':
             cppfiles = ['Delphes/*.cpp']
             hfiles   = ['Delphes/*.h']
@@ -357,6 +379,10 @@ class LibraryWriter():
             isLibrary=False
             ProductName='TestFastjet'
             ProductPath='../Bin/'
+        elif package=='test_htt':
+            isLibrary=False
+            ProductName='TestHEPTopTagger'
+            ProductPath='../Bin/'
         elif package=='test_root':
             isLibrary=False
             ProductName='TestRoot'
@@ -390,7 +416,7 @@ class LibraryWriter():
         # log file name
         if package in ['process','commons','test','configuration']:
             logfile = folder+'/compilation.log'
-        elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_root','test_delphes','test_delphesMA5tune']:
+        elif package in ['test_process','test_commons','test_zlib','test_fastjet', "test_htt", 'test_root','test_delphes','test_delphesMA5tune']:
             logfile = folder+'/compilation_'+package[5:]+'.log'
         else:
             logfile = folder+'/compilation_'+package+'.log'
@@ -398,7 +424,7 @@ class LibraryWriter():
         # makefile
         if package in ['process','commons','test','configuration']:
             makefile = 'Makefile'
-        elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_root','test_delphes','test_delphesMA5tune']:
+        elif package in ['test_process','test_commons','test_zlib','test_fastjet', "test_htt", 'test_root','test_delphes','test_delphesMA5tune']:
             makefile = 'Makefile_'+package[5:]
         else:
             makefile = 'Makefile_'+package
@@ -425,7 +451,7 @@ class LibraryWriter():
         # log file name
         if package in ['process','commons','test','configuration']:
             logfile = folder+'/linking.log'
-        elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_root','test_delphes','test_delphesMA5tune']:
+        elif package in ['test_process','test_commons','test_zlib','test_fastjet',"test_htt",'test_root','test_delphes','test_delphesMA5tune']:
             logfile = folder+'/linking_'+package[5:]+'.log'
         else:
             logfile = folder+'/linking_'+package+'.log'
@@ -433,7 +459,7 @@ class LibraryWriter():
         # makefile
         if package in ['process','commons','test','configuration']:
             makefile = 'Makefile'
-        elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_root','test_delphes','test_delphesMA5tune']:
+        elif package in ['test_process','test_commons','test_zlib','test_fastjet',"test_htt",'test_root','test_delphes','test_delphesMA5tune']:
             makefile = 'Makefile_'+package[5:]
         else:
             makefile = 'Makefile_'+package
@@ -457,7 +483,7 @@ class LibraryWriter():
         # log file name
         if package in ['process','commons','configuration','test']:
             logfile = folder+'/cleanup.log'
-        elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_root','test_delphes','test_delphesMA5tune']:
+        elif package in ['test_process','test_commons','test_zlib','test_fastjet',"test_htt",'test_root','test_delphes','test_delphesMA5tune']:
             logfile = folder+'/cleanup_'+package[5:]+'.log'
         else:
             logfile = folder+'/cleanup_'+package+'.log'
@@ -465,7 +491,7 @@ class LibraryWriter():
         # makefile
         if package in ['process','commons','test','configuration']:
             makefile = 'Makefile'
-        elif package in ['test_process','test_commons','test_zlib','test_fastjet','test_root','test_delphes','test_delphesMA5tune']:
+        elif package in ['test_process','test_commons','test_zlib','test_fastjet',"test_htt",'test_root','test_delphes','test_delphesMA5tune']:
             makefile = 'Makefile_'+package[5:]
         else:
             makefile = 'Makefile_'+package
@@ -489,7 +515,7 @@ class LibraryWriter():
         # log file name
         if package in ['process','commons','configuration']:
             logfile = folder+'/mrproper.log'
-        elif package in ['test_process','test_commons','test_zlib','test_root','test_fastjet','test_delphes','test_delphesMA5tune']:
+        elif package in ['test_process','test_commons','test_zlib','test_root','test_fastjet',"test_htt",'test_delphes','test_delphesMA5tune']:
             logfile = folder+'/mrproper_'+package[5:]+'.log'
         else:
             logfile = folder+'/mrproper_'+package+'.log'
@@ -499,7 +525,7 @@ class LibraryWriter():
         # makefile
         if package in ['process','commons','test','configuration']:
             makefile = 'Makefile'
-        elif package in ['test_process','test_commons','test_zlib','test_root','test_fastjet','test_delphes','test_delphesMA5tune']:
+        elif package in ['test_process','test_commons','test_zlib','test_root','test_fastjet',"test_htt",'test_delphes','test_delphesMA5tune']:
             makefile = 'Makefile_'+package[5:]
         else:
             makefile = 'Makefile_'+package
