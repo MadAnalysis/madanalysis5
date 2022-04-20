@@ -27,6 +27,7 @@
 // SampleAnalyser headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecJetFormat.h"
+#include "SampleAnalyzer/Interfaces/substructure/ClusterBase.h"
 
 namespace fastjet {
     namespace HEPTopTagger {
@@ -44,11 +45,11 @@ namespace MA5 {
         public:
 
             enum Mode {
-                EARLY_MASSRATIO_SORT_MASS,
-                LATE_MASSRATIO_SORT_MASS,
-                EARLY_MASSRATIO_SORT_MODDJADE,
-                LATE_MASSRATIO_SORT_MODDJADE,
-                TWO_STEP_FILTER
+                EARLY_MASSRATIO_SORT_MASS,     // apply 2D mass plane requirements then select the candidate which minimizes |m_cand-mt|
+                LATE_MASSRATIO_SORT_MASS,      // select the candidate which minimizes |m_cand-mt|
+                EARLY_MASSRATIO_SORT_MODDJADE, // apply the 2D mass plane requirements then select the candidate with highest jade distance
+                LATE_MASSRATIO_SORT_MODDJADE,  //select the candidate with highest modified jade distance
+                TWO_STEP_FILTER                // only analyze the candidate built with the highest pT(t) after unclustering
             };
 
             struct InputParameters {
@@ -69,11 +70,11 @@ namespace MA5 {
                 MAfloat32 filtering_R = 0.3; // max subjet distance for filtering
                 MAfloat32 filtering_minpt = 0.; // min subjet pt for filtering
                 // jet algorithm for filtering
-                Substructure::Algorithm filtering_algorithm = Substructure::Algorithm::cambridge;
+                Substructure::Algorithm filtering_algorithm = Substructure::cambridge;
 
                 // Reclustering
                 // reclustering jet algorithm
-                Substructure::Algorithm reclustering_algorithm = Substructure::Algorithm::cambridge;
+                Substructure::Algorithm reclustering_algorithm = Substructure::cambridge;
 
                 //top mass range
                 MAfloat32 top_mass = 172.3;

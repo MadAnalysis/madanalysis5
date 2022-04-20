@@ -24,16 +24,12 @@
 #include "HEPTopTagger/HEPTopTagger.hh"
 
 // SampleAnalyser headers
-#include "SampleAnalyzer/Interfaces/substructure/ClusterBase.h"
 #include "SampleAnalyzer/Interfaces/HEPTopTagger/HTT.h"
 
 namespace MA5 {
     namespace Substructure {
 
-        HTT::~HTT()
-        {
-            delete _tagger;
-        }
+        HTT::~HTT() { delete _tagger; }
 
         //============================//
         //        Initialization      //
@@ -73,9 +69,17 @@ namespace MA5 {
             _tagger->set_filtering_n(param.filt_N);
             _tagger->set_filtering_R(param.filtering_R);
             _tagger->set_filtering_minpt_subjet(param.filtering_minpt);
-            _tagger->set_filtering_jetalgorithm(
-                ClusterBase().__get_clustering_algorithm(param.filtering_algorithm)
-            );
+
+            fastjet::JetAlgorithm algo_ = fastjet::antikt_algorithm;
+            if (param.filtering_algorithm == Substructure::cambridge) algo_ = fastjet::cambridge_algorithm;
+            else if (param.filtering_algorithm == Substructure::kt)   algo_ = fastjet::kt_algorithm;
+            _tagger->set_filtering_jetalgorithm(algo_);
+
+            // Reclustering
+            algo_ = fastjet::antikt_algorithm;
+            if (param.reclustering_algorithm == Substructure::cambridge) algo_ = fastjet::cambridge_algorithm;
+            else if (param.reclustering_algorithm == Substructure::kt)   algo_ = fastjet::kt_algorithm;
+            _tagger->set_reclustering_jetalgorithm(algo_);
 
             // MassDrop
             _tagger->set_mass_drop_threshold(param.mass_drop);
@@ -98,28 +102,51 @@ namespace MA5 {
         //======================//
 
         // accessor to top jet
-        const RecJetFormat * HTT::top() const { return ClusterBase().__transform_jet(_tagger->t());}
+        const RecJetFormat * HTT::top() const
+        {
+            RecJetFormat * NewJet = new RecJetFormat(const_cast<fastjet::PseudoJet&>(_tagger->t()));
+            return NewJet;
+        }
 
         //accessor to bottom jet
-        const RecJetFormat * HTT::b() const { return ClusterBase().__transform_jet(_tagger->b());}
+        const RecJetFormat * HTT::b() const
+        {
+            RecJetFormat * NewJet = new RecJetFormat(const_cast<fastjet::PseudoJet&>(_tagger->b()));
+            return NewJet;
+        }
 
         //accessor to W jet
-        const RecJetFormat * HTT::W() const { return ClusterBase().__transform_jet(_tagger->W());}
+        const RecJetFormat * HTT::W() const
+        {
+            RecJetFormat * NewJet = new RecJetFormat(const_cast<fastjet::PseudoJet&>(_tagger->W()));
+            return NewJet;
+        }
 
         //accessor to leading subjet from W
-        const RecJetFormat * HTT::W1() const { return ClusterBase().__transform_jet(_tagger->W1());}
+        const RecJetFormat * HTT::W1() const
+        {
+            RecJetFormat * NewJet = new RecJetFormat(const_cast<fastjet::PseudoJet&>(_tagger->W1()));
+            return NewJet;
+        }
 
         //accessor to second leading subjet from W
-        const RecJetFormat * HTT::W2() const { return ClusterBase().__transform_jet(_tagger->W2());}
+        const RecJetFormat * HTT::W2() const
+        {
+            RecJetFormat * NewJet = new RecJetFormat(const_cast<fastjet::PseudoJet&>(_tagger->W2()));
+            return NewJet;
+        }
 
         // accessor to PT ordered subjets
         std::vector<const RecJetFormat *> HTT::subjets() const
         {
             std::vector<const RecJetFormat *> output;
             output.reserve(3);
-            output.push_back(ClusterBase().__transform_jet(_tagger->j1()));
-            output.push_back(ClusterBase().__transform_jet(_tagger->j2()));
-            output.push_back(ClusterBase().__transform_jet(_tagger->j3()));
+            RecJetFormat * j1 = new RecJetFormat(const_cast<fastjet::PseudoJet&>(_tagger->j1()));
+            RecJetFormat * j2 = new RecJetFormat(const_cast<fastjet::PseudoJet&>(_tagger->j2()));
+            RecJetFormat * j3 = new RecJetFormat(const_cast<fastjet::PseudoJet&>(_tagger->j3()));
+            output.push_back(j1);
+            output.push_back(j2);
+            output.push_back(j3);
             return output;
         }
 
