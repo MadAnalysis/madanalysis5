@@ -566,6 +566,9 @@ class Main():
                     libraries.append(['test_htt', 'interface to HEPTopTagger module', 'test_htt',
                                       self.archi_info.ma5dir + '/tools/SampleAnalyzer/Bin/TestHEPTopTagger',
                                       self.archi_info.ma5dir + '/tools/SampleAnalyzer/Test/', True])
+        else:
+            os.environ["FASTJET_FLAG"] = ""
+
         # Delphes
         if self.archi_info.has_delphes:
             libraries.append(['Delphes', 'interface to Delphes', 'delphes',
