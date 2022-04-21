@@ -25,7 +25,8 @@
 #define MADANALYSIS5_SOFTDROP_H
 
 // SampleAnalyser headers
-#include "SampleAnalyzer/Interfaces/substructure/ClusterBase.h"
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
+#include "SampleAnalyzer/Commons/DataFormat/RecJetFormat.h"
 
 namespace fastjet {
     namespace contrib {

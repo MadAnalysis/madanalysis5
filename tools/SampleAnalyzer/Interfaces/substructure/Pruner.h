@@ -25,9 +25,11 @@
 #define MADANALYSIS5_PRUNER_H
 
 // SampleAnalyser headers
-#include "SampleAnalyzer/Interfaces/substructure/ClusterBase.h"
+#include "SampleAnalyzer/Interfaces/substructure/Commons.h"
 
-using namespace std;
+namespace fastjet {
+    class JetDefinition;
+}
 
 namespace MA5 {
     namespace Substructure {

@@ -32,11 +32,10 @@
 #include "fastjet/ClusterSequence.hh"
 
 // SampleAnalyser headers
-#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
-#include "SampleAnalyzer/Commons/DataFormat/RecJetFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/Service/PDGService.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
+#include "SampleAnalyzer/Interfaces/substructure/Commons.h"
 
 namespace fastjet
 {
@@ -49,16 +48,11 @@ using namespace std;
 namespace MA5{
     namespace Substructure {
 
-        // Accessor for jet clustering algorithms
-        enum Algorithm {antikt, cambridge, kt};
-
         class Recluster;
-        class HTT;
 
         class ClusterBase {
 
             friend class Recluster;
-            friend class HTT;
 
         //---------------------------------------------------------------------------------
         //                                 data members

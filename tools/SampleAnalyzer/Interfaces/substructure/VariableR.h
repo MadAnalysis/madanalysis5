@@ -30,8 +30,6 @@
 // SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/substructure/ClusterBase.h"
 
-using namespace std;
-
 namespace MA5 {
     namespace Substructure {
         class VariableR : public ClusterBase {
