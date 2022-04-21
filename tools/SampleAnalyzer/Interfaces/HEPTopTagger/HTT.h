@@ -25,9 +25,7 @@
 #define MADANALYSIS5_HTT_H
 
 // SampleAnalyser headers
-#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
-#include "SampleAnalyzer/Commons/DataFormat/RecJetFormat.h"
-#include "SampleAnalyzer/Interfaces/substructure/ClusterBase.h"
+#include "SampleAnalyzer/Interfaces/substructure/Commons.h"
 
 namespace fastjet {
     namespace HEPTopTagger {
@@ -70,11 +68,11 @@ namespace MA5 {
                 MAfloat32 filtering_R = 0.3; // max subjet distance for filtering
                 MAfloat32 filtering_minpt = 0.; // min subjet pt for filtering
                 // jet algorithm for filtering
-                Substructure::Algorithm filtering_algorithm = Substructure::cambridge;
+                Algorithm filtering_algorithm = Algorithm::cambridge;
 
                 // Reclustering
                 // reclustering jet algorithm
-                Substructure::Algorithm reclustering_algorithm = Substructure::cambridge;
+                Algorithm reclustering_algorithm = Algorithm::cambridge;
 
                 //top mass range
                 MAfloat32 top_mass = 172.3;
