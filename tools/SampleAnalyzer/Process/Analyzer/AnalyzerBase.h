@@ -41,7 +41,7 @@
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 
 // FJcontrib tools
-#ifdef MADANALYSIS5_CLUSTERBASE_H
+#ifdef MA5_FASTJET_MODE
     #include "SampleAnalyzer/Interfaces/substructure/SoftDrop.h"
     #include "SampleAnalyzer/Interfaces/substructure/Cluster.h"
     #include "SampleAnalyzer/Interfaces/substructure/Recluster.h"

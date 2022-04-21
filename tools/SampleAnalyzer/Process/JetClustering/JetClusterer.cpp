@@ -30,7 +30,7 @@
 #include "SampleAnalyzer/Commons/Service/PDGService.h"
 #include "SampleAnalyzer/Process/JetClustering/NullSmearer.h"
 
-#ifdef MADANALYSIS5_VARIABLER_H
+#ifdef MA5_FASTJET_MODE
     #include "SampleAnalyzer/Interfaces/substructure/VariableR.h"
 #endif
 
@@ -700,7 +700,6 @@ MAbool JetClusterer::LoadJetConfiguration(std::map<std::string,std::string> opti
         }
         else if (algorithm == "VariableR")
         {
-            #ifdef MADANALYSIS5_VARIABLER_H
             for (std::string key: {"rho", "minR", "maxR", "PTmin", "clustertype", "strategy", "exclusive"})
             {
                 if (options.find("cluster."+key) == options.end())
@@ -746,9 +745,6 @@ MAbool JetClusterer::LoadJetConfiguration(std::map<std::string,std::string> opti
                  << "clustertype = " << options["cluster.clustertype"] << ", "
                  << "strategy = " << options["cluster.strategy"]
                  << endmsg;
-            #else
-            ERROR << "VariableR plugin is not available." << endmsg;
-            #endif
         }
         else
         {
