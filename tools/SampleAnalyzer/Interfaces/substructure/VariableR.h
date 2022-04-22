@@ -24,30 +24,12 @@
 #ifndef MADANALYSIS5_VARIABLER_H
 #define MADANALYSIS5_VARIABLER_H
 
-// FastJet headers
-#include "fastjet/contrib/VariableRPlugin.hh"
-
 // SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/substructure/ClusterBase.h"
 
 namespace MA5 {
     namespace Substructure {
         class VariableR : public ClusterBase {
-
-            //---------------------------------------------------------------------------------
-            //                                 data members
-            //---------------------------------------------------------------------------------
-            protected:
-                fastjet::contrib::VariableRPlugin::ClusterType clusterType_; // whether to use CA-like, kT-like,
-                                                            // or anti-kT-like distance measure
-                                                            // (this value is the same as the p exponent in
-                                                            // generalized-kt, with anti-kt = -1.0, CA = 0.0, and
-                                                            // kT = 1.0)
-
-                fastjet::contrib::VariableRPlugin::Strategy strategy_;
-                // decodes which algorithm to apply for the clustering
-
-
             public:
 
                 enum ClusterType {CALIKE, KTLIKE, AKTLIKE};

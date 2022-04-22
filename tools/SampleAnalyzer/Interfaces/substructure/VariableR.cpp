@@ -40,12 +40,19 @@ namespace MA5 {
                 MAbool isExclusive
         )
         {
+            fastjet::contrib::VariableRPlugin::ClusterType clusterType_ = fastjet::contrib::VariableRPlugin::AKTLIKE;
+            // whether to use CA-like, kT-like,
+            // or anti-kT-like distance measure
+            // (this value is the same as the p exponent in
+            // generalized-kt, with anti-kt = -1.0, CA = 0.0, and
+            // kT = 1.0)
             if (clusterType == Substructure::VariableR::CALIKE)
                 clusterType_ = fastjet::contrib::VariableRPlugin::CALIKE;
             else if (clusterType == Substructure::VariableR::KTLIKE)
                 clusterType_ = fastjet::contrib::VariableRPlugin::KTLIKE;
-            else if (clusterType == Substructure::VariableR::AKTLIKE)
-                clusterType_ = fastjet::contrib::VariableRPlugin::AKTLIKE;
+
+            fastjet::contrib::VariableRPlugin::Strategy strategy_;
+            // decodes which algorithm to apply for the clustering
 
             if (strategy == Substructure::VariableR::Best)
                 strategy_ = fastjet::contrib::VariableRPlugin::Best;
