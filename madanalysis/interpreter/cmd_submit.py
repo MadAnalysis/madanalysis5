@@ -414,8 +414,9 @@ class CmdSubmit(CmdBase):
                 self.logger.error("job submission aborted.")
                 return False
 
-        # @Jack: new setup configuration. In order to run the code in SFS-FastJet mode analysis
-        # has to be compiled with `-DMA5_FASTJET_MODE` flag but this needs to be deactivated for
+        # @Jack: new setup configuration. In order to run the code in the
+        # SFS-FastJet mode, the analysis has to be compiled with the
+        # `-DMA5_FASTJET_MODE` flag. This however needs to be deactivated for
         # Delphes-ROOT based analyses.
         root_dataset, hepmc_dataset = False, False
         for dataset in self.main.datasets:
@@ -428,7 +429,7 @@ class CmdSubmit(CmdBase):
             os.environ["FASTJET_FLAG"] = ""
         elif self.main.fastsim.package in ["fastjet"] and hepmc_dataset:
             if root_dataset and hepmc_dataset:
-                self.logger.error("ROOT input is not allowed for SFS-FastJet based analysis.")
+                self.logger.error("ROOT input files not allowed for SFS-FastJet based analyses.")
                 return False
             os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
 
