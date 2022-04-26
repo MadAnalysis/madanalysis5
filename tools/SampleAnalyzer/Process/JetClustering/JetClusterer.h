@@ -161,20 +161,19 @@ namespace MA5
         std::string algorithm;
         if (options.find("algorithm") == options.end())
         {
-            ERROR << "Jet configuration needs to have `algorithm` option. Jet configuration will be ignored." << endmsg;
+            ERROR << "Jet configuration needs to have an `algorithm` option. Jet configuration ignored." << endmsg;
             return true;
         }
         else algorithm = options["algorithm"];
         if (options.find("JetID") == options.end())
         {
-            ERROR << "Jet configuration needs to have `JetID` option. Jet configuration will be ignored." << endmsg;
+            ERROR << "Jet configuration needs to have a `JetID` option. Jet configuration ignored." << endmsg;
             return true;
         }
         if (substructure_collection_.find(options["JetID"]) != substructure_collection_.end() || \
                 cluster_collection_.find(options["JetID"]) != cluster_collection_.end() )
         {
-            ERROR << "Jet ID " + options["JetID"] + \
-                " already exists. Jet configuration will be ignored." << endmsg;
+            ERROR << "Jet ID " + options["JetID"] + " already defined. Jet configuration ignored." << endmsg;
             return true;
         }
 
@@ -207,7 +206,7 @@ namespace MA5
                     else if (it.second == "cdfjetclu")   new_algo = new ClusterAlgoCDFJetClu();
                     else if (it.second == "gridjet")     new_algo = new ClusterAlgoGridJet();
                     else {
-                        ERROR << "Unknown algorithm : " << it.second << ". It will be ignored." << endmsg;
+                        ERROR << "Unknown algorithm " << it.second << " ignored." << endmsg;
                         return true;
                     }
                     continue;
@@ -222,7 +221,7 @@ namespace MA5
                 // Other
                 try
                 {
-                  throw EXCEPTION_WARNING("Parameter = "+key+" unknown. It will be skipped.","",0);
+                  throw EXCEPTION_WARNING("Parameter = "+key+" unknown and thus skipped.","",0);
                 }
                 catch(const std::exception& e)
                 {
@@ -246,7 +245,7 @@ namespace MA5
             {
                 if (options.find("cluster."+key) == options.end())
                 {
-                    ERROR << "Option 'cluster." + key + "' is missing. VariableR clustering will be ignored." << endmsg;
+                    ERROR << "Option 'cluster." + key + "' is missing. VariableR clustering ignored." << endmsg;
                     return true;
                 }
             }
