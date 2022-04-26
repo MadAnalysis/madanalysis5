@@ -124,19 +124,19 @@ class SetupWriter():
 
             file.write('if [[ $WITH_FASTJET -eq "1" ]]  && [[ $WITH_DELPHES -eq "1" ]]\n')
             file.write('then\n')
-            file.write('    echo -e $RED"ERROR: FastJet and Delphes can not be executed in the same analysis."$NORMAL\n')
+            file.write('    echo -e $RED"ERROR: FastJet and Delphes cannot be executed within the same analysis."$NORMAL\n')
             file.write('    return 1\n')
             file.write('fi\n\n')
 
             file.write('if [[ $WITH_FASTJET -eq "1" ]]\n')
             file.write('then\n')
             file.write('    export FASTJET_FLAG="-DMA5_FASTJET_MODE"\n')
-            file.write('    echo -e $BLUE"   * SFS-FastJet mode has been initiated."$NORMAL\n')
+            file.write('    echo -e $BLUE"   * The SFS-FastJet mode has been initiated."$NORMAL\n')
             file.write('fi\n\n')
 
             file.write('if [[ $WITH_DELPHES -eq "1" ]] || [[ $WITH_FASTJET -eq "0" ]]\n')
             file.write('then\n')
-            file.write('    echo -e $BLUE"   * SFS-FastJet mode has been turned off."\n')
+            file.write('    echo -e $BLUE"   * Tge SFS-FastJet mode has been turned off."\n')
             file.write('    usage\n')
             file.write('    echo -e $NORMAL\n')
             file.write('fi\n\n')
@@ -274,89 +274,4 @@ class SetupWriter():
             return False
 
         return True
-
-    #@JACK: This function is not used
-    # @staticmethod
-    # def WriteSetupFileForJob(bash,path,archi_info):
-    #
-    #     # Variable to check at the end
-    #     toCheck=[]
-    #
-    #     # Opening file in write-only mode
-    #     import os
-    #     if bash:
-    #         filename = os.path.normpath(path+"/setup.sh")
-    #     else:
-    #         filename = os.path.normpath(path+"/setup.csh")
-    #     try:
-    #         file = open(filename,"w")
-    #     except:
-    #         logging.getLogger('MA5').error('Impossible to create the file "' + filename +'"')
-    #         return False
-    #
-    #     # Calling the good shell
-    #     if bash:
-    #         file.write('#!/bin/sh\n')
-    #     else:
-    #         file.write('#!/bin/csh -f\n')
-    #     file.write('\n')
-    #
-    #     # Defining colours
-    #     file.write('# Defining colours for shell\n')
-    #     if bash:
-    #         file.write('GREEN="\\\\033[1;32m"\n')
-    #         file.write('RED="\\\\033[1;31m"\n')
-    #         file.write('PINK="\\\\033[1;35m"\n')
-    #         file.write('BLUE="\\\\033[1;34m"\n')
-    #         file.write('YELLOW="\\\\033[1;33m"\n')
-    #         file.write('CYAN="\\\\033[1;36m"\n')
-    #         file.write('NORMAL="\\\\033[0;39m"\n')
-    #         # using ' ' could be more convenient to code
-    #         # but in this case, the colour code are interpreted
-    #         # by the linux command 'more'
-    #     else:
-    #         file.write('set GREEN  = "\\033[1;32m"\n')
-    #         file.write('set RED    = "\\033[1;31m"\n')
-    #         file.write('set PINK   = "\\033[1;35m"\n')
-    #         file.write('set BLUE   = "\\033[1;34m"\n')
-    #         file.write('set YELLOW = "\\033[1;33m"\n')
-    #         file.write('set CYAN   = "\\033[1;36m"\n')
-    #         file.write('set NORMAL = "\\033[0;39m"\n')
-    #     file.write('\n')
-    #
-    #     # Treating ma5dir
-    #     ma5dir=archi_info.ma5dir
-    #     if ma5dir.endswith('/'):
-    #         ma5dir=ma5dir[:-1]
-    #
-    #     # Configuring PATH environment variable
-    #     file.write('# Configuring MA5 environment variable\n')
-    #     if bash:
-    #         file.write('export MA5_BASE=' + (ma5dir)+'\n')
-    #     else:
-    #         file.write('setenv MA5_BASE ' + (ma5dir)+'\n')
-    #     toCheck.append('MA5_BASE')
-    #     file.write('\n')
-    #
-    #     # Launching MadAnalysis with empty script
-    #     file.write('# Launching MA5 to check if the libraries need to be rebuild\n')
-    #     file.write('$MA5_BASE/bin/ma5 --script $MA5_BASE/madanalysis/input/init.ma5\n')
-    #     file.write('\n')
-    #
-    #     # Loading the SampleAnalyzer setup files
-    #     file.write('# Loading the setup files\n')
-    #     if bash:
-    #         file.write('source $MA5_BASE/tools/SampleAnalyzer/setup.sh\n')
-    #     else:
-    #         file.write('source $MA5_BASE/tools/SampleAnalyzer/setup.csh\n')
-    #
-    #     # Closing the file
-    #     try:
-    #         file.close()
-    #     except:
-    #         logging.getLogger('MA5').error('Impossible to close the file "'+filename+'"')
-    #         return False
-    #
-    #     return True
-
 
