@@ -131,6 +131,7 @@ namespace MA5
             closest_approach_.clear();
             d0_         = 0.;
             dz_         = 0.;
+            momentum_rotation_ = 0.;
         }
 
         /// Print particle informations
