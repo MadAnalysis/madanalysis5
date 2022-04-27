@@ -40,13 +40,6 @@ class InstallFastjetContrib:
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir = os.path.normpath(self.tmpdir + '/MA5_fastjetcontrib/')
         self.ncores     = 1
-        # self.files = {"fastjetcontrib.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fjcontrib-1.012.tar.gz"}
-        # self.files = {"fastjetcontrib.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fjcontrib-1.017.tar.gz"}
-        # self.files = {"fastjetcontrib.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fjcontrib-1.024.tar.gz"}
-        # self.files = {"fastjetcontrib.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fjcontrib-1.027.tar.gz"}
-        # self.files = {"fastjetcontrib.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fjcontrib-1.039.tar.gz"}
-        # self.files = {"fastjetcontrib.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fjcontrib-1.042.tar.gz"}
-        # self.files = {"fastjetcontrib.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fjcontrib-1.045.tar.gz"}
         self.files = {
             "fastjetcontrib.tar.gz": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fjcontrib-1.048.tar.gz"
         }
