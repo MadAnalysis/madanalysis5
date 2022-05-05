@@ -57,19 +57,19 @@ class DetectHEPTopTagger:
         msg = ""
 
         if not self.archi_info.has_fastjet:
-            logging.getLogger("MA5").debug(f" -> no fastjet")
-            return DetectStatusType.UNFOUND, "FastJet does not exist"
+            logging.getLogger("MA5").debug(f" -> FastJet not found")
+            return DetectStatusType.UNFOUND, "FastJet not found."
         if not self.archi_info.has_fjcontrib:
-            logging.getLogger("MA5").debug(f" -> no fastjet contrib.")
-            return DetectStatusType.UNFOUND, "FastJet contrib does not exist"
+            logging.getLogger("MA5").debug(f" -> FastJet contrib not found.")
+            return DetectStatusType.UNFOUND, "FastJet contrib not found."
 
         if not os.path.isdir(os.path.join(self.archi_info.ma5dir, "tools", "HEPTopTagger")):
             logging.getLogger("MA5").debug(
-                f" -> {os.path.join(self.archi_info.ma5dir, 'tools', 'HEPTopTagger')} does not exist."
+                f" -> The {os.path.join(self.archi_info.ma5dir, 'tools', 'HEPTopTagger')} folder does not exist."
             )
             return (
                 DetectStatusType.UNFOUND,
-                f"{os.path.join(self.archi_info.ma5dir, 'tools', 'HEPTopTagger')} does not exist.",
+                f"The {os.path.join(self.archi_info.ma5dir, 'tools', 'HEPTopTagger')} folder does not exist.",
             )
 
         # Check HTT files
