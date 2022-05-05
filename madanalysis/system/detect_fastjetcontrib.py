@@ -61,7 +61,7 @@ class DetectFastjetContrib:
         theCommands = [fjconfig, "--libs"]
         ok, out, err = ShellCommand.ExecuteWithCapture(theCommands, "./")
         if not ok:
-            return False, "fastjet-config program does not work properly."
+            return False, "The fastjet-config executable does not work properly."
 
         libpath = [x[2:] for x in out.split() if x.startswith("-L")][0]
 
@@ -74,7 +74,7 @@ class DetectFastjetContrib:
         if len(not_found) != 0:
             return (
                 DetectStatusType.UNFOUND,
-                "Can not find following fjcontrib libraries: " + ", ".join(not_found),
+                "The following FJContrib libraries cannot be found: " + ", ".join(not_found),
             )
 
         # Ok
