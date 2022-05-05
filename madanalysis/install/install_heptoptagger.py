@@ -36,7 +36,6 @@ class InstallHEPTopTagger:
         self.tmpdir = self.main.session_info.tmpdir
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir = os.path.normpath(self.tmpdir + "/MA5_heptoptagger/")
-        self.ncores = 1
         self.github_repo = "https://api.github.com/repos/MadAnalysis/HEPTopTagger/releases/latest"
         self.meta = {}
 
@@ -67,7 +66,7 @@ class InstallHEPTopTagger:
         return ok
 
     def Download(self):
-        # Checking connection with MA5 web site
+        # Checking the link to GitHub
         theCommands=['curl', '-s', self.github_repo]
         logging.getLogger('MA5').debug('shell command: '+' '.join(theCommands))
         ok, out = ShellCommand.ExecuteWithLog(
@@ -78,6 +77,7 @@ class InstallHEPTopTagger:
 
         self.meta = json.loads(out)
 
+        # Downloading the package from GitHub
         logging.getLogger('MA5').debug(f"  -> HEPTopTagger {self.meta['tag_name']}")
         logging.getLogger('MA5').debug(f"  -> Published at {self.meta['published_at']}")
         theCommands = [
@@ -104,6 +104,7 @@ class InstallHEPTopTagger:
         if not ok:
             return False
 
+        # Checking where all files are
         from glob import glob
         content = glob(self.installdir + "/*")
         if len(content) == 0:
@@ -121,6 +122,7 @@ class InstallHEPTopTagger:
         if not found:
             return False
 
+        # Copying all files where relevant
         import shutil
         for htt_file in content:
             logging.getLogger("MA5").debug(f"copy {htt_file} to {self.installdir}")
