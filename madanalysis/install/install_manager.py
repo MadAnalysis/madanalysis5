@@ -53,7 +53,7 @@ class InstallManager():
                 from madanalysis.install.install_heptoptagger import InstallHEPTopTagger
                 installer=InstallHEPTopTagger(self.main)
             else:
-                self.logger.error("HEPTopTagger requires FastJet and fjcontrib libraries.")
+                self.logger.error("HEPTopTagger requires FastJet and the FJContrib libraries to be installed. Installation skipped")
                 return True
         elif package in ['delphes', 'delphesma5tune']:
             if self.main.archi_info.has_root:
