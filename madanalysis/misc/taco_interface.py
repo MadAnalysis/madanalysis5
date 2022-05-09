@@ -47,6 +47,7 @@ class TACORegion(Region):
         s95exp: float,
         s95obs: float,
         cls: float,
+        best: bool = None # we might not need this
     ) -> None:
         """
         Initialization of MadAnalysis Signal Region
@@ -77,6 +78,7 @@ class TACORegion(Region):
         self.s95exp = s95exp
         self.s95obs = s95obs
         self.cls = cls
+        self.best = best
 
         self.marginalize = False
 
@@ -251,5 +253,5 @@ if __name__ == "__main__":
     print("ul", combiner.getUpperLimitOnMu(expected=False))
     print("expected ul", combiner.getUpperLimitOnMu(expected=True))
     print("r-value", combiner.getRValue())
-    print(f"expected 1-CLs : {clsRoot(1., combiner, True)}")
-    print(f"obs 1-CLs : {clsRoot(1., combiner, False)}")
+    print(f"expected 1-CLs : {1. - clsRoot(1., combiner, True)}")
+    print(f"obs 1-CLs : {1. - clsRoot(1., combiner, False)}")
