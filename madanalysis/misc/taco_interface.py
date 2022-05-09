@@ -228,6 +228,6 @@ if __name__ == "__main__":
 
     combiner = TheoryPredictionsCombiner(SRs)
     print("TheoryPredictionsCombiner: ")
-    print("ul", combiner.getUpperLimit(expected=False))
-    print("expected ul", combiner.getUpperLimit(expected=True))
+    print("ul", combiner.getUpperLimitOnMu(expected=False))
+    print("expected ul", combiner.getUpperLimitOnMu(expected=True))
     print("r-value", combiner.getRValue())
