@@ -31,6 +31,7 @@ import pyhf
 
 # TODO: remove pyhf dependency from TACO interface
 
+
 class TACORegion(Region):
     def __init__(
         self,
@@ -133,16 +134,13 @@ class TACORegion(Region):
                 with warnings.catch_warnings():
                     # `pyhf.infer.mle.fixed_poi_fit` returns twice negative log likelihood
                     _, twice_nllh = pyhf.infer.mle.fixed_poi_fit(
-                        mu, data, model, return_fitted_val=True,
-                        par_bounds = par_bounds
+                        mu, data, model, return_fitted_val=True, par_bounds=par_bounds
                     )
                 return twice_nllh
             except ValueError as err:
                 return "update bounds"
 
-        model = pyhf.simplemodels.uncorrelated_background(
-            [self.nsignal], [self.nb], [self.deltanb]
-        )
+        model = pyhf.simplemodels.uncorrelated_background([self.nsignal], [self.nb], [self.deltanb])
         par_bounds = model.config.suggested_bounds()
         # print(par_bounds)
         data = [self.nobs if not expected else self.nb] + model.config.auxdata
@@ -151,8 +149,10 @@ class TACORegion(Region):
         while True:
             twice_nllh = get_twice_nllh(model, data, par_bounds)
             if twice_nllh == "update bounds":
-                par_bounds = [(par_bounds[0][0], par_bounds[0][1] * 2.),
-                              (par_bounds[1][0], par_bounds[1][1] * 2.)]
+                par_bounds = [
+                    (par_bounds[0][0], par_bounds[0][1] * 2.0),
+                    (par_bounds[1][0], par_bounds[1][1] * 2.0),
+                ]
                 # print(f"update bounds: {par_bounds}")
             else:
                 break
@@ -176,6 +176,7 @@ class TACORegion(Region):
 if __name__ == "__main__":
     import argparse, json, os
     from smodels.tools.theoryPredictionsCombiner import TheoryPredictionsCombiner
+    from smodels.tools.statistics import rootFromNLLs
 
     parser = argparse.ArgumentParser(description="Test TACO interface")
     path = parser.add_argument_group("Path handling")
@@ -226,8 +227,29 @@ if __name__ == "__main__":
             print(f"Likelihood mu = 1 : {region.likelihood(1.)}")
             print(f"Likelihood mu = 0 : {region.likelihood(0.)}")
 
+    def clsRoot(mu, combiner, expected=False):
+        # at - infinity this should be .95,
+        # at + infinity it should -.05
+        # Make sure to always compute the correct llhd value (from theoryPrediction)
+        # and not used the cached value (which is constant for mu~=1 an mu~=0)
+
+        mu_hat, sigma_mu, lmax = combiner.findMuHat(allowNegativeSignals=True, extended_output=True)
+        nll0 = combiner.likelihood(mu_hat, expected=expected, nll=True)
+        # a posteriori expected is needed here
+        # mu_hat is mu_hat for signal_rel
+        mu_hatA, _, nll0A = combiner.findMuHat(
+            expected="posteriori", nll=True, extended_output=True
+        )
+
+        nll = combiner.likelihood(mu, nll=True, expected=expected, useCached=False)
+        nllA = combiner.likelihood(mu, expected="posteriori", nll=True, useCached=False)
+        ret = rootFromNLLs(nllA, nll0A, nll, nll0)
+        return ret
+
     combiner = TheoryPredictionsCombiner(SRs)
-    print("TheoryPredictionsCombiner: ")
+    print("\nTheoryPredictionsCombiner: ")
     print("ul", combiner.getUpperLimitOnMu(expected=False))
     print("expected ul", combiner.getUpperLimitOnMu(expected=True))
     print("r-value", combiner.getRValue())
+    print(f"expected 1-CLs : {clsRoot(1., combiner, True)}")
+    print(f"obs 1-CLs : {clsRoot(1., combiner, False)}")
