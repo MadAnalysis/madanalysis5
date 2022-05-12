@@ -1469,19 +1469,19 @@ class RunRecast():
         observed, backgrounds, nsignal = [], [], []
         # Collect the input data necessary for the simplified_likelyhood.py method
         for reg in cov_regions:
-            nsignal.append(xsection*lumi*1000.*regiondata[reg]["Nf"]/regiondata[reg]["N0"])
+            nsignal.append(xsection * lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"])
             backgrounds.append(regiondata[reg]["nb"])
             observed.append(regiondata[reg]["nobs"])
         # data
         from madanalysis.misc.simplified_likelihood import Data, UpperLimitComputer
         LHdata = Data(
-            observed=observed, backgrounds=backgrounds, covariance=covariance, nsignal=nsignal, deltas_rel=0., lumi=lumi
+            observed=observed, backgrounds=backgrounds, covariance=covariance, nsignal=nsignal, deltas_rel=0.2, lumi=lumi
         )
-        computer = UpperLimitComputer(ntoys = self.ntoys, cl = .95)
+        computer = UpperLimitComputer(ntoys=self.ntoys, cl=.95)
         regiondata["cov_subset"][self._cov_subset]["mu"] = float(computer.ulOnYields(LHdata, expected=expected))
         # calculation and output
         try:
-            return 1. - (computer.computeCLs(LHdata, expected=expected) + .05)
+            return computer.computeCLs(LHdata, expected=expected)
         except Exception as err:
             logging.getLogger('MA5').debug("slhCLs : " + str(err))
             return 0.0

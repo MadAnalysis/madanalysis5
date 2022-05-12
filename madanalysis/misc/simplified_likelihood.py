@@ -49,30 +49,26 @@ import logging
 logger = logging.getLogger("MA5")
 
 # rootFromNLLs, determineBrentBracket are retreived from smodels.tools.statistics
-def rootFromNLLs(nllA, nll0A, nll, nll0):
+def rootFromNLLs(nllA, nll0A, nll, nll0, get_cls=False):
     """compute the CLs - alpha from the NLLs"""
-    qmu = 2 * (nll - nll0)
-    if qmu < 0.0:
-        qmu = 0.0
+    qmu = 0.0 if 2 * (nll - nll0) < 0.0 else 2 * (nll - nll0)
     sqmu = np.sqrt(qmu)
     qA = 2 * (nllA - nll0A)
     if qA < 0.0:
         qA = 0.0
     sqA = np.sqrt(qA)
-    CLsb = 1.0 - stats.multivariate_normal.cdf(sqmu)
-    CLb = 0.0
     if qA >= qmu:
+        CLsb = 1.0 - stats.multivariate_normal.cdf(sqmu)
         CLb = stats.multivariate_normal.cdf(sqA - sqmu)
     else:
-        if qA == 0.0:
-            CLsb = 1.0
-            CLb = 1.0
-        else:
-            CLsb = 1.0 - stats.multivariate_normal.cdf((qmu + qA) / (2 * sqA))
-            CLb = 1.0 - stats.multivariate_normal.cdf((qmu - qA) / (2 * sqA))
-    CLs = 0.0
-    if CLb > 0.0:
-        CLs = CLsb / CLb
+        CLsb = 1.0 if qA == 0.0 else 1.0 - stats.multivariate_normal.cdf((qmu + qA) / (2 * sqA))
+        CLb = 1.0 if qA == 0.0 else 1.0 - stats.multivariate_normal.cdf((qmu - qA) / (2 * sqA))
+
+    CLs = CLsb / CLb if CLb > 0 else 0.
+
+    if get_cls:
+        return 1. - CLs
+
     cl = 0.95
     root = CLs - 1.0 + cl
     return root
@@ -1097,7 +1093,7 @@ class UpperLimitComputer:
         return ul / model.lumi
 
     def _ul_preprocess(
-        self, model, marginalize=False, toys=None, expected=False, trylasttime=False
+        self, model, marginalize=False, toys=None, expected=False, trylasttime=False, signal_type="signal_rel"
     ):
         """
         Process the upper limit calculator
@@ -1123,7 +1119,7 @@ class UpperLimitComputer:
             if expected == "posteriori":
                 # print ( "here!" )
                 tempc = LikelihoodComputer(oldmodel, toys)
-                theta_hat_, _ = tempc.findThetaHat(0 * oldmodel.signal_rel)
+                theta_hat_, _ = tempc.findThetaHat(0 * getattr(oldmodel, signal_type))
             # model.observed = model.backgrounds
             for i, d in enumerate(model.backgrounds):
                 # model.observed[i]=int(np.ceil(d))
@@ -1133,10 +1129,10 @@ class UpperLimitComputer:
                 model.observed[i] = float(d)
         computer = LikelihoodComputer(model, toys)
         mu_hat = computer.findMuHat(
-            model.signal_rel, allowNegativeSignals=False, extended_output=False
+            getattr(model, signal_type), allowNegativeSignals=False, extended_output=False
         )
-        theta_hat0, _ = computer.findThetaHat(0 * model.signal_rel)
-        sigma_mu = computer.getSigmaMu(mu_hat, model.signal_rel, theta_hat0)
+        theta_hat0, _ = computer.findThetaHat(0 * getattr(model, signal_type))
+        sigma_mu = computer.getSigmaMu(mu_hat, getattr(model, signal_type), theta_hat0)
 
         nll0 = computer.likelihood(model.signals(mu_hat), marginalize=marginalize, nll=True)
         # print ( f"SL nll0 {nll0:.3f} muhat {mu_hat:.3f} sigma_mu {sigma_mu:.3f}" )
@@ -1157,18 +1153,18 @@ class UpperLimitComputer:
         # print ( f"SL finding mu hat with {aModel.signal_rel}: mu_hatA, obs: {aModel.observed}" )
         compA = LikelihoodComputer(aModel, toys)
         ## compute
-        mu_hatA = compA.findMuHat(aModel.signal_rel)
+        mu_hatA = compA.findMuHat(getattr(aModel, signal_type))
         nll0A = compA.likelihood(aModel.signals(mu_hatA), marginalize=marginalize, nll=True)
         # print ( f"SL nll0A {nll0A:.3f} mu_hatA {mu_hatA:.3f} bg {aModel.backgrounds[0]:.3f} obs {aModel.observed[0]:.3f}" )
         # return 1.
 
-        def root_func(mu):
+        def root_func(mu, get_cls=False):
             ## the function to find the zero of (ie CLs - alpha)
             nsig = model.signals(mu)
             computer.ntot = model.backgrounds + nsig
             nll = computer.likelihood(nsig, marginalize=marginalize, nll=True)
             nllA = compA.likelihood(nsig, marginalize=marginalize, nll=True)
-            return rootFromNLLs(nllA, nll0A, nll, nll0)
+            return rootFromNLLs(nllA, nll0A, nll, nll0, get_cls=get_cls)
 
         return mu_hat, sigma_mu, root_func
 
@@ -1207,10 +1203,12 @@ class UpperLimitComputer:
         :param trylasttime: if True, then dont try extra
         :return: 1 - CLs value
         """
-        _, _, root_func = self._ul_preprocess(model, marginalize, toys, expected, trylasttime)
+        _, _, root_func = self._ul_preprocess(
+            model, marginalize, toys, expected, trylasttime, signal_type="nsignal"
+        )
 
         # 1-(CLs+alpha) -> alpha = 0.05
-        return 0.95 - root_func(1.0)
+        return root_func(1.0, get_cls=True)
 
 
 if __name__ == "__main__":
