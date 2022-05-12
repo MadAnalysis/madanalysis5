@@ -1557,6 +1557,8 @@ class RunRecast():
             return sig95
 
         for cov_subset in self.cov_config.keys():
+            # TODO remove self._cov_subset
+            self._cov_subset = cov_subset
             cov_regions = self.cov_config[cov_subset]["cov_regions"]
             covariance  = self.cov_config[cov_subset]["covariance" ]
             if cov_subset not in regiondata["cov_subset"].keys():
