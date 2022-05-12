@@ -35,6 +35,7 @@ from shell_command                                              import ShellComm
 from string_tools                                               import StringTools
 from six.moves                                                  import map, range, input
 import copy, logging, math, os, shutil, time, sys, json
+from typing import Text, Dict
 
 
 class RunRecast():
@@ -75,12 +76,12 @@ class RunRecast():
 
     def SetCLsCalculator(self):
         if self.main.session_info.has_pyhf and self.main.recasting.CLs_calculator_backend == "pyhf":
-            self.cls_calculator = pyhf_wrapper_py3
+            self.cls_calculator = pyhf_wrapper
         elif not self.main.session_info.has_pyhf:
             self.main.recasting.CLs_calculator_backend = "native"
 
         if self.main.session_info.has_pyhf and self.main.recasting.expectation_assumption == "aposteriori":
-            self.cls_calculator = pyhf_wrapper_py3
+            self.cls_calculator = pyhf_wrapper
             self.main.recasting.CLs_calculator_backend = "pyhf"
             self.is_apriori = False
         elif not self.main.session_info.has_pyhf and self.main.recasting.expectation_assumption == "aposteriori":
@@ -829,13 +830,13 @@ class RunRecast():
                 ## Performing the CLS calculation
                 regiondata=self.extract_sig_cls(regiondata, regions, lumi, "exp")
                 if self.cov_config != {}:
-                    regiondata=self.extract_sig_lhcls(regiondata, dataset.xsection, lumi, "exp")
+                    regiondata=self.extract_sig_lhcls(regiondata, lumi, "exp")
                 # CLs calculation for pyhf
                 regiondata = self.pyhf_sig95Wrapper(lumi, regiondata, "exp")
 
                 if extrapolated_lumi=='default':
                     if self.cov_config != {}:
-                        regiondata=self.extract_sig_lhcls(regiondata, dataset.xsection, lumi, "obs")
+                        regiondata=self.extract_sig_lhcls(regiondata, lumi, "obs")
                     regiondata = self.extract_sig_cls(regiondata, regions, lumi, "obs")
                     regiondata = self.pyhf_sig95Wrapper(lumi, regiondata, 'obs')
                 else:
@@ -1480,7 +1481,7 @@ class RunRecast():
         regiondata["cov_subset"][self._cov_subset]["mu"] = float(computer.ulOnYields(LHdata, expected=expected))
         # calculation and output
         try:
-            return computer.computeCLs(LHdata, expected=expected)
+            return 1. - (computer.computeCLs(LHdata, expected=expected) + .05)
         except Exception as err:
             logging.getLogger('MA5').debug("slhCLs : " + str(err))
             return 0.0
@@ -1532,7 +1533,7 @@ class RunRecast():
         return regiondata
 
     # Calculating the upper limits on sigma with simplified likelihood
-    def extract_sig_lhcls(self, regiondata: dict, xsection: float, lumi: float, tag: str) -> dict:
+    def extract_sig_lhcls(self, regiondata: Dict, lumi: float, tag: Text) -> dict:
         """
         Compute gloabal upper limit on cross section.
 
@@ -1540,8 +1541,6 @@ class RunRecast():
         ----------
         regiondata : Dict
             Dictionary including all the information about SR yields
-        xsection: float
-            production cross-section of the process
         lumi : float
             luminosity
         tag : str
@@ -1567,19 +1566,12 @@ class RunRecast():
                 regiondata["cov_subset"][cov_subset][f"s95{tag}"]= "-1"
                 continue
 
-            observed, backgrounds, nsignal = [], [], []
-            # Collect the input data necessary for the simplified_likelyhood.py method
-            for reg in cov_regions:
-                nsignal.append(xsection * lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"])
-                backgrounds.append(regiondata[reg]["nb"])
-                observed.append(regiondata[reg]["nobs"])
-
             low, hig = 1., 1.
-            while self.slhCLs(regiondata,cov_regions,low,lumi,covariance,(tag=="exp"), ntoys = self.ntoys)>0.95:
+            while self.slhCLs(regiondata, cov_regions, low, lumi, covariance, (tag == "exp"), ntoys=self.ntoys) > 0.95:
                 self.logger.debug('lower bound = ' + str(low))
                 low *= 0.1
                 if low < 1e-10: break
-            while self.slhCLs(regiondata,cov_regions,hig,lumi,covariance,(tag=="exp"), ntoys = self.ntoys)<0.95:
+            while self.slhCLs(regiondata, cov_regions, hig, lumi, covariance, (tag == "exp"), ntoys=self.ntoys) < 0.95:
                 self.logger.debug('upper bound = ' + str(hig))
                 hig *= 10.
                 if hig > 1e10: break
@@ -1587,13 +1579,13 @@ class RunRecast():
             try:
                 import scipy
                 sig95 = get_s95(cov_regions, covariance)
-                s95 = scipy.optimize.brentq(sig95,low,hig,xtol=low/100.)
+                s95 = scipy.optimize.brentq(sig95, low, hig, xtol=low / 100.)
             except ImportError as err:
                 self.logger.debug("Can't import scipy")
-                s95=-1
+                s95 = -1
             except Exception as err:
                 self.logger.debug(str(err.args[0]))
-                s95=-1
+                s95 = -1
             self.logger.debug(f"s95{tag} = {s95:.5f} [pb]")
             regiondata["cov_subset"][cov_subset][f"s95{tag}"] = f"{s95:.7f}"
 
