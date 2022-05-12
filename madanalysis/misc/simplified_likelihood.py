@@ -38,6 +38,7 @@
 from scipy import stats, optimize, integrate, special, linalg
 from numpy import sqrt, exp, log, sign, array, ndarray
 from functools import reduce
+from typing import Text, Optional, Union, Tuple
 
 # from smodels.tools.statistics import rootFromNLLs, determineBrentBracket
 
@@ -64,10 +65,10 @@ def rootFromNLLs(nllA, nll0A, nll, nll0, get_cls=False):
         CLsb = 1.0 if qA == 0.0 else 1.0 - stats.multivariate_normal.cdf((qmu + qA) / (2 * sqA))
         CLb = 1.0 if qA == 0.0 else 1.0 - stats.multivariate_normal.cdf((qmu - qA) / (2 * sqA))
 
-    CLs = CLsb / CLb if CLb > 0 else 0.
+    CLs = CLsb / CLb if CLb > 0 else 0.0
 
     if get_cls:
-        return 1. - CLs
+        return 1.0 - CLs
 
     cl = 0.95
     root = CLs - 1.0 + cl
@@ -348,6 +349,16 @@ class Data:
         """
 
         return mu * self.signal_rel
+
+    def nsignals(self, mu):
+        """
+        Returns the number of expected signal events, for all datasets,
+        given total signal strength mu.
+
+        :param mu: Total number of signal events summed over all datasets.
+        """
+
+        return mu * self.nsignal
 
 
 class LikelihoodComputer:
@@ -1093,8 +1104,14 @@ class UpperLimitComputer:
         return ul / model.lumi
 
     def _ul_preprocess(
-        self, model, marginalize=False, toys=None, expected=False, trylasttime=False, signal_type="signal_rel"
-    ):
+        self,
+        model: Data,
+        marginalize: Optional[bool] = False,
+        toys: Optional[float] = None,
+        expected: Optional[Union[bool, Text]] = False,
+        trylasttime: Optional[bool] = False,
+        signal_type: Optional[Text] = "signal_rel",
+    ) -> Tuple:
         """
         Process the upper limit calculator
         :param model: statistical model
@@ -1104,8 +1121,16 @@ class UpperLimitComputer:
                           true: compute a priori expected, "posteriori":
                           compute a posteriori expected
         :param trylasttime: if True, then dont try extra
+        :param signal_type: signal_type will allow both SModelS and MadAnalysis interface
+                            to use this function simultaneously. For signal_rel upper limit
+                            is calculated for normalised signal events for nsignals upper limit
+                            is calculated for number of signal events.
         :return: mu_hat, sigma_mu, root_func
         """
+        assert signal_type in [
+            "signal_rel",
+            "nsignal",
+        ], f"Signal type can only be `signal_rel` or `nsignal`. `{signal_type}` is given"
         # if expected:
         #    marginalize = True
         if model.zeroSignal():
@@ -1134,14 +1159,22 @@ class UpperLimitComputer:
         theta_hat0, _ = computer.findThetaHat(0 * getattr(model, signal_type))
         sigma_mu = computer.getSigmaMu(mu_hat, getattr(model, signal_type), theta_hat0)
 
-        nll0 = computer.likelihood(model.signals(mu_hat), marginalize=marginalize, nll=True)
+        nll0 = computer.likelihood(
+            getattr(model, "signals" if signal_type == "signal_rel" else "nsignals")(mu_hat),
+            marginalize=marginalize,
+            nll=True,
+        )
         # print ( f"SL nll0 {nll0:.3f} muhat {mu_hat:.3f} sigma_mu {sigma_mu:.3f}" )
         if np.isinf(nll0) and marginalize == False and not trylasttime:
             logger.warning(
                 "nll is infinite in profiling! we switch to marginalization, but only for this one!"
             )
             marginalize = True
-            nll0 = computer.likelihood(model.signals(mu_hat), marginalize=True, nll=True)
+            nll0 = computer.likelihood(
+                getattr(model, "signals" if signal_type == "signal_rel" else "nsignals")(mu_hat),
+                marginalize=True,
+                nll=True,
+            )
             if np.isinf(nll0):
                 logger.warning("marginalization didnt help either. switch back.")
                 marginalize = False
@@ -1154,13 +1187,22 @@ class UpperLimitComputer:
         compA = LikelihoodComputer(aModel, toys)
         ## compute
         mu_hatA = compA.findMuHat(getattr(aModel, signal_type))
-        nll0A = compA.likelihood(aModel.signals(mu_hatA), marginalize=marginalize, nll=True)
+        nll0A = compA.likelihood(
+            getattr(aModel, "signals" if signal_type == "signal_rel" else "nsignals")(mu_hatA),
+            marginalize=marginalize,
+            nll=True,
+        )
         # print ( f"SL nll0A {nll0A:.3f} mu_hatA {mu_hatA:.3f} bg {aModel.backgrounds[0]:.3f} obs {aModel.observed[0]:.3f}" )
         # return 1.
 
-        def root_func(mu, get_cls=False):
+        def root_func(mu: float, get_cls: bool = False) -> float:
+            """
+            Calculate the root
+            :param mu: float POI
+            :param get_cls: if true returns 1-CLs value
+            """
             ## the function to find the zero of (ie CLs - alpha)
-            nsig = model.signals(mu)
+            nsig = getattr(model, "signals" if signal_type == "signal_rel" else "nsignals")(mu)
             computer.ntot = model.backgrounds + nsig
             nll = computer.likelihood(nsig, marginalize=marginalize, nll=True)
             nllA = compA.likelihood(nsig, marginalize=marginalize, nll=True)
@@ -1307,8 +1349,8 @@ if __name__ == "__main__":
     """
     results:
     old ul= 180.999844
-    ul (marginalized) 180.84672924414696
-    CLs (marginalized) 0.0
+    ul (marginalized) 184.8081186162269
+    CLs (marginalized) 1.0
     ul (profiled) 180.68039063387553
     CLs (profiled) 0.75
     """
