@@ -1408,6 +1408,8 @@ class RunRecast():
                 if all(s <= 0. for s in [regiondata[reg]["Nf"] for reg in cov_regions]):
                     regiondata["cov_subset"][cov_subset]["CLs"]= 0.
                     continue
+                # TODO remove self._cov_subset
+                self._cov_subset = cov_subset
                 CLs = self.slhCLs(regiondata,cov_regions,xsection,lumi,covariance, ntoys = self.ntoys)
                 s95 = float(regiondata["cov_subset"][cov_subset]["s95exp"])
                 regiondata["cov_subset"][cov_subset]["CLs"] = CLs
@@ -1457,8 +1459,7 @@ class RunRecast():
         return regiondata
 
 
-    @staticmethod
-    def slhCLs(regiondata,cov_regions,xsection,lumi,covariance,expected=False, ntoys = 10000):
+    def slhCLs(self, regiondata, cov_regions, xsection, lumi, covariance, expected=False, ntoys = 10000):
         """ (slh for simplified likelihood)
             Compute a global CLs combining the different region yields by using a simplified
             likelihood method (see CMS-NOTE-2017-001 for more information). It relies on the
@@ -1475,7 +1476,8 @@ class RunRecast():
         LHdata = Data(
             observed=observed, backgrounds=backgrounds, covariance=covariance, nsignal=nsignal, deltas_rel=0., lumi=lumi
         )
-        computer = UpperLimitComputer(ntoys = ntoys, cl = .95)
+        computer = UpperLimitComputer(ntoys = self.ntoys, cl = .95)
+        regiondata["cov_subset"][self._cov_subset]["mu"] = float(computer.ulOnYields(LHdata, expected=expected))
         # calculation and output
         try:
             return computer.computeCLs(LHdata, expected=expected)
@@ -1549,10 +1551,10 @@ class RunRecast():
         if "cov_subset" not in regiondata.keys():
             regiondata["cov_subset"] = {}
 
-        # def get_s95(regs, matrix):
-        #     def sig95(xsection):
-        #         return self.slhCLs(regiondata,regs,xsection,lumi,matrix,(tag=="exp"), ntoys = self.ntoys)-0.95
-        #     return sig95
+        def get_s95(regs, matrix):
+            def sig95(xsection):
+                return self.slhCLs(regiondata,regs,xsection,lumi,matrix,(tag=="exp"), ntoys = self.ntoys)-0.95
+            return sig95
 
         for cov_subset in self.cov_config.keys():
             cov_regions = self.cov_config[cov_subset]["cov_regions"]
@@ -1570,41 +1572,26 @@ class RunRecast():
                 backgrounds.append(regiondata[reg]["nb"])
                 observed.append(regiondata[reg]["nobs"])
 
-            from madanalysis.misc.simplified_likelihood import Data, UpperLimitComputer
-            # Prepare the data structure
-            LHdata = Data(
-                observed=observed,
-                backgrounds=backgrounds,
-                covariance=covariance,
-                nsignal=nsignal,
-                deltas_rel=0.,
-                lumi=lumi
-            )
-            computer = UpperLimitComputer(ntoys=self.ntoys, cl=.95)
-            is_expected = (tag == "exp")
-            if self.main.recasting.expectation_assumption == "aposteriori" and is_expected:
-                is_expected = "aposteriori"
-            s95 = computer.ulOnYields(model=LHdata, expected=is_expected) / (1000. * lumi)
-            # low, hig = 1., 1.
-            # while self.slhCLs(regiondata,cov_regions,low,lumi,covariance,(tag=="exp"), ntoys = self.ntoys)>0.95:
-            #     self.logger.debug('lower bound = ' + str(low))
-            #     low *= 0.1
-            #     if low < 1e-10: break
-            # while self.slhCLs(regiondata,cov_regions,hig,lumi,covariance,(tag=="exp"), ntoys = self.ntoys)<0.95:
-            #     self.logger.debug('upper bound = ' + str(hig))
-            #     hig *= 10.
-            #     if hig > 1e10: break
-            #
-            # try:
-            #     import scipy
-            #     sig95 = get_s95(cov_regions, covariance)
-            #     s95 = scipy.optimize.brentq(sig95,low,hig,xtol=low/100.)
-            # except ImportError as err:
-            #     self.logger.debug("Can't import scipy")
-            #     s95=-1
-            # except Exception as err:
-            #     self.logger.debug(str(err))
-            #     s95=-1
+            low, hig = 1., 1.
+            while self.slhCLs(regiondata,cov_regions,low,lumi,covariance,(tag=="exp"), ntoys = self.ntoys)>0.95:
+                self.logger.debug('lower bound = ' + str(low))
+                low *= 0.1
+                if low < 1e-10: break
+            while self.slhCLs(regiondata,cov_regions,hig,lumi,covariance,(tag=="exp"), ntoys = self.ntoys)<0.95:
+                self.logger.debug('upper bound = ' + str(hig))
+                hig *= 10.
+                if hig > 1e10: break
+
+            try:
+                import scipy
+                sig95 = get_s95(cov_regions, covariance)
+                s95 = scipy.optimize.brentq(sig95,low,hig,xtol=low/100.)
+            except ImportError as err:
+                self.logger.debug("Can't import scipy")
+                s95=-1
+            except Exception as err:
+                self.logger.debug(str(err.args[0]))
+                s95=-1
             self.logger.debug(f"s95{tag} = {s95:.5f} [pb]")
             regiondata["cov_subset"][cov_subset][f"s95{tag}"] = f"{s95:.7f}"
 
