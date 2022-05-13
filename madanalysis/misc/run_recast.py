@@ -38,7 +38,7 @@ import copy, logging, math, os, shutil, time, sys, json
 from typing import Text, Dict
 
 
-class RunRecast():
+class RunRecast:
 
     def __init__(self, main, dirname):
         self.dirname          = dirname
@@ -75,6 +75,10 @@ class RunRecast():
 
 
     def SetCLsCalculator(self):
+        def pyhf_wrapper(nobs, nb, deltanb, nsignal, ntoys, CLs_obs = True):
+            from pyhf_interface import PyhfInterface
+            interface = PyhfInterface(nsignal, nobs, nb, deltanb)
+            return interface.computeCLs(CLs_obs = CLs_obs)
         if self.main.session_info.has_pyhf and self.main.recasting.CLs_calculator_backend == "pyhf":
             self.cls_calculator = pyhf_wrapper
         elif not self.main.session_info.has_pyhf:
@@ -131,15 +135,17 @@ class RunRecast():
         if self.forced or self.main.script:
             return
         self.logger.info("Would you like to edit the recasting Card ? (Y/N)")
-        allowed_answers=['n','no','y','yes']
-        answer=""
-        while answer not in  allowed_answers:
-            answer=input("Answer: ")
-            answer=answer.lower()
-        if answer=="no" or answer=="n":
+        allowed_answers = ['n', 'no', 'y', 'yes']
+        answer = ""
+        while answer not in allowed_answers:
+            answer = input("Answer: ")
+            answer = answer.lower()
+        if answer == "no" or answer == "n":
             return
         else:
-            err = os.system(self.main.session_info.editor+" "+self.dirname+"/Input/recasting_card.dat")
+            err = os.system(
+                self.main.session_info.editor + " " + self.dirname + "/Input/recasting_card.dat"
+            )
 
         return
 
@@ -1376,91 +1382,93 @@ class RunRecast():
     def extract_cls(self,regiondata,regions,xsection,lumi):
         self.logger.debug('Compute CLs...')
         ## computing fi a region belongs to the best expected ones, and derive the CLs in all cases
-        bestreg=[]
+        bestreg = []
         rMax = -1
         for reg in regions:
             nsignal = xsection * lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
-            nb      = regiondata[reg]["nb"]
-            nobs    = regiondata[reg]["nobs"]
+            nb = regiondata[reg]["nb"]
+            nobs = regiondata[reg]["nobs"]
             deltanb = regiondata[reg]["deltanb"]
-            if nsignal<=0:
-                rSR   = -1
+            if nsignal <= 0:
+                rSR = -1
                 myCLs = 0
             else:
-                n95     = float(regiondata[reg]["s95exp"]) * lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
-                rSR     = nsignal/n95
-                myCLs   = self.cls_calculator(nobs, nb, deltanb, nsignal, self.ntoys, CLs_obs = True)
+                n95 = float(regiondata[reg]["s95exp"]) * lumi * 1000. * regiondata[reg]["Nf"] / \
+                      regiondata[reg]["N0"]
+                rSR = nsignal / n95
+                myCLs = self.cls_calculator(nobs, nb, deltanb, nsignal, self.ntoys, CLs_obs = True)
             regiondata[reg]["rSR"] = rSR
             regiondata[reg]["CLs"] = myCLs
             if rSR > rMax:
-                regiondata[reg]["best"]=1
+                regiondata[reg]["best"] = 1
                 for mybr in bestreg:
-                    regiondata[mybr]["best"]=0
+                    regiondata[mybr]["best"] = 0
                 bestreg = [reg]
                 rMax = rSR
             else:
-                regiondata[reg]["best"]=0
+                regiondata[reg]["best"] = 0
 
         if self.cov_config != {}:
             minsig95, bestreg = 1e99, []
             for cov_subset in self.cov_config.keys():
                 cov_regions = self.cov_config[cov_subset]["cov_regions"]
-                covariance  = self.cov_config[cov_subset]["covariance" ]
+                covariance = self.cov_config[cov_subset]["covariance"]
                 if all(s <= 0. for s in [regiondata[reg]["Nf"] for reg in cov_regions]):
-                    regiondata["cov_subset"][cov_subset]["CLs"]= 0.
+                    regiondata["cov_subset"][cov_subset]["CLs"] = 0.
                     continue
-                # TODO remove self._cov_subset
-                self._cov_subset = cov_subset
-                CLs = self.slhCLs(regiondata,cov_regions,xsection,lumi,covariance, ntoys = self.ntoys)
                 s95 = float(regiondata["cov_subset"][cov_subset]["s95exp"])
-                regiondata["cov_subset"][cov_subset]["CLs"] = CLs
+                regiondata["cov_subset"][cov_subset]["CLs"] = self.slhCLs(
+                        regiondata, cov_regions, xsection, lumi, covariance
+                )
                 if 0. < s95 < minsig95:
                     regiondata['cov_subset'][cov_subset]["best"] = 1
                     for mybr in bestreg:
-                        regiondata['cov_subset'][mybr]["best"]=0
+                        regiondata['cov_subset'][mybr]["best"] = 0
                     bestreg = [cov_subset]
                     minsig95 = s95
                 else:
-                    regiondata['cov_subset'][cov_subset]["best"]=0
+                    regiondata['cov_subset'][cov_subset]["best"] = 0
 
         #initialize pyhf for cls calculation
-        iterator = [] if self.pyhf_config=={} else copy.deepcopy(list(self.pyhf_config.items()))
+        iterator = [] if self.pyhf_config == {} else copy.deepcopy(list(self.pyhf_config.items()))
         minsig95, bestreg = 1e99, []
         for n, (likelihood_profile, config) in enumerate(iterator):
-            self.logger.debug('    * Running CLs for '+likelihood_profile)
+            self.logger.debug('    * Running CLs for ' + likelihood_profile)
             # safety check, just in case
-            if regiondata.get('pyhf',{}).get(likelihood_profile, False) == False:
+            if regiondata.get('pyhf', {}).get(likelihood_profile, False) == False:
                 continue
             background = HF_Background(config)
-            self.logger.debug('current pyhf Configuration = '+str(config))
-            signal = HF_Signal(config,regiondata,xsection=xsection)
+            self.logger.debug('current pyhf Configuration = ' + str(config))
+            signal = HF_Signal(config, regiondata, xsection = xsection)
             is_not_extrapolated = signal.lumi == lumi
-            CLs    = -1
+            CLs = -1
             if signal.isAlive():
                 sig_HF = signal(lumi)
                 bkg_HF = background(lumi)
                 if self.main.developer_mode:
                     setattr(self, "hf_sig_test", sig_HF)
                     setattr(self, "hf_bkg_test", bkg_HF)
-                CLs = pyhf_wrapper(bkg_HF, sig_HF)
+                from pyhf_interface import PyhfInterface
+                interface = PyhfInterface(sig_HF, bkg_HF)
+                CLs = interface.computeCLs()
                 # Take observed if default lumi used, use expected if extrapolated
                 CLs_out = CLs['CLs_obs'] if is_not_extrapolated else CLs['CLs_exp'][2]
                 regiondata['pyhf'][likelihood_profile]['full_CLs_output'] = CLs
                 if CLs_out >= 0.:
-                    regiondata['pyhf'][likelihood_profile]['CLs']  = CLs_out
+                    regiondata['pyhf'][likelihood_profile]['CLs'] = CLs_out
                 s95 = float(regiondata['pyhf'][likelihood_profile]['s95exp'])
                 if 0. < s95 < minsig95:
                     regiondata['pyhf'][likelihood_profile]["best"] = 1
                     for mybr in bestreg:
-                        regiondata['pyhf'][mybr]["best"]=0
+                        regiondata['pyhf'][mybr]["best"] = 0
                     bestreg = [likelihood_profile]
                     minsig95 = s95
                 else:
-                    regiondata['pyhf'][likelihood_profile]["best"]=0
+                    regiondata['pyhf'][likelihood_profile]["best"] = 0
         return regiondata
 
 
-    def slhCLs(self, regiondata, cov_regions, xsection, lumi, covariance, expected=False, ntoys = 10000):
+    def slhCLs(self, regiondata, cov_regions, xsection, lumi, covariance, expected = False):
         """ (slh for simplified likelihood)
             Compute a global CLs combining the different region yields by using a simplified
             likelihood method (see CMS-NOTE-2017-001 for more information). It relies on the
@@ -1475,13 +1483,17 @@ class RunRecast():
         # data
         from madanalysis.misc.simplified_likelihood import Data, UpperLimitComputer
         LHdata = Data(
-            observed=observed, backgrounds=backgrounds, covariance=covariance, nsignal=nsignal, deltas_rel=0.2, lumi=lumi
+            observed = observed,
+            backgrounds = backgrounds,
+            covariance = covariance,
+            nsignal = nsignal,
+            deltas_rel = 0.0,
+            lumi = lumi,
         )
-        computer = UpperLimitComputer(ntoys=self.ntoys, cl=.95)
-        regiondata["cov_subset"][self._cov_subset]["mu"] = float(computer.ulOnYields(LHdata, expected=expected))
+        computer = UpperLimitComputer(ntoys = self.ntoys, cl = .95)
         # calculation and output
         try:
-            return computer.computeCLs(LHdata, expected=expected)
+            return computer.computeCLs(LHdata, expected = expected)
         except Exception as err:
             logging.getLogger('MA5').debug("slhCLs : " + str(err))
             return 0.0
@@ -1552,26 +1564,31 @@ class RunRecast():
 
         def get_s95(regs, matrix):
             def sig95(xsection):
-                return self.slhCLs(regiondata,regs,xsection,lumi,matrix,(tag=="exp"), ntoys = self.ntoys)-0.95
+                return self.slhCLs(
+                    regiondata, regs, xsection, lumi, matrix, (tag == "exp"), ntoys = self.ntoys
+                ) - 0.95
+
             return sig95
 
         for cov_subset in self.cov_config.keys():
-            # TODO remove self._cov_subset
-            self._cov_subset = cov_subset
             cov_regions = self.cov_config[cov_subset]["cov_regions"]
-            covariance  = self.cov_config[cov_subset]["covariance" ]
+            covariance = self.cov_config[cov_subset]["covariance"]
             if cov_subset not in regiondata["cov_subset"].keys():
                 regiondata["cov_subset"][cov_subset] = {}
             if all(s <= 0. for s in [regiondata[reg]["Nf"] for reg in cov_regions]):
-                regiondata["cov_subset"][cov_subset][f"s95{tag}"]= "-1"
+                regiondata["cov_subset"][cov_subset][f"s95{tag}"] = "-1"
                 continue
 
             low, hig = 1., 1.
-            while self.slhCLs(regiondata, cov_regions, low, lumi, covariance, (tag == "exp"), ntoys=self.ntoys) > 0.95:
+            while self.slhCLs(
+                regiondata, cov_regions, low, lumi, covariance, (tag == "exp"),
+            ) > 0.95:
                 self.logger.debug('lower bound = ' + str(low))
                 low *= 0.1
                 if low < 1e-10: break
-            while self.slhCLs(regiondata, cov_regions, hig, lumi, covariance, (tag == "exp"), ntoys=self.ntoys) < 0.95:
+            while self.slhCLs(
+                regiondata, cov_regions, hig, lumi, covariance, (tag == "exp"),
+            ) < 0.95:
                 self.logger.debug('upper bound = ' + str(hig))
                 hig *= 10.
                 if hig > 1e10: break
@@ -1598,8 +1615,10 @@ class RunRecast():
         if 'pyhf' not in list(regiondata.keys()):
             regiondata['pyhf'] = {}
 
-        def get_pyhf_result(*args):
-            rslt = pyhf_wrapper(*args)
+        def get_pyhf_result(background, signal):
+            from pyhf_interface import PyhfInterface
+            interface = PyhfInterface(signal, background)
+            rslt = interface.computeCLs()
             if tag == "exp" and not self.is_apriori:
                 return rslt["CLs_exp"][2]
             return rslt['CLs_obs']

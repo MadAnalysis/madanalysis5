@@ -128,9 +128,7 @@ class PyhfInterface:
 
         return None, None, None
 
-    def computeCLs(
-        self, CLs_exp: bool = True, CLs_obs: bool = True, iteration_threshold: int = 3
-    ) -> Union[float, Dict]:
+    def computeCLs(self, iteration_threshold: int = 3, **kwargs) -> Union[float, Dict]:
         """
         Compute 1-CLs values
 
@@ -153,19 +151,19 @@ class PyhfInterface:
         )
 
         if self.model is None or self.data is None:
-            if not CLs_exp or not CLs_obs:
+            if "CLs_exp" in kwargs.keys() or "CLs_obs" in kwargs.keys():
                 return -1
             else:
                 return {"CLs_obs": -1, "CLs_exp": [-1] * 5}
 
-        def get_CLs(model, data, **kwargs):
+        def get_CLs(model, data, **keywordargs):
             try:
                 CLs_obs, CLs_exp = pyhf.infer.hypotest(
                     1.0,
                     data,
                     model,
-                    test_stat=kwargs.get("stats", "qtilde"),
-                    par_bounds=kwargs.get("bounds", model.config.suggested_bounds()),
+                    test_stat=keywordargs.get("stats", "qtilde"),
+                    par_bounds=keywordargs.get("bounds", model.config.suggested_bounds()),
                     return_expected_set=True,
                 )
 
@@ -219,13 +217,13 @@ class PyhfInterface:
                 # hard limit on iteration required if it exceeds this value it means
                 # Nsig >>>>> Nobs
                 if it >= iteration_threshold:
-                    if not CLs_exp or not CLs_obs:
+                    if "CLs_exp" in kwargs.keys() or "CLs_obs" in kwargs.keys():
                         return 1
                     return {"CLs_obs": 1.0, "CLs_exp": [1.0] * 5}
 
-        if CLs_exp and not CLs_obs:
+        if kwargs.get("CLs_exp", False):
             return CLs["CLs_exp"][2]
-        elif CLs_obs and not CLs_exp:
+        elif kwargs.get("CLs_obs", False):
             return CLs["CLs_obs"]
 
         return CLs
@@ -319,7 +317,7 @@ class PyhfInterface:
                 else 0.0
             )
 
-    def muhat(self, expected: bool = False, allowNegativeSignals:bool = True):
+    def muhat(self, expected: bool = False, allowNegativeSignals: bool = True):
         """
         get the value of mu for which the likelihood is maximal. this is only used for
         initialisation of the optimizer, so can be skipped in the first version of the code.
@@ -332,7 +330,7 @@ class PyhfInterface:
             if true, allow negative values for mu
         """
         workspace, self.model, self.data = self._initialize_workspace(
-                self.signal, self.background, self.nb, self.delta_nb, expected
+            self.signal, self.background, self.nb, self.delta_nb, expected
         )
 
         with warnings.catch_warnings():
@@ -344,9 +342,9 @@ class PyhfInterface:
             try:
                 bounds = self.model.config.suggested_bounds()
                 if allowNegativeSignals:
-                    bounds[self.model.config.poi_index] = (-5., 10. )
+                    bounds[self.model.config.poi_index] = (-5.0, 10.0)
                 muhat, maxNllh = pyhf.infer.mle.fit(
-                        self.data, self.model, return_fitted_val=True, par_bounds = bounds
+                    self.data, self.model, return_fitted_val=True, par_bounds=bounds
                 )
                 return muhat[self.model.config.poi_index]
             except (pyhf.exceptions.FailedMinimization, ValueError) as e:
