@@ -21,7 +21,7 @@
 #
 ################################################################################
 
-import logging, sys
+import logging, sys, scipy
 from typing import Sequence, Dict, Union, Optional
 from numpy import warnings, isnan
 import numpy as np
@@ -136,12 +136,16 @@ class PyhfInterface:
 
         return workspace, model, data
 
-    def computeCLs(self, iteration_threshold: int = 3, **kwargs) -> Union[float, Dict]:
+    def computeCLs(
+        self, mu: float = 1.0, expected: bool = False, iteration_threshold: int = 3, **kwargs
+    ) -> Union[float, Dict]:
         """
         Compute 1-CLs values
 
         Parameters
         ----------
+        mu: float
+            POI signal strength
         CLs_exp: bool
             if true return expected CLs value
         CLs_obs: bool
@@ -155,7 +159,7 @@ class PyhfInterface:
             CLs values {"CLs_obs": xx, "CLs_exp": [xx] * 5} or single CLs value
         """
         _, self.model, self.data = self._initialize_workspace(
-            self.signal, self.background, self.nb, self.delta_nb
+            self.signal, self.background, self.nb, self.delta_nb, expected
         )
 
         if self.model is None or self.data is None:
@@ -167,7 +171,7 @@ class PyhfInterface:
         def get_CLs(model, data, **keywordargs):
             try:
                 CLs_obs, CLs_exp = pyhf.infer.hypotest(
-                    1.0,
+                    mu,
                     data,
                     model,
                     test_stat=keywordargs.get("stats", "qtilde"),
@@ -358,3 +362,24 @@ class PyhfInterface:
             except (pyhf.exceptions.FailedMinimization, ValueError) as e:
                 logging.getLogger("MA5").error(f"pyhf mle.fit failed {e}")
                 return float("nan")
+
+    def computeUpperLimitOnMu(self, expected: bool = False):
+        """
+        Compute upper limit on POI (signal strength)
+        Parameters
+        ----------
+        expected:bool
+        """
+        computer = lambda mu: self.computeCLs(mu=mu, expected=expected, CLs_obs=True) - 0.95
+
+        low, hig = 1.0, 1.0
+        while computer(low) > 0.95:
+            low *= 0.1
+            if low < 1e-10:
+                break
+        while computer(hig) < 0.95:
+            hig *= 10.0
+            if hig > 1e10:
+                break
+
+        return scipy.optimize.brentq(computer, low, hig, xtol=low / 100.0)
