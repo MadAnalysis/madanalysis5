@@ -25,7 +25,7 @@ import logging, sys
 from typing import Sequence, Dict, Union, Optional
 from numpy import warnings, isnan
 import numpy as np
-from histfactory_reader import HF_Background, HF_Signal
+from madanalysis.misc.histfactory_reader import HF_Background, HF_Signal
 
 try:
     import pyhf
