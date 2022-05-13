@@ -49,9 +49,21 @@ import logging
 
 logger = logging.getLogger("MA5")
 
-# rootFromNLLs, determineBrentBracket are retreived from smodels.tools.statistics
-def rootFromNLLs(nllA, nll0A, nll, nll0, get_cls=False):
-    """compute the CLs - alpha from the NLLs"""
+# CLsfromNLL, determineBrentBracket are retreived from smodels.tools.statistics
+def CLsfromNLL(
+    nllA: float, nll0A: float, nll: float, nll0: float, return_type: Text = "CLs-alpha"
+) -> float:
+    """
+    compute the CLs - alpha from the NLLs
+    TODO: following needs explanation
+    :param nllA:
+    :param nll0A:
+    :param nll:
+    :param nll0:
+    :param return_type: (Text) "CLs-alpha" or "1-CLs"
+    :return:
+    """
+    assert return_type in ["CLs-alpha", "1-CLs"], f"Unknown return type: {return_type}."
     qmu = 0.0 if 2 * (nll - nll0) < 0.0 else 2 * (nll - nll0)
     sqmu = np.sqrt(qmu)
     qA = 2 * (nllA - nll0A)
@@ -67,7 +79,7 @@ def rootFromNLLs(nllA, nll0A, nll, nll0, get_cls=False):
 
     CLs = CLsb / CLb if CLb > 0 else 0.0
 
-    if get_cls:
+    if return_type == "1-CLs":
         return 1.0 - CLs
 
     cl = 0.95
@@ -1067,7 +1079,7 @@ class LikelihoodComputer:
 class UpperLimitComputer:
     debug_mode = False
 
-    def __init__(self, ntoys=30000, cl=0.95):
+    def __init__(self, ntoys: float = 30000, cl: float = 0.95):
 
         """
         :param ntoys: number of toys when marginalizing
@@ -1076,12 +1088,12 @@ class UpperLimitComputer:
         self.toys = ntoys
         self.cl = cl
 
-    def ulOnSigmaTimesEff(
+    def getUpperLimitOnSigmaTimesEff(
         self, model, marginalize=False, toys=None, expected=False, trylasttime=False
     ):
         """upper limit on the fiducial cross section sigma times efficiency,
-            obtained from the defined
-            Data (using the signal prediction
+            summed over all signal regions, i.e. sum_i xsec^prod_i eff_i
+            obtained from the defined Data (using the signal prediction
             for each signal regio/dataset), by using
             the q_mu test statistic from the CCGV paper (arXiv:1007.1727).
 
@@ -1093,9 +1105,10 @@ class UpperLimitComputer:
         :params trylasttime: if True, then dont try extra
         :returns: upper limit on fiducial cross section
         """
-        ul = self.ulOnYields(
+        ul = self.getUpperLimitOnMu(
             model, marginalize=marginalize, toys=toys, expected=expected, trylasttime=trylasttime
         )
+
         if ul == None:
             return ul
         if model.lumi is None:
@@ -1130,7 +1143,7 @@ class UpperLimitComputer:
         assert signal_type in [
             "signal_rel",
             "nsignal",
-        ], f"Signal type can only be `signal_rel` or `nsignal`. `{signal_type}` is given"
+        ], f"Signal type can only be `signal_rel` or `nsignal`. `{signal_type}` is given."
         # if expected:
         #    marginalize = True
         if model.zeroSignal():
@@ -1165,7 +1178,7 @@ class UpperLimitComputer:
             nll=True,
         )
         # print ( f"SL nll0 {nll0:.3f} muhat {mu_hat:.3f} sigma_mu {sigma_mu:.3f}" )
-        if np.isinf(nll0) and marginalize == False and not trylasttime:
+        if np.isinf(nll0) and not marginalize and not trylasttime:
             logger.warning(
                 "nll is infinite in profiling! we switch to marginalization, but only for this one!"
             )
@@ -1195,7 +1208,7 @@ class UpperLimitComputer:
         # print ( f"SL nll0A {nll0A:.3f} mu_hatA {mu_hatA:.3f} bg {aModel.backgrounds[0]:.3f} obs {aModel.observed[0]:.3f}" )
         # return 1.
 
-        def root_func(mu: float, get_cls: bool = False) -> float:
+        def clsRoot(mu: float, return_type: Text = "CLs-alpha") -> float:
             """
             Calculate the root
             :param mu: float POI
@@ -1206,13 +1219,16 @@ class UpperLimitComputer:
             computer.ntot = model.backgrounds + nsig
             nll = computer.likelihood(nsig, marginalize=marginalize, nll=True)
             nllA = compA.likelihood(nsig, marginalize=marginalize, nll=True)
-            return rootFromNLLs(nllA, nll0A, nll, nll0, get_cls=get_cls)
+            return CLsfromNLL(nllA, nll0A, nll, nll0, return_type=return_type)
 
-        return mu_hat, sigma_mu, root_func
+        return mu_hat, sigma_mu, clsRoot
 
-    def ulOnYields(self, model, marginalize=False, toys=None, expected=False, trylasttime=False):
-        """upper limit on signal yields obtained from the defined
-            Data (using the signal prediction
+    def getUpperLimitOnMu(
+        self, model, marginalize=False, toys=None, expected=False, trylasttime=False
+    ):
+        """upper limit on the signal strength multiplier mu
+            obtained from the defined Data (using the signal prediction
+
             for each signal regio/dataset), by using
             the q_mu test statistic from the CCGV paper (arXiv:1007.1727).
 
@@ -1222,20 +1238,27 @@ class UpperLimitComputer:
                           true: compute a priori expected, "posteriori":
                           compute a posteriori expected
         :params trylasttime: if True, then dont try extra
-        :returns: upper limit on yields
+        :returns: upper limit on the signal strength multiplier mu
         """
-        mu_hat, sigma_mu, root_func = self._ul_preprocess(
+        mu_hat, sigma_mu, clsRoot = self._ul_preprocess(
             model, marginalize, toys, expected, trylasttime
         )
         if mu_hat == None:
             return None
-        a, b = determineBrentBracket(mu_hat, sigma_mu, root_func)
-        mu_lim = optimize.brentq(root_func, a, b, rtol=1e-03, xtol=1e-06)
+        a, b = determineBrentBracket(mu_hat, sigma_mu, clsRoot)
+        mu_lim = optimize.brentq(clsRoot, a, b, rtol=1e-03, xtol=1e-06)
         return mu_lim
 
-    def computeCLs(self, model, marginalize=False, toys=None, expected=False, trylasttime=False):
+    def computeCLs(
+        self,
+        model: Data,
+        marginalize: bool = False,
+        toys: float = None,
+        expected: Union[bool, Text] = False,
+        trylasttime: bool = False,
+    ) -> float:
         """
-        Compute the confidence level of the model
+        Compute the exclusion confidence level of the model (1-CLs)
         :param model: statistical model
         :param marginalize: if true, marginalize nuisances, else profile them
         :param toys: specify number of toys. Use default is none
@@ -1245,12 +1268,10 @@ class UpperLimitComputer:
         :param trylasttime: if True, then dont try extra
         :return: 1 - CLs value
         """
-        _, _, root_func = self._ul_preprocess(
-            model, marginalize, toys, expected, trylasttime, signal_type="nsignal"
-        )
+        _, _, clsRoot = self._ul_preprocess(model, marginalize, toys, expected, trylasttime)
 
         # 1-(CLs+alpha) -> alpha = 0.05
-        return root_func(1.0, get_cls=True)
+        return clsRoot(1.0, return_type="1-CLs")
 
 
 if __name__ == "__main__":
@@ -1337,11 +1358,13 @@ if __name__ == "__main__":
         nsignal
     )  # With respect to the older refernece value one must normalize the xsec
     print("old ul=", ul_old)
-    ul = ulComp.ulOnYields(m, marginalize=True)
+    ul = ulComp.getUpperLimitOnMu(m, marginalize=True)
+
     cls = ulComp.computeCLs(m, marginalize=True)
     print("ul (marginalized)", ul)
     print("CLs (marginalized)", cls)
-    ul = ulComp.ulOnYields(m, marginalize=False)
+
+    ul = ulComp.getUpperLimitOnMu(m, marginalize=False)
     cls = ulComp.computeCLs(m, marginalize=False)
     print("ul (profiled)", ul)
     print("CLs (profiled)", cls)
