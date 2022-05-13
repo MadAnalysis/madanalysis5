@@ -76,7 +76,7 @@ class RunRecast:
 
     def SetCLsCalculator(self):
         def pyhf_wrapper(nobs, nb, deltanb, nsignal, ntoys, CLs_obs = True):
-            from pyhf_interface import PyhfInterface
+            from madanalysis.misc.pyhf_interface import PyhfInterface
             interface = PyhfInterface(nsignal, nobs, nb, deltanb)
             return interface.computeCLs(CLs_obs = CLs_obs)
         if self.main.session_info.has_pyhf and self.main.recasting.CLs_calculator_backend == "pyhf":
@@ -1448,7 +1448,7 @@ class RunRecast:
                 if self.main.developer_mode:
                     setattr(self, "hf_sig_test", sig_HF)
                     setattr(self, "hf_bkg_test", bkg_HF)
-                from pyhf_interface import PyhfInterface
+                from madanalysis.misc.pyhf_interface import PyhfInterface
                 interface = PyhfInterface(sig_HF, bkg_HF)
                 CLs = interface.computeCLs()
                 # Take observed if default lumi used, use expected if extrapolated
@@ -1616,7 +1616,7 @@ class RunRecast:
             regiondata['pyhf'] = {}
 
         def get_pyhf_result(background, signal):
-            from pyhf_interface import PyhfInterface
+            from madanalysis.misc.pyhf_interface import PyhfInterface
             interface = PyhfInterface(signal, background)
             rslt = interface.computeCLs()
             if tag == "exp" and not self.is_apriori:
