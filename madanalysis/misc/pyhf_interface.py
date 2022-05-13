@@ -92,6 +92,7 @@ class PyhfInterface:
         Tuple:
             Workspace(can be none in simple case), model, data
         """
+        workspace, model, data = None, None, None
 
         try:
             with warnings.catch_warnings():
@@ -105,7 +106,6 @@ class PyhfInterface:
                     )
                     data = [background] + model.config.auxdata
 
-                    return None, model, data
                 elif isinstance(signal, HF_Signal) and isinstance(background, HF_Background):
                     HF = background()
                     if expected:
@@ -119,14 +119,22 @@ class PyhfInterface:
                         },
                     )
                     data = workspace.data(model)
-
-                    return workspace, model, data
+                elif isinstance(signal, list) and isinstance(background, dict):
+                    workspace = pyhf.Workspace(background)
+                    model = workspace.model(
+                        patches=[signal],
+                        modifier_settings={
+                            "normsys": {"interpcode": "code4"},
+                            "histosys": {"interpcode": "code4p"},
+                        },
+                    )
+                    data = workspace.data(model)
         except (pyhf.exceptions.InvalidSpecification, KeyError) as err:
             logging.getLogger("MA5").error("Invalid JSON file!! " + str(err))
         except Exception as err:
             logging.getLogger("MA5").debug("Unknown error, check PyhfInterface " + str(err))
 
-        return None, None, None
+        return workspace, model, data
 
     def computeCLs(self, iteration_threshold: int = 3, **kwargs) -> Union[float, Dict]:
         """

@@ -1629,42 +1629,50 @@ class RunRecast:
                 return get_pyhf_result(bkg(lumi), signal(lumi))-0.95
             return CLs
 
-        iterator = [] if self.pyhf_config=={} else copy.deepcopy(list(self.pyhf_config.items()))
+        iterator = [] if self.pyhf_config == {} else copy.deepcopy(list(self.pyhf_config.items()))
         for n, (likelihood_profile, config) in enumerate(iterator):
-            self.logger.debug('    * Running sig95'+tag+' for '+likelihood_profile)
+            self.logger.debug('    * Running sig95' + tag + ' for ' + likelihood_profile)
             if likelihood_profile not in list(regiondata['pyhf'].keys()):
                 regiondata['pyhf'][likelihood_profile] = {}
-            background = HF_Background(config, expected=(tag=='exp' and self.is_apriori))
-            self.logger.debug('Config : '+str(config))
-            if not HF_Signal(config, regiondata, xsection=1., background=background).isAlive():
-                self.logger.debug(likelihood_profile+' has no signal event.')
-                regiondata['pyhf'][likelihood_profile]["s95"+tag] = "-1"
+            background = HF_Background(config, expected = (tag == 'exp' and self.is_apriori))
+            self.logger.debug('Config : ' + str(config))
+            if not HF_Signal(config, regiondata, xsection = 1., background = background).isAlive():
+                self.logger.debug(likelihood_profile + ' has no signal event.')
+                regiondata['pyhf'][likelihood_profile]["s95" + tag] = "-1"
                 continue
 
             low, hig = 1., 1.
-            while get_pyhf_result(background(lumi),\
-                                  HF_Signal(config, regiondata,xsection=low)(lumi)) > 0.95:
-                self.logger.debug(tag+': profile '+likelihood_profile+\
-                                               ', lower bound = '+str(low))
+            while get_pyhf_result(
+                background(lumi),
+                HF_Signal(config, regiondata, xsection = low)(lumi)
+            ) > 0.95:
+                self.logger.debug(
+                    tag + ': profile ' + likelihood_profile + \
+                    ', lower bound = ' + str(low)
+                )
                 low *= 0.1
                 if low < 1e-10: break
-            while get_pyhf_result(background(lumi),\
-                                  HF_Signal(config, regiondata,xsection=hig)(lumi)) < 0.95:
-                self.logger.debug(tag+': profile '+likelihood_profile+\
-                                               ', higher bound = '+str(hig))
+            while get_pyhf_result(
+                background(lumi),
+                HF_Signal(config, regiondata, xsection = hig)(lumi)
+            ) < 0.95:
+                self.logger.debug(
+                    tag + ': profile ' + likelihood_profile + \
+                    ', higher bound = ' + str(hig)
+                )
                 hig *= 10.
                 if hig > 1e10: break
             try:
                 import scipy
                 s95 = scipy.optimize.brentq(
-                    sig95(config, regiondata, background),low,hig,xtol=low/100.
+                    sig95(config, regiondata, background), low, hig, xtol = low / 100.
                 )
             except Exception as err:
                 self.logger.debug(str(err))
-                self.logger.debug('Can not calculate sig95'+tag+' for '+likelihood_profile)
-                s95=-1
-            regiondata['pyhf'][likelihood_profile]["s95"+tag] = "{:.7f}".format(s95)
-            self.logger.debug(likelihood_profile+' sig95'+tag+' = {:.7f} pb'.format(s95))
+                self.logger.debug('Can not calculate sig95' + tag + ' for ' + likelihood_profile)
+                s95 = -1
+            regiondata['pyhf'][likelihood_profile]["s95" + tag] = "{:.7f}".format(s95)
+            self.logger.debug(likelihood_profile + ' sig95' + tag + ' = {:.7f} pb'.format(s95))
         return regiondata
 
 
