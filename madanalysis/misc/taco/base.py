@@ -25,8 +25,33 @@ from abc import ABC, abstractmethod
 from typing import Text
 
 
+class MA5DataSet:
+    def __init__(self, srname):
+        """param srname: the name of the signal region
+        ("dataset" is SModelS' name for a signal region)"""
+        self.srname = srname
+
+    def getID(self):
+        return self.srname
+
+
+class MA5CrossSection:
+    def __init__(self, value: float, sqrts: float = 13.0):
+        """production cross section
+        :param value: the value of the production cross section
+        :param sqrts: center of mass energy
+        """
+        self.value = value
+        self.sqrts = sqrts
+
+
 class TACOBase(ABC):
-    def __init__(self, analysis: Text, regionID: Text):
+    def __init__(
+        self,
+        analysis: Text = "__unknown_analysis__",
+        regionID: Text = "__unknown_region__",
+        xsection: float = -1,
+    ):
         """
         Abstract Class for TACO interface
 
@@ -36,10 +61,13 @@ class TACOBase(ABC):
         regionID: (Text) region name
         """
         self.analysis = analysis
-        self.regionOD = regionID
+        self.dataset = MA5DataSet(regionID)
+        self.xsection = MA5CrossSection(xsection, 13.0)
 
     @abstractmethod
-    def likelihood(self, mu: float = 1.0, nll: bool = False, expected: bool = False) -> float:
+    def likelihood(
+        self, mu: float = 1.0, nll: bool = False, expected: bool = False, useCached=False
+    ) -> float:
         """
         Returns the value of the likelihood.
         Inspired by the `pyhf.infer.mle` module but for non-log likelihood
@@ -80,3 +108,19 @@ class TACOBase(ABC):
             if true, allow negative values for mu
         """
         raise NotImplementedError
+
+    @abstractmethod
+    def getUpperLimit(self, expected: bool = False):
+        """
+        code here that retrieves the upper limit, expected or observed
+        """
+        raise NotImplementedError
+
+    def dataType(self):  # a technicality
+        return "efficiencyMap"
+
+    def analysisId(self):
+        """
+        return the analysis id, e.g. "atlas_susy_2018_02"
+        """
+        return self.analysis

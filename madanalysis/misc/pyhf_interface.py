@@ -93,11 +93,10 @@ class PyhfInterface:
             Workspace(can be none in simple case), model, data
         """
         workspace, model, data = None, None, None
-
         try:
             with warnings.catch_warnings():
                 warnings.filterwarnings("ignore")
-                if isinstance(signal, float) and isinstance(background, float):
+                if isinstance(signal, float) and isinstance(background, (float, int)):
                     if expected:
                         background = nb
                     # Create model from uncorrelated region
@@ -240,7 +239,13 @@ class PyhfInterface:
 
         return CLs
 
-    def likelihood(self, mu: float = 1.0, nll: bool = False, expected: bool = False) -> float:
+    def likelihood(
+        self,
+        mu: float = 1.0,
+        nll: bool = False,
+        expected: bool = False,
+        iteration_threshold: int = 3,
+    ) -> float:
         """
         Returns the value of the likelihood.
         Inspired by the `pyhf.infer.mle` module but for non-log likelihood
@@ -264,20 +269,52 @@ class PyhfInterface:
         mu = max(mu, -20.0)
         mu = min(mu, 40.0)
 
+        def computellhd(model, data, bounds):
+            try:
+                _, twice_nllh = pyhf.infer.mle.fixed_poi_fit(
+                    mu,
+                    self.data,
+                    self.model,
+                    return_fitted_val=True,
+                    maxiter=200,
+                    par_bounds=bounds,
+                )
+            except (AssertionError, pyhf.exceptions.FailedMinimization, ValueError) as err:
+                logging.getLogger("MA5").debug(str(err))
+                return "update bounds"
+
+            return twice_nllh
+
         with warnings.catch_warnings():
             warnings.filterwarnings(
                 "ignore",
                 "Values in x were outside bounds during a minimize step, clipping to bounds",
             )
-            _, twice_nllh = pyhf.infer.mle.fixed_poi_fit(
-                mu, self.data, self.model, return_fitted_val=True, maxiter=200
-            )
+
+            bounds = self.model.config.suggested_bounds()
+            it = 0
+            while True:
+                twice_nllh = computellhd(self.model, self.data, bounds)
+                if twice_nllh == "update bounds":
+                    bounds[self.model.config.poi_index] = (
+                        bounds[self.model.config.poi_index][0] - 5.0,
+                        2.0 * bounds[self.model.config.poi_index][1],
+                    )
+                    it += 1
+                else:
+                    break
+                if it >= iteration_threshold:
+                    logging.getLogger("MA5").debug("pyhf mle.fit failed")
+                    return float("nan")
+
             return np.exp(-twice_nllh / 2.0) if not nll else twice_nllh / 2.0
 
     def sigma_mu(self, expected: bool = False):
         """
         get an estimate for the standard deviation of mu around mu_hat this is only used for
         initialisation of the optimizer, so can be skipped in the first version,
+
+        adapted from smodels.tools.pyhfInterface
 
         expected:
             get muhat for the expected likelihood, not observed.
@@ -329,7 +366,12 @@ class PyhfInterface:
                 else 0.0
             )
 
-    def muhat(self, expected: bool = False, allowNegativeSignals: bool = True):
+    def muhat(
+        self,
+        expected: bool = False,
+        allowNegativeSignals: bool = True,
+        iteration_threshold: int = 3,
+    ):
         """
         get the value of mu for which the likelihood is maximal. this is only used for
         initialisation of the optimizer, so can be skipped in the first version of the code.
@@ -345,23 +387,46 @@ class PyhfInterface:
             self.signal, self.background, self.nb, self.delta_nb, expected
         )
 
+        def computeMu(model, data, **keywordargs):
+            try:
+                muhat, maxNllh = pyhf.infer.mle.fit(
+                    data,
+                    model,
+                    return_fitted_val=True,
+                    par_bounds=keywordargs.get("bounds", model.config.suggested_bounds()),
+                )
+            except (AssertionError, pyhf.exceptions.FailedMinimization, ValueError) as err:
+                logging.getLogger("MA5").debug(str(err))
+                # dont use false here 1.-CLs = 0 can be interpreted as false
+                return "update bounds", None
+
+            return muhat, maxNllh
+
         with warnings.catch_warnings():
             warnings.filterwarnings(
                 "ignore",
                 "Values in x were outside bounds during a minimize step, clipping to bounds",
             )
+            bounds = self.model.config.suggested_bounds()
+            if allowNegativeSignals:
+                bounds[self.model.config.poi_index] = (-5.0, 10.0)
+            arguments = dict(bounds=bounds)
+            it = 0
+            while True:
+                muhat, maxNllh = computeMu(self.model, self.data, **arguments)
+                if muhat == "update bounds":
+                    arguments["bounds"][self.model.config.poi_index] = (
+                        2.0 * arguments["bounds"][self.model.config.poi_index][0],
+                        2.0 * arguments["bounds"][self.model.config.poi_index][1],
+                    )
+                    it += 1
+                else:
+                    break
+                if it >= iteration_threshold:
+                    logging.getLogger("MA5").debug("pyhf mle.fit failed")
+                    return float("nan")
 
-            try:
-                bounds = self.model.config.suggested_bounds()
-                if allowNegativeSignals:
-                    bounds[self.model.config.poi_index] = (-5.0, 10.0)
-                muhat, maxNllh = pyhf.infer.mle.fit(
-                    self.data, self.model, return_fitted_val=True, par_bounds=bounds
-                )
-                return muhat[self.model.config.poi_index]
-            except (pyhf.exceptions.FailedMinimization, ValueError) as e:
-                logging.getLogger("MA5").error(f"pyhf mle.fit failed {e}")
-                return float("nan")
+        return muhat[self.model.config.poi_index]
 
     def computeUpperLimitOnMu(self, expected: bool = False):
         """
