@@ -25,6 +25,7 @@ import logging, sys
 from typing import Sequence, Dict, Union, Optional
 from numpy import warnings, isnan
 import numpy as np
+from histfactory_reader import HF_Background, HF_Signal
 
 try:
     import pyhf
@@ -49,8 +50,8 @@ class PyhfInterface:
 
     def __init__(
         self,
-        signal: Union[Sequence, float],
-        background: Union[Dict, float],
+        signal: Union[HF_Signal, float],
+        background: Union[HF_Background, float],
         nb: Optional[float] = None,
         delta_nb: Optional[float] = None,
     ):
@@ -62,18 +63,55 @@ class PyhfInterface:
         self.nb = nb
         self.delta_nb = delta_nb
 
+    @staticmethod
+    def _initialize_workspace(
+        signal: Union[Sequence, float],
+        background: Union[Dict, float],
+        nb: Optional[float] = None,
+        delta_nb: Optional[float] = None,
+        expected: Optional[bool] = False,
+    ):
+        """
+        Initialize pyhf workspace
+
+        Parameters
+        ----------
+        signal: Union[Sequence, float]
+            number of signal events or json patch
+        background: Union[Dict, float]
+            number of observed events or json dictionary
+        nb: Optional[float]
+            number of expected background events (MC)
+        delta_nb: Optional[float]
+            uncertainty on expected background events
+        expected: bool
+            if true prepare apriori expected workspace, default False
+
+        Returns
+        -------
+        Tuple:
+            Workspace(can be none in simple case), model, data
+        """
+
         try:
             with warnings.catch_warnings():
                 warnings.filterwarnings("ignore")
                 if isinstance(signal, float) and isinstance(background, float):
+                    if expected:
+                        background = nb
                     # Create model from uncorrelated region
-                    self.model = pyhf.simplemodels.uncorrelated_background(
+                    model = pyhf.simplemodels.uncorrelated_background(
                         [max(signal, 0.0)], [nb], [delta_nb]
                     )
-                    self.data = [background] + self.model.config.auxdata
-                else:
-                    workspace = pyhf.Workspace(background)
-                    self.model = workspace.model(
+                    data = [background] + model.config.auxdata
+
+                    return None, model, data
+                elif isinstance(signal, HF_Signal) and isinstance(background, HF_Background):
+                    HF = background()
+                    if expected:
+                        HF = background.get_expected()
+                    workspace = pyhf.Workspace(HF)
+                    model = workspace.model(
                         patches=[signal],
                         modifier_settings={
                             "normsys": {"interpcode": "code4"},
@@ -81,10 +119,14 @@ class PyhfInterface:
                         },
                     )
                     data = workspace.data(model)
+
+                    return workspace, model, data
         except (pyhf.exceptions.InvalidSpecification, KeyError) as err:
             logging.getLogger("MA5").error("Invalid JSON file!! " + str(err))
         except Exception as err:
             logging.getLogger("MA5").debug("Unknown error, check PyhfInterface " + str(err))
+
+        return None, None, None
 
     def computeCLs(
         self, CLs_exp: bool = True, CLs_obs: bool = True, iteration_threshold: int = 3
@@ -106,6 +148,10 @@ class PyhfInterface:
         float or dict:
             CLs values {"CLs_obs": xx, "CLs_exp": [xx] * 5} or single CLs value
         """
+        _, self.model, self.data = self._initialize_workspace(
+            self.signal, self.background, self.nb, self.delta_nb
+        )
+
         if self.model is None or self.data is None:
             if not CLs_exp or not CLs_obs:
                 return -1
@@ -184,22 +230,6 @@ class PyhfInterface:
 
         return CLs
 
-    @staticmethod
-    def exponentiateNLL(twice_nll: float, doIt: bool) -> float:
-        """
-
-        Parameters
-        ----------
-        twice_nll: float
-            twice negative log likelihood
-        doIt: bool
-            if doIt, then compute likelihood from nll, else return nll
-        """
-        if twice_nll is None:
-            return 0.0 if doIt else 9000.0
-
-        return np.exp(-twice_nll / 2.0) if doIt else twice_nll / 2.0
-
     def likelihood(self, mu: float = 1.0, nll: bool = False, expected: bool = False) -> float:
         """
         Returns the value of the likelihood.
@@ -212,10 +242,12 @@ class PyhfInterface:
         nll: bool
             if true, return nll, not llhd
         expected: bool
-            if False, compute expected values, if True,
-            compute a priori expected, if "posteriori" compute posteriori
-            expected
+            if true, compute expected likelihood, else observed.
         """
+        _, self.model, self.data = self._initialize_workspace(
+            self.signal, self.background, self.nb, self.delta_nb, expected
+        )
+
         if self.model is None or self.data is None:
             return -1
         # set a threshold for mu
@@ -231,3 +263,92 @@ class PyhfInterface:
                 mu, self.data, self.model, return_fitted_val=True, maxiter=200
             )
             return np.exp(-twice_nllh / 2.0) if not nll else twice_nllh / 2.0
+
+    def sigma_mu(self, expected: bool = False):
+        """
+        get an estimate for the standard deviation of mu around mu_hat this is only used for
+        initialisation of the optimizer, so can be skipped in the first version,
+
+        expected:
+            get muhat for the expected likelihood, not observed.
+        """
+        workspace, self.model, self.data = self._initialize_workspace(
+            self.signal, self.background, self.nb, self.delta_nb, expected
+        )
+
+        if workspace is not None:
+            obss, bgs, bgVars, nsig = {}, {}, {}, {}
+            channels = workspace.channels
+            for chdata in workspace["channels"]:
+                if not chdata["name"] in channels:
+                    continue
+                bg, var = 0.0, 0.0
+                for sample in chdata["samples"]:
+                    if sample["name"] == "Bkg":
+                        tbg = sample["data"][0]
+                        bg += tbg
+                        hi = sample["modifiers"][0]["data"]["hi_data"][0]
+                        lo = sample["modifiers"][0]["data"]["lo_data"][0]
+                        delta = max((hi - bg, bg - lo))
+                        var += delta**2
+                    if sample["name"] == "bsm":
+                        ns = sample["data"][0]
+                        nsig[chdata["name"]] = ns
+                bgs[chdata["name"]] = bg
+                bgVars[chdata["name"]] = var
+            for chdata in workspace["observations"]:
+                if not chdata["name"] in channels:
+                    continue
+                obss[chdata["name"]] = chdata["data"][0]
+            vars = []
+            for c in channels:
+                # poissonian error
+                if nsig[c] == 0.0:
+                    nsig[c] = 1e-5
+                poiss = (obss[c] - bgs[c]) / nsig[c]
+                gauss = bgVars[c] / nsig[c] ** 2
+                vars.append(poiss + gauss)
+            var_mu = np.sum(vars)
+            n = len(obss)
+            return float(np.sqrt(var_mu / (n**2)))
+
+        else:
+            return (
+                float(np.sqrt(self.delta_nb**2 + self.nb) / self.signal)
+                if self.signal > 0.0
+                else 0.0
+            )
+
+    def muhat(self, expected: bool = False, allowNegativeSignals:bool = True):
+        """
+        get the value of mu for which the likelihood is maximal. this is only used for
+        initialisation of the optimizer, so can be skipped in the first version of the code.
+
+        Parameters
+        ----------
+        expected: bool
+            get muhat for the expected likelihood, not observed.
+        allowNegativeSignals: bool
+            if true, allow negative values for mu
+        """
+        workspace, self.model, self.data = self._initialize_workspace(
+                self.signal, self.background, self.nb, self.delta_nb, expected
+        )
+
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                "Values in x were outside bounds during a minimize step, clipping to bounds",
+            )
+
+            try:
+                bounds = self.model.config.suggested_bounds()
+                if allowNegativeSignals:
+                    bounds[self.model.config.poi_index] = (-5., 10. )
+                muhat, maxNllh = pyhf.infer.mle.fit(
+                        self.data, self.model, return_fitted_val=True, par_bounds = bounds
+                )
+                return muhat[self.model.config.poi_index]
+            except (pyhf.exceptions.FailedMinimization, ValueError) as e:
+                logging.getLogger("MA5").error(f"pyhf mle.fit failed {e}")
+                return float("nan")
