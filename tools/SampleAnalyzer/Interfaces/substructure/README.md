@@ -31,13 +31,13 @@ its name, needs to be executed during the analysis execution.
 ## Outline
 * [Examples](#examples)
   * [SoftDrop](#softdrop)
-  * [Filtering](#filter)
+  * [Filtering](#filtering)
   * [Energy Correlator](#energy-correlator)
   * [Nsubjettiness](#nsubjettiness)
-  * [Clustering](#cluster)
+  * [Clustering](#clustering)
   * [VariableR](#variabler)
-  * [Pruning](#pruner)
-  * [Reclustering](#recluster)
+  * [Pruning](#pruning)
+  * [Reclustering](#reclustering)
 
 # Examples
 The examples below are designed to illutrate only analysis header files, but can
