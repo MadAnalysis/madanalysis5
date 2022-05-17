@@ -43,8 +43,6 @@ namespace fastjet
     class PseudoJet;
 }
 
-using namespace std;
-
 namespace MA5{
     namespace Substructure {
 
