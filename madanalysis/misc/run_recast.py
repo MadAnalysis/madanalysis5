@@ -676,7 +676,6 @@ class RunRecast:
                     newfile.write(
                         '      if (!analyzer_' + analysis + '->Execute(mySample, myEvent)) continue;\n'
                     )
-            elif '!analyzer1' in line:
                 if self.TACO_output != '':
                     newfile.write("      // Fill TACO file\n")
                     newfile.write('      manager.DumpSR(TACO_file);\n')
