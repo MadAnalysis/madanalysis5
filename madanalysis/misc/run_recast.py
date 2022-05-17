@@ -412,12 +412,12 @@ class RunRecast:
                 ignore = False
                 newfile.write(line)
                 if self.TACO_output != "":
-                    newfile.write("    // Initialize TACO output\n")
-                    newfile.write(
-                        '    std::ofstream TACO_file;\n      TACO_file.open(\"../Output/' +
-                        self.TACO_output + '\");\n'
-                    )
-                    newfile.write('\n      manager.HeadSR(TACO_file);\n      TACO_file << std::endl;\n')
+                    if self.TACO_output != '':
+                        newfile.write("  // Initialize TACO output\n")
+                        newfile.write(
+                            '  std::ofstream TACO_file;\n  TACO_file.open(\"../Output/' + self.TACO_output + '\");\n'
+                        )
+                        newfile.write('  manager.HeadSR(TACO_file);\n  TACO_file << std::endl;\n')
             elif '//Getting pointer to the clusterer' in line:
                 ignore=False
                 newfile.write(line)
@@ -430,15 +430,16 @@ class RunRecast:
                         '      if (!analyzer_' + analysis + '->Execute(mySample, myEvent)) continue;\n'
                     )
                 if self.TACO_output != '':
-                    newfile.write("\n      // Fill TACO file\n")
+                    newfile.write("      // Fill TACO file\n")
                     newfile.write('      manager.DumpSR(TACO_file);\n')
             elif '    }' in line:
                 newfile.write(line)
-                ignore=False
-            elif 'manager.Finalize(mySamples, myEvent);' in line and self.TACO_output != '':
-                newfile.write(line);
-                newfile.write("    // Close TACO file\n")
-                newfile.write('  TACO_file.close();\n');
+                ignore = False
+            elif 'manager.Finalize(mySamples,myEvent);' in line and self.TACO_output != '':
+                newfile.write(line)
+                if self.TACO_output != '':
+                    newfile.write("  // Close TACO file\n")
+                    newfile.write('  TACO_file.close();\n')
             elif not ignore:
                 newfile.write(line)
         mainfile.close()
@@ -665,20 +666,26 @@ class RunRecast:
             elif 'if(!manager.PostInitialize()) return 1;' in line:
                 ignore = False
                 newfile.write(line)
-                if self.TACO_output!='':
-                    newfile.write('      std::ofstream TACO_file;\n      TACO_file.open(\"../Output/' + self.TACO_output+'\");\n')
-                    newfile.write('      manager.HeadSR(TACO_file);\n      TACO_file << std::endl;\n');
+                if self.TACO_output != '':
+                    newfile.write("  // Initialize TACO output\n")
+                    newfile.write('  std::ofstream TACO_file;\n  TACO_file.open(\"../Output/' + self.TACO_output+'\");\n')
+                    newfile.write('  manager.HeadSR(TACO_file);\n  TACO_file << std::endl;\n')
             elif '!analyzer_' in line and not ignore:
                 ignore=True
                 for analysis in analysislist:
-                    newfile.write('      if (!analyzer_'+analysis+'->Execute(mySample,myEvent)) continue;\n')
+                    newfile.write(
+                        '      if (!analyzer_' + analysis + '->Execute(mySample, myEvent)) continue;\n'
+                    )
             elif '!analyzer1' in line:
-                if self.TACO_output!='':
-                    newfile.write('\nmanager.DumpSR(TACO_file);\n');
+                if self.TACO_output != '':
+                    newfile.write("      // Fill TACO file\n")
+                    newfile.write('      manager.DumpSR(TACO_file);\n')
                 ignore=False
             elif 'manager.Finalize(mySamples,myEvent);' in line and self.TACO_output!='':
-                newfile.write(line);
-                newfile.write('  TACO_file.close();\n');
+                newfile.write(line)
+                if self.TACO_output != '':
+                    newfile.write("  // Close TACO file\n")
+                    newfile.write('  TACO_file.close();\n');
             elif not ignore:
                 newfile.write(line)
 
