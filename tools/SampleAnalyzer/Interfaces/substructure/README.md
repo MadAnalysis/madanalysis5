@@ -1,39 +1,51 @@
-# Usage of substructure module within MadAnalysis 5
+# Usage of the substructure module shipped with MadAnalysis 5
 
-Substructure module has been deviced to link with [SFS](https://arxiv.org/abs/2006.09387) where jet clustering
-information has been preserved throughout the analysis execution. This allows user to use `Substructure` interface
-to use `FastJet` libraries without dealing with the details about jets that are allocated in the memory. 
-`Substructure` interface uses cluster history to link `RecJetFormat` to `FastJet`'s `PseudoJet` format and converts
-two types seemlesly in the background.
+The Substructure module of MadAnalysis 5 has been designed to be used within the
+[SFS framework](https://arxiv.org/abs/2006.09387), in which jet clustering
+information is preserved and used throughout the analysis execution. This allows
+users to use the `Substructure` interface to the `FastJet` libraries without
+having to deal with how jets are treated internally (in particular with respect
+to memory management). The`Substructure` interface uses the clustering history
+to link `RecJetFormat` objects to `FastJet`'s `PseudoJet` objects, and converts
+the two types of object seamlesly in the background.
 
-Each class that has been constructed under `Substructure` namespace has been equiped with `Initialize` and `Execute`
-functions. `Initialize` function creates a memory allocation for the corresponding `FastJet` or `fjcontib` 
-backend. 
+Each class that has been constructed under the `Substructure` namespace has been
+equiped with an `Initialize` and an `Execute` function. The `Initialize`
+function creates a memory allocation for the corresponding `FastJet` (or
+`fjcontib` backend).
 
-**Note:** Initializing any given `Substructure` class durin execution of the analysis can slow down the code and 
-might create memory allocation problems. For the best results **always** initialize the substructure classes 
-during analysis initialization. Examples can be found below.
+**Note:** Initialising any given of the `Substructure` classes during the
+execution of the analysis can slow down the code and might create memory
+allocation problems. The best practice requires to **always** initialise the
+used substructure classes in the analysis initialisation routine. Examples are
+provided below.
 
-Depending on the nature of the tool `Execute` function can take `const RecJetFormat *` or 
-`std::vector<const RecJetFormat *>` where the former is designed for one jet and the latter is for a collection
-of jets. The action of the `Execute` function depends on the tool that in use. `Execute` function, as the name 
-suggests, needs to be executed during analysis execution.
+Depending on the nature of the jet substructure tool considered, the `Execute`
+function can take as an argument a `const RecJetFormat *` pointer or a
+`std::vector<const RecJetFormat *>` vector of pointers. The former possibility
+is designed to work with a single jet, whereas the latter is designed to work
+with a collection of jets. The precise action of the `Execute` function depends
+on the substructure tools to be used. The `Execute` function, as suggested by
+its name, needs to be executed during the analysis execution.
 
 ## Outline
 * [Examples](#examples)
   * [SoftDrop](#softdrop)
-  * [Filter](#filter)
+  * [Filtering](#filter)
   * [Energy Correlator](#energy-correlator)
   * [Nsubjettiness](#nsubjettiness)
-  * [Cluster](#cluster)
+  * [Clustering](#cluster)
   * [VariableR](#variabler)
-  * [Pruner](#pruner)
-  * [Recluster](#recluster)
+  * [Pruning](#pruner)
+  * [Reclustering](#recluster)
 
 # Examples
-The examples are designed to show only on a analysis header file but can easily be used separately in header and
-source file. It is easier to examplify the functionality through a single file. To create this environment 
-write a file named `substructure_example.ma5` with the commands as shown below
+The examples below are designed to illutrate only analysis header files, but can
+easily be generalised to be used separately in a header and a source file. We
+only made this choice as it is easier to examplify the functionalities through a
+single file. To create an environment compatible with the substructure module,
+we begin with writing a file named `substructure_example.ma5` including the
+commands shown below:
 ```
 # Define standard AK04 jet
 set main.fastsim.package = fastjet
@@ -48,17 +60,20 @@ set main.fastsim.ptmin = 20.0
 # Define AK08 jet
 define jet_algorithm AK08 antikt radius=0.8 ptmin=200
 
-# Define VariableR algorithm name: "varR"
+# Define a VariableR algorithm name "varR"
 define jet_algorithm varR VariableR rho=2000
 set varR.minR = 0
 set varR.maxR = 2
 set varR.ptmin = 20
 ```
-This will create a MadAnalysis 5 workspace which has the information for a primary jet named `AK04` clustered 
-with `antikt` algorithm `R=0.4` and `ptmin=20` GeV. Further more it will create two additional jets named `AK08`
-and `varR` where former is clustered with `antikt` algorithm `R=0.8` and `ptmin=200` and latter is created with
-`VariableR` algorithm. Each additional jet has been initialized in different method to examplify possible ways 
-of jet definitions. All available `jet_algorithm` definitions are shown with the default values in the table below
+This will generate a MadAnalysis 5 workspace which includes a definition of a
+primary jet class named `AK04`, and clustered according to the `antikt`
+algorithm with the parameters `R=0.4` and `ptmin=20` GeV. Furthermore, the
+commands lead to the initialisation of two additional jet classes named `AK08`
+and `varR`. In the former case, jets are clustered with the `antikt` algorithm
+with parameters `R=0.8` and `ptmin=200` GeV. The latter definition leads to a
+jet definition through the `VariableR` algorithm. All available `jet_algorithm`
+definitions are shown with their default values in the table below.
 
 |       Algorithm       | Parameters & Default values                                                        |
 |:---------------------:|:-----------------------------------------------------------------------------------|
@@ -69,16 +84,19 @@ of jet definitions. All available `jet_algorithm` definitions are shown with the
 |      `cdfjetclu`      | `radius=0.4`, `ptmin=5.`, `overlap=0.5`, `seed=1.`, `iratch=0.`                    |
 |     `cdfmidpoint`     | `radius=0.4`, `ptmin=5.`, `overlap=0.5`, `seed=1.`, `iratch=0.`, `areafraction=1.` |
 |       `siscone`       | `radius=0.4`, `ptmin=5.`, `overlap=0.5`, `input_ptmin=5.`, `npassmax=1.`           |
-|      `VariableR`      | `rho=2000.`, `minR=0.`, `maxR=2.`, `ptmin=20.` `exclusive=False` `clustertype=CALIKE` `strategy=Best` |
+|      `VariableR`      | `rho=2000.`, `minR=0.`, `maxR=2.`, `ptmin=20.` `exclusive=False`                   |
+|                       | `clustertype=CALIKE` `strategy=Best`                                               |
 
-This card can be executed as show below
+The above MadAnalysis 5 script can be executed as:
 ```bash
 cd madanalysis5
 ./bin/ma5 -Re my_workspace test substructure_example.ma5
 ```
-This will create a MadAnalysus 5 workspace in Expert mode. The workspace is named after `my_workspace` 
-and the analysis file is named as `test`. `test.h` and `test.cpp` files can be found under 
-`my_workspace/Build/SampleAnalyzer/User/Analyzer`. The Initial structure of `test.h` will be as follows
+This will create a MadAnalysus 5 workspace in the Expert mode of the code. The
+workspace is named `my_workspace` and the analysis file is named `test`. The
+`test.h` and `test.cpp` files can be found under
+  `my_workspace/Build/SampleAnalyzer/User/Analyzer`.
+The structure of `test.h` reads:
 
 `my_workspace/Build/SampleAnalyzer/User/Analyzer/test.h`:
 ```c++
@@ -104,20 +122,20 @@ class test : public AnalyzerBase
 
 #endif
 ```
-For the purposes of this example `test.cpp` will not be used; hence can be removed. We will only modify `test.h`
-file from now on.
+For the purposes of this example `test.cpp` is not be used and can hence be
+removed. We will only modify `test.h` from now on.
 
 [Back to top](#outline)
 
 ## SoftDrop:
 
-First one need to create the private `softdrop` object to be able to access it thorough different functions 
-within `test` class
+First we need to create a private `softdrop` object to be able to access it
+thorough the different functions of the `test` class
 ```c++
 private: 
     Substructure::SoftDrop softDrop;
 ```
-Then during the `Initialize` function this can be called as follows;
+Then during the `Initialize` function, it can be called as
 ```c++
 virtual bool Initialize(const MA5::Configuration& cfg, const std::map<std::string,std::string>& parameters)
 {
@@ -128,10 +146,12 @@ virtual bool Initialize(const MA5::Configuration& cfg, const std::map<std::strin
     return true;
 }
 ```
-Note that it is possible to define `SoftDrop` as pointer, `Substructure::SoftDrop* softDrop;`, but for that 
-case the class should be initialized with `new` keyword `softDrop = new Substructure::SoftDrop(beta, z_cut);`.
+Note that it is possible to define a `SoftDrop` object through a pointer,
+  `Substructure::SoftDrop* softDrop;`
+In this case, the class should be initialised as:
+  `softDrop = new Substructure::SoftDrop(beta, z_cut);`.
 
-In the following `SoftDrop` can be used during execution
+The `SoftDrop` object can then be further used during the execution of the code.
 ```c++
 virtual bool Execute(SampleFormat& sample, const EventFormat& event)
 {
@@ -147,17 +167,20 @@ virtual bool Execute(SampleFormat& sample, const EventFormat& event)
     return true;
 }
 ```
-Note that if `SoftDrop` is defined as a pointer it needs to be executed as `const RecJet softdrop_jet = softDrop->Execute(AK08[0]);`.
-Here `filter` function takes only "AK08" jets as defined [above](#examples) and removes the jets with $ p_T < 200 $ GeV
-and $ |\eta| > 2.5 $. In the following `softDrop` has been executed with the leading `AK08` jet resulting in 
-`const RecJetFormat *` (here we use `RecJet` as a shorthand which has been defined in `SampleAnalyzer` backend).
+Note that if `SoftDrop` is defined as a pointer it needs to be executed as
+  `const RecJet softdrop_jet = softDrop->Execute(AK08[0]);`.
+Here the `filter` function cleans the "AK08" jet collection defined
+[above](#examples) and removes from it any jet with pT<200 GeV and |eta|>2.5. In
+the following we apply the `softDrop` method on the leading `AK08` jet, which
+results in a `const RecJetFormat *` object, the `RecJet` definition used here
+having been defined in the `SampleAnalyzer` backend.
 
-**Note:** Since all the classes has been desinged in the same way from now on we will only show a usage example 
-without detailed explanation.
+**Note:** All substructure classes are desinged in the same way. Therefore, from
+now on we only show simple examples of usage without any detailed explanations.
 
 [Back to top](#outline)
 
-## Filter
+## Filtering
 ```c++
     private:
         Substructure::Filter JetFilter;
@@ -189,7 +212,7 @@ without detailed explanation.
                 const RecJet filteredJet = JetFilter.Execute(AK08[0]);
                 INFO << "pT(j_filt) = " << filteredJet->pt()  << " pT(j_1) = " << AK08[0]->pt() << endmsg;
             }
-            
+
             // RecJets shorthand for `std::vector<const RecJetFormat *>`
             RecJets AK08_filtered = JetFilter.Execute(AK08);
             for (MAuint32 i=0; i<AK08_filtered.size(); i++)
@@ -277,7 +300,7 @@ without detailed explanation.
         }
 ```
 [Back to top](#outline)
-## Cluster
+## Clustering
 ```c++
     private:
         Substructure::Cluster cluster;
@@ -357,7 +380,7 @@ without detailed explanation.
         }
 ```
 [Back to top](#outline)
-## Pruner
+## Pruning
 ```c++
     private:
         Substructure::Pruner pruner;
@@ -400,7 +423,7 @@ without detailed explanation.
 ```
 [Back to top](#outline)
 
-## Recluster
+## Reclustering
 ```c++
     private:
         Substructure::Recluster recluster;
