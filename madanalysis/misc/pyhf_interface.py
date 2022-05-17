@@ -22,7 +22,7 @@
 ################################################################################
 
 import logging, sys, scipy
-from typing import Sequence, Dict, Union, Optional
+from typing import Sequence, Dict, Union, Optional, Tuple
 from numpy import warnings, isnan
 import numpy as np
 from madanalysis.misc.histfactory_reader import HF_Background, HF_Signal
@@ -241,10 +241,11 @@ class PyhfInterface:
 
     def likelihood(
         self,
-        mu: float = 1.0,
-        nll: bool = False,
-        expected: bool = False,
-        iteration_threshold: int = 3,
+        mu: Optional[float] = 1.0,
+        nll: Optional[bool] = False,
+        expected: Optional[bool] = False,
+        mu_lim: Optional[Tuple[float, float]] = (-20., 40.),
+        iteration_threshold: Optional[int] = 3,
     ) -> float:
         """
         Returns the value of the likelihood.
@@ -258,6 +259,10 @@ class PyhfInterface:
             if true, return nll, not llhd
         expected: bool
             if true, compute expected likelihood, else observed.
+        mu_lim: Optional[Sequence[float,float]]
+            threshold on mu (POI). default [-20, 40]
+        iteration_threshold: int
+            maximum number of trials to find maximum log-likelihood
         """
         _, self.model, self.data = self._initialize_workspace(
             self.signal, self.background, self.nb, self.delta_nb, expected
@@ -266,8 +271,12 @@ class PyhfInterface:
         if self.model is None or self.data is None:
             return -1
         # set a threshold for mu
-        mu = max(mu, -20.0)
-        mu = min(mu, 40.0)
+        if not isinstance(mu, float):
+            mu = 1.0
+        if mu < mu_lim[0]:
+            mu = mu_lim[0]
+        elif mu > mu_lim[1]:
+            mu = mu_lim[1]
 
         def computellhd(model, data, bounds):
             try:
@@ -357,14 +366,16 @@ class PyhfInterface:
                 vars.append(poiss + gauss)
             var_mu = np.sum(vars)
             n = len(obss)
+            print(f"sigma_mu = {float(np.sqrt(var_mu / (n**2)))}")
             return float(np.sqrt(var_mu / (n**2)))
 
         else:
-            return (
+            res = (
                 float(np.sqrt(self.delta_nb**2 + self.nb) / self.signal)
                 if self.signal > 0.0
                 else 0.0
             )
+            return res
 
     def muhat(
         self,
