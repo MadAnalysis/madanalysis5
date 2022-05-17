@@ -101,42 +101,42 @@ namespace MA5 {
         //       Accessors      //
         //======================//
 
-        // accessor to top jet
+        // accessor to the top jet
         const RecJetFormat * HTT::top() const
         {
             RecJetFormat * NewJet = new RecJetFormat(const_cast<fastjet::PseudoJet&>(_tagger->t()));
             return NewJet;
         }
 
-        //accessor to bottom jet
+        // accessor to the bottom jet inside the top
         const RecJetFormat * HTT::b() const
         {
             RecJetFormat * NewJet = new RecJetFormat(const_cast<fastjet::PseudoJet&>(_tagger->b()));
             return NewJet;
         }
 
-        //accessor to W jet
+        // accessor to the W jet inside the top
         const RecJetFormat * HTT::W() const
         {
             RecJetFormat * NewJet = new RecJetFormat(const_cast<fastjet::PseudoJet&>(_tagger->W()));
             return NewJet;
         }
 
-        //accessor to leading subjet from W
+        // accessor to the leading subjet inside the W jet
         const RecJetFormat * HTT::W1() const
         {
             RecJetFormat * NewJet = new RecJetFormat(const_cast<fastjet::PseudoJet&>(_tagger->W1()));
             return NewJet;
         }
 
-        //accessor to second leading subjet from W
+        // accessor to second leading subjet inside the W jet
         const RecJetFormat * HTT::W2() const
         {
             RecJetFormat * NewJet = new RecJetFormat(const_cast<fastjet::PseudoJet&>(_tagger->W2()));
             return NewJet;
         }
 
-        // accessor to PT ordered subjets
+        // accessor to all PT-ordered subjets
         std::vector<const RecJetFormat *> HTT::subjets() const
         {
             std::vector<const RecJetFormat *> output;
@@ -156,22 +156,22 @@ namespace MA5 {
         // print tagger settings
         void HTT::get_settings() const { _tagger->get_setting(); }
 
-        // accessor to pruned mass
+        // accessor to the pruned mass
         MAfloat32 HTT::pruned_mass() const { return _tagger->pruned_mass(); }
 
-        // accessor to unfiltered mass
+        // accessor to the unfiltered mass
         MAfloat32 HTT::unfiltered_mass() const { return _tagger->unfiltered_mass(); }
 
-        // accessor to delta top
+        // accessor to the difference between the reconstructed top mass and the true top mass
         MAfloat32 HTT::delta_top() const { return _tagger->delta_top(); }
 
-        // Is given jet tagged
+        // Is a given jet top-tagged
         MAbool HTT::is_tagged() const { return _tagger->is_tagged(); }
 
-        // top mass window requirement passed?
+        // Is the top mass window requirement satisfied?
         MAbool HTT::is_maybe_top() const { return _tagger->is_maybe_top(); }
 
-        // 2D mass plane requirements passed?
+        // Are 2D mass plane requirements satisfied?
         MAbool HTT::is_masscut_passed() const { return _tagger->is_masscut_passed(); }
     }
 }

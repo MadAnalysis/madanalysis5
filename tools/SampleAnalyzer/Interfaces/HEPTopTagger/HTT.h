@@ -43,11 +43,11 @@ namespace MA5 {
         public:
 
             enum Mode {
-                EARLY_MASSRATIO_SORT_MASS,     // apply 2D mass plane requirements then select the candidate which minimizes |m_cand-mt|
-                LATE_MASSRATIO_SORT_MASS,      // select the candidate which minimizes |m_cand-mt|
-                EARLY_MASSRATIO_SORT_MODDJADE, // apply the 2D mass plane requirements then select the candidate with highest jade distance
-                LATE_MASSRATIO_SORT_MODDJADE,  //select the candidate with highest modified jade distance
-                TWO_STEP_FILTER                // only analyze the candidate built with the highest pT(t) after unclustering
+                EARLY_MASSRATIO_SORT_MASS,     // applies 2D mass plane requirements then select the candidate which minimizes |m_cand-mt|
+                LATE_MASSRATIO_SORT_MASS,      // selects the candidate which minimizes |m_cand-mt|
+                EARLY_MASSRATIO_SORT_MODDJADE, // applies the 2D mass plane requirements then select the candidate with highest jade distance
+                LATE_MASSRATIO_SORT_MODDJADE,  // selects the candidate with highest modified jade distance
+                TWO_STEP_FILTER                // only analyzes the candidate built with the highest pT(t) after unclustering
             };
 
             struct InputParameters {
@@ -82,8 +82,8 @@ namespace MA5 {
 
                 // set top mass ratio range
                 MAfloat32 fw = 0.15;
-                MAfloat32 mass_ratio_range_min = (1-fw)*80.379/172.9;
-                MAfloat32 mass_ratio_range_max = (1+fw)*80.379/172.9;
+                MAfloat32 mass_ratio_range_min = (1.-fw)*W_mass/top_mass;
+                MAfloat32 mass_ratio_range_max = (1.+fw)*W_mass/top_mass;
 
                 //mass ratio cuts
                 MAfloat32 m23cut = 0.35;

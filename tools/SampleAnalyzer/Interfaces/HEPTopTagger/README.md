@@ -1,15 +1,16 @@
 # HEPTopTagger for MadAnalysis 5
-This module is based on `Substructure` module and constructed
-with the same principle where class is consist of a `Initialize`
-and `Execute` function. However due to the complexity of HTT 
-algorithm `Execute` function does not return anything but it includes 
-various accessors. This example follows the `Substructure` module. Thus
-for details see `tools/SampleAnalyzer/Interfaces/substructure/README.md`.
+This module is based on the `Substructure` module of MadAnalysis 5, and is thus
+constructed following the same principle. The corresponding class consists of an
+`Initialize` and an `Execute` function. However, due to the complexity of the
+HEPTopTgger algorithm, the `Execute` function does not return anything. Instead
+it is equipped with various accessors.
+For details see `tools/SampleAnalyzer/Interfaces/substructure/README.md`.
 
 ## Installation
-Simply use `install HEPTopTagger` command through MadAnalysis 5 interface. 
-Please make sure that `FastJet` and `FastJet contrib` has already been installed
-and available to MadAnalysis 5.
+Simply call the `install HEPTopTagger` command through the MadAnalysis 5 command
+line interface. Please make sure that the `FastJet` and `FastJet contrib`
+packages have already been installed, and that they are available from
+MadAnalysis 5.
 
 ## Examples
 ```c++
@@ -71,8 +72,8 @@ namespace MA5
 
             // set top mass ratio range
             parameters.fw = 0.15;
-            parameters.mass_ratio_range_min = (1-parameters.fw)*80.379/172.9;
-            parameters.mass_ratio_range_max = (1+parameters.fw)*80.379/172.9;
+            parameters.mass_ratio_range_min = (1-parameters.fw)*parameters.W_mass/parameters.top_mass;
+            parameters.mass_ratio_range_max = (1+parameters.fw)*parameters.W_mass/parameters.top_mass;
 
             //mass ratio cuts
             parameters.m23cut = 0.35;
