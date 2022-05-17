@@ -323,10 +323,8 @@ class RunRecast:
         self.main.script = script_mode
         old_fastsim = self.main.fastsim.package
         self.main.fastsim.package="fastjet"
+        output_name = "SFS_events.lhe" + self.main.archi_info.has_zlib * ".gz"
         if self.main.recasting.store_events:
-            output_name = "SFS_events.lhe"
-            if self.main.archi_info.has_zlib:
-                output_name += ".gz"
             self.logger.debug("   Setting the output LHE file :"+output_name)
 
         # Initializing the JobWriter
@@ -339,7 +337,7 @@ class RunRecast:
         self.logger.info("   Copying 'SampleAnalyzer' source files...")
         if not jobber.CopyLHEAnalysis():
             return False
-        if not jobber.CreateBldDir(analysisName="SFSRun",outputName="SFSRun.saf"):
+        if not jobber.CreateBldDir(analysisName = "SFSRun", outputName = "SFSRun.saf"):
             return False
         if not jobber.WriteSelectionHeader(self.main):
             return False
@@ -354,14 +352,20 @@ class RunRecast:
         if not jobber.WriteMakefiles():
             return False
         # Copying the analysis files
-        analysisList = open(self.dirname+'_SFSRun/Build/SampleAnalyzer/User/Analyzer/analysisList.h','w')
+        analysisList = open(
+            self.dirname + '_SFSRun/Build/SampleAnalyzer/User/Analyzer/analysisList.h', 'w'
+        )
         for ana in analysislist:
-            analysisList.write('#include "SampleAnalyzer/User/Analyzer/'+ana+'.h"\n')
+            analysisList.write('#include "SampleAnalyzer/User/Analyzer/' + ana + '.h"\n')
         analysisList.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"\n')
         analysisList.write('#include "SampleAnalyzer/Commons/Service/LogStream.h"\n\n')
-        analysisList.write('// -----------------------------------------------------------------------------\n')
+        analysisList.write(
+            '// -----------------------------------------------------------------------------\n'
+        )
         analysisList.write('// BuildUserTable\n')
-        analysisList.write('// -----------------------------------------------------------------------------\n')
+        analysisList.write(
+            '// -----------------------------------------------------------------------------\n'
+        )
         analysisList.write('void BuildUserTable(MA5::AnalyzerManager& manager)\n')
         analysisList.write('{\n')
         analysisList.write('  using namespace MA5;\n')
@@ -402,28 +406,39 @@ class RunRecast:
                 if self.main.recasting.store_events:
                     newfile.write('  //Getting pointer to the writer\n')
                     newfile.write('  WriterBase* writer1 = \n')
-                    newfile.write('      manager.InitializeWriter("lhe","'+output_name+'");\n')
+                    newfile.write('      manager.InitializeWriter("lhe","' + output_name + '");\n')
                     newfile.write('  if (writer1==0) return 1;\n\n')
-            elif '// Post initialization (creates the new output directory structure)' in line and self.TACO_output!='':
-                newfile.write('    std::ofstream out;\n      out.open(\"../Output/' + self.TACO_output+'\");\n')
-                newfile.write('\n      manager.HeadSR(out);\n      out << std::endl;\n');
+            elif 'if(!manager.PostInitialize()) return 1;' in line:
+                ignore = False
+                newfile.write(line)
+                if self.TACO_output != "":
+                    newfile.write("    // Initialize TACO output\n")
+                    newfile.write(
+                        '    std::ofstream TACO_file;\n      TACO_file.open(\"../Output/' +
+                        self.TACO_output + '\");\n'
+                    )
+                    newfile.write('\n      manager.HeadSR(TACO_file);\n      TACO_file << std::endl;\n')
             elif '//Getting pointer to the clusterer' in line:
                 ignore=False
                 newfile.write(line)
             elif '!analyzer1' in line and not ignore:
-                ignore=True
+                ignore = True
                 if self.main.recasting.store_events:
-                    newfile.write('      writer1->WriteEvent(myEvent,mySample);\n')
+                    newfile.write('      writer1->WriteEvent(myEvent, mySample);\n')
                 for analysis in analysislist:
-                    newfile.write('      if (!analyzer_'+analysis+'->Execute(mySample,myEvent)) continue;\n')
-                if self.TACO_output!='':
-                    newfile.write('\n      manager.DumpSR(out);\n');
+                    newfile.write(
+                        '      if (!analyzer_' + analysis + '->Execute(mySample, myEvent)) continue;\n'
+                    )
+                if self.TACO_output != '':
+                    newfile.write("\n      // Fill TACO file\n")
+                    newfile.write('      manager.DumpSR(TACO_file);\n')
             elif '    }' in line:
                 newfile.write(line)
                 ignore=False
-            elif 'manager.Finalize(mySamples,myEvent);' in line and self.TACO_output!='':
+            elif 'manager.Finalize(mySamples, myEvent);' in line and self.TACO_output != '':
                 newfile.write(line);
-                newfile.write('  out.close();\n');
+                newfile.write("    // Close TACO file\n")
+                newfile.write('  TACO_file.close();\n');
             elif not ignore:
                 newfile.write(line)
         mainfile.close()
@@ -646,24 +661,24 @@ class RunRecast:
                     newfile.write('  AnalyzerBase* analyzer_'+analysis+'=\n')
                     newfile.write('    manager.InitializeAnalyzer(\"'+analysis+'\",\"'+analysis+'.saf\",'+\
                        'prm'+analysis+');\n')
-                    newfile.write(  '  if (analyzer_'+analysis+'==0) return 1;\n\n')
-            elif '// Post initialization (creates the new output directory structure)' in line:
-                ignore=False
+                    newfile.write('  if (analyzer_'+analysis+'==0) return 1;\n\n')
+            elif 'if(!manager.PostInitialize()) return 1;' in line:
+                ignore = False
                 newfile.write(line)
                 if self.TACO_output!='':
-                    newfile.write('      std::ofstream out;\n      out.open(\"../Output/' + self.TACO_output+'\");\n')
-                    newfile.write('      manager.HeadSR(out);\n      out << std::endl;\n');
+                    newfile.write('      std::ofstream TACO_file;\n      TACO_file.open(\"../Output/' + self.TACO_output+'\");\n')
+                    newfile.write('      manager.HeadSR(TACO_file);\n      TACO_file << std::endl;\n');
             elif '!analyzer_' in line and not ignore:
                 ignore=True
                 for analysis in analysislist:
                     newfile.write('      if (!analyzer_'+analysis+'->Execute(mySample,myEvent)) continue;\n')
             elif '!analyzer1' in line:
                 if self.TACO_output!='':
-                    newfile.write('\nmanager.DumpSR(out);\n');
+                    newfile.write('\nmanager.DumpSR(TACO_file);\n');
                 ignore=False
             elif 'manager.Finalize(mySamples,myEvent);' in line and self.TACO_output!='':
                 newfile.write(line);
-                newfile.write('  out.close();\n');
+                newfile.write('  TACO_file.close();\n');
             elif not ignore:
                 newfile.write(line)
 
@@ -748,7 +763,8 @@ class RunRecast:
         for analysis in analyses:
             shutil.move(self.dirname+'_RecastRun/Output/SAF/PADevents/'+analysis+'_0',self.dirname+'/Output/SAF/'+setname+'/'+analysis)
         if self.TACO_output!='':
-            filename  = '.'.join(self.TACO_output.split('.')[:-1]) + '_' + card.replace('tcl','') + self.TACO_output.split('.')[-1]
+            filename = '.'.join(self.TACO_output.split('.')[:-1]) + '_' + card.replace('tcl', '') + \
+                       self.TACO_output.split('.')[-1]
             shutil.move(self.dirname+'_RecastRun/Output/'+self.TACO_output,self.dirname+'/Output/SAF/'+setname+'/'+filename)
         return True
 
