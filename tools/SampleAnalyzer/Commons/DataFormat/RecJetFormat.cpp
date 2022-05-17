@@ -36,8 +36,8 @@ namespace MA5 {
         std::vector<const RecJetFormat *> output_jets;
                 try {
             if (!RecJetFormat::has_exclusive_subjets())
-                throw EXCEPTION_ERROR("This Jet structure has no implementation for exclusive_subjets",
-                                      "Exclusive subjets only exists for Jets clustered in the sense of the exclusive algorithm.", 0);
+                throw EXCEPTION_ERROR("This jet structure does not contain exclusive_subjets",
+                                      "Exclusive subjets only exist for jets clustered through an exclusive algorithm.", 0);
         } catch (const std::exception& err) {
                 MANAGE_EXCEPTION(err);
                 return output_jets;
@@ -58,8 +58,8 @@ namespace MA5 {
         std::vector<const RecJetFormat *> output_jets;
         try {
             if (!RecJetFormat::has_exclusive_subjets())
-                throw EXCEPTION_ERROR("This Jet structure has no implementation for exclusive_subjets",
-                                      "Exclusive subjets only exists for Jets clustered in the sense of the exclusive algorithm.", 0);
+                throw EXCEPTION_ERROR("This jet structure does not contain exclusive_subjets",
+                                      "Exclusive subjets only exist for jets clustered through an exclusive algorithm.", 0);
         } catch (const std::exception& err) {
                 MANAGE_EXCEPTION(err);
                 return output_jets;
