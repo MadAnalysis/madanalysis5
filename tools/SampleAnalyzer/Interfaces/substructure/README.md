@@ -84,8 +84,7 @@ definitions are shown with their default values in the table below.
 |      `cdfjetclu`      | `radius=0.4`, `ptmin=5.`, `overlap=0.5`, `seed=1.`, `iratch=0.`                    |
 |     `cdfmidpoint`     | `radius=0.4`, `ptmin=5.`, `overlap=0.5`, `seed=1.`, `iratch=0.`, `areafraction=1.` |
 |       `siscone`       | `radius=0.4`, `ptmin=5.`, `overlap=0.5`, `input_ptmin=5.`, `npassmax=1.`           |
-|      `VariableR`      | `rho=2000.`, `minR=0.`, `maxR=2.`, `ptmin=20.` `exclusive=False`                   |
-|                       | `clustertype=CALIKE` `strategy=Best`                                               |
+|      `VariableR`      | `rho=2000.`, `minR=0.`, `maxR=2.`, `ptmin=20.` `exclusive=False` `clustertype=CALIKE` `strategy=Best` |
 
 The above MadAnalysis 5 script can be executed as:
 ```bash
