@@ -154,11 +154,5 @@ class slSingleRegion(TACOBase):
         return interface.findMuHat([self.nsignal()], allowNegativeSignals=allowNegativeSignals)
 
     def getUpperLimit(self, expected: bool = False):
-        if expected:
-            data = Data(
-                self.experimental_data[1], *self.experimental_data[1:], nsignal=self.nsignal()
-            )
-        else:
-            data = self.data
         interface = UpperLimitComputer()
-        return interface.getUpperLimitOnMu(data, marginalize=self.marginalize, expected=expected)
+        return interface.getUpperLimitOnMu(self.data, marginalize=self.marginalize, expected=expected)
