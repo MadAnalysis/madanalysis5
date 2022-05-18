@@ -24,13 +24,15 @@
 #ifndef MADANALYSIS5_SOFTDROP_H
 #define MADANALYSIS5_SOFTDROP_H
 
-// FastJet headers
-#include "fastjet/contrib/SoftDrop.hh"
-
 // SampleAnalyser headers
-#include "SampleAnalyzer/Interfaces/fastjet/ClusterBase.h"
+#include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
+#include "SampleAnalyzer/Commons/DataFormat/RecJetFormat.h"
 
-using namespace std;
+namespace fastjet {
+    namespace contrib {
+        class SoftDrop;
+    }
+}
 
 namespace MA5 {
     namespace Substructure {
@@ -71,7 +73,7 @@ namespace MA5 {
                 SoftDrop() {}
 
                 // Destructor
-                virtual ~SoftDrop() {}
+                ~SoftDrop();
 
                 //============================//
                 //        Initialization      //
@@ -85,40 +87,17 @@ namespace MA5 {
                  )
                 { Initialize(beta, symmetry_cut, R0); }
 
-                void Initialize(MAfloat32 beta, MAfloat32 symmetry_cut, MAfloat32 R0=1.)
-                { softDrop_ = new fastjet::contrib::SoftDrop(beta, symmetry_cut, R0); }
+                void Initialize(MAfloat32 beta, MAfloat32 symmetry_cut, MAfloat32 R0=1.);
 
                 //=======================//
                 //        Execution      //
                 //=======================//
                 
                 // Execute with a single jet
-                const RecJetFormat * Execute(const RecJetFormat *jet)
-                {
-                    fastjet::PseudoJet sd_jet = (*softDrop_)(jet->pseudojet());
-                    return ClusterBase().__transform_jet(sd_jet);
-                }
+                const RecJetFormat * Execute(const RecJetFormat *jet) const;
 
                 // Execute with a list of jets
-                std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets)
-                {
-                    std::vector<const RecJetFormat *> output_jets;
-                    for (auto &jet: jets)
-                        output_jets.push_back(Execute(jet));
-
-                    // Sort with respect to jet pT
-                    std::sort(
-                        output_jets.begin(),
-                        output_jets.end(),
-                        [](const RecJetFormat *j1, const RecJetFormat *j2)
-                        {
-                            return (j1->pt() > j2->pt());
-                        }
-                    );
-
-                    return output_jets;
-                }
-
+                std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets) const;
         };
     }
 }

@@ -24,32 +24,12 @@
 #ifndef MADANALYSIS5_VARIABLER_H
 #define MADANALYSIS5_VARIABLER_H
 
-// FastJet headers
-#include "fastjet/contrib/VariableRPlugin.hh"
-
 // SampleAnalyser headers
-#include "SampleAnalyzer/Interfaces/fastjet/ClusterBase.h"
-
-using namespace std;
+#include "SampleAnalyzer/Interfaces/substructure/ClusterBase.h"
 
 namespace MA5 {
     namespace Substructure {
         class VariableR : public ClusterBase {
-
-            //---------------------------------------------------------------------------------
-            //                                 data members
-            //---------------------------------------------------------------------------------
-            protected:
-                fastjet::contrib::VariableRPlugin::ClusterType clusterType_; // whether to use CA-like, kT-like,
-                                                            // or anti-kT-like distance measure
-                                                            // (this value is the same as the p exponent in
-                                                            // generalized-kt, with anti-kt = -1.0, CA = 0.0, and
-                                                            // kT = 1.0)
-
-                fastjet::contrib::VariableRPlugin::Strategy strategy_;
-                // decodes which algorithm to apply for the clustering
-
-
             public:
 
                 enum ClusterType {CALIKE, KTLIKE, AKTLIKE};
@@ -66,7 +46,7 @@ namespace MA5 {
                 VariableR() {}
 
                 /// Destructor
-                virtual ~VariableR() {}
+                ~VariableR() {}
 
                 //============================//
                 //        Initialization      //
@@ -96,37 +76,7 @@ namespace MA5 {
                     Substructure::VariableR::Strategy strategy = Substructure::VariableR::Best,
                     MAfloat32 ptmin = 0.,
                     MAbool isExclusive = false
-                )
-                {
-                    if (clusterType == Substructure::VariableR::CALIKE)
-                        clusterType_ = fastjet::contrib::VariableRPlugin::CALIKE;
-                    else if (clusterType == Substructure::VariableR::KTLIKE)
-                        clusterType_ = fastjet::contrib::VariableRPlugin::KTLIKE;
-                    else if (clusterType == Substructure::VariableR::AKTLIKE)
-                        clusterType_ = fastjet::contrib::VariableRPlugin::AKTLIKE;
-
-                    if (strategy == Substructure::VariableR::Best)
-                        strategy_ = fastjet::contrib::VariableRPlugin::Best;
-                    else if (strategy == Substructure::VariableR::N2Tiled)
-                        strategy_ = fastjet::contrib::VariableRPlugin::N2Tiled;
-                    else if (strategy == Substructure::VariableR::N2Plain)
-                        strategy_ = fastjet::contrib::VariableRPlugin::N2Plain;
-                    else if (strategy == Substructure::VariableR::NNH)
-                        strategy_ = fastjet::contrib::VariableRPlugin::NNH;
-                    else if (strategy == Substructure::VariableR::Native)
-                        strategy_ = fastjet::contrib::VariableRPlugin::Native;
-
-                    ptmin_ = ptmin; isExclusive_ = isExclusive;
-
-                    JetDefPlugin_ = new fastjet::contrib::VariableRPlugin(
-                            rho, minR, maxR, clusterType_, false, strategy_
-                    );
-                    isPlugin_ = true;
-
-                    /// Note that pre-clustering is deprecated and will likely be
-                    /// removed in a future releasse of this contrib.
-                    /// (precluster = false at the moment)
-                }
+                );
         };
     }
 }

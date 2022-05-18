@@ -24,14 +24,13 @@
 #ifndef MADANALYSIS5_FILTER_H
 #define MADANALYSIS5_FILTER_H
 
-// FastJet headers
-#include "fastjet/tools/Filter.hh"
-
 // SampleAnalyser headers
-#include "SampleAnalyzer/Interfaces/fastjet/ClusterBase.h"
-#include "SampleAnalyzer/Interfaces/fastjet/Selector.h"
+#include "SampleAnalyzer/Interfaces/substructure/Commons.h"
+#include "SampleAnalyzer/Interfaces/substructure/Selector.h"
 
-using namespace std;
+namespace fastjet {
+    class Filter;
+}
 
 namespace MA5 {
     namespace Substructure {
@@ -54,11 +53,9 @@ namespace MA5 {
             //                                 data members
             //---------------------------------------------------------------------------------
             protected:
-                fastjet::Selector selector_; // the Selector applied to compute the kept subjets
 
                 /// Jet definition
                 fastjet::JetDefinition* JetDefinition_; // the jet definition applied to obtain the subjets
-                MAbool isJetDefined_;
 
                 MAfloat32 rho_; // if non-zero, backgruond-subtract each subjet befor selection
                 MAfloat32 Rfilt_; // the filtering radius
@@ -73,7 +70,7 @@ namespace MA5 {
                 Filter() {}
 
                 /// Destructor
-                virtual ~Filter() {}
+                ~Filter();
 
                 //============================//
                 //        Initialization      //
@@ -86,60 +83,22 @@ namespace MA5 {
                 Filter(MAfloat32 Rfilt, Selector selector, MAfloat32 rho=0.)
                 { Initialize(Rfilt, selector, rho); }
 
-                void Initialize(Algorithm algorithm, MAfloat32 radius, Selector selector, MAfloat32 rho=0.)
-                {
-                    JetDefinition_ = new fastjet::JetDefinition(
-                            ClusterBase().__get_clustering_algorithm(algorithm), radius
-                    );
-                    selector_ = selector.__get(); Rfilt_=-1.; rho_=rho; isJetDefined_=true;
-                    init_filter();
-                }
-
-                void Initialize(MAfloat32 Rfilt, Selector selector, MAfloat32 rho=0.)
-                {
-                    selector_ = selector.__get(); Rfilt_=Rfilt; rho_=rho; isJetDefined_=false;
-                    init_filter();
-                }
+                void Initialize(Algorithm algorithm, MAfloat32 radius, Selector selector, MAfloat32 rho=0.);
+                void Initialize(MAfloat32 Rfilt, Selector selector, MAfloat32 rho=0.);
 
                 //=======================//
                 //        Execution      //
                 //=======================//
 
                 // Method to filter a given jet.
-                const RecJetFormat* Execute(const RecJetFormat *jet)
-                {
-                    fastjet::PseudoJet filtered_jet = (*JetFilter_)(jet->pseudojet());
-                    return ClusterBase().__transform_jet(filtered_jet);
-                }
+                const RecJetFormat* Execute(const RecJetFormat *jet) const;
 
                 // Method to filter all the jets in a vector
-                std::vector<const RecJetFormat*> Execute(std::vector<const RecJetFormat *> &jets)
-                {
-                    std::vector<const RecJetFormat *> output_jets;
-                    for (auto &jet: jets)
-                        output_jets.push_back(Execute(jet));
-
-                    std::sort(
-                        output_jets.begin(),
-                        output_jets.end(),
-                        [](const RecJetFormat *j1, const RecJetFormat *j2)
-                        {
-                            return (j1->pt() > j2->pt());
-                        }
-                    );
-
-                    return output_jets;
-                }
+                std::vector<const RecJetFormat*> Execute(std::vector<const RecJetFormat *> &jets) const;
 
             private:
 
-                void init_filter()
-                {
-                    if (isJetDefined_)
-                        JetFilter_ = new fastjet::Filter(*JetDefinition_, selector_, rho_);
-                    else
-                        JetFilter_ = new fastjet::Filter(Rfilt_, selector_, rho_);
-                }
+                void init_filter(Selector selector, MAbool isJetDefined);
 
 
         };

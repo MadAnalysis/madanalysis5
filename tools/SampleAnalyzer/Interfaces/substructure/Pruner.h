@@ -24,13 +24,12 @@
 #ifndef MADANALYSIS5_PRUNER_H
 #define MADANALYSIS5_PRUNER_H
 
-// FastJet headers
-#include "fastjet/tools/Pruner.hh"
-
 // SampleAnalyser headers
-#include "SampleAnalyzer/Interfaces/fastjet/ClusterBase.h"
+#include "SampleAnalyzer/Interfaces/substructure/Commons.h"
 
-using namespace std;
+namespace fastjet {
+    class JetDefinition;
+}
 
 namespace MA5 {
     namespace Substructure {
@@ -52,7 +51,7 @@ namespace MA5 {
                 Pruner() {}
 
                 /// Destructor
-                virtual ~Pruner() {}
+                ~Pruner();
 
                 //============================//
                 //        Initialization      //
@@ -73,47 +72,23 @@ namespace MA5 {
                 { Initialize(algorithm, -1., zcut, Rcut_factor); }
 
                 // Initialize with all the arguments. Note that if R <= 0 max allowable radius will be used
-                void Initialize(Substructure::Algorithm algorithm, MAfloat32 R, MAfloat32 zcut, MAfloat32 Rcut_factor)
-                {
-                    fastjet::JetAlgorithm algo_ = ClusterBase().__get_clustering_algorithm(algorithm);
-
-                    if (R<=0.)
-                        JetDefinition_ = new fastjet::JetDefinition(algo_, fastjet::JetDefinition::max_allowable_R);
-                    else
-                        JetDefinition_ = new fastjet::JetDefinition(algo_, R);
-
-                    zcut_ = zcut; Rcut_factor_=Rcut_factor;
-                }
+                void Initialize(
+                    Substructure::Algorithm algorithm, MAfloat32 R, MAfloat32 zcut, MAfloat32 Rcut_factor
+                );
 
                 //=======================//
                 //        Execution      //
                 //=======================//
 
                 // Method to prune a given jet with respect to initialization parameters
-                const RecJetFormat * Execute(const RecJetFormat *jet)
-                {
-                    fastjet::PseudoJet pruned_jet = __prune(jet->pseudojet());
-                    return ClusterBase().__transform_jet(pruned_jet);
-                }
+                const RecJetFormat * Execute(const RecJetFormat *jet) const;
 
                 // Method to prune each given jet individually with respect to initialization parameters
-                std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets)
-                {
-                    std::vector<const RecJetFormat *> output_jets;
-                    for (auto &jet: jets)
-                        output_jets.push_back(Execute(jet));
-                    return output_jets;
-                }
+                std::vector<const RecJetFormat *> Execute(std::vector<const RecJetFormat *> &jets) const;
 
             private:
 
-                fastjet::PseudoJet __prune(fastjet::PseudoJet jet)
-                {
-                    fastjet::Pruner pruner(
-                            *const_cast<const fastjet::JetDefinition*>(JetDefinition_), zcut_, Rcut_factor_
-                    );
-                    return pruner(jet);
-                }
+                fastjet::PseudoJet __prune(fastjet::PseudoJet jet) const;
 
         };
     }

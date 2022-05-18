@@ -28,14 +28,17 @@
 #include <vector>
 #include <algorithm>
 
-// FastJet headers
-#include "fastjet/contrib/EnergyCorrelator.hh"
-
 // SampleAnalyser headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecJetFormat.h"
 
 using namespace std;
+
+namespace fastjet {
+    namespace contrib {
+        class EnergyCorrelator;
+    }
+}
 
 namespace MA5 {
     namespace Substructure {
@@ -70,7 +73,7 @@ namespace MA5 {
             EnergyCorrelator() {}
 
             /// Destructor
-            virtual ~EnergyCorrelator() {}
+            ~EnergyCorrelator();
 
             /// constructs an N-point correlator with angular exponent beta,
             /// using the specified choice of energy and angular measure as well
@@ -87,27 +90,10 @@ namespace MA5 {
                     MAfloat32 beta,
                     EnergyCorrelator::Measure measure = EnergyCorrelator::Measure::pt_R,
                     EnergyCorrelator::Strategy strategy = EnergyCorrelator::Strategy::storage_array
-            )
-            {
-                fastjet::contrib::EnergyCorrelator::Measure measure_;
-                fastjet::contrib::EnergyCorrelator::Strategy strategy_;
-
-                if (measure == EnergyCorrelator::Measure::pt_R)
-                    measure_ = fastjet::contrib::EnergyCorrelator::Measure::pt_R;
-                else if (measure == EnergyCorrelator::Measure::E_theta)
-                    measure_ = fastjet::contrib::EnergyCorrelator::Measure::E_theta;
-                else
-                    measure_ = fastjet::contrib::EnergyCorrelator::Measure::E_inv;
-
-                if (strategy == EnergyCorrelator::Strategy::storage_array)
-                    strategy_ = fastjet::contrib::EnergyCorrelator::Strategy::storage_array;
-                else strategy_ = fastjet::contrib::EnergyCorrelator::Strategy::slow;
-
-                _EC = new fastjet::contrib::EnergyCorrelator(N, beta, measure_, strategy_);
-            }
+            );
 
             // Method to execute with a single jet
-            MAdouble64 Execute(const RecJetFormat* jet) { return (*_EC)(jet->pseudojet()); }
+            MAdouble64 Execute(const RecJetFormat* jet) const;
         };
     }
 }
