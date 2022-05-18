@@ -26,7 +26,7 @@ from madanalysis.misc.simplified_likelihood import Data, LikelihoodComputer, Upp
 from typing import Text
 
 
-class SLSingleRegion(TACOBase):
+class slSingleRegion(TACOBase):
     def __init__(
         self,
         analysis: Text,
@@ -40,14 +40,14 @@ class SLSingleRegion(TACOBase):
         lumi: float,
         sqrts: float = 13.0,
     ):
-        super(SLSingleRegion, self).__init__(analysis, regionID, xsection)
+        super(slSingleRegion, self).__init__(analysis, regionID, xsection)
         self.xsection.sqrts = sqrts
         self.Nf = Nf
         self.N0 = N0
         self.lumi = lumi
 
-        self.data = Data(nobs, nb, deltanb, nsignal=self.nsignal())
-        self.data_exp = Data(nb, nb, deltanb, nsignal=self.nsignal())
+        self.experimental_data = [nobs, nb, deltanb]
+        self.data = Data(*self.experimental_data, nsignal=self.nsignal())
 
         self.marginalize = False
         self.cachedLlhds = {"exp": {}, "obs": {}}
@@ -66,7 +66,8 @@ class SLSingleRegion(TACOBase):
         """
         for testing purposes
         """
-        return UpperLimitComputer().computeCLs(self.data, expected=expected)
+        interface = UpperLimitComputer()
+        return interface.computeCLs(self.data, expected=expected)
 
     def likelihood(
         self,
@@ -81,8 +82,6 @@ class SLSingleRegion(TACOBase):
         ----------
         mu: (float) POI signal strength
         expected: if true, compute expected likelihood, else observed.
-                 if "posteriori", compute a posteriori expected likelihood
-                 (FIXME do we need this?)
         nll: if True, return the negative log likelihood instead of the likelihood
         useCached: if true reuse cached results
 
@@ -90,24 +89,27 @@ class SLSingleRegion(TACOBase):
         -------
         likelihood with respect to given POI
         """
+
         if useCached:
             cached = None
             if expected:
                 cached = self.cachedLlhds["exp"].get(mu, None)
             else:
                 cached = self.cachedLlhds["obs"].get(mu, None)
-
             if cached is not None:
                 return cached
 
-        computer = LikelihoodComputer(self.data)
-        llhd = computer.likelihood(self.nsignal(mu), marginalize=self.marginalize, nll=nll)
-
         if expected:
+            data = Data(
+                self.experimental_data[1], *self.experimental_data[1:], nsignal=self.nsignal()
+            )
+            interface = LikelihoodComputer(self.data)
+            llhd = interface.likelihood(self.nsignal(mu), marginalize=self.marginalize, nll=nll)
             cached = self.cachedLlhds["exp"][mu] = llhd
         else:
+            interface = LikelihoodComputer(self.data)
+            llhd = interface.likelihood(self.nsignal(mu), marginalize=self.marginalize, nll=nll)
             cached = self.cachedLlhds["obs"][mu] = llhd
-
         return llhd
 
     def sigma_mu(self, expected: bool = False, **kwargs) -> float:
@@ -122,8 +124,16 @@ class SLSingleRegion(TACOBase):
                  if "posteriori", compute a posteriori expected likelihood
                  (FIXME do we need this?)
         """
-        computer = LikelihoodComputer(self.data_exp if expected else self.data)
-        return computer.getSigmaMu(1.0, self.nsignal(), computer.findThetaHat(self.nsignal()))
+
+        if expected:
+            data = Data(
+                self.experimental_data[1], *self.experimental_data[1:], nsignal=self.nsignal()
+            )
+        else:
+            data = self.data
+        interface = LikelihoodComputer(data)
+        theta_hat = interface.findThetaHat(self.nsignal())
+        return interface.getSigmaMu(1.0, self.nsignal(), theta_hat)
 
     def muhat(self, expected: bool = False, allowNegativeSignals: bool = True) -> float:
         """
@@ -134,5 +144,21 @@ class SLSingleRegion(TACOBase):
         expected
         allowNegativeSignals: if true, then also allow for negative values
         """
-        computer = LikelihoodComputer(self.data_exp if expected else self.data)
-        return computer.findMuHat(self.nsignal(), allowNegativeSignals)
+        if expected:
+            data = Data(
+                self.experimental_data[1], *self.experimental_data[1:], nsignal=self.nsignal()
+            )
+        else:
+            data = self.data
+        interface = LikelihoodComputer(data)
+        return interface.findMuHat([self.nsignal()], allowNegativeSignals=allowNegativeSignals)
+
+    def getUpperLimit(self, expected: bool = False):
+        if expected:
+            data = Data(
+                self.experimental_data[1], *self.experimental_data[1:], nsignal=self.nsignal()
+            )
+        else:
+            data = self.data
+        interface = UpperLimitComputer()
+        return interface.getUpperLimitOnMu(data, marginalize=self.marginalize, expected=expected)
