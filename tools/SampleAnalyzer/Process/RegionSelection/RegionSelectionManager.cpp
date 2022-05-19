@@ -167,13 +167,13 @@ void RegionSelectionManager::WriteHistoDefinition(SAFWriter& output)
 void RegionSelectionManager::HeadSR(std::ostream &outwriter, const std::string &ananame)
 {
   for (MAuint32 i=0;i<regions_.size();i++)
-    outwriter <<  " " << ananame << "-" << regions_[i]->GetName();
+    outwriter <<  "," << ananame << "-" << regions_[i]->GetName();
 }
 
 
 void RegionSelectionManager::DumpSR(std::ostream &outwriter)
 {
   for (MAuint32 i=0;i<regions_.size();i++)
-    outwriter<< "  " << regions_[i]->IsSurviving();
+    outwriter<< "," << regions_[i]->IsSurviving();
 }
 
