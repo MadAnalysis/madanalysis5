@@ -935,7 +935,7 @@ class PlotFlow:
         outputPy.write('    ')
         if not is_logx:
             outputPy.write('#')
-        outputPy.write('plt.gca().set_xscale("log",nonposx="clip")\n')
+        outputPy.write('plt.gca().set_xscale("log",nonpositive="clip")\n')
         outputPy.write('\n')
 
 
@@ -950,7 +950,7 @@ class PlotFlow:
         outputPy.write('    ')
         if not is_logy:
             outputPy.write('#')
-        outputPy.write('plt.gca().set_yscale("log",nonposy="clip")\n')
+        outputPy.write('plt.gca().set_yscale("log",nonpositive="clip")\n')
         outputPy.write('\n')
 
  
