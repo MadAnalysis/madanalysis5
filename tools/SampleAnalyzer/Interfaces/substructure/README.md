@@ -169,7 +169,7 @@ virtual bool Execute(SampleFormat& sample, const EventFormat& event)
 Note that if `SoftDrop` is defined as a pointer it needs to be executed as
   `const RecJet softdrop_jet = softDrop->Execute(AK08[0]);`.
 Here the `filter` function cleans the "AK08" jet collection defined
-[above](#examples) and removes from it any jet with pT<200 GeV and |eta|>2.5. In
+[above](#examples) and removes from it any jet with $p_T<200$ GeV and $|\eta|>2.5$. In
 the following we apply the `softDrop` method on the leading `AK08` jet, which
 results in a `const RecJetFormat *` object, the `RecJet` definition used here
 having been defined in the `SampleAnalyzer` backend.
