@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2020 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -110,7 +110,7 @@ class DetectRoot:
         msg = ''
 
         # Trying to call root-config with which
-        result = ShellCommand.Which('root-config')
+        result = ShellCommand.Which('root-config', mute = True)
         if len(result)==0:
             msg = 'ROOT module called "root-config" is not detected.\n'\
                   +'Two explanations :n'\

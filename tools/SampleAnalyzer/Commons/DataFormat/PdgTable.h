@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2020 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -59,6 +59,8 @@ class PdgTable {
   void Print() const;
 
   const PdgDataFormat& operator[](const MAint32 Pdgid) const;
+
+  const PdgDataFormat& GetParticle(const MAint32 Pdgid, MAbool verbose=true) const;
 
   private:
 

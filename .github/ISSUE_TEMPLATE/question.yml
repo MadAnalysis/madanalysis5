@@ -1,0 +1,34 @@
+name: Question
+description: Have a question about MadAnalysis 5? Let us help!
+labels: "question"
+
+body:
+  - type: markdown
+    id: description
+    attributes:
+      value: |
+        ## Before posting a question
+
+        Search existing [GitHub issues](https://github.com/MadAnalysis/madanalysis5/issues) or [Launchpad questions](https://answers.launchpad.net/madanalysis5) to make sure the issue does not already exist.
+  
+        For general technical details check out our [documentation](http://arxiv.org/abs/1206.1599), [tutorials](https://madanalysis.irmp.ucl.ac.be/wiki/tutorials), [FAQs about Normal Mode](http://madanalysis.irmp.ucl.ac.be/wiki/FAQNormalMode) and reference cards provided under `madanalysis5/doc` folder.
+        
+        If your question involves software issues, please include your system settings as shown below;
+        
+        **System Settings:**
+
+        - Operating system: (e.g. macOS v12.1)
+        - Python version: (print the output of `python --version`)
+        - gcc/c++ version: (print the output of `g++ --version` or `gcc --version`)
+        - MadAnalysis 5 version: (print the output of `./bin/ma5 --version`)
+        - If applicable, versions for other third party software i.e. Fastjet, Delphes, pyhf etc.
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: |
+        How can we help?
+        
+        * **Please use [Markdown syntax](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).**
+    validations:
+      required: true

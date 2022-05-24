@@ -33,11 +33,10 @@ and call immediately the command line interface scripts"""
 
 # Checking if the correct release of Python is installed
 import sys
-if not sys.version_info[0] == 2 or sys.version_info[1] < 6:
+if not sys.version_info[0] == 3 or sys.version_info[1] < 7:
     sys.exit('Python release '+ sys.version + ' is detected.\n' + \
-    'MadAnalysis 5 works only with python 2.6 ' + \
-    'or later (but not python 3.X).\n' + \
-    'Please upgrade your version of python.')
+    'MadAnalysis 5 works only with python 3.7 ' + \
+    'or later \n Please upgrade your python version.')
 
 
 ################################################################################
@@ -47,11 +46,11 @@ class Argument():
    
     @staticmethod
     def PrintSyntax():
-        print "Syntax of the program: ./makedoc <arg>"
-        print "where <arg> can be:"
-        print "  help      ->  displying this message"
-        print "  clean     ->  removing temporary files (aux, bbl, log, ..."
-        print "  mrproper  ->  removing PDF files and temporary files"
+        print("Syntax of the program: ./makedoc <arg>")
+        print("where <arg> can be:")
+        print("  help      ->  displying this message")
+        print("  clean     ->  removing temporary files (aux, bbl, log, ...")
+        print("  mrproper  ->  removing PDF files and temporary files")
 
     @staticmethod
     def Clean():
@@ -106,14 +105,14 @@ class MakeLatex():
 
         # Show
         if show:
-             print '      command line: '+' '.join(theCommands)
+             print('      command line: '+' '.join(theCommands))
 
         # Launching the commands
         try:
             result=subprocess.Popen(theCommands,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=workfolder)
         except:
             if not mute:
-                print '      ERROR: impossible to execute the commands: '+' '.join(theCommands)
+                print('      ERROR: impossible to execute the commands: '+' '.join(theCommands))
             return False, []
 
         # Getting stdout
@@ -137,7 +136,7 @@ class MakeLatex():
         # Getting results
         if result.returncode!=0:
             if not mute:
-                print '      ERROR: command '+str(theCommands)+' is not found'
+                print('      ERROR: command '+str(theCommands)+' is not found')
             return False, msg2
 
         # Return results
@@ -152,21 +151,21 @@ class MakeLatex():
         test, result = MakeLatex.ExecuteCommand(['which','pdflatex'],mute=True)
         ok = ok and test and (len(result)!=0)
         if (not test) or len(result)==0:
-            print "  ERROR: pdflatex is not found"
+            print("  ERROR: pdflatex is not found")
 
         # Detection of biblatex
         result = MakeLatex.ExecuteCommand(['which','bibtex'],mute=True)
         ok = ok and test and (len(result)!=0)
         if (not test) or len(result)==0:
-            print "  ERROR: bibtex is not found"
+            print("  ERROR: bibtex is not found")
         return ok
  
     def Execute(self):
-        log = file(self.logfilename,'w')
+        log = open(self.logfilename,'w')
         log.write('BUILDING THE LATEX FILE\n')
         log.write(self.texfilename+'\n\n')
 
-        print '    - step 1/4: producing .aux file...'
+        print('    - step 1/4: producing .aux file...')
         log.write('\n')
         log.write('*****************************************************\n')
         log.write(' STEP 1/4\n') 
@@ -182,7 +181,7 @@ class MakeLatex():
         bibname = bibname.split('/')[-1]
         bibtex_cmd  = ['bibtex',bibname]
 
-        print '    - step 2/4: producing .bbl file with references...'
+        print('    - step 2/4: producing .bbl file with references...')
         log.write('\n')
         log.write('*****************************************************\n')
         log.write(' STEP 2/4\n') 
@@ -192,7 +191,7 @@ class MakeLatex():
         if not test:
             return False
 
-        print '    - step 3/4: creating the reference labels...'
+        print('    - step 3/4: creating the reference labels...')
         log.write('\n')
         log.write('*****************************************************\n')
         log.write(' STEP 3/4 \n') 
@@ -202,7 +201,7 @@ class MakeLatex():
         if not test:
             return False
 
-        print '    - step 4/4: including the reference labels...'
+        print('    - step 4/4: including the reference labels...')
         log.write('\n')
         log.write('*****************************************************\n')
         log.write(' STEP 4/4 \n') 
@@ -213,10 +212,10 @@ class MakeLatex():
             return False
 
         log.close()
-        print '    - finalizing the PDF file'
+        print('    - finalizing the PDF file')
         pdfname = self.texfilename[:-3]+'pdf'
         if not os.path.isfile(pdfname):
-            print '      ERROR: PDF file is not found: '+pdfname
+            print('      ERROR: PDF file is not found: '+pdfname)
             return False
         os.rename(pdfname,self.outfilename)
         return True
@@ -239,12 +238,12 @@ if len(arguments)==1:
         Argument.PrintSyntax()
         sys.exit()
     else:
-        print 'ERROR: wrong arguments'
+        print('ERROR: wrong arguments')
         Argument.PrintSyntax()
         sys.exit()
 elif len(arguments)>=1:
-    print 'ERROR: wrong arguments'
-    PrintSyntax()
+    print('ERROR: wrong arguments')
+    Argument.PrintSyntax()
     sys.exit()
 
 # Defining colors
@@ -255,58 +254,58 @@ endmsg = '\x1b[0m'
 
 
 # The beginning
-print ""
-print cyan+"Welcome to MA5 reference-card maker!"+endmsg
-print ""
+print("")
+print(cyan+"Welcome to MA5 reference-card maker!"+endmsg)
+print("")
 
 # Finding the doc folder
 import os
 docpath = os.path.split(os.path.realpath( __file__ ))[0]
 if not os.path.isdir(docpath):
-    print red+'ERROR: '+endmsg+'the documentation folder is not here:\n'+docpath
-    print ""
+    print(red+'ERROR: '+endmsg+'the documentation folder is not here:\n'+docpath)
+    print("")
     sys.exit()
-print cyan+"- Documentation folder to process is here: "+endmsg+docpath
+print(cyan+"- Documentation folder to process is here: "+endmsg+docpath)
 
 # Detecting pdflatex and bibtex
-print cyan+"- Detecting of the presence of the Latex programs..."+endmsg
+print(cyan+"- Detecting of the presence of the Latex programs..."+endmsg)
 if not MakeLatex.CheckPrograms():
-    print red+'Aborted'
-    print ""
+    print(red+'Aborted')
+    print("")
     sys.exit() 
 ok = True
 
 # Building normal-mode reference-card
-print cyan+"- Building reference card for the normal mode..."+endmsg
+print(cyan+"- Building reference card for the normal mode..."+endmsg)
 maker=MakeLatex(docpath+'/normal_mode/main_normal.tex',\
                 docpath+'/normal_mode/main_normal.bib',\
                 docpath+'/normal_mode.pdf',\
                 docpath+'/normal_mode.log',\
                 docpath+'/normal_mode/')
 if not maker.Execute():
-    print red+"      ERROR:"+endmsg+" Impossible to build the reference card for the normal mode!" 
-    print "      see the log file: "+docpath+'/normal_mode.log'  
+    print(red+"      ERROR:"+endmsg+" Impossible to build the reference card for the normal mode!")
+    print("      see the log file: "+docpath+'/normal_mode.log')
     ok = False
 
 # Building expert-mode reference-card
-print cyan+"- Building reference card for the expert mode..."+endmsg
+print(cyan+"- Building reference card for the expert mode..."+endmsg)
 maker=MakeLatex(docpath+'/expert_mode/main_expert.tex',\
                 docpath+'/expert_mode/main_expert.bib',\
                 docpath+'/expert_mode.pdf',\
                 docpath+'/expert_mode.log',\
                 docpath+'/expert_mode/')
 if not maker.Execute():
-    print red+"      ERROR:"+endmsg+" Impossible to build the reference card for the expert mode!" 
-    print "      see the log file: "+docpath+'/expert_mode.log'  
+    print(red+"      ERROR:"+endmsg+" Impossible to build the reference card for the expert mode!")
+    print("      see the log file: "+docpath+'/expert_mode.log')
     ok = False
 
 # It's the end of the word as we know it!
 if ok:
-    print green+"Success!"+endmsg
-    print ""
-    print cyan+"Goodbye! Have a good day!"+endmsg
-    print ""  
+    print(green+"Success!"+endmsg)
+    print("")
+    print(cyan+"Goodbye! Have a good day!"+endmsg)
+    print("")
 else:
-    print red+"Aborted"+endmsg
-    print ""
+    print(red+"Aborted"+endmsg)
+    print("")
 

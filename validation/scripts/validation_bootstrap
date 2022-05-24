@@ -1,0 +1,309 @@
+#!/usr/bin/env python3
+
+################################################################################
+#
+#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
+#  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
+#
+#  This file is part of MadAnalysis 5.
+#  Official website: <https://github.com/MadAnalysis/madanalysis5>
+#
+#  MadAnalysis 5 is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  MadAnalysis 5 is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
+#
+################################################################################
+
+import argparse
+import os, sys
+from typing import Text
+
+try:
+    import ma5_validation as ma5
+except ModuleNotFoundError as err:
+    sys.exit("The validation interface has not been found. Please install the interface first. "
+             "For details, see `validation/README.md`")
+
+
+def run_scripts(path: Text):
+    """
+    A generic function to run MadAnalysis 5 scripts
+
+    Parameters
+    ----------
+    path : Text
+        Path to the folder containing the scripts, or the full path of the script itself.
+
+    Raises
+    ------
+    MadAnalysis5ExecutionError
+        If execution has failed.
+    MadAnalysis5Error
+        If check has failed.
+    For other exceptions please see `ma5_validation.utils.JobHandler` internal exceptions.
+    """
+
+    def execute(script: ma5.utils.ScriptReader):
+        script.decode()
+        job = ma5.utils.JobHandler(script)
+        if not job.execute():
+            raise ma5.system.MadAnalysis5ExecutionError("MadAnalysis execution has failed.")
+        if not job.check():
+            raise ma5.system.MadAnalysis5Error("MadAnalysis has raised an error.")
+
+    if os.path.isdir(path):
+        for script in [f for f in os.listdir(path) if f.endswith(".ma5")]:
+            execute(ma5.utils.ScriptReader(os.path.join(path, script)))
+    else:
+        if path.endswith(".ma5"):
+            execute(ma5.utils.ScriptReader(path))
+        else:
+            raise ma5.system.InvalidScript(f"Unknown file format: {path}")
+
+
+def main(args):
+
+    ma5.utils.PathHandler.set_ma5path(args.MA5DIR)
+    ma5.utils.PathHandler.set_logpath(args.LOGDIR)
+
+    list_of_samples = [
+        "mg5_ttbar2l.lhco",
+        "MinBias.pileup",
+        "ttbar_sl_1.lhe",
+        "ttbar_sl_2.lhe",
+        "zz.lhe.gz",
+        "mg5_zll.lhco",
+        "ttbar_fh.lhe.gz",
+        "ttbar_sl_1.lhe.gz",
+        "ttbar_sl_2.lhe.gz",
+        "wplus_prod.hepmc.gz",
+    ]
+
+    def install_samples():
+        smp_installation = ma5.utils.InstallationHandler("samples")
+        job = ma5.utils.JobHandler(smp_installation)
+        if not (job.execute() and job.check()):
+            raise ma5.system.MadAnalysis5Error("A problem has occurred during the installation of the samples.")
+
+    # Check if samples are installed
+    if not os.path.isdir(ma5.utils.PathHandler.SMP_PATH):
+        install_samples()
+    else:
+        # Satisfy minimum requirement for samples
+        for smp in list_of_samples:
+            if smp not in os.listdir(ma5.utils.PathHandler.SMP_PATH):
+                install_samples()
+                break
+
+    session_info, archi_info = ma5.utils.PathHandler.check_ma5_setup()
+
+    if not archi_info.has_zlib:
+        zlib_installation = ma5.utils.InstallationHandler("zlib")
+        job = ma5.utils.JobHandler(zlib_installation)
+        if not (job.execute() and job.check()):
+            raise ma5.system.MadAnalysis5Error("A problem has occurred during the installation of zlib.")
+        archi_info.has_zlib = True
+
+    # Validate Parton Level
+    if args.PARTON:
+        run_scripts(ma5.utils.PathHandler.PARTON_LEVEL_PATH)
+
+    # Validate Hadron Level
+    if args.HADRON:
+        run_scripts(ma5.utils.PathHandler.HADRON_LEVEL_PATH)
+
+    # Validate Reco level
+    if args.RECO:
+        run_scripts(ma5.utils.PathHandler.RECO_LEVEL_PATH)
+
+    # Validate Expert Mode
+    if args.EXPERT:
+        if not archi_info.has_fastjet:
+            job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("fastjet"))
+            if not (job.execute() and job.check()):
+                raise ma5.system.MadAnalysis5Error(
+                    "A problem has occurred during the installation of fastjet."
+                )
+            archi_info.has_fastjet = True
+        run_scripts(ma5.utils.PathHandler.EXPERT_LEVEL_PATH)
+
+    # Validate custom script
+    if args.CUSTOM is not None:
+        run_scripts(args.CUSTOM)
+
+    # Validate Fastjet
+    if args.FASTJET:
+        if not archi_info.has_fastjet:
+            job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("fastjet"))
+            if not (job.execute() and job.check()):
+                raise ma5.system.MadAnalysis5Error(
+                    "A problem has occurred during the installation of fastjet ."
+                )
+            archi_info.has_fastjet = True
+        run_scripts(ma5.utils.PathHandler.FASTJET_INTERFACE_PATH)
+
+    # Validate Delphes
+    if args.DELPHES:
+        if not archi_info.has_delphes:
+            if not archi_info.has_root:
+                job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("root"))
+                if not (job.execute() and job.check()):
+                    raise ma5.system.MadAnalysis5Error(
+                        "A problem has occurred during the installation of root."
+                    )
+                archi_info.has_root = True
+            job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("delphes"))
+            if not (job.execute() and job.check()):
+                raise ma5.system.MadAnalysis5Error(
+                    "A problem has occurred during the installation of delphes."
+                )
+            archi_info.has_delphes = True
+        run_scripts(ma5.utils.PathHandler.DELPHES_INTERFACE_PATH)
+
+    # Validate PAD
+    if args.PAD:
+        if not archi_info.has_delphes:
+            if not archi_info.has_root:
+                job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("root"))
+                if not (job.execute() and job.check()):
+                    raise ma5.system.MadAnalysis5Error(
+                        "A problem has occurred during the installation of root."
+                    )
+                archi_info.has_root = True
+            job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("delphes"))
+            if not (job.execute() and job.check()):
+                raise ma5.system.MadAnalysis5Error(
+                    "A problem has occurred during the installation of delphes."
+                )
+            archi_info.has_delphes = True
+        if not session_info.has_pad:
+            job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("PAD"))
+            if not (job.execute() and job.check()):
+                raise ma5.system.MadAnalysis5Error(
+                    "A problem has occurred during the installation of the PAD."
+                )
+            session_info.has_pad = True
+            session_info.has_padsfs = True
+        run_scripts(ma5.utils.PathHandler.PAD_INTERFACE_PATH)
+
+    # Validate PADForSFS
+    if args.PADForSFS:
+        if not archi_info.has_fastjet:
+            job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("fastjet"))
+            if not (job.execute() and job.check()):
+                raise ma5.system.MadAnalysis5Error(
+                    "A problem has occurred during the installation of fastjet."
+                )
+            archi_info.has_fastjet = True
+        if not session_info.has_padsfs:
+            job = ma5.utils.JobHandler(ma5.utils.InstallationHandler("PADForSFS"))
+            if not (job.execute() and job.check()):
+                raise ma5.system.MadAnalysis5Error(
+                    "A problem has occurred during the installation of the PAD for SFS."
+                )
+            session_info.has_padsfs = True
+        run_scripts(ma5.utils.PathHandler.PAD_INTERFACE_PATH)
+
+
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(description="Validation module executor for MadAnalysis 5")
+
+    paths = parser.add_argument_group("Path handling.")
+    paths.add_argument(
+        "--ma5-dir",
+        type=str,
+        dest="MA5DIR",
+        default=ma5.utils.PathHandler.MA5PATH,
+        help=f"MadAnalysis 5 directory path. " f"Default `{ma5.utils.PathHandler.MA5PATH}`",
+    )
+    paths.add_argument(
+        "--log-dir",
+        type=str,
+        dest="LOGDIR",
+        default=ma5.utils.PathHandler.LOGPATH,
+        help=f"Log directory path. " f"Default `{ma5.utils.PathHandler.LOGPATH}`",
+    )
+
+    validation = parser.add_argument_group("Validation Handling")
+    validation.add_argument(
+        "-P",
+        "--parton-level",
+        dest="PARTON",
+        action="store_true",
+        default=False,
+        help="Validate normal mode in parton level.",
+    )
+    validation.add_argument(
+        "-H",
+        "--hadron-level",
+        dest="HADRON",
+        action="store_true",
+        default=False,
+        help="Validate normal mode in hadron level.",
+    )
+    validation.add_argument(
+        "-R",
+        "--reco-level",
+        dest="RECO",
+        action="store_true",
+        default=False,
+        help="Validate normal mode in reco level.",
+    )
+    validation.add_argument(
+        "-e",
+        "--expert-mode",
+        dest="EXPERT",
+        action="store_true",
+        default=False,
+        help="Validate expert mode.",
+    )
+    validation.add_argument(
+        "--fastjet",
+        dest="FASTJET",
+        action="store_true",
+        default=False,
+        help="Validate FastJet interface.",
+    )
+    validation.add_argument(
+        "--delphes",
+        dest="DELPHES",
+        action="store_true",
+        default=False,
+        help="Validate Delphes interface.",
+    )
+    validation.add_argument(
+        "--pad",
+        dest="PAD",
+        action="store_true",
+        default=False,
+        help="Validate PAD interface including PAD.",
+    )
+    validation.add_argument(
+        "--padforsfs",
+        dest="PADForSFS",
+        action="store_true",
+        default=False,
+        help="Validate PADForSFS interface including PADForSFS.",
+    )
+    validation.add_argument(
+        "--custom-script",
+        dest="CUSTOM",
+        default=None,
+        type=str,
+        help="Validate a custom MadAnalysis 5 script. Script needs to be written in `ma5_validation` syntax.",
+    )
+
+    args = parser.parse_args()
+
+    main(args)

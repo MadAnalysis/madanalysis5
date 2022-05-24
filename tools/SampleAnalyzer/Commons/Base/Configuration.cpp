@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2020 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -40,8 +40,8 @@ using namespace MA5;
 // Initializing static data members
 // -----------------------------------------------------------------------------
 // DO NOT TOUCH THESE LINES
-const std::string Configuration::sampleanalyzer_version_ = "1.10.2";
-const std::string Configuration::sampleanalyzer_date_    = "2022/02/15";
+const std::string Configuration::sampleanalyzer_version_ = "2.0";
+const std::string Configuration::sampleanalyzer_date_    = "2022/05/24";
 // DO NOT TOUCH THESE LINES
 
 // -----------------------------------------------------------------------------

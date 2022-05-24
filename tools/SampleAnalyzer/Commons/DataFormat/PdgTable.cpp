@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2020 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -87,4 +87,21 @@ const PdgDataFormat& PdgTable::operator[](const MAint32 Pdgid) const
   }    
    
   return it->second;
+}
+
+
+const PdgDataFormat& PdgTable::GetParticle(const MAint32 Pdgid, MAbool verbose) const
+{
+    std::map<MAint32, PdgDataFormat>::const_iterator it = Table_.find(Pdgid);
+    try
+    {
+        if (it==Table_.end()) throw EXCEPTION_WARNING_VERBOSE("PDG ID not found ["+CONVERT->ToString(Pdgid)+"]","",0,verbose);
+    }
+    catch(const std::exception& e)
+    {
+        MANAGE_EXCEPTION(e);
+        return empty_;
+    }
+
+    return it->second;
 }

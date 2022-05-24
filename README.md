@@ -17,6 +17,7 @@
  - [Troubleshootings and bug reports](#troubleshootings-and-bug-reports)
  - [Supported third party software](#supported-third-party-software)
  - [Authors](#authors)
+ - [Developer's Guide: How to contribute to MadAnalysis 5](./doc/CONTRIBUTING.md)
  - [Our famous last words](#our-famous-last-words)
  - [Credits](#credits)
 
@@ -51,8 +52,8 @@ MadAnalysis 5 requires several external libraries in order to properly run:
    sufficient to issue in a shell `$ python --version`.
 
  - Either the GNU GCC compiler, or the Apple clang compiler. MadAnalysis 5 has been validated:
-     - with the versions `4.3.X` and `4.4.X` of the GCC compiler. The GCC compiler can be downloaded from [this website](http://gcc.gnu.org/).
-     - with the version 12.0.5 (clang-1205.0.22.9) of the clang compiler.
+     - with the version (minimum) `7.0` of the GCC compiler. The GCC compiler can be downloaded from [this website](http://gcc.gnu.org/).
+     - with the version 13.1.6 (clang-1316.0.21.2) of the clang compiler.
 
 To benefit from all options coming with the MadAnalysis 5 program, the following
 (optional) libraries have to be installed on the system:
@@ -62,7 +63,8 @@ also be downloaded by by typing `ma5> install zlib` through MadAnalysis interfac
    downloaded from [this link](http://fastjet.fr/). This package can also be installed by 
   typing `ma5> install fastjet` in MadAnalysis.
  - LaTeX and `pdflatex` compilers for report rendering.
-
+ - All Python libraries that MadAnalysis 5 requires can be installed by typing 
+`$ python3 -m pip install -r requirements.txt`.
 
 ### Downloading and installing the MadAnalysis 5 package
 

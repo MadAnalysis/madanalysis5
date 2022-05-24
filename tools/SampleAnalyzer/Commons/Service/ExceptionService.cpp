@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2020 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -45,6 +45,8 @@ void ExceptionService::Display(const ExceptionType& e)
                                 e.GetLine(),
                                 e.GetMsg(),
                                 e.GetFunction());
+
+  display = e.verbose() ? display : false;
   // Veto ?
   if (!display) return;
 

@@ -2,7 +2,7 @@
 
 ################################################################################
 #  
-#  Copyright (C) 2012-2020 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -38,6 +38,7 @@ if  sys.version_info[0] != 3 or sys.version_info[1] <= 6:
     'MadAnalysis 5 works only with Python version 3.7 and more recent version.\n' + \
     'Please upgrade your Python installation.')
 
+
 # Checking that the 'six' package is present
 try:
     import six
@@ -67,8 +68,8 @@ sys.path.insert(0, servicedir)
 
 # Release version
 # Do not touch it !!!!!  
-version = "1.10.2"
-date = "2022/02/15"
+version = "2.0"
+date = "2022/05/24"
 
 # Loading the MadAnalysis session
 import madanalysis.core.launcher

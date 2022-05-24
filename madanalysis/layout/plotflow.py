@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2020 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -936,7 +936,7 @@ class PlotFlow:
         outputPy.write('    ')
         if not is_logx:
             outputPy.write('#')
-        outputPy.write('plt.gca().set_xscale("log",nonposx="clip")\n')
+        outputPy.write('plt.gca().set_xscale("log",nonpositive="clip")\n')
         outputPy.write('\n')
 
 
@@ -951,7 +951,7 @@ class PlotFlow:
         outputPy.write('    ')
         if not is_logy:
             outputPy.write('#')
-        outputPy.write('plt.gca().set_yscale("log",nonposy="clip")\n')
+        outputPy.write('plt.gca().set_yscale("log",nonpositive="clip")\n')
         outputPy.write('\n')
 
  

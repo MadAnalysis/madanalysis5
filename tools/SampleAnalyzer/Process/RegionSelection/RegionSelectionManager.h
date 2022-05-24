@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2020 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -210,6 +210,49 @@ class RegionSelectionManager
     // Creating the cut
     cutmanager_.AddCut(myname,myregions);
   }
+
+
+  void AddCut(const std::string&name, std::vector<std::string> SRnames)
+  {
+    // The name of the cut
+    std::string myname=name;
+    if(myname.compare("")==0)
+    {
+      std::stringstream numstream;
+      numstream << cutmanager_.GetCuts().size();
+      myname = "Cut" + numstream.str();
+    }
+
+    // Creating the vector of SR of interests
+    std::vector<RegionSelection*> myregions;
+    for(MAuint32 i=0; i<SRnames.size(); i++)
+    {
+      for(MAuint32 j=0; j<regions_.size(); j++)
+      {
+        if(regions_[j]->GetName().compare(SRnames[i])==0)
+        {
+          myregions.push_back(regions_[j]);
+          break;
+        }
+      }
+
+      try
+      {
+        if (myregions.size()==i) throw EXCEPTION_WARNING("Assigning the cut \"" + name +
+                                                         "\" to the non-existing signal region \"" + SRnames[i] +
+                                                         "\"","",0);
+      }
+      catch (const std::exception& e)
+      {
+        MANAGE_EXCEPTION(e);
+      }
+    }
+
+    // Creating the cut
+    cutmanager_.AddCut(myname,myregions);
+
+  }
+
 
   /// Apply a cut
   MAbool ApplyCut(MAbool, std::string const&);

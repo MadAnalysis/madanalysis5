@@ -150,4 +150,3 @@ Update notes for MadAnalysis 5 (in reverse time order)
                                 - Merging check plots
 
 1.0.0   (2012/06/08) ma5team: Official release of version 1.0.0 
-

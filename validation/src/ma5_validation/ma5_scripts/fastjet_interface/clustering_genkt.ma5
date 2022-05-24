@@ -1,0 +1,16 @@
+#TITLE fastsim with genkt algorithm
+#MODE RECO
+
+set main.fastsim.package = fastjet
+set main.fastsim.algorithm = genkt
+set main.fastsim.exclusive = false
+set main.fastsim.p = -1.0
+set main.fastsim.ptmin = 5.0
+set main.fastsim.radius = 1.0
+display main
+plot MET
+
+import $MA5PATH/samples/*hep*
+import $MA5PATH/samples/*hepmc*
+submit
+#END

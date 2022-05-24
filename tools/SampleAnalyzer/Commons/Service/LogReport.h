@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2020 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -84,7 +84,7 @@ class LogReport
  public:
 
   /// Constructor withtout argument
-  LogReport() : GeneralCounter_(0), GlobalThreshold_(1000000), MsgThreshold_(10)
+  LogReport() : GeneralCounter_(0), GlobalThreshold_(1000000), MsgThreshold_(5)
   {}
 
   /// Destructor
@@ -95,7 +95,7 @@ class LogReport
   void Reset()
   { 
     GlobalThreshold_ = 1000000;
-    MsgThreshold_ = 10;
+    MsgThreshold_ = 5;
     GeneralCounter_ = 0;
     MsgTable_.clear();
     Name_="";
@@ -136,7 +136,7 @@ class LogReport
                                                           LogMsgValue() ));
       if (!test.second)
       {
-        std::cout << "ERREUR" << std::endl;
+        std::cout << "ERROR" << std::endl;
         return MsgTable_.end();
       }
       it = test.first;

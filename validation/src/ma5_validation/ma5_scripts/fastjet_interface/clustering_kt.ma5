@@ -1,0 +1,23 @@
+#TITLE fastsim with kt algorithm
+#MODE RECO
+
+set main.fastsim.package = fastjet
+set main.fastsim.algorithm = kt
+set main.fastsim.exclusive = false
+set main.fastsim.ptmin = 5.0
+set main.fastsim.radius = 0.4
+set main.fastsim.exclusive_id = false
+set main.fastsim.bjet_id.efficiency = 0.5
+set main.fastsim.bjet_id.exclusive = true
+set main.fastsim.bjet_id.matching_dr = 1
+set main.fastsim.tau_id.efficiency = 0.5
+set main.fastsim.bjet_id.misid_cjet  = 0.5
+set main.fastsim.bjet_id.misid_ljet = 0.5
+set main.fastsim.tau_id.misid_ljet = 0.5
+display main
+plot MET
+
+import $MA5PATH/samples/*hep*
+import $MA5PATH/samples/*hepmc*
+submit
+#END
