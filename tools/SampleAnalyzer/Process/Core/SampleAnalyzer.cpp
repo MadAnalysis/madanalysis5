@@ -923,13 +923,19 @@ void SampleAnalyzer::UpdateProgressBar()
 void SampleAnalyzer::HeadSR(std::ostream &outwriter)
 {
     for(MAuint32 i=0; i<analyzers_.size(); i++)
-        analyzers_[i]->Manager()->HeadSR(outwriter, analyzers_[i]->name());
+    {
+        MAbool is_first = (i == 0);
+        analyzers_[i]->Manager()->HeadSR(outwriter, analyzers_[i]->name(), is_first);
+    }
 }
 
 // Write body of the TACO file in CSV format
 void SampleAnalyzer::DumpSR(std::ostream &outwriter)
 {
     for(MAuint32 i=0; i<analyzers_.size(); i++)
-        analyzers_[i]->Manager()->DumpSR(outwriter);
+    {
+        MAbool is_first = (i == 0);
+        analyzers_[i]->Manager()->DumpSR(outwriter, is_first);
+    }
     outwriter << std::endl;
 }
