@@ -64,6 +64,9 @@ class TACOBase(ABC):
         self.dataset = MA5DataSet(regionID)
         self.xsection = MA5CrossSection(xsection, 13.0)
 
+    def __repr__(self):
+        return f"Analysis: {self.analysis}, Region: {self.dataset.srname}"
+
     @abstractmethod
     def likelihood(
         self, mu: float = 1.0, nll: bool = False, expected: bool = False, useCached=False
@@ -80,6 +83,20 @@ class TACOBase(ABC):
             if true, return nll, not llhd
         expected: bool
             if true, compute expected likelihood, else observed.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def lmax(self, expected: bool = False, nll: bool = False) -> float:
+        """
+        Compute maximum likelihood
+
+        Parameters
+        ----------
+        expected: bool
+            if expected, compute expected max likelihood
+        nll: bool
+            if true, return nll, not llhd
         """
         raise NotImplementedError
 
