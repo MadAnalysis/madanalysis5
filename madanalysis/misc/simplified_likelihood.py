@@ -1010,7 +1010,7 @@ class LikelihoodComputer:
         muhat_, sigma_mu, lmax = fmh["muhat"], fmh["sigma_mu"], fmh["lmax"]
         self.muhat = muhat_
         self.sigma_mu = sigma_mu
-        return self.likelihood(muhat * nsig, marginalize=marginalize, nll=nll)
+        return self.likelihood(muhat_ * nsig, marginalize=marginalize, nll=nll)
 
     def findMuHatViaGradient(
         self,
