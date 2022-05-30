@@ -247,7 +247,7 @@ def MainSession(mode,arglist,ma5dir,version,date):
     logging.getLogger('MA5').info("*             Eur. Phys. J. C74 (2014) 3103                 *")
     logging.getLogger('MA5').info("*                                                           *")
     logging.getLogger('MA5').info("*   The MadAnalysis Development Team - Please visit us at   *")
-    logging.getLogger('MA5').info("*            https://launchpad.net/madanalysis5             *")
+    logging.getLogger('MA5').info("*              https://github.com/MadAnalysis               *")
     logging.getLogger('MA5').info("*                                                           *")
     logging.getLogger('MA5').info("*              Type 'help' for in-line help.                *")
     logging.getLogger('MA5').info("*                                                           *")
