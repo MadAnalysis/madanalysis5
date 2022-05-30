@@ -24,6 +24,10 @@
    libraries via `pip`.
    ([#31](https://github.com/MadAnalysis/madanalysis5/pull/31)).
 
+ * MadAnalysis will keep track of release updates on GitHub and inform users
+   regarding the version in use. 
+   ([#65](https://github.com/MadAnalysis/madanalysis5/pull/65))
+
 ## Improvements
  * We added an interface to include CRs and VRs with using full likelihoods.
    ([#5](https://github.com/MadAnalysis/madanalysis5/pull/5))

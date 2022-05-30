@@ -27,8 +27,9 @@ from madanalysis.system.user_info          import UserInfo
 from madanalysis.system.config_checker     import ConfigChecker
 from madanalysis.system.detect_manager     import DetectManager
 from string_tools                          import StringTools
+from shell_command import ShellCommand
 import logging
-import os
+import os, json
 
 class CheckUp():
 
@@ -534,3 +535,41 @@ class CheckUp():
         self.logger.debug('-------- END: set environment variables --------')
 
         return True
+
+    def check_updates(self):
+        github_repo = "https://api.github.com/repos/MadAnalysis/madanalysis5/releases/latest"
+        theCommands=['curl', '-s', github_repo]
+        ok, out = ShellCommand.ExecuteWithLog(
+            theCommands, os.path.normpath(self.archi_info.ma5dir + "/.github_meta.log"), ".", silent=True
+        )
+        if not ok:
+            self.logger.debug("Unable to retrieve information from GitHub...")
+            self.logger.debug(f"see the log file in : "
+                              f"{os.path.normpath(self.archi_info.ma5dir + '/.github_meta.log')}")
+            return True
+
+        meta = json.loads(out)
+
+        latest_version = [int(x) for x in meta['tag_name'][1:].split(".")]
+        current_version = [int(x) for x in self.archi_info.ma5_version.split(".")]
+
+        def compare_versions(version1, version2):
+            if version1 == version2:
+                return False
+            if version1[0] > version2[0]:
+                return True
+            elif version1[0] == version2[0] and version1[1] > version2[1]:
+                return True
+            elif version1[0] == version2[0] and version1[1] == version2[1] and version1[2] > version2[2]:
+                return True
+            else:
+                return False
+
+        if compare_versions(latest_version, current_version):
+            self.logger.warning(f"A new version of MadAnalysis 5 is available ({meta['tag_name']}).")
+            self.logger.warning(f"The latest version can be downloaded from : ")
+            self.logger.warning(f"{meta['html_url']}")
+        elif compare_versions(current_version, latest_version):
+            self.logger.warning(f"A not-updated version of MadAnalysis 5 is in use ({self.archi_info.ma5_version}).")
+            self.logger.warning(f"The latest stable version can be downloaded from :")
+            self.logger.warning(f"{meta['html_url']}")
