@@ -206,7 +206,7 @@ class AnalyzerBase
     void AddDefaultHadronic()
     {
       try {
-          throw EXCEPTION_WARNING("This function has been deprecated.", "", 1);
+          throw EXCEPTION_WARNING("This function is deprecated.", "", 1);
       } catch (const std::exception& err) {
           MANAGE_EXCEPTION(err);
       }
@@ -215,7 +215,7 @@ class AnalyzerBase
     void AddDefaultInvisible()
     {
         try {
-            throw EXCEPTION_WARNING("This function has been deprecated.", "", 1);
+            throw EXCEPTION_WARNING("This function is deprecated.", "", 1);
         } catch (const std::exception& err) {
             MANAGE_EXCEPTION(err);
         }
