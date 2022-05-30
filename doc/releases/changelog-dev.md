@@ -28,9 +28,10 @@
  * We added an interface to include CRs and VRs with using full likelihoods.
    ([#5](https://github.com/MadAnalysis/madanalysis5/pull/5))
  
- * Hadronic and invisible particle definitions in Reco mode has been externalized
-   from the analysis now they will be globally set in `main.cpp`. This will allow
-   PADForSFS to be able to set invisible particles through normal mode. 
+ * Hadronic and invisible particle definitions in the reco mode have been externalised
+   from the analysis code. Now they will be globally set in `main.cpp`. This allows the
+   PADForSFS framework to be able to change the list of hadronic and invisible 
+   particles through the normal mode of running of the code. 
    ([#66](https://github.com/MadAnalysis/madanalysis5/pull/66))
 
 ## Bug fixes
