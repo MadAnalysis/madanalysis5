@@ -155,6 +155,12 @@ class SampleAnalyzer
 
   std::map<std::string, std::string> options() {return cfg_.Options();}
 
+  // Default Hadronic particles
+  void AddDefaultHadronic();
+
+  // Default Hadronic particles
+  void AddDefaultInvisible();
+
  private:
 
   /// CheckDatatypes
