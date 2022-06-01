@@ -463,6 +463,20 @@ class Main():
             return False
         self.AutoSetGraphicalRenderer()
 
+        try:
+            import datetime
+            # check for updates every afternoon between 1 PM and 3 PM
+            now = datetime.datetime.now()
+            if 13 < now.hour < 15:
+                checkup.check_updates()
+        except ModuleNotFoundError:
+            from random import random
+            if random() > 0.5:
+                checkup.check_updates()
+        except Exception as err:
+            self.logger.debug(f"Unable to check updates: {err.msg}")
+            pass
+
         # Ok
         return True
 

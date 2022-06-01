@@ -53,23 +53,6 @@ def WriteJobInitialize(file,main):
         file.write('\n')
         WriteInvisibleList(file,main)
         file.write('\n')
-    else:
-        file.write('  // Initializing PhysicsService for MC\n') 
-        file.write('  PHYSICS->mcConfig().Reset();\n\n')
-        file.write('\n')
-        file.write('  // definition of the multiparticle "hadronic"\n')
-        file.write('  AddDefaultHadronic();')
-        file.write('\n')
-        file.write('  // definition of the multiparticle "invisible"\n')
-        file.write('  AddDefaultInvisible();\n')
-        for item in main.multiparticles.Get("invisible"):
-            if item not in [-16,-14,-12,12,14,16,1000022,1000039]:
-              file.write('  PHYSICS->mcConfig().AddInvisibleId('+str(item)+');\n')
-        for item in [-16,-14,-12,12,14,16,1000022,1000039]:
-            if item not in main.multiparticles.Get("invisible"):
-                file.write('  PHYSICS->mcConfig().RemoveInvisibleId('+str(item)+');\n')
-        file.write('\n')
-
 
     # recConfig initialization
     if main.mode==MA5RunningType.RECO:

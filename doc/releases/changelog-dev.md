@@ -24,9 +24,23 @@
    libraries via `pip`.
    ([#31](https://github.com/MadAnalysis/madanalysis5/pull/31)).
 
+ * MadAnalysis will keep track of release updates on GitHub and inform users
+   regarding the version in use. 
+   ([#65](https://github.com/MadAnalysis/madanalysis5/pull/65))
+
 ## Improvements
  * We added an interface to include CRs and VRs with using full likelihoods.
    ([#5](https://github.com/MadAnalysis/madanalysis5/pull/5))
+ 
+ * Hadronic and invisible particle definitions in the reco mode have been externalised
+   from the analysis code. Now they will be globally set in `main.cpp`. This allows the
+   PADForSFS framework to be able to change the list of hadronic and invisible 
+   particles through the normal mode of running of the code. 
+   ([#66](https://github.com/MadAnalysis/madanalysis5/pull/66))
+
+ * Installation of Python-based third-party software has been deprecated. 
+   This now will be handled through `requirements.txt`.
+   ([#68](https://github.com/MadAnalysis/madanalysis5/pull/68))
 
 ## Bug fixes
  * Zero division error fixed in the simplified likelihoods workflow.

@@ -1,30 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2020 Jack Araz, Eric Conte & Benjamin Fuks
-#  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
-#  
-#  This file is part of MadAnalysis 5.
-#  Official website: <https://launchpad.net/madanalysis5>
-#  
-#  MadAnalysis 5 is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#  
-#  MadAnalysis 5 is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#  GNU General Public License for more details.
-#  
-#  You should have received a copy of the GNU General Public License
-#  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
-#  
-################################################################################
-
-
-###############################################################################
-#  
-#  Copyright (C) 2012-2013 Eric Conte, Benjamin Fuks
+#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -97,8 +73,9 @@ class ShellCommand():
         # Launching the commands
         try:
             result=subprocess.Popen(theCommands, cwd=path, **kwargs)
-        except:
+        except Exception as err:
             logging.getLogger('MA5').error('impossible to execute the commands: '+' '.join(theCommands))
+            logging.getLogger('MA5').debug(str(err))
             return False
 
         # Getting stdout
@@ -114,9 +91,10 @@ class ShellCommand():
         # Launching the commands
         try:
             result=subprocess.Popen(theCommands, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=path)
-        except:
+        except Exception as err:
             if not silent:
                 logging.getLogger('MA5').error('impossible to execute the commands: '+' '.join(theCommands))
+            logging.getLogger('MA5').debug(str(err))
             return False, None
 
         while True:
