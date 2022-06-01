@@ -26,7 +26,7 @@ from __future__                             import absolute_import
 from madanalysis.interpreter.cmd_base       import CmdBase
 from madanalysis.install.install_manager    import InstallManager
 from six.moves import input
-import logging, os
+import logging, os, sys
 
 
 class CmdInstall(CmdBase):
@@ -73,7 +73,7 @@ class CmdInstall(CmdBase):
                 elif os.path.isfile(os.path.join(dpath,libname+'.dylib')):
                     mylib = os.path.join(dpath,libname+'.dylib')
                 else:
-                    return;
+                    return True
 
                 main.archi_info.libraries[to_activate]= mylib+":"+str(os.stat(mylib).st_mtime)
 
@@ -129,11 +129,15 @@ class CmdInstall(CmdBase):
         elif args[0]=='gnuplot':
             return installer.Execute('gnuplot')
         elif args[0]=='matplotlib':
-            return installer.Execute('matplotlib')
+            self.logger.warning("This command has been deprecated.")
+            self.logger.warning(f"Please use '{sys.executable} -m pip install -r requirements.txt' instead.")
+            return True
         elif args[0]=='root':
             return installer.Execute('root')
         elif args[0]=='numpy':
-            return installer.Execute('numpy')
+            self.logger.warning("This command has been deprecated.")
+            self.logger.warning(f"Please use '{sys.executable} -m pip install -r requirements.txt' instead.")
+            return True
         elif args[0]=='PADForMA5tune':
             if inst_delphes(self.main,installer,'delphesMA5tune',True):
                 return installer.Execute('PADForMA5tune')
@@ -190,12 +194,9 @@ class CmdInstall(CmdBase):
                     return 'restart'
             return padsfs_install_check
         elif args[0]=='pyhf':
-            if self.main.session_info.has_scipy:
-                return installer.Execute('pyhf')
-            else:
-                self.logger.error("The PYHF module requires scipy, please retry"+\
-                                  "after installing scipy.")
-                return True
+            self.logger.warning("This command has been deprecated.")
+            self.logger.warning(f"Please use '{sys.executable} -m pip install -r requirements.txt' instead.")
+            return True
         elif args[0]=='likelihood_simplifier':
             if self.main.session_info.has_scipy and self.main.session_info.has_pyhf:
                 return installer.Execute('simplify')

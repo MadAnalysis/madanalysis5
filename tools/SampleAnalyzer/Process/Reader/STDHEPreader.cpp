@@ -712,6 +712,7 @@ MAbool AddMothers(MCParticleFormat* part,MCParticleFormat* mum)
     if (m==mum) return false;
   }
   part->mothers().push_back(mum);
+  return true;
 }
 
 
@@ -726,6 +727,7 @@ MAbool AddDaughters(MCParticleFormat* part,MCParticleFormat* dau)
     if (d==dau) return false;
   }
   part->daughters().push_back(dau);
+  return true;
 }
 
 

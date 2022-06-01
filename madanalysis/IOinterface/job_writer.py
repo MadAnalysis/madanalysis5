@@ -23,13 +23,15 @@
 
 
 from __future__ import absolute_import
-
+from madanalysis.selection.instance_name      import InstanceName
+from madanalysis.IOinterface.folder_writer    import FolderWriter
+from shell_command                            import ShellCommand
+from madanalysis.enumeration.ma5_running_type import MA5RunningType
 import logging
 import os
 import shutil
 
 import six
-from shell_command import ShellCommand
 
 from madanalysis.IOinterface.folder_writer import FolderWriter
 from madanalysis.selection.instance_name import InstanceName
@@ -541,8 +543,23 @@ class JobWriter(object):
 
         # Post intialization (crating the output directory structure)
         file.write('  // Post initialization (creates the new output directory structure)\n')
-        file.write('  if(!manager.PostInitialize()) return 1;\n\n')
+        file.write('  if(!manager.PostInitialize()) return 1;\n')
 
+        # Add default hadrons and invisible particles for Reco mode
+        if self.main.mode == MA5RunningType.RECO:
+            file.write('\n  // Initializing PhysicsService for MC\n')
+            file.write('  PHYSICS->mcConfig().Reset();\n')
+            file.write('  // definition of the multiparticle "hadronic"\n')
+            file.write('  manager.AddDefaultHadronic();\n')
+            file.write('  // definition of the multiparticle "invisible"\n')
+            file.write('  manager.AddDefaultInvisible();\n')
+            for item in self.main.multiparticles.Get("invisible"):
+                if item not in [-16, -14, -12, 12, 14, 16, 1000022, 1000039]:
+                    file.write(f"  PHYSICS->mcConfig().AddInvisibleId({item});\n")
+            for item in [-16, -14, -12, 12, 14, 16, 1000022, 1000039]:
+                if item not in self.main.multiparticles.Get("invisible"):
+                    file.write(f"  PHYSICS->mcConfig().RemoveInvisibleId({item});\n")
+            file.write('\n')
 
         # Loop
         file.write('  // ---------------------------------------------------\n')
