@@ -471,11 +471,11 @@ class JobWriter(object):
             file.write('  std::map<std::string, std::string> parametersC1;\n')
             parameters = self.main.fastsim.SampleAnalyzerConfigString()
             for k,v in sorted(six.iteritems(parameters),key=lambda k_v: (k_v[0],k_v[1])):
-                file.write('  parametersC1["'+k+'"]="'+v+'";\n')
+                file.write('  parametersC1["' + (k + '"').ljust(30, " ") + '] = "' + v + '";\n')
             for obj in ["electron","muon","track","photon"]:
                 if len(getattr(self.main.superfastsim, obj+"_isocone_radius")) != 0:
                     file.write(
-                        '  parametersC1["isolation.'+obj+'.radius"]="'+ ','.join(
+                        '  parametersC1[' + ('"isolation.' + obj + '.radius"').ljust(30, " ") + '] = "' + ','.join(
                         [str(x) for x in getattr(self.main.superfastsim, obj+"_isocone_radius")]
                         )+'";\n'
                     )
@@ -491,7 +491,7 @@ class JobWriter(object):
                     file.write('  std::map<std::string, std::string> '+map_name+';\n')
                     for opt, val in item.__dict__.items():
                         if opt in ['JetID','algorithm']:
-                            file.write('  '+map_name+'["'+(opt+'"').ljust(18,' ') + '] = "'+str(val)+'";\n')
+                            file.write('  '+map_name+'["'+(opt+'"').ljust(20,' ') + '] = "'+str(val)+'";\n')
                         else:
                             # To follow old syntax add "cluster.". 
                             # This is not necessary but makes sense for unified syntax
