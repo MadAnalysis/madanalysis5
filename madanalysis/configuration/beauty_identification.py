@@ -33,12 +33,10 @@ class BeautyIdentification():
     default_misid_ljet  = 0.
     
 
-    userVariables = { "bjet_id.matching_dr" : [str(default_matching_dr)],\
-                      "bjet_id.exclusive"   : [str(default_exclusive)],\
-                      "bjet_id.efficiency"  : [str(default_efficiency)],\
-                      "bjet_id.misid_cjet"  : [str(default_misid_cjet)],\
-                      "bjet_id.misid_ljet"  : [str(default_misid_ljet)]\
-                    }
+    userVariables = {
+        "bjet_id.matching_dr" : [str(default_matching_dr)],
+        "bjet_id.exclusive"   : [str(default_exclusive)],
+    }
 
     def __init__(self):
         self.matching_dr = BeautyIdentification.default_matching_dr
@@ -52,9 +50,6 @@ class BeautyIdentification():
         logging.getLogger('MA5').info("  + b-jet identification:")
         self.user_DisplayParameter("bjet_id.matching_dr")
         self.user_DisplayParameter("bjet_id.exclusive")
-        self.user_DisplayParameter("bjet_id.efficiency")
-        self.user_DisplayParameter("bjet_id.misid_cjet")
-        self.user_DisplayParameter("bjet_id.misid_ljet")
 
 
     def user_DisplayParameter(self,parameter):
@@ -123,64 +118,25 @@ class BeautyIdentification():
                 return False
 
         # efficiency
-        elif parameter=="bjet_id.efficiency":
-            try:
-                number = float(value)
-            except:
-                logging.getLogger('MA5').error("the efficiency must be a float value.")
-                return False
-            if number<0:
-                logging.getLogger('MA5').error("the efficiency cannot be negative.")
-                return False
-            if number>1:
-                logging.getLogger('MA5').error("the efficiency cannot not greater to 1.")
-                return False
-            self.efficiency=number
-
-        # efficiency
-        elif parameter=="bjet_id.efficiency":
-            try:
-                number = float(value)
-            except:
-                logging.getLogger('MA5').error("the efficiency must be a float value.")
-                return False
-            if number<0:
-                logging.getLogger('MA5').error("the efficiency cannot be negative.")
-                return False
-            if number>1:
-                logging.getLogger('MA5').error("the efficiency cannot be greater to 1.")
-                return False
-            self.efficiency=number
+        elif parameter == "bjet_id.efficiency":
+            logging.getLogger('MA5').error("This function has been deprecated, please use SFS functionality instead.")
+            logging.getLogger('MA5').error("Same functionality can be captured via following command in SFS:")
+            logging.getLogger('MA5').error(f"     -> define tagger b as b {value}")
+            return False
 
         # mis efficiency (cjet)
         elif parameter=="bjet_id.misid_cjet":
-            try:
-                number = float(value)
-            except:
-                logging.getLogger('MA5').error("the mis-id efficiency must be a float value.")
-                return False
-            if number<0:
-                logging.getLogger('MA5').error("the mis-id efficiency cannot be negative.")
-                return False
-            if number>1:
-                logging.getLogger('MA5').error("the mis-id efficiency cannot be greater to 1.")
-                return False
-            self.misid_cjet=number
+            logging.getLogger('MA5').error("This function has been deprecated, please use SFS functionality instead.")
+            logging.getLogger('MA5').error("Same functionality can be captured via following command in SFS:")
+            logging.getLogger('MA5').error(f"     -> define tagger b as c {value}")
+            return False
 
         # mis efficiency (ljet)
         elif parameter=="bjet_id.misid_ljet":
-            try:
-                number = float(value)
-            except:
-                logging.getLogger('MA5').error("the mis-id efficiency must be a float value.")
-                return False
-            if number<0:
-                logging.getLogger('MA5').error("the mis-id efficiency cannot be negative.")
-                return False
-            if number>1:
-                logging.getLogger('MA5').error("the mis-id efficiency cannot be greater to 1.")
-                return False
-            self.misid_ljet=number
+            logging.getLogger('MA5').error("This function has been deprecated, please use SFS functionality instead.")
+            logging.getLogger('MA5').error("Same functionality can be captured via following command in SFS:")
+            logging.getLogger('MA5').error(f"     -> define tagger b as j {value}")
+            return False
 
         # other    
         else:

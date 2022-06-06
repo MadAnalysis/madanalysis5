@@ -31,36 +31,39 @@ class TauIdentification():
     default_efficiency  = 1.
     default_misid_ljet  = 0.
 
-    userVariables = { "tau_id.efficiency"  : [str(default_efficiency)],\
-                      "tau_id.misid_ljet"  : [str(default_misid_ljet)]\
-                    }
+    userVariables = {"tau_id.matching_dr": [str(default_misid_ljet)]}
 
 
     def __init__(self):
         self.efficiency  = TauIdentification.default_efficiency
         self.misid_ljet  = TauIdentification.default_misid_ljet
+        self.matching_dr = TauIdentification.default_matching_dr
 
         
     def Display(self):
         logging.getLogger('MA5').info("  + hadronic-tau identification:")
-        self.user_DisplayParameter("tau_id.efficiency")
-        self.user_DisplayParameter("tau_id.misid_ljet")
+        self.user_DisplayParameter("tau_id.matching_dr")
+        # self.user_DisplayParameter("tau_id.efficiency")
+        # self.user_DisplayParameter("tau_id.misid_ljet")
 
 
     def user_DisplayParameter(self,parameter):
-        if parameter=="tau_id.efficiency":
-            logging.getLogger('MA5').info("    + id efficiency = "+str(self.efficiency))
-        elif parameter=="tau_id.misid_ljet":
-            logging.getLogger('MA5').info("    + mis-id efficiency (light quarks) = "+str(self.misid_ljet))
+        if parameter=="tau_id.matching_dr":
+            logging.getLogger('MA5').info("    + DeltaR matching = "+str(self.matching_dr))
+        # if parameter=="tau_id.efficiency":
+        #     logging.getLogger('MA5').info("    + id efficiency = "+str(self.efficiency))
+        # elif parameter=="tau_id.misid_ljet":
+        #     logging.getLogger('MA5').info("    + mis-id efficiency (light quarks) = "+str(self.misid_ljet))
         else:
             logging.getLogger('MA5').error("'clustering' has no parameter called '"+parameter+"'")
 
 
     def SampleAnalyzerConfigString(self):
-        mydict = {}
-        mydict['tau_id.efficiency']  = str(self.efficiency)
-        mydict['tau_id.misid_ljet']  = str(self.misid_ljet)
-        return mydict
+        return {
+            'tau_id.efficiency': str(self.efficiency),
+            'tau_id.misid_ljet': str(self.misid_ljet),
+            'tau_id.matching_dr': str(self.matching_dr),
+        }
 
         
     def user_GetValues(self,variable):
@@ -75,35 +78,31 @@ class TauIdentification():
 
 
     def user_SetParameter(self,parameter,value):
-        # efficiency
-        if parameter=="tau_id.efficiency":
+        # matching deltar
+        if parameter == "tau_id.matching_dr":
             try:
                 number = float(value)
             except:
-                logging.getLogger('MA5').error("the efficiency must be a float value.")
+                logging.getLogger('MA5').error("the 'matching deltaR' must be a float value.")
                 return False
-            if number<0:
-                logging.getLogger('MA5').error("the efficiency cannot be negative.")
+            if number <= 0:
+                logging.getLogger('MA5').error("the 'matching deltaR' cannot be negative or null.")
                 return False
-            if number>1:
-                logging.getLogger('MA5').error("the efficiency cannot not greater to 1.")
-                return False
-            self.efficiency=number
+            self.matching_dr = number
+
+        # efficiency
+        elif parameter == "tau_id.efficiency":
+            logging.getLogger('MA5').error("This function has been deprecated, please use SFS functionality instead.")
+            logging.getLogger('MA5').error("Same functionality can be captured via following command in SFS:")
+            logging.getLogger('MA5').error(f"     -> define tagger ta as ta {value}")
+            return False
 
         # mis efficiency (ljet)
-        elif parameter=="tau_id.misid_ljet":
-            try:
-                number = float(value)
-            except:
-                logging.getLogger('MA5').error("the mis-id efficiency must be a float value.")
-                return False
-            if number<0:
-                logging.getLogger('MA5').error("the mis-id efficiency cannot be negative.")
-                return False
-            if number>1:
-                logging.getLogger('MA5').error("the mis-id efficiency cannot be greater to 1.")
-                return False
-            self.misid_ljet=number
+        elif parameter == "tau_id.misid_ljet":
+            logging.getLogger('MA5').error("This function has been deprecated, please use SFS functionality instead.")
+            logging.getLogger('MA5').error("Same functionality can be captured via following command in SFS:")
+            logging.getLogger('MA5').error(f"     -> define tagger ta as j {value}")
+            return False
 
         # other    
         else:
