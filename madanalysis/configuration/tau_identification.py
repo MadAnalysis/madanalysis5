@@ -4,8 +4,8 @@
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #
 #  This file is part of MadAnalysis 5.
-#  Official website: <https://launchpad.net/madanalysis5>
-#
+#  Official website: <https://github.com/MadAnalysis/madanalysis5>
+#  
 #  MadAnalysis 5 is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation, either version 3 of the License, or
