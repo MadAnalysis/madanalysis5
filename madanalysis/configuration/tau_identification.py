@@ -32,7 +32,7 @@ class TauIdentification:
     default_exclusive = True
     default_efficiency = 1.0
     default_misid_ljet = 0.0
-    default_reconstruction_method = "jet-based"
+    default_reconstruction_method = "hadron-based"
 
     userVariables = {
         "tau_id.matching_dr": [str(default_misid_ljet)],
