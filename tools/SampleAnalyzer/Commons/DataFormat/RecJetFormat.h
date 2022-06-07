@@ -59,6 +59,7 @@ namespace MA5
     class DetectorDelphes;
     class DetectorDelphesMA5tune;
     class DelphesMemoryInterface;
+    class SFSTaggerBase;
 
     class RecJetFormat : public RecParticleFormat
     {
@@ -69,6 +70,7 @@ namespace MA5
         friend class bTagger;
         friend class TauTagger;
         friend class cTagger;
+        friend class SFSTaggerBase;
         friend class DetectorDelphes;
         friend class DetectorDelphesMA5tune;
         friend class DelphesTreeReader;

@@ -305,7 +305,7 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
                 if (!found) myEvent.rec()->MCCquarks_.push_back(&(part));
             }
 
-                // looking for taus
+            // looking for taus
             else if (absid==15)
             {
                 // rejecting particle if coming from hadronization

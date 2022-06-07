@@ -47,6 +47,7 @@ class DelphesMA5tuneTreeReader;
 class DetectorDelphes;
 class DetectorDelphesMA5tune;
 class DelphesMemoryInterface;
+class SFSTaggerBase;
 
 class RecTauFormat : public RecJetFormat
 {
@@ -59,6 +60,7 @@ class RecTauFormat : public RecJetFormat
   friend class DetectorDelphes;
   friend class DetectorDelphesMA5tune;
   friend class DelphesMemoryInterface;
+  friend class SFSTaggerBase;
 
   // -------------------------------------------------------------
   //                        data members

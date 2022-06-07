@@ -59,6 +59,7 @@ namespace MA5
     class ROOTReader;
     class TauTagger;
     class bTagger;
+    class SFSTaggerBase;
     class JetClusterer;
     class ClusterAlgoBase;
     class ClusterAlgoFastJet;
@@ -73,6 +74,7 @@ namespace MA5
         friend class ROOTReader;
         friend class TauTagger;
         friend class bTagger;
+        friend class SFSTaggerBase;
         friend class JetClusterer;
         friend class ClusterAlgoBase;
         friend class ClusterAlgoFastJet;
