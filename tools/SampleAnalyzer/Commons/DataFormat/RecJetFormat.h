@@ -93,6 +93,7 @@ namespace MA5
         MAuint16 ntracks_;   /// number of tracks
         MAbool btag_;        /// b-tag
         MAbool ctag_;        /// c-tag
+        MAbool tautag_;      /// tau-tag
         MAbool true_ctag_;   /// c-tag (before id or misid)
         MAbool true_btag_;   /// b-tag (before id or misid)
         std::vector<MAint32> Constituents_;  /// indices of the MC particles
@@ -150,9 +151,11 @@ namespace MA5
             ntracks_   = 0;
             btag_      = false;
             ctag_      = false;
+            tautag_    = false;
             true_btag_ = false;
             true_ctag_ = false;
             isolCones_.clear();
+            Constituents_.clear();
         }
 
         /// Accessor to the number of tracks
@@ -183,13 +186,21 @@ namespace MA5
         void setBtag(const MAbool& tag)
         {btag_=tag;}
 
-        /// Setting a new true_ctag_ value
+        /// Setting a new ctag_ value
         void setCtag(const MAbool& tag)
         {ctag_=tag;}
 
-        /// Setting a new ctag_ value
+        /// Setting a new true_ctag_ value
         void setTrueCtag(const MAbool& tag)
         {true_ctag_=tag;}
+
+        /// Accessor to the tautag
+        const MAbool& tautag() const
+        { return tautag_; }
+
+        /// Setting a new tautag_ value
+        void setTautag(const MAbool& tag)
+        {tautag_=tag;}
 
         /// Setting ntracks
         void setNtracks(MAuint16 ntracks)
