@@ -165,7 +165,7 @@ namespace MA5 {
 
         if (_isTauTaggingEffOn)
         {
-            /// In Jet based tau tagging this loop will not run
+            /// @attention In Jet based tau tagging this loop will not run
             for (MAuint32 itau = 0; itau < Ntau; itau++)
             {
                 if (RANDOM->flat() > tau_tagging_eff(myEvent.rec()->taus()[itau]))
