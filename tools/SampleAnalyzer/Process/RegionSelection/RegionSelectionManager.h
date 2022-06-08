@@ -475,8 +475,8 @@ class RegionSelectionManager
   }
 
   /// Dumping the content of the counters
-  void HeadSR(std::ostream &, const std::string&);
-  void DumpSR(std::ostream &);
+  void HeadSR(std::ostream &, const std::string&, MAbool&);
+  void DumpSR(std::ostream &, MAbool&);
 
 };
 

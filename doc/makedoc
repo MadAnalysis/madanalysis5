@@ -121,7 +121,7 @@ class MakeLatex():
             return False, []
 
         # Splitting the lines
-        msg = out.split('\n')
+        msg = str(out).split('\n')
 
         # Removing irrelevant component
         msg2 = []

@@ -920,23 +920,25 @@ void SampleAnalyzer::UpdateProgressBar()
 }
 
 
-
+// Write header for the TACO file in CSV format
 void SampleAnalyzer::HeadSR(std::ostream &outwriter)
 {
-  outwriter << "#";
-  for(MAuint32 i=0; i<analyzers_.size(); i++)
-  {
-    outwriter <<" ";
-    analyzers_[i]->Manager()->HeadSR(outwriter, analyzers_[i]->name());
-  }
+    for(MAuint32 i=0; i<analyzers_.size(); i++)
+    {
+        MAbool is_first = (i == 0);
+        analyzers_[i]->Manager()->HeadSR(outwriter, analyzers_[i]->name(), is_first);
+    }
 }
 
-
+// Write body of the TACO file in CSV format
 void SampleAnalyzer::DumpSR(std::ostream &outwriter)
 {
-  for(MAuint32 i=0; i<analyzers_.size(); i++)
-    analyzers_[i]->Manager()->DumpSR(outwriter);
-  outwriter << std::endl;
+    for(MAuint32 i=0; i<analyzers_.size(); i++)
+    {
+        MAbool is_first = (i == 0);
+        analyzers_[i]->Manager()->DumpSR(outwriter, is_first);
+    }
+    outwriter << std::endl;
 }
 
 void SampleAnalyzer::AddDefaultHadronic()

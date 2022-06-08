@@ -164,16 +164,23 @@ void RegionSelectionManager::WriteHistoDefinition(SAFWriter& output)
 
 
 
-void RegionSelectionManager::HeadSR(std::ostream &outwriter, const std::string &ananame)
+void RegionSelectionManager::HeadSR(std::ostream &outwriter, const std::string &ananame, MAbool &is_first)
 {
-  for (MAuint32 i=0;i<regions_.size();i++)
-    outwriter <<  " " << ananame << "-" << regions_[i]->GetName();
+    // Set first SR out of the for loop to avoid many if executions
+    // use :: instead of - since - is generally used in SR names
+    if (regions_.size() > 0 && is_first) outwriter << ananame << "::" << regions_[0]->GetName();
+
+    for (MAuint32 i = is_first ? 1 : 0; i < regions_.size(); i++)
+        outwriter << "," << ananame << "::" << regions_[i]->GetName();
 }
 
 
-void RegionSelectionManager::DumpSR(std::ostream &outwriter)
+void RegionSelectionManager::DumpSR(std::ostream &outwriter, MAbool &is_first)
 {
-  for (MAuint32 i=0;i<regions_.size();i++)
-    outwriter<< "  " << regions_[i]->IsSurviving();
+    // Set first SR out of the for loop to avoid many if executions
+    if (regions_.size() > 0 && is_first) outwriter << regions_[0]->IsSurviving();
+
+    for (MAuint32 i = is_first ? 1 : 0; i < regions_.size(); i++)
+        outwriter << "," << regions_[i]->IsSurviving();
 }
 
