@@ -61,4 +61,4 @@
 
 This release contains contributions from (in alphabetical order):
 
-[Jack Y. Araz](@jackaraz), [Benjamin Fuks](@BFuks)
+[Jack Y. Araz](https://github.com/jackaraz), [Benjamin Fuks](https://github.com/bfuks)
