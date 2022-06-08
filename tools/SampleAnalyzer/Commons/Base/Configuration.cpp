@@ -4,7 +4,7 @@
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
-//  Official website: <https://launchpad.net/madanalysis5>
+//  Official website: <https://github.com/MadAnalysis/madanalysis5>
 //  
 //  MadAnalysis 5 is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -40,8 +40,8 @@ using namespace MA5;
 // Initializing static data members
 // -----------------------------------------------------------------------------
 // DO NOT TOUCH THESE LINES
-const std::string Configuration::sampleanalyzer_version_ = "1.10.1";
-const std::string Configuration::sampleanalyzer_date_    = "2022/01/15";
+const std::string Configuration::sampleanalyzer_version_ = "1.10.2";
+const std::string Configuration::sampleanalyzer_date_    = "2022/06/08";
 // DO NOT TOUCH THESE LINES
 
 // -----------------------------------------------------------------------------
