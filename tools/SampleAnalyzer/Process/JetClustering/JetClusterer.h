@@ -33,7 +33,6 @@
 #include "SampleAnalyzer/Process/JetClustering/bTagger.h"
 #include "SampleAnalyzer/Process/JetClustering/cTagger.h"
 #include "SampleAnalyzer/Process/JetClustering/TauTagger.h"
-#include "SampleAnalyzer/Process/JetClustering/NullSmearer.h"
 #include "SampleAnalyzer/Commons/Base/SmearerBase.h"
 #include "SampleAnalyzer/Commons/Base/SFSTaggerBase.h"
 

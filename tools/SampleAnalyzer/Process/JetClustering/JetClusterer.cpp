@@ -28,7 +28,6 @@
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 #include "SampleAnalyzer/Commons/Service/ConvertService.h"
 #include "SampleAnalyzer/Commons/Service/PDGService.h"
-#include "SampleAnalyzer/Process/JetClustering/NullSmearer.h"
 
 #ifdef MA5_FASTJET_MODE
     #include "SampleAnalyzer/Interfaces/substructure/VariableR.h"
@@ -75,7 +74,7 @@ MAbool JetClusterer::Initialize(const std::map<std::string,std::string>& options
 //    myBtagger_   = new bTagger();
 //    myCtagger_   = new cTagger();
 //    myTautagger_ = new TauTagger();
-    mySmearer_   = new NullSmearer();
+    mySmearer_   = new SmearerBase();
     myTagger_    = new SFSTaggerBase();
     myTaggerOptions_ = new SFSTaggerBaseOptions();
     mySmearer_->Initialize(true);
