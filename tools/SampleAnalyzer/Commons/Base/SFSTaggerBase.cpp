@@ -65,6 +65,7 @@ namespace MA5 {
                     /// @attention This is for consistency. Tau tag is created for this application only.
                     jet.setTautag(false);
                 }
+                /// Do not continue if tagger is not on (for code efficiency)
                 if (!_isJetTaggingOn) continue;
 
                 /// We have a true b-jet: is it b-tagged?
@@ -75,7 +76,9 @@ namespace MA5 {
                 /// We have a true c-jet: is it b-tagged?
                 else if (jet.true_ctag())
                 {
-                    if (RANDOM->flat() < c_mistag_b(jet)) jet.setBtag(true);
+                    if (RANDOM->flat() < c_mistag_b(jet)) {
+                        jet.setBtag(true); jet.setCtag(false);
+                    }
                 }
                 /// We have a true light-jet: is it b-tagged?
                 else
@@ -89,7 +92,9 @@ namespace MA5 {
                 /// We have a true b-jet: is it c-tagged?
                 if (jet.true_btag())
                 {
-                    if (RANDOM->flat() < b_mistag_c(jet)) { jet.setCtag(true); jet.setBtag(false); }
+                    if (RANDOM->flat() < b_mistag_c(jet)) {
+                        jet.setCtag(true); jet.setBtag(false);
+                    }
                 }
                 /// We have a true c-jet: is it c-tagged?
                 else if (jet.true_ctag())
@@ -110,7 +115,8 @@ namespace MA5 {
                 /// if not, is it mis-tagged as anything?
                 else
                 {
-                    { /// Scope for light jet mistagging as tau
+                    /// Scope for light jet mistagging as tau
+                    {
                         /// if not, is it Tau-tagged?
                         if (RANDOM->flat() < lightjet_mistag_tau(jet)) {
                             RecTauFormat *newTau = myEvent.rec()->GetNewTau();
@@ -119,7 +125,8 @@ namespace MA5 {
                             continue;
                         }
                     }
-                    { /// Scope for light jet mistagging for electron
+                    /// Scope for light jet mistagging for electron
+                    {
                         /// if not, is it Electron-tagged?
                         if (RANDOM->flat() < lightjet_mistag_electron(jet))
                         {
@@ -137,7 +144,8 @@ namespace MA5 {
                             toRemove.push_back(ijet);
                         }
                     }
-                    { /// Scope for light jet mistagging for photon
+                    /// Scope for light jet mistagging for photon
+                    {
                         /// if not, is it Photon-tagged?
                         if (RANDOM->flat() < lightjet_mistag_photon(jet))
                         {
@@ -165,7 +173,7 @@ namespace MA5 {
 
         if (_isTauTaggingEffOn)
         {
-            /// @attention In Jet based tau tagging this loop will not run
+            /// @attention In Jet based tau tagging this loop will not run. If its runnning thats a bug
             for (MAuint32 itau = 0; itau < Ntau; itau++)
             {
                 if (RANDOM->flat() > tau_tagging_eff(myEvent.rec()->taus()[itau]))
@@ -211,7 +219,7 @@ namespace MA5 {
                     continue;
                 }
                 /// Muon mistagging as light jet
-                /// @attention this will cause problems if executed in substructure tools
+                /// @warning this will cause problems if executed in substructure tools
                 if (RANDOM->flat() < muon_mistag_lightjet(muon))
                 {
                     RecJetFormat* NewParticle = myEvent.rec()->GetNewJet();
@@ -237,14 +245,103 @@ namespace MA5 {
         /// Electron mistagging
         if (_isElectronTaggingOn)
         {
-            /// @todo complete this section
+            MAuint32 ielec = -1;
+            for (auto &electron: myEvent.rec()->electrons())
+            {
+                ielec++;
+                /// Electron mistagging as muon
+                if (RANDOM->flat() < electron_mistag_muon(electron))
+                {
+                    RecLeptonFormat* NewParticle = myEvent.rec()->GetNewMuon();
+                    NewParticle->setMomentum(electron.momentum());
+                    NewParticle->setMc(electron.mc());
+                    NewParticle->SetCharge(electron.charge());
+                    toRemove.push_back(ielec);
+                    continue;
+                }
+                /// Electron mistagging as photon
+                if (RANDOM->flat() < electron_mistag_photon(electron))
+                {
+                    RecPhotonFormat* NewParticle = myEvent.rec()->GetNewPhoton();
+                    NewParticle->setMomentum(electron.momentum());
+                    NewParticle->setMc(electron.mc());
+                    toRemove.push_back(ielec);
+                    continue;
+                }
+                /// Electron mistagging as jet
+                /// @warning This will cause problems during execution with substructure module
+                if (RANDOM->flat() < electron_mistag_lightjet(electron))
+                {
+                    RecJetFormat* NewParticle = myEvent.rec()->GetNewJet();
+                    NewParticle->setMomentum(electron.momentum());
+                    NewParticle->setMc(electron.mc());
+                    NewParticle->setNtracks(1);
+                    THT    += electron.pt();
+                    Meff   += electron.pt();
+                    MALorentzVector MissHT = myEvent.rec()->MHT().momentum() - electron.momentum();
+                    (&myEvent.rec()->MHT().momentum())->SetPxPyPzE(
+                        MissHT.Px(), MissHT.Py(), 0., MissHT.E()
+                    );
+                    toRemove.push_back(ielec);
+                    continue;
+                }
+            }
+            /// Remove mistagged electrons
+            for (MAuint32 i=toRemove.size();i>0;i--)
+                myEvent.rec()->electrons().erase(myEvent.rec()->electrons().begin() + toRemove[i-1]);
+            toRemove.clear();
         }
 
 
         /// Photon mistaging
         if (_isPhotonTaggingOn)
         {
-            /// @todo complete this section
+            MAuint32 iph = -1;
+            for (auto &photon: myEvent.rec()->photons())
+            {
+                iph++;
+                /// Photon mistagging as electron
+                if (RANDOM->flat() < photon_mistag_electron(photon))
+                {
+                    RecLeptonFormat* NewParticle = myEvent.rec()->GetNewElectron();
+                    NewParticle->setMomentum(photon.momentum());
+                    NewParticle->setMc(photon.mc());
+                    NewParticle->SetCharge(RANDOM->flat() > 0.5 ? 1. : -1.);
+                    toRemove.push_back(iph);
+                    continue;
+                }
+                /// Photon mistagging as muon
+                if (RANDOM->flat() < photon_mistag_muon(photon))
+                {
+                    RecLeptonFormat* NewParticle = myEvent.rec()->GetNewMuon();
+                    NewParticle->setMomentum(photon.momentum());
+                    NewParticle->setMc(photon.mc());
+                    NewParticle->SetCharge(RANDOM->flat() > 0.5 ? 1. : -1.);
+                    toRemove.push_back(iph);
+                    continue;
+                }
+                /// Photon mistagging as jet
+                /// @warning This will cause problems during execution with substructure module
+                if (RANDOM->flat() < photon_mistag_lightjet(photon))
+                {
+                    RecJetFormat* NewParticle = myEvent.rec()->GetNewJet();
+                    NewParticle->setMomentum(photon.momentum());
+                    NewParticle->setMc(photon.mc());
+                    NewParticle->setNtracks(1);
+                    THT    += photon.pt();
+                    Meff   += photon.pt();
+                    MALorentzVector MissHT = myEvent.rec()->MHT().momentum() - photon.momentum();
+                    (&myEvent.rec()->MHT().momentum())->SetPxPyPzE(
+                        MissHT.Px(), MissHT.Py(), 0., MissHT.E()
+                    );
+                    toRemove.push_back(iph);
+                    continue;
+                }
+            }
+            /// Remove mistagged photons
+            for (MAuint32 i=toRemove.size();i>0;i--)
+                myEvent.rec()->photons().erase(myEvent.rec()->photons().begin() + toRemove[i-1]);
+            toRemove.clear();
         }
     }
 

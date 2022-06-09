@@ -50,7 +50,7 @@ namespace MA5 {
         MAfloat32 ctag_matching_deltaR = 0.3;
         MAbool ctag_exclusive = true;
         MAfloat32 tautag_matching_deltaR = 0.3;
-        MAbool tautag_exclusive = true; /// not used at the moment.
+        MAbool tautag_exclusive = true;
         MAbool tautag_jetbased = false;
     };
 
