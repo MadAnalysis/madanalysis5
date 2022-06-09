@@ -95,6 +95,9 @@ namespace MA5 {
         /// Initialize options
         void SetOptions(SFSTaggerBaseOptions &opt) { _options = opt; }
 
+        /// Print parameters
+        void PrintParam() const;
+
         /// Accesor to options
         SFSTaggerBaseOptions options() const { return _options; }
 

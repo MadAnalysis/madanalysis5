@@ -71,9 +71,6 @@ MAbool JetClusterer::Initialize(const std::map<std::string,std::string>& options
     if (algo_==0) return false;
 
     // configure tagger
-//    myBtagger_   = new bTagger();
-//    myCtagger_   = new cTagger();
-//    myTautagger_ = new TauTagger();
     mySmearer_   = new SmearerBase();
     myTagger_    = new SFSTaggerBase();
     myTaggerOptions_ = new SFSTaggerBaseOptions();
@@ -235,9 +232,6 @@ MAbool JetClusterer::Initialize(const std::map<std::string,std::string>& options
 void JetClusterer::Finalize()
 {
     if (algo_!=0)        delete algo_;
-//    if (myBtagger_!=0)   delete myBtagger_;
-//    if (myCtagger_!=0)   delete myCtagger_;
-//    if (myTautagger_!=0) delete myTautagger_;
     if (mySmearer_!=0)   delete mySmearer_;
     if (myTaggerOptions_!=0) delete myTaggerOptions_;
     if (myTagger_!=0)    delete myTagger_;

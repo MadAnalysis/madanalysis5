@@ -30,19 +30,16 @@
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
 #include "SampleAnalyzer/Commons/Service/Physics.h"
 #include "SampleAnalyzer/Commons/Base/ClusterAlgoBase.h"
-#include "SampleAnalyzer/Process/JetClustering/bTagger.h"
-#include "SampleAnalyzer/Process/JetClustering/cTagger.h"
-#include "SampleAnalyzer/Process/JetClustering/TauTagger.h"
 #include "SampleAnalyzer/Commons/Base/SmearerBase.h"
 #include "SampleAnalyzer/Commons/Base/SFSTaggerBase.h"
 
 #ifdef MA5_FASTJET_MODE
-  #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoStandard.h"
-  #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoSISCone.h"
-  #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoCDFMidpoint.h"
-  #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoCDFJetClu.h"
-  #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoGridJet.h"
-  #include "SampleAnalyzer/Interfaces/substructure/ClusterBase.h"
+#include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoStandard.h"
+#include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoSISCone.h"
+#include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoCDFMidpoint.h"
+#include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoCDFJetClu.h"
+#include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoGridJet.h"
+#include "SampleAnalyzer/Interfaces/substructure/ClusterBase.h"
 #endif
 
 // STL headers
@@ -54,145 +51,140 @@
 namespace MA5
 {
 
-  class JetClusterer
-  {
-    //--------------------------------------------------------------------------
-    //                              data members
-    //--------------------------------------------------------------------------
-  protected :
+    class JetClusterer
+    {
+        //--------------------------------------------------------------------------
+        //                              data members
+        //--------------------------------------------------------------------------
+    protected :
 
-    ClusterAlgoBase* algo_;
-    bTagger*     myBtagger_;
-    cTagger*     myCtagger_;
-    TauTagger*   myTautagger_;
-    SmearerBase* mySmearer_;
-    SFSTaggerBase* myTagger_;
+        ClusterAlgoBase* algo_;
+        /// SFS smearer
+        SmearerBase* mySmearer_;
+        /// b/c/tau tagger
+        SFSTaggerBase* myTagger_;
 
-    SFSTaggerBaseOptions* myTaggerOptions_;
+        /// pointer to tagger options
+        SFSTaggerBaseOptions* myTaggerOptions_;
 
-    /// Exclusive id for tau-elec-photon-jet
-    MAbool ExclusiveId_;
+        /// Exclusive id for tau-elec-photon-jet
+        MAbool ExclusiveId_;
 
-    /// Primary Jet ID
-    std::string JetID_;
+        /// Primary Jet ID
+        std::string JetID_;
 
 #ifdef MA5_FASTJET_MODE
-    /// Jet collection configurations
-    std::map<std::string, ClusterAlgoBase*> cluster_collection_;
+        /// Jet collection configurations
+        std::map<std::string, ClusterAlgoBase*> cluster_collection_;
 
-    // Jet collection configuration with VariableR
-    std::map<std::string, Substructure::ClusterBase*> substructure_collection_;
+        // Jet collection configuration with VariableR
+        std::map<std::string, Substructure::ClusterBase*> substructure_collection_;
 #endif
 
-    MAuint32 muon;
-    MAuint32 electron;
-    MAuint32 tauH;
-    MAuint32 tauM;
-    MAuint32 tauE;
-    MAuint32 photon;
+        MAuint32 muon;
+        MAuint32 electron;
+        MAuint32 tauH;
+        MAuint32 tauM;
+        MAuint32 tauE;
+        MAuint32 photon;
 
-    // Track Isolation radius
-    std::vector<MAfloat64> isocone_track_radius_;
+        // Track Isolation radius
+        std::vector<MAfloat64> isocone_track_radius_;
 
-    // Electron Isolation radius
-    std::vector<MAfloat64> isocone_electron_radius_;
+        // Electron Isolation radius
+        std::vector<MAfloat64> isocone_electron_radius_;
 
-    // Muon Isolation radius
-    std::vector<MAfloat64> isocone_muon_radius_;
+        // Muon Isolation radius
+        std::vector<MAfloat64> isocone_muon_radius_;
 
-    // Photon Isolation radius
-    std::vector<MAfloat64> isocone_photon_radius_;
+        // Photon Isolation radius
+        std::vector<MAfloat64> isocone_photon_radius_;
 
-    //--------------------------------------------------------------------------
-    //                              method members
-    //--------------------------------------------------------------------------
-  public :
+        //--------------------------------------------------------------------------
+        //                              method members
+        //--------------------------------------------------------------------------
+    public :
 
-    /// Constructor without argument
-    JetClusterer (ClusterAlgoBase* algo) 
-    {
-      // Initializing tagger
-      algo_        = algo;
+        /// Constructor without argument
+        JetClusterer (ClusterAlgoBase* algo)
+        {
+            // Initializing tagger
+            algo_        = algo;
 #ifdef MA5_FASTJET_MODE
-      cluster_collection_.clear();
-      substructure_collection_.clear();
+            cluster_collection_.clear();
+            substructure_collection_.clear();
 #endif
-      myBtagger_   = 0;
-      myCtagger_   = 0;
-      myTautagger_ = 0;
-      mySmearer_   = 0;
-      ExclusiveId_ = false;
-      JetID_       = "Ma5Jet";
-      muon=0;
-      electron=0;
-      tauH=0;
-      tauM=0;
-      tauE=0;
-      photon=0;
-      isocone_track_radius_.clear();
-      isocone_electron_radius_.clear();
-      isocone_muon_radius_.clear();
-      isocone_photon_radius_.clear();
-    }
+            mySmearer_   = 0;
+            myTagger_    = 0;
+            myTaggerOptions_ = 0;
+            ExclusiveId_ = false;
+            JetID_       = "Ma5Jet";
+            muon=0;
+            electron=0;
+            tauH=0;
+            tauM=0;
+            tauE=0;
+            photon=0;
+            isocone_track_radius_.clear();
+            isocone_electron_radius_.clear();
+            isocone_muon_radius_.clear();
+            isocone_photon_radius_.clear();
+        }
 
-    /// Destructor
-    ~JetClusterer()
-    { }
+        /// Destructor
+        ~JetClusterer()
+        { }
 
-    /// Initialization
-    MAbool Initialize(const std::map<std::string,std::string>& options);
+        /// Initialization
+        MAbool Initialize(const std::map<std::string,std::string>& options);
 
-    /// Jet clustering
-    MAbool Execute(SampleFormat& mySample, EventFormat& myEvent);
+        /// Jet clustering
+        MAbool Execute(SampleFormat& mySample, EventFormat& myEvent);
 
-    /// Finalization
-    void Finalize();
+        /// Finalization
+        void Finalize();
 
-    /// Generic loader for the smearer module
-    void LoadSmearer(SmearerBase* smearer)
-    {
-        mySmearer_ = smearer;
-        mySmearer_->Initialize();
-    }
+        /// Generic loader for the smearer module
+        void LoadSmearer(SmearerBase* smearer)
+        {
+            mySmearer_ = smearer;
+            mySmearer_->Initialize();
+        }
 
-    /// Generic Loader for tagger module
-    void LoadTagger(SFSTaggerBase* tagger)
-    {
-        myTagger_ = tagger;
-        myTagger_->Initialize(*myTaggerOptions_);
-    }
+        /// Generic Loader for tagger module
+        void LoadTagger(SFSTaggerBase* tagger)
+        {
+            myTagger_ = tagger;
+            myTagger_->Initialize(*myTaggerOptions_);
+        }
 
-    // Load additional Jets
-    MAbool LoadJetConfiguration(std::map<std::string,std::string> options);
+        // Load additional Jets
+        MAbool LoadJetConfiguration(std::map<std::string,std::string> options);
 
-    /// Accessor to the jet clusterer name
-    std::string GetName() 
-    { 
-      if (algo_==0) return "NotDefined";
-      else return algo_->GetName();
-    }
+        /// Accessor to the jet clusterer name
+        std::string GetName()
+        {
+            if (algo_==0) return "NotDefined";
+            else return algo_->GetName();
+        }
 
-    /// Accessor to the b tagger parameters
-    std::string bParameters()
-    { return myBtagger_->GetParameters(); }
+        /// Accessor to the tagger parameters
+        void TaggerParameters()
+        { myTagger_->PrintParam(); }
 
-    /// Accessor to the tau tagger parameters
-    std::string tauParameters()
-    { return myTautagger_->GetParameters(); }
+        /// Print parameters
+        void PrintParam()
+        { algo_->PrintParam(); }
 
-    /// Print parameters
-    void PrintParam()
-    { algo_->PrintParam(); }
+        /// Accessor to the jet clusterer parameters
+        std::string GetParameters()
+        { return algo_->GetParameters(); }
 
-    /// Accessor to the jet clusterer parameters
-    std::string GetParameters()
-    { return algo_->GetParameters(); }
+    private:
+        MAbool IsLast(const MCParticleFormat* part, EventFormat& myEvent);
+        void GetFinalState(const MCParticleFormat* part, std::set<const MCParticleFormat*>& finalstates);
 
- private:
-    MAbool IsLast(const MCParticleFormat* part, EventFormat& myEvent);
-    void GetFinalState(const MCParticleFormat* part, std::set<const MCParticleFormat*>& finalstates);
-
-  };
+    };
 
 }
 

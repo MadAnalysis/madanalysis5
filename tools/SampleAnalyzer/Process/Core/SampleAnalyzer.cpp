@@ -467,8 +467,7 @@ JetClusterer* SampleAnalyzer::InitializeJetClusterer(
 
   // Display
   INFO << "        with algo: " << myClusterer->GetParameters() << endmsg;
-  INFO << "        with bjet: " << myClusterer->bParameters() << endmsg;
-  INFO << "        with tau:  " << myClusterer->tauParameters() << endmsg;
+  myClusterer->TaggerParameters();
 
   // Returning the clusterer
   return myClusterer;
