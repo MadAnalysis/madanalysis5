@@ -33,13 +33,13 @@ namespace MA5 {
     void SFSTaggerBase::PrintParam() const
     {
         std::string excl = _options.btag_exclusive ? "Exclusive" : "Inclusive";
-        INFO << "        with bjet: dR = " << _options.btag_matching_deltaR << " ; " << excl << endmsg;
+        INFO << "        with bjet: ΔR = " << _options.btag_matching_deltaR << " ; " << excl << endmsg;
         excl = _options.ctag_exclusive ? "Exclusive" : "Inclusive";
-        INFO << "        with cjet: dR = " << _options.ctag_matching_deltaR << " ; " << excl << endmsg;
+        INFO << "        with cjet: ΔR = " << _options.ctag_matching_deltaR << " ; " << excl << endmsg;
         if (_options.tautag_jetbased)
         {
             excl = _options.ctag_exclusive ? "Exclusive" : "Inclusive";
-            INFO << "        with tau : dR = " << _options.tautag_matching_deltaR << " ; " << excl << endmsg;
+            INFO << "        with tau : ΔR = " << _options.tautag_matching_deltaR << " ; " << excl << endmsg;
         }
         else
         {
