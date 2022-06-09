@@ -28,8 +28,8 @@ import logging
 
 class TauIdentification:
 
-    default_matching_dr = 0.5
-    default_exclusive = True
+    default_matching_dr = 0.3
+    default_exclusive = False
     default_efficiency = 1.0
     default_misid_ljet = 0.0
     default_reconstruction_method = "hadron-based"
@@ -44,6 +44,7 @@ class TauIdentification:
         self.misid_ljet = TauIdentification.default_misid_ljet
         self.matching_dr = TauIdentification.default_matching_dr
         self.reconstruction_method = TauIdentification.default_reconstruction_method
+        self.exclusive = TauIdentification.default_exclusive
 
     def Display(self):
         logging.getLogger("MA5").info("  + hadronic-tau identification:")
@@ -64,10 +65,9 @@ class TauIdentification:
 
     def SampleAnalyzerConfigString(self):
         return {
-            "tau_id.efficiency": str(self.efficiency),
-            "tau_id.misid_ljet": str(self.misid_ljet),
             "tau_id.matching_dr": str(self.matching_dr),
-            "tau_id.reconstruction_method": self.reconstruction_method,
+            "tau_id.reconstruction_method": "1" if self.reconstruction_method == "jet-based" else "0",
+            "tau_id.exclusive" : "1" if self.exclusive else "0",
         }
 
     def user_GetValues(self, variable):
@@ -90,7 +90,23 @@ class TauIdentification:
             if number <= 0:
                 logging.getLogger("MA5").error("the 'matching deltaR' cannot be negative or null.")
                 return False
+            if self.reconstruction_method == "hadron-based":
+                logging.getLogger("MA5").warning("Hadronic tau matching is only available in jet-based tagging mode.")
+                logging.getLogger("MA5").warning("To activate jet-based tagging type "
+                                                 "`set main.fastsim.tau_id.reconstruction_method = jet-based`")
             self.matching_dr = number
+
+        # Exclusive algorithm
+        elif parameter == "tau_id.exclusive":
+            if value not in ["true", "false"]:
+                logging.getLogger('MA5').error("'exclusive' possible values are : 'true', 'false'")
+                return False
+            if self.reconstruction_method == "hadron-based":
+                logging.getLogger("MA5").warning("Exclusive Hadronic tau matching is only available "
+                                                 "in jet-based tagging mode.")
+                logging.getLogger("MA5").warning("To activate jet-based tagging type "
+                                                 "`set main.fastsim.tau_id.reconstruction_method = jet-based`")
+            self.exclusive = (value == "true")
 
         # reconstruction method
         if parameter == "tau_id.reconstruction_method":
