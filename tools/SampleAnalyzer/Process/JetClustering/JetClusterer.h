@@ -35,6 +35,7 @@
 #include "SampleAnalyzer/Process/JetClustering/TauTagger.h"
 #include "SampleAnalyzer/Process/JetClustering/NullSmearer.h"
 #include "SampleAnalyzer/Commons/Base/SmearerBase.h"
+#include "SampleAnalyzer/Commons/Base/SFSTaggerBase.h"
 
 #ifdef MA5_FASTJET_MODE
   #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoStandard.h"
@@ -66,6 +67,9 @@ namespace MA5
     cTagger*     myCtagger_;
     TauTagger*   myTautagger_;
     SmearerBase* mySmearer_;
+    SFSTaggerBase* myTagger_;
+
+    SFSTaggerBaseOptions* myTaggerOptions_;
 
     /// Exclusive id for tau-elec-photon-jet
     MAbool ExclusiveId_;
@@ -150,6 +154,14 @@ namespace MA5
     {
         mySmearer_ = smearer;
         mySmearer_->Initialize();
+    }
+
+    /// Generic Loader for tagger module
+    void LoadTagger(SFSTaggerBase* tagger)
+    {
+        myTagger_ = tagger;
+        myTagger_->Initialize();
+        myTagger_->SetOptions(*myTaggerOptions_);
     }
 
     // Load additional Jets
