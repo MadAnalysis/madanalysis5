@@ -460,10 +460,10 @@ namespace MA5 {
     void SFSTaggerBase::Jet2Tau(const RecJetFormat * myJet, RecTauFormat *myTau, EventFormat &myEvent) const
     {
         myTau->setMomentum(myJet->momentum());
-        myTau->ntracks_   = myJet->ntracks();
-        myTau->mc_        = myJet->mc_;
-        myTau->DecayMode_ = PHYSICS->GetTauDecayMode(myTau->mc_);
-        myTau->pseudojet_ = myJet->pseudojet_;
+        myTau->setNtracks(myJet->ntracks());
+        myTau->setMc(myJet->mc_);
+        myTau->setDecayMode(PHYSICS->GetTauDecayMode(myTau->mc_));
+        myTau->setPseudoJet(myJet->pseudojet_);
 
         MAint32 charge = 0;
         myTau->Constituents_.reserve(myJet->Constituents_.size());
@@ -473,7 +473,7 @@ namespace MA5 {
         for (auto &constit: myTau->Constituents_)
             charge += PDG->GetCharge(myEvent.mc()->particles()[constit].pdgid());
 
-        myTau->charge_ = charge > 0 ? true : false;
+        myTau->setCharge(charge > 0 ? true : false);
     }
 
 }
