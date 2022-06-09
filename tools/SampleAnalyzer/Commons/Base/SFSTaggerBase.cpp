@@ -39,11 +39,11 @@ namespace MA5 {
         if (_options.tautag_jetbased)
         {
             excl = _options.ctag_exclusive ? "Exclusive" : "Inclusive";
-            INFO << "        with tau: dR = " << _options.tautag_matching_deltaR << " ; " << excl << endmsg;
+            INFO << "        with tau : dR = " << _options.tautag_matching_deltaR << " ; " << excl << endmsg;
         }
         else
         {
-            INFO << "        with tau: hadron-based tagging" << endmsg;
+            INFO << "        with tau : hadron-based tagging" << endmsg;
         }
     }
 
@@ -374,7 +374,7 @@ namespace MA5 {
         for (auto &bHadron: myEvent.rec()->MCBquarks_)
         {
             MAfloat32 DeltaRmax = _options.btag_matching_deltaR;
-            MAuint32 current_ijet = -1;
+            MAint32 current_ijet = -1;
             for (MAuint32 ijet = 0; ijet < myEvent.rec()->jets().size(); ijet++)
             {
                 MAfloat32 dR = myEvent.rec()->jets()[ijet].dr(bHadron);
@@ -405,7 +405,7 @@ namespace MA5 {
         for (auto &cHadron: myEvent.rec()->MCCquarks_)
         {
             MAfloat32 DeltaRmax = _options.ctag_matching_deltaR;
-            MAuint32 current_ijet = -1;
+            MAint32 current_ijet = -1;
             for (MAuint32 ijet = 0; ijet < myEvent.rec()->jets().size(); ijet++)
             {
                 MAfloat32 dR = myEvent.rec()->jets()[ijet].dr(cHadron);
@@ -436,7 +436,7 @@ namespace MA5 {
         for (auto &hadronicTau: myEvent.rec()->MCHadronicTaus())
         {
             MAfloat32 DeltaRmax = _options.tautag_matching_deltaR;
-            MAuint32 current_jet = -1;
+            MAint32 current_jet = -1;
             for (MAuint32 ijet = 0; ijet < myEvent.rec()->jets().size(); ijet++)
             {
                 if (myEvent.rec()->jets()[ijet].true_ctag() || myEvent.rec()->jets()[ijet].true_btag())

@@ -424,9 +424,6 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
                         // Saving the hadrons in MC container
                         myEvent.rec()->MCHadronicTaus_.push_back(&(part));
 
-                        // Applying efficiency
-//                        if (!myTautagger_->IsIdentified()) continue;
-
                         /// If tau tagging is jet based do not proceed
                         if (!myTaggerOptions_->tautag_jetbased)
                         {
