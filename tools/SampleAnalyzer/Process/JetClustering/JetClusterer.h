@@ -67,6 +67,9 @@ namespace MA5
         /// pointer to tagger options
         SFSTaggerBaseOptions* myTaggerOptions_;
 
+        /// Print SFS banner
+        MAbool SFSbanner_;
+
         /// Exclusive id for tau-elec-photon-jet
         MAbool ExclusiveId_;
 
@@ -117,6 +120,7 @@ namespace MA5
             mySmearer_   = 0;
             myTagger_    = 0;
             myTaggerOptions_ = 0;
+            SFSbanner_ = true;
             ExclusiveId_ = false;
             JetID_       = "Ma5Jet";
             muon=0;
@@ -149,6 +153,7 @@ namespace MA5
         {
             mySmearer_ = smearer;
             mySmearer_->Initialize();
+            if (SFSbanner_) {PrintSFSBanner(); SFSbanner_ = false;}
         }
 
         /// Generic Loader for tagger module
@@ -156,6 +161,7 @@ namespace MA5
         {
             myTagger_ = tagger;
             myTagger_->Initialize(*myTaggerOptions_);
+            if (SFSbanner_) {PrintSFSBanner(); SFSbanner_ = false;}
         }
 
         // Load additional Jets
@@ -179,6 +185,25 @@ namespace MA5
         /// Accessor to the jet clusterer parameters
         std::string GetParameters()
         { return algo_->GetParameters(); }
+
+        /// SFS Banner
+        void PrintSFSBanner()
+        {
+            INFO << "   <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endmsg;
+            INFO << "   <>                                                              <>" << endmsg;
+            INFO << "   <>     Simplified Fast Detector Simulation in MadAnalysis 5     <>" << endmsg;
+            INFO << "   <>            Please cite arXiv:2006.09387 [hep-ph]             <>" << endmsg;
+            if (mySmearer_->isPropagatorOn()) // cite particle propagator module
+            {
+                INFO << "   <>                                                              <>" << endmsg;
+                INFO << "   <>            Particle Propagation in MadAnalysis 5             <>" << endmsg;
+                INFO << "   <>            Please cite arXiv:2112.05163 [hep-ph]             <>" << endmsg;
+                INFO << "   <>                                                              <>" << endmsg;
+            }
+            INFO << "   <>         https://madanalysis.irmp.ucl.ac.be/wiki/SFS          <>" << endmsg;
+            INFO << "   <>                                                              <>" << endmsg;
+            INFO << "   <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endmsg;
+        }
 
     private:
         MAbool IsLast(const MCParticleFormat* part, EventFormat& myEvent);
