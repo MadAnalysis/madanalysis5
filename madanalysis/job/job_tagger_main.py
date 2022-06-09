@@ -23,6 +23,30 @@
 
 
 class JobTaggerMain:
+
+    # structure: (true_id, reco_id) : "..."
+    base = {
+        (5, 5): "/// B-jet tagging efficiency (b as b)\nMAfloat32 NewTagger::b_tagging_eff(const RecJetFormat &object) const",
+        (5, 4): "/// B-jet mistagging as C-jet (b as c)\nMAfloat32 NewTagger::b_mistag_c(const RecJetFormat &object) const",
+        (4, 4): "/// C-jet tagging efficiency (c as c)\nMAfloat32 NewTagger::c_tagging_eff(const RecJetFormat &object) const",
+        (4, 5): "/// C-jet mistagging as C-jet (c as b)\nMAfloat32 NewTagger::c_mistag_b(const RecJetFormat &object) const",
+        (21, 5): "/// Light-Jet mistagging as b-jet (j as b)\nMAfloat32 NewTagger::lightjet_mistag_b(const RecJetFormat &object) const",
+        (21, 4): "/// Light-Jet mistagging as c jet (j as c)\nMAfloat32 NewTagger::lightjet_mistag_c(const RecJetFormat &object) const",
+        (21, 15): "/// Light-Jet mistagging as tau (j as ta)\nMAfloat32 NewTagger::lightjet_mistag_tau(const RecJetFormat &object) const",
+        (21, 11): "/// Light-Jet mistagging as electron (j as e)\nMAfloat32 NewTagger::lightjet_mistag_electron(const RecJetFormat &object) const",
+        (21, 22): "/// Light-Jet mistagging as photon (j as photon)\nMAfloat32 NewTagger::lightjet_mistag_photon(const RecJetFormat &object) const",
+        (15, 15): "/// Tau tagging efficiency (ta as ta)\nMAfloat32 NewTagger::tau_tagging_eff(const RecTauFormat &object) const",
+        (11, 13): "/// Electron mistagging as muon (e as mu)\nMAfloat32 NewTagger::electron_mistag_muon(const RecLeptonFormat &object) const",
+        (11, 22): "/// Electron mistagging as photon (e as a)\nMAfloat32 NewTagger::electron_mistag_photon(const RecLeptonFormat &object) const",
+        (11, 21): "/// Electron mistagging as light jet (e as j)\nMAfloat32 NewTagger::electron_mistag_lightjet(const RecLeptonFormat &object) const",
+        (13, 11): "/// Electron mistagging as electron (mu as e)\nMAfloat32 NewTagger::muon_mistag_electron(const RecLeptonFormat &object) const",
+        (13, 22): "/// Electron mistagging as photon (mu as a)\nMAfloat32 NewTagger::muon_mistag_photon(const RecLeptonFormat &object) const",
+        (13, 21): "/// Electron mistagging as light jet (mu as j)\nMAfloat32 NewTagger::muon_mistag_lightjet(const RecLeptonFormat &object) const",
+        (22, 11): "/// Electron mistagging as electron (a as e)\nMAfloat32 NewTagger::photon_mistag_electron(const RecPhotonFormat &object) const",
+        (22, 13): "/// Electron mistagging as muon (a as mu)\nMAfloat32 NewTagger::photon_mistag_muon(const RecPhotonFormat &object) const",
+        (22, 21): "/// Electron mistagging as light jet (a as j)\nMAfloat32 NewTagger::photon_mistag_lightjet(const RecPhotonFormat &object) const",
+    }
+
     ## Initialization
     def __init__(self, fastsim):
         self.fastsim = fastsim
@@ -33,181 +57,32 @@ class JobTaggerMain:
         # header
         file.write('#include "SampleAnalyzer/User/Analyzer/new_tagger.h"\n')
         file.write('#include "SampleAnalyzer/User/Analyzer/efficiencies.h"\n')
-        file.write('#include "SampleAnalyzer/Commons/Service/RandomService.h"\n')
-        file.write('#include "SampleAnalyzer/Commons/Service/PDGService.h"\n')
-        file.write('#include "SampleAnalyzer/Commons/Service/Physics.h"\n')
         file.write('using namespace MA5;\n')
-        file.write('\n')
-        file.write('void NewTagger::Execute(SampleFormat& sample, ' +\
-            'EventFormat& event)\n{\n')
 
-        # Removal container
-        file.write('  // Storing the IDs of objects that need to leave a collection\n')
-        file.write('  std::vector<MAuint32> toRemove;\n\n')
+        unique_rules = []
+        for key, rule in self.fastsim.tagger.rules.items():
+            if (int(rule["id_true"]), int(rule["id_reco"])) not in unique_rules:
+                unique_rules.append((int(rule["id_true"]), int(rule["id_reco"])))
 
-        # global event variables
-        file.write('  // Shortcut for global event variables\n')
-        file.write('  MAfloat64 & THT  = event.rec()->THT();\n')
-        file.write('  MAfloat64 & Meff = event.rec()->Meff();\n\n')
+        for true_id, reco_id in unique_rules:
+            file.write("\n"+JobTaggerMain.base[(true_id, reco_id)] + " {\n")
 
-        # b/c-tagging + jet mistagging as any other object
-        file.write('  // b/c-tagging + jet-mistagging\n')
-        file.write('  MAuint32 Ntaus = event.rec()->taus().size();\n')
-        file.write('  for (MAuint32 i=0; i<event.rec()->jets().size(); i++)\n')
-        file.write('  {\n')
-        for reco_ID in [ ['5', 'b', 'Btag'], ['4', 'c', 'Ctag'] ]:
-            pretag=''
-            for true_ID in [ ['5', 'b', 'true_btag'], ['4', 'c', 'true_ctag'], ['21', 'j', '' ] ]:
-                if self.HaveRules(true_ID[:-1], reco_ID[:-1]):
-                    file.write('    // We have a true ' + true_ID[-2].replace('j','light') + '-jet: is it ' + reco_ID[-2] + '-tagged?\n')
-                    if true_ID[-1]=='':
-                        file.write('    ' + pretag + '\n')
-                    else:
-                        file.write('    ' + pretag + 'if (event.rec()->jets()[i].' + true_ID[-1]+ '())\n')
-                    file.write('    {\n')
-                    self.PrintTagger(true_ID[:-1], reco_ID[:-1], file,'(&event.rec()->jets()[i])',reco_ID[-1])
-                    file.write('    }\n\n')
-                    pretag='else '
-            file.write('    // We have a '+reco_ID[-2]+'-tagged jet -> moving on with the next jet\n')
-            file.write('    if (event.rec()->jets()[i].'+reco_ID[-1].lower()+'()) { continue; }\n\n')
-        # Do we have some mistagging of a jet as any other object
-        if self.HaveRules(['21', 'j'], ['15', 'ta','11','e','22','a']):
-            file.write('    // We have a true b/c-jet -> cannot be mistagged\n')
-            file.write('    if (event.rec()->jets()[i].true_btag() || event.rec()->jets()[i].true_ctag()) { continue; }\n\n')
-            file.write('    // if not, is it mis-tagged as anything?\n')
-            file.write('    else\n')
-            file.write('    {\n')
-            for reco_ID in [  ['15', 'ta', 'TauMistag'],  ['11', 'e', 'Electron'],  ['22', 'a', 'Photon']  ]:
-                #  Checking the existence of the related rules
-                if not self.HaveRules(['21', 'j'], reco_ID[:-1]):
-                    continue
-                file.write('     {\n')
-                file.write('       // if not, is it '+reco_ID[2].split('Mistag')[0]+'-tagged?\n')
-                self.PrintTagger(['21', 'j'], reco_ID[:-1],file,'(&event.rec()->jets()[i])',reco_ID[2])
-                file.write('     }\n')
-            file.write('    }\n')
-        file.write('  }\n\n')
-        file.write('  for (MAuint32 i=toRemove.size();i>0;i--)\n')
-        file.write('    event.rec()->jets().erase(event.rec()->jets().begin() + toRemove[i-1]);\n')
-        file.write('  toRemove.clear();\n\n')
-
-        # tau-tagging
-        if self.HaveRules(['15', 'ta'], ['15', 'ta']):
-            file.write('  // tau-tagging\n')
-            file.write('  for (MAuint32 i=0; i<Ntaus; i++)\n')
-            file.write('  {\n')
-            self.PrintTagger(['15', 'ta'], ['15', 'ta'],file,'(&event.rec()->taus()[i])','Jet')
-            file.write('  }\n')
-            file.write('  for (MAuint32 i=toRemove.size();i>0;i--)\n')
-            file.write('    event.rec()->taus().erase(event.rec()->taus().begin() + toRemove[i-1]);\n')
-            file.write('  toRemove.clear();\n\n')
-
-        # Muon and electron mis-tagging
-        for true_ID in [  ['13', 'mu', 'muons'],  ['11', 'e', 'electrons'],  ['22', 'a', 'photons']  ]:
-            if self.HaveRules(true_ID[:-1], ['11', 'e', '22', 'a', '21', 'j', '13', 'mu']):
-                file.write('  // Mistagging of ' + true_ID[-1] + '\n')
-                file.write('  for (MAuint32 i=0; i<event.rec()->' + true_ID[-1] + '().size(); i++)\n')
-                file.write('  {\n')
-                self.PrintTagger(true_ID[:-1], ['11', 'e', '22', 'a', '21', 'j', '13', 'mu'], file,
-                   '(&event.rec()->' + true_ID[-1] + '()[i])','LeptonicMistag')
-                file.write('  }\n')
-                file.write('  for (MAuint32 i=toRemove.size();i>0;i--)\n')
-                file.write('    event.rec()->' + true_ID[-1] + '().erase(event.rec()->' + true_ID[-1] + '().begin() + toRemove[i-1]);\n')
-                file.write('  toRemove.clear();\n\n')
-
-        # End
-        file.write('}\n\n')
-
-
-    def HaveRules(self, true_list, reco_list):
-        for key, val in self.fastsim.tagger.rules.items():
-            if val['id_true'] in true_list and val['id_reco'] in reco_list:
-                return True
-        return False
-
-
-    def PrintTagger(self, true_list, reco_list, file, obj, prop):
-        # To get information on the existence of a tagger for a given particle species
-        check_initializer = 0
-        for key, val in self.fastsim.tagger.rules.items():
-            if val['id_true'] in true_list and val['id_reco'] in reco_list:
-                eff_str = []
-                initializer = 'MAdouble64 '
-                if check_initializer > 0:
-                    initializer = ''
-                for eff_key, eff_val in val['efficiencies'].items():
-                    my_eff_str = eff_val['bounds'].tocpp_call(obj,\
-                      'bnd_'+str(val['id_true'])+'_'+str(val['id_reco'])+'_'+str(eff_key))
-                    my_eff_str +=' * '
-                    my_eff_str += eff_val['function'].tocpp_call(obj,\
-                      'eff_'+str(val['id_true'])+'_'+str(val['id_reco'])+'_'+str(eff_key))
-                    eff_str.append(my_eff_str)
-                file.write('      ' + initializer  + ' efficiency = ' + ' + '.join(eff_str) +';\n')
-                if prop=='TauMistag':
-                    file.write('      if (RANDOM->flat() < efficiency)\n')
-                    file.write('      {\n')
-                    file.write('        RecTauFormat* newTau = event.rec()->GetNewTau();\n')
-                    file.write('        newTau->setMomentum('+obj+'->momentum());\n')
-                    file.write('        newTau->setNtracks(' + obj + '->ntracks());\n')
-                    file.write('        newTau->setMc(' + obj + '->mc());\n')
-                    file.write('        newTau->setDecayMode(PHYSICS->GetTauDecayMode(newTau->mc()));\n')
-                    file.write('        MAint32 charge = 0;\n')
-                    file.write('        for (MAuint32 icst=0;icst<'+obj+'->constituents().size();icst++)\n')
-                    file.write('          charge += PDG->GetCharge(event.mc()->particles()['+obj+'->constituents()[icst]].pdgid());\n')
-                    file.write('        newTau->setCharge(charge>0);\n')
-                    file.write('        toRemove.push_back(i);\n')
-                    file.write('        continue;\n')
-                    file.write('      }\n')
-                elif prop in ['Jet', 'LeptonicMistag', 'Electron', 'Photon']:
-                    if 'tau' in obj and prop=='Jet':
-                        file.write('      if (RANDOM->flat() > efficiency)\n')
-                    else:
-                        file.write('      if (RANDOM->flat() < efficiency)\n')
-                    # Get the object for the reco object
-                    newprop = prop
-                    if val['id_reco'] in ['11', 'e']  :
-                        newprop = 'Electron'
-                    elif val['id_reco'] in ['13', 'mu'] :
-                        newprop = 'Muon'
-                    elif val['id_reco'] in ['22', 'a']  :
-                        newprop = 'Photon'
-                    elif val['id_reco'] in ['21', 'j']  :
-                        newprop = 'Jet'
-                    file.write('      {\n')
-                    file.write('        Rec'+newprop.replace('Electron','Lepton').replace('Muon','Lepton')+ \
-                         'Format* NewParticle = event.rec()->GetNew'+newprop+'();\n')
-                    file.write('        NewParticle->setMomentum('+obj+'->momentum());\n')
-                    file.write('        NewParticle->setMc(' + obj + '->mc());\n')
-                    if newprop in ['Electron', 'Muon']:
-                         if 'muon' in obj or 'electron' in obj:
-                             file.write('        NewParticle->SetCharge(' + obj + '->charge());\n')
-                         else:
-                             file.write('        if(RANDOM->flat() > 0.5)\n')
-                             file.write('            NewParticle->SetCharge(1.);\n')
-                             file.write('        else)\n')
-                             file.write('            NewParticle->SetCharge(-1.);\n')
-                    elif newprop=='Jet':
-                        if 'tau' in obj:
-                            file.write('        NewParticle->setNtracks(' + obj + '->ntracks());\n')
-                        else:
-                            file.write('        NewParticle->setNtracks(1);\n')
-                            file.write('        THT    += '+obj+'->pt();\n')
-                            file.write('        Meff   += '+obj+'->pt();\n')
-                            file.write('        MALorentzVector MissHT = event.rec()->MHT().momentum() - '+obj+'->momentum();\n')
-                            file.write('        (&event.rec()->MHT().momentum())->SetPxPyPzE(MissHT.Px(), MissHT.Py(), 0., MissHT.E());\n')
-                    if 'jets' in obj and newprop in ['Electron', 'Photon']:
-                        file.write('        THT    -= '+obj+'->pt();\n')
-                        file.write('        Meff   -= '+obj+'->pt();\n')
-                        file.write('        MALorentzVector MissHT = event.rec()->MHT().momentum() + '+obj+'->momentum();\n')
-                        file.write('        (&event.rec()->MHT().momentum())->SetPxPyPzE(MissHT.Px(), MissHT.Py(), 0., MissHT.E());\n')
-                    file.write('        toRemove.push_back(i);\n')
-                    file.write('        continue;\n')
-                    file.write('      }\n')
-                else:
-                    if true_list[0] in reco_list:
-                        file.write('      if (RANDOM->flat() > efficiency)')
-                        file.write(' { ' + obj+'->set'+prop+'(false); }\n')
-                    else:
-                        file.write('      if (RANDOM->flat() < efficiency)')
-                        file.write(' { ' + obj+'->set'+prop+'(true); }\n')
-                check_initializer+=1
+            check_initializer = 0
+            for key, val in self.fastsim.tagger.rules.items():
+                if val['id_true'] in [str(true_id)] and val['id_reco'] in [str(reco_id)]:
+                    eff_str = []
+                    initializer = 'MAfloat32 '
+                    if check_initializer > 0:
+                        initializer = ''
+                    for eff_key, eff_val in val['efficiencies'].items():
+                        my_eff_str = eff_val['bounds'].tocpp_call(
+                            "object",'bnd_'+str(val['id_true'])+'_'+str(val['id_reco'])+'_'+str(eff_key), pointer=".",
+                        )
+                        my_eff_str +=' * '
+                        my_eff_str += eff_val['function'].tocpp_call(
+                            "object", 'eff_'+str(val['id_true'])+'_'+str(val['id_reco'])+'_'+str(eff_key), pointer=".",
+                        )
+                        eff_str.append(my_eff_str)
+                    file.write('    ' + initializer  + ' efficiency = ' + ' + '.join(eff_str) +';\n')
+                    check_initializer += 1
+            file.write("    return efficiency;\n}\n")

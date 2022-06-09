@@ -507,7 +507,8 @@ class JobWriter(object):
                 file.write('  cluster1->LoadSmearer(mySmearer);\n\n')
             if self.main.superfastsim.isTaggerOn():
                 file.write('  // Declaration of a generic tagger\n')
-                file.write('  NewTagger* tagger = new NewTagger();\n\n')
+                file.write('  NewTagger* myTagger = new NewTagger();\n')
+                file.write('  cluster1->LoadTagger(myTagger);\n\n')
 
 
         # + Case Delphes
@@ -593,8 +594,6 @@ class JobWriter(object):
             file.write('      if (!analyzer2->Execute(mySample,myEvent)) continue;\n')
         if self.main.fastsim.package=="fastjet":
             file.write('      cluster1->Execute(mySample,myEvent);\n')
-            if self.main.superfastsim.isTaggerOn():
-                file.write('      tagger->Execute(mySample,myEvent);\n')
         elif self.main.fastsim.package=="delphes":
             file.write('      fastsim1->Execute(mySample,myEvent);\n')
         elif self.main.fastsim.package=="delphesMA5tune":

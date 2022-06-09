@@ -75,6 +75,7 @@ MAbool JetClusterer::Initialize(const std::map<std::string,std::string>& options
     myTagger_    = new SFSTaggerBase();
     myTaggerOptions_ = new SFSTaggerBaseOptions();
     mySmearer_->Initialize(true);
+    myTagger_->Initialize();
 
 
     /// Loop ower options
@@ -220,7 +221,7 @@ MAbool JetClusterer::Initialize(const std::map<std::string,std::string>& options
     /// configure algo
     algo_->Initialize();
     /// Configure Tagger
-    myTagger_->Initialize(*myTaggerOptions_);
+    myTagger_->SetOptions(*myTaggerOptions_);
 
     return true;
 }

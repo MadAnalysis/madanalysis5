@@ -269,9 +269,9 @@ class AST:
 
 
     # Setting the c++ in text initialization
-    def tocpp_call(self,obj,name):
+    def tocpp_call(self,obj,name, pointer="->"):
         obs = list(set([x.name for x in self.leaves if x.type=='var']))
         result  = ' fct_' + name + '('
-        result += ', '.join([obj+'->'+obs_list.__dict__[x].code_reco for x in obs])
+        result += ', '.join([obj+pointer+obs_list.__dict__[x].code_reco for x in obs])
         result += ') '
         return result
