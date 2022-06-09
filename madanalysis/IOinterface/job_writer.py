@@ -692,6 +692,10 @@ class JobWriter(object):
         file.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"\n')
         file.write('#include "SampleAnalyzer/User/Analyzer/user.h"\n')
         file.write('#include "SampleAnalyzer/Commons/Service/LogStream.h"\n')
+        if self.main.superfastsim.isTaggerOn():
+            file.write('#include "new_tagger.h"\n')
+        if self.main.superfastsim.isNewSmearerOn():
+            file.write('#include "new_smearer_reco.h"\n')
         file.write('\n')
         file.write('// ------------------------------------------' +\
                    '-----------------------------------\n')
