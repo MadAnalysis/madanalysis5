@@ -72,7 +72,7 @@ namespace MA5 {
         /// Destructor
         virtual ~SFSTaggerBase() {}
 
-        virtual void Initialize()
+        virtual void Initialize(SFSTaggerBaseOptions &opt)
         {
             /// @brief Booleans for code efficiency
             /// Turn on the usage of tau tagging efficiency
@@ -85,6 +85,8 @@ namespace MA5 {
             _isElectronTaggingOn = false;
             /// Turn on the usage of photon (mis)tagging efficiency
             _isPhotonTaggingOn = false;
+            /// Initialize options
+            SetOptions(opt);
         }
 
         /// @brief Execution: execute truth and detector level tagging algorithm

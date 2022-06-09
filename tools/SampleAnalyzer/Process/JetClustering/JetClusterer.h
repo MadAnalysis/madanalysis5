@@ -160,8 +160,7 @@ namespace MA5
     void LoadTagger(SFSTaggerBase* tagger)
     {
         myTagger_ = tagger;
-        myTagger_->Initialize();
-        myTagger_->SetOptions(*myTaggerOptions_);
+        myTagger_->Initialize(*myTaggerOptions_);
     }
 
     // Load additional Jets
