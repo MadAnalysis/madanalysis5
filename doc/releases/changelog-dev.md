@@ -54,9 +54,11 @@
    ([#56](https://github.com/MadAnalysis/madanalysis5/pull/56))
  * Negative value can now be used for SFS bounds.
    ([#52](https://github.com/MadAnalysis/madanalysis5/pull/52))
+ * Bugfix for covariance matrix construction when global likelihood switch is off.
+   ([#88](https://github.com/MadAnalysis/madanalysis5/pull/88))
 
 ## Contributors
 
 This release contains contributions from (in alphabetical order):
 
-Jack Y. Araz, Benjamin Fuks
+[Jack Y. Araz](https://github.com/jackaraz), [Benjamin Fuks](https://github.com/bfuks)
