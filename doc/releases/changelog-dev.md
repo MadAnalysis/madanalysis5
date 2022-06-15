@@ -56,6 +56,8 @@
    ([#52](https://github.com/MadAnalysis/madanalysis5/pull/52))
  * Bugfix for covariance matrix construction when global likelihood switch is off.
    ([#88](https://github.com/MadAnalysis/madanalysis5/pull/88))
+ * Update the version check message for the cases that local version is greater
+   than stable version. ([#91](https://github.com/MadAnalysis/madanalysis5/pull/91))
 
 ## Contributors
 
