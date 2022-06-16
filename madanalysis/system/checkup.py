@@ -570,6 +570,6 @@ class CheckUp():
             self.logger.warning(f"The latest version can be downloaded from : ")
             self.logger.warning(f"{meta['html_url']}")
         elif compare_versions(current_version, latest_version):
-            self.logger.warning(f"A not-updated version of MadAnalysis 5 is in use ({self.archi_info.ma5_version}).")
+            self.logger.warning(f"A non stable version of MadAnalysis 5 is in use (v{self.archi_info.ma5_version}).")
             self.logger.warning(f"The latest stable version can be downloaded from :")
             self.logger.warning(f"{meta['html_url']}")
