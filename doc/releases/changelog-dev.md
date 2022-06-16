@@ -45,7 +45,7 @@
  * Debug mode message has been extended to include module, function and file names 
    with line number. ([#90](https://github.com/MadAnalysis/madanalysis5/pull/90))
  
- * Set hard limit to python version to 3.7+
+ * Set hard limit to python version to 3.6+ (PS: lxplus uses 3.6 minimum)
    ([#92](https://github.com/MadAnalysis/madanalysis5/pull/92))
 
 ## Bug fixes
