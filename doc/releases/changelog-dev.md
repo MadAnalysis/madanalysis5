@@ -42,6 +42,9 @@
    This now will be handled through `requirements.txt`.
    ([#68](https://github.com/MadAnalysis/madanalysis5/pull/68))
 
+ * Debug mode message has been extended to include module, function and file names 
+   with line number. ([#90](https://github.com/MadAnalysis/madanalysis5/pull/90))
+
 ## Bug fixes
  * Zero division error fixed in the simplified likelihoods workflow.
    ([#4](https://github.com/MadAnalysis/madanalysis5/pull/4))

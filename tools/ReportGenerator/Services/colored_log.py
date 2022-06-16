@@ -62,7 +62,8 @@ class ColoredFormatterMA5(logging.Formatter):
         elif ( record.levelno >= 20 ): #INFO
             color = '\x1b[0mMA5: '
         elif ( record.levelno >= 10 ): #DEBUG
-            color = '\x1b[36mMA5-DEBUG: '
+            color = f"\x1b[36mMA5-DEBUG ({record.module}.{record.funcName}() " \
+                    f"in {record.filename}::L{record.lineno}): "
         else:                          #ANYTHING ELSE
             color = '\x1b[0mMA5: '
         record.msg = color + str( record.msg ) + '\x1b[0m'
