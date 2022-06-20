@@ -1727,9 +1727,9 @@ class RunRecast():
         # Adding the global CLs from simplified likelihood
         for cov_subset in self.cov_config.keys():
             if not xsflag:
-                myxsexp = regiondata["cov_subset"][cov_subset]["s95exp"]
-                myxsobs = regiondata["cov_subset"][cov_subset]["s95obs"]
-                best    = str(regiondata["cov_subset"][cov_subset].get("best",0))
+                myxsexp = regiondata["cov_subset"][cov_subset].get("s95exp", "-1")
+                myxsobs = regiondata["cov_subset"][cov_subset].get("s95obs", "-1")
+                best    = str(regiondata["cov_subset"][cov_subset].get("best", 0))
                 myglobalcls = "%.4f" % regiondata["cov_subset"][cov_subset]["CLs"]
                 description = "[SL]-"+cov_subset
                 summary.write(analysis.ljust(30,' ') + description.ljust(60,' ') + best.ljust(10, ' ') +
@@ -1769,8 +1769,8 @@ class RunRecast():
         for likelihood_profile in list(self.pyhf_config.keys()):
             if likelihood_profile not in list(pyhf_data.keys()):
                 continue
-            myxsexp   = pyhf_data.get(likelihood_profile,{}).get('s95exp',"-1")
-            myxsobs   = pyhf_data.get(likelihood_profile,{}).get('s95obs',"-1")
+            myxsexp = pyhf_data.get(likelihood_profile, {}).get('s95exp', "-1")
+            myxsobs = pyhf_data.get(likelihood_profile, {}).get('s95obs', "-1")
             if not xsflag:
                 self.logger.debug(str(pyhf_data))
                 mycls   = '{:.4f}'.format(pyhf_data.get(likelihood_profile,{}).get('CLs', 0.))

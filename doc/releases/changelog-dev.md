@@ -51,21 +51,30 @@
 ## Bug fixes
  * Zero division error fixed in the simplified likelihoods workflow.
    ([#4](https://github.com/MadAnalysis/madanalysis5/pull/4))
+
  * Bug fix in the Pyhf wrapper.
    ([#10](https://github.com/MadAnalysis/madanalysis5/pull/10))
+
  * The ability to flush previous executions has been added to the PADForSFS.
    ([#17](https://github.com/MadAnalysis/madanalysis5/pull/17))
+
  * The `RecParticleFormat` dataformat now has an `ntracks()` accessor (as
    required by the NormalMode).
    ([#56](https://github.com/MadAnalysis/madanalysis5/pull/56))
+
  * Negative value can now be used for SFS bounds.
    ([#52](https://github.com/MadAnalysis/madanalysis5/pull/52))
+
  * Bugfix for covariance matrix construction when global likelihood switch is off.
    ([#88](https://github.com/MadAnalysis/madanalysis5/pull/88))
+
  * Update the version check message for the cases that local version is greater
    than stable version. ([#91](https://github.com/MadAnalysis/madanalysis5/pull/91))
  * Error handling has been fixed for the version update checker
    ([#95](https://github.com/MadAnalysis/madanalysis5/pull/95)).
+
+ * SL interface break has been fixed in cases of HL extrapolation.
+   ([#93](https://github.com/MadAnalysis/madanalysis5/pull/93))
 
 ## Contributors
 
