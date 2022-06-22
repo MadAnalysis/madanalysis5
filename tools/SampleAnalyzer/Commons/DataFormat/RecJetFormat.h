@@ -265,6 +265,15 @@ namespace MA5
         /// Setting a new Tight_tautag_ value
         void setTightTautag(const MAbool& tag);
 
+        /// Set all b-tags
+        void setAllBtags(const MAbool& tag);
+
+        /// Set all c-tags
+        void setAllCtags(const MAbool& tag);
+
+        /// Set all tau-tags
+        void setAllTautags(const MAbool& tag);
+
         /// Add one constituent
         void AddConstituent (const MAint32& index);
 

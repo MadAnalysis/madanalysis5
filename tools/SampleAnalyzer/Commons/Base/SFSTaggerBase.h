@@ -29,6 +29,9 @@
 
 namespace MA5 {
 
+    /// Status of the tagger
+    enum TaggerStatus {LOOSE, MID, TIGHT};
+
     struct SFSTaggerBaseOptions {
         /// @brief Tagging options
         ///
@@ -123,97 +126,137 @@ namespace MA5 {
         ///   B-Tagging   //
         ///===============//
 
-        /// B-jet tagging efficiency (b as b)
-        virtual MAfloat32 b_tagging_eff(const RecJetFormat &object) const { return 1.; }
+        /// loose B-jet tagging efficiency (b as b)
+        virtual MAfloat32 loose_b_tagging_eff(const RecJetFormat &object) const { return 2.; }
 
-        /// B-jet mistagging as C-jet (b as c)
-        virtual MAfloat32 b_mistag_c(const RecJetFormat &object) const { return 0.; }
+        /// loose B-jet mistagging as C-jet (b as c)
+        virtual MAfloat32 loose_b_mistag_c(const RecJetFormat &object) const { return -1.; }
+
+        /// mid B-jet tagging efficiency (b as b)
+        virtual MAfloat32 mid_b_tagging_eff(const RecJetFormat &object) const { return 2.; }
+
+        /// loose B-jet mistagging as C-jet (b as c)
+        virtual MAfloat32 mid_b_mistag_c(const RecJetFormat &object) const { return -1.; }
+
+        /// tight B-jet tagging efficiency (b as b)
+        virtual MAfloat32 tight_b_tagging_eff(const RecJetFormat &object) const { return 2.; }
+
+        /// loose B-jet mistagging as C-jet (b as c)
+        virtual MAfloat32 tight_b_mistag_c(const RecJetFormat &object) const { return -1.; }
 
         //===============//
         //   C-Tagging   //
         //===============//
 
-        /// C-jet tagging efficiency (c as c)
-        virtual MAfloat32 c_tagging_eff(const RecJetFormat &object) const { return 1.; }
+        /// loose C-jet tagging efficiency (c as c)
+        virtual MAfloat32 loose_c_tagging_eff(const RecJetFormat &object) const { return 2.; }
 
-        /// C-jet mistagging as C-jet (c as b)
-        virtual MAfloat32 c_mistag_b(const RecJetFormat &object) const { return 0.; }
+        /// loose C-jet mistagging as C-jet (c as b)
+        virtual MAfloat32 loose_c_mistag_b(const RecJetFormat &object) const { return -1.; }
+
+        /// mid C-jet tagging efficiency (c as c)
+        virtual MAfloat32 mid_c_tagging_eff(const RecJetFormat &object) const { return 2.; }
+
+        /// mid C-jet mistagging as C-jet (c as b)
+        virtual MAfloat32 mid_c_mistag_b(const RecJetFormat &object) const { return -1.; }
+
+        /// tight C-jet tagging efficiency (c as c)
+        virtual MAfloat32 tight_c_tagging_eff(const RecJetFormat &object) const { return 2.; }
+
+        /// tight C-jet mistagging as C-jet (c as b)
+        virtual MAfloat32 tight_c_mistag_b(const RecJetFormat &object) const { return -1.; }
 
         //=======================//
         //   Light-Jet Tagging   //
         //=======================//
 
-        /// Light-Jet mistagging as b-jet (j as b)
-        virtual MAfloat32 lightjet_mistag_b(const RecJetFormat &object) const { return 0.; }
+        /// loose Light-Jet mistagging as b-jet (j as b)
+        virtual MAfloat32 lightjet_mistag_b_loose(const RecJetFormat &object) const { return -1.; }
 
-        /// Light-Jet mistagging as c jet (j as c)
-        virtual MAfloat32 lightjet_mistag_c(const RecJetFormat &object) const { return 0.; }
+        /// loose Light-Jet mistagging as c jet (j as c)
+        virtual MAfloat32 lightjet_mistag_c_loose(const RecJetFormat &object) const { return -1.; }
 
-        /// Light-Jet mistagging as tau (j as ta)
-        virtual MAfloat32 lightjet_mistag_tau(const RecJetFormat &object) const { return 0.; }
+        /// loose Light-Jet mistagging as tau (j as ta)
+        virtual MAfloat32 lightjet_mistag_tau_loose(const RecJetFormat &object) const { return -1.; }
+
+        /// mid Light-Jet mistagging as b-jet (j as b)
+        virtual MAfloat32 lightjet_mistag_b_mid(const RecJetFormat &object) const { return -1.; }
+
+        /// mid Light-Jet mistagging as c jet (j as c)
+        virtual MAfloat32 lightjet_mistag_c_mid(const RecJetFormat &object) const { return -1.; }
+
+        /// mid Light-Jet mistagging as tau (j as ta)
+        virtual MAfloat32 lightjet_mistag_tau_mid(const RecJetFormat &object) const { return -1.; }
+
+        /// tight Light-Jet mistagging as b-jet (j as b)
+        virtual MAfloat32 lightjet_mistag_b_tight(const RecJetFormat &object) const { return -1.; }
+
+        /// tight Light-Jet mistagging as c jet (j as c)
+        virtual MAfloat32 lightjet_mistag_c_tight(const RecJetFormat &object) const { return -1.; }
+
+        /// tight Light-Jet mistagging as tau (j as ta)
+        virtual MAfloat32 lightjet_mistag_tau_tight(const RecJetFormat &object) const { return -1.; }
 
         /// Light-Jet mistagging as electron (j as e)
-        virtual MAfloat32 lightjet_mistag_electron(const RecJetFormat &object) const { return 0.; }
+        virtual MAfloat32 lightjet_mistag_electron(const RecJetFormat &object) const { return -1.; }
 
         /// Light-Jet mistagging as photon (j as photon)
-        virtual MAfloat32 lightjet_mistag_photon(const RecJetFormat &object) const { return 0.; }
+        virtual MAfloat32 lightjet_mistag_photon(const RecJetFormat &object) const { return -1.; }
 
         //=================//
         //   Tau Tagging   //
         //=================//
 
         /// Convert jet to tau
-        MAfloat32 tau_tagging_eff(const RecJetFormat &jet) const
-        {
-            RecTauFormat myTau;
-            myTau.setMomentum(jet.momentum());
-            myTau.ntracks_   = jet.ntracks();
-            myTau.mc_        = jet.mc_;
+        MAfloat32 tau_tagging_eff(const RecJetFormat &jet, TaggerStatus status) const;
 
-            return tau_tagging_eff(myTau);
-        }
+        /// loose_Tau tagging efficiency (ta as ta)
+        virtual MAfloat32 loose_tau_tagging_eff(const RecTauFormat &object) const { return 2.; }
 
-        /// Tau tagging efficiency (ta as ta)
-        virtual MAfloat32 tau_tagging_eff(const RecTauFormat &object) const { return 1.; }
+        /// mid_Tau tagging efficiency (ta as ta)
+        virtual MAfloat32 mid_tau_tagging_eff(const RecTauFormat &object) const { return 2.; }
+
+        /// tight_Tau tagging efficiency (ta as ta)
+        virtual MAfloat32 tight_tau_tagging_eff(const RecTauFormat &object) const { return 2.; }
 
         //=======================//
         //   Electron Tagging   //
         //======================//
 
         /// Electron mistagging as muon (e as mu)
-        virtual MAfloat32 electron_mistag_muon(const RecLeptonFormat &object) const { return 0.; }
+        virtual MAfloat32 electron_mistag_muon(const RecLeptonFormat &object) const { return -1.; }
 
         /// Electron mistagging as photon (e as a)
-        virtual MAfloat32 electron_mistag_photon(const RecLeptonFormat &object) const { return 0.; }
+        virtual MAfloat32 electron_mistag_photon(const RecLeptonFormat &object) const { return -1.; }
 
         /// Electron mistagging as light jet (e as j)
-        virtual MAfloat32 electron_mistag_lightjet(const RecLeptonFormat &object) const { return 0.; }
+        virtual MAfloat32 electron_mistag_lightjet(const RecLeptonFormat &object) const { return -1.; }
 
         //==================//
         //   Muon Tagging   //
         //==================//
 
         /// Electron mistagging as electron (mu as e)
-        virtual MAfloat32 muon_mistag_electron(const RecLeptonFormat &object) const { return 0.; }
+        virtual MAfloat32 muon_mistag_electron(const RecLeptonFormat &object) const { return -1.; }
 
         /// Electron mistagging as photon (mu as a)
-        virtual MAfloat32 muon_mistag_photon(const RecLeptonFormat &object) const { return 0.; }
+        virtual MAfloat32 muon_mistag_photon(const RecLeptonFormat &object) const { return -1.; }
 
         /// Electron mistagging as light jet (mu as j)
-        virtual MAfloat32 muon_mistag_lightjet(const RecLeptonFormat &object) const { return 0.; }
+        virtual MAfloat32 muon_mistag_lightjet(const RecLeptonFormat &object) const { return -1.; }
 
         //====================//
         //   Photon Tagging   //
         //====================//
 
         /// Electron mistagging as electron (a as e)
-        virtual MAfloat32 photon_mistag_electron(const RecPhotonFormat &object) const { return 0.; }
+        virtual MAfloat32 photon_mistag_electron(const RecPhotonFormat &object) const { return -1.; }
 
         /// Electron mistagging as muon (a as mu)
-        virtual MAfloat32 photon_mistag_muon(const RecPhotonFormat &object) const { return 0.; }
+        virtual MAfloat32 photon_mistag_muon(const RecPhotonFormat &object) const { return -1.; }
 
         /// Electron mistagging as light jet (a as j)
-        virtual MAfloat32 photon_mistag_lightjet(const RecPhotonFormat &object) const { return 0.; }
+        virtual MAfloat32 photon_mistag_lightjet(const RecPhotonFormat &object) const { return -1.; }
     };
 }
 

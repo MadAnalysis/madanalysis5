@@ -25,9 +25,6 @@
 
 #ifdef MA5_FASTJET_MODE
 
-// FastJet headers
-#include "fastjet/PseudoJet.hh"
-
 namespace MA5 {
 
     /// Clear all information
@@ -163,6 +160,30 @@ namespace MA5 {
 
     /// Setting a new Tight_tautag_ value
     void RecJetFormat::setTightTautag(const MAbool& tag) { tight_tautag_ = tag; }
+
+    /// Set all b-tags
+    void RecJetFormat::setAllBtags(const MAbool &tag) {
+        true_btag_ = tag;
+        loose_btag_ = tag;
+        mid_btag_ = tag;
+        tight_btag_ = tag;
+    }
+
+    /// Set all c-tags
+    void RecJetFormat::setAllCtags(const MAbool &tag) {
+        true_ctag_ = tag;
+        loose_ctag_ = tag;
+        mid_ctag_ = tag;
+        tight_ctag_ = tag;
+    }
+
+    /// Set all tau-tags
+    void RecJetFormat::setAllTautags(const MAbool &tag) {
+        true_tautag_ = tag;
+        loose_tautag_ = tag;
+        mid_tautag_ = tag;
+        tight_tautag_ = tag;
+    }
 
     // return a vector of all subjets of the current jet (in the sense of the exclusive algorithm)
     // that would be obtained when running the algorithm with the given dcut.
