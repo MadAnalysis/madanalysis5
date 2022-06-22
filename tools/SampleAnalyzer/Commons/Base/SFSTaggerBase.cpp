@@ -213,7 +213,7 @@ namespace MA5 {
             /// @attention In Jet based tau tagging this loop will not run. If its runnning thats a bug
             for (MAuint32 itau = 0; itau < Ntau; itau++)
             {
-                if (RANDOM->flat() > tau_tagging_eff(myEvent.rec()->taus()[itau]))
+                if (RANDOM->flat() > loose_tau_tagging_eff(myEvent.rec()->taus()[itau]))
                 {
                     RecJetFormat* NewParticle = myEvent.rec()->GetNewJet();
                     NewParticle->setMomentum((&myEvent.rec()->taus()[itau])->momentum());
