@@ -21,31 +21,10 @@
 #  
 ################################################################################
 
+from madanalysis.job.job_tagger_header import JobTaggerHeader
+from madanalysis.fastsim.tagger import TaggerStatus
 
 class JobTaggerMain:
-
-    # structure: (true_id, reco_id) : "..."
-    base = {
-        (5, 5): "/// B-jet tagging efficiency (b as b)\nMAfloat32 NewTagger::b_tagging_eff(const RecJetFormat &object) const",
-        (5, 4): "/// B-jet mistagging as C-jet (b as c)\nMAfloat32 NewTagger::b_mistag_c(const RecJetFormat &object) const",
-        (4, 4): "/// C-jet tagging efficiency (c as c)\nMAfloat32 NewTagger::c_tagging_eff(const RecJetFormat &object) const",
-        (4, 5): "/// C-jet mistagging as C-jet (c as b)\nMAfloat32 NewTagger::c_mistag_b(const RecJetFormat &object) const",
-        (21, 5): "/// Light-Jet mistagging as b-jet (j as b)\nMAfloat32 NewTagger::lightjet_mistag_b(const RecJetFormat &object) const",
-        (21, 4): "/// Light-Jet mistagging as c jet (j as c)\nMAfloat32 NewTagger::lightjet_mistag_c(const RecJetFormat &object) const",
-        (21, 15): "/// Light-Jet mistagging as tau (j as ta)\nMAfloat32 NewTagger::lightjet_mistag_tau(const RecJetFormat &object) const",
-        (21, 11): "/// Light-Jet mistagging as electron (j as e)\nMAfloat32 NewTagger::lightjet_mistag_electron(const RecJetFormat &object) const",
-        (21, 22): "/// Light-Jet mistagging as photon (j as photon)\nMAfloat32 NewTagger::lightjet_mistag_photon(const RecJetFormat &object) const",
-        (15, 15): "/// Tau tagging efficiency (ta as ta)\nMAfloat32 NewTagger::tau_tagging_eff(const RecTauFormat &object) const",
-        (11, 13): "/// Electron mistagging as muon (e as mu)\nMAfloat32 NewTagger::electron_mistag_muon(const RecLeptonFormat &object) const",
-        (11, 22): "/// Electron mistagging as photon (e as a)\nMAfloat32 NewTagger::electron_mistag_photon(const RecLeptonFormat &object) const",
-        (11, 21): "/// Electron mistagging as light jet (e as j)\nMAfloat32 NewTagger::electron_mistag_lightjet(const RecLeptonFormat &object) const",
-        (13, 11): "/// Electron mistagging as electron (mu as e)\nMAfloat32 NewTagger::muon_mistag_electron(const RecLeptonFormat &object) const",
-        (13, 22): "/// Electron mistagging as photon (mu as a)\nMAfloat32 NewTagger::muon_mistag_photon(const RecLeptonFormat &object) const",
-        (13, 21): "/// Electron mistagging as light jet (mu as j)\nMAfloat32 NewTagger::muon_mistag_lightjet(const RecLeptonFormat &object) const",
-        (22, 11): "/// Electron mistagging as electron (a as e)\nMAfloat32 NewTagger::photon_mistag_electron(const RecPhotonFormat &object) const",
-        (22, 13): "/// Electron mistagging as muon (a as mu)\nMAfloat32 NewTagger::photon_mistag_muon(const RecPhotonFormat &object) const",
-        (22, 21): "/// Electron mistagging as light jet (a as j)\nMAfloat32 NewTagger::photon_mistag_lightjet(const RecPhotonFormat &object) const",
-    }
 
     ## Initialization
     def __init__(self, fastsim):
@@ -61,26 +40,30 @@ class JobTaggerMain:
 
         unique_rules = []
         for key, rule in self.fastsim.tagger.rules.items():
-            if (int(rule["id_true"]), int(rule["id_reco"])) not in unique_rules:
-                unique_rules.append((int(rule["id_true"]), int(rule["id_reco"])))
+            if (int(rule["id_true"]), int(rule["id_reco"]), TaggerStatus.to_str(rule["tag"])) not in unique_rules:
+                unique_rules.append((int(rule["id_true"]), int(rule["id_reco"]), TaggerStatus.to_str(rule["tag"])))
 
-        for true_id, reco_id in unique_rules:
-            file.write("\n"+JobTaggerMain.base[(true_id, reco_id)] + " {\n")
+        for true_id, reco_id, tag in unique_rules:
+            file.write("\n" + JobTaggerHeader.base[(true_id, reco_id)](tag) + " {\n")
 
             check_initializer = 0
             for key, val in self.fastsim.tagger.rules.items():
-                if val['id_true'] in [str(true_id)] and val['id_reco'] in [str(reco_id)]:
+                if val['id_true'] in [str(true_id)] and val['id_reco'] in [str(reco_id)] and val["tag"] == TaggerStatus.get_status(tag):
                     eff_str = []
                     initializer = 'MAfloat32 '
                     if check_initializer > 0:
                         initializer = ''
                     for eff_key, eff_val in val['efficiencies'].items():
                         my_eff_str = eff_val['bounds'].tocpp_call(
-                            "object",'bnd_'+str(val['id_true'])+'_'+str(val['id_reco'])+'_'+str(eff_key), pointer=".",
+                            "object",
+                            f"bnd_{val['id_true']}_{val['id_reco']}_{eff_key}_{TaggerStatus.to_str(val['tag'])}",
+                            pointer=".",
                         )
                         my_eff_str +=' * '
                         my_eff_str += eff_val['function'].tocpp_call(
-                            "object", 'eff_'+str(val['id_true'])+'_'+str(val['id_reco'])+'_'+str(eff_key), pointer=".",
+                            "object",
+                            f"eff_{val['id_true']}_{val['id_reco']}_{eff_key}_{TaggerStatus.to_str(val['tag'])}",
+                            pointer=".",
                         )
                         eff_str.append(my_eff_str)
                     file.write('    ' + initializer  + ' efficiency = ' + ' + '.join(eff_str) +';\n')
