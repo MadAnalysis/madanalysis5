@@ -106,10 +106,10 @@ namespace MA5 {
     const MAbool& RecJetFormat::tight_tautag() const { return tight_tautag_; }
 
     /// Accessor to the true c-tag
-    const MAbool& RecJetFormat::true_ctag() const {return true_btag_;}
+    const MAbool& RecJetFormat::true_ctag() const {return true_ctag_;}
 
     /// Accessor to the true b-tag
-    const MAbool& RecJetFormat::true_btag() const {return true_ctag_;}
+    const MAbool& RecJetFormat::true_btag() const {return true_btag_;}
 
     /// Accessor to the true tau-tag
     const MAbool& RecJetFormat::true_tautag() const {return true_tautag_;}
