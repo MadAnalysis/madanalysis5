@@ -89,6 +89,9 @@ class RandomService
     return Service_;
   }
 
+  /// Set random seed
+  static void SetSeed(int seed) { std::srand(seed); }
+
   /// Deleting the unique instance of Convert Service
   static void Kill()
   {
