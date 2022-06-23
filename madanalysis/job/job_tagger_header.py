@@ -69,7 +69,7 @@ class JobTaggerHeader:
         file.write('    class NewTagger: public SFSTaggerBase {\n')
         file.write('    private:\n')
         file.write('        /// Code efficiency booleans\n')
-        file.write('        MAbool _isTauTaggingEffOn, _isMuonTaggingOn, _isElectronTaggingOn, _isPhotonTaggingOn;\n')
+        file.write('        MAbool _isJetTaggingOn, _isTauTaggingEffOn, _isMuonTaggingOn, _isElectronTaggingOn, _isPhotonTaggingOn;\n')
         file.write('        SFSTaggerBaseOptions _options;\n')
         file.write('    public :\n')
         file.write('        /// Constructor without argument\n')
@@ -80,8 +80,8 @@ class JobTaggerHeader:
         file.write('            /// @brief Booleans for code efficiency\n')
         file.write('            /// Turn on the usage of tau tagging efficiency\n')
         file.write(f"            _isTauTaggingEffOn = {'true' if (5,5) in [(x[0], x[1]) for x in self.unique_rules] else 'false'};\n")
-        # file.write('            /// Turn on the usage of jet (mis)tagging efficiency\n')
-        # file.write(f"            _isJetTaggingOn = {'true' if any([x in self.unique_rules for x in [(5,5), (4,5), (21,5), (5,4), (4,4), (21,4), (21,15), (21,11), (21,22)]]) else 'false'};\n")
+        file.write('            /// Turn on the usage of jet (mis)tagging efficiency\n')
+        file.write(f"            _isJetTaggingOn = {'true' if any([x in [(x[0], x[1]) for x in self.unique_rules] for x in [(5,5), (4,5), (21,5), (5,4), (4,4), (21,4), (21,15), (21,11), (21,22)]]) else 'false'};\n")
         file.write('            /// Turn on the usage of muon (mis)tagging efficiency\n')
         file.write(f"            _isMuonTaggingOn = {'true' if 13 in [x[0] for x in self.unique_rules] else 'false'};\n")
         file.write('            /// Turn on the usage of electron (mis)tagging efficiency\n')
@@ -96,7 +96,7 @@ class JobTaggerHeader:
         file.write('        ///==========================================//\n\n')
         for rule in self.unique_rules:
             header = JobTaggerHeader.base[(rule[0], rule[1])](rule[2]).split("\n")
-            file.write(f"\t{header[0]}\n")
+            file.write(f"\n\t{header[0]}\n")
             file.write(f"\t{header[1].replace('NewTagger::', '')};\n")
         file.write('    };\n}\n#endif //MADANALYSIS5_NEW_TAGGER_H')
 

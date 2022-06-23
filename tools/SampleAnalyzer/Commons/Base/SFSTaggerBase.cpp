@@ -79,126 +79,130 @@ namespace MA5 {
         MAuint32 Ntau = myEvent.rec()->taus().size();
         std::vector<MAuint32> toRemove;
         /// Jet tagging with detector effects
-        MAint32 ijet = -1;
-        for (auto &jet: myEvent.rec()->jets())
+        if (_isJetTaggingOn)
         {
-            ijet++;
-            /// We have a true b-jet: is it b-tagged?
-            if (jet.true_btag())
+            MAint32 ijet = -1;
+            for (auto &jet: myEvent.rec()->jets())
             {
-                jet.setLooseBtag(RANDOM->flat() < loose_b_tagging_eff(jet));
-                jet.setMidBtag(RANDOM->flat() < mid_b_tagging_eff(jet));
-                jet.setTightBtag(RANDOM->flat() < tight_b_tagging_eff(jet));
-            }
-            /// We have a true c-jet: is it b-tagged?
-            else if (jet.true_ctag())
-            {
-                jet.setLooseBtag(RANDOM->flat() < loose_c_mistag_b(jet));
-                jet.setMidBtag(RANDOM->flat() < mid_c_mistag_b(jet));
-                jet.setTightBtag(RANDOM->flat() < tight_c_mistag_b(jet));
-            }
-            /// We have a true light-jet: is it b-tagged?
-            else
-            {
-                jet.setLooseBtag(RANDOM->flat() < lightjet_mistag_b_loose(jet));
-                jet.setMidBtag(RANDOM->flat() < lightjet_mistag_b_mid(jet));
-                jet.setTightBtag(RANDOM->flat() < lightjet_mistag_b_tight(jet));
-            }
-
-            /// We have a true b-jet: is it c-tagged?
-            if (jet.true_btag())
-            {
-                /// We have a b-tagged jet -> moving on with the next jet
-                jet.setLooseCtag(!jet.loose_btag() && RANDOM->flat() < loose_b_mistag_c(jet));
-                jet.setMidCtag(!jet.mid_btag() && RANDOM->flat() < mid_b_mistag_c(jet));
-                jet.setTightCtag(!jet.tight_btag() && RANDOM->flat() < tight_b_mistag_c(jet));
-            }
-            /// We have a true c-jet: is it c-tagged?
-            else if (jet.true_ctag())
-            {
-                jet.setLooseCtag(!jet.loose_btag() && RANDOM->flat() < loose_c_tagging_eff(jet));
-                jet.setMidCtag(!jet.mid_btag() && RANDOM->flat() < mid_c_tagging_eff(jet));
-                jet.setTightCtag(!jet.tight_btag() && RANDOM->flat() < tight_c_tagging_eff(jet));
-            }
-            /// We have a true light-jet: is it c-tagged?
-            else
-            {
-                jet.setLooseCtag(RANDOM->flat() < lightjet_mistag_c_loose(jet));
-                jet.setMidCtag(RANDOM->flat() < lightjet_mistag_c_mid(jet));
-                jet.setTightCtag(RANDOM->flat() < lightjet_mistag_c_tight(jet));
-            }
-
-            if (_options.tautag_jetbased)
-            {
-                if (jet.true_tautag())
+                ijet++;
+                /// We have a true b-jet: is it b-tagged?
+                if (jet.true_btag())
                 {
-                    jet.setLooseTautag(!jet.loose_btag() && !jet.loose_ctag() &&
-                                       RANDOM->flat() < tau_tagging_eff(jet, LOOSE));
-                    jet.setMidTautag(!jet.mid_btag() && !jet.mid_ctag() &&
-                                     RANDOM->flat() < tau_tagging_eff(jet, MID));
-                    jet.setTightTautag(!jet.tight_btag() && !jet.tight_ctag() &&
-                                       RANDOM->flat() < tau_tagging_eff(jet, TIGHT));
-                } else {
-                    jet.setLooseTautag(!jet.loose_btag() && !jet.loose_ctag() &&
-                                       RANDOM->flat() < lightjet_mistag_tau_loose(jet));
-                    jet.setMidTautag(!jet.mid_btag() && !jet.mid_ctag() &&
-                                     RANDOM->flat() < lightjet_mistag_tau_mid(jet));
-                    jet.setTightTautag(!jet.tight_btag() && !jet.tight_ctag() &&
-                                       RANDOM->flat() < lightjet_mistag_tau_tight(jet));
+                    if (RANDOM->flat() > loose_b_tagging_eff(jet)) jet.setLooseBtag(false);
+                    if (RANDOM->flat() < mid_b_tagging_eff(jet)) jet.setMidBtag(false);
+                    if (RANDOM->flat() < tight_b_tagging_eff(jet)) jet.setTightBtag(false);
+                }
+                /// We have a true c-jet: is it b-tagged?
+                else if (jet.true_ctag())
+                {
+                    if (RANDOM->flat() < loose_c_mistag_b(jet)) jet.setLooseBtag(true);
+                    if (RANDOM->flat() < mid_c_mistag_b(jet)) jet.setMidBtag(true);
+                    if (RANDOM->flat() < tight_c_mistag_b(jet)) jet.setTightBtag(true);
+                }
+                /// We have a true light-jet: is it b-tagged?
+                else
+                {
+                    if (RANDOM->flat() < lightjet_mistag_b_loose(jet)) jet.setLooseBtag(true);
+                    if (RANDOM->flat() < lightjet_mistag_b_mid(jet)) jet.setMidBtag(true);
+                    if (RANDOM->flat() < lightjet_mistag_b_tight(jet)) jet.setTightBtag(true);
                 }
 
-            }
+                /// We have a true b-jet: is it c-tagged?
+                if (jet.true_btag())
+                {
+                    /// We have a b-tagged jet -> moving on with the next jet
+                    if (!jet.loose_btag() && RANDOM->flat() < loose_b_mistag_c(jet)) jet.setLooseCtag(true);
+                    if (!jet.mid_btag() && RANDOM->flat() < mid_b_mistag_c(jet)) jet.setMidCtag(true);
+                    if (!jet.tight_btag() && RANDOM->flat() < tight_b_mistag_c(jet)) jet.setTightCtag(true);
+                }
+                /// We have a true c-jet: is it c-tagged?
+                else if (jet.true_ctag())
+                {
+                    if (!jet.loose_btag() && RANDOM->flat() > loose_c_tagging_eff(jet)) jet.setLooseCtag(false);
+                    if (!jet.mid_btag() && RANDOM->flat() > mid_c_tagging_eff(jet)) jet.setMidCtag(false);
+                    if (!jet.tight_btag() && RANDOM->flat() > tight_c_tagging_eff(jet)) jet.setTightCtag(false);
+                }
+                /// We have a true light-jet: is it c-tagged?
+                else
+                {
+                    if (!jet.loose_btag() && RANDOM->flat() < lightjet_mistag_c_loose(jet)) jet.setLooseCtag(true);
+                    if (!jet.mid_btag() && RANDOM->flat() < lightjet_mistag_c_mid(jet)) jet.setMidCtag(true);
+                    if (!jet.tight_btag() && RANDOM->flat() < lightjet_mistag_c_tight(jet)) jet.setTightCtag(true);
+                }
 
-            /// We have a true b/c-jet -> cannot be mistagged
-            if (jet.ctag() || jet.btag() || jet.tautag()) continue;
-            /// if not, is it mis-tagged as anything?
-            else
-            {
-                /// Scope for light jet mistagging as tau
-                if (!_options.tautag_jetbased) {
-                    /// if not, is it Tau-tagged?
-                    if (RANDOM->flat() < lightjet_mistag_tau_loose(jet)) {
-                        RecTauFormat *newTau = myEvent.rec()->GetNewTau();
-                        Jet2Tau(&jet, newTau, myEvent);
-                        toRemove.push_back(ijet);
-                        continue;
+                if (_options.tautag_jetbased)
+                {
+                    if (jet.true_tautag())
+                    {
+                        if (!jet.loose_btag() && !jet.loose_ctag() && RANDOM->flat() > tau_tagging_eff(jet, LOOSE))
+                            jet.setLooseTautag(false);
+                        if (!jet.mid_btag() && !jet.mid_ctag() && RANDOM->flat() > tau_tagging_eff(jet, MID))
+                            jet.setMidTautag(false);
+                        if (!jet.tight_btag() && !jet.tight_ctag() && RANDOM->flat() > tau_tagging_eff(jet, TIGHT))
+                            jet.setTightTautag(false);
+                    } else {
+                        if (!jet.loose_btag() && !jet.loose_ctag() && RANDOM->flat() < lightjet_mistag_tau_loose(jet))
+                            jet.setLooseTautag(true);
+                        if (!jet.mid_btag() && !jet.mid_ctag() && RANDOM->flat() < lightjet_mistag_tau_mid(jet))
+                            jet.setMidTautag(true);
+                        if (!jet.tight_btag() && !jet.tight_ctag() && RANDOM->flat() < lightjet_mistag_tau_tight(jet))
+                            jet.setTightTautag(true);
                     }
                 }
-                /// Scope for light jet mistagging for electron
+
+                /// We have a true b/c-jet -> cannot be mistagged
+                /// @attention Loose tag is always the default
+                if (jet.loose_ctag() || jet.loose_btag() || jet.loose_tautag()) continue;
+
+                /// if not, is it mis-tagged as anything?
+                else
                 {
-                    /// if not, is it Electron-tagged?
-                    if (RANDOM->flat() < lightjet_mistag_electron(jet))
-                    {
-                        RecLeptonFormat* NewParticle = myEvent.rec()->GetNewElectron();
-                        NewParticle->setMomentum(jet.momentum());
-                        NewParticle->setMc(jet.mc());
-                        /// @attention charge can also be determined via total constituent charge
-                        NewParticle->SetCharge(RANDOM->flat() > 0.5 ? 1. : -1.);
-                        THT  -= jet.pt();
-                        Meff -= jet.pt();
-                        MALorentzVector MissHT = myEvent.rec()->MHT().momentum() + jet.momentum();
-                        (&myEvent.rec()->MHT().momentum())->SetPxPyPzE(
-                            MissHT.Px(), MissHT.Py(), 0., MissHT.E()
-                        );
-                        toRemove.push_back(ijet);
+                    /// Scope for light jet mistagging as tau
+                    if (!_options.tautag_jetbased) {
+                        /// if not, is it Tau-tagged?
+                        if (RANDOM->flat() < lightjet_mistag_tau_loose(jet)) {
+                            RecTauFormat *newTau = myEvent.rec()->GetNewTau();
+                            Jet2Tau(&jet, newTau, myEvent);
+                            toRemove.push_back(ijet);
+                            continue;
+                        }
                     }
-                }
-                /// Scope for light jet mistagging for photon
-                {
-                    /// if not, is it Photon-tagged?
-                    if (RANDOM->flat() < lightjet_mistag_photon(jet))
+                    /// Scope for light jet mistagging for electron
                     {
-                        RecPhotonFormat* NewParticle = myEvent.rec()->GetNewPhoton();
-                        NewParticle->setMomentum(jet.momentum());
-                        NewParticle->setMc(jet.mc());
-                        THT  -= jet.pt();
-                        Meff -= jet.pt();
-                        MALorentzVector MissHT = myEvent.rec()->MHT().momentum() + jet.momentum();
-                        (&myEvent.rec()->MHT().momentum())->SetPxPyPzE(
-                            MissHT.Px(), MissHT.Py(), 0., MissHT.E()
-                        );
-                        toRemove.push_back(ijet);
-                        continue;
+                        /// if not, is it Electron-tagged?
+                        if (RANDOM->flat() < lightjet_mistag_electron(jet))
+                        {
+                            RecLeptonFormat* NewParticle = myEvent.rec()->GetNewElectron();
+                            NewParticle->setMomentum(jet.momentum());
+                            NewParticle->setMc(jet.mc());
+                            /// @attention charge can also be determined via total constituent charge
+                            NewParticle->SetCharge(RANDOM->flat() > 0.5 ? 1. : -1.);
+                            THT  -= jet.pt();
+                            Meff -= jet.pt();
+                            MALorentzVector MissHT = myEvent.rec()->MHT().momentum() + jet.momentum();
+                            (&myEvent.rec()->MHT().momentum())->SetPxPyPzE(
+                                MissHT.Px(), MissHT.Py(), 0., MissHT.E()
+                            );
+                            toRemove.push_back(ijet);
+                        }
+                    }
+                    /// Scope for light jet mistagging for photon
+                    {
+                        /// if not, is it Photon-tagged?
+                        if (RANDOM->flat() < lightjet_mistag_photon(jet))
+                        {
+                            RecPhotonFormat* NewParticle = myEvent.rec()->GetNewPhoton();
+                            NewParticle->setMomentum(jet.momentum());
+                            NewParticle->setMc(jet.mc());
+                            THT  -= jet.pt();
+                            Meff -= jet.pt();
+                            MALorentzVector MissHT = myEvent.rec()->MHT().momentum() + jet.momentum();
+                            (&myEvent.rec()->MHT().momentum())->SetPxPyPzE(
+                                MissHT.Px(), MissHT.Py(), 0., MissHT.E()
+                            );
+                            toRemove.push_back(ijet);
+                            continue;
+                        }
                     }
                 }
             }
@@ -403,10 +407,10 @@ namespace MA5 {
                     {
                         current_ijet = ijet; DeltaRmax = dR;
                     }
-                    else { myEvent.rec()->jets()[ijet].setTrueBtag(true); }
+                    else { myEvent.rec()->jets()[ijet].setAllBtags(true); }
                 }
             }
-            if (current_ijet >= 0) myEvent.rec()->jets()[current_ijet].setTrueBtag(true);
+            if (current_ijet >= 0) myEvent.rec()->jets()[current_ijet].setAllBtags(true);
         }
     }
 
@@ -427,10 +431,10 @@ namespace MA5 {
                     {
                         current_ijet = ijet; DeltaRmax = dR;
                     }
-                    else { myEvent.rec()->jets()[ijet].setTrueCtag(true); }
+                    else { myEvent.rec()->jets()[ijet].setAllCtags(true); }
                 }
             }
-            if (current_ijet >= 0) myEvent.rec()->jets()[current_ijet].setTrueCtag(true);
+            if (current_ijet >= 0) myEvent.rec()->jets()[current_ijet].setAllCtags(true);
         }
     }
 
@@ -453,10 +457,10 @@ namespace MA5 {
                     {
                         DeltaRmax = dR; current_jet = ijet;
                     }
-                    else myEvent.rec()->jets()[current_jet].setTrueTautag(true);
+                    else myEvent.rec()->jets()[current_jet].setAllTautags(true);
                 }
             }
-            if (current_jet >= 0) myEvent.rec()->jets()[current_jet].setTrueTautag(true);
+            if (current_jet >= 0) myEvent.rec()->jets()[current_jet].setAllTautags(true);
         }
     }
 
