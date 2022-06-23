@@ -69,7 +69,7 @@ namespace MA5 {
     /// and used during tagging. If not defined, by default truth level tagging will be applied.
 
     class SFSTaggerBase {
-    private:
+    protected:
         /// Code efficiency booleans
         MAbool _isJetTaggingOn, _isTauTaggingEffOn, _isMuonTaggingOn, _isElectronTaggingOn, _isPhotonTaggingOn;
         SFSTaggerBaseOptions _options;
