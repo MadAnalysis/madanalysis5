@@ -42,6 +42,11 @@ namespace MA5 {
         ///
         /// options starting with ctag and tautag are the ones corresponding to c-jet and tau-jet tagging
         ///
+        /// @warning Old tagger did not have c-tagger. In order to match the results from the old
+        /// tagger, adding @code enable_ctagging = false @endcode .This makes sure that the results
+        /// do not change between versions. Additionally @code deltaR = 0.5 @endcode was the default
+        /// value in old version that has been reinstated as well.
+        ///
         /// @code taujtag_jetbased : bool@endcode
         /// States the nature of tau tagging proecedure. If false, the hadronic tau in the event history
         /// will be found and used as hadronic tau object. if True, this hadronic tau will be matched with
