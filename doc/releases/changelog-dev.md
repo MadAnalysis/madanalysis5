@@ -48,7 +48,7 @@
  * Set hard limit to python version to 3.6+ (PS: lxplus uses 3.6 minimum)
    ([#92](https://github.com/MadAnalysis/madanalysis5/pull/92))
 
- * An option to set random seed has been implemented for normal and expert mode
+ * An option to set random seed has been implemented, both for the normal and the expert modes
    ([#96](https://github.com/MadAnalysis/madanalysis5/pull/96)).
 
 ## Bug fixes
