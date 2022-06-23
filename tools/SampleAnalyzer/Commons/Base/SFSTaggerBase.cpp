@@ -89,8 +89,8 @@ namespace MA5 {
                 if (jet.true_btag())
                 {
                     if (RANDOM->flat() > loose_b_tagging_eff(jet)) jet.setLooseBtag(false);
-                    if (RANDOM->flat() < mid_b_tagging_eff(jet)) jet.setMidBtag(false);
-                    if (RANDOM->flat() < tight_b_tagging_eff(jet)) jet.setTightBtag(false);
+                    if (RANDOM->flat() > mid_b_tagging_eff(jet)) jet.setMidBtag(false);
+                    if (RANDOM->flat() > tight_b_tagging_eff(jet)) jet.setTightBtag(false);
                 }
                 /// We have a true c-jet: is it b-tagged?
                 else if (jet.true_ctag())
@@ -394,10 +394,15 @@ namespace MA5 {
     /// Truth B-Jet tagging
     void SFSTaggerBase::BJetTagging(EventFormat &myEvent) const
     {
+        /// Bjet candidates
+        std::vector<RecJetFormat*> Candidates;
+
         for (auto &bHadron: myEvent.rec()->MCBquarks_)
         {
+            RecJetFormat* tag = 0;
             MAfloat32 DeltaRmax = _options.btag_matching_deltaR;
-            MAint32 current_ijet = -1;
+
+            /// Loop over jets
             for (MAuint32 ijet = 0; ijet < myEvent.rec()->jets().size(); ijet++)
             {
                 MAfloat32 dR = myEvent.rec()->jets()[ijet].dr(bHadron);
@@ -405,22 +410,31 @@ namespace MA5 {
                 {
                     if (_options.btag_exclusive)
                     {
-                        current_ijet = ijet; DeltaRmax = dR;
+                        tag = &(myEvent.rec()->jets()[ijet]);
+                        DeltaRmax = dR;
                     }
-                    else { myEvent.rec()->jets()[ijet].setAllBtags(true); }
+                    else Candidates.push_back(&(myEvent.rec()->jets()[ijet]));
                 }
             }
-            if (current_ijet >= 0) myEvent.rec()->jets()[current_ijet].setAllBtags(true);
+            if (_options.btag_exclusive && tag!=0) Candidates.push_back(tag);
         }
+
+        for (auto &jet: Candidates)
+            jet->setAllBtags(true);
     }
 
     /// Truth C-Jet tagging
     void SFSTaggerBase::CJetTagging(EventFormat &myEvent) const
     {
+        /// Cjet candidates
+        std::vector<RecJetFormat*> Candidates;
+
         for (auto &cHadron: myEvent.rec()->MCCquarks_)
         {
             MAfloat32 DeltaRmax = _options.ctag_matching_deltaR;
-            MAint32 current_ijet = -1;
+            RecJetFormat* tag = 0;
+
+            /// Loop over jets
             for (MAuint32 ijet = 0; ijet < myEvent.rec()->jets().size(); ijet++)
             {
                 if (myEvent.rec()->jets()[ijet].true_btag()) continue;
@@ -429,13 +443,17 @@ namespace MA5 {
                 {
                     if (_options.ctag_exclusive)
                     {
-                        current_ijet = ijet; DeltaRmax = dR;
+                        tag = &(myEvent.rec()->jets()[ijet]);
+                        DeltaRmax = dR;
                     }
-                    else { myEvent.rec()->jets()[ijet].setAllCtags(true); }
+                    else Candidates.push_back(&(myEvent.rec()->jets()[ijet]));
                 }
             }
-            if (current_ijet >= 0) myEvent.rec()->jets()[current_ijet].setAllCtags(true);
+            if (_options.ctag_exclusive && tag!=0) Candidates.push_back(tag);
         }
+
+        for (auto &jet: Candidates)
+            jet->setAllCtags(true);
     }
 
     /// This method implements tau matching for jets
