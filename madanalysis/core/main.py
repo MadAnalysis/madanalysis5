@@ -53,6 +53,7 @@ import os
 import sys
 import platform
 from six.moves import range
+import traceback as tb
 
 class Main():
 
@@ -476,7 +477,8 @@ class Main():
             if random() > 0.5:
                 checkup.check_updates()
         except Exception as err:
-            self.logger.debug(f"Unable to check updates: {err.msg}")
+            self.logger.debug(f"Unable to check updates")
+            self.logger.debug(tb.format_exc())
             pass
 
         # Ok
