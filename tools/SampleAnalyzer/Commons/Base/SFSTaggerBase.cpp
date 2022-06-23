@@ -32,17 +32,22 @@ namespace MA5 {
     /// Print parameters
     void SFSTaggerBase::PrintParam() const
     {
+        /// Print B-taggging options
         std::string excl = _options.btag_exclusive ? "Exclusive" : "Inclusive";
         INFO << "        with bjet: ΔR = " << _options.btag_matching_deltaR << " ; " << excl << endmsg;
         excl = _options.ctag_exclusive ? "Exclusive" : "Inclusive";
-        INFO << "        with cjet: ΔR = " << _options.ctag_matching_deltaR << " ; " << excl << endmsg;
-        if (_options.tautag_jetbased)
-        {
+
+        /// Print C-tagging options
+        if (_options.enable_ctagging) {
+            INFO << "        with cjet: ΔR = "
+                 << _options.ctag_matching_deltaR << " ; " << excl << endmsg;
+        }
+
+        /// Print Tau-tagging options
+        if (_options.tautag_jetbased) {
             excl = _options.ctag_exclusive ? "Exclusive" : "Inclusive";
             INFO << "        with tau : ΔR = " << _options.tautag_matching_deltaR << " ; " << excl << endmsg;
-        }
-        else
-        {
+        } else {
             INFO << "        with tau : hadron-based tagging" << endmsg;
         }
     }
@@ -394,45 +399,37 @@ namespace MA5 {
     /// Truth B-Jet tagging
     void SFSTaggerBase::BJetTagging(EventFormat &myEvent) const
     {
-        /// Bjet candidates
-        std::vector<RecJetFormat*> Candidates;
-
+        /// Loop over B-hadrons
         for (auto &bHadron: myEvent.rec()->MCBquarks_)
         {
-            RecJetFormat* tag = 0;
             MAfloat32 DeltaRmax = _options.btag_matching_deltaR;
-
+            /// @attention If not exclusive `current_ijet` will always be -1
+            /// thus jets will only be tagged with respect to dR
+            MAint32 current_ijet = -1;
             /// Loop over jets
             for (MAuint32 ijet = 0; ijet < myEvent.rec()->jets().size(); ijet++)
             {
                 MAfloat32 dR = myEvent.rec()->jets()[ijet].dr(bHadron);
                 if (dR <= DeltaRmax)
                 {
-                    if (_options.btag_exclusive)
-                    {
-                        tag = &(myEvent.rec()->jets()[ijet]);
-                        DeltaRmax = dR;
-                    }
-                    else Candidates.push_back(&(myEvent.rec()->jets()[ijet]));
+                    if (_options.btag_exclusive) { current_ijet = ijet; DeltaRmax = dR; }
+                    else myEvent.rec()->jets()[ijet].setAllBtags(true);
                 }
             }
-            if (_options.btag_exclusive && tag!=0) Candidates.push_back(tag);
+            if (current_ijet >= 0) myEvent.rec()->jets()[current_ijet].setAllBtags(true);
         }
-
-        for (auto &jet: Candidates)
-            jet->setAllBtags(true);
     }
 
     /// Truth C-Jet tagging
     void SFSTaggerBase::CJetTagging(EventFormat &myEvent) const
     {
-        /// Cjet candidates
-        std::vector<RecJetFormat*> Candidates;
-
+        /// Loop over C-hadrons
         for (auto &cHadron: myEvent.rec()->MCCquarks_)
         {
             MAfloat32 DeltaRmax = _options.ctag_matching_deltaR;
-            RecJetFormat* tag = 0;
+            /// @attention If not exclusive `current_ijet` will always be -1
+            /// thus jets will only be tagged with respect to dR
+            MAint32 current_ijet = -1;
 
             /// Loop over jets
             for (MAuint32 ijet = 0; ijet < myEvent.rec()->jets().size(); ijet++)
@@ -441,19 +438,20 @@ namespace MA5 {
                 MAfloat32 dR = myEvent.rec()->jets()[ijet].dr(cHadron);
                 if (dR <= DeltaRmax)
                 {
-                    if (_options.ctag_exclusive)
-                    {
-                        tag = &(myEvent.rec()->jets()[ijet]);
-                        DeltaRmax = dR;
+                    if (_options.ctag_exclusive) { current_ijet = ijet; DeltaRmax = dR; }
+                    else {
+                        if (_options.enable_ctagging)
+                            myEvent.rec()->jets()[ijet].setAllCtags(true);
+                        else myEvent.rec()->jets()[ijet].setTrueCtag(true);
                     }
-                    else Candidates.push_back(&(myEvent.rec()->jets()[ijet]));
                 }
             }
-            if (_options.ctag_exclusive && tag!=0) Candidates.push_back(tag);
+            if (current_ijet >= 0) {
+                if (_options.enable_ctagging)
+                    myEvent.rec()->jets()[current_ijet].setAllCtags(true);
+                else myEvent.rec()->jets()[current_ijet].setTrueCtag(true);
+            }
         }
-
-        for (auto &jet: Candidates)
-            jet->setAllCtags(true);
     }
 
     /// This method implements tau matching for jets

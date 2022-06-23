@@ -48,11 +48,12 @@ namespace MA5 {
         /// a jet and the jet will be considered as tau jet.
         ///
         /// @warning DR matching for tau tagging is only available on jet based method
-        MAfloat32 btag_matching_deltaR = 0.3;
+        MAfloat32 btag_matching_deltaR = 0.5;
         MAbool btag_exclusive = true;
-        MAfloat32 ctag_matching_deltaR = 0.3;
+        MAbool enable_ctagging = false;
+        MAfloat32 ctag_matching_deltaR = 0.5;
         MAbool ctag_exclusive = true;
-        MAfloat32 tautag_matching_deltaR = 0.3;
+        MAfloat32 tautag_matching_deltaR = 0.5;
         MAbool tautag_exclusive = true;
         MAbool tautag_jetbased = false;
     };
