@@ -150,7 +150,25 @@ MAbool JetClusterer::Initialize(const std::map<std::string,std::string>& options
             }
             /// What is the cjet matching DR
             else if (key == "cjet_id.matching_dr") myTaggerOptions_->ctag_matching_deltaR = tmp;
-                /// Is cjet run via exclusive algorithm
+
+            /// Is CJet tagging enabled
+            else if (key == "cjet_id.enable_ctagging")
+            {
+                try {
+                    if (tmp == 1.) myTaggerOptions_->enable_ctagging = true;
+                    else if (tmp == 0.) myTaggerOptions_->enable_ctagging = false;
+                    else
+                        throw EXCEPTION_WARNING(
+                                "'cjet_id.enable_ctagging' must be equal to 0 or 1. Using default "
+                                "value 'cjet_id.enable_ctagging' = " \
+                            + CONVERT->ToString(myTaggerOptions_->enable_ctagging), "", 0
+                        );
+                }
+                catch (const std::exception &e) {
+                    MANAGE_EXCEPTION(e);
+                }
+            }
+            /// Is taujet run via exclusive algorithm
             else if (key == "tau_id.exclusive")
             {
                 try {
