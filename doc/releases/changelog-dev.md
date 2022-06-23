@@ -48,6 +48,9 @@
  * Set hard limit to python version to 3.6+ (PS: lxplus uses 3.6 minimum)
    ([#92](https://github.com/MadAnalysis/madanalysis5/pull/92))
 
+ * An option to set random seed has been implemented for normal and expert mode
+   ([#96](https://github.com/MadAnalysis/madanalysis5/pull/96)).
+
 ## Bug fixes
  * Zero division error fixed in the simplified likelihoods workflow.
    ([#4](https://github.com/MadAnalysis/madanalysis5/pull/4))
@@ -75,6 +78,10 @@
 
  * SL interface break has been fixed in cases of HL extrapolation.
    ([#93](https://github.com/MadAnalysis/madanalysis5/pull/93))
+
+ * Custom analyses does not need to have a vtable hence the expert mode and normal
+   mode analysis writers have been modified to remove `virtual` functions from the 
+   analyses ([#96](https://github.com/MadAnalysis/madanalysis5/pull/96)).
 
 ## Contributors
 
