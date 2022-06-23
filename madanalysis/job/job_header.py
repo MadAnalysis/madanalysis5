@@ -49,13 +49,13 @@ def WriteHeader(file,main):
 
     # Class
     file.write('class user : public AnalyzerBase\n{\n')
-    file.write('  INIT_ANALYSIS(user,"MadAnalysis5job")\n\n')
-    file.write(' public : \n')
-    file.write('  virtual MAbool Initialize(const MA5::Configuration& cfg,\n')
-    file.write('                            const std::map<std::string,std::string>& parameters);\n')
-    file.write('  virtual void Finalize(const SampleFormat& summary, const std::vector<SampleFormat>& files);\n')
-    file.write('  virtual MAbool Execute(SampleFormat& sample, const EventFormat& event);\n')
-    file.write('\n private : \n')
+    file.write('    INIT_ANALYSIS(user, "MadAnalysis5job")\n\n')
+    file.write('    public : \n')
+    file.write('        MAbool Initialize(const MA5::Configuration& cfg,\n')
+    file.write('                          const std::map<std::string,std::string>& parameters);\n')
+    file.write('        void Finalize(const SampleFormat& summary, const std::vector<SampleFormat>& files);\n')
+    file.write('        MAbool Execute(SampleFormat& sample, const EventFormat& event);\n')
+    file.write('\n    private : \n')
 
 
 def WriteCore(file,main,part_list):
