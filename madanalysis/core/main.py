@@ -55,15 +55,16 @@ from six.moves import range
 import traceback as tb
 
 class Main():
-
-    userVariables = { "currentdir"      : [], \
-                      "normalize"       : ["none","lumi","lumi_weight"], \
-                      "graphic_render"  : ["root","matplotlib","none"], \
-                      "lumi"            : [], \
-                      "stacking_method" : ["stack","superimpose","normalize2one"], \
-                      "outputfile"      : ['"output.lhe.gz"','"output.lhco.gz"'],\
-                      "recast"          : ["on", "off"] \
-                      }
+    userVariables = {
+        "currentdir": [],
+        "normalize": ["none", "lumi", "lumi_weight"],
+        "graphic_render": ["root", "matplotlib", "none"],
+        "lumi": [],
+        "stacking_method": ["stack", "superimpose", "normalize2one"],
+        "outputfile": ['"output.lhe.gz"', '"output.lhco.gz"'],
+        "recast": ["on", "off"],
+        "random_seed": ["47"],
+    }
 
     forced = False
     version = ""
@@ -90,6 +91,7 @@ class Main():
         self.madgraph       = MadGraphInterface()
         self.logger         = logging.getLogger('MA5')
         self.redirectSAlogger = False
+        self.random_seed    = None
 
 
     def ResetParameters(self):
@@ -101,6 +103,7 @@ class Main():
         self.lumi           = 10
         self.lastjob_name   = ''
         self.lastjob_status = False
+        self.random_seed    = None
         self.stack          = StackingMethodType.STACK
         self.isolation      = IsolationConfiguration()
         self.output         = ""
@@ -286,10 +289,19 @@ class Main():
     def user_GetParameters(self):
         return list(Main.userVariables.keys())
 
-    def user_SetParameter(self,parameter,value):
+    def user_SetParameter(self, parameter, value):
         # currentdir
         if parameter=="currentdir":
             self.set_currentdir(value)
+        elif parameter == "random_seed":
+            try:
+                tmp = int(value)
+            except ValueError as err:
+                self.logger.debug(tb.format_exc())
+                self.logger.error("Random seed has have an integer value.")
+                return False
+            self.random_seed = tmp
+            self.logger.debug(f"Random seed has been set to {self.random_seed}")
 
         # stacked
         elif parameter=="stacking_method":
