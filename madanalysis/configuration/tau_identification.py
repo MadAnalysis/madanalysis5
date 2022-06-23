@@ -30,33 +30,33 @@ class TauIdentification:
 
     default_matching_dr = 0.3
     default_exclusive = False
-    default_efficiency = 1.0
-    default_misid_ljet = 0.0
     default_reconstruction_method = "hadron-based"
 
     userVariables = {
-        "tau_id.matching_dr": [str(default_misid_ljet)],
         "tau_id.reconstruction_method": ["jet-based", "hadron-based"],
     }
 
     def __init__(self):
-        self.efficiency = TauIdentification.default_efficiency
-        self.misid_ljet = TauIdentification.default_misid_ljet
         self.matching_dr = TauIdentification.default_matching_dr
         self.reconstruction_method = TauIdentification.default_reconstruction_method
         self.exclusive = TauIdentification.default_exclusive
 
     def Display(self):
         logging.getLogger("MA5").info("  + hadronic-tau identification:")
-        self.user_DisplayParameter("tau_id.matching_dr")
+        if self.reconstruction_method == "jet-based":
+            self.user_DisplayParameter("tau_id.matching_dr")
         self.user_DisplayParameter("tau_id.reconstruction_method")
 
     def user_DisplayParameter(self, parameter):
         if parameter == "tau_id.matching_dr":
             logging.getLogger("MA5").info(f"    + DeltaR matching = {self.matching_dr:.2f}")
-        elif parameter == "tau_id.clustering_method":
+        elif parameter == "tau_id.reconstruction_method":
             logging.getLogger("MA5").info(
-                f"    + Reconstruction method = {self.reconstruction_method}"
+                f"    + Reconstruction method: {self.reconstruction_method}"
+            )
+        elif parameter == "tau_id.exclusive":
+            logging.getLogger("MA5").info(
+                f"    + exclusive algo = {'true' if self.exclusive else 'false'}"
             )
         else:
             logging.getLogger("MA5").error(
@@ -67,14 +67,11 @@ class TauIdentification:
         return {
             "tau_id.matching_dr": str(self.matching_dr),
             "tau_id.reconstruction_method": "1" if self.reconstruction_method == "jet-based" else "0",
-            "tau_id.exclusive" : "1" if self.exclusive else "0",
+            "tau_id.exclusive": "1" if self.exclusive else "0",
         }
 
     def user_GetValues(self, variable):
-        try:
-            return TauIdentification.userVariables[variable]
-        except:
-            return []
+        return TauIdentification.userVariables.get(variable, [])
 
     def user_GetParameters(self):
         return list(TauIdentification.userVariables.keys())
@@ -118,6 +115,15 @@ class TauIdentification:
                     + ", ".join(TauIdentification.userVariables["tau_id.reconstruction_method"])
                 )
                 return False
+            if self.reconstruction_method == "jet-based":
+                TauIdentification.userVariables.update(
+                    {"tau_id.matching_dr": [str(TauIdentification.default_matching_dr)],
+                     "tau_id.exclusive": ["True", "False"]}
+                )
+            else:
+                TauIdentification.userVariables = {
+                    "tau_id.reconstruction_method": ["jet-based", "hadron-based"]
+                }
 
         # efficiency
         elif parameter == "tau_id.efficiency":

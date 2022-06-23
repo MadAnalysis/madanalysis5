@@ -31,19 +31,20 @@ class CharmIdentification:
     default_matching_dr = 0.5
     default_exclusive = True
 
-    userVariables = {
-        "cjet_id.matching_dr": [str(default_matching_dr)],
-        "cjet_id.exclusive": [str(default_exclusive)],
-    }
+    userVariables = {"cjet_id.status": ["on", "off"]}
 
     def __init__(self):
         self.matching_dr = CharmIdentification.default_matching_dr
         self.exclusive = CharmIdentification.default_exclusive
+        self.status = False
 
     def Display(self):
-        logging.getLogger("MA5").info("  + b-jet identification:")
-        self.user_DisplayParameter("cjet_id.matching_dr")
-        self.user_DisplayParameter("cjet_id.exclusive")
+        logging.getLogger("MA5").info("  + c-jet identification:")
+        if self.status:
+            self.user_DisplayParameter("cjet_id.matching_dr")
+            self.user_DisplayParameter("cjet_id.exclusive")
+        else:
+            logging.getLogger("MA5").info("    + Disabled")
 
     def user_DisplayParameter(self, parameter):
         if parameter == "cjet_id.matching_dr":
@@ -61,18 +62,16 @@ class CharmIdentification:
         return {
             "cjet_id.matching_dr": str(self.matching_dr),
             "cjet_id.exclusive": "1" if self.exclusive else "0",
+            "cjet_id.enable_ctagging": "1" if self.status else "0",
         }
 
     def user_GetValues(self, variable):
-        try:
-            return CharmIdentification.userVariables[variable]
-        except:
-            return []
+        return CharmIdentification.userVariables.get(variable, [])
 
     def user_GetParameters(self):
         return list(CharmIdentification.userVariables.keys())
 
-    def user_SetParameter(self, parameter, value):
+    def user_SetParameter(self, parameter, value: str) -> bool:
         # matching deltar
         if parameter == "cjet_id.matching_dr":
             try:
@@ -84,6 +83,22 @@ class CharmIdentification:
                 logging.getLogger("MA5").error("the 'matching deltaR' cannot be negative or null.")
                 return False
             self.matching_dr = number
+
+        # Enable ctagger
+        elif parameter == "cjet_id.status":
+            if value.lower() not in ["on", "off"]:
+                logging.getLogger("MA5").error("C-Jet tagging status can only be `on` or `off`.")
+                return False
+            self.status = value.lower() == "on"
+            if self.status and "cjet_id.matching_dr" not in CharmIdentification.userVariables.keys():
+                CharmIdentification.userVariables.update(
+                    {
+                        "cjet_id.matching_dr": [str(CharmIdentification.default_matching_dr)],
+                        "cjet_id.exclusive": ["True", "False"],
+                    }
+                )
+            else:
+                CharmIdentification.userVariables = {"cjet_id.status": ["on", "off"]}
 
         # exclusive
         elif parameter == "cjet_id.exclusive":
