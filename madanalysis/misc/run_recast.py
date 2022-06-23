@@ -1044,26 +1044,26 @@ class RunRecast():
                 except Exception as err:
                     self.logger.warning('Invalid info file (' + analysis+ '): ill-defined lumi')
                     self.logger.debug(str(err))
-                    return -1,-1,-1
+                    return -1, -1, -1
                 self.logger.debug('The luminosity of ' + analysis + ' is ' + str(lumi) + ' fb-1.')
             # regions
             if child.tag == "region" and ("type" not in child.attrib or child.attrib["type"] == "signal"):
                 if "id" not in child.attrib:
                     self.logger.warning('Invalid info file (' + analysis+ '): <region id> tag.')
-                    return -1,-1,-1
+                    return -1, -1, -1
                 if child.attrib["id"] in regions:
                     self.logger.warning('Invalid info file (' + analysis+ '): doubly-defined region.')
-                    return -1,-1,-1
+                    return -1, -1, -1
                 regions.append(child.attrib["id"])
                 # If one covariance entry is found, the covariance switch is turned on
-                if "covariance" in [rchild.tag for rchild in child]:
-                    for grand_child in [gchild for gchild in child if gchild.tag == "covariance"]:
+                if self.main.recasting.global_likelihoods_switch:
+                    for grand_child in child.findall("covariance"):
                         if "cov_subset" in info_root.attrib:
                             if grand_child.attrib.get("cov_subset", "default") in [info_root.attrib["cov_subset"], "default"]:
                                 if child.attrib["id"] not in self.cov_config[info_root.attrib["cov_subset"]]["cov_regions"]:
                                     self.cov_config[info_root.attrib["cov_subset"]]["cov_regions"].append(child.attrib["id"])
                         else:
-                            if grand_child.attrib.get("cov_subset", False) != False:
+                            if grand_child.attrib.get("cov_subset", False):
                                 subsetID = grand_child.attrib["cov_subset"]
                                 if subsetID not in list(self.cov_config.keys()):
                                     self.cov_config[subsetID] = dict(cov_regions = [],
@@ -1129,7 +1129,7 @@ class RunRecast():
                         err_scale = lumi_scaling
                         deltanb = round(deltanb*err_scale,8)
                     else:
-                        nb_new = nb*lumi_scaling;
+                        nb_new = nb*lumi_scaling
                         deltanb = round(math.sqrt(self.main.recasting.error_extrapolation[0]**2*nb_new**2 
                                                   + self.main.recasting.error_extrapolation[1]**2*nb_new), 8);
                 else:
@@ -1738,9 +1738,9 @@ class RunRecast():
         # Adding the global CLs from simplified likelihood
         for cov_subset in self.cov_config.keys():
             if not xsflag:
-                myxsexp = regiondata["cov_subset"][cov_subset]["s95exp"]
-                myxsobs = regiondata["cov_subset"][cov_subset]["s95obs"]
-                best    = str(regiondata["cov_subset"][cov_subset].get("best",0))
+                myxsexp = regiondata["cov_subset"][cov_subset].get("s95exp", "-1")
+                myxsobs = regiondata["cov_subset"][cov_subset].get("s95obs", "-1")
+                best    = str(regiondata["cov_subset"][cov_subset].get("best", 0))
                 myglobalcls = "%.4f" % regiondata["cov_subset"][cov_subset]["CLs"]
                 description = "[SL]-"+cov_subset
                 summary.write(analysis.ljust(30,' ') + description.ljust(60,' ') + best.ljust(10, ' ') +
@@ -1780,8 +1780,8 @@ class RunRecast():
         for likelihood_profile in list(self.pyhf_config.keys()):
             if likelihood_profile not in list(pyhf_data.keys()):
                 continue
-            myxsexp   = pyhf_data.get(likelihood_profile,{}).get('s95exp',"-1")
-            myxsobs   = pyhf_data.get(likelihood_profile,{}).get('s95obs',"-1")
+            myxsexp = pyhf_data.get(likelihood_profile, {}).get('s95exp', "-1")
+            myxsobs = pyhf_data.get(likelihood_profile, {}).get('s95obs', "-1")
             if not xsflag:
                 self.logger.debug(str(pyhf_data))
                 mycls   = '{:.4f}'.format(pyhf_data.get(likelihood_profile,{}).get('CLs', 0.))

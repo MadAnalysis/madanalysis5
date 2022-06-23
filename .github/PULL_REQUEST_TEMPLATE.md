@@ -7,10 +7,10 @@ Please complete the following checklist when submitting a PR:
   - [ ] All new functions and code must be clearly commented and documented.
       If you do make documentation changes, make sure that the docs build and
       render correctly by running `./doc/makedoc`.
-  - [ ] Add a new entry to the `madanalysis/UpdateNotes.txt` file, summarizing the
-      change, and including a link back to the PR.
+  - [ ] Add a new entry to the [`doc/releases/changelog-dev.md`](/MadAnalysis/madanalysis5/blob/main/doc/releases/changelog-dev.md)
+        file, summarizing the change, and including a link back to the PR.
 
-For details please see the documentation [here](../doc/CONTRIBUTING.md).
+For details please see the documentation [here](/MadAnalysis/madanalysis5/blob/main/doc/CONTRIBUTING.md).
 
 When all the above are checked, delete everything above the dashed
 line and fill in the pull request template.
