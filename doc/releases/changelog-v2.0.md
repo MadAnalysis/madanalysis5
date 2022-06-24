@@ -26,6 +26,10 @@ so that MadAnalysis can be compiled without these modules as well.
 * Tagger module has been redesigned to accommodate substructure module.
   [(#86)](https://github.com/MadAnalysis/madanalysis5/pull/86)
     
+* Multilevel object tagging has been enabled through SFS.
+  ([#97](https://github.com/MadAnalysis/madanalysis5/pull/97))
+  * Option to activate c-jet tagging has been introduced.
+  * Option to use jet-based hadronic tau matching has been introduced.
 
 ## Improvements
 
@@ -34,6 +38,9 @@ so that MadAnalysis can be compiled without these modules as well.
   [(#86)](https://github.com/MadAnalysis/madanalysis5/pull/86)
 
 ## Bug fixes
+
+* Various bugfixes for matching the numeric results to the Ma5 v1.10.
+  ([#97](https://github.com/MadAnalysis/madanalysis5/pull/97))
 
 ## Contributors
 
