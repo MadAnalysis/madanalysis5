@@ -70,7 +70,13 @@ namespace MA5
         /// Print SFS banner
         MAbool SFSbanner_;
 
-        /// Exclusive id for tau-elec-photon-jet
+        /// @brief Exclusive id for tau-elec-photon-jet
+        /// @code ExclusiveId_ = true; @endcode
+        /// Exclusive algorithm: FS Leptons (photons) originated from hadronic decays
+        /// will not be included in Lepton (photon) collection.
+        /// @code ExclusiveId_ = false; @endcode
+        /// Includive algorithm: All FS leptons (photons) will be included in
+        /// their corresponding containers.
         MAbool ExclusiveId_;
 
         /// Primary Jet ID
