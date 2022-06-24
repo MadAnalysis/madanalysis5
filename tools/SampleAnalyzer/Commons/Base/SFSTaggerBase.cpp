@@ -32,21 +32,45 @@ namespace MA5 {
     /// Print parameters
     void SFSTaggerBase::PrintParam() const
     {
+        /// Print B-taggging options
         std::string excl = _options.btag_exclusive ? "Exclusive" : "Inclusive";
-        INFO << "        with bjet: ΔR = " << _options.btag_matching_deltaR << " ; " << excl << endmsg;
+        INFO << "        with bjet: matching ΔR = "
+             << _options.btag_matching_deltaR
+             << " ; " << excl << endmsg;
         excl = _options.ctag_exclusive ? "Exclusive" : "Inclusive";
-        INFO << "        with cjet: ΔR = " << _options.ctag_matching_deltaR << " ; " << excl << endmsg;
-        if (_options.tautag_jetbased)
-        {
-            excl = _options.ctag_exclusive ? "Exclusive" : "Inclusive";
-            INFO << "        with tau : ΔR = " << _options.tautag_matching_deltaR << " ; " << excl << endmsg;
+
+        /// Print C-tagging options
+        if (_options.enable_ctagging) {
+            INFO << "        with cjet: matching ΔR = "
+                 << _options.ctag_matching_deltaR
+                 << " ; " << excl << endmsg;
         }
-        else
-        {
+
+        /// Print Tau-tagging options
+        if (_options.tautag_jetbased) {
+            excl = _options.ctag_exclusive ? "Exclusive" : "Inclusive";
+            INFO << "        with tau : matching ΔR = "
+                 << _options.tautag_matching_deltaR
+                 << " ; " << excl << endmsg;
+        } else {
             INFO << "        with tau : hadron-based tagging" << endmsg;
         }
     }
 
+    /// Convert jet to tau
+    MAfloat32 SFSTaggerBase::tau_tagging_eff(const RecJetFormat &jet, TaggerStatus status) const
+    {
+        RecTauFormat myTau;
+        myTau.setMomentum(jet.momentum());
+        myTau.ntracks_   = jet.ntracks();
+        myTau.mc_        = jet.mc_;
+
+        if (status == TaggerStatus::MID) return mid_tau_tagging_eff(myTau);
+        else if (status == TaggerStatus::TIGHT) return tight_tau_tagging_eff(myTau);
+        else return loose_tau_tagging_eff(myTau);
+    }
+
+    /// Execute tagger
     void SFSTaggerBase::Execute(EventFormat &myEvent) const
     {
         /// Shortcut for global event variables
@@ -63,80 +87,90 @@ namespace MA5 {
         /// Get initial number of taus.
         /// @attention if tau tagging is jet based Ntau will be zero
         MAuint32 Ntau = myEvent.rec()->taus().size();
-
-        /// Jet tagging with detector effects
         std::vector<MAuint32> toRemove;
-        MAuint32 ijet = -1;
-        if (_isJetTaggingOn || _options.tautag_jetbased) {
+        /// Jet tagging with detector effects
+        if (_isJetTaggingOn)
+        {
+            MAint32 ijet = -1;
             for (auto &jet: myEvent.rec()->jets())
             {
                 ijet++;
-                if (jet.tautag())
-                {
-                    if (RANDOM->flat() < tau_tagging_eff(jet))
-                    {
-                        RecTauFormat *newTau = myEvent.rec()->GetNewTau();
-                        Jet2Tau(&jet, newTau, myEvent);
-                        toRemove.push_back(ijet);
-                        continue;
-                    }
-                    /// @attention This is for consistency. Tau tag is created for this application only.
-                    jet.setTautag(false);
-                }
-                /// Do not continue if tagger is not on (for code efficiency)
-                if (!_isJetTaggingOn) continue;
-
                 /// We have a true b-jet: is it b-tagged?
                 if (jet.true_btag())
                 {
-                    if (RANDOM->flat() > b_tagging_eff(jet)) jet.setBtag(false);
+                    if (RANDOM->flat() > loose_b_tagging_eff(jet)) jet.setLooseBtag(false);
+                    if (RANDOM->flat() > mid_b_tagging_eff(jet)) jet.setMidBtag(false);
+                    if (RANDOM->flat() > tight_b_tagging_eff(jet)) jet.setTightBtag(false);
                 }
                 /// We have a true c-jet: is it b-tagged?
                 else if (jet.true_ctag())
                 {
-                    if (RANDOM->flat() < c_mistag_b(jet)) {
-                        jet.setBtag(true); jet.setCtag(false);
-                    }
+                    if (RANDOM->flat() < loose_c_mistag_b(jet)) jet.setLooseBtag(true);
+                    if (RANDOM->flat() < mid_c_mistag_b(jet)) jet.setMidBtag(true);
+                    if (RANDOM->flat() < tight_c_mistag_b(jet)) jet.setTightBtag(true);
                 }
                 /// We have a true light-jet: is it b-tagged?
                 else
                 {
-                    if (RANDOM->flat() < lightjet_mistag_b(jet)) jet.setBtag(true);
+                    if (RANDOM->flat() < lightjet_mistag_b_loose(jet)) jet.setLooseBtag(true);
+                    if (RANDOM->flat() < lightjet_mistag_b_mid(jet)) jet.setMidBtag(true);
+                    if (RANDOM->flat() < lightjet_mistag_b_tight(jet)) jet.setTightBtag(true);
                 }
-
-                /// We have a b-tagged jet -> moving on with the next jet
-                if (jet.btag()) continue;
 
                 /// We have a true b-jet: is it c-tagged?
                 if (jet.true_btag())
                 {
-                    if (RANDOM->flat() < b_mistag_c(jet)) {
-                        jet.setCtag(true); jet.setBtag(false);
-                    }
+                    /// We have a b-tagged jet -> moving on with the next jet
+                    if (!jet.loose_btag() && RANDOM->flat() < loose_b_mistag_c(jet)) jet.setLooseCtag(true);
+                    if (!jet.mid_btag() && RANDOM->flat() < mid_b_mistag_c(jet)) jet.setMidCtag(true);
+                    if (!jet.tight_btag() && RANDOM->flat() < tight_b_mistag_c(jet)) jet.setTightCtag(true);
                 }
                 /// We have a true c-jet: is it c-tagged?
                 else if (jet.true_ctag())
                 {
-                    if (RANDOM->flat() > c_tagging_eff(jet)) jet.setCtag(false);
+                    if (!jet.loose_btag() && RANDOM->flat() > loose_c_tagging_eff(jet)) jet.setLooseCtag(false);
+                    if (!jet.mid_btag() && RANDOM->flat() > mid_c_tagging_eff(jet)) jet.setMidCtag(false);
+                    if (!jet.tight_btag() && RANDOM->flat() > tight_c_tagging_eff(jet)) jet.setTightCtag(false);
                 }
                 /// We have a true light-jet: is it c-tagged?
                 else
                 {
-                    if (RANDOM->flat() < lightjet_mistag_c(jet)) jet.setCtag(true);
+                    if (!jet.loose_btag() && RANDOM->flat() < lightjet_mistag_c_loose(jet)) jet.setLooseCtag(true);
+                    if (!jet.mid_btag() && RANDOM->flat() < lightjet_mistag_c_mid(jet)) jet.setMidCtag(true);
+                    if (!jet.tight_btag() && RANDOM->flat() < lightjet_mistag_c_tight(jet)) jet.setTightCtag(true);
                 }
 
-                /// We have a c-tagged jet -> moving on with the next jet
-                if (jet.ctag()) continue;
+                if (_options.tautag_jetbased)
+                {
+                    if (jet.true_tautag())
+                    {
+                        if (!jet.loose_btag() && !jet.loose_ctag() && RANDOM->flat() > tau_tagging_eff(jet, LOOSE))
+                            jet.setLooseTautag(false);
+                        if (!jet.mid_btag() && !jet.mid_ctag() && RANDOM->flat() > tau_tagging_eff(jet, MID))
+                            jet.setMidTautag(false);
+                        if (!jet.tight_btag() && !jet.tight_ctag() && RANDOM->flat() > tau_tagging_eff(jet, TIGHT))
+                            jet.setTightTautag(false);
+                    } else {
+                        if (!jet.loose_btag() && !jet.loose_ctag() && RANDOM->flat() < lightjet_mistag_tau_loose(jet))
+                            jet.setLooseTautag(true);
+                        if (!jet.mid_btag() && !jet.mid_ctag() && RANDOM->flat() < lightjet_mistag_tau_mid(jet))
+                            jet.setMidTautag(true);
+                        if (!jet.tight_btag() && !jet.tight_ctag() && RANDOM->flat() < lightjet_mistag_tau_tight(jet))
+                            jet.setTightTautag(true);
+                    }
+                }
 
                 /// We have a true b/c-jet -> cannot be mistagged
-                if (jet.ctag() || jet.btag()) continue;
+                /// @attention Loose tag is always the default
+                if (jet.loose_ctag() || jet.loose_btag() || jet.loose_tautag()) continue;
+
                 /// if not, is it mis-tagged as anything?
                 else
                 {
                     /// Scope for light jet mistagging as tau
-                    {
+                    if (!_options.tautag_jetbased) {
                         /// if not, is it Tau-tagged?
-                        if (RANDOM->flat() < lightjet_mistag_tau(jet)) {
+                        if (RANDOM->flat() < lightjet_mistag_tau_loose(jet)) {
                             RecTauFormat *newTau = myEvent.rec()->GetNewTau();
                             Jet2Tau(&jet, newTau, myEvent);
                             toRemove.push_back(ijet);
@@ -182,19 +216,18 @@ namespace MA5 {
                     }
                 }
             }
-            /// Remove jets from the collection
-            for (MAuint32 i = toRemove.size(); i > 0; i--)
-                myEvent.rec()->jets().erase(myEvent.rec()->jets().begin() + toRemove[i-1]);
-            toRemove.clear();
         }
+        /// Remove jets from the collection
+        for (MAuint32 i = toRemove.size(); i > 0; i--)
+            myEvent.rec()->jets().erase(myEvent.rec()->jets().begin() + toRemove[i-1]);
+        toRemove.clear();
 
-
-        if (_isTauTaggingEffOn)
+        if (_isTauTaggingEffOn && !_options.tautag_jetbased)
         {
             /// @attention In Jet based tau tagging this loop will not run. If its runnning thats a bug
             for (MAuint32 itau = 0; itau < Ntau; itau++)
             {
-                if (RANDOM->flat() > tau_tagging_eff(myEvent.rec()->taus()[itau]))
+                if (RANDOM->flat() > loose_tau_tagging_eff(myEvent.rec()->taus()[itau]))
                 {
                     RecJetFormat* NewParticle = myEvent.rec()->GetNewJet();
                     NewParticle->setMomentum((&myEvent.rec()->taus()[itau])->momentum());
@@ -371,61 +404,57 @@ namespace MA5 {
     /// Truth B-Jet tagging
     void SFSTaggerBase::BJetTagging(EventFormat &myEvent) const
     {
+        /// Loop over B-hadrons
         for (auto &bHadron: myEvent.rec()->MCBquarks_)
         {
             MAfloat32 DeltaRmax = _options.btag_matching_deltaR;
+            /// @attention If not exclusive `current_ijet` will always be -1
+            /// thus jets will only be tagged with respect to dR
             MAint32 current_ijet = -1;
+            /// Loop over jets
             for (MAuint32 ijet = 0; ijet < myEvent.rec()->jets().size(); ijet++)
             {
                 MAfloat32 dR = myEvent.rec()->jets()[ijet].dr(bHadron);
                 if (dR <= DeltaRmax)
                 {
-                    if (_options.btag_exclusive)
-                    {
-                        current_ijet = ijet; DeltaRmax = dR;
-                    }
-                    else
-                    {
-                        myEvent.rec()->jets()[ijet].setTrueBtag(true);
-                        myEvent.rec()->jets()[ijet].setBtag(true);
-                    }
+                    if (_options.btag_exclusive) { current_ijet = ijet; DeltaRmax = dR; }
+                    else myEvent.rec()->jets()[ijet].setAllBtags(true);
                 }
             }
-            if (current_ijet >= 0)
-            {
-                myEvent.rec()->jets()[current_ijet].setTrueBtag(true);
-                myEvent.rec()->jets()[current_ijet].setBtag(true);
-            }
+            if (current_ijet >= 0) myEvent.rec()->jets()[current_ijet].setAllBtags(true);
         }
     }
 
     /// Truth C-Jet tagging
     void SFSTaggerBase::CJetTagging(EventFormat &myEvent) const
     {
+        /// Loop over C-hadrons
         for (auto &cHadron: myEvent.rec()->MCCquarks_)
         {
             MAfloat32 DeltaRmax = _options.ctag_matching_deltaR;
+            /// @attention If not exclusive `current_ijet` will always be -1
+            /// thus jets will only be tagged with respect to dR
             MAint32 current_ijet = -1;
+
+            /// Loop over jets
             for (MAuint32 ijet = 0; ijet < myEvent.rec()->jets().size(); ijet++)
             {
+                if (myEvent.rec()->jets()[ijet].true_btag()) continue;
                 MAfloat32 dR = myEvent.rec()->jets()[ijet].dr(cHadron);
                 if (dR <= DeltaRmax)
                 {
-                    if (_options.ctag_exclusive)
-                    {
-                        current_ijet = ijet; DeltaRmax = dR;
-                    }
-                    else
-                    {
-                        myEvent.rec()->jets()[ijet].setTrueCtag(true);
-                        myEvent.rec()->jets()[ijet].setCtag(true);
+                    if (_options.ctag_exclusive) { current_ijet = ijet; DeltaRmax = dR; }
+                    else {
+                        if (_options.enable_ctagging)
+                            myEvent.rec()->jets()[ijet].setAllCtags(true);
+                        else myEvent.rec()->jets()[ijet].setTrueCtag(true);
                     }
                 }
             }
-            if (current_ijet >= 0)
-            {
-                myEvent.rec()->jets()[current_ijet].setTrueCtag(true);
-                myEvent.rec()->jets()[current_ijet].setCtag(true);
+            if (current_ijet >= 0) {
+                if (_options.enable_ctagging)
+                    myEvent.rec()->jets()[current_ijet].setAllCtags(true);
+                else myEvent.rec()->jets()[current_ijet].setTrueCtag(true);
             }
         }
     }
@@ -449,10 +478,10 @@ namespace MA5 {
                     {
                         DeltaRmax = dR; current_jet = ijet;
                     }
-                    else myEvent.rec()->jets()[current_jet].setTautag(true);
+                    else myEvent.rec()->jets()[current_jet].setAllTautags(true);
                 }
             }
-            if (current_jet >= 0) myEvent.rec()->jets()[current_jet].setTautag(true);
+            if (current_jet >= 0) myEvent.rec()->jets()[current_jet].setAllTautags(true);
         }
     }
 
@@ -473,7 +502,7 @@ namespace MA5 {
         for (auto &constit: myTau->Constituents_)
             charge += PDG->GetCharge(myEvent.mc()->particles()[constit].pdgid());
 
-        myTau->setCharge(charge > 0 ? true : false);
+        myTau->setCharge(charge > 0);
     }
 
 }

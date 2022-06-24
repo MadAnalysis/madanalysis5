@@ -103,6 +103,7 @@ class CmdSet(CmdBase.CmdBase):
         object = args[0]
 #        object = object.lower()
         object = object.replace('fastsim.bjet_id.','fastsim.bjet_idXXX')
+        object = object.replace('fastsim.cjet_id.','fastsim.cjet_idXXX')
         object = object.replace('fastsim.tau_id.','fastsim.tau_idXXX')
         objs = object.split('.')
         for i in range(len(objs)):

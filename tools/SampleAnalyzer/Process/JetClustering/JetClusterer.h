@@ -70,7 +70,13 @@ namespace MA5
         /// Print SFS banner
         MAbool SFSbanner_;
 
-        /// Exclusive id for tau-elec-photon-jet
+        /// @brief Exclusive id for tau-elec-photon-jet
+        /// @code ExclusiveId_ = true; @endcode
+        /// Exclusive algorithm: FS Leptons (photons) originated from hadronic decays
+        /// will not be included in Lepton (photon) collection.
+        /// @code ExclusiveId_ = false; @endcode
+        /// Includive algorithm: All FS leptons (photons) will be included in
+        /// their corresponding containers.
         MAbool ExclusiveId_;
 
         /// Primary Jet ID
@@ -109,26 +115,25 @@ namespace MA5
     public :
 
         /// Constructor without argument
-        JetClusterer (ClusterAlgoBase* algo)
-        {
+        JetClusterer (ClusterAlgoBase* algo) {
             // Initializing tagger
-            algo_        = algo;
+            algo_ = algo;
 #ifdef MA5_FASTJET_MODE
             cluster_collection_.clear();
             substructure_collection_.clear();
 #endif
-            mySmearer_   = 0;
-            myTagger_    = 0;
+            mySmearer_ = 0;
+            myTagger_ = 0;
             myTaggerOptions_ = 0;
             SFSbanner_ = true;
             ExclusiveId_ = false;
-            JetID_       = "Ma5Jet";
-            muon=0;
-            electron=0;
-            tauH=0;
-            tauM=0;
-            tauE=0;
-            photon=0;
+            JetID_ = "Ma5Jet";
+            muon = 0;
+            electron = 0;
+            tauH = 0;
+            tauM = 0;
+            tauE = 0;
+            photon = 0;
             isocone_track_radius_.clear();
             isocone_electron_radius_.clear();
             isocone_muon_radius_.clear();
@@ -136,8 +141,12 @@ namespace MA5
         }
 
         /// Destructor
-        ~JetClusterer()
-        { }
+        ~JetClusterer() {
+            if (algo_ != 0) delete algo_;
+            if (mySmearer_ != 0) delete mySmearer_;
+            if (myTagger_ != 0) delete myTagger_;
+            if (myTaggerOptions_ != 0) delete myTaggerOptions_;
+        }
 
         /// Initialization
         MAbool Initialize(const std::map<std::string,std::string>& options);

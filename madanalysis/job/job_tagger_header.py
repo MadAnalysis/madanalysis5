@@ -21,30 +21,31 @@
 #
 ################################################################################
 
+from madanalysis.fastsim.tagger import TaggerStatus
 
 class JobTaggerHeader:
 
     # structure: (true_id, reco_id) : "..."
     base = {
-        (5, 5): "\t/// B-jet tagging efficiency (b as b)\n\tMAfloat32 b_tagging_eff(const RecJetFormat &object) const",
-        (5, 4): "\t/// B-jet mistagging as C-jet (b as c)\n\tMAfloat32 b_mistag_c(const RecJetFormat &object) const",
-        (4, 4): "\t/// C-jet tagging efficiency (c as c)\n\tMAfloat32 c_tagging_eff(const RecJetFormat &object) const",
-        (4, 5): "\t/// C-jet mistagging as C-jet (c as b)\n\tMAfloat32 c_mistag_b(const RecJetFormat &object) const",
-        (21, 5): "\t/// Light-Jet mistagging as b-jet (j as b)\n\tMAfloat32 lightjet_mistag_b(const RecJetFormat &object) const",
-        (21, 4): "\t/// Light-Jet mistagging as c jet (j as c)\n\tMAfloat32 lightjet_mistag_c(const RecJetFormat &object) const",
-        (21, 15): "\t/// Light-Jet mistagging as tau (j as ta)\n\tMAfloat32 lightjet_mistag_tau(const RecJetFormat &object) const",
-        (21, 11): "\t/// Light-Jet mistagging as electron (j as e)\n\tMAfloat32 lightjet_mistag_electron(const RecJetFormat &object) const",
-        (21, 22): "\t/// Light-Jet mistagging as photon (j as photon)\n\tMAfloat32 lightjet_mistag_photon(const RecJetFormat &object) const",
-        (15, 15): "\t/// Tau tagging efficiency (ta as ta)\n\tMAfloat32 tau_tagging_eff(const RecTauFormat &object) const",
-        (11, 13): "\t/// Electron mistagging as muon (e as mu)\n\tMAfloat32 electron_mistag_muon(const RecLeptonFormat &object) const",
-        (11, 22): "\t/// Electron mistagging as photon (e as a)\n\tMAfloat32 electron_mistag_photon(const RecLeptonFormat &object) const",
-        (11, 21): "\t/// Electron mistagging as light jet (e as j)\n\tMAfloat32 electron_mistag_lightjet(const RecLeptonFormat &object) const",
-        (13, 11): "\t/// Electron mistagging as electron (mu as e)\n\tMAfloat32 muon_mistag_electron(const RecLeptonFormat &object) const",
-        (13, 22): "\t/// Electron mistagging as photon (mu as a)\n\tMAfloat32 muon_mistag_photon(const RecLeptonFormat &object) const",
-        (13, 21): "\t/// Electron mistagging as light jet (mu as j)\n\tMAfloat32 muon_mistag_lightjet(const RecLeptonFormat &object) const",
-        (22, 11): "\t/// Electron mistagging as electron (a as e)\n\tMAfloat32 photon_mistag_electron(const RecPhotonFormat &object) const",
-        (22, 13): "\t/// Electron mistagging as muon (a as mu)\n\tMAfloat32 photon_mistag_muon(const RecPhotonFormat &object) const",
-        (22, 21): "\t/// Electron mistagging as light jet (a as j)\n\tMAfloat32 photon_mistag_lightjet(const RecPhotonFormat &object) const",
+        (5, 5): lambda tag: f"/// B-jet tagging efficiency (b as b)\nMAfloat32 NewTagger::{tag}_b_tagging_eff(const RecJetFormat &object) const",
+        (5, 4): lambda tag: f"/// B-jet mistagging as C-jet (b as c)\nMAfloat32 NewTagger::{tag}_b_mistag_c(const RecJetFormat &object) const",
+        (4, 4): lambda tag: f"/// C-jet tagging efficiency (c as c)\nMAfloat32 NewTagger::{tag}_c_tagging_eff(const RecJetFormat &object) const",
+        (4, 5): lambda tag: f"/// C-jet mistagging as C-jet (c as b)\nMAfloat32 NewTagger::{tag}_c_mistag_b(const RecJetFormat &object) const",
+        (21, 5): lambda tag: f"/// Light-Jet mistagging as b-jet (j as b)\nMAfloat32 NewTagger::lightjet_mistag_b_{tag}(const RecJetFormat &object) const",
+        (21, 4): lambda tag: f"/// Light-Jet mistagging as c jet (j as c)\nMAfloat32 NewTagger::lightjet_mistag_c_{tag}(const RecJetFormat &object) const",
+        (21, 15): lambda tag: f"/// Light-Jet mistagging as tau (j as ta)\nMAfloat32 NewTagger::lightjet_mistag_tau_{tag}(const RecJetFormat &object) const",
+        (21, 11): lambda tag: f"/// Light-Jet mistagging as electron (j as e)\nMAfloat32 NewTagger::lightjet_mistag_electron(const RecJetFormat &object) const",
+        (21, 22): lambda tag: f"/// Light-Jet mistagging as photon (j as photon)\nMAfloat32 NewTagger::lightjet_mistag_photon(const RecJetFormat &object) const",
+        (15, 15): lambda tag: f"/// Tau tagging efficiency (ta as ta)\nMAfloat32 NewTagger::{tag}_tau_tagging_eff(const RecTauFormat &object) const",
+        (11, 13): lambda tag: f"/// Electron mistagging as muon (e as mu)\nMAfloat32 NewTagger::electron_mistag_muon(const RecLeptonFormat &object) const",
+        (11, 22): lambda tag: f"/// Electron mistagging as photon (e as a)\nMAfloat32 NewTagger::electron_mistag_photon(const RecLeptonFormat &object) const",
+        (11, 21): lambda tag: f"/// Electron mistagging as light jet (e as j)\nMAfloat32 NewTagger::electron_mistag_lightjet(const RecLeptonFormat &object) const",
+        (13, 11): lambda tag: f"/// Electron mistagging as electron (mu as e)\nMAfloat32 NewTagger::muon_mistag_electron(const RecLeptonFormat &object) const",
+        (13, 22): lambda tag: f"/// Electron mistagging as photon (mu as a)\nMAfloat32 NewTagger::muon_mistag_photon(const RecLeptonFormat &object) const",
+        (13, 21): lambda tag: f"/// Electron mistagging as light jet (mu as j)\nMAfloat32 NewTagger::muon_mistag_lightjet(const RecLeptonFormat &object) const",
+        (22, 11): lambda tag: f"/// Electron mistagging as electron (a as e)\nMAfloat32 NewTagger::photon_mistag_electron(const RecPhotonFormat &object) const",
+        (22, 13): lambda tag: f"/// Electron mistagging as muon (a as mu)\nMAfloat32 NewTagger::photon_mistag_muon(const RecPhotonFormat &object) const",
+        (22, 21): lambda tag: f"/// Electron mistagging as light jet (a as j)\nMAfloat32 NewTagger::photon_mistag_lightjet(const RecPhotonFormat &object) const",
     }
 
 
@@ -54,8 +55,8 @@ class JobTaggerHeader:
 
         self.unique_rules = []
         for key, rule in self.fastsim.tagger.rules.items():
-            if (int(rule["id_true"]), int(rule["id_reco"])) not in self.unique_rules:
-                self.unique_rules.append((int(rule["id_true"]), int(rule["id_reco"])))
+            if (int(rule["id_true"]), int(rule["id_reco"]), TaggerStatus.to_str(rule["tag"])) not in self.unique_rules:
+                self.unique_rules.append((int(rule["id_true"]), int(rule["id_reco"]), TaggerStatus.to_str(rule["tag"])))
 
 
     ## Writing NewTagger.h
@@ -66,10 +67,6 @@ class JobTaggerHeader:
         file.write('#include "SampleAnalyzer/Commons/Base/SFSTaggerBase.h"\n')
         file.write('namespace MA5 {\n')
         file.write('    class NewTagger: public SFSTaggerBase {\n')
-        file.write('    private:\n')
-        file.write('        /// Code efficiency booleans\n')
-        file.write('        MAbool _isJetTaggingOn, _isTauTaggingEffOn, _isMuonTaggingOn, _isElectronTaggingOn, _isPhotonTaggingOn;\n')
-        file.write('        SFSTaggerBaseOptions _options;\n')
         file.write('    public :\n')
         file.write('        /// Constructor without argument\n')
         file.write('        NewTagger() {}\n\n')
@@ -78,9 +75,9 @@ class JobTaggerHeader:
         file.write('        void Initialize() {\n')
         file.write('            /// @brief Booleans for code efficiency\n')
         file.write('            /// Turn on the usage of tau tagging efficiency\n')
-        file.write(f"            _isTauTaggingEffOn = {'true' if (5,5) in self.unique_rules else 'false'};\n")
+        file.write(f"            _isTauTaggingEffOn = {'true' if (15, 15) in [(x[0], x[1]) for x in self.unique_rules] else 'false'};\n")
         file.write('            /// Turn on the usage of jet (mis)tagging efficiency\n')
-        file.write(f"            _isJetTaggingOn = {'true' if any([x in self.unique_rules for x in [(5,5), (4,5), (21,5), (5,4), (4,4), (21,4), (21,15), (21,11), (21,22)]]) else 'false'};\n")
+        file.write(f"            _isJetTaggingOn = {'true' if any([x in [(x[0], x[1]) for x in self.unique_rules] for x in [(5,5), (4,5), (21,5), (5,4), (4,4), (21,4), (21,15), (21,11), (21,22)]]) else 'false'};\n")
         file.write('            /// Turn on the usage of muon (mis)tagging efficiency\n')
         file.write(f"            _isMuonTaggingOn = {'true' if 13 in [x[0] for x in self.unique_rules] else 'false'};\n")
         file.write('            /// Turn on the usage of electron (mis)tagging efficiency\n')
@@ -94,7 +91,9 @@ class JobTaggerHeader:
         file.write('        ///                                          //\n')
         file.write('        ///==========================================//\n\n')
         for rule in self.unique_rules:
-            file.write(JobTaggerHeader.base[rule] + ";\n")
+            header = JobTaggerHeader.base[(rule[0], rule[1])](rule[2]).split("\n")
+            file.write(f"\n\t{header[0]}\n")
+            file.write(f"\t{header[1].replace('NewTagger::', '')};\n")
         file.write('    };\n}\n#endif //MADANALYSIS5_NEW_TAGGER_H')
 
 
@@ -109,11 +108,17 @@ class JobTaggerHeader:
             for eff_key in value['efficiencies'].keys():
                  eff_fnc = value['efficiencies'][eff_key]['function']
                  eff_bnd = value['efficiencies'][eff_key]['bounds'  ]
-                 file.write(eff_fnc.tocpp('MAdouble64', \
-                     'eff_'+str(value['id_true']) + '_' + str(value['id_reco'])+'_'+\
-                       str(eff_key))+'\n')
-                 file.write(eff_bnd.tocpp('MAbool', \
-                     'bnd_'+str(value['id_true']) + '_' + str(value['id_reco'])+'_'+\
-                       str(eff_key)) + '\n')
+                 file.write(
+                     eff_fnc.tocpp(
+                         'MAdouble64',
+                         f"eff_{value['id_true']}_{value['id_reco']}_{eff_key}_{TaggerStatus.to_str(value['tag'])}"
+                     )+'\n'
+                 )
+                 file.write(
+                     eff_bnd.tocpp(
+                         'MAbool',
+                         f"bnd_{value['id_true']}_{value['id_reco']}_{eff_key}_{TaggerStatus.to_str(value['tag'])}"
+                     ) + '\n'
+                 )
         file.write('#endif')
 

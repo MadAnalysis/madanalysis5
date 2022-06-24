@@ -24,14 +24,6 @@
 
 // SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoFastJet.h"
-#include "SampleAnalyzer/Commons/Service/LoopService.h"
-#include "SampleAnalyzer/Commons/Service/Physics.h"
-#include "SampleAnalyzer/Commons/Service/PDGService.h"
-#include "SampleAnalyzer/Commons/Base/SmearerBase.h"
-
-// FastJet headers
-#include <fastjet/PseudoJet.hh>
-
 
 using namespace MA5;
 
@@ -113,7 +105,11 @@ MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
         );
     }
 
-    Meff += MET->pt();
+    /// @attention in the earlier version of the code Meff is filled with MET->pt() at this point
+    /// we now switched to MHT because in the earlier version of the code when this function
+    /// executed MET was empty. For numerical consistency we use MHT here.
+    /// For details see JetClusterer.cpp and ClusterAlgoFastjet.cpp in v1.10.x
+    Meff += MHT->pt();
     return true;
 }
 

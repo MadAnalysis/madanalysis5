@@ -36,7 +36,7 @@ class BeautyIdentification:
 
     userVariables = {
         "bjet_id.matching_dr": [str(default_matching_dr)],
-        "bjet_id.exclusive": [str(default_exclusive)],
+        "bjet_id.exclusive": ["True", "False"],
     }
 
     def __init__(self):
@@ -70,15 +70,12 @@ class BeautyIdentification:
         }
 
     def user_GetValues(self, variable):
-        try:
-            return BeautyIdentification.userVariables[variable]
-        except:
-            return []
+        return BeautyIdentification.userVariables.get(variable, [])
 
     def user_GetParameters(self):
         return list(BeautyIdentification.userVariables.keys())
 
-    def user_SetParameter(self, parameter, value):
+    def user_SetParameter(self, parameter: str, value: str) -> bool:
         # matching deltar
         if parameter == "bjet_id.matching_dr":
             try:
@@ -93,7 +90,7 @@ class BeautyIdentification:
 
         # exclusive
         elif parameter == "bjet_id.exclusive":
-            if value not in ["true", "false"]:
+            if value.lower() not in ["true", "false"]:
                 logging.getLogger("MA5").error("'exclusive' possible values are : 'true', 'false'")
                 return False
             self.exclusive = value == "true"
