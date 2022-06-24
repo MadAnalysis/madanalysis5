@@ -546,7 +546,7 @@ class JobWriter(object):
         file.write('  // Post initialization (creates the new output directory structure)\n')
         file.write('  if(!manager.PostInitialize()) return 1;\n')
         if self.main.random_seed:
-            file.write("\n\n  /// Fixing random seed\n")
+            file.write("\n\n  /// Setting the random seed\n")
             file.write(f"  RANDOM->SetSeed({self.main.random_seed});\n\n")
 
         # Add default hadrons and invisible particles for Reco mode

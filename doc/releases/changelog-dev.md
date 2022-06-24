@@ -48,7 +48,7 @@
  * Set hard limit to python version to 3.6+ (PS: lxplus uses 3.6 minimum)
    ([#92](https://github.com/MadAnalysis/madanalysis5/pull/92))
 
- * An option to set random seed has been implemented for normal and expert mode
+ * An option to set random seed has been implemented, both for the normal and the expert modes
    ([#96](https://github.com/MadAnalysis/madanalysis5/pull/96)).
 
 ## Bug fixes
@@ -68,20 +68,21 @@
  * Negative value can now be used for SFS bounds.
    ([#52](https://github.com/MadAnalysis/madanalysis5/pull/52))
 
- * Bugfix for covariance matrix construction when global likelihood switch is off.
-   ([#88](https://github.com/MadAnalysis/madanalysis5/pull/88))
+ * Bugfix for covariance matrix construction when global likelihood switch is off
+   ([#88](https://github.com/MadAnalysis/madanalysis5/pull/88)).
 
  * Update the version check message for the cases that local version is greater
    than stable version. ([#91](https://github.com/MadAnalysis/madanalysis5/pull/91))
  * Error handling has been fixed for the version update checker
    ([#95](https://github.com/MadAnalysis/madanalysis5/pull/95)).
 
- * SL interface break has been fixed in cases of HL extrapolation.
-   ([#93](https://github.com/MadAnalysis/madanalysis5/pull/93))
+ * SL interface break has been fixed in cases of HL extrapolation
+   ([#93](https://github.com/MadAnalysis/madanalysis5/pull/93)).
 
- * Custom analyses does not need to have a vtable hence the expert mode and normal
-   mode analysis writers have been modified to remove `virtual` functions from the 
-   analyses ([#96](https://github.com/MadAnalysis/madanalysis5/pull/96)).
+ * Custom analyses do not need to have vtable's. The expert mode and normal mode
+   analysis writers have therefore been modified to remove these `virtual` functions
+   from the generated analyses.
+   ([#96](https://github.com/MadAnalysis/madanalysis5/pull/96)).
 
 ## Contributors
 
