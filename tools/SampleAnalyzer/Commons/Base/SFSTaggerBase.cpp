@@ -34,19 +34,24 @@ namespace MA5 {
     {
         /// Print B-taggging options
         std::string excl = _options.btag_exclusive ? "Exclusive" : "Inclusive";
-        INFO << "        with bjet: ΔR = " << _options.btag_matching_deltaR << " ; " << excl << endmsg;
+        INFO << "        with bjet: matching ΔR = "
+             << _options.btag_matching_deltaR
+             << " ; " << excl << endmsg;
         excl = _options.ctag_exclusive ? "Exclusive" : "Inclusive";
 
         /// Print C-tagging options
         if (_options.enable_ctagging) {
-            INFO << "        with cjet: ΔR = "
-                 << _options.ctag_matching_deltaR << " ; " << excl << endmsg;
+            INFO << "        with cjet: matching ΔR = "
+                 << _options.ctag_matching_deltaR
+                 << " ; " << excl << endmsg;
         }
 
         /// Print Tau-tagging options
         if (_options.tautag_jetbased) {
             excl = _options.ctag_exclusive ? "Exclusive" : "Inclusive";
-            INFO << "        with tau : ΔR = " << _options.tautag_matching_deltaR << " ; " << excl << endmsg;
+            INFO << "        with tau : matching ΔR = "
+                 << _options.tautag_matching_deltaR
+                 << " ; " << excl << endmsg;
         } else {
             INFO << "        with tau : hadron-based tagging" << endmsg;
         }
