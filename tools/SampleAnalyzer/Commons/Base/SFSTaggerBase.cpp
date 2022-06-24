@@ -217,7 +217,7 @@ namespace MA5 {
             myEvent.rec()->jets().erase(myEvent.rec()->jets().begin() + toRemove[i-1]);
         toRemove.clear();
 
-        if (_isTauTaggingEffOn)
+        if (_isTauTaggingEffOn && !_options.tautag_jetbased)
         {
             /// @attention In Jet based tau tagging this loop will not run. If its runnning thats a bug
             for (MAuint32 itau = 0; itau < Ntau; itau++)
