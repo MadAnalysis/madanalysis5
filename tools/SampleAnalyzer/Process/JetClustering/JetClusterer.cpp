@@ -28,9 +28,16 @@
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 #include "SampleAnalyzer/Commons/Service/ConvertService.h"
 #include "SampleAnalyzer/Commons/Service/PDGService.h"
+#include "SampleAnalyzer/Commons/Base/ClusterAlgoBase.h"
+#include "SampleAnalyzer/Commons/Service/Physics.h"
 
 #ifdef MA5_FASTJET_MODE
     #include "SampleAnalyzer/Interfaces/substructure/VariableR.h"
+    #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoStandard.h"
+    #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoSISCone.h"
+    #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoCDFMidpoint.h"
+    #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoCDFJetClu.h"
+    #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoGridJet.h"
 #endif
 
 using namespace MA5;
@@ -60,6 +67,65 @@ void SetConeRadius(
     }
 }
 
+/// Constructor
+JetClusterer::JetClusterer (ClusterAlgoBase* algo){
+    // Initializing tagger
+    algo_ = algo;
+#ifdef MA5_FASTJET_MODE
+    cluster_collection_.clear();
+    substructure_collection_.clear();
+#endif
+    mySmearer_ = 0;
+    myTagger_ = 0;
+    myTaggerOptions_ = 0;
+    SFSbanner_ = true;
+    ExclusiveId_ = false;
+    JetID_ = "Ma5Jet";
+    muon = 0;
+    electron = 0;
+    tauH = 0;
+    tauM = 0;
+    tauE = 0;
+    photon = 0;
+    isocone_track_radius_.clear();
+    isocone_electron_radius_.clear();
+    isocone_muon_radius_.clear();
+    isocone_photon_radius_.clear();
+}
+
+
+///Destructor
+JetClusterer::~JetClusterer() {
+    if (algo_ != 0) delete algo_;
+    if (mySmearer_ != 0) delete mySmearer_;
+    if (myTagger_ != 0) delete myTagger_;
+    if (myTaggerOptions_ != 0) delete myTaggerOptions_;
+#ifdef MA5_FASTJET_MODE
+    for (auto &col: cluster_collection_)
+        if (col.second != 0) delete col.second;
+    for (auto &col: substructure_collection_)
+        if (col.second != 0) delete col.second;
+#endif
+}
+
+/// Accessor to the jet clusterer name
+std::string JetClusterer::GetName()
+{
+    if (algo_==0) return "NotDefined";
+    else return algo_->GetName();
+}
+
+/// Accessor to the tagger parameters
+void JetClusterer::TaggerParameters()
+{ myTagger_->PrintParam(); }
+
+/// Print parameters
+void JetClusterer::PrintParam()
+{ algo_->PrintParam(); }
+
+/// Accessor to the jet clusterer parameters
+std::string JetClusterer::GetParameters()
+{ return algo_->GetParameters(); }
 
 
 // -----------------------------------------------------------------------------

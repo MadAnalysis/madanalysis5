@@ -28,31 +28,22 @@
 // SampleAnalyser headers
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
-#include "SampleAnalyzer/Commons/Service/Physics.h"
-#include "SampleAnalyzer/Commons/Base/ClusterAlgoBase.h"
 #include "SampleAnalyzer/Commons/Base/SmearerBase.h"
 #include "SampleAnalyzer/Commons/Base/SFSTaggerBase.h"
 
 #ifdef MA5_FASTJET_MODE
-#include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoStandard.h"
-#include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoSISCone.h"
-#include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoCDFMidpoint.h"
-#include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoCDFJetClu.h"
-#include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoGridJet.h"
 #include "SampleAnalyzer/Interfaces/substructure/ClusterBase.h"
 #endif
 
 // STL headers
-#include <map>
-#include <algorithm>
 #include <locale>
 
 
-namespace MA5
-{
+namespace MA5 {
 
-    class JetClusterer
-    {
+    class ClusterAlgoBase;
+
+    class JetClusterer {
         //--------------------------------------------------------------------------
         //                              data members
         //--------------------------------------------------------------------------
@@ -114,45 +105,11 @@ namespace MA5
         //--------------------------------------------------------------------------
     public :
 
-        /// Constructor without argument
-        JetClusterer (ClusterAlgoBase* algo) {
-            // Initializing tagger
-            algo_ = algo;
-#ifdef MA5_FASTJET_MODE
-            cluster_collection_.clear();
-            substructure_collection_.clear();
-#endif
-            mySmearer_ = 0;
-            myTagger_ = 0;
-            myTaggerOptions_ = 0;
-            SFSbanner_ = true;
-            ExclusiveId_ = false;
-            JetID_ = "Ma5Jet";
-            muon = 0;
-            electron = 0;
-            tauH = 0;
-            tauM = 0;
-            tauE = 0;
-            photon = 0;
-            isocone_track_radius_.clear();
-            isocone_electron_radius_.clear();
-            isocone_muon_radius_.clear();
-            isocone_photon_radius_.clear();
-        }
+        /// Constructor
+        JetClusterer (ClusterAlgoBase* algo);
 
         /// Destructor
-        ~JetClusterer() {
-            if (algo_ != 0) delete algo_;
-            if (mySmearer_ != 0) delete mySmearer_;
-            if (myTagger_ != 0) delete myTagger_;
-            if (myTaggerOptions_ != 0) delete myTaggerOptions_;
-#ifdef MA5_FASTJET_MODE
-            for (auto &col: cluster_collection_)
-                if (col.second != 0) delete col.second;
-            for (auto &col: substructure_collection_)
-                if (col.second != 0) delete col.second;
-#endif
-        }
+        ~JetClusterer();
 
         /// Initialization
         MAbool Initialize(const std::map<std::string,std::string>& options);
@@ -184,23 +141,16 @@ namespace MA5
         MAbool LoadJetConfiguration(std::map<std::string,std::string> options);
 
         /// Accessor to the jet clusterer name
-        std::string GetName()
-        {
-            if (algo_==0) return "NotDefined";
-            else return algo_->GetName();
-        }
+        std::string GetName();
 
         /// Accessor to the tagger parameters
-        void TaggerParameters()
-        { myTagger_->PrintParam(); }
+        void TaggerParameters();
 
         /// Print parameters
-        void PrintParam()
-        { algo_->PrintParam(); }
+        void PrintParam();
 
         /// Accessor to the jet clusterer parameters
-        std::string GetParameters()
-        { return algo_->GetParameters(); }
+        std::string GetParameters();
 
         /// SFS Banner
         void PrintSFSBanner()
