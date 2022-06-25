@@ -146,6 +146,12 @@ namespace MA5
             if (mySmearer_ != 0) delete mySmearer_;
             if (myTagger_ != 0) delete myTagger_;
             if (myTaggerOptions_ != 0) delete myTaggerOptions_;
+#ifdef MA5_FASTJET_MODE
+            for (auto &col: cluster_collection_)
+                if (col.second != 0) delete col.second;
+            for (auto &col: substructure_collection_)
+                if (col.second != 0) delete col.second;
+#endif
         }
 
         /// Initialization
