@@ -160,7 +160,18 @@ class RecEventFormat
 
   /// Destructor
   ~RecEventFormat()
-  { }
+  {
+     for (auto &p: MCHadronicTaus_)
+         if (p != 0) delete p;
+      for (auto &p: MCMuonicTaus_)
+          if (p != 0) delete p;
+      for (auto &p: MCElectronicTaus_)
+          if (p != 0) delete p;
+      for (auto &p: MCBquarks_)
+          if (p != 0) delete p;
+      for (auto &p: MCCquarks_)
+          if (p != 0) delete p;
+  }
 
   /// Accessor to the photon collection (read-only)
   const std::vector<RecPhotonFormat>& photons() const {return photons_;}
