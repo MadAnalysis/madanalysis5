@@ -32,8 +32,8 @@ namespace MA5 {
 
         Filter::~Filter()
         {
-            delete JetDefinition_;
-            delete JetFilter_;
+            if (JetDefinition_ != 0) delete JetDefinition_;
+            if (JetFilter_ != 0) delete JetFilter_;
         }
 
         //============================//
