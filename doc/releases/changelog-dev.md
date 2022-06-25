@@ -84,6 +84,9 @@
    from the generated analyses.
    ([#96](https://github.com/MadAnalysis/madanalysis5/pull/96)).
 
+ * `RecEventFormat` memory allocation for MC particles has been freed
+   ([#100](https://github.com/MadAnalysis/madanalysis5/pull/100)).
+
 ## Contributors
 
 This release contains contributions from (in alphabetical order):
