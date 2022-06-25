@@ -37,6 +37,10 @@ so that MadAnalysis can be compiled without these modules as well.
   file. This will lead to much cleaner and independent analysis construction.
   [(#86)](https://github.com/MadAnalysis/madanalysis5/pull/86)
 
+* Compilation time testing has been added for Jet Substructure and
+  HEPTopTagger interfaces 
+  ([#86](https://github.com/MadAnalysis/madanalysis5/pull/86)).
+
 ## Bug fixes
 
 * Various bugfixes for matching the numeric results to the Ma5 v1.10.
