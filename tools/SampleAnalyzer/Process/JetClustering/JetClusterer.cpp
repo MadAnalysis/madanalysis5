@@ -32,713 +32,709 @@
 #include "SampleAnalyzer/Commons/Service/Physics.h"
 
 #ifdef MA5_FASTJET_MODE
-    #include "SampleAnalyzer/Interfaces/substructure/VariableR.h"
-    #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoStandard.h"
-    #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoSISCone.h"
-    #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoCDFMidpoint.h"
-    #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoCDFJetClu.h"
-    #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoGridJet.h"
+#include "SampleAnalyzer/Interfaces/substructure/VariableR.h"
+#include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoStandard.h"
+#include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoSISCone.h"
+#include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoCDFMidpoint.h"
+#include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoCDFJetClu.h"
+#include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoGridJet.h"
 #endif
 
-using namespace MA5;
+namespace MA5 {
 
-/// Set isolation cones for tracks, e, mu, photon based on tower objects
-template<class Type>
-void SetConeRadius(
-        std::vector<MAfloat64> cone_radius, std::vector<Type>& objects, MCParticleFormat part, MAbool addself=false
-)
-{
-    for (MAuint32 iR=0; iR<cone_radius.size(); iR++)
+    /// Set isolation cones for tracks, e, mu, photon based on tower objects
+    template<class Type>
+    void SetConeRadius(
+            std::vector<MAfloat64> cone_radius, std::vector<Type>& objects, MCParticleFormat part, MAbool addself=false
+    )
     {
-        for (MAuint32 i=0; i<objects.size(); i++)
+        for (MAuint32 iR=0; iR<cone_radius.size(); iR++)
         {
-            IsolationConeType* current_isocone = objects[i].GetIsolCone(cone_radius[iR]);
-            if (objects[i].dr(part.momentum()) < cone_radius[iR])
+            for (MAuint32 i=0; i<objects.size(); i++)
             {
-                current_isocone->addsumPT(part.pt());
-                current_isocone->addSumET(part.et());
-                if (addself)
+                IsolationConeType* current_isocone = objects[i].GetIsolCone(cone_radius[iR]);
+                if (objects[i].dr(part.momentum()) < cone_radius[iR])
                 {
-                    current_isocone->setSelfPT(objects[i].pt());
-                    current_isocone->setSelfET(objects[i].et());
+                    current_isocone->addsumPT(part.pt());
+                    current_isocone->addSumET(part.et());
+                    if (addself)
+                    {
+                        current_isocone->setSelfPT(objects[i].pt());
+                        current_isocone->setSelfET(objects[i].et());
+                    }
                 }
             }
         }
     }
-}
 
-/// Constructor
-JetClusterer::JetClusterer (ClusterAlgoBase* algo){
-    // Initializing tagger
-    algo_ = algo;
+    /// Constructor
+    JetClusterer::JetClusterer (ClusterAlgoBase* algo){
+        // Initializing tagger
+        algo_ = algo;
 #ifdef MA5_FASTJET_MODE
-    cluster_collection_.clear();
-    substructure_collection_.clear();
+        cluster_collection_.clear();
+        substructure_collection_.clear();
 #endif
-    mySmearer_ = 0;
-    myTagger_ = 0;
-    myTaggerOptions_ = 0;
-    SFSbanner_ = true;
-    ExclusiveId_ = false;
-    JetID_ = "Ma5Jet";
-    muon = 0;
-    electron = 0;
-    tauH = 0;
-    tauM = 0;
-    tauE = 0;
-    photon = 0;
-    isocone_track_radius_.clear();
-    isocone_electron_radius_.clear();
-    isocone_muon_radius_.clear();
-    isocone_photon_radius_.clear();
-}
+        mySmearer_ = 0;
+        myTagger_ = 0;
+        myTaggerOptions_ = 0;
+        SFSbanner_ = true;
+        ExclusiveId_ = false;
+        JetID_ = "Ma5Jet";
+        muon = 0;
+        electron = 0;
+        tauH = 0;
+        tauM = 0;
+        tauE = 0;
+        photon = 0;
+        isocone_track_radius_.clear();
+        isocone_electron_radius_.clear();
+        isocone_muon_radius_.clear();
+        isocone_photon_radius_.clear();
+    }
 
 
-///Destructor
-JetClusterer::~JetClusterer() {
-    if (algo_ != 0) delete algo_;
-    if (mySmearer_ != 0) delete mySmearer_;
-    if (myTagger_ != 0) delete myTagger_;
-    if (myTaggerOptions_ != 0) delete myTaggerOptions_;
+    ///Destructor
+    JetClusterer::~JetClusterer() {
+        if (algo_ != 0) delete algo_;
+        if (mySmearer_ != 0) delete mySmearer_;
+        if (myTagger_ != 0) delete myTagger_;
+        if (myTaggerOptions_ != 0) delete myTaggerOptions_;
 #ifdef MA5_FASTJET_MODE
-    for (auto &col: cluster_collection_)
-        if (col.second != 0) delete col.second;
-    for (auto &col: substructure_collection_)
-        if (col.second != 0) delete col.second;
+        for (auto &col: cluster_collection_)
+            if (col.second != 0) delete col.second;
+        for (auto &col: substructure_collection_)
+            if (col.second != 0) delete col.second;
 #endif
-}
+    }
 
-/// Accessor to the jet clusterer name
-std::string JetClusterer::GetName()
-{
-    if (algo_==0) return "NotDefined";
-    else return algo_->GetName();
-}
-
-/// Accessor to the tagger parameters
-void JetClusterer::TaggerParameters()
-{ myTagger_->PrintParam(); }
-
-/// Print parameters
-void JetClusterer::PrintParam()
-{ algo_->PrintParam(); }
-
-/// Accessor to the jet clusterer parameters
-std::string JetClusterer::GetParameters()
-{ return algo_->GetParameters(); }
-
-
-// -----------------------------------------------------------------------------
-// Initialize
-// -----------------------------------------------------------------------------
-MAbool JetClusterer::Initialize(const std::map<std::string,std::string>& options)
-{
-    // algo defined ?
-    if (algo_==0) return false;
-
-    // configure tagger
-    mySmearer_   = new SmearerBase();
-    myTagger_    = new SFSTaggerBase();
-    myTaggerOptions_ = new SFSTaggerBaseOptions();
-    mySmearer_->Initialize(true);
-    myTagger_->Initialize();
-
-
-    /// Loop ower options
-    for (const auto &opt: options)
+    /// Accessor to the jet clusterer name
+    std::string JetClusterer::GetName()
     {
-        std::string key = ClusterAlgoBase::Lower(opt.first);
-        MAbool result=false;
+        if (algo_==0) return "NotDefined";
+        else return algo_->GetName();
+    }
 
-        /// Initialize exclusive algorithm for jet clustering
-        if (key == "exclusive_id")
+    /// Accessor to the tagger parameters
+    void JetClusterer::TaggerParameters() { myTagger_->PrintParam(); }
+
+    /// Print parameters
+    void JetClusterer::PrintParam() { algo_->PrintParam(); }
+
+    /// Accessor to the jet clusterer parameters
+    std::string JetClusterer::GetParameters() { return algo_->GetParameters(); }
+
+
+    // -----------------------------------------------------------------------------
+    // Initialize
+    // -----------------------------------------------------------------------------
+    MAbool JetClusterer::Initialize(const std::map<std::string,std::string>& options)
+    {
+        // algo defined ?
+        if (algo_==0) return false;
+
+        // configure tagger
+        mySmearer_   = new SmearerBase();
+        myTagger_    = new SFSTaggerBase();
+        myTaggerOptions_ = new SFSTaggerBaseOptions();
+        mySmearer_->Initialize(true);
+        myTagger_->Initialize();
+
+
+        /// Loop ower options
+        for (const auto &opt: options)
         {
-            MAint32 tmp=0;
-            std::stringstream str;
-            str << opt.second;
-            str >> tmp;
-            try
+            std::string key = ClusterAlgoBase::Lower(opt.first);
+            MAbool result=false;
+
+            /// Initialize exclusive algorithm for jet clustering
+            if (key == "exclusive_id")
             {
-                if (tmp==1) ExclusiveId_=true;
-                else if (tmp==0) ExclusiveId_=false;
-                else throw EXCEPTION_WARNING(
-                    "'exclusive_id' must be equal to 0 or 1. Using default value 'exclusive_id' = " \
+                MAint32 tmp=0;
+                std::stringstream str;
+                str << opt.second;
+                str >> tmp;
+                try
+                {
+                    if (tmp==1) ExclusiveId_=true;
+                    else if (tmp==0) ExclusiveId_=false;
+                    else throw EXCEPTION_WARNING(
+                                "'exclusive_id' must be equal to 0 or 1. Using default value 'exclusive_id' = " \
                     + CONVERT->ToString(ExclusiveId_), "", 0
-                );
+                        );
+                }
+                catch(const std::exception& e)
+                {
+                    MANAGE_EXCEPTION(e);
+                }
+                result=true;
             }
-            catch(const std::exception& e)
+                /// B tagging options
+            else if (key.find("bjet_id.") == 0 || key.find("cjet_id.") == 0 || key.find("tau_id.") == 0)
             {
-                MANAGE_EXCEPTION(e);
-            }
-            result=true;
-        }
-        /// B tagging options
-        else if (key.find("bjet_id.") == 0 || key.find("cjet_id.") == 0 || key.find("tau_id.") == 0)
-        {
-            /// Turn the input value to float
-            MAfloat32 tmp = 0;
-            std::stringstream str;
-            str << opt.second;
-            str >> tmp;
+                /// Turn the input value to float
+                MAfloat32 tmp = 0;
+                std::stringstream str;
+                str << opt.second;
+                str >> tmp;
 
-            /// Is bjet run via exclusive algorithm
-            if (key == "bjet_id.exclusive") {
-                try {
-                    if (tmp == 1.) myTaggerOptions_->btag_exclusive = true;
-                    else if (tmp == 0.) myTaggerOptions_->btag_exclusive = false;
-                    else
-                        throw EXCEPTION_WARNING(
-                            "'bjet_id.exclusive' must be equal to 0 or 1. Using default value 'bjet_id.exclusive' = " \
+                /// Is bjet run via exclusive algorithm
+                if (key == "bjet_id.exclusive") {
+                    try {
+                        if (tmp == 1.) myTaggerOptions_->btag_exclusive = true;
+                        else if (tmp == 0.) myTaggerOptions_->btag_exclusive = false;
+                        else
+                            throw EXCEPTION_WARNING(
+                                    "'bjet_id.exclusive' must be equal to 0 or 1. Using default value 'bjet_id.exclusive' = " \
                             + CONVERT->ToString(myTaggerOptions_->btag_exclusive), "", 0
-                        );
+                            );
+                    }
+                    catch (const std::exception &e) {
+                        MANAGE_EXCEPTION(e);
+                    }
                 }
-                catch (const std::exception &e) {
-                    MANAGE_EXCEPTION(e);
-                }
-            }
-            /// What is the bjet matching DR
-            else if (key == "bjet_id.matching_dr") myTaggerOptions_->btag_matching_deltaR = tmp;
-            /// Is cjet run via exclusive algorithm
-            else if (key == "cjet_id.exclusive")
-            {
-                try {
-                    if (tmp == 1.) myTaggerOptions_->ctag_exclusive = true;
-                    else if (tmp == 0.) myTaggerOptions_->ctag_exclusive = false;
-                    else
-                        throw EXCEPTION_WARNING(
-                                "'cjet_id.exclusive' must be equal to 0 or 1. Using default value 'cjet_id.exclusive' = " \
+                    /// What is the bjet matching DR
+                else if (key == "bjet_id.matching_dr") myTaggerOptions_->btag_matching_deltaR = tmp;
+                    /// Is cjet run via exclusive algorithm
+                else if (key == "cjet_id.exclusive")
+                {
+                    try {
+                        if (tmp == 1.) myTaggerOptions_->ctag_exclusive = true;
+                        else if (tmp == 0.) myTaggerOptions_->ctag_exclusive = false;
+                        else
+                            throw EXCEPTION_WARNING(
+                                    "'cjet_id.exclusive' must be equal to 0 or 1. Using default value 'cjet_id.exclusive' = " \
                             + CONVERT->ToString(myTaggerOptions_->ctag_exclusive), "", 0
-                        );
+                            );
+                    }
+                    catch (const std::exception &e) {
+                        MANAGE_EXCEPTION(e);
+                    }
                 }
-                catch (const std::exception &e) {
-                    MANAGE_EXCEPTION(e);
-                }
-            }
-            /// What is the cjet matching DR
-            else if (key == "cjet_id.matching_dr") myTaggerOptions_->ctag_matching_deltaR = tmp;
+                    /// What is the cjet matching DR
+                else if (key == "cjet_id.matching_dr") myTaggerOptions_->ctag_matching_deltaR = tmp;
 
-            /// Is CJet tagging enabled
-            else if (key == "cjet_id.enable_ctagging")
-            {
-                try {
-                    if (tmp == 1.) myTaggerOptions_->enable_ctagging = true;
-                    else if (tmp == 0.) myTaggerOptions_->enable_ctagging = false;
-                    else
-                        throw EXCEPTION_WARNING(
-                                "'cjet_id.enable_ctagging' must be equal to 0 or 1. Using default "
-                                "value 'cjet_id.enable_ctagging' = " \
+                    /// Is CJet tagging enabled
+                else if (key == "cjet_id.enable_ctagging")
+                {
+                    try {
+                        if (tmp == 1.) myTaggerOptions_->enable_ctagging = true;
+                        else if (tmp == 0.) myTaggerOptions_->enable_ctagging = false;
+                        else
+                            throw EXCEPTION_WARNING(
+                                    "'cjet_id.enable_ctagging' must be equal to 0 or 1. Using default "
+                                    "value 'cjet_id.enable_ctagging' = " \
                             + CONVERT->ToString(myTaggerOptions_->enable_ctagging), "", 0
-                        );
+                            );
+                    }
+                    catch (const std::exception &e) {
+                        MANAGE_EXCEPTION(e);
+                    }
                 }
-                catch (const std::exception &e) {
-                    MANAGE_EXCEPTION(e);
-                }
-            }
-            /// Is taujet run via exclusive algorithm
-            else if (key == "tau_id.exclusive")
-            {
-                try {
-                    if (tmp == 1.) myTaggerOptions_->tautag_exclusive = true;
-                    else if (tmp == 0.) myTaggerOptions_->tautag_exclusive = false;
-                    else
-                        throw EXCEPTION_WARNING(
-                                "'cjet_id.exclusive' must be equal to 0 or 1. Using default value 'cjet_id.exclusive' = " \
+                    /// Is taujet run via exclusive algorithm
+                else if (key == "tau_id.exclusive")
+                {
+                    try {
+                        if (tmp == 1.) myTaggerOptions_->tautag_exclusive = true;
+                        else if (tmp == 0.) myTaggerOptions_->tautag_exclusive = false;
+                        else
+                            throw EXCEPTION_WARNING(
+                                    "'cjet_id.exclusive' must be equal to 0 or 1. Using default value 'cjet_id.exclusive' = " \
                             + CONVERT->ToString(myTaggerOptions_->ctag_exclusive), "", 0
-                        );
+                            );
+                    }
+                    catch (const std::exception &e) {
+                        MANAGE_EXCEPTION(e);
+                    }
                 }
-                catch (const std::exception &e) {
-                    MANAGE_EXCEPTION(e);
-                }
-            }
-            else if (key == "tau_id.matching_dr") myTaggerOptions_->tautag_matching_deltaR = tmp;
-            else if (key == "tau_id.reconstruction_method")
-            {
-                try {
-                    if (tmp == 1.) myTaggerOptions_->tautag_jetbased = true;
-                    else if (tmp == 0.) myTaggerOptions_->tautag_jetbased = false;
-                    else
-                        throw EXCEPTION_WARNING(
-                            "Hadronic tau tagging has only two options 0 corresponds to hadron-based tagging algorithm "
-                            "and 1 corresponds to jet-based tagging algorithm. Default, hadron-based, "
-                            "algorithm will be used", "", 0
-                        );
-                }
-                catch (const std::exception &e) {
-                    MANAGE_EXCEPTION(e);
-                    myTaggerOptions_->tautag_jetbased = false;
-                }
-            }
-            else
-            {
-                try { throw EXCEPTION_WARNING("Parameter = "+key+" unknown. It will be skipped.","",0); }
-                catch(const std::exception& e) { MANAGE_EXCEPTION(e); }
-            }
-            result=true;
-        }
-        /// clustering algo
-        else if (key.find("cluster.")==0) result = algo_->SetParameter(key.substr(8),opt.second);
-        /// Primary Jet ID
-        else if (key == "jetid")
-        {
-            JetID_ = opt.second;
-            result = true;
-        }
-        /// Isolation cone radius for tracker
-        else if (key.find("isolation")==0)
-        {
-            std::stringstream str(opt.second);
-            for (MAfloat64 tmp; str >> tmp;)
-            {
-                if (tmp>0. && key.substr(10) == "track.radius")    isocone_track_radius_.push_back(tmp);
-                if (tmp>0. && key.substr(10) == "electron.radius") isocone_electron_radius_.push_back(tmp);
-                if (tmp>0. && key.substr(10) == "muon.radius")     isocone_muon_radius_.push_back(tmp);
-                if (tmp>0. && key.substr(10) == "photon.radius")   isocone_photon_radius_.push_back(tmp);
-                if (str.peek() == ',' || str.peek() == ' ') str.ignore();
-            }
-            result = true;
-        }
-
-        /// Other
-        try { if (!result) throw EXCEPTION_WARNING("Parameter = "+key+" unknown. It will be skipped.","",0); }
-        catch(const std::exception& e) { MANAGE_EXCEPTION(e); }
-    }
-    /// configure algo
-    algo_->Initialize();
-    /// Configure Tagger
-    myTagger_->SetOptions(*myTaggerOptions_);
-
-    return true;
-}
-
-
-// -----------------------------------------------------------------------------
-// Finalize
-// -----------------------------------------------------------------------------
-void JetClusterer::Finalize()
-{
-    if (algo_!=0)        delete algo_;
-    if (mySmearer_!=0)   delete mySmearer_;
-    if (myTaggerOptions_!=0) delete myTaggerOptions_;
-    if (myTagger_!=0)    delete myTagger_;
-}
-
-
-// -----------------------------------------------------------------------------
-// GetFinalState
-// -----------------------------------------------------------------------------
-void JetClusterer::GetFinalState(const MCParticleFormat* part, std::set<const MCParticleFormat*>& finalstates)
-{
-    for (MAuint32 i=0; i<part->daughters().size(); i++)
-    {
-        if (PHYSICS->Id->IsFinalState(part->daughters()[i])) finalstates.insert(part->daughters()[i]);
-        else return GetFinalState(part->daughters()[i],finalstates);
-    }
-}
-
-
-// -----------------------------------------------------------------------------
-// IsLast
-// -----------------------------------------------------------------------------
-MAbool JetClusterer::IsLast(const MCParticleFormat* part, EventFormat& myEvent)
-{
-    for (MAuint32 i=0; i<part->daughters().size(); i++)
-    {
-        if (part->daughters()[i]->pdgid()==part->pdgid()) return false;
-    }
-    return true;
-}
-
-// -----------------------------------------------------------------------------
-// Execute
-// -----------------------------------------------------------------------------
-MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
-{
-    // Safety
-    if (mySample.mc() == 0 || myEvent.mc() == 0) return false;
-    if (mySample.rec() == 0) mySample.InitializeRec();
-    if (myEvent.rec() == 0) myEvent.InitializeRec();
-
-    // Reseting the reconstructed event
-    myEvent.rec()->Reset();
-
-    // Veto
-    std::vector<MAbool> vetos(myEvent.mc()->particles().size(), false);
-    std::set<const MCParticleFormat *> vetos2;
-
-    // shortcut for TET & THT
-    MAfloat64 &TET = myEvent.rec()->TET();
-    //  MAfloat64 & THT = myEvent.rec()->THT();
-    RecParticleFormat *MET = &(myEvent.rec()->MET());
-    RecParticleFormat *MHT = &(myEvent.rec()->MHT());
-
-    // Filling the dataformat with electron/muon
-    for (MAuint32 i = 0; i < myEvent.mc()->particles().size(); i++)
-    {
-        const MCParticleFormat& part = myEvent.mc()->particles()[i];
-        MAuint32 absid = std::abs(part.pdgid());
-
-        // Rejecting particle with a null pt (initial state ?)
-        if (part.pt()<1e-10) continue;
-
-        // Run particle propagator
-        if (mySmearer_->isPropagatorOn() && part.mothers().size()>0)
-            mySmearer_->ParticlePropagator(const_cast<MCParticleFormat*>(&part));
-
-        /// @attention delphes based analyses already has tracks
-        /// Set up tracks as charged FS particles OR charged interstate particles with nonzero ctau
-        if (PDG->IsCharged(part.pdgid()) && part.mothers().size()>0 && algo_!=0)
-        {
-            // Minimum tracking requirement is around 0.5 mm see ref. 1007.1988
-            if (part.ctau() > 0. || PHYSICS->Id->IsFinalState(part))
-            {
-                // Reminder: -1 is reserved for the tracks
-                MCParticleFormat smeared_track = mySmearer_->Execute(&part, -1);
-                if (smeared_track.pt() > 1e-5)
+                else if (key == "tau_id.matching_dr") myTaggerOptions_->tautag_matching_deltaR = tmp;
+                else if (key == "tau_id.reconstruction_method")
                 {
-                    RecTrackFormat * track = myEvent.rec()->GetNewTrack();
-                    MALorentzVector trk_mom;
-                    trk_mom.SetPtEtaPhiM(smeared_track.pt(),
-                                         smeared_track.eta(),
-                                         smeared_track.phi(),0.0);
-                    track->setMomentum(trk_mom);
-                    track->setD0(smeared_track.d0());
-                    track->setDZ(smeared_track.dz());
-                    track->setD0Approx(smeared_track.d0_approx());
-                    track->setDZApprox(smeared_track.dz_approx());
-                    MAdouble64 ctau = PHYSICS->Id->IsFinalState(part) ? 0.0 : part.mothers()[0]->ctau();
-                    MALorentzVector new_vertex(part.mothers()[0]->decay_vertex().X(),
-                                               part.mothers()[0]->decay_vertex().Y(),
-                                               part.mothers()[0]->decay_vertex().Z(), ctau);
-                    track->setProductionVertex(new_vertex);
-                    track->setClosestApproach(smeared_track.closest_approach());
-                    track->setMc(&(part));
-                    track->SetCharge(PDG->GetCharge(part.pdgid(), false) / 3.);
+                    try {
+                        if (tmp == 1.) myTaggerOptions_->tautag_jetbased = true;
+                        else if (tmp == 0.) myTaggerOptions_->tautag_jetbased = false;
+                        else
+                            throw EXCEPTION_WARNING(
+                                    "Hadronic tau tagging has only two options 0 corresponds to hadron-based tagging algorithm "
+                                    "and 1 corresponds to jet-based tagging algorithm. Default, hadron-based, "
+                                    "algorithm will be used", "", 0
+                            );
+                    }
+                    catch (const std::exception &e) {
+                        MANAGE_EXCEPTION(e);
+                        myTaggerOptions_->tautag_jetbased = false;
+                    }
                 }
+                else
+                {
+                    try { throw EXCEPTION_WARNING("Parameter = "+key+" unknown. It will be skipped.","",0); }
+                    catch(const std::exception& e) { MANAGE_EXCEPTION(e); }
+                }
+                result=true;
             }
+                /// clustering algo
+            else if (key.find("cluster.")==0) result = algo_->SetParameter(key.substr(8),opt.second);
+                /// Primary Jet ID
+            else if (key == "jetid")
+            {
+                JetID_ = opt.second;
+                result = true;
+            }
+                /// Isolation cone radius for tracker
+            else if (key.find("isolation")==0)
+            {
+                std::stringstream str(opt.second);
+                for (MAfloat64 tmp; str >> tmp;)
+                {
+                    if (tmp>0. && key.substr(10) == "track.radius")    isocone_track_radius_.push_back(tmp);
+                    if (tmp>0. && key.substr(10) == "electron.radius") isocone_electron_radius_.push_back(tmp);
+                    if (tmp>0. && key.substr(10) == "muon.radius")     isocone_muon_radius_.push_back(tmp);
+                    if (tmp>0. && key.substr(10) == "photon.radius")   isocone_photon_radius_.push_back(tmp);
+                    if (str.peek() == ',' || str.peek() == ' ') str.ignore();
+                }
+                result = true;
+            }
+
+            /// Other
+            try { if (!result) throw EXCEPTION_WARNING("Parameter = "+key+" unknown. It will be skipped.","",0); }
+            catch(const std::exception& e) { MANAGE_EXCEPTION(e); }
         }
+        /// configure algo
+        algo_->Initialize();
+        /// Configure Tagger
+        myTagger_->SetOptions(*myTaggerOptions_);
 
-        // Treating intermediate particles
-        if (PHYSICS->Id->IsInterState(part))
+        return true;
+    }
+
+
+    // -----------------------------------------------------------------------------
+    // Finalize
+    // -----------------------------------------------------------------------------
+    void JetClusterer::Finalize()
+    {
+        if (algo_!=0)        delete algo_;
+        if (mySmearer_!=0)   delete mySmearer_;
+        if (myTaggerOptions_!=0) delete myTaggerOptions_;
+        if (myTagger_!=0)    delete myTagger_;
+    }
+
+
+    // -----------------------------------------------------------------------------
+    // GetFinalState
+    // -----------------------------------------------------------------------------
+    void JetClusterer::GetFinalState(const MCParticleFormat* part, std::set<const MCParticleFormat*>& finalstates)
+    {
+        for (MAuint32 i=0; i<part->daughters().size(); i++)
         {
-            // rejecting not interesting particles
-            if (absid!=5 && absid!=4 && absid!=15) continue;
+            if (PHYSICS->Id->IsFinalState(part->daughters()[i])) finalstates.insert(part->daughters()[i]);
+            else return GetFinalState(part->daughters()[i],finalstates);
+        }
+    }
 
-            // keeping the last particle with the same id in the decay chain
-            if (!IsLast(&part, myEvent)) continue;
 
-            // looking for b quarks
-            if (absid==5)
+    // -----------------------------------------------------------------------------
+    // IsLast
+    // -----------------------------------------------------------------------------
+    MAbool JetClusterer::IsLast(const MCParticleFormat* part, EventFormat& myEvent)
+    {
+        for (MAuint32 i=0; i<part->daughters().size(); i++)
+        {
+            if (part->daughters()[i]->pdgid()==part->pdgid()) return false;
+        }
+        return true;
+    }
+
+    // -----------------------------------------------------------------------------
+    // Execute
+    // -----------------------------------------------------------------------------
+    MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
+    {
+        // Safety
+        if (mySample.mc() == 0 || myEvent.mc() == 0) return false;
+        if (mySample.rec() == 0) mySample.InitializeRec();
+        if (myEvent.rec() == 0) myEvent.InitializeRec();
+
+        // Reseting the reconstructed event
+        myEvent.rec()->Reset();
+
+        // Veto
+        std::vector<MAbool> vetos(myEvent.mc()->particles().size(), false);
+        std::set<const MCParticleFormat *> vetos2;
+
+        // shortcut for TET & THT
+        MAfloat64 &TET = myEvent.rec()->TET();
+        //  MAfloat64 & THT = myEvent.rec()->THT();
+        RecParticleFormat *MET = &(myEvent.rec()->MET());
+        RecParticleFormat *MHT = &(myEvent.rec()->MHT());
+
+        // Filling the dataformat with electron/muon
+        for (MAuint32 i = 0; i < myEvent.mc()->particles().size(); i++)
+        {
+            const MCParticleFormat& part = myEvent.mc()->particles()[i];
+            MAuint32 absid = std::abs(part.pdgid());
+
+            // Rejecting particle with a null pt (initial state ?)
+            if (part.pt()<1e-10) continue;
+
+            // Run particle propagator
+            if (mySmearer_->isPropagatorOn() && part.mothers().size()>0)
+                mySmearer_->ParticlePropagator(const_cast<MCParticleFormat*>(&part));
+
+            /// @attention delphes based analyses already has tracks
+            /// Set up tracks as charged FS particles OR charged interstate particles with nonzero ctau
+            if (PDG->IsCharged(part.pdgid()) && part.mothers().size()>0 && algo_!=0)
             {
-                MAbool found=false;
-                for (MAuint32 j=0;j<myEvent.rec()->MCBquarks_.size();j++)
+                // Minimum tracking requirement is around 0.5 mm see ref. 1007.1988
+                if (part.ctau() > 0. || PHYSICS->Id->IsFinalState(part))
                 {
-                    if (myEvent.rec()->MCBquarks_[j]==&(part))
-                    {found=true; break;}
+                    // Reminder: -1 is reserved for the tracks
+                    MCParticleFormat smeared_track = mySmearer_->Execute(&part, -1);
+                    if (smeared_track.pt() > 1e-5)
+                    {
+                        RecTrackFormat * track = myEvent.rec()->GetNewTrack();
+                        MALorentzVector trk_mom;
+                        trk_mom.SetPtEtaPhiM(smeared_track.pt(),
+                                             smeared_track.eta(),
+                                             smeared_track.phi(),0.0);
+                        track->setMomentum(trk_mom);
+                        track->setD0(smeared_track.d0());
+                        track->setDZ(smeared_track.dz());
+                        track->setD0Approx(smeared_track.d0_approx());
+                        track->setDZApprox(smeared_track.dz_approx());
+                        MAdouble64 ctau = PHYSICS->Id->IsFinalState(part) ? 0.0 : part.mothers()[0]->ctau();
+                        MALorentzVector new_vertex(part.mothers()[0]->decay_vertex().X(),
+                                                   part.mothers()[0]->decay_vertex().Y(),
+                                                   part.mothers()[0]->decay_vertex().Z(), ctau);
+                        track->setProductionVertex(new_vertex);
+                        track->setClosestApproach(smeared_track.closest_approach());
+                        track->setMc(&(part));
+                        track->SetCharge(PDG->GetCharge(part.pdgid(), false) / 3.);
+                    }
                 }
-                if (!found) myEvent.rec()->MCBquarks_.push_back(&(part));
             }
 
-            /// looking for c quarks
-            else if (absid==4)
+            // Treating intermediate particles
+            if (PHYSICS->Id->IsInterState(part))
             {
-                MAbool found=false;
-                for (MAuint32 j=0;j<myEvent.rec()->MCCquarks_.size();j++)
-                {
-                    if (myEvent.rec()->MCCquarks_[j]==&(part))
-                    {found=true; break;}
-                }
-                if (!found) myEvent.rec()->MCCquarks_.push_back(&(part));
-            }
+                // rejecting not interesting particles
+                if (absid!=5 && absid!=4 && absid!=15) continue;
 
-            /// looking for taus
-            else if (absid==15)
+                // keeping the last particle with the same id in the decay chain
+                if (!IsLast(&part, myEvent)) continue;
+
+                // looking for b quarks
+                if (absid==5)
+                {
+                    MAbool found=false;
+                    for (MAuint32 j=0;j<myEvent.rec()->MCBquarks_.size();j++)
+                    {
+                        if (myEvent.rec()->MCBquarks_[j]==&(part))
+                        {found=true; break;}
+                    }
+                    if (!found) myEvent.rec()->MCBquarks_.push_back(&(part));
+                }
+
+                    /// looking for c quarks
+                else if (absid==4)
+                {
+                    MAbool found=false;
+                    for (MAuint32 j=0;j<myEvent.rec()->MCCquarks_.size();j++)
+                    {
+                        if (myEvent.rec()->MCCquarks_[j]==&(part))
+                        {found=true; break;}
+                    }
+                    if (!found) myEvent.rec()->MCCquarks_.push_back(&(part));
+                }
+
+                    /// looking for taus
+                else if (absid==15)
+                {
+                    // rejecting particle if coming from hadronization
+                    if (LOOP->ComingFromHadronDecay(&part,mySample,myEvent.mc()->particles().size())) continue;
+
+                    // Looking taus daughters id
+                    MAbool leptonic   = true;
+                    MAbool muonic     = false;
+                    MAbool electronic = false;
+                    for (MAuint32 j=0;j<part.daughters().size();j++)
+                    {
+                        MAuint32 pdgid = std::abs(part.daughters()[j]->pdgid());
+                        if      (pdgid==13) muonic=true;
+                        else if (pdgid==11) electronic=true;
+                        else if (pdgid!=22 /*photons*/ &&
+                                 !(pdgid>=11 && pdgid<=16) /*neutrinos*/)
+                            leptonic=false;
+                    }
+                    if (!leptonic) {muonic=false; electronic=false;}
+
+                    // Saving taus decaying into muons (only one copy)
+                    if (muonic)
+                    {
+                        MAbool found=false;
+                        for (MAuint32 j=0;j<myEvent.rec()->MCMuonicTaus_.size();j++)
+                        {
+                            if (myEvent.rec()->MCMuonicTaus_[j]==&(part))
+                            {found=true; break;}
+                        }
+                        if (!found) myEvent.rec()->MCMuonicTaus_.push_back(&(part));
+                    }
+                    else if (electronic) // Saving taus decaying into electrons (only one copy)
+                    {
+                        MAbool found=false;
+                        for (MAuint32 j=0;j<myEvent.rec()->MCElectronicTaus_.size();j++)
+                        {
+                            if (myEvent.rec()->MCElectronicTaus_[j]==&(part))
+                            {found=true; break;}
+                        }
+                        if (!found) myEvent.rec()->MCElectronicTaus_.push_back(&(part));
+                    }
+                    else // Saving taus decaying into hadrons (only copy)
+                    {
+                        MAbool found=false;
+                        for (MAuint32 j=0;j<myEvent.rec()->MCHadronicTaus_.size();j++)
+                        {
+                            if (myEvent.rec()->MCHadronicTaus_[j]==&(part))
+                            {found=true; break;}
+                        }
+                        if (!found)
+                        {
+                            // Saving the hadrons in MC container
+                            myEvent.rec()->MCHadronicTaus_.push_back(&(part));
+
+                            /// If tau tagging is jet based do not proceed
+                            if (myTaggerOptions_->tautag_jetbased) continue;
+
+                            // Smearing the hadronic taus
+                            MCParticleFormat smeared = mySmearer_->Execute(
+                                    &part, static_cast<MAint32>(absid)
+                            );
+                            // If smeared pt is zero, no need to count the particle but it still needs
+                            // to be vetoed for jet clustering.
+                            if (smeared.pt() > 1e-10) {
+                                // Creating reco hadronic taus
+                                RecTauFormat* myTau = myEvent.rec()->GetNewTau();
+                                if (part.pdgid()>0) myTau->setCharge(-1);
+                                else myTau->setCharge(+1);
+                                myTau->setMomentum(smeared.momentum());
+                                myTau->setD0(smeared.d0());
+                                myTau->setDZ(smeared.dz());
+                                myTau->setD0Approx(smeared.d0_approx());
+                                myTau->setDZApprox(smeared.dz_approx());
+                                myTau->setProductionVertex(
+                                        MALorentzVector(part.mothers()[0]->decay_vertex().X(),
+                                                        part.mothers()[0]->decay_vertex().Y(),
+                                                        part.mothers()[0]->decay_vertex().Z(),
+                                                        0.0)
+                                );
+                                myTau->setClosestApproach(smeared.closest_approach());
+                                myTau->setMc(&part);
+                                myTau->setDecayMode(PHYSICS->GetTauDecayMode(myTau->mc()));
+                                if (myTau->DecayMode() <= 0) myTau->setNtracks(0); // ERROR case
+                                else if (myTau->DecayMode() == 7 ||
+                                         myTau->DecayMode() == 9)
+                                    myTau->setNtracks(3); // 3-Prong
+                                else myTau->setNtracks(1); // 1-Prong
+
+                                /// Set MET and TET
+                                if (ExclusiveId_) { (*MET) -= myTau->momentum(); TET += myTau->pt(); }
+
+                            } // (smeared.pt() < 1e-10)
+
+                            // Searching final state
+                            GetFinalState(&part,vetos2);
+                        }
+                    }
+                } // if (absid==15)
+            } // if (PHYSICS->Id->IsInterState(part))
+
+                // Keeping only final states
+            else if (PHYSICS->Id->IsFinalState(part))
             {
                 // rejecting particle if coming from hadronization
-                if (LOOP->ComingFromHadronDecay(&part,mySample,myEvent.mc()->particles().size())) continue;
-
-                // Looking taus daughters id
-                MAbool leptonic   = true;
-                MAbool muonic     = false;
-                MAbool electronic = false;
-                for (MAuint32 j=0;j<part.daughters().size();j++)
+                if (!(ExclusiveId_ && LOOP->ComingFromHadronDecay(&part, mySample)))
                 {
-                    MAuint32 pdgid = std::abs(part.daughters()[j]->pdgid());
-                    if      (pdgid==13) muonic=true;
-                    else if (pdgid==11) electronic=true;
-                    else if (pdgid!=22 /*photons*/ &&
-                             !(pdgid>=11 && pdgid<=16) /*neutrinos*/)
-                        leptonic=false;
-                }
-                if (!leptonic) {muonic=false; electronic=false;}
-
-                // Saving taus decaying into muons (only one copy)
-                if (muonic)
-                {
-                    MAbool found=false;
-                    for (MAuint32 j=0;j<myEvent.rec()->MCMuonicTaus_.size();j++)
-                    {
-                        if (myEvent.rec()->MCMuonicTaus_[j]==&(part))
-                        {found=true; break;}
-                    }
-                    if (!found) myEvent.rec()->MCMuonicTaus_.push_back(&(part));
-                }
-                else if (electronic) // Saving taus decaying into electrons (only one copy)
-                {
-                    MAbool found=false;
-                    for (MAuint32 j=0;j<myEvent.rec()->MCElectronicTaus_.size();j++)
-                    {
-                        if (myEvent.rec()->MCElectronicTaus_[j]==&(part))
-                        {found=true; break;}
-                    }
-                    if (!found) myEvent.rec()->MCElectronicTaus_.push_back(&(part));
-                }
-                else // Saving taus decaying into hadrons (only copy)
-                {
-                    MAbool found=false;
-                    for (MAuint32 j=0;j<myEvent.rec()->MCHadronicTaus_.size();j++)
-                    {
-                        if (myEvent.rec()->MCHadronicTaus_[j]==&(part))
-                        {found=true; break;}
-                    }
-                    if (!found)
-                    {
-                        // Saving the hadrons in MC container
-                        myEvent.rec()->MCHadronicTaus_.push_back(&(part));
-
-                        /// If tau tagging is jet based do not proceed
-                        if (myTaggerOptions_->tautag_jetbased) continue;
-
-                        // Smearing the hadronic taus
-                        MCParticleFormat smeared = mySmearer_->Execute(
-                            &part, static_cast<MAint32>(absid)
-                        );
-                        // If smeared pt is zero, no need to count the particle but it still needs
-                        // to be vetoed for jet clustering.
-                        if (smeared.pt() > 1e-10) {
-                            // Creating reco hadronic taus
-                            RecTauFormat* myTau = myEvent.rec()->GetNewTau();
-                            if (part.pdgid()>0) myTau->setCharge(-1);
-                            else myTau->setCharge(+1);
-                            myTau->setMomentum(smeared.momentum());
-                            myTau->setD0(smeared.d0());
-                            myTau->setDZ(smeared.dz());
-                            myTau->setD0Approx(smeared.d0_approx());
-                            myTau->setDZApprox(smeared.dz_approx());
-                            myTau->setProductionVertex(
-                                MALorentzVector(part.mothers()[0]->decay_vertex().X(),
-                                                   part.mothers()[0]->decay_vertex().Y(),
-                                                   part.mothers()[0]->decay_vertex().Z(),
-                                                   0.0)
-                            );
-                            myTau->setClosestApproach(smeared.closest_approach());
-                            myTau->setMc(&part);
-                            myTau->setDecayMode(PHYSICS->GetTauDecayMode(myTau->mc()));
-                            if (myTau->DecayMode() <= 0) myTau->setNtracks(0); // ERROR case
-                            else if (myTau->DecayMode() == 7 ||
-                                     myTau->DecayMode() == 9)
-                                myTau->setNtracks(3); // 3-Prong
-                            else myTau->setNtracks(1); // 1-Prong
-
-                            /// Set MET and TET
-                            if (ExclusiveId_) { (*MET) -= myTau->momentum(); TET += myTau->pt(); }
-
-                        } // (smeared.pt() < 1e-10)
-
-                        // Searching final state
-                        GetFinalState(&part,vetos2);
-                    }
-                }
-            } // if (absid==15)
-        } // if (PHYSICS->Id->IsInterState(part))
-
-        // Keeping only final states
-        else if (PHYSICS->Id->IsFinalState(part))
-        {
-            // rejecting particle if coming from hadronization
-            if (!(ExclusiveId_ && LOOP->ComingFromHadronDecay(&part, mySample)))
-            {
-                // Muons
-                if (absid == 13)
-                {
-                    vetos[i]=true;
-
-                    // Smearing its momentum
-                    MCParticleFormat smeared = mySmearer_->Execute(&part, static_cast<MAint32>(absid));
-                    if (smeared.pt() > 1e-10) {
-                        RecLeptonFormat *current_muon = myEvent.rec()->GetNewMuon();
-                        current_muon->setMomentum(smeared.momentum());
-                        current_muon->setD0(smeared.d0());
-                        current_muon->setDZ(smeared.dz());
-                        current_muon->setD0Approx(smeared.d0_approx());
-                        current_muon->setDZApprox(smeared.dz_approx());
-                        current_muon->setProductionVertex(MALorentzVector(part.mothers()[0]->decay_vertex().X(),
-                                                                          part.mothers()[0]->decay_vertex().Y(),
-                                                                          part.mothers()[0]->decay_vertex().Z(), 0.0));
-                        current_muon->setClosestApproach(smeared.closest_approach());
-                        current_muon->setMc(&(part));
-                        if (part.pdgid() == 13) current_muon->SetCharge(-1);
-                        else current_muon->SetCharge(+1);
-
-                        /// Set MET and TET
-                        (*MET) -= current_muon->momentum();
-                        TET += current_muon->pt();
-                    }
-                } // (absid == 13)
-                // Electrons
-                else if (absid==11)
-                {
-                    vetos[i]=true;
-
-                    // Smearing the electron momentum
-                    MCParticleFormat smeared = mySmearer_->Execute(&part, static_cast<MAint32>(absid));
-                    if (smeared.pt() > 1e-10) {
-                        RecLeptonFormat * elec = myEvent.rec()->GetNewElectron();
-                        elec->setMomentum(smeared.momentum());
-                        elec->setD0(smeared.d0());
-                        elec->setDZ(smeared.dz());
-                        elec->setD0Approx(smeared.d0_approx());
-                        elec->setDZApprox(smeared.dz_approx());
-                        elec->setProductionVertex(MALorentzVector(part.mothers()[0]->decay_vertex().X(),
-                                                                  part.mothers()[0]->decay_vertex().Y(),
-                                                                  part.mothers()[0]->decay_vertex().Z(),0.0));
-                        elec->setClosestApproach(smeared.closest_approach());
-                        elec->setMc(&(part));
-                        if (part.pdgid()==11) elec->SetCharge(-1);
-                        else elec->SetCharge(+1);
-
-                        /// Set MET and TET
-                        if (ExclusiveId_) { (*MET) -= elec->momentum(); TET += elec->pt(); }
-                    }
-                } // if (absid==11)
-                // Photons
-                else if (absid==22 )
-                {
-                    if (!LOOP->IrrelevantPhoton(&part,mySample))
+                    // Muons
+                    if (absid == 13)
                     {
                         vetos[i]=true;
 
-                        // Smearing the photon momentum
+                        // Smearing its momentum
                         MCParticleFormat smeared = mySmearer_->Execute(&part, static_cast<MAint32>(absid));
                         if (smeared.pt() > 1e-10) {
-                            RecPhotonFormat * current_photon = myEvent.rec()->GetNewPhoton();
-                            current_photon->setMomentum(smeared.momentum());
-                            current_photon->setD0(smeared.d0());
-                            current_photon->setDZ(smeared.dz());
-                            current_photon->setD0Approx(smeared.d0_approx());
-                            current_photon->setDZApprox(smeared.dz_approx());
-                            current_photon->setProductionVertex(MALorentzVector(part.mothers()[0]->decay_vertex().X(),
-                                                                                part.mothers()[0]->decay_vertex().Y(),
-                                                                                part.mothers()[0]->decay_vertex().Z(),
-                                                                                0.0));
-                            current_photon->setClosestApproach(smeared.closest_approach());
-                            current_photon->setMc(&(part));
+                            RecLeptonFormat *current_muon = myEvent.rec()->GetNewMuon();
+                            current_muon->setMomentum(smeared.momentum());
+                            current_muon->setD0(smeared.d0());
+                            current_muon->setDZ(smeared.dz());
+                            current_muon->setD0Approx(smeared.d0_approx());
+                            current_muon->setDZApprox(smeared.dz_approx());
+                            current_muon->setProductionVertex(MALorentzVector(part.mothers()[0]->decay_vertex().X(),
+                                                                              part.mothers()[0]->decay_vertex().Y(),
+                                                                              part.mothers()[0]->decay_vertex().Z(), 0.0));
+                            current_muon->setClosestApproach(smeared.closest_approach());
+                            current_muon->setMc(&(part));
+                            if (part.pdgid() == 13) current_muon->SetCharge(-1);
+                            else current_muon->SetCharge(+1);
 
                             /// Set MET and TET
-                            if (ExclusiveId_) { (*MET) -= current_photon->momentum(); TET += current_photon->pt(); }
-                        } // (smeared.pt() <= 1e-10)
-                    } // (!LOOP->IrrelevantPhoton(&part,mySample))
-                } // (absid==22 && !reject_hadronic)
-            }
+                            (*MET) -= current_muon->momentum();
+                            TET += current_muon->pt();
+                        }
+                    } // (absid == 13)
+                        // Electrons
+                    else if (absid==11)
+                    {
+                        vetos[i]=true;
 
-            // Collect Hadrons for jet clustering...
+                        // Smearing the electron momentum
+                        MCParticleFormat smeared = mySmearer_->Execute(&part, static_cast<MAint32>(absid));
+                        if (smeared.pt() > 1e-10) {
+                            RecLeptonFormat * elec = myEvent.rec()->GetNewElectron();
+                            elec->setMomentum(smeared.momentum());
+                            elec->setD0(smeared.d0());
+                            elec->setDZ(smeared.dz());
+                            elec->setD0Approx(smeared.d0_approx());
+                            elec->setDZApprox(smeared.dz_approx());
+                            elec->setProductionVertex(MALorentzVector(part.mothers()[0]->decay_vertex().X(),
+                                                                      part.mothers()[0]->decay_vertex().Y(),
+                                                                      part.mothers()[0]->decay_vertex().Z(),0.0));
+                            elec->setClosestApproach(smeared.closest_approach());
+                            elec->setMc(&(part));
+                            if (part.pdgid()==11) elec->SetCharge(-1);
+                            else elec->SetCharge(+1);
 
-            // Putting the good inputs into the containter
-            // Good inputs = - final state
-            //               - visible
-            //               - if exclusiveID=1: particles not vetoed
-            //               - if exclusiveID=0: all particles except muons
-            if (PHYSICS->Id->IsInvisible(part) || algo_==0) continue;
+                            /// Set MET and TET
+                            if (ExclusiveId_) { (*MET) -= elec->momentum(); TET += elec->pt(); }
+                        }
+                    } // if (absid==11)
+                        // Photons
+                    else if (absid==22 )
+                    {
+                        if (!LOOP->IrrelevantPhoton(&part,mySample))
+                        {
+                            vetos[i]=true;
 
-            // ExclusiveId mode
-            if (ExclusiveId_)
-            {
-                if (vetos[i]) continue;
-                if (vetos2.find(&part)!=vetos2.end()) continue;
-            }
-            // NonExclusive Id mode
-            else if (std::abs(part.pdgid())==13) continue;
+                            // Smearing the photon momentum
+                            MCParticleFormat smeared = mySmearer_->Execute(&part, static_cast<MAint32>(absid));
+                            if (smeared.pt() > 1e-10) {
+                                RecPhotonFormat * current_photon = myEvent.rec()->GetNewPhoton();
+                                current_photon->setMomentum(smeared.momentum());
+                                current_photon->setD0(smeared.d0());
+                                current_photon->setDZ(smeared.dz());
+                                current_photon->setD0Approx(smeared.d0_approx());
+                                current_photon->setDZApprox(smeared.dz_approx());
+                                current_photon->setProductionVertex(MALorentzVector(part.mothers()[0]->decay_vertex().X(),
+                                                                                    part.mothers()[0]->decay_vertex().Y(),
+                                                                                    part.mothers()[0]->decay_vertex().Z(),
+                                                                                    0.0));
+                                current_photon->setClosestApproach(smeared.closest_approach());
+                                current_photon->setMc(&(part));
 
-            // Smearer module returns a smeared MCParticleFormat object
-            // Default: NullSmearer, that does nothing
-            // Reminder: 0 is reserved for the jet constituents
-            MCParticleFormat smeared = mySmearer_->Execute(&part, 0);
-            if (smeared.pt() <= 1e-10) continue;
+                                /// Set MET and TET
+                                if (ExclusiveId_) { (*MET) -= current_photon->momentum(); TET += current_photon->pt(); }
+                            } // (smeared.pt() <= 1e-10)
+                        } // (!LOOP->IrrelevantPhoton(&part,mySample))
+                    } // (absid==22 && !reject_hadronic)
+                }
 
-            // Filling good particle for clustering
-            myEvent.rec()->AddHadron(smeared, i);
+                // Collect Hadrons for jet clustering...
 
-        } // if (PHYSICS->Id->IsFinalState(part))
-    } // for (MAuint32 i=0;i<myEvent.mc()->particles().size();i++)
+                // Putting the good inputs into the containter
+                // Good inputs = - final state
+                //               - visible
+                //               - if exclusiveID=1: particles not vetoed
+                //               - if exclusiveID=0: all particles except muons
+                if (PHYSICS->Id->IsInvisible(part) || algo_==0) continue;
 
-    // Set Primary Jet ID
-    myEvent.rec()->SetPrimaryJetID(JetID_);
-    // Launching the clustering
-    // -> Filling the collection: myEvent->rec()->jets()
-    algo_->Execute(mySample, myEvent, mySmearer_);
+                // ExclusiveId mode
+                if (ExclusiveId_)
+                {
+                    if (vetos[i]) continue;
+                    if (vetos2.find(&part)!=vetos2.end()) continue;
+                }
+                    // NonExclusive Id mode
+                else if (std::abs(part.pdgid())==13) continue;
+
+                // Smearer module returns a smeared MCParticleFormat object
+                // Default: NullSmearer, that does nothing
+                // Reminder: 0 is reserved for the jet constituents
+                MCParticleFormat smeared = mySmearer_->Execute(&part, 0);
+                if (smeared.pt() <= 1e-10) continue;
+
+                // Filling good particle for clustering
+                myEvent.rec()->AddHadron(smeared, i);
+
+            } // if (PHYSICS->Id->IsFinalState(part))
+        } // for (MAuint32 i=0;i<myEvent.mc()->particles().size();i++)
+
+        // Set Primary Jet ID
+        myEvent.rec()->SetPrimaryJetID(JetID_);
+        // Launching the clustering
+        // -> Filling the collection: myEvent->rec()->jets()
+        algo_->Execute(mySample, myEvent, mySmearer_);
 
 #ifdef MA5_FASTJET_MODE
-    // Cluster additional jets separately. In order to save time Execute function
-  // saves hadron inputs into memory and that configuration is used for the rest
-  // of the jets.
-  for (auto &collection_item: cluster_collection_)
-      collection_item.second->Cluster(myEvent, collection_item.first);
-  for (auto &substructure: substructure_collection_)
-      substructure.second->Execute(myEvent, substructure.first);
+        // Cluster additional jets separately. In order to save time Execute function
+        // saves hadron inputs into memory and that configuration is used for the rest
+        // of the jets.
+        for (auto &collection_item: cluster_collection_)
+            collection_item.second->Cluster(myEvent, collection_item.first);
+        for (auto &substructure: substructure_collection_)
+            substructure.second->Execute(myEvent, substructure.first);
 #endif
 
-    MET->momentum().SetPz(0.);
-    MET->momentum().SetE(MET->momentum().Pt());
-    MHT->momentum().SetPz(0.);
-    MHT->momentum().SetE(MHT->momentum().Pt());
+        MET->momentum().SetPz(0.);
+        MET->momentum().SetE(MET->momentum().Pt());
+        MHT->momentum().SetPz(0.);
+        MHT->momentum().SetE(MHT->momentum().Pt());
 
-    /// Execute tagger
-    myTagger_->Execute(myEvent);
+        /// Execute tagger
+        myTagger_->Execute(myEvent);
 
-    // Sorting the objects
-    std::sort(myEvent.rec()->electrons_.begin(), myEvent.rec()->electrons_.end(),
-              [](RecLeptonFormat const & lep1, RecLeptonFormat const & lep2){ return lep1.pt() > lep2.pt(); });
-    std::sort(myEvent.rec()->muons_.begin(), myEvent.rec()->muons_.end(),
-              [](RecLeptonFormat const & lep1, RecLeptonFormat const & lep2){ return lep1.pt() > lep2.pt(); });
-    std::sort(myEvent.rec()->taus_.begin(),      myEvent.rec()->taus_.end(),
-              [](RecTauFormat const & ta1, RecTauFormat const & ta2){ return  ta1.pt() > ta2.pt(); });
-    std::sort(myEvent.rec()->photons_.begin(), myEvent.rec()->photons_.end(),
-              [](RecPhotonFormat const & ph1, RecPhotonFormat const & ph2){ return  ph1.pt() > ph2.pt(); });
-    std::sort(myEvent.rec()->jets().begin(), myEvent.rec()->jets().end(),
-              [](RecJetFormat &j1, RecJetFormat &j2) { return j1.pt() > j2.pt();});
+        // Sorting the objects
+        std::sort(myEvent.rec()->electrons_.begin(), myEvent.rec()->electrons_.end(),
+                  [](RecLeptonFormat const & lep1, RecLeptonFormat const & lep2){ return lep1.pt() > lep2.pt(); });
+        std::sort(myEvent.rec()->muons_.begin(), myEvent.rec()->muons_.end(),
+                  [](RecLeptonFormat const & lep1, RecLeptonFormat const & lep2){ return lep1.pt() > lep2.pt(); });
+        std::sort(myEvent.rec()->taus_.begin(),      myEvent.rec()->taus_.end(),
+                  [](RecTauFormat const & ta1, RecTauFormat const & ta2){ return  ta1.pt() > ta2.pt(); });
+        std::sort(myEvent.rec()->photons_.begin(), myEvent.rec()->photons_.end(),
+                  [](RecPhotonFormat const & ph1, RecPhotonFormat const & ph2){ return  ph1.pt() > ph2.pt(); });
+        std::sort(myEvent.rec()->jets().begin(), myEvent.rec()->jets().end(),
+                  [](RecJetFormat &j1, RecJetFormat &j2) { return j1.pt() > j2.pt();});
 
 
 #ifdef MA5_FASTJET_MODE
-    // Setup isolation cones
-  if (isocone_track_radius_.size() > 0 || isocone_electron_radius_.size() > 0 || \
+        // Setup isolation cones
+        if (isocone_track_radius_.size() > 0 || isocone_electron_radius_.size() > 0 || \
       isocone_muon_radius_.size() > 0  || isocone_photon_radius_.size() > 0)
-  {
-    for (auto &part: myEvent.rec()->cluster_inputs())
-    {
-        MCParticleFormat current_jet;
-        current_jet.momentum().SetPxPyPzE(part.px(),part.py(),part.pz(),part.e());
-        // Set track isolation
-        // Isolation cone is applied to each particle that deposits energy in HCAL;
-        // all hadronic activity assumed to reach to HCAL
-        SetConeRadius(isocone_track_radius_,    myEvent.rec()->tracks(),    current_jet, false);
-        // Set Electron isolation
-        SetConeRadius(isocone_electron_radius_, myEvent.rec()->electrons(), current_jet, !ExclusiveId_);
-        // Set Muon isolation
-        SetConeRadius(isocone_muon_radius_,     myEvent.rec()->muons(),     current_jet, false);
-        // Set Photon isolation
-        SetConeRadius(isocone_photon_radius_,   myEvent.rec()->photons(),   current_jet, !ExclusiveId_);
+        {
+            for (auto &part: myEvent.rec()->cluster_inputs())
+            {
+                MCParticleFormat current_jet;
+                current_jet.momentum().SetPxPyPzE(part.px(),part.py(),part.pz(),part.e());
+                // Set track isolation
+                // Isolation cone is applied to each particle that deposits energy in HCAL;
+                // all hadronic activity assumed to reach to HCAL
+                SetConeRadius(isocone_track_radius_,    myEvent.rec()->tracks(),    current_jet, false);
+                // Set Electron isolation
+                SetConeRadius(isocone_electron_radius_, myEvent.rec()->electrons(), current_jet, !ExclusiveId_);
+                // Set Muon isolation
+                SetConeRadius(isocone_muon_radius_,     myEvent.rec()->muons(),     current_jet, false);
+                // Set Photon isolation
+                SetConeRadius(isocone_photon_radius_,   myEvent.rec()->photons(),   current_jet, !ExclusiveId_);
+            }
+
+        }
+#endif
+
+        return true;
     }
 
-  }
-#endif
-
-    return true;
-}
-
-// Load additional Jets
-MAbool JetClusterer::LoadJetConfiguration(std::map<std::string, std::string> options)
-{
+    // Load additional Jets
+    MAbool JetClusterer::LoadJetConfiguration(std::map<std::string, std::string> options) {
 #ifdef MA5_FASTJET_MODE
-    std::string new_jetid;
+        std::string new_jetid;
         std::string algorithm;
         if (options.find("algorithm") == options.end())
         {
@@ -793,7 +789,7 @@ MAbool JetClusterer::LoadJetConfiguration(std::map<std::string, std::string> opt
                     }
                     continue;
                 }
-                // clustering algo -> keep the previous syntax
+                    // clustering algo -> keep the previous syntax
                 else if (key.find("cluster.")==0)
                 {
                     clustering_params.insert(std::pair<std::string,std::string>(key.substr(8),it.second));
@@ -803,12 +799,12 @@ MAbool JetClusterer::LoadJetConfiguration(std::map<std::string, std::string> opt
                 // Other
                 try
                 {
-                  throw EXCEPTION_WARNING("Parameter = "+key+" unknown. It will be skipped.","",0);
+                    throw EXCEPTION_WARNING("Parameter = "+key+" unknown. It will be skipped.","",0);
                 }
                 catch(const std::exception& e)
                 {
-                  MANAGE_EXCEPTION(e);
-                  return false;
+                    MANAGE_EXCEPTION(e);
+                    return false;
                 }
             }
 
@@ -853,7 +849,7 @@ MAbool JetClusterer::LoadJetConfiguration(std::map<std::string, std::string> opt
             variableR = new Substructure::VariableR(rho, minR, maxR, ctype, strategy, ptmin, isExclusive);
 
             substructure_collection_.insert(
-                std::pair<std::string, Substructure::VariableR*>(options["JetID"], variableR)
+                    std::pair<std::string, Substructure::VariableR*>(options["JetID"], variableR)
             );
 
             std::string exclusive = isExclusive ? "True" : "False";
@@ -877,7 +873,9 @@ MAbool JetClusterer::LoadJetConfiguration(std::map<std::string, std::string> opt
 
         return true;
 #else
-    ERROR << "FastJet has not been enabled. Can not add jets to the analysis." << endmsg;
+        ERROR << "FastJet has not been enabled. Can not add jets to the analysis." << endmsg;
     return true;
 #endif
-}
+    }
+
+} // namespace
