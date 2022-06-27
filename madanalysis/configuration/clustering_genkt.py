@@ -30,11 +30,13 @@ class ClusteringGenKt():
     default_exclusive = False
     default_ptmin     = 5.
     default_P         = -1.
+    default_collision = 'pp'
 
     userVariables = { "radius" : [str(default_radius)],\
                       "exclusive" : [str(default_exclusive)],\
                       "p" : [str(default_P)],\
-                      "ptmin" : [str(default_ptmin)] }
+                      "ptmin" : [str(default_ptmin)],\
+                      "collision" : [str(default_collision)]}
 
 
     def __init__(self):
@@ -42,6 +44,7 @@ class ClusteringGenKt():
         self.exclusive = ClusteringGenKt.default_exclusive
         self.ptmin     = ClusteringGenKt.default_ptmin
         self.P         = ClusteringGenKt.default_P
+        self.collision = ClusteringGenKt.default_collision
 
         
     def Display(self):
@@ -49,6 +52,7 @@ class ClusteringGenKt():
         self.user_DisplayParameter("exclusive")
         self.user_DisplayParameter("p")
         self.user_DisplayParameter("ptmin")
+        self.user_DisplayParameter("collision")
 
 
     def user_DisplayParameter(self,parameter):
@@ -70,6 +74,8 @@ class ClusteringGenKt():
             elif self.P==-1:
                 word="[Anti-Kt algorithm behaviour]"
             logging.getLogger('MA5').info("  + specific parameter P = "+str(self.P)+" "+word)
+        elif parameter=="collision":
+            logging.getLogger('MA5').info("  + type of collisions = "+str(self.collision))
         else:
             logging.getLogger('MA5').error("'clustering' has no parameter called '"+parameter+"'")
 
@@ -83,6 +89,7 @@ class ClusteringGenKt():
             mydict['cluster.exclusive'] = '1'
         else:
             mydict['cluster.exclusive'] = '0'
+        mydict['cluster.collision'] =str(self.collision)
         return mydict
 
         
@@ -140,6 +147,14 @@ class ClusteringGenKt():
                 logging.getLogger('MA5').error("the P parameter must be a float value.")
                 return False
             self.P=number
+
+        # collision
+        elif parameter=="collision":
+            if value in['pp','ee']:
+                self.collision = value
+            else:
+                logging.getLogger('MA5').error("the collision nature must be pp or ee.")
+                return False
 
         # other    
         else:
