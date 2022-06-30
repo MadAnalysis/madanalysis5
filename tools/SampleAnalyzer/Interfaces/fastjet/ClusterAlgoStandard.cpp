@@ -77,7 +77,7 @@ MAbool ClusterAlgoStandard::SetParameter(const std::string& key, const std::stri
     str >> tmp;
     if (tmp=="pp") collision_=true;
     else if (tmp=="ee") collision_=false;
-    else WARNING << "Collision must be pp or ee. Using default value = " 
+    else WARNING << "The type of collisions in the events must be pp or ee. Using default value = " 
                        << collision_ << endmsg; 
   }
 
@@ -165,7 +165,7 @@ void ClusterAlgoStandard::PrintParam()
   else if (JetAlgorithm_=="antikt") INFO << "Algorithm : anti kt" << endmsg;
   else if (JetAlgorithm_=="genkt") INFO << "Algorithm : generalized kt" << endmsg;
   INFO << "Parameters used :" << endmsg; 
-  INFO << "R = " << R_ << "; p = " << p_ << "; Ptmin = " << Ptmin_ << "; collision=" << collision_ << endmsg;
+  INFO << "R = " << R_ << "; p = " << p_ << "; Ptmin = " << Ptmin_ << "; collision type =" << collision_ << endmsg;
 }
 
 std::string ClusterAlgoStandard::GetName()
@@ -180,7 +180,7 @@ std::string ClusterAlgoStandard::GetName()
 std::string ClusterAlgoStandard::GetParameters()
 {
   std::stringstream str;
-  str << "R=" << R_ << " ; p=" << p_ << " ; PTmin=" << Ptmin_ << " ; collision=" << collision_;
+  str << "R=" << R_ << " ; p=" << p_ << " ; PTmin=" << Ptmin_ << " ; collision type =" << collision_;
   return str.str();
 }
 
