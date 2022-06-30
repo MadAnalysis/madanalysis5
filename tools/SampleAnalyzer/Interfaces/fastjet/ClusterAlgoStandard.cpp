@@ -68,6 +68,19 @@ MAbool ClusterAlgoStandard::SetParameter(const std::string& key, const std::stri
     p_=tmp;
   }
 
+  // p
+  else if (key=="collision")
+  {
+    std::string tmp;
+    std::stringstream str;
+    str << value;
+    str >> tmp;
+    if (tmp=="pp") collision_=true;
+    else if (tmp=="ee") collision_=false;
+    else WARNING << "The type of collisions in the events must be pp or ee. Using default value = " 
+                       << collision_ << endmsg; 
+  }
+
   // exclusive
   else if (key=="exclusive")
   {
@@ -110,19 +123,23 @@ MAbool ClusterAlgoStandard::Initialize()
   // Creating Jet Definition
   if (JetAlgorithm_=="kt")
   {
-      JetDefinition_ = new fastjet::JetDefinition(fastjet::kt_algorithm, R_);
+    if (collision_) JetDefinition_ = new fastjet::JetDefinition(fastjet::kt_algorithm, R_);
+    else JetDefinition_ = new fastjet::JetDefinition(fastjet::ee_kt_algorithm, R_);
   }
   else if (JetAlgorithm_=="antikt")
   {
-      JetDefinition_ = new fastjet::JetDefinition(fastjet::antikt_algorithm, R_);
+    if (collision_) JetDefinition_ = new fastjet::JetDefinition(fastjet::antikt_algorithm, R_);
+    else JetDefinition_ = new fastjet::JetDefinition(fastjet::ee_genkt_algorithm, R_, -1.);
   }
   else if (JetAlgorithm_=="cambridge")
   {
-      JetDefinition_ = new fastjet::JetDefinition(fastjet::cambridge_algorithm, R_);
+    if (collision_) JetDefinition_ = new fastjet::JetDefinition(fastjet::cambridge_algorithm, R_);
+    else JetDefinition_ = new fastjet::JetDefinition(fastjet::ee_genkt_algorithm, R_, 0.);
   }
   else if (JetAlgorithm_== "genkt") 
   {
-      JetDefinition_ = new fastjet::JetDefinition(fastjet::genkt_algorithm, R_, p_);
+    if (collision_) JetDefinition_ = new fastjet::JetDefinition(fastjet::genkt_algorithm, R_, p_);
+    else JetDefinition_ = new fastjet::JetDefinition(fastjet::ee_genkt_algorithm, R_, p_);
   }
   else
   {
@@ -135,6 +152,12 @@ MAbool ClusterAlgoStandard::Initialize()
 }
 
 
+std::string ClusterAlgoStandard::GetCollisionType() const
+{
+  if (collision_) return "pp";
+  else return "ee";
+}
+
 void ClusterAlgoStandard::PrintParam()
 {
   if (JetAlgorithm_=="kt") INFO << "Algorithm : kt" << endmsg;
@@ -142,7 +165,7 @@ void ClusterAlgoStandard::PrintParam()
   else if (JetAlgorithm_=="antikt") INFO << "Algorithm : anti kt" << endmsg;
   else if (JetAlgorithm_=="genkt") INFO << "Algorithm : generalized kt" << endmsg;
   INFO << "Parameters used :" << endmsg; 
-  INFO << "R = " << R_ << "; p = " << p_ << "; Ptmin = " << Ptmin_ << endmsg;
+  INFO << "R = " << R_ << "; p = " << p_ << "; Ptmin = " << Ptmin_ << "; collision type =" << collision_ << endmsg;
 }
 
 std::string ClusterAlgoStandard::GetName()
@@ -157,7 +180,7 @@ std::string ClusterAlgoStandard::GetName()
 std::string ClusterAlgoStandard::GetParameters()
 {
   std::stringstream str;
-  str << "R=" << R_ << " ; p=" << p_ << " ; PTmin=" << Ptmin_;
+  str << "R=" << R_ << " ; p=" << p_ << " ; PTmin=" << Ptmin_ << " ; collision type =" << collision_;
   return str.str();
 }
 

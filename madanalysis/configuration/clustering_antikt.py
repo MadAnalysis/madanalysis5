@@ -28,19 +28,22 @@ class ClusteringAntiKt():
 
     default_radius    = 0.4
     default_ptmin     = 5.
+    default_collision = 'pp'
 
     userVariables = { "radius" : [str(default_radius)],\
-                      "ptmin" : [str(default_ptmin)] }
-
+                      "ptmin" : [str(default_ptmin)],\
+                      "collision" : [str(default_collision)]}
 
     def __init__(self):
         self.radius    = ClusteringAntiKt.default_radius
         self.ptmin     = ClusteringAntiKt.default_ptmin
+        self.collision = ClusteringAntiKt.default_collision
 
         
     def Display(self):
         self.user_DisplayParameter("radius")
         self.user_DisplayParameter("ptmin")
+        self.user_DisplayParameter("collision")
 
 
     def user_DisplayParameter(self,parameter):
@@ -48,6 +51,8 @@ class ClusteringAntiKt():
             logging.getLogger('MA5').info("  + cone radius = "+str(self.radius))
         elif parameter=="ptmin":
             logging.getLogger('MA5').info("  + PT min (GeV) for produced jets = "+str(self.ptmin))
+        elif parameter=="collision":
+            logging.getLogger('MA5').info("  + type of collisions described in the events = "+str(self.collision))
         else:
             logging.getLogger('MA5').error("'clustering' has no parameter called '"+parameter+"'")
 
@@ -56,6 +61,7 @@ class ClusteringAntiKt():
         mydict = {}
         mydict['cluster.R']     = str(self.radius)
         mydict['cluster.PTmin'] = str(self.ptmin)
+        mydict['cluster.collision'] =str(self.collision)
         return mydict
 
         
@@ -94,6 +100,14 @@ class ClusteringAntiKt():
                 logging.getLogger('MA5').error("the ptmin cannot be negative.")
                 return False
             self.ptmin=number
+
+        # collision
+        elif parameter=="collision":
+            if value in['pp','ee']:
+                self.collision = value
+            else:
+                logging.getLogger('MA5').error("the nature of the collisions described in the events must be pp or ee.")
+                return False
 
         # other    
         else:
