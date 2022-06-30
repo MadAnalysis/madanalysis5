@@ -106,7 +106,7 @@ class ClusteringCambridge():
             if value in['pp','ee']:
                 self.collision = value
             else:
-                logging.getLogger('MA5').error("the nature of the collisions described in the events must be pp or ee."")
+                logging.getLogger('MA5').error("the nature of the collisions described in the events must be pp or ee.")
                 return False
 
         # other    
