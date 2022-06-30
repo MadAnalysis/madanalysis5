@@ -52,7 +52,7 @@ class ClusteringCambridge():
         elif parameter=="ptmin":
             logging.getLogger('MA5').info("  + PT min (GeV) for produced jets = "+str(self.ptmin))
         elif parameter=="collision":
-            logging.getLogger('MA5').info("  + type of collisions = "+str(self.collision))
+            logging.getLogger('MA5').info("  + type of collisions described in the event file = "+str(self.collision))
         else:
             logging.getLogger('MA5').error("'clustering' has no parameter called '"+parameter+"'")
 
@@ -106,7 +106,7 @@ class ClusteringCambridge():
             if value in['pp','ee']:
                 self.collision = value
             else:
-                logging.getLogger('MA5').error("the collision nature must be pp or ee.")
+                logging.getLogger('MA5').error("the nature of the collisions described in the event file must be pp or ee."")
                 return False
 
         # other    
