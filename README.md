@@ -265,3 +265,4 @@ If you use MadAnalysis 5, please cite:
  - [J. Y. Araz, M. Frank and B. Fuks; Eur. Phys. J. C 80 (2020) 6, 531](https://arxiv.org/abs/1910.11418)
  - [J. Y. Araz, B. Fuks and G. Polykratis; Eur. Phys. J. C 81 (2021) 329](https://arxiv.org/abs/2006.09387)
  - [J. Y. Araz, B. Fuks, M. D. Goodsell and M. Utsch; arXiv:2112.05163](https://arxiv.org/abs/2112.05163)
+ - [G.Alguero, J.Y. Araz, B. Fuks, S. Kraml; arXiv:2206.14870](https://arxiv.org/abs/2206.14870)
