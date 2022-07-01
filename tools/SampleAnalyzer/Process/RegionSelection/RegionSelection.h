@@ -29,6 +29,7 @@
 // STL headers
 #include <string>
 #include <vector>
+#include <map>
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Counter/CounterManager.h"
@@ -48,6 +49,8 @@ class RegionSelection
   MAbool surviving_;
   MAuint32 NumberOfCutsAppliedSoFar_;
   MAfloat64 weight_;
+  std::map<MAuint32, MAfloat64> multiWeight_;
+
 
   CounterManager cutflow_;
 
@@ -116,6 +119,26 @@ class RegionSelection
     cutflow_.IncrementNInitial(weight);
     weight_=weight;
   }
+
+  //Multiweight Integration implementation below
+  void SetWeight(const std::map<MAuint32, MAfloat64> &multiweight) {
+	multiWeight_ = multiweight;
+  }
+
+  std::map<MAuint32, MAfloat64> GetWeights() {return multiWeight_;}
+
+  void IncrementCutFlow(const std::map<MAuint32, MAfloat64> &multiweight){
+	cutflow_[NumberOfCutsAppliedSoFar_].Increment(multiweight);
+	NumberOfCutsAppliedSoFar_++;
+  }
+
+  void InitializeForNewEvent(const std::map<MAuint32, MAfloat64> &multiweight){
+	  SetSurvivingTest(true);
+	  SetNumberOfCutsAppliedSoFar(0);
+	  cutflow_.IncrementNInitial(multiweight);
+	  multiWeight_=multiweight;
+  }
+
 
 };
 

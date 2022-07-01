@@ -34,6 +34,12 @@
 #include <string>
 #include <map>
 
+struct multiWeightEntry {
+	  std::pair<MAint64, MAint64> nentries_;
+	  std::pair<MAfloat64, MAfloat64> sumweight_;
+	  std::pair<MAfloat64, MAfloat64> sumweight2_;
+};
+
 
 namespace MA5
 {
@@ -63,6 +69,8 @@ class Counter
   /// sum of squared weights
   /// first = positive weight ; second = negative weight
   std::pair<MAfloat64,MAfloat64> sumweight2_;
+
+  std::map<MAuint32, multiWeightEntry*> multiweight_;
 
 
   // -------------------------------------------------------------
@@ -107,6 +115,25 @@ class Counter
       sumweight2_.second+=weight*weight;
     }
   }
+
+  void Increment(const std::map<MAuint32, MAfloat64> &multiweights){
+	  for(const auto &weight : multiweights){
+			if(multiweight_.find(weight.first) == multiweight_.end()){
+				multiweight_[weight.first] = new multiWeightEntry;
+			}
+			if(weight.second > 0){
+				multiweight_[weight.first]->nentries_.first++;
+				multiweight_[weight.first]->sumweight_.first+=weight.second;
+				multiweight_[weight.first]->sumweight2_.first+=weight.second*weight.second;
+			}
+			else if (weight.second < 0){
+				multiweight_[weight.first]->nentries_.second++;
+				multiweight_[weight.first]->sumweight_.second+=weight.second;
+				multiweight_[weight.first]->sumweight2_.second+=weight.second*weight.second;
+			}
+	  }
+  }
+
 
 };
 

@@ -30,6 +30,7 @@
 #include <iostream>
 #include <ostream>
 #include <vector>
+#include <map>
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Counter/Counter.h"
@@ -107,6 +108,11 @@ class CounterManager
   /// Finalizing
   void Finalize()
   { Reset(); }
+
+  void IncrementNInitial(const std::map<MAuint32, MAfloat64> &multiweight){
+	initial_.Increment(multiweight);
+  }
+
 
 };
 
