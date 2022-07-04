@@ -2,9 +2,9 @@
 
 ## New features since last release
 
-* Substructure module have been implemented to MadAnalysis 5.
-  [(#13)](https://github.com/MadAnalysis/madanalysis5/pull/13)
-  * Module includes the following functionality through normal/expert mode
+* A module allowing for jet substructure studies has been implemented in
+  MadAnalysis 5. [(#13)](https://github.com/MadAnalysis/madanalysis5/pull/13)
+  * It includes the following fastjet-contrib functionalities:
     * VariableR: normal and expert mode
     * SoftDrop: expert mode
     * Clusterer: expert mode
@@ -14,36 +14,37 @@
     * Pruner: expert mode
     * Energy Correlator: expert mode
     * HEPTopTagger: expert mode
-  * `RecJetFormat` has been wrapped with `PseudoJet` to accommodate dynamic
-    transition between two objects.
-  
-  All these methods can be used through SFS interface.
+  * `RecJetFormat` has been wrapped with a `PseudoJet` structure to accommodate
+     dynamic transition between two objects.
 
-* Substructure and HEPTopTagger has been redesigned to be shared library 
-so that MadAnalysis can be compiled without these modules as well.
+  All these methods can be used through the SFS interface.
+
+* Substructure and HEPTopTagger has been redesigned to be shared libraries, so
+  that MadAnalysis could be compiled without these modules as well.
   [(#63)](https://github.com/MadAnalysis/madanalysis5/pull/63)
 
-* Tagger module has been redesigned to accommodate substructure module.
+* The tagger module has been redesigned to accommodate the features of
+  substructure module.
   [(#86)](https://github.com/MadAnalysis/madanalysis5/pull/86)
-    
-* Multilevel object tagging has been enabled through SFS.
+
+* Multi-level object tagging has been enabled through the SFS framework.
   ([#97](https://github.com/MadAnalysis/madanalysis5/pull/97))
-  * Option to activate c-jet tagging has been introduced.
+  * Option to activate charm-jet tagging has been introduced.
   * Option to use jet-based hadronic tau matching has been introduced.
 
 ## Improvements
 
-* SFS libraries included in `analysisList.h` file instead of main analysis
-  file. This will lead to much cleaner and independent analysis construction.
-  [(#86)](https://github.com/MadAnalysis/madanalysis5/pull/86)
+* The SFS libraries are now included in the file `analysisList.h`, instead of in
+  the main analysis file. This leads to much cleaner and independent analysis
+  construction. [(#86)](https://github.com/MadAnalysis/madanalysis5/pull/86)
 
-* Compilation time testing has been added for Jet Substructure and
+* Compilation time testing has been added for the jet Substructure and
   HEPTopTagger interfaces 
   ([#86](https://github.com/MadAnalysis/madanalysis5/pull/86)).
 
 ## Bug fixes
 
-* Various bugfixes for matching the numeric results to the Ma5 v1.10.
+* Various bugfixes for matching the numeric results to MA5 v1.10.
   ([#97](https://github.com/MadAnalysis/madanalysis5/pull/97))
 
 ## Contributors
