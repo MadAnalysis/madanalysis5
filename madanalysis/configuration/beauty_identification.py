@@ -97,34 +97,22 @@ class BeautyIdentification:
 
         # efficiency
         elif parameter == "bjet_id.efficiency":
-            logging.getLogger("MA5").error(
-                "This function has been deprecated, please use SFS functionality instead."
-            )
-            logging.getLogger("MA5").error(
-                "Same functionality can be captured via following command in SFS:"
-            )
+            logging.getLogger("MA5").error("This function is deprecated; please use the corresponding SFS functionality instead.")
+            logging.getLogger("MA5").error("This can be achieved by typing the following command:")
             logging.getLogger("MA5").error(f"     -> define tagger b as b {value}")
             return False
 
         # mis efficiency (cjet)
         elif parameter == "bjet_id.misid_cjet":
-            logging.getLogger("MA5").error(
-                "This function has been deprecated, please use SFS functionality instead."
-            )
-            logging.getLogger("MA5").error(
-                "Same functionality can be captured via following command in SFS:"
-            )
+            logging.getLogger("MA5").error("This function is deprecated; please use the corresponding SFS functionality instead.")
+            logging.getLogger("MA5").error("This can be achieved by typing the following command:")
             logging.getLogger("MA5").error(f"     -> define tagger b as c {value}")
             return False
 
         # mis efficiency (ljet)
         elif parameter == "bjet_id.misid_ljet":
-            logging.getLogger("MA5").error(
-                "This function has been deprecated, please use SFS functionality instead."
-            )
-            logging.getLogger("MA5").error(
-                "Same functionality can be captured via following command in SFS:"
-            )
+            logging.getLogger("MA5").error("This function is deprecated; please use the corresponding SFS functionality instead.")
+            logging.getLogger("MA5").error("This can be achieved by typing the following command:")
             logging.getLogger("MA5").error(f"     -> define tagger b as j {value}")
             return False
 

@@ -37,10 +37,10 @@ class TaggerStatus(Enum):
 
     @staticmethod
     def get_status(status: str):
-        """Convert string to tagger status"""
+        """Convert string to tagger criterion"""
         if status.lower() == "loose":
             return TaggerStatus.LOOSE
-        elif status.lower() in ["mid", "medium"]:
+        elif status.lower() in ["med", "mid", "medium"]:
             return TaggerStatus.MID
         elif status.lower() == "tight":
             return TaggerStatus.TIGHT
@@ -52,7 +52,7 @@ class TaggerStatus(Enum):
         if status == TaggerStatus.LOOSE:
             return "loose"
         elif status == TaggerStatus.MID:
-            return "mid"
+            return "medium"
         elif status == TaggerStatus.TIGHT:
             return "tight"
         else:
@@ -73,7 +73,7 @@ class Tagger:
         :param id_reco: particle id to be reconstructed
         :param function: efficiency function
         :param bounds: bounds of the function
-        :param tag: status of the tagger
+        :param tag: loose/medium/tight criterion of the tagger
         :return:
         """
 

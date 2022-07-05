@@ -109,7 +109,10 @@ MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
     /// we now switched to MHT because in the earlier version of the code when this function
     /// executed MET was empty. For numerical consistency we use MHT here.
     /// For details see JetClusterer.cpp and ClusterAlgoFastjet.cpp in v1.10.x
-    Meff += MHT->pt();
+    /// BENJ" changed back to MET; to be discussed.
+    Meff += MET->pt();
+
+    // Exit
     return true;
 }
 

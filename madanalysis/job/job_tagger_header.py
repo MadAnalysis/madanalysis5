@@ -28,24 +28,24 @@ class JobTaggerHeader:
     # structure: (true_id, reco_id) : "..."
     base = {
         (5, 5): lambda tag: f"/// B-jet tagging efficiency (b as b)\nMAfloat32 NewTagger::{tag}_b_tagging_eff(const RecJetFormat &object) const",
-        (5, 4): lambda tag: f"/// B-jet mistagging as C-jet (b as c)\nMAfloat32 NewTagger::{tag}_b_mistag_c(const RecJetFormat &object) const",
+        (5, 4): lambda tag: f"/// B-jet mistagging rate as a C-jet (b as c)\nMAfloat32 NewTagger::{tag}_b_mistag_c(const RecJetFormat &object) const",
         (4, 4): lambda tag: f"/// C-jet tagging efficiency (c as c)\nMAfloat32 NewTagger::{tag}_c_tagging_eff(const RecJetFormat &object) const",
-        (4, 5): lambda tag: f"/// C-jet mistagging as C-jet (c as b)\nMAfloat32 NewTagger::{tag}_c_mistag_b(const RecJetFormat &object) const",
-        (21, 5): lambda tag: f"/// Light-Jet mistagging as b-jet (j as b)\nMAfloat32 NewTagger::lightjet_mistag_b_{tag}(const RecJetFormat &object) const",
-        (21, 4): lambda tag: f"/// Light-Jet mistagging as c jet (j as c)\nMAfloat32 NewTagger::lightjet_mistag_c_{tag}(const RecJetFormat &object) const",
-        (21, 15): lambda tag: f"/// Light-Jet mistagging as tau (j as ta)\nMAfloat32 NewTagger::lightjet_mistag_tau_{tag}(const RecJetFormat &object) const",
-        (21, 11): lambda tag: f"/// Light-Jet mistagging as electron (j as e)\nMAfloat32 NewTagger::lightjet_mistag_electron(const RecJetFormat &object) const",
-        (21, 22): lambda tag: f"/// Light-Jet mistagging as photon (j as photon)\nMAfloat32 NewTagger::lightjet_mistag_photon(const RecJetFormat &object) const",
+        (4, 5): lambda tag: f"/// C-jet mistagging rate as a B-jet (c as b)\nMAfloat32 NewTagger::{tag}_c_mistag_b(const RecJetFormat &object) const",
+        (21, 5): lambda tag: f"/// Light-Jet mistagging rate as a b-jet (j as b)\nMAfloat32 NewTagger::lightjet_mistag_b_{tag}(const RecJetFormat &object) const",
+        (21, 4): lambda tag: f"/// Light-Jet mistagging rate as a c jet (j as c)\nMAfloat32 NewTagger::lightjet_mistag_c_{tag}(const RecJetFormat &object) const",
+        (21, 15): lambda tag: f"/// Light-Jet mistagging rate as a tau (j as ta)\nMAfloat32 NewTagger::lightjet_mistag_tau_{tag}(const RecJetFormat &object) const",
+        (21, 11): lambda tag: f"/// Light-Jet mistagging rate as an electron (j as e)\nMAfloat32 NewTagger::lightjet_mistag_electron(const RecJetFormat &object) const",
+        (21, 22): lambda tag: f"/// Light-Jet mistagging rate as a photon (j as photon)\nMAfloat32 NewTagger::lightjet_mistag_photon(const RecJetFormat &object) const",
         (15, 15): lambda tag: f"/// Tau tagging efficiency (ta as ta)\nMAfloat32 NewTagger::{tag}_tau_tagging_eff(const RecTauFormat &object) const",
-        (11, 13): lambda tag: f"/// Electron mistagging as muon (e as mu)\nMAfloat32 NewTagger::electron_mistag_muon(const RecLeptonFormat &object) const",
-        (11, 22): lambda tag: f"/// Electron mistagging as photon (e as a)\nMAfloat32 NewTagger::electron_mistag_photon(const RecLeptonFormat &object) const",
-        (11, 21): lambda tag: f"/// Electron mistagging as light jet (e as j)\nMAfloat32 NewTagger::electron_mistag_lightjet(const RecLeptonFormat &object) const",
-        (13, 11): lambda tag: f"/// Electron mistagging as electron (mu as e)\nMAfloat32 NewTagger::muon_mistag_electron(const RecLeptonFormat &object) const",
-        (13, 22): lambda tag: f"/// Electron mistagging as photon (mu as a)\nMAfloat32 NewTagger::muon_mistag_photon(const RecLeptonFormat &object) const",
-        (13, 21): lambda tag: f"/// Electron mistagging as light jet (mu as j)\nMAfloat32 NewTagger::muon_mistag_lightjet(const RecLeptonFormat &object) const",
-        (22, 11): lambda tag: f"/// Electron mistagging as electron (a as e)\nMAfloat32 NewTagger::photon_mistag_electron(const RecPhotonFormat &object) const",
-        (22, 13): lambda tag: f"/// Electron mistagging as muon (a as mu)\nMAfloat32 NewTagger::photon_mistag_muon(const RecPhotonFormat &object) const",
-        (22, 21): lambda tag: f"/// Electron mistagging as light jet (a as j)\nMAfloat32 NewTagger::photon_mistag_lightjet(const RecPhotonFormat &object) const",
+        (11, 13): lambda tag: f"/// Electron mistagging rate as a muon (e as mu)\nMAfloat32 NewTagger::electron_mistag_muon(const RecLeptonFormat &object) const",
+        (11, 22): lambda tag: f"/// Electron mistagging rate as a photon (e as a)\nMAfloat32 NewTagger::electron_mistag_photon(const RecLeptonFormat &object) const",
+        (11, 21): lambda tag: f"/// Electron mistagging rate as a light jet (e as j)\nMAfloat32 NewTagger::electron_mistag_lightjet(const RecLeptonFormat &object) const",
+        (13, 11): lambda tag: f"/// Electron mistagging rate as an electron (mu as e)\nMAfloat32 NewTagger::muon_mistag_electron(const RecLeptonFormat &object) const",
+        (13, 22): lambda tag: f"/// Electron mistagging rate as a photon (mu as a)\nMAfloat32 NewTagger::muon_mistag_photon(const RecLeptonFormat &object) const",
+        (13, 21): lambda tag: f"/// Electron mistagging rate as a light jet (mu as j)\nMAfloat32 NewTagger::muon_mistag_lightjet(const RecLeptonFormat &object) const",
+        (22, 11): lambda tag: f"/// Electron mistagging rate as an electron (a as e)\nMAfloat32 NewTagger::photon_mistag_electron(const RecPhotonFormat &object) const",
+        (22, 13): lambda tag: f"/// Electron mistagging rate as a muon (a as mu)\nMAfloat32 NewTagger::photon_mistag_muon(const RecPhotonFormat &object) const",
+        (22, 21): lambda tag: f"/// Electron mistagging rate as a light jet (a as j)\nMAfloat32 NewTagger::photon_mistag_lightjet(const RecPhotonFormat &object) const",
     }
 
 
@@ -75,7 +75,7 @@ class JobTaggerHeader:
         file.write('        void Initialize() {\n')
         file.write('            /// @brief Booleans for code efficiency\n')
         file.write('            /// Turn on the usage of tau tagging efficiency\n')
-        file.write(f"            _isTauTaggingEffOn = {'true' if (15, 15) in [(x[0], x[1]) for x in self.unique_rules] else 'false'};\n")
+        file.write(f"            _isTauTaggingEffOn = {'true' if any([x in [(x[0], x[1]) for x in self.unique_rules] for x in [(15,15), (21,15)]]) else 'false'};\n")
         file.write('            /// Turn on the usage of jet (mis)tagging efficiency\n')
         file.write(f"            _isJetTaggingOn = {'true' if any([x in [(x[0], x[1]) for x in self.unique_rules] for x in [(5,5), (4,5), (21,5), (5,4), (4,4), (21,4), (21,15), (21,11), (21,22)]]) else 'false'};\n")
         file.write('            /// Turn on the usage of muon (mis)tagging efficiency\n')

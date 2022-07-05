@@ -81,12 +81,12 @@ namespace MA5 {
         SFSbanner_ = true;
         ExclusiveId_ = false;
         JetID_ = "Ma5Jet";
-        muon = 0;
-        electron = 0;
-        tauH = 0;
-        tauM = 0;
-        tauE = 0;
-        photon = 0;
+        muon_ = 0;
+        electron_ = 0;
+        tauH_ = 0;
+        tauM_ = 0;
+        tauE_ = 0;
+        photon_ = 0;
         isocone_track_radius_.clear();
         isocone_electron_radius_.clear();
         isocone_muon_radius_.clear();

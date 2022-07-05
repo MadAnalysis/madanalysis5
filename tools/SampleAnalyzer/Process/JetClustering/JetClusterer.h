@@ -81,12 +81,12 @@ namespace MA5 {
         std::map<std::string, Substructure::ClusterBase*> substructure_collection_;
 #endif
 
-        MAuint32 muon;
-        MAuint32 electron;
-        MAuint32 tauH;
-        MAuint32 tauM;
-        MAuint32 tauE;
-        MAuint32 photon;
+        MAuint32 muon_;
+        MAuint32 electron_;
+        MAuint32 tauH_;
+        MAuint32 tauM_;
+        MAuint32 tauE_;
+        MAuint32 photon_;
 
         // Track Isolation radius
         std::vector<MAfloat64> isocone_track_radius_;

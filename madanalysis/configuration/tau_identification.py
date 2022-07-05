@@ -82,14 +82,14 @@ class TauIdentification:
             try:
                 number = float(value)
             except:
-                logging.getLogger("MA5").error("the 'matching deltaR' must be a float value.")
+                logging.getLogger("MA5").error("the 'matching deltaR' parameter must be a float.")
                 return False
             if number <= 0:
-                logging.getLogger("MA5").error("the 'matching deltaR' cannot be negative or null.")
+                logging.getLogger("MA5").error("the 'matching deltaR' parameter cannot be negative or zero.")
                 return False
             if self.reconstruction_method == "hadron-based":
-                logging.getLogger("MA5").warning("Hadronic tau matching is only available in jet-based tagging mode.")
-                logging.getLogger("MA5").warning("To activate jet-based tagging type "
+                logging.getLogger("MA5").warning("Hadronic tau matching is only available in the jet-based tagging mode.")
+                logging.getLogger("MA5").warning("To activate jet-based tagging, please type:"
                                                  "`set main.fastsim.tau_id.reconstruction_method = jet-based`")
             self.matching_dr = number
 
@@ -99,9 +99,8 @@ class TauIdentification:
                 logging.getLogger('MA5').error("'exclusive' possible values are : 'true', 'false'")
                 return False
             if self.reconstruction_method == "hadron-based":
-                logging.getLogger("MA5").warning("Exclusive Hadronic tau matching is only available "
-                                                 "in jet-based tagging mode.")
-                logging.getLogger("MA5").warning("To activate jet-based tagging type "
+                logging.getLogger("MA5").warning("Exclusive Hadronic tau matching is only available in the jet-based tagging mode.")
+                logging.getLogger("MA5").warning("To activate jet-based tagging, please type:"
                                                  "`set main.fastsim.tau_id.reconstruction_method = jet-based`")
             self.exclusive = (value == "true")
 
@@ -127,23 +126,15 @@ class TauIdentification:
 
         # efficiency
         elif parameter == "tau_id.efficiency":
-            logging.getLogger("MA5").error(
-                "This function has been deprecated, please use SFS functionality instead."
-            )
-            logging.getLogger("MA5").error(
-                "Same functionality can be captured via following command in SFS:"
-            )
+            logging.getLogger("MA5").error("This function is deprecated; please use the corresponding SFS functionality instead.")
+            logging.getLogger("MA5").error("This can be achieved by typing the following command:")
             logging.getLogger("MA5").error(f"     -> define tagger ta as ta {value}")
             return False
 
         # mis efficiency (ljet)
         elif parameter == "tau_id.misid_ljet":
-            logging.getLogger("MA5").error(
-                "This function has been deprecated, please use SFS functionality instead."
-            )
-            logging.getLogger("MA5").error(
-                "Same functionality can be captured via following command in SFS:"
-            )
+            logging.getLogger("MA5").error("This function is deprecated; please use the corresponding SFS functionality instead.")
+            logging.getLogger("MA5").error("This can be achieved by typing the following command:")
             logging.getLogger("MA5").error(f"     -> define tagger ta as j {value}")
             return False
 

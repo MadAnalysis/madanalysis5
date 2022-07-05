@@ -36,9 +36,9 @@ namespace MA5 {
         /// @brief Tagging options
         ///
         /// @code btag_matching_deltaR : double @endcode
-        /// matching deltaR is the threshold for maximum dR distance between a jet and B-hadron
+        /// matching deltaR is the upper threshold on the dR distance between a jet and B-hadron
         /// @code  btag_exclusive : bool @endcode
-        /// exclusive algorithm is designed to dynamically find the jet that best matches to the B-hadron
+        /// The exclusive algorithm is designed to dynamically find the jet that best matches with a given B-hadron
         ///
         /// options starting with ctag and tautag are the ones corresponding to c-jet and tau-jet tagging
         ///
@@ -48,11 +48,11 @@ namespace MA5 {
         /// value in old version that has been reinstated as well.
         ///
         /// @code taujtag_jetbased : bool@endcode
-        /// States the nature of tau tagging proecedure. If false, the hadronic tau in the event history
-        /// will be found and used as hadronic tau object. if True, this hadronic tau will be matched with
-        /// a jet and the jet will be considered as tau jet.
+        /// States the nature of the tau tagging proecedure. If false, hadronic taus in the event history
+        /// will be found and used as hadronic tau object. If True, this hadronic tau will be matched with
+        /// a jet and the jet will be considered as a tau jet.
         ///
-        /// @warning DR matching for tau tagging is only available on jet based method
+        /// @warning DR matching for tau tagging is only available with the jet-based method
         MAfloat32 btag_matching_deltaR = 0.5;
         MAbool btag_exclusive = true;
         MAbool enable_ctagging = false;

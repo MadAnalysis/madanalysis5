@@ -156,8 +156,15 @@ namespace MA5
         virtual void Print() const
         {
             INFO << "ntracks ="   << /*set::setw(8)*/"" << std::left << ntracks_  << ", "
-                 << "btag = " << /*set::setw(8)*/"" << std::left << loose_btag_ << ", "
-                 << "ctag = " << /*set::setw(8)*/"" << std::left << loose_ctag_ << ", ";
+                 << "loose  btag   = " <<  std::left << loose_btag_ << ", "
+                 << "loose  ctag   = " <<  std::left << loose_ctag_ << ", "
+                 << "medium btag   = " <<  std::left << mid_btag_ << ", "
+                 << "medium ctag   = " <<  std::left << mid_ctag_ << ", "
+                 << "tight  btag   = " <<  std::left << tight_btag_ << ", "
+                 << "tight  ctag   = " <<  std::left << tight_ctag_ << ", "
+                 << "loose  tautag = " <<  std::left << loose_tautag_ << ", "
+                 << "medium tautag = " <<  std::left << mid_tautag_ << ", "
+                 << "tight  tautag = " <<  std::left << tight_tautag_ << ", ";
             RecParticleFormat::Print();
         }
 
