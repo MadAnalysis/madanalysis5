@@ -30,6 +30,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <map>
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Counter/MultiRegionCounterManager.h"
@@ -143,6 +144,16 @@ class RegionSelectionManager
       regions_[i]->InitializeForNewEvent(EventWeight);
     for (MAuint32 i=0; i < plotmanager_.GetNplots(); i++)
       plotmanager_.GetHistos()[i]->SetFreshEvent(true);
+  }
+
+  /// Initialize for multiweight
+  void InitializeForNewEvent(const std::map<MAuint32, MAfloat64> &weights){
+	 NumberOfSurvivingRegions_ = regions_.size();
+	 for (MAuint32 i=0; i<regions_.size(); i++ )
+	 {
+		regions_[i]->InitializeForNewEvent(weights);
+	 }
+      	
   }
 
   /// This method associates all regions with a cut
