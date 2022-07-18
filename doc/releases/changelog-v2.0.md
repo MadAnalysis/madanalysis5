@@ -47,6 +47,9 @@
 * Various bugfixes for matching the numeric results to MA5 v1.10.
   ([#97](https://github.com/MadAnalysis/madanalysis5/pull/97))
 
+* $M_{eff}$ definition has been fixed.
+  [(#86)](https://github.com/MadAnalysis/madanalysis5/pull/86)
+
 ## Contributors
 
 This release contains contributions from (in alphabetical order):
