@@ -172,114 +172,150 @@ namespace MA5
         virtual void Reset() { clear(); }
 
         /// Clear all information
-        void clear();
+        void clear()
+        {
+            ntracks_ = 0;
+            loose_btag_ = false;
+            loose_ctag_ = false;
+            loose_tautag_ = false;
+            mid_btag_ = false;
+            mid_ctag_ = false;
+            mid_tautag_ = false;
+            tight_btag_ = false;
+            tight_ctag_ = false;
+            tight_tautag_ = false;
+            true_ctag_ = false;
+            true_btag_ = false;
+            true_tautag_ = false;
+            isolCones_.clear();
+            Constituents_.clear();
+        }
 
         /// Accessor to the number of tracks
-        const MAuint16 ntracks() const;
+        const MAuint16 ntracks() const {return ntracks_;}
 
         /// Setting ntracks
-        void setNtracks(MAuint16 ntracks);
+        void setNtracks(MAuint16 ntracks) { ntracks_ = ntracks; }
 
-        /// Tagger options
-
-        /// Accessor to the loose b-tag
-        const MAbool& btag() const;
-
-        /// Accessor to the loose c-tag
-        const MAbool& ctag() const;
-
-        /// Accessor to the loose c-tag
-        const MAbool& tautag() const;
+        ///==================///
+        /// Tagger accessors ///
+        ///==================///
 
         /// Accessor to the loose b-tag
-        const MAbool& loose_btag() const;
+        const MAbool& btag() const { return loose_btag(); }
 
         /// Accessor to the loose c-tag
-        const MAbool& loose_ctag() const;
+        const MAbool& ctag() const { return loose_ctag(); }
 
         /// Accessor to the loose c-tag
-        const MAbool& loose_tautag() const;
+        const MAbool& tautag() const { return loose_tautag(); }
+
+        /// Accessor to the loose b-tag
+        const MAbool& loose_btag() const { return loose_btag_; }
+
+        /// Accessor to the loose c-tag
+        const MAbool& loose_ctag() const { return loose_ctag_; }
+
+        /// Accessor to the loose c-tag
+        const MAbool& loose_tautag() const { return loose_tautag_; }
 
         /// Accessor to the mid b-tag
-        const MAbool& mid_btag() const;
+        const MAbool& mid_btag() const { return mid_btag_; }
 
         /// Accessor to the mid c-tag
-        const MAbool& mid_ctag() const;
+        const MAbool& mid_ctag() const { return mid_ctag_; }
 
         /// Accessor to the mid c-tag
-        const MAbool& mid_tautag() const;
+        const MAbool& mid_tautag() const { return mid_tautag_; }
 
         /// Accessor to the tight b-tag
-        const MAbool& tight_btag() const;
+        const MAbool& tight_btag() const { return tight_btag_; }
 
         /// Accessor to the tight c-tag
-        const MAbool& tight_ctag() const;
+        const MAbool& tight_ctag() const { return tight_ctag_; }
 
         /// Accessor to the tight c-tag
-        const MAbool& tight_tautag() const;
+        const MAbool& tight_tautag() const { return tight_tautag_; }
 
         /// Accessor to the true c-tag
-        const MAbool& true_ctag() const;
+        const MAbool& true_ctag() const {return true_ctag_;}
 
         /// Accessor to the true b-tag
-        const MAbool& true_btag() const;
+        const MAbool& true_btag() const {return true_btag_;}
 
         /// Accessor to the true tau-tag
-        const MAbool& true_tautag() const;
+        const MAbool& true_tautag() const {return true_tautag_;}
+
+        /// Setters for tagger
 
         /// Setting a new true_btag_ value
-        void setTrueBtag(const MAbool& tag);
+        void setTrueBtag(const MAbool& tag) { true_btag_ = tag;}
 
         /// Setting a new true_ctag_ value
-        void setTrueCtag(const MAbool& tag);
+        void setTrueCtag(const MAbool& tag) { true_ctag_ = tag;}
 
         /// Setting a new true_tautag_ value
-        void setTrueTautag(const MAbool& tag);
+        void setTrueTautag(const MAbool& tag) { true_tautag_ = tag;}
 
         /// Setting a new loose_btag_ value
-        void setBtag(const MAbool& tag);
+        void setBtag(const MAbool& tag) { setLooseBtag(tag); }
 
         /// Setting a new loose_ctag_ value
-        void setCtag(const MAbool& tag);
+        void setCtag(const MAbool& tag) { setLooseCtag(tag); }
 
         /// Setting a new loose_tautag_ value
-        void setTautag(const MAbool& tag);
+        void setTautag(const MAbool& tag) { setLooseTautag(tag); }
 
         /// Setting a new loose_btag_ value
-        void setLooseBtag(const MAbool& tag);
+        void setLooseBtag(const MAbool& tag) { loose_btag_ = tag; }
 
         /// Setting a new loose_ctag_ value
-        void setLooseCtag(const MAbool& tag);
+        void setLooseCtag(const MAbool& tag) { loose_ctag_ = tag; }
 
         /// Setting a new loose_tautag_ value
-        void setLooseTautag(const MAbool& tag);
+        void setLooseTautag(const MAbool& tag) { loose_tautag_ = tag; }
 
         /// Setting a new Mid_btag_ value
-        void setMidBtag(const MAbool& tag);
+        void setMidBtag(const MAbool& tag) { mid_btag_ = tag; }
 
         /// Setting a new Mid_ctag_ value
-        void setMidCtag(const MAbool& tag);
+        void setMidCtag(const MAbool& tag) { mid_ctag_ = tag; }
 
         /// Setting a new Mid_tautag_ value
-        void setMidTautag(const MAbool& tag);
+        void setMidTautag(const MAbool& tag) { mid_tautag_ = tag; }
 
         /// Setting a new Tight_btag_ value
-        void setTightBtag(const MAbool& tag);
+        void setTightBtag(const MAbool& tag) { tight_btag_ = tag; }
 
         /// Setting a new Tight_ctag_ value
-        void setTightCtag(const MAbool& tag);
+        void setTightCtag(const MAbool& tag) { tight_ctag_ = tag; }
 
         /// Setting a new Tight_tautag_ value
-        void setTightTautag(const MAbool& tag);
+        void setTightTautag(const MAbool& tag) { tight_tautag_ = tag; }
 
         /// Set all b-tags
-        void setAllBtags(const MAbool& tag);
+        void setAllBtags(const MAbool &tag) {
+            true_btag_ = tag;
+            loose_btag_ = tag;
+            mid_btag_ = tag;
+            tight_btag_ = tag;
+        }
 
         /// Set all c-tags
-        void setAllCtags(const MAbool& tag);
+        void setAllCtags(const MAbool &tag) {
+            true_ctag_ = tag;
+            loose_ctag_ = tag;
+            mid_ctag_ = tag;
+            tight_ctag_ = tag;
+        }
 
         /// Set all tau-tags
-        void setAllTautags(const MAbool& tag);
+        void setAllTautags(const MAbool &tag) {
+            true_tautag_ = tag;
+            loose_tautag_ = tag;
+            mid_tautag_ = tag;
+            tight_tautag_ = tag;
+        }
 
         /// Add one constituent
         void AddConstituent (const MAint32& index);
