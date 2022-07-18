@@ -489,7 +489,9 @@ namespace MA5 {
         myTau->setNtracks(myJet->ntracks());
         myTau->setMc(myJet->mc_);
         myTau->setDecayMode(PHYSICS->GetTauDecayMode(myTau->mc_));
+#ifdef MA5_FASTJET_MODE
         myTau->setPseudoJet(myJet->pseudojet_);
+#endif
 
         MAint32 charge = 0;
         myTau->Constituents_.reserve(myJet->Constituents_.size());
