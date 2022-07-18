@@ -75,7 +75,7 @@ class JobTaggerHeader:
         file.write('        void Initialize() {\n')
         file.write('            /// @brief Booleans for code efficiency\n')
         file.write('            /// Turn on the usage of tau tagging efficiency\n')
-        file.write(f"            _isTauTaggingEffOn = {'true' if any([x in [(x[0], x[1]) for x in self.unique_rules] for x in [(15,15), (21,15)]]) else 'false'};\n")
+        file.write(f"            _isTauTaggingEffOn = {'true' if (15, 15) in [(x[0], x[1]) for x in self.unique_rules] else 'false'};\n")
         file.write('            /// Turn on the usage of jet (mis)tagging efficiency\n')
         file.write(f"            _isJetTaggingOn = {'true' if any([x in [(x[0], x[1]) for x in self.unique_rules] for x in [(5,5), (4,5), (21,5), (5,4), (4,4), (21,4), (21,15), (21,11), (21,22)]]) else 'false'};\n")
         file.write('            /// Turn on the usage of muon (mis)tagging efficiency\n')
