@@ -7,6 +7,8 @@
 
 ![Python v3.8](https://img.shields.io/badge/python-3670A0?style=plastic&logo=python&logoColor=ffdd54&label=3.8&color=brightgreen)
 ![C++](https://img.shields.io/badge/c++-%2300599C.svg?style=plastic&logo=c%2B%2B&logoColor=white&label=11)
+[![CI](https://github.com/MadAnalysis/madanalysis5/actions/workflows/quick_validation.yml/badge.svg?style=plastic)](https://github.com/MadAnalysis/madanalysis5/actions/workflows/quick_validation.yml)
+
 ## Outline
  - [What is MadAnalysis 5?](#what-is-madanalysis-5)
  - [Requirements](#requirements)
@@ -234,7 +236,8 @@ authors thank you for this.
 In the following you can find supported third party software that can be used within MadAnalysis 5.
 The [latest release](https://github.com/MadAnalysis/madanalysis5/releases) of MadAnalysis 5 has been tested with enlisted versions.
 
-- [FastJet](http://fastjet.fr) v3.3.3
+- [FastJet](http://fastjet.fr) v3.4.0
+- [FastJet Contrib](https://fastjet.hepforge.org/contrib/) v1.048
 - [Delphes](https://github.com/delphes/delphes) v3.4.3
 - [ROOT](https://root.cern) v6.04.08
 - [pyhf](https://github.com/scikit-hep/pyhf) v0.6.3
