@@ -586,9 +586,9 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
       {
         // Creating new jet
           output_jets.emplace_back(part->PT,part->Eta,part->Phi,part->Mass);
-          output_jets.back().ntracks_  = 0; // To fix later
-          output_jets.back().btag_     = part->BTag;
-          output_jets.back().HEoverEE_ = part->EhadOverEem;
+          output_jets.back().ntracks_     = 0; // To fix later
+          output_jets.back().loose_btag_ = part->BTag;
+          output_jets.back().HEoverEE_   = part->EhadOverEem;
 
         // Setting corresponding gen particle
         /*      for (MAuint32 j=0;j<static_cast<MAuint32>(part->Particles.GetEntries());j++)
@@ -624,9 +624,9 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
 
       // Setting jet info
       jet->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,part->Mass);
-      jet->ntracks_  = 0; // To fix later
-      jet->btag_     = part->BTag;
-      jet->HEoverEE_ = part->EhadOverEem;
+      jet->ntracks_    = 0; // To fix later
+      jet->loose_btag_ = part->BTag;
+      jet->HEoverEE_   = part->EhadOverEem;
     }
   }
 

@@ -24,33 +24,82 @@
 
 from __future__ import absolute_import
 import logging
-class Tagger:
+from typing import Any, Optional
+from enum import Enum, auto
 
+AST = Any
+
+class TaggerStatus(Enum):
+    NONE = auto()
+    LOOSE = auto()
+    MID = auto()
+    TIGHT = auto()
+
+    @staticmethod
+    def get_status(status: str):
+        """Convert string to tagger criterion"""
+        if status.lower() == "loose":
+            return TaggerStatus.LOOSE
+        elif status.lower() in ["med", "mid", "medium"]:
+            return TaggerStatus.MID
+        elif status.lower() == "tight":
+            return TaggerStatus.TIGHT
+        else:
+            return TaggerStatus.NONE
+
+    @staticmethod
+    def to_str(status):
+        if status == TaggerStatus.LOOSE:
+            return "loose"
+        elif status == TaggerStatus.MID:
+            return "medium"
+        elif status == TaggerStatus.TIGHT:
+            return "tight"
+        else:
+            return ""
+
+
+class Tagger:
     # Initialization
     def __init__(self):
-        self.logger = logging.getLogger('MA5');
+        self.logger = logging.getLogger('MA5')
         self.rules = {}
 
+    def add_rule(self, id_true: str, id_reco: str, function: AST, bounds: AST, tag: Optional[TaggerStatus] = None) -> None:
+        """
+        Adding a rule to the tagger. The bounds and function are written as ASTs
 
-    # Adding a rule to the tagger
-    # The bounds and function are written as ASTs
-    def add_rule(self,id_true, id_reco, function, bounds):
+        :param id_true: true particle id
+        :param id_reco: particle id to be reconstructed
+        :param function: efficiency function
+        :param bounds: bounds of the function
+        :param tag: loose/medium/tight criterion of the tagger
+        :return:
+        """
+
         ## Checking wether the tagger is supported
-        if not self.is_supported(id_true, id_reco):
+        if not self.is_supported(id_true, id_reco, tag):
             return
+        ## Default tag for jets and taus is loose tag. If tag is not given convert to loose
+        if id_reco in ["21", "4", "5", "15"] and id_true in ["21", "4", "5", "15"]:
+            tag = tag if tag != TaggerStatus.NONE else TaggerStatus.LOOSE
         ## Checking whether the reco/true pair already exists
-        key_number=len(list(self.rules.keys()))+1
+        key_number = len(list(self.rules.keys())) + 1
         for key, value in self.rules.items():
-            if value['id_true']==id_true and value['id_reco']==id_reco:
+            if value['id_true'] == id_true and value['id_reco'] == id_reco and value["tag"] == tag:
                 key_number = key
         if not key_number in list(self.rules.keys()):
-            self.rules[key_number] = { 'id_true':id_true, 'id_reco':id_reco,
-              'efficiencies':{} }
+            self.rules[key_number] = dict(
+                id_true=id_true,
+                id_reco=id_reco,
+                efficiencies=dict(),
+                tag=tag
+            )
 
         ## Defining a new rule ID for an existing tagger
-        eff_key = len(self.rules[key_number]['efficiencies'])+1
-        self.rules[key_number]['efficiencies'][eff_key] = { 'function':function,
-            'bounds': bounds }
+        eff_key = len(self.rules[key_number]['efficiencies']) + 1
+        self.rules[key_number]['efficiencies'][eff_key] = {'function': function,
+                                                           'bounds': bounds}
 
 
     def display(self):
@@ -59,8 +108,8 @@ class Tagger:
         self.logger.info('*********************************')
         for key in self.rules.keys():
             myrule = self.rules[key]
-            self.logger.info(str(key) + ' - Tagging a true PDG-' + str(myrule['id_true']) + \
-               ' as a PDG-' + str(myrule['id_reco']))
+            self.logger.info(f"{key} - Tagging a true PDG-{myrule['id_true']} as a PDG-{myrule['id_reco']}" \
+                             + (myrule["tag"] != TaggerStatus.NONE)*f" with {TaggerStatus.to_str(myrule['tag'])} tag.")
             for eff_key in myrule['efficiencies'].keys():
                 cpp_name = 'eff_'+str(myrule['id_true'])+'_'+str(myrule['id_reco'])+\
                   '_'+str(eff_key)
@@ -77,11 +126,20 @@ class Tagger:
             self.logger.info('  --------------------')
 
 
-    def is_supported(self,id_true, id_reco):
-        supported = { '5':['21','4','5'], '4':['21','4','5'], '15':['15','21'],
-                      '21' : ['11','13','22'], '11' : ['13','22', '21'],
-                      '13' : ['11','22'],      '22' : ['11','13', '21']}
+    def is_supported(self,id_true: str, id_reco: str, tag: TaggerStatus):
+        supported = {'5': ['21', '4', '5'], '4': ['21', '4', '5'], '15': ['15', '21'],
+                     '21': ['11', '13', '22'], '11': ['13', '22', '21'],
+                     '13': ['11', '22'], '22': ['11', '13', '21']}
         if id_reco not in list(supported.keys()) or id_true not in supported[id_reco]:
-            self.logger.error('This tagger is currently not supported (tagging '+ id_true + ' as ' + id_reco + '). Tagger ignored.')
+            self.logger.error(
+                f"This tagger is currently not supported (tagging {id_true} as {id_reco}). Tagger ignored."
+            )
             return False
+        if tag in [TaggerStatus.LOOSE, TaggerStatus.MID, TaggerStatus.TIGHT]:
+            if id_reco not in ["21", "4", "5", "15"] or id_true not in ["21", "4", "5", "15"]:
+                self.logger.error(
+                    f"This tagger is currently not supported. {id_true} can not be tagged as {id_reco} with "
+                    f"{TaggerStatus.to_str(tag)} tag."
+                )
+                return False
         return True

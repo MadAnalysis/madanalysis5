@@ -554,7 +554,7 @@ class CheckUp():
 
         meta = json.loads(out)
 
-        latest_version = [int(x) for x in meta['tag_name'][1:].split(".")]
+        latest_version = [int(x) for x in meta['tag_name'][1:].split("_")[0].split(".")]
         current_version = [int(x) for x in self.archi_info.ma5_version.split(".")]
 
         def compare_versions(version1, version2):

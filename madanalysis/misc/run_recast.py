@@ -357,6 +357,10 @@ class RunRecast():
             analysisList.write('#include "SampleAnalyzer/User/Analyzer/'+ana+'.h"\n')
         analysisList.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"\n')
         analysisList.write('#include "SampleAnalyzer/Commons/Service/LogStream.h"\n\n')
+        if self.main.superfastsim.isTaggerOn():
+            analysisList.write('#include "new_tagger.h"\n')
+        if self.main.superfastsim.isNewSmearerOn():
+            analysisList.write('#include "new_smearer_reco.h"\n')
         analysisList.write('// -----------------------------------------------------------------------------\n')
         analysisList.write('// BuildUserTable\n')
         analysisList.write('// -----------------------------------------------------------------------------\n')

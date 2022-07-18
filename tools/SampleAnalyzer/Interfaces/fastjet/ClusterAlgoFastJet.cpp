@@ -24,14 +24,6 @@
 
 // SampleAnalyser headers
 #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoFastJet.h"
-#include "SampleAnalyzer/Commons/Service/LoopService.h"
-#include "SampleAnalyzer/Commons/Service/Physics.h"
-#include "SampleAnalyzer/Commons/Service/PDGService.h"
-#include "SampleAnalyzer/Commons/Base/SmearerBase.h"
-
-// FastJet headers
-#include <fastjet/PseudoJet.hh>
-
 
 using namespace MA5;
 
@@ -52,26 +44,6 @@ MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
     if (Exclusive_) jets = clust_seq->exclusive_jets(0.);
     else jets = clust_seq->inclusive_jets(0.);
 
-    // Initialize output jet vector
-    std::vector<RecJetFormat> output_jets;
-
-    // Smearing if necessary
-    MAint32 jet_counter = 0;
-    if (smearer->isJetSmearerOn())
-    {
-        for (auto &jet: jets)
-        {
-            // Smearer module returns a smeared MCParticleFormat object
-            // Default: NullSmearer, that does nothing
-            // Reminder: 21 is reserved for the reco-jets
-            MCParticleFormat current_jet(jet.px(),jet.py(),jet.pz(),jet.e());
-            MCParticleFormat smeared = smearer->Execute(dynamic_cast<const MCParticleFormat*>(&current_jet), 21);
-            jet.reset_momentum(smeared.px(),smeared.py(),smeared.pz(),smeared.e());
-            if(jet.pt() >= Ptmin_) jet_counter++;
-        }
-        output_jets.reserve(jet_counter);
-    }
-
     // Calculating the MET
     ParticleBaseFormat* MET = myEvent.rec()->GetNewMet();
     ParticleBaseFormat* MHT = myEvent.rec()->GetNewMht();
@@ -82,9 +54,22 @@ MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
     MAfloat64 & Meff= myEvent.rec()->Meff();
 
     // Storing
-    for (auto &jet: fastjet::sorted_by_pt(jets))
+    for (auto &jet: jets)
     {
         if (jet.pt() <= 1e-10) continue;
+
+        if (smearer->isJetSmearerOn())
+        {
+            // Smearer module returns a smeared MCParticleFormat object
+            // Default: NullSmearer, that does nothing
+            // Reminder: 21 is reserved for the reco-jets
+            MCParticleFormat current_jet(jet.px(),jet.py(),jet.pz(),jet.e());
+            MCParticleFormat smeared = smearer->Execute(
+                dynamic_cast<const MCParticleFormat*>(&current_jet), 21
+            );
+            jet.reset_momentum(smeared.px(),smeared.py(),smeared.pz(),smeared.e());
+        }
+
         MALorentzVector q(jet.px(),jet.py(),jet.pz(),jet.e());
         (*MET) -= q;
         (*MHT) -= q;
@@ -95,19 +80,39 @@ MAbool ClusterAlgoFastJet::Execute(SampleFormat& mySample, EventFormat& myEvent,
         if(jet.pt() < Ptmin_) continue;
 
         // Saving jet information
-        output_jets.emplace_back(jet);
+        RecJetFormat * RecJet = myEvent.rec()->GetNewJet();
+        RecJet->pseudojet_=jet;
+        RecJet->setMomentum(MALorentzVector(jet.px(),jet.py(),jet.pz(),jet.e()));
+
         std::vector<fastjet::PseudoJet> constituents = clust_seq->constituents(jet);
-        output_jets.back().Constituents_.reserve(constituents.size());
-        output_jets.back().ntracks_ = 0;
+        RecJet->Constituents_.reserve(constituents.size());
+        RecJet->ntracks_ = 0;
         for (auto &constit: constituents)
         {
-            output_jets.back().Constituents_.emplace_back(constit.user_index());
+            RecJet->Constituents_.emplace_back(constit.user_index());
             if (PDG->IsCharged(myEvent.mc()->particles()[constit.user_index()].pdgid()))
-                output_jets.back().ntracks_++;
+                RecJet->ntracks_++;
         }
     }
-    myEvent.rec()->jetcollection_.insert(std::make_pair(myEvent.rec()->PrimaryJetID_, output_jets));
+
+    // Create an empty accessor if there are no jets. Jets are not sorted at this point!!
+    if (jets.size() == 0) myEvent.rec()->CreateEmptyJetAccesor();
+    else {
+        std::sort(
+            myEvent.rec()->jetcollection_[myEvent.rec()->PrimaryJetID_].begin(),
+            myEvent.rec()->jetcollection_[myEvent.rec()->PrimaryJetID_].end(),
+            [](RecJetFormat const &j1, RecJetFormat const &j2) { return j1.pt() > j2.pt(); }
+        );
+    }
+
+    /// @attention in the earlier version of the code Meff is filled with MET->pt() at this point
+    /// we now switched to MHT because in the earlier version of the code when this function
+    /// executed MET was empty. For numerical consistency we use MHT here.
+    /// For details see JetClusterer.cpp and ClusterAlgoFastjet.cpp in v1.10.x
+    /// BENJ" changed back to MET; to be discussed.
     Meff += MET->pt();
+
+    // Exit
     return true;
 }
 

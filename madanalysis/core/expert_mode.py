@@ -155,15 +155,18 @@ class ExpertMode:
 
         # if fastsim functionalities are needed
         if config!='':
-            with open(self.path+'/Build/SampleAnalyzer/User/Analyzer/'+title+'.h','r') as f:
+            with open(self.path+'/Build/SampleAnalyzer/User/Analyzer/analysisList.h','r') as f:
                 header = f.readlines()
-            to_include = [x for x in os.listdir(self.path+'/Build/SampleAnalyzer/User/Analyzer/') if x in ['new_smearer_reco.h',
-                                                                                                                'new_tagger.h']]
-            top_header    = header[:header.index('namespace MA5\n')]
-            bottom_header = header[header.index('namespace MA5\n'):]
-            for inc in to_include:
+                to_include = [x for x in os.listdir(self.path + '/Build/SampleAnalyzer/User/Analyzer/') if
+                              x in ['new_smearer_reco.h', 'new_tagger.h']]
+
+            top_header    = header[:header.index('// -----------------------------------------------------------------------------\n')]
+            bottom_header = header[header.index('// -----------------------------------------------------------------------------\n'):]
+            for idx, inc in enumerate(to_include):
+                if idx == 0:
+                    top_header.append("/// SFS Headers\n")
                 top_header.append('#include "'+inc+'"\n')
-            open(self.path+'/Build/SampleAnalyzer/User/Analyzer/'+title+'.h','w').writelines(top_header+bottom_header)
+            open(self.path+'/Build/SampleAnalyzer/User/Analyzer/analysisList.h','w').writelines(top_header+bottom_header)
 
         return True
 

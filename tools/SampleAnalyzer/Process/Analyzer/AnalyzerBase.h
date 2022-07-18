@@ -42,16 +42,16 @@
 
 // FJcontrib tools
 #ifdef MA5_FASTJET_MODE
-    #include "SampleAnalyzer/Interfaces/substructure/SoftDrop.h"
-    #include "SampleAnalyzer/Interfaces/substructure/Cluster.h"
-    #include "SampleAnalyzer/Interfaces/substructure/Recluster.h"
-    #include "SampleAnalyzer/Interfaces/substructure/Nsubjettiness.h"
-    #include "SampleAnalyzer/Interfaces/substructure/VariableR.h"
-    #include "SampleAnalyzer/Interfaces/substructure/Pruner.h"
-    #include "SampleAnalyzer/Interfaces/substructure/Selector.h"
-    #include "SampleAnalyzer/Interfaces/substructure/Filter.h"
-    #include "SampleAnalyzer/Interfaces/substructure/EnergyCorrelator.h"
-    #include "SampleAnalyzer/Interfaces/HEPTopTagger/HTT.h"
+#include "SampleAnalyzer/Interfaces/substructure/SoftDrop.h"
+#include "SampleAnalyzer/Interfaces/substructure/Cluster.h"
+#include "SampleAnalyzer/Interfaces/substructure/Recluster.h"
+#include "SampleAnalyzer/Interfaces/substructure/Nsubjettiness.h"
+#include "SampleAnalyzer/Interfaces/substructure/VariableR.h"
+#include "SampleAnalyzer/Interfaces/substructure/Pruner.h"
+#include "SampleAnalyzer/Interfaces/substructure/Selector.h"
+#include "SampleAnalyzer/Interfaces/substructure/Filter.h"
+#include "SampleAnalyzer/Interfaces/substructure/EnergyCorrelator.h"
+#include "SampleAnalyzer/Interfaces/HEPTopTagger/HTT.h"
 #endif
 
 // STL headers
@@ -65,16 +65,17 @@
 #define INIT_ANALYSIS(CLASS,NAME) public: CLASS() {setName(NAME);} virtual ~CLASS() {} private:
 
 // Introduce shorthand for widely used reconstructed objects
-#define RecJet     MA5::RecJetFormat *
-#define RecJets    std::vector<const MA5::RecJetFormat *>
-#define RecTau     MA5::RecTauFormat *
-#define RecTaus    std::vector<const MA5::RecTauFormat *>
-#define RecLepton  MA5::RecLeptonFormat *
-#define RecLeptons std::vector<const MA5::RecLeptonFormat *>
-#define RecPhoton  MA5::RecPhotonFormat *
-#define RecPhotons std::vector<const MA5::RecPhotonFormat *>
-#define RecTrack   MA5::RecTrackFormat *
-#define RecTracks  std::vector<const MA5::RecTrackFormat *>
+#define RecJet MA5::RecJetFormat *
+typedef std::vector<const RecJet> RecJets;
+#define RecTau MA5::RecTauFormat *
+typedef std::vector<const RecTau> RecTaus;
+#define  RecLepton MA5::RecLeptonFormat *
+typedef std::vector<const RecLepton> RecLeptons;
+#define RecPhoton MA5::RecPhotonFormat *
+typedef std::vector<const RecPhoton> RecPhotons;
+#define RecTrack MA5::RecTrackFormat *
+typedef std::vector<const RecTrack> RecTracks;
+
 
 namespace MA5 {
     class AnalyzerBase
