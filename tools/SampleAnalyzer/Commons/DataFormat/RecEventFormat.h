@@ -188,7 +188,18 @@ namespace MA5
 
         /// Destructor
         ~RecEventFormat()
-        { }
+        {
+            for (auto &p: MCHadronicTaus_)
+               if (p != 0) delete p;
+            for (auto &p: MCMuonicTaus_)
+                if (p != 0) delete p;
+            for (auto &p: MCElectronicTaus_)
+                if (p != 0) delete p;
+            for (auto &p: MCBquarks_)
+                if (p != 0) delete p;
+            for (auto &p: MCCquarks_)
+                if (p != 0) delete p;
+        }
 
         /// Accessor to the photon collection (read-only)
         const std::vector<RecPhotonFormat>& photons() const {return photons_;}
@@ -280,7 +291,7 @@ namespace MA5
         const std::vector<const MCParticleFormat*>& MCCquarks() const
         {return MCCquarks_;}
 
-        /// Accessor to the electron collection
+        /// Accessor to the photon collection
         std::vector<RecPhotonFormat>& photons() {return photons_;}
 
         /// Accessor to the electron collection

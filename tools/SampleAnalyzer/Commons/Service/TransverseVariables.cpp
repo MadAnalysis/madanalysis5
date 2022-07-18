@@ -515,7 +515,40 @@ MAfloat64 TransverseVariables::MT2W(std::vector<const MCParticleFormat*> jets, c
 
 
 /// The alphaT variable
-void LoopForAlphaT(const MAuint32 n1, const std::vector<const MCParticleFormat*> jets,
+void LoopForAlphaT(const MAuint32 n1, const std::vector<RecJetFormat>& jets,
+                   MAfloat64 &MinDHT, const MAint32 last, std::vector<bool>& Ids, MAuint32 nIds)
+{
+   // We have enough information to form the pseudo jets
+   if(nIds==n1)
+   {
+     // Computing the DeltaHT of the pseudo jets and checking if minimum
+     MAfloat64 THT1 = 0; 
+     MAfloat64 THT2 = 0;
+     for (MAuint32 i=0;i<Ids.size();i++)
+     {
+       if (Ids[i]) THT1+=jets[i].et();
+       else THT2+=jets[i].et();
+     }
+     MAfloat64 DeltaHT = std::abs(THT1-THT2);
+     if (DeltaHT<MinDHT) MinDHT=DeltaHT;
+
+    // Exit
+    return;
+   }
+
+   // The first pseudo jet is incomplete -> adding one element
+   for(MAuint32 i=(last+1); i<=(jets.size()-n1+nIds); i++)
+   {
+     // Saving the current state
+     Ids[i]=true;
+     LoopForAlphaT(n1, jets, MinDHT, i, Ids,nIds+1);
+     Ids[i]=false; 
+   }
+}
+
+
+/// The alphaT variable
+void SlowLoopForAlphaT(const MAuint32 n1, const std::vector<const MCParticleFormat*> jets,
   MAfloat64 &MinDHT, const MAint32 last, std::vector<MAuint32> Ids)
 {
    // We have enough information to form the pseudo jets
@@ -547,11 +580,11 @@ void LoopForAlphaT(const MAuint32 n1, const std::vector<const MCParticleFormat*>
    {
      Ids = Save;   
      Ids.push_back(i);   
-     LoopForAlphaT(n1, jets, MinDHT, i, Ids); 
+     SlowLoopForAlphaT(n1, jets, MinDHT, i, Ids); 
    }
 }
 
-void LoopForAlphaT(const MAuint32 n1, std::vector<RecJetFormat> jets,
+void SlowLoopForAlphaT(const MAuint32 n1, std::vector<RecJetFormat> jets,
   MAfloat64 &MinDHT, const MAint32 last, std::vector<MAuint32> Ids)
 {
    // We have enough information to form the pseudo jets
@@ -583,7 +616,7 @@ void LoopForAlphaT(const MAuint32 n1, std::vector<RecJetFormat> jets,
    {
      Ids = Save;   
      Ids.push_back(i);   
-     LoopForAlphaT(n1, jets, MinDHT, i, Ids); 
+     SlowLoopForAlphaT(n1, jets, MinDHT, i, Ids); 
    }
 }
 
@@ -628,7 +661,55 @@ MAfloat64 TransverseVariables::AlphaT(const MCEventFormat* event)
   for (MAuint32 n1=1; n1<=(jets.size()/2); n1++)
   {
     std::vector<MAuint32> DummyJet;
-    LoopForAlphaT(n1,jets,MinDeltaHT,-1,DummyJet);
+    SlowLoopForAlphaT(n1,jets,MinDeltaHT,-1,DummyJet);
+  }
+
+  // Final
+  return 0.5*(1.-MinDeltaHT/THT)/sqrt(1.-MHT/THT*MHT/THT);
+}
+
+MAfloat64 TransverseVariables::SlowAlphaT(const MCEventFormat* event)
+{
+  std::vector<const MCParticleFormat*> jets;
+
+  // Creating jet collection
+  for (MAuint32 i=0;i<event->particles().size();i++)
+  {
+    if (event->particles()[i].statuscode()!=event->particles()[event->particles().size()-1].statuscode()) continue;
+    if (event->particles()[i].pdgid()!=21 && (abs(event->particles()[i].pdgid())<1 || 
+        abs(event->particles()[i].pdgid())>5)) continue;
+    jets.push_back(&event->particles()[i]);
+  }
+
+  // safety
+  if (jets.size()<2) return 0;
+
+  // dijet event
+  if (jets.size()==2) return std::min(jets[0]->et(),jets[1]->et()) /
+                             ( jets[0]->momentum()+jets[1]->momentum() ).Mt();
+
+  MAfloat64 MinDeltaHT = 1e6;
+
+  // compute vectum sum of jet momenta
+  MALorentzVector q(0.,0.,0.,0.);
+  for (MAuint32 i=0;i<jets.size();i++) q+=jets[i]->momentum();
+  MAfloat64 MHT = q.Pt();
+
+  // compute HT
+  MAfloat64 THT = 0;
+  for (MAuint32 i=0;i<jets.size();i++) THT+=jets[i]->et();
+
+  // Safety
+  if (THT==0) return -1.;
+  else if (MHT/THT>=1) return -1.;
+
+  // more than 3 jets : split into 2 sets
+  // n1 = number of jets in the first set
+  // n2 = number of jets in the second set
+  for (MAuint32 n1=1; n1<=(jets.size()/2); n1++)
+  {
+    std::vector<MAuint32> DummyJet;
+    SlowLoopForAlphaT(n1,jets,MinDeltaHT,-1,DummyJet);
   }
 
   // Final
@@ -636,6 +717,51 @@ MAfloat64 TransverseVariables::AlphaT(const MCEventFormat* event)
 }
 
 MAfloat64 TransverseVariables::AlphaT(const RecEventFormat* event)
+{
+  // jets
+  const std::vector<RecJetFormat>& jets = event->jets();
+
+  // safety
+  if (jets.size()<2) return 0;
+
+  // dijet event: the easiest case
+  if (jets.size()==2) return std::min(jets[0].et(),jets[1].et()) / 
+  ((jets[0].momentum())+(jets[1].momentum())).Mt();
+
+  // more than 2 jets: loops
+  MAfloat64 MinDeltaHT = 1e6;
+
+  // compute vectum sum of jet momenta
+  MALorentzVector q(0.,0.,0.,0.);
+  for (MAuint32 i=0;i<jets.size();i++) q+=jets[i].momentum();
+  MAfloat64 MHT = q.Pt();
+
+  // compute HT
+  MAfloat64 THT = 0;
+  for (MAuint32 i=0;i<jets.size();i++) THT+=jets[i].et();
+
+  // Safety
+  if (THT==0) return -1.;
+  else if (MHT/THT>=1) return -1.;
+
+  // split into 2 sets
+  // n1 = number of jets in the first set
+  // n2 = number of jets in the second set
+  std::vector<bool> DummyJet(jets.size(),false);
+  for (MAuint32 n1=1; n1<=(jets.size()/2); n1++)
+  {
+    std::fill(DummyJet.begin(),DummyJet.end(),false);
+    LoopForAlphaT(n1,jets,MinDeltaHT,-1,DummyJet,0);
+  }
+
+  // Final
+  return 0.5*(1.-MinDeltaHT/THT)/sqrt(1.-MHT/THT*MHT/THT);
+}
+
+
+
+
+MAfloat64 TransverseVariables::SlowAlphaT(const RecEventFormat* event)
 {
   // jets
   std::vector<RecJetFormat> jets = event->jets();
@@ -668,13 +794,10 @@ MAfloat64 TransverseVariables::AlphaT(const RecEventFormat* event)
   for (MAuint32 n1=1; n1<=(jets.size()/2); n1++)
           {
             std::vector<MAuint32> DummyJet;
-    LoopForAlphaT(n1,jets,MinDeltaHT,-1,DummyJet);
+    SlowLoopForAlphaT(n1,jets,MinDeltaHT,-1,DummyJet);
   }
 
   // Final
   return 0.5*(1.-MinDeltaHT/THT)/sqrt(1.-MHT/THT*MHT/THT);
 }
-
-
-
 

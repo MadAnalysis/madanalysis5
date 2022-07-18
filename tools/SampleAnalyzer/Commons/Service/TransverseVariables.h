@@ -233,6 +233,8 @@ class TransverseVariables
   /// The Alpha_T variable
   MAfloat64 AlphaT(const MCEventFormat*);
   MAfloat64 AlphaT(const RecEventFormat*);
+  MAfloat64 SlowAlphaT(const MCEventFormat*);
+  MAfloat64 SlowAlphaT(const RecEventFormat*);
 
 
 };
