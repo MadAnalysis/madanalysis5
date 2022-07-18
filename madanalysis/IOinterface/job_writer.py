@@ -557,12 +557,15 @@ class JobWriter(object):
             file.write('  manager.AddDefaultHadronic();\n')
             file.write('  // definition of the multiparticle "invisible"\n')
             file.write('  manager.AddDefaultInvisible();\n')
-            for item in self.main.multiparticles.Get("invisible"):
-                if item not in [-16, -14, -12, 12, 14, 16, 1000022, 1000039]:
-                    file.write(f"  PHYSICS->mcConfig().AddInvisibleId({item});\n")
-            for item in [-16, -14, -12, 12, 14, 16, 1000022, 1000039]:
-                if item not in self.main.multiparticles.Get("invisible"):
-                    file.write(f"  PHYSICS->mcConfig().RemoveInvisibleId({item});\n")
+            # If expert mode is initiated without an SFS card "invisible"
+            # collection does not exist. Thus just initiate with default config.
+            if self.main.multiparticles.Find("invisible"):
+                for item in self.main.multiparticles.Get("invisible"):
+                    if item not in [-16, -14, -12, 12, 14, 16, 1000022, 1000039]:
+                        file.write(f"  PHYSICS->mcConfig().AddInvisibleId({item});\n")
+                for item in [-16, -14, -12, 12, 14, 16, 1000022, 1000039]:
+                    if item not in self.main.multiparticles.Get("invisible"):
+                        file.write(f"  PHYSICS->mcConfig().RemoveInvisibleId({item});\n")
             file.write('\n')
 
         # Loop
