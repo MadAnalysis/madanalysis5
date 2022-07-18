@@ -32,6 +32,9 @@
   * Option to activate charm-jet tagging has been introduced.
   * Option to use jet-based hadronic tau matching has been introduced.
 
+* Command to fix random seed has been added.
+  [(#86)](https://github.com/MadAnalysis/madanalysis5/pull/86)
+
 ## Improvements
 
 * The SFS libraries are now included in the file `analysisList.h`, instead of in
