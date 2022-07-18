@@ -87,6 +87,9 @@
  * `RecEventFormat` memory allocation for MC particles has been freed
    ([#100](https://github.com/MadAnalysis/madanalysis5/pull/100)).
 
+ * Bugfix for multiplarticle decleration in expert-reco mode initiation without an SFS card.
+   ([#111](https://github.com/MadAnalysis/madanalysis5/pull/111))
+
 ## Contributors
 
 This release contains contributions from (in alphabetical order):
