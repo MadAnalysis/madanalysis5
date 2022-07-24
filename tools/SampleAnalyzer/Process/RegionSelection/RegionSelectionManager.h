@@ -73,7 +73,6 @@ class RegionSelectionManager
   RegionSelectionManager() {};
 
   /// Destructor
-  // 
   ~RegionSelectionManager() { 
     for(auto &region_pointer : regions_){
       delete region_pointer;
