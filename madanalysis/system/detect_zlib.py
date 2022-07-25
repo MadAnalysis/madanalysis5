@@ -47,7 +47,7 @@ class DetectZlib:
 
         self.search_libs = []
         self.search_incs = []
-        
+
         self.logger       = logging.getLogger('MA5')
 
         # NAme of the header

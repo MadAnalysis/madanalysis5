@@ -95,7 +95,6 @@ namespace MA5
             void Initialize(MAbool base=false)
             {
                 SetParameters();
-                if (!base) { PrintHeader(); }
                 PrintDebug();
                 output_.Reset();
                 c_  = 2.99792458E+8; // [m/s]
@@ -269,25 +268,6 @@ namespace MA5
 
                 module = JetSmearer_ ? "on" : "off";
                 DEBUG << "      * Jet Smearer        = " << module << endmsg;
-            }
-
-
-            void PrintHeader()
-            {
-                INFO << "   <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endmsg;
-                INFO << "   <>                                                              <>" << endmsg;
-                INFO << "   <>     Simplified Fast Detector Simulation in MadAnalysis 5     <>" << endmsg;
-                INFO << "   <>            Please cite arXiv:2006.09387 [hep-ph]             <>" << endmsg;
-                if (isPropagatorOn()) // cite particle propagator module
-                {
-                    INFO << "   <>                                                              <>" << endmsg;
-                    INFO << "   <>            Particle Propagation in MadAnalysis 5             <>" << endmsg;
-                    INFO << "   <>            Please cite arXiv:2112.05163 [hep-ph]             <>" << endmsg;
-                    INFO << "   <>                                                              <>" << endmsg;
-                }
-                INFO << "   <>         https://madanalysis.irmp.ucl.ac.be/wiki/SFS          <>" << endmsg;
-                INFO << "   <>                                                              <>" << endmsg;
-                INFO << "   <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>" << endmsg;
             }
     };
 }

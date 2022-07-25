@@ -802,6 +802,7 @@ class PlotFlow:
                                '             label='+mytitle+', ')
             if ntot!=0:
                 outputPy.write('histtype='+filledmode+', ')
+
             try:
                 import matplotlib.pyplot as plt
                 plt.hist([0],normed=True)

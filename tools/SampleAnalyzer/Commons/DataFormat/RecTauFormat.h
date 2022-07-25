@@ -33,7 +33,7 @@
 #include <iomanip>
 
 // SampleAnalyzer headers
-#include "SampleAnalyzer/Commons/DataFormat/RecParticleFormat.h"
+#include "SampleAnalyzer/Commons/DataFormat/RecJetFormat.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
 
@@ -47,8 +47,9 @@ class DelphesMA5tuneTreeReader;
 class DetectorDelphes;
 class DetectorDelphesMA5tune;
 class DelphesMemoryInterface;
+class SFSTaggerBase;
 
-class RecTauFormat : public RecParticleFormat
+class RecTauFormat : public RecJetFormat
 {
 
   friend class LHCOReader;
@@ -59,6 +60,7 @@ class RecTauFormat : public RecParticleFormat
   friend class DetectorDelphes;
   friend class DetectorDelphesMA5tune;
   friend class DelphesMemoryInterface;
+  friend class SFSTaggerBase;
 
   // -------------------------------------------------------------
   //                        data members

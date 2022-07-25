@@ -40,13 +40,9 @@ class InstallFastjetContrib:
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir = os.path.normpath(self.tmpdir + '/MA5_fastjetcontrib/')
         self.ncores     = 1
-#       self.files = {"fastjetcontrib.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fjcontrib-1.012.tar.gz"}
-#       self.files = {"fastjetcontrib.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fjcontrib-1.017.tar.gz"}
-#        self.files = {"fastjetcontrib.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fjcontrib-1.024.tar.gz"}
-#        self.files = {"fastjetcontrib.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fjcontrib-1.027.tar.gz"}
-#        self.files = {"fastjetcontrib.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fjcontrib-1.039.tar.gz"}
-#        self.files = {"fastjetcontrib.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fjcontrib-1.042.tar.gz"}
-        self.files = {"fastjetcontrib.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fjcontrib-1.045.tar.gz"}
+        self.files = {
+            "fastjetcontrib.tar.gz": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fjcontrib-1.048.tar.gz"
+        }
 
     def GetNcores(self):
         self.ncores = InstallService.get_ncores(self.main.archi_info.ncores,\
@@ -85,7 +81,9 @@ class InstallFastjetContrib:
 
     def Configure(self):
         # Input
-        theCommands=['./configure','--fastjet-config='+self.bindir]
+        # TODO: figure out how to give `-std=c++11 -fPIC` together to CXXFLAGS
+        # using " or ' doesn't work on linux systems
+        theCommands = ['./configure', '--fastjet-config=' + self.bindir, 'CXXFLAGS=-fPIC']
         logname=os.path.normpath(self.installdir+'/configuration_contrib.log')
         # Execute
         logging.getLogger('MA5').debug('shell command: '+' '.join(theCommands))
