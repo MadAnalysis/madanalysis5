@@ -33,6 +33,7 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <fstream>
 
 struct multiWeightEntry {
 	  std::pair<MAint64, MAint64> nentries_;
@@ -114,10 +115,30 @@ class Counter
       sumweight_.second+=weight;
       sumweight2_.second+=weight*weight;
     }
+
   }
 
+  void Debug(int debugCount, int weightprocessed){
+		for(auto &p : multiweight_){
+			std::ofstream output;
+			output.open("/Users/kfan/desktop/output.txt", std::fstream::app);
+			output << "ID : " << p.first << " increment multiweight call number : " << debugCount << " weight Processed :"<< weightprocessed;
+			output << "\n";
+			output << "pos entries : " <<  p.second->nentries_.first << " --  " << nentries_.first << " neg entries : " << p.second->nentries_.second <<   " -- "  << nentries_.second << "\n";
+			output << "pos sum : " << p.second->sumweight_.first <<  " -- " << sumweight_.first << " neg sum : " << p.second->sumweight_.second <<  " -- " << sumweight_.second << "\n";
+			output << "pos squared : " <<p.second->sumweight2_.first <<  " -- " << sumweight2_.first << " neg squared : " << p.second->sumweight2_.second <<  " -- " << sumweight2_.second << "\n";
+			output << "----------------------------------------------------------";
+			output << "\n";
+			output.close();
+
+	  }
+
+  }
+
+
   void Increment(const std::map<MAuint32, MAfloat64> &multiweights){
-	  for(const auto &weight : multiweights){
+	//	static int incrementDebugCount = 0;
+		for(const auto &weight : multiweights){
 			if(multiweight_.find(weight.first) == multiweight_.end()){
 				multiweight_[weight.first] = new multiWeightEntry;
 			}
@@ -132,6 +153,12 @@ class Counter
 				multiweight_[weight.first]->sumweight2_.second+=weight.second*weight.second;
 			}
 	  }
+	
+	  //Debug testing
+//	  Debug(incrementDebugCount, multiweights.begin()->second);	
+//	  incrementDebugCount++;
+		
+
   }
 
 
