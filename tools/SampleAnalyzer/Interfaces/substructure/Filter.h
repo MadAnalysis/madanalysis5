@@ -30,6 +30,7 @@
 
 namespace fastjet {
     class Filter;
+    class JetDefinition;
 }
 
 namespace MA5 {
@@ -67,7 +68,10 @@ namespace MA5 {
             public:
 
                 /// Constructor without argument
-                Filter() {}
+                Filter() {
+                    JetDefinition_ = 0;
+                    JetFilter_ = 0;
+                }
 
                 /// Destructor
                 ~Filter();

@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2020 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -25,6 +25,7 @@
 from __future__ import absolute_import
 from __future__ import print_function
 from six.moves import range
+
 class Main():
     def __init__(self,version,date,mr5dir):
         self.version = version

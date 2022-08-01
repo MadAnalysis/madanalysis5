@@ -32,7 +32,9 @@ namespace MA5{
     namespace Substructure {
 
         // Accessor for jet clustering algorithms
-        enum Algorithm {antikt, cambridge, kt};
+        enum Algorithm {
+            antikt = 0, akt = 0, AKT = 0, ANTIKT = 0, cambridge = 1, ca = 1, CA = 1, CAMBRIDGE = 1, kt = 2, KT = 2
+        };
 
     }
 }

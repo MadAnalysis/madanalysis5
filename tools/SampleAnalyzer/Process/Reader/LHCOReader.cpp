@@ -363,8 +363,8 @@ void LHCOReader::FillEventParticleLine(const std::string& line, EventFormat& myE
 
     // 8th column : btag
     str >> tmp;
-    if ( tmp == 1. || tmp ==2.) jet->btag_=true;
-    else jet->btag_ =false;
+    if ( tmp == 1. || tmp ==2.) jet->loose_btag_=true;
+    else jet->loose_btag_ =false;
     str >> jet->HEoverEE_;
   }
 

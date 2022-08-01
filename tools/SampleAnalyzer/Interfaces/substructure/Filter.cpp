@@ -32,8 +32,8 @@ namespace MA5 {
 
         Filter::~Filter()
         {
-            delete JetDefinition_;
-            delete JetFilter_;
+            if (JetDefinition_ != 0) delete JetDefinition_;
+            if (JetFilter_ != 0) delete JetFilter_;
         }
 
         //============================//
@@ -53,7 +53,7 @@ namespace MA5 {
 
         void Filter::Initialize(MAfloat32 Rfilt, Selector selector, MAfloat32 rho)
         {
-            Rfilt_=Rfilt; rho_=rho;
+            Rfilt_=Rfilt; rho_=rho; JetDefinition_ = 0;
             init_filter(selector,false);
         }
 

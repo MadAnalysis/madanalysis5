@@ -25,10 +25,20 @@
 
 #ifdef MA5_FASTJET_MODE
 
-// FastJet headers
-#include "fastjet/PseudoJet.hh"
-
 namespace MA5 {
+
+    /// Add one constituent
+    void RecJetFormat::AddConstituent(const MAint32& index) { Constituents_.push_back(index); }
+
+    /// get constituent collections
+    const std::vector<MAint32>& RecJetFormat::constituents() const { return Constituents_; }
+
+    /// Add one isolation cone
+    void RecJetFormat::AddIsolCone (const IsolationConeType& cone) { isolCones_.push_back(cone); }
+
+    /// get the collection of isolation cones
+    const std::vector<IsolationConeType>& RecJetFormat::isolCones() const { return isolCones_; }
+
     // return a vector of all subjets of the current jet (in the sense of the exclusive algorithm)
     // that would be obtained when running the algorithm with the given dcut.
     std::vector<const RecJetFormat *> RecJetFormat::exclusive_subjets(MAfloat32 dcut) const

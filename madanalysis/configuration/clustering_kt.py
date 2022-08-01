@@ -29,21 +29,25 @@ class ClusteringKt():
     default_radius    = 0.4
     default_exclusive = False
     default_ptmin     = 5.
+    default_collision = 'pp'
 
     userVariables = { "radius" : [str(default_radius)],\
                       "exclusive" : [str(default_exclusive)],\
-                      "ptmin" : [str(default_ptmin)] }
+                      "ptmin" : [str(default_ptmin)],\
+                      "collision" : [str(default_collision)]}
 
     def __init__(self):
-        self.radius    = ClusteringKt.default_radius
-        self.exclusive = ClusteringKt.default_exclusive
-        self.ptmin     = ClusteringKt.default_ptmin
+        self.radius     = ClusteringKt.default_radius
+        self.exclusive  = ClusteringKt.default_exclusive
+        self.ptmin      = ClusteringKt.default_ptmin
+        self.collision  = ClusteringKt.default_collision
 
         
     def Display(self):
         self.user_DisplayParameter("radius")
         self.user_DisplayParameter("exclusive")
         self.user_DisplayParameter("ptmin")
+        self.user_DisplayParameter("collision")
 
 
     def user_DisplayParameter(self,parameter):
@@ -56,6 +60,8 @@ class ClusteringKt():
             logging.getLogger('MA5').info("  + exclusive algo = "+msg)
         elif parameter=="ptmin":
             logging.getLogger('MA5').info("  + PT min (GeV) for produced jets = "+str(self.ptmin))
+        elif parameter=="collision":
+            logging.getLogger('MA5').info("  + type of collisions described in the events = "+str(self.collision))
         else:
             logging.getLogger('MA5').error("'clustering' has no parameter called '"+parameter+"'")
 
@@ -68,6 +74,7 @@ class ClusteringKt():
             mydict['cluster.exclusive'] = '1'
         else:
             mydict['cluster.exclusive'] = '0'
+        mydict['cluster.collision'] =str(self.collision)
         return mydict
 
         
@@ -116,6 +123,14 @@ class ClusteringKt():
                 logging.getLogger('MA5').error("the ptmin cannot be negative.")
                 return False
             self.ptmin=number
+
+        # collision
+        elif parameter=="collision":
+            if value in['pp','ee']:
+                self.collision = value
+            else:
+                logging.getLogger('MA5').error("the nature of the collisions described in the events must be pp or ee.")
+                return False
 
         # other    
         else:

@@ -504,7 +504,7 @@ class MergingPlots:
         else:
             outputPy.write('    ymin='+str(DJRplots[ind].ymin)+'\n')
         outputPy.write('    plt.gca().set_ylim(ymin,ymax)\n')
-        outputPy.write('    plt.gca().set_yscale("log",nonposy="clip")\n')
+        outputPy.write('    plt.gca().set_yscale("log",nonpositive="clip")\n')
         outputPy.write('\n\n')
 
         # Displaying a legend

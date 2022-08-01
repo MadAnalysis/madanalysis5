@@ -35,7 +35,7 @@ and call immediately the command line interface scripts"""
 import sys
 if  sys.version_info[0] != 3 or sys.version_info[1] <= 6:
     sys.exit('Python release '+ sys.version + ' is detected.\n' + \
-    'MadAnalysis 5 works only with Python version 3.8 and more recent version.\n' + \
+    'MadAnalysis 5 works only with Python version 3.6 or more recent version.\n' + \
     'Please upgrade your Python installation.')
 
 # Checking that the 'six' package is present
@@ -67,8 +67,8 @@ sys.path.insert(0, servicedir)
 
 # Release version
 # Do not touch it !!!!!  
-version = "2.0.0"
-date = "2022/05/24"
+version = "2.0.4"
+date = "2022/07/18"
 
 # Loading the MadAnalysis session
 import madanalysis.core.launcher

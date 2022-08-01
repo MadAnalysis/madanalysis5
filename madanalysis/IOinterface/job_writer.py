@@ -471,11 +471,11 @@ class JobWriter(object):
             file.write('  std::map<std::string, std::string> parametersC1;\n')
             parameters = self.main.fastsim.SampleAnalyzerConfigString()
             for k,v in sorted(six.iteritems(parameters),key=lambda k_v: (k_v[0],k_v[1])):
-                file.write('  parametersC1["'+k+'"]="'+v+'";\n')
+                file.write('  parametersC1["' + (k + '"').ljust(30, " ") + '] = "' + v + '";\n')
             for obj in ["electron","muon","track","photon"]:
                 if len(getattr(self.main.superfastsim, obj+"_isocone_radius")) != 0:
                     file.write(
-                        '  parametersC1["isolation.'+obj+'.radius"]="'+ ','.join(
+                        '  parametersC1[' + ('"isolation.' + obj + '.radius"').ljust(30, " ") + '] = "' + ','.join(
                         [str(x) for x in getattr(self.main.superfastsim, obj+"_isocone_radius")]
                         )+'";\n'
                     )
@@ -491,7 +491,7 @@ class JobWriter(object):
                     file.write('  std::map<std::string, std::string> '+map_name+';\n')
                     for opt, val in item.__dict__.items():
                         if opt in ['JetID','algorithm']:
-                            file.write('  '+map_name+'["'+(opt+'"').ljust(18,' ') + '] = "'+str(val)+'";\n')
+                            file.write('  '+map_name+'["'+(opt+'"').ljust(20,' ') + '] = "'+str(val)+'";\n')
                         else:
                             # To follow old syntax add "cluster.". 
                             # This is not necessary but makes sense for unified syntax
@@ -507,7 +507,8 @@ class JobWriter(object):
                 file.write('  cluster1->LoadSmearer(mySmearer);\n\n')
             if self.main.superfastsim.isTaggerOn():
                 file.write('  // Declaration of a generic tagger\n')
-                file.write('  NewTagger* tagger = new NewTagger();\n\n')
+                file.write('  NewTagger* myTagger = new NewTagger();\n')
+                file.write('  cluster1->LoadTagger(myTagger);\n\n')
 
 
         # + Case Delphes
@@ -556,12 +557,15 @@ class JobWriter(object):
             file.write('  manager.AddDefaultHadronic();\n')
             file.write('  // definition of the multiparticle "invisible"\n')
             file.write('  manager.AddDefaultInvisible();\n')
-            for item in self.main.multiparticles.Get("invisible"):
-                if item not in [-16, -14, -12, 12, 14, 16, 1000022, 1000039]:
-                    file.write(f"  PHYSICS->mcConfig().AddInvisibleId({item});\n")
-            for item in [-16, -14, -12, 12, 14, 16, 1000022, 1000039]:
-                if item not in self.main.multiparticles.Get("invisible"):
-                    file.write(f"  PHYSICS->mcConfig().RemoveInvisibleId({item});\n")
+            # If expert mode is initiated without an SFS card "invisible"
+            # collection does not exist. Thus just initiate with default config.
+            if self.main.multiparticles.Find("invisible"):
+                for item in self.main.multiparticles.Get("invisible"):
+                    if item not in [-16, -14, -12, 12, 14, 16, 1000022, 1000039]:
+                        file.write(f"  PHYSICS->mcConfig().AddInvisibleId({item});\n")
+                for item in [-16, -14, -12, 12, 14, 16, 1000022, 1000039]:
+                    if item not in self.main.multiparticles.Get("invisible"):
+                        file.write(f"  PHYSICS->mcConfig().RemoveInvisibleId({item});\n")
             file.write('\n')
 
         # Loop
@@ -596,8 +600,6 @@ class JobWriter(object):
             file.write('      if (!analyzer2->Execute(mySample,myEvent)) continue;\n')
         if self.main.fastsim.package=="fastjet":
             file.write('      cluster1->Execute(mySample,myEvent);\n')
-            if self.main.superfastsim.isTaggerOn():
-                file.write('      tagger->Execute(mySample,myEvent);\n')
         elif self.main.fastsim.package=="delphes":
             file.write('      fastsim1->Execute(mySample,myEvent);\n')
         elif self.main.fastsim.package=="delphesMA5tune":
@@ -696,6 +698,10 @@ class JobWriter(object):
         file.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"\n')
         file.write('#include "SampleAnalyzer/User/Analyzer/user.h"\n')
         file.write('#include "SampleAnalyzer/Commons/Service/LogStream.h"\n')
+        if self.main.superfastsim.isTaggerOn():
+            file.write('#include "new_tagger.h"\n')
+        if self.main.superfastsim.isNewSmearerOn():
+            file.write('#include "new_smearer_reco.h"\n')
         file.write('\n')
         file.write('// ------------------------------------------' +\
                    '-----------------------------------\n')

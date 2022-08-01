@@ -357,6 +357,10 @@ class RunRecast():
             analysisList.write('#include "SampleAnalyzer/User/Analyzer/'+ana+'.h"\n')
         analysisList.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"\n')
         analysisList.write('#include "SampleAnalyzer/Commons/Service/LogStream.h"\n\n')
+        if self.main.superfastsim.isTaggerOn():
+            analysisList.write('#include "new_tagger.h"\n')
+        if self.main.superfastsim.isNewSmearerOn():
+            analysisList.write('#include "new_smearer_reco.h"\n')
         analysisList.write('// -----------------------------------------------------------------------------\n')
         analysisList.write('// BuildUserTable\n')
         analysisList.write('// -----------------------------------------------------------------------------\n')
@@ -807,7 +811,7 @@ class RunRecast():
                     # TODO: Update arXiv number this is Les Houches arxiv number
                     print_gl_citation = False
                     self.logger.info("\033[1m   * Using global likelihoods to improve CLs calculations\033[0m")
-                    self.logger.info("\033[1m     Please cite arXiv:2002.12220 [hep-ph]\033[0m")
+                    self.logger.info("\033[1m     Please cite arXiv:2206.14870 [hep-ph]\033[0m")
                     if self.pyhf_config!={}:
                         self.logger.info("\033[1m                 pyhf DOI:10.5281/zenodo.1169739\033[0m")
                         self.logger.info("\033[1m                 For more details see https://scikit-hep.org/pyhf/\033[0m")

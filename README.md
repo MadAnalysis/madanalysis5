@@ -7,6 +7,8 @@
 
 ![Python v3.8](https://img.shields.io/badge/python-3670A0?style=plastic&logo=python&logoColor=ffdd54&label=3.8&color=brightgreen)
 ![C++](https://img.shields.io/badge/c++-%2300599C.svg?style=plastic&logo=c%2B%2B&logoColor=white&label=11)
+[![CI](https://github.com/MadAnalysis/madanalysis5/actions/workflows/quick_validation.yml/badge.svg?style=plastic)](https://github.com/MadAnalysis/madanalysis5/actions/workflows/quick_validation.yml)
+
 ## Outline
  - [What is MadAnalysis 5?](#what-is-madanalysis-5)
  - [Requirements](#requirements)
@@ -234,7 +236,8 @@ authors thank you for this.
 In the following you can find supported third party software that can be used within MadAnalysis 5.
 The [latest release](https://github.com/MadAnalysis/madanalysis5/releases) of MadAnalysis 5 has been tested with enlisted versions.
 
-- [FastJet](http://fastjet.fr) v3.3.3
+- [FastJet](http://fastjet.fr) v3.4.0
+- [FastJet Contrib](https://fastjet.hepforge.org/contrib/) v1.048
 - [Delphes](https://github.com/delphes/delphes) v3.4.3
 - [ROOT](https://root.cern) v6.04.08
 - [pyhf](https://github.com/scikit-hep/pyhf) v0.6.3
@@ -264,4 +267,5 @@ If you use MadAnalysis 5, please cite:
  - [E. Conte, and B. Fuks; Int. J. Mod. Phys. A 33 (2018) 1830027](http://arxiv.org/abs/1808.00480)
  - [J. Y. Araz, M. Frank and B. Fuks; Eur. Phys. J. C 80 (2020) 6, 531](https://arxiv.org/abs/1910.11418)
  - [J. Y. Araz, B. Fuks and G. Polykratis; Eur. Phys. J. C 81 (2021) 329](https://arxiv.org/abs/2006.09387)
- - [J. Y. Araz, B. Fuks, M. D. Goodsell and M. Utsch; arXiv:2112.05163](https://arxiv.org/abs/2112.05163)
+ - [J. Y. Araz, B. Fuks, M. D. Goodsell and M. Utsch; Eur. Phys. J. C 82 (2022) 597](https://arxiv.org/abs/2112.05163)
+ - [G. Alguero, J. Y. Araz, B. Fuks, S. Kraml; arXiv:2206.14870](https://arxiv.org/abs/2206.14870)

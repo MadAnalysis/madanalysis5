@@ -45,6 +45,9 @@ class ClusterAlgoStandard: public ClusterAlgoFastJet
     /// generalised kt parameter
     MAfloat64 p_;
 
+    /// nature of the collision (True=pp,False=ee)
+    MAbool collision_;
+    
 //---------------------------------------------------------------------------------
 //                                method members
 //---------------------------------------------------------------------------------
@@ -52,7 +55,7 @@ class ClusterAlgoStandard: public ClusterAlgoFastJet
 
     /// Constructor with algorithm
     ClusterAlgoStandard(std::string Algo): ClusterAlgoFastJet(Algo) 
-    {R_=0.5; p_=-1.;}
+    {R_=0.5; p_=-1.; collision_=true;}
 
     /// Destructor
     virtual ~ClusterAlgoStandard() 
@@ -72,6 +75,9 @@ class ClusterAlgoStandard: public ClusterAlgoFastJet
 
     /// Accessor to the jet clusterer parameters
     virtual std::string GetParameters();
+
+    /// Accessor to the collision type
+    std::string GetCollisionType() const;
 
 };
 
