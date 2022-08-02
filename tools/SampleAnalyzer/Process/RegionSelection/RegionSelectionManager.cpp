@@ -24,6 +24,7 @@
 
 // STL headers
 #include <iostream>
+#include <sys/resource.h>
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelectionManager.h"
@@ -69,7 +70,11 @@ MAbool RegionSelectionManager::ApplyCut(MAbool condition, std::string const &cut
     if(!ThisRegion->IsSurviving() ) { continue; }
 
     /// Check the current cut:
-    if(condition) { ThisRegion->IncrementCutFlow(ThisRegion->GetWeight()); }
+    if(condition) { 
+		ThisRegion->IncrementCutFlow(ThisRegion->GetWeight());
+		//multiweight
+		ThisRegion->IncrementCutFlow(ThisRegion->GetWeights());
+	}
     else
     {
       ThisRegion->SetSurvivingTest(false);

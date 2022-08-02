@@ -56,6 +56,8 @@ class Counter
   // -------------------------------------------------------------
  public :
 
+
+
   /// name of the analysis
   std::string name_;
 
@@ -90,7 +92,7 @@ class Counter
 
   /// Destructor
   ~Counter()
-  { }
+  {  }
 
   /// Reset
   void Reset()
@@ -98,24 +100,10 @@ class Counter
     nentries_   = std::make_pair(0,0); 
     sumweight_  = std::make_pair(0.,0.);
     sumweight2_ = std::make_pair(0.,0.);
-  }
-
-  /// Increment the counter
-  void Increment(const MAfloat32& weight=1.)
-  {
-    if (weight>0)
-    {
-      nentries_.first++;
-      sumweight_.first+=weight;
-      sumweight2_.first+=weight*weight;
-    }
-    else if (weight<0)
-    {
-      nentries_.second++;
-      sumweight_.second+=weight;
-      sumweight2_.second+=weight*weight;
-    }
-
+	for(auto &p : multiweight_){
+		delete p.second;
+	}
+	multiweight_.clear();
   }
 
   void Debug(int debugCount, int weightprocessed){
@@ -155,11 +143,33 @@ class Counter
 	  }
 	
 	  //Debug testing
-//	  Debug(incrementDebugCount, multiweights.begin()->second);	
-//	  incrementDebugCount++;
-		
+	//  Debug(incrementDebugCount, multiweights.begin()->second);	
+	//  incrementDebugCount++;	
 
   }
+
+
+  /// Increment the counter
+  void Increment(const MAfloat32& weight)
+  {
+    if (weight>0)
+    {
+      nentries_.first++;
+      sumweight_.first+=weight;
+      sumweight2_.first+=weight*weight;
+    }
+    else if (weight<0)
+    {
+      nentries_.second++;
+      sumweight_.second+=weight;
+      sumweight2_.second+=weight*weight;
+    }
+
+  }
+
+  
+
+  
 
 
 };

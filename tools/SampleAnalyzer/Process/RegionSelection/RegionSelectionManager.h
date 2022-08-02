@@ -31,6 +31,9 @@
 #include <string>
 #include <sstream>
 #include <map>
+#include <fstream>
+
+
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Counter/MultiRegionCounterManager.h"
@@ -40,6 +43,7 @@
 #include "SampleAnalyzer/Process/Writer/SAFWriter.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
+using namespace std;
 
 namespace MA5
 {
@@ -66,6 +70,11 @@ class RegionSelectionManager
   /// Weight associated with the processed event
   MAfloat64 weight_;
 
+
+  //multiweight
+  std::map<MAuint32, MAfloat64> multiweight_;
+
+ 
   // -------------------------------------------------------------
   //                      method members
   // -------------------------------------------------------------
@@ -102,6 +111,10 @@ class RegionSelectionManager
   MAfloat64 GetCurrentEventWeight()
     { return weight_; }
 
+  std::map<MAuint32, MAfloat64> GetCurrentEventMultiWeight(){
+	  return multiweight_;
+  }
+
   /// Set method
   void SetCurrentEventWeight(MAfloat64 weight)
   {
@@ -120,6 +133,24 @@ class RegionSelectionManager
           if (regions_[i]->GetName() == name) {regions_[i]->SetWeight(weight); break;}
       }
     }
+
+	//set methods for multiweight
+	void SetCurrentEventWeight(const std::map<MAuint32, MAfloat64> &multiweight){
+		multiweight_ = multiweight;
+		for(auto &region : regions_){
+			region->SetWeight(multiweight);
+		}
+	}
+
+	void SetRegionWeight(std::string name, std::map<MAuint32, MAfloat64> &multiweight){
+		for(auto &region : regions_){
+			if(region->GetName() == name) {
+				region->SetWeight(multiweight);
+				break;
+			}
+		}
+	}
+	
 
   /// Adding a RegionSelection to the manager
   void AddRegionSelection(const std::string& name)
@@ -142,11 +173,13 @@ class RegionSelectionManager
     NumberOfSurvivingRegions_ = regions_.size();
     for (MAuint32 i=0; i<regions_.size(); i++ )
       regions_[i]->InitializeForNewEvent(EventWeight);
+		
     for (MAuint32 i=0; i < plotmanager_.GetNplots(); i++)
       plotmanager_.GetHistos()[i]->SetFreshEvent(true);
   }
 
   /// Initialize for multiweight
+  
   void InitializeForNewEvent(const std::map<MAuint32, MAfloat64> &weights){
 	 NumberOfSurvivingRegions_ = regions_.size();
 	 for (MAuint32 i=0; i<regions_.size(); i++ )
@@ -155,6 +188,7 @@ class RegionSelectionManager
 	 }
       	
   }
+  
 
   /// This method associates all regions with a cut
   void AddCut(const std::string&name)
@@ -485,9 +519,15 @@ class RegionSelectionManager
     return false;
   }
 
+
+
+
   /// Dumping the content of the counters
   void HeadSR(std::ostream &, const std::string&);
   void DumpSR(std::ostream &);
+
+  
+  
 
 };
 

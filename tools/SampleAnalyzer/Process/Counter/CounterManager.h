@@ -30,7 +30,7 @@
 #include <iostream>
 #include <ostream>
 #include <vector>
-#include <map>
+
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Counter/Counter.h"
@@ -90,8 +90,10 @@ class CounterManager
   { return counters_[index];}
 
   /// Incrementing the initial number of events
-  void IncrementNInitial(MAfloat32 weight=1.0)
-  { initial_.Increment(weight); }
+  void IncrementNInitial(MAfloat32 weight)
+  { 
+	  initial_.Increment(weight); 
+  }
 
   /// Incrementing the initial number of events
   Counter& GetInitial()
@@ -109,8 +111,14 @@ class CounterManager
   void Finalize()
   { Reset(); }
 
+  
   void IncrementNInitial(const std::map<MAuint32, MAfloat64> &multiweight){
 	initial_.Increment(multiweight);
+  }
+  
+
+  std::vector<Counter> GetCounters(){
+	  return counters_;
   }
 
 

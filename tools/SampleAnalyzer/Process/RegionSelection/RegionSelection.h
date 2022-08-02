@@ -48,6 +48,7 @@ class RegionSelection
   std::string name_;
   MAbool surviving_;
   MAuint32 NumberOfCutsAppliedSoFar_;
+  MAuint32 MultiNumberOfCutsAppliedSoFar_;
   MAfloat64 weight_;
   std::map<MAuint32, MAfloat64> multiWeight_;
 
@@ -67,9 +68,12 @@ class RegionSelection
   /// Destructor
   ~RegionSelection()  { };
 
+ 
   /// Get methods
   std::string GetName()
     { return name_; }
+
+  CounterManager GetCutflow(){ return cutflow_; }
 
   MAbool IsSurviving()
     { return surviving_; }
@@ -82,7 +86,7 @@ class RegionSelection
 
   /// Printing the cutflow
   void WriteCutflow(SAFWriter& output)
-    { cutflow_.Write_TextFormat(output); }
+    { cutflow_.Write_TextFormat(output);}
 
   /// Set methods
   void SetName(std::string name)
@@ -100,11 +104,16 @@ class RegionSelection
   void SetNumberOfCutsAppliedSoFar(MAuint32 NumberOfCutsAppliedSoFar)
     { NumberOfCutsAppliedSoFar_ = NumberOfCutsAppliedSoFar; }
 
+  void SetMultiNumberOfCutsAppliedSoFar(MAuint32 MultiNumberOfCutsAppliedSoFar){
+	  MultiNumberOfCutsAppliedSoFar_ = MultiNumberOfCutsAppliedSoFar;
+  }
+
   // Increment CutFlow (when this region passes a cut)
   void IncrementCutFlow(MAfloat64 weight)
   {
     cutflow_[NumberOfCutsAppliedSoFar_].Increment(weight);
     NumberOfCutsAppliedSoFar_++;
+
   }
 
   // Add a cut to the CutFlow
@@ -127,18 +136,21 @@ class RegionSelection
 
   std::map<MAuint32, MAfloat64> GetWeights() {return multiWeight_;}
 
+  
   void IncrementCutFlow(const std::map<MAuint32, MAfloat64> &multiweight){
-	cutflow_[NumberOfCutsAppliedSoFar_].Increment(multiweight);
-	NumberOfCutsAppliedSoFar_++;
+	cutflow_[MultiNumberOfCutsAppliedSoFar_].Increment(multiweight);
+	MultiNumberOfCutsAppliedSoFar_++;
   }
-
+  
+  
+  
   void InitializeForNewEvent(const std::map<MAuint32, MAfloat64> &multiweight){
 	  SetSurvivingTest(true);
-	  SetNumberOfCutsAppliedSoFar(0);
+	  SetMultiNumberOfCutsAppliedSoFar(0);
 	  cutflow_.IncrementNInitial(multiweight);
 	  multiWeight_=multiweight;
   }
-
+  
 
 };
 

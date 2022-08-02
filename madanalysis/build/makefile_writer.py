@@ -347,7 +347,8 @@ class MakefileWriter():
 
         # - general
         libs=[]
-        file.write('LIBFLAGS  = \n')
+        # added SQL
+        file.write('LIBFLAGS  = -l sqlite3\n')
 
         # - commons
         if options.has_commons:

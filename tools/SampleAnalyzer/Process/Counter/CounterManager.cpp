@@ -24,6 +24,8 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Counter/CounterManager.h"
+#include "SampleAnalyzer/Process/Writer/DatabaseManager.h"
+
 
 
 using namespace MA5;
@@ -77,13 +79,15 @@ void CounterManager::Write_RootFormat(TFile* output) const
 /// Write the counters in a TEXT file
 void CounterManager::Write_TextFormat(SAFWriter& output) const
 {
+
+	
   // header
   *output.GetStream() << "<InitialCounter>" << std::endl;
 
   // name
   *output.GetStream() << "\"Initial number of events\"      #" << std::endl;
 
-  // nentries
+  // nentries 
   output.GetStream()->width(15);
   *output.GetStream() << std::left << std::scientific << initial_.nentries_.first;
   *output.GetStream() << " ";
@@ -111,12 +115,10 @@ void CounterManager::Write_TextFormat(SAFWriter& output) const
   *output.GetStream() << "</InitialCounter>" << std::endl;
   *output.GetStream() << std::endl;
 
-
-
   // Loop over the counters
   for (MAuint32 i=0;i<counters_.size();i++)
   {
-    // header
+	// header
     *output.GetStream() << "<Counter>" << std::endl;
 
     // name
@@ -154,4 +156,58 @@ void CounterManager::Write_TextFormat(SAFWriter& output) const
     *output.GetStream() << "</Counter>" << std::endl;
     *output.GetStream() << std::endl;
   }
+
+
+ 
+  /*
+  //initialize database file and add cuts/weights to DB
+  DatabaseManager dbManager(folder_path + "Cutflow.db");
+  dbManager.createTables();
+
+  //push initial to database
+  
+  dbManager.addCut("initial", "events");
+  for(const auto &p : initial_.multiweight_){
+
+	int id, pos_entries, neg_entries;
+	double pos_sum, neg_sum, pos_2sum, neg_2sum;
+	id = p.first;
+	pos_entries = p.second->nentries_.first;
+	neg_entries = p.second->nentries_.second;
+	pos_sum = p.second->sumweight_.first;
+	neg_sum = p.second->sumweight_.second;
+	pos_2sum = p.second->sumweight2_.first;
+	neg_2sum = p.second->sumweight2_.second;
+
+	dbManager.addWeight("initial", "events", id, pos_entries, neg_entries, pos_sum, neg_sum, pos_2sum, neg_2sum);
+  }
+
+  //push cutflow weights to database
+  for(const auto &cut : counters_){
+	
+//	std::cout << region_name << " " << cut.name_ << " " << counters_.size() << std::endl;
+	dbManager.addCut(region_name, cut.name_);
+	
+	for(const auto &p : cut.multiweight_){
+		int id, pos_entries, neg_entries;
+		double pos_sum, neg_sum, pos_2sum, neg_2sum;
+		id = p.first;
+		pos_entries = p.second->nentries_.first;
+		neg_entries = p.second->nentries_.second;
+		pos_sum = p.second->sumweight_.first;
+		neg_sum = p.second->sumweight_.second;
+		pos_2sum = p.second->sumweight2_.first;
+		neg_2sum = p.second->sumweight2_.second;
+//		std::cout << "id : " << id << " pos_entry " << pos_entries << " neg_entry " << neg_entries << " pos_sum " <<pos_sum << " neg_sum " <<neg_sum << " pos_2sum " << pos_2sum << " neg_2sum " << neg_2sum << std::endl;
+
+
+		dbManager.addWeight(region_name, cut.name_, id, pos_entries, neg_entries, pos_sum, neg_sum, pos_2sum, neg_2sum);
+
+	}
+	dbManager.closeDB();
+
+  }
+  */
+  
+
 }
