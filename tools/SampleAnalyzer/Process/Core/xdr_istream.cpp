@@ -50,8 +50,8 @@ xdr_istream& xdr_istream::operator>>(std::string &s)
   MAchar* dummy = new MAchar[pad];
   sb_->sgetn(dummy,pad);
 
-  delete line;
-  delete dummy;
+  delete [] line;
+  delete [] dummy;
   return *this;
 }
 

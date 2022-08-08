@@ -34,6 +34,7 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Counter/CounterManager.h"
 #include "SampleAnalyzer/Process/Writer/SAFWriter.h"
+#include "SampleAnalyzer/Process/Writer/DatabaseManager.h"
 
 
 namespace MA5
@@ -73,7 +74,6 @@ class RegionSelection
   std::string GetName()
     { return name_; }
 
-  CounterManager GetCutflow(){ return cutflow_; }
 
   MAbool IsSurviving()
     { return surviving_; }
@@ -87,6 +87,10 @@ class RegionSelection
   /// Printing the cutflow
   void WriteCutflow(SAFWriter& output)
     { cutflow_.Write_TextFormat(output);}
+
+  void WriteSQL(DatabaseManager &db, bool &AddInitial){
+	  cutflow_.WriteSQL(db, AddInitial, name_);
+  }
 
   /// Set methods
   void SetName(std::string name)

@@ -828,61 +828,19 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
   for(int i = 0; i < analyzers_.size(); ++i){
 	std::string path = analyzers_[i]->Output() + "/Cutflows/cutflows.db";
 	DatabaseManager dbManager(path);
-	dbManager.createTables();
-	dbManager.addCut("initial", "event");
+	dbManager.createTables();	
 	bool addInitial = true;
 	
 	AnalyzerBase* myanalysis = analyzers_[i];
 	//insert region,cut pair to cutflow table and region,cut,weight_id (weight data) to weights table
 	for(int j = 0; j < myanalysis->Manager()->Regions().size(); ++j){
 		RegionSelection *myRS = myanalysis->Manager()->Regions()[j];
-		std::string region_name = myRS->GetName();
-
-		//add initial events to db
-		if(addInitial){
-			Counter initial = myRS->GetCutflow().GetInitial();
-			for(const auto &p : initial.multiweight_){
-				int id, pos_entries, neg_entries;
-				double pos_sum, neg_sum, pos_2sum, neg_2sum;
-				id = p.first;
-				pos_entries = p.second->nentries_.first;
-				neg_entries = p.second->nentries_.second;
-				pos_sum = p.second->sumweight_.first;
-				neg_sum = p.second->sumweight_.second;
-				pos_2sum = p.second->sumweight2_.first;
-				neg_2sum = p.second->sumweight2_.second;
-				dbManager.addWeight("initial", "event", id, pos_entries, neg_entries, pos_sum, neg_sum, pos_2sum, neg_2sum);
-			}
-			addInitial = false;
-		}
-
-		for(const auto &cut : myRS->GetCutflow().GetCounters()){
-			std::string cut_name = cut.name_;
-			dbManager.addCut(region_name, cut_name);
-			for(const auto &p : cut.multiweight_){
-				int id, pos_entries, neg_entries;
-				double pos_sum, neg_sum, pos_2sum, neg_2sum;
-				id = p.first;
-				pos_entries = p.second->nentries_.first;
-				neg_entries = p.second->nentries_.second;
-				pos_sum = p.second->sumweight_.first;
-				neg_sum = p.second->sumweight_.second;
-				pos_2sum = p.second->sumweight2_.first;
-				neg_2sum = p.second->sumweight2_.second;
-				dbManager.addWeight(region_name, cut.name_, id, pos_entries, neg_entries, pos_sum, neg_sum, pos_2sum, neg_2sum);
-			}
-
-
-		}
+		myRS->WriteSQL(dbManager, addInitial);
 	}
-
 	dbManager.closeDB();
   }
 
   //end of multi-weight cutflow code
-
-
-	
 
 
   // The user-defined stuff

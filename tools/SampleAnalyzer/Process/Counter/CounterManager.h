@@ -35,6 +35,7 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Counter/Counter.h"
 #include "SampleAnalyzer/Process/Writer/SAFWriter.h"
+#include "SampleAnalyzer/Process/Writer/DatabaseManager.h"
 
 
 namespace MA5
@@ -104,6 +105,8 @@ class CounterManager
   /// Write the counters in a Text file
   void Write_TextFormat(SAFWriter& output) const;
 
+  void WriteSQL(DatabaseManager &db, bool &AddInitial, std::string region_name);
+
   /// Write the counters in a ROOT file
   //  void Write_RootFormat(TFile* output) const;
 
@@ -117,9 +120,6 @@ class CounterManager
   }
   
 
-  std::vector<Counter> GetCounters(){
-	  return counters_;
-  }
 
 
 };

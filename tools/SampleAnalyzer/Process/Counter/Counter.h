@@ -39,6 +39,14 @@ struct multiWeightEntry {
 	  std::pair<MAint64, MAint64> nentries_;
 	  std::pair<MAfloat64, MAfloat64> sumweight_;
 	  std::pair<MAfloat64, MAfloat64> sumweight2_;
+	  multiWeightEntry(){
+		nentries_.first = 0;
+		nentries_.second = 0;
+		sumweight_.first = 0.;
+		sumweight_.second = 0.;
+		sumweight2_.first = 0.;
+		sumweight2_.second = 0.;
+	  }
 };
 
 
@@ -82,7 +90,7 @@ class Counter
  public :
 
   /// Constructor without argument 
-  Counter(const std::string& name = "unkwown")
+  Counter(const std::string& name = "unknown")
   { 
     name_       = name;
     nentries_   = std::make_pair(0,0); 
@@ -92,7 +100,9 @@ class Counter
 
   /// Destructor
   ~Counter()
-  {  }
+  { 
+	 
+  }
 
   /// Reset
   void Reset()
@@ -128,7 +138,7 @@ class Counter
 	//	static int incrementDebugCount = 0;
 		for(const auto &weight : multiweights){
 			if(multiweight_.find(weight.first) == multiweight_.end()){
-				multiweight_[weight.first] = new multiWeightEntry;
+				multiweight_[weight.first] = new multiWeightEntry();
 			}
 			if(weight.second > 0){
 				multiweight_[weight.first]->nentries_.first++;

@@ -24,7 +24,7 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Counter/CounterManager.h"
-#include "SampleAnalyzer/Process/Writer/DatabaseManager.h"
+
 
 
 
@@ -158,56 +158,46 @@ void CounterManager::Write_TextFormat(SAFWriter& output) const
   }
 
 
- 
-  /*
-  //initialize database file and add cuts/weights to DB
-  DatabaseManager dbManager(folder_path + "Cutflow.db");
-  dbManager.createTables();
+}
 
-  //push initial to database
-  
-  dbManager.addCut("initial", "events");
-  for(const auto &p : initial_.multiweight_){
-
-	int id, pos_entries, neg_entries;
-	double pos_sum, neg_sum, pos_2sum, neg_2sum;
-	id = p.first;
-	pos_entries = p.second->nentries_.first;
-	neg_entries = p.second->nentries_.second;
-	pos_sum = p.second->sumweight_.first;
-	neg_sum = p.second->sumweight_.second;
-	pos_2sum = p.second->sumweight2_.first;
-	neg_2sum = p.second->sumweight2_.second;
-
-	dbManager.addWeight("initial", "events", id, pos_entries, neg_entries, pos_sum, neg_sum, pos_2sum, neg_2sum);
-  }
-
-  //push cutflow weights to database
-  for(const auto &cut : counters_){
-	
-//	std::cout << region_name << " " << cut.name_ << " " << counters_.size() << std::endl;
-	dbManager.addCut(region_name, cut.name_);
-	
-	for(const auto &p : cut.multiweight_){
-		int id, pos_entries, neg_entries;
-		double pos_sum, neg_sum, pos_2sum, neg_2sum;
-		id = p.first;
-		pos_entries = p.second->nentries_.first;
-		neg_entries = p.second->nentries_.second;
-		pos_sum = p.second->sumweight_.first;
-		neg_sum = p.second->sumweight_.second;
-		pos_2sum = p.second->sumweight2_.first;
-		neg_2sum = p.second->sumweight2_.second;
-//		std::cout << "id : " << id << " pos_entry " << pos_entries << " neg_entry " << neg_entries << " pos_sum " <<pos_sum << " neg_sum " <<neg_sum << " pos_2sum " << pos_2sum << " neg_2sum " << neg_2sum << std::endl;
-
-
-		dbManager.addWeight(region_name, cut.name_, id, pos_entries, neg_entries, pos_sum, neg_sum, pos_2sum, neg_2sum);
-
+void CounterManager::WriteSQL(DatabaseManager &db, bool &AddInitial, std::string region_name){
+	if(AddInitial){
+		db.addCut("initial","event");
+		for(const auto &p : initial_.multiweight_){
+			int id, pos_entries, neg_entries;
+			double pos_sum, neg_sum, pos_2sum, neg_2sum;
+			id = p.first;
+			pos_entries = p.second->nentries_.first;
+			neg_entries = p.second->nentries_.second;
+			pos_sum = p.second->sumweight_.first;
+			neg_sum = p.second->sumweight_.second;
+			pos_2sum = p.second->sumweight2_.first;
+			neg_2sum = p.second->sumweight2_.second;
+			db.addWeight("initial", "event", id, pos_entries, neg_entries, pos_sum, neg_sum, pos_2sum, neg_2sum);
+		}
+		AddInitial = false;
 	}
-	dbManager.closeDB();
 
-  }
-  */
-  
+	for(const auto &cut : counters_){
+		std::string cut_name = cut.name_;
+		db.addCut(region_name, cut_name);	
+		for(const auto &p : cut.multiweight_){
+			int id, pos_entries, neg_entries;
+			double pos_sum, neg_sum, pos_2sum, neg_2sum;
+			id = p.first;
+			pos_entries = p.second->nentries_.first;
+			neg_entries = p.second->nentries_.second;
+			pos_sum = p.second->sumweight_.first;
+			neg_sum = p.second->sumweight_.second;
+			pos_2sum = p.second->sumweight2_.first;
+			neg_2sum = p.second->sumweight2_.second;
+			db.addWeight(region_name, cut_name, id, pos_entries, neg_entries, pos_sum, neg_sum, pos_2sum, neg_2sum);
+			}
+
+
+		}
+
+
 
 }
+
