@@ -42,6 +42,7 @@
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Process/Writer/SAFWriter.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
+#include "SampleAnalyzer/Commons/DataFormat/WeightCollection.h"
 
 using namespace std;
 
@@ -139,10 +140,10 @@ class RegionSelectionManager
     }
 
 	//set methods for multiweight
-	void SetCurrentEventWeight(const std::map<MAuint32, MAfloat64> &multiweight){
-		multiweight_ = multiweight;
+	void SetCurrentEventWeight(const WeightCollection &multiweight){
+		multiweight_ = multiweight.GetWeights();
 		for(auto &region : regions_){
-			region->SetWeight(multiweight);
+			region->SetWeight(multiweight_);
 		}
 	}
 

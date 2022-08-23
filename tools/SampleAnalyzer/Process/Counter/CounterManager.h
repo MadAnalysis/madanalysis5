@@ -105,6 +105,8 @@ class CounterManager
   /// Write the counters in a Text file
   void Write_TextFormat(SAFWriter& output) const;
 
+
+  //Write to SQL database
   void WriteSQL(DatabaseManager &db, bool &AddInitial, std::string region_name);
 
   /// Write the counters in a ROOT file

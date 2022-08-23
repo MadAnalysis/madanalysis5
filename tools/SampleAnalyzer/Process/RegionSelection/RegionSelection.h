@@ -88,6 +88,7 @@ class RegionSelection
   void WriteCutflow(SAFWriter& output)
     { cutflow_.Write_TextFormat(output);}
 
+  //write to SQL database
   void WriteSQL(DatabaseManager &db, bool &AddInitial){
 	  cutflow_.WriteSQL(db, AddInitial, name_);
   }

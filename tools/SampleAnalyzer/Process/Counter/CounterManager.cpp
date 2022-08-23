@@ -160,8 +160,13 @@ void CounterManager::Write_TextFormat(SAFWriter& output) const
 
 }
 
+
+//pass in database handler object, flag to check if initial events has been added, no need to repeatedly insert 
+//initial since each region has an identical copy, pass in region name
 void CounterManager::WriteSQL(DatabaseManager &db, bool &AddInitial, std::string region_name){
 	if(AddInitial){
+		//if add initial is true, insert the initial event cut, and for each weight id, insert the values into
+		//the database, set flag to false afterwards
 		db.addCut("initial","event");
 		for(const auto &p : initial_.multiweight_){
 			int id, pos_entries, neg_entries;
@@ -178,6 +183,8 @@ void CounterManager::WriteSQL(DatabaseManager &db, bool &AddInitial, std::string
 		AddInitial = false;
 	}
 
+	//for each cut in the region, add region and cut names to cutflow table
+	//for each weight id in each cut, insert the values into the database
 	for(const auto &cut : counters_){
 		std::string cut_name = cut.name_;
 		db.addCut(region_name, cut_name);	
@@ -192,12 +199,10 @@ void CounterManager::WriteSQL(DatabaseManager &db, bool &AddInitial, std::string
 			pos_2sum = p.second->sumweight2_.first;
 			neg_2sum = p.second->sumweight2_.second;
 			db.addWeight(region_name, cut_name, id, pos_entries, neg_entries, pos_sum, neg_sum, pos_2sum, neg_2sum);
-			}
-
-
 		}
 
 
+	}
 
 }
 

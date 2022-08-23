@@ -101,7 +101,9 @@ class Counter
   /// Destructor
   ~Counter()
   { 
-	 
+	  for(auto &p : multiweight_){
+		  delete p.second;
+	  } 
   }
 
   /// Reset
