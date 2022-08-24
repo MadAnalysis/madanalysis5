@@ -145,8 +145,7 @@ void RegionSelectionManager::FillHisto(std::string const&histname, MAfloat64 val
         if (myhisto->FreshEvent())  {
 			myhisto->IncrementNEvents(weight_);
 		}
-
-		//std::cout << "multiweight size in regionManager is : " << multiweight_.size() << std::endl;
+	
         myhisto->Fill(val,weight_);
 		myhisto->IncrementNEvents(multiweight_);
 		myhisto->Fill(val, multiweight_);

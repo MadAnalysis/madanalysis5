@@ -158,7 +158,11 @@ class Histo : public PlotBase
 
   /// Destructor
   virtual ~Histo()
-  { }
+  { 
+	  for(auto &p : MultiweightHistoData){
+			delete p.second;
+	  }
+  }
 
   /// Setting the linked regions
   void SetSelectionRegions(std::vector<RegionSelection*> myregions)

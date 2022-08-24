@@ -115,6 +115,7 @@ class DatabaseManager {
 
 			sql = "CREATE TABLE IF NOT EXISTS Statistics("\
 				   "name TEXT NOT NULL,"\
+				   "id TEXT NOT NULL,"\
 				   "pos_num_events INTEGER NOT NULL,"\
 				   "neg_num_events INTEGER NOT NULL,"\
 				   "pos_sum_event_weights_over_events DOUBLE NOT NULL,"\
@@ -129,7 +130,7 @@ class DatabaseManager {
 				   "neg_value_times_weight DOUBLE NOT NULL,"\
 				   "pos_value_squared_times_weight DOUBLE NOT NULL,"\
 				   "neg_value_squared_times_weight DOUBLE NOT NULL,"\
-				   "primary key(name) );";
+				   "primary key(name, id) );";
 				   
 			rc = sqlite3_exec(db, sql.c_str(), callback, 0, &zErrMsg);
 			checkDBErrors("creating Statistics table");
@@ -153,7 +154,8 @@ class DatabaseManager {
 			checkDBErrors("inserting into Histo: " + name);
 		}
 
-		void addStatistic(string name, 
+		void addStatistic(string name,
+				int id,
 				int pos_events, 
 				int neg_events,
 				double pos_sum_events,
@@ -169,7 +171,7 @@ class DatabaseManager {
 				double pos_val2_weight,
 				double neg_val2_weight){
 
-			sql = "INSERT INTO Statistics VALUES ('" + name + "','" + to_string(pos_events) + "','" + to_string(neg_events) + "','" + to_string(pos_sum_events) + "','" + to_string(neg_sum_events) + "','" + to_string(pos_entries) + "','" + to_string(neg_entries) + "','" + to_string(pos_sum_entries) + "','" + to_string(neg_sum_entries) + "','" + to_string(pos_sum_squared) + "','" + to_string(neg_sum_squared) + "','" + to_string(pos_val_weight) + "','" + to_string(neg_val_weight) + "','" + to_string(pos_val2_weight) + "','" + to_string(neg_val2_weight) + "')"; 
+			sql = "INSERT INTO Statistics VALUES ('" + name + "','" + to_string(id) + "','" + to_string(pos_events) + "','" + to_string(neg_events) + "','" + to_string(pos_sum_events) + "','" + to_string(neg_sum_events) + "','" + to_string(pos_entries) + "','" + to_string(neg_entries) + "','" + to_string(pos_sum_entries) + "','" + to_string(neg_sum_entries) + "','" + to_string(pos_sum_squared) + "','" + to_string(neg_sum_squared) + "','" + to_string(pos_val_weight) + "','" + to_string(neg_val_weight) + "','" + to_string(pos_val2_weight) + "','" + to_string(neg_val2_weight) + "')"; 
 
 			rc = sqlite3_exec(db, sql.c_str(), callback, 0 , &zErrMsg);
 			checkDBErrors("inserting into Statistics: " + name);
