@@ -35,6 +35,26 @@
 #include "SampleAnalyzer/Process/Plot/PlotBase.h"
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelection.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
+#include "SampleAnalyzer/Process/Writer/DatabaseManager.h"
+
+
+struct MultiWeightHisto {
+	std::vector< std::pair<MAfloat64,MAfloat64> > histo_;
+	std::pair<MAfloat64, MAfloat64> underflow_;
+	std::pair<MAfloat64, MAfloat64> overflow_;
+
+	/// Sum of event-weights over entries
+	std::pair<MAfloat64,MAfloat64> sum_w_;
+
+	/// Sum of squared weights
+	std::pair<MAfloat64,MAfloat64> sum_ww_;
+
+	/// Sum of value * weight
+	std::pair<MAfloat64,MAfloat64> sum_xw_;
+
+	/// Sum of value * value * weight
+	std::pair<MAfloat64,MAfloat64> sum_xxw_;
+};
 
 
 namespace MA5
@@ -73,6 +93,8 @@ class Histo : public PlotBase
 
   /// RegionSelections attached to the histo
   std::vector<RegionSelection*> regions_;
+
+  std::map<MAuint32, MultiWeightHisto*> MultiweightHistoData;
 
   // -------------------------------------------------------------
   //                       method members
@@ -204,8 +226,60 @@ class Histo : public PlotBase
     }
   }
 
+  void Fill(MAfloat64 value, std::map<MAuint32, MAfloat64> &weights){
+	// Safety : nan or isinf
+    try
+    {
+      if (std::isnan(value)) throw EXCEPTION_WARNING("Skipping a NaN (Not a Number) value in an histogram.","",0); 
+      if (std::isinf(value)) throw EXCEPTION_WARNING("Skipping a Infinity value in an histogram.","",0); 
+    }
+    catch (const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
+    }
+
+	for(const auto &id_weight : weights){
+		if(MultiweightHistoData.find(id_weight.first) == MultiweightHistoData.end()){
+			MultiweightHistoData[id_weight.first] = new MultiWeightHisto();
+			MultiweightHistoData[id_weight.first]->histo_.resize(nbins_);
+		}
+		//Positive weight
+		if(id_weight.second >= 0){
+			multiweight_event_info[id_weight.first]->nentries_.first++;
+			MultiweightHistoData[id_weight.first]->sum_w_.first   +=id_weight.second;
+			MultiweightHistoData[id_weight.first]->sum_ww_.first  +=id_weight.second * id_weight.second;
+			MultiweightHistoData[id_weight.first]->sum_xw_.first  +=value * id_weight.second;
+			MultiweightHistoData[id_weight.first]->sum_xxw_.first +=value*value*id_weight.second;
+			if (value < xmin_) MultiweightHistoData[id_weight.first]->underflow_.first+=id_weight.second;
+			else if (value >= xmax_) MultiweightHistoData[id_weight.first]->overflow_.first+=id_weight.second;
+			else
+			{
+				MultiweightHistoData[id_weight.first]->histo_[std::floor((value-xmin_)/step_)].first+=id_weight.second;
+			}
+		} else {
+			int absWeight = std::abs(id_weight.second);
+			multiweight_event_info[id_weight.first]->nentries_.second++;
+			MultiweightHistoData[id_weight.first]->sum_w_.second   += absWeight;
+			MultiweightHistoData[id_weight.first]->sum_ww_.second  += absWeight * absWeight;
+			MultiweightHistoData[id_weight.first]->sum_xw_.second  +=value * absWeight;
+			MultiweightHistoData[id_weight.first]->sum_xxw_.second +=value*value*absWeight;
+			if (value < xmin_) MultiweightHistoData[id_weight.first]->underflow_.second+=absWeight;
+			else if (value >= xmax_) MultiweightHistoData[id_weight.first]->overflow_.second+=absWeight;
+			else
+			{
+				MultiweightHistoData[id_weight.first]->histo_[std::floor((value-xmin_)/step_)].second+=absWeight;
+			}
+
+		}
+	}
+
+
+
+  }
+
   /// Write the plot in a ROOT file
   virtual void Write_TextFormat(std::ostream* output);
+  virtual void WriteSQL(DatabaseManager &db);
 
   /// Write the plot in a ROOT file
   //  virtual void Write_RootFormat(std::pair<TH1F*,TH1F*>& histos);

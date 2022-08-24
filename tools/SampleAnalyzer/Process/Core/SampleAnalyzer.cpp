@@ -805,6 +805,15 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
     out.Finalize();
   }
 
+  // Create histo SQlite file
+  for(MAuint32 i = 0; i < analyzers_.size(); ++i){
+	  std::string path = analyzers_[i]->Output() + "/Histograms/histo.db";
+	  DatabaseManager dbManager(path);
+	  dbManager.createHistoTables();
+	  analyzers_[i]->Manager()->GetPlotManager()->WriteSQL(dbManager);
+	  dbManager.closeDB();
+  }
+
 
   // Saving the cut flows
   for(MAuint32 i=0; i<analyzers_.size(); i++)
@@ -828,7 +837,7 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
   for(int i = 0; i < analyzers_.size(); ++i){
 	std::string path = analyzers_[i]->Output() + "/Cutflows/cutflows.db";
 	DatabaseManager dbManager(path);
-	dbManager.createTables();	
+	dbManager.createCutflowTables();	
 	bool addInitial = true;
 	
 	AnalyzerBase* myanalysis = analyzers_[i];

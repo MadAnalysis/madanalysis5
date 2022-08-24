@@ -42,6 +42,40 @@ void Histo::Write_TextFormat(std::ostream* output)
   *output << std::endl;
 }
 
+void Histo::WriteSQL(DatabaseManager &db){
+	std::string regionNames = "";
+	for(MAuint32 i = 0; i < regions_.size(); ++i){
+		if(i != 0) {regionNames += " ";}
+		regionNames += regions_[i]->GetName();
+	}
+	db.addHisto(name_, nbins_, xmin_, xmax_, regionNames);
+	db.addStatistic(name_,
+			nevents_.first,
+			nevents_.second,
+			nevents_w_.first,
+			nevents_w_.second,
+			nentries_.first,
+			nentries_.second,
+			sum_w_.first,
+			sum_w_.second,
+			sum_ww_.first,
+			sum_ww_.second,
+			sum_xw_.first,
+			sum_xw_.second,
+			sum_xxw_.first,
+			sum_xxw_.second);
+	std::cout << MultiweightHistoData.size() << std::endl;
+	for(const auto &weight_id : MultiweightHistoData){
+		db.addData(name_, weight_id.first, "underflow", weight_id.second->underflow_.first, weight_id.second->underflow_.second);
+		db.addData(name_, weight_id.first, "overflow", weight_id.second->overflow_.first, weight_id.second->overflow_.second);
+		for(int i = 0; i < nbins_; ++i){
+			db.addData(name_, weight_id.first, "bin " + to_string(i+1), weight_id.second->histo_[i].first, weight_id.second->histo_[i].second);
+		}
+	}
+
+
+}
+
 
 /// Write the plot in a Text file
 void Histo::Write_TextFormatBody(std::ostream* output)

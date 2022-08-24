@@ -38,7 +38,7 @@
 #include "SampleAnalyzer/Process/Plot/HistoFrequency.h"
 #include "SampleAnalyzer/Process/Writer/SAFWriter.h"
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelection.h"
-
+#include "SampleAnalyzer/Process/Writer/DatabaseManager.h"
 
 namespace MA5
 {
@@ -138,6 +138,13 @@ class PlotManager
 
   /// Write the counters in a Text file
   void Write_TextFormat(SAFWriter& output);
+
+  void WriteSQL(DatabaseManager &db){
+	  for(auto &pl : plots_){
+			pl->WriteSQL(db);	
+	  }
+  }
+
 
   /// Finalizing
   void Finalize()

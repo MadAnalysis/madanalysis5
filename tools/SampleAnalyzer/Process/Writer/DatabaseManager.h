@@ -73,7 +73,7 @@ class DatabaseManager {
 			}
 		}
 
-		void createTables() {
+		void createCutflowTables() {
 
 		    // Save SQL to create a table
 		    sql = "CREATE TABLE IF NOT EXISTS Cutflow(" \
@@ -101,6 +101,87 @@ class DatabaseManager {
 			rc = sqlite3_exec(db, sql.c_str(), callback, 0, &zErrMsg);
 			checkDBErrors("creating weights table");
 		}
+
+		void createHistoTables(){
+			sql = "CREATE TABLE IF NOT EXISTS HistoDescription("\
+				   "name TEXT NOT NULL,"\
+				   "num_of_bins INTEGER NOT NULL,"\
+				   "xmin DOUBLE NOT NULL,"\
+				   "xmas DOUBLE NOT NULL,"\
+				   "regions TEXT NOT NULL,"\
+				   "primary key(name) );";
+			rc = sqlite3_exec(db, sql.c_str(), callback, 0, &zErrMsg);
+			checkDBErrors("creating HistoDescription table");
+
+			sql = "CREATE TABLE IF NOT EXISTS Statistics("\
+				   "name TEXT NOT NULL,"\
+				   "pos_num_events INTEGER NOT NULL,"\
+				   "neg_num_events INTEGER NOT NULL,"\
+				   "pos_sum_event_weights_over_events DOUBLE NOT NULL,"\
+				   "neg_sum_event_weights_over_events DOUBLE NOT NULL,"\
+				   "pos_entries INTEGER NOT NULL,"\
+				   "neg_entries INTEGER NOT NULL,"\
+				   "pos_sum_event_weights_over_entries DOUBLE NOT NULL,"\
+				   "neg_sum_event_weights_over_entries DOUBLE NOT NULL,"\
+				   "pos_sum_squared_weights DOUBLE NOT NULL,"\
+				   "neg_sum_squared_weights DOUBLE NOT NULL,"\
+				   "pos_value_times_weight DOUBLE NOT NULL,"\
+				   "neg_value_times_weight DOUBLE NOT NULL,"\
+				   "pos_value_squared_times_weight DOUBLE NOT NULL,"\
+				   "neg_value_squared_times_weight DOUBLE NOT NULL,"\
+				   "primary key(name) );";
+				   
+			rc = sqlite3_exec(db, sql.c_str(), callback, 0, &zErrMsg);
+			checkDBErrors("creating Statistics table");
+
+			sql = "CREATE TABLE IF NOT EXISTS Data("\
+				   "name TEXT NOT NULL,"\
+				   "id INTERGER NOT NULL,"\
+				   "bin TEXT NOT NULL,"\
+				   "positive DOUBLE NOT NULL,"\
+				   "negative DOUBLE NOT NULL,"\
+				   "primary key (name, id, bin) );";
+				   
+			rc = sqlite3_exec(db, sql.c_str(), callback, 0, &zErrMsg);
+			checkDBErrors("creating Data table");
+
+		}
+
+		void addHisto(string name, int bins, double xmin, double xmax, string regions){
+			sql = "INSERT INTO HistoDescription VALUES ('" + name + "'" + "," + "'" + to_string(bins) + "'" + "," + "'" + to_string(xmin) + "'" + "," + "'" + to_string(xmax) + "'" + "," + "'" + regions + "')";
+			rc = sqlite3_exec(db, sql.c_str(), callback, 0 , &zErrMsg);
+			checkDBErrors("inserting into Histo: " + name);
+		}
+
+		void addStatistic(string name, 
+				int pos_events, 
+				int neg_events,
+				double pos_sum_events,
+				double neg_sum_events,
+				int pos_entries,
+				int neg_entries,
+				double pos_sum_entries,
+				double neg_sum_entries,
+				double pos_sum_squared,
+				double neg_sum_squared,
+				double pos_val_weight,
+				double neg_val_weight,
+				double pos_val2_weight,
+				double neg_val2_weight){
+
+			sql = "INSERT INTO Statistics VALUES ('" + name + "','" + to_string(pos_events) + "','" + to_string(neg_events) + "','" + to_string(pos_sum_events) + "','" + to_string(neg_sum_events) + "','" + to_string(pos_entries) + "','" + to_string(neg_entries) + "','" + to_string(pos_sum_entries) + "','" + to_string(neg_sum_entries) + "','" + to_string(pos_sum_squared) + "','" + to_string(neg_sum_squared) + "','" + to_string(pos_val_weight) + "','" + to_string(neg_val_weight) + "','" + to_string(pos_val2_weight) + "','" + to_string(neg_val2_weight) + "')"; 
+
+			rc = sqlite3_exec(db, sql.c_str(), callback, 0 , &zErrMsg);
+			checkDBErrors("inserting into Statistics: " + name);
+			
+		}
+
+		void addData(string name, int id, string bin, double positive, double negative){
+			sql = "INSERT INTO Data VALUES ('" + name + "'" + "," + "'" + to_string(id) + "'" + "," + "'" + bin + "'" + "," + "'" + to_string(positive) + "'" + "," + "'" + to_string(negative) + "')";
+			rc = sqlite3_exec(db, sql.c_str(), callback, 0 , &zErrMsg);
+			checkDBErrors("inserting into Data: " + name + " " + to_string(id));
+
+		}
 	
 		//add cut to databse with primary keys region name and cut name
 		void addCut(string r_name, string c_name) {
@@ -109,7 +190,7 @@ class DatabaseManager {
 			sql = "INSERT INTO Cutflow VALUES ('" + r_name + "'" + "," + "'" + c_name + "')";	
 			//cout << sql << endl;
 			rc = sqlite3_exec(db, sql.c_str(), callback, 0 , &zErrMsg);
-			checkDBErrors("inserting cutflow: " + r_name + " " + c_name);
+			//checkDBErrors("inserting cutflow: " + r_name + " " + c_name);
 				    
 		}
 
@@ -119,7 +200,7 @@ class DatabaseManager {
 				   + "','" + to_string(pos_2sum) + "','" + to_string(neg_2sum) + "')";
 			//cout << sql << endl;
 			rc = sqlite3_exec(db, sql.c_str(), callback, 0 , &zErrMsg);
-			checkDBErrors("inserting weight values: " + r_name + " " + c_name + " weight ID: " + to_string(id));
+			//checkDBErrors("inserting weight values: " + r_name + " " + c_name + " weight ID: " + to_string(id));
 		
 		}
 

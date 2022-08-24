@@ -186,12 +186,15 @@ class RegionSelectionManager
   /// Initialize for multiweight
   
   void InitializeForNewEvent(const std::map<MAuint32, MAfloat64> &weights){
+	 multiweight_ = weights;
 	 NumberOfSurvivingRegions_ = regions_.size();
 	 for (MAuint32 i=0; i<regions_.size(); i++ )
 	 {
 		regions_[i]->InitializeForNewEvent(weights);
 	 }
-      	
+	 for(MAuint32 i = 0; i < plotmanager_.GetNplots(); ++i){
+		 plotmanager_.GetHistos()[i]->SetMultiweightFreshEvent(true);
+	 }
   }
   
 
