@@ -151,7 +151,7 @@ class DatabaseManager {
 		void addHisto(string name, int bins, double xmin, double xmax, string regions){
 			sql = "INSERT INTO HistoDescription VALUES ('" + name + "'" + "," + "'" + to_string(bins) + "'" + "," + "'" + to_string(xmin) + "'" + "," + "'" + to_string(xmax) + "'" + "," + "'" + regions + "')";
 			rc = sqlite3_exec(db, sql.c_str(), callback, 0 , &zErrMsg);
-			checkDBErrors("inserting into Histo: " + name);
+			//checkDBErrors("inserting into Histo: " + name);
 		}
 
 		void addStatistic(string name,
@@ -174,14 +174,14 @@ class DatabaseManager {
 			sql = "INSERT INTO Statistics VALUES ('" + name + "','" + to_string(id) + "','" + to_string(pos_events) + "','" + to_string(neg_events) + "','" + to_string(pos_sum_events) + "','" + to_string(neg_sum_events) + "','" + to_string(pos_entries) + "','" + to_string(neg_entries) + "','" + to_string(pos_sum_entries) + "','" + to_string(neg_sum_entries) + "','" + to_string(pos_sum_squared) + "','" + to_string(neg_sum_squared) + "','" + to_string(pos_val_weight) + "','" + to_string(neg_val_weight) + "','" + to_string(pos_val2_weight) + "','" + to_string(neg_val2_weight) + "')"; 
 
 			rc = sqlite3_exec(db, sql.c_str(), callback, 0 , &zErrMsg);
-			checkDBErrors("inserting into Statistics: " + name);
+			//checkDBErrors("inserting into Statistics: " + name);
 			
 		}
 
 		void addData(string name, int id, string bin, double positive, double negative){
 			sql = "INSERT INTO Data VALUES ('" + name + "'" + "," + "'" + to_string(id) + "'" + "," + "'" + bin + "'" + "," + "'" + to_string(positive) + "'" + "," + "'" + to_string(negative) + "')";
 			rc = sqlite3_exec(db, sql.c_str(), callback, 0 , &zErrMsg);
-			checkDBErrors("inserting into Data: " + name + " " + to_string(id));
+			//checkDBErrors("inserting into Data: " + name + " " + to_string(id));
 
 		}
 	

@@ -155,6 +155,7 @@ class PlotBase
 	  }
   }
 
+  //initialize histograms multiweights (without initialization, 0 entries will not show up in histogram)
   virtual void InitMultiweights(const std::map<MAuint32, MAfloat64> &weights){
 	  for(const auto &id_weight : weights){
 			 if(multiweight_event_info.find(id_weight.first) == multiweight_event_info.end()){
