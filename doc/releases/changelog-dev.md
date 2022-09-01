@@ -11,9 +11,12 @@
    existing `scope/destruction` of `RegionSelectionManager`.
    ([#113](https://github.com/MadAnalysis/madanalysis5/pull/113))
 
+ * Fixed function names for CLs calculator initialisation which would create 
+   error in postfit expected CLs computation.
+   ([#124](https://github.com/MadAnalysis/madanalysis5/pull/124))
 
 ## Contributors
 
 This release contains contributions from (in alphabetical order):
 
-[Kyle Fan](https://github.com/kfan326)
+[Jack Y. Araz](https://github.com/jackaraz), [Kyle Fan](https://github.com/kfan326)

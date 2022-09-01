@@ -75,12 +75,12 @@ class RunRecast():
 
     def SetCLsCalculator(self):
         if self.main.session_info.has_pyhf and self.main.recasting.CLs_calculator_backend == "pyhf":
-            self.cls_calculator = pyhf_wrapper_py3
+            self.cls_calculator = pyhf_wrapper
         elif not self.main.session_info.has_pyhf:
             self.main.recasting.CLs_calculator_backend = "native"
 
         if self.main.session_info.has_pyhf and self.main.recasting.expectation_assumption == "aposteriori":
-            self.cls_calculator = pyhf_wrapper_py3
+            self.cls_calculator = pyhf_wrapper
             self.main.recasting.CLs_calculator_backend = "pyhf"
             self.is_apriori = False
         elif not self.main.session_info.has_pyhf and self.main.recasting.expectation_assumption == "aposteriori":
@@ -1824,6 +1824,17 @@ def clean_region_name(mystr):
 
 
 def pyhf_wrapper(*args, **kwargs):
+    """
+    Computes CLs values via pyhf interface
+
+    :param args: input arguments `nobs, nb, deltanb, nsignal` or `bkg_HF, sig_HF`
+        function will decide for the correct action depending on number of arguments
+    :param kwargs:
+        CLs_exp: bool
+            return expected values
+        CLs_obs: bool
+            return obs values
+    """
     import pyhf
     from pyhf.optimize import mixins
     from numpy import warnings, isnan, ndarray
