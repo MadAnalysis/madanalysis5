@@ -58,26 +58,26 @@ void Histo::WriteSQL(DatabaseManager &db){
 	for(const auto &weight_id : MultiweightHistoData){
 		db.addStatistic(name_,
 			weight_id.first,
-			multiweight_event_info[weight_id.first]->nevents_.first,
-			multiweight_event_info[weight_id.first]->nevents_.second,
-			multiweight_event_info[weight_id.first]->nevents_w_.first,
-			multiweight_event_info[weight_id.first]->nevents_w_.second,
-			multiweight_event_info[weight_id.first]->nentries_.first,
-			multiweight_event_info[weight_id.first]->nentries_.second,
-			weight_id.second->sum_w_.first,
-			weight_id.second->sum_w_.second,
-			weight_id.second->sum_ww_.first,
-			weight_id.second->sum_ww_.second,
-			weight_id.second->sum_xw_.first,
-			weight_id.second->sum_xw_.second,
-			weight_id.second->sum_xxw_.first,
-			weight_id.second->sum_xxw_.second);
+			multiweight_event_info[weight_id.first].nevents_.first,
+			multiweight_event_info[weight_id.first].nevents_.second,
+			multiweight_event_info[weight_id.first].nevents_w_.first,
+			multiweight_event_info[weight_id.first].nevents_w_.second,
+			multiweight_event_info[weight_id.first].nentries_.first,
+			multiweight_event_info[weight_id.first].nentries_.second,
+			weight_id.second.sum_w_.first,
+			weight_id.second.sum_w_.second,
+			weight_id.second.sum_ww_.first,
+			weight_id.second.sum_ww_.second,
+			weight_id.second.sum_xw_.first,
+			weight_id.second.sum_xw_.second,
+			weight_id.second.sum_xxw_.first,
+			weight_id.second.sum_xxw_.second);
 		//for each weight histo,weight id pair: add bucket data to Data table
-		db.addData(name_, weight_id.first, "underflow", weight_id.second->underflow_.first, weight_id.second->underflow_.second);
+		db.addData(name_, weight_id.first, "underflow", weight_id.second.underflow_.first, weight_id.second.underflow_.second);
 		for(int i = 0; i < nbins_; ++i){
-			db.addData(name_, weight_id.first, "bin " + to_string(i+1), weight_id.second->histo_[i].first, weight_id.second->histo_[i].second);
+			db.addData(name_, weight_id.first, "bin " + to_string(i+1), weight_id.second.histo_[i].first, weight_id.second.histo_[i].second);
 		}
-		db.addData(name_, weight_id.first, "overflow", weight_id.second->overflow_.first, weight_id.second->overflow_.second);
+		db.addData(name_, weight_id.first, "overflow", weight_id.second.overflow_.first, weight_id.second.overflow_.second);
 	}
 
 

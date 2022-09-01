@@ -149,7 +149,7 @@ void RegionSelectionManager::FillHisto(std::string const&histname, MAfloat64 val
 	
         myhisto->Fill(val,weight_);
 		myhisto->IncrementNEvents(multiweight_);
-		myhisto->Fill(val, multiweight_);
+		myhisto->Fill(val,multiweight_);
       }
       break;
     }

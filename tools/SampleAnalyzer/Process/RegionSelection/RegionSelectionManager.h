@@ -190,6 +190,7 @@ class RegionSelectionManager
 	{
 		plotmanager_.GetHistos()[i]->SetFreshEvent(true);
 		plotmanager_.GetHistos()[i]->SetMultiweightFreshEvent(true);
+		plotmanager_.GetHistos()[i]->InitMultiweights(weights);
 	}
   }
 
