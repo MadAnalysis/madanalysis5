@@ -109,7 +109,7 @@ MAbool MergingPlots::Execute(SampleFormat& mySample, const EventFormat& myEvent)
     WARNING << "Found one event with a zero weight. Skipping..." << endmsg;
     return false;
   }
-  Manager()->InitializeForNewEvent(myEventWeight);
+  Manager()->InitializeForNewEvent(myEventWeight, myEvent.mc()->multiweights().GetWeights());
 
   // Getting number of extra jets in the event
   MAuint32 njets = 0;

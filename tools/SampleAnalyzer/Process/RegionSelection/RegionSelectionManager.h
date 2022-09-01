@@ -120,6 +120,7 @@ class RegionSelectionManager
 	  return multiweight_;
   }
 
+  
   /// Set method
   void SetCurrentEventWeight(MAfloat64 weight)
   {
@@ -139,6 +140,7 @@ class RegionSelectionManager
       }
     }
 
+	
 	//set methods for multiweight
 	void SetCurrentEventWeight(const WeightCollection &multiweight){
 		multiweight_ = multiweight.GetWeights();
@@ -156,6 +158,7 @@ class RegionSelectionManager
 		}
 	}
 	
+	
 
   /// Adding a RegionSelection to the manager
   void AddRegionSelection(const std::string& name)
@@ -172,22 +175,31 @@ class RegionSelectionManager
   }
 
   /// Getting ready for a new event
-  void InitializeForNewEvent(MAfloat64 EventWeight)
+  void InitializeForNewEvent(MAfloat64 EventWeight, const std::map<MAuint32, MAfloat64> &weights)
   {
     weight_ = EventWeight;
+	multiweight_ = weights;
     NumberOfSurvivingRegions_ = regions_.size();
     for (MAuint32 i=0; i<regions_.size(); i++ )
-      regions_[i]->InitializeForNewEvent(EventWeight);
-		
+	{
+		regions_[i]->InitializeForNewEvent(EventWeight, weights);
+			
+
+	}
     for (MAuint32 i=0; i < plotmanager_.GetNplots(); i++)
-      plotmanager_.GetHistos()[i]->SetFreshEvent(true);
+	{
+		plotmanager_.GetHistos()[i]->SetFreshEvent(true);
+		plotmanager_.GetHistos()[i]->SetMultiweightFreshEvent(true);
+	}
   }
 
   /// Initialize for multiweight
   
+
+  /*
   void InitializeForNewEvent(const std::map<MAuint32, MAfloat64> &weights){
 	 multiweight_ = weights;
-	 NumberOfSurvivingRegions_ = regions_.size();
+	 //NumberOfSurvivingRegions_ = regions_.size();
 	 for (MAuint32 i=0; i<regions_.size(); i++ )
 	 {
 		regions_[i]->InitializeForNewEvent(weights);
@@ -196,6 +208,7 @@ class RegionSelectionManager
 		 plotmanager_.GetHistos()[i]->SetMultiweightFreshEvent(true);
 	 }
   }
+  */
   
 
   /// This method associates all regions with a cut

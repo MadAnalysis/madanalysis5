@@ -64,6 +64,7 @@ MAbool RegionSelectionManager::ApplyCut(MAbool condition, std::string const &cut
   std::vector<RegionSelection*> RegionsForThisCut = mycut->Regions();
   for (MAuint32 i=0; i<RegionsForThisCut.size(); i++)
   {
+	
     RegionSelection* ThisRegion = RegionsForThisCut[i];
 
     /// Skip the current region if it has failed a previous cut
@@ -71,9 +72,9 @@ MAbool RegionSelectionManager::ApplyCut(MAbool condition, std::string const &cut
 
     /// Check the current cut:
     if(condition) { 
-		ThisRegion->IncrementCutFlow(ThisRegion->GetWeight());
+		ThisRegion->IncrementCutFlow(ThisRegion->GetWeight(), ThisRegion->GetWeights());
 		//multiweight
-		ThisRegion->IncrementCutFlow(ThisRegion->GetWeights());
+		//ThisRegion->IncrementCutFlow(ThisRegion->GetWeights());
 	}
     else
     {

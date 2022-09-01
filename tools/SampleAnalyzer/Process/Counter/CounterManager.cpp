@@ -172,12 +172,12 @@ void CounterManager::WriteSQL(DatabaseManager &db, bool &AddInitial, std::string
 			int id, pos_entries, neg_entries;
 			double pos_sum, neg_sum, pos_2sum, neg_2sum;
 			id = p.first;
-			pos_entries = p.second->nentries_.first;
-			neg_entries = p.second->nentries_.second;
-			pos_sum = p.second->sumweight_.first;
-			neg_sum = p.second->sumweight_.second;
-			pos_2sum = p.second->sumweight2_.first;
-			neg_2sum = p.second->sumweight2_.second;
+			pos_entries = p.second.nentries_.first;
+			neg_entries = p.second.nentries_.second;
+			pos_sum = p.second.sumweight_.first;
+			neg_sum = p.second.sumweight_.second;
+			pos_2sum = p.second.sumweight2_.first;
+			neg_2sum = p.second.sumweight2_.second;
 			db.addWeight("initial", "event", id, pos_entries, neg_entries, pos_sum, neg_sum, pos_2sum, neg_2sum);
 		}
 		AddInitial = false;
@@ -187,17 +187,18 @@ void CounterManager::WriteSQL(DatabaseManager &db, bool &AddInitial, std::string
 	//for each weight id in each cut, insert the values into the database
 	for(const auto &cut : counters_){
 		std::string cut_name = cut.name_;
-		db.addCut(region_name, cut_name);	
+		db.addCut(region_name, cut_name);
+	//	std::cout << "number of multiweight entries in cut : " << region_name << " " << cut_name << " is : " << cut.multiweight_.size() << std::endl;
 		for(const auto &p : cut.multiweight_){
 			int id, pos_entries, neg_entries;
 			double pos_sum, neg_sum, pos_2sum, neg_2sum;
 			id = p.first;
-			pos_entries = p.second->nentries_.first;
-			neg_entries = p.second->nentries_.second;
-			pos_sum = p.second->sumweight_.first;
-			neg_sum = p.second->sumweight_.second;
-			pos_2sum = p.second->sumweight2_.first;
-			neg_2sum = p.second->sumweight2_.second;
+			pos_entries = p.second.nentries_.first;
+			neg_entries = p.second.nentries_.second;
+			pos_sum = p.second.sumweight_.first;
+			neg_sum = p.second.sumweight_.second;
+			pos_2sum = p.second.sumweight2_.first;
+			neg_2sum = p.second.sumweight2_.second;
 			db.addWeight(region_name, cut_name, id, pos_entries, neg_entries, pos_sum, neg_sum, pos_2sum, neg_2sum);
 		}
 

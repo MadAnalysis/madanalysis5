@@ -91,9 +91,13 @@ class CounterManager
   { return counters_[index];}
 
   /// Incrementing the initial number of events
-  void IncrementNInitial(MAfloat32 weight)
+  void IncrementNInitial(MAfloat32 weight, const std::map<MAuint32, MAfloat64> &multiweight)
   { 
-	  initial_.Increment(weight); 
+	  initial_.Increment(weight);
+	  initial_.Increment(multiweight);
+	  for(auto &cut : counters_){
+		  cut.Init(multiweight);
+	  }
   }
 
   /// Incrementing the initial number of events
@@ -117,9 +121,11 @@ class CounterManager
   { Reset(); }
 
   
+  /*
   void IncrementNInitial(const std::map<MAuint32, MAfloat64> &multiweight){
 	initial_.Increment(multiweight);
   }
+  */
   
 
 

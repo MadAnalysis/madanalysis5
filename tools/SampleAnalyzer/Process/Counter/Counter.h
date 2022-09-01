@@ -36,17 +36,26 @@
 #include <fstream>
 
 struct multiWeightEntry {
-	  std::pair<MAint64, MAint64> nentries_;
-	  std::pair<MAfloat64, MAfloat64> sumweight_;
-	  std::pair<MAfloat64, MAfloat64> sumweight2_;
-	  multiWeightEntry(){
-		nentries_.first = 0;
-		nentries_.second = 0;
-		sumweight_.first = 0.;
-		sumweight_.second = 0.;
-		sumweight2_.first = 0.;
-		sumweight2_.second = 0.;
-	  }
+	std::pair<MAint64, MAint64> nentries_;
+	std::pair<MAfloat64, MAfloat64> sumweight_;
+	std::pair<MAfloat64, MAfloat64> sumweight2_;
+	multiWeightEntry(double input = 0){
+		nentries_.first = input;
+		nentries_.second = input;
+		sumweight_.first = input;
+		sumweight_.second = input;
+		sumweight2_.first = input;
+		sumweight2_.second = input;
+	}
+
+	multiWeightEntry(const multiWeightEntry &rhs){
+		nentries_.first = rhs.nentries_.first;
+		nentries_.second = rhs.nentries_.second;
+		sumweight_.first = rhs.sumweight_.first;
+		sumweight_.second = rhs.sumweight_.second;
+		sumweight2_.first = rhs.sumweight2_.first;
+		sumweight2_.second = rhs.sumweight2_.second;
+	}
 };
 
 
@@ -81,7 +90,7 @@ class Counter
   /// first = positive weight ; second = negative weight
   std::pair<MAfloat64,MAfloat64> sumweight2_;
 
-  std::map<MAuint32, multiWeightEntry*> multiweight_;
+  std::map<MAuint32, multiWeightEntry> multiweight_;
 
 
   // -------------------------------------------------------------
@@ -100,11 +109,7 @@ class Counter
 
   /// Destructor
   ~Counter()
-  { 
-	  for(auto &p : multiweight_){
-		  delete p.second;
-	  } 
-  }
+  {   }
 
   /// Reset
   void Reset()
@@ -112,12 +117,10 @@ class Counter
     nentries_   = std::make_pair(0,0); 
     sumweight_  = std::make_pair(0.,0.);
     sumweight2_ = std::make_pair(0.,0.);
-	for(auto &p : multiweight_){
-		delete p.second;
-	}
 	multiweight_.clear();
   }
 
+  /*
   void Debug(int debugCount, int weightprocessed){
 		for(auto &p : multiweight_){
 			std::ofstream output;
@@ -134,32 +137,34 @@ class Counter
 	  }
 
   }
+  */
+
 
 
   void Increment(const std::map<MAuint32, MAfloat64> &multiweights){
 	//	static int incrementDebugCount = 0;
-		for(const auto &weight : multiweights){
-			if(multiweight_.find(weight.first) == multiweight_.end()){
-				multiweight_[weight.first] = new multiWeightEntry();
-			}
+
+	  for(const auto &weight : multiweights){
+
 			if(weight.second > 0){
-				multiweight_[weight.first]->nentries_.first++;
-				multiweight_[weight.first]->sumweight_.first+=weight.second;
-				multiweight_[weight.first]->sumweight2_.first+=weight.second*weight.second;
+				multiweight_[weight.first].nentries_.first++;
+				multiweight_[weight.first].sumweight_.first+=weight.second;
+				multiweight_[weight.first].sumweight2_.first+=weight.second*weight.second;
 			}
 			else if (weight.second < 0){
-				multiweight_[weight.first]->nentries_.second++;
-				multiweight_[weight.first]->sumweight_.second+=weight.second;
-				multiweight_[weight.first]->sumweight2_.second+=weight.second*weight.second;
+				multiweight_[weight.first].nentries_.second++;
+				multiweight_[weight.first].sumweight_.second+=weight.second;
+				multiweight_[weight.first].sumweight2_.second+=weight.second*weight.second;
 			}
 	  }
+	  
 	
 	  //Debug testing
 	//  Debug(incrementDebugCount, multiweights.begin()->second);	
 	//  incrementDebugCount++;	
 
   }
-
+  
 
   /// Increment the counter
   void Increment(const MAfloat32& weight)
@@ -178,6 +183,14 @@ class Counter
     }
 
   }
+
+  void Init(const std::map<MAuint32, MAfloat64> &weights){
+	  for(auto w : weights){
+		  if(multiweight_.find(w.first) == multiweight_.end()) {multiweight_[w.first] = multiWeightEntry(0) ;}
+	  }
+  }
+
+
 
   
 
