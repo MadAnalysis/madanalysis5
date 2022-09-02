@@ -814,7 +814,6 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
 	  dbManager.closeDB();
   }
 
-
   // Saving the cut flows
   for(MAuint32 i=0; i<analyzers_.size(); i++)
   {
@@ -841,6 +840,7 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
 	bool addInitial = true;
 	
 	AnalyzerBase* myanalysis = analyzers_[i];
+	mySamples[i].mc()->WriteWeightNames(dbManager);
 	//insert region,cut pair to cutflow table and region,cut,weight_id (weight data) to weights table
 	for(int j = 0; j < myanalysis->Manager()->Regions().size(); ++j){
 		RegionSelection *myRS = myanalysis->Manager()->Regions()[j];

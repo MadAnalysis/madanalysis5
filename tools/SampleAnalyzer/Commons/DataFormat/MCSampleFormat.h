@@ -36,7 +36,8 @@
 #include "SampleAnalyzer/Commons/DataFormat/GeneratorInfo.h"
 #include "SampleAnalyzer/Commons/DataFormat/MCProcessFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/WeightDefinition.h"
-#include "SampleAnalyzer/Commons/Service/LogService.h" 
+#include "SampleAnalyzer/Commons/Service/LogService.h"
+#include "SampleAnalyzer/Process/Writer/DatabaseManager.h"
 
 
 namespace MA5
@@ -80,6 +81,8 @@ class MCSampleFormat
 
   // ----------------------- multiweights ------------------------
   WeightDefinition weight_definition_;
+  std::map<int, std::string> weight_names;
+
 
   // ----------------------- file info ---------------------------
   MAfloat64 xsection_;
@@ -123,6 +126,18 @@ class MCSampleFormat
     xsection_error_     = 0.;
     sumweight_positive_ = 0.;
     sumweight_negative_ = 0.;
+  }
+
+  //set weight names
+  void SetName(int id, std::string name) {
+	weight_names[id] = name;
+  }
+
+  void WriteWeightNames(DatabaseManager &db){
+	db.createWeightNamesTable();
+	for(auto &p : weight_names){
+		db.addWeightDefinition(p.first, p.second);
+	}
   }
 
   /// Accessoir to the generator type

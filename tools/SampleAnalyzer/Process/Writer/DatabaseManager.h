@@ -148,6 +148,20 @@ class DatabaseManager {
 
 		}
 
+		void createWeightNamesTable(){
+			sql = "CREATE TABLE IF NOT EXISTS WeightDefinition("\
+				   "id INTERGER NOT NULL,"\
+				   "definition TEXT NOT NULL,"\
+				   "primary key (id) );";
+			rc = sqlite3_exec(db, sql.c_str(), callback, 0, &zErrMsg);
+			checkDBErrors("creating Weight Names table");
+		}
+
+		void addWeightDefinition(int id, string def){
+			sql = "INSERT INTO WeightDefinition VALUES ('" + to_string(id) + "','" + def + "')";
+			rc = sqlite3_exec(db, sql.c_str(), callback, 0, &zErrMsg);
+		}
+
 		void addHisto(string name, int bins, double xmin, double xmax, string regions){
 			sql = "INSERT INTO HistoDescription VALUES ('" + name + "'" + "," + "'" + to_string(bins) + "'" + "," + "'" + to_string(xmin) + "'" + "," + "'" + to_string(xmax) + "'" + "," + "'" + regions + "')";
 			rc = sqlite3_exec(db, sql.c_str(), callback, 0 , &zErrMsg);
