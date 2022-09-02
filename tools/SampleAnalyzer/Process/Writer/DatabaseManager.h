@@ -107,7 +107,7 @@ class DatabaseManager {
 				   "name TEXT NOT NULL,"\
 				   "num_of_bins INTEGER NOT NULL,"\
 				   "xmin DOUBLE NOT NULL,"\
-				   "xmas DOUBLE NOT NULL,"\
+				   "xmax DOUBLE NOT NULL,"\
 				   "regions TEXT NOT NULL,"\
 				   "primary key(name) );";
 			rc = sqlite3_exec(db, sql.c_str(), callback, 0, &zErrMsg);
