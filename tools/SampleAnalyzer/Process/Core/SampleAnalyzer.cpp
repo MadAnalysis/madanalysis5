@@ -834,7 +834,7 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
 
   //save multi-weight cutflows to SQL - Kyle Fan
   for(int i = 0; i < analyzers_.size(); ++i){
-	std::string path = analyzers_[i]->Output() + "/Cutflows/Analysis-" + to_string(i) + "-cutflows.db";
+	std::string path = analyzers_[i]->Output() + "/Cutflows/cutflows.db";
 	DatabaseManager dbManager(path);
 	dbManager.createCutflowTables();	
 	bool addInitial = true;
