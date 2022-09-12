@@ -88,6 +88,8 @@ class UserInfo:
         # dvipdf
         self.dvipdf_veto = None
 
+        self.sqlite_veto = None
+
         # logger
         self.logger = logging.getLogger('MA5')
 

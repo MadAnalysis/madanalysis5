@@ -126,6 +126,9 @@ class DetectManager():
         elif package=='latex':
             from madanalysis.system.detect_latex import DetectLatex
             checker=DetectLatex(self.archi_info, self.user_info, self.session_info, self.debug)
+        elif package=='sqlite':
+            from madanalysis.system.detect_sqlite import DetectSQLite
+            checker=DetectSQLite(self.archi_info, self.user_info, self.session_info, self.debug)
         else:
             self.logger.error('the package "'+rawpackage+'" is unknown')
             return False

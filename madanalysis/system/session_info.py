@@ -44,6 +44,7 @@ class SessionInfo():
         self.has_pad            = False
         self.has_padsfs         = False
         self.has_padma5         = False
+        self.has_sqlite3        = False
         self.gcc_header_search_path  = []
         self.gcc_library_search_path = []
         self.padma5_build_path = ""
