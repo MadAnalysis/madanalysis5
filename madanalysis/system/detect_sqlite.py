@@ -41,7 +41,7 @@ class DetectSQLite:
         self.user_info    = user_info
         self.session_info = session_info
         self.debug        = debug
-        self.name         = 'sqlite3'
+        self.name         = 'SQLite3'
         self.mandatory    = False
         self.log          = []
         self.logger       = logging.getLogger('MA5')
