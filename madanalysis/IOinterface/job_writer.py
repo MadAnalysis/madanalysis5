@@ -750,6 +750,7 @@ class JobWriter(object):
 
         options.has_root_inc       = self.main.archi_info.has_root
         options.has_root_lib       = self.main.archi_info.has_root
+        options.has_sqlite         = self.main.archi_info.has_sqlite3
         #options.has_userpackage = True
         toRemove=['Log/compilation.log','Log/linking.log','Log/cleanup.log','Log/mrproper.log']
 

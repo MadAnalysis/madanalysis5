@@ -659,7 +659,8 @@ class Main():
         options.has_zlib           = self.archi_info.has_zlib
         options.has_fastjet        = self.archi_info.has_fastjet
         options.has_delphes        = self.archi_info.has_delphes
-        options.has_delphesMA5tune = self.archi_info.has_delphesMA5tune
+        options.has_delphesMA5tune = self.archi_info.has_delphesMA5tune 
+        options.has_sqlite3        = self.archi_info.has_sqlite3
         #MakefileWriter.UserfriendlyMakefileForSampleAnalyzer(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Makefile',options)
 
         # Writing the setup

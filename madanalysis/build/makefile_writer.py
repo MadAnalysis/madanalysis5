@@ -41,6 +41,7 @@ class MakefileWriter():
             self.has_fastjet        = False
             self.has_delphes        = False
             self.has_delphesMA5tune = False
+            self.has_sqlite3        = False
 
 
     @staticmethod
@@ -98,7 +99,10 @@ class MakefileWriter():
             file.write('\tcd Test && $(MAKE) -f Makefile_delphesMA5tune\n')
         if options.has_process:
             file.write('\tcd Process && $(MAKE) -f Makefile\n')
-            file.write('\tcd Test && $(MAKE) -f Makefile_process\n')
+            file.write('\tcd Test && $(MAKE) -f Makefile_process\n') 
+        if options.has_sqlite3:
+            file.write('\tcd Interfaces && $(MAKE) -f Makefile_sqlite\n')
+            file.write('\tcd Test && $(MAKE) -f Makefile_sqlite\n')
         file.write('\n')
 
         # Clean
@@ -125,6 +129,9 @@ class MakefileWriter():
         if options.has_process:
             file.write('\tcd Process && $(MAKE) -f Makefile clean\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_process clean\n')
+        if options.has_sqlite3:
+            file.write('\tcd Interfaces && $(MAKE) -f Makefile_sqlite clean\n')
+            file.write('\tcd Test && $(MAKE) -f Makefile_sqlite clean\n')
         file.write('\n')
 
         # Mrproper
@@ -152,6 +159,9 @@ class MakefileWriter():
         if options.has_process:
             file.write('\tcd Process && $(MAKE) -f Makefile mrproper\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_process mrproper\n')
+        if options.has_sqlite3:
+            file.write('\tcd Interfaces && $(MAKE) -f Makefile_sqlite mrproper\n')
+            file.write('\tcd Test && $(MAKE) -f Makefile_sqlite mrproper\n')
         file.write('\n')
 
         # Closing the file
@@ -194,6 +204,7 @@ class MakefileWriter():
             self.has_root_tag              = False
             self.has_root_lib              = False
             self.has_root_ma5lib           = False
+            self.has_sqlite                = False
 
 
 
@@ -321,7 +332,8 @@ class MakefileWriter():
             for header in archi_info.delphesMA5tune_inc_paths:
                 cxxflags.extend(['-I'+header])
             file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
-
+        
+             
         # - tags
         cxxflags=[]
         if options.has_root_tag:
@@ -347,6 +359,7 @@ class MakefileWriter():
 
         # - general
         libs=[]
+
         # added SQL
         file.write('LIBFLAGS  = -l sqlite3\n')
 
@@ -430,6 +443,10 @@ class MakefileWriter():
         if options.has_heptoptagger:
             file.write('LIBFLAGS += -lHEPTopTagger_for_ma5\n')
 
+        # SQLite3
+        #if options.has_sqlite:
+        #    file.write('LIBFLAGS += -l sqlite3\n')
+
         # - Commons
         if options.has_commons:
             libs=[]
@@ -465,6 +482,8 @@ class MakefileWriter():
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libsubstructure_for_ma5.so')
         if options.has_heptoptagger:
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libHEPTopTagger_for_ma5.so')
+        if options.has_sqlite:
+            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libsqlite_for_ma5.so')
         if len(libs)!=0:
             file.write('# Requirements to check before building\n')
             for ind in range(0,len(libs)):

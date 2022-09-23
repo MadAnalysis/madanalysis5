@@ -131,6 +131,8 @@ class LibraryWriter():
             filename = self.path+"/SampleAnalyzer/Test/Makefile_delphesMA5tune"
         elif package=='test_root':
             filename = self.path+"/SampleAnalyzer/Test/Makefile_root"
+        elif package=='test_sqlite':
+            filename = self.path+"/SampleAnalyzer/Test/Makefile_sqlite"
 
         # Header
         title=''
@@ -158,6 +160,8 @@ class LibraryWriter():
             title='*delphesMA5tune-interface* test'
         elif package=='test_root':
             title='*root-interface* test'
+        elif package=='test+sqlite':
+            title='*sqlite* test'
         else:
             title='interface to '+package
 
@@ -342,6 +346,8 @@ class LibraryWriter():
           #  options.has_delphesMA5tune_tag    = self.main.archi_info.has_delphesMA5tune
           #  options.has_zlib_tag              = self.main.archi_info.has_zlib
             toRemove.extend(['compilation_process.log','linking_process.log','cleanup_process.log','mrproper_process.log','../Bin/TestSampleAnalyzer.log'])
+        elif package=='sqlite':
+            options.has_sqlite              = self.main.archi_info.has_sqlite3
 
         # file pattern
         if package in ['commons','process','configuration']:
@@ -374,6 +380,9 @@ class LibraryWriter():
         elif package=='test_root':
             cppfiles = ['Root/*.cpp']
             hfiles   = ['Root/*.h']
+        elif package=='test_sqlite':
+            cppfiles = ['SQLite/*.cpp']
+            hfiles   = ['SQLite/*.h']
         else:
             cppfiles = [package+'/*.cpp']
             hfiles   = [package+'/*.h']
