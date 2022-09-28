@@ -75,7 +75,7 @@ void Histo::WriteSQL(DatabaseManager &db){
 		//for each weight histo,weight id pair: add bucket data to Data table
 		db.addData(name_, weight_id.first, "underflow", weight_id.second.underflow_.first, weight_id.second.underflow_.second);
 		for(int i = 0; i < nbins_; ++i){
-			db.addData(name_, weight_id.first, "bin " + to_string(i+1), weight_id.second.histo_[i].first, weight_id.second.histo_[i].second);
+			db.addData(name_, weight_id.first, to_string(i+1), weight_id.second.histo_[i].first, weight_id.second.histo_[i].second);
 		}
 		db.addData(name_, weight_id.first, "overflow", weight_id.second.overflow_.first, weight_id.second.overflow_.second);
 	}

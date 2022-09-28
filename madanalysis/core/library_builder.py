@@ -80,6 +80,10 @@ class LibraryBuilder:
             libraries.append(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so')
         if self.archi_info.has_delphesMA5tune:
             libraries.append(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphesMA5tune_for_ma5.so')
+        if self.archi_info.has_sqlite3:
+            libraries.append(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libsqlite_for_ma5.so')
+
+
         for library in libraries:
             if not os.path.isfile(library):
                 self.logger.debug('\t-> library '+ library + " not found.")

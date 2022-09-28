@@ -47,6 +47,7 @@ class DetectSQLite:
         self.logger       = logging.getLogger('MA5')
 
         # adding what you want here
+        self.headernames=['DatabaseManager.h']
 
     def PrintDisableMessage(self):
         self.logger.warning("sqlite3 not detected, multiweight output format will not be supported!")

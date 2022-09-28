@@ -101,6 +101,7 @@ class ArchitectureInfo:
         self.delphesMA5tune_lib=""
         self.fastjet_bin_path=""
         self.fastjet_lib_paths=[]
+        
 
         # C++ compiler versions
         self.cpp11 = False

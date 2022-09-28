@@ -38,7 +38,10 @@
 #include "SampleAnalyzer/Commons/Base/Configuration.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 #include "SampleAnalyzer/Commons/Service/Physics.h"
-#include "SampleAnalyzer/Process/Writer/DatabaseManager.h"
+
+#ifdef SQLITE3_USE
+	#include "SampleAnalyzer/Interfaces/SQLite3/DatabaseManager.h"
+#endif
 
 
 using namespace MA5;
@@ -805,15 +808,7 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
     out.Finalize();
   }
 
-  // Create histo SQlite file
-  for(MAuint32 i = 0; i < analyzers_.size(); ++i){
-	  std::string path = analyzers_[i]->Output() + "/Histograms/histo.db";
-	  DatabaseManager dbManager(path);
-	  dbManager.createHistoTables();
-	  analyzers_[i]->Manager()->GetPlotManager()->WriteSQL(dbManager);
-	  dbManager.closeDB();
-  }
-
+  
   // Saving the cut flows
   for(MAuint32 i=0; i<analyzers_.size(); i++)
   {
@@ -831,6 +826,16 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
     }
   }
 
+#ifdef SQLITE3_USE
+
+  // Create histo SQlite file
+  for(MAuint32 i = 0; i < analyzers_.size(); ++i){
+	  std::string path = analyzers_[i]->Output() + "/Histograms/histo.db";
+	  DatabaseManager dbManager(path);
+	  dbManager.createHistoTables();
+	  analyzers_[i]->Manager()->GetPlotManager()->WriteSQL(dbManager);
+	  dbManager.closeDB();
+  }
 
   //save multi-weight cutflows to SQL - Kyle Fan
   for(int i = 0; i < analyzers_.size(); ++i){
@@ -848,7 +853,7 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
 	}
 	dbManager.closeDB();
   }
-
+#endif
   //end of multi-weight cutflow code
 
 

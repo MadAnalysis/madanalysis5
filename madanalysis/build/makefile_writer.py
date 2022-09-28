@@ -205,6 +205,8 @@ class MakefileWriter():
             self.has_root_lib              = False
             self.has_root_ma5lib           = False
             self.has_sqlite                = False
+            self.has_sqlite_tag            = False
+            self.has_sqlite_lib            = False
 
 
 
@@ -332,6 +334,7 @@ class MakefileWriter():
             for header in archi_info.delphesMA5tune_inc_paths:
                 cxxflags.extend(['-I'+header])
             file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
+  
         
              
         # - tags
@@ -350,6 +353,8 @@ class MakefileWriter():
              cxxflags.extend(['-DDELPHES_USE'])
         if options.has_delphesMA5tune_tag:
              cxxflags.extend(['-DDELPHESMA5TUNE_USE'])
+        if options.has_sqlite_tag:
+            cxxflags.extend(['-DSQLITE3_USE'])
         if len(cxxflags)!=0:
             file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
         file.write('\n')
@@ -361,7 +366,7 @@ class MakefileWriter():
         libs=[]
 
         # added SQL
-        file.write('LIBFLAGS  = -l sqlite3\n')
+        #file.write('LIBFLAGS  = -l sqlite3\n')
 
         # - commons
         if options.has_commons:
@@ -444,8 +449,12 @@ class MakefileWriter():
             file.write('LIBFLAGS += -lHEPTopTagger_for_ma5\n')
 
         # SQLite3
-        #if options.has_sqlite:
-        #    file.write('LIBFLAGS += -l sqlite3\n')
+        if options.has_sqlite: 
+            file.write('LIBFLAGS += -l sqlite3\n')
+
+        if options.has_sqlite_lib:
+            file.write('LIBFLAGS += -l sqlite3\n')
+          
 
         # - Commons
         if options.has_commons:
@@ -482,7 +491,7 @@ class MakefileWriter():
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libsubstructure_for_ma5.so')
         if options.has_heptoptagger:
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libHEPTopTagger_for_ma5.so')
-        if options.has_sqlite:
+        if options.has_sqlite_lib: 
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libsqlite_for_ma5.so')
         if len(libs)!=0:
             file.write('# Requirements to check before building\n')

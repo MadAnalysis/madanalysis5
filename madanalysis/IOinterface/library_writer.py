@@ -160,7 +160,7 @@ class LibraryWriter():
             title='*delphesMA5tune-interface* test'
         elif package=='test_root':
             title='*root-interface* test'
-        elif package=='test+sqlite':
+        elif package=='test_sqlite':
             title='*sqlite* test'
         else:
             title='interface to '+package
@@ -243,10 +243,13 @@ class LibraryWriter():
             options.ma5_fastjet_mode   = self.main.archi_info.has_fastjet
             options.has_fastjet_inc    = self.main.archi_info.has_fastjet
             options.has_fastjet_lib    = self.main.archi_info.has_fastjet
+            #options.has_sqlite_lib     = self.main.archi_info.has_sqlite3
+            options.has_sqlite_tag     = self.main.archi_info.has_sqlite3
             # options.has_fastjet_ma5lib = self.main.archi_info.has_fastjet
             toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
         elif package=='test_commons':
             options.has_commons  = True
+            options.has_sqlite_tag = self.main.archi_info.has_sqlite3
             toRemove.extend(['compilation_commons.log','linking_commons.log','cleanup_commons.log','mrproper_commons.log','../Bin/TestCommons.log'])
         elif package=='zlib':
             options.has_commons  = True
@@ -256,6 +259,7 @@ class LibraryWriter():
         elif package=='test_zlib':
             options.has_commons     = True
             options.has_zlib_ma5lib = True
+            options.has_sqlite_tag  = self.main.archi_info.has_sqlite3
           #  options.has_zlib_lib = True
             toRemove.extend(['compilation_zlib.log','linking_zlib.log','cleanup_zlib.log','mrproper_zlib.log','../Bin/TestZlib.log'])
         elif package=='delphes':
@@ -328,6 +332,8 @@ class LibraryWriter():
             options.has_fastjet_lib    = self.main.archi_info.has_fastjet
             options.ma5_fastjet_mode   = self.main.archi_info.has_fastjet
             options.has_substructure   = self.main.archi_info.has_fjcontrib and self.main.archi_info.has_fastjet
+            options.has_sqlite_tag     = self.main.archi_info.has_sqlite3
+            options.has_sqlite_lib     = self.main.archi_info.has_sqlite3
 
             toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
         elif package=='test_process':
