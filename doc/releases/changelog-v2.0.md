@@ -56,6 +56,9 @@
 * $M_{eff}$ definition has been fixed.
   [(#86)](https://github.com/MadAnalysis/madanalysis5/pull/86)
 
+* Jet collection accessor has been fixed in DelphesMa5Tune
+  ([#135](https://github.com/MadAnalysis/madanalysis5/pull/135))
+
 ## Contributors
 
 This release contains contributions from (in alphabetical order):
