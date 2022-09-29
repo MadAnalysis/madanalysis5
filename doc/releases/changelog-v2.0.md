@@ -45,6 +45,9 @@
   HEPTopTagger interfaces 
   ([#86](https://github.com/MadAnalysis/madanalysis5/pull/86)).
 
+* `fatjet` and `genjet` collections have been merged into `jetcollection` map.
+  ([#135](https://github.com/MadAnalysis/madanalysis5/pull/135))
+
 ## Bug fixes
 
 * Various bugfixes for matching the numeric results to MA5 v1.10.
