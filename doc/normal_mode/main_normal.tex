@@ -48,14 +48,15 @@
 
 \begin{document}
 \begin{center} 
-{\color{ao} \huge \textbf{\textsc{MadAnalysis} 5 v1.9}} \\ \vspace{0.25cm}
+{\color{ao} \huge \textbf{\textsc{MadAnalysis} 5 v2.0}} \\ \vspace{0.25cm}
 {\color{ao} \huge \textbf{Normal-Mode reference card}} \\ \vspace{0.25cm}
 \vspace{0.1cm} \textsl{\today}\\
 \vspace{0.1cm} \textsl{website: \url{http://madanalysis.irmp.ucl.ac.be/}}\\
 \vspace{0.1cm} \textsl{References:\\ \href{https://arxiv.org/abs/1206.1599}{arXiv:1206.1599 [hep-ph]}, \href{https://arxiv.org/abs/1405.3982}{arXiv:1405.3982 [hep-ph]}, 
 \href{https://arxiv.org/abs/1407.3278}{arXiv:1407.3278 [hep-ph]},\\
 \href{https://arxiv.org/abs/1910.11418}{arXiv:1910.11418 [hep-ph]},
-\href{https://arxiv.org/abs/2006.09387}{arXiv2006.09387 [hep-ph]}
+\href{https://arxiv.org/abs/2006.09387}{arXiv2006.09387 [hep-ph]}, 
+\href{https://arxiv.org/abs/2206.14870}{arXiv: 2206.14870 [hep-ph]}
 }
 \end{center}
 
@@ -604,6 +605,15 @@ clustering algorithms.\\
   procedure of the CDF reconstruction algorithms.\\
 \color{ao} \verb?spacing? & Grid spacing in the grid jet algorithm.\\
 \color{ao} \verb?ymax? & Maximum rapidity value in the grid jet algorithm.\\
+
+\color{ao} \verb?electron_isocone_radius? & Creates an isolation cone around electrons with respect to HCAL deposits.\\
+\color{ao} \verb?muon_isocone_radius? & Creates an isolation cone around muons with respect to HCAL deposits.\\
+\color{ao} \verb?photon_isocone_radius? & Creates an isolation cone around photons with respect to HCAL deposits.\\
+\color{ao} \verb?track_isocone_radius? & Creates an isolation cone around tracks with respect to HCAL deposits.\\
+
+\color{ao} \verb?particle_propagator? & Enables particle propagator module. Default \verb?off?.\\
+\color{ao} \verb?magnetic_field? & Sets magnetic field strength in T. Default 3.8 T.\\
+
 \hline
 \end{tabular}
 \end{center}
@@ -624,9 +634,15 @@ Symbol& Description\\
   a float.\\
 \color{ao} \verb?bjet_id.misid_ljet? & Mistagging rate of a light jet as a $b$-jet,
   as a float.\\
+  
+\color{ao} \verb?cjet_id.status? & Enable advance $c$-jet tagging and mistagging capabilities by setting \verb?on/off?. Default \verb?off?.\\
+\color{ao} \verb?cjet_id.exclusive? & Allows several $c$-jets to be issued from a single $C$-hadron. (Only available if \verb?cjet_id.status? is on)\\
+\color{ao} \verb?cjet_id.matching_dr? & Angular distance parameter matching a $c$-jet with a $C$-hadron. (Only available if \verb?cjet_id.status? is on)\\
+
 \color{ao} \verb?tau_id.efficiency? & Tau-tagging efficiency, as a float.\\
 \color{ao} \verb?tau_id.misid_ljet? &  Mistagging rate of a light jet as a hadronic tau,
    as a float.\\
+   \color{ao} \verb?tau_id.reconstruction_method? & Reconstruction method for hadronic taus. Jet-based reconstruction allows matching truth level taus to the jets. Hadron-based reconstruction finds hadronic taus in the event and uses them as tau objects. Default \verb?hadron-based?.\\
 \hline
 \end{tabular}
 \end{center}
@@ -756,6 +772,9 @@ efficiencies) or as a different object (mistagging rates). These modules are
     object. \\
   \color{ao} \verb?jes?   & Generates a function to scale reconstructed jet energy. \\
   \color{ao} \verb?energy_scaling?   & Generates a function to scale reconstructed object energy. \\
+
+  \color{ao} \verb?jet_algorithm?   & Defines a new jet object. \\
+  
     \hline
  \end{tabular}
 \end{center}
@@ -853,7 +872,20 @@ Define the Jet Energy Scale (JES) corrections to apply to clustered jets. The co
 \end{verbatim}}
 Define the rescaling corrections to apply to the energy of a reconstructed object {\tt <p1>}.
 The corresponding energy scaling function is given by {\tt <function>}.
-The bounds correspond to the domain that scaling function applies ({\tt PT > ..., ETA < ...}, etc.).
+The bounds correspond to the domain that the scaling function applies ({\tt PT > ..., ETA < ...}, etc.).
+
+The \verb?jet_algorithm? submodule can be used following the syntax
+{\color{ao} \begin{verbatim}
+		define jet_algorithm <jet_id> <clustering algorithm> <parameters>
+\end{verbatim}}
+or
+{\color{ao} \begin{verbatim}
+		define jet_algorithm <jet_id> <clustering algorithm> 
+		set <jet_id>.<parameter> = <value>
+\end{verbatim}}
+Here {\tt <jet\_id>} stands for the identification of this particular jet definition which can get any value except the same names as samples, \texttt{<clustering algorithm>} refers to the desired clustering algorithm and \texttt{<parameters>} are the specific parameters for the given clustering algorithm. Details about the usage of this module both in normal mode and expert mode can be found in {\tt madanalysis5/tools/SampleAnalyzer/Interfaces/substructure/README.md}.
+
+
 %\vspace{3cm}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{shaded}
