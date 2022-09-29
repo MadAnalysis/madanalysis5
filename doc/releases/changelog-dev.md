@@ -4,6 +4,9 @@
 
 ## Improvements
 
+ * Pyhf version requirement have been updated.
+   ([#134](https://github.com/MadAnalysis/madanalysis5/pull/134))
+
 ## Bug fixes
 
  * Fixed destructor in `RegionSelectionManager` so that `RegionSelection` 
@@ -14,6 +17,7 @@
  * Fixed function names for CLs calculator initialisation which would create 
    error in postfit expected CLs computation.
    ([#124](https://github.com/MadAnalysis/madanalysis5/pull/124))
+   
 
 ## Contributors
 
