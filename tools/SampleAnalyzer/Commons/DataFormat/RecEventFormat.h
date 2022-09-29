@@ -103,12 +103,10 @@ namespace MA5
         // Identification of the primary jet. Corresponds to content of the jets_
         std::string PrimaryJetID_;
 
-        /// Collection of reconstructed fat jets
-        std::vector<RecJetFormat>    fatjets_;
-
         /// Collection of reconstructed jet dictionary
         // @JACK note for the future: if lots of jet input is used change map
         // to unordered map for efficiency UI is the same!
+        // 29.09.2022 - Jack: fatjet and genjet is added to jetcollection
         std::map<std::string, std::vector<RecJetFormat> > jetcollection_;
 
 #ifdef MA5_FASTJET_MODE
@@ -118,9 +116,6 @@ namespace MA5
 
         /// Create an empty jet
         std::vector<RecJetFormat>    emptyjet_;
-
-        /// Collection of generated jets
-        std::vector<RecJetFormat>    genjets_;
 
         /// Collection of reconstructed tracks
         MAbool tracks_ok_;
@@ -214,7 +209,16 @@ namespace MA5
         const std::vector<RecTauFormat>& taus() const {return taus_;}
 
         /// Accessor to the fat jet collection (read-only)
-        const std::vector<RecJetFormat>& fatjets() const {return fatjets_;}
+        const std::vector<RecJetFormat>& fatjets() const
+        {
+            std::string id = "fatjet";
+            if (jetcollection_.find(id) != jetcollection_.end())
+                return jetcollection_.at(id);
+            else
+            {
+                return emptyjet_;
+            }
+        }
 
         /// Accessor to the jet collection (read-only)
         const std::vector<RecJetFormat>& jets() const
@@ -242,7 +246,16 @@ namespace MA5
         }
 
         /// Accessor to the genjet collection (read-only)
-        const std::vector<RecJetFormat>& genjets() const {return genjets_;}
+        const std::vector<RecJetFormat>& genjets() const
+        {
+            std::string id = "genjet";
+            if (jetcollection_.find(id) != jetcollection_.end())
+                return jetcollection_.at(id);
+            else
+            {
+                return emptyjet_;
+            }
+        }
 
         /// Accessor to the track collection (read-only)
         const std::vector<RecTrackFormat>& tracks() const {return tracks_;}
@@ -329,7 +342,16 @@ namespace MA5
         }
 
         /// Accessor to the fat jet collection
-        std::vector<RecJetFormat>& fatjets() {return fatjets_;}
+        std::vector<RecJetFormat>& fatjets()
+        {
+            std::string id = "fatjet";
+            if (jetcollection_.find(id) != jetcollection_.end())
+                return jetcollection_.at(id);
+            else
+            {
+                return emptyjet_;
+            }
+        }
 
         /// Accessor to the towers collection
         std::vector<RecTowerFormat>& towers() {return towers_;}
@@ -338,7 +360,16 @@ namespace MA5
         std::vector<RecParticleFormat>& EFlowNeutralHadrons() {return EFlowNeutralHadrons_;}
 
         /// Accessor to the jet collection
-        std::vector<RecJetFormat>& genjets() {return genjets_;}
+        std::vector<RecJetFormat>& genjets()
+        {
+            std::string id = "genjet";
+            if (jetcollection_.find(id) != jetcollection_.end())
+                return jetcollection_.at(id);
+            else
+            {
+                return emptyjet_;
+            }
+        }
 
         /// Accessor to the track collection
         std::vector<RecTrackFormat>& tracks() {return tracks_;}

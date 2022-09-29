@@ -612,7 +612,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
   if (data_.FatJet_!=0)
   {
     MAuint32 njets = static_cast<MAuint32>(data_.FatJet_->GetEntries());
-    myEvent.rec()->fatjets_.reserve(njets);
+    // myEvent.rec()->fatjets_.reserve(njets);
     for (MAuint32 i=0;i<njets;i++)
     {
       // getting the i-th particle
