@@ -49,6 +49,9 @@ namespace MA5
             MAdouble64 c_;
             MAdouble64 pi_;
 
+            /// Lenght unit mm=1 cm=0.1
+            MAfloat32 length_unit_;
+
         //---------------------------------------------------------------------------------
         //                            protected data members
         //---------------------------------------------------------------------------------
@@ -87,14 +90,17 @@ namespace MA5
             /// Destructor
             virtual ~SmearerBase() {}
 
-
             /// Accessors
             const MAdouble64 Bz() const { return Bz_; }
+
+            /// Length unit setter
+            void SetLengthUnit(MAfloat32 val) { length_unit_ = val; }
 
             /// Initialisation
             void Initialize(MAbool base=false)
             {
                 SetParameters();
+                length_unit_ = 1.0;
                 if (!base) { PrintHeader(); }
                 PrintDebug();
                 output_.Reset();
