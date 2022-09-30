@@ -4,6 +4,10 @@
 
 ## Improvements
 
+ * Ability to read and store length and energy information has been implemented
+   for particle propagator module.
+   ([#140](https://github.com/MadAnalysis/madanalysis5/pull/140))
+
 ## Bug fixes
 
  * Fixed destructor in `RegionSelectionManager` so that `RegionSelection` 
