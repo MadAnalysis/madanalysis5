@@ -46,9 +46,10 @@ class ArchitectureInfo:
         self.has_zlib           = False
         self.has_delphes        = False
         self.has_delphesMA5tune = False
+
+        # Flag for SQlite3
         self.has_sqlite3        = False
        
-        
 
         # Library to put before all the others?
         self.root_priority           = False
