@@ -631,9 +631,6 @@ class Main():
             libraries.append(['SQLite3', 'interface to SQLite3', 'sqlite',
                                 self.archi_info.ma5dir + '/tools/SampleAnalyzer/Lib/libsqlite_for_ma5.so',
                                 self.archi_info.ma5dir + '/tools/SampleAnalyzer/Interfaces', False])
-            #libraries.append(['test_sqlite', 'interface to SQLite3', 'test_sqlite', 
-             #                   self.archi_info.ma5dir + '/tools/SampleAnalyzer/Bin/TestSQLite',
-              #                  self.archi_info.ma5dir + '/tools/SampleAnalyzer/Test/', True])
 
 
         # Process
