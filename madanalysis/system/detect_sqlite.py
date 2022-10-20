@@ -89,7 +89,6 @@ class DetectSQLite:
 
 
     def SaveInfo(self):
-        self.session_info.has_sqlite3=True
         self.archi_info.has_sqlite3 = True
         return True
 
