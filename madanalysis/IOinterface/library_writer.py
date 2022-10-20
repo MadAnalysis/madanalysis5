@@ -160,8 +160,6 @@ class LibraryWriter():
             title='*delphesMA5tune-interface* test'
         elif package=='test_root':
             title='*root-interface* test'
-        elif package=='test_sqlite':
-            title='*sqlite* test'
         else:
             title='interface to '+package
 
