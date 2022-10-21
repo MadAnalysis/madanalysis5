@@ -36,9 +36,8 @@
 #include "SampleAnalyzer/Process/Counter/Counter.h"
 #include "SampleAnalyzer/Process/Writer/SAFWriter.h"
 
-#ifdef SQLITE3_USE
-	#include "SampleAnalyzer/Interfaces/SQLite3/DatabaseManager.h"
-#endif
+#include "SampleAnalyzer/Commons/Base/DatabaseManager.h"
+
 
 
 namespace MA5
@@ -112,10 +111,8 @@ class CounterManager
   /// Write the counters in a Text file
   void Write_TextFormat(SAFWriter& output) const;
 
-#ifdef SQLITE3_USE
   //Write to SQL database
   void WriteSQL(DatabaseManager &db, bool &AddInitial, std::string region_name);
-#endif
 
   /// Write the counters in a ROOT file
   //  void Write_RootFormat(TFile* output) const;

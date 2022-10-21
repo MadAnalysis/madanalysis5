@@ -34,9 +34,8 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/LogService.h"
-#ifdef SQLITE3_USE
-	#include "SampleAnalyzer/Interfaces/SQLite3/DatabaseManager.h"
-#endif
+
+#include "SampleAnalyzer/Commons/Base/DatabaseManager.h"
 
 
 struct MultiweightEvents {
@@ -170,9 +169,7 @@ class PlotBase
   /// Write the plot in a ROOT file
   virtual void Write_TextFormat(std::ostream* output) = 0;
 
-#ifdef SQLITE3_USE
   virtual void WriteSQL(DatabaseManager &db) {};
-#endif
 
   /// Increment number of events
   void IncrementNEvents(MAfloat64 weight=1.0)

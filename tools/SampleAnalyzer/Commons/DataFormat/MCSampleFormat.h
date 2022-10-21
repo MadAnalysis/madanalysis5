@@ -38,9 +38,7 @@
 #include "SampleAnalyzer/Commons/DataFormat/WeightDefinition.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
-#ifdef SQLITE3_USE
-	#include "SampleAnalyzer/Interfaces/SQLite3/DatabaseManager.h"
-#endif
+#include "SampleAnalyzer/Commons/Base/DatabaseManager.h"
 
 
 namespace MA5
@@ -136,14 +134,14 @@ class MCSampleFormat
 	weight_names[id] = name;
   }
 
-#ifdef SQLITE3_USE
+
   void WriteWeightNames(DatabaseManager &db){
 	db.createWeightNamesTable();
 	for(auto &p : weight_names){
 		db.addWeightDefinition(p.first, p.second);
 	}
   }
-#endif
+
   /// Accessoir to the generator type
   const MA5GEN::GeneratorType* GeneratorType() const
   { return sample_generator_; }

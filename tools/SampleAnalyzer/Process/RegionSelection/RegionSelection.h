@@ -35,10 +35,7 @@
 #include "SampleAnalyzer/Process/Counter/CounterManager.h"
 #include "SampleAnalyzer/Process/Writer/SAFWriter.h"
 
-#ifdef SQLITE3_USE
-	#include "SampleAnalyzer/Interfaces/SQLite3/DatabaseManager.h"
-#endif
-
+#include "SampleAnalyzer/Commons/Base/DatabaseManager.h"
 
 namespace MA5
 {
@@ -90,12 +87,10 @@ class RegionSelection
   void WriteCutflow(SAFWriter& output)
     { cutflow_.Write_TextFormat(output);}
 
-#ifdef SQLITE3_USE
   //write to SQL database
   void WriteSQL(DatabaseManager &db, bool &AddInitial){
 	  cutflow_.WriteSQL(db, AddInitial, name_);
   }
-#endif
 
   /// Set methods
   void SetName(std::string name)

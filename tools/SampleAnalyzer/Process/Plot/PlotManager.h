@@ -39,9 +39,8 @@
 #include "SampleAnalyzer/Process/Writer/SAFWriter.h"
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelection.h"
 
-#ifdef SQLITE3_USE
-	#include "SampleAnalyzer/Interfaces/SQLite3/DatabaseManager.h"
-#endif
+#include "SampleAnalyzer/Commons/Base/DatabaseManager.h"
+
 
 namespace MA5
 {
@@ -142,13 +141,11 @@ class PlotManager
   /// Write the counters in a Text file
   void Write_TextFormat(SAFWriter& output);
 
-#ifdef SQLITE3_USE
   void WriteSQL(DatabaseManager &db){
 	  for(auto &pl : plots_){
 			pl->WriteSQL(db);	
 	  }
   }
-#endif
 
 
   /// Finalizing

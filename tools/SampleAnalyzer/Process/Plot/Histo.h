@@ -35,9 +35,8 @@
 #include "SampleAnalyzer/Process/Plot/PlotBase.h"
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelection.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
-#ifdef SQLITE3_USE
-	#include "SampleAnalyzer/Interfaces/SQLite3/DatabaseManager.h"
-#endif
+
+#include "SampleAnalyzer/Commons/Base/DatabaseManager.h"
 
 
 struct MultiWeightHisto {
@@ -319,9 +318,7 @@ class Histo : public PlotBase
   /// Write the plot in a ROOT file
   virtual void Write_TextFormat(std::ostream* output);
 
-#ifdef SQLITE3_USE
   virtual void WriteSQL(DatabaseManager &db);
-#endif
 
   /// Write the plot in a ROOT file
   //  virtual void Write_RootFormat(std::pair<TH1F*,TH1F*>& histos);

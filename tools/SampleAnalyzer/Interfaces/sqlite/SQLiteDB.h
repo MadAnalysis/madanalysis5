@@ -1,14 +1,14 @@
 #pragma once
 
-
 #include <iostream>
 #include <string>
 #include <sqlite3.h>
 
+#include "SampleAnalyzer/Commons/Base/SQLbase.h"
+
 using namespace std;
 
-class DatabaseManager {
-
+class SQLiteDB : public SQLiteBase {
 	private:
 		// Pointer to SQLite connection
     	sqlite3 *db;
@@ -61,7 +61,7 @@ class DatabaseManager {
 
 	public:
 
-		DatabaseManager(string path) {
+		SQLiteDB(string path) : SQLiteBase(path){
 			// Save the result of opening the file
     		rc = sqlite3_open(path.c_str(), &db);
 			// enable foreign key constraint
@@ -220,29 +220,15 @@ class DatabaseManager {
 		
 		}
 
-		void closeDB() {
+		void closeDB() 
+		
+		{
 
 			// Close the SQL connection
     		sqlite3_close(db);
 
 		}
-	
+		
 
 
 };
-
-/*
-int main() {
-	DatabaseManager dbManager("test.db");
-	dbManager.createTables();
-	dbManager.addCut("region1", "cut1");
-	dbManager.addWeight("region1", "cut1", 1, 2, 2, 2, -2, 4, 4);
-	dbManager.addWeight("region1", "cut1", 10, 2, 3, 4, 5, 6, 7);
-	dbManager.closeDB();
-
-}
-
-*/
-
-
-
