@@ -39,9 +39,8 @@
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 #include "SampleAnalyzer/Commons/Service/Physics.h"
 
-#ifdef SQLITE3_USE
-	#include "SampleAnalyzer/Interfaces/SQLite3/DatabaseManager.h"
-#endif
+#include "SampleAnalyzer/Commons/Base/DatabaseManager.h"
+
 
 
 using namespace MA5;
@@ -826,7 +825,7 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
     }
   }
 
-#ifdef SQLITE3_USE
+
 
   // Create histo SQlite file
   for(MAuint32 i = 0; i < analyzers_.size(); ++i){
@@ -853,7 +852,7 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
 	}
 	dbManager.closeDB();
   }
-#endif
+
   //end of multi-weight cutflow code
 
 

@@ -453,7 +453,8 @@ class MakefileWriter():
             file.write('LIBFLAGS += -l sqlite3\n')
 
         if options.has_sqlite_lib:
-            file.write('LIBFLAGS += -l sqlite3\n')
+            ##file.write('LIBFLAGS += -l sqlite3\n')
+            file.write('LIBFLAGS += -l sqlite_for_ma5\n')
           
 
         # - Commons

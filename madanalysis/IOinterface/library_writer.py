@@ -131,9 +131,7 @@ class LibraryWriter():
             filename = self.path+"/SampleAnalyzer/Test/Makefile_delphesMA5tune"
         elif package=='test_root':
             filename = self.path+"/SampleAnalyzer/Test/Makefile_root"
-        elif package=='test_sqlite':
-            filename = self.path+"/SampleAnalyzer/Test/Makefile_sqlite"
-
+       
         # Header
         title=''
         if package=='commons':
@@ -383,10 +381,7 @@ class LibraryWriter():
             hfiles   = ['DelphesMA5tune/*.h']
         elif package=='test_root':
             cppfiles = ['Root/*.cpp']
-            hfiles   = ['Root/*.h']
-        elif package=='test_sqlite':
-            cppfiles = ['SQLite/*.cpp']
-            hfiles   = ['SQLite/*.h']
+            hfiles   = ['Root/*.h'] 
         else:
             cppfiles = [package+'/*.cpp']
             hfiles   = [package+'/*.h']
