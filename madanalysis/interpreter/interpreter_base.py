@@ -24,7 +24,6 @@
 
 """  A file containing different extension of the cmd basic python library"""
 from __future__ import absolute_import
-from madanalysis.IOinterface.text_file_reader import TextFileReader
 from madanalysis.core.script_stack            import ScriptStack
 from madanalysis.interpreter.history          import History
 
@@ -32,8 +31,6 @@ from madanalysis.interpreter.history          import History
 import cmd
 import logging
 import os
-import signal
-import traceback
 import subprocess
 import readline
 from six.moves import range
@@ -142,7 +139,16 @@ class InterpreterBase(cmd.Cmd):
                break
 
         # Add the line to the history
-        self.history.Add(line)
+        if isinstance(self.history, list):
+            if len(self.history) > 0:
+                tmp = History()
+                for line in self.history:
+                    tmp.Add(line)
+                self.history = tmp
+            else:
+                self.history = History()
+        else:
+            self.history.Add(line)
 
         # Isolating operator
         if not line.startswith('shell'):
