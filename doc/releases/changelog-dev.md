@@ -15,6 +15,9 @@
    error in postfit expected CLs computation.
    ([#124](https://github.com/MadAnalysis/madanalysis5/pull/124))
 
+ * Fixed the directory import mentioned in issue [#146](https://github.com/MadAnalysis/madanalysis5/issues/146)
+   ([#156](https://github.com/MadAnalysis/madanalysis5/pull/156))
+
 ## Contributors
 
 This release contains contributions from (in alphabetical order):
