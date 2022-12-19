@@ -39,7 +39,8 @@
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 #include "SampleAnalyzer/Commons/Service/Physics.h"
 
-#include "SampleAnalyzer/Commons/Base/DatabaseManager.h"
+//#include "SampleAnalyzer/Commons/Base/DatabaseManager.h"
+#include "SampleAnalyzer/Commons/Base/OutputManager.h"
 
 
 
@@ -826,7 +827,19 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
   }
 
 
+  for(MAuint32 i = 0; i < analyzers_.size(); ++i){
 
+	  std::string histo_path = analyzers_[i]->Output() + "/Histograms/histo.db";
+	  std::string cutflow_path = analyzers_[i]->Output() + "/Cutflows/cutflows.db";
+	  vector<array<string, 3> > outputs;
+	  outputs.push_back({"sqlite", cutflow_path, histo_path});
+	  OutputManager output_manager(outputs, analyzers_[i], &mySamples[0]);
+	  output_manager.Execute();
+  }
+
+
+
+  /*
   // Create histo SQlite file
   for(MAuint32 i = 0; i < analyzers_.size(); ++i){
 	  std::string path = analyzers_[i]->Output() + "/Histograms/histo.db";
@@ -854,6 +867,7 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
   }
 
   //end of multi-weight cutflow code
+  */
 
 
   // The user-defined stuff
