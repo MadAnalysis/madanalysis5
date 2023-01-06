@@ -77,8 +77,8 @@ namespace MA5
         MAint32                        weightMode_;
         std::vector<ProcessFormat>     processes_;
         const MA5GEN::GeneratorType*   sample_generator_;
-        MAfloat32                      length_unit_; /// Lenght unit mm=1 cm=0.1
-        MAfloat32                      energy_unit_; /// Lenght unit gev=1 mev=0.001 kev=0.000001
+        MAfloat32                      length_unit_; /// Length unit: mm=1 cm=0.1
+        MAfloat32                      energy_unit_; /// Energy unit: GeV=1 MeV=0.001 keV=0.000001
 
         // ----------------------- multiweights ------------------------
         WeightDefinition weight_definition_;
@@ -254,10 +254,10 @@ namespace MA5
         /// Length unit setter
         void SetLengthUnit(MAfloat32 val) { length_unit_ = val; }
 
-        /// Accessor to the lenght unit
+        /// Accessor to the length unit
         MAfloat32 LengthUnit() {return length_unit_;}
 
-        /// Accessor to the lenght unit
+        /// Accessor to the length unit
         const MAfloat32 LengthUnit() const {return length_unit_;}
 
         /// Energy unit setter

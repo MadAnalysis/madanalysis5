@@ -400,24 +400,18 @@ void HEPMCReader::FillUnits(const std::string& line, SampleFormat& mySample)
     // character 'N'
     str >> tmp;
 
-    // momentum units
+    // Unit of energy
     str >> tmp;
     if (tmp=="GEV") energy_unit_=1;
     else if (tmp=="MEV") energy_unit_=0.001;
     else if (tmp=="KEV") energy_unit_=0.000001;
-    else
-    {
-        std::cout << "ERROR: energy unit is unknown: " << tmp << std::endl;
-    }
+    else ERROR <<  "Unknown unit of energy: " << tmp << endmsg;
 
-    // length units
+    // Unit of length
     str >> tmp;
     if (tmp=="MM") length_unit_=1;
     else if (tmp=="CM") length_unit_=0.1;
-    else
-    {
-        std::cout << "ERROR: length unit is unknown: " << tmp << std::endl;
-    }
+    else ERROR << "Unknown unit of length: " << tmp << endmsg;
 
     /// Set length and energy units
     mySample.mc()->SetLengthUnit(length_unit_);
