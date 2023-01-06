@@ -32,4 +32,4 @@
 
 This release contains contributions from (in alphabetical order):
 
-[Jack Y. Araz](https://github.com/jackaraz), [Kyle Fan](https://github.com/kfan326)
+[Jack Y. Araz](https://github.com/jackaraz), [Kyle Fan](https://github.com/kfan326), [Benjamin Fuks](https://github.com/BFuks)
