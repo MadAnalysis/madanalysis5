@@ -39,7 +39,6 @@ namespace MA5 {
         muons_.clear();
         taus_.clear();
         jetcollection_.clear();
-        fatjets_.clear();
         emptyjet_.clear();
 #ifdef MA5_FASTJET_MODE
         // pseudojet : only available when fastjet is in use (code efficiency)
@@ -57,7 +56,6 @@ namespace MA5 {
         EFlowPhotons_.clear();
         EFlowNeutralHadrons_ok_=false;
         EFlowNeutralHadrons_.clear();
-        genjets_.clear();
         MET_.Reset();
         MHT_.Reset();
         TET_  = 0.;
@@ -223,15 +221,21 @@ namespace MA5 {
     /// Giving a new fat jet entry
     RecJetFormat* RecEventFormat::GetNewFatJet()
     {
-        fatjets_.push_back(RecJetFormat());
-        return &fatjets_.back();
+        std::string id = "fatjet";
+        std::pair< std::map<std::string, std::vector<RecJetFormat> >::iterator,bool> new_jet;
+        new_jet = jetcollection_.insert(std::make_pair(id,std::vector<RecJetFormat>() ));
+        new_jet.first->second.push_back(RecJetFormat());
+        return &(new_jet.first->second.back());
     }
 
     /// Giving a new gen jet entry
     RecJetFormat* RecEventFormat::GetNewGenJet()
     {
-        genjets_.push_back(RecJetFormat());
-        return &genjets_.back();
+        std::string id = "genjet";
+        std::pair< std::map<std::string, std::vector<RecJetFormat> >::iterator,bool> new_jet;
+        new_jet = jetcollection_.insert(std::make_pair(id,std::vector<RecJetFormat>() ));
+        new_jet.first->second.push_back(RecJetFormat());
+        return &(new_jet.first->second.back());
     }
 
     /// Giving a new track entry
