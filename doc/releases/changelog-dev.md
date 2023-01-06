@@ -8,6 +8,9 @@
    for particle propagator module.
    ([#140](https://github.com/MadAnalysis/madanalysis5/pull/140))
 
+ * Pyhf version requirement have been updated.
+   ([#134](https://github.com/MadAnalysis/madanalysis5/pull/134))
+
 ## Bug fixes
 
  * Fixed destructor in `RegionSelectionManager` so that `RegionSelection` 
@@ -32,4 +35,4 @@
 
 This release contains contributions from (in alphabetical order):
 
-[Jack Y. Araz](https://github.com/jackaraz), [Kyle Fan](https://github.com/kfan326)
+[Jack Y. Araz](https://github.com/jackaraz), [Kyle Fan](https://github.com/kfan326), [Benjamin Fuks](https://github.com/BFuks)
