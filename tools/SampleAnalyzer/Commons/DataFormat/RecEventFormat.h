@@ -106,7 +106,7 @@ namespace MA5
         /// Collection of reconstructed jet dictionary
         // @JACK note for the future: if lots of jet input is used change map
         // to unordered map for efficiency UI is the same!
-        // 29.09.2022 - Jack: fatjet and genjet is added to jetcollection
+        // 29.09.2022 - Jack: the fatjet and genjet collections are added to jetcollection
         std::map<std::string, std::vector<RecJetFormat> > jetcollection_;
 
 #ifdef MA5_FASTJET_MODE
