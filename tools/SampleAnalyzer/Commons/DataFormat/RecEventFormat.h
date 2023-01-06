@@ -42,9 +42,9 @@
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
 #ifdef MA5_FASTJET_MODE
-    namespace fastjet {
-        class PseudoJet;
-    }
+namespace fastjet {
+    class PseudoJet;
+}
 #endif
 
 
@@ -111,7 +111,7 @@ namespace MA5
 
 #ifdef MA5_FASTJET_MODE
         // hadrons to be clustered (code efficiency)
-    std::vector<fastjet::PseudoJet> input_hadrons_;
+        std::vector<fastjet::PseudoJet> input_hadrons_;
 #endif
 
         /// Create an empty jet
@@ -185,7 +185,7 @@ namespace MA5
         ~RecEventFormat()
         {
             for (auto &p: MCHadronicTaus_)
-               if (p != 0) delete p;
+                if (p != 0) delete p;
             for (auto &p: MCMuonicTaus_)
                 if (p != 0) delete p;
             for (auto &p: MCElectronicTaus_)
@@ -431,8 +431,8 @@ namespace MA5
         void AddHadron(MCParticleFormat& v, MAuint32& idx);
 
 #ifdef MA5_FASTJET_MODE
-    // Get hadrons to cluster (code efficiency)
-    std::vector<fastjet::PseudoJet>& cluster_inputs();
+        // Get hadrons to cluster (code efficiency)
+        std::vector<fastjet::PseudoJet>& cluster_inputs();
 #endif
 
         /// Displaying data member values.
@@ -442,12 +442,11 @@ namespace MA5
             INFO << "   -------------------------------------------" << endmsg;
             INFO << "   Event Content : " << endmsg;
             INFO << "      * Jet Content : " << endmsg;
-            for (std::map<std::string, std::vector<RecJetFormat> >::const_iterator
-                    it=jetcollection_.begin();it!=jetcollection_.end();it++)
+            for (auto &col: jetcollection_)
             {
-                std::string tag = it->first==PrimaryJetID_ ? " (Primary)" : " ";
-                INFO << "         - Jet ID = " << it->first << ", Number of Jets = "
-                     << it->second.size() << tag << endmsg;
+                std::string tag = col.first==PrimaryJetID_ ? " (Primary)" : " ";
+                INFO << "         - Jet ID = " << col.first << ", Number of Jets = "
+                     << col.second.size() << tag << endmsg;
             }
             INFO << "      * Number of Taus      = " << taus_.size() << endmsg;
             INFO << "      * Number of Electrons = " << electrons_.size() << endmsg;
