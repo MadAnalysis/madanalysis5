@@ -15,11 +15,14 @@
    error in postfit expected CLs computation.
    ([#124](https://github.com/MadAnalysis/madanalysis5/pull/124))
 
- * zlib version has been updated.
+  * zlib version has been updated.
    ([#152](https://github.com/MadAnalysis/madanalysis5/pull/152))
 
  * Fixed the directory import mentioned in issue [#146](https://github.com/MadAnalysis/madanalysis5/issues/146)
    ([#156](https://github.com/MadAnalysis/madanalysis5/pull/156))
+
+ * Fixed attribute setting issue presented in issue [#153](https://github.com/MadAnalysis/madanalysis5/issues/153)
+   ([#154](https://github.com/MadAnalysis/madanalysis5/pull/154)).
 
 ## Contributors
 
