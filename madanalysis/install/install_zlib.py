@@ -39,8 +39,7 @@ class InstallZlib:
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir = os.path.normpath(self.tmpdir + '/MA5_zlib/')
         self.ncores     = 1
-#        self.files = {"zlib.tar.gz" : "http://zlib.net/zlib-1.2.11.tar.gz"}
-        self.files = {"zlib.tar.gz" : "http://zlib.net/zlib-1.2.12.tar.gz"}
+        self.files = {"zlib.tar.gz" : "http://zlib.net/zlib-1.2.13.tar.gz"}
         
 
     def Detect(self):
