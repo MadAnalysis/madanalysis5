@@ -125,9 +125,10 @@ class Histogram():
             except:
                 logging.getLogger('MA5').error("variable 'xmin' must be a float value")
                 return False
-            if tmp > self.xmax:
-                logging.getLogger('MA5').error("'xmin' value must be less than 'xmax' value")
-                return False
+            if isinstance(self.xmax, float):
+                if tmp > self.xmax:
+                    logging.getLogger('MA5').error("'xmin' value must be less than 'xmax' value")
+                    return False
             else:
                 self.xmin = tmp
         # xmax
@@ -137,9 +138,10 @@ class Histogram():
             except:
                 logging.getLogger('MA5').error("variable 'xmax' must be a float value")
                 return False
-            if tmp < self.xmin:
-                logging.getLogger('MA5').error("'xmax' value must be greater than 'xmin' value")
-                return False
+            if isinstance(self.xmin, float):
+                if tmp < self.xmin:
+                    logging.getLogger('MA5').error("'xmax' value must be greater than 'xmin' value")
+                    return False
             else:
                 self.xmax = tmp
         # ymin
@@ -149,9 +151,10 @@ class Histogram():
             except:
                 logging.getLogger('MA5').error("variable 'ymin' must be a float value")
                 return False
-            if tmp > self.ymax:
-                logging.getLogger('MA5').error("'ymin' value must be less than 'ymax' value")
-                return False
+            if isinstance(self.ymax, float):
+                if tmp > self.ymax:
+                    logging.getLogger('MA5').error("'ymin' value must be less than 'ymax' value")
+                    return False
             else:
                 self.ymin = tmp
         # ymax
@@ -161,9 +164,10 @@ class Histogram():
             except:
                 logging.getLogger('MA5').error("variable 'ymax' must be a float value")
                 return False
-            if self.ymin!=[] and tmp < self.ymin:
-                logging.getLogger('MA5').error("'ymax' value must be greater than 'ymin' value")
-                return False
+            if isinstance(self.ymin, float):
+                if tmp < self.ymin:
+                    logging.getLogger('MA5').error("'ymax' value must be greater than 'ymin' value")
+                    return False
             else:
                 self.ymax = tmp
         # logX
