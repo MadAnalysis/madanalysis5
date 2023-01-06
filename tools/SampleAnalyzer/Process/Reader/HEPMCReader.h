@@ -84,6 +84,8 @@ class HEPMCReader : public ReaderTextBase
     firstHeavyIons_=true;
     nparts_max_=0;
     nvertices_max_=0;
+    energy_unit_ = 1.0;
+    length_unit_ = 1.0;
   }
 
   /// Destructor
@@ -107,7 +109,7 @@ class HEPMCReader : public ReaderTextBase
   MAbool FillEvent(const std::string& line, EventFormat& myEvent, SampleFormat& mySample);
   void   FillEventInformations(const std::string& line, EventFormat& myEvent);
   void   FillCrossSection(const std::string& line, SampleFormat& mySample);
-  void   FillUnits(const std::string& line);
+  void   FillUnits(const std::string& line, SampleFormat& mySample);
   void   FillEventPDFInfo(const std::string& line, SampleFormat& mySample, EventFormat& myEvent);
   void   FillEventParticleLine(const std::string& line, EventFormat& myEvent);
   void   FillEventVertexLine(const std::string& line, EventFormat& myEvent);

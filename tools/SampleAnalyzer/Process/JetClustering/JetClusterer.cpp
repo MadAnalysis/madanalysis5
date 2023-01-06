@@ -181,6 +181,9 @@ MAbool JetClusterer::Execute(SampleFormat& mySample, EventFormat& myEvent)
   if (mySample.rec()==0) mySample.InitializeRec();
   if (myEvent.rec() ==0) myEvent.InitializeRec();
 
+  /// Set length unit
+  mySmearer_->SetLengthUnit(mySample.mc()->LengthUnit());
+
   // Reseting the reconstructed event
   myEvent.rec()->Reset();
 
