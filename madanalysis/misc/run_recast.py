@@ -793,7 +793,6 @@ class RunRecast():
 
                 # Citation notifications for Global Likelihoods
                 if (self.cov_config != {} or self.pyhf_config!={}) and print_gl_citation:
-                    # TODO: Update arXiv number this is Les Houches arxiv number
                     print_gl_citation = False
                     self.logger.info("\033[1m   * Using global likelihoods to improve CLs calculations\033[0m")
                     self.logger.info("\033[1m     Please cite arXiv:2206.14870 [hep-ph]\033[0m")
@@ -813,8 +812,7 @@ class RunRecast():
                     self.logger.info("\033[1m   * Using `pyhf` for CLs calculation\033[0m")
                     self.logger.info("\033[1m     DOI:10.5281/zenodo.1169739\033[0m")
                     self.logger.info("\033[1m     For more details see https://scikit-hep.org/pyhf/\033[0m")
-                    # TODO: Update arXiv number this is Les Houches arxiv number
-                    self.logger.info("\033[1m     Please cite arXiv:2002.12220 [hep-ph]\033[0m")
+                    self.logger.info("\033[1m     Please cite arXiv:2206.14870 [hep-ph]\033[0m")
 
 
             ## Reading the cutflow information
