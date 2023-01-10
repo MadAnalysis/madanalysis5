@@ -1,6 +1,6 @@
 name: Question
 description: Have a question about MadAnalysis 5? Let us help!
-labels: "question"
+labels: ":question:question"
 
 body:
   - type: markdown
