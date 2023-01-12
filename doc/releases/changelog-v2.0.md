@@ -59,10 +59,6 @@
 * Jet collection accessor has been fixed in DelphesMa5Tune
   ([#135](https://github.com/MadAnalysis/madanalysis5/pull/135))
 
-* Submit function has been modified to eliminate issues with LHCO 
-  reader mentioned in issue [#136](https://github.com/MadAnalysis/madanalysis5/issues/136).
-  ([#167](https://github.com/MadAnalysis/madanalysis5/pull/167))
-
 ## Contributors
 
 This release contains contributions from (in alphabetical order):
