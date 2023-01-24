@@ -10,7 +10,7 @@ Please complete the following checklist when submitting a PR:
   - [ ] Add a new entry to the [`doc/releases/changelog-dev.md`](/MadAnalysis/madanalysis5/blob/main/doc/releases/changelog-dev.md)
         file, summarizing the change, and including a link back to the PR.
 
-For details please see the documentation [here](/MadAnalysis/madanalysis5/blob/main/doc/CONTRIBUTING.md).
+For details please see the documentation [here](/MadAnalysis/madanalysis5/blob/main/CONTRIBUTING.md).
 
 When all the above are checked, delete everything above the dashed
 line and fill in the pull request template.

@@ -10,6 +10,7 @@ Thank you!
 Our contributors (alphabetically) include:
 - Gael Alguero
 - Beranger Dumont
+- [Kyle Fan](https://github.com/kfan326)
 - Sabine Kraml
 - Mark Goodsell
 - Valentin Hirschi

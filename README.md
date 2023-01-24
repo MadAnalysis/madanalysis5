@@ -17,7 +17,7 @@
  - [Troubleshootings and bug reports](#troubleshootings-and-bug-reports)
  - [Supported third party software](#supported-third-party-software)
  - [Authors](#authors)
- - [Developer's Guide: How to contribute to MadAnalysis 5](./doc/CONTRIBUTING.md)
+ - [Developer's Guide: How to contribute to MadAnalysis 5](./CONTRIBUTING.md)
  - [Our famous last words](#our-famous-last-words)
  - [Credits](#credits)
 
@@ -256,7 +256,7 @@ That's all folks!
 
 ### Credits
 
-If you use MadAnalysis 5, please cite:
+If you use MadAnalysis 5, please cite ([BibTeX file can be found here](./CITATIONS.bib)):
 
  - [E. Conte, B. Fuks and G. Serret; Comput. Phys. Commun. 184 (2013) 222](http://arxiv.org/abs/1206.1599)
  - [E. Conte, B. Dumont, B. Fuks and C. Wymant; Eur. Phys. J. C 74 (2014) 10, 3103](http://arxiv.org/abs/1405.3982)
