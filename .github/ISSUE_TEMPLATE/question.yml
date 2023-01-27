@@ -9,12 +9,9 @@ body:
       value: |
         ## Before posting a question
 
-        Search existing [GitHub issues](https://github.com/MadAnalysis/madanalysis5/issues) or 
-        [Launchpad questions](https://answers.launchpad.net/madanalysis5) to make sure the issue does not already exist.
+        Search existing [GitHub issues](https://github.com/MadAnalysis/madanalysis5/issues) or [Launchpad questions](https://answers.launchpad.net/madanalysis5) to make sure the issue does not already exist.
   
-        For general technical details check out our [documentation](http://arxiv.org/abs/1206.1599), 
-        [tutorials](https://madanalysis.irmp.ucl.ac.be/wiki/tutorials), 
-        [FAQs about Normal Mode](http://madanalysis.irmp.ucl.ac.be/wiki/FAQNormalMode) and reference cards provided under `madanalysis5/doc` folder.
+        For general technical details check out our [documentation](http://arxiv.org/abs/1206.1599), [tutorials](https://madanalysis.irmp.ucl.ac.be/wiki/tutorials), [FAQs about Normal Mode](http://madanalysis.irmp.ucl.ac.be/wiki/FAQNormalMode) and reference cards provided under `madanalysis5/doc` folder.
         
         **Note:** Latest release of MadAnalysis 5 can be found at [this link](https://github.com/MadAnalysis/madanalysis5/releases).
         
@@ -25,10 +22,7 @@ body:
         - Operating system: (e.g. macOS v12.1)
         - Python version: (print the output of `python --version`)
         - gcc/c++ version: (print the output of `g++ --version` or `gcc --version`)
-        - MadAnalysis 5 version: (print the output of `./bin/ma5 --version` or if you are working on a branch 
-        please report the name of the branch and last commit ID. The abbreviated 
-        commit ID can be found via `git log -n1 --format="%h"` command. To retreive the branch name please use
-        `git rev-parse --abbrev-ref HEAD` command.)
+        - MadAnalysis 5 version: (print the output of `./bin/ma5 --version` or if you are working on a branch please report the name of the branch and last commit ID. The abbreviated commit ID can be found via `git log -n1 --format="%h"` command. To retreive the branch name please use `git rev-parse --abbrev-ref HEAD` command.)
         - If applicable, versions for other third party software i.e. Fastjet, Delphes, pyhf etc.
   - type: textarea
     id: question
