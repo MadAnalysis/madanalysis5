@@ -22,7 +22,10 @@ body:
         - OS: [e.g. macOS v12.1]
         - Python version (print the output of `$ python --version`)
         - gcc/c++ version (print the output of `$ g++ --version` or `$ gcc --version`)
-        - MadAnalysis 5 version (print the output of `$ ./bin/ma5 --version`)
+        - MadAnalysis 5 version (print the output of `$ ./bin/ma5 --version` or if you are working on a branch 
+        please report the name of the branch and last commit ID. The abbreviated 
+        commit ID can be found via `git log -n1 --format="%h"` command. To retreive the branch name please use
+        `git rev-parse --abbrev-ref HEAD` command.)
         - If applicable, versions for other third party software i.e. Fastjet, Delphes, pyhf etc.
     validations:
       required: true
