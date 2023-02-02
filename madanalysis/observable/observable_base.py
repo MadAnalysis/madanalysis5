@@ -95,7 +95,7 @@ class ObservableBase():
         if plot_unitX_latex!=None:
             newobs.plot_unitX_tlatex=plot_unitX_latex
         if code_parton!=None:
-            newobs.code_parton=codeparton
+            newobs.code_parton=code_parton
         if code_hadron!=None:
             newobs.code_hadron=code_hadron
         if code_reco!=None:
