@@ -116,6 +116,9 @@
  * Fixed attribute setting issue presented in issue [#153](https://github.com/MadAnalysis/madanalysis5/issues/153)
   ([#154](https://github.com/MadAnalysis/madanalysis5/pull/154)).
 
+ * Fixed an attribute misspelling in `ObservableBase`.
+   ([#171](https://github.com/MadAnalysis/madanalysis5/pull/171)) 
+
 ## Contributors
 
 This release contains contributions from (in alphabetical order):
