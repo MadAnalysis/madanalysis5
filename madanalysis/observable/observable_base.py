@@ -115,37 +115,37 @@ class ObservableBase:
         )
 
         # replace
-        if name != None:
+        if name is not None:
             newobs.name = name
-        if args != None:
+        if args is not None:
             newobs.args = args
-        if combination != None:
+        if combination is not None:
             newobs.combination = combination
-        if plot_auto != None:
+        if plot_auto is not None:
             newobs.plot_auto = plot_auto
-        if plot_nbins != None:
+        if plot_nbins is not None:
             newobs.plot_nbins = plot_nbins
-        if plot_xmin != None:
+        if plot_xmin is not None:
             newobs.plot_xmin = plot_xmin
-        if plot_xmax != None:
+        if plot_xmax is not None:
             newobs.plot_xmax = plot_xmax
-        if plot_unitX_tlatex != None:
+        if plot_unitX_tlatex is not None:
             newobs.plot_unitX_tlatex = plot_unitX_tlatex
-        if plot_unitX_latex != None:
+        if plot_unitX_latex is not None:
             newobs.plot_unitX_tlatex = plot_unitX_latex
-        if code_parton != None:
+        if code_parton is not None:
             newobs.code_parton = code_parton
-        if code_hadron != None:
+        if code_hadron is not None:
             newobs.code_hadron = code_hadron
-        if code_reco != None:
+        if code_reco is not None:
             newobs.code_reco = code_reco
-        if cut_event != None:
+        if cut_event is not None:
             newobs.cut_event = cut_event
-        if cut_candidate != None:
+        if cut_candidate is not None:
             newobs.cut_candidate = cut_candidate
-        if tlatex != None:
+        if tlatex is not None:
             newobs.tlatex = tlatex
-        if latex != None:
+        if latex is not None:
             newobs.latex = latex
 
         # return the clone
