@@ -30,6 +30,11 @@ from madanalysis.IOinterface.saf_block_status import SafBlockStatus
 from madanalysis.layout.histogram             import Histogram
 from madanalysis.layout.histogram_logx        import HistogramLogX
 from madanalysis.layout.histogram_frequency   import HistogramFrequency
+from madanalysis.IOinterface.sqlite_reader    import getMeanAndStdev
+from madanalysis.IOinterface.sqlite_reader    import DBreader_debug 
+
+
+
 import glob
 import logging
 import shutil
@@ -318,10 +323,18 @@ class JobReader():
             while(os.path.isdir(self.safdir+"/"+name+"/MergingPlots_"+str(i))):
                 i+=1
             filename = self.safdir+"/"+name+"/MergingPlots_"+str(i-1)+"/Histograms/histos.saf"
+            ##file path for sqlite db
+            sqlite_db_filename = self.safdir+"/"+name+"/MergingPlots_"+str(i-1)+"/Histograms/histo.db"
+
+
+
         else:
             while(os.path.isdir(self.safdir+"/"+name+"/MadAnalysis5job_"+str(i))):
                 i+=1
             filename = self.safdir+"/"+name+"/MadAnalysis5job_"+str(i-1)+"/Histograms/histos.saf"
+            ##file path for sqlite db
+            sqlite_db_filename = self.safdir+"/"+name+"/MadAnalysis5job_"+str(i-1)+"/Histograms/histo.db"
+
 
         # Opening the file
         try:
@@ -347,6 +360,11 @@ class JobReader():
         data_positive = []
         data_negative = []
         labels        = []
+
+        ## SqliteDB extractor
+        sqlite_output_dictionary = getMeanAndStdev(sqlite_db_filename)
+        #DBreader_debug(sqlite_output_dictionary)
+        
 
         # Loop over the lines
         numline=0
@@ -391,13 +409,25 @@ class JobReader():
                 elif words[0].lower()=='<histo>':
                     histoTag.activate()
                 elif words[0].lower()=='</histo>':
+
+
                     histoTag.desactivate()
                     plot.histos.append(copy.copy(histoinfo))
-                    plot.histos[-1].positive.array = data_positive[:]
-                    plot.histos[-1].negative.array = data_negative[:]
-                    histoinfo.Reset()
+                    #plot.histos[-1].positive.array = data_positive[:]
+                    #plot.histos[-1].negative.array = data_negative[:]
+                    #histoinfo.Reset()
                     data_positive = []
                     data_negative = []
+
+                    for bin_index in sqlite_output_dictionary[histoinfo.name]:
+                        data_positive.append(sqlite_output_dictionary[histoinfo.name][bin_index][0])
+                        data_negative.append(sqlite_output_dictionary[histoinfo.name][bin_index][2])
+                    histoinfo.Reset()
+
+                    plot.histos[-1].positive.array = data_positive[:]
+                    plot.histos[-1].negative.array = data_negative[:]
+                                   
+
                 elif words[0].lower()=='<histofrequency>':
                     histoFreqTag.activate()
                 elif words[0].lower()=='</histofrequency>':
