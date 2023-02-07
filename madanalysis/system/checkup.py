@@ -532,6 +532,13 @@ class CheckUp():
         self.logger.debug('after DYLD_LIBRARY_PATH='+str(os.environ['DYLD_LIBRARY_PATH']))
         self.logger.debug('--------')
 
+        # ROOT INCLUDE PATH
+        if self.archi_info.has_delphes:
+            os.environ['ROOT_INCLUDE_PATH']=os.path.join(self.archi_info.ma5dir,'tools','delphes','external');
+        if self.archi_info.has_delphesMA5tune:
+            os.environ['ROOT_INCLUDE_PATH']=os.path.join(self.archi_info.ma5dir,'tools','delphesMA5tune','external');
+
+
         self.logger.debug('-------- END: set environment variables --------')
 
         return True

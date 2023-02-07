@@ -50,11 +50,9 @@ class InstallDelphes:
         self.untardir    = os.path.join(self.tmpdir, 'MA5_'+self.package)
         self.ncores      = 1
         if package == 'delphesma5tune':
-            self.files = {package+".tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes-3.5.0.tar.gz"}
+            self.files = {package+".tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes3.5.0.tar.gz"}
         else:
-#             self.files = {package+".tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/delphes342pre.tar.gz"} # Delphes for LLP not release yet
-#            self.files = {package+".tar.gz" : "http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.4.2.tar.gz"}
-            self.files = {package+".tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes3.4.3.tar.gz"}
+            self.files = {package+".tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes3.5.0.tar.gz"}
         self.logger = logging.getLogger('MA5')
 
 
@@ -119,7 +117,7 @@ class InstallDelphes:
         if self.package == 'delphesMA5tune':
             # Copying the patch
             self.logger.debug('Copying the patch ...')
-            input=self.toolsdir+'/SampleAnalyzer/Interfaces/delphesMA5tune/patch_delphesMA5tune.tgz'
+            input=self.toolsdir+'/SampleAnalyzer/Interfaces/delphesMA5tune/patch_delphesMA5tune_v35.tgz'
             output=packagedir+'/patch_delphesMA5tune.tgz'
             try:
                 shutil.copy(input,output)
