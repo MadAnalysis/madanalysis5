@@ -1,3 +1,4 @@
+ .github_meta.log
 */*.pyc
 */*/*.pyc
 */*/*/*.pyc
@@ -12,3 +13,5 @@ tools/SampleAnalyzer/Test/Makefile_*
 */*/*.log
 doc/??????_mode.log
 doc/??????_mode.pdf
+.DS_Store
+ANALYSIS_*

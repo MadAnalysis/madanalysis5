@@ -119,6 +119,10 @@
  * Fixed an attribute misspelling in `ObservableBase`.
    ([#171](https://github.com/MadAnalysis/madanalysis5/pull/171)) 
 
+ * Update of the version of Delphes/DelphesMa5tune + compatibility with M1 chips and Mac OS 13.0.
+   ([#173](https://github.com/orgs/MadAnalysis/discussions/173))
+
+
 ## Contributors
 
 This release contains contributions from (in alphabetical order):
