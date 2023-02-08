@@ -137,6 +137,7 @@ void RegionSelectionManager::FillHisto(std::string const&histname, MAfloat64 val
 			myhistoX->IncrementNEvents(multiweight_);
 		}
         myhistoX->Fill(val,weight_);
+		myhistoX->Fill(val,multiweight_);
       }
       // Normal histo
       else if(dynamic_cast<Histo*>(plotmanager_.GetHistos()[i])!=0)
