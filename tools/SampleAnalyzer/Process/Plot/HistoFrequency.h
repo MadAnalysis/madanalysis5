@@ -34,6 +34,15 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Plot/PlotBase.h"
 
+struct MultiWeightHistoFrequency {
+
+	/// collection of observables for each weight id entry
+	std::map<int, std::pair<MAfloat64, MAfloat64> > stack_;
+	/// Sum of even-weights over entries for each id entry
+	std::pair<MAfloat64, MAfloat64> sum_w_;
+
+};
+
 
 namespace MA5
 {
@@ -52,6 +61,7 @@ class HistoFrequency : public PlotBase
   /// Sum of event-weights over entries
   std::pair<MAfloat64,MAfloat64> sum_w_;
 
+  std::map<MAuint32, MultiWeightHistoFrequency> MultiWeightHistoFrequencyData;
   /// RegionSelections attached to the histo
   std::vector<RegionSelection*> regions_;
 
@@ -123,6 +133,30 @@ class HistoFrequency : public PlotBase
         stack_[obs].second+=weight;
       }
     }
+  }
+
+  void Fill(const MAint32 &obs, std::map<MAuint32, MAfloat64> &weights){
+
+	  for(auto &id_weight : weights) {
+			iterator it = MultiWeightHistoFrequencyData[id_weight.first].stack_.find(obs); 
+			if(it == MultiWeightHistoFrequencyData[id_weight.first].stack_.end()){
+				MultiWeightHistoFrequencyData[id_weight.first].stack_[obs] = std::make_pair(0.,0.);
+			}
+			else {
+				if(id_weight.second >= 0){
+					multiweight_event_info[id_weight.first].nentries_.first++;
+					MultiWeightHistoFrequencyData[id_weight.first].sum_w_.first += id_weight.second;
+					MultiWeightHistoFrequencyData[id_weight.first].stack_[obs].first += id_weight.second;
+					
+				} else {
+					int absWeight = std::abs(id_weight.second);
+					multiweight_event_info[id_weight.first].nentries_.second++;
+					MultiWeightHistoFrequencyData[id_weight.first].sum_w_.second += absWeight;
+					MultiWeightHistoFrequencyData[id_weight.first].stack_[obs].second += absWeight;
+				}
+			}
+	  }
+		
   }
 
   /// Write the plot in a ROOT file

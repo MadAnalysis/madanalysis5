@@ -113,8 +113,12 @@ void RegionSelectionManager::FillHisto(std::string const&histname, MAfloat64 val
           }
           catch (const std::exception& e)  { MANAGE_EXCEPTION(e); }
           // Filling the histo
-          if (myhistof->FreshEvent())  myhistof->IncrementNEvents(weight_);
+          if (myhistof->FreshEvent()) {
+			  myhistof->IncrementNEvents(weight_);
+			  myhistof->IncrementNEvents(multiweight_);
+		  }
           myhistof->Fill(val,weight_);
+		  myhistof->Fill(val,multiweight_);
        }
       // LogX histo
       else if(dynamic_cast<HistoLogX*>(plotmanager_.GetHistos()[i])!=0)
@@ -128,7 +132,10 @@ void RegionSelectionManager::FillHisto(std::string const&histname, MAfloat64 val
         }
         catch (const std::exception& e)  { MANAGE_EXCEPTION(e); }
         // Filling the histo
-        if (myhistoX->FreshEvent())  myhistoX->IncrementNEvents(weight_);
+        if (myhistoX->FreshEvent())  {
+			myhistoX->IncrementNEvents(weight_);
+			myhistoX->IncrementNEvents(multiweight_);
+		}
         myhistoX->Fill(val,weight_);
       }
       // Normal histo
@@ -145,10 +152,11 @@ void RegionSelectionManager::FillHisto(std::string const&histname, MAfloat64 val
         // Filling the histo
         if (myhisto->FreshEvent())  {
 			myhisto->IncrementNEvents(weight_);
+			myhisto->IncrementNEvents(multiweight_);
 		}
 	
         myhisto->Fill(val,weight_);
-		myhisto->IncrementNEvents(multiweight_);
+		//myhisto->IncrementNEvents(multiweight_);
 		myhisto->Fill(val,multiweight_);
       }
       break;
