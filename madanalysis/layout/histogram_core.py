@@ -50,6 +50,7 @@ class HistogramCore:
         self.nan         = 0.
         self.inf         = 0.
         self.array       = []
+        self.stdev       = []
 
 
     def ComputeIntegral(self):

@@ -417,15 +417,26 @@ class JobReader():
                     #plot.histos[-1].negative.array = data_negative[:]
                     #histoinfo.Reset()
                     data_positive = []
+                    data_positive_stdev = []
                     data_negative = []
+                    data_negative_stdev = []
 
+                    
+                    # save bin mean and stdev into histogram_core for positive and negative values
                     for bin_index in sqlite_output_dictionary[histoinfo.name]:
                         data_positive.append(sqlite_output_dictionary[histoinfo.name][bin_index][0])
+                        data_positive_stdev.append(sqlite_output_dictionary[histoinfo.name][bin_index][1])
                         data_negative.append(sqlite_output_dictionary[histoinfo.name][bin_index][2])
+                        data_negative_stdev.append(sqlite_output_dictionary[histoinfo.name][bin_index][3])
+
                     histoinfo.Reset()
 
                     plot.histos[-1].positive.array = data_positive[:]
                     plot.histos[-1].negative.array = data_negative[:]
+
+                    plot.histos[-1].positive.stdev = data_positive_stdev[:]
+                    plot.histos[-1].negative.stdev = data_negative_stdev[:]
+
                                    
 
                 elif words[0].lower()=='<histofrequency>':
