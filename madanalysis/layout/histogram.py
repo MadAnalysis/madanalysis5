@@ -95,6 +95,14 @@ class Histogram:
                 data[-1]=0
         self.summary.array = data[:] # [:] -> clone of data
 
+        #stdev
+        stdev_data = []
+        for i in range(0, len(self.positive.array)):
+            stdev_data.append(max(0, self.positive.stdev[i]-self.negative.stdev[i]))
+        self.summary.stdev = stdev_data[:]
+
+
+
         # Integral
         self.positive.ComputeIntegral()
         self.negative.ComputeIntegral()
