@@ -5,7 +5,7 @@ import math
 import statistics
 
 
-def getMeanAndStdev(path):
+def getMeanAndStdevOld(path):
 
     con = sqlite3.connect(path)
     cursor = con.cursor()
@@ -16,7 +16,7 @@ def getMeanAndStdev(path):
     neg_bins = dict()
 
     ## bin_data has all data for the histogram, need to get mean and standard deviation for each bin
-    ## each row of the query is a tuple of 5 elements [histo name, weight id, bin, positive value, negative value]
+    ## each row of the query is a tuple of 5 elements [histo name, weight id, bin #, positive value, negative value]
     ## sort them into +bin/-bin[name] -> bin # -> [mean, standard deviation]
 
     for row in bin_data:
@@ -50,6 +50,40 @@ def getMeanAndStdev(path):
 
     return output
 
+def getMeanAndStdev(path):
+
+    con = sqlite3.connect(path)
+    cursor = con.cursor()
+    bin_data = cursor.execute("select * from data;").fetchall()
+
+    ## parse data in the form of parsed_data[histo_name][bin #][{positive value, negative value}]
+    parsed_data = dict()
+    for row in bin_data:
+
+        histo_name = row[0]
+        weight_id = row[1]
+        bin_number = row[2]
+        value = float(row[3]) - abs(float(row[4]))
+      
+        if histo_name not in parsed_data:
+            ## if histo name is not in the parsed_data dictionary, then create a new bin dictionary for that histo, then for the bin, create a weigh id dictionary
+            parsed_data[histo_name] = dict()
+            parsed_data[histo_name][bin_number] = []
+            
+        else:
+            ## since histo name is in the parsed_data dictionary, we need to check if the bin in the dictioary, if not then create a weight id dictionary for that bin
+            if bin_number not in parsed_data[histo_name]:
+                parsed_data[histo_name][bin_number] = []
+
+        parsed_data[histo_name][bin_number].append(value)
+   
+    output = dict()
+    for histo_name in parsed_data:
+        output[histo_name] = dict()
+        for bin_number in parsed_data[histo_name]:
+            output[histo_name][bin_number] = [statistics.mean(parsed_data[histo_name][bin_number]), statistics.stdev(parsed_data[histo_name][bin_number])]
+
+    return output
 
 
 ## debug for printing out output dictionary

@@ -85,7 +85,7 @@ class Histogram:
         # Data
         data = []
         for i in range(0,len(self.positive.array)):
-            data.append(self.positive.array[i]-self.negative.array[i])
+            data.append(self.positive.array[i])
             if data[-1]<0:
                 self.warnings.append(\
                     'dataset='+dataset.name+\
@@ -98,7 +98,7 @@ class Histogram:
         #stdev
         stdev_data = []
         for i in range(0, len(self.positive.array)):
-            stdev_data.append(max(0, self.positive.stdev[i]-self.negative.stdev[i]))
+            stdev_data.append(max(0, self.positive.stdev[i]))
         self.summary.stdev = stdev_data[:]
 
 
