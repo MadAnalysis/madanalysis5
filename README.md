@@ -235,7 +235,7 @@ In the following you can find supported third party software that can be used wi
 The [latest release](https://github.com/MadAnalysis/madanalysis5/releases) of MadAnalysis 5 has been tested with enlisted versions.
 
 - [FastJet](http://fastjet.fr) v3.3.3
-- [Delphes](https://github.com/delphes/delphes) v3.4.3
+- [Delphes](https://github.com/delphes/delphes) v3.5.0
 - [ROOT](https://root.cern) v6.04.08
 - [pyhf](https://github.com/scikit-hep/pyhf) v0.7.0
 
@@ -265,4 +265,5 @@ If you use MadAnalysis 5, please cite ([BibTeX file can be found here](./CITATIO
  - [J. Y. Araz, M. Frank and B. Fuks; Eur. Phys. J. C 80 (2020) 6, 531](https://arxiv.org/abs/1910.11418)
  - [J. Y. Araz, B. Fuks and G. Polykratis; Eur. Phys. J. C 81 (2021) 329](https://arxiv.org/abs/2006.09387)
  - [J. Y. Araz, B. Fuks, M. D. Goodsell and M. Utsch; Eur. Phys. J. C 82 (2022) 597](https://arxiv.org/abs/2112.05163)
- - [G. Alguero, J. Y. Araz, B. Fuks, S. Kraml; arXiv:2206.14870](https://arxiv.org/abs/2206.14870)
+ - [G. Alguero, J. Y. Araz, B. Fuks, S. Kraml; SciPost Phys. 14 (2023) 009](https://doi.org/10.21468/SciPostPhys.14.1.009)
+ - [J. Y. Araz, A. Buckley, B. Fuks; arXiv:2303.03427](https://arxiv.org/abs/2303.03427)
