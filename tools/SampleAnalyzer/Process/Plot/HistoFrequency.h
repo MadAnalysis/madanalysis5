@@ -33,6 +33,7 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Plot/PlotBase.h"
+#include "SampleAnalyzer/Commons/Base/DatabaseManager.h"
 
 struct MultiWeightHistoFrequency {
 
@@ -158,6 +159,15 @@ class HistoFrequency : public PlotBase
 	  }
 		
   }
+
+
+  virtual void WriteSQL(DatabaseManager &db) {
+	
+
+
+
+
+  };
 
   /// Write the plot in a ROOT file
   virtual void Write_TextFormat(std::ostream* output)

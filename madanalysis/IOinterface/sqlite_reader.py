@@ -50,6 +50,8 @@ def getMeanAndStdevOld(path):
 
     return output
 
+
+
 def getMeanAndStdev(path):
 
     con = sqlite3.connect(path)
@@ -84,6 +86,20 @@ def getMeanAndStdev(path):
             output[histo_name][bin_number] = [statistics.mean(parsed_data[histo_name][bin_number]), statistics.stdev(parsed_data[histo_name][bin_number])]
 
     return output
+
+def getHistoStatisticsAvg(path):
+
+    con = sqlite3.connect(path)
+    cursor = con.cursor()
+    statistics = cursor.execute("select name, avg(pos_num_events), avg(neg_num_events), avg(pos_sum_event_weights_over_events), avg(neg_sum_event_weights_over_events), avg(pos_entries), avg(neg_entries), avg(pos_sum_event_weights_over_entries), avg(neg_sum_event_weights_over_entries), avg(pos_sum_squared_weights), avg(neg_sum_squared_weights), avg(pos_value_times_weight), avg(neg_value_times_weight), avg(pos_value_squared_times_weight), avg(neg_value_squared_times_weight)
+from Statistics
+group by name;").fetchall()
+
+
+    return statistics;
+
+
+
 
 
 ## debug for printing out output dictionary

@@ -111,6 +111,8 @@ class HistogramLogX:
                 data[-1]=0
         self.summary.array = data[:] # [:] -> clone of data
 
+
+
         # Integral
         self.positive.ComputeIntegral()
         self.negative.ComputeIntegral()
