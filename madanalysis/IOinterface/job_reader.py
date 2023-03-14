@@ -31,7 +31,8 @@ from madanalysis.layout.histogram             import Histogram
 from madanalysis.layout.histogram_logx        import HistogramLogX
 from madanalysis.layout.histogram_frequency   import HistogramFrequency
 from madanalysis.IOinterface.sqlite_reader    import getMeanAndStdev
-from madanalysis.IOinterface.sqlite_reader    import DBreader_debug 
+from madanalysis.IOinterface.sqlite_reader    import DBreader_debug
+from madanalysis.IOinterface.sqlite_reader    import getHistoStatisticsAvg
 
 
 
