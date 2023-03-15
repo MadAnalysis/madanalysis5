@@ -94,8 +94,13 @@ def getHistoStatisticsAvg(path):
    
     
     statistics = cursor.execute("select name, avg(pos_num_events), avg(neg_num_events), avg(pos_sum_event_weights_over_events), avg(neg_sum_event_weights_over_events), avg(pos_entries), avg(neg_entries), avg(pos_sum_event_weights_over_entries), avg(neg_sum_event_weights_over_entries), avg(pos_sum_squared_weights), avg(neg_sum_squared_weights), avg(pos_value_times_weight), avg(neg_value_times_weight), avg(pos_value_squared_times_weight), avg(neg_value_squared_times_weight) from Statistics group by name;").fetchall()
+       
+    statdict = dict()
+    for i in range(len(statistics)):
+        statdict[statistics[i][0]] = statistics[i][1:]
         
-    return statistics;
+    return statdict;
+
 
 
 
