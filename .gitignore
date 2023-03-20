@@ -148,3 +148,14 @@ tools/SampleAnalyzer/Test/Makefile_*
 */*/*.log
 doc/??????_mode.log
 doc/??????_mode.pdf
+.ma5history
+architecture.ma5
+setup.sh
+setup.csh
+PortabilityCheckup
+TestCommons
+TestSampleAnalyzer
+tools/SampleAnalyzer/Commons/Makefile
+PortabilityTags.h
+tools/SampleAnalyzer/Configuration
+tools/SampleAnalyzer/Process
