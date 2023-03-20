@@ -42,6 +42,7 @@ class OutputManager {
 
 					 histogram.createHistoTables();
 					 analyzer_->Manager()->GetPlotManager()->WriteSQL(histogram);
+					 samples_->mc()->WriteWeightNames(histogram);
 					 histogram.closeDB();
 
 					 cutflow.createCutflowTables();	
