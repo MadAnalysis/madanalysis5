@@ -418,19 +418,23 @@ class CmdSubmit(CmdBase):
         # SFS-FastJet mode, the analysis has to be compiled with the
         # `-DMA5_FASTJET_MODE` flag. This however needs to be deactivated for
         # Delphes-ROOT based analyses.
-        root_dataset, hepmc_dataset = False, False
+        root_dataset, hepmc_dataset, lhco_dataset = False, False, False
         for dataset in self.main.datasets:
             for sample in dataset:
                 if "hepmc" in sample:
                     hepmc_dataset = True
                 elif "root" in sample:
                     root_dataset = True
+                elif "lhco" in sample:
+                    lhco_dataset = True
         if self.main.fastsim.package in ["delphes","delphesMA5tune"] or root_dataset:
             os.environ["FASTJET_FLAG"] = ""
         elif self.main.fastsim.package in ["fastjet"] and hepmc_dataset:
             if root_dataset and hepmc_dataset:
                 self.logger.error("ROOT input files not allowed for SFS-FastJet based analyses.")
                 return False
+            os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
+        elif self.main.fastsim.package == 'none' and self.main.archi_info.has_fastjet and lhco_dataset:
             os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
 
         if self.resubmit and not self.main.recasting.status=='on':
