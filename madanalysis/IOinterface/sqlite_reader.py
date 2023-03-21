@@ -51,12 +51,24 @@ def getMeanAndStdevOld(path):
     return output
 
 
+def getStatistics(stats):
+    histoname_dict = dict()
+    for entry in stats:
+        if entry[0] not in histoname_dict:
+            histoname_dict[entry[0]] = dict()
+        histoname_dict[entry[0]][entry[1]] = float(entry[2]) - float(entry[3])
+    return histoname_dict
+
 
 def getMeanAndStdev(path):
 
     con = sqlite3.connect(path)
     cursor = con.cursor()
     bin_data = cursor.execute("select * from data;").fetchall()
+    stats_data = cursor.execute("select name, id, pos_sum_event_weights_over_events, neg_sum_event_weights_over_events from Statistics").fetchall()
+
+    statsdict = getStatistics(stats_data)
+
 
     ## parse data in the form of parsed_data[histo_name][bin #][{positive value, negative value}]
     parsed_data = dict()
@@ -65,8 +77,8 @@ def getMeanAndStdev(path):
         histo_name = row[0]
         weight_id = row[1]
         bin_number = row[2]
-        value = float(row[3]) - abs(float(row[4]))
-      
+        sumw = statsdict[histo_name][str(weight_id)]
+        value = (float(row[3]) - abs(float(row[4]))) / sumw      
         if histo_name not in parsed_data:
             ## if histo name is not in the parsed_data dictionary, then create a new bin dictionary for that histo, then for the bin, create a weigh id dictionary
             parsed_data[histo_name] = dict()
