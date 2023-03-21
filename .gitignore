@@ -162,3 +162,9 @@ tools/SampleAnalyzer/Configuration
 tools/SampleAnalyzer/Process
 .DS_Store
 ANALYSIS_*
+samples/*
+tools/fastjet
+tools/HEPTopTagger
+tools/zlib
+fastjet-config
+Test*
