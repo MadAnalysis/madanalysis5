@@ -153,13 +153,10 @@ doc/??????_mode.pdf
 architecture.ma5
 setup.sh
 setup.csh
-PortabilityCheckup
-TestCommons
-TestSampleAnalyzer
 tools/SampleAnalyzer/Commons/Makefile
+tools/SampleAnalyzer/Configuration/Makefile
+tools/SampleAnalyzer/Process/Makefile
 PortabilityTags.h
-tools/SampleAnalyzer/Configuration
-tools/SampleAnalyzer/Process
 .DS_Store
 ANALYSIS_*
 samples/*
