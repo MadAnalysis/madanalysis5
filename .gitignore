@@ -167,4 +167,4 @@ tools/fastjet
 tools/HEPTopTagger
 tools/zlib
 fastjet-config
-Test*
+tools/SampleAnalyzer/Bin
