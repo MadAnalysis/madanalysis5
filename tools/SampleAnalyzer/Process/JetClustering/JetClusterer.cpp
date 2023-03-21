@@ -78,7 +78,6 @@ namespace MA5
         mySmearer_ = 0;
         myTagger_ = 0;
         myTaggerOptions_ = 0;
-        SFSbanner_ = true;
         ExclusiveId_ = false;
         JetID_ = "Ma5Jet";
         isocone_track_radius_.clear();
