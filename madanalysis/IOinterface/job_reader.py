@@ -476,18 +476,25 @@ class JobReader():
                         data_negative = []
 
                     else:
+                        bin_means = []
+                        bin_stdev = []
+ 
+                        # save bin mean and stdev into histogram_core for positive and negative values
+                        for bin_index in sqlite_output_dictionary[histologxinfo.name]:
+                            if bin_index not in ["underflow", "overflow"]:
+                                bin_means.append(sqlite_output_dictionary[histoinfo.name][bin_index][0])
+                                bin_stdev.append(sqlite_output_dictionary[histoinfo.name][bin_index][1])
+                            elif bin_index == "underflow":
+                                plot.histos[-1].positive.underflow = sqlite_output_dictionary[histologxinfo.name][bin_index][0]  
+                            elif bin_index == "overflow":
+                                plot.histos[-1].positive.overflow = sqlite_output_dictionary[histologxinfo.name][bin_index][0] 
 
-                        for bin_index in sqlite_output_dictionary[histoinfo.name]:
-                            bin_means.append(sqlite_output_dictionary[histologxinfo.name][bin_index][0])
-                            bin_stdev.append(sqlite_output_dictionary[histologxinfo.name][bin_index][1])
-                           
-                        histoinfo.Reset()
+                        histologxinfo.Reset()
 
                         plot.histos[-1].positive.array = bin_means[:]
                         ##plot.histos[-1].negative.array = bin_means[:]
                         plot.histos[-1].positive.stdev = bin_stdev[:]
                         ##plot.histos[-1].negative.stdev = bin_stdev[:]
-
 
             # Looking from histogram description
             elif descriptionTag.activated:
