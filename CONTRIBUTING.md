@@ -6,7 +6,7 @@ You can begin this with forking the `main` repository.
 
 Unless there is a very small fix that does not require any discussion, please
 always first [open an issue](https://github.com/MadAnalysis/madanalysis5/issues/new/choose)
-to discuss your requesti with the development team. For a good example, please check out the
+to discuss your request with the development team. For a good example, please check out the
 [PR #12](https://github.com/MadAnalysis/madanalysis5/pull/12) proposed by Matthew Feickert
 ([@matthewfeickert](https://github.com/matthewfeickert)).
 
@@ -39,5 +39,6 @@ Here are the steps to follow to make a pull request:
 5. Pull the main (or `dev`, if exists) branch to make sure that there is no
    conflict with the current developments of the code.
 6. Make sure that you have added your name to the list of contributors in
-   `doc/CONTRIBUTORS.md`.
+   `doc/CONTRIBUTORS.md` and modify appropriate section of 
+   `doc/releases/changelog-dev.md`.
 7. Once you are done, request one of the maintainers to review your PR.

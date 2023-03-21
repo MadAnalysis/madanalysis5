@@ -134,6 +134,7 @@ dmypy.json
 # VScode type checker
 .vscode/
 
+ .github_meta.log
 */*.pyc
 */*/*.pyc
 */*/*/*.pyc
@@ -159,3 +160,5 @@ tools/SampleAnalyzer/Commons/Makefile
 PortabilityTags.h
 tools/SampleAnalyzer/Configuration
 tools/SampleAnalyzer/Process
+.DS_Store
+ANALYSIS_*

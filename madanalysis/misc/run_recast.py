@@ -75,12 +75,12 @@ class RunRecast():
 
     def SetCLsCalculator(self):
         if self.main.session_info.has_pyhf and self.main.recasting.CLs_calculator_backend == "pyhf":
-            self.cls_calculator = pyhf_wrapper_py3
+            self.cls_calculator = pyhf_wrapper
         elif not self.main.session_info.has_pyhf:
             self.main.recasting.CLs_calculator_backend = "native"
 
         if self.main.session_info.has_pyhf and self.main.recasting.expectation_assumption == "aposteriori":
-            self.cls_calculator = pyhf_wrapper_py3
+            self.cls_calculator = pyhf_wrapper
             self.main.recasting.CLs_calculator_backend = "pyhf"
             self.is_apriori = False
         elif not self.main.session_info.has_pyhf and self.main.recasting.expectation_assumption == "aposteriori":
@@ -808,7 +808,6 @@ class RunRecast():
 
                 # Citation notifications for Global Likelihoods
                 if (self.cov_config != {} or self.pyhf_config!={}) and print_gl_citation:
-                    # TODO: Update arXiv number this is Les Houches arxiv number
                     print_gl_citation = False
                     self.logger.info("\033[1m   * Using global likelihoods to improve CLs calculations\033[0m")
                     self.logger.info("\033[1m     Please cite arXiv:2206.14870 [hep-ph]\033[0m")
@@ -828,8 +827,7 @@ class RunRecast():
                     self.logger.info("\033[1m   * Using `pyhf` for CLs calculation\033[0m")
                     self.logger.info("\033[1m     DOI:10.5281/zenodo.1169739\033[0m")
                     self.logger.info("\033[1m     For more details see https://scikit-hep.org/pyhf/\033[0m")
-                    # TODO: Update arXiv number this is Les Houches arxiv number
-                    self.logger.info("\033[1m     Please cite arXiv:2002.12220 [hep-ph]\033[0m")
+                    self.logger.info("\033[1m     Please cite arXiv:2206.14870 [hep-ph]\033[0m")
 
 
             ## Reading the cutflow information
@@ -1839,6 +1837,17 @@ def clean_region_name(mystr):
 
 
 def pyhf_wrapper(*args, **kwargs):
+    """
+    Computes CLs values via pyhf interface
+
+    :param args: input arguments `nobs, nb, deltanb, nsignal` or `bkg_HF, sig_HF`
+        function will decide for the correct action depending on number of arguments
+    :param kwargs:
+        CLs_exp: bool
+            return expected values
+        CLs_obs: bool
+            return obs values
+    """
     import pyhf
     from pyhf.optimize import mixins
     from numpy import warnings, isnan, ndarray

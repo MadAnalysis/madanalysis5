@@ -19,7 +19,7 @@
  - [Troubleshootings and bug reports](#troubleshootings-and-bug-reports)
  - [Supported third party software](#supported-third-party-software)
  - [Authors](#authors)
- - [Developer's Guide: How to contribute to MadAnalysis 5](./doc/CONTRIBUTING.md)
+ - [Developer's Guide: How to contribute to MadAnalysis 5](./CONTRIBUTING.md)
  - [Our famous last words](#our-famous-last-words)
  - [Credits](#credits)
 
@@ -238,9 +238,9 @@ The [latest release](https://github.com/MadAnalysis/madanalysis5/releases) of Ma
 
 - [FastJet](http://fastjet.fr) v3.4.0
 - [FastJet Contrib](https://fastjet.hepforge.org/contrib/) v1.048
-- [Delphes](https://github.com/delphes/delphes) v3.4.3
+- [Delphes](https://github.com/delphes/delphes) v3.5.0
 - [ROOT](https://root.cern) v6.04.08
-- [pyhf](https://github.com/scikit-hep/pyhf) v0.6.3
+- [pyhf](https://github.com/scikit-hep/pyhf) v0.7.0
 
 ### Authors
 
@@ -259,7 +259,7 @@ That's all folks!
 
 ### Credits
 
-If you use MadAnalysis 5, please cite:
+If you use MadAnalysis 5, please cite ([BibTeX file can be found here](./CITATIONS.bib)):
 
  - [E. Conte, B. Fuks and G. Serret; Comput. Phys. Commun. 184 (2013) 222](http://arxiv.org/abs/1206.1599)
  - [E. Conte, B. Dumont, B. Fuks and C. Wymant; Eur. Phys. J. C 74 (2014) 10, 3103](http://arxiv.org/abs/1405.3982)
@@ -268,4 +268,5 @@ If you use MadAnalysis 5, please cite:
  - [J. Y. Araz, M. Frank and B. Fuks; Eur. Phys. J. C 80 (2020) 6, 531](https://arxiv.org/abs/1910.11418)
  - [J. Y. Araz, B. Fuks and G. Polykratis; Eur. Phys. J. C 81 (2021) 329](https://arxiv.org/abs/2006.09387)
  - [J. Y. Araz, B. Fuks, M. D. Goodsell and M. Utsch; Eur. Phys. J. C 82 (2022) 597](https://arxiv.org/abs/2112.05163)
- - [G. Alguero, J. Y. Araz, B. Fuks, S. Kraml; arXiv:2206.14870](https://arxiv.org/abs/2206.14870)
+ - [G. Alguero, J. Y. Araz, B. Fuks, S. Kraml; SciPost Phys. 14 (2023) 009](https://doi.org/10.21468/SciPostPhys.14.1.009)
+ - [J. Y. Araz, A. Buckley, B. Fuks; arXiv:2303.03427](https://arxiv.org/abs/2303.03427)
