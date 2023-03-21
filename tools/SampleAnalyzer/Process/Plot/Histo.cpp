@@ -42,6 +42,47 @@ void Histo::Write_TextFormat(std::ostream* output)
   *output << std::endl;
 }
 
+//db class passed in from SampleAnalyzer execute function, adds histo, statistics and data for each weight id to
+//SQlite3 output file
+void Histo::WriteSQL(DatabaseManager &db){
+
+	//create string of regions associated with the Histo
+	std::string regionNames = "";
+	for(MAuint32 i = 0; i < regions_.size(); ++i){
+		if(i != 0) {regionNames += " ";}
+		regionNames += regions_[i]->GetName();
+	}
+	//add general histo info to the Histo Description table
+	db.addHisto(name_, nbins_, xmin_, xmax_, regionNames);
+	//for each histo, weight id pair: add statistics info to Statistics table
+	for(const auto &weight_id : MultiweightHistoData){
+		db.addStatistic(name_,
+			weight_id.first,
+			multiweight_event_info[weight_id.first].nevents_.first,
+			multiweight_event_info[weight_id.first].nevents_.second,
+			multiweight_event_info[weight_id.first].nevents_w_.first,
+			multiweight_event_info[weight_id.first].nevents_w_.second,
+			multiweight_event_info[weight_id.first].nentries_.first,
+			multiweight_event_info[weight_id.first].nentries_.second,
+			weight_id.second.sum_w_.first,
+			weight_id.second.sum_w_.second,
+			weight_id.second.sum_ww_.first,
+			weight_id.second.sum_ww_.second,
+			weight_id.second.sum_xw_.first,
+			weight_id.second.sum_xw_.second,
+			weight_id.second.sum_xxw_.first,
+			weight_id.second.sum_xxw_.second);
+		//for each weight histo,weight id pair: add bucket data to Data table
+		db.addData(name_, weight_id.first, "underflow", weight_id.second.underflow_.first, weight_id.second.underflow_.second);
+		for(int i = 0; i < nbins_; ++i){
+			db.addData(name_, weight_id.first, std::to_string(i+1), weight_id.second.histo_[i].first, weight_id.second.histo_[i].second);
+		}
+		db.addData(name_, weight_id.first, "overflow", weight_id.second.overflow_.first, weight_id.second.overflow_.second);
+	}
+
+
+}
+
 
 /// Write the plot in a Text file
 void Histo::Write_TextFormatBody(std::ostream* output)

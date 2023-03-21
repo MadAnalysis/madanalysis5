@@ -31,9 +31,13 @@
 #include <ostream>
 #include <vector>
 
+
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Counter/Counter.h"
 #include "SampleAnalyzer/Process/Writer/SAFWriter.h"
+
+#include "SampleAnalyzer/Commons/Base/DatabaseManager.h"
+
 
 
 namespace MA5
@@ -89,8 +93,14 @@ class CounterManager
   { return counters_[index];}
 
   /// Incrementing the initial number of events
-  void IncrementNInitial(MAfloat32 weight=1.0)
-  { initial_.Increment(weight); }
+  void IncrementNInitial(MAfloat32 weight, const std::map<MAuint32, MAfloat64> &multiweight)
+  { 
+	  initial_.Increment(weight);
+	  initial_.Increment(multiweight);
+	  for(auto &cut : counters_){
+		  cut.Init(multiweight);
+	  }
+  }
 
   /// Incrementing the initial number of events
   Counter& GetInitial()
@@ -101,12 +111,25 @@ class CounterManager
   /// Write the counters in a Text file
   void Write_TextFormat(SAFWriter& output) const;
 
+  //Write to SQL database
+  void WriteSQL(DatabaseManager &db, bool &AddInitial, std::string region_name);
+
   /// Write the counters in a ROOT file
   //  void Write_RootFormat(TFile* output) const;
 
   /// Finalizing
   void Finalize()
   { Reset(); }
+
+  
+  /*
+  void IncrementNInitial(const std::map<MAuint32, MAfloat64> &multiweight){
+	initial_.Increment(multiweight);
+  }
+  */
+  
+
+
 
 };
 

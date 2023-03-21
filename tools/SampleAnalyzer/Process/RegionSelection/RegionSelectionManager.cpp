@@ -24,6 +24,7 @@
 
 // STL headers
 #include <iostream>
+#include <sys/resource.h>
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelectionManager.h"
@@ -63,13 +64,18 @@ MAbool RegionSelectionManager::ApplyCut(MAbool condition, std::string const &cut
   std::vector<RegionSelection*> RegionsForThisCut = mycut->Regions();
   for (MAuint32 i=0; i<RegionsForThisCut.size(); i++)
   {
+	
     RegionSelection* ThisRegion = RegionsForThisCut[i];
 
     /// Skip the current region if it has failed a previous cut
     if(!ThisRegion->IsSurviving() ) { continue; }
 
     /// Check the current cut:
-    if(condition) { ThisRegion->IncrementCutFlow(ThisRegion->GetWeight()); }
+    if(condition) { 
+		ThisRegion->IncrementCutFlow(ThisRegion->GetWeight(), ThisRegion->GetWeights());
+		//multiweight
+		//ThisRegion->IncrementCutFlow(ThisRegion->GetWeights());
+	}
     else
     {
       ThisRegion->SetSurvivingTest(false);
@@ -107,8 +113,12 @@ void RegionSelectionManager::FillHisto(std::string const&histname, MAfloat64 val
           }
           catch (const std::exception& e)  { MANAGE_EXCEPTION(e); }
           // Filling the histo
-          if (myhistof->FreshEvent())  myhistof->IncrementNEvents(weight_);
+          if (myhistof->FreshEvent()) {
+			  myhistof->IncrementNEvents(weight_);
+			  myhistof->IncrementNEvents(multiweight_);
+		  }
           myhistof->Fill(val,weight_);
+		  myhistof->Fill(val,multiweight_);
        }
       // LogX histo
       else if(dynamic_cast<HistoLogX*>(plotmanager_.GetHistos()[i])!=0)
@@ -122,8 +132,12 @@ void RegionSelectionManager::FillHisto(std::string const&histname, MAfloat64 val
         }
         catch (const std::exception& e)  { MANAGE_EXCEPTION(e); }
         // Filling the histo
-        if (myhistoX->FreshEvent())  myhistoX->IncrementNEvents(weight_);
+        if (myhistoX->FreshEvent())  {
+			myhistoX->IncrementNEvents(weight_);
+			myhistoX->IncrementNEvents(multiweight_);
+		}
         myhistoX->Fill(val,weight_);
+		myhistoX->Fill(val,multiweight_);
       }
       // Normal histo
       else if(dynamic_cast<Histo*>(plotmanager_.GetHistos()[i])!=0)
@@ -137,8 +151,14 @@ void RegionSelectionManager::FillHisto(std::string const&histname, MAfloat64 val
         }
         catch (const std::exception& e)  { MANAGE_EXCEPTION(e); }
         // Filling the histo
-        if (myhisto->FreshEvent())  myhisto->IncrementNEvents(weight_);
+        if (myhisto->FreshEvent())  {
+			myhisto->IncrementNEvents(weight_);
+			myhisto->IncrementNEvents(multiweight_);
+		}
+	
         myhisto->Fill(val,weight_);
+		//myhisto->IncrementNEvents(multiweight_);
+		myhisto->Fill(val,multiweight_);
       }
       break;
     }

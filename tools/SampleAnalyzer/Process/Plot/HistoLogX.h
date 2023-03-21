@@ -49,6 +49,7 @@ class HistoLogX : public Histo
   MAfloat64 log_xmin_;
   MAfloat64 log_xmax_;
 
+
   // -------------------------------------------------------------
   //                       method members
   // -------------------------------------------------------------
@@ -163,6 +164,55 @@ class HistoLogX : public Histo
         histo_[std::floor((std::log10(value)-log_xmin_)/step_)].second+=weight;
       }
     }
+  }
+
+  void Fill(MAfloat64 value, std::map<MAuint32, MAfloat64> &weights){
+
+	try
+    {
+      if (std::isnan(value)) throw EXCEPTION_WARNING("Skipping a NaN (Not a Number) value in an histogram.","",0); 
+      if (std::isinf(value)) throw EXCEPTION_WARNING("Skipping a Infinity value in an histogram.","",0); 
+    }
+    catch (const std::exception& e)
+    {
+      MANAGE_EXCEPTION(e);
+    }
+
+	for(auto &id_weight : weights){
+		if(id_weight.second >= 0) {
+
+			multiweight_event_info[id_weight.first].nentries_.first++;
+			MultiweightHistoData[id_weight.first].sum_w_.first   +=id_weight.second;
+			MultiweightHistoData[id_weight.first].sum_ww_.first  +=id_weight.second * id_weight.second;
+			MultiweightHistoData[id_weight.first].sum_xw_.first  +=value * id_weight.second;
+
+			//in log bountries map, access by weight id which gives a pair, first element is the min and second is the max
+			if( value < xmin_) {
+				MultiweightHistoData[id_weight.first].underflow_.first +=id_weight.second;
+			} else if (value >= xmax_) {
+				MultiweightHistoData[id_weight.first].overflow_.first +=id_weight.second;
+			} else {
+				MultiweightHistoData[id_weight.first].histo_[std::floor((std::log10(value)-log_xmin_)/step_)].first+=id_weight.second;
+			}
+
+		} else {
+			multiweight_event_info[id_weight.first].nentries_.second++;
+			int absWeight = std::abs(id_weight.second);
+			MultiweightHistoData[id_weight.first].sum_w_.second   +=absWeight;
+			MultiweightHistoData[id_weight.first].sum_ww_.second  +=absWeight * absWeight;
+			MultiweightHistoData[id_weight.first].sum_xw_.second  +=value * absWeight;
+			if(value < xmin_) {
+				MultiweightHistoData[id_weight.first].underflow_.second +=absWeight;
+			} else if (value >= xmax_) MultiweightHistoData[id_weight.first].overflow_.second+=absWeight;
+			else
+			{
+				MultiweightHistoData[id_weight.first].histo_[std::floor((std::log10(value)-log_xmin_)/step_)].second+=absWeight;
+			}
+			
+
+		}
+	}
+
   }
 
 

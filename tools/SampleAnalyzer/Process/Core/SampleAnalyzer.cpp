@@ -39,6 +39,10 @@
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 #include "SampleAnalyzer/Commons/Service/Physics.h"
 
+//#include "SampleAnalyzer/Commons/Base/DatabaseManager.h"
+#include "SampleAnalyzer/Commons/Base/OutputManager.h"
+
+
 
 using namespace MA5;
 
@@ -804,7 +808,7 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
     out.Finalize();
   }
 
-
+  
   // Saving the cut flows
   for(MAuint32 i=0; i<analyzers_.size(); i++)
   {
@@ -814,13 +818,57 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
       RegionSelection *myRS = myanalysis->Manager()->Regions()[j];
       std::string safname = myanalysis->Output() + "/Cutflows/" + 
          CleanName(myRS->GetName()) + ".saf";
-      out.Initialize(&cfg_, safname.c_str());
+	  out.Initialize(&cfg_, safname.c_str());
       out.WriteHeader();
       myRS->WriteCutflow(out);
       out.WriteFoot();
       out.Finalize();
     }
   }
+
+
+  for(MAuint32 i = 0; i < analyzers_.size(); ++i){
+
+	  std::string histo_path = analyzers_[i]->Output() + "/Histograms/histo.db";
+	  std::string cutflow_path = analyzers_[i]->Output() + "/Cutflows/cutflows.db";
+	  vector<array<string, 3> > outputs;
+	  outputs.push_back({"sqlite", cutflow_path, histo_path});
+	  OutputManager output_manager(outputs, analyzers_[i], &mySamples[0]);
+	  output_manager.Execute();
+  }
+
+
+
+  /*
+  // Create histo SQlite file
+  for(MAuint32 i = 0; i < analyzers_.size(); ++i){
+	  std::string path = analyzers_[i]->Output() + "/Histograms/histo.db";
+	  DatabaseManager dbManager(path);
+	  dbManager.createHistoTables();
+	  analyzers_[i]->Manager()->GetPlotManager()->WriteSQL(dbManager);
+	  dbManager.closeDB();
+  }
+
+  //save multi-weight cutflows to SQL - Kyle Fan
+  for(int i = 0; i < analyzers_.size(); ++i){
+	std::string path = analyzers_[i]->Output() + "/Cutflows/cutflows.db";
+	DatabaseManager dbManager(path);
+	dbManager.createCutflowTables();	
+	bool addInitial = true;
+	
+	AnalyzerBase* myanalysis = analyzers_[i];
+	mySamples[0].mc()->WriteWeightNames(dbManager);
+	//insert region,cut pair to cutflow table and region,cut,weight_id (weight data) to weights table
+	for(int j = 0; j < myanalysis->Manager()->Regions().size(); ++j){
+		RegionSelection *myRS = myanalysis->Manager()->Regions()[j];
+		myRS->WriteSQL(dbManager, addInitial);
+	}
+	dbManager.closeDB();
+  }
+
+  //end of multi-weight cutflow code
+  */
+
 
   // The user-defined stuff
   for(MAuint32 i=0; i<analyzers_.size(); i++)

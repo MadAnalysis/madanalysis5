@@ -328,6 +328,8 @@ class CheckUp():
             return False
         if not self.checker.Execute('root'):
             return False
+        if not self.checker.Execute('sqlite'):
+            return False
 
         self.archi_info.has_delphes           = checker2.checkDelphes()
         self.archi_info.has_delphesMA5tune    = checker2.checkDelphesMA5tune()

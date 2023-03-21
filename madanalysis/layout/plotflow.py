@@ -640,8 +640,17 @@ class PlotFlow:
                 outputPy.write(str(histos[ind].summary.array[bin-1]*scales[ind]))
             outputPy.write('])\n\n')
 
+        #stdev
+        for ind in range(0, len(histos)):
+            outputPy.write('    # Creating array for stdev\n')
+            outputPy.write('    err = numpy.array([')
+            for bin in range(1, xnbin+1):
+                if bin !=1:
+                    outputPy.write(',')
+                outputPy.write(str(histos[ind].summary.stdev[bin-1]*scales[ind]))
+            outputPy.write('])\n\n')
 
-
+       
         # Canvas
         outputPy.write('    # Creating a new Canvas\n')
         dpi=80
@@ -795,7 +804,7 @@ class PlotFlow:
             mylinewidth  = self.main.datasets[ind].linewidth
             mylinestyle  = LineStyleType.convert2matplotlib(self.main.datasets[ind].linestyle)
 
-            outputPy.write('    pad.hist('+\
+            outputPy.write('    n, _, _ =   pad.hist('+\
                                'x=xData, '+\
                                'bins=xBinning, '+\
                                'weights='+myweights+',\\\n'+\
@@ -823,6 +832,10 @@ class PlotFlow:
                                    'cumulative=False, density=False, align="mid",'+\
                                    ' orientation="vertical")\n\n')
         outputPy.write('\n')
+
+
+        # error bar
+        outputPy.write('    plt.errorbar(xData, n, yerr = err, fmt=\'r.\')\n')
 
         # Label
         outputPy.write('    # Axis\n')

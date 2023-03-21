@@ -26,6 +26,8 @@
 #include "SampleAnalyzer/Process/Counter/CounterManager.h"
 
 
+
+
 using namespace MA5;
 
 /*
@@ -77,13 +79,15 @@ void CounterManager::Write_RootFormat(TFile* output) const
 /// Write the counters in a TEXT file
 void CounterManager::Write_TextFormat(SAFWriter& output) const
 {
+
+	
   // header
   *output.GetStream() << "<InitialCounter>" << std::endl;
 
   // name
   *output.GetStream() << "\"Initial number of events\"      #" << std::endl;
 
-  // nentries
+  // nentries 
   output.GetStream()->width(15);
   *output.GetStream() << std::left << std::scientific << initial_.nentries_.first;
   *output.GetStream() << " ";
@@ -111,12 +115,10 @@ void CounterManager::Write_TextFormat(SAFWriter& output) const
   *output.GetStream() << "</InitialCounter>" << std::endl;
   *output.GetStream() << std::endl;
 
-
-
   // Loop over the counters
   for (MAuint32 i=0;i<counters_.size();i++)
   {
-    // header
+	// header
     *output.GetStream() << "<Counter>" << std::endl;
 
     // name
@@ -154,4 +156,54 @@ void CounterManager::Write_TextFormat(SAFWriter& output) const
     *output.GetStream() << "</Counter>" << std::endl;
     *output.GetStream() << std::endl;
   }
+
+
 }
+
+
+//pass in database handler object, flag to check if initial events has been added, no need to repeatedly insert 
+//initial since each region has an identical copy, pass in region name
+void CounterManager::WriteSQL(DatabaseManager &db, bool &AddInitial, std::string region_name){
+	if(AddInitial){
+		//if add initial is true, insert the initial event cut, and for each weight id, insert the values into
+		//the database, set flag to false afterwards
+		db.addCut("initial","event");
+		for(const auto &p : initial_.multiweight_){
+			int id, pos_entries, neg_entries;
+			double pos_sum, neg_sum, pos_2sum, neg_2sum;
+			id = p.first;
+			pos_entries = p.second.nentries_.first;
+			neg_entries = p.second.nentries_.second;
+			pos_sum = p.second.sumweight_.first;
+			neg_sum = p.second.sumweight_.second;
+			pos_2sum = p.second.sumweight2_.first;
+			neg_2sum = p.second.sumweight2_.second;
+			db.addWeight("initial", "event", id, pos_entries, neg_entries, pos_sum, neg_sum, pos_2sum, neg_2sum);
+		}
+		AddInitial = false;
+	}
+
+	//for each cut in the region, add region and cut names to cutflow table
+	//for each weight id in each cut, insert the values into the database
+	for(const auto &cut : counters_){
+		std::string cut_name = cut.name_;
+		db.addCut(region_name, cut_name);
+	//	std::cout << "number of multiweight entries in cut : " << region_name << " " << cut_name << " is : " << cut.multiweight_.size() << std::endl;
+		for(const auto &p : cut.multiweight_){
+			int id, pos_entries, neg_entries;
+			double pos_sum, neg_sum, pos_2sum, neg_2sum;
+			id = p.first;
+			pos_entries = p.second.nentries_.first;
+			neg_entries = p.second.nentries_.second;
+			pos_sum = p.second.sumweight_.first;
+			neg_sum = p.second.sumweight_.second;
+			pos_2sum = p.second.sumweight2_.first;
+			neg_2sum = p.second.sumweight2_.second;
+			db.addWeight(region_name, cut_name, id, pos_entries, neg_entries, pos_sum, neg_sum, pos_2sum, neg_2sum);
+		}
+
+
+	}
+
+}
+

@@ -131,7 +131,7 @@ class LibraryWriter():
             filename = self.path+"/SampleAnalyzer/Test/Makefile_delphesMA5tune"
         elif package=='test_root':
             filename = self.path+"/SampleAnalyzer/Test/Makefile_root"
-
+       
         # Header
         title=''
         if package=='commons':
@@ -239,10 +239,13 @@ class LibraryWriter():
             options.ma5_fastjet_mode   = self.main.archi_info.has_fastjet
             options.has_fastjet_inc    = self.main.archi_info.has_fastjet
             options.has_fastjet_lib    = self.main.archi_info.has_fastjet
+            #options.has_sqlite_lib     = self.main.archi_info.has_sqlite3
+            options.has_sqlite_tag     = self.main.archi_info.has_sqlite3
             # options.has_fastjet_ma5lib = self.main.archi_info.has_fastjet
             toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
         elif package=='test_commons':
             options.has_commons  = True
+            options.has_sqlite_tag = self.main.archi_info.has_sqlite3
             toRemove.extend(['compilation_commons.log','linking_commons.log','cleanup_commons.log','mrproper_commons.log','../Bin/TestCommons.log'])
         elif package=='zlib':
             options.has_commons  = True
@@ -252,6 +255,7 @@ class LibraryWriter():
         elif package=='test_zlib':
             options.has_commons     = True
             options.has_zlib_ma5lib = True
+            options.has_sqlite_tag  = self.main.archi_info.has_sqlite3
           #  options.has_zlib_lib = True
             toRemove.extend(['compilation_zlib.log','linking_zlib.log','cleanup_zlib.log','mrproper_zlib.log','../Bin/TestZlib.log'])
         elif package=='delphes':
@@ -324,6 +328,8 @@ class LibraryWriter():
             options.has_fastjet_lib    = self.main.archi_info.has_fastjet
             options.ma5_fastjet_mode   = self.main.archi_info.has_fastjet
             options.has_substructure   = self.main.archi_info.has_fjcontrib and self.main.archi_info.has_fastjet
+            options.has_sqlite_tag     = self.main.archi_info.has_sqlite3
+            options.has_sqlite_lib     = self.main.archi_info.has_sqlite3
 
             toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
         elif package=='test_process':
@@ -342,6 +348,8 @@ class LibraryWriter():
           #  options.has_delphesMA5tune_tag    = self.main.archi_info.has_delphesMA5tune
           #  options.has_zlib_tag              = self.main.archi_info.has_zlib
             toRemove.extend(['compilation_process.log','linking_process.log','cleanup_process.log','mrproper_process.log','../Bin/TestSampleAnalyzer.log'])
+        elif package=='sqlite':
+            options.has_sqlite              = self.main.archi_info.has_sqlite3
 
         # file pattern
         if package in ['commons','process','configuration']:
@@ -373,7 +381,7 @@ class LibraryWriter():
             hfiles   = ['DelphesMA5tune/*.h']
         elif package=='test_root':
             cppfiles = ['Root/*.cpp']
-            hfiles   = ['Root/*.h']
+            hfiles   = ['Root/*.h'] 
         else:
             cppfiles = [package+'/*.cpp']
             hfiles   = [package+'/*.h']

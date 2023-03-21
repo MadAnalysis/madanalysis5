@@ -626,6 +626,13 @@ class Main():
                               self.archi_info.ma5dir + '/tools/SampleAnalyzer/Bin/TestRoot',
                               self.archi_info.ma5dir + '/tools/SampleAnalyzer/Test/', True])
 
+        # SQLite3
+        if self.archi_info.has_sqlite3:
+            libraries.append(['SQLite3', 'interface to SQLite3', 'sqlite',
+                                self.archi_info.ma5dir + '/tools/SampleAnalyzer/Lib/libsqlite_for_ma5.so',
+                                self.archi_info.ma5dir + '/tools/SampleAnalyzer/Interfaces', False])
+
+
         # Process
         libraries.append(['process', 'SampleAnalyzer core', 'process',
                           self.archi_info.ma5dir + '/tools/SampleAnalyzer/Lib/libprocess_for_ma5.so',
@@ -634,6 +641,7 @@ class Main():
                           self.archi_info.ma5dir + '/tools/SampleAnalyzer/Bin/TestSampleAnalyzer',
                           self.archi_info.ma5dir + '/tools/SampleAnalyzer/Test/', True])
 
+        
   
         # Writing the Makefiles
         self.logger.info("")
@@ -659,7 +667,8 @@ class Main():
         options.has_zlib           = self.archi_info.has_zlib
         options.has_fastjet        = self.archi_info.has_fastjet
         options.has_delphes        = self.archi_info.has_delphes
-        options.has_delphesMA5tune = self.archi_info.has_delphesMA5tune
+        options.has_delphesMA5tune = self.archi_info.has_delphesMA5tune 
+        options.has_sqlite3        = self.archi_info.has_sqlite3
         #MakefileWriter.UserfriendlyMakefileForSampleAnalyzer(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Makefile',options)
 
         # Writing the setup

@@ -29,11 +29,13 @@
 // STL headers
 #include <string>
 #include <vector>
+#include <map>
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Counter/CounterManager.h"
 #include "SampleAnalyzer/Process/Writer/SAFWriter.h"
 
+#include "SampleAnalyzer/Commons/Base/DatabaseManager.h"
 
 namespace MA5
 {
@@ -48,6 +50,8 @@ class RegionSelection
   MAbool surviving_;
   MAuint32 NumberOfCutsAppliedSoFar_;
   MAfloat64 weight_;
+  std::map<MAuint32, MAfloat64> multiWeight_;
+
 
   CounterManager cutflow_;
 
@@ -64,9 +68,11 @@ class RegionSelection
   /// Destructor
   ~RegionSelection()  { };
 
+ 
   /// Get methods
   std::string GetName()
     { return name_; }
+
 
   MAbool IsSurviving()
     { return surviving_; }
@@ -79,7 +85,12 @@ class RegionSelection
 
   /// Printing the cutflow
   void WriteCutflow(SAFWriter& output)
-    { cutflow_.Write_TextFormat(output); }
+    { cutflow_.Write_TextFormat(output);}
+
+  //write to SQL database
+  void WriteSQL(DatabaseManager &db, bool &AddInitial){
+	  cutflow_.WriteSQL(db, AddInitial, name_);
+  }
 
   /// Set methods
   void SetName(std::string name)
@@ -97,11 +108,14 @@ class RegionSelection
   void SetNumberOfCutsAppliedSoFar(MAuint32 NumberOfCutsAppliedSoFar)
     { NumberOfCutsAppliedSoFar_ = NumberOfCutsAppliedSoFar; }
 
+
   // Increment CutFlow (when this region passes a cut)
-  void IncrementCutFlow(MAfloat64 weight)
+  void IncrementCutFlow(MAfloat64 weight, const std::map<MAuint32, MAfloat64> &multiweight)
   {
     cutflow_[NumberOfCutsAppliedSoFar_].Increment(weight);
+	cutflow_[NumberOfCutsAppliedSoFar_].Increment(multiweight);
     NumberOfCutsAppliedSoFar_++;
+
   }
 
   // Add a cut to the CutFlow
@@ -109,13 +123,23 @@ class RegionSelection
     { cutflow_.InitCut(CutName); }
 
   /// Getting ready for a new event
-  void InitializeForNewEvent(const MAfloat64 &weight)
+  void InitializeForNewEvent(const MAfloat64 &weight,const std::map<MAuint32, MAfloat64> &multiweight)
   {
     SetSurvivingTest(true);
     SetNumberOfCutsAppliedSoFar(0);
-    cutflow_.IncrementNInitial(weight);
+    cutflow_.IncrementNInitial(weight, multiweight);
+	multiWeight_=multiweight;
     weight_=weight;
   }
+
+  //Multiweight Integration implementation below
+  void SetWeight(const std::map<MAuint32, MAfloat64> &multiweight) {
+	multiWeight_ = multiweight;
+  }
+
+  std::map<MAuint32, MAfloat64> GetWeights() {return multiWeight_;}
+
+  
 
 };
 

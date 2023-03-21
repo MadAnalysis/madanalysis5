@@ -30,6 +30,12 @@ from madanalysis.IOinterface.saf_block_status import SafBlockStatus
 from madanalysis.layout.histogram             import Histogram
 from madanalysis.layout.histogram_logx        import HistogramLogX
 from madanalysis.layout.histogram_frequency   import HistogramFrequency
+from madanalysis.IOinterface.sqlite_reader    import getMeanAndStdev
+from madanalysis.IOinterface.sqlite_reader    import DBreader_debug
+from madanalysis.IOinterface.sqlite_reader    import getHistoStatisticsAvg
+
+
+
 import glob
 import logging
 import shutil
@@ -318,10 +324,18 @@ class JobReader():
             while(os.path.isdir(self.safdir+"/"+name+"/MergingPlots_"+str(i))):
                 i+=1
             filename = self.safdir+"/"+name+"/MergingPlots_"+str(i-1)+"/Histograms/histos.saf"
+            ##file path for sqlite db
+            sqlite_db_filename = self.safdir+"/"+name+"/MergingPlots_"+str(i-1)+"/Histograms/histo.db"
+
+
+
         else:
             while(os.path.isdir(self.safdir+"/"+name+"/MadAnalysis5job_"+str(i))):
                 i+=1
             filename = self.safdir+"/"+name+"/MadAnalysis5job_"+str(i-1)+"/Histograms/histos.saf"
+            ##file path for sqlite db
+            sqlite_db_filename = self.safdir+"/"+name+"/MadAnalysis5job_"+str(i-1)+"/Histograms/histo.db"
+
 
         # Opening the file
         try:
@@ -347,6 +361,16 @@ class JobReader():
         data_positive = []
         data_negative = []
         labels        = []
+
+
+        ## SqliteDB extractor
+        sqlite_exists = os.path.isfile(sqlite_db_filename)
+        if sqlite_exists:
+            sqlite_output_dictionary = getMeanAndStdev(sqlite_db_filename)
+            histoStatistics = getHistoStatisticsAvg(sqlite_db_filename)
+        #DBreader_debug(sqlite_output_dictionary)
+
+    
 
         # Loop over the lines
         numline=0
@@ -391,13 +415,40 @@ class JobReader():
                 elif words[0].lower()=='<histo>':
                     histoTag.activate()
                 elif words[0].lower()=='</histo>':
+
+                    
                     histoTag.desactivate()
                     plot.histos.append(copy.copy(histoinfo))
-                    plot.histos[-1].positive.array = data_positive[:]
-                    plot.histos[-1].negative.array = data_negative[:]
-                    histoinfo.Reset()
-                    data_positive = []
-                    data_negative = []
+
+                    if not sqlite_exists:
+
+                        plot.histos[-1].positive.array = data_positive[:]
+                        plot.histos[-1].negative.array = data_negative[:]
+                        histoinfo.Reset()
+                        bin_means = []
+                        bin_stdev = []
+                    else:
+                        bin_means = []
+                        bin_stdev = []
+ 
+                        # save bin mean and stdev into histogram_core for positive and negative values
+                        for bin_index in sqlite_output_dictionary[histoinfo.name]:
+                            if bin_index not in ["underflow", "overflow"]:
+                                bin_means.append(sqlite_output_dictionary[histoinfo.name][bin_index][0])
+                                bin_stdev.append(sqlite_output_dictionary[histoinfo.name][bin_index][1])
+                            elif bin_index == "underflow":
+                                plot.histos[-1].positive.underflow = sqlite_output_dictionary[histoinfo.name][bin_index][0]  
+                            elif bin_index == "overflow":
+                                plot.histos[-1].positive.overflow = sqlite_output_dictionary[histoinfo.name][bin_index][0] 
+
+                        histoinfo.Reset()
+
+                        plot.histos[-1].positive.array = bin_means[:]
+                        ##plot.histos[-1].negative.array = bin_means[:]
+                        plot.histos[-1].positive.stdev = bin_stdev[:]
+                        ##plot.histos[-1].negative.stdev = bin_stdev[:]
+                                                          
+
                 elif words[0].lower()=='<histofrequency>':
                     histoFreqTag.activate()
                 elif words[0].lower()=='</histofrequency>':
@@ -415,11 +466,35 @@ class JobReader():
                 elif words[0].lower()=='</histologx>':
                     histoLogXTag.desactivate()
                     plot.histos.append(copy.copy(histologxinfo))
-                    plot.histos[-1].positive.array = data_positive[:]
-                    plot.histos[-1].negative.array = data_negative[:]
-                    histologxinfo.Reset()
-                    data_positive = []
-                    data_negative = []
+
+                    if not sqlite_exists:
+
+                        plot.histos[-1].positive.array = data_positive[:]
+                        plot.histos[-1].negative.array = data_negative[:]
+                        histologxinfo.Reset()
+                        data_positive = []
+                        data_negative = []
+
+                    else:
+                        bin_means = []
+                        bin_stdev = []
+ 
+                        # save bin mean and stdev into histogram_core for positive and negative values
+                        for bin_index in sqlite_output_dictionary[histologxinfo.name]:
+                            if bin_index not in ["underflow", "overflow"]:
+                                bin_means.append(sqlite_output_dictionary[histoinfo.name][bin_index][0])
+                                bin_stdev.append(sqlite_output_dictionary[histoinfo.name][bin_index][1])
+                            elif bin_index == "underflow":
+                                plot.histos[-1].positive.underflow = sqlite_output_dictionary[histologxinfo.name][bin_index][0]  
+                            elif bin_index == "overflow":
+                                plot.histos[-1].positive.overflow = sqlite_output_dictionary[histologxinfo.name][bin_index][0] 
+
+                        histologxinfo.Reset()
+
+                        plot.histos[-1].positive.array = bin_means[:]
+                        ##plot.histos[-1].negative.array = bin_means[:]
+                        plot.histos[-1].positive.stdev = bin_stdev[:]
+                        ##plot.histos[-1].negative.stdev = bin_stdev[:]
 
             # Looking from histogram description
             elif descriptionTag.activated:
@@ -464,80 +539,143 @@ class JobReader():
 
             # Looking from histogram statistics
             elif statisticsTag.activated and len(words)==2:
+                
                 if statisticsTag.Nlines==0:
                     results = self.ExtractStatisticsInt(words,numline,filename)
+                    
                     if histoTag.activated:
-                        histoinfo.positive.nevents=results[0]
-                        histoinfo.negative.nevents=results[1]
+                        if sqlite_exists:
+                            histoinfo.positive.nevents = int(histoStatistics[histoinfo.name][0])
+                            histoinfo.negative.nevents = int(histoStatistics[histoinfo.name][1])                           
+                        else :
+                            histoinfo.positive.nevents=results[0]
+                            histoinfo.negative.nevents=results[1]
                     elif histoLogXTag.activated:
-                        histologxinfo.positive.nevents=results[0]
-                        histologxinfo.negative.nevents=results[1]
+                        if sqlite_exists:
+                            histologxinfo.positive.nevents = int(histoStatistics[histologxinfo.name][0])
+                            histologxinfo.negative.nevents = int(histoStatistics[histologxinfo.name][1])                          
+                        else :
+                            histologxinfo.positive.nevents=results[0]
+                            histologxinfo.negative.nevents=results[1]
                     elif histoFreqTag.activated:
                         histofreqinfo.positive.nevents=results[0]
                         histofreqinfo.negative.nevents=results[1]
 
                 elif statisticsTag.Nlines==1:
                     results = self.ExtractStatisticsFloat(words,numline,filename)
+                   
                     if histoTag.activated:
-                        histoinfo.positive.sumwentries=results[0]
-                        histoinfo.negative.sumwentries=results[1]
+                        if sqlite_exists:
+                            histoinfo.positive.sumwentries = histoStatistics[histoinfo.name][2]
+                            histoinfo.negative.sumwentries = histoStatistics[histoinfo.name][3]                            
+                        else :
+                            histoinfo.positive.sumwentries=results[0]
+                            histoinfo.negative.sumwentries=results[1]
                     elif histoLogXTag.activated:
-                        histologxinfo.positive.sumwentries=results[0]
-                        histologxinfo.negative.sumwentries=results[1]
+                        if sqlite_exists:
+                            histologxinfo.positive.sumwentries = histoStatistics[histologxinfo.name][2]
+                            histologxinfo.negative.sumwentries = histoStatistics[histologxinfo.name][3]                          
+                        else :
+                            histologxinfo.positive.sumwentries=results[0]
+                            histologxinfo.negative.sumwentries=results[1]
                     elif histoFreqTag.activated:
                         histofreqinfo.positive.sumwentries=results[0]
                         histofreqinfo.negative.sumwentries=results[1]
 
                 elif statisticsTag.Nlines==2:
                     results = self.ExtractStatisticsInt(words,numline,filename)
+                   
                     if histoTag.activated:
-                        histoinfo.positive.nentries=results[0]
-                        histoinfo.negative.nentries=results[1]
+                        if sqlite_exists:
+                            histoinfo.positive.nentries = int(histoStatistics[histoinfo.name][4])
+                            histoinfo.negative.nentries = int(histoStatistics[histoinfo.name][5])                      
+                        else :
+                            histoinfo.positive.nentries=results[0]
+                            histoinfo.negative.nentries=results[1]
                     elif histoLogXTag.activated:
-                        histologxinfo.positive.nentries=results[0]
-                        histologxinfo.negative.nentries=results[1]
+                        if sqlite_exists:
+                            histologxinfo.positive.nentries = int(histoStatistics[histologxinfo.name][4])
+                            histologxinfo.negative.nentries = int(histoStatistics[histologxinfo.name][5])                           
+                        else :
+                            histologxinfo.positive.nentries=results[0]
+                            histologxinfo.negative.nentries=results[1]
                     elif histoFreqTag.activated:
                         histofreqinfo.positive.nentries=results[0]
                         histofreqinfo.negative.nentries=results[1]
 
                 elif statisticsTag.Nlines==3:
                     results = self.ExtractStatisticsFloat(words,numline,filename)
+                   
                     if histoTag.activated:
-                        histoinfo.positive.sumw=results[0]
-                        histoinfo.negative.sumw=results[1]
+                        if sqlite_exists:
+                            histoinfo.positive.sumw = histoStatistics[histoinfo.name][6] 
+                            histoinfo.negative.sumw = histoStatistics[histoinfo.name][7]                          
+                        else :
+                            histoinfo.positive.sumw=results[0]
+                            histoinfo.negative.sumw=results[1]
                     elif histoLogXTag.activated:
-                        histologxinfo.positive.sumw=results[0]
-                        histologxinfo.negative.sumw=results[1]
+                        if sqlite_exists:
+                            histologxinfo.positive.sumw = histoStatistics[histologxinfo.name][6] 
+                            histologxinfo.negative.sumw = histoStatistics[histologxinfo.name][7]                          
+                        else :
+                            histologxinfo.positive.sumw=results[0]
+                            histologxinfo.negative.sumw=results[1]
                     elif histoFreqTag.activated:
                         histofreqinfo.positive.sumw=results[0]
                         histofreqinfo.negative.sumw=results[1]
 
                 elif statisticsTag.Nlines==4 and not histoFreqTag.activated:
                     results = self.ExtractStatisticsFloat(words,numline,filename)
+                   
                     if histoTag.activated:
-                        histoinfo.positive.sumw2=results[0]
-                        histoinfo.negative.sumw2=results[1]
+                        if sqlite_exists:
+                            histoinfo.positive.sumw2 = histoStatistics[histoinfo.name][8] 
+                            histoinfo.negative.sumw2 = histoStatistics[histoinfo.name][9]                 
+                        else :
+                            histoinfo.positive.sumw2=results[0]
+                            histoinfo.negative.sumw2=results[1]
                     elif histoLogXTag.activated:
-                        histologxinfo.positive.sumw2=results[0]
-                        histologxinfo.negative.sumw2=results[1]
-
+                        if sqlite_exists:
+                            histologxinfo.positive.sumw2 = histoStatistics[histologxinfo.name][8] 
+                            histologxinfo.negative.sumw2 = histoStatistics[histologxinfo.name][9]                         
+                        else :
+                            histologxinfo.positive.sumw2=results[0]
+                            histologxinfo.negative.sumw2=results[1]
                 elif statisticsTag.Nlines==5 and not histoFreqTag.activated:
                     results = self.ExtractStatisticsFloat(words,numline,filename)
+                
                     if histoTag.activated:
-                        histoinfo.positive.sumwx=results[0]
-                        histoinfo.negative.sumwx=results[1]
+                        if sqlite_exists:
+                            histoinfo.positive.sumwx = histoStatistics[histoinfo.name][10]
+                            histoinfo.negative.sumwx = histoStatistics[histoinfo.name][11]                           
+                        else :
+                            histoinfo.positive.sumwx=results[0]
+                            histoinfo.negative.sumwx=results[1]
                     elif histoLogXTag.activated:
-                        histologxinfo.positive.sumwx=results[0]
-                        histologxinfo.negative.sumwx=results[1]
+                        if sqlite_exists:
+                            histologxinfo.positive.sumwx = histoStatistics[histologxinfo.name][10]
+                            histologxinfo.negative.sumwx = histoStatistics[histologxinfo.name][11]                          
+                        else :
+                            histologxinfo.positive.sumwx=results[0]
+                            histologxinfo.negative.sumwx=results[1]
 
                 elif statisticsTag.Nlines==6 and not histoFreqTag.activated:
                     results = self.ExtractStatisticsFloat(words,numline,filename)
+                   
                     if histoTag.activated:
-                        histoinfo.positive.sumw2x=results[0]
-                        histoinfo.negative.sumw2x=results[1]
+                        if sqlite_exists:
+                            histoinfo.positive.sumw2x = histoStatistics[histoinfo.name][12]
+                            histoinfo.negative.sumw2x = histoStatistics[histoinfo.name][13] 
+                        else :
+                            histoinfo.positive.sumw2x=results[0]
+                            histoinfo.negative.sumw2x=results[1]
                     elif histoLogXTag.activated:
-                        histologxinfo.positive.sumw2x=results[0]
-                        histologxinfo.negative.sumw2x=results[1]
+                        if sqlite_exists:
+                            histologxinfo.positive.sumw2x = histoStatistics[histologxinfo.name][12]
+                            histologxinfo.negative.sumw2x = histoStatistics[histologxinfo.name][13]
+                        else :
+                            histologxinfo.positive.sumw2x=results[0]
+                            histologxinfo.negative.sumw2x=results[1]
 
                 else:
                     logging.getLogger('MA5').warning('Extra line is found: '+line)

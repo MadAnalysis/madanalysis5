@@ -47,6 +47,10 @@ class ArchitectureInfo:
         self.has_delphes        = False
         self.has_delphesMA5tune = False
 
+        # Flag for SQlite3
+        self.has_sqlite3        = False
+       
+
         # Library to put before all the others?
         self.root_priority           = False
         self.zlib_priority           = False
@@ -98,6 +102,7 @@ class ArchitectureInfo:
         self.delphesMA5tune_lib=""
         self.fastjet_bin_path=""
         self.fastjet_lib_paths=[]
+        
 
         # C++ compiler versions
         self.cpp11 = False

@@ -35,6 +35,7 @@ class HistogramFrequencyCore:
         self.overflow  = 0.
         self.underflow = 0.
         self.array     = []
+        self.stdev     = []
 
     def ComputeIntegral(self):
         self.integral = 0

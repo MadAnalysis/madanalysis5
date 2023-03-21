@@ -66,6 +66,13 @@ class WeightCollection
   ~WeightCollection()
   { }
 
+  //copy constructor 
+  WeightCollection(const WeightCollection &rhs){
+	  for(const auto &id_weights :rhs.weights_){
+		weights_[id_weights.first]=id_weights.second;
+	  }
+  }
+
   /// Clear all the content
   void Reset()
   { weights_.clear(); }
@@ -162,6 +169,47 @@ class WeightCollection
     }
   }
 
+  //multiply operator
+  WeightCollection& operator*=(const MAfloat64 multiple){
+		for(auto &id_value : weights_){
+			id_value.second *= multiple;
+		}
+		return *this;
+  }
+
+  //add operator
+  WeightCollection& operator+=(const MAfloat64 input){
+	  for(auto &id_value : weights_){
+		  id_value.second += input;
+	  }	
+	  return *this;
+  }
+
+  //subtract operator
+  WeightCollection& operator-=(const MAfloat64 input){
+	  for(auto &id_value : weights_){
+		  id_value.second -= input;
+	  }	
+	  return *this;
+  }
+
+  //divide operator
+  WeightCollection& operator/=(const MAfloat64 input){
+	  for(auto &id_value : weights_){
+		  id_value.second /= input;
+	  }	
+	  return *this;
+  }
+
+  
+  //assignment operator 
+  WeightCollection& operator=(const MAfloat64 input){
+	  for(auto &id_value : weights_){
+		  id_value.second = input;
+	  }
+	  return *this;
+  }  
+  
 
 };
 

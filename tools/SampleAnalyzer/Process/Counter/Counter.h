@@ -33,6 +33,30 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <fstream>
+
+struct multiWeightEntry {
+	std::pair<MAint64, MAint64> nentries_;
+	std::pair<MAfloat64, MAfloat64> sumweight_;
+	std::pair<MAfloat64, MAfloat64> sumweight2_;
+	multiWeightEntry(double input = 0){
+		nentries_.first = input;
+		nentries_.second = input;
+		sumweight_.first = input;
+		sumweight_.second = input;
+		sumweight2_.first = input;
+		sumweight2_.second = input;
+	}
+
+	multiWeightEntry(const multiWeightEntry &rhs){
+		nentries_.first = rhs.nentries_.first;
+		nentries_.second = rhs.nentries_.second;
+		sumweight_.first = rhs.sumweight_.first;
+		sumweight_.second = rhs.sumweight_.second;
+		sumweight2_.first = rhs.sumweight2_.first;
+		sumweight2_.second = rhs.sumweight2_.second;
+	}
+};
 
 
 namespace MA5
@@ -49,6 +73,8 @@ class Counter
   // -------------------------------------------------------------
  public :
 
+
+
   /// name of the analysis
   std::string name_;
 
@@ -64,6 +90,8 @@ class Counter
   /// first = positive weight ; second = negative weight
   std::pair<MAfloat64,MAfloat64> sumweight2_;
 
+  std::map<MAuint32, multiWeightEntry> multiweight_;
+
 
   // -------------------------------------------------------------
   //                       method members
@@ -71,7 +99,7 @@ class Counter
  public :
 
   /// Constructor without argument 
-  Counter(const std::string& name = "unkwown")
+  Counter(const std::string& name = "unknown")
   { 
     name_       = name;
     nentries_   = std::make_pair(0,0); 
@@ -81,7 +109,7 @@ class Counter
 
   /// Destructor
   ~Counter()
-  { }
+  {   }
 
   /// Reset
   void Reset()
@@ -89,10 +117,57 @@ class Counter
     nentries_   = std::make_pair(0,0); 
     sumweight_  = std::make_pair(0.,0.);
     sumweight2_ = std::make_pair(0.,0.);
+	multiweight_.clear();
   }
 
+  /*
+  void Debug(int debugCount, int weightprocessed){
+		for(auto &p : multiweight_){
+			std::ofstream output;
+			output.open("/Users/kfan/desktop/output.txt", std::fstream::app);
+			output << "ID : " << p.first << " increment multiweight call number : " << debugCount << " weight Processed :"<< weightprocessed;
+			output << "\n";
+			output << "pos entries : " <<  p.second->nentries_.first << " --  " << nentries_.first << " neg entries : " << p.second->nentries_.second <<   " -- "  << nentries_.second << "\n";
+			output << "pos sum : " << p.second->sumweight_.first <<  " -- " << sumweight_.first << " neg sum : " << p.second->sumweight_.second <<  " -- " << sumweight_.second << "\n";
+			output << "pos squared : " <<p.second->sumweight2_.first <<  " -- " << sumweight2_.first << " neg squared : " << p.second->sumweight2_.second <<  " -- " << sumweight2_.second << "\n";
+			output << "----------------------------------------------------------";
+			output << "\n";
+			output.close();
+
+	  }
+
+  }
+  */
+
+
+
+  void Increment(const std::map<MAuint32, MAfloat64> &multiweights){
+	//	static int incrementDebugCount = 0;
+
+	  for(const auto &weight : multiweights){
+
+			if(weight.second > 0){
+				multiweight_[weight.first].nentries_.first++;
+				multiweight_[weight.first].sumweight_.first+=weight.second;
+				multiweight_[weight.first].sumweight2_.first+=weight.second*weight.second;
+			}
+			else if (weight.second < 0){
+				multiweight_[weight.first].nentries_.second++;
+				multiweight_[weight.first].sumweight_.second+=weight.second;
+				multiweight_[weight.first].sumweight2_.second+=weight.second*weight.second;
+			}
+	  }
+	  
+	
+	  //Debug testing
+	//  Debug(incrementDebugCount, multiweights.begin()->second);	
+	//  incrementDebugCount++;	
+
+  }
+  
+
   /// Increment the counter
-  void Increment(const MAfloat32& weight=1.)
+  void Increment(const MAfloat32& weight)
   {
     if (weight>0)
     {
@@ -106,7 +181,21 @@ class Counter
       sumweight_.second+=weight;
       sumweight2_.second+=weight*weight;
     }
+
   }
+
+  void Init(const std::map<MAuint32, MAfloat64> &weights){
+	  for(auto w : weights){
+		  if(multiweight_.find(w.first) == multiweight_.end()) {multiweight_[w.first] = multiWeightEntry(0) ;}
+	  }
+  }
+
+
+
+  
+
+  
+
 
 };
 

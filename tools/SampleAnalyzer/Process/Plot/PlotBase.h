@@ -35,6 +35,44 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
+#include "SampleAnalyzer/Commons/Base/DatabaseManager.h"
+
+
+struct MultiweightEvents {
+	/// Number of events
+  std::pair<MAint64,MAint64> nevents_;
+
+  /// Number of entries
+  std::pair<MAint64,MAint64> nentries_;
+
+  /// Sum of event-weight over events
+  std::pair<MAfloat64,MAfloat64> nevents_w_;
+
+  MAbool fresh_event_;
+
+  MultiweightEvents() {
+	  fresh_event_ = true;
+	  nevents_.first = 0;
+	  nevents_.second = 0;
+	  nentries_.first = 0;
+	  nentries_.second = 0;
+	  nevents_w_.first = 0.;
+	  nevents_w_.second = 0.;
+
+  }
+
+  MultiweightEvents(const MultiweightEvents &rhs){
+	  nevents_.first = rhs.nevents_.first;
+	  nevents_.second = rhs.nevents_.second;
+	  nentries_.first = rhs.nentries_.first;
+	  nentries_.second = rhs.nentries_.second;
+	  nevents_w_.first = rhs.nevents_w_.first;
+	  nevents_w_.second = rhs.nevents_w_.second;
+	  fresh_event_ = rhs.fresh_event_;
+  }
+
+};
+
 
 namespace MA5
 {
@@ -62,6 +100,9 @@ class PlotBase
   /// Flag telling whether a given histo has already been modified for an event
   MAbool fresh_event_;
 
+  //map containing event meta data for each weight id
+  std::map<MAuint32, MultiweightEvents> multiweight_event_info; 
+
 
   // -------------------------------------------------------------
   //                       method members
@@ -76,6 +117,7 @@ class PlotBase
     nentries_    = std::make_pair(0,0);
     nevents_w_   = std::make_pair(0,0);
     fresh_event_ = true;
+	
   }
 
   /// Constructor with argument 
@@ -86,20 +128,48 @@ class PlotBase
     nevents_w_   = std::make_pair(0,0);
     nentries_    = std::make_pair(0,0);
     fresh_event_ = true;
+	
   }
 
   /// Destructor
   virtual ~PlotBase()
-  { }
+  { 
+  }
 
   /// Accesor for fresh_event
   MAbool FreshEvent() { return fresh_event_;}
 
+  /// Accessor for multiweight fresh_event
+  MAbool MultiweightFreshEvent(int index) {
+	  return multiweight_event_info[index].fresh_event_;
+  }
+
   /// Modifier for fresh_event
-  void SetFreshEvent(MAbool tag) { fresh_event_ = tag;}
+  void SetFreshEvent(MAbool tag) { 
+	  fresh_event_ = tag;
+  }
+
+  /// Modifier for Multiweight fresh_event
+  void SetMultiweightFreshEvent(MAbool tag) {
+	  for(auto &weight_id : multiweight_event_info){
+		  weight_id.second.fresh_event_ = tag;
+	  }
+  }
+
+  //initialize histograms multiweights (without initialization, 0 entries will not show up in histogram)
+  virtual void InitMultiweights(const std::map<MAuint32, MAfloat64> &weights){
+	  for(const auto &id_weight : weights){
+			 if(multiweight_event_info.find(id_weight.first) == multiweight_event_info.end()){
+				multiweight_event_info[id_weight.first] = MultiweightEvents();		
+		  }
+
+	  }
+  }
 
   /// Write the plot in a ROOT file
   virtual void Write_TextFormat(std::ostream* output) = 0;
+
+  virtual void WriteSQL(DatabaseManager &db) {};
 
   /// Increment number of events
   void IncrementNEvents(MAfloat64 weight=1.0)
@@ -118,9 +188,36 @@ class PlotBase
     SetFreshEvent(false);
   }
 
+  void IncrementNEvents(std::map<MAuint32, MAfloat64> &weights){
+	  for(const auto &id_weight : weights){
+		  /*
+		  if(multiweight_event_info.find(id_weight.first) == multiweight_event_info.end()){
+			  multiweight_event_info[id_weight.first] = new MultiweightEvents();
+			  multiweight_event_info[id_weight.first]->fresh_event_ = true;	
+		  }
+		  */
+
+		  if(MultiweightFreshEvent(id_weight.first)){
+			if(id_weight.second >= 0){
+				multiweight_event_info[id_weight.first].nevents_.first++;
+				multiweight_event_info[id_weight.first].nevents_w_.first+=id_weight.second;		
+			} else {
+				multiweight_event_info[id_weight.first].nevents_.second++;
+				multiweight_event_info[id_weight.first].nevents_w_.second+=std::abs(id_weight.second);
+			}
+
+		  }
+		  multiweight_event_info[id_weight.first].fresh_event_ = false;
+	  }
+  }
+
   /// Return Number of events
   const std::pair<MAint64,MAint64>& GetNEvents()
   { return nevents_; }
+
+  const std::pair<MAint64, MAint64>& GetNEvents(int index){
+	return multiweight_event_info[index].nevents_;
+  }
 
   // Return the name
   std::string GetName()
