@@ -35,9 +35,10 @@ from shell_command                                              import ShellComm
 from string_tools                                               import StringTools
 from six.moves                                                  import map, range, input
 import copy, logging, math, os, shutil, time, sys, json
+from typing import Text, Dict
 
 
-class RunRecast():
+class RunRecast:
 
     def __init__(self, main, dirname):
         self.dirname          = dirname
@@ -74,6 +75,10 @@ class RunRecast():
 
 
     def SetCLsCalculator(self):
+        def pyhf_wrapper(nobs, nb, deltanb, nsignal, ntoys, CLs_obs = True):
+            from madanalysis.misc.pyhf_interface import PyhfInterface
+            interface = PyhfInterface(nsignal, nobs, nb, deltanb)
+            return interface.computeCLs(CLs_obs = CLs_obs)
         if self.main.session_info.has_pyhf and self.main.recasting.CLs_calculator_backend == "pyhf":
             self.cls_calculator = pyhf_wrapper
         elif not self.main.session_info.has_pyhf:
@@ -130,15 +135,17 @@ class RunRecast():
         if self.forced or self.main.script:
             return
         self.logger.info("Would you like to edit the recasting Card ? (Y/N)")
-        allowed_answers=['n','no','y','yes']
-        answer=""
-        while answer not in  allowed_answers:
-            answer=input("Answer: ")
-            answer=answer.lower()
-        if answer=="no" or answer=="n":
+        allowed_answers = ['n', 'no', 'y', 'yes']
+        answer = ""
+        while answer not in allowed_answers:
+            answer = input("Answer: ")
+            answer = answer.lower()
+        if answer == "no" or answer == "n":
             return
         else:
-            err = os.system(self.main.session_info.editor+" "+self.dirname+"/Input/recasting_card.dat")
+            err = os.system(
+                self.main.session_info.editor + " " + self.dirname + "/Input/recasting_card.dat"
+            )
 
         return
 
@@ -316,10 +323,8 @@ class RunRecast():
         self.main.script = script_mode
         old_fastsim = self.main.fastsim.package
         self.main.fastsim.package="fastjet"
+        output_name = "SFS_events.lhe" + self.main.archi_info.has_zlib * ".gz"
         if self.main.recasting.store_events:
-            output_name = "SFS_events.lhe"
-            if self.main.archi_info.has_zlib:
-                output_name += ".gz"
             self.logger.debug("   Setting the output LHE file :"+output_name)
 
         # Initializing the JobWriter
@@ -332,7 +337,7 @@ class RunRecast():
         self.logger.info("   Copying 'SampleAnalyzer' source files...")
         if not jobber.CopyLHEAnalysis():
             return False
-        if not jobber.CreateBldDir(analysisName="SFSRun",outputName="SFSRun.saf"):
+        if not jobber.CreateBldDir(analysisName = "SFSRun", outputName = "SFSRun.saf"):
             return False
         if not jobber.WriteSelectionHeader(self.main):
             return False
@@ -347,14 +352,20 @@ class RunRecast():
         if not jobber.WriteMakefiles():
             return False
         # Copying the analysis files
-        analysisList = open(self.dirname+'_SFSRun/Build/SampleAnalyzer/User/Analyzer/analysisList.h','w')
+        analysisList = open(
+            self.dirname + '_SFSRun/Build/SampleAnalyzer/User/Analyzer/analysisList.h', 'w'
+        )
         for ana in analysislist:
-            analysisList.write('#include "SampleAnalyzer/User/Analyzer/'+ana+'.h"\n')
+            analysisList.write('#include "SampleAnalyzer/User/Analyzer/' + ana + '.h"\n')
         analysisList.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"\n')
         analysisList.write('#include "SampleAnalyzer/Commons/Service/LogStream.h"\n\n')
-        analysisList.write('// -----------------------------------------------------------------------------\n')
+        analysisList.write(
+            '// -----------------------------------------------------------------------------\n'
+        )
         analysisList.write('// BuildUserTable\n')
-        analysisList.write('// -----------------------------------------------------------------------------\n')
+        analysisList.write(
+            '// -----------------------------------------------------------------------------\n'
+        )
         analysisList.write('void BuildUserTable(MA5::AnalyzerManager& manager)\n')
         analysisList.write('{\n')
         analysisList.write('  using namespace MA5;\n')
@@ -395,28 +406,40 @@ class RunRecast():
                 if self.main.recasting.store_events:
                     newfile.write('  //Getting pointer to the writer\n')
                     newfile.write('  WriterBase* writer1 = \n')
-                    newfile.write('      manager.InitializeWriter("lhe","'+output_name+'");\n')
+                    newfile.write('      manager.InitializeWriter("lhe","' + output_name + '");\n')
                     newfile.write('  if (writer1==0) return 1;\n\n')
-            elif '// Post initialization (creates the new output directory structure)' in line and self.TACO_output!='':
-                newfile.write('    std::ofstream out;\n      out.open(\"../Output/' + self.TACO_output+'\");\n')
-                newfile.write('\n      manager.HeadSR(out);\n      out << std::endl;\n');
+            elif 'if(!manager.PostInitialize()) return 1;' in line:
+                ignore = False
+                newfile.write(line)
+                if self.TACO_output != "":
+                    if self.TACO_output != '':
+                        newfile.write("  // Initialize TACO output\n")
+                        newfile.write(
+                            '  std::ofstream TACO_file;\n  TACO_file.open(\"../Output/' + self.TACO_output + '\");\n'
+                        )
+                        newfile.write('  manager.HeadSR(TACO_file);\n  TACO_file << std::endl;\n')
             elif '//Getting pointer to the clusterer' in line:
                 ignore=False
                 newfile.write(line)
             elif '!analyzer1' in line and not ignore:
-                ignore=True
+                ignore = True
                 if self.main.recasting.store_events:
-                    newfile.write('      writer1->WriteEvent(myEvent,mySample);\n')
+                    newfile.write('      writer1->WriteEvent(myEvent, mySample);\n')
                 for analysis in analysislist:
-                    newfile.write('      if (!analyzer_'+analysis+'->Execute(mySample,myEvent)) continue;\n')
-                if self.TACO_output!='':
-                    newfile.write('\n      manager.DumpSR(out);\n');
+                    newfile.write(
+                        '      if (!analyzer_' + analysis + '->Execute(mySample, myEvent)) continue;\n'
+                    )
+                if self.TACO_output != '':
+                    newfile.write("      // Fill TACO file\n")
+                    newfile.write('      manager.DumpSR(TACO_file);\n')
             elif '    }' in line:
                 newfile.write(line)
-                ignore=False
-            elif 'manager.Finalize(mySamples,myEvent);' in line and self.TACO_output!='':
-                newfile.write(line);
-                newfile.write('  out.close();\n');
+                ignore = False
+            elif 'manager.Finalize(mySamples,myEvent);' in line and self.TACO_output != '':
+                newfile.write(line)
+                if self.TACO_output != '':
+                    newfile.write("  // Close TACO file\n")
+                    newfile.write('  TACO_file.close();\n')
             elif not ignore:
                 newfile.write(line)
         mainfile.close()
@@ -639,24 +662,30 @@ class RunRecast():
                     newfile.write('  AnalyzerBase* analyzer_'+analysis+'=\n')
                     newfile.write('    manager.InitializeAnalyzer(\"'+analysis+'\",\"'+analysis+'.saf\",'+\
                        'prm'+analysis+');\n')
-                    newfile.write(  '  if (analyzer_'+analysis+'==0) return 1;\n\n')
-            elif '// Post initialization (creates the new output directory structure)' in line:
-                ignore=False
+                    newfile.write('  if (analyzer_'+analysis+'==0) return 1;\n\n')
+            elif 'if(!manager.PostInitialize()) return 1;' in line:
+                ignore = False
                 newfile.write(line)
-                if self.TACO_output!='':
-                    newfile.write('      std::ofstream out;\n      out.open(\"../Output/' + self.TACO_output+'\");\n')
-                    newfile.write('      manager.HeadSR(out);\n      out << std::endl;\n');
+                if self.TACO_output != '':
+                    newfile.write("  // Initialize TACO output\n")
+                    newfile.write('  std::ofstream TACO_file;\n  TACO_file.open(\"../Output/' + self.TACO_output+'\");\n')
+                    newfile.write('  manager.HeadSR(TACO_file);\n  TACO_file << std::endl;\n')
             elif '!analyzer_' in line and not ignore:
                 ignore=True
                 for analysis in analysislist:
-                    newfile.write('      if (!analyzer_'+analysis+'->Execute(mySample,myEvent)) continue;\n')
+                    newfile.write(
+                        '      if (!analyzer_' + analysis + '->Execute(mySample, myEvent)) continue;\n'
+                    )
             elif '!analyzer1' in line:
-                if self.TACO_output!='':
-                    newfile.write('\nmanager.DumpSR(out);\n');
+                if self.TACO_output != '':
+                    newfile.write("      // Fill TACO file\n")
+                    newfile.write('      manager.DumpSR(TACO_file);\n')
                 ignore=False
             elif 'manager.Finalize(mySamples,myEvent);' in line and self.TACO_output!='':
-                newfile.write(line);
-                newfile.write('  out.close();\n');
+                newfile.write(line)
+                if self.TACO_output != '':
+                    newfile.write("  // Close TACO file\n")
+                    newfile.write('  TACO_file.close();\n');
             elif not ignore:
                 newfile.write(line)
 
@@ -741,7 +770,8 @@ class RunRecast():
         for analysis in analyses:
             shutil.move(self.dirname+'_RecastRun/Output/SAF/PADevents/'+analysis+'_0',self.dirname+'/Output/SAF/'+setname+'/'+analysis)
         if self.TACO_output!='':
-            filename  = '.'.join(self.TACO_output.split('.')[:-1]) + '_' + card.replace('tcl','') + self.TACO_output.split('.')[-1]
+            filename = '.'.join(self.TACO_output.split('.')[:-1]) + '_' + card.replace('tcl', '') + \
+                       self.TACO_output.split('.')[-1]
             shutil.move(self.dirname+'_RecastRun/Output/'+self.TACO_output,self.dirname+'/Output/SAF/'+setname+'/'+filename)
         return True
 
@@ -825,17 +855,17 @@ class RunRecast():
                     return False
 
                 ## Performing the CLS calculation
-                regiondata=self.extract_sig_cls(regiondata,regions,lumi,"exp")
+                regiondata=self.extract_sig_cls(regiondata, regions, lumi, "exp")
                 if self.cov_config != {}:
-                    regiondata=self.extract_sig_lhcls(regiondata,lumi,"exp")
+                    regiondata=self.extract_sig_lhcls(regiondata, lumi, "exp")
                 # CLs calculation for pyhf
                 regiondata = self.pyhf_sig95Wrapper(lumi, regiondata, "exp")
 
                 if extrapolated_lumi=='default':
                     if self.cov_config != {}:
-                        regiondata=self.extract_sig_lhcls(regiondata,lumi,"obs")
-                    regiondata = self.extract_sig_cls(regiondata,regions,lumi,"obs")
-                    regiondata = self.pyhf_sig95Wrapper(lumi,regiondata,'obs')
+                        regiondata=self.extract_sig_lhcls(regiondata, lumi, "obs")
+                    regiondata = self.extract_sig_cls(regiondata, regions, lumi, "obs")
+                    regiondata = self.pyhf_sig95Wrapper(lumi, regiondata, 'obs')
                 else:
                     for reg in regions:
                         regiondata[reg]["nobs"]=regiondata[reg]["nb"]
@@ -1373,90 +1403,93 @@ class RunRecast():
     def extract_cls(self,regiondata,regions,xsection,lumi):
         self.logger.debug('Compute CLs...')
         ## computing fi a region belongs to the best expected ones, and derive the CLs in all cases
-        bestreg=[]
+        bestreg = []
         rMax = -1
         for reg in regions:
             nsignal = xsection * lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
-            nb      = regiondata[reg]["nb"]
-            nobs    = regiondata[reg]["nobs"]
+            nb = regiondata[reg]["nb"]
+            nobs = regiondata[reg]["nobs"]
             deltanb = regiondata[reg]["deltanb"]
-            if nsignal<=0:
-                rSR   = -1
+            if nsignal <= 0:
+                rSR = -1
                 myCLs = 0
             else:
-                n95     = float(regiondata[reg]["s95exp"]) * lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
-                rSR     = nsignal/n95
-                myCLs   = self.cls_calculator(nobs, nb, deltanb, nsignal, self.ntoys, CLs_obs = True)
+                n95 = float(regiondata[reg]["s95exp"]) * lumi * 1000. * regiondata[reg]["Nf"] / \
+                      regiondata[reg]["N0"]
+                rSR = nsignal / n95
+                myCLs = self.cls_calculator(nobs, nb, deltanb, nsignal, self.ntoys, CLs_obs = True)
             regiondata[reg]["rSR"] = rSR
             regiondata[reg]["CLs"] = myCLs
             if rSR > rMax:
-                regiondata[reg]["best"]=1
+                regiondata[reg]["best"] = 1
                 for mybr in bestreg:
-                    regiondata[mybr]["best"]=0
+                    regiondata[mybr]["best"] = 0
                 bestreg = [reg]
                 rMax = rSR
             else:
-                regiondata[reg]["best"]=0
+                regiondata[reg]["best"] = 0
 
         if self.cov_config != {}:
             minsig95, bestreg = 1e99, []
             for cov_subset in self.cov_config.keys():
                 cov_regions = self.cov_config[cov_subset]["cov_regions"]
-                covariance  = self.cov_config[cov_subset]["covariance" ]
+                covariance = self.cov_config[cov_subset]["covariance"]
                 if all(s <= 0. for s in [regiondata[reg]["Nf"] for reg in cov_regions]):
-                    regiondata["cov_subset"][cov_subset]["CLs"]= 0.
+                    regiondata["cov_subset"][cov_subset]["CLs"] = 0.
                     continue
-                CLs = self.slhCLs(regiondata,cov_regions,xsection,lumi,covariance, ntoys = self.ntoys)
                 s95 = float(regiondata["cov_subset"][cov_subset]["s95exp"])
-                regiondata["cov_subset"][cov_subset]["CLs"] = CLs
+                regiondata["cov_subset"][cov_subset]["CLs"] = self.slhCLs(
+                        regiondata, cov_regions, xsection, lumi, covariance
+                )
                 if 0. < s95 < minsig95:
                     regiondata['cov_subset'][cov_subset]["best"] = 1
                     for mybr in bestreg:
-                        regiondata['cov_subset'][mybr]["best"]=0
+                        regiondata['cov_subset'][mybr]["best"] = 0
                     bestreg = [cov_subset]
                     minsig95 = s95
                 else:
-                    regiondata['cov_subset'][cov_subset]["best"]=0
+                    regiondata['cov_subset'][cov_subset]["best"] = 0
 
         #initialize pyhf for cls calculation
-        iterator = [] if self.pyhf_config=={} else copy.deepcopy(list(self.pyhf_config.items()))
+        iterator = [] if self.pyhf_config == {} else copy.deepcopy(list(self.pyhf_config.items()))
         minsig95, bestreg = 1e99, []
         for n, (likelihood_profile, config) in enumerate(iterator):
-            self.logger.debug('    * Running CLs for '+likelihood_profile)
+            self.logger.debug('    * Running CLs for ' + likelihood_profile)
             # safety check, just in case
-            if regiondata.get('pyhf',{}).get(likelihood_profile, False) == False:
+            if regiondata.get('pyhf', {}).get(likelihood_profile, False) == False:
                 continue
             background = HF_Background(config)
-            self.logger.debug('current pyhf Configuration = '+str(config))
-            signal = HF_Signal(config,regiondata,xsection=xsection)
+            self.logger.debug('current pyhf Configuration = ' + str(config))
+            signal = HF_Signal(config, regiondata, xsection = xsection)
             is_not_extrapolated = signal.lumi == lumi
-            CLs    = -1
+            CLs = -1
             if signal.isAlive():
                 sig_HF = signal(lumi)
                 bkg_HF = background(lumi)
                 if self.main.developer_mode:
                     setattr(self, "hf_sig_test", sig_HF)
                     setattr(self, "hf_bkg_test", bkg_HF)
-                CLs = pyhf_wrapper(bkg_HF, sig_HF)
+                from madanalysis.misc.pyhf_interface import PyhfInterface
+                interface = PyhfInterface(sig_HF, bkg_HF)
+                CLs = interface.computeCLs()
                 # Take observed if default lumi used, use expected if extrapolated
                 CLs_out = CLs['CLs_obs'] if is_not_extrapolated else CLs['CLs_exp'][2]
                 regiondata['pyhf'][likelihood_profile]['full_CLs_output'] = CLs
                 if CLs_out >= 0.:
-                    regiondata['pyhf'][likelihood_profile]['CLs']  = CLs_out
+                    regiondata['pyhf'][likelihood_profile]['CLs'] = CLs_out
                 s95 = float(regiondata['pyhf'][likelihood_profile]['s95exp'])
                 if 0. < s95 < minsig95:
                     regiondata['pyhf'][likelihood_profile]["best"] = 1
                     for mybr in bestreg:
-                        regiondata['pyhf'][mybr]["best"]=0
+                        regiondata['pyhf'][mybr]["best"] = 0
                     bestreg = [likelihood_profile]
                     minsig95 = s95
                 else:
-                    regiondata['pyhf'][likelihood_profile]["best"]=0
+                    regiondata['pyhf'][likelihood_profile]["best"] = 0
         return regiondata
 
 
-    @staticmethod
-    def slhCLs(regiondata,cov_regions,xsection,lumi,covariance,expected=False, ntoys = 10000):
+    def slhCLs(self, regiondata, cov_regions, xsection, lumi, covariance, expected = False):
         """ (slh for simplified likelihood)
             Compute a global CLs combining the different region yields by using a simplified
             likelihood method (see CMS-NOTE-2017-001 for more information). It relies on the
@@ -1465,17 +1498,23 @@ class RunRecast():
         observed, backgrounds, nsignal = [], [], []
         # Collect the input data necessary for the simplified_likelyhood.py method
         for reg in cov_regions:
-            nsignal.append(xsection*lumi*1000.*regiondata[reg]["Nf"]/regiondata[reg]["N0"])
+            nsignal.append(xsection * lumi * 1000. * regiondata[reg]["Nf"] / regiondata[reg]["N0"])
             backgrounds.append(regiondata[reg]["nb"])
             observed.append(regiondata[reg]["nobs"])
         # data
-        from madanalysis.misc.simplified_likelihood import Data
-        LHdata = Data(observed, backgrounds, covariance, None, nsignal)
-        from madanalysis.misc.simplified_likelihood import CLsComputer
-        computer = CLsComputer(ntoys = ntoys, cl = .95)
+        from madanalysis.misc.simplified_likelihood import Data, UpperLimitComputer
+        LHdata = Data(
+            observed = observed,
+            backgrounds = backgrounds,
+            covariance = covariance,
+            nsignal = nsignal,
+            deltas_rel = 0.0,
+            lumi = lumi,
+        )
+        computer = UpperLimitComputer(ntoys = self.ntoys, cl = .95)
         # calculation and output
         try:
-            return computer.computeCLs(LHdata, expected=expected)
+            return computer.computeCLs(LHdata, expected = expected)
         except Exception as err:
             logging.getLogger('MA5').debug("slhCLs : " + str(err))
             return 0.0
@@ -1527,7 +1566,7 @@ class RunRecast():
         return regiondata
 
     # Calculating the upper limits on sigma with simplified likelihood
-    def extract_sig_lhcls(self,regiondata,lumi,tag):
+    def extract_sig_lhcls(self, regiondata: Dict, lumi: float, tag: Text) -> dict:
         """
         Compute gloabal upper limit on cross section.
 
@@ -1546,24 +1585,31 @@ class RunRecast():
 
         def get_s95(regs, matrix):
             def sig95(xsection):
-                return self.slhCLs(regiondata,regs,xsection,lumi,matrix,(tag=="exp"), ntoys = self.ntoys)-0.95
+                return self.slhCLs(
+                    regiondata, regs, xsection, lumi, matrix, (tag == "exp"), ntoys = self.ntoys
+                ) - 0.95
+
             return sig95
 
         for cov_subset in self.cov_config.keys():
             cov_regions = self.cov_config[cov_subset]["cov_regions"]
-            covariance  = self.cov_config[cov_subset]["covariance" ]
+            covariance = self.cov_config[cov_subset]["covariance"]
             if cov_subset not in regiondata["cov_subset"].keys():
                 regiondata["cov_subset"][cov_subset] = {}
             if all(s <= 0. for s in [regiondata[reg]["Nf"] for reg in cov_regions]):
-                regiondata["cov_subset"][cov_subset]["s95"+tag]= "-1"
+                regiondata["cov_subset"][cov_subset][f"s95{tag}"] = "-1"
                 continue
 
             low, hig = 1., 1.
-            while self.slhCLs(regiondata,cov_regions,low,lumi,covariance,(tag=="exp"), ntoys = self.ntoys)>0.95:
+            while self.slhCLs(
+                regiondata, cov_regions, low, lumi, covariance, (tag == "exp"),
+            ) > 0.95:
                 self.logger.debug('lower bound = ' + str(low))
                 low *= 0.1
                 if low < 1e-10: break
-            while self.slhCLs(regiondata,cov_regions,hig,lumi,covariance,(tag=="exp"), ntoys = self.ntoys)<0.95:
+            while self.slhCLs(
+                regiondata, cov_regions, hig, lumi, covariance, (tag == "exp"),
+            ) < 0.95:
                 self.logger.debug('upper bound = ' + str(hig))
                 hig *= 10.
                 if hig > 1e10: break
@@ -1571,16 +1617,15 @@ class RunRecast():
             try:
                 import scipy
                 sig95 = get_s95(cov_regions, covariance)
-                s95 = scipy.optimize.brentq(sig95,low,hig,xtol=low/100.)
+                s95 = scipy.optimize.brentq(sig95, low, hig, xtol=low / 100.)
             except ImportError as err:
                 self.logger.debug("Can't import scipy")
-                s95=-1
+                s95 = -1
             except Exception as err:
-                self.logger.debug(str(err))
-                s95=-1
-
-            self.logger.debug('s95 = ' + str(s95) + ' pb')
-            regiondata["cov_subset"][cov_subset]["s95"+tag] = ("%.7f" % s95)
+                self.logger.debug(str(err.args[0]))
+                s95 = -1
+            self.logger.debug(f"s95{tag} = {s95:.5f} [pb]")
+            regiondata["cov_subset"][cov_subset][f"s95{tag}"] = f"{s95:.7f}"
 
         return regiondata
 
@@ -1591,8 +1636,10 @@ class RunRecast():
         if 'pyhf' not in list(regiondata.keys()):
             regiondata['pyhf'] = {}
 
-        def get_pyhf_result(*args):
-            rslt = pyhf_wrapper(*args)
+        def get_pyhf_result(background, signal):
+            from madanalysis.misc.pyhf_interface import PyhfInterface
+            interface = PyhfInterface(signal, background)
+            rslt = interface.computeCLs()
             if tag == "exp" and not self.is_apriori:
                 return rslt["CLs_exp"][2]
             return rslt['CLs_obs']
@@ -1603,42 +1650,50 @@ class RunRecast():
                 return get_pyhf_result(bkg(lumi), signal(lumi))-0.95
             return CLs
 
-        iterator = [] if self.pyhf_config=={} else copy.deepcopy(list(self.pyhf_config.items()))
+        iterator = [] if self.pyhf_config == {} else copy.deepcopy(list(self.pyhf_config.items()))
         for n, (likelihood_profile, config) in enumerate(iterator):
-            self.logger.debug('    * Running sig95'+tag+' for '+likelihood_profile)
+            self.logger.debug('    * Running sig95' + tag + ' for ' + likelihood_profile)
             if likelihood_profile not in list(regiondata['pyhf'].keys()):
                 regiondata['pyhf'][likelihood_profile] = {}
-            background = HF_Background(config, expected=(tag=='exp' and self.is_apriori))
-            self.logger.debug('Config : '+str(config))
-            if not HF_Signal(config, regiondata, xsection=1., background=background).isAlive():
-                self.logger.debug(likelihood_profile+' has no signal event.')
-                regiondata['pyhf'][likelihood_profile]["s95"+tag] = "-1"
+            background = HF_Background(config, expected = (tag == 'exp' and self.is_apriori))
+            self.logger.debug('Config : ' + str(config))
+            if not HF_Signal(config, regiondata, xsection = 1., background = background).isAlive():
+                self.logger.debug(likelihood_profile + ' has no signal event.')
+                regiondata['pyhf'][likelihood_profile]["s95" + tag] = "-1"
                 continue
 
             low, hig = 1., 1.
-            while get_pyhf_result(background(lumi),\
-                                  HF_Signal(config, regiondata,xsection=low)(lumi)) > 0.95:
-                self.logger.debug(tag+': profile '+likelihood_profile+\
-                                               ', lower bound = '+str(low))
+            while get_pyhf_result(
+                background(lumi),
+                HF_Signal(config, regiondata, xsection = low)(lumi)
+            ) > 0.95:
+                self.logger.debug(
+                    tag + ': profile ' + likelihood_profile + \
+                    ', lower bound = ' + str(low)
+                )
                 low *= 0.1
                 if low < 1e-10: break
-            while get_pyhf_result(background(lumi),\
-                                  HF_Signal(config, regiondata,xsection=hig)(lumi)) < 0.95:
-                self.logger.debug(tag+': profile '+likelihood_profile+\
-                                               ', higher bound = '+str(hig))
+            while get_pyhf_result(
+                background(lumi),
+                HF_Signal(config, regiondata, xsection = hig)(lumi)
+            ) < 0.95:
+                self.logger.debug(
+                    tag + ': profile ' + likelihood_profile + \
+                    ', higher bound = ' + str(hig)
+                )
                 hig *= 10.
                 if hig > 1e10: break
             try:
                 import scipy
                 s95 = scipy.optimize.brentq(
-                    sig95(config, regiondata, background),low,hig,xtol=low/100.
+                    sig95(config, regiondata, background), low, hig, xtol = low / 100.
                 )
             except Exception as err:
                 self.logger.debug(str(err))
-                self.logger.debug('Can not calculate sig95'+tag+' for '+likelihood_profile)
-                s95=-1
-            regiondata['pyhf'][likelihood_profile]["s95"+tag] = "{:.7f}".format(s95)
-            self.logger.debug(likelihood_profile+' sig95'+tag+' = {:.7f} pb'.format(s95))
+                self.logger.debug('Can not calculate sig95' + tag + ' for ' + likelihood_profile)
+                s95 = -1
+            regiondata['pyhf'][likelihood_profile]["s95" + tag] = "{:.7f}".format(s95)
+            self.logger.debug(likelihood_profile + ' sig95' + tag + ' = {:.7f} pb'.format(s95))
         return regiondata
 
 
