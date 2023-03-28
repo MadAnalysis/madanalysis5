@@ -56,7 +56,10 @@ def getStatistics(stats):
     for entry in stats:
         if entry[0] not in histoname_dict:
             histoname_dict[entry[0]] = dict()
-        histoname_dict[entry[0]][entry[1]] = float(entry[2]) - float(entry[3])
+        sumw = float(entry[2]) - abs(float(entry[3]))
+        if sumw == 0:
+            raise Exception("sumw is 0 for histo " + entry[0] + " and weight id " + entry[1])
+        histoname_dict[entry[0]][entry[1]] = sumw
     return histoname_dict
 
 
@@ -78,7 +81,8 @@ def getMeanAndStdev(path):
         weight_id = row[1]
         bin_number = row[2]
         sumw = statsdict[histo_name][str(weight_id)]
-        value = (float(row[3]) - abs(float(row[4]))) / sumw      
+
+        value = (float(row[3]) - abs(float(row[4]))) /sumw      
         if histo_name not in parsed_data:
             ## if histo name is not in the parsed_data dictionary, then create a new bin dictionary for that histo, then for the bin, create a weigh id dictionary
             parsed_data[histo_name] = dict()
