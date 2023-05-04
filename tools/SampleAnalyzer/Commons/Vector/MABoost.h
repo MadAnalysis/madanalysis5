@@ -85,6 +85,13 @@ namespace MA5
             setBoostVector(bx, by, bz);
         }
 
+        /// @brief Initialise boost vector with LorentzVector
+        /// @param q lorentz vector
+        MABoost(const MALorentzVector &q)
+        {
+            setBoostVector(q);
+        }
+
         // Destructor
         ~MABoost() {}
 
