@@ -42,11 +42,14 @@
   construction. [(#86)](https://github.com/MadAnalysis/madanalysis5/pull/86)
 
 * Compilation time testing has been added for the jet Substructure and
-  HEPTopTagger interfaces 
+  HEPTopTagger interfaces
   ([#86](https://github.com/MadAnalysis/madanalysis5/pull/86)).
 
 * `fatjet` and `genjet` collections have been merged into `jetcollection` map.
   ([#135](https://github.com/MadAnalysis/madanalysis5/pull/135))
+
+* Accessors of the `MABoost` class has been extended.
+  [(#13)](https://github.com/MadAnalysis/madanalysis5/pull/13)
 
 ## Bug fixes
 
@@ -67,5 +70,5 @@
 
 This release contains contributions from (in alphabetical order):
 
-[Jack Y. Araz](https://github.com/jackaraz), 
+[Jack Y. Araz](https://github.com/jackaraz),
 [Benjamin Fuks](https://github.com/BFuks)
