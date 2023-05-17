@@ -1309,8 +1309,8 @@ class RunRecast():
             out.write('\n');
         else:
             out.write("# analysis name".ljust(30, ' ') + "signal region".ljust(60,' ') + \
-             "best?".ljust(10,' ') + 'sig95(exp)'.ljust(15,' ') + 'sig95(obs)'.ljust(15, ' ') +\
-             '1-CLs'.ljust( 5,' ') + '     ||    ' + 'efficiency'.ljust(15,' ') +\
+             "best?".ljust(10,' ') + 'sig95(exp)'.ljust(20,' ') + 'sig95(obs)'.ljust(20, ' ') +\
+             '1-CLs'.ljust(10,' ') + '     ||    ' + 'efficiency'.ljust(15,' ') +\
              "stat".ljust(15,' '));
             for i in range(0,len(self.main.recasting.systematics)):
                 out.write(("syst" + str(i+1) + "(" + str(self.main.recasting.systematics[i][0]*100) + "%)").ljust(15," "))
@@ -1522,7 +1522,7 @@ class RunRecast():
                 self.logger.debug(str(err)); s95=-1
 
             self.logger.debug('region ' + reg + ', s95 = ' + str(s95) + ' pb')
-            regiondata[reg]["s95"+tag] = ("%.7f" % s95)
+            regiondata[reg]["s95"+tag] = ("%-20.7f" % s95)
 
         return regiondata
 
@@ -1580,7 +1580,7 @@ class RunRecast():
                 s95=-1
 
             self.logger.debug('s95 = ' + str(s95) + ' pb')
-            regiondata["cov_subset"][cov_subset]["s95"+tag] = ("%.7f" % s95)
+            regiondata["cov_subset"][cov_subset]["s95"+tag] = ("%-20.7f" % s95)
 
         return regiondata
 
@@ -1689,10 +1689,10 @@ class RunRecast():
             else:
                 myxsobs = "-1"
             if not xsflag:
-                mycls  = "%.4f" % regiondata[reg]["CLs"]
+                mycls  = "%.10f" % regiondata[reg]["CLs"]
                 summary.write(analysis.ljust(30,' ') + reg.ljust(60,' ') +\
                    str(regiondata[reg]["best"]).ljust(10, ' ') +\
-                   myxsexp.ljust(15,' ') + myxsobs.ljust(15,' ') + mycls.ljust( 7,' ') + \
+                   myxsexp.ljust(20,' ') + myxsobs.ljust(20,' ') + mycls.ljust(10,' ') + \
                    '   ||    ' + myeff.ljust(15,' ') + mystat.ljust(15,' '));
                 for onesyst in mysyst:
                     summary.write(onesyst.ljust(15, ' '))
@@ -1716,7 +1716,7 @@ class RunRecast():
                           ("%.4f" % min(band)) + ', ' + ("%.4f" % max(band)) + ']\n')
             else:
                 summary.write(analysis.ljust(30,' ') + reg.ljust(60,' ') +\
-                   myxsexp.ljust(15,' ') + myxsobs.ljust(15,' ') + \
+                   myxsexp.ljust(20,' ') + myxsobs.ljust(20,' ') + \
                    ' ||    ' + myeff.ljust(15,' ') + mystat.ljust(15,' '))
                 if syst!=[0]:
                     for onesyst in mysyst:
