@@ -106,7 +106,8 @@ class InstallSimplify:
             logging.getLogger('MA5').debug("simplify has been imported from "+" ".join(simplify.__path__))
 
         except ImportError as err:
-            logging.getLogger('MA5').error("The simplify module cannot be used. Please check that all requirements are available and (re-)install it.")
+            logging.getLogger('MA5').error("The simplify module cannot be used. "+\
+                                           "Please check that all requirements are available and (re-)install it.")
             logging.getLogger('MA5').debug(err)
             self.display_log()
             return False

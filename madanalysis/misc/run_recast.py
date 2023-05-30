@@ -450,7 +450,8 @@ class RunRecast():
                 os.mkdir(self.dirname+'/Output/SAF/'+dataset.name+'/'+analysis+'/Cutflows')
             if not os.path.isdir(self.dirname+'/Output/SAF/'+dataset.name+'/'+analysis+'/Histograms'):
                 os.mkdir(self.dirname+'/Output/SAF/'+dataset.name+'/'+analysis+'/Histograms')
-            if not os.path.isdir(self.dirname+'/Output/SAF/'+dataset.name+'/'+analysis+'/RecoEvents') and self.main.recasting.store_events :
+            if not os.path.isdir(self.dirname+'/Output/SAF/'+dataset.name+'/'+analysis+'/RecoEvents') and \
+               self.main.recasting.store_events :
                 os.mkdir(self.dirname+'/Output/SAF/'+dataset.name+'/'+analysis+'/RecoEvents')
             cutflow_list   = os.listdir(self.dirname+'_SFSRun/Output/SAF/_'+ dataset.name+'/'+analysis+'_0/Cutflows')
             histogram_list = os.listdir(self.dirname+'_SFSRun/Output/SAF/_'+ dataset.name+'/'+analysis+'_0/Histograms')
@@ -476,7 +477,8 @@ class RunRecast():
                                 '/Output/SAF/'+dataset.name+'/'+analysis+'/RecoEvents/'+\
                                 event_list[0])
             if self.TACO_output!='':
-                filename  = '.'.join(self.TACO_output.split('.')[:-1]) + '_' + card.split('/')[-1].replace('ma5','') + self.TACO_output.split('.')[-1]
+                filename  = '.'.join(self.TACO_output.split('.')[:-1]) + '_' + \
+                    card.split('/')[-1].replace('ma5','') + self.TACO_output.split('.')[-1]
                 shutil.move(self.dirname+'_SFSRun/Output/'+self.TACO_output,self.dirname+'/Output/SAF/'+dataset.name+'/'+filename)
 
         if not self.main.developer_mode:

@@ -39,7 +39,8 @@ class InstallMatplotlib:
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir = os.path.normpath(self.tmpdir + '/MA5_matplotlib/')
         self.ncores     = 1
-        self.files = {"matplotlib.tar.gz" : "http://sourceforge.net/projects/matplotlib/files/matplotlib/matplotlib-1.3.1/matplotlib-1.3.1.tar.gz"}
+        self.files = {"matplotlib.tar.gz" : "http://sourceforge.net/projects/matplotlib/files/matplotlib/"+\
+                                            "matplotlib-1.3.1/matplotlib-1.3.1.tar.gz"}
 
 
     def Detect(self):

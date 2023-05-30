@@ -254,7 +254,8 @@ class DelphesConfiguration:
 
             # other case: error
             else:
-                logging.getLogger('MA5').error("The file format for the pile-up source is not known. Only files with .pileup extension can be used.")
+                logging.getLogger('MA5').error("The file format for the pile-up source is not known. "+\
+                                               "Only files with .pileup extension can be used.")
                 return False
 
         else:

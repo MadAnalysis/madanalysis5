@@ -149,7 +149,8 @@ class DelphesCardChecker():
                 self.Modules.append(MyModule)
             if len(split)>=3 and split[0] in ['set','add'] and split[1].endswith('InputArray'):
                 if len(self.Modules)==0:
-                    logging.getLogger("MA5").warning('Problem with Delphes card: InputArray before module definition @ line '+str(counter))
+                    logging.getLogger("MA5").warning('Problem with Delphes card: InputArray '\
+                                                     +'before module definition @ line '+str(counter))
                 else:          
                     self.Modules[-1].inputs.append(split[2])
                     if len(split)==4:
@@ -157,7 +158,8 @@ class DelphesCardChecker():
                     
             if len(split)>=3 and split[0]=='set' and split[1].endswith('OutputArray'):
                 if len(self.Modules)==0:
-                    logging.getLogger("MA5").warning('Problem with Delphes card OutputArray before module definition @ line '+str(counter))
+                    logging.getLogger("MA5").warning('Problem with Delphes card OutputArray '\
+                                                     +'before module definition @ line '+str(counter))
                 else:          
                     self.Modules[-1].outputs.append(split[2])
             if len(split)>=3 and split[0]=='set' and split[1]=='PileUpFile' and module=='PileUpMerger':
@@ -169,7 +171,8 @@ class DelphesCardChecker():
  
     def decodeContentCard(self):
         # check that modules are declared
-        logging.getLogger("MA5").debug("- Check that the modules to execute are declared (#modules="+str(len(self.ModuleExecutionPaths))+")...")
+        logging.getLogger("MA5").debug("- Check that the modules to execute are declared (#modules="+\
+                                       str(len(self.ModuleExecutionPaths))+")...")
         test = True
         for i in self.ModuleExecutionPaths:
             ok=False
@@ -194,7 +197,8 @@ class DelphesCardChecker():
             for input in module.inputs:
                 words=input.split('/')
                 if len(words)!=2:
-                    logging.getLogger("MA5").warning("Problem with Delphes card: the module "+module.name+" has a bad syntax for the input collection: "+input)
+                    logging.getLogger("MA5").warning("Problem with Delphes card: the module "+module.name+\
+                                                     " has a bad syntax for the input collection: "+input)
                     test=False
                 else:
                     theModule=words[0]
@@ -208,7 +212,8 @@ class DelphesCardChecker():
                            ok=True
                            break
                     if not ok and theModule!='Delphes':
-                        logging.getLogger("MA5").warning("Problem with Delphes card: the module "+module.name+" has unknown InputArray module called: "+theModule)
+                        logging.getLogger("MA5").warning("Problem with Delphes card: the module "+module.name+\
+                                                         " has unknown InputArray module called: "+theModule)
                         test=False
                     elif theModule!='Delphes':
                         ok=False
@@ -217,7 +222,8 @@ class DelphesCardChecker():
                                 ok=True
                                 break
                         if not ok:
-                            logging.getLogger("MA5").warning("Problem with Delphes card: the module "+module.name+" has unknown InputArray label called: "+theCollection)
+                            logging.getLogger("MA5").warning("Problem with Delphes card: the module "+module.name+\
+                                                             " has unknown InputArray label called: "+theCollection)
                             test=False
 
 

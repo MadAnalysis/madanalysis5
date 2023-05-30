@@ -114,9 +114,15 @@ class SetupWriter():
         file.write('\n')
 
         # Treating PATH
-        toPATH, toPATHsh, toPATHcsh = SetupWriter.OrderPath(archi_info.toPATH1,'$PATH',archi_info.toPATH2,ma5dir)
-        toLDPATH, toLDPATHsh, toLDPATHcsh = SetupWriter.OrderPath(archi_info.toLDPATH1,'$LD_LIBRARY_PATH',archi_info.toLDPATH2,ma5dir)
-        toDYLDPATH, toDYLDPATHsh, toDYLDPATHcsh = SetupWriter.OrderPath(archi_info.toLDPATH1,'$DYLD_LIBRARY_PATH',archi_info.toLDPATH2,ma5dir)
+        toPATH, toPATHsh, toPATHcsh = SetupWriter.OrderPath(archi_info.toPATH1,\
+                                                            '$PATH',archi_info.toPATH2,\
+                                                            ma5dir)
+        toLDPATH, toLDPATHsh, toLDPATHcsh = SetupWriter.OrderPath(archi_info.toLDPATH1,\
+                                                                  '$LD_LIBRARY_PATH',\
+                                                                  archi_info.toLDPATH2,ma5dir)
+        toDYLDPATH, toDYLDPATHsh, toDYLDPATHcsh = SetupWriter.OrderPath(archi_info.toLDPATH1,\
+                                                                        '$DYLD_LIBRARY_PATH',\
+                                                                        archi_info.toLDPATH2,ma5dir)
                 
         # Configuring PATH environment variable
         if len(toPATH)!=0:

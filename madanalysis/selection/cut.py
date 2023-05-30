@@ -38,7 +38,8 @@ import logging
 class Cut():
 
     userVariables = { "threshold"  : [], \
-                      "rank"       : ["Eordering","Pordering","PTordering","ETordering","PXordering","PYordering","PZordering","ETAordering"], \
+                      "rank"       : ["Eordering","Pordering","PTordering","ETordering",\
+                                      "PXordering","PYordering","PZordering","ETAordering"], \
                       "statuscode" : ["finalstate","interstate","allstate","initialstate"], \
                       "regions": "all"
     }

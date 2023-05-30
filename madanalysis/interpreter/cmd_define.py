@@ -72,7 +72,8 @@ class CmdDefine(CmdBase.CmdBase):
         # Checking if the name is authorized
         if not self.IsAuthorizedLabel(name):
             logging.getLogger('MA5').error("syntax error with the name '" + name + "'.")
-            logging.getLogger('MA5').error("A correct name contains only characters being letters, digits or the '+', '-', '~' and '_' symbols.")
+            logging.getLogger('MA5').error("A correct name contains only characters being letters, "+\
+                                           "digits or the '+', '-', '~' and '_' symbols.")
             logging.getLogger('MA5').error("Moreover, a correct name  starts with a letter or the '_' symbol.")
             return
 
@@ -105,7 +106,8 @@ class CmdDefine(CmdBase.CmdBase):
     def help(help):
         logging.getLogger('MA5').info("   Syntax: define <particle name> = PDG-id")
         logging.getLogger('MA5').info("   Associates a symbol to a specific particle defined by its PDG-id.")
-        logging.getLogger('MA5').info("   Syntax: define <(multi)particle name> = <PDG-id / existing (multi)particle> <PDG-id / (multi)particle> ...")
+        logging.getLogger('MA5').info("   Syntax: define <(multi)particle name> = "+\
+                                      "<PDG-id / existing (multi)particle> <PDG-id / (multi)particle> ...")
         logging.getLogger('MA5').info("   Associates a symbol to a multiparticle defined by several particles.")
         logging.getLogger('MA5').info("")
         logging.getLogger('MA5').info("   Syntax: define tagger  <p1> as <p2> <function> [<bounds>]")
@@ -136,9 +138,11 @@ class CmdDefine(CmdBase.CmdBase):
         # For the future:
         # logging.getLogger('MA5').info("")
         # logging.getLogger('MA5').info("   Syntax: define scaling <variable> for <p1> <function> [<bounds>]")
-        # logging.getLogger('MA5').info("   Define rescaling corrections to apply to a variable <variable> for a reconstructed object <p1>.")
+        # logging.getLogger('MA5').info("   Define rescaling corrections to apply to a variable <variable> "+\
+        #    "for a reconstructed object <p1>.")
         # logging.getLogger('MA5').info("   The corresponding scaling function is given by <function>.")
-        # logging.getLogger('MA5').info("   The bounds correspond to the domain that scaling function applies (pt > ..., eta < ..., etc.).")
+        # logging.getLogger('MA5').info("   The bounds correspond to the domain that scaling function applies "+\
+        #    "(pt > ..., eta < ..., etc.).")
 
 
     def complete(self,text,line,begidx,endidx):

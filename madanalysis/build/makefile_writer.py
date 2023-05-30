@@ -377,7 +377,8 @@ class MakefileWriter():
                 libs.extend(['-lfastjet_for_ma5'])
             if options.has_fastjet_lib:
 #                libs.extend(['$(shell fastjet-config --libs --plugins)']) # --rpath=no)'])
-                libs.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config --libs --plugins)']) # --rpath=no)'])
+                libs.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config '+\
+                             '--libs --plugins)']) # --rpath=no)'])
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
 
         # - delphes
@@ -409,7 +410,8 @@ class MakefileWriter():
         # - Root
         libs=[]
         #libs.extend(['-L'+archi_info.root_lib_path, \
-        #            '-lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic -lEG'])
+        #            '-lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint '+\
+        #            '-lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic -lEG'])
         # becareful: to not forget -lEG
         if options.has_root:
             libs.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/root-config --libs)','-lEG'])
@@ -552,7 +554,8 @@ class MakefileWriter():
             ProductPath=ProductPath+'/'
         if isLibrary:
             if options.isMac:
-                file.write('\t$(CXX) -shared -flat_namespace -dynamiclib -undefined suppress -o '+ProductPath+'$(LIBRARY) $(OBJS) $(LIBFLAGS)\n')
+                file.write('\t$(CXX) -shared -flat_namespace -dynamiclib -undefined suppress -o '+\
+                           ProductPath+'$(LIBRARY) $(OBJS) $(LIBFLAGS)\n')
             else:
                 file.write('\t$(CXX) -shared -o '+ProductPath+'$(LIBRARY) $(OBJS) $(LIBFLAGS)\n')
         else:

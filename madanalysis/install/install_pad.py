@@ -163,7 +163,8 @@ class InstallPad:
                 for line in json_input:
                     if len(line.strip())==0 or line.strip().startswith('#'):
                         continue;
-                    json_dictionary[line.strip().split('|')[0].strip()] = [ line.strip().split('|')[1].split(), line.strip().split('|')[2].split()];
+                    json_dictionary[line.strip().split('|')[0].strip()] = \
+                        [ line.strip().split('|')[1].split(), line.strip().split('|')[2].split()];
                 json_input.close();
 
         # Getting the analysis one by one (and creating first skeleton analyses for each of them)
@@ -209,7 +210,8 @@ class InstallPad:
             if len(analysis)!=0 and len(url)!=0:
                 logging.getLogger('MA5').debug(" ** Getting the analysis " + analysis + ' located at ' + url)
                 ## Creating a skeleton if necessary (+ inclusion in the analysis list and in the main)
-                if not (analysis in ["cms_b2g_12_012", "cms_sus_13_011"] or (analysis=="atlas_susy_2016_07" and self.padname=='PADForSFS')):
+                if not (analysis in ["cms_b2g_12_012", "cms_sus_13_011"] or \
+                        (analysis=="atlas_susy_2016_07" and self.padname=='PADForSFS')):
                     logging.getLogger('MA5').debug('  --> Creating a skeleton analysis for ' + analysis)
                     import sys
                     TheCommand = [sys.executable,'newAnalyzer.py', analysis, analysis]
@@ -293,7 +295,8 @@ class InstallPad:
 
         # Bibliography file
         logging.getLogger('MA5').debug(" ** Getting the bibliography file " + self.installdir+"/bibliography.bib")
-        TheCommand = ['cp', os.path.join(self.downloaddir,'bib_'+self.padname.replace('For','').lower()+'.dat'), self.installdir+"/bibliography.bib"]
+        TheCommand = ['cp', os.path.join(self.downloaddir,'bib_'+self.padname.replace('For','').lower()+'.dat'),\
+                      self.installdir+"/bibliography.bib"]
         logging.getLogger('MA5').debug('  -->  ' + ' '.join(TheCommand))
         ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir+'/tools')
         if not ok:
@@ -349,7 +352,8 @@ class InstallPad:
 
         # Updating the main in order to get a correct file name for the template analysis
         logging.getLogger('MA5').debug(" ** Preparing the main program of the PAD")
-        TheCommand = ['mv',os.path.join(self.installdir,'Build','Main','main.cpp'), os.path.join(self.installdir,'Build','Main','main.cpp.save')]
+        TheCommand = ['mv',os.path.join(self.installdir,'Build','Main','main.cpp'),\
+                      os.path.join(self.installdir,'Build','Main','main.cpp.save')]
         ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir+'/tools')
         if not ok:
             return False

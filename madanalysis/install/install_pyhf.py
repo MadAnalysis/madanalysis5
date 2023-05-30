@@ -137,7 +137,8 @@ class Installpyhf:
                 self.display_log()
                 return False
         except ImportError as err:
-            logging.getLogger('MA5').error("The pyhf module cannot be used. Please check that all requirements are available and (re-)install it.")
+            logging.getLogger('MA5').error("The pyhf module cannot be used. "+\
+                                           "Please check that all requirements are available and (re-)install it.")
             logging.getLogger('MA5').error("Using phyf requires the click, tqdm, six, jsonschema, jsonpatch and pyyaml packages")
             logging.getLogger('MA5').debug(err)
             self.display_log()

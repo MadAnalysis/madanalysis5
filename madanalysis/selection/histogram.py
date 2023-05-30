@@ -43,7 +43,8 @@ class Histogram():
                       "stacking_method" : ["auto","stack","superimpose","normalize2one"], \
                       "logX"  : ["true","false"], \
                       "logY"  : ["true","false"], \
-                      "rank"  : ["Eordering","Pordering","PTordering","ETordering","PXordering","PYordering","PZordering","ETAordering"], \
+                      "rank"  : ["Eordering","Pordering","PTordering","ETordering","PXordering",\
+                                 "PYordering","PZordering","ETAordering"], \
                       "statuscode" : ["finalstate","interstate","allstate","initialstate"], \
                       "titleX" :[], \
                       "titleY" :[], \
@@ -411,7 +412,8 @@ class Histogram():
                    else:
                        word = 'N. of ' + part_string + ' pairs '
                elif len(self.arguments[0][0])>2:
-                   if self.GetStringArguments().count('[')==len(self.arguments[0][0]) and self.GetStringArguments().count(']')==len(self.arguments[0][0]) and \
+                   if self.GetStringArguments().count('[')==len(self.arguments[0][0]) and \
+                      self.GetStringArguments().count(']')==len(self.arguments[0][0]) and \
                       self.observable.name!='N':
                        word = "Events "
                    else:
@@ -450,7 +452,8 @@ class Histogram():
                    else:
                        word = '$#mathrm{N.} #mathrm{of}# ' + part_string + '# #mathrm{pairs}$'
                elif len(self.arguments[0][0])>2:
-                   if self.GetStringArguments().count('[')==len(self.arguments[0][0]) and self.GetStringArguments().count(']')==len(self.arguments[0][0]) and \
+                   if self.GetStringArguments().count('[')==len(self.arguments[0][0]) and \
+                      self.GetStringArguments().count(']')==len(self.arguments[0][0]) and \
                       self.observable.name!='N':
                        word = "$#mathrm{Events}$"
                    else:

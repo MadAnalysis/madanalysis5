@@ -179,9 +179,11 @@ class RecastConfiguration:
                 self.logger.info("   * Errors on the background extrapolated " + self.error_extrapolation + "ly (if necessary)")
             else:
                 if self.error_extrapolation[1]==0:
-                    self.logger.info("   * Relative error on the extrapolated background taken as {:.1%}".format(self.error_extrapolation[0]))
+                    self.logger.info("   * Relative error on the extrapolated background taken as"+\
+                                     " {:.1%}".format(self.error_extrapolation[0]))
                 else:
-                    self.logger.info("   * Relative error on the extrapolated background Nb taken as sqrt({:.2f}^2 + ({:.2f}/Nb)^2)".format(self.error_extrapolation[0],self.error_extrapolation[1]))
+                    self.logger.info("   * Relative error on the extrapolated background Nb taken as"+\
+                                     " sqrt({:.2f}^2 + ({:.2f}/Nb)^2)".format(self.error_extrapolation[0],self.error_extrapolation[1]))
             return
         elif parameter=="global_likelihoods":
             self.logger.info("   * Global-Likelihoods will"+(not self.global_likelihoods_switch)*' not'+\
@@ -592,7 +594,8 @@ class RecastConfiguration:
                     self.logger.error("Recasting card: invalid analysis (not present in the PADForMA5tune): " + myana)
                     return False
                 if not os.path.isfile(os.path.normpath(os.path.join(self.ma5dir,'tools/PADForMA5tune/Input/Cards',mydelphes))):
-                    self.logger.error("Recasting card: PADForMA5tune analysis linked to an invalid delphes card: " + myana + " - " + mydelphes)
+                    self.logger.error("Recasting card: PADForMA5tune analysis linked to an invalid delphes card: " +\
+                                      myana + " - " + mydelphes)
                     return False
             elif myver=="vSFS":
                 if not myana in  [x[0] for x in sfslist]:

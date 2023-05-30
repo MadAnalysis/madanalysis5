@@ -124,7 +124,8 @@ class FastsimConfiguration:
 
                 # DelphesMA5tune ?
                 if value=='delphesMA5tune' and not archi_info.has_delphesMA5tune:
-                    logging.getLogger('MA5').error("delphesMA5tune library is not installed. This fast-simulation package is not available.")
+                    logging.getLogger('MA5').error("delphesMA5tune library is not installed."+\
+                                                   " This fast-simulation package is not available.")
                     return
 
                 test=True
@@ -138,7 +139,8 @@ class FastsimConfiguration:
                             test=False
                             break
                 if not test:
-                    logging.getLogger('MA5').error("some datasets contain reconstructed file format. Fast-simulation cannot be switched on.")
+                    logging.getLogger('MA5').error("some datasets contain reconstructed file format."+\
+                                                   "Fast-simulation cannot be switched on.")
                     return
                  
             if value=="fastjet":

@@ -242,7 +242,8 @@ class CmdPlot(CmdBase,CmdSelectionBase):
 
 
     def help(self):
-        self.logger.info("   Syntax: plot observable_name ( multiparticle1 multiparticle2 ... ) nbins xmin xmax { region1 regon2 .... } [ option1 option 2 ]")
+        self.logger.info("   Syntax: plot observable_name ( multiparticle1 multiparticle2 ... ) nbins xmin xmax "+\
+                         "{ region1 regon2 .... } [ option1 option 2 ]")
         self.logger.info("   Declares an histogram: ")
         self.logger.info("    - describing the distribution of a given observable, related to one or a combination of (multi)particles,")
         self.logger.info("    - with nbins being the number of bins,")

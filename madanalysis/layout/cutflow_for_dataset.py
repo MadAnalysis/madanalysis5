@@ -136,8 +136,10 @@ class CutFlowForDataset:
                     self.Nrejected_posweight[reg][icut].mean = self.Ntotal_posweight.mean - self.Nselected_posweight[reg][icut].mean
                     self.Nrejected_negweight[reg][icut].mean = self.Ntotal_negweight.mean - self.Nselected_negweight[reg][icut].mean
                 else:
-                    self.Nrejected_posweight[reg][icut].mean = self.Nselected_posweight[reg][icut-1].mean - self.Nselected_posweight[reg][icut].mean
-                    self.Nrejected_negweight[reg][icut].mean = self.Nselected_negweight[reg][icut-1].mean - self.Nselected_negweight[reg][icut].mean
+                    self.Nrejected_posweight[reg][icut].mean = self.Nselected_posweight[reg][icut-1].mean \
+                                                               - self.Nselected_posweight[reg][icut].mean
+                    self.Nrejected_negweight[reg][icut].mean = self.Nselected_negweight[reg][icut-1].mean \
+                                                               - self.Nselected_negweight[reg][icut].mean
 
         # Combining negative & positive weight events for computing Nselected, Nrejected and Ntotal
         self.Ntotal.mean = self.Ntotal_posweight.mean - self.Ntotal_negweight.mean
@@ -169,7 +171,8 @@ class CutFlowForDataset:
                 else:
                     if self.Nselected[reg][icut].mean > self.Nselected[reg][icut-1].mean:
                         self.warnings[reg][icut].append('The number of selected events > the initial number of events: '+\
-                          str(self.Nselected[reg][icut].mean)+' > '+str(self.Nselected[reg][icut-1].mean)+'. Set the number of selected events to 0.')
+                          str(self.Nselected[reg][icut].mean)+' > '+str(self.Nselected[reg][icut-1].mean)+\
+                                                        '. Set the number of selected events to 0.')
                         self.Nselected[reg][icut].mean=0
 
         # Calculating errors on Naccepted and Nrejected

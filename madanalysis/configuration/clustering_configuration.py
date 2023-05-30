@@ -129,7 +129,8 @@ class ClusteringConfiguration:
                             test=False
                             break
                 if not test:
-                    logging.getLogger('MA5').error("some datasets contain partonic/hadronic file format. Clustering algorithm cannot be switched off.")
+                    logging.getLogger('MA5').error("some datasets contain partonic/hadronic file format. "+\
+                                                   "Clustering algorithm cannot be switched off.")
                     return
 
             # Switch on the clustering
@@ -153,7 +154,8 @@ class ClusteringConfiguration:
                             test=False
                             break
                 if not test:
-                    logging.getLogger('MA5').error("some datasets contain reconstructed file format. Clustering algorithm cannot be switched on.")
+                    logging.getLogger('MA5').error("some datasets contain reconstructed file format. "+\
+                                                   "Clustering algorithm cannot be switched on.")
                     return
                  
             if value=="kt":

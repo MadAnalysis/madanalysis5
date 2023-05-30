@@ -194,7 +194,8 @@ class JobTaggerMain:
                             file.write('        THT    += '+obj+'->pt();\n')
                             file.write('        Meff   += '+obj+'->pt();\n')
                             file.write('        MALorentzVector MissHT = event.rec()->MHT().momentum() - '+obj+'->momentum();\n')
-                            file.write('        (&event.rec()->MHT().momentum())->SetPxPyPzE(MissHT.Px(), MissHT.Py(), 0., MissHT.E());\n')
+                            file.write('        (&event.rec()->MHT().momentum())->SetPxPyPzE(MissHT.Px(), '+\
+                                       'MissHT.Py(), 0., MissHT.E());\n')
                     if 'jets' in obj and newprop in ['Electron', 'Photon']:
                         file.write('        THT    -= '+obj+'->pt();\n')
                         file.write('        Meff   -= '+obj+'->pt();\n')
