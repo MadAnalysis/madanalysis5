@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 ################################################################################
-#  
+#
 #  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #
@@ -69,8 +69,8 @@ sys.path.insert(0, servicedir)
 
 # Release version
 # Do not touch it !!!!!
-version = "2.0.7"
-date = "2023/03/21"
+version = "2.0.8"
+date = "2023/05/31"
 
 # Loading the MadAnalysis session
 import madanalysis.core.launcher
