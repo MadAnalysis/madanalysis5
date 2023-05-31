@@ -390,10 +390,18 @@ class MakefileWriter():
             if options.has_fastjet_ma5lib:
                 libs.extend(['-lfastjet_for_ma5'])
             if options.has_fastjet_lib:
-#                libs.extend(['$(shell fastjet-config --libs --plugins)']) # --rpath=no)'])
-                libs.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config '+\
-                             '--libs --plugins)']) # --rpath=no)'])
+                libs.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config --libs --plugins)'])
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
+            libs=[]
+            if options.has_fjcontrib:
+                # Add fjcontrib libraries
+                libs.extend(["-lRecursiveTools"])   # SoftDrop
+                libs.extend(["-lVariableR"])        # VariableR
+                libs.extend(["-lEnergyCorrelator"]) # -lEnergyCorrelator
+            if options.has_nsubjettiness:
+                libs.extend(["-lNsubjettiness"])    # Nsubjettiness
+            if options.has_nsubjettiness or options.has_fjcontrib:
+                file.write('LIBFLAGS += '+' '.join(libs)+'\n')
 
         # - delphes
         if options.has_delphes_ma5lib or options.has_delphes_lib:
