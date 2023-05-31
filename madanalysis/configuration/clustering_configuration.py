@@ -1,6 +1,6 @@
 ################################################################################
-#
-#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
+#  
+#  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #
 #  This file is part of MadAnalysis 5.
@@ -144,9 +144,8 @@ class ClusteringConfiguration:
                             test = False
                             break
                 if not test:
-                    logging.getLogger("MA5").error(
-                        "some datasets contain partonic/hadronic file format. Clustering algorithm cannot be switched off."
-                    )
+                    logging.getLogger('MA5').error("some datasets contain partonic/hadronic file format. "+\
+                                                   "Clustering algorithm cannot be switched off.")
                     return
 
             # Switch on the clustering
@@ -181,9 +180,8 @@ class ClusteringConfiguration:
                             test = False
                             break
                 if not test:
-                    logging.getLogger("MA5").error(
-                        "some datasets contain reconstructed file format. Clustering algorithm cannot be switched on."
-                    )
+                    logging.getLogger('MA5').error("some datasets contain reconstructed file format. "+\
+                                                   "Clustering algorithm cannot be switched on.")
                     return
 
             if value == "kt":
@@ -248,6 +246,7 @@ class ClusteringConfiguration:
         else:
             return self.clustering.user_SetParameter(parameter, value)
 
+
     def user_GetParameters(self):
         if self.algorithm != "none":
             table = list(ClusteringConfiguration.userVariables.keys())
@@ -285,4 +284,5 @@ class ClusteringConfiguration:
         else:
             if variable == "algorithm":
                 table.extend(ClusteringConfiguration.userVariables["algorithm"])
+        return table
         return table

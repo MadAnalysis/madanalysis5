@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -33,8 +33,10 @@ import logging
 class Dataset:
 
     userVariables = { "type"        : ["signal","background"], \
-                      "linecolor"   : ["auto","none","red","black","white","yellow","blue","grey","green","purple","cyan","orange"], \
-                      "backcolor"   : ["auto","none","red","black","white","yellow","blue","grey","green","purple","cyan","orange"], \
+                      "linecolor"   : ["auto","none","red","black","white","yellow",\
+                                       "blue","grey","green","purple","cyan","orange"], \
+                      "backcolor"   : ["auto","none","red","black","white","yellow",\
+                                       "blue","grey","green","purple","cyan","orange"], \
                       "backstyle"    : ["solid","dotted","hline","dline","vline"], \
                       "linestyle"   : ["solid","dashed","dotted","dash-dotted"],\
                       "linewidth"   : [], \
@@ -94,7 +96,8 @@ class Dataset:
             elif value=="background":
                 self.background=True
             else:
-                logging.getLogger('MA5').error("The possible values for the attribute 'type' are 'signal' and 'background'.")
+                logging.getLogger('MA5').error("The possible values for the attribute 'type' "+\
+                                               "are 'signal' and 'background'.")
 
         #weighted events
         elif variable == "weighted_events":
@@ -103,7 +106,8 @@ class Dataset:
             elif value=="false":
                 self.weighted_events=False
             else:
-                logging.getLogger('MA5').error("The possible values for the attribute 'weighted_events' are 'true' and 'false'.")
+                logging.getLogger('MA5').error("The possible values for the attribute "+\
+                                               "'weighted_events' are 'true' and 'false'.")
 
         #linecolor        
         elif variable == "linecolor":
@@ -133,8 +137,9 @@ class Dataset:
             elif value=="auto":
                 self.linecolor=ColorType.AUTO
             else:
-                logging.getLogger('MA5').error("the possible values for the attribute 'linecolor' are 'auto', 'none', 'black', 'white', 'red', 'yellow'," + \
-                "'blue', 'grey', 'purple', 'cyan', 'orange'.")
+                logging.getLogger('MA5').error("the possible values for the attribute 'linecolor' are "+\
+                                               "'auto', 'none', 'black', 'white', 'red', 'yellow'," + \
+                                               "'blue', 'grey', 'purple', 'cyan', 'orange'.")
                 return
 
             #SHADE
@@ -167,7 +172,8 @@ class Dataset:
             elif value=="dash-dotted":
                 self.linestyle=LineStyleType.DASHDOTTED
             else:
-                logging.getLogger('MA5').error("the possible values for the attribute 'linestyle' are 'solid', 'dashed', 'dotted', 'dash-dotted'.")
+                logging.getLogger('MA5').error("the possible values for the attribute 'linestyle' are "+\
+                                               "'solid', 'dashed', 'dotted', 'dash-dotted'.")
                 
         #linewidth
         elif variable == "linewidth":
@@ -195,7 +201,8 @@ class Dataset:
             elif value=="vline":
                 self.backstyle=BackStyleType.VLINE
             else:
-                logging.getLogger('MA5').error("the possible values for the attribute 'backstyle' are 'solid', 'dotted', 'hline', 'dline', 'vline'.")
+                logging.getLogger('MA5').error("the possible values for the attribute 'backstyle' are "+\
+                                               "'solid', 'dotted', 'hline', 'dline', 'vline'.")
 
         #backcolor        
         elif variable == "backcolor":
@@ -224,8 +231,9 @@ class Dataset:
             elif value=="auto":
                 self.backcolor=ColorType.AUTO
             else:
-                logging.getLogger('MA5').error("the possible value for the attribute 'backcolor' are 'auto', 'none', 'black', 'white', 'red', 'yellow'," + \
-                "'blue', 'grey', 'purple', 'cyan', 'orange'.")
+                logging.getLogger('MA5').error("the possible value for the attribute 'backcolor' are "+\
+                                               "'auto', 'none', 'black', 'white', 'red', 'yellow'," + \
+                                               "'blue', 'grey', 'purple', 'cyan', 'orange'.")
                 return
                
             #SHADE
@@ -252,7 +260,8 @@ class Dataset:
             try:
                 tmp = float(value)
             except:
-                logging.getLogger('MA5').error("the value of the attribute '"+variable+"' must be set to a positive floating number.")
+                logging.getLogger('MA5').error("the value of the attribute '"+variable+\
+                                               "' must be set to a positive floating number.")
                 return
             if tmp>=0:
                 if variable == "weight":
@@ -261,16 +270,19 @@ class Dataset:
                     self.xsection=tmp
                     self.measured_global.xsection = tmp
             else:
-                logging.getLogger('MA5').error("the value of the attribute '"+variable+"' must be set to a positive floating number.")
+                logging.getLogger('MA5').error("the value of the attribute '"+variable+\
+                                               "' must be set to a positive floating number.")
                 return
 
         # uncertainties
-        elif variable in ["scale_up_variation","scale_down_variation","pdf_up_variation","pdf_down_variation",
-           "scale_variation", "pdf_variation"]:
+        elif variable in ["scale_up_variation","scale_down_variation",\
+                          "pdf_up_variation","pdf_down_variation",\
+                          "scale_variation", "pdf_variation"]:
             try:
                 tmp = float(value)
             except:
-                logging.getLogger('MA5').error("the value of the attribute '"+variable+"' must be set to a positive floating-point number")
+                logging.getLogger('MA5').error("the value of the attribute '"+variable+\
+                                               "' must be set to a positive floating-point number")
                 return
             if tmp>=0:
                 if variable == "scale_up_variation":
@@ -296,7 +308,8 @@ class Dataset:
                     self.pdfdn = tmp
                     self.pdfup = tmp
             else:
-                logging.getLogger('MA5').error("the value of the attribute '"+variable+"' must be set to a positive floating-point number")
+                logging.getLogger('MA5').error("the value of the attribute '"+variable+\
+                                               "' must be set to a positive floating-point number")
                 return
 
         # title
@@ -357,10 +370,12 @@ class Dataset:
             logging.getLogger('MA5').info("   User-imposed cross section = "+str(self.xsection))
         elif parameter=="scale_unc":
             if not self.scaleup == None and not self.scaledn == None:
-                logging.getLogger('MA5').info("   User-imposed scale uncertainties: -{:.1%}, +{:.1%}".format(self.scaledn,self.scaleup))
+                logging.getLogger('MA5').info("   User-imposed scale uncertainties: "+\
+                                              "-{:.1%}, +{:.1%}".format(self.scaledn,self.scaleup))
         elif parameter=="PDF_unc":
             if not self.pdfup == None and not self.pdfdn == None:
-                logging.getLogger('MA5').info("   User-imposed PDF uncertainties: -{:.1%}, +{:.1%}".format(self.pdfdn,self.pdfup))
+                logging.getLogger('MA5').info("   User-imposed PDF uncertainties: "+\
+                                              "-{:.1%}, +{:.1%}".format(self.pdfdn,self.pdfup))
         elif parameter=="type":
             logging.getLogger('MA5').info("   Type = "+self.GetStringTag())
         elif parameter=="weighted_events":
@@ -379,7 +394,8 @@ class Dataset:
                     msg+=str(self.lineshade)
             logging.getLogger('MA5').info("   Line color in histograms = "+msg)
         elif parameter=="linestyle":
-            logging.getLogger('MA5').info("   Line style in histograms = "+LineStyleType.convert2string(self.linestyle))
+            logging.getLogger('MA5').info("   Line style in histograms = "+\
+                                          LineStyleType.convert2string(self.linestyle))
         elif parameter=="linewidth":
             logging.getLogger('MA5').info("   Line width in histograms = "+str(self.linewidth))
         elif parameter=="backcolor":
@@ -391,7 +407,8 @@ class Dataset:
                     msg+=str(self.backshade)
             logging.getLogger('MA5').info("   Background color in histograms = "+msg)
         elif parameter=="backstyle":
-            logging.getLogger('MA5').info("   Background style in histograms = "+BackStyleType.convert2string(self.backstyle))
+            logging.getLogger('MA5').info("   Background style in histograms = "+\
+                                          BackStyleType.convert2string(self.backstyle))
         else:
             logging.getLogger('MA5').error(" the class dataset has no attribute denoted by '"+parameter+"'")
 

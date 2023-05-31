@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -90,7 +90,8 @@ class Leaf:
             return self.name
         elif self.type == 'un_op' and len(self.daughters)==1 and self.name!='-':
             if self.name=='minus': return '-' + tree.get(self.daughters[0]).write_cpp(tree) 
-            else                 : return 'std::'+self.name.replace('gamma','tgamma') + '(' + tree.get(self.daughters[0]).write_cpp(tree) + ')'
+            else                 : return 'std::'+self.name.replace('gamma','tgamma') +\
+                                 '        (' + tree.get(self.daughters[0]).write_cpp(tree) + ')'
         elif self.type == 'un_op' and len(self.daughters)==1 and self.name=='-':
             return self.name + '(' + tree.get(self.daughters[0]).write_cpp(tree) + ')'
         elif self.type == 'bin2_op' and len(self.daughters)==2:

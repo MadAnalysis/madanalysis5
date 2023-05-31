@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -243,7 +243,8 @@ class LibraryWriter():
             toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
         elif package=='test_commons':
             options.has_commons  = True
-            toRemove.extend(['compilation_commons.log','linking_commons.log','cleanup_commons.log','mrproper_commons.log','../Bin/TestCommons.log'])
+            toRemove.extend(['compilation_commons.log','linking_commons.log','cleanup_commons.log',\
+                             'mrproper_commons.log','../Bin/TestCommons.log'])
         elif package=='zlib':
             options.has_commons  = True
             options.has_zlib_inc = True
@@ -253,7 +254,8 @@ class LibraryWriter():
             options.has_commons     = True
             options.has_zlib_ma5lib = True
           #  options.has_zlib_lib = True
-            toRemove.extend(['compilation_zlib.log','linking_zlib.log','cleanup_zlib.log','mrproper_zlib.log','../Bin/TestZlib.log'])
+            toRemove.extend(['compilation_zlib.log','linking_zlib.log','cleanup_zlib.log',\
+                             'mrproper_zlib.log','../Bin/TestZlib.log'])
         elif package=='delphes':
             options.has_commons     = True
             options.has_delphes_inc = True
@@ -261,14 +263,16 @@ class LibraryWriter():
             options.has_root        = True
             options.has_root_inc    = True
             options.has_root_lib    = True
-            toRemove.extend(['compilation_delphes.log','linking_delphes.log','cleanup_delphes.log','mrproper_delphes.log'])
+            toRemove.extend(['compilation_delphes.log','linking_delphes.log',\
+                             'cleanup_delphes.log','mrproper_delphes.log'])
         elif package=='test_delphes':
             options.has_commons     = True
             options.has_delphes_ma5lib = True
           #  options.has_delphes_lib = True
             options.has_root_inc    = True
             options.has_root_lib    = True
-            toRemove.extend(['compilation_delphes.log','linking_delphes.log','cleanup_delphes.log','mrproper_delphes.log','../Bin/TestDelphes.log'])
+            toRemove.extend(['compilation_delphes.log','linking_delphes.log','cleanup_delphes.log',\
+                             'mrproper_delphes.log','../Bin/TestDelphes.log'])
         elif package=='root':
             options.has_commons     = True
             options.has_root        = True
@@ -291,7 +295,8 @@ class LibraryWriter():
             options.has_root_ma5lib = True
             options.has_root_inc    = True
             options.has_root_lib    = True
-            toRemove.extend(['compilation_root.log','linking_root.log','cleanup_root.log','mrproper_root.log','../Bin/TestRoot.log'])
+            toRemove.extend(['compilation_root.log','linking_root.log',\
+                             'cleanup_root.log','mrproper_root.log','../Bin/TestRoot.log'])
         elif package=='delphesMA5tune':
             options.has_commons            = True
             options.has_delphesMA5tune_lib = True
@@ -299,14 +304,16 @@ class LibraryWriter():
             options.has_root        = True
             options.has_root_inc    = True
             options.has_root_lib    = True
-            toRemove.extend(['compilation_delphesMA5tune.log','linking_delphesMA5tune.log','cleanup_delphesMA5tune.log','mrproper_delphesMA5tune.log'])
+            toRemove.extend(['compilation_delphesMA5tune.log','linking_delphesMA5tune.log',\
+                             'cleanup_delphesMA5tune.log','mrproper_delphesMA5tune.log'])
         elif package=='test_delphesMA5tune':
             options.has_commons            = True
             options.has_delphesMA5tune_ma5lib = True
             options.has_root_inc    = True
             options.has_root_lib    = True
          #   options.has_delphesMA5tune_lib = True
-            toRemove.extend(['compilation_delphesMA5tune.log','linking_delphesMA5tune.log','cleanup_delphesMA5tune.log','mrproper_delphesMA5tune.log','../Bin/TestDelphesMA5tune.log'])
+            toRemove.extend(['compilation_delphesMA5tune.log','linking_delphesMA5tune.log',\
+                             'cleanup_delphesMA5tune.log','mrproper_delphesMA5tune.log','../Bin/TestDelphesMA5tune.log'])
         elif package=='process':
             options.has_commons=True
             options.has_fastjet_ma5lib        = self.main.archi_info.has_fastjet
@@ -341,7 +348,8 @@ class LibraryWriter():
           #  options.has_delphes_tag           = self.main.archi_info.has_delphes
           #  options.has_delphesMA5tune_tag    = self.main.archi_info.has_delphesMA5tune
           #  options.has_zlib_tag              = self.main.archi_info.has_zlib
-            toRemove.extend(['compilation_process.log','linking_process.log','cleanup_process.log','mrproper_process.log','../Bin/TestSampleAnalyzer.log'])
+            toRemove.extend(['compilation_process.log','linking_process.log','cleanup_process.log',\
+                             'mrproper_process.log','../Bin/TestSampleAnalyzer.log'])
 
         # file pattern
         if package in ['commons','process','configuration']:
@@ -425,7 +433,8 @@ class LibraryWriter():
             ProductPath='../Lib/'
 
         # write makefile
-        MakefileWriter.Makefile(filename,title,ProductName,ProductPath,isLibrary,cppfiles,hfiles,options,self.main.archi_info,toRemove)
+        MakefileWriter.Makefile(filename,title,ProductName,ProductPath,isLibrary,cppfiles,hfiles,\
+                                options,self.main.archi_info,toRemove)
 
         return True
 

@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -996,7 +996,8 @@ class Layout:
         if mode==ReportFormatType.LATEX:
 
             # Launching latex and producing DVI file
-            os.system('cd '+output_path+'; latex -interaction=nonstopmode main.tex > latex.log 2>&1; latex -interaction=nonstopmode main.tex >> latex.log 2>&1')
+            os.system('cd '+output_path+'; latex -interaction=nonstopmode main.tex > latex.log 2>&1; '+\
+                      'latex -interaction=nonstopmode main.tex >> latex.log 2>&1')
 
             name=os.path.normpath(output_path+'/main.dvi')
             if not os.path.isfile(name):
@@ -1026,7 +1027,8 @@ class Layout:
         elif mode==ReportFormatType.PDFLATEX:
 
             # Launching latex and producing PDF file
-            os.system('cd '+output_path+'; pdflatex -interaction=nonstopmode main.tex > latex.log 2>&1; pdflatex -interaction=nonstopmode main.tex >> latex.log 2>&1');
+            os.system('cd '+output_path+'; pdflatex -interaction=nonstopmode main.tex > latex.log 2>&1; '+\
+                      'pdflatex -interaction=nonstopmode main.tex >> latex.log 2>&1');
 
             # Checking latex log : are there errors
             if not Layout.CheckLatexLog(output_path+'/latex.log'):

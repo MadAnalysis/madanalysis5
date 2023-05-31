@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -309,7 +309,8 @@ class JobWriter(object):
             elif self.main.fastsim.package=="delphesMA5tune":
                 input = open(self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Interfaces/delphesMA5tune/"+cardname,'r')
         except:
-            logging.getLogger('MA5').error("impossible to find "+self.main.archi_info.ma5dir+"/tools/SampleAnalyzer/Interfaces/delphes/"+cardname)
+            logging.getLogger('MA5').error("impossible to find "+self.main.archi_info.ma5dir+\
+                                           "/tools/SampleAnalyzer/Interfaces/delphes/"+cardname)
             return False
         if "../../../.." in cardname:
             cardname=cardname.split('/')[-1]
@@ -763,7 +764,8 @@ class JobWriter(object):
         ProductPath='./'
 
         # Write makefile
-        MakefileWriter.Makefile(filename,title,ProductName,ProductPath,isLibrary,cppfiles,hfiles,options,self.main.archi_info,toRemove,moreIncludes=['./'])
+        MakefileWriter.Makefile(filename,title,ProductName,ProductPath,isLibrary,cppfiles,hfiles,\
+                                options,self.main.archi_info,toRemove,moreIncludes=['./'])
 
         # Setup
         from madanalysis.build.setup_writer import SetupWriter

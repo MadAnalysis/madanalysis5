@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -390,18 +390,10 @@ class MakefileWriter():
             if options.has_fastjet_ma5lib:
                 libs.extend(['-lfastjet_for_ma5'])
             if options.has_fastjet_lib:
-                libs.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config --libs --plugins)'])
+#                libs.extend(['$(shell fastjet-config --libs --plugins)']) # --rpath=no)'])
+                libs.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config '+\
+                             '--libs --plugins)']) # --rpath=no)'])
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
-            libs=[]
-            if options.has_fjcontrib:
-                # Add fjcontrib libraries
-                libs.extend(["-lRecursiveTools"])   # SoftDrop
-                libs.extend(["-lVariableR"])        # VariableR
-                libs.extend(["-lEnergyCorrelator"]) # -lEnergyCorrelator
-            if options.has_nsubjettiness:
-                libs.extend(["-lNsubjettiness"])    # Nsubjettiness
-            if options.has_nsubjettiness or options.has_fjcontrib:
-                file.write('LIBFLAGS += '+' '.join(libs)+'\n')
 
         # - delphes
         if options.has_delphes_ma5lib or options.has_delphes_lib:
@@ -437,6 +429,9 @@ class MakefileWriter():
 
         # - Root
         libs=[]
+        #libs.extend(['-L'+archi_info.root_lib_path, \
+        #            '-lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint '+\
+        #            '-lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic -lEG'])
         # becareful: to not forget -lEG
         if options.has_root:
             libs.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/root-config --libs)','-lEG'])
@@ -583,7 +578,8 @@ class MakefileWriter():
             ProductPath=ProductPath+'/'
         if isLibrary:
             if options.isMac:
-                file.write('\t$(CXX) -shared -flat_namespace -dynamiclib -undefined suppress -o '+ProductPath+'$(LIBRARY) $(OBJS) $(LIBFLAGS)\n')
+                file.write('\t$(CXX) -shared -flat_namespace -dynamiclib -undefined suppress -o '+\
+                           ProductPath+'$(LIBRARY) $(OBJS) $(LIBFLAGS)\n')
             else:
                 file.write('\t$(CXX) -shared -o '+ProductPath+'$(LIBRARY) $(OBJS) $(LIBFLAGS)\n')
         else:

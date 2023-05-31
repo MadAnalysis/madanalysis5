@@ -1,6 +1,6 @@
 ################################################################################
 #
-#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #
 #  This file is part of MadAnalysis 5.
@@ -106,7 +106,8 @@ class InstallSimplify:
             logging.getLogger('MA5').debug("simplify has been imported from "+" ".join(simplify.__path__))
 
         except ImportError as err:
-            logging.getLogger('MA5').error("The simplify module cannot be used. Please check that all requirements are available and (re-)install it.")
+            logging.getLogger('MA5').error("The simplify module cannot be used. "+\
+                                           "Please check that all requirements are available and (re-)install it.")
             logging.getLogger('MA5').debug(err)
             self.display_log()
             return False

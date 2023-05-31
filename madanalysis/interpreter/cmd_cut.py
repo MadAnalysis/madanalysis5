@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -591,7 +591,8 @@ class CmdCut(CmdBase,CmdSelectionBase):
         logging.getLogger('MA5').info("   Syntax: " + CutType.convert2cmdname(self.cut_type) +\
                      " observable_name ( multiparticle1 multiparticle2 ... ) operator threshold { regions } [ option1 option 2 ]")
         logging.getLogger('MA5').info("   Declares a cut: ")
-        logging.getLogger('MA5').info("    - related to the distribution of a given observable, associated to one or a combination of (multi)particles,")
+        logging.getLogger('MA5').info("    - related to the distribution of a given observable, "+\
+                                      "associated to one or a combination of (multi)particles,")
         logging.getLogger('MA5').info("    - supported logical operators: <= , < , >= , > , == , != ,")
         logging.getLogger('MA5').info("    - threshold being a value.")
         logging.getLogger('MA5').info("    - regions to which this cut applies can be (optionally) given (or it applies to all regions).")

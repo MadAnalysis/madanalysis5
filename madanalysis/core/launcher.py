@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -241,7 +241,8 @@ def MainSession(mode,arglist,ma5dir,version,date):
     logging.getLogger('MA5').info("*                  \ \_\\\ \_\ \_\ \_\ \____/                *")
     logging.getLogger('MA5').info("*                   \/_/ \/_/\/_/\/_/\/___/                 *")
     logging.getLogger('MA5').info("*                                                           *")
-    logging.getLogger('MA5').info("*   MA5 release : " + "%-24s" % main.archi_info.ma5_version + "%+15s" % main.archi_info.ma5_date  + "   *")
+    logging.getLogger('MA5').info("*   MA5 release : " + "%-24s" % main.archi_info.ma5_version + \
+                                  "%+15s" % main.archi_info.ma5_date  + "   *")
     logging.getLogger('MA5').info("*                                                           *")
     logging.getLogger('MA5').info("*         Comput. Phys. Commun. 184 (2013) 222-256          *")
     logging.getLogger('MA5').info("*             Eur. Phys. J. C74 (2014) 3103                 *")
@@ -361,7 +362,8 @@ def Usage():
     logging.getLogger('MA5').info(" -v or --version")
     logging.getLogger('MA5').info("    or --release     : display the version number of MadAnalysis")
     logging.getLogger('MA5').info(" -b or --build       : rebuild the SampleAnalyzer static library")
-    logging.getLogger('MA5').info(" -f or --forced      : do not ask for confirmation when MA5 removes a directory or overwrites an object") 
+    logging.getLogger('MA5').info(" -f or --forced      : do not ask for confirmation when MA5 removes "+\
+                                  "a directory or overwrites an object") 
     logging.getLogger('MA5').info(" -s or --script      : quit automatically MA5 when the script is loaded")
     logging.getLogger('MA5').info(" -h or --help        : dump this help")
     logging.getLogger('MA5').info(" -i or --installcard : produce the default installation card in installation_card.dat")

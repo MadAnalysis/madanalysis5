@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -89,7 +89,8 @@ class CmdDefine(CmdBase.CmdBase):
         # Checking if the name is authorized
         if not self.IsAuthorizedLabel(name):
             logging.getLogger('MA5').error("syntax error with the name '" + name + "'.")
-            logging.getLogger('MA5').error("A correct name contains only characters being letters, digits or the '+', '-', '~' and '_' symbols.")
+            logging.getLogger('MA5').error("A correct name contains only characters being letters, "+\
+                                           "digits or the '+', '-', '~' and '_' symbols.")
             logging.getLogger('MA5').error("Moreover, a correct name  starts with a letter or the '_' symbol.")
             return
 
@@ -122,7 +123,8 @@ class CmdDefine(CmdBase.CmdBase):
     def help(help):
         logging.getLogger('MA5').info("   Syntax: define <particle name> = PDG-id")
         logging.getLogger('MA5').info("   Associates a symbol to a specific particle defined by its PDG-id.")
-        logging.getLogger('MA5').info("   Syntax: define <(multi)particle name> = <PDG-id / existing (multi)particle> <PDG-id / (multi)particle> ...")
+        logging.getLogger('MA5').info("   Syntax: define <(multi)particle name> = "+\
+                                      "<PDG-id / existing (multi)particle> <PDG-id / (multi)particle> ...")
         logging.getLogger('MA5').info("   Associates a symbol to a multiparticle defined by several particles.")
         logging.getLogger('MA5').info("")
         logging.getLogger('MA5').info("   Syntax: define tagger  <p1> as <p2> <function> [<bounds>]")

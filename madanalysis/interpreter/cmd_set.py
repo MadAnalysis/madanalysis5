@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -117,7 +117,8 @@ class CmdSet(CmdBase.CmdBase):
             bkp_ma5tune = self.main.archi_info.has_delphesMA5tune
             self.main.archi_info.has_delphes = checker.checkDelphes(True)
             self.main.archi_info.has_delphesMA5tune = checker.checkDelphesMA5tune(True)
-            self.main.recasting.user_SetParameter("status",args[2],self.main.mode,self.main.archi_info,self.main.session_info, self.main.datasets)
+            self.main.recasting.user_SetParameter("status",args[2],self.main.mode,\
+                                                  self.main.archi_info,self.main.session_info, self.main.datasets)
             self.main.archi_info.has_delphes = bkp_delphes
             self.main.archi_info.has_delphesMA5tune = bkp_ma5tune
             if args[2]=='on' and self.main.fastsim.package!='none':
@@ -155,7 +156,8 @@ class CmdSet(CmdBase.CmdBase):
                 elif args[2] in ['jets', 'constituents']:
                     self.main.superfastsim.jetrecomode = args[2]
                 else:
-                    logging.getLogger('MA5').error("Jet smearing can only be based on the jet ('jets') or on its constituents ('constituents').")
+                    logging.getLogger('MA5').error("Jet smearing can only be based on the jet ('jets') or "+\
+                                                   "on its constituents ('constituents').")
             elif objs[2] == 'magnetic_field':
                 try:
                     self.main.superfastsim.mag_field  = float(args[2])
@@ -230,7 +232,8 @@ class CmdSet(CmdBase.CmdBase):
             bkp_ma5tune = self.main.archi_info.has_delphesMA5tune
             self.main.archi_info.has_delphes = checker.checkDelphes(True)
             self.main.archi_info.has_delphesMA5tune = checker.checkDelphesMA5tune(True)
-            self.main.recasting.user_SetParameter(objs[2:],args[2:],self.main.mode,self.main.archi_info,self.main.session_info, self.main.datasets)
+            self.main.recasting.user_SetParameter(objs[2:],args[2:],self.main.mode,self.main.archi_info,\
+                                                  self.main.session_info, self.main.datasets)
             self.main.archi_info.has_delphes = bkp_delphes
             self.main.archi_info.has_delphesMA5tune = bkp_ma5tune
         else:
