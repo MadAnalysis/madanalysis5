@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -656,9 +656,11 @@ class ConfigChecker:
             if not os.path.normpath(mypath) in self.archi_info.delphesMA5tune_lib_paths:
                 self.archi_info.delphesMA5tune_lib_paths.append(os.path.normpath(mypath))
             self.archi_info.delphesMA5tune_lib      = os.path.normpath(myfiles[0]) if len(myfiles)>0 else "";
-            self.archi_info.delphesMA5tune_original_libs.extend([fl for fl in myfiles if not fl in self.archi_info.delphesMA5tune_original_libs])
+            self.archi_info.delphesMA5tune_original_libs.extend([fl for fl in myfiles \
+                                                                 if not fl in self.archi_info.delphesMA5tune_original_libs])
             delphesMA5tune_dict=glob.glob(os.path.dirname(self.archi_info.delphesMA5tune_lib)+'/*.pcm')
-            self.archi_info.delphesMA5tune_original_libs.extend([fl for fl in delphesMA5tune_dict if not fl in self.archi_info.delphesMA5tune_original_libs])
+            self.archi_info.delphesMA5tune_original_libs.extend([fl for fl in delphesMA5tune_dict \
+                                                                 if not fl in self.archi_info.delphesMA5tune_original_libs])
             if not getpaths:
                 self.logger.debug("-> result for lib paths: "+str(self.archi_info.delphesMA5tune_lib_paths))
                 self.logger.debug("-> result for lib files: "+str(self.archi_info.delphesMA5tune_lib))
@@ -671,7 +673,8 @@ class ConfigChecker:
 #                    self.logger.warning("To enable this format, please type 'install delphesMA5tune'.")
                 return False
             
-        self.archi_info.libraries['DelphesMA5tune']=self.archi_info.delphesMA5tune_lib+":"+str(os.stat(self.archi_info.delphesMA5tune_lib).st_mtime)
+        self.archi_info.libraries['DelphesMA5tune']=self.archi_info.delphesMA5tune_lib+":"\
+            +str(os.stat(self.archi_info.delphesMA5tune_lib).st_mtime)
         self.archi_info.delphesMA5tune_priority=(force or ma5installation)
 
         # Lib

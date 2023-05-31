@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -45,8 +45,9 @@ class InstallFastjet:
 #        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.2.1.tar.gz"}
 #        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.3.0.tar.gz"}
 #        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.3.2.tar.gz"}
-        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.3.3.tar.gz"}
+#        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.3.3.tar.gz"}
 #        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.4.0.tar.gz"}
+        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.4.1.tar.gz"}
 
     def Detect(self):
         if not os.path.isdir(self.toolsdir):

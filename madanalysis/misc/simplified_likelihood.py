@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -285,7 +285,8 @@ class LikelihoodComputer:
                 #    logger.debug("zero denominator, but numerator also zero, so we set denom to 1.")
                     denominator[ctr]=1.
                 else:
-                    raise Exception("we have a zero value in the denominator at pos %d, with a non-zero numerator. dont know how to handle." % ctr)
+                    raise Exception("we have a zero value in the denominator at pos "+\
+                                    "%d, with a non-zero numerator. dont know how to handle." % ctr)
         ret = self.model.observed*signal_rel/denominator - signal_rel
         
         if type(ret) in [ array, ndarray, list ]:
@@ -418,7 +419,8 @@ class LikelihoodComputer:
             return nllp_
         lmbda = self.nsig + self.model.A + theta + self.model.C * theta**2 / self.model.B**2
         lmbda[lmbda<=0.] = 1e-30 ## turn zeroes to small values
-        # nllp_ = ( self.ones - self.model.observed / lmbda + NP.dot( theta , self.weight ) ) * ( self.ones + 2*self.model.C * theta / self.model.B**2 )
+        # nllp_ = ( self.ones - self.model.observed / lmbda + NP.dot( theta , self.weight ) ) \
+        #          * ( self.ones + 2*self.model.C * theta / self.model.B**2 )
         T=self.ones + 2*self.model.C/self.model.B**2*theta
         nllp_ = T - self.model.observed / lmbda * ( T ) + NP.dot( theta , self.weight )
         return nllp_
@@ -436,7 +438,9 @@ class LikelihoodComputer:
         lmbda[lmbda<=0.] = 1e-30 ## turn zeroes to small values
         T=self.ones + 2*self.model.C/self.model.B**2*theta
         # T_i = 1_i + 2*c_i/B_i**2 * theta_i
-        nllh_ = self.weight + NP.diag ( self.model.observed * T**2 / (lmbda**2) ) - NP.diag ( self.model.observed / lmbda * 2 * self.model.C / self.model.B**2 ) + NP.diag ( 2*self.model.C/self.model.B**2 )
+        nllh_ = self.weight + NP.diag ( self.model.observed * T**2 / (lmbda**2) ) - \
+                NP.diag ( self.model.observed / lmbda * 2 * self.model.C / self.model.B**2 ) + \
+                NP.diag ( 2*self.model.C/self.model.B**2 )
         return nllh_
 
     def getThetaHat(self, nobs, nb, nsig, covb, max_iterations ):
@@ -528,7 +532,9 @@ class LikelihoodComputer:
                 ini = ret_c
                 ret_c = optimize.fmin_tnc ( self.nll, ret_c[0], fprime=self.nllprime,
                                             disp=0, bounds=bounds )
-                # print ( "[findThetaHat] mu=%s bg=%s observed=%s V=%s, nsig=%s theta=%s, nll=%s" % ( self.nsig[0]/self.model.efficiencies[0], self.model.backgrounds, self.model.observed,self.model.covariance, self.nsig, ret_c[0], self.nll(ret_c[0]) ) )
+                # print ( "[findThetaHat] mu=%s bg=%s observed=%s V=%s, nsig=%s theta=%s, nll=%s"\
+                #% ( self.nsig[0]/self.model.efficiencies[0], self.model.backgrounds, \
+                #self.model.observed,self.model.covariance, self.nsig, ret_c[0], self.nll(ret_c[0]) ) )
                 if ret_c[-1] not in [ 0, 1, 2 ]:
                     return ret_c[0],ret_c[-1]
                 else:

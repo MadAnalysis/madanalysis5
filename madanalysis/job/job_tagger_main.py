@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -194,7 +194,8 @@ class JobTaggerMain:
                             file.write('        THT    += '+obj+'->pt();\n')
                             file.write('        Meff   += '+obj+'->pt();\n')
                             file.write('        MALorentzVector MissHT = event.rec()->MHT().momentum() - '+obj+'->momentum();\n')
-                            file.write('        (&event.rec()->MHT().momentum())->SetPxPyPzE(MissHT.Px(), MissHT.Py(), 0., MissHT.E());\n')
+                            file.write('        (&event.rec()->MHT().momentum())->SetPxPyPzE(MissHT.Px(), '+\
+                                       'MissHT.Py(), 0., MissHT.E());\n')
                     if 'jets' in obj and newprop in ['Electron', 'Photon']:
                         file.write('        THT    -= '+obj+'->pt();\n')
                         file.write('        Meff   -= '+obj+'->pt();\n')

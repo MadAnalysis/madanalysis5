@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -152,10 +152,14 @@ class ObservableType(object):
     # name : accept_particles 
     values = { 'UNKNOWN' : [False,'','','','',0,0,0,False,False],\
                'SQRTS' :   [False,'PHYSICS->SqrtS(event.mc())','PHYSICS->SqrtS(event.mc())','','GeV',100,0.,1000., True, False],\
-               'TET' :     [False,'PHYSICS->Transverse->EventTET(event.mc())','PHYSICS->Transverse->EventTET(event.mc())','PHYSICS->Transverse->EventTET(event.rec())','GeV',100,0.,1000., True,False],\
-               'MET' :     [False,'PHYSICS->Transverse->EventMET(event.mc())','PHYSICS->Transverse->EventMET(event.mc())','PHYSICS->Transverse->EventMET(event.rec())','GeV',100,0.,1000., True,False],\
-               'THT' :     [False,'PHYSICS->Transverse->EventTHT(event.mc())','PHYSICS->Transverse->EventTHT(event.mc())','PHYSICS->Transverse->EventTHT(event.rec())','GeV',100,0.,1000., True,False],\
-               'MHT' :     [False,'PHYSICS->Transverse->EventMHT(event.mc())','PHYSICS->Transverse->EventMHT(event.mc())','PHYSICS->Transverse->EventMHT(event.rec())','GeV',100,0.,1000.,True,False],\
+               'TET' :     [False,'PHYSICS->Transverse->EventTET(event.mc())','PHYSICS->Transverse->EventTET(event.mc())',\
+                            'PHYSICS->Transverse->EventTET(event.rec())','GeV',100,0.,1000., True,False],\
+               'MET' :     [False,'PHYSICS->Transverse->EventMET(event.mc())','PHYSICS->Transverse->EventMET(event.mc())',\
+                            'PHYSICS->Transverse->EventMET(event.rec())','GeV',100,0.,1000., True,False],\
+               'THT' :     [False,'PHYSICS->Transverse->EventTHT(event.mc())','PHYSICS->Transverse->EventTHT(event.mc())',\
+                            'PHYSICS->Transverse->EventTHT(event.rec())','GeV',100,0.,1000., True,False],\
+               'MHT' :     [False,'PHYSICS->Transverse->EventMHT(event.mc())','PHYSICS->Transverse->EventMHT(event.mc())',\
+                            'PHYSICS->Transverse->EventMHT(event.rec())','GeV',100,0.,1000.,True,False],\
                'WEIGHTS' : [False,'PHYSICS->weights(event.mc())','PHYSICS->weights(event.mc())','','',100,0.,1., True,False],\
                'NPID':     [False,'NPID','NPID','NPID','',100,0.,100.,False,False],\
                'NAPID':    [False,'NAPID','NAPID','NAPID','',100,0.,100.,False,False],\

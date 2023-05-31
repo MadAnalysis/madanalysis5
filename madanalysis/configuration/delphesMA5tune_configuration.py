@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -152,7 +152,8 @@ class DelphesMA5tuneConfiguration:
 
             # other case: error
             else:
-                logging.getLogger('MA5').error("The file format for the pile-up source is not known. Only files with .pileup extension can be used.")
+                logging.getLogger('MA5').error("The file format for the pile-up source is not known. "+\
+                                               "Only files with .pileup extension can be used.")
                 return False
 
         else:
