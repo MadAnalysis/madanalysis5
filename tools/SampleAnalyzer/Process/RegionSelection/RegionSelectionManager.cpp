@@ -76,7 +76,7 @@ MAbool RegionSelectionManager::ApplyCut(MAbool condition, std::string const &cut
 		/// Check the current cut:
 		if (condition)
 		{
-			ThisRegion->IncrementCutFlow(ThisRegion->GetWeight());
+			ThisRegion->IncrementCutFlow(ThisRegion->GetMultiWeight());
 		}
 		else
 		{
@@ -205,8 +205,9 @@ void RegionSelectionManager::HeadSR(std::ostream &outwriter, const std::string &
 void RegionSelectionManager::DumpSR(std::ostream &outwriter, MAbool &is_first)
 {
 	// Set first SR out of the for loop to avoid many if executions
-    if (regions_.size() > 0 && is_first) outwriter << regions_[0]->IsSurviving();
+	if (regions_.size() > 0 && is_first)
+		outwriter << regions_[0]->IsSurviving();
 
-    for (MAuint32 i = is_first ? 1 : 0; i < regions_.size(); i++)
-        outwriter << "," << regions_[i]->IsSurviving();
+	for (MAuint32 i = is_first ? 1 : 0; i < regions_.size(); i++)
+		outwriter << "," << regions_[i]->IsSurviving();
 }

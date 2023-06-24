@@ -1,30 +1,28 @@
 ////////////////////////////////////////////////////////////////////////////////
-//  
+//
 //  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
-//  
+//
 //  This file is part of MadAnalysis 5.
 //  Official website: <https://github.com/MadAnalysis/madanalysis5>
-//  
+//
 //  MadAnalysis 5 is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//  
+//
 //  MadAnalysis 5 is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 //  GNU General Public License for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License
 //  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
-//  
+//
 ////////////////////////////////////////////////////////////////////////////////
-
 
 #ifndef __REGIONSELECTION_H
 #define __REGIONSELECTION_H
-
 
 // STL headers
 #include <string>
@@ -34,90 +32,124 @@
 #include "SampleAnalyzer/Process/Counter/CounterManager.h"
 #include "SampleAnalyzer/Process/Writer/SAFWriter.h"
 
-
 namespace MA5
 {
 
-class RegionSelection
-{
-  // -------------------------------------------------------------
-  //                        data members
-  // -------------------------------------------------------------
- private:
-  std::string name_;
-  MAbool surviving_;
-  MAuint32 NumberOfCutsAppliedSoFar_;
-  MAfloat64 weight_;
+    class RegionSelection
+    {
+        // -------------------------------------------------------------
+        //                        data members
+        // -------------------------------------------------------------
+    private:
+        std::string name_;
+        MAbool surviving_;
+        MAuint32 NumberOfCutsAppliedSoFar_;
 
-  CounterManager cutflow_;
+        /// @brief multi weight definition string is the name of the weight
+        /// float corresponds to the weight's value
+        std::map<MAuint32, MAfloat64> weight_;
 
-  // -------------------------------------------------------------
-  //                      method members
-  // -------------------------------------------------------------
- public :
-  /// Constructor without argument
-  RegionSelection() {name_ = "";};
+        CounterManager cutflow_;
 
-  /// Constructor with argument
-  RegionSelection(const std::string& name) { name_=name; };
+        // -------------------------------------------------------------
+        //                      method members
+        // -------------------------------------------------------------
+    public:
+        /// Constructor without argument
+        RegionSelection() { name_ = ""; };
 
-  /// Destructor
-  ~RegionSelection()  { };
+        /// Constructor with argument
+        RegionSelection(const std::string &name) { name_ = name; };
 
-  /// Get methods
-  std::string GetName()
-    { return name_; }
+        /// Destructor
+        ~RegionSelection(){};
 
-  MAbool IsSurviving()
-    { return surviving_; }
+        /// Get methods
+        std::string GetName()
+        {
+            return name_;
+        }
 
-  MAuint32 GetNumberOfCutsAppliedSoFar()
-    { return NumberOfCutsAppliedSoFar_; }
+        MAbool IsSurviving()
+        {
+            return surviving_;
+        }
 
-  /// Printing the list of histograms
-  void WriteDefinition(SAFWriter &output);
+        MAuint32 GetNumberOfCutsAppliedSoFar()
+        {
+            return NumberOfCutsAppliedSoFar_;
+        }
 
-  /// Printing the cutflow
-  void WriteCutflow(SAFWriter& output)
-    { cutflow_.Write_TextFormat(output); }
+        /// Printing the list of histograms
+        void WriteDefinition(SAFWriter &output);
 
-  /// Set methods
-  void SetName(std::string name)
-    { name_ = name; }
+        /// Printing the cutflow
+        void WriteCutflow(SAFWriter &output)
+        {
+            cutflow_.Write_TextFormat(output);
+        }
 
-  /// Set weight
-  void SetWeight(MAfloat64 weight) { weight_=weight;}
+        /// Set methods
+        void SetName(std::string name)
+        {
+            name_ = name;
+        }
 
-  /// Set weight
-  MAfloat64 GetWeight() { return weight_;}
+        /// Set weight
+        void SetWeight(MAfloat64 weight)
+        {
+            weight_.clear();
+            weight_.insert(std::make_pair(0, weight));
+        }
 
-  void SetSurvivingTest(MAbool surviving)
-    { surviving_ = surviving; }
+        /// Set weight
+        void SetWeight(std::map<MAuint32, MAfloat64> weight) { weight_ = weight; }
 
-  void SetNumberOfCutsAppliedSoFar(MAuint32 NumberOfCutsAppliedSoFar)
-    { NumberOfCutsAppliedSoFar_ = NumberOfCutsAppliedSoFar; }
+        /// Get weight
+        MAfloat64 GetWeight() { return weight_[0]; }
 
-  // Increment CutFlow (when this region passes a cut)
-  void IncrementCutFlow(MAfloat64 weight)
-  {
-    cutflow_[NumberOfCutsAppliedSoFar_].Increment(weight);
-    NumberOfCutsAppliedSoFar_++;
-  }
+        /// @brief get weight with a certain id
+        /// @return weight value
+        MAfloat64 GetWeight(MAint32 id) { return weight_.at(id); }
 
-  // Add a cut to the CutFlow
-  void AddCut(std::string const &CutName)
-    { cutflow_.InitCut(CutName); }
+        /// Get multi weight
+        std::map<MAuint32, MAfloat64> GetMultiWeight() { return weight_; }
 
-  /// Getting ready for a new event
-  void InitializeForNewEvent(const MAfloat64 &weight)
-  {
-    SetSurvivingTest(true);
-    SetNumberOfCutsAppliedSoFar(0);
-    cutflow_.IncrementNInitial(weight);
-    weight_=weight;
-  }
+        void SetSurvivingTest(MAbool surviving) { surviving_ = surviving; }
 
-};
+        void SetNumberOfCutsAppliedSoFar(MAuint32 NumberOfCutsAppliedSoFar)
+        {
+            NumberOfCutsAppliedSoFar_ = NumberOfCutsAppliedSoFar;
+        }
+
+        // Increment CutFlow (when this region passes a cut)
+        void IncrementCutFlow(std::map<MAuint32, MAfloat64> weight)
+        {
+            cutflow_[NumberOfCutsAppliedSoFar_].Increment(weight);
+            NumberOfCutsAppliedSoFar_++;
+        }
+
+        // Add a cut to the CutFlow
+        void AddCut(std::string const &CutName) { cutflow_.InitCut(CutName); }
+
+        /// Getting ready for a new event
+        void InitializeForNewEvent(const MAfloat64 &weight)
+        {
+            SetWeight(weight);
+            SetSurvivingTest(true);
+            SetNumberOfCutsAppliedSoFar(0);
+            cutflow_.IncrementNInitial(weight_);
+        }
+
+        /// Getting ready for a new event
+        void InitializeForNewEvent(const std::map<MAuint32, MAfloat64> &weight)
+        {
+            SetWeight(weight);
+            SetSurvivingTest(true);
+            SetNumberOfCutsAppliedSoFar(0);
+            cutflow_.IncrementNInitial(weight);
+        }
+    };
 
 }
 
