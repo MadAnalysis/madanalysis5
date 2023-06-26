@@ -43,6 +43,9 @@ namespace MA5
         //                        data members
         // -------------------------------------------------------------
     private:
+        /// @brief intialisation indicator
+        MAbool initialised_;
+
         // Collection of counters
         std::vector<Counter> counters_;
 
@@ -54,16 +57,13 @@ namespace MA5
         // -------------------------------------------------------------
     public:
         /// Constructor without argument
-        CounterManager() {}
+        CounterManager() { initialised_ = false; }
 
         /// Destructor
         ~CounterManager() {}
 
         /// Initialize
-        void Initialize(const MAuint32 &n)
-        {
-            counters_.resize(n);
-        }
+        void Initialize(const MAuint32 &n) { counters_.resize(n); }
 
         // Specifying a cut name
         void InitCut(const std::string myname)
@@ -73,48 +73,34 @@ namespace MA5
         }
 
         /// Reset
-        void Reset()
-        {
-            counters_.clear();
-        }
+        void Reset() { counters_.clear(); }
 
         /// Overloading operator []
-        const Counter &operator[](const MAuint32 &index) const
-        {
-            return counters_[index];
-        }
-        Counter &operator[](const MAuint32 &index)
-        {
-            return counters_[index];
-        }
+        const Counter &operator[](const MAuint32 &index) const { return counters_[index]; }
+        Counter &operator[](const MAuint32 &index) { return counters_[index]; }
 
         /// Incrementing the initial number of events
-        void IncrementNInitial(std::map<MAuint32, MAfloat64> weight)
+        void IncrementNInitial(const WeightCollection &weight)
         {
             initial_.Increment(weight);
+            if (!initialised_)
+            {
+                for (auto &counter : counters_)
+                    counter.Initialise(weight);
+                initialised_ = true;
+            }
         }
 
         /// Incrementing the initial number of events
-        Counter &GetInitial()
-        {
-            return initial_;
-        }
-        const Counter &GetInitial() const
-        {
-            return initial_;
-        }
+        Counter &GetInitial() { return initial_; }
+
+        const Counter &GetInitial() const { return initial_; }
 
         /// Write the counters in a Text file
         void Write_TextFormat(SAFWriter &output) const;
 
-        /// Write the counters in a ROOT file
-        //  void Write_RootFormat(TFile* output) const;
-
         /// Finalizing
-        void Finalize()
-        {
-            Reset();
-        }
+        void Finalize() { Reset(); }
     };
 
 }

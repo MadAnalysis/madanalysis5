@@ -26,6 +26,7 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
+#include "SampleAnalyzer/Process/Counter/Basics.h"
 
 // STL headers
 #include <iostream>
@@ -34,12 +35,11 @@
 
 namespace MA5
 {
-
-    class CounterCollection;
+    class CounterManager;
 
     class Counter
     {
-        friend class CounterCollection;
+        friend class CounterManager;
 
         // -------------------------------------------------------------
         //                        data members
@@ -50,15 +50,15 @@ namespace MA5
 
         /// number of times the function Increment is called
         /// first = positive weight ; second = negative weight
-        std::pair<MAint64, MAint64> nentries_;
+        std::map<MAint32, ENTRIES> nentries_;
 
         /// sum of weights
         /// first = positive weight ; second = negative weight
-        std::map<MAuint32, std::pair<MAfloat64, MAfloat64>> sumweight_;
+        std::map<MAint32, WEIGHTS> sumweights_;
 
         /// sum of squared weights
         /// first = positive weight ; second = negative weight
-        std::map<MAuint32, std::pair<MAfloat64, MAfloat64>> sumweight2_;
+        std::map<MAint32, WEIGHTS> sumweights2_;
 
         // -------------------------------------------------------------
         //                       method members
@@ -68,9 +68,7 @@ namespace MA5
         Counter(const std::string &name = "unkwown")
         {
             name_ = name;
-            nentries_ = std::make_pair(0, 0);
-            sumweight_[0] = std::make_pair(0., 0.);
-            sumweight2_[0] = std::make_pair(0., 0.);
+            Reset();
         }
 
         /// Destructor
@@ -79,29 +77,47 @@ namespace MA5
         /// Reset
         void Reset()
         {
-            nentries_ = std::make_pair(0, 0);
-            sumweight_.clear();
-            sumweight2_.clear();
+            nentries_.clear();
+            sumweights_.clear();
+            sumweights2_.clear();
         }
 
-        /// Increment the counter
-        void Increment(const std::map<MAuint32, MAfloat64> &multiweight)
+        MAint32 size() { return nentries_.size(); }
+
+        void Initialise(const WeightCollection &multiweight)
         {
-            for (auto &current_weight : multiweight)
+            Reset();
+            for (auto &weight : multiweight.GetWeights())
             {
-                MAfloat64 weight = current_weight.second;
-                MAuint32 idx = current_weight.first;
-                if (weight > 0)
+
+                nentries_[weight.first] = ENTRIES();
+                sumweights_[weight.first] = WEIGHTS();
+                sumweights2_[weight.first] = WEIGHTS();
+            }
+        }
+
+        std::map<MAint32, ENTRIES> nentries() { return nentries_; }
+        std::map<MAint32, WEIGHTS> sumW() { return sumweights_; }
+        std::map<MAint32, WEIGHTS> sumW2() { return sumweights2_; }
+
+        /// Increment the counter
+        void Increment(const WeightCollection &multiweight)
+        {
+            for (auto &weight : multiweight.GetWeights())
+            {
+                MAint32 idx = weight.first;
+                MAdouble64 w = weight.second;
+                if (w >= 0)
                 {
-                    nentries_.first++;
-                    sumweight_[idx].first += weight;
-                    sumweight2_[idx].first += weight * weight;
+                    nentries_[idx].positive++;
+                    sumweights_[idx].positive += w;
+                    sumweights2_[idx].positive += w * w;
                 }
-                else if (weight < 0)
+                else
                 {
-                    nentries_.second++;
-                    sumweight_[idx].second += weight;
-                    sumweight2_[idx].second += weight * weight;
+                    nentries_[idx].negative++;
+                    sumweights_[idx].negative += w;
+                    sumweights2_[idx].negative += w * w;
                 }
             }
         }
