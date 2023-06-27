@@ -270,6 +270,9 @@ namespace MA5
         /// @param name name of the weight
         void SetWeightName(int id, std::string name) { weight_names_[id] = name; }
 
+        /// @brief accessor to weight names
+        const std::map<int, std::string> WeightNames() const { return weight_names_; }
+
         /// Adding a weight
         void addWeightedEvents(MAfloat64 weight)
         {
