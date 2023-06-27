@@ -605,6 +605,7 @@ class JobWriter(object):
             file.write('      fastsim1->Execute(mySample,myEvent);\n')
         elif self.main.fastsim.package=="delphesMA5tune":
             file.write('      fastsim1->Execute(mySample,myEvent);\n')
+        file.write('      manager.PrepareForExecution(mySample, myEvent);\n')
         file.write('      if (!analyzer1->Execute(mySample,myEvent)) continue;\n')
         if self.output!="" and  not self.output.lower().endswith('root'):
             file.write('      writer1->WriteEvent(myEvent,mySample);\n')

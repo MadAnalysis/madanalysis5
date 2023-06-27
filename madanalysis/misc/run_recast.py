@@ -416,6 +416,7 @@ class RunRecast():
                 ignore=True
                 if self.main.recasting.store_events:
                     newfile.write('      writer1->WriteEvent(myEvent,mySample);\n')
+                newfile.write('      manager.PrepareForExecution(mySample, myEvent);\n')
                 for analysis in analysislist:
                     newfile.write('      if (!analyzer_'+analysis+'->Execute(mySample,myEvent)) continue;\n')
                 if self.TACO_output!='':
