@@ -29,133 +29,252 @@ using namespace MA5;
 /// Write the plot in a Text file
 void Histo::Write_TextFormat(std::ostream *output)
 {
-  // Header
-  *output << "<Histo>" << std::endl;
+    // Header
+    *output << "<Histo>" << std::endl;
 
-  // Write the body
-  Write_TextFormatBody(output);
+    // Write the body
+    Write_TextFormatBody(output);
 
-  // Foot
-  *output << "</Histo>" << std::endl;
-  *output << std::endl;
+    // Foot
+    *output << "</Histo>" << std::endl;
+    *output << std::endl;
 }
 
 /// Write the plot in a Text file
 void Histo::Write_TextFormatBody(std::ostream *output)
 {
-  // Description
-  *output << "  <Description>" << std::endl;
+    // Description
+    *output << "  <Description>" << std::endl;
 
-  // Name
-  *output << "    \"" << name_ << "\"" << std::endl;
+    // Name
+    *output << "    \"" << name_ << "\"" << std::endl;
 
-  // Title
-  *output << "    ";
-  output->width(10);
-  *output << std::left << "# nbins";
-  output->width(15);
-  *output << std::left << "xmin";
-  output->width(15);
-  *output << std::left << "xmax" << std::endl;
+    // Title
+    *output << "    ";
+    output->width(10);
+    *output << std::left << "# nbins";
+    output->width(15);
+    *output << std::left << "xmin";
+    output->width(15);
+    *output << std::left << "xmax" << std::endl;
 
-  // Data
-  *output << "      ";
-  output->width(8);
-  *output << std::left << nbins_;
-  output->width(15);
-  *output << std::left << std::scientific << xmin_;
-  output->width(15);
-  *output << std::left << std::scientific << xmax_ << std::endl;
-
-  // SelectionRegions
-  if (regions_.size() != 0)
-  {
-    MAuint32 maxlength = 0;
-    for (MAuint32 i = 0; i < regions_.size(); i++)
-      if (regions_[i]->GetName().size() > maxlength)
-        maxlength = regions_[i]->GetName().size();
-    *output << std::left << "    # Defined regions" << std::endl;
-    for (MAuint32 i = 0; i < regions_.size(); i++)
-    {
-      *output << "      " << std::setw(maxlength) << std::left << regions_[i]->GetName();
-      *output << "    # Region nr. " << std::fixed << i + 1 << std::endl;
-    }
-  }
-
-  // End description
-  *output << "  </Description>" << std::endl;
-
-  // Statistics
-  *output << "  <Statistics>" << std::endl;
-
-  *output << "      ";
-  output->width(15);
-  *output << std::fixed << nevents_.first;
-  output->width(15);
-  *output << std::fixed << nevents_.second;
-  *output << " # nevents" << std::endl;
-  *output << "      ";
-  output->width(15);
-  *output << std::scientific << nevents_w_.first;
-  output->width(15);
-  *output << std::scientific << nevents_w_.second;
-  *output << " # sum of event-weights over events" << std::endl;
-  *output << "      ";
-  output->width(15);
-  *output << std::fixed << nentries_.first;
-  output->width(15);
-  *output << std::fixed << nentries_.second;
-  *output << " # nentries" << std::endl;
-  *output << "      ";
-  output->width(15);
-  *output << std::scientific << sum_w_[0].first;
-  output->width(15);
-  *output << std::scientific << sum_w_[0].second;
-  *output << " # sum of event-weights over entries" << std::endl;
-  *output << "      ";
-  output->width(15);
-  *output << std::scientific << sum_ww_[0].first;
-  output->width(15);
-  *output << std::scientific << sum_ww_[0].second;
-  *output << " # sum weights^2" << std::endl;
-  *output << "      ";
-  output->width(15);
-  *output << std::scientific << sum_xw_[0].first;
-  output->width(15);
-  *output << std::scientific << sum_xw_[0].second;
-  *output << " # sum value*weight" << std::endl;
-  *output << "      ";
-  output->width(15);
-  *output << std::scientific << sum_xxw_[0].first;
-  output->width(15);
-  *output << std::scientific << sum_xxw_[0].second;
-  *output << " # sum value^2*weight" << std::endl;
-  *output << "  </Statistics>" << std::endl;
-
-  // Data
-  *output << "  <Data>" << std::endl;
-  *output << "      ";
-  output->width(15);
-  *output << std::scientific << underflow_[0].first;
-  output->width(15);
-  *output << std::scientific << underflow_[0].second;
-  *output << " # underflow" << std::endl;
-  for (MAuint32 i = 0; i < histo_.size(); i++)
-  {
+    // Data
     *output << "      ";
+    output->width(8);
+    *output << std::left << nbins_;
     output->width(15);
-    *output << std::scientific << histo_[0][i].first;
+    *output << std::left << std::scientific << xmin_;
     output->width(15);
-    *output << std::scientific << histo_[0][i].second;
-    if (i < 2 || i >= (histo_.size() - 2))
-      *output << " # bin " << i + 1 << " / " << histo_.size();
-    *output << std::endl;
-  }
-  *output << "      ";
-  output->width(15);
-  *output << std::scientific << overflow_[0].first;
-  output->width(15);
-  *output << std::scientific << overflow_[0].second;
-  *output << " # overflow" << std::endl;
-  *output << "  </Data>" << std::endl;
+    *output << std::left << std::scientific << xmax_ << std::endl;
+
+    // SelectionRegions
+    if (regions_.size() != 0)
+    {
+        MAuint32 maxlength = 0;
+        for (MAuint32 i = 0; i < regions_.size(); i++)
+            if (regions_[i]->GetName().size() > maxlength)
+                maxlength = regions_[i]->GetName().size();
+        *output << std::left << "    # Defined regions" << std::endl;
+        for (MAuint32 i = 0; i < regions_.size(); i++)
+        {
+            *output << "      " << std::setw(maxlength) << std::left << regions_[i]->GetName();
+            *output << "    # Region nr. " << std::fixed << i + 1 << std::endl;
+        }
+    }
+
+    // End description
+    *output << "  </Description>" << std::endl;
+
+    // Statistics
+    *output << "  <Statistics>" << std::endl;
+
+    *output << "      ";
+    for (auto &event : nevents_)
+    {
+        output->width(15);
+        *output << std::fixed << event.second.positive;
+        output->width(15);
+        *output << std::fixed << event.second.negative;
+    }
+    *output << " # nevents" << std::endl;
+    *output << "      ";
+    for (auto &event : nevents_w_)
+    {
+        output->width(15);
+        *output << std::scientific << event.second.positive;
+        output->width(15);
+        *output << std::scientific << event.second.negative;
+    }
+    *output << " # sum of event-weights over events" << std::endl;
+    *output << "      ";
+    for (auto &event : nentries_)
+    {
+        output->width(15);
+        *output << std::fixed << event.second.positive;
+        output->width(15);
+        *output << std::fixed << event.second.negative;
+    }
+    *output << " # nentries" << std::endl;
+    *output << "      ";
+    for (auto &event : sum_w_)
+    {
+        output->width(15);
+        *output << std::scientific << event.second.positive;
+        output->width(15);
+        *output << std::scientific << event.second.negative;
+    }
+    *output << " # sum of event-weights over entries" << std::endl;
+    *output << "      ";
+    for (auto &event : sum_ww_)
+    {
+        output->width(15);
+        *output << std::scientific << event.second.positive;
+        output->width(15);
+        *output << std::scientific << event.second.negative;
+    }
+    *output << " # sum weights^2" << std::endl;
+    *output << "      ";
+    for (auto &event : sum_xw_)
+    {
+        output->width(15);
+        *output << std::scientific << event.second.positive;
+        output->width(15);
+        *output << std::scientific << event.second.negative;
+    }
+    *output << " # sum value*weight" << std::endl;
+    *output << "      ";
+    for (auto &event : sum_xxw_)
+    {
+        output->width(15);
+        *output << std::scientific << event.second.positive;
+        output->width(15);
+        *output << std::scientific << event.second.negative;
+    }
+    *output << " # sum value^2*weight" << std::endl;
+    *output << "  </Statistics>" << std::endl;
+
+    // Data
+    *output << "  <Data>" << std::endl;
+    *output << "      ";
+    for (auto &event : underflow_)
+    {
+        output->width(15);
+        *output << std::scientific << event.second.positive;
+        output->width(15);
+        *output << std::scientific << event.second.negative;
+    }
+    *output << " # underflow" << std::endl;
+    for (MAuint32 ibin = 0; ibin < histo_.size(); ibin++)
+    {
+        *output << "      ";
+        for (auto &bin : histo_[ibin])
+        {
+            output->width(15);
+            *output << std::scientific << bin.second.positive;
+            output->width(15);
+            *output << std::scientific << bin.second.negative;
+        }
+        if (ibin < 2 || ibin >= (histo_.size() - 2))
+            *output << " # bin " << ibin + 1 << " / " << histo_.size();
+        *output << std::endl;
+    }
+    *output << "      ";
+    for (auto &event : overflow_)
+    {
+        output->width(15);
+        *output << std::scientific << event.second.positive;
+        output->width(15);
+        *output << std::scientific << event.second.negative;
+    }
+    *output << " # overflow" << std::endl;
+    *output << "  </Data>" << std::endl;
+}
+
+/// @brief Initialise the containers
+/// @param weights weight collection
+void Histo::Initialise(const WeightCollection &weights)
+{
+    if (!initialised_)
+    {
+        for (auto &w : weights.GetWeights())
+        {
+            MAint32 idx = w.first;
+            for (MAuint16 i = 0; i < nbins_; i++)
+            {
+                std::map<MAint32, WEIGHTS> current;
+                current[idx] = WEIGHTS();
+                if (histo_.size() < i)
+                    histo_.push_back(current);
+                else
+                    histo_[i] = current;
+            }
+            underflow_[idx] = WEIGHTS();
+            overflow_[idx] = WEIGHTS();
+            sum_w_[idx] = WEIGHTS();
+            sum_ww_[idx] = WEIGHTS();
+            sum_xw_[idx] = WEIGHTS();
+            sum_xxw_[idx] = WEIGHTS();
+        }
+        initialised_ = true;
+    }
+}
+
+/// Filling histogram
+void Histo::Fill(MAfloat64 value, const WeightCollection &weights)
+{
+    Initialise(weights);
+    // Safety : nan or isinf
+    try
+    {
+        if (std::isnan(value))
+            throw EXCEPTION_WARNING("Skipping a NaN (Not a Number) value in an histogram.", "", 0);
+        if (std::isinf(value))
+            throw EXCEPTION_WARNING("Skipping a Infinity value in an histogram.", "", 0);
+    }
+    catch (const std::exception &e)
+    {
+        MANAGE_EXCEPTION(e);
+    }
+
+    for (auto &w : weights.GetWeights())
+    {
+        MAdouble64 weight = w.second;
+        MAint32 idx = w.first;
+        // Positive weight
+        if (weight >= 0)
+        {
+            nentries_[idx].positive++;
+            sum_w_[idx].positive += weight;
+            sum_ww_[idx].positive += weight * weight;
+            sum_xw_[idx].positive += value * weight;
+            sum_xxw_[idx].positive += value * value * weight;
+            if (value < xmin_)
+                underflow_[idx].positive += weight;
+            else if (value >= xmax_)
+                overflow_[idx].positive += weight;
+            else
+            {
+                histo_[std::floor((value - xmin_) / step_)][idx].positive += weight;
+            }
+        }
+
+        // Negative weight
+        else
+        {
+            MAdouble64 pw = std::fabs(weight);
+            nentries_[idx].negative++;
+            sum_w_[idx].negative += pw;
+            sum_ww_[idx].negative += pw * pw;
+            sum_xw_[idx].negative += value * pw;
+            sum_xxw_[idx].negative += value * value * pw;
+            if (value < xmin_)
+                underflow_[idx].negative += pw;
+            else if (value >= xmax_)
+                overflow_[idx].negative += pw;
+            else
+            {
+                histo_[std::floor((value - xmin_) / step_)][idx].negative += pw;
+            }
+        }
+    }
 }
