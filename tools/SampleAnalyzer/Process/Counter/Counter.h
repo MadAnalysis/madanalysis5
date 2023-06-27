@@ -26,7 +26,8 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
-#include "SampleAnalyzer/Process/Counter/Basics.h"
+#include "SampleAnalyzer/Commons/Base/Basics.h"
+#include "SampleAnalyzer/Commons/DataFormat/WeightCollection.h"
 
 // STL headers
 #include <iostream>

@@ -26,51 +26,6 @@
 
 using namespace MA5;
 
-/*
-/// Write the counters in a ROOT file
-void CounterManager::Write_RootFormat(TFile* output) const
-{
-  // Creating ROOT containers
-  TVector nentries_pos   (counters_.size());
-  TVector sumweight_pos  (counters_.size());
-  TVector sumweight2_pos (counters_.size());
-  TVector nentries_neg   (counters_.size());
-  TVector sumweight_neg  (counters_.size());
-  TVector sumweight2_neg (counters_.size());
-  TVector initial_pos    (1);
-  TVector initial_neg    (1);
-  TVector initial2_pos    (1);
-  TVector initial2_neg    (1);
-
-  // Filling ROOT containers with info
-  for (MAuint32 i=0; i<counters_.size();i++)
-  {
-    nentries_pos[i]   = counters_[i].nentries_.first;
-    sumweight_pos[i]  = counters_[i].sumweight_.first;
-    sumweight2_pos[i] = counters_[i].sumweight2_.first;
-    nentries_neg[i]   = counters_[i].nentries_.second;
-    sumweight_neg[i]  = counters_[i].sumweight_.second;
-    sumweight2_neg[i] = counters_[i].sumweight2_.second;
-  }
-  initial_pos[0]  = initial_.sumweight_.first;
-  initial_neg[0]  = initial_.sumweight_.second;
-  initial2_pos[0] = initial_.sumweight2_.first;
-  initial2_neg[0] = initial_.sumweight2_.second;
-
-  // Saving info
-  initial_pos.Write("initial_sumw_positive_weight");
-  initial_neg.Write("initial_sumw_negative_weight");
-  initial2_pos.Write("initial_sumw2_positive_weight");
-  initial2_neg.Write("initial_sumw2_negative_weight");
-  nentries_pos.Write("nentries_pos");
-  sumweight_pos.Write("accepted_sumw_positive_weight");
-  sumweight2_pos.Write("accepted_sumw2_positive_weight");
-  nentries_neg.Write("nentries_neg");
-  sumweight_neg.Write("accepted_sumw_negative_weight");
-  sumweight2_neg.Write("accepted_sumw2_negative_weight");
-}
-*/
-
 /// Write the counters in a TEXT file
 void CounterManager::Write_TextFormat(SAFWriter &output) const
 {
@@ -81,27 +36,36 @@ void CounterManager::Write_TextFormat(SAFWriter &output) const
     *output.GetStream() << "\"Initial number of events\"      #" << std::endl;
 
     // nentries
-    output.GetStream()->width(15);
-    *output.GetStream() << std::left << std::scientific << initial_.nentries_.first;
-    *output.GetStream() << " ";
-    output.GetStream()->width(15);
-    *output.GetStream() << std::left << std::scientific << initial_.nentries_.second;
+    for (auto &event : initial_.nentries_)
+    {
+        output.GetStream()->width(15);
+        *output.GetStream() << std::left << std::scientific << event.second.positive;
+        *output.GetStream() << " ";
+        output.GetStream()->width(15);
+        *output.GetStream() << std::left << std::scientific << event.second.negative;
+    }
     *output.GetStream() << " # nentries" << std::endl;
 
     // sum of weights
-    output.GetStream()->width(15);
-    *output.GetStream() << std::left << std::scientific << initial_.sumweight_.at(0).first;
-    *output.GetStream() << " ";
-    output.GetStream()->width(15);
-    *output.GetStream() << std::left << std::scientific << initial_.sumweight_.at(0).second;
+    for (auto &event : initial_.sumweights_)
+    {
+        output.GetStream()->width(15);
+        *output.GetStream() << std::left << std::scientific << event.second.positive;
+        *output.GetStream() << " ";
+        output.GetStream()->width(15);
+        *output.GetStream() << std::left << std::scientific << event.second.negative;
+    }
     *output.GetStream() << " # sum of weights" << std::endl;
 
     // sum of weights^2
-    output.GetStream()->width(15);
-    *output.GetStream() << std::left << std::scientific << initial_.sumweight2_.at(0).first;
-    *output.GetStream() << " ";
-    output.GetStream()->width(15);
-    *output.GetStream() << std::left << std::scientific << initial_.sumweight2_.at(0).second;
+    for (auto &event : initial_.sumweights2_)
+    {
+        output.GetStream()->width(15);
+        *output.GetStream() << std::left << std::scientific << event.second.positive;
+        *output.GetStream() << " ";
+        output.GetStream()->width(15);
+        *output.GetStream() << std::left << std::scientific << event.second.negative;
+    }
     *output.GetStream() << " # sum of weights^2" << std::endl;
 
     // foot
@@ -124,27 +88,36 @@ void CounterManager::Write_TextFormat(SAFWriter &output) const
         *output.GetStream() << "# " << i + 1 << "st cut" << std::endl;
 
         // nentries
-        output.GetStream()->width(15);
-        *output.GetStream() << std::left << std::scientific << counters_[i].nentries_.first;
-        *output.GetStream() << " ";
-        output.GetStream()->width(15);
-        *output.GetStream() << std::left << std::scientific << counters_[i].nentries_.second;
+        for (auto &event : counters_[i].nentries_)
+        {
+            output.GetStream()->width(15);
+            *output.GetStream() << std::left << std::scientific << event.second.positive;
+            *output.GetStream() << " ";
+            output.GetStream()->width(15);
+            *output.GetStream() << std::left << std::scientific << event.second.negative;
+        }
         *output.GetStream() << " # nentries" << std::endl;
 
         // sum of weights
-        output.GetStream()->width(15);
-        *output.GetStream() << std::left << std::scientific << counters_[i].sumweight_.at(0).first;
-        *output.GetStream() << " ";
-        output.GetStream()->width(15);
-        *output.GetStream() << std::left << std::scientific << counters_[i].sumweight_.at(0).second;
+        for (auto &event : counters_[i].sumweights_)
+        {
+            output.GetStream()->width(15);
+            *output.GetStream() << std::left << std::scientific << event.second.positive;
+            *output.GetStream() << " ";
+            output.GetStream()->width(15);
+            *output.GetStream() << std::left << std::scientific << event.second.negative;
+        }
         *output.GetStream() << " # sum of weights" << std::endl;
 
         // sum of weights^2
-        output.GetStream()->width(15);
-        *output.GetStream() << std::left << std::scientific << counters_[i].sumweight2_.at(0).first;
-        *output.GetStream() << " ";
-        output.GetStream()->width(15);
-        *output.GetStream() << std::left << std::scientific << counters_[i].sumweight2_.at(0).second;
+        for (auto &event : counters_[i].sumweights2_)
+        {
+            output.GetStream()->width(15);
+            *output.GetStream() << std::left << std::scientific << event.second.positive;
+            *output.GetStream() << " ";
+            output.GetStream()->width(15);
+            *output.GetStream() << std::left << std::scientific << event.second.negative;
+        }
         *output.GetStream() << " # sum of weights^2" << std::endl;
 
         // foot
