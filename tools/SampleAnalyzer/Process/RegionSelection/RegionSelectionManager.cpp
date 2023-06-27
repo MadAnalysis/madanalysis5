@@ -35,9 +35,7 @@ MAbool RegionSelectionManager::ApplyCut(MAbool condition, std::string const &cut
 {
 	/// Skip the cut if all regions are already failing the previous cut
 	if (NumberOfSurvivingRegions_ == 0)
-	{
 		return false;
-	}
 
 	/// Get the cut under consideration
 	MultiRegionCounter *mycut = 0;
@@ -69,23 +67,25 @@ MAbool RegionSelectionManager::ApplyCut(MAbool condition, std::string const &cut
 
 		/// Skip the current region if it has failed a previous cut
 		if (!ThisRegion->IsSurviving())
-		{
 			continue;
-		}
+
+		WeightCollection current_region_weight;
+		if (region_weight_.find(ThisRegion->GetName()) != region_weight_.end())
+			current_region_weight = region_weight_[ThisRegion->GetName()];
+		else
+			current_region_weight = weight_;
 
 		/// Check the current cut:
 		if (condition)
 		{
-			ThisRegion->IncrementCutFlow(ThisRegion->GetMultiWeight());
+			ThisRegion->IncrementCutFlow(current_region_weight);
 		}
 		else
 		{
 			ThisRegion->SetSurvivingTest(false);
 			NumberOfSurvivingRegions_--;
 			if (NumberOfSurvivingRegions_ == 0)
-			{
 				return false;
-			}
 		}
 	}
 
