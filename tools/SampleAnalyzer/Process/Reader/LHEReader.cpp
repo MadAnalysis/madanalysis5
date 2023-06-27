@@ -498,7 +498,7 @@ void LHEReader::FillEventInitLine(const std::string &line,
     str >> myEvent.mc()->alphaQED_;
     str >> myEvent.mc()->alphaQCD_;
     myEvent.mc()->particles_.reserve(nparts);
-    myEvent.mc()->weights().Add(0, weight);
+    myEvent.mc()->multiweights_.Add(0, weight);
     mothers_.reserve(nparts);
 }
 
@@ -565,10 +565,12 @@ void LHEReader::FillWeightLine(const std::string &line,
     if (tmp != "<wgt")
         return;
 
-    std::size_t found1 = line.find("\"");
+    /// @jackaraz: Note that changing "\"" to "\'". this may cause problems in certain files
+    /// with the LHE example that I have the quotes are written with ' not with "
+    std::size_t found1 = line.find("\'");
     if (found1 == std::string::npos)
         return;
-    std::size_t found2 = line.find("\"", found1 + 1);
+    std::size_t found2 = line.find("\'", found1 + 1);
     if (found2 == std::string::npos)
         return;
     std::string idstring = line.substr(found1 + 1, found2 - found1 - 1);
@@ -577,7 +579,6 @@ void LHEReader::FillWeightLine(const std::string &line,
     str2 << idstring;
     MAuint32 id;
     str2 >> id;
-
     found1 = line.find(">");
     if (found1 == std::string::npos)
         return;
@@ -590,6 +591,5 @@ void LHEReader::FillWeightLine(const std::string &line,
     str3 << valuestring;
     MAfloat64 value;
     str3 >> value;
-
     myEvent.mc()->weights().Add(id, value);
 }

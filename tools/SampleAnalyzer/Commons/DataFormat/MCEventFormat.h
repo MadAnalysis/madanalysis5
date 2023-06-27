@@ -164,6 +164,9 @@ namespace MA5
         WeightCollection &weights() { return multiweights_; }
 
         /// Accessor to multiweights
+        const WeightCollection &weights() const { return multiweights_; }
+
+        /// Accessor to multiweights
         const MAfloat64 &get_weight(MAuint32 id) const { return multiweights_.Get(id); }
 
         /// Accessor to the generated particle collection (read-only)

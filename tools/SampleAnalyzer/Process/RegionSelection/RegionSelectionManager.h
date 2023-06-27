@@ -83,9 +83,6 @@ namespace MA5
         /// Reset
         void Reset()
         {
-            for (MAuint32 i = 0; i < regions_.size(); i++)
-                if (regions_[i] != 0)
-                    delete regions_[i];
             regions_.clear();
             cutmanager_.Finalize();
             plotmanager_.Finalize();
@@ -138,9 +135,11 @@ namespace MA5
 
         /// @brief initialise new event with multiweight definition
         /// @param EventWeight weight map
-        void InitializeForNewEvent(WeightCollection &EventWeight)
+        void InitializeForNewEvent(const WeightCollection &EventWeight)
         {
-            weight_ = EventWeight;
+            weight_.Reset();
+            for (auto &w : EventWeight.GetWeights())
+                weight_.Add(w.first, w.second);
             NumberOfSurvivingRegions_ = regions_.size();
             for (auto &reg : regions_)
                 reg->InitializeForNewEvent(EventWeight);

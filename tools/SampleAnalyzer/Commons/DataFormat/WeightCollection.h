@@ -61,7 +61,7 @@ namespace MA5
         {
             weights_.clear();
             for (auto &id_weights : rhs.weights_)
-                weights_[id_weights.first] = id_weights.second;
+                Add(id_weights.first, id_weights.second);
         }
 
         /// @brief Initialise weights with a certain size and default value

@@ -71,20 +71,16 @@ namespace MA5
         PlotBase()
         {
             // Reseting statistical counters
-            nevents_.insert(std::make_pair(0, ENTRIES()));
-            nentries_.insert(std::make_pair(0, ENTRIES()));
-            nevents_w_.insert(std::make_pair(0, WEIGHTS()));
             fresh_event_ = true;
+            initialised_ = false;
         }
 
         /// Constructor with argument
         PlotBase(const std::string &name)
         {
             name_ = name;
-            nevents_.insert(std::make_pair(0, ENTRIES()));
-            nentries_.insert(std::make_pair(0, ENTRIES()));
-            nevents_w_.insert(std::make_pair(0, WEIGHTS()));
             fresh_event_ = true;
+            initialised_ = false;
         }
 
         /// Destructor
@@ -112,6 +108,7 @@ namespace MA5
                     nentries_[weight.first] = ENTRIES();
                     nevents_w_[weight.first] = WEIGHTS();
                 }
+                initialised_ = true;
             }
         }
 
