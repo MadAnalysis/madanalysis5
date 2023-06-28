@@ -194,18 +194,11 @@ void Histo::Write_TextFormatBody(std::ostream *output)
 /// @param weights weight collection
 void Histo::_initialize(const WeightCollection &weights)
 {
+    std::map<MAint32, WEIGHTS> current;
     for (auto &w : weights.GetWeights())
     {
         MAint32 idx = w.first;
-        for (MAuint16 i = 0; i < nbins_; i++)
-        {
-            std::map<MAint32, WEIGHTS> current;
-            current[idx] = WEIGHTS();
-            if (histo_.size() < i)
-                histo_.push_back(current);
-            else
-                histo_[i] = current;
-        }
+        current[idx] = WEIGHTS();
         underflow_[idx] = WEIGHTS();
         overflow_[idx] = WEIGHTS();
         sum_w_[idx] = WEIGHTS();
@@ -213,12 +206,13 @@ void Histo::_initialize(const WeightCollection &weights)
         sum_xw_[idx] = WEIGHTS();
         sum_xxw_[idx] = WEIGHTS();
     }
+    for (MAuint16 i = 0; i < nbins_; i++)
+        histo_.push_back(current);
 }
 
 /// Filling histogram
 void Histo::Fill(MAfloat64 value, const WeightCollection &weights)
 {
-    Initialize(weights);
     // Safety : nan or isinf
     try
     {
@@ -249,9 +243,7 @@ void Histo::Fill(MAfloat64 value, const WeightCollection &weights)
             else if (value >= xmax_)
                 overflow_[idx].positive += weight;
             else
-            {
                 histo_[std::floor((value - xmin_) / step_)][idx].positive += weight;
-            }
         }
 
         // Negative weight
@@ -268,9 +260,7 @@ void Histo::Fill(MAfloat64 value, const WeightCollection &weights)
             else if (value >= xmax_)
                 overflow_[idx].negative += pw;
             else
-            {
                 histo_[std::floor((value - xmin_) / step_)][idx].negative += pw;
-            }
         }
     }
 }
