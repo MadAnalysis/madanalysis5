@@ -144,7 +144,7 @@ namespace MA5
             for (auto &reg : regions_)
                 reg->InitializeForNewEvent(EventWeight);
             for (MAuint32 i = 0; i < plotmanager_.GetNplots(); i++)
-                plotmanager_.GetHistos()[i]->SetFreshEvent(true);
+                plotmanager_.GetHistos()[i]->SetFreshEvent(true, EventWeight);
         }
 
         /// This method associates all regions with a cut

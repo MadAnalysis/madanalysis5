@@ -52,9 +52,6 @@ namespace MA5
         /// RegionSelections attached to the histo
         std::vector<RegionSelection *> regions_;
 
-        /// @brief is the class initialised
-        MAbool initialised_;
-
         // -------------------------------------------------------------
         //                       method members
         // -------------------------------------------------------------
@@ -70,14 +67,10 @@ namespace MA5
         /// Destructor
         virtual ~HistoFrequency() {}
 
-        void initialise_weights(const WeightCollection &multiweight)
+        void _initialize(const WeightCollection &multiweight)
         {
-            if (!initialised_)
-            {
-                for (auto &weight : multiweight.GetWeights())
-                    sum_w_[weight.first] = WEIGHTS();
-                initialised_ = true;
-            }
+            for (auto &weight : multiweight.GetWeights())
+                sum_w_[weight.first] = WEIGHTS();
         }
 
         /// Setting the linked regions
@@ -107,8 +100,6 @@ namespace MA5
         /// Adding an entry for a given observable
         void Fill(const MAint32 &obs, WeightCollection &weights)
         {
-
-            initialise_weights(weights);
             for (auto &weight : weights.GetWeights())
             {
                 MAint32 idx = weight.first;

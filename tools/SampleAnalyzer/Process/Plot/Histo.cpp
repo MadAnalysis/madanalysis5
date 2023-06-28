@@ -192,37 +192,33 @@ void Histo::Write_TextFormatBody(std::ostream *output)
 
 /// @brief Initialise the containers
 /// @param weights weight collection
-void Histo::Initialise(const WeightCollection &weights)
+void Histo::_initialize(const WeightCollection &weights)
 {
-    if (!initialised_)
+    for (auto &w : weights.GetWeights())
     {
-        for (auto &w : weights.GetWeights())
+        MAint32 idx = w.first;
+        for (MAuint16 i = 0; i < nbins_; i++)
         {
-            MAint32 idx = w.first;
-            for (MAuint16 i = 0; i < nbins_; i++)
-            {
-                std::map<MAint32, WEIGHTS> current;
-                current[idx] = WEIGHTS();
-                if (histo_.size() < i)
-                    histo_.push_back(current);
-                else
-                    histo_[i] = current;
-            }
-            underflow_[idx] = WEIGHTS();
-            overflow_[idx] = WEIGHTS();
-            sum_w_[idx] = WEIGHTS();
-            sum_ww_[idx] = WEIGHTS();
-            sum_xw_[idx] = WEIGHTS();
-            sum_xxw_[idx] = WEIGHTS();
+            std::map<MAint32, WEIGHTS> current;
+            current[idx] = WEIGHTS();
+            if (histo_.size() < i)
+                histo_.push_back(current);
+            else
+                histo_[i] = current;
         }
-        initialised_ = true;
+        underflow_[idx] = WEIGHTS();
+        overflow_[idx] = WEIGHTS();
+        sum_w_[idx] = WEIGHTS();
+        sum_ww_[idx] = WEIGHTS();
+        sum_xw_[idx] = WEIGHTS();
+        sum_xxw_[idx] = WEIGHTS();
     }
 }
 
 /// Filling histogram
 void Histo::Fill(MAfloat64 value, const WeightCollection &weights)
 {
-    Initialise(weights);
+    Initialize(weights);
     // Safety : nan or isinf
     try
     {

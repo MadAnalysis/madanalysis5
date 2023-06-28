@@ -90,24 +90,31 @@ namespace MA5
         MAbool FreshEvent() { return fresh_event_; }
 
         /// Modifier for fresh_event
-        void SetFreshEvent(MAbool tag) { fresh_event_ = tag; }
+        void SetFreshEvent(MAbool tag, const WeightCollection &EventWeight)
+        {
+            Initialize(EventWeight);
+            fresh_event_ = tag;
+        }
 
         /// Write the plot in a ROOT file
         virtual void Write_TextFormat(std::ostream *output) = 0;
 
+        /// @brief Initialiser for the classes that inherits this class
+        virtual void _initialize(const WeightCollection &multiweight) = 0;
+
         /// @brief Initialise the containers
         /// @param multiweight multiweight collection
-        void Initialise(const WeightCollection &multiweight)
+        void Initialize(const WeightCollection &multiweight)
         {
             if (!initialised_)
             {
                 for (auto &weight : multiweight.GetWeights())
                 {
-
                     nevents_[weight.first] = ENTRIES();
                     nentries_[weight.first] = ENTRIES();
                     nevents_w_[weight.first] = WEIGHTS();
                 }
+                _initialize(multiweight);
                 initialised_ = true;
             }
         }
@@ -115,7 +122,6 @@ namespace MA5
         /// Increment number of events
         void IncrementNEvents(const WeightCollection &weights)
         {
-            Initialise(weights);
             for (auto &weight : weights.GetWeights())
             {
                 MAint32 idx = weight.first;
@@ -131,7 +137,7 @@ namespace MA5
                     nevents_w_[idx].negative += std::fabs(w);
                 }
             }
-            SetFreshEvent(false);
+            SetFreshEvent(false, weights);
         }
 
         /// Return Number of events

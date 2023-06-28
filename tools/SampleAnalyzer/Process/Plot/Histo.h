@@ -75,9 +75,6 @@ namespace MA5
         /// RegionSelections attached to the histo
         std::vector<RegionSelection *> regions_;
 
-        /// @brief If the class is initialised or not
-        MAbool initialised_;
-
         // -------------------------------------------------------------
         //                       method members
         // -------------------------------------------------------------
@@ -89,7 +86,6 @@ namespace MA5
             xmin_ = 0;
             xmax_ = 100;
             step_ = (xmax_ - xmin_) / static_cast<MAfloat64>(nbins_);
-            initialised_ = false;
         }
 
         /// Constructor with argument
@@ -98,7 +94,6 @@ namespace MA5
         /// Constructor with argument
         Histo(const std::string &name, MAuint32 nbins, MAfloat64 xmin, MAfloat64 xmax) : PlotBase(name)
         {
-            initialised_ = false;
             // Setting the description: nbins
             try
             {
@@ -160,7 +155,9 @@ namespace MA5
         }
 
         /// Initialise the class
-        void Initialise(const WeightCollection &weights);
+        /// @brief Initialise the containers
+        /// @param weights weight collection
+        virtual void _initialize(const WeightCollection &multiweight);
 
         /// Filling histogram
         void Fill(MAfloat64 value, const WeightCollection &weights);

@@ -113,6 +113,9 @@ namespace MA5
 
         /// Write the plot in a Text file
         virtual void Write_TextFormat(std::ostream *output);
+
+        /// @brief initialise the class
+        virtual void _initialize(const WeightCollection &weights) {}
     };
 
 }

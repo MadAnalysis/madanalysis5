@@ -42,7 +42,6 @@ void HistoLogX::Write_TextFormat(std::ostream *output)
 
 void HistoLogX::Fill(MAfloat64 value, const WeightCollection &weights)
 {
-    Initialise(weights);
     // Safety : nan or isinf
     try
     {

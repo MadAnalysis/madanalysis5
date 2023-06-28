@@ -110,6 +110,7 @@ void RegionSelectionManager::FillHisto(std::string const &histname, MAfloat64 va
 			if (dynamic_cast<HistoFrequency *>(plotmanager_.GetHistos()[i]) != 0)
 			{
 				myhistof = dynamic_cast<HistoFrequency *>(plotmanager_.GetHistos()[i]);
+
 				if (myhistof->AllSurviving() == 0)
 					return;
 				try
