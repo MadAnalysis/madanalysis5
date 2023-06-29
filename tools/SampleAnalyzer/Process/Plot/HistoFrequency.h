@@ -126,7 +126,7 @@ namespace MA5
             }
         }
 
-        /// Write the plot in a ROOT file
+        /// Write the plot in a text file
         virtual void Write_TextFormat(std::ostream *output)
         {
             // Header
