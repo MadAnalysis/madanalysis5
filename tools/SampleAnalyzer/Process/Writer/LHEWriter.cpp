@@ -620,7 +620,7 @@ MAbool LHEWriter::WriteEventHeader(const EventFormat &myEvent,
     {
         *output_ << std::setw(2) << std::right << nevents << " ";
         *output_ << std::setw(3) << std::right << myEvent.mc()->processId_ << " ";
-        MAfloat64 myweight = myEvent.mc()->get_weight(0);
+        MAfloat64 myweight = myEvent.mc()->GetWeight(0);
         if (myweight == 0)
             myweight = 1;
         *output_ << std::setw(14) << std::right << LHEWriter::FortranFormat_SimplePrecision(myweight) << " ";
