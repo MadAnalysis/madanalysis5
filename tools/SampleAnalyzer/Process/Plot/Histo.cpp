@@ -198,7 +198,6 @@ void Histo::_initialize(const WeightCollection &weights)
     for (auto &w : weights.GetWeights())
     {
         MAint32 idx = w.first;
-        current[idx] = WEIGHTS();
         underflow_[idx] = WEIGHTS();
         overflow_[idx] = WEIGHTS();
         sum_w_[idx] = WEIGHTS();
@@ -206,8 +205,6 @@ void Histo::_initialize(const WeightCollection &weights)
         sum_xw_[idx] = WEIGHTS();
         sum_xxw_[idx] = WEIGHTS();
     }
-    for (MAuint16 i = 0; i < nbins_; i++)
-        histo_.push_back(current);
 }
 
 /// Filling histogram

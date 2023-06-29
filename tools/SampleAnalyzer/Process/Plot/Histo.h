@@ -123,6 +123,7 @@ namespace MA5
 
             step_ = (xmax_ - xmin_) / static_cast<MAfloat64>(nbins_);
 
+            /// resize takes care of initialisation
             histo_.resize(nbins_);
         }
 
