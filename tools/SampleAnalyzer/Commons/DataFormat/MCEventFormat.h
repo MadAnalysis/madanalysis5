@@ -100,13 +100,13 @@ namespace MA5
         MCEventFormat()
         {
             processId_ = 0;
-            // weight_ = 1.;
             scale_ = 0.;
             alphaQED_ = 0.;
             alphaQCD_ = 0.;
             TET_ = 0.;
             THT_ = 0.;
             Meff_ = 0.;
+            multiweights_.clear();
         }
 
         /// Destructor
@@ -191,7 +191,6 @@ namespace MA5
         void Reset()
         {
             processId_ = 0;
-            // weight_ = 1.;
             scale_ = 0.;
             alphaQED_ = 0.;
             alphaQCD_ = 0.;
