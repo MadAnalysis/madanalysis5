@@ -75,7 +75,6 @@ namespace MA5
         MAfloat32 energy_unit_; /// Energy unit: GeV=1 MeV=0.001 keV=0.000001
 
         // ----------------------- multiweights ------------------------
-        /// @jackaraz: not sure if this is doing anything
         /// @brief store weight names
         std::map<int, std::string> weight_names_;
 
