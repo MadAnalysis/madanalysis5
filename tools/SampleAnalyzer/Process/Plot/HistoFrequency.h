@@ -31,7 +31,6 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Plot/PlotBase.h"
-#include "SampleAnalyzer/Commons/Base/Basics.h"
 
 namespace MA5
 {

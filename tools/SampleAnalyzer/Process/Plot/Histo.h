@@ -33,7 +33,6 @@
 #include "SampleAnalyzer/Process/Plot/PlotBase.h"
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelection.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
-#include "SampleAnalyzer/Commons/Base/Basics.h"
 
 namespace MA5
 {

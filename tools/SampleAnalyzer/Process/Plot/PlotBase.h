@@ -32,7 +32,7 @@
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/LogService.h"
-#include "SampleAnalyzer/Commons/Base/Basics.h"
+#include "SampleAnalyzer/Commons/Base/HistoStructures.h"
 #include "SampleAnalyzer/Commons/DataFormat/WeightCollection.h"
 
 namespace MA5
