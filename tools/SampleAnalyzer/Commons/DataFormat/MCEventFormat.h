@@ -158,16 +158,13 @@ namespace MA5
         const MAfloat64 &alphaQCD() const { return alphaQCD_; }
 
         /// Accessor to multiweights
-        const WeightCollection &multiweights() const { return multiweights_; }
-
-        /// Accessor to multiweights
         WeightCollection &weights() { return multiweights_; }
 
         /// Accessor to multiweights
         const WeightCollection &weights() const { return multiweights_; }
 
         /// Accessor to multiweights
-        const MAfloat64 &get_weight(MAuint32 id) const { return multiweights_.Get(id); }
+        const MAfloat64 &GetWeight(MAuint32 id) const { return multiweights_.Get(id); }
 
         /// Accessor to the generated particle collection (read-only)
         const std::vector<MCParticleFormat> &particles() const { return particles_; }
@@ -179,7 +176,7 @@ namespace MA5
         void setProcessId(MAuint32 v) { processId_ = v; }
 
         /// Setting the event weight
-        // void setWeight(MAfloat64 v) const { weight_ = v; }
+        void setWeight(MAuint32 id, MAfloat64 value) { multiweights_.Add(id, value); }
 
         /// Setting the scale
         void setScale(MAfloat64 v) { scale_ = v; }
