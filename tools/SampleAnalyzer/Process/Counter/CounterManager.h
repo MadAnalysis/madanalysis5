@@ -82,13 +82,13 @@ namespace MA5
         /// Incrementing the initial number of events
         void IncrementNInitial(const WeightCollection &weight)
         {
-            initial_.Increment(weight);
             if (!initialised_)
             {
                 for (auto &counter : counters_)
                     counter.Initialise(weight);
                 initialised_ = true;
             }
+            initial_.Increment(weight);
         }
 
         /// Incrementing the initial number of events
