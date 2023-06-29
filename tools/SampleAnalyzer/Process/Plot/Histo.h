@@ -123,7 +123,7 @@ namespace MA5
 
             step_ = (xmax_ - xmin_) / static_cast<MAfloat64>(nbins_);
 
-            // histo_.resize(nbins_);
+            histo_.resize(nbins_);
         }
 
         /// Destructor
