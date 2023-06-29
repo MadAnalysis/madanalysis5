@@ -122,124 +122,58 @@ namespace MA5
         }
 
         /// Accessoir to the generator type
-        const MA5GEN::GeneratorType *GeneratorType() const
-        {
-            return sample_generator_;
-        }
+        const MA5GEN::GeneratorType *GeneratorType() const { return sample_generator_; }
 
         /// Accessor to PDG ID of the intial partons
-        const std::pair<MAint32, MAint32> &beamPDGID() const
-        {
-            return beamPDGID_;
-        }
+        const std::pair<MAint32, MAint32> &beamPDGID() const { return beamPDGID_; }
 
         /// Accessor to the beam energy
-        const std::pair<MAfloat64, MAfloat64> &beamE() const
-        {
-            return beamE_;
-        }
+        const std::pair<MAfloat64, MAfloat64> &beamE() const { return beamE_; }
 
         /// Accessor to the PDF authors
-        const std::pair<MAuint32, MAuint32> &beamPDFauthor() const
-        {
-            return beamPDFauthor_;
-        }
+        const std::pair<MAuint32, MAuint32> &beamPDFauthor() const { return beamPDFauthor_; }
 
         /// Accessor to the PDF identity
-        const std::pair<MAuint32, MAuint32> &beamPDFID() const
-        {
-            return beamPDFID_;
-        }
+        const std::pair<MAuint32, MAuint32> &beamPDFID() const { return beamPDFID_; }
 
         /// Accessor to the weight mode
-        const MAint32 &weightMode() const
-        {
-            return weightMode_;
-        }
+        const MAint32 &weightMode() const { return weightMode_; }
 
         /// Accessor to the xsection mean
-        const MAfloat64 &xsection() const
-        {
-            return xsection_;
-        }
+        const MAfloat64 &xsection() const { return xsection_; }
 
         /// Accessor to the xsection mean
-        const MAfloat64 &xsection_mean() const
-        {
-            return xsection_;
-        }
+        const MAfloat64 &xsection_mean() const { return xsection_; }
 
         /// Accessor to the xsection error
-        const MAfloat64 &xsection_error() const
-        {
-            return xsection_error_;
-        }
+        const MAfloat64 &xsection_error() const { return xsection_error_; }
 
         /// Accessor to the number of events with positive weight
-        const MAfloat64 &sumweight_positive() const
-        {
-            return sumweight_positive_;
-        }
+        const MAfloat64 &sumweight_positive() const { return sumweight_positive_; }
 
         /// Accessor to the number of events with negative weight
-        const MAfloat64 &sumweight_negative() const
-        {
-            return sumweight_negative_;
-        }
+        const MAfloat64 &sumweight_negative() const { return sumweight_negative_; }
 
         /// Accessor to the process collection (read-only)
-        const std::vector<ProcessFormat> &processes() const
-        {
-            return processes_;
-        }
+        const std::vector<ProcessFormat> &processes() const { return processes_; }
 
         /// Accessor to the process collection
-        std::vector<ProcessFormat> &processes()
-        {
-            return processes_;
-        }
-
-        /// Accessor to the weight definition (read-only)
-        const WeightDefinition &weight_definition() const
-        {
-            return weight_definition_;
-        }
-
-        /// Accessor to the weight definition
-        WeightDefinition &weight_definition()
-        {
-            return weight_definition_;
-        }
+        std::vector<ProcessFormat> &processes() { return processes_; }
 
         /// Set the PDG ID of the intial partons
-        void setBeamPDGID(MAint32 a, MAint32 b)
-        {
-            beamPDGID_ = std::make_pair(a, b);
-        }
+        void setBeamPDGID(MAint32 a, MAint32 b) { beamPDGID_ = std::make_pair(a, b); }
 
         /// Set the beam energy
-        void setBeamE(MAfloat64 a, MAfloat64 b)
-        {
-            beamE_ = std::make_pair(a, b);
-        }
+        void setBeamE(MAfloat64 a, MAfloat64 b) { beamE_ = std::make_pair(a, b); }
 
         /// Set the PDF authors
-        void setBeamPDFauthor(MAuint32 a, MAuint32 b)
-        {
-            beamPDFauthor_ = std::make_pair(a, b);
-        }
+        void setBeamPDFauthor(MAuint32 a, MAuint32 b) { beamPDFauthor_ = std::make_pair(a, b); }
 
         /// Set the the PDF identity
-        void setBeamPDFid(MAuint32 a, MAuint32 b)
-        {
-            beamPDFID_ = std::make_pair(a, b);
-        }
+        void setBeamPDFid(MAuint32 a, MAuint32 b) { beamPDFID_ = std::make_pair(a, b); }
 
         /// Set the weight mode
-        void setWeightMode(MAint32 v)
-        {
-            weightMode_ = v;
-        }
+        void setWeightMode(MAint32 v) { weightMode_ = v; }
 
         /// Set the cross section mean
         // BENJ: the normalization in the pythia lhe output by madgraph has been changed
@@ -251,16 +185,10 @@ namespace MA5
         }
 
         /// Set the cross section mean
-        void setXsectionMean(MAfloat64 value)
-        {
-            xsection_ = value;
-        }
+        void setXsectionMean(MAfloat64 value) { xsection_ = value; }
 
         /// Set the cross section mean
-        void setXsectionError(MAfloat64 value)
-        {
-            xsection_error_ = value;
-        }
+        void setXsectionError(MAfloat64 value) { xsection_error_ = value; }
 
         /// @brief set weight names
         /// @param id location of the weight
@@ -286,10 +214,7 @@ namespace MA5
         }
 
         /// Accessor to the number of events with negative weight
-        void setSumweight_negative(MAfloat64 sum)
-        {
-            sumweight_negative_ += sum;
-        }
+        void setSumweight_negative(MAfloat64 sum) { sumweight_negative_ += sum; }
 
         /// Giving a new process entry
         ProcessFormat *GetNewProcess()
