@@ -103,7 +103,7 @@ namespace MA5
                     std::string idname;
                     str >> idname;
                     throw EXCEPTION_WARNING("The Weight '" + idname +
-                                                "' is defined at two times. Redundant values are skipped.",
+                                                "' is defined at twice. Redundant values are skipped.",
                                             "", 0);
                 }
             }
