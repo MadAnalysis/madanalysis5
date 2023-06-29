@@ -76,7 +76,6 @@ namespace MA5
 
         // ----------------------- multiweights ------------------------
         /// @jackaraz: not sure if this is doing anything
-        WeightDefinition weight_definition_;
         /// @brief store weight names
         std::map<int, std::string> weight_names_;
 
