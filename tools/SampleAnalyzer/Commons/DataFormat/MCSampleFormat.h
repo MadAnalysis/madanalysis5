@@ -113,7 +113,6 @@ namespace MA5
             energy_unit_ = 1.0;
 
             // WeightDefinition
-            weight_definition_.Reset();
             weight_names_.clear();
 
             // File info
