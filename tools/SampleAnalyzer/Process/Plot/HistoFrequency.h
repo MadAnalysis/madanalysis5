@@ -55,10 +55,6 @@ namespace MA5
         //                       method members
         // -------------------------------------------------------------
     public:
-        // @jackaraz: these may not be necessary:
-        // typedef std::map<int, std::pair<MAfloat64, MAfloat64>>::iterator iterator;
-        // typedef std::map<int, std::pair<MAfloat64, MAfloat64>>::const_iterator const_iterator;
-        // typedef std::map<int, std::pair<MAfloat64, MAfloat64>>::size_type size_type;
 
         /// Constructor with argument
         HistoFrequency(const std::string &name) : PlotBase(name) { initialised_ = false; }
