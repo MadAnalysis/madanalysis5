@@ -149,7 +149,7 @@ namespace MA5
         /// Get a weight
         const MAfloat64 &operator[](MAuint32 id) const { return Get(id); }
 
-        /// Add a new weight group
+        /// @brief Print weight information
         void Print() const
         {
             if (weights_.empty())
