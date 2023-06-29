@@ -97,7 +97,7 @@ namespace MA5
             try
             {
                 if (nbins == 0)
-                    throw EXCEPTION_WARNING("nbins cannot be equal to 0. Set 100.", "", 0);
+                    throw EXCEPTION_WARNING("nbins cannot be equal to 0. 100 bins will be used.", "", 0);
                 nbins_ = nbins;
             }
             catch (const std::exception &e)
