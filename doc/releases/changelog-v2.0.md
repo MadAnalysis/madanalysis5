@@ -35,6 +35,9 @@
 * Command to fix random seed has been added.
   [(#86)](https://github.com/MadAnalysis/madanalysis5/pull/86)
 
+* Multiweight handler has been implemented.
+  [(#205)](https://github.com/MadAnalysis/madanalysis5/pull/205)
+
 ## Improvements
 
 * The SFS libraries are now included in the file `analysisList.h`, instead of in
