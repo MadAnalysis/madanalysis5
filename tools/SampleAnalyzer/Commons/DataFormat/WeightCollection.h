@@ -133,7 +133,7 @@ namespace MA5
                     std::string idname;
                     str >> idname;
                     throw EXCEPTION_ERROR("The Weight '" + idname +
-                                              "' is not defined. Return null value.",
+                                              "' is not defined. A null value is returned.",
                                           "", 0);
                 }
             }
