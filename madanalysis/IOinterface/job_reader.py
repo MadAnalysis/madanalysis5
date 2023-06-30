@@ -62,10 +62,14 @@ class JobReader:
 
     def CheckDir(self):
         if not os.path.isdir(self.path):
-            logging.getLogger("MA5").error("Directory called '" + self.path + "' is not found.")
+            logging.getLogger("MA5").error(
+                "Directory called '" + self.path + "' is not found."
+            )
             return False
         elif not os.path.isdir(self.safdir):
-            logging.getLogger("MA5").error("Directory called '" + self.safdir + "' is not found.")
+            logging.getLogger("MA5").error(
+                "Directory called '" + self.safdir + "' is not found."
+            )
             return False
         else:
             return True
@@ -76,7 +80,13 @@ class JobReader:
             return True
         else:
             logging.getLogger("MA5").error(
-                "File called '" + self.safdir + "/" + name + "/" + name + ".saf' is not found."
+                "File called '"
+                + self.safdir
+                + "/"
+                + name
+                + "/"
+                + name
+                + ".saf' is not found."
             )
             return False
 
@@ -95,7 +105,9 @@ class JobReader:
         try:
             results.xerror = float(words[1])
         except:
-            logging.getLogger("MA5").error("xsection_error is not a float value:" + words[1])
+            logging.getLogger("MA5").error(
+                "xsection_error is not a float value:" + words[1]
+            )
 
         # Extracting number of events
         try:
@@ -223,7 +235,11 @@ class JobReader:
             b = float(words[1])
         except:
             logging.getLogger("MA5").error(
-                str(words[1]) + ' must be a float value @ "' + filename + '" line=' + str(numline)
+                str(words[1])
+                + ' must be a float value @ "'
+                + filename
+                + '" line='
+                + str(numline)
             )
             b = 0.0
 
@@ -232,7 +248,11 @@ class JobReader:
             c = float(words[2])
         except:
             logging.getLogger("MA5").error(
-                str(words[2]) + ' must be a float value @ "' + filename + '" line=' + str(numline)
+                str(words[2])
+                + ' must be a float value @ "'
+                + filename
+                + '" line='
+                + str(numline)
             )
             c = 0.0
 
@@ -261,6 +281,7 @@ class JobReader:
         # Initializing tags
         beginTag = SafBlockStatus()
         endTag = SafBlockStatus()
+        weightTag = SafBlockStatus()
         globalTag = SafBlockStatus()
         detailTag = SafBlockStatus()
 
@@ -301,6 +322,10 @@ class JobReader:
                     detailTag.activate()
                 elif words[0].lower() == "</sampledetailedinfo>":
                     detailTag.desactivate()
+                if words[0].lower() == "<weightnames>":
+                    weightTag.activate()
+                elif words[0].lower() == "</weightnames>":
+                    weightTag.desactivate()
 
             # Looking for summary sample info
             elif globalTag.activated and len(words) == 5:
@@ -308,23 +333,34 @@ class JobReader:
 
             # Looking for detail sample info (one line for each file)
             elif detailTag.activated and len(words) == 5:
-                dataset.measured_detail.append(self.ExtractSampleInfo(words, numline, filename))
+                dataset.measured_detail.append(
+                    self.ExtractSampleInfo(words, numline, filename)
+                )
+            # Read weights
+            if globalTag.activated and weightTag.activated and len(words) == 2:
+                dataset.AddWeight(int(words[0]), words[1])
 
         # Information found ?
         if beginTag.Nactivated == 0 or beginTag.activated:
-            logging.getLogger("MA5").error("SAF header <SAFheader> and </SAFheader> is not found.")
+            logging.getLogger("MA5").error(
+                "SAF header <SAFheader> and </SAFheader> is not found."
+            )
         if endTag.Nactivated == 0 or endTag.activated:
-            logging.getLogger("MA5").error("SAF footer <SAFfooter> and </SAFfooter> is not found.")
+            logging.getLogger("MA5").error(
+                "SAF footer <SAFfooter> and </SAFfooter> is not found."
+            )
         if globalTag.Nactivated == 0 or globalTag.activated:
             logging.getLogger("MA5").error(
-                "Information corresponding to the block " + "<SampleGlobalInfo> is not found."
+                "Information corresponding to the block "
+                + "<SampleGlobalInfo> is not found."
             )
             logging.getLogger("MA5").error(
                 "Information on the dataset '" + dataset.name + "' are not updated."
             )
         if detailTag.Nactivated == 0 or globalTag.activated:
             logging.getLogger("MA5").error(
-                "Information corresponding to the block " + "<SampleDetailInfo> is not found."
+                "Information corresponding to the block "
+                + "<SampleDetailInfo> is not found."
             )
             logging.getLogger("MA5").error(
                 "Information on the dataset '" + dataset.name + "' are not updated."
@@ -341,7 +377,12 @@ class JobReader:
             while os.path.isdir(self.safdir + "/" + name + "/MergingPlots_" + str(i)):
                 i += 1
             filename = (
-                self.safdir + "/" + name + "/MergingPlots_" + str(i - 1) + "/Histograms/histos.saf"
+                self.safdir
+                + "/"
+                + name
+                + "/MergingPlots_"
+                + str(i - 1)
+                + "/Histograms/histos.saf"
             )
         else:
             while os.path.isdir(self.safdir + "/" + name + "/MadAnalysis5job_" + str(i)):
@@ -469,7 +510,11 @@ class JobReader:
                             "invalid name for histogram @ line=" + str(numline) + " : "
                         )
                         logging.getLogger("MA5").error(str(line))
-                elif descriptionTag.Nlines == 1 and not histoFreqTag.activated and len(words) >= 3:
+                elif (
+                    descriptionTag.Nlines == 1
+                    and not histoFreqTag.activated
+                    and len(words) >= 3
+                ):
                     results = self.ExtractDescription(words, numline, filename)
                     if histoTag.activated:
                         histoinfo.nbins = results[0]
@@ -493,7 +538,9 @@ class JobReader:
                         histofreqinfo.regions.append(words[0])
                     else:
                         logging.getLogger("MA5").error(
-                            "invalid region for a histogram @ line=" + str(numline) + " : "
+                            "invalid region for a histogram @ line="
+                            + str(numline)
+                            + " : "
                         )
                         logging.getLogger("MA5").error(str(line))
                 else:
@@ -639,7 +686,12 @@ class JobReader:
             i += 1
         filenames = sorted(
             glob.glob(
-                self.safdir + "/" + name + "/MadAnalysis5job_" + str(i - 1) + "/Cutflows/*.saf"
+                self.safdir
+                + "/"
+                + name
+                + "/MadAnalysis5job_"
+                + str(i - 1)
+                + "/Cutflows/*.saf"
             )
         )
 
@@ -649,7 +701,9 @@ class JobReader:
             try:
                 file = open(myfile, "r")
             except:
-                logging.getLogger("MA5").error("File called '" + myfile + "' is not found")
+                logging.getLogger("MA5").error(
+                    "File called '" + myfile + "' is not found"
+                )
                 return
 
             # Initializing tags
