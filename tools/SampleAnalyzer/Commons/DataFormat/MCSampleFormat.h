@@ -111,7 +111,6 @@ namespace MA5
             length_unit_ = 1.0;
             energy_unit_ = 1.0;
 
-            // WeightDefinition
             weight_names_.clear();
 
             // File info
@@ -178,11 +177,7 @@ namespace MA5
         /// Set the cross section mean
         // BENJ: the normalization in the pythia lhe output by madgraph has been changed
         //       the 1e9 factor is not needed anymore
-        void setXsection(MAfloat64 value)
-        //  { xsection_=value*getXsectionUnitFactor();}
-        {
-            xsection_ = value;
-        }
+        void setXsection(MAfloat64 value) { xsection_ = value; }
 
         /// Set the cross section mean
         void setXsectionMean(MAfloat64 value) { xsection_ = value; }
@@ -196,7 +191,7 @@ namespace MA5
         void SetWeightName(int id, std::string name) { weight_names_[id] = name; }
 
         /// @brief accessor to weight names
-        const std::map<int, std::string> WeightNames() const { return weight_names_; }
+        const std::map<int, std::string> &WeightNames() const { return weight_names_; }
 
         /// Adding a weight
         void addWeightedEvents(MAfloat64 weight)
