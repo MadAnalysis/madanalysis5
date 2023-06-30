@@ -22,7 +22,7 @@
 ################################################################################
 
 
-from typing import Text, List
+from typing import Text, List, Dict, Any
 from dataclasses import dataclass, field
 import numpy as np
 
@@ -57,6 +57,10 @@ class Weight:
                 self._mur = float(sector.split("=")[1])
             elif "PDF" in sector:
                 self._pdf = int(sector.split("=")[1])
+
+    def to_dict(self) -> Dict[Text, Any]:
+        """Convert to dictionary"""
+        return {"loc": self.loc, "name": self.name}
 
     @property
     def aux(self) -> int:
@@ -112,13 +116,36 @@ class WeightCollection:
 
     def __init__(self, collection: List[Weight] = None):
         self._collection = [] if collection is None else collection
+        self._names = []
 
     def append(self, name: Text, idx: int):
         """Add weight into the collection"""
-        self._collection.append(Weight(name=name, loc=idx))
+        if name not in self.names:
+            self._collection.append(Weight(name=name, loc=idx))
 
     def __iter__(self):
         yield from self._collection
+
+    def __len__(self):
+        return len(self._collection)
+
+    @property
+    def names(self) -> List[Text]:
+        """retreive weight names"""
+        if len(self) == len(self._names):
+            return self._names
+
+        self._names = [x.name for x in self]
+        return self._names
+
+    def to_dict(self) -> List[Dict[Text, Any]]:
+        """Convert to dictionary"""
+        return [x.to_dict() for x in self]
+
+    def from_dict(self, data: List[Dict[Text, Any]]) -> None:
+        """Construct collection from data"""
+        for dat in data:
+            self.append(dat["name"], dat["loc"])
 
     @property
     def nominal(self) -> Weight:
