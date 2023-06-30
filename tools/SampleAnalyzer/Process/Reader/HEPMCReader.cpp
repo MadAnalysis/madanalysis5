@@ -400,8 +400,6 @@ void HEPMCReader::FillEventInformations(const std::string &line,
         {
             MAfloat64 value;
             str >> value;
-            // if (i == 0)
-            //     myEvent.mc()->weight_ = value;
             myEvent.mc()->weights().Add(i, value);
         }
     }
