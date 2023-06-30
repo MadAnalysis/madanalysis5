@@ -1004,6 +1004,10 @@ void SampleAnalyzer::FillSummary(SampleFormat &summary,
 		summary.mc()->xsection_ = 0;
 		summary.mc()->xsection_error_ = 0;
 	}
+
+	/// ! this assumes all the weight identifiers are the same through out the sample set
+	for (auto &name_map : samples.back().mc()->WeightNames())
+		summary.mc()->SetWeightName(name_map.first, name_map.second);
 }
 
 /// Updating the progress bar
