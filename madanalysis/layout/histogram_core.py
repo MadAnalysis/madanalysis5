@@ -24,9 +24,8 @@
 
 from __future__ import absolute_import
 import logging
-import numpy as np
 from math import sqrt
-from six.moves import range
+import numpy as np
 
 
 class HistogramCore:
@@ -34,22 +33,38 @@ class HistogramCore:
 
         # statistics
         # - int
-        self.nevents = np.array([0])
-        self.nentries = np.array([0])
+        self.nevents = 0
+        self.nentries = 0
         # - float
-        self.integral = np.array([0.0])
-        self.sumwentries = np.array([0.0])
-        self.sumw = np.array([0.0])
-        self.sumw2 = np.array([0.0])
-        self.sumwx = np.array([0.0])
-        self.sumw2x = np.array([0.0])
+        self.integral = 0.0
+        self.sumwentries = 0.0
+        self.sumw = 0.0
+        self.sumw2 = 0.0
+        self.sumwx = 0.0
+        self.sumw2x = 0.0
 
         # content
-        self.underflow = np.array([0.0])
-        self.overflow = np.array([0.0])
-        self.nan = np.array([0.0])
-        self.inf = np.array([0.0])
+        self.underflow = 0.0
+        self.overflow = 0.0
+        self.nan = 0.0
+        self.inf = 0.0
         self.array = []
+        self.array_unc = []
+
+    def convert_to_numpy(self) -> None:
+        """Convert data containers into numpy arrays for convenience"""
+        for tp in [
+            "nevents",
+            "nentries",
+            "sumwentries",
+            "sumw",
+            "sumw2",
+            "sumwx",
+            "sumw2x",
+            "underflow",
+            "overflow",
+        ]:
+            setattr(self, tp, np.array(getattr(self, tp)))
 
     def ComputeIntegral(self):
         self.integral = np.sum(self.array, axis=0)
@@ -78,8 +93,14 @@ class HistogramCore:
         )
 
     def GetMean(self):
-        return np.array([wx / w for wx, w in zip(self.sumwx, self.sumw) if w != 0])
+        if self.sumw == 0:
+            return 0.0
+
+        return self.sumwx / self.sumw
 
     def GetRMS(self):
+        if self.sumw == 0:
+            return 0.0
+
         mean = self.GetMean()
         return sqrt(abs(self.sumw2x / self.sumw - mean * mean))
