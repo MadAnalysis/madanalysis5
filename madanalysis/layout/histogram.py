@@ -47,69 +47,77 @@ class Histogram:
 
     def FinalizeReading(self, main, dataset):
 
-        # convert everything to numpy arrays
-        for loc in ["positive", "negative", "summary"]:
-            for tp in [
-                "nevents",
-                "nentries",
-                "sumwentries",
-                "sumw",
-                "sumw2",
-                "sumwx",
-                "sumw2x",
-                "underflow",
-                "overflow",
-            ]:
-                setattr(getattr(self, loc), tp, np.array(getattr(getattr(self, loc), tp)))
+        self.positive.convert_to_numpy()
+        self.negative.convert_to_numpy()
+        self.summary.convert_to_numpy()
 
         # Statistics
-        self.summary.nevents = np.array(self.positive.nevents) + np.array(self.negative.nevents)
-        self.summary.nentries = np.array(self.positive.nentries) + np.array(self.negative.nentries)
+        self.summary.nevents = self.positive.nevents + self.negative.nevents
+        self.summary.nentries = self.positive.nentries + self.negative.nentries
 
         # sumw
-        self.summary.sumw = np.clip(
-            np.array(self.positive.sumw) - np.array(self.negative.sumw), 0, None
-        )
+        self.summary.sumw = np.clip(self.positive.sumw - self.negative.sumw, 0, None)
 
         # sumw2
-        self.summary.sumw2 = np.clip(
-            np.array(self.positive.sumw2) - np.array(self.negative.sumw2), 0, None
-        )
+        self.summary.sumw2 = np.clip(self.positive.sumw2 - self.negative.sumw2, 0, None)
 
         # sumwx
-        self.summary.sumwx = np.array(self.positive.sumwx) - np.array(self.negative.sumwx)
+        self.summary.sumwx = self.positive.sumwx - self.negative.sumwx
         # no correction on it
 
         # sumw2x
-        self.summary.sumw2x = np.array(self.positive.sumw2x) - np.array(self.negative.sumw2x)
+        self.summary.sumw2x = self.positive.sumw2x - self.negative.sumw2x
         # no correction on it
 
         # underflow
         self.summary.underflow = np.clip(
-            np.array(self.positive.underflow) - np.array(self.negative.underflow), 0, None
+            self.positive.underflow - self.negative.underflow, 0, None
         )
 
         # overflow
         self.summary.overflow = np.clip(
-            np.array(self.positive.overflow) - np.array(self.negative.overflow), 0, None
+            self.positive.overflow - self.negative.overflow, 0, None
         )
+
+        # compute mean and uncertainties for the statistics
+        # ! @jackaraz: this portion of the code should be changed to accomodate different types of
+        # ! PDF + scale unc combination for now its just mean and std
+        for tp in [
+            "nevents",
+            "nentries",
+            "sumw",
+            "sumw2",
+            "sumwx",
+            "sumw2x",
+            "underflow",
+            "overflow",
+        ]:
+            # compute unc shape: (lower, upper)
+            std = float(np.std(getattr(self.summary, tp)))
+            setattr(self.summary, tp + "_unc", (std, std))
+            # compute mean
+            setattr(self.summary, tp, float(np.mean(getattr(self.summary, tp))))
 
         # Data
         data = []
         for i, array in enumerate(self.positive.array):
-            data.append(np.array(self.positive.array[i]) - np.array(self.negative.array[i]))
+            data.append(np.array(array) - np.array(self.negative.array[i]))
             if np.any(data[-1] < 0):
                 self.warnings.append(
-                    "dataset="
-                    + dataset.name
-                    + " -> bin "
-                    + str(i)
-                    + " has a negative content : "
-                    + str(data[-1])
-                    + ". This value is set to zero"
+                    f"dataset={dataset.name} -> bin {i} has a negative content : "
+                    f"{str(data[-1])}. This value is set to zero."
                 )
                 data[-1] = np.clip(data[-1], 0, None)
         self.summary.array = np.array(data[:])  # [:] -> clone of data
+
+        # Compute the mean and the error on the data
+        # mean shape should be (Nbins, ) and the histogram unc shape should be (Nbins, 2)
+        # where first column is the lower envelop and second is upper envelop
+        histogram_mean = np.mean(self.summary.array, axis=1)
+        std = np.std(self.summary.array, axis=1)
+        histogram_unc = np.hstack([std, std])
+        self.summary.array = histogram_mean.reshape(-1)
+        self.summary.array_unc = histogram_unc
 
         # Integral
         self.positive.ComputeIntegral()

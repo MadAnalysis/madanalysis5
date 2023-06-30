@@ -23,7 +23,11 @@
 
 
 from __future__ import absolute_import
-from madanalysis.enumeration.uncertainty_type import UncertaintyType
+
+import logging
+import six
+from six.moves import range
+
 from madanalysis.enumeration.normalize_type import NormalizeType
 from madanalysis.enumeration.report_format_type import ReportFormatType
 from madanalysis.enumeration.color_type import ColorType
@@ -32,9 +36,6 @@ from madanalysis.enumeration.backstyle_type import BackStyleType
 from madanalysis.enumeration.stacking_method_type import StackingMethodType
 from madanalysis.layout.plotflow_for_dataset import PlotFlowForDataset
 import madanalysis.enumeration.color_hex
-import logging
-import six
-from six.moves import range
 
 
 class PlotFlow:
@@ -54,7 +55,10 @@ class PlotFlow:
         # Initializing NPID
         if len(self.detail) > 0:
             for ihisto in range(0, len(self.detail[0])):
-                if self.detail[0].histos[ihisto].__class__.__name__ == "HistogramFrequency":
+                if (
+                    self.detail[0].histos[ihisto].__class__.__name__
+                    == "HistogramFrequency"
+                ):
                     self.InitializeHistoFrequency(ihisto)
 
         # Creating plots
@@ -95,9 +99,9 @@ class PlotFlow:
                 found = False
                 value_positive = 0
                 value_negative = 0
-                for i in range(len(histo[ihisto].labels)):
+                for i, label in enumerate(histo[ihisto].labels):
 
-                    if newlabel == histo[ihisto].labels[i]:
+                    if newlabel == label:
                         value_positive = histo[ihisto].positive.array[i]
                         value_negative = histo[ihisto].negative.array[i]
                         found = True
@@ -158,27 +162,19 @@ class PlotFlow:
                     + ReportFormatType.convert2filetype(modes[iout])
                 )
 
-            for iset, detail in enumerate(self.detail):
+            for detail in self.detail:
                 # Appending histo
                 histos.append(detail[irelhisto])
-                #               if mode==2:
                 scales.append(detail[irelhisto].scale)
-            #               else:
-            #                   scales.append(1)
 
             logging.getLogger("MA5").debug("Producing file " + filenameC + " ...")
             if self.main.archi_info.has_root:
-                self.DrawROOT(
-                    histos,
-                    scales,
-                    select,
-                    irelhisto,
-                    filenameC,
-                    output_files,
-                )
+                self.DrawROOT(histos, scales, select, irelhisto, filenameC, output_files)
 
             logging.getLogger("MA5").debug("Producing file " + filenamePy + " ...")
-            self.DrawMATPLOTLIB(histos, scales, select, irelhisto, filenamePy, output_files)
+            self.DrawMATPLOTLIB(
+                histos, scales, select, irelhisto, filenamePy, output_files
+            )
 
             irelhisto += 1
 
@@ -210,7 +206,8 @@ class PlotFlow:
         # Stacking or superimposing histos ?
         stackmode = False
         if ref.stack == StackingMethodType.STACK or (
-            ref.stack == StackingMethodType.AUTO and self.main.stack == StackingMethodType.STACK
+            ref.stack == StackingMethodType.AUTO
+            and self.main.stack == StackingMethodType.STACK
         ):
             stackmode = True
 
@@ -427,7 +424,18 @@ class PlotFlow:
                 linecolor10 = [9, 46, 8, 4, 6, 2, 7, 3, 42, 48]
                 linecolor = linecolor10[ind]
                 if stackmode:
-                    backstyle10 = [3004, 3005, 3006, 3007, 3013, 3017, 3022, 3315, 3351, 3481]
+                    backstyle10 = [
+                        3004,
+                        3005,
+                        3006,
+                        3007,
+                        3013,
+                        3017,
+                        3022,
+                        3315,
+                        3351,
+                        3481,
+                    ]
                     backstyle = backstyle10[ind]
                     backcolor = linecolor10[ind]
             else:
@@ -472,7 +480,9 @@ class PlotFlow:
         outputC.write("  // Creating a new THStack\n")
         PlotFlow.counter += 1
         outputC.write(
-            '  THStack* stack = new THStack("mystack_' + str(PlotFlow.counter) + '","mystack");\n'
+            '  THStack* stack = new THStack("mystack_'
+            + str(PlotFlow.counter)
+            + '","mystack");\n'
         )
         # Loop over datasets and histos
         for ind in range(0, len(histos)):
@@ -570,7 +580,9 @@ class PlotFlow:
             for ind in range(0, len(histos)):
                 histoname = "S" + histos[ind].name + "_" + str(ind)
                 nicetitle = PlotFlow.NiceTitle(self.main.datasets[ind].title)
-                outputC.write("  legend->AddEntry(" + histoname + ',"' + nicetitle + '");\n')
+                outputC.write(
+                    "  legend->AddEntry(" + histoname + ',"' + nicetitle + '");\n'
+                )
             outputC.write("  legend->SetFillColor(0);\n")
             outputC.write("  legend->SetTextSize(0.05);\n")
             outputC.write("  legend->SetTextFont(22);\n")
@@ -621,15 +633,16 @@ class PlotFlow:
         # Stacking or superimposing histos ?
         stackmode = False
         if ref.stack == StackingMethodType.STACK or (
-            ref.stack == StackingMethodType.AUTO and self.main.stack == StackingMethodType.STACK
+            ref.stack == StackingMethodType.AUTO
+            and self.main.stack == StackingMethodType.STACK
         ):
             stackmode = True
 
         # Open the file in write-mode
         try:
             outputPy = open(filenamePy, "w")
-        except:
-            logging.getLogger("MA5").error("Impossible to write the file: " + filenamePy)
+        except Exception:
+            logging.getLogger("MA5").error(f"Impossible to write the file: {filenamePy}")
             return False
 
         # File header
@@ -642,7 +655,6 @@ class PlotFlow:
         outputPy.write("    # Library import\n")
         outputPy.write("    import numpy\n")
         outputPy.write("    import matplotlib\n")
-        #        outputPy.write("    matplotlib.use('Agg')\n")
         outputPy.write("    import matplotlib.pyplot   as plt\n")
         outputPy.write("    import matplotlib.gridspec as gridspec\n")
         outputPy.write("\n")
@@ -681,12 +693,11 @@ class PlotFlow:
 
         # Data
         outputPy.write("    # Creating data sequence: middle of each bin\n")
-        outputPy.write("    xData = numpy.array([")
-        for bin in range(0, xnbin):
-            if bin != 0:
-                outputPy.write(",")
-            outputPy.write(str(histos[0].GetBinMean(bin)))
-        outputPy.write("])\n\n")
+        outputPy.write(
+            "    xData = numpy.array(["
+            + ", ".join([f"{histos[0].GetBinMean(ibin):.5e}" for ibin in range(xnbin)])
+            + "])\n\n"
+        )
 
         # Loop over datasets and histos
         ntot = 0
@@ -696,12 +707,9 @@ class PlotFlow:
             histoname = "y" + hist.name + "_" + str(ind)
             outputPy.write("    # Creating weights for histo: " + histoname + "\n")
             outputPy.write("    " + histoname + "_weights = numpy.array([")
-            for bin in range(1, xnbin + 1):
-                ntot += hist.summary.array[bin - 1] * scales[ind]
-                if bin != 1:
-                    outputPy.write(",")
-                outputPy.write(str(hist.summary.array[bin - 1] * scales[ind]))
-            outputPy.write("])\n\n")
+            current_histo = hist.summary.array * scales[ind]
+            outputPy.write(", ".join(f"{x:.8e}" for x in current_histo) + "])\n\n")
+            ntot = float(sum(current_histo))
 
         # Canvas
         outputPy.write("    # Creating a new Canvas\n")
@@ -732,7 +740,9 @@ class PlotFlow:
         outputPy.write("    # Creating a new Stack\n")
         for ind in range(len(histos) - 1, -1, -1):
             myweight = "y" + histos[ind].name + "_" + str(ind) + "_weights"
-            mytitle = '"' + PlotFlow.NiceTitleMatplotlib(self.main.datasets[ind].title) + '"'
+            mytitle = (
+                '"' + PlotFlow.NiceTitleMatplotlib(self.main.datasets[ind].title) + '"'
+            )
             mytitle = mytitle.replace("_", "\_")
 
             if not stackmode:
@@ -819,7 +829,18 @@ class PlotFlow:
                 linecolor10 = [9, 46, 8, 4, 6, 2, 7, 3, 42, 48]
                 linecolor = linecolor10[ind]
                 if stackmode:
-                    backstyle10 = [3004, 3005, 3006, 3007, 3013, 3017, 3022, 3315, 3351, 3481]
+                    backstyle10 = [
+                        3004,
+                        3005,
+                        3006,
+                        3007,
+                        3013,
+                        3017,
+                        3022,
+                        3315,
+                        3351,
+                        3481,
+                    ]
                     backstyle = backstyle10[ind]
                     backcolor = linecolor10[ind]
             else:
@@ -845,10 +866,16 @@ class PlotFlow:
 
             # background style
             if self.main.datasets[ind].backstyle != BackStyleType.AUTO:
-                backstyle = BackStyleType.convert2matplotlib(self.main.datasets[ind].backstyle)
+                backstyle = BackStyleType.convert2matplotlib(
+                    self.main.datasets[ind].backstyle
+                )
 
-            mylinecolor = '"' + madanalysis.enumeration.color_hex.color_hex[linecolor] + '"'
-            mybackcolor = '"' + madanalysis.enumeration.color_hex.color_hex[backcolor] + '"'
+            mylinecolor = (
+                '"' + madanalysis.enumeration.color_hex.color_hex[linecolor] + '"'
+            )
+            mybackcolor = (
+                '"' + madanalysis.enumeration.color_hex.color_hex[backcolor] + '"'
+            )
 
             filledmode = '"stepfilled"'
             rWidth = 1.0
@@ -859,7 +886,9 @@ class PlotFlow:
             #                filledmode='"bar"'
             #                rWidth=0.8
             mylinewidth = self.main.datasets[ind].linewidth
-            mylinestyle = LineStyleType.convert2matplotlib(self.main.datasets[ind].linestyle)
+            mylinestyle = LineStyleType.convert2matplotlib(
+                self.main.datasets[ind].linestyle
+            )
 
             outputPy.write(
                 "    pad.hist("
@@ -953,7 +982,9 @@ class PlotFlow:
             or self.main.normalize == NormalizeType.LUMI_WEIGHT
         ):
             axis_titleY += (
-                " $(#mathcal{L}_{#mathrm{int}} = " + str(self.main.lumi) + "# #mathrm{fb}^{-1})$ "
+                " $(#mathcal{L}_{#mathrm{int}} = "
+                + str(self.main.lumi)
+                + "# #mathrm{fb}^{-1})$ "
             )
         elif self.main.normalize == NormalizeType.NONE:
             axis_titleY += " $(#mathrm{not}# #mathrm{normalized})$"
@@ -1019,7 +1050,9 @@ class PlotFlow:
         if ref.ymin == []:
             if not is_logy:
                 outputPy.write("#")
-            outputPy.write("ymin=min([x for x in (" + myweights + ") if x])/100. # log scale\n")
+            outputPy.write(
+                "ymin=min([x for x in (" + myweights + ") if x])/100. # log scale\n"
+            )
         else:
             if is_logy and ref.ymin <= 0:
                 outputPy.write("#")
@@ -1062,7 +1095,9 @@ class PlotFlow:
             for bin in range(0, xnbin):
                 if bin >= 1:
                     outputPy.write(",")
-                outputPy.write('"' + str(histos[0].stringlabels[bin]).replace("_", "\_") + '"')
+                outputPy.write(
+                    '"' + str(histos[0].stringlabels[bin]).replace("_", "\_") + '"'
+                )
             outputPy.write("])\n")
             outputPy.write('    plt.xticks(xData, xLabels, rotation="vertical")\n')
             outputPy.write("\n")

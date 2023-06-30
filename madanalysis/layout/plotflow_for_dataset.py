@@ -24,18 +24,21 @@
 
 from __future__ import absolute_import
 
-from madanalysis.enumeration.normalize_type import NormalizeType
-from madanalysis.enumeration.stacking_method_type import StackingMethodType
-
 import copy
 from six.moves import range
+import numpy as np
+
+from madanalysis.enumeration.normalize_type import NormalizeType
+from madanalysis.enumeration.stacking_method_type import StackingMethodType
+from madanalysis.dataset import dataset as Dataset
+from .histogram_processor import HistogramProcessor
 
 
 class PlotFlowForDataset:
-    def __init__(self, main, dataset):
+    def __init__(self, main, dataset: Dataset):
         self.histos = []
         self.main = main
-        self.dataset = dataset
+        self.dataset: Dataset = dataset
 
         # Getting xsection
         self.xsection = self.dataset.measured_global.xsection
@@ -64,17 +67,14 @@ class PlotFlowForDataset:
         iplot = 0
 
         # Loop over plot
-        for iabshisto in range(0, len(self.main.selection)):
+        for select in self.main.selection:
             # Keep only histogram
-            if self.main.selection[iabshisto].__class__.__name__ != "Histogram":
+            if select.__class__.__name__ != "Histogram":
                 continue
 
             # Case of histogram frequency
             if self.histos[iplot].__class__.__name__ == "HistogramFrequency":
-                if self.main.selection[iabshisto].observable.name == "NPID":
-                    NPID = True
-                else:
-                    NPID = False
+                NPID = True if select.observable.name == "NPID" else False
                 self.histos[iplot].CreateHistogram(NPID, self.main)
             else:
                 self.histos[iplot].CreateHistogram()
@@ -85,6 +85,9 @@ class PlotFlowForDataset:
 
         iplot = 0
 
+        # ! @jackaraz: this portion of the code should be changed to accomodate different types of
+        # ! PDF + scale unc combination for now its just mean and std
+
         # Loop over plot
         for iabshisto, select in enumerate(self.main.selection):
 
@@ -92,17 +95,28 @@ class PlotFlowForDataset:
             if select.__class__.__name__ != "Histogram":
                 continue
 
+            processor = HistogramProcessor(
+                self.histos[iplot],
+                self.dataset.weight_collection,
+                self.dataset.measured_global.nevents,
+                thexsection,
+            )
+            
             # Reset scale
             scale = 0.0
+
+            # integral
+            integral = (
+                self.histos[iplot].positive.integral
+                - self.histos[iplot].negative.integral
+            )
+            integral = np.mean(integral)
 
             # Case 1: Normalization to ONE
             if select.stack == StackingMethodType.NORMALIZE2ONE or (
                 self.main.stack == StackingMethodType.NORMALIZE2ONE
                 and self.main.selection[iabshisto].stack == StackingMethodType.AUTO
             ):
-                integral = (
-                    self.histos[iplot].positive.integral - self.histos[iplot].negative.integral
-                )
                 if integral > 0.0:
                     scale = 1.0 / integral
                 else:
@@ -116,44 +130,57 @@ class PlotFlowForDataset:
             #                or depends on WEIGHT+LUMI
             elif self.main.normalize in [NormalizeType.LUMI, NormalizeType.LUMI_WEIGHT]:
 
-                # integral
-                integral = (
-                    self.histos[iplot].positive.integral - self.histos[iplot].negative.integral
-                )
+                # # compute efficiency : Nevent / Ntotal
+                # if self.dataset.measured_global.nevents == 0:
+                #     eff = 0
+                # else:
+                #     eff = (
+                #         self.histos[iplot].positive.nevents
+                #         + self.histos[iplot].negative.nevents
+                #     ) / float(self.dataset.measured_global.nevents)
+                #     print("eff", eff)
+                #     eff = np.mean(eff)
 
-                # compute efficiency : Nevent / Ntotal
-                if self.dataset.measured_global.nevents == 0:
-                    eff = 0
-                else:
-                    eff = (
-                        self.histos[iplot].positive.nevents + self.histos[iplot].negative.nevents
-                    ) / float(self.dataset.measured_global.nevents)
-
-                # compute the good xsection value
+                # # compute the good xsection value
                 thexsection = self.xsection
                 if self.main.normalize == NormalizeType.LUMI_WEIGHT:
                     thexsection = thexsection * self.dataset.weight
 
-                # compute final entries/event ratio
-                entries_per_events = 0
-                sumw = self.histos[iplot].positive.sumw - self.histos[iplot].negative.sumw
-                Nentries = (
-                    self.histos[iplot].positive.sumwentries
-                    - self.histos[iplot].negative.sumwentries
-                )
-                if sumw != 0 and Nentries != 0:
-                    entries_per_events = sumw / Nentries
+                # # compute final entries/event ratio
+                # entries_per_events = 0
+                # sumw = self.histos[iplot].positive.sumw - self.histos[iplot].negative.sumw
+                # Nentries = (
+                #     self.histos[iplot].positive.sumwentries
+                #     - self.histos[iplot].negative.sumwentries
+                # )
 
-                # compute the scale
-                if integral != 0:
-                    scale = (
-                        thexsection * self.main.lumi * 1000 * eff * entries_per_events / integral
-                    )
-                else:
-                    scale = 1  # no scale for empty plot
+                # std_entries = float(np.std(Nentries))
+                # Nentries_unc = (std_entries, std_entries)
+                # Nentries = float(np.mean(Nentries))
+                # std_sumw = float(np.std(sumw))
+                # sumw = float(np.mean(sumw))
+
+                # print(sumw, Nentries)
+                # if sumw != 0 and Nentries != 0:
+                #     entries_per_events = sumw / Nentries
+
+                # # compute the scale
+                # if integral != 0:
+                #     scale = (
+                #         thexsection
+                #         * self.main.lumi
+                #         * 1000
+                #         * eff
+                #         * entries_per_events
+                #         / integral
+                #     )
+                # else:
+                #     scale = 1  # no scale for empty plot
+
+                scale = processor.scale(lumi=self.main.lumi)
 
             # Setting the computing scale
             self.histos[iplot].scale = copy.copy(scale)
-
+            setattr(self.histos[iplot], "processor", processor)
             # Incrementing counter
             iplot += 1
