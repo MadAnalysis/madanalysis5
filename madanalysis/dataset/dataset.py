@@ -76,6 +76,8 @@ class Dataset:
         "pdf_up_variation": [],
         "pdf_down_variation": [],
         "pdf_variation": [],
+        "dynamic_scale_choice": ["1", "2", "3", "4"],
+        "n_point_scale_variation": ["3", "5", "7", "9"],
         "title": [],
         "weighted_events": ["true", "false"],
     }
@@ -102,6 +104,8 @@ class Dataset:
         self.measured_global = SampleInfo()
         self.measured_detail = []
         self.weight_collection: WeightCollection = WeightCollection()
+        self.dynamic_scale_choice = None
+        self.n_point_scale_variation = 3
 
     def __len__(self):
         return len(self.filenames)
@@ -112,7 +116,7 @@ class Dataset:
     def user_GetValues(self, variable):
         try:
             return Dataset.userVariables[variable]
-        except:
+        except KeyError:
             return []
 
     def user_GetParameters(self):
@@ -345,7 +349,7 @@ class Dataset:
         ]:
             try:
                 tmp = float(value)
-            except:
+            except ValueError:
                 logging.getLogger("MA5").error(
                     "the value of the attribute '"
                     + variable
@@ -382,6 +386,31 @@ class Dataset:
                     + "' must be set to a positive floating-point number"
                 )
                 return
+
+        # Dynamic scale choice
+        elif variable == "dynamic_scale_choice":
+            try:
+                tmp = int(value)
+                if tmp not in [1, 2, 3, 4]:
+                    raise ValueError("dynamic_scale_choice is not within 1,2,3,4")
+            except ValueError:
+                logging.getLogger("MA5").error(
+                    "Dynamic scale choice can only be 1,2,3 or 4."
+                )
+                return
+            self.dynamic_scale_choice = tmp
+
+        elif variable == "n_point_scale_variation":
+            try:
+                tmp = int(value)
+                if tmp not in [3, 5, 7, 9]:
+                    raise ValueError("n_point_scale_variation is not within 3,5,7 or 9")
+            except ValueError:
+                logging.getLogger("MA5").error(
+                    "n-point scale variation can only be 3,5,7 or 9."
+                )
+                return
+            self.n_point_scale_variation = tmp
 
         # title
         elif variable == "title":
