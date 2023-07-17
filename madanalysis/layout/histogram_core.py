@@ -49,7 +49,7 @@ class HistogramCore:
         self.nan = 0.0
         self.inf = 0.0
         self.array = []
-        self.array_unc = []
+        self.array_full = []
 
     def convert_to_numpy(self) -> None:
         """Convert data containers into numpy arrays for convenience"""
