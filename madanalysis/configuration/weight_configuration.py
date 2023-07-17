@@ -22,7 +22,7 @@
 ################################################################################
 
 
-from typing import Text, List, Dict, Any
+from typing import Text, List, Dict, Any, Tuple
 from dataclasses import dataclass, field
 import numpy as np
 
@@ -41,6 +41,7 @@ class Weight:
     _merging: float = field(init=False, default=None)
 
     def __post_init__(self) -> None:
+        self.name = self.name.replace("DYN_SCALE", "DYNSCALE")
         sectors = self.name.split("_")
 
         for sector in sectors:
@@ -49,7 +50,7 @@ class Weight:
                 break
             if "MERGING" in sector:
                 self._merging = float(sector.split("=")[1])
-            elif "DYN_SCALE" in sector:
+            elif "DYNSCALE" in sector:
                 self._dyn_scale = int(sector.split("=")[1])
             elif "MUF" in sector:
                 self._muf = float(sector.split("=")[1])
@@ -57,6 +58,16 @@ class Weight:
                 self._mur = float(sector.split("=")[1])
             elif "PDF" in sector:
                 self._pdf = int(sector.split("=")[1])
+
+    def __repr__(self) -> Text:
+        return (
+            f"Weight(loc={self.loc}, pdf={self.pdfset}, "
+            + f"muf={self.muf}, mur={self.mur}, dynamic={self.dynamic_scale}, "
+            + f"merging={self.merging}, aux={self.aux})"
+        )
+
+    def __str__(self) -> Text:
+        return self.__repr__()
 
     def to_dict(self) -> Dict[Text, Any]:
         """Convert to dictionary"""
@@ -122,6 +133,15 @@ class WeightCollection:
         """Add weight into the collection"""
         if name not in self.names:
             self._collection.append(Weight(name=name, loc=idx))
+
+    def __repr__(self) -> Text:
+        # if len(self) < 5:
+        return "WeightCollection(" + ",".join([str(x) for x in self]) + ")"
+
+        # return f"WeightCollection(contains {len(self)} weight definitions)"
+
+    def __str__(self) -> Text:
+        return self.__repr__()
 
     def __iter__(self) -> Weight:
         yield from self._collection
@@ -198,3 +218,83 @@ class WeightCollection:
     def pdfsets(self) -> List[int]:
         """Retreive a list of pdfsets"""
         return np.unique([w.pdfset for w in self if w.pdfset is not None]).tolist()
+
+    @property
+    def scales(self) -> Dict[Text, List[float]]:
+        """return scale for muf and mur"""
+        muf = np.unique([w.muf for w in self if w.muf is not None]).tolist()
+        muf.sort()
+        mur = np.unique([w.mur for w in self if w.mur is not None]).tolist()
+        mur.sort()
+        return {"muf": muf, "mur": mur}
+
+    @property
+    def has_scale(self) -> bool:
+        """is there any scale variations"""
+        return len(self.scales["muf"]) > 0
+
+    @property
+    def central_scale(self) -> float:
+        """retreive central scale"""
+        scales = self.scales["muf"]
+        return scales[len(scales) // 2]
+
+    def get_scale_vars(self, point: int = 3, dynamic: int = None) -> Tuple:
+        if dynamic is not None:
+            dynamic = dynamic if self.has_dyn_scale(dynamic) else None
+
+        scales = self.scales["muf"]
+        if len(scales) == 5 and point == 3:
+            scales = scales[1:-1]
+        elif len(scales) == 7:
+            if point == 3:
+                scales = scales[2:-2]
+            if point == 5:
+                scales = scales[1:-1]
+        elif len(scales) == 9:
+            if point == 3:
+                scales = scales[3:-3]
+            elif point == 5:
+                scales = scales[2:-2]
+            elif point == 7:
+                scales = scales[1:-1]
+
+        min_scale = min(scales)
+        max_scale = max(scales)
+
+        return (
+            self.get_scale(dynamic=dynamic, muf=min_scale, mur=min_scale),
+            self.get_scale(dynamic=dynamic, muf=max_scale, mur=max_scale),
+        )
+
+    def get_scale(
+        self, dynamic: int = None, muf: float = 1.0, mur: float = 1.0
+    ) -> List[Weight]:
+        if dynamic is not None:
+            dynamic = dynamic if self.has_dyn_scale(dynamic) else None
+        return WeightCollection(
+            [
+                w
+                for w in self
+                if w.dynamic_scale == dynamic and w.muf == muf and w.mur == mur
+            ]
+        )
+
+    def has_dyn_scale(self, scale: int) -> bool:
+        """If weight collection has a particular dynamic scale"""
+        assert scale in [1, 2, 3, 4], "invalid dynamic scale"
+        for w in self:
+            if w.dynamic_scale == scale:
+                return True
+        return False
+
+    @property
+    def loc(self) -> List[int]:
+        """retreive the locations of the weights"""
+        return [w.loc for w in self]
+
+    def __iadd__(self, other):
+        assert isinstance(other, WeightCollection)
+        for items in other:
+            self._collection.append(items)
+        return self
