@@ -25,8 +25,9 @@
 from __future__ import absolute_import
 
 import logging
-import six
+import six, os, json, copy, logging
 from six.moves import range
+import numpy as np
 
 from madanalysis.enumeration.normalize_type import NormalizeType
 from madanalysis.enumeration.report_format_type import ReportFormatType
@@ -36,6 +37,7 @@ from madanalysis.enumeration.backstyle_type import BackStyleType
 from madanalysis.enumeration.stacking_method_type import StackingMethodType
 from madanalysis.layout.plotflow_for_dataset import PlotFlowForDataset
 import madanalysis.enumeration.color_hex
+from madanalysis.configuration.weight_configuration import WeightCollection
 
 
 class PlotFlow:
@@ -46,6 +48,15 @@ class PlotFlow:
 
     def __init__(self, main):
         self.main = main
+        self.pdftable = {}
+        with open(
+            os.path.join(self.main.archi_info.ma5dir, "madanalysis/input/LHAPDF.txt"), "r"
+        ) as f:
+            for line in f.readlines()[1:]:
+                pdf = line.split(",")
+                self.pdftable.update(
+                    {int(pdf[0]): {"name": pdf[1], "members": int(pdf[-1])}}
+                )
         self.detail = []
         for dataset in main.datasets:
             self.detail.append(PlotFlowForDataset(main, dataset))
@@ -144,6 +155,7 @@ class PlotFlow:
             self.color = 1
             histos = []
             scales = []
+            datasets = []
 
             # Name of output files
             filenameC = histo_path + "/selection_" + str(irelhisto) + ".C"
@@ -164,6 +176,7 @@ class PlotFlow:
 
             for detail in self.detail:
                 # Appending histo
+                datasets.append(detail.dataset)
                 histos.append(detail[irelhisto])
                 scales.append(detail[irelhisto].scale)
 
@@ -173,7 +186,7 @@ class PlotFlow:
 
             logging.getLogger("MA5").debug("Producing file " + filenamePy + " ...")
             self.DrawMATPLOTLIB(
-                histos, scales, select, irelhisto, filenamePy, output_files
+                histos, scales, datasets, select, irelhisto, filenamePy, output_files
             )
 
             irelhisto += 1
@@ -611,7 +624,9 @@ class PlotFlow:
         # Ok
         return True
 
-    def DrawMATPLOTLIB(self, histos, scales, ref, irelhisto, filenamePy, outputnames):
+    def DrawMATPLOTLIB(
+        self, histos, scales, datasets, ref, irelhisto, filenamePy, outputnames
+    ):
 
         # Is there any legend?
         legendmode = False
@@ -653,7 +668,7 @@ class PlotFlow:
 
         # Import Libraries
         outputPy.write("    # Library import\n")
-        outputPy.write("    import numpy\n")
+        outputPy.write("    import numpy as np\n")
         outputPy.write("    import matplotlib\n")
         outputPy.write("    import matplotlib.pyplot   as plt\n")
         outputPy.write("    import matplotlib.gridspec as gridspec\n")
@@ -662,7 +677,7 @@ class PlotFlow:
         # Matplotlib & numpy version
         outputPy.write("    # Library version\n")
         outputPy.write("    matplotlib_version = matplotlib.__version__\n")
-        outputPy.write("    numpy_version      = numpy.__version__\n")
+        outputPy.write("    numpy_version      = np.__version__\n")
         outputPy.write("\n")
 
         # Binning
@@ -681,7 +696,7 @@ class PlotFlow:
             outputPy.write("\n")
         else:
             outputPy.write(
-                "    xBinning = numpy.linspace("
+                "    xBinning = np.linspace("
                 + str(xmin)
                 + ","
                 + str(xmax)
@@ -694,7 +709,7 @@ class PlotFlow:
         # Data
         outputPy.write("    # Creating data sequence: middle of each bin\n")
         outputPy.write(
-            "    xData = numpy.array(["
+            "    xData = np.array(["
             + ", ".join([f"{histos[0].GetBinMean(ibin):.5e}" for ibin in range(xnbin)])
             + "])\n\n"
         )
@@ -703,12 +718,140 @@ class PlotFlow:
         ntot = 0
         for ind, hist in enumerate(histos):
 
+            # pdfset dictionary structure:
+            # "weights": are the nominal weights including scale uncertainties
+            # "replicas": are PDF variations
+            pdfset = {}
+            if len(datasets[ind].weight_collection) > 1:
+                # find pdf set
+                for pdfid in datasets[ind].weight_collection.pdfsets:
+                    if pdfid in self.pdftable:
+                        pdfset = copy.deepcopy(self.pdftable[pdfid])
+                        pdfset.update(
+                            {"weights": datasets[ind].weight_collection.pdfset(pdfid)}
+                        )
+                        pdfset.update({"replicas": WeightCollection()})
+                        for idx in range(1, pdfset["members"]):
+                            pdfset["replicas"] += datasets[ind].weight_collection.pdfset(
+                                pdfid + idx
+                            )
+                        break
+
+            print("Scales", pdfset["weights"].get_scale(muf=1.0, mur=1.0))
+
+            # with open("/Users/jackaraz/Desktop/test.json", "w") as f:
+            #     json.dump(
+            #         pdfset["weights"].get_scale(muf=1.0, mur=1.0).to_dict(), f, indent=4
+            #     )
+
+            # TODO: If there is only scale variations
+            if len(pdfset) == 0:
+                pass
+
             # Creating a new histo
             histoname = "y" + hist.name + "_" + str(ind)
             outputPy.write("    # Creating weights for histo: " + histoname + "\n")
-            outputPy.write("    " + histoname + "_weights = numpy.array([")
+            outputPy.write("    " + histoname + "_weights = np.array([")
+            print(hist.summary.array_full.shape)
             current_histo = hist.summary.array * scales[ind]
+            full_histo = hist.summary.array_full * scales[ind]
+            upper_scale, lower_scale = None, None
+            upper_pdf, lower_pdf = None, None
+            scale_unc, pdf_unc = None, None
+            if len(pdfset) != 0:
+                if pdfset["weights"].has_scale:
+                    dyn_scale = datasets[ind].dynamic_scale_choice
+                    n_point_scale = datasets[ind].n_point_scale_variation
+
+                    # Get the nominal weight
+                    central_scale = pdfset["weights"].central_scale
+                    nominal_loc = (
+                        pdfset["weights"]
+                        .get_scale(
+                            dynamic=dyn_scale, muf=central_scale, mur=central_scale
+                        )
+                        .loc
+                    )
+                    current_histo = np.squeeze(full_histo[:, nominal_loc])
+                    print("current_histo", current_histo.shape)
+
+                    scale_vars = pdfset["weights"].get_scale_vars(
+                        point=n_point_scale, dynamic=dyn_scale
+                    )
+
+                    scale_upper_loc = scale_vars[1].loc
+                    scale_lower_loc = scale_vars[0].loc
+                    upper_scale = np.abs(
+                        np.squeeze(full_histo[:, scale_upper_loc]) - current_histo
+                    )
+                    lower_scale = np.abs(
+                        np.squeeze(full_histo[:, scale_lower_loc]) - current_histo
+                    )
+                    scale_unc = np.vstack([lower_scale, upper_scale])
+
+                if len(pdfset["replicas"]) != 0:
+                    pdfvar_loc = pdfset["replicas"].loc + nominal_loc
+                    pdfvar_histo = full_histo[:, pdfvar_loc]
+
+                    ### Choose method
+                    method = "replicas"
+                    known_hessians = ["CT18", "MSHT20"]
+                    if "hessian" in pdfset["name"].lower() or any(
+                        x in pdfset["name"] for x in known_hessians
+                    ):
+                        method = "hessian"
+
+                    logging.getLogger("MA5").debug(
+                        f"Using {method} pdf combination for {pdfset['name']} pdf set."
+                    )
+
+                    ### Replicas method
+                    if method == "replicas":
+                        mean_histo = np.mean(pdfvar_histo, axis=1)
+                        pdf_unc = np.sqrt(
+                            np.sum(
+                                np.square(pdfvar_histo - mean_histo.reshape(-1, 1)),
+                                axis=1,
+                            )
+                            / pdfvar_histo.shape[0]
+                        )
+                        pdf_unc = np.vstack([pdf_unc, pdf_unc])
+                    else:
+                        print("I dont know how to do this yet!!!")
+                        pass
+                        ### Hessian method
+                        # upper = np.sqrt(
+
+                        # )
+
+            total_unc = None
+            if scale_unc is not None:
+                total_unc = scale_unc
+
+                if pdf_unc is not None:
+                    lower_scale = total_unc[0] / current_histo
+                    upper_scale = total_unc[1] / current_histo
+
+                    lower_pdf = pdf_unc[0] / current_histo
+                    upper_pdf = pdf_unc[0] / current_histo
+
+                    lower_unc = np.sqrt(lower_scale**2 + lower_pdf**2)
+                    upper_unc = np.sqrt(upper_scale**2 + upper_pdf**2)
+                    total_unc = np.vstack(
+                        [lower_unc * current_histo, upper_unc * current_histo]
+                    )
+
+            elif pdf_unc is not None:
+                total_unc = pdf_unc
+
             outputPy.write(", ".join(f"{x:.8e}" for x in current_histo) + "])\n\n")
+
+            if upper_scale is not None:
+                outputPy.write("    " + histoname + "_scale_up_weights = np.array([")
+                outputPy.write(", ".join(f"{x:.8e}" for x in upper_scale) + "])\n\n")
+                outputPy.write("    " + histoname + "_scale_dn_weights = np.array([")
+                outputPy.write(", ".join(f"{x:.8e}" for x in lower_scale) + "])\n\n")
+
             ntot = float(sum(current_histo))
 
         # Canvas
@@ -747,12 +890,28 @@ class PlotFlow:
 
             if not stackmode:
                 myweights = "y" + histos[ind].name + "_" + str(ind) + "_weights"
+                myweights_scale_up = (
+                    "y" + histos[ind].name + "_" + str(ind) + "_scale_up_weights"
+                )
+                myweights_scale_dn = (
+                    "y" + histos[ind].name + "_" + str(ind) + "_scale_dn_weights"
+                )
             else:
                 myweights = ""
+                myweights_scale_up = ""
+                myweights_scale_dn = ""
                 for ind2 in range(0, ind + 1):
                     if ind2 >= 1:
                         myweights += "+"
+                        myweights_scale_up += "+"
+                        myweights_scale_dn += "+"
                     myweights += "y" + histos[ind2].name + "_" + str(ind2) + "_weights"
+                    myweights_scale_up += (
+                        "y" + histos[ind2].name + "_" + str(ind2) + "_scale_up_weights"
+                    )
+                    myweights_scale_dn += (
+                        "y" + histos[ind2].name + "_" + str(ind2) + "_scale_dn_weights"
+                    )
 
             # reset
             linecolor = 0
@@ -901,6 +1060,7 @@ class PlotFlow:
                 + mytitle
                 + ", "
             )
+
             if ntot != 0:
                 outputPy.write("histtype=" + filledmode + ", ")
 
@@ -949,6 +1109,14 @@ class PlotFlow:
                     + ' orientation="vertical")\n\n'
                 )
         outputPy.write("\n")
+
+        if upper_scale is not None:
+            outputPy.write(
+                "    pad.errorbar("
+                + "[x + (xBinning[0] + xBinning[1])/2 for x in xBinning[:-1]],"
+                + f"{myweights}, yerr={total_unc.tolist()},"
+                + " fmt='.', elinewidth=1, capsize=2)\n\n"
+            )
 
         # Label
         outputPy.write("    # Axis\n")
@@ -1013,7 +1181,7 @@ class PlotFlow:
                     myweights += "+"
                 myweights += "y" + histos[ind].name + "_" + str(ind) + "_weights"
         else:
-            myweights = "numpy.array(["
+            myweights = "np.array(["
             for ind in range(0, len(histos)):
                 if ind >= 1:
                     myweights += ","
@@ -1040,7 +1208,7 @@ class PlotFlow:
                     myweights += "+"
                 myweights += "y" + histos[ind].name + "_" + str(ind) + "_weights"
         else:
-            myweights = "numpy.array(["
+            myweights = "np.array(["
             for ind in range(0, len(histos)):
                 if ind >= 1:
                     myweights += ","
@@ -1091,7 +1259,7 @@ class PlotFlow:
         # Labels
         if frequencyhisto:
             outputPy.write("    # Labels for x-Axis\n")
-            outputPy.write("    xLabels = numpy.array([")
+            outputPy.write("    xLabels = np.array([")
             for bin in range(0, xnbin):
                 if bin >= 1:
                     outputPy.write(",")
