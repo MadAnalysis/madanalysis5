@@ -108,24 +108,18 @@ class Histogram:
                     f"{str(data[-1])}. This value is set to zero."
                 )
                 data[-1] = np.clip(data[-1], 0, None)
-        self.summary.array = np.array(data[:])  # [:] -> clone of data
+        self.summary.array_full = np.array(data[:])  # [:] -> clone of data
 
         # Compute the mean and the error on the data
         # mean shape should be (Nbins, ) and the histogram unc shape should be (Nbins, 2)
         # where first column is the lower envelop and second is upper envelop
-        histogram_mean = np.mean(self.summary.array, axis=1)
-        std = np.std(self.summary.array, axis=1)
-        histogram_unc = np.hstack([std, std])
+        histogram_mean = np.mean(self.summary.array_full, axis=1)
         self.summary.array = histogram_mean.reshape(-1)
-        self.summary.array_unc = histogram_unc
 
         # Integral
         self.positive.ComputeIntegral()
         self.negative.ComputeIntegral()
         self.summary.ComputeIntegral()
-
-    def CreateHistogram(self):
-        pass
 
     def Reset(self):
 
