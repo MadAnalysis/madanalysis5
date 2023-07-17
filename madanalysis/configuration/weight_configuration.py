@@ -118,15 +118,15 @@ class WeightCollection:
         self._collection = [] if collection is None else collection
         self._names = []
 
-    def append(self, name: Text, idx: int):
+    def append(self, name: Text, idx: int) -> None:
         """Add weight into the collection"""
         if name not in self.names:
             self._collection.append(Weight(name=name, loc=idx))
 
-    def __iter__(self):
+    def __iter__(self) -> Weight:
         yield from self._collection
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._collection)
 
     @property
@@ -155,7 +155,7 @@ class WeightCollection:
                 return w
         raise ValueError("Can not find nominal weight")
 
-    def group_for(self, group: Text):
+    def group_for(self, group: Text) -> Dict:
         """Create a group"""
         assert group in ["muf", "mur", "pdfset", "dynamic_scale"]
 
@@ -176,6 +176,23 @@ class WeightCollection:
     def pdfset(self, pdfid: int) -> List[Weight]:
         """retreive weights corresponding to one pdf set"""
         return WeightCollection([w for w in self if w.pdfset == pdfid])
+
+    def get(self, **kwargs) -> List[Weight]:
+        if len(kwargs) == 0:
+            return []
+        collection = []
+        keys = ["muf", "mur", "dynamic_scale", "pdfset", "merging"]
+
+        for weight in self:
+            add = True
+            for key in (key for key in keys if key in kwargs):
+                if getattr(weight, key) != kwargs.get(key):
+                    add = False
+                    break
+            if add:
+                collection.append(weight)
+
+        return WeightCollection(collection)
 
     @property
     def pdfsets(self) -> List[int]:
