@@ -717,6 +717,7 @@ class PlotFlow:
         # Loop over datasets and histos
         ntot = 0
         for ind, hist in enumerate(histos):
+            logging.getLogger("MA5").debug(f"<><><><><><> {hist.name} <><><><><><>")
 
             # pdfset dictionary structure:
             # "weights": are the nominal weights including scale uncertainties
@@ -737,16 +738,10 @@ class PlotFlow:
                             )
                         break
 
-            print("Scales", pdfset["weights"].get_scale(muf=1.0, mur=1.0))
-
-            # with open("/Users/jackaraz/Desktop/test.json", "w") as f:
-            #     json.dump(
-            #         pdfset["weights"].get_scale(muf=1.0, mur=1.0).to_dict(), f, indent=4
-            #     )
-
-            # TODO: If there is only scale variations
             if len(pdfset) == 0:
-                pass
+                logging.getLogger("MA5").debug("No additional source of uncertainty")
+            else:
+                logging.getLogger("MA5").debug(pdfset)
 
             # Creating a new histo
             histoname = "y" + hist.name + "_" + str(ind)
@@ -795,7 +790,11 @@ class PlotFlow:
 
                     ### Choose method
                     method = "replicas"
-                    known_hessians = ["CT18", "MSHT20"]
+                    # TODO this list may need to be extended
+                    known_hessians = [
+                        "CT18",
+                        "MSHT20",
+                    ]
                     if "hessian" in pdfset["name"].lower() or any(
                         x in pdfset["name"] for x in known_hessians
                     ):
@@ -817,12 +816,37 @@ class PlotFlow:
                         )
                         pdf_unc = np.vstack([pdf_unc, pdf_unc])
                     else:
-                        print("I dont know how to do this yet!!!")
-                        pass
-                        ### Hessian method
-                        # upper = np.sqrt(
+                        upper = np.zeros(full_histo.shape[0])
+                        lower = np.zeros(full_histo.shape[0])
+                        for idx, replica in enumerate(pdfset["replicas"]):
+                            if idx % 2 != 0:
+                                continue
+                            other_replica = pdfset["replicas"][idx + 1]
+                            first = np.squeeze(full_histo[:, replica.loc]) - current_histo
+                            second = (
+                                np.squeeze(full_histo[:, other_replica.loc])
+                                - current_histo
+                            )
 
-                        # )
+                            upper += np.square(
+                                np.max(
+                                    np.vstack([first, second, np.zeros(first.shape)]),
+                                    axis=0,
+                                )
+                            )
+
+                            first = current_histo - np.squeeze(full_histo[:, replica.loc])
+                            second = current_histo - np.squeeze(
+                                full_histo[:, other_replica.loc]
+                            )
+                            lower += np.square(
+                                np.max(
+                                    np.vstack([first, second, np.zeros(first.shape)]),
+                                    axis=0,
+                                )
+                            )
+
+                        pdf_unc = np.sqrt(np.vstack([lower, upper]))
 
             total_unc = None
             if scale_unc is not None:
