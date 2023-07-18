@@ -45,6 +45,9 @@ class Histogram:
         self.negative.Print()
         self.summary.Print()
 
+    def CreateHistogram(self):
+        pass
+
     def FinalizeReading(self, main, dataset):
 
         self.positive.convert_to_numpy()
