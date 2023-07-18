@@ -135,10 +135,10 @@ class WeightCollection:
             self._collection.append(Weight(name=name, loc=idx))
 
     def __repr__(self) -> Text:
-        # if len(self) < 5:
-        return "WeightCollection(" + ",".join([str(x) for x in self]) + ")"
+        if len(self) < 5:
+            return "WeightCollection(" + ",".join([str(x) for x in self]) + ")"
 
-        # return f"WeightCollection(contains {len(self)} weight definitions)"
+        return f"WeightCollection(contains {len(self)} weight definitions)"
 
     def __str__(self) -> Text:
         return self.__repr__()
@@ -148,6 +148,9 @@ class WeightCollection:
 
     def __len__(self) -> int:
         return len(self._collection)
+
+    def __getitem__(self, index: int) -> Weight:
+        return self._collection[index]
 
     @property
     def names(self) -> List[Text]:
