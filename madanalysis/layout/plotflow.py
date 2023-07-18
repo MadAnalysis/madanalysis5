@@ -768,7 +768,6 @@ class PlotFlow:
                         .loc
                     )
                     current_histo = np.squeeze(full_histo[:, nominal_loc])
-                    print("current_histo", current_histo.shape)
 
                     scale_vars = pdfset["weights"].get_scale_vars(
                         point=n_point_scale, dynamic=dyn_scale
@@ -848,6 +847,7 @@ class PlotFlow:
 
                         pdf_unc = np.sqrt(np.vstack([lower, upper]))
 
+            # TODO give options for both linear and quadrature combination
             total_unc = None
             if scale_unc is not None:
                 total_unc = scale_unc
@@ -857,7 +857,7 @@ class PlotFlow:
                     upper_scale = total_unc[1] / current_histo
 
                     lower_pdf = pdf_unc[0] / current_histo
-                    upper_pdf = pdf_unc[0] / current_histo
+                    upper_pdf = pdf_unc[1] / current_histo
 
                     lower_unc = np.sqrt(lower_scale**2 + lower_pdf**2)
                     upper_unc = np.sqrt(upper_scale**2 + upper_pdf**2)
@@ -869,12 +869,6 @@ class PlotFlow:
                 total_unc = pdf_unc
 
             outputPy.write(", ".join(f"{x:.8e}" for x in current_histo) + "])\n\n")
-
-            if upper_scale is not None:
-                outputPy.write("    " + histoname + "_scale_up_weights = np.array([")
-                outputPy.write(", ".join(f"{x:.8e}" for x in upper_scale) + "])\n\n")
-                outputPy.write("    " + histoname + "_scale_dn_weights = np.array([")
-                outputPy.write(", ".join(f"{x:.8e}" for x in lower_scale) + "])\n\n")
 
             ntot = float(sum(current_histo))
 
@@ -914,28 +908,14 @@ class PlotFlow:
 
             if not stackmode:
                 myweights = "y" + histos[ind].name + "_" + str(ind) + "_weights"
-                myweights_scale_up = (
-                    "y" + histos[ind].name + "_" + str(ind) + "_scale_up_weights"
-                )
-                myweights_scale_dn = (
-                    "y" + histos[ind].name + "_" + str(ind) + "_scale_dn_weights"
-                )
             else:
                 myweights = ""
-                myweights_scale_up = ""
-                myweights_scale_dn = ""
                 for ind2 in range(0, ind + 1):
                     if ind2 >= 1:
                         myweights += "+"
                         myweights_scale_up += "+"
                         myweights_scale_dn += "+"
                     myweights += "y" + histos[ind2].name + "_" + str(ind2) + "_weights"
-                    myweights_scale_up += (
-                        "y" + histos[ind2].name + "_" + str(ind2) + "_scale_up_weights"
-                    )
-                    myweights_scale_dn += (
-                        "y" + histos[ind2].name + "_" + str(ind2) + "_scale_dn_weights"
-                    )
 
             # reset
             linecolor = 0
