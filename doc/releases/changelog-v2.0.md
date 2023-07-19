@@ -66,6 +66,9 @@
   reader mentioned in issue [#136](https://github.com/MadAnalysis/madanalysis5/issues/136).
   ([#167](https://github.com/MadAnalysis/madanalysis5/pull/167))
 
+* Delphes crash fixed due to miscommunication between libraries see issue [#204](https://github.com/MadAnalysis/madanalysis5/issues/204).
+  ([#208](https://github.com/MadAnalysis/madanalysis5/pull/208))
+
 ## Contributors
 
 This release contains contributions from (in alphabetical order):
