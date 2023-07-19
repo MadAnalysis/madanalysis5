@@ -602,6 +602,9 @@ class Main():
 
         # Delphes
         if self.archi_info.has_delphes:
+            # @jackaraz: activate fastjet flag
+            if self.archi_info.has_fastjet:
+                os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
             libraries.append(['Delphes', 'interface to Delphes', 'delphes',
                               self.archi_info.ma5dir + '/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so',
                               self.archi_info.ma5dir + '/tools/SampleAnalyzer/Interfaces', False])
