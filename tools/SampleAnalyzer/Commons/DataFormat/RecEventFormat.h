@@ -114,7 +114,7 @@ namespace MA5
         std::vector<fastjet::PseudoJet> input_hadrons_;
 #endif
 
-        /// Create an empty jet
+        /// Empty jet (useful temporary object)
         std::vector<RecJetFormat>    emptyjet_;
 
         /// Collection of reconstructed tracks
@@ -177,7 +177,7 @@ namespace MA5
         // -------------------------------------------------------------
     public :
 
-        /// Constructor withtout arguments
+        /// Constructor without arguments
         RecEventFormat()
         { Reset(); }
 
