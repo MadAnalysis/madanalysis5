@@ -176,7 +176,7 @@ class WeightCollection:
         for w in self:
             if w.is_nominal:
                 return w
-        raise ValueError("Can not find nominal weight")
+        raise ValueError("Cannot find nominal weight")
 
     def group_for(self, group: Text) -> Dict:
         """Create a group"""
@@ -246,29 +246,27 @@ class WeightCollection:
         if dynamic is not None:
             dynamic = dynamic if self.has_dyn_scale(dynamic) else None
 
-        scales = self.scales["muf"]
-        if len(scales) == 5 and point == 3:
-            scales = scales[1:-1]
-        elif len(scales) == 7:
-            if point == 3:
-                scales = scales[2:-2]
-            if point == 5:
-                scales = scales[1:-1]
-        elif len(scales) == 9:
-            if point == 3:
-                scales = scales[3:-3]
-            elif point == 5:
-                scales = scales[2:-2]
-            elif point == 7:
-                scales = scales[1:-1]
+        scale_choices = [];
+        all_scale_choices = [];
+        for w in self:
+          if w.dynamic_scale==dynamic:
+              all_scale_choices.append([w.muf, w.mur])
+              if point==3:
+                  if w.muf==w.mur and w.muf in [0.5,1.0,2.0]:
+                      scale_choices.append([w.muf, w.mur])
+              elif point==7:
+                  if [w.muf, w.mur] in [ [0.5,0.5], [0.5,1.0], [1.0,0.5], [1.0,1.0], [1.0,2.0], [2.0,1.0], [2.0,2.0] ]:
+                      scale_choices.append([w.muf, w.mur])
+              elif point==9:
+                  if w.muf in [0.5,1.0,2.0] and w.mur in [0.5,1.0,2.0]:
+                      scale_choices.append([w.muf, w.mur])
+              else:
+                  scale_choices.append([w.muf, w.mur])
 
-        min_scale = min(scales)
-        max_scale = max(scales)
+        if len(scale_choices) != point:
+            scale_choices = all_scale_choices
 
-        return (
-            self.get_scale(dynamic=dynamic, muf=min_scale, mur=min_scale),
-            self.get_scale(dynamic=dynamic, muf=max_scale, mur=max_scale),
-        )
+        return ( [self.get_scale(dynamic=dynamic, muf=x[0], mur=x[1]) for x in scale_choices] )
 
     def get_scale(
         self, dynamic: int = None, muf: float = 1.0, mur: float = 1.0

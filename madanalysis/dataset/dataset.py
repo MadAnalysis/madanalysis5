@@ -403,11 +403,11 @@ class Dataset:
         elif variable == "n_point_scale_variation":
             try:
                 tmp = int(value)
-                if tmp not in [3, 5, 7, 9]:
-                    raise ValueError("n_point_scale_variation is not within 3,5,7 or 9")
+                if tmp not in [3, 7, 9]:
+                    raise ValueError("n_point_scale_variation is not within 3,7 or 9")
             except ValueError:
                 logging.getLogger("MA5").error(
-                    "n-point scale variation can only be 3,5,7 or 9."
+                    "n-point scale variation can only be 3,7 or 9."
                 )
                 return
             self.n_point_scale_variation = tmp
