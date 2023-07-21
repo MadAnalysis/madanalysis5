@@ -34,7 +34,7 @@ from collections                                                import OrderedDi
 from shell_command                                              import ShellCommand
 from string_tools                                               import StringTools
 from six.moves                                                  import map, range, input
-import copy, logging, math, os, shutil, time, sys, json
+import copy, logging, math, os, shutil, time, sys, json, os
 
 
 class RunRecast():
@@ -56,6 +56,9 @@ class RunRecast():
         self.is_apriori       = True
         self.cls_calculator   = cls
         self.TACO_output      = self.main.recasting.TACO_output
+        
+        # @jackaraz: activate fastjet flag
+        os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
 
     def init(self):
         ### First, the analyses to take care off
