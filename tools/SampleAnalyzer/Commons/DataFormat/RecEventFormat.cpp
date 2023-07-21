@@ -42,7 +42,7 @@ namespace MA5 {
         emptyjet_.clear();
 #ifdef MA5_FASTJET_MODE
         // pseudojet : only available when fastjet is in use (code efficiency)
-    input_hadrons_.clear();
+        input_hadrons_.clear();
 #endif
         towers_ok_=false;
         towers_.clear();

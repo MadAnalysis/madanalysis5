@@ -263,6 +263,7 @@ class LibraryWriter():
             options.has_root        = True
             options.has_root_inc    = True
             options.has_root_lib    = True
+            options.ma5_fastjet_mode = self.main.archi_info.has_root and self.main.archi_info.has_fastjet
             toRemove.extend(['compilation_delphes.log','linking_delphes.log',\
                              'cleanup_delphes.log','mrproper_delphes.log'])
         elif package=='test_delphes':

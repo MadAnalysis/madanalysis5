@@ -53,7 +53,9 @@ class CmdSubmit(CmdBase):
         self.forbiddenpaths = []
         self.forbiddenpaths.append(os.path.normpath(self.main.archi_info.ma5dir + "/lib"))
         self.forbiddenpaths.append(os.path.normpath(self.main.archi_info.ma5dir + "/bin"))
-        self.forbiddenpaths.append(os.path.normpath(self.main.archi_info.ma5dir + "/madanalysis"))
+        self.forbiddenpaths.append(
+            os.path.normpath(self.main.archi_info.ma5dir + "/madanalysis")
+        )
 
     def do(self, args, history):
         if not self.resubmit:
@@ -133,13 +135,17 @@ class CmdSubmit(CmdBase):
                 break
 
         if ToReAnalyze:
-            self.logger.info("   Creating the new histograms and/or applying the new cuts...")
+            self.logger.info(
+                "   Creating the new histograms and/or applying the new cuts..."
+            )
             # Submission
             if not self.submit(self.main.lastjob_name, history):
                 return
             self.logger.info("   Updating the reports...")
         else:
-            self.logger.info("   No new histogram / cut to account for. Updating the reports...")
+            self.logger.info(
+                "   No new histogram / cut to account for. Updating the reports..."
+            )
 
         # Reading info from job output
         layout = Layout(self.main)
@@ -181,7 +187,9 @@ class CmdSubmit(CmdBase):
 
         # Checking if a dataset has been defined
         if len(self.main.datasets) == 0:
-            self.logger.error("no dataset found; please define a dataset (via the command import).")
+            self.logger.error(
+                "no dataset found; please define a dataset (via the command import)."
+            )
             self.logger.error("job submission aborted.")
             return
 
@@ -243,7 +251,9 @@ class CmdSubmit(CmdBase):
         while os.path.isdir(args[0] + "/Output/Histos/MadAnalysis5job_" + str(i)):
             i += 1
 
-        histopath = os.path.expanduser(args[0] + "/Output/Histos/MadAnalysis5job_" + str(i))
+        histopath = os.path.expanduser(
+            args[0] + "/Output/Histos/MadAnalysis5job_" + str(i)
+        )
         if not histopath.startswith("/"):
             histopath = self.main.currentdir + "/" + histopath
         histopath = os.path.normpath(histopath)
@@ -258,7 +268,9 @@ class CmdSubmit(CmdBase):
 
         # Getting output filename for PDF report
         if self.main.session_info.has_pdflatex:
-            pdfpath = os.path.expanduser(args[0] + "/Output/PDF/MadAnalysis5job_" + str(i))
+            pdfpath = os.path.expanduser(
+                args[0] + "/Output/PDF/MadAnalysis5job_" + str(i)
+            )
             if not pdfpath.startswith("/"):
                 pdfpath = self.main.currentdir + "/" + pdfpath
             pdfpath = os.path.normpath(pdfpath)
@@ -267,7 +279,9 @@ class CmdSubmit(CmdBase):
 
         # Getting output filename for DVI report
         if self.main.session_info.has_latex:
-            dvipath = os.path.expanduser(args[0] + "/Output/DVI/MadAnalysis5job_" + str(i))
+            dvipath = os.path.expanduser(
+                args[0] + "/Output/DVI/MadAnalysis5job_" + str(i)
+            )
             if not dvipath.startswith("/"):
                 dvipath = self.main.currentdir + "/" + dvipath
             dvipath = os.path.normpath(dvipath)
@@ -301,7 +315,9 @@ class CmdSubmit(CmdBase):
                 pdfpath = pdfpath[len(self.main.currentdir) :]
             if pdfpath[0] == "/":
                 pdfpath = pdfpath[1:]
-            self.logger.info("     -> To open this PDF report, please type 'open " + pdfpath + "'.")
+            self.logger.info(
+                "     -> To open this PDF report, please type 'open " + pdfpath + "'."
+            )
 
         else:
             self.logger.warning("pdflatex not installed -> no PDF report.")
@@ -320,7 +336,9 @@ class CmdSubmit(CmdBase):
 
             # Displaying message for opening DVI
             if self.main.session_info.has_dvipdf:
-                pdfpath = os.path.expanduser(args[0] + "/Output/DVI/MadAnalysis5job_" + str(i))
+                pdfpath = os.path.expanduser(
+                    args[0] + "/Output/DVI/MadAnalysis5job_" + str(i)
+                )
                 if self.main.currentdir in pdfpath:
                     pdfpath = pdfpath[len(self.main.currentdir) :]
                 if pdfpath[0] == "/":
@@ -339,10 +357,14 @@ class CmdSubmit(CmdBase):
         # checking if delphes is needed and installing/activating it if relevant
         detector_handler = DetectorManager(self.main)
         if not detector_handler.manage("delphes"):
-            logging.getLogger("MA5").error("Problem with the handling of delphes/delphesMA5tune")
+            logging.getLogger("MA5").error(
+                "Problem with the handling of delphes/delphesMA5tune"
+            )
             return False
         if not detector_handler.manage("delphesMA5tune"):
-            logging.getLogger("MA5").error("Problem with the handling of delphes/delphesMA5tune")
+            logging.getLogger("MA5").error(
+                "Problem with the handling of delphes/delphesMA5tune"
+            )
             return False
 
         # Initializing the JobWriter
@@ -353,7 +375,9 @@ class CmdSubmit(CmdBase):
             self.logger.info("   Creating folder '" + dirname.split("/")[-1] + "'...")
         else:
             self.logger.info(
-                "   Checking the structure of the folder '" + dirname.split("/")[-1] + "'..."
+                "   Checking the structure of the folder '"
+                + dirname.split("/")[-1]
+                + "'..."
             )
         if not jobber.Open():
             self.logger.error("job submission aborted.")
@@ -444,18 +468,17 @@ class CmdSubmit(CmdBase):
                     root_dataset = True
                 elif "lhco" in sample:
                     lhco_dataset = True
-        if self.main.fastsim.package in ["delphes", "delphesMA5tune"] or root_dataset:
-            os.environ["FASTJET_FLAG"] = ""
-        elif self.main.fastsim.package in ["fastjet"] and hepmc_dataset:
+        # if self.main.fastsim.package in ["delphes","delphesMA5tune"] or root_dataset:
+        #     os.environ["FASTJET_FLAG"] = ""
+        if self.main.fastsim.package in ["fastjet"] and hepmc_dataset:
             if root_dataset and hepmc_dataset:
-                self.logger.error("ROOT input files not allowed for SFS-FastJet based analyses.")
+                self.logger.error(
+                    "ROOT input files not allowed for SFS-FastJet based analyses."
+                )
                 return False
-            os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
-        elif (
-            self.main.fastsim.package == "none"
-            and self.main.archi_info.has_fastjet
-            and lhco_dataset
-        ):
+        # elif self.main.fastsim.package == 'none' and self.main.archi_info.has_fastjet and lhco_dataset:
+        #     os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
+        if self.main.archi_info.has_fastjet:
             os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
 
         if self.resubmit and not self.main.recasting.status == "on":
@@ -476,11 +499,17 @@ class CmdSubmit(CmdBase):
                 return False
 
             for item in self.main.datasets:
-                self.logger.info("   Running 'SampleAnalyzer' over dataset '" + item.name + "'...")
-                self.logger.info("    *******************************************************")
+                self.logger.info(
+                    "   Running 'SampleAnalyzer' over dataset '" + item.name + "'..."
+                )
+                self.logger.info(
+                    "    *******************************************************"
+                )
                 if not jobber.RunJob(item):
                     self.logger.error("run over '" + item.name + "' aborted.")
-                self.logger.info("    *******************************************************")
+                self.logger.info(
+                    "    *******************************************************"
+                )
         return True
 
     def extract(self, dirname, layout):
@@ -500,12 +529,14 @@ class CmdSubmit(CmdBase):
 
         if self.main.recasting.status != "on":
             self.logger.info("   Extracting data from the output files...")
-            for i, dataset in enumerate(self.main.datasets):
-                jobber.ExtractGeneral(dataset)
-                jobber.ExtractHistos(dataset, layout.plotflow.detail[i])
-                jobber.ExtractCuts(dataset, layout.cutflow.detail[i])
+            for i in range(0, len(self.main.datasets)):
+                jobber.ExtractGeneral(self.main.datasets[i])
+                jobber.ExtractHistos(self.main.datasets[i], layout.plotflow.detail[i])
+                jobber.ExtractCuts(self.main.datasets[i], layout.cutflow.detail[i])
                 if self.main.merging.enable:
-                    jobber.ExtractHistos(dataset, layout.merging.detail[i], merging=True)
+                    jobber.ExtractHistos(
+                        self.main.datasets[i], layout.merging.detail[i], merging=True
+                    )
         return True
 
     def help(self):
