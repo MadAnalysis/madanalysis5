@@ -729,10 +729,20 @@ class PlotFlow:
                 # separate the weights related to PDF variations from the other weights
                 for pdfid in datasets[ind].weight_collection.pdfsets:
                     if pdfid in self.pdftable:
-                        weight_set.update( {"weights": datasets[ind].weight_collection.pdfset(pdfid)} )
-                        weight_set.update( {"pdf_variations": {self.pdftable[pdfid]["name"]:WeightCollection()} } )
+                        weight_set.update(
+                            {"weights": datasets[ind].weight_collection.pdfset(pdfid)}
+                        )
+                        weight_set.update(
+                            {
+                                "pdf_variations": {
+                                    self.pdftable[pdfid]["name"]: WeightCollection()
+                                }
+                            }
+                        )
                         for idx in range(1, self.pdftable[pdfid]["members"]):
-                            weight_set["pdf_variations"][self.pdftable[pdfid]["name"]] += datasets[ind].weight_collection.pdfset(pdfid + idx)
+                            weight_set["pdf_variations"][
+                                self.pdftable[pdfid]["name"]
+                            ] += datasets[ind].weight_collection.pdfset(pdfid + idx)
 
             # Some checks
             if len(weight_set) == 0:
@@ -755,75 +765,138 @@ class PlotFlow:
                     # Configuration
                     dyn_scale = datasets[ind].dynamic_scale_choice
                     n_point_scale = datasets[ind].n_point_scale_variation
-                    scale_vars = weight_set["weights"].get_scale_vars(point=n_point_scale, dynamic=dyn_scale)
-                    logging.getLogger("MA5").debug("Dyn. scale configuration " + str(dyn_scale) + "; " + str(n_point_scale) + "points")
-                    logging.getLogger("MA5").debug("Scale variations = " + str(scale_vars))
+                    scale_vars = weight_set["weights"].get_scale_vars(
+                        point=n_point_scale, dynamic=dyn_scale
+                    )
+                    logging.getLogger("MA5").debug(
+                        "Dyn. scale configuration "
+                        + str(dyn_scale)
+                        + "; "
+                        + str(n_point_scale)
+                        + "points"
+                    )
+                    logging.getLogger("MA5").debug(
+                        "Scale variations = " + str(scale_vars)
+                    )
 
                     # Nominal histo
                     central_scale = weight_set["weights"].central_scale
-                    nominal_loc = weight_set["weights"].get_scale(dynamic=dyn_scale, muf=central_scale, mur=central_scale).loc
-                    logging.getLogger("MA5").debug("Nominal weight location = " + str(nominal_loc))
+                    nominal_loc = (
+                        weight_set["weights"]
+                        .get_scale(
+                            dynamic=dyn_scale, muf=central_scale, mur=central_scale
+                        )
+                        .loc
+                    )
+                    logging.getLogger("MA5").debug(
+                        "Nominal weight location = " + str(nominal_loc)
+                    )
                     current_histo = np.squeeze(full_histo[:, nominal_loc])
 
                 # Scale variation envelope
                 if weight_set["weights"].has_scale:
-                    upper_histo = np.copy(current_histo)
-                    lower_histo = np.copy(current_histo)
-                    for x in scale_vars:
-                        scale_histo = np.squeeze(full_histo[:, x.loc])
-                        for i, mybin in enumerate(current_histo):
-                            if upper_histo[i] < scale_histo[i]: upper_histo[i] = scale_histo[i]
-                            if lower_histo[i] > scale_histo[i]: lower_histo[i] = scale_histo[i]
-                    upper_scale = np.abs(upper_histo - current_histo)
-                    lower_scale = np.abs(lower_histo - current_histo)
-                    scale_unc = np.vstack([lower_scale, upper_scale])
+                    upper_histo = np.max(
+                        np.hstack(
+                            [
+                                np.copy(current_histo).reshape(-1, 1),
+                                full_histo[:, scale_vars.loc],
+                            ]
+                        ),
+                        axis=1,
+                    )
+                    lower_histo = np.min(
+                        np.hstack(
+                            [
+                                np.copy(current_histo).reshape(-1, 1),
+                                full_histo[:, scale_vars.loc],
+                            ]
+                        ),
+                        axis=1,
+                    )
+                    scale_unc = np.vstack(
+                        [
+                            np.abs(lower_histo - current_histo),
+                            np.abs(upper_histo - current_histo),
+                        ]
+                    )
 
                 # PDF variations
                 if len(weight_set["pdf_variations"]) != 0:
-                    pdf_unc = {};
+                    pdf_unc = {}
                     for pdf_set, pdf_weights in weight_set["pdf_variations"].items():
-                        pdfvar_loc   = pdf_weights.loc + nominal_loc
+                        pdfvar_loc = pdf_weights.loc + nominal_loc
                         pdfvar_histo = full_histo[:, pdf_weights.loc]
 
                         ### Method to use for PDF uncertainties
                         ### TODO: verify that this works for all standard sets
-                        method = "replicas" if (("NNPDF" in pdf_set and not "hessian" in pdf_set) or ("PDF4LHC" in pdf_set and "_mc_" in pdf_set)) else "hessian"
-                        logging.getLogger("MA5").debug(f"Using {method} pdf combination for {pdf_set} pdf set.")
+                        method = (
+                            "replicas"
+                            if (
+                                ("NNPDF" in pdf_set and not "hessian" in pdf_set)
+                                or ("PDF4LHC" in pdf_set and "_mc_" in pdf_set)
+                            )
+                            else "hessian"
+                        )
+                        logging.getLogger("MA5").debug(
+                            f"Using {method} pdf combination for {pdf_set} pdf set."
+                        )
 
                         ### Replicas method
                         if method == "replicas":
                             mean_histo = np.mean(pdfvar_histo, axis=1)
-                            uncertainties = np.sqrt(np.sum(np.square(pdfvar_histo - mean_histo.reshape(-1, 1)),axis=1)/pdfvar_histo.shape[1])
+                            uncertainties = np.sqrt(
+                                np.sum(
+                                    np.square(pdfvar_histo - mean_histo.reshape(-1, 1)),
+                                    axis=1,
+                                )
+                                / pdfvar_histo.shape[1]
+                            )
                         ### Hessian method
                         else:
-                            uncertainties = np.sqrt(np.sum(np.square(pdfvar_histo - current_histo.reshape(-1, 1)),axis=1))
+                            uncertainties = np.sqrt(
+                                np.sum(
+                                    np.square(
+                                        pdfvar_histo - current_histo.reshape(-1, 1)
+                                    ),
+                                    axis=1,
+                                )
+                            )
                         pdf_unc[pdf_set] = np.vstack([uncertainties, uncertainties])
 
             # TODO give options for both linear and quadrature combination
             total_unc = None
             # Two sets of uncertainties
             if scale_unc is not None and pdf_unc is not None:
-                lower_unc = scale_unc[0]
-                upper_unc = scale_unc[1]
-                for pdf_set, pdf_error in pdf_unc.items():
-                    lower = np.sqrt(np.square(scale_unc[0]) + np.square(pdf_error[0]))
-                    upper = np.sqrt(np.square(scale_unc[1]) + np.square(pdf_error[1]))
-                    for i, mybin in enumerate(lower):
-                        if lower[i] > lower_unc[i]: lower_unc[i] = lower[i]
-                        if upper[i] > upper_unc[i]: upper_unc[i] = upper[i]
+                lower_unc = np.hstack(
+                    [
+                        np.sqrt(np.square(scale_unc[0]) + np.square(pdf_error[0]))
+                        for _, pdf_error in pdf_unc.items()
+                    ]
+                )
+                if len(lower_unc.shape) > 1:
+                    lower_unc = np.min(lower_unc, axis=1)
+
+                upper_unc = np.hstack(
+                    [
+                        np.sqrt(np.square(scale_unc[1]) + np.square(pdf_error[1]))
+                        for _, pdf_error in pdf_unc.items()
+                    ]
+                )
+                if len(upper_unc.shape) > 1:
+                    upper_unc = np.max(upper_unc, axis=1)
                 total_unc = np.vstack([lower_unc, upper_unc])
             # only scale uncertainties
             elif scale_unc is not None:
                 total_unc = scale_unc
             # only PDF uncertainties
             elif pdf_unc is not None:
-                for pdf_set, pdf_error in pdf_unc.items():
-                    if total_unc is None:
-                        total_unc = pdf_error
-                    else:
-                        for i, mybin in enumerate(pdf_error[0]):
-                            if total_unc[0][i] > pdf_error[0][i]: total_unc[0][i] = pdf_error[0][i]
-                            if total_unc[1][i] > pdf_error[1][i]: total_unc[1][i] = pdf_error[1][i]
+                lower_pdf = np.hstack([pdf_error[0] for _, pdf_error in pdf_unc.items()])
+                if len(lower_pdf.shape) > 1:
+                    lower_pdf = np.min(lower_pdf, axis=1)
+                upper_pdf = np.hstack([pdf_error[1] for _, pdf_error in pdf_unc.items()])
+                if len(upper_pdf.shape) > 1:
+                    upper_pdf = np.max(upper_pdf, axis=1)
+                total_unc = np.vstack([lower_pdf, upper_pdf])
 
             outputPy.write(", ".join(f"{x:.8e}" for x in current_histo) + "])\n\n")
             ntot = float(sum(current_histo))
@@ -1070,7 +1143,7 @@ class PlotFlow:
                 )
         outputPy.write("\n")
 
-        if upper_scale is not None:
+        if total_unc is not None:
             outputPy.write(
                 "    pad.errorbar("
                 + "[x + (xBinning[0] + xBinning[1])/2 for x in xBinning[:-1]],"
