@@ -246,27 +246,39 @@ class WeightCollection:
         if dynamic is not None:
             dynamic = dynamic if self.has_dyn_scale(dynamic) else None
 
-        scale_choices = [];
-        all_scale_choices = [];
+        scale_choices = []
+        all_scale_choices = []
         for w in self:
-          if w.dynamic_scale==dynamic:
-              all_scale_choices.append([w.muf, w.mur])
-              if point==3:
-                  if w.muf==w.mur and w.muf in [0.5,1.0,2.0]:
-                      scale_choices.append([w.muf, w.mur])
-              elif point==7:
-                  if [w.muf, w.mur] in [ [0.5,0.5], [0.5,1.0], [1.0,0.5], [1.0,1.0], [1.0,2.0], [2.0,1.0], [2.0,2.0] ]:
-                      scale_choices.append([w.muf, w.mur])
-              elif point==9:
-                  if w.muf in [0.5,1.0,2.0] and w.mur in [0.5,1.0,2.0]:
-                      scale_choices.append([w.muf, w.mur])
-              else:
-                  scale_choices.append([w.muf, w.mur])
+            if w.dynamic_scale == dynamic:
+                all_scale_choices.append([w.muf, w.mur])
+                if point == 3:
+                    if w.muf == w.mur and w.muf in [0.5, 1.0, 2.0]:
+                        scale_choices.append([w.muf, w.mur])
+                elif point == 7:
+                    if [w.muf, w.mur] in [
+                        [0.5, 0.5],
+                        [0.5, 1.0],
+                        [1.0, 0.5],
+                        [1.0, 1.0],
+                        [1.0, 2.0],
+                        [2.0, 1.0],
+                        [2.0, 2.0],
+                    ]:
+                        scale_choices.append([w.muf, w.mur])
+                elif point == 9:
+                    if w.muf in [0.5, 1.0, 2.0] and w.mur in [0.5, 1.0, 2.0]:
+                        scale_choices.append([w.muf, w.mur])
+                else:
+                    scale_choices.append([w.muf, w.mur])
 
         if len(scale_choices) != point:
             scale_choices = all_scale_choices
 
-        return ( [self.get_scale(dynamic=dynamic, muf=x[0], mur=x[1]) for x in scale_choices] )
+        output = WeightCollection()
+        for x in scale_choices:
+            output += self.get_scale(dynamic=dynamic, muf=x[0], mur=x[1])
+
+        return output
 
     def get_scale(
         self, dynamic: int = None, muf: float = 1.0, mur: float = 1.0
@@ -298,4 +310,13 @@ class WeightCollection:
         assert isinstance(other, WeightCollection)
         for items in other:
             self._collection.append(items)
+        return self
+
+    def __add__(self, other):
+        assert isinstance(other, WeightCollection)
+        for item in other:
+            if item not in self._collection:
+                self._collection.append(item)
+            else:
+                raise ValueError(f"{item} already exists.")
         return self
