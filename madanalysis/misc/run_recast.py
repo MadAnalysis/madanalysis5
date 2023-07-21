@@ -56,9 +56,6 @@ class RunRecast():
         self.is_apriori       = True
         self.cls_calculator   = cls
         self.TACO_output      = self.main.recasting.TACO_output
-        
-        # @jackaraz: activate fastjet flag
-        os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
 
     def init(self):
         ### First, the analyses to take care off
@@ -265,11 +262,6 @@ class RunRecast():
             return False
         self.logger.debug("   Fixing the pileup path...")
         self.fix_pileup(self.dirname+'_RecastRun/Input/'+card)
-
-        # @Jack: new setup configuration. In order to run the code in SFS-FastJet mode analysis
-        # has to be compiled with `-DMA5_FASTJET_MODE` flag but this needs to be deactivated for
-        # Delphes-ROOT based analyses.
-        os.environ["FASTJET_FLAG"] = ""
 
         # Creating executable
         self.logger.info("   Compiling 'SampleAnalyzer'...")
@@ -698,6 +690,8 @@ class RunRecast():
             strcores='-j'+str(ncores)
             command.append(strcores)
         logfile = self.dirname+'_RecastRun/Build/Log/PADcompilation.log'
+        # @jackaraz: this is needed for the recjetformat
+        os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
         result, out = ShellCommand.ExecuteWithLog(command,logfile,self.dirname+'_RecastRun/Build')
         time.sleep(1.);
         # Checks and exit
