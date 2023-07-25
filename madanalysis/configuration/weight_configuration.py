@@ -234,7 +234,7 @@ class WeightCollection:
     @property
     def has_scale(self) -> bool:
         """is there any scale variations"""
-        return len(self.scales["muf"]) > 0
+        return (len(self.scales["mur"]) > 0) or (len(self.scales["muf"]) > 0)
 
     @property
     def central_scale(self) -> float:
