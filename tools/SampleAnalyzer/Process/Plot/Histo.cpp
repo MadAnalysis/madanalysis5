@@ -204,6 +204,11 @@ void Histo::_initialize(const WeightCollection &weights)
         sum_ww_[idx] = WEIGHTS();
         sum_xw_[idx] = WEIGHTS();
         sum_xxw_[idx] = WEIGHTS();
+        for (MAuint32 idb = 0; idb < nbins_; idb++)
+        {
+            histo_[idb][idx] = WEIGHTS();
+            histo_[idb][idx] = WEIGHTS();
+        }
     }
 }
 
