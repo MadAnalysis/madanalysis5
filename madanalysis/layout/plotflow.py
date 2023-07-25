@@ -355,7 +355,7 @@ class PlotFlow:
                     + str(current_histo[mybin - 1])
                     + ");\n"
                 )
-                if uncertainties!=None:
+                if not uncertainties is None:
                     outputC.write(
                         "  "
                         + histoname
