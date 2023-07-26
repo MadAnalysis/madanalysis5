@@ -82,19 +82,21 @@ class HistogramProcessor:
         self.bin_weights = positive_bin_weights - negative_bin_weights
         self.integral = np.sum(self.bin_weights, axis=0) + self.overflow + self.underflow
 
-    def scale(self, lumi: float) -> float:
+    def scale(self, lumi: float, scale_choice: int, central_pdfs: np.array) -> float:
         """
         Compute the scale of the nominal histogram
 
         Args:
             lumi (``float``): luminosity in fb-1
+            scale_choice (``int``): tag indicating how the central scale choice has been made
+            central_pdfs (``np.array``): list with all acceptable PDF choices for the central set
 
         Returns:
             ``float``:
             scale of the histogram
         """
         # find nominal weight location
-        idx = self.weight_collection.nominal.loc
+        idx = self.weight_collection.nominal(scale_choice=scale_choice, central_pdfs=central_pdfs).loc
 
         if self.integral[idx] == 0:
             return 0.0

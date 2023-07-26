@@ -722,6 +722,7 @@ class JobReader:
                 numline += 1
 
                 # Removing comments
+                is_comment_line = (len(line.split('#'))==2 and line.split('#')[-1]=='\n')
                 index = line.find("#")
                 if index != -1:
                     line = line[:index]
@@ -755,8 +756,9 @@ class JobReader:
                         cutflow_for_region.append(copy.copy(cutinfo))
                         cutinfo.Reset()
 
-                elif initialTag.activated and len(words) == 2:
+                elif initialTag.activated and not is_comment_line and len(words) >= 2:
                     results = self.ExtractCutLine(words, numline, myfile)
+                    print(numline, results)
                     if initialTag.Nlines == 0:
                         cut.initial.nentries_pos = results[0]
                         cut.initial.nentries_neg = results[1]
@@ -778,7 +780,7 @@ class JobReader:
                         logging.getLogger("MA5").warning("Extra line is found: " + line)
                     cutTag.newline()
 
-                elif cutTag.activated and len(words) == 2:
+                elif cutTag.activated and len(words) >= 2:
                     results = self.ExtractCutLine(words, numline, myfile)
                     if cutTag.Nlines == 1:
                         cutinfo.nentries_pos = results[0]

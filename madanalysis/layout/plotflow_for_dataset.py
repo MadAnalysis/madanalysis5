@@ -131,8 +131,13 @@ class PlotFlowForDataset:
                 thexsection = self.xsection
                 if self.main.normalize == NormalizeType.LUMI_WEIGHT:
                     thexsection = thexsection * self.dataset.weight
+                pdf_list = []
+                import os
+                with open(os.path.join(self.main.archi_info.ma5dir, "madanalysis/input/LHAPDF.txt"), "r") as f:
+                     for line in f.readlines()[1:]:
+                         pdf_list.append(int(line.split(",")[0]))
 
-                scale = processor.scale(lumi=self.main.lumi)
+                scale = processor.scale(lumi=self.main.lumi, scale_choice=self.dataset.dynamic_scale_choice, central_pdfs = pdf_list)
 
             # Setting the computing scale
             self.histos[iplot].scale = copy.copy(scale)

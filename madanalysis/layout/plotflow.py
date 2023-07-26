@@ -315,10 +315,8 @@ class PlotFlow:
             else:
                 outputC.write(
                     "  TH1F* "
-#                    "  TGraphAsymmErrors* "
                     + histoname
                     + ' = new TH1F("'
-#                    + ' = new TGraphAsymmErrors("'
                     + histoname
                     + '","'
                     + histoname
@@ -345,7 +343,6 @@ class PlotFlow:
                 + "); // underflow\n"
             )
             for mybin in range(1, xnbin + 1):
-                ntot += current_histo[mybin - 1]
                 outputC.write(
                     "  "
                     + histoname
@@ -366,6 +363,7 @@ class PlotFlow:
                         + ");\n"
                     )
             nentries = hist.summary.nentries
+            ntot = float(sum(current_histo))
             outputC.write(
                 "  "
                 + histoname
@@ -1248,17 +1246,23 @@ class PlotFlow:
 
         # Many weights - initialisation
         full_histo = histo_data.array_full * scale
+        upper_merging, lower_merging = None, None
         upper_scale, lower_scale = None, None
         upper_pdf, lower_pdf = None, None
-        scale_unc, pdf_unc = None, None
+        scale_unc, pdf_unc, merging_unc = None, None, None
         dyn_scale = dataset.dynamic_scale_choice
         n_point_scale = dataset.n_point_scale_variation
+        merging_scale = dataset.merging_scale_variation
         logging.getLogger("MA5").debug(
             "Dyn. scale configuration "
             + str(dyn_scale)
             + "; "
             + str(n_point_scale)
             + "points"
+        )
+        logging.getLogger("MA5").debug(
+            "Merging scale configuration "
+            + str(merging_scale)
         )
 
         # Get the nominal weight

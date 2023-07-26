@@ -39,15 +39,24 @@ class Weight:
     _mur: float = field(init=False, default=None)
     _pdf: int = field(init=False, default=None)
     _merging: float = field(init=False, default=None)
+    _alphas: float = field(init=False, default=None)
 
     def __post_init__(self) -> None:
         self.name = self.name.replace("DYN_SCALE", "DYNSCALE")
         sectors = self.name.split("_")
 
+        # PYTHIA NOMINAL WEIGHT
+        # -> note: to ignore, we need to use the MG5  nominal weight
+        if self.name is "Weight":
+             return
+
         for sector in sectors:
             if "AUX" in sector:
                 self._aux = int(sectors[1])
                 break
+            elif any([x in sector for x in ["scomp", "smax", "smin"]]):
+                 self._aux = float(sector.split("=")[1])
+                 break
             if "MERGING" in sector:
                 self._merging = float(sector.split("=")[1])
             elif "DYNSCALE" in sector:
@@ -58,12 +67,15 @@ class Weight:
                 self._mur = float(sector.split("=")[1])
             elif "PDF" in sector:
                 self._pdf = int(sector.split("=")[1])
+            elif "ALPSFACT" in sector:
+                self._alphas= float(sector.split("=")[1])
 
     def __repr__(self) -> Text:
         return (
             f"Weight(loc={self.loc}, pdf={self.pdfset}, "
             + f"muf={self.muf}, mur={self.mur}, dynamic={self.dynamic_scale}, "
-            + f"merging={self.merging}, aux={self.aux})"
+            + f"merging={self.merging}, aux={self.aux}, "
+            + f"alpsfac={self.alphas})"
         )
 
     def __str__(self) -> Text:
@@ -75,51 +87,38 @@ class Weight:
 
     @property
     def aux(self) -> int:
-        """retreive aux value"""
+        """retrieve aux value"""
         return self._aux
 
     @property
     def dynamic_scale(self) -> int:
-        """retreive dynamic scale"""
+        """retrieve dynamic scale"""
         return self._dyn_scale
 
     @property
     def muf(self) -> float:
-        """retreive factorisation scale"""
+        """retrieve the factorisation scale variation"""
         return self._muf
 
     @property
     def mur(self) -> float:
-        """retreive **forget the name** scale"""
+        """retrieve the renormalisation scale variation"""
         return self._mur
 
     @property
     def pdfset(self) -> int:
-        """retreive pdf set id"""
+        """retrieve pdf set id"""
         return self._pdf
 
     @property
     def merging(self) -> float:
-        """retreive merging scale"""
+        """retrieve merging scale"""
         return self._merging
 
     @property
-    def is_nominal(self) -> bool:
-        """Return true if the weight is nominal"""
-        if all(
-            x is None
-            for x in [
-                self.aux,
-                self.pdfset,
-                self.dynamic_scale,
-                self.muf,
-                self.mur,
-                self.merging,
-            ]
-        ):
-            return True
-
-        return False
+    def alphas(self) -> float:
+        """retrieve the alpha_s variation"""
+        return self._alphas
 
 
 class WeightCollection:
@@ -154,7 +153,7 @@ class WeightCollection:
 
     @property
     def names(self) -> List[Text]:
-        """retreive weight names"""
+        """retrieve weight names"""
         if len(self) == len(self._names):
             return self._names
 
@@ -170,12 +169,16 @@ class WeightCollection:
         for dat in data:
             self.append(dat["name"], dat["loc"])
 
-    @property
-    def nominal(self) -> Weight:
+    def nominal(self, scale_choice: int, central_pdfs: np.array) -> Weight:
         """Get nominal weight"""
         for w in self:
-            if w.is_nominal:
-                return w
+            if any([not x is None for x in [w.aux, w.alphas]]):
+                continue
+            if w.muf!=1.0 or w.mur!=1.0 or w.dynamic_scale!=scale_choice:
+                continue
+            if not w.pdfset in central_pdfs:
+                continue
+            return w
         raise ValueError("Cannot find nominal weight")
 
     def group_for(self, group: Text) -> Dict:
@@ -197,14 +200,14 @@ class WeightCollection:
         return group_dict
 
     def pdfset(self, pdfid: int) -> List[Weight]:
-        """retreive weights corresponding to one pdf set"""
+        """retrieve weights corresponding to one pdf set"""
         return WeightCollection([w for w in self if w.pdfset == pdfid])
 
     def get(self, **kwargs) -> List[Weight]:
         if len(kwargs) == 0:
             return []
         collection = []
-        keys = ["muf", "mur", "dynamic_scale", "pdfset", "merging"]
+        keys = ["muf", "mur", "dynamic_scale", "pdfset", "merging", "alphas"]
 
         for weight in self:
             add = True
@@ -238,7 +241,7 @@ class WeightCollection:
 
     @property
     def central_scale(self) -> float:
-        """retreive central scale"""
+        """retrieve central scale"""
         scales = self.scales["muf"]
         return scales[len(scales) // 2]
 
@@ -249,6 +252,8 @@ class WeightCollection:
         scale_choices = []
         all_scale_choices = []
         for w in self:
+            if not w.alphas is None:
+                continue
             if w.dynamic_scale == dynamic:
                 all_scale_choices.append([w.muf, w.mur])
                 if point == 3:
@@ -289,7 +294,7 @@ class WeightCollection:
             [
                 w
                 for w in self
-                if w.dynamic_scale == dynamic and w.muf == muf and w.mur == mur
+                if w.dynamic_scale == dynamic and w.muf == muf and w.mur == mur and w.alphas is None
             ]
         )
 
@@ -303,7 +308,7 @@ class WeightCollection:
 
     @property
     def loc(self) -> List[int]:
-        """retreive the locations of the weights"""
+        """retrieve the locations of the weights"""
         return [w.loc for w in self]
 
     def __iadd__(self, other):

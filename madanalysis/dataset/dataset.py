@@ -77,7 +77,10 @@ class Dataset:
         "pdf_down_variation": [],
         "pdf_variation": [],
         "dynamic_scale_choice": ["1", "2", "3", "4"],
-        "n_point_scale_variation": ["3", "5", "7", "9"],
+        "n_point_scale_variation": ["3", "7", "9"],
+        "include_merging_scale_variation": [True, False],
+        "include_pdfset_variation": [True, False],
+        "include_scale_variation": [True, False],
         "title": [],
         "weighted_events": ["true", "false"],
     }
@@ -103,9 +106,18 @@ class Dataset:
         self.weighted_events = True
         self.measured_global = SampleInfo()
         self.measured_detail = []
+
+        # Reweighting 
         self.weight_collection: WeightCollection = WeightCollection()
+
+        # scale variation calculations
         self.dynamic_scale_choice = None
         self.n_point_scale_variation = 3
+
+        # Turning all elements of uncertainty calculations to on or off
+        self.include_merging_scale_variation = True
+        self.include_scale_variation = True
+        self.include_pdfset_variation = True
 
     def __len__(self):
         return len(self.filenames)
