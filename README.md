@@ -237,7 +237,7 @@ The [latest release](https://github.com/MadAnalysis/madanalysis5/releases) of Ma
 - [FastJet](http://fastjet.fr) v3.3.3
 - [Delphes](https://github.com/delphes/delphes) v3.5.0
 - [ROOT](https://root.cern) v6.04.08
-- [pyhf](https://github.com/scikit-hep/pyhf) v0.7.0
+- [pyhf](https://github.com/scikit-hep/pyhf) v0.7.3
 
 ### Authors
 
