@@ -28,12 +28,16 @@
 # MAIN PROGRAM
 ################################################################################
 
-"""This is the main executable, a simple frontend to set up the PYTHONPATH
-and call immediately the command line interface scripts"""
+"""
+This is the main executable, a simple frontend to set up the PYTHONPATH
+and call immediately the command line interface scripts
+"""
+
+import importlib
+import os
+import sys
 
 # Checking if the correct release of Python is installed
-import sys, importlib, os
-
 if sys.version_info[0] != 3 or sys.version_info[1] <= 6:
     sys.exit(
         "Python release "
@@ -44,10 +48,11 @@ if sys.version_info[0] != 3 or sys.version_info[1] <= 6:
     )
 
 # Checking that the 'six' package is present
-if importlib.util.find_spec("six") is None:
+if not importlib.util.find_spec("six"):
     sys.exit(
-        'The python "six" module is not found on your system. '
-        + "Please install it with by typing in a shell:\n  python -m pip install six"
+        'The python "six" module is not found on your system and it is required for MadAnalysis 5 for '
+        + "a question of Python 2/3 compatibility. Please install it with the following command:\n"
+        + "pip install six"
     )
 
 # Getting the parent directory (ma5 root dir) of the script real path (bin)

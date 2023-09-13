@@ -46,16 +46,16 @@ const std::string Configuration::sampleanalyzer_date_ = "2023/05/31";
 // -----------------------------------------------------------------------------
 void Configuration::PrintSyntax()
 {
-  INFO << endmsg;
-  INFO << "Syntax : SampleAnalyzer [option] <filelist>" << endmsg;
-  INFO << " with <filelist> = txt file containing all sample file names" << endmsg;
-  INFO << " with [option] = " << endmsg;
-  INFO << "   --check_event      : check the compliance of the event file" << endmsg;
-  INFO << "   --no_event_weight  : the event weights are not used" << endmsg;
-  INFO << "   --ma5_version      : returns the version of this release" << endmsg;
-  INFO << "  Any aditional option for the analyzer can be given with the following syntax:" << endmsg;
-  INFO << "   --<opt_name>=<val>" << endmsg;
-  INFO << endmsg;
+    INFO << endmsg;
+    INFO << "Syntax : SampleAnalyzer [option] <filelist>" << endmsg;
+    INFO << " with <filelist> = txt file containing all sample file names" << endmsg;
+    INFO << " with [option] = " << endmsg;
+    INFO << "   --check_event      : check the compliance of the event file" << endmsg;
+    INFO << "   --no_event_weight  : the event weights are not used" << endmsg;
+    INFO << "   --ma5_version      : returns the version of this release" << endmsg;
+    INFO << "  Any aditional option for the analyzer can be given with the following syntax:" << endmsg;
+    INFO << "   --<opt_name>=<val>" << endmsg;
+    INFO << endmsg;
 }
 
 // -----------------------------------------------------------------------------
@@ -175,7 +175,6 @@ MAbool Configuration::Initialize(MAint32 &argc, MAchar *argv[])
               << input_list_name_ << "' and '" << argv[i]
               << "'. Only one is required." << endmsg;
         return false;
-      }
     }
   }
 
@@ -214,7 +213,6 @@ void Configuration::Display()
   else
   {
     INFO << endmsg;
-  }
 
   // Displaying options
   if (check_event_)

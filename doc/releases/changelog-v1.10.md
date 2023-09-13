@@ -1,4 +1,4 @@
-# Release version 1.10.7
+# Release version 1.10
 
 ## New features since last release
 
@@ -62,7 +62,14 @@
 * More digits have been added to the CLs output file.
   ([#194](https://github.com/MadAnalysis/madanalysis5/pull/194))
 
+* The required version of pyhf was updated to v0.7.3 to take advantage of recent
+  edge case bug fixes.
+  ([#211](https://github.com/MadAnalysis/madanalysis5/pull/211))
+
 ## Bug fixes
+
+* Permanently fix the zlib version to the latest.
+   ([#219](https://github.com/MadAnalysis/madanalysis5/pull/219))
 
 * Zero division error fixed in the simplified likelihoods workflow.
    ([#4](https://github.com/MadAnalysis/madanalysis5/pull/4))
@@ -132,4 +139,5 @@ This release contains contributions from (in alphabetical order):
 
 [Jack Y. Araz](https://github.com/jackaraz),
 [Kyle Fan](https://github.com/kfan326),
+[Matthew Feickert](https://github.com/matthewfeickert),
 [Benjamin Fuks](https://github.com/bfuks)
