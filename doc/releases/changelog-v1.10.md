@@ -1,4 +1,4 @@
-# Release version 1.10.7
+# Release version 1.10.12
 
 ## New features since last release
 
@@ -67,6 +67,9 @@
   ([#211](https://github.com/MadAnalysis/madanalysis5/pull/211))
 
 ## Bug fixes
+
+* Permanently fix the zlib version to the latest.
+   ([#219](https://github.com/MadAnalysis/madanalysis5/pull/219))
 
 * Zero division error fixed in the simplified likelihoods workflow.
    ([#4](https://github.com/MadAnalysis/madanalysis5/pull/4))
