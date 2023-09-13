@@ -34,7 +34,7 @@ from collections                                                import OrderedDi
 from shell_command                                              import ShellCommand
 from string_tools                                               import StringTools
 from six.moves                                                  import map, range, input
-import copy, logging, math, os, shutil, time, sys, json
+import copy, logging, math, os, shutil, time, sys, json, os
 
 
 class RunRecast():
@@ -258,7 +258,7 @@ class RunRecast():
         self.logger.info("   Writing the list of datasets...")
         jobber.WriteDatasetList(dataset)
         self.logger.info("   Creating Makefiles...")
-        if not jobber.WriteMakefiles():
+        if not jobber.WriteMakefiles(ma5_fastjet_mode=False):
             return False
         self.logger.debug("   Fixing the pileup path...")
         self.fix_pileup(self.dirname+'_RecastRun/Input/'+card)
@@ -352,6 +352,10 @@ class RunRecast():
             analysisList.write('#include "SampleAnalyzer/User/Analyzer/'+ana+'.h"\n')
         analysisList.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"\n')
         analysisList.write('#include "SampleAnalyzer/Commons/Service/LogStream.h"\n\n')
+        if self.main.superfastsim.isTaggerOn():
+            analysisList.write('#include "new_tagger.h"\n')
+        if self.main.superfastsim.isNewSmearerOn():
+            analysisList.write('#include "new_smearer_reco.h"\n')
         analysisList.write('// -----------------------------------------------------------------------------\n')
         analysisList.write('// BuildUserTable\n')
         analysisList.write('// -----------------------------------------------------------------------------\n')
@@ -424,6 +428,12 @@ class RunRecast():
         #restore
         self.main.recasting.status = "on"
         self.main.fastsim.package  = old_fastsim
+
+        # @Jack: new setup configuration. In order to run the code in SFS-FastJet mode analysis
+        # has to be compiled with `-DMA5_FASTJET_MODE` flag but this needs to be deactivated for
+        # Delphes-ROOT based analyses.
+        os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
+
         # Creating executable
         self.logger.info("   Compiling 'SampleAnalyzer'...")
         if not jobber.CompileJob():
@@ -680,6 +690,8 @@ class RunRecast():
             strcores='-j'+str(ncores)
             command.append(strcores)
         logfile = self.dirname+'_RecastRun/Build/Log/PADcompilation.log'
+        # @jackaraz: this is needed for the recjetformat
+        os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
         result, out = ShellCommand.ExecuteWithLog(command,logfile,self.dirname+'_RecastRun/Build')
         time.sleep(1.);
         # Checks and exit

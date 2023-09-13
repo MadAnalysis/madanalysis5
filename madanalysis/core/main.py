@@ -29,6 +29,7 @@ from madanalysis.selection.selection                    import Selection
 from madanalysis.interpreter.cmd_base                   import CmdBase
 from madanalysis.region.region_collection               import RegionCollection
 from madanalysis.fastsim.fastsim                        import SuperFastSim
+from madanalysis.jet_clustering.jet_collection          import JetCollection
 from madanalysis.system.session_info                    import SessionInfo
 from madanalysis.system.architecture_info               import ArchitectureInfo
 from madanalysis.core.library_builder                   import LibraryBuilder
@@ -98,6 +99,7 @@ class Main():
         self.merging        = MergingConfiguration()
         self.fastsim        = FastsimConfiguration()
         self.superfastsim   = SuperFastSim()
+        self.jet_collection = JetCollection()
         self.recasting      = RecastConfiguration()
         self.fom            = FomConfiguration()
         self.lumi           = 10
@@ -516,11 +518,11 @@ class Main():
             if not os.path.isfile(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestSampleAnalyzer'):
                 FirstUse=True
 
-            precompiler = LibraryWriter('lib',self)
-            if not precompiler.Run('TestSampleAnalyzer',\
-                                   [self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/Process/dummy_list.txt'],\
-                                   self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/',silent=True):
-                UpdateNeed=True
+            precompiler = LibraryWriter('lib', self)
+            if not precompiler.Run('TestSampleAnalyzer',
+                                   [self.archi_info.ma5dir + '/tools/SampleAnalyzer/Test/Process/dummy_list.txt'],
+                                   self.archi_info.ma5dir + '/tools/SampleAnalyzer/Bin/', silent=True):
+                UpdateNeed = True
 
             if not precompiler.CheckRun('TestSampleAnalyzer',self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/',silent=True):
                 UpdateNeed=True
@@ -554,65 +556,83 @@ class Main():
         # |- [4] = folder
         # |- [5] = False=Library, True=Executable
         libraries = []
-        libraries.append(['configuration','SampleAnalyzer configuration', 'configuration', \
-                          self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/PortabilityCheckup',\
-                          self.archi_info.ma5dir+'/tools/SampleAnalyzer/Configuration',True])
-        libraries.append(['commons','SampleAnalyzer commons', 'commons', \
-                          self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libcommons_for_ma5.so',\
-                          self.archi_info.ma5dir+'/tools/SampleAnalyzer/Commons',False])
-        libraries.append(['test_commons','SampleAnalyzer commons', 'test_commons', \
-                          self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestCommons',\
-                          self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
+        libraries.append(['configuration', 'SampleAnalyzer configuration', 'configuration',
+                          self.archi_info.ma5dir + '/tools/SampleAnalyzer/Bin/PortabilityCheckup',
+                          self.archi_info.ma5dir + '/tools/SampleAnalyzer/Configuration', True])
+        libraries.append(['commons', 'SampleAnalyzer commons', 'commons',
+                          self.archi_info.ma5dir + '/tools/SampleAnalyzer/Lib/libcommons_for_ma5.so',
+                          self.archi_info.ma5dir + '/tools/SampleAnalyzer/Commons', False])
+        libraries.append(['test_commons', 'SampleAnalyzer commons', 'test_commons',
+                          self.archi_info.ma5dir + '/tools/SampleAnalyzer/Bin/TestCommons',
+                          self.archi_info.ma5dir + '/tools/SampleAnalyzer/Test/', True])
         # Zlib
         if self.archi_info.has_zlib:
-            libraries.append(['zlib', 'interface to zlib', 'zlib',\
-                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libzlib_for_ma5.so',\
-                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces',False])
-            libraries.append(['test_zlib','interface to zlib', 'test_zlib',\
-                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestZlib',\
-                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
+            libraries.append(['zlib', 'interface to zlib', 'zlib',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Lib/libzlib_for_ma5.so',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Interfaces', False])
+            libraries.append(['test_zlib', 'interface to zlib', 'test_zlib',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Bin/TestZlib',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Test/', True])
 
         # Fastjet
         if self.archi_info.has_fastjet:
-            libraries.append(['FastJet', 'interface to FastJet', 'fastjet',\
-                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so',\
-                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces',False])
-            libraries.append(['test_fastjet','interface to Fastjet', 'test_fastjet',\
-                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestFastjet',\
-                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
+            os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
+            libraries.append(['FastJet', 'interface to FastJet', 'fastjet',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Interfaces', False])
+            libraries.append(['test_fastjet', 'interface to Fastjet', 'test_fastjet',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Bin/TestFastjet',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Test/', True])
+            if self.archi_info.has_fjcontrib:
+                libraries.append(['substructure', 'interface to Jet Substructure module', 'substructure',
+                                  self.archi_info.ma5dir + '/tools/SampleAnalyzer/Lib/libsubstructure_for_ma5.so',
+                                  self.archi_info.ma5dir + '/tools/SampleAnalyzer/Interfaces', False])
+                libraries.append(['test_substructure', 'interface to Jet Substructure module', 'test_substructure',
+                                  self.archi_info.ma5dir + '/tools/SampleAnalyzer/Bin/TestSubstructure',
+                                  self.archi_info.ma5dir + '/tools/SampleAnalyzer/Test/', True])
+                if self.archi_info.has_heptoptagger:
+                    libraries.append(['HEPTopTagger', 'interface to HEPTopTagger module', 'HEPTopTagger',
+                                      self.archi_info.ma5dir + '/tools/SampleAnalyzer/Lib/libHEPTopTagger_for_ma5.so',
+                                      self.archi_info.ma5dir + '/tools/SampleAnalyzer/Interfaces', False])
+                    libraries.append(['test_htt', 'interface to HEPTopTagger module', 'test_htt',
+                                      self.archi_info.ma5dir + '/tools/SampleAnalyzer/Bin/TestHEPTopTagger',
+                                      self.archi_info.ma5dir + '/tools/SampleAnalyzer/Test/', True])
+        else:
+            os.environ["FASTJET_FLAG"] = ""
+
         # Delphes
         if self.archi_info.has_delphes:
-            libraries.append(['Delphes', 'interface to Delphes', 'delphes',\
-                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so',\
-                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces',False])
-            libraries.append(['test_delphes','interface to Delphes', 'test_delphes',\
-                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestDelphes',\
-                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
+            libraries.append(['Delphes', 'interface to Delphes', 'delphes',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Interfaces', False])
+            libraries.append(['test_delphes', 'interface to Delphes', 'test_delphes',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Bin/TestDelphes',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Test/', True])
         # DelphesMA5tune
         if self.archi_info.has_delphesMA5tune:
-            libraries.append(['Delphes-MA5tune', 'interface to Delphes-MA5tune', 'delphesMA5tune',\
-                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphesMA5tune_for_ma5.so',\
-                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces',False])
-            libraries.append(['test_delphesMA5tune','interface to DelphesMA5tune', 'test_delphesMA5tune',\
-                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestDelphesMA5tune',\
-                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
+            libraries.append(['Delphes-MA5tune', 'interface to Delphes-MA5tune', 'delphesMA5tune',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Lib/libdelphesMA5tune_for_ma5.so',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Interfaces', False])
+            libraries.append(['test_delphesMA5tune', 'interface to DelphesMA5tune', 'test_delphesMA5tune',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Bin/TestDelphesMA5tune',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Test/', True])
 
         # Root
         if self.archi_info.has_root:
-            libraries.append(['Root', 'interface to Root', 'root',\
-                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libroot_for_ma5.so',\
-                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces',False])
-            libraries.append(['test_root','interface to Root', 'test_root',\
-                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestRoot',\
-                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
+            libraries.append(['Root', 'interface to Root', 'root',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Lib/libroot_for_ma5.so',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Interfaces', False])
+            libraries.append(['test_root', 'interface to Root', 'test_root',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Bin/TestRoot',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Test/', True])
 
         # Process
-        libraries.append(['process', 'SampleAnalyzer core', 'process',\
-                          self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libprocess_for_ma5.so',\
-                          self.archi_info.ma5dir+'/tools/SampleAnalyzer/Process',False])
-        libraries.append(['test_process','SampleAnalyzer core', 'test_process',\
-                          self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestSampleAnalyzer',\
-                          self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
+        libraries.append(['process', 'SampleAnalyzer core', 'process',
+                          self.archi_info.ma5dir + '/tools/SampleAnalyzer/Lib/libprocess_for_ma5.so',
+                          self.archi_info.ma5dir + '/tools/SampleAnalyzer/Process', False])
+        libraries.append(['test_process', 'SampleAnalyzer core', 'test_process',
+                          self.archi_info.ma5dir + '/tools/SampleAnalyzer/Bin/TestSampleAnalyzer',
+                          self.archi_info.ma5dir + '/tools/SampleAnalyzer/Test/', True])
 
   
         # Writing the Makefiles

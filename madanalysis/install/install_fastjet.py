@@ -39,14 +39,6 @@ class InstallFastjet:
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir = os.path.normpath(self.tmpdir + '/MA5_fastjet/')
         self.ncores     = 1
-#        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.0.6.tar.gz"}
-#        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.1.3.tar.gz"}
-#        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.2.0.tar.gz"}
-#        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.2.1.tar.gz"}
-#        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.3.0.tar.gz"}
-#        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.3.2.tar.gz"}
-#        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.3.3.tar.gz"}
-#        self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.4.0.tar.gz"}
         self.files = {"fastjet.tar.gz" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/WikiStart/fastjet-3.4.1.tar.gz"}
 
     def Detect(self):
@@ -109,7 +101,9 @@ class InstallFastjet:
 
     def Configure(self):
         # Input
-        theCommands=['./configure','--prefix='+self.installdir]
+        initial_env = os.environ.get("CXXFLAGS", "")
+        os.environ["CXXFLAGS"] = initial_env + " -std=c++11 -fPIC "
+        theCommands = ['./configure', '--prefix=' + self.installdir, "--enable-allplugins"]
         logname=os.path.normpath(self.installdir+'/configuration.log')
         # Execute
         logging.getLogger('MA5').debug('shell command: '+' '.join(theCommands))
@@ -117,6 +111,11 @@ class InstallFastjet:
                                              logname,\
                                              self.tmpdir,\
                                              silent=False)
+        # reset CXXFLAGS
+        if initial_env == "":
+            os.environ.pop("CXXFLAGS")
+        else:
+            os.environ["CXXFLAGS"] = initial_env
         # return result
         if not ok:
             logging.getLogger('MA5').error('impossible to configure the project. For more details, see the log file:')

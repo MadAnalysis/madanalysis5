@@ -184,7 +184,7 @@ MAbool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Eve
       {
         RecJetFormat* jet = myEvent.rec()->GetNewJet();
         jet->momentum_.SetPxPyPzE(cand->Momentum.Px(),cand->Momentum.Py(),cand->Momentum.Pz(),cand->Momentum.E());
-        jet->btag_ = cand->BTag;
+        jet->loose_btag_ = cand->BTag;
         if (cand->Eem!=0) jet->HEoverEE_ = cand->Ehad/cand->Eem; else jet->HEoverEE_ = 999.;
         jet->ntracks_ = 0; // To fix later
       }
@@ -204,7 +204,7 @@ MAbool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Eve
       }
       RecJetFormat* genjet = myEvent.rec()->GetNewGenJet();
       genjet->momentum_ = cand->Momentum;
-      genjet->btag_ = cand->BTag;
+      genjet->loose_btag_ = cand->BTag;
     }
     }*/
 

@@ -16,3 +16,7 @@ Information can also be found in the following files.
                      project from its early days to now.
 - [PAD](./PAD.md): guidelines to submit a new analysis to our Public Analysis Database
                    (PAD).
+
+Further details on the usage of specific modules can be found in the following files:
+- [Jet Substructure](../tools/SampleAnalyzer/Interfaces/substructure/README.md)
+- [HEPTopTagger](../tools/SampleAnalyzer/Interfaces/HEPTopTagger/README.md)

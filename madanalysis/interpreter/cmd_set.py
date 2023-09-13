@@ -80,6 +80,11 @@ class CmdSet(CmdBase.CmdBase):
             self.main.datasets.Get(objs[0]).user_SetParameter(objs[1],theValue,theValue2,theValue3)
             return
 
+        # Set the properties of jet object within the jet collection if given jetID exists.
+        elif objs[0] in self.main.jet_collection.GetNames():
+            self.main.jet_collection.Set(objs,value)
+            return
+
         # Anything else
         else :
             logging.getLogger('MA5').error("no object called '"+objs[0]+"' is found")
@@ -98,6 +103,7 @@ class CmdSet(CmdBase.CmdBase):
         object = args[0]
 #        object = object.lower()
         object = object.replace('fastsim.bjet_id.','fastsim.bjet_idXXX')
+        object = object.replace('fastsim.cjet_id.','fastsim.cjet_idXXX')
         object = object.replace('fastsim.tau_id.','fastsim.tau_idXXX')
         objs = object.split('.')
         for i in range(len(objs)):
@@ -143,7 +149,11 @@ class CmdSet(CmdBase.CmdBase):
             self.main.merging.user_SetParameter(objs[2],args[2],self.main.mode,self.main.archi_info.has_fastjet)
         elif len(objs)==3 and objs[0].lower()=='main' and objs[1].lower()=='fastsim':
             if objs[2] == 'jetrecomode':
-                if args[2] in ['jets', 'constituents']:
+                # Multi-cluster protection
+                if len(self.main.jet_collection)>0 and args[2].lower() == 'jets':
+                    logging.getLogger('MA5').error("Jet smearing can not be based on clustered jets when multi-cluster is in effect.")
+                    logging.getLogger('MA5').error("Jet smearing will be based on constituents")
+                elif args[2] in ['jets', 'constituents']:
                     self.main.superfastsim.jetrecomode = args[2]
                 else:
                     logging.getLogger('MA5').error("Jet smearing can only be based on the jet ('jets') or "+\
@@ -154,23 +164,37 @@ class CmdSet(CmdBase.CmdBase):
                     self.main.superfastsim.propagator = True
                 except:
                     logging.getLogger('MA5').error("The magnetic field has to be numerical (in Tesla).")
+
+            # @JACK: Tracker radius & halflength are ineffective atm
             elif objs[2] == 'tracker_radius':
                 try:
                     self.main.superfastsim.radius      = float(args[2])
                     self.main.superfastsim.propagator  = True
                 except:
                     logging.getLogger('MA5').error("The tracker cylinder radius has to be numerical (in meters).")
+
             elif objs[2] == 'half_length':
                 try:
                     self.main.superfastsim.half_length = float(args[2])
                     self.main.superfastsim.propagator  = True
                 except:
                     logging.getLogger('MA5').error("The tracker cylinder half length needs to numerical (in meters).")
+
             elif objs[2] == 'particle_propagator':
                 if args[2] in ['on', 'off']:
                     self.main.superfastsim.propagator = (args[2]=='on')
                 else:
                     logging.getLogger('MA5').error("Particle propagation can be either on or off (default: off).")
+
+            elif objs[2].lower() == 'jetid':
+                if self.main.fastsim.package == 'fastjet':
+                    if args[2] not in self.main.jet_collection.GetNames():
+                        self.main.fastsim.clustering.JetID = args[2]
+                    else:
+                        logging.getLogger('MA5').error("Jet ID '"+args[2]+"' is already in use.")
+                else:
+                    logging.getLogger('MA5').error("Jet ID is only available while fastjet package is in use.")
+
             elif objs[2] in [x+"_isocone_radius" for x in ["electron","muon","track","photon"]]:
                 tmp = []
                 for x in args[2:]:
@@ -346,6 +370,7 @@ class CmdSet(CmdBase.CmdBase):
         if variable==None:
             output = ["main"]
             output.extend(self.main.datasets.GetNames())
+            output.extend(self.main.jet_collection.GetNames())
             output.extend( [ "selection["+str(ind+1)+"]" \
                              for ind in \
                              range(0,len(self.main.selection)) ] )
@@ -397,6 +422,15 @@ class CmdSet(CmdBase.CmdBase):
                 return self.finalize_complete(text,output)
             else:
                 return self.finalize_complete(text,self.main.datasets.Get(object).user_GetValues(variable))
+
+        # Jet Collection object
+        elif object in self.main.jet_collection.GetNames():
+            if not withValue:
+                output = [ object+"."+ item \
+                          for item in \
+                          self.main.jet_collection.Get(object).user_GetParameters() ]
+                return self.finalize_complete(text,output)
+            return self.finalize_complete(text,self.main.jet_collection.Get(object).user_GetValues(variable))
 
         # Other cases
         else:

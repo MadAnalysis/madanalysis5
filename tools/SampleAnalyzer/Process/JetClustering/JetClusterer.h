@@ -2,144 +2,146 @@
 //  
 //  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
-//  
+//
 //  This file is part of MadAnalysis 5.
 //  Official website: <https://github.com/MadAnalysis/madanalysis5>
-//  
+//
 //  MadAnalysis 5 is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//  
+//
 //  MadAnalysis 5 is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 //  GNU General Public License for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License
 //  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
-//  
+//
 ////////////////////////////////////////////////////////////////////////////////
-
 
 #ifndef JET_CLUSTERER_H
 #define JET_CLUSTERER_H
 
-
 // SampleAnalyser headers
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
-#include "SampleAnalyzer/Commons/Service/Physics.h"
-#include "SampleAnalyzer/Commons/Base/ClusterAlgoBase.h"
-#include "SampleAnalyzer/Process/JetClustering/bTagger.h"
-#include "SampleAnalyzer/Process/JetClustering/cTagger.h"
-#include "SampleAnalyzer/Process/JetClustering/TauTagger.h"
-#include "SampleAnalyzer/Process/JetClustering/NullSmearer.h"
 #include "SampleAnalyzer/Commons/Base/SmearerBase.h"
+#include "SampleAnalyzer/Commons/Base/SFSTaggerBase.h"
+
+#ifdef MA5_FASTJET_MODE
+#include "SampleAnalyzer/Interfaces/substructure/ClusterBase.h"
+#endif
 
 // STL headers
-#include <map>
-#include <algorithm>
 #include <locale>
-
 
 namespace MA5
 {
 
-  class JetClusterer
-  {
-    //--------------------------------------------------------------------------
-    //                              data members
-    //--------------------------------------------------------------------------
-  protected :
+    class ClusterAlgoBase;
 
-    ClusterAlgoBase* algo_;
-    bTagger*     myBtagger_;
-    cTagger*     myCtagger_;
-    TauTagger*   myTautagger_;
-    SmearerBase* mySmearer_;
-
-    /// Exclusive id for tau-elec-photon-jet
-    MAbool ExclusiveId_;
-
-    MAuint32 muon;
-    MAuint32 electron;
-    MAuint32 tauH;
-    MAuint32 tauM;
-    MAuint32 tauE;
-    MAuint32 photon;
-
-    //--------------------------------------------------------------------------
-    //                              method members
-    //--------------------------------------------------------------------------
-  public :
-
-    /// Constructor without argument
-    JetClusterer (ClusterAlgoBase* algo) 
+    class JetClusterer
     {
-      // Initializing tagger
-      algo_        = algo;
-      myBtagger_   = 0;
-      myCtagger_   = 0;
-      myTautagger_ = 0;
-      mySmearer_   = 0;
-      ExclusiveId_ = false;
-      muon=0;
-      electron=0;
-      tauH=0;
-      tauM=0;
-      tauE=0;
-      photon=0;
-    }
+        //--------------------------------------------------------------------------
+        //                              data members
+        //--------------------------------------------------------------------------
+    protected:
+        ClusterAlgoBase *algo_;
+        /// SFS smearer
+        SmearerBase *mySmearer_;
+        /// b/c/tau tagger
+        SFSTaggerBase *myTagger_;
 
-    /// Destructor
-    ~JetClusterer()
-    { }
+        /// pointer to tagger options
+        SFSTaggerBaseOptions *myTaggerOptions_;
 
-    /// Initialization
-    MAbool Initialize(const std::map<std::string,std::string>& options);
+        /// @brief Exclusive id for tau-elec-photon-jet
+        /// @code ExclusiveId_ = true; @endcode
+        /// Exclusive algorithm: FS Leptons (photons) originated from hadronic decays
+        /// will not be included in Lepton (photon) collection.
+        /// @code ExclusiveId_ = false; @endcode
+        /// Includive algorithm: All FS leptons (photons) will be included in
+        /// their corresponding containers.
+        MAbool ExclusiveId_;
 
-    /// Jet clustering
-    MAbool Execute(SampleFormat& mySample, EventFormat& myEvent);
+        /// Primary Jet ID
+        std::string JetID_;
 
-    /// Finalization
-    void Finalize();
+#ifdef MA5_FASTJET_MODE
+        /// Jet collection configurations
+        std::map<std::string, ClusterAlgoBase *> cluster_collection_;
 
-    /// Generic loader for the smearer module
-    void LoadSmearer(SmearerBase* smearer)
-    {
-        mySmearer_ = smearer;
-        mySmearer_->Initialize();
-    }
+        // Jet collection configuration with VariableR
+        std::map<std::string, Substructure::ClusterBase *> substructure_collection_;
+#endif
 
-    /// Accessor to the jet clusterer name
-    std::string GetName() 
-    { 
-      if (algo_==0) return "NotDefined";
-      else return algo_->GetName();
-    }
+        // Track Isolation radius
+        std::vector<MAfloat64> isocone_track_radius_;
 
-    /// Accessor to the b tagger parameters
-    std::string bParameters()
-    { return myBtagger_->GetParameters(); }
+        // Electron Isolation radius
+        std::vector<MAfloat64> isocone_electron_radius_;
 
-    /// Accessor to the tau tagger parameters
-    std::string tauParameters()
-    { return myTautagger_->GetParameters(); }
+        // Muon Isolation radius
+        std::vector<MAfloat64> isocone_muon_radius_;
 
-    /// Print parameters
-    void PrintParam()
-    { algo_->PrintParam(); }
+        // Photon Isolation radius
+        std::vector<MAfloat64> isocone_photon_radius_;
 
-    /// Accessor to the jet clusterer parameters
-    std::string GetParameters()
-    { return algo_->GetParameters(); }
+        //--------------------------------------------------------------------------
+        //                              method members
+        //--------------------------------------------------------------------------
+    public:
+        /// Constructor
+        JetClusterer(ClusterAlgoBase *algo);
 
- private:
-    MAbool IsLast(const MCParticleFormat* part, EventFormat& myEvent);
-    void GetFinalState(const MCParticleFormat* part, std::set<const MCParticleFormat*>& finalstates);
+        /// Destructor
+        ~JetClusterer();
 
-  };
+        /// Initialization
+        MAbool Initialize(const std::map<std::string, std::string> &options);
+
+        /// Jet clustering
+        MAbool Execute(SampleFormat &mySample, EventFormat &myEvent);
+
+        /// Finalization
+        void Finalize();
+
+        /// Generic loader for the smearer module
+        void LoadSmearer(SmearerBase *smearer)
+        {
+            mySmearer_ = smearer;
+            mySmearer_->Initialize();
+        }
+
+        /// Generic Loader for tagger module
+        void LoadTagger(SFSTaggerBase *tagger)
+        {
+            myTagger_ = tagger;
+            myTagger_->Initialize();
+            myTagger_->SetOptions(*myTaggerOptions_);
+        }
+
+        // Load additional Jets
+        MAbool LoadJetConfiguration(std::map<std::string, std::string> options);
+
+        /// Accessor to the jet clusterer name
+        std::string GetName();
+
+        /// Accessor to the tagger parameters
+        void TaggerParameters();
+
+        /// Print parameters
+        void PrintParam();
+
+        /// Accessor to the jet clusterer parameters
+        std::string GetParameters();
+
+    private:
+        MAbool IsLast(const MCParticleFormat *part, EventFormat &myEvent);
+        void GetFinalState(const MCParticleFormat *part, std::set<const MCParticleFormat *> &finalstates);
+    };
 
 }
 

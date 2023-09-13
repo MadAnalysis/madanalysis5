@@ -62,18 +62,6 @@ class ClusterAlgoBase
     /// Exclusive id for tau-elec-photon-jet
     MAbool ExclusiveId_;
 
-    // Track Isolation radius
-    std::vector<MAfloat64> isocone_track_radius_;
-
-    // Electron Isolation radius
-    std::vector<MAfloat64> isocone_electron_radius_;
-
-    // Muon Isolation radius
-    std::vector<MAfloat64> isocone_muon_radius_;
-
-    // Photon Isolation radius
-    std::vector<MAfloat64> isocone_photon_radius_;
-
 
 //---------------------------------------------------------------------------------
 //                                method members
@@ -86,10 +74,6 @@ class ClusterAlgoBase
       JetAlgorithm_=Algo;
       // Initializing common parameters
       Ptmin_       = 0.;
-      isocone_track_radius_.clear();
-      isocone_electron_radius_.clear();
-      isocone_muon_radius_.clear();
-      isocone_photon_radius_.clear();
       Exclusive_   = false;
       ExclusiveId_ = false;
     }
@@ -98,10 +82,11 @@ class ClusterAlgoBase
     virtual ~ClusterAlgoBase() {}
 
     /// Jet clustering
-    virtual MAbool Execute(SampleFormat& mySample, EventFormat& myEvent, 
-                         MAbool ExclusiveId, const std::vector<bool>& vetos,
-                         const std::set<const MCParticleFormat*> vetos2,
-                         SmearerBase* smearer)=0;
+    virtual MAbool Execute(SampleFormat& mySample, EventFormat& myEvent,
+                           SmearerBase* smearer)=0;
+
+    // Extra Jet clustering
+    virtual MAbool Cluster(EventFormat& myEvent, std::string JetID)=0;
 
     /// Set parameter
     virtual MAbool SetParameter(const std::string& key, const std::string& value)=0;

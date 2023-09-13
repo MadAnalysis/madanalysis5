@@ -460,6 +460,7 @@ class MergingPlots:
                 outputPy.write('             label=\'Sum\', ')
             else:
                 outputPy.write('             label=\''+str(ind-1)+'-jet sample\', ')
+
             try:
                 import matplotlib.pyplot as plt
                 plt.hist([0],normed=True)

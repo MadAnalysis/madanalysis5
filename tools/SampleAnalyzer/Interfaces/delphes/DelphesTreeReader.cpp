@@ -117,12 +117,12 @@ StatusCode::Type DelphesTreeReader::ReadEvent(EventFormat& myEvent, SampleFormat
 MAbool DelphesTreeReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
 {
   // MHT & THT
-  for (MAuint32 i=0; i<myEvent.rec()->jets_.size();i++)
+  for (MAuint32 i=0; i<myEvent.rec()->jets().size();i++)
   {
-    myEvent.rec()->MHT_ -= myEvent.rec()->jets_[i].momentum();
-    if (data_.branchHT_==0) myEvent.rec()->THT_ += myEvent.rec()->jets_[i].pt();
-    myEvent.rec()->TET_ += myEvent.rec()->jets_[i].pt();
-    myEvent.rec()->Meff_ += myEvent.rec()->jets_[i].pt();
+    myEvent.rec()->MHT_ -= myEvent.rec()->jets()[i].momentum();
+    if (data_.branchHT_==0) myEvent.rec()->THT_ += myEvent.rec()->jets()[i].pt();
+    myEvent.rec()->TET_ += myEvent.rec()->jets()[i].pt();
+    myEvent.rec()->Meff_ += myEvent.rec()->jets()[i].pt();
   }
 
   // TET
@@ -562,7 +562,9 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
   if (data_.Jet_!=0)
   {
     MAuint32 njets = static_cast<MAuint32>(data_.Jet_->GetEntries());
-    myEvent.rec()->jets_.reserve(njets);
+//    myEvent.rec()->jets_.reserve(njets);
+      std::vector<RecJetFormat> output_jets;
+      output_jets.reserve(njets);
     for (MAuint32 i=0;i<njets;i++)
     {
       // getting the i-th particle
@@ -583,13 +585,10 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
       else
       {
         // Creating new jet
-        RecJetFormat * jet = myEvent.rec()->GetNewJet();
-
-        // Setting jet info
-        jet->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,part->Mass);
-        jet->ntracks_  = 0; // To fix later
-        jet->btag_     = part->BTag;
-        jet->HEoverEE_ = part->EhadOverEem;
+          output_jets.emplace_back(part->PT,part->Eta,part->Phi,part->Mass);
+          output_jets.back().ntracks_     = 0; // To fix later
+          output_jets.back().loose_btag_ = part->BTag;
+          output_jets.back().HEoverEE_   = part->EhadOverEem;
 
         // Setting corresponding gen particle
         /*      for (MAuint32 j=0;j<static_cast<MAuint32>(part->Particles.GetEntries());j++)
@@ -604,6 +603,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
                 }*/
       }
     }
+      myEvent.rec()->jetcollection_.insert(std::make_pair(myEvent.rec()->PrimaryJetID_, output_jets));
   }
 
   // ---------------------------------------------------------------------------
@@ -612,7 +612,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
   if (data_.FatJet_!=0)
   {
     MAuint32 njets = static_cast<MAuint32>(data_.FatJet_->GetEntries());
-    myEvent.rec()->fatjets_.reserve(njets);
+    // myEvent.rec()->fatjets_.reserve(njets);
     for (MAuint32 i=0;i<njets;i++)
     {
       // getting the i-th particle
@@ -624,9 +624,9 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
 
       // Setting jet info
       jet->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,part->Mass);
-      jet->ntracks_  = 0; // To fix later
-      jet->btag_     = part->BTag;
-      jet->HEoverEE_ = part->EhadOverEem;
+      jet->ntracks_    = 0; // To fix later
+      jet->loose_btag_ = part->BTag;
+      jet->HEoverEE_   = part->EhadOverEem;
     }
   }
 

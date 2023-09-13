@@ -28,9 +28,14 @@ from madanalysis.IOinterface.folder_writer    import FolderWriter
 from shell_command                            import ShellCommand
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
 import logging
-import shutil
 import os
+import shutil
+
 import six
+
+from madanalysis.IOinterface.folder_writer import FolderWriter
+from madanalysis.selection.instance_name import InstanceName
+
 
 class JobWriter(object):
 
@@ -204,7 +209,7 @@ class JobWriter(object):
     def CopyDelphesCard(self,input,output,cfg,theFile):
         TagTreeWriter=False
         TagExecutionPath=False
-        
+
         # READING THE FILE  
         for line in input:
 
@@ -219,7 +224,7 @@ class JobWriter(object):
             if myline.startswith('#'):
                 output.write(line)
                 continue
-                
+
             if len(words)>=2:
                 if words[0].lower()=='set' and \
                    words[1].lower()=='executionpath':
@@ -267,15 +272,15 @@ class JobWriter(object):
                     if words[3].lower()=='eflowneutralhadron' and cfg.skim_eflow:
                         output.write('#'+line)
                         continue
-            
+
             # Enter TreeWriter
             output.write(line)
-        
+
 
     def CopyDelphesMA5Card(self,input,output,cfg,theFile):
         TagTreeWriter=False
         TagExecutionPath=False
-        
+
         # READING THE FILE  
         for line in input:
 
@@ -323,12 +328,12 @@ class JobWriter(object):
             # Adding file
             if cfg.pileup.startswith('/'):
                 theFile = cfg.pileup
-            else:    
+            else:
                 theFile = os.path.normpath(theDir+"/"+cfg.pileup)
- 
+
         if self.main.fastsim.package=="delphes":
             self.CopyDelphesCard(input,output,cfg,theFile)
-        elif self.main.fastsim.package=="delphesMA5tune": 
+        elif self.main.fastsim.package=="delphesMA5tune":
             self.CopyDelphesMA5Card(input,output,cfg,theFile)
 
         try:
@@ -358,7 +363,7 @@ class JobWriter(object):
             except:
                 logging.getLogger('MA5').error('Impossible to copy the file "newAnalyzer"')
                 return False
-            try:    
+            try:
                 os.chmod(self.path+"/Build/SampleAnalyzer/newAnalyzer.py",0o755)
             except:
                 logging.getLogger('MA5').error('Impossible to make executable the file "newAnalyzer"')
@@ -388,7 +393,7 @@ class JobWriter(object):
     def PrintIncludes(self,file):
         file.write('// SampleHeader header\n')
         file.write('#include "SampleAnalyzer/Process/Core/SampleAnalyzer.h"\n')
-        file.write('#include "SampleAnalyzer/User/Analyzer/analysisList.h"\n') 
+        file.write('#include "SampleAnalyzer/User/Analyzer/analysisList.h"\n')
         file.write('using namespace MA5;\n\n')
         return
 
@@ -461,18 +466,17 @@ class JobWriter(object):
 
         # Fast-Simulation detector
         # + Case Fastsim
+        # + Case extra jet definitions
         if self.main.fastsim.package=="fastjet":
             file.write('  //Getting pointer to the clusterer\n')
             file.write('  std::map<std::string, std::string> parametersC1;\n')
             parameters = self.main.fastsim.SampleAnalyzerConfigString()
-            for k,v in sorted(six.iteritems(parameters),\
-                              key=lambda k_v: (k_v[0],k_v[1])):
-                file.write('  parametersC1["'+k+'"]="'+v+'";\n')
-
+            for k,v in sorted(six.iteritems(parameters),key=lambda k_v: (k_v[0],k_v[1])):
+                file.write('  parametersC1["' + (k + '"').ljust(30, " ") + '] = "' + v + '";\n')
             for obj in ["electron","muon","track","photon"]:
                 if len(getattr(self.main.superfastsim, obj+"_isocone_radius")) != 0:
                     file.write(
-                        '  parametersC1["isolation.'+obj+'.radius"]="'+ ','.join(
+                        '  parametersC1[' + ('"isolation.' + obj + '.radius"').ljust(30, " ") + '] = "' + ','.join(
                         [str(x) for x in getattr(self.main.superfastsim, obj+"_isocone_radius")]
                         )+'";\n'
                     )
@@ -480,22 +484,43 @@ class JobWriter(object):
             file.write('      manager.InitializeJetClusterer("'+\
                        self.main.fastsim.clustering.algorithm+'",parametersC1);\n')
             file.write('  if (cluster1==0) return 1;\n\n')
+            if len(self.main.jet_collection) > 0:
+                # Write configuration for other jets
+                for ix, (key, item) in enumerate(self.main.jet_collection.collection.items()):
+                    map_name = "JetConfiguration"+str(ix+1)
+                    file.write('  //Adding new jet with ID ' + key + '\n')
+                    file.write('  std::map<std::string, std::string> '+map_name+';\n')
+                    for opt, val in item.__dict__.items():
+                        if opt in ['JetID','algorithm']:
+                            file.write('  '+map_name+'["'+(opt+'"').ljust(20,' ') + '] = "'+str(val)+'";\n')
+                        else:
+                            # To follow old syntax add "cluster.". 
+                            # This is not necessary but makes sense for unified syntax
+                            opt = opt.replace('radius','R')
+                            opt = opt.replace('ptmin','PTmin')
+                            valule = val if type(val) != bool else val*(1)
+                            file.write('  '+map_name+'["'+('cluster.'+opt+'"').ljust(18,' ') +\
+                                                       '] = "'+str(valule)+'";\n')
+                    file.write('  cluster1->LoadJetConfiguration('+map_name+');\n\n')
             if self.main.superfastsim.isNewSmearerOn():
                 file.write('  // Declaration of the smearer\n')
                 file.write('  SmearerBase* mySmearer = new NewSmearer();\n')
                 file.write('  cluster1->LoadSmearer(mySmearer);\n\n')
             if self.main.superfastsim.isTaggerOn():
                 file.write('  // Declaration of a generic tagger\n')
-                file.write('  NewTagger* tagger = new NewTagger();\n\n')
+                file.write('  NewTagger* myTagger = new NewTagger();\n')
+                file.write('  cluster1->LoadTagger(myTagger);\n\n')
+
 
         # + Case Delphes
         if self.main.fastsim.package in ["delphes","delphesMA5tune"]:
             file.write('  //Getting pointer to fast-simulation package\n')
             file.write('  std::map<std::string, std::string> parametersD1;\n')
-            if self.fastsim.package=="delphesMA5tune":
-                cfg=self.main.fastsim.delphesMA5tune
-            else:
-                cfg=self.main.fastsim.delphes
+            #@JACK: This variable is not used
+            #if self.fastsim.package=="delphesMA5tune":
+            #    cfg=self.main.fastsim.delphesMA5tune
+            #else:
+            #    cfg=self.main.fastsim.delphes
             parameters = self.main.fastsim.SampleAnalyzerConfigString()
             for k,v in sorted(six.iteritems(parameters),\
                               key=lambda k_v1: (k_v1[0],k_v1[1])):
@@ -576,8 +601,6 @@ class JobWriter(object):
             file.write('      if (!analyzer2->Execute(mySample,myEvent)) continue;\n')
         if self.main.fastsim.package=="fastjet":
             file.write('      cluster1->Execute(mySample,myEvent);\n')
-            if self.main.superfastsim.isTaggerOn():
-                file.write('      tagger->Execute(mySample,myEvent);\n')
         elif self.main.fastsim.package=="delphes":
             file.write('      fastsim1->Execute(mySample,myEvent);\n')
         elif self.main.fastsim.package=="delphesMA5tune":
@@ -676,6 +699,10 @@ class JobWriter(object):
         file.write('#include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"\n')
         file.write('#include "SampleAnalyzer/User/Analyzer/user.h"\n')
         file.write('#include "SampleAnalyzer/Commons/Service/LogStream.h"\n')
+        if self.main.superfastsim.isTaggerOn():
+            file.write('#include "new_tagger.h"\n')
+        if self.main.superfastsim.isNewSmearerOn():
+            file.write('#include "new_smearer_reco.h"\n')
         file.write('\n')
         file.write('// ------------------------------------------' +\
                    '-----------------------------------\n')
@@ -690,44 +717,10 @@ class JobWriter(object):
         file.close()
         return True
 
-    def WriteSampleAnalyzerMakefile(self,option=""):
 
-        from madanalysis.build.makefile_writer import MakefileWriter
-        options=MakefileWriter.MakefileOptions()
-
-        # Name of the Makefile
-        filename = self.path+"/Build/SampleAnalyzer/Makefile"
-
-        # Header
-        title='User package'
-        toRemove = []
-
-        # Options
-        option.has_commons   = True
-        options.has_process  = True
-        if self.main.archi_info.has_root:
-            options.has_root_inc = True
-            options.has_root_lib = True
-        toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
-
-        # File to compile
-        cppfiles = package+'/*.cpp'
-        hfiles   = package+'/*.h'
-
-        # Files to produce
-        isLibrary=True
-        ProductName='libUserPackage_for_ma5.so'
-        ProductPath='../../Build/Lib/'
-
-        # write makefile
-        MakefileWriter.Makefile(filename,title,ProductName,ProductPath,isLibrary,cppfiles,hfiles,options,self.main.archi_info,toRemove)
-
-        # Ok
-        return True
-    
-
-    def WriteMakefiles(self,option=""):
-
+    def WriteMakefiles(self, option="", **kwargs):
+        # kwargs: keyword arguments regarding additional mode options such as `ma5_fastjet_mode`
+        # this will protect Delphes based analyses in PAD
         from madanalysis.build.makefile_writer import MakefileWriter
         options=MakefileWriter.MakefileOptions()
 
@@ -740,9 +733,26 @@ class JobWriter(object):
         # Options
         options.has_commons  = True
         options.has_process  = True
-        if self.main.archi_info.has_root:
-            options.has_root_inc = True
-            options.has_root_lib = True
+        # @JACK enable usage of fastjet
+        # If there are any root files, fastjet clusterer should not run with MA5_FASTJET_MODE Flag
+        options.ma5_fastjet_mode   = self.main.archi_info.has_fastjet and self.main.archi_info.has_fjcontrib
+        options.has_fastjet_lib    = self.main.archi_info.has_fastjet
+        options.has_fastjet_ma5lib = self.main.archi_info.has_fastjet
+        # @JACK: fastjet_inc is required to be able to use the FJ files when FJ mode is on
+        options.has_fastjet_inc    = self.main.archi_info.has_fastjet
+        # @Jack: add substructure library
+        options.has_substructure = self.main.archi_info.has_fastjet and self.main.archi_info.has_fjcontrib
+        # @Jack: add HTT library
+        options.has_heptoptagger = (
+                self.main.archi_info.has_fastjet and \
+                self.main.archi_info.has_fjcontrib and \
+                self.main.archi_info.has_heptoptagger
+        )
+
+        options.has_root_inc       = self.main.archi_info.has_root
+        options.has_root_lib       = self.main.archi_info.has_root
+        # @jackaraz: to prevent seg-fault error with delphes
+        options.has_fastjet_tag    = self.main.archi_info.has_root and self.main.archi_info.has_fastjet
         #options.has_userpackage = True
         toRemove=['Log/compilation.log','Log/linking.log','Log/cleanup.log','Log/mrproper.log']
 
@@ -763,7 +773,8 @@ class JobWriter(object):
         from madanalysis.build.setup_writer import SetupWriter
         SetupWriter.WriteSetupFile(True, self.path+'/Build/',self.main.archi_info)
         SetupWriter.WriteSetupFile(False,self.path+'/Build/',self.main.archi_info)
-        
+        #@JACK: Why are we using C-shell this is not necessary anymore.
+
         # Ok
         return True
 
@@ -803,7 +814,7 @@ class JobWriter(object):
 
         # log file name
         logfile = folder+'/Log/compilation.log'
-        
+
         # shell command
         commands = ['make','compile']
 
@@ -814,7 +825,7 @@ class JobWriter(object):
         if not result:
             logging.getLogger('MA5').error('impossible to compile the project. For more details, see the log file:')
             logging.getLogger('MA5').error(logfile)
-            
+
         return result
 
 
@@ -825,7 +836,7 @@ class JobWriter(object):
 
         # log file name
         logfile = folder+'/Log/mrproper.log'
-        
+
         # shell command
         commands = ['make','mrproper']
 
@@ -836,30 +847,9 @@ class JobWriter(object):
         if not result:
             logging.getLogger('MA5').error('impossible to clean the project. For more details, see the log file:')
             logging.getLogger('MA5').error(logfile)
-            
+
         return result
 
-
-    def MrproperJob(self):
-
-        # folder
-        folder = self.path+'/Build'
-
-        # log file name
-        logfile = folder+'/Log/mrproper.log'
-        
-        # shell command
-        commands = ['make','mrproper']
-
-        # call
-        result, out = ShellCommand.ExecuteWithLog(commands,logfile,folder)
-
-        # return result
-        if not result:
-            logging.getLogger('MA5').error('impossible to clean the project. For more details, see the log file:')
-            logging.getLogger('MA5').error(logfile)
-            
-        return result
 
 
     def LinkJob(self):
@@ -869,7 +859,7 @@ class JobWriter(object):
 
         # log file name
         logfile = folder+'/Log/linking.log'
-        
+
         # shell command
         commands = ['make','link']
 
@@ -886,7 +876,7 @@ class JobWriter(object):
 
     def WriteHistory(self,history,firstdir):
         file = open(self.path+"/history.ma5","w")
-        file.write('set main.currentdir = '+firstdir+'\n') 
+        file.write('set main.currentdir = '+firstdir+'\n')
         for line in history.history:
             items = line.split(';')
             for item in items :
@@ -902,7 +892,7 @@ class JobWriter(object):
                 else:
                     file.write(item)
                     file.write("\n")
-        file.close()    
+        file.close()
 
     def WriteDatasetList(self,dataset):
         name=InstanceName.Get(dataset.name)
@@ -910,7 +900,7 @@ class JobWriter(object):
         for item in dataset:
             file.write(item)
             file.write("\n")
-        file.close()    
+        file.close()
 
 
     def RunJob(self,dataset):
@@ -947,8 +937,3 @@ class JobWriter(object):
             result = ShellCommand.Execute(commands,folder)
 
         return result
-
-
-    def WriteTagger(self):
-        # header file
-        bla

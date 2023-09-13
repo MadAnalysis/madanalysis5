@@ -2,131 +2,146 @@
 #  
 #  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
-#  
+#
 #  This file is part of MadAnalysis 5.
 #  Official website: <https://github.com/MadAnalysis/madanalysis5>
-#  
+#
 #  MadAnalysis 5 is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
-#  
+#
 #  MadAnalysis 5 is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #  GNU General Public License for more details.
-#  
+#
 #  You should have received a copy of the GNU General Public License
 #  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
-#  
+#
 ################################################################################
 
 
 from __future__ import absolute_import
-from madanalysis.configuration.clustering_kt          import ClusteringKt
-from madanalysis.configuration.clustering_antikt      import ClusteringAntiKt
-from madanalysis.configuration.clustering_genkt       import ClusteringGenKt
-from madanalysis.configuration.clustering_cambridge   import ClusteringCambridge
-from madanalysis.configuration.clustering_gridjet     import ClusteringGridJet
+from madanalysis.configuration.clustering_kt import ClusteringKt
+from madanalysis.configuration.clustering_antikt import ClusteringAntiKt
+from madanalysis.configuration.clustering_genkt import ClusteringGenKt
+from madanalysis.configuration.clustering_cambridge import ClusteringCambridge
+from madanalysis.configuration.clustering_gridjet import ClusteringGridJet
 from madanalysis.configuration.clustering_cdfmidpoint import ClusteringCDFMidPoint
-from madanalysis.configuration.clustering_cdfjetclu   import ClusteringCDFJetClu
-from madanalysis.configuration.clustering_siscone     import ClusteringSisCone
-from madanalysis.configuration.beauty_identification  import BeautyIdentification
-from madanalysis.configuration.tau_identification     import TauIdentification
-from madanalysis.enumeration.ma5_running_type         import MA5RunningType
+from madanalysis.configuration.clustering_cdfjetclu import ClusteringCDFJetClu
+from madanalysis.configuration.clustering_siscone import ClusteringSisCone
+from madanalysis.configuration.beauty_identification import BeautyIdentification
+from madanalysis.configuration.charm_identification import CharmIdentification
+from madanalysis.configuration.tau_identification import TauIdentification
+from madanalysis.enumeration.ma5_running_type import MA5RunningType
 import logging
+
 
 class ClusteringConfiguration:
 
-    userVariables = { "algorithm" : ["kt","antikt","genkt",\
-                                     "cambridge","gridjet",\
-                                     "siscone",\
-                                     "cdfjetclu", "cdfmidpoint",\
-                                     "none"],
-                      "exclusive_id"            : ["true","false"],
-                      "jetrecomode"             : ["jets","constituents"],
-                      "magnetic_field"          : ["3.8"],
-                      # "tracker_radius"          : ["1.29"],
-                      # "half_length"             : ["3.0"],
-                      "particle_propagator"     : ["on","off"],
-                      "track_isocone_radius"    : ["0.5"],
-                      "electron_isocone_radius" : ["0.5"],
-                      "muon_isocone_radius"     : ["0.5"],
-                      "photon_isocone_radius"   : ["0.5"],
-
-                    }
+    userVariables = {
+        "algorithm": [
+            "kt",
+            "antikt",
+            "genkt",
+            "cambridge",
+            "gridjet",
+            "siscone",
+            "cdfjetclu",
+            "cdfmidpoint",
+            "none",
+        ],
+        "exclusive_id": ["true", "false"],
+        "jetrecomode": ["jets", "constituents"],
+        "magnetic_field": ["3.8"],
+        # "tracker_radius"          : ["1.29"], @JACK these are not available atm
+        # "half_length"             : ["3.0"],
+        "particle_propagator": ["on", "off"],
+        "JetID": ["Ma5Jet"],
+        "track_isocone_radius": ["0.5"],
+        "electron_isocone_radius": ["0.5"],
+        "muon_isocone_radius": ["0.5"],
+        "photon_isocone_radius": ["0.5"],
+    }
 
     def __init__(self):
-        self.algorithm    = "antikt"
-        self.clustering   = ClusteringAntiKt()
-        self.beauty       = BeautyIdentification()
-        self.tau          = TauIdentification()
+        self.algorithm = "antikt"
+        self.clustering = ClusteringAntiKt()
+        self.beauty = BeautyIdentification()
+        self.charm = CharmIdentification()
+        self.tau = TauIdentification()
         self.exclusive_id = True
+        self.JetID = "Ma5Jet"
 
-        
     def Display(self):
         self.user_DisplayParameter("algorithm")
-        if self.algorithm!="none":
+        if self.algorithm != "none":
+            logging.getLogger("MA5").info("  + Jet ID : " + self.JetID)
             self.clustering.Display()
             self.user_DisplayParameter("exclusive_id")
             self.beauty.Display()
+            self.charm.Display()
             self.tau.Display()
 
-
-    def user_DisplayParameter(self,parameter):
-        if parameter=="algorithm":
-            logging.getLogger('MA5').info(" clustering algorithm : "+self.algorithm)
+    def user_DisplayParameter(self, parameter):
+        if parameter == "algorithm":
+            logging.getLogger("MA5").info(" clustering algorithm : " + self.algorithm)
             return
-        if self.algorithm!="none":
-            if parameter=="exclusive_id":
-                word=""
+        if self.algorithm != "none":
+            if parameter == "exclusive_id":
+                word = ""
                 if self.exclusive_id:
-                    word="true"
+                    word = "true"
                 else:
-                    word="false"
-                logging.getLogger('MA5').info("  + exclusive identification = "+word)
-            elif parameter.startswith('bjet_id.'):
+                    word = "false"
+                logging.getLogger("MA5").info("  + exclusive identification = " + word)
+            elif parameter.startswith("bjet_id."):
                 self.beauty.user_DisplayParameter(parameter)
-            elif parameter.startswith('tau_id.'):
+            elif parameter.startswith("cjet_id."):
+                self.charm.user_DisplayParameter(parameter)
+            elif parameter.startswith("tau_id."):
                 self.tau.user_DisplayParameter(parameter)
             else:
                 self.clustering.user_DisplayParameter(parameter)
 
-
     def SampleAnalyzerConfigString(self):
-        if self.algorithm!="none":
+        if self.algorithm != "none":
             mydict = {}
+            mydict["JetID"] = self.JetID
             if self.exclusive_id:
-                mydict['exclusive_id'] = '1'
+                mydict["exclusive_id"] = "1"
             else:
-                mydict['exclusive_id'] = '0'
+                mydict["exclusive_id"] = "0"
             mydict.update(self.clustering.SampleAnalyzerConfigString())
             mydict.update(self.beauty.SampleAnalyzerConfigString())
+            mydict.update(self.charm.SampleAnalyzerConfigString())
             mydict.update(self.tau.SampleAnalyzerConfigString())
             return mydict
         else:
             return {}
 
+    def user_SetParameter(self, parameter, value, datasets, level):
 
-    def user_SetParameter(self,parameter,value,datasets,level):
-        
         # algorithm
-        if parameter=="algorithm":
+        if parameter == "algorithm":
 
             # Switch off the clustering
-            if value=="none":
-                test=True
+            if value == "none":
+                test = True
                 for dataset in datasets:
                     if not test:
                         break
                     for file in dataset.filenames:
-                        if file.endswith('lhe') or \
-                           file.endswith('lhe.gz') or \
-                           file.endswith('hep') or \
-                           file.endswith('hep.gz') or \
-                           file.endswith('hepmc') or \
-                           file.endswith('hepmc.gz'):
-                            test=False
+                        if (
+                            file.endswith("lhe")
+                            or file.endswith("lhe.gz")
+                            or file.endswith("hep")
+                            or file.endswith("hep.gz")
+                            or file.endswith("hepmc")
+                            or file.endswith("hepmc.gz")
+                        ):
+                            test = False
                             break
                 if not test:
                     logging.getLogger('MA5').error("some datasets contain partonic/hadronic file format. "+\
@@ -134,118 +149,140 @@ class ClusteringConfiguration:
                     return
 
             # Switch on the clustering
-            elif value in ["kt","antikt","cambridge","genkt",\
-                           "gridjet","cdfmidpoint","cdfjetclu",\
-                           "siscone"]:
+            elif value in [
+                "kt",
+                "antikt",
+                "cambridge",
+                "genkt",
+                "gridjet",
+                "cdfmidpoint",
+                "cdfjetclu",
+                "siscone",
+            ]:
 
                 # Only in reco mode
-                if level!=MA5RunningType.RECO:
-                    logging.getLogger('MA5').error("clustering algorithm is only available in RECO mode")
+                if level != MA5RunningType.RECO:
+                    logging.getLogger("MA5").error(
+                        "clustering algorithm is only available in RECO mode"
+                    )
                     return
-                
-                test=True
+
+                test = True
                 for dataset in datasets:
                     if not test:
                         break
                     for file in dataset.filenames:
-                        if file.endswith('lhco') or \
-                           file.endswith('lhco.gz') or \
-                           file.endswith('root'):
-                            test=False
+                        if (
+                            file.endswith("lhco")
+                            or file.endswith("lhco.gz")
+                            or file.endswith("root")
+                        ):
+                            test = False
                             break
                 if not test:
                     logging.getLogger('MA5').error("some datasets contain reconstructed file format. "+\
                                                    "Clustering algorithm cannot be switched on.")
                     return
-                 
-            if value=="kt":
-                self.algorithm="kt"
+
+            if value == "kt":
+                self.algorithm = "kt"
                 self.clustering = ClusteringKt()
-            elif value=="antikt":
-                self.algorithm="antikt"
+            elif value == "antikt":
+                self.algorithm = "antikt"
                 self.clustering = ClusteringAntiKt()
-            elif value=="cambridge":
-                self.algorithm="cambridge"
+            elif value == "cambridge":
+                self.algorithm = "cambridge"
                 self.clustering = ClusteringCambridge()
-            elif value=="genkt":
-                self.algorithm="genkt"
+            elif value == "genkt":
+                self.algorithm = "genkt"
                 self.clustering = ClusteringGenKt()
-            elif value=="gridjet":
-                self.algorithm="gridjet"
+            elif value == "gridjet":
+                self.algorithm = "gridjet"
                 self.clustering = ClusteringGridJet()
-            elif value=="cdfmidpoint":
-                self.algorithm="cdfmidpoint"
+            elif value == "cdfmidpoint":
+                self.algorithm = "cdfmidpoint"
                 self.clustering = ClusteringCDFMidPoint()
-            elif value=="cdfjetclu":
-                self.algorithm="cdfjetclu"
+            elif value == "cdfjetclu":
+                self.algorithm = "cdfjetclu"
                 self.clustering = ClusteringCDFJetClu()
-            elif value=="siscone":
-                self.algorithm="siscone"
+            elif value == "siscone":
+                self.algorithm = "siscone"
                 self.clustering = ClusteringSisCone()
-            elif value=="none":
-                self.algorithm="none"
+            elif value == "none":
+                self.algorithm = "none"
                 self.clustering = 0
             else:
-                logging.getLogger('MA5').error("algorithm called '"+value+"' is not found.")
-            return    
+                logging.getLogger("MA5").error("algorithm called '" + value + "' is not found.")
+            return
 
         # other rejection if no algo specified
-        if self.algorithm=="none":
-            logging.getLogger('MA5').error("'clustering' has no parameter called '"+parameter+"'")
+        if self.algorithm == "none":
+            logging.getLogger("MA5").error(
+                "'clustering' has no parameter called '" + parameter + "'"
+            )
             return
 
         # exclusive_id
-        if parameter=="exclusive_id":
-            if value=="true":
-                self.exclusive_id=True
-            elif value=="false":
-                self.exclusive_id=False
+        if parameter == "exclusive_id":
+            if value == "true":
+                self.exclusive_id = True
+            elif value == "false":
+                self.exclusive_id = False
             else:
-                logging.getLogger('MA5').error("The allowed values for 'exclusive_id' " +\
-                              "parameter are 'true' or 'false'.")
-            return    
+                logging.getLogger("MA5").error(
+                    "The allowed values for 'exclusive_id' " + "parameter are 'true' or 'false'."
+                )
+            return
 
         # other
-        elif parameter.startswith('bjet_id.'):
-            return self.beauty.user_SetParameter(parameter,value)
-        elif parameter.startswith('tau_id.'):
-            return self.tau.user_SetParameter(parameter,value)
+        elif parameter.startswith("bjet_id."):
+            return self.beauty.user_SetParameter(parameter, value)
+        elif parameter.startswith("cjet_id."):
+            return self.charm.user_SetParameter(parameter, value)
+        elif parameter.startswith("tau_id."):
+            return self.tau.user_SetParameter(parameter, value)
+        elif parameter.lower() == "jetid":
+            self.JetID = str(value)
         else:
-            return self.clustering.user_SetParameter(parameter,value)
+            return self.clustering.user_SetParameter(parameter, value)
 
-        
+
     def user_GetParameters(self):
-        if self.algorithm!="none":
+        if self.algorithm != "none":
             table = list(ClusteringConfiguration.userVariables.keys())
             table.extend(self.clustering.user_GetParameters())
             table.extend(self.beauty.user_GetParameters())
+            table.extend(self.charm.user_GetParameters())
             table.extend(self.tau.user_GetParameters())
         else:
             table = ["algorithm"]
         return table
 
-
-    def user_GetValues(self,variable):
+    def user_GetValues(self, variable):
         table = []
-        if self.algorithm!="none":
+        if self.algorithm != "none":
             try:
                 table.extend(ClusteringConfiguration.userVariables[variable])
-            except:
+            except Exception as err:
                 pass
             try:
                 table.extend(self.clustering.user_GetValues(variable))
-            except:
+            except Exception as err:
                 pass
             try:
                 table.extend(self.beauty.user_GetValues(variable))
-            except:
+            except Exception as err:
+                pass
+            try:
+                table.extend(self.charm.user_GetValues(variable))
+            except Exception as err:
                 pass
             try:
                 table.extend(self.tau.user_GetValues(variable))
-            except:
+            except Exception as err:
                 pass
         else:
-            if variable=="algorithm":
+            if variable == "algorithm":
                 table.extend(ClusteringConfiguration.userVariables["algorithm"])
         return table
-        
+        return table

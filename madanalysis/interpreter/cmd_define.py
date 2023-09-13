@@ -47,6 +47,23 @@ class CmdDefine(CmdBase.CmdBase):
             self.main.superfastsim.define(args,self.main.multiparticles)
             return
 
+        # Jet Definition
+        if args[0] == 'jet_algorithm':
+            if self.main.mode != MA5RunningType.RECO:
+                logging.getLogger('MA5').error("Jet algorithms are only available in the RECO mode")
+                logging.getLogger('MA5').error("Please restart the program with './bin/ma5 -R '")
+                return
+            if self.main.fastsim.package != 'fastjet':
+                logging.getLogger('MA5').error("Jet algorithms requires FastJet as a fastsim package. ")
+                return
+            ok = self.main.jet_collection.define(args,self.main.datasets.GetNames()+\
+                                                     [self.main.fastsim.clustering.JetID])
+            if ok and len(self.main.jet_collection)==1:
+                # Multi-cluster protection
+                logging.getLogger('MA5').warning("Constituent-based smearing will be applied.")
+                self.main.superfastsim.jetrecomode = 'constituents'
+            return
+
         #Checking argument number
         if not len(args) > 2:
             logging.getLogger('MA5').error("wrong number of arguments for the command 'define'.")
@@ -136,14 +153,19 @@ class CmdDefine(CmdBase.CmdBase):
         logging.getLogger('MA5').info("   The corresponding energy scaling function is given by <function>.")
         logging.getLogger('MA5').info("   The bounds correspond to the domain that scaling function applies (pt > ..., eta < ..., etc.).")
         # For the future:
-        # logging.getLogger('MA5').info("")
-        # logging.getLogger('MA5').info("   Syntax: define scaling <variable> for <p1> <function> [<bounds>]")
-        # logging.getLogger('MA5').info("   Define rescaling corrections to apply to a variable <variable> "+\
-        #    "for a reconstructed object <p1>.")
-        # logging.getLogger('MA5').info("   The corresponding scaling function is given by <function>.")
-        # logging.getLogger('MA5').info("   The bounds correspond to the domain that scaling function applies "+\
-        #    "(pt > ..., eta < ..., etc.).")
-
+        logging.getLogger('MA5').info("")
+        logging.getLogger('MA5').info("   Syntax: define scaling <variable> for <p1> <function> [<bounds>]")
+        logging.getLogger('MA5').info("   Define rescaling corrections to apply to a variable <variable> for a reconstructed object <p1>.")
+        logging.getLogger('MA5').info("   The corresponding scaling function is given by <function>.")
+        logging.getLogger('MA5').info("   The bounds correspond to the domain that scaling function applies (pt > ..., eta < ..., etc.).")
+        logging.getLogger('MA5').info("")
+        algorithms = ['antikt','cambridge', 'genkt','gridjet','kt','genkt', 'cdfjetclu','cdfmidpoint','siscone']
+        logging.getLogger('MA5').info('   Syntax: define jet_algorithm <name> <algorithm> <keyword args>')
+        logging.getLogger('MA5').info('           - <name>         : Name to be assigned to the jet.')
+        logging.getLogger('MA5').info('           - <algorithm>    : Clustering algorithm of the jet. Available algorithms are: ')
+        logging.getLogger('MA5').info('                              '+', '.join(algorithms))
+        logging.getLogger('MA5').info('           - <keyword args> : (Optional) depending on the nature of the algorithm.')
+        logging.getLogger('MA5').info("                              it can be radius=0.4, ptmin=20 etc.")
 
     def complete(self,text,line,begidx,endidx):
 
@@ -154,7 +176,8 @@ class CmdDefine(CmdBase.CmdBase):
             nargs += 1
 
         if nargs==2:
-            output=['tagger', 'smearer', 'reco_efficiency', "jes", "energy_scaling"]
+            output=['tagger', 'smearer', 'reco_efficiency', "jes",
+                    "energy_scaling", "scaling", "jet_algorithm"]
             return self.finalize_complete(text,output)
 
         elif nargs==3 or (nargs==5 and args[1] == 'tagger'):

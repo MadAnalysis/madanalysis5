@@ -23,10 +23,11 @@
 
 
 from __future__ import absolute_import
+
 import logging
-from shell_command import ShellCommand
-from string_tools  import StringTools
+
 from six.moves import range
+from string_tools import StringTools
 
 
 class MakefileWriter():
@@ -165,6 +166,13 @@ class MakefileWriter():
             self.has_commons               = False
             self.has_process               = False
             self.has_fastjet_tag           = False
+            # @JACK: cant use FASTJET_USE tag, it clashes with ROOT
+            self.ma5_fastjet_mode          = False
+            self.has_fjcontrib             = False
+            self.has_substructure          = False
+            self.has_heptoptagger          = False
+            self.has_nsubjettiness         = False
+
             self.has_delphes_tag           = False
             self.has_delphesMA5tune_tag    = False
             self.has_root_tag              = False
@@ -188,10 +196,13 @@ class MakefileWriter():
             self.has_root_ma5lib           = False
 
 
-    @staticmethod
-    def Makefile(MakefileName,title,ProductName,ProductPath,isLibrary,cppfiles,hfiles,options,archi_info,toRemove,moreIncludes=[]):
 
-        import os
+    @staticmethod
+    def Makefile(
+            MakefileName, title, ProductName, ProductPath, isLibrary, cppfiles, hfiles,
+            options, archi_info, toRemove, moreIncludes = []
+    ):
+
         # Open the Makefile
         try:
             file = open(MakefileName,"w")
@@ -218,7 +229,7 @@ class MakefileWriter():
 
         # - general
         cxxflags=[]
-        cxxflags.extend(['-Wall','-std=c++11','-O3','-fPIC', '-I$(MA5_BASE)/tools/']) # general
+        cxxflags.extend(['-Wall', '-std=c++11', '-O3', '-fPIC', '-I$(MA5_BASE)/tools/']) # general
         file.write('CXXFLAGS  = '+' '.join(cxxflags)+'\n')
         for item in moreIncludes:
             file.write('CXXFLAGS += '+' -I'+item+'\n')
@@ -317,6 +328,10 @@ class MakefileWriter():
             cxxflags.extend(['-DROOT_USE'])
         if options.has_fastjet_tag:
             cxxflags.extend(['-DFASTJET_USE'])
+        if options.ma5_fastjet_mode:
+            # @JACK: This flag enables usage of certain modules in SampleAnalyzer which
+            # depends on availablity of FastJet library.
+            cxxflags.extend(["$(FASTJET_FLAG)"])
         if options.has_zlib_tag:
             cxxflags.extend(['-DZIP_USE'])
         if options.has_delphes_tag:
@@ -353,7 +368,6 @@ class MakefileWriter():
             if options.has_zlib_ma5lib:
                 libs.extend(['-lzlib_for_ma5'])
             if options.has_zlib_lib:
-#                libs.extend(['-L'+archi_info.zlib_lib_path,'-lz'])
                 libs.extend(['-lz'])
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
 
@@ -376,10 +390,18 @@ class MakefileWriter():
             if options.has_fastjet_ma5lib:
                 libs.extend(['-lfastjet_for_ma5'])
             if options.has_fastjet_lib:
-#                libs.extend(['$(shell fastjet-config --libs --plugins)']) # --rpath=no)'])
-                libs.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config '+\
-                             '--libs --plugins)']) # --rpath=no)'])
+                libs.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config --libs --plugins)'])
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
+            libs=[]
+            if options.has_fjcontrib:
+                # Add fjcontrib libraries
+                libs.extend(["-lRecursiveTools"])   # SoftDrop
+                libs.extend(["-lVariableR"])        # VariableR
+                libs.extend(["-lEnergyCorrelator"]) # -lEnergyCorrelator
+            if options.has_nsubjettiness:
+                libs.extend(["-lNsubjettiness"])    # Nsubjettiness
+            if options.has_nsubjettiness or options.has_fjcontrib:
+                file.write('LIBFLAGS += '+' '.join(libs)+'\n')
 
         # - delphes
         if options.has_delphes_ma5lib or options.has_delphes_lib:
@@ -387,7 +409,6 @@ class MakefileWriter():
             if options.has_delphes_ma5lib:
                 libs.extend(['-ldelphes_for_ma5'])
             if options.has_delphes_lib:
-#                libs.extend(['-L'+archi_info.delphes_lib_paths[0],'-lDelphes'])
                 libs.extend(['-lDelphes'])
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
 
@@ -397,9 +418,16 @@ class MakefileWriter():
             if options.has_delphesMA5tune_ma5lib:
                 libs.extend(['-ldelphesMA5tune_for_ma5'])
             if options.has_delphesMA5tune_lib:
-#                libs.extend(['-L'+archi_info.delphesMA5tune_lib_paths[0],'-lDelphesMA5tune'])
                 libs.extend(['-lDelphesMA5tune'])
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
+
+        # Substructure module
+        if options.has_substructure:
+            file.write('LIBFLAGS += -lsubstructure_for_ma5\n')
+
+        # HEPTopTagger module
+        if options.has_heptoptagger:
+            file.write('LIBFLAGS += -lHEPTopTagger_for_ma5\n')
 
         # - Commons
         if options.has_commons:
@@ -435,6 +463,10 @@ class MakefileWriter():
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libdelphesMA5tune_for_ma5.so')
         if options.has_fastjet_ma5lib:
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so')
+        if options.has_substructure:
+            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libsubstructure_for_ma5.so')
+        if options.has_heptoptagger:
+            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libHEPTopTagger_for_ma5.so')
         if len(libs)!=0:
             file.write('# Requirements to check before building\n')
             for ind in range(0,len(libs)):
