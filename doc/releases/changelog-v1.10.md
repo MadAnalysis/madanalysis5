@@ -1,4 +1,4 @@
-# Release version 1.10.12
+# Release version 1.10
 
 ## New features since last release
 
