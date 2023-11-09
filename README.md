@@ -7,23 +7,23 @@
 
 ![Python v3.8](https://img.shields.io/badge/python-3670A0?style=plastic&logo=python&logoColor=ffdd54&label=3.8&color=brightgreen)
 ![C++](https://img.shields.io/badge/c++-%2300599C.svg?style=plastic&logo=c%2B%2B&logoColor=white&label=11)
+
 ## Outline
- - [What is MadAnalysis 5?](#what-is-madanalysis-5)
- - [Requirements](#requirements)
- - [Downloading and installing the MadAnalysis 5 package](#downloading-and-installing-the-madanalysis-5-package)
- - [Usage of MadAnalysis 5](#usage-of-madanalysis-5)
- - [Description of the package](#description-of-the-package)
- - [Very first steps with MadAnalysis 5](#very-first-steps-with-madanalysis-5)
- - [Troubleshootings and bug reports](#troubleshootings-and-bug-reports)
- - [Supported third party software](#supported-third-party-software)
- - [Authors](#authors)
- - [Developer's Guide: How to contribute to MadAnalysis 5](./CONTRIBUTING.md)
- - [Our famous last words](#our-famous-last-words)
- - [Credits](#credits)
 
+- [What is MadAnalysis 5?](#what-is-madanalysis-5)
+- [Requirements](#requirements)
+- [Downloading and installing the MadAnalysis 5 package](#downloading-and-installing-the-madanalysis-5-package)
+- [Usage of MadAnalysis 5](#usage-of-madanalysis-5)
+- [Description of the package](#description-of-the-package)
+- [Very first steps with MadAnalysis 5](#very-first-steps-with-madanalysis-5)
+- [Troubleshootings and bug reports](#troubleshootings-and-bug-reports)
+- [Supported third party software](#supported-third-party-software)
+- [Authors](#authors)
+- [Developer's Guide: How to contribute to MadAnalysis 5](./CONTRIBUTING.md)
+- [Our famous last words](#our-famous-last-words)
+- [Credits](#credits)
 
-
-### What is MadAnalysis 5? 
+### What is MadAnalysis 5?
 
 MadAnalysis 5 is a framework for phenomenological investigations at particle
 colliders. Based on a C++ kernel, this program allows to efficiently perform, in
@@ -47,45 +47,49 @@ More details can be found on the [MadAnalysis 5 website](https://madanalysis.irm
 
 MadAnalysis 5 requires several external libraries in order to properly run:
 
- - Python 3.8 or a more recent version that can be downloaded from [this website](http://www.python.org/)
+- Python 3.8 or a more recent version that can be downloaded from [this website](http://www.python.org/)
    In order to check the installed version of Python on a system, it is
    sufficient to issue in a shell `$ python --version`.
 
- - Either the GNU GCC compiler, or the Apple clang compiler. MadAnalysis 5 has been validated:
-     - with the version (minimum) `7.0` of the GCC compiler. The GCC compiler can be downloaded from [this website](http://gcc.gnu.org/).
-     - with the version 13.1.6 (clang-1316.0.21.2) of the clang compiler.
+- Either the GNU GCC compiler, or the Apple clang compiler. MadAnalysis 5 has been validated:
+  - with the version (minimum) `7.0` of the GCC compiler. The GCC compiler can be downloaded from [this website](http://gcc.gnu.org/).
+  - with the version 13.1.6 (clang-1316.0.21.2) of the clang compiler.
 
 To benefit from all options coming with the MadAnalysis 5 program, the following
 (optional) libraries have to be installed on the system:
- - Zlib headers and libraries that can be downloaded from [this website](http://zlib.net/) which can 
+
+- Zlib headers and libraries that can be downloaded from [this website](http://zlib.net/) which can
 also be downloaded by by typing `ma5> install zlib` through MadAnalysis interface.
- - The FastJet package version 3.3, or a more recent version, that can be
-   downloaded from [this link](http://fastjet.fr/). This package can also be installed by 
+- The FastJet package version 3.3, or a more recent version, that can be
+   downloaded from [this link](http://fastjet.fr/). This package can also be installed by
   typing `ma5> install fastjet` in MadAnalysis.
- - LaTeX and `pdflatex` compilers for report rendering.
- - All Python libraries that MadAnalysis 5 requires can be installed by typing 
+- LaTeX and `pdflatex` compilers for report rendering.
+- All Python libraries that MadAnalysis 5 requires can be installed by typing
 `$ python3 -m pip install -r requirements.txt`.
 
 ### Downloading and installing the MadAnalysis 5 package
 
 We are moving from our previous location in [Launchpad](https://launchpad.net/madanalysis5) but the latest MadAnalysis 5
-version can still be downloaded through [here](https://launchpad.net/madanalysis5) until the 
-release of `v1.10`. Note that future versions will only be available through GitHub. 
+version can still be downloaded through [here](https://launchpad.net/madanalysis5) until the
+release of `v1.10`. Note that future versions will only be available through GitHub.
 
 If you satisfy the requirements mentioned [above](#requirements) the only thing that you need to do is
- download the latest release from [here](https://github.com/MadAnalysis/madanalysis5/releases) and 
+ download the latest release from [here](https://github.com/MadAnalysis/madanalysis5/releases) and
 start playing;
+
 ```bash
-$ cd madanalysis5
-$ ./bin/ma5
+cd madanalysis5
+./bin/ma5
 ```
-During your first execution MadAnalysis 5 will build the entire workspace automatically. 
-Note that release versions are always the stable ones the main repository will be under constant 
+
+During your first execution MadAnalysis 5 will build the entire workspace automatically.
+Note that release versions are always the stable ones the main repository will be under constant
 development.
 
 ### Usage of MadAnalysis 5
 
 Syntax: `./bin/ma5 [options] [scripts]`
+
 ```
 [options]
 This optional argument allows to select the running mode of MadAnalysis 5 appropriate 
@@ -111,10 +115,12 @@ List of available options :
 This optional argument is a list of filenames containing a set of MadAnalysis 5 commands. 
 The file name are handled as concatenated, and the commands are applied sequentially.
 ```
+
 ### Description of the package
 
 The directory structure of the MadAnalysis 5 package can be summarized as
 follows:
+
 ```
    +  bin                | This directory contains the executable file 'ma5'.
    +  madanalysis        | This directory contains all the source files of
@@ -155,20 +161,25 @@ follows:
   (+) samples            | This optional directory is dedicated to event sample
                          |   storage. 
 ```
+
 The main file of the package is also the only one which is supposed to be run on
-a system: 
+a system:
+
 ```bash
-$ ./bin/ma5
+./bin/ma5
 ```
+
 In addition, several text files are dedicated to specific information:
-  - `README`: this file,
-  - `COPYING`: the description of the software license,
-  - `version.txt`: general information about the installed release,
-  - `madanalysis/UpdateNotes.txt`: the update notes.
+
+- `README`: this file,
+- `COPYING`: the description of the software license,
+- `version.txt`: general information about the installed release,
+- `madanalysis/UpdateNotes.txt`: the update notes.
 
 The C++ kernel of MadAnalysis is stored in the directory
   `tools/SampleAnalyzer`
-This directory has the following structure: 
+This directory has the following structure:
+
 ```
    + tools
      + SampleAnalyzer
@@ -198,6 +209,7 @@ This directory has the following structure:
      + newAnalyzer.py     | This script allows to create a blank analysis.
      + newFilter.py       | This script allows to create a blank filter.
 ```
+
 The Glue directory contains routines dedicated to future developments and are
 thus neither supporter, nor documented.
 
@@ -209,7 +221,8 @@ To start MadAnalysis 5, it is enough to type in a shell `./bin/ma5`
 
 In a first step, the program checks all the dependencies and provide warning
 and/or error messages if necessary. Next, the `SampleAnalyzer` C++ kernel library
-is generated. This is performed once and for all at the first run of MadAnalysis 
+is generated. This is performed once and for all at the first run of MadAnalysis
+
 - Let us however note that if the system configuration changes, this is
 detected by MadAnalysis 5 and the library is regenerated.
 
@@ -242,6 +255,7 @@ The [latest release](https://github.com/MadAnalysis/madanalysis5/releases) of Ma
 ### Authors
 
 MadAnalysis 5 is openly developed by the core dev team consisting of:
+
 - [Jack Y. Araz](mailto:jack.araz@durham.ac.uk)
 - [Benjamin Fuks](mailto:fuks@lpthe.jussieu.fr)
 - [Eric Conte](mailto:eric.conte@iphc.cnrs.fr)
@@ -258,12 +272,12 @@ That's all folks!
 
 If you use MadAnalysis 5, please cite ([BibTeX file can be found here](./CITATIONS.bib)):
 
- - [E. Conte, B. Fuks and G. Serret; Comput. Phys. Commun. 184 (2013) 222](http://arxiv.org/abs/1206.1599)
- - [E. Conte, B. Dumont, B. Fuks and C. Wymant; Eur. Phys. J. C 74 (2014) 10, 3103](http://arxiv.org/abs/1405.3982)
- - [B. Dumont, B. Fuks, S. Kraml et al.; Eur. Phys. J. C 75 (2015) 2, 56](http://arxiv.org/abs/1407.3278)
- - [E. Conte, and B. Fuks; Int. J. Mod. Phys. A 33 (2018) 1830027](http://arxiv.org/abs/1808.00480)
- - [J. Y. Araz, M. Frank and B. Fuks; Eur. Phys. J. C 80 (2020) 6, 531](https://arxiv.org/abs/1910.11418)
- - [J. Y. Araz, B. Fuks and G. Polykratis; Eur. Phys. J. C 81 (2021) 329](https://arxiv.org/abs/2006.09387)
- - [J. Y. Araz, B. Fuks, M. D. Goodsell and M. Utsch; Eur. Phys. J. C 82 (2022) 597](https://arxiv.org/abs/2112.05163)
- - [G. Alguero, J. Y. Araz, B. Fuks, S. Kraml; SciPost Phys. 14 (2023) 009](https://doi.org/10.21468/SciPostPhys.14.1.009)
- - [J. Y. Araz, A. Buckley, B. Fuks; arXiv:2303.03427](https://arxiv.org/abs/2303.03427)
+- [E. Conte, B. Fuks, and G. Serret; Comput. Phys. Commun. 184 (2013) 222](http://arxiv.org/abs/1206.1599)
+- [E. Conte, B. Dumont, B. Fuks and C. Wymant; Eur. Phys. J. C 74 (2014) 10, 3103](http://arxiv.org/abs/1405.3982)
+- [B. Dumont, B. Fuks, S. Kraml et al.; Eur. Phys. J. C 75 (2015) 2, 56](http://arxiv.org/abs/1407.3278)
+- [E. Conte, and B. Fuks; Int. J. Mod. Phys. A 33 (2018) 1830027](http://arxiv.org/abs/1808.00480)
+- [J. Y. Araz, M. Frank and B. Fuks; Eur. Phys. J. C 80 (2020) 6, 531](https://arxiv.org/abs/1910.11418)
+- [J. Y. Araz, B. Fuks and G. Polykratis; Eur. Phys. J. C 81 (2021) 329](https://arxiv.org/abs/2006.09387)
+- [J. Y. Araz, B. Fuks, M. D. Goodsell, and M. Utsch; Eur. Phys. J. C 82 (2022) 597](https://arxiv.org/abs/2112.05163)
+- [G. Alguero, J. Y. Araz, B. Fuks, S. Kraml; SciPost Phys. 14 (2023) 009](https://doi.org/10.21468/SciPostPhys.14.1.009)
+- [J. Y. Araz, A. Buckley, B. Fuks; Eur. Phys. J. C 83 (2023) no.7, 664](https://doi.org/10.1140/epjc/s10052-023-11779-2)

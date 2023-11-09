@@ -22,19 +22,34 @@
 ################################################################################
 
 
-from __future__                                                 import absolute_import
-from madanalysis.install.detector_manager                       import DetectorManager
-from madanalysis.configuration.delphesMA5tune_configuration     import DelphesMA5tuneConfiguration
-from madanalysis.configuration.delphes_configuration            import DelphesConfiguration
-from madanalysis.IOinterface.folder_writer                      import FolderWriter
-from madanalysis.IOinterface.job_writer                         import JobWriter
-from madanalysis.IOinterface.library_writer                     import LibraryWriter
-from madanalysis.misc.histfactory_reader                        import HF_Background, HF_Signal, get_HFID
-from collections                                                import OrderedDict
-from shell_command                                              import ShellCommand
-from string_tools                                               import StringTools
-from six.moves                                                  import map, range, input
-import copy, logging, math, os, shutil, time, sys, json
+from __future__ import absolute_import
+
+import copy
+import json
+import logging
+import math
+import os
+import shutil
+import sys
+import time
+from collections import OrderedDict
+import numpy as np
+
+from shell_command import ShellCommand
+from six.moves import input, map, range
+from string_tools import StringTools
+
+from madanalysis.configuration.delphes_configuration import \
+    DelphesConfiguration
+from madanalysis.configuration.delphesMA5tune_configuration import \
+    DelphesMA5tuneConfiguration
+from madanalysis.install.detector_manager import DetectorManager
+from madanalysis.IOinterface.folder_writer import FolderWriter
+from madanalysis.IOinterface.job_writer import JobWriter
+from madanalysis.IOinterface.library_writer import LibraryWriter
+from madanalysis.misc.histfactory_reader import (
+    HF_Background, HF_Signal,get_HFID
+)
 
 
 class RunRecast():
@@ -1054,15 +1069,15 @@ class RunRecast():
                         else:
                             if grand_child.attrib.get("cov_subset", False):
                                 subsetID = grand_child.attrib["cov_subset"]
-                                if subsetID not in list(self.cov_config.keys()):
+                                if subsetID not in self.cov_config.keys():
                                     self.cov_config[subsetID] = dict(cov_regions = [],
                                                                      covariance  = [] )
                                 if child.attrib["id"] not in self.cov_config[subsetID]["cov_regions"]:
                                     self.cov_config[subsetID]["cov_regions"].append(child.attrib["id"])
 
-        if self.cov_config != {}:
-            for cov_subset in self.cov_config.keys():
-                length = len(self.cov_config[cov_subset]["cov_regions"])
+        if self.cov_config:
+            for cov_subset, subset in self.cov_config.items():
+                length = len(subset["cov_regions"])
                 self.cov_config[cov_subset]["covariance"] = [
                     [0. for i in range(length)] for j in range(length)
                 ]
@@ -1076,7 +1091,7 @@ class RunRecast():
                     # self.logger.debug(str(lumi)+' '+str(regions)+ ' '+str(regiondata))
                     try:
                         myval=float(rchild.text)
-                    except Exception as err:
+                    except ValueError as err:
                         self.logger.warning('Invalid info file (' + analysis+ '): region data ill-defined.')
                         self.logger.debug(str(err))
                         return -1,-1,-1
@@ -1091,35 +1106,25 @@ class RunRecast():
                     elif rchild.tag=="deltanb_stat":
                         stat = myval
                     elif rchild.tag=="covariance":
-                        if self.cov_config != {}:
+                        if self.cov_config:
                             for cov_subset, item in self.cov_config.items():
                                 if child.attrib["id"] not in item["cov_regions"] or \
                                         rchild.attrib["region"] not in item["cov_regions"]:
                                     continue
                                 i = item["cov_regions"].index(child.attrib["id"])
                                 j = item["cov_regions"].index(rchild.attrib["region"])
-                                if self.main.recasting.error_extrapolation=='sqrt':
-                                    myval = round(math.sqrt(myval)*lumi_scaling,8);
-                                elif self.main.recasting.error_extrapolation=='linear':
-                                    myval *= lumi_scaling**2
-                                else:
-                                    myval = round(myval*lumi_scaling**2*self.main.recasting.error_extrapolation[0]**2 + \
-                                                  math.sqrt(myval)*lumi_scaling*self.main.recasting.error_extrapolation[1]**2,8);
-
                                 self.cov_config[cov_subset]["covariance"][i][j] = myval
                     else:
                         self.logger.warning('Invalid info file (' + analysis+ '): unknown region subtag.')
                         return -1,-1,-1
                 if syst == -1 and stat == -1:
                     if self.main.recasting.error_extrapolation=='sqrt':
-                        err_scale=math.sqrt(lumi_scaling)
-                        deltanb = round(deltanb*err_scale,8)
+                        deltanb = round(deltanb * math.sqrt(lumi_scaling),8)
                     elif self.main.recasting.error_extrapolation=='linear':
-                        err_scale = lumi_scaling
-                        deltanb = round(deltanb*err_scale,8)
+                        deltanb = round(deltanb * lumi_scaling,8)
                     else:
                         nb_new = nb*lumi_scaling
-                        deltanb = round(math.sqrt(self.main.recasting.error_extrapolation[0]**2*nb_new**2 
+                        deltanb = round(math.sqrt(self.main.recasting.error_extrapolation[0]**2*nb_new**2 \
                                                   + self.main.recasting.error_extrapolation[1]**2*nb_new), 8);
                 else:
                     if syst==-1:
@@ -1132,6 +1137,22 @@ class RunRecast():
         tmp = {}
         for cov_subset, item in self.cov_config.items():
             if item["covariance"] != []:
+                cov = np.array(item["covariance"])
+                sigma = np.sqrt(np.diag(cov))
+                invsigma = np.linalg.inv(np.diag(sigma))
+                corr = invsigma @ cov @ invsigma
+                
+                if self.main.recasting.error_extrapolation=='sqrt':
+                    new_sigma = round(math.sqrt(sigma)*lumi_scaling,8)
+                elif self.main.recasting.error_extrapolation=='linear':
+                    new_sigma *= lumi_scaling**2
+                else:
+                    new_sigma = sigma * lumi_scaling**2 * self.main.recasting.error_extrapolation[0]**2 + \
+                        np.sqrt(sigma) * lumi_scaling * self.main.recasting.error_extrapolation[1]**2
+
+                new_sigma_matrix = np.diag(new_sigma)
+                new_cov = new_sigma_matrix @ corr @ new_sigma_matrix
+                item["covariance"] = new_cov.tolist()
                 tmp[cov_subset] = item
         self.cov_config = tmp
 
@@ -1400,11 +1421,11 @@ class RunRecast():
             else:
                 regiondata[reg]["best"]=0
 
-        if self.cov_config != {}:
+        if self.cov_config:
             minsig95, bestreg = 1e99, []
-            for cov_subset in self.cov_config.keys():
-                cov_regions = self.cov_config[cov_subset]["cov_regions"]
-                covariance  = self.cov_config[cov_subset]["covariance" ]
+            for cov_subset, subset in self.cov_config.items():
+                cov_regions = subset["cov_regions"]
+                covariance  = subset["covariance" ]
                 if all(s <= 0. for s in [regiondata[reg]["Nf"] for reg in cov_regions]):
                     regiondata["cov_subset"][cov_subset]["CLs"]= 0.
                     continue
@@ -1421,12 +1442,12 @@ class RunRecast():
                     regiondata['cov_subset'][cov_subset]["best"]=0
 
         #initialize pyhf for cls calculation
-        iterator = [] if self.pyhf_config=={} else copy.deepcopy(list(self.pyhf_config.items()))
+        iterator = [] if not self.pyhf_config else copy.deepcopy(self.pyhf_config).items()
         minsig95, bestreg = 1e99, []
-        for n, (likelihood_profile, config) in enumerate(iterator):
+        for likelihood_profile, config in iterator:
             self.logger.debug('    * Running CLs for '+likelihood_profile)
             # safety check, just in case
-            if regiondata.get('pyhf',{}).get(likelihood_profile, False) == False:
+            if regiondata.get('pyhf',{}).get(likelihood_profile, False) is False:
                 continue
             background = HF_Background(config)
             self.logger.debug('current pyhf Configuration = '+str(config))
@@ -1836,8 +1857,8 @@ def pyhf_wrapper(*args, **kwargs):
             return obs values
     """
     import pyhf
+    from numpy import isnan, ndarray, warnings
     from pyhf.optimize import mixins
-    from numpy import warnings, isnan, ndarray
 
     # Scilence pyhf's messages
     pyhf.pdf.log.setLevel(logging.CRITICAL)
@@ -1949,6 +1970,7 @@ def pyhf_wrapper(*args, **kwargs):
 
 def cls(NumObserved, ExpectedBG, BGError, SigHypothesis, NumToyExperiments, **kwargs):
     import scipy.stats
+
     # generate a set of expected-number-of-background-events, one for each toy
     # experiment, distributed according to a Gaussian with the specified mean
     # and uncertainty
