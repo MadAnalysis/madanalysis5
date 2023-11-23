@@ -133,7 +133,7 @@ MAbool LHEReader::ReadHeader(SampleFormat& mySample)
       tag_simplified_pythia=true;
     if ( (line.find("<MA5Format> Simplified LHE format </MA5Format>")!=std::string::npos) )
       tag_simplified_ma5=true;
-    EndOfLoop = (line.find("<event>")!=std::string::npos);
+    EndOfLoop = (line.find("<event")!=std::string::npos);
   }
   while(!EndOfLoop);
 
