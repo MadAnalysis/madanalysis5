@@ -23,22 +23,23 @@
 
 
 from __future__ import absolute_import
-
+from madanalysis.enumeration.uncertainty_type import UncertaintyType
+from madanalysis.enumeration.normalize_type import NormalizeType
+from madanalysis.enumeration.report_format_type import ReportFormatType
+from madanalysis.enumeration.observable_type import ObservableType
+from madanalysis.enumeration.color_type import ColorType
+from madanalysis.enumeration.linestyle_type import LineStyleType
+from madanalysis.enumeration.backstyle_type import BackStyleType
+from madanalysis.enumeration.stacking_method_type import StackingMethodType
 import copy
 from six.moves import range
-import numpy as np
-
-from madanalysis.enumeration.normalize_type import NormalizeType
-from madanalysis.enumeration.stacking_method_type import StackingMethodType
-from madanalysis.dataset import dataset as Dataset
-from .histogram_processor import HistogramProcessor
 
 
 class PlotFlowForDataset:
-    def __init__(self, main, dataset: Dataset):
+    def __init__(self, main, dataset):
         self.histos = []
         self.main = main
-        self.dataset: Dataset = dataset
+        self.dataset = dataset
 
         # Getting xsection
         self.xsection = self.dataset.measured_global.xsection
@@ -67,14 +68,17 @@ class PlotFlowForDataset:
         iplot = 0
 
         # Loop over plot
-        for select in self.main.selection:
+        for iabshisto in range(0, len(self.main.selection)):
             # Keep only histogram
-            if select.__class__.__name__ != "Histogram":
+            if self.main.selection[iabshisto].__class__.__name__ != "Histogram":
                 continue
 
             # Case of histogram frequency
             if self.histos[iplot].__class__.__name__ == "HistogramFrequency":
-                NPID = True if select.observable.name == "NPID" else False
+                if self.main.selection[iabshisto].observable.name == "NPID":
+                    NPID = True
+                else:
+                    NPID = False
                 self.histos[iplot].CreateHistogram(NPID, self.main)
             else:
                 self.histos[iplot].CreateHistogram()
@@ -84,36 +88,28 @@ class PlotFlowForDataset:
     def ComputeScale(self):
 
         iplot = 0
+
         # Loop over plot
-        for iabshisto, select in enumerate(self.main.selection):
+        for iabshisto in range(0, len(self.main.selection)):
 
             # Keep only histogram
-            if select.__class__.__name__ != "Histogram":
+            if self.main.selection[iabshisto].__class__.__name__ != "Histogram":
                 continue
-
-            processor = HistogramProcessor(
-                self.histos[iplot],
-                self.dataset.weight_collection,
-                self.dataset.measured_global.nevents,
-                self.xsection,
-            )
 
             # Reset scale
             scale = 0.0
 
-            # integral
-            integral = (
-                self.histos[iplot].positive.integral
-                - self.histos[iplot].negative.integral
-            )
-
-            integral = np.mean(integral)
-
             # Case 1: Normalization to ONE
-            if select.stack == StackingMethodType.NORMALIZE2ONE or (
+            if self.main.selection[
+                iabshisto
+            ].stack == StackingMethodType.NORMALIZE2ONE or (
                 self.main.stack == StackingMethodType.NORMALIZE2ONE
                 and self.main.selection[iabshisto].stack == StackingMethodType.AUTO
             ):
+                integral = (
+                    self.histos[iplot].positive.integral
+                    - self.histos[iplot].negative.integral
+                )
                 if integral > 0.0:
                     scale = 1.0 / integral
                 else:
@@ -127,20 +123,51 @@ class PlotFlowForDataset:
             #                or depends on WEIGHT+LUMI
             elif self.main.normalize in [NormalizeType.LUMI, NormalizeType.LUMI_WEIGHT]:
 
+                # integral
+                integral = (
+                    self.histos[iplot].positive.integral
+                    - self.histos[iplot].negative.integral
+                )
+
+                # compute efficiency : Nevent / Ntotal
+                if self.dataset.measured_global.nevents == 0:
+                    eff = 0
+                else:
+                    eff = (
+                        self.histos[iplot].positive.nevents
+                        + self.histos[iplot].negative.nevents
+                    ) / float(self.dataset.measured_global.nevents)
+
                 # compute the good xsection value
                 thexsection = self.xsection
                 if self.main.normalize == NormalizeType.LUMI_WEIGHT:
                     thexsection = thexsection * self.dataset.weight
-                pdf_list = []
-                import os
-                with open(os.path.join(self.main.archi_info.ma5dir, "madanalysis/input/LHAPDF.txt"), "r") as f:
-                     for line in f.readlines()[1:]:
-                         pdf_list.append(int(line.split(",")[0]))
 
-                scale = processor.scale(lumi=self.main.lumi, scale_choice=self.dataset.dynamic_scale_choice, central_pdfs = pdf_list)
+                # compute final entries/event ratio
+                entries_per_events = 0
+                sumw = self.histos[iplot].positive.sumw - self.histos[iplot].negative.sumw
+                Nentries = (
+                    self.histos[iplot].positive.sumwentries
+                    - self.histos[iplot].negative.sumwentries
+                )
+                if sumw != 0 and Nentries != 0:
+                    entries_per_events = sumw / Nentries
+
+                # compute the scale
+                if integral != 0:
+                    scale = (
+                        thexsection
+                        * self.main.lumi
+                        * 1000
+                        * eff
+                        * entries_per_events
+                        / integral
+                    )
+                else:
+                    scale = 1  # no scale for empty plot
 
             # Setting the computing scale
             self.histos[iplot].scale = copy.copy(scale)
-            setattr(self.histos[iplot], "processor", processor)
+
             # Incrementing counter
             iplot += 1
