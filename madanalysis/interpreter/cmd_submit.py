@@ -24,21 +24,25 @@
 
 from __future__ import absolute_import
 
-import logging, glob, os
-from six.moves import range
-
-from madanalysis.interpreter.cmd_base import CmdBase
-from madanalysis.IOinterface.job_writer import JobWriter
-from madanalysis.IOinterface.layout_writer import LayoutWriter
-from madanalysis.IOinterface.job_reader import JobReader
-from madanalysis.enumeration.report_format_type import ReportFormatType
-from madanalysis.layout.layout import Layout
-from madanalysis.install.detector_manager import DetectorManager
-from madanalysis.misc.run_recast import RunRecast
-from madanalysis.IOinterface.delphescard_checker import DelphesCardChecker
+import glob
+import logging
+import os
 
 from chronometer import Chronometer
+from six.moves import range
 from string_tools import StringTools
+
+from madanalysis.enumeration.report_format_type import ReportFormatType
+from madanalysis.install.detector_manager import DetectorManager
+from madanalysis.interpreter.cmd_base import CmdBase
+from madanalysis.IOinterface.delphescard_checker import DelphesCardChecker
+from madanalysis.IOinterface.job_reader import JobReader
+from madanalysis.IOinterface.job_writer import JobWriter
+from madanalysis.IOinterface.layout_writer import LayoutWriter
+from madanalysis.layout.layout import Layout
+from madanalysis.misc.run_recast import RunRecast
+
+# pylint: disable=C0200,C0103
 
 
 class CmdSubmit(CmdBase):
@@ -529,13 +533,13 @@ class CmdSubmit(CmdBase):
 
         if self.main.recasting.status != "on":
             self.logger.info("   Extracting data from the output files...")
-            for i in range(0, len(self.main.datasets)):
-                jobber.ExtractGeneral(self.main.datasets[i])
-                jobber.ExtractHistos(self.main.datasets[i], layout.plotflow.detail[i])
-                jobber.ExtractCuts(self.main.datasets[i], layout.cutflow.detail[i])
+            for idat, dataset in enumerate(self.main.datasets):
+                jobber.ExtractGeneral(dataset)
+                jobber.ExtractHistos(dataset, layout.plotflow.detail[idat])
+                jobber.ExtractCuts(dataset, layout.cutflow.detail[idat])
                 if self.main.merging.enable:
                     jobber.ExtractHistos(
-                        self.main.datasets[i], layout.merging.detail[i], merging=True
+                        dataset, layout.merging.detail[idat], merging=True
                     )
         return True
 

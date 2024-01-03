@@ -34,6 +34,7 @@ from madanalysis.IOinterface.saf_block_status import SafBlockStatus
 from madanalysis.layout.histogram import Histogram
 from madanalysis.layout.histogram_logx import HistogramLogX
 from madanalysis.layout.histogram_frequency import HistogramFrequency
+from madanalysis.multiweight.histogram import MultiWeightHisto
 
 
 def check_instance(instance: str, instance_type: Callable[[str], Any]) -> bool:
@@ -91,7 +92,6 @@ class JobReader:
             return False
 
     def ExtractSampleInfo(self, words, numline, filename):
-
         # Creating container for info
         results = SampleInfo()
 
@@ -145,7 +145,6 @@ class JobReader:
         return self.ExtractStatisticsFloat(words, numline, filename)
 
     def ExtractDescription(self, words, numline, filename):
-
         # Extracting nbins
         try:
             a = int(words[0])
@@ -216,7 +215,6 @@ class JobReader:
         return positive_weights, negative_weights
 
     def ExtractDataFreq(self, words, numline, filename):
-
         # Extracting label
         try:
             a = int(words[0])
@@ -266,7 +264,6 @@ class JobReader:
     # selection plots    -> plot
 
     def ExtractGeneral(self, dataset):
-
         # Getting the output file name
         name = InstanceName.Get(dataset.name)
         filename = self.safdir + "/" + name + "/" + name + ".saf"
@@ -288,7 +285,6 @@ class JobReader:
         # Loop over the lines
         numline = 0
         for line in file:
-
             # Incrementing line counter
             numline += 1
 
@@ -415,6 +411,7 @@ class JobReader:
 
         # Initializing temporary containers
         histoinfo = Histogram()
+        multiweight_histo = MultiWeightHisto(weight_collection=dataset.weight_collection)
         histologxinfo = HistogramLogX()
         histofreqinfo = HistogramFrequency()
         data_positive = []
@@ -438,7 +435,6 @@ class JobReader:
             words = line.split()
             if len(words) == 0:
                 continue
-
             # decoding the file
             if len(words) == 1 and words[0][0] == "<" and words[0][-1] == ">":
                 if words[0].lower() == "<safheader>":
@@ -469,6 +465,15 @@ class JobReader:
                     plot.histos[-1].positive.array = data_positive[:]
                     plot.histos[-1].negative.array = data_negative[:]
                     histoinfo.Reset()
+                    if multiweight_histo.is_consistent:
+                        plot.multiweight_histos.append(copy.deepcopy(multiweight_histo))
+                        print(multiweight_histo)
+                        print(multiweight_histo.shape)
+                    else:
+                        plot.multiweight_histos.append(False)
+                    multiweight_histo = MultiWeightHisto(
+                        weight_collection=dataset.weight_collection
+                    )
                     data_positive = []
                     data_negative = []
                 elif words[0].lower() == "<histofrequency>":
@@ -501,6 +506,7 @@ class JobReader:
                         myname = line[1:-1]
                         if histoTag.activated:
                             histoinfo.name = myname
+                            multiweight_histo.name = myname
                         elif histoLogXTag.activated:
                             histologxinfo.name = myname
                         elif histoFreqTag.activated:
@@ -520,6 +526,9 @@ class JobReader:
                         histoinfo.nbins = results[0]
                         histoinfo.xmin = results[1]
                         histoinfo.xmax = results[2]
+                        multiweight_histo.set_description(
+                            results[0], results[1], results[2]
+                        )
                     elif histoLogXTag.activated:
                         histologxinfo.nbins = results[0]
                         histologxinfo.xmin = results[1]
@@ -532,6 +541,7 @@ class JobReader:
                 elif descriptionTag.Nlines >= 1:
                     if histoTag.activated and len(words) == 1:
                         histoinfo.regions.append(words[0])
+                        multiweight_histo.regions.append(words[0])
                     elif histoLogXTag.activated and len(words) == 1:
                         histologxinfo.regions.append(words[0])
                     elif histoFreqTag.activated and len(words) == 1:
@@ -552,77 +562,181 @@ class JobReader:
                 if statisticsTag.Nlines == 0:
                     results = self.ExtractStatisticsInt(words, numline, filename)
                     if histoTag.activated:
-                        histoinfo.positive.nevents = results[0]
-                        histoinfo.negative.nevents = results[1]
+                        histoinfo.positive.nevents = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        histoinfo.negative.nevents = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
+                        multiweight_histo.set_nevents(
+                            results[0]
+                            if isinstance(results[0], float)
+                            else results[0][0],
+                            results[1]
+                            if isinstance(results[1], float)
+                            else results[1][0],
+                        )
+
                     elif histoLogXTag.activated:
-                        histologxinfo.positive.nevents = results[0]
-                        histologxinfo.negative.nevents = results[1]
+                        histologxinfo.positive.nevents = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        histologxinfo.negative.nevents = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
                     elif histoFreqTag.activated:
-                        histofreqinfo.positive.nevents = results[0]
-                        histofreqinfo.negative.nevents = results[1]
+                        histofreqinfo.positive.nevents = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        histofreqinfo.negative.nevents = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
 
                 elif statisticsTag.Nlines == 1:
                     results = self.ExtractStatisticsFloat(words, numline, filename)
                     if histoTag.activated:
-                        histoinfo.positive.sumwentries = results[0]
-                        histoinfo.negative.sumwentries = results[1]
+                        histoinfo.positive.sumwentries = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        histoinfo.negative.sumwentries = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
+                        multiweight_histo.weights_to_bin(
+                            "sumw_over_entries", (results[0], results[1])
+                        )
                     elif histoLogXTag.activated:
-                        histologxinfo.positive.sumwentries = results[0]
-                        histologxinfo.negative.sumwentries = results[1]
+                        histologxinfo.positive.sumwentries = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        histologxinfo.negative.sumwentries = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
                     elif histoFreqTag.activated:
-                        histofreqinfo.positive.sumwentries = results[0]
-                        histofreqinfo.negative.sumwentries = results[1]
+                        histofreqinfo.positive.sumwentries = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        histofreqinfo.negative.sumwentries = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
 
                 elif statisticsTag.Nlines == 2:
                     results = self.ExtractStatisticsInt(words, numline, filename)
                     if histoTag.activated:
-                        histoinfo.positive.nentries = results[0]
-                        histoinfo.negative.nentries = results[1]
+                        histoinfo.positive.nentries = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        histoinfo.negative.nentries = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
+                        multiweight_histo.set_nentries(
+                            results[0]
+                            if isinstance(results[0], float)
+                            else results[0][0],
+                            results[1]
+                            if isinstance(results[1], float)
+                            else results[1][0],
+                        )
                     elif histoLogXTag.activated:
-                        histologxinfo.positive.nentries = results[0]
-                        histologxinfo.negative.nentries = results[1]
+                        histologxinfo.positive.nentries = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        histologxinfo.negative.nentries = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
                     elif histoFreqTag.activated:
-                        histofreqinfo.positive.nentries = results[0]
-                        histofreqinfo.negative.nentries = results[1]
+                        histofreqinfo.positive.nentries = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        histofreqinfo.negative.nentries = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
 
                 elif statisticsTag.Nlines == 3:
                     results = self.ExtractStatisticsFloat(words, numline, filename)
                     if histoTag.activated:
-                        histoinfo.positive.sumw = results[0]
-                        histoinfo.negative.sumw = results[1]
+                        histoinfo.positive.sumw = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        histoinfo.negative.sumw = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
+                        multiweight_histo.weights_to_bin(
+                            "sumw_over_events", (results[0], results[1])
+                        )
                     elif histoLogXTag.activated:
-                        histologxinfo.positive.sumw = results[0]
-                        histologxinfo.negative.sumw = results[1]
+                        histologxinfo.positive.sumw = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        histologxinfo.negative.sumw = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
                     elif histoFreqTag.activated:
-                        histofreqinfo.positive.sumw = results[0]
-                        histofreqinfo.negative.sumw = results[1]
+                        histofreqinfo.positive.sumw = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        histofreqinfo.negative.sumw = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
 
                 elif statisticsTag.Nlines == 4 and not histoFreqTag.activated:
                     results = self.ExtractStatisticsFloat(words, numline, filename)
                     if histoTag.activated:
-                        histoinfo.positive.sumw2 = results[0]
-                        histoinfo.negative.sumw2 = results[1]
+                        histoinfo.positive.sumw2 = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        histoinfo.negative.sumw2 = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
+                        multiweight_histo.weights_to_bin(
+                            "sumw2", (results[0], results[1])
+                        )
                     elif histoLogXTag.activated:
-                        histologxinfo.positive.sumw2 = results[0]
-                        histologxinfo.negative.sumw2 = results[1]
+                        histologxinfo.positive.sumw2 = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        histologxinfo.negative.sumw2 = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
 
                 elif statisticsTag.Nlines == 5 and not histoFreqTag.activated:
                     results = self.ExtractStatisticsFloat(words, numline, filename)
                     if histoTag.activated:
-                        histoinfo.positive.sumwx = results[0]
-                        histoinfo.negative.sumwx = results[1]
+                        histoinfo.positive.sumwx = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        histoinfo.negative.sumwx = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
+                        multiweight_histo.weights_to_bin(
+                            "sum_value_weights", (results[0], results[1])
+                        )
                     elif histoLogXTag.activated:
-                        histologxinfo.positive.sumwx = results[0]
-                        histologxinfo.negative.sumwx = results[1]
+                        histologxinfo.positive.sumwx = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        histologxinfo.negative.sumwx = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
 
                 elif statisticsTag.Nlines == 6 and not histoFreqTag.activated:
                     results = self.ExtractStatisticsFloat(words, numline, filename)
                     if histoTag.activated:
-                        histoinfo.positive.sumw2x = results[0]
-                        histoinfo.negative.sumw2x = results[1]
+                        histoinfo.positive.sumw2x = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        histoinfo.negative.sumw2x = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
+                        multiweight_histo.weights_to_bin(
+                            "sum_value2_weights", (results[0], results[1])
+                        )
                     elif histoLogXTag.activated:
-                        histologxinfo.positive.sumw2x = results[0]
-                        histologxinfo.negative.sumw2x = results[1]
+                        histologxinfo.positive.sumw2x = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        histologxinfo.negative.sumw2x = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
 
                 else:
                     logging.getLogger("MA5").warning("Extra line is found: " + line)
@@ -637,22 +751,57 @@ class JobReader:
                 results = self.ExtractStatisticsFloat(words, numline, filename)
                 if dataTag.Nlines == 0:
                     if histoTag.activated:
-                        histoinfo.positive.underflow = results[0]
-                        histoinfo.negative.underflow = results[1]
+                        histoinfo.positive.underflow = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        histoinfo.negative.underflow = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
+                        multiweight_histo.weights_to_bin(
+                            "underflow", (results[0], results[1])
+                        )
                     elif histoLogXTag.activated:
-                        histologxinfo.positive.underflow = results[0]
-                        histologxinfo.negative.underflow = results[1]
+                        histologxinfo.positive.underflow = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        histologxinfo.negative.underflow = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
                 elif dataTag.Nlines == (histoinfo.nbins + 1):
                     if histoTag.activated:
-                        histoinfo.positive.overflow = results[0]
-                        histoinfo.negative.overflow = results[1]
+                        histoinfo.positive.overflow = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        histoinfo.negative.overflow = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
+                        multiweight_histo.weights_to_bin(
+                            "overflow", (results[0], results[1])
+                        )
                     elif histoLogXTag.activated:
-                        histologxinfo.positive.overflow = results[0]
-                        histologxinfo.negative.overflow = results[1]
+                        histologxinfo.positive.overflow = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        histologxinfo.negative.overflow = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
                 elif dataTag.Nlines >= 1 and dataTag.Nlines <= histoinfo.nbins:
                     if histoTag.activated or histoLogXTag.activated:
-                        data_positive.append(results[0])
-                        data_negative.append(results[1])
+                        # print(
+                        #     "here:",
+                        #     histoinfo.name,
+                        #     results[0]
+                        #     if isinstance(results[0], float)
+                        #     else results[0][0],
+                        # )
+                        data_positive.append(
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        data_negative.append(
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
+                        multiweight_histo.append_positive_weights(results[0])
+                        multiweight_histo.append_negative_weights(results[1])
                 else:
                     logging.getLogger("MA5").warning("Extra line is found: " + line)
                 dataTag.newline()
@@ -717,12 +866,13 @@ class JobReader:
             # Loop over the lines
             numline = 0
             for line in file:
-
                 # Incrementing line counter
                 numline += 1
 
                 # Removing comments
-                is_comment_line = (len(line.split('#'))==2 and line.split('#')[-1]=='\n')
+                is_comment_line = (
+                    len(line.split("#")) == 2 and line.split("#")[-1] == "\n"
+                )
                 index = line.find("#")
                 if index != -1:
                     line = line[:index]
@@ -758,16 +908,27 @@ class JobReader:
 
                 elif initialTag.activated and not is_comment_line and len(words) >= 2:
                     results = self.ExtractCutLine(words, numline, myfile)
-                    print(numline, results)
                     if initialTag.Nlines == 0:
-                        cut.initial.nentries_pos = results[0]
-                        cut.initial.nentries_neg = results[1]
+                        cut.initial.nentries_pos = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        cut.initial.nentries_neg = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
                     elif initialTag.Nlines == 1:
-                        cut.initial.sumw_pos = results[0]
-                        cut.initial.sumw_neg = results[1]
+                        cut.initial.sumw_pos = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        cut.initial.sumw_neg = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
                     elif initialTag.Nlines == 2:
-                        cut.initial.sumw2_pos = results[0]
-                        cut.initial.sumw2_neg = results[1]
+                        cut.initial.sumw2_pos = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        cut.initial.sumw2_neg = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
                     else:
                         logging.getLogger("MA5").warning("Extra line is found: " + line)
                     initialTag.newline()
@@ -783,14 +944,26 @@ class JobReader:
                 elif cutTag.activated and len(words) >= 2:
                     results = self.ExtractCutLine(words, numline, myfile)
                     if cutTag.Nlines == 1:
-                        cutinfo.nentries_pos = results[0]
-                        cutinfo.nentries_neg = results[1]
+                        cutinfo.nentries_pos = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        cutinfo.nentries_neg = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
                     elif cutTag.Nlines == 2:
-                        cutinfo.sumw_pos = results[0]
-                        cutinfo.sumw_neg = results[1]
+                        cutinfo.sumw_pos = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        cutinfo.sumw_neg = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
                     elif cutTag.Nlines == 3:
-                        cutinfo.sumw2_pos = results[0]
-                        cutinfo.sumw2_neg = results[1]
+                        cutinfo.sumw2_pos = (
+                            results[0] if isinstance(results[0], float) else results[0][0]
+                        )
+                        cutinfo.sumw2_neg = (
+                            results[1] if isinstance(results[1], float) else results[1][0]
+                        )
                     else:
                         logging.getLogger("MA5").warning("Extra line is found: " + line)
                     cutTag.newline()
