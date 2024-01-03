@@ -23,21 +23,21 @@
 
 
 from __future__ import absolute_import
-from madanalysis.enumeration.uncertainty_type import UncertaintyType
-from madanalysis.enumeration.normalize_type import NormalizeType
-from madanalysis.enumeration.report_format_type import ReportFormatType
-from madanalysis.enumeration.observable_type import ObservableType
-from madanalysis.enumeration.color_type import ColorType
-from madanalysis.enumeration.linestyle_type import LineStyleType
-from madanalysis.enumeration.backstyle_type import BackStyleType
-from madanalysis.enumeration.stacking_method_type import StackingMethodType
-import copy
+
+import copy, os
+
 from six.moves import range
+
+from madanalysis.enumeration.normalize_type import NormalizeType
+from madanalysis.enumeration.stacking_method_type import StackingMethodType
+
+# pylint: disable=C0200,C0103
 
 
 class PlotFlowForDataset:
     def __init__(self, main, dataset):
         self.histos = []
+        self.multiweight_histos = []
         self.main = main
         self.dataset = dataset
 
@@ -89,6 +89,11 @@ class PlotFlowForDataset:
 
         iplot = 0
 
+        with open(
+            os.path.join(self.main.archi_info.ma5dir, "madanalysis/input/LHAPDF.txt"), "r"
+        ) as f:
+            pdf_list = [int(line.split(",")[0]) for line in f.readlines()[1:]]
+
         # Loop over plot
         for iabshisto in range(0, len(self.main.selection)):
 
@@ -98,6 +103,13 @@ class PlotFlowForDataset:
 
             # Reset scale
             scale = 0.0
+            multiweight_scale = 0.0
+            if self.multiweight_histos[iplot]:
+                self.multiweight_histos[iplot].set_central_weight_loc(
+                    scale_choice=self.dataset.dynamic_scale_choice,
+                    n_point_scale_variation=self.dataset.n_point_scale_variation,
+                    central_pdfs=pdf_list,
+                )
 
             # Case 1: Normalization to ONE
             if self.main.selection[
@@ -110,14 +122,20 @@ class PlotFlowForDataset:
                     self.histos[iplot].positive.integral
                     - self.histos[iplot].negative.integral
                 )
+                multiweight_integral = 0
+                if self.multiweight_histos[iplot]:
+                    multiweight_integral = self.multiweight_histos[iplot].integral
                 if integral > 0.0:
                     scale = 1.0 / integral
                 else:
                     scale = 0.0
+                if multiweight_integral > 0.0:
+                    multiweight_scale = 1.0 / multiweight_integral
 
             # Case 2: No normalization
             elif self.main.normalize == NormalizeType.NONE:
                 scale = 1.0
+                multiweight_scale = 1.0
 
             # Case 3 and 4 : Normalization formula depends on LUMI
             #                or depends on WEIGHT+LUMI
@@ -128,15 +146,21 @@ class PlotFlowForDataset:
                     self.histos[iplot].positive.integral
                     - self.histos[iplot].negative.integral
                 )
+                multiweight_integral, multiweight_eff = 0, 0
+                if len(self.multiweight_histos) != 0:
+                    multiweight_integral = self.multiweight_histos[iplot].integral
 
                 # compute efficiency : Nevent / Ntotal
                 if self.dataset.measured_global.nevents == 0:
                     eff = 0
                 else:
+                    nevt = float(self.dataset.measured_global.nevents)
                     eff = (
                         self.histos[iplot].positive.nevents
                         + self.histos[iplot].negative.nevents
-                    ) / float(self.dataset.measured_global.nevents)
+                    ) / nevt
+                    if self.multiweight_histos[iplot]:
+                        multiweight_eff = self.multiweight_histos[iplot].nevents / nevt
 
                 # compute the good xsection value
                 thexsection = self.xsection
@@ -166,8 +190,31 @@ class PlotFlowForDataset:
                 else:
                     scale = 1  # no scale for empty plot
 
+                if self.multiweight_histos[iplot]:
+                    entries_per_events = 0
+                    sumw = self.multiweight_histos[iplot].central_sumw_over_events
+                    Nentries = self.multiweight_histos[iplot].central_sumw_over_entries
+                    if Nentries != 0:
+                        entries_per_events = sumw / Nentries
+                    # compute the scale
+                    if multiweight_integral != 0:
+                        multiweight_scale = (
+                            thexsection
+                            * self.main.lumi
+                            * 1000
+                            * multiweight_eff
+                            * entries_per_events
+                            / multiweight_integral
+                        )
+                    else:
+                        multiweight_scale = 1  # no scale for empty plot
+                        print("here no scale", multiweight_integral)
+
             # Setting the computing scale
             self.histos[iplot].scale = copy.copy(scale)
+            if len(self.multiweight_histos) != 0:
+                self.multiweight_histos[iplot].scale = copy.copy(multiweight_scale)
+                print("scale", self.multiweight_histos[iplot].scale)
 
             # Incrementing counter
             iplot += 1

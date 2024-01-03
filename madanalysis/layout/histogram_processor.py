@@ -21,13 +21,15 @@
 #
 ################################################################################
 
-from typing import List, Union, Text, Dict
 import json
 from dataclasses import dataclass
-from .histogram import Histogram
-from madanalysis.configuration.weight_configuration import WeightCollection
+from typing import Dict, List, Text, Union
 
 import numpy as np
+
+from madanalysis.configuration.weight_configuration import WeightCollection
+
+from .histogram import Histogram
 
 
 @dataclass
@@ -96,7 +98,9 @@ class HistogramProcessor:
             scale of the histogram
         """
         # find nominal weight location
-        idx = self.weight_collection.nominal(scale_choice=scale_choice, central_pdfs=central_pdfs).loc
+        idx = self.weight_collection.nominal(
+            scale_choice=scale_choice, central_pdfs=central_pdfs
+        ).loc
 
         if self.integral[idx] == 0:
             return 0.0
