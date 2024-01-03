@@ -22,8 +22,9 @@
 ################################################################################
 
 
-from typing import Text, List, Dict, Any, Tuple
 from dataclasses import dataclass, field
+from typing import Any, Dict, List, Text, Tuple
+
 import numpy as np
 
 
@@ -48,15 +49,15 @@ class Weight:
         # PYTHIA NOMINAL WEIGHT
         # -> note: to ignore, we need to use the MG5  nominal weight
         if self.name is "Weight":
-             return
+            return
 
         for sector in sectors:
             if "AUX" in sector:
                 self._aux = int(sectors[1])
                 break
             elif any([x in sector for x in ["scomp", "smax", "smin"]]):
-                 self._aux = float(sector.split("=")[1])
-                 break
+                self._aux = float(sector.split("=")[1])
+                break
             if "MERGING" in sector:
                 self._merging = float(sector.split("=")[1])
             elif "DYNSCALE" in sector:
@@ -68,7 +69,7 @@ class Weight:
             elif "PDF" in sector:
                 self._pdf = int(sector.split("=")[1])
             elif "ALPSFACT" in sector:
-                self._alphas= float(sector.split("=")[1])
+                self._alphas = float(sector.split("=")[1])
 
     def __repr__(self) -> Text:
         return (
@@ -174,7 +175,7 @@ class WeightCollection:
         for w in self:
             if any([not x is None for x in [w.aux, w.alphas]]):
                 continue
-            if w.muf!=1.0 or w.mur!=1.0 or w.dynamic_scale!=scale_choice:
+            if w.muf != 1.0 or w.mur != 1.0 or w.dynamic_scale != scale_choice:
                 continue
             if not w.pdfset in central_pdfs:
                 continue
@@ -294,7 +295,10 @@ class WeightCollection:
             [
                 w
                 for w in self
-                if w.dynamic_scale == dynamic and w.muf == muf and w.mur == mur and w.alphas is None
+                if w.dynamic_scale == dynamic
+                and w.muf == muf
+                and w.mur == mur
+                and w.alphas is None
             ]
         )
 
