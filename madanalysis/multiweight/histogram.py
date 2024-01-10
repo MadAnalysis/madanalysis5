@@ -1,13 +1,14 @@
 """This file includes classes for multiweight histograms"""
 
+import copy
+import warnings
+from collections import namedtuple
 from dataclasses import dataclass
 from typing import Callable, List, Text, Tuple, Union
-from collections import namedtuple
-import copy
-import numpy as np
-from madanalysis.configuration.weight_configuration import WeightCollection
-from madanalysis.enumeration.stacking_method_type import StackingMethodType
 
+import numpy as np
+
+from madanalysis.configuration.weight_configuration import WeightCollection
 
 _nevt = namedtuple("events", ["positive", "negative"])
 
@@ -79,33 +80,6 @@ class Description:
         step = (self.xmax - self.xmin) / float(self.nbins)
         # value
         return self.xmin + (bn + 0.5) * step
-
-
-@dataclass
-class WeightNames:
-    """
-    Representation of weight names
-
-    Args:
-        names (`List[Text]`): name of the weights
-    """
-
-    names: List[Text]
-
-    def __getitem__(self, idx: int) -> Text:
-        return self.names[idx]
-
-    def __len__(self) -> int:
-        return len(self.names)
-
-    def __iter__(self) -> Text:
-        yield from self.names
-
-    def __eq__(self, other) -> bool:
-        if not isinstance(other, WeightNames):
-            return False
-
-        return all(i == j for i, j in zip(self, other))
 
 
 class MultiWeightBin:
@@ -456,6 +430,11 @@ class MultiWeightHisto:
         ]
 
     @property
+    def has_scale_unc(self) -> bool:
+        """Does the histogram has scale unc"""
+        return self.weight_collection.has_scale
+
+    @property
     def scale_uncertainties(self) -> Tuple[np.ndarray, np.ndarray]:
         """
         Retreive scale uncertainties
@@ -464,6 +443,7 @@ class MultiWeightHisto:
             ``Tuple[np.ndarray, np.ndarray]``:
             lower and upper uncertainties per bin
         """
+        central_weights = self.weights * self.scale
         bins = self.all_scaled_weights
 
         if not self.weight_collection.has_scale:
@@ -483,4 +463,90 @@ class MultiWeightHisto:
             current_weights = [current_bin[wloc] for wloc in weight_loc]
             upper.append(max(current_weights))
             lower.append(min(current_weights))
-        return np.array(lower), np.array(upper)
+        return (
+            np.clip(central_weights - np.array(lower), 0.0, None),
+            np.clip(np.array(upper) - central_weights, 0.0, None),
+        )
+
+    @property
+    def has_pdf_unc(self) -> bool:
+        """Does the histogram has PDFs"""
+        return len(self.weight_collection.pdfsets) > 1
+
+    @property
+    def pdf_uncertainties(self) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Retreive PDF uncertainties
+
+        Returns:
+            ``Tuple[np.ndarray, np.ndarray]``:
+            lower and upper uncertainties per bin
+        """
+        if not self.has_pdf_unc:
+            return [self.weights * self.scale] * 2
+
+        method = "replicas"  # "eigenvector"
+
+        bins = self.all_scaled_weights
+
+        pdfids = self.weight_collection.pdfsets
+        pdfids.pop(pdfids.index(self.nominal_weight.pdfset))
+
+        pdf_sets = WeightCollection([self.nominal_weight])
+
+        new_bins = []
+
+        # Replicas
+        if method == "replicas":
+            # 2202.13416 eq 3.2
+            pdf_sets += self.weight_collection.pdfset(pdfids)
+            pdf_locs = pdf_sets.loc
+            mean_bin_value = np.array(
+                [np.mean([bn[loc] for loc in pdf_locs]) for bn in bins]
+            )
+
+            for bn, mean_val in zip(bins, mean_bin_value):
+                new_bins.append(
+                    np.sqrt(
+                        sum((bn[loc] - mean_val) ** 2 for loc in pdf_locs)
+                        / (len(pdf_locs) - 1)
+                    )
+                )
+            return new_bins, new_bins
+
+        # Eigenvectors
+        # ! Unclear 2202.13416 eq 3.1
+        # pdf_locs = pdf_sets.loc
+        # for bn, mean_val in zip(bins, self.weights * self.scale):
+
+        #     # upper limit
+        #     [max([bn[loc] - mean_val,  ] for loc in pdf_locs]
+
+    @property
+    def uncertainties(self) -> Tuple[np.ndarray, np.ndarray]:
+        """Retreive uncertainties per bin"""
+        nominal = self.weights * self.scale
+
+        scale_lower, scale_upper = np.zeros(self.description.nbins), np.zeros(
+            self.description.nbins
+        )
+        if self.has_scale_unc:
+            scale_lower, scale_upper = self.scale_uncertainties
+            with warnings.catch_warnings(record=False):
+                scale_lower = np.where(nominal > 0.0, scale_lower / nominal, 0.0)
+                scale_upper = np.where(nominal > 0.0, scale_upper / nominal, 0.0)
+
+        pdf_lower, pdf_upper = np.zeros(self.description.nbins), np.zeros(
+            self.description.nbins
+        )
+        if self.has_pdf_unc:
+            pdf_lower, pdf_upper = self.pdf_uncertainties
+            with warnings.catch_warnings(record=False):
+                pdf_lower = np.where(nominal > 0.0, pdf_lower / nominal, 0.0)
+                pdf_upper = np.where(nominal > 0.0, pdf_upper / nominal, 0.0)
+
+        # add in quadrature
+        return (
+            np.sqrt(scale_lower**2 + pdf_lower**2) * nominal,
+            np.sqrt(scale_lower**2 + pdf_lower**2) * nominal,
+        )
