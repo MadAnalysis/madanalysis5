@@ -1265,43 +1265,33 @@ class PlotFlow:
                 + "])\n\n"
             )
 
-            # extract scale uncertainties
-            lower_unc, upper_unc = histos[ind].scale_uncertainties
+            # extract uncertainties
+            lower_unc, upper_unc = histos[ind].uncertainties
 
             # Write upper limits
-            scale_upper_name = "y_UPPER_" + histos[ind].name + "_" + str(ind) + "_weights"
+            upper_unc_name = "y_UPPER_" + histos[ind].name + "_" + str(ind) + "_weights"
             outputPy.write(
                 "    # Delta Upper limits for the scale uncertainty: " + histoname + "\n"
             )
             outputPy.write(
                 "    "
-                + scale_upper_name
+                + upper_unc_name
                 + " = np.array(["
-                + ", ".join(
-                    [
-                        f"{u-c:.5e}" if c != 0.0 else "0.0"
-                        for u, c in zip(upper_unc, current_weights)
-                    ]
-                )
+                + ", ".join([f"{u:.5e}" if u != 0.0 else "0.0" for u in upper_unc])
                 + "])\n\n"
             )
 
             # Writing lower limits
             outputPy.write(
-                "    # Delta Lower limits for the scale uncertainty: " + histoname + "\n"
+                "    # Delta Lower limits for the uncertainties: " + histoname + "\n"
             )
-            scale_lower_name = "y_LOWER_" + histos[ind].name + "_" + str(ind) + "_weights"
+            lower_unc_name = "y_LOWER_" + histos[ind].name + "_" + str(ind) + "_weights"
             outputPy.write("    # Creating weights for histo: " + histoname + "\n")
             outputPy.write(
                 "    "
-                + scale_lower_name
+                + lower_unc_name
                 + " = np.array(["
-                + ", ".join(
-                    [
-                        f"{c-l:.5e}" if c != 0.0 else "0.0"
-                        for l, c in zip(lower_unc, current_weights)
-                    ]
-                )
+                + ", ".join([f"{l:.5e}" if l != 0.0 else "0.0" for l in lower_unc])
                 + "])\n\n"
             )
 
@@ -1477,7 +1467,7 @@ class PlotFlow:
             outputPy.write(
                 "    pad.errorbar(\n"
                 f"        xData, {myweights},\n"
-                f"        yerr=[{scale_lower_name}, {scale_upper_name}],\n"
+                f"        yerr=[{lower_unc_name}, {upper_unc_name}],\n"
                 "        fmt='.', elinewidth=1, capsize=3,\n"
                 "    )\n\n"
             )
@@ -1614,7 +1604,9 @@ class PlotFlow:
                 )
             myweights += "])"
         if ref.ymax == []:
-            outputPy.write("    ymax=(" + myweights + ").max()*1.1\n")
+            outputPy.write(
+                "    ymax=(" + myweights + "+" + upper_unc_name + ").max()*1.1\n"
+            )
         else:
             outputPy.write("    ymax=" + str(ref.ymax) + "\n")
         outputPy.write("    ")
