@@ -26,6 +26,7 @@ from __future__ import absolute_import
 
 import logging
 
+import numpy as np
 import six
 from six.moves import range
 
@@ -957,7 +958,7 @@ class PlotFlow:
                     + "             bottom=None, "
                     + 'cumulative=False, normed=False, align="mid", orientation="vertical")\n\n'
                 )
-            except:
+            except Exception:
                 outputPy.write(
                     "rwidth="
                     + str(rWidth)
@@ -1199,8 +1200,9 @@ class PlotFlow:
         # Open the file in write-mode
         try:
             outputPy = open(filenamePy, "w")
-        except:
+        except Exception as err:
             logging.getLogger("MA5").error("Impossible to write the file: " + filenamePy)
+            logging.getLogger("MA5").debug(err)
             return False
 
         # File header
@@ -1237,12 +1239,13 @@ class PlotFlow:
 
         # Data
         outputPy.write("    # Creating data sequence: middle of each bin\n")
-        outputPy.write("    xData = np.array([")
-        for bn in range(0, xnbin):
-            if bn != 0:
-                outputPy.write(",")
-            outputPy.write(str(histos[0].description.GetBinMean(bn)))
-        outputPy.write("])\n\n")
+        outputPy.write(
+            "    xData = np.array(["
+            + ", ".join(
+                [f"{histos[0].description.GetBinMean(x):.5e}" for x in range(0, xnbin)]
+            )
+            + "])\n\n"
+        )
 
         # Loop over datasets and histos
         ntot = 0
@@ -1251,40 +1254,56 @@ class PlotFlow:
                 continue
 
             # Creating a new histo
-            histoname = "y_MULTIWEIGHT_" + histos[ind].name + "_" + str(ind)
+            histoname = "y_nominal_" + histos[ind].name + "_" + str(ind)
             outputPy.write("    # Creating weights for histo: " + histoname + "\n")
-            outputPy.write("    " + histoname + "_weights = np.array([")
-            print("weights", histos[ind].weights)
-            print("scale", histos[ind].scale)
             current_weights = histos[ind].weights * histos[ind].scale
-            for bn in range(1, xnbin + 1):
-                ntot += current_weights[bn - 1]
-                if bn != 1:
-                    outputPy.write(",")
-                outputPy.write(str(current_weights[bn - 1]))
-            outputPy.write("])\n\n")
+            outputPy.write(
+                "    "
+                + histoname
+                + "_weights = np.array(["
+                + ", ".join([f"{c:.5e}" if c != 0.0 else "0.0" for c in current_weights])
+                + "])\n\n"
+            )
 
-            # Creating a new histo
+            # extract scale uncertainties
             lower_unc, upper_unc = histos[ind].scale_uncertainties
-            histoname = "y_UPPER_" + histos[ind].name + "_" + str(ind)
+
+            # Write upper limits
+            scale_upper_name = "y_UPPER_" + histos[ind].name + "_" + str(ind) + "_weights"
+            outputPy.write(
+                "    # Delta Upper limits for the scale uncertainty: " + histoname + "\n"
+            )
+            outputPy.write(
+                "    "
+                + scale_upper_name
+                + " = np.array(["
+                + ", ".join(
+                    [
+                        f"{u-c:.5e}" if c != 0.0 else "0.0"
+                        for u, c in zip(upper_unc, current_weights)
+                    ]
+                )
+                + "])\n\n"
+            )
+
+            # Writing lower limits
+            outputPy.write(
+                "    # Delta Lower limits for the scale uncertainty: " + histoname + "\n"
+            )
+            scale_lower_name = "y_LOWER_" + histos[ind].name + "_" + str(ind) + "_weights"
             outputPy.write("    # Creating weights for histo: " + histoname + "\n")
-            outputPy.write("    " + histoname + "_weights = np.array([")
-            for bn in range(1, xnbin + 1):
-                ntot += current_weights[bn - 1]
-                if bn != 1:
-                    outputPy.write(",")
-                outputPy.write(str(upper_unc[bn - 1]))
-            outputPy.write("])\n\n")
-            histoname = "y_LOWER_" + histos[ind].name + "_" + str(ind)
-            outputPy.write("    " + "# " + f"scale = {histos[ind].scale}\n")
-            outputPy.write("    # Creating weights for histo: " + histoname + "\n")
-            outputPy.write("    " + histoname + "_weights = np.array([")
-            for bn in range(1, xnbin + 1):
-                ntot += current_weights[bn - 1]
-                if bn != 1:
-                    outputPy.write(",")
-                outputPy.write(str(lower_unc[bn - 1]))
-            outputPy.write("])\n\n")
+            outputPy.write(
+                "    "
+                + scale_lower_name
+                + " = np.array(["
+                + ", ".join(
+                    [
+                        f"{c-l:.5e}" if c != 0.0 else "0.0"
+                        for l, c in zip(lower_unc, current_weights)
+                    ]
+                )
+                + "])\n\n"
+            )
 
         # Canvas
         outputPy.write("    # Creating a new Canvas\n")
@@ -1312,20 +1331,14 @@ class PlotFlow:
             mytitle = mytitle.replace("_", "\_")
 
             if not stackmode:
-                myweights = (
-                    "y_MULTIWEIGHT_" + histos[ind].name + "_" + str(ind) + "_weights"
-                )
+                myweights = "y_nominal_" + histos[ind].name + "_" + str(ind) + "_weights"
             else:
                 myweights = ""
                 for ind2 in range(0, ind + 1):
                     if ind2 >= 1:
                         myweights += "+"
                     myweights += (
-                        "y_MULTIWEIGHT_"
-                        + histos[ind2].name
-                        + "_"
-                        + str(ind2)
-                        + "_weights"
+                        "y_nominal_" + histos[ind2].name + "_" + str(ind2) + "_weights"
                     )
 
             # reset
@@ -1456,12 +1469,17 @@ class PlotFlow:
             if backcolor == 0:  # invisible
                 filledmode = '"step"'
                 mybackcolor = "None"
-            #            if frequencyhisto:
-            #                filledmode='"bar"'
-            #                rWidth=0.8
             mylinewidth = self.main.datasets[ind].linewidth
             mylinestyle = LineStyleType.convert2matplotlib(
                 self.main.datasets[ind].linestyle
+            )
+
+            outputPy.write(
+                "    pad.errorbar(\n"
+                f"        xData, {myweights},\n"
+                f"        yerr=[{scale_lower_name}, {scale_upper_name}],\n"
+                "        fmt='.', elinewidth=1, capsize=3,\n"
+                "    )\n\n"
             )
 
             outputPy.write(
@@ -1500,7 +1518,8 @@ class PlotFlow:
                     + "             bottom=None, "
                     + 'cumulative=False, normed=False, align="mid", orientation="vertical")\n\n'
                 )
-            except Exception:
+            except Exception as err:
+                logging.getLogger("MA5").debug(err)
                 outputPy.write(
                     "rwidth="
                     + str(rWidth)
@@ -1584,20 +1603,14 @@ class PlotFlow:
             for ind in range(0, len(histos)):
                 if ind >= 1:
                     myweights += "+"
-                myweights += (
-                    "y_MULTIWEIGHT_" + histos[ind].name + "_" + str(ind) + "_weights"
-                )
+                myweights += "y_nominal_" + histos[ind].name + "_" + str(ind) + "_weights"
         else:
             myweights = "numpy.array(["
             for ind in range(0, len(histos)):
                 if ind >= 1:
                     myweights += ","
                 myweights += (
-                    "y_MULTIWEIGHT_"
-                    + histos[ind].name
-                    + "_"
-                    + str(ind)
-                    + "_weights.max()"
+                    "y_nominal_" + histos[ind].name + "_" + str(ind) + "_weights.max()"
                 )
             myweights += "])"
         if ref.ymax == []:
@@ -1619,20 +1632,14 @@ class PlotFlow:
             for ind in range(0, len(histos)):
                 if ind >= 1:
                     myweights += "+"
-                myweights += (
-                    "y_MULTIWEIGHT_" + histos[ind].name + "_" + str(ind) + "_weights"
-                )
+                myweights += "y_nominal_" + histos[ind].name + "_" + str(ind) + "_weights"
         else:
             myweights = "numpy.array(["
             for ind in range(0, len(histos)):
                 if ind >= 1:
                     myweights += ","
                 myweights += (
-                    "y_MULTIWEIGHT_"
-                    + histos[ind].name
-                    + "_"
-                    + str(ind)
-                    + "_weights.min()"
+                    "y_nominal_" + histos[ind].name + "_" + str(ind) + "_weights.min()"
                 )
             myweights += ",1.])"
         outputPy.write("    ")
@@ -1710,7 +1717,7 @@ class PlotFlow:
         outputPy.write("    # Saving the image\n")
         for outputname in outputnames:
             outputPy.write("    plt.savefig('" + outputname + "')\n")
-        outputPy.write("\n")
+        outputPy.write("    plt.close('all')\n")
 
         # Call the function
         outputPy.write("# Running!\n")
