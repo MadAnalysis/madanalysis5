@@ -467,8 +467,8 @@ class JobReader:
                     histoinfo.Reset()
                     if multiweight_histo.is_consistent:
                         plot.multiweight_histos.append(copy.deepcopy(multiweight_histo))
-                        print(multiweight_histo)
-                        print(multiweight_histo.shape)
+                        logging.getLogger("MA5").debug(multiweight_histo)
+                        logging.getLogger("MA5").debug(multiweight_histo.shape)
                     else:
                         plot.multiweight_histos.append(False)
                     multiweight_histo = MultiWeightHisto(
