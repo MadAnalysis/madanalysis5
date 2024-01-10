@@ -173,9 +173,9 @@ class MultiWeightBin:
     def __add__(self, other):
         if isinstance(other, MultiWeightBin):
             assert len(other) == len(self), "Dimensionality does not match"
-            return MultiWeightBin(other.weights + self.weights)
+            return MultiWeightBin(other.weights + copy.deepcopy(self.weights))
         elif isinstance(other, (int, float)):
-            return MultiWeightBin(other + self.weights)
+            return MultiWeightBin(other + copy.deepcopy(self.weights))
 
         raise ValueError("Unknown operation")
 
@@ -194,18 +194,21 @@ class MultiWeightBin:
         return self
 
     def __neg__(self):
-        return MultiWeightBin(-1.0 * self.weights)
+        return MultiWeightBin(-1.0 * copy.deepcopy(self.weights))
 
     def __mul__(self, other):
         if isinstance(other, MultiWeightBin):
             assert len(other) == len(self), "Dimensionality does not match"
-            return MultiWeightBin(other.weights * self.weights)
+            return MultiWeightBin(other.weights * copy.deepcopy(self.weights))
         elif isinstance(other, (int, float)):
-            return MultiWeightBin(other * self.weights)
+            return MultiWeightBin(other * copy.deepcopy(self.weights))
 
         raise ValueError("Unknown operation")
 
     __rmul__ = __mul__
+
+    def __abs__(self):
+        return MultiWeightBin(np.abs(self.weights))
 
 
 class MultiWeightHisto:
@@ -224,6 +227,7 @@ class MultiWeightHisto:
         # Scale of the histogram
         self.central_idx = 0
         # Central weight location
+        self.nominal_weight = None
         self.dynamic_scale_choice = None
         self.n_point_scale_variation = None
 
@@ -270,7 +274,8 @@ class MultiWeightHisto:
     def set_central_weight_loc(
         self, scale_choice: int, n_point_scale_variation: int, central_pdfs: List[int]
     ) -> None:
-        self.central_idx = self.weight_collection.nominal(scale_choice, central_pdfs).loc
+        self.nominal_weight = self.weight_collection.nominal(scale_choice, central_pdfs)
+        self.central_idx = self.nominal_weight.loc
         self.dynamic_scale_choice = scale_choice
         self.n_point_scale_variation = n_point_scale_variation
         print("Central PDF loc:", self.central_idx)
@@ -406,23 +411,25 @@ class MultiWeightHisto:
             sum(self._positive_weights)
             + self.underflow[0]
             + self.overflow[0]
-            - (sum(self._negative_weights) + self.underflow[1] + self.overflow[1])
+            - (
+                abs(sum(self._negative_weights))
+                + abs(self.underflow[1])
+                + abs(self.overflow[1])
+            )
         )[self.central_idx]
 
     @property
     def central_sumw_over_events(self) -> float:
         """Sum of weights over events"""
-        return (
-            self.sumw_over_events[0][self.central_idx]
-            - self.sumw_over_events[1][self.central_idx]
+        return self.sumw_over_events[0][self.central_idx] - abs(
+            self.sumw_over_events[1][self.central_idx]
         )
 
     @property
     def central_sumw_over_entries(self) -> float:
         """Sum of weights over entries"""
-        return (
-            self.sumw_over_entries[0][self.central_idx]
-            - self.sumw_over_entries[1][self.central_idx]
+        return self.sumw_over_entries[0][self.central_idx] - abs(
+            self.sumw_over_entries[1][self.central_idx]
         )
 
     @property
@@ -436,53 +443,44 @@ class MultiWeightHisto:
     def weights(self) -> np.ndarray:
         return np.array(
             [
-                (pos - neg).weights[self.central_idx]
+                (pos - abs(neg))[self.central_idx]
                 for pos, neg in zip(self._positive_weights, self._negative_weights)
             ]
         )
 
     @property
-    def scale_uncertainties(self) -> Tuple[List[float], List[float]]:
+    def all_scaled_weights(self):
+        return [
+            (pos - abs(neg)) * self.scale
+            for pos, neg in zip(self._positive_weights, self._negative_weights)
+        ]
+
+    @property
+    def scale_uncertainties(self) -> Tuple[np.ndarray, np.ndarray]:
         """
         Retreive scale uncertainties
 
         Returns:
-            ``Tuple[List[float], List[float]]``:
+            ``Tuple[np.ndarray, np.ndarray]``:
             lower and upper uncertainties per bin
         """
-        bins = [
-            (pos - neg)
-            for pos, neg in zip(self._positive_weights, self._negative_weights)
-        ]
+        bins = self.all_scaled_weights
 
         if not self.weight_collection.has_scale:
             central = [b[self.central_idx] for b in bins]
             return central, central
 
-        weight_collection = self.weight_collection.get_scale_vars(
-            self.n_point_scale_variation, self.dynamic_scale_choice
+        weight_loc = (
+            self.weight_collection.get_scale_vars(
+                self.n_point_scale_variation, self.dynamic_scale_choice
+            )
+            .pdfset(self.nominal_weight.pdfset)
+            .loc
         )
-        central_scale_idx = self.n_point_scale_variation // 2
 
         upper, lower = [], []
         for current_bin in bins:
-            central = current_bin[central_scale_idx]
-            upper_unc = copy.deepcopy(central)
-            lower_unc = copy.deepcopy(central)
-            upper_diff, lower_diff = 0, 0
-            # find maximum uncertainty
-            for iw, w in enumerate(weight_collection):
-                if iw == self.n_point_scale_variation // 2:
-                    continue
-                if iw < self.n_point_scale_variation // 2:
-                    if abs(central - current_bin[w.loc]) > lower_diff:
-                        lower_diff = abs(central - current_bin[w.loc])
-                        lower_unc = current_bin[w.loc]
-                elif iw > self.n_point_scale_variation // 2:
-                    if abs(central - current_bin[w.loc]) > upper_diff:
-                        upper_diff = abs(central - current_bin[w.loc])
-                        upper_unc = current_bin[w.loc]
-
-            upper.append(upper_unc)
-            lower.append(lower_unc)
-        return lower, upper
+            current_weights = [current_bin[wloc] for wloc in weight_loc]
+            upper.append(max(current_weights))
+            lower.append(min(current_weights))
+        return np.array(lower), np.array(upper)
