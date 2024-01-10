@@ -212,9 +212,9 @@ class WeightCollection:
 
     def pdfset(self, pdfid: Union[int, List[int]]) -> List[Weight]:
         """retrieve weights corresponding to one pdf set"""
-        return WeightCollection(
-            [w for w in self if w.pdfset == pdfid or w.pdfset in pdfid]
-        )
+        if isinstance(pdfid, int):
+            return WeightCollection([w for w in self if w.pdfset == pdfid])
+        return WeightCollection([w for w in self if w.pdfset in pdfid])
 
     def get(self, **kwargs) -> List[Weight]:
         if len(kwargs) == 0:
@@ -251,6 +251,11 @@ class WeightCollection:
     def has_scale(self) -> bool:
         """is there any scale variations"""
         return (len(self.scales["mur"]) > 0) or (len(self.scales["muf"]) > 0)
+
+    @property
+    def has_pdf(self) -> bool:
+        """is there any pdf definition"""
+        return len(self.pdfsets) > 0
 
     @property
     def central_scale(self) -> float:
