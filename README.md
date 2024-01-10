@@ -240,7 +240,7 @@ The [latest release](https://github.com/MadAnalysis/madanalysis5/releases) of Ma
 - [FastJet Contrib](https://fastjet.hepforge.org/contrib/) v1.048
 - [Delphes](https://github.com/delphes/delphes) v3.5.0
 - [ROOT](https://root.cern) v6.04.08
-- [pyhf](https://github.com/scikit-hep/pyhf) v0.7.0
+- [pyhf](https://github.com/scikit-hep/pyhf) v0.7.3
 
 ### Authors
 
