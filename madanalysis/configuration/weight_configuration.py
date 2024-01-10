@@ -23,7 +23,8 @@
 
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Text, Tuple
+from typing import Any, Dict, List, Text, Tuple, Union
+import copy
 
 import numpy as np
 
@@ -41,6 +42,11 @@ class Weight:
     _pdf: int = field(init=False, default=None)
     _merging: float = field(init=False, default=None)
     _alphas: float = field(init=False, default=None)
+
+    def __eq__(self, other):
+        return all(
+            getattr(other, attr) == getattr(self, attr) for attr in ["name", "loc"]
+        )
 
     def __post_init__(self) -> None:
         self.name = self.name.replace("DYN_SCALE", "DYNSCALE")
@@ -126,8 +132,9 @@ class WeightCollection:
     """Create a weight collection"""
 
     def __init__(self, collection: List[Weight] = None):
-        self._collection = [] if collection is None else collection
+        self._collection: List[Weight] = [] if collection is None else collection
         self._names = []
+        self._nominal: Weight = None
 
     def append(self, name: Text, idx: int) -> None:
         """Add weight into the collection"""
@@ -172,15 +179,18 @@ class WeightCollection:
 
     def nominal(self, scale_choice: int, central_pdfs: np.array) -> Weight:
         """Get nominal weight"""
-        for w in self:
-            if any([not x is None for x in [w.aux, w.alphas]]):
-                continue
-            if w.muf != 1.0 or w.mur != 1.0 or w.dynamic_scale != scale_choice:
-                continue
-            if not w.pdfset in central_pdfs:
-                continue
-            return w
-        raise ValueError("Cannot find nominal weight")
+        if self._nominal is None:
+            for w in self:
+                if any([not x is None for x in [w.aux, w.alphas]]):
+                    continue
+                if w.muf != 1.0 or w.mur != 1.0 or w.dynamic_scale != scale_choice:
+                    continue
+                if not w.pdfset in central_pdfs:
+                    continue
+                # !WARNING: this will fail if there are multiple pdfsets that are used
+                # ! this search will only return the first one
+                self._nominal = w
+        return self._nominal
 
     def group_for(self, group: Text) -> Dict:
         """Create a group"""
@@ -200,9 +210,11 @@ class WeightCollection:
 
         return group_dict
 
-    def pdfset(self, pdfid: int) -> List[Weight]:
+    def pdfset(self, pdfid: Union[int, List[int]]) -> List[Weight]:
         """retrieve weights corresponding to one pdf set"""
-        return WeightCollection([w for w in self if w.pdfset == pdfid])
+        return WeightCollection(
+            [w for w in self if w.pdfset == pdfid or w.pdfset in pdfid]
+        )
 
     def get(self, **kwargs) -> List[Weight]:
         if len(kwargs) == 0:
@@ -291,16 +303,16 @@ class WeightCollection:
     ) -> List[Weight]:
         if dynamic is not None:
             dynamic = dynamic if self.has_dyn_scale(dynamic) else None
-        return WeightCollection(
-            [
-                w
-                for w in self
-                if w.dynamic_scale == dynamic
+        output = WeightCollection()
+        for w in self:
+            if (
+                w.dynamic_scale == dynamic
                 and w.muf == muf
                 and w.mur == mur
                 and w.alphas is None
-            ]
-        )
+            ):
+                output += w
+        return output
 
     def has_dyn_scale(self, scale: int) -> bool:
         """If weight collection has a particular dynamic scale"""
@@ -313,19 +325,25 @@ class WeightCollection:
     @property
     def loc(self) -> List[int]:
         """retrieve the locations of the weights"""
-        return [w.loc for w in self]
+        return np.unique([w.loc for w in self])
 
     def __iadd__(self, other):
-        assert isinstance(other, WeightCollection)
-        for items in other:
-            self._collection.append(items)
+        if isinstance(other, WeightCollection):
+            for items in other:
+                if items not in self._collection:
+                    self._collection.append(items)
+        elif isinstance(other, Weight):
+            if other not in self._collection:
+                self._collection.append(other)
         return self
 
     def __add__(self, other):
-        assert isinstance(other, WeightCollection)
-        for item in other:
-            if item not in self._collection:
-                self._collection.append(item)
-            else:
-                raise ValueError(f"{item} already exists.")
-        return self
+        current_col = copy.deepcopy(self._collection)
+        if isinstance(other, WeightCollection):
+            for item in other:
+                if item not in current_col:
+                    current_col.append(item)
+        elif isinstance(other, Weight):
+            if other not in current_col:
+                current_col.append(other)
+        return WeightCollection(current_col)
