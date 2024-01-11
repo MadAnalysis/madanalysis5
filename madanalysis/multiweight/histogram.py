@@ -494,8 +494,6 @@ class MultiWeightHisto:
 
         pdf_sets = WeightCollection([self.nominal_weight])
 
-        new_bins = []
-
         # Replicas
         if method == "replicas":
             # 2202.13416 eq 3.2
@@ -505,13 +503,15 @@ class MultiWeightHisto:
                 [np.mean([bn[loc] for loc in pdf_locs]) for bn in bins]
             )
 
-            for bn, mean_val in zip(bins, mean_bin_value):
-                new_bins.append(
+            new_bins = np.array(
+                [
                     np.sqrt(
                         sum((bn[loc] - mean_val) ** 2 for loc in pdf_locs)
                         / (len(pdf_locs) - 1)
                     )
-                )
+                    for bn, mean_val in zip(bins, mean_bin_value)
+                ]
+            )
             return new_bins, new_bins
 
         # Eigenvectors
