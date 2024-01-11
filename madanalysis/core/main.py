@@ -37,7 +37,6 @@ from madanalysis.IOinterface.library_writer             import LibraryWriter
 from madanalysis.IOinterface.madgraph_interface         import MadGraphInterface
 from madanalysis.enumeration.ma5_running_type           import MA5RunningType
 from madanalysis.enumeration.stacking_method_type       import StackingMethodType
-from madanalysis.enumeration.uncertainty_type           import UncertaintyType
 from madanalysis.enumeration.normalize_type             import NormalizeType
 from madanalysis.enumeration.graphic_render_type        import GraphicRenderType
 from madanalysis.observable.observable_manager          import ObservableManager
@@ -48,10 +47,8 @@ from madanalysis.configuration.isolation_configuration  import IsolationConfigur
 from madanalysis.configuration.merging_configuration    import MergingConfiguration
 from string_tools                                       import StringTools
 from madanalysis.system.checkup                         import CheckUp
-import logging
-import os
-import sys
-import platform
+from madanalysis.multiweight.lhapdf_info import LHAPDFInfo
+import logging, os, sys
 from six.moves import range
 import traceback as tb
 
@@ -93,6 +90,7 @@ class Main():
         self.logger         = logging.getLogger('MA5')
         self.redirectSAlogger = False
         self.random_seed    = None
+        self.lhapdf_info: LHAPDFInfo = None
 
 
     def ResetParameters(self):
@@ -449,6 +447,9 @@ class Main():
 
         if not checkup.CheckArchitecture():
             return False
+        self.lhapdf_info = LHAPDFInfo(
+            os.path.join(self.archi_info.ma5dir, "madanalysis/input/LHAPDF.txt")
+        )
         if not checkup.ReadUserOptions():
             return False
         if not checkup.CheckSessionInfo():
