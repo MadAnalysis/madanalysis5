@@ -22,9 +22,10 @@
 ################################################################################
 
 
+import copy
+import logging
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Text, Tuple, Union
-import copy
 
 import numpy as np
 
@@ -177,8 +178,9 @@ class WeightCollection:
         for dat in data:
             self.append(dat["name"], dat["loc"])
 
-    def nominal(self, scale_choice: int, central_pdfs: np.array) -> Weight:
+    def nominal(self, scale_choice: int, central_pdfs) -> Weight:
         """Get nominal weight"""
+        weight_set = []
         if self._nominal is None:
             for w in self:
                 if any([not x is None for x in [w.aux, w.alphas]]):
@@ -187,10 +189,14 @@ class WeightCollection:
                     continue
                 if not w.pdfset in central_pdfs:
                     continue
-                # !WARNING: this will fail if there are multiple pdfsets that are used
-                # ! this search will only return the first one
-                self._nominal = w
-        return self._nominal
+                weight_set.append(w)
+            if len(weight_set) > 1:
+                logging.getLogger("MA5").warning(
+                    "Variations on multi-pdf sets are not supported at the moment."
+                    f"{central_pdfs[weight_set[0].pdfset].name} will be used instead"
+                )
+
+        return weight_set[0]
 
     def group_for(self, group: Text) -> Dict:
         """Create a group"""
@@ -214,7 +220,7 @@ class WeightCollection:
         """retrieve weights corresponding to one pdf set"""
         if isinstance(pdfid, int):
             return WeightCollection([w for w in self if w.pdfset == pdfid])
-        return WeightCollection([w for w in self if w.pdfset in pdfid])
+        return WeightCollection([self.get(pdfset=pdf) for pdf in pdfid])
 
     def get(self, **kwargs) -> List[Weight]:
         if len(kwargs) == 0:
@@ -228,7 +234,7 @@ class WeightCollection:
                 if getattr(weight, key) != kwargs.get(key):
                     add = False
                     break
-            if add:
+            if add and weight not in collection:
                 collection.append(weight)
 
         return WeightCollection(collection)
@@ -330,7 +336,7 @@ class WeightCollection:
     @property
     def loc(self) -> List[int]:
         """retrieve the locations of the weights"""
-        return np.unique([w.loc for w in self])
+        return np.unique([w.loc for w in self]).tolist()
 
     def __iadd__(self, other):
         if isinstance(other, WeightCollection):
