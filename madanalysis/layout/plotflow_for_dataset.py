@@ -89,11 +89,6 @@ class PlotFlowForDataset:
 
         iplot = 0
 
-        with open(
-            os.path.join(self.main.archi_info.ma5dir, "madanalysis/input/LHAPDF.txt"), "r"
-        ) as f:
-            pdf_list = [int(line.split(",")[0]) for line in f.readlines()[1:]]
-
         # Loop over plot
         for iabshisto in range(0, len(self.main.selection)):
 
@@ -108,7 +103,7 @@ class PlotFlowForDataset:
                 self.multiweight_histos[iplot].set_central_weight_loc(
                     scale_choice=self.dataset.dynamic_scale_choice,
                     n_point_scale_variation=self.dataset.n_point_scale_variation,
-                    central_pdfs=pdf_list,
+                    central_pdfs=self.main.lhapdf_info,
                 )
 
             # Case 1: Normalization to ONE
