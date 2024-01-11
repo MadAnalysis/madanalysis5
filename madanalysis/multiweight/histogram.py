@@ -485,20 +485,20 @@ class MultiWeightHisto:
         if not self.has_pdf_unc:
             return [self.weights * self.scale] * 2
 
-        method = "replicas"  # "eigenvector"
+        method = "replicas"  # "eigenvector" #
 
         bins = self.all_scaled_weights
 
         pdfids = self.weight_collection.pdfsets
         pdfids.pop(pdfids.index(self.nominal_weight.pdfset))
 
-        pdf_sets = WeightCollection([self.nominal_weight])
-
         # Replicas
         if method == "replicas":
             # 2202.13416 eq 3.2
-            pdf_sets += self.weight_collection.pdfset(pdfids)
-            pdf_locs = pdf_sets.loc
+            pdf_locs = (
+                WeightCollection([self.nominal_weight])
+                + self.weight_collection.pdfset(pdfids)
+            ).loc
             mean_bin_value = np.array(
                 [np.mean([bn[loc] for loc in pdf_locs]) for bn in bins]
             )
@@ -515,12 +515,39 @@ class MultiWeightHisto:
             return new_bins, new_bins
 
         # Eigenvectors
-        # ! Unclear 2202.13416 eq 3.1
-        # pdf_locs = pdf_sets.loc
-        # for bn, mean_val in zip(bins, self.weights * self.scale):
+        # 2202.13416 eq 3.1
+        pdf_locs = self.weight_collection.pdfset(pdfids).loc
+        upper, lower = [], []
+        for bn, mean_val in zip(bins, self.weights * self.scale):
+            current_upper_bin, current_lower_bin = [], []
+            for idx in range(0, len(pdf_locs), 2):
+                # upper limit
+                current_upper_bin.append(
+                    np.square(
+                        max(
+                            [
+                                bn[pdf_locs[idx]] - mean_val,
+                                bn[pdf_locs[idx + 1]] - mean_val,
+                                0.0,
+                            ]
+                        )
+                    )
+                )
+                current_lower_bin.append(
+                    np.square(
+                        max(
+                            [
+                                -bn[pdf_locs[idx]] + mean_val,
+                                -bn[pdf_locs[idx + 1]] + mean_val,
+                                0.0,
+                            ]
+                        )
+                    )
+                )
+            upper.append(np.sqrt(sum(current_upper_bin)))
+            lower.append(np.sqrt(sum(current_lower_bin)))
 
-        #     # upper limit
-        #     [max([bn[loc] - mean_val,  ] for loc in pdf_locs]
+        return np.array(lower), np.array(upper)
 
     @property
     def uncertainties(self) -> Tuple[np.ndarray, np.ndarray]:
