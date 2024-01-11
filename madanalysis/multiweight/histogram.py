@@ -532,7 +532,7 @@ class MultiWeightHisto:
         )
         if self.has_scale_unc:
             scale_lower, scale_upper = self.scale_uncertainties
-            with warnings.catch_warnings(record=False):
+            with warnings.catch_warnings(record=True):
                 scale_lower = np.where(nominal > 0.0, scale_lower / nominal, 0.0)
                 scale_upper = np.where(nominal > 0.0, scale_upper / nominal, 0.0)
 
@@ -541,7 +541,7 @@ class MultiWeightHisto:
         )
         if self.has_pdf_unc:
             pdf_lower, pdf_upper = self.pdf_uncertainties
-            with warnings.catch_warnings(record=False):
+            with warnings.catch_warnings(record=True):
                 pdf_lower = np.where(nominal > 0.0, pdf_lower / nominal, 0.0)
                 pdf_upper = np.where(nominal > 0.0, pdf_upper / nominal, 0.0)
 
