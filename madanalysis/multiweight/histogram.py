@@ -10,6 +10,8 @@ import numpy as np
 
 from madanalysis.configuration.weight_configuration import WeightCollection
 
+from .lhapdf_info import PDF, LHAPDFInfo
+
 _nevt = namedtuple("events", ["positive", "negative"])
 
 # pylint: disable=C0103
@@ -202,6 +204,7 @@ class MultiWeightHisto:
         self.central_idx = 0
         # Central weight location
         self.nominal_weight = None
+        self.pdf: PDF = None
         self.dynamic_scale_choice = None
         self.n_point_scale_variation = None
 
@@ -246,10 +249,11 @@ class MultiWeightHisto:
         )
 
     def set_central_weight_loc(
-        self, scale_choice: int, n_point_scale_variation: int, central_pdfs: List[int]
+        self, scale_choice: int, n_point_scale_variation: int, central_pdfs: LHAPDFInfo
     ) -> None:
         self.nominal_weight = self.weight_collection.nominal(scale_choice, central_pdfs)
         self.central_idx = self.nominal_weight.loc
+        self.pdf = central_pdfs[self.nominal_weight.pdfset]
         self.dynamic_scale_choice = scale_choice
         self.n_point_scale_variation = n_point_scale_variation
         print("Central PDF loc:", self.central_idx)
@@ -485,40 +489,35 @@ class MultiWeightHisto:
         if not self.has_pdf_unc:
             return [self.weights * self.scale] * 2
 
-        method = "replicas"  # "eigenvector" #
+        method = "replicas"  # "eigenvector"  #
 
         bins = self.all_scaled_weights
 
-        pdfids = self.weight_collection.pdfsets
-        pdfids.pop(pdfids.index(self.nominal_weight.pdfset))
+        pdf_locs = []
+        for idx, pdfid in enumerate(self.pdf):
+            if idx != 0:
+                pdf_locs.append(
+                    *self.weight_collection.get(pdfset=pdfid, muf=1.0, mur=1.0).loc
+                )
 
         # Replicas
         if method == "replicas":
             # 2202.13416 eq 3.2
-            pdf_locs = (
-                WeightCollection([self.nominal_weight])
-                + self.weight_collection.pdfset(pdfids)
-            ).loc
-            mean_bin_value = np.array(
-                [np.mean([bn[loc] for loc in pdf_locs]) for bn in bins]
-            )
+            pdf_locs.insert(0, self.nominal_weight.loc)
+            new_bins = np.zeros(self.description.nbins)
+            for idx, bn in enumerate(bins):
+                mean_bin_value = np.mean([bn[loc] for loc in pdf_locs])
 
-            new_bins = np.array(
-                [
-                    np.sqrt(
-                        sum((bn[loc] - mean_val) ** 2 for loc in pdf_locs)
-                        / (len(pdf_locs) - 1)
-                    )
-                    for bn, mean_val in zip(bins, mean_bin_value)
-                ]
-            )
+                new_bins[idx] = np.sqrt(
+                    sum((bn[loc] - mean_bin_value) ** 2 for loc in pdf_locs)
+                    / (len(pdf_locs) - 1)
+                )
             return new_bins, new_bins
 
         # Eigenvectors
         # 2202.13416 eq 3.1
-        pdf_locs = self.weight_collection.pdfset(pdfids).loc
-        upper, lower = [], []
-        for bn, mean_val in zip(bins, self.weights * self.scale):
+        upper, lower = np.zeros(self.description.nbins), np.zeros(self.description.nbins)
+        for ibn, (bn, mean_val) in enumerate(zip(bins, self.weights * self.scale)):
             current_upper_bin, current_lower_bin = [], []
             for idx in range(0, len(pdf_locs), 2):
                 # upper limit
@@ -544,8 +543,8 @@ class MultiWeightHisto:
                         )
                     )
                 )
-            upper.append(np.sqrt(sum(current_upper_bin)))
-            lower.append(np.sqrt(sum(current_lower_bin)))
+            upper[ibn] = np.sqrt(sum(current_upper_bin))
+            lower[ibn] = np.sqrt(sum(current_lower_bin))
 
         return np.array(lower), np.array(upper)
 
