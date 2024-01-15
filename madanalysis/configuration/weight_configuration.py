@@ -51,6 +51,33 @@ class Weight:
 
     def __post_init__(self) -> None:
         self.name = self.name.replace("DYN_SCALE", "DYNSCALE")
+
+        # Check the name to make sure its written correctly
+        # This is due to the HEPMC files that are written terribly
+        # wrong so we need to correct them. Some of the files includes
+        # AUX tag for every weight definition. If the name is AUX_XXX
+        # where XXX is integer, that is a true aux, if not remove the
+        # AUX tag.
+        portions = self.name.split("_")
+        if portions[0].upper() == "AUX":
+            if len(portions) > 2:
+                # This is not a true AUX remove the AUX tag
+                self.name = "_".join(portions[1:])
+            elif len(portions) == 2:
+                try:
+                    tmp = int(portions[1])
+                except ValueError as err:
+                    logging.getLogger("MA5").error(
+                        f"Unknown weight definition: {self.name}"
+                    )
+                    logging.getLogger("MA5").debug(err)
+                    self.name = "_".join(portions[1:])
+            else:
+                logging.getLogger("MA5").error(f"Unknown weight definition: {self.name}")
+                logging.getLogger("MA5").error(
+                    "This weight definition will be considered as auxiliary."
+                )
+
         sectors = self.name.split("_")
 
         # PYTHIA NOMINAL WEIGHT
