@@ -536,7 +536,12 @@ class CmdSubmit(CmdBase):
             for idat, dataset in enumerate(self.main.datasets):
                 jobber.ExtractGeneral(dataset)
                 jobber.ExtractHistos(dataset, layout.plotflow.detail[idat])
-                jobber.ExtractCuts(dataset, layout.cutflow.detail[idat])
+                jobber.ExtractCuts(
+                    dataset,
+                    layout.cutflow.detail[idat],
+                    layout.cutflow.multiweight_detail[idat],
+                )
+                print(layout.cutflow.multiweight_detail[idat].get_cutflow)
                 if self.main.merging.enable:
                     jobber.ExtractHistos(
                         dataset, layout.merging.detail[idat], merging=True
