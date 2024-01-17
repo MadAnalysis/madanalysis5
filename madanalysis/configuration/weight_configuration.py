@@ -52,12 +52,13 @@ class Weight:
     def __post_init__(self) -> None:
         self.name = self.name.replace("DYN_SCALE", "DYNSCALE")
 
-        # Check the name to make sure its written correctly
-        # This is due to the HEPMC files that are written terribly
-        # wrong so we need to correct them. Some of the files includes
-        # AUX tag for every weight definition. If the name is AUX_XXX
-        # where XXX is integer, that is a true aux, if not remove the
-        # AUX tag.
+        # Check the weight name and make sure its written according
+        # to standard conventions, and update it if necessary. This is
+        # needed due to terribly written HEPMC files by MadSTR.
+        # These files include an `AUX` tag for every weight name. 
+        # Therefore, if the weight name is `AUX_XXX`with XXX being
+        # an integer, then we have a true `AUX` weight. Otherwise, we
+        # remove the `AUX` string from the weight name.
         portions = self.name.split("_")
         if portions[0].upper() == "AUX":
             if len(portions) > 2:
