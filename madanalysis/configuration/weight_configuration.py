@@ -87,6 +87,7 @@ class Weight:
             return
 
         for sector in sectors:
+            print(sectors)
             if "AUX" in sector:
                 self._aux = int(sectors[1])
                 break
@@ -98,9 +99,15 @@ class Weight:
             elif "DYNSCALE" in sector:
                 self._dyn_scale = int(sector.split("=")[1])
             elif "MUF" in sector:
-                self._muf = float(sector.split("=")[1])
+                if not '=' in sector:
+                    self._muf = float(sector.replace('MUF', 'MUF=').split("=")[1])
+                else:
+                    self._muf = float(sector.split("=")[1])
             elif "MUR" in sector:
-                self._mur = float(sector.split("=")[1])
+                if not '=' in sector:
+                    self._mur = float(sector.replace('MUR', 'MUR=').split("=")[1])
+                else:
+                    self._mur = float(sector.split("=")[1])
             elif "PDF" in sector:
                 self._pdf = int(sector.split("=")[1])
             elif "ALPSFACT" in sector:
