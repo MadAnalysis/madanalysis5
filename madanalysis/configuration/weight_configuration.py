@@ -87,7 +87,6 @@ class Weight:
             return
 
         for sector in sectors:
-            print(sectors)
             if "AUX" in sector:
                 self._aux = int(sectors[1])
                 break
