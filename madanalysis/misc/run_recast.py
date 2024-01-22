@@ -1145,7 +1145,7 @@ class RunRecast():
                 if self.main.recasting.error_extrapolation=='sqrt':
                     new_sigma = round(math.sqrt(sigma)*lumi_scaling,8)
                 elif self.main.recasting.error_extrapolation=='linear':
-                    new_sigma *= lumi_scaling**2
+                    new_sigma = new_sigma * lumi_scaling**2
                 else:
                     new_sigma = sigma * lumi_scaling**2 * self.main.recasting.error_extrapolation[0]**2 + \
                         np.sqrt(sigma) * lumi_scaling * self.main.recasting.error_extrapolation[1]**2
