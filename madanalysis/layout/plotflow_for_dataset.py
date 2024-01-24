@@ -24,7 +24,7 @@
 
 from __future__ import absolute_import
 
-import copy, os
+import copy
 
 from six.moves import range
 
@@ -142,7 +142,7 @@ class PlotFlowForDataset:
                     - self.histos[iplot].negative.integral
                 )
                 multiweight_integral, multiweight_eff = 0, 0
-                if len(self.multiweight_histos) != 0:
+                if len(self.multiweight_histos) != 0 and self.multiweight_histos[iplot]:
                     multiweight_integral = self.multiweight_histos[iplot].integral
 
                 # compute efficiency : Nevent / Ntotal
@@ -203,13 +203,11 @@ class PlotFlowForDataset:
                         )
                     else:
                         multiweight_scale = 1  # no scale for empty plot
-                        print("here no scale", multiweight_integral)
 
             # Setting the computing scale
             self.histos[iplot].scale = copy.copy(scale)
-            if len(self.multiweight_histos) != 0:
+            if len(self.multiweight_histos) != 0 and self.multiweight_histos[iplot]:
                 self.multiweight_histos[iplot].scale = copy.copy(multiweight_scale)
-                print("scale", self.multiweight_histos[iplot].scale)
 
             # Incrementing counter
             iplot += 1
