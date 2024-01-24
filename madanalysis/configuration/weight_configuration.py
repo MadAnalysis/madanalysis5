@@ -55,7 +55,7 @@ class Weight:
         # Check the weight name and make sure its written according
         # to standard conventions, and update it if necessary. This is
         # needed due to terribly written HEPMC files by MadSTR.
-        # These files include an `AUX` tag for every weight name. 
+        # These files include an `AUX` tag for every weight name.
         # Therefore, if the weight name is `AUX_XXX`with XXX being
         # an integer, then we have a true `AUX` weight. Otherwise, we
         # remove the `AUX` string from the weight name.
@@ -83,7 +83,7 @@ class Weight:
 
         # PYTHIA NOMINAL WEIGHT
         # -> note: to ignore, we need to use the MG5  nominal weight
-        if self.name is "Weight":
+        if self.name == "Weight":
             return
 
         for sector in sectors:
@@ -98,13 +98,13 @@ class Weight:
             elif "DYNSCALE" in sector:
                 self._dyn_scale = int(sector.split("=")[1])
             elif "MUF" in sector:
-                if not '=' in sector:
-                    self._muf = float(sector.replace('MUF', 'MUF=').split("=")[1])
+                if not "=" in sector:
+                    self._muf = float(sector.replace("MUF", "MUF=").split("=")[1])
                 else:
                     self._muf = float(sector.split("=")[1])
             elif "MUR" in sector:
-                if not '=' in sector:
-                    self._mur = float(sector.replace('MUR', 'MUR=').split("=")[1])
+                if not "=" in sector:
+                    self._mur = float(sector.replace("MUR", "MUR=").split("=")[1])
                 else:
                     self._mur = float(sector.split("=")[1])
             elif "PDF" in sector:
