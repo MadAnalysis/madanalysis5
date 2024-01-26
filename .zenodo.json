@@ -1,0 +1,41 @@
+{
+    "description": "A package for event file analysis and recasting of LHC results",
+    "license": "GPL-3.0",
+    "title": "MadAnalysis/madanalysis5: v1.10.12",
+    "version": "v1.10.12",
+    "upload_type": "software",
+    "creators": [
+        {
+            "affiliation": "Thomas Jefferson National Accelerator Facility",
+            "name": "Araz, Jack Y.",
+            "orcid": "0000-0001-8721-8042"
+        },
+        {
+            "affiliation": "Sorbonne University",
+            "name": "Fuks, Benjamin"
+        },
+        {
+            "affiliation": "Institut Pluridisciplinaire Hubert Curien",
+            "name": "Conte, Eric"
+        }
+    ],
+    "access_right": "open",
+    "keywords": [
+        "physics",
+        "bsm",
+        "reinterpretation",
+        "lhc"
+    ],
+    "related_identifiers": [
+        {
+            "scheme": "url",
+            "identifier": "https://github.com/MadAnalysis/madanalysis5/tree/v1.10.12",
+            "relation": "isSupplementTo"
+        },
+        {
+            "scheme": "url",
+            "identifier": "http://madanalysis.irmp.ucl.ac.be",
+            "relation": "isDocumentedBy"
+        }
+    ]
+}
