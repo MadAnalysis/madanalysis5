@@ -221,7 +221,7 @@ class WeightCollection:
                     continue
                 if w.muf != 1.0 or w.mur != 1.0 or w.dynamic_scale != scale_choice:
                     continue
-                if not w.pdfset in central_pdfs:
+                if not w.pdfset in central_pdfs and w.pdfset!=None:
                     continue
                 weight_set.append(w)
             if len(weight_set) > 1:
@@ -252,6 +252,9 @@ class WeightCollection:
 
     def pdfset(self, pdfid: Union[int, List[int]]) -> List[Weight]:
         """retrieve weights corresponding to one pdf set"""
+        if pdfid is None:
+            return WeightCollection([self.get(pdfset=None)])
+
         if isinstance(pdfid, int):
             return WeightCollection([w for w in self if w.pdfset == pdfid])
         return WeightCollection([self.get(pdfset=pdf) for pdf in pdfid])

@@ -253,10 +253,10 @@ class MultiWeightHisto:
     ) -> None:
         self.nominal_weight = self.weight_collection.nominal(scale_choice, central_pdfs)
         self.central_idx = self.nominal_weight.loc
-        self.pdf = central_pdfs[self.nominal_weight.pdfset]
+        try: self.pdf = central_pdfs[self.nominal_weight.pdfset]
+        except: self.pdf = self.central_idx
         self.dynamic_scale_choice = scale_choice
         self.n_point_scale_variation = n_point_scale_variation
-        print("Central PDF loc:", self.central_idx)
 
     @property
     def is_consistent(self) -> bool:
