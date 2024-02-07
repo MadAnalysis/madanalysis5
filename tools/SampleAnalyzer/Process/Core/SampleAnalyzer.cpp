@@ -789,6 +789,16 @@ StatusCode::Type SampleAnalyzer::NextEvent(SampleFormat &mySample, EventFormat &
 	return StatusCode::KEEP;
 }
 
+/// @brief Prepare analyzers for the execution by initialising the weights
+/// @param mySample sample dataset
+/// @param myEvent event dataset
+void SampleAnalyzer::PrepareForExecution(SampleFormat &mySample, EventFormat &myEvent)
+{
+	if (myEvent.mc() != 0)
+		for (auto &analyzer : analyzers_)
+			analyzer->Manager()->InitializeForNewEvent(myEvent.mc()->weights());
+}
+
 /// Home made functions to make reasonnable filenames
 inline void ReplaceAll(std::string &name, const std::string &In, const std::string &Out)
 {
@@ -994,6 +1004,10 @@ void SampleAnalyzer::FillSummary(SampleFormat &summary,
 		summary.mc()->xsection_ = 0;
 		summary.mc()->xsection_error_ = 0;
 	}
+
+	/// ! this assumes all the weight identifiers are the same through out the sample set
+	for (auto &name_map : samples.back().mc()->WeightNames())
+		summary.mc()->SetWeightName(name_map.first, name_map.second);
 }
 
 /// Updating the progress bar
