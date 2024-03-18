@@ -133,9 +133,12 @@
 * Update of the version of Delphes/DelphesMa5tune + compatibility with M1 chips and Mac OS 13.0.
    ([#173](https://github.com/orgs/MadAnalysis/discussions/173))
 
-* Covariance matrix implementation has been fixed for HL extrapolations 
+* Covariance matrix implementation has been fixed for HL extrapolations
   (see issue [#223](https://github.com/MadAnalysis/madanalysis5/issues/223)).
   ([#225](https://github.com/MadAnalysis/madanalysis5/pull/225))
+
+* Minor bugfix in luminosity scaling for recasting
+  ([#238](https://github.com/MadAnalysis/madanalysis5/pull/238))
 
 ## Contributors
 
