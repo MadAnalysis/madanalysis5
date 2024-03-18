@@ -135,7 +135,7 @@
 
 * Covariance matrix implementation has been fixed for HL extrapolations
   (see issue [#223](https://github.com/MadAnalysis/madanalysis5/issues/223)).
-  ([#225](https://github.com/MadAnalysis/madanalysis5/pull/225))
+  ([#225](https://github.com/MadAnalysis/madanalysis5/pull/225)) and ([#246](https://github.com/MadAnalysis/madanalysis5/pull/246))
 
 * Minor bugfix in luminosity scaling for recasting
   ([#238](https://github.com/MadAnalysis/madanalysis5/pull/238))
