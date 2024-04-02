@@ -44,6 +44,7 @@ class ArchitectureInfo:
         self.has_zlib           = False
         self.has_delphes        = False
         self.has_delphesMA5tune = False
+        self.has_onnx           = False 
 
         # Library to put before all the others?
         self.root_priority           = False
@@ -51,6 +52,7 @@ class ArchitectureInfo:
         self.delphes_priority        = False
         self.delphesMA5tune_priority = False
         self.fastjet_priority        = False
+        self.onnx_priority           = False 
 
         # Library files
         self.zlib_original_libs           = []
@@ -58,6 +60,8 @@ class ArchitectureInfo:
         self.root_original_bins           = []
         self.delphes_original_libs        = []
         self.delphesMA5tune_original_libs = []
+        self.onnx_original_libs           = []
+
 
         # Version
         self.python_version   = ""
@@ -88,6 +92,9 @@ class ArchitectureInfo:
         self.zlib_inc_path=""
         self.zlib_lib_path=""
         self.zlib_lib=""
+        self.onnx_inc_path=""
+        self.onnx_lib_path=""
+        self.onnx_lib=""
         self.delphes_inc_paths=[]
         self.delphes_lib_paths=[]
         self.delphes_lib=""

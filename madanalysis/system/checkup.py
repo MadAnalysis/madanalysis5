@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -324,6 +324,8 @@ class CheckUp():
             return False
         if not self.checker.Execute('root'):
             return False
+        if not self.checker.Execute('onnx'):
+            return False
 
         self.archi_info.has_delphes           = checker2.checkDelphes()
         self.archi_info.has_delphesMA5tune    = checker2.checkDelphesMA5tune()
@@ -345,6 +347,8 @@ class CheckUp():
         if not self.checker.Execute('pyhf'):
             return False
         if not self.checker.Execute('simplify'):
+            return False
+        if not self.checker.Execute('onnx'):
             return False
         return True
 
@@ -531,13 +535,6 @@ class CheckUp():
                                               ':'.join(self.archi_info.toLDPATH2)
         self.logger.debug('after DYLD_LIBRARY_PATH='+str(os.environ['DYLD_LIBRARY_PATH']))
         self.logger.debug('--------')
-
-        # ROOT INCLUDE PATH
-        if self.archi_info.has_delphes:
-            os.environ['ROOT_INCLUDE_PATH']=os.path.join(self.archi_info.ma5dir,'tools','delphes','external');
-        if self.archi_info.has_delphesMA5tune:
-            os.environ['ROOT_INCLUDE_PATH']=os.path.join(self.archi_info.ma5dir,'tools','delphesMA5tune','external');
-
 
         self.logger.debug('-------- END: set environment variables --------')
 
