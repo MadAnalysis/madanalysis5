@@ -40,6 +40,7 @@ class MakefileWriter():
             self.has_fastjet        = False
             self.has_delphes        = False
             self.has_delphesMA5tune = False
+            self.has_onnx           = False 
 
 
     @staticmethod
@@ -95,6 +96,9 @@ class MakefileWriter():
         if options.has_delphesMA5tune:
             file.write('\tcd Interfaces && $(MAKE) -f Makefile_delphesMA5tune\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_delphesMA5tune\n')
+        if options.has_onnx:
+            file.write('\tcd Interfaces && $(MAKE) -f Makefile_onnx\n')
+            file.write('\tcd Test && $(MAKE) -f Makefile_onnx\n')
         if options.has_process:
             file.write('\tcd Process && $(MAKE) -f Makefile\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_process\n')
@@ -121,6 +125,9 @@ class MakefileWriter():
         if options.has_delphesMA5tune:
             file.write('\tcd Interfaces && $(MAKE) -f Makefile_delphesMA5tune clean\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_delphesMA5tune clean\n')
+        if options.has_onnx:
+            file.write('\tcd Interfaces && $(MAKE) -f Makefile_onnx clean\n')
+            file.write('\tcd Test && $(MAKE) -f Makefile_onnx clean\n')
         if options.has_process:
             file.write('\tcd Process && $(MAKE) -f Makefile clean\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_process clean\n')
@@ -148,6 +155,9 @@ class MakefileWriter():
         if options.has_delphesMA5tune:
             file.write('\tcd Interfaces && $(MAKE) -f Makefile_delphesMA5tune mrproper\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_delphesMA5tune mrproper\n')
+        if options.has_onnx:
+            file.write('\tcd Interfaces && $(MAKE) -f Makefile_onnx mrproper\n')
+            file.write('\tcd Test && $(MAKE) -f Makefile_onnx mrproper\n')
         if options.has_process:
             file.write('\tcd Process && $(MAKE) -f Makefile mrproper\n')
             file.write('\tcd Test && $(MAKE) -f Makefile_process mrproper\n')
@@ -186,6 +196,10 @@ class MakefileWriter():
             self.has_root_tag              = False
             self.has_root_lib              = False
             self.has_root_ma5lib           = False
+            self.has_onnx_tag              = False
+            self.has_onnx_inc              = False
+            self.has_onnx_lib              = False
+            self.has_onnx_ma5lib           = False
 
 
     @staticmethod
@@ -225,7 +239,7 @@ class MakefileWriter():
 
         # - compilation severity
         if not options.has_root_inc    and not options.has_fastjet_inc and \
-           not options.has_zlib_inc    and \
+           not options.has_zlib_inc    and not options.has_onnx_inc and \
            not options.has_delphes_inc and not options.has_delphesMA5tune_inc:
             
             # - compilation severity level 1
@@ -297,6 +311,12 @@ class MakefileWriter():
             cxxflags.extend(['-I'+archi_info.zlib_inc_path])
             file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
 
+        # - onnx
+        if options.has_onnx_inc:
+            cxxflags=[]
+            cxxflags.extend(['-I'+archi_info.onnx_inc_path])
+            file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
+
         # - delphes
         if options.has_delphes_inc:
             cxxflags=[]
@@ -319,6 +339,8 @@ class MakefileWriter():
             cxxflags.extend(['-DFASTJET_USE'])
         if options.has_zlib_tag:
             cxxflags.extend(['-DZIP_USE'])
+        if options.has_onnx_tag:
+            cxxflags.extend(['-DONNX_USE'])
         if options.has_delphes_tag:
              cxxflags.extend(['-DDELPHES_USE'])
         if options.has_delphesMA5tune_tag:
@@ -355,6 +377,15 @@ class MakefileWriter():
             if options.has_zlib_lib:
 #                libs.extend(['-L'+archi_info.zlib_lib_path,'-lz'])
                 libs.extend(['-lz'])
+            file.write('LIBFLAGS += '+' '.join(libs)+'\n')
+
+        # - onnx
+        if options.has_onnx_ma5lib or options.has_onnx_lib:
+            libs=[]
+            if options.has_onnx_ma5lib:
+                libs.extend(['-lonnx_for_ma5'])
+            if options.has_onnx_lib:
+                libs.extend(['-L'+archi_info.onnx_lib_path,'-lonnxruntime'])
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
 
         # - root
@@ -435,6 +466,8 @@ class MakefileWriter():
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libdelphesMA5tune_for_ma5.so')
         if options.has_fastjet_ma5lib:
             libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so')
+        if options.has_onnx_ma5lib:
+            libs.append('$(MA5_BASE)/tools/SampleAnalyzer/Lib/libonnx_for_ma5.so')
         if len(libs)!=0:
             file.write('# Requirements to check before building\n')
             for ind in range(0,len(libs)):
