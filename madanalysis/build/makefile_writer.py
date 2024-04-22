@@ -386,6 +386,8 @@ class MakefileWriter():
                 libs.extend(['-lonnx_for_ma5'])
             if options.has_onnx_lib:
                 libs.extend(['-L'+archi_info.onnx_lib_path,'-lonnxruntime'])
+                libs.extend(['-Wl,-rpath,'+archi_info.onnx_lib_path])
+
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
 
         # - root
