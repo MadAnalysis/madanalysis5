@@ -25,7 +25,7 @@
 // SampleHeader headers
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
-//#include "SampleAnalyzer/Interfaces/onnx/????.h"
+#include "onnx/onnxruntime-osx-x86_64-1.17.1/include/onnxruntime_cxx_api.h"
 
 
 using namespace MA5;

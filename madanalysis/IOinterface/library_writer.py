@@ -201,8 +201,9 @@ class LibraryWriter():
             toRemove.extend(['compilation_onnx.log','linking_onnx.log','cleanup_onnx.log','mrproper_onnx.log'])
         elif package=='test_onnx':
             options.has_commons     = True
-            options.has_onnx_ma5lib = True
-          #  options.has_zlib_lib = True
+            #options.has_onnx_ma5lib = True
+            options.has_onnx_inc = True
+            options.has_onnx_lib = True
             toRemove.extend(['compilation_onnx.log','linking_onnx.log','cleanup_onnx.log',\
                              'mrproper_onnx.log','../Bin/TestOnnx.log'])
         elif package=='delphes':
