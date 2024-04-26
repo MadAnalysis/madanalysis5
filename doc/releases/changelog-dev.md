@@ -2,7 +2,7 @@
 
 ## New features since last release
 
-- In expert mode, all `Histo` protected properties like `nbins_` now have getters, e.g. `Manager()->GetPlotManager()->GetHistos()[0]->Nbins()` ([#247](https://github.com/MadAnalysis/madanalysis5/pull/247)).
+- In expert mode, all `Histo` protected properties like `nbins_` now have getters, e.g. `Manager()->GetPlotManager()->GetHistos()[0]->Nbins()` ([#251](https://github.com/MadAnalysis/madanalysis5/pull/251)).
 
 ## Improvements
 
