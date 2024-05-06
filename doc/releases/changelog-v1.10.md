@@ -149,5 +149,5 @@ This release contains contributions from (in alphabetical order):
 [Jack Y. Araz](https://github.com/jackaraz),
 [Kyle Fan](https://github.com/kfan326),
 [Matthew Feickert](https://github.com/matthewfeickert),
-[Benjamin Fuks](https://github.com/bfuks)
+[Benjamin Fuks](https://github.com/bfuks),
 [Bingxuan Liu](https://github.com/prbbing)
