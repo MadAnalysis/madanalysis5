@@ -108,6 +108,7 @@ void bTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
 
     // 100% identification
     if (jet->true_btag_) jet->btag_=true;
+    if (jet->true_ctag_) jet->ctag_=true;
     if (!doEfficiency_ && !doMisefficiency_) continue;
 
     // identification efficiency
