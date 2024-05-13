@@ -43,7 +43,10 @@ class InstallOnnx:
         self.untardir = os.path.normpath(self.tmpdir + "/MA5_onnx/")
         self.ncores = 1
         self.version = "1.17.1"
-        self.ver_name = "onnxruntime-osx-x86_64-"+self.version
+        if self.main.archi_info.isMac :
+            self.ver_name = "onnxruntime-osx-x86_64-"+self.version
+        else : #if not mac is linux 
+            self.ver_name = "onnxruntime-linux-x64-"+self.version  
         self.files = {self.ver_name+".tgz": "https://github.com/microsoft/onnxruntime/releases/download/v"+self.version+"/"+self.ver_name+".tgz"}
 
     def Detect(self):
