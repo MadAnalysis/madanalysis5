@@ -45,8 +45,11 @@ class InstallOnnx:
         self.version = "1.17.1"
         if self.main.archi_info.isMac :
             self.ver_name = "onnxruntime-osx-x86_64-"+self.version
+            self.lib_name = "libonnxruntime."+self.version+".dylib"
         else : #if not mac is linux 
-            self.ver_name = "onnxruntime-linux-x64-"+self.version  
+            self.ver_name = "onnxruntime-linux-x64-"+self.version
+            self.lib_name = "libonnxruntime.so."+self.version
+
         self.files = {self.ver_name+".tgz": "https://github.com/microsoft/onnxruntime/releases/download/v"+self.version+"/"+self.ver_name+".tgz"}
 
     def Detect(self):
@@ -124,7 +127,7 @@ class InstallOnnx:
             self.display_log()
             return False
 
-        if (not os.path.isfile(self.installdir +"/" +self.ver_name +"/lib/libonnxruntime."+self.version+".dylib")):
+        if (not os.path.isfile(self.installdir +"/" +self.ver_name +"/lib/"+self.lib_name)):
             logging.getLogger("MA5").error(
                 "libonnxruntime is missing."
             )
