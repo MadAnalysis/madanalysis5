@@ -47,13 +47,17 @@ class DetectONNX:
         self.log          = []
         self.logger       = logging.getLogger('MA5')
         self.version = "1.17.1"
-        self.ver_name = "onnxruntime-osx-x86_64-"+self.version
-       
+        if self.archi_info.isMac :
+            self.ver_name = "onnxruntime-osx-x86_64-"+self.version
+            self.lib_name = "libonnxruntime."+self.version+".dylib"
+        else : #if not mac is linux 
+            self.ver_name = "onnxruntime-linux-x64-"+self.version  
+            self.lib_name = "libonnxruntime.so."+self.version       
         # NAme of the header
         self.headernames=['onnxruntime_cxx_api.h']
         
         # Name of the dynamic lib
-        self.libnames=['libonnxruntime.'+self.version+'.dylib'] 
+        self.libnames=[self.lib_name] 
 
         # adding what you want here
 
