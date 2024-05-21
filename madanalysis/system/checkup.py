@@ -63,6 +63,8 @@ class CheckUp():
         if self.archi_info.platform.lower() in ['darwin','mac','macosx']:
             self.archi_info.isMac = True
             platform_text+='\x1b[32m'+'[MAC/OSX mode]'+'\x1b[0m'
+            if platform.machine().lower() != "x86_64" :
+                self.archi_info.isARM64 = True 
         else:
             self.archi_info.isMac = False
             platform_text+='\x1b[32m'+'[Linux mode]'+'\x1b[0m'

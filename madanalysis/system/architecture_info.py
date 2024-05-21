@@ -37,6 +37,7 @@ class ArchitectureInfo:
 
         # Main flags
         self.isMac = False
+        self.isARM64 = False
 
         # Is there optional package?
         self.has_root           = False

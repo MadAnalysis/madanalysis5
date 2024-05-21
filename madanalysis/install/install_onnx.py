@@ -44,7 +44,10 @@ class InstallOnnx:
         self.ncores = 1
         self.version = "1.17.1"
         if self.main.archi_info.isMac :
-            self.ver_name = "onnxruntime-osx-x86_64-"+self.version
+            if self.main.archi_info.isARM64: 
+                self.ver_name = "onnxruntime-osx-arm64-"+self.version
+            else : 
+                self.ver_name = "onnxruntime-osx-x86_64-"+self.version
             self.lib_name = "libonnxruntime."+self.version+".dylib"
         else : #if not mac is linux 
             self.ver_name = "onnxruntime-linux-x64-"+self.version
