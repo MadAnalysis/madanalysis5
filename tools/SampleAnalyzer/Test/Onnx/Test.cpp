@@ -25,7 +25,7 @@
 // SampleHeader headers
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
-#include "onnx/onnxruntime-osx-x86_64-1.17.1/include/onnxruntime_cxx_api.h"
+#include "onnxruntime_cxx_api.h"
 
 
 using namespace MA5;
@@ -37,6 +37,7 @@ MAint32 main(MAint32 argc, MAchar *argv[])
 {
   std::cout << "BEGIN-SAMPLEANALYZER-TEST" << std::endl;
   std::cout << std::endl;
+  Ort::Env env;
 
   EventFormat  event;
   SampleFormat sample;
