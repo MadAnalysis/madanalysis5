@@ -110,6 +110,10 @@ class MABoost
     }    
   }
 
+  // Get the boost vector
+  MAVector3 BoostVector() const { return MAVector3(bx_, by_, bz_); }
+
+
   // Boost a MALorentzVector
   void boost(MALorentzVector& p) const
   {

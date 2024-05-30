@@ -25,6 +25,7 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Vector/MARotation3axis.h"
 #include "SampleAnalyzer/Commons/Vector/MARotation3euler.h"
+#include "SampleAnalyzer/Commons/Vector/MARotationGeneral.h"
 #include "SampleAnalyzer/Commons/Vector/MABoost.h"
 
 using namespace MA5;

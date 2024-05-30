@@ -225,8 +225,10 @@ class MALorentzVector
   
   // Sophisticated mutators ---------------------------------------
 
-  inline void SetVectMag(const MAVector3& spatial, MAdouble64 magnitude);
-  inline void SetVectM  (const MAVector3& spatial, MAdouble64 mass);
+  inline void SetVectMag(const MAVector3& spatial, MAdouble64 magnitude)
+    {SetXYZM(spatial.X(), spatial.Y(), spatial.Z(), magnitude);}
+  inline void SetVectM  (const MAVector3& spatial, MAdouble64 mass)
+    {SetVectMag(spatial, mass);}
   inline void SetVectE  (const MAVector3& spatial, MAdouble64 energy);
 
    // Set all components
