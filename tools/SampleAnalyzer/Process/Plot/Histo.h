@@ -204,6 +204,32 @@ class Histo : public PlotBase
     }
   }
 
+  /// Histogram arrays
+  std::vector< std::pair<MAfloat64,MAfloat64> > Histo() { return histo_; }
+  std::pair<MAfloat64, MAfloat64> Underflow() { return underflow_; }
+  std::pair<MAfloat64, MAfloat64> Overflow() { return overflow_; }
+
+  /// Histogram description
+  MAuint32  Nbins() { return nbins_; }
+  MAfloat64 Xmin() { return xmin_; }
+  MAfloat64 Xmax() { return xmax_; }
+  MAfloat64 Step() { return step_; }
+
+  /// Sum of event-weights over entries
+  std::pair<MAfloat64,MAfloat64> SumW() { return sum_w_; }
+
+  /// Sum of squared weights
+  std::pair<MAfloat64,MAfloat64> SumWW() { return sum_ww_; }
+
+  /// Sum of value * weight
+  std::pair<MAfloat64,MAfloat64> SumXW() { return sum_xw_; }
+
+  /// Sum of value * value * weight
+  std::pair<MAfloat64,MAfloat64> SumXXW() { return sum_xxw_; }
+
+  /// RegionSelections attached to the histo
+  std::vector<RegionSelection*> Regions() { return regions_; }
+
   /// Write the plot in a ROOT file
   virtual void Write_TextFormat(std::ostream* output);
 
