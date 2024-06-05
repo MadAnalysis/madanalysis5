@@ -45,7 +45,7 @@ class NELDERMEAD
 
 
   public:
-    NELDERMEAD() {(void)kcount;};
+    NELDERMEAD() {(void)kcount; (void)icound; };
     void Minimize(std::function<double(const double*)> infn);
     //void Minimize(double (*infn) ( const double*));
     void SetVariable(int index, const char* name, double initialval, double step);

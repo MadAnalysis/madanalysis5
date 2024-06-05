@@ -273,9 +273,11 @@ namespace RestFrames {
     for(int i = 0; i < Nchild; i++){
       ReconstructionFrame& child = GetChildFrame(i);
       MA5::MALorentzVector P = m_ChildStates[&child].GetFourVector();
-      Booster.setBoostVector(P);
       if(P.M() > 0.)
-	SetChildBoostVector(child, Booster.BoostVector());
+      {
+        Booster.setBoostVector(P);
+        SetChildBoostVector(child, Booster.BoostVector());
+      }
       else
 	SetChildBoostVector(child, m_Empty3Vector);
       Ptot += P;

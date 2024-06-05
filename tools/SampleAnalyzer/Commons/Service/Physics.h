@@ -38,10 +38,11 @@
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Commons/DataFormat/MCEventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/RecEventFormat.h"
-#include "SampleAnalyzer/Commons/Service/TransverseVariables.h"
 #include "SampleAnalyzer/Commons/Service/Identification.h"
 #include "SampleAnalyzer/Commons/Service/Isolation.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
+#include "SampleAnalyzer/Commons/Service/RestFramesHelper.h"
+#include "SampleAnalyzer/Commons/Service/TransverseVariables.h"
 
 
 #define PHYSICS MA5::PhysicsService::getInstance()
@@ -66,6 +67,7 @@ class PhysicsService
 
   /// Transverse variable toolbox
   TransverseVariables *Transverse;
+  RestFramesHelper *RF;
 
   /// Identification method toolbox
   Identification *Id;
@@ -208,6 +210,7 @@ class PhysicsService
   /// Constructor
   PhysicsService()  
   {
+    RF = new RestFramesHelper();
     Transverse = new TransverseVariables();
     Id = new Identification();
     Isol = new Isolation();
@@ -216,6 +219,7 @@ class PhysicsService
   /// Destructor
   ~PhysicsService()
   {
+    delete RF;
     delete Transverse;
     delete Id;
     delete Isol;

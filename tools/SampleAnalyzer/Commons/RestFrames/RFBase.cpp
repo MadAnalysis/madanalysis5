@@ -189,17 +189,14 @@ namespace RestFrames {
   // Initializer.
   __attribute__((constructor))
   static void initializer(void){
-    printf("\n" "\x1b[36m");
-   // printf(PACKAGE_NAME);
-  //  printf(" v");
-  //  printf(PACKAGE_VERSION);
-    printf("Loading: RestFrames\n");
-    printf(" -- Developed by Christopher Rogan (crogan@cern.ch)\n");
-    printf("                     ");
-    printf("Copyright (c) 2014-2018, Christopher Rogan\n");
-    printf("                     ");
-    printf("http://RestFrames.com\n");
-    printf("\x1b[0m" "\n");
+//    printf("\n" "\x1b[36m");
+//    printf("Loading: RestFrames\n");
+//    printf(" -- Developed by Christopher Rogan (crogan@cern.ch)\n");
+//    printf("                     ");
+//    printf("Copyright (c) 2014-2018, Christopher Rogan\n");
+//    printf("                     ");
+//    printf("http://RestFrames.com\n");
+//    printf("\x1b[0m" "\n");
     RestFrames::RFKey key(0);
   }
 

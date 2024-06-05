@@ -154,15 +154,15 @@ namespace RestFrames {
   RFKey CombinatoricGroup::AddLabFrameFourVector(const MA5::MALorentzVector& V,
 						 const RFCharge& charge){
     if(IsEmpty()) return RFKey(-1);
-    
+
     MA5::MALorentzVector P = V;
-    if(P.M() < 0.) P.SetVectM(V.Vect(),0.);
-    
+    if(P.M() < 0.) P.SetVectM(V.Vect(), 0.);
+
     VisibleState& state = GetNewElement();
     state.SetFourVector(P);
     state.SetCharge(charge);
     m_Elements.Add(state);
-   
+
     return state.GetKey();
   }
 
@@ -188,9 +188,11 @@ namespace RestFrames {
   MA5::MALorentzVector CombinatoricGroup::GetLabFrameFourVector(const RFKey& key) const {
     int N = GetNChildStates();
     for(int i = N-1; i >= 0; i--)
-      if(GetChildState(i).ContainsElement(key))
-  	return GetChildState(i).GetElement(key).GetFourVector();
-    return MA5::MALorentzVector(0.,0.,0.,0.);
+    {
+        if(GetChildState(i).ContainsElement(key))
+            return GetChildState(i).GetElement(key).GetFourVector();
+    }
+    return MA5::MALorentzVector(0., 0., 0., 0.);
   }
 
   int CombinatoricGroup::GetNElementsInFrame(const RestFrame& frame) const {
