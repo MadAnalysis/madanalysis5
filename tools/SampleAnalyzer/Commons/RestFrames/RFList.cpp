@@ -259,15 +259,9 @@ namespace RestFrames {
   }
 
   void RFList<State>::Boost(const MA5::MAVector3& B) const {
-    MA5::MABoost Booster;
-    Booster.setBoostVector(B.X(), B.Y(), B.Z());
     int N = GetN();
     for(int i = 0; i < N; i++)
-    {
-        MA5::MALorentzVector p = m_Objs[i]->GetFourVector();
-        Booster.boost(p);
-        m_Objs[i]->SetFourVector(p);
-    }
+      m_Objs[i]->Boost(B);
   }
 
   template class RFList<RFBase>;

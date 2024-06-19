@@ -311,9 +311,7 @@ namespace RestFrames {
       ReconstructionFrame& child = GetChildFrame(i);
 
       bool terminal = child.IsVisibleFrame() || child.IsInvisibleFrame();
-      if(!terminal)
-        m_ChildStates[&child].Boost(-GetChildBoostVector(child));
-    
+      if(!terminal) m_ChildStates[&child].Boost(-GetChildBoostVector(child));
       if(!child.AnalyzeEventRecursive())
 	return SetSpirit(false);
      

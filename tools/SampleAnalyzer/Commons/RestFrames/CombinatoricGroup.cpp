@@ -201,8 +201,7 @@ namespace RestFrames {
   }
 
   VisibleState& CombinatoricGroup::GetNewElement(){
-    if(m_Elements.GetN() < m_InitStates.GetN())
-      return m_InitStates[m_Elements.GetN()];
+    if(m_Elements.GetN() < m_InitStates.GetN()) return m_InitStates[m_Elements.GetN()];
     char strn[10];
     snprintf(strn, sizeof(strn), "%d", m_Elements.GetN() + 1);
     std::string name = GetName()+"_"+std::string(strn);
