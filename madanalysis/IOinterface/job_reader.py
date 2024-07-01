@@ -334,7 +334,8 @@ class JobReader:
                 )
             # Read weights
             if globalTag.activated and weightTag.activated and len(words) == 2:
-                dataset.AddWeight(int(words[0]), words[1])
+                if not words[1] in dataset.weight_collection.names:
+                    dataset.AddWeight(int(words[0]), words[1])
 
         # Information found ?
         if beginTag.Nactivated == 0 or beginTag.activated:

@@ -173,8 +173,9 @@ class WeightCollection:
 
     def append(self, name: Text, idx: int) -> None:
         """Add weight into the collection"""
-        if name not in self.names:
-            self._collection.append(Weight(name=name, loc=idx))
+        temp_weight = Weight(name=name, loc=idx)
+        if not temp_weight.name in self.names:
+            self._collection.append(temp_weight)
 
     def __repr__(self) -> Text:
         if len(self) < 5:
