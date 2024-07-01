@@ -430,10 +430,10 @@ class Main():
         self.logger.debug('Function AutoSetGraphicalRenderer:')
         self.logger.debug('   - ROOT is there:       '+str(self.session_info.has_root))
         self.logger.debug('   - Matplotlib is there: '+str(self.session_info.has_matplotlib))
-        if self.session_info.has_root:
-            self.graphic_render = GraphicRenderType.ROOT
-        elif self.session_info.has_matplotlib:
+        if self.session_info.has_matplotlib:
             self.graphic_render = GraphicRenderType.MATPLOTLIB
+        elif self.session_info.has_root:
+            self.graphic_render = GraphicRenderType.ROOT
         else:
             self.graphic_render = GraphicRenderType.NONE
         self.logger.info("Package used for graphical rendering: "+\

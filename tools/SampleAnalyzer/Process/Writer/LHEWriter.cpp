@@ -233,6 +233,15 @@ MAbool LHEWriter::WriteHeader(const SampleFormat &mySample)
              << " " << cfg_->GetSampleAnalyzerVersion()
              << " </SampleAnalyzerVersion>" << std::endl;
 
+    // Weightnames if any
+    if (mySample.mc()->WeightNames().size()>0)
+    {
+      *output_ << "<initrwgt>" << std::endl;
+      for (const auto& pair : mySample.mc()->WeightNames())
+        *output_ << "  <weight id='" << pair.first << "'> " << pair.second << " </weight>" << std::endl;
+      *output_ << "</initrwgt>" << std::endl;
+    }
+
     // Explanation about the LHE
     *output_ << "<FormatDescription>" << std::endl;
     *output_ << "#################################################################################" << std::endl;
@@ -593,9 +602,21 @@ MAbool LHEWriter::WriteEvent(const EventFormat &myEvent,
         WriteMET(myEvent.rec()->MET(), particles.back());
     }
 
-    // Event foot
+    // Particle list
     for (MAuint32 i = 0; i < particles.size(); i++)
         particles[i].Print(i + 1, output_);
+
+    // Weights
+    if (mySample.mc()->WeightNames().size()>0)
+    {
+       *output_ << "  <rwgt>" << std::endl;
+       for (const auto& pair : myEvent.mc()->weights().GetWeights())
+          *output_ << "    <wgt id='" << pair.first << "'> " << std::setw(18) << std::right
+                   << FortranFormat_DoublePrecision(pair.second) << " </wgt>" << std::endl;
+       *output_ << "  </rwgt>" << std::endl;
+    }
+
+    // Footer
     *output_ << "</event>" << std::endl;
     return true;
 }
