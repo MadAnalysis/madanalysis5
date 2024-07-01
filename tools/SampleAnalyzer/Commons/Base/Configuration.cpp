@@ -175,6 +175,7 @@ MAbool Configuration::Initialize(MAint32 &argc, MAchar *argv[])
               << input_list_name_ << "' and '" << argv[i]
               << "'. Only one is required." << endmsg;
         return false;
+      }
     }
   }
 
@@ -211,7 +212,6 @@ void Configuration::Display()
     return;
   }
   else
-  {
     INFO << endmsg;
 
   // Displaying options
