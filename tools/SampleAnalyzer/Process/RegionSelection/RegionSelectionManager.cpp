@@ -35,9 +35,7 @@ MAbool RegionSelectionManager::ApplyCut(MAbool condition, std::string const &cut
 {
 	/// Skip the cut if all regions are already failing the previous cut
 	if (NumberOfSurvivingRegions_ == 0)
-	{
 		return false;
-	}
 
 	/// Get the cut under consideration
 	MultiRegionCounter *mycut = 0;
@@ -69,23 +67,25 @@ MAbool RegionSelectionManager::ApplyCut(MAbool condition, std::string const &cut
 
 		/// Skip the current region if it has failed a previous cut
 		if (!ThisRegion->IsSurviving())
-		{
 			continue;
-		}
+
+		WeightCollection current_region_weight;
+		if (region_weight_.find(ThisRegion->GetName()) != region_weight_.end())
+			current_region_weight = region_weight_[ThisRegion->GetName()];
+		else
+			current_region_weight = weight_;
 
 		/// Check the current cut:
 		if (condition)
 		{
-			ThisRegion->IncrementCutFlow(ThisRegion->GetWeight());
+			ThisRegion->IncrementCutFlow(current_region_weight);
 		}
 		else
 		{
 			ThisRegion->SetSurvivingTest(false);
 			NumberOfSurvivingRegions_--;
 			if (NumberOfSurvivingRegions_ == 0)
-			{
 				return false;
-			}
 		}
 	}
 
@@ -110,6 +110,7 @@ void RegionSelectionManager::FillHisto(std::string const &histname, MAfloat64 va
 			if (dynamic_cast<HistoFrequency *>(plotmanager_.GetHistos()[i]) != 0)
 			{
 				myhistof = dynamic_cast<HistoFrequency *>(plotmanager_.GetHistos()[i]);
+
 				if (myhistof->AllSurviving() == 0)
 					return;
 				try
@@ -205,8 +206,9 @@ void RegionSelectionManager::HeadSR(std::ostream &outwriter, const std::string &
 void RegionSelectionManager::DumpSR(std::ostream &outwriter, MAbool &is_first)
 {
 	// Set first SR out of the for loop to avoid many if executions
-    if (regions_.size() > 0 && is_first) outwriter << regions_[0]->IsSurviving();
+	if (regions_.size() > 0 && is_first)
+		outwriter << regions_[0]->IsSurviving();
 
-    for (MAuint32 i = is_first ? 1 : 0; i < regions_.size(); i++)
-        outwriter << "," << regions_[i]->IsSurviving();
+	for (MAuint32 i = is_first ? 1 : 0; i < regions_.size(); i++)
+		outwriter << "," << regions_[i]->IsSurviving();
 }

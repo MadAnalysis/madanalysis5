@@ -550,16 +550,15 @@ class JobWriter(object):
             file.write("\n\n  /// Setting the random seed\n")
             file.write(f"  RANDOM->SetSeed({self.main.random_seed});\n\n")
 
-        # Add default hadrons and invisible particles for Reco mode
-        if self.main.mode == MA5RunningType.RECO:
+        # Add default hadrons and invisible particles for RECO and HADRON mode
+        # The invisible container may also be changed when runnign the code in HADRON mode.
+        if self.main.mode in [MA5RunningType.RECO, MA5RunningType.HADRON]:
             file.write('\n  // Initializing PhysicsService for MC\n')
             file.write('  PHYSICS->mcConfig().Reset();\n')
             file.write('  // definition of the multiparticle "hadronic"\n')
             file.write('  manager.AddDefaultHadronic();\n')
             file.write('  // definition of the multiparticle "invisible"\n')
             file.write('  manager.AddDefaultInvisible();\n')
-            # If expert mode is initiated without an SFS card "invisible"
-            # collection does not exist. Thus just initiate with default config.
             if self.main.multiparticles.Find("invisible"):
                 for item in self.main.multiparticles.Get("invisible"):
                     if item not in [-16, -14, -12, 12, 14, 16, 1000022, 1000039]:
@@ -605,6 +604,7 @@ class JobWriter(object):
             file.write('      fastsim1->Execute(mySample,myEvent);\n')
         elif self.main.fastsim.package=="delphesMA5tune":
             file.write('      fastsim1->Execute(mySample,myEvent);\n')
+        file.write('      manager.PrepareForExecution(mySample, myEvent);\n')
         file.write('      if (!analyzer1->Execute(mySample,myEvent)) continue;\n')
         if self.output!="" and  not self.output.lower().endswith('root'):
             file.write('      writer1->WriteEvent(myEvent,mySample);\n')
