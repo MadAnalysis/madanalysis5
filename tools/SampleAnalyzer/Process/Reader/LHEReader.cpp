@@ -52,7 +52,7 @@ MAbool LHEReader::ReadHeader(SampleFormat &mySample)
 
     // Read line by line the file until tag <header>
     // Note from Benj: the header tags are optional according to LHE standards
-    //                 the init tags are alsways the last ones before the events
+    //                 the init tags are always the last ones before the events
     MAbool EndOfLoop = false, GoodInit = false;
 
     while (!GoodInit)
@@ -72,6 +72,7 @@ MAbool LHEReader::ReadHeader(SampleFormat &mySample)
         if (HeaderFound)
         {
             EndOfLoop = false;
+            MAbool in_weights=false;
             do
             {
                 if (!ReadLine(line, false))
@@ -81,6 +82,12 @@ MAbool LHEReader::ReadHeader(SampleFormat &mySample)
                     continue;
                 else
                     mySample.AddHeader(line);
+
+                // Weight initialisation
+                if (line.find("<initrwgt>") != std::string::npos) in_weights=true;
+                if (line.find("</initrwgt>") != std::string::npos) in_weights=false;
+                if(in_weights) FillWeightNames(line, mySample);
+
                 if ((line.find("<MGGenerationInfo>") != std::string::npos) ||
                     (line.find("<mgversion>") != std::string::npos) ||
                     (line.find("<MG5ProcCard>") != std::string::npos))
@@ -549,6 +556,35 @@ void LHEReader::FillEventParticleLine(const std::string &line,
     part->momentum_.SetPxPyPzE(px, py, pz, e);
     part->decay_vertex_.SetT(ctau);
     mothers_.push_back(std::make_pair(mothup1, mothup2));
+}
+
+//------------------------------------------------------------------------------
+// FillWeightNames
+//------------------------------------------------------------------------------
+void LHEReader::FillWeightNames(const std::string &line, SampleFormat &mySample)
+{
+    // Parsing
+    std::stringstream str(line);
+    std::size_t startTagPos = line.find("<weight");
+    std::size_t endTagPos = line.find("</weight>");
+    if (startTagPos != std::string::npos && endTagPos != std::string::npos)
+    {
+        // Extract the weight id
+        std::size_t idPos = line.find("id='", startTagPos);
+        std::size_t idEndPos = line.find("'", idPos + 4);
+        std::string id = line.substr(idPos + 4, idEndPos - (idPos + 4));
+
+        // Extract the content between the tags
+        std::size_t nameStart = line.find(">", startTagPos) + 1;
+        std::string weight_name = line.substr(nameStart, endTagPos - nameStart);
+
+        // Trim the weight_name string
+        weight_name.erase(0, weight_name.find_first_not_of(" \t\n\r"));
+        weight_name.erase(weight_name.find_last_not_of(" \t\n\r") + 1);
+
+        // Print the id and weight_name
+        mySample.mc()->SetWeightName(std::stoi(id), weight_name);
+    }
 }
 
 // -----------------------------------------------------------------------------
