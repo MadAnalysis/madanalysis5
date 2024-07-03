@@ -574,5 +574,5 @@ class MultiWeightHisto:
         # add in quadrature
         return (
             np.sqrt(scale_lower**2 + pdf_lower**2) * nominal,
-            np.sqrt(scale_lower**2 + pdf_lower**2) * nominal,
+            np.sqrt(scale_upper**2 + pdf_upper**2) * nominal,
         )

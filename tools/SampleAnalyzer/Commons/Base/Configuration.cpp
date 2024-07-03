@@ -38,8 +38,8 @@ namespace MA5
     // Initializing static data members
     // -----------------------------------------------------------------------------
     // DO NOT TOUCH THESE LINES
-    const std::string Configuration::sampleanalyzer_version_ = "2.0.9";
-    const std::string Configuration::sampleanalyzer_date_ = "2024/01/11";
+    const std::string Configuration::sampleanalyzer_version_ = "2.0.10";
+    const std::string Configuration::sampleanalyzer_date_ = "2024/07/03";
     // DO NOT TOUCH THESE LINES
 
     // -----------------------------------------------------------------------------
@@ -124,7 +124,6 @@ namespace MA5
             // converting const characters into string
             std::string argument = std::string(argv[i]);
             Lower(argument);
-            INFO << argument << endmsg;
 
             // safety : skip empty string
             if (argument.size() == 0)

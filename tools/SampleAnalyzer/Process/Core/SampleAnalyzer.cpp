@@ -189,15 +189,13 @@ void SampleAnalyzer::CheckDatatypes() const
 }
 
 /// Initialization of the SampleAnalyzer
-MAbool SampleAnalyzer::Initialize(MAint32 argc, MAchar **argv,
-								  const std::string &pdgFileName)
+MAbool SampleAnalyzer::Initialize(MAint32 argc, MAchar **argv, const std::string &pdgFileName)
 {
-	// Initializing general pointers
-	myReader_ = 0;
+    // Initializing general pointers
+    myReader_ = 0;
 
-	// Configuration
-	if (!cfg_.Initialize(argc, argv))
-		return false;
+    // Configuration
+    if (!cfg_.Initialize(argc, argv)) return false;
 
 	// Displaying configuration
 	cfg_.Display();

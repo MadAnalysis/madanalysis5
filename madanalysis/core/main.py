@@ -104,7 +104,7 @@ class Main():
         self.lastjob_name   = ''
         self.lastjob_status = False
         self.random_seed    = None
-        self.stack          = StackingMethodType.STACK
+        self.stack          = StackingMethodType.SUPERIMPOSE
         self.isolation      = IsolationConfiguration()
         self.output         = ""
         self.graphic_render = GraphicRenderType.NONE

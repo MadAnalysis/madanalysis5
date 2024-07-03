@@ -668,8 +668,9 @@ class PlotFlow:
         # Open the file in write-mode
         try:
             outputPy = open(filenamePy, "w")
-        except:
+        except Exception as err:
             logging.getLogger("MA5").error("Impossible to write the file: " + filenamePy)
+            logging.getLogger("MA5").debug(err)
             return False
 
         # File header
@@ -682,7 +683,6 @@ class PlotFlow:
         outputPy.write("    # Library import\n")
         outputPy.write("    import numpy\n")
         outputPy.write("    import matplotlib\n")
-        #        outputPy.write("    matplotlib.use('Agg')\n")
         outputPy.write("    import matplotlib.pyplot   as plt\n")
         outputPy.write("    import matplotlib.gridspec as gridspec\n")
         outputPy.write("\n")
@@ -884,17 +884,20 @@ class PlotFlow:
                 linecolor = ColorType.convert2root(
                     self.main.datasets[ind].linecolor, self.main.datasets[ind].lineshade
                 )
+            mylinecolor = ('"' + madanalysis.enumeration.color_hex.color_hex[linecolor] + '"')
+
             # lineStyle
-            linestyle = LineStyleType.convert2code(self.main.datasets[ind].linestyle)
+            mylinestyle = LineStyleType.convert2matplotlib(self.main.datasets[ind].linestyle)
 
             # linewidth
-            linewidth = self.main.datasets[ind].linewidth
+            mylinewidth = self.main.datasets[ind].linewidth
 
             # background color
             if self.main.datasets[ind].backcolor != ColorType.AUTO:
                 backcolor = ColorType.convert2root(
                     self.main.datasets[ind].backcolor, self.main.datasets[ind].backshade
                 )
+            mybackcolor = ('"' + madanalysis.enumeration.color_hex.color_hex[backcolor] + '"')
 
             # background style
             if self.main.datasets[ind].backstyle != BackStyleType.AUTO:
@@ -902,26 +905,14 @@ class PlotFlow:
                     self.main.datasets[ind].backstyle
                 )
 
-            mylinecolor = (
-                '"' + madanalysis.enumeration.color_hex.color_hex[linecolor] + '"'
-            )
-            mybackcolor = (
-                '"' + madanalysis.enumeration.color_hex.color_hex[backcolor] + '"'
-            )
-
+            # Filling mode
             filledmode = '"stepfilled"'
             rWidth = 1.0
             if backcolor == 0:  # invisible
                 filledmode = '"step"'
                 mybackcolor = "None"
-            #            if frequencyhisto:
-            #                filledmode='"bar"'
-            #                rWidth=0.8
-            mylinewidth = self.main.datasets[ind].linewidth
-            mylinestyle = LineStyleType.convert2matplotlib(
-                self.main.datasets[ind].linestyle
-            )
 
+            # Histo
             outputPy.write(
                 "    pad.hist("
                 + "x=xData, "
@@ -1189,12 +1180,10 @@ class PlotFlow:
         if len(self.main.datasets) > 1:
             legendmode = True
 
-        # Stacking or superimposing histos ?
+        # Stacking or superimposing histos?
+        # Default in the multiweight case: superimposed
         stackmode = False
-        if ref.stack == StackingMethodType.STACK or (
-            ref.stack == StackingMethodType.AUTO
-            and self.main.stack == StackingMethodType.STACK
-        ):
+        if ref.stack == StackingMethodType.STACK or self.main.stack == StackingMethodType.STACK:
             stackmode = True
 
         # Open the file in write-mode
@@ -1213,17 +1202,11 @@ class PlotFlow:
 
         # Import Libraries
         outputPy.write("    # Library import\n")
-        outputPy.write("    import numpy as np\n")
+        outputPy.write("    import numpy\n")
         outputPy.write("    import matplotlib\n")
-        #        outputPy.write("    matplotlib.use('Agg')\n")
         outputPy.write("    import matplotlib.pyplot   as plt\n")
         outputPy.write("    import matplotlib.gridspec as gridspec\n")
-        outputPy.write("\n")
-
-        # Matplotlib & numpy version
-        outputPy.write("    # Library version\n")
-        outputPy.write("    matplotlib_version = matplotlib.__version__\n")
-        outputPy.write("    numpy_version      = np.__version__\n")
+        outputPy.write("    import matplotlib.patches  as patches\n")
         outputPy.write("\n")
 
         # Binning
@@ -1231,21 +1214,13 @@ class PlotFlow:
         xnbin = histos[0].description.nbins
         outputPy.write("    # Histo binning\n")
         outputPy.write(
-            f"    xBinning=np.linspace({histos[0].description.xmin}, "
+            f"    xBinning=numpy.linspace({histos[0].description.xmin}, "
             f"{histos[0].description.xmax}, {xnbin+1}, "
             "endpoint=True)\n"
         )
+        outputPy.write("    bin_centers = 0.5 * (xBinning[1:] + xBinning[:-1])\n")
+        outputPy.write("    bin_width = xBinning[1] - xBinning[0]\n")
         outputPy.write("\n")
-
-        # Data
-        outputPy.write("    # Creating data sequence: middle of each bin\n")
-        outputPy.write(
-            "    xData = np.array(["
-            + ", ".join(
-                [f"{histos[0].description.GetBinMean(x):.5e}" for x in range(0, xnbin)]
-            )
-            + "])\n\n"
-        )
 
         # Loop over datasets and histos
         ntot = 0
@@ -1254,46 +1229,52 @@ class PlotFlow:
                 continue
 
             # Creating a new histo
-            histoname = "y_nominal_" + histos[ind].name + "_" + str(ind)
-            outputPy.write("    # Creating weights for histo: " + histoname + "\n")
+            histotag  = "y_" + histos[ind].name + "_" + str(ind)
+            histoname = histotag + "_weights"
+            outputPy.write(f"    # Creating weights for histo: {histotag}\n")
             current_weights = histos[ind].weights * histos[ind].scale
+            ntot+= sum(current_weights)
             outputPy.write(
-                "    "
-                + histoname
-                + "_weights = np.array(["
+                f"    {histoname} = numpy.array(["
                 + ", ".join([f"{c:.5e}" if c != 0.0 else "0.0" for c in current_weights])
-                + "])\n\n"
+                + "])\n"
             )
+            outputPy.write(f"    {histotag}, _ = numpy.histogram(a=numpy.array(bin_centers), bins=xBinning, weights={histoname})\n\n")
 
-            # extract uncertainties
+            # Extract uncertainties
             lower_unc, upper_unc = histos[ind].uncertainties
 
+            # total curve with error
+            if ind==0:
+                tot_lower_unc = lower_unc
+                tot_upper_unc = upper_unc
+                tot_central = current_weights
+            else:
+                tot_lower_unc = np.sqrt(tot_lower_unc**2 + lower_unc**2)
+                tot_upper_unc = np.sqrt(tot_upper_unc**2 + upper_unc**2)
+                tot_central = tot_central + current_weights
+
             # Write upper limits
-            upper_unc_name = "y_UPPER_" + histos[ind].name + "_" + str(ind) + "_weights"
+            uppertag  = "yup_" + histos[ind].name + "_" + str(ind)
+            uppername = uppertag + "_weights"
+            outputPy.write(f"    # Upper error bar for: {histotag}\n")
             outputPy.write(
-                "    # Delta Upper limits for the scale uncertainty: " + histoname + "\n"
-            )
-            outputPy.write(
-                "    "
-                + upper_unc_name
-                + " = np.array(["
+                f"    {uppername}  = numpy.array(["
                 + ", ".join([f"{u:.5e}" if u != 0.0 else "0.0" for u in upper_unc])
-                + "])\n\n"
+                + "])\n"
             )
+            outputPy.write(f"    {uppertag} = {histotag} + {uppername}\n\n")
 
             # Writing lower limits
+            lowertag  = "ylow_" + histos[ind].name + "_" + str(ind)
+            lowername = lowertag + "_weights"
+            outputPy.write(f"    # Lower error bar for: {histotag}\n")
             outputPy.write(
-                "    # Delta Lower limits for the uncertainties: " + histoname + "\n"
-            )
-            lower_unc_name = "y_LOWER_" + histos[ind].name + "_" + str(ind) + "_weights"
-            outputPy.write("    # Creating weights for histo: " + histoname + "\n")
-            outputPy.write(
-                "    "
-                + lower_unc_name
-                + " = np.array(["
+                f"    {lowername} = numpy.array(["
                 + ", ".join([f"{l:.5e}" if l != 0.0 else "0.0" for l in lower_unc])
-                + "])\n\n"
+                + "])\n"
             )
+            outputPy.write(f"    {lowertag} = {histotag} - {lowername}\n\n")
 
         # Canvas
         outputPy.write("    # Creating a new Canvas\n")
@@ -1312,225 +1293,115 @@ class PlotFlow:
             outputPy.write("    frame = gridspec.GridSpec(1,1,right=0.7)\n")
         outputPy.write("    pad   = fig.add_subplot(frame[0])\n\n")
 
+        # Styles and colours
+        linecolors = [
+            [9], [9, 46], [9, 46, 8], [9, 46, 8, 4], [9, 46, 8, 4, 6], [9, 46, 8, 4, 6, 2],
+            [9, 46, 8, 4, 6, 2, 7], [9, 46, 8, 4, 6, 2, 7, 3], [9, 46, 8, 4, 6, 2, 7, 3, 42],
+            [9, 46, 8, 4, 6, 2, 7, 3, 42, 48]
+        ]
+        backstyles = [
+            ['///'], ['///','\\\\\\\\\\\\'], ['///','\\\\\\\\\\','-'], ['///','\\\\\\\\\\\\','---','|||'], ['///','\\\\\\\\\\\\','---','|||','+++'],
+            ['///','\\\\\\\\\\\\','---','|','+++','xxx'], ['///','\\\\\\\\\\\\','---','|||','+++','xxx','ooo'],
+            ['///','\\\\\\\\\\\\','---','|','+++','xxx','ooo','...'], ['///','\\\\\\\\\\\\','---','|||','+++','xxx','ooo','...','***'],
+            ['///','\\\\\\\\\\\\','---','|','+++','xxx','ooo','...','***','/\\']
+        ]
+
         # Stack
-        outputPy.write("    # Creating a new Stack\n")
+        titles = []
         for ind in range(len(histos) - 1, -1, -1):
-            mytitle = (
-                '"' + PlotFlow.NiceTitleMatplotlib(self.main.datasets[ind].title) + '"'
-            )
+            mytitle = ('"' + PlotFlow.NiceTitleMatplotlib(self.main.datasets[ind].title) + '"')
             mytitle = mytitle.replace("_", "\_")
 
-            if not stackmode:
-                myweights = "y_nominal_" + histos[ind].name + "_" + str(ind) + "_weights"
-            else:
-                myweights = ""
-                for ind2 in range(0, ind + 1):
-                    if ind2 >= 1:
-                        myweights += "+"
-                    myweights += (
-                        "y_nominal_" + histos[ind2].name + "_" + str(ind2) + "_weights"
-                    )
-
-            # reset
-            linecolor = 0
-            linestyle = 0
-            backcolor = 0
-            backstyle = 0
-            linewidth = 1
-
-            # Setting AUTO settings
-            if len(histos) == 1:
-                linecolor1 = [9]
-                linecolor = linecolor1[ind]
-                if stackmode:
-                    backstyle1 = [3004]
-                    backstyle = backstyle1[ind]
-                    backcolor = linecolor1[ind]
-            elif len(histos) == 2:
-                linecolor2 = [9, 46]
-                linecolor = linecolor2[ind]
-                if stackmode:
-                    backstyle2 = [3004, 3005]
-                    backstyle = backstyle2[ind]
-                    backcolor = linecolor2[ind]
-            elif len(histos) == 3:
-                linecolor3 = [9, 46, 8]
-                linecolor = linecolor3[ind]
-                if stackmode:
-                    backstyle3 = [3004, 3005, 3006]
-                    backstyle = backstyle3[ind]
-                    backcolor = linecolor3[ind]
-            elif len(histos) == 4:
-                linecolor4 = [9, 46, 8, 4]
-                linecolor = linecolor4[ind]
-                if stackmode:
-                    backstyle4 = [3004, 3005, 3006, 3007]
-                    backstyle = backstyle4[ind]
-                    backcolor = linecolor4[ind]
-            elif len(histos) == 5:
-                linecolor5 = [9, 46, 8, 4, 6]
-                linecolor = linecolor5[ind]
-                if stackmode:
-                    backstyle5 = [3004, 3005, 3006, 3007, 3013]
-                    backstyle = backstyle5[ind]
-                    backcolor = linecolor5[ind]
-            elif len(histos) == 6:
-                linecolor6 = [9, 46, 8, 4, 6, 2]
-                linecolor = linecolor6[ind]
-                if stackmode:
-                    backstyle6 = [3004, 3005, 3006, 3007, 3013, 3017]
-                    backstyle = backstyle6[ind]
-                    backcolor = linecolor6[ind]
-            elif len(histos) == 7:
-                linecolor7 = [9, 46, 8, 4, 6, 2, 7]
-                linecolor = linecolor7[ind]
-                if stackmode:
-                    backstyle7 = [3004, 3005, 3006, 3007, 3013, 3017, 3022]
-                    backstyle = backstyle7[ind]
-                    backcolor = linecolor7[ind]
-            elif len(histos) == 8:
-                linecolor8 = [9, 46, 8, 4, 6, 2, 7, 3]
-                linecolor = linecolor8[ind]
-                if stackmode:
-                    backstyle8 = [3004, 3005, 3006, 3007, 3013, 3017, 3022, 3315]
-                    backstyle = backstyle8[ind]
-                    backcolor = linecolor8[ind]
-            elif len(histos) == 9:
-                linecolor9 = [9, 46, 8, 4, 6, 2, 7, 3, 42]
-                linecolor = linecolor9[ind]
-                if stackmode:
-                    backstyle9 = [3004, 3005, 3006, 3007, 3013, 3017, 3022, 3315, 3351]
-                    backstyle = backstyle9[ind]
-                    backcolor = linecolor9[ind]
-            elif len(histos) == 10:
-                linecolor10 = [9, 46, 8, 4, 6, 2, 7, 3, 42, 48]
-                linecolor = linecolor10[ind]
-                if stackmode:
-                    backstyle10 = [
-                        3004,
-                        3005,
-                        3006,
-                        3007,
-                        3013,
-                        3017,
-                        3022,
-                        3315,
-                        3351,
-                        3481,
-                    ]
-                    backstyle = backstyle10[ind]
-                    backcolor = linecolor10[ind]
+            # Set linecolor based on the length of histos
+            if len(histos) <= 10:
+                linecolor = linecolors[len(histos) - 1][ind]
+                backcolor = linecolors[len(histos) - 1][ind]
+                backstyle = "'" + backstyles[len(histos) - 1][ind] + "'"
             else:
                 linecolor = self.color
+                backcolor = self.color
                 self.color += 1
 
-            # linecolor
+            # line colour, style and width
             if self.main.datasets[ind].linecolor != ColorType.AUTO:
                 linecolor = ColorType.convert2root(
                     self.main.datasets[ind].linecolor, self.main.datasets[ind].lineshade
                 )
-            # lineStyle
-            linestyle = LineStyleType.convert2code(self.main.datasets[ind].linestyle)
-
-            # linewidth
+            mylinecolor = ('"' + madanalysis.enumeration.color_hex.color_hex[linecolor] + '"')
+            titles.append([mytitle, mylinecolor, backstyle])
+            linestyle = LineStyleType.convert2matplotlib(self.main.datasets[ind].linestyle)
             linewidth = self.main.datasets[ind].linewidth
 
-            # background color
+            # background style and colour
             if self.main.datasets[ind].backcolor != ColorType.AUTO:
                 backcolor = ColorType.convert2root(
                     self.main.datasets[ind].backcolor, self.main.datasets[ind].backshade
                 )
+            mybackcolor = ('"' + madanalysis.enumeration.color_hex.color_hex[backcolor] + '"')
 
-            # background style
-            if self.main.datasets[ind].backstyle != BackStyleType.AUTO:
-                backstyle = BackStyleType.convert2matplotlib(
-                    self.main.datasets[ind].backstyle
-                )
-
-            mylinecolor = (
-                '"' + madanalysis.enumeration.color_hex.color_hex[linecolor] + '"'
-            )
-            mybackcolor = (
-                '"' + madanalysis.enumeration.color_hex.color_hex[backcolor] + '"'
-            )
-
-            filledmode = '"stepfilled"'
-            rWidth = 1.0
-            if backcolor == 0:  # invisible
-                filledmode = '"step"'
-                mybackcolor = "None"
-            mylinewidth = self.main.datasets[ind].linewidth
-            mylinestyle = LineStyleType.convert2matplotlib(
-                self.main.datasets[ind].linestyle
-            )
-
-            outputPy.write(
-                "    pad.errorbar(\n"
-                f"        xData, {myweights},\n"
-                f"        yerr=[{lower_unc_name}, {upper_unc_name}],\n"
-                "        fmt='.', elinewidth=1, capsize=3,\n"
-                "    )\n\n"
-            )
-
-            outputPy.write(
-                "    pad.hist("
-                + "x=xData, "
-                + "bins=xBinning, "
-                + "weights="
-                + myweights
-                + ",\\\n"
-                + "             label="
-                + mytitle
-                + ", "
-            )
-            if ntot != 0:
-                outputPy.write("histtype=" + filledmode + ", ")
-            try:
-                import matplotlib.pyplot as plt
-
-                plt.hist([0], normed=True)
+            # No stacking: error rectangles around each bin
+            if not stackmode:
+                # Rectangles around the error bar for each bin
+                outputPy.write("    # Add rectangles for each bin\n")
+                outputPy.write("    for center, y_val, y_up, y_low in zip(bin_centers, y_" + histos[ind].name + "_" + str(ind) + ", yup_" + histos[ind].name + "_" + str(ind) + ", ylow_" + histos[ind].name + "_" + str(ind) + "):\n")
+                outputPy.write("        rect = patches.Rectangle( (center - bin_width / 2, y_low), bin_width, y_up - y_low, facecolor="+mybackcolor+", edgecolor=" + mylinecolor + ", hatch=" + backstyle + ", alpha=0.3)\n")
+                outputPy.write("        pad.add_patch(rect)\n")
+                # Error bars
+                outputPy.write("    # Plot the error bars\n")
                 outputPy.write(
-                    "rwidth="
-                    + str(rWidth)
-                    + ",\\\n"
-                    + "             color="
-                    + mybackcolor
-                    + ", "
-                    + "edgecolor="
-                    + mylinecolor
-                    + ", "
-                    + "linewidth="
-                    + str(mylinewidth)
-                    + ", "
-                    + "linestyle="
-                    + mylinestyle
-                    + ",\\\n"
-                    + "             bottom=None, "
-                    + 'cumulative=False, normed=False, align="mid", orientation="vertical")\n\n'
+                    "    pad.errorbar(bin_centers, y_" + histos[ind].name + "_" + str(ind) 
+                    + ", yerr=[ylow_" + histos[ind].name + "_" + str(ind) + "_weights,  yup_" + histos[ind].name + "_" + str(ind) + "_weights],"
+                    + "label=" + mytitle + ","
+                    + f" fmt='.', elinewidth=1, capsize=3, color='black')\n\n"
                 )
-            except Exception as err:
-                logging.getLogger("MA5").debug(err)
+
+            # Stacking: combined error bar
+            else:
+                try:
+                    import matplotlib.pyplot as plt
+                    plt.hist([0], normed=True)
+                    norm_key="normed"
+                except Exception:
+                    norm_key = "density"
                 outputPy.write(
-                    "rwidth="
-                    + str(rWidth)
-                    + ",\\\n"
-                    + "             color="
-                    + mybackcolor
-                    + ", "
-                    + "edgecolor="
-                    + mylinecolor
-                    + ", "
-                    + "linewidth="
-                    + str(mylinewidth)
-                    + ", "
-                    + "linestyle="
-                    + mylinestyle
-                    + ",\\\n"
-                    + "             bottom=None, "
-                    + 'cumulative=False, density=False, align="mid",'
-                    + ' orientation="vertical")\n\n'
+                    "    pad.hist(x=bin_centers, bins=xBinning, "
+                    + "weights=y_" + histos[ind].name + "_" + str(ind) + ",\n"
+                    + "         label=" + mytitle + ", "
                 )
+                if ntot != 0:
+                    outputPy.write("histtype='stepfilled', ")
+                outputPy.write(f"rwidth=1.0, color={mybackcolor}, \n")
+                if ind==0:
+                    outputPy.write("         bottom=None, ")
+                else:
+                    outputPy.write("         bottom=y_" + histos[ind-1].name + "_" + str(ind-1) + ", ")
+                outputPy.write(f"cumulative=False, {norm_key}=False, align=\"mid\", orientation=\"vertical\")\n\n")
         outputPy.write("\n")
+
+        # Rectangles around the error bar for each bin
+        if stackmode:
+            outputPy.write("    # Add rectangles for each bin around the total\n")
+            outputPy.write(
+                f"    tot_central  = numpy.array(["
+                + ", ".join([f"{u:.5e}" if u != 0.0 else "0.0" for u in tot_central])
+                + "])\n"
+            )
+            outputPy.write(
+                f"    tot_up  = numpy.array(["
+                + ", ".join([f"{u:.5e}" if u != 0.0 else "0.0" for u in tot_upper_unc])
+                + "])\n"
+            )
+            outputPy.write(
+                f"    tot_low = numpy.array(["
+                + ", ".join([f"{u:.5e}" if u != 0.0 else "0.0" for u in tot_lower_unc])
+                + "])\n"
+            )
+            outputPy.write("    ytot, _ = numpy.histogram(a=numpy.array(bin_centers), bins=xBinning, weights=tot_central)\n")
+            outputPy.write("    yup  = ytot + tot_up\n")
+            outputPy.write("    ylow = ytot - tot_low\n")
+            outputPy.write("    for center, y, y_up, y_low in zip(bin_centers, ytot, yup, ylow):\n")
+            outputPy.write("        rect = patches.Rectangle( (center - bin_width / 2, y_low), bin_width, y_up - y_low, facecolor='white', edgecolor='black' , hatch='////', alpha=0.3)\n")
+            outputPy.write("        pad.add_patch(rect)\n\n")
 
         # Label
         outputPy.write("    # Axis\n")
@@ -1542,6 +1413,7 @@ class PlotFlow:
         else:
             axis_titleX = ref.titleX
         axis_titleX = axis_titleX.replace("#DeltaR", "#Delta R")
+        axis_titleX = axis_titleX.replace("#slash", "\\not\!\!\!\!")
         axis_titleX = axis_titleX.replace("#", "\\")
         outputPy.write('    plt.xlabel(r"' + axis_titleX + '",\\\n')
         outputPy.write('               fontsize=16,color="black")\n')
@@ -1588,63 +1460,28 @@ class PlotFlow:
 
         # Bound y
         outputPy.write("    # Boundary of y-axis\n")
-        myweights = ""
-        if stackmode:
-            for ind in range(0, len(histos)):
-                if ind >= 1:
-                    myweights += "+"
-                myweights += "y_nominal_" + histos[ind].name + "_" + str(ind) + "_weights"
-        else:
-            myweights = "numpy.array(["
-            for ind in range(0, len(histos)):
-                if ind >= 1:
-                    myweights += ","
-                myweights += (
-                    "y_nominal_" + histos[ind].name + "_" + str(ind) + "_weights.max()"
-                )
-            myweights += "])"
         if ref.ymax == []:
-            outputPy.write(
-                "    ymax=(" + myweights + "+" + upper_unc_name + ").max()*1.1\n"
-            )
+            if stackmode:
+                outputPy.write("    ymax = yup.max()*1.1\n")
+            else:
+                myweights = "numpy.array([" + ",".join([f"yup_{histos[ind].name}_{ind}.max()" for ind in range(len(histos))]) + "])"
+                outputPy.write("    ymax=(" + myweights + ").max()*1.1\n")
         else:
             outputPy.write("    ymax=" + str(ref.ymax) + "\n")
-        outputPy.write("    ")
         if ref.ymin == []:
-            if is_logy:
-                outputPy.write("#")
-            outputPy.write("ymin=0 # linear scale\n")
+            if stackmode and is_logy:
+                outputPy.write("    ymin = min([x for x in ylow if x])/100\n")
+            elif stackmode and not is_logy:
+                outputPy.write("    ymin = 0 # linear scale\n")
+            elif is_logy:
+                myweights = "numpy.array([" + ",".join([f"min([x for x in ylow_{histos[ind].name}_{ind} if x>0])" for ind in range(len(histos))]) + "])"
+                outputPy.write("    ymin =(" + myweights + ").min()/100\n")
+            else:
+                outputPy.write("    ymin = 0 # linear scale")
         else:
             if is_logy and ref.ymin <= 0:
                 outputPy.write("#")
             outputPy.write("ymin=" + str(ref.ymin) + " # linear scale\n")
-
-        myweights = ""
-        if stackmode:
-            for ind in range(0, len(histos)):
-                if ind >= 1:
-                    myweights += "+"
-                myweights += "y_nominal_" + histos[ind].name + "_" + str(ind) + "_weights"
-        else:
-            myweights = "numpy.array(["
-            for ind in range(0, len(histos)):
-                if ind >= 1:
-                    myweights += ","
-                myweights += (
-                    "y_nominal_" + histos[ind].name + "_" + str(ind) + "_weights.min()"
-                )
-            myweights += ",1.])"
-        outputPy.write("    ")
-        if ref.ymin == []:
-            if not is_logy:
-                outputPy.write("#")
-            outputPy.write(
-                "ymin=min([x for x in (" + myweights + ") if x])/100. # log scale\n"
-            )
-        else:
-            if is_logy and ref.ymin <= 0:
-                outputPy.write("#")
-            outputPy.write("ymin=" + str(ref.ymin) + " # log scale\n")
         outputPy.write("    plt.gca().set_ylim(ymin,ymax)\n")
         outputPy.write("\n")
 
@@ -1676,34 +1513,19 @@ class PlotFlow:
         outputPy.write('plt.gca().set_yscale("log",nonpositive="clip")\n')
         outputPy.write("\n")
 
-        # Labels
-        ### BENJ: not necessary for getting the png and pdf files
-        # Draw
-        #        outputPy.write('    # Draw\n')
-        #        outputPy.write('    plt.show()\n')
-        #        outputPy.write('\n')
-
         # Legend
         if legendmode:
-
-            # Reminder for 'loc'
-            # -'best'         : 0, (only implemented for axes legends)
-            # -'upper right'  : 1,
-            # -'upper left'   : 2,
-            # -'lower left'   : 3,
-            # -'lower right'  : 4,
-            # -'right'        : 5,
-            # -'center left'  : 6,
-            # -'center right' : 7,
-            # -'lower center' : 8,
-            # -'upper center' : 9,
-            # -'center'       : 10,
-
             outputPy.write("    # Legend\n")
-            outputPy.write(
-                "    plt.legend(bbox_to_anchor=(1.05,1), loc=2," + " borderaxespad=0.)\n"
-            )
-            outputPy.write("\n")
+            outputPy.write("    import matplotlib.patches as patches\n")
+            outputPy.write("    # Create custom legend handles\n")
+            outputPy.write("    legend_handles = [\n")
+            for label,color,hatch in titles:
+                if stackmode:
+                    outputPy.write("        patches.Patch(color=" + color + ", alpha=0.3, label=" + label + "),\n")
+                else:
+                    outputPy.write("        patches.Patch(color=" + color + ", hatch=" + hatch +", alpha=0.3, label=" + label + "),\n")
+            outputPy.write("    ]\n")
+            outputPy.write("    pad.legend(handles=legend_handles, bbox_to_anchor=(1.05,1), loc=2," + " borderaxespad=0.)\n\n")
 
         # Producing the image
         outputPy.write("    # Saving the image\n")
