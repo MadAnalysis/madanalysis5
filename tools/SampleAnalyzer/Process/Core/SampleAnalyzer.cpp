@@ -812,6 +812,7 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
     AnalyzerBase* myanalysis = analyzers_[i];
     for(MAuint32 j=0; j<myanalysis->Manager()->Regions().size(); j++)
     {
+      // SAF
       RegionSelection *myRS = myanalysis->Manager()->Regions()[j];
       std::string safname = myanalysis->Output() + "/Cutflows/" + 
          CleanName(myRS->GetName()) + ".saf";
@@ -820,6 +821,12 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
       myRS->WriteCutflow(out);
       out.WriteFoot();
       out.Finalize();
+
+      // YODA
+      std::string cleanName = CleanName(myRS->GetName());
+      std::string yodaname = myanalysis->Output() + "/Cutflows/" + 
+         cleanName + ".yoda";
+      myRS->WriteCutflow("CF-"+cleanName, yodaname);
     }
   }
 

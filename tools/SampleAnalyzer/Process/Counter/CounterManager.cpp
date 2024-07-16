@@ -26,6 +26,10 @@
 #include "SampleAnalyzer/Process/Counter/CounterManager.h"
 
 
+#include "YODA/Histo.h"
+#include "YODA/WriterYODA.h"
+
+
 using namespace MA5;
 
 /*
@@ -154,4 +158,44 @@ void CounterManager::Write_TextFormat(SAFWriter& output) const
     *output.GetStream() << "</Counter>" << std::endl;
     *output.GetStream() << std::endl;
   }
+}
+
+/// Auxiliary function to set a bin value with number of entries, sumW and sumW2
+void setBin(YODA::BinnedHisto1D<std::string>& h, MAuint32 bin, Counter counter){
+  const std::array<double, 2> sumW({counter.sumweight_.first, counter.sumweight_.first});
+  const std::array<double, 2> sumW2({counter.sumweight2_.first, counter.sumweight2_.first});
+  YODA::Dbn<1> sumWdbn2(counter.nentries_.first, sumW, sumW2);
+  h.set(bin, sumWdbn2);
+}
+
+/// Write the counters in a YODA file
+void CounterManager::Write_TextFormat(std::string name, std::string yodaname) const
+{
+  // check for valid histogram
+  if(counters_.size()==0){
+    INFO << "      Skipping histogram with name '" << name << "' because it has "
+        << counters_.size() << " bins." << endmsg;
+    return;
+  }
+
+  // get counter names
+  std::vector<std::string> edges = {""};
+  for(MAuint32 i=0;i<counters_.size();i++){
+    edges.emplace_back(counters_[i].name_);
+  }
+
+  // create histogram
+  YODA::BinnedHisto1D<std::string> h(edges, name);
+
+  // set initial values
+  setBin(h, 1, initial_);
+
+  // set counter values
+  for (MAuint32 i=0;i<counters_.size();i++)
+  {
+    setBin(h, i+2, counters_[i]);
+  }
+
+  // write to file
+  YODA::WriterYODA::write(yodaname, h);
 }

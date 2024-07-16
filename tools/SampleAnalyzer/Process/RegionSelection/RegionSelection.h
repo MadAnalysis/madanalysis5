@@ -81,6 +81,10 @@ class RegionSelection
   void WriteCutflow(SAFWriter& output)
     { cutflow_.Write_TextFormat(output); }
 
+  /// Printing the cutflow as YODA file
+  void WriteCutflow(std::string name, std::string yodaname)
+    {  cutflow_.Write_TextFormat(name, yodaname); }
+
   /// Set methods
   void SetName(std::string name)
     { name_ = name; }

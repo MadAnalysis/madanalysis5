@@ -218,10 +218,11 @@ class MakefileWriter():
 
         # - general
         cxxflags=[]
-        cxxflags.extend(['-Wall','-std=c++11','-O3','-fPIC', '-I$(MA5_BASE)/tools/']) # general
+        cxxflags.extend(['-Wall','-std=c++17','-O3','-fPIC', '-I$(MA5_BASE)/tools/']) # general
         file.write('CXXFLAGS  = '+' '.join(cxxflags)+'\n')
         for item in moreIncludes:
             file.write('CXXFLAGS += '+' -I'+item+'\n')
+        file.write('CXXFLAGS += `yoda-config --cflags`\n')
 
         # - compilation severity
         if not options.has_root_inc    and not options.has_fastjet_inc and \
@@ -406,6 +407,8 @@ class MakefileWriter():
             libs=[]
             libs.extend(['-lcommons_for_ma5'])
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
+
+        file.write('LIBFLAGS += `yoda-config --libs`\n')
 
         # - Root
         libs=[]
