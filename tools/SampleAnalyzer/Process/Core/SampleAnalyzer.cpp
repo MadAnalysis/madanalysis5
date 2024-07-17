@@ -737,7 +737,7 @@ inline std::string CleanName(const std::string &name)
 
 /// Finalize fuction
 MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples, 
-                              EventFormat& myEvent)
+                              EventFormat& myEvent, bool storeYODA)
 {
   // -----------------------------------------------------------------------
   //                      DUMP NUMBER OF EVENT
@@ -823,10 +823,12 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
       out.Finalize();
 
       // YODA
-      std::string cleanName = CleanName(myRS->GetName());
-      std::string yodaname = myanalysis->Output() + "/Cutflows/" + 
-         cleanName + ".yoda";
-      myRS->WriteCutflow("CF-"+cleanName, yodaname);
+      if(storeYODA){
+        std::string cleanName = CleanName(myRS->GetName());
+        std::string yodaname = myanalysis->Output() + "/Cutflows/" +
+          cleanName + ".yoda";
+        myRS->WriteCutflow("CF-"+cleanName, yodaname);
+      }
     }
   }
 

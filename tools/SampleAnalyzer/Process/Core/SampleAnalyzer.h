@@ -141,7 +141,7 @@ class SampleAnalyzer
   StatusCode::Type NextFile(SampleFormat& mysample);
 
   /// Finalization of the SampleAnalyzer
-  MAbool Finalize(std::vector<SampleFormat>& mysamples, EventFormat& myevent);
+  MAbool Finalize(std::vector<SampleFormat>& mysamples, EventFormat& myevent, bool storeYODA=false);
 
   /// Updating the progress bar
   void UpdateProgressBar();

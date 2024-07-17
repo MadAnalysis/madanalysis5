@@ -88,6 +88,11 @@ class UserInfo:
         # dvipdf
         self.dvipdf_veto = None
 
+        # YODA
+        self.yoda_veto     = None
+        self.yoda_includes = None
+        self.yoda_libs     = None
+
         # logger
         self.logger = logging.getLogger('MA5')
 

@@ -37,6 +37,7 @@ class RecastConfiguration:
          "card_path"              : "",\
          "store_root"             : ["True", "False"] , \
          "store_events"           : ["True", "False"] , \
+         "store_yoda"             : ["True", "False"] , \
          "THerror_combination"    : ["quadratic","linear"], \
          "error_extrapolation"    : ["linear", "sqrt"],\
          "global_likelihoods"     : ["on","off"],\
@@ -55,6 +56,7 @@ class RecastConfiguration:
         self.padsfs                     = False
         self.store_root                 = False
         self.store_events               = False
+        self.store_yoda                 = False
         self.TACO_output                = ""
         self.global_likelihoods_switch  = True
         self.CLs_calculator_backend     = "native"
@@ -104,6 +106,7 @@ class RecastConfiguration:
             self.user_DisplayParameter("CLs_numofexps")
             self.user_DisplayParameter("card_path")
             self.user_DisplayParameter("store_events")
+            self.user_DisplayParameter("store_yoda")
             self.user_DisplayParameter("TACO_output")
             self.user_DisplayParameter("extrapolated_luminosities")
             self.user_DisplayParameter("systematics")
@@ -157,8 +160,11 @@ class RecastConfiguration:
         elif parameter=="store_root" or parameter=="store_events":
             self.logger.info("   * Keeping the event files: "+str(self.store_root or self.store_events))
             return
+        elif parameter=="store_yoda":
+            self.logger.info("   * Storing results as .yoda files: "+str(self.store_yoda))
+            return
         elif parameter=="TACO_output":
-            self.logger.info("   * Running in TACO mode and storing the results at " +str(self.TACO_output));
+            self.logger.info("   * Running in TACO mode and storing the results at " +str(self.TACO_output))
             return
         elif parameter=="systematics":
             if len(self.systematics) > 0:
@@ -322,6 +328,13 @@ class RecastConfiguration:
                 self.logger.error("Do the root files need to be stored? (True/False)")
                 return
 
+        # Give results additionally as .yoda files
+        elif parameter=="store_yoda":
+            if self.status!="on":
+                self.logger.error("Please first set the recasting mode to 'on'.")
+                return
+            self.store_yoda = value
+
         # Running in TACO mode
         elif parameter=="TACO_output":
             if self.status!="on":
@@ -473,7 +486,7 @@ class RecastConfiguration:
             if var == "add":
                 table = ["extrapolated_luminosity", "systematics"]
             else:
-                table = ["CLs_numofexps", "card_path", "store_events", 'TACO_output', "add",
+                table = ["CLs_numofexps", "card_path", "store_events", "store_yoda", 'TACO_output', "add",
                          "THerror_combination", "error_extrapolation", "global_likelihoods",
                          "CLs_calculator_backend", "expectation_assumption"]#, "simplify_likelihoods"
         else:
@@ -483,30 +496,10 @@ class RecastConfiguration:
 
     def user_GetValues(self,variable):
         table = []
-        if variable=="status":
-                table.extend(RecastConfiguration.userVariables["status"])
-        elif variable =="CLs_numofexps":
-                table.extend(RecastConfiguration.userVariables["CLs_numofexps"])
-        elif variable =="card_path":
-                table.extend(RecastConfiguration.userVariables["card_path"])
-        elif variable =="store_root":
-                table.extend(RecastConfiguration.userVariables["store_root"])
-        elif variable =="store_events":
-                table.extend(RecastConfiguration.userVariables["store_events"])
-        elif variable =="TACO_output":
-                table.extend(RecastConfiguration.userVariables["TACO_output"])
-        elif variable =="THerror_combination":
-                table.extend(RecastConfiguration.userVariables["THerror_combination"])
-        elif variable =="error_extrapolation":
-                table.extend(RecastConfiguration.userVariables["error_extrapolation"])
-        elif variable =="global_likelihoods":
-                table.extend(RecastConfiguration.userVariables["global_likelihoods"])
-        elif variable =="CLs_calculator_backend":
-            table.extend(RecastConfiguration.userVariables["CLs_calculator_backend"])
-        elif variable =="simplify_likelihoods":
-            table.extend(RecastConfiguration.userVariables["simplify_likelihoods"])
-        elif variable =="expectation_assumption":
-            table.extend(RecastConfiguration.userVariables["expectation_assumption"])
+        if variable in ["status", "CLs_numofexps", "card_path", "store_root", "store_events", "store_yoda",
+                        "TACO_output", "THerror_combination", "error_extrapolation", "global_likelihoods",
+                        "CLs_calculator_backend", "simplify_likelihoods", "expectation_assumption"]:
+            table.extend(RecastConfiguration.userVariables[variable])
         return table
 
 

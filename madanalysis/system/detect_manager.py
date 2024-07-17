@@ -123,6 +123,9 @@ class DetectManager():
         elif package=='latex':
             from madanalysis.system.detect_latex import DetectLatex
             checker=DetectLatex(self.archi_info, self.user_info, self.session_info, self.debug)
+        elif package=='yoda':
+            from madanalysis.system.detect_yoda import DetectYODA
+            checker=DetectYODA(self.archi_info, self.user_info, self.session_info, self.debug)
         else:
             self.logger.error('the package "'+rawpackage+'" is unknown')
             return False

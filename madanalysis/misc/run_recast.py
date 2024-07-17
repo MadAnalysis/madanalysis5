@@ -71,6 +71,7 @@ class RunRecast():
         self.is_apriori       = True
         self.cls_calculator   = cls
         self.TACO_output      = self.main.recasting.TACO_output
+        self.store_yoda       = self.main.recasting.store_yoda
 
     def init(self):
         ### First, the analyses to take care off
@@ -429,9 +430,12 @@ class RunRecast():
             elif '    }' in line:
                 newfile.write(line)
                 ignore=False
-            elif 'manager.Finalize(mySamples,myEvent);' in line and self.TACO_output!='':
-                newfile.write(line);
-                newfile.write('  out.close();\n');
+            elif 'manager.Finalize(mySamples,myEvent);' in line:
+                if self.store_yoda:
+                    line = line.replace(");", ",true);")
+                newfile.write(line)
+                if self.TACO_output!='':
+                    newfile.write('  out.close();\n')
             elif not ignore:
                 newfile.write(line)
         mainfile.close()
@@ -671,9 +675,12 @@ class RunRecast():
                 if self.TACO_output!='':
                     newfile.write('\nmanager.DumpSR(out);\n');
                 ignore=False
-            elif 'manager.Finalize(mySamples,myEvent);' in line and self.TACO_output!='':
-                newfile.write(line);
-                newfile.write('  out.close();\n');
+            elif 'manager.Finalize(mySamples,myEvent);' in line:
+                if self.store_yoda:
+                    line = line.replace(");", ",true);")
+                newfile.write(line)
+                if self.TACO_output!='':
+                    newfile.write('  out.close();\n')
             elif not ignore:
                 newfile.write(line)
 
