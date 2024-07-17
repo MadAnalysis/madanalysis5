@@ -311,8 +311,6 @@ class CheckUp():
             return False
         if not self.checker.Execute('latex'):
             return False
-        if not self.checker.Execute('YODA'):
-            return False
         return True
 
     def CheckOptionalProcessingPackages(self):
