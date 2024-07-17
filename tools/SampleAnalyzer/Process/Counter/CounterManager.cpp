@@ -25,9 +25,10 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Counter/CounterManager.h"
 
-
+#ifdef YODA_USE
 #include "YODA/Histo.h"
 #include "YODA/WriterYODA.h"
+#endif
 
 
 using namespace MA5;
@@ -160,6 +161,7 @@ void CounterManager::Write_TextFormat(SAFWriter& output) const
   }
 }
 
+#ifdef YODA_USE
 /// Auxiliary function to set a bin value with number of entries, sumW and sumW2
 void setBin(YODA::BinnedHisto1D<std::string>& h, MAuint32 bin, Counter counter){
   const std::array<double, 2> sumW({counter.sumweight_.first, counter.sumweight_.first});
@@ -167,6 +169,7 @@ void setBin(YODA::BinnedHisto1D<std::string>& h, MAuint32 bin, Counter counter){
   YODA::Dbn<1> sumWdbn2(counter.nentries_.first, sumW, sumW2);
   h.set(bin, sumWdbn2);
 }
+#endif
 
 /// Write the counters in a YODA file
 void CounterManager::Write_TextFormat(std::string name, std::string yodaname) const
@@ -184,6 +187,7 @@ void CounterManager::Write_TextFormat(std::string name, std::string yodaname) co
     edges.emplace_back(counters_[i].name_);
   }
 
+  #ifdef YODA_USE
   // create histogram
   YODA::BinnedHisto1D<std::string> h(edges, name);
 
@@ -198,4 +202,5 @@ void CounterManager::Write_TextFormat(std::string name, std::string yodaname) co
 
   // write to file
   YODA::WriterYODA::write(yodaname, h);
+  #endif
 }
