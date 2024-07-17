@@ -169,21 +169,23 @@ class MakefileWriter():
             self.has_delphesMA5tune_tag    = False
             self.has_root_tag              = False
             self.has_zlib_tag              = False
+            self.has_yoda_tag              = False
             self.has_fastjet_inc           = False
             self.has_delphes_inc           = False
             self.has_delphesMA5tune_inc    = False
             self.has_zlib_inc              = False
             self.has_root_inc              = False
+            self.has_yoda_inc              = False
             self.has_fastjet_lib           = False
             self.has_delphes_lib           = False
             self.has_delphesMA5tune_lib    = False
             self.has_zlib_lib              = False
+            self.has_yoda_lib              = False
             self.has_fastjet_ma5lib        = False
             self.has_delphes_ma5lib        = False
             self.has_delphesMA5tune_ma5lib = False
             self.has_zlib_ma5lib           = False
             self.has_root                  = False
-            self.has_root_tag              = False
             self.has_root_lib              = False
             self.has_root_ma5lib           = False
 
@@ -222,7 +224,6 @@ class MakefileWriter():
         file.write('CXXFLAGS  = '+' '.join(cxxflags)+'\n')
         for item in moreIncludes:
             file.write('CXXFLAGS += '+' -I'+item+'\n')
-        file.write('CXXFLAGS += `yoda-config --cflags`\n')
 
         # - compilation severity
         if not options.has_root_inc    and not options.has_fastjet_inc and \
@@ -280,6 +281,7 @@ class MakefileWriter():
                 file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
 
         # - root
+        print("has root inc: "+str(options.has_root_inc))
         if options.has_root_inc:
             cxxflags=[]
             cxxflags.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/root-config --cflags)'])
@@ -312,6 +314,15 @@ class MakefileWriter():
                 cxxflags.extend(['-I'+header])
             file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
 
+        # - YODA
+        print("has yoda inc: "+str(options.has_yoda_inc))
+        print(options)
+        if options.has_yoda_inc:
+            cxxflags=[]
+            cxxflags.extend(['$(shell yoda-config --cflags)'])
+            #cxxflags.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/root-config --cflags)'])
+            file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
+
         # - tags
         cxxflags=[]
         if options.has_root_tag:
@@ -324,6 +335,8 @@ class MakefileWriter():
              cxxflags.extend(['-DDELPHES_USE'])
         if options.has_delphesMA5tune_tag:
              cxxflags.extend(['-DDELPHESMA5TUNE_USE'])
+        if options.has_yoda_tag:
+             cxxflags.extend(['-DYODA_USE'])
         if len(cxxflags)!=0:
             file.write('CXXFLAGS += '+' '.join(cxxflags)+'\n')
         file.write('\n')
@@ -402,13 +415,18 @@ class MakefileWriter():
                 libs.extend(['-lDelphesMA5tune'])
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
 
+        # - YODA
+        if options.has_yoda_lib:
+            #libs.extend(['$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/yoda-config --libs) -lEG'])
+            libs.extend(['$(shell yoda-config --libs)'])
+            file.write('LIBFLAGS += '+' '.join(libs)+'\n')
+        #file.write('LIBFLAGS += `yoda-config --libs`\n')
+
         # - Commons
         if options.has_commons:
             libs=[]
             libs.extend(['-lcommons_for_ma5'])
             file.write('LIBFLAGS += '+' '.join(libs)+'\n')
-
-        file.write('LIBFLAGS += `yoda-config --libs`\n')
 
         # - Root
         libs=[]

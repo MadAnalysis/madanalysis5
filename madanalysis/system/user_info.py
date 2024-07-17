@@ -271,6 +271,14 @@ class UserInfo:
         elif option=='dvipdf_veto':
             self.dvipdf_veto=self.ConvertToBool(option,value,filename)
 
+        # YODA
+        elif option=='yoda_veto':
+            self.yoda_veto=self.ConvertToBool(option,value,filename)
+        elif option=='yoda_includes':
+            self.yoda_includes=value
+        elif option=='yoda_libs':
+            self.yoda_libs=value
+
         # other
         else:
             self.logger.warning(filename+': the option called "'+option+'" is not found')
