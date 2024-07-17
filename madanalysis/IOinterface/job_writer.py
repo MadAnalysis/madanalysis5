@@ -746,6 +746,9 @@ class JobWriter(object):
         if self.main.archi_info.has_root:
             options.has_root_inc = True
             options.has_root_lib = True
+        if self.main.archi_info.has_yoda:
+            options.has_yoda_inc = True
+            options.has_yoda_lib = True
         #options.has_userpackage = True
         toRemove=['Log/compilation.log','Log/linking.log','Log/cleanup.log','Log/mrproper.log']
 

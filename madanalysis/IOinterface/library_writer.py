@@ -260,6 +260,9 @@ class LibraryWriter():
             options.has_zlib_tag              = self.main.archi_info.has_zlib
             options.has_root_tag              = self.main.archi_info.has_root
             options.has_root_ma5lib           = self.main.archi_info.has_root
+            options.has_yoda_tag              = self.main.archi_info.has_yoda
+            options.has_yoda_inc              = self.main.archi_info.has_yoda
+            options.has_yoda_lib              = self.main.archi_info.has_yoda
             toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
         elif package=='test_process':
             options.has_commons               = True
