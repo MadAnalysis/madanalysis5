@@ -84,8 +84,8 @@ class DetectYODA:
         word=word.rstrip()
         numbers = word.split('.')
         if len(numbers)>=1:
-            if numbers[0]=='0':
-                self.logger.error("Release must be greater than 2.0.0. Please upgrade the YODA version.")
+            if int(numbers[0])<2:
+                self.logger.warning("Release must be greater than 2.0.0. Please upgrade the YODA version.")
                 return DetectStatusType.UNFOUND,''
         else:
             self.logger.warning("Impossible to decode the YODA release")
