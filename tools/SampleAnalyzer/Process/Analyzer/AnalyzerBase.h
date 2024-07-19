@@ -39,6 +39,7 @@
 #include "SampleAnalyzer/Commons/Base/Configuration.h"
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelectionManager.h"
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
+#include "SampleAnalyzer/Commons/Service/HEPData.h"
 
 // STL headers
 #include <set>
