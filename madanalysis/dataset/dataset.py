@@ -492,6 +492,9 @@ class Dataset:
             )
         logging.getLogger("MA5").info("   Ratio of negative weights = " + str(msg) + " %")
         logging.getLogger("MA5").info("   ******************************************")
+        logging.getLogger("MA5").info("   Uncertainty treatment")
+        self.user_DisplayParameter("n_point_scale_variation")
+        logging.getLogger("MA5").info("   ******************************************")
 
     def user_DisplayParameter(self, parameter):
         if parameter == "weight":
@@ -553,6 +556,8 @@ class Dataset:
                 "   Background style in histograms = "
                 + BackStyleType.convert2string(self.backstyle)
             )
+        elif parameter == "n_point_scale_variation":
+            logging.getLogger("MA5").info(f"   Scale uncertainties: from {self.n_point_scale_variation} point variations")
         else:
             logging.getLogger("MA5").error(
                 " the class dataset has no attribute denoted by '" + parameter + "'"
