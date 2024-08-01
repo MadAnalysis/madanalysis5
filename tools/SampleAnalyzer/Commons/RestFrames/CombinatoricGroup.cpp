@@ -202,7 +202,7 @@ namespace RestFrames {
 
   VisibleState& CombinatoricGroup::GetNewElement(){
     if(m_Elements.GetN() < m_InitStates.GetN()) return m_InitStates[m_Elements.GetN()];
-    char strn[10];
+    char strn[12];
     snprintf(strn, sizeof(strn), "%d", m_Elements.GetN() + 1);
     std::string name = GetName()+"_"+std::string(strn);
     VisibleState* statePtr = new VisibleState(name,name);

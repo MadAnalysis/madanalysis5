@@ -26,6 +26,7 @@
 
 // STL Headers
 #include <string>
+#include <vector>
 
 namespace MA5
 {

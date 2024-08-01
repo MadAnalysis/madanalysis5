@@ -10,7 +10,7 @@ NELDERMEAD::~NELDERMEAD(){ };
 
 void NELDERMEAD::SetVariable(int index, const char* name, double initialval, double step)
 {
-  if(index >= vals.size()) // need to increase the size of the arrays
+  if(static_cast<std::vector<double>::size_type>(index) >= vals.size()) // need to increase the size of the arrays
   {
     vals.resize(index+1);
     steps.resize(index+1);
@@ -68,7 +68,7 @@ void NELDERMEAD::SetVariableValue( int index, double value)
     {
       double* Xout = new double[vals.size()];
 
-      for(int i=0;i<vals.size();i++)
+      for(int i=0;static_cast<std::vector<double>::size_type>(i)<vals.size();i++)
       {
 	//std::cout << " x("<<i<<"): " << vals[i] ;
         Xout[i] = vals[i];
@@ -89,7 +89,7 @@ void NELDERMEAD::SetVariableValue( int index, double value)
   
   //std::vector<double> starts;
   std::vector<int> free_indices;
-  for(int i=0;i<vals.size();i++){
+  for(int i=0;static_cast<std::vector<double>::size_type>(i)<vals.size();i++){
     wpars[i] = vals[i];
       if(!fixed[i])
       {
@@ -101,7 +101,7 @@ void NELDERMEAD::SetVariableValue( int index, double value)
   // need to set up a lambda for the nelmin
   //auto mylam = [*this,wpars,infn](double x[]){
     auto mylam = [wpars,infn,free_indices](double x[]){
-    for(int m=0;m<free_indices.size(); m++){
+    for(int m=0;static_cast<std::vector<double>::size_type>(m)<free_indices.size(); m++){
         wpars[free_indices[m]]=x[m];
     }
     return infn(wpars);
@@ -120,7 +120,7 @@ void NELDERMEAD::SetVariableValue( int index, double value)
 
   nelmin(mylam, nfree, starts,results ,&newminval,_eps,steps,convergence_interval,_maxit,&nits,&num_restarts,&_status);
    int m=0;
-  for(int i=0;i<vals.size();i++){
+  for(int i=0;static_cast<std::vector<double>::size_type>(i)<vals.size();i++){
     if(!fixed[i])
       {
         vals[i]=results[m];
