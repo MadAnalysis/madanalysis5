@@ -88,9 +88,9 @@ class MARotationGeneral
   void rotate(MAVector3& p) const
   {
      tmp_ = p;
-     p.SetX(tmp_.X()*c_ + tmp_.Cross(axis_).X()*s_ + axis_.X()*tmp_.Dot(axis_)*(1.0 - c_));
-     p.SetY(tmp_.Y()*c_ + tmp_.Cross(axis_).Y()*s_ + axis_.Y()*tmp_.Dot(axis_)*(1.0 - c_));
-     p.SetZ(tmp_.Z()*c_ + tmp_.Cross(axis_).Z()*s_ + axis_.Z()*tmp_.Dot(axis_)*(1.0 - c_));
+     p.SetX(tmp_.X()*c_ - tmp_.Cross(axis_).X()*s_ + axis_.X()*tmp_.Dot(axis_)*(1.0 - c_));
+     p.SetY(tmp_.Y()*c_ - tmp_.Cross(axis_).Y()*s_ + axis_.Y()*tmp_.Dot(axis_)*(1.0 - c_));
+     p.SetZ(tmp_.Z()*c_ - tmp_.Cross(axis_).Z()*s_ + axis_.Z()*tmp_.Dot(axis_)*(1.0 - c_));
   }
 
 };
