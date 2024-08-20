@@ -139,6 +139,9 @@ class PlotManager
   /// Write the counters in a Text file
   void Write_TextFormat(SAFWriter& output);
 
+  /// Write the counters in a YODA file
+  void Write_YODA(std::string yodaname);
+
   /// Finalizing
   void Finalize()
   { Reset(); }

@@ -792,6 +792,12 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
     analyzers_[i]->Manager()->GetPlotManager()->Write_TextFormat(out);
     out.WriteFoot();
     out.Finalize();
+
+    // YODA
+    if(storeYODA){
+      std::string yodaname = analyzers_[i]->Output() + "/Histograms/histos.yoda";
+      analyzers_[i]->Manager()->GetPlotManager()->Write_YODA(yodaname);
+    }
   }
 
   // Linking the histos to the SRs
@@ -827,7 +833,7 @@ MAbool SampleAnalyzer::Finalize(std::vector<SampleFormat>& mySamples,
         std::string cleanName = CleanName(myRS->GetName());
         std::string yodaname = myanalysis->Output() + "/Cutflows/" +
           cleanName + ".yoda";
-        myRS->WriteCutflow("CF-"+cleanName, yodaname);
+        myRS->WriteCutflowYODA("CF-"+cleanName, yodaname);
       }
     }
   }

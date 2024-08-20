@@ -82,8 +82,8 @@ class RegionSelection
     { cutflow_.Write_TextFormat(output); }
 
   /// Printing the cutflow as YODA file
-  void WriteCutflow(std::string name, std::string yodaname)
-    {  cutflow_.Write_TextFormat(name, yodaname); }
+  void WriteCutflowYODA(std::string histoname, std::string yodaname)
+    {  cutflow_.Write_YODA(histoname, yodaname); }
 
   /// Set methods
   void SetName(std::string name)

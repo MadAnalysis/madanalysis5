@@ -29,6 +29,10 @@
 #include <map>
 #include <sstream>
 
+#ifdef YODA_USE
+#include "YODA/Histo.h"
+#include "YODA/WriterYODA.h"
+#endif
 
 using namespace MA5;
 
@@ -39,4 +43,25 @@ void PlotManager::Write_TextFormat(SAFWriter& output)
     plots_[i]->Write_TextFormat(output.GetStream());
 }
 
+/// Write the counters in a YODA file
+void PlotManager::Write_YODA(std::string yodaname)
+{
+  #ifdef YODA_USE
 
+  std::vector<YODA::Estimate1D*> yodaHistos;
+
+  // collect histograms as YODA
+  for (MAuint32 i=0;i<plots_.size();i++)
+    yodaHistos.push_back(plots_[i]->ToYODA());
+
+  // write histograms
+  YODA::Writer& yodaWriter = YODA::WriterYODA::create();
+  yodaWriter.write(yodaname, yodaHistos);
+
+  // clean-up
+  for (auto yodaHisto : yodaHistos)
+    delete yodaHisto;
+  yodaHistos.clear();
+
+  #endif
+}

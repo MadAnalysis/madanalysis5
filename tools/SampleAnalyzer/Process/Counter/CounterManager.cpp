@@ -163,20 +163,20 @@ void CounterManager::Write_TextFormat(SAFWriter& output) const
 
 #ifdef YODA_USE
 /// Auxiliary function to set a bin value with number of entries, sumW and sumW2
-void setBin(YODA::BinnedHisto1D<std::string>& h, MAuint32 bin, Counter counter){
+void setBin(YODA::BinnedHisto1D<std::string>& yodaHisto, MAuint32 bin, Counter counter){
   const std::array<double, 2> sumW({counter.sumweight_.first, counter.sumweight_.first});
   const std::array<double, 2> sumW2({counter.sumweight2_.first, counter.sumweight2_.first});
   YODA::Dbn<1> sumWdbn2(counter.nentries_.first, sumW, sumW2);
-  h.set(bin, sumWdbn2);
+  yodaHisto.set(bin, sumWdbn2);
 }
 #endif
 
 /// Write the counters in a YODA file
-void CounterManager::Write_TextFormat(std::string name, std::string yodaname) const
+void CounterManager::Write_YODA(std::string histoname, std::string yodaname) const
 {
   // check for valid histogram
   if(counters_.size()==0){
-    INFO << "      Skipping histogram with name '" << name << "' because it has "
+    INFO << "      Skipping histogram with name '" << histoname << "' because it has "
         << counters_.size() << " bins." << endmsg;
     return;
   }
@@ -189,7 +189,7 @@ void CounterManager::Write_TextFormat(std::string name, std::string yodaname) co
 
   #ifdef YODA_USE
   // create histogram
-  YODA::BinnedHisto1D<std::string> h(edges, name);
+  YODA::BinnedHisto1D<std::string> h(edges, histoname);
 
   // set initial values
   setBin(h, 1, initial_);

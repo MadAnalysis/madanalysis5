@@ -236,6 +236,13 @@ class HistoFrequency : public PlotBase
   }
   */
 
+  #ifdef YODA_USE
+  /// return the plot as a YODA histogram
+  virtual YODA::Estimate1D* ToYODA(){
+    ERROR << "ToYODA isn't implemented yet for HistoFrequency" << endmsg;
+  };
+  #endif
+
 };
 
 }

@@ -210,6 +210,11 @@ class Histo : public PlotBase
   /// Write the plot in a ROOT file
   //  virtual void Write_RootFormat(std::pair<TH1F*,TH1F*>& histos);
 
+  #ifdef YODA_USE
+  /// return the plot as a YODA histogram
+  virtual YODA::Estimate1D* ToYODA();
+  #endif
+
  protected:
 
   /// Write the plot in a ROOT file

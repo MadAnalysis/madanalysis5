@@ -102,7 +102,7 @@ class CounterManager
   void Write_TextFormat(SAFWriter& output) const;
 
   /// Write the counters in a YODA file
-  void Write_TextFormat(std::string name, std::string yodaname) const;
+  void Write_YODA(std::string histoname, std::string yodaname) const;
 
   /// Write the counters in a ROOT file
   //  void Write_RootFormat(TFile* output) const;

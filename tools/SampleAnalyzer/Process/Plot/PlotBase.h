@@ -32,6 +32,10 @@
 #include <string>
 #include <cmath>
 
+#ifdef YODA_USE
+#include "YODA/Histo.h"
+#endif
+
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
@@ -100,6 +104,11 @@ class PlotBase
 
   /// Write the plot in a ROOT file
   virtual void Write_TextFormat(std::ostream* output) = 0;
+
+  #ifdef YODA_USE
+  /// return the plot as a YODA histogram
+  virtual YODA::Estimate1D* ToYODA() = 0;
+  #endif
 
   /// Increment number of events
   void IncrementNEvents(MAfloat64 weight=1.0)
