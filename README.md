@@ -4,6 +4,8 @@
 [![TUTO](https://img.shields.io/static/v1?style=plastic&label=Tutorials&message=@HomePage&color=red)](https://madanalysis.irmp.ucl.ac.be/wiki/tutorials)
 [![Talks](https://img.shields.io/static/v1?style=plastic&label=Talks&message=@HomePage&color=red)](http://madanalysis.irmp.ucl.ac.be/wiki/Talks)
 [![FAQ](https://img.shields.io/static/v1?style=plastic&label=FAQ&message=NormalMode&color=orange)](http://madanalysis.irmp.ucl.ac.be/wiki/FAQNormalMode)
+[![DOI](https://zenodo.org/badge/445622664.svg)](https://zenodo.org/badge/latestdoi/445622664)
+
 
 ![Python v3.8](https://img.shields.io/badge/python-3670A0?style=plastic&logo=python&logoColor=ffdd54&label=3.8&color=brightgreen)
 ![C++](https://img.shields.io/badge/c++-%2300599C.svg?style=plastic&logo=c%2B%2B&logoColor=white&label=11)
