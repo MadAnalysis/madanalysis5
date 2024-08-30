@@ -1857,7 +1857,8 @@ def pyhf_wrapper(*args, **kwargs):
             return obs values
     """
     import pyhf
-    from numpy import isnan, ndarray, warnings
+    import warnings
+    from numpy import isnan, ndarray
     from pyhf.optimize import mixins
 
     # Scilence pyhf's messages
