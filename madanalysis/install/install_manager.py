@@ -85,6 +85,9 @@ class InstallManager():
         elif package=='simplify':
             from madanalysis.install.install_simplify import InstallSimplify
             installer=InstallSimplify(self.main)
+        elif package=='onnx':
+            from madanalysis.install.install_onnx import InstallOnnx
+            installer=InstallOnnx(self.main)
         else:
             self.logger.error('the package "'+rawpackage+'" is unknown')
             return False

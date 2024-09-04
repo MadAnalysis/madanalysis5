@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2022 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -80,6 +80,8 @@ class LibraryBuilder:
             libraries.append(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphes_for_ma5.so')
         if self.archi_info.has_delphesMA5tune:
             libraries.append(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libdelphesMA5tune_for_ma5.so')
+        if self.archi_info.has_onnx:
+            libraries.append(self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libonnx_for_ma5.so')
         for library in libraries:
             if not os.path.isfile(library):
                 self.logger.debug('\t-> library '+ library + " not found.")

@@ -39,6 +39,7 @@ class SessionInfo():
         self.has_gnuplot        = False
         self.has_pdflatex       = False
         self.has_latex          = False
+        self.has_onnx           = False 
         self.has_dvipdf         = False
         self.has_web            = True
         self.has_pad            = False
