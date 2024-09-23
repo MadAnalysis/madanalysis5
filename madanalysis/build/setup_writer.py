@@ -151,6 +151,7 @@ class SetupWriter:
             file.write('set YELLOW = "\\033[1;33m"\n')
             file.write('set CYAN   = "\\033[1;36m"\n')
             file.write('set NORMAL = "\\033[0;39m"\n')
+            file.write('setenv FASTJET_FLAG "-DMA5_FASTJET_MODE"\n')
         file.write("\n")
 
         # Treating ma5dir
@@ -283,15 +284,15 @@ class SetupWriter:
                     file.write(" && ")
                 file.write("$?" + toCheck[ind])
             file.write(" ) then\n")
-            file.write('    printf $YELLOW"' + StringTools.Fill("-", 56) + '\n$NORMAL"\n')
+            file.write('    printf $YELLOW"' + StringTools.Fill("-", 56) + '"$NORMAL\n')
             file.write(
                 '    printf $YELLOW"'
                 + StringTools.Center(
                     "Your environment is properly configured for MA5", 56
                 )
-                + '\n$NORMAL"\n'
+                + '"$NORMAL\n'
             )
-            file.write('    printf $YELLOW"' + StringTools.Fill("-", 56) + '\n"$NORMAL\n')
+            file.write('    printf $YELLOW"' + StringTools.Fill("-", 56) + '"$NORMAL\n')
             file.write("endif\n")
 
         # Closing the file
