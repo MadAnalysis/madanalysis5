@@ -24,17 +24,21 @@
 
 from __future__ import absolute_import
 
-from typing import Callable, Any, List, Tuple
-import glob, logging, os, copy
+import copy
+import glob
+import logging
+import os
+from typing import Any, Callable, List, Tuple
 
-from madanalysis.selection.instance_name import InstanceName
 from madanalysis.dataset.sample_info import SampleInfo
-from madanalysis.layout.cut_info import CutInfo
 from madanalysis.IOinterface.saf_block_status import SafBlockStatus
+from madanalysis.layout.cut_info import CutInfo
 from madanalysis.layout.histogram import Histogram
-from madanalysis.layout.histogram_logx import HistogramLogX
 from madanalysis.layout.histogram_frequency import HistogramFrequency
+from madanalysis.layout.histogram_logx import HistogramLogX
+from madanalysis.multiweight.cutflow import MultiWeightCut, MultiWeightCutFlow
 from madanalysis.multiweight.histogram import MultiWeightHisto
+from madanalysis.selection.instance_name import InstanceName
 
 
 def check_instance(instance: str, instance_type: Callable[[str], Any]) -> bool:
@@ -828,7 +832,7 @@ class JobReader:
         # Closing the file
         file.close()
 
-    def ExtractCuts(self, dataset, cut):
+    def ExtractCuts(self, dataset, cut, multiweigtcutflow: MultiWeightCutFlow):
         # Getting the output file name
         name = InstanceName.Get(dataset.name)
         i = 0
@@ -862,6 +866,7 @@ class JobReader:
             initialTag = SafBlockStatus()
             cutTag = SafBlockStatus()
             cutinfo = CutInfo()
+            multiweightcut = MultiWeightCut()
             cutflow_for_region = []
 
             # Loop over the lines
@@ -899,13 +904,19 @@ class JobReader:
                         initialTag.activate()
                     elif words[0].lower() == "</initialcounter>":
                         initialTag.desactivate()
+                        multiweightcut.name = "Initial"
+                        multiweigtcutflow.append(copy.deepcopy(multiweightcut))
+                        multiweightcut = MultiWeightCut()
                     elif words[0].lower() == "<counter>":
                         cutTag.activate()
                     elif words[0].lower() == "</counter>":
                         cutTag.desactivate()
                         cutinfo.cutregion = myfile.split("/")[-1].split(".")[:-1]
+                        multiweightcut.region = cutinfo.cutregion
                         cutflow_for_region.append(copy.copy(cutinfo))
+                        multiweigtcutflow.append(copy.deepcopy(multiweightcut))
                         cutinfo.Reset()
+                        multiweightcut = MultiWeightCut()
 
                 elif initialTag.activated and not is_comment_line and len(words) >= 2:
                     results = self.ExtractCutLine(words, numline, myfile)
@@ -916,6 +927,7 @@ class JobReader:
                         cut.initial.nentries_neg = (
                             results[1] if isinstance(results[1], float) else results[1][0]
                         )
+                        multiweightcut.add("nentries", results[0], results[1])
                     elif initialTag.Nlines == 1:
                         cut.initial.sumw_pos = (
                             results[0] if isinstance(results[0], float) else results[0][0]
@@ -923,6 +935,7 @@ class JobReader:
                         cut.initial.sumw_neg = (
                             results[1] if isinstance(results[1], float) else results[1][0]
                         )
+                        multiweightcut.add("sumw", results[0], results[1])
                     elif initialTag.Nlines == 2:
                         cut.initial.sumw2_pos = (
                             results[0] if isinstance(results[0], float) else results[0][0]
@@ -930,6 +943,7 @@ class JobReader:
                         cut.initial.sumw2_neg = (
                             results[1] if isinstance(results[1], float) else results[1][0]
                         )
+                        multiweightcut.add("sumw2", results[0], results[1])
                     else:
                         logging.getLogger("MA5").warning("Extra line is found: " + line)
                     initialTag.newline()
@@ -938,6 +952,7 @@ class JobReader:
                 elif cutTag.activated and '"' in line:
                     if cutTag.Nlines == 0:
                         cutinfo.cutname = line.strip()
+                        multiweightcut.name = line.strip()
                     else:
                         logging.getLogger("MA5").warning("Extra line is found: " + line)
                     cutTag.newline()
@@ -951,6 +966,7 @@ class JobReader:
                         cutinfo.nentries_neg = (
                             results[1] if isinstance(results[1], float) else results[1][0]
                         )
+                        multiweightcut.add("nentries", results[0], results[1])
                     elif cutTag.Nlines == 2:
                         cutinfo.sumw_pos = (
                             results[0] if isinstance(results[0], float) else results[0][0]
@@ -958,6 +974,7 @@ class JobReader:
                         cutinfo.sumw_neg = (
                             results[1] if isinstance(results[1], float) else results[1][0]
                         )
+                        multiweightcut.add("sumw", results[0], results[1])
                     elif cutTag.Nlines == 3:
                         cutinfo.sumw2_pos = (
                             results[0] if isinstance(results[0], float) else results[0][0]
@@ -965,6 +982,7 @@ class JobReader:
                         cutinfo.sumw2_neg = (
                             results[1] if isinstance(results[1], float) else results[1][0]
                         )
+                        multiweightcut.add("sumw2", results[0], results[1])
                     else:
                         logging.getLogger("MA5").warning("Extra line is found: " + line)
                     cutTag.newline()

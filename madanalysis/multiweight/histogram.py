@@ -22,17 +22,16 @@
 ################################################################################
 
 """This file includes classes for multiweight histograms"""
-
-import copy
 import warnings
 from collections import namedtuple
 from dataclasses import dataclass
-from typing import Callable, List, Text, Tuple, Union
+from typing import List, Text, Tuple
 
 import numpy as np
 
 from madanalysis.configuration.weight_configuration import WeightCollection
 
+from .bin import MultiWeightBin
 from .lhapdf_info import PDF, LHAPDFInfo
 
 _nevt = namedtuple("events", ["positive", "negative"])
@@ -105,109 +104,6 @@ class Description:
         step = (self.xmax - self.xmin) / float(self.nbins)
         # value
         return self.xmin + (bn + 0.5) * step
-
-
-class MultiWeightBin:
-    """
-    Representation of a multiweight bin
-
-    Args:
-        weights (`List[float]`): sum of weights within the bin per weight
-    """
-
-    contract: Callable[[np.ndarray], float] = np.mean
-    error: Callable[[np.ndarray], Union[float, Tuple[float, float]]] = np.std
-
-    def __init__(self, weights: List[float]):
-        self.weights = np.array(weights)
-
-    def __repr__(self):
-        return f"MultiWeightBin({len(self)} weights)"
-
-    def __str__(self):
-        return self.__repr__()
-
-    @staticmethod
-    def set_contractor(func: Callable[[np.ndarray], float]) -> None:
-        """
-        Set contractor function which computes central value for the bin
-
-        Args:
-            func (``Callable[[np.ndarray], float]``): contractor function
-        """
-        MultiWeightBin.contract = func
-
-    @staticmethod
-    def set_error(func: Union[float, Tuple[float, float]]) -> None:
-        """
-        Set error function
-
-        Args:
-            func (``Union[float, Tuple[float, float]]``): error function
-        """
-        MultiWeightBin.error = func
-
-    @property
-    def central_value(self) -> float:
-        """Retreive the central value of the bin"""
-        return float(MultiWeightBin.contract(self.weights))
-
-    @property
-    def error(self) -> Union[float, Tuple[float, float]]:
-        """Retreive the error for the bin"""
-        err = MultiWeightBin.error(self.weights)
-        if isinstance(err, (tuple, list)):
-            return float(err[0]), float(err[1])
-        return float(err)
-
-    def __getitem__(self, idx: int) -> float:
-        return self.weights[idx]
-
-    def __len__(self) -> int:
-        return len(self.weights)
-
-    def __iter__(self) -> float:
-        yield from self.weights
-
-    def __add__(self, other):
-        if isinstance(other, MultiWeightBin):
-            assert len(other) == len(self), "Dimensionality does not match"
-            return MultiWeightBin(other.weights + copy.deepcopy(self.weights))
-        elif isinstance(other, (int, float)):
-            return MultiWeightBin(other + copy.deepcopy(self.weights))
-
-        raise ValueError("Unknown operation")
-
-    __radd__ = __add__
-
-    def __iadd__(self, other):
-        return self.__add__(other)
-
-    def __sub__(self, other):
-        other = -other
-        return self.__add__(other)
-
-    __rsub__ = __sub__
-
-    def __pos__(self):
-        return self
-
-    def __neg__(self):
-        return MultiWeightBin(-1.0 * copy.deepcopy(self.weights))
-
-    def __mul__(self, other):
-        if isinstance(other, MultiWeightBin):
-            assert len(other) == len(self), "Dimensionality does not match"
-            return MultiWeightBin(other.weights * copy.deepcopy(self.weights))
-        elif isinstance(other, (int, float)):
-            return MultiWeightBin(other * copy.deepcopy(self.weights))
-
-        raise ValueError("Unknown operation")
-
-    __rmul__ = __mul__
-
-    def __abs__(self):
-        return MultiWeightBin(np.abs(self.weights))
 
 
 class MultiWeightHisto:
@@ -532,8 +428,7 @@ class MultiWeightHisto:
                 mean_bin_value = np.mean([bn[loc] for loc in pdf_locs])
 
                 new_bins[idx] = np.sqrt(
-                    sum((bn[loc] - mean_bin_value) ** 2 for loc in pdf_locs)
-                    / (len(pdf_locs) - 1)
+                    np.mean([(bn[loc] - mean_bin_value) ** 2 for loc in pdf_locs])
                 )
             return new_bins, new_bins
 
