@@ -49,7 +49,7 @@ from madanalysis.IOinterface.job_writer import JobWriter
 from madanalysis.IOinterface.library_writer import LibraryWriter
 from madanalysis.misc.histfactory_reader import HF_Background, HF_Signal, get_HFID
 
-from .statistical_models import initialise_statistical_models
+from .statistical_models import initialise_statistical_models, compute_poi_upper_limits
 
 try:
     import spey
@@ -1266,7 +1266,7 @@ class RunRecast:
                 for model_type, record in zip(model_types, [None, "cov_subset", "pyhf"]):
                     models = statistical_models[model_type]
                     if models:
-                        regiondata = self.compute_poi_upper_limits(
+                        regiondata = compute_poi_upper_limits(
                             regiondata,
                             models,
                             dataset.xsection,
@@ -2141,48 +2141,6 @@ class RunRecast:
                 else:
                     regiondata["pyhf"][llhd_profile]["best"] = 0
 
-        return regiondata
-
-    def compute_poi_upper_limits(
-        self,
-        regiondata: dict,
-        stat_models: dict,
-        xsection: float,
-        is_extrapolated: bool,
-        record_to: str = None,
-    ) -> dict:  # pylint: disable=too-many-arguments
-        """
-        Compute upper limit on cross section.
-
-        Args:
-            regiondata (``dict``): data for each region
-            regions (``list[str]``): list of regions
-            xsection (``float``): cross section
-            lumi (``float``): luminosity
-            is_extrapolated (``bool``): extrapolated luminosity
-            record_to (``str``): record to a specific section in regiondata
-
-        Returns:
-            ``dict``:
-            regiondata
-        """
-        self.logger.debug("Compute signal CL...")
-        if record_to is not None and record_to not in regiondata.keys():
-            regiondata[record_to] = {}
-        tags = (
-            [[APRIORI], ["exp"]]
-            if is_extrapolated
-            else [[APOSTERIORI, OBSERVED], ["exp", "obs"]]
-        )
-
-        for tag, label in zip(*tags):
-            for reg, stat_model in stat_models.items():
-                s95 = stat_model.poi_upper_limit(expected=tag) * xsection
-                self.logger.debug(f"{record_to}:: region {reg} s95{label} = {s95:.5f} pb")
-                if record_to is None:
-                    regiondata[reg]["s95" + label] = "%-20.7f" % s95
-                else:
-                    regiondata[record_to][reg]["s95" + label] = "%-20.7f" % s95
         return regiondata
 
     def write_cls_output(
