@@ -44,12 +44,7 @@ class DetectSpey:
         # adding what you want here
 
     def IsItVetoed(self):
-        if self.user_info.spey_veto:
-            self.logger.debug("user setting: veto on spey")
-            return True
-        else:
-            self.logger.debug("no user veto")
-            return False
+        return False
 
     def AutoDetection(self):
         try:
