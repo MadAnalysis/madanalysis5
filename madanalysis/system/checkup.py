@@ -380,19 +380,9 @@ class CheckUp:
     def CheckOptionalReinterpretationPackages(self):
         # Optional packages
         self.logger.info("Checking optional packages devoted to reinterpretation:")
-
-        if not self.checker.Execute("scipy"):
-            return False
-        if not self.checker.Execute("pad"):
-            return False
-        if not self.checker.Execute("padma5"):
-            return False
-        if not self.checker.Execute("padsfs"):
-            return False
-        if not self.checker.Execute("pyhf"):
-            return False
-        if not self.checker.Execute("simplify"):
-            return False
+        for package in ["scipy", "spey", "pad", "padma5", "padsfs","simplify"]:
+            if not self.checker.Execute(package):
+                return False
         return True
 
     def CreateSymLink(self, source, destination):

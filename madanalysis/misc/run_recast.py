@@ -35,7 +35,6 @@ import time
 from collections import OrderedDict
 
 import numpy as np
-import spey
 from shell_command import ShellCommand
 from six.moves import input, map, range
 from string_tools import StringTools
@@ -52,9 +51,14 @@ from madanalysis.misc.histfactory_reader import HF_Background, HF_Signal, get_HF
 
 from .statistical_models import initialise_statistical_models
 
-APRIORI = spey.ExpectationType.apriori
-APOSTERIORI = spey.ExpectationType.aposteriori
-OBSERVED = spey.ExpectationType.observed
+try:
+    import spey
+
+    APRIORI = spey.ExpectationType.apriori
+    APOSTERIORI = spey.ExpectationType.aposteriori
+    OBSERVED = spey.ExpectationType.observed
+except ImportError:
+    pass
 
 # pylint: disable=logging-fstring-interpolation
 

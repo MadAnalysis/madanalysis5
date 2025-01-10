@@ -142,7 +142,10 @@ class DetectPAD:
 
     def ToolsDetection(self):
         msg = ''
-
+        if not self.archi_info.has_spey:
+            msg = "Spey is not installed. Please install it before using "+self.name+"."
+            return DetectStatusType.UNFOUND, msg
+            
         if self.ma5tune:
             thefolder = 'PADForMA5tune'
         elif self.sfs:
