@@ -1258,52 +1258,22 @@ class RunRecast:
                 )
 
                 ## Performing the CLS calculation
-                regiondata = self.extract_sig_cls(
-                    regiondata,
-                    statistical_models["uncorrelated_background"],
-                    dataset.xsection,
-                    "exp",
-                )
-                if self.cov_config:
-                    regiondata = self.extract_sig_lhcls(
-                        regiondata,
-                        statistical_models["simplified_likelihoods"],
-                        dataset.xsection,
-                        "exp",
-                    )
-                # CLs calculation for pyhf
-                if self.pyhf_config:
-                    regiondata = self.pyhf_sig95Wrapper(
-                        regiondata,
-                        statistical_models["full_likelihoods"],
-                        dataset.xsection,
-                        "exp",
-                    )
+                model_types = [
+                    "uncorrelated_background",
+                    "simplified_likelihoods",
+                    "full_likelihoods",
+                ]
+                for model_type, record in zip(model_types, [None, "cov_subset", "pyhf"]):
+                    models = statistical_models[model_type]
+                    if models:
+                        regiondata = self.compute_poi_upper_limits(
+                            regiondata,
+                            models,
+                            dataset.xsection,
+                            is_extrapolated=extrapolated_lumi != "default",
+                            record_to=record,
+                        )
 
-                if extrapolated_lumi == "default":
-                    regiondata = self.extract_sig_cls(
-                        regiondata,
-                        statistical_models["uncorrelated_background"],
-                        dataset.xsection,
-                        "obs",
-                    )
-                    if self.cov_config:
-                        regiondata = self.extract_sig_lhcls(
-                            regiondata,
-                            statistical_models["simplified_likelihoods"],
-                            dataset.xsection,
-                            "obs",
-                        )
-                    if self.pyhf_config:
-                        regiondata = self.pyhf_sig95Wrapper(
-                            regiondata,
-                            statistical_models["full_likelihoods"],
-                            dataset.xsection,
-                            "obs",
-                        )
-                else:
-                    for reg in regions:
-                        regiondata[reg]["nobs"] = regiondata[reg]["nb"]
                 xsflag = True
                 if dataset.xsection > 0:
                     xsflag = False
@@ -2140,9 +2110,11 @@ class RunRecast:
         if self.cov_config:
             minsig95, bestreg = 1e99, []
             for cov_subset, stat_model in stat_models["simplified_likelihoods"].items():
-                CLs = stat_model.exclusion_confidence_level(expected=expected)[idx]
+                CLs = stat_model.exclusion_confidence_level(expected=expected)
                 s95 = float(regiondata["cov_subset"][cov_subset]["s95exp"])
-                regiondata["cov_subset"][cov_subset]["CLs"] = CLs
+                regiondata["cov_subset"][cov_subset]["CLs"] = CLs[idx]
+                if expected != OBSERVED:
+                    regiondata["cov_subset"][cov_subset]["full_CLs_output"] = CLs
                 if 0.0 < s95 < minsig95:
                     regiondata["cov_subset"][cov_subset]["best"] = 1
                     for mybr in bestreg:
@@ -2157,7 +2129,8 @@ class RunRecast:
             for llhd_profile, stat_model in stat_models["full_likelihoods"].items():
                 CLs = stat_model.exclusion_confidence_level(expected=expected)
                 regiondata["pyhf"][llhd_profile]["CLs"] = CLs[idx]
-                regiondata["pyhf"][llhd_profile]["full_CLs_output"] = CLs
+                if expected != OBSERVED:
+                    regiondata["pyhf"][llhd_profile]["full_CLs_output"] = CLs
                 s95 = float(regiondata["pyhf"][llhd_profile]["s95exp"])
                 if 0.0 < s95 < minsig95:
                     regiondata["pyhf"][llhd_profile]["best"] = 1
@@ -2170,78 +2143,47 @@ class RunRecast:
 
         return regiondata
 
-    def extract_sig_cls(
-        self, regiondata: dict, stat_models: dict, xsection: float, tag: str
+    def compute_poi_upper_limits(
+        self,
+        regiondata: dict,
+        stat_models: dict,
+        xsection: float,
+        is_extrapolated: bool,
+        record_to: str = None,
     ) -> dict:  # pylint: disable=too-many-arguments
         """
-        Compute gloabal upper limit on cross section.
+        Compute upper limit on cross section.
 
         Args:
             regiondata (``dict``): data for each region
             regions (``list[str]``): list of regions
             xsection (``float``): cross section
             lumi (``float``): luminosity
-            tag (``str``): expected or observed
+            is_extrapolated (``bool``): extrapolated luminosity
+            record_to (``str``): record to a specific section in regiondata
 
         Returns:
             ``dict``:
             regiondata
         """
         self.logger.debug("Compute signal CL...")
-        for reg, stat_model in stat_models.items():
-            s95 = (
-                stat_model.poi_upper_limit(expected=OBSERVED if tag == "obs" else APRIORI)
-                * xsection
-            )
-            self.logger.debug(f"region {reg} s95{tag} = {s95:.5f} pb")
-            regiondata[reg]["s95" + tag] = "%-20.7f" % s95
-        return regiondata
+        if record_to is not None and record_to not in regiondata.keys():
+            regiondata[record_to] = {}
+        tags = ["exp", "obs"] if not is_extrapolated else ["exp"]
 
-    # Calculating the upper limits on sigma with simplified likelihood
-    def extract_sig_lhcls(
-        self, regiondata: dict, stat_models: dict, xsection: float, tag: str
-    ) -> dict:
-        """
-        Compute signal CL for simplified likelihood.
-
-        Args:
-            regiondata (``dict``): data per region
-            stat_models (``dict``): statistical models
-            xsection (``float``): cross section
-            tag (``str``): expected or observed
-
-        Returns:
-            ``dict``:
-            regiondata
-        """
-        self.logger.debug("Compute signal CL for correlated stat models...")
-
-        if "cov_subset" not in regiondata.keys():
-            regiondata["cov_subset"] = {}
-
-        for cov_subset, stat_model in stat_models.items():
-            s95 = (
-                stat_model.poi_upper_limit(expected=OBSERVED if tag == "obs" else APRIORI)
-                * xsection
-            )
-            self.logger.debug(f"cov subset {cov_subset} s95{tag} = {s95:.5f} pb")
-            regiondata["cov_subset"][cov_subset]["s95" + tag] = "%-20.7f" % s95
-
-        return regiondata
-
-    def pyhf_sig95Wrapper(
-        self, regiondata: dict, stat_models: dict, xsection: float, tag: str
-    ) -> dict:
-        if "pyhf" not in regiondata:
-            regiondata["pyhf"] = {}
-
-        for llhd_profile, stat_model in stat_models.items():
-            s95 = (
-                stat_model.poi_upper_limit(expected=OBSERVED if tag == "obs" else APRIORI)
-                * xsection
-            )
-            self.logger.debug(f"pyhf {llhd_profile} s95{tag} = {s95:.5f} pb")
-            regiondata["pyhf"][llhd_profile]["s95" + tag] = "%-20.7f" % s95
+        for tag in tags:
+            for reg, stat_model in stat_models.items():
+                s95 = (
+                    stat_model.poi_upper_limit(
+                        expected=OBSERVED if tag == "obs" else APRIORI
+                    )
+                    * xsection
+                )
+                self.logger.debug(f"{record_to}:: region {reg} s95{tag} = {s95:.5f} pb")
+                if record_to is None:
+                    regiondata[reg]["s95" + tag] = "%-20.7f" % s95
+                else:
+                    regiondata[record_to][reg]["s95" + tag] = "%-20.7f" % s95
         return regiondata
 
     def write_cls_output(
