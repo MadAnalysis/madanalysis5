@@ -3,3 +3,5 @@ scipy>=1.7.1
 numpy>=1.19.5
 pyhf==0.7.3
 lxml>=4.6.2
+spey>=0.1.11
+spey_pyhf>=0.1.9
