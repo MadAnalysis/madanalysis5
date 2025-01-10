@@ -2169,21 +2169,20 @@ class RunRecast:
         self.logger.debug("Compute signal CL...")
         if record_to is not None and record_to not in regiondata.keys():
             regiondata[record_to] = {}
-        tags = ["exp", "obs"] if not is_extrapolated else ["exp"]
+        tags = (
+            [[APRIORI], ["exp"]]
+            if is_extrapolated
+            else [[APOSTERIORI, OBSERVED], ["exp", "obs"]]
+        )
 
-        for tag in tags:
+        for tag, label in zip(*tags):
             for reg, stat_model in stat_models.items():
-                s95 = (
-                    stat_model.poi_upper_limit(
-                        expected=OBSERVED if tag == "obs" else APRIORI
-                    )
-                    * xsection
-                )
-                self.logger.debug(f"{record_to}:: region {reg} s95{tag} = {s95:.5f} pb")
+                s95 = stat_model.poi_upper_limit(expected=tag) * xsection
+                self.logger.debug(f"{record_to}:: region {reg} s95{label} = {s95:.5f} pb")
                 if record_to is None:
-                    regiondata[reg]["s95" + tag] = "%-20.7f" % s95
+                    regiondata[reg]["s95" + label] = "%-20.7f" % s95
                 else:
-                    regiondata[record_to][reg]["s95" + tag] = "%-20.7f" % s95
+                    regiondata[record_to][reg]["s95" + label] = "%-20.7f" % s95
         return regiondata
 
     def write_cls_output(
