@@ -109,8 +109,8 @@ class DetectManager():
             from madanalysis.system.detect_numpy import DetectNumpy
             checker=DetectNumpy(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='pyhf':
-            from madanalysis.system.detect_pyhf import Detectpyhf
-            checker=Detectpyhf(self.archi_info, self.user_info, self.session_info, self.debug)
+            from madanalysis.system.detect_spey import DetectSpey
+            checker=DetectSpey(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='simplify':
             from madanalysis.system.detect_simplify import DetectSimplify
             checker=DetectSimplify(self.archi_info, self.user_info, self.session_info, self.debug)
