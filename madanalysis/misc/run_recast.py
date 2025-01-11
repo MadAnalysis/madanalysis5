@@ -33,6 +33,7 @@ import shutil
 import sys
 import time
 from collections import OrderedDict
+from math import sqrt
 
 import numpy as np
 from shell_command import ShellCommand
@@ -49,7 +50,7 @@ from madanalysis.IOinterface.job_writer import JobWriter
 from madanalysis.IOinterface.library_writer import LibraryWriter
 from madanalysis.misc.histfactory_reader import HF_Background, HF_Signal, get_HFID
 
-from .statistical_models import initialise_statistical_models, compute_poi_upper_limits
+from .statistical_models import compute_poi_upper_limits, initialise_statistical_models
 
 try:
     import spey
@@ -61,6 +62,14 @@ except ImportError:
     pass
 
 # pylint: disable=logging-fstring-interpolation
+
+
+def comb_sqr(*args, rnd: int = None) -> float:
+    """Combine squared values"""
+    val = sqrt(sum(x**2 for x in args))
+    if rnd is not None:
+        return round(val, rnd)
+    return val
 
 
 class RunRecast:
@@ -1286,57 +1295,15 @@ class RunRecast:
                     )
 
                 ## Uncertainties on the rates
-                Error_dict = {}
-                if dataset.scaleup != None:
-                    Error_dict["scale_up"] = round(dataset.scaleup, 8)
-                    Error_dict["scale_dn"] = -round(dataset.scaledn, 8)
-                else:
-                    Error_dict["scale_up"], Error_dict["scale_dn"] = 0.0, 0.0
-                if dataset.pdfup != None:
-                    Error_dict["pdf_up"] = round(dataset.pdfup, 8)
-                    Error_dict["pdf_dn"] = -round(dataset.pdfdn, 8)
-                else:
-                    Error_dict["pdf_up"], Error_dict["pdf_dn"] = 0.0, 0.0
-                if self.main.recasting.THerror_combination == "linear":
-                    Error_dict["TH_up"] = round(
-                        Error_dict["scale_up"] + Error_dict["pdf_up"], 8
-                    )
-                    Error_dict["TH_dn"] = round(
-                        Error_dict["scale_dn"] + Error_dict["pdf_dn"], 8
-                    )
-                else:
-                    Error_dict["TH_up"] = round(
-                        math.sqrt(
-                            Error_dict["pdf_up"] ** 2 + Error_dict["scale_up"] ** 2
-                        ),
-                        8,
-                    )
-                    Error_dict["TH_dn"] = -round(
-                        math.sqrt(
-                            Error_dict["pdf_dn"] ** 2 + Error_dict["scale_dn"] ** 2
-                        ),
-                        8,
-                    )
-                for i in range(0, len(self.main.recasting.systematics)):
-                    for unc in self.main.recasting.systematics:
-                        Error_dict["sys" + str(i) + "_up"] = round(
-                            math.sqrt(
-                                Error_dict["TH_up"] ** 2
-                                + self.main.recasting.systematics[i][0] ** 2
-                            ),
-                            8,
-                        )
-                        Error_dict["sys" + str(i) + "_dn"] = -round(
-                            math.sqrt(
-                                Error_dict["TH_dn"] ** 2
-                                + self.main.recasting.systematics[i][1] ** 2
-                            ),
-                            8,
-                        )
+                Error_dict = error_dict_setup(
+                    dataset=dataset,
+                    systematics=self.main.recasting.systematics,
+                    linear_comb=self.main.recasting.THerror_combination == "linear",
+                )
 
                 ## Computation of the uncertainties on the limits
                 regiondata_errors = {}
-                if dataset.xsection > 0.0 and any([x != 0 for x in Error_dict.values()]):
+                if dataset.xsection > 0.0 and any(x != 0 for x in Error_dict.values()):
                     for error_key, error_value in Error_dict.items():
                         varied_xsec = max(
                             round(dataset.xsection * (1.0 + error_value), 10), 0.0
@@ -2446,3 +2413,50 @@ def clean_region_name(mystr):
     newstr = newstr.replace("(", "_lp_")
     newstr = newstr.replace(")", "_rp_")
     return newstr
+
+
+def error_dict_setup(
+    dataset, systematics: list[list[float]], linear_comb: bool
+) -> dict[str, float]:
+    """
+    Setup the error dictionary for a given dataset.
+
+    Args:
+        dataset (``_type_``): dataset description
+        systematics (``list[list[float]]``): systematics description
+
+    Returns:
+        ``dict[str, float]``:
+        error dictionary
+    """
+    def comb(*args, rnd=8):
+        if linear_comb:
+            return round(sum(args), rnd)
+        return comb_sqr(*args, rnd=rnd)
+    
+    Error_dict = {
+        "scale_up": 0.0,
+        "scale_dn": 0.0,
+        "pdf_up": 0.0,
+        "pdf_dn": 0.0,
+    }
+    if dataset.scaleup is not None:
+        Error_dict["scale_up"] = round(dataset.scaleup, 8)
+        Error_dict["scale_dn"] = -round(dataset.scaledn, 8)
+    if dataset.pdfup is not None:
+        Error_dict["pdf_up"] = round(dataset.pdfup, 8)
+        Error_dict["pdf_dn"] = -round(dataset.pdfdn, 8)
+    Error_dict.update(
+        {
+            "TH_up": comb(Error_dict["scale_up"], Error_dict["pdf_up"]),
+            "TH_dn": -comb(Error_dict["scale_dn"], Error_dict["pdf_dn"]),
+        }
+    )
+    for idx, syst in enumerate(systematics):
+        Error_dict.update(
+            {
+                f"sys{idx}_up": comb_sqr(Error_dict["TH_up"], syst[0], rnd=8),
+                f"sys{idx}_dn": -comb_sqr(Error_dict["TH_dn"], syst[1], rnd=8),
+            }
+        )
+    return Error_dict

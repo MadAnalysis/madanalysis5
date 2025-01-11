@@ -1,5 +1,7 @@
-import spey
 import logging
+
+import spey
+
 from .histfactory_reader import HF_Background, HF_Signal
 
 APRIORI = spey.ExpectationType.apriori
@@ -128,9 +130,9 @@ def compute_poi_upper_limits(
         for reg, stat_model in stat_models.items():
             s95 = stat_model.poi_upper_limit(expected=tag) * xsection
             if record_to is None:
-                logger.debug(f"region {reg} s95{label} = {s95:.5f} pb")
-                regiondata[reg]["s95" + label] = "%-20.7f" % s95
+                logger.debug("region %s s95%s = %.5f pb", reg, label, s95)
+                regiondata[reg][f"s95{label}"] = f"{s95:20.7f}"
             else:
-                logger.debug(f"{record_to}:: region {reg} s95{label} = {s95:.5f} pb")
-                regiondata[record_to][reg]["s95" + label] = "%-20.7f" % s95
+                logger.debug("%s:: region %s s95%s = %.5f pb", record_to, reg, label, s95)
+                regiondata[record_to][reg][f"s95{label}"] = f"{s95:20.7f}"
     return regiondata
