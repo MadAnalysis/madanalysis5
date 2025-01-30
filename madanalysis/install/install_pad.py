@@ -55,13 +55,15 @@ class InstallPad:
             self.files  = {
              "padsfs.dat"     : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/SFS/padsfs3.dat",
              "bib_padsfs.dat" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/bib_pad3.dat",
-             "json_padsfs.dat": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/SFS/json_padsfs3.dat"
+             "json_padsfs.dat": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/SFS/json_padsfs3.dat",
+             "csv_padsfs.dat" : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/SFS/csv_padsfs.dat"
             }
         self.analyses       = []
         self.analysis_files = []
         self.pileup_files   = []
         self.delphes_cards  = []
         self.json_cards     = []
+        self.csv_cards      = []
 
 
     def Detect(self):
@@ -137,6 +139,12 @@ class InstallPad:
             if not ok:
                 return False
 
+        # CSV files
+        if "csv_padsfs.dat" in self.files.keys():
+            logging.debug('Creating folder '+self.installdir+'/Input/CSV')
+            TheCommand = ['mkdir', self.installdir+'/Input/CSV']
+            ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir+'/tools')
+
         # EXIT
         return True
 
@@ -166,6 +174,24 @@ class InstallPad:
                     json_dictionary[line.strip().split('|')[0].strip()] = \
                         [ line.strip().split('|')[1].split(), line.strip().split('|')[2].split()];
                 json_input.close();
+
+        # CSV files
+        csv_dictionary    = {}
+        if self.padname in ['PADForSFS']:
+            csv_struct_name = [x for x in self.files.keys() if 'csv' in x]
+            if len(csv_struct_name) == 1:
+                logging.getLogger('MA5').debug(" ** Getting the list of data CSV files in " + self.downloaddir+"/"+csv_struct_name[0])
+                csv_input = open(os.path.join(self.downloaddir,csv_struct_name[0]))
+                for line in csv_input:
+                    if len(line.strip())==0 or line.strip().startswith('#'): continue
+                    analysis_name = line.strip().split('|')[0].strip()
+                    server_name = line.strip().split('|')[1].strip()
+                    csv_name = line.strip().split('|')[2].strip()
+                    tag = line.strip().split('|')[3].strip()
+                    if not analysis_name in csv_dictionary.keys(): csv_dictionary[analysis_name] = {}
+                    if not server_name in csv_dictionary[analysis_name].keys(): csv_dictionary[analysis_name][server_name] = {}
+                    csv_dictionary[analysis_name][server_name][csv_name] = tag
+                csv_input.close();
 
         # Getting the analysis one by one (and creating first skeleton analyses for each of them)
         logging.getLogger('MA5').debug('Reading the analysis list in ' + \
@@ -243,6 +269,15 @@ class InstallPad:
                                'https://dataverse.uclouvain.be/api/access/datafile/' + json_dictionary[analysis][1][i_json]
                             self.json_cards.append(analysis+'_'+json_dictionary[analysis][0][i_json]+'.json')
                             self.analysis_files.append(analysis+'_'+json_dictionary[analysis][0][i_json]+'.json')
+                    ## CSV files
+                    if analysis in list(csv_dictionary.keys()):
+                        TheCommand = ['mkdir', self.installdir+'/Input/CSV/'+ analysis.upper()]
+                        ok= ShellCommand.Execute(TheCommand,self.main.archi_info.ma5dir+'/tools')
+                        for k, v in csv_dictionary[analysis].items():
+                            if k != 'dataverse': continue
+                            for file, tag in v.items():
+                                files[file+'.csv'] = 'https://dataverse.uclouvain.be/api/access/datafile/' + tag
+                                self.csv_cards.append([analysis, file+'.csv'])
                 else:
                     if url=='MA5-local':
                         url='http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/'
@@ -313,9 +348,13 @@ class InstallPad:
                 oldfile = os.path.join(self.downloaddir, analysis + '.'+extension)
                 shutil.copy(oldfile,newfile)
 
-        # json files fopr pyhf
+        # json files for pyhf
         for json in self.json_cards:
             shutil.copy(os.path.join(self.downloaddir,json), self.PADdir)
+
+        # data files
+        for csv in self.csv_cards:
+            shutil.copy(os.path.join(self.downloaddir,csv[1]), self.installdir+'/Input/CSV/'+ csv[0].upper())
 
         # the delphes cards
         for myfile in self.delphes_cards:
