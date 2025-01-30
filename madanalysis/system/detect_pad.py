@@ -1,56 +1,54 @@
 ################################################################################
-#  
+#
 #  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
-#  
+#
 #  This file is part of MadAnalysis 5.
 #  Official website: <https://github.com/MadAnalysis/madanalysis5>
-#  
+#
 #  MadAnalysis 5 is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
-#  
+#
 #  MadAnalysis 5 is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #  GNU General Public License for more details.
-#  
+#
 #  You should have received a copy of the GNU General Public License
 #  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
-#  
+#
 ################################################################################
 
 
-from __future__                                 import absolute_import
-from shell_command                              import ShellCommand
+from __future__ import absolute_import
+from shell_command import ShellCommand
 from madanalysis.enumeration.detect_status_type import DetectStatusType
-from madanalysis.system.config_checker          import ConfigChecker
+from madanalysis.system.config_checker import ConfigChecker
 import logging, os
 
 
 class DetectPAD:
-
-    def __init__(self,archi_info, user_info, session_info, debug, padtype=''):
-        self.archi_info   = archi_info
-        self.user_info    = user_info
+    def __init__(self, archi_info, user_info, session_info, debug, padtype=""):
+        self.archi_info = archi_info
+        self.user_info = user_info
         self.session_info = session_info
-        self.debug        = debug
-        self.ma5tune      = (padtype=="ma5")
-        self.sfs          = (padtype=="sfs")
+        self.debug = debug
+        self.ma5tune = padtype == "ma5"
+        self.sfs = padtype == "sfs"
         if self.ma5tune:
-            self.name  = 'PADForMA5tune'
+            self.name = "PADForMA5tune"
         elif self.sfs:
-            self.name  = 'PADForSFS'
+            self.name = "PADForSFS"
         else:
-            self.name  = 'PAD'
-        self.mandatory   = False
-        self.force       = False
-        self.build_file  = ''
-        self.build_path  = ''
-        self.version     = ''
-        self.logger      = logging.getLogger('MA5')
-
+            self.name = "PAD"
+        self.mandatory = False
+        self.force = False
+        self.build_file = ""
+        self.build_path = ""
+        self.version = ""
+        self.logger = logging.getLogger("MA5")
 
     def IsItVetoed(self):
         if self.ma5tune:
@@ -75,9 +73,10 @@ class DetectPAD:
                 self.logger.debug("no user veto")
                 return False
 
-
     def AreDependenciesInstalled(self):
-        checker = ConfigChecker(self.archi_info, self.user_info, self.session_info, False, False)
+        checker = ConfigChecker(
+            self.archi_info, self.user_info, self.session_info, False, False
+        )
         if self.ma5tune:
             if not checker.checkDelphesMA5tune(True):
                 self.logger.debug("dependency 'DelphesMA5tune' is not installed")
@@ -89,11 +88,11 @@ class DetectPAD:
         return True
 
     def ManualDetection(self):
-        msg = ''
+        msg = ""
 
         if self.ma5tune:
             # User setting
-            if self.user_info.padma5_build_path==None:
+            if self.user_info.padma5_build_path == None:
                 return DetectStatusType.UNFOUND, msg
 
             self.logger.debug("User setting: PADForMA5Tune build path is specified.")
@@ -103,7 +102,10 @@ class DetectPAD:
 
         if self.sfs:
             # User setting
-            if self.user_info.padsfs_build_path==None or not self.archi_info.has_fastjet:
+            if (
+                self.user_info.padsfs_build_path == None
+                or not self.archi_info.has_fastjet
+            ):
                 return DetectStatusType.UNFOUND, msg
 
             self.logger.debug("User setting: PADForSFS build path is specified.")
@@ -113,7 +115,7 @@ class DetectPAD:
 
         else:
             # User setting
-            if self.user_info.pad_build_path==None:
+            if self.user_info.pad_build_path == None:
                 return DetectStatusType.UNFOUND, msg
 
             self.logger.debug("User setting: PAD build path is specified.")
@@ -121,76 +123,90 @@ class DetectPAD:
             # Folder name
             folder = os.path.normpath(self.user_info.pad_build_path)
 
-        filename = folder+'/MadAnalysis5job'
+        filename = folder + "/MadAnalysis5job"
 
         # Detection of the PAD exectuable
-        self.logger.debug("Detecting MadAnalysis5job in the path specified by the user ...")
+        self.logger.debug(
+            "Detecting MadAnalysis5job in the path specified by the user ..."
+        )
         if not os.path.isfile(filename) and not self.sfs:
-            logging.getLogger('MA5').debug('-> not found')
-            msg  = "MadAnalysis5job program is not found in folder: "+folder+"\n"
-            msg += "Please check that "+self.name+" is properly installed."
+            logging.getLogger("MA5").debug("-> not found")
+            msg = "MadAnalysis5job program is not found in folder: " + folder + "\n"
+            msg += "Please check that " + self.name + " is properly installed."
             return DetectStatusType.UNFOUND, msg
 
-        self.build_file=filename
-        self.build_path=folder
+        self.build_file = filename
+        self.build_path = folder
 
-        self.logger.debug("MadAnalysis5job program found in: "+self.build_path)
+        self.logger.debug("MadAnalysis5job program found in: " + self.build_path)
 
         # Ok
         return DetectStatusType.FOUND, msg
 
-
     def ToolsDetection(self):
-        msg = ''
+        msg = ""
+        if not self.archi_info.has_spey:
+            msg = (
+                "Spey is not installed. Please install it before using " + self.name + "."
+            )
+            return DetectStatusType.UNFOUND, msg
 
         if self.ma5tune:
-            thefolder = 'PADForMA5tune'
+            thefolder = "PADForMA5tune"
         elif self.sfs:
-            thefolder = 'PADForSFS'
+            thefolder = "PADForSFS"
             if not self.archi_info.has_fastjet:
                 return DetectStatusType.UNFOUND, msg
         else:
-            thefolder = 'PAD'
+            thefolder = "PAD"
 
-        filename = os.path.normpath(self.archi_info.ma5dir+'/tools/'+thefolder+'/Build/MadAnalysis5job')
+        filename = os.path.normpath(
+            self.archi_info.ma5dir + "/tools/" + thefolder + "/Build/MadAnalysis5job"
+        )
         if self.sfs:
-            filename = os.path.normpath(self.archi_info.ma5dir+'/tools/'+thefolder+'/Build/SampleAnalyzer/User/Analyzer/analysisList.h')
+            filename = os.path.normpath(
+                self.archi_info.ma5dir
+                + "/tools/"
+                + thefolder
+                + "/Build/SampleAnalyzer/User/Analyzer/analysisList.h"
+            )
 
-        self.logger.debug("Look for "+self.name+" in the folder here :"+filename+" ...")
+        self.logger.debug(
+            "Look for " + self.name + " in the folder here :" + filename + " ..."
+        )
         if os.path.isfile(filename):
             self.logger.debug("-> found")
-            self.build_file=filename
-            self.build_path=os.path.dirname(self.build_file)
+            self.build_file = filename
+            self.build_path = os.path.dirname(self.build_file)
         else:
             self.logger.debug("-> not found")
             return DetectStatusType.UNFOUND, msg
 
         return DetectStatusType.FOUND, msg
 
-
     def ExtractInfo(self):
         if self.sfs:
             return True
-        theCommands = [self.build_file,'--info']
-        ok, out, err = ShellCommand.ExecuteWithCapture(theCommands,'./')
+        theCommands = [self.build_file, "--info"]
+        ok, out, err = ShellCommand.ExecuteWithCapture(theCommands, "./")
         if not ok:
             self.logger.debug("->ERROR: MadAnalyis5job program does not work properly.")
             self.logger.debug(str(out))
             self.logger.debug(str(err))
             return False
-        lines=out.split('\n')
+        lines = out.split("\n")
         ok = False
         nbAnalysis = 0
         for line in lines:
-            line=line.lstrip()
-            line=line.rstrip()
-            if line.startswith('BEGIN '):
+            line = line.lstrip()
+            line = line.rstrip()
+            if line.startswith("BEGIN "):
                 self.logger.debug("  MA5 stamp found!")
                 ok = True
                 continue
             if ok:
                 nbAnalysis += 1
-            if line.endswith('END '):
+            if line.endswith("END "):
                 break
         if self.debug:
             self.logger.debug("  number of recast analyses: " + str(nbAnalysis))
@@ -198,23 +214,20 @@ class DetectPAD:
         # Ok
         return ok
 
-
     def SaveInfo(self):
         # archi_info
         if self.ma5tune:
-             self.session_info.has_padma5           = True
-             self.session_info.padma5_build_path    = self.build_path
-             self.session_info.padma5_original_bins = [self.build_file]
+            self.session_info.has_padma5 = True
+            self.session_info.padma5_build_path = self.build_path
+            self.session_info.padma5_original_bins = [self.build_file]
         elif self.sfs:
-             self.session_info.has_padsfs           = True
-             self.session_info.padsfs_build_path    = self.build_path
-             self.session_info.padsfs_original_bins = [self.build_file]
+            self.session_info.has_padsfs = True
+            self.session_info.padsfs_build_path = self.build_path
+            self.session_info.padsfs_original_bins = [self.build_file]
         else:
-             self.session_info.has_pad              = True
-             self.session_info.pad_build_path       = self.build_path
-             self.session_info.pad_original_bins    = [self.build_file]
-        
+            self.session_info.has_pad = True
+            self.session_info.pad_build_path = self.build_path
+            self.session_info.pad_original_bins = [self.build_file]
+
         # Ok
         return True
-
-
