@@ -380,7 +380,7 @@ class CheckUp:
     def CheckOptionalReinterpretationPackages(self):
         # Optional packages
         self.logger.info("Checking optional packages devoted to reinterpretation:")
-        for package in ["scipy", "spey", "pad", "padma5", "padsfs","simplify"]:
+        for package in ["scipy", "spey", "pyhf", "pad", "padma5", "padsfs","simplify"]:
             if not self.checker.Execute(package):
                 return False
         return True
