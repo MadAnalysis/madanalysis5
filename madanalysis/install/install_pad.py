@@ -214,7 +214,11 @@ class InstallPad:
             # getting the dataverse URLs
             delphes_url='';
             if 'dataverse' in delphes:
-                delphes_url = 'https://dataverse.uclouvain.be/api/access/datafile/'+delphes.split()[-1][:-1];
+                if len(delphes.split())==3:
+                    delphes_url = 'https://dataverse.uclouvain.be/api/access/datafile/'+delphes.split()[-1][:-1];
+                if len(delphes.split())==4:
+                    delphes_url = 'https://dataverse.uclouvain.be/api/access/datafile/:persistentId?persistentId=doi:10.14428/DVN/' + \
+                       delphes.split()[2].strip() + '/' + delphes.split()[-1][:-1].strip();
                 if len(analysis)==0 and len(url)==0:
                    delphes = delphes.split()[1]
                 elif self.padname!='PADForSFS':
@@ -260,13 +264,25 @@ class InstallPad:
                 if 'dataverse' in url:
                     exts = ['cpp', 'h', 'info'];
                     anl_files = url.split(']')[0].split()[1:];
+                    doi=''
+                    if len(anl_files)==4:
+                       doi=anl_files[0]
+                       anl_files=anl_files[1:]
                     for i in range(len(anl_files)):
-                        files[analysis+'.'+exts[i]] = 'https://dataverse.uclouvain.be/api/access/datafile/'+anl_files[i];
+                        if doi=='':
+                            files[analysis+'.'+exts[i]] = 'https://dataverse.uclouvain.be/api/access/datafile/'+anl_files[i];
+                        else:
+                            files[analysis+'.'+exts[i]] = 'https://dataverse.uclouvain.be/api/access/datafile/:persistentId?persistentId=doi:10.14428/DVN/'+\
+                               doi + '/' + anl_files[i];
                     ## json files
                     if analysis in list(json_dictionary.keys()):
                         for i_json in range(len(json_dictionary[analysis][0])):
-                            files[analysis+'_'+json_dictionary[analysis][0][i_json]+'.json'] =\
-                               'https://dataverse.uclouvain.be/api/access/datafile/' + json_dictionary[analysis][1][i_json]
+                            if doi=='':
+                                files[analysis+'_'+json_dictionary[analysis][0][i_json]+'.json'] =\
+                                   'https://dataverse.uclouvain.be/api/access/datafile/' + json_dictionary[analysis][1][i_json]
+                            else:
+                                files[analysis+'_'+json_dictionary[analysis][0][i_json]+'.json'] =\
+                                   'https://dataverse.uclouvain.be/api/access/datafile/:persistentId?persistentId=doi:10.14428/DVN/' + doi + '/' + json_dictionary[analysis][1][i_json]
                             self.json_cards.append(analysis+'_'+json_dictionary[analysis][0][i_json]+'.json')
                             self.analysis_files.append(analysis+'_'+json_dictionary[analysis][0][i_json]+'.json')
                     ## CSV files
@@ -276,7 +292,11 @@ class InstallPad:
                         for k, v in csv_dictionary[analysis].items():
                             if k != 'dataverse': continue
                             for file, tag in v.items():
-                                files[file+'.csv'] = 'https://dataverse.uclouvain.be/api/access/datafile/' + tag
+                                if doi=='':
+                                    files[file+'.csv'] = 'https://dataverse.uclouvain.be/api/access/datafile/' + tag
+                                else:
+                                    files[file+'.csv'] = 'https://dataverse.uclouvain.be/api/access/datafile/:persistentId?persistentId=doi:10.14428/DVN/' +\
+                                       doi + '/' +  tag
                                 self.csv_cards.append([analysis, file+'.csv'])
                 else:
                     if url=='MA5-local':
