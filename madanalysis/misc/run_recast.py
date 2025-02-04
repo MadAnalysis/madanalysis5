@@ -50,17 +50,6 @@ from madanalysis.IOinterface.job_writer import JobWriter
 from madanalysis.IOinterface.library_writer import LibraryWriter
 from madanalysis.misc.histfactory_reader import HF_Background, HF_Signal, get_HFID
 
-from .statistical_models import compute_poi_upper_limits, initialise_statistical_models
-
-try:
-    import spey
-
-    APRIORI = spey.ExpectationType.apriori
-    APOSTERIORI = spey.ExpectationType.aposteriori
-    OBSERVED = spey.ExpectationType.observed
-except ImportError:
-    pass
-
 # pylint: disable=logging-fstring-interpolation
 
 
@@ -1126,6 +1115,15 @@ class RunRecast:
     ################################################
 
     def compute_cls(self, analyses, dataset):
+        from .statistical_models import (
+            initialise_statistical_models,
+            compute_poi_upper_limits,
+            APRIORI,
+            APOSTERIORI,
+            OBSERVED,
+        )
+        import spey
+
         ## Checking whether the CLs module can be used
         ET = self.check_xml_scipy_methods()
         if not ET:
@@ -1707,7 +1705,7 @@ class RunRecast:
             return {}
         pyhf_config = OrderedDict()
         analysis = info_root.attrib["id"]
-        nprofile = 0
+        nprofile, default_lumi = 0, 0
         to_remove = []
         self.logger.debug(" === Reading info file for pyhf ===")
         for child in info_root:
@@ -2040,6 +2038,8 @@ class RunRecast:
         lumi: float,
         is_extrapolated: bool,
     ) -> dict:
+        from .statistical_models import APRIORI, APOSTERIORI, OBSERVED
+
         self.logger.debug("Compute CLs...")
         ## computing fi a region belongs to the best expected ones, and derive the CLs in all cases
         idx = 2 if is_extrapolated else 0
@@ -2429,11 +2429,12 @@ def error_dict_setup(
         ``dict[str, float]``:
         error dictionary
     """
+
     def comb(*args, rnd=8):
         if linear_comb:
             return round(sum(args), rnd)
         return comb_sqr(*args, rnd=rnd)
-    
+
     Error_dict = {
         "scale_up": 0.0,
         "scale_dn": 0.0,

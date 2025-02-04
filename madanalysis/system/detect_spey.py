@@ -55,9 +55,8 @@ class DetectSpey:
             return DetectStatusType.UNFOUND, ""
 
         # Checking release
-        if self.debug:
-            self.logger.debug("  release = " + spey.version())
-            self.logger.debug("  where? = " + spey.__file__)
+        self.logger.debug("  release = " + spey.version())
+        self.logger.debug("  where? = " + spey.__file__)
 
         # Ok
         return DetectStatusType.FOUND, ""
