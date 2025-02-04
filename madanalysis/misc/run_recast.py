@@ -33,7 +33,6 @@ import shutil
 import sys
 import time
 from collections import OrderedDict
-from math import sqrt
 
 import numpy as np
 from shell_command import ShellCommand
@@ -48,17 +47,15 @@ from madanalysis.install.detector_manager import DetectorManager
 from madanalysis.IOinterface.folder_writer import FolderWriter
 from madanalysis.IOinterface.job_writer import JobWriter
 from madanalysis.IOinterface.library_writer import LibraryWriter
-from madanalysis.misc.histfactory_reader import HF_Background, HF_Signal, get_HFID
+from madanalysis.misc.histfactory_reader import (
+    HF_Background,
+    HF_Signal,
+    get_HFID,
+    construct_histfactory_dictionary,
+)
+from madanalysis.misc.theoretical_error_setup import error_dict_setup
 
 # pylint: disable=logging-fstring-interpolation,import-outside-toplevel
-
-
-def comb_sqr(*args, rnd: int = None) -> float:
-    """Combine squared values"""
-    val = sqrt(sum(x**2 for x in args))
-    if rnd is not None:
-        return round(val, rnd)
-    return val
 
 
 class RunRecast:
@@ -1667,20 +1664,20 @@ class RunRecast:
         of SRs.
         """
         self.pyhf_config = {}  # reset
-        if any([x.tag == "pyhf" for x in info_root]):
+        if any(x.tag == "pyhf" for x in info_root):
             # pyhf_path = os.path.join(self.main.archi_info.ma5dir, 'tools/pyhf/pyhf-master/src')
             try:
                 # if os.path.isdir(pyhf_path) and pyhf_path not in sys.path:
                 #     sys.path.insert(0, pyhf_path)
-                import pyhf
+                import spey_pyhf
 
-                self.logger.debug("Pyhf v" + str(pyhf.__version__))
+                self.logger.debug("spey_pyhf v" + str(spey_pyhf.__version__))
                 self.logger.debug(
-                    "pyhf has been imported from " + " ".join(pyhf.__path__)
+                    "spey_pyhf has been imported from " + " ".join(spey_pyhf.__path__)
                 )
             except ImportError:
                 self.logger.warning(
-                    'To use the global likelihood PYHF machinery, please type "install pyhf"'
+                    "To use the global likelihood machinery, please install spey-pyhf"
                 )
                 return {}
             except Exception as err:
@@ -1689,184 +1686,8 @@ class RunRecast:
                 return {}
         else:
             return {}
-        pyhf_config = OrderedDict()
-        analysis = info_root.attrib["id"]
-        nprofile, default_lumi = 0, 0
-        to_remove = []
-        self.logger.debug(" === Reading info file for pyhf ===")
-        for child in info_root:
-            if child.tag == "lumi":
-                default_lumi = float(child.text)
-            if child.tag == "pyhf":
-                likelihood_profile = child.attrib.get(
-                    "id", "HF-Likelihood-" + str(nprofile)
-                )
-                if likelihood_profile == "HF-Likelihood-" + str(nprofile):
-                    nprofile += 1
-                if not likelihood_profile in list(pyhf_config.keys()):
-                    pyhf_config[likelihood_profile] = {
-                        "name": "No File name in info file...",
-                        "path": os.path.join(
-                            self.pad, "Build/SampleAnalyzer/User/Analyzer"
-                        ),
-                        "lumi": default_lumi,
-                        "SR": OrderedDict(),
-                    }
-                for subchild in child:
-                    if subchild.tag == "name":
-                        if (
-                            self.main.recasting.simplify_likelihoods
-                            and self.main.session_info.has_simplify
-                        ):
-                            main_path = pyhf_config[likelihood_profile]["path"]
-                            full = str(subchild.text)
-                            simplified = full.split(".json")[0] + "_simplified.json"
-                            if os.path.isfile(os.path.join(main_path, simplified)):
-                                pyhf_config[likelihood_profile]["name"] = simplified
-                            else:
-                                simplify_path = os.path.join(
-                                    self.main.archi_info.ma5dir,
-                                    "tools/simplify/simplify-master/src",
-                                )
-                                try:
-                                    if (
-                                        os.path.isdir(simplify_path)
-                                        and simplify_path not in sys.path
-                                    ):
-                                        sys.path.insert(0, simplify_path)
-                                    import simplify
-
-                                    self.logger.debug(
-                                        "simplify has been imported from "
-                                        + " ".join(simplify.__path__)
-                                    )
-                                    self.logger.debug("simplifying " + full)
-                                    with open(os.path.join(main_path, full), "r") as f:
-                                        spec = json.load(f)
-                                    # Get model and data
-                                    poi_name = "lumi"
-                                    try:
-                                        original_poi = spec["measurements"][0]["config"][
-                                            "poi"
-                                        ]
-                                        spec["measurements"][0]["config"][
-                                            "poi"
-                                        ] = poi_name
-                                    except IndexError:
-                                        raise simplify.exceptions.InvalidMeasurement(
-                                            "The measurement index 0 is out of bounds."
-                                        )
-                                    model, data = simplify.model_tools.model_and_data(
-                                        spec
-                                    )
-
-                                    fixed_params = model.config.suggested_fixed()
-                                    init_pars = model.config.suggested_init()
-                                    # Fit the model to data
-                                    fit_result = simplify.fitter.fit(
-                                        model,
-                                        data,
-                                        init_pars=init_pars,
-                                        fixed_pars=fixed_params,
-                                    )
-                                    # Get yields
-                                    ylds = simplify.yields.get_yields(
-                                        spec, fit_result, []
-                                    )
-                                    newspec = simplify.simplified.get_simplified_spec(
-                                        spec,
-                                        ylds,
-                                        allowed_modifiers=[],
-                                        prune_channels=[],
-                                        include_signal=False,
-                                    )
-                                    newspec["measurements"][0]["config"][
-                                        "poi"
-                                    ] = original_poi
-                                    with open(
-                                        os.path.join(main_path, simplified), "w+"
-                                    ) as out_file:
-                                        json.dump(
-                                            newspec, out_file, indent=4, sort_keys=True
-                                        )
-                                    pyhf_config[likelihood_profile]["name"] = simplified
-                                except ImportError:
-                                    self.logger.warning(
-                                        "To use simplified likelihoods, please install simplify"
-                                    )
-                                    pyhf_config[likelihood_profile]["name"] = str(
-                                        subchild.text
-                                    )
-                                except (
-                                    Exception,
-                                    simplify.exceptions.InvalidMeasurement,
-                                ) as err:
-                                    self.logger.warning("Can not simplify " + full)
-                                    self.logger.debug(str(err))
-                                    pyhf_config[likelihood_profile]["name"] = str(
-                                        subchild.text
-                                    )
-                        else:
-                            pyhf_config[likelihood_profile]["name"] = str(subchild.text)
-                        self.logger.debug(
-                            pyhf_config[likelihood_profile]["name"]
-                            + " file will be used."
-                        )
-                    elif subchild.tag == "regions":
-                        for channel in subchild:
-                            if channel.tag == "channel":
-                                if not channel.attrib.get("name", False):
-                                    self.logger.warning("Invalid or corrupted info file")
-                                    self.logger.warning(
-                                        "Please check " + likelihood_profile
-                                    )
-                                    to_remove.append(likelihood_profile)
-                                else:
-                                    data = []
-                                    if channel.text != None:
-                                        data = channel.text.split()
-                                    pyhf_config[likelihood_profile]["SR"][
-                                        channel.attrib["name"]
-                                    ] = {
-                                        "channels": channel.get("id", default=-1),
-                                        "data": data,
-                                    }
-                                    is_included = (
-                                        (
-                                            channel.get("is_included", default=0)
-                                            in ["True", "1", "yes"]
-                                        )
-                                        if len(data) == 0
-                                        else True
-                                    )
-                                    pyhf_config[likelihood_profile]["SR"][
-                                        channel.attrib["name"]
-                                    ].update({"is_included": is_included})
-                                    if (
-                                        pyhf_config[likelihood_profile]["SR"][
-                                            channel.attrib["name"]
-                                        ]["channels"]
-                                        == -1
-                                    ):
-                                        file = os.path.join(
-                                            pyhf_config[likelihood_profile]["path"],
-                                            pyhf_config[likelihood_profile]["name"],
-                                        )
-                                        ID = get_HFID(file, channel.attrib["name"])
-                                        if not isinstance(ID, str):
-                                            pyhf_config[likelihood_profile]["SR"][
-                                                channel.attrib["name"]
-                                            ]["channels"] = str(ID)
-                                        else:
-                                            self.logger.warning(ID)
-                                            self.logger.warning(
-                                                "Please check "
-                                                + likelihood_profile
-                                                + "and/or "
-                                                + channel.attrib["name"]
-                                            )
-                                            to_remove.append(likelihood_profile)
-
+        analysis =info_root.attrib["id"]        
+        pyhf_config, to_remove = construct_histfactory_dictionary(info_root, self)
         # validate
         for likelihood_profile, config in pyhf_config.items():
             if likelihood_profile in to_remove:
@@ -2399,51 +2220,3 @@ def clean_region_name(mystr):
     newstr = newstr.replace("(", "_lp_")
     newstr = newstr.replace(")", "_rp_")
     return newstr
-
-
-def error_dict_setup(
-    dataset, systematics: list[list[float]], linear_comb: bool
-) -> dict[str, float]:
-    """
-    Setup the error dictionary for a given dataset.
-
-    Args:
-        dataset (``_type_``): dataset description
-        systematics (``list[list[float]]``): systematics description
-
-    Returns:
-        ``dict[str, float]``:
-        error dictionary
-    """
-
-    def comb(*args, rnd=8):
-        if linear_comb:
-            return round(sum(args), rnd)
-        return comb_sqr(*args, rnd=rnd)
-
-    Error_dict = {
-        "scale_up": 0.0,
-        "scale_dn": 0.0,
-        "pdf_up": 0.0,
-        "pdf_dn": 0.0,
-    }
-    if dataset.scaleup is not None:
-        Error_dict["scale_up"] = round(dataset.scaleup, 8)
-        Error_dict["scale_dn"] = -round(dataset.scaledn, 8)
-    if dataset.pdfup is not None:
-        Error_dict["pdf_up"] = round(dataset.pdfup, 8)
-        Error_dict["pdf_dn"] = -round(dataset.pdfdn, 8)
-    Error_dict.update(
-        {
-            "TH_up": comb(Error_dict["scale_up"], Error_dict["pdf_up"]),
-            "TH_dn": -comb(Error_dict["scale_dn"], Error_dict["pdf_dn"]),
-        }
-    )
-    for idx, syst in enumerate(systematics):
-        Error_dict.update(
-            {
-                f"sys{idx}_up": comb_sqr(Error_dict["TH_up"], syst[0], rnd=8),
-                f"sys{idx}_dn": -comb_sqr(Error_dict["TH_dn"], syst[1], rnd=8),
-            }
-        )
-    return Error_dict
