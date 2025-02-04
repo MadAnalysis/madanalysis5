@@ -50,7 +50,7 @@ from madanalysis.IOinterface.job_writer import JobWriter
 from madanalysis.IOinterface.library_writer import LibraryWriter
 from madanalysis.misc.histfactory_reader import HF_Background, HF_Signal, get_HFID
 
-# pylint: disable=logging-fstring-interpolation
+# pylint: disable=logging-fstring-interpolation,import-outside-toplevel
 
 
 def comb_sqr(*args, rnd: int = None) -> float:
@@ -72,11 +72,9 @@ class RunRecast:
         self.pad = ""
         self.first11 = True
         self.first12 = True
-        self.ntoys = self.main.recasting.CLs_numofexps
         self.pyhf_config = {}  # initialize and configure histfactory
         self.cov_config = {}
         self.logger = logging.getLogger("MA5")
-        self.is_apriori = True
         self.TACO_output = self.main.recasting.TACO_output
 
     def init(self):
@@ -1118,9 +1116,6 @@ class RunRecast:
         from .statistical_models import (
             initialise_statistical_models,
             compute_poi_upper_limits,
-            APRIORI,
-            APOSTERIORI,
-            OBSERVED,
         )
         import spey
 
@@ -1347,27 +1342,18 @@ class RunRecast:
         return True
 
     def check_xml_scipy_methods(self):
-        ## Checking whether scipy is installed
-        if not self.main.session_info.has_scipy:
-            self.logger.warning(
-                "scipy is not installed... the CLs module cannot be used."
-            )
-            self.logger.warning("Please install scipy.")
-            return False
-        else:
-            import scipy.stats
         ## Checking XML parsers
         try:
             from lxml import ET
-        except Exception as err:
+        except ImportError as err:
             self.logger.debug(str(err))
             try:
                 import xml.etree.ElementTree as ET
-            except Exception as err:
+            except ImportError as err2:
                 self.logger.warning(
                     "lxml or xml not available... the CLs module cannot be used"
                 )
-                self.logger.debug(str(err))
+                self.logger.debug(str(err2))
                 return False
         # exit
         return ET
