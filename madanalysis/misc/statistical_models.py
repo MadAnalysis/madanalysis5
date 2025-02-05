@@ -1,6 +1,7 @@
 import logging
 
 import spey
+from numpy import isinf, isnan
 
 from .histfactory_reader import HF_Background, HF_Signal
 
@@ -117,7 +118,7 @@ def compute_poi_upper_limits(
         ``dict``:
         regiondata
     """
-    logger.debug("Compute signal CL...")
+    logger.debug("Computing upper limits...")
     if record_to is not None and record_to not in regiondata.keys():
         regiondata[record_to] = {}
     tags = (
@@ -129,6 +130,7 @@ def compute_poi_upper_limits(
     for tag, label in zip(*tags):
         for reg, stat_model in stat_models.items():
             s95 = stat_model.poi_upper_limit(expected=tag) * xsection
+            s95 = -1 if isinf(s95) or isnan(s95) else s95
             if record_to is None:
                 logger.debug("region %s s95%s = %.5f pb", reg, label, s95)
                 regiondata[reg][f"s95{label}"] = f"{s95:20.7f}"
