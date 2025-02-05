@@ -28,16 +28,13 @@ import glob
 import logging
 import os
 import shutil
-import sys
-
-from six.moves import range
 
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
 
+# pylint: disable=logging-fstring-interpolation, logging-not-lazy
+
 
 class RecastConfiguration:
-
-    default_CLs_numofexps = 100000
 
     userVariables = {
         "status": ["on", "off"],
@@ -48,6 +45,7 @@ class RecastConfiguration:
         "error_extrapolation": ["linear", "sqrt"],
         "global_likelihoods": ["on", "off"],
         "simplify_likelihoods": ["True", "False"],
+        "stat_only_mode": "",
         "TACO_output": "",
     }
 
@@ -67,6 +65,8 @@ class RecastConfiguration:
         self.extrapolated_luminosities = []
         self.THerror_combination = "linear"
         self.error_extrapolation = "linear"
+        self.stat_only_mode = False
+        self.stat_only_dir = None
         self.DelphesDic = {}
         self.description = {}
         self.ma5dir = os.path.abspath(
@@ -108,7 +108,6 @@ class RecastConfiguration:
                     self.description[line.split("|")[0].strip()] = line.split("|")[1][:-1]
                 dico_file.close()
 
-        self.CLs_numofexps = 100000
         self.card_path = ""
         self.logger = logging.getLogger("MA5")
 
@@ -120,7 +119,6 @@ class RecastConfiguration:
             self.user_DisplayParameter("pad")
             self.user_DisplayParameter("padtune")
             self.user_DisplayParameter("padsfs")
-            self.user_DisplayParameter("CLs_numofexps")
             self.user_DisplayParameter("card_path")
             self.user_DisplayParameter("store_events")
             self.user_DisplayParameter("TACO_output")
@@ -129,91 +127,65 @@ class RecastConfiguration:
             self.user_DisplayParameter("THerror_combination")
             self.user_DisplayParameter("error_extrapolation")
             self.user_DisplayParameter("global_likelihoods")
-            self.user_DisplayParameter("CLs_calculator_backend")
-            self.user_DisplayParameter("simplify_likelihoods")
-            self.user_DisplayParameter("expectation_assumption")
+            self.user_DisplayParameter("stat_only_mode")
 
     def user_DisplayParameter(self, parameter):
         if parameter == "status":
-            self.logger.info(" recasting mode: " + self.status)
-            return
+            self.logger.info(f" recasting mode: {self.status}")
         elif parameter == "delphes":
-            if self.delphes:
-                self.logger.info("   * analyses based on delphes    : allowed")
-            else:
-                self.logger.info("   * analyses based on delphes    : not allowed")
-            return
-        elif parameter == "ma5tune":
-            if self.ma5tune:
-                self.logger.info("   * analyses based on the ma5tune: allowed")
-            else:
-                self.logger.info("   * analyses based on the ma5tune: not allowed")
-            return
-        elif parameter == "pad":
-            if self.pad:
-                self.logger.info("   * the PAD is                   : available")
-            else:
-                self.logger.info("   * the PAD is                   : not available")
-            return
-        elif parameter == "padtune":
-            if self.padtune:
-                self.logger.info("   * the PADForMa5tune is         : available")
-            else:
-                self.logger.info("   * the PADForMa5tune is         : not available")
-            return
-        elif parameter == "padsfs":
-            if self.padsfs:
-                self.logger.info("   * the PADForSFS is             : available")
-            else:
-                self.logger.info("   * the PADForSFS is             : not available")
-            return
-        elif parameter == "CLs_numofexps":
             self.logger.info(
-                "   * Number of toy experiments for the CLs calculation: "
-                + str(self.CLs_numofexps)
+                f"   * analyses based on delphes    : {('not '*(not self.delphes)) + 'allowed'}"
             )
-            return
+        elif parameter == "ma5tune":
+            self.logger.info(
+                f"   * analyses based on the ma5tune: {('not '*(not self.ma5tune)) + 'allowed'}"
+            )
+        elif parameter == "pad":
+            self.logger.info(
+                f"   * the PAD is                   : {('not '*(not self.pad)) + 'available'}"
+            )
+        elif parameter == "padtune":
+            self.logger.info(
+                f"   * the PADForMa5tune is         : {('not '*(not self.padtune)) + 'available'}"
+            )
+        elif parameter == "padsfs":
+            self.logger.info(
+                f"   * the PADForSFS is             : {('not '*(not self.padsfs)) + 'available'}"
+            )
         elif parameter == "card_path":
             self.logger.info("   * Path to a recasting card: " + str(self.card_path))
-            return
-        elif parameter == "store_root" or parameter == "store_events":
+        elif parameter in ["store_root", "store_events"]:
             self.logger.info(
                 "   * Keeping the event files: "
                 + str(self.store_root or self.store_events)
             )
-            return
         elif parameter == "TACO_output":
             self.logger.info(
                 "   * Running in TACO mode and storing the results at "
                 + str(self.TACO_output)
             )
-            return
         elif parameter == "systematics":
             if len(self.systematics) > 0:
-                for i in range(0, len(self.systematics)):
-                    up, dn = self.systematics[i]
-                    self.logger.info(
-                        "   * Systematics "
-                        + str(i + 1)
-                        + ": [+{:.1%}, -{:.1%}]".format(up, dn)
-                    )
-            return
+                for idx, syst in enumerate(self.systematics):
+                    up, dn = syst
+                    self.logger.info(f"   * Systematics {idx}: [+{up:.1%}, -{dn:.1%}]")
         elif parameter == "extrapolated_luminosity":
             if len(self.extrapolated_luminosities) > 0:
-                tmp = ["{:.1f}".format(x) + " fb^{-1}" for x in self.extrapolated_lumi]
+                tmp = [
+                    "{:.1f}".format(x) + " fb^{-1}"
+                    for x in self.extrapolated_luminosities
+                ]
                 self.logger.info(
                     "   * Results extrapolated for the luminosities: " + ", ".join(tmp)
                 )
-            return
         elif parameter == "THerror_combination":
             self.logger.info(
                 "   * Theory errors (if provided) are combined in a "
                 + self.THerror_combination
                 + " way"
             )
-            return
         elif parameter == "error_extrapolation":
-            if type(self.error_extrapolation) == str:
+            if isinstance(self.error_extrapolation, str):
                 self.logger.info(
                     "   * Errors on the background extrapolated "
                     + self.error_extrapolation
@@ -232,7 +204,6 @@ class RecastConfiguration:
                             self.error_extrapolation[0], self.error_extrapolation[1]
                         )
                     )
-            return
         elif parameter == "global_likelihoods":
             self.logger.info(
                 "   * Global-Likelihoods will"
@@ -241,29 +212,16 @@ class RecastConfiguration:
                 + (self.global_likelihoods_switch) * ", if available"
                 + "."
             )
-            return
-        elif parameter == "CLs_calculator_backend":
-            self.logger.info(
-                "   * Exclusion limits will be calculated with "
-                + (self.CLs_calculator_backend == "native")
-                * " MadAnalysis 5 native calculator"
-                + (self.CLs_calculator_backend == "pyhf") * " pyhf (if available)"
-                + "."
-            )
-            return
         elif parameter == "simplify_likelihoods":
             if self.simplify_likelihoods:
-                self.logger.debug(
+                self.logger.info(
                     "   * Simplified profile likelihoods will be used when available."
                 )
-            return
-        elif parameter == "expectation_assumption":
-            self.logger.info(
-                "   * A "
-                + self.expectation_assumption[1:]
-                + " expected exclusion limits will be used."
-            )
-            return
+        elif parameter == "stat_only_mode":
+            if self.stat_only_mode:
+                self.logger.info(
+                    "   * Only test statistics will be computed for the given analysis."
+                )
 
         return
 
@@ -277,6 +235,11 @@ class RecastConfiguration:
         else:
             parameter = parameters
             value = values
+
+        if parameter != "status" and self.status != "on":
+            self.logger.error("Please first set the recasting mode to 'on'.")
+            return
+
         # algorithm
         if parameter == "status":
             # Switch on the clustering
@@ -307,12 +270,15 @@ class RecastConfiguration:
                         "Delphes and/or the PAD are not installed (or deactivated): "
                         + "the corresponding analyses will be unavailable"
                     )
+                else:
+                    canrecast = True
+
+                if not archi_info.has_spey:
                     self.logger.warning("Recast module requires Spey package.")
                     self.logger.warning(
                         "Installation instructions can be found at https://spey.readthedocs.io/"
                     )
-                else:
-                    canrecast = True
+                    canrecast = False
 
                 # DelphesMA5tune and the PADFor MA5TUne?
                 if archi_info.has_root and archi_info.has_delphesMA5tune:
@@ -379,10 +345,6 @@ class RecastConfiguration:
 
         # path to a recasting card
         elif parameter == "card_path":
-            if self.status != "on":
-                self.logger.error("Please first set the recasting mode to 'on'.")
-                return
-
             if os.path.isfile(value):
                 self.card_path = value
             else:
@@ -391,9 +353,6 @@ class RecastConfiguration:
 
         # Keeping the root files
         elif parameter == "store_root" or parameter == "store_events":
-            if self.status != "on":
-                self.logger.error("Please first set the recasting mode to 'on'.")
-                return
             if value == "True":
                 self.store_root = True
                 self.store_events = True
@@ -406,16 +365,10 @@ class RecastConfiguration:
 
         # Running in TACO mode
         elif parameter == "TACO_output":
-            if self.status != "on":
-                self.logger.error("Please first set the recasting mode to 'on'.")
-                return
             self.TACO_output = value
 
         # Systematic uncertainties and Luminosity extrapolation
         elif parameter == "add":
-            if self.status != "on":
-                self.logger.error("Please first set the recasting mode to 'on'.")
-                return
             ## Checking the values
             try:
                 vals = [float(x) for x in values if x != ","]
@@ -457,9 +410,6 @@ class RecastConfiguration:
 
         # Error combination
         elif parameter == "THerror_combination":
-            if self.status != "on":
-                self.logger.error("Please first set the recasting mode to 'on'.")
-                return
             if value in ["quadratic", "linear"]:
                 self.THerror_combination = value
             else:
@@ -482,9 +432,6 @@ class RecastConfiguration:
                     "or taken as two comma-separated user-defined values (systs, stats)"
                 )
 
-            if self.status != "on":
-                self.logger.error("Please first set the recasting mode to 'on'.")
-                return
             if value in ["linear", "sqrt"]:
                 self.error_extrapolation = value
             else:
@@ -497,15 +444,12 @@ class RecastConfiguration:
                         self.error_extrapolation = [float(value), 0]
                     else:
                         self.error_extrapolation = [float(x) for x in all_values]
-                except:
+                except ValueError:
                     error_message()
                     return
 
         # Switch to turn off the global likelihood calculations
         elif parameter == "global_likelihoods":
-            if self.status != "on":
-                self.logger.error("Please first set the recasting mode to 'on'.")
-                return
             if value.lower() in ["on", "off"]:
                 self.global_likelihoods_switch = value.lower() == "on"
             else:
@@ -516,9 +460,6 @@ class RecastConfiguration:
 
         # Set simplified likelihoods
         elif parameter == "simplify_likelihoods":
-            if self.status != "on":
-                self.logger.error("Please first set the recasting mode to 'on'.")
-                return
             if value.lower() in ["true", "false"]:
                 self.simplify_likelihoods = value.lower() == "true"
                 if self.simplify_likelihoods:
@@ -530,11 +471,19 @@ class RecastConfiguration:
                 self.logger.error("Please type either True or False.")
                 return
 
+        elif parameter == "stat_only_mode":
+            if value.lower() == "off":
+                self.stat_only_mode = False
+            if os.path.isdir(os.path.join(value, "Output/SAF")):
+                self.stat_only_dir = value
+                self.stat_only_mode = True
+            else:
+                self.logger.error("{value} is not a valid directory.")
+                return
+
         # other rejection if no algo specified
         else:
-            self.logger.error(
-                "the recast module has no parameter called '" + str(parameter) + "'"
-            )
+            self.logger.error(f"The recast module has no parameter called '{parameter}'")
             return
 
     def user_GetParameters(self, var=""):
@@ -551,7 +500,7 @@ class RecastConfiguration:
                     "THerror_combination",
                     "error_extrapolation",
                     "global_likelihoods",
-                    "CLs_calculator_backend",
+                    "stat_only_mode",
                     "expectation_assumption",
                 ]  # , "simplify_likelihoods"
         else:
@@ -560,24 +509,8 @@ class RecastConfiguration:
 
     def user_GetValues(self, variable):
         table = []
-        if variable == "status":
-            table.extend(RecastConfiguration.userVariables["status"])
-        elif variable == "card_path":
-            table.extend(RecastConfiguration.userVariables["card_path"])
-        elif variable == "store_root":
-            table.extend(RecastConfiguration.userVariables["store_root"])
-        elif variable == "store_events":
-            table.extend(RecastConfiguration.userVariables["store_events"])
-        elif variable == "TACO_output":
-            table.extend(RecastConfiguration.userVariables["TACO_output"])
-        elif variable == "THerror_combination":
-            table.extend(RecastConfiguration.userVariables["THerror_combination"])
-        elif variable == "error_extrapolation":
-            table.extend(RecastConfiguration.userVariables["error_extrapolation"])
-        elif variable == "global_likelihoods":
-            table.extend(RecastConfiguration.userVariables["global_likelihoods"])
-        elif variable == "simplify_likelihoods":
-            table.extend(RecastConfiguration.userVariables["simplify_likelihoods"])
+        if variable in RecastConfiguration.userVariables:
+            table.extend(RecastConfiguration.userVariables[variable])
         return table
 
     def CreateCard(self, dirname, write=True):

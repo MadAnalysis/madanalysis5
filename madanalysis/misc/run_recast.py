@@ -340,10 +340,8 @@ class RunRecast:
 
         """
         if any(
-            [
-                (x.endswith("root")) or (x.endswith("lhco")) or (x.endswith("lhco.gz"))
-                for x in dataset.filenames
-            ]
+            any(x.endswith(y) for y in ["root", "lhco", "lhco.gz"])
+            for x in dataset.filenames
         ):
             self.logger.error("   Dataset can not contain reconstructed file type.")
             return False
@@ -798,56 +796,60 @@ class RunRecast:
 
         # Executing the PAD
         for myset in self.main.datasets:
-            if version in ["v1.1", "v1.2"]:
-                ## Preparing the PAD
-                self.update_pad_main(analyses)
-                if not self.make_pad():
-                    self.main.forced = self.forced
-                    return False
-                ## Getting the file name corresponding to the events
-                eventfile = os.path.normpath(
-                    self.dirname
-                    + "/Output/SAF/"
-                    + myset.name
-                    + "/RecoEvents/RecoEvents_"
-                    + version.replace(".", "x")
-                    + "_"
-                    + card.replace(".tcl", "")
-                    + ".root"
-                )
-                if not os.path.isfile(eventfile):
-                    self.logger.error("The file called " + eventfile + " is not found...")
-                    return False
-                ## Running the PAD
-                if not self.run_pad(eventfile):
-                    self.main.forced = self.forced
-                    return False
-                ## Saving the output and cleaning
-                if not self.save_output(
-                    '"' + eventfile + '"', myset.name, analyses, card
-                ):
-                    self.main.forced = self.forced
-                    return False
-                if not self.main.recasting.store_root:
-                    os.remove(eventfile)
-                else:
-                    time.sleep(1.0)
-            else:
-                # Run SFS
-                if not self.run_SimplifiedFastSim(
-                    myset,
-                    self.main.archi_info.ma5dir + "/tools/PADForSFS/Input/Cards/" + card,
-                    analyses,
-                ):
-                    return False
-                if self.main.recasting.store_root:
-                    self.logger.warning(
-                        "Simplified-FastSim does not use root, hence file will not be stored."
+            if not self.main.recasting.stat_only_mode:
+                if version in ["v1.1", "v1.2"]:
+                    ## Preparing the PAD
+                    self.update_pad_main(analyses)
+                    if not self.make_pad():
+                        self.main.forced = self.forced
+                        return False
+                    ## Getting the file name corresponding to the events
+                    eventfile = os.path.normpath(
+                        self.dirname
+                        + "/Output/SAF/"
+                        + myset.name
+                        + "/RecoEvents/RecoEvents_"
+                        + version.replace(".", "x")
+                        + "_"
+                        + card.replace(".tcl", "")
+                        + ".root"
                     )
-
+                    if not os.path.isfile(eventfile):
+                        self.logger.error(f"The file called {eventfile} is not found...")
+                        return False
+                    ## Running the PAD
+                    if not self.run_pad(eventfile):
+                        self.main.forced = self.forced
+                        return False
+                    ## Saving the output and cleaning
+                    if not self.save_output(
+                        '"' + eventfile + '"', myset.name, analyses, card
+                    ):
+                        self.main.forced = self.forced
+                        return False
+                    if not self.main.recasting.store_root:
+                        os.remove(eventfile)
+                    else:
+                        time.sleep(1.0)
+                else:
+                    # Run SFS
+                    if not self.run_SimplifiedFastSim(
+                        myset,
+                        self.main.archi_info.ma5dir
+                        + "/tools/PADForSFS/Input/Cards/"
+                        + card,
+                        analyses,
+                    ):
+                        return False
+                    if self.main.recasting.store_root:
+                        self.logger.warning(
+                            "Simplified-FastSim does not use root, hence file will not be stored."
+                        )
+            else:
+                self.dirname = self.main.recasting.stat_only_dir
             ## Running the CLs exclusion script (if available)
-            self.logger.debug("Compute CLs exclusion for " + myset.name)
-            if self.ntoys > 0 and not self.compute_cls(analyses, myset):
+            self.logger.debug(f"Compute CLs exclusion for {myset.name}")
+            if not self.compute_cls(analyses, myset):
                 self.main.forced = self.forced
                 return False
 
@@ -1115,6 +1117,7 @@ class RunRecast:
             compute_poi_upper_limits,
         )
         import spey
+        from spey.system.webutils import get_bibtex
 
         ## Checking whether the CLs module can be used
         ET = self.check_xml_scipy_methods()
@@ -1127,9 +1130,8 @@ class RunRecast:
         self.logger.info("\033[1m     Please cite arXiv:2307.06996 [hep-ph]\033[0m")
 
         # Bibliography
-        bibfile = os.path.join(
-            self.dirname, "Output/SAF", dataset.name, "bibliography.bib"
-        )
+        bibfile = os.path.join(self.dirname, "bibliography.bib")
+        print_gl_citation = self.main.recasting.global_likelihoods_switch
         with open(bibfile, "w") as bib:
             bib.write(spey.cite() + "\n")
             if self.pyhf_config:
@@ -1137,13 +1139,27 @@ class RunRecast:
                 for _, item in pyhfbib.items():
                     for it in item:
                         bib.write(it + "\n")
-
-        print_gl_citation = self.main.recasting.global_likelihoods_switch
+            try:
+                for arxiv in [
+                    "1910.11418",
+                    "2303.03427",
+                    "2206.14870",
+                    "2112.05163",
+                    "2006.09387",
+                ]:
+                    bib.write(get_bibtex("inspire/arxiv", arxiv) + "\n")
+            except Exception:
+                pass
         if (
             len(self.main.recasting.extrapolated_luminosities) > 0
             or any(
                 x is not None
-                for x in [dataset.scaleup, dataset.scaledn, dataset.pdfup, dataset.pdfdn]
+                for x in [
+                    dataset.scaleup,
+                    dataset.scaledn,
+                    dataset.pdfup,
+                    dataset.pdfdn,
+                ]
             )
             or any(a + b > 0.0 for a, b in self.main.recasting.systematics)
         ):
@@ -1686,7 +1702,7 @@ class RunRecast:
                 return {}
         else:
             return {}
-        analysis =info_root.attrib["id"]        
+        analysis = info_root.attrib["id"]
         pyhf_config, to_remove = construct_histfactory_dictionary(info_root, self)
         # validate
         for likelihood_profile, config in pyhf_config.items():
