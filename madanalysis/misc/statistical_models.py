@@ -119,8 +119,9 @@ def compute_poi_upper_limits(
         regiondata
     """
     logger.debug("Computing upper limits...")
-    if record_to is not None and record_to not in regiondata.keys():
-        regiondata[record_to] = {}
+    if record_to is not None:
+        if record_to not in regiondata:
+            regiondata[record_to] = {}
     tags = (
         [[APRIORI], ["exp"]]
         if is_extrapolated
@@ -129,12 +130,15 @@ def compute_poi_upper_limits(
 
     for tag, label in zip(*tags):
         for reg, stat_model in stat_models.items():
+            logger.debug("running %s for %s", reg, record_to)
             s95 = stat_model.poi_upper_limit(expected=tag) * xsection
             s95 = -1 if isinf(s95) or isnan(s95) else s95
             if record_to is None:
                 logger.debug("region %s s95%s = %.5f pb", reg, label, s95)
                 regiondata[reg][f"s95{label}"] = f"{s95:20.7f}"
             else:
+                if reg not in regiondata[record_to]:
+                    regiondata[record_to][reg] = {}
                 logger.debug("%s:: region %s s95%s = %.5f pb", record_to, reg, label, s95)
                 regiondata[record_to][reg][f"s95{label}"] = f"{s95:20.7f}"
     return regiondata

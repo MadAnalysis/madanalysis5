@@ -1294,7 +1294,7 @@ class RunRecast:
                     xsflag = False
                     regiondata = self.extract_cls(
                         regiondata,
-                        regions,
+                        statistical_models,
                         dataset.xsection,
                         lumi,
                         is_extrapolated=extrapolated_lumi != "default",
@@ -1861,7 +1861,7 @@ class RunRecast:
         lumi: float,
         is_extrapolated: bool,
     ) -> dict:
-        from .statistical_models import APRIORI, APOSTERIORI, OBSERVED
+        from .statistical_models import APRIORI, OBSERVED
 
         self.logger.debug("Compute CLs...")
         ## computing fi a region belongs to the best expected ones, and derive the CLs in all cases

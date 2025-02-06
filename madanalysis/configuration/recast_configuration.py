@@ -492,7 +492,6 @@ class RecastConfiguration:
                 table = ["extrapolated_luminosity", "systematics"]
             else:
                 table = [
-                    "CLs_numofexps",
                     "card_path",
                     "store_events",
                     "TACO_output",
@@ -774,8 +773,7 @@ class RecastConfiguration:
             return thecard
 
     def CheckFile(self, dirname, dataset):
-        if self.CLs_numofexps <= 0:
-            return True
+        dirname = self.stat_only_dir if self.stat_only_mode else dirname
         filename = os.path.normpath(
             dirname + "/Output/SAF/" + dataset.name + "/CLs_output.dat"
         )
@@ -792,8 +790,7 @@ class RecastConfiguration:
         return True
 
     def collect_outputs(self, dirname, datasets):
-        if self.CLs_numofexps <= 0:
-            return
+        dirname = self.stat_only_dir if self.stat_only_mode else dirname
         filename = os.path.normpath(
             os.path.join(dirname, "Output/SAF/CLs_output_summary.dat")
         )
