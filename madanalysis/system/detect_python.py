@@ -66,16 +66,16 @@ class DetectPython:
         # Which python
         if self.debug:
             self.logger.debug("  sys.executable:         " + str(sys.executable))
-            result = ShellCommand.Which('python',all=False,mute=True)
+            result = ShellCommand.Which('python3',all=False,mute=True)
             if len(result)==0:
-                self.logger.error('python compiler not found. Please install it before ' + \
+                self.logger.error('python3 compiler not found. Please install it before ' + \
                                   'using MadAnalysis 5')
                 return False
             self.logger.debug("  which:                  " + str(result[0]))
 
         # Which all
         if self.debug:
-            result = ShellCommand.Which('python',all=True,mute=True)
+            result = ShellCommand.Which('python3',all=True,mute=True)
             if len(result)==0:
                 self.logger.error('g++ compiler not found. Please install it before ' + \
                                   'using MadAnalysis 5')
