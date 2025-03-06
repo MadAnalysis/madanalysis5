@@ -42,7 +42,7 @@ def initialise_statistical_models(
     signal_yields_per_region = {}
 
     # Uncorrelated background
-    pdf_wrapper = spey.get_backend("default_pdf.uncorrelated_background")
+    pdf_wrapper = spey.get_backend("default.uncorrelated_background")
     for reg in regions:
         signal_yields_per_region[reg] = (
             xsection * lumi * 1000.0 * regiondata[reg]["Nf"] / regiondata[reg]["N0"]
@@ -57,7 +57,7 @@ def initialise_statistical_models(
 
     # Simplified likelihoods
     if simplified_model_config is not None:
-        pdf_wrapper = spey.get_backend("default_pdf.correlated_background")
+        pdf_wrapper = spey.get_backend("default.correlated_background")
         for cov_subset, item in simplified_model_config.items():
             cov_regions, covariance = item["cov_regions"], item["covariance"]
 
