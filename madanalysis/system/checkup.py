@@ -380,7 +380,7 @@ class CheckUp:
     def CheckOptionalReinterpretationPackages(self):
         # Optional packages
         self.logger.info("Checking optional packages devoted to reinterpretation:")
-        for package in ["scipy", "spey", "pyhf", "pad", "padma5", "padsfs","simplify"]:
+        for package in ["scipy", "spey", "pyhf", "pad", "padma5", "padsfs", "simplify"]:
             if not self.checker.Execute(package):
                 return False
         return True
@@ -624,8 +624,8 @@ class CheckUp:
             from semantic_version import Version
 
             response = requests.get(
-               "https://api.github.com/repos/MadAnalysis/madanalysis5/releases/latest",
-               timeout=1,
+                "https://api.github.com/repos/MadAnalysis/madanalysis5/releases/latest",
+                timeout=1,
             )
             response.encoding = "utf-8"
             info = response.json()
@@ -636,5 +636,6 @@ class CheckUp:
                 )
                 self.logger.warning(f"The latest version can be downloaded from : ")
                 self.logger.warning(f"{info['html_url']}")
-        except Exception as e:
+        except (requests.exceptions.ConnectionError, ImportError) as e:
+            self.logger.debug("Cannot check updates...")
             pass
