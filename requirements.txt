@@ -2,5 +2,5 @@ matplotlib>=3.4.2
 scipy>=1.7.1
 numpy>=1.19.5, <2.0.0
 lxml>=4.6.2
-spey>=0.1.11
-spey_pyhf>=0.1.9
+spey>=0.2.0
+spey_pyhf>=0.2.0
