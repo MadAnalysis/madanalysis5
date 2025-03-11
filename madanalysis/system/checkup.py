@@ -624,8 +624,8 @@ class CheckUp:
             from semantic_version import Version
 
             response = requests.get(
-                "https://api.github.com/repos/MadAnalysis/madanalysis5/releases/latest",
-                timeout=1,
+               "https://api.github.com/repos/MadAnalysis/madanalysis5/releases/latest",
+               timeout=1,
             )
             response.encoding = "utf-8"
             info = response.json()
@@ -636,5 +636,5 @@ class CheckUp:
                 )
                 self.logger.warning(f"The latest version can be downloaded from : ")
                 self.logger.warning(f"{info['html_url']}")
-        except ImportError:
+        except Exception as e:
             pass
