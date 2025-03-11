@@ -23,13 +23,16 @@
 
 
 from __future__ import absolute_import
-from madanalysis.system.user_info import UserInfo
+
+import json
+import logging
+import os
+
+from string_tools import StringTools
+
 from madanalysis.system.config_checker import ConfigChecker
 from madanalysis.system.detect_manager import DetectManager
-from string_tools import StringTools
-from shell_command import ShellCommand
-import logging
-import os, json
+from madanalysis.system.user_info import UserInfo
 
 
 class CheckUp:
