@@ -848,10 +848,11 @@ class RunRecast:
             else:
                 self.dirname = self.main.recasting.stat_only_dir
             ## Running the CLs exclusion script (if available)
-            self.logger.debug(f"Compute CLs exclusion for {myset.name}")
-            if not self.compute_cls(analyses, myset):
-                self.main.forced = self.forced
-                return False
+            if not self.main.recasting.analysis_only_mode:
+                self.logger.debug(f"Compute CLs exclusion for {myset.name}")
+                if not self.compute_cls(analyses, myset):
+                    self.main.forced = self.forced
+                    return False
 
         # Exit
         return True

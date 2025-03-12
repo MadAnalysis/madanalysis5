@@ -45,6 +45,7 @@ class RecastConfiguration:
         "error_extrapolation": ["linear", "sqrt"],
         "global_likelihoods": ["on", "off"],
         "simplify_likelihoods": ["True", "False"],
+        "analysis_only_mode": "",
         "stat_only_mode": "",
         "TACO_output": "",
     }
@@ -66,6 +67,7 @@ class RecastConfiguration:
         self.THerror_combination = "linear"
         self.error_extrapolation = "linear"
         self.stat_only_mode = False
+        self.analysis_only_mode = False
         self.stat_only_dir = None
         self.DelphesDic = {}
         self.description = {}
@@ -128,6 +130,7 @@ class RecastConfiguration:
             self.user_DisplayParameter("error_extrapolation")
             self.user_DisplayParameter("global_likelihoods")
             self.user_DisplayParameter("stat_only_mode")
+            self.user_DisplayParameter("analysis_only_mode")
 
     def user_DisplayParameter(self, parameter):
         if parameter == "status":
@@ -222,6 +225,9 @@ class RecastConfiguration:
                 self.logger.info(
                     "   * Only test statistics will be computed for the given analysis."
                 )
+        elif parameter == "analysis_only_mode":
+            if self.analysis_only_mode:
+                self.logger.info("   * Only analysis will be executed.")
 
         return
 
@@ -480,6 +486,14 @@ class RecastConfiguration:
             else:
                 self.logger.error("{value} is not a valid directory.")
                 return
+        elif parameter == "analysis_only_mode":
+            if value.lower() == "off":
+                self.analysis_only_mode = False
+            elif value.lower() == "on":
+                self.analysis_only_mode = True
+            else:
+                self.logger.error("analysis_only_mode can only be set to 'on' or 'off'.")
+                return
 
         # other rejection if no algo specified
         else:
@@ -500,6 +514,7 @@ class RecastConfiguration:
                     "error_extrapolation",
                     "global_likelihoods",
                     "stat_only_mode",
+                    "analysis_only_mode",
                     "expectation_assumption",
                 ]  # , "simplify_likelihoods"
         else:
