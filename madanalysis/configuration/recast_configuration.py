@@ -45,7 +45,7 @@ class RecastConfiguration:
         "error_extrapolation": ["linear", "sqrt"],
         "global_likelihoods": ["on", "off"],
         "simplify_likelihoods": ["True", "False"],
-        "analysis_only_mode": "",
+        "analysis_only_mode": ["True", "False"],
         "stat_only_mode": "",
         "TACO_output": "",
     }
@@ -227,7 +227,7 @@ class RecastConfiguration:
                 )
         elif parameter == "analysis_only_mode":
             if self.analysis_only_mode:
-                self.logger.info("   * Only analysis will be executed.")
+                self.logger.info("   * MadAnalysis 5 will only compute the various signal region efficiencies (no statistical treatment).")
 
         return
 
@@ -487,12 +487,12 @@ class RecastConfiguration:
                 self.logger.error("{value} is not a valid directory.")
                 return
         elif parameter == "analysis_only_mode":
-            if value.lower() == "off":
+            if value.lower() == "false":
                 self.analysis_only_mode = False
-            elif value.lower() == "on":
+            elif value.lower() == "true":
                 self.analysis_only_mode = True
             else:
-                self.logger.error("analysis_only_mode can only be set to 'on' or 'off'.")
+                self.logger.error("analysis_only_mode can only be set to 'True' or 'False'.")
                 return
 
         # other rejection if no algo specified
