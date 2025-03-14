@@ -173,7 +173,7 @@ class CmdSubmit(CmdBase):
              return
 
         # Checking if a dataset has been defined
-        if len(self.main.datasets)==0:
+        if len(self.main.datasets)==0 and not self.main.recasting.stat_only_mode:
             self.logger.error("no dataset found; please define a dataset (via the command import).")
             self.logger.error("job submission aborted.")
             return
@@ -195,7 +195,10 @@ class CmdSubmit(CmdBase):
         self.main.lastjob_status = False
 
         # Submission
-        self.logger.debug('Launching SampleAnalyzer ...')
+        if not self.main.recasting.stat_only_mode:
+            self.logger.debug('Launching SampleAnalyzer ...')
+        else:
+            self.logger.debug('Starting statistics calculations...')
         if not self.submit(filename,history):
             return
 
@@ -385,11 +388,16 @@ class CmdSubmit(CmdBase):
         self.logger.info("   Writing the command line history...")
         jobber.WriteHistory(history,self.main.firstdir)
         if self.main.recasting.status == "on":
-            self.main.recasting.collect_outputs(dirname,self.main.datasets)
-            self.logger.info('    -> the results can be found in:') 
-            self.logger.info('       '+ dirname + '/Output/SAF/CLs_output_summary.dat')
-            for item in self.main.datasets:
-                self.logger.info('       '+ dirname + '/Output/SAF/'+ item.name + '/CLs_output.dat')
+            if not self.main.recasting.analysis_only_mode:
+                self.main.recasting.collect_outputs(dirname,self.main.datasets)
+                self.logger.info('    -> the results can be found in:') 
+                self.logger.info('       '+ dirname + '/Output/SAF/CLs_output_summary.dat')
+                for item in self.main.datasets:
+                    self.logger.info('       '+ dirname + '/Output/SAF/'+ item.name + '/CLs_output.dat')
+            else:
+                self.logger.info('    -> Efficiency results can be found in:') 
+                for item in self.main.datasets:
+                    self.logger.info('       '+ dirname + '/Output/SAF/' + item.name)
         else:
             layouter = LayoutWriter(self.main, dirname)
             layouter.WriteLayoutConfig()
@@ -450,7 +458,7 @@ class CmdSubmit(CmdBase):
 
         for item in self.main.datasets:
             if self.main.recasting.status=='on':
-                if not self.main.recasting.CheckFile(dirname,item):
+                if not self.main.recasting.analysis_only_mode and not self.main.recasting.CheckFile(dirname,item):
                     return False
             elif not jobber.CheckFile(item):
                 self.logger.error("errors have occured during the analysis.")

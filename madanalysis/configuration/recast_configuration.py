@@ -46,8 +46,8 @@ class RecastConfiguration:
         "global_likelihoods": ["on", "off"],
         "simplify_likelihoods": ["True", "False"],
         "analysis_only_mode": ["True", "False"],
-        "stat_only_mode": "",
-        "TACO_output": "",
+#        "stat_only_mode": "",
+        "TACO_output": ""
     }
 
     def __init__(self):
@@ -129,7 +129,7 @@ class RecastConfiguration:
             self.user_DisplayParameter("THerror_combination")
             self.user_DisplayParameter("error_extrapolation")
             self.user_DisplayParameter("global_likelihoods")
-            self.user_DisplayParameter("stat_only_mode")
+#            self.user_DisplayParameter("stat_only_mode")
             self.user_DisplayParameter("analysis_only_mode")
 
     def user_DisplayParameter(self, parameter):
@@ -220,11 +220,11 @@ class RecastConfiguration:
                 self.logger.info(
                     "   * Simplified profile likelihoods will be used when available."
                 )
-        elif parameter == "stat_only_mode":
-            if self.stat_only_mode:
-                self.logger.info(
-                    "   * Only test statistics will be computed for the given analysis."
-                )
+#         elif parameter == "stat_only_mode":
+#             if self.stat_only_mode:
+#                 self.logger.info(
+#                     "   * Test statistics will be computed for the given analysis."
+#                 )
         elif parameter == "analysis_only_mode":
             if self.analysis_only_mode:
                 self.logger.info("   * MadAnalysis 5 will only compute the various signal region efficiencies (no statistical treatment).")
@@ -478,7 +478,7 @@ class RecastConfiguration:
                 return
 
         elif parameter == "stat_only_mode":
-            if value.lower() == "off":
+            if value.lower() == "false":
                 self.stat_only_mode = False
             if os.path.isdir(os.path.join(value, "Output/SAF")):
                 self.stat_only_dir = value
@@ -513,9 +513,8 @@ class RecastConfiguration:
                     "THerror_combination",
                     "error_extrapolation",
                     "global_likelihoods",
-                    "stat_only_mode",
-                    "analysis_only_mode",
-                    "expectation_assumption",
+#                    "stat_only_mode",
+                    "analysis_only_mode"
                 ]  # , "simplify_likelihoods"
         else:
             table = []
