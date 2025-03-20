@@ -44,20 +44,20 @@ void Histo::Write_TextFormat(std::ostream* output)
 
 #ifdef YODA_USE
 /// Return the plot as a YODA file
-YODA::Estimate1D* Histo::ToYODA()
+std::shared_ptr<YODA::Estimate1D> Histo::ToYODA() const
 {
   // create histogram
-  YODA::Estimate1D* yodaHisto = new YODA::Estimate1D(nbins_, xmin_, xmax_, name_, name_);
+  YODA::Estimate1D yodaHisto(nbins_, xmin_, xmax_, name_, name_);
 
   // set bin values
-  yodaHisto->bins()[0].setVal(underflow_.first);
+  yodaHisto.bins()[0].setVal(underflow_.first);
   for (MAuint32 i=0;i<histo_.size();i++)
   {
-    yodaHisto->bins()[i+1].setVal(histo_[i].first);
+    yodaHisto.bins()[i+1].setVal(histo_[i].first);
   }
-  yodaHisto->bins()[histo_.size()+1].setVal(overflow_.first);
+  yodaHisto.bins()[histo_.size()+1].setVal(overflow_.first);
 
-  return yodaHisto;
+  return std::make_shared<YODA::Estimate1D>(yodaHisto);
 }
 #endif
 

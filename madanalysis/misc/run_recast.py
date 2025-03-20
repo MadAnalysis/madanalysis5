@@ -413,9 +413,10 @@ class RunRecast():
                     newfile.write('  WriterBase* writer1 = \n')
                     newfile.write('      manager.InitializeWriter("lhe","'+output_name+'");\n')
                     newfile.write('  if (writer1==0) return 1;\n\n')
-            elif '// Post initialization (creates the new output directory structure)' in line and self.TACO_output!='':
+            elif '// Initializing PhysicsService for MC' in line and self.TACO_output!='':
                 newfile.write('    std::ofstream out;\n      out.open(\"../Output/' + self.TACO_output+'\");\n')
-                newfile.write('\n      manager.HeadSR(out);\n      out << std::endl;\n');
+                newfile.write('\n      manager.HeadSR(out);\n      out << std::endl;\n')
+                newfile.write('\n'+line)
             elif '//Getting pointer to the clusterer' in line:
                 ignore=False
                 newfile.write(line)

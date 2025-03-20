@@ -44,24 +44,18 @@ void PlotManager::Write_TextFormat(SAFWriter& output)
 }
 
 /// Write the counters in a YODA file
-void PlotManager::Write_YODA(std::string yodaname)
+void PlotManager::Write_YODA(std::string yodaname) const
 {
   #ifdef YODA_USE
-
-  std::vector<YODA::Estimate1D*> yodaHistos;
+  std::vector<std::shared_ptr<YODA::Estimate1D>> yodaHistos;
 
   // collect histograms as YODA
-  for (MAuint32 i=0;i<plots_.size();i++)
-    yodaHistos.push_back(plots_[i]->ToYODA());
+  for (const PlotBase *plot : plots_){
+    yodaHistos.push_back(plot->ToYODA());
+  }
 
   // write histograms
   YODA::Writer& yodaWriter = YODA::WriterYODA::create();
   yodaWriter.write(yodaname, yodaHistos);
-
-  // clean-up
-  for (auto yodaHisto : yodaHistos)
-    delete yodaHisto;
-  yodaHistos.clear();
-
   #endif
 }

@@ -107,7 +107,8 @@ class PlotBase
 
   #ifdef YODA_USE
   /// return the plot as a YODA histogram
-  virtual YODA::Estimate1D* ToYODA() = 0;
+  typedef std::shared_ptr<YODA::Estimate1D> YODAEstimatePtr;
+  virtual YODAEstimatePtr ToYODA() const = 0;
   #endif
 
   /// Increment number of events
@@ -132,7 +133,7 @@ class PlotBase
   { return nevents_; }
 
   // Return the name
-  std::string GetName()
+  std::string GetName() const
     { return name_; }
 
 };

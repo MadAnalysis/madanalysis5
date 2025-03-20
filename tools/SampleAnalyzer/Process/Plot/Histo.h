@@ -212,7 +212,7 @@ class Histo : public PlotBase
 
   #ifdef YODA_USE
   /// return the plot as a YODA histogram
-  virtual YODA::Estimate1D* ToYODA();
+  virtual YODAEstimatePtr ToYODA() const;
   #endif
 
  protected:

@@ -140,7 +140,7 @@ class PlotManager
   void Write_TextFormat(SAFWriter& output);
 
   /// Write the counters in a YODA file
-  void Write_YODA(std::string yodaname);
+  void Write_YODA(std::string yodaname) const;
 
   /// Finalizing
   void Finalize()
