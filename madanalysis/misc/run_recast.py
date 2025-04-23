@@ -1261,6 +1261,11 @@ class RunRecast:
                     )
                     return False
 
+                if dataset.xsection <= 0:
+                    self.logger.error(
+                        f"Cross section for {dataset.name} is not defined. Skipping the CLs calculation."
+                    )
+                    return False
                 # Setup statistical models
                 statistical_models = initialise_statistical_models(
                     regiondata=regiondata,
