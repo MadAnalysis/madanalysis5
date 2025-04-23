@@ -1,8 +1,8 @@
 {
     "description": "A package for event file analysis and recasting of LHC results",
     "license": "GPL-3.0",
-    "title": "MadAnalysis/madanalysis5: v1.10.12",
-    "version": "v1.10.12",
+    "title": "MadAnalysis/madanalysis5: v1.11.0",
+    "version": "v1.11.0",
     "upload_type": "software",
     "creators": [
         {
@@ -29,7 +29,7 @@
     "related_identifiers": [
         {
             "scheme": "url",
-            "identifier": "https://github.com/MadAnalysis/madanalysis5/tree/v1.10.12",
+            "identifier": "https://github.com/MadAnalysis/madanalysis5/tree/v1.11.0",
             "relation": "isSupplementTo"
         },
         {
