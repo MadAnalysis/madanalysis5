@@ -32,11 +32,10 @@ import os
 import shutil
 import sys
 import time
-from collections import OrderedDict
 
 import numpy as np
 from shell_command import ShellCommand
-from six.moves import input, map, range
+from six.moves import input, range
 from string_tools import StringTools
 
 from madanalysis.configuration.delphes_configuration import DelphesConfiguration
@@ -50,7 +49,6 @@ from madanalysis.IOinterface.library_writer import LibraryWriter
 from madanalysis.misc.histfactory_reader import (
     HF_Background,
     HF_Signal,
-    get_HFID,
     construct_histfactory_dictionary,
 )
 from madanalysis.misc.theoretical_error_setup import error_dict_setup
@@ -186,9 +184,8 @@ class RunRecast:
         ## Check and exit
         if not check:
             self.logger.error(
-                "The "
-                + self.detector
-                + " library is not present -> the associated analyses cannot be used"
+                "The %s library is not present -> the associated analyses cannot be used",
+                self.detector,
             )
             return False
         return True
@@ -198,7 +195,7 @@ class RunRecast:
     ################################################
     def fastsim_single(self, version, delphescard):
         self.logger.debug(
-            "Launch a bunch of fastsim with the delphes card: " + delphescard
+            "Launch a bunch of fastsim with the delphes card: %s", delphescard
         )
 
         # Init and header
@@ -215,6 +212,7 @@ class RunRecast:
 
         # Checking whether events have already been generated and if not, event generation
         self.logger.debug("Loop over the datasets...")
+        evtfile = None
         for item in self.main.datasets:
             if self.detector == "delphesMA5tune":
                 evtfile = (
@@ -237,7 +235,7 @@ class RunRecast:
             elif self.detector == "fastjet":
                 return True
 
-            self.logger.debug("- applying fastsim and producing " + evtfile + "...")
+            self.logger.debug("- applying fastsim and producing %s ...", evtfile)
             if not os.path.isfile(os.path.normpath(evtfile)):
                 if not self.generate_events(item, delphescard):
                     return False
@@ -248,6 +246,7 @@ class RunRecast:
     def fastsim_header(self, version):
         ## Gettign the version dependent stuff
         to_print = False
+        tag = None
         if version == "v1.1" and self.first11:
             to_print = True
             tag = version
@@ -262,7 +261,7 @@ class RunRecast:
                 "   **********************************************************"
             )
             self.logger.info(
-                "   " + StringTools.Center(tag + " detector simulations", 57)
+                "   %s", StringTools.Center(f"{tag} detector simulations", 57)
             )
             self.logger.info(
                 "   **********************************************************"
@@ -1113,12 +1112,13 @@ class RunRecast:
     ################################################
 
     def compute_cls(self, analyses, dataset):
-        from .statistical_models import (
-            initialise_statistical_models,
-            compute_poi_upper_limits,
-        )
         import spey
         from spey.system.webutils import get_bibtex
+
+        from .statistical_models import (
+            compute_poi_upper_limits,
+            initialise_statistical_models,
+        )
 
         ## Checking whether the CLs module can be used
         ET = self.check_xml_scipy_methods()
@@ -1224,11 +1224,6 @@ class RunRecast:
                         self.logger.info(
                             "\033[1m                 For more details see https://scikit-hep.org/pyhf/\033[0m"
                         )
-                        if sys.version_info[0] == 2:
-                            self.logger.warning(
-                                "Please note that recent pyhf releases no longer support Python 2."
-                                + " An older version has been used. Results may be impacted."
-                            )
                         if (
                             self.main.recasting.simplify_likelihoods
                             and self.main.session_info.has_simplify

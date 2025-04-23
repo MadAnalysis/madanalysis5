@@ -300,7 +300,6 @@ class RecastConfiguration:
                         "DelphesMA5tune and/or the PADForMA5tune are not installed "
                         + "(or deactivated): the corresponding analyses will be unavailable"
                     )
-                    self.logger.warning("Recast module requires Spey package.")
                 else:
                     canrecast = True
 
