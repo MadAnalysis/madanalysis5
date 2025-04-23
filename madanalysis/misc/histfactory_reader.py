@@ -21,9 +21,6 @@
 #
 ################################################################################
 
-
-from __future__ import absolute_import
-
 import copy
 import json
 import logging
@@ -31,16 +28,20 @@ import math
 import os
 import sys
 from collections import OrderedDict
+from pathlib import Path
 from typing import Tuple
 
-from six.moves import range
+try:
+    from spey_pyhf.helper_functions import WorkspaceInterpreter
+except ImportError:
+    WorkspaceInterpreter = None
 
 
-class HistFactory(object):
+class HistFactory:
     def __init__(self, pyhf_config):
         self.pyhf_config = pyhf_config.get("SR", {})
         self.lumi = pyhf_config.get("lumi", 1.0)
-        self.path = pyhf_config.get("path", "missing_path")
+        self.path = Path(pyhf_config.get("path", "missing_path"))
         self.name = pyhf_config.get("name", "missing_name")
         self.logger = logging.getLogger("MA5")
         if isinstance(self, HF_Background):
@@ -201,23 +202,28 @@ class HistFactory(object):
 
 
 class HF_Background(HistFactory):
-    def __init__(self, pyhf_config, expected=False):
-        super(HF_Background, self).__init__(pyhf_config)
-        self.logger.debug("Reading : " + os.path.join(self.path, self.name))
-        if os.path.isfile(os.path.join(self.path, self.name)):
-            with open(os.path.join(self.path, self.name), "r") as json_file:
+    def __init__(self, pyhf_config: dict, expected: bool = False):
+        super().__init__(pyhf_config)
+
+        if WorkspaceInterpreter is None:
+            raise ImportError(
+                "The 'spey_pyhf' package is required for the HistFactory class."
+            )
+
+        bkg_file = self.path.joinpath(self.name)
+        self.logger.debug("Reading : %s", bkg_file)
+        if bkg_file.is_file():
+            with bkg_file.open("r") as json_file:
                 self.hf = json.load(json_file)
         else:
-            self.logger.warning(
-                "Can not find file : " + os.path.join(self.path, self.name)
-            )
+            self.logger.warning("Can not find file : %s", bkg_file)
 
         if expected:
             self.hf = self.impose_expected()
 
     def size(self):
         # The number of SRs in the likelihood profile
-        return [len(x.get("data", [])) for x in self.get_observed()]
+        return list(WorkspaceInterpreter(self.hf).bin_map.values())
 
     def impose_expected(self):
         """
@@ -279,13 +285,19 @@ class HF_Signal(HistFactory):
     """
 
     def __init__(self, pyhf_config, regiondata, xsection=-1, **kwargs):
-        super(HF_Signal, self).__init__(pyhf_config)
+        super().__init__(pyhf_config)
         self.signal_config = {}
 
-        with open(os.path.join(self.path, self.name), "r") as json_file:
-            tmp_bkg = json.load(json_file)
+        if WorkspaceInterpreter is None:
+            raise ImportError(
+                "The 'spey_pyhf' package is required for the HistFactory class."
+            )
 
-        bin_sizes = [len(x.get("data", [])) for x in tmp_bkg.get("observations", [])]
+        with self.path.joinpath(self.name).open("r") as json_file:
+            tmp_bkg = WorkspaceInterpreter(json.load(json_file))
+
+        bin_map = tmp_bkg.bin_map
+        self.poi_name = tmp_bkg.poi_name[0][1]
 
         for key, item in self.pyhf_config.items():
             if key != "lumi":
@@ -303,9 +315,7 @@ class HF_Signal(HistFactory):
                             len(tmp_bkg["channels"][int(item["channels"])]["samples"]) - 1
                         )
                     )
-                    self.signal_config[key]["bin_size"] = bin_sizes[
-                        int(self.signal_config[key]["path"].split("/")[2])
-                    ]
+                    self.signal_config[key]["bin_size"] = bin_map[key]
 
                 self.signal_config[key]["data"] = []
                 for SRname in item["data"]:
@@ -343,7 +353,7 @@ class HF_Signal(HistFactory):
                         ],
                         "modifiers": [
                             {"data": None, "name": "lumi", "type": "lumi"},
-                            {"data": None, "name": "mu_SIG", "type": "normfactor"},
+                            {"data": None, "name": self.poi_name, "type": "normfactor"},
                         ],
                     },
                 }
@@ -375,8 +385,8 @@ class HF_Signal(HistFactory):
                 return []
         return HF
 
-    def validate_bins(self, background, HF=[]):
-        if HF == []:
+    def validate_bins(self, background, HF: list = None):
+        if HF is None:
             HF = self.hf
         bkg_bins = background.size()
         to_validate = [False] * len(bkg_bins)
