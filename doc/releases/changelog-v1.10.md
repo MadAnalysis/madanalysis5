@@ -68,6 +68,9 @@
 
 * Include c-tagging options.
 
+* Integrating RestFrames as well as readers for CSV-encoded efficiencies provided on HEPData.
+
+
 ## Bug fixes
 
 * Permanently fix the zlib version to the latest.

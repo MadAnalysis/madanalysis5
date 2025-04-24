@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -111,6 +111,9 @@ class DetectManager():
         elif package=='pyhf':
             from madanalysis.system.detect_pyhf import Detectpyhf
             checker=Detectpyhf(self.archi_info, self.user_info, self.session_info, self.debug)
+        elif package=='spey':
+            from madanalysis.system.detect_spey import DetectSpey
+            checker=DetectSpey(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='simplify':
             from madanalysis.system.detect_simplify import DetectSimplify
             checker=DetectSimplify(self.archi_info, self.user_info, self.session_info, self.debug)

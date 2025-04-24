@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 ################################################################################
 #
-#  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #
 #  This file is part of MadAnalysis 5.
@@ -33,7 +33,7 @@ This is the main executable, a simple frontend to set up the PYTHONPATH
 and call immediately the command line interface scripts
 """
 
-import importlib
+from importlib import util
 import os
 import sys
 
@@ -48,7 +48,7 @@ if sys.version_info[0] != 3 or sys.version_info[1] <= 6:
     )
 
 # Checking that the 'six' package is present
-if not importlib.util.find_spec("six"):
+if not util.find_spec("six"):
     sys.exit(
         'The python "six" module is not found on your system and it is required for MadAnalysis 5 for '
         + "a question of Python 2/3 compatibility. Please install it with the following command:\n"
@@ -74,8 +74,8 @@ sys.path.insert(0, servicedir)
 
 # Release version
 # Do not touch it !!!!!
-version = "1.10.16"
-date = "2024/08/26"
+version = "1.11.0"
+date = "2025/04/23"
 
 # Loading the MadAnalysis session
 import madanalysis.core.launcher

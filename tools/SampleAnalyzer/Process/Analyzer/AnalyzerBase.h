@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -39,6 +39,7 @@
 #include "SampleAnalyzer/Commons/Base/Configuration.h"
 #include "SampleAnalyzer/Process/RegionSelection/RegionSelectionManager.h"
 #include "SampleAnalyzer/Commons/Base/PortableDatatypes.h"
+#include "SampleAnalyzer/Commons/Service/HEPData.h"
 
 // STL headers
 #include <set>
