@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -39,7 +39,6 @@ MAfloat64 IsolationBase::sumPT(const RecLeptonFormat* part,
                               MAfloat64 PTmin) const
 {
   MAfloat64 sumPT=0.;
-  MAuint32 counter=0;
 
   // Loop over the towers
   for (MAuint32 i=0;i<tracks.size();i++)
@@ -57,7 +56,6 @@ MAfloat64 IsolationBase::sumPT(const RecLeptonFormat* part,
 
     // Sum
     sumPT += track.pt();
-    counter++;
   }
 
   // return PT sum of tracks in the cone
@@ -74,7 +72,6 @@ MAfloat64 IsolationBase::sumPT(const RecLeptonFormat* part,
                               MAfloat64 PTmin) const
 {
   MAfloat64 sumPT=0.;
-  MAuint32 counter=0;
 
   // Loop over the tracks
   for (MAuint32 i=0;i<towers.size();i++)
@@ -89,7 +86,6 @@ MAfloat64 IsolationBase::sumPT(const RecLeptonFormat* part,
 
     // Sum
     sumPT += tower.pt();
-    counter++;
   }
 
   // return PT sum of towers in the cone
@@ -106,7 +102,6 @@ MAfloat64 IsolationBase::sumPT(const RecLeptonFormat* part,
                               MAfloat64 PTmin) const
 {
   MAfloat64 sumPT=0.;
-  MAuint32 counter=0;
 
   // Loop over the tracks
   for (MAuint32 i=0;i<towers.size();i++)
@@ -121,7 +116,6 @@ MAfloat64 IsolationBase::sumPT(const RecLeptonFormat* part,
 
     // Sum
     sumPT += tower.pt();
-    counter++;
   }
 
   // return PT sum of towers in the cone
@@ -138,7 +132,6 @@ MAfloat64 IsolationBase::sumPT(const RecPhotonFormat* part,
                               MAfloat64 PTmin) const
 {
   MAfloat64 sumPT=0.;
-  MAuint32 counter=0;
 
   // Loop over the towers
   for (MAuint32 i=0;i<tracks.size();i++)
@@ -153,7 +146,6 @@ MAfloat64 IsolationBase::sumPT(const RecPhotonFormat* part,
 
     // Sum
     sumPT += track.pt();
-    counter++;
   }
 
   // return PT sum of tracks in the cone
@@ -170,7 +162,6 @@ MAfloat64 IsolationBase::sumPT(const RecPhotonFormat* part,
                          MAfloat64 PTmin) const
 {
   MAfloat64 sumPT=0.;
-  MAuint32 counter=0;
 
   // Loop over the tracks
   for (MAuint32 i=0;i<towers.size();i++)
@@ -185,7 +176,6 @@ MAfloat64 IsolationBase::sumPT(const RecPhotonFormat* part,
 
     // Sum
     sumPT += tower.pt();
-    counter++;
   }
 
   // return PT sum of towers in the cone
@@ -202,7 +192,6 @@ MAfloat64 IsolationBase::sumPT(const RecPhotonFormat* part,
                          MAfloat64 PTmin) const
 {
   MAfloat64 sumPT=0.;
-  MAuint32 counter=0;
 
   // Loop over the tracks
   for (MAuint32 i=0;i<towers.size();i++)
@@ -220,7 +209,6 @@ MAfloat64 IsolationBase::sumPT(const RecPhotonFormat* part,
 
     // Sum
     sumPT += tower.pt();
-    counter++;
   }
 
   // return PT sum of towers in the cone

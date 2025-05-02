@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -100,8 +100,7 @@ class CmdSet(CmdBase.CmdBase):
         object = object.replace('fastsim.bjet_id.','fastsim.bjet_idXXX')
         object = object.replace('fastsim.tau_id.','fastsim.tau_idXXX')
         objs = object.split('.')
-        for i in range(len(objs)):
-            objs[i] = objs[i].replace('XXX','.')
+        objs = [o.replace('XXX','.') for o in objs]
 
         if len(objs)==2 and objs[0].lower()=='main' and objs[1].lower()=='recast':
             user_info    = UserInfo()

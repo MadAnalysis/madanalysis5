@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -108,6 +108,7 @@ void bTagger::Method1 (SampleFormat& mySample, EventFormat& myEvent)
 
     // 100% identification
     if (jet->true_btag_) jet->btag_=true;
+    if (jet->true_ctag_) jet->ctag_=true;
     if (!doEfficiency_ && !doMisefficiency_) continue;
 
     // identification efficiency
