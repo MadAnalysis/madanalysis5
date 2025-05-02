@@ -54,6 +54,9 @@ class DetectManager():
         if package=='zlib':
             from madanalysis.system.detect_zlib import DetectZlib
             checker=DetectZlib(self.archi_info, self.user_info, self.session_info, self.debug)
+        elif package=='onnx':
+            from madanalysis.system.detect_onnx import DetectONNX
+            checker=DetectONNX(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='fastjet':
             from madanalysis.system.detect_fastjet import DetectFastjet
             checker=DetectFastjet(self.archi_info, self.user_info, self.session_info, self.debug)

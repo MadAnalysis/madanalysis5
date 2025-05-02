@@ -28,12 +28,14 @@ import logging
 
 class SessionInfo:
     def __init__(self):
+
         self.editor = ""
         self.username = ""
         self.tmpdir = ""
         self.downloaddir = ""
         self.has_root = False
         self.has_matplotlib = False
+        self.has_onnx = False 
         self.has_spey = False
         self.has_simplify = False
         self.has_scipy = False

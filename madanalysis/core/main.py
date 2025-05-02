@@ -670,6 +670,15 @@ class Main:
                 ]
             )
 
+        # ONNX
+        if self.archi_info.has_onnx:
+            libraries.append(['onnx', 'interface to onnx', 'onnx',\
+                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Lib/libonnx_for_ma5.so',\
+                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Interfaces',False])
+            libraries.append(['test_onnx','interface to onnx', 'test_onnx',\
+                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Bin/TestOnnx',\
+                              self.archi_info.ma5dir+'/tools/SampleAnalyzer/Test/',True])
+
         # Fastjet
         if self.archi_info.has_fastjet:
             libraries.append(
@@ -811,6 +820,7 @@ class Main:
         options.has_process = True
         options.has_test = True
         options.has_zlib = self.archi_info.has_zlib
+        options.has_onnx = self.archi_info.has_onnx
         options.has_fastjet = self.archi_info.has_fastjet
         options.has_delphes = self.archi_info.has_delphes
         options.has_delphesMA5tune = self.archi_info.has_delphesMA5tune
