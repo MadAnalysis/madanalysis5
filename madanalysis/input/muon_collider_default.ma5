@@ -1,0 +1,580 @@
+#<><><><><><><><><><><><><><><><><><><><><><><><><>
+#                                                <>
+#   Muon Collider Default                        <>
+#   Author: Parham Dehghani                      <>
+#                                                <>
+#   ### The performance that has been encoded    <>
+#   in this card is to be intended as a “target” <>
+#   performance for the highest possible energy. <>
+#                                                <>
+#<><><><><><><><><><><><><><><><><><><><><><><><><>
+
+# Set FastJet variables
+
+set main.fastsim.package = fastjet
+set main.fastsim.algorithm = antikt
+set main.fastsim.radius = 0.4
+set main.fastsim.bjet_id.matching_dr = 0.3
+set main.fastsim.bjet_id.exclusive = true
+set main.fastsim.exclusive_id = false
+set main.fastsim.ptmin = 5.0
+set main.fastsim.jetrecomode = jets 
+
+## Jet
+# Reconstruction efficiency
+
+# HCAL 
+define smearer j with E sqrt(1.38^2  + E*0.308^2  + E^2*0.050^2)  [abseta <= 0.3]
+define smearer j with E sqrt(1.25^2  + E*0.322^2  + E^2*0.048^2)  [abseta > 0.3 and abseta <= 0.78]
+define smearer j with E sqrt(1.159^2 + E*0.341^2 + E^2*0.049^2)   [abseta > 0.78 and abseta <= 1.099]
+define smearer j with E sqrt(1.09^2 + E*0.319^2 + E^2*0.052^2)    [abseta > 1.099 and abseta <= 2.5]
+
+# Momentum Smearing
+define smearer j with PT 0.02  [abseta < 0.76]
+define smearer j with PT 0.05  [abseta >= 0.76]
+
+
+## Muon
+# Muon Smearing
+define smearer mu with PT sqrt(0.0000364164 + (3*9.06262e-8 *pt^2* cosh(eta)^2 *(2.82074e-7/sin(2*atan(exp(-abseta)))^2 + (504.525 *(1/400000000 + (0.117945* 1/cosh(eta)^2)/(pt^2 *sin(2*atan(exp(-abseta)))^2)))/sin(2*atan(exp(-abseta)))^2) *sin(2*atan(exp(-abseta)))^2)/(0.00516429/sin(2*atan(exp(-abseta)))^2 + (96868.8 *(1/400000000 + 5*(0.117945 * 1/cosh(eta)^2)/(pt^2 *sin(2*atan(exp(-abseta)))^2)))/sin(2*atan(exp(-abseta)))^2)) [abseta < 1.35]
+
+define smearer mu with PT 1.53846*((0.00953577)- sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2))))*abseta + 3.07692*sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2)))- 2.07692*(0.00953577) [abseta > 1.35 and abseta < 2.00 and E >= 0.0000 and E < 1.0000]
+
+define smearer mu with PT 1.53846*(0.0076395 - sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2))))*abseta + 3.07692*sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2))) - 2.07692*(0.0076395) [abseta > 1.35 and abseta < 2.00 and E >= 1.0000 and E < 2.0000]
+
+define smearer mu with PT 1.53846*(0.0050085 - sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2))))*abseta + 3.07692*sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2))) - 2.07692*(0.0050085) [abseta > 1.35 and abseta < 2.00 and E >= 2.0000 and E < 5.0000]
+
+define smearer mu with PT 1.53846*((0.004277 + (7.5-5.000000)* 0.000005)- sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2))))*abseta + 3.07692*sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2)))- 2.07692*(0.004277 + (7.5-5.000000)* 0.000005) [abseta > 1.35 and abseta < 2.00 and E >= 5.0000 and E < 10.0000]
+
+define smearer mu with PT 1.53846*((0.004302 + (15-10.000000)* 0.000007)- sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2))))*abseta + 3.07692*sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2)))- 2.07692*(0.004302 + (15-10.000000)* 0.000007) [abseta > 1.35 and abseta < 2.00 and E >= 10.0000 and E < 20.0000]
+
+define smearer mu with PT 1.53846*((0.004368 + (35-20.000000)* 0.000007)- sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2))))*abseta + 3.07692*sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2)))- 2.07692*(0.004368 + (35-20.000000)* 0.000007) [abseta > 1.35 and abseta < 2.00 and E >= 20.0000 and E < 50.0000]
+
+define smearer mu with PT 1.53846*((0.004581 + (75-50.000000)* 0.000006)- sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2))))*abseta + 3.07692*sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2)))- 2.07692*(0.004581 + (75-50.000000)* 0.000006) [abseta > 1.35 and abseta < 2.00 and E >= 50.0000 and E < 100.0000]
+
+define smearer mu with PT 1.53846*((0.004875 + (150-100.000000)* 0.000005)- sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2))))*abseta + 3.07692*sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2)))- 2.07692*(0.004875 + (150-100.000000)* 0.000005) [abseta > 1.35 and abseta < 2.00 and E >= 100.0000 and E < 200.0000]
+
+define smearer mu with PT 1.53846*((0.005344 + (350-200.000000)* 0.000004)- sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2))))*abseta + 3.07692*sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2)))- 2.07692*(0.005344 + (350-200.000000)* 0.000004) [abseta > 1.35 and abseta < 2.00 and E >= 200.0000 and E < 500.0000]
+
+define smearer mu with PT 1.53846*((0.006395 + (750-500.000000)* 0.000004)- sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2))))*abseta + 3.07692*sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2)))- 2.07692*(0.006395 + (750-500.000000)* 0.000004) [abseta > 1.35 and abseta < 2.00 and E >= 500.0000 and E < 1000.0000]
+
+define smearer mu with PT 1.53846*((0.008441 + (1500-1000.000000)* 0.000005)- sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2))))*abseta + 3.07692*sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2)))- 2.07692*(0.008441 + (1500-1000.000000)* 0.000005) [abseta > 1.35 and abseta < 2.00 and E >= 1000.0000 and E < 2000.0000]
+
+define smearer mu with PT 1.53846*((0.013700 + (3500-2000.000000)* 0.000006)- sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2))))*abseta + 3.07692*sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2)))- 2.07692*(0.013700 + (3500-2000.000000)* 0.000006) [abseta > 1.35 and abseta < 2.00 and E >= 2000.0000 and E < 5000.0000]
+
+define smearer mu with PT 1.53846*((0.031615 + (7500-5000.000000)* 0.000006)- sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2))))*abseta + 3.07692*sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2)))- 2.07692*(0.031615 + (7500-5000.000000)* 0.000006) [abseta > 1.35 and abseta < 2.00 and E >= 5000.0000 and E < 10000.0000]
+
+define smearer mu with PT 1.53846*((0.062437*1.0)- sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2))))*abseta + 3.07692*sqrt(0.0000364164 + (9.06262e-8 *(1.19507e-6 + 2137.54 *(1/400000000 + 0.155982/pt^2)) *pt^2)/(0.0218797 + 410407. *(1/400000000 + 0.155982/pt^2)))- 2.07692*(0.062437*1.0) [abseta > 1.35 and abseta < 2.00 and E >= 10000]
+
+
+define smearer mu with PT (0.01062416) [abseta >= 2.0000 and abseta < 2.1000 and E >= 0.0000 and E < 1.0000]
+define smearer mu with PT (0.010624 + (1.5-1.000000)* -0.005532) [abseta >= 2.0000 and abseta < 2.1000 and E >= 1.0000 and E < 2.0000]
+define smearer mu with PT (0.005092 + (3.5-2.000000)* -0.000326) [abseta >= 2.0000 and abseta < 2.1000 and E >= 2.0000 and E < 5.0000]
+define smearer mu with PT (0.004115 + (7.5-5.000000)* 0.000006) [abseta >= 2.0000 and abseta < 2.1000 and E >= 5.0000 and E < 10.0000]
+define smearer mu with PT (0.004143 + (15-10.000000)* 0.000007) [abseta >= 2.0000 and abseta < 2.1000 and E >= 10.0000 and E < 20.0000]
+define smearer mu with PT (0.004209 + (35-20.000000)* 0.000007) [abseta >= 2.0000 and abseta < 2.1000 and E >= 20.0000 and E < 50.0000]
+define smearer mu with PT (0.004413 + (75-50.000000)* 0.000005) [abseta >= 2.0000 and abseta < 2.1000 and E >= 50.0000 and E < 100.0000]
+define smearer mu with PT (0.004681 + (150-100.000000)* 0.000004) [abseta >= 2.0000 and abseta < 2.1000 and E >= 100.0000 and E < 200.0000]
+define smearer mu with PT (0.005076 + (350-200.000000)* 0.000004) [abseta >= 2.0000 and abseta < 2.1000 and E >= 200.0000 and E < 500.0000]
+define smearer mu with PT (0.006270 + (750-500.000000)* 0.000005) [abseta >= 2.0000 and abseta < 2.1000 and E >= 500.0000 and E < 1000.0000]
+define smearer mu with PT (0.008960 + (1500-1000.000000)* 0.000007) [abseta >= 2.0000 and abseta < 2.1000 and E >= 1000.0000 and E < 2000.0000]
+define smearer mu with PT (0.015510 + (3500-2000.000000)* 0.000007) [abseta >= 2.0000 and abseta < 2.1000 and E >= 2000.0000 and E < 5000.0000]
+define smearer mu with PT (0.036867 + (7500-5000.000000)* 0.000007) [abseta >= 2.0000 and abseta < 2.1000 and E >= 5000.0000 and E < 10000.0000]
+define smearer mu with PT (0.073168*1.0) [abseta >= 2.0000 and abseta < 2.1000 and E >= 10000.0000]
+
+define smearer mu with PT (0.01007098) [abseta >= 2.1000 and abseta < 2.2000 and E >= 0.0000 and E < 1.0000]
+define smearer mu with PT (0.010071 + (1.5-1.000000)* -0.004627) [abseta >= 2.1000 and abseta < 2.2000 and E >= 1.0000 and E < 2.0000]
+define smearer mu with PT (0.005444 + (3.5-2.000000)* -0.000322) [abseta >= 2.1000 and abseta < 2.2000 and E >= 2.0000 and E < 5.0000]
+define smearer mu with PT (0.004478 + (7.5-5.000000)* 0.000005) [abseta >= 2.1000 and abseta < 2.2000 and E >= 5.0000 and E < 10.0000]
+define smearer mu with PT (0.004501 + (15-10.000000)* 0.000006) [abseta >= 2.1000 and abseta < 2.2000 and E >= 10.0000 and E < 20.0000]
+define smearer mu with PT (0.004558 + (35-20.000000)* 0.000005) [abseta >= 2.1000 and abseta < 2.2000 and E >= 20.0000 and E < 50.0000]
+define smearer mu with PT (0.004701 + (75-50.000000)* 0.000004) [abseta >= 2.1000 and abseta < 2.2000 and E >= 50.0000 and E < 100.0000]
+define smearer mu with PT (0.004888 + (150-100.000000)* 0.000003) [abseta >= 2.1000 and abseta < 2.2000 and E >= 100.0000 and E < 200.0000]
+define smearer mu with PT (0.005213 + (350-200.000000)* 0.000004) [abseta >= 2.1000 and abseta < 2.2000 and E >= 200.0000 and E < 500.0000]
+define smearer mu with PT (0.006429 + (750-500.000000)* 0.000006) [abseta >= 2.1000 and abseta < 2.2000 and E >= 500.0000 and E < 1000.0000]
+define smearer mu with PT (0.009343 + (1500-1000.000000)* 0.000007) [abseta >= 2.1000 and abseta < 2.2000 and E >= 1000.0000 and E < 2000.0000]
+define smearer mu with PT (0.016410 + (3500-2000.000000)* 0.000008) [abseta >= 2.1000 and abseta < 2.2000 and E >= 2000.0000 and E < 5000.0000]
+define smearer mu with PT (0.039265 + (7500-5000.000000)* 0.000008) [abseta >= 2.1000 and abseta < 2.2000 and E >= 5000.0000 and E < 10000.0000]
+define smearer mu with PT (0.078014*1.0) [abseta >= 2.1000 and abseta < 2.2000 and E >= 10000.0000]
+
+define smearer mu with PT (0.01095892) [abseta >= 2.2000 and abseta < 2.3000 and E >= 0.0000 and E < 1.0000]
+define smearer mu with PT (0.010959 + (1.5-1.000000)* -0.005458) [abseta >= 2.2000 and abseta < 2.3000 and E >= 1.0000 and E < 2.0000]
+define smearer mu with PT (0.005501 + (3.5-2.000000)* -0.000281) [abseta >= 2.2000 and abseta < 2.3000 and E >= 2.0000 and E < 5.0000]
+define smearer mu with PT (0.004660 + (7.5-5.000000)* 0.000005) [abseta >= 2.2000 and abseta < 2.3000 and E >= 5.0000 and E < 10.0000]
+define smearer mu with PT (0.004686 + (15-10.000000)* 0.000007) [abseta >= 2.2000 and abseta < 2.3000 and E >= 10.0000 and E < 20.0000]
+define smearer mu with PT (0.004757 + (35-20.000000)* 0.000006) [abseta >= 2.2000 and abseta < 2.3000 and E >= 20.0000 and E < 50.0000]
+define smearer mu with PT (0.004937 + (75-50.000000)* 0.000004) [abseta >= 2.2000 and abseta < 2.3000 and E >= 50.0000 and E < 100.0000]
+define smearer mu with PT (0.005143 + (150-100.000000)* 0.000004) [abseta >= 2.2000 and abseta < 2.3000 and E >= 100.0000 and E < 200.0000]
+define smearer mu with PT (0.005505 + (350-200.000000)* 0.000005) [abseta >= 2.2000 and abseta < 2.3000 and E >= 200.0000 and E < 500.0000]
+define smearer mu with PT (0.006975 + (750-500.000000)* 0.000007) [abseta >= 2.2000 and abseta < 2.3000 and E >= 500.0000 and E < 1000.0000]
+define smearer mu with PT (0.010462 + (1500-1000.000000)* 0.000008) [abseta >= 2.2000 and abseta < 2.3000 and E >= 1000.0000 and E < 2000.0000]
+define smearer mu with PT (0.018731 + (3500-2000.000000)* 0.000009) [abseta >= 2.2000 and abseta < 2.3000 and E >= 2000.0000 and E < 5000.0000]
+define smearer mu with PT (0.045159 + (7500-5000.000000)* 0.000009) [abseta >= 2.2000 and abseta < 2.3000 and E >= 5000.0000 and E < 10000.0000]
+define smearer mu with PT (0.089830*1.0) [abseta >= 2.2000 and abseta < 2.3000 and E >= 10000.0000]
+
+define smearer mu with PT (0.01279214) [abseta >= 2.3000 and abseta < 2.4000 and E >= 0.0000 and E < 1.0000]
+define smearer mu with PT (0.012792 + (1.5-1.000000)* -0.005763) [abseta >= 2.3000 and abseta < 2.4000 and E >= 1.0000 and E < 2.0000]
+define smearer mu with PT (0.007029 + (3.5-2.000000)* -0.000513) [abseta >= 2.3000 and abseta < 2.4000 and E >= 2.0000 and E < 5.0000]
+define smearer mu with PT (0.005489 + (7.5-5.000000)* 0.000003) [abseta >= 2.3000 and abseta < 2.4000 and E >= 5.0000 and E < 10.0000]
+define smearer mu with PT (0.005503 + (15-10.000000)* 0.000003) [abseta >= 2.3000 and abseta < 2.4000 and E >= 10.0000 and E < 20.0000]
+define smearer mu with PT (0.005537 + (35-20.000000)* 0.000003) [abseta >= 2.3000 and abseta < 2.4000 and E >= 20.0000 and E < 50.0000]
+define smearer mu with PT (0.005636 + (75-50.000000)* 0.000003) [abseta >= 2.3000 and abseta < 2.4000 and E >= 50.0000 and E < 100.0000]
+define smearer mu with PT (0.005773 + (150-100.000000)* 0.000003) [abseta >= 2.3000 and abseta < 2.4000 and E >= 100.0000 and E < 200.0000]
+define smearer mu with PT (0.006060 + (350-200.000000)* 0.000005) [abseta >= 2.3000 and abseta < 2.4000 and E >= 200.0000 and E < 500.0000]
+define smearer mu with PT (0.007489 + (750-500.000000)* 0.000007) [abseta >= 2.3000 and abseta < 2.4000 and E >= 500.0000 and E < 1000.0000]
+define smearer mu with PT (0.011117 + (1500-1000.000000)* 0.000009) [abseta >= 2.3000 and abseta < 2.4000 and E >= 1000.0000 and E < 2000.0000]
+define smearer mu with PT (0.019824 + (3500-2000.000000)* 0.000009) [abseta >= 2.3000 and abseta < 2.4000 and E >= 2000.0000 and E < 5000.0000]
+define smearer mu with PT (0.047732 + (7500-5000.000000)* 0.000009) [abseta >= 2.3000 and abseta < 2.4000 and E >= 5000.0000 and E < 10000.0000]
+define smearer mu with PT (0.094931*1.0) [abseta >= 2.3000 and abseta < 2.4000 and E >= 10000.0000]
+
+define smearer mu with PT (0.01502671) [abseta >= 2.4000 and abseta < 2.5000 and E >= 0.0000 and E < 1.0000]
+define smearer mu with PT (0.015027 + (1.5-1.000000)* -0.007177) [abseta >= 2.4000 and abseta < 2.5000 and E >= 1.0000 and E < 2.0000]
+define smearer mu with PT (0.007850 + (3.5-2.000000)* -0.000651) [abseta >= 2.4000 and abseta < 2.5000 and E >= 2.0000 and E < 5.0000]
+define smearer mu with PT (0.005898 + (7.5-5.000000)* 0.000003) [abseta >= 2.4000 and abseta < 2.5000 and E >= 5.0000 and E < 10.0000]
+define smearer mu with PT (0.005913 + (15-10.000000)* 0.000003) [abseta >= 2.4000 and abseta < 2.5000 and E >= 10.0000 and E < 20.0000]
+define smearer mu with PT (0.005947 + (35-20.000000)* 0.000003) [abseta >= 2.4000 and abseta < 2.5000 and E >= 20.0000 and E < 50.0000]
+define smearer mu with PT (0.006039 + (75-50.000000)* 0.000003) [abseta >= 2.4000 and abseta < 2.5000 and E >= 50.0000 and E < 100.0000]
+define smearer mu with PT (0.006170 + (150-100.000000)* 0.000003) [abseta >= 2.4000 and abseta < 2.5000 and E >= 100.0000 and E < 200.0000]
+define smearer mu with PT (0.006485 + (350-200.000000)* 0.000006) [abseta >= 2.4000 and abseta < 2.5000 and E >= 200.0000 and E < 500.0000]
+define smearer mu with PT (0.008140 + (750-500.000000)* 0.000008) [abseta >= 2.4000 and abseta < 2.5000 and E >= 500.0000 and E < 1000.0000]
+define smearer mu with PT (0.012304 + (1500-1000.000000)* 0.000010) [abseta >= 2.4000 and abseta < 2.5000 and E >= 1000.0000 and E < 2000.0000]
+define smearer mu with PT (0.022168 + (3500-2000.000000)* 0.000010) [abseta >= 2.4000 and abseta < 2.5000 and E >= 2000.0000 and E < 5000.0000]
+define smearer mu with PT (0.053585 + (7500-5000.000000)* 0.000011) [abseta >= 2.4000 and abseta < 2.5000 and E >= 5000.0000 and E < 10000.0000]
+define smearer mu with PT (0.106635*1.0) [abseta >= 2.4000 and abseta < 2.5000 and E >= 10000.0000]
+
+# Reconstruction efficiency
+
+define reco_efficiency mu 0.00 [E < 2.5]
+define reco_efficiency mu 0.999 [E >= 2.5]
+
+
+
+## Electron
+# Electron Momentum Smearing
+
+define smearer e with PT (0.00315864) [abseta >= 0.0000 and abseta < 0.1000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.003159 + (1.5-1.000000)* 0.000007) [abseta >= 0.0000 and abseta < 0.1000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.003166 + (3.5-2.000000)* 0.000011) [abseta >= 0.0000 and abseta < 0.1000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.003198 + (7.5-5.000000)* 0.000012) [abseta >= 0.0000 and abseta < 0.1000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.003259 + (55-10.000000)* 0.000010) [abseta >= 0.0000 and abseta < 0.1000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.004173 + (550-100.000000)* 0.000019) [abseta >= 0.0000 and abseta < 0.1000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.020916 + (5500-1000.000000)* 0.000021) [abseta >= 0.0000 and abseta < 0.1000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.205876*1.0) [abseta >= 0.0000 and abseta < 0.1000 and E >= 10000.0000]
+
+define smearer e with PT (0.00316278) [abseta >= 0.1000 and abseta < 0.2000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.003163 + (1.5-1.000000)* 0.000006) [abseta >= 0.1000 and abseta < 0.2000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.003169 + (3.5-2.000000)* 0.000010) [abseta >= 0.1000 and abseta < 0.2000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.003198 + (7.5-5.000000)* 0.000011) [abseta >= 0.1000 and abseta < 0.2000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.003255 + (55-10.000000)* 0.000010) [abseta >= 0.1000 and abseta < 0.2000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.004165 + (550-100.000000)* 0.000019) [abseta >= 0.1000 and abseta < 0.2000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.020917 + (5500-1000.000000)* 0.000021) [abseta >= 0.1000 and abseta < 0.2000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.205952*1.0) [abseta >= 0.1000 and abseta < 0.2000 and E >= 10000.0000]
+
+define smearer e with PT (0.00320482) [abseta >= 0.2000 and abseta < 0.3000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.003205 + (1.5-1.000000)* 0.000006) [abseta >= 0.2000 and abseta < 0.3000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.003211 + (3.5-2.000000)* 0.000009) [abseta >= 0.2000 and abseta < 0.3000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.003238 + (7.5-5.000000)* 0.000011) [abseta >= 0.2000 and abseta < 0.3000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.003294 + (55-10.000000)* 0.000010) [abseta >= 0.2000 and abseta < 0.3000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.004176 + (550-100.000000)* 0.000018) [abseta >= 0.2000 and abseta < 0.3000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.020586 + (5500-1000.000000)* 0.000020) [abseta >= 0.2000 and abseta < 0.3000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.202528*1.0) [abseta >= 0.2000 and abseta < 0.3000 and E >= 10000.0000]
+
+define smearer e with PT (0.00325680) [abseta >= 0.3000 and abseta < 0.4000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.003257 + (1.5-1.000000)* 0.000001) [abseta >= 0.3000 and abseta < 0.4000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.003257 + (3.5-2.000000)* 0.000009) [abseta >= 0.3000 and abseta < 0.4000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.003286 + (7.5-5.000000)* 0.000011) [abseta >= 0.3000 and abseta < 0.4000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.003342 + (55-10.000000)* 0.000009) [abseta >= 0.3000 and abseta < 0.4000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.004195 + (550-100.000000)* 0.000017) [abseta >= 0.3000 and abseta < 0.4000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.019873 + (5500-1000.000000)* 0.000019) [abseta >= 0.3000 and abseta < 0.4000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.195142*1.0) [abseta >= 0.3000 and abseta < 0.4000 and E >= 10000.0000]
+
+define smearer e with PT (0.00354020) [abseta >= 0.4000 and abseta < 0.5000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.003540 + (1.5-1.000000)* -0.000201) [abseta >= 0.4000 and abseta < 0.5000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.003340 + (3.5-2.000000)* 0.000009) [abseta >= 0.4000 and abseta < 0.5000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.003366 + (7.5-5.000000)* 0.000011) [abseta >= 0.4000 and abseta < 0.5000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.003422 + (55-10.000000)* 0.000009) [abseta >= 0.4000 and abseta < 0.5000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.004265 + (550-100.000000)* 0.000017) [abseta >= 0.4000 and abseta < 0.5000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.019240 + (5500-1000.000000)* 0.000019) [abseta >= 0.4000 and abseta < 0.5000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.188429*1.0) [abseta >= 0.4000 and abseta < 0.5000 and E >= 10000.0000]
+
+define smearer e with PT (0.00362672) [abseta >= 0.5000 and abseta < 0.6000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.003627 + (1.5-1.000000)* -0.000223) [abseta >= 0.5000 and abseta < 0.6000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.003403 + (3.5-2.000000)* 0.000008) [abseta >= 0.5000 and abseta < 0.6000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.003428 + (7.5-5.000000)* 0.000010) [abseta >= 0.5000 and abseta < 0.6000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.003479 + (55-10.000000)* 0.000009) [abseta >= 0.5000 and abseta < 0.6000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.004256 + (550-100.000000)* 0.000016) [abseta >= 0.5000 and abseta < 0.6000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.018471 + (5500-1000.000000)* 0.000018) [abseta >= 0.5000 and abseta < 0.6000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.180531*1.0) [abseta >= 0.5000 and abseta < 0.6000 and E >= 10000.0000]
+
+define smearer e with PT (0.00386864) [abseta >= 0.6000 and abseta < 0.7000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.003869 + (1.5-1.000000)* -0.000354) [abseta >= 0.6000 and abseta < 0.7000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.003515 + (3.5-2.000000)* 0.000007) [abseta >= 0.6000 and abseta < 0.7000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.003536 + (7.5-5.000000)* 0.000009) [abseta >= 0.6000 and abseta < 0.7000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.003583 + (55-10.000000)* 0.000009) [abseta >= 0.6000 and abseta < 0.7000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.004349 + (550-100.000000)* 0.000015) [abseta >= 0.6000 and abseta < 0.7000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.017442 + (5500-1000.000000)* 0.000017) [abseta >= 0.6000 and abseta < 0.7000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.169559*1.0) [abseta >= 0.6000 and abseta < 0.7000 and E >= 10000.0000]
+
+define smearer e with PT (0.00418203) [abseta >= 0.7000 and abseta < 0.8000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.004182 + (1.5-1.000000)* -0.000556) [abseta >= 0.7000 and abseta < 0.8000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.003626 + (3.5-2.000000)* 0.000007) [abseta >= 0.7000 and abseta < 0.8000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.003645 + (7.5-5.000000)* 0.000008) [abseta >= 0.7000 and abseta < 0.8000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.003687 + (55-10.000000)* 0.000008) [abseta >= 0.7000 and abseta < 0.8000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.004399 + (550-100.000000)* 0.000013) [abseta >= 0.7000 and abseta < 0.8000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.016509 + (5500-1000.000000)* 0.000016) [abseta >= 0.7000 and abseta < 0.8000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.159676*1.0) [abseta >= 0.7000 and abseta < 0.8000 and E >= 10000.0000]
+
+define smearer e with PT (0.00436103) [abseta >= 0.8000 and abseta < 0.9000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.004361 + (1.5-1.000000)* -0.000597) [abseta >= 0.8000 and abseta < 0.9000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.003764 + (3.5-2.000000)* 0.000006) [abseta >= 0.8000 and abseta < 0.9000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.003781 + (7.5-5.000000)* 0.000008) [abseta >= 0.8000 and abseta < 0.9000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.003821 + (55-10.000000)* 0.000007) [abseta >= 0.8000 and abseta < 0.9000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.004495 + (550-100.000000)* 0.000012) [abseta >= 0.8000 and abseta < 0.9000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.015532 + (5500-1000.000000)* 0.000015) [abseta >= 0.8000 and abseta < 0.9000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.149090*1.0) [abseta >= 0.8000 and abseta < 0.9000 and E >= 10000.0000]
+
+define smearer e with PT (0.00488279) [abseta >= 0.9000 and abseta < 1.0000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.004883 + (1.5-1.000000)* -0.000969) [abseta >= 0.9000 and abseta < 1.0000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.003914 + (3.5-2.000000)* 0.000006) [abseta >= 0.9000 and abseta < 1.0000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.003930 + (7.5-5.000000)* 0.000007) [abseta >= 0.9000 and abseta < 1.0000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.003967 + (55-10.000000)* 0.000007) [abseta >= 0.9000 and abseta < 1.0000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.004593 + (550-100.000000)* 0.000011) [abseta >= 0.9000 and abseta < 1.0000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.014592 + (5500-1000.000000)* 0.000014) [abseta >= 0.9000 and abseta < 1.0000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.138764*1.0) [abseta >= 0.9000 and abseta < 1.0000 and E >= 10000.0000]
+
+define smearer e with PT (0.00513716) [abseta >= 1.0000 and abseta < 1.1000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.005137 + (1.5-1.000000)* -0.001026) [abseta >= 1.0000 and abseta < 1.1000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.004111 + (3.5-2.000000)* 0.000005) [abseta >= 1.0000 and abseta < 1.1000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.004125 + (7.5-5.000000)* 0.000007) [abseta >= 1.0000 and abseta < 1.1000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.004159 + (55-10.000000)* 0.000007) [abseta >= 1.0000 and abseta < 1.1000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.004752 + (550-100.000000)* 0.000010) [abseta >= 1.0000 and abseta < 1.1000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.013718 + (5500-1000.000000)* 0.000013) [abseta >= 1.0000 and abseta < 1.1000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.128750*1.0) [abseta >= 1.0000 and abseta < 1.1000 and E >= 10000.0000]
+
+define smearer e with PT (0.00572019) [abseta >= 1.1000 and abseta < 1.2000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.005720 + (1.5-1.000000)* -0.001362) [abseta >= 1.1000 and abseta < 1.2000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.004359 + (3.5-2.000000)* 0.000005) [abseta >= 1.1000 and abseta < 1.2000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.004372 + (7.5-5.000000)* 0.000006) [abseta >= 1.1000 and abseta < 1.2000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.004405 + (55-10.000000)* 0.000007) [abseta >= 1.1000 and abseta < 1.2000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.005024 + (550-100.000000)* 0.000010) [abseta >= 1.1000 and abseta < 1.2000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.013902 + (5500-1000.000000)* 0.000013) [abseta >= 1.1000 and abseta < 1.2000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.129437*1.0) [abseta >= 1.1000 and abseta < 1.2000 and E >= 10000.0000]
+
+define smearer e with PT (0.00613558) [abseta >= 1.2000 and abseta < 1.3000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.006136 + (1.5-1.000000)* -0.001331) [abseta >= 1.2000 and abseta < 1.3000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.004805 + (3.5-2.000000)* 0.000005) [abseta >= 1.2000 and abseta < 1.3000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.004818 + (7.5-5.000000)* 0.000007) [abseta >= 1.2000 and abseta < 1.3000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.004851 + (55-10.000000)* 0.000007) [abseta >= 1.2000 and abseta < 1.3000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.005512 + (550-100.000000)* 0.000012) [abseta >= 1.2000 and abseta < 1.3000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.016144 + (5500-1000.000000)* 0.000015) [abseta >= 1.2000 and abseta < 1.3000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.151739*1.0) [abseta >= 1.2000 and abseta < 1.3000 and E >= 10000.0000]
+
+define smearer e with PT (0.00655464) [abseta >= 1.3000 and abseta < 1.4000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.006555 + (1.5-1.000000)* -0.001843) [abseta >= 1.3000 and abseta < 1.4000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.004711 + (3.5-2.000000)* 0.000004) [abseta >= 1.3000 and abseta < 1.4000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.004724 + (7.5-5.000000)* 0.000005) [abseta >= 1.3000 and abseta < 1.4000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.004748 + (55-10.000000)* 0.000006) [abseta >= 1.3000 and abseta < 1.4000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.005326 + (550-100.000000)* 0.000009) [abseta >= 1.3000 and abseta < 1.4000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.013686 + (5500-1000.000000)* 0.000012) [abseta >= 1.3000 and abseta < 1.4000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.125361*1.0) [abseta >= 1.3000 and abseta < 1.4000 and E >= 10000.0000]
+
+define smearer e with PT (0.00714442) [abseta >= 1.4000 and abseta < 1.5000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.007144 + (1.5-1.000000)* -0.002674) [abseta >= 1.4000 and abseta < 1.5000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.004470 + (3.5-2.000000)* -0.000070) [abseta >= 1.4000 and abseta < 1.5000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.004259 + (7.5-5.000000)* 0.000006) [abseta >= 1.4000 and abseta < 1.5000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.004287 + (55-10.000000)* 0.000009) [abseta >= 1.4000 and abseta < 1.5000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.005101 + (550-100.000000)* 0.000008) [abseta >= 1.4000 and abseta < 1.5000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.012303 + (5500-1000.000000)* 0.000011) [abseta >= 1.4000 and abseta < 1.5000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.110091*1.0) [abseta >= 1.4000 and abseta < 1.5000 and E >= 10000.0000]
+
+define smearer e with PT (0.00680449) [abseta >= 1.5000 and abseta < 1.6000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.006804 + (1.5-1.000000)* -0.002108) [abseta >= 1.5000 and abseta < 1.6000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.004696 + (3.5-2.000000)* -0.000116) [abseta >= 1.5000 and abseta < 1.6000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.004348 + (7.5-5.000000)* 0.000009) [abseta >= 1.5000 and abseta < 1.6000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.004391 + (55-10.000000)* 0.000009) [abseta >= 1.5000 and abseta < 1.6000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.005232 + (550-100.000000)* 0.000007) [abseta >= 1.5000 and abseta < 1.6000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.011392 + (5500-1000.000000)* 0.000010) [abseta >= 1.5000 and abseta < 1.6000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.097988*1.0) [abseta >= 1.5000 and abseta < 1.6000 and E >= 10000.0000]
+
+define smearer e with PT (0.00763793) [abseta >= 1.6000 and abseta < 1.7000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.007638 + (1.5-1.000000)* -0.003061) [abseta >= 1.6000 and abseta < 1.7000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.004577 + (3.5-2.000000)* -0.000168) [abseta >= 1.6000 and abseta < 1.7000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.004074 + (7.5-5.000000)* 0.000009) [abseta >= 1.6000 and abseta < 1.7000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.004121 + (55-10.000000)* 0.000009) [abseta >= 1.6000 and abseta < 1.7000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.004910 + (550-100.000000)* 0.000006) [abseta >= 1.6000 and abseta < 1.7000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.010635 + (5500-1000.000000)* 0.000009) [abseta >= 1.6000 and abseta < 1.7000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.090704*1.0) [abseta >= 1.6000 and abseta < 1.7000 and E >= 10000.0000]
+
+define smearer e with PT (0.00913948) [abseta >= 1.7000 and abseta < 1.8000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.009139 + (1.5-1.000000)* -0.004405) [abseta >= 1.7000 and abseta < 1.8000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.004735 + (3.5-2.000000)* -0.000231) [abseta >= 1.7000 and abseta < 1.8000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.004043 + (7.5-5.000000)* 0.000005) [abseta >= 1.7000 and abseta < 1.8000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.004066 + (55-10.000000)* 0.000007) [abseta >= 1.7000 and abseta < 1.8000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.004739 + (550-100.000000)* 0.000006) [abseta >= 1.7000 and abseta < 1.8000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.009891 + (5500-1000.000000)* 0.000008) [abseta >= 1.7000 and abseta < 1.8000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.083216*1.0) [abseta >= 1.7000 and abseta < 1.8000 and E >= 10000.0000]
+
+define smearer e with PT (0.00956747) [abseta >= 1.8000 and abseta < 1.9000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.009567 + (1.5-1.000000)* -0.004497) [abseta >= 1.8000 and abseta < 1.9000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.005070 + (3.5-2.000000)* -0.000331) [abseta >= 1.8000 and abseta < 1.9000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.004078 + (7.5-5.000000)* 0.000004) [abseta >= 1.8000 and abseta < 1.9000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.004100 + (55-10.000000)* 0.000006) [abseta >= 1.8000 and abseta < 1.9000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.004682 + (550-100.000000)* 0.000005) [abseta >= 1.8000 and abseta < 1.9000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.009157 + (5500-1000.000000)* 0.000007) [abseta >= 1.8000 and abseta < 1.9000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.074702*1.0) [abseta >= 1.8000 and abseta < 1.9000 and E >= 10000.0000]
+
+define smearer e with PT (0.00964334) [abseta >= 1.9000 and abseta < 2.0000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.009643 + (1.5-1.000000)* -0.003950) [abseta >= 1.9000 and abseta < 2.0000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.005694 + (3.5-2.000000)* -0.000479) [abseta >= 1.9000 and abseta < 2.0000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.004256 + (7.5-5.000000)* 0.000005) [abseta >= 1.9000 and abseta < 2.0000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.004281 + (55-10.000000)* 0.000006) [abseta >= 1.9000 and abseta < 2.0000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.004862 + (550-100.000000)* 0.000004) [abseta >= 1.9000 and abseta < 2.0000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.008501 + (5500-1000.000000)* 0.000006) [abseta >= 1.9000 and abseta < 2.0000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.062525*1.0) [abseta >= 1.9000 and abseta < 2.0000 and E >= 10000.0000]
+
+define smearer e with PT (0.01045039) [abseta >= 2.0000 and abseta < 2.1000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.010450 + (1.5-1.000000)* -0.005379) [abseta >= 2.0000 and abseta < 2.1000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.005072 + (3.5-2.000000)* -0.000321) [abseta >= 2.0000 and abseta < 2.1000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.004109 + (7.5-5.000000)* 0.000006) [abseta >= 2.0000 and abseta < 2.1000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.004137 + (55-10.000000)* 0.000006) [abseta >= 2.0000 and abseta < 2.1000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.004666 + (550-100.000000)* 0.000005) [abseta >= 2.0000 and abseta < 2.1000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.008951 + (5500-1000.000000)* 0.000007) [abseta >= 2.0000 and abseta < 2.1000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.073400*1.0) [abseta >= 2.0000 and abseta < 2.1000 and E >= 10000.0000]
+
+define smearer e with PT (0.01046694) [abseta >= 2.1000 and abseta < 2.2000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.010467 + (1.5-1.000000)* -0.005023) [abseta >= 2.1000 and abseta < 2.2000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.005444 + (3.5-2.000000)* -0.000330) [abseta >= 2.1000 and abseta < 2.2000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.004455 + (7.5-5.000000)* 0.000005) [abseta >= 2.1000 and abseta < 2.2000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.004479 + (55-10.000000)* 0.000004) [abseta >= 2.1000 and abseta < 2.2000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.004883 + (550-100.000000)* 0.000005) [abseta >= 2.1000 and abseta < 2.2000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.009382 + (5500-1000.000000)* 0.000008) [abseta >= 2.1000 and abseta < 2.2000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.078852*1.0) [abseta >= 2.1000 and abseta < 2.2000 and E >= 10000.0000]
+
+define smearer e with PT (0.01090933) [abseta >= 2.2000 and abseta < 2.3000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.010909 + (1.5-1.000000)* -0.005299) [abseta >= 2.2000 and abseta < 2.3000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.005610 + (3.5-2.000000)* -0.000302) [abseta >= 2.2000 and abseta < 2.3000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.004704 + (7.5-5.000000)* 0.000005) [abseta >= 2.2000 and abseta < 2.3000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.004730 + (55-10.000000)* 0.000005) [abseta >= 2.2000 and abseta < 2.3000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.005146 + (550-100.000000)* 0.000006) [abseta >= 2.2000 and abseta < 2.3000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.010323 + (5500-1000.000000)* 0.000009) [abseta >= 2.2000 and abseta < 2.3000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.088469*1.0) [abseta >= 2.2000 and abseta < 2.3000 and E >= 10000.0000]
+
+define smearer e with PT (0.01271833) [abseta >= 2.3000 and abseta < 2.4000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.012718 + (1.5-1.000000)* -0.005764) [abseta >= 2.3000 and abseta < 2.4000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.006954 + (3.5-2.000000)* -0.000492) [abseta >= 2.3000 and abseta < 2.4000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.005479 + (7.5-5.000000)* 0.000003) [abseta >= 2.3000 and abseta < 2.4000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.005495 + (55-10.000000)* 0.000003) [abseta >= 2.3000 and abseta < 2.4000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.005774 + (550-100.000000)* 0.000006) [abseta >= 2.3000 and abseta < 2.4000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.011265 + (5500-1000.000000)* 0.000009) [abseta >= 2.3000 and abseta < 2.4000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.096592*1.0) [abseta >= 2.3000 and abseta < 2.4000 and E >= 10000.0000]
+
+define smearer e with PT (0.01515272) [abseta >= 2.4000 and abseta < 2.5000 and E >= 0.0000 and E < 1.0000]
+define smearer e with PT (0.015153 + (1.5-1.000000)* -0.007272) [abseta >= 2.4000 and abseta < 2.5000 and E >= 1.0000 and E < 2.0000]
+define smearer e with PT (0.007881 + (3.5-2.000000)* -0.000660) [abseta >= 2.4000 and abseta < 2.5000 and E >= 2.0000 and E < 5.0000]
+define smearer e with PT (0.005900 + (7.5-5.000000)* 0.000003) [abseta >= 2.4000 and abseta < 2.5000 and E >= 5.0000 and E < 10.0000]
+define smearer e with PT (0.005914 + (55-10.000000)* 0.000003) [abseta >= 2.4000 and abseta < 2.5000 and E >= 10.0000 and E < 100.0000]
+define smearer e with PT (0.006174 + (550-100.000000)* 0.000007) [abseta >= 2.4000 and abseta < 2.5000 and E >= 100.0000 and E < 1000.0000]
+define smearer e with PT (0.012486 + (5500-1000.000000)* 0.000011) [abseta >= 2.4000 and abseta < 2.5000 and E >= 1000.0000 and E < 10000.0000]
+define smearer e with PT (0.108659*1.0) [abseta >= 2.4000 and abseta < 2.5000 and E >= 10000.0000]
+
+
+# Reconstruction efficiency
+
+define reco_efficiency e 0.00 [E < 3.0]
+define reco_efficiency e 0.00 [abseta > 2.50]
+
+define reco_efficiency e 0.58 [E >= 3 and E < 8 and abseta > 1.95 and abseta < 2.50]
+define reco_efficiency e 0.70 [E >= 3 and E < 8 and abseta <= 1.95 and abseta > 1.22]
+define reco_efficiency e 0.60 [E >= 3 and E < 8 and abseta <= 1.22 and abseta > 1.1]
+define reco_efficiency e 0.70 [E >= 3 and E < 8 and abseta <= 1.1 and abseta > 0.91]
+define reco_efficiency e 0.80 [E >= 3 and E < 8 and abseta <= 0.91 and abseta > 0.69]
+define reco_efficiency e 0.84 [E >= 3 and E < 8 and abseta <= 0.69]
+
+define reco_efficiency e 0.60 [E >= 8 and E < 13 and abseta > 1.95 and abseta < 2.50]
+define reco_efficiency e 0.76 [E >= 8 and E < 13 and abseta <= 1.95 and abseta > 1.22]
+define reco_efficiency e 0.67 [E >= 8 and E < 13 and abseta <= 1.22 and abseta > 1.1]
+define reco_efficiency e 0.78 [E >= 8 and E < 13 and abseta <= 1.1 and abseta > 0.91]
+define reco_efficiency e 0.86 [E >= 8 and E < 13 and abseta <= 0.91 and abseta > 0.69]
+define reco_efficiency e 0.88 [E >= 8 and E < 13 and abseta <= 0.69]
+
+define reco_efficiency e 0.60 [E >= 13 and E < 18 and abseta > 1.95 and abseta < 2.50]
+define reco_efficiency e 0.80 [E >= 13 and E < 18 and abseta <= 1.95 and abseta > 1.22]
+define reco_efficiency e 0.68 [E >= 13 and E < 18 and abseta <= 1.22 and abseta > 1.1]
+define reco_efficiency e 0.84 [E >= 13 and E < 18 and abseta <= 1.1 and abseta > 0.91]
+define reco_efficiency e 0.88 [E >= 13 and E < 18 and abseta <= 0.91 and abseta > 0.69]
+define reco_efficiency e 0.90 [E >= 13 and E < 18 and abseta <= 0.69]
+
+define reco_efficiency e 0.64 [E >= 18 and E < 23 and abseta > 1.95 and abseta < 2.50]
+define reco_efficiency e 0.82 [E >= 18 and E < 23 and abseta <= 1.95 and abseta > 1.22]
+define reco_efficiency e 0.70 [E >= 18 and E < 23 and abseta <= 1.22 and abseta > 1.1]
+define reco_efficiency e 0.84 [E >= 18 and E < 23 and abseta <= 1.1 and abseta > 0.91]
+define reco_efficiency e 0.90 [E >= 18 and E < 23 and abseta <= 0.91 and abseta > 0.69]
+define reco_efficiency e 0.92 [E >= 18 and E < 23 and abseta <= 0.69]
+
+define reco_efficiency e 0.64 [E >= 23 and E < 28 and abseta > 1.95 and abseta < 2.50]
+define reco_efficiency e 0.86 [E >= 23 and E < 28 and abseta <= 1.95 and abseta > 1.22]
+define reco_efficiency e 0.74 [E >= 23 and E < 28 and abseta <= 1.22 and abseta > 1.1]
+define reco_efficiency e 0.87 [E >= 23 and E < 28 and abseta <= 1.1 and abseta > 0.91]
+define reco_efficiency e 0.91 [E >= 23 and E < 28 and abseta <= 0.91 and abseta > 0.69]
+define reco_efficiency e 0.94 [E >= 23 and E < 28 and abseta <= 0.69]
+
+define reco_efficiency e 0.67 [E >= 28 and E < 35 and abseta > 1.95 and abseta < 2.50]
+define reco_efficiency e 0.88 [E >= 28 and E < 35 and abseta <= 1.95 and abseta > 1.22]
+define reco_efficiency e 0.78 [E >= 28 and E < 35 and abseta <= 1.22 and abseta > 1.1]
+define reco_efficiency e 0.90 [E >= 28 and E < 35 and abseta <= 1.1 and abseta > 0.91]
+define reco_efficiency e 0.94 [E >= 28 and E < 35 and abseta <= 0.91 and abseta > 0.69]
+define reco_efficiency e 0.94 [E >= 28 and E < 35 and abseta <= 0.69]
+
+define reco_efficiency e 0.68 [E >= 35 and E < 45 and abseta > 1.95 and abseta < 2.50]
+define reco_efficiency e 0.90 [E >= 35 and E < 45 and abseta <= 1.95 and abseta > 1.22]
+define reco_efficiency e 0.86 [E >= 35 and E < 45 and abseta <= 1.22 and abseta > 1.1]
+define reco_efficiency e 0.92 [E >= 35 and E < 45 and abseta <= 1.1 and abseta > 0.91]
+define reco_efficiency e 0.94 [E >= 35 and E < 45 and abseta <= 0.91 and abseta > 0.69]
+define reco_efficiency e 0.96 [E >= 35 and E < 45 and abseta <= 0.69]
+
+define reco_efficiency e 0.70 [E >= 45 and E < 80 and abseta > 1.95 and abseta < 2.50]
+define reco_efficiency e 0.92 [E >= 45 and E < 80 and abseta <= 1.95 and abseta > 1.22]
+define reco_efficiency e 0.80 [E >= 45 and E < 80 and abseta <= 1.22 and abseta > 1.1]
+define reco_efficiency e 0.94 [E >= 45 and E < 80 and abseta <= 1.1 and abseta > 0.91]
+define reco_efficiency e 0.96 [E >= 45 and E < 80 and abseta <= 0.91 and abseta > 0.69]
+define reco_efficiency e 0.97 [E >= 45 and E < 80 and abseta <= 0.69]
+
+define reco_efficiency e 0.68 [E >= 80 and E < 200 and abseta > 1.95 and abseta < 2.50]
+define reco_efficiency e 0.96 [E >= 80 and E < 200 and abseta <= 1.95 and abseta > 1.22]
+define reco_efficiency e 0.84 [E >= 80 and E < 200 and abseta <= 1.22 and abseta > 1.1]
+define reco_efficiency e 0.94 [E >= 80 and E < 200 and abseta <= 1.1 and abseta > 0.91]
+define reco_efficiency e 0.98 [E >= 80 and E < 200 and abseta <= 0.91 and abseta > 0.69]
+define reco_efficiency e 0.98 [E >= 80 and E < 200 and abseta <= 0.69]
+
+define reco_efficiency e 0.68 [E >= 200 and E < 400 and abseta > 1.95 and abseta < 2.50]
+define reco_efficiency e 0.97 [E >= 200 and E < 400 and abseta <= 1.95 and abseta > 1.22]
+define reco_efficiency e 0.86 [E >= 200 and E < 400 and abseta <= 1.22 and abseta > 1.1]
+define reco_efficiency e 0.96 [E >= 200 and E < 400 and abseta <= 1.1 and abseta > 0.91]
+define reco_efficiency e 0.98 [E >= 200 and E < 400 and abseta <= 0.91 and abseta > 0.69]
+define reco_efficiency e 0.98 [E >= 200 and E < 400 and abseta <= 0.69]
+
+define reco_efficiency e 0.68 [E >= 400 and abseta > 1.95 and abseta < 2.50]
+define reco_efficiency e 0.96 [E >= 400 and abseta <= 1.95 and abseta > 1.22]
+define reco_efficiency e 0.82 [E >= 400 and abseta <= 1.22 and abseta > 1.1]
+define reco_efficiency e 0.96 [E >= 400 and abseta <= 1.1 and abseta > 0.91]
+define reco_efficiency e 0.98 [E >= 400 and abseta <= 0.91 and abseta > 0.69]
+define reco_efficiency e 0.98 [E >= 400 and abseta <= 0.69]
+
+# ECAL
+# set ECalResolutionFormula for (11) and (22)
+
+define smearer e with E sqrt(E^2*0.01^2 + E*0.156^2) [abseta <= 0.78]
+define smearer e with E sqrt(E^2*0.01^2 + E*0.175^2) [abseta>0.78 and abseta<=0.83]
+define smearer e with E sqrt(E^2*0.01^2 + E*0.151^2) [abseta>0.83 and abseta<=2.5]
+
+define smearer a with E sqrt(E^2*0.01^2 + E*0.156^2) [abseta <= 0.78]
+define smearer a with E sqrt(E^2*0.01^2 + E*0.175^2) [abseta>0.78 and abseta<=0.83]
+define smearer a with E sqrt(E^2*0.01^2 + E*0.151^2) [abseta>0.83 and abseta<=2.5]
+
+
+## Photon
+
+# Reconstruction efficiency
+define reco_efficiency a 0.00 [E < 2.0]
+define reco_efficiency a 0.94 [E >= 2.0 and abseta < 0.7]
+define reco_efficiency a 0.90 [E >= 2.0 and abseta >= 0.7 and abseta <= 2.5]
+
+## Jet tagging efficiency
+# B tagging misidentification rate for light jets (j)
+define tagger j as b 2e-2 [E >= 500 and abseta <= 2.66 and abseta > 2.09]
+define tagger j as b 9e-3 [E >= 500 and abseta <= 2.09 and abseta > 1.53]
+define tagger j as b 8e-3 [E >= 500 and abseta <= 1.53 and abseta > 1.165]
+define tagger j as b 8e-3 [E >= 500 and abseta <= 1.165 and abseta > 0.885]
+define tagger j as b 1e-2 [E >= 500 and abseta <= 0.885 and abseta > 0.655]
+define tagger j as b 9e-3 [E >= 500 and abseta <= 0.655 and abseta > 0.455]
+define tagger j as b 1e-2 [E >= 500 and abseta <= 0.455 and abseta > 0.27]
+define tagger j as b 1e-2 [E >= 500 and abseta <= 0.27 and abseta > 0.09]
+define tagger j as b 1e-2 [E >= 500 and abseta <= 0.09]
+
+define tagger j as b 2e-2 [E < 500 and E >= 250 and abseta <= 2.66 and abseta > 2.09]
+define tagger j as b 7e-3 [E < 500 and E >= 250 and abseta <= 2.09 and abseta > 1.53]
+define tagger j as b 6e-3 [E < 500 and E >= 250 and abseta <= 1.53 and abseta > 1.165]
+define tagger j as b 6e-3 [E < 500 and E >= 250 and abseta <= 1.165 and abseta > 0.885]
+define tagger j as b 5e-3 [E < 500 and E >= 250 and abseta <= 0.885 and abseta > 0.655]
+define tagger j as b 5e-3 [E < 500 and E >= 250 and abseta <= 0.655 and abseta > 0.455]
+define tagger j as b 5e-3 [E < 500 and E >= 250 and abseta <= 0.455 and abseta > 0.27]
+define tagger j as b 5e-3 [E < 500 and E >= 250 and abseta <= 0.27 and abseta > 0.09]
+define tagger j as b 5e-3 [E < 500 and E >= 250 and abseta <= 0.09]
+
+define tagger j as b 2e-2 [E < 250 and E >= 100 and abseta <= 2.66 and abseta > 2.09]
+define tagger j as b 4e-3 [E < 250 and E >= 100 and abseta <= 2.09 and abseta > 1.53]
+define tagger j as b 3e-3 [E < 250 and E >= 100 and abseta <= 1.53 and abseta > 1.165]
+define tagger j as b 3e-3 [E < 250 and E >= 100 and abseta <= 1.165 and abseta > 0.885]
+define tagger j as b 2e-3 [E < 250 and E >= 100 and abseta <= 0.885 and abseta > 0.655]
+define tagger j as b 2e-3 [E < 250 and E >= 100 and abseta <= 0.655 and abseta > 0.455]
+define tagger j as b 2e-3 [E < 250 and E >= 100 and abseta <= 0.455 and abseta > 0.27]
+define tagger j as b 2e-3 [E < 250 and E >= 100 and abseta <= 0.27 and abseta > 0.09]
+define tagger j as b 2e-3 [E < 250 and E >= 100 and abseta <= 0.09]
+
+define tagger j as b 2e-2 [E < 100 and abseta <= 2.66 and abseta > 2.09]
+define tagger j as b 6e-3 [E < 100 and abseta <= 2.09 and abseta > 1.53]
+define tagger j as b 3e-3 [E < 100 and abseta <= 1.53 and abseta > 1.165]
+define tagger j as b 2e-3 [E < 100 and abseta <= 1.165 and abseta > 0.885]
+define tagger j as b 1e-3 [E < 100 and abseta <= 0.885 and abseta > 0.655]
+define tagger j as b 1e-3 [E < 100 and abseta <= 0.655 and abseta > 0.455]
+define tagger j as b 1e-3 [E < 100 and abseta <= 0.455 and abseta > 0.27]
+define tagger j as b 1e-3 [E < 100 and abseta <= 0.27 and abseta > 0.09]
+define tagger j as b 1e-3 [E < 100 and abseta <= 0.09]
+
+
+
+
+# B tagging misidentification rate for c-jets
+define tagger c as b 1e-1 [E >= 500 and abseta <= 2.66 and abseta > 2.09]
+define tagger c as b 4e-2 [E >= 500 and abseta <= 2.09 and abseta > 1.53]
+define tagger c as b 3e-2 [E >= 500 and abseta <= 1.53 and abseta > 1.165]
+define tagger c as b 3e-2 [E >= 500 and abseta <= 1.165 and abseta > 0.885]
+define tagger c as b 4e-2 [E >= 500 and abseta <= 0.885 and abseta > 0.655]
+define tagger c as b 4e-2 [E >= 500 and abseta <= 0.655 and abseta > 0.455]
+define tagger c as b 5e-2 [E >= 500 and abseta <= 0.455 and abseta > 0.27]
+define tagger c as b 5e-2 [E >= 500 and abseta <= 0.27 and abseta > 0.09]
+define tagger c as b 6e-2 [E >= 500 and abseta <= 0.09]
+
+define tagger c as b 1e-1 [E < 500 and E >= 250 and abseta <= 2.66 and abseta > 2.09]
+define tagger c as b 4e-2 [E < 500 and E >= 250 and abseta <= 2.09 and abseta > 1.53]
+define tagger c as b 3e-2 [E < 500 and E >= 250 and abseta <= 1.53 and abseta > 1.165]
+define tagger c as b 2e-2 [E < 500 and E >= 250 and abseta <= 1.165 and abseta > 0.885]
+define tagger c as b 1e-2 [E < 500 and E >= 250 and abseta <= 0.885 and abseta > 0.655]
+define tagger c as b 1e-2 [E < 500 and E >= 250 and abseta <= 0.655 and abseta > 0.455]
+define tagger c as b 1e-2 [E < 500 and E >= 250 and abseta <= 0.455 and abseta > 0.27]
+define tagger c as b 1e-2 [E < 500 and E >= 250 and abseta <= 0.27 and abseta > 0.09]
+define tagger c as b 1e-2 [E < 500 and E >= 250 and abseta <= 0.09]
+
+define tagger c as b 1e-1 [E < 250 and E >= 100 and abseta <= 2.66 and abseta > 2.09]
+define tagger c as b 4e-2 [E < 250 and E >= 100 and abseta <= 2.09 and abseta > 1.53]
+define tagger c as b 2e-2 [E < 250 and E >= 100 and abseta <= 1.53 and abseta > 1.165]
+define tagger c as b 1e-2 [E < 250 and E >= 100 and abseta <= 1.165 and abseta > 0.885]
+define tagger c as b 1e-2 [E < 250 and E >= 100 and abseta <= 0.885 and abseta > 0.655]
+define tagger c as b 8e-3 [E < 250 and E >= 100 and abseta <= 0.655 and abseta > 0.455]
+define tagger c as b 7e-3 [E < 250 and E >= 100 and abseta <= 0.455 and abseta > 0.27]
+define tagger c as b 7e-3 [E < 250 and E >= 100 and abseta <= 0.27 and abseta > 0.09]
+define tagger c as b 7e-3 [E < 250 and E >= 100 and abseta <= 0.09]
+
+define tagger c as b 1e-1 [E < 100 and abseta <= 2.66 and abseta > 2.09]
+define tagger c as b 7e-2 [E < 100 and abseta <= 2.09 and abseta > 1.53]
+define tagger c as b 4e-2 [E < 100 and abseta <= 1.53 and abseta > 1.165]
+define tagger c as b 2e-2 [E < 100 and abseta <= 1.165 and abseta > 0.885]
+define tagger c as b 1e-2 [E < 100 and abseta <= 0.885 and abseta > 0.655]
+define tagger c as b 1e-2 [E < 100 and abseta <= 0.655 and abseta > 0.455]
+define tagger c as b 1e-2 [E < 100 and abseta <= 0.455 and abseta > 0.27]
+define tagger c as b 9e-3 [E < 100 and abseta <= 0.27 and abseta > 0.09]
+define tagger c as b 9e-3 [E < 100 and abseta <= 0.09]
+
+# B tagging TARGET efficiency
+define tagger b as b 0.9                                   [abseta < 2.5]
+define tagger b as b 0.0                                   [abseta >= 2.5]
+
+
+## Tau
+# Tau tagging
+define tagger j as ta 0.02
+define tagger ta as ta 0.0 [pt<10]
+define tagger ta as ta 0.8 [pt>=10]
+
+
+
