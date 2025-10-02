@@ -1134,7 +1134,11 @@ class RunRecast:
         bibfile = os.path.join(self.dirname, "bibliography.bib")
         print_gl_citation = self.main.recasting.global_likelihoods_switch
         with open(bibfile, "w") as bib:
-            bib.write(spey.cite() + "\n")
+            try:
+                bib.write(spey.cite() + "\n")
+            except Exception as err:
+                self.logger.debug(err)
+                pass
             if self.pyhf_config:
                 pyhfbib = spey.get_backend_bibtex("pyhf")
                 for _, item in pyhfbib.items():
