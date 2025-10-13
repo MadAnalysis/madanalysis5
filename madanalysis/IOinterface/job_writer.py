@@ -705,6 +705,9 @@ class JobWriter(object):
         # Options
         option.has_commons   = True
         options.has_process  = True
+        if self.main.archi_info.has_onnx:
+            options.has_onnx_inc = True
+            options.has_onnx_lib = True
         if self.main.archi_info.has_root:
             options.has_root_inc = True
             options.has_root_lib = True
@@ -740,6 +743,9 @@ class JobWriter(object):
         # Options
         options.has_commons  = True
         options.has_process  = True
+        if self.main.archi_info.has_onnx:
+            options.has_onnx_inc = True
+            options.has_onnx_lib = True       
         if self.main.archi_info.has_root:
             options.has_root_inc = True
             options.has_root_lib = True
