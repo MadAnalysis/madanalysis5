@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -25,6 +25,7 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/Vector/MARotation3axis.h"
 #include "SampleAnalyzer/Commons/Vector/MARotation3euler.h"
+#include "SampleAnalyzer/Commons/Vector/MARotationGeneral.h"
 #include "SampleAnalyzer/Commons/Vector/MABoost.h"
 
 using namespace MA5;

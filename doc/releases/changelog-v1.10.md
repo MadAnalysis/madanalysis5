@@ -66,6 +66,11 @@
   edge case bug fixes.
   ([#211](https://github.com/MadAnalysis/madanalysis5/pull/211))
 
+* Include c-tagging options.
+
+* Integrating RestFrames as well as readers for CSV-encoded efficiencies provided on HEPData.
+
+
 ## Bug fixes
 
 * Permanently fix the zlib version to the latest.
@@ -133,6 +138,13 @@
 * Update of the version of Delphes/DelphesMa5tune + compatibility with M1 chips and Mac OS 13.0.
    ([#173](https://github.com/orgs/MadAnalysis/discussions/173))
 
+* Covariance matrix implementation has been fixed for HL extrapolations
+  (see issue [#223](https://github.com/MadAnalysis/madanalysis5/issues/223)).
+  ([#225](https://github.com/MadAnalysis/madanalysis5/pull/225)) and ([#246](https://github.com/MadAnalysis/madanalysis5/pull/246))
+
+* Minor bugfix in luminosity scaling for recasting
+  ([#238](https://github.com/MadAnalysis/madanalysis5/pull/238))
+
 ## Contributors
 
 This release contains contributions from (in alphabetical order):
@@ -140,4 +152,5 @@ This release contains contributions from (in alphabetical order):
 [Jack Y. Araz](https://github.com/jackaraz),
 [Kyle Fan](https://github.com/kfan326),
 [Matthew Feickert](https://github.com/matthewfeickert),
-[Benjamin Fuks](https://github.com/bfuks)
+[Benjamin Fuks](https://github.com/bfuks),
+[Bingxuan Liu](https://github.com/prbbing)

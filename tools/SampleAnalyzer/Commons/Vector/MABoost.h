@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //
 //  This file is part of MadAnalysis 5.
@@ -128,6 +128,10 @@ namespace MA5
                 MABoost();
             }
         }
+
+  // Get the boost vector
+  MAVector3 BoostVector() const { return MAVector3(bx_, by_, bz_); }
+
 
         /// @brief Accessor to Beta
         /// @return beta value

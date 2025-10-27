@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -86,7 +86,7 @@ class MARotation3euler
     m_[0][1] =  cpsi   * sphi    + spsi * ctheta * cphi; 
     m_[0][2] =  spsi   * stheta;
     m_[1][0] = -spsi   * cphi    - cpsi * ctheta * sphi;
-    m_[2][1] = -spsi   * sphi    + cpsi * ctheta * cphi;
+    m_[1][1] = -spsi   * sphi    + cpsi * ctheta * cphi;
     m_[1][2] =  cpsi   * stheta;
     m_[2][0] =  stheta * sphi;
     m_[2][1] = -stheta * cphi;
