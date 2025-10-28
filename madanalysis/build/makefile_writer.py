@@ -338,7 +338,6 @@ class MakefileWriter():
             cxxflags.extend(['-DZIP_USE'])
         if options.has_delphes_tag:
              cxxflags.extend(['-DDELPHES_USE'])
-             os.environ["FASTJET_FLAG"] = "" # @jackaraz: delphes and substructure module do not like each other
         if options.has_delphesMA5tune_tag:
              cxxflags.extend(['-DDELPHESMA5TUNE_USE'])
         if len(cxxflags)!=0:
