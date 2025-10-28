@@ -25,6 +25,7 @@
 from __future__ import absolute_import
 
 import logging
+import os
 
 from six.moves import range
 from string_tools import StringTools
@@ -332,10 +333,12 @@ class MakefileWriter():
             # @JACK: This flag enables usage of certain modules in SampleAnalyzer which
             # depends on availablity of FastJet library.
             cxxflags.extend(["$(FASTJET_FLAG)"])
+            os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE" # @jackaraz this is needed for compilation
         if options.has_zlib_tag:
             cxxflags.extend(['-DZIP_USE'])
         if options.has_delphes_tag:
              cxxflags.extend(['-DDELPHES_USE'])
+             os.environ["FASTJET_FLAG"] = "" # @jackaraz: delphes and substructure module do not like each other
         if options.has_delphesMA5tune_tag:
              cxxflags.extend(['-DDELPHESMA5TUNE_USE'])
         if len(cxxflags)!=0:
