@@ -333,7 +333,6 @@ class MakefileWriter():
             # @JACK: This flag enables usage of certain modules in SampleAnalyzer which
             # depends on availablity of FastJet library.
             cxxflags.extend(["$(FASTJET_FLAG)"])
-            os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE" # @jackaraz this is needed for compilation
         if options.has_zlib_tag:
             cxxflags.extend(['-DZIP_USE'])
         if options.has_delphes_tag:
