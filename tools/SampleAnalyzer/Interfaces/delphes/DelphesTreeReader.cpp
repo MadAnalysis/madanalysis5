@@ -397,14 +397,16 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
       if (header1!=0)
       {
         // Set event-weight
-        myEvent.mc()->setWeight(header1->Weight);
+        INFO << " FIX ME " << header1->Weight << endmsg;
+        myEvent.mc()->setWeight(0,header1->Weight);
       }
       else
       {
         HepMCEvent* header2 = dynamic_cast<HepMCEvent*>(data_.Event_->At(i));
         if (header2==0) continue;
         // Set event-weight
-        myEvent.mc()->setWeight(header2->Weight);
+        INFO << " FIX ME " << header2->Weight << endmsg;
+        myEvent.mc()->setWeight(0,header2->Weight);
       }
     }
   }
