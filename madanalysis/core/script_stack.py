@@ -24,10 +24,7 @@
 
 from __future__ import absolute_import
 import logging
-import glob
 import os
-import sys
-import shutil
 
 class ScriptStack:
 

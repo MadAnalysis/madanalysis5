@@ -38,18 +38,12 @@ from six.moves import input, range
 from string_tools import StringTools
 
 from madanalysis.configuration.delphes_configuration import DelphesConfiguration
-from madanalysis.configuration.delphesMA5tune_configuration import (
-    DelphesMA5tuneConfiguration,
-)
+from madanalysis.configuration.delphesMA5tune_configuration import DelphesMA5tuneConfiguration
 from madanalysis.install.detector_manager import DetectorManager
 from madanalysis.IOinterface.folder_writer import FolderWriter
 from madanalysis.IOinterface.job_writer import JobWriter
 from madanalysis.IOinterface.library_writer import LibraryWriter
-from madanalysis.misc.histfactory_reader import (
-    HF_Background,
-    HF_Signal,
-    construct_histfactory_dictionary,
-)
+from madanalysis.misc.histfactory_reader import HF_Background, HF_Signal, construct_histfactory_dictionary
 from madanalysis.misc.theoretical_error_setup import error_dict_setup
 
 # pylint: disable=logging-fstring-interpolation,import-outside-toplevel
@@ -541,7 +535,9 @@ class RunRecast:
             self.logger.error("run over '" + dataset.name + "' aborted.")
             return False
         self.logger.info("    *******************************************************")
-
+        
+        os.environ["FASTJET_FLAG"] = ""
+        
         if not os.path.isdir(self.dirname + "/Output/SAF/" + dataset.name):
             os.mkdir(self.dirname + "/Output/SAF/" + dataset.name)
         for analysis in analysislist:
@@ -1126,10 +1122,7 @@ class RunRecast:
         import spey
         from spey.system.webutils import get_bibtex
 
-        from .statistical_models import (
-            compute_poi_upper_limits,
-            initialise_statistical_models,
-        )
+        from .statistical_models import compute_poi_upper_limits, initialise_statistical_models
 
         ## Checking whether the CLs module can be used
         ET = self.check_xml_scipy_methods()
