@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //
 //  This file is part of MadAnalysis 5.
@@ -408,7 +408,7 @@ void HEPMCReader::FillEventInformations(const std::string &line,
 // -----------------------------------------------------------------------------
 // FillUnits
 // -----------------------------------------------------------------------------
-void HEPMCReader::FillUnits(const std::string& line, SampleFormat& mySample)
+void HEPMCReader::FillUnits(const std::string &line, SampleFormat &mySample)
 {
     std::stringstream str;
     str << line;
@@ -419,28 +419,34 @@ void HEPMCReader::FillUnits(const std::string& line, SampleFormat& mySample)
 
     // Unit of energy
     str >> tmp;
-    if (tmp=="GEV") energy_unit_=1;
-    else if (tmp=="MEV") energy_unit_=0.001;
-    else if (tmp=="KEV") energy_unit_=0.000001;
-    else ERROR <<  "Unknown unit of energy: " << tmp << endmsg;
+    if (tmp == "GEV")
+        energy_unit_ = 1;
+    else if (tmp == "MEV")
+        energy_unit_ = 0.001;
+    else if (tmp == "KEV")
+        energy_unit_ = 0.000001;
+    else
+        ERROR << "Unknown unit of energy: " << tmp << endmsg;
 
     // Unit of length
     str >> tmp;
-    if (tmp=="MM") length_unit_=1;
-    else if (tmp=="CM") length_unit_=0.1;
-    else ERROR << "Unknown unit of length: " << tmp << endmsg;
+    if (tmp == "MM")
+        length_unit_ = 1;
+    else if (tmp == "CM")
+        length_unit_ = 0.1;
+    else
+        ERROR << "Unknown unit of length: " << tmp << endmsg;
 
     /// Set length and energy units
     mySample.mc()->SetLengthUnit(length_unit_);
     mySample.mc()->SetEnergyUnit(energy_unit_);
 }
 
-
 // -----------------------------------------------------------------------------
 // FillCrossSection
 // -----------------------------------------------------------------------------
-void HEPMCReader::FillCrossSection(const std::string& line,
-                                   SampleFormat& mySample)
+void HEPMCReader::FillCrossSection(const std::string &line,
+                                   SampleFormat &mySample)
 {
     // Splitting the line in words
     std::stringstream str;
@@ -451,15 +457,15 @@ void HEPMCReader::FillCrossSection(const std::string& line,
     str >> firstc;
 
     // xsection mean
-    MAfloat64 xsectmp=0;
+    MAfloat64 xsectmp = 0;
     str >> xsectmp;
 
     // xsection error
-    MAfloat64 xsectmp_err=0;
+    MAfloat64 xsectmp_err = 0;
     str >> xsectmp_err;
 
     // saving xsection mean & error
-    if (mySample.mc()!=0)
+    if (mySample.mc() != 0)
     {
         mySample.mc()->setXsectionMean(xsectmp);
         mySample.mc()->setXsectionError(xsectmp_err);
@@ -469,9 +475,9 @@ void HEPMCReader::FillCrossSection(const std::string& line,
 // -----------------------------------------------------------------------------
 // FillEventPDFInfo
 // -----------------------------------------------------------------------------
-void HEPMCReader::FillEventPDFInfo(const std::string& line,
-                                   SampleFormat& mySample,
-                                   EventFormat& myEvent)
+void HEPMCReader::FillEventPDFInfo(const std::string &line,
+                                   SampleFormat &mySample,
+                                   EventFormat &myEvent)
 {
     std::stringstream str;
     str << line;
@@ -491,23 +497,23 @@ void HEPMCReader::FillEventPDFInfo(const std::string& line,
 // -----------------------------------------------------------------------------
 // FillEventParticleLine
 // -----------------------------------------------------------------------------
-void HEPMCReader::FillEventParticleLine(const std::string& line,
-                                        EventFormat& myEvent)
+void HEPMCReader::FillEventParticleLine(const std::string &line,
+                                        EventFormat &myEvent)
 {
     std::stringstream str;
     str << line;
 
-    MAfloat64 tmp;    // temporary variable to fill in LorentzVector
+    MAfloat64 tmp; // temporary variable to fill in LorentzVector
 
     // Get a new particle
-    MCParticleFormat * part = myEvent.mc()->GetNewParticle();
+    MCParticleFormat *part = myEvent.mc()->GetNewParticle();
     MAchar linecode;
-    MAfloat64 px=0.;
-    MAfloat64 py=0.;
-    MAfloat64 pz=0.;
-    MAfloat64 e=0.;
-    MAuint32  partnum;
-    MAint32   decay_barcode;
+    MAfloat64 px = 0.;
+    MAfloat64 py = 0.;
+    MAfloat64 pz = 0.;
+    MAfloat64 e = 0.;
+    MAuint32 partnum;
+    MAint32 decay_barcode;
 
     str >> linecode;          // letter 'P'
     str >> partnum;           // particle number
@@ -525,21 +531,20 @@ void HEPMCReader::FillEventParticleLine(const std::string& line,
     //  MAuint32 barcode;         // barcode = an integer which uniquely
     //  str >> barcode;           //           identifies the GenParticle within the event.
 
+    part->momentum_.SetPxPyPzE(px * energy_unit_,
+                               py * energy_unit_,
+                               pz * energy_unit_,
+                               e * energy_unit_);
 
-    part->momentum_.SetPxPyPzE (px * energy_unit_,
-                                py * energy_unit_,
-                                pz * energy_unit_,
-                                e  * energy_unit_);
-
-    MAuint32 part_index = myEvent.mc()->particles_.size()-1;
+    MAuint32 part_index = myEvent.mc()->particles_.size() - 1;
 
     // Set production vertex
-    std::pair<std::map<MAint32,HEPVertex>::iterator,MAbool> ret;
-    ret = vertices_.insert(std::make_pair(currentvertex_,HEPVertex()));
+    std::pair<std::map<MAint32, HEPVertex>::iterator, MAbool> ret;
+    ret = vertices_.insert(std::make_pair(currentvertex_, HEPVertex()));
     ret.first->second.out_.push_back(part_index);
 
     // Set decay vertex
-    ret = vertices_.insert(std::make_pair(decay_barcode,HEPVertex()));
+    ret = vertices_.insert(std::make_pair(decay_barcode, HEPVertex()));
     ret.first->second.in_.push_back(part_index);
 
     // Ok
@@ -549,7 +554,7 @@ void HEPMCReader::FillEventParticleLine(const std::string& line,
 // -----------------------------------------------------------------------------
 // FillEventVertexLine
 // -----------------------------------------------------------------------------
-void HEPMCReader::FillEventVertexLine(const std::string& line, EventFormat& myEvent)
+void HEPMCReader::FillEventVertexLine(const std::string &line, EventFormat &myEvent)
 {
     std::stringstream str;
     str << line;
@@ -558,22 +563,22 @@ void HEPMCReader::FillEventVertexLine(const std::string& line, EventFormat& myEv
     MAint32 barcode;
     HEPVertex vertex;
 
-    str >> linecode;      // character 'V'
-    str >> barcode;       // barcode
-    str >> vertex.id_;    // id
-    str >> vertex.x_;     // x
-    str >> vertex.y_;     // y
-    str >> vertex.z_;     // z
-    str >> vertex.ctau_;  // ctau
+    str >> linecode;     // character 'V'
+    str >> barcode;      // barcode
+    str >> vertex.id_;   // id
+    str >> vertex.x_;    // x
+    str >> vertex.y_;    // y
+    str >> vertex.z_;    // z
+    str >> vertex.ctau_; // ctau
 
     // Adding this vertex to the vertex collection
-    std::pair<std::map<MAint32,HEPVertex>::iterator,MAbool> res = vertices_.insert(std::make_pair(barcode,vertex));
+    std::pair<std::map<MAint32, HEPVertex>::iterator, MAbool> res = vertices_.insert(std::make_pair(barcode, vertex));
     if (!res.second)
     {
-        res.first->second.id_   = vertex.id_;
-        res.first->second.x_    = vertex.x_;
-        res.first->second.y_    = vertex.y_;
-        res.first->second.z_    = vertex.z_;
+        res.first->second.id_ = vertex.id_;
+        res.first->second.x_ = vertex.x_;
+        res.first->second.y_ = vertex.y_;
+        res.first->second.z_ = vertex.z_;
         res.first->second.ctau_ = vertex.ctau_;
     }
 

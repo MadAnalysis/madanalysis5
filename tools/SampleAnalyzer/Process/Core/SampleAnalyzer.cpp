@@ -189,15 +189,13 @@ void SampleAnalyzer::CheckDatatypes() const
 }
 
 /// Initialization of the SampleAnalyzer
-MAbool SampleAnalyzer::Initialize(MAint32 argc, MAchar **argv,
-								  const std::string &pdgFileName)
+MAbool SampleAnalyzer::Initialize(MAint32 argc, MAchar **argv, const std::string &pdgFileName)
 {
-	// Initializing general pointers
-	myReader_ = 0;
+    // Initializing general pointers
+    myReader_ = 0;
 
-	// Configuration
-	if (!cfg_.Initialize(argc, argv))
-		return false;
+    // Configuration
+    if (!cfg_.Initialize(argc, argv)) return false;
 
 	// Displaying configuration
 	cfg_.Display();
@@ -1004,8 +1002,8 @@ void SampleAnalyzer::FillSummary(SampleFormat &summary,
 		summary.mc()->xsection_ = 0;
 		summary.mc()->xsection_error_ = 0;
 	}
-    
-    /// ! this assumes all the weight identifiers are the same through out the sample set
+
+	/// ! this assumes all the weight identifiers are the same through out the sample set
 	for (auto &name_map : samples.back().mc()->WeightNames())
 		summary.mc()->SetWeightName(name_map.first, name_map.second);
 }
