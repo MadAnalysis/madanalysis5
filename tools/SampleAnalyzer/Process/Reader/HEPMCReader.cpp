@@ -1,26 +1,25 @@
 ////////////////////////////////////////////////////////////////////////////////
-//  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//
+//  Copyright (C) 2012-2023 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
-//  
+//
 //  This file is part of MadAnalysis 5.
 //  Official website: <https://github.com/MadAnalysis/madanalysis5>
-//  
+//
 //  MadAnalysis 5 is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//  
+//
 //  MadAnalysis 5 is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 //  GNU General Public License for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License
 //  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
-//  
+//
 ////////////////////////////////////////////////////////////////////////////////
-
 
 // STL headers
 #include <sstream>
@@ -30,32 +29,31 @@
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
-
 using namespace MA5;
-
 
 // -----------------------------------------------------------------------------
 // ReadHeader
 // -----------------------------------------------------------------------------
-MAbool HEPMCReader::ReadHeader(SampleFormat& mySample)
+MAbool HEPMCReader::ReadHeader(SampleFormat &mySample)
 {
     // Reset the saved line
-    savedline_="";
+    savedline_ = "";
 
     // Initialize MC
     mySample.InitializeMC();
     mySample.SetSampleFormat(MA5FORMAT::HEPMC);
     mySample.SetSampleGenerator(MA5GEN::UNKNOWN);
-    warnmother_=true;
+    warnmother_ = true;
 
     // Skipping header line until first event line
     std::string firstWord;
     std::string line;
 
-    while(firstWord!="E")
+    while (firstWord != "E")
     {
         // Getting the next non-empty line
-        if (!ReadLine(line)) return false;
+        if (!ReadLine(line))
+            return false;
 
         // Splitting the line in words
         std::stringstream str;
@@ -65,17 +63,16 @@ MAbool HEPMCReader::ReadHeader(SampleFormat& mySample)
         str >> firstWord;
     }
 
-    savedline_  = line;
+    savedline_ = line;
 
     // Normal end
     return true;
 }
 
-
 // -----------------------------------------------------------------------------
 // FinalizeHeader
 // -----------------------------------------------------------------------------
-MAbool HEPMCReader::FinalizeHeader(SampleFormat& mySample)
+MAbool HEPMCReader::FinalizeHeader(SampleFormat &mySample)
 {
     return true;
 }
@@ -83,7 +80,7 @@ MAbool HEPMCReader::FinalizeHeader(SampleFormat& mySample)
 // -----------------------------------------------------------------------------
 // ReadEvent
 // -----------------------------------------------------------------------------
-StatusCode::Type HEPMCReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySample)
+StatusCode::Type HEPMCReader::ReadEvent(EventFormat &myEvent, SampleFormat &mySample)
 {
     // Initializing MC event
     myEvent.InitializeMC();
@@ -91,27 +88,30 @@ StatusCode::Type HEPMCReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySa
     // Allocating memory for all particles
     myEvent.mc()->particles_.reserve(nparts_max_);
 
-    MAbool eventOnGoing=false;
+    MAbool eventOnGoing = false;
 
     // Read the saved line
-    if (savedline_!="")
+    if (savedline_ != "")
     {
         FillEvent(savedline_, myEvent, mySample);
-        eventOnGoing=true;
-        savedline_="";
+        eventOnGoing = true;
+        savedline_ = "";
     }
 
-    MAbool endEvent=false;
+    MAbool endEvent = false;
 
     // Loop over particle
-    while(!endEvent)
+    while (!endEvent)
     {
         std::string line;
 
         // Getting a line from the file
         if (!ReadLine(line))
         {
-            if (eventOnGoing) return StatusCode::KEEP; else return StatusCode::FAILURE;
+            if (eventOnGoing)
+                return StatusCode::KEEP;
+            else
+                return StatusCode::FAILURE;
         }
 
         // Splitting the line in words
@@ -123,16 +123,16 @@ StatusCode::Type HEPMCReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySa
         str >> firstWord;
 
         // Is next event ?
-        if (firstWord=="E")
+        if (firstWord == "E")
         {
-            savedline_  = line;
+            savedline_ = line;
             return StatusCode::KEEP;
         }
         else
         {
             // Decoding the line
-            endEvent=!FillEvent(line, myEvent, mySample);
-            eventOnGoing=true;
+            endEvent = !FillEvent(line, myEvent, mySample);
+            eventOnGoing = true;
         }
     }
 
@@ -140,67 +140,74 @@ StatusCode::Type HEPMCReader::ReadEvent(EventFormat& myEvent, SampleFormat& mySa
     return StatusCode::KEEP;
 }
 
-
-
 // -----------------------------------------------------------------------------
 // FinalizeEvent
 // -----------------------------------------------------------------------------
-MAbool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
+MAbool HEPMCReader::FinalizeEvent(SampleFormat &mySample, EventFormat &myEvent)
 {
     // Compute max numbers of particles & vertices
-    if (myEvent.mc()->particles_.size()>nparts_max_) nparts_max_=myEvent.mc()->particles_.size();
-
+    if (myEvent.mc()->particles_.size() > nparts_max_)
+        nparts_max_ = myEvent.mc()->particles_.size();
 
     // Fill vertices information
-    for (std::map<MAint32,HEPVertex>::iterator it=vertices_.begin(); it!=vertices_.end(); it++)
+    for (std::map<MAint32, HEPVertex>::iterator it = vertices_.begin(); it != vertices_.end(); it++)
     {
         // Decay position & lifetime
-        for (MAuint32 i=0;i<it->second.in_.size();i++)
+        for (MAuint32 i = 0; i < it->second.in_.size(); i++)
         {
-            MCParticleFormat* part = &(myEvent.mc()->particles_[it->second.in_[i]]);
-            part->decay_vertex_.SetXYZT(it->second.x_,it->second.y_,it->second.z_,it->second.ctau_);
+            MCParticleFormat *part = &(myEvent.mc()->particles_[it->second.in_[i]]);
+            part->decay_vertex_.SetXYZT(it->second.x_, it->second.y_, it->second.z_, it->second.ctau_);
         }
 
         // Mother+daughter relations
-        for (MAuint32 i=0;i<it->second.in_.size();i++)
+        for (MAuint32 i = 0; i < it->second.in_.size(); i++)
         {
-            for (MAuint32 j=0;j<it->second.out_.size();j++)
+            for (MAuint32 j = 0; j < it->second.out_.size(); j++)
             {
-                MCParticleFormat* mum = &(myEvent.mc()->particles_[it->second.in_[i]]);
-                MCParticleFormat* dau = &(myEvent.mc()->particles_[it->second.out_[j]]);
+                MCParticleFormat *mum = &(myEvent.mc()->particles_[it->second.in_[i]]);
+                MCParticleFormat *dau = &(myEvent.mc()->particles_[it->second.out_[j]]);
 
                 // Deal with HERWIG initial particle : initial part = part whose mother is itself
-                if (mum!=dau)
+                if (mum != dau)
                 {
                     // Safety: be sure to have not 2 same daughters
-                    MAbool found=false;
-                    for (MAuint32 h=0;h<mum->daughters().size();h++)
+                    MAbool found = false;
+                    for (MAuint32 h = 0; h < mum->daughters().size(); h++)
                     {
-                        if (mum->daughters()[h]==dau) {found=true; break;}
+                        if (mum->daughters()[h] == dau)
+                        {
+                            found = true;
+                            break;
+                        }
                     }
-                    if (!found) mum -> daughters().push_back(dau);
+                    if (!found)
+                        mum->daughters().push_back(dau);
 
                     // Safety: be sure to have not 2 same mothers
-                    found=false;
-                    for (MAuint32 h=0;h<dau->mothers().size();h++)
+                    found = false;
+                    for (MAuint32 h = 0; h < dau->mothers().size(); h++)
                     {
-                        if (dau->mothers()[h]==mum) {found=true; break;}
+                        if (dau->mothers()[h] == mum)
+                        {
+                            found = true;
+                            break;
+                        }
                     }
-                    if (!found) dau -> mothers().push_back(mum);
+                    if (!found)
+                        dau->mothers().push_back(mum);
                 }
             }
         }
     }
     vertices_.clear();
 
-
     // Computing met, mht, ...
-    for (MAuint32 i=0; i<myEvent.mc()->particles_.size();i++)
+    for (MAuint32 i = 0; i < myEvent.mc()->particles_.size(); i++)
     {
-        MCParticleFormat& part = myEvent.mc()->particles_[i];
+        MCParticleFormat &part = myEvent.mc()->particles_[i];
 
         // MET, MHT, TET, THT
-        if (part.statuscode()==1 && !PHYSICS->Id->IsInvisible(part))
+        if (part.statuscode() == 1 && !PHYSICS->Id->IsInvisible(part))
         {
             myEvent.mc()->MET_ -= part.momentum();
             myEvent.mc()->TET_ += part.pt();
@@ -224,15 +231,14 @@ MAbool HEPMCReader::FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)
     return true;
 }
 
-
 //------------------------------------------------------------------------------
 // FillWeightNames
 //------------------------------------------------------------------------------
-MAbool HEPMCReader::FillWeightNames(const std::string& line)
+MAbool HEPMCReader::FillWeightNames(const std::string &line, SampleFormat &mySample)
 {
     // Splitting line in words
     std::stringstream str;
-    str << line ;
+    str << line;
 
     // Getting the first word
     std::string firstWord;
@@ -246,80 +252,92 @@ MAbool HEPMCReader::FillWeightNames(const std::string& line)
     std::vector<std::string> weight_names(nweights);
 
     // Filling weight names
-    for (MAuint32 i=0;i<weight_names.size();i++)
+    for (MAuint32 i = 0; i < weight_names.size(); i++)
     {
         std::string tmp;
         str >> tmp;
-        if (tmp=="") continue;
+        if (tmp == "")
+            continue;
 
-        if (tmp[0]=='"' && tmp[tmp.size()-1]=='"') tmp=tmp.substr(1,tmp.size()-2);
-        weight_names[i]=tmp;
+        if (tmp[0] == '"' && tmp[tmp.size() - 1] == '"')
+            tmp = tmp.substr(1, tmp.size() - 2);
+        weight_names[i] = tmp;
+        mySample.mc()->SetWeightName(i, tmp);
     }
 
     // Ok
     return true;
 }
 
-
 //------------------------------------------------------------------------------
 // FillHeavyIons
 //------------------------------------------------------------------------------
-MAbool HEPMCReader::FillHeavyIons(const std::string& line)
+MAbool HEPMCReader::FillHeavyIons(const std::string &line)
 {
     try
     {
-        if (line!="") if (firstHeavyIons_) throw EXCEPTION_WARNING("HeavyIons block is not read by SampleAnalyzer","",0);
+        if (line != "")
+            if (firstHeavyIons_)
+                throw EXCEPTION_WARNING("HeavyIons block is not read by SampleAnalyzer", "", 0);
     }
-    catch(const std::exception& e)
+    catch (const std::exception &e)
     {
         MANAGE_EXCEPTION(e);
     }
-    firstHeavyIons_=false;
+    firstHeavyIons_ = false;
     return false;
 }
-
 
 //------------------------------------------------------------------------------
 // FillEventHeader
 //------------------------------------------------------------------------------
-MAbool HEPMCReader::FillEvent(const std::string& line,
-                              EventFormat& myEvent,
-                              SampleFormat& mySample)
+MAbool HEPMCReader::FillEvent(const std::string &line,
+                              EventFormat &myEvent,
+                              SampleFormat &mySample)
 {
     // Splitting line in words
     std::stringstream str;
-    str << line ;
+    str << line;
 
     // Getting the first word
     std::string firstWord;
     str >> firstWord;
 
     // Event global info
-    if(firstWord=="E") FillEventInformations(line, myEvent);
+    if (firstWord == "E")
+        FillEventInformations(line, myEvent);
 
     // Weight names
-    else if (firstWord=="N") FillWeightNames(line);
+    else if (firstWord == "N")
+        FillWeightNames(line, mySample);
 
     // Event units
-    else if (firstWord=="U") FillUnits(line, mySample);
+    else if (firstWord == "U")
+        FillUnits(line, mySample);
 
     // Cross section
-    else if (firstWord=="C") FillCrossSection(line,mySample);
+    else if (firstWord == "C")
+        FillCrossSection(line, mySample);
 
     // HeavyIon line
-    else if (firstWord=="H") FillHeavyIons(line);
+    else if (firstWord == "H")
+        FillHeavyIons(line);
 
     // PDF Info
-    else if (firstWord=="F") FillEventPDFInfo(line,mySample,myEvent);
+    else if (firstWord == "F")
+        FillEventPDFInfo(line, mySample, myEvent);
 
     // Vertex line
-    else if (firstWord=="V") FillEventVertexLine(line,myEvent);
+    else if (firstWord == "V")
+        FillEventVertexLine(line, myEvent);
 
     // Particle Line
-    else if (firstWord=="P") FillEventParticleLine(line,myEvent);
+    else if (firstWord == "P")
+        FillEventParticleLine(line, myEvent);
 
     // End
-    else if (firstWord=="HepMC::IO_GenEvent-END_EVENT_LISTING") return false;
+    else if (firstWord == "HepMC::IO_GenEvent-END_EVENT_LISTING")
+        return false;
 
     // Other cases
     else
@@ -327,9 +345,9 @@ MAbool HEPMCReader::FillEvent(const std::string& line,
         // ignore other cases
         try
         {
-            throw EXCEPTION_WARNING("HEPMC linecode unknown","",0);
+            throw EXCEPTION_WARNING("HEPMC linecode unknown", "", 0);
         }
-        catch(const std::exception& e)
+        catch (const std::exception &e)
         {
             MANAGE_EXCEPTION(e);
         }
@@ -342,14 +360,14 @@ MAbool HEPMCReader::FillEvent(const std::string& line,
 // -----------------------------------------------------------------------------
 // FillEventInformations
 // -----------------------------------------------------------------------------
-void HEPMCReader::FillEventInformations(const std::string& line,
-                                        EventFormat& myEvent)
+void HEPMCReader::FillEventInformations(const std::string &line,
+                                        EventFormat &myEvent)
 {
     std::stringstream str;
     str << line;
 
     std::string firstc;
-    MAint32 tmp=0;
+    MAint32 tmp = 0;
 
     // Filling general info
     str >> firstc;                   // character 'E'
@@ -366,26 +384,25 @@ void HEPMCReader::FillEventInformations(const std::string& line,
 
     // Extracting random state list
     str >> tmp;
-    if (tmp>0)
+    if (tmp > 0)
     {
         std::vector<MAint64> randoms(static_cast<MAuint32>(tmp));
-        for (MAuint32 i=0;i<randoms.size();i++) str >> randoms[i];
+        for (MAuint32 i = 0; i < randoms.size(); i++)
+            str >> randoms[i];
     }
 
     // Extracting weight lists
     str >> tmp;
-    if (tmp>0)
+    if (tmp > 0)
     {
-        MAuint32 nweights=static_cast<MAuint32>(tmp);
-        for (MAuint32 i=0;i<nweights;i++)
+        MAuint32 nweights = static_cast<MAuint32>(tmp);
+        for (MAuint32 i = 0; i < nweights; i++)
         {
             MAfloat64 value;
             str >> value;
-            if (i==0) myEvent.mc()->weight_=value;
-            myEvent.mc()->multiweights().Add(i+1,value);
+            myEvent.mc()->weights().Add(i, value);
         }
     }
-
 }
 
 // -----------------------------------------------------------------------------
@@ -416,7 +433,6 @@ void HEPMCReader::FillUnits(const std::string& line, SampleFormat& mySample)
     /// Set length and energy units
     mySample.mc()->SetLengthUnit(length_unit_);
     mySample.mc()->SetEnergyUnit(energy_unit_);
-
 }
 
 
@@ -564,4 +580,3 @@ void HEPMCReader::FillEventVertexLine(const std::string& line, EventFormat& myEv
     // Set the current vertex barcode
     currentvertex_ = barcode;
 }
-

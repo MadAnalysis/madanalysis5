@@ -227,7 +227,7 @@ void DelphesTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& mySample)
       if (weight==0) continue;
 
       // creating new particle and filling particle info
-      myEvent.mc()->multiweights().Add(weight->ID,weight->Weight);
+      myEvent.mc()->weights().Add(weight->ID,weight->Weight);
     }
   }
 

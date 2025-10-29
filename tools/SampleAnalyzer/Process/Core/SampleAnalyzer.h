@@ -161,6 +161,11 @@ class SampleAnalyzer
   // Default Hadronic particles
   void AddDefaultInvisible();
 
+  /// @brief Prepare the analyses for execution by initialising the weights
+  /// @param mysample sample data
+  /// @param myevent event data
+  void PrepareForExecution(SampleFormat &mysample, EventFormat &myevent);
+
  private:
 
   /// CheckDatatypes

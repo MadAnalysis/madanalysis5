@@ -641,7 +641,7 @@ MAbool STDHEPreader::DecodeSTDHEP4(const std::string& version,
   // Extracting the event weight
   MAfloat64 eventweight=1;
   *xdrinput_ >> eventweight;
-  myEvent.mc()->setWeight(eventweight);
+  myEvent.mc()->weights().Add(0, eventweight);
 
   // Extracting alpha QED
   MAfloat64 alphaQED=0;

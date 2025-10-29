@@ -91,6 +91,7 @@ class LHEReader : public ReaderTextBase
   //! Fill the event from text line 
   void FillEventInitLine(const std::string& line, EventFormat& myFormat);
   void FillEventParticleLine(const std::string& line, EventFormat& myFormat);
+  void FillWeightNames(const std::string &line, SampleFormat &mySample);
   void FillWeightLine(const std::string& line, EventFormat& myEvent);
 
 };
