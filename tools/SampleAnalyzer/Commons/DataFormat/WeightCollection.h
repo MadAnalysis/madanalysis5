@@ -67,7 +67,7 @@ namespace MA5
         /// @brief Initialise weights with a certain size and default value
         /// @param size number of weights
         /// @param default_value default value for each weight
-        WeightCollection(const MAint32 &size, MAdouble64 default_value = 0.0)
+        WeightCollection(const MAuint32 &size, MAdouble64 default_value = 0.0)
         {
             for (MAuint32 i = 0; i < size; i++)
                 weights_[i] = default_value;
