@@ -102,7 +102,12 @@ namespace MA5
 
         /// @brief Accessor to the current event weight
         /// @return weight collection object
-        const WeightCollection GetCurrentEventWeight() const { return weight_; }
+        const WeightCollection GetCurrentEventWeights() const { return weight_; }
+
+        /// @brief Accessor to the current event weight
+        /// @return weight collection object
+        /// This function is for backwards compatibility
+        const MAdouble64 GetCurrentEventWeight() const { return weight_[0]; }
 
         /// @brief Set current event weight with a weight map
         /// @param weight weight index and value
