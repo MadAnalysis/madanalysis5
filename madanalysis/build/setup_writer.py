@@ -142,7 +142,7 @@ class SetupWriter:
             file.write("then\n")
             file.write('    export FASTJET_FLAG="-DMA5_FASTJET_MODE"\n')
             file.write(
-                '    echo -e $BLUE"   * The SFS-FastJet mode has been initiated."$NORMAL\n'
+                '    echo -e $BLUE"   * The SFS-FastJet mode has been activated."$NORMAL\n'
             )
             file.write("fi\n\n")
             file.write('if [[ $WITH_DELPHES -eq "1" ]] || [[ $WITH_FASTJET -eq "0" ]]\n')
@@ -156,6 +156,9 @@ class SetupWriter:
                 )
                 file.write("    export ROOT_INCLUDE_PATH=" + ":".join(inc_pths) + "\n")
                 file.write("    export FASTJET_FLAG=\n")
+                file.write(
+                    '    echo -e $BLUE"   * Delphes mode has been activated."$NORMAL\n'
+                )
             else:
                 file.write('    echo -e $RED"   * Delphes is not available."$NORMAL\n')
             file.write("fi\n\n")
