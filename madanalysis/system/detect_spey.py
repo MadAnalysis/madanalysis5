@@ -25,8 +25,12 @@
 from __future__ import absolute_import
 
 import logging
+from importlib.util import find_spec
+from importlib.metadata import version
 
 from madanalysis.enumeration.detect_status_type import DetectStatusType
+
+log = logging.getLogger("MA5")
 
 
 class DetectSpey:
@@ -39,7 +43,6 @@ class DetectSpey:
         self.name = "Spey"
         self.mandatory = False
         self.log = []
-        self.logger = logging.getLogger("MA5")
         self.moreInfo = "For more details see https://spey.readthedocs.io"
         # adding what you want here
 
@@ -47,16 +50,19 @@ class DetectSpey:
         return False
 
     def AutoDetection(self):
-        try:
-            import spey
-            import spey_pyhf
-        except ModuleNotFoundError as err:
-            self.logger.debug(str(err))
+        spey_check = find_spec("spey") is not None
+        spey_pyhf_check = find_spec("spey_pyhf") is not None
+        if not spey_check:
+            log.debug("Spey is not available")
+        if not spey_pyhf_check:
+            log.debug("Spey-pyhf plug-in is not available")
+
+        if not spey_pyhf_check or not spey_check:
             return DetectStatusType.UNFOUND, ""
 
         # Checking release
-        self.logger.debug("  release = " + spey.version())
-        self.logger.debug("  where? = " + spey.__file__)
+        log.debug("  release = %s", version("spey"))
+        # log.debug("  where? = " + spey.__file__)
 
         # Ok
         return DetectStatusType.FOUND, ""
