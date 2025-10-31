@@ -62,6 +62,7 @@ class DetectSpey:
 
         # Checking release
         log.debug("  release = %s", version("spey"))
+        log.debug(self.moreInfo)
         # log.debug("  where? = " + spey.__file__)
 
         # Ok
