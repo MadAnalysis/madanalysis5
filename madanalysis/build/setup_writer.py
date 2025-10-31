@@ -28,7 +28,6 @@ from string_tools import StringTools
 from six.moves import range
 from pathlib import Path
 
-
 log = logging.getLogger("MA5")
 
 
@@ -96,7 +95,7 @@ class SetupWriter:
 
             file.write('export WITH_FASTJET="0"\n')
             file.write('export WITH_DELPHES="0"\n')
-            # file.write('user=" "\n\n')
+            file.write('user=" "\n\n')
 
             file.write("function usage() {\n")
             file.write('    echo -e "Usage: source setup.sh [options]"\n')
@@ -155,11 +154,10 @@ class SetupWriter:
                     next((p for p in inc_pths if Path(p).stem == "delphes"), "")
                     + "/modules"
                 )
-            file.write("    export ROOT_INCLUDE_PATH=" + ":".join(inc_pths) + "\n")
-            file.write("    export FASTJET_FLAG=\n")
-            file.write(
-                '    echo -e $BLUE"   * Delphes mode has been initiated."$NORMAL\n'
-            )
+                file.write("    export ROOT_INCLUDE_PATH=" + ":".join(inc_pths) + "\n")
+                file.write("    export FASTJET_FLAG=\n")
+            else:
+                file.write('    echo -e $RED"   * Delphes is not available."$NORMAL\n')
             file.write("fi\n\n")
 
         else:
