@@ -912,7 +912,7 @@ class JobWriter(object):
         options.has_delphes_ma5lib = self.main.archi_info.has_delphes and not kwargs.get(
             "ma5_fastjet_mode", True
         )
-        options.has_delphes = self.main.archi_info.has_delphes and not kwargs.get(
+        options.has_delphes_lib = self.main.archi_info.has_delphes and not kwargs.get(
             "ma5_fastjet_mode", True
         )
 

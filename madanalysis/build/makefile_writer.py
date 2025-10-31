@@ -328,7 +328,9 @@ class MakefileWriter:
                 ]
             )
             #            cxxflags.extend(['$(shell fastjet-config --cxxflags)'])
+            file.write("ifeq ($(FASTJET_FLAG),-DMA5_FASTJET_MODE)\n")
             file.write("CXXFLAGS += " + " ".join(cxxflags) + "\n")
+            file.write("endif\n")
 
         # - zlib
         if options.has_zlib_inc:
@@ -355,7 +357,7 @@ class MakefileWriter:
         if options.has_root_tag:
             cxxflags.extend(["-DROOT_USE"])
         if options.has_fastjet_tag:
-            cxxflags.extend(['-DFASTJET_USE'])
+            cxxflags.extend(["-DFASTJET_USE"])
         if options.ma5_fastjet_mode:
             # @JACK: This flag enables usage of certain modules in SampleAnalyzer which
             # depends on availablity of FastJet library.
@@ -425,13 +427,13 @@ class MakefileWriter:
             libs = []
             if options.has_fastjet_ma5lib:
                 libs.extend(["-lfastjet_for_ma5"])
+                file.write("LIBFLAGS += " + " ".join(libs) + "\n")
             if options.has_fastjet_lib:
-                libs.extend(
-                    [
-                        "$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config --libs --plugins)"
-                    ]
+                file.write("ifeq ($(FASTJET_FLAG),-DMA5_FASTJET_MODE)\n")
+                file.write(
+                    "LIBFLAGS += $(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config --libs --plugins)\n"
                 )
-            file.write("LIBFLAGS += " + " ".join(libs) + "\n")
+                file.write("endif\n")
             libs = []
             if options.has_fjcontrib:
                 # Add fjcontrib libraries
