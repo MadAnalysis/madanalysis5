@@ -302,6 +302,7 @@ class RunRecast:
         # Creating executable
         log.info("   Compiling 'SampleAnalyzer'...")
         os.environ["ROOT_INCLUDE_PATH"] = ":".join(self.delphes_inc_pths)
+        os.environ["FASTJET_FLAG"] = ""
         if not jobber.CompileJob():
             return False
         log.info("   Linking 'SampleAnalyzer'...")
