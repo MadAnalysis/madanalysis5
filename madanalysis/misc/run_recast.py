@@ -269,8 +269,6 @@ class RunRecast:
             log.info("   **********************************************************")
 
     def run_delphes(self, dataset, card):
-        if dataset.xsection == 0.:
-            self.main.
         # Initializing the JobWriter
         if os.path.isdir(self.dirname + "_RecastRun"):
             if not FolderWriter.RemoveDirectory(
@@ -871,7 +869,7 @@ class RunRecast:
                 self.dirname = self.main.recasting.stat_only_dir
             ## Running the CLs exclusion script (if available)
             if xsec_check:
-                if not self.main.recasting.analysis_only_mode :
+                if not self.main.recasting.analysis_only_mode:
                     log.debug(f"Compute CLs exclusion for {myset.name}")
                     if not self.compute_cls(analyses, myset):
                         self.main.forced = self.forced
