@@ -642,6 +642,10 @@ class CheckUp:
                 )
                 self.logger.warning(f"The latest version can be downloaded from : ")
                 self.logger.warning(f"{info['html_url']}")
-        except (requests.exceptions.ConnectionError, ImportError) as e:
+        except (
+            requests.exceptions.ConnectionError,
+            ImportError,
+            requests.exceptions.ReadTimeout,
+        ) as e:
             self.logger.debug("Cannot check updates...")
             pass

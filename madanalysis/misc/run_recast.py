@@ -29,6 +29,7 @@ import json
 import logging
 import math
 import os
+import re
 import shutil
 import time
 from pathlib import Path
@@ -268,6 +269,8 @@ class RunRecast:
             log.info("   **********************************************************")
 
     def run_delphes(self, dataset, card):
+        if dataset.xsection == 0.:
+            self.main.
         # Initializing the JobWriter
         if os.path.isdir(self.dirname + "_RecastRun"):
             if not FolderWriter.RemoveDirectory(
@@ -537,8 +540,6 @@ class RunRecast:
             return False
         log.info("    *******************************************************")
 
-        os.environ["FASTJET_FLAG"] = ""
-
         if not os.path.isdir(self.dirname + "/Output/SAF/" + dataset.name):
             os.mkdir(self.dirname + "/Output/SAF/" + dataset.name)
         for analysis in analysislist:
@@ -713,6 +714,12 @@ class RunRecast:
         else:
             log.debug("Analysis kept in " + self.dirname + "_SFSRun folder.")
 
+        if dataset.xsection == 0.0:
+            dataset.xsection = self.read_xsec(
+                f"{self.dirname}/Output/SAF/{dataset.name}/{dataset.name}.saf"
+            )
+            log.debug(f"Cross-section has been set to {dataset.xsection} pb.")
+
         return True
 
     def generate_events(self, dataset, card):
@@ -799,10 +806,17 @@ class RunRecast:
 
         # Executing the PAD
         for myset in self.main.datasets:
+            xsec_check = True
             if not self.main.recasting.stat_only_mode:
                 if version in ["v1.1", "v1.2"]:
-                    os.environ["ROOT_INCLUDE_PATH"] = ":".join(self.delphes_inc_pths)
-                    os.environ["FASTJET_FLAG"] = ""
+                    os.environ.update(
+                        {
+                            "ROOT_INCLUDE_PATH": ":".join(self.delphes_inc_pths),
+                            "FASTJET_FLAG": "",
+                        }
+                    )
+                    if myset.xsection == 0.0:
+                        xsec_check = False
                     ## Preparing the PAD
                     self.update_pad_main(analyses)
                     if not self.make_pad():
@@ -838,8 +852,9 @@ class RunRecast:
                         time.sleep(1.0)
                 else:
                     # Run SFS
-                    os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
-                    os.environ["ROOT_INCLUDE_PATH"] = ""
+                    os.environ.update(
+                        {"ROOT_INCLUDE_PATH": "", "FASTJET_FLAG": "-DMA5_FASTJET_MODE"}
+                    )
                     if not self.run_SimplifiedFastSim(
                         myset,
                         self.main.archi_info.ma5dir
@@ -855,11 +870,12 @@ class RunRecast:
             else:
                 self.dirname = self.main.recasting.stat_only_dir
             ## Running the CLs exclusion script (if available)
-            if not self.main.recasting.analysis_only_mode:
-                log.debug(f"Compute CLs exclusion for {myset.name}")
-                if not self.compute_cls(analyses, myset):
-                    self.main.forced = self.forced
-                    return False
+            if xsec_check:
+                if not self.main.recasting.analysis_only_mode :
+                    log.debug(f"Compute CLs exclusion for {myset.name}")
+                    if not self.compute_cls(analyses, myset):
+                        self.main.forced = self.forced
+                        return False
 
         # Exit
         return True
@@ -1013,8 +1029,6 @@ class RunRecast:
             strcores = "-j" + str(ncores)
             command.append(strcores)
         logfile = self.dirname + "_RecastRun/Build/Log/PADcompilation.log"
-        # @jackaraz: this is needed for the recjetformat
-        os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
         result, out = ShellCommand.ExecuteWithLog(
             command, logfile, self.dirname + "_RecastRun/Build"
         )
@@ -1264,7 +1278,7 @@ class RunRecast:
                     )
                     return False
 
-                if dataset.xsection <= 0:
+                if dataset.xsection == 0.0:
                     log.error(
                         f"Cross section for {dataset.name} is not defined. Skipping the CLs calculation."
                     )
@@ -1775,6 +1789,23 @@ class RunRecast:
                     ).ljust(15, " ")
                 )
             out.write("\n")
+
+    @staticmethod
+    def read_xsec(path: str) -> float:
+        """Read cross section value from SAF file"""
+        saf_file = Path(path)
+        if not saf_file.exists():
+            return 0.0
+        with saf_file.open("r", encoding="utf-8") as f:
+            smp_info = (
+                [
+                    match.group(1)
+                    for match in re.finditer(r"<SampleGlobalInfo>(.*?)<", f.read(), re.S)
+                ][0]
+                .splitlines()[-1]
+                .split()
+            )
+        return float(smp_info[0])
 
     def read_cutflows(self, path, regions, regiondata):
         log.debug("Read the cutflow from the files:")
