@@ -1483,11 +1483,7 @@ class RunRecast:
                 cov_regions=[], covariance=[]
             )
         # activate pyhf
-        if (
-            self.main.recasting.global_likelihoods_switch
-            and self.main.session_info.has_pyhf
-            and self.cov_config == {}
-        ):
+        if self.main.recasting.global_likelihoods_switch and self.cov_config == {}:
             try:
                 self.pyhf_config = self.pyhf_info_file(info_root)
                 log.debug(str(self.pyhf_config))
