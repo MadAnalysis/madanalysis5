@@ -145,7 +145,7 @@ class SetupWriter:
                 '    echo -e $BLUE"   * The SFS-FastJet mode has been activated."$NORMAL\n'
             )
             file.write("fi\n\n")
-            file.write('if [[ $WITH_DELPHES -eq "1" ]] || [[ $WITH_FASTJET -eq "0" ]]\n')
+            file.write('if [[ $WITH_DELPHES -eq "1" ]]\n')
             file.write("then\n")
             inc_pths = []
             if len(archi_info.delphes_inc_paths) != 0:
