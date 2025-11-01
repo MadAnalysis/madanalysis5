@@ -807,12 +807,8 @@ class RunRecast:
             xsec_check = True
             if not self.main.recasting.stat_only_mode:
                 if version in ["v1.1", "v1.2"]:
-                    os.environ.update(
-                        {
-                            "ROOT_INCLUDE_PATH": ":".join(self.delphes_inc_pths),
-                            "FASTJET_FLAG": "",
-                        }
-                    )
+                    os.environ["ROOT_INCLUDE_PATH"] = ":".join(self.delphes_inc_pths)
+                    os.environ["FASTJET_FLAG"] = ""
                     if myset.xsection == 0.0:
                         xsec_check = False
                     ## Preparing the PAD
@@ -850,9 +846,8 @@ class RunRecast:
                         time.sleep(1.0)
                 else:
                     # Run SFS
-                    os.environ.update(
-                        {"ROOT_INCLUDE_PATH": "", "FASTJET_FLAG": "-DMA5_FASTJET_MODE"}
-                    )
+                    os.environ["ROOT_INCLUDE_PATH"] = ""
+                    os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
                     if not self.run_SimplifiedFastSim(
                         myset,
                         self.main.archi_info.ma5dir
