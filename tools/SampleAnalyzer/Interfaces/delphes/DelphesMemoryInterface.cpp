@@ -164,6 +164,7 @@ MAbool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Eve
   // --------------Jet collection
   if (Jet_!=0)
   {
+    MAint32 njet = 0;
     for (MAuint32 i=0;i<static_cast<MAuint32>(Jet_->GetEntries());i++)
     {
       Candidate* cand = dynamic_cast<Candidate*>(Jet_->At(i));
@@ -183,13 +184,22 @@ MAbool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat& mySample, Eve
       else
       {
         RecJetFormat* jet = myEvent.rec()->GetNewJet();
-        jet->momentum_.SetPxPyPzE(cand->Momentum.Px(),cand->Momentum.Py(),cand->Momentum.Pz(),cand->Momentum.E());
+        jet->setMomentum(
+            MALorentzVector(
+                cand->Momentum.Px(),
+                cand->Momentum.Py(),
+                cand->Momentum.Pz(),
+                cand->Momentum.E()
+            )
+        );
         jet->loose_btag_ = cand->BTag;
         if (cand->Eem!=0) jet->HEoverEE_ = cand->Ehad/cand->Eem; else jet->HEoverEE_ = 999.;
         jet->ntracks_ = 0; // To fix later
+        njet++;
       }
     }
-  }
+    if (njet == 0) myEvent.rec()->CreateEmptyJetAccesor();
+  } else { myEvent.rec()->CreateEmptyJetAccesor(); }
 
   // --------------GenJet collection
   /*  if (genjetsArray!=0)
