@@ -451,23 +451,23 @@ namespace MA5
         /// Giving a new tau entry
         RecTauFormat *GetNewTau();
 
-        /// Giving a new primary jet entry
-        RecJetFormat *GetNewJet();
-
-        /// Giving a new primary jet entry
-        void CreateEmptyJetAccesor();
-
         // Get a new jet entry with specific ID
         RecJetFormat *GetNewJet(std::string id);
+
+        /// Giving a new primary jet entry
+        RecJetFormat *GetNewJet() { return GetNewJet(PrimaryJetID_); }
+
+        /// Giving a new fat jet entry
+        RecJetFormat *GetNewFatJet() { return GetNewJet("fatjet"); }
+
+        /// Giving a new gen jet entry
+        RecJetFormat *GetNewGenJet() { return GetNewJet("genjet"); }
 
         // Create an empty jet accessor with specific id
         void CreateEmptyJetAccesor(std::string id);
 
-        /// Giving a new fat jet entry
-        RecJetFormat *GetNewFatJet();
-
-        /// Giving a new gen jet entry
-        RecJetFormat *GetNewGenJet();
+        /// Giving a new primary jet entry
+        void CreateEmptyJetAccesor() { return CreateEmptyJetAccesor(PrimaryJetID_); }
 
         /// Giving a new track entry
         RecTrackFormat *GetNewTrack();
@@ -476,10 +476,10 @@ namespace MA5
         RecVertexFormat *GetNewVertex();
 
         /// Giving a pointer to the Missing Transverse Energy
-        RecParticleFormat *GetNewMet();
+        RecParticleFormat *GetNewMet() { return &MET_; }
 
         /// Giving a pointer to the Missing Transverse Energy
-        RecParticleFormat *GetNewMht();
+        RecParticleFormat *GetNewMht() { return &MHT_; }
     };
 
 }

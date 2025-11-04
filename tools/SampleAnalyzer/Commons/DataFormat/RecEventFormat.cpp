@@ -29,7 +29,8 @@
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Commons/DataFormat/RecEventFormat.h"
 
-namespace MA5 {
+namespace MA5
+{
     /// Clearing all information
     void RecEventFormat::Reset()
     {
@@ -44,22 +45,22 @@ namespace MA5 {
         // pseudojet : only available when fastjet is in use (code efficiency)
         input_hadrons_.clear();
 #endif
-        towers_ok_=false;
+        towers_ok_ = false;
         towers_.clear();
-        tracks_ok_=false;
+        tracks_ok_ = false;
         tracks_.clear();
-        vertices_ok_=false;
+        vertices_ok_ = false;
         vertices_.clear();
-        EFlowTracks_ok_=false;
+        EFlowTracks_ok_ = false;
         EFlowTracks_.clear();
-        EFlowPhotons_ok_=false;
+        EFlowPhotons_ok_ = false;
         EFlowPhotons_.clear();
-        EFlowNeutralHadrons_ok_=false;
+        EFlowNeutralHadrons_ok_ = false;
         EFlowNeutralHadrons_.clear();
         MET_.Reset();
         MHT_.Reset();
-        TET_  = 0.;
-        THT_  = 0.;
+        TET_ = 0.;
+        THT_ = 0.;
         Meff_ = 0.;
         MCHadronicTaus_.clear();
         MCMuonicTaus_.clear();
@@ -75,8 +76,10 @@ namespace MA5 {
     // Remove an element from jet collection
     void RecEventFormat::Remove_Collection(std::string id)
     {
-        if (hasJetID(id)) jetcollection_.erase(id);
-        else ERROR << "Remove_Collection:: '" << id << "' does not exist." << endmsg;
+        if (hasJetID(id))
+            jetcollection_.erase(id);
+        else
+            ERROR << "Remove_Collection:: '" << id << "' does not exist." << endmsg;
     }
 
     /// Change Jet ID
@@ -85,7 +88,7 @@ namespace MA5 {
         if (!hasJetID(new_id) && hasJetID(previous_id))
         {
             auto it = jetcollection_.find(previous_id);
-            std::swap(jetcollection_[new_id],it->second);
+            std::swap(jetcollection_[new_id], it->second);
             jetcollection_.erase(it);
         }
         else
@@ -102,14 +105,13 @@ namespace MA5 {
     {
         std::vector<std::string> keys;
         keys.reserve(jetcollection_.size());
-        for (auto &key: jetcollection_)
+        for (auto &key : jetcollection_)
             keys.emplace_back(key.first);
         return keys;
     }
 
-
     // Add a new hadron to be clustered. (for code efficiency)
-    void RecEventFormat::AddHadron(MCParticleFormat& v, MAuint32& idx)
+    void RecEventFormat::AddHadron(MCParticleFormat &v, MAuint32 &idx)
     {
 #ifdef MA5_FASTJET_MODE
         fastjet::PseudoJet input;
@@ -121,7 +123,7 @@ namespace MA5 {
 
 #ifdef MA5_FASTJET_MODE
     // Get hadrons to cluster (code efficiency)
-    std::vector<fastjet::PseudoJet>& RecEventFormat::cluster_inputs() {return input_hadrons_;}
+    std::vector<fastjet::PseudoJet> &RecEventFormat::cluster_inputs() { return input_hadrons_; }
 #endif
 
     //======================//
@@ -129,14 +131,14 @@ namespace MA5 {
     //======================//
 
     /// Giving a new photon entry
-    RecPhotonFormat* RecEventFormat::GetNewPhoton()
+    RecPhotonFormat *RecEventFormat::GetNewPhoton()
     {
         photons_.push_back(RecPhotonFormat());
         return &photons_.back();
     }
 
     /// Giving a new electron entry
-    RecLeptonFormat* RecEventFormat::GetNewElectron()
+    RecLeptonFormat *RecEventFormat::GetNewElectron()
     {
         electrons_.push_back(RecLeptonFormat());
         (&electrons_.back())->setElectronId();
@@ -144,7 +146,7 @@ namespace MA5 {
     }
 
     /// Giving a new muon entry
-    RecLeptonFormat* RecEventFormat::GetNewMuon()
+    RecLeptonFormat *RecEventFormat::GetNewMuon()
     {
         muons_.push_back(RecLeptonFormat());
         (&muons_.back())->setMuonId();
@@ -152,111 +154,66 @@ namespace MA5 {
     }
 
     /// Giving a new tower entry
-    RecTowerFormat* RecEventFormat::GetNewTower()
+    RecTowerFormat *RecEventFormat::GetNewTower()
     {
         towers_.push_back(RecTowerFormat());
         return &towers_.back();
     }
 
     /// Giving a new EFlowTrack entry
-    RecTrackFormat* RecEventFormat::GetNewEFlowTrack()
+    RecTrackFormat *RecEventFormat::GetNewEFlowTrack()
     {
         EFlowTracks_.push_back(RecTrackFormat());
         return &EFlowTracks_.back();
     }
 
     /// Giving a new EFlowPhoton entry
-    RecParticleFormat* RecEventFormat::GetNewEFlowPhoton()
+    RecParticleFormat *RecEventFormat::GetNewEFlowPhoton()
     {
         EFlowPhotons_.push_back(RecParticleFormat());
         return &EFlowPhotons_.back();
     }
 
     /// Giving a new EFlowNeutralHadron entry
-    RecParticleFormat* RecEventFormat::GetNewEFlowNeutralHadron()
+    RecParticleFormat *RecEventFormat::GetNewEFlowNeutralHadron()
     {
         EFlowNeutralHadrons_.push_back(RecParticleFormat());
         return &EFlowNeutralHadrons_.back();
     }
 
     /// Giving a new tau entry
-    RecTauFormat* RecEventFormat::GetNewTau()
+    RecTauFormat *RecEventFormat::GetNewTau()
     {
         taus_.push_back(RecTauFormat());
         return &taus_.back();
     }
 
-    /// Giving a new primary jet entry
-    RecJetFormat* RecEventFormat::GetNewJet()
-    {
-        std::pair< std::map<std::string, std::vector<RecJetFormat> >::iterator, bool> new_jet;
-        new_jet = jetcollection_.insert(std::make_pair(PrimaryJetID_,std::vector<RecJetFormat>() ));
-        new_jet.first->second.push_back(RecJetFormat());
-        return &(new_jet.first->second.back());
-    }
-
-    /// Giving a new primary jet entry
-    void RecEventFormat::CreateEmptyJetAccesor()
-    {
-        std::pair< std::map<std::string, std::vector<RecJetFormat> >::iterator, bool> new_jet;
-        new_jet = jetcollection_.insert(std::make_pair(PrimaryJetID_,std::vector<RecJetFormat>() ));
-    }
-
     // Get a new jet entry with specific ID
-    RecJetFormat* RecEventFormat::GetNewJet(std::string id)
+    RecJetFormat *RecEventFormat::GetNewJet(std::string id)
     {
-        std::pair< std::map<std::string, std::vector<RecJetFormat> >::iterator,bool> new_jet;
-        new_jet = jetcollection_.insert(std::make_pair(id,std::vector<RecJetFormat>() ));
-        new_jet.first->second.push_back(RecJetFormat());
-        return &(new_jet.first->second.back());
+        auto &jets = jetcollection_[id];
+        jets.emplace_back();
+        return &jets.back();
     }
 
     // Create an empty jet accessor with specific id
     void RecEventFormat::CreateEmptyJetAccesor(std::string id)
     {
-        std::pair< std::map<std::string, std::vector<RecJetFormat> >::iterator,bool> new_jet;
-        new_jet = jetcollection_.insert(std::make_pair(id,std::vector<RecJetFormat>() ));
-    }
-
-    /// Giving a new fat jet entry
-    RecJetFormat* RecEventFormat::GetNewFatJet()
-    {
-        std::string id = "fatjet";
-        std::pair< std::map<std::string, std::vector<RecJetFormat> >::iterator,bool> new_jet;
-        new_jet = jetcollection_.insert(std::make_pair(id,std::vector<RecJetFormat>() ));
-        new_jet.first->second.push_back(RecJetFormat());
-        return &(new_jet.first->second.back());
-    }
-
-    /// Giving a new gen jet entry
-    RecJetFormat* RecEventFormat::GetNewGenJet()
-    {
-        std::string id = "genjet";
-        std::pair< std::map<std::string, std::vector<RecJetFormat> >::iterator,bool> new_jet;
-        new_jet = jetcollection_.insert(std::make_pair(id,std::vector<RecJetFormat>() ));
-        new_jet.first->second.push_back(RecJetFormat());
-        return &(new_jet.first->second.back());
+        std::pair<std::map<std::string, std::vector<RecJetFormat>>::iterator, bool> new_jet;
+        new_jet = jetcollection_.insert(std::make_pair(id, std::vector<RecJetFormat>()));
     }
 
     /// Giving a new track entry
-    RecTrackFormat* RecEventFormat::GetNewTrack()
+    RecTrackFormat *RecEventFormat::GetNewTrack()
     {
         tracks_.push_back(RecTrackFormat());
         return &tracks_.back();
     }
 
     /// Giving a new vertex entry
-    RecVertexFormat* RecEventFormat::GetNewVertex()
+    RecVertexFormat *RecEventFormat::GetNewVertex()
     {
         vertices_.push_back(RecVertexFormat());
         return &vertices_.back();
     }
-
-    /// Giving a pointer to the Missing Transverse Energy
-    RecParticleFormat* RecEventFormat::GetNewMet() { return &MET_; }
-
-    /// Giving a pointer to the Missing Transverse Energy
-    RecParticleFormat* RecEventFormat::GetNewMht() { return &MHT_; }
-
-
 }
