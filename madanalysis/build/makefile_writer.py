@@ -414,6 +414,7 @@ class MakefileWriter:
                 )
             file.write("LIBFLAGS += " + " ".join(libs) + "\n")
         else:
+            libs = []
             if options.has_root_lib:
                 libs.extend(
                     [
@@ -422,7 +423,7 @@ class MakefileWriter:
                 )
                 file.write("LIBFLAGS += " + " ".join(libs) + "\n")
 
-            # - fastjet
+        # - fastjet
         if options.has_fastjet_ma5lib or options.has_fastjet_lib:
             libs = []
             if options.has_fastjet_ma5lib:
@@ -483,16 +484,16 @@ class MakefileWriter:
         #            '-lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint '+\
         #            '-lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic -lEG'])
         # becareful: to not forget -lEG
-        if options.has_root:
-            libs.extend(
-                [
-                    "$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/root-config --libs)",
-                    "-lEG",
-                ]
-            )
-        if len(libs) != 0:
-            file.write("LIBFLAGS += " + " ".join(libs) + "\n")
-        file.write("\n")
+        # if options.has_root:
+        #     libs.extend(
+        #         [
+        #             "$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/root-config --libs)",
+        #             "-lEG",
+        #         ]
+        #     )
+        # if len(libs) != 0:
+        #     file.write("LIBFLAGS += " + " ".join(libs) + "\n")
+        # file.write("\n")
 
         # Lib to check
         libs = []

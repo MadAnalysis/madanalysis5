@@ -83,7 +83,7 @@ class InstallManager():
                 installer=InstallPad(self.main, rawpackage)
             else:
                 self.logger.warning('the package "' + rawpackage + '" cannot be installed without root ' +\
-                    'and scipy; installation skipped')
+                    'and spey; installation skipped')
                 return True
         elif package=='simplify':
             from madanalysis.install.install_simplify import InstallSimplify
