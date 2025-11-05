@@ -109,9 +109,6 @@ def DefaultInstallCard():
     output.write('# -----LATEX-----\n')
     output.write('# latex_veto = 0 # 0=No, 1=Yes\n')
     output.write('\n')
-    output.write('# -----SCIPY-----\n')
-    output.write('# scipy_veto = 0 # 0=No, 1=Yes\n')
-    output.write('\n')
     output.close()
 
 

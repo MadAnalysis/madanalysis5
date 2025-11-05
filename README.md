@@ -253,13 +253,13 @@ The [latest release](https://github.com/MadAnalysis/madanalysis5/releases) of Ma
 - [FastJet Contrib](https://fastjet.hepforge.org/contrib/) v1.048
 - [Delphes](https://github.com/delphes/delphes) v3.5.0
 - [ROOT](https://root.cern) v6.04.08
-- [pyhf](https://github.com/scikit-hep/pyhf) v0.7.3
+- [Spey](https://spey.readthedocs.io/) v0.2.5
 
 ### Authors
 
 MadAnalysis 5 is openly developed by the core dev team consisting of:
 
-- [Jack Y. Araz](mailto:jack.araz@durham.ac.uk)
+- [Jack Y. Araz](mailto:j.araz@ucl.ac.uk)
 - [Benjamin Fuks](mailto:fuks@lpthe.jussieu.fr)
 - [Eric Conte](mailto:eric.conte@iphc.cnrs.fr)
 

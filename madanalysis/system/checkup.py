@@ -372,9 +372,9 @@ class CheckUp:
             return False
         if not self.checker.Execute("fastjet"):
             return False
-        if not self.checker.Execute('fastjet-contrib'):
+        if not self.checker.Execute("fastjet-contrib"):
             return False
-        if not self.checker.Execute('HEPTopTagger'):
+        if not self.checker.Execute("HEPTopTagger"):
             return False
         if not self.checker.Execute("root"):
             return False
@@ -386,7 +386,7 @@ class CheckUp:
     def CheckOptionalReinterpretationPackages(self):
         # Optional packages
         self.logger.info("Checking optional packages devoted to reinterpretation:")
-        for package in ["scipy", "spey", "pyhf", "pad", "padma5", "padsfs", "simplify"]:
+        for package in ["spey", "pad", "padma5", "padsfs", "simplify"]:
             if not self.checker.Execute(package):
                 return False
         return True
@@ -642,6 +642,10 @@ class CheckUp:
                 )
                 self.logger.warning(f"The latest version can be downloaded from : ")
                 self.logger.warning(f"{info['html_url']}")
-        except (requests.exceptions.ConnectionError, ImportError) as e:
+        except (
+            requests.exceptions.ConnectionError,
+            ImportError,
+            requests.exceptions.ReadTimeout,
+        ) as e:
             self.logger.debug("Cannot check updates...")
             pass

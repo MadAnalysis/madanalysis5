@@ -78,16 +78,13 @@ class InstallManager():
             from madanalysis.install.install_numpy import InstallNumpy
             installer=InstallNumpy(self.main)
         elif package in ['pad', 'padforma5tune', 'padforsfs']:
-            if (package == 'padforsfs') or (self.main.archi_info.has_root and self.main.session_info.has_scipy):
+            if (package == 'padforsfs') or (self.main.archi_info.has_root and self.main.session_info.has_spey):
                 from madanalysis.install.install_pad import InstallPad
                 installer=InstallPad(self.main, rawpackage)
             else:
                 self.logger.warning('the package "' + rawpackage + '" cannot be installed without root ' +\
-                    'and scipy; installation skipped')
+                    'and spey; installation skipped')
                 return True
-        elif package=='pyhf':
-            from madanalysis.install.install_pyhf import Installpyhf
-            installer=Installpyhf(self.main)
         elif package=='simplify':
             from madanalysis.install.install_simplify import InstallSimplify
             installer=InstallSimplify(self.main)
