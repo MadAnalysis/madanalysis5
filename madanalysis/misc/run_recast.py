@@ -35,9 +35,9 @@ import time
 from pathlib import Path
 
 import numpy as np
-from shell_command import ShellCommand
+from shell_command import ShellCommand  # pylint: disable=import-error
 from six.moves import input, range
-from string_tools import StringTools
+from string_tools import StringTools  # pylint: disable=import-error
 
 from madanalysis.configuration.delphes_configuration import DelphesConfiguration
 from madanalysis.configuration.delphesMA5tune_configuration import (
@@ -301,8 +301,8 @@ class RunRecast:
 
         # Creating executable
         log.info("   Compiling 'SampleAnalyzer'...")
-        os.environ["ROOT_INCLUDE_PATH"] = ":".join(self.delphes_inc_pths)
-        os.environ["FASTJET_FLAG"] = ""
+        # os.environ["ROOT_INCLUDE_PATH"] = ":".join(self.delphes_inc_pths)
+        # os.environ["FASTJET_FLAG"] = ""
         if not jobber.CompileJob():
             return False
         log.info("   Linking 'SampleAnalyzer'...")
@@ -808,8 +808,8 @@ class RunRecast:
             xsec_check = True
             if not self.main.recasting.stat_only_mode:
                 if version in ["v1.1", "v1.2"]:
-                    os.environ["ROOT_INCLUDE_PATH"] = ":".join(self.delphes_inc_pths)
-                    os.environ["FASTJET_FLAG"] = ""
+                    # os.environ["ROOT_INCLUDE_PATH"] = ":".join(self.delphes_inc_pths)
+                    # os.environ["FASTJET_FLAG"] = ""
                     if myset.xsection == 0.0:
                         xsec_check = False
                     ## Preparing the PAD
@@ -847,8 +847,6 @@ class RunRecast:
                         time.sleep(1.0)
                 else:
                     # Run SFS
-                    os.environ["ROOT_INCLUDE_PATH"] = ""
-                    os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
                     if not self.run_SimplifiedFastSim(
                         myset,
                         self.main.archi_info.ma5dir
@@ -1043,6 +1041,9 @@ class RunRecast:
         infile = open(self.dirname + "_RecastRun/Input/PADevents.list", "w")
         infile.write(eventfile)
         infile.close()
+        jobber = JobWriter(self.main, self.dirname + "_RecastRun")
+        if not jobber.WriteMakefiles(ma5_fastjet_mode=False):
+            return False
         ## cleaning the output directory
         if os.path.isdir(
             os.path.normpath(self.dirname + "_RecastRun/Output/SAF/PADevents")
@@ -1056,7 +1057,7 @@ class RunRecast:
         ok = ShellCommand.Execute(command, self.dirname + "_RecastRun/Build")
         ## checks
         if not ok:
-            log.error("Problem with the run of the PAD on the file: " + eventfile)
+            log.error("Problem with the run of the PAD on the file: %s", eventfile)
             return False
         os.remove(self.dirname + "_RecastRun/Input/PADevents.list")
         ## exit

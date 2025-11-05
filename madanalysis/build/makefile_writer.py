@@ -28,7 +28,7 @@ import logging
 import os
 
 from six.moves import range
-from string_tools import StringTools
+from string_tools import StringTools  # pylint: disable=import-error
 
 
 class MakefileWriter:
@@ -59,9 +59,9 @@ class MakefileWriter:
 
         # Open the Makefile
         try:
-            file = open(filename, "w")
-        except:
-            logging.getLogger("MA5").error("impossible to write the file " + filename)
+            file = open(filename, "w", encoding="utf-8")
+        except (IOError, OSError):
+            logging.getLogger("MA5").error("impossible to write the file %s", filename)
             return False
 
         # Header
@@ -328,9 +328,7 @@ class MakefileWriter:
                 ]
             )
             #            cxxflags.extend(['$(shell fastjet-config --cxxflags)'])
-            file.write("ifeq ($(FASTJET_FLAG),-DMA5_FASTJET_MODE)\n")
             file.write("CXXFLAGS += " + " ".join(cxxflags) + "\n")
-            file.write("endif\n")
 
         # - zlib
         if options.has_zlib_inc:
@@ -430,11 +428,10 @@ class MakefileWriter:
                 libs.extend(["-lfastjet_for_ma5"])
                 file.write("LIBFLAGS += " + " ".join(libs) + "\n")
             if options.has_fastjet_lib:
-                file.write("ifeq ($(FASTJET_FLAG),-DMA5_FASTJET_MODE)\n")
+                os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
                 file.write(
                     "LIBFLAGS += $(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config --libs --plugins)\n"
                 )
-                file.write("endif\n")
             libs = []
             if options.has_fjcontrib:
                 # Add fjcontrib libraries

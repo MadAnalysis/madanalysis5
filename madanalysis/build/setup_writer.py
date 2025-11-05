@@ -23,10 +23,10 @@
 
 
 from __future__ import absolute_import
-import logging, os
-from string_tools import StringTools
-from six.moves import range
+import logging
 from pathlib import Path
+from string_tools import StringTools  # pylint: disable=import-error
+from six.moves import range
 
 log = logging.getLogger("MA5")
 
@@ -79,6 +79,15 @@ class SetupWriter:
 
         # Defining colours
         file.write("# Defining colours for shell\n")
+
+        delphes_inc_pths = []
+        if len(archi_info.delphes_inc_paths) != 0:
+            delphes_inc_pths = archi_info.delphes_inc_paths
+            delphes_inc_pths.append(
+                next((p for p in delphes_inc_pths if Path(p).stem == "delphes"), "")
+                + "/modules"
+            )
+
         if bash:
             file.write('GREEN="\\\\033[1;32m"\n')
             file.write('RED="\\\\033[1;31m"\n')
@@ -87,82 +96,8 @@ class SetupWriter:
             file.write('YELLOW="\\\\033[1;33m"\n')
             file.write('CYAN="\\\\033[1;36m"\n')
             file.write('NORMAL="\\\\033[0;39m"\n\n')
-            # using ' ' could be more convenient to code
-            # but in this case, the colour code are interpreted
-            # by the linux command 'more'
-
-            # @jackaraz: by default fastjet flag should be set otherwise recjetformat complains
-
-            file.write('export WITH_FASTJET="0"\n')
-            file.write('export WITH_DELPHES="0"\n')
-            file.write('user=" "\n\n')
-
-            file.write("function usage() {\n")
-            file.write('    echo -e "Usage: source setup.sh [options]"\n')
-            file.write(
-                '    echo -e "   -h OR --help   : Prints this very useful text."\n'
-            )
-            file.write(
-                '    echo -e "   --with-fastjet : Enables the usage of FastJet interface within the analysis."\n'
-            )
-            file.write(
-                '    echo -e "   --with-delphes : Enables the usage of Delphes interface within the analysis."\n'
-            )
-            file.write("}\n\n")
-
-            file.write('for user in "$@"\n')
-            file.write("do\n")
-            file.write('    if [[ $user == "--with-fastjet" ]]\n')
-            file.write("    then\n")
-            file.write('        export WITH_FASTJET="1"\n')
-            file.write('    elif [[ $user == "--with-delphes" ]]\n')
-            file.write("    then\n")
-            file.write('        export WITH_DELPHES="1"\n')
-            file.write('    elif [[ $user == "-h" ]] || [[ $user == "--help" ]]\n')
-            file.write("    then\n")
-            file.write("        usage\n")
-            file.write("        return 0\n")
-            file.write("    else\n")
-            file.write('        echo -e $RED"ERROR: Invalid commandline option."\n')
-            file.write("        usage\n")
-            file.write("        echo -e $NORMAL\n")
-            file.write("        return 1\n")
-            file.write("    fi\n")
-            file.write("done\n\n")
-
-            file.write('if [[ $WITH_FASTJET -eq "1" ]]  && [[ $WITH_DELPHES -eq "1" ]]\n')
-            file.write("then\n")
-            file.write(
-                '    echo -e $RED"ERROR: FastJet and Delphes cannot be executed within the same analysis."$NORMAL\n'
-            )
-            file.write("    return 1\n")
-            file.write("fi\n\n")
-
-            file.write('if [[ $WITH_FASTJET -eq "1" ]]\n')
-            file.write("then\n")
-            file.write('    export FASTJET_FLAG="-DMA5_FASTJET_MODE"\n')
-            file.write(
-                '    echo -e $BLUE"   * The SFS-FastJet mode has been activated."$NORMAL\n'
-            )
-            file.write("fi\n\n")
-            file.write('if [[ $WITH_DELPHES -eq "1" ]]\n')
-            file.write("then\n")
-            inc_pths = []
-            if len(archi_info.delphes_inc_paths) != 0:
-                inc_pths = archi_info.delphes_inc_paths
-                inc_pths.append(
-                    next((p for p in inc_pths if Path(p).stem == "delphes"), "")
-                    + "/modules"
-                )
-                file.write("    export ROOT_INCLUDE_PATH=" + ":".join(inc_pths) + "\n")
-                file.write("    export FASTJET_FLAG=\n")
-                file.write(
-                    '    echo -e $BLUE"   * Delphes mode has been activated."$NORMAL\n'
-                )
-            else:
-                file.write('    echo -e $RED"   * Delphes is not available."$NORMAL\n')
-            file.write("fi\n\n")
-
+            file.write("export ROOT_INCLUDE_PATH=" + ":".join(delphes_inc_pths) + "\n")
+            file.write('export FASTJET_FLAG="-DMA5_FASTJET_MODE"\n')
         else:
             file.write('set GREEN  = "\\033[1;32m"\n')
             file.write('set RED    = "\\033[1;31m"\n')
@@ -171,6 +106,7 @@ class SetupWriter:
             file.write('set YELLOW = "\\033[1;33m"\n')
             file.write('set CYAN   = "\\033[1;36m"\n')
             file.write('set NORMAL = "\\033[0;39m"\n')
+            file.write("setenv ROOT_INCLUDE_PATH " + ":".join(delphes_inc_pths) + "\n")
             file.write('setenv FASTJET_FLAG "-DMA5_FASTJET_MODE"\n')
         file.write("\n")
 
