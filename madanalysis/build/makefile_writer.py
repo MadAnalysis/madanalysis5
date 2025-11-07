@@ -423,6 +423,7 @@ class MakefileWriter:
 
         # - fastjet
         if options.has_fastjet_ma5lib or options.has_fastjet_lib:
+            os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
             libs = []
             if options.has_fastjet_ma5lib:
                 libs.extend(["-lfastjet_for_ma5"])

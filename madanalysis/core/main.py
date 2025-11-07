@@ -674,6 +674,7 @@ class Main:
         # Fastjet
         if self.archi_info.has_fastjet:
             os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
+            self.logger.debug("setting environment: FASTJET_FLAG=%s", os.environ["FASTJET_FLAG"])
             libraries.append(['FastJet', 'interface to FastJet', 'fastjet',
                               self.archi_info.ma5dir + '/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so',
                               self.archi_info.ma5dir + '/tools/SampleAnalyzer/Interfaces', False])

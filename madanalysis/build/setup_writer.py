@@ -96,8 +96,12 @@ class SetupWriter:
             file.write('YELLOW="\\\\033[1;33m"\n')
             file.write('CYAN="\\\\033[1;36m"\n')
             file.write('NORMAL="\\\\033[0;39m"\n\n')
-            file.write("export ROOT_INCLUDE_PATH=" + ":".join(delphes_inc_pths) + "\n")
-            file.write('export FASTJET_FLAG="-DMA5_FASTJET_MODE"\n')
+            if archi_info.has_delphes:
+                file.write(
+                    "export ROOT_INCLUDE_PATH=" + ":".join(delphes_inc_pths) + "\n"
+                )
+            if archi_info.has_fastjet:
+                file.write('export FASTJET_FLAG="-DMA5_FASTJET_MODE"\n')
         else:
             file.write('set GREEN  = "\\033[1;32m"\n')
             file.write('set RED    = "\\033[1;31m"\n')
@@ -106,8 +110,12 @@ class SetupWriter:
             file.write('set YELLOW = "\\033[1;33m"\n')
             file.write('set CYAN   = "\\033[1;36m"\n')
             file.write('set NORMAL = "\\033[0;39m"\n')
-            file.write("setenv ROOT_INCLUDE_PATH " + ":".join(delphes_inc_pths) + "\n")
-            file.write('setenv FASTJET_FLAG "-DMA5_FASTJET_MODE"\n')
+            if archi_info.has_delphes:
+                file.write(
+                    "setenv ROOT_INCLUDE_PATH " + ":".join(delphes_inc_pths) + "\n"
+                )
+            if archi_info.has_fastjet:
+                file.write('setenv FASTJET_FLAG "-DMA5_FASTJET_MODE"\n')
         file.write("\n")
 
         # Treating ma5dir
