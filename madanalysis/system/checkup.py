@@ -368,6 +368,8 @@ class CheckUp:
             self.archi_info, self.user_info, self.session_info, self.script, self.debug
         )
 
+        if not self.checker.Execute("root"):
+            return False
         if not self.checker.Execute("zlib"):
             return False
         if not self.checker.Execute("fastjet"):
@@ -375,8 +377,6 @@ class CheckUp:
         if not self.checker.Execute("fastjet-contrib"):
             return False
         if not self.checker.Execute("HEPTopTagger"):
-            return False
-        if not self.checker.Execute("root"):
             return False
 
         self.archi_info.has_delphes = checker2.checkDelphes()
