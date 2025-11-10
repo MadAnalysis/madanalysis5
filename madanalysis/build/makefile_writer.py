@@ -423,12 +423,12 @@ class MakefileWriter:
 
         # - fastjet
         if options.has_fastjet_ma5lib or options.has_fastjet_lib:
+            os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
             libs = []
             if options.has_fastjet_ma5lib:
                 libs.extend(["-lfastjet_for_ma5"])
                 file.write("LIBFLAGS += " + " ".join(libs) + "\n")
             if options.has_fastjet_lib:
-                os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
                 file.write(
                     "LIBFLAGS += $(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config --libs --plugins)\n"
                 )

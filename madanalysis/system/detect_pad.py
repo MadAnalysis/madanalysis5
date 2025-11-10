@@ -103,7 +103,7 @@ class DetectPAD:
         if self.sfs:
             # User setting
             if (
-                self.user_info.padsfs_build_path == None
+                self.user_info.padsfs_build_path is None
                 or not self.archi_info.has_fastjet
             ):
                 return DetectStatusType.UNFOUND, msg
@@ -115,7 +115,7 @@ class DetectPAD:
 
         else:
             # User setting
-            if self.user_info.pad_build_path == None:
+            if self.user_info.pad_build_path is None:
                 return DetectStatusType.UNFOUND, msg
 
             self.logger.debug("User setting: PAD build path is specified.")
@@ -138,7 +138,7 @@ class DetectPAD:
         self.build_file = filename
         self.build_path = folder
 
-        self.logger.debug("MadAnalysis5job program found in: " + self.build_path)
+        self.logger.debug("MadAnalysis5job program found in: %s", self.build_path)
 
         # Ok
         return DetectStatusType.FOUND, msg
