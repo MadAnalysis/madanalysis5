@@ -28,6 +28,7 @@ import logging
 import os
 import re
 import subprocess
+from pathlib import Path
 
 from shell_command import ShellCommand
 
@@ -139,10 +140,11 @@ class DetectFastjet:
 
         if fastjet_cxx is not None:
             if self.archi_info.has_root and self.archi_info.root_compiler != "":
-                if fastjet_cxx != self.archi_info.root_compiler:
-                    return (
-                        DetectStatusType.UNFOUND,
-                        "FastJet is compiled with a different compiler than MadAnalysis. Please rebuild FastJet through MadAnalysis.",
+                if Path(fastjet_cxx).stem != Path(self.archi_info.root_compiler).stem:
+                    log.warning(
+                        "FastJet is compiled with a different compiler than MadAnalysis."
+                        "This might be due to the ROOT installation which requires specific compiler."
+                        "Please rebuild FastJet through MadAnalysis."
                     )
 
         # Debug mode
@@ -208,13 +210,12 @@ class DetectFastjet:
 
         if fastjet_cxx is not None:
             if self.archi_info.has_root and self.archi_info.root_compiler != "":
-                if fastjet_cxx != self.archi_info.root_compiler:
-                    log.error(
+                if Path(fastjet_cxx).stem != Path(self.archi_info.root_compiler).stem:
+                    log.warning(
                         "FastJet is compiled with a different compiler than MadAnalysis."
                         "This might be due to the ROOT installation which requires specific compiler."
                         "Please rebuild FastJet through MadAnalysis."
                     )
-                    return False
         else:
             log.warning("Unable to validate FastJet compilation.")
 
