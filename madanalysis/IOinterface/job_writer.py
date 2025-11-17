@@ -679,8 +679,8 @@ class JobWriter(object):
         # Add default hadrons and invisible particles for RECO and HADRON mode
         # The invisible container may also be changed when runnign the code in HADRON mode.
         if self.main.mode in [MA5RunningType.RECO, MA5RunningType.HADRON]:
-            file.write('\n  // Initializing PhysicsService for MC\n')
-            file.write('  PHYSICS->mcConfig().Reset();\n')
+            file.write("\n  // Initializing PhysicsService for MC\n")
+            file.write("  PHYSICS->mcConfig().Reset();\n")
             file.write('  // definition of the multiparticle "hadronic"\n')
             file.write("  manager.AddDefaultHadronic();\n")
             file.write('  // definition of the multiparticle "invisible"\n')
@@ -736,7 +736,7 @@ class JobWriter(object):
             file.write("      fastsim1->Execute(mySample,myEvent);\n")
         elif self.main.fastsim.package == "delphesMA5tune":
             file.write("      fastsim1->Execute(mySample,myEvent);\n")
-        file.write('      manager.PrepareForExecution(mySample, myEvent);\n')
+        file.write("      manager.PrepareForExecution(mySample, myEvent);\n")
         file.write("      if (!analyzer1->Execute(mySample,myEvent)) continue;\n")
         if self.output != "" and not self.output.lower().endswith("root"):
             file.write("      writer1->WriteEvent(myEvent,mySample);\n")
