@@ -21,7 +21,6 @@
 #
 ################################################################################
 
-
 from __future__ import absolute_import
 
 import copy
@@ -55,10 +54,10 @@ from madanalysis.misc.histfactory_reader import (
 )
 from madanalysis.misc.theoretical_error_setup import error_dict_setup
 from madanalysis.misc.utils import (
+    clean_region_name,
     edit_recasting_card,
     get_runs,
     read_xsec,
-    clean_region_name,
 )
 
 # pylint: disable=logging-fstring-interpolation,import-outside-toplevel
@@ -135,10 +134,12 @@ class RunRecast:
                 return False
 
             ## Cleaning
-            if not FolderWriter.RemoveDirectory(
-                os.path.normpath(self.dirname + "_RecastRun")
-            ):
-                return False
+            pth = Path(os.path.normpath(self.dirname + "_RecastRun"))
+            if not self.main.developer_mode:
+                if not FolderWriter.RemoveDirectory(str(pth)):
+                    log.error("Cannot remove directory: %s", str(pth))
+            else:
+                log.debug("Analysis kept in %s folder.", str(pth))
 
         # exit
         self.main.forced = self.forced
@@ -555,9 +556,6 @@ class RunRecast:
                             outfile.write(
                                 "      writer1->WriteEvent(myEvent,mySample);\n"
                             )
-                        outfile.write(
-                            "      manager.PrepareForExecution(mySample, myEvent);\n"
-                        )
                         for analysis in analysislist:
                             outfile.write(
                                 f"      if (!analyzer_{analysis}->Execute(mySample,myEvent)) continue;\n"
@@ -1850,7 +1848,7 @@ class RunRecast:
             ["TH_up", "TH_dn", "TH   error"],
         ]
         for reg in regions:
-            eff = max(regiondata[reg]["Nf"] / regiondata[reg]["N0"], 0.)
+            eff = max(regiondata[reg]["Nf"] / regiondata[reg]["N0"], 0.0)
             stat = round(
                 math.sqrt(eff * (1 - eff) / (abs(regiondata[reg]["N0"]) * lumi)), 10
             )
