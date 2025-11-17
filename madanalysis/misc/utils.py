@@ -52,3 +52,19 @@ def read_xsec(path: str) -> float:
             .split()
         )
     return float(smp_info[0])
+
+
+def clean_region_name(mystr):
+    newstr = mystr.replace("/", "_slash_")
+    newstr = newstr.replace("->", "_to_")
+    newstr = newstr.replace(">=", "_greater_than_or_equal_to_")
+    newstr = newstr.replace(">", "_greater_than_")
+    newstr = newstr.replace("<=", "_smaller_than_or_equal_to_")
+    newstr = newstr.replace("<", "_smaller_than_")
+    newstr = newstr.replace(" ", "_")
+    newstr = newstr.replace(",", "_")
+    newstr = newstr.replace("+", "_")
+    newstr = newstr.replace("-", "_")
+    newstr = newstr.replace("(", "_lp_")
+    newstr = newstr.replace(")", "_rp_")
+    return newstr

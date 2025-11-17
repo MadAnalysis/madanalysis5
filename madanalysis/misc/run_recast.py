@@ -54,7 +54,12 @@ from madanalysis.misc.histfactory_reader import (
     construct_histfactory_dictionary,
 )
 from madanalysis.misc.theoretical_error_setup import error_dict_setup
-from madanalysis.misc.utils import edit_recasting_card, get_runs, read_xsec
+from madanalysis.misc.utils import (
+    edit_recasting_card,
+    get_runs,
+    read_xsec,
+    clean_region_name,
+)
 
 # pylint: disable=logging-fstring-interpolation,import-outside-toplevel
 
@@ -358,7 +363,9 @@ class RunRecast:
         if event_path is not None:
             root_path = event_path / "DelphesEvents.root"
             if root_path.is_file():
-                main_event_path = Path(self.dirname) / f"Output/SAF/{dataset.name}/RecoEvents"
+                main_event_path = (
+                    Path(self.dirname) / f"Output/SAF/{dataset.name}/RecoEvents"
+                )
                 main_event_path.mkdir(parents=True, exist_ok=True)
                 moved_smp = (
                     main_event_path
@@ -1829,7 +1836,7 @@ class RunRecast:
             if self.pyhf_config != {}:
                 iterator = copy.deepcopy(list(self.pyhf_config.items()))
                 for n, (likelihood_profile, config) in enumerate(iterator):
-                    if regiondata.get("pyhf", {}).get(likelihood_profile, False) == False:
+                    if not regiondata.get("pyhf", {}).get(likelihood_profile, False):
                         continue
                     signal = HF_Signal(config, regiondata, xsection=1.0)
                     name = summary.name.split(".dat")[0]
@@ -1843,9 +1850,7 @@ class RunRecast:
             ["TH_up", "TH_dn", "TH   error"],
         ]
         for reg in regions:
-            eff = regiondata[reg]["Nf"] / regiondata[reg]["N0"]
-            if eff < 0:
-                eff = 0
+            eff = max(regiondata[reg]["Nf"] / regiondata[reg]["N0"], 0.)
             stat = round(
                 math.sqrt(eff * (1 - eff) / (abs(regiondata[reg]["N0"]) * lumi)), 10
             )
@@ -1855,16 +1860,16 @@ class RunRecast:
                     syst.append(round(0.5 * (unc[0] + unc[1]) * eff, 8))
             else:
                 syst = [0]
-            myeff = "%.7f" % eff
-            mystat = "%.7f" % stat
-            mysyst = ["%.7f" % x for x in syst]
+            myeff = f"{eff:.7f}"
+            mystat = f"{stat:.7f}"
+            mysyst = [f"{x:.7f}" for x in syst]
             myxsexp = regiondata[reg]["s95exp"]
             if "s95obs" in list(regiondata[reg].keys()):
                 myxsobs = regiondata[reg]["s95obs"]
             else:
                 myxsobs = "-1"
             if not xsflag:
-                mycls = "%.10f" % regiondata[reg]["CLs"]
+                mycls = f"{regiondata[reg]['CLs']:.7f}"
                 summary.write(
                     analysis.ljust(30, " ")
                     + reg.ljust(60, " ")
@@ -1893,9 +1898,9 @@ class RunRecast:
                             "".ljust(90, " ")
                             + error_set[2]
                             + " band:         ["
-                            + ("%.4f" % min(band))
+                            + (f"{min(band):.4f}")
                             + ", "
-                            + ("%.4f" % max(band))
+                            + (f"{max(band):.4f}")
                             + "]\n"
                         )
                 for i, sys in enumerate(self.main.recasting.systematics):
@@ -2093,19 +2098,3 @@ class RunRecast:
                     + "".ljust(15, " ")
                 )
                 summary.write("\n")
-
-
-def clean_region_name(mystr):
-    newstr = mystr.replace("/", "_slash_")
-    newstr = newstr.replace("->", "_to_")
-    newstr = newstr.replace(">=", "_greater_than_or_equal_to_")
-    newstr = newstr.replace(">", "_greater_than_")
-    newstr = newstr.replace("<=", "_smaller_than_or_equal_to_")
-    newstr = newstr.replace("<", "_smaller_than_")
-    newstr = newstr.replace(" ", "_")
-    newstr = newstr.replace(",", "_")
-    newstr = newstr.replace("+", "_")
-    newstr = newstr.replace("-", "_")
-    newstr = newstr.replace("(", "_lp_")
-    newstr = newstr.replace(")", "_rp_")
-    return newstr
