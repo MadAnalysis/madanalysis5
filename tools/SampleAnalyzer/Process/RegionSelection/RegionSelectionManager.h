@@ -113,6 +113,10 @@ namespace MA5
         /// @param weight weight index and value
         void SetCurrentEventWeight(WeightCollection &weight) { weight_ = WeightCollection(weight); }
 
+        /// @brief Set current event weight with a weight map
+        /// @param weight weight index and value
+        void SetCurrentEventWeight(const WeightCollection &weight) { weight_ = WeightCollection(weight); }
+
         /// @brief Set a specific weight to a region different than the others
         /// @param name region name
         /// @param weight weight collection object
