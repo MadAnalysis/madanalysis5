@@ -38,7 +38,6 @@
 
 namespace MA5
 {
-
     class WeightCollection
     {
 
@@ -161,11 +160,43 @@ namespace MA5
 
         /// @brief multiply operator
         /// @param multiple
-        WeightCollection &operator*=(const MAfloat64 &multiple)
+        WeightCollection &operator*=(const MAdouble64 &multiple)
         {
             for (auto &x : weights_)
                 x *= multiple;
             return *this;
+        }
+
+        WeightCollection operator*(const MAdouble64 &multiple) const
+        {
+            WeightCollection result(*this); // copy
+            for (auto &x : result.weights_)
+                x *= multiple;
+            return result;
+        }
+
+        WeightCollection operator/(const MAdouble64 &multiple) const
+        {
+            WeightCollection result(*this); // copy
+            for (auto &x : result.weights_)
+                x /= multiple;
+            return result;
+        }
+
+        WeightCollection operator+(const MAdouble64 &multiple) const
+        {
+            WeightCollection result(*this); // copy
+            for (auto &x : result.weights_)
+                x += multiple;
+            return result;
+        }
+
+        WeightCollection operator-(const MAdouble64 &multiple) const
+        {
+            WeightCollection result(*this); // copy
+            for (auto &x : result.weights_)
+                x -= multiple;
+            return result;
         }
 
         /// @brief add operator
@@ -227,6 +258,25 @@ namespace MA5
         }
     };
 
+    inline WeightCollection operator*(const MAdouble64 &multiple, const WeightCollection &w)
+    {
+        return w * multiple;
+    }
+
+    inline WeightCollection operator/(const MAdouble64 &multiple, const WeightCollection &w)
+    {
+        return w / multiple;
+    }
+
+    inline WeightCollection operator+(const MAdouble64 &multiple, const WeightCollection &w)
+    {
+        return w + multiple;
+    }
+
+    inline WeightCollection operator-(const MAdouble64 &multiple, const WeightCollection &w)
+    {
+        return w - multiple;
+    }
 }
 
 #endif
