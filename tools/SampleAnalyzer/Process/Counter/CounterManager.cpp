@@ -39,10 +39,10 @@ void CounterManager::Write_TextFormat(SAFWriter &output) const
     for (auto &event : initial_.nentries_)
     {
         output.GetStream()->width(15);
-        *output.GetStream() << std::left << std::scientific << event.second.positive;
+        *output.GetStream() << std::left << std::scientific << event.positive;
         *output.GetStream() << " ";
         output.GetStream()->width(15);
-        *output.GetStream() << std::left << std::scientific << event.second.negative;
+        *output.GetStream() << std::left << std::scientific << event.negative;
     }
     *output.GetStream() << " # nentries" << std::endl;
 
@@ -50,10 +50,10 @@ void CounterManager::Write_TextFormat(SAFWriter &output) const
     for (auto &event : initial_.sumweights_)
     {
         output.GetStream()->width(15);
-        *output.GetStream() << std::left << std::scientific << event.second.positive;
+        *output.GetStream() << std::left << std::scientific << event.positive;
         *output.GetStream() << " ";
         output.GetStream()->width(15);
-        *output.GetStream() << std::left << std::scientific << event.second.negative;
+        *output.GetStream() << std::left << std::scientific << event.negative;
     }
     *output.GetStream() << " # sum of weights" << std::endl;
 
@@ -61,10 +61,10 @@ void CounterManager::Write_TextFormat(SAFWriter &output) const
     for (auto &event : initial_.sumweights2_)
     {
         output.GetStream()->width(15);
-        *output.GetStream() << std::left << std::scientific << event.second.positive;
+        *output.GetStream() << std::left << std::scientific << event.positive;
         *output.GetStream() << " ";
         output.GetStream()->width(15);
-        *output.GetStream() << std::left << std::scientific << event.second.negative;
+        *output.GetStream() << std::left << std::scientific << event.negative;
     }
     *output.GetStream() << " # sum of weights^2" << std::endl;
 
@@ -91,10 +91,10 @@ void CounterManager::Write_TextFormat(SAFWriter &output) const
         for (auto &event : counters_[i].nentries_)
         {
             output.GetStream()->width(15);
-            *output.GetStream() << std::left << std::scientific << event.second.positive;
+            *output.GetStream() << std::left << std::scientific << event.positive;
             *output.GetStream() << " ";
             output.GetStream()->width(15);
-            *output.GetStream() << std::left << std::scientific << event.second.negative;
+            *output.GetStream() << std::left << std::scientific << event.negative;
         }
         *output.GetStream() << " # nentries" << std::endl;
 
@@ -102,10 +102,10 @@ void CounterManager::Write_TextFormat(SAFWriter &output) const
         for (auto &event : counters_[i].sumweights_)
         {
             output.GetStream()->width(15);
-            *output.GetStream() << std::left << std::scientific << event.second.positive;
+            *output.GetStream() << std::left << std::scientific << event.positive;
             *output.GetStream() << " ";
             output.GetStream()->width(15);
-            *output.GetStream() << std::left << std::scientific << event.second.negative;
+            *output.GetStream() << std::left << std::scientific << event.negative;
         }
         *output.GetStream() << " # sum of weights" << std::endl;
 
@@ -113,10 +113,10 @@ void CounterManager::Write_TextFormat(SAFWriter &output) const
         for (auto &event : counters_[i].sumweights2_)
         {
             output.GetStream()->width(15);
-            *output.GetStream() << std::left << std::scientific << event.second.positive;
+            *output.GetStream() << std::left << std::scientific << event.positive;
             *output.GetStream() << " ";
             output.GetStream()->width(15);
-            *output.GetStream() << std::left << std::scientific << event.second.negative;
+            *output.GetStream() << std::left << std::scientific << event.negative;
         }
         *output.GetStream() << " # sum of weights^2" << std::endl;
 

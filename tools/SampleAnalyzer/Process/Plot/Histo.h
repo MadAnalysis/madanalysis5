@@ -49,9 +49,9 @@ namespace MA5
         /// different PDF and their corresponding positive and negative weights.
 
         /// Histogram arrays
-        std::vector<std::map<MAint32, WEIGHTS>> histo_;
-        std::map<MAint32, WEIGHTS> underflow_;
-        std::map<MAint32, WEIGHTS> overflow_;
+        std::vector<std::vector<WEIGHTS>> histo_;
+        std::vector<WEIGHTS> underflow_;
+        std::vector<WEIGHTS> overflow_;
 
         /// Histogram description
         MAuint32 nbins_;
@@ -60,16 +60,16 @@ namespace MA5
         MAfloat64 step_;
 
         /// Sum of event-weights over entries
-        std::map<MAint32, WEIGHTS> sum_w_;
+        std::vector<WEIGHTS> sum_w_;
 
         /// Sum of squared weights
-        std::map<MAint32, WEIGHTS> sum_ww_;
+        std::vector<WEIGHTS> sum_ww_;
 
         /// Sum of value * weight
-        std::map<MAint32, WEIGHTS> sum_xw_;
+        std::vector<WEIGHTS> sum_xw_;
 
         /// Sum of value * value * weight
-        std::map<MAint32, WEIGHTS> sum_xxw_;
+        std::vector<WEIGHTS> sum_xxw_;
 
         /// RegionSelections attached to the histo
         std::vector<RegionSelection *> regions_;

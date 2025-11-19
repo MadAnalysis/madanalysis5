@@ -92,63 +92,63 @@ void Histo::Write_TextFormatBody(std::ostream *output)
     for (auto &event : nevents_)
     {
         output->width(15);
-        *output << std::fixed << event.second.positive;
+        *output << std::fixed << event.positive;
         output->width(15);
-        *output << std::fixed << event.second.negative;
+        *output << std::fixed << event.negative;
     }
     *output << " # nevents" << std::endl;
     *output << "      ";
     for (auto &event : nevents_w_)
     {
         output->width(15);
-        *output << std::scientific << event.second.positive;
+        *output << std::scientific << event.positive;
         output->width(15);
-        *output << std::scientific << event.second.negative;
+        *output << std::scientific << event.negative;
     }
     *output << " # sum of event-weights over events" << std::endl;
     *output << "      ";
     for (auto &event : nentries_)
     {
         output->width(15);
-        *output << std::fixed << event.second.positive;
+        *output << std::fixed << event.positive;
         output->width(15);
-        *output << std::fixed << event.second.negative;
+        *output << std::fixed << event.negative;
     }
     *output << " # nentries" << std::endl;
     *output << "      ";
     for (auto &event : sum_w_)
     {
         output->width(15);
-        *output << std::scientific << event.second.positive;
+        *output << std::scientific << event.positive;
         output->width(15);
-        *output << std::scientific << event.second.negative;
+        *output << std::scientific << event.negative;
     }
     *output << " # sum of event-weights over entries" << std::endl;
     *output << "      ";
     for (auto &event : sum_ww_)
     {
         output->width(15);
-        *output << std::scientific << event.second.positive;
+        *output << std::scientific << event.positive;
         output->width(15);
-        *output << std::scientific << event.second.negative;
+        *output << std::scientific << event.negative;
     }
     *output << " # sum weights^2" << std::endl;
     *output << "      ";
     for (auto &event : sum_xw_)
     {
         output->width(15);
-        *output << std::scientific << event.second.positive;
+        *output << std::scientific << event.positive;
         output->width(15);
-        *output << std::scientific << event.second.negative;
+        *output << std::scientific << event.negative;
     }
     *output << " # sum value*weight" << std::endl;
     *output << "      ";
     for (auto &event : sum_xxw_)
     {
         output->width(15);
-        *output << std::scientific << event.second.positive;
+        *output << std::scientific << event.positive;
         output->width(15);
-        *output << std::scientific << event.second.negative;
+        *output << std::scientific << event.negative;
     }
     *output << " # sum value^2*weight" << std::endl;
     *output << "  </Statistics>" << std::endl;
@@ -159,9 +159,9 @@ void Histo::Write_TextFormatBody(std::ostream *output)
     for (auto &event : underflow_)
     {
         output->width(15);
-        *output << std::scientific << event.second.positive;
+        *output << std::scientific << event.positive;
         output->width(15);
-        *output << std::scientific << event.second.negative;
+        *output << std::scientific << event.negative;
     }
     *output << " # underflow" << std::endl;
     for (MAuint32 ibin = 0; ibin < histo_.size(); ibin++)
@@ -170,9 +170,9 @@ void Histo::Write_TextFormatBody(std::ostream *output)
         for (auto &bin : histo_[ibin])
         {
             output->width(15);
-            *output << std::scientific << bin.second.positive;
+            *output << std::scientific << bin.positive;
             output->width(15);
-            *output << std::scientific << bin.second.negative;
+            *output << std::scientific << bin.negative;
         }
         if (ibin < 2 || ibin >= (histo_.size() - 2))
             *output << " # bin " << ibin + 1 << " / " << histo_.size();
@@ -182,9 +182,9 @@ void Histo::Write_TextFormatBody(std::ostream *output)
     for (auto &event : overflow_)
     {
         output->width(15);
-        *output << std::scientific << event.second.positive;
+        *output << std::scientific << event.positive;
         output->width(15);
-        *output << std::scientific << event.second.negative;
+        *output << std::scientific << event.negative;
     }
     *output << " # overflow" << std::endl;
     *output << "  </Data>" << std::endl;
@@ -194,22 +194,15 @@ void Histo::Write_TextFormatBody(std::ostream *output)
 /// @param weights weight collection
 void Histo::_initialize(const WeightCollection &weights)
 {
-    std::map<MAint32, WEIGHTS> current;
-    for (auto &w : weights.GetWeights())
-    {
-        MAint32 idx = w.first;
-        underflow_[idx] = WEIGHTS();
-        overflow_[idx] = WEIGHTS();
-        sum_w_[idx] = WEIGHTS();
-        sum_ww_[idx] = WEIGHTS();
-        sum_xw_[idx] = WEIGHTS();
-        sum_xxw_[idx] = WEIGHTS();
-        for (MAuint32 idb = 0; idb < nbins_; idb++)
-        {
-            histo_[idb][idx] = WEIGHTS();
-            histo_[idb][idx] = WEIGHTS();
-        }
-    }
+    MAuint32 n = weights.size();
+    underflow_.resize(n);
+    overflow_.resize(n);
+    sum_w_.resize(n);
+    sum_ww_.resize(n);
+    sum_xw_.resize(n);
+    sum_xxw_.resize(n);
+    for (MAuint32 idb = 0; idb < nbins_; idb++)
+        histo_[idb].resize(n);
 }
 
 /// Filling histogram
@@ -228,10 +221,9 @@ void Histo::Fill(MAfloat64 value, const WeightCollection &weights)
         MANAGE_EXCEPTION(e);
     }
 
-    for (auto &w : weights.GetWeights())
+    for (MAuint32 idx = 0; idx < weights.size(); idx++)
     {
-        MAdouble64 weight = w.second;
-        MAint32 idx = w.first;
+        MAfloat64 weight = weights[idx];
         // Positive weight
         if (weight >= 0)
         {

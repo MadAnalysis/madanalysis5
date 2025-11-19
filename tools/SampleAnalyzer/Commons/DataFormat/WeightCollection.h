@@ -46,7 +46,7 @@ namespace MA5
         //                        data members
         // -------------------------------------------------------------
     private:
-        std::map<MAuint32, MAfloat64> weights_;
+        std::vector<MAfloat64> weights_;
         static const MAfloat64 emptyvalue_;
 
         // -------------------------------------------------------------
@@ -60,18 +60,13 @@ namespace MA5
         WeightCollection(const WeightCollection &rhs)
         {
             weights_.clear();
-            for (auto &id_weights : rhs.weights_)
-                Add(id_weights.first, id_weights.second);
+            weights_ = rhs.weights_;
         }
 
         /// @brief Initialise weights with a certain size and default value
         /// @param size number of weights
         /// @param default_value default value for each weight
-        WeightCollection(const MAuint32 &size, MAdouble64 default_value = 0.0)
-        {
-            for (MAuint32 i = 0; i < size; i++)
-                weights_[i] = default_value;
-        }
+        WeightCollection(const MAuint32 &size, MAdouble64 default_value = 0.0) : weights_(size, default_value) {}
 
         /// Destructor
         ~WeightCollection() {}
@@ -86,48 +81,19 @@ namespace MA5
         /// Size
         MAuint32 size() { return weights_.size(); }
 
+        void resize(MAuint32 n) { weights_.resize(n); }
+
         /// Add a new weight group
         MAbool Add(MAuint32 id, MAfloat64 value)
         {
-            // Try to add the item
-            std::pair<std::map<MAuint32, MAfloat64>::iterator, bool> ret;
-            ret = weights_.insert(std::pair<MAuint32, MAfloat64>(id, value));
-
-            // Is it added?
-            try
+            if (id < size())
             {
-                if (!ret.second)
-                {
-                    std::stringstream str;
-                    str << id;
-                    std::string idname;
-                    str >> idname;
-                    if (idname != "0")
-                        throw EXCEPTION_WARNING("The Weight '" + idname +
-                                                    "' is defined twice. Redundant values are skipped.",
-                                                "", 0);
-                }
+                weights_.at(id) = value;
+                return true;
             }
-            catch (const std::exception &e)
+            else
             {
-                MANAGE_EXCEPTION(e);
-                return false;
-            }
-
-            return true;
-        }
-
-        /// Get all the Weight Collection
-        const std::map<MAuint32, MAfloat64> &GetWeights() const { return weights_; }
-
-        /// Get a weight
-        const MAfloat64 &Get(MAuint32 id) const
-        {
-            // Try to get the item
-            std::map<MAuint32, MAfloat64>::const_iterator it = weights_.find(id);
-            try
-            {
-                if (it == weights_.end())
+                try
                 {
                     std::stringstream str;
                     str << id;
@@ -137,14 +103,41 @@ namespace MA5
                                               "' is not defined. A null value is returned.",
                                           "", 0);
                 }
+                catch (const std::exception &e)
+                {
+                    MANAGE_EXCEPTION(e);
+                    return false;
+                }
+            }
+        }
+
+        /// Get all the Weight Collection
+        const std::vector<MAfloat64> &GetWeights() const { return weights_; }
+
+        /// Get all the Weights
+        const std::vector<MAfloat64> &values() const { return weights_; }
+
+        /// Get a weight
+        const MAfloat64 &Get(MAuint32 id) const
+        {
+            if (id >= 0 && id < size())
+                return weights_[id];
+
+            try
+            {
+                std::stringstream str;
+                str << id;
+                std::string idname;
+                str >> idname;
+                throw EXCEPTION_ERROR("The Weight '" + idname +
+                                          "' is not defined. A null value is returned.",
+                                      "", 0);
             }
             catch (const std::exception &e)
             {
                 MANAGE_EXCEPTION(e);
                 return emptyvalue_;
             }
-
-            return it->second;
         }
 
         /// Get a weight
@@ -153,22 +146,9 @@ namespace MA5
         /// @brief Print weight information
         void Print() const
         {
-            if (weights_.empty())
-                return;
-
-            // Loop over weights for getting max
-            MAuint32 maxi = 0;
-            for (std::map<MAuint32, MAfloat64>::const_iterator
-                     it = weights_.begin();
-                 it != weights_.end(); it++)
-            {
-                if (it->first > maxi)
-                    maxi = it->first;
-            }
-
-            // Loop over weights
-            for (auto &w : weights_)
-                INFO << "ID=" << w.first << " : " << w.second << endmsg;
+            if (!weights_.empty())
+                for (MAuint32 i = 0; i < size(); i++)
+                    INFO << "ID=" << i << " : " << weights_[i] << endmsg;
         }
 
         /// @brief add weight to specific location
@@ -176,66 +156,73 @@ namespace MA5
         /// @param weight weight value
         void add_weight_to(MAint32 idx, MAdouble64 weight) { weights_[idx] += weight; }
 
+        // explicit setter from same-typed vector (if you need it)
+        void SetWeights(const std::vector<MAfloat64> &v) { weights_ = v; }
+
         /// @brief multiply operator
         /// @param multiple
-        WeightCollection &operator*=(const MAfloat64 multiple)
+        WeightCollection &operator*=(const MAfloat64 &multiple)
         {
-            for (auto &id_value : weights_)
-                id_value.second *= multiple;
+            for (auto &x : weights_)
+                x *= multiple;
             return *this;
         }
 
         /// @brief add operator
         /// @param input
-        WeightCollection &operator+=(const MAfloat64 input)
+        WeightCollection &operator+=(const MAfloat64 &input)
         {
-            for (auto &id_value : weights_)
-                id_value.second += input;
+            for (auto &x : weights_)
+                x += input;
             return *this;
         }
 
         /// @brief add operator
         /// @param input
-        WeightCollection &operator+=(const WeightCollection input)
+        WeightCollection &operator+=(const std::vector<MAdouble64> &input)
         {
-            for (auto &id_value : weights_)
-                id_value.second += input.Get(id_value.first);
+            if (size() != input.size())
+                throw std::invalid_argument("Size mismatch in WeightCollection::operator+= (weights_ and input must have the same size)");
+            std::transform(weights_.begin(), weights_.end(), input.begin(), weights_.begin(),
+                           [](MAdouble64 a, MAdouble64 b)
+                           { return a + b; });
             return *this;
         }
 
         /// @brief subtract operator
         /// @param input
-        WeightCollection &operator-=(const MAfloat64 input)
+        WeightCollection &operator-=(const MAfloat64 &input)
         {
-            for (auto &id_value : weights_)
-                id_value.second -= input;
+            for (auto &x : weights_)
+                x -= input;
             return *this;
         }
 
         /// @brief divide operator
         /// @param input
-        WeightCollection &operator/=(const MAfloat64 input)
+        WeightCollection &operator/=(const MAfloat64 &input)
         {
-            for (auto &id_value : weights_)
-                id_value.second /= input;
+            for (auto &x : weights_)
+                x /= input;
             return *this;
         }
 
         /// @brief assignment operator
         /// @param input
-        WeightCollection &operator=(const MAfloat64 input)
+        WeightCollection &operator=(const MAfloat64 &input)
         {
-            for (auto &id_value : weights_)
-                id_value.second = input;
+            for (auto &x : weights_)
+                x = input;
             return *this;
         }
 
         /// @brief assignment operator
         /// @param input
-        WeightCollection &operator=(const WeightCollection input)
+        WeightCollection &operator=(const WeightCollection &w)
         {
-            for (auto &id_value : weights_)
-                id_value.second = input.Get(id_value.first);
+            if (this == &w)
+                return *this;
+            weights_ = w.weights_;
             return *this;
         }
     };

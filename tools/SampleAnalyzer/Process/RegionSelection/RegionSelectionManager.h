@@ -142,9 +142,7 @@ namespace MA5
         /// @param EventWeight weight map
         void InitializeForNewEvent(const WeightCollection &EventWeight)
         {
-            weight_.Reset();
-            for (auto &w : EventWeight.GetWeights())
-                weight_.Add(w.first, w.second);
+            weight_.SetWeights(EventWeight.GetWeights());
             NumberOfSurvivingRegions_ = regions_.size();
             for (auto &reg : regions_)
                 reg->InitializeForNewEvent(EventWeight);

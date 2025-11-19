@@ -49,13 +49,13 @@ namespace MA5
         std::string name_;
 
         /// @brief number of events. entries object includes positive and negative accessors
-        std::map<MAint32, ENTRIES> nevents_;
+        std::vector<ENTRIES> nevents_;
 
         /// @brief Number of entries
-        std::map<MAint32, ENTRIES> nentries_;
+        std::vector<ENTRIES> nentries_;
 
         /// @brief Sum of event-weight over events
-        std::map<MAint32, WEIGHTS> nevents_w_;
+        std::vector<WEIGHTS> nevents_w_;
 
         /// Flag telling whether a given histo has already been modified for an event
         MAbool fresh_event_;
@@ -108,12 +108,10 @@ namespace MA5
         {
             if (!initialised_)
             {
-                for (auto &weight : multiweight.GetWeights())
-                {
-                    nevents_[weight.first] = ENTRIES();
-                    nentries_[weight.first] = ENTRIES();
-                    nevents_w_[weight.first] = WEIGHTS();
-                }
+                MAuint32 n = multiweight.size();
+                nevents_.resize(n);
+                nentries_.resize(n);
+                nevents_w_.resize(n);
                 _initialize(multiweight);
                 initialised_ = true;
             }
@@ -122,10 +120,9 @@ namespace MA5
         /// Increment number of events
         void IncrementNEvents(const WeightCollection &weights)
         {
-            for (auto &weight : weights.GetWeights())
+            for (MAuint32 idx = 0; idx < weights.size(); idx++)
             {
-                MAint32 idx = weight.first;
-                MAdouble64 w = weight.second;
+                MAdouble64 w = weights[idx];
                 if (w >= 0)
                 {
                     nevents_[idx].positive++;
@@ -137,11 +134,11 @@ namespace MA5
                     nevents_w_[idx].negative += std::fabs(w);
                 }
             }
-            SetFreshEvent(false, weights);
+            fresh_event_ = false;
         }
 
         /// Return Number of events
-        const std::map<MAint32, ENTRIES> &GetNEvents() { return nevents_; }
+        const std::vector<ENTRIES> &GetNEvents() { return nevents_; }
 
         // Return the name
         std::string GetName() { return name_; }

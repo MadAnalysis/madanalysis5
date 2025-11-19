@@ -51,15 +51,15 @@ namespace MA5
 
         /// number of times the function Increment is called
         /// first = positive weight ; second = negative weight
-        std::map<MAint32, ENTRIES> nentries_;
+        std::vector<ENTRIES> nentries_;
 
         /// sum of weights
         /// first = positive weight ; second = negative weight
-        std::map<MAint32, WEIGHTS> sumweights_;
+        std::vector<WEIGHTS> sumweights_;
 
         /// sum of squared weights
         /// first = positive weight ; second = negative weight
-        std::map<MAint32, WEIGHTS> sumweights2_;
+        std::vector<WEIGHTS> sumweights2_;
 
         // -------------------------------------------------------------
         //                       method members
@@ -88,27 +88,23 @@ namespace MA5
         void Initialise(const WeightCollection &multiweight)
         {
             Reset();
-            for (auto &weight : multiweight.GetWeights())
-            {
-
-                nentries_[weight.first] = ENTRIES();
-                sumweights_[weight.first] = WEIGHTS();
-                sumweights2_[weight.first] = WEIGHTS();
-            }
+            MAuint32 n = multiweight.GetWeights().size();
+            nentries_.resize(n);
+            sumweights_.resize(n);
+            sumweights2_.resize(n);
         }
 
-        std::map<MAint32, ENTRIES> nentries() { return nentries_; }
-        std::map<MAint32, WEIGHTS> sumW() { return sumweights_; }
-        std::map<MAint32, WEIGHTS> sumW2() { return sumweights2_; }
+        std::vector<ENTRIES> nentries() { return nentries_; }
+        std::vector<WEIGHTS> sumW() { return sumweights_; }
+        std::vector<WEIGHTS> sumW2() { return sumweights2_; }
 
         /// Increment the counter
         void Increment(const WeightCollection &multiweight)
         {
-            for (auto &weight : multiweight.GetWeights())
+            for (MAuint32 idx = 0; idx < multiweight.size(); idx++)
             {
-                MAint32 idx = weight.first;
-                MAdouble64 w = weight.second;
-                if (w >= 0)
+                MAfloat64 w = multiweight[idx];
+                if (w >= 0.0)
                 {
                     nentries_[idx].positive++;
                     sumweights_[idx].positive += w;

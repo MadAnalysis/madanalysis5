@@ -44,10 +44,10 @@ namespace MA5
         // -------------------------------------------------------------
     protected:
         /// Collection of observables
-        std::map<int, std::map<MAint32, WEIGHTS>> stack_;
+        std::map<int, std::vector<WEIGHTS>> stack_;
 
         /// Sum of event-weights over entries
-        std::map<MAint32, WEIGHTS> sum_w_;
+        std::vector<WEIGHTS> sum_w_;
 
         /// RegionSelections attached to the histo
         std::vector<RegionSelection *> regions_;
@@ -62,11 +62,7 @@ namespace MA5
         /// Destructor
         virtual ~HistoFrequency() {}
 
-        void _initialize(const WeightCollection &multiweight)
-        {
-            for (auto &weight : multiweight.GetWeights())
-                sum_w_[weight.first] = WEIGHTS();
-        }
+        void _initialize(const WeightCollection &multiweight) { sum_w_.resize(multiweight.size()); }
 
         /// Setting the linked regions
         void SetSelectionRegions(std::vector<RegionSelection *> myregions)

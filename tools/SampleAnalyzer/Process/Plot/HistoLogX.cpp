@@ -55,10 +55,9 @@ void HistoLogX::Fill(MAfloat64 value, const WeightCollection &weights)
         MANAGE_EXCEPTION(e);
     }
 
-    for (auto &w : weights.GetWeights())
+    for (MAuint32 idx = 0; idx < weights.size(); idx++)
     {
-        MAdouble64 weight = w.second;
-        MAint32 idx = w.first;
+        MAdouble64 weight = weights[idx];
         // Positive weight
         if (weight >= 0)
         {

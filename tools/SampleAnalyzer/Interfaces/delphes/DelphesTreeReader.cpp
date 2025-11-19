@@ -212,17 +212,16 @@ void DelphesTreeReader::FillEvent(EventFormat &myEvent, SampleFormat &mySample)
     {
         // Number of generated particles
         MAuint32 nweights = static_cast<MAuint32>(data_.Weight_->GetEntries());
-
+        std::vector<MAfloat64> w(nweights, 0.);
         for (MAuint32 i = 0; i < nweights; i++)
         {
             // getting the i-th particle
             LHEFWeight *weight = dynamic_cast<LHEFWeight *>(data_.Weight_->At(i));
             if (weight == 0)
                 continue;
-
-            // creating new particle and filling particle info
-            myEvent.mc()->weights().Add(weight->ID, weight->Weight);
+            w.at(weight->ID) = weight->Weight;
         }
+        myEvent.mc()->setWeights(w);
     }
 
     // ---------------------------------------------------------------------------

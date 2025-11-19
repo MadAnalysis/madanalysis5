@@ -178,6 +178,9 @@ namespace MA5
         /// Setting the event weight
         void setWeight(MAuint32 id, MAfloat64 value) { multiweights_.Add(id, value); }
 
+        /// Setting the event weight
+        void setWeights(std::vector<MAfloat64> &v) { multiweights_.SetWeights(v); }
+
         /// Setting the scale
         void setScale(MAfloat64 v) { scale_ = v; }
 

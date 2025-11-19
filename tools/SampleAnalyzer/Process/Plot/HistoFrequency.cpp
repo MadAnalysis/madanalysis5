@@ -29,10 +29,9 @@ using namespace MA5;
 /// Adding an entry for a given observable
 void HistoFrequency::Fill(const MAint32 &obs, WeightCollection &weights)
 {
-    for (auto &weight : weights.GetWeights())
+    for (MAuint32 idx = 0; idx < weights.size(); idx++)
     {
-        MAint32 idx = weight.first;
-        MAdouble64 w = weight.second;
+        MAdouble64 w = weights[idx];
         // Value not found
         if (stack_.find(obs) == stack_.end())
             stack_[obs][idx] = WEIGHTS();
@@ -90,36 +89,36 @@ void HistoFrequency::Write_TextFormat(std::ostream *output)
     for (auto &event : nevents_)
     {
         output->width(15);
-        *output << std::fixed << event.second.positive;
+        *output << std::fixed << event.positive;
         output->width(15);
-        *output << std::fixed << event.second.negative;
+        *output << std::fixed << event.negative;
     }
     *output << " # nevents" << std::endl;
     *output << "      ";
     for (auto &event : nevents_w_)
     {
         output->width(15);
-        *output << std::scientific << event.second.positive;
+        *output << std::scientific << event.positive;
         output->width(15);
-        *output << std::scientific << event.second.negative;
+        *output << std::scientific << event.negative;
     }
     *output << " # sum of event-weights over events" << std::endl;
     *output << "      ";
     for (auto &event : nentries_)
     {
         output->width(15);
-        *output << std::fixed << event.second.positive;
+        *output << std::fixed << event.positive;
         output->width(15);
-        *output << std::fixed << event.second.negative;
+        *output << std::fixed << event.negative;
     }
     *output << " # nentries" << std::endl;
     *output << "      ";
     for (auto &event : sum_w_)
     {
         output->width(15);
-        *output << std::scientific << event.second.positive;
+        *output << std::scientific << event.positive;
         output->width(15);
-        *output << std::scientific << event.second.negative;
+        *output << std::scientific << event.negative;
     }
     *output << " # sum of event-weights over entries" << std::endl;
     *output << "  </Statistics>" << std::endl;
@@ -136,9 +135,9 @@ void HistoFrequency::Write_TextFormat(std::ostream *output)
         for (auto &weight : it.second)
         {
             output->width(15);
-            *output << std::left << std::scientific << weight.second.positive;
+            *output << std::left << std::scientific << weight.positive;
             output->width(15);
-            *output << std::left << std::scientific << weight.second.negative;
+            *output << std::left << std::scientific << weight.negative;
         }
         if (i < 2 || i >= (stack_.size() - 2))
             *output << " # bin " << i + 1 << " / " << stack_.size();

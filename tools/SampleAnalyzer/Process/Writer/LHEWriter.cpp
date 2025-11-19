@@ -610,9 +610,9 @@ MAbool LHEWriter::WriteEvent(const EventFormat &myEvent,
     if (mySample.mc()->WeightNames().size() > 0)
     {
         *output_ << "  <rwgt>" << std::endl;
-        for (const auto &pair : myEvent.mc()->weights().GetWeights())
-            *output_ << "    <wgt id='" << pair.first << "'> " << std::setw(18) << std::right
-                     << FortranFormat_DoublePrecision(pair.second) << " </wgt>" << std::endl;
+        for (MAuint32 idx = 0; idx < myEvent.mc()->weights().size(); idx++)
+            *output_ << "    <wgt id='" << idx << "'> " << std::setw(18) << std::right
+                     << FortranFormat_DoublePrecision(myEvent.mc()->weights()[idx]) << " </wgt>" << std::endl;
         *output_ << "  </rwgt>" << std::endl;
     }
 

@@ -403,14 +403,14 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
       if (header1!=0)
       {
         // Set event-weight
-        myEvent.mc()->setWeight(header1->Weight);
+        myEvent.mc()->setWeight(i, header1->Weight);
       }
       else
       {
         HepMCEvent* header2 = dynamic_cast<HepMCEvent*>(branchEvent_->At(i));
         if (header2==0) continue;
         // Set event-weight
-        myEvent.mc()->setWeight(header2->Weight);
+        myEvent.mc()->setWeight(i, header2->Weight);
       }
     }
   }

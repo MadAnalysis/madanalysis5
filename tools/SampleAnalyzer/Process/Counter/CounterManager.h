@@ -86,6 +86,7 @@ namespace MA5
             {
                 for (auto &counter : counters_)
                     counter.Initialise(weight);
+                initial_.Initialise(weight);
                 initialised_ = true;
             }
             initial_.Increment(weight);

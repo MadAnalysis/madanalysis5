@@ -396,13 +396,15 @@ void HEPMCReader::FillEventInformations(const std::string &line,
     if (tmp > 0)
     {
         MAuint32 nweights = static_cast<MAuint32>(tmp);
+        std::vector<MAfloat64> w(nweights, 0.0);
         for (MAuint32 i = 0; i < nweights; i++)
         {
             MAfloat64 value;
             str >> value;
-            myEvent.mc()->weights().Add(i, value);
+            w.at(i) = value;
         }
-    }
+        myEvent.mc()->setWeights(w);
+        }
 }
 
 // -----------------------------------------------------------------------------
