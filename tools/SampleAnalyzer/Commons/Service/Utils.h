@@ -42,6 +42,33 @@
 namespace MA5
 {
 
+    // ============================= //
+    // ===== Vector operations ===== //
+    // ============================= //
+
+    /// Create a new vector by adding two vectors together.
+    /// @attention this wont change the content of two original vectors
+    template <typename T>
+    std::vector<T> operator+(const std::vector<T> &A, const std::vector<T> &B)
+    {
+        std::vector<T> AB;
+        AB.reserve(A.size() + B.size());          // preallocate memory
+        AB.insert(AB.end(), A.begin(), A.end());  // add A;
+        AB.insert(AB.end(), B.begin(), B.end());  // add B;
+        return AB;
+    }
+
+    /// Add second vector to the first vector
+    /// @attention this wont create a new vector but
+    /// will add the second to the first
+    template <typename T>
+    std::vector<T> &operator+=(std::vector<T> &A, const std::vector<T> &B)
+    {
+        A.reserve(A.size() + B.size());         // preallocate memory without erase original data
+        A.insert(A.end(), B.begin(), B.end());  // add B;
+        return A;                               // here A could be named AB
+    }
+
     //===========//
     // Filtering //
     //===========//
@@ -56,6 +83,20 @@ namespace MA5
         {
             if(obj.pt() < ptmin || obj.abseta() > absetamax || obj.abseta() < absetamin) continue;
             filtered.push_back(&obj);
+        }
+        return filtered;
+    }
+
+    // Example: std::vector<RecJetFormat> signaljets = filter(signaljets, ptmin, etamax);
+    template<class Type>
+    std::vector<const Type *> filter(std::vector<const Type *>& objects, MAfloat64 ptmin,
+                                     MAfloat64 absetamax=20., MAfloat64 absetamin=-1.)
+    {
+        std::vector<const Type*> filtered;
+        for(auto & obj: objects)
+        {
+            if(obj->pt() < ptmin || obj->abseta() > absetamax || obj->abseta() < absetamin) continue;
+            filtered.push_back(obj);
         }
         return filtered;
     }
@@ -88,34 +129,42 @@ namespace MA5
     // Overlap Removal //
     //=================//
 
-    // Overlap Removal
+    /// @brief Overlap Removal
+    /// Remove overlaping objects from the first collection (v1) with
+    /// respect to a minimum deltaR distance from the second collection (v2)
     template<typename T1, typename T2> std::vector<const T1*>
-      OverlapRemoval(std::vector<const T1*> &v1, std::vector<const T2*> &v2,
-      const MAdouble64 &drmin)
+    OverlapRemoval(std::vector<const T1*> &v1, std::vector<const T2*> &v2,
+                   const MAdouble64 &drmin)
     {
-      // Determining with objects should be removed
-      std::vector<bool> mask(v1.size(),false);
-      for (MAuint32 j=0;j<v1.size();j++)
-        for (MAuint32 i=0;i<v2.size();i++)
-          if (v2[i]->dr(v1[j]) < drmin)
-          {
-            mask[j]=true;
-            break;
-          }
+        // Determining with objects should be removed
+        std::vector<bool> mask(v1.size(),false);
+        for (MAuint32 j=0;j<v1.size();j++)
+            for (MAuint32 i=0;i<v2.size();i++)
+                if (v2[i]->dr(v1[j]) < drmin)
+                {
+                    mask[j]=true;
+                    break;
+                }
 
-      // Building the cleaned container
-      std::vector<const T1*> cleaned_v1;
-      for (MAuint32 i=0;i<v1.size();i++)
-        if (!mask[i]) cleaned_v1.push_back(v1[i]);
+        // Building the cleaned container
+        std::vector<const T1*> cleaned_v1;
+        for (MAuint32 i=0;i<v1.size();i++)
+            if (!mask[i]) cleaned_v1.push_back(v1[i]);
 
-      return cleaned_v1;
+        return cleaned_v1;
     }
 
-    // Example:  signaljets = conditional_removal(signaljets,signalel,
-    //            [] (const RecJetFormat * jet, const RecLeptonFormat * el) {return jet->dr(el) > 0.2;});
+    /// Example:
+    /// @code
+    /// signaljets = conditional_removal(signaljets,signalel,
+    ///            [] (const RecJetFormat * jet, const RecLeptonFormat * el)
+    ///                {return jet->dr(el) > 0.2;});
+    /// @endcode
+    /// Remove objects from the first collection (v1) with respect
+    /// to a boolean function between v1 and second collection.
     template<typename T1, typename T2, typename FN>
     std::vector<const T1*> conditional_removal(
-        std::vector<const T1*> &v1, std::vector<const T2*> &v2, FN func
+            std::vector<const T1*> &v1, std::vector<const T2*> &v2, FN func
     )
     {
         // Determining with objects should be removed

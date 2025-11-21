@@ -36,7 +36,6 @@ class SessionInfo:
         self.has_matplotlib = False
         self.has_spey = False
         self.has_simplify = False
-        self.has_scipy = False
         self.has_gnuplot = False
         self.has_pdflatex = False
         self.has_latex = False

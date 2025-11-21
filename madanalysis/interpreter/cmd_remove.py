@@ -53,7 +53,12 @@ class CmdRemove(CmdBase.CmdBase):
                     logging.getLogger('MA5').error(" - "+self.main.selection[item].GetStringDisplay())
                 logging.getLogger('MA5').error("Please remove these plots/cuts before removing the Particle/Multiparticle "+ name +".")
             return
-                
+
+        # Jet collection removal
+        if name in self.main.jet_collection.GetNames():
+            self.main.jet_collection.Delete(name)
+            return
+        
         # No object found 
         logging.getLogger('MA5').error("No object called '"+name+"' found.")
 
@@ -97,6 +102,7 @@ class CmdRemove(CmdBase.CmdBase):
             output = [ "selection["+str(ind+1)+"]" \
                        for ind in range(0,len(self.main.selection)) ]
             output.extend(self.main.datasets.GetNames())
+            output.extend(self.main.jet_collection.GetNames())
             output.extend(self.main.multiparticles.GetNames())
 
             # Cannot possible to remove invis

@@ -69,6 +69,9 @@ class DetectManager():
         elif package=='fastjet-contrib':
             from madanalysis.system.detect_fastjetcontrib import DetectFastjetContrib
             checker=DetectFastjetContrib(self.archi_info, self.user_info, self.session_info, self.debug)
+        elif package=='heptoptagger':
+            from madanalysis.system.detect_heptoptagger import DetectHEPTopTagger
+            checker=DetectHEPTopTagger(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='delphes':
             from madanalysis.system.detect_delphes import DetectDelphes
             checker=DetectDelphes(self.archi_info, self.user_info, self.session_info, self.debug)
@@ -84,9 +87,6 @@ class DetectManager():
         elif package=='gnuplot':
             from madanalysis.system.detect_gnuplot import DetectGnuPlot
             checker=DetectMatplotlib(self.archi_info, self.user_info, self.session_info, self.debug)
-        elif package=='scipy':
-            from madanalysis.system.detect_scipy import DetectScipy
-            checker=DetectScipy(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='root_graphical':
             from madanalysis.system.detect_root_graphical import DetectRootGraphical
             checker=DetectRootGraphical(self.archi_info, self.user_info, self.session_info, self.debug)
@@ -108,9 +108,6 @@ class DetectManager():
         elif package=='numpy':
             from madanalysis.system.detect_numpy import DetectNumpy
             checker=DetectNumpy(self.archi_info, self.user_info, self.session_info, self.debug)
-        elif package=='pyhf':
-            from madanalysis.system.detect_pyhf import Detectpyhf
-            checker=Detectpyhf(self.archi_info, self.user_info, self.session_info, self.debug)
         elif package=='spey':
             from madanalysis.system.detect_spey import DetectSpey
             checker=DetectSpey(self.archi_info, self.user_info, self.session_info, self.debug)

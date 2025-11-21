@@ -29,19 +29,21 @@ import json
 import logging
 import math
 import os
+import re
 import shutil
-import sys
 import time
+from pathlib import Path
 
 import numpy as np
-from shell_command import ShellCommand
+from shell_command import ShellCommand  # pylint: disable=import-error
 from six.moves import input, range
-from string_tools import StringTools
+from string_tools import StringTools  # pylint: disable=import-error
 
 from madanalysis.configuration.delphes_configuration import DelphesConfiguration
 from madanalysis.configuration.delphesMA5tune_configuration import (
     DelphesMA5tuneConfiguration,
 )
+from madanalysis.core.main import Main
 from madanalysis.install.detector_manager import DetectorManager
 from madanalysis.IOinterface.folder_writer import FolderWriter
 from madanalysis.IOinterface.job_writer import JobWriter
@@ -55,11 +57,13 @@ from madanalysis.misc.theoretical_error_setup import error_dict_setup
 
 # pylint: disable=logging-fstring-interpolation,import-outside-toplevel
 
+log = logging.getLogger("MA5")
+
 
 class RunRecast:
-    def __init__(self, main, dirname):
-        self.dirname = dirname
-        self.main = main
+    def __init__(self, main: Main, dirname: str):
+        self.dirname: str = dirname
+        self.main: Main = main
         self.delphes_runcard = []
         self.analysis_runcard = []
         self.forced = self.main.forced
@@ -69,21 +73,26 @@ class RunRecast:
         self.first12 = True
         self.pyhf_config = {}  # initialize and configure histfactory
         self.cov_config = {}
-        self.logger = logging.getLogger("MA5")
         self.TACO_output = self.main.recasting.TACO_output
+
+        self.delphes_inc_pths = []
+        if len(self.main.archi_info.delphes_inc_paths) != 0:
+            self.delphes_inc_pths = self.main.archi_info.delphes_inc_paths
+            self.delphes_inc_pths.append(
+                next((p for p in self.delphes_inc_pths if Path(p).stem == "delphes"), "")
+                + "/modules"
+            )
 
     def init(self):
         ### First, the analyses to take care off
-        logging.getLogger("MA5").debug(
-            "  Inviting the user to edit the recasting card..."
-        )
+        log.debug("  Inviting the user to edit the recasting card...")
         self.edit_recasting_card()
         ### Getting the list of analyses to recast
-        self.logger.info("   Getting the list of delphes simulation to be performed...")
+        log.info("   Getting the list of delphes simulation to be performed...")
         self.get_runs()
         ### Check if we have anything to do
         if len(self.delphes_runcard) == 0:
-            self.logger.warning("No recasting to do... Please check the recasting card")
+            log.warning("No recasting to do... Please check the recasting card")
             return False
 
         ### Exit
@@ -129,7 +138,7 @@ class RunRecast:
     def edit_recasting_card(self):
         if self.forced or self.main.script:
             return
-        self.logger.info("Would you like to edit the recasting Card ? (Y/N)")
+        log.info("Would you like to edit the recasting Card ? (Y/N)")
         allowed_answers = ["n", "no", "y", "yes"]
         answer = ""
         while answer not in allowed_answers:
@@ -183,7 +192,7 @@ class RunRecast:
             check = True
         ## Check and exit
         if not check:
-            self.logger.error(
+            log.error(
                 "The %s library is not present -> the associated analyses cannot be used",
                 self.detector,
             )
@@ -194,24 +203,22 @@ class RunRecast:
     ### DELPHES RUN
     ################################################
     def fastsim_single(self, version, delphescard):
-        self.logger.debug(
-            "Launch a bunch of fastsim with the delphes card: %s", delphescard
-        )
+        log.debug("Launch a bunch of fastsim with the delphes card: %s", delphescard)
 
         # Init and header
         self.fastsim_header(version)
 
         # Activating the right delphes
         if self.detector != "fastjet":
-            self.logger.debug("Activating the detector (switch delphes/delphesMA5tune)")
+            log.debug("Activating the detector (switch delphes/delphesMA5tune)")
             self.main.fastsim.package = self.detector
             detector_handler = DetectorManager(self.main)
             if not detector_handler.manage(self.detector):
-                self.logger.error("Problem with the activation of delphesMA5tune")
+                log.error("Problem with the activation of delphesMA5tune")
                 return False
 
         # Checking whether events have already been generated and if not, event generation
-        self.logger.debug("Loop over the datasets...")
+        log.debug("Loop over the datasets...")
         evtfile = None
         for item in self.main.datasets:
             if self.detector == "delphesMA5tune":
@@ -235,7 +242,7 @@ class RunRecast:
             elif self.detector == "fastjet":
                 return True
 
-            self.logger.debug("- applying fastsim and producing %s ...", evtfile)
+            log.debug("- applying fastsim and producing %s ...", evtfile)
             if not os.path.isfile(os.path.normpath(evtfile)):
                 if not self.generate_events(item, delphescard):
                     return False
@@ -257,15 +264,9 @@ class RunRecast:
             self.first12 = False
         ## Printing
         if to_print:
-            self.logger.info(
-                "   **********************************************************"
-            )
-            self.logger.info(
-                "   %s", StringTools.Center(f"{tag} detector simulations", 57)
-            )
-            self.logger.info(
-                "   **********************************************************"
-            )
+            log.info("   **********************************************************")
+            log.info("   %s", StringTools.Center(f"{tag} detector simulations", 57))
+            log.info("   **********************************************************")
 
     def run_delphes(self, dataset, card):
         # Initializing the JobWriter
@@ -277,45 +278,43 @@ class RunRecast:
         jobber = JobWriter(self.main, self.dirname + "_RecastRun")
 
         # Writing process
-        self.logger.info(
-            "   Creating folder '" + self.dirname.split("/")[-1] + "_RecastRun'..."
-        )
+        log.info("   Creating folder '" + self.dirname.split("/")[-1] + "_RecastRun'...")
         if not jobber.Open():
             return False
-        self.logger.info("   Copying 'SampleAnalyzer' source files...")
+        log.info("   Copying 'SampleAnalyzer' source files...")
         if not jobber.CopyLHEAnalysis():
             return False
         if not jobber.CreateBldDir():
             return False
-        self.logger.info("   Inserting your selection into 'SampleAnalyzer'...")
+        log.info("   Inserting your selection into 'SampleAnalyzer'...")
         if not jobber.WriteSelectionHeader(self.main):
             return False
         if not jobber.WriteSelectionSource(self.main):
             return False
-        self.logger.info("   Writing the list of datasets...")
+        log.info("   Writing the list of datasets...")
         jobber.WriteDatasetList(dataset)
-        self.logger.info("   Creating Makefiles...")
-        if not jobber.WriteMakefiles():
+        log.info("   Creating Makefiles...")
+        if not jobber.WriteMakefiles(ma5_fastjet_mode=False):
             return False
-        self.logger.debug("   Fixing the pileup path...")
+        log.debug("   Fixing the pileup path...")
         self.fix_pileup(self.dirname + "_RecastRun/Input/" + card)
 
         # Creating executable
-        self.logger.info("   Compiling 'SampleAnalyzer'...")
+        log.info("   Compiling 'SampleAnalyzer'...")
+        # os.environ["ROOT_INCLUDE_PATH"] = ":".join(self.delphes_inc_pths)
+        # os.environ["FASTJET_FLAG"] = ""
         if not jobber.CompileJob():
             return False
-        self.logger.info("   Linking 'SampleAnalyzer'...")
+        log.info("   Linking 'SampleAnalyzer'...")
         if not jobber.LinkJob():
             return False
 
         # Running
-        self.logger.info(
-            "   Running 'SampleAnalyzer' over dataset '" + dataset.name + "'..."
-        )
-        self.logger.info("    *******************************************************")
+        log.info("   Running 'SampleAnalyzer' over dataset '" + dataset.name + "'...")
+        log.info("    *******************************************************")
         if not jobber.RunJob(dataset):
-            self.logger.error("run over '" + dataset.name + "' aborted.")
-        self.logger.info("    *******************************************************")
+            log.error("run over '" + dataset.name + "' aborted.")
+        log.info("    *******************************************************")
 
         # Exit
         return True
@@ -342,7 +341,7 @@ class RunRecast:
             any(x.endswith(y) for y in ["root", "lhco", "lhco.gz"])
             for x in dataset.filenames
         ):
-            self.logger.error("   Dataset can not contain reconstructed file type.")
+            log.error("   Dataset can not contain reconstructed file type.")
             return False
         # Load the analysis card
         from madanalysis.core.script_stack import ScriptStack
@@ -363,16 +362,16 @@ class RunRecast:
             output_name = "SFS_events.lhe"
             if self.main.archi_info.has_zlib:
                 output_name += ".gz"
-            self.logger.debug("   Setting the output LHE file :" + output_name)
+            log.debug("   Setting the output LHE file :" + output_name)
 
         # Initializing the JobWriter
         jobber = JobWriter(self.main, self.dirname + "_SFSRun")
 
         # Writing process
-        self.logger.info("   Creating folder '" + self.dirname.split("/")[-1] + "'...")
+        log.info("   Creating folder '" + self.dirname.split("/")[-1] + "'...")
         if not jobber.Open():
             return False
-        self.logger.info("   Copying 'SampleAnalyzer' source files...")
+        log.info("   Copying 'SampleAnalyzer' source files...")
         if not jobber.CopyLHEAnalysis():
             return False
         if not jobber.CreateBldDir(analysisName="SFSRun", outputName="SFSRun.saf"):
@@ -384,9 +383,9 @@ class RunRecast:
             return False
         os.remove(self.dirname + "_SFSRun/Build/SampleAnalyzer/User/Analyzer/user.cpp")
         #######
-        self.logger.info("   Writing the list of datasets...")
+        log.info("   Writing the list of datasets...")
         jobber.WriteDatasetList(dataset)
-        self.logger.info("   Creating Makefiles...")
+        log.info("   Creating Makefiles...")
         if not jobber.WriteMakefiles():
             return False
         # Copying the analysis files
@@ -400,6 +399,10 @@ class RunRecast:
             '#include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"\n'
         )
         analysisList.write('#include "SampleAnalyzer/Commons/Service/LogStream.h"\n\n')
+        if self.main.superfastsim.isTaggerOn():
+            analysisList.write('#include "new_tagger.h"\n')
+        if self.main.superfastsim.isNewSmearerOn():
+            analysisList.write('#include "new_smearer_reco.h"\n')
         analysisList.write(
             "// -----------------------------------------------------------------------------\n"
         )
@@ -428,9 +431,9 @@ class RunRecast:
                 )
                 analysisList.write('  manager.Add("' + ana + '", new ' + ana + ");\n")
         except Exception as err:
-            self.logger.debug(str(err))
-            self.logger.error("Cannot copy the analysis: " + ana)
-            self.logger.error(
+            log.debug(str(err))
+            log.error("Cannot copy the analysis: " + ana)
+            log.error(
                 "Please make sure that corresponding analysis downloaded propoerly."
             )
             return False
@@ -438,7 +441,7 @@ class RunRecast:
         analysisList.close()
 
         # Update Main
-        self.logger.info("   Updating the main executable")
+        log.info("   Updating the main executable")
         shutil.move(
             self.dirname + "_SFSRun/Build/Main/main.cpp",
             self.dirname + "_SFSRun/Build/Main/main.bak",
@@ -514,24 +517,27 @@ class RunRecast:
         # restore
         self.main.recasting.status = "on"
         self.main.fastsim.package = old_fastsim
+
+        # @Jack: new setup configuration. In order to run the code in SFS-FastJet mode analysis
+        # has to be compiled with `-DMA5_FASTJET_MODE` flag but this needs to be deactivated for
+        # Delphes-ROOT based analyses.
+
         # Creating executable
-        self.logger.info("   Compiling 'SampleAnalyzer'...")
+        log.info("   Compiling 'SampleAnalyzer'...")
         if not jobber.CompileJob():
-            self.logger.error("job submission aborted.")
+            log.error("job submission aborted.")
             return False
-        self.logger.info("   Linking 'SampleAnalyzer'...")
+        log.info("   Linking 'SampleAnalyzer'...")
         if not jobber.LinkJob():
-            self.logger.error("job submission aborted.")
+            log.error("job submission aborted.")
             return False
         # Running
-        self.logger.info(
-            "   Running 'SampleAnalyzer' over dataset '" + dataset.name + "'..."
-        )
-        self.logger.info("    *******************************************************")
+        log.info("   Running 'SampleAnalyzer' over dataset '" + dataset.name + "'...")
+        log.info("    *******************************************************")
         if not jobber.RunJob(dataset):
-            self.logger.error("run over '" + dataset.name + "' aborted.")
+            log.error("run over '" + dataset.name + "' aborted.")
             return False
-        self.logger.info("    *******************************************************")
+        log.info("    *******************************************************")
 
         if not os.path.isdir(self.dirname + "/Output/SAF/" + dataset.name):
             os.mkdir(self.dirname + "/Output/SAF/" + dataset.name)
@@ -703,9 +709,15 @@ class RunRecast:
             if not FolderWriter.RemoveDirectory(
                 os.path.normpath(self.dirname + "_SFSRun")
             ):
-                self.logger.error("Cannot remove directory: " + self.dirname + "_SFSRun")
+                log.error("Cannot remove directory: " + self.dirname + "_SFSRun")
         else:
-            self.logger.debug("Analysis kept in " + self.dirname + "_SFSRun folder.")
+            log.debug("Analysis kept in " + self.dirname + "_SFSRun folder.")
+
+        if dataset.xsection == 0.0:
+            dataset.xsection = self.read_xsec(
+                f"{self.dirname}/Output/SAF/{dataset.name}/{dataset.name}.saf"
+            )
+            log.debug(f"Cross-section has been set to {dataset.xsection} pb.")
 
         return True
 
@@ -728,9 +740,7 @@ class RunRecast:
             )
         # Execution
         if not self.run_delphes(dataset, card):
-            self.logger.error(
-                "The " + self.detector + " problem with the running of the fastsim"
-            )
+            log.error("The " + self.detector + " problem with the running of the fastsim")
             return False
         # Restoring the run
         self.main.recasting.status = "on"
@@ -781,7 +791,7 @@ class RunRecast:
         # Activating the right delphes
         detector_handler = DetectorManager(self.main)
         if not detector_handler.manage(self.detector):
-            self.logger.error("Problem with the activation of delphesMA5tune")
+            log.error("Problem with the activation of delphesMA5tune")
             return False
 
         ## Getting the analyses associated with the given card
@@ -795,8 +805,13 @@ class RunRecast:
 
         # Executing the PAD
         for myset in self.main.datasets:
+            xsec_check = True
             if not self.main.recasting.stat_only_mode:
                 if version in ["v1.1", "v1.2"]:
+                    # os.environ["ROOT_INCLUDE_PATH"] = ":".join(self.delphes_inc_pths)
+                    # os.environ["FASTJET_FLAG"] = ""
+                    if myset.xsection == 0.0:
+                        xsec_check = False
                     ## Preparing the PAD
                     self.update_pad_main(analyses)
                     if not self.make_pad():
@@ -814,7 +829,7 @@ class RunRecast:
                         + ".root"
                     )
                     if not os.path.isfile(eventfile):
-                        self.logger.error(f"The file called {eventfile} is not found...")
+                        log.error(f"The file called {eventfile} is not found...")
                         return False
                     ## Running the PAD
                     if not self.run_pad(eventfile):
@@ -841,36 +856,37 @@ class RunRecast:
                     ):
                         return False
                     if self.main.recasting.store_root:
-                        self.logger.warning(
+                        log.warning(
                             "Simplified-FastSim does not use root, hence file will not be stored."
                         )
             else:
                 self.dirname = self.main.recasting.stat_only_dir
             ## Running the CLs exclusion script (if available)
-            if not self.main.recasting.analysis_only_mode:
-                self.logger.debug(f"Compute CLs exclusion for {myset.name}")
-                if not self.compute_cls(analyses, myset):
-                    self.main.forced = self.forced
-                    return False
+            if xsec_check:
+                if not self.main.recasting.analysis_only_mode:
+                    log.debug(f"Compute CLs exclusion for {myset.name}")
+                    if not self.compute_cls(analyses, myset):
+                        self.main.forced = self.forced
+                        return False
 
         # Exit
         return True
 
     def analysis_header(self, version, card):
         ## Printing
-        self.logger.info("   **********************************************************")
-        self.logger.info(
+        log.info("   **********************************************************")
+        log.info(
             "   "
             + StringTools.Center(
                 version + " running of the PAD" + " on events generated with", 57
             )
         )
-        self.logger.info("   " + StringTools.Center(card, 57))
-        self.logger.info("   **********************************************************")
+        log.info("   " + StringTools.Center(card, 57))
+        log.info("   **********************************************************")
 
     def update_pad_main(self, analysislist):
         ## Migrating the necessary files to the working directory
-        self.logger.info("   Writing the PAD analyses")
+        log.info("   Writing the PAD analyses")
         ## Safety (for backwards compatibility)
         if not os.path.isfile(self.pad + "/Build/Main/main.bak"):
             shutil.copy(
@@ -995,7 +1011,7 @@ class RunRecast:
 
     def make_pad(self):
         # Initializing the compiler
-        self.logger.info("   Compiling the PAD located in " + self.dirname + "_RecastRun")
+        log.info("   Compiling the PAD located in " + self.dirname + "_RecastRun")
         compiler = LibraryWriter("lib", self.main)
         ncores = compiler.get_ncores2()
         # compiling
@@ -1011,10 +1027,10 @@ class RunRecast:
         time.sleep(1.0)
         # Checks and exit
         if not result:
-            self.logger.error(
+            log.error(
                 "Impossible to compile the PAD. For more details, see the log file:"
             )
-            self.logger.error(logfile)
+            log.error(logfile)
             return False
         return True
 
@@ -1025,6 +1041,9 @@ class RunRecast:
         infile = open(self.dirname + "_RecastRun/Input/PADevents.list", "w")
         infile.write(eventfile)
         infile.close()
+        jobber = JobWriter(self.main, self.dirname + "_RecastRun")
+        if not jobber.WriteMakefiles(ma5_fastjet_mode=False):
+            return False
         ## cleaning the output directory
         if os.path.isdir(
             os.path.normpath(self.dirname + "_RecastRun/Output/SAF/PADevents")
@@ -1038,7 +1057,7 @@ class RunRecast:
         ok = ShellCommand.Execute(command, self.dirname + "_RecastRun/Build")
         ## checks
         if not ok:
-            self.logger.error("Problem with the run of the PAD on the file: " + eventfile)
+            log.error("Problem with the run of the PAD on the file: %s", eventfile)
             return False
         os.remove(self.dirname + "_RecastRun/Input/PADevents.list")
         ## exit
@@ -1125,10 +1144,8 @@ class RunRecast:
         if not ET:
             return False
 
-        self.logger.info(
-            "\033[1m   * Exclusion limit computation uses Spey package\033[0m"
-        )
-        self.logger.info("\033[1m     Please cite arXiv:2307.06996 [hep-ph]\033[0m")
+        log.info("\033[1m   * Exclusion limit computation uses Spey package\033[0m")
+        log.info("\033[1m     Please cite arXiv:2307.06996 [hep-ph]\033[0m")
 
         # Bibliography
         bibfile = os.path.join(self.dirname, "bibliography.bib")
@@ -1137,7 +1154,7 @@ class RunRecast:
             try:
                 bib.write(spey.cite() + "\n")
             except Exception as err:
-                self.logger.debug(err)
+                log.debug(err)
                 pass
             if self.pyhf_config:
                 pyhfbib = spey.get_backend_bibtex("pyhf")
@@ -1168,16 +1185,16 @@ class RunRecast:
             )
             or any(a + b > 0.0 for a, b in self.main.recasting.systematics)
         ):
-            self.logger.info(
+            log.info(
                 "\033[1m   * Using Uncertainties and Higher-Luminosity Estimates\033[0m"
             )
-            self.logger.info("\033[1m     Please cite arXiv:1910.11418 [hep-ph]\033[0m")
+            log.info("\033[1m     Please cite arXiv:1910.11418 [hep-ph]\033[0m")
 
         ## Running over all luminosities to extrapolate
         for extrapolated_lumi in [
             "default"
         ] + self.main.recasting.extrapolated_luminosities:
-            self.logger.info(
+            log.info(
                 f"   Calculation of the exclusion CLs for a lumi of {extrapolated_lumi}"
             )
             ## Preparing the output file and checking whether a cross section has been defined
@@ -1198,16 +1215,16 @@ class RunRecast:
 
             ## running over all analysis
             for analysis in analyses:
-                self.logger.debug(f"Running CLs exclusion calculation for {analysis}")
+                log.debug(f"Running CLs exclusion calculation for {analysis}")
                 # Getting the info file information (possibly rescaled)
                 lumi, regions, regiondata = self.parse_info_file(
                     ET, analysis, extrapolated_lumi
                 )
-                self.logger.debug(f"lumi = {str(lumi)}")
-                self.logger.debug(f"regions = {str(regions)}")
-                self.logger.debug(f"regiondata = {str(regiondata)}")
+                log.debug(f"lumi = {str(lumi)}")
+                log.debug(f"regions = {str(regions)}")
+                log.debug(f"regiondata = {str(regiondata)}")
                 if lumi == -1 or regions == -1 or regiondata == -1:
-                    self.logger.warning(
+                    log.warning(
                         f"Info file for {analysis} missing or corrupted. Skipping the CLs calculation."
                     )
                     return False
@@ -1215,33 +1232,29 @@ class RunRecast:
                 # Citation notifications for Global Likelihoods
                 if (self.cov_config or self.pyhf_config) and print_gl_citation:
                     print_gl_citation = False
-                    self.logger.info(
+                    log.info(
                         "\033[1m   * Using global likelihoods to improve CLs calculations\033[0m"
                     )
-                    self.logger.info(
-                        "\033[1m     Please cite arXiv:2206.14870 [hep-ph]\033[0m"
-                    )
+                    log.info("\033[1m     Please cite arXiv:2206.14870 [hep-ph]\033[0m")
                     if self.pyhf_config != {}:
-                        self.logger.info(
+                        log.info(
                             "\033[1m                 pyhf DOI:10.5281/zenodo.1169739\033[0m"
                         )
-                        self.logger.info(
+                        log.info(
                             "\033[1m                 For more details see https://scikit-hep.org/pyhf/\033[0m"
                         )
                         if (
                             self.main.recasting.simplify_likelihoods
                             and self.main.session_info.has_simplify
                         ):
-                            self.logger.info(
+                            log.info(
                                 "\033[1m                 using simplify: ATL-PHYS-PUB-2021-038\033[0m"
                             )
-                            self.logger.info(
+                            log.info(
                                 "\033[1m                 For more details see https://github.com/eschanet/simplify\033[0m"
                             )
                     elif self.cov_config:
-                        self.logger.info(
-                            "\033[1m                 CMS-NOTE-2017-001\033[0m"
-                        )
+                        log.info("\033[1m                 CMS-NOTE-2017-001\033[0m")
 
                 ## Reading the cutflow information
                 regiondata = self.read_cutflows(
@@ -1255,13 +1268,13 @@ class RunRecast:
                     regiondata,
                 )
                 if regiondata == -1:
-                    self.logger.warning(
+                    log.warning(
                         f"Info file for {analysis} corrupted. Skipping the CLs calculation."
                     )
                     return False
 
-                if dataset.xsection <= 0:
-                    self.logger.error(
+                if dataset.xsection == 0.0:
+                    log.error(
                         f"Cross section for {dataset.name} is not defined. Skipping the CLs calculation."
                     )
                     return False
@@ -1364,14 +1377,12 @@ class RunRecast:
         try:
             from lxml import ET
         except ImportError as err:
-            self.logger.debug(str(err))
+            log.debug(str(err))
             try:
                 import xml.etree.ElementTree as ET
             except ImportError as err2:
-                self.logger.warning(
-                    "lxml or xml not available... the CLs module cannot be used"
-                )
-                self.logger.debug(str(err2))
+                log.warning("lxml or xml not available... the CLs module cannot be used")
+                log.debug(str(err2))
                 return False
         # exit
         return ET
@@ -1382,35 +1393,35 @@ class RunRecast:
             self.pad + "/Build/SampleAnalyzer/User/Analyzer/" + analysis + ".info"
         )  # ERIC
         if not os.path.isfile(filename):
-            self.logger.warning("Info " + filename + " does not exist...")
+            log.warning("Info " + filename + " does not exist...")
             return -1, -1, -1
         ## Getting the XML information
         try:
             with open(filename, "r") as info_input:
                 info_tree = etree.parse(info_input)
         except Exception as err:
-            self.logger.warning("Error during XML parsing: " + str(err))
-            self.logger.warning("Cannot parse the info file")
+            log.warning("Error during XML parsing: " + str(err))
+            log.warning("Cannot parse the info file")
             return -1, -1, -1
 
         try:
             results = self.header_info_file(info_tree, analysis, extrapolated_lumi)
             return results
         except Exception as err:
-            self.logger.warning("Error during extracting header info file: " + str(err))
-            self.logger.warning("Cannot parse the info file")
+            log.warning("Error during extracting header info file: " + str(err))
+            log.warning("Cannot parse the info file")
             return -1, -1, -1
 
     def fix_pileup(self, filename):
         # x
-        self.logger.debug("delphes card is here: " + filename)
+        log.debug("delphes card is here: " + filename)
 
         # Container for pileup
         FoundPileup = []
 
         # Safe
         if not os.path.isfile(filename):
-            self.logger.error("internal error: file " + filename + " is not found")
+            log.error("internal error: file " + filename + " is not found")
             return False
 
         # Estimate the newpath of pileup
@@ -1455,16 +1466,14 @@ class RunRecast:
         return True
 
     def header_info_file(self, etree, analysis, extrapolated_lumi):
-        self.logger.debug("Reading info from the file related to " + analysis + "...")
+        log.debug("Reading info from the file related to " + analysis + "...")
         ## checking the header of the file
         info_root = etree.getroot()
         if info_root.tag != "analysis":
-            self.logger.warning("Invalid info file (" + analysis + "): <analysis> tag.")
+            log.warning("Invalid info file (" + analysis + "): <analysis> tag.")
             return -1, -1, -1
         if info_root.attrib["id"].lower() != analysis.lower():
-            self.logger.warning(
-                "Invalid info file (" + analysis + "): <analysis id> tag."
-            )
+            log.warning("Invalid info file (" + analysis + "): <analysis id> tag.")
             return -1, -1, -1
         ## extracting the information
         lumi = 0
@@ -1483,16 +1492,12 @@ class RunRecast:
                 cov_regions=[], covariance=[]
             )
         # activate pyhf
-        if (
-            self.main.recasting.global_likelihoods_switch
-            and self.main.session_info.has_pyhf
-            and self.cov_config == {}
-        ):
+        if self.main.recasting.global_likelihoods_switch and self.cov_config == {}:
             try:
                 self.pyhf_config = self.pyhf_info_file(info_root)
-                self.logger.debug(str(self.pyhf_config))
+                log.debug(str(self.pyhf_config))
             except Exception as err:
-                self.logger.debug("Check pyhf_info_file function!\n" + str(err))
+                log.debug("Check pyhf_info_file function!\n" + str(err))
                 self.pyhf_config = {}
 
         ## first we need to get the number of regions
@@ -1505,25 +1510,19 @@ class RunRecast:
                         lumi_scaling = round(extrapolated_lumi / lumi, 8)
                         lumi = lumi * lumi_scaling
                 except Exception as err:
-                    self.logger.warning(
-                        "Invalid info file (" + analysis + "): ill-defined lumi"
-                    )
-                    self.logger.debug(str(err))
+                    log.warning("Invalid info file (" + analysis + "): ill-defined lumi")
+                    log.debug(str(err))
                     return -1, -1, -1
-                self.logger.debug(
-                    "The luminosity of " + analysis + " is " + str(lumi) + " fb-1."
-                )
+                log.debug("The luminosity of " + analysis + " is " + str(lumi) + " fb-1.")
             # regions
             if child.tag == "region" and (
                 "type" not in child.attrib or child.attrib["type"] == "signal"
             ):
                 if "id" not in child.attrib:
-                    self.logger.warning(
-                        "Invalid info file (" + analysis + "): <region id> tag."
-                    )
+                    log.warning("Invalid info file (" + analysis + "): <region id> tag.")
                     return -1, -1, -1
                 if child.attrib["id"] in regions:
-                    self.logger.warning(
+                    log.warning(
                         "Invalid info file (" + analysis + "): doubly-defined region."
                     )
                     return -1, -1, -1
@@ -1574,17 +1573,17 @@ class RunRecast:
             ):
                 nobs, nb, deltanb, syst, stat = [-1] * 5
                 for rchild in child:
-                    # self.logger.debug(rchild.tag)
-                    # self.logger.debug(str(lumi)+' '+str(regions)+ ' '+str(regiondata))
+                    # log.debug(rchild.tag)
+                    # log.debug(str(lumi)+' '+str(regions)+ ' '+str(regiondata))
                     try:
                         myval = float(rchild.text)
                     except ValueError as err:
-                        self.logger.warning(
+                        log.warning(
                             "Invalid info file ("
                             + analysis
                             + "): region data ill-defined."
                         )
-                        self.logger.debug(str(err))
+                        log.debug(str(err))
                         return -1, -1, -1
                     if rchild.tag == "nobs":
                         nobs = myval
@@ -1608,7 +1607,7 @@ class RunRecast:
                                 j = item["cov_regions"].index(rchild.attrib["region"])
                                 self.cov_config[cov_subset]["covariance"][i][j] = myval
                     else:
-                        self.logger.warning(
+                        log.warning(
                             "Invalid info file (" + analysis + "): unknown region subtag."
                         )
                         return -1, -1, -1
@@ -1692,18 +1691,18 @@ class RunRecast:
                 #     sys.path.insert(0, pyhf_path)
                 import spey_pyhf
 
-                self.logger.debug("spey_pyhf v" + str(spey_pyhf.__version__))
-                self.logger.debug(
+                log.debug("spey_pyhf v" + str(spey_pyhf.__version__))
+                log.debug(
                     "spey_pyhf has been imported from " + " ".join(spey_pyhf.__path__)
                 )
             except ImportError:
-                self.logger.warning(
+                log.warning(
                     "To use the global likelihood machinery, please install spey-pyhf"
                 )
                 return {}
             except Exception as err:
-                self.logger.debug("Problem with pyhf_info_file function!!")
-                self.logger.debug(str(err))
+                log.debug("Problem with pyhf_info_file function!!")
+                log.debug(str(err))
                 return {}
         else:
             return {}
@@ -1720,11 +1719,11 @@ class RunRecast:
             )
 
             if signal.hf != []:
-                self.logger.debug(
+                log.debug(
                     'Likelihood profile "' + str(likelihood_profile) + '" is valid.'
                 )
             else:
-                self.logger.warning(
+                log.warning(
                     "Invalid profile in "
                     + analysis
                     + " ignoring :"
@@ -1739,7 +1738,7 @@ class RunRecast:
 
     def write_cls_header(self, xs, out):
         if xs <= 0:
-            self.logger.info(
+            log.info(
                 "   Signal xsection not defined. The 95% excluded xsection will be calculated."
             )
             out.write(
@@ -1786,8 +1785,25 @@ class RunRecast:
                 )
             out.write("\n")
 
+    @staticmethod
+    def read_xsec(path: str) -> float:
+        """Read cross section value from SAF file"""
+        saf_file = Path(path)
+        if not saf_file.exists():
+            return 0.0
+        with saf_file.open("r", encoding="utf-8") as f:
+            smp_info = (
+                [
+                    match.group(1)
+                    for match in re.finditer(r"<SampleGlobalInfo>(.*?)<", f.read(), re.S)
+                ][0]
+                .splitlines()[-1]
+                .split()
+            )
+        return float(smp_info[0])
+
     def read_cutflows(self, path, regions, regiondata):
-        self.logger.debug("Read the cutflow from the files:")
+        log.debug("Read the cutflow from the files:")
         for reg in regions:
             regname = clean_region_name(reg)
             ## getting the initial and final number of events
@@ -1799,15 +1815,15 @@ class RunRecast:
             theregs = regname.split(";")
             for regiontocombine in theregs:
                 filename = path + "/" + regiontocombine + ".saf"
-                self.logger.debug("+ " + filename)
+                log.debug("+ " + filename)
                 if not os.path.isfile(filename):
-                    self.logger.warning(
+                    log.warning(
                         "Cannot find a cutflow for the region "
                         + regiontocombine
                         + " in "
                         + path
                     )
-                    self.logger.warning("Skipping the CLs calculation.")
+                    log.warning("Skipping the CLs calculation.")
                     return -1
                 mysaffile = open(filename)
                 myN0 = -1
@@ -1831,7 +1847,7 @@ class RunRecast:
                         myNf = float(line.split()[0]) + float(line.split()[1])
                 mysaffile.close()
                 if myNf == -1 or myN0 == -1:
-                    self.logger.warning(
+                    log.warning(
                         "Invalid cutflow for the region "
                         + reg
                         + "("
@@ -1839,12 +1855,12 @@ class RunRecast:
                         + ") in "
                         + path
                     )
-                    self.logger.warning("Skipping the CLs calculation.")
+                    log.warning("Skipping the CLs calculation.")
                     return -1
                 Nf += myNf
                 N0 += myN0
             if Nf == 0 and N0 == 0:
-                self.logger.warning(
+                log.warning(
                     "Invalid cutflow for the region "
                     + reg
                     + "("
@@ -1852,7 +1868,7 @@ class RunRecast:
                     + ") in "
                     + path
                 )
-                self.logger.warning("Skipping the CLs calculation.")
+                log.warning("Skipping the CLs calculation.")
                 return -1
             regiondata[reg]["N0"] = N0
             regiondata[reg]["Nf"] = Nf
@@ -1868,7 +1884,7 @@ class RunRecast:
     ) -> dict:
         from .statistical_models import APRIORI, OBSERVED
 
-        self.logger.debug("Compute CLs...")
+        log.debug("Compute CLs...")
         ## computing fi a region belongs to the best expected ones, and derive the CLs in all cases
         idx = 2 if is_extrapolated else 0
         expected = APRIORI if is_extrapolated else OBSERVED
@@ -1941,7 +1957,7 @@ class RunRecast:
     def write_cls_output(
         self, analysis, regions, regiondata, errordata, summary, xsflag, lumi
     ):
-        self.logger.debug("Write CLs...")
+        log.debug("Write CLs...")
         if self.main.developer_mode:
             to_save = {analysis: {"regiondata": regiondata, "errordata": errordata}}
             name = summary.name.split(".dat")[0] + ".json"
@@ -1952,7 +1968,7 @@ class RunRecast:
                     (k, i) for k, i in past.items() if k not in list(to_save.keys())
                 ]:
                     to_save[key] = item
-            self.logger.debug("Saving dictionary : " + name)
+            log.debug("Saving dictionary : " + name)
             with open(name, "w+") as results:
                 json.dump(to_save, results, indent=4)
             ###################################################################################
@@ -2144,7 +2160,7 @@ class RunRecast:
             myxsexp = pyhf_data.get(likelihood_profile, {}).get("s95exp", "-1")
             myxsobs = pyhf_data.get(likelihood_profile, {}).get("s95obs", "-1")
             if not xsflag:
-                self.logger.debug(str(pyhf_data))
+                log.debug(str(pyhf_data))
                 mycls = "{:.4f}".format(
                     pyhf_data.get(likelihood_profile, {}).get("CLs", 0.0)
                 )

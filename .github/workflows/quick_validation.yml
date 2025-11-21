@@ -1,67 +1,67 @@
-name: Quick Validation 
+name: Quick Validation
 
 on:
-  push:
-    branches:
-    - main
-    - release/*
-  # Each pull request should be validated before merging with main or dev
-  pull_request:
-    branches:
-    - main
-    - dev
-  # Enables manual action execution.
-  workflow_dispatch:
+    # push:
+    # branches:
+    # - main
+    # - release/*
+    # Each pull request should be validated before merging with main or dev
+    # pull_request:
+    # branches:
+    # - main
+    # - dev
+    # Enables manual action execution.
+    workflow_dispatch:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  test:
-    name: OS ${{ matrix.os }}, Python ${{ matrix.python-version }}
-    runs-on: ${{ matrix.os }}
+    test:
+        name: OS ${{ matrix.os }}, Python ${{ matrix.python-version }}
+        runs-on: ${{ matrix.os }}
 
-    strategy:
-      matrix:
-        python-version: ['3.8']
-        os: [ubuntu-latest]
-        
-    steps:
-      - uses: actions/checkout@v2
-      
-      - name: Set up Python version ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
+        strategy:
+            matrix:
+                python-version: ["3.8"]
+                os: [ubuntu-latest]
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip 
-          python -m pip install -r requirements.txt
-          echo $PWD && cd validation
-          python -m pip install -e .
-          
-      - name: List installed dependencies
-        run: python -m pip list
-        
-      - name: Print help message
-        run: |
-          ./validation/scripts/validation_bootstrap -h
-          
-      - name: Validate Parton-Level analyses
-        run: |
-          ./validation/scripts/validation_bootstrap -P
+        steps:
+            - uses: actions/checkout@v2
 
-      - name: Validate Hadron-Level analyses
-        run: |
-          ./validation/scripts/validation_bootstrap -H
+            - name: Set up Python version ${{ matrix.python-version }}
+              uses: actions/setup-python@v2
+              with:
+                  python-version: ${{ matrix.python-version }}
 
-      - name: Validate Reco-Level analyses
-        run : |
-          ./validation/scripts/validation_bootstrap -R
+            - name: Install dependencies
+              run: |
+                  python -m pip install --upgrade pip 
+                  python -m pip install -r requirements.txt
+                  echo $PWD && cd validation
+                  python -m pip install -e .
 
-      #- name : Validate Expert mode
-      #  run : |
-      #    ./validation/scripts/validation_bootstrap -e
+            - name: List installed dependencies
+              run: python -m pip list
 
-      - name : Validate FastJet interface
-        run : |
-          ./validation/scripts/validation_bootstrap --fastjet
+            - name: Print help message
+              run: |
+                  ./validation/scripts/validation_bootstrap -h
+
+            - name: Validate Parton-Level analyses
+              run: |
+                  ./validation/scripts/validation_bootstrap -P
+
+            - name: Validate Hadron-Level analyses
+              run: |
+                  ./validation/scripts/validation_bootstrap -H
+
+            - name: Validate Reco-Level analyses
+              run: |
+                  ./validation/scripts/validation_bootstrap -R
+
+            #- name : Validate Expert mode
+            #  run : |
+            #    ./validation/scripts/validation_bootstrap -e
+
+            - name: Validate FastJet interface
+              run: |
+                  ./validation/scripts/validation_bootstrap --fastjet

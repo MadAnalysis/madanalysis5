@@ -25,7 +25,7 @@
 from __future__ import absolute_import
 import logging
 from madanalysis.fastsim.ast            import AST
-from madanalysis.fastsim.tagger         import Tagger
+from madanalysis.fastsim.tagger         import Tagger, TaggerStatus
 from madanalysis.fastsim.smearer        import Smearer
 from madanalysis.fastsim.recoefficiency import RecoEfficiency
 from madanalysis.fastsim.scaling        import Scaling
@@ -71,11 +71,11 @@ class SuperFastSim:
         self.photon_isocone_radius   = []
 
     # Definition of a new tagging/smearing rule
-    def define(self,args,prts):
-        prts.Add('c',[4])
-        prts.Add('track',[]) # PDGID is not important
-        prts.Add('JES',  []) # PDGID is not important
-        prts_remove = ['c','track','JES']
+    def define(self, args, prts):
+        prts.Add('c', [4])
+        prts.Add('track', [])  # PDGID is not important
+        prts.Add('JES', [])  # PDGID is not important
+        prts_remove = ['c', 'track', 'JES']
 
         ## remove all initializations when this session is over
         def remove_prts_def(prts_remove,prts):
@@ -87,11 +87,11 @@ class SuperFastSim:
             return (prt[0] in ('-','+') and prt[1:].isdigit()) or prt.isdigit()
 
         ## Checking the length of the argument list
-        if (args[0]=='tagger' and len(args)<5) or (args[0]=='smearer' and len(args)<3) \
-           or  (args[0]=='reco_efficiency' and len(args)<3) or (args[0]=='jes' and len(args)<2) \
-           or (args[0]=='energy_scaling' and len(args)<3) or (args[0]=='scaling' and len(args)<4):
+        if (args[0] == 'tagger' and len(args) < 5) or (args[0] == 'smearer' and len(args) < 3) \
+                or (args[0] == 'reco_efficiency' and len(args) < 3) or (args[0] == 'jes' and len(args) < 2) \
+                or (args[0] == 'energy_scaling' and len(args) < 3) or (args[0] == 'scaling' and len(args) < 4):
             self.logger.error('Not enough arguments for tagging/smearing/reconstruction/scaling')
-            remove_prts_def(prts_remove,prts)
+            remove_prts_def(prts_remove, prts)
             return
 
         ## Checking the first argument
@@ -176,39 +176,43 @@ class SuperFastSim:
             to_decode=args[4:]
 
         ## Getting the bounds and the function
-        function, bounds = self.decode_args(to_decode)
+        function, bounds, tags = self.decode_args(to_decode)
         if function=='':
             self.logger.error('Cannot decode the function or the bounds - ' + args[0] + ' ignored.')
             remove_prts_def(prts_remove,prts)
             return
 
         ## Adding a rule to a tagger/smearer
-        if args[0]=='tagger':
-            self.tagger.add_rule(true_id,reco_id,function,bounds)
-        elif args[0]=='smearer':
-            self.smearer.add_rule(true_id,obs,function,bounds)
-        elif args[0]=='reco_efficiency':
-            self.reco.add_rule(true_id,function,bounds)
-        elif args[0] in ['jes','energy_scaling','scaling']:
-            self.scaling.add_rule(true_id,obs,function,bounds)
-        remove_prts_def(prts_remove,prts)
+        if args[0] == 'tagger':
+            self.tagger.add_rule(true_id, reco_id, function, bounds, TaggerStatus.get_status(tags))
+        elif args[0] == 'smearer':
+            self.smearer.add_rule(true_id, obs, function, bounds)
+        elif args[0] == 'reco_efficiency':
+            self.reco.add_rule(true_id, function, bounds)
+        elif args[0] in ['jes', 'energy_scaling', 'scaling']:
+            self.scaling.add_rule(true_id, obs, function, bounds)
+        remove_prts_def(prts_remove, prts)
         return
 
 
     # Transform the arguments passed in the interpreter in the right format
     def decode_args(self,myargs):
         # Special formating for the power operator
-        args = ' '.join(myargs).replace('^',' ^ ')
-        for symb in ['< =','> =','= =']:
+        args = ' '.join(myargs).replace('^', ' ^ ')
+        for symb in ['< =', '> =', '= =']:
             args = args.replace(symb, ''.join(symb.split()))
         args = args.split()
 
         ## To get the difference pieces of the command
         Nbracket1    = 0
         Nbracket2    = 0
+        Nbracket3    = 0
         beginOptions = len(args)
         endOptions   = -1
         foundOptions = False
+        beginTags    = len(args)
+        endTags      = -1
+        foundTags    = False
 
         ## Extraction of the arguments
         for i in range(0,len(args)):
@@ -225,14 +229,35 @@ class SuperFastSim:
                 Nbracket2-=1
                 if Nbracket1==0:
                     endOptions = i
+            # Look for tagging options
+            elif args[i] == "{":
+                Nbracket3+=1
+                if Nbracket1 == 0 and Nbracket2 == 0:
+                    beginTags = i
+                    foundTags = True
+            elif args[i] == "}":
+                Nbracket3-=1
+                if Nbracket1 == 0 and Nbracket2 == 0:
+                    endTags = i
+
 
         ## Sanity
         if Nbracket1!=0:
             self.logger.error("number of opening '(' and closing ')' does not match.")
-            return '', []
+            return '', [], None
         if Nbracket2!=0:
             self.logger.error("number of opening '[' and closing ']' does not match.")
-            return '', []
+            return '', [], None
+        if Nbracket3!=0:
+            self.logger.error("number of opening '{' and closing '}' does not match.")
+            return '', [], None
+
+        ## Find tags
+        tags = args[beginTags + 1:endTags]
+        if len(tags) > 1:
+            self.logger.error("Can not process more than one tag.")
+            return '', [], None
+        tags = tags[0] if len(tags) == 1 else ""
 
         ## Putting the bounds into an AST
         bounds = ' '.join(args[beginOptions+1:endOptions])
@@ -242,10 +267,14 @@ class SuperFastSim:
         ast_bounds.feed(bounds)
 
         ## Putting the efficiency into an AST
-        efficiency = ' ' .join(args[:beginOptions])
+        start_from = beginOptions if foundOptions else beginTags
+        efficiency = ' ' .join(args[:start_from])
         ast_eff = AST(1, self.observables.full_list)
         ast_eff.feed(efficiency)
-        return ast_eff, ast_bounds
+
+        self.logger.debug(f"Tags: {tags}\nBounds: {bounds}\nefficiency: {efficiency}")
+
+        return ast_eff, ast_bounds, tags
 
 
 

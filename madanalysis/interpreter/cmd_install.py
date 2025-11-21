@@ -124,6 +124,8 @@ class CmdInstall(CmdBase):
             if installer.Execute('fastjet')==False:
                 return False
             return installer.Execute('fastjet-contrib')
+        elif args[0]=='HEPTopTagger':
+            return installer.Execute('HEPTopTagger')
         elif args[0]=='gnuplot':
             return installer.Execute('gnuplot')
         elif args[0]=='matplotlib':
@@ -191,12 +193,8 @@ class CmdInstall(CmdBase):
                             return False
                     return 'restart'
             return padsfs_install_check
-        elif args[0]=='pyhf':
-            self.logger.warning("This command has been deprecated.")
-            self.logger.warning(f"Please use '{sys.executable} -m pip install -r requirements.txt' instead.")
-            return True
         elif args[0]=='likelihood_simplifier':
-            if self.main.session_info.has_scipy and self.main.session_info.has_pyhf:
+            if self.main.session_info.has_spey:
                 return installer.Execute('simplify')
             else:
                 self.logger.error("The `simplify` module requires pyhf, please retry"+ \
@@ -224,7 +222,7 @@ class CmdInstall(CmdBase):
         else:
             output = ["samples","zlib","fastjet", "delphes", "delphesMA5tune",\
                 "gnuplot", "matplotlib", "root" , "numpy", "PAD", "PADForMA5tune",\
-                "PADForSFS", "pyhf"]
+                "PADForSFS", "HEPTopTagger"]
             return self.finalize_complete(text,output)
 
 

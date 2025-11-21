@@ -46,8 +46,8 @@ class RecastConfiguration:
         "global_likelihoods": ["on", "off"],
         "simplify_likelihoods": ["True", "False"],
         "analysis_only_mode": ["True", "False"],
-#        "stat_only_mode": "",
-        "TACO_output": ""
+        #        "stat_only_mode": "",
+        "TACO_output": "",
     }
 
     def __init__(self):
@@ -129,7 +129,7 @@ class RecastConfiguration:
             self.user_DisplayParameter("THerror_combination")
             self.user_DisplayParameter("error_extrapolation")
             self.user_DisplayParameter("global_likelihoods")
-#            self.user_DisplayParameter("stat_only_mode")
+            #            self.user_DisplayParameter("stat_only_mode")
             self.user_DisplayParameter("analysis_only_mode")
 
     def user_DisplayParameter(self, parameter):
@@ -220,14 +220,16 @@ class RecastConfiguration:
                 self.logger.info(
                     "   * Simplified profile likelihoods will be used when available."
                 )
-#         elif parameter == "stat_only_mode":
-#             if self.stat_only_mode:
-#                 self.logger.info(
-#                     "   * Test statistics will be computed for the given analysis."
-#                 )
+        #         elif parameter == "stat_only_mode":
+        #             if self.stat_only_mode:
+        #                 self.logger.info(
+        #                     "   * Test statistics will be computed for the given analysis."
+        #                 )
         elif parameter == "analysis_only_mode":
             if self.analysis_only_mode:
-                self.logger.info("   * MadAnalysis 5 will only compute the various signal region efficiencies (no statistical treatment).")
+                self.logger.info(
+                    "   * MadAnalysis 5 will only compute the various signal region efficiencies (no statistical treatment)."
+                )
 
         return
 
@@ -491,7 +493,9 @@ class RecastConfiguration:
             elif value.lower() == "true":
                 self.analysis_only_mode = True
             else:
-                self.logger.error("analysis_only_mode can only be set to 'True' or 'False'.")
+                self.logger.error(
+                    "analysis_only_mode can only be set to 'True' or 'False'."
+                )
                 return
 
         # other rejection if no algo specified
@@ -512,8 +516,8 @@ class RecastConfiguration:
                     "THerror_combination",
                     "error_extrapolation",
                     "global_likelihoods",
-#                    "stat_only_mode",
-                    "analysis_only_mode"
+                    #                    "stat_only_mode",
+                    "analysis_only_mode",
                 ]  # , "simplify_likelihoods"
         else:
             table = []
@@ -808,23 +812,21 @@ class RecastConfiguration:
             os.path.join(dirname, "Output/SAF/CLs_output_summary.dat")
         )
         self.logger.debug('Check summary file "' + filename + '"...')
-        out = open(filename, "w")
-        counter = 1
-        for item in datasets:
-            outset = open(
-                os.path.normpath(
+        with open(filename, "w", encoding="utf-8") as out:
+            counter = 1
+            for item in datasets:
+                cls_pth = os.path.normpath(
                     os.path.join(dirname, "Output", "SAF", item.name, "CLs_output.dat")
                 )
-            )
-            for line in outset:
-                if counter == 1 and "# analysis name" in line:
-                    out.write("# dataset name".ljust(30) + line[2:])
-                    counter += 1
-                if len(line.lstrip()) == 0:
-                    continue
-                if line.lstrip()[0] == "#":
-                    continue
-                out.write(item.name.ljust(30) + line)
-            outset.close()
-            out.write("\n")
-        out.close()
+                if os.path.isfile(cls_pth):
+                    with open(cls_pth, "r", encoding="utf-8") as outset:
+                        for line in outset.readlines():
+                            if counter == 1 and "# analysis name" in line:
+                                out.write("# dataset name".ljust(30) + line[2:])
+                                counter += 1
+                            if len(line.lstrip()) == 0:
+                                continue
+                            if line.lstrip()[0] == "#":
+                                continue
+                            out.write(item.name.ljust(30) + line)
+                        out.write("\n")

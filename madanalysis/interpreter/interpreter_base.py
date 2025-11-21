@@ -24,16 +24,22 @@
 
 """  A file containing different extension of the cmd basic python library"""
 from __future__ import absolute_import
-from madanalysis.core.script_stack            import ScriptStack
-from madanalysis.interpreter.history          import History
 
 # Python import
 import cmd
 import logging
 import os
-import subprocess
 import readline
+import subprocess
+
 from six.moves import range
+
+from madanalysis.core.script_stack import ScriptStack
+from madanalysis.interpreter.history import History
+
+
+class InvalidCmd(Exception):
+    """expected error for wrong command"""
 
 
 #===============================================================================
@@ -45,15 +51,6 @@ class InterpreterBase(cmd.Cmd):
     This extensions supports line breaking, history, comments,
     internal call to cmdline, path completion,...
     this class should be MG5 independent"""
-
-    class InvalidCmd(Exception):
-        """expected error for wrong command"""
-        pass    
- 
-        debug_output = 'debug'
-        error_debug = """Please report this bug to developers\nMore information can be found in '%s'."""
-        error_debug += """\nPlease attach this file to your report."""
-        keyboard_stop_msg = """Stopping all current operations. Program must exited. Please type 'exit'"""
 
     interpreter_operators = ['(',')','[',']','&','|','&',\
                              '^','!','=','>','<',',']

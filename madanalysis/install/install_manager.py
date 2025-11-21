@@ -24,7 +24,6 @@
 
 from __future__ import absolute_import
 import logging
-import sys
 
 from string_tools import StringTools
 from chronometer  import Chronometer
@@ -49,6 +48,13 @@ class InstallManager():
         elif package=='fastjet-contrib':
             from madanalysis.install.install_fastjetcontrib import InstallFastjetContrib
             installer=InstallFastjetContrib(self.main)
+        elif package=='heptoptagger':
+            if self.main.archi_info.has_fastjet and self.main.archi_info.has_fjcontrib:
+                from madanalysis.install.install_heptoptagger import InstallHEPTopTagger
+                installer=InstallHEPTopTagger(self.main)
+            else:
+                self.logger.error("HEPTopTagger requires FastJet and the FJContrib libraries to be installed. Installation skipped")
+                return True
         elif package in ['delphes', 'delphesma5tune']:
             if self.main.archi_info.has_root:
                 from madanalysis.install.install_delphes import InstallDelphes
@@ -72,16 +78,13 @@ class InstallManager():
             from madanalysis.install.install_numpy import InstallNumpy
             installer=InstallNumpy(self.main)
         elif package in ['pad', 'padforma5tune', 'padforsfs']:
-            if (package == 'padforsfs') or (self.main.archi_info.has_root and self.main.session_info.has_scipy):
+            if (package == 'padforsfs') or (self.main.archi_info.has_root and self.main.session_info.has_spey):
                 from madanalysis.install.install_pad import InstallPad
                 installer=InstallPad(self.main, rawpackage)
             else:
                 self.logger.warning('the package "' + rawpackage + '" cannot be installed without root ' +\
-                    'and scipy; installation skipped')
+                    'and spey; installation skipped')
                 return True
-        elif package=='pyhf':
-            from madanalysis.install.install_pyhf import Installpyhf
-            installer=Installpyhf(self.main)
         elif package=='simplify':
             from madanalysis.install.install_simplify import InstallSimplify
             installer=InstallSimplify(self.main)

@@ -29,6 +29,7 @@ from madanalysis.selection.selection import Selection
 from madanalysis.interpreter.cmd_base import CmdBase
 from madanalysis.region.region_collection import RegionCollection
 from madanalysis.fastsim.fastsim import SuperFastSim
+from madanalysis.jet_clustering.jet_collection import JetCollection
 from madanalysis.system.session_info import SessionInfo
 from madanalysis.system.architecture_info import ArchitectureInfo
 from madanalysis.core.library_builder import LibraryBuilder
@@ -36,7 +37,6 @@ from madanalysis.IOinterface.library_writer import LibraryWriter
 from madanalysis.IOinterface.madgraph_interface import MadGraphInterface
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
 from madanalysis.enumeration.stacking_method_type import StackingMethodType
-from madanalysis.enumeration.uncertainty_type import UncertaintyType
 from madanalysis.enumeration.normalize_type import NormalizeType
 from madanalysis.enumeration.graphic_render_type import GraphicRenderType
 from madanalysis.observable.observable_manager import ObservableManager
@@ -45,14 +45,14 @@ from madanalysis.configuration.fastsim_configuration import FastsimConfiguration
 from madanalysis.configuration.fom_configuration import FomConfiguration
 from madanalysis.configuration.isolation_configuration import IsolationConfiguration
 from madanalysis.configuration.merging_configuration import MergingConfiguration
-from string_tools import StringTools
 from madanalysis.system.checkup import CheckUp
 import logging
 import os
 import sys
-import platform
 from six.moves import range
 import traceback as tb
+
+# pylint: disable=too-many-instance-attributes,import-outside-toplevel, import-error,consider-using-enumerate,logging-not-lazy,logging-fstring-interpolation
 
 
 class Main:
@@ -98,6 +98,7 @@ class Main:
         self.merging = MergingConfiguration()
         self.fastsim = FastsimConfiguration()
         self.superfastsim = SuperFastSim()
+        self.jet_collection = JetCollection()
         self.recasting = RecastConfiguration()
         self.fom = FomConfiguration()
         self.lumi = 10
@@ -672,27 +673,30 @@ class Main:
 
         # Fastjet
         if self.archi_info.has_fastjet:
-            libraries.append(
-                [
-                    "FastJet",
-                    "interface to FastJet",
-                    "fastjet",
-                    self.archi_info.ma5dir
-                    + "/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so",
-                    self.archi_info.ma5dir + "/tools/SampleAnalyzer/Interfaces",
-                    False,
-                ]
-            )
-            libraries.append(
-                [
-                    "test_fastjet",
-                    "interface to Fastjet",
-                    "test_fastjet",
-                    self.archi_info.ma5dir + "/tools/SampleAnalyzer/Bin/TestFastjet",
-                    self.archi_info.ma5dir + "/tools/SampleAnalyzer/Test/",
-                    True,
-                ]
-            )
+            os.environ["FASTJET_FLAG"] = "-DMA5_FASTJET_MODE"
+            self.logger.debug("setting environment: FASTJET_FLAG=%s", os.environ["FASTJET_FLAG"])
+            libraries.append(['FastJet', 'interface to FastJet', 'fastjet',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Lib/libfastjet_for_ma5.so',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Interfaces', False])
+            libraries.append(['test_fastjet', 'interface to Fastjet', 'test_fastjet',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Bin/TestFastjet',
+                              self.archi_info.ma5dir + '/tools/SampleAnalyzer/Test/', True])
+            if self.archi_info.has_fjcontrib:
+                libraries.append(['substructure', 'interface to Jet Substructure module', 'substructure',
+                                  self.archi_info.ma5dir + '/tools/SampleAnalyzer/Lib/libsubstructure_for_ma5.so',
+                                  self.archi_info.ma5dir + '/tools/SampleAnalyzer/Interfaces', False])
+                libraries.append(['test_substructure', 'interface to Jet Substructure module', 'test_substructure',
+                                  self.archi_info.ma5dir + '/tools/SampleAnalyzer/Bin/TestSubstructure',
+                                  self.archi_info.ma5dir + '/tools/SampleAnalyzer/Test/', True])
+                if self.archi_info.has_heptoptagger:
+                    libraries.append(['HEPTopTagger', 'interface to HEPTopTagger module', 'HEPTopTagger',
+                                      self.archi_info.ma5dir + '/tools/SampleAnalyzer/Lib/libHEPTopTagger_for_ma5.so',
+                                      self.archi_info.ma5dir + '/tools/SampleAnalyzer/Interfaces', False])
+                    libraries.append(['test_htt', 'interface to HEPTopTagger module', 'test_htt',
+                                      self.archi_info.ma5dir + '/tools/SampleAnalyzer/Bin/TestHEPTopTagger',
+                                      self.archi_info.ma5dir + '/tools/SampleAnalyzer/Test/', True])
+        else:
+            os.environ["FASTJET_FLAG"] = ""
         # Delphes
         if self.archi_info.has_delphes:
             libraries.append(
@@ -854,29 +858,20 @@ class Main:
             self.logger.info(
                 "   **********************************************************"
             )
-            self.logger.info(
-                "   Component "
-                + str(ind + 1)
-                + "/"
-                + str(len(libraries))
-                + " - "
-                + product
-                + ": "
-                + libraries[ind][1]
-            )
+            self.logger.info(f"   Component {ind + 1}/{len(libraries)} - {product}: {libraries[ind][1]}")
 
             # Cleaning the project
             self.logger.info(
-                "     - Cleaning the project before building the " + product + " ..."
+                f"     - Cleaning the project before building the {product} ..."
             )
             if not compiler.MrProper(libraries[ind][2], libraries[ind][4]):
-                self.logger.error("The " + product + " building aborted.")
+                self.logger.error(f"The {product} building aborted.")
                 sys.exit()
 
             # Compiling
             self.logger.info("     - Compiling the source files ...")
             if not compiler.Compile(ncores, libraries[ind][2], libraries[ind][4]):
-                self.logger.error("The " + product + " building aborted.")
+                self.logger.error(f"The {product} building aborted.")
                 sys.exit()
 
             # Linking
