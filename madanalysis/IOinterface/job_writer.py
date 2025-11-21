@@ -915,6 +915,8 @@ class JobWriter(object):
         options.has_delphes_lib = self.main.archi_info.has_delphes and not kwargs.get(
             "ma5_fastjet_mode", True
         )
+        # JACK: to prevent seg-fault error with delphes
+        options.remove_fastjet_lib = not kwargs.get("ma5_fastjet_mode", True)
 
         options.has_root_inc = self.main.archi_info.has_root
         options.has_root_lib = self.main.archi_info.has_root
