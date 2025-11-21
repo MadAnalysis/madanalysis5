@@ -449,7 +449,11 @@ class CmdSubmit(CmdBase):
 
         if not self.main.recasting.status == "on" and not self.resubmit:
             self.logger.info("   Creating Makefiles...")
-            if not jobber.WriteMakefiles():
+            if not jobber.WriteMakefiles(
+                ma5_fastjet_mode=(
+                    self.main.fastsim.package not in ["delphes", "delphesMA5tune"]
+                )
+            ):
                 self.logger.error("job submission aborted.")
                 return False
 

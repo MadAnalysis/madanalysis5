@@ -196,6 +196,9 @@ class MakefileWriter:
             self.has_root_lib = False
             self.has_root_ma5lib = False
 
+            # @JACK: Remove fastjet lib by default to avoid conflicts with root
+            self.remove_fastjet_lib = False
+
     @staticmethod
     def Makefile(
         MakefileName,
@@ -327,7 +330,6 @@ class MakefileWriter:
                     "$(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config --cxxflags)"
                 ]
             )
-            #            cxxflags.extend(['$(shell fastjet-config --cxxflags)'])
             file.write("CXXFLAGS += " + " ".join(cxxflags) + "\n")
 
         # - zlib
@@ -429,9 +431,17 @@ class MakefileWriter:
                 libs.extend(["-lfastjet_for_ma5"])
                 file.write("LIBFLAGS += " + " ".join(libs) + "\n")
             if options.has_fastjet_lib:
-                file.write(
-                    "LIBFLAGS += $(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config --libs --plugins)\n"
-                )
+                if options.remove_fastjet_lib:
+                    file.write(
+                        "# Adding fastjet libraries is disabled to avoid conflicts with ROOT\n"
+                    )
+                    file.write(
+                        "# LIBFLAGS += $(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config --libs --plugins)\n"
+                    )
+                else:
+                    file.write(
+                        "LIBFLAGS += $(shell $(MA5_BASE)/tools/SampleAnalyzer/ExternalSymLink/Bin/fastjet-config --libs --plugins)\n"
+                    )
             libs = []
             if options.has_fjcontrib:
                 # Add fjcontrib libraries
