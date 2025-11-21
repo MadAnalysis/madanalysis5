@@ -257,7 +257,7 @@ class RunRecast:
         log.info("   Writing the list of datasets...")
         jobber.WriteDatasetList(dataset)
         log.info("   Creating Makefiles...")
-        if not jobber.WriteMakefiles():
+        if not jobber.WriteMakefiles(ma5_fastjet_mode=False):
             return False
 
         # Build analysisList.h and copy analyzer files from the pad
