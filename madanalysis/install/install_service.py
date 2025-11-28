@@ -225,7 +225,7 @@ class InstallService:
             except Exception as err:
                 log.debug(err)
                 log.debug("-> Problem to decode it")
-                log.warning(
+                log.debug(
                     "Bad description for %s, can not read the size of the file.", url
                 )
                 # result = "ERROR"
