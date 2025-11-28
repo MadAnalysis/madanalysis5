@@ -193,15 +193,7 @@ class InstallService:
         for file, url in filesToDownload.items():
             ind += 1
             result = "OK"
-            log.info(
-                "    - "
-                + str(ind)
-                + "/"
-                + str(len(list(filesToDownload.keys())))
-                + " "
-                + url
-                + " ..."
-            )
+            log.info("    - %s/%s %s ...", ind, len(list(filesToDownload.keys())), url)
             output = installdir + "/" + file
 
             # Try to connect the file
