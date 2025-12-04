@@ -145,35 +145,10 @@ class CmdInstall(CmdBase):
                 self.logger.warning('DelphesMA5tune is not installed... please exit the program and install the pad')
                 return True
         elif args[0]=='PAD':
-            pad_install_check, padsfs_install_check = False, False
-            # First check if PAD4SFS is installed
-            if not self.main.session_info.has_padsfs:
-                # check if FastJet is installed
-                if not self.main.archi_info.has_fastjet:
-                    answer = "y"
-                    if not self.main.forced:
-                        self.logger.warning("PADForSFS requires FastJet to be installed.")
-                        self.logger.info("Would you like to install FastJet? [Y/N]")
-                        while True:
-                            answer = input("Answer : ")
-                            if answer.lower() in ['y','n','yes','no', "yeap", "nope"]:
-                                break
-                    if answer.lower() in ['y','yes',"yeap"]:
-                        for package in ["fastjet", "fastjet-contrib", "PADForSFS"]:
-                            if not installer.Execute(package):
-                                return False
-                        padsfs_install_check = 'restart'
-                else:
-                    padsfs_install_check = installer.Execute('PADForSFS')
-
-            if inst_delphes(self.main,installer,'delphes',True):
-                pad_install_check = installer.Execute('PAD')
-            else:
-                self.logger.warning('Delphes is not installed (and will be installed). '+
-                                    'Then please exit MA5 and re-install the PAD')
-            if 'restart' in [pad_install_check, padsfs_install_check]:
-                return 'restart'
-            return any([pad_install_check, padsfs_install_check])
+            if not self.main.archi_info.has_delphes:
+                self.logger.warning("PAD requires delphes installation, installing it...")
+                return installer.Execute('Delphes')
+            return installer.Execute('PAD')
         elif args[0]=='PADForSFS':
             padsfs_install_check = False
             if self.main.archi_info.has_fastjet:
