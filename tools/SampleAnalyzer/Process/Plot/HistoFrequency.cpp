@@ -29,28 +29,23 @@ using namespace MA5;
 /// Adding an entry for a given observable
 void HistoFrequency::Fill(const MAint32 &obs, WeightCollection &weights)
 {
+    // value not found, extend the stack
+    if (stack_.find(obs) == stack_.end())
+        stack_[obs].resize(weights.size());
     for (MAuint32 idx = 0; idx < weights.size(); idx++)
     {
         MAdouble64 w = weights[idx];
-        // Value not found
-        if (stack_.find(obs) == stack_.end())
-            stack_[obs][idx] = WEIGHTS();
-
-        // Value found
+        if (w >= 0)
+        {
+            nentries_[idx].positive++;
+            sum_w_[idx].positive += w;
+            stack_[obs][idx].positive += w;
+        }
         else
         {
-            if (w >= 0)
-            {
-                nentries_[idx].positive++;
-                sum_w_[idx].positive += w;
-                stack_[obs][idx].positive += w;
-            }
-            else
-            {
-                nentries_[idx].negative++;
-                sum_w_[idx].negative += std::fabs(w);
-                stack_[obs][idx].negative += std::fabs(w);
-            }
+            nentries_[idx].negative++;
+            sum_w_[idx].negative += std::fabs(w);
+            stack_[obs][idx].negative += std::fabs(w);
         }
     }
 }

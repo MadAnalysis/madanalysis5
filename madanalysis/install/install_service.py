@@ -181,8 +181,8 @@ class InstallService:
         # Opening log file
         try:
             logfile = open(logFileName, "w")
-        except:
-            log.error("impossible to create the file " + logFileName)
+        except Exception:
+            log.error("impossible to create the file %s", logFileName)
             return False
 
         # Parameters
@@ -198,7 +198,7 @@ class InstallService:
 
             # Try to connect the file
             info = InstallService.UrlAccess(url, headers=kwargs.get("headers", None))
-            ok = info != None
+            ok = info is not None
 
             # Check if the connection is OK
             if not ok:
