@@ -1,24 +1,24 @@
 ################################################################################
-#  
+#
 #  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
-#  
+#
 #  This file is part of MadAnalysis 5.
 #  Official website: <https://github.com/MadAnalysis/madanalysis5>
-#  
+#
 #  MadAnalysis 5 is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
-#  
+#
 #  MadAnalysis 5 is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #  GNU General Public License for more details.
-#  
+#
 #  You should have received a copy of the GNU General Public License
 #  along with MadAnalysis 5. If not, see <http://www.gnu.org/licenses/>
-#  
+#
 ################################################################################
 
 
@@ -27,6 +27,7 @@ import logging
 import glob
 import os
 import sys
+from tempfile import TemporaryDirectory
 import re
 import platform
 from shell_command  import ShellCommand
@@ -55,10 +56,10 @@ class DetectGpp:
     def PrintDisableMessage(self):
         self.logger.warning('g++ compiler not found. Please install it before using MadAnalysis 5.')
 
-        
+
     def AutoDetection(self):
         msg=''
-        
+
         # Which
         result = ShellCommand.Which('g++',all=False,mute=True)
         if len(result)==0:
@@ -70,19 +71,20 @@ class DetectGpp:
 
         # Check C++ version
         try:
-            with open(os.path.join(self.archi_info.ma5dir, "cxxtest.cc"), 'w') as f:
-                f.write("int main() { return 0; }\n")
-            command = lambda cxx_version: [
-                f"g++ -std=c++{cxx_version} "
-                f"{os.path.join(self.archi_info.ma5dir, 'cxxtest.cc')} "
-                f"-o {os.path.join(self.archi_info.ma5dir, 'cxxtest')}"
-            ]
-            for version in [11,14]: # ,17,20]: for the future
-                result = ShellCommand.Execute(command(version), self.archi_info.ma5dir, shell=True)
-                if result:
-                    setattr(self.archi_info, "cpp"+str(version), True)
-            os.remove(os.path.join(self.archi_info.ma5dir, "cxxtest.cc"))
-            os.remove(os.path.join(self.archi_info.ma5dir, "cxxtest"))
+            with TemporaryDirectory() as tmpdir:
+                with open(os.path.join(tmpdir, "cxxtest.cc"), 'w') as f:
+                    f.write("int main() { return 0; }\n")
+                command = lambda cxx_version: [
+                    f"g++ -std=c++{cxx_version} "
+                    f"{os.path.join(tmpdir, 'cxxtest.cc')} "
+                    f"-o {os.path.join(tmpdir, 'cxxtest')}"
+                ]
+                for version in [11,14]: # ,17,20]: for the future
+                    result = ShellCommand.Execute(command(version), tmpdir, shell=True)
+                    if result:
+                        setattr(self.archi_info, "cpp"+str(version), True)
+                os.remove(os.path.join(tmpdir, "cxxtest.cc"))
+                os.remove(os.path.join(tmpdir, "cxxtest"))
         except Exception as err:
             self.logger.debug(f"Unexpected {err}, {type(err)}")
 
@@ -144,7 +146,7 @@ class DetectGpp:
                 for path in paths:
                     if os.path.isdir(path):
                         self.library_paths.append(os.path.normpath(path))
-                    
+
         if self.debug:
             self.logger.debug("  search path for headers:")
             for line in self.header_paths:
