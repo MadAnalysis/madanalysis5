@@ -667,7 +667,7 @@ class JobWriter(object):
 
             file.write("  if (fastsim1==0) return 1;\n\n")
 
-        # Post intialization (crating the output directory structure)
+        # Post intialization (creating the output directory structure)
         file.write(
             "  // Post initialization (creates the new output directory structure)\n"
         )
@@ -685,7 +685,7 @@ class JobWriter(object):
             file.write("  manager.AddDefaultHadronic();\n")
             file.write('  // definition of the multiparticle "invisible"\n')
             file.write("  manager.AddDefaultInvisible();\n")
-            # If expert mode is initiated without an SFS card "invisible"
+            # If expert mode is initiated without an SFS card, then the "invisible"
             # collection does not exist. Thus just initiate with default config.
             if self.main.multiparticles.Find("invisible"):
                 for item in self.main.multiparticles.Get("invisible"):
@@ -695,6 +695,17 @@ class JobWriter(object):
                     if item not in self.main.multiparticles.Get("invisible"):
                         file.write(f"  PHYSICS->mcConfig().RemoveInvisibleId({item});\n")
             file.write("\n")
+
+        # Instead, if PARTON mode
+        else:
+            file.write('  // definition of the multiparticle "hadronic"\n')
+            for item in self.main.multiparticles.Get("hadronic"):
+                file.write('  PHYSICS->mcConfig().AddHadronicId('+str(item)+');\n')
+            file.write('\n')
+            file.write('  // definition of the multiparticle "invisible"\n')
+            for item in self.main.multiparticles.Get("invisible"):
+                file.write('  PHYSICS->mcConfig().AddInvisibleId('+str(item)+');\n')
+            file.write('\n')
 
         # Loop
         file.write("  // ---------------------------------------------------\n")
