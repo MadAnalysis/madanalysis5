@@ -1,0 +1,64 @@
+c++ -Wall -std=c++11 -O3 -fPIC -I/Users/fuks/Documents/HEPTools/MadAnalysis5/GitRepository/tmp/madanalysis5/tools/ -I./ -stdlib=libc++ -pthread -std=c++14 -m64 -I/Applications/Root/include -o Main/main.o -c Main/main.cpp
+In file included from Main/main.cpp:12:
+In file included from ./SampleAnalyzer/User/Analyzer/analysisList.h:2:
+In file included from ./SampleAnalyzer/User/Analyzer/user.h:5:
+In file included from /Users/fuks/Documents/HEPTools/MadAnalysis5/GitRepository/tmp/madanalysis5/tools/SampleAnalyzer/Interfaces/root/RootMainHeaders.h:32:
+In file included from /Applications/Root/include/TTree.h:46:
+In file included from /Applications/Root/include/TBranch.h:29:
+In file included from /Applications/Root/include/TBranchCacheInfo.h:25:
+/Applications/Root/include/TBits.h:150:11: warning: use of bitwise '&' with boolean operands [-Wbitwise-instead-of-logical]
+   return (Bool_t)lhs & rhs;
+          ^~~~~~~~~~~~~~~~~
+                      &&
+/Applications/Root/include/TBits.h:150:11: note: cast one or both operands to int to silence this warning
+/Applications/Root/include/TBits.h:155:11: warning: use of bitwise '|' with boolean operands [-Wbitwise-instead-of-logical]
+   return (Bool_t)lhs | rhs;
+          ^~~~~~~~~~~~~~~~~
+                      ||
+/Applications/Root/include/TBits.h:155:11: note: cast one or both operands to int to silence this warning
+In file included from Main/main.cpp:12:
+In file included from ./SampleAnalyzer/User/Analyzer/analysisList.h:2:
+In file included from ./SampleAnalyzer/User/Analyzer/user.h:5:
+In file included from /Users/fuks/Documents/HEPTools/MadAnalysis5/GitRepository/tmp/madanalysis5/tools/SampleAnalyzer/Interfaces/root/RootMainHeaders.h:39:
+In file included from /Applications/Root/include/TCanvas.h:15:
+In file included from /Applications/Root/include/TPad.h:15:
+In file included from /Applications/Root/include/TVirtualPad.h:30:
+In file included from /Applications/Root/include/TQObject.h:42:
+/Applications/Root/include/TVirtualQConnection.h:53:42: warning: 'sizeof (val)' will return the size of the pointer, not the array itself [-Wsizeof-pointer-div]
+      constexpr size_t size = sizeof(val)/sizeof(val[0]);
+                              ~~~~~~~~~~~^
+/Applications/Root/include/TVirtualQConnection.h:51:25: note: pointer 'val' declared here
+   void SetArg(const T* val)
+                        ^
+3 warnings generated.
+c++ -Wall -std=c++11 -O3 -fPIC -I/Users/fuks/Documents/HEPTools/MadAnalysis5/GitRepository/tmp/madanalysis5/tools/ -I./ -stdlib=libc++ -pthread -std=c++14 -m64 -I/Applications/Root/include -o SampleAnalyzer/User/Analyzer/user.o -c SampleAnalyzer/User/Analyzer/user.cpp
+In file included from SampleAnalyzer/User/Analyzer/user.cpp:1:
+In file included from ./SampleAnalyzer/User/Analyzer/user.h:5:
+In file included from /Users/fuks/Documents/HEPTools/MadAnalysis5/GitRepository/tmp/madanalysis5/tools/SampleAnalyzer/Interfaces/root/RootMainHeaders.h:32:
+In file included from /Applications/Root/include/TTree.h:46:
+In file included from /Applications/Root/include/TBranch.h:29:
+In file included from /Applications/Root/include/TBranchCacheInfo.h:25:
+/Applications/Root/include/TBits.h:150:11: warning: use of bitwise '&' with boolean operands [-Wbitwise-instead-of-logical]
+   return (Bool_t)lhs & rhs;
+          ^~~~~~~~~~~~~~~~~
+                      &&
+/Applications/Root/include/TBits.h:150:11: note: cast one or both operands to int to silence this warning
+/Applications/Root/include/TBits.h:155:11: warning: use of bitwise '|' with boolean operands [-Wbitwise-instead-of-logical]
+   return (Bool_t)lhs | rhs;
+          ^~~~~~~~~~~~~~~~~
+                      ||
+/Applications/Root/include/TBits.h:155:11: note: cast one or both operands to int to silence this warning
+In file included from SampleAnalyzer/User/Analyzer/user.cpp:1:
+In file included from ./SampleAnalyzer/User/Analyzer/user.h:5:
+In file included from /Users/fuks/Documents/HEPTools/MadAnalysis5/GitRepository/tmp/madanalysis5/tools/SampleAnalyzer/Interfaces/root/RootMainHeaders.h:39:
+In file included from /Applications/Root/include/TCanvas.h:15:
+In file included from /Applications/Root/include/TPad.h:15:
+In file included from /Applications/Root/include/TVirtualPad.h:30:
+In file included from /Applications/Root/include/TQObject.h:42:
+/Applications/Root/include/TVirtualQConnection.h:53:42: warning: 'sizeof (val)' will return the size of the pointer, not the array itself [-Wsizeof-pointer-div]
+      constexpr size_t size = sizeof(val)/sizeof(val[0]);
+                              ~~~~~~~~~~~^
+/Applications/Root/include/TVirtualQConnection.h:51:25: note: pointer 'val' declared here
+   void SetArg(const T* val)
+                        ^
+3 warnings generated.
