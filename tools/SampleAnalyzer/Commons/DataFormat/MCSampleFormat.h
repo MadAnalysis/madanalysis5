@@ -75,8 +75,9 @@ namespace MA5
         MAfloat32 energy_unit_; /// Energy unit: GeV=1 MeV=0.001 keV=0.000001
 
         // ----------------------- multiweights ------------------------
-        /// @brief store weight names
+        /// @brief store weight names and idnex for local storage
         std::map<int, std::string> weight_names_;
+        std::map<int, std::size_t> weight_index_;
 
         // ----------------------- file info ---------------------------
         MAfloat64 xsection_;
@@ -112,6 +113,7 @@ namespace MA5
             energy_unit_ = 1.0;
 
             weight_names_.clear();
+            weight_index_.clear();
 
             // File info
             xsection_ = 0.;
@@ -188,7 +190,29 @@ namespace MA5
         /// @brief set weight names
         /// @param id location of the weight
         /// @param name name of the weight
-        void SetWeightName(int id, std::string name) { weight_names_[id] = name; }
+        /// The weight-index allow us to internal know who is who in the weight vector at the event level
+        void SetWeightName(int id, std::string name)
+        {
+          weight_names_[id] = name;
+          if (weight_index_.find(id)==weight_index_.end())
+          {
+            std::size_t idx = weight_index_.size();
+            weight_index_[id] = idx;
+          }
+        }
+
+        // Method to obtain the internal index of a weight
+        std::size_t GetWeightIndex(int id) const
+        {
+            auto it = weight_index_.find(id);
+            if (it == weight_index_.end())
+            {
+                std::stringstream str;
+                str << id;
+                throw EXCEPTION_ERROR("Unknown weight ID '" + str.str() + "'", "", 0);
+            }
+            return it->second;
+        }
 
         /// @brief accessor to weight names
         const std::map<int, std::string> &WeightNames() const { return weight_names_; }

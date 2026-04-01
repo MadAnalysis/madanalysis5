@@ -182,6 +182,10 @@ MAbool LHEReader::ReadHeader(SampleFormat &mySample)
         mySample.SetSampleGenerator(MA5GEN::UNKNOWN);
     }
 
+
+    // Safety if no weight information: we need one weight
+    if(mySample.mc()->WeightNames().empty()) mySample.mc()->SetWeightName(0, "nominal");
+
     // Normal end
     firstevent_ = true;
     return true;
@@ -217,6 +221,7 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat &myEvent, SampleFormat &mySamp
 {
     // Initiliaze MC
     myEvent.InitializeMC();
+    myEvent.mc()->weights().resize(mySample.mc()->WeightNames().size());
 
     // Declaring a new string for line
     std::string line;
@@ -246,12 +251,12 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat &myEvent, SampleFormat &mySamp
             EndOfEvent = true;
             continue;
         }
-        else if (line.find("<rwgt>") != std::string::npos || line.find("mgrwt") != std::string::npos)
+        else if (line.find("<rwgt>") != std::string::npos || line.find("<mgrwt>") != std::string::npos)
         {
             multiweight_block = true;
             continue;
         }
-        else if (line.find("</rwgt>") != std::string::npos || line.find("/mgrwt") != std::string::npos)
+        else if (line.find("</rwgt>") != std::string::npos || line.find("</mgrwt>") != std::string::npos)
         {
             multiweight_block = false;
             continue;
@@ -272,6 +277,7 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat &myEvent, SampleFormat &mySamp
         // Actions
         if (event_block && !multiweight_block && !clustering_block)
         {
+            // Event init line
             if (event_header)
             {
                 FillEventInitLine(line, myEvent);
@@ -282,7 +288,7 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat &myEvent, SampleFormat &mySamp
         }
         else if (event_block && multiweight_block && !clustering_block)
         {
-            FillWeightLine(line, myEvent);
+            FillWeightLine(line, mySample, myEvent);
         }
         else if (event_block && !multiweight_block && clustering_block)
         {
@@ -567,68 +573,75 @@ void LHEReader::FillEventParticleLine(const std::string &line,
 void LHEReader::FillWeightNames(const std::string &line, SampleFormat &mySample)
 {
     // Parsing
-    std::stringstream str(line);
     std::size_t startTagPos = line.find("<weight");
     std::size_t endTagPos = line.find("</weight>");
-    if (startTagPos != std::string::npos && endTagPos != std::string::npos)
+
+    // Safety
+    if (startTagPos == std::string::npos || endTagPos == std::string::npos) return;
+
+    // Extract the weight id -- Benj: we can have either a double quote or single quote
+    std::size_t idPos = line.find("id=", startTagPos)+3;
+    char quote = line[idPos];
+    if (quote!='\'' && quote!='"') return;
+    std::size_t idStart = idPos+1;
+    std::size_t idEndPos = line.find(quote, idStart);
+    std::string id = line.substr(idStart, idEndPos - idStart);
+
+    // Extract the content between the tags
+    std::size_t nameStart = line.find(">", startTagPos)+1;
+    std::string weight_name = line.substr(nameStart, endTagPos - nameStart);
+
+    // Trim the weight_name string
+    weight_name.erase(0, weight_name.find_first_not_of(" \t\n\r"));
+    weight_name.erase(weight_name.find_last_not_of(" \t\n\r") + 1);
+
+    // Print the id and weight_name
+    try
     {
-        // Extract the weight id
-        std::size_t idPos = line.find("id='", startTagPos);
-        std::size_t idEndPos = line.find("'", idPos + 4);
-        std::string id = line.substr(idPos + 4, idEndPos - (idPos + 4));
-
-        // Extract the content between the tags
-        std::size_t nameStart = line.find(">", startTagPos) + 1;
-        std::string weight_name = line.substr(nameStart, endTagPos - nameStart);
-
-        // Trim the weight_name string
-        weight_name.erase(0, weight_name.find_first_not_of(" \t\n\r"));
-        weight_name.erase(weight_name.find_last_not_of(" \t\n\r") + 1);
-
-        // Print the id and weight_name
         mySample.mc()->SetWeightName(std::stoi(id), weight_name);
     }
+    catch(const std::exception&e)
+    {
+        ERROR << "Non-numeric weight ID '" << id << "' is not supported." << endmsg;
+        MANAGE_EXCEPTION(e);
+    }
+
 }
 
 // -----------------------------------------------------------------------------
 // FillWeightLine
 // -----------------------------------------------------------------------------
-void LHEReader::FillWeightLine(const std::string &line,
-                               EventFormat &myEvent)
+void LHEReader::FillWeightLine(const std::string &line, SampleFormat &mySample, EventFormat &myEvent)
 {
-    std::stringstream str;
-    str << line;
+    std::size_t idPos = line.find("id=");
+    if (idPos == std::string::npos) return;
+    idPos += 3;
 
-    std::string tmp;
-    str >> tmp;
-    if (tmp != "<wgt")
-        return;
+    char quote = line[idPos];
+    if (quote != '\'' && quote != '"') return;
 
-    /// @jackaraz: Note that changing "\"" to "\'". this may cause problems in certain files
-    /// with the LHE example that I have the quotes are written with ' not with "
-    std::size_t found1 = line.find("\'");
-    if (found1 == std::string::npos)
-        return;
-    std::size_t found2 = line.find("\'", found1 + 1);
-    if (found2 == std::string::npos)
-        return;
-    std::string idstring = line.substr(found1 + 1, found2 - found1 - 1);
+    std::size_t found1 = idPos;
+    std::size_t found2 = line.find(quote, found1 + 1);
+    if (found2 == std::string::npos) return;
 
-    std::stringstream str2;
-    str2 << idstring;
-    MAuint32 id;
-    str2 >> id;
-    found1 = line.find(">");
-    if (found1 == std::string::npos)
-        return;
-    found2 = line.find("<", found1 + 1);
-    if (found2 == std::string::npos)
-        return;
-    std::string valuestring = line.substr(found1 + 1, found2 - found1 - 1);
+    std::string id = line.substr(found1 + 1, found2 - found1 - 1);
 
-    std::stringstream str3;
-    str3 << valuestring;
-    MAfloat64 value;
-    str3 >> value;
-    myEvent.mc()->weights().Add(id, value);
+    std::size_t found3 = line.find(">", found2);
+    if (found3 == std::string::npos) return;
+    std::size_t found4 = line.find("<", found3 + 1);
+    if (found4 == std::string::npos) return;
+
+    std::string value = line.substr(found3 + 1, found4 - found3 - 1);
+
+    std::stringstream str1(id);
+    MAuint32 myid;
+    str1 >> myid;
+    if (str1.fail()) return;
+
+    std::stringstream str2(value);
+    MAfloat64 myvalue;
+    str2 >> myvalue;
+    if (str2.fail()) return;
+
+    myEvent.mc()->weights().Add(mySample.mc()->GetWeightIndex(myid), myvalue);
 }
