@@ -244,6 +244,7 @@ class JobReader():
         endTag         = SafBlockStatus()
         globalTag      = SafBlockStatus()
         detailTag      = SafBlockStatus()
+        weightnamesTag = SafBlockStatus()
 
         # Loop over the lines
         numline=0
@@ -282,13 +283,17 @@ class JobReader():
                     detailTag.activate()
                 elif words[0].lower()=='</sampledetailedinfo>':
                     detailTag.desactivate()
+                elif words[0].lower()=='<weightnames>':
+                    weightnamesTag.activate()
+                elif words[0].lower()=='</weightnames>':
+                    weightnamesTag.desactivate()
 
             # Looking for summary sample info
-            elif globalTag.activated and len(words)==5:
+            elif globalTag.activated and len(words)==5 and (not weightnamesTag.activated):
                 dataset.measured_global = self.ExtractSampleInfo(words,numline,filename)
 
             # Looking for detail sample info (one line for each file)
-            elif detailTag.activated and len(words)==5:
+            elif detailTag.activated and len(words)==5 and (not weightnamesTag.activated):
                 dataset.measured_detail.append(self.ExtractSampleInfo(words,numline,filename))
 
         # Information found ?
