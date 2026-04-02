@@ -1,4 +1,4 @@
-################################################################################
+###############################################################################
 #  
 #  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
@@ -44,8 +44,9 @@ class InstallSamples:
             "zz.lhe.gz"          : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/zz.lhe.gz", \
             "mg5_ttbar2l.lhco"   : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/mg5_ttbar2l.lhco", \
             "mg5_zll.lhco"       : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/mg5_zll.lhco", \
-            "wplus_prod.hepmc.gz": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/wplus_prod.hepmc.gz",
-            "MinBias.pileup"     : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/MinBias.pileup",
+            "wplus_prod.hepmc.gz": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/wplus_prod.hepmc.gz", \
+            "MinBias.pileup"     : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/MinBias.pileup", \
+            "lljj.lhe.gz"        : "https://github.com/MadAnalysis/samples/raw/refs/heads/main/lljj.lhe.gz"
         }
 
 
