@@ -698,7 +698,7 @@ class JobWriter(object):
 
         # Instead, if PARTON mode
         else:
-            file.write('  // definition of the multiparticle "hadronic"\n')
+            file.write('\n  // definition of the multiparticle "hadronic"\n')
             for item in self.main.multiparticles.Get("hadronic"):
                 file.write('  PHYSICS->mcConfig().AddHadronicId('+str(item)+');\n')
             file.write('\n')
