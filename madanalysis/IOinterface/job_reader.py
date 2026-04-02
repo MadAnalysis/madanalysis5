@@ -549,24 +549,28 @@ class JobReader():
                 statisticsTag.newline()
 
             # Looking from histogram data [ histo and histoLogX ]
-            elif dataTag.activated and len(words)==2 and (histoTag.activated or histoLogXTag.activated):
-                results = self.ExtractStatisticsFloat(words,numline,filename)
+            # For multiweight histograms, the SAF line contains 2*Nweights columns:
+            #   w1_pos w1_neg w2_pos w2_neg ...
+            # For the standard Python plotting machinery, keep only the nominal pair,
+            # i.e. the first two columns.
+            elif dataTag.activated and len(words)>=2 and (histoTag.activated or histoLogXTag.activated):
+                results = self.ExtractStatisticsFloat(words[:2],numline,filename)
+                nbins = histoinfo.nbins if histoTag.activated else histologxinfo.nbins
                 if dataTag.Nlines==0:
                     if histoTag.activated:
                         histoinfo.positive.underflow=results[0]
                         histoinfo.negative.underflow=results[1]
-                    elif histoLogXTag.activated:
+                    else:
                         histologxinfo.positive.underflow=results[0]
                         histologxinfo.negative.underflow=results[1]
-                elif dataTag.Nlines==(histoinfo.nbins+1):
+                elif dataTag.Nlines==(nbins+1):
                     if histoTag.activated:
                         histoinfo.positive.overflow=results[0]
                         histoinfo.negative.overflow=results[1]
-                    elif histoLogXTag.activated:
+                    else:
                         histologxinfo.positive.overflow=results[0]
                         histologxinfo.negative.overflow=results[1]
-                elif dataTag.Nlines>=1 and dataTag.Nlines<=histoinfo.nbins:
-                    if histoTag.activated or histoLogXTag.activated:
+                elif dataTag.Nlines>=1 and dataTag.Nlines<=nbins:
                         data_positive.append(results[0])
                         data_negative.append(results[1])
                 else:
