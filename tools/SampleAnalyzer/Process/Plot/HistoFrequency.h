@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -97,33 +97,26 @@ class HistoFrequency : public PlotBase
   /// Adding an entry for a given observable
   void Fill(const MAint32& obs, MAfloat64 weight=1.0)
   {
-    // Looking for the value
-    iterator it = stack_.find(obs);
+    // Looking for the value and creating it if not existing
+    if (stack_.find(obs) == stack_.end())
+       stack_[obs] = std::make_pair(0.,0.);
 
-    // Value not found
-    if (it==stack_.end())
+    // Noe filling the histogram
+    if (weight>=0)
     {
-      stack_[obs]=std::make_pair(0.,0.);
+      nentries_.first++;
+      sum_w_.first+=weight;
+      stack_[obs].first+=weight;
     }
-
-    // Value found
-    else
+    else 
     {
-      if (weight>=0)
-      {
-        nentries_.first++;
-        sum_w_.first+=weight;
-        stack_[obs].first+=weight;
-      }
-      else 
-      {
-        nentries_.second++; 
-        weight=std::abs(weight);
-        sum_w_.second+=weight;
-        stack_[obs].second+=weight;
-      }
+      nentries_.second++; 
+      weight=std::abs(weight);
+      sum_w_.second+=weight;
+      stack_[obs].second+=weight;
     }
   }
+
 
   /// Write the plot in a ROOT file
   virtual void Write_TextFormat(std::ostream* output)

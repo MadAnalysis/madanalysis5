@@ -7,8 +7,11 @@
 ## Improvements
 
 * Statistical inference has been moved to Spey
+* The validation module has been rebranded (for now)
 
 ## Bug fixes
+* Bug fix in the HistFrequency module of SampleAnalyzer
+  (The first time an entry was found, it was not added to the histo)
 
 ## Contributors
 
