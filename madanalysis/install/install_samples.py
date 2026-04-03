@@ -1,6 +1,6 @@
-################################################################################
+###############################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -37,15 +37,16 @@ class InstallSamples:
         self.installdir = os.path.normpath(self.main.archi_info.ma5dir+'/samples')
         self.files = {
             "ttbar_fh.lhe.gz"    : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_fh.lhe.gz", \
-            "ttbar_sl_1.lhe.gz"  : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_sl_1.lhe.gz", \
+            "ttbar_sl_1.lhe.gz"  : "https://github.com/MadAnalysis/samples/raw/refs/heads/main/ttbar_sl_1.lhe.gz", \
             "ttbar_sl_2.lhe.gz"  : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_sl_2.lhe.gz", \
             "ttbar_sl_1.lhe"     : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_sl_1.lhe", \
             "ttbar_sl_2.lhe"     : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/ttbar_sl_2.lhe", \
             "zz.lhe.gz"          : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/zz.lhe.gz", \
             "mg5_ttbar2l.lhco"   : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/mg5_ttbar2l.lhco", \
             "mg5_zll.lhco"       : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/mg5_zll.lhco", \
-            "wplus_prod.hepmc.gz": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/wplus_prod.hepmc.gz",
-            "MinBias.pileup"     : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/MinBias.pileup",
+            "wplus_prod.hepmc.gz": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/wplus_prod.hepmc.gz", \
+            "MinBias.pileup"     : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/samples/MinBias.pileup", \
+            "lljj.lhe.gz"        : "https://github.com/MadAnalysis/samples/raw/refs/heads/main/lljj.lhe.gz"
         }
 
 

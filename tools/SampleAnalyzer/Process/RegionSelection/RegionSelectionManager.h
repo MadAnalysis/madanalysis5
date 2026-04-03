@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //
 //  This file is part of MadAnalysis 5.
@@ -28,6 +28,8 @@
 #include <vector>
 #include <string>
 #include <sstream>
+
+#define assertm(exp, msg) assert(((void)msg, exp))
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Counter/MultiRegionCounterManager.h"
@@ -59,7 +61,10 @@ namespace MA5
         MAuint32 NumberOfSurvivingRegions_;
 
         /// Weight associated with the processed event
-        MAfloat64 weight_;
+        WeightCollection weight_;
+
+        /// Weight associated with specific regions
+        std::map<std::string, WeightCollection> region_weight_;
 
         // -------------------------------------------------------------
         //                      method members
@@ -72,69 +77,52 @@ namespace MA5
         ~RegionSelectionManager()
         {
             for (auto &region_pointer : regions_)
-            {
                 delete region_pointer;
-            }
         };
 
         /// Reset
         void Reset()
         {
-            for (MAuint32 i = 0; i < regions_.size(); i++)
-            {
-                if (regions_[i] != 0)
-                    delete regions_[i];
-            }
             regions_.clear();
             cutmanager_.Finalize();
             plotmanager_.Finalize();
+            weight_.clear();
+            region_weight_.clear();
         }
 
         /// Finalizing
         void Finalize() { Reset(); }
 
         /// Get methods
-        std::vector<RegionSelection *> Regions()
-        {
-            return regions_;
-        }
+        std::vector<RegionSelection *> Regions() { return regions_; }
 
-        MultiRegionCounterManager *GetCutManager()
-        {
-            return &cutmanager_;
-        }
+        MultiRegionCounterManager *GetCutManager() { return &cutmanager_; }
 
-        PlotManager *GetPlotManager()
-        {
-            return &plotmanager_;
-        }
+        PlotManager *GetPlotManager() { return &plotmanager_; }
 
-        MAfloat64 GetCurrentEventWeight()
-        {
-            return weight_;
-        }
+        /// @brief Accessor to the current event weight
+        /// @return weight collection object
+        const WeightCollection GetCurrentEventWeights() const { return weight_; }
 
-        /// Set method
-        void SetCurrentEventWeight(MAfloat64 weight)
-        {
-            weight_ = weight;
-            for (MAuint16 i = 0; i < regions_.size(); i++)
-            {
-                regions_[i]->SetWeight(weight);
-            }
-        }
+        /// @brief Accessor to the current event weight
+        /// @return weight collection object
+        /// This function is for backwards compatibility
+        const MAdouble64 GetCurrentEventWeight() const { return weight_[0]; }
 
-        /// Set method
-        void SetRegionWeight(std::string name, MAfloat64 weight)
+        /// @brief Set current event weight with a weight map
+        /// @param weight weight index and value
+        void SetCurrentEventWeight(WeightCollection &weight) { weight_ = WeightCollection(weight); }
+
+        /// @brief Set current event weight with a weight map
+        /// @param weight weight index and value
+        void SetCurrentEventWeight(const WeightCollection &weight) { weight_ = WeightCollection(weight); }
+
+        /// @brief Set a specific weight to a region different than the others
+        /// @param name region name
+        /// @param weight weight collection object
+        void SetRegionWeight(std::string name, WeightCollection &weight)
         {
-            for (MAuint16 i = 0; i < regions_.size(); i++)
-            {
-                if (regions_[i]->GetName() == name)
-                {
-                    regions_[i]->SetWeight(weight);
-                    break;
-                }
-            }
+            region_weight_.insert(std::make_pair(name, WeightCollection(weight)));
         }
 
         /// Adding a RegionSelection to the manager
@@ -151,15 +139,19 @@ namespace MA5
             regions_.push_back(myregion);
         }
 
-        /// Getting ready for a new event
-        void InitializeForNewEvent(MAfloat64 EventWeight)
+        /// THIS FUNCTION HAS BEEN DEPRECATED
+        void InitializeForNewEvent(MAfloat64 EventWeight) {}
+
+        /// @brief initialise new event with multiweight definition
+        /// @param EventWeight weight map
+        void InitializeForNewEvent(const WeightCollection &EventWeight)
         {
-            weight_ = EventWeight;
+            weight_.SetWeights(EventWeight.GetWeights());
             NumberOfSurvivingRegions_ = regions_.size();
-            for (MAuint32 i = 0; i < regions_.size(); i++)
-                regions_[i]->InitializeForNewEvent(EventWeight);
+            for (auto &reg : regions_)
+                reg->InitializeForNewEvent(EventWeight);
             for (MAuint32 i = 0; i < plotmanager_.GetNplots(); i++)
-                plotmanager_.GetHistos()[i]->SetFreshEvent(true);
+                plotmanager_.GetHistos()[i]->SetFreshEvent(true, EventWeight);
         }
 
         /// This method associates all regions with a cut

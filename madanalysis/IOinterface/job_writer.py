@@ -1,6 +1,6 @@
 ################################################################################
 #
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #
 #  This file is part of MadAnalysis 5.
@@ -667,7 +667,7 @@ class JobWriter(object):
 
             file.write("  if (fastsim1==0) return 1;\n\n")
 
-        # Post intialization (crating the output directory structure)
+        # Post intialization (creating the output directory structure)
         file.write(
             "  // Post initialization (creates the new output directory structure)\n"
         )
@@ -676,15 +676,16 @@ class JobWriter(object):
             file.write("\n\n  /// Setting the random seed\n")
             file.write(f"  RANDOM->SetSeed({self.main.random_seed});\n\n")
 
-        # Add default hadrons and invisible particles for Reco mode
-        if self.main.mode == MA5RunningType.RECO:
+        # Add default hadrons and invisible particles for RECO and HADRON mode
+        # The invisible container may also be changed when runnign the code in HADRON mode.
+        if self.main.mode in [MA5RunningType.RECO, MA5RunningType.HADRON]:
             file.write("\n  // Initializing PhysicsService for MC\n")
             file.write("  PHYSICS->mcConfig().Reset();\n")
             file.write('  // definition of the multiparticle "hadronic"\n')
             file.write("  manager.AddDefaultHadronic();\n")
             file.write('  // definition of the multiparticle "invisible"\n')
             file.write("  manager.AddDefaultInvisible();\n")
-            # If expert mode is initiated without an SFS card "invisible"
+            # If expert mode is initiated without an SFS card, then the "invisible"
             # collection does not exist. Thus just initiate with default config.
             if self.main.multiparticles.Find("invisible"):
                 for item in self.main.multiparticles.Get("invisible"):
@@ -694,6 +695,17 @@ class JobWriter(object):
                     if item not in self.main.multiparticles.Get("invisible"):
                         file.write(f"  PHYSICS->mcConfig().RemoveInvisibleId({item});\n")
             file.write("\n")
+
+        # Instead, if PARTON mode
+        else:
+            file.write('\n  // definition of the multiparticle "hadronic"\n')
+            for item in self.main.multiparticles.Get("hadronic"):
+                file.write('  PHYSICS->mcConfig().AddHadronicId('+str(item)+');\n')
+            file.write('\n')
+            file.write('  // definition of the multiparticle "invisible"\n')
+            for item in self.main.multiparticles.Get("invisible"):
+                file.write('  PHYSICS->mcConfig().AddInvisibleId('+str(item)+');\n')
+            file.write('\n')
 
         # Loop
         file.write("  // ---------------------------------------------------\n")
@@ -735,6 +747,7 @@ class JobWriter(object):
             file.write("      fastsim1->Execute(mySample,myEvent);\n")
         elif self.main.fastsim.package == "delphesMA5tune":
             file.write("      fastsim1->Execute(mySample,myEvent);\n")
+        file.write("      manager.PrepareForExecution(mySample, myEvent);\n")
         file.write("      if (!analyzer1->Execute(mySample,myEvent)) continue;\n")
         if self.output != "" and not self.output.lower().endswith("root"):
             file.write("      writer1->WriteEvent(myEvent,mySample);\n")
