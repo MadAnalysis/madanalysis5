@@ -39,6 +39,7 @@ This script supports two workflows.
    - run ``./bin/ma5 -s scripts/NAME.ma5`` from the MA5 home directory,
    - detect the newly created ``ANALYSIS_X`` directory,
    - compare its histogram output against ``outputs/NAME.saf``.
+   - if the output file is not available, it is downloaded from github
 
    Usage:
        python HistoChecks.py run <name>
@@ -52,10 +53,14 @@ contributions.
 from __future__ import annotations
 
 import argparse
+import gzip
 import math
 import os
 import subprocess
+import shutil
 import sys
+import urllib.request
+import urllib.error
 from pathlib import Path
 from typing import List, Sequence, Tuple
 
@@ -67,6 +72,7 @@ REL_TOL = 1e-5
 THRESHOLD_ORANGE = 1e-12
 THRESHOLD_RED = 1e-6
 DEFAULT_MAX_BINS_TO_PRINT = 12
+REFERENCE_BASE_URL = "https://raw.githubusercontent.com/MadAnalysis/validation_data/main"
 
 # ANSI colors for terminal output.
 RED = "\033[91m"
@@ -75,6 +81,51 @@ GREEN = "\033[92m"
 BOLD = "\033[1m"
 RESET = "\033[0m"
 
+
+# ---------------------------------------------------------------------------
+#  Ensure the reference output SAF filesexists locally
+# ---------------------------------------------------------------------------
+def ensure_reference_file(name: str, ma5dir: Path) -> Path:
+    """Ensure validation/outputs/<name>.saf exists locally.
+
+    If missing, download <name>.saf.gz from the validation_data GitHub repo
+    and decompress it locally.
+    """
+
+    # Init and safety
+    local_dir = ma5dir / "validation" / "outputs"
+    local_dir.mkdir(parents=True, exist_ok=True)
+    local_saf = local_dir / f"{name}.saf"
+    if local_saf.exists(): return local_saf
+
+    # Download needed
+    remote_gz_url = f"{REFERENCE_BASE_URL}/{name}.saf.gz"
+    local_gz = local_dir / f"{name}.saf.gz"
+
+    print(f"{BOLD}Reference SAF not found locally.{RESET}")
+    print(f"{BOLD}Downloading:{RESET} {remote_gz_url}")
+
+    try:
+        urllib.request.urlretrieve(remote_gz_url, local_gz)
+    except urllib.error.HTTPError as exc:
+        raise FileNotFoundError(
+            f"Could not download reference file: {remote_gz_url} (HTTP {exc.code})"
+        ) from exc
+    except urllib.error.URLError as exc:
+        raise RuntimeError(
+            f"Failed to download reference file: {remote_gz_url} ({exc})"
+        ) from exc
+
+    # Unzipping
+    print(f"{BOLD}Decompressing:{RESET} {local_gz.name}")
+    with gzip.open(local_gz, "rb") as fin, open(local_saf, "wb") as fout:
+        shutil.copyfileobj(fin, fout)
+        local_gz.unlink(missing_ok=True)
+
+    if not local_saf.exists():
+        raise FileNotFoundError(f"Decompression failed, missing file: {local_saf}")
+
+    return local_saf
 
 # ---------------------------------------------------------------------------
 # SAF parsing
@@ -256,18 +307,18 @@ def run_ma5_script(name: str, ma5dir: Path) -> Tuple[Path, Path]:
 
     Returns ``(reference_histo_file, produced_histo_file)``.
     """
+    # Is the script existing?
     script_path = ma5dir / "validation/scripts" / f"{name}.ma5"
     if not script_path.exists(): raise FileNotFoundError(f"Missing MA5 script: {script_path}")
 
-    reference_path = ma5dir / "validation/outputs" / f"{name}.saf"
-    if not reference_path.exists(): raise FileNotFoundError(f"Missing reference histogram file: {reference_path}")
+    # Is the reference output existing?
+    reference_path = ensure_reference_file(name, ma5dir)
 
+    # Run
     before = [p.name for p in ma5dir.iterdir() if p.is_dir() and p.name.startswith("ANALYSIS_")]
-
     cmd = ["./bin/ma5", "-s", str(script_path.relative_to(ma5dir))]
     result = subprocess.run(cmd, cwd=ma5dir, text=True)
     if result.returncode != 0: raise RuntimeError(f"MA5 execution failed with exit code {result.returncode}")
-
     analysis_dir = find_new_analysis_dir(ma5dir, before)
     produced_histos = find_dataset_histo_file(analysis_dir)
     if not produced_histos.exists(): raise FileNotFoundError(f"Produced histogram file not found: {produced_histos}")
