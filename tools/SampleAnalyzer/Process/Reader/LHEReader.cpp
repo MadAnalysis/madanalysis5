@@ -184,7 +184,8 @@ MAbool LHEReader::ReadHeader(SampleFormat &mySample)
 
 
     // Safety if no weight information: we need one weight
-    if(mySample.mc()->WeightNames().empty()) mySample.mc()->SetWeightName(0, "nominal");
+    if (mySample.mc()->WeightNames().find(0) == mySample.mc()->WeightNames().end())
+        mySample.mc()->SetWeightName(0, "nominal");
 
     // Normal end
     firstevent_ = true;
@@ -280,7 +281,7 @@ StatusCode::Type LHEReader::ReadEvent(EventFormat &myEvent, SampleFormat &mySamp
             // Event init line
             if (event_header)
             {
-                FillEventInitLine(line, myEvent);
+                FillEventInitLine(line, mySample, myEvent);
                 event_header = false;
             }
             else
@@ -500,8 +501,7 @@ void LHEReader::FillHeaderProcessLine(const std::string &line,
 // -----------------------------------------------------------------------------
 // FillEventInitLine
 // -----------------------------------------------------------------------------
-void LHEReader::FillEventInitLine(const std::string &line,
-                                  EventFormat &myEvent)
+void LHEReader::FillEventInitLine(const std::string &line, SampleFormat &mySample, EventFormat &myEvent)
 {
     MAdouble64 weight;
     std::stringstream str;
@@ -514,7 +514,7 @@ void LHEReader::FillEventInitLine(const std::string &line,
     str >> myEvent.mc()->alphaQED_;
     str >> myEvent.mc()->alphaQCD_;
     myEvent.mc()->particles_.reserve(nparts);
-    myEvent.mc()->multiweights_.Add(0, weight);
+    myEvent.mc()->multiweights_.Add(mySample.mc()->GetWeightIndex(0), weight);
     mothers_.reserve(nparts);
 }
 
@@ -594,6 +594,12 @@ void LHEReader::FillWeightNames(const std::string &line, SampleFormat &mySample)
     // Trim the weight_name string
     weight_name.erase(0, weight_name.find_first_not_of(" \t\n\r"));
     weight_name.erase(weight_name.find_last_not_of(" \t\n\r") + 1);
+
+    // Nominal weight
+    if (mySample.mc()->WeightNames().find(0) == mySample.mc()->WeightNames().end())
+        mySample.mc()->SetWeightName(0, "nominal");
+
+    INFO << id << " : " << weight_name<< endmsg;
 
     // Print the id and weight_name
     try
