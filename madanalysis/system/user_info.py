@@ -63,6 +63,11 @@ class UserInfo:
         self.zlib_includes = None
         self.zlib_libs     = None
 
+        # Onnx
+        self.onnx_veto     = None
+        self.onnx_veto_includes = None
+        self.onnx_libs     = None
+
         # Fastjet
         self.fastjet_veto     = None
         self.fastjet_bin_path = None
