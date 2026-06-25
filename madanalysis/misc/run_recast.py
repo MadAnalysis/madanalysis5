@@ -84,6 +84,7 @@ class RunRecast:
     def __init__(self, main: Main, dirname: str):
         self.dirname: str = dirname
         self.main: Main = main
+        self.logger = logging.getLogger("MA5")
         self.delphes_runcard = []
         self.analysis_runcard = []
         self.forced = self.main.forced
