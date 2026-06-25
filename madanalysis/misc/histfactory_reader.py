@@ -602,7 +602,6 @@ def construct_histfactory_dictionary(info_root, run_recast_session) -> Tuple[dic
                                 )
                                 to_remove.append(likelihood_profile)
                             else:
-                                data = []
                                 data = (channel.text or "").split()
                                 pyhf_config[likelihood_profile]["SR"][channel.attrib["name"]] = { "channels": channel.get("id", default=-1), "data": data }
                                 is_included = ( channel.get("is_included", default="False").strip().lower() in ["true", "1", "yes"] ) if len(data) == 0 else True
