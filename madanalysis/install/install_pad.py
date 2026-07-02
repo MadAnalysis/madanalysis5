@@ -42,7 +42,7 @@ class InstallPad:
         self.untardir    = ""
         self.ncores      = 1
         self.files= {
-          "pad.dat"    : "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/pad3.dat",
+          "pad.dat"    : "https://raw.githubusercontent.com/MadAnalysis/PAD_files/main/pad_multiweights.dat",
           "bib_pad.dat": "http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/bib_pad3.dat",
           "json_pad.dat":"http://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/json_pad3.dat"
         }
