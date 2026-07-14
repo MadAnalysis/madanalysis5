@@ -254,6 +254,12 @@ class PlotFlow:
              self.main.stack==StackingMethodType.STACK ):
             stackmode=True
 
+        # Ratio subplot ?
+        ratiomode = self.main.ratio_plot and len(histos)>1
+        if ratiomode:
+            ref_index = self.GetRatioReferenceIndex()
+            ratios, ratiomin, ratiomax = self.ComputeRatios(histos,scales,ref_index)
+
         # Open the file in write-mode
         try:
             outputC = open(filenameC,'w')
@@ -279,7 +285,10 @@ class PlotFlow:
         widthx=700
         if legendmode:
             widthx=1000
-        outputC.write('  TCanvas* canvas = new TCanvas("'+canvas_name+'","'+canvas_name+'",0,0,'+str(widthx)+',500);\n')
+        height=500
+        if ratiomode:
+            height=650
+        outputC.write('  TCanvas* canvas = new TCanvas("'+canvas_name+'","'+canvas_name+'",0,0,'+str(widthx)+','+str(height)+');\n')
         outputC.write('  gStyle->SetOptStat(0);\n')
         outputC.write('  gStyle->SetOptTitle(0);\n')
         outputC.write('  canvas->SetHighLightColor(2);\n')
@@ -289,15 +298,37 @@ class PlotFlow:
         outputC.write('  canvas->SetBorderSize(3);\n')
         outputC.write('  canvas->SetFrameBorderMode(0);\n')
         outputC.write('  canvas->SetFrameBorderSize(0);\n')
-        outputC.write('  canvas->SetTickx(1);\n')
-        outputC.write('  canvas->SetTicky(1);\n')
-        outputC.write('  canvas->SetLeftMargin(0.14);\n')
         margin=0.05
         if legendmode:
             margin=0.3
-        outputC.write('  canvas->SetRightMargin('+str(margin)+');\n')
-        outputC.write('  canvas->SetBottomMargin(0.15);\n')
-        outputC.write('  canvas->SetTopMargin(0.05);\n')
+
+        ratio_frac=0.3
+        if ratiomode:
+            outputC.write('  // Splitting the canvas into a main pad and a ratio pad\n')
+            outputC.write('  TPad* pad_main = new TPad("pad_main_'+str(PlotFlow.counter)+'","pad_main",0.,'+str(ratio_frac)+',1.,1.);\n')
+            outputC.write('  pad_main->SetTickx(1);\n')
+            outputC.write('  pad_main->SetTicky(1);\n')
+            outputC.write('  pad_main->SetLeftMargin(0.14);\n')
+            outputC.write('  pad_main->SetRightMargin('+str(margin)+');\n')
+            outputC.write('  pad_main->SetTopMargin(0.05);\n')
+            outputC.write('  pad_main->SetBottomMargin(0.02);\n')
+            outputC.write('  pad_main->Draw();\n')
+            outputC.write('  TPad* pad_ratio = new TPad("pad_ratio_'+str(PlotFlow.counter)+'","pad_ratio",0.,0.,1.,'+str(ratio_frac)+');\n')
+            outputC.write('  pad_ratio->SetTickx(1);\n')
+            outputC.write('  pad_ratio->SetTicky(1);\n')
+            outputC.write('  pad_ratio->SetLeftMargin(0.14);\n')
+            outputC.write('  pad_ratio->SetRightMargin('+str(margin)+');\n')
+            outputC.write('  pad_ratio->SetTopMargin(0.03);\n')
+            outputC.write('  pad_ratio->SetBottomMargin(0.38);\n')
+            outputC.write('  pad_ratio->Draw();\n')
+            outputC.write('  pad_main->cd();\n')
+        else:
+            outputC.write('  canvas->SetTickx(1);\n')
+            outputC.write('  canvas->SetTicky(1);\n')
+            outputC.write('  canvas->SetLeftMargin(0.14);\n')
+            outputC.write('  canvas->SetRightMargin('+str(margin)+');\n')
+            outputC.write('  canvas->SetBottomMargin(0.15);\n')
+            outputC.write('  canvas->SetTopMargin(0.05);\n')
         outputC.write('\n')
 
         # Binning
@@ -314,6 +345,7 @@ class PlotFlow:
 
         # Loop over datasets and histos
         ntot = 0
+        linecolors = []
         for ind in range(0,len(histos)):
 
             # Creating TH1F
@@ -429,6 +461,7 @@ class PlotFlow:
                 linecolor=ColorType.convert2root( \
                           self.main.datasets[ind].linecolor,\
                           self.main.datasets[ind].lineshade)
+            linecolors.append(linecolor)
 
             # lineStyle
             linestyle=LineStyleType.convert2code(self.main.datasets[ind].linestyle)
@@ -442,7 +475,7 @@ class PlotFlow:
                           self.main.datasets[ind].backcolor,\
                           self.main.datasets[ind].backshade)
 
-            # background color  
+            # background color
             if self.main.datasets[ind].backstyle!=BackStyleType.AUTO:
                 backstyle=BackStyleType.convert2code( \
                           self.main.datasets[ind].backstyle)
@@ -523,12 +556,16 @@ class PlotFlow:
             axis_titleX = PlotFlow.NiceTitle(ref.titleX)
 
         # Setting X axis label
-        outputC.write('  stack->GetXaxis()->SetLabelSize(0.04);\n')
-        outputC.write('  stack->GetXaxis()->SetLabelOffset(0.005);\n')
-        outputC.write('  stack->GetXaxis()->SetTitleSize(0.06);\n')
-        outputC.write('  stack->GetXaxis()->SetTitleFont(22);\n')
-        outputC.write('  stack->GetXaxis()->SetTitleOffset(1);\n')
-        outputC.write('  stack->GetXaxis()->SetTitle("'+axis_titleX+'");\n')
+        if ratiomode:
+            # X axis is drawn on the ratio pad instead
+            outputC.write('  stack->GetXaxis()->SetLabelSize(0.);\n')
+        else:
+            outputC.write('  stack->GetXaxis()->SetLabelSize(0.04);\n')
+            outputC.write('  stack->GetXaxis()->SetLabelOffset(0.005);\n')
+            outputC.write('  stack->GetXaxis()->SetTitleSize(0.06);\n')
+            outputC.write('  stack->GetXaxis()->SetTitleFont(22);\n')
+            outputC.write('  stack->GetXaxis()->SetTitleOffset(1);\n')
+            outputC.write('  stack->GetXaxis()->SetTitle("'+axis_titleX+'");\n')
         if frequencyhisto:
             for bin in range(1,xnbin+1):
                  outputC.write('  stack->GetXaxis()->SetBinLabel('+str(bin)+','\
@@ -543,8 +580,13 @@ class PlotFlow:
         logy=0
         if ref.logY and ntot != 0:
             logy=1
-        outputC.write('  canvas->SetLogx('+str(logx)+');\n')
-        outputC.write('  canvas->SetLogy('+str(logy)+');\n')
+        if ratiomode:
+            outputC.write('  pad_main->SetLogx('+str(logx)+');\n')
+            outputC.write('  pad_main->SetLogy('+str(logy)+');\n')
+            outputC.write('  pad_ratio->SetLogx('+str(logx)+');\n')
+        else:
+            outputC.write('  canvas->SetLogx('+str(logx)+');\n')
+            outputC.write('  canvas->SetLogy('+str(logy)+');\n')
         outputC.write('\n')
 
         # Displaying a legend
@@ -560,6 +602,58 @@ class PlotFlow:
             outputC.write('  legend->SetTextFont(22);\n')
             outputC.write('  legend->SetY1(TMath::Max(0.15,0.97-0.10*legend->GetListOfPrimitives()->GetSize()));\n')
             outputC.write('  legend->Draw();\n')
+            outputC.write('\n')
+
+        # Ratio pad
+        if ratiomode:
+            outputC.write('  // Ratio pad\n')
+            outputC.write('  pad_ratio->cd();\n')
+            firstdrawn = True
+            for ind in range(0,len(histos)):
+                if ind==ref_index:
+                    continue
+                histoname='Ratio'+histos[ind].name+'_'+str(ind)
+                if logxhisto:
+                    outputC.write('  TH1F* '+histoname+' = new TH1F("'+histoname+'","'+\
+                                  histoname+'",'+str(xnbin)+',xBinning);\n')
+                else:
+                    outputC.write('  TH1F* '+histoname+' = new TH1F("'+histoname+'","'+\
+                                  histoname+'",'+str(xnbin)+','+\
+                                  str(histos[ind].xmin)+','+str(histos[ind].xmax)+');\n')
+                for bin in range(1,xnbin+1):
+                    value = ratios[ind][bin-1]
+                    if value is None:
+                        value = 0.
+                    outputC.write('  '+histoname+'->SetBinContent('+str(bin)+','+str(value)+');\n')
+                outputC.write('  '+histoname+'->SetStats(0);\n')
+                outputC.write('  '+histoname+'->SetLineColor('+str(linecolors[ind])+');\n')
+                outputC.write('  '+histoname+'->SetLineWidth('+str(self.main.datasets[ind].linewidth)+');\n')
+                outputC.write('  '+histoname+'->SetLineStyle('+\
+                              str(LineStyleType.convert2code(self.main.datasets[ind].linestyle))+');\n')
+                outputC.write('  '+histoname+'->SetFillStyle(0);\n')
+                if firstdrawn:
+                    outputC.write('  '+histoname+'->SetMinimum('+str(ratiomin)+');\n')
+                    outputC.write('  '+histoname+'->SetMaximum('+str(ratiomax)+');\n')
+                    outputC.write('  '+histoname+'->GetYaxis()->SetTitle("Ratio");\n')
+                    outputC.write('  '+histoname+'->GetYaxis()->SetLabelSize(0.11);\n')
+                    outputC.write('  '+histoname+'->GetYaxis()->SetTitleSize(0.12);\n')
+                    outputC.write('  '+histoname+'->GetYaxis()->SetTitleFont(22);\n')
+                    outputC.write('  '+histoname+'->GetYaxis()->SetTitleOffset(0.5);\n')
+                    outputC.write('  '+histoname+'->GetYaxis()->SetNdivisions(505);\n')
+                    outputC.write('  '+histoname+'->GetXaxis()->SetLabelSize(0.11);\n')
+                    outputC.write('  '+histoname+'->GetXaxis()->SetTitleSize(0.13);\n')
+                    outputC.write('  '+histoname+'->GetXaxis()->SetTitleFont(22);\n')
+                    outputC.write('  '+histoname+'->GetXaxis()->SetTitleOffset(1.2);\n')
+                    outputC.write('  '+histoname+'->GetXaxis()->SetTitle("'+axis_titleX+'");\n')
+                    outputC.write('  '+histoname+'->Draw("hist");\n')
+                    firstdrawn = False
+                else:
+                    outputC.write('  '+histoname+'->Draw("hist same");\n')
+            outputC.write('  TLine* line_unity = new TLine('+\
+                          str(histos[0].xmin)+',1,'+str(histos[0].xmax)+',1);\n')
+            outputC.write('  line_unity->SetLineStyle(2);\n')
+            outputC.write('  line_unity->SetLineColor(kGray+2);\n')
+            outputC.write('  line_unity->Draw();\n')
             outputC.write('\n')
 
         # Producing the image
