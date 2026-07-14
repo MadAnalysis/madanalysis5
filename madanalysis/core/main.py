@@ -62,6 +62,8 @@ class Main:
         "graphic_render": ["root", "matplotlib", "none"],
         "lumi": [],
         "stacking_method": ["stack", "superimpose", "normalize2one"],
+        "ratio_plot": ["on", "off"],
+        "ratio_reference": [],
         "outputfile": ['"output.lhe.gz"', '"output.lhco.gz"'],
         "recast": ["on", "off"],
         "random_seed": ["47"],
@@ -105,6 +107,8 @@ class Main:
         self.lastjob_status = False
         self.random_seed = None
         self.stack = StackingMethodType.STACK
+        self.ratio_plot = False
+        self.ratio_reference = ""
         self.isolation = IsolationConfiguration()
         self.output = ""
         self.graphic_render = GraphicRenderType.NONE
@@ -286,6 +290,12 @@ class Main:
             else:
                 sentence += "normalize2one"
             self.logger.info(sentence)
+        elif parameter == "ratio_plot":
+            word = "on" if self.ratio_plot else "off"
+            self.logger.info(" ratio subplot for histograms = " + word)
+        elif parameter == "ratio_reference":
+            word = self.ratio_reference if self.ratio_reference != "" else "(first imported dataset)"
+            self.logger.info(" ratio reference dataset = " + word)
         elif parameter == "normalize":
             word = ""
             if self.normalize == NormalizeType.NONE:
@@ -320,6 +330,8 @@ class Main:
     def user_GetValues(self, variable):
         if variable == "currentdir":
             return CmdBase.directory_complete()
+        elif variable == "ratio_reference":
+            return self.datasets.GetNames()
         else:
             try:
                 return Main.userVariables[variable]
@@ -356,6 +368,31 @@ class Main:
                     "'stack' possible values are : 'stack', 'superimpose', 'normalize2one'"
                 )
                 return False
+
+        # ratio_plot
+        elif parameter == "ratio_plot":
+            if value == "on":
+                self.ratio_plot = True
+            elif value == "off":
+                self.ratio_plot = False
+            else:
+                self.logger.error(
+                    "'ratio_plot' possible values are : 'on', 'off'"
+                )
+                return False
+
+        # ratio_reference
+        elif parameter == "ratio_reference":
+            if value == "":
+                self.ratio_reference = ""
+            else:
+                if self.datasets.Find(value):
+                    self.ratio_reference = value
+                else:
+                    self.logger.error(
+                        "'ratio_reference' must be the name of an already imported dataset"
+                    )
+                    return False
 
         # normalize
         elif parameter == "normalize":

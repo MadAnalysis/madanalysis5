@@ -135,6 +135,52 @@ class PlotFlow:
         return text
 
 
+    def GetRatioReferenceIndex(self):
+        # Index of the ratio-panel reference dataset (matched by import name)
+        if self.main.ratio_reference != "":
+            names = self.main.datasets.GetNames()
+            if self.main.ratio_reference in names:
+                return names.index(self.main.ratio_reference)
+        return 0
+
+    @staticmethod
+    def ComputeRatios(histos,scales,ref_index=0):
+        # Ratio of each dataset's histogram to the reference dataset
+        nbins = histos[0].nbins
+        ref_array = [histos[ref_index].summary.array[bin]*scales[ref_index] for bin in range(nbins)]
+        ref_max = max(ref_array) if ref_array else 0.
+        # exclude low-stat reference bins from the auto-range (they're noisy)
+        statthreshold = ref_max*0.01
+
+        ratios = []
+        for ind in range(0,len(histos)):
+            row = []
+            for bin in range(1,nbins+1):
+                num = histos[ind].summary.array[bin-1]*scales[ind]
+                den = histos[ref_index].summary.array[bin-1]*scales[ref_index]
+                row.append(num/den if den!=0 else None)
+            ratios.append(row)
+
+        allvalues = []
+        for bin in range(nbins):
+            if ref_array[bin] <= statthreshold:
+                continue
+            for ind, row in enumerate(ratios):
+                if ind==ref_index:
+                    continue
+                if row[bin] is not None:
+                    allvalues.append(row[bin])
+        allvalues.append(1.)
+        ratiomin = min(allvalues)
+        ratiomax = max(allvalues)
+        margin = (ratiomax-ratiomin)*0.2
+        if margin==0:
+            margin=0.5
+        ratiomin -= margin
+        ratiomax += margin
+        return ratios, ratiomin, ratiomax
+
+
     def DrawAll(self,histo_path,modes,output_paths,ListROOTplots):
         # Loop on each histo type
         irelhisto=0
@@ -208,6 +254,12 @@ class PlotFlow:
              self.main.stack==StackingMethodType.STACK ):
             stackmode=True
 
+        # Ratio subplot ?
+        ratiomode = self.main.ratio_plot and len(histos)>1
+        if ratiomode:
+            ref_index = self.GetRatioReferenceIndex()
+            ratios, ratiomin, ratiomax = self.ComputeRatios(histos,scales,ref_index)
+
         # Open the file in write-mode
         try:
             outputC = open(filenameC,'w')
@@ -233,7 +285,10 @@ class PlotFlow:
         widthx=700
         if legendmode:
             widthx=1000
-        outputC.write('  TCanvas* canvas = new TCanvas("'+canvas_name+'","'+canvas_name+'",0,0,'+str(widthx)+',500);\n')
+        height=500
+        if ratiomode:
+            height=650
+        outputC.write('  TCanvas* canvas = new TCanvas("'+canvas_name+'","'+canvas_name+'",0,0,'+str(widthx)+','+str(height)+');\n')
         outputC.write('  gStyle->SetOptStat(0);\n')
         outputC.write('  gStyle->SetOptTitle(0);\n')
         outputC.write('  canvas->SetHighLightColor(2);\n')
@@ -243,15 +298,37 @@ class PlotFlow:
         outputC.write('  canvas->SetBorderSize(3);\n')
         outputC.write('  canvas->SetFrameBorderMode(0);\n')
         outputC.write('  canvas->SetFrameBorderSize(0);\n')
-        outputC.write('  canvas->SetTickx(1);\n')
-        outputC.write('  canvas->SetTicky(1);\n')
-        outputC.write('  canvas->SetLeftMargin(0.14);\n')
         margin=0.05
         if legendmode:
             margin=0.3
-        outputC.write('  canvas->SetRightMargin('+str(margin)+');\n')
-        outputC.write('  canvas->SetBottomMargin(0.15);\n')
-        outputC.write('  canvas->SetTopMargin(0.05);\n')
+
+        ratio_frac=0.3
+        if ratiomode:
+            outputC.write('  // Splitting the canvas into a main pad and a ratio pad\n')
+            outputC.write('  TPad* pad_main = new TPad("pad_main_'+str(PlotFlow.counter)+'","pad_main",0.,'+str(ratio_frac)+',1.,1.);\n')
+            outputC.write('  pad_main->SetTickx(1);\n')
+            outputC.write('  pad_main->SetTicky(1);\n')
+            outputC.write('  pad_main->SetLeftMargin(0.14);\n')
+            outputC.write('  pad_main->SetRightMargin('+str(margin)+');\n')
+            outputC.write('  pad_main->SetTopMargin(0.05);\n')
+            outputC.write('  pad_main->SetBottomMargin(0.02);\n')
+            outputC.write('  pad_main->Draw();\n')
+            outputC.write('  TPad* pad_ratio = new TPad("pad_ratio_'+str(PlotFlow.counter)+'","pad_ratio",0.,0.,1.,'+str(ratio_frac)+');\n')
+            outputC.write('  pad_ratio->SetTickx(1);\n')
+            outputC.write('  pad_ratio->SetTicky(1);\n')
+            outputC.write('  pad_ratio->SetLeftMargin(0.14);\n')
+            outputC.write('  pad_ratio->SetRightMargin('+str(margin)+');\n')
+            outputC.write('  pad_ratio->SetTopMargin(0.03);\n')
+            outputC.write('  pad_ratio->SetBottomMargin(0.38);\n')
+            outputC.write('  pad_ratio->Draw();\n')
+            outputC.write('  pad_main->cd();\n')
+        else:
+            outputC.write('  canvas->SetTickx(1);\n')
+            outputC.write('  canvas->SetTicky(1);\n')
+            outputC.write('  canvas->SetLeftMargin(0.14);\n')
+            outputC.write('  canvas->SetRightMargin('+str(margin)+');\n')
+            outputC.write('  canvas->SetBottomMargin(0.15);\n')
+            outputC.write('  canvas->SetTopMargin(0.05);\n')
         outputC.write('\n')
 
         # Binning
@@ -268,6 +345,7 @@ class PlotFlow:
 
         # Loop over datasets and histos
         ntot = 0
+        linecolors = []
         for ind in range(0,len(histos)):
 
             # Creating TH1F
@@ -383,6 +461,7 @@ class PlotFlow:
                 linecolor=ColorType.convert2root( \
                           self.main.datasets[ind].linecolor,\
                           self.main.datasets[ind].lineshade)
+            linecolors.append(linecolor)
 
             # lineStyle
             linestyle=LineStyleType.convert2code(self.main.datasets[ind].linestyle)
@@ -396,7 +475,7 @@ class PlotFlow:
                           self.main.datasets[ind].backcolor,\
                           self.main.datasets[ind].backshade)
 
-            # background color  
+            # background color
             if self.main.datasets[ind].backstyle!=BackStyleType.AUTO:
                 backstyle=BackStyleType.convert2code( \
                           self.main.datasets[ind].backstyle)
@@ -477,12 +556,16 @@ class PlotFlow:
             axis_titleX = PlotFlow.NiceTitle(ref.titleX)
 
         # Setting X axis label
-        outputC.write('  stack->GetXaxis()->SetLabelSize(0.04);\n')
-        outputC.write('  stack->GetXaxis()->SetLabelOffset(0.005);\n')
-        outputC.write('  stack->GetXaxis()->SetTitleSize(0.06);\n')
-        outputC.write('  stack->GetXaxis()->SetTitleFont(22);\n')
-        outputC.write('  stack->GetXaxis()->SetTitleOffset(1);\n')
-        outputC.write('  stack->GetXaxis()->SetTitle("'+axis_titleX+'");\n')
+        if ratiomode:
+            # X axis is drawn on the ratio pad instead
+            outputC.write('  stack->GetXaxis()->SetLabelSize(0.);\n')
+        else:
+            outputC.write('  stack->GetXaxis()->SetLabelSize(0.04);\n')
+            outputC.write('  stack->GetXaxis()->SetLabelOffset(0.005);\n')
+            outputC.write('  stack->GetXaxis()->SetTitleSize(0.06);\n')
+            outputC.write('  stack->GetXaxis()->SetTitleFont(22);\n')
+            outputC.write('  stack->GetXaxis()->SetTitleOffset(1);\n')
+            outputC.write('  stack->GetXaxis()->SetTitle("'+axis_titleX+'");\n')
         if frequencyhisto:
             for bin in range(1,xnbin+1):
                  outputC.write('  stack->GetXaxis()->SetBinLabel('+str(bin)+','\
@@ -497,8 +580,13 @@ class PlotFlow:
         logy=0
         if ref.logY and ntot != 0:
             logy=1
-        outputC.write('  canvas->SetLogx('+str(logx)+');\n')
-        outputC.write('  canvas->SetLogy('+str(logy)+');\n')
+        if ratiomode:
+            outputC.write('  pad_main->SetLogx('+str(logx)+');\n')
+            outputC.write('  pad_main->SetLogy('+str(logy)+');\n')
+            outputC.write('  pad_ratio->SetLogx('+str(logx)+');\n')
+        else:
+            outputC.write('  canvas->SetLogx('+str(logx)+');\n')
+            outputC.write('  canvas->SetLogy('+str(logy)+');\n')
         outputC.write('\n')
 
         # Displaying a legend
@@ -514,6 +602,58 @@ class PlotFlow:
             outputC.write('  legend->SetTextFont(22);\n')
             outputC.write('  legend->SetY1(TMath::Max(0.15,0.97-0.10*legend->GetListOfPrimitives()->GetSize()));\n')
             outputC.write('  legend->Draw();\n')
+            outputC.write('\n')
+
+        # Ratio pad
+        if ratiomode:
+            outputC.write('  // Ratio pad\n')
+            outputC.write('  pad_ratio->cd();\n')
+            firstdrawn = True
+            for ind in range(0,len(histos)):
+                if ind==ref_index:
+                    continue
+                histoname='Ratio'+histos[ind].name+'_'+str(ind)
+                if logxhisto:
+                    outputC.write('  TH1F* '+histoname+' = new TH1F("'+histoname+'","'+\
+                                  histoname+'",'+str(xnbin)+',xBinning);\n')
+                else:
+                    outputC.write('  TH1F* '+histoname+' = new TH1F("'+histoname+'","'+\
+                                  histoname+'",'+str(xnbin)+','+\
+                                  str(histos[ind].xmin)+','+str(histos[ind].xmax)+');\n')
+                for bin in range(1,xnbin+1):
+                    value = ratios[ind][bin-1]
+                    if value is None:
+                        value = 0.
+                    outputC.write('  '+histoname+'->SetBinContent('+str(bin)+','+str(value)+');\n')
+                outputC.write('  '+histoname+'->SetStats(0);\n')
+                outputC.write('  '+histoname+'->SetLineColor('+str(linecolors[ind])+');\n')
+                outputC.write('  '+histoname+'->SetLineWidth('+str(self.main.datasets[ind].linewidth)+');\n')
+                outputC.write('  '+histoname+'->SetLineStyle('+\
+                              str(LineStyleType.convert2code(self.main.datasets[ind].linestyle))+');\n')
+                outputC.write('  '+histoname+'->SetFillStyle(0);\n')
+                if firstdrawn:
+                    outputC.write('  '+histoname+'->SetMinimum('+str(ratiomin)+');\n')
+                    outputC.write('  '+histoname+'->SetMaximum('+str(ratiomax)+');\n')
+                    outputC.write('  '+histoname+'->GetYaxis()->SetTitle("Ratio");\n')
+                    outputC.write('  '+histoname+'->GetYaxis()->SetLabelSize(0.11);\n')
+                    outputC.write('  '+histoname+'->GetYaxis()->SetTitleSize(0.12);\n')
+                    outputC.write('  '+histoname+'->GetYaxis()->SetTitleFont(22);\n')
+                    outputC.write('  '+histoname+'->GetYaxis()->SetTitleOffset(0.5);\n')
+                    outputC.write('  '+histoname+'->GetYaxis()->SetNdivisions(505);\n')
+                    outputC.write('  '+histoname+'->GetXaxis()->SetLabelSize(0.11);\n')
+                    outputC.write('  '+histoname+'->GetXaxis()->SetTitleSize(0.13);\n')
+                    outputC.write('  '+histoname+'->GetXaxis()->SetTitleFont(22);\n')
+                    outputC.write('  '+histoname+'->GetXaxis()->SetTitleOffset(1.2);\n')
+                    outputC.write('  '+histoname+'->GetXaxis()->SetTitle("'+axis_titleX+'");\n')
+                    outputC.write('  '+histoname+'->Draw("hist");\n')
+                    firstdrawn = False
+                else:
+                    outputC.write('  '+histoname+'->Draw("hist same");\n')
+            outputC.write('  TLine* line_unity = new TLine('+\
+                          str(histos[0].xmin)+',1,'+str(histos[0].xmax)+',1);\n')
+            outputC.write('  line_unity->SetLineStyle(2);\n')
+            outputC.write('  line_unity->SetLineColor(kGray+2);\n')
+            outputC.write('  line_unity->Draw();\n')
             outputC.write('\n')
 
         # Producing the image
@@ -563,6 +703,13 @@ class PlotFlow:
              self.main.stack==StackingMethodType.STACK ):
             stackmode=True
 
+        # Ratio subplot ?
+        ratiomode = self.main.ratio_plot and len(histos)>1
+        if ratiomode:
+            ref_index = self.GetRatioReferenceIndex()
+            ratios, ratiomin, ratiomax = self.ComputeRatios(histos,scales,ref_index)
+        mainpad   = 'pad'
+        bottompad = 'pad_ratio' if ratiomode else 'pad'
 
         # Open the file in write-mode
         try:
@@ -584,6 +731,7 @@ class PlotFlow:
 #        outputPy.write("    matplotlib.use('Agg')\n")
         outputPy.write('    import matplotlib.pyplot   as plt\n')
         outputPy.write('    import matplotlib.gridspec as gridspec\n')
+        outputPy.write('    import matplotlib.ticker\n')
         outputPy.write('\n')
 
         # Matplotlib & numpy version
@@ -643,23 +791,37 @@ class PlotFlow:
         outputPy.write('    # Creating a new Canvas\n')
         dpi=80
         height=500
+        if ratiomode:
+            height=650
         widthx=700
         if legendmode:
             widthx=1000
         outputPy.write('    fig   = plt.figure(figsize=('+\
                        str(widthx/dpi)+','+str(height/dpi)+\
                        '),dpi='+str(dpi)+')\n')
-        if not legendmode:
-            outputPy.write('    frame = gridspec.GridSpec(1,1)\n')
+        if not ratiomode:
+            if not legendmode:
+                outputPy.write('    frame = gridspec.GridSpec(1,1)\n')
+            else:
+                outputPy.write('    frame = gridspec.GridSpec(1,1,right=0.7)\n')
+            # subplot argument: nrows, ncols, plot_number
+            # outputPy.write('    pad = fig.add_subplot(111)\n')
+            outputPy.write('    pad   = fig.add_subplot(frame[0])\n')
         else:
-            outputPy.write('    frame = gridspec.GridSpec(1,1,right=0.7)\n')
-        # subplot argument: nrows, ncols, plot_number
-        # outputPy.write('    pad = fig.add_subplot(111)\n')
-        outputPy.write('    pad   = fig.add_subplot(frame[0])\n')
+            if not legendmode:
+                outputPy.write('    frame = gridspec.GridSpec(2,1,height_ratios=[3,1],hspace=0.06)\n')
+            else:
+                outputPy.write('    frame = gridspec.GridSpec(2,1,height_ratios=[3,1],hspace=0.06,right=0.7)\n')
+            outputPy.write('    pad       = fig.add_subplot(frame[0])\n')
+            outputPy.write('    pad_ratio = fig.add_subplot(frame[1],sharex=pad)\n')
+            outputPy.write('    plt.setp(pad.get_xticklabels(), visible=False)\n')
         outputPy.write('\n')
 
         # Stack
         outputPy.write('    # Creating a new Stack\n')
+        linecolor_hex = {}
+        linestyle_mpl = {}
+        linewidth_val = {}
         for ind in range(len(histos)-1,-1,-1):
             myweight = 'y'+histos[ind].name+'_'+str(ind)+'_weights'
             mytitle  = '"'+PlotFlow.NiceTitleMatplotlib(self.main.datasets[ind].title)+'"'
@@ -792,6 +954,10 @@ class PlotFlow:
             mylinewidth  = self.main.datasets[ind].linewidth
             mylinestyle  = LineStyleType.convert2matplotlib(self.main.datasets[ind].linestyle)
 
+            linecolor_hex[ind] = mylinecolor
+            linestyle_mpl[ind] = mylinestyle
+            linewidth_val[ind] = mylinewidth
+
             outputPy.write('    pad.hist('+\
                                'x=xData, '+\
                                'bins=xBinning, '+\
@@ -831,7 +997,7 @@ class PlotFlow:
             axis_titleX = ref.titleX
         axis_titleX = axis_titleX.replace('#DeltaR','#Delta R')
         axis_titleX = axis_titleX.replace('#','\\')
-        outputPy.write('    plt.xlabel(r"'+axis_titleX+'",\\\n')
+        outputPy.write('    '+bottompad+'.set_xlabel(r"'+axis_titleX+'",\\\n')
         outputPy.write('               fontsize=16,color="black")\n')
 
         # Y-axis
@@ -855,7 +1021,7 @@ class PlotFlow:
         if ref.titleY!="": 
             axis_titleY = PlotFlow.NiceTitle(ref.titleY)
         axis_titleY = axis_titleY.replace('#','\\')
-        outputPy.write('    plt.ylabel(r"'+axis_titleY+'",\\\n')
+        outputPy.write('    '+mainpad+'.set_ylabel(r"'+axis_titleY+'",\\\n')
         outputPy.write('               fontsize=16,color="black")\n')
         outputPy.write('\n')
 
@@ -918,7 +1084,7 @@ class PlotFlow:
             if is_logy and ref.ymin<=0:
                 outputPy.write('#')
             outputPy.write('ymin=' + str(ref.ymin)+' # log scale\n')
-        outputPy.write('    plt.gca().set_ylim(ymin,ymax)\n')
+        outputPy.write('    '+mainpad+'.set_ylim(ymin,ymax)\n')
         outputPy.write('\n')
 
         # X axis
@@ -927,12 +1093,12 @@ class PlotFlow:
         outputPy.write('    ')
         if is_logx:
             outputPy.write('#')
-        outputPy.write('plt.gca().set_xscale("linear")\n')
+        outputPy.write(bottompad+'.set_xscale("linear")\n')
         # - Log
         outputPy.write('    ')
         if not is_logx:
             outputPy.write('#')
-        outputPy.write('plt.gca().set_xscale("log",nonpositive="clip")\n')
+        outputPy.write(bottompad+'.set_xscale("log",nonpositive="clip")\n')
         outputPy.write('\n')
 
 
@@ -942,12 +1108,12 @@ class PlotFlow:
         outputPy.write('    ')
         if is_logy:
             outputPy.write('#')
-        outputPy.write('plt.gca().set_yscale("linear")\n')
+        outputPy.write(mainpad+'.set_yscale("linear")\n')
         # - Log
         outputPy.write('    ')
         if not is_logy:
             outputPy.write('#')
-        outputPy.write('plt.gca().set_yscale("log",nonpositive="clip")\n')
+        outputPy.write(mainpad+'.set_yscale("log",nonpositive="clip")\n')
         outputPy.write('\n')
 
  
@@ -960,7 +1126,8 @@ class PlotFlow:
                     outputPy.write(',')
                 outputPy.write('"'+str(histos[0].stringlabels[bin]).replace('_','\_')+'"')
             outputPy.write('])\n')
-            outputPy.write('    plt.xticks(xData, xLabels, rotation="vertical")\n')
+            outputPy.write('    '+bottompad+'.set_xticks(xData)\n')
+            outputPy.write('    '+bottompad+'.set_xticklabels(xLabels, rotation="vertical")\n')
             outputPy.write('\n')
 
 ### BENJ: not necessary for getting the png and pdf files
@@ -987,10 +1154,29 @@ class PlotFlow:
 
             
             outputPy.write('    # Legend\n')
-            outputPy.write('    plt.legend(bbox_to_anchor=(1.05,1), loc=2,'+\
+            outputPy.write('    '+mainpad+'.legend(bbox_to_anchor=(1.05,1), loc=2,'+\
                                 ' borderaxespad=0.)\n')
             outputPy.write('\n')
-                           
+
+        # Ratio panel
+        if ratiomode:
+            outputPy.write('    # Ratio panel\n')
+            for ind in range(0,len(histos)):
+                if ind==ref_index:
+                    continue
+                valuestr = ','.join(['0.' if v is None else str(v) for v in ratios[ind]])
+                outputPy.write('    ratio_'+str(ind)+'_weights = numpy.array(['+valuestr+'])\n')
+                outputPy.write('    pad_ratio.hist(x=xData, bins=xBinning, '+\
+                               'weights=ratio_'+str(ind)+'_weights, histtype="step",\\\n'+\
+                               '                   color='+linecolor_hex[ind]+', '+\
+                               'linewidth='+str(linewidth_val[ind])+', '+\
+                               'linestyle='+linestyle_mpl[ind]+')\n')
+            outputPy.write('    pad_ratio.axhline(1.0, color="gray", linestyle="--", linewidth=1)\n')
+            outputPy.write('    pad_ratio.set_ylim('+str(ratiomin)+','+str(ratiomax)+')\n')
+            outputPy.write('    pad_ratio.set_ylabel(r"Ratio",fontsize=12,color="black")\n')
+            outputPy.write('    pad_ratio.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(nbins=4))\n')
+            outputPy.write('\n')
+
         # Producing the image
         outputPy.write('    # Saving the image\n')
         for outputname in outputnames:
