@@ -678,7 +678,11 @@ class JobWriter(object):
 
         # Add default hadrons and invisible particles for RECO and HADRON mode
         # The invisible container may also be changed when runnign the code in HADRON mode.
-        if self.main.mode in [MA5RunningType.RECO, MA5RunningType.HADRON]:
+        if self.main.mode in [
+            MA5RunningType.RECO,
+            MA5RunningType.HADRON,
+            MA5RunningType.PARTON,
+        ]:
             file.write("\n  // Initializing PhysicsService for MC\n")
             file.write("  PHYSICS->mcConfig().Reset();\n")
             file.write('  // definition of the multiparticle "hadronic"\n')
@@ -695,17 +699,6 @@ class JobWriter(object):
                     if item not in self.main.multiparticles.Get("invisible"):
                         file.write(f"  PHYSICS->mcConfig().RemoveInvisibleId({item});\n")
             file.write("\n")
-
-        # Instead, if PARTON mode
-        else:
-            file.write('\n  // definition of the multiparticle "hadronic"\n')
-            for item in self.main.multiparticles.Get("hadronic"):
-                file.write('  PHYSICS->mcConfig().AddHadronicId('+str(item)+');\n')
-            file.write('\n')
-            file.write('  // definition of the multiparticle "invisible"\n')
-            for item in self.main.multiparticles.Get("invisible"):
-                file.write('  PHYSICS->mcConfig().AddInvisibleId('+str(item)+');\n')
-            file.write('\n')
 
         # Loop
         file.write("  // ---------------------------------------------------\n")
