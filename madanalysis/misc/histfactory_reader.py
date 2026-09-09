@@ -602,23 +602,9 @@ def construct_histfactory_dictionary(info_root, run_recast_session) -> Tuple[dic
                                 )
                                 to_remove.append(likelihood_profile)
                             else:
-                                data = []
-                                if channel.text != None:
-                                    data = channel.text.split()
-                                pyhf_config[likelihood_profile]["SR"][
-                                    channel.attrib["name"]
-                                ] = {
-                                    "channels": channel.get("id", default=-1),
-                                    "data": data,
-                                }
-                                is_included = (
-                                    (
-                                        channel.get("is_included", default=0)
-                                        in ["True", "1", "yes"]
-                                    )
-                                    if len(data) == 0
-                                    else True
-                                )
+                                data = (channel.text or "").split()
+                                pyhf_config[likelihood_profile]["SR"][channel.attrib["name"]] = { "channels": channel.get("id", default=-1), "data": data }
+                                is_included = ( channel.get("is_included", default="False").strip().lower() in ["true", "1", "yes"] ) if len(data) == 0 else True
                                 pyhf_config[likelihood_profile]["SR"][
                                     channel.attrib["name"]
                                 ].update({"is_included": is_included})

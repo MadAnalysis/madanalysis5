@@ -84,6 +84,7 @@ class RunRecast:
     def __init__(self, main: Main, dirname: str):
         self.dirname: str = dirname
         self.main: Main = main
+        self.logger = logging.getLogger("MA5")
         self.delphes_runcard = []
         self.analysis_runcard = []
         self.forced = self.main.forced
@@ -127,7 +128,7 @@ class RunRecast:
         """
         ### First, the analyses to take care off
         log.debug("  Inviting the user to edit the recasting card...")
-        if not self.forced or not self.main.script:
+        if not self.forced and not self.main.script:
             edit_recasting_card(self.main.session_info.editor, self.dirname)
         ### Getting the list of analyses to recast
         log.info("   Getting the list of delphes simulation to be performed...")
