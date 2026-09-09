@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
-//  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //
 //  This file is part of MadAnalysis 5.
@@ -38,139 +38,245 @@
 
 namespace MA5
 {
-
-  class WeightCollection
-  {
-
-    // -------------------------------------------------------------
-    //                        data members
-    // -------------------------------------------------------------
-  private:
-    std::map<MAuint32, MAfloat64> weights_;
-    static const MAfloat64 emptyvalue_;
-
-    // -------------------------------------------------------------
-    //                      method members
-    // -------------------------------------------------------------
-  public:
-    /// Constructor withtout arguments
-    WeightCollection()
+    class WeightCollection
     {
-    }
 
-    /// Destructor
-    ~WeightCollection()
-    {
-    }
+        // -------------------------------------------------------------
+        //                        data members
+        // -------------------------------------------------------------
+    private:
+        std::vector<MAfloat64> weights_;
+        static const MAfloat64 emptyvalue_;
 
-    /// Clear all the content
-    void Reset()
-    {
-      weights_.clear();
-    }
-    void clear() { Reset(); }
+        // -------------------------------------------------------------
+        //                      method members
+        // -------------------------------------------------------------
+    public:
+        /// Constructor withtout arguments
+        WeightCollection() {}
 
-    /// Size
-    MAuint32 size() const
-    {
-      return weights_.size();
-    }
-
-    /// Add a new weight group
-    MAbool Add(MAuint32 id, MAfloat64 value)
-    {
-      // Try to add the item
-      std::pair<std::map<MAuint32, MAfloat64>::iterator, bool> ret;
-      ret = weights_.insert(std::pair<MAuint32, MAfloat64>(id, value));
-
-      // Is it added?
-      try
-      {
-        if (!ret.second)
+        // copy constructor
+        WeightCollection(const WeightCollection &rhs)
         {
-          std::stringstream str;
-          str << id;
-          std::string idname;
-          str >> idname;
-          throw EXCEPTION_WARNING("The Weight '" + idname +
-                                      "' is defined at two times. Redundant values are skipped.",
-                                  "", 0);
+            weights_.clear();
+            weights_ = rhs.weights_;
         }
-      }
-      catch (const std::exception &e)
-      {
-        MANAGE_EXCEPTION(e);
-        return false;
-      }
 
-      return true;
-    }
+        /// @brief Initialise weights with a certain size and default value
+        /// @param size number of weights
+        /// @param default_value default value for each weight
+        WeightCollection(const MAuint32 &size, MAdouble64 default_value = 0.0) : weights_(size, default_value) {}
 
-    /// Get all the Weight Collection
-    const std::map<MAuint32, MAfloat64> &GetWeights() const
-    {
-      return weights_;
-    }
+        /// Destructor
+        ~WeightCollection() {}
 
-    /// Get a weight
-    const MAfloat64 &Get(MAuint32 id) const
-    {
-      // Try to get the item
-      std::map<MAuint32, MAfloat64>::const_iterator it = weights_.find(id);
-      try
-      {
-        if (it == weights_.end())
+        /// Clear all the content
+        void Reset() { weights_.clear(); }
+        void clear() { Reset(); }
+
+        /// Size
+        MAuint32 size() const { return weights_.size(); }
+
+        /// Size
+        MAuint32 size() { return weights_.size(); }
+
+        void resize(MAuint32 n) { weights_.resize(n); }
+
+        /// Add a new weight group
+        MAbool Add(MAuint32 id, MAfloat64 value)
         {
-          std::stringstream str;
-          str << id;
-          std::string idname;
-          str >> idname;
-          throw EXCEPTION_ERROR("The Weight '" + idname +
-                                    "' is not defined. Return null value.",
-                                "", 0);
+            if (id < size())
+            {
+                weights_.at(id) = value;
+                return true;
+            }
+            else
+            {
+                try
+                {
+                    std::stringstream str;
+                    str << id;
+                    std::string idname;
+                    str >> idname;
+                    throw EXCEPTION_ERROR("The Weight '" + idname +
+                                              "' is not defined. A null value is returned.",
+                                          "", 0);
+                }
+                catch (const std::exception &e)
+                {
+                    MANAGE_EXCEPTION(e);
+                    return false;
+                }
+            }
         }
-      }
-      catch (const std::exception &e)
-      {
-        MANAGE_EXCEPTION(e);
-        return emptyvalue_;
-      }
 
-      return it->second;
-    }
+        /// Get all the Weight Collection
+        const std::vector<MAfloat64> &GetWeights() const { return weights_; }
 
-    /// Get a weight
-    const MAfloat64 &operator[](MAuint32 id) const
+        /// Get all the Weights
+        const std::vector<MAfloat64> &values() const { return weights_; }
+
+        /// Get a weight
+        const MAfloat64 &Get(MAuint32 id) const
+        {
+            if (id >= 0 && id < size())
+                return weights_[id];
+
+            try
+            {
+                std::stringstream str;
+                str << id;
+                std::string idname;
+                str >> idname;
+                throw EXCEPTION_ERROR("The Weight '" + idname +
+                                          "' is not defined. A null value is returned.",
+                                      "", 0);
+            }
+            catch (const std::exception &e)
+            {
+                MANAGE_EXCEPTION(e);
+                return emptyvalue_;
+            }
+        }
+
+        /// Get a weight
+        const MAfloat64 &operator[](MAuint32 id) const { return Get(id); }
+
+        /// @brief Print weight information
+        void Print() const
+        {
+            if (!weights_.empty())
+                for (MAuint32 i = 0; i < size(); i++)
+                    INFO << "ID=" << i << " : " << weights_[i] << endmsg;
+        }
+
+        /// @brief add weight to specific location
+        /// @param idx location
+        /// @param weight weight value
+        void add_weight_to(MAint32 idx, MAdouble64 weight) { weights_[idx] += weight; }
+
+        // explicit setter from same-typed vector (if you need it)
+        void SetWeights(const std::vector<MAfloat64> &v) { weights_ = v; }
+
+        /// @brief multiply operator
+        /// @param multiple
+        WeightCollection &operator*=(const MAdouble64 &multiple)
+        {
+            for (auto &x : weights_)
+                x *= multiple;
+            return *this;
+        }
+
+        WeightCollection operator*(const MAdouble64 &multiple) const
+        {
+            WeightCollection result(*this); // copy
+            for (auto &x : result.weights_)
+                x *= multiple;
+            return result;
+        }
+
+        WeightCollection operator/(const MAdouble64 &multiple) const
+        {
+            WeightCollection result(*this); // copy
+            for (auto &x : result.weights_)
+                x /= multiple;
+            return result;
+        }
+
+        WeightCollection operator+(const MAdouble64 &multiple) const
+        {
+            WeightCollection result(*this); // copy
+            for (auto &x : result.weights_)
+                x += multiple;
+            return result;
+        }
+
+        WeightCollection operator-(const MAdouble64 &multiple) const
+        {
+            WeightCollection result(*this); // copy
+            for (auto &x : result.weights_)
+                x -= multiple;
+            return result;
+        }
+
+        /// @brief add operator
+        /// @param input
+        WeightCollection &operator+=(const MAfloat64 &input)
+        {
+            for (auto &x : weights_)
+                x += input;
+            return *this;
+        }
+
+        /// @brief add operator
+        /// @param input
+        WeightCollection &operator+=(const std::vector<MAdouble64> &input)
+        {
+            if (size() != input.size())
+                throw std::invalid_argument("Size mismatch in WeightCollection::operator+= (weights_ and input must have the same size)");
+            std::transform(weights_.begin(), weights_.end(), input.begin(), weights_.begin(),
+                           [](MAdouble64 a, MAdouble64 b)
+                           { return a + b; });
+            return *this;
+        }
+
+        /// @brief subtract operator
+        /// @param input
+        WeightCollection &operator-=(const MAfloat64 &input)
+        {
+            for (auto &x : weights_)
+                x -= input;
+            return *this;
+        }
+
+        /// @brief divide operator
+        /// @param input
+        WeightCollection &operator/=(const MAfloat64 &input)
+        {
+            for (auto &x : weights_)
+                x /= input;
+            return *this;
+        }
+
+        /// @brief assignment operator
+        /// @param input
+        WeightCollection &operator=(const MAfloat64 &input)
+        {
+            for (auto &x : weights_)
+                x = input;
+            return *this;
+        }
+
+        /// @brief assignment operator
+        /// @param input
+        WeightCollection &operator=(const WeightCollection &w)
+        {
+            if (this == &w)
+                return *this;
+            weights_ = w.weights_;
+            return *this;
+        }
+    };
+
+    inline WeightCollection operator*(const MAdouble64 &multiple, const WeightCollection &w)
     {
-      return Get(id);
+        return w * multiple;
     }
 
-    /// Add a new weight group
-    void Print() const
+    inline WeightCollection operator/(const MAdouble64 &multiple, const WeightCollection &w)
     {
-      if (weights_.empty())
-        return;
-
-      // Loop over weights for getting max
-      MAuint32 maxi = 0;
-      for (std::map<MAuint32, MAfloat64>::const_iterator
-               it = weights_.begin();
-           it != weights_.end(); it++)
-      {
-        if (it->first > maxi)
-          maxi = it->first;
-      }
-
-      // Loop over weights
-      for (std::map<MAuint32, MAfloat64>::const_iterator
-               it = weights_.begin();
-           it != weights_.end(); it++)
-      {
-        INFO << "ID=" << it->first << " : " << it->second << endmsg;
-      }
+        return w / multiple;
     }
-  };
 
+    inline WeightCollection operator+(const MAdouble64 &multiple, const WeightCollection &w)
+    {
+        return w + multiple;
+    }
+
+    inline WeightCollection operator-(const MAdouble64 &multiple, const WeightCollection &w)
+    {
+        return w - multiple;
+    }
 }
 
 #endif

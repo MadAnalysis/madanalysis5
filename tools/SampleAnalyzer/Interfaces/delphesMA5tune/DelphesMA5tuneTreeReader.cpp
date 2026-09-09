@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -403,14 +403,14 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
       if (header1!=0)
       {
         // Set event-weight
-        myEvent.mc()->setWeight(header1->Weight);
+        myEvent.mc()->setWeight(i, header1->Weight);
       }
       else
       {
         HepMCEvent* header2 = dynamic_cast<HepMCEvent*>(branchEvent_->At(i));
         if (header2==0) continue;
         // Set event-weight
-        myEvent.mc()->setWeight(header2->Weight);
+        myEvent.mc()->setWeight(i, header2->Weight);
       }
     }
   }
