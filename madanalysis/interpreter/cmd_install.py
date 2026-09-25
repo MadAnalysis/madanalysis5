@@ -102,6 +102,8 @@ class CmdInstall(CmdBase):
             elif ResuActi == 1 and not has_release:
                 self.logger.warning(to_activate + " is not installed: installing it...")
                 resu = installer.Execute(release)
+                if resu == 'restart':
+                    return resu
                 if resu:
                     UpdatePaths()
                     if not main.CheckConfig():
@@ -138,17 +140,12 @@ class CmdInstall(CmdBase):
             self.logger.warning("This command has been deprecated.")
             self.logger.warning(f"Please use '{sys.executable} -m pip install -r requirements.txt' instead.")
             return True
-        elif args[0]=='PADForMA5tune':
-            if inst_delphes(self.main,installer,'delphesMA5tune',True):
-                return installer.Execute('PADForMA5tune')
+        elif args[0] in ['PAD', 'PADForMA5tune']:
+            release = 'delphes' if args[0] == 'PAD' else 'delphesMA5tune'
+            if inst_delphes(self.main, installer, release, pad=True):
+                return installer.Execute(args[0])
             else:
-                self.logger.warning('DelphesMA5tune is not installed... please exit the program and install the pad')
-                return True
-        elif args[0]=='PAD':
-            if not self.main.archi_info.has_delphes:
-                self.logger.warning("PAD requires delphes installation, installing it...")
-                return installer.Execute('Delphes')
-            return installer.Execute('PAD')
+                return False
         elif args[0]=='PADForSFS':
             padsfs_install_check = False
             if self.main.archi_info.has_fastjet:
