@@ -35,38 +35,54 @@ class CmdRemove(CmdBase.CmdBase):
         CmdBase.CmdBase.__init__(self,main,"remove")
 
     def remove_input(self,name):
-       
         # Dataset removal
         if self.main.datasets.Find(name):
             self.main.datasets.Remove(name)
             return
- 
+
        # Multiparticle removal
         if self.main.multiparticles.Find(name):
             theList = self.main.selection.GetItemsUsingMultiparticle(name) 
             if len(theList) == 0:
                 self.main.multiparticles.Remove(name,self.main.mode)
             else:
-                logging.getLogger('MA5').error("The Particle/Multiparticle '" + name + \
-                              "' cannot be removed, being used by: ")
+                self.logger.error("The Particle/Multiparticle '" + name + "' cannot be removed, being used by: ")
                 for item in theList:
-                    logging.getLogger('MA5').error(" - "+self.main.selection[item].GetStringDisplay())
-                logging.getLogger('MA5').error("Please remove these plots/cuts before removing the Particle/Multiparticle "+ name +".")
+                    self.logger.error(" - "+self.main.selection[item].GetStringDisplay())
+                self.logger.error("Please remove these plots/cuts before removing the Particle/Multiparticle "+ name +".")
             return
 
         # Jet collection removal
         if name in self.main.jet_collection.GetNames():
             self.main.jet_collection.Delete(name)
             return
-        
+
+        # Region removal
+        if self.main.regions.Find(name):
+            self.remove_region(name)
+            return
+
         # No object found 
-        logging.getLogger('MA5').error("No object called '"+name+"' found.")
+        self.logger.error("No object called '"+name+"' found.")
 
 
+    # Removal of a histogram or a cut
     def remove_selection(self,index):
-
         self.main.selection.Remove(index)
         return 
+
+    # Removal of a signal region
+    def remove_region(self, name):
+        for index in range(len(self.main.selection) - 1, -1, -1):
+            item = self.main.selection[index]
+            if name not in item.regions:
+                continue
+            item.regions = [ region for region in item.regions if region != name]
+            if not item.regions:
+                self.logger.warning(f"   Removing selection #{index+1} solely attached to region {name}")
+                self.main.selection.Remove(index + 1)
+        self.main.regions.Remove(name)
+
 
     def do(self,args):
 
@@ -85,7 +101,8 @@ class CmdRemove(CmdBase.CmdBase):
 
     def help(self):
         logging.getLogger('MA5').info("   Syntax: remove <object name>")
-        logging.getLogger('MA5').info("   Removing an existing object from the memory.")
+        logging.getLogger('MA5').info("   Removing an existing object or region from the memory.")
+        logging.getLogger('MA5').info("   Removing a region also removes all cuts and histograms associated exclusively with it.")
 
     def complete(self,text,line,begidx,endidx):
 
@@ -104,6 +121,7 @@ class CmdRemove(CmdBase.CmdBase):
             output.extend(self.main.datasets.GetNames())
             output.extend(self.main.jet_collection.GetNames())
             output.extend(self.main.multiparticles.GetNames())
+            output.extend(self.main.regions.GetNames())
 
             # Cannot possible to remove invis
             if self.main.mode != MA5RunningType.RECO:

@@ -105,6 +105,7 @@ class CmdSubmit(CmdBase):
             "plot",
             "select",
             "reject",
+            "remove",
             "set main.clustering",
             "set main.merging",
             "define",
