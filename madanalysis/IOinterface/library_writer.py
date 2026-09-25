@@ -305,6 +305,7 @@ class LibraryWriter():
             options.has_root        = True
             options.has_root_inc    = True
             options.has_root_lib    = True
+            options.ma5_fastjet_mode = self.main.archi_info.has_root and self.main.archi_info.has_fastjet
             toRemove.extend(['compilation_delphesMA5tune.log','linking_delphesMA5tune.log',\
                              'cleanup_delphesMA5tune.log','mrproper_delphesMA5tune.log'])
         elif package=='test_delphesMA5tune':

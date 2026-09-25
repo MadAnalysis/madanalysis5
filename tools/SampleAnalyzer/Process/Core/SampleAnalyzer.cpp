@@ -792,9 +792,20 @@ StatusCode::Type SampleAnalyzer::NextEvent(SampleFormat &mySample, EventFormat &
 /// @param myEvent event dataset
 void SampleAnalyzer::PrepareForExecution(SampleFormat &mySample, EventFormat &myEvent)
 {
-	if (myEvent.mc() != 0)
-		for (auto &analyzer : analyzers_)
-			analyzer->Manager()->InitializeForNewEvent(myEvent.mc()->weights());
+    // Safety
+    WeightCollection weights;
+    if (myEvent.mc() != 0)
+        weights = myEvent.mc()->weights();
+    else
+        weights = WeightCollection(1, 1.0);
+
+    // Preserve the collection size
+    if (cfg_.IsNoEventWeight())
+        weights = 1.0;
+
+    if (myEvent.mc() != 0)
+        for (auto &analyzer : analyzers_)
+            analyzer->Manager()->InitializeForNewEvent(myEvent.mc()->weights());
 }
 
 /// Home made functions to make reasonnable filenames

@@ -364,21 +364,11 @@ class CheckUp:
     def CheckOptionalProcessingPackages(self):
         # Optional packages
         self.logger.info("Checking optional packages devoted to data processing:")
-        checker2 = ConfigChecker(
-            self.archi_info, self.user_info, self.session_info, self.script, self.debug
-        )
+        checker2 = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
 
-        if not self.checker.Execute("root"):
-            return False
-        if not self.checker.Execute("zlib"):
-            return False
-        if not self.checker.Execute("fastjet"):
-            return False
-        if not self.checker.Execute("fastjet-contrib"):
-            return False
-        if not self.checker.Execute("HEPTopTagger"):
-            return False
-
+        for package in ["root", "zlib", "fastjet", "fastjet-contrib", "HEPTopTagger"]:
+            if not self.checker.Execute(package):
+                return False
         self.archi_info.has_delphes = checker2.checkDelphes()
         self.archi_info.has_delphesMA5tune = checker2.checkDelphesMA5tune()
         return True

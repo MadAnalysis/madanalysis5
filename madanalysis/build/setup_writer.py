@@ -82,7 +82,7 @@ class SetupWriter:
 
         delphes_inc_pths = []
         if len(archi_info.delphes_inc_paths) != 0:
-            delphes_inc_pths = archi_info.delphes_inc_paths
+            delphes_inc_pths = list(archi_info.delphes_inc_paths)
             delphes_inc_pths.append(
                 next((p for p in delphes_inc_pths if Path(p).stem == "delphes"), "")
                 + "/modules"

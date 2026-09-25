@@ -106,7 +106,7 @@ class RunRecast:
 
         self.delphes_inc_pths = []
         if len(self.main.archi_info.delphes_inc_paths) != 0:
-            self.delphes_inc_pths = self.main.archi_info.delphes_inc_paths
+            self.delphes_inc_pths = list(self.main.archi_info.delphes_inc_paths)
             self.delphes_inc_pths.append(
                 next((p for p in self.delphes_inc_pths if Path(p).stem == "delphes"), "")
                 + "/modules"
@@ -404,25 +404,14 @@ class RunRecast:
         self.main.recasting.status = "on"
         self.main.fastsim.package = "none"
 
-        event_path = next(
-            (
-                x
-                for x in (recast_path / f"Output/SAF/_{dataset.name}").iterdir()
-                if "RecoEvents" in str(x)
-            ),
-            None,
-        )
+        event_path = next((x for x in (recast_path / f"Output/SAF/_{dataset.name}").iterdir() if "RecoEvents" in str(x)), None)
         if event_path is not None:
-            root_path = event_path / "DelphesEvents.root"
+            root_filename = "DelphesMA5tuneEvents.root" if self.detector == "delphesMA5tune" else "DelphesEvents.root"
+            root_path = event_path / root_filename
             if root_path.is_file():
-                main_event_path = (
-                    Path(self.dirname) / f"Output/SAF/{dataset.name}/RecoEvents"
-                )
+                main_event_path = (Path(self.dirname) / f"Output/SAF/{dataset.name}/RecoEvents")
                 main_event_path.mkdir(parents=True, exist_ok=True)
-                moved_smp = (
-                    main_event_path
-                    / f"RecoEvents_{version}_{card.replace('.tcl', '')}.root"
-                )
+                moved_smp = (main_event_path / f"RecoEvents_{version}_{card.replace('.tcl', '')}.root")
                 shutil.move(str(root_path), str(moved_smp))
 
         return True

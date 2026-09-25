@@ -732,6 +732,7 @@ class JobWriter(object):
         file.write("        else if (result2==StatusCode::FAILURE) break;\n")
         file.write("      }\n")
         file.write("          manager.UpdateProgressBar();\n")
+        file.write("          manager.PrepareForExecution(mySample, myEvent);\n")
         if self.merging.enable:
             file.write("      if (!analyzer2->Execute(mySample,myEvent)) continue;\n")
         if self.main.fastsim.package == "fastjet":
@@ -740,7 +741,6 @@ class JobWriter(object):
             file.write("      fastsim1->Execute(mySample,myEvent);\n")
         elif self.main.fastsim.package == "delphesMA5tune":
             file.write("      fastsim1->Execute(mySample,myEvent);\n")
-        file.write("      manager.PrepareForExecution(mySample, myEvent);\n")
         file.write("      if (!analyzer1->Execute(mySample,myEvent)) continue;\n")
         if self.output != "" and not self.output.lower().endswith("root"):
             file.write("      writer1->WriteEvent(myEvent,mySample);\n")
@@ -915,12 +915,11 @@ class JobWriter(object):
             and self.main.archi_info.has_heptoptagger
         )
 
-        options.has_delphes_ma5lib = self.main.archi_info.has_delphes and not kwargs.get(
-            "ma5_fastjet_mode", True
-        )
-        options.has_delphes_lib = self.main.archi_info.has_delphes and not kwargs.get(
-            "ma5_fastjet_mode", True
-        )
+        options.has_delphes_ma5lib = self.main.archi_info.has_delphes and not kwargs.get("ma5_fastjet_mode", True)
+        options.has_delphes_lib = self.main.archi_info.has_delphes and not kwargs.get("ma5_fastjet_mode", True)
+        options.has_delphesMA5tune_ma5lib = (self.main.archi_info.has_delphesMA5tune and not kwargs.get("ma5_fastjet_mode", True))
+        options.has_delphesMA5tune_lib = (self.main.archi_info.has_delphesMA5tune and not kwargs.get("ma5_fastjet_mode", True))
+
         # JACK: to prevent seg-fault error with delphes
         options.remove_fastjet_lib = not kwargs.get("ma5_fastjet_mode", True)
 

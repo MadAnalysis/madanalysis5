@@ -109,7 +109,7 @@ class CmdInstall(CmdBase):
                 return resu
             elif ResuActi == 0 and has_release and not pad:
                 self.logger.warning("A previous " + release +' installation has been found. Skipping...')
-                self.logger.warning('To update ;' + release + ', please remove first the tools/' + release + 'delphes directory')
+                self.logger.warning('To update ' + release + ', please remove first the tools/' + release + ' directory')
             return True
 
         # Calling selection method

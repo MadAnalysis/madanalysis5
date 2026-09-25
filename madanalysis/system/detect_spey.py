@@ -70,5 +70,4 @@ class DetectSpey:
 
     def SaveInfo(self):
         self.session_info.has_spey = True
-        self.archi_info.has_spey = True
         return True

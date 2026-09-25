@@ -398,22 +398,17 @@ class ConfigChecker:
                 self.logger.debug("Look for Delphes in the folder "+self.archi_info.ma5dir+"/tools ...")
             if os.path.isdir(self.archi_info.ma5dir+'/tools/delphes') and \
                os.path.isdir(self.archi_info.ma5dir+'/tools/delphes/external'):
-                dpath =  os.path.normpath(os.path.join(self.archi_info.ma5dir,'tools','delphes'))
-                if not dpath in self.archi_info.delphes_inc_paths:
-                    self.archi_info.delphes_inc_paths.append(dpath)
-                if not dpath in self.archi_info.delphes_lib_paths:
-                    self.archi_info.delphes_lib_paths.append(dpath)
-                dpath=os.path.normpath(os.path.join(self.archi_info.ma5dir,'tools','delphes','external'))
-                if not dpath in self.archi_info.delphes_inc_paths:
-                    self.archi_info.delphes_inc_paths.append(dpath)
-                if not getpaths:
-                    self.logger.debug("-> found")
+
+                dpath = os.path.normpath(os.path.join(self.archi_info.ma5dir, "tools", "delphes"))
+                self.archi_info.delphes_inc_paths = [dpath, os.path.join(dpath, "external")]
+                self.archi_info.delphes_lib_paths = [dpath]
+                if not getpaths: self.logger.debug("-> found")
                 ma5installation = True
             elif os.path.isdir(self.archi_info.ma5dir+'/tools/DEACT_delphes') and \
                os.path.isdir(self.archi_info.ma5dir+'/tools/DEACT_delphes/external') and getpaths:
-                self.archi_info.delphes_inc_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphes/external')
-                self.archi_info.delphes_inc_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphes')
-                self.archi_info.delphes_lib_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphes')
+                dpath = os.path.normpath(os.path.join(self.archi_info.ma5dir, "tools", "DEACT_delphes"))
+                self.archi_info.delphes_inc_paths = [dpath, os.path.join(dpath, "external")]
+                self.archi_info.delphes_lib_paths = [dpath]
                 self.includes.append(self.archi_info.ma5dir+'/tools/DEACT_delphes')
                 self.includes.append(self.archi_info.ma5dir+'/tools/DEACT_delphes/external')
                 self.libs.append(self.archi_info.ma5dir+'/tools/DEACT_delphes')
@@ -428,10 +423,6 @@ class ConfigChecker:
                         self.logger.debug("-> not found")
                         self.PrintFAIL(package_name,warning=True)
                 return False
-
-            if len(self.archi_info.delphes_inc_paths)>2:
-              del self.archi_info.delphes_inc_paths[-1]
-              del self.archi_info.delphes_inc_paths[-1]
 
         # Check if the libraries and headers are available
         if force or ma5installation:
@@ -529,8 +520,8 @@ class ConfigChecker:
 
     def checkDelphesMA5tune(self,getpaths=False):
         # Checking if Delphes-MA5tune is present
-        package_name = self.PrintLibrary("Delphes-MA5tune")
         if not getpaths:
+            package_name = self.PrintLibrary("Delphes-MA5tune")
             self.logger.debug("Delphes-MA5tune")
 
         # User veto
@@ -599,22 +590,16 @@ class ConfigChecker:
                 self.logger.debug("Look for DelphesMA5tune in the folder "+self.archi_info.ma5dir+"/tools...")
             if os.path.isdir(self.archi_info.ma5dir+'/tools/delphesMA5tune') and \
                os.path.isdir(self.archi_info.ma5dir+'/tools/delphesMA5tune/external'):
-                dpath =  os.path.normpath(os.path.join(self.archi_info.ma5dir,'tools','delphesMA5tune'))
-                if not dpath in self.archi_info.delphesMA5tune_inc_paths:
-                    self.archi_info.delphesMA5tune_inc_paths.append(dpath)
-                if not dpath in self.archi_info.delphesMA5tune_lib_paths:
-                    self.archi_info.delphesMA5tune_lib_paths.append(dpath)
-                dpath=os.path.normpath(os.path.join(self.archi_info.ma5dir,'tools','delphesMA5tune','external'))
-                if not dpath in self.archi_info.delphesMA5tune_inc_paths:
-                    self.archi_info.delphesMA5tune_inc_paths.append(dpath)
-                if not getpaths:
-                    self.logger.debug("-> found")
+                dpath = os.path.normpath(os.path.join(self.archi_info.ma5dir, "tools", "delphesMA5tune"))
+                self.archi_info.delphesMA5tune_inc_paths = [dpath, os.path.join(dpath, "external")]
+                self.archi_info.delphesMA5tune_lib_paths = [dpath]
+                if not getpaths: self.logger.debug("-> found")
                 ma5installation = True
             elif os.path.isdir(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune') and \
                os.path.isdir(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/external') and getpaths:
-                self.archi_info.delphesMA5tune_inc_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/external')
-                self.archi_info.delphesMA5tune_inc_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune')
-                self.archi_info.delphesMA5tune_lib_paths.insert(0,self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune')
+                dpath = os.path.normpath(os.path.join(self.archi_info.ma5dir, "tools", "DEACT_delphesMA5tune"))
+                self.archi_info.delphesMA5tune_inc_paths = [dpath, os.path.join(dpath, "external")]
+                self.archi_info.delphesMA5tune_lib_paths = [dpath]
                 self.includes.append(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune')
                 self.includes.append(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune/external')
                 self.libs.append(self.archi_info.ma5dir+'/tools/DEACT_delphesMA5tune')

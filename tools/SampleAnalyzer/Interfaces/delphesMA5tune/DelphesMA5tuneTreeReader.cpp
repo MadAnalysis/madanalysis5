@@ -432,8 +432,8 @@ void DelphesMA5tuneTreeReader::FillEvent(EventFormat& myEvent, SampleFormat& myS
     {
       RecJetFormat * jet = myEvent.rec()->GetNewJet();
       jet->momentum_.SetPtEtaPhiM(part->PT,part->Eta,part->Phi,0.0);
-      jet->ntracks_  = 0; // To fix later
-      jet->btag_     = part->BTag;
+      jet->ntracks_ = 0; // To fix later
+      jet->loose_btag_ = part->BTag;
       jet->HEoverEE_ = part->EhadOverEem;
     }
   }

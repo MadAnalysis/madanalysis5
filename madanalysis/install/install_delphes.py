@@ -177,11 +177,13 @@ class InstallDelphes:
         filename = self.installdir+'/doc/genMakefile.tcl'
         self.logger.debug('Updating files '+filename+ ': no CMSSW\n')
         self.SwitchOffCMSSW(filename)
+        if not self.ProtectBundledFastJet(filename): return False
 
         # Updating ExRootTask
         filename = self.installdir+'/external/ExRootAnalysis/ExRootTask.cc'
         self.logger.debug('Updating files: commenting out lines in: '+filename+' ...')
         self.CommentLines(filename,[64,65,66],'//')
+        if not self.ProtectBundledFastJet(os.path.join(self.installdir, 'Makefile')): return False
 
         # Updating ExRootTask
         filename = self.installdir+'/external/ExRootAnalysis/ExRootConfReader.cc'
@@ -360,6 +362,34 @@ class InstallDelphes:
             self.logger.error("impossible to copy "+filename+'.savema5 in '+filename)
             return False
 
+        return True
+
+
+
+    def ProtectBundledFastJet(self, filename):
+        """Prevent Delphes' bundled FastJet symbols from being interposed."""
+        if not sys.platform.startswith('linux'): return True
+
+        # Delphes embeds FastJet installation, while MA5 may load a different one
+        # the same process. We need to bind both functions and data symbols locally.
+        linker_flag = 'DELPHES_LIBS += -Wl,-Bsymbolic\n'
+        with open(filename, 'r') as input_file: lines = input_file.readlines()
+        if linker_flag in lines: return True
+
+        insertion_point = None
+        for index, line in enumerate(lines):
+            if line.startswith('DELPHES_LIBS ='):
+                insertion_point = index + 1
+                break
+        if insertion_point is None:
+            self.logger.error('unable to protect bundled FastJet symbols in ' + filename)
+            return False
+
+        lines.insert(insertion_point, linker_flag)
+        with open(filename, 'w') as output_file:
+           output_file.writelines(lines)
+
+        # Exit
         return True
 
 
@@ -612,45 +642,19 @@ class InstallDelphes:
         # Paths and architecture update
         def activate(onelib):
             return onelib.replace("DEACT_","")
-        def libclean(onelib):
-            if len(onelib)>2:
-                del onelib[-1]
-                del onelib[-1]
-            return onelib
-        if self.package=='delphes':
-            # shortcuts
-            delphes_path = self.main.archi_info.delphes_lib_paths[0]
-            originals    = self.main.archi_info.delphes_original_libs
-            # architecture
-            self.main.archi_info.delphes_lib           = activate(self.main.archi_info.delphes_lib)
-            self.main.archi_info.delphes_original_libs = [activate(x) for x in originals]
-            self.main.archi_info.delphes_inc_paths     = libclean(
-                [activate(x) for x in self.main.archi_info.delphes_inc_paths ])
-            self.main.archi_info.delphes_lib_paths     = libclean(
-                [activate(x) for x in self.main.archi_info.delphes_lib_paths ])
-            # Updating shortcuts
-            originals    = self.main.archi_info.delphes_original_libs
-        elif self.package=='delphesMA5tune':
-            # shortcuts
-            delphes_path = self.main.archi_info.delphesMA5tune_lib_paths[0]
-            originals    = self.main.archi_info.delphesMA5tune_original_libs
-            # architecture
-            self.main.archi_info.delphesMA5tune_lib           = activate(self.main.archi_info.delphesMA5tune_lib)
-            self.main.archi_info.delphesMA5tune_original_libs = [activate(x) for x in originals]
-            self.main.archi_info.delphesMA5tune_inc_paths     = libclean(
-                [ activate(x) for x in self.main.archi_info.delphesMA5tune_inc_paths ])
-            self.main.archi_info.delphesMA5tune_lib_paths     = libclean(
-                [ activate(x) for x in self.main.archi_info.delphesMA5tune_lib_paths ])
-            # Updating shortcuts
-            originals    = self.main.archi_info.delphesMA5tune_original_libs
-        activated_path = activate(delphes_path)
+        delphes_path = getattr(self.main.archi_info, self.package + "_lib_paths")[0]
 
-        # do we have to activate delphes?
-        if not 'DEACT' in delphes_path:
-            return 0
+        # Already activated
+        if not 'DEACT' in delphes_path: return 0
+
+        # We have to activate delphes -> renaming the directory
         self.logger.warning(self.package + " is deactivated. Activating it.")
-
-        # renaming the directory
+        setattr(self.main.archi_info, self.package+"_lib", activate(getattr(self.main.archi_info, self.package+"_lib")))
+        for suffix in ("_original_libs", "_inc_paths", "_lib_paths"):
+            attribute = self.package + suffix
+            setattr(self.main.archi_info, attribute, [activate(path) for path in getattr(self.main.archi_info, attribute)])
+        originals = getattr(self.main.archi_info, self.package+"_original_libs")
+        activated_path = activate(delphes_path)
         shutil.move(delphes_path,activated_path)
 
         # creating the virtual links

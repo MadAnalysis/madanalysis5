@@ -25,9 +25,10 @@
 #define __REGIONSELECTIONMANAGER_H
 
 // STL headers
-#include <vector>
 #include <string>
 #include <sstream>
+#include <stdexcept>
+#include <vector>
 
 #define assertm(exp, msg) assert(((void)msg, exp))
 
@@ -83,6 +84,7 @@ namespace MA5
         /// Reset
         void Reset()
         {
+            NumberOfSurvivingRegions_ = 0;
             regions_.clear();
             cutmanager_.Finalize();
             plotmanager_.Finalize();
@@ -109,6 +111,36 @@ namespace MA5
         /// This function is for backwards compatibility
         const MAdouble64 GetCurrentEventWeight() const { return weight_[0]; }
 
+
+        /// Build a collection from a single scalar weight.
+        /// Preserve the current variation-to-nominal ratios where defined.
+        /// Rquired for backward compatibility with old PAD analyses
+        WeightCollection BuildScalarWeights(MAfloat64 scalar_w) const
+        {
+            // With only one weight, no rescaling is needed.
+            if (weight_.size()==1)
+                return WeightCollection(1, scalar_w);
+
+            // Safety - no correction can be inferred from a zero nominal weight.
+            const MAfloat64 nominal = weight_[0];
+            if (nominal==0.0)
+            {
+                if (scalar_w==0.0)
+                    return weight_;
+                throw std::invalid_argument("BuildScalarWeights: cannot rescale multiple weights from a zero nominal to a nonzero nominal");
+            }
+
+            // Creates a new collection with all weights scaled accordingly
+            // Stores the provided nominal weight exactly to avoid rounding from rescaling
+            const MAfloat64 factor = scalar_w/nominal;
+            WeightCollection result(weight_);
+            result *= factor;
+            result.Add(0, scalar_w);
+
+            // Output
+            return result;
+        }
+
         /// @brief Set current event weight with a weight map
         /// @param weight weight index and value
         void SetCurrentEventWeight(WeightCollection &weight) { weight_ = WeightCollection(weight); }
@@ -117,13 +149,30 @@ namespace MA5
         /// @param weight weight index and value
         void SetCurrentEventWeight(const WeightCollection &weight) { weight_ = WeightCollection(weight); }
 
+
+        /// Case of a scalar weight - required for older PAD analyses
+        /// Set the absolute nominal weight for the current event and apply the same multiplicative
+        /// correction to all variation weights
+        void SetCurrentEventWeight(MAfloat64 weight) { weight_ = BuildScalarWeights(weight); }
+
+
         /// @brief Set a specific weight to a region different than the others
         /// @param name region name
         /// @param weight weight collection object
         void SetRegionWeight(std::string name, WeightCollection &weight)
         {
-            region_weight_.insert(std::make_pair(name, WeightCollection(weight)));
+            region_weight_[name] = WeightCollection(weight);
         }
+
+        /// Case of a scalar weight - required for older PAD analyses
+        /// Set the absolute nominal weight for one region. Use the same convention
+        /// as SetCurrentEventWeight()
+        void SetRegionWeight(std::string name, MAfloat64 weight)
+        {
+            const WeightCollection region_weights = BuildScalarWeights(weight);
+            region_weight_[name] = region_weights;
+        }
+
 
         /// Adding a RegionSelection to the manager
         void AddRegionSelection(const std::string &name)
@@ -147,6 +196,7 @@ namespace MA5
         void InitializeForNewEvent(const WeightCollection &EventWeight)
         {
             weight_.SetWeights(EventWeight.GetWeights());
+            region_weight_.clear();
             NumberOfSurvivingRegions_ = regions_.size();
             for (auto &reg : regions_)
                 reg->InitializeForNewEvent(EventWeight);
