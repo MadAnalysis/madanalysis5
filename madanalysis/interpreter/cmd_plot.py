@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -213,7 +213,7 @@ class CmdPlot(CmdBase,CmdSelectionBase):
 
         # Creating histo
         setofRegions = self.main.regions.GetClusteredRegions(self.main.selection)
-        if (setofRegions==[[]] and HistoRegionNames==[]) or (list(set(HistoRegionNames)) in setofRegions):
+        if any(set(HistoRegionNames).issubset(regions) for regions in setofRegions):
             histo = Histogram(obsRef,arguments,nbins,xmin,xmax,regions=HistoRegionNames)
             # Getting options
             if beginOptions!=len(args):

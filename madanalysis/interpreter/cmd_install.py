@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -102,6 +102,8 @@ class CmdInstall(CmdBase):
             elif ResuActi == 1 and not has_release:
                 self.logger.warning(to_activate + " is not installed: installing it...")
                 resu = installer.Execute(release)
+                if resu == 'restart':
+                    return resu
                 if resu:
                     UpdatePaths()
                     if not main.CheckConfig():
@@ -109,7 +111,7 @@ class CmdInstall(CmdBase):
                 return resu
             elif ResuActi == 0 and has_release and not pad:
                 self.logger.warning("A previous " + release +' installation has been found. Skipping...')
-                self.logger.warning('To update ;' + release + ', please remove first the tools/' + release + 'delphes directory')
+                self.logger.warning('To update ' + release + ', please remove first the tools/' + release + ' directory')
             return True
 
         # Calling selection method
@@ -138,42 +140,12 @@ class CmdInstall(CmdBase):
             self.logger.warning("This command has been deprecated.")
             self.logger.warning(f"Please use '{sys.executable} -m pip install -r requirements.txt' instead.")
             return True
-        elif args[0]=='PADForMA5tune':
-            if inst_delphes(self.main,installer,'delphesMA5tune',True):
-                return installer.Execute('PADForMA5tune')
+        elif args[0] in ['PAD', 'PADForMA5tune']:
+            release = 'delphes' if args[0] == 'PAD' else 'delphesMA5tune'
+            if inst_delphes(self.main, installer, release, pad=True):
+                return installer.Execute(args[0])
             else:
-                self.logger.warning('DelphesMA5tune is not installed... please exit the program and install the pad')
-                return True
-        elif args[0]=='PAD':
-            pad_install_check, padsfs_install_check = False, False
-            # First check if PAD4SFS is installed
-            if not self.main.session_info.has_padsfs:
-                # check if FastJet is installed
-                if not self.main.archi_info.has_fastjet:
-                    answer = "y"
-                    if not self.main.forced:
-                        self.logger.warning("PADForSFS requires FastJet to be installed.")
-                        self.logger.info("Would you like to install FastJet? [Y/N]")
-                        while True:
-                            answer = input("Answer : ")
-                            if answer.lower() in ['y','n','yes','no', "yeap", "nope"]:
-                                break
-                    if answer.lower() in ['y','yes',"yeap"]:
-                        for package in ["fastjet", "fastjet-contrib", "PADForSFS"]:
-                            if not installer.Execute(package):
-                                return False
-                        padsfs_install_check = 'restart'
-                else:
-                    padsfs_install_check = installer.Execute('PADForSFS')
-
-            if inst_delphes(self.main,installer,'delphes',True):
-                pad_install_check = installer.Execute('PAD')
-            else:
-                self.logger.warning('Delphes is not installed (and will be installed). '+
-                                    'Then please exit MA5 and re-install the PAD')
-            if 'restart' in [pad_install_check, padsfs_install_check]:
-                return 'restart'
-            return any([pad_install_check, padsfs_install_check])
+                return False
         elif args[0]=='PADForSFS':
             padsfs_install_check = False
             if self.main.archi_info.has_fastjet:

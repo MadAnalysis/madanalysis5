@@ -1,6 +1,6 @@
 ################################################################################
 #
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #
 #  This file is part of MadAnalysis 5.
@@ -667,7 +667,7 @@ class JobWriter(object):
 
             file.write("  if (fastsim1==0) return 1;\n\n")
 
-        # Post intialization (crating the output directory structure)
+        # Post intialization (creating the output directory structure)
         file.write(
             "  // Post initialization (creates the new output directory structure)\n"
         )
@@ -676,15 +676,20 @@ class JobWriter(object):
             file.write("\n\n  /// Setting the random seed\n")
             file.write(f"  RANDOM->SetSeed({self.main.random_seed});\n\n")
 
-        # Add default hadrons and invisible particles for Reco mode
-        if self.main.mode == MA5RunningType.RECO:
+        # Add default hadrons and invisible particles for RECO and HADRON mode
+        # The invisible container may also be changed when runnign the code in HADRON mode.
+        if self.main.mode in [
+            MA5RunningType.RECO,
+            MA5RunningType.HADRON,
+            MA5RunningType.PARTON,
+        ]:
             file.write("\n  // Initializing PhysicsService for MC\n")
             file.write("  PHYSICS->mcConfig().Reset();\n")
             file.write('  // definition of the multiparticle "hadronic"\n')
             file.write("  manager.AddDefaultHadronic();\n")
             file.write('  // definition of the multiparticle "invisible"\n')
             file.write("  manager.AddDefaultInvisible();\n")
-            # If expert mode is initiated without an SFS card "invisible"
+            # If expert mode is initiated without an SFS card, then the "invisible"
             # collection does not exist. Thus just initiate with default config.
             if self.main.multiparticles.Find("invisible"):
                 for item in self.main.multiparticles.Get("invisible"):
@@ -727,6 +732,7 @@ class JobWriter(object):
         file.write("        else if (result2==StatusCode::FAILURE) break;\n")
         file.write("      }\n")
         file.write("          manager.UpdateProgressBar();\n")
+        file.write("          manager.PrepareForExecution(mySample, myEvent);\n")
         if self.merging.enable:
             file.write("      if (!analyzer2->Execute(mySample,myEvent)) continue;\n")
         if self.main.fastsim.package == "fastjet":
@@ -909,12 +915,11 @@ class JobWriter(object):
             and self.main.archi_info.has_heptoptagger
         )
 
-        options.has_delphes_ma5lib = self.main.archi_info.has_delphes and not kwargs.get(
-            "ma5_fastjet_mode", True
-        )
-        options.has_delphes_lib = self.main.archi_info.has_delphes and not kwargs.get(
-            "ma5_fastjet_mode", True
-        )
+        options.has_delphes_ma5lib = self.main.archi_info.has_delphes and not kwargs.get("ma5_fastjet_mode", True)
+        options.has_delphes_lib = self.main.archi_info.has_delphes and not kwargs.get("ma5_fastjet_mode", True)
+        options.has_delphesMA5tune_ma5lib = (self.main.archi_info.has_delphesMA5tune and not kwargs.get("ma5_fastjet_mode", True))
+        options.has_delphesMA5tune_lib = (self.main.archi_info.has_delphesMA5tune and not kwargs.get("ma5_fastjet_mode", True))
+
         # JACK: to prevent seg-fault error with delphes
         options.remove_fastjet_lib = not kwargs.get("ma5_fastjet_mode", True)
 

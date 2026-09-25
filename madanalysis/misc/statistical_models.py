@@ -135,10 +135,10 @@ def compute_poi_upper_limits(
             s95 = -1 if isinf(s95) or isnan(s95) else s95
             if record_to is None:
                 logger.debug("region %s s95%s = %.5f pb", reg, label, s95)
-                regiondata[reg][f"s95{label}"] = f"{s95:20.7f}"
+                regiondata[reg][f"s95{label}"] = f"{s95:.7f}"
             else:
                 if reg not in regiondata[record_to]:
                     regiondata[record_to][reg] = {}
                 logger.debug("%s:: region %s s95%s = %.5f pb", record_to, reg, label, s95)
-                regiondata[record_to][reg][f"s95{label}"] = f"{s95:20.7f}"
+                regiondata[record_to][reg][f"s95{label}"] = f"{s95:.7f}"
     return regiondata

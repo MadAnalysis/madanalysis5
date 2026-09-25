@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -233,9 +233,9 @@ void DetectorDelphes::Finalize()
   modularDelphes_->FinishTask();
   if (output_) treeWriter_->Write();
 
+  delete modularDelphes_; modularDelphes_=0;
   delete confReader_; confReader_=0;
   delete treeWriter_; treeWriter_=0;
-  delete modularDelphes_; modularDelphes_=0;
 }
 
 void DetectorDelphes::StoreEventHeader(SampleFormat& mySample, EventFormat& myEvent)

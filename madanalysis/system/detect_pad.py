@@ -1,6 +1,6 @@
 ################################################################################
 #
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #
 #  This file is part of MadAnalysis 5.
@@ -145,7 +145,7 @@ class DetectPAD:
 
     def ToolsDetection(self):
         msg = ""
-        if not self.archi_info.has_spey:
+        if not self.session_info.has_spey:
             msg = (
                 "Spey is not installed. Please install it before using " + self.name + "."
             )

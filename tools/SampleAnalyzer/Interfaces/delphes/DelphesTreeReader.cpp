@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //
 //  This file is part of MadAnalysis 5.
@@ -212,17 +212,16 @@ void DelphesTreeReader::FillEvent(EventFormat &myEvent, SampleFormat &mySample)
     {
         // Number of generated particles
         MAuint32 nweights = static_cast<MAuint32>(data_.Weight_->GetEntries());
-
+        std::vector<MAfloat64> w(nweights, 0.);
         for (MAuint32 i = 0; i < nweights; i++)
         {
             // getting the i-th particle
             LHEFWeight *weight = dynamic_cast<LHEFWeight *>(data_.Weight_->At(i));
             if (weight == 0)
                 continue;
-
-            // creating new particle and filling particle info
-            myEvent.mc()->multiweights().Add(weight->ID, weight->Weight);
+            w.at(weight->ID) = weight->Weight;
         }
+        myEvent.mc()->setWeights(w);
     }
 
     // ---------------------------------------------------------------------------
@@ -406,7 +405,8 @@ void DelphesTreeReader::FillEvent(EventFormat &myEvent, SampleFormat &mySample)
             if (header1 != 0)
             {
                 // Set event-weight
-                myEvent.mc()->setWeight(header1->Weight);
+                INFO << " FIX ME " << header1->Weight << endmsg;
+                myEvent.mc()->setWeight(0, header1->Weight);
             }
             else
             {
@@ -414,7 +414,8 @@ void DelphesTreeReader::FillEvent(EventFormat &myEvent, SampleFormat &mySample)
                 if (header2 == 0)
                     continue;
                 // Set event-weight
-                myEvent.mc()->setWeight(header2->Weight);
+                INFO << " FIX ME " << header2->Weight << endmsg;
+                myEvent.mc()->setWeight(0, header2->Weight);
             }
         }
     }

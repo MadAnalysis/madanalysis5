@@ -172,7 +172,7 @@ Command & Description\\
 \verbdef{\verbtextda}{reject ([part]) [criterion]}
 \verbdef{\verbtextdb}{select ([part]) [criterion]}
 \verbdef{\verbtexte}{[criterion]}
-\verbdef{\verbtextf}{swap main.selection[n1] main.selection[n2]}
+\verbdef{\verbtextf}{swap selection[n1] selection[n2]}
 In order to design an analysis in the \MA\ framework, the user can rely on the
 following commands.
 \renewcommand{\arraystretch}{1.2}%
@@ -208,7 +208,8 @@ Command & Description\\
   & Defines a selection cut that leads to the rejection (or selection) of an
     object candidate if the \verb?[criterion]? condition is satisfied.\\
 \color{ao} \verb?remove [object]? & Deletes an object (a (multi)particle label, a region, a
- histogram or a cut).\\
+    histogram or a cut). Removing a region also removes its associations with cuts
+    and histograms; those associated exclusively with this region are deleted.\\
 \color{ao} \verb?resubmit? & Adjusts the last generated C++ code relatively to the commands
   issued after the last \verb?submit? command, and executes it.\\
 \color{ao} \verb?set [obj] = [val]? & Sets an attribute of a specific object to a given

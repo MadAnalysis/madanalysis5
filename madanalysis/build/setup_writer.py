@@ -1,6 +1,6 @@
 ################################################################################
 #
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #
 #  This file is part of MadAnalysis 5.
@@ -82,7 +82,7 @@ class SetupWriter:
 
         delphes_inc_pths = []
         if len(archi_info.delphes_inc_paths) != 0:
-            delphes_inc_pths = archi_info.delphes_inc_paths
+            delphes_inc_pths = list(archi_info.delphes_inc_paths)
             delphes_inc_pths.append(
                 next((p for p in delphes_inc_pths if Path(p).stem == "delphes"), "")
                 + "/modules"

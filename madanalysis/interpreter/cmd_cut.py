@@ -1,6 +1,6 @@
 ################################################################################
 #  
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #  
 #  This file is part of MadAnalysis 5.
@@ -195,7 +195,7 @@ class CmdCut(CmdBase,CmdSelectionBase):
             self.main.selection.Add(cut)
         else:
             setofRegions = self.main.regions.GetClusteredRegions(self.main.selection)
-            if (setofRegions==[[]] and CutRegionNames==[]) or (list(set(CutRegionNames)) in setofRegions):
+            if any(set(CutRegionNames).issubset(regions) for regions in setofRegions):
                 cut = Cut(parts,condition,self.cut_type,regions=CutRegionNames)
                 # Setting options
                 if foundOptions:

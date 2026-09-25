@@ -1,6 +1,6 @@
 ################################################################################
 #
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #
 #  This file is part of MadAnalysis 5.
@@ -272,7 +272,7 @@ class RecastConfiguration:
                 if (
                     not archi_info.has_delphes
                     or not session_info.has_pad
-                    or not archi_info.has_spey
+                    or not session_info.has_spey
                 ):
                     self.logger.warning(
                         "Delphes and/or the PAD are not installed (or deactivated): "
@@ -281,7 +281,7 @@ class RecastConfiguration:
                 else:
                     canrecast = True
 
-                if not archi_info.has_spey:
+                if not session_info.has_spey:
                     self.logger.warning("Recast module requires Spey package.")
                     self.logger.warning(
                         "Installation instructions can be found at https://spey.readthedocs.io/"
@@ -296,7 +296,7 @@ class RecastConfiguration:
                 if (
                     not archi_info.has_delphesMA5tune
                     or not session_info.has_padma5
-                    or not archi_info.has_spey
+                    or not session_info.has_spey
                 ):
                     self.logger.warning(
                         "DelphesMA5tune and/or the PADForMA5tune are not installed "

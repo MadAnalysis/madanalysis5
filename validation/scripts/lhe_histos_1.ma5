@@ -1,0 +1,294 @@
+#TITLE Histogram-only regression tests in parton level
+#MODE PARTON
+
+import samples/lljj.lhe.gz as testset
+
+set main.normalize = none
+set main.lumi = 1.0
+
+define e = e+ e-
+define mu = mu+ mu-
+# ------------------------------------------------------------------
+# Event-level histograms
+# ------------------------------------------------------------------
+plot SQRTS     50 0 5000
+plot SCALE     50 0 2000
+plot ALPHA_QCD 50 0 0.3
+plot ALPHA_QED 50 0 0.02
+plot TET       50 0 5000
+plot THT       50 0 5000
+plot MET       50 0 1500
+plot MHT       50 0 1500
+plot NPID
+plot NAPID
+plot WEIGHTS
+
+# ------------------------------------------------------------------
+# Inclusive electron histograms
+# ------------------------------------------------------------------
+plot PT(e)       50 0 1000 [PTordering]
+plot ETA(e)      50 -8 8
+plot ABSETA(e)   50 0 8
+plot PHI(e)      32 -3.2 3.2
+plot E(e)        50 0 2000
+plot ET(e)       50 0 2000
+plot M(e)        50 0 20
+plot MT(e)       50 0 1000
+plot MT_MET(e)   50 0 1000
+plot P(e)        50 0 2000
+plot PX(e)       50 -1000 1000
+plot PY(e)       50 -1000 1000
+plot PZ(e)       50 -2000 2000
+plot R(e)        50 0 10
+plot Y(e)        50 -8 8
+plot BETA(e)     50 0 1.2
+plot GAMMA(e)    50 1 100
+
+# Leading/subleading electrons
+plot PT(e[1])      50 0 1000 [PTordering]
+plot ETA(e[1])     50 -8 8 [PTordering]
+plot PHI(e[1])     32 -3.2 3.2 [PTordering]
+plot E(e[1])       50 0 2000 [PTordering]
+plot MT_MET(e[1])  50 0 1000 [PTordering]
+plot PT(e[2])      50 0 1000 [PTordering]
+plot ETA(e[2])     50 -8 8 [PTordering]
+plot PHI(e[2])     32 -3.2 3.2 [PTordering]
+plot E(e[2])       50 0 2000 [PTordering]
+plot MT_MET(e[2])  50 0 1000 [PTordering]
+plot M(e[1] e[2])  50 0 1000 [PTordering]
+plot PT(e[1] e[2]) 50 0 1500 [PTordering]
+plot DELTAR(e[1],e[2])      50 0 10 [PTordering]
+plot DPHI_0_PI(e[1],e[2])   32 0 3.2 [PTordering]
+plot DPHI_0_2PI(e[1],e[2])  32 0 6.4 [PTordering]
+
+# ------------------------------------------------------------------
+# Inclusive muon histograms
+# ------------------------------------------------------------------
+plot PT(mu)      50 0 1000 [PTordering]
+plot ETA(mu)     50 -8 8
+plot ABSETA(mu)  50 0 8
+plot PHI(mu)     32 -3.2 3.2
+plot E(mu)       50 0 2000
+plot ET(mu)      50 0 2000
+plot M(mu)       50 0 20
+plot MT(mu)      50 0 1000
+plot MT_MET(mu)  50 0 1000
+plot P(mu)       50 0 2000
+plot PX(mu)      50 -1000 1000
+plot PY(mu)      50 -1000 1000
+plot PZ(mu)      50 -2000 2000
+plot R(mu)       50 0 10
+plot Y(mu)       50 -8 8
+plot BETA(mu)    50 0 1.2
+plot GAMMA(mu)   50 1 100
+
+# Leading/subleading muons
+plot PT(mu[1])      50 0 1000 [PTordering]
+plot ETA(mu[1])     50 -8 8 [PTordering]
+plot PHI(mu[1])     32 -3.2 3.2 [PTordering]
+plot E(mu[1])       50 0 2000 [PTordering]
+plot MT_MET(mu[1])  50 0 1000 [PTordering]
+plot PT(mu[2])      50 0 1000 [PTordering]
+plot ETA(mu[2])     50 -8 8 [PTordering]
+plot PHI(mu[2])     32 -3.2 3.2 [PTordering]
+plot E(mu[2])       50 0 2000 [PTordering]
+plot MT_MET(mu[2])  50 0 1000 [PTordering]
+plot M(mu[1] mu[2])  50 0 1000 [PTordering]
+plot PT(mu[1] mu[2]) 50 0 1500 [PTordering]
+plot DELTAR(mu[1],mu[2])      50 0 10 [PTordering]
+plot DPHI_0_PI(mu[1],mu[2])   32 0 3.2 [PTordering]
+plot DPHI_0_2PI(mu[1],mu[2])  32 0 6.4 [PTordering]
+
+# ------------------------------------------------------------------
+# Inclusive b-jet / b-parton histograms
+# ------------------------------------------------------------------
+plot PT(b)       50 0 1000 [PTordering]
+plot ETA(b)      50 -8 8
+plot ABSETA(b)   50 0 8
+plot PHI(b)      32 -3.2 3.2
+plot E(b)        50 0 2000
+plot ET(b)       50 0 2000
+plot M(b)        50 0 50
+plot MT(b)       50 0 1000
+plot MT_MET(b)   50 0 1000
+plot P(b)        50 0 2000
+plot PX(b)       50 -1000 1000
+plot PY(b)       50 -1000 1000
+plot PZ(b)       50 -2000 2000
+plot R(b)        50 0 10
+plot Y(b)        50 -8 8
+plot BETA(b)     50 0 1.2
+plot GAMMA(b)    50 1 100
+
+# Leading/subleading b objects
+plot PT(b[1])      50 0 1000 [PTordering]
+plot ETA(b[1])     50 -8 8 [PTordering]
+plot PHI(b[1])     32 -3.2 3.2 [PTordering]
+plot E(b[1])       50 0 2000 [PTordering]
+plot MT_MET(b[1])  50 0 1000 [PTordering]
+plot PT(b[2])      50 0 1000 [PTordering]
+plot ETA(b[2])     50 -8 8 [PTordering]
+plot PHI(b[2])     32 -3.2 3.2 [PTordering]
+plot E(b[2])       50 0 2000 [PTordering]
+plot MT_MET(b[2])  50 0 1000 [PTordering]
+plot M(b[1] b[2])  50 0 2000 [PTordering]
+plot PT(b[1] b[2]) 50 0 2000 [PTordering]
+plot DELTAR(b[1],b[2])      50 0 10 [PTordering]
+plot DPHI_0_PI(b[1],b[2])   32 0 3.2 [PTordering]
+plot DPHI_0_2PI(b[1],b[2])  32 0 6.4 [PTordering]
+
+# ------------------------------------------------------------------
+# Inclusive light-jet / light-parton histograms
+# ------------------------------------------------------------------
+plot PT(j)       50 0 1000 [PTordering]
+plot ETA(j)      50 -8 8
+plot ABSETA(j)   50 0 8
+plot PHI(j)      32 -3.2 3.2
+plot E(j)        50 0 2000
+plot ET(j)       50 0 2000
+plot M(j)        50 0 200
+plot MT(j)       50 0 1000
+plot MT_MET(j)   50 0 1000
+plot P(j)        50 0 2000
+plot PX(j)       50 -1000 1000
+plot PY(j)       50 -1000 1000
+plot PZ(j)       50 -2000 2000
+plot R(j)        50 0 10
+plot Y(j)        50 -8 8
+plot BETA(j)     50 0 1.2
+plot GAMMA(j)    50 1 100
+
+# Leading/subleading light jets
+plot PT(j[1])      50 0 1000 [PTordering]
+plot ETA(j[1])     50 -8 8 [PTordering]
+plot PHI(j[1])     32 -3.2 3.2 [PTordering]
+plot E(j[1])       50 0 2000 [PTordering]
+plot MT_MET(j[1])  50 0 1000 [PTordering]
+plot PT(j[2])      50 0 1000 [PTordering]
+plot ETA(j[2])     50 -8 8 [PTordering]
+plot PHI(j[2])     32 -3.2 3.2 [PTordering]
+plot E(j[2])       50 0 2000 [PTordering]
+plot MT_MET(j[2])  50 0 1000 [PTordering]
+plot M(j[1] j[2])  50 0 3000 [PTordering]
+plot PT(j[1] j[2]) 50 0 3000 [PTordering]
+plot DELTAR(j[1],j[2])      50 0 10 [PTordering]
+plot DPHI_0_PI(j[1],j[2])   32 0 3.2 [PTordering]
+plot DPHI_0_2PI(j[1],j[2])  32 0 6.4 [PTordering]
+
+# ------------------------------------------------------------------
+# Inclusive two-object histograms by object category
+# ------------------------------------------------------------------
+plot DELTAR(e,e)         50 0 10
+plot DPHI_0_PI(e,e)      32 0 3.2
+plot DPHI_0_2PI(e,e)     32 0 6.4
+plot M(e e)              50 0 1000
+plot PT(e e)             50 0 1500
+
+plot DELTAR(mu,mu)       50 0 10
+plot DPHI_0_PI(mu,mu)    32 0 3.2
+plot DPHI_0_2PI(mu,mu)   32 0 6.4
+plot M(mu mu)            50 0 1000
+plot PT(mu mu)           50 0 1500
+
+plot DELTAR(b,b)         50 0 10
+plot DPHI_0_PI(b,b)      32 0 3.2
+plot DPHI_0_2PI(b,b)     32 0 6.4
+plot M(b b)              50 0 2000
+plot PT(b b)             50 0 2000
+
+plot DELTAR(j,j)         50 0 10
+plot DPHI_0_PI(j,j)      32 0 3.2
+plot DPHI_0_2PI(j,j)     32 0 6.4
+plot M(j j)              50 0 3000
+plot PT(j j)             50 0 3000
+
+# Mixed-object histograms
+plot DELTAR(e,mu)        50 0 10
+plot DELTAR(e,j)         50 0 10
+plot DELTAR(mu,j)        50 0 10
+plot DELTAR(b,j)         50 0 10
+plot M(e mu)             50 0 1000
+plot M(e j)              50 0 2000
+plot M(mu j)             50 0 2000
+plot M(b j)              50 0 3000
+plot PT(e mu)            50 0 1500
+plot PT(b j)             50 0 3000
+
+# Leading mixed-object combinations
+plot DELTAR(e[1],mu[1])        50 0 10 [PTordering]
+plot DELTAR(e[1],j[1])         50 0 10 [PTordering]
+plot DELTAR(mu[1],j[1])        50 0 10 [PTordering]
+plot DELTAR(b[1],j[1])         50 0 10 [PTordering]
+plot M(e[1] mu[1])             50 0 1000 [PTordering]
+plot M(e[1] j[1])              50 0 2000 [PTordering]
+plot M(mu[1] j[1])             50 0 2000 [PTordering]
+plot M(b[1] j[1])              50 0 3000 [PTordering]
+plot PT(e[1] mu[1])            50 0 1500 [PTordering]
+plot PT(b[1] j[1])             50 0 3000 [PTordering]
+
+# ------------------------------------------------------------------
+# Additional logX histogram tests
+# ------------------------------------------------------------------
+plot SQRTS     50 1 5000   [logX]
+plot SCALE     50 1 2000   [logX]
+plot MET       50 1 1500   [logX]
+plot MHT       50 1 1500   [logX]
+plot WEIGHTS   50 1e-6 1e3 [logX]
+
+# Inclusive object spectra with logarithmic x axis
+plot PT(e)       50 1 1000   [PTordering logX]
+plot E(e)        50 1 2000   [logX]
+plot MT_MET(e)   50 1 1000   [logX]
+plot P(e)        50 1 2000   [logX]
+plot GAMMA(e)    50 1 100    [logX]
+
+plot PT(mu)      50 1 1000   [PTordering logX]
+plot E(mu)       50 1 2000   [logX]
+plot MT_MET(mu)  50 1 1000   [logX]
+plot P(mu)       50 1 2000   [logX]
+plot GAMMA(mu)   50 1 100    [logX]
+
+plot PT(b)       50 1 1000   [PTordering logX]
+plot E(b)        50 1 2000   [logX]
+plot MT_MET(b)   50 1 1000   [logX]
+plot P(b)        50 1 2000   [logX]
+plot GAMMA(b)    50 1 100    [logX]
+
+plot PT(j)       50 1 1000   [PTordering logX]
+plot E(j)        50 1 2000   [logX]
+plot MT_MET(j)   50 1 1000   [logX]
+plot P(j)        50 1 2000   [logX]
+plot GAMMA(j)    50 1 100    [logX]
+
+# Leading/subleading object spectra with logarithmic x axis
+plot PT(e[1])      50 1 1000 [PTordering logX]
+plot PT(e[2])      50 1 1000 [PTordering logX]
+plot M(e[1] e[2])  50 1 1000 [PTordering logX]
+plot DELTAR(e[1],e[2])      50 1e-2 10  [PTordering logX]
+
+plot PT(mu[1])      50 1 1000 [PTordering logX]
+plot PT(mu[2])      50 1 1000 [PTordering logX]
+plot M(mu[1] mu[2]) 50 1 1000 [PTordering logX]
+plot DELTAR(mu[1],mu[2])     50 1e-2 10 [PTordering logX]
+
+plot PT(b[1])      50 1 1000 [PTordering logX]
+plot PT(b[2])      50 1 1000 [PTordering logX]
+plot M(b[1] b[2])  50 1 2000 [PTordering logX]
+plot DELTAR(b[1],b[2])      50 1e-2 10 [PTordering logX]
+
+plot PT(j[1])      50 1 1000 [PTordering logX]
+plot PT(j[2])      50 1 1000 [PTordering logX]
+plot M(j[1] j[2])  50 1 3000 [PTordering logX]
+plot DELTAR(j[1],j[2])      50 1e-2 10 [PTordering logX]
+
+# Mixed leading-object combinations with logarithmic x axis
+plot M(e[1] mu[1])   50 1 1000 [PTordering logX]
+plot M(e[1] j[1])    50 1 2000 [PTordering logX]
+plot M(mu[1] j[1])   50 1 2000 [PTordering logX]
+plot M(b[1] j[1])    50 1 3000 [PTordering logX]
+plot PT(e[1] mu[1])  50 1 1500 [PTordering logX]
+plot PT(b[1] j[1])   50 1 3000 [PTordering logX]
+plot DELTAR(e[1],mu[1]) 50 1e-2 10 [PTordering logX]
+plot DELTAR(b[1],j[1])  50 1e-2 10 [PTordering logX]
+
+submit

@@ -1,6 +1,6 @@
 ################################################################################
 #
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #
 #  This file is part of MadAnalysis 5.
@@ -105,6 +105,7 @@ class CmdSubmit(CmdBase):
             "plot",
             "select",
             "reject",
+            "remove",
             "set main.clustering",
             "set main.merging",
             "define",

@@ -1,6 +1,6 @@
 ################################################################################
 #
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #
 #  This file is part of MadAnalysis 5.
@@ -121,12 +121,7 @@ class DetectFastjet:
         self.bin_path = os.path.dirname(self.bin_file)
 
         try:
-            result = subprocess.run(
-                ["./fastjet-config", "--config"],
-                capture_output=True,
-                text=True,
-                check=True,
-            )
+            result = subprocess.run([self.bin_file, "--config"], capture_output=True, text=True, check=True)
         except subprocess.CalledProcessError:
             return DetectStatusType.UNFOUND, "Unable to run fastjet-config."
 
@@ -136,7 +131,7 @@ class DetectFastjet:
             fastjet_cxx = match.group(1)
             log.debug("FastJet CXX = %s", fastjet_cxx)
         else:
-            log.warning("Unable to validate FastJet compilation.")
+            log.warning("FastJet does not report its compiler; compatibility will be checked by the SampleAnalyzer build test.")
 
         if fastjet_cxx is not None:
             if self.archi_info.has_root and self.archi_info.root_compiler != "":
@@ -217,7 +212,7 @@ class DetectFastjet:
                         "Please rebuild FastJet through MadAnalysis."
                     )
         else:
-            log.warning("Unable to validate FastJet compilation.")
+            log.warning("FastJet does not report its compiler; compatibility will be checked by the SampleAnalyzer build test.")
 
         # Ok
         return True

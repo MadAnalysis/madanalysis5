@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //
 //  This file is part of MadAnalysis 5.
@@ -25,9 +25,12 @@
 #define __REGIONSELECTIONMANAGER_H
 
 // STL headers
-#include <vector>
 #include <string>
 #include <sstream>
+#include <stdexcept>
+#include <vector>
+
+#define assertm(exp, msg) assert(((void)msg, exp))
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Counter/MultiRegionCounterManager.h"
@@ -59,7 +62,10 @@ namespace MA5
         MAuint32 NumberOfSurvivingRegions_;
 
         /// Weight associated with the processed event
-        MAfloat64 weight_;
+        WeightCollection weight_;
+
+        /// Weight associated with specific regions
+        std::map<std::string, WeightCollection> region_weight_;
 
         // -------------------------------------------------------------
         //                      method members
@@ -72,70 +78,101 @@ namespace MA5
         ~RegionSelectionManager()
         {
             for (auto &region_pointer : regions_)
-            {
                 delete region_pointer;
-            }
         };
 
         /// Reset
         void Reset()
         {
-            for (MAuint32 i = 0; i < regions_.size(); i++)
-            {
-                if (regions_[i] != 0)
-                    delete regions_[i];
-            }
+            NumberOfSurvivingRegions_ = 0;
             regions_.clear();
             cutmanager_.Finalize();
             plotmanager_.Finalize();
+            weight_.clear();
+            region_weight_.clear();
         }
 
         /// Finalizing
         void Finalize() { Reset(); }
 
         /// Get methods
-        std::vector<RegionSelection *> Regions()
-        {
-            return regions_;
-        }
+        std::vector<RegionSelection *> Regions() { return regions_; }
 
-        MultiRegionCounterManager *GetCutManager()
-        {
-            return &cutmanager_;
-        }
+        MultiRegionCounterManager *GetCutManager() { return &cutmanager_; }
 
-        PlotManager *GetPlotManager()
-        {
-            return &plotmanager_;
-        }
+        PlotManager *GetPlotManager() { return &plotmanager_; }
 
-        MAfloat64 GetCurrentEventWeight()
-        {
-            return weight_;
-        }
+        /// @brief Accessor to the current event weight
+        /// @return weight collection object
+        const WeightCollection GetCurrentEventWeights() const { return weight_; }
 
-        /// Set method
-        void SetCurrentEventWeight(MAfloat64 weight)
+        /// @brief Accessor to the current event weight
+        /// @return weight collection object
+        /// This function is for backwards compatibility
+        const MAdouble64 GetCurrentEventWeight() const { return weight_[0]; }
+
+
+        /// Build a collection from a single scalar weight.
+        /// Preserve the current variation-to-nominal ratios where defined.
+        /// Rquired for backward compatibility with old PAD analyses
+        WeightCollection BuildScalarWeights(MAfloat64 scalar_w) const
         {
-            weight_ = weight;
-            for (MAuint16 i = 0; i < regions_.size(); i++)
+            // With only one weight, no rescaling is needed.
+            if (weight_.size()==1)
+                return WeightCollection(1, scalar_w);
+
+            // Safety - no correction can be inferred from a zero nominal weight.
+            const MAfloat64 nominal = weight_[0];
+            if (nominal==0.0)
             {
-                regions_[i]->SetWeight(weight);
+                if (scalar_w==0.0)
+                    return weight_;
+                throw std::invalid_argument("BuildScalarWeights: cannot rescale multiple weights from a zero nominal to a nonzero nominal");
             }
+
+            // Creates a new collection with all weights scaled accordingly
+            // Stores the provided nominal weight exactly to avoid rounding from rescaling
+            const MAfloat64 factor = scalar_w/nominal;
+            WeightCollection result(weight_);
+            result *= factor;
+            result.Add(0, scalar_w);
+
+            // Output
+            return result;
         }
 
-        /// Set method
+        /// @brief Set current event weight with a weight map
+        /// @param weight weight index and value
+        void SetCurrentEventWeight(WeightCollection &weight) { weight_ = WeightCollection(weight); }
+
+        /// @brief Set current event weight with a weight map
+        /// @param weight weight index and value
+        void SetCurrentEventWeight(const WeightCollection &weight) { weight_ = WeightCollection(weight); }
+
+
+        /// Case of a scalar weight - required for older PAD analyses
+        /// Set the absolute nominal weight for the current event and apply the same multiplicative
+        /// correction to all variation weights
+        void SetCurrentEventWeight(MAfloat64 weight) { weight_ = BuildScalarWeights(weight); }
+
+
+        /// @brief Set a specific weight to a region different than the others
+        /// @param name region name
+        /// @param weight weight collection object
+        void SetRegionWeight(std::string name, WeightCollection &weight)
+        {
+            region_weight_[name] = WeightCollection(weight);
+        }
+
+        /// Case of a scalar weight - required for older PAD analyses
+        /// Set the absolute nominal weight for one region. Use the same convention
+        /// as SetCurrentEventWeight()
         void SetRegionWeight(std::string name, MAfloat64 weight)
         {
-            for (MAuint16 i = 0; i < regions_.size(); i++)
-            {
-                if (regions_[i]->GetName() == name)
-                {
-                    regions_[i]->SetWeight(weight);
-                    break;
-                }
-            }
+            const WeightCollection region_weights = BuildScalarWeights(weight);
+            region_weight_[name] = region_weights;
         }
+
 
         /// Adding a RegionSelection to the manager
         void AddRegionSelection(const std::string &name)
@@ -151,15 +188,20 @@ namespace MA5
             regions_.push_back(myregion);
         }
 
-        /// Getting ready for a new event
-        void InitializeForNewEvent(MAfloat64 EventWeight)
+        /// THIS FUNCTION HAS BEEN DEPRECATED
+        void InitializeForNewEvent(MAfloat64 EventWeight) {}
+
+        /// @brief initialise new event with multiweight definition
+        /// @param EventWeight weight map
+        void InitializeForNewEvent(const WeightCollection &EventWeight)
         {
-            weight_ = EventWeight;
+            weight_.SetWeights(EventWeight.GetWeights());
+            region_weight_.clear();
             NumberOfSurvivingRegions_ = regions_.size();
-            for (MAuint32 i = 0; i < regions_.size(); i++)
-                regions_[i]->InitializeForNewEvent(EventWeight);
+            for (auto &reg : regions_)
+                reg->InitializeForNewEvent(EventWeight);
             for (MAuint32 i = 0; i < plotmanager_.GetNplots(); i++)
-                plotmanager_.GetHistos()[i]->SetFreshEvent(true);
+                plotmanager_.GetHistos()[i]->SetFreshEvent(true, EventWeight);
         }
 
         /// This method associates all regions with a cut

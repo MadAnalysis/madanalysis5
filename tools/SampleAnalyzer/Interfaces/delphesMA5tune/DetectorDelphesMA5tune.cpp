@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //  
-//  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+//  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 //  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 //  
 //  This file is part of MadAnalysis 5.
@@ -237,10 +237,9 @@ void DetectorDelphesMA5tune::Finalize()
   nprocesses_=0;
   modularDelphes_->FinishTask();
   if (output_) treeWriter_->Write();
-
+  delete modularDelphes_; modularDelphes_=0;
   delete confReader_; confReader_=0;
   delete treeWriter_; treeWriter_=0;
-  delete modularDelphes_; modularDelphes_=0;
 }
 
 void DetectorDelphesMA5tune::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat& myEvent)
@@ -381,7 +380,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
         MAfloat64 pz = cand->Momentum.Pz();
         MAfloat64 e  = cand->Momentum.E();
         jet->momentum_.SetPxPyPzE(px,py,pz,e);
-        jet->btag_ = cand->BTag;
+        jet->loose_btag_ = cand->BTag;
         if (cand->Eem!=0) jet->HEoverEE_ = cand->Ehad/cand->Eem; else jet->HEoverEE_ = 999.;
         jet->ntracks_ = 0; // To fix later
       }
@@ -407,7 +406,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
       MAfloat64 pz = cand->Momentum.Pz();
       MAfloat64 e  = cand->Momentum.E();
       genjet->momentum_.SetPxPyPzE(px,py,pz,e);
-      genjet->btag_ = cand->BTag;
+      genjet->loose_btag_ = cand->BTag;
     }
   }
 

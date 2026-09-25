@@ -1,6 +1,6 @@
 ################################################################################
 #
-#  Copyright (C) 2012-2025 Jack Araz, Eric Conte & Benjamin Fuks
+#  Copyright (C) 2012-2026 Jack Araz, Eric Conte & Benjamin Fuks
 #  The MadAnalysis development team, email: <ma5team@iphc.cnrs.fr>
 #
 #  This file is part of MadAnalysis 5.
@@ -31,6 +31,8 @@ from shell_command import ShellCommand
 
 from madanalysis.install.install_service import InstallService
 
+log = logging.getLogger("MA5")
+
 
 class InstallFastjet:
     def __init__(self, main):
@@ -47,14 +49,10 @@ class InstallFastjet:
 
     def Detect(self):
         if not os.path.isdir(self.toolsdir):
-            logging.getLogger("MA5").debug(
-                "The folder '" + self.toolsdir + "' is not found"
-            )
+            log.debug("The folder '" + self.toolsdir + "' is not found")
             return False
         if not os.path.isdir(self.installdir):
-            logging.getLogger("MA5").debug(
-                "The folder " + self.installdir + "' is not found"
-            )
+            log.debug("The folder " + self.installdir + "' is not found")
             return False
         return True
 
@@ -124,9 +122,11 @@ class InstallFastjet:
             "--prefix=" + self.installdir,
             "--enable-allplugins",
         ]
+        log.debug("Configuring fastjet with prefix %s", self.installdir)
+        log.debug("Configuring fastjet with CXXFLAGS %s", os.environ["CXXFLAGS"])
         logname = os.path.normpath(self.installdir + "/configuration.log")
         # Execute
-        logging.getLogger("MA5").debug("shell command: " + " ".join(theCommands))
+        log.debug("shell command: " + " ".join(theCommands))
         ok, out = ShellCommand.ExecuteWithLog(
             theCommands, logname, self.tmpdir, silent=False
         )
@@ -137,10 +137,10 @@ class InstallFastjet:
             os.environ["CXXFLAGS"] = initial_env
         # return result
         if not ok:
-            logging.getLogger("MA5").error(
+            log.error(
                 "impossible to configure the project. For more details, see the log file:"
             )
-            logging.getLogger("MA5").error(logname)
+            log.error(logname)
         return ok
 
     def Build(self):
@@ -148,16 +148,16 @@ class InstallFastjet:
         theCommands = ["make", "-j" + str(self.ncores)]
         logname = os.path.normpath(self.installdir + "/compilation.log")
         # Execute
-        logging.getLogger("MA5").debug("shell command: " + " ".join(theCommands))
+        log.debug("shell command: " + " ".join(theCommands))
         ok, out = ShellCommand.ExecuteWithLog(
             theCommands, logname, self.tmpdir, silent=False
         )
         # return result
         if not ok:
-            logging.getLogger("MA5").error(
+            log.error(
                 "impossible to build the project. For more details, see the log file:"
             )
-            logging.getLogger("MA5").error(logname)
+            log.error(logname)
         return ok
 
     def Install(self):
@@ -165,16 +165,16 @@ class InstallFastjet:
         theCommands = ["make", "install"]
         logname = os.path.normpath(self.installdir + "/installation.log")
         # Execute
-        logging.getLogger("MA5").debug("shell command: " + " ".join(theCommands))
+        log.debug("shell command: " + " ".join(theCommands))
         ok, out = ShellCommand.ExecuteWithLog(
             theCommands, logname, self.tmpdir, silent=False
         )
         # return result
         if not ok:
-            logging.getLogger("MA5").error(
+            log.error(
                 "impossible to build the project. For more details, see the log file:"
             )
-            logging.getLogger("MA5").error(logname)
+            log.error(logname)
         return ok
 
     def Check(self):
@@ -186,52 +186,38 @@ class InstallFastjet:
         ]
         for dir in dirs:
             if not os.path.isdir(dir):
-                logging.getLogger("MA5").error("folder " + dir + " is missing.")
+                log.error("folder " + dir + " is missing.")
                 self.display_log()
                 return False
 
         # Check fastjet executable
         if not os.path.isfile(self.installdir + "/bin/fastjet-config"):
-            logging.getLogger("MA5").error("binary labeled 'fastjet-config' is missing.")
+            log.error("binary labeled 'fastjet-config' is missing.")
             self.display_log()
             return False
 
         # Check one header file
         if not os.path.isfile(self.installdir + "/include/fastjet/PseudoJet.hh"):
-            logging.getLogger("MA5").error(
-                "header labeled 'include/fastjet/PseudoJet.hh' is missing."
-            )
+            log.error("header labeled 'include/fastjet/PseudoJet.hh' is missing.")
             self.display_log()
             return False
 
         if (not os.path.isfile(self.installdir + "/lib/libfastjet.so")) and (
             not os.path.isfile(self.installdir + "/lib/libfastjet.a")
         ):
-            logging.getLogger("MA5").error(
-                "library labeled 'libfastjet.so' or 'libfastjet.a' is missing."
-            )
+            log.error("library labeled 'libfastjet.so' or 'libfastjet.a' is missing.")
             self.display_log()
             return False
 
         return True
 
     def display_log(self):
-        logging.getLogger("MA5").error("More details can be found into the log files:")
-        logging.getLogger("MA5").error(
-            " - " + os.path.normpath(self.installdir + "/wget.log")
-        )
-        logging.getLogger("MA5").error(
-            " - " + os.path.normpath(self.installdir + "/unpack.log")
-        )
-        logging.getLogger("MA5").error(
-            " - " + os.path.normpath(self.installdir + "/configuration.log")
-        )
-        logging.getLogger("MA5").error(
-            " - " + os.path.normpath(self.installdir + "/compilation.log")
-        )
-        logging.getLogger("MA5").error(
-            " - " + os.path.normpath(self.installdir + "/installation.log")
-        )
+        log.error("More details can be found into the log files:")
+        log.error(" - " + os.path.normpath(self.installdir + "/wget.log"))
+        log.error(" - " + os.path.normpath(self.installdir + "/unpack.log"))
+        log.error(" - " + os.path.normpath(self.installdir + "/configuration.log"))
+        log.error(" - " + os.path.normpath(self.installdir + "/compilation.log"))
+        log.error(" - " + os.path.normpath(self.installdir + "/installation.log"))
 
     def NeedToRestart(self):
         return True
