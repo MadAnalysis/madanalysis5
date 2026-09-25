@@ -12,7 +12,7 @@
 ## Bug fixes
 * Bug fix in the HistFrequency module of SampleAnalyzer
   (The first time an entry was found, it was not added to the histo)
-* Fixing the PAD installation due to change in the metadata management of the dataverse
+* Fixing the PAD installation due to change in the metadata management of the dataverse (see [PR319](https://github.com/MadAnalysis/madanalysis5/pull/319))
 
 
 ## Contributors
