@@ -372,35 +372,45 @@ class InstallService:
             log.warning("Problem with Python version decoding!")
             modeSSL = False
 
-        # Try to access
-        ok = True
-        for nAttempt in range(0, nMaxAttempts):
-            if nAttempt > 0:
-                log.warning("New attempt to access the url: " + url)
-                log.debug("Waiting " + str(nSeconds) + " seconds ...")
-                time.sleep(nSeconds)
-            log.debug(
-                "Attempt "
-                + str(nAttempt + 1)
-                + "/"
-                + str(nMaxAttempts)
-                + " to access the url"
+
+
+        # Keep the URL used in messages separate from the request object.
+        if isinstance(url, six.moves.urllib.request.Request):
+            display_url = url.get_full_url()
+            request = url
+            if headers is not None:
+                for name, value in headers.items():
+                    request.add_header(name, value)
+        else:
+            display_url = url
+            request = (
+                six.moves.urllib.request.Request(url, headers=headers)
+                if headers is not None
+                else url
             )
+
+        # Try to access.
+        ok = False
+        for nAttempt in range(nMaxAttempts):
+            if nAttempt > 0:
+                log.warning("New attempt to access the url: %s", display_url)
+                log.debug("Waiting %s seconds ...", nSeconds)
+                time.sleep(nSeconds)
+            log.debug("Attempt %s/%s to access the url", nAttempt + 1, nMaxAttempts)
+
             try:
-                if headers is not None:
-                    url = six.moves.urllib.request.Request(url, headers=headers)
                 if modeSSL:
-                    info = six.moves.urllib.request.urlopen(
-                        url, context=ssl._create_unverified_context()
-                    )
+                    info = six.moves.urllib.request.urlopen(request, context=ssl._create_unverified_context())
                 else:
-                    info = six.moves.urllib.request.urlopen(url)
+                    info = six.moves.urllib.request.urlopen(request)
             except Exception as err:
                 log.debug(err)
-                log.warning("Impossible to access the url: " + url)
-                ok = False
-            if ok:
-                break
+                log.warning("Impossible to access the url: %s", display_url)
+                continue
+
+            # A successful attempt ends the retry loop.
+            ok = True
+            break
 
         if not ok:
             return None
