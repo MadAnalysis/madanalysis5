@@ -32,8 +32,9 @@ from six.moves import range
 from six.moves import input
 import six
 
-class InstallService():
+log = logging.getLogger("MA5")
 
+class InstallService():
     @staticmethod
     def convert_bytes(bytes):
         bytes = float(bytes)
@@ -183,13 +184,13 @@ class InstallService():
 
 
     @staticmethod        
-    def wget(filesToDownload,logFileName,installdir):
+    def wget(filesToDownload,logFileName,installdir, **kwargs):
 
         # Opening log file
         try:
-            log=open(logFileName,'w')
+            logfile=open(logFileName,'w')
         except:
-            logging.getLogger('MA5').error('impossible to create the file '+logFileName)
+            log.error('impossible to create the file '+logFileName)
             return False
 
         # Parameters
@@ -200,47 +201,44 @@ class InstallService():
         for file,url in filesToDownload.items():
             ind+=1
             result="OK"
-            logging.getLogger('MA5').info('    - ' + str(ind)+"/"+str(len(list(filesToDownload.keys())))+" "+url+" ...")
+            log.info("    - %s/%s %s ...", ind, len(list(filesToDownload.keys())), url)
             output = installdir+'/'+file
 
             # Try to connect the file
-            info = InstallService.UrlAccess(url)
-            ok=(info!=None)
+            info = InstallService.UrlAccess(url, headers=kwargs.get("headers", None))
+            ok = info is not None
 
             # Check if the connection is OK
             if not ok:
-                logging.getLogger('MA5').warning("Impossible to download the package from "+\
-                                url + " to "+output)
+                log.warning("Impossible to download the package from " + url + " to " + output)
                 result="ERROR"
                 error=True
 
                 # Write download status in the log file
-                log.write(url+' : '+result+'\n')
+                logfile.write(url+' : '+result+'\n')
 
                 # skip the file
                 continue
 
             # Decoding the size of the remote file
-            logging.getLogger('MA5').debug('Decoding the size of the remote file...')
-            sizeURLFile = 0                    
+            log.debug('Decoding the size of the remote file...')
+            sizeURLFile = -1
             try:
                 if six.PY2:
                     sizeURLFile = int(info.info().getheaders("Content-Length")[0])
                 else:
                     sizeURLFile = int(info.info().get("Content-Length"))
             except Exception as err:
-                print(err)
-                logging.getLogger('MA5').debug('-> Problem to decode it')
-                logging.getLogger('MA5').warning("Bad description for "+url)
-                result="ERROR"
-                error=True
+                log.debug(err)
+                log.debug("-> Problem to decode it")
+                log.debug(
+                    "Bad description for %s, can not read the size of the file.", url
+                )
 
                 # Write download status in the log file
-                log.write(url+' : '+result+'\n')
+                logfile.write(url+' : '+result+'\n')
 
-                # skip the file
-                continue
-            logging.getLogger('MA5').debug('-> size='+str(sizeURLFile))
+            log.debug("-> size=%s", str(sizeURLFile))
 
             # Does the file exist locally?
             ok=False
@@ -263,13 +261,19 @@ class InstallService():
 
                 # Comparing the sizes of two files
                 if ok:
-                    logging.getLogger('MA5').debug('-> size='+str(sizeSYSFile))
-                    logging.getLogger('MA5').debug('Comparing the sizes of two files...')
-                    if sizeURLFile != sizeSYSFile :
-                        logging.getLogger('MA5').debug('-> Difference detected!')
-                        logging.getLogger('MA5').info("   '" + file + "' is corrupted or is an old version." + os.linesep +\
-                                     "         --> Downloading a new package ...")
-                        ok=False
+                    log.debug("-> size=" + str(sizeSYSFile))
+                    log.debug("Comparing the sizes of two files...")
+                    if sizeURLFile != sizeSYSFile:
+                        log.debug("-> Difference detected!")
+                        log.info(
+                            "   '"
+                            + file
+                            + "' is corrupted or is an old version."
+                            + os.linesep
+                            + "         --> Downloading a new package ..."
+                        )
+                        ok = False
+
 
                 # Case where the two files are identifical -> do nothing
                 if ok:
@@ -319,11 +323,11 @@ class InstallService():
                         error=True
 
             # Write download status in the log file
-            log.write(url+' : '+result+'\n')
+            logfile.write(url+' : '+result+'\n')
 
         # Close the log file
         try:
-            log.close()
+            logfile.close()
         except:
             logging.getLogger('MA5').error('impossible to close the file '+logFileName)
 
@@ -336,7 +340,7 @@ class InstallService():
 
 
     @staticmethod
-    def UrlAccess(url):
+    def UrlAccess(url, headers: dict[str, str] = None):
 
         import six.moves.urllib.request, six.moves.urllib.error, six.moves.urllib.parse
         import ssl
@@ -364,6 +368,8 @@ class InstallService():
                 time.sleep(nSeconds)
             logging.getLogger('MA5').debug("Attempt "+str(nAttempt+1)+"/"+str(nMaxAttempts)+" to access the url")
             try:
+                if headers is not None:
+                    url = six.moves.urllib.request.Request(url, headers=headers)
                 if modeSSL:
                     info = six.moves.urllib.request.urlopen(url, context=ssl._create_unverified_context())
                 else:

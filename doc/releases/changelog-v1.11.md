@@ -12,6 +12,8 @@
 ## Bug fixes
 * Bug fix in the HistFrequency module of SampleAnalyzer
   (The first time an entry was found, it was not added to the histo)
+* Fixing the PAD installation due to change in the metadata management of the dataverse
+
 
 ## Contributors
 
