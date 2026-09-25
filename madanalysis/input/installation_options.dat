@@ -54,3 +54,8 @@
 # -----SCIPY-----
 # scipy_veto = 0 # 0=No, 1=Yes
 
+# -----ONNX-----
+# onnx_veto     = 0 # 0=No, 1=Yes
+# onnx_includes = /home/onnx/include/
+# onnx_libs     = /home/onnx/lib/
+

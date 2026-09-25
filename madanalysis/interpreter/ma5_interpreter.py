@@ -361,6 +361,14 @@ class MA5Interpreter(Interpreter):
             if not installer.Execute('zlib'):
                 self.logger.error('Impossible to install zlib.')
                 return False
+            
+        # If not onnx -> install onnx
+        if not self.main.archi_info.has_onnx:
+            self.logger.info('The onnx package has not been found. Proceeding with its local installation.')
+            installer=InstallManager(self.main)
+            if not installer.Execute('onnx'):
+                self.logger.error('Impossible to install onnx.')
+                return False
 
         # If not fastjet -> install fastjet
         if not self.main.archi_info.has_fastjet:

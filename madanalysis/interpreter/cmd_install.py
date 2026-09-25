@@ -118,6 +118,8 @@ class CmdInstall(CmdBase):
             return installer.Execute('samples')
         elif args[0]=='zlib':
             return installer.Execute('zlib')
+        elif args[0]=='onnx':
+            return installer.Execute('onnx')
         elif args[0] in ['delphes', 'delphesMA5tune']:
             return inst_delphes(self.main,installer,args[0])
         elif args[0]=='fastjet':
@@ -210,7 +212,7 @@ class CmdInstall(CmdBase):
     def help(self):
         self.logger.info("   Syntax: install <component>")
         self.logger.info("   Download and install a MadAnalysis component from the official site.")
-        self.logger.info("   List of available components: samples zlib fastjet delphes delphesMA5tune PAD PADForMA5tune PADForSFS")
+        self.logger.info("   List of available components: samples zlib fastjet delphes delphesMA5tune PAD PADForMA5tune PADForSFS onnx")
 
 
     def complete(self,text,args,begidx,endidx):
@@ -224,7 +226,7 @@ class CmdInstall(CmdBase):
         else:
             output = ["samples","zlib","fastjet", "delphes", "delphesMA5tune",\
                 "gnuplot", "matplotlib", "root" , "numpy", "PAD", "PADForMA5tune",\
-                "PADForSFS", "pyhf"]
+                "PADForSFS", "pyhf", "onnx"]
             return self.finalize_complete(text,output)
 
 

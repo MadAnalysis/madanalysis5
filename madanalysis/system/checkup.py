@@ -70,7 +70,9 @@ class CheckUp:
         )
         if self.archi_info.platform.lower() in ["darwin", "mac", "macosx"]:
             self.archi_info.isMac = True
-            platform_text += "\x1b[32m" + "[MAC/OSX mode]" + "\x1b[0m"
+            platform_text+='\x1b[32m'+'[MAC/OSX mode]'+'\x1b[0m'
+            if platform.machine().lower() != "x86_64" :
+                self.archi_info.isARM64 = True 
         else:
             self.archi_info.isMac = False
             platform_text += "\x1b[32m" + "[Linux mode]" + "\x1b[0m"
@@ -374,6 +376,8 @@ class CheckUp:
             return False
         if not self.checker.Execute("root"):
             return False
+        if not self.checker.Execute('onnx'):
+            return False
 
         self.archi_info.has_delphes = checker2.checkDelphes()
         self.archi_info.has_delphesMA5tune = checker2.checkDelphesMA5tune()
@@ -382,7 +386,7 @@ class CheckUp:
     def CheckOptionalReinterpretationPackages(self):
         # Optional packages
         self.logger.info("Checking optional packages devoted to reinterpretation:")
-        for package in ["scipy", "spey", "pyhf", "pad", "padma5", "padsfs", "simplify"]:
+        for package in ["scipy", "spey", "pyhf", "pad", "padma5", "padsfs", "simplify", "onnx"]:
             if not self.checker.Execute(package):
                 return False
         return True

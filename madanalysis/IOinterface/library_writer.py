@@ -132,6 +132,8 @@ class LibraryWriter():
             filename = self.path+"/SampleAnalyzer/Test/Makefile_delphesMA5tune"
         elif package=='test_root':
             filename = self.path+"/SampleAnalyzer/Test/Makefile_root"
+        elif package=='test_onnx':
+            filename = self.path+"/SampleAnalyzer/Test/Makefile_onnx"
 
         # Header
         title=''
@@ -155,6 +157,8 @@ class LibraryWriter():
             title='*delphesMA5tune-interface* test'
         elif package=='test_root':
             title='*root-interface* test'
+        elif package=='test_onnx':
+            title='*onnx-interface* test'
         else:
             title='interface to '+package
 
@@ -190,6 +194,18 @@ class LibraryWriter():
           #  options.has_zlib_lib = True
             toRemove.extend(['compilation_zlib.log','linking_zlib.log','cleanup_zlib.log',\
                              'mrproper_zlib.log','../Bin/TestZlib.log'])
+        elif package=='onnx':
+            options.has_commons  = True
+            options.has_onnx_inc = True
+            options.has_onnx_lib = True
+            toRemove.extend(['compilation_onnx.log','linking_onnx.log','cleanup_onnx.log','mrproper_onnx.log'])
+        elif package=='test_onnx':
+            options.has_commons     = True
+            #options.has_onnx_ma5lib = True
+            options.has_onnx_inc = True
+            options.has_onnx_lib = True
+            toRemove.extend(['compilation_onnx.log','linking_onnx.log','cleanup_onnx.log',\
+                             'mrproper_onnx.log','../Bin/TestOnnx.log'])
         elif package=='delphes':
             options.has_commons     = True
             options.has_delphes_inc = True
@@ -260,6 +276,8 @@ class LibraryWriter():
             options.has_zlib_tag              = self.main.archi_info.has_zlib
             options.has_root_tag              = self.main.archi_info.has_root
             options.has_root_ma5lib           = self.main.archi_info.has_root
+            options.has_onnx_tag              = self.main.archi_info.has_onnx
+            options.has_onnx_ma5lib           = self.main.archi_info.has_onnx
             toRemove.extend(['compilation.log','linking.log','cleanup.log','mrproper.log'])
         elif package=='test_process':
             options.has_commons               = True
@@ -304,6 +322,9 @@ class LibraryWriter():
         elif package=='test_root':
             cppfiles = ['Root/*.cpp']
             hfiles   = ['Root/*.h']
+        elif package=='test_onnx':
+            cppfiles = ['Onnx/*.cpp']
+            hfiles   = ['Onnx/*.h']
         else:
             cppfiles = [package+'/*.cpp']
             hfiles   = [package+'/*.h']
@@ -332,6 +353,10 @@ class LibraryWriter():
         elif package=='test_root':
             isLibrary=False
             ProductName='TestRoot'
+            ProductPath='../Bin/'
+        elif package=='test_onnx':
+            isLibrary=False
+            ProductName='TestOnnx'
             ProductPath='../Bin/'
         elif package=='test_delphes':
             isLibrary=False
@@ -364,7 +389,7 @@ class LibraryWriter():
         if package in ['process','commons','test','configuration']:
             logfile = folder+'/compilation.log'
         elif package in ['test_process','test_commons','test_zlib','test_fastjet',\
-                         'test_root','test_delphes','test_delphesMA5tune']:
+                         'test_root','test_delphes','test_delphesMA5tune','test_onnx']:
             logfile = folder+'/compilation_'+package[5:]+'.log'
         else:
             logfile = folder+'/compilation_'+package+'.log'
@@ -373,7 +398,7 @@ class LibraryWriter():
         if package in ['process','commons','test','configuration']:
             makefile = 'Makefile'
         elif package in ['test_process','test_commons','test_zlib','test_fastjet',\
-                         'test_root','test_delphes','test_delphesMA5tune']:
+                         'test_root','test_delphes','test_delphesMA5tune','test_onnx']:
             makefile = 'Makefile_'+package[5:]
         else:
             makefile = 'Makefile_'+package
@@ -401,7 +426,7 @@ class LibraryWriter():
         if package in ['process','commons','test','configuration']:
             logfile = folder+'/linking.log'
         elif package in ['test_process','test_commons','test_zlib','test_fastjet',\
-                         'test_root','test_delphes','test_delphesMA5tune']:
+                         'test_root','test_delphes','test_delphesMA5tune','test_onnx']:
             logfile = folder+'/linking_'+package[5:]+'.log'
         else:
             logfile = folder+'/linking_'+package+'.log'
@@ -410,7 +435,7 @@ class LibraryWriter():
         if package in ['process','commons','test','configuration']:
             makefile = 'Makefile'
         elif package in ['test_process','test_commons','test_zlib','test_fastjet',\
-                         'test_root','test_delphes','test_delphesMA5tune']:
+                         'test_root','test_delphes','test_delphesMA5tune','test_onnx']:
             makefile = 'Makefile_'+package[5:]
         else:
             makefile = 'Makefile_'+package
@@ -435,7 +460,7 @@ class LibraryWriter():
         if package in ['process','commons','configuration','test']:
             logfile = folder+'/cleanup.log'
         elif package in ['test_process','test_commons','test_zlib','test_fastjet',\
-                         'test_root','test_delphes','test_delphesMA5tune']:
+                         'test_root','test_delphes','test_delphesMA5tune','test_onnx']:
             logfile = folder+'/cleanup_'+package[5:]+'.log'
         else:
             logfile = folder+'/cleanup_'+package+'.log'
@@ -444,7 +469,7 @@ class LibraryWriter():
         if package in ['process','commons','test','configuration']:
             makefile = 'Makefile'
         elif package in ['test_process','test_commons','test_zlib','test_fastjet',\
-                         'test_root','test_delphes','test_delphesMA5tune']:
+                         'test_root','test_delphes','test_delphesMA5tune','test_onnx']:
             makefile = 'Makefile_'+package[5:]
         else:
             makefile = 'Makefile_'+package
@@ -469,7 +494,7 @@ class LibraryWriter():
         if package in ['process','commons','configuration']:
             logfile = folder+'/mrproper.log'
         elif package in ['test_process','test_commons','test_zlib','test_root','test_fastjet',\
-                         'test_delphes','test_delphesMA5tune']:
+                         'test_delphes','test_delphesMA5tune','test_onnx']:
             logfile = folder+'/mrproper_'+package[5:]+'.log'
         else:
             logfile = folder+'/mrproper_'+package+'.log'
@@ -480,7 +505,7 @@ class LibraryWriter():
         if package in ['process','commons','test','configuration']:
             makefile = 'Makefile'
         elif package in ['test_process','test_commons','test_zlib','test_root','test_fastjet',\
-                         'test_delphes','test_delphesMA5tune']:
+                         'test_delphes','test_delphesMA5tune','test_onnx']:
             makefile = 'Makefile_'+package[5:]
         else:
             makefile = 'Makefile_'+package
