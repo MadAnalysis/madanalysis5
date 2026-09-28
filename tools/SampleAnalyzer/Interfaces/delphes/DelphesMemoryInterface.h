@@ -45,7 +45,8 @@
 
 
 class TObjArray;
-class TFolder;
+class Delphes;
+class Candidate;
 
 namespace MA5
 {
@@ -54,6 +55,9 @@ namespace MA5
 class DelphesMemoryInterface
 {
  public : 
+
+  /// Original Delphes candidates mapped to MC particle indices for this event.
+  std::map<const Candidate*, MAuint32> MCParticleIndices_;
 
   /// Pointers to data
   TObjArray* Jet_;
@@ -81,41 +85,11 @@ class DelphesMemoryInterface
   /** @brief Destructor (the arrays belong to Delphes). */
   ~DelphesMemoryInterface();
 
-  /**
-   * @brief Initialise from a Delphes folder.
-   *
-   * @param delphesFolder Delphes folder.
-   */
-  // NOTE: this overload is declared but never defined.
-  void Initialize(TFolder* delphesFolder);
+  /// Initialize access to the collections produced by Delphes
+  void Initialize(Delphes* delphes, const std::map<std::string,std::string>& table, MAbool MA5card);
 
-  /**
-   * @brief Print the content of a Delphes folder (debugging).
-   *
-   * @param delphesFolder Delphes folder.
-   */
-  static void Print(TFolder* delphesFolder);
+  TObjArray* GetCollection(Delphes* delphes, const std::map<std::string,std::string>& table, const std::string& name);
 
-  /**
-   * @brief Find the output arrays of the Delphes modules.
-   *
-   * @param delphesFolder Delphes folder.
-   * @param table map branch name -> module output array (from the TreeWriter card section).
-   * @param MA5card use the MA5-tuned collections.
-   */
-  void Initialize(TFolder* delphesFolder, const std::map<std::string,std::string>& table, MAbool MA5card);
-
-  /**
-   * @brief Find an output array of a Delphes module.
-   *
-   * @param delphesFolder Delphes folder.
-   * @param table map branch name -> module output array.
-   * @param name branch name.
-   * @return the array, or 0 if not found.
-   */
-  TObjArray* GetCollection(TFolder* delphesFolder, 
-                           const std::map<std::string,std::string>& table,
-                           const std::string& name);
 
   /**
    * @brief Fill the reconstructed event (jets, taus, leptons, photons, tracks, towers, e-flow objects, MET and HT).

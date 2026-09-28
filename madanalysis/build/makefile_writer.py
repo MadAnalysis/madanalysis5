@@ -532,7 +532,11 @@ class MakefileWriter:
             if options.has_delphesMA5tune_ma5lib:
                 libs.extend(["-ldelphesMA5tune_for_ma5"])
             if options.has_delphesMA5tune_lib:
-                libs.extend(["-lDelphesMA5tune"])
+                libs.append("-lDelphesMA5tune")
+                if any(os.path.isfile(os.path.join(archi_info.root_lib_path, filename)) for filename in ("libMinuit.so", "libMinuit.dylib", "libMinuit.a")):
+                    libs.append("-lMinuit")
+                else:
+                    logging.getLogger("MA5").warning("ROOT Minuit library not found: cms_sus_13_011 cannot be linked and is unavailable.")
             file.write("LIBFLAGS += " + " ".join(libs) + "\n")
 
         # Substructure module

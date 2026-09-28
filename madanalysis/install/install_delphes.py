@@ -71,10 +71,7 @@ class InstallDelphes:
         self.downloaddir = self.main.session_info.downloaddir
         self.untardir    = os.path.join(self.tmpdir, 'MA5_'+self.package)
         self.ncores      = 1
-        if package == 'delphesma5tune':
-            self.files = {package+".tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes3.5.0.tar.gz"}
-        else:
-            self.files = {package+".tar.gz" : "https://madanalysis.irmp.ucl.ac.be/raw-attachment/wiki/MA5SandBox/delphes3.5.0.tar.gz"}
+        self.files = {package+".tar.gz" : "https://github.com/delphes/delphes/archive/refs/tags/3.5.2pre02.tar.gz"}
         self.logger = logging.getLogger('MA5')
 
 
@@ -181,7 +178,7 @@ class InstallDelphes:
         if self.package == 'delphesMA5tune':
             # Copying the patch
             self.logger.debug('Copying the patch ...')
-            input=self.toolsdir+'/SampleAnalyzer/Interfaces/delphesMA5tune/patch_delphesMA5tune_v35.tgz'
+            input=self.toolsdir+'/SampleAnalyzer/Interfaces/delphesMA5tune/patch_delphesMA5tune_v532pre02.tgz'
             output=packagedir+'/patch_delphesMA5tune.tgz'
             try:
                 shutil.copy(input,output)
@@ -229,30 +226,11 @@ class InstallDelphes:
                     self.logger.error('impossible to move the file/folder '+myfile+' from '+packagedir+' to '+self.installdir)
                     return False
 
-
-# No need with the last release of ROOT
-#        if self.package=='delphes':
-#            # Updating DelphesFormula
-#            filename = self.installdir+'/classes/DelphesFormula.cc'
-#            self.logger.debug('Updating files '+filename+ ': adding d0\n')
-#            self.AddD0(filename)
-
-        # Updating Makefile
+        # Updating the genMakefile
         filename = self.installdir+'/doc/genMakefile.tcl'
         self.logger.debug('Updating files '+filename+ ': no CMSSW\n')
         self.SwitchOffCMSSW(filename)
         if not self.ProtectBundledFastJet(filename): return False
-
-        # Updating ExRootTask
-        filename = self.installdir+'/external/ExRootAnalysis/ExRootTask.cc'
-        self.logger.debug('Updating files: commenting out lines in: '+filename+' ...')
-        self.CommentLines(filename,[64,65,66],'//')
-        if not self.ProtectBundledFastJet(os.path.join(self.installdir, 'Makefile')): return False
-
-        # Updating ExRootTask
-        filename = self.installdir+'/external/ExRootAnalysis/ExRootConfReader.cc'
-        self.logger.debug('Updating files: commenting out lines in: '+filename+' ...')
-        self.CommentLines(filename,[177,178,179,180],'//')
 
         # Adding files
         if self.package=='delphes':
@@ -282,6 +260,16 @@ class InstallDelphes:
         # Execute
         self.logger.debug('shell command: '+' '.join(theCommands))
         ok, out= ShellCommand.ExecuteWithLog(theCommands,logname,self.installdir,silent=False)
+        if not ok:
+            self.logger.error('impossible to configure the project. For more details, see the log file:')
+            self.logger.error(logname)
+            return False
+
+        filename = os.path.join(self.installdir, 'Makefile')
+        self.SwitchOffCMSSW(filename)
+        return self.ProtectBundledFastJet(filename)
+
+
 
         # Updating the Makefile
         self.logger.debug('Updating the Makefiles: no CMSSW\n')

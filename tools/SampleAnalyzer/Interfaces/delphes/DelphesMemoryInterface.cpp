@@ -32,14 +32,17 @@
 
 // Delphes headers
 #include "classes/DelphesClasses.h"
+#include "modules/Delphes.h"
 
 // ROOT headers
 #include <TObjArray.h>
 #include <TFile.h>
 #include <TDatabasePDG.h>
 #include <TParticlePDG.h>
-#include <TFolder.h>
 #include <TClonesArray.h>
+
+// Exceptions
+#include <stdexcept>
 
 using namespace MA5;
 
@@ -72,72 +75,51 @@ DelphesMemoryInterface::DelphesMemoryInterface()
 DelphesMemoryInterface::~DelphesMemoryInterface() {}
 
 // -----------------------------------------------------------------------------
-// Print TFolder  -- ONLY FOR DEBUG
-// -----------------------------------------------------------------------------
-void DelphesMemoryInterface::Print(TFolder *delphesFolder)
-{
-    if (delphesFolder == 0)
-        std::cout << "Empty DelphesFolder" << std::endl;
-    // FIXME: the null-pointer checks above and below only print a message: the pointers are dereferenced
-    //   anyway.
-    TCollection *folders = delphesFolder->GetListOfFolders();
-    folders->Print();
-    TFolder *myexport = dynamic_cast<TFolder *>(delphesFolder->FindObject("Export"));
-    if (myexport == 0)
-        std::cout << "No export" << std::endl;
-    myexport->Print();
-}
-
-// -----------------------------------------------------------------------------
 // GetCollection
 // -----------------------------------------------------------------------------
-TObjArray *DelphesMemoryInterface::GetCollection(TFolder *delphesFolder,
-                                                 const std::map<std::string, std::string> &table,
-                                                 const std::string &name)
+TObjArray* DelphesMemoryInterface::GetCollection(Delphes* delphes, const std::map<std::string, std::string>& table, const std::string& name)
 {
     std::map<std::string, std::string>::const_iterator it = table.find(name);
+
     if (it == table.end())
         return 0;
 
-    std::string pathname = "Export/" + it->second;
-    return dynamic_cast<TObjArray *>(delphesFolder->FindObject(pathname.c_str()));
+    return delphes->ImportArray(it->second.c_str());
 }
 
 // -----------------------------------------------------------------------------
 // Initialize
 // -----------------------------------------------------------------------------
-void DelphesMemoryInterface::Initialize(TFolder *delphesFolder,
-                                        const std::map<std::string, std::string> &table,
-                                        MAbool MA5card)
+void DelphesMemoryInterface::Initialize(Delphes *delphes, const std::map<std::string, std::string> &table, MAbool MA5card)
 {
     // DelphesMA5 card ?
     delphesMA5card_ = MA5card;
 
     // Official Delphes collections
-    //  GenJet_       = GetCollection(delphesFolder,table,"GenJet");
-    MET_ = GetCollection(delphesFolder, table, "MissingET");
-    Tower_ = GetCollection(delphesFolder, table, "Tower");
-    Track_ = GetCollection(delphesFolder, table, "Track");
-    HT_ = GetCollection(delphesFolder, table, "ScalarHT");
-    EFlowTrack_ = GetCollection(delphesFolder, table, "EFlowTrack");
-    EFlowPhoton_ = GetCollection(delphesFolder, table, "EFlowPhoton");
-    EFlowNeutral_ = GetCollection(delphesFolder, table, "EFlowNeutralHadron");
-    FatJet_ = GetCollection(delphesFolder, table, "FatJet");
+    //  GenJet_       = GetCollection(delphes,table,"GenJet");
+    MET_ = GetCollection(delphes, table, "MissingET");
+    Tower_ = GetCollection(delphes, table, "Tower");
+    Track_ = GetCollection(delphes, table, "Track");
+    HT_ = GetCollection(delphes, table, "ScalarHT");
+    EFlowTrack_ = GetCollection(delphes, table, "EFlowTrack");
+    EFlowPhoton_ = GetCollection(delphes, table, "EFlowPhoton");
+    EFlowNeutral_ = GetCollection(delphes, table, "EFlowNeutralHadron");
+    FatJet_ = GetCollection(delphes, table, "FatJet");
 
     // MA5 Delphes collections
     if (MA5card)
     {
-        Jet_ = GetCollection(delphesFolder, table, "JetMA5");
-        Electron_ = GetCollection(delphesFolder, table, "ElectronMA5");
-        Muon_ = GetCollection(delphesFolder, table, "MuonMA5");
-        Photon_ = GetCollection(delphesFolder, table, "PhotonMA5");
+        Jet_ = GetCollection(delphes, table, "JetMA5");
+        Electron_ = GetCollection(delphes, table, "ElectronMA5");
+        Muon_ = GetCollection(delphes, table, "MuonMA5");
+        Photon_ = GetCollection(delphes, table, "PhotonMA5");
     }
     else
     {
-        Jet_ = GetCollection(delphesFolder, table, "Jet");
-        Electron_ = GetCollection(delphesFolder, table, "Electron");
-        Muon_ = GetCollection(delphesFolder, table, "Muon");
-        Photon_ = GetCollection(delphesFolder, table, "Photon");
+        Jet_ = GetCollection(delphes, table, "Jet");
+        Electron_ = GetCollection(delphes, table, "Electron");
+        Muon_ = GetCollection(delphes, table, "Muon");
+        Photon_ = GetCollection(delphes, table, "Photon");
     }
 
     // Display warning to main branches
@@ -165,6 +147,24 @@ void DelphesMemoryInterface::Initialize(TFolder *delphesFolder,
 // -----------------------------------------------------------------------------
 MAbool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat &mySample, EventFormat &myEvent)
 {
+  // Use the same generator association as Delphes TreeWriter for tracks
+  // and leptons. Cloning preserves the original candidate at position zero.
+  const auto associateMC = [&](RecParticleFormat *particle, Candidate *candidate)
+  {
+    TObjArray *sources = candidate->GetCandidates();
+    const Candidate *source = sources->GetEntriesFast() == 0 ? 0 : dynamic_cast<const Candidate *>(sources->At(0));
+
+    const auto found = MCParticleIndices_.find(source);
+
+    if (found == MCParticleIndices_.end())
+        throw std::runtime_error("DelphesMemoryInterface: track/lepton generator association does not point to an input MC particle");
+
+    particle->mc_ = &myEvent.mc()->particles()[found->second];
+
+    // Event-local identity shared by a track and its reconstructed lepton.
+    particle->delphesTags_.push_back(static_cast<MAuint64>(found->second) + 1);
+  };
+
     // --------------Jet collection
     if (Jet_ != 0)
     {
@@ -281,6 +281,11 @@ MAbool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat &mySample, Eve
                 continue;
             }
             RecLeptonFormat *muon = myEvent.rec()->GetNewMuon();
+            associateMC(muon, cand);
+            muon->d0_ = cand->D0;
+            muon->d0error_ = cand->ErrorD0;
+            muon->dz_ = cand->DZ;
+            muon->dzerror_ = cand->ErrorDZ;
             muon->momentum_.SetPxPyPzE(cand->Momentum.Px(), cand->Momentum.Py(), cand->Momentum.Pz(), cand->Momentum.E());
             muon->SetCharge(cand->Charge);
         }
@@ -298,6 +303,11 @@ MAbool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat &mySample, Eve
                 continue;
             }
             RecLeptonFormat *elec = myEvent.rec()->GetNewElectron();
+            associateMC(elec, cand);
+            elec->d0_ = cand->D0;
+            elec->d0error_ = cand->ErrorD0;
+            elec->dz_ = cand->DZ;
+            elec->dzerror_ = cand->ErrorDZ;
             elec->momentum_.SetPxPyPzE(cand->Momentum.Px(), cand->Momentum.Py(), cand->Momentum.Pz(), cand->Momentum.E());
             elec->SetCharge(cand->Charge);
         }
@@ -338,6 +348,7 @@ MAbool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat &mySample, Eve
                 continue;
             }
             RecTrackFormat *track = myEvent.rec()->GetNewTrack();
+            associateMC(track, cand);
             track->pdgid_ = cand->PID;
             if (cand->Charge > 0)
                 track->charge_ = true;
