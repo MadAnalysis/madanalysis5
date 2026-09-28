@@ -257,6 +257,9 @@ void DetectorDelphes::StoreEventHeader(SampleFormat& mySample, EventFormat& myEv
 
 void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat& myEvent)
 {
+  // Safety -> clear
+  interface_.MCParticleIndices_.clear();
+
   // Create a table for generated particle
   std::map<const MCParticleFormat*,MAuint32> gentable; 
   std::map<const MCParticleFormat*,MAuint32>::iterator ret;
@@ -275,6 +278,7 @@ void DetectorDelphes::TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat&
 
     // Adding a new Delphes particle
     Candidate* candidate = factory_->NewCandidate();
+    interface_.MCParticleIndices_[candidate] = i;
 
     // Filling Delphes particle with obvious information
     candidate->PID = part->pdgid();

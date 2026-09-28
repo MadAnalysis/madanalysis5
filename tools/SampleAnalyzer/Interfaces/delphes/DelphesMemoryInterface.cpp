@@ -36,6 +36,9 @@
 #include <TFolder.h>
 #include <TClonesArray.h>
 
+// Exceptions
+#include <stdexcept>
+
 using namespace MA5;
 
 // -----------------------------------------------------------------------------
@@ -157,6 +160,24 @@ void DelphesMemoryInterface::Initialize(TFolder *delphesFolder,
 // -----------------------------------------------------------------------------
 MAbool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat &mySample, EventFormat &myEvent)
 {
+  // Use the same generator association as Delphes TreeWriter for tracks
+  // and leptons. Cloning preserves the original candidate at position zero.
+  const auto associateMC = [&](RecParticleFormat *particle, Candidate *candidate)
+  {
+    TObjArray *sources = candidate->GetCandidates();
+    const Candidate *source = sources->GetEntriesFast() == 0 ? 0 : dynamic_cast<const Candidate *>(sources->At(0));
+
+    const auto found = MCParticleIndices_.find(source);
+
+    if (found == MCParticleIndices_.end())
+        throw std::runtime_error("DelphesMemoryInterface: track/lepton generator association does not point to an input MC particle");
+
+    particle->mc_ = &myEvent.mc()->particles()[found->second];
+
+    // Event-local identity shared by a track and its reconstructed lepton.
+    particle->delphesTags_.push_back(static_cast<MAuint64>(found->second) + 1);
+  };
+
     // --------------Jet collection
     if (Jet_ != 0)
     {
@@ -273,6 +294,11 @@ MAbool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat &mySample, Eve
                 continue;
             }
             RecLeptonFormat *muon = myEvent.rec()->GetNewMuon();
+            associateMC(muon, cand);
+            muon->d0_ = cand->D0;
+            muon->d0error_ = cand->ErrorD0;
+            muon->dz_ = cand->DZ;
+            muon->dzerror_ = cand->ErrorDZ;
             muon->momentum_.SetPxPyPzE(cand->Momentum.Px(), cand->Momentum.Py(), cand->Momentum.Pz(), cand->Momentum.E());
             muon->SetCharge(cand->Charge);
         }
@@ -290,6 +316,11 @@ MAbool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat &mySample, Eve
                 continue;
             }
             RecLeptonFormat *elec = myEvent.rec()->GetNewElectron();
+            associateMC(elec, cand);
+            elec->d0_ = cand->D0;
+            elec->d0error_ = cand->ErrorD0;
+            elec->dz_ = cand->DZ;
+            elec->dzerror_ = cand->ErrorDZ;
             elec->momentum_.SetPxPyPzE(cand->Momentum.Px(), cand->Momentum.Py(), cand->Momentum.Pz(), cand->Momentum.E());
             elec->SetCharge(cand->Charge);
         }
@@ -330,6 +361,7 @@ MAbool DelphesMemoryInterface::TransfertDELPHEStoMA5(SampleFormat &mySample, Eve
                 continue;
             }
             RecTrackFormat *track = myEvent.rec()->GetNewTrack();
+            associateMC(track, cand);
             track->pdgid_ = cand->PID;
             if (cand->Charge > 0)
                 track->charge_ = true;

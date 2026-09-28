@@ -41,6 +41,7 @@
 
 class TObjArray;
 class TFolder;
+class Candidate;
 
 namespace MA5
 {
@@ -48,6 +49,9 @@ namespace MA5
 class DelphesMemoryInterface
 {
  public : 
+
+  /// Original Delphes candidates mapped to MC particle indices for this event.
+  std::map<const Candidate*, MAuint32> MCParticleIndices_;
 
   /// Pointers to data
   TObjArray* Jet_;
