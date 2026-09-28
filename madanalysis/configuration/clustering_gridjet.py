@@ -22,9 +22,21 @@
 ################################################################################
 
 
+"""Configuration of the GridJet jet-clustering algorithm (``set main.fastsim.<parameter>``).
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
 import logging
 class ClusteringGridJet():
+    """Parameters of the GridJet jet-clustering algorithm (FastJet).
+
+    User-settable parameters (default values in the ``default_*`` class attributes):
+
+        * ``ymax``: maximum rapidity of the grid;
+        * ``spacing``: requested grid spacing;
+        * ``ptmin``: minimum transverse momentum (GeV) of the jets;
+    """
 
     default_ymax    = 3.
     default_spacing = 0.1
@@ -34,19 +46,26 @@ class ClusteringGridJet():
                       "spacing" : [str(default_spacing)],\
                       "ptmin" : [str(default_ptmin)] }
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialise all parameters to their default values."""
         self.ymax    = ClusteringGridJet.default_ymax
         self.spacing = ClusteringGridJet.default_spacing
         self.ptmin   = ClusteringGridJet.default_ptmin
 
         
-    def Display(self):
+    def Display(self) -> None:
+        """Log all parameters."""
         self.user_DisplayParameter("ymax")
         self.user_DisplayParameter("spacing")
         self.user_DisplayParameter("ptmin")
 
 
-    def user_DisplayParameter(self,parameter):
+    def user_DisplayParameter(self,parameter: str) -> None:
+        """Log the value of one parameter.
+
+        Args:
+            parameter (``str``): name of the parameter.
+        """
         if parameter=="ymax":
             logging.getLogger('MA5').info("  + ymax = "+str(self.ymax))
         elif parameter=="ptmin":
@@ -57,7 +76,15 @@ class ClusteringGridJet():
             logging.getLogger('MA5').error("'clustering' has no parameter called '"+parameter+"'")
 
 
-    def SampleAnalyzerConfigString(self):
+    def SampleAnalyzerConfigString(self) -> dict[str, str]:
+        """Get the options passed to the SampleAnalyzer jet clusterer.
+
+        The keys are ``cluster.Ymax``, ``cluster.RequestedGridSpacing``, ``cluster.Ptmin``.
+
+        Returns:
+            ``dict[str, str]``:
+            Option names and values, written in the generated ``main.cpp``.
+        """
         mydict = {}
         mydict['cluster.Ymax']                 = str(self.ymax)
         mydict['cluster.RequestedGridSpacing'] = str(self.spacing)
@@ -65,18 +92,43 @@ class ClusteringGridJet():
         return mydict
 
         
-    def user_GetValues(self,variable):
+    def user_GetValues(self,variable: str) -> list[str]:
+        """Get suggested values of a parameter (tab completion).
+
+        Args:
+            variable (``str``): name of the parameter.
+
+        Returns:
+            ``list[str]``:
+            The default value as a one-element list, or an empty list.
+        """
         try:
             return ClusteringGridJet.userVariables[variable]
         except:
             return []
 
     
-    def user_GetParameters(self):
+    def user_GetParameters(self) -> list[str]:
+        """Get the names of the user-settable parameters.
+
+        Returns:
+            ``list[str]``:
+            Parameter names.
+        """
         return list(ClusteringGridJet.userVariables.keys())
 
 
-    def user_SetParameter(self,parameter,value):
+    def user_SetParameter(self,parameter: str,value: str) -> bool | None:
+        """Set a parameter (``set main.fastsim.<parameter> = <value>``).
+
+        Args:
+            parameter (``str``): name of the parameter.
+            value (``str``): value typed by the user.
+
+        Returns:
+            ``bool | None``:
+            ``False`` for invalid values, ``None`` otherwise (success or unknown parameter).
+        """
         # ymax
         if parameter=="ymax":
             try:
@@ -84,6 +136,7 @@ class ClusteringGridJet():
             except:
                 logging.getLogger('MA5').error("the rapidity maximum must be a float value.")
                 return False
+            # FIXME: the maximum rapidity is stored in 'self.radius' instead of 'self.ymax'.
             self.radius=number
 
         # spacing

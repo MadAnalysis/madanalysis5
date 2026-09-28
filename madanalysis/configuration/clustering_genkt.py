@@ -22,9 +22,23 @@
 ################################################################################
 
 
+"""Configuration of the generalised kT jet-clustering algorithm (``set main.fastsim.<parameter>``).
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
 import logging
 class ClusteringGenKt():
+    """Parameters of the generalised kT jet-clustering algorithm (FastJet).
+
+    User-settable parameters (default values in the ``default_*`` class attributes):
+
+        * ``radius``: cone radius R;
+        * ``exclusive``: exclusive clustering (``true``/``false``);
+        * ``ptmin``: minimum transverse momentum (GeV) of the jets;
+        * ``p``: exponent p of the generalised kT algorithm (-1 = anti-kT, 0 = C/A, 1 = kT);
+        * ``collision``: type of collision (``pp`` or ``ee``);
+    """
 
     default_radius    = 0.4
     default_exclusive = False
@@ -39,7 +53,8 @@ class ClusteringGenKt():
                       "collision" : [str(default_collision)]}
 
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialise all parameters to their default values."""
         self.radius    = ClusteringGenKt.default_radius
         self.exclusive = ClusteringGenKt.default_exclusive
         self.ptmin     = ClusteringGenKt.default_ptmin
@@ -47,7 +62,8 @@ class ClusteringGenKt():
         self.collision = ClusteringGenKt.default_collision
 
         
-    def Display(self):
+    def Display(self) -> None:
+        """Log all parameters."""
         self.user_DisplayParameter("radius")
         self.user_DisplayParameter("exclusive")
         self.user_DisplayParameter("p")
@@ -55,7 +71,12 @@ class ClusteringGenKt():
         self.user_DisplayParameter("collision")
 
 
-    def user_DisplayParameter(self,parameter):
+    def user_DisplayParameter(self,parameter: str) -> None:
+        """Log the value of one parameter.
+
+        Args:
+            parameter (``str``): name of the parameter.
+        """
         if parameter=="radius":
             logging.getLogger('MA5').info("  + cone radius = "+str(self.radius))
         elif parameter=="exclusive":
@@ -80,7 +101,15 @@ class ClusteringGenKt():
             logging.getLogger('MA5').error("'clustering' has no parameter called '"+parameter+"'")
 
 
-    def SampleAnalyzerConfigString(self):
+    def SampleAnalyzerConfigString(self) -> dict[str, str]:
+        """Get the options passed to the SampleAnalyzer jet clusterer.
+
+        The keys are ``cluster.R``, ``cluster.PTmin``, ``cluster.p``, ``cluster.exclusive``, ``cluster.collision``.
+
+        Returns:
+            ``dict[str, str]``:
+            Option names and values, written in the generated ``main.cpp``.
+        """
         mydict = {}
         mydict['cluster.R']     = str(self.radius)
         mydict['cluster.PTmin'] = str(self.ptmin)
@@ -93,18 +122,43 @@ class ClusteringGenKt():
         return mydict
 
         
-    def user_GetValues(self,variable):
+    def user_GetValues(self,variable: str) -> list[str]:
+        """Get suggested values of a parameter (tab completion).
+
+        Args:
+            variable (``str``): name of the parameter.
+
+        Returns:
+            ``list[str]``:
+            The default value as a one-element list, or an empty list.
+        """
         try:
             return ClusteringGenKt.userVariables[variable]
         except:
             return []
 
     
-    def user_GetParameters(self):
+    def user_GetParameters(self) -> list[str]:
+        """Get the names of the user-settable parameters.
+
+        Returns:
+            ``list[str]``:
+            Parameter names.
+        """
         return list(ClusteringGenKt.userVariables.keys())
 
 
-    def user_SetParameter(self,parameter,value):
+    def user_SetParameter(self,parameter: str,value: str) -> bool | None:
+        """Set a parameter (``set main.fastsim.<parameter> = <value>``).
+
+        Args:
+            parameter (``str``): name of the parameter.
+            value (``str``): value typed by the user.
+
+        Returns:
+            ``bool | None``:
+            ``False`` for invalid values, ``None`` otherwise (success or unknown parameter).
+        """
         # radius
         if parameter=="radius":
             try:
