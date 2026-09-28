@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file WeightDefinition.cpp
+ * @brief Implementation of MA5::WeightDefinition.
+ */
+
 #include "SampleAnalyzer/Commons/DataFormat/WeightDefinition.h"
 
 using namespace MA5;
@@ -47,6 +52,8 @@ void WeightDefinition::AddGroup(std::string name, std::string combine)
   }
     
   // Adding the WeightGroup to the database
+  // FIXME: push_back may reallocate groups_: the lastgroup_ pointer and the group pointers kept by the
+  // weights of the previous groups are then dangling.
   groups_.push_back(WeightGroup(combine,name));
 
   // Setting the last group

@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // SampleHeader headers
+/**
+ * @file DelphesMemoryInterface.cpp
+ * @brief Implementation of MA5::DelphesMemoryInterface.
+ */
+
 #include "SampleAnalyzer/Interfaces/delphes/DelphesMemoryInterface.h"
 #include "SampleAnalyzer/Commons/Service/ExceptionService.h"
 
@@ -43,6 +48,7 @@ using namespace MA5;
 // -----------------------------------------------------------------------------
 DelphesMemoryInterface::DelphesMemoryInterface()
 {
+    // FIXME: Vertex_ is neither initialised here nor set in Initialize().
     Jet_ = 0;
     FatJet_ = 0;
     Electron_ = 0;
@@ -72,6 +78,8 @@ void DelphesMemoryInterface::Print(TFolder *delphesFolder)
 {
     if (delphesFolder == 0)
         std::cout << "Empty DelphesFolder" << std::endl;
+    // FIXME: the null-pointer checks above and below only print a message: the pointers are dereferenced
+    //   anyway.
     TCollection *folders = delphesFolder->GetListOfFolders();
     folders->Print();
     TFolder *myexport = dynamic_cast<TFolder *>(delphesFolder->FindObject("Export"));

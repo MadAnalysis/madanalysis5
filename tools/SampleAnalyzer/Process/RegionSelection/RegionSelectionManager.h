@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file RegionSelectionManager.h
+ * @brief Manager of the signal regions, cuts and histograms of an analysis (Manager()).
+ */
+
 #ifndef __REGIONSELECTIONMANAGER_H
 #define __REGIONSELECTIONMANAGER_H
 
@@ -30,6 +35,7 @@
 #include <stdexcept>
 #include <vector>
 
+/** @brief assert with a message. */
 #define assertm(exp, msg) assert(((void)msg, exp))
 
 // SampleAnalyzer headers
@@ -43,48 +49,59 @@
 namespace MA5
 {
 
+    /**
+     * @brief Manager of the signal regions, cuts and histograms of an analysis.
+     *
+     * Typical usage in an analysis:
+     * - Initialize(): AddRegionSelection(), AddCut(), AddHisto();
+     * - Execute(): ApplyCut() for each cut (false once all the regions fail),
+     *   FillHisto(), IsSurviving().
+     * The event weights are set by SampleAnalyzer::PrepareForExecution(); they can be
+     * modified with SetCurrentEventWeight() or per region with SetRegionWeight().
+     */
     class RegionSelectionManager
     {
         // -------------------------------------------------------------
         //                        data members
         // -------------------------------------------------------------
     private:
-        /// Collection of Region selections
+        /** @brief Signal regions (owned). */
         std::vector<RegionSelection *> regions_;
 
-        /// Collection of plots that will be generated during the analysis
+        /** @brief Histograms. */
         PlotManager plotmanager_;
 
-        /// Collection of cuts that will be applied to the analysis
+        /** @brief Cuts. */
         MultiRegionCounterManager cutmanager_;
 
-        /// Index related to the number of surviving regions in an analysis
+        /** @brief Number of regions still surviving for the current event. */
         MAuint32 NumberOfSurvivingRegions_;
 
-        /// Weight associated with the processed event
+        /** @brief Weights of the current event. */
         WeightCollection weight_;
 
-        /// Weight associated with specific regions
+        /** @brief Weights of the current event specific to some regions (cut-flows only). */
         std::map<std::string, WeightCollection> region_weight_;
 
         // -------------------------------------------------------------
         //                      method members
         // -------------------------------------------------------------
     public:
-        /// constructor
+        /** @brief Constructor. */
         RegionSelectionManager() {};
 
-        /// Destructor
+        /** @brief Destructor (deletes the regions). */
         ~RegionSelectionManager()
         {
             for (auto &region_pointer : regions_)
                 delete region_pointer;
         };
 
-        /// Reset
+        /** @brief Clear the regions (without deleting them), the cuts, the histograms and the weights. */
         void Reset()
         {
             NumberOfSurvivingRegions_ = 0;
+            // NOTE: the regions are not deleted here (memory leak).
             regions_.clear();
             cutmanager_.Finalize();
             plotmanager_.Finalize();
@@ -92,29 +109,53 @@ namespace MA5
             region_weight_.clear();
         }
 
-        /// Finalizing
+        /** @brief Clear the regions, the cuts, the histograms and the weights. */
         void Finalize() { Reset(); }
 
-        /// Get methods
+        /**
+         * @brief Accessor to the regions.
+         *
+         * @return a copy of the collection.
+         */
         std::vector<RegionSelection *> Regions() { return regions_; }
 
+        /**
+         * @brief Accessor to the cut manager.
+         *
+         * @return a pointer to the cut manager.
+         */
         MultiRegionCounterManager *GetCutManager() { return &cutmanager_; }
 
+        /**
+         * @brief Accessor to the histogram manager.
+         *
+         * @return a pointer to the histogram manager.
+         */
         PlotManager *GetPlotManager() { return &plotmanager_; }
 
-        /// @brief Accessor to the current event weight
-        /// @return weight collection object
+        /**
+         * @brief Accessor to the weights of the current event.
+         *
+         * @return a copy of the weights.
+         */
         const WeightCollection GetCurrentEventWeights() const { return weight_; }
 
-        /// @brief Accessor to the current event weight
-        /// @return weight collection object
-        /// This function is for backwards compatibility
+        /**
+         * @brief Accessor to the nominal weight of the current event (backward compatibility).
+         *
+         * @return the nominal weight.
+         */
         const MAdouble64 GetCurrentEventWeight() const { return weight_[0]; }
 
 
-        /// Build a collection from a single scalar weight.
-        /// Preserve the current variation-to-nominal ratios where defined.
-        /// Rquired for backward compatibility with old PAD analyses
+        /**
+         * @brief Build a weight collection from a nominal weight, keeping the ratios of the variations to the nominal weight.
+         *
+         * Required for backward compatibility with older PAD analyses.
+         *
+         * @param scalar_w new nominal weight.
+         * @return the rescaled weights.
+         */
         WeightCollection BuildScalarWeights(MAfloat64 scalar_w) const
         {
             // With only one weight, no rescaling is needed.
@@ -127,6 +168,8 @@ namespace MA5
             {
                 if (scalar_w==0.0)
                     return weight_;
+                // NOTE: throws std::invalid_argument (not a SampleAnalyzer exception) when the current nominal weight
+                //   is 0.
                 throw std::invalid_argument("BuildScalarWeights: cannot rescale multiple weights from a zero nominal to a nonzero nominal");
             }
 
@@ -141,32 +184,47 @@ namespace MA5
             return result;
         }
 
-        /// @brief Set current event weight with a weight map
-        /// @param weight weight index and value
+        /**
+         * @brief Set the weights of the current event.
+         *
+         * @param weight weights.
+         */
         void SetCurrentEventWeight(WeightCollection &weight) { weight_ = WeightCollection(weight); }
 
-        /// @brief Set current event weight with a weight map
-        /// @param weight weight index and value
+        /**
+         * @brief Set the weights of the current event.
+         *
+         * @param weight weights.
+         */
         void SetCurrentEventWeight(const WeightCollection &weight) { weight_ = WeightCollection(weight); }
 
 
-        /// Case of a scalar weight - required for older PAD analyses
-        /// Set the absolute nominal weight for the current event and apply the same multiplicative
-        /// correction to all variation weights
+        /**
+         * @brief Set the nominal weight of the current event; the variations are rescaled by the same factor
+         * (backward compatibility with older PAD analyses).
+         *
+         * @param weight nominal weight.
+         */
         void SetCurrentEventWeight(MAfloat64 weight) { weight_ = BuildScalarWeights(weight); }
 
 
-        /// @brief Set a specific weight to a region different than the others
-        /// @param name region name
-        /// @param weight weight collection object
+        /**
+         * @brief Set weights specific to a region (used for its cut-flow).
+         *
+         * @param name name of the region.
+         * @param weight weights.
+         */
         void SetRegionWeight(std::string name, WeightCollection &weight)
         {
             region_weight_[name] = WeightCollection(weight);
         }
 
-        /// Case of a scalar weight - required for older PAD analyses
-        /// Set the absolute nominal weight for one region. Use the same convention
-        /// as SetCurrentEventWeight()
+        /**
+         * @brief Set the nominal weight of a region (variations rescaled, see SetCurrentEventWeight()).
+         *
+         * @param name name of the region.
+         * @param weight nominal weight.
+         */
         void SetRegionWeight(std::string name, MAfloat64 weight)
         {
             const WeightCollection region_weights = BuildScalarWeights(weight);
@@ -174,7 +232,11 @@ namespace MA5
         }
 
 
-        /// Adding a RegionSelection to the manager
+        /**
+         * @brief Declare a signal region.
+         *
+         * @param name name of the region.
+         */
         void AddRegionSelection(const std::string &name)
         {
             std::string myname = name;
@@ -184,15 +246,23 @@ namespace MA5
                 numstream << regions_.size();
                 myname = "RegionSelection" + numstream.str();
             }
+            // FIXME: 'name' is used instead of 'myname': the default name of an unnamed region is never applied.
             RegionSelection *myregion = new RegionSelection(name);
             regions_.push_back(myregion);
         }
 
-        /// THIS FUNCTION HAS BEEN DEPRECATED
+        /**
+         * @brief Deprecated: the event weights are now set by SampleAnalyzer::PrepareForExecution() (no-op).
+         *
+         * @param EventWeight ignored.
+         */
         void InitializeForNewEvent(MAfloat64 EventWeight) {}
 
-        /// @brief initialise new event with multiweight definition
-        /// @param EventWeight weight map
+        /**
+         * @brief Prepare all the regions and histograms for a new event.
+         *
+         * @param EventWeight weights of the event.
+         */
         void InitializeForNewEvent(const WeightCollection &EventWeight)
         {
             weight_.SetWeights(EventWeight.GetWeights());
@@ -204,7 +274,11 @@ namespace MA5
                 plotmanager_.GetHistos()[i]->SetFreshEvent(true, EventWeight);
         }
 
-        /// This method associates all regions with a cut
+        /**
+         * @brief Declare a cut applied to all the regions.
+         *
+         * @param name name of the cut (a default name is used if empty).
+         */
         void AddCut(const std::string &name)
         {
             // The name of the cut
@@ -219,14 +293,25 @@ namespace MA5
             cutmanager_.AddCut(myname, regions_);
         }
 
-        /// This method associates one single region with a cut
+        /**
+         * @brief Declare a cut applied to one region.
+         *
+         * @param name name of the cut.
+         * @param RSname name of the region.
+         */
         void AddCut(const std::string &name, const std::string &RSname)
         {
             std::string RSnameA[] = {RSname};
             AddCut(name, RSnameA);
         }
 
-        /// this method associates an arbitrary number of RS with a cut
+        /**
+         * @brief Declare a cut applied to several regions.
+         *
+         * @tparam NRS number of regions.
+         * @param name name of the cut.
+         * @param RSnames names of the regions.
+         */
         template <int NRS>
         void AddCut(const std::string &name, std::string const (&RSnames)[NRS])
         {
@@ -270,6 +355,12 @@ namespace MA5
             cutmanager_.AddCut(myname, myregions);
         }
 
+        /**
+         * @brief Declare a cut applied to several regions.
+         *
+         * @param name name of the cut.
+         * @param SRnames names of the regions.
+         */
         void AddCut(const std::string &name, std::vector<std::string> SRnames)
         {
             // The name of the cut
@@ -312,10 +403,20 @@ namespace MA5
             cutmanager_.AddCut(myname, myregions);
         }
 
-        /// Apply a cut
+        /**
+         * @brief Apply a cut to the surviving regions attached to it.
+         *
+         * @param condition result of the cut for the current event.
+         * @param cut name of the cut.
+         * @return false if no region survives anymore (the event can be skipped), true otherwise (also for an undeclared cut).
+         */
         MAbool ApplyCut(MAbool, std::string const &);
 
-        /// This method associates all signal regions with an histo
+        /**
+         * @brief Declare a frequency histogram attached to all the regions.
+         *
+         * @param name name of the histogram.
+         */
         void AddHistoFrequency(const std::string &name)
         {
             // The name of the histo
@@ -330,7 +431,14 @@ namespace MA5
             plotmanager_.Add_HistoFrequency(myname, regions_);
         }
 
-        /// This method associates all signal regions with an histo
+        /**
+         * @brief Declare a histogram attached to all the regions.
+         *
+         * @param name name.
+         * @param nb number of bins.
+         * @param xmin lower bound.
+         * @param xmax upper bound.
+         */
         void AddHisto(const std::string &name, MAuint32 nb, MAfloat64 xmin, MAfloat64 xmax)
         {
             // The name of the histo
@@ -345,7 +453,14 @@ namespace MA5
             plotmanager_.Add_Histo(myname, nb, xmin, xmax, regions_);
         }
 
-        /// This method associates all signal regions with an histo
+        /**
+         * @brief Declare a histogram with a logarithmic binning attached to all the regions.
+         *
+         * @param name name.
+         * @param nb number of bins.
+         * @param xmin lower bound.
+         * @param xmax upper bound.
+         */
         void AddHistoLogX(const std::string &name, MAuint32 nb, MAfloat64 xmin, MAfloat64 xmax)
         {
             // The name of the histo
@@ -360,7 +475,15 @@ namespace MA5
             plotmanager_.Add_HistoLogX(myname, nb, xmin, xmax, regions_);
         }
 
-        /// This method associates one single signal region with an histo
+        /**
+         * @brief Declare a histogram attached to one region.
+         *
+         * @param name name.
+         * @param nb number of bins.
+         * @param xmin lower bound.
+         * @param xmax upper bound.
+         * @param RSname name of the region.
+         */
         void AddHisto(const std::string &name, MAuint32 nb, MAfloat64 xmin, MAfloat64 xmax,
                       const std::string &RSname)
         {
@@ -368,21 +491,43 @@ namespace MA5
             AddHisto(name, nb, xmin, xmax, RSnameA);
         }
 
-        /// This method associates one single signal region with an histo
+        /**
+         * @brief Declare a histogram with a logarithmic binning attached to one region.
+         *
+         * @param name name.
+         * @param nb number of bins.
+         * @param xmin lower bound.
+         * @param xmax upper bound.
+         * @param RSname name of the region.
+         */
         void AddHistoLogX(const std::string &name, MAuint32 nb, MAfloat64 xmin, MAfloat64 xmax,
                           const std::string &RSname)
         {
             std::string RSnameA[] = {RSname};
             AddHistoLogX(name, nb, xmin, xmax, RSnameA);
         }
-        /// This method associates one single signal region with an histo
+        /**
+         * @brief Declare a frequency histogram attached to one region.
+         *
+         * @param name name.
+         * @param RSname name of the region.
+         */
         void AddHistoFrequency(const std::string &name, const std::string &RSname)
         {
             std::string RSnameA[] = {RSname};
             AddHistoFrequency(name, RSnameA);
         }
 
-        /// this method associates an arbitrary number of RS with an histo
+        /**
+         * @brief Declare a histogram attached to several regions.
+         *
+         * @tparam NRS number of regions.
+         * @param name name.
+         * @param nb number of bins.
+         * @param xmin lower bound.
+         * @param xmax upper bound.
+         * @param RSnames names of the regions.
+         */
         template <int NRS>
         void AddHisto(const std::string &name, MAuint32 nb,
                       MAfloat64 xmin, MAfloat64 xmax, std::string const (&RSnames)[NRS])
@@ -425,7 +570,16 @@ namespace MA5
             plotmanager_.Add_Histo(myname, nb, xmin, xmax, myregions);
         }
 
-        /// this method associates an arbitrary number of RS with an histo
+        /**
+         * @brief Declare a histogram with a logarithmic binning attached to several regions.
+         *
+         * @tparam NRS number of regions.
+         * @param name name.
+         * @param nb number of bins.
+         * @param xmin lower bound.
+         * @param xmax upper bound.
+         * @param RSnames names of the regions.
+         */
         template <int NRS>
         void AddHistoLogX(const std::string &name, MAuint32 nb,
                           MAfloat64 xmin, MAfloat64 xmax, std::string const (&RSnames)[NRS])
@@ -468,7 +622,13 @@ namespace MA5
             plotmanager_.Add_HistoLogX(myname, nb, xmin, xmax, myregions);
         }
 
-        /// this method associates an arbitrary number of RS with an histo
+        /**
+         * @brief Declare a frequency histogram attached to several regions.
+         *
+         * @tparam NRS number of regions.
+         * @param name name.
+         * @param RSnames names of the regions.
+         */
         template <int NRS>
         void AddHistoFrequency(const std::string &name, std::string const (&RSnames)[NRS])
         {
@@ -510,13 +670,27 @@ namespace MA5
             plotmanager_.Add_HistoFrequency(myname, myregions);
         }
 
-        /// Filling an histo with a value val
+        /**
+         * @brief Fill a histogram if all its regions survive (warning if only some of them survive).
+         *
+         * @param histname name of the histogram.
+         * @param val value.
+         */
         void FillHisto(std::string const &, MAfloat64 val);
 
-        /// Writing the definition saf file
+        /**
+         * @brief Write the list of regions in the SAF format.
+         *
+         * @param output SAF writer.
+         */
         void WriteHistoDefinition(SAFWriter &output);
 
-        /// Checking if a given RS is surviging
+        /**
+         * @brief Does the current event survive the cuts of a region?
+         *
+         * @param RSname name of the region.
+         * @return the survival status (false with a warning for an unknown region).
+         */
         MAbool IsSurviving(const std::string &RSname)
         {
             // Looking for the region and checking its status
@@ -541,8 +715,20 @@ namespace MA5
             return false;
         }
 
-        /// Dumping the content of the counters
+        /**
+         * @brief Write the names of the regions (as `<analysis>::<region>`, comma-separated).
+         *
+         * @param outwriter output stream.
+         * @param ananame name of the analysis.
+         * @param is_first is this the first analysis written?
+         */
         void HeadSR(std::ostream &, const std::string &, MAbool &);
+        /**
+         * @brief Write the survival status of the regions (comma-separated).
+         *
+         * @param outwriter output stream.
+         * @param is_first is this the first analysis written?
+         */
         void DumpSR(std::ostream &, MAbool &);
     };
 

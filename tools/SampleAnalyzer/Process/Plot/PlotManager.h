@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file PlotManager.h
+ * @brief Collection of the histograms of an analysis.
+ */
+
 #ifndef PLOT_MANAGER_H
 #define PLOT_MANAGER_H
 
@@ -40,6 +45,7 @@
 namespace MA5
 {
 
+    /** @brief Collection of the histograms of an analysis (owned). */
     class PlotManager
     {
 
@@ -47,20 +53,20 @@ namespace MA5
         //                        data members
         // -------------------------------------------------------------
     protected:
-        /// Collection of plots
+        /** @brief Histograms. */
         std::vector<PlotBase *> plots_;
 
         // -------------------------------------------------------------
         //                       method members
         // -------------------------------------------------------------
     public:
-        /// Constructor without argument
+        /** @brief Constructor. */
         PlotManager() {}
 
-        /// Destructor
+        /** @brief Destructor (the histograms are deleted by Reset()/Finalize()). */
         ~PlotManager() {}
 
-        /// Reset
+        /** @brief Delete all the histograms. */
         void Reset()
         {
             for (MAuint32 i = 0; i < plots_.size(); i++)
@@ -69,13 +75,29 @@ namespace MA5
             plots_.clear();
         }
 
-        /// Get method
+        /**
+         * @brief Accessor to the histograms.
+         *
+         * @return a copy of the collection.
+         */
         std::vector<PlotBase *> GetHistos() { return plots_; }
 
-        /// Getting thenumber of plots
+        /**
+         * @brief Number of histograms.
+         *
+         * @return the number of histograms.
+         */
         MAuint32 GetNplots() { return plots_.size(); }
 
-        /// Adding a 1D histogram with fixed bins
+        /**
+         * @brief Create a histogram with a linear binning.
+         *
+         * @param name name.
+         * @param bins number of bins.
+         * @param xmin lower bound.
+         * @param xmax upper bound.
+         * @return the histogram.
+         */
         Histo *Add_Histo(const std::string &name, MAuint32 bins,
                          MAfloat64 xmin, MAfloat64 xmax)
         {
@@ -84,6 +106,16 @@ namespace MA5
             return myhisto;
         }
 
+        /**
+         * @brief Create a histogram with a linear binning attached to regions.
+         *
+         * @param name name.
+         * @param bins number of bins.
+         * @param xmin lower bound.
+         * @param xmax upper bound.
+         * @param regions regions.
+         * @return the histogram.
+         */
         Histo *Add_Histo(const std::string &name, MAuint32 bins,
                          MAfloat64 xmin, MAfloat64 xmax, std::vector<RegionSelection *> regions)
         {
@@ -93,7 +125,15 @@ namespace MA5
             return myhisto;
         }
 
-        /// Adding a 1D histogram with a log binning
+        /**
+         * @brief Create a histogram with a logarithmic binning.
+         *
+         * @param name name.
+         * @param bins number of bins.
+         * @param xmin lower bound.
+         * @param xmax upper bound.
+         * @return the histogram.
+         */
         HistoLogX *Add_HistoLogX(const std::string &name, MAuint32 bins,
                                  MAfloat64 xmin, MAfloat64 xmax)
         {
@@ -102,6 +142,16 @@ namespace MA5
             return myhisto;
         }
 
+        /**
+         * @brief Create a histogram with a logarithmic binning attached to regions.
+         *
+         * @param name name.
+         * @param bins number of bins.
+         * @param xmin lower bound.
+         * @param xmax upper bound.
+         * @param regions regions.
+         * @return the histogram.
+         */
         HistoLogX *Add_HistoLogX(const std::string &name, MAuint32 bins,
                                  MAfloat64 xmin, MAfloat64 xmax, std::vector<RegionSelection *> regions)
         {
@@ -111,7 +161,12 @@ namespace MA5
             return myhisto;
         }
 
-        /// Adding a 1D histogram for frequency
+        /**
+         * @brief Create a frequency histogram.
+         *
+         * @param name name.
+         * @return the histogram.
+         */
         HistoFrequency *Add_HistoFrequency(const std::string &name)
         {
             HistoFrequency *myhisto = new HistoFrequency(name);
@@ -119,6 +174,13 @@ namespace MA5
             return myhisto;
         }
 
+        /**
+         * @brief Create a frequency histogram attached to regions.
+         *
+         * @param name name.
+         * @param regions regions.
+         * @return the histogram.
+         */
         HistoFrequency *Add_HistoFrequency(const std::string &name, std::vector<RegionSelection *> regions)
         {
             HistoFrequency *myhisto = new HistoFrequency(name);
@@ -127,10 +189,14 @@ namespace MA5
             return myhisto;
         }
 
-        /// Write the counters in a Text file
+        /**
+         * @brief Write all the histograms in the SAF format.
+         *
+         * @param output SAF writer.
+         */
         void Write_TextFormat(SAFWriter &output);
 
-        /// Finalizing
+        /** @brief Delete all the histograms. */
         void Finalize() { Reset(); }
     };
 

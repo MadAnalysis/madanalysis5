@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file LHCOReader.h
+ * @brief Reader of LHC Olympics (LHCO) files (reconstructed objects).
+ */
+
 #ifndef LHCO_READER_h
 #define LHCO_READER_h
 
@@ -33,6 +38,7 @@
 namespace MA5
 {
 
+/** @brief Reader of LHC Olympics files (photons, electrons, muons, taus, jets and MET). */
 class LHCOReader : public ReaderTextBase
 {
 
@@ -41,9 +47,13 @@ class LHCOReader : public ReaderTextBase
   // -------------------------------------------------------------
  protected:
 
+  /** @brief Has the header line of the next event been saved? */
   MAbool saved_;
+  /** @brief Is the first event being read? */
   MAbool firstevent_;
+  /** @brief Has the end of the file been reached? */
   MAbool EndOfFile_;
+  /** @brief Header line of the next event. */
   std::string savedline_;
 
 
@@ -52,30 +62,64 @@ class LHCOReader : public ReaderTextBase
   // -------------------------------------------------------------
  public:
 
-  //! Constructor without argument
+  /** @brief Constructor. */
   LHCOReader()
   { }
 
-  //! Destructor
+  /** @brief Destructor. */
   virtual ~LHCOReader()
   { }
 
-  //! Read the header
+  /**
+   * @brief Initialise the sample (no header in LHCO files).
+   *
+   * @param mySample sample.
+   * @return true.
+   */
   virtual MAbool ReadHeader(SampleFormat& mySample);
 
-  //! Finalize the header
+  /**
+   * @brief Finalise the header (nothing to do).
+   *
+   * @param mySample sample.
+   * @return true.
+   */
   virtual MAbool FinalizeHeader(SampleFormat& mySample);
 
-  //! Read the event
+  /**
+   * @brief Read the objects of the next event (until the next line starting with 0).
+   *
+   * @param myEvent event to fill.
+   * @param mySample sample.
+   * @return KEEP, or FAILURE once the end of the file has been reached.
+   */
   virtual StatusCode::Type ReadEvent(EventFormat& myEvent, SampleFormat& mySample);
 
-  //! Finalize the event
+  /**
+   * @brief Compute MHT, THT, TET and Meff.
+   *
+   * @param mySample sample.
+   * @param myEvent event.
+   * @return true.
+   */
   virtual MAbool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent);
 
 
  private:
 
+  /**
+   * @brief Read an object line.
+   *
+   * @param line line.
+   * @param myEvent event.
+   */
   void FillEventParticleLine(const std::string& line, EventFormat& myEvent);
+  /**
+   * @brief Read the header line of an event (nothing is stored).
+   *
+   * @param line line.
+   * @param myEvent event.
+   */
   void FillEventInitLine(const std::string& line, EventFormat& myEvent);
 };
 

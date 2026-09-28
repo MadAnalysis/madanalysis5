@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file RecEventFormat.h
+ * @brief Reconstructed objects of an event.
+ */
+
 #ifndef RecEventFormat_h
 #define RecEventFormat_h
 
@@ -67,6 +72,15 @@ namespace MA5
     class DelphesMA5tuneTreeReader;
     class DelphesMemoryInterface;
 
+    /**
+     * @brief Reconstructed objects of an event.
+     *
+     * Jets are stored in a dictionary of collections indexed by a jet identifier; the
+     * primary collection (PrimaryJetID_, `Ma5Jet` by default) is returned by jets().
+     * Additional collections are defined with `define jet_algorithm`; `fatjet` and
+     * `genjet` are reserved identifiers. The class also stores the Monte Carlo B/C
+     * hadrons and taus used by the truth-level taggers.
+     */
     class RecEventFormat
     {
         friend class LHEReader;
@@ -87,102 +101,101 @@ namespace MA5
         //                        data members
         // -------------------------------------------------------------
     private:
-        /// Collection of reconstructed photons
+        /** @brief Reconstructed photons. */
         std::vector<RecPhotonFormat> photons_;
 
-        /// Collection of reconstructed electrons
+        /** @brief Reconstructed electrons. */
         std::vector<RecLeptonFormat> electrons_;
 
-        /// Collection of reconstructed muons
+        /** @brief Reconstructed muons. */
         std::vector<RecLeptonFormat> muons_;
 
-        /// Collection of reconstructed taus
+        /** @brief Reconstructed hadronic taus. */
         std::vector<RecTauFormat> taus_;
 
-        // Identification of the primary jet. Corresponds to content of the jets_
+        /** @brief Identifier of the primary jet collection. */
         std::string PrimaryJetID_;
 
-        /// Collection of reconstructed jet dictionary
-        // @JACK note for the future: if lots of jet input is used change map
-        // to unordered map for efficiency UI is the same!
-        // 29.09.2022 - Jack: the fatjet and genjet collections are added to jetcollection
+        /** @brief Jet collections, indexed by jet identifier. */
         std::map<std::string, std::vector<RecJetFormat>> jetcollection_;
 
 #ifdef MA5_FASTJET_MODE
-        // hadrons to be clustered (code efficiency)
+        /** @brief Hadrons to be clustered by FastJet (filled during the event reading). */
         std::vector<fastjet::PseudoJet> input_hadrons_;
 #endif
 
-        /// Empty jet (useful temporary object)
+        /** @brief Empty jet collection (unused). */
         std::vector<RecJetFormat> emptyjet_;
 
-        /// Collection of reconstructed tracks
+        /** @brief Reconstructed tracks (and availability flag). */
         MAbool tracks_ok_;
         std::vector<RecTrackFormat> tracks_;
 
-        /// Collection of reconstructed vertices
+        /** @brief Reconstructed vertices (and availability flag). */
         MAbool vertices_ok_;
         std::vector<RecVertexFormat> vertices_;
 
-        /// Reconstructed towers
+        /** @brief Calorimeter towers (and availability flag). */
         MAbool towers_ok_;
         std::vector<RecTowerFormat> towers_;
 
-        /// Collection of reconstructed EFlow tracks
+        /** @brief Energy-flow tracks (and availability flag). */
         MAbool EFlowTracks_ok_;
         std::vector<RecTrackFormat> EFlowTracks_;
 
-        /// Collection of reconstructed EFlow tracks
+        /** @brief Energy-flow photons (and availability flag). */
         MAbool EFlowPhotons_ok_;
         std::vector<RecParticleFormat> EFlowPhotons_;
 
-        /// Collection of reconstructed EFlow tracks
+        /** @brief Energy-flow neutral hadrons (and availability flag). */
         MAbool EFlowNeutralHadrons_ok_;
         std::vector<RecParticleFormat> EFlowNeutralHadrons_;
 
-        /// Reconstructed Missing Transverse Energy
+        /** @brief Missing transverse momentum. */
         RecParticleFormat MET_;
 
-        /// Reconstructed Missing Hadronic Transverse Energy
+        /** @brief Missing hadronic transverse momentum. */
         RecParticleFormat MHT_;
 
-        /// Reconstructed Scalar sum of transverse energy
+        /** @brief Scalar sum of the transverse energies. */
         MAfloat64 TET_;
 
-        /// Reconstructed Scalar sum of hadronic transverse energy
+        /** @brief Scalar sum of the hadronic transverse energies. */
         MAfloat64 THT_;
 
-        /// Computed total effective mass (sum of jet's PT + MET
+        /** @brief Effective mass (THT + MET). */
         MAfloat64 Meff_;
 
-        /// Monte Carlo taus decaying hadronically
+        /** @brief Monte Carlo taus decaying hadronically (pointers into the Monte Carlo record). */
         std::vector<const MCParticleFormat *> MCHadronicTaus_;
 
-        /// Monte Carlo taus decaying into muon
+        /** @brief Monte Carlo taus decaying into a muon. */
         std::vector<const MCParticleFormat *> MCMuonicTaus_;
 
-        /// Monte Carlo taus decaying into electron
+        /** @brief Monte Carlo taus decaying into an electron. */
         std::vector<const MCParticleFormat *> MCElectronicTaus_;
 
-        /// Monte Carlo b-quarks
+        /** @brief Monte Carlo B hadrons used for b-tagging. */
         std::vector<const MCParticleFormat *> MCBquarks_;
 
-        /// Monte Carlo c-quarks
+        /** @brief Monte Carlo C hadrons used for c-tagging. */
         std::vector<const MCParticleFormat *> MCCquarks_;
 
         // -------------------------------------------------------------
         //                      method members
         // -------------------------------------------------------------
     public:
-        /// Constructor without arguments
+        /** @brief Constructor (members reset). */
         RecEventFormat()
         {
             Reset();
         }
 
-        /// Destructor
+        /** @brief Destructor. */
         ~RecEventFormat()
         {
+            // FIXME: the Monte Carlo pointers below point into the particle vector of MCEventFormat (they are
+            // not allocated with new, see JetClusterer.cpp): deleting them is undefined behaviour.
             for (auto &p : MCHadronicTaus_)
                 if (p != 0)
                     delete p;
@@ -200,19 +213,40 @@ namespace MA5
                     delete p;
         }
 
-        /// Accessor to the photon collection (read-only)
+        /**
+         * @brief Accessor to the photons (read-only).
+         *
+         * @return the photons.
+         */
         const std::vector<RecPhotonFormat> &photons() const { return photons_; }
 
-        /// Accessor to the electron collection (read-only)
+        /**
+         * @brief Accessor to the electrons (read-only).
+         *
+         * @return the electrons.
+         */
         const std::vector<RecLeptonFormat> &electrons() const { return electrons_; }
 
-        /// Accessor to the muon collection (read-only)
+        /**
+         * @brief Accessor to the muons (read-only).
+         *
+         * @return the muons.
+         */
         const std::vector<RecLeptonFormat> &muons() const { return muons_; }
 
-        /// Accessor to the tau collection (read-only)
+        /**
+         * @brief Accessor to the hadronic taus (read-only).
+         *
+         * @return the hadronic taus.
+         */
         const std::vector<RecTauFormat> &taus() const { return taus_; }
 
-        // Accessor to a specific jet dictionary (read-only)
+        /**
+         * @brief Accessor to a jet collection (read-only).
+         *
+         * @param id jet identifier.
+         * @return the collection (empty if the identifier does not exist).
+         */
         const std::vector<RecJetFormat> &jets(std::string id) const
         {
             auto it = jetcollection_.find(id);
@@ -223,192 +257,406 @@ namespace MA5
             return empty_jet;
         }
 
-        /// Accessor to the fat jet collection (read-only)
+        /**
+         * @brief Accessor to the fat jets (`fatjet` collection) (read-only).
+         *
+         * @return the fat jets.
+         */
         const std::vector<RecJetFormat> &fatjets() const { return jets("fatjet"); }
 
-        /// Accessor to the jet collection (read-only)
+        /**
+         * @brief Accessor to the primary jets (read-only).
+         *
+         * @return the primary jets.
+         */
         const std::vector<RecJetFormat> &jets() const { return jets(PrimaryJetID_); }
 
-        /// Accessor to the jet collection dictionary (read-only)
+        /**
+         * @brief Accessor to the jet collections (read-only).
+         *
+         * @return the jet collections.
+         */
         const std::map<std::string, std::vector<RecJetFormat>> &jetcollection() const { return jetcollection_; }
 
-        /// Accessor to the genjet collection (read-only)
+        /**
+         * @brief Accessor to the generator-level jets (`genjet` collection) (read-only).
+         *
+         * @return the generator-level jets.
+         */
         const std::vector<RecJetFormat> &genjets() const { return jets("genjet"); }
 
-        /// Accessor to the track collection (read-only)
+        /**
+         * @brief Accessor to the tracks (read-only).
+         *
+         * @return the tracks.
+         */
         const std::vector<RecTrackFormat> &tracks() const { return tracks_; }
 
-        /// Accessor to the vertex collection (read-only)
+        /**
+         * @brief Accessor to the vertices (read-only).
+         *
+         * @return the vertices.
+         */
         const std::vector<RecVertexFormat> &vertex() const { return vertices_; }
 
-        /// Accessor to the tower collection (read-only)
+        /**
+         * @brief Accessor to the calorimeter towers (read-only).
+         *
+         * @return the calorimeter towers.
+         */
         const std::vector<RecTowerFormat> &towers() const { return towers_; }
+        /**
+         * @brief Accessor to the energy-flow tracks (read-only).
+         *
+         * @return the energy-flow tracks.
+         */
         const std::vector<RecTrackFormat> &EFlowTracks() const { return EFlowTracks_; }
+        /**
+         * @brief Accessor to the energy-flow photons (read-only).
+         *
+         * @return the energy-flow photons.
+         */
         const std::vector<RecParticleFormat> &EFlowPhotons() const { return EFlowPhotons_; }
+        /**
+         * @brief Accessor to the energy-flow neutral hadrons (read-only).
+         *
+         * @return the energy-flow neutral hadrons.
+         */
         const std::vector<RecParticleFormat> &EFlowNeutralHadrons() const { return EFlowNeutralHadrons_; }
 
-        /// Accessor to the Missing Transverse Energy (read-only)
+        /**
+         * @brief Accessor to the missing transverse momentum (read-only).
+         *
+         * @return the missing transverse momentum.
+         */
         const RecParticleFormat &MET() const { return MET_; }
 
-        /// Accessor to the Missing Hadronic Transverse Energy (read-only)
+        /**
+         * @brief Accessor to the missing hadronic transverse momentum (read-only).
+         *
+         * @return the missing hadronic transverse momentum.
+         */
         const RecParticleFormat &MHT() const { return MHT_; }
 
-        /// Accessor to the Total Transverse Energy (read-only)
+        /**
+         * @brief Accessor to the scalar sum of the transverse energies (read-only).
+         *
+         * @return the scalar sum of the transverse energies.
+         */
         const MAfloat64 &TET() const { return TET_; }
 
-        /// Accessor to the Total Hadronic Transverse Energy (read-only)
+        /**
+         * @brief Accessor to the scalar sum of the hadronic transverse energies (read-only).
+         *
+         * @return the scalar sum of the hadronic transverse energies.
+         */
         const MAfloat64 &THT() const { return THT_; }
 
-        /// Accessor to the Total effective mass (read-only)
+        /**
+         * @brief Accessor to the effective mass (read-only).
+         *
+         * @return the effective mass.
+         */
         const MAfloat64 &Meff() const { return Meff_; }
 
-        /// Accessor to the Monte Carlo taus decaying hadronically
+        /**
+         * @brief Accessor to the Monte Carlo taus decaying hadronically (read-only).
+         *
+         * @return the Monte Carlo taus decaying hadronically.
+         */
         const std::vector<const MCParticleFormat *> &MCHadronicTaus() const
         {
             return MCHadronicTaus_;
         }
 
-        /// Accessor to Monte Carlo taus decaying into muon
+        /**
+         * @brief Accessor to the Monte Carlo taus decaying into a muon (read-only).
+         *
+         * @return the Monte Carlo taus decaying into a muon.
+         */
         const std::vector<const MCParticleFormat *> &MCMuonicTaus() const
         {
             return MCMuonicTaus_;
         }
 
-        /// Accessor to Monte Carlo taus decaying into electron
+        /**
+         * @brief Accessor to the Monte Carlo taus decaying into an electron (read-only).
+         *
+         * @return the Monte Carlo taus decaying into an electron.
+         */
         const std::vector<const MCParticleFormat *> &MCElectronicTaus() const
         {
             return MCElectronicTaus_;
         }
 
-        /// Accessor to Monte Carlo b-quarks
+        /**
+         * @brief Accessor to the Monte Carlo B hadrons (read-only).
+         *
+         * @return the Monte Carlo B hadrons.
+         */
         const std::vector<const MCParticleFormat *> &MCBquarks() const
         {
             return MCBquarks_;
         }
 
-        /// Accessor to Monte Carlo c-quarks
+        /**
+         * @brief Accessor to the Monte Carlo C hadrons (read-only).
+         *
+         * @return the Monte Carlo C hadrons.
+         */
         const std::vector<const MCParticleFormat *> &MCCquarks() const
         {
             return MCCquarks_;
         }
 
-        /// Accessor to the photon collection
+        /**
+         * @brief Accessor to the photons.
+         *
+         * @return the photons.
+         */
         std::vector<RecPhotonFormat> &photons() { return photons_; }
 
-        /// Accessor to the electron collection
+        /**
+         * @brief Accessor to the electrons.
+         *
+         * @return the electrons.
+         */
         std::vector<RecLeptonFormat> &electrons() { return electrons_; }
 
-        /// Accessor to the muon collection
+        /**
+         * @brief Accessor to the muons.
+         *
+         * @return the muons.
+         */
         std::vector<RecLeptonFormat> &muons() { return muons_; }
 
-        /// Accessor to the tau collection
+        /**
+         * @brief Accessor to the hadronic taus.
+         *
+         * @return the hadronic taus.
+         */
         std::vector<RecTauFormat> &taus() { return taus_; }
 
-        /// Accessor to a specific jet in the dictionary
+        /**
+         * @brief Accessor to a jet collection.
+         *
+         * @param id jet identifier.
+         * @return the collection (a shared static empty vector if the identifier does not exist).
+         */
         std::vector<RecJetFormat> &jets(std::string id)
         {
             auto it = jetcollection_.find(id);
             if (it != jetcollection_.end())
                 return it->second;
 
+            // NOTE: modifying the returned empty vector affects all later lookups of unknown identifiers.
             static std::vector<RecJetFormat> empty_jet;
             return empty_jet;
         }
 
-        /// Accessor to the jet collection
+        /**
+         * @brief Accessor to the primary jets.
+         *
+         * @return the primary jets.
+         */
         std::vector<RecJetFormat> &jets() { return jets(PrimaryJetID_); }
 
-        /// Accessor to the jet dictionary
+        /**
+         * @brief Accessor to the jet collections.
+         *
+         * @return the jet collections.
+         */
         std::map<std::string, std::vector<RecJetFormat>> &jetcollection() { return jetcollection_; }
 
-        /// Accessor to the fat jet collection
+        /**
+         * @brief Accessor to the fat jets (`fatjet` collection).
+         *
+         * @return the fat jets.
+         */
         std::vector<RecJetFormat> &fatjets() { return jets("fatjet"); }
 
-        /// Accessor to the towers collection
+        /**
+         * @brief Accessor to the calorimeter towers.
+         *
+         * @return the calorimeter towers.
+         */
         std::vector<RecTowerFormat> &towers() { return towers_; }
+        /**
+         * @brief Accessor to the energy-flow tracks.
+         *
+         * @return the energy-flow tracks.
+         */
         std::vector<RecTrackFormat> &EFlowTracks() { return EFlowTracks_; }
+        /**
+         * @brief Accessor to the energy-flow photons.
+         *
+         * @return the energy-flow photons.
+         */
         std::vector<RecParticleFormat> &EFlowPhotons() { return EFlowPhotons_; }
+        /**
+         * @brief Accessor to the energy-flow neutral hadrons.
+         *
+         * @return the energy-flow neutral hadrons.
+         */
         std::vector<RecParticleFormat> &EFlowNeutralHadrons() { return EFlowNeutralHadrons_; }
 
-        /// Accessor to the jet collection
+        /**
+         * @brief Accessor to the generator-level jets (`genjet` collection).
+         *
+         * @return the generator-level jets.
+         */
         std::vector<RecJetFormat> &genjets() { return jets("genjet"); }
 
-        /// Accessor to the track collection
+        /**
+         * @brief Accessor to the tracks.
+         *
+         * @return the tracks.
+         */
         std::vector<RecTrackFormat> &tracks() { return tracks_; }
 
-        /// Accessor to the Missing Transverse Energy
+        /**
+         * @brief Accessor to the missing transverse momentum.
+         *
+         * @return the missing transverse momentum.
+         */
         RecParticleFormat &MET() { return MET_; }
 
-        /// Accessor to the Missing Hadronic Transverse Energy
+        /**
+         * @brief Accessor to the missing hadronic transverse momentum.
+         *
+         * @return the missing hadronic transverse momentum.
+         */
         RecParticleFormat &MHT() { return MHT_; }
 
-        /// Accessor to the Total Transverse Energy
+        /**
+         * @brief Accessor to the scalar sum of the transverse energies.
+         *
+         * @return the scalar sum of the transverse energies.
+         */
         MAfloat64 &TET() { return TET_; }
 
-        /// Accessor to the Total Hadronic Transverse Energy
+        /**
+         * @brief Accessor to the scalar sum of the hadronic transverse energies.
+         *
+         * @return the scalar sum of the hadronic transverse energies.
+         */
         MAfloat64 &THT() { return THT_; }
 
-        /// Accessor to the Total effective mass
+        /**
+         * @brief Accessor to the effective mass.
+         *
+         * @return the effective mass.
+         */
         MAfloat64 &Meff() { return Meff_; }
 
-        /// Accessor to the Monte Carlo taus decaying hadronically
+        /**
+         * @brief Accessor to the Monte Carlo taus decaying hadronically.
+         *
+         * @return the Monte Carlo taus decaying hadronically.
+         */
         std::vector<const MCParticleFormat *> &MCHadronicTaus()
         {
             return MCHadronicTaus_;
         }
 
-        /// Accessor to Monte Carlo taus decaying into muon
+        /**
+         * @brief Accessor to the Monte Carlo taus decaying into a muon.
+         *
+         * @return the Monte Carlo taus decaying into a muon.
+         */
         std::vector<const MCParticleFormat *> &MCMuonicTaus()
         {
             return MCMuonicTaus_;
         }
 
-        /// Accessor to Monte Carlo taus decaying into electron
+        /**
+         * @brief Accessor to the Monte Carlo taus decaying into an electron.
+         *
+         * @return the Monte Carlo taus decaying into an electron.
+         */
         std::vector<const MCParticleFormat *> &MCElectronicTaus()
         {
             return MCElectronicTaus_;
         }
 
-        /// Accessor to Monte Carlo b-quarks
+        /**
+         * @brief Accessor to the Monte Carlo B hadrons.
+         *
+         * @return the Monte Carlo B hadrons.
+         */
         std::vector<const MCParticleFormat *> &MCBquarks()
         {
             return MCBquarks_;
         }
 
-        /// Accessor to Monte Carlo c-quarks
+        /**
+         * @brief Accessor to the Monte Carlo C hadrons.
+         *
+         * @return the Monte Carlo C hadrons.
+         */
         std::vector<const MCParticleFormat *> &MCCquarks()
         {
             return MCCquarks_;
         }
 
-        /// Clearing all information
+        /** @brief Reset the event (the primary jet identifier is set back to `Ma5Jet`). */
         void Reset();
 
-        // Initialize PrimaryJetID
+        /**
+         * @brief Set the identifier of the primary jet collection.
+         *
+         * @param v jet identifier.
+         */
         void SetPrimaryJetID(std::string v) { PrimaryJetID_ = v; }
 
-        // Remove an element from jet collection
+        /**
+         * @brief Remove a jet collection (error if it does not exist).
+         *
+         * @param id jet identifier.
+         */
         void Remove_Collection(std::string id);
 
-        /// Change Jet ID
+        /**
+         * @brief Rename a jet collection.
+         *
+         * @param previous_id current identifier.
+         * @param new_id new identifier (must not exist).
+         */
         void ChangeJetID(std::string previous_id, std::string new_id);
 
-        // Get the list of jet collection IDs
+        /**
+         * @brief List the identifiers of the jet collections.
+         *
+         * @return the identifiers.
+         */
         const std::vector<std::string> GetJetIDs() const;
 
-        // Check if collection ID exists
+        /**
+         * @brief Does a jet collection exist?
+         *
+         * @param id jet identifier.
+         * @return true if it exists.
+         */
         MAbool hasJetID(std::string id) { return (jetcollection_.find(id) != jetcollection_.end()); }
 
-        // Add a new hadron to be clustered. (for code efficiency)
+        /**
+         * @brief Add a hadron to the list of FastJet inputs (FastJet mode only).
+         *
+         * @param v hadron.
+         * @param idx index of the hadron in the Monte Carlo record (FastJet user index).
+         */
         void AddHadron(MCParticleFormat &v, MAuint32 &idx);
 
 #ifdef MA5_FASTJET_MODE
-        // Get hadrons to cluster (code efficiency)
+        /**
+         * @brief Accessor to the FastJet inputs.
+         *
+         * @return the pseudojets.
+         */
         std::vector<fastjet::PseudoJet> &cluster_inputs();
 #endif
 
-        /// Displaying data member values.
-        /// @JACK: added for debugging purposes. Does not need to be included in the original code.
+        /** @brief Print the content of the event (debugging). */
         void Print() const
         {
             INFO << "   -------------------------------------------" << endmsg;
@@ -427,58 +675,127 @@ namespace MA5
             INFO << "   -------------------------------------------" << endmsg;
         }
 
-        /// Giving a new photon entry
+        /**
+         * @brief Append a new photon.
+         *
+         * @return a pointer to the new object (invalidated by the next insertion).
+         */
         RecPhotonFormat *GetNewPhoton();
 
-        /// Giving a new electron entry
+        /**
+         * @brief Append a new electron.
+         *
+         * @return a pointer to the new object (invalidated by the next insertion).
+         */
         RecLeptonFormat *GetNewElectron();
 
-        /// Giving a new muon entry
+        /**
+         * @brief Append a new muon.
+         *
+         * @return a pointer to the new object (invalidated by the next insertion).
+         */
         RecLeptonFormat *GetNewMuon();
 
-        /// Giving a new tower entry
+        /**
+         * @brief Append a new calorimeter tower.
+         *
+         * @return a pointer to the new object (invalidated by the next insertion).
+         */
         RecTowerFormat *GetNewTower();
 
-        /// Giving a new EFlowTrack entry
+        /**
+         * @brief Append a new energy-flow track.
+         *
+         * @return a pointer to the new object (invalidated by the next insertion).
+         */
         RecTrackFormat *GetNewEFlowTrack();
 
-        /// Giving a new EFlowPhoton entry
+        /**
+         * @brief Append a new energy-flow photon.
+         *
+         * @return a pointer to the new object (invalidated by the next insertion).
+         */
         RecParticleFormat *GetNewEFlowPhoton();
 
-        /// Giving a new EFlowNeutralHadron entry
+        /**
+         * @brief Append a new energy-flow neutral hadron.
+         *
+         * @return a pointer to the new object (invalidated by the next insertion).
+         */
         RecParticleFormat *GetNewEFlowNeutralHadron();
 
-        /// Giving a new tau entry
+        /**
+         * @brief Append a new hadronic tau.
+         *
+         * @return a pointer to the new object (invalidated by the next insertion).
+         */
         RecTauFormat *GetNewTau();
 
-        // Get a new jet entry with specific ID
+        /**
+         * @brief Append a new jet to a collection (created if needed).
+         *
+         * @param id jet identifier.
+         * @return a pointer to the new jet.
+         */
         RecJetFormat *GetNewJet(std::string id);
 
-        /// Giving a new primary jet entry
+        /**
+         * @brief Append a new primary jet.
+         *
+         * @return a pointer to the new object (invalidated by the next insertion).
+         */
         RecJetFormat *GetNewJet() { return GetNewJet(PrimaryJetID_); }
 
-        /// Giving a new fat jet entry
+        /**
+         * @brief Append a new fat jet.
+         *
+         * @return a pointer to the new object (invalidated by the next insertion).
+         */
         RecJetFormat *GetNewFatJet() { return GetNewJet("fatjet"); }
 
-        /// Giving a new gen jet entry
+        /**
+         * @brief Append a new generator-level jet.
+         *
+         * @return a pointer to the new object (invalidated by the next insertion).
+         */
         RecJetFormat *GetNewGenJet() { return GetNewJet("genjet"); }
 
-        // Create an empty jet accessor with specific id
+        /**
+         * @brief Create an empty jet collection (nothing is done if it exists).
+         *
+         * @param id jet identifier.
+         */
         void CreateEmptyJetAccesor(std::string id);
 
-        /// Giving a new primary jet entry
+        /** @brief Create an empty primary jet collection. */
         void CreateEmptyJetAccesor() { return CreateEmptyJetAccesor(PrimaryJetID_); }
 
-        /// Giving a new track entry
+        /**
+         * @brief Append a new track.
+         *
+         * @return a pointer to the new object (invalidated by the next insertion).
+         */
         RecTrackFormat *GetNewTrack();
 
-        /// Giving a new vertex entry
+        /**
+         * @brief Append a new vertex.
+         *
+         * @return a pointer to the new object (invalidated by the next insertion).
+         */
         RecVertexFormat *GetNewVertex();
 
-        /// Giving a pointer to the Missing Transverse Energy
+        /**
+         * @brief Accessor to the missing transverse momentum object.
+         *
+         * @return a pointer to MET.
+         */
         RecParticleFormat *GetNewMet() { return &MET_; }
 
-        /// Giving a pointer to the Missing Transverse Energy
+        /**
+         * @brief Accessor to the missing hadronic transverse momentum object.
+         *
+         * @return a pointer to MHT.
+         */
         RecParticleFormat *GetNewMht() { return &MHT_; }
     };
 

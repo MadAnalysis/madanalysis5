@@ -23,6 +23,11 @@
 
 
 // SampleAnalyser headers
+/**
+ * @file ClusterAlgoCDFMidpoint.cpp
+ * @brief Implementation of MA5::ClusterAlgoCDFMidpoint.
+ */
+
 #include "SampleAnalyzer/Interfaces/fastjet/ClusterAlgoCDFMidpoint.h"
 
 // FastJet headers
@@ -109,6 +114,7 @@ MAbool ClusterAlgoCDFMidpoint::SetParameter(const std::string& key, const std::s
 MAbool ClusterAlgoCDFMidpoint::Initialize()
 {
   // Creating plugin
+  // NOTE: the plugin is never deleted (the jet definition does not own it).
   fastjet::JetDefinition::Plugin* Plugin_ = new fastjet::CDFMidPointPlugin(R_, OverlapThreshold_, 
                                            SeedThreshold_, ConeAreaFraction_);
 

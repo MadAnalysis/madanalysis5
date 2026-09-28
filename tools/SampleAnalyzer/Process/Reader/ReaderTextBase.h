@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file ReaderTextBase.h
+ * @brief Base class of the readers of text-based files (plain, gzip-compressed or FIFO).
+ */
+
 #ifndef READER_TEXT_BASE_h
 #define READER_TEXT_BASE_h
 
@@ -41,6 +46,7 @@ class gz_istream;
 namespace MA5
 {
 
+/** @brief Base class of the readers of text-based files (plain, gzip-compressed or FIFO). */
 class ReaderTextBase : public ReaderBase
 {
 
@@ -49,17 +55,17 @@ class ReaderTextBase : public ReaderBase
   // -------------------------------------------------------------
  protected:
 
-  /// Streaming in GZ format
+  /** @brief Input stream for compressed files (same object as input_). */
   gz_istream * gzinput_;
 
-  /// Streaming for reading input
+  /** @brief Input stream and previous position. */
   std::istream*  input_;
   std::streampos oldpos_;
 
-  /// Streaming for fifo
+  /** @brief Input stream for FIFO files. */
   std::ifstream* input_fifo_;
 
-  /// Name of the file (without prefix such as file: or rfio:)
+  /** @brief Name of the file (without prefix such as file: or rfio:). */
   std::string filename_;
 
 
@@ -68,49 +74,99 @@ class ReaderTextBase : public ReaderBase
   // -------------------------------------------------------------
  public:
 
-  /// Constructor without argument
+  /** @brief Constructor. */
   ReaderTextBase()
   {
     input_      = 0;
     input_fifo_ = 0;
   }
 
-  /// Destructor
+  /** @brief Destructor (closes the streams). */
   virtual ~ReaderTextBase()
   {
     if (input_     !=0) delete input_;
     if (input_fifo_!=0) delete input_fifo_;
   }
 
-  /// Initialize
+  /**
+   * @brief Open the file (compressed, FIFO or plain).
+   *
+   * @param rawfilename file name.
+   * @param cfg run configuration.
+   * @return false if the file cannot be opened (the program exits for RFIO or compressed files without zlib).
+   */
   virtual MAbool Initialize(const std::string& rawfilename,
                           const Configuration& cfg);
 
-  /// Read the sample (virtual pure)
+  /**
+   * @brief Read the header of the file.
+   *
+   * @param mySample sample to fill.
+   * @return false in case of error.
+   */
   virtual MAbool ReadHeader(SampleFormat& mySample) = 0;
 
-  /// Finalize the header (virtual pure)
+  /**
+   * @brief Finalise the reading of the header.
+   *
+   * @param mySample sample.
+   * @return false in case of error.
+   */
   virtual MAbool FinalizeHeader(SampleFormat& mySample) = 0;
 
-  /// Read the event (virtual pure)
+  /**
+   * @brief Read the next event.
+   *
+   * @param myEvent event to fill.
+   * @param mySample sample.
+   * @return the status of the reading.
+   */
   virtual StatusCode::Type ReadEvent(EventFormat& myEvent, SampleFormat& mySample) = 0;
 
-  /// Finalize the event (virtual pure)
+  /**
+   * @brief Finalise the event.
+   *
+   * @param mySample sample.
+   * @param myEvent event.
+   * @return false in case of error.
+   */
   virtual MAbool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent) = 0;
 
-  /// Finalize
+  /**
+   * @brief Close the file.
+   *
+   * @return true.
+   */
   virtual MAbool Finalize();
 
-  /// Read line text
+  /**
+   * @brief Read the next non-empty line.
+   *
+   * @param line output line.
+   * @param removeComment remove what follows a '#'.
+   * @return false at the end of the file.
+   */
   MAbool ReadLine(std::string& line, MAbool removeComment=true);
 
-  /// Get the file size (in octet)
+  /**
+   * @brief Get the size of the file (compressed size for gzip files).
+   *
+   * @return the size in bytes (0 if no file is open).
+   */
   virtual MAint64 GetFileSize();
 
-  /// Get the final position in file
+  /**
+   * @brief Get the final position in the file (the file size).
+   *
+   * @return the size in bytes.
+   */
   virtual MAint64 GetFinalPosition();
 
-  /// Get the position in file
+  /**
+   * @brief Get the current position in the file.
+   *
+   * @return the position in bytes.
+   */
   virtual MAint64 GetPosition();
 
 };

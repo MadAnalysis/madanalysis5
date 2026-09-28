@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // FastJet headers
+/**
+ * @file Recluster.cpp
+ * @brief Implementation of MA5::Substructure::Recluster.
+ */
+
 #include "fastjet/contrib/Recluster.hh"
 
 // SampleAnalyser headers
@@ -73,6 +78,7 @@ namespace MA5 {
             }
         }
 
+        // NOTE: member template defined in the .cpp file (not usable from other translation units).
         template<class Func>
         std::vector<const RecJetFormat *> Recluster::Execute(const RecJetFormat *jet, Func func)
         {

@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file ConvertService.cpp
+ * @brief Static members of MA5::ConvertService.
+ */
+
 #include "SampleAnalyzer/Commons/Service/ConvertService.h"
 
 using namespace MA5;

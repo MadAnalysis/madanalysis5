@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file xdr_istream.cpp
+ * @brief Implementation of MA5::xdr_istream.
+ */
+
 #include "SampleAnalyzer/Process/Core/xdr_istream.h"
 
 // STL headers
@@ -125,6 +130,8 @@ xdr_istream& xdr_istream::operator>>(MAfloat32 &v)
 
   MAuint32 n=0;
   (*this)>>n;
+  // NOTE: type punning through reinterpret_cast (technically undefined behaviour; memcpy is the safe
+  //   way).
   MAfloat32* vp = reinterpret_cast<MAfloat32*>(&n);
   v=*vp;
   return *this;

@@ -23,6 +23,11 @@
 
 
 // SampleHeader headers
+/**
+ * @file Test.cpp
+ * @brief Smoke test of the DelphesMA5tune interface (link test).
+ */
+
 #include "SampleAnalyzer/Commons/DataFormat/EventFormat.h"
 #include "SampleAnalyzer/Commons/DataFormat/SampleFormat.h"
 #include "SampleAnalyzer/Interfaces/delphesMA5tune/DetectorDelphesMA5tune.h"
@@ -33,6 +38,16 @@ using namespace MA5;
 // -----------------------------------------------------------------------
 // main program
 // -----------------------------------------------------------------------
+/**
+ * @brief Instantiate a DetectorDelphesMA5tune object to check that the library links and loads.
+ *
+ * The markers BEGIN-SAMPLEANALYZER-TEST / END-SAMPLEANALYZER-TEST are checked by the
+ * Python front-end (LibraryWriter, madanalysis/IOinterface/library_writer.py) to validate the build.
+ *
+ * @param argc number of command-line arguments.
+ * @param argv command-line arguments.
+ * @return 0.
+ */
 MAint32 main(MAint32 argc, MAchar *argv[])
 {
   std::cout << "BEGIN-SAMPLEANALYZER-TEST" << std::endl;

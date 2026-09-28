@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file WeightCollection.cpp
+ * @brief Static members of MA5::WeightCollection.
+ */
+
 #include "SampleAnalyzer/Commons/DataFormat/WeightCollection.h"
 
 using namespace MA5;

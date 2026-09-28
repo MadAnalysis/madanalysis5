@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file AnalyzerManager.h
+ * @brief Registry of the analyses.
+ */
+
 #ifndef ANALYSIS_MANAGER_h
 #define ANALYSIS_MANAGER_h
 
@@ -34,6 +39,7 @@
 namespace MA5
 {
 
+/** @brief Registry of the analyses available in the job (user analyses are added by main.cpp). */
 class AnalyzerManager : public ManagerBase<AnalyzerBase>
 {
   // -------------------------------------------------------------
@@ -41,21 +47,29 @@ class AnalyzerManager : public ManagerBase<AnalyzerBase>
   // -------------------------------------------------------------
  public :
 
-  /// Constructor without argument
+  /** @brief Constructor. */
   AnalyzerManager() : ManagerBase<AnalyzerBase>()
   { }
 
-  /// Destructor
+  /** @brief Destructor. */
   ~AnalyzerManager()
   { }
 
-  /// Let the user selectes an analysis 
+  /**
+   * @brief Ask the user to choose an analysis on the standard input (exits on a wrong choice).
+   *
+   * @return the chosen analysis.
+   */
   AnalyzerBase* ChoiceAnalyzer();
 
-  /// Build the predefined table
+  /** @brief Register the predefined analyses (MergingPlots when FastJet is used). */
   void BuildPredefinedTable();
 
-  /// Print the list of items in the collection
+  /**
+   * @brief Print the registered analyses.
+   *
+   * @param os logger.
+   */
   void Print(LogStream& os=INFO) const
   { ManagerBase<AnalyzerBase>::Print(Objects_, Names_, os); }
 

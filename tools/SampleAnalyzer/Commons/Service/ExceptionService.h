@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file ExceptionService.h
+ * @brief Handling of the SampleAnalyzer exceptions (MANAGE_EXCEPTION).
+ */
+
 #ifndef EXCEPTION_SERVICE_H
 #define EXCEPTION_SERVICE_H
 
@@ -38,7 +43,10 @@
 #include "SampleAnalyzer/Commons/Service/ExceptionType.h"
 
 
-// ShortCut to display and store an exception
+/**
+ * @brief Display and count an exception: SampleAnalyzer exceptions are displayed with their
+ * location, other std::exception objects are converted into errors.
+ */
 #define MANAGE_EXCEPTION(e) if (dynamic_cast<const MA5::ExceptionType*>(&e)==0) \
                           MA5::ExceptionService::GetInstance()->Display( \
                           EXCEPTION_ERROR(e.what(),\
@@ -50,13 +58,7 @@
 namespace MA5
 {
 
-//////////////////////////////////////////////////////////////////////////////
-/// The class ExceptionService manages the reports related to the logger
-/// ERROR and WARNING. 
-///
-/// ExceptionService is a singleton-pattern-based class : only one instance.
-/// Getting the only one instance : ExceptionService::GetInstance()
-//////////////////////////////////////////////////////////////////////////////
+/** @brief Singleton displaying the exceptions and counting them in the WARNING and ERROR reports. */
 class ExceptionService
 {
   // -------------------------------------------------------------
@@ -64,13 +66,13 @@ class ExceptionService
   // -------------------------------------------------------------
  private :
 
-  /// Pointer to the unique instance of ExceptionService
+  /** @brief Unique instance. */
   static ExceptionService* Service_;
 
-  /// Report for WARNING logger
+  /** @brief Report of the warnings. */
   LogReport WarningReport_;
 
-  /// Report for ERROR logger
+  /** @brief Report of the errors. */
   LogReport ErrorReport_;
 
 
@@ -79,42 +81,58 @@ class ExceptionService
   // -------------------------------------------------------------
  private:
 
-  /// Constructor without argument
+  /** @brief Constructor. */
   ExceptionService() 
   {
     WarningReport_.SetName("Warning");
     ErrorReport_.SetName("Error");
   }
 
-  /// Destructor
+  /** @brief Destructor. */
   ~ExceptionService()
   {}
 
  public:
 
-  /// Getting the unique instance of ExceptionService
+  /**
+   * @brief Get the unique instance (created at the first call).
+   *
+   * @return the instance.
+   */
   static ExceptionService* GetInstance()
   {
     if (Service_==0) Service_ = new ExceptionService;
     return Service_;
   }
 
-  /// Deleting the unique instance of Exception Service
+  /** @brief Delete the unique instance. */
   static void Kill()
   {
     if (Service_!=0) delete Service_;
     Service_=0;
   }
   
-  /// Accessor to the WARNING logger report
+  /**
+   * @brief Accessor to the report of the warnings.
+   *
+   * @return the report.
+   */
   LogReport& WarningReport()
   { return WarningReport_; }
 
-  /// Accessor to the ERROR logger report
+  /**
+   * @brief Accessor to the report of the errors.
+   *
+   * @return the report.
+   */
   LogReport& ErrorReport()
   { return ErrorReport_; }
 
-  /// Displaying and storing the exception
+  /**
+   * @brief Count an exception and display it (unless vetoed by the thresholds or its verbosity).
+   *
+   * @param e exception.
+   */
   void Display(const ExceptionType& e);
 
 };

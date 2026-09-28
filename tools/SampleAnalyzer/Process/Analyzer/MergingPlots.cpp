@@ -23,6 +23,11 @@
 
 
 // To be included only if fastjet is available
+/**
+ * @file MergingPlots.cpp
+ * @brief Implementation of MA5::MergingPlots (FastJet only).
+ */
+
 #ifdef FASTJET_USE
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Process/Analyzer/MergingPlots.h"
@@ -76,6 +81,7 @@ MAbool MergingPlots::Initialize(const Configuration& cfg,
   }
 
   // Initializing DJR plots
+  // FIXME: merging_njets_ is not initialised when the parameter 'njets' is not given.
   if (merging_njets_==0) 
   {
     ERROR << "number of jets requested for DJR plots is zero" << endmsg;
@@ -102,6 +108,8 @@ MAbool MergingPlots::Execute(SampleFormat& mySample, const EventFormat& myEvent)
 {
   // Event weight
   MAfloat64 myEventWeight;
+  // FIXME: Configuration() builds a default configuration: IsNoEventWeight() is always false here
+  // (weighted_events_ was meant).
   if(Configuration().IsNoEventWeight()) myEventWeight=1.;
   else if(myEvent.mc()->weight()!=0.) myEventWeight=myEvent.mc()->weight();
   else
@@ -196,6 +204,7 @@ MAuint32 MergingPlots::ExtractHardJetNumber(const MCEventFormat* myEvent,
       // The mother is not filtered -> testing if we have a radiation pattern
       else
       {
+        // remove the particle itself and the duplicates from the family
         // Get all brothers and sisters and kill MAfloat64s
         for(MAint32 j=family.size()-1;j>0;j--)
         {
@@ -232,12 +241,14 @@ MAuint32 MergingPlots::ExtractHardJetNumber(const MCEventFormat* myEvent,
 
     // coming from initial state ? 6 first particles
     MAbool initial=false;
+    // NOTE: assumes at least 6 particles in the event.
     for (MAuint32 ind=0;ind<6;ind++)
     {
       if (myPart->mothers()[0]== &(myEvent->particles()[ind]))
       { initial=true; break; }
     }
     if (initial) continue;
+    // FIXME: mothers()[1] is accessed although the particle may have a single mother (out of bounds).
     if (myPart->mothers()[0]==0 || myPart->mothers()[1]==0) continue;
 
     // Pythia 6 format: removing the initial guys

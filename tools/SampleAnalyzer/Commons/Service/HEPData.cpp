@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // SampleAnalyzer headers
+/**
+ * @file HEPData.cpp
+ * @brief Implementation of MA5::Efficiency1D.
+ */
+
 #include "SampleAnalyzer/Commons/Service/HEPData.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
@@ -60,6 +65,7 @@ void Efficiency1D::ReadCSV(std::string filename)
       fields.push_back(std::stod(field));
 
     // Storing the bin edge + the efficiency value
+    // FIXME: fields[1] and fields[3] are read without checking that at least four fields exist.
     if (fields.size() <= 6)
     {
       bin_edges_.push_back(fields[1]);
@@ -82,6 +88,8 @@ double Efficiency1D::Get(const double x)
   if(!init_) return 0.0;
 
   // Iterator to the first bin edge larger than x
+  // FIXME: lower_bound returns the edge equal to x: a value exactly on a bin edge is assigned to the
+  // previous bin (upper_bound was meant).
   auto it = std::lower_bound(bin_edges_.begin(), bin_edges_.end(), x);
 
   // Three cases (underflow, overflow, normal)

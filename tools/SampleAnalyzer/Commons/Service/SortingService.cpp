@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file SortingService.cpp
+ * @brief Static members of MA5::SortingService.
+ */
+
 #include "SampleAnalyzer/Commons/Service/SortingService.h"
 
 

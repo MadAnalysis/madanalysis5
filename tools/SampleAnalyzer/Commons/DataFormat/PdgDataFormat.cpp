@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file PdgDataFormat.cpp
+ * @brief Implementation of MA5::PdgDataFormat.
+ */
+
 #include "SampleAnalyzer/Commons/DataFormat/PdgDataFormat.h" 
 
 // STL headers

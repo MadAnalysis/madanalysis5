@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file DelphesDataFormat.h
+ * @brief Branches and arrays of a Delphes ROOT tree.
+ */
+
 #ifndef DELPHES_DATA_FORMAT_h
 #define DELPHES_DATA_FORMAT_h
 
@@ -42,6 +47,12 @@
 namespace MA5
 {
 
+/**
+ * @brief Branches and TClonesArray buffers of a Delphes ROOT file (used by DelphesTreeReader).
+ *
+ * Standard Delphes branches are used, except when the MA5-tuned branches (JetMA5,
+ * ElectronMA5, MuonMA5, PhotonMA5) are found; see InitializeBranch().
+ */
 struct DelphesDataFormat
 {
   /// Pointers to data
@@ -80,28 +91,43 @@ struct DelphesDataFormat
   TBranch* branchEFlowPhoton_;
   TBranch* branchEFlowNeutral_;
 
-  // List of collection
+  /** @brief List of collections (unused). */
   std::vector<std::pair<std::string,std::string> > collections_;
 
-  // Switch for MA5card
+  /** @brief Whether the file was produced with an MA5-tuned Delphes card. */
   MAbool delphesMA5card_;
 
-  /// Constructor without arguments
+  /** @brief Constructor (all pointers set to 0). */
   DelphesDataFormat();
 
-  /// Destructor
+  /** @brief Destructor (deletes the arrays). */
   ~DelphesDataFormat();
 
-  /// GetEntry
+  /**
+   * @brief Load a tree entry in all the available branches.
+   *
+   * @param treeEntry local entry number in the tree.
+   * @return false if the reading of a branch failed.
+   */
   MAbool GetEntry(MAint64 treeEntry);
 
-  /// Initialize all data
+  /** @brief Create the arrays of all the available branches. */
   void InitializeData();
 
-  // Initialize all branches 
+  /**
+   * @brief Find the branches of a Delphes tree (warnings are issued for the missing main branches).
+   *
+   * @param tree Delphes tree.
+   */
   void InitializeBranch(TTree* tree);
 
-  // Initialize a specific datum 
+  /**
+   * @brief Create the array associated with a branch and set the branch address.
+   *
+   * @param branch branch (may be 0).
+   * @param array array to allocate.
+   * @return false if the branch is 0 or its class is unknown.
+   */
   MAbool InitializeData(TBranch*& branch,TClonesArray*& array);
 
 };

@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file MARotation.cpp
+ * @brief Compilation unit of the rotation and boost headers.
+ */
+
 #include "SampleAnalyzer/Commons/Vector/MARotation3axis.h"
 #include "SampleAnalyzer/Commons/Vector/MARotation3euler.h"
 #include "SampleAnalyzer/Commons/Vector/MARotationGeneral.h"

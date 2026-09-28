@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file RecPhotonFormat.h
+ * @brief Reconstructed photon.
+ */
+
 #ifndef RecPhotonFormat_h
 #define RecPhotonFormat_h
 
@@ -45,6 +50,7 @@ class LHCOReader;
 class ROOTReader;
 class DelphesMemoryInterface;
 
+/** @brief Reconstructed photon. */
 class RecPhotonFormat : public RecParticleFormat
 {
 
@@ -61,6 +67,7 @@ class RecPhotonFormat : public RecParticleFormat
   //                        data members
   // -------------------------------------------------------------             
  protected:
+  /** @brief Isolation cones of various radii. */
   std::vector<IsolationConeType> isolCones_; // isolation cones
 
 
@@ -69,38 +76,52 @@ class RecPhotonFormat : public RecParticleFormat
   // -------------------------------------------------------------             
  public:
 
-  /// Constructor without arguments
+  /** @brief Constructor (isolation cones cleared). */
   RecPhotonFormat()
   { Reset(); }
 
-  /// Destructor
+  /** @brief Destructor. */
   virtual ~RecPhotonFormat()
   {}
 
-  /// Dump information
+  /** @brief Print the photon properties. */
   virtual void Print() const
   {
 
     RecParticleFormat::Print();
   }
 
-  /// Clear all information
+  /** @brief Clear the isolation cones (the other members are not reset). */
   virtual void Reset()
   {
     isolCones_.clear(); 
   }
 
-  /// get the collection of isolation cones
+  /**
+   * @brief Accessor to the isolation cones.
+   *
+   * @return the cones.
+   */
   const std::vector<IsolationConeType>& isolCones() const
   { return isolCones_; }
 
-  /// giving a new isolation cone entry
+  /**
+   * @brief Append a new isolation cone.
+   *
+   * @return a pointer to the new cone.
+   */
   IsolationConeType* GetNewIsolCone()
   {
     isolCones_.push_back(IsolationConeType());
     return &isolCones_.back();
   }
 
+  /**
+   * @brief Get the isolation cone of a given radius (created if needed).
+   *
+   * @param radius radius of the cone.
+   * @return a pointer to the cone.
+   */
   IsolationConeType* GetIsolCone(MAfloat32 radius)
   {
     for (MAuint32 i=0; i<isolCones_.size(); i++)

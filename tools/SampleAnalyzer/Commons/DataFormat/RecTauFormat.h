@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file RecTauFormat.h
+ * @brief Reconstructed hadronic tau.
+ */
+
 #ifndef RecTauFormat_h
 #define RecTauFormat_h
 
@@ -49,6 +54,7 @@ class DetectorDelphesMA5tune;
 class DelphesMemoryInterface;
 class SFSTaggerBase;
 
+/** @brief Reconstructed hadronic tau (a jet with a charge and a decay mode). */
 class RecTauFormat : public RecJetFormat
 {
 
@@ -67,8 +73,13 @@ class RecTauFormat : public RecJetFormat
   // -------------------------------------------------------------
  protected:
 
+  /** @brief Electric charge (false: -1, true: +1). */
   MAbool charge_;    /// charge of the particle 0 = -1, 1 = +1
+  /** @brief Number of tracks. */
+  // NOTE: this member shadows RecJetFormat::ntracks_ and RecParticleFormat::ntracks_.
   MAuint16 ntracks_; /// number of tracks
+  // Decay mode: 1 = e nu nu, 2 = mu nu nu, 3 = K nu, 4 = K* nu, 5 = rho (-> pi pi0) nu,
+  // 6 = a1 (-> pi 2pi0) nu, 7 = a1 (-> 3pi) nu, 8 = pi nu, 9 = 3pi pi0 nu, 0 = other
   MAint32 DecayMode_; /// Decay mode :  1 = Tau --> e nu nu
                     ///               2 = Tau --> mu nu nu
                     ///               3 = Tau --> K nu
@@ -85,15 +96,15 @@ class RecTauFormat : public RecJetFormat
   // -------------------------------------------------------------
  public:
 
-  /// Constructor without arguments
+  /** @brief Constructor (members reset). */
   RecTauFormat()
   { Reset(); }
 
-  /// Destructor                                                      
+  /** @brief Destructor. */
   virtual ~RecTauFormat()
   {}
 
-  /// Dump information
+  /** @brief Print the tau properties. */
   virtual void Print() const
   {
     INFO << "charge ="   << /*set::setw(8)*/"" << std::left << charge_  << ", "  
@@ -101,34 +112,59 @@ class RecTauFormat : public RecJetFormat
     RecParticleFormat::Print();
   }
 
-  /// Clear all information
+  /** @brief Reset the charge and the number of tracks. */
   virtual void Reset()
+  // FIXME: DecayMode_ is not reset (uninitialised after construction).
   {
     charge_=0.; 
     ntracks_=0;
   }
 
-  /// Accessor to the electric charge
+  /**
+   * @brief Accessor to the electric charge.
+   *
+   * @return +1 or -1.
+   */
   virtual const MAint32 charge() const
   { if (charge_) return +1; else return -1; }
 
-  /// Mutator to the electric charge
+  /**
+   * @brief Set the electric charge.
+   *
+   * @param charge charge (> 0: positive, otherwise negative).
+   */
   virtual void setCharge(MAfloat32 charge )
   { if (charge>0) charge_=true; else charge_=false; }
 
-  /// Accessor to the number of tracks
+  /**
+   * @brief Accessor to the number of tracks.
+   *
+   * @return the number of tracks.
+   */
   const MAuint16 ntracks() const
   { return ntracks_; }
 
-  /// Mutator to the number of tracks
+  /**
+   * @brief Set the number of tracks.
+   *
+   * @param ntracks number of tracks.
+   */
   virtual void setNtracks(MAuint16 ntracks)
   { ntracks_=ntracks; }
 
-  /// Accessor to the decay mode
+  /**
+   * @brief Accessor to the decay mode (see DecayMode_).
+   *
+   * @return the decay mode.
+   */
   const MAint32 DecayMode() const
   { return DecayMode_; }
 
-  /// Mutator to the decay mode
+  /**
+   * @brief Set the decay mode.
+   *
+   * @param mode decay mode (see DecayMode_).
+   */
   void setDecayMode(MAint32 mode)
   { DecayMode_=mode; }
 };

@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file PDGService.h
+ * @brief Singleton giving access to the particle properties (charge, ...), available as PDG.
+ */
+
 #ifndef PDGSERVICE_h
 #define PDGSERVICE_h
 
@@ -38,11 +43,13 @@
 #include "SampleAnalyzer/Commons/DataFormat/MCParticleFormat.h"
 
 
+/** @brief Shortcut to the PDGService singleton. */
 #define PDG PDGService::GetInstance()
 
 namespace MA5
 {
 
+/** @brief Singleton giving access to the particle properties read from `tools/SampleAnalyzer/particle.tbl`. */
 class PDGService
 {
 
@@ -51,8 +58,11 @@ class PDGService
   // -------------------------------------------------------------
  protected:
 
+  /** @brief Table of the particle properties. */
   PdgTable* Table_;  
+  /** @brief PDG codes of the neutral particles. */
   std::set<MAint32> NeutralTable_;  
+  /** @brief Unique instance. */
   static PDGService* service_;
 
   // -------------------------------------------------------------
@@ -60,21 +70,30 @@ class PDGService
   // -------------------------------------------------------------
  public:
 
-  /// GetInstance
+  /**
+   * @brief Get the unique instance (created at the first call).
+   *
+   * @return the instance.
+   */
   static PDGService* GetInstance()
   {
     if (service_==0) service_ = new PDGService;
     return service_;
   }
 
-  /// Kill
+  /** @brief Delete the unique instance. */
   static void Kill()
   {
     if (service_!=0) delete service_;
     service_=0;
   }
 
-  /// Is charged ?
+  /**
+   * @brief Is a particle charged?
+   *
+   * @param pdgid PDG code.
+   * @return false for the neutral particles of the table (true for unknown codes).
+   */
   MAbool IsCharged (MAint32 pdgid)
   {
     std::set<MAint32>::const_iterator it = NeutralTable_.find(pdgid);
@@ -82,19 +101,35 @@ class PDGService
     else return false; 
   }
 
-  /// Get charge
+  /**
+   * @brief Get the electric charge of a particle.
+   *
+   * @param pdgid PDG code.
+   * @param verbose warn if the code is unknown.
+   * @return the charge in units of e/3 (0 if unknown).
+   */
   MAint32 GetCharge (MAint32 pdgid, MAbool verbose = true)
   {
     return (*Table_).GetParticle(pdgid, verbose).Charge();
   }
 
-  /// Get charge
+  /**
+   * @brief Get the electric charge of a particle.
+   *
+   * @param part particle.
+   * @return the charge in units of e/3.
+   */
   MAint32 GetCharge (const MCParticleFormat& part)
   {
     return GetCharge(part.pdgid());
   }
 
-  /// Get charge
+  /**
+   * @brief Get the electric charge of a particle.
+   *
+   * @param part particle (0 allowed).
+   * @return the charge in units of e/3 (0 for a null pointer).
+   */
   MAint32 GetCharge (const MCParticleFormat* part)
   {
     if (part==0) return 0;
@@ -103,7 +138,7 @@ class PDGService
 
  private:
 
-  /// Constructor
+  /** @brief Constructor: read `$MA5_BASE/tools/SampleAnalyzer/particle.tbl` (silently empty if missing). */
   PDGService()  
   {
     Table_ = new PdgTable;
@@ -113,6 +148,8 @@ class PDGService
     std::string temp_string;
     std::istringstream curstring;
 
+    // FIXME: std::getenv returns a null pointer if MA5_BASE is not set: constructing a std::string from it
+    // is undefined behaviour (crash).
     std::string ma5dir = std::getenv("MA5_BASE");
     std::ifstream table ((ma5dir+"/tools/SampleAnalyzer/particle.tbl").c_str());
 
@@ -147,6 +184,7 @@ class PDGService
 
       curstring >> ID >> name >> charge >> mass >> width >> lifetime;
 
+      // the table gives c*tau in mm; it is stored in m
       PdgDataFormat particle(ID,name,mass,charge,width,lifetime/1000.);
 
       Table_->Insert(ID,particle);
@@ -154,7 +192,7 @@ class PDGService
     }
   }
 
-  /// Destructor
+  /** @brief Destructor. */
   ~PDGService()
   {delete Table_;}
 };

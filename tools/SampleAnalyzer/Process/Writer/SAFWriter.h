@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file SAFWriter.h
+ * @brief Writer of the SAF (Simple Analysis Format) output files.
+ */
+
 #ifndef WRITER_SAF_h
 #define WRITER_SAF_h
 
@@ -35,6 +40,11 @@
 namespace MA5
 {
 
+    /**
+     * @brief Writer of the SAF files (sample summaries, histograms, cut-flows).
+     *
+     * The histograms and cut-flows write themselves through GetStream().
+     */
     class SAFWriter : public WriterTextBase
     {
 
@@ -46,28 +56,63 @@ namespace MA5
         //                       method members
         // -------------------------------------------------------------
     public:
-        /// Constructor without argument
+        /** @brief Constructor. */
         SAFWriter() {}
 
-        /// Destructor
+        /** @brief Destructor. */
         virtual ~SAFWriter() {}
 
-        /// Read the sample (virtual pure)
+        /**
+         * @brief Write the SAF header and the global information of a sample (cross section, sums of weights, weight names).
+         *
+         * @param mySample sample.
+         * @return true.
+         */
         virtual MAbool WriteHeader(const SampleFormat &mySample);
+        /**
+         * @brief Write the SAF header.
+         *
+         * @return true.
+         */
         virtual MAbool WriteHeader();
 
-        /// Read the sample (virtual pure)
+        /**
+         * @brief Write the list of files and their detailed information.
+         *
+         * @param mySample samples.
+         * @return true.
+         */
         MAbool WriteFiles(const std::vector<SampleFormat> &mySample);
 
-        /// Read the event (virtual pure)
+        /**
+         * @brief Write an event (nothing is written).
+         *
+         * @param myEvent event.
+         * @param mySample sample.
+         * @return true.
+         */
         virtual MAbool WriteEvent(const EventFormat &myEvent,
                                   const SampleFormat &mySample);
 
-        /// Finalize the event (virtual pure)
+        /**
+         * @brief Write the SAF footer.
+         *
+         * @param mySample sample.
+         * @return true.
+         */
         virtual MAbool WriteFoot(const SampleFormat &mySample);
+        /**
+         * @brief Write the SAF footer.
+         *
+         * @return true.
+         */
         virtual MAbool WriteFoot();
 
-        /// Getting stream
+        /**
+         * @brief Accessor to the output stream.
+         *
+         * @return the stream.
+         */
         std::ostream *GetStream() { return output_; }
     };
 

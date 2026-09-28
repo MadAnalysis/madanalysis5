@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file ParticleBaseFormat.h
+ * @brief Base class of all particle and object formats (four-momentum and displacement).
+ */
+
 #ifndef ParticleBaseFormat_h
 #define ParticleBaseFormat_h
 
@@ -48,6 +53,14 @@ class STDHEPreader;
 class HEPMCReader;
 class ROOTReader;
 
+/**
+ * @brief Base class of the Monte Carlo particles and reconstructed objects.
+ *
+ * It stores the four-momentum and the displacement observables (point of closest
+ * approach to the beam axis, transverse and longitudinal impact parameters d0 and
+ * dz, exact and in the straight-line approximation), and provides the usual
+ * kinematic accessors. Lengths are in mm.
+ */
 class ParticleBaseFormat
 {
   friend class LHEReader;
@@ -61,10 +74,10 @@ class ParticleBaseFormat
   // -------------------------------------------------------------
  protected:
    
-  /// Quadrivector of particle (E, px,py,pz)
+  /** @brief Four-momentum (px, py, pz, E). */
   MALorentzVector momentum_;  
 
-  // Point of closest approach (+ straight line approximation)
+  /** @brief Point of closest approach to the beam axis, impact parameters d0/dz and their straight-line approximations. */
   MAVector3 closest_approach_;
   MAdouble64 d0_;
   MAdouble64 dz_;
@@ -76,23 +89,35 @@ class ParticleBaseFormat
   // -------------------------------------------------------------
  public :
 
-  /// Constructor without argument
+  /** @brief Constructor without argument (the members are not reset). */
   ParticleBaseFormat()
+  // FIXME: d0_, dz_, d0_approx_ and dz_approx_ are left uninitialised by this constructor.
   { }
 
-  /// Constructor without argument
+  /**
+   * @brief Constructor from the momentum components.
+   *
+   * @param px x component.
+   * @param py y component.
+   * @param pz z component.
+   * @param e energy.
+   */
   ParticleBaseFormat(MAfloat64 px, MAfloat64 py, MAfloat64 pz, MAfloat64 e)
   { Reset(); momentum_.SetPxPyPzE(px,py,pz,e); }
 
-  /// Constructor without argument
+  /**
+   * @brief Constructor from a four-vector.
+   *
+   * @param p four-momentum.
+   */
   ParticleBaseFormat(const MALorentzVector& p)
   { Reset(); momentum_.SetPxPyPzE(p.Px(),p.Py(),p.Pz(),p.E()); }
 
-  /// Destructor
+  /** @brief Destructor. */
   virtual ~ParticleBaseFormat()
   { }
 
-  /// Clear all information
+  /** @brief Reset the momentum and the displacement observables. */
   virtual void Reset()
   {
     momentum_.SetPxPyPzE(0.,0.,0.,0.);
@@ -101,7 +126,7 @@ class ParticleBaseFormat
     d0_approx_ = 0.; dz_approx_ = 0.;
   }
 
-  /// Print particle informations
+  /** @brief Print the four-momentum. */
   virtual void Print() const
   {
     INFO << "momentum=(";
@@ -112,26 +137,54 @@ class ParticleBaseFormat
          << ", "<</*std::setw(8)*/"" << std::left << momentum_.E() << ") - ";
   }
 
-  /// Accessor to 4-vector momentum (read-only)
+  /**
+   * @brief Accessor to the four-momentum (read-only).
+   *
+   * @return the four-momentum.
+   */
   const MALorentzVector& momentum() const {return momentum_;}
 
-  /// Accessor to 4-vector momentum
+  /**
+   * @brief Accessor to the four-momentum.
+   *
+   * @return the four-momentum (modifiable).
+   */
   MALorentzVector& momentum() {return momentum_;}
 
-  /// Set the 4-vector momentum
+  /**
+   * @brief Set the four-momentum.
+   *
+   * @param v four-momentum.
+   */
   void setMomentum(const MALorentzVector& v) {momentum_=v;}
 
-  /// Accessor to the particle energy
+  /**
+   * @brief Accessor to the energy.
+   *
+   * @return the energy.
+   */
   const MAfloat32 e()       const {return momentum_.E();       }
 
-  /// Accessor to the particle mass
+  /**
+   * @brief Accessor to the invariant mass.
+   *
+   * @return the invariant mass.
+   */
   const MAfloat32 m()       const {return momentum_.M();       }
 
-  /// Accessor to the particle momentum magnitude
+  /**
+   * @brief Accessor to the magnitude of the momentum.
+   *
+   * @return the magnitude of the momentum.
+   */
   const MAfloat32 p()       const {return momentum_.P();       }
 
   /// Accessor to the particle transverse mass
-  // WARNING: ROOT native formula is not the good one
+  /**
+   * @brief Accessor to the transverse mass, computed as sqrt(Et^2 - pT^2) (0 if negative).
+   *
+   * @return the transverse mass.
+   */
   const MAfloat32 mt()      const 
   { 
     //    return momentum_.Mt();
@@ -139,6 +192,12 @@ class ParticleBaseFormat
     if (tmp<0) return 0.; else return sqrt(tmp);
   }
 
+  /**
+   * @brief Transverse mass of the system made of the particle and the missing transverse momentum.
+   *
+   * @param MET missing transverse momentum.
+   * @return the transverse mass (0 if the squared mass is negative).
+   */
   const MAfloat32 mt_met(const MALorentzVector& MET) const 
   { 
     // Computing ET sum
@@ -153,34 +212,75 @@ class ParticleBaseFormat
     else return sqrt(value);
   }
 
-  /// Accessor to the particle transverse energy
+  /**
+   * @brief Accessor to the transverse energy.
+   *
+   * @return the transverse energy.
+   */
   const MAfloat32 et()      const {return momentum_.Et();      }
 
-  /// Accessor to the particle transverse momentum magnitude
+  /**
+   * @brief Accessor to the transverse momentum.
+   *
+   * @return the transverse momentum.
+   */
   const MAfloat32 pt()      const {return momentum_.Perp();    }
 
-  /// Accessor to the particle x-component momentum
+  /**
+   * @brief Accessor to the x component of the momentum.
+   *
+   * @return the x component of the momentum.
+   */
   const MAfloat32 px()      const {return momentum_.Px();      }
 
-  /// Accessor to the particle y-component momentum
+  /**
+   * @brief Accessor to the y component of the momentum.
+   *
+   * @return the y component of the momentum.
+   */
   const MAfloat32 py()      const {return momentum_.Py();      }
 
-  /// Accessor to the particle z-component momentum
+  /**
+   * @brief Accessor to the z component of the momentum.
+   *
+   * @return the z component of the momentum.
+   */
   const MAfloat32 pz()      const {return momentum_.Pz();      }
 
-  /// Accessor to the particle pseudo-rapidity
+  /**
+   * @brief Accessor to the pseudorapidity.
+   *
+   * @return the pseudorapidity.
+   */
   const MAfloat32 eta()     const {return momentum_.Eta();     }
 
-  /// Accessor to the particle pseudo-rapidity
+  /**
+   * @brief Accessor to the absolute value of the pseudorapidity.
+   *
+   * @return the absolute value of the pseudorapidity.
+   */
   const MAfloat32 abseta()     const {return std::abs(momentum_.Eta());     }
 
-  /// Accessor to the particle polar angle
+  /**
+   * @brief Accessor to the polar angle.
+   *
+   * @return the polar angle.
+   */
   const MAfloat32 theta()   const {return momentum_.Theta();   }
 
-  /// Accessor to the particle azimuthal angle
+  /**
+   * @brief Accessor to the azimuthal angle.
+   *
+   * @return the azimuthal angle.
+   */
   const MAfloat32 phi()     const {return momentum_.Phi();     }
 
-  /// Accessor to the delta Phi (given in [0, pi] with another particle direction
+  /**
+   * @brief Azimuthal angle difference with another particle, in [0, pi].
+   *
+   * @param p other particle.
+   * @return the angle difference.
+   */
   const MAfloat32 dphi_0_pi(const ParticleBaseFormat* p) const 
   {
     MAfloat64 dphi = std::abs(momentum_.Phi() - p->momentum().Phi());
@@ -188,7 +288,12 @@ class ParticleBaseFormat
     return dphi;
   }
 
-  /// Accessor to the delta Phi (given in [0, pi] with another particle direction
+  /**
+   * @brief Azimuthal angle difference with another particle, in [0, pi].
+   *
+   * @param p other particle.
+   * @return the angle difference.
+   */
   const MAfloat32 dphi_0_pi(const ParticleBaseFormat& p) const 
   {
     MAfloat64 dphi = std::abs(momentum_.Phi() - p.momentum().Phi());
@@ -196,15 +301,30 @@ class ParticleBaseFormat
     return dphi;
   }
 
-  /// Accessor to the recoil class (computed wrt another particle)
+  /**
+   * @brief Recoil mass with respect to another particle, |M(p_this - p_other)|.
+   *
+   * @param p other particle.
+   * @return the recoil mass.
+   */
   const MAfloat32 recoil(const ParticleBaseFormat* p) const
     { return std::abs((momentum_ - p->momentum()).M()); }
 
-  /// Accessor to the recoil class (computed wrt another particle)
+  /**
+   * @brief Recoil mass with respect to another particle, |M(p_this - p_other)|.
+   *
+   * @param p other particle.
+   * @return the recoil mass.
+   */
   const MAfloat32 recoil(const ParticleBaseFormat& p) const
     { return std::abs((momentum_ - p.momentum()).M()); }
 
-  /// Accessor to the delta Phi (given in [0, 2pi] with another particle direction
+  /**
+   * @brief Azimuthal angle difference with another particle, in [0, 2pi].
+   *
+   * @param p other particle.
+   * @return the angle difference.
+   */
   const MAfloat32 dphi_0_2pi(const ParticleBaseFormat* p) const 
   {
     MAfloat64 dphi =momentum_.Phi() - p->momentum().Phi();
@@ -212,7 +332,12 @@ class ParticleBaseFormat
     return dphi;
   }
 
-  /// Accessor to the delta Phi (given in [0, 2pi] with another particle direction
+  /**
+   * @brief Azimuthal angle difference with another particle, in [0, 2pi].
+   *
+   * @param p other particle.
+   * @return the angle difference.
+   */
   const MAfloat32 dphi_0_2pi(const ParticleBaseFormat& p) const 
   {
     MAfloat64 dphi = momentum_.Phi() - p.momentum().Phi();
@@ -220,85 +345,209 @@ class ParticleBaseFormat
     return dphi;
   }
 
-  /// Accessor to the particle rapidity
+  /**
+   * @brief Accessor to the rapidity.
+   *
+   * @return the rapidity.
+   */
   const MAfloat32 y()       const {return momentum_.Rapidity();}
 
-  /// Accessor to the relativist beta parameter
+  /**
+   * @brief Accessor to the velocity beta = p/E.
+   *
+   * @return the velocity beta = p/E.
+   */
   const MAfloat32 beta()    const {return momentum_.Beta();    }
 
-  /// Accessor to the relativist gamma parameter
+  /**
+   * @brief Accessor to the Lorentz factor gamma.
+   *
+   * @return the Lorentz factor gamma.
+   */
   const MAfloat32 gamma()   const {return momentum_.Gamma();   }
 
-  /// Accessor to the polar radius
+  /**
+   * @brief Accessor to sqrt(eta^2 + phi^2) (distance to the origin of the (eta, phi) plane).
+   *
+   * @return the value.
+   */
   const MAfloat32 r()       const
   { 
     return sqrt(momentum_.Eta()*momentum_.Eta() + \
                 momentum_.Phi()*momentum_.Phi() ); 
   }
 
-  /// Accessor to the delta R with another particle direction
+  /**
+   * @brief Angular distance DeltaR = sqrt(Deta^2 + Dphi^2) with another particle.
+   *
+   * @param p other particle.
+   * @return DeltaR.
+   */
   const MAfloat32 dr(const ParticleBaseFormat& p) const 
   { return momentum_.DeltaR(p.momentum()); }
 
-  /// Accessor to the delta R with another particle direction
+  /**
+   * @brief Angular distance DeltaR = sqrt(Deta^2 + Dphi^2) with another particle.
+   *
+   * @param p other particle.
+   * @return DeltaR.
+   */
   const MAfloat32 dr(const ParticleBaseFormat* p) const 
   { return momentum_.DeltaR(p->momentum()); }
 
-  /// Accessor to the angle with another particle direction
+  /**
+   * @brief Angle between the momenta of two particles.
+   *
+   * @param p other particle.
+   * @return the angle in radians.
+   */
   const MAfloat32 angle(const ParticleBaseFormat& p) const 
   { return momentum_.Angle(p.momentum()); }
 
-  /// Accessor to the angle with another particle direction
+  /**
+   * @brief Angle between the momenta of two particles.
+   *
+   * @param p other particle.
+   * @return the angle in radians.
+   */
   const MAfloat32 angle(const ParticleBaseFormat* p) const 
   { return momentum_.Angle(p->momentum()); }
 
-  /// operator * (scalar)
+  /**
+   * @brief Scale the four-momentum.
+   *
+   * @param a scale factor.
+   * @return a particle with the scaled four-momentum.
+   */
   ParticleBaseFormat operator * (MAfloat64 a) const
   { return ParticleBaseFormat(a*momentum_); }
 
-  /// operator * (momentum)
+  /**
+   * @brief Minkowski scalar product of two four-momenta.
+   *
+   * @param p other particle.
+   * @return the scalar product.
+   */
   MAfloat64 operator * (const ParticleBaseFormat& p) const
   { return momentum_.Dot(p.momentum_); }
 
-  /// operator + (momentum)
+  /**
+   * @brief Sum of two four-momenta.
+   *
+   * @param p other particle.
+   * @return a particle with the summed four-momentum.
+   */
   ParticleBaseFormat operator + (const ParticleBaseFormat& p) const 
   { return ParticleBaseFormat(momentum_+p.momentum_); }
 
-  /// operator - (momentum)
+  /**
+   * @brief Difference of two four-momenta.
+   *
+   * @param p other particle.
+   * @return a particle with the difference.
+   */
   ParticleBaseFormat operator - (const ParticleBaseFormat& p) const
   { return ParticleBaseFormat(momentum_-p.momentum_); }
 
-  /// operator + (momentum)
+  /**
+   * @brief Add a four-vector.
+   *
+   * @param p four-vector.
+   * @return a particle with the summed four-momentum.
+   */
   ParticleBaseFormat operator + (const MALorentzVector& p) const 
   { return ParticleBaseFormat(momentum_+p); }
 
-  /// operator - (momentum)
+  /**
+   * @brief Subtract a four-vector.
+   *
+   * @param p four-vector.
+   * @return a particle with the difference.
+   */
   ParticleBaseFormat operator - (const MALorentzVector& p) const
   { return ParticleBaseFormat(momentum_-p); }
 
-  /// operator += (momentum)
+  /**
+   * @brief Add the four-momentum of another particle.
+   *
+   * @param p other particle.
+   * @return this particle.
+   */
   ParticleBaseFormat& operator += (const ParticleBaseFormat& p)
   { this->momentum_ += p.momentum_;
     return *this; }
 
-  /// operator -= (momentum)
+  /**
+   * @brief Subtract the four-momentum of another particle.
+   *
+   * @param p other particle.
+   * @return this particle.
+   */
   ParticleBaseFormat& operator -= (const ParticleBaseFormat& p)
   { this->momentum_ -= p.momentum_;
     return *this; }
 
-  /// Accessor to the point of closest approach (read-only)
+  /**
+   * @brief Accessor to the point of closest approach to the beam axis.
+   *
+   * @return the point [mm].
+   */
   const MAVector3& closest_approach() const {return closest_approach_;}
+  /**
+   * @brief Accessor to the transverse impact parameter.
+   *
+   * @return d0 [mm].
+   */
   const MAdouble64& d0() const {return d0_;}
+  /**
+   * @brief Accessor to the longitudinal impact parameter.
+   *
+   * @return dz [mm].
+   */
   const MAdouble64& dz() const {return dz_;}
 
-  /// Accessor to the d0/dz for a straight line approximation (read-only)
+  /**
+   * @brief Accessor to d0 in the straight-line approximation.
+   *
+   * @return d0 [mm].
+   */
   const MAdouble64& d0_approx() const {return d0_approx_;}
+  /**
+   * @brief Accessor to dz in the straight-line approximation.
+   *
+   * @return dz [mm].
+   */
   const MAdouble64& dz_approx() const {return dz_approx_;}
 
+  /**
+   * @brief Set d0.
+   *
+   * @param v value [mm].
+   */
   void setD0(MAdouble64 v)        {d0_=v;}
+  /**
+   * @brief Set dz.
+   *
+   * @param v value [mm].
+   */
   void setDZ(MAdouble64 v)        {dz_=v;}
+  /**
+   * @brief Set d0 in the straight-line approximation.
+   *
+   * @param v value [mm].
+   */
   void setD0Approx(MAdouble64 v)  {d0_approx_=v;}
+  /**
+   * @brief Set dz in the straight-line approximation.
+   *
+   * @param v value [mm].
+   */
   void setDZApprox(MAdouble64 v)  {dz_approx_=v;}
+  /**
+   * @brief Set the point of closest approach.
+   *
+   * @param v point [mm].
+   */
   void setClosestApproach(const MAVector3& v)  {closest_approach_=v;}
 
 

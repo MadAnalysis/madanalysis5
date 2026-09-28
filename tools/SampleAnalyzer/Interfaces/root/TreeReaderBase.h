@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file TreeReaderBase.h
+ * @brief Interface of the readers of ROOT trees (Delphes, Delphes-MA5tune).
+ */
+
 #ifndef TREE_READER_BASE_h
 #define TREE_READER_BASE_h
 
@@ -44,6 +49,7 @@ class TTree;
 namespace MA5
 {
 
+/** @brief Abstract base class of the readers of ROOT trees. */
 class TreeReaderBase
 {
 
@@ -52,10 +58,10 @@ class TreeReaderBase
   // -------------------------------------------------------------
  protected:
 
-  /// Input file stream
+  /** @brief Input ROOT file. */
   TFile* source_;
 
-  /// Tree
+  /** @brief Tree to read. */
   TTree* tree_;
 
   // -------------------------------------------------------------
@@ -63,34 +69,68 @@ class TreeReaderBase
   // -------------------------------------------------------------
  public:
 
-  /// Constructor without argument
+  /** @brief Constructor. */
   TreeReaderBase()
   { source_=0; tree_=0; } 
 
-  /// Constructor with arguments
+  /**
+   * @brief Constructor.
+   *
+   * @param source input ROOT file.
+   * @param tree tree to read.
+   */
   TreeReaderBase(TFile* source, TTree* tree)
   { source_=source; tree_=tree; }
 
-  /// Destructor
+  /** @brief Destructor. */
   virtual ~TreeReaderBase()
   { }
 
-  /// Read the header
+  /**
+   * @brief Initialise the branches of the tree.
+   *
+   * @return false in case of error.
+   */
   virtual MAbool Initialize()=0;
 
-  /// Read the header
+  /**
+   * @brief Read the header.
+   *
+   * @param mySample sample to fill.
+   * @return false in case of error.
+   */
   virtual MAbool ReadHeader(SampleFormat& mySample)=0;
 
-  /// Read the event
+  /**
+   * @brief Read the next entry of the tree.
+   *
+   * @param myEvent event to fill.
+   * @param mySample sample.
+   * @return the status of the reading.
+   */
   virtual StatusCode::Type ReadEvent(EventFormat& myEvent, SampleFormat& mySample)=0;
 
-  /// Finalize the event
+  /**
+   * @brief Finalise the event.
+   *
+   * @param mySample sample.
+   * @param myEvent event.
+   * @return false in case of error.
+   */
   virtual MAbool FinalizeEvent(SampleFormat& mySample, EventFormat& myEvent)=0;
 
-  /// Get the file size
+  /**
+   * @brief Final position (number of entries of the tree).
+   *
+   * @return the final position.
+   */
   virtual MAint64 GetFinalPosition()=0;
 
-  /// Get the position in file (in octet)
+  /**
+   * @brief Current position (index of the current entry).
+   *
+   * @return the position.
+   */
   virtual MAint64 GetPosition()=0;
 
 };

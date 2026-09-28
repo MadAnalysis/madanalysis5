@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file LogService.cpp
+ * @brief Implementation of MA5::LogService.
+ */
+
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 
 using namespace MA5;

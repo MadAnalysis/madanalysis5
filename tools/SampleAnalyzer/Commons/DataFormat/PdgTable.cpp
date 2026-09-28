@@ -23,6 +23,11 @@
 
 
 // STL headers
+/**
+ * @file PdgTable.cpp
+ * @brief Implementation of MA5::PdgTable.
+ */
+
 #include <iostream> 
 #include <iomanip>
 
@@ -46,6 +51,7 @@ PdgTable::PdgTable(const PdgTable& Table)
 PdgTable& PdgTable::operator=(const PdgTable& Table) 
 {
   if(this == &Table) return *this;
+  // NOTE: Table_ is not cleared: the tables are merged.
   std::map<MAint32, PdgDataFormat>::const_iterator i;
   for(i = Table.Table_.begin(); i != Table.Table_.end(); i++)
   {

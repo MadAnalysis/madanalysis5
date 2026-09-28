@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file ReaderManager.h
+ * @brief Registry of the event-file readers, selected by file extension.
+ */
+
 #ifndef READER_MANAGER_h
 #define READER_MANAGER_h
 
@@ -34,6 +39,7 @@
 namespace MA5
 {
 
+/** @brief Registry of the readers (lhe, lhco, hep, hepmc, their .gz versions, and root with ROOT). */
 class ReaderManager : public ManagerBase<ReaderBase>
 {
   // -------------------------------------------------------------
@@ -41,21 +47,30 @@ class ReaderManager : public ManagerBase<ReaderBase>
   // -------------------------------------------------------------
  public:
 
-  /// Constructor without argument
+  /** @brief Constructor. */
   ReaderManager() : ManagerBase<ReaderBase>()
   { }
 
-  /// Destructor
+  /** @brief Destructor. */
   ~ReaderManager()
   { }
 
-  /// Build the table
+  /** @brief Register the available readers (the .gz extensions require zlib, root requires ROOT). */
   void BuildTable();
 
-  /// Get the good Reader from a given file name
+  /**
+   * @brief Find the reader corresponding to the extension of a file (a `.fifo` suffix is ignored).
+   *
+   * @param filename file name.
+   * @return the reader, or 0 (with an error message for a forbidden extension).
+   */
   ReaderBase* GetByFileExtension(std::string filename);
 
-  /// Print the list of items in the collection
+  /**
+   * @brief Print the registered readers.
+   *
+   * @param os logger.
+   */
   void Print(LogStream& os=INFO) const
   { ManagerBase<ReaderBase>::Print(Objects_, Names_, os); }
 

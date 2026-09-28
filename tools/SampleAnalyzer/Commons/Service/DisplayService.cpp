@@ -23,6 +23,11 @@
 
 
 // SampleAnalyzer headers
+/**
+ * @file DisplayService.cpp
+ * @brief Implementation of MA5::DisplayService.
+ */
+
 #include "SampleAnalyzer/Commons/Service/DisplayService.h"
 
 using namespace MA5;

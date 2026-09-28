@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file LHEParticleFormat.h
+ * @brief Particle line of an LHE file.
+ */
+
 #ifndef LHE_PARTICLE_FORMAT_h
 #define LHE_PARTICLE_FORMAT_h
 
@@ -37,6 +42,7 @@
 namespace MA5
 {
 
+/** @brief Content of a particle line of an LHE event. */
 class LHEParticleFormat
 {
 
@@ -45,6 +51,7 @@ class LHEParticleFormat
   // -------------------------------------------------------------
  public:
 
+  /** @brief PDG code, status, mothers, colours, momentum, mass, c*tau and spin (HEPEUP convention). */
   MAint32   id;
   MAint32   status;
   MAuint32  mother1;
@@ -59,11 +66,31 @@ class LHEParticleFormat
   MAfloat32 ctau;
   MAfloat32 spin;
 
+  /**
+   * @brief Format a number in the Fortran style (mantissa and two-digit exponent).
+   *
+   * @param value number.
+   * @param precision number of digits.
+   * @return the formatted number.
+   */
   static std::string FortranFormat_SimplePrecision(MAfloat32 value,
                                                    MAuint32 precision=7); 
+  /**
+   * @brief Format a number in the Fortran style (mantissa and two-digit exponent).
+   *
+   * @param value number.
+   * @param precision number of digits.
+   * @return the formatted number.
+   */
   static std::string FortranFormat_DoublePrecision(MAfloat64 value,
                                                    MAuint32 precision=11); 
 
+  /**
+   * @brief Write the particle line.
+   *
+   * @param num index of the particle (unused).
+   * @param out output stream.
+   */
   void Print(MAuint32 num, std::ostream* out);
 };
 

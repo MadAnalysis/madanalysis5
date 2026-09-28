@@ -23,6 +23,11 @@
 
 
 // STL headers
+/**
+ * @file DetectorDelphesMA5tune.cpp
+ * @brief Implementation of MA5::DetectorDelphesMA5tune.
+ */
+
 #include <fstream>
 #include <algorithm>
 
@@ -237,6 +242,7 @@ void DetectorDelphesMA5tune::Finalize()
   nprocesses_=0;
   modularDelphes_->FinishTask();
   if (output_) treeWriter_->Write();
+  // NOTE: outputFile_ is neither closed nor deleted.
   delete modularDelphes_; modularDelphes_=0;
   delete confReader_; confReader_=0;
   delete treeWriter_; treeWriter_=0;
@@ -346,6 +352,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
 
   // https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/Arrays
 
+  // FIXME: the module arrays are hard-coded (table_ is not used) and the photons are not exported.
   // Jet collection
   TObjArray* jetsArray = dynamic_cast<TObjArray*>(delphesFolder_->FindObject("Export/JetEnergyScale/jets"/* FastJetFinder/jets"*/));
   if (jetsArray==0) {if (!first_) WARNING << "no jets collection found" << endmsg;}

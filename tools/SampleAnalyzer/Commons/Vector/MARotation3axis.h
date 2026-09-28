@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file MARotation3axis.h
+ * @brief Rotation around one of the Cartesian axes.
+ */
+
 #ifndef MARotation3axis_h
 #define MARotation3axis_h
 
@@ -42,11 +47,13 @@
 namespace MA5
 {
 
+/** @brief Rotation by an angle around the x, y or z axis. */
 class MARotation3axis
 {
 
  public :
 
+  /** @brief Rotation axis. */
   enum AxisType{Xaxis=0,Yaxis=1,Zaxis=2};
 
   // -------------------------------------------------------------
@@ -54,6 +61,7 @@ class MARotation3axis
   // -------------------------------------------------------------
  protected:
   
+  /** @brief Cosine and sine of the angle, rotation axis, temporary value. */
   MAdouble64 c_; // cos(angle)
   MAdouble64 s_; // sin(angle)
   AxisType   axis_;
@@ -65,18 +73,29 @@ class MARotation3axis
   // -------------------------------------------------------------
  public :
 
-  // Constructors
+  /** @brief Constructor (null rotation around z, not the identity). */
   MARotation3axis()
   {c_=0.; s_=0.; axis_=Zaxis;}
 
+  /**
+   * @brief Constructor.
+   *
+   * @param angle rotation angle.
+   * @param axis rotation axis.
+   */
   MARotation3axis(MAdouble64 angle, AxisType axis)
   {setAngleAxis(angle,axis);}
   
-  // Destructor
+  /** @brief Destructor. */
   ~MARotation3axis()
   {}
 
-  // Setting the rotation angle
+  /**
+   * @brief Set the angle and the axis.
+   *
+   * @param angle rotation angle.
+   * @param axis rotation axis.
+   */
   void setAngleAxis(MAdouble64 angle,AxisType axis)
   {
     s_ = std::sin(angle);
@@ -84,11 +103,19 @@ class MARotation3axis
     axis_ = axis;
   }
   
-  // Rotate a MALorentzVector
+  /**
+   * @brief Rotate the spatial part of a four-vector in place.
+   *
+   * @param q four-vector.
+   */
   void rotate(MALorentzVector& q) const
   { rotate(q.Vect()); }
 
-  // Rotate a MAVector3
+  /**
+   * @brief Rotate a three-vector in place.
+   *
+   * @param p three-vector.
+   */
   void rotate(MAVector3& p) const
   {
     if (axis_==Xaxis)
@@ -111,7 +138,12 @@ class MARotation3axis
     }
   }
 
-  // Operator *
+  /**
+   * @brief Rotated copy of a four-vector.
+   *
+   * @param q four-vector.
+   * @return the rotated four-vector.
+   */
   MALorentzVector operator* (const MALorentzVector& q) const
   {
     if (axis_==Xaxis)
@@ -137,7 +169,12 @@ class MARotation3axis
     }
     else {return MALorentzVector();}
   }
-  // Operator *
+  /**
+   * @brief Rotated copy of a three-vector.
+   *
+   * @param p three-vector.
+   * @return the rotated vector.
+   */
   MAVector3 operator* (const MAVector3& p) const
   {
     if (axis_==Xaxis)

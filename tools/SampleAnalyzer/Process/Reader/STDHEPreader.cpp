@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // SampleAnalyzer headers
+/**
+ * @file STDHEPreader.cpp
+ * @brief Implementation of MA5::STDHEPreader.
+ */
+
 #include "SampleAnalyzer/Process/Reader/STDHEPreader.h"
 #include "SampleAnalyzer/Commons/Service/LogService.h"
 #include "SampleAnalyzer/Commons/Service/ConvertService.h"
@@ -704,9 +709,13 @@ MAbool STDHEPreader::DecodeSTDHEP4(const std::string &version,
     return true;
 }
 
-// -----------------------------------------------------------------------------
-// AddMothers
-// -----------------------------------------------------------------------------
+/**
+ * @brief Add a mother to a particle (if not already present).
+ *
+ * @param part particle.
+ * @param mum mother.
+ * @return false if already present.
+ */
 MAbool AddMothers(MCParticleFormat *part, MCParticleFormat *mum)
 {
     for (MAuint32 i = 0; i < part->mothers().size(); i++)
@@ -719,9 +728,13 @@ MAbool AddMothers(MCParticleFormat *part, MCParticleFormat *mum)
     return true;
 }
 
-// -----------------------------------------------------------------------------
-// AddDaughters
-// -----------------------------------------------------------------------------
+/**
+ * @brief Add a daughter to a particle (if not already present).
+ *
+ * @param part particle.
+ * @param dau daughter.
+ * @return false if already present.
+ */
 MAbool AddDaughters(MCParticleFormat *part, MCParticleFormat *dau)
 {
     for (MAuint32 i = 0; i < part->daughters().size(); i++)
@@ -769,6 +782,7 @@ MAbool STDHEPreader::FinalizeEvent(SampleFormat &mySample, EventFormat &myEvent)
             }
             else
             {
+                // NOTE: the message is misleading: the mother index is out of range.
                 std::cout << "ERROR: a particle is its own mother" << std::endl;
             }
         }
@@ -785,6 +799,7 @@ MAbool STDHEPreader::FinalizeEvent(SampleFormat &mySample, EventFormat &myEvent)
             }
             else
             {
+                // NOTE: the message is misleading: the mother index is out of range.
                 std::cout << "ERROR: a particle is its own mother" << std::endl;
             }
         }
@@ -829,6 +844,7 @@ MAbool STDHEPreader::Finalize()
     if (!ReaderTextBase::Finalize())
         return false;
     if (xdrinput_ != 0)
+        // NOTE: the pointer is not reset (xdrinput_ is also left uninitialised by the constructor).
         delete xdrinput_;
     return true;
 }
@@ -840,6 +856,8 @@ void STDHEPreader::SetVersion(const std::string &version)
 {
     if (version.size() < 2)
         version_ = UNKNOWN;
+    // FIXME: compares the character with the integer 1 (not '1'); same for 2 below: V1/V2 are never
+    //   detected.
     else if (version[0] == 1)
         version_ = V1;
     else if (version == "2.01")

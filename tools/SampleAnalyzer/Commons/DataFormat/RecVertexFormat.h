@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file RecVertexFormat.h
+ * @brief Reconstructed vertex.
+ */
+
 #ifndef RecVertexFormat_h
 #define RecVertexFormat_h
 
@@ -48,6 +53,7 @@ class DetectorDelphes;
 class DetectorDelphesMA5tune;
 class DelphesMemoryInterface;
 
+/** @brief Reconstructed vertex (Delphes). */
 class RecVertexFormat
 {
 
@@ -68,9 +74,13 @@ class RecVertexFormat
   // -------------------------------------------------------------
  protected:
 
+  /** @brief Number of degrees of freedom of the vertex fit. */
   MAint32 ndf_;   /// number of degree of freedom
+  /** @brief Position of the vertex (x, y, z, t). */
   MALorentzVector position_;
+  /** @brief Uncertainties on the position. */
   MALorentzVector error_;
+  /** @brief Monte Carlo particles associated with the vertex. */
   std::vector<MCParticleFormat*> constituents_; // link to MCParticle used for that
 
   // -------------------------------------------------------------
@@ -78,41 +88,58 @@ class RecVertexFormat
   // -------------------------------------------------------------
  public:
 
-  /// Constructor without arguments
+  /** @brief Constructor (members reset). */
   RecVertexFormat()
   { Reset(); }
 
-  /// Destructor
+  /** @brief Destructor. */
   virtual ~RecVertexFormat()
   {}
 
-  /// Dump information
+  /** @brief Print the vertex properties. */
   virtual void Print() const
   {
     INFO << "ndf = " << ndf_ << endmsg;
   }
 
-  /// Clear all information
+  /** @brief Reset the members. */
   virtual void Reset()
   {
     ndf_ = 0;
     position_.Reset();
+    // NOTE: constituents_ is not cleared.
     error_.Reset();
   }
 
-  /// Accessor to the pdgid
+  /**
+   * @brief Accessor to the number of degrees of freedom.
+   *
+   * @return the number of degrees of freedom.
+   */
   const MAint32 ndf() const
   {return ndf_;}
 
-  /// Accessor to the position
+  /**
+   * @brief Accessor to the position.
+   *
+   * @return the position.
+   */
   const MALorentzVector& position() const
   {return position_;}
 
-  /// Accessor to the error
+  /**
+   * @brief Accessor to the uncertainties on the position.
+   *
+   * @return the uncertainties.
+   */
   const MALorentzVector& error() const
   {return error_;}
 
-  /// Accessor to the constituents
+  /**
+   * @brief Accessor to the associated Monte Carlo particles.
+   *
+   * @return the particles.
+   */
   const std::vector<MCParticleFormat*>& constituents() const
   {return constituents_;}
   

@@ -23,6 +23,11 @@
 
 
 // STL headers
+/**
+ * @file LogReport.cpp
+ * @brief Printing of the LogReport summary table.
+ */
+
 #include <iomanip>
 #include <algorithm>
 #include <vector>
@@ -50,6 +55,7 @@ void LogReport::WriteGenericReport(LogStream& os) const
   }
 
   // Sort the container by timing average value
+  // NOTE: the entries are sorted by number of occurrences (not by timing, as the comment says).
   std::sort(table.begin(),table.end(),LogReport::OccurencyOrder);
 
   // Header
@@ -60,6 +66,7 @@ void LogReport::WriteGenericReport(LogStream& os) const
   std::string title;
   if (Name_=="")  title="LogReport ";
   else title="LogReport-" + Name_;
+  // NOTE: unsigned underflow for titles longer than about 78 characters.
   index=39-(title.size()/2); 
   os << "|";
   for (MAuint32 i=0;i<(index-1);i++) os << " ";

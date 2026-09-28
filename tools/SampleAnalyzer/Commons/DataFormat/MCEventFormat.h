@@ -21,6 +21,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @file MCEventFormat.h
+ * @brief Monte Carlo event record.
+ */
+
 #ifndef MCEventFormat_h
 #define MCEventFormat_h
 
@@ -47,6 +52,12 @@ namespace MA5
     class DelphesTreeReader;
     class DelphesMA5tuneTreeReader;
 
+    /**
+     * @brief Monte Carlo event: generated particles, event weights and global observables.
+     *
+     * The global observables (MET, MHT, TET, THT, Meff) are computed from the final-state
+     * particles when the event is finalised by the reader.
+     */
     class MCEventFormat
     {
         friend class LHEReader;
@@ -62,41 +73,43 @@ namespace MA5
         //                        data members
         // -------------------------------------------------------------
     private:
+        /** @brief Process identifier, scale, couplings, PDF information (the PDF members are unused). */
         MAuint32 processId_; /// identity of the current process
         // mutable MAfloat64 weight_;             /// event weight
         MAfloat64 scale_;                      /// scale Q of the event
         MAfloat64 alphaQED_;                   /// ALPHA_em value used
         MAfloat64 alphaQCD_;                   /// ALPHA_s value used
+        // NOTE: PDFscale_, x_ and xpdf_ are never initialised nor accessible.
         MAfloat64 PDFscale_;                   /// scale for PDF
         std::pair<MAfloat64, MAfloat64> x_;    /// x values
         std::pair<MAfloat64, MAfloat64> xpdf_; /// xpdf values
 
-        /// List of generated particles
+        /** @brief Generated particles. */
         std::vector<MCParticleFormat> particles_;
 
-        /// Computed Missing Transverse Energy
+        /** @brief Missing transverse momentum. */
         MCParticleFormat MET_;
 
-        /// Computed Missing Hadronic Transverse Energy
+        /** @brief Missing hadronic transverse momentum. */
         MCParticleFormat MHT_;
 
-        /// Computed Scalar sum of transverse energy
+        /** @brief Scalar sum of the transverse energies. */
         MAfloat64 TET_;
 
-        /// Computed Scalar sum of hadronic transverse energy
+        /** @brief Scalar sum of the hadronic transverse energies. */
         MAfloat64 THT_;
 
-        /// Computed total effective mass (sum of jet's PT + MET
+        /** @brief Effective mass (THT + MET). */
         MAfloat64 Meff_;
 
-        /// List of weights
+        /** @brief Event weights (index 0 is the nominal weight). */
         WeightCollection multiweights_;
 
         // -------------------------------------------------------------
         //                      method members
         // -------------------------------------------------------------
     public:
-        /// Constructor withtout arguments
+        /** @brief Constructor. */
         MCEventFormat()
         {
             processId_ = 0;
@@ -109,88 +122,194 @@ namespace MA5
             multiweights_.clear();
         }
 
-        /// Destructor
+        /** @brief Destructor. */
         ~MCEventFormat() {}
 
-        /// Accessor to the Missing Transverse Energy (read-only)
+        /**
+         * @brief Accessor to the missing transverse momentum (read-only).
+         *
+         * @return the MET object.
+         */
         const MCParticleFormat &MET() const { return MET_; }
 
-        /// Accessor to the Missing Hadronic Transverse Energy (read-only)
+        /**
+         * @brief Accessor to the missing hadronic transverse momentum (read-only).
+         *
+         * @return the MHT object.
+         */
         const MCParticleFormat &MHT() const { return MHT_; }
 
-        /// Accessor to the Total Transverse Energy (read-only)
+        /**
+         * @brief Accessor to the scalar sum of the transverse energies (read-only).
+         *
+         * @return TET.
+         */
         const MAfloat64 &TET() const { return TET_; }
 
-        /// Accessor to the Total Hadronic Transverse Energy (read-only)
+        /**
+         * @brief Accessor to the scalar sum of the hadronic transverse energies (read-only).
+         *
+         * @return THT.
+         */
         const MAfloat64 &THT() const { return THT_; }
 
-        /// Accessor to the Total effective mass (read-only)
+        /**
+         * @brief Accessor to the effective mass (read-only).
+         *
+         * @return Meff.
+         */
         const MAfloat64 &Meff() const { return Meff_; }
 
-        /// Accessor to the Missing Transverse Energy
+        /**
+         * @brief Accessor to the missing transverse momentum.
+         *
+         * @return the MET object.
+         */
         MCParticleFormat &MET() { return MET_; }
 
-        /// Accessor to the Missing Hadronic Transverse Energy
+        /**
+         * @brief Accessor to the missing hadronic transverse momentum.
+         *
+         * @return the MHT object.
+         */
         MCParticleFormat &MHT() { return MHT_; }
 
-        /// Accessor to the Total Transverse Energy
+        /**
+         * @brief Accessor to the scalar sum of the transverse energies.
+         *
+         * @return TET.
+         */
         MAfloat64 &TET() { return TET_; }
 
-        /// Accessor to the Total Hadronic Transverse Energy
+        /**
+         * @brief Accessor to the scalar sum of the hadronic transverse energies.
+         *
+         * @return THT.
+         */
         MAfloat64 &THT() { return THT_; }
 
-        /// Accessor to the Total effective mass
+        /**
+         * @brief Accessor to the effective mass.
+         *
+         * @return Meff.
+         */
         MAfloat64 &Meff() { return Meff_; }
 
-        /// Accessor to the process identity
+        /**
+         * @brief Accessor to the process identifier.
+         *
+         * @return the identifier.
+         */
         const MAuint32 &processId() const { return processId_; }
 
-        /// Accessor to the event weight
+        /**
+         * @brief Accessor to the nominal event weight (index 0).
+         *
+         * @return the weight.
+         */
         const MAfloat64 &weight() const { return multiweights_.Get(0); }
 
-        /// Accessor to the scale
+        /**
+         * @brief Accessor to the scale of the event.
+         *
+         * @return the scale.
+         */
         const MAfloat64 &scale() const { return scale_; }
 
-        /// Accessor to alpha_QED
+        /**
+         * @brief Accessor to the QED coupling.
+         *
+         * @return alpha_QED.
+         */
         const MAfloat64 &alphaQED() const { return alphaQED_; }
 
-        /// Accessor to alpha_QCD
+        /**
+         * @brief Accessor to the QCD coupling.
+         *
+         * @return alpha_s.
+         */
         const MAfloat64 &alphaQCD() const { return alphaQCD_; }
 
-        /// Accessor to multiweights
+        /**
+         * @brief Accessor to the event weights.
+         *
+         * @return the weights.
+         */
         WeightCollection &weights() { return multiweights_; }
 
-        /// Accessor to multiweights
+        /**
+         * @brief Accessor to the event weights (read-only).
+         *
+         * @return the weights.
+         */
         const WeightCollection &weights() const { return multiweights_; }
 
-        /// Accessor to multiweights
+        /**
+         * @brief Accessor to one event weight.
+         *
+         * @param id index of the weight.
+         * @return the weight (0 with an error if the index is not defined).
+         */
         const MAfloat64 &GetWeight(MAuint32 id) const { return multiweights_.Get(id); }
 
-        /// Accessor to the generated particle collection (read-only)
+        /**
+         * @brief Accessor to the generated particles (read-only).
+         *
+         * @return the particles.
+         */
         const std::vector<MCParticleFormat> &particles() const { return particles_; }
 
-        /// Accessor to the generated particle collection
+        /**
+         * @brief Accessor to the generated particles.
+         *
+         * @return the particles.
+         */
         std::vector<MCParticleFormat> &particles() { return particles_; }
 
-        /// Setting the process identity
+        /**
+         * @brief Set the process identifier.
+         *
+         * @param v identifier.
+         */
         void setProcessId(MAuint32 v) { processId_ = v; }
 
-        /// Setting the event weight
+        /**
+         * @brief Set one event weight (the index must exist).
+         *
+         * @param id index of the weight.
+         * @param value weight.
+         */
         void setWeight(MAuint32 id, MAfloat64 value) { multiweights_.Add(id, value); }
 
-        /// Setting the event weight
+        /**
+         * @brief Set all the event weights.
+         *
+         * @param v weights.
+         */
         void setWeights(std::vector<MAfloat64> &v) { multiweights_.SetWeights(v); }
 
-        /// Setting the scale
+        /**
+         * @brief Set the scale of the event.
+         *
+         * @param v scale.
+         */
         void setScale(MAfloat64 v) { scale_ = v; }
 
-        /// Setting AlphaQED
+        /**
+         * @brief Set the QED coupling.
+         *
+         * @param v alpha_QED.
+         */
         void setAlphaQED(MAfloat64 v) { alphaQED_ = v; }
 
-        /// Setting AlphaQCD
+        /**
+         * @brief Set the QCD coupling.
+         *
+         * @param v alpha_s.
+         */
         void setAlphaQCD(MAfloat64 v) { alphaQCD_ = v; }
 
-        /// Clearing all information
+        /** @brief Reset the event. */
         void Reset()
         {
             processId_ = 0;
@@ -206,7 +325,7 @@ namespace MA5
             Meff_ = 0.;
         }
 
-        /// Displaying data member values
+        /** @brief Print the event properties. */
         void Print() const
         {
             INFO << "nparts=" << particles_.size()
@@ -218,18 +337,24 @@ namespace MA5
             INFO << "nweights=" << multiweights_.size() << endmsg;
         }
 
-        /// Displaying data
+        /** @brief Print the decay vertices (reconstructed from the mother links) on the standard output. */
         void PrintVertices() const;
 
-        /// Displaying mothers
+        /** @brief Print the mothers of each particle on the standard output. */
         void PrintMothers() const;
 
-        /// Displaying daughters
+        /** @brief Print the daughters of each particle on the standard output. */
         void PrintDaughters() const;
 
-        /// Giving a new particle
+        /**
+         * @brief Append a new (empty) particle to the event.
+         *
+         * @return a pointer to the new particle.
+         */
         MCParticleFormat *GetNewParticle()
         {
+            // NOTE: push_back may reallocate the vector: pointers to the particles (e.g. mother/daughter links)
+            // are invalidated if the capacity is exceeded.
             particles_.push_back(MCParticleFormat());
             return &particles_.back();
         }

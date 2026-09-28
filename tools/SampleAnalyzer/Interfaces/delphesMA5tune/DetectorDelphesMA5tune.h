@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file DetectorDelphesMA5tune.h
+ * @brief DelphesMA5tune detector simulation run inside SampleAnalyzer.
+ */
+
 #ifndef DETECTOR_DELPHESMA5TUNE_H
 #define DETECTOR_DELPHESMA5TUNE_H
 
@@ -44,6 +49,7 @@ class TFile;
 namespace MA5
 {
 
+/** @brief Detector simulation with DelphesMA5tune, run event by event on the MC particles. */
 class DetectorDelphesMA5tune: public DetectorBase
 {
 
@@ -83,38 +89,75 @@ class DetectorDelphesMA5tune: public DetectorBase
 //---------------------------------------------------------------------------------
   public :
 
-    /// Constructor without argument
+    /** @brief Constructor without argument. */
     DetectorDelphesMA5tune() 
     { outputdir_="."; output_=false; first_=false; nprocesses_=0; }
 
-    /// Destructor
+    /** @brief Destructor. */
     virtual ~DetectorDelphesMA5tune()
     {}
 
-    /// Initialization
+    /**
+     * @brief Read the card and the options, create the output file and the Delphes modules.
+     *
+     * @param configFile DelphesMA5tune card.
+     * @param options options `output` (0/1), `rootfile` and `outputdir`.
+     * @return false in case of error.
+     */
     virtual MAbool Initialize(const std::string& configFile, const std::map<std::string,std::string>& options);
 
-    /// Finalization
+    /** @brief Finish the Delphes tasks, write the output tree and delete the Delphes objects. */
     virtual void Finalize();
 
-    /// Print parameters
+    /** @brief Print the parameters (nothing). */
     virtual void PrintParam();
 
-    /// Accessor to the jet clusterer name
+    /**
+     * @brief Accessor to the name of the detector simulation.
+     *
+     * @return "delphes".
+     */
+    // NOTE: the same name as DetectorDelphes is returned.
     virtual std::string GetName()
     { return "delphes"; }
 
-    /// Accessor to the jet clusterer parameters
+    /**
+     * @brief Accessor to the parameters.
+     *
+     * @return an empty string.
+     */
     virtual std::string GetParameters();
 
-    /// Jet clustering
+    /**
+     * @brief Run DelphesMA5tune on an event.
+     *
+     * @param mySample current sample.
+     * @param myEvent current event.
+     * @return true.
+     */
     virtual MAbool Execute(SampleFormat& mySample, EventFormat& myEvent);
 
-    /// Store Event block
+    /**
+     * @brief Fill the Event branch of the output tree.
+     *
+     * @param mySample current sample.
+     * @param myEvent current event.
+     */
     void StoreEventHeader(SampleFormat& mySample, EventFormat& myEvent);
 
-    /// Translation functions
+    /**
+     * @brief Give the MC particles of the event to Delphes.
+     *
+     * @param mySample current sample.
+     * @param myEvent current event.
+     */
     void TranslateMA5toDELPHES(SampleFormat& mySample, EventFormat& myEvent);
+    /**
+     * @brief Fill the reconstructed event from the Delphes output.
+     *
+     * @param mySample current sample.
+     * @param myEvent current event.
+     */
     void TranslateDELPHEStoMA5(SampleFormat& mySample, EventFormat& myEvent);
 
 };

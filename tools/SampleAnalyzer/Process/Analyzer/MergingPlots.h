@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+/**
+ * @file MergingPlots.h
+ * @brief Predefined analysis producing the differential jet rate (DJR) plots (FastJet only).
+ */
+
 #ifndef MERGING_PLOTS_H
 #define MERGING_PLOTS_H
 
@@ -39,6 +44,12 @@ namespace MA5
 
 class DJRextractor;
 
+/**
+ * @brief Analysis filling the DJR distributions used to validate the ME/PS merging.
+ *
+ * For each DJR, the total distribution and the contribution of the events with 0, 1, ...
+ * extra partons are filled (histograms `DJR<i>_total` and `DJR<i>_<n>jet`).
+ */
 class MergingPlots : public AnalyzerBase
 {
   INIT_ANALYSIS(MergingPlots,"MergingPlots")
@@ -48,22 +59,28 @@ class MergingPlots : public AnalyzerBase
 //---------------------------------------------------------------------------------
   private :
 
-  /// Algo based on FastJet
+  /** @brief Algorithm computing the DJR values (kT clustering). */
   DJRextractor* algo_;
 
-  /// DJR plots
+  /** @brief DJR plots. */
   std::vector<MergingPlotType> DJR_;
 
-  /// User configuration
+  /** @brief Maximum number of extra jets, flavour of the matched quarks, no-single-radiation flag, MA5 mode. */
   MAuint32 merging_njets_;
   MAuint8  merging_nqmatch_;
   MAbool   merging_nosingrad_;
   MAbool   ma5_mode_;
 
-  /// Saving merging plots in the output file
+  /** @brief Write the plots in the SAF file (empty: the plots are written by the region manager). */
   void Write_TextFormat(SAFWriter& output);
 
-  /// Extracting the number of additionnal jets contained in the event 
+  /**
+   * @brief Number of extra partons produced by the matrix element.
+   *
+   * @param myEvent Monte Carlo event.
+   * @param mySample Monte Carlo sample.
+   * @return the number of extra partons.
+   */
   MAuint32 ExtractHardJetNumber(const MCEventFormat* myEvent, MCSampleFormat* mySample);
 
 
@@ -72,14 +89,31 @@ class MergingPlots : public AnalyzerBase
 //---------------------------------------------------------------------------------
  public : 
 
-  /// Initialization
+  /**
+   * @brief Initialise the plots (parameter `njets`: number of extra jets; `ma5_mode`: 1 to take the number of jets from the process identifier).
+   *
+   * @param cfg run configuration.
+   * @param parameters parameters.
+   * @return false if njets is 0.
+   */
   virtual MAbool Initialize(const Configuration& cfg,
              const std::map<std::string,std::string>& parameters);
 
-  /// Finalization
+  /**
+   * @brief Finalise the algorithm and the plots.
+   *
+   * @param summary summary of the samples.
+   * @param files samples.
+   */
   virtual void Finalize(const SampleFormat& summary, const std::vector<SampleFormat>& files);
 
-  /// Execution
+  /**
+   * @brief Fill the DJR plots for an event.
+   *
+   * @param sample current sample.
+   * @param event current event.
+   * @return false if the event is skipped.
+   */
   virtual MAbool Execute(SampleFormat& sample, const EventFormat& event);
 
 };

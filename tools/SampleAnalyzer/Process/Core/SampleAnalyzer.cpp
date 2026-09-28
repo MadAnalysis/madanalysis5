@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // STL headers
+/**
+ * @file SampleAnalyzer.cpp
+ * @brief Implementation of MA5::SampleAnalyzer.
+ */
+
 #include <string>
 #include <sys/stat.h>
 
@@ -214,6 +219,7 @@ MAbool SampleAnalyzer::Initialize(MAint32 argc, MAchar **argv, const std::string
 	if (!input)
 	{
 		ERROR << "The file list '" << filename << "' is not existing." << endmsg;
+		// FIXME: returns 1 (true) although the file list does not exist: the error is not propagated.
 		return 1;
 	}
 
@@ -302,7 +308,12 @@ AnalyzerBase *SampleAnalyzer::InitializeAnalyzer(const std::string &name,
 	return myAnalysis;
 }
 
-/// Post initialization: creation of the output directory structure
+/**
+ * @brief Create a directory if it does not exist.
+ *
+ * @param dirname path.
+ * @return 0 if created, 1 if it already exists, -1 in case of error.
+ */
 inline MAint32 CreateDir(std::string dirname)
 {
 	struct stat myStat;
@@ -559,6 +570,7 @@ DetectorBase *SampleAnalyzer::InitializeDetector(
 	}
 
 	// Check if the SAF directory exists -> if not: create it
+	// FIXME: '../SAF' instead of '../Output/SAF' (inconsistent with the other output directories).
 	dirname = "../SAF";
 	if (CreateDir(dirname) == -1)
 	{
@@ -600,6 +612,7 @@ DetectorBase *SampleAnalyzer::InitializeDetector(
 	prm2["outputdir"] = newoutdirname;
 
 	// Initialize (specific to the detector)
+	// NOTE: std::getenv can return a null pointer; ma5dir is unused.
 	std::string ma5dir = std::getenv("MA5_BASE");
 	//  std::string config = ma5dir+"/tools/SampleAnalyzer/"+configFile;
 	std::string config = configFile;
@@ -683,6 +696,7 @@ StatusCode::Type SampleAnalyzer::NextFile(SampleFormat &mySample)
 			value = static_cast<MAfloat64>(length) / (1024. * 1024. * 1024. * 1024.);
 			unit = 5;
 		}
+		// FIXME: 'if' instead of 'else if': files larger than 1e12 bytes are displayed in Go.
 		if (length > 1e9)
 		{
 			value = static_cast<MAfloat64>(length) / (1024. * 1024. * 1024.);
@@ -800,6 +814,8 @@ void SampleAnalyzer::PrepareForExecution(SampleFormat &mySample, EventFormat &my
         weights = WeightCollection(1, 1.0);
 
     // Preserve the collection size
+    // FIXME: the local 'weights' (and the --no_event_weight option) is never used: the analyses always
+    // receive the event weights, and nothing is initialised when there is no MC event.
     if (cfg_.IsNoEventWeight())
         weights = 1.0;
 
@@ -808,7 +824,13 @@ void SampleAnalyzer::PrepareForExecution(SampleFormat &mySample, EventFormat &my
             analyzer->Manager()->InitializeForNewEvent(myEvent.mc()->weights());
 }
 
-/// Home made functions to make reasonnable filenames
+/**
+ * @brief Replace all the occurrences of a substring.
+ *
+ * @param name string (modified).
+ * @param In substring to replace.
+ * @param Out replacement.
+ */
 inline void ReplaceAll(std::string &name, const std::string &In, const std::string &Out)
 {
 	size_t pos = name.find(In);
@@ -819,6 +841,12 @@ inline void ReplaceAll(std::string &name, const std::string &In, const std::stri
 	}
 }
 
+/**
+ * @brief Turn a region name into a valid file name.
+ *
+ * @param name region name.
+ * @return the cleaned name.
+ */
 inline std::string CleanName(const std::string &name)
 {
 	std::string tmp = name;
@@ -1015,6 +1043,8 @@ void SampleAnalyzer::FillSummary(SampleFormat &summary,
 	}
 
 	/// ! this assumes all the weight identifiers are the same through out the sample set
+	// NOTE: assumes that the last sample has Monte Carlo information (null pointer otherwise) and that
+	// the list of samples is not empty.
 	for (auto &name_map : samples.back().mc()->WeightNames())
 		summary.mc()->SetWeightName(name_map.first, name_map.second);
 }

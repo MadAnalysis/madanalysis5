@@ -22,6 +22,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // SampleAnalyzer headers
+/**
+ * @file HistoLogX.cpp
+ * @brief Implementation of MA5::HistoLogX.
+ */
+
 #include "SampleAnalyzer/Process/Plot/HistoLogX.h"
 
 using namespace MA5;
@@ -55,6 +60,8 @@ void HistoLogX::Fill(MAfloat64 value, const WeightCollection &weights)
         MANAGE_EXCEPTION(e);
     }
 
+    // FIXME: the NaN/Inf value is only reported: the function goes on and fills the histogram (for NaN
+    // the bin index is undefined).
     for (MAuint32 idx = 0; idx < weights.size(); idx++)
     {
         MAdouble64 weight = weights[idx];
