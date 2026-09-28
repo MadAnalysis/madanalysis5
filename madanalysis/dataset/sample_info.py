@@ -22,8 +22,22 @@
 ################################################################################
 
 
+"""Measured properties of an event sample (filled from the SampleAnalyzer output)."""
+
+from __future__ import annotations
+
 class SampleInfo():
-    def __init__(self):
+    """Global information about an event sample or a dataset, as measured by SampleAnalyzer.
+
+    Attributes:
+        xsection (``float``): cross section in pb.
+        xerror (``float``): uncertainty on the cross section in pb.
+        nevents (``int``): number of events.
+        sumw_positive (``float``): sum of the positive event weights.
+        sumw_negative (``float``): sum of the absolute values of the negative event weights.
+    """
+    def __init__(self) -> None:
+        """Initialise all quantities to zero."""
         self.xsection = 0.
         self.xerror   = 0.
         self.nevents  = 0

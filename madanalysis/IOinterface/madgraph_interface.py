@@ -22,7 +22,18 @@
 ################################################################################
 
 
+"""Automatic generation of MadAnalysis 5 cards for MadGraph5_aMC@NLO.
+
+When MadAnalysis 5 is used from MG5_aMC, default analysis cards are written from the
+generated processes: plots of the kinematics of the final-state (and intermediate)
+particles at parton level, and a reconstruction (FastJet, Delphes) plus plots and
+recasting commands at hadron level. The MG5_aMC objects (processes, model, legs) are
+accessed through their ``get`` method.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 from madanalysis.configuration.recast_configuration     import RecastConfiguration
 import itertools
 import logging
@@ -31,8 +42,21 @@ import six
 from six.moves import range
 
 class MadGraphInterface():
+    """Generator of the MadAnalysis 5 cards used by MG5_aMC.
 
-    def __init__(self):
+    Attributes:
+        model: UFO model of MG5_aMC (``particle_dict`` gives the particle properties).
+        multiparticles (``dict[str, list[int]]``): multiparticles defined in MG5_aMC.
+        card (``list[str]``): lines of the card being generated.
+        invisible_particles (``list[str]``): names of the invisible particles.
+        invisible_pdgs (``list[str]``): PDG codes of the invisible particles.
+        recastinfo (``RecastConfiguration``): used to list the PAD analyses.
+        has_root / has_matplotlib / has_delphes / has_delphesMA5tune (``bool``): available
+            packages (set by the MG5_aMC interface).
+    """
+
+    def __init__(self) -> None:
+        """Create the generator (all packages assumed available)."""
         self.logger = logging.getLogger('MA5')
         self.model = ''
         self.multiparticles={}
@@ -46,15 +70,30 @@ class MadGraphInterface():
         self.has_delphesMA5tune = True
 
     class InvalidCard(Exception):
+        """Raised for an unknown card type."""
         pass
     class MultiParts(Exception):
+        """Raised when a PDG-code list matches no multiparticle."""
         pass
 
 
-    def generate_card(self, MG5history, ProcessesDefinitions, ProcessesLists, card_type='parton'):
-        """ Main routine allowing for the creation of ma5 cards.
-            ProcessesDefinitions is a list of blocks, one block for each generate or add process command;
-            ProcessesLists is a more detailed list"""
+    def generate_card(self, MG5history: list[str], ProcessesDefinitions: list, ProcessesLists: list, card_type: str = 'parton') -> str:
+        """Generate a MadAnalysis 5 card.
+
+        Args:
+            MG5history (``list[str]``): MG5_aMC command history (used for ``define`` commands).
+            ProcessesDefinitions (``list``): one process definition per ``generate``/``add
+                process`` command.
+            ProcessesLists (``list``): detailed list of the processes (gives the model).
+            card_type (``str``, default ``'parton'``): ``'parton'`` or ``'hadron'``.
+
+        Raises:
+            ``MadGraphInterface.InvalidCard``: for an unknown card type.
+
+        Returns:
+            ``str``:
+            The content of the card.
+        """
 
         ## Initialization
         self.logger.info('Creating an MA5 card for the mode: ' + card_type)
@@ -97,6 +136,8 @@ class MadGraphInterface():
                 self.logger.debug('pdgs = '+str(myline[3:]))
                 mypdgs= [self.get_pdg_code(prt) for prt in myline[3:]]
                 self.multiparticles[myline[1]]=sorted(sum([e if isinstance(e,list) else [e] for e in mypdgs],[]))
+        # FIXME: deleting entries while iterating over the dictionary raises a RuntimeError when an
+        # empty multiparticle is found.
         for key, value in self.multiparticles.items():
             if len([x for x in value if x != '']) == 0:
                 del self.multiparticles[key]
@@ -114,7 +155,17 @@ class MadGraphInterface():
             raise self.InvalidCard('Unknown card type')
 
 
-    def generate_parton_card(self, ProcessesDefinitions, ProcessesLists):
+    def generate_parton_card(self, ProcessesDefinitions: list, ProcessesLists: list) -> str:
+        """Complete the parton-level card (global plots and plots of each process).
+
+        Args:
+            ProcessesDefinitions (``list``): process definitions.
+            ProcessesLists (``list``): detailed process lists (unused).
+
+        Returns:
+            ``str``:
+            The content of the card.
+        """
         self.card.append('# Histogram drawer (options: matplotlib or root)')
         if self.has_root:
             self.card.append('set main.graphic_render = root\n')
@@ -139,13 +190,28 @@ class MadGraphInterface():
         return '\n'.join(self.card)
 
 
-    def generate_hadron_card(self, ProcessesDefinitions, ProcessesLists):
+    def generate_hadron_card(self, ProcessesDefinitions: list, ProcessesLists: list) -> str:
+        """Complete the hadron-level card.
+
+        The card defines a FastJet reconstruction (and a Delphes one if available), basic
+        object selections, plots of the leading objects expected from the final states, and
+        the recasting commands with all PAD analyses commented out.
+
+        Args:
+            ProcessesDefinitions (``list``): process definitions.
+            ProcessesLists (``list``): detailed process lists (unused).
+
+        Returns:
+            ``str``:
+            The content of the card.
+        """
         self.card.append('set main.fastsim.package = fastjet')
         self.card.append('set main.fastsim.algorithm = antikt')
         self.card.append('set main.fastsim.radius = 0.4')
         self.card.append('set main.fastsim.ptmin = 5.0')
         self.card.append('# b-tagging')
         self.card.append('set main.fastsim.bjet_id.matching_dr = 0.4')
+        # FIXME: the b/tau efficiency options below are deprecated (they now only print an error).
         self.card.append('set main.fastsim.bjet_id.efficiency = 1.0')
         self.card.append('set main.fastsim.bjet_id.misid_cjet = 0.0')
         self.card.append('set main.fastsim.bjet_id.misid_ljet = 0.0')
@@ -307,7 +373,17 @@ class MadGraphInterface():
         return '\n'.join(self.card)
 
 
-    def get_Npart(self, prt, pdglist):
+    def get_Npart(self, prt: int | list[int], pdglist: list[int]) -> int:
+        """Check whether a particle (or one of a multiparticle) belongs to a PDG-code list.
+
+        Args:
+            prt (``int | list[int]``): PDG code(s).
+            pdglist (``list[int]``): PDG codes to match.
+
+        Returns:
+            ``int``:
+            ``1`` if matched, ``0`` otherwise.
+        """
         if isinstance(prt, list):
             for x in prt:
                 if x in pdglist:
@@ -317,8 +393,15 @@ class MadGraphInterface():
             return int(prt in pdglist)
 
 
-    def generate_parton_card_for_procdef(self, process, interstate=[], finalstate=[], invisstate=[]):
-        """ Main routine for decoding the parton-level process"""
+    def generate_parton_card_for_procdef(self, process: Any, interstate: list[str] = [], finalstate: list[str] = [], invisstate: list[str] = []) -> None:
+        """Add the plots of one process (before and after the decays of the intermediate particles).
+
+        Args:
+            process (``Any``): MG5_aMC process definition (strings are ignored).
+            interstate (``list[str]``, default ``[]``): intermediate particles.
+            finalstate (``list[str]``, default ``[]``): visible final-state particles.
+            invisstate (``list[str]``, default ``[]``): invisible final-state particles.
+        """
 
         # init
         if interstate==[] and finalstate==[]:
@@ -344,7 +427,20 @@ class MadGraphInterface():
             self.logger.debug('    >> invisible final state particles after decay: ' + str(invisstate))
             self.generate_plots(interstate,finalstate,invisstate)
 
-    def decay(self,chains,old_int,old_fin,old_inv):
+    def decay(self,chains: list,old_int: list[str],old_fin: list[str],old_inv: list[str]) -> tuple[list[str], list[str], list[str]]:
+        """Replace the decaying particles by their decay products (recursively).
+
+        Args:
+            chains (``list``): decay chains.
+            old_int (``list[str]``): intermediate particles.
+            old_fin (``list[str]``): visible final-state particles.
+            old_inv (``list[str]``): invisible final-state particles.
+
+        Returns:
+            ``tuple[list[str], list[str], list[str]]``:
+            The updated intermediate, visible and invisible particles (the input lists are
+            modified in place).
+        """
         new_int, new_fin, new_inv = old_int, old_fin, old_inv
         for mydecay in chains:
             dec_init,dec_inter,dec_final,dec_inv = self.particles_in_process(mydecay)
@@ -355,10 +451,21 @@ class MadGraphInterface():
                 new_fin+=dec_final
                 new_int+=dec_inter
             if new_int!=[]:
+                # NOTE: typo 'newfin' (new_fin is however modified in place).
                 new_int, newfin, new_inv = self.decay(mydecay.get('decay_chains'),new_int,new_fin,new_inv)
         return new_int,new_fin,new_inv
 
-    def particles_in_process(self,process):
+    def particles_in_process(self,process: Any) -> tuple[list[str], list[str], list[str], list[str]]:
+        """Classify the legs of a process.
+
+        Args:
+            process (``Any``): MG5_aMC process definition.
+
+        Returns:
+            ``tuple[list[str], list[str], list[str], list[str]]``:
+            Initial-state, intermediate (decaying), visible final-state and invisible
+            final-state particle names.
+        """
          # init
         initstate = []
         intstate = []
@@ -383,7 +490,14 @@ class MadGraphInterface():
 
 
 
-    def generate_plots(self,interstate,finalstate,invisible):
+    def generate_plots(self,interstate: list[str],finalstate: list[str],invisible: list[str]) -> None:
+        """Add PT/ETA, invariant-mass, DELTAR and (with invisible particles) MT_MET plots.
+
+        Args:
+            interstate (``list[str]``): intermediate particles.
+            finalstate (``list[str]``): visible final-state particles.
+            invisible (``list[str]``): invisible particles.
+        """
         # Formatting the inputs (tally)
         new_inter = []
         new_final = []
@@ -434,7 +548,19 @@ class MadGraphInterface():
                 self.card.append('plot MT_MET(' + part + ') 40 0  500 [logY]')
 
     # from pdf list to name
-    def get_name(self,pdg):
+    def get_name(self,pdg: list[int]) -> str:
+        """Get the name of a particle or multiparticle from its PDG code(s).
+
+        Args:
+            pdg (``list[int]``): PDG code(s).
+
+        Raises:
+            ``MadGraphInterface.MultiParts``: if no multiparticle matches the codes.
+
+        Returns:
+            ``str``:
+            The (multi)particle name.
+        """
         if len(pdg)==1:
             myprt =self.model.get('particle_dict')[pdg[0]]
             if myprt['is_part']:
@@ -451,8 +577,18 @@ class MadGraphInterface():
 
 
     # from pdg code to name
-    def get_pdg_code(self,prt):
+    def get_pdg_code(self,prt: str) -> int | list[int] | str:
+        """Get the PDG code(s) of a particle or multiparticle name.
+
+        Args:
+            prt (``str``): name or PDG code.
+
+        Returns:
+            ``int | list[int] | str``:
+            The PDG code, the list of codes of a multiparticle, or ``''`` if unknown.
+        """
         try:
+            # NOTE: isinstance(int(prt), int) is always True when int() succeeds.
             if isinstance( int(prt), int ):
                return int(prt)
         except:
@@ -467,7 +603,13 @@ class MadGraphInterface():
                 return ''
 
     # adding the particle definitions
-    def get_invisible(self, card_type='parton'):
+    def get_invisible(self, card_type: str = 'parton') -> None:
+        """Find the invisible particles of the model (massless-width, colourless, neutral, not
+        the photon) and define the ``invisible`` multiparticle (hadron cards).
+
+        Args:
+            card_type (``str``, default ``'parton'``): card type.
+        """
         do_parton = card_type=='parton'
         # Do we have MET?
         for key, value in six.iteritems(self.model.get('particle_dict')):
@@ -482,14 +624,25 @@ class MadGraphInterface():
             if not do_parton:
                 self.card.append('define invisible = ' + ' '.join(list(set(self.invisible_pdgs))))
 
-    def write_multiparticles(self):
+    def write_multiparticles(self) -> None:
+        """Write the invisible multiparticles and the ``invisible`` definition in the card.
+        """
         for key, value in six.iteritems(self.multiparticles):
             if len([ x for x in value if x in [self.get_pdg_code(y) for y in self.invisible_particles] ])==len(value):
                 self.invisible_particles.append(key)
                 self.card.append('define ' + key + ' = ' + ' '.join([str(x) for x in value]))
         self.card.append('define invisible = ' + ' '.join(self.invisible_particles)+'\n')
 
-    def get_finalstate_particles(self, process):
+    def get_finalstate_particles(self, process: Any) -> list:
+        """Get the PDG codes of the visible final-state particles (after all decays).
+
+        Args:
+            process (``Any``): MG5_aMC process definition.
+
+        Returns:
+            ``list``:
+            PDG codes (or lists of codes for multiparticles).
+        """
         dummy, interstate,finalstate,invisstate = self.particles_in_process(process)
         if interstate !=[]:
             interstate, finalstate, invisstate = \

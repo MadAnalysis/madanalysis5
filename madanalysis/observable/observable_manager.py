@@ -22,13 +22,36 @@
 ################################################################################
 
 
+"""Registry of the observables available in a running mode."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.observable.observable_base import ObservableBase
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
 import madanalysis.observable.observable_list
 
 
 class ObservableManager:
-    def __init__(self, mode):
+    """Collect the observables of :mod:`madanalysis.observable.observable_list`.
+
+    Attributes:
+        full_list (``list[str]``): all observable names.
+        plot_list (``list[str]``): observables available in the running mode.
+        cut_event_list (``list[str]``): observables usable in event cuts.
+        cut_candidate_list (``list[str]``): observables usable in candidate cuts.
+
+    Unknown attributes are resolved as observable names (``manager.PT``), see
+    :meth:`__getattr__`.
+    """
+    def __init__(self, mode: int) -> None:
+        """Scan the observable catalogue for a running mode.
+
+        Args:
+            mode (``int``): :class:`~madanalysis.enumeration.ma5_running_type.MA5RunningType` code.
+        """
 
         mlist = list(madanalysis.observable.observable_list.__dict__.keys())
 
@@ -63,22 +86,61 @@ class ObservableManager:
             if ref.cut_candidate:
                 self.cut_candidate_list.append(item)
 
-    def get(self, name):
+    def get(self, name: str) -> ObservableBase | None:
+        """Get an observable by name.
+
+        Args:
+            name (``str``): name of the observable (module-level variable name).
+
+        Returns:
+            ``ObservableBase | None``:
+            The observable, or ``None`` if not defined.
+        """
         if name not in list(madanalysis.observable.observable_list.__dict__.keys()):
             return None
         return madanalysis.observable.observable_list.__dict__[name]
 
-    def findPlotObservable(self, obs):
+    def findPlotObservable(self, obs: str) -> bool:
+        """Check whether an observable can be plotted in the running mode.
+
+        Args:
+            obs (``str``): name of the observable.
+
+        Returns:
+            ``bool``:
+            ``True`` if the observable is in :attr:`plot_list`.
+        """
         if obs in self.plot_list:
             return True
         else:
             return False
 
-    def findCutObservable(self, obs):
+    def findCutObservable(self, obs: str) -> bool:
+        """Check whether an observable can be used in cuts.
+
+        Args:
+            obs (``str``): name of the observable.
+
+        Returns:
+            ``bool``:
+            ``True`` if the observable is in ``cut_list`` (see FIXME).
+        """
+        # FIXME: 'cut_list' does not exist; __getattr__ returns None and 'obs in None' raises
+        # a TypeError (cut_event_list/cut_candidate_list intended).
         if obs in self.cut_list:
             return True
         else:
             return False
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> ObservableBase | None:
+        """Resolve unknown attributes as observable names.
+
+        Args:
+            name (``str``): attribute name.
+
+        Returns:
+            ``ObservableBase | None``:
+            The observable, or ``None`` (no ``AttributeError`` is ever raised, which hides
+            typos in attribute names).
+        """
         return self.get(name)

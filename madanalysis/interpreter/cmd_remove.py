@@ -22,19 +22,39 @@
 ################################################################################
 
 
+"""Interpreter command ``remove``: remove an object or a plot/cut."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 import madanalysis.interpreter.cmd_base as CmdBase
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
 import logging
 from six.moves import range
 
 class CmdRemove(CmdBase.CmdBase):
-    """Command REMOVE"""
+    """Command ``remove <object>`` / ``remove selection[i]``."""
 
-    def __init__(self,main):
+    def __init__(self,main: Main) -> None:
+        """Register the ``remove`` command.
+
+        Args:
+            main (``Main``): session state.
+        """
         CmdBase.CmdBase.__init__(self,main,"remove")
 
-    def remove_input(self,name):
+    def remove_input(self,name: str) -> None:
+        """Remove a named object.
+
+        The name is searched, in this order, among the datasets, the (multi)particles (which
+        cannot be removed while used by the selection), the jet collections and the regions.
+
+        Args:
+            name (``str``): name of the object.
+        """
         # Dataset removal
         if self.main.datasets.Find(name):
             self.main.datasets.Remove(name)
@@ -67,12 +87,25 @@ class CmdRemove(CmdBase.CmdBase):
 
 
     # Removal of a histogram or a cut
-    def remove_selection(self,index):
+    def remove_selection(self,index: int) -> None:
+        """Remove a plot or a cut.
+
+        Args:
+            index (``int``): 1-based index in the selection.
+        """
         self.main.selection.Remove(index)
         return 
 
     # Removal of a signal region
-    def remove_region(self, name):
+    def remove_region(self, name: str) -> None:
+        """Remove a signal region.
+
+        The region is detached from all plots/cuts; items attached only to this region are
+        removed.
+
+        Args:
+            name (``str``): name of the region.
+        """
         for index in range(len(self.main.selection) - 1, -1, -1):
             item = self.main.selection[index]
             if name not in item.regions:
@@ -84,7 +117,13 @@ class CmdRemove(CmdBase.CmdBase):
         self.main.regions.Remove(name)
 
 
-    def do(self,args):
+    def do(self,args: list[str]) -> None:
+        """Remove an object (one argument) or an item of the selection (``selection[i]``).
+
+        Args:
+            args (``list[str]``): arguments of the command (split by
+                :meth:`~madanalysis.interpreter.interpreter_base.InterpreterBase.split_arg`).
+        """
 
         if len(args)==1:
             self.remove_input(args[0])
@@ -99,12 +138,25 @@ class CmdRemove(CmdBase.CmdBase):
             return
 
 
-    def help(self):
+    def help(self) -> None:
+        """Display the help of the ``remove`` command."""
         logging.getLogger('MA5').info("   Syntax: remove <object name>")
         logging.getLogger('MA5').info("   Removing an existing object or region from the memory.")
         logging.getLogger('MA5').info("   Removing a region also removes all cuts and histograms associated exclusively with it.")
 
-    def complete(self,text,line,begidx,endidx):
+    def complete(self,text: str,line: str,begidx: int,endidx: int) -> list[str]:
+        """Tab completion of the ``remove`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``list[str]``:
+            Names of the removable objects.
+        """
 
         # remove selection[i]
         # 0      1
@@ -124,6 +176,7 @@ class CmdRemove(CmdBase.CmdBase):
             output.extend(self.main.regions.GetNames())
 
             # Cannot possible to remove invis
+            # FIXME: raises ValueError if 'invisible' or 'hadronic' has been removed by the user.
             if self.main.mode != MA5RunningType.RECO:
                 output.remove("invisible")
                 output.remove("hadronic")

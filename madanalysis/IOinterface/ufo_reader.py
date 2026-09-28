@@ -22,7 +22,17 @@
 ################################################################################
 
 
+"""Minimal reader of UFO models (``import <UFO folder>``).
+
+The ``particles.py`` and ``parameters.py`` files of the model are parsed as text (the
+model is not imported); every particle is defined as a MadAnalysis 5 label and the
+stable neutral colourless particles (except the photon) are added to the
+``invisible`` multiparticle.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 import madanalysis.core.main as Main
 import logging
 import os
@@ -30,7 +40,21 @@ from six.moves import range
 
 
 class UFOParticle:
-    def __init__(self,name):
+    """Particle read from a UFO model.
+
+    Attributes:
+        name (``str``): name (with the quotes of the UFO file).
+        pdg (``int``): PDG code (negative for antiparticles).
+        charge (``float``): electric charge.
+        color (``int``): colour representation.
+        mass / width (``str``): names of the mass and width parameters (``Param.<name>``).
+    """
+    def __init__(self,name: str) -> None:
+        """Create a particle with default properties.
+
+        Args:
+            name (``str``): particle name.
+        """
         self.name   = name
         self.pdg    = 0
         self.charge = 0
@@ -39,41 +63,94 @@ class UFOParticle:
         self.width  = ""
 
 class UFOParameter:
-    def __init__(self,name,value):
+    """Parameter read from a UFO model (``name`` and raw ``value``)."""
+    def __init__(self,name: str,value: str) -> None:
+        """Create a parameter.
+
+        Args:
+            name (``str``): parameter name.
+            value (``str``): raw value (number or expression).
+        """
         self.name  = name
         self.value = value
         
 class UFOParameterCollection:
-    def __init__(self):
+    """List of :class:`UFOParameter` objects."""
+    def __init__(self) -> None:
+        """Create an empty collection."""
         self.parameters = []
 
-    def Add(self,name,value):
+    def Add(self,name: str,value: str) -> None:
+        """Add a parameter.
+
+        Args:
+            name (``str``): parameter name.
+            value (``str``): raw value.
+        """
         self.parameters.append(UFOParameter(name,value))
         
-    def Get(self,name):
+    def Get(self,name: str) -> UFOParameter | None:
+        """Get a parameter by name.
+
+        Args:
+            name (``str``): parameter name.
+
+        Returns:
+            ``UFOParameter | None``:
+            The parameter, or ``None``.
+        """
         for i in range(0,len(self.parameters)):
             if name==self.parameters[i].name:
                 return self.parameters[i]
         return None    
 
 class UFOParticleCollection:
-    def __init__(self):
+    """List of :class:`UFOParticle` objects with unique names."""
+    def __init__(self) -> None:
+        """Create an empty collection."""
         self.parts = []
 
-    def Add(self,name):
+    def Add(self,name: str) -> bool:
+        """Add a particle (ignored if the name exists).
+
+        Args:
+            name (``str``): particle name.
+
+        Returns:
+            ``bool``:
+            ``True`` if the particle has been added.
+        """
         for i in range(0,len(self.parts)):
             if name==self.parts[i].name:
                 return False
         self.parts.append(UFOParticle(name))
         return True
 
-    def Get(self,name):
+    def Get(self,name: str) -> UFOParticle | None:
+        """Get a particle by name.
+
+        Args:
+            name (``str``): particle name.
+
+        Returns:
+            ``UFOParticle | None``:
+            The particle, or ``None``.
+        """
         for i in range(0,len(self.parts)):
             if name==self.parts[i].name:
                 return self.parts[i]
         return None    
 
-    def Remove(self,name):
+    def Remove(self,name: str) -> bool:
+        """Remove a particle.
+
+        Args:
+            name (``str``): particle name.
+
+        Returns:
+            ``bool``:
+            ``True`` if the particle has been removed.
+        """
         for i in range(0,len(self.parts)):
             if name==self.parts[i].name:
                 del self.parts[i]
@@ -82,8 +159,22 @@ class UFOParticleCollection:
         
         
 class UFOReader():
+    """Reader of a UFO model folder.
 
-    def __init__(self,path,cmd_define):
+    Attributes:
+        cmd_define (``CmdDefine``): ``define`` command used to register the labels.
+        path (``str``): UFO folder.
+        parts (``UFOParticleCollection``): particles read.
+        parameters (``UFOParameterCollection``): parameters read.
+    """
+
+    def __init__(self,path: str,cmd_define: Any) -> None:
+        """Create the reader.
+
+        Args:
+            path (``str``): UFO folder.
+            cmd_define (``CmdDefine``): ``define`` command used to register the labels.
+        """
         self.cmd_define = cmd_define
         self.path       = path
         self.isopen     = False
@@ -91,7 +182,16 @@ class UFOReader():
         self.parameters = UFOParameterCollection()
 
     @staticmethod
-    def CheckStructure(path):
+    def CheckStructure(path: str) -> bool:
+        """Check that a folder looks like a UFO model.
+
+        Args:
+            path (``str``): folder.
+
+        Returns:
+            ``bool``:
+            ``True`` if ``__init__.py``, ``particles.py`` and ``parameters.py`` exist.
+        """
         if not os.path.isdir(path):
             return False
         if not os.path.isfile(path+'/__init__.py'):
@@ -102,7 +202,13 @@ class UFOReader():
             return False
         return True
     
-    def OpenParticle(self):
+    def OpenParticle(self) -> bool:
+        """Open ``particles.py``.
+
+        Returns:
+            ``bool``:
+            ``False`` if a file is already open (a missing file is only logged).
+        """
 
         # Checking if the file is opened
         if self.isopen:
@@ -111,13 +217,20 @@ class UFOReader():
 
         name = os.path.normpath(self.path+"/"+'particles.py')
         if os.path.isfile(name):
+            # FIXME: 'isopen' is never set to True, so the Close* methods never close the file.
             self.file = open (name, "r")
         else:
             logging.getLogger('MA5').info('UFO file called ' + name + ' is not found')
         return True    
 
 
-    def OpenParameter(self):
+    def OpenParameter(self) -> bool:
+        """Open ``parameters.py``.
+
+        Returns:
+            ``bool``:
+            ``False`` if a file is already open (a missing file is only logged).
+        """
 
         # Checking if the file is opened
         if self.isopen:
@@ -132,11 +245,21 @@ class UFOReader():
         return True    
 
 
-    def CreateParticle(self):
+    def CreateParticle(self) -> bool | None:
+        """Define all particles as labels and extend the ``invisible`` multiparticle.
+
+        Invisible particles are the neutral colourless particles with a vanishing width
+        (the photon excepted).
+
+        Returns:
+            ``bool | None``:
+            ``True`` if no invisible particle is found, ``None`` otherwise.
+        """
         invisibles = []
         for item in self.parts.parts:
             tmp=[]
             tmp.append(item.pdg)
+            # NOTE: [1:-1] strips the quotes of the UFO name.
             self.cmd_define.fill(item.name[1:-1],tmp)
 
             #is it invisible
@@ -176,6 +299,7 @@ class UFOReader():
         for item in invisibles:
             if item.pdg==22:
                 continue
+            # NOTE: the names added to 'inv' keep their quotes (message only).
             inv+=item.name+" "
             tmp.append(item.pdg)
 
@@ -188,7 +312,13 @@ class UFOReader():
 
         
 
-    def ReadParameter(self):
+    def ReadParameter(self) -> bool:
+        """Parse the ``Parameter(...)`` blocks of the open file (names and values).
+
+        Returns:
+            ``bool``:
+            Always ``True``.
+        """
         ParameterBlock = False
         Nbrace    = 0
         isName    = False
@@ -283,7 +413,14 @@ class UFOReader():
 
 
 
-    def ReadParticle(self):
+    def ReadParticle(self) -> bool:
+        """Parse the ``Particle(...)`` blocks of the open file (PDG code, name, antiname, mass,
+        width, charge and colour); antiparticles are added with the opposite PDG code.
+
+        Returns:
+            ``bool``:
+            Always ``True``.
+        """
 
         ParticleBlock = False
         Nbrace   = 0
@@ -448,7 +585,18 @@ class UFOReader():
                     Color=""
         return True
 
-    def AddParticle(self,Name,Pdg,Mass,Width,Charge,Color,antiparticle=False):
+    def AddParticle(self,Name: str,Pdg: str,Mass: str,Width: str,Charge: str,Color: str,antiparticle: bool = False) -> None:
+        """Store a particle read from the model.
+
+        Args:
+            Name (``str``): particle name.
+            Pdg (``str``): PDG code.
+            Mass (``str``): mass parameter.
+            Width (``str``): width parameter.
+            Charge (``str``): electric charge (integer or fraction ``a/b``).
+            Color (``str``): colour representation.
+            antiparticle (``bool``, default ``False``): store the antiparticle (opposite PDG code).
+        """
 
         #particle is already defined ?
         if self.parts.Get(Name) is not None:
@@ -456,6 +604,7 @@ class UFOReader():
 
         #add the new particle in the list
         self.parts.Add(Name)
+        # NOTE: the particle is not removed from the collection when the checks below fail.
         thepart = self.parts.Get(Name)
 
         #add properties
@@ -465,6 +614,8 @@ class UFOReader():
             logging.getLogger('MA5').error("PDG-ID of the particle " + Name +\
                           " is not an integer value : " + Pdg)
             return
+        # FIXME: only the PDG code is conjugated for antiparticles: the charge (and colour) keep the
+        # values of the particle.
         if antiparticle:
             thepart.pdg*=-1
 
@@ -498,7 +649,13 @@ class UFOReader():
 
         
 
-    def CloseParticle(self):
+    def CloseParticle(self) -> bool:
+        """Close ``particles.py``.
+
+        Returns:
+            ``bool``:
+            Always ``True``.
+        """
 
         if self.isopen:
            self.file.close() 
@@ -507,7 +664,13 @@ class UFOReader():
         return True
 
 
-    def CloseParameter(self):
+    def CloseParameter(self) -> bool:
+        """Close ``parameters.py`` and log the number of particles read.
+
+        Returns:
+            ``bool``:
+            Always ``True``.
+        """
 
         if self.isopen:
            self.file.close() 

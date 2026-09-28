@@ -22,8 +22,12 @@
 ################################################################################
 
 
+"""Collection of the particle and multiparticle labels defined in the session."""
+
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import annotations
+from typing import Any
 from madanalysis.enumeration.ma5_running_type import MA5RunningType
 from madanalysis.multiparticle.multiparticle  import MultiParticle
 import logging
@@ -31,17 +35,44 @@ import six
 from six.moves import input
 
 class MultiParticleCollection:
+    """Dictionary of :class:`~madanalysis.multiparticle.multiparticle.MultiParticle` objects.
 
-    def __init__(self):
+    Particles are the entries with a single PDG code, multiparticles those with several.
+
+    Attributes:
+        table (``dict[str, MultiParticle]``): definitions indexed by label.
+    """
+
+    def __init__(self) -> None:
+        """Create an empty collection."""
         self.table = {}
 
-    def __len__(self):
+    def __len__(self) -> int:
+        """Get the number of labels.
+
+        Returns:
+            ``int``:
+            Number of (multi)particles.
+        """
         return len(self.table)
 
-    def __getitem__(self,i):
+    def __getitem__(self,i: str) -> MultiParticle:
+        """Get a definition by label.
+
+        Args:
+            i (``str``): label (dictionary key, despite the argument name).
+
+        Raises:
+            ``KeyError``: if the label is not defined.
+
+        Returns:
+            ``MultiParticle``:
+            The definition.
+        """
         return self.table[i]
 
-    def DisplayMultiparticles(self):
+    def DisplayMultiparticles(self) -> None:
+        """Log the labels of all multiparticles (sorted)."""
         sorted_keys = sorted(self.table.keys())
         msg = ""
         for key in sorted_keys:
@@ -49,7 +80,8 @@ class MultiParticleCollection:
                 msg += key + " " 
         logging.getLogger('MA5').info(msg)        
 
-    def DisplayParticles(self):
+    def DisplayParticles(self) -> None:
+        """Log the labels of all particles (sorted)."""
         sorted_keys = sorted(self.table.keys())
         msg = ""
         for key in sorted_keys:
@@ -57,13 +89,33 @@ class MultiParticleCollection:
                 msg += key + " "
         logging.getLogger('MA5').info(msg)        
 
-    def Find(self,name):
+    def Find(self,name: str) -> bool:
+        """Check whether a label is defined.
+
+        Args:
+            name (``str``): label.
+
+        Returns:
+            ``bool``:
+            ``True`` if the label exists.
+        """
+        # FIXME: str.lower() result discarded (same in Add/Get/Remove): lookups are case-sensitive.
         name.lower()
         if name in list(self.table.keys()):
             return True
         return False
 
-    def Add(self,name,ids,forced=False):
+    def Add(self,name: str,ids: list[int],forced: bool = False) -> None:
+        """Define (or redefine) a label.
+
+        If the label already exists and ``forced`` is ``False``, the user is asked
+        interactively whether the previous definition must be overwritten.
+
+        Args:
+            name (``str``): label.
+            ids (``list[int]``): PDG codes.
+            forced (``bool``, default ``False``): overwrite without asking.
+        """
         name.lower()
         if self.Find(name) and not forced:
             logging.getLogger('MA5').warning("Particle/Multiparticle labelled '"+name+"' is" + \
@@ -79,42 +131,91 @@ class MultiParticleCollection:
                 return
         self.table[name]=MultiParticle(name,ids)
 
-    def Get(self,name):
+    def Get(self,name: str) -> MultiParticle:
+        """Get a definition by label.
+
+        Args:
+            name (``str``): label.
+
+        Raises:
+            ``KeyError``: if the label is not defined.
+
+        Returns:
+            ``MultiParticle``:
+            The definition.
+        """
         name.lower()
         return self.table[name]
 
-    def Reset(self):
+    def Reset(self) -> None:
+        """Remove all labels."""
         self.table = {}
             
-    def ResetParticles(self):
+    def ResetParticles(self) -> None:
+        """Remove all particles (single PDG code)."""
         for key in list(self.table.keys()):
             if len(self.table[key])==1:
                 del self.table[key]
 
-    def ResetMultiparticles(self):
+    def ResetMultiparticles(self) -> None:
+        """Remove all multiparticles (several PDG codes)."""
         for key in list(self.table.keys()):
             if len(self.table[key])!=1:
                 del self.table[key]
 
-    def Remove(self,name,level):
+    def Remove(self,name: str,level: int) -> None:
+        """Remove a label.
+
+        Args:
+            name (``str``): label.
+            level (``int``): running mode; ``hadronic`` and ``invisible`` are protected
+                outside the reco mode.
+        """
         name.lower()
         if self.Find(name):
+            # NOTE: the reserved keywords are only protected outside the RECO mode.
             if level!=MA5RunningType.RECO and \
                    ( name=="hadronic" or name=="invisible" ) :
                 logging.getLogger('MA5').error("this multiparticle cannot be removed (reserved keyword).")
             else:    
                 del self.table[name]
 
-    def GetNames(self):
+    def GetNames(self) -> list[str]:
+        """Get all labels.
+
+        Returns:
+            ``list[str]``:
+            Sorted labels.
+        """
         return sorted(self.table.keys())
 
-    def GetName(self,id):
+    def GetName(self,id: int) -> str:
+        """Get the label of the particle associated with a PDG code.
+
+        Args:
+            id (``int``): PDG code.
+
+        Returns:
+            ``str``:
+            Label of a single-code entry containing ``id``, or ``""``.
+        """
         for key,multi in self.table.items():
             if len(multi)==1 and multi.Find(id):
                 return key
         return ""
 
-    def GetAName(self,id1,id2):
+    def GetAName(self,id1: int,id2: int) -> str:
+        """Get a label for a pair of PDG codes (e.g. a particle and its antiparticle).
+
+        Args:
+            id1 (``int``): first PDG code.
+            id2 (``int``): second PDG code.
+
+        Returns:
+            ``str``:
+            ``"<label1>/<label2>"`` (smaller code first), a single label if only one is
+            known, or ``""``.
+        """
         if id1>id2:
             a=id2
             b=id1
@@ -139,7 +240,16 @@ class MultiParticleCollection:
             return s1 + "/" + s2
 
 
-    def LoadWithSAF(self,ast):
+    def LoadWithSAF(self,ast: Any) -> None:
+        """Rebuild the collection from a parsed SAF tree.
+
+        Args:
+            ast (``Any``): parsed SAF tree.
+
+        .. warning::
+            No class of the code base implements the tree interface used here
+            (``GetBranch``): this method is currently dead code.
+        """
         # Reseting the multiparticle collection
         self.Reset()
         
@@ -168,6 +278,7 @@ class MultiParticleCollection:
                     a = int(item)
                 except:
                     print("ERROR: impossible to convert '"+str(item)+"' to integer value")
+                # FIXME: if int() fails, the previous value of 'a' (or an undefined 'a') is appended.
                 tmp.append(a)
             self.Add(name,tmp,forced=False)
                 

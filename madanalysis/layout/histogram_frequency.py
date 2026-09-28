@@ -22,18 +22,46 @@
 ################################################################################
 
 
+"""Frequency histogram (``NPID``/``NAPID``) read from the SampleAnalyzer output."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
+    from madanalysis.dataset.dataset import Dataset
 from madanalysis.layout.histogram_frequency_core import HistogramFrequencyCore
 import logging
 from six.moves import range
 
 class HistogramFrequency:
+    """Frequency histogram (``NPID``/``NAPID``) filled separately for positive and negative event weights.
 
-    def __init__(self):
+    Attributes:
+        name (``str``): name of the histogram.
+        nbins (``int``): number of bins.
+        xmin (``float``): lower bound of the x axis.
+        xmax (``float``): upper bound of the x axis.
+        ymin (``list[float]``): lower bound(s) of the y axis (empty if automatic).
+        ymax (``list[float]``): upper bound(s) of the y axis (empty if automatic).
+        scale (``float``): normalisation factor.
+        positive (``HistogramFrequencyCore``): content for positive weights.
+        negative (``HistogramFrequencyCore``): content for negative weights.
+        summary (``HistogramFrequencyCore``): net content.
+        warnings (``list[str]``): warnings raised while reading.
+        regions (``list[str]``): regions of the histogram.
+        labels (``list[int]``): PDG code of each bin.
+        stringlabels (``list[str]``): name of each bin.
+    """
+
+    def __init__(self) -> None:
+        """Initialise an empty histogram (see :meth:`Reset`)."""
         self.Reset()
 
 
-    def Print(self):
+    def Print(self) -> None:
+        """Log the definition and the statistics of the histogram."""
         # General info
         if self.ymin!=[] or self.ymax!=[]:
             logging.getLogger('MA5').info(' ' + str(self.ymin) + ' ' + str(self.ymax))
@@ -44,7 +72,16 @@ class HistogramFrequency:
         self.summary.Print()
 
 
-    def FinalizeReading(self,main,dataset):
+    def FinalizeReading(self,main: Main,dataset: Dataset) -> None:
+        """Build the summary (positive minus negative weights) after reading the SAF file.
+
+        Negative bin contents (and statistics) are set to zero, with a warning stored in
+        :attr:`warnings`.
+
+        Args:
+            main (``Main``): session state (unused).
+            dataset (``Dataset``): dataset (used in the warnings).
+        """
 
         # Statistics
         self.summary.nevents = self.positive.nevents + self.negative.nevents
@@ -69,7 +106,14 @@ class HistogramFrequency:
         self.summary.ComputeIntegral()
 
 
-    def CreateHistogram(self,NPID,main):
+    def CreateHistogram(self,NPID: bool,main: Main) -> None:
+        """Build the bin labels from the PDG codes.
+
+        Args:
+            NPID (``bool``): ``True`` for ``NPID`` (particle names), ``False`` for ``NAPID``
+                (names without charge distinction).
+            main (``Main``): session state (particle names).
+        """
 
         # Filling bins
         self.stringlabels = []
@@ -93,7 +137,8 @@ class HistogramFrequency:
             self.xmax  = self.nbins
 
 
-    def Reset(self):
+    def Reset(self) -> None:
+        """Reset the definition and the content of the histogram."""
 
         # General info
         self.name     = ""
@@ -119,11 +164,26 @@ class HistogramFrequency:
         # regions
         self.regions = []
 
-    def GetRegions(self):
+    def GetRegions(self) -> list[str]:
+        """Get the regions of the histogram.
+
+        Returns:
+            ``list[str]``:
+            Region names.
+        """
         return self.regions
 
 
-    def GetBinLowEdge(self,bin):
+    def GetBinLowEdge(self,bin: int) -> float:
+        """Get the lower edge of a bin (linear binning).
+
+        Args:
+            bin (``int``): 0-based bin index.
+
+        Returns:
+            ``float``:
+            The lower edge (clamped to ``xmin``/``xmax`` outside the range).
+        """
 
         # Special case
         if bin<=0:
@@ -139,9 +199,19 @@ class HistogramFrequency:
         return self.xmin+bin*step
 
 
-    def GetBinUpperEdge(self,bin):
+    def GetBinUpperEdge(self,bin: int) -> float:
+        """Get the upper edge of a bin (linear binning).
+
+        Args:
+            bin (``int``): 0-based bin index.
+
+        Returns:
+            ``float``:
+            The upper edge (clamped to ``xmin``/``xmax`` outside the range).
+        """
 
         # Special case
+        # FIXME: returns xmin for the first bin instead of its upper edge (xmin + step).
         if bin<=0:
             return self.xmin
 
@@ -155,7 +225,16 @@ class HistogramFrequency:
         return self.xmin+(bin+1)*step
 
 
-    def GetBinMean(self,bin):
+    def GetBinMean(self,bin: int) -> float:
+        """Get the centre of a bin (linear binning).
+
+        Args:
+            bin (``int``): 0-based bin index.
+
+        Returns:
+            ``float``:
+            The centre (clamped to ``xmin``/``xmax`` outside the range).
+        """
 
         # Special case
         if bin<0:

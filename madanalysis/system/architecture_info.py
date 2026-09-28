@@ -22,14 +22,45 @@
 ################################################################################
 
 
+"""System configuration relevant for the compilation of SampleAnalyzer.
+
+An :class:`ArchitectureInfo` object is filled by the dependency detectors and pickled
+into ``tools/architecture.ma5`` when the libraries are built. At the next start, the
+stored and detected configurations are compared: any difference triggers a rebuild of
+the libraries.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
 import logging
 
 log = logging.getLogger("MA5")
 
 
 class ArchitectureInfo:
-    def __init__(self):
+    """Detected system configuration.
+
+    Main attributes:
+
+    * ``ma5_version``, ``ma5_date``, ``ma5dir``: MadAnalysis 5 release and folder;
+    * ``platform``, ``release``, ``isMac``: operating system;
+    * ``has_root``, ``has_fastjet``, ``has_fjcontrib``, ``has_heptoptagger``, ``has_zlib``,
+      ``has_delphes``, ``has_delphesMA5tune``, ``has_spey``: available packages;
+    * ``*_priority``: whether a package location was forced by the user;
+    * ``*_original_libs``/``*_original_bins``, ``*_inc_path(s)``, ``*_lib_path(s)``,
+      ``*_bin_path``: locations of the packages;
+    * ``python_version``, ``gcc_version``, ``make_version``, ``root_version``, ... : versions;
+    * ``libraries``/``headers``: ``{name: "path:mtime"}`` used to detect package updates;
+    * ``toPATH1``/``toLDPATH1`` (``toPATH2``/``toLDPATH2``): paths to prepend (append) to
+      ``PATH`` and ``LD_LIBRARY_PATH``;
+    * ``root_compiler``, ``root_features``: ROOT compiler and features;
+    * ``cpp11``, ``cpp14``, ``cpp17``, ``cpp20``: supported C++ standards;
+    * ``compilation_severity``: warning level of the compilation (0 = normal, up to 4 =
+      ultra strict), for validation purposes;
+    * ``ncores``: number of cores used for the compilation.
+    """
+    def __init__(self) -> None:
+        """Initialise an empty configuration (nothing detected)."""
 
         self.ma5_version = ""
         self.ma5_date = ""
@@ -112,11 +143,21 @@ class ArchitectureInfo:
         # 0 = normal, Other possible values: 1, 2, 3 and 4 (4=ultra strict compilation)
         self.compilation_severity = 0
 
-    def dump(self):
+    def dump(self) -> None:
+        """Log all attributes at debug level."""
         for item in self.__dict__:
             log.debug(item + "\t" + str(self.__dict__[item]))
 
-    def __eq__(self, other):
+    def __eq__(self, other: ArchitectureInfo) -> bool:
+        """Compare all attributes with another object.
+
+        Args:
+            other (``ArchitectureInfo``): object to compare with.
+
+        Returns:
+            ``bool``:
+            ``True`` if all attributes are equal.
+        """
         log.debug("Compare 2 ArchitureInfo objects:")
         log.debug("The current one (number of items=" + str(len(self.__dict__)) + "):")
         log.debug(str(self.__dict__))
@@ -141,10 +182,32 @@ class ArchitectureInfo:
 
         return self.__dict__ == other.__dict__
 
-    def __neq__(self, other):
+    def __neq__(self, other: ArchitectureInfo) -> bool:
+        """Negation of :meth:`__eq__`.
+
+        .. note::
+            Python uses ``__ne__``, not ``__neq__``: this method is never called implicitly
+            (``!=`` already falls back to the negation of ``__eq__``).
+
+        Args:
+            other (``ArchitectureInfo``): object to compare with.
+
+        Returns:
+            ``bool``:
+            ``True`` if at least one attribute differs.
+        """
         return not self.__eq__(other)
 
-    def save(self, filename):
+    def save(self, filename: str) -> bool:
+        """Pickle the system configuration into a file.
+
+        Args:
+            filename (``str``): destination file.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
 
         # Open the file
         try:
@@ -169,7 +232,18 @@ class ArchitectureInfo:
         # Return the operation status
         return test
 
-    def load(self, filename):
+    def load(self, filename: str) -> bool:
+        """Load the system configuration from a pickle file.
+
+        Only the attributes existing in the current object are copied.
+
+        Args:
+            filename (``str``): pickle file.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
 
         # Open the file
         try:
@@ -209,5 +283,14 @@ class ArchitectureInfo:
         # Return the operation status
         return test
 
-    def Compare(self, other):
+    def Compare(self, other: ArchitectureInfo) -> bool:
+        """Compare with another configuration (e.g. the one stored with the libraries).
+
+        Args:
+            other (``ArchitectureInfo``): configuration to compare with.
+
+        Returns:
+            ``bool``:
+            ``True`` if both configurations are identical.
+        """
         return self == other

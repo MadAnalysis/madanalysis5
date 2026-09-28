@@ -22,7 +22,15 @@
 ################################################################################
 
 
+"""Makefile generation, compilation, linking and testing of the SampleAnalyzer components.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 from madanalysis.IOinterface.folder_writer import FolderWriter
 from shell_command                         import ShellCommand
 import logging
@@ -31,14 +39,38 @@ from six.moves import input
 
 
 class LibraryWriter():
+    """Builder of the SampleAnalyzer libraries and test programs of ``tools/SampleAnalyzer``.
 
-    def __init__(self,jobdir,main):
+    Each component is identified by a keyword (see :meth:`WriteMakefileForInterfaces`); its
+    Makefile is ``Makefile`` (core components), ``Makefile_<package>`` (interfaces, in
+    ``Interfaces/``) or ``Makefile_<name>`` for the test program ``test_<name>`` (in
+    ``Test/``). The make logs are written next to the Makefile.
+
+    Attributes:
+        jobdir (``str``): unused (always ``"lib"``).
+        main (``Main``): session state.
+        path (``str``): ``<ma5dir>/tools``.
+    """
+
+    def __init__(self,jobdir: str,main: Main) -> None:
+        """Create the builder.
+
+        Args:
+            jobdir (``str``): unused label (``"lib"``).
+            main (``Main``): session state.
+        """
         self.jobdir     = jobdir
         self.main       = main
         self.path       = os.path.normpath(self.main.archi_info.ma5dir+"/tools/")
         self.logger     = logging.getLogger('MA5')
 
-    def get_ncores(self):
+    def get_ncores(self) -> int:
+        """Ask the number of cores for the compilation (all cores in forced mode).
+
+        Returns:
+            ``int``:
+            Number of cores.
+        """
         # Number of cores
         import multiprocessing
         nmaxcores=multiprocessing.cpu_count()
@@ -67,7 +99,13 @@ class LibraryWriter():
                      str(ncores))
         return ncores
 
-    def get_ncores2(self):
+    def get_ncores2(self) -> int:
+        """Same as :meth:`get_ncores` with a different indentation of the messages.
+
+        Returns:
+            ``int``:
+            Number of cores.
+        """
         # Number of cores
         import multiprocessing
         nmaxcores=multiprocessing.cpu_count()
@@ -97,10 +135,36 @@ class LibraryWriter():
         return ncores
 
 
-    def Open(self):
+    def Open(self) -> bool:
+        """Recreate :attr:`path`.
+
+        .. warning::
+            :attr:`path` is the whole ``tools`` folder: calling this method deletes it. It is
+            not called anywhere.
+
+        Returns:
+            ``bool``:
+            Result of :meth:`~madanalysis.IOinterface.folder_writer.FolderWriter.CreateDirectory`.
+        """
+        # WARNING: self.path is <ma5dir>/tools; overwrite=True deletes the whole folder.
         return FolderWriter.CreateDirectory(self.path,overwrite=True)
 
-    def WriteMakefileForInterfaces(self,package):
+    def WriteMakefileForInterfaces(self,package: str) -> bool:
+        """Write the Makefile of a component.
+
+        The Makefile options (packages to include/link) and the product (library
+        ``lib<package>_for_ma5.so`` in ``Lib/`` or test executable in ``Bin/``) depend on the
+        component.
+
+        Args:
+            package (``str``): component keyword (``commons``, ``process``, ``configuration``, an
+                interface such as ``zlib``/``fastjet``/``root``/``delphes``, or a test program
+                ``test_<name>``).
+
+        Returns:
+            ``bool``:
+            Always ``True``.
+        """
 
         from madanalysis.build.makefile_writer import MakefileWriter
         options=MakefileWriter.MakefileOptions()
@@ -158,6 +222,8 @@ class LibraryWriter():
             title='*delphesMA5tune-interface* test'
         elif package=='test_root':
             title='*root-interface* test'
+        # NOTE: unknown keywords (e.g. 'test', used by Main.BuildLibrary) produce a generic
+        # Interfaces/Makefile_<keyword>.
         else:
             title='interface to '+package
 
@@ -441,7 +507,20 @@ class LibraryWriter():
         return True
 
 
-    def Compile(self,ncores,package,folder):
+    def Compile(self,ncores: int,package: str,folder: str) -> bool:
+        """Run ``make compile`` for a component.
+
+        Args:
+            ncores (``int``): number of parallel jobs.
+            package (``str``): component keyword (``commons``, ``process``, ``configuration``, an
+                interface such as ``zlib``/``fastjet``/``root``/``delphes``, or a test program
+                ``test_<name>``).
+            folder (``str``): folder of the Makefile.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
 
         # number of cores
         strcores=''
@@ -483,7 +562,19 @@ class LibraryWriter():
         return result
 
 
-    def Link(self,package,folder):
+    def Link(self,package: str,folder: str) -> bool:
+        """Run ``make link`` for a component.
+
+        Args:
+            package (``str``): component keyword (``commons``, ``process``, ``configuration``, an
+                interface such as ``zlib``/``fastjet``/``root``/``delphes``, or a test program
+                ``test_<name>``).
+            folder (``str``): folder of the Makefile.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
 
         # log file name
         if package in ['process','commons','test','configuration']:
@@ -517,7 +608,19 @@ class LibraryWriter():
         return result
 
 
-    def Clean(self,package,folder):
+    def Clean(self,package: str,folder: str) -> bool:
+        """Run ``make clean`` for a component (removes the object files).
+
+        Args:
+            package (``str``): component keyword (``commons``, ``process``, ``configuration``, an
+                interface such as ``zlib``/``fastjet``/``root``/``delphes``, or a test program
+                ``test_<name>``).
+            folder (``str``): folder of the Makefile.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
 
         # log file name
         if package in ['process','commons','configuration','test']:
@@ -551,7 +654,19 @@ class LibraryWriter():
         return result
 
 
-    def MrProper(self,package,folder):
+    def MrProper(self,package: str,folder: str) -> bool:
+        """Run ``make mrproper`` for a component (removes all products).
+
+        Args:
+            package (``str``): component keyword (``commons``, ``process``, ``configuration``, an
+                interface such as ``zlib``/``fastjet``/``root``/``delphes``, or a test program
+                ``test_<name>``).
+            folder (``str``): folder of the Makefile.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
 
         # log file name
         if package in ['process','commons','configuration']:
@@ -589,7 +704,19 @@ class LibraryWriter():
         return result
 
 
-    def Run(self,program,args,folder,silent=False):
+    def Run(self,program: str,args: list[str],folder: str,silent: bool = False) -> bool:
+        """Run a program (the output is written in ``<folder>/<program>.log``).
+
+        Args:
+            program (``str``): name of the executable.
+            args (``list[str]``): command-line arguments.
+            folder (``str``): folder of the executable.
+            silent (``bool``, default ``False``): do not log errors.
+
+        Returns:
+            ``bool``:
+            ``True`` if the program succeeded.
+        """
 
         # shell command
         commands = ['./'+program]
@@ -611,7 +738,18 @@ class LibraryWriter():
         return result
 
 
-    def CheckRun(self,program,folder,silent=False):
+    def CheckRun(self,program: str,folder: str,silent: bool = False) -> bool:
+        """Check the log of a test program (``BEGIN-``/``END-SAMPLEANALYZER-TEST`` stamps).
+
+        Args:
+            program (``str``): name of the executable.
+            folder (``str``): folder of the executable.
+            silent (``bool``, default ``False``): unused.
+
+        Returns:
+            ``bool``:
+            ``True`` if both stamps are found.
+        """
 
         # log file name
         logfile = os.path.normpath(folder+'/'+program+'.log')
@@ -655,7 +793,18 @@ class LibraryWriter():
 
 
 
-    def CheckRunConfiguration(self,program,folder,silent=False):
+    def CheckRunConfiguration(self,program: str,folder: str,silent: bool = False) -> bool:
+        """Check the log of the ``PortabilityCheckup`` program.
+
+        Args:
+            program (``str``): name of the executable.
+            folder (``str``): folder of the executable.
+            silent (``bool``, default ``False``): unused.
+
+        Returns:
+            ``bool``:
+            ``True`` if the begin/end stamps and ``FINAL TEST = OK`` are found.
+        """
 
         # log file name
         logfile = os.path.normpath(folder+'/'+program+'.log')

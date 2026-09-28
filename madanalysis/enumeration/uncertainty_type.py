@@ -22,14 +22,36 @@
 ################################################################################
 
 
+"""Statistical uncertainty models."""
+
+from __future__ import annotations
+
 import six
 
 class metaclass(type):
-        def __getattr__(self, name):
+        """Metaclass turning the class attribute access ``UncertaintyType.NAME`` into an integer code.
+
+        Accessing ``UncertaintyType.NAME`` returns the index of ``NAME`` in ``UncertaintyType.values``; the
+        conversion helpers below map such an index back to the associated properties.
+        """
+        def __getattr__(self, name: str) -> int:
+                """Get the integer code of an enumeration entry.
+
+                Args:
+                    name (``str``): name of the entry (e.g. ``UncertaintyType.POISSON``).
+
+                Raises:
+                    ``ValueError``: if ``name`` is not a key of ``values``.
+
+                Returns:
+                    ``int``:
+                    Index of the entry in ``values``.
+                """
                 return self.values.index(name)
 
 
 @six.add_metaclass(metaclass)
 class UncertaintyType(object):
+        """Uncertainty models: ``POISSON``, ``BINOMIAL`` and ``IMPROVED``."""
         values = ['POISSON','BINOMIAL','IMPROVED']
 

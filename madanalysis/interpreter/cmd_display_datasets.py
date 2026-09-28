@@ -22,23 +22,57 @@
 ################################################################################
 
 
+"""Interpreter command ``display_datasets``: list the imported datasets."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 import madanalysis.interpreter.cmd_base as CmdBase
 import logging
 
 class CmdDisplayDatasets(CmdBase.CmdBase):
-    """Command DISPLAY_DATASETS"""
+    """Command ``display_datasets``."""
 
-    def __init__(self,main):
+    def __init__(self,main: Main) -> None:
+        """Register the ``display_datasets`` command.
+
+        Args:
+            main (``Main``): session state.
+        """
         CmdBase.CmdBase.__init__(self,main,"display_datasets")
 
-    def do(self,args):
+    def do(self,args: list[str]) -> None:
+        """Display the imported datasets (arguments are ignored).
+
+        Args:
+            args (``list[str]``): arguments of the command (split by
+                :meth:`~madanalysis.interpreter.interpreter_base.InterpreterBase.split_arg`).
+        """
         self.main.datasets.Display()
 
-    def help(self):
+    def help(self) -> None:
+        """Display the help of the ``display_datasets`` command."""
         logging.getLogger('MA5').info("   Syntax: display_datasets")
         logging.getLogger('MA5').info("   Displays the list of all the imported datasets.")
 
-    def complete(self,text,line,begidx,endidx,main):
+    # FIXME: extra 'main' argument: the interpreter calls complete(text,line,begidx,endidx),
+    # which raises a TypeError (silently swallowed by readline).
+    def complete(self,text: str,line: str,begidx: int,endidx: int,main: Main) -> None:
+        """Tab completion of the ``display_datasets`` command (no completion).
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+            main (``Main``): unused.
+
+        Returns:
+            ``None``:
+            No completion.
+        """
         return
 

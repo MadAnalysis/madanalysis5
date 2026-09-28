@@ -22,18 +22,40 @@
 ################################################################################
 
 
+"""Interpreter command ``define_region``: declare signal regions."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
 import madanalysis.interpreter.cmd_base as CmdBase
 import logging
 
 class CmdDefineRegion(CmdBase.CmdBase):
-    """Command DEFINE_REGION"""
+    """Command ``define_region <list of regions>``."""
 
-    def __init__(self,main):
+    def __init__(self,main: Main) -> None:
+        """Register the ``define_region`` command.
+
+        Args:
+            main (``Main``): session state.
+        """
         self.logger       = logging.getLogger('MA5')
         CmdBase.CmdBase.__init__(self,main,"define_region")
 
-    def do(self,args):
+    def do(self,args: list[str]) -> bool | None:
+        """Declare one or more signal regions.
+
+        Args:
+            args (``list[str]``): arguments of the command (split by
+                :meth:`~madanalysis.interpreter.interpreter_base.InterpreterBase.split_arg`).
+
+        Returns:
+            ``bool | None``:
+            ``True`` if no region name is given, ``None`` otherwise.
+        """
         #Checking argument number
         if len(args) == 0:
             logging.getLogger('MA5').error("wrong number of arguments for the command 'define_region'.")
@@ -41,9 +63,23 @@ class CmdDefineRegion(CmdBase.CmdBase):
             return True
 
         # Calling fill
+        # NOTE: the result of fill is discarded.
         self.fill(args,self.main.forced)
 
-    def fill(self,args,forced=False):
+    def fill(self,args: list[str],forced: bool = False) -> bool:
+        """Check the region names and add them to :attr:`Main.regions`.
+
+        A name must not be a reserved word, must be a valid label and must not be used by
+        a dataset, a (multi)particle, an observable or another region.
+
+        Args:
+            args (``list[str]``): names of the regions.
+            forced (``bool``, default ``False``): unused.
+
+        Returns:
+            ``bool``:
+            ``True`` if all regions have been added, ``False`` otherwise.
+        """
         # Checking if the name is authorized
         for x in args:
             if x in self.reserved_words:
@@ -81,14 +117,31 @@ class CmdDefineRegion(CmdBase.CmdBase):
             if self.main.regions.Find(x):
                 logging.getLogger('MA5').error("A region '"+x+"' already exists. Please choose a different name.")
                 return False
+            # FIXME: regions are added one by one inside the check loop: if a later name is already
+            # defined, the earlier regions are still added although False is returned.
             self.main.regions.Add(x)
 
         return True
 
-    def help(help):
+    # NOTE: the instance argument is named 'help' instead of 'self'.
+    def help(help) -> None:
+        """Display the help of the ``define_region`` command."""
         logging.getLogger('MA5').info("   Syntax: define_region <list of regions>")
         logging.getLogger('MA5').info("   Creates one or more analysis regions.")
 
-    def complete(self,text,line,begidx,endidx):
+    def complete(self,text: str,line: str,begidx: int,endidx: int) -> bool:
+        """Tab completion of the ``define_region`` command.
+
+        Args:
+            text (``str``): word being completed.
+            line (``str``): full input line.
+            begidx (``int``): start index of ``text`` in ``line``.
+            endidx (``int``): end index of ``text`` in ``line``.
+
+        Returns:
+            ``bool``:
+            Always ``True`` (no completion).
+        """
+        # FIXME: complete should return a list of completions, not True.
         return True
 

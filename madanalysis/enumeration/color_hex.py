@@ -22,6 +22,13 @@
 ################################################################################
 
 
+"""Mapping between ROOT colour indices and hexadecimal RGB codes.
+
+:data:`color_hex` is used to translate the ROOT colour codes of
+:class:`~madanalysis.enumeration.color_type.ColorType` into colours understood by
+Matplotlib when the figures are produced with Matplotlib.
+"""
+
 color_hex = {0:'#ffffff',\
 1:'#000000',\
 2:'#ff0000',\

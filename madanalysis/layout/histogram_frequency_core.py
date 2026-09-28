@@ -22,12 +22,29 @@
 ################################################################################
 
 
+"""Content of a frequency histogram (e.g. ``NPID``) for one sign of the event weights."""
+
 from __future__ import absolute_import
+from __future__ import annotations
 import logging
 
 
 class HistogramFrequencyCore:
-    def __init__(self):
+    """Statistics and content of a frequency histogram.
+
+    Attributes:
+        integral (``float``): sum of the bin contents.
+        nevents (``int``): number of events.
+        sumwentries (``float``): sum of the weights of the entries.
+        sumw (``float``): sum of the weights.
+        entries (``float``): number of entries.
+        nentries (``int``): number of entries.
+        overflow (``float``): overflow content.
+        underflow (``float``): underflow content.
+        array (``list[float]``): bin contents.
+    """
+    def __init__(self) -> None:
+        """Initialise an empty histogram."""
         self.integral = 0.0
         self.nevents = 0
         self.sumwentries = 0.0
@@ -38,12 +55,14 @@ class HistogramFrequencyCore:
         self.underflow = 0.0
         self.array = []
 
-    def ComputeIntegral(self):
+    def ComputeIntegral(self) -> None:
+        """Compute :attr:`integral` from the bin contents."""
         self.integral = 0
         for value in self.array:
             self.integral += value
 
-    def Print(self):
+    def Print(self) -> None:
+        """Log the statistics."""
 
         logging.getLogger("MA5").info(
             "nevents=" + str(self.nevents) + " entries=" + str(self.entries)

@@ -22,7 +22,10 @@
 ################################################################################
 
 
+"""Helpers shared by the installers: downloads, unpacking, folders and number of cores."""
+
 from __future__ import absolute_import
+from typing import Any
 
 import glob
 import logging
@@ -38,8 +41,18 @@ log = logging.getLogger("MA5")
 
 
 class InstallService:
+    """Static helpers used by the ``install`` command."""
     @staticmethod
-    def convert_bytes(bytes):
+    def convert_bytes(bytes: "float") -> "str":
+        """Format a size in bytes with a unit suffix.
+
+        Args:
+            bytes (``float``): size in bytes.
+
+        Returns:
+            ``str``:
+            E.g. ``"1.50M"``.
+        """
         bytes = float(bytes)
         if bytes >= 1099511627776:
             terabytes = bytes / 1099511627776
@@ -58,7 +71,15 @@ class InstallService:
         return size
 
     @staticmethod
-    def reporthook2(bytes_so_far, chunk_size, total_size):
+    def reporthook2(bytes_so_far: "int", chunk_size: "int", total_size: "int") -> "None":
+        """Print the download progress on the standard output (same line).
+
+        Args:
+            bytes_so_far (``int``): downloaded size.
+            chunk_size (``int``): size of a chunk (unused).
+            total_size (``int``): total size (``-1`` if unknown).
+        """
+        # FIXME: ZeroDivisionError if the size is 0; negative percentage if the size is unknown (-1).
         percent = float(bytes_so_far) / total_size
         percent = round(percent * 100, 2)
         sys.stdout.write(
@@ -70,7 +91,14 @@ class InstallService:
         )
 
     @staticmethod
-    def reporthook(numblocks, blocksize, filesize):
+    def reporthook(numblocks: "int", blocksize: "int", filesize: "int") -> "None":
+        """Legacy ``urlretrieve`` progress hook logging the download progress every 10%.
+
+        Args:
+            numblocks (``int``): number of downloaded blocks.
+            blocksize (``int``): size of a block.
+            filesize (``int``): total size.
+        """
         try:
             step = int(filesize / (blocksize * 10))
         except:
@@ -90,7 +118,17 @@ class InstallService:
         log.info("      " + theString + " of " + InstallService.convert_bytes(filesize))
 
     @staticmethod
-    def get_ncores(nmaxcores, forced):
+    def get_ncores(nmaxcores: "int", forced: "bool") -> "int":
+        """Ask the user for the number of cores used for a compilation.
+
+        Args:
+            nmaxcores (``int``): number of available cores (default answer).
+            forced (``bool``): do not ask, use all cores.
+
+        Returns:
+            ``int``:
+            Number of cores.
+        """
         log.info(
             "   How many cores would you like to use for the compilation ? default = max = %s",
             nmaxcores,
@@ -118,7 +156,20 @@ class InstallService:
         return ncores
 
     @staticmethod
-    def untar(logname, downloaddir, installdir, tarball):
+    def untar(logname: "str", downloaddir: "str", installdir: "str", tarball: "str") -> "tuple[bool, str]":
+        """Unpack a ``.tar.gz`` archive.
+
+        Args:
+            logname (``str``): log file.
+            downloaddir (``str``): folder containing the archive.
+            installdir (``str``): destination folder.
+            tarball (``str``): name of the archive.
+
+        Returns:
+            ``tuple[bool, str]``:
+            Success flag and the unpacked folder (the single sub-folder if the archive
+            contains only one, ``installdir`` otherwise).
+        """
         # Unpacking the folder
         theCommands = ["tar", "xzf", tarball, "-C", installdir]
         log.debug("shell command: " + " ".join(theCommands))
@@ -140,7 +191,17 @@ class InstallService:
             return True, installdir
 
     @staticmethod
-    def prepare_tmp(untardir, downloaddir):
+    def prepare_tmp(untardir: "str", downloaddir: "str") -> "bool":
+        """Create an empty temporary folder (removing a previous one) and the download folder.
+
+        Args:
+            untardir (``str``): temporary unpacking folder.
+            downloaddir (``str``): download folder.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         # Removing previous temporary folder path
         if os.path.isdir(untardir):
             log.debug(
@@ -176,7 +237,19 @@ class InstallService:
         return True
 
     @staticmethod
-    def wget(filesToDownload, logFileName, installdir, **kwargs):
+    def wget(filesToDownload: "dict[str, str]", logFileName: "str", installdir: "str", **kwargs) -> "bool":
+        """Download files (files with the expected size already present are not downloaded again).
+
+        Args:
+            filesToDownload (``dict[str, str]``): ``{local file name: URL}``.
+            logFileName (``str``): log file (one line per URL with ``OK``/``ERROR``).
+            installdir (``str``): destination folder.
+            **kwargs: ``headers`` (``dict[str, str]``), extra HTTP headers.
+
+        Returns:
+            ``bool``:
+            ``True`` if all files have been downloaded.
+        """
 
         # Opening log file
         try:
@@ -302,6 +375,8 @@ class InstallService:
                     info.close()
                     log.warning("Impossible to write the file " + output)
                     result = "ERROR"
+                    # FIXME: 'error' is a global flag: after one failure, the next files are neither downloaded
+                    # nor closed ('if not error' blocks below).
                     error = True
 
                 # Copy the file
@@ -346,7 +421,22 @@ class InstallService:
             return True
 
     @staticmethod
-    def UrlAccess(url, headers: dict[str, str] = None):
+    # FIXME: 'dict[str, str]' is evaluated at definition time: the module cannot be imported
+    # with Python 3.8 (TypeError), although Python >= 3.8 is supported.
+    def UrlAccess(url, headers: dict[str, str] = None) -> "Any":
+        """Open a URL (three attempts, 3 s apart).
+
+        .. warning::
+            The SSL certificates are not verified.
+
+        Args:
+            url (``str | urllib.request.Request``): URL or request.
+            headers (``dict[str, str]``, default ``None``): extra HTTP headers.
+
+        Returns:
+            ``Any``:
+            The response object, or ``None`` if the URL cannot be accessed.
+        """
 
         import ssl
         import time
@@ -432,17 +522,30 @@ class InstallService:
         return info
 
     @staticmethod
-    def check_ma5site():
+    def check_ma5site() -> "bool":
+        """Try to access the MadAnalysis 5 website.
+
+        Returns:
+            ``bool``:
+            Always ``True`` (the result of the access is ignored).
+        """
         url = "http://madanalysis.irmp.ucl.ac.be"
         log.debug("Testing the access to MadAnalysis 5 website: " + url + " ...")
         info = InstallService.UrlAccess(url)
         # Close the access
+        # NOTE: the function always returns True, even if the site is unreachable.
         if info != None:
             info.close()
         return True
 
     @staticmethod
-    def check_dataverse():
+    def check_dataverse() -> "bool":
+        """Try to access the UCLouvain Dataverse.
+
+        Returns:
+            ``bool``:
+            Always ``True`` (the result of the access is ignored).
+        """
         url = "http://dataverse.uclouvain.be"
         log.debug("Testing access to the MadAnalysis5 dataverse: " + url + " ...")
         info = InstallService.UrlAccess(url)
@@ -452,7 +555,16 @@ class InstallService:
         return True
 
     @staticmethod
-    def create_tools_folder(path):
+    def create_tools_folder(path: "str") -> "bool":
+        """Create the ``tools`` folder if needed.
+
+        Args:
+            path (``str``): path of the folder.
+
+        Returns:
+            ``bool``:
+            ``True`` on success.
+        """
         if os.path.isdir(path):
             log.debug("   The installation folder 'tools' is already created.")
         else:
@@ -465,7 +577,17 @@ class InstallService:
         return True
 
     @staticmethod
-    def create_package_folder(toolsdir, package):
+    def create_package_folder(toolsdir: "str", package: "str") -> "bool":
+        """Create the installation folder of a package (it must not exist yet).
+
+        Args:
+            toolsdir (``str``): parent folder.
+            package (``str``): name of the package folder.
+
+        Returns:
+            ``bool``:
+            ``False`` if the folder already exists or cannot be created.
+        """
 
         # Removing the folder package
         if os.path.isdir(os.path.join(toolsdir, package)):

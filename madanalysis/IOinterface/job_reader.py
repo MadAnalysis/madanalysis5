@@ -22,7 +22,25 @@
 ################################################################################
 
 
+"""Reader of the SAF outputs of a normal-mode job.
+
+The files read are, for each dataset ``<ds>`` (mangled with
+:class:`~madanalysis.selection.instance_name.InstanceName`):
+
+* ``Output/SAF/<ds>/<ds>.saf``: sample information (cross section, number of events,
+  sums of weights) in the ``<SampleGlobalInfo>`` and ``<SampleDetailedInfo>`` blocks;
+* ``Output/SAF/<ds>/MadAnalysis5job_<n>/Histograms/histos.saf``: ``<Histo>``,
+  ``<HistoLogX>`` and ``<HistoFrequency>`` blocks (description, statistics, data);
+* ``Output/SAF/<ds>/MadAnalysis5job_<n>/Cutflows/<region>.saf``: ``<InitialCounter>``
+  and ``<Counter>`` blocks.
+
+Numbers come in pairs (positive-weight and negative-weight contributions). The last
+job number ``<n>`` is used.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.dataset.sample_info          import SampleInfo
 from madanalysis.layout.cut_info              import CutInfo
@@ -38,12 +56,29 @@ import copy
 
 
 class JobReader():
+    """Reader of the SAF files of a job.
 
-    def __init__(self,jobdir):
+    Attributes:
+        path (``str``): job directory.
+        safdir (``str``): ``<job>/Output/SAF``.
+    """
+
+    def __init__(self,jobdir: str) -> None:
+        """Create the reader.
+
+        Args:
+            jobdir (``str``): job directory.
+        """
         self.path   = jobdir
         self.safdir = os.path.normpath(self.path+"/Output/SAF/")
 
-    def CheckDir(self):
+    def CheckDir(self) -> bool:
+        """Check that the job and SAF folders exist.
+
+        Returns:
+            ``bool``:
+            ``True`` if both folders exist.
+        """
         if not os.path.isdir(self.path):
             logging.getLogger('MA5').error("Directory called '"+self.path+"' is not found.")
             return False
@@ -53,7 +88,16 @@ class JobReader():
         else:
             return True
 
-    def CheckFile(self,dataset):
+    def CheckFile(self,dataset: Any) -> bool:
+        """Check that the sample SAF file of a dataset exists.
+
+        Args:
+            dataset (``Dataset``): the dataset.
+
+        Returns:
+            ``bool``:
+            ``True`` if the file exists.
+        """
         name=InstanceName.Get(dataset.name)
         if os.path.isfile(self.safdir+"/"+name+"/"+name+".saf"):
             return True
@@ -62,7 +106,19 @@ class JobReader():
             return False
 
 
-    def ExtractSampleInfo(self,words,numline,filename):
+    def ExtractSampleInfo(self,words: list[str],numline: int,filename: str) -> Any:
+        """Decode a sample-information line (cross section, error, number of events, positive
+        and negative sums of weights).
+
+        Args:
+            words (``list[str]``): words of the line.
+            numline (``int``): line number (for error messages).
+            filename (``str``): file name (for error messages).
+
+        Returns:
+            ``SampleInfo``:
+            The decoded information (invalid fields are left at zero).
+        """
 
         # Creating container for info
         results = SampleInfo()
@@ -105,7 +161,18 @@ class JobReader():
         return results
 
 
-    def ExtractCutLine(self,words,numline,filename):
+    def ExtractCutLine(self,words: list[str],numline: int,filename: str) -> list[float]:
+        """Decode a counter line (positive and negative values).
+
+        Args:
+            words (``list[str]``): words of the line.
+            numline (``int``): line number (for error messages).
+            filename (``str``): file name (for error messages).
+
+        Returns:
+            ``list[float]``:
+            The two values.
+        """
 
         # Extracting xsection
         try:
@@ -120,11 +187,24 @@ class JobReader():
             logging.getLogger('MA5').error("Counter is not a float value:"+words[1])
 
         # Returning exracting values
+        # FIXME: if a conversion fails above, 'a' or 'b' is undefined here (UnboundLocalError);
+        # same issue in ExtractDescription.
         return [a,b]
 
 
 
-    def ExtractDescription(self,words,numline,filename):
+    def ExtractDescription(self,words: list[str],numline: int,filename: str) -> list:
+        """Decode a histogram-binning line.
+
+        Args:
+            words (``list[str]``): words of the line.
+            numline (``int``): line number (for error messages).
+            filename (``str``): file name (for error messages).
+
+        Returns:
+            ``list``:
+            ``[nbins, xmin, xmax]``.
+        """
 
         # Extracting nbins
         try:
@@ -147,7 +227,18 @@ class JobReader():
         # Returning exracting values
         return [a,b,c]
 
-    def ExtractStatisticsInt(self,words,numline,filename):
+    def ExtractStatisticsInt(self,words: list[str],numline: int,filename: str) -> list[int]:
+        """Decode a pair of non-negative integers (invalid values are replaced by 0).
+
+        Args:
+            words (``list[str]``): words of the line.
+            numline (``int``): line number (for error messages).
+            filename (``str``): file name (for error messages).
+
+        Returns:
+            ``list[int]``:
+            The two values.
+        """
 
         # Extracting positive
         try:
@@ -173,7 +264,18 @@ class JobReader():
         return [a,b]
 
 
-    def ExtractStatisticsFloat(self,words,numline,filename):
+    def ExtractStatisticsFloat(self,words: list[str],numline: int,filename: str) -> list[float]:
+        """Decode a pair of floats (invalid values are replaced by 0).
+
+        Args:
+            words (``list[str]``): words of the line.
+            numline (``int``): line number (for error messages).
+            filename (``str``): file name (for error messages).
+
+        Returns:
+            ``list[float]``:
+            The two values.
+        """
 
         # Extracting positive
         try:
@@ -193,7 +295,18 @@ class JobReader():
         return [a,b]
 
 
-    def ExtractDataFreq(self,words,numline,filename):
+    def ExtractDataFreq(self,words: list[str],numline: int,filename: str) -> list:
+        """Decode a line of a frequency histogram (label, positive and negative contents).
+
+        Args:
+            words (``list[str]``): words of the line.
+            numline (``int``): line number (for error messages).
+            filename (``str``): file name (for error messages).
+
+        Returns:
+            ``list``:
+            ``[label, positive, negative]``.
+        """
 
         # Extracting label
         try:
@@ -226,7 +339,13 @@ class JobReader():
     # merging plots      -> merging
     # selection plots    -> plot
 
-    def ExtractGeneral(self,dataset):
+    def ExtractGeneral(self,dataset: Any) -> None:
+        """Read the sample SAF file of a dataset and fill its ``measured_global`` and
+        ``measured_detail`` attributes.
+
+        Args:
+            dataset (``Dataset``): the dataset.
+        """
 
         # Getting the output file name
         name=InstanceName.Get(dataset.name)
@@ -306,6 +425,7 @@ class JobReader():
                           "<SampleGlobalInfo> is not found.")
             logging.getLogger('MA5').error("Information on the dataset '"+dataset.name+\
                           "' are not updated.")
+        # FIXME: 'globalTag' is tested instead of 'detailTag'.
         if detailTag.Nactivated==0 or globalTag.activated:
             logging.getLogger('MA5').error("Information corresponding to the block "+\
                           "<SampleDetailInfo> is not found.")
@@ -315,7 +435,16 @@ class JobReader():
         # Closing the file
         file.close()
 
-    def ExtractHistos(self,dataset,plot,merging=False):
+    def ExtractHistos(self,dataset: Any,plot: Any,merging: bool = False) -> None:
+        """Read the histograms of a dataset and append them to a plot-flow object.
+
+        Args:
+            dataset (``Dataset``): the dataset.
+            plot (``PlotFlowForDataset | MergingPlotsForDataset``): container filled with the
+                histograms (``plot.histos``).
+            merging (``bool``, default ``False``): read the merging plots (``MergingPlots_<n>``)
+                instead of the analysis histograms.
+        """
         # Getting the output file name
         name=InstanceName.Get(dataset.name)
         i=0
@@ -397,6 +526,8 @@ class JobReader():
                     histoTag.activate()
                 elif words[0].lower()=='</histo>':
                     histoTag.desactivate()
+                    # NOTE: shallow copy followed by Reset(): the copy is only safe if Reset rebinds (and does not
+                    # mutate) the sub-objects.
                     plot.histos.append(copy.copy(histoinfo))
                     plot.histos[-1].positive.array = data_positive[:]
                     plot.histos[-1].negative.array = data_negative[:]
@@ -594,7 +725,15 @@ class JobReader():
         # Closing the file
         file.close()
 
-    def ExtractCuts(self,dataset,cut):
+    def ExtractCuts(self,dataset: Any,cut: Any) -> None:
+        """Read the cut-flows (one file per region) of a dataset.
+
+        Args:
+            dataset (``Dataset``): the dataset.
+            cut (``CutFlowForDataset``): container filled with the initial counter
+                (``cut.initial``) and one list of :class:`~madanalysis.layout.cut_info.CutInfo`
+                per region (``cut.cuts``).
+        """
         # Getting the output file name
         name=InstanceName.Get(dataset.name)
         i=0
@@ -656,6 +795,7 @@ class JobReader():
                         cutTag.activate()
                     elif words[0].lower()=='</counter>':
                         cutTag.desactivate()
+                        # NOTE: a list of strings (file name split on '.') is stored, not a string.
                         cutinfo.cutregion = myfile.split('/')[-1].split('.')[:-1]
                         cutflow_for_region.append(copy.copy(cutinfo))
                         cutinfo.Reset()

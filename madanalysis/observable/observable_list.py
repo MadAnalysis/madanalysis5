@@ -22,6 +22,19 @@
 ################################################################################
 
 
+"""Catalogue of the observables of the normal mode.
+
+Every module-level :class:`~madanalysis.observable.observable_base.ObservableBase`
+instance defined here is automatically registered by
+:class:`~madanalysis.observable.observable_manager.ObservableManager` (the variable
+name must be the observable name, in upper case except for the combination prefixes).
+
+Particle observables (e.g. ``PT``) are cloned with combination prefixes: ``s``
+(scalar sum), ``sd`` (scalar difference), ``d`` (vector difference) and ``r``
+(ratio), e.g. ``sPT(j[1] j[2])``. Without prefix, the observable is computed on the
+vector sum of the particles.
+"""
+
 from __future__ import absolute_import
 from madanalysis.enumeration.combination_type import CombinationType
 from madanalysis.enumeration.argument_type import ArgumentType
@@ -31,6 +44,7 @@ import math
 
 # Warning : all observable labels must be in uppercase
 
+#: ``SQRTS``: partonic centre-of-mass energy sqrt(s-hat) of the hard process (MC only).
 SQRTS = ObservableBase(
     name="SQRTS",
     args=[],
@@ -50,6 +64,7 @@ SQRTS = ObservableBase(
     latex="$\sqrt{\hat{s}}$",
 )
 
+#: ``SCALE``: factorisation/renormalisation scale Q of the event (MC only).
 SCALE = ObservableBase(
     name="SCALE",
     args=[],
@@ -69,6 +84,9 @@ SCALE = ObservableBase(
     latex="event scale Q",
 )
 
+# FIXME: the 'latex' string below contains an unintended escape sequence ('\\t' or '\\b');
+# a raw string or a doubled backslash is needed.
+#: ``ALPHA_QCD``: value of the strong coupling used for the event (MC only).
 ALPHA_QCD = ObservableBase(
     name="ALPHA_QCD",
     args=[],
@@ -88,6 +106,9 @@ ALPHA_QCD = ObservableBase(
     latex="$\alpha_\textrm{QCD}$",
 )
 
+# FIXME: the 'latex' string below contains an unintended escape sequence ('\\t' or '\\b');
+# a raw string or a doubled backslash is needed.
+#: ``ALPHA_QED``: value of the electromagnetic coupling used for the event (MC only).
 ALPHA_QED = ObservableBase(
     name="ALPHA_QED",
     args=[],
@@ -107,6 +128,7 @@ ALPHA_QED = ObservableBase(
     latex="$\alpha_\textrm{QED}$",
 )
 
+#: ``ALPHAT``: alpha_T variable of the event.
 ALPHAT = ObservableBase(
     name="ALPHAT",
     args=[],
@@ -127,6 +149,7 @@ ALPHAT = ObservableBase(
 )
 
 
+#: ``TET``: total transverse energy of the event.
 TET = ObservableBase(
     name="TET",
     args=[],
@@ -146,6 +169,7 @@ TET = ObservableBase(
     latex="$E_T$",
 )
 
+#: ``MET``: missing transverse energy of the event.
 MET = ObservableBase(
     name="MET",
     args=[],
@@ -165,6 +189,7 @@ MET = ObservableBase(
     latex="$\slash{E}_T$",
 )
 
+#: ``THT``: scalar sum of the transverse momenta of the hadronic objects (H_T).
 THT = ObservableBase(
     name="THT",
     args=[],
@@ -184,6 +209,7 @@ THT = ObservableBase(
     latex="$H_T$",
 )
 
+#: ``MEFF``: effective mass (H_T + MET).
 MEFF = ObservableBase(
     name="MEFF",
     args=[],
@@ -203,6 +229,7 @@ MEFF = ObservableBase(
     latex="$M_{eff}$",
 )
 
+#: ``MHT``: missing transverse hadronic energy (norm of the vector sum of the jet momenta).
 MHT = ObservableBase(
     name="MHT",
     args=[],
@@ -222,6 +249,7 @@ MHT = ObservableBase(
     latex="$\slash{H}_T$",
 )
 
+#: ``WEIGHTS``: event weights (MC only).
 WEIGHTS = ObservableBase(
     name="WEIGHTS",
     args=[],
@@ -242,6 +270,7 @@ WEIGHTS = ObservableBase(
 )
 
 
+#: ``NPID``: number of particles per PDG code (charge-sensitive).
 NPID = ObservableBase(
     name="NPID",
     args=[],
@@ -261,6 +290,7 @@ NPID = ObservableBase(
     latex="NPID",
 )
 
+#: ``NAPID``: number of particles per absolute PDG code.
 NAPID = ObservableBase(
     name="NAPID",
     args=[],
@@ -280,6 +310,7 @@ NAPID = ObservableBase(
     latex="|NPID|",
 )
 
+#: ``E``: energy.
 E = ObservableBase(
     name="E",
     args=[ArgumentType.COMBINATION],
@@ -300,17 +331,22 @@ E = ObservableBase(
 )
 
 vE = E
+#: ``sE``: scalar sum of ``E`` over the combined particles.
 sE = ObservableBase.Clone(
     E, name="sE", combination=CombinationType.SUMSCALAR, tlatex="sE", latex="sE"
 )
+#: ``sdE``: scalar difference of ``E`` over the combined particles.
 sdE = dsE = ObservableBase.Clone(
     E, name="sdE", combination=CombinationType.DIFFSCALAR, tlatex="sdE", latex="sdE"
 )
+#: ``dE``: vector difference of ``E`` over the combined particles.
 dE = dvE = vdE = ObservableBase.Clone(
     E, name="dE", combination=CombinationType.DIFFVECTOR, tlatex="dE", latex="dE"
 )
+#: ``rE``: ratio of ``E`` over the combined particles.
 rE = ObservableBase.Clone(E, name="rE", combination=CombinationType.RATIO, tlatex="rE", latex="rE")
 
+#: ``M``: invariant mass.
 M = ObservableBase(
     name="M",
     args=[ArgumentType.COMBINATION],
@@ -331,18 +367,23 @@ M = ObservableBase(
 )
 
 vM = M
+#: ``sM``: scalar sum of ``M`` over the combined particles.
 sM = ObservableBase.Clone(
     M, name="sM", combination=CombinationType.SUMSCALAR, tlatex="sM", latex="sM"
 )
+#: ``sdM``: scalar difference of ``M`` over the combined particles.
 sdM = dsM = ObservableBase.Clone(
     M, name="sdM", combination=CombinationType.DIFFSCALAR, tlatex="sdM", latex="sdM"
 )
+#: ``dM``: vector difference of ``M`` over the combined particles.
 dM = dvM = vdM = ObservableBase.Clone(
     M, name="dM", combination=CombinationType.DIFFVECTOR, tlatex="dM", latex="dM"
 )
+#: ``rM``: ratio of ``M`` over the combined particles.
 rM = ObservableBase.Clone(M, name="rM", combination=CombinationType.RATIO, tlatex="rM", latex="rM")
 
 
+#: ``P``: norm of the momentum.
 P = ObservableBase(
     name="P",
     args=[ArgumentType.COMBINATION],
@@ -363,17 +404,22 @@ P = ObservableBase(
 )
 
 vP = P
+#: ``sP``: scalar sum of ``P`` over the combined particles.
 sP = ObservableBase.Clone(
     P, name="sP", combination=CombinationType.SUMSCALAR, tlatex="sp", latex="sp"
 )
+#: ``sdP``: scalar difference of ``P`` over the combined particles.
 sdP = dsP = ObservableBase.Clone(
     P, name="sdP", combination=CombinationType.DIFFSCALAR, tlatex="sdp", latex="sdp"
 )
+#: ``dP``: vector difference of ``P`` over the combined particles.
 dP = dvP = vdP = ObservableBase.Clone(
     P, name="dP", combination=CombinationType.DIFFVECTOR, tlatex="dp", latex="dp"
 )
+#: ``rP``: ratio of ``P`` over the combined particles.
 rP = ObservableBase.Clone(P, name="rP", combination=CombinationType.RATIO, tlatex="rp", latex="rp")
 
+#: ``ET``: transverse energy.
 ET = ObservableBase(
     name="ET",
     args=[ArgumentType.COMBINATION],
@@ -394,19 +440,25 @@ ET = ObservableBase(
 )
 
 vET = ET
+#: ``sET``: scalar sum of ``ET`` over the combined particles.
 sET = ObservableBase.Clone(
     ET, name="sET", combination=CombinationType.SUMSCALAR, tlatex="sE_{T}", latex="$sE_T$"
 )
+#: ``sdET``: scalar difference of ``ET`` over the combined particles.
 sdET = dsET = ObservableBase.Clone(
     ET, name="sdET", combination=CombinationType.DIFFSCALAR, tlatex="dsE_{T}", latex="$dsE_T$"
 )
+# FIXME: the 'latex' string below lacks the opening '$'.
+#: ``dET``: vector difference of ``ET`` over the combined particles.
 dET = dvET = vdET = ObservableBase.Clone(
     ET, name="dET", combination=CombinationType.DIFFVECTOR, tlatex="dE_{T}", latex="dE_T$"
 )
+#: ``rET``: ratio of ``ET`` over the combined particles.
 rET = ObservableBase.Clone(
     ET, name="rET", combination=CombinationType.RATIO, tlatex="rE_{T}", latex="$rE_T$"
 )
 
+#: ``MT``: transverse mass.
 MT = ObservableBase(
     name="MT",
     args=[ArgumentType.COMBINATION],
@@ -427,20 +479,25 @@ MT = ObservableBase(
 )
 
 vMT = MT
+#: ``sMT``: scalar sum of ``MT`` over the combined particles.
 sMT = ObservableBase.Clone(
     MT, name="sMT", combination=CombinationType.SUMSCALAR, tlatex="sM_{T}", latex="$sM_T$"
 )
+#: ``sdMT``: scalar difference of ``MT`` over the combined particles.
 sdMT = dsMT = ObservableBase.Clone(
     MT, name="sdMT", combination=CombinationType.DIFFSCALAR, tlatex="sdM_{T}", latex="$sdM_T$"
 )
+#: ``dMT``: vector difference of ``MT`` over the combined particles.
 dMT = dvMT = vdMT = ObservableBase.Clone(
     MT, name="dMT", combination=CombinationType.DIFFVECTOR, tlatex="dM_{T}", latex="$dM_T$"
 )
+#: ``rMT``: ratio of ``MT`` over the combined particles.
 rMT = ObservableBase.Clone(
     MT, name="rMT", combination=CombinationType.RATIO, tlatex="rM_{T}", latex="$rM_T$"
 )
 
 
+#: ``MT_MET``: transverse mass computed with the missing transverse momentum.
 MT_MET = ObservableBase(
     name="MT_MET",
     args=[ArgumentType.COMBINATION],
@@ -462,9 +519,11 @@ MT_MET = ObservableBase(
 
 
 vMT_MET = MT_MET
+#: ``sMT_MET``: scalar sum of ``MT_MET`` over the combined particles.
 sMT_MET = ObservableBase.Clone(
     MT_MET, name="sMT_MET", combination=CombinationType.SUMSCALAR, tlatex="sM_{T}", latex="$sM_T$"
 )
+#: ``sdMT_MET``: scalar difference of ``MT_MET`` over the combined particles.
 sdMT_MET = dsMT_MET = ObservableBase.Clone(
     MT_MET,
     name="sdMT_MET",
@@ -472,13 +531,16 @@ sdMT_MET = dsMT_MET = ObservableBase.Clone(
     tlatex="sdM_{T}",
     latex="$sdM_T$",
 )
+#: ``dMT_MET``: vector difference of ``MT_MET`` over the combined particles.
 dMT_MET = dvMT_MET = vdMT_MET = ObservableBase.Clone(
     MT_MET, name="dMT_MET", combination=CombinationType.DIFFVECTOR, tlatex="dM_{T}", latex="$dM_T$"
 )
+#: ``rMT_MET``: ratio of ``MT_MET`` over the combined particles.
 rMT_MET = ObservableBase.Clone(
     MT_MET, name="rMT_MET", combination=CombinationType.RATIO, tlatex="rM_{T}", latex="$rM_T$"
 )
 
+#: ``PT``: transverse momentum.
 PT = ObservableBase(
     name="PT",
     args=[ArgumentType.COMBINATION],
@@ -499,19 +561,24 @@ PT = ObservableBase(
 )
 
 vPT = PT
+#: ``sPT``: scalar sum of ``PT`` over the combined particles.
 sPT = ObservableBase.Clone(
     PT, name="sPT", combination=CombinationType.SUMSCALAR, tlatex="sp_{T}", latex="$sp_T$"
 )
+#: ``sdPT``: scalar difference of ``PT`` over the combined particles.
 sdPT = dsPT = ObservableBase.Clone(
     PT, name="sdPT", combination=CombinationType.DIFFSCALAR, tlatex="sdp_{T}", latex="$sdp_T$"
 )
+#: ``dPT``: vector difference of ``PT`` over the combined particles.
 dPT = dvPT = vdPT = ObservableBase.Clone(
     PT, name="dPT", combination=CombinationType.DIFFVECTOR, tlatex="dp_{T}", latex="$dp_T$"
 )
+#: ``rPT``: ratio of ``PT`` over the combined particles.
 rPT = ObservableBase.Clone(
     PT, name="rPT", combination=CombinationType.RATIO, tlatex="rp_{T}", latex="$rp_T$"
 )
 
+#: ``PX``: x-component of the momentum.
 PX = ObservableBase(
     name="PX",
     args=[ArgumentType.COMBINATION],
@@ -532,19 +599,24 @@ PX = ObservableBase(
 )
 
 vPX = PX
+#: ``sPX``: scalar sum of ``PX`` over the combined particles.
 sPX = ObservableBase.Clone(
     PX, name="sPX", combination=CombinationType.SUMSCALAR, tlatex="sp_{x}", latex="$sp_x$"
 )
+#: ``sdPX``: scalar difference of ``PX`` over the combined particles.
 sdPX = dsPX = ObservableBase.Clone(
     PX, name="sdPX", combination=CombinationType.DIFFSCALAR, tlatex="sdp_{x}", latex="$sdp_x$"
 )
+#: ``dPX``: vector difference of ``PX`` over the combined particles.
 dPX = dvPX = vdPX = ObservableBase.Clone(
     PX, name="dPX", combination=CombinationType.DIFFVECTOR, tlatex="dp_{x}", latex="$dp_x$"
 )
+#: ``rPX``: ratio of ``PX`` over the combined particles.
 rPX = ObservableBase.Clone(
     PX, name="rPX", combination=CombinationType.RATIO, tlatex="rp_{x}", latex="$rp_x$"
 )
 
+#: ``PY``: y-component of the momentum.
 PY = ObservableBase(
     name="PY",
     args=[ArgumentType.COMBINATION],
@@ -565,19 +637,24 @@ PY = ObservableBase(
 )
 
 vPY = PY
+#: ``sPY``: scalar sum of ``PY`` over the combined particles.
 sPY = ObservableBase.Clone(
     PY, name="sPY", combination=CombinationType.SUMSCALAR, tlatex="sp_{y}", latex="$sp_y$"
 )
+#: ``sdPY``: scalar difference of ``PY`` over the combined particles.
 sdPY = dsPY = ObservableBase.Clone(
     PY, name="sdPY", combination=CombinationType.DIFFSCALAR, tlatex="sdp_{y}", latex="$sdp_y$"
 )
+#: ``dPY``: vector difference of ``PY`` over the combined particles.
 dPY = dvPY = vdPY = ObservableBase.Clone(
     PY, name="dPY", combination=CombinationType.DIFFVECTOR, tlatex="dp_{y}", latex="$dp_y$"
 )
+#: ``rPY``: ratio of ``PY`` over the combined particles.
 rPY = ObservableBase.Clone(
     PY, name="rPY", combination=CombinationType.RATIO, tlatex="rp_{y}", latex="$rp_y$"
 )
 
+#: ``PZ``: z-component of the momentum.
 PZ = ObservableBase(
     name="PZ",
     args=[ArgumentType.COMBINATION],
@@ -598,19 +675,24 @@ PZ = ObservableBase(
 )
 
 vPZ = PZ
+#: ``sPZ``: scalar sum of ``PZ`` over the combined particles.
 sPZ = ObservableBase.Clone(
     PZ, name="sPZ", combination=CombinationType.SUMSCALAR, tlatex="sp_{z}", latex="$sp_z$"
 )
+#: ``sdPZ``: scalar difference of ``PZ`` over the combined particles.
 sdPZ = dsPZ = ObservableBase.Clone(
     PZ, name="sdPZ", combination=CombinationType.DIFFSCALAR, tlatex="sdp_{z}", latex="$sdp_z$"
 )
+#: ``dPZ``: vector difference of ``PZ`` over the combined particles.
 dPZ = dvPZ = vdPZ = ObservableBase.Clone(
     PZ, name="dPZ", combination=CombinationType.DIFFVECTOR, tlatex="dp_{z}", latex="$dp_z$"
 )
+#: ``rPZ``: ratio of ``PZ`` over the combined particles.
 rPZ = ObservableBase.Clone(
     PZ, name="rPZ", combination=CombinationType.RATIO, tlatex="rp_{z}", latex="$rp_z$"
 )
 
+#: ``R``: distance to the origin in the (eta, phi) plane.
 R = ObservableBase(
     name="R",
     args=[ArgumentType.COMBINATION],
@@ -631,18 +713,23 @@ R = ObservableBase(
 )
 
 vR = R
+#: ``sR``: scalar sum of ``R`` over the combined particles.
 sR = ObservableBase.Clone(
     R, name="sR", combination=CombinationType.SUMSCALAR, tlatex="sR", latex="sR"
 )
+#: ``sdR``: scalar difference of ``R`` over the combined particles.
 sdR = dsR = ObservableBase.Clone(
     R, name="sdR", combination=CombinationType.DIFFSCALAR, tlatex="sdR", latex="sdR"
 )
+#: ``dR``: vector difference of ``R`` over the combined particles.
 dR = dvR = vdR = ObservableBase.Clone(
     R, name="dR", combination=CombinationType.DIFFVECTOR, tlatex="dR", latex="dR"
 )
+#: ``rR``: ratio of ``R`` over the combined particles.
 rR = ObservableBase.Clone(R, name="rR", combination=CombinationType.RATIO, tlatex="rR", latex="rR")
 
 
+#: ``DELTAR``: angular distance Delta R between two (combinations of) particles.
 DELTAR = ObservableBase(
     name="DELTAR",
     args=[ArgumentType.COMBINATION, ArgumentType.COMBINATION],
@@ -663,6 +750,7 @@ DELTAR = ObservableBase(
 )
 
 vDELTAR = DELTAR
+#: ``dDELTAR``: vector difference of ``DELTAR`` over the combined particles.
 dDELTAR = dvDELTAR = vdDELTAR = ObservableBase.Clone(
     DELTAR,
     name="dDELTAR",
@@ -671,6 +759,7 @@ dDELTAR = dvDELTAR = vdDELTAR = ObservableBase.Clone(
     latex="$d\Delta R$",
 )
 
+#: ``DPHI_0_PI``: azimuthal angle difference between two objects, in [0, pi].
 DPHI_0_PI = ObservableBase(
     name="DPHI_0_PI",
     args=[ArgumentType.COMBINATION, ArgumentType.COMBINATION],
@@ -690,6 +779,7 @@ DPHI_0_PI = ObservableBase(
     latex="$\Delta\Phi_{0,\pi}$",
 )
 
+#: ``DPHI_0_2PI``: azimuthal angle difference between two objects, in [0, 2 pi].
 DPHI_0_2PI = ObservableBase(
     name="DPHI_0_2PI",
     args=[ArgumentType.COMBINATION, ArgumentType.COMBINATION],
@@ -709,6 +799,7 @@ DPHI_0_2PI = ObservableBase(
     latex="$\Delta\Phi_{0,2\pi}$",
 )
 
+#: ``RECOIL``: recoil mass of the first object against the second one.
 RECOIL = ObservableBase(
     name="RECOIL",
     args=[ArgumentType.COMBINATION, ArgumentType.COMBINATION],
@@ -729,6 +820,7 @@ RECOIL = ObservableBase(
 )
 
 
+#: ``ETA``: pseudorapidity.
 ETA = ObservableBase(
     name="ETA",
     args=[ArgumentType.COMBINATION],
@@ -749,19 +841,24 @@ ETA = ObservableBase(
 )
 
 vETA = ETA
+#: ``sETA``: scalar sum of ``ETA`` over the combined particles.
 sETA = ObservableBase.Clone(
     ETA, name="sETA", combination=CombinationType.SUMSCALAR, tlatex="s#eta", latex="$s\eta$"
 )
+#: ``sdETA``: scalar difference of ``ETA`` over the combined particles.
 sdETA = dsETA = ObservableBase.Clone(
     ETA, name="sdETA", combination=CombinationType.DIFFSCALAR, tlatex="sd#eta", latex="$sd\eta$"
 )
+#: ``dETA``: vector difference of ``ETA`` over the combined particles.
 dETA = dvETA = vdETA = ObservableBase.Clone(
     ETA, name="dETA", combination=CombinationType.DIFFVECTOR, tlatex="d#eta", latex="$d\eta$"
 )
+#: ``rETA``: ratio of ``ETA`` over the combined particles.
 rETA = ObservableBase.Clone(
     ETA, name="rETA", combination=CombinationType.RATIO, tlatex="r#eta", latex="$r\eta$"
 )
 
+#: ``ABSETA``: absolute value of the pseudorapidity.
 ABSETA = ObservableBase(
     name="ABSETA",
     args=[ArgumentType.COMBINATION],
@@ -782,6 +879,7 @@ ABSETA = ObservableBase(
 )
 
 vABSETA = ABSETA
+#: ``sABSETA``: scalar sum of ``ABSETA`` over the combined particles.
 sABSETA = ObservableBase.Clone(
     ABSETA,
     name="sABSETA",
@@ -789,6 +887,7 @@ sABSETA = ObservableBase.Clone(
     tlatex="s|#eta|",
     latex="$s|\eta|$",
 )
+#: ``sdABSETA``: scalar difference of ``ABSETA`` over the combined particles.
 sdABSETA = dsABSETA = ObservableBase.Clone(
     ABSETA,
     name="sdABSETA",
@@ -796,6 +895,7 @@ sdABSETA = dsABSETA = ObservableBase.Clone(
     tlatex="sd|#eta|",
     latex="$sd|\eta|$",
 )
+#: ``dABSETA``: vector difference of ``ABSETA`` over the combined particles.
 dABSETA = dvABSETA = vdABSETA = ObservableBase.Clone(
     ABSETA,
     name="dABSETA",
@@ -803,11 +903,15 @@ dABSETA = dvABSETA = vdABSETA = ObservableBase.Clone(
     tlatex="d|#eta|",
     latex="$d|\eta|$",
 )
+#: ``rABSETA``: ratio of ``ABSETA`` over the combined particles.
 rABSETA = ObservableBase.Clone(
     ABSETA, name="rABSETA", combination=CombinationType.RATIO, tlatex="r|#eta|", latex="$r|\eta|$"
 )
 
 
+# FIXME: the 'latex' string below contains an unintended escape sequence ('\\t' or '\\b');
+# a raw string or a doubled backslash is needed.
+#: ``THETA``: polar angle.
 THETA = ObservableBase(
     name="THETA",
     args=[ArgumentType.COMBINATION],
@@ -828,9 +932,15 @@ THETA = ObservableBase(
 )
 
 vTHETA = THETA
+# FIXME: the 'latex' string below contains an unintended escape sequence ('\\t' or '\\b');
+# a raw string or a doubled backslash is needed.
+#: ``sTHETA``: scalar sum of ``THETA`` over the combined particles.
 sTHETA = ObservableBase.Clone(
     THETA, name="sTHETA", combination=CombinationType.SUMSCALAR, tlatex="s#theta", latex="$s\theta$"
 )
+# FIXME: the 'latex' string below contains an unintended escape sequence ('\\t' or '\\b');
+# a raw string or a doubled backslash is needed.
+#: ``sdTHETA``: scalar difference of ``THETA`` over the combined particles.
 sdTHETA = dsTHETA = ObservableBase.Clone(
     THETA,
     name="sdTHETA",
@@ -838,6 +948,9 @@ sdTHETA = dsTHETA = ObservableBase.Clone(
     tlatex="sd#theta",
     latex="$sd\theta$",
 )
+# FIXME: the 'latex' string below contains an unintended escape sequence ('\\t' or '\\b');
+# a raw string or a doubled backslash is needed.
+#: ``dTHETA``: vector difference of ``THETA`` over the combined particles.
 dTHETA = dvTHETA = vdTHETA = ObservableBase.Clone(
     THETA,
     name="dTHETA",
@@ -845,10 +958,14 @@ dTHETA = dvTHETA = vdTHETA = ObservableBase.Clone(
     tlatex="d#theta",
     latex="$d\theta$",
 )
+# FIXME: the 'latex' string below contains an unintended escape sequence ('\\t' or '\\b');
+# a raw string or a doubled backslash is needed.
+#: ``rTHETA``: ratio of ``THETA`` over the combined particles.
 rTHETA = ObservableBase.Clone(
     THETA, name="rTHETA", combination=CombinationType.RATIO, tlatex="r#theta", latex="$r\theta$"
 )
 
+#: ``PHI``: azimuthal angle.
 PHI = ObservableBase(
     name="PHI",
     args=[ArgumentType.COMBINATION],
@@ -869,6 +986,7 @@ PHI = ObservableBase(
 )
 
 vPHI = PHI
+#: ``sPHI``: scalar sum of ``PHI`` over the combined particles.
 sPHI = ObservableBase.Clone(
     PHI,
     name="sPHI",
@@ -878,6 +996,7 @@ sPHI = ObservableBase.Clone(
     plot_xmin=-2.0 * math.pi - 0.01,
     plot_xmax=2.0 * math.pi + 0.01,
 )
+#: ``sdPHI``: scalar difference of ``PHI`` over the combined particles.
 sdPHI = dsPHI = ObservableBase.Clone(
     PHI,
     name="sdPHI",
@@ -887,14 +1006,17 @@ sdPHI = dsPHI = ObservableBase.Clone(
     plot_xmin=-2.0 * math.pi - 0.01,
     plot_xmax=2.0 * math.pi + 0.01,
 )
+#: ``dPHI``: vector difference of ``PHI`` over the combined particles.
 dPHI = dvPHI = vdPHI = ObservableBase.Clone(
     PHI, name="dPHI", combination=CombinationType.DIFFVECTOR, tlatex="d#phi", latex="$d\phi$"
 )
+#: ``rPHI``: ratio of ``PHI`` over the combined particles.
 rPHI = ObservableBase.Clone(
     PHI, name="rPHI", combination=CombinationType.RATIO, tlatex="r#phi", latex="$r\phi$"
 )
 
 
+#: ``Y``: rapidity.
 Y = ObservableBase(
     name="Y",
     args=[ArgumentType.COMBINATION],
@@ -915,17 +1037,24 @@ Y = ObservableBase(
 )
 
 vY = Y
+#: ``sY``: scalar sum of ``Y`` over the combined particles.
 sY = ObservableBase.Clone(
     Y, name="sY", combination=CombinationType.SUMSCALAR, tlatex="sy", latex="sy"
 )
+#: ``sdY``: scalar difference of ``Y`` over the combined particles.
 sdY = dsY = ObservableBase.Clone(
     Y, name="sdY", combination=CombinationType.DIFFSCALAR, tlatex="sdy", latex="sdy"
 )
+#: ``dY``: vector difference of ``Y`` over the combined particles.
 dY = dvY = vdY = ObservableBase.Clone(
     Y, name="dY", combination=CombinationType.DIFFVECTOR, tlatex="dy", latex="dy"
 )
+#: ``rY``: ratio of ``Y`` over the combined particles.
 rY = ObservableBase.Clone(Y, name="rY", combination=CombinationType.RATIO, tlatex="ry", latex="ry")
 
+# FIXME: the 'latex' string below contains an unintended escape sequence ('\\t' or '\\b');
+# a raw string or a doubled backslash is needed.
+#: ``BETA``: velocity (v/c).
 BETA = ObservableBase(
     name="BETA",
     args=[ArgumentType.COMBINATION],
@@ -946,20 +1075,33 @@ BETA = ObservableBase(
 )
 
 vBETA = BETA
+# FIXME: the 'latex' string below contains an unintended escape sequence ('\\t' or '\\b');
+# a raw string or a doubled backslash is needed.
+#: ``sBETA``: scalar sum of ``BETA`` over the combined particles.
 sBETA = ObservableBase.Clone(
     BETA, name="sBETA", combination=CombinationType.SUMSCALAR, tlatex="s#beta", latex="$s\beta$"
 )
+# FIXME: the 'latex' string below contains an unintended escape sequence ('\\t' or '\\b');
+# a raw string or a doubled backslash is needed.
+#: ``sdBETA``: scalar difference of ``BETA`` over the combined particles.
 sdBETA = dsBETA = ObservableBase.Clone(
     BETA, name="sdBETA", combination=CombinationType.DIFFSCALAR, tlatex="sd#beta", latex="$sd\beta$"
 )
+# FIXME: the 'latex' string below contains an unintended escape sequence ('\\t' or '\\b');
+# a raw string or a doubled backslash is needed.
+#: ``dBETA``: vector difference of ``BETA`` over the combined particles.
 dBETA = dvBETA = vdBETA = ObservableBase.Clone(
     BETA, name="dBETA", combination=CombinationType.DIFFVECTOR, tlatex="d#beta", latex="$d\beta$"
 )
+# FIXME: the 'latex' string below contains an unintended escape sequence ('\\t' or '\\b');
+# a raw string or a doubled backslash is needed.
+#: ``rBETA``: ratio of ``BETA`` over the combined particles.
 rBETA = ObservableBase.Clone(
     BETA, name="rBETA", combination=CombinationType.RATIO, tlatex="r#beta", latex="$r\beta$"
 )
 
 
+#: ``GAMMA``: Lorentz factor.
 GAMMA = ObservableBase(
     name="GAMMA",
     args=[ArgumentType.COMBINATION],
@@ -980,9 +1122,11 @@ GAMMA = ObservableBase(
 )
 
 vGAMMA = GAMMA
+#: ``sGAMMA``: scalar sum of ``GAMMA`` over the combined particles.
 sGAMMA = ObservableBase.Clone(
     GAMMA, name="sGAMMA", combination=CombinationType.SUMSCALAR, tlatex="s#gamma", latex="$s\gamma$"
 )
+#: ``sdGAMMA``: scalar difference of ``GAMMA`` over the combined particles.
 sdGAMMA = dsGAMMA = ObservableBase.Clone(
     GAMMA,
     name="sdGAMMA",
@@ -990,6 +1134,7 @@ sdGAMMA = dsGAMMA = ObservableBase.Clone(
     tlatex="sd#gamma",
     latex="$sd\gamma$",
 )
+#: ``dGAMMA``: vector difference of ``GAMMA`` over the combined particles.
 dGAMMA = dvGAMMA = vdGAMMA = ObservableBase.Clone(
     GAMMA,
     name="dGAMMA",
@@ -997,10 +1142,12 @@ dGAMMA = dvGAMMA = vdGAMMA = ObservableBase.Clone(
     tlatex="d#gamma",
     latex="$d\gamma$",
 )
+#: ``rGAMMA``: ratio of ``GAMMA`` over the combined particles.
 rGAMMA = ObservableBase.Clone(
     GAMMA, name="rGAMMA", combination=CombinationType.RATIO, tlatex="r#gamma", latex="$r\gamma$"
 )
 
+#: ``N``: number of particles (multiplicity).
 N = ObservableBase(
     name="N",
     args=[ArgumentType.COMBINATION],
@@ -1021,17 +1168,22 @@ N = ObservableBase(
 )
 
 vN = N
+#: ``sN``: scalar sum of ``N`` over the combined particles.
 sN = ObservableBase.Clone(
     N, name="sN", combination=CombinationType.SUMSCALAR, tlatex="sN", latex="sN"
 )
+#: ``sdN``: scalar difference of ``N`` over the combined particles.
 sdN = dsN = ObservableBase.Clone(
     N, name="sdN", combination=CombinationType.DIFFSCALAR, tlatex="sdN", latex="sdN"
 )
+#: ``dN``: vector difference of ``N`` over the combined particles.
 dN = dvN = vdN = ObservableBase.Clone(
     N, name="dN", combination=CombinationType.DIFFVECTOR, tlatex="dN", latex="dN"
 )
+#: ``rN``: ratio of ``N`` over the combined particles.
 rN = ObservableBase.Clone(N, name="rN", combination=CombinationType.RATIO, tlatex="rN", latex="rN")
 
+#: ``HE_EE``: ratio of hadronic to electromagnetic calorimeter energies (reco only).
 HE_EE = ObservableBase(
     name="HE_EE",
     args=[ArgumentType.PARTICLE],
@@ -1051,6 +1203,7 @@ HE_EE = ObservableBase(
     latex="$E_H/E_E$",
 )
 
+#: ``EE_HE``: ratio of electromagnetic to hadronic calorimeter energies (reco only).
 EE_HE = ObservableBase(
     name="EE_HE",
     args=[ArgumentType.PARTICLE],
@@ -1070,6 +1223,9 @@ EE_HE = ObservableBase(
     latex="$E_E/E_H$",
 )
 
+# FIXME: the 'latex' string below contains an unintended escape sequence ('\\t' or '\\b');
+# a raw string or a doubled backslash is needed.
+#: ``NTRACKS``: number of tracks associated with the object (reco only).
 NTRACKS = ObservableBase(
     name="NTRACKS",
     args=[ArgumentType.PARTICLE],
@@ -1089,6 +1245,7 @@ NTRACKS = ObservableBase(
     latex="$n_\textrm{tracks}$",
 )
 
+#: ``D0``: transverse impact parameter.
 D0 = ObservableBase(
     name="D0",
     args=[ArgumentType.COMBINATION],
@@ -1108,19 +1265,24 @@ D0 = ObservableBase(
     latex="$d_0$",
 )
 vD0 = D0
+#: ``sD0``: scalar sum of ``D0`` over the combined particles.
 sD0 = ObservableBase.Clone(
     D0, name="sD0", combination=CombinationType.SUMSCALAR, tlatex="sd_{0}", latex="$sd_{0}$"
 )
+#: ``sdD0``: scalar difference of ``D0`` over the combined particles.
 sdD0 = dsD0 = ObservableBase.Clone(
     D0, name="sdD0", combination=CombinationType.DIFFSCALAR, tlatex="sdd_{0}", latex="$sdd_{0}$"
 )
+#: ``dD0``: vector difference of ``D0`` over the combined particles.
 dD0 = dvD0 = vdD0 = ObservableBase.Clone(
     D0, name="dD0", combination=CombinationType.DIFFVECTOR, tlatex="dd_{0}", latex="$dd_{0}$"
 )
+#: ``rD0``: ratio of ``D0`` over the combined particles.
 rD0 = ObservableBase.Clone(
     D0, name="rD0", combination=CombinationType.RATIO, tlatex="rd_{0}", latex="$rd_{0}$"
 )
 
+#: ``D0APPROX``: approximate transverse impact parameter.
 D0APPROX = ObservableBase(
     name="D0APPROX",
     args=[ArgumentType.COMBINATION],
@@ -1140,6 +1302,7 @@ D0APPROX = ObservableBase(
     latex="$d_0^{\\rm approx.}$",
 )
 vD0APPROX = D0APPROX
+#: ``sD0APPROX``: scalar sum of ``D0APPROX`` over the combined particles.
 sD0APPROX = ObservableBase.Clone(
     D0APPROX,
     name="sD0APPROX",
@@ -1147,6 +1310,7 @@ sD0APPROX = ObservableBase.Clone(
     tlatex="sd_{0}^{approx.}",
     latex="$sd_{0}^{\\rm approx.}$",
 )
+#: ``sdD0APPROX``: scalar difference of ``D0APPROX`` over the combined particles.
 sdD0APPROX = dsD0APPROX = ObservableBase.Clone(
     D0APPROX,
     name="sdD0APPROX",
@@ -1154,6 +1318,7 @@ sdD0APPROX = dsD0APPROX = ObservableBase.Clone(
     tlatex="sdd_{0}^{approx.}",
     latex="$sdd_{0}^{\\rm approx.}$",
 )
+#: ``dD0APPROX``: vector difference of ``D0APPROX`` over the combined particles.
 dD0APPROX = dvD0APPROX = vdD0APPROX = ObservableBase.Clone(
     D0APPROX,
     name="dD0APPROX",
@@ -1161,6 +1326,7 @@ dD0APPROX = dvD0APPROX = vdD0APPROX = ObservableBase.Clone(
     tlatex="dd_{0}^{approx.}",
     latex="$dd_{0}^{\\rm approx.}$",
 )
+#: ``rD0APPROX``: ratio of ``D0APPROX`` over the combined particles.
 rD0APPROX = ObservableBase.Clone(
     D0APPROX,
     name="rD0APPROX",
@@ -1169,6 +1335,7 @@ rD0APPROX = ObservableBase.Clone(
     latex="$rd_{0}^{\\rm approx.}$",
 )
 
+#: ``DZ``: longitudinal impact parameter.
 DZ = ObservableBase(
     name="DZ",
     args=[ArgumentType.COMBINATION],
@@ -1188,20 +1355,25 @@ DZ = ObservableBase(
     latex="$d_z$",
 )
 vDZ = DZ
+#: ``sDZ``: scalar sum of ``DZ`` over the combined particles.
 sDZ = ObservableBase.Clone(
     DZ, name="sDZ", combination=CombinationType.SUMSCALAR, tlatex="sd_{z}", latex="$sd_{z}$"
 )
+#: ``sdDZ``: scalar difference of ``DZ`` over the combined particles.
 sdDZ = dsDZ = ObservableBase.Clone(
     DZ, name="sdDZ", combination=CombinationType.DIFFSCALAR, tlatex="sdd_{z}", latex="$sdd_{z}$"
 )
+#: ``dDZ``: vector difference of ``DZ`` over the combined particles.
 dDZ = dvDZ = vdDZ = ObservableBase.Clone(
     DZ, name="dDZ", combination=CombinationType.DIFFVECTOR, tlatex="dd_{z}", latex="$dd_{z}$"
 )
+#: ``rDZ``: ratio of ``DZ`` over the combined particles.
 rDZ = ObservableBase.Clone(
     DZ, name="rDZ", combination=CombinationType.RATIO, tlatex="rd_{z}", latex="$rd_{z}$"
 )
 
 
+#: ``DZAPPROX``: approximate longitudinal impact parameter.
 DZAPPROX = ObservableBase(
     name="DZAPPROX",
     args=[ArgumentType.COMBINATION],
@@ -1221,6 +1393,7 @@ DZAPPROX = ObservableBase(
     latex="$d_z^{\\rm approx.}$",
 )
 vDZAPPROX = DZAPPROX
+#: ``sDZAPPROX``: scalar sum of ``DZAPPROX`` over the combined particles.
 sDZAPPROX = ObservableBase.Clone(
     DZAPPROX,
     name="sDZAPPROX",
@@ -1228,6 +1401,7 @@ sDZAPPROX = ObservableBase.Clone(
     tlatex="sd_{z}^{approx.}",
     latex="$sd_{z}^{\\rm approx.}$",
 )
+#: ``sdDZAPPROX``: scalar difference of ``DZAPPROX`` over the combined particles.
 sdDZAPPROX = dsDZAPPROX = ObservableBase.Clone(
     DZAPPROX,
     name="sdDZAPPROX",
@@ -1235,6 +1409,7 @@ sdDZAPPROX = dsDZAPPROX = ObservableBase.Clone(
     tlatex="sdd_{z}^{approx.}",
     latex="$sdd_{z}^{\\rm approx.}$",
 )
+#: ``dDZAPPROX``: vector difference of ``DZAPPROX`` over the combined particles.
 dDZAPPROX = dvDZAPPROX = vdDZAPPROX = ObservableBase.Clone(
     DZAPPROX,
     name="dDZAPPROX",
@@ -1242,6 +1417,7 @@ dDZAPPROX = dvDZAPPROX = vdDZAPPROX = ObservableBase.Clone(
     tlatex="dd_{z}^{approx.}",
     latex="$dd_{z}^{\\rm approx.}$",
 )
+#: ``rDZAPPROX``: ratio of ``DZAPPROX`` over the combined particles.
 rDZAPPROX = ObservableBase.Clone(
     DZAPPROX,
     name="rDZAPPROX",
@@ -1251,6 +1427,7 @@ rDZAPPROX = ObservableBase.Clone(
 )
 
 
+#: ``XD``: x-coordinate of the point of closest approach.
 XD = ObservableBase(
     name="XD",
     args=[ArgumentType.COMBINATION],
@@ -1271,19 +1448,24 @@ XD = ObservableBase(
 )
 
 vXD = XD
+#: ``sXD``: scalar sum of ``XD`` over the combined particles.
 sXD = ObservableBase.Clone(
     XD, name="sXD", combination=CombinationType.SUMSCALAR, tlatex="sx_{d}", latex="$sx_{d}$"
 )
+#: ``sdXD``: scalar difference of ``XD`` over the combined particles.
 sdXD = dsXD = ObservableBase.Clone(
     XD, name="sdXD", combination=CombinationType.DIFFSCALAR, tlatex="sdx_{d}", latex="$sdx_{d}$"
 )
+#: ``dXD``: vector difference of ``XD`` over the combined particles.
 dXD = dvXD = vdXD = ObservableBase.Clone(
     XD, name="dXD", combination=CombinationType.DIFFVECTOR, tlatex="dx_{d}", latex="$dx_{d}$"
 )
+#: ``rXD``: ratio of ``XD`` over the combined particles.
 rXD = ObservableBase.Clone(
     XD, name="rXD", combination=CombinationType.RATIO, tlatex="rx_{d}", latex="$rx_{d}$"
 )
 
+#: ``YD``: y-coordinate of the point of closest approach.
 YD = ObservableBase(
     name="YD",
     args=[ArgumentType.COMBINATION],
@@ -1304,19 +1486,24 @@ YD = ObservableBase(
 )
 
 vYD = YD
+#: ``sYD``: scalar sum of ``YD`` over the combined particles.
 sYD = ObservableBase.Clone(
     YD, name="sYD", combination=CombinationType.SUMSCALAR, tlatex="sy_{d}", latex="$sy_{d}$"
 )
+#: ``sdYD``: scalar difference of ``YD`` over the combined particles.
 sdYD = dsYD = ObservableBase.Clone(
     YD, name="sdYD", combination=CombinationType.DIFFSCALAR, tlatex="sdy_{d}", latex="$sdy_{d}$"
 )
+#: ``dYD``: vector difference of ``YD`` over the combined particles.
 dYD = dvYD = vdPY = ObservableBase.Clone(
     YD, name="dYD", combination=CombinationType.DIFFVECTOR, tlatex="dy_{d}", latex="$dy_{d}$"
 )
+#: ``rYD``: ratio of ``YD`` over the combined particles.
 rYD = ObservableBase.Clone(
     YD, name="rYD", combination=CombinationType.RATIO, tlatex="ry_{d}", latex="$ry_{d}$"
 )
 
+#: ``ZD``: z-coordinate of the point of closest approach.
 ZD = ObservableBase(
     name="ZD",
     args=[ArgumentType.COMBINATION],
@@ -1337,15 +1524,19 @@ ZD = ObservableBase(
 )
 
 vZD = ZD
+#: ``sZD``: scalar sum of ``ZD`` over the combined particles.
 sZD = ObservableBase.Clone(
     ZD, name="sZD", combination=CombinationType.SUMSCALAR, tlatex="sz_{d}", latex="$sz_{d}$"
 )
+#: ``sdZD``: scalar difference of ``ZD`` over the combined particles.
 sdZD = dsZD = ObservableBase.Clone(
     ZD, name="sdZD", combination=CombinationType.DIFFSCALAR, tlatex="sdz_{d}", latex="$sdz_{d}$"
 )
+#: ``dZD``: vector difference of ``ZD`` over the combined particles.
 dZD = dvZD = vdPY = ObservableBase.Clone(
     ZD, name="dZD", combination=CombinationType.DIFFVECTOR, tlatex="dz_{d}", latex="$dz_{d}$"
 )
+#: ``rZD``: ratio of ``ZD`` over the combined particles.
 rZD = ObservableBase.Clone(
     ZD, name="rZD", combination=CombinationType.RATIO, tlatex="rz_{d}", latex="$rz_{d}$"
 )

@@ -22,7 +22,20 @@
 ################################################################################
 
 
+"""Writer of the ``user::Execute`` method of the generated analysis.
+
+:class:`~madanalysis.selection.instance_name.InstanceName` is used to give unique C++
+names to the containers and to avoid duplicated code; it is cleared between the
+different code blocks.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any, TextIO
+
+if TYPE_CHECKING:
+    from madanalysis.core.main import Main
+    from madanalysis.multiparticle.extraparticle import ExtraParticle
 from madanalysis.selection.histogram          import Histogram
 from madanalysis.selection.instance_name      import InstanceName
 from madanalysis.enumeration.observable_type  import ObservableType
@@ -32,7 +45,18 @@ import logging
 import copy
 from six.moves import range
 
-def WriteExecute(file,main,part_list):
+def WriteExecute(file: TextIO,main: Main,part_list: list[list[Any]]) -> None:
+    """Write ``user::Execute``.
+
+    The method initialises the event weight, clears and fills the particle containers,
+    then applies the plots and cuts of the selection in order.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+        part_list (``list[list[Any]]``): particle containers (see
+            :func:`~madanalysis.job.job_particle.GetParticles`).
+    """
 
     # Function header
     file.write('MAbool user::Execute(SampleFormat& sample, ' +\
@@ -59,12 +83,24 @@ def WriteExecute(file,main,part_list):
     file.write('  return true;\n')
     file.write('}\n\n')
 
-def WriteJobRank(part,file,rank,status,regions):
+def WriteJobRank(part: ExtraParticle,file: TextIO,rank: str,status: str,regions: list[str]) -> None:
+    """Write the extraction of the PT-ranked particle from the ordered container.
+
+    Nothing is written for unranked particles.
+
+    Args:
+        part (``ExtraParticle``): particle of the container.
+        file (``TextIO``): output C++ file.
+        rank (``str``): ranking option (e.g. ``'PTordering'``).
+        status (``str``): status code.
+        regions (``list[str]``): regions of the container.
+    """
 
     if part.PTrank==0:
         return
 
     # Skipping if already defined
+    # NOTE: the 'PTRANK_' key is never registered with InstanceName.Get: this test never skips.
     if InstanceName.Find("PTRANK_"+part.name+rank+status):
         return
     container=InstanceName.Get('P_'+part.name+rank+status+'_REG_'+'_'.join(regions))
@@ -78,7 +114,16 @@ def WriteJobRank(part,file,rank,status,regions):
                newcontainer+','+str(part.PTrank)+','+rank+');\n\n')
 
 
-def WriteCleanContainer(part,file,rank,status,regions):
+def WriteCleanContainer(part: ExtraParticle,file: TextIO,rank: str,status: str,regions: list[str]) -> None:
+    """Write the clearing of a particle container (once per container).
+
+    Args:
+        part (``ExtraParticle``): particle of the container.
+        file (``TextIO``): output C++ file.
+        rank (``str``): ranking option (e.g. ``'PTordering'``).
+        status (``str``): status code.
+        regions (``list[str]``): regions of the container.
+    """
     # Skipping if already defined
     if InstanceName.Find('P_'+part.name+rank+status+'_REG_'+'_'.join(regions)):
         return
@@ -87,12 +132,24 @@ def WriteCleanContainer(part,file,rank,status,regions):
     container=InstanceName.Get('P_'+part.name+rank+status+'_REG_'+'_'.join(regions))
 
     # Getting id name
+    # NOTE: 'id' is unused.
     id='isP_'+InstanceName.Get(part.name+rank+status+'_REG_'+'_'.join(regions))
 
     file.write('      ' + container + '.clear();\n')
 
 
-def WriteFillContainer(part,file,rank,status,regions):
+def WriteFillContainer(part: ExtraParticle,file: TextIO,rank: str,status: str,regions: list[str]) -> None:
+    """Write the filling of a container with the Monte Carlo particles passing ``isP_<name>``.
+
+    Nothing is written for PT-ranked particles (filled by :func:`WriteJobRank`).
+
+    Args:
+        part (``ExtraParticle``): particle of the container.
+        file (``TextIO``): output C++ file.
+        rank (``str``): ranking option (e.g. ``'PTordering'``).
+        status (``str``): status code.
+        regions (``list[str]``): regions of the container.
+    """
 
     # If PTrank, no fill
     if part.PTrank!=0:
@@ -112,7 +169,18 @@ def WriteFillContainer(part,file,rank,status,regions):
                container + '.push_back(&(event.mc()->particles()[i]));\n')
 
 
-def WriteFillWithJetContainer(part,file,rank,status,regions):
+def WriteFillWithJetContainer(part: ExtraParticle,file: TextIO,rank: str,status: str,regions: list[str]) -> None:
+    """Write the filling of the container with the jets of the event (unranked particles only).
+
+    PDG 21: all jets, 5: b-tagged jets, 1: non-b-tagged jets.
+
+    Args:
+        part (``ExtraParticle``): particle of the container.
+        file (``TextIO``): output C++ file.
+        rank (``str``): ranking option (e.g. ``'PTordering'``).
+        status (``str``): status code.
+        regions (``list[str]``): regions of the container.
+    """
 
     # If PTrank, no fill
     if part.PTrank!=0:
@@ -142,7 +210,18 @@ def WriteFillWithJetContainer(part,file,rank,status,regions):
                    container+'.push_back(&(event.rec()->jets()[i]));\n')
 
 
-def WriteFillWithElectronContainer(part,file,rank,status,regions):
+def WriteFillWithElectronContainer(part: ExtraParticle,file: TextIO,rank: str,status: str,regions: list[str]) -> None:
+    """Write the filling of the container with the electrons of the event (unranked particles only).
+
+    The sign of the PDG identifier selects the charge.
+
+    Args:
+        part (``ExtraParticle``): particle of the container.
+        file (``TextIO``): output C++ file.
+        rank (``str``): ranking option (e.g. ``'PTordering'``).
+        status (``str``): status code.
+        regions (``list[str]``): regions of the container.
+    """
 
     # If PTrank, no fill
     if part.PTrank!=0:
@@ -166,7 +245,16 @@ def WriteFillWithElectronContainer(part,file,rank,status,regions):
                    container+'.push_back(&(event.rec()->electrons()[i]));\n')
 
 
-def WriteFillWithPhotonContainer(part,file,rank,status,regions):
+def WriteFillWithPhotonContainer(part: ExtraParticle,file: TextIO,rank: str,status: str,regions: list[str]) -> None:
+    """Write the filling of the container with the photons of the event (unranked particles only).
+
+    Args:
+        part (``ExtraParticle``): particle of the container.
+        file (``TextIO``): output C++ file.
+        rank (``str``): ranking option (e.g. ``'PTordering'``).
+        status (``str``): status code.
+        regions (``list[str]``): regions of the container.
+    """
 
     # If PTrank, no fill
     if part.PTrank!=0:
@@ -184,7 +272,18 @@ def WriteFillWithPhotonContainer(part,file,rank,status,regions):
         file.write('      '+container+'.push_back(&(event.rec()->photons()[i]));\n')
 
 
-def WriteFillWithMuonContainer(part,file,rank,status,regions):
+def WriteFillWithMuonContainer(part: ExtraParticle,file: TextIO,rank: str,status: str,regions: list[str]) -> None:
+    """Write the filling of the container with the muons of the event (unranked particles only).
+
+    The sign selects the charge; PDG 130 stands for isolated muons.
+
+    Args:
+        part (``ExtraParticle``): particle of the container.
+        file (``TextIO``): output C++ file.
+        rank (``str``): ranking option (e.g. ``'PTordering'``).
+        status (``str``): status code.
+        regions (``list[str]``): regions of the container.
+    """
 
     # If PTrank, no fill
     if part.PTrank!=0:
@@ -220,7 +319,18 @@ def WriteFillWithMuonContainer(part,file,rank,status,regions):
                container+'.push_back(&(event.rec()->muons()[i]));\n')
 
 
-def WriteFillWithTauContainer(part,file,rank,status,regions):
+def WriteFillWithTauContainer(part: ExtraParticle,file: TextIO,rank: str,status: str,regions: list[str]) -> None:
+    """Write the filling of the container with the hadronic taus of the event (unranked particles only).
+
+    The sign of the PDG identifier selects the charge.
+
+    Args:
+        part (``ExtraParticle``): particle of the container.
+        file (``TextIO``): output C++ file.
+        rank (``str``): ranking option (e.g. ``'PTordering'``).
+        status (``str``): status code.
+        regions (``list[str]``): regions of the container.
+    """
 
     # If PTrank, no fill
     if part.PTrank!=0:
@@ -243,13 +353,23 @@ def WriteFillWithTauContainer(part,file,rank,status,regions):
         file.write('      if (event.rec()->taus()[i].charge()>0) '+\
                    container+'.push_back(&(event.rec()->taus()[i]));\n')
 
-def WriteFillWithMETContainer(part,file,rank,status,regions):
+def WriteFillWithMETContainer(part: ExtraParticle,file: TextIO,rank: str,status: str,regions: list[str]) -> None:
+    """Write the filling of the container with the reconstructed MET (PDG 100).
+
+    Args:
+        part (``ExtraParticle``): particle of the container.
+        file (``TextIO``): output C++ file.
+        rank (``str``): ranking option (e.g. ``'PTordering'``).
+        status (``str``): status code.
+        regions (``list[str]``): regions of the container.
+    """
 
     # If PTrank, no fill
     if part.PTrank!=0:
         return
 
     # Skipping if already defined
+    # NOTE: the key tested here (without regions) differs from the one registered below.
     if InstanceName.Find('P_'+part.name+rank+status):
         return
 
@@ -262,7 +382,16 @@ def WriteFillWithMETContainer(part,file,rank,status,regions):
                    '.push_back(&(event.rec()->MET()));\n')
 
 
-def WriteFillWithMHTContainer(part,file,rank,status,regions):
+def WriteFillWithMHTContainer(part: ExtraParticle,file: TextIO,rank: str,status: str,regions: list[str]) -> None:
+    """Write the filling of the container with the reconstructed MHT (PDG 99).
+
+    Args:
+        part (``ExtraParticle``): particle of the container.
+        file (``TextIO``): output C++ file.
+        rank (``str``): ranking option (e.g. ``'PTordering'``).
+        status (``str``): status code.
+        regions (``list[str]``): regions of the container.
+    """
 
     # If PTrank, no fill
     if part.PTrank!=0:
@@ -281,7 +410,16 @@ def WriteFillWithMHTContainer(part,file,rank,status,regions):
                    '.push_back(&(event.rec()->MHT()));\n')
 
 
-def WriteFillWithMETContainerMC(part,file,rank,status,regions):
+def WriteFillWithMETContainerMC(part: ExtraParticle,file: TextIO,rank: str,status: str,regions: list[str]) -> None:
+    """Write the filling of the container with the Monte Carlo MET (PDG 100).
+
+    Args:
+        part (``ExtraParticle``): particle of the container.
+        file (``TextIO``): output C++ file.
+        rank (``str``): ranking option (e.g. ``'PTordering'``).
+        status (``str``): status code.
+        regions (``list[str]``): regions of the container.
+    """
 
     # If PTrank, no fill
     if part.PTrank!=0:
@@ -300,7 +438,16 @@ def WriteFillWithMETContainerMC(part,file,rank,status,regions):
                    '.push_back(&(event.mc()->MET()));\n')
 
 
-def WriteFillWithMHTContainerMC(part,file,rank,status,regions):
+def WriteFillWithMHTContainerMC(part: ExtraParticle,file: TextIO,rank: str,status: str,regions: list[str]) -> None:
+    """Write the filling of the container with the Monte Carlo MHT (PDG 99).
+
+    Args:
+        part (``ExtraParticle``): particle of the container.
+        file (``TextIO``): output C++ file.
+        rank (``str``): ranking option (e.g. ``'PTordering'``).
+        status (``str``): status code.
+        regions (``list[str]``): regions of the container.
+    """
     
     # If PTrank, no fill
     if part.PTrank!=0:
@@ -319,7 +466,18 @@ def WriteFillWithMHTContainerMC(part,file,rank,status,regions):
                    '.push_back(&(event.mc()->MHT()));\n')
 
 
-def WriteContainer(file,main,part_list):
+def WriteContainer(file: TextIO,main: Main,part_list: list[list[Any]]) -> None:
+    """Write the clearing, filling and PT ranking of all particle containers.
+
+    At parton/hadron level the Monte Carlo particles are looped over; at reco level,
+    the jets, photons, electrons, muons, taus, MET and MHT.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+        part_list (``list[list[Any]]``): particle containers (see
+            :func:`~madanalysis.job.job_particle.GetParticles`).
+    """
 
     # Skipping empty case
     if len(part_list)==0:
@@ -425,7 +583,15 @@ def WriteContainer(file,main,part_list):
     InstanceName.Clear()
 
 
-def WriteSelection(file,main,part_list):
+def WriteSelection(file: TextIO,main: Main,part_list: list[list[Any]]) -> None:
+    """Write the code of each plot, event cut and candidate cut of the selection.
+
+    Args:
+        file (``TextIO``): output C++ file.
+        main (``Main``): session state.
+        part_list (``list[list[Any]]``): particle containers (see
+            :func:`~madanalysis.job.job_particle.GetParticles`).
+    """
 
     import madanalysis.job.job_plot          as JobPlot
     import madanalysis.job.job_event_cut     as JobEventCut

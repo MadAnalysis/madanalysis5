@@ -1,3 +1,7 @@
+"""Small helpers of the recasting mode."""
+
+from __future__ import annotations
+
 import logging
 import os
 import re
@@ -6,8 +10,18 @@ from pathlib import Path
 log = logging.getLogger("MA5")
 
 
+# FIXME: annotated '-> None' but a tuple of two lists is returned.
 def get_runs(dirname: str) -> None:
-    """Retreive analyses from recasting card"""
+    """Read the recasting card of a job.
+
+    Args:
+        dirname (``str``): job directory (``Input/recasting_card.dat`` is read).
+
+    Returns:
+        ``None``:
+        See FIXME: the function actually returns ``(del_runs, ana_runs)``, the lists of
+        ``(version, detector card)`` and ``(version, analysis)`` pairs switched on.
+    """
     del_runs = []
     ana_runs = []
     ## decoding the card
@@ -26,7 +40,12 @@ def get_runs(dirname: str) -> None:
 
 
 def edit_recasting_card(editor: str, dirname: str) -> None:
-    """Prompt to edit the recasting card"""
+    """Ask the user whether the recasting card must be edited and open it in the editor.
+
+    Args:
+        editor (``str``): editor command.
+        dirname (``str``): job directory.
+    """
     log.info("Would you like to edit the recasting Card ? (Y/N)")
     allowed_answers = ["n", "no", "nope", "y", "yes", "yeap"]
     answer = ""
@@ -38,11 +57,20 @@ def edit_recasting_card(editor: str, dirname: str) -> None:
 
 
 def read_xsec(path: str) -> float:
-    """Read cross section value from SAF file"""
+    """Read the cross section from the ``<SampleGlobalInfo>`` block of a SAF file.
+
+    Args:
+        path (``str``): SAF file.
+
+    Returns:
+        ``float``:
+        The cross section in pb (``0.0`` if the file does not exist).
+    """
     saf_file = Path(path)
     if not saf_file.exists():
         return 0.0
     with saf_file.open("r", encoding="utf-8") as f:
+        # NOTE: IndexError if the file has no <SampleGlobalInfo> block.
         smp_info = (
             [
                 match.group(1)
@@ -54,7 +82,16 @@ def read_xsec(path: str) -> float:
     return float(smp_info[0])
 
 
-def clean_region_name(mystr):
+def clean_region_name(mystr: str) -> str:
+    """Convert a region name into the name of its cut-flow file.
+
+    Args:
+        mystr (``str``): region name.
+
+    Returns:
+        ``str``:
+        The name with special characters replaced (e.g. ``>`` -> ``_greater_than_``).
+    """
     newstr = mystr.replace("/", "_slash_")
     newstr = newstr.replace("->", "_to_")
     newstr = newstr.replace(">=", "_greater_than_or_equal_to_")

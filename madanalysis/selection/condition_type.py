@@ -22,7 +22,11 @@
 ################################################################################
 
 
+"""Elementary condition of a cut (``observable(particles) operator threshold``)."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 from madanalysis.enumeration.connector_type     import ConnectorType
 from madanalysis.enumeration.operator_type      import OperatorType
 from madanalysis.enumeration.combination_type   import CombinationType
@@ -31,14 +35,36 @@ from six.moves import range
 
 
 class ConditionType():
+    """Elementary condition such as ``PT(mu[1]) > 20``.
 
-    def __init__(self,observable, parts, operator, threshold ):
+    Attributes:
+        observable (``ObservableBase``): the observable.
+        parts (``list``): arguments of the observable (particle objects).
+        operator (``int``): :class:`~madanalysis.enumeration.operator_type.OperatorType` code.
+        threshold (``float``): threshold value.
+    """
+
+    def __init__(self,observable: Any, parts: list, operator: int, threshold: float ) -> None:
+        """Create the condition.
+
+        Args:
+            observable (``ObservableBase``): the observable.
+            parts (``list``): arguments of the observable.
+            operator (``int``): comparison operator code.
+            threshold (``float``): threshold value.
+        """
         self.observable = observable
         self.parts      = parts
         self.operator   = operator
         self.threshold  = threshold
 
-    def GetStringDisplay(self):
+    def GetStringDisplay(self) -> str:
+        """Get the user-level representation of the condition.
+
+        Returns:
+            ``str``:
+            E.g. ``"PT ( mu[1] ) > 20.0"``.
+        """
         msg=self.observable.name
         if len(self.parts)!=0:
             msg+=" ("

@@ -1,3 +1,7 @@
+"""Construction of the Spey statistical models of the recasting mode and computation of
+the upper limits on the signal cross section.
+"""
+
 import logging
 
 import spey
@@ -12,6 +16,9 @@ OBSERVED = spey.ExpectationType.observed
 logger = logging.getLogger("MA5")
 
 
+# FIXME: 'list[str]'/'dict[...]' annotations are evaluated at import time: this module cannot
+# be imported with Python 3.8 (same issue in theoretical_error_setup.py, run_recast.py and
+# install_service.py).
 def initialise_statistical_models(
     regiondata: dict,
     regions: list[str],
@@ -20,20 +27,30 @@ def initialise_statistical_models(
     simplified_model_config: dict = None,
     full_statistical_model_config: dict = None,
 ) -> dict[str, dict[str, spey.StatisticalModel]]:
-    """
-    initialise statistical models
+    r"""Build the statistical models of an analysis.
+
+    The signal yield of each region is :math:`\sigma \times L \times 1000 \times N_f / N_0`
+    (:math:`\sigma` in pb, :math:`L` in fb\ :sup:`-1`). Three kinds of models are built:
+
+    * one ``default.uncorrelated_background`` model per signal region;
+    * one ``default.correlated_background`` model (simplified likelihood) per covariance
+      subset;
+    * one ``pyhf`` model (full likelihood) per likelihood profile.
 
     Args:
-        regiondata (``dict``): data per region
-        regions (``list[str]``): region list
-        xsection (``float``): cross section
-        lumi (``float``): luminosity
-        simplified_model_config (``dict``, default ``None``): simplified model configuration
-        full_statistical_model_config (``dict``, default ``None``): full statistical model configuration
+        regiondata (``dict``): data per region (``nobs``, ``nb``, ``deltanb``, ``N0``, ``Nf``).
+        regions (``list[str]``): signal regions.
+        xsection (``float``): signal cross section in pb.
+        lumi (``float``): luminosity in fb^-1.
+        simplified_model_config (``dict``, default ``None``): covariance subsets
+            (``{subset: {"cov_regions": [...], "covariance": [[...]]}}``).
+        full_statistical_model_config (``dict``, default ``None``): HistFactory
+            configurations.
 
     Returns:
         ``dict[str, dict[str, spey.StatisticalModel]]``:
-        Statistical model dictionary
+        Models indexed by kind (``uncorrelated_background``, ``simplified_likelihoods``,
+        ``full_likelihoods``) and by region/subset/profile.
     """
     uncorrelated_background = {}
     simplified_likelihoods = {}
@@ -103,20 +120,25 @@ def compute_poi_upper_limits(
     is_extrapolated: bool,
     record_to: str = None,
 ) -> dict:  # pylint: disable=too-many-arguments
-    """
-    Compute upper limit on cross section.
+    """Compute the 95% CL upper limits on the signal cross section.
+
+    Expected (a-posteriori, or a-priori for extrapolated luminosities) and observed (not
+    for extrapolated luminosities) limits are stored as ``s95exp``/``s95obs`` strings in
+    pb (``-1`` if not finite).
 
     Args:
-        regiondata (``dict``): data for each region
-        regions (``list[str]``): list of regions
-        xsection (``float``): cross section
-        lumi (``float``): luminosity
-        is_extrapolated (``bool``): extrapolated luminosity
-        record_to (``str``): record to a specific section in regiondata
+        regiondata (``dict``): region data, updated in place.
+        stat_models (``dict``): models of one kind (see
+            :func:`initialise_statistical_models`).
+        xsection (``float``): signal cross section in pb (the upper limit on the signal
+            strength is multiplied by it).
+        is_extrapolated (``bool``): extrapolated luminosity.
+        record_to (``str``, default ``None``): sub-dictionary where the results are stored
+            (``"cov_subset"`` or ``"pyhf"``); results are stored per region if ``None``.
 
     Returns:
         ``dict``:
-        regiondata
+        The updated region data.
     """
     logger.debug("Computing upper limits...")
     if record_to is not None:

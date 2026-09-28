@@ -1,4 +1,8 @@
 # python
+"""Unit tests (pytest) of :class:`~madanalysis.misc.run_recast.RunRecast` helpers."""
+
+from __future__ import annotations
+
 import os
 import sys
 import xml.etree.ElementTree as ET
@@ -21,7 +25,10 @@ from .run_recast import RunRecast
 
 
 class _DummyRecasting:
-    def __init__(self):
+    """Minimal stand-in for :class:`~madanalysis.configuration.recast_configuration.RecastConfiguration`.
+    """
+    def __init__(self) -> None:
+        """Set the recasting attributes used by the tested methods."""
         self.TACO_output = ""
         self.ma5tune = False
         self.delphes = False
@@ -36,7 +43,14 @@ class _DummyRecasting:
 
 
 class _DummyArchi:
-    def __init__(self, ma5dir):
+    """Minimal stand-in for :class:`~madanalysis.system.architecture_info.ArchitectureInfo`.
+    """
+    def __init__(self, ma5dir: str) -> None:
+        """Set the architecture attributes used by the tested methods.
+
+        Args:
+            ma5dir (``str``): fake MadAnalysis 5 folder.
+        """
         self.ma5dir = str(ma5dir)
         self.has_fastjet = False
         self.delphes_inc_paths = []
@@ -44,13 +58,21 @@ class _DummyArchi:
 
 
 class _DummySession:
-    def __init__(self):
+    """Minimal stand-in for :class:`~madanalysis.system.session_info.SessionInfo`."""
+    def __init__(self) -> None:
+        """Set the session attributes used by the tested methods."""
         self.editor = "vi"
         self.has_simplify = False
 
 
 class _DummyMain:
-    def __init__(self, ma5dir):
+    """Minimal stand-in for :class:`~madanalysis.core.main.Main`."""
+    def __init__(self, ma5dir: str) -> None:
+        """Build the fake session state.
+
+        Args:
+            ma5dir (``str``): fake MadAnalysis 5 folder.
+        """
         self.forced = False
         self.recasting = _DummyRecasting()
         self.archi_info = _DummyArchi(ma5dir)
@@ -58,6 +80,7 @@ class _DummyMain:
         self.developer_mode = False
         # placeholders referenced by code but not used in tests
         class _FS:
+            """Placeholder for the fast-simulation objects."""
             pass
 
         self.fastsim = _FS()
@@ -66,7 +89,8 @@ class _DummyMain:
         self.script = False
 
 
-def test_fix_pileup_success(tmp_path):
+def test_fix_pileup_success(tmp_path) -> None:
+    """``fix_pileup`` rewrites the pile-up path and keeps the original card."""
     # Setup directories
     ma5dir = tmp_path / "ma5"
     pad_pileup_dir = ma5dir / "tools" / "PAD" / "Input" / "Pileup"
@@ -99,7 +123,8 @@ def test_fix_pileup_success(tmp_path):
     assert "Pileup/pileup1.root" in new_text
 
 
-def test_fix_pileup_missing_pileup_returns_false(tmp_path):
+def test_fix_pileup_missing_pileup_returns_false(tmp_path) -> None:
+    """``fix_pileup`` fails when the pile-up file does not exist."""
     # Setup ma5dir but do NOT create pileup file
     ma5dir = tmp_path / "ma5"
     pad_pileup_dir = ma5dir / "tools" / "PAD" / "Input" / "Pileup"
@@ -117,7 +142,8 @@ def test_fix_pileup_missing_pileup_returns_false(tmp_path):
     assert ok is False
 
 
-def test_check_xml_scipy_methods_returns_et_module(tmp_path):
+def test_check_xml_scipy_methods_returns_et_module(tmp_path) -> None:
+    """``check_xml_scipy_methods`` returns a working ElementTree-like module."""
     main = _DummyMain(tmp_path)
     rc = RunRecast(main, str(tmp_path))
     ET_module = rc.check_xml_scipy_methods()
@@ -132,7 +158,8 @@ def test_check_xml_scipy_methods_returns_et_module(tmp_path):
     assert root.find("child").text == "1"
 
 
-def test_parse_info_file_and_header_info_file(tmp_path):
+def test_parse_info_file_and_header_info_file(tmp_path) -> None:
+    """``parse_info_file`` reads the luminosity and region data of an info file."""
     # Create pad analyzer info file structure
     pad = tmp_path / "pad"
     ana_dir = pad / "Build" / "SampleAnalyzer" / "User" / "Analyzer"

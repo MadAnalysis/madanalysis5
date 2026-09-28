@@ -22,7 +22,24 @@
 ################################################################################
 
 
+"""Simplified Fast Simulation (SFS) of MadAnalysis 5 (arXiv:2006.09387).
+
+The SFS parametrises the detector response with user-defined formulas:
+
+* ``define tagger <true> as <reco> <efficiency> [<bounds>] {<working point>}``
+* ``define smearer <object> with <observable> <resolution> [<bounds>]``
+* ``define reco_efficiency <object> <efficiency> [<bounds>]``
+* ``define jes <scale> [<bounds>]`` and ``define energy_scaling <object> <scale> [<bounds>]``
+* ``define scaling <observable> for <object> <scale> [<bounds>]``
+
+The rules are converted into C++ code by :mod:`madanalysis.job.job_tagger_header`,
+:mod:`madanalysis.job.job_tagger_main`, :mod:`madanalysis.job.job_smearer_reco_header`
+and :mod:`madanalysis.job.job_smearer_reco_main`.
+"""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 import logging
 from madanalysis.fastsim.ast            import AST
 from madanalysis.fastsim.tagger         import Tagger, TaggerStatus
@@ -33,9 +50,23 @@ from six.moves import range
 
 
 class SuperFastSim:
+    """Container of all SFS rules and settings (``main.superfastsim``).
+
+    Attributes:
+        tagger / smearer / reco / scaling: the corresponding rule containers.
+        jetrecomode (``str``): ``"jets"`` (smear the clustered jets) or ``"constituents"``
+            (smear the jet constituents before clustering).
+        mag_field / radius / half_length (``float``): magnetic field (T) and tracker
+            dimensions (m) used by the particle propagator.
+        propagator (``bool``): whether charged particles are propagated in the magnetic field.
+        track_isocone_radius / electron_isocone_radius / muon_isocone_radius /
+        photon_isocone_radius (``list[float]``): isolation cone radii to compute.
+        observables (``ObservableManager | str``): observables usable in formulas.
+    """
 
     # Initialization
-    def __init__(self):
+    def __init__(self) -> None:
+        """Create an empty SFS configuration."""
         self.logger                  = logging.getLogger('MA5')
         self.tagger                  = Tagger()
         self.smearer                 = Smearer()
@@ -52,10 +83,16 @@ class SuperFastSim:
         self.photon_isocone_radius   = []
         self.observables             = ''
 
-    def InitObservables(self, obs_list):
+    def InitObservables(self, obs_list: Any) -> None:
+        """Set the observables usable in the SFS formulas.
+
+        Args:
+            obs_list (``ObservableManager``): observable registry of the session.
+        """
         self.observables = obs_list
 
-    def Reset(self):
+    def Reset(self) -> None:
+        """Remove all rules and reset the settings (the observables are kept)."""
         self.tagger                  = Tagger()
         self.smearer                 = Smearer()
         self.reco                    = RecoEfficiency()
@@ -71,19 +108,47 @@ class SuperFastSim:
         self.photon_isocone_radius   = []
 
     # Definition of a new tagging/smearing rule
-    def define(self, args, prts):
+    def define(self, args: list[str], prts: Any) -> None:
+        """Decode a ``define tagger/smearer/reco_efficiency/jes/energy_scaling/scaling``
+        command and store the corresponding rule.
+
+        The labels ``c``, ``track`` and ``JES`` are temporarily added to the
+        multiparticle collection while the command is decoded. Errors are logged and the
+        command is ignored.
+
+        Args:
+            args (``list[str]``): arguments of the ``define`` command.
+            prts (``MultiParticleCollection``): (multi)particles of the session.
+        """
+        # FIXME: if the user already defined 'c', Add() asks interactively to overwrite it and the
+        # label is removed at the end of the command, deleting the user definition.
         prts.Add('c', [4])
         prts.Add('track', [])  # PDGID is not important
         prts.Add('JES', [])  # PDGID is not important
         prts_remove = ['c', 'track', 'JES']
 
         ## remove all initializations when this session is over
-        def remove_prts_def(prts_remove,prts):
+        def remove_prts_def(prts_remove: list[str],prts: Any) -> None:
+            """Remove the temporary labels from the multiparticle collection.
+
+            Args:
+                prts_remove (``list[str]``): labels to remove.
+                prts (``MultiParticleCollection``): multiparticle collection.
+            """
             for particle in prts_remove:
                 prts.Remove(particle,     None)
 
         ## list of PDG codes associated with a a multiparticle
-        def is_pdgcode(prt):
+        def is_pdgcode(prt: str) -> bool:
+            """Check whether a string is a (signed) PDG code.
+
+            Args:
+                prt (``str``): string to test.
+
+            Returns:
+                ``bool``:
+                ``True`` for strings like ``11``, ``-11`` or ``+11``.
+            """
             return (prt[0] in ('-','+') and prt[1:].isdigit()) or prt.isdigit()
 
         ## Checking the length of the argument list
@@ -196,7 +261,21 @@ class SuperFastSim:
 
 
     # Transform the arguments passed in the interpreter in the right format
-    def decode_args(self,myargs):
+    def decode_args(self,myargs: list[str]) -> tuple[Any, Any, str | None]:
+        """Split the arguments of an SFS rule into function, bounds and working point.
+
+        The bounds are given between square brackets and the working point between curly
+        brackets; the remaining leading arguments form the function.
+
+        Args:
+            myargs (``list[str]``): arguments following the object specification.
+
+        Returns:
+            ``tuple[Any, Any, str | None]``:
+            The function and bounds as :class:`~madanalysis.fastsim.ast.AST` objects (``''``
+            and ``[]`` on error) and the working-point string (``None`` on error, ``""`` if
+            absent).
+        """
         # Special formating for the power operator
         args = ' '.join(myargs).replace('^', ' ^ ')
         for symb in ['< =', '> =', '= =']:
@@ -279,7 +358,13 @@ class SuperFastSim:
 
 
     # Display of a taggers/smearer
-    def display(self,args):
+    def display(self,args: list[str]) -> None:
+        """Log the rules of one SFS module.
+
+        Args:
+            args (``list[str]``): ``[module]`` with module ``tagger``, ``smearer``,
+                ``reco_efficiency``, ``jes``, ``energy_scaling`` or ``scaling``.
+        """
         if args[0]=='tagger':
             self.tagger.display()
         elif args[0]=='smearer':
@@ -293,21 +378,69 @@ class SuperFastSim:
 
 
     # On/off checks
-    def isRecoOn(self):
+    def isRecoOn(self) -> bool:
+        """Check whether reconstruction efficiencies are defined.
+
+        Returns:
+            ``bool``:
+            ``True`` if at least one rule exists.
+        """
         return self.reco.rules != {}
-    def isTaggerOn(self):
+    def isTaggerOn(self) -> bool:
+        """Check whether taggers are defined.
+
+        Returns:
+            ``bool``:
+            ``True`` if at least one rule exists.
+        """
         return self.tagger.rules != {}
-    def isSmearerOn(self):
+    def isSmearerOn(self) -> bool:
+        """Check whether smearers are defined.
+
+        Returns:
+            ``bool``:
+            ``True`` if at least one rule exists.
+        """
         return self.smearer.rules != {}
-    def isPropagatorOn(self):
+    def isPropagatorOn(self) -> bool:
+        """Check whether the particle propagator is enabled.
+
+        Returns:
+            ``bool``:
+            :attr:`propagator`.
+        """
         return self.propagator
-    def isScalingOn(self):
+    def isScalingOn(self) -> bool:
+        """Check whether scaling rules are defined.
+
+        Returns:
+            ``bool``:
+            ``True`` if at least one rule exists.
+        """
         return self.scaling.rules != {}
-    def isRecoSmearerOn(self):
+    def isRecoSmearerOn(self) -> bool:
+        """Check whether the body of the generated smearer is needed.
+
+        Returns:
+            ``bool``:
+            ``True`` if scaling, smearing or reconstruction rules exist.
+        """
         # all modules that modifies new_smearer body
         return (self.isScalingOn() or self.isSmearerOn() or self.isRecoOn())
-    def isNewSmearerOn(self):
+    def isNewSmearerOn(self) -> bool:
+        """Check whether a generated smearer (header) is needed.
+
+        Returns:
+            ``bool``:
+            ``True`` if :meth:`isRecoSmearerOn` or the propagator is on.
+        """
         # all modules that modifies new_smearer header
         return (self.isRecoSmearerOn() or self.isPropagatorOn())
-    def isSFSOn(self):
+    def isSFSOn(self) -> bool:
+        """Check whether any SFS functionality is used.
+
+        Returns:
+            ``bool``:
+            ``True`` if a smearer or a tagger is needed.
+        """
         return (self.isNewSmearerOn() or self.isTaggerOn())

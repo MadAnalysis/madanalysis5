@@ -22,7 +22,11 @@
 ################################################################################
 
 
+"""Check of the system configuration performed at the start of each session."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import Any
 
 import logging
 import os
@@ -35,7 +39,25 @@ from madanalysis.system.user_info import UserInfo
 
 
 class CheckUp:
-    def __init__(self, archi_info, session_info, debug, script):
+    """Sequence of configuration checks (called from
+    :meth:`madanalysis.core.main.Main.CheckConfig` and
+    :meth:`madanalysis.core.main.Main.CheckConfig2`).
+
+    Attributes:
+        user_info (``UserInfo``): user options (read by :meth:`ReadUserOptions`).
+        archi_info (``ArchitectureInfo``): system configuration (filled by the checks).
+        session_info (``SessionInfo``): session information (filled by the checks).
+        checker (``DetectManager``): dependency detector.
+    """
+    def __init__(self, archi_info: Any, session_info: Any, debug: bool, script: bool) -> None:
+        """Create the check-up.
+
+        Args:
+            archi_info (``ArchitectureInfo``): system configuration to fill.
+            session_info (``SessionInfo``): session information to fill.
+            debug (``bool``): print detailed information.
+            script (``bool``): script mode.
+        """
         self.user_info = UserInfo()
         self.archi_info = archi_info
         self.session_info = session_info
@@ -46,7 +68,13 @@ class CheckUp:
         )
         self.logger = logging.getLogger("MA5")
 
-    def CheckArchitecture(self):
+    def CheckArchitecture(self) -> bool:
+        """Detect the Python release, the platform (Linux or macOS) and the number of cores.
+
+        Returns:
+            ``bool``:
+            Always ``True``.
+        """
 
         # Fill with Python info
         import sys
@@ -135,7 +163,17 @@ class CheckUp:
 
         return True
 
-    def CheckSessionInfo(self):
+    def CheckSessionInfo(self) -> bool:
+        """Determine the user name, web access, temporary and download folders, and text editor.
+
+        The temporary folder is taken from the user options, then ``$TMPDIR``/``$TMP``/
+        ``$TEMP``, then ``/tmp/<user>``; the download folder from the user options or
+        ``<tmpdir>/MA5_downloads``; the editor from ``$EDITOR`` (``vi`` by default).
+
+        Returns:
+            ``bool``:
+            ``False`` if no temporary or download folder can be created.
+        """
 
         # Fill with user name
         try:
@@ -325,7 +363,13 @@ class CheckUp:
         # Ok
         return True
 
-    def ReadUserOptions(self):
+    def ReadUserOptions(self) -> bool:
+        """Read ``madanalysis/input/installation_options.dat``.
+
+        Returns:
+            ``bool``:
+            ``False`` if the file cannot be read.
+        """
         # Reading user options
         self.logger.info("Reading user settings ...")
         filename = self.archi_info.ma5dir + "/madanalysis/input/installation_options.dat"
@@ -333,7 +377,13 @@ class CheckUp:
             return False
         return True
 
-    def CheckMandatoryPackages(self):
+    def CheckMandatoryPackages(self) -> bool:
+        """Detect Python, g++ and GNU Make.
+
+        Returns:
+            ``bool``:
+            ``False`` if a mandatory package is missing.
+        """
         # Mandatory packages
         self.logger.info("Checking mandatory packages:")
 
@@ -345,7 +395,13 @@ class CheckUp:
             return False
         return True
 
-    def CheckOptionalGraphicalPackages(self):
+    def CheckOptionalGraphicalPackages(self) -> bool:
+        """Detect ROOT (graphics), Matplotlib, gnuplot, pdflatex and latex.
+
+        Returns:
+            ``bool``:
+            ``False`` only for unexpected failures.
+        """
         # Optional packages
         self.logger.info("Checking optional packages devoted to histogramming:")
 
@@ -361,7 +417,13 @@ class CheckUp:
             return False
         return True
 
-    def CheckOptionalProcessingPackages(self):
+    def CheckOptionalProcessingPackages(self) -> bool:
+        """Detect ROOT, zlib, FastJet, FastJet contrib, HEPTopTagger, Delphes and Delphes-MA5tune.
+
+        Returns:
+            ``bool``:
+            ``False`` only for unexpected failures.
+        """
         # Optional packages
         self.logger.info("Checking optional packages devoted to data processing:")
         checker2 = ConfigChecker(self.archi_info, self.user_info, self.session_info, self.script, self.debug)
@@ -373,7 +435,13 @@ class CheckUp:
         self.archi_info.has_delphesMA5tune = checker2.checkDelphesMA5tune()
         return True
 
-    def CheckOptionalReinterpretationPackages(self):
+    def CheckOptionalReinterpretationPackages(self) -> bool:
+        """Detect Spey, the PAD, the PADForMA5tune, the PADForSFS and simplify.
+
+        Returns:
+            ``bool``:
+            ``False`` only for unexpected failures.
+        """
         # Optional packages
         self.logger.info("Checking optional packages devoted to reinterpretation:")
         for package in ["spey", "pad", "padma5", "padsfs", "simplify"]:
@@ -381,10 +449,21 @@ class CheckUp:
                 return False
         return True
 
-    def CreateSymLink(self, source, destination):
+    def CreateSymLink(self, source: str, destination: str) -> bool:
+        """Create a symbolic link (an existing link is replaced).
+
+        Args:
+            source (``str``): target of the link.
+            destination (``str``): path of the link.
+
+        Returns:
+            ``bool``:
+            ``False`` if the destination is an existing file/folder or cannot be created.
+        """
 
         # Is it a good source
         if source == "":
+            # FIXME: no return after this error: the link creation continues with an empty source.
             self.logger.error("source empty for creating symbolic link: " + source)
 
         # Is there a previous link?
@@ -420,7 +499,19 @@ class CheckUp:
 
         return True
 
-    def SetFolder(self):
+    def SetFolder(self) -> bool:
+        """Prepare the library folders and the environment of the Python process.
+
+        Creates ``tools/SampleAnalyzer/{Lib,ExternalSymLink/Lib,ExternalSymLink/Bin}``,
+        symbolic links to the external binaries/libraries (ROOT, FastJet, zlib, Delphes),
+        fills ``archi_info.toPATH*``/``toLDPATH*`` and prepends them to ``PATH``,
+        ``LD_LIBRARY_PATH`` (and ``DYLD_LIBRARY_PATH`` on macOS). ``ROOT_INCLUDE_PATH`` is set
+        when Delphes is available.
+
+        Returns:
+            ``bool``:
+            Always ``True``.
+        """
 
         # Reset the pieces of environment variables
         self.archi_info.toPATH1 = []  # First in PATH variable
@@ -601,6 +692,7 @@ class CheckUp:
         self.logger.debug("--------")
 
         # ROOT INCLUDE PATH
+        # NOTE: ROOT_INCLUDE_PATH of Delphes is overwritten if Delphes-MA5tune is also available.
         if self.archi_info.has_delphes:
             os.environ["ROOT_INCLUDE_PATH"] = os.path.join(
                 self.archi_info.ma5dir, "tools", "delphes", "external"
@@ -615,6 +707,12 @@ class CheckUp:
         return True
 
     def check_updates(self) -> None:
+        """Log a warning if a newer MadAnalysis 5 release is available on GitHub.
+
+        Requires the ``requests`` and ``semantic_version`` modules; network errors are
+        silently ignored (1 s timeout).
+        """
+        # NOTE: the webaccess_veto user option (session_info.has_web) is not honoured here.
         try:
             import requests
             from semantic_version import Version
@@ -632,6 +730,8 @@ class CheckUp:
                 )
                 self.logger.warning(f"The latest version can be downloaded from : ")
                 self.logger.warning(f"{info['html_url']}")
+        # FIXME: if 'import requests' fails, evaluating 'requests.exceptions' in this clause raises a
+        # NameError; other failures (unexpected JSON, non-semantic version) are not caught either.
         except (
             requests.exceptions.ConnectionError,
             ImportError,

@@ -22,7 +22,14 @@
 ################################################################################
 
 
+"""Writer of the HTML reports."""
+
 from __future__ import absolute_import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from madanalysis.IOinterface.text_report import TextReport
 import madanalysis.IOinterface.text_file_writer as TextFileWriter
 from madanalysis.IOinterface.html_style_writer  import HTMLCSSWriter
 from madanalysis.enumeration.color_type         import ColorType
@@ -38,9 +45,19 @@ import pwd
 from six.moves import range
 
 class HTMLReportWriter(TextFileWriter.TextFileWriter):
-    """Generate HTML report"""
+    """Generator of the HTML report (``index.html``).
+
+    The page is accumulated in :attr:`page` and written by :meth:`WriteFoot`.
+    """
     
-    def __init__(self, filename, pdffile=''):
+    def __init__(self, filename: str, pdffile: str = '') -> None:
+        """Create the writer and write the CSS style sheet (``style.css``).
+
+        Args:
+            filename (``str``): path of ``index.html``.
+            pdffile (``str``, default ``''``): relative path of the PDF version of the report
+                (linked from the menu if not empty).
+        """
         TextFileWriter.TextFileWriter.__init__(self,filename)
         self.page=[]
         self.section=[]
@@ -65,7 +82,16 @@ class HTMLReportWriter(TextFileWriter.TextFileWriter):
         self.style.Close()
 
     @staticmethod    
-    def CheckStructure(dirname):
+    def CheckStructure(dirname: str) -> bool:
+        """Check that a HTML report folder contains the expected files.
+
+        Args:
+            dirname (``str``): report folder.
+
+        Returns:
+            ``bool``:
+            ``True`` if the folder and its files exist.
+        """
         if not os.path.isdir(dirname):
             return False
         if not os.path.isfile(dirname+'/index.html'):
@@ -76,7 +102,8 @@ class HTMLReportWriter(TextFileWriter.TextFileWriter):
             return False
         return True
 
-    def WriteHeader(self):
+    def WriteHeader(self) -> None:
+        """Write the HTML preamble."""
         self.page.append('<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" '+ \
           '\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n')
         self.page.append('<html xmlns=\'http://www.w3.org/1999/xhtml\' xml:lang=\'en\' ' + \
@@ -90,7 +117,12 @@ class HTMLReportWriter(TextFileWriter.TextFileWriter):
         self.page.append('</head>\n\n')
         self.page.append('<body>\n')
     
-    def WriteTitle(self,title):
+    def WriteTitle(self,title: str) -> None:
+        """Write the title block (title, logo, author and date).
+
+        Args:
+            title (``str``): report title.
+        """
         self.page.append('<div id=\'top\' class=\'top\'>\n')
         self.page.append('  <table>\n')
         self.page.append('    <tr>\n      <td width=\'35%\'>\n')
@@ -113,7 +145,13 @@ class HTMLReportWriter(TextFileWriter.TextFileWriter):
           mydate + '</font></i>\n')
         self.page.append('      </td>\n    </tr>\n  </table>\n</div>\n\n')
  
-    def TableOfContents(self):
+    def TableOfContents(self) -> str:
+        """Build the menu (table of contents) of the page.
+
+        Returns:
+            ``str``:
+            HTML code of the menu and of the opening of the main panel.
+        """
         contents = '<div id=\'menu\' class= \'menu\'>\n  <br />\n';
         if self.pdffile != '':
             contents += '  <h3>PDF version of this report</h3>\n'
@@ -135,24 +173,41 @@ class HTMLReportWriter(TextFileWriter.TextFileWriter):
         contents += '<div id=\'main\' class=\'main\'>\n'
         return contents
     
-    def WriteSpacor(self):
+    def WriteSpacor(self) -> None:
+        """Write a separator (horizontal rule)."""
         self.page.append("<HR SIZE=\"4\" WIDTH=350 noshade>\n")
 
-    def WriteVspace(self):
+    def WriteVspace(self) -> None:
+        """Write a vertical space."""
         self.page.append("<SPACER TYPE=vertical>")
 
-    def WriteSubTitle(self,subtitle):
+    def WriteSubTitle(self,subtitle: str) -> None:
+        """Write a section title.
+
+        Args:
+            subtitle (``str``): title.
+        """
         self.section.append(subtitle)
         self.sectionLevel.append(1)
         self.page.append('  <br /><br />\n\n  <h2>'+ subtitle + '</h2><br />\n')
 
-    def WriteSubSubTitle(self,subtitle):
+    def WriteSubSubTitle(self,subtitle: str) -> None:
+        """Write a subsection title.
+
+        Args:
+            subtitle (``str``): title.
+        """
         self.section.append(subtitle)
         self.sectionLevel.append(2)
         self.page.append('  <h3><a name=\'' + subtitle.replace(' ', '') + '\'>' + \
           subtitle+'</a></h3><br />\n')
         
-    def WriteText(self,text):
+    def WriteText(self,text: TextReport) -> None:
+         """Write formatted text (as a list item inside a bullet list).
+
+         Args:
+             text (``TextReport``): text to write.
+         """
          if self.bullet!=0:
             self.page.append('    <li>\n      ')
          text.WriteHTML(self.page)
@@ -161,21 +216,31 @@ class HTMLReportWriter(TextFileWriter.TextFileWriter):
          else:
             self.page.append('  <br />\n')
 
-    def NewLine(self):
+    def NewLine(self) -> None:
+        """Close the current row and start a new one."""
         self.page.append("<BR>")
-    def NewBlankLine(self):
+    def NewBlankLine(self) -> None:
+        """Insert a line break."""
         self.page.append("<BR>")
 
-    def OpenBullet(self):
+    def OpenBullet(self) -> None:
+        """Open a bullet list."""
         self.bullet=self.bullet+1
         self.page[-1]=self.page[-1].replace('</h3><br />','</h3>')
         self.page.append("  <ul>\n")
 
-    def CloseBullet(self):
+    def CloseBullet(self) -> None:
+        """Close the current bullet list."""
         self.bullet=self.bullet-1
         self.page.append("  </ul>\n")
 
-    def CreateTable(self,col,caption):
+    def CreateTable(self,col: list[float],caption: TextReport) -> None:
+        """Open a table.
+
+        Args:
+            col (``list[float]``): relative widths of the columns.
+            caption (``TextReport``): caption (ignored if empty).
+        """
         self.table=self.table+1
         self.number_col=len(col)
         self.col_size=col
@@ -186,7 +251,14 @@ class HTMLReportWriter(TextFileWriter.TextFileWriter):
             self.page.append("    </caption>\n")
         self.page.append('    <tr>\n')
 
-    def NewCell(self,color=None,span=1):
+    def NewCell(self,color: int | None = None,span: int = 1) -> None:
+        """Open a new cell in the current row.
+
+        Args:
+            color (``int | None``, default ``None``): background colour
+                (:class:`~madanalysis.enumeration.color_type.ColorType` code, white if ``None``).
+            span (``int``, default ``1``): number of spanned columns.
+        """
         if color is None:
             color=ColorType.WHITE
         size=0
@@ -211,19 +283,28 @@ class HTMLReportWriter(TextFileWriter.TextFileWriter):
         self.first_cell=True
         self.page.append("      </td>\n    </tr>\n    <tr>\n")
 
-    def EndLine(self):
+    def EndLine(self) -> None:
+        """Close the current (last) row."""
         self.current_col=0
         self.first_cell=True
         self.page.append("      </td>\n    </tr>\n")
 
-    def EndTable(self):
+    def EndTable(self) -> None:
+        """Close the current table."""
         self.table=self.table-1
         self.page.append("  </table><br /> <br />\n")
 
-    def WriteFigure(self,caption,filename):
+    def WriteFigure(self,caption: TextReport,filename: str) -> None:
+        """Insert a figure.
+
+        Args:
+            caption (``TextReport``): caption.
+            filename (``str``): path of the figure without extension (````.png````).
+        """
         thefile = os.path.normpath(filename)
         im = PngReader(thefile+'.png')
         if not im.Open():
+            # NOTE: the file is not closed when the checks below fail.
             return
         if not im.IsValid():
             return
@@ -239,7 +320,9 @@ class HTMLReportWriter(TextFileWriter.TextFileWriter):
                 '.png\' ' + 'height=\''+ str(scale*im.header.height)+'\' alt =\'\' />\n')
         self.page.append("  </center><br /> <br />\n")
 
-    def WriteFoot(self):
+    def WriteFoot(self) -> None:
+        """Close the document (and check that bullets and tables are closed); the table of contents is inserted and the page written.
+        """
         if self.bullet!=0:
             logging.getLogger('MA5').warning(" the number of 'OpenBullet()' and 'CloseBullet()' are different.")
         if self.table!=0:
@@ -248,6 +331,7 @@ class HTMLReportWriter(TextFileWriter.TextFileWriter):
         self.page.append("</div>\n")
         self.page.append("</body>\n")
         self.page.append("</html>\n")
+        # NOTE: the table of contents is inserted at a hard-coded position of the page.
         self.page.insert(17,self.TableOfContents())
         for item in self.page:
             self.file.write(item)
