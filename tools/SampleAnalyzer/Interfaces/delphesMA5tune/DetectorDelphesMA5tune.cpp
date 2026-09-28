@@ -25,6 +25,7 @@
 // STL headers
 #include <fstream>
 #include <algorithm>
+#include <stdexcept>
 
 // SampleAnalyzer headers
 #include "SampleAnalyzer/Interfaces/delphesMA5tune/DetectorDelphesMA5tune.h"
@@ -37,7 +38,6 @@
 #include <TFile.h>
 #include <TDatabasePDG.h>
 #include <TParticlePDG.h>
-#include <TFolder.h>
 
 // Delphes headers
 #include "external/ExRootAnalysis/ExRootConfReader.h"
@@ -143,13 +143,6 @@ MAbool DetectorDelphesMA5tune::Initialize(const std::string& configFile, const s
 
   // Initializing delphes
   modularDelphes_ = new Delphes("Delphes");
-  delphesFolder_ = dynamic_cast<TFolder*>(
-       gROOT->GetListOfBrowsables()->FindObject("Delphes"));
-  if (delphesFolder_==0)
-  {
-    ERROR << "Problem during initialization of Delphes" << endmsg;
-    return false;
-  }
   modularDelphes_->SetConfReader(confReader_);
   modularDelphes_->SetTreeWriter(treeWriter_);
 
@@ -344,10 +337,21 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
   if (mySample.rec()==0) mySample.InitializeRec();
   myEvent.rec()->Reset();
 
-  // https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/Arrays
+  // Some collections are optional in the MA5tune cards.
+  const auto getCollection = [this](const char* name) -> TObjArray*
+  {
+    try
+    {
+      return modularDelphes_->ImportArray(name);
+    }
+    catch (const std::runtime_error&)
+    {
+      return 0;
+    }
+  };
 
   // Jet collection
-  TObjArray* jetsArray = dynamic_cast<TObjArray*>(delphesFolder_->FindObject("Export/JetEnergyScale/jets"/* FastJetFinder/jets"*/));
+  TObjArray* jetsArray = getCollection("JetEnergyScale/jets");
   if (jetsArray==0) {if (!first_) WARNING << "no jets collection found" << endmsg;}
   else
   {
@@ -388,7 +392,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
   }
 
   // GenJet collection
-  TObjArray* genjetsArray = dynamic_cast<TObjArray*>(delphesFolder_->FindObject("Export/GenJetFinder/jets"));
+  TObjArray* genjetsArray = getCollection("GenJetFinder/jets");
   if (genjetsArray==0) {if (!first_) WARNING << "no genjets collection found" << endmsg;}
   else
   {
@@ -411,8 +415,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
   }
 
   // Muon collection
-  TObjArray* muonArray = dynamic_cast<TObjArray*>(
-         delphesFolder_->FindObject("Export/MuonIsolationCalculation/DelphesMA5tuneMuons"));
+  TObjArray* muonArray = getCollection("MuonIsolationCalculation/DelphesMA5tuneMuons");
   if (muonArray==0) {if (!first_) WARNING << "no muons collection found" << endmsg;}
   else
   {
@@ -435,8 +438,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
   }
 
   // Electron collection
-  TObjArray* elecArray = dynamic_cast<TObjArray*>(
-     delphesFolder_->FindObject("Export/ElectronIsolationCalculation/DelphesMA5tuneElectrons"));
+  TObjArray* elecArray = getCollection("ElectronIsolationCalculation/DelphesMA5tuneElectrons");
   if (elecArray==0) {if (!first_) WARNING << "no elecs collection found" << endmsg;}
   else
   {
@@ -459,8 +461,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
   }
 
   // Track collection
-  TObjArray* trackArray = dynamic_cast<TObjArray*>(
-    delphesFolder_->FindObject("Export/TrackIsolationCalculation/DelphesMA5tuneTracks"));
+  TObjArray* trackArray = getCollection("TrackIsolationCalculation/DelphesMA5tuneTracks");
   if (trackArray==0) {if (!first_) WARNING << "no tracks collection found" << endmsg;}
   else
   {
@@ -486,8 +487,7 @@ void DetectorDelphesMA5tune::TranslateDELPHEStoMA5(SampleFormat& mySample, Event
   }
 
   // MET
-  TObjArray* metArray  = dynamic_cast<TObjArray*>(
-    delphesFolder_->FindObject("Export/MissingET/momentum"));
+  TObjArray* metArray = getCollection("MissingET/momentum");
   if (metArray==0) {if (!first_) WARNING << "MET collection is not found" << endmsg;}
   else
   {

@@ -37,7 +37,6 @@ class ExRootTreeBranch;
 class Delphes;
 class DelphesFactory;
 class TObjArray;
-class TFolder;
 class TDatabasePDG;
 class TParticlePDG;
 class TFile;
@@ -67,7 +66,6 @@ class DetectorDelphes: public DetectorBase
     TObjArray*        partonOutputArray_;
     TFile*            outputFile_;
     TDatabasePDG*     PDG_;
-    TFolder*          delphesFolder_;
 
     // parameters
     MAbool output_;

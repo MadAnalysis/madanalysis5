@@ -38,7 +38,6 @@
 #include <TFile.h>
 #include <TDatabasePDG.h>
 #include <TParticlePDG.h>
-#include <TFolder.h>
 
 // Delphes headers
 #include "external/ExRootAnalysis/ExRootConfReader.h"
@@ -155,13 +154,6 @@ MAbool DetectorDelphes::Initialize(const std::string& configFile, const std::map
 
   // Creating all Delphes modules
   modularDelphes_ = new Delphes("Delphes");
-  delphesFolder_ = dynamic_cast<TFolder*>(
-       gROOT->GetListOfBrowsables()->FindObject("Delphes"));
-  if (delphesFolder_==0)
-  {
-    ERROR << "Problem during initialization of Delphes" << endmsg;
-    return false;
-  }
 
   // Initializing Delphes modules
   modularDelphes_->SetConfReader(confReader_);
@@ -181,7 +173,7 @@ MAbool DetectorDelphes::Initialize(const std::string& configFile, const std::map
   modularDelphes_->Clear();
 
   // Initializing interface
-  interface_.Initialize(delphesFolder_,table_,MA5card_);
+  interface_.Initialize(modularDelphes_,table_,MA5card_);
 
   return true;
 }

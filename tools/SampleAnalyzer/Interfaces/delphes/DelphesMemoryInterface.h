@@ -40,7 +40,7 @@
 
 
 class TObjArray;
-class TFolder;
+class Delphes;
 class Candidate;
 
 namespace MA5
@@ -79,17 +79,11 @@ class DelphesMemoryInterface
   /// Destructor
   ~DelphesMemoryInterface();
 
-  /// Initialize with delphesFolder
-  void Initialize(TFolder* delphesFolder);
+  /// Initialize access to the collections produced by Delphes
+  void Initialize(Delphes* delphes, const std::map<std::string,std::string>& table, MAbool MA5card);
 
-  /// Print -- DEBUG --
-  static void Print(TFolder* delphesFolder);
+  TObjArray* GetCollection(Delphes* delphes, const std::map<std::string,std::string>& table, const std::string& name);
 
-  void Initialize(TFolder* delphesFolder, const std::map<std::string,std::string>& table, MAbool MA5card);
-
-  TObjArray* GetCollection(TFolder* delphesFolder, 
-                           const std::map<std::string,std::string>& table,
-                           const std::string& name);
 
   MAbool TransfertDELPHEStoMA5(SampleFormat& mySample, EventFormat& myEvent);
 
